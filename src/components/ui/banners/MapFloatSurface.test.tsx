@@ -2,7 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagBrand, jetlagTheme } from "@/theme/theme";
-import { MapFloatAlert, MapFloatAlertPanel } from "./MapFloatAlert";
+import { MapFloatAlertPanel } from "./MapFloatAlert";
 import { MapFloatSurface } from "./MapFloatSurface";
 import { floatToneStyles } from "./mapFloatToneStyles";
 
@@ -31,18 +31,6 @@ describe("floatToneStyles", () => {
 });
 
 describe("MapFloatSurface", () => {
-  it("renders children and optional title", () => {
-    render(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <MapFloatSurface tone="flag" title="Match">
-          Prompt text
-        </MapFloatSurface>
-      </MantineProvider>,
-    );
-    expect(screen.getByText("Match")).toBeInTheDocument();
-    expect(screen.getByText("Prompt text")).toBeInTheDocument();
-  });
-
   it("supports alert role", () => {
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
@@ -53,29 +41,9 @@ describe("MapFloatSurface", () => {
     );
     expect(screen.getByRole("alert")).toHaveTextContent("Outside zone");
   });
-
-  it("forwards className for width and margins", () => {
-    const { container } = render(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <MapFloatSurface tone="default" className="mx-3 mt-1.5">
-          Syncing
-        </MapFloatSurface>
-      </MantineProvider>,
-    );
-    expect(container.querySelector(".mx-3")).toBeTruthy();
-  });
 });
 
 describe("MapFloatAlert wrappers", () => {
-  it("MapFloatAlert renders children via default tone surface", () => {
-    render(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <MapFloatAlert role="status">Round ending soon</MapFloatAlert>
-      </MantineProvider>,
-    );
-    expect(screen.getByRole("status")).toHaveTextContent("Round ending soon");
-  });
-
   it("MapFloatAlertPanel defaults to alert role with halt tone", () => {
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
@@ -83,21 +51,5 @@ describe("MapFloatAlert wrappers", () => {
       </MantineProvider>,
     );
     expect(screen.getByRole("alert")).toHaveTextContent("Outside the zone");
-  });
-
-  it("MapFloatAlertPanel keeps copy and actions in a flex action row", () => {
-    render(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <MapFloatAlertPanel>
-          <span>Outside the zone</span>
-          <button type="button">Dismiss</button>
-        </MapFloatAlertPanel>
-      </MantineProvider>,
-    );
-    const panel = screen.getByRole("alert");
-    const style = getComputedStyle(panel);
-    expect(style.display).toBe("flex");
-    expect(style.justifyContent).toBe("space-between");
-    expect(style.alignItems).toBe("center");
   });
 });

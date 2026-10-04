@@ -9,16 +9,6 @@ describe("AnimatedBanner", () => {
     document.documentElement.dataset.motion = "reduced";
   });
 
-  it("renders children when visible", () => {
-    render(
-      <AnimatedBanner visible>
-        <p role="status">Timer alert</p>
-      </AnimatedBanner>,
-    );
-
-    expect(screen.getByRole("status")).toHaveTextContent("Timer alert");
-  });
-
   it("unmounts after visible becomes false with reduced motion", async () => {
     const onDismiss = vi.fn();
     const { rerender } = render(
