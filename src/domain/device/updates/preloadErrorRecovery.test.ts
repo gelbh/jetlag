@@ -1,71 +1,67 @@
 import { describe, expect, it, vi } from "vitest";
-import { installPreloadErrorRecovery } from "./preloadErrorRecovery";
+import {
+  cancelPendingChunkReloadRetry,
+  clearChunkReloadFlag,
+  wasChunkReloadDeferred,
+} from "./chunkLoadRecovery";
+import { installPreloadErrorRecovery, isPreloadLoadFailure } from "./preloadErrorRecovery";
 
-function setup(online: boolean) {
+const CHUNK_ERROR = new TypeError(
+  "Failed to fetch dynamically imported module: https://example.test/assets/Map-abc.js",
+);
+
+function setup(defer: (run: () => void) => void = (run) => run()) {
   const target = new EventTarget();
-  const state = { online };
-  const recover = vi.fn(() => true);
-  installPreloadErrorRecovery({
-    target: target as unknown as Window,
-    isOnline: () => state.online,
-    recover,
-    defer: (run) => run(),
-  });
-  const preloadError = () => {
-    const event = new Event("vite:preloadError", { cancelable: true });
+  const recover = vi.fn();
+  installPreloadErrorRecovery({ target, recover, defer });
+  const preloadError = (payload: unknown = CHUNK_ERROR) => {
+    const event = Object.assign(new Event("vite:preloadError", { cancelable: true }), { payload });
     target.dispatchEvent(event);
     return event;
   };
-  return { target, state, recover, preloadError };
+  return { recover, preloadError };
 }
 
+describe("isPreloadLoadFailure", () => {
+  it("accepts chunk fetch and CSS preload failures only", () => {
+    expect(isPreloadLoadFailure(CHUNK_ERROR)).toBe(true);
+    expect(isPreloadLoadFailure(new Error("Unable to preload CSS for /assets/a.css"))).toBe(true);
+    expect(isPreloadLoadFailure(new TypeError("x is not a function"))).toBe(false);
+    expect(isPreloadLoadFailure(undefined)).toBe(false);
+  });
+});
+
 describe("installPreloadErrorRecovery", () => {
-  it("recovers right away when online without swallowing the import error", () => {
-    const { recover, preloadError } = setup(true);
+  it("recovers when online without swallowing the import error", () => {
+    const { recover, preloadError } = setup();
     const event = preloadError();
     expect(recover).toHaveBeenCalledTimes(1);
     expect(event.defaultPrevented).toBe(false);
   });
 
+  it("ignores module errors that are not load failures", () => {
+    const { recover, preloadError } = setup();
+    preloadError(new TypeError("x is not a function"));
+    expect(recover).not.toHaveBeenCalled();
+  });
+
   it("defers recovery to a later task so the import's own handler runs first", () => {
-    const target = new EventTarget();
-    const recover = vi.fn(() => true);
     const deferred: Array<() => void> = [];
-    installPreloadErrorRecovery({
-      target: target as unknown as Window,
-      isOnline: () => true,
-      recover,
-      defer: (run) => deferred.push(run),
-    });
-    target.dispatchEvent(new Event("vite:preloadError", { cancelable: true }));
+    const { recover, preloadError } = setup((run) => deferred.push(run));
+    preloadError();
     expect(recover).not.toHaveBeenCalled();
-    deferred.forEach((run) => run());
+    for (const run of deferred) run();
     expect(recover).toHaveBeenCalledTimes(1);
   });
 
-  it("waits for the online event while offline", () => {
-    const { recover, preloadError } = setup(false);
-    preloadError();
-    expect(recover).not.toHaveBeenCalled();
-  });
-
-  it("recovers exactly once on online, however many chunks failed offline", () => {
-    const { target, state, recover, preloadError } = setup(false);
-    preloadError();
-    preloadError();
-    preloadError();
-    state.online = true;
-    target.dispatchEvent(new Event("online"));
-    target.dispatchEvent(new Event("online"));
-    expect(recover).toHaveBeenCalledTimes(1);
-  });
-
-  it("waits again if the device drops offline after recovering", () => {
-    const { target, recover, preloadError } = setup(false);
-    preloadError();
-    target.dispatchEvent(new Event("online"));
-    preloadError();
-    target.dispatchEvent(new Event("online"));
-    expect(recover).toHaveBeenCalledTimes(2);
+  it("hands the injected offline check to the chunk-reload gate instead of reloading", () => {
+    const target = new EventTarget();
+    const isOffline = vi.fn(() => true);
+    installPreloadErrorRecovery({ target, isOffline, defer: (run) => run() });
+    target.dispatchEvent(Object.assign(new Event("vite:preloadError"), { payload: CHUNK_ERROR }));
+    expect(isOffline).toHaveBeenCalled();
+    expect(wasChunkReloadDeferred()).toBe(true);
+    cancelPendingChunkReloadRetry();
+    clearChunkReloadFlag();
   });
 });

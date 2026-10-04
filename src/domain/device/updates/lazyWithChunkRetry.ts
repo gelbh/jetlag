@@ -39,7 +39,11 @@ export function reloadForChunkLoadError(
 ): boolean {
   const resolveContext = () => getReloadContext?.() ?? chunkReloadContextGetter?.();
   // Re-resolved when an offline retry fires, so a session joined meanwhile isn't reloaded.
-  return attemptChunkReload({ ...resolveContext(), isOffline, resolveRetryOptions: resolveContext });
+  return attemptChunkReload({
+    ...resolveContext(),
+    isOffline,
+    resolveRetryOptions: resolveContext,
+  });
 }
 
 // React.lazy needs a wide component type across named-export modules.

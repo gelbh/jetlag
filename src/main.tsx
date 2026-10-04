@@ -17,7 +17,17 @@ import { unregisterDevServiceWorkers } from "./domain/device/updates/unregisterD
 import "./theme/mantineShellStyles";
 import "./index.css";
 
-installPreloadErrorRecovery();
+// deviceOffline pulls the session store; keep it out of the entry chunk. Until it loads, the
+// gate falls back to the browser's online flag.
+let isDeviceOffline: (() => boolean) | undefined;
+void import("./services/core/network/deviceOffline.ts")
+  .then((module) => {
+    isDeviceOffline = module.isDeviceEffectivelyOffline;
+  })
+  .catch(() => {});
+installPreloadErrorRecovery({
+  isOffline: () => isDeviceOffline?.() ?? (typeof navigator !== "undefined" && !navigator.onLine),
+});
 markStandaloneShellClass();
 markEmbedShellAttribute();
 // Gate here (not only inside the bridge) so production never fetches the
