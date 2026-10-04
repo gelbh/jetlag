@@ -96,6 +96,8 @@ export function useTimeTrapTool({
     placingRef.current = true;
     commitWrite("timetrap.place", () => writeTimeTrap(sessionId, trap)).acknowledged.then(
       () => {
+        // existingTrap guards from here; release so a cleared trap can be re-placed.
+        placingRef.current = false;
         commitWrite("system.message", () => postSystemMessage(announcement));
       },
       () => {
