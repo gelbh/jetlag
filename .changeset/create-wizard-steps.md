@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-improve: Create flow uses Where, Frame, and Play steps
+improve: Create flow uses Where, Rules, and Play steps
