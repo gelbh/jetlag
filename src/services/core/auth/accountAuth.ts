@@ -19,10 +19,11 @@ import {
   type User,
 } from "firebase/auth";
 import { ensureAnonymousUser, getFirebaseAuth } from "../firebase/firebase";
+import { OAUTH_REDIRECT_PENDING_KEY } from "./persistedAuthHint";
 
 export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
 /** Set before linkWithRedirect / signInWithRedirect; cleared on redirect recovery. */
-export const OAUTH_REDIRECT_PENDING_KEY = "jl.oauthRedirectPending";
+export { OAUTH_REDIRECT_PENDING_KEY };
 
 export const OAUTH_REDIRECT_FAILED_MESSAGE =
   "Sign-in didn’t complete. Allow popups for this site and try again.";
