@@ -12,11 +12,14 @@ describe("createGithubRelease", () => {
       message: "Validation Failed",
       errors: [{ resource: "Release", code: "already_exists", field: "tag_name" }],
     });
-    mock.method(globalThis, "fetch", async () =>
-      new Response(body, {
-        status: 422,
-        headers: { "Content-Type": "application/json" },
-      }),
+    mock.method(
+      globalThis,
+      "fetch",
+      async () =>
+        new Response(body, {
+          status: 422,
+          headers: { "Content-Type": "application/json" },
+        }),
     );
 
     await assert.doesNotReject(() =>
@@ -36,11 +39,14 @@ describe("createGithubRelease", () => {
       message: "Validation Failed",
       errors: [{ resource: "Release", code: "invalid", field: "body" }],
     });
-    mock.method(globalThis, "fetch", async () =>
-      new Response(body, {
-        status: 422,
-        headers: { "Content-Type": "application/json" },
-      }),
+    mock.method(
+      globalThis,
+      "fetch",
+      async () =>
+        new Response(body, {
+          status: 422,
+          headers: { "Content-Type": "application/json" },
+        }),
     );
 
     await assert.rejects(
