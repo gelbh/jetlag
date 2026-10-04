@@ -88,15 +88,56 @@ export async function expectCreatePageMapPreviewLoaded(page: Page) {
   await expect.poll(async () => page.locator(".maplibregl-canvas").count()).toBeGreaterThan(0);
 }
 
+/** Jump to Create Rules (Create steps tab, else Next from Where). */
+export async function goToCreateRulesStep(page: Page) {
+  const rulesTab = page.getByRole("tablist", { name: "Create steps" }).getByRole("tab", {
+    name: "Rules",
+  });
+  if (await rulesTab.isVisible().catch(() => false)) {
+    await rulesTab.click();
+  } else {
+    await page.getByRole("button", { name: "Next" }).click();
+  }
+
+  await expect(page.getByRole("radiogroup", { name: "Game size" })).toBeVisible({
+    timeout: 10_000,
+  });
+}
+
+/** Advance Where → Rules → Play (or jump via Create steps Play tab). */
+export async function goToCreatePlayStep(page: Page) {
+  const createGame = page.getByRole("button", { name: "Create game" });
+  if (await createGame.isVisible().catch(() => false)) {
+    return;
+  }
+
+  const playTab = page.getByRole("tablist", { name: "Create steps" }).getByRole("tab", {
+    name: "Play",
+  });
+  if (await playTab.isVisible().catch(() => false)) {
+    await playTab.click();
+  } else {
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
+  }
+
+  await expect(createGame).toBeVisible({ timeout: 10_000 });
+}
+
+export async function expectCreatePlaceSelected(page: Page, placeMatch = /Dublin/i) {
+  await expect(page.getByPlaceholder("Dublin, Ireland")).toHaveValue(placeMatch, {
+    timeout: 10_000,
+  });
+}
+
 export async function createSessionFromCreatePage(page: Page) {
   await page.goto("/create");
   await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
   await page.getByRole("button", { name: "Find place" }).click();
-  await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
-    timeout: 10_000,
-  });
+  await expectCreatePlaceSelected(page);
   await expectCreatePageMapPreviewLoaded(page);
-  await page.getByRole("button", { name: "Confirm game area" }).click();
+  await goToCreatePlayStep(page);
+  await page.getByRole("button", { name: "Create game" }).click();
   await expect(page).toHaveURL(/\/map/, { timeout: 15_000 });
   await expect(page.getByRole("button", { name: "Radar" })).toBeVisible({
     timeout: 15_000,

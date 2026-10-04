@@ -17,6 +17,7 @@ import {
 } from "@/domain/device/updates/serviceWorkerRefresh";
 import { tryUpdateServiceWorker } from "@/domain/device/updates/serviceWorkerUpdate";
 import { compareAppVersions } from "@/domain/session/meta/sessionVersion";
+import { useAppCheckArmed } from "@/hooks/app/useAppCheckArmed";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import { useHotfixGraceReload } from "@/hooks/app/useHotfixGraceReload";
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
@@ -52,12 +53,14 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const safeToReload = isSafeToReloadApp({ session });
 
   // Wait for auth bootstrap: a restored user is attached before the appConfig
-  // read (rules need sign-in), and Firestore stays off the boot path on public
-  // shells, where main.tsx starts auth only once the page is idle.
+  // read (rules need sign-in). Also wait for a real consumer to arm App Check:
+  // Firestore is App Check-enforced, so reading first would load reCAPTCHA on
+  // public shells before the player acts.
   const authBootstrapReady = useAuthBootstrapReady();
+  const appCheckArmed = useAppCheckArmed();
 
   useEffect(() => {
-    if (!isFirebaseConfigured() || !authBootstrapReady) {
+    if (!isFirebaseConfigured() || !authBootstrapReady || !appCheckArmed) {
       return;
     }
 
@@ -83,7 +86,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       unsubscribe?.();
     };
-  }, [authBootstrapReady]);
+  }, [authBootstrapReady, appCheckArmed]);
 
   const effectiveRuntimeConfig = isFirebaseConfigured() ? runtimeConfig : null;
 

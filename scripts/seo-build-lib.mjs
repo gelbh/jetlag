@@ -9,14 +9,14 @@ export function loadCrawlPolicy(root) {
 
 /**
  * Routes prerendered only so the first paint is real HTML (hydrated by `src/main.tsx`), not for
- * search. They stay `noindex`, off the sitemap and in `disallowPaths`; the crawl policy JSON
- * (`indexablePaths`) remains the only index list.
+ * search. They stay `noindex` and off the sitemap, and must stay out of `disallowPaths` so crawlers
+ * can read that `noindex`; the crawl policy JSON (`indexablePaths`) remains the only index list.
  */
 export const PERF_PRERENDER_PATHS = Object.freeze(["/join"]);
 
 /**
- * Every path to prerender, indexable first. Throws if a perf-only path is also indexable or is
- * not disallowed, so the two lists cannot silently merge.
+ * Every path to prerender, indexable first. Throws if a perf-only path is also indexable, so the
+ * two lists cannot silently merge, or is robots-disallowed, which would hide its `noindex`.
  */
 export function prerenderTargets(policy, perfPaths = PERF_PRERENDER_PATHS) {
   const indexable = new Set(policy.indexablePaths);
@@ -25,8 +25,8 @@ export function prerenderTargets(policy, perfPaths = PERF_PRERENDER_PATHS) {
     if (indexable.has(path)) {
       throw new Error(`${path} is in both indexablePaths and PERF_PRERENDER_PATHS`);
     }
-    if (!disallowed.has(path)) {
-      throw new Error(`Perf-only prerender path ${path} must be in disallowPaths`);
+    if (disallowed.has(path)) {
+      throw new Error(`Perf-only prerender path ${path} must not be in disallowPaths`);
     }
   }
   return [
