@@ -1,5 +1,8 @@
 const ORIGIN = "http://127.0.0.1:4173";
 const ORIGIN_PATTERN = "http://127\\.0\\.0\\.1:4173";
+// LHCI matches on finalUrl, which follows client replaceState: tolerate a query string so a
+// route that rewrites its URL keeps its gates (an unmatched URL is silently unasserted).
+const END = "/?(\\?.*)?$";
 
 /**
  * Every audited route gets the same a11y / CLS / target-size gates plus its own perf floor.
@@ -44,22 +47,22 @@ function createLhciConfig({ perf, createMaxTbtMs, outputDir, collectSettings }) 
       assert: {
         assertMatrix: [
           {
-            matchingUrlPattern: `${ORIGIN_PATTERN}/?$`,
+            matchingUrlPattern: `${ORIGIN_PATTERN}${END}`,
             assertions: routeAssertions(perf.home),
           },
           {
-            matchingUrlPattern: `${ORIGIN_PATTERN}/join/?$`,
+            matchingUrlPattern: `${ORIGIN_PATTERN}/join${END}`,
             assertions: routeAssertions(perf.join),
           },
           {
             // SEO gate uses prerendered `/premium` (index,follow).
-            matchingUrlPattern: `${ORIGIN_PATTERN}/premium/?$`,
+            matchingUrlPattern: `${ORIGIN_PATTERN}/premium${END}`,
             assertions: routeAssertions(perf.premium, {
               "categories:seo": ["error", { minScore: 0.9 }],
             }),
           },
           {
-            matchingUrlPattern: `${ORIGIN_PATTERN}/create/?$`,
+            matchingUrlPattern: `${ORIGIN_PATTERN}/create${END}`,
             assertions: routeAssertions(
               perf.create,
               createMaxTbtMs === undefined
