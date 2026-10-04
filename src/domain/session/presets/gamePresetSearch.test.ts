@@ -1,21 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { mergeBundledPresets } from "../../regions/bundledGamePresets";
 import { defaultAdvancedSessionSettings } from "../tools/advancedSessionSettings";
-import { filterGamePresetsForSearch } from "./gamePresetSearch";
+import { filterGamePresetsForSearch, matchGamePresetForPlace } from "./gamePresetSearch";
+
+const userPreset = {
+  id: "preset-weekly",
+  name: "Weekly game",
+  createdAt: "2026-01-01T00:00:00.000Z",
+  updatedAt: "2026-01-01T00:00:00.000Z",
+  schemaVersion: 1,
+  gameSize: "medium" as const,
+  distanceUnit: "metric" as const,
+  advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+  placeLabel: "Galway, Ireland",
+  migrationStatus: "ok" as const,
+};
 
 describe("filterGamePresetsForSearch", () => {
-  const userPreset = {
-    id: "preset-weekly",
-    name: "Weekly game",
-    createdAt: "2026-01-01T00:00:00.000Z",
-    updatedAt: "2026-01-01T00:00:00.000Z",
-    schemaVersion: 1,
-    gameSize: "medium" as const,
-    distanceUnit: "metric" as const,
-    advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
-    placeLabel: "Galway, Ireland",
-    migrationStatus: "ok" as const,
-  };
   const presets = mergeBundledPresets([userPreset]);
 
   it("returns all presets when the query is empty", () => {
@@ -61,5 +62,38 @@ describe("filterGamePresetsForSearch", () => {
     const firstUserIndex = results.findIndex((preset) => preset.id === "preset-weekly");
     const lastBundledIndex = results.findLastIndex((preset) => preset.id.startsWith("bundled:"));
     expect(firstUserIndex).toBeGreaterThan(lastBundledIndex);
+  });
+});
+
+describe("matchGamePresetForPlace", () => {
+  const presets = mergeBundledPresets([userPreset]);
+
+  it("loads County Dublin from a county geocode", () => {
+    expect(
+      matchGamePresetForPlace(presets, { displayName: "County Dublin, Leinster, Ireland" })?.id,
+    ).toBe("bundled:dublin-county");
+  });
+
+  it("loads County Dublin from a Co Dublin label", () => {
+    expect(matchGamePresetForPlace(presets, { displayName: "Co Dublin, Ireland" })?.id).toBe(
+      "bundled:dublin-county",
+    );
+  });
+
+  it("does not treat Dublin city as County Dublin", () => {
+    expect(matchGamePresetForPlace(presets, { displayName: "Dublin, Ireland" })).toBeNull();
+  });
+
+  it("loads Greater London only when the geocode is the UK place", () => {
+    expect(
+      matchGamePresetForPlace(presets, { displayName: "London, England, United Kingdom" })?.id,
+    ).toBe("bundled:london");
+    expect(matchGamePresetForPlace(presets, { displayName: "London, Ontario, Canada" })).toBeNull();
+  });
+
+  it("loads a user preset when the place label is unique", () => {
+    expect(matchGamePresetForPlace(presets, { displayName: "Galway, Ireland" })?.id).toBe(
+      "preset-weekly",
+    );
   });
 });

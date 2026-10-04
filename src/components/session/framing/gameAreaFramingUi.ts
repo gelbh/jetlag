@@ -14,7 +14,7 @@ export function framingModeHint(mode: FramingMode): string {
     case "rectangle":
       return "Pan and zoom. The dashed line is your play boundary.";
     case "circle":
-      return "Tap the map for center, then zoom to set radius.";
+      return "Pan and zoom to resize. Tap to move the center.";
     case "polygon":
       return "Tap each corner, then close the shape.";
     default: {
