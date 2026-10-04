@@ -32,6 +32,7 @@ import {
   setBootstrapTagLazy,
   syncAnalyticsIdentityLazy,
 } from "../analytics/lazyTelemetry";
+import { markAppCheckArmed, resetAppCheckArmedStateForTests } from "./appCheckArmedState";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
 import {
   isFirebaseConfigured,
@@ -159,10 +160,17 @@ function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
   }
 }
 
+/**
+ * Arms App Check (loads reCAPTCHA). Call only from real token consumers —
+ * Firestore, Storage, callables, the premium proxy — never from boot or gates.
+ */
 export function getFirebaseAppCheck(): AppCheck | null {
   if (!isFirebaseConfigured()) {
     return null;
   }
+
+  // Emulator skips App Check but still flips the flag, so gates behave like prod in e2e.
+  markAppCheckArmed();
 
   if (firebaseUsesEmulator()) {
     getFirebaseApp();
@@ -185,6 +193,8 @@ export function getFirebaseAuth(): Auth {
 
 function createFirestoreDb(): Firestore {
   const firebaseApp = getFirebaseApp();
+  // Firestore is App Check-enforced: arm it before the first request leaves.
+  getFirebaseAppCheck();
 
   if (firebaseUsesEmulator()) {
     const firestore = initializeFirestore(firebaseApp, {
@@ -377,4 +387,5 @@ export async function resetFirebaseForTests(): Promise<void> {
   anonymousSignInPromise = null;
   authStateReadyPromise = null;
   resetAuthBootstrapStateForTests();
+  resetAppCheckArmedStateForTests();
 }

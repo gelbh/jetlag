@@ -10,6 +10,12 @@ vi.mock("@/hooks/app/useAuthBootstrapReady", () => ({
   useAuthBootstrapReady: () => true,
 }));
 
+const appCheckArmed = vi.hoisted(() => ({ value: true }));
+
+vi.mock("@/hooks/app/useAppCheckArmed", () => ({
+  useAppCheckArmed: () => appCheckArmed.value,
+}));
+
 vi.mock("@/services/core/firebase/authBootstrapState", () => ({
   isFirebaseConfigured: () => true,
 }));
@@ -50,6 +56,16 @@ function renderGate(children: React.ReactNode) {
 describe("ClientMinVersionGate", () => {
   beforeEach(() => {
     subscribeMock.mockReset();
+    appCheckArmed.value = true;
+  });
+
+  it("does not subscribe (Firestore → App Check) until a consumer arms App Check", async () => {
+    appCheckArmed.value = false;
+
+    renderGate(<div>app-content</div>);
+
+    expect(await screen.findByText("app-content")).toBeInTheDocument();
+    expect(subscribeMock).not.toHaveBeenCalled();
   });
 
   it("blocks with update-required UI when below global min", async () => {
