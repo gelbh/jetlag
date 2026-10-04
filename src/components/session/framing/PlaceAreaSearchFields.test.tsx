@@ -63,4 +63,16 @@ describe("PlaceAreaSearchFields inset", () => {
     fireEvent.click(screen.getByRole("button", { name: /Dublin, Ireland/ }));
     expect(onSelectPlace).toHaveBeenCalledWith(dublin);
   });
+
+  it("calls onSearch from Find place click and Enter on the textbox", () => {
+    const onSearch = vi.fn();
+    renderInset({ onSearch });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+    expect(onSearch).toHaveBeenCalledTimes(1);
+    const textbox = screen.getByRole("textbox", { name: /city, county, state, or country/i });
+    expect(textbox).toHaveAttribute("enterkeyhint", "search");
+    expect(textbox).toHaveAttribute("inputmode", "search");
+    fireEvent.keyDown(textbox, { key: "Enter" });
+    expect(onSearch).toHaveBeenCalledTimes(2);
+  });
 });

@@ -67,6 +67,9 @@ export function PlaceAreaSearchFields({
           }}
           disabled={disabled || searchLoading}
           styles={insetTextInputStyles}
+          enterKeyHint="search"
+          inputMode="search"
+          rightSectionPointerEvents="all"
           rightSection={
             <ActionIcon
               type="button"
