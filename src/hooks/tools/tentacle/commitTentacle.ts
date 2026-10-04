@@ -1,5 +1,4 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/tentacleGeometry";
 import type { AnnotationRecord, GameArea, TentaclePoi } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
@@ -148,9 +147,9 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
       outOfReach: tentacleOutOfReach,
       gameArea,
     });
-  } catch (error) {
-    setMapError(error instanceof Error ? error.message : MEASURING_PERSIST_OVER_BUDGET_MESSAGE);
-    return;
+  } catch {
+    // Persist ceiling: keep Point annotation; shade rebuild omits elim JSON.
+    eliminationJson = undefined;
   }
 
   const metadata: AnnotationRecord["metadata"] = {

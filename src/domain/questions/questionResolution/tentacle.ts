@@ -41,7 +41,8 @@ export async function resolveTentaclePendingQuestion(
       gameArea,
     });
   } catch {
-    return null;
+    // Persist ceiling: keep Point annotation; omit elim JSON (same as solo commit).
+    eliminationJson = undefined;
   }
 
   const resolvedMetadata: AnnotationRecord["metadata"] = {
