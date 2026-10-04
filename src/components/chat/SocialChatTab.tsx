@@ -1,12 +1,10 @@
 import { ActionIcon, Box, Group, Stack, Text, TextInput } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
-import { commitWrite } from "@/services/firestore/commitWrite";
+import { sendSocialMessage } from "@/services/session/socialChat";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
-import { createMessageId } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
-import { postSocialMessage } from "../../services/firestore/firestoreSessionExtras";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { PendingSyncBadge } from "./PendingSyncBadge";
 
@@ -44,15 +42,12 @@ export function SocialChatTab({
     if (!text) {
       return;
     }
-    // Mint the id once per submit: the doc id is the message id, so a Firestore
-    // replay on reconnect rewrites the same doc instead of creating a duplicate.
-    const messageId = createMessageId();
     setDraft("");
-    // Not awaited: the server ack never arrives offline. Rejections surface via
-    // WriteFailureNotifier; the pending row shows "Waiting to send" meanwhile.
-    commitWrite("chat.send", () =>
-      postSocialMessage(sessionId, senderUid, senderRole, text, messageId),
-    );
+    // Not awaited: offline the ack only arrives after reconnect. On a rejection
+    // WriteFailureNotifier surfaces it; give the text back if the box is still empty.
+    void sendSocialMessage(sessionId, senderUid, senderRole, text).acknowledged.catch(() => {
+      setDraft((current) => (current === "" ? text : current));
+    });
   };
 
   return (
