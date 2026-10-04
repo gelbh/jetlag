@@ -186,7 +186,9 @@ export async function handleSentryTunnelRequest(
     return new Response("Invalid Sentry envelope", { status: 400 });
   }
 
-  const allowed = allowlist ? isAllowlisted(target, allowlist) : isAllowedSentryTunnelTarget(target);
+  const allowed = allowlist
+    ? isAllowlisted(target, allowlist)
+    : isAllowedSentryTunnelTarget(target);
   if (!allowed) {
     return new Response("Sentry project not allowed", { status: 403 });
   }
