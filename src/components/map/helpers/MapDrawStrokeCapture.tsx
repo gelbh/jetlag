@@ -27,9 +27,12 @@ export function MapDrawStrokeCapture({ enabled, onBegin, onExtend, onEnd }: Stro
       return;
     }
 
+    const nativeMap = map.getMap();
+    const dragPan = nativeMap.dragPan;
+
     const begin = (lat: number, lng: number) => {
       drawingRef.current = true;
-      map.dragPan.disable();
+      dragPan?.disable();
       handlersRef.current.onBegin(lat, lng);
     };
 
@@ -45,7 +48,7 @@ export function MapDrawStrokeCapture({ enabled, onBegin, onExtend, onEnd }: Stro
         return;
       }
       drawingRef.current = false;
-      map.dragPan.enable();
+      dragPan?.enable();
       handlersRef.current.onEnd();
     };
 
@@ -88,7 +91,7 @@ export function MapDrawStrokeCapture({ enabled, onBegin, onExtend, onEnd }: Stro
       map.off("touchcancel", end);
       if (drawingRef.current) {
         drawingRef.current = false;
-        map.dragPan.enable();
+        dragPan?.enable();
       }
     };
   }, [enabled, map]);
