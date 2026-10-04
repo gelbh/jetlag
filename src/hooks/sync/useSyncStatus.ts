@@ -31,6 +31,9 @@ export function useSyncStatus(): {
 
   useEffect(() => {
     setNetworkReachable(reachabilityEnabled ? reachable : null);
+    // Unmount (session exit) must not leave a stale `false` that blocks callables
+    // off-session, where no probe runs to clear it.
+    return () => setNetworkReachable(null);
   }, [reachabilityEnabled, reachable, setNetworkReachable]);
 
   useEffect(() => {

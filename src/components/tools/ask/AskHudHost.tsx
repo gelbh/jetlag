@@ -3,7 +3,7 @@
  */
 
 import { Stack } from "@mantine/core";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { SheetHost } from "@/components/ui/sheets/SheetHost";
 import { AskCommitStrip } from "./AskCommitStrip";
 import { AskCostChip } from "./AskCostChip";
@@ -43,6 +43,12 @@ export function AskHudHost({
   showCostChip = true,
   showCue = true,
 }: AskHudHostProps) {
+  // Mount closed then flip open so Drawer runs closed→open present (Settings/Chat parity).
+  const [presented, setPresented] = useState(false);
+  useEffect(() => {
+    setPresented(true);
+  }, []);
+
   const cueTicker = showCue ? <AskModeCueTicker cue={cue} /> : null;
 
   const costChip = showCostChip ? (
@@ -75,7 +81,7 @@ export function AskHudHost({
   return (
     <div data-testid="ask-hud-host" data-ask-composition="ask-first">
       <SheetHost
-        open
+        open={presented}
         onClose={onDismiss ?? (() => undefined)}
         ariaLabel={toolLabel}
         maxHeightClassName="max-h-[min(72dvh,640px)]"

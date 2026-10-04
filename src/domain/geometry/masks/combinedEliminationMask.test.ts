@@ -109,6 +109,42 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask parity", () => {
       booleanPointInPolygon(turfPoint([-0.155, 51.45]), baseline!),
     );
   });
+
+  it("incremental prior union new matches full rebuild on point-in-polygon samples", async () => {
+    const priorAnnotations = [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)];
+    const next = matchingAnnotation("c", -0.13);
+    const all = [...priorAnnotations, next];
+
+    const priorMask = await buildCombinedMask(priorAnnotations, gameArea);
+    const fullRebuild = await buildCombinedMask(all, gameArea);
+    expect(priorMask).not.toBeNull();
+    expect(fullRebuild).not.toBeNull();
+
+    const newInput = computeEliminationUnionInputTs([next], gameArea, []);
+    const geometry = featureToGameAreaGeometry(gameAreaToFeature(gameArea));
+    const incremental = await runMaskFromUnionInput(
+      {
+        polygons: [priorMask!, ...newInput.polygons],
+        disks: newInput.disks,
+      },
+      geometry,
+    );
+
+    expect(incremental).not.toBeNull();
+    const samples: [number, number][] = [
+      [-0.185, 51.45],
+      [-0.155, 51.45],
+      [-0.125, 51.45],
+      [-0.11, 51.45],
+      [-0.15, 51.41],
+    ];
+    for (const [lng, lat] of samples) {
+      const sample = turfPoint([lng, lat]);
+      expect(booleanPointInPolygon(sample, incremental!)).toBe(
+        booleanPointInPolygon(sample, fullRebuild!),
+      );
+    }
+  });
 });
 
 describe.skipIf(!wasmPkgReady)("combinedEliminationMask", () => {

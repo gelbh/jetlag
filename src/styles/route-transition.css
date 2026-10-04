@@ -109,13 +109,11 @@ html[data-nav-direction="back"] .route-transition-overlay--exiting {
 
 @media (prefers-reduced-motion: reduce) {
   .route-transition-overlay {
-    animation: route-transition-overlay-fade-in var(--motion-route-overlay-exit, 200ms)
-      ease both;
+    animation: route-transition-overlay-fade-in var(--motion-route-overlay-exit, 200ms) ease both;
   }
 
   .route-transition-overlay--exiting {
-    animation: route-transition-overlay-fade-out var(--motion-route-overlay-exit, 200ms)
-      ease both;
+    animation: route-transition-overlay-fade-out var(--motion-route-overlay-exit, 200ms) ease both;
   }
 
   .route-transition-overlay .loading-spinner {
@@ -124,14 +122,12 @@ html[data-nav-direction="back"] .route-transition-overlay--exiting {
 }
 
 html[data-motion="reduced"] .route-transition-overlay {
-  animation: route-transition-overlay-fade-in var(--motion-route-overlay-exit, 200ms)
-    ease both;
+  animation: route-transition-overlay-fade-in var(--motion-route-overlay-exit, 200ms) ease both;
 }
 
 html[data-motion-decorative="off"] .route-transition-overlay--exiting,
 html[data-motion="reduced"] .route-transition-overlay--exiting {
-  animation: route-transition-overlay-fade-out var(--motion-route-overlay-exit, 200ms)
-    ease both;
+  animation: route-transition-overlay-fade-out var(--motion-route-overlay-exit, 200ms) ease both;
 }
 
 html[data-motion="reduced"] .route-transition-overlay .loading-spinner {
