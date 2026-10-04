@@ -1,6 +1,7 @@
 import { ActionIcon, Box, Group, Stack, Text, TextInput } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
+import { commitWrite } from "@/services/firestore/commitWrite";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
 import { createMessageId } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
@@ -29,7 +30,6 @@ export function SocialChatTab({
   readOnly = false,
 }: SocialChatTabProps) {
   const [draft, setDraft] = useState("");
-  const [sending, setSending] = useState(false);
   const socialMessages = useMemo(
     () =>
       messages
@@ -39,19 +39,20 @@ export function SocialChatTab({
   );
   const bottomRef = useStickScrollToBottom(socialMessages.length);
 
-  const send = async () => {
+  const send = () => {
     const text = draft.trim();
     if (!text) {
       return;
     }
-
-    setSending(true);
-    try {
-      await postSocialMessage(sessionId, senderUid, senderRole, text, createMessageId());
-      setDraft("");
-    } finally {
-      setSending(false);
-    }
+    // Mint the id once per submit: the doc id is the message id, so a Firestore
+    // replay on reconnect rewrites the same doc instead of creating a duplicate.
+    const messageId = createMessageId();
+    setDraft("");
+    // Not awaited: the server ack never arrives offline. Rejections surface via
+    // WriteFailureNotifier; the pending row shows "Waiting to send" meanwhile.
+    commitWrite("chat.send", () =>
+      postSocialMessage(sessionId, senderUid, senderRole, text, messageId),
+    );
   };
 
   return (
@@ -113,7 +114,7 @@ export function SocialChatTab({
           component="form"
           onSubmit={(event) => {
             event.preventDefault();
-            void send();
+            send();
           }}
         >
           <TextInput
@@ -139,7 +140,7 @@ export function SocialChatTab({
             size={40}
             radius="xl"
             variant="filled"
-            disabled={sending || draft.trim().length === 0}
+            disabled={draft.trim().length === 0}
             aria-label="Send"
             styles={{
               root: {
