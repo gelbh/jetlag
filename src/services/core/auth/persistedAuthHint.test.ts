@@ -1,31 +1,33 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { resetClientEnvForTests } from "@/config/env";
+import { describe, expect, it } from "vitest";
 import { expectsPermanentSignIn, OAUTH_REDIRECT_PENDING_KEY } from "./persistedAuthHint";
 
-const KEY = "firebase:authUser:test-api-key:[DEFAULT]";
+const KEY = "firebase:authUser:any-api-key:[DEFAULT]";
 
-function storageWith(entries: Record<string, string>): Pick<Storage, "getItem"> {
-  return { getItem: (key) => entries[key] ?? null };
+type HintStorage = Pick<Storage, "getItem" | "key" | "length">;
+
+function storageWith(entries: Record<string, string>): HintStorage {
+  const keys = Object.keys(entries);
+  return {
+    length: keys.length,
+    key: (index) => keys[index] ?? null,
+    getItem: (key) => entries[key] ?? null,
+  };
 }
 
 const empty = storageWith({});
-const blocked: Pick<Storage, "getItem"> = {
+const blocked: HintStorage = {
+  get length(): number {
+    throw new DOMException("blocked", "SecurityError");
+  },
+  key: () => {
+    throw new DOMException("blocked", "SecurityError");
+  },
   getItem: () => {
     throw new DOMException("blocked", "SecurityError");
   },
 };
 
 describe("expectsPermanentSignIn", () => {
-  beforeEach(() => {
-    vi.stubEnv("VITE_FIREBASE_API_KEY", "test-api-key");
-    resetClientEnvForTests();
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
-    resetClientEnvForTests();
-  });
-
   it("is false with no persisted user", () => {
     expect(expectsPermanentSignIn(empty, empty)).toBe(false);
   });
@@ -39,6 +41,13 @@ describe("expectsPermanentSignIn", () => {
     const user = storageWith({ [KEY]: JSON.stringify({ uid: "p", isAnonymous: false }) });
     expect(expectsPermanentSignIn(user, empty)).toBe(true);
     expect(expectsPermanentSignIn(empty, user)).toBe(true);
+  });
+
+  it("ignores permanent users persisted for another Firebase app", () => {
+    const other = storageWith({
+      "firebase:authUser:any-api-key:secondary": JSON.stringify({ isAnonymous: false }),
+    });
+    expect(expectsPermanentSignIn(other, empty)).toBe(false);
   });
 
   it("is true while an OAuth redirect sign-in is coming back", () => {
