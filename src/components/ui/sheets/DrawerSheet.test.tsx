@@ -128,6 +128,41 @@ describe("DrawerSheet", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("clears stale drag translateY when reopening after grabber dismiss", () => {
+    const onClose = vi.fn();
+    const { rerender } = render(
+      withAppUi(
+        <DrawerSheet open onClose={onClose} ariaLabel="Changelog">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    const handle = screen.getByRole("button", {
+      name: "Drag sheet down to dismiss",
+    });
+    dragGrabberDown(handle, 120);
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    rerender(
+      withAppUi(
+        <DrawerSheet open={false} onClose={onClose} ariaLabel="Changelog">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+    rerender(
+      withAppUi(
+        <DrawerSheet open onClose={onClose} ariaLabel="Changelog">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    const sheet = screen.getByTestId("mantine-drawer-sheet");
+    expect(sheet.style.transform).not.toContain("translateY");
+  });
+
   it("dismisses from grabber even when the host body is scrolled", () => {
     const onClose = vi.fn();
     render(

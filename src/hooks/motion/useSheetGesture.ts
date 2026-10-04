@@ -32,6 +32,8 @@ export interface UseSheetGestureResult {
   scrimStyle: CSSProperties;
   handleProps: SheetHandleProps;
   isDragging: boolean;
+  /** Clear drag translate (call when the sheet reopens after a kept-mounted dismiss). */
+  reset: () => void;
 }
 
 export function useSheetGesture({
@@ -102,6 +104,7 @@ export function useSheetGesture({
     scrimStyle,
     handleProps: bindings,
     isDragging,
+    reset,
   };
 }
 
