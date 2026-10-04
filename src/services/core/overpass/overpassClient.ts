@@ -27,6 +27,13 @@ export class OverpassUnavailableError extends Error {
   }
 }
 
+export class OverpassQueryTooExpensiveError extends Error {
+  constructor(message = OVERPASS_UNAVAILABLE_MESSAGE) {
+    super(message);
+    this.name = "OverpassQueryTooExpensiveError";
+  }
+}
+
 export class OverpassPayloadTooLargeError extends Error {
   constructor(message = "Overpass response too large.") {
     super(message);
@@ -69,7 +76,7 @@ function overpassProxyUrl(): string | null {
 }
 
 function isRetryableOverpassStatus(status: number): boolean {
-  return status === 429 || status === 502 || status === 503 || status === 504;
+  return status === 429 || status === 502 || status === 503;
 }
 
 function isRetryableOverpassError(error: unknown): boolean {
@@ -127,6 +134,10 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
           return response;
         }
 
+        if (response.status === 504) {
+          throw new OverpassQueryTooExpensiveError();
+        }
+
         if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
           lastError = new OverpassUnavailableError();
           await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
@@ -148,14 +159,12 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
           throw error;
         }
 
-        if (error instanceof FetchTimeoutError) {
-          lastError = new OverpassUnavailableError();
-          if (attempt < OVERPASS_MAX_RETRIES) {
-            await sleep(retryDelayMs(attempt, null));
-            continue;
-          }
+        if (error instanceof OverpassQueryTooExpensiveError) {
+          throw error;
+        }
 
-          break;
+        if (error instanceof FetchTimeoutError) {
+          throw new OverpassQueryTooExpensiveError();
         }
 
         if (!isRetryableOverpassError(error)) {
@@ -227,6 +236,10 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
         return response;
       }
 
+      if (response.status === 504) {
+        throw new OverpassQueryTooExpensiveError();
+      }
+
       if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_PROXY_MAX_RETRIES) {
         lastError = new OverpassUnavailableError();
         await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
@@ -245,6 +258,14 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
     } catch (error) {
       if (error instanceof OverpassUnavailableError || isNonRetryableOverpassFailure(error)) {
         throw error;
+      }
+
+      if (error instanceof OverpassQueryTooExpensiveError) {
+        throw error;
+      }
+
+      if (error instanceof FetchTimeoutError) {
+        throw new OverpassQueryTooExpensiveError();
       }
 
       if (!isRetryableOverpassError(error)) {
