@@ -41,6 +41,18 @@ describe("MapFloatSurface", () => {
     );
     expect(screen.getByRole("alert")).toHaveTextContent("Outside zone");
   });
+
+  it("renders optional title on the alert surface", () => {
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapFloatSurface tone="flag" title="Match">
+          Prompt text
+        </MapFloatSurface>
+      </MantineProvider>,
+    );
+    expect(screen.getByText("Match")).toBeInTheDocument();
+    expect(screen.getByText("Prompt text")).toBeInTheDocument();
+  });
 });
 
 describe("MapFloatAlert wrappers", () => {
