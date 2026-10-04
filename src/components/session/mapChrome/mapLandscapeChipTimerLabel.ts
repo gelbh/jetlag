@@ -8,6 +8,7 @@ import {
 } from "@/domain/session/hiding/hidingPeriod";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { computeElapsedMs, formatElapsedTime, type TimerState } from "@/domain/session/timer/timer";
+import { serverNow } from "@/services/core/time/serverClock";
 
 export type LandscapeChipTimerLabel = {
   phase: string;
@@ -30,7 +31,7 @@ export function mapLandscapeChipTimerLabel({
   }
 
   const elapsed = computeElapsedMs(timerState);
-  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules);
+  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules, serverNow());
 
   if (questionTimer) {
     return {

@@ -5,6 +5,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocFromCache,
   getDocs,
   onSnapshot,
   orderBy,
@@ -75,12 +76,17 @@ function pendingQuestionsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "pendingQuestions");
 }
 
-/** Returns status string when the pending question exists; otherwise null. */
+/**
+ * Returns status string when the pending question exists; otherwise null.
+ * Cache first: the pendingQuestions listener keeps it current, and a default
+ * getDoc on lie-fi waits until the SDK decides it is offline (~10 s).
+ */
 export async function getPendingQuestionStatus(
   sessionId: string,
   questionId: string,
 ): Promise<string | null> {
-  const snapshot = await getDoc(doc(pendingQuestionsCollection(sessionId), questionId));
+  const ref = doc(pendingQuestionsCollection(sessionId), questionId);
+  const snapshot = await getDocFromCache(ref).catch(() => getDoc(ref));
   if (!snapshot.exists()) {
     return null;
   }
@@ -302,39 +308,87 @@ export function subscribeToSessionMessages(
   );
 }
 
-export async function writePendingQuestion(
+/**
+ * Question + its chat row in one atomic batch: queued offline as a unit, so
+ * there is no half-asked state to compensate. Pending asks get `receivedAt`
+ * stamped by the server so the hider's answer window starts on arrival;
+ * walking asks get it when the walk completes (`stampReceivedAt`).
+ */
+export async function writeAskedQuestionBatch(
   sessionId: string,
   question: PendingQuestionRecord,
+  message: SessionMessageRecord,
 ): Promise<void> {
-  await setDoc(
-    doc(pendingQuestionsCollection(sessionId), question.id),
-    buildPendingQuestionDocument(question),
-  );
+  const batch = writeBatch(getFirestoreDb());
+  batch.set(doc(pendingQuestionsCollection(sessionId), question.id), {
+    ...buildPendingQuestionDocument(question),
+    ...(question.status === "pending" ? { receivedAt: serverTimestamp() } : {}),
+  });
+  batch.set(doc(messagesCollection(sessionId), message.id), buildSessionMessageDocument(message));
+  await batch.commit();
 }
 
-export async function deletePendingQuestion(sessionId: string, questionId: string): Promise<void> {
-  await deleteDoc(doc(pendingQuestionsCollection(sessionId), questionId));
+export type PendingQuestionPatch = Partial<
+  Pick<
+    PendingQuestionRecord,
+    | "status"
+    | "answer"
+    | "resolvedAnnotationId"
+    | "placement"
+    | "promptText"
+    | "replyOptions"
+    | "answerableAt"
+    | "deadlineExpiredAt"
+    | "answeredLate"
+    | "cardDraw"
+    | "cardKeep"
+  >
+>;
+
+/** A question transition plus the chat writes that announce it. */
+export interface PendingQuestionBatchWrites {
+  questionId: string;
+  questionPatch: PendingQuestionPatch;
+  /** Patch to the question's existing chat row. */
+  gameMessage?: {
+    id: string;
+    patch: { status: "answered" | "cancelled"; selectedReply?: string };
+  };
+  /** New chat row (system notice, or the question row when a walk completes). */
+  newMessage?: SessionMessageRecord;
+  /** Stamp server receipt: the question becomes answerable for the hider with this write. */
+  stampReceivedAt?: boolean;
+}
+
+/** Applied atomically so an offline queue never replays half a transition. */
+export async function writePendingQuestionUpdateBatch(
+  sessionId: string,
+  writes: PendingQuestionBatchWrites,
+): Promise<void> {
+  const batch = writeBatch(getFirestoreDb());
+  batch.update(doc(pendingQuestionsCollection(sessionId), writes.questionId), {
+    ...(stripUndefinedValues(writes.questionPatch) as Record<string, unknown>),
+    ...(writes.stampReceivedAt ? { receivedAt: serverTimestamp() } : {}),
+  });
+  if (writes.gameMessage) {
+    batch.update(
+      doc(messagesCollection(sessionId), writes.gameMessage.id),
+      stripUndefinedValues(writes.gameMessage.patch) as Record<string, unknown>,
+    );
+  }
+  if (writes.newMessage) {
+    batch.set(
+      doc(messagesCollection(sessionId), writes.newMessage.id),
+      buildSessionMessageDocument(writes.newMessage),
+    );
+  }
+  await batch.commit();
 }
 
 export async function updatePendingQuestion(
   sessionId: string,
   questionId: string,
-  patch: Partial<
-    Pick<
-      PendingQuestionRecord,
-      | "status"
-      | "answer"
-      | "resolvedAnnotationId"
-      | "placement"
-      | "promptText"
-      | "replyOptions"
-      | "answerableAt"
-      | "deadlineExpiredAt"
-      | "answeredLate"
-      | "cardDraw"
-      | "cardKeep"
-    >
-  >,
+  patch: PendingQuestionPatch,
 ): Promise<void> {
   await updateDoc(
     doc(pendingQuestionsCollection(sessionId), questionId),
@@ -449,25 +503,6 @@ export async function cancelWalkingThermometersAfterIdentityHeal(
   }
 }
 
-export async function updateGameMessageAnswer(
-  sessionId: string,
-  messageId: string,
-  selectedReply: string,
-): Promise<void> {
-  await updateDoc(doc(messagesCollection(sessionId), messageId), {
-    selectedReply,
-    status: "answered",
-  });
-}
-
-export async function updateGameMessageStatus(
-  sessionId: string,
-  messageId: string,
-  status: "cancelled",
-): Promise<void> {
-  await updateDoc(doc(messagesCollection(sessionId), messageId), { status });
-}
-
 export function subscribeToPendingQuestions(
   sessionId: string,
   onChange: (questions: PendingQuestionRecord[]) => void,
@@ -565,23 +600,38 @@ export async function postSocialMessage(
   });
 }
 
+export function buildGameSystemMessage(
+  sessionId: string,
+  senderUid: string,
+  senderRole: PlayerRole,
+  text: string,
+  messageId: string,
+  createdAt: string = new Date().toISOString(),
+): SessionMessageRecord {
+  return {
+    id: messageId,
+    sessionId,
+    channel: "game",
+    senderUid,
+    senderRole,
+    createdAt,
+    kind: "system",
+    text,
+  };
+}
+
 export async function postGameSystemMessage(
   sessionId: string,
   senderUid: string,
   senderRole: PlayerRole,
   text: string,
   messageId: string,
+  createdAt?: string,
 ): Promise<void> {
-  await writeSessionMessage(sessionId, {
-    id: messageId,
+  await writeSessionMessage(
     sessionId,
-    channel: "game",
-    senderUid,
-    senderRole,
-    createdAt: new Date().toISOString(),
-    kind: "system",
-    text,
-  });
+    buildGameSystemMessage(sessionId, senderUid, senderRole, text, messageId, createdAt),
+  );
 }
 
 export { serverTimestamp, sessionDoc };

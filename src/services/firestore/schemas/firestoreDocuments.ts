@@ -115,6 +115,8 @@ export const pendingQuestionDocumentSchema = z
     promptText: z.string().optional(),
     answer: z.unknown().optional(),
     answerableAt: z.string().optional(),
+    /** Firestore Timestamp from serverTimestamp(); null in local snapshots until acked. */
+    receivedAt: z.unknown().optional(),
     deadlineExpiredAt: z.string().optional(),
     answeredLate: z.boolean().optional(),
     resolvedAnnotationId: z.string().optional(),

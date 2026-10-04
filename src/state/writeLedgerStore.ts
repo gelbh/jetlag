@@ -5,6 +5,7 @@ export type WriteLabel =
   | "question.ask"
   | "question.answer"
   | "question.cancel"
+  | "question.update"
   | "endgame.start"
   | "found.request"
   | "found.confirm"

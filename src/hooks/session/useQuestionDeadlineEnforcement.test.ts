@@ -70,6 +70,39 @@ describe("useQuestionDeadlineEnforcement", () => {
     expect(pauseTimer).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    {
+      name: "a queued ask the hider has not received",
+      overrides: { pendingSync: true },
+    },
+    {
+      name: "an ask that reached the server well after it was asked",
+      overrides: { receivedAt: new Date(Date.now() - 30 * 1000).toISOString() },
+    },
+  ])("does not expire $name", async ({ overrides }) => {
+    const postSystemMessage = vi.fn();
+    renderHook(() =>
+      useQuestionDeadlineEnforcement({
+        sessionId: "session-1",
+        enabled: true,
+        sessionRules: { gameSize: "small" },
+        pendingQuestions: [pendingQuestion(overrides)],
+        hidingZones: [],
+        hidingTimerRunning: true,
+        pauseTimer: vi.fn(),
+        resumeTimer: vi.fn(),
+        postSystemMessage,
+      }),
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+
+    expect(updatePendingQuestion).not.toHaveBeenCalled();
+    expect(postSystemMessage).not.toHaveBeenCalled();
+  });
+
   it("does not run when disabled or session id is missing", async () => {
     renderHook(() =>
       useQuestionDeadlineEnforcement({

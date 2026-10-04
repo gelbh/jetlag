@@ -8,12 +8,16 @@ import {
 
 const firestoreMocks = vi.hoisted(() => {
   const batchUpdate = vi.fn();
+  const batchSet = vi.fn();
   const batchCommit = vi.fn(async () => undefined);
   return {
     setDoc: vi.fn(async () => undefined),
     updateDoc: vi.fn(async () => undefined),
     deleteDoc: vi.fn(async () => undefined),
     addDoc: vi.fn(async () => undefined),
+    getDocFromCache: vi.fn(async () => {
+      throw new Error("not cached");
+    }),
     getDoc: vi.fn(async () => ({
       exists: () => true,
       data: () => ({ status: "walking" }),
@@ -25,9 +29,11 @@ const firestoreMocks = vi.hoisted(() => {
     ),
     writeBatch: vi.fn(() => ({
       update: batchUpdate,
+      set: batchSet,
       commit: batchCommit,
     })),
     batchUpdate,
+    batchSet,
     batchCommit,
     doc: vi.fn((...segments: string[]) => ({ path: segments.join("/") })),
     collection: vi.fn((...segments: string[]) => ({
@@ -44,11 +50,12 @@ vi.mock("firebase/firestore", () => ({
   deleteDoc: firestoreMocks.deleteDoc,
   doc: firestoreMocks.doc,
   getDoc: firestoreMocks.getDoc,
+  getDocFromCache: firestoreMocks.getDocFromCache,
   getDocs: firestoreMocks.getDocs,
   onSnapshot: vi.fn(),
   orderBy: vi.fn(),
   query: vi.fn(),
-  serverTimestamp: vi.fn(),
+  serverTimestamp: vi.fn(() => "SERVER_TIMESTAMP"),
   setDoc: firestoreMocks.setDoc,
   updateDoc: firestoreMocks.updateDoc,
   writeBatch: firestoreMocks.writeBatch,
@@ -70,11 +77,11 @@ import {
   cancelWalkingThermometerQuestions,
   cancelWalkingThermometersAfterIdentityHeal,
   cancelWalkingThermometersAndAnnounce,
-  deletePendingQuestion,
   deletePlayerLocation,
   subscribeToSessionMessages,
   updatePendingQuestion,
-  writePendingQuestion,
+  writeAskedQuestionBatch,
+  writePendingQuestionUpdateBatch,
   writePlayerLocation,
 } from "./firestoreSessionExtras";
 
@@ -111,17 +118,6 @@ describe("firestoreSessionExtras writes", () => {
     vi.clearAllMocks();
   });
 
-  it("writes pending questions with serialized documents", async () => {
-    const question = samplePendingQuestion();
-
-    await writePendingQuestion("session-1", question);
-
-    expect(firestoreMocks.setDoc).toHaveBeenCalledWith(
-      expect.objectContaining({ path: expect.stringContaining("pq-1") }),
-      buildPendingQuestionDocument(question),
-    );
-  });
-
   it("patches pending question fields without undefined values", async () => {
     await updatePendingQuestion("session-1", "pq-1", {
       status: "answered",
@@ -136,14 +132,6 @@ describe("firestoreSessionExtras writes", () => {
         answer: { kind: "reply", replyId: "yes" },
         deadlineExpiredAt: "2026-01-01T00:10:00.000Z",
       },
-    );
-  });
-
-  it("deletes pending questions by id", async () => {
-    await deletePendingQuestion("session-1", "pq-1");
-
-    expect(firestoreMocks.deleteDoc).toHaveBeenCalledWith(
-      expect.objectContaining({ path: expect.stringContaining("pq-1") }),
     );
   });
 
@@ -257,6 +245,103 @@ describe("firestoreSessionExtras writes", () => {
     expect(restored.promptText).toBe(question.promptText);
     expect(restored.cardDraw).toBe(2);
     expect(restored.deadlineExpiredAt).toBe("2026-01-01T00:10:00.000Z");
+  });
+
+  it("asks atomically: question stamped with server receipt + chat row in one batch", async () => {
+    const question = samplePendingQuestion();
+    const message = {
+      id: "msg-1",
+      sessionId: "session-1",
+      channel: "game" as const,
+      senderUid: "seeker-1",
+      senderRole: "seeker" as const,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      kind: "question" as const,
+      pendingQuestionId: "pq-1",
+      status: "pending" as const,
+    };
+
+    await writeAskedQuestionBatch("session-1", question, message);
+
+    expect(firestoreMocks.batchSet).toHaveBeenCalledTimes(2);
+    expect(firestoreMocks.batchSet).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("pq-1") }),
+      { ...buildPendingQuestionDocument(question), receivedAt: "SERVER_TIMESTAMP" },
+    );
+    expect(firestoreMocks.batchSet).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("msg-1") }),
+      expect.objectContaining({ kind: "question", pendingQuestionId: "pq-1" }),
+    );
+    expect(firestoreMocks.batchCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not stamp receivedAt on walking asks", async () => {
+    const question = samplePendingQuestion({ status: "walking", answerableAt: undefined });
+
+    await writeAskedQuestionBatch("session-1", question, {
+      id: "msg-1",
+      sessionId: "session-1",
+      channel: "game",
+      senderUid: "seeker-1",
+      senderRole: "seeker",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      kind: "system",
+      text: "Thermometer walk started",
+    });
+
+    const [, questionDoc] = firestoreMocks.batchSet.mock.calls[0] as unknown as [
+      unknown,
+      Record<string, unknown>,
+    ];
+    expect(questionDoc).not.toHaveProperty("receivedAt");
+  });
+
+  it("applies a question transition and its chat writes in one batch", async () => {
+    await writePendingQuestionUpdateBatch("session-1", {
+      questionId: "pq-1",
+      questionPatch: { status: "cancelled", answer: undefined },
+      gameMessage: { id: "msg-1", patch: { status: "cancelled" } },
+      newMessage: {
+        id: "msg-2",
+        sessionId: "session-1",
+        channel: "game",
+        senderUid: "seeker-1",
+        senderRole: "seeker",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        kind: "system",
+        text: "Expired question dismissed. You can ask again.",
+      },
+    });
+
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("pq-1") }),
+      { status: "cancelled" },
+    );
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("msg-1") }),
+      { status: "cancelled" },
+    );
+    expect(firestoreMocks.batchSet).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("msg-2") }),
+      expect.objectContaining({ kind: "system" }),
+    );
+    expect(firestoreMocks.batchCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads server receipt as ISO and treats the unacked null placeholder as absent", () => {
+    const document = buildPendingQuestionDocument(samplePendingQuestion());
+    const stamped = deserializePendingQuestionFromFirestore("pq-1", "session-1", {
+      ...document,
+      receivedAt: { toDate: () => new Date("2026-01-01T00:12:00.000Z") },
+    });
+    const unacked = deserializePendingQuestionFromFirestore("pq-1", "session-1", {
+      ...document,
+      receivedAt: null,
+    });
+
+    expect(stamped.receivedAt).toBe("2026-01-01T00:12:00.000Z");
+    expect(unacked.receivedAt).toBeUndefined();
+    expect(buildPendingQuestionDocument(stamped)).not.toHaveProperty("receivedAt");
   });
 
   it("appends player trail points under the session subcollection", async () => {

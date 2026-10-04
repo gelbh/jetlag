@@ -7,6 +7,7 @@ import type {
   SessionMessageRecord,
 } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import { serverNow } from "@/services/core/time/serverClock";
 import {
   HiderPendingQuestionAnswer,
   type HiderPendingQuestionAnswerProps,
@@ -42,11 +43,12 @@ export function QuestionAlertBanner({
   answeredPendingIds,
   onAnswerQuestion,
 }: QuestionAlertBannerProps) {
-  const [nowMs, setNowMs] = useState(() => Date.now());
+  // Server clock: deadline anchors are server-stamped, and expiry marks answers late.
+  const [nowMs, setNowMs] = useState(() => serverNow());
 
   useEffect(() => {
     const interval = window.setInterval(() => {
-      setNowMs(Date.now());
+      setNowMs(serverNow());
     }, 1000);
     return () => window.clearInterval(interval);
   }, []);

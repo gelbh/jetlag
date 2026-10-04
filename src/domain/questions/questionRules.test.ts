@@ -3,6 +3,7 @@ import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { answerDeadlineMs } from "../session/size/gameSizeRules";
 import {
+  activeDeadlineAnchor,
   countAnnotationUses,
   formatAnswerCountdown,
   formatDrawPickSummary,
@@ -10,11 +11,13 @@ import {
   formatPendingDrawPickSummary,
   formatSequentialDrawPickSummary,
   hasOpenPendingQuestion,
+  isAwaitingServerReceipt,
   isQuestionAnswerDeadlineExpired,
   isUsedOptionPendingQuestion,
   questionAnswerDeadlineMs,
   questionCostBreakdown,
   questionCostLabel,
+  resolveDeadlineAnchor,
 } from "./questionRules";
 
 describe("isUsedOptionPendingQuestion", () => {
@@ -134,5 +137,50 @@ describe("questionRules", () => {
         "a1",
       ),
     ).toBe(1);
+  });
+});
+
+describe("resolveDeadlineAnchor", () => {
+  it("uses the later of answerableAt and server receipt", () => {
+    expect(
+      resolveDeadlineAnchor({
+        answerableAt: "2026-01-01T10:00:00.000Z",
+        receivedAt: "2026-01-01T10:12:00.000Z",
+      }),
+    ).toBe("2026-01-01T10:12:00.000Z");
+    expect(
+      resolveDeadlineAnchor({
+        answerableAt: "2026-01-01T10:00:05.000Z",
+        receivedAt: "2026-01-01T10:00:00.000Z",
+      }),
+    ).toBe("2026-01-01T10:00:05.000Z");
+    expect(resolveDeadlineAnchor({ answerableAt: "2026-01-01T10:00:00.000Z" })).toBe(
+      "2026-01-01T10:00:00.000Z",
+    );
+    expect(resolveDeadlineAnchor({ receivedAt: "2026-01-01T10:12:00.000Z" })).toBe(
+      "2026-01-01T10:12:00.000Z",
+    );
+    expect(resolveDeadlineAnchor({})).toBeUndefined();
+  });
+});
+
+describe("isAwaitingServerReceipt", () => {
+  it("is true only for a local unacked write the server has not stamped", () => {
+    expect(isAwaitingServerReceipt({ pendingSync: true })).toBe(true);
+    expect(
+      isAwaitingServerReceipt({ pendingSync: true, receivedAt: "2026-01-01T10:00:00.000Z" }),
+    ).toBe(false);
+    expect(isAwaitingServerReceipt({})).toBe(false);
+  });
+});
+
+describe("activeDeadlineAnchor", () => {
+  it("withholds the anchor while the ask is queued, then uses the later anchor", () => {
+    const asked = { answerableAt: "2026-01-01T10:00:00.000Z" };
+    expect(activeDeadlineAnchor({ ...asked, pendingSync: true })).toBeUndefined();
+    expect(activeDeadlineAnchor(asked)).toBe("2026-01-01T10:00:00.000Z");
+    expect(activeDeadlineAnchor({ ...asked, receivedAt: "2026-01-01T10:05:00.000Z" })).toBe(
+      "2026-01-01T10:05:00.000Z",
+    );
   });
 });

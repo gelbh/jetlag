@@ -5,6 +5,7 @@ import {
   mapToolDockShortLabel,
 } from "../../domain/map/mapTools";
 import {
+  activeDeadlineAnchor,
   formatExpiredAnswerCountdown,
   formatPendingDrawPickSummary,
   questionAnswerDeadlineMs,
@@ -68,9 +69,9 @@ export function HiderPendingQuestionAnswer({
     ? questionAnswerDeadlineMs(pending.toolType, sessionRules)
     : questionAnswerDeadlineMs("matching", sessionRules);
   const countdown =
-    !walking && !closed && pending?.answerableAt
+    !walking && !closed && pending && activeDeadlineAnchor(pending)
       ? formatExpiredAnswerCountdown(
-          pending.answerableAt,
+          activeDeadlineAnchor(pending),
           deadlineMs,
           pending.deadlineExpiredAt,
           nowMs,
