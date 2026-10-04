@@ -24,7 +24,7 @@ import {
 } from "../kernel";
 import { unionPolygonFeaturesInSlices } from "../progressive/unionSlices";
 import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
-import { resolveGameAreaCellDivisions } from "./seaLevel";
+import { resolveLinearNearRegionCoarseDivisions } from "./seaLevel";
 
 type SegmentBoundingBox = {
   south: number;
@@ -443,7 +443,12 @@ export async function buildCoastlineNearRegion(
   distanceMeters: number,
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  const cacheKey = coastlineNearRegionCacheKey(gameArea, distanceMeters, segments, "batch:wasm");
+  const cacheKey = coastlineNearRegionCacheKey(
+    gameArea,
+    distanceMeters,
+    segments,
+    "batch:wasm:isoline",
+  );
   const cached = getCachedCoastlineNearRegion(cacheKey);
   if (cached) {
     return cached;
@@ -462,7 +467,7 @@ export async function buildCoastlineNearRegion(
       disks: [],
       gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
       mode: "distanceThreshold",
-      divisions: resolveGameAreaCellDivisions(gameArea),
+      divisions: resolveLinearNearRegionCoarseDivisions(gameArea),
     });
 
     if (result) {
