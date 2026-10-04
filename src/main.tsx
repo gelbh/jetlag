@@ -12,10 +12,12 @@ import { countRecoverableError } from "./domain/device/perf/recoverableErrors.ts
 import { scheduleAfterFirstPaint } from "./domain/device/perf/scheduleAfterFirstPaint.ts";
 import { scheduleWhenIdleAfterLoad } from "./domain/device/perf/scheduleWhenIdleAfterLoad.ts";
 import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
+import { installPreloadErrorRecovery } from "./domain/device/updates/preloadErrorRecovery.ts";
 import { unregisterDevServiceWorkers } from "./domain/device/updates/unregisterDevServiceWorkers.ts";
 import "./theme/mantineShellStyles";
 import "./index.css";
 
+installPreloadErrorRecovery();
 markStandaloneShellClass();
 markEmbedShellAttribute();
 // Gate here (not only inside the bridge) so production never fetches the
