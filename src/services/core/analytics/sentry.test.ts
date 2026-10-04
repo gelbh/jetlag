@@ -23,6 +23,7 @@ const replayIntegration = vi.hoisted(() => vi.fn(() => ({ name: "Replay" })));
 const getClientEnv = vi.hoisted(() => vi.fn((): Record<string, string> => ({})));
 const idleCallbacks = vi.hoisted((): Array<() => void> => []);
 const isolationScopeAddBreadcrumb = vi.hoisted(() => vi.fn());
+const scopeSetTransactionName = vi.hoisted(() => vi.fn());
 
 vi.mock("@sentry/react", () => ({
   addBreadcrumb,
@@ -35,6 +36,7 @@ vi.mock("@sentry/react", () => ({
   browserTracingIntegration,
   replayIntegration,
   getIsolationScope: () => ({ addBreadcrumb: isolationScopeAddBreadcrumb }),
+  getCurrentScope: () => ({ setTransactionName: scopeSetTransactionName }),
 }));
 
 vi.mock("../../../config/env", () => ({
@@ -54,7 +56,14 @@ import {
   initSentry,
   reportFirestoreListenPermissionDenied,
   reportJoinPermissionDenied,
+  setTransactionName,
 } from "./sentry";
+
+function stubProdWithDsn(): void {
+  vi.stubEnv("MODE", "production");
+  vi.stubEnv("DEV", false);
+  getClientEnv.mockReturnValue({ VITE_SENTRY_DSN: "https://key@example.invalid/1" });
+}
 
 describe("initSentry", () => {
   afterEach(() => {
@@ -75,9 +84,7 @@ describe("initSentry", () => {
   });
 
   it("inits without replay, then adds replay once on idle", () => {
-    vi.stubEnv("MODE", "production");
-    vi.stubEnv("DEV", false);
-    getClientEnv.mockReturnValue({ VITE_SENTRY_DSN: "https://key@example.invalid/1" });
+    stubProdWithDsn();
 
     initSentry();
 
@@ -88,7 +95,6 @@ describe("initSentry", () => {
       replaysOnErrorSampleRate: number;
     };
     expect(options.integrations).toEqual([{ name: "BrowserTracing" }]);
-    expect(browserTracingIntegration).toHaveBeenCalledWith({ enableInp: true });
     expect(replayIntegration).not.toHaveBeenCalled();
     expect(options.replaysOnErrorSampleRate).toBe(1.0);
     expect(options).toHaveProperty("replaysSessionSampleRate");
@@ -105,6 +111,54 @@ describe("initSentry", () => {
 
     initSentry();
     expect(idleCallbacks).toHaveLength(1);
+  });
+
+  // SDK 11's default span streaming names pageloads "Pageload" and drops LCP/CLS from them.
+  it("keeps route-named pageloads with LCP/CLS/INP on the static trace lifecycle", () => {
+    stubProdWithDsn();
+    browserTracingIntegration.mockClear();
+
+    initSentry();
+
+    const options = init.mock.lastCall?.[0] as { traceLifecycle?: string };
+    expect(options.traceLifecycle).toBe("static");
+
+    expect(browserTracingIntegration).toHaveBeenCalledOnce();
+    const tracingOptions = (browserTracingIntegration.mock.calls[0] as unknown[])[0] as Record<
+      string,
+      unknown
+    > & {
+      beforeStartSpan?: (options: { name: string; op?: string }) => { name: string; op?: string };
+    };
+    // SDK defaults keep pageload/navigation spans, LCP/CLS on the pageload and INP spans.
+    for (const key of [
+      "instrumentPageLoad",
+      "instrumentNavigation",
+      "enableInp",
+      "webVitals",
+      "idleTimeout",
+      "finalTimeout",
+    ]) {
+      expect(tracingOptions).not.toHaveProperty(key);
+    }
+
+    const beforeStartSpan = tracingOptions.beforeStartSpan;
+    expect(beforeStartSpan).toBeTypeOf("function");
+    expect(beforeStartSpan?.({ name: "/join", op: "pageload" })).toEqual({
+      name: "/join",
+      op: "pageload",
+    });
+    expect(beforeStartSpan?.({ name: "/presets/abc123/edit", op: "navigation" })).toEqual({
+      name: "/presets/:id/edit",
+      op: "navigation",
+    });
+  });
+});
+
+describe("setTransactionName", () => {
+  it("names the scope with the parameterized route", () => {
+    setTransactionName("/presets/abc123/edit");
+    expect(scopeSetTransactionName).toHaveBeenCalledWith("/presets/:id/edit");
   });
 });
 
