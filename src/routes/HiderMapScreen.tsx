@@ -14,8 +14,8 @@ import { HidingZoneStationsLayer } from "../components/map/layers/HidingZoneStat
 import { HidingZonesLayer } from "../components/map/layers/HidingZonesLayer";
 import { LiveHiderLocationsLayer } from "../components/map/layers/LiveHiderLocationsLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/layers/LiveSeekerLocationsLayer";
-import { LiveUserLocationLayer } from "../components/map/layers/LiveUserLocationLayer";
 import { PendingQuestionLayer } from "../components/map/layers/PendingQuestionLayer";
+import { UserLocationLayer } from "../components/map/layers/UserLocationLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
@@ -160,11 +160,6 @@ export function HiderMapScreen() {
     uid,
     enabled: true,
   });
-  const [liveLocationError, setLiveLocationError] = useState<string | null>(null);
-  const handleLiveLocationError = useCallback((error: string | null) => {
-    setLiveLocationError(error);
-  }, []);
-  const locationError = liveLocationError ?? hiderLocationSyncError;
   const [recenterToken, setRecenterToken] = useState(0);
   const [truthReveal, setTruthReveal] = useState<HiderTruthRevealState | null>(null);
   const [chatAnswerError, setChatAnswerError] = useState<string | null>(null);
@@ -242,7 +237,7 @@ export function HiderMapScreen() {
   const stationCenter = useMemo(() => hiderStationCenter(myZone), [myZone]);
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
   const needsTruthLocation = pendingQuestions.some((question) => question.status === "pending");
-  const { reading: liveLocationReading } = useLiveLocation(
+  const { reading: liveLocationReading, error: liveLocationWatchError } = useLiveLocation(
     showCurrentLocation || needsTruthLocation,
     {
       highAccuracy: liveLocationProfile.highAccuracy,
@@ -250,6 +245,7 @@ export function HiderMapScreen() {
       minDistanceMeters: liveLocationProfile.minDistanceMeters,
     },
   );
+  const locationError = liveLocationWatchError ?? hiderLocationSyncError;
   const hidingPlace = useMemo((): LatLngTuple | null => {
     if (!liveLocationReading) {
       return null;
@@ -832,11 +828,7 @@ export function HiderMapScreen() {
             />
           </Suspense>
         ) : null}
-        <LiveUserLocationLayer
-          enabled={showCurrentLocation}
-          lowPowerMode={lowPowerMode}
-          onError={handleLiveLocationError}
-        />
+        {showCurrentLocation ? <UserLocationLayer reading={liveLocationReading} /> : null}
       </MapViewWithLandscapeInset>
     </div>
   );
