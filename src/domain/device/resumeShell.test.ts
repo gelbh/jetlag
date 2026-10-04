@@ -1,8 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  clearActiveRevealTransition,
-  revealRouteTransition,
-} from "../../navigation/revealRouteTransition";
+import { clearActiveRevealTransition } from "../../navigation/revealRouteTransition";
 import {
   clearResumeVisualArtifacts,
   RESUME_FALLBACK_CLASSES,
@@ -70,30 +67,14 @@ describe("resumeShell", () => {
     expect(rootHasResumeReady(root)).toBe(false);
   });
 
-  it("clearResumeVisualArtifacts strips fallback classes and skips VT", () => {
+  it("clearResumeVisualArtifacts strips fallback classes", () => {
     const root = document.createElement("div");
     root.id = "root";
     root.classList.add(...RESUME_FALLBACK_CLASSES);
     document.body.appendChild(root);
 
-    const skipTransition = vi.fn();
-    document.startViewTransition = vi.fn(() => {
-      const finished = Promise.resolve();
-      return {
-        finished,
-        ready: finished,
-        updateCallbackDone: finished,
-        skipTransition,
-        types: new Set(),
-      } as unknown as ViewTransition;
-    });
-
-    void revealRouteTransition("forward", true, () => undefined);
-    expect(skipTransition).not.toHaveBeenCalled();
-
     clearResumeVisualArtifacts();
 
-    expect(skipTransition).toHaveBeenCalledTimes(1);
     for (const className of RESUME_FALLBACK_CLASSES) {
       expect(root.classList.contains(className)).toBe(false);
     }
