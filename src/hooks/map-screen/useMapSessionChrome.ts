@@ -2,6 +2,7 @@ import type { RefObject } from "react";
 import { useCallback, useRef } from "react";
 import { callableErrorMessage } from "@/domain/device/feedback/userErrors";
 import { isNeedsConnectionError } from "@/domain/device/network/needsConnectionError";
+import { commitWrite } from "@/services/firestore/commitWrite";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { isActive, LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
@@ -225,15 +226,11 @@ export function useMapSessionChrome({
         trackSessionEnded("expected_already_ended");
       } else {
         captureException(error);
-        // Emulator / no Functions: fall back to client end write.
-        try {
-          await endRemoteSession(sessionId);
-          trackSessionEnded("fallback_client_end");
-        } catch (fallbackError) {
-          captureException(fallbackError);
-          window.alert("Couldn't end the session. Try again.");
-          return;
-        }
+        // Emulator / no Functions: fall back to the client end write. Not awaited —
+        // it applies locally and replays on reconnect; rejections reach WriteFailureNotifier.
+        commitWrite("session.end", () => endRemoteSession(sessionId));
+        // Counts the local end; a later rules rejection surfaces via the notifier.
+        trackSessionEnded("fallback_client_end");
       }
     }
     // Activity only — session_ended already tracked via endSession / paths above.
@@ -297,15 +294,9 @@ export function useMapSessionChrome({
         } else {
           captureException(error);
           if (alone) {
-            try {
-              await endRemoteSession(session.id);
-              trackSessionEnded("fallback_client_end");
-            } catch (fallbackError) {
-              captureException(fallbackError);
-              allowPlayerLocationPublishes();
-              window.alert("Couldn't leave the session. Try again.");
-              return;
-            }
+            const sessionId = session.id;
+            commitWrite("session.end", () => endRemoteSession(sessionId));
+            trackSessionEnded("fallback_client_end");
           } else {
             allowPlayerLocationPublishes();
             window.alert("Couldn't leave the session. Try again.");

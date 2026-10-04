@@ -92,7 +92,6 @@ export {
 } from "./incidentEmail";
 export {
   handleSentryTunnelRequest,
-  parseSentryEnvelopeTarget,
   resolveSentryTunnelAllowlist,
   SENTRY_TUNNEL_PATH,
 } from "./sentryTunnel";

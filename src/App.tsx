@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, Suspense, useEffect, useLayoutEffect } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, useLocation } from "react-router-dom";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
+import { PlayerRouteViewTransition } from "./components/motion/PlayerRouteViewTransition";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
 import { WriteFailureNotifier } from "./components/session/status/WriteFailureNotifier";
@@ -124,7 +125,9 @@ function EdgeSwipeBackBinder() {
 function PlayerPhoneShellOutlet() {
   return (
     <PlayerPhoneShell>
-      <Outlet />
+      <PlayerRouteViewTransition>
+        <Outlet />
+      </PlayerRouteViewTransition>
     </PlayerPhoneShell>
   );
 }

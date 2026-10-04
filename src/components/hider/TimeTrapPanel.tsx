@@ -13,7 +13,6 @@ interface TimeTrapPanelProps {
   searchDisabled: boolean;
   existingTrapStationName: string | null;
   onConfirm: () => void;
-  saving: boolean;
   error: string | null;
   bonusMinutes: number;
 }
@@ -30,7 +29,6 @@ export function TimeTrapPanel({
   searchDisabled,
   existingTrapStationName,
   onConfirm,
-  saving,
   error,
   bonusMinutes,
 }: TimeTrapPanelProps) {
@@ -64,10 +62,10 @@ export function TimeTrapPanel({
           <button
             type="button"
             onClick={onConfirm}
-            disabled={!selectedStation || saving}
+            disabled={!selectedStation}
             className="btn-primary min-h-12 w-full disabled:opacity-40"
           >
-            {saving ? "Placing trap…" : "Place time trap"}
+            Place time trap
           </button>
         </>
       )}

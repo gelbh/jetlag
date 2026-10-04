@@ -1,40 +1,20 @@
-//! Coastline near region via distance threshold on a game-area cell grid.
+//! Coastline near region via distance-threshold isoline on a game-area cell grid.
 
 use crate::geodesic::{haversine_meters, LatLng};
-use crate::mask::{multipolygon_to_feature, GameArea};
+use crate::linear_near_region_isoline::{
+    build_isoline_near_region_from_grid, BoundingBox, CellClass,
+};
+use crate::mask::GameArea;
 use crate::types::PolygonFeature;
-use geo::{BooleanOps, ClosestPoint, Contains, Coord, LineString, MultiPolygon, Point, Polygon};
+use geo::{ClosestPoint, Contains, Coord, LineString, Point};
 
-const MAX_SEA_LEVEL_SAMPLE_CELLS: f64 = 600.0;
-const DEFAULT_SEA_LEVEL_DIVISIONS: u32 = 10;
-const MAX_SMALL_AREA_DIVISIONS: u32 = 45;
-const MIN_GAME_AREA_DIVISIONS: u32 = 8;
 const MIN_GAME_AREA_LAT_SPAN: f64 = 0.005;
 const MIN_GAME_AREA_LNG_SPAN: f64 = 0.005;
+const LINEAR_NEAR_REGION_COARSE_MAX_CELLS: f64 = 256.0;
+const LINEAR_NEAR_REGION_COARSE_MIN_DIVISIONS: u32 = 8;
+const LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS: u32 = 16;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum CellClass {
-    Near,
-    Far,
-    Skip,
-}
-
-struct BoundingBox {
-    south: f64,
-    west: f64,
-    north: f64,
-    east: f64,
-}
-
-#[derive(Clone, Copy)]
-struct MergedRect {
-    row_start: usize,
-    row_end: usize,
-    col_start: usize,
-    col_end: usize,
-}
-
-/// Distance-threshold near coast: cells whose center is within `radius_meters` of any segment.
+/// Distance-threshold near coast: isoline at R over a coarse/fine cell grid.
 pub fn build_coastline_near_region_distance_threshold(
     segments: &[Vec<[f64; 2]>],
     radius_meters: f64,
@@ -46,13 +26,16 @@ pub fn build_coastline_near_region_distance_threshold(
     }
 
     let bbox = normalize_bounding_box(game_area_bounding_box_raw(game_area));
-    let divisions = divisions.unwrap_or_else(|| resolve_game_area_cell_divisions(&bbox));
+    let divisions = divisions.unwrap_or_else(|| resolve_linear_near_region_coarse_divisions(&bbox));
     let divisions = divisions.max(1) as usize;
 
     let lat_step = (bbox.north - bbox.south) / divisions as f64;
     let lng_step = (bbox.east - bbox.west) / divisions as f64;
 
     let mut grid = vec![vec![CellClass::Skip; divisions]; divisions];
+    let mut distances = vec![vec![f64::INFINITY; divisions]; divisions];
+    let mut near_count = 0usize;
+    let mut far_count = 0usize;
 
     for (row, grid_row) in grid.iter_mut().enumerate() {
         for (col, cell) in grid_row.iter_mut().enumerate() {
@@ -73,31 +56,47 @@ pub fn build_coastline_near_region_distance_threshold(
             }
 
             let distance = nearest_distance_to_segments(center, segments);
-            *cell = if distance <= radius_meters {
-                CellClass::Near
+            distances[row][col] = distance;
+            if distance <= radius_meters {
+                *cell = CellClass::Near;
+                near_count += 1;
             } else {
-                CellClass::Far
-            };
+                *cell = CellClass::Far;
+                far_count += 1;
+            }
         }
     }
 
-    build_near_region_from_grid(&grid, game_area, &bbox, divisions)
+    if near_count == 0 {
+        return None;
+    }
+
+    if far_count == 0 {
+        return game_area.to_feature();
+    }
+
+    build_isoline_near_region_from_grid(
+        &grid,
+        &distances,
+        radius_meters,
+        game_area,
+        &bbox,
+        divisions,
+        |point| nearest_distance_to_segments(point, segments),
+    )
 }
 
-fn resolve_game_area_cell_divisions(bbox: &BoundingBox) -> u32 {
+fn resolve_linear_near_region_coarse_divisions(bbox: &BoundingBox) -> u32 {
     let lat_span = bbox.north - bbox.south;
     let lng_span = bbox.east - bbox.west;
     let area_ratio = (lat_span * lng_span) / (MIN_GAME_AREA_LAT_SPAN * MIN_GAME_AREA_LNG_SPAN);
-
-    if area_ratio <= 1.0 {
-        let target = (MAX_SEA_LEVEL_SAMPLE_CELLS / area_ratio.max(0.01))
-            .sqrt()
-            .floor() as u32;
-        return target.clamp(DEFAULT_SEA_LEVEL_DIVISIONS, MAX_SMALL_AREA_DIVISIONS);
-    }
-
-    let target = (MAX_SEA_LEVEL_SAMPLE_CELLS / area_ratio).sqrt().floor() as u32;
-    target.clamp(MIN_GAME_AREA_DIVISIONS, DEFAULT_SEA_LEVEL_DIVISIONS)
+    let target = (LINEAR_NEAR_REGION_COARSE_MAX_CELLS / area_ratio.max(0.01))
+        .sqrt()
+        .floor() as u32;
+    target.clamp(
+        LINEAR_NEAR_REGION_COARSE_MIN_DIVISIONS,
+        LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS,
+    )
 }
 
 fn game_area_bounding_box_raw(game_area: &GameArea) -> BoundingBox {
@@ -231,144 +230,6 @@ fn nearest_distance_to_segments(point: LatLng, segments: &[Vec<[f64; 2]>]) -> f6
     nearest
 }
 
-fn merge_near_cell_rects(grid: &[Vec<CellClass>]) -> Vec<MergedRect> {
-    let width = grid.first().map(|row| row.len()).unwrap_or(0);
-    let mut row_runs: Vec<Vec<(usize, usize)>> = Vec::new();
-
-    for row in grid {
-        let mut runs = Vec::new();
-        let mut run_start: Option<usize> = None;
-
-        for (col, cell) in row.iter().enumerate() {
-            match (*cell == CellClass::Near, run_start) {
-                (true, None) => run_start = Some(col),
-                (false, Some(start)) => {
-                    runs.push((start, col));
-                    run_start = None;
-                }
-                _ => {}
-            }
-        }
-        if let Some(start) = run_start {
-            runs.push((start, width));
-        }
-        row_runs.push(runs);
-    }
-
-    let mut all_rects = Vec::new();
-    let mut open_rects: std::collections::HashMap<String, MergedRect> =
-        std::collections::HashMap::new();
-
-    for (row, runs) in row_runs.iter().enumerate() {
-        let mut current_keys = std::collections::HashSet::new();
-
-        for run in runs {
-            let key = format!("{}:{}", run.0, run.1);
-            current_keys.insert(key.clone());
-            if let Some(existing) = open_rects.remove(&key) {
-                if existing.row_end == row {
-                    open_rects.insert(
-                        key,
-                        MergedRect {
-                            row_end: row + 1,
-                            ..existing
-                        },
-                    );
-                    continue;
-                }
-                all_rects.push(existing);
-            }
-            open_rects.insert(
-                key,
-                MergedRect {
-                    row_start: row,
-                    row_end: row + 1,
-                    col_start: run.0,
-                    col_end: run.1,
-                },
-            );
-        }
-
-        for (key, rect) in open_rects.clone().iter() {
-            if !current_keys.contains(key) && rect.row_end <= row {
-                all_rects.push(*rect);
-                open_rects.remove(key);
-            }
-        }
-    }
-
-    all_rects.extend(open_rects.into_values());
-    all_rects
-}
-
-fn cell_ring(
-    rect: &MergedRect,
-    south: f64,
-    west: f64,
-    lat_step: f64,
-    lng_step: f64,
-) -> LineString<f64> {
-    let cell_south = south + rect.row_start as f64 * lat_step;
-    let cell_north = south + rect.row_end as f64 * lat_step;
-    let cell_west = west + rect.col_start as f64 * lng_step;
-    let cell_east = west + rect.col_end as f64 * lng_step;
-
-    LineString(vec![
-        Coord {
-            x: cell_west,
-            y: cell_south,
-        },
-        Coord {
-            x: cell_east,
-            y: cell_south,
-        },
-        Coord {
-            x: cell_east,
-            y: cell_north,
-        },
-        Coord {
-            x: cell_west,
-            y: cell_north,
-        },
-        Coord {
-            x: cell_west,
-            y: cell_south,
-        },
-    ])
-}
-
-fn build_near_region_from_grid(
-    grid: &[Vec<CellClass>],
-    game_area: &GameArea,
-    bbox: &BoundingBox,
-    divisions: usize,
-) -> Option<PolygonFeature> {
-    let rects = merge_near_cell_rects(grid);
-    if rects.is_empty() {
-        return None;
-    }
-
-    let lat_step = (bbox.north - bbox.south) / divisions as f64;
-    let lng_step = (bbox.east - bbox.west) / divisions as f64;
-
-    let polys: Vec<Polygon<f64>> = rects
-        .iter()
-        .map(|rect| {
-            Polygon::new(
-                cell_ring(rect, bbox.south, bbox.west, lat_step, lng_step),
-                vec![],
-            )
-        })
-        .collect();
-
-    let near_mp = MultiPolygon(polys);
-    let clipped = game_area.multipolygon.intersection(&near_mp);
-    if clipped.0.is_empty() {
-        return None;
-    }
-    multipolygon_to_feature(&clipped)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -394,5 +255,14 @@ mod tests {
         let probe = destination_point(coast_mid, radius_meters + 500.0, bearing);
 
         assert!(!feature_contains_lng_lat(&near, probe.1, probe.0));
+    }
+
+    #[test]
+    fn none_divisions_uses_linear_coarse_budget() {
+        let area = GameArea::polygon_box(-1.0, 50.0, 1.0, 52.0);
+        let bbox = normalize_bounding_box(game_area_bounding_box_raw(&area));
+        let divisions = resolve_linear_near_region_coarse_divisions(&bbox);
+        assert!(divisions >= LINEAR_NEAR_REGION_COARSE_MIN_DIVISIONS);
+        assert!(divisions <= LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS);
     }
 }

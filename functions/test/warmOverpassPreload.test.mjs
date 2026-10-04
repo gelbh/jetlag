@@ -22,6 +22,22 @@ describe("warmOverpassPreload", () => {
     assert.match(queries[2], /leisure"="park"/);
   });
 
+  it("omits coastline and landmass warm queries for large AABBs", () => {
+    const queries = buildWarmPreloadQueries({
+      south: 52.2782562,
+      west: 4.7287776,
+      north: 52.4310394,
+      east: 5.0791622,
+    });
+
+    assert.equal(queries.length, 3);
+    for (const query of queries) {
+      assert.doesNotMatch(query, /natural"="coastline"/);
+      assert.doesNotMatch(query, /natural"="water"/);
+    }
+    assert.match(queries[0], /leisure"="park"/);
+  });
+
   it("skips warm preload for free sessions", async () => {
     const result = await handleSessionWarmPreloadWrite({
       data: {

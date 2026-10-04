@@ -1,41 +1,31 @@
+import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import type { ReactElement } from "react";
+import { describe, expect, it } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
 import { RolePicker } from "./RolePicker";
 
-vi.mock("../../ui/forms/RadioCardGroup", () => ({
-  RadioCardGroup: ({
-    options,
-    label,
-  }: {
-    options: Array<{ title: string; description: string }>;
-    label: string;
-  }) => (
-    <div>
-      <p>{label}</p>
-      <ul>
-        {options.map((option) => (
-          <li key={option.title}>
-            {option.title}: {option.description}
-          </li>
-        ))}
-      </ul>
-    </div>
-  ),
-}));
+function renderPicker(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
 
 describe("RolePicker", () => {
-  it("shows seeker and hider by default", () => {
-    render(<RolePicker value="seeker" onChange={() => undefined} />);
+  it("shows seeker and hider tiles by default", () => {
+    renderPicker(<RolePicker value="seeker" onChange={() => undefined} />);
 
-    expect(screen.getByText(/Seeker:/)).toBeInTheDocument();
-    expect(screen.getByText(/Hider:/)).toBeInTheDocument();
-    expect(screen.queryByText(/Observer:/)).not.toBeInTheDocument();
+    expect(screen.getByText("Choose your side")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /Seeker/ })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: /Hider/ })).toHaveAttribute("aria-checked", "false");
+    expect(screen.queryByRole("radio", { name: /Observer/ })).not.toBeInTheDocument();
   });
 
   it("includes observer when requested", () => {
-    render(<RolePicker value="observer" onChange={() => undefined} includeObserver />);
+    renderPicker(<RolePicker value="observer" onChange={() => undefined} includeObserver />);
 
-    expect(screen.getByText(/Observer:/)).toBeInTheDocument();
-    expect(screen.getByText(/Switch between seeker and hider views/i)).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /Observer/ })).toHaveAttribute("aria-checked", "true");
   });
 });

@@ -1,10 +1,10 @@
 import {
   answerInChat,
+  backdatePendingQuestionDeadline,
   expect,
   expectChatAnswer,
   listPendingQuestionIds,
   openChat,
-  patchPendingQuestionAnswerableAt,
   readPersistedSessionId,
   sendRadarToHiders,
   startSessionTimer,
@@ -23,7 +23,7 @@ test("@smoke enforces answer deadlines with a system message and timer pause", a
     await sendRadarToHiders(hostPage);
   });
 
-  await test.step("backdate answerableAt so deadline has passed", async () => {
+  await test.step("backdate the answer window so the deadline has passed", async () => {
     const sessionId = await readPersistedSessionId(hostPage);
     await expect(async () => {
       const questionIds = await listPendingQuestionIds(hostPage, sessionId);
@@ -31,8 +31,7 @@ test("@smoke enforces answer deadlines with a system message and timer pause", a
     }).toPass({ timeout: 20_000 });
 
     const [questionId] = await listPendingQuestionIds(hostPage, sessionId);
-    await patchPendingQuestionAnswerableAt(
-      hostPage,
+    await backdatePendingQuestionDeadline(
       sessionId,
       questionId,
       new Date(Date.now() - 10 * 60 * 1000).toISOString(),
