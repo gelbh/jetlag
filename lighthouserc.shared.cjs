@@ -37,7 +37,8 @@ function createLhciConfig({ perf, createMaxTbtMs, outputDir, collectSettings }) 
         url: [`${ORIGIN}/`, `${ORIGIN}/premium`, `${ORIGIN}/join`, `${ORIGIN}/create`],
         // Served like prod (Worker + Assets routing); see scripts/lhci-preview-server.mjs.
         startServerCommand: "npm run preview:lhci",
-        startServerReadyPattern: "Local:",
+        // Match plain console line from lhci-preview-server.mjs (Vite 8 ANSI breaks /Local:/i).
+        startServerReadyPattern: "LHCI preview ready",
         numberOfRuns: 3,
         settings: {
           ...collectSettings,
