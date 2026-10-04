@@ -1,5 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
+import { useWriteLedgerStore, type WriteLabel } from "@/state/writeLedgerStore";
 import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import { useMapSessionActions } from "./useMapSessionActions";
 
@@ -10,16 +12,42 @@ vi.mock("../../services/core/firebase/firebase", () => ({
 const confirmFoundHiderSessionMock = vi.hoisted(() => vi.fn());
 const requestFoundHiderSessionMock = vi.hoisted(() => vi.fn());
 const resetFoundHiderSessionMock = vi.hoisted(() => vi.fn());
+const startEndGameSessionMock = vi.hoisted(() => vi.fn());
+const clearEndGameRequestSessionMock = vi.hoisted(() => vi.fn());
+const resetEndGameSessionMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../../services/firestore/firestoreAnnotations", () => ({
-  clearEndGameRequestSession: vi.fn(),
+  clearEndGameRequestSession: clearEndGameRequestSessionMock,
   confirmFoundHiderSession: confirmFoundHiderSessionMock,
   requestEndGameSession: vi.fn(),
   requestFoundHiderSession: requestFoundHiderSessionMock,
-  resetEndGameSession: vi.fn(),
+  resetEndGameSession: resetEndGameSessionMock,
   resetFoundHiderSession: resetFoundHiderSessionMock,
+  startEndGameSession: startEndGameSessionMock,
   updateSessionRules: vi.fn(),
 }));
+
+/** Offline: Firestore applies locally but the server ack never arrives. */
+const never = () => new Promise<void>(() => {});
+
+function ledgerEntries(): { label: WriteLabel; status: string }[] {
+  return Object.values(useWriteLedgerStore.getState().entries).map(({ label, status }) => ({
+    label,
+    status,
+  }));
+}
+
+const confirmedZone: HidingZoneRecord = {
+  hiderUid: "hider-1",
+  sessionId: "remote-session-1",
+  stationId: "dublin-central",
+  stationName: "Dublin Central",
+  center: { lat: 53.35, lng: -6.26 },
+  radiusMeters: 500,
+  geometryJson: "{}",
+  status: "confirmed",
+  confirmedAt: "2026-01-01T00:00:00.000Z",
+};
 
 const baseSession: SessionRecord = {
   id: LOCAL_SESSION_ID,
@@ -42,9 +70,19 @@ const baseSession: SessionRecord = {
 
 describe("useMapSessionActions", () => {
   beforeEach(() => {
-    confirmFoundHiderSessionMock.mockReset();
-    requestFoundHiderSessionMock.mockReset();
-    resetFoundHiderSessionMock.mockReset();
+    vi.restoreAllMocks();
+    for (const mock of [
+      confirmFoundHiderSessionMock,
+      requestFoundHiderSessionMock,
+      resetFoundHiderSessionMock,
+      startEndGameSessionMock,
+      clearEndGameRequestSessionMock,
+      resetEndGameSessionMock,
+    ]) {
+      mock.mockReset();
+      mock.mockImplementation(never);
+    }
+    useWriteLedgerStore.setState({ entries: {} });
   });
 
   it("blocks end game until a hiding zone is confirmed", () => {
@@ -258,52 +296,141 @@ describe("useMapSessionActions", () => {
     );
   });
 
-  it("alerts when remote found confirm fails instead of rejecting", async () => {
-    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-    confirmFoundHiderSessionMock.mockRejectedValue(
-      new Error("Missing or insufficient permissions."),
-    );
-
-    const pendingSession: SessionRecord = {
+  describe("remote writes are fire-and-track", () => {
+    const remoteSession: SessionRecord = {
       ...baseSession,
       id: "remote-session-1",
       memberUids: ["host-1", "hider-1"],
-      foundRequestedAt: "2026-01-01T01:00:00.000Z",
-      foundRequestedByUid: "host-1",
     };
 
-    const { result } = renderHook(() =>
-      useMapSessionActions({
-        session: pendingSession,
-        setSession: vi.fn(),
-        uid: "hider-1",
-        myRole: "hider",
-        isRemote: true,
-        gameRulesEditable: false,
-        timerHasStarted: true,
-        hidingZones: [
-          {
-            hiderUid: "hider-1",
-            sessionId: "remote-session-1",
-            stationId: "dublin-central",
-            stationName: "Dublin Central",
-            center: { lat: 53.35, lng: -6.26 },
-            radiusMeters: 500,
-            geometryJson: "{}",
-            status: "confirmed",
-            confirmedAt: "2026-01-01T00:00:00.000Z",
-          },
-        ],
-      }),
-    );
+    function renderRemote(session: SessionRecord, uid: string, setSession = vi.fn()) {
+      return renderHook(() =>
+        useMapSessionActions({
+          session,
+          setSession,
+          uid,
+          myRole: uid === "hider-1" ? "hider" : "seeker",
+          isRemote: true,
+          gameRulesEditable: false,
+          timerHasStarted: true,
+          hidingZones: [confirmedZone],
+        }),
+      );
+    }
 
-    await act(async () => {
-      await result.current.handleConfirmFoundHider();
+    it("starts End Game without waiting for the server ack", () => {
+      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+      vi.spyOn(window, "confirm").mockReturnValue(true);
+      const { result } = renderRemote(remoteSession, "host-1");
+
+      act(() => result.current.handleStartEndGame());
+
+      expect(startEndGameSessionMock).toHaveBeenCalledWith(
+        "remote-session-1",
+        "host-1",
+        expect.objectContaining({ "hider-1": expect.objectContaining({ lat: 53.35 }) }),
+        expect.any(String),
+      );
+      expect(alertSpy).not.toHaveBeenCalled();
+      expect(ledgerEntries()).toEqual([{ label: "endgame.start", status: "pending" }]);
     });
 
-    expect(confirmFoundHiderSessionMock).toHaveBeenCalledWith("remote-session-1", "hider-1");
-    expect(alertSpy).toHaveBeenCalledWith(
-      "Could not confirm found hider. Check your connection and try again.",
-    );
+    it("declares found hider without waiting for the server ack", () => {
+      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+      vi.spyOn(window, "confirm").mockReturnValue(true);
+      const { result } = renderRemote(remoteSession, "host-1");
+
+      act(() => result.current.handleRequestFoundHider());
+
+      expect(requestFoundHiderSessionMock).toHaveBeenCalledWith("remote-session-1", "host-1");
+      expect(alertSpy).not.toHaveBeenCalled();
+      expect(ledgerEntries()).toEqual([{ label: "found.request", status: "pending" }]);
+    });
+
+    it("confirms found hider without waiting for the server ack", () => {
+      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+      const { result } = renderRemote(
+        {
+          ...remoteSession,
+          foundRequestedAt: "2026-01-01T01:00:00.000Z",
+          foundRequestedByUid: "host-1",
+        },
+        "hider-1",
+      );
+
+      act(() => result.current.handleConfirmFoundHider());
+
+      expect(confirmFoundHiderSessionMock).toHaveBeenCalledWith("remote-session-1", "hider-1");
+      expect(alertSpy).not.toHaveBeenCalled();
+      expect(ledgerEntries()).toEqual([{ label: "found.confirm", status: "pending" }]);
+    });
+
+    it("declines found hider optimistically without waiting for the server ack", () => {
+      const setSession = vi.fn();
+      const { result } = renderRemote(
+        {
+          ...remoteSession,
+          foundRequestedAt: "2026-01-01T01:00:00.000Z",
+          foundRequestedByUid: "host-1",
+        },
+        "hider-1",
+        setSession,
+      );
+
+      act(() => result.current.handleDeclineFoundHider());
+
+      expect(resetFoundHiderSessionMock).toHaveBeenCalledWith("remote-session-1");
+      expect(setSession).toHaveBeenCalledWith(
+        expect.objectContaining({ foundRequestedAt: undefined, foundRequestedByUid: undefined }),
+        "hider-1",
+      );
+      expect(ledgerEntries()).toEqual([{ label: "found.decline", status: "pending" }]);
+    });
+
+    it("resets an active End Game without waiting for the server ack", () => {
+      const setSession = vi.fn();
+      const { result } = renderRemote(
+        {
+          ...remoteSession,
+          endGameStartedAt: "2026-01-01T01:00:00.000Z",
+          endGameStartedByUid: "host-1",
+        },
+        "host-1",
+        setSession,
+      );
+
+      act(() => result.current.handleResetEndGame());
+
+      expect(resetEndGameSessionMock).toHaveBeenCalledWith("remote-session-1");
+      expect(clearEndGameRequestSessionMock).not.toHaveBeenCalled();
+      expect(setSession).toHaveBeenCalledWith(
+        expect.objectContaining({ endGameStartedAt: undefined }),
+        "host-1",
+      );
+      expect(ledgerEntries()).toEqual([{ label: "endgame.reset", status: "pending" }]);
+    });
+
+    it("hands a rules rejection to the ledger instead of alerting", async () => {
+      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+      confirmFoundHiderSessionMock.mockRejectedValue(
+        new Error("Missing or insufficient permissions."),
+      );
+      const { result } = renderRemote(
+        {
+          ...remoteSession,
+          foundRequestedAt: "2026-01-01T01:00:00.000Z",
+          foundRequestedByUid: "host-1",
+        },
+        "hider-1",
+      );
+
+      await act(async () => {
+        result.current.handleConfirmFoundHider();
+        await Promise.resolve();
+      });
+
+      expect(alertSpy).not.toHaveBeenCalled();
+      expect(ledgerEntries()).toEqual([{ label: "found.confirm", status: "failed" }]);
+    });
   });
 });
