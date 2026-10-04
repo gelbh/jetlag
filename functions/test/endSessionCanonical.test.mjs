@@ -23,7 +23,7 @@ function mockDb({ sessionData, sessionExists = true, updates, deleted }) {
           deleted.push(ref);
         },
       };
-      await fn(tx);
+      return fn(tx);
     },
     collection: (name) => ({
       doc: (id) => ({ name, id }),
@@ -42,7 +42,10 @@ test("endSessionCanonical writes outcome and deletes code", async () => {
   });
   const sessionDoc = { ref: db._sessionRef, data: () => ({ code: "ABCD" }) };
 
-  await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
+  assert.equal(
+    await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" }),
+    "abandoned",
+  );
   assert.equal(updates[0].status, "ended");
   assert.equal(updates[0].gameOutcome, "abandoned");
   assert.deepEqual(deleted, [{ name: "sessionCodes", id: "ABCD" }]);
@@ -61,7 +64,7 @@ test("endSessionCanonical preserves existing found outcome from fresh read", asy
     data: () => ({ code: "ABCD", status: "active" }),
   };
 
-  await endSessionCanonical(db, sessionDoc, { gameOutcome: "ended_early" });
+  assert.equal(await endSessionCanonical(db, sessionDoc, { gameOutcome: "ended_early" }), "found");
   assert.equal(updates[0].gameOutcome, "found");
 });
 
@@ -80,7 +83,7 @@ test("endSessionCanonical no-ops session update when already ended", async () =>
   });
   const sessionDoc = { ref: db._sessionRef, data: () => ({}) };
 
-  await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
+  assert.equal(await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" }), false);
   assert.equal(updates.length, 0);
   assert.deepEqual(deleted, [{ name: "sessionCodes", id: "ABCD" }]);
 });
@@ -96,7 +99,7 @@ test("endSessionCanonical is idempotent when session document is missing", async
   });
   const sessionDoc = { ref: db._sessionRef, data: () => ({ code: "ABCD" }) };
 
-  await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
+  assert.equal(await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" }), false);
   assert.equal(updates.length, 0);
   assert.equal(deleted.length, 0);
 });

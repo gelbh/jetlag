@@ -81,14 +81,62 @@ export function wasChunkReloadDeferred(): boolean {
   return readDeferredFlag();
 }
 
-export function attemptChunkReload(options?: {
+export type ChunkReloadOptions = {
   session?: unknown;
   pathname?: string;
   onNeedRefresh?: () => void;
   registration?: ServiceWorkerRegistration;
   applyUpdate?: (reloadPage?: boolean) => Promise<void>;
-}): boolean {
+  /** Defaults to `navigator.onLine === false`; injectable for tests and richer reachability checks. */
+  isOffline?: () => boolean;
+  /**
+   * Resolves the options at the moment an offline retry fires. The session can change while the
+   * device is offline, and reusing the snapshot from the failure could reload mid-game.
+   */
+  resolveRetryOptions?: () => ChunkReloadOptions | undefined;
+};
+
+function isNavigatorOffline(): boolean {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
+}
+
+let pendingOnlineRetry: (() => void) | undefined;
+let pendingRetryOptions: ChunkReloadOptions | undefined;
+
+function scheduleRetryWhenOnline(options: ChunkReloadOptions | undefined): void {
+  pendingRetryOptions = options;
+  if (pendingOnlineRetry || typeof window === "undefined") {
+    return;
+  }
+
+  pendingOnlineRetry = () => {
+    const latest = pendingRetryOptions;
+    pendingOnlineRetry = undefined;
+    pendingRetryOptions = undefined;
+    attemptChunkReload(latest?.resolveRetryOptions?.() ?? latest);
+  };
+  window.addEventListener("online", pendingOnlineRetry, { once: true });
+}
+
+/** Drops a queued offline retry. Not tied to `clearChunkReloadFlag`, whose boot timer would race it. */
+export function cancelPendingChunkReloadRetry(): void {
+  if (pendingOnlineRetry && typeof window !== "undefined") {
+    window.removeEventListener("online", pendingOnlineRetry);
+  }
+  pendingOnlineRetry = undefined;
+  pendingRetryOptions = undefined;
+}
+
+export function attemptChunkReload(options?: ChunkReloadOptions): boolean {
   if (readSessionFlag()) {
+    return false;
+  }
+
+  // A reload while offline can't fetch the app shell and lands on a blank page, so wait for
+  // the network instead and retry once.
+  if ((options?.isOffline ?? isNavigatorOffline)()) {
+    writeDeferredFlag();
+    scheduleRetryWhenOnline(options);
     return false;
   }
 
@@ -115,13 +163,9 @@ export function attemptChunkReload(options?: {
   return true;
 }
 
-export function tryApplyDeferredChunkReload(options: {
-  session: unknown;
-  pathname: string;
-  onNeedRefresh?: () => void;
-  registration?: ServiceWorkerRegistration;
-  applyUpdate?: (reloadPage?: boolean) => Promise<void>;
-}): boolean {
+export function tryApplyDeferredChunkReload(
+  options: ChunkReloadOptions & { session: unknown; pathname: string },
+): boolean {
   if (!wasChunkReloadDeferred()) {
     return false;
   }

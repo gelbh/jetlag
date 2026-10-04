@@ -177,6 +177,7 @@ export function initAnalytics(): void {
 export function grantAnalyticsConsent(): void {
   writeAnalyticsConsent("granted");
   initAnalytics();
+  track(ANALYTICS_EVENTS.analytics_consent_accepted, { surface: "banner" });
   if (typeof window !== "undefined") {
     trackPageView(window.location.pathname + window.location.search);
   }

@@ -17,8 +17,8 @@ import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettings
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
-import { HidingZoneHudBody } from "../../components/tools/ask/HidingZoneHudBody";
-import { HidingZoneMapPlacementChrome } from "../../components/tools/ask/HidingZoneMapPlacementChrome";
+import { HidingZoneHudBody } from "../../components/tools/ask/hiding-zone/HidingZoneHudBody";
+import { HidingZoneMapPlacementChrome } from "../../components/tools/ask/hiding-zone/HidingZoneMapPlacementChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { PopupCloseButton } from "../../components/ui/brand/PopupCloseButton";
 import { activeModeCue } from "../../domain/ask/askHudModes";
