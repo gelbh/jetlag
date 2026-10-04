@@ -162,6 +162,7 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
           {locationStatus ? (
             <p
               role="status"
+              className="mt-2 px-1"
               style={{
                 color:
                   locationStatusTone === "halt"
@@ -184,7 +185,7 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
             />
           </InsetGroup>
           {selectedAreas.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-2 px-1">
               {selectedAreas.map((area, index) => (
                 <button
                   key={`${index}-${area.type}`}
@@ -223,13 +224,16 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
                 icon={<PlusCircleIcon size={18} weight="bold" />}
                 onClick={onAddCurrentArea}
                 disabled={!previewGameArea || searchDisabled}
+                showSeparator
               />
               <InsetRow
                 label={importLoading ? "Importing…" : "Import KML/KMZ"}
                 icon={<UploadSimpleIcon size={18} weight="bold" />}
                 onClick={() => importFileInputRef.current?.click()}
                 disabled={searchDisabled}
+                showSeparator
               />
+              <InsetHairline insetStart="1rem" />
               <NativeSelect
                 aria-label="Transit metro"
                 data={[

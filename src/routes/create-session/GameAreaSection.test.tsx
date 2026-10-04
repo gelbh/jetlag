@@ -156,6 +156,7 @@ describe("GameAreaSection create IA groups", () => {
     const status = screen.getByRole("status");
     expect(status).toHaveTextContent("Couldn't use your location.");
     expect(status).toHaveStyle({ color: "var(--color-halt)" });
+    expect(status).toHaveClass("mt-2", "px-1");
   });
 
   it("uses inset groups and NativeSelect instead of field-input selects", () => {
