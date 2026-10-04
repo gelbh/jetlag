@@ -122,6 +122,51 @@ describe("useGameAreaFraming", () => {
     expect(result.current.hasValidDraft).toBe(false);
   });
 
+  it("applyFocusBounds does not mint an area from the first viewport", () => {
+    const { result } = renderHook(() => useGameAreaFraming());
+
+    act(() => {
+      result.current.applyFocusBounds([
+        [53.332, -6.278],
+        [53.368, -6.242],
+      ]);
+      result.current.handleBoundsChange(mockBounds as never);
+      result.current.handleUserViewportFramed();
+    });
+
+    expect(result.current.manualGameArea).toBeNull();
+    expect(result.current.hasValidDraft).toBe(false);
+    expect(result.current.userFramed).toBe(false);
+  });
+
+  it("applyFocusBounds keeps an existing framed area through a later viewport", () => {
+    const { result } = renderHook(() => useGameAreaFraming());
+
+    act(() => {
+      result.current.setFramingMode("rectangle");
+      result.current.handleBoundsChange(mockBounds as never);
+      result.current.handleUserViewportFramed();
+    });
+    const framed = result.current.manualGameArea;
+    expect(framed).not.toBeNull();
+
+    const gpsViewport = {
+      getSouthWest: () => ({ lat: 51.4, lng: -0.25 }),
+      getNorthEast: () => ({ lat: 51.6, lng: 0.05 }),
+    };
+
+    act(() => {
+      result.current.applyFocusBounds([
+        [53.332, -6.278],
+        [53.368, -6.242],
+      ]);
+      result.current.handleBoundsChange(gpsViewport as never);
+      result.current.handleUserViewportFramed();
+    });
+
+    expect(result.current.manualGameArea).toEqual(framed);
+  });
+
   describe("viewport suppress timeout", () => {
     beforeEach(() => {
       vi.useFakeTimers();

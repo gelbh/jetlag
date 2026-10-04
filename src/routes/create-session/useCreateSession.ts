@@ -254,7 +254,12 @@ export function useCreateSession() {
       .then((reading) => {
         userLocationRef.current = [reading.lat, reading.lng];
         requestMap();
-        framing.resetManualFraming();
+        const hasExistingArea = Boolean(
+          framing.manualGameArea || importedGameArea || selectedPlace || selectedAreas.length > 0,
+        );
+        if (!hasExistingArea) {
+          framing.resetManualFraming();
+        }
         framing.applyFocusBounds(gpsReadingToFocusBounds(reading.lat, reading.lng));
         setLocationStatus("Using your location for search and map.");
         setLocationStatusTone("ok");
@@ -266,7 +271,15 @@ export function useCreateSession() {
       .finally(() => {
         setLocationBusy(false);
       });
-  }, [framing.applyFocusBounds, framing.resetManualFraming, requestMap]);
+  }, [
+    framing.applyFocusBounds,
+    framing.manualGameArea,
+    framing.resetManualFraming,
+    importedGameArea,
+    requestMap,
+    selectedAreas,
+    selectedPlace,
+  ]);
 
   const bootstrapHostAuth = useCallback(async () => {
     if (!isFirebaseConfigured()) {
@@ -757,13 +770,6 @@ export function useCreateSession() {
     setImportedGameArea(null);
   };
 
-  const handleFramingModeChange = (mode: Parameters<typeof framing.setFramingMode>[0]) => {
-    // Circle / polygon framing is driven by taps on the live map.
-    requestMap();
-    setImportedGameArea(null);
-    framing.setFramingMode(mode);
-  };
-
   const handleFramingModalConfirm = (result: Parameters<typeof framing.loadFramingResult>[0]) => {
     requestMap();
     if (framing.userFramed) {
@@ -872,7 +878,6 @@ export function useCreateSession() {
     handleConfirm,
     applyPlace,
     handleLocationQueryChange,
-    handleFramingModeChange,
     handleFramingModalConfirm,
     handleAccessCodeChange,
     handleSessionTierChange,

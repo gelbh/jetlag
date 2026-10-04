@@ -266,6 +266,9 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
     (expression: MapBoundsExpression) => {
       const nextBounds = toMapBounds(expression);
       setFocusBounds(expression);
+      // Pan-only: keep any existing draft, and do not let the next MapLibre
+      // viewport mint a rectangle from GPS / search fitBounds.
+      setManualDrawingEnabled(false);
       suppressViewportUpdates();
       boundsRef.current = nextBounds;
       setBounds(nextBounds);

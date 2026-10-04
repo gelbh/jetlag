@@ -346,6 +346,98 @@ describe("CreateSession", () => {
     expect(screen.getByPlaceholderText("Dublin, Ireland")).toHaveValue("");
   });
 
+  it("Use my location keeps an imported boundary", async () => {
+    parseBoundaryFile.mockResolvedValue(IMPORTED_AREA);
+    requestLocationAccess.mockResolvedValue({
+      lat: 53.35,
+      lng: -6.26,
+      accuracy: 12,
+      heading: null,
+    });
+    renderCreateSession();
+
+    importBoundaryFile();
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
+    expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
+    expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(IMPORTED_AREA, {
+        regionPackId: undefined,
+      });
+    });
+  });
+
+  it("Use my location keeps a searched place", async () => {
+    searchPlaces.mockResolvedValueOnce([
+      {
+        id: "dublin",
+        displayName: "Dublin, Ireland",
+        center: [53.35, -6.26],
+        bounds: { south: 53.3, west: -6.4, north: 53.4, east: -6.1 },
+        placeCategory: "city",
+        approximateAreaSqMi: 10,
+      },
+    ]);
+    requestLocationAccess.mockResolvedValue({
+      lat: 51.5,
+      lng: -0.12,
+      accuracy: 12,
+      heading: null,
+    });
+    renderCreateSession();
+
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Dublin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Dublin, Ireland")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
+    expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Dublin, Ireland")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalled();
+    });
+  });
+
+  it("Use my location keeps a framed area from Draw on map", async () => {
+    requestLocationAccess.mockResolvedValue({
+      lat: 53.35,
+      lng: -6.26,
+      accuracy: 12,
+      heading: null,
+    });
+    renderCreateSession();
+
+    fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
+    loadMapWithDefaultViewport();
+    fireEvent.click(screen.getByRole("button", { name: "Done" }));
+
+    fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
+    expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
+    loadMapWithDefaultViewport();
+
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledTimes(1);
+    });
+    expect(
+      screen.queryByText(
+        /search for a place, import a boundary, or move the map until the play area is framed/i,
+      ),
+    ).not.toBeInTheDocument();
+  });
+
   it("Use my location shows halt status when GPS is denied", async () => {
     requestLocationAccess.mockRejectedValue(new Error("User denied Geolocation"));
     renderCreateSession();
