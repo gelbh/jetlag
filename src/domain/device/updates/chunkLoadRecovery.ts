@@ -89,6 +89,11 @@ export type ChunkReloadOptions = {
   applyUpdate?: (reloadPage?: boolean) => Promise<void>;
   /** Defaults to `navigator.onLine === false`; injectable for tests and richer reachability checks. */
   isOffline?: () => boolean;
+  /**
+   * Resolves the options at the moment an offline retry fires. The session can change while the
+   * device is offline, and reusing the snapshot from the failure could reload mid-game.
+   */
+  resolveRetryOptions?: () => ChunkReloadOptions | undefined;
 };
 
 function isNavigatorOffline(): boolean {
@@ -96,17 +101,30 @@ function isNavigatorOffline(): boolean {
 }
 
 let pendingOnlineRetry: (() => void) | undefined;
+let pendingRetryOptions: ChunkReloadOptions | undefined;
 
 function scheduleRetryWhenOnline(options: ChunkReloadOptions | undefined): void {
+  pendingRetryOptions = options;
   if (pendingOnlineRetry || typeof window === "undefined") {
     return;
   }
 
   pendingOnlineRetry = () => {
+    const latest = pendingRetryOptions;
     pendingOnlineRetry = undefined;
-    attemptChunkReload(options);
+    pendingRetryOptions = undefined;
+    attemptChunkReload(latest?.resolveRetryOptions?.() ?? latest);
   };
   window.addEventListener("online", pendingOnlineRetry, { once: true });
+}
+
+/** Drops a queued offline retry. Not tied to `clearChunkReloadFlag`, whose boot timer would race it. */
+export function cancelPendingChunkReloadRetry(): void {
+  if (pendingOnlineRetry && typeof window !== "undefined") {
+    window.removeEventListener("online", pendingOnlineRetry);
+  }
+  pendingOnlineRetry = undefined;
+  pendingRetryOptions = undefined;
 }
 
 export function attemptChunkReload(options?: ChunkReloadOptions): boolean {
@@ -114,8 +132,8 @@ export function attemptChunkReload(options?: ChunkReloadOptions): boolean {
     return false;
   }
 
-  // A reload while offline can't fetch the shell and lands on a blank page, so wait for the
-  // network and retry once. The guard flag stays unset so that retry is not swallowed.
+  // A reload while offline can't fetch the app shell and lands on a blank page, so wait for
+  // the network instead and retry once.
   if ((options?.isOffline ?? isNavigatorOffline)()) {
     writeDeferredFlag();
     scheduleRetryWhenOnline(options);

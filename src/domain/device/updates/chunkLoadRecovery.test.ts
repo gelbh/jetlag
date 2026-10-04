@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   attemptChunkReload,
+  cancelPendingChunkReloadRetry,
   clearChunkReloadFlag,
   hasChunkReloadBeenAttempted,
   isChunkLoadError,
@@ -141,11 +142,7 @@ describe("attemptChunkReload while offline", () => {
   });
 
   afterEach(() => {
-    // Drain any retry still waiting for the network so it cannot leak into the next test.
-    offline = false;
-    sessionStorage.setItem("jetlag:chunk-reload", "1");
-    window.dispatchEvent(new Event("online"));
-    sessionStorage.clear();
+    cancelPendingChunkReloadRetry();
   });
 
   it("defers instead of reloading and records the deferred flag", () => {
@@ -185,6 +182,30 @@ describe("attemptChunkReload while offline", () => {
     expect(reload).not.toHaveBeenCalled();
     expect(onNeedRefresh).toHaveBeenCalledOnce();
     expect(wasChunkReloadDeferred()).toBe(true);
+  });
+
+  it("re-reads the session when the network returns", () => {
+    const onNeedRefresh = vi.fn();
+    let session: unknown = null;
+    const resolveRetryOptions = () => ({ isOffline, session, pathname: "/map", onNeedRefresh });
+    attemptChunkReload({ ...resolveRetryOptions(), resolveRetryOptions });
+
+    session = { id: "session-1" };
+    offline = false;
+    window.dispatchEvent(new Event("online"));
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(onNeedRefresh).toHaveBeenCalledOnce();
+  });
+
+  it("does not retry after the pending retry is cancelled", () => {
+    attemptChunkReload({ isOffline });
+    cancelPendingChunkReloadRetry();
+
+    offline = false;
+    window.dispatchEvent(new Event("online"));
+
+    expect(reload).not.toHaveBeenCalled();
   });
 
   it("falls back to navigator.onLine when no checker is injected", () => {
