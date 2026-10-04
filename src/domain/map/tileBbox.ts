@@ -1,9 +1,7 @@
-import type { BoundingBox } from "../geometry/kernel/boundingBox";
+import { type BoundingBox, boundingBoxesIntersect } from "../geometry/gameArea/gameAreaBounds";
 import { isEsriTileUrl, isOpenFreeMapUrl } from "./mapTileHosts";
 
 // Relative imports: this module is bundled into the service worker (src/sw.ts).
-
-export type Bbox = BoundingBox;
 
 export interface TileXYZ {
   z: number;
@@ -62,7 +60,7 @@ function tileYToLat(y: number, tilesPerAxis: number): number {
 }
 
 /** Web Mercator (XYZ) tile → lon/lat bbox. */
-export function tileToBbox(z: number, x: number, y: number): Bbox {
+export function tileToBbox(z: number, x: number, y: number): BoundingBox {
   const tilesPerAxis = 2 ** z;
   return {
     west: (x / tilesPerAxis) * 360 - 180,
@@ -72,39 +70,11 @@ export function tileToBbox(z: number, x: number, y: number): Bbox {
   };
 }
 
-/** Inclusive axis-aligned intersection (touching edges count). No antimeridian wrap. */
-export function bboxIntersects(a: Bbox, b: Bbox): boolean {
-  return a.west <= b.east && b.west <= a.east && a.south <= b.north && b.south <= a.north;
-}
-
 /** True when `url` is a basemap tile whose footprint overlaps `gameAreaBbox`. */
-export function isTileInGameArea(url: string, gameAreaBbox: Bbox | null): boolean {
+export function isTileInGameArea(url: string, gameAreaBbox: BoundingBox | null): boolean {
   if (!gameAreaBbox) {
     return false;
   }
   const tile = parseTileXYZ(url);
-  return tile ? bboxIntersects(tileToBbox(tile.z, tile.x, tile.y), gameAreaBbox) : false;
-}
-
-/** Valid lon/lat bbox (finite, in range, non-inverted). Used to validate SW messages + storage. */
-export function isValidBbox(value: unknown): value is Bbox {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-  const { south, west, north, east } = value as Record<string, unknown>;
-  if (
-    typeof south !== "number" ||
-    typeof west !== "number" ||
-    typeof north !== "number" ||
-    typeof east !== "number" ||
-    !Number.isFinite(south) ||
-    !Number.isFinite(west) ||
-    !Number.isFinite(north) ||
-    !Number.isFinite(east)
-  ) {
-    return false;
-  }
-  return (
-    south >= -90 && north <= 90 && west >= -180 && east <= 180 && south <= north && west <= east
-  );
+  return tile ? boundingBoxesIntersect(tileToBbox(tile.z, tile.x, tile.y), gameAreaBbox) : false;
 }

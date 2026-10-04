@@ -19,6 +19,7 @@ import {
 import { isEsriTileUrl, isOpenFreeMapUrl } from "./domain/map/mapTileHosts";
 import { isTileInGameArea } from "./domain/map/tileBbox";
 import { createGameAreaBboxStore, SW_STATE_CACHE_NAME } from "./services/device/gameAreaBboxStore";
+import { siblingCacheFallbackPlugin } from "./services/device/siblingCacheFallbackPlugin";
 import {
   ANNOTATION_SYNC_MESSAGE_TYPE,
   ANNOTATION_SYNC_TAG,
@@ -44,9 +45,11 @@ const gameAreaBbox = createGameAreaBboxStore(() => caches.open(SW_STATE_CACHE_NA
  * Viewed tiles only: both strategies cache what MapLibre already requested.
  * Never prefetch tiles here (OSM tile usage policy forbids pre-emptive fetching).
  * Tiles overlapping the session game area go to a separate cache with its own,
- * larger budget so roaming elsewhere cannot evict play-area tiles.
+ * larger budget so roaming elsewhere cannot evict play-area tiles. Each side reads
+ * the other on a miss, so a tile cached on either side is never refetched.
  */
 function registerSplitTileRoute(matches: (href: string) => boolean, cacheName: string): void {
+  const gameAreaCacheName = `${cacheName}-game-area`;
   const general = new CacheFirst({
     cacheName,
     plugins: [
@@ -54,15 +57,17 @@ function registerSplitTileRoute(matches: (href: string) => boolean, cacheName: s
         maxEntries: PWA_TILE_CACHE_MAX_ENTRIES,
         maxAgeSeconds: PWA_TILE_CACHE_MAX_AGE_SECONDS,
       }),
+      siblingCacheFallbackPlugin(gameAreaCacheName),
     ],
   });
   const gameArea = new CacheFirst({
-    cacheName: `${cacheName}-game-area`,
+    cacheName: gameAreaCacheName,
     plugins: [
       new ExpirationPlugin({
         maxEntries: PWA_GAME_AREA_TILE_CACHE_MAX_ENTRIES,
         maxAgeSeconds: PWA_GAME_AREA_TILE_CACHE_MAX_AGE_SECONDS,
       }),
+      siblingCacheFallbackPlugin(cacheName),
     ],
   });
 

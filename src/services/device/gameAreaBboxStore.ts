@@ -1,4 +1,7 @@
-import { type Bbox, isValidBbox } from "../../domain/map/tileBbox";
+import {
+  type BoundingBox,
+  isValidBoundingBox,
+} from "../../domain/geometry/gameArea/gameAreaBounds";
 
 // Relative imports: this module is bundled into the service worker (src/sw.ts).
 
@@ -8,9 +11,9 @@ export const GAME_AREA_BBOX_STATE_KEY = "/__jetlag-sw-state/game-area-bbox.json"
 
 export interface GameAreaBboxStore {
   /** Current bbox; reads persisted state once (lazily) after an SW restart. */
-  get(): Promise<Bbox | null>;
+  get(): Promise<BoundingBox | null>;
   /** Update in memory immediately, then persist (`null` deletes the entry). */
-  set(bbox: Bbox | null): Promise<void>;
+  set(bbox: BoundingBox | null): Promise<void>;
 }
 
 /**
@@ -18,12 +21,12 @@ export interface GameAreaBboxStore {
  * killing and restarting the service worker between tile fetches.
  */
 export function createGameAreaBboxStore(openCache: () => Promise<Cache>): GameAreaBboxStore {
-  let current: Bbox | null = null;
-  let hydrated = false;
-  let hydration: Promise<void> | null = null;
+  /** `undefined` = not known yet (persisted state not read, no message received). */
+  let current: BoundingBox | null | undefined;
+  let hydration: Promise<void> | undefined;
   let writeChain: Promise<void> = Promise.resolve();
 
-  async function readPersisted(): Promise<Bbox | null> {
+  async function readPersisted(): Promise<BoundingBox | null> {
     try {
       const cache = await openCache();
       const response = await cache.match(GAME_AREA_BBOX_STATE_KEY);
@@ -31,13 +34,13 @@ export function createGameAreaBboxStore(openCache: () => Promise<Cache>): GameAr
         return null;
       }
       const parsed: unknown = await response.json();
-      return isValidBbox(parsed) ? parsed : null;
+      return isValidBoundingBox(parsed) ? parsed : null;
     } catch {
       return null;
     }
   }
 
-  async function persist(bbox: Bbox | null): Promise<void> {
+  async function persist(bbox: BoundingBox | null): Promise<void> {
     try {
       const cache = await openCache();
       if (bbox) {
@@ -55,27 +58,22 @@ export function createGameAreaBboxStore(openCache: () => Promise<Cache>): GameAr
     }
   }
 
-  function hydrate(): Promise<void> {
-    hydration ??= readPersisted().then((persisted) => {
-      // A message that arrived while we were reading wins over stale storage.
-      if (!hydrated) {
-        current = persisted;
-        hydrated = true;
-      }
-    });
-    return hydration;
-  }
-
   return {
     async get() {
-      if (!hydrated) {
-        await hydrate();
+      if (current === undefined) {
+        hydration ??= readPersisted().then((persisted) => {
+          // A message that arrived while we were reading wins over stale storage.
+          // (`??=` would be wrong: a received `null` is a known state.)
+          if (current === undefined) {
+            current = persisted;
+          }
+        });
+        await hydration;
       }
-      return current;
+      return current ?? null;
     },
     set(bbox) {
       current = bbox;
-      hydrated = true;
       // Serialize writes so a quick bbox → null sequence cannot persist out of order.
       writeChain = writeChain.then(() => persist(bbox));
       return writeChain;

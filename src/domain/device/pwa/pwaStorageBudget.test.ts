@@ -22,8 +22,10 @@ describe("pwaStorageBudget", () => {
   });
 
   it("gives game-area tiles a larger, longer-lived budget than the general cache", () => {
-    expect(PWA_GAME_AREA_TILE_CACHE_MAX_ENTRIES).toBe(2000);
-    expect(PWA_GAME_AREA_TILE_CACHE_MAX_AGE_SECONDS).toBe(14 * 24 * 60 * 60);
+    expect(PWA_GAME_AREA_TILE_CACHE_MAX_ENTRIES).toBeGreaterThan(PWA_TILE_CACHE_MAX_ENTRIES);
+    expect(PWA_GAME_AREA_TILE_CACHE_MAX_AGE_SECONDS).toBeGreaterThan(
+      PWA_TILE_CACHE_MAX_AGE_SECONDS,
+    );
   });
 
   it("detects usage over the soft storage cap", () => {

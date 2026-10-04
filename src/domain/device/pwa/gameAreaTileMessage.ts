@@ -1,4 +1,4 @@
-import { type Bbox, isValidBbox } from "../../map/tileBbox";
+import { type BoundingBox, isValidBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 
 // Relative imports: this module is bundled into the service worker (src/sw.ts).
 
@@ -7,10 +7,10 @@ export const GAME_AREA_SW_MESSAGE_TYPE = "jetlag:game-area";
 
 export interface GameAreaSwMessage {
   type: typeof GAME_AREA_SW_MESSAGE_TYPE;
-  bbox: Bbox | null;
+  bbox: BoundingBox | null;
 }
 
-export function createGameAreaSwMessage(bbox: Bbox | null): GameAreaSwMessage {
+export function createGameAreaSwMessage(bbox: BoundingBox | null): GameAreaSwMessage {
   return { type: GAME_AREA_SW_MESSAGE_TYPE, bbox };
 }
 
@@ -29,7 +29,7 @@ export function parseGameAreaSwMessage(data: unknown): GameAreaSwMessage | null 
   if (bbox === null) {
     return createGameAreaSwMessage(null);
   }
-  if (!isValidBbox(bbox)) {
+  if (!isValidBoundingBox(bbox)) {
     return null;
   }
   const { south, west, north, east } = bbox;

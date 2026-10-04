@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { boundingBoxesIntersect, isValidBoundingBox } from "../geometry/gameArea/gameAreaBounds";
 import { ESRI_REFERENCE_OVERLAY_TILE_URL, ESRI_WORLD_IMAGERY_TILE_URL } from "./mapBasemaps";
-import {
-  bboxIntersects,
-  isTileInGameArea,
-  isValidBbox,
-  parseTileXYZ,
-  tileToBbox,
-} from "./tileBbox";
+import { isTileInGameArea, parseTileXYZ, tileToBbox } from "./tileBbox";
 
 function fillXyzTemplate(template: string, z: number, x: number, y: number): string {
   return template.replace("{z}", String(z)).replace("{x}", String(x)).replace("{y}", String(y));
@@ -75,22 +70,22 @@ describe("tileToBbox", () => {
     expect(bbox.west).toBeLessThan(-0.12);
     expect(bbox.east).toBeGreaterThan(-0.12);
     expect(bbox.south).toBeLessThan(bbox.north);
-    expect(bboxIntersects(bbox, LONDON_BBOX)).toBe(true);
+    expect(boundingBoxesIntersect(bbox, LONDON_BBOX)).toBe(true);
   });
 });
 
-describe("bboxIntersects", () => {
+describe("boundingBoxesIntersect", () => {
   it("detects overlap, containment, and shared edges", () => {
     const a = { south: 0, west: 0, north: 10, east: 10 };
-    expect(bboxIntersects(a, { south: 5, west: 5, north: 15, east: 15 })).toBe(true);
-    expect(bboxIntersects(a, { south: 2, west: 2, north: 3, east: 3 })).toBe(true);
-    expect(bboxIntersects(a, { south: 10, west: 0, north: 20, east: 10 })).toBe(true);
+    expect(boundingBoxesIntersect(a, { south: 5, west: 5, north: 15, east: 15 })).toBe(true);
+    expect(boundingBoxesIntersect(a, { south: 2, west: 2, north: 3, east: 3 })).toBe(true);
+    expect(boundingBoxesIntersect(a, { south: 10, west: 0, north: 20, east: 10 })).toBe(true);
   });
 
   it("rejects disjoint boxes on either axis", () => {
     const a = { south: 0, west: 0, north: 10, east: 10 };
-    expect(bboxIntersects(a, { south: 11, west: 0, north: 20, east: 10 })).toBe(false);
-    expect(bboxIntersects(a, { south: 0, west: -20, north: 10, east: -1 })).toBe(false);
+    expect(boundingBoxesIntersect(a, { south: 11, west: 0, north: 20, east: 10 })).toBe(false);
+    expect(boundingBoxesIntersect(a, { south: 0, west: -20, north: 10, east: -1 })).toBe(false);
   });
 });
 
@@ -108,18 +103,18 @@ describe("isTileInGameArea", () => {
   });
 });
 
-describe("isValidBbox", () => {
+describe("isValidBoundingBox", () => {
   it("accepts a finite in-range box", () => {
-    expect(isValidBbox(LONDON_BBOX)).toBe(true);
+    expect(isValidBoundingBox(LONDON_BBOX)).toBe(true);
   });
 
   it("rejects malformed, inverted, or out-of-range boxes", () => {
-    expect(isValidBbox(null)).toBe(false);
-    expect(isValidBbox({ south: 0, west: 0, north: 1 })).toBe(false);
-    expect(isValidBbox({ south: "0", west: 0, north: 1, east: 1 })).toBe(false);
-    expect(isValidBbox({ south: Number.NaN, west: 0, north: 1, east: 1 })).toBe(false);
-    expect(isValidBbox({ south: 2, west: 0, north: 1, east: 1 })).toBe(false);
-    expect(isValidBbox({ south: 0, west: -181, north: 1, east: 1 })).toBe(false);
-    expect(isValidBbox({ south: -91, west: 0, north: 1, east: 1 })).toBe(false);
+    expect(isValidBoundingBox(null)).toBe(false);
+    expect(isValidBoundingBox({ south: 0, west: 0, north: 1 })).toBe(false);
+    expect(isValidBoundingBox({ south: "0", west: 0, north: 1, east: 1 })).toBe(false);
+    expect(isValidBoundingBox({ south: Number.NaN, west: 0, north: 1, east: 1 })).toBe(false);
+    expect(isValidBoundingBox({ south: 2, west: 0, north: 1, east: 1 })).toBe(false);
+    expect(isValidBoundingBox({ south: 0, west: -181, north: 1, east: 1 })).toBe(false);
+    expect(isValidBoundingBox({ south: -91, west: 0, north: 1, east: 1 })).toBe(false);
   });
 });

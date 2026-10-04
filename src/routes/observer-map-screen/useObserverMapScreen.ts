@@ -45,7 +45,7 @@ export function useObserverMapScreen() {
     playAreaReady: resolvedPlayAreaReady,
   } = useResolvedSessionRules(session);
   const resolvedGameArea = gameArea ?? session?.gameArea ?? null;
-  useGameAreaTileCacheSync(resolvedGameArea);
+  useGameAreaTileCacheSync(gameArea);
   // Join-preview / zero areas must not frame the camera (fitBoundsMode="once").
   const displayGameArea =
     resolvedPlayAreaReady && resolvedGameArea != null && !isPlaceholderGameArea(resolvedGameArea)
