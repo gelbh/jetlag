@@ -1,44 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isCloudflareKvMissSpan } from "../lib/sentryHostNoiseSpans.mjs";
+import {
+  CLOUDFLARE_KV_VALUES_IGNORE_SPAN,
+  isCloudflareKvValuesNoiseSpanName,
+} from "../lib/sentryHostNoiseSpans.mjs";
 
-test("drops KV values 404", () => {
+test("matches KV values URLs", () => {
   assert.equal(
-    isCloudflareKvMissSpan({
-      op: "http.client",
-      data: {
-        "http.url":
-          "https://api.cloudflare.com/client/v4/accounts/x/storage/kv/namespaces/y/values/premium%3Aabc",
-        "http.status_code": 404,
-      },
-    }),
+    isCloudflareKvValuesNoiseSpanName(
+      "GET https://api.cloudflare.com/client/v4/accounts/x/storage/kv/namespaces/y/values/premium%3Aabc",
+    ),
     true,
   );
+  assert.ok(CLOUDFLARE_KV_VALUES_IGNORE_SPAN instanceof RegExp);
 });
 
-test("keeps KV 401", () => {
+test("ignores non-KV Cloudflare URLs", () => {
   assert.equal(
-    isCloudflareKvMissSpan({
-      op: "http.client",
-      data: {
-        "http.url":
-          "https://api.cloudflare.com/client/v4/accounts/x/storage/kv/namespaces/y/values/premium%3Aabc",
-        "http.status_code": 401,
-      },
-    }),
-    false,
-  );
-});
-
-test("keeps non-KV Cloudflare 404", () => {
-  assert.equal(
-    isCloudflareKvMissSpan({
-      op: "http.client",
-      data: {
-        "http.url": "https://api.cloudflare.com/client/v4/accounts/x/tokens/verify",
-        "http.status_code": 404,
-      },
-    }),
+    isCloudflareKvValuesNoiseSpanName(
+      "GET https://api.cloudflare.com/client/v4/accounts/x/tokens/verify",
+    ),
     false,
   );
 });

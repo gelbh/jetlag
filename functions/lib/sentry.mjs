@@ -5,7 +5,7 @@ import * as Sentry from "@sentry/node";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError } from "firebase-functions/v2/https";
 import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../session/expectedSessionUxHttpsErrors.mjs";
-import { isCloudflareKvMissSpan } from "./sentryHostNoiseSpans.mjs";
+import { CLOUDFLARE_KV_VALUES_IGNORE_SPAN } from "./sentryHostNoiseSpans.mjs";
 
 const sentryDsnSecret = defineSecret("SENTRY_DSN");
 
@@ -237,17 +237,13 @@ export function initFunctionsSentry() {
     release: `jetlag@${readAppVersion()}`,
     tracesSampleRate: 0.1,
     dataCollection: FUNCTIONS_SENTRY_DATA_COLLECTION,
+    // Mutable: Sentry ignoreSpans rejects readonly tuples (same as client).
+    ignoreSpans: [CLOUDFLARE_KV_VALUES_IGNORE_SPAN],
     beforeSend(event) {
       if (isAbortErrorEvent(event) || isOverpassTransportNoiseEvent(event)) {
         return null;
       }
       return event;
-    },
-    beforeSendSpan(span) {
-      if (isCloudflareKvMissSpan(span)) {
-        return null;
-      }
-      return span;
     },
   });
   initialized = true;
