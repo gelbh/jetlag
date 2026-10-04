@@ -1,5 +1,5 @@
-import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../overpass/endpoints";
-import { withOverpassConcurrencyLimit } from "../../overpass/requestQueue";
+import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../geo/overpass/endpoints";
+import { withOverpassConcurrencyLimit } from "../../geo/overpass/requestQueue";
 import { buildPremiumProxyHeaders } from "../auth/accessControl";
 import { getFirebaseAuth } from "../firebase/firebase";
 import { waitForRestoredFirebaseAuth } from "../firebase/firebaseAuthReady";
