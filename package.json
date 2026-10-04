@@ -1,7 +1,7 @@
 {
   "name": "jetlag",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
@@ -15,7 +15,6 @@
     "preview:lhci": "node scripts/lhci-preview-server.mjs",
     "lint": "biome ci --error-on-warnings .",
     "format": "biome check --write .",
-    "lint:css": "stylelint --cache --report-needless-disables --report-invalid-scope-disables \"src/**/*.css\" \"public/**/*.css\"",
     "lint:pr-title": "bash scripts/lint-pr-title.sh",
     "typecheck": "tsc -b --noEmit",
     "flags:sync": "node scripts/sync-region-flags.mjs",
@@ -97,7 +96,6 @@
     "@cloudflare/workers-types": "^5.20260925.1",
     "@commitlint/cli": "~21.2.3",
     "@commitlint/config-conventional": "~21.2.0",
-    "@dreamsicle.io/stylelint-config-tailwindcss": "^1.2.2",
     "@firebase/rules-unit-testing": "^5.0.2",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.63.0",
@@ -121,8 +119,6 @@
     "postcss": "^8.5.28",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
-    "stylelint": "^17.15.0",
-    "stylelint-config-standard": "^40.0.0",
     "tailwindcss": "~4.3.0",
     "typescript": "~6.0.2",
     "vite": "~8.3.1",
