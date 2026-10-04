@@ -11,7 +11,6 @@ import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { type TimerState, timerStateToRemote } from "@/domain/session/timer/timer";
 import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
-import { serverNowIso } from "@/services/core/time/serverClock";
 import { emitGameEndedActivity } from "@/services/session/emitSessionActivity";
 import { cancelOpenPendingQuestions, postGameSystemMessage } from "../firestoreSessionExtras";
 import { sessionRulesPatchToFirestore } from "../serialization/serializeSession";
@@ -157,7 +156,7 @@ export async function resetRemoteSession(
   hostUid: string,
   hostRole: PlayerRole,
 ): Promise<string> {
-  const resetAt = serverNowIso();
+  const resetAt = new Date().toISOString();
 
   const snapshot = await getDocs(annotationsCollection(sessionId));
   const activeDocs = snapshot.docs.filter(

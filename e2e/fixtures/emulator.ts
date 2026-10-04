@@ -71,6 +71,7 @@ export async function advanceLocalTimerElapsedMs(
       parsed.state.bySessionId ??= {};
       parsed.state.bySessionId[targetSessionId] = {
         accumulatedMs: targetElapsedMs,
+        // runningSince is server-frame; local e2e server clock offset is ~0.
         runningSince: Date.now(),
       };
       localStorage.setItem("jetlag-timer", JSON.stringify(parsed));

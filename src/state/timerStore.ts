@@ -8,7 +8,7 @@ const STORAGE_KEY = "jetlag-timer";
  * One-time move from sessionStorage (pre-server-clock builds) so a running
  * hiding timer survives the upgrade. Must run before `persist` hydrates.
  */
-export function migrateTimerStorageFromSession(): void {
+function migrateTimerStorageFromSession(): void {
   try {
     const legacy = sessionStorage.getItem(STORAGE_KEY);
     if (legacy === null) return;
