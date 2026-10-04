@@ -1,4 +1,6 @@
-const HOME_PRERENDER_PATH = "/prerender/home/";
+// Also imported by scripts/lhci-document-route.mjs via Node type stripping: keep this file
+// to erasable TS syntax (no enums/namespaces, relative imports with extensions).
+export const HOME_PRERENDER_PATH = "/prerender/home/";
 const MAX_ASSET_REDIRECT_HOPS = 2;
 
 export function isPrerenderHomePath(pathname: string): boolean {
