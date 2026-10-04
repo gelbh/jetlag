@@ -8,11 +8,7 @@ interface AdminMobileDeskProps {
   bodies: AdminPanelBodies;
 }
 
-export function AdminMobileDesk({
-  activePanelId,
-  onSelectPanel,
-  bodies,
-}: AdminMobileDeskProps) {
+export function AdminMobileDesk({ activePanelId, onSelectPanel, bodies }: AdminMobileDeskProps) {
   return (
     <div className="jl-ops-mobile" data-testid="admin-ops-mobile">
       <Tabs

@@ -93,7 +93,9 @@ describe("AdminMonitorPane", () => {
     expect(
       screen.getByText("Sessions unavailable. Retry from the Sessions panel."),
     ).toBeInTheDocument();
-    expect(screen.queryByText("Select a live session to watch the map here.")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Select a live session to watch the map here."),
+    ).not.toBeInTheDocument();
   });
 
   it("uses compact embed path without nested grid when container is narrow", () => {

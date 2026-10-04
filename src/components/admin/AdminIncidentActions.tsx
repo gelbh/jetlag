@@ -194,7 +194,9 @@ export function AdminIncidentActions({
           aria-label="Mitigation type"
           value={mitigationType}
           disabled={actionsDisabled || mitigationBusy}
-          onChange={(event) => setMitigationType(event.currentTarget.value as IncidentMitigationType)}
+          onChange={(event) =>
+            setMitigationType(event.currentTarget.value as IncidentMitigationType)
+          }
           data={INCIDENT_MITIGATION_OPTIONS.map((option) => ({
             value: option.type,
             label: option.label,

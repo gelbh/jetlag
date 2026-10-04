@@ -56,37 +56,4 @@ describe("AdminSessionFilters", () => {
     expect(screen.getByRole("button", { name: "Singleplayer" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Hiding" })).toBeInTheDocument();
   });
-
-  it("collapses More filters when forceCollapsed becomes true", () => {
-    const { rerender } = renderFilters();
-
-    fireEvent.click(screen.getByRole("button", { name: "More filters" }));
-    expect(screen.getByRole("button", { name: "Singleplayer" })).toBeInTheDocument();
-
-    rerender(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <AdminSessionFilters
-          query=""
-          liveOnly
-          annotatedOnly={false}
-          mode="all"
-          state={null}
-          sort="lastActivity"
-          onQueryChange={vi.fn()}
-          onLiveOnlyChange={vi.fn()}
-          onAnnotatedOnlyChange={vi.fn()}
-          onModeChange={vi.fn()}
-          onStateChange={vi.fn()}
-          onSortChange={vi.fn()}
-          forceCollapsed
-        />
-      </MantineProvider>,
-    );
-
-    expect(screen.getByRole("button", { name: "More filters" })).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
-    expect(screen.queryByRole("button", { name: "Singleplayer" })).not.toBeInTheDocument();
-  });
 });

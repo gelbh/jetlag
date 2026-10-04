@@ -29,6 +29,7 @@
 .jl-incident-queue-scroll {
   min-height: 0;
   flex: 1;
+  order: 2;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0.375rem;
@@ -315,13 +316,19 @@ html[data-motion="static"] .jl-incident-queue-row {
   flex-shrink: 0;
   align-items: center;
   gap: 0.5rem;
+  order: 1;
   padding: 0 0.625rem 0.375rem;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-ink-muted);
 }
 
-.jl-incident-queue-filter--secondary {
+.jl-incident-queue--empty .jl-incident-empty {
+  order: 1;
+}
+
+.jl-incident-queue--empty .jl-incident-queue-filter {
+  order: 2;
   margin-top: 0.25rem;
   padding-top: 0.5rem;
   font-weight: 500;
@@ -540,8 +547,15 @@ html[data-motion="static"] .jl-incident-queue-row {
   font-weight: 650;
   color: var(--color-ink);
 }
-.jl-incident-queue-list { display: flex; flex-direction: column; gap: 0.5rem; }
-.jl-incident-queue-age { color: var(--color-ink-muted); font-size: 0.75rem; }
+.jl-incident-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.jl-incident-queue-age {
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+}
 .jl-incident-detail-fields {
   display: grid;
   gap: 0.5rem 1rem;
@@ -552,5 +566,7 @@ html[data-motion="static"] .jl-incident-queue-row {
   font-size: 0.75rem;
   text-transform: uppercase;
 }
-.jl-incident-detail-fields dd { margin: 0; color: var(--color-ink); }
-
+.jl-incident-detail-fields dd {
+  margin: 0;
+  color: var(--color-ink);
+}

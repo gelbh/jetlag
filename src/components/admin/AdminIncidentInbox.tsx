@@ -40,7 +40,6 @@ export function AdminIncidentInbox({
   );
 
   const queueEmpty = !loading && !error && visible.length === 0;
-  const deferShowClosed = visible.length === 0;
 
   const onCloseRow = async (
     incidentId: string,
@@ -57,28 +56,15 @@ export function AdminIncidentInbox({
     }
   };
 
-  const showClosedControl = (
-    <Checkbox
-      className={
-        deferShowClosed
-          ? "jl-incident-queue-filter jl-incident-queue-filter--secondary"
-          : "jl-incident-queue-filter"
-      }
-      size="xs"
-      label="Show closed"
-      checked={showClosed}
-      onChange={(event) => setShowClosed(event.currentTarget.checked)}
-    />
-  );
-
   return (
-    <section className="jl-incident-queue" aria-label="Incident queue">
+    <section
+      className={`jl-incident-queue${queueEmpty ? " jl-incident-queue--empty" : ""}`}
+      aria-label="Incident queue"
+    >
       <div className="jl-incident-pane-header">
         <h2 className="jl-incident-pane-title">Incident queue</h2>
         <span className="jl-incident-pane-meta">{openCount} open</span>
       </div>
-
-      {!deferShowClosed ? showClosedControl : null}
 
       {error ? (
         <Alert className="jl-incident-empty" color="red" title="Queue error" role="alert">
@@ -91,6 +77,14 @@ export function AdminIncidentInbox({
           {rowError}
         </Alert>
       ) : null}
+
+      <Checkbox
+        className="jl-incident-queue-filter"
+        size="xs"
+        label="Show closed"
+        checked={showClosed}
+        onChange={(event) => setShowClosed(event.currentTarget.checked)}
+      />
 
       {loading && incidents.length === 0 && !error ? (
         <div className="jl-incident-empty" aria-busy="true">
@@ -110,8 +104,6 @@ export function AdminIncidentInbox({
         </div>
       ) : null}
 
-      {deferShowClosed ? showClosedControl : null}
-
       {visible.length > 0 ? (
         <div className="jl-scroll jl-incident-queue-scroll">
           {visible.map((incident) => {
@@ -128,7 +120,6 @@ export function AdminIncidentInbox({
                   className="jl-incident-queue-row-main"
                   aria-current={active ? "true" : undefined}
                   onClick={() => onSelect(incident.id)}
-                  style={{ display: "block", width: "100%", textAlign: "left" }}
                 >
                   <div className="jl-incident-queue-row-top">
                     <span className="jl-incident-queue-id">

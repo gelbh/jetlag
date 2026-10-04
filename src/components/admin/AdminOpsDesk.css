@@ -1,6 +1,13 @@
 /* Admin ops desk: geometry / DnD / hit-target allowlist (Band 3). */
 
+/* Fill .app-scroll-root; do not set display:flex here (fights static AppShell grid). */
 .jl-ops-desk {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.jl-ops-desk-main {
   display: flex;
   min-height: 0;
   flex: 1;

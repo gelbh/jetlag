@@ -54,57 +54,48 @@ function renderInbox(props: Partial<ComponentProps<typeof AdminIncidentInbox>> =
   );
 }
 
-function follows(earlier: HTMLElement, later: HTMLElement) {
-  return Boolean(earlier.compareDocumentPosition(later) & Node.DOCUMENT_POSITION_FOLLOWING);
-}
-
 describe("AdminIncidentInbox empty structure", () => {
-  it("keeps empty as title plus one help line with Show closed after", () => {
+  it("keeps empty as title plus one help line and a single Show closed control", () => {
     renderInbox();
 
-    const title = screen.getByText("No incidents");
-    const help = screen.getByText("Player reports appear here when submitted.");
-    const showClosed = screen.getByLabelText("Show closed");
     const empty = screen.getByTestId("admin-incident-inbox-empty");
+    const showClosed = screen.getByLabelText("Show closed");
 
     expect(empty.querySelectorAll(".jl-incident-empty-title")).toHaveLength(1);
     expect(empty.querySelectorAll(".jl-incident-empty-body")).toHaveLength(1);
-    expect(follows(title, help)).toBe(true);
-    expect(follows(help, showClosed)).toBe(true);
-    expect(showClosed.closest(".jl-incident-queue-filter--secondary")).not.toBeNull();
+    expect(screen.getByText("No incidents")).toBeInTheDocument();
+    expect(screen.getByText("Player reports appear here when submitted.")).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Show closed")).toHaveLength(1);
+    expect(showClosed.closest(".jl-incident-queue")).toHaveClass("jl-incident-queue--empty");
   });
 
-  it("keeps Show closed after empty when only closed incidents are hidden", () => {
+  it("reveals hidden closed incidents from Show closed without remounting the control", () => {
     renderInbox({
       incidents: [makeIncident({ id: "inc-closed", status: "resolved" })],
       openCount: 0,
     });
 
-    const title = screen.getByText("No incidents");
-    const help = screen.getByText("Player reports appear here when submitted.");
     const showClosed = screen.getByLabelText("Show closed");
-
-    expect(follows(title, help)).toBe(true);
-    expect(follows(help, showClosed)).toBe(true);
+    expect(screen.getByTestId("admin-incident-inbox-empty")).toBeInTheDocument();
 
     fireEvent.click(showClosed);
 
     expect(screen.getByText(/INC-/i)).toBeInTheDocument();
     expect(screen.queryByTestId("admin-incident-inbox-empty")).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Show closed").closest(".jl-incident-queue-filter--secondary")).toBeNull();
+    expect(screen.getAllByLabelText("Show closed")).toHaveLength(1);
+    expect(screen.getByLabelText("Show closed").closest(".jl-incident-queue")).not.toHaveClass(
+      "jl-incident-queue--empty",
+    );
   });
 
-  it("places Show closed before rows when the queue has visible incidents", () => {
+  it("keeps one Show closed control when the queue has visible incidents", () => {
     renderInbox({
       incidents: [makeIncident()],
       openCount: 1,
     });
 
-    const showClosed = screen.getByLabelText("Show closed");
-    const rowId = screen.getByText(/INC-/i);
-
     expect(screen.queryByTestId("admin-incident-inbox-empty")).not.toBeInTheDocument();
-    expect(follows(showClosed, rowId)).toBe(true);
-    expect(showClosed.closest(".jl-incident-queue-filter--secondary")).toBeNull();
+    expect(screen.getAllByLabelText("Show closed")).toHaveLength(1);
+    expect(screen.getByText(/INC-/i)).toBeInTheDocument();
   });
 });

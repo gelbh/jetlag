@@ -19,7 +19,10 @@ function expectStaticAppShell(layout: "desktop" | "mobile") {
   const desk = screen.getByTestId("admin-ops-desk");
   expect(desk).toHaveAttribute("data-layout", layout);
   expect(desk).toHaveAttribute("data-admin-shell", "mantine-static");
-  expect(desk.classList.contains("mantine-AppShell-root") || desk.querySelector(".mantine-AppShell-root")).toBeTruthy();
+  expect(
+    desk.classList.contains("mantine-AppShell-root") ||
+      desk.querySelector(".mantine-AppShell-root"),
+  ).toBeTruthy();
 }
 
 const SEEKER_HIDER_META = /1S \/ 1H/i;

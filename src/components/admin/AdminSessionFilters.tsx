@@ -19,8 +19,6 @@ interface AdminSessionFiltersProps {
   onModeChange: (mode: AdminSessionModeFilter) => void;
   onStateChange: (state: AdminSessionStateChip) => void;
   onSortChange: (sort: AdminSessionSort) => void;
-  /** When true, collapse mode/phase chips (fail/empty chrome distill). */
-  forceCollapsed?: boolean;
 }
 
 const SORT_OPTIONS: { value: AdminSessionSort; label: string }[] = [
@@ -44,17 +42,8 @@ export function AdminSessionFilters({
   onModeChange,
   onStateChange,
   onSortChange,
-  forceCollapsed = false,
 }: AdminSessionFiltersProps) {
   const [moreOpen, setMoreOpen] = useState(false);
-  const [wasForceCollapsed, setWasForceCollapsed] = useState(forceCollapsed);
-
-  if (forceCollapsed !== wasForceCollapsed) {
-    setWasForceCollapsed(forceCollapsed);
-    if (forceCollapsed) {
-      setMoreOpen(false);
-    }
-  }
 
   return (
     <Stack gap="sm">

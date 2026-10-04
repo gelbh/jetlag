@@ -527,16 +527,13 @@ export function AdminOpsDesk() {
               onModeChange={setModeFilter}
               onStateChange={setStateFilter}
               onSortChange={setSort}
-              forceCollapsed={sessions.length === 0 && !sessionsError}
             />
           </div>
           {sessionsLoading ? (
             <AdminSessionSkeletonRows />
           ) : sessions.length === 0 ? (
             <div className="jl-ops-empty">
-              <p className="jl-ops-empty-title">
-                {liveOnly ? "No live sessions" : "No sessions"}
-              </p>
+              <p className="jl-ops-empty-title">{liveOnly ? "No live sessions" : "No sessions"}</p>
               <p className="jl-ops-empty-body">Games appear here while a host session is active.</p>
             </div>
           ) : filteredSessions.length === 0 ? (
@@ -696,7 +693,7 @@ export function AdminOpsDesk() {
   return (
     <AppShell
       mode="static"
-      header={{ height: "auto" }}
+      header={{ height: "3.25rem", offset: false }}
       padding={0}
       className="jl-ops-desk"
       data-testid="admin-ops-desk"
@@ -705,7 +702,7 @@ export function AdminOpsDesk() {
       data-resume-ready="true"
     >
       <AppShell.Header withBorder={false}>{deskTopbar}</AppShell.Header>
-      <AppShell.Main>
+      <AppShell.Main className="jl-ops-desk-main">
         {isDesktop ? (
           <>
             {incidentsError && visibleIncidents.length > 0 ? (
