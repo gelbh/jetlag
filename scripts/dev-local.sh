@@ -238,6 +238,7 @@ write_dev_local_firebase_json() {
   # Root-level config so firestore.rules / functions stay in-project (firebase
   # rejects ../ when --config lives under .firebase/).
   AUTH_PORT="$1" FIRESTORE_PORT="$2" STORAGE_PORT="$3" FUNCTIONS_PORT="$4" UI_PORT="$5" HUB_PORT="$6" LOGGING_PORT="$7" \
+    EVENTARC_PORT="$8" TASKS_PORT="$9" \
     node -e '
       const fs = require("fs");
       const j = require("./firebase.json");
@@ -250,6 +251,8 @@ write_dev_local_firebase_json() {
       emu.ui = { enabled: true, host, port: Number(process.env.UI_PORT) };
       emu.hub = { host, port: Number(process.env.HUB_PORT) };
       emu.logging = { host, port: Number(process.env.LOGGING_PORT) };
+      emu.eventarc = { host, port: Number(process.env.EVENTARC_PORT) };
+      emu.tasks = { host, port: Number(process.env.TASKS_PORT) };
       fs.writeFileSync("firebase.dev-local.json", JSON.stringify(j, null, 2) + "\n");
     '
 }
@@ -257,6 +260,7 @@ write_dev_local_firebase_json() {
 main() {
   local slug="${1:-}"
   local root vite_port auth_port firestore_port storage_port functions_port ui_port hub_port logging_port
+  local eventarc_port tasks_port
   local auth_base firestore_base storage_base functions_base ui_base
   local FREE_PORT=""
   root="$(resolve_root "$slug")"
@@ -285,7 +289,9 @@ main() {
     "functions:${functions_base}" \
     "ui:${ui_base}" \
     "hub:4400" \
-    "logging:4500"
+    "logging:4500" \
+    "eventarc:9299" \
+    "tasks:9499"
 
   assign_service_port 5173
   vite_port="$FREE_PORT"
@@ -303,10 +309,19 @@ main() {
   hub_port="$FREE_PORT"
   assign_service_port 4500
   logging_port="$FREE_PORT"
+  assign_service_port 9299
+  eventarc_port="$FREE_PORT"
+  assign_service_port 9499
+  tasks_port="$FREE_PORT"
 
   write_dev_local_firebase_json \
     "$auth_port" "$firestore_port" "$storage_port" "$functions_port" \
-    "$ui_port" "$hub_port" "$logging_port"
+    "$ui_port" "$hub_port" "$logging_port" \
+    "$eventarc_port" "$tasks_port"
+
+  if [[ "$PORT_MODE" == new ]]; then
+    printf 'dev-local: second emulator suite is expected on new ports; prefer kill for a quiet single stack\n' >&2
+  fi
 
   printf 'dev-local: Vite http://127.0.0.1:%s/\n' "$vite_port" >&2
   printf 'dev-local: Emulator UI http://127.0.0.1:%s/\n' "$ui_port" >&2

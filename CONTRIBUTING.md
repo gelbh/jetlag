@@ -78,6 +78,17 @@ just dev-emulator
 # npm run emulators:local  # uses that config when present
 ```
 
+### Expected emulator noise
+
+`just dev-local` (especially a second stack on remapped ports) prints Firebase / Functions lines that look like failures. Most are expected for the locked emulator-only suite (`auth,firestore,storage,functions`). Map play does not need them silenced.
+
+- **Dual suite:** Choosing new ports while another stack is up is intended. firebase-tools may warn `It seems that you are running multiple instances of the emulator suite for project demo-jetlag`. The launcher also prints `dev-local: second emulator suite is expected on new ports; prefer kill for a quiet single stack`.
+- **Eventarc / Tasks:** Functions v2 late-starts these sidecars even when `--only` omits them. The launcher pins `emulators.eventarc` / `emulators.tasks` in generated `firebase.dev-local.json`, so you should not see `unable to start on port 9299` / `9499` hop spam unless something outside the map holds the port.
+- **ADC:** `Application Default Credentials detected. Non-emulated services will access production using these credentials.` is expected when ADC is present. Do not strip credentials to silence it. Not required to fix for map play.
+- **GSM 403 / secrets:** Without `functions/.secret.local`, the Functions emulator may call Google Secret Manager for `demo-jetlag` and log `Unable to access secret environment variables from Google Cloud Secret Manager` (often 403). Optional `functions/.secret.local` overrides quiet that (follow-up: committed `functions/.secret.local.example`; copy, do not commit the real file). Not required for map play. The launcher does not auto-create it.
+- **Schedulers ignored:** `function ignored because the pubsub emulator does not exist or is not running` is expected (`--only` has no Pub/Sub). That is OK for map play. Starting Pub/Sub still does not auto-run cron; invoke via `functions:shell` or a manual publish if you need a scheduled handler.
+- **Trigger chatter:** Firestore triggers (capture, finalize, warm preload, and similar) log real work. Two suites double the volume. Prefer kill-defaults at the busy-port prompt for a quiet single stack.
+
 If the map geometry kernel stubs with `jetlag-geometry-kernel pkg missing`, build WASM once:
 
 ```bash
