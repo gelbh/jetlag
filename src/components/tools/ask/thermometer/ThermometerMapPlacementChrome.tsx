@@ -59,7 +59,7 @@ const answerSegmentStyles = (selected: boolean, tone: "success" | "danger") => {
       height: "2.75rem",
       borderRadius: 10,
       paddingInline: "0.7rem",
-      fontSize: "0.9375rem",
+      fontSize: "1rem",
       fontWeight: 650,
       letterSpacing: "-0.02em",
       justifyContent: "center",
@@ -309,7 +309,7 @@ export function ThermometerMapPlacementChrome({
       costLabel={costLabel}
       phase={phase}
       onUseGps={() => undefined}
-      error={null}
+      error={error}
       statusTitle=""
       statusBody=""
       toolIcon={<HudThermometerIcon width={20} height={20} />}
