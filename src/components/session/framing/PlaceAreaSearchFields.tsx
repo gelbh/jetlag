@@ -1,4 +1,7 @@
-import type { GeocodedPlace } from "@/services/geo/geocoding";
+import { ActionIcon, TextInput } from "@mantine/core";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { insetTextInputStyles } from "@/components/ui/entry/entryChrome";
+import { type GeocodedPlace, GeocodedPlaceLeading } from "@/services/geo/geocoding";
 import { formatPlaceSearchSubtitle } from "@/services/geo/geocoding/geocodingRank";
 import { SearchResultsList } from "../../tools/shared/controls/SearchResultsList";
 import { SearchField } from "../../ui/forms/SearchField";
@@ -13,6 +16,7 @@ interface PlaceAreaSearchFieldsProps {
   selectedPlace: GeocodedPlace | null;
   onSelectPlace: (place: GeocodedPlace) => void;
   disabled?: boolean;
+  variant?: "field" | "inset";
 }
 
 export function PlaceAreaSearchFields({
@@ -25,7 +29,61 @@ export function PlaceAreaSearchFields({
   selectedPlace,
   onSelectPlace,
   disabled = false,
+  variant = "field",
 }: PlaceAreaSearchFieldsProps) {
+  const results = (
+    <>
+      <SearchResultsList
+        results={searchResults}
+        onSelect={onSelectPlace}
+        selectedId={selectedPlaceId}
+        renderLeading={(place) => <GeocodedPlaceLeading category={place.placeCategory} />}
+        renderSubtitle={formatPlaceSearchSubtitle}
+        variant="compact"
+      />
+
+      {selectedPlace && searchResults.length === 0 ? (
+        <p className="flex items-start gap-2 text-xs text-ink-dim">
+          <GeocodedPlaceLeading category={selectedPlace.placeCategory} />
+          <span>{formatPlaceSearchSubtitle(selectedPlace)}</span>
+        </p>
+      ) : null}
+    </>
+  );
+
+  if (variant === "inset") {
+    return (
+      <>
+        <TextInput
+          aria-label="City, county, state, or country"
+          placeholder="Dublin, Ireland"
+          value={locationQuery}
+          onChange={(event) => onLocationQueryChange(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onSearch();
+            }
+          }}
+          disabled={disabled || searchLoading}
+          styles={insetTextInputStyles}
+          rightSection={
+            <ActionIcon
+              type="button"
+              variant="subtle"
+              aria-label="Find place"
+              onClick={onSearch}
+              disabled={disabled || searchLoading}
+            >
+              <MagnifyingGlassIcon size={18} weight="bold" />
+            </ActionIcon>
+          }
+        />
+        {results}
+      </>
+    );
+  }
+
   return (
     <>
       <SearchField
@@ -39,18 +97,7 @@ export function PlaceAreaSearchFields({
         placeholder="Dublin, Ireland"
         disabled={disabled}
       />
-
-      <SearchResultsList
-        results={searchResults}
-        onSelect={onSelectPlace}
-        selectedId={selectedPlaceId}
-        renderSubtitle={formatPlaceSearchSubtitle}
-        variant="compact"
-      />
-
-      {selectedPlace && searchResults.length === 0 ? (
-        <p className="text-xs text-ink-dim">{formatPlaceSearchSubtitle(selectedPlace)}</p>
-      ) : null}
+      {results}
     </>
   );
 }
