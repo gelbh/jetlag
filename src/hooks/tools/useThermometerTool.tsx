@@ -1,6 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ThermometerHudBody } from "../../components/tools/ask/ThermometerHudBody";
-import { ThermometerMapPlacementChrome } from "../../components/tools/ask/ThermometerMapPlacementChrome";
+import { ThermometerHudBody } from "../../components/tools/ask/thermometer/ThermometerHudBody";
+import { ThermometerMapPlacementChrome } from "../../components/tools/ask/thermometer/ThermometerMapPlacementChrome";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
 import type { AskHudReadiness } from "../../domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MatchingHudBody } from "@/components/tools/ask/MatchingHudBody";
+import { MatchingHudBody } from "@/components/tools/ask/matching/MatchingHudBody";
 import {
   MatchingMapPlacementChrome,
   type MatchingMapPlacementPhase,
-} from "@/components/tools/ask/MatchingMapPlacementChrome";
+} from "@/components/tools/ask/matching/MatchingMapPlacementChrome";
 import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { canCommit as askCanCommit } from "@/domain/ask/askHudModes";

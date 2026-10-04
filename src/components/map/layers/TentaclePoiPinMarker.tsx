@@ -3,7 +3,7 @@
  */
 import { createElement } from "react";
 import { Marker } from "react-map-gl/maplibre";
-import { tentacleCategoryIcon } from "@/components/tools/ask/tentacleCategoryIcons";
+import { tentacleCategoryIcon } from "@/components/tools/ask/tentacle/tentacleCategoryIcons";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import type { TentacleExtendedCategoryId } from "@/domain/questions";
 

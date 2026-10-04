@@ -7,11 +7,11 @@ import {
 } from "@/domain/geo/poiCandidateAdapters";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import { useMapStore } from "@/state/mapStore";
-import { TentacleHudBody } from "../../components/tools/ask/TentacleHudBody";
+import { TentacleHudBody } from "../../components/tools/ask/tentacle/TentacleHudBody";
 import {
   TentacleMapPlacementChrome,
   type TentacleMapPlacementPhase,
-} from "../../components/tools/ask/TentacleMapPlacementChrome";
+} from "../../components/tools/ask/tentacle/TentacleMapPlacementChrome";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {

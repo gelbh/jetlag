@@ -1,9 +1,9 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { RadarHudBody } from "../../components/tools/ask/RadarHudBody";
+import { RadarHudBody } from "../../components/tools/ask/radar/RadarHudBody";
 import {
   RadarMapPlacementChrome,
   type RadarMapPlacementPhase,
-} from "../../components/tools/ask/RadarMapPlacementChrome";
+} from "../../components/tools/ask/radar/RadarMapPlacementChrome";
 import { RadarPanel } from "../../components/tools/RadarPanel";
 import type { AskHudReadiness } from "../../domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";

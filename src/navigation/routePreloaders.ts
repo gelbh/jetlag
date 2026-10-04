@@ -38,12 +38,12 @@ export const importLeaderboard = () =>
   import("../routes/Leaderboard").then((m) => ({ default: m.Leaderboard }));
 
 export const importAdminOpsDesk = () =>
-  import("../components/admin/AdminOpsDesk").then((m) => ({
+  import("../components/admin/ops/AdminOpsDesk").then((m) => ({
     default: m.AdminOpsDesk,
   }));
 
 export const importAdminPreloadRequestInbox = () =>
-  import("../components/admin/AdminPreloadRequestInbox").then((m) => ({
+  import("../components/admin/ops/AdminPreloadRequestInbox").then((m) => ({
     default: m.AdminPreloadRequestInbox,
   }));
 

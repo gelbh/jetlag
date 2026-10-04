@@ -1,4 +1,4 @@
-import { AdminMonitorPlayerFocus } from "../../components/admin/AdminMonitorPlayerFocus";
+import { AdminMonitorPlayerFocus } from "../../components/admin/monitor/AdminMonitorPlayerFocus";
 import { MapView } from "../../components/map/chrome/MapView";
 import { MapViewportTracker } from "../../components/map/chrome/MapViewportTracker";
 import { GameAreaMask } from "../../components/map/layers/GameAreaMask";
