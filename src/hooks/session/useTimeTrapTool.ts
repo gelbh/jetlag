@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { commitWrite } from "@/services/firestore/commitWrite";
 import { buildTimeTrapRecord, type TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapViewportBounds } from "../../domain/map/transitViewport";
@@ -33,9 +34,10 @@ export function useTimeTrapTool({
   const [stationsError, setStationsError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [selectedStation, setSelectedStation] = useState<TransitStation | null>(null);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { beginRequest, isLatestRequest } = useLatestRequest();
+  // Blocks a double tap before the listener's existingTrap re-renders the panel.
+  const placingRef = useRef(false);
 
   const filteredStations = useMemo(() => searchStations(query, stations), [query, stations]);
 
@@ -73,30 +75,36 @@ export function useTimeTrapTool({
     [beginRequest, enabled, gameArea, isLatestRequest],
   );
 
-  const confirmTrap = useCallback(async () => {
-    if (!selectedStation || existingTrap) {
-      return;
+  /** Returns whether the trap was placed (the write is queued, not yet acked). */
+  const confirmTrap = useCallback((): boolean => {
+    if (!selectedStation || existingTrap || placingRef.current) {
+      return false;
     }
 
     if (!isValidHidingStation(selectedStation, gameArea)) {
       setError("That station is outside the play area.");
-      return;
+      return false;
     }
 
-    setSaving(true);
     setError(null);
 
-    try {
-      const trap = buildTimeTrapRecord(sessionId, hiderUid, selectedStation);
-      await writeTimeTrap(sessionId, trap);
-      await postSystemMessage(
-        `Time trap placed at ${selectedStation.name} (+${trap.bonusMinutes} min when passed through).`,
-      );
-    } catch (writeError) {
-      setError(writeError instanceof Error ? writeError.message : "Couldn't place the time trap.");
-    } finally {
-      setSaving(false);
-    }
+    // Fire-and-track: the trap listener picks up the local write at once (which
+    // also hides this panel via existingTrap); rejections reach WriteFailureNotifier.
+    // The chat announcement waits for the server ack so a rejected trap is never announced.
+    const trap = buildTimeTrapRecord(sessionId, hiderUid, selectedStation);
+    const announcement = `Time trap placed at ${selectedStation.name} (+${trap.bonusMinutes} min when passed through).`;
+    placingRef.current = true;
+    commitWrite("timetrap.place", () => writeTimeTrap(sessionId, trap)).acknowledged.then(
+      () => {
+        // existingTrap guards from here; release so a cleared trap can be re-placed.
+        placingRef.current = false;
+        commitWrite("system.message", () => postSystemMessage(announcement));
+      },
+      () => {
+        placingRef.current = false;
+      },
+    );
+    return true;
   }, [existingTrap, gameArea, hiderUid, postSystemMessage, selectedStation, sessionId]);
 
   return {
@@ -109,7 +117,6 @@ export function useTimeTrapTool({
     setSelectedStation,
     searchStationsInArea,
     confirmTrap,
-    saving,
     error,
   };
 }

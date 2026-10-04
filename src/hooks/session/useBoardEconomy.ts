@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { commitWrite } from "@/services/firestore/commitWrite";
 import {
   advanceUntilInteractivePick,
   type BoardEconomyState,
@@ -70,13 +71,15 @@ export function useBoardEconomy(params: {
     };
   }, [enabled, sessionId, roundSeed]);
 
+  // Fire-and-track: the subscription sees the local write immediately; card
+  // actions must not wait on server ack (they would hang offline).
   const persist = useCallback(
-    async (next: BoardEconomyState) => {
+    (next: BoardEconomyState) => {
       if (!sessionId || !enabled) {
         return;
       }
       setState(next);
-      await writeBoardEconomyState(sessionId, next);
+      commitWrite("economy.update", () => writeBoardEconomyState(sessionId, next));
     },
     [enabled, sessionId],
   );
@@ -103,7 +106,7 @@ export function useBoardEconomy(params: {
       }
       const started = beginSequentialRewardPick(current, cycles);
       const advanced = advanceUntilInteractivePick(started);
-      await persist(advanced);
+      persist(advanced);
       return {
         mustDiscard: enforceHandLimit(advanced.hand, advanced.handLimit).mustDiscard,
         needsPick: advanced.pendingPick !== null,
@@ -120,7 +123,7 @@ export function useBoardEconomy(params: {
       const advanced = advanceUntilInteractivePick(
         continueSequentialRewardPick(state, keepInstanceIds),
       );
-      await persist(advanced);
+      persist(advanced);
       return advanced.pendingPick !== null;
     },
     [persist, state],
@@ -131,7 +134,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      await persist(discardFromHand(state, instanceIds));
+      persist(discardFromHand(state, instanceIds));
     },
     [persist, state],
   );
@@ -141,7 +144,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      await persist(playExpandHand(state, instanceId, powerUpId));
+      persist(playExpandHand(state, instanceId, powerUpId));
     },
     [persist, state],
   );
@@ -151,7 +154,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      await persist(playDiscardDrawPowerUp(state, powerUpInstanceId, discardInstanceIds, drawN));
+      persist(playDiscardDrawPowerUp(state, powerUpInstanceId, discardInstanceIds, drawN));
     },
     [persist, state],
   );
@@ -161,7 +164,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      await persist(playMoveCard(state, moveInstanceId));
+      persist(playMoveCard(state, moveInstanceId));
     },
     [persist, state],
   );
@@ -171,7 +174,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      await persist(playCurse(state, curseInstanceId, new Date().toISOString()));
+      persist(playCurse(state, curseInstanceId, new Date().toISOString()));
     },
     [persist, state],
   );
@@ -181,7 +184,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      await persist(markCurseCleared(state, curseInstanceId, new Date().toISOString()));
+      persist(markCurseCleared(state, curseInstanceId, new Date().toISOString()));
     },
     [persist, state],
   );
