@@ -6,6 +6,7 @@ import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
 import { createMapBounds } from "@/domain/map/mapBounds";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
+import { gpsReadingToFocusBounds } from "./utils";
 
 const ensureAnonymousUser = vi.hoisted(() => vi.fn(async () => ({ uid: "host-1" })));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => false));
@@ -28,6 +29,12 @@ const fakeMapRef = vi.hoisted(() => {
 });
 vi.mock("@/components/map/helpers/useMapLibreMap", () => ({
   useMapLibreMap: () => fakeMapRef,
+}));
+
+const requestLocationAccess = vi.hoisted(() => vi.fn());
+vi.mock("@/services/core/location/geolocation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/services/core/location/geolocation")>()),
+  requestLocationAccess,
 }));
 
 const searchPlaces = vi.hoisted(() => vi.fn(async () => [] as unknown[]));
@@ -129,6 +136,7 @@ beforeEach(() => {
   mapView.model = null;
   startSeaLevelBackgroundSampling.mockReset();
   parseBoundaryFile.mockReset();
+  requestLocationAccess.mockReset();
   isFirebaseConfigured.mockReturnValue(false);
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -306,6 +314,47 @@ describe("CreateSession", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Circle" }));
 
     expect(screen.getByTestId("create-map")).toBeInTheDocument();
+  });
+
+  it("Use my location focuses the map strip without inventing a game area", async () => {
+    requestLocationAccess.mockResolvedValue({
+      lat: 53.35,
+      lng: -6.26,
+      accuracy: 12,
+      heading: null,
+    });
+    renderCreateSession();
+
+    fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
+
+    expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
+    expect(screen.getByTestId("create-map")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mapView.model?.focusBounds).toEqual(gpsReadingToFocusBounds(53.35, -6.26));
+    });
+
+    loadMapWithDefaultViewport();
+    fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
+
+    expect(
+      await screen.findByText(
+        /search for a place, import a boundary, or move the map until the play area is framed/i,
+      ),
+    ).toBeInTheDocument();
+    expect(startSeaLevelBackgroundSampling).not.toHaveBeenCalled();
+    expect(screen.getByPlaceholderText("Dublin, Ireland")).toHaveValue("");
+  });
+
+  it("Use my location shows halt status when GPS is denied", async () => {
+    requestLocationAccess.mockRejectedValue(new Error("User denied Geolocation"));
+    renderCreateSession();
+
+    fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
+
+    expect(await screen.findByText(/couldn't use your location/i)).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Dublin, Ireland")).toHaveValue("");
+    expect(screen.queryByDisplayValue(/53\.35/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("create-map")).not.toBeInTheDocument();
   });
 
   it("Confirm reports a map load failure instead of blaming the player", async () => {

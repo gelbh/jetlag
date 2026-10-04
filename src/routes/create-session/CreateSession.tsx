@@ -170,6 +170,9 @@ export function CreateSession() {
               onBoundaryImport: (event) => void session.handleBoundaryImport(event),
               onApplyPlace: session.applyPlace,
               onRequestLocationBias: session.requestLocationBias,
+              locationStatus: session.locationStatus,
+              locationStatusTone: session.locationStatusTone,
+              locationBusy: session.locationBusy,
               onTransitMetroChange: session.setTransitMetroOverride,
             }}
             settingsSlot={

@@ -47,6 +47,9 @@ export type GameAreaSectionModel = {
   onBoundaryImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onApplyPlace: (place: GeocodedPlace) => void;
   onRequestLocationBias: () => void;
+  locationStatus: string | null;
+  locationStatusTone: "ok" | "halt" | null;
+  locationBusy: boolean;
   onTransitMetroChange: (metroId: string) => void;
 };
 
@@ -97,6 +100,9 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
     onBoundaryImport,
     onApplyPlace,
     onRequestLocationBias,
+    locationStatus,
+    locationStatusTone,
+    locationBusy,
     onTransitMetroChange,
   } = model;
   return (
@@ -254,10 +260,25 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
           fullWidth
           styles={grayStyles}
           onClick={onRequestLocationBias}
-          disabled={searchLoading || importLoading}
+          disabled={searchLoading || importLoading || locationBusy}
         >
-          Use my location
+          {locationBusy ? "Locating…" : "Use my location"}
         </Button>
+        {locationStatus ? (
+          <p
+            role="status"
+            className="text-sm leading-snug"
+            style={{
+              margin: 0,
+              color:
+                locationStatusTone === "halt"
+                  ? "var(--color-halt)"
+                  : "var(--color-field-ink-muted)",
+            }}
+          >
+            {locationStatus}
+          </p>
+        ) : null}
 
         <Button
           type="button"

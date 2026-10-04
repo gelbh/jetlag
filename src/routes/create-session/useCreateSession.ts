@@ -74,7 +74,7 @@ import {
   CreateSessionMapMountAbortedError,
   useCreateSessionMapMount,
 } from "./useCreateSessionMapMount";
-import { placeToFocusBounds } from "./utils";
+import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const MISSING_GAME_AREA_ERROR =
   "Search for a place, import a boundary, or move the map until the play area is framed.";
@@ -153,6 +153,9 @@ export function useCreateSession() {
   const [importLoading, setImportLoading] = useState(false);
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
+  const [locationBusy, setLocationBusy] = useState(false);
+  const [locationStatus, setLocationStatus] = useState<string | null>(null);
+  const [locationStatusTone, setLocationStatusTone] = useState<"ok" | "halt" | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
   const presetApplyGenerationRef = useRef(0);
   const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
@@ -244,14 +247,26 @@ export function useCreateSession() {
   }, [framing.applyFocusToGameArea, presets, requestMap, searchParams]);
 
   const requestLocationBias = useCallback(() => {
+    setLocationBusy(true);
+    setLocationStatus(null);
+    setLocationStatusTone(null);
     void requestLocationAccess({ highAccuracy: false, userGesture: true })
       .then((reading) => {
         userLocationRef.current = [reading.lat, reading.lng];
+        requestMap();
+        framing.resetManualFraming();
+        framing.applyFocusBounds(gpsReadingToFocusBounds(reading.lat, reading.lng));
+        setLocationStatus("Using your location for search and map.");
+        setLocationStatusTone("ok");
       })
       .catch(() => {
-        // Best-effort location bias only; search works without GPS.
+        setLocationStatus("Couldn't use your location.");
+        setLocationStatusTone("halt");
+      })
+      .finally(() => {
+        setLocationBusy(false);
       });
-  }, []);
+  }, [framing.applyFocusBounds, framing.resetManualFraming, requestMap]);
 
   const bootstrapHostAuth = useCallback(async () => {
     if (!isFirebaseConfigured()) {
@@ -868,5 +883,8 @@ export function useCreateSession() {
     handleDistanceUnitChange,
     handlePremiumSignedIn,
     requestLocationBias,
+    locationStatus,
+    locationStatusTone,
+    locationBusy,
   };
 }

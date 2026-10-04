@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { MapBoundsExpression } from "../../domain/map/mapBounds";
 import { createTestGameArea } from "../../test/fixtures/sessions";
 import { useGameAreaFraming } from "./useGameAreaFraming";
 
@@ -103,6 +104,22 @@ describe("useGameAreaFraming", () => {
     expect(result.current.circleCenter).toBeNull();
     expect(result.current.manualGameArea).toBeNull();
     expect(result.current.userFramed).toBe(true);
+  });
+
+  it("applyFocusBounds sets focus without a manual game area", () => {
+    const { result } = renderHook(() => useGameAreaFraming());
+    const bounds: MapBoundsExpression = [
+      [53.332, -6.278],
+      [53.368, -6.242],
+    ];
+
+    act(() => {
+      result.current.applyFocusBounds(bounds);
+    });
+
+    expect(result.current.focusBounds).toEqual(bounds);
+    expect(result.current.manualGameArea).toBeNull();
+    expect(result.current.hasValidDraft).toBe(false);
   });
 
   describe("viewport suppress timeout", () => {

@@ -66,6 +66,9 @@ const baseModel: GameAreaSectionModel = {
   onBoundaryImport: vi.fn(),
   onApplyPlace: vi.fn(),
   onRequestLocationBias: vi.fn(),
+  locationStatus: null,
+  locationStatusTone: null,
+  locationBusy: false,
   onTransitMetroChange: vi.fn(),
 };
 

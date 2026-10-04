@@ -14,7 +14,11 @@ import {
 } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapBounds, MapBoundsExpression } from "../../domain/map/mapBounds";
-import { boundingBoxToBoundsExpression, createMapBounds } from "../../domain/map/mapBounds";
+import {
+  boundingBoxToBoundsExpression,
+  createMapBounds,
+  toMapBounds,
+} from "../../domain/map/mapBounds";
 
 export type FramingMode = "rectangle" | "circle" | "polygon";
 
@@ -258,15 +262,22 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
     [suppressViewportUpdates],
   );
 
-  const applyFocusToGameArea = useCallback(
-    (gameArea: GameArea) => {
-      const nextBounds = boundingBoxToMapBounds(gameAreaToBoundingBox(gameArea));
-      setFocusBounds(gameAreaToBoundsExpression(gameArea));
+  const applyFocusBounds = useCallback(
+    (expression: MapBoundsExpression) => {
+      const nextBounds = toMapBounds(expression);
+      setFocusBounds(expression);
       suppressViewportUpdates();
       boundsRef.current = nextBounds;
       setBounds(nextBounds);
     },
     [suppressViewportUpdates],
+  );
+
+  const applyFocusToGameArea = useCallback(
+    (gameArea: GameArea) => {
+      applyFocusBounds(gameAreaToBoundsExpression(gameArea));
+    },
+    [applyFocusBounds],
   );
 
   const previewGameArea = useMemo(() => manualGameArea, [manualGameArea]);
@@ -309,6 +320,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       resetPolygonVertices,
       resetManualFraming,
       loadFramingResult,
+      applyFocusBounds,
       applyFocusToGameArea,
     }),
     [
@@ -331,6 +343,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       resetPolygonVertices,
       resetManualFraming,
       loadFramingResult,
+      applyFocusBounds,
       applyFocusToGameArea,
     ],
   );
