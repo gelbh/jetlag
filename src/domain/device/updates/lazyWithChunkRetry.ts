@@ -71,20 +71,8 @@ export function lazyWithChunkRetry(
       ? resolvedThenable(loaded)
       : load().catch((error) => {
           if (isChunkLoadError(error)) {
-            const context = getReloadContext?.() ?? chunkReloadContextGetter?.();
-            if (
-              attemptChunkReload(
-                context
-                  ? {
-                      session: context.session,
-                      pathname: context.pathname,
-                      onNeedRefresh: context.onNeedRefresh,
-                      registration: context.registration,
-                      applyUpdate: context.applyUpdate,
-                    }
-                  : undefined,
-              )
-            ) {
+            const resolveContext = () => getReloadContext?.() ?? chunkReloadContextGetter?.();
+            if (attemptChunkReload({ ...resolveContext(), resolveRetryOptions: resolveContext })) {
               return new Promise<never>(() => {});
             }
           }
