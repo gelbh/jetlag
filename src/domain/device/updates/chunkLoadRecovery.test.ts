@@ -88,18 +88,19 @@ describe("attemptChunkReload", () => {
     expect(wasChunkReloadDeferred()).toBe(true);
   });
 
-  it("reloads off the map even with an active session", () => {
+  it("defers reload off the map while a session is still active", () => {
     expect(
       attemptChunkReload({
         session: { id: "session-1" },
         pathname: "/",
         onNeedRefresh,
       }),
-    ).toBe(true);
+    ).toBe(false);
 
-    expect(reload).toHaveBeenCalledOnce();
-    expect(onNeedRefresh).not.toHaveBeenCalled();
-    expect(hasChunkReloadBeenAttempted()).toBe(true);
+    expect(reload).not.toHaveBeenCalled();
+    expect(onNeedRefresh).toHaveBeenCalledOnce();
+    expect(hasChunkReloadBeenAttempted()).toBe(false);
+    expect(wasChunkReloadDeferred()).toBe(true);
   });
 
   it("activates a waiting service worker before reload when available", () => {
@@ -139,12 +140,12 @@ describe("tryApplyDeferredChunkReload", () => {
     });
   });
 
-  it("reloads after leaving the map when a chunk reload was deferred", () => {
+  it("reloads after the session ends when a chunk reload was deferred", () => {
     sessionStorage.setItem("jetlag:chunk-deferred", "1");
 
     expect(
       tryApplyDeferredChunkReload({
-        session: { id: "session-1" },
+        session: null,
         pathname: "/",
         onNeedRefresh,
       }),
@@ -154,7 +155,7 @@ describe("tryApplyDeferredChunkReload", () => {
     expect(wasChunkReloadDeferred()).toBe(false);
   });
 
-  it("does nothing while still on the map", () => {
+  it("does nothing while a session is still active", () => {
     sessionStorage.setItem("jetlag:chunk-deferred", "1");
 
     expect(

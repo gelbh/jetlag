@@ -2,10 +2,9 @@ import { describe, expect, it } from "vitest";
 import { appUpdateCopy } from "./appUpdateCopy";
 
 describe("appUpdateCopy", () => {
-  it("uses player-safe deferred wording", () => {
+  it("uses player-safe deferred wording for map chunk deferral", () => {
     expect(appUpdateCopy.deferredTitle).toBe("Update waiting");
-    expect(appUpdateCopy.deferredBody).toMatch(/game ends/i);
-    expect(appUpdateCopy.deferredDismiss).toBe("Later");
+    expect(appUpdateCopy.chunkDeferredBody).toMatch(/game ends/i);
   });
 
   it("uses refresh wording only for safe reload", () => {

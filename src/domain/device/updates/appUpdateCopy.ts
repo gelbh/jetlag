@@ -1,7 +1,5 @@
 export const appUpdateCopy = {
   deferredTitle: "Update waiting",
-  deferredBody: "Installs when this game ends",
-  deferredDismiss: "Later",
   readyTitle: "Update ready",
   readyAction: "Refresh now",
   chunkDeferredBody: "Installs when this game ends",

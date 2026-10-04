@@ -21,11 +21,8 @@ vi.mock("@/domain/device/changelog", () => ({
 vi.mock("@/hooks/app/useAppUpdateState", () => ({
   useAppUpdateState: () => ({
     applyUpdate: vi.fn(),
-    inActiveMapSession: false,
     safeToReload: true,
-    showMapChip: false,
     showGlobalBanner: false,
-    dismissDeferred: () => {},
     hotfixGraceActive: false,
     hotfixGraceSecondsRemaining: null,
     hotfixRequiredMinAppVersion: null,

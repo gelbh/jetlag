@@ -96,7 +96,6 @@ export function attemptChunkReload(options?: {
     options &&
     !isSafeToReloadApp({
       session: options.session,
-      pathname: options.pathname ?? "/",
     })
   ) {
     writeDeferredFlag();
@@ -130,7 +129,6 @@ export function tryApplyDeferredChunkReload(options: {
   if (
     !isSafeToReloadApp({
       session: options.session,
-      pathname: options.pathname,
     })
   ) {
     return false;

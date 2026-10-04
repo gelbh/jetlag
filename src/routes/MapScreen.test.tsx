@@ -6,10 +6,6 @@ import { createTestSession } from "../test/fixtures/sessions";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { MapScreen } from "./MapScreen";
 
-vi.mock("../components/ui/banners/AppUpdateMapChip", () => ({
-  AppUpdateMapChip: () => null,
-}));
-
 vi.mock("../components/incident/HotfixGraceChip", () => ({
   HotfixGraceChip: () => null,
 }));

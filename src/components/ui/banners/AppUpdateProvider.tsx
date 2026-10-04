@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { setServiceWorkerChunkReloadContext } from "@/domain/device/updates/lazyWithChunkRetry";
+import { shouldShowOptionalAppUpdateBanner } from "@/domain/device/updates/optionalAppUpdateUi";
 import {
   acknowledgeSoftReload,
   shouldHonorSoftReload,
@@ -41,7 +42,6 @@ function pickHigherVersion(left: string | undefined, right: string | undefined):
 
 export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const [needsRefresh, setNeedsRefresh] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
   const [updateSW, setUpdateSW] = useState<ServiceWorkerReloader | null>(null);
   const [runtimeConfig, setRuntimeConfig] = useState<AppConfigRuntime | null>(null);
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
@@ -49,11 +49,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const session = useSessionStore((state) => state.session);
 
-  const inActiveMapSession = Boolean(session) && location.pathname === "/map";
-  const safeToReload = isSafeToReloadApp({
-    session,
-    pathname: location.pathname,
-  });
+  const safeToReload = isSafeToReloadApp({ session });
 
   // Wait for auth bootstrap: a restored user is attached before the appConfig
   // read (rules need sign-in), and Firestore stays off the boot path on public
@@ -160,7 +156,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
             return;
           }
           setNeedsRefresh(true);
-          setDismissed(false);
         },
         onRegistered(nextRegistration) {
           if (cancelled) {
@@ -172,14 +167,12 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
               return;
             }
             setNeedsRefresh(true);
-            setDismissed(false);
           });
           stopScheduledChecks = scheduleServiceWorkerUpdateChecks(nextRegistration, () => {
             if (cancelled) {
               return;
             }
             setNeedsRefresh(true);
-            setDismissed(false);
           });
         },
         onRegisterError() {
@@ -196,7 +189,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
         tryUpdateServiceWorker(registrationRef.current);
         promptIfWaiting(registrationRef.current, () => {
           setNeedsRefresh(true);
-          setDismissed(false);
         });
       }
     };
@@ -217,14 +209,12 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     tryUpdateServiceWorker(registrationRef.current);
     promptIfWaiting(registrationRef.current, () => {
       setNeedsRefresh(true);
-      setDismissed(false);
     });
   }, [location.pathname]);
 
   useEffect(() => {
     return registerAppNeedRefreshHandler(() => {
       setNeedsRefresh(true);
-      setDismissed(false);
     });
   }, []);
 
@@ -243,24 +233,20 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     void maybeApplyPendingUpdate({
       needsRefresh,
       session,
-      pathname: location.pathname,
       registration: registrationRef.current,
       applyUpdate: updateSW,
     });
-  }, [needsRefresh, updateSW, location.pathname, session]);
-
-  const dismissDeferred = useCallback(() => setDismissed(true), []);
+  }, [needsRefresh, updateSW, session]);
 
   const value = useMemo<AppUpdateContextValue>(() => {
-    const showMapChip = needsRefresh && inActiveMapSession && !dismissed && !safeToReload;
-    const showGlobalBanner = needsRefresh && !showMapChip && !(inActiveMapSession && dismissed);
+    const showGlobalBanner = shouldShowOptionalAppUpdateBanner({
+      needsRefresh,
+      safeToReload,
+    });
 
     return {
-      inActiveMapSession,
       safeToReload,
-      showMapChip,
       showGlobalBanner,
-      dismissDeferred,
       applyUpdate: () => {
         void applyServiceWorkerUpdate(registrationRef.current, updateSW ?? undefined);
       },
@@ -269,12 +255,9 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       hotfixRequiredMinAppVersion: hotfixGrace.requiredMinAppVersion,
     };
   }, [
-    dismissDeferred,
-    dismissed,
     hotfixGrace.active,
     hotfixGrace.requiredMinAppVersion,
     hotfixGrace.secondsRemaining,
-    inActiveMapSession,
     needsRefresh,
     safeToReload,
     updateSW,
