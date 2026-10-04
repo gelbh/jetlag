@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { OVERPASS_L2_ENV_KEYS as K } from "../proxies/overpassL2Env.mjs";
 import {
   clearOverpassCachesForTests,
   fetchCachedOverpassQuery,
 } from "../proxies/overpassProxyCore.mjs";
 import {
+  createCloudflareL2Backend,
   createMemoryL2Backend,
+  createOverpassR2S3ClientConfig,
   overpassL2CacheKey,
   readOverpassL2,
   setOverpassL2BackendForTests,
@@ -28,6 +32,95 @@ describe("overpassSharedCache", () => {
     const hit = await readOverpassL2(key);
     assert.equal(hit?.stale, false);
     assert.equal(hit?.text, '{"elements":[]}');
+  });
+
+  it("R2 S3 client config opts out of default checksums for R2", () => {
+    const previous = {};
+    for (const envKey of Object.values(K)) {
+      previous[envKey] = process.env[envKey];
+      process.env[envKey] = `test-${envKey}`;
+    }
+    try {
+      const config = createOverpassR2S3ClientConfig();
+      assert.equal(config.requestChecksumCalculation, "WHEN_REQUIRED");
+      assert.equal(config.responseChecksumValidation, "WHEN_REQUIRED");
+      assert.equal(config.forcePathStyle, true);
+      assert.equal(config.region, "auto");
+    } finally {
+      for (const [envKey, value] of Object.entries(previous)) {
+        if (value === undefined) {
+          delete process.env[envKey];
+        } else {
+          process.env[envKey] = value;
+        }
+      }
+    }
+  });
+
+  it("cloudflare R2 put/get send S3 Key with premium colon prefix", async () => {
+    const previous = {};
+    for (const envKey of Object.values(K)) {
+      previous[envKey] = process.env[envKey];
+      process.env[envKey] = `test-${envKey}`;
+    }
+
+    const sends = [];
+    const objects = new Map();
+    const mockClient = {
+      async send(command) {
+        const input = command.input;
+        sends.push({ name: command.constructor.name, Key: input.Key });
+        if (command instanceof PutObjectCommand) {
+          objects.set(input.Key, {
+            body: input.Body,
+            contentType: input.ContentType,
+          });
+          return {};
+        }
+        if (command instanceof GetObjectCommand) {
+          const hit = objects.get(input.Key);
+          if (!hit) {
+            const error = new Error("NoSuchKey");
+            error.name = "NoSuchKey";
+            error.$metadata = { httpStatusCode: 404 };
+            throw error;
+          }
+          return {
+            Body: {
+              transformToString: async () => hit.body,
+            },
+            ContentType: hit.contentType,
+          };
+        }
+        throw new Error(`unexpected S3 command: ${command.constructor.name}`);
+      },
+    };
+
+    try {
+      const backend = createCloudflareL2Backend({
+        createS3Client: () => mockClient,
+      });
+      const key = overpassL2CacheKey("query", "premium");
+      const r2Key = `overpass/${key}`;
+
+      assert.equal(await backend.r2Get(r2Key), null);
+      await backend.r2Put(r2Key, '{"elements":[]}', "application/json");
+      const hit = await backend.r2Get(r2Key);
+
+      assert.ok(sends.every((entry) => String(entry.Key).includes("premium:")));
+      assert.ok(sends.some((entry) => entry.name === "PutObjectCommand"));
+      assert.ok(sends.some((entry) => entry.name === "GetObjectCommand"));
+      assert.equal(hit?.body, '{"elements":[]}');
+      assert.equal(hit?.contentType, "application/json");
+    } finally {
+      for (const [envKey, value] of Object.entries(previous)) {
+        if (value === undefined) {
+          delete process.env[envKey];
+        } else {
+          process.env[envKey] = value;
+        }
+      }
+    }
   });
 
   it("expired entry is stale only when allowExpired", async () => {
