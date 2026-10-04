@@ -132,6 +132,15 @@ function loadMapWithDefaultViewport() {
   });
 }
 
+function goToFrame() {
+  fireEvent.click(screen.getByRole("button", { name: "Next" }));
+}
+
+function goToPlay() {
+  goToFrame();
+  fireEvent.click(screen.getByRole("button", { name: "Next" }));
+}
+
 beforeEach(() => {
   mapView.model = null;
   startSeaLevelBackgroundSampling.mockReset();
@@ -175,15 +184,41 @@ function renderCreateSession() {
 }
 
 describe("CreateSession", () => {
-  it("renders Apple Back control, Create title, and confirm footer", () => {
+  it("renders Apple Back link, Create title, Next, and Find place", () => {
     renderCreateSession();
 
     expect(screen.getByRole("link", { name: /^back$/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^create$/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Draw on map" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Create game" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Find place" })).toBeInTheDocument();
     const root = document.querySelector(".jl-create-session");
     expect(root).toBeTruthy();
+  });
+
+  it("starts on Where without Create game or Draw on map", () => {
+    renderCreateSession();
+    expect(
+      screen.getByRole("textbox", { name: /city, county, state, or country/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create game" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Draw on map" })).toBeNull();
+    expect(screen.getByRole("link", { name: /^back$/i })).toBeInTheDocument();
+  });
+
+  it("Next then Next reveals Play and Create game; Back reverses", () => {
+    renderCreateSession();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByRole("button", { name: "Draw on map" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create game" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByRole("button", { name: "Create game" })).toBeInTheDocument();
+    expect(screen.getByRole("tablist", { name: "Your side" })).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: /city, county, state, or country/i })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("button", { name: "Draw on map" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("button", { name: "Find place" })).toBeInTheDocument();
   });
 
   it("disables confirm until host auth is ready when Firebase is configured", async () => {
@@ -197,6 +232,7 @@ describe("CreateSession", () => {
     );
 
     renderCreateSession();
+    goToPlay();
 
     const confirm = screen.getByRole("button", { name: "Create game" });
     expect(confirm).toBeDisabled();
@@ -212,6 +248,7 @@ describe("CreateSession", () => {
     ensureAnonymousUser.mockRejectedValue(new Error("auth down"));
 
     renderCreateSession();
+    goToPlay();
 
     await waitFor(() => {
       expect(screen.getByText(/couldn't sign in to create a session/i)).toBeInTheDocument();
@@ -232,6 +269,7 @@ describe("CreateSession", () => {
       expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
     });
 
+    goToPlay();
     fireEvent.click(screen.getByRole("button", { name: "Create game" }));
 
     await waitFor(() => {
@@ -280,6 +318,7 @@ describe("CreateSession", () => {
 
   it("Confirm with no area awaits map mount, then frames the live viewport", async () => {
     renderCreateSession();
+    goToPlay();
 
     fireEvent.click(screen.getByRole("button", { name: "Create game" }));
 
@@ -310,6 +349,7 @@ describe("CreateSession", () => {
 
   it("opens the fullscreen framing map from Draw on map", () => {
     renderCreateSession();
+    goToFrame();
 
     fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
 
@@ -335,6 +375,7 @@ describe("CreateSession", () => {
     });
 
     loadMapWithDefaultViewport();
+    goToPlay();
     fireEvent.click(screen.getByRole("button", { name: "Create game" }));
 
     expect(
@@ -343,6 +384,8 @@ describe("CreateSession", () => {
       ),
     ).toBeInTheDocument();
     expect(startSeaLevelBackgroundSampling).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByPlaceholderText("Dublin, Ireland")).toHaveValue("");
   });
 
@@ -365,6 +408,7 @@ describe("CreateSession", () => {
     expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
     expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
 
+    goToPlay();
     fireEvent.click(screen.getByRole("button", { name: "Create game" }));
     await waitFor(() => {
       expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(IMPORTED_AREA, {
@@ -404,6 +448,7 @@ describe("CreateSession", () => {
     expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
     expect(screen.getByDisplayValue("Dublin, Ireland")).toBeInTheDocument();
 
+    goToPlay();
     fireEvent.click(screen.getByRole("button", { name: "Create game" }));
     await waitFor(() => {
       expect(startSeaLevelBackgroundSampling).toHaveBeenCalled();
@@ -419,14 +464,17 @@ describe("CreateSession", () => {
     });
     renderCreateSession();
 
+    goToFrame();
     fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
     loadMapWithDefaultViewport();
     fireEvent.click(screen.getByRole("button", { name: "Done" }));
 
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
     fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
     expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
     loadMapWithDefaultViewport();
 
+    goToPlay();
     fireEvent.click(screen.getByRole("button", { name: "Create game" }));
     await waitFor(() => {
       expect(startSeaLevelBackgroundSampling).toHaveBeenCalledTimes(1);
@@ -454,6 +502,7 @@ describe("CreateSession", () => {
     vi.useFakeTimers();
     try {
       renderCreateSession();
+      goToPlay();
 
       fireEvent.click(screen.getByRole("button", { name: "Create game" }));
       await act(async () => {
