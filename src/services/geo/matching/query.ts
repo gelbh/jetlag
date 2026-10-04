@@ -42,9 +42,14 @@ export function buildMatchingFeaturesQuery(
 ): string {
   void categoryId;
   void customCategories;
-  const bbox = formatOverpassBbox(matchingSearchBoundingBox(gameArea));
+  return buildMatchingFeaturesQueryForBbox(matchingSearchBoundingBox(gameArea), selectors);
+}
 
-  return buildNodeWayRelationBboxQuery(bbox, selectors);
+export function buildMatchingFeaturesQueryForBbox(
+  bbox: BoundingBox,
+  selectors: readonly string[],
+): string {
+  return buildNodeWayRelationBboxQuery(formatOverpassBbox(bbox), selectors);
 }
 
 export function buildStreetPathQuery(gameArea: GameArea): string {

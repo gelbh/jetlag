@@ -1,5 +1,6 @@
 import {
   distanceBetweenPoints,
+  gameAreaToBoundingBox,
   isPointInGameArea,
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
@@ -11,7 +12,12 @@ import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCust
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached, measuringPlacesCacheKey } from "../cache";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
-import { buildTaggedBboxOverpassQuery, formatOverpassBboxFromGameArea } from "./queryHelpers";
+import { mergeOverpassElementPayloads, queryOverpassWithBboxSplit } from "./overpassBboxSplit";
+import {
+  buildTaggedBboxOverpassQuery,
+  formatOverpassBbox,
+  formatOverpassBboxFromGameArea,
+} from "./queryHelpers";
 import { fetchBundledMeasuringPlaces, mergeMeasuringPlaces } from "./regionPackPoi";
 
 const HYGIENE_MEASURING_CATEGORIES = new Set<MeasuringLocationCategory>([
@@ -69,6 +75,13 @@ export function buildMeasuringPlacesQuery(
   selectors: readonly string[],
 ): string {
   return buildTaggedBboxOverpassQuery(formatOverpassBboxFromGameArea(gameArea), selectors);
+}
+
+function buildMeasuringPlacesQueryForBbox(
+  bbox: { south: number; west: number; north: number; east: number },
+  selectors: readonly string[],
+): string {
+  return buildTaggedBboxOverpassQuery(formatOverpassBbox(bbox), selectors);
 }
 
 function isSwimmingPool(tags: Record<string, string>): boolean {
@@ -147,8 +160,11 @@ async function fetchOverpassMeasuringPlaces(
   cacheScope: string,
 ): Promise<MeasuringPlace[]> {
   return getOrFetchCached(measuringPlacesCacheKey(gameArea, cacheScope), async () => {
-    const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-      buildMeasuringPlacesQuery(gameArea, selectors),
+    const payload = await queryOverpassWithBboxSplit(
+      (bbox) => buildMeasuringPlacesQueryForBbox(bbox, selectors),
+      gameAreaToBoundingBox(gameArea),
+      (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
+      mergeOverpassElementPayloads,
     );
 
     return filterHygieneMeasuringPlaces(

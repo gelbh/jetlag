@@ -5,8 +5,11 @@ import {
   pickNearestMatchingFeature,
 } from "@/domain/geo/matchingAdapters";
 import type { MatchingFeature } from "@/domain/geo/types";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import { isPointInGameArea } from "@/domain/geometry/gameArea/geometry";
+import {
+  gameAreaToBoundingBox,
+  isPointInGameArea,
+  type LatLngTuple,
+} from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
 import {
   adminLevelForMatchingCategory,
@@ -36,9 +39,13 @@ import {
   landmassToMatchingFeature,
 } from "../overpass/landmassFeatures";
 import type { MeasuringPlace } from "../overpass/measuringPlaces";
+import {
+  mergeOverpassElementPayloads,
+  queryOverpassWithBboxSplit,
+} from "../overpass/overpassBboxSplit";
 import { fetchBundledMeasuringPlaces, mergeMeasuringPlaces } from "../overpass/regionPackPoi";
 import { parseMatchingFeatures } from "./parse";
-import { buildMatchingFeaturesQuery, matchingFeaturesCacheKey } from "./query";
+import { buildMatchingFeaturesQueryForBbox, matchingFeaturesCacheKey } from "./query";
 import {
   buildLetterZoneFeatures,
   buildStationFirstLetterFeatures,
@@ -133,8 +140,11 @@ async function fetchOverpassMatchingFeaturesCached(
   return getOrFetchCached(
     matchingFeaturesCacheKey(gameArea, categoryId, options),
     async () => {
-      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-        buildMatchingFeaturesQuery(gameArea, categoryId, selectors, customCategories),
+      const payload = await queryOverpassWithBboxSplit(
+        (bbox) => buildMatchingFeaturesQueryForBbox(bbox, selectors),
+        gameAreaToBoundingBox(gameArea),
+        (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
+        mergeOverpassElementPayloads,
       );
 
       return parseMatchingFeatures(payload.elements, gameArea, categoryId, customCategories);

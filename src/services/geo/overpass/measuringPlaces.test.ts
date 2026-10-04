@@ -7,6 +7,7 @@ import {
   findNearestMeasuringPlace,
   parseMeasuringPlaces,
 } from "./measuringPlaces";
+import { formatOverpassBboxFromGameArea } from "./queryHelpers";
 import { clearBundledPoiCacheForTests } from "./regionPackPoi";
 
 const sampleGameArea: GameArea = {
@@ -299,6 +300,24 @@ describe("measuring places", () => {
       "Science Museum",
       "British Museum",
     ]);
+  });
+
+  it("splits the Overpass bbox when the full-area query is too expensive", async () => {
+    const fullAreaBbox = formatOverpassBboxFromGameArea(sampleGameArea);
+    const querySpy = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockImplementation(async (ql: string) => {
+        if (ql.includes(fullAreaBbox)) {
+          throw new overpassClient.OverpassQueryTooExpensiveError();
+        }
+        return {
+          elements: [{ id: 1, tags: { name: "Near Museum" }, lat: 51.45, lon: -0.16 }],
+        };
+      });
+
+    const places = await fetchMeasuringPlacesInArea(sampleGameArea, "museum");
+    expect(places.some((place) => place.name === "Near Museum")).toBe(true);
+    expect(querySpy.mock.calls.length).toBeGreaterThan(1);
   });
 
   it("awaits Overpass when the bundle is empty or missing", async () => {

@@ -6,6 +6,16 @@ const WARM_PRELOAD_MEASURING_SELECTORS = [
   { category: "hospital", selectors: ['["amenity"="hospital"]'] },
 ];
 
+const METERS_PER_DEGREE_LAT = 111_320;
+const GEOM_WARM_MIN_AABB_KM2 = 100;
+
+function boundingBoxAreaKm2({ south, west, north, east }) {
+  const midLat = (north + south) / 2;
+  const latMeters = (north - south) * METERS_PER_DEGREE_LAT;
+  const lngMeters = (east - west) * METERS_PER_DEGREE_LAT * Math.cos((midLat * Math.PI) / 180);
+  return Math.max((latMeters * lngMeters) / 1_000_000, 0);
+}
+
 function formatBbox({ south, west, north, east }) {
   return `${south},${west},${north},${east}`;
 }
@@ -75,15 +85,15 @@ export function buildWarmPreloadQueries(gameArea) {
     return [];
   }
 
-  const queries = [
-    buildCoastlineWarmQuery(bounds),
-    buildLandmassWarmQuery(bounds),
-    ...WARM_PRELOAD_MEASURING_SELECTORS.map((entry) =>
-      buildMeasuringWarmQuery(bounds, entry.selectors),
-    ),
-  ];
+  const measuringQueries = WARM_PRELOAD_MEASURING_SELECTORS.map((entry) =>
+    buildMeasuringWarmQuery(bounds, entry.selectors),
+  );
 
-  return queries;
+  if (boundingBoxAreaKm2(bounds) >= GEOM_WARM_MIN_AABB_KM2) {
+    return measuringQueries;
+  }
+
+  return [buildCoastlineWarmQuery(bounds), buildLandmassWarmQuery(bounds), ...measuringQueries];
 }
 
 export async function warmOverpassPreloadForGameArea(gameArea) {
