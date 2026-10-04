@@ -499,6 +499,7 @@ describe("worker fetch", () => {
 
     expect(response.status).toBe(404);
     expect(response.headers.get("ETag")).toBeNull();
+    expect(response.headers.get("Cache-Control")).toBe("no-cache");
     const body = await response.text();
     const headerNonce = (response.headers.get("Content-Security-Policy") ?? "").match(
       /'nonce-([^']+)'/,
@@ -506,6 +507,23 @@ describe("worker fetch", () => {
     expect(headerNonce).toBeTruthy();
     expect(body).toContain(`<script nonce="${headerNonce}" type="module"`);
     expect(body).toContain('<meta name="robots" content="noindex,nofollow">');
+  });
+
+  it("keeps unknown html under /geo/ uncached as a 404", async () => {
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(
+          new Response("<!doctype html>", {
+            headers: { "Content-Type": "text/html; charset=utf-8" },
+          }),
+        ),
+      },
+    } as Env;
+
+    const response = await worker.fetch(new Request("https://jetlag.gelbhart.dev/geo/nope"), env);
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("no-cache");
   });
 
   it("returns 404 without a body for HEAD on unknown paths", async () => {

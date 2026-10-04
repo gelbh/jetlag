@@ -70,11 +70,6 @@ describe("routeSeo", () => {
     expect(crawlPolicy.disallowPaths).toEqual(["/admin"]);
     const isDisallowed = (path: string) =>
       crawlPolicy.disallowPaths.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
-    for (const path of APP_ROUTE_PATHS) {
-      if (isDisallowed(path)) {
-        expect(path.startsWith("/admin"), `${path} disallowed outside /admin`).toBe(true);
-      }
-    }
     for (const path of listIndexablePaths()) {
       expect(isDisallowed(path), `${path} is indexable but disallowed`).toBe(false);
     }

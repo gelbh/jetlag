@@ -52,6 +52,7 @@ function withNotFoundStatus(response: Response): Response {
   // Without validators, clients cannot revalidate this into a 304 that hides the 404.
   headers.delete("ETag");
   headers.delete("Last-Modified");
+  headers.set("Cache-Control", "no-cache");
   return new Response(response.body, { status: 404, headers });
 }
 
@@ -93,15 +94,17 @@ export default {
         },
       });
     }
-    const assetResponse = isUnknownAppDocument(pathname, fetched)
-      ? withNotFoundStatus(fetched)
-      : fetched;
-
-    if (shouldApplyDocumentCsp(assetResponse)) {
-      return applyCacheControlHeader(await applyDocumentCspNonce(assetResponse), pathname);
+    if (isUnknownAppDocument(pathname, fetched)) {
+      // Skip path-based Cache-Control: the 404 keeps no-cache even under long-lived prefixes.
+      const notFound = withNotFoundStatus(fetched);
+      return shouldApplyDocumentCsp(notFound) ? applyDocumentCspNonce(notFound) : notFound;
     }
 
-    return applyCacheControlHeader(assetResponse, pathname);
+    if (shouldApplyDocumentCsp(fetched)) {
+      return applyCacheControlHeader(await applyDocumentCspNonce(fetched), pathname);
+    }
+
+    return applyCacheControlHeader(fetched, pathname);
   },
 } satisfies ExportedHandler<Env>;
 
