@@ -1,4 +1,5 @@
 import type { Feature, LineString } from "geojson";
+import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   nearestPointToCoastlines,
@@ -14,7 +15,12 @@ import {
   readCachedMemoryEntry,
   writeCoastlineSegmentsCache,
 } from "../cache";
-import { formatOverpassBboxFromGameArea, overpassQueryTemplate } from "./query";
+import {
+  mergeOverpassElementPayloads,
+  type OverpassBbox,
+  queryOverpassWithBboxSplit,
+} from "./overpassBboxSplit";
+import { formatOverpassBbox, overpassQueryTemplate } from "./query";
 import { loadBundledCoastlinePack, mergeCoastlineSegments } from "./regionPackCoastline";
 
 export interface FetchCoastlineOptions {
@@ -22,13 +28,16 @@ export interface FetchCoastlineOptions {
   onEnrich?: (prepared: PreparedLinearSegments) => void;
 }
 
-export function buildCoastlineQuery(gameArea: GameArea): string {
-  const bbox = formatOverpassBboxFromGameArea(gameArea);
-
+export function buildCoastlineQueryForBbox(bbox: OverpassBbox): string {
+  const bboxStr = formatOverpassBbox(bbox);
   return overpassQueryTemplate(`
-    way["natural"="coastline"](${bbox});
+    way["natural"="coastline"](${bboxStr});
     out geom;
   `);
+}
+
+export function buildCoastlineQuery(gameArea: GameArea): string {
+  return buildCoastlineQueryForBbox(gameAreaToBoundingBox(gameArea));
 }
 
 function wayToLineString(nodes: Array<{ lat: number; lon: number }>): Feature<LineString> | null {
@@ -49,12 +58,19 @@ function wayToLineString(nodes: Array<{ lat: number; lon: number }>): Feature<Li
 async function fetchCoastlineSegmentsFromOverpass(
   gameArea: GameArea,
 ): Promise<Feature<LineString>[]> {
-  const payload = await queryOverpass<{
-    elements: Array<{
-      type: string;
-      geometry?: Array<{ lat: number; lon: number }>;
-    }>;
-  }>(buildCoastlineQuery(gameArea));
+  const payload = await queryOverpassWithBboxSplit(
+    buildCoastlineQueryForBbox,
+    gameAreaToBoundingBox(gameArea),
+    (ql) =>
+      queryOverpass<{
+        elements: Array<{
+          type: string;
+          id: number;
+          geometry?: Array<{ lat: number; lon: number }>;
+        }>;
+      }>(ql),
+    mergeOverpassElementPayloads,
+  );
 
   return payload.elements
     .filter((element) => element.type === "way" && element.geometry)

@@ -183,4 +183,38 @@ describe("coastline lookup", () => {
     expect(prepared.segments).toEqual([]);
     expect(queryOverpass).not.toHaveBeenCalled();
   });
+
+  it("splits a too-expensive full AABB into child bboxes", async () => {
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockRejectedValueOnce(new overpassClient.OverpassQueryTooExpensiveError())
+      .mockResolvedValue({
+        elements: [
+          {
+            type: "way",
+            id: 1,
+            geometry: [
+              { lat: 53.35, lon: -6.35 },
+              { lat: 53.36, lon: -6.34 },
+            ],
+          },
+        ],
+      });
+
+    const segments = await fetchCoastlineSegments(sampleGameArea);
+
+    expect(queryOverpass.mock.calls.length).toBeGreaterThan(1);
+    expect(segments.length).toBeGreaterThan(0);
+  });
+
+  it("does not split OverpassUnavailableError", async () => {
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockRejectedValue(new overpassClient.OverpassUnavailableError());
+
+    await expect(fetchCoastlineSegments(sampleGameArea)).rejects.toBeInstanceOf(
+      overpassClient.OverpassUnavailableError,
+    );
+    expect(queryOverpass).toHaveBeenCalledTimes(1);
+  });
 });
