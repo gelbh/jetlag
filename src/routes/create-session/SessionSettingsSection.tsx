@@ -1,6 +1,4 @@
 import { GameSizePicker } from "../../components/session/identity/GameSizePicker";
-import { RolePicker } from "../../components/session/identity/RolePicker";
-import { AdvancedSessionSettings } from "../../components/session/settings/AdvancedSessionSettings";
 import { InsetGroup } from "../../components/ui/entry/entryChrome";
 import { InsetHairline } from "../../components/ui/entry/InsetRow";
 import { SegmentControl } from "../../components/ui/forms/SegmentControl";
@@ -10,11 +8,8 @@ import {
 } from "../../domain/billing/premiumProducts";
 import type { GameArea, SessionTier } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import type { AdvancedSessionSettingsValue } from "../../domain/session/tools/advancedSessionSettings";
 import type { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
-import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 
 type VisibleTierOption = ReturnType<typeof usePremiumHostEligibility>["visibleTierOptions"][number];
@@ -23,13 +18,9 @@ export interface SessionSettingsSectionProps {
   loading: boolean;
   verifyingAccess: boolean;
   previewGameArea: GameArea | null;
-  playerRole: PlayerRole;
-  onPlayerRoleChange: (role: PlayerRole) => void;
   gameSize: GameSize;
   gameSizeUserOverrode?: boolean;
   distanceUnit: DistanceUnit;
-  advancedSettings: AdvancedSessionSettingsValue;
-  onAdvancedSettingsChange: (value: AdvancedSessionSettingsValue) => void;
   onGameSizeChange: (size: GameSize) => void;
   onGameSizeUserOverride?: () => void;
   onDistanceUnitChange: (unit: DistanceUnit) => void;
@@ -45,13 +36,9 @@ export function SessionSettingsSection({
   loading,
   verifyingAccess,
   previewGameArea,
-  playerRole,
-  onPlayerRoleChange,
   gameSize,
   gameSizeUserOverrode = false,
   distanceUnit,
-  advancedSettings,
-  onAdvancedSettingsChange,
   onGameSizeChange,
   onGameSizeUserOverride,
   onDistanceUnitChange,
@@ -62,13 +49,6 @@ export function SessionSettingsSection({
   packCreditsLabel,
   packPremiumFlow,
 }: SessionSettingsSectionProps) {
-  const handlePlayerRoleChange = (role: PlayerRole) => {
-    onPlayerRoleChange(role);
-    queueMicrotask(() => {
-      track(ANALYTICS_EVENTS.role_selected, { role, surface: "create" });
-    });
-  };
-
   const busy = loading || verifyingAccess;
 
   const showTier = isFirebaseConfigured();
@@ -76,27 +56,19 @@ export function SessionSettingsSection({
 
   return (
     <>
-      <InsetGroup>
-        <div className="space-y-2 px-4 py-3">
-          <p className="text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
-            Your side
-          </p>
-          <RolePicker
-            value={playerRole}
-            onChange={handlePlayerRoleChange}
-            disabled={busy}
-            compact
-          />
-        </div>
-      </InsetGroup>
-
-      <InsetGroup>
-        <div className="space-y-2 px-4 py-3">
-          <p className="text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
-            Distance edition
-          </p>
+      <GameSizePicker
+        gameArea={previewGameArea}
+        value={gameSize}
+        distanceUnit={distanceUnit}
+        onChange={onGameSizeChange}
+        userOverrode={gameSizeUserOverrode}
+        onUserOverride={onGameSizeUserOverride}
+        disabled={busy}
+        compact
+        accessory={
           <SegmentControl
             aria-label="Distance edition"
+            variant="pill"
             value={distanceUnit}
             onChange={onDistanceUnitChange}
             disabled={busy}
@@ -105,21 +77,8 @@ export function SessionSettingsSection({
               { value: "metric", label: "Metric" },
             ]}
           />
-        </div>
-      </InsetGroup>
-
-      <InsetGroup>
-        <GameSizePicker
-          gameArea={previewGameArea}
-          value={gameSize}
-          distanceUnit={distanceUnit}
-          onChange={onGameSizeChange}
-          userOverrode={gameSizeUserOverrode}
-          onUserOverride={onGameSizeUserOverride}
-          disabled={busy}
-          compact
-        />
-      </InsetGroup>
+        }
+      />
 
       {showTier || showPackCredits ? (
         <InsetGroup>
@@ -167,19 +126,6 @@ export function SessionSettingsSection({
           ) : null}
         </InsetGroup>
       ) : null}
-
-      <InsetGroup>
-        <div className="px-4 py-3">
-          <AdvancedSessionSettings
-            gameSize={gameSize}
-            distanceUnit={distanceUnit}
-            gameArea={previewGameArea}
-            value={advancedSettings}
-            onChange={onAdvancedSettingsChange}
-            disabled={busy}
-          />
-        </div>
-      </InsetGroup>
     </>
   );
 }

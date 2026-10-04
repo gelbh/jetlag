@@ -1,6 +1,6 @@
 import { ActionIcon, Text, TextInput, UnstyledButton } from "@mantine/core";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
-import { Fragment } from "react";
+import { Fragment, useRef } from "react";
 import { insetTextInputStyles } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
 import { type GeocodedPlace, GeocodedPlaceLeading } from "@/services/geo/geocoding";
@@ -31,7 +31,7 @@ export function PlaceAreaSearchInsetResults({
   searchResults: GeocodedPlace[];
   selectedPlaceId: string | null;
   onSelectPlace: (place: GeocodedPlace) => void;
-  /** When results sit outside an InsetGroup, omit the first row's prefix rule. */
+  /** Omit the first row's prefix rule inside a grouped list. */
   skipLeadingHairline?: boolean;
 }) {
   return (
@@ -42,7 +42,7 @@ export function PlaceAreaSearchInsetResults({
 
         return (
           <Fragment key={place.id}>
-            {showHairline ? <InsetHairline insetStart="1rem" /> : null}
+            {showHairline ? <InsetHairline insetStart="3.25rem" /> : null}
             <UnstyledButton
               type="button"
               onClick={() => onSelectPlace(place)}
@@ -106,6 +106,13 @@ function SelectedPlaceCaption({ place }: { place: GeocodedPlace }) {
   );
 }
 
+function selectAllInputText(target: EventTarget | null) {
+  if (!(target instanceof HTMLInputElement)) {
+    return;
+  }
+  target.select();
+}
+
 export function PlaceAreaSearchFields({
   locationQuery,
   onLocationQueryChange,
@@ -119,6 +126,7 @@ export function PlaceAreaSearchFields({
   variant = "field",
   showResults = true,
 }: PlaceAreaSearchFieldsProps) {
+  const lastTouchTapMs = useRef(0);
   const selectedCaption =
     selectedPlace && searchResults.length === 0 ? (
       <SelectedPlaceCaption place={selectedPlace} />
@@ -138,10 +146,29 @@ export function PlaceAreaSearchFields({
               onSearch();
             }
           }}
+          onDoubleClick={(event) => selectAllInputText(event.currentTarget)}
+          onPointerUp={(event) => {
+            if (event.pointerType !== "touch") {
+              return;
+            }
+            const now = performance.now();
+            if (now - lastTouchTapMs.current < 400) {
+              selectAllInputText(event.currentTarget);
+            }
+            lastTouchTapMs.current = now;
+          }}
           disabled={disabled || searchLoading}
-          styles={insetTextInputStyles}
+          styles={{
+            ...insetTextInputStyles,
+            input: {
+              ...insetTextInputStyles.input,
+              // inset paddingInline cancels Mantine's right-section gutter.
+              paddingInlineEnd: "2.75rem",
+            },
+          }}
           enterKeyHint="search"
           inputMode="search"
+          rightSectionWidth="2.75rem"
           rightSectionPointerEvents="all"
           rightSection={
             <ActionIcon

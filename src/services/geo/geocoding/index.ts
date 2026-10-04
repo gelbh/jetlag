@@ -1,5 +1,5 @@
 export type { SearchPlacesOptions } from "./client";
-export { reverseGeocodePoint, searchPlaces } from "./client";
+export { reverseGeocodePoint, searchPlaces, suggestPlacesAtPoint } from "./client";
 export {
   formatPlaceSearchSubtitle,
   mergeRankedGeocodedPlaceCandidates,

@@ -6,10 +6,13 @@ import { filledStyles } from "@/components/ui/entry/entryStyles";
 import { SegmentControl } from "@/components/ui/forms/SegmentControl";
 import { CreateSessionMapPane } from "../../components/session/framing/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../../components/session/framing/GameAreaFramingModal";
+import { RolePicker } from "../../components/session/identity/RolePicker";
+import { AdvancedSessionSettings } from "../../components/session/settings/AdvancedSessionSettings";
 import {
   buildCreateSessionPresetDraft,
   createSessionDraftToGamePreset,
 } from "../../domain/session/presets/gamePreset";
+import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import { type CreateSheetStep, GameAreaSection } from "./GameAreaSection";
 import { NestedSplitLayout } from "./NestedSplitLayout";
@@ -21,13 +24,6 @@ export function CreateSession() {
   const savePreset = useGamePresetStore((state) => state.savePreset);
   const session = useCreateSession();
   const [createStep, setCreateStep] = useState<CreateSheetStep>("where");
-
-  const handlePresetSelect = useCallback(
-    (presetId: string) => {
-      session.navigate(`/create?preset=${presetId}`);
-    },
-    [session],
-  );
 
   const handleSavePreset = useCallback(() => {
     const name = window.prompt("Preset name");
@@ -63,25 +59,17 @@ export function CreateSession() {
         <CreateSessionMapPane
           mapStyle={session.mapStyle}
           focusBounds={session.mapFocusBounds}
+          mapFocusToken={session.mapFocusToken}
           previewGameArea={session.mapPreviewGameArea ?? session.previewGameArea}
           selectedGameSize={session.gameSize}
-          manualFramingActive={session.manualFramingActive}
-          framingMode={session.framing.framingMode}
-          circleCenter={session.framing.circleCenter}
-          circleRadiusMeters={session.framing.circleRadiusMeters}
-          polygonVertices={session.framing.polygonVertices}
           mapRequested={session.mapRequested}
           mapMounted={session.mapMounted}
-          onRequestMap={session.requestMap}
+          onRequestMap={session.openMapAtLocation}
           onMapMounted={session.handleMapMounted}
-          onBoundsChange={session.framing.handleBoundsChange}
-          onUserViewportFramed={session.handleUserViewportFramed}
-          onMapClick={
-            session.manualFramingActive &&
-            (session.framing.framingMode === "circle" || session.framing.framingMode === "polygon")
-              ? session.framing.handleMapClick
-              : undefined
-          }
+          onRequestLocation={session.requestLocationBias}
+          locationBusy={session.locationBusy}
+          locationStatus={session.locationStatus}
+          locationStatusTone={session.locationStatusTone}
         />
 
         <GameAreaFramingModal
@@ -106,7 +94,7 @@ export function CreateSession() {
                 onChange={setCreateStep}
                 options={[
                   { value: "where", label: "Where" },
-                  { value: "frame", label: "Frame" },
+                  { value: "rules", label: "Rules" },
                   { value: "play", label: "Play" },
                 ]}
               />
@@ -129,7 +117,7 @@ export function CreateSession() {
                     variant="subtle"
                     color="gray"
                     className="min-h-11"
-                    onClick={() => setCreateStep(createStep === "play" ? "frame" : "where")}
+                    onClick={() => setCreateStep(createStep === "play" ? "rules" : "where")}
                   >
                     Back
                   </Button>
@@ -140,7 +128,7 @@ export function CreateSession() {
                     variant="subtle"
                     color="gray"
                     className="min-h-11 flex-1"
-                    onClick={() => setCreateStep(createStep === "where" ? "frame" : "play")}
+                    onClick={() => setCreateStep(createStep === "where" ? "rules" : "play")}
                   >
                     Next
                   </Button>
@@ -188,6 +176,7 @@ export function CreateSession() {
               bundledPresetSelectGroups: session.bundledPresetSelectGroups,
               favouritePresetSelectOptions: session.favouritePresetSelectOptions,
               userPresets: session.userPresets,
+              loadedPreset: session.loadedPreset,
               loading: session.loading,
               verifyingAccess: session.verifyingAccess,
               searchLoading: session.searchLoading,
@@ -201,19 +190,18 @@ export function CreateSession() {
               previewGameArea: session.previewGameArea,
               transitMetroId: session.transitMetroId,
               metros: session.metros,
-              onPresetSelect: handlePresetSelect,
+              onPresetSelect: session.selectPreset,
               onSavePreset: handleSavePreset,
-              onOpenFramingModal: () => session.setFramingModalOpen(true),
+              onOpenFramingModal: () => {
+                session.requestMap();
+                session.setFramingModalOpen(true);
+              },
               onRemoveSelectedArea: session.removeSelectedArea,
               onLocationQueryChange: session.handleLocationQueryChange,
               onSearch: () => void session.handleSearch(),
               onAddCurrentArea: session.addCurrentArea,
               onBoundaryImport: (event) => void session.handleBoundaryImport(event),
               onApplyPlace: session.applyPlace,
-              onRequestLocationBias: session.requestLocationBias,
-              locationStatus: session.locationStatus,
-              locationStatusTone: session.locationStatusTone,
-              locationBusy: session.locationBusy,
               onTransitMetroChange: session.setTransitMetroOverride,
             }}
             settingsSlot={
@@ -221,13 +209,9 @@ export function CreateSession() {
                 loading={session.loading}
                 verifyingAccess={session.verifyingAccess}
                 previewGameArea={session.previewGameArea}
-                playerRole={session.playerRole}
-                onPlayerRoleChange={session.handlePlayerRoleChange}
                 gameSize={session.gameSize}
                 gameSizeUserOverrode={session.gameSizeUserOverrode}
                 distanceUnit={session.distanceUnit}
-                advancedSettings={session.advancedSettings}
-                onAdvancedSettingsChange={session.setAdvancedSettings}
                 onGameSizeChange={session.handleGameSizeChange}
                 onGameSizeUserOverride={session.handleGameSizeUserOverride}
                 onDistanceUnitChange={session.handleDistanceUnitChange}
@@ -237,6 +221,29 @@ export function CreateSession() {
                 onSessionTierChange={session.handleSessionTierChange}
                 packCreditsLabel={session.packCreditsLabel}
                 packPremiumFlow={session.packPremiumFlow}
+              />
+            }
+            advancedSlot={
+              <AdvancedSessionSettings
+                gameSize={session.gameSize}
+                distanceUnit={session.distanceUnit}
+                gameArea={session.previewGameArea}
+                value={session.advancedSettings}
+                onChange={session.setAdvancedSettings}
+                disabled={session.loading || session.verifyingAccess}
+                collapsible={false}
+              />
+            }
+            playSlot={
+              <RolePicker
+                value={session.playerRole}
+                onChange={(role) => {
+                  session.handlePlayerRoleChange(role);
+                  queueMicrotask(() => {
+                    track(ANALYTICS_EVENTS.role_selected, { role, surface: "create" });
+                  });
+                }}
+                disabled={session.loading || session.verifyingAccess}
               />
             }
           />

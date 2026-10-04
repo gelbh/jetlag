@@ -1,20 +1,19 @@
-import { Paper, Text } from "@mantine/core";
+import { ActionIcon, Paper, Text } from "@mantine/core";
+import { CrosshairIcon } from "@phosphor-icons/react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { scheduleWhenIdleAfterLoad } from "@/domain/device/perf/scheduleWhenIdleAfterLoad";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
 import type { MapStyle } from "@/domain/map/mapBasemaps";
 import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
 import { type GameSize } from "@/domain/session/size/gameSize";
-import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
 import { MapView } from "../../map/chrome/MapView";
 import { useMapLibreMap } from "../../map/helpers/useMapLibreMap";
-import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
 import { GameAreaMask } from "../../map/layers/GameAreaMask";
+import { JlIcon } from "../../ui/brand/JlIcon";
 import { CreateSessionMapFacade } from "./CreateSessionMapFacade";
 import { GameAreaFramingStats } from "./GameAreaFramingControls";
-import { framingModeHint } from "./gameAreaFramingUi";
 import { prefetchCreateSessionMap } from "./prefetchCreateSessionMap";
 
 const mapHintPanelStyles = {
@@ -31,25 +30,52 @@ const LOADING_PLATE_TIMEOUT_MS = 10_000;
 export const CREATE_SESSION_MAP_SHELL_CLASS =
   "relative h-[33dvh] max-h-[36dvh] min-h-[28dvh] shrink-0 touch-none";
 
+/** Symmetric fitBounds inset. */
+export const CREATE_SESSION_FIT_PAD_PX = 48;
+
+/**
+ * Extra bottom inset when the compact play-area stats chip is on the map.
+ * Overlay `pb-3` (12) + Paper `py-xs` (~20) + compact stats line (~20) + slack.
+ */
+export const CREATE_SESSION_STATS_OVERLAY_PAD_PX = 64;
+
+const LOCATE_BTN_SIZE = 44;
+
+const locateControlStyles = {
+  root: {
+    ...mapChromeSurfaceStyles,
+    width: LOCATE_BTN_SIZE,
+    height: LOCATE_BTN_SIZE,
+    minWidth: LOCATE_BTN_SIZE,
+    minHeight: LOCATE_BTN_SIZE,
+    padding: 0,
+    lineHeight: 0,
+    borderRadius: 14,
+    color: "var(--color-field-ink)",
+    "&:disabled": {
+      opacity: 0.4,
+    },
+  },
+} as const;
+
 interface CreateSessionMapPaneProps {
   mapStyle: MapStyle;
   focusBounds: MapBoundsExpression | null;
+  mapFocusToken?: number;
   previewGameArea: GameArea | null;
   selectedGameSize: GameSize;
-  manualFramingActive: boolean;
-  framingMode: FramingMode;
-  circleCenter: LatLngTuple | null;
-  circleRadiusMeters: number | null;
-  polygonVertices: readonly LatLngTuple[];
   /** Some intent asked for the live map; until then a static facade stands in. */
   mapRequested: boolean;
   /** MapLibre loaded and reported its first viewport. */
   mapMounted: boolean;
   onRequestMap: () => void;
   onMapMounted: (map: MapLibreMap | null) => void;
-  onBoundsChange: (bounds: MapBounds) => void;
-  onUserViewportFramed: () => void;
-  onMapClick?: (lat: number, lng: number) => void;
+  /** Mount / camera reports only; strip map never mints framing drafts. */
+  onBoundsChange?: (bounds: MapBounds) => void;
+  onRequestLocation?: () => void;
+  locationBusy?: boolean;
+  locationStatus?: string | null;
+  locationStatusTone?: "ok" | "halt" | null;
 }
 
 function CreateSessionMapShell({ children }: { children?: ReactNode }) {
@@ -78,20 +104,18 @@ function CreateSessionMapMountSignal({
 function CreateSessionMapPaneInner({
   mapStyle,
   focusBounds,
+  mapFocusToken = 0,
   previewGameArea,
   selectedGameSize,
-  manualFramingActive,
-  framingMode,
-  circleCenter,
-  circleRadiusMeters,
-  polygonVertices,
   mapRequested,
   mapMounted,
   onRequestMap,
   onMapMounted,
   onBoundsChange,
-  onUserViewportFramed,
-  onMapClick,
+  onRequestLocation,
+  locationBusy = false,
+  locationStatus = null,
+  locationStatusTone = null,
 }: CreateSessionMapPaneProps) {
   const mapInstanceRef = useRef<MapLibreMap | null>(null);
   const boundsSeenRef = useRef(false);
@@ -149,7 +173,7 @@ function CreateSessionMapPaneInner({
 
   const handleBoundsChange = useCallback(
     (bounds: MapBounds) => {
-      onBoundsChange(bounds);
+      onBoundsChange?.(bounds);
       if (boundsSeenRef.current) {
         return;
       }
@@ -173,12 +197,13 @@ function CreateSessionMapPaneInner({
             model={{
               mapStyle,
               onBoundsChange: handleBoundsChange,
-              onUserViewportFramed,
-              onMapClick,
               zoom: 10,
               focusBounds,
+              recenterToken: mapFocusToken,
+              onRecenter: () => undefined,
               fitBoundsMode: "once",
-              fitBoundsPadding: [48, 48],
+              fitBoundsPadding: [CREATE_SESSION_FIT_PAD_PX, CREATE_SESSION_FIT_PAD_PX],
+              focusPaddingBias: previewGameArea ? CREATE_SESSION_STATS_OVERLAY_PAD_PX : 0,
               showZoomControl: false,
               showMapStyleToggle: false,
               showCompassControl: false,
@@ -186,17 +211,7 @@ function CreateSessionMapPaneInner({
             }}
           >
             <CreateSessionMapMountSignal onMapInstance={handleMapInstance} />
-            {manualFramingActive ? (
-              <FramingPreviewLayers
-                gameArea={previewGameArea}
-                framingMode={framingMode}
-                circleCenter={circleCenter}
-                circleRadiusMeters={circleRadiusMeters}
-                polygonVertices={polygonVertices}
-              />
-            ) : previewGameArea ? (
-              <GameAreaMask gameArea={previewGameArea} framing />
-            ) : null}
+            {previewGameArea ? <GameAreaMask gameArea={previewGameArea} framing /> : null}
           </MapView>
         </div>
       ) : null}
@@ -215,6 +230,41 @@ function CreateSessionMapPaneInner({
         {loading ? "Loading map…" : ""}
       </span>
 
+      {onRequestLocation ? (
+        <div className="pointer-events-none absolute top-3 right-3 z-[var(--z-banner)] flex max-w-[min(16rem,calc(100%-1.5rem))] flex-col items-end gap-2">
+          <ActionIcon
+            type="button"
+            variant="default"
+            size={LOCATE_BTN_SIZE}
+            className="pointer-events-auto"
+            aria-label={locationBusy ? "Locating…" : "Use my location"}
+            disabled={locationBusy}
+            onClick={(event) => {
+              event.stopPropagation();
+              onRequestLocation();
+            }}
+            styles={locateControlStyles}
+          >
+            <JlIcon icon={CrosshairIcon} size={20} weight="bold" className="block" />
+          </ActionIcon>
+          {locationStatus ? (
+            <p
+              role="status"
+              className="rounded-[10px] px-2 py-1 text-right text-xs"
+              style={{
+                backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
+                color:
+                  locationStatusTone === "halt"
+                    ? "var(--color-halt)"
+                    : "var(--color-field-ink-muted)",
+              }}
+            >
+              {locationStatus}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       {mapRequested ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3">
           {previewGameArea ? (
@@ -228,9 +278,7 @@ function CreateSessionMapPaneInner({
           ) : mapMounted ? (
             <Paper className="max-w-md" radius={14} px="sm" py="xs" style={mapHintPanelStyles}>
               <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
-                {manualFramingActive
-                  ? framingModeHint(framingMode)
-                  : "Search a place or draw on the map."}
+                Search a place, load a preset, or open Draw.
               </Text>
             </Paper>
           ) : null}

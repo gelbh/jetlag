@@ -1,6 +1,6 @@
-import { NativeSelect, Text } from "@mantine/core";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { insetTextInputStyles, SectionLabel } from "@/components/ui/entry/entryChrome";
+import { Text } from "@mantine/core";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { SectionLabel } from "@/components/ui/entry/entryChrome";
 import type { GameArea } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
@@ -13,7 +13,7 @@ import {
   playAreaValueForUnit,
   recommendGameSize,
 } from "@/domain/session/size/gameSize";
-import { gameSizeRulesSummary } from "@/domain/session/size/gameSizeRules";
+import { gameSizeRulesSummary, hidingPeriodMinutes } from "@/domain/session/size/gameSizeRules";
 import { RadioCardGroup } from "../../ui/forms/RadioCardGroup";
 
 interface GameSizePickerProps {
@@ -23,6 +23,7 @@ interface GameSizePickerProps {
   distanceUnit?: DistanceUnit;
   disabled?: boolean;
   compact?: boolean;
+  accessory?: ReactNode;
   /** When set by a parent that survives remount, skips recommend overwrite. */
   userOverrode?: boolean;
   onUserOverride?: () => void;
@@ -35,6 +36,7 @@ export function GameSizePicker({
   distanceUnit = "imperial",
   disabled,
   compact = false,
+  accessory,
   userOverrode: userOverrodeProp,
   onUserOverride,
 }: GameSizePickerProps) {
@@ -82,31 +84,51 @@ export function GameSizePicker({
 
   if (compact) {
     return (
-      <div>
-        <div className="flex items-baseline justify-between gap-2 px-4 pt-2">
-          <SectionLabel>Game size</SectionLabel>
-          {playAreaSummary ? (
-            <Text size="xs" c="var(--color-field-ink-muted)">
-              {playAreaSummary}
-              {recommended ? ` · Rec ${gameSizeLabel(recommended, distanceUnit).label}` : ""}
-            </Text>
-          ) : null}
+      <div className="px-1 py-2">
+        <div className="flex items-center justify-between gap-2">
+          <SectionLabel>Choose game size</SectionLabel>
+          {accessory}
         </div>
-        <NativeSelect
-          aria-label="Game size"
-          data={GAME_SIZE_OPTIONS.map((size) => ({
-            value: size,
-            label: gameSizeLabel(size, distanceUnit).label,
-          }))}
-          value={value}
-          disabled={disabled}
-          onChange={(event) => {
-            selectSize(event.currentTarget.value as GameSize);
-          }}
-          styles={insetTextInputStyles}
-        />
+        {playAreaSummary ? (
+          <Text size="xs" c="var(--color-field-ink-muted)" mt={4}>
+            {playAreaSummary}
+            {recommended ? ` · Rec ${gameSizeLabel(recommended, distanceUnit).label}` : ""}
+          </Text>
+        ) : null}
+        <div role="radiogroup" aria-label="Game size" className="mt-3 grid grid-cols-3 gap-2">
+          {GAME_SIZE_OPTIONS.map((size) => {
+            const meta = gameSizeLabel(size, distanceUnit);
+            const rules = gameSizeRulesSummary(size, distanceUnit);
+            const hidingMinutes = hidingPeriodMinutes(size);
+            const hidingShort =
+              hidingMinutes < 60 ? `${hidingMinutes} min` : `${hidingMinutes / 60} hr`;
+            const selected = value === size;
+            const isRecommended = recommended === size && gameArea !== null;
+            return (
+              <button
+                key={size}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={`${meta.label}. ${rules.hidingPeriodLabel}${isRecommended ? ". Recommended" : ""}`}
+                disabled={disabled}
+                onClick={() => selectSize(size)}
+                className={`flex min-h-24 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-3 text-center disabled:opacity-50 ${
+                  selected
+                    ? "border-flag bg-flag-soft text-flag"
+                    : "border-rule bg-canvas text-field-ink"
+                }`}
+              >
+                <span className="text-[1.0625rem] font-semibold tracking-[-0.01em]">
+                  {meta.label}
+                </span>
+                <span className="text-xs text-field-ink-muted">{hidingShort}</span>
+              </button>
+            );
+          })}
+        </div>
         {compactArea ? (
-          <Text size="xs" c="var(--color-field-ink-muted)" px={16} pb={8}>
+          <Text size="xs" c="var(--color-field-ink-muted)" mt={8}>
             Compact area, good for a short local game.
           </Text>
         ) : null}

@@ -62,7 +62,6 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
     (place: GeocodedPlace) => {
       setSelectedPlaceId(place.id);
       setSelectedPlace(place);
-      setSearchResults([]);
       setLocationQueryState(place.displayName);
       setSearchError(null);
       onPlaceApplied?.(place);
@@ -95,12 +94,8 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
         return;
       }
 
-      if (results.length === 1) {
-        applyPlace(results[0]);
-        return;
-      }
-
-      setSearchResults(results);
+      setSearchResults(results.length > 1 ? results : []);
+      applyPlace(results[0]!);
     } catch (nextError) {
       if (!isLatestRequest(requestId)) {
         return;

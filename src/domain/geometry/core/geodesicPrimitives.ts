@@ -1,6 +1,6 @@
 import difference from "@turf/difference";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { MapBounds } from "../../map/mapBounds";
+import { createMapBounds, type MapBounds } from "../../map/mapBounds";
 import { haversineMeters } from "./haversine";
 import type { LatLngTuple } from "./types";
 
@@ -59,6 +59,22 @@ export function destinationPoint(
     );
 
   return [(lat2 * 180) / Math.PI, (lng2 * 180) / Math.PI];
+}
+
+/** Inscribe an equal-meter square in `bounds` (center stays put). */
+export function squareizeMapBounds(bounds: MapBounds): MapBounds {
+  const southWest = bounds.getSouthWest();
+  const northEast = bounds.getNorthEast();
+  const center: LatLngTuple = [
+    (southWest.lat + northEast.lat) / 2,
+    (southWest.lng + northEast.lng) / 2,
+  ];
+  const halfSideMeters = centerToViewportEdgeRadiusMeters(center, bounds);
+  const south = destinationPoint(center, halfSideMeters, 180)[0];
+  const north = destinationPoint(center, halfSideMeters, 0)[0];
+  const west = destinationPoint(center, halfSideMeters, 270)[1];
+  const east = destinationPoint(center, halfSideMeters, 90)[1];
+  return createMapBounds({ south, west, north, east });
 }
 
 export function safeDifference(

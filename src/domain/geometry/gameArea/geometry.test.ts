@@ -24,9 +24,11 @@ import {
   distanceBetweenPoints,
   gameAreaExteriorStrokeRings,
   gameAreaOutsideMask,
+  haversineMeters,
   isPointInGameArea,
   normalizeBoundingBox,
   safeDifference,
+  squareizeMapBounds,
 } from "./geometry";
 
 const pkgEntry = path.resolve(
@@ -58,6 +60,24 @@ describe("geometry helpers", () => {
     const gameArea = boundsToGameArea(bounds as never);
     expect(gameArea.coordinates[0][0]).toEqual([-0.2, 51.4]);
     expect(gameArea.coordinates[0]).toHaveLength(5);
+  });
+
+  it("squareizeMapBounds equalizes north-south and east-west meters", () => {
+    const bounds = {
+      getSouthWest: () => ({ lat: 53.27, lng: -6.45 }),
+      getNorthEast: () => ({ lat: 53.42, lng: -6.08 }),
+    };
+    const square = squareizeMapBounds(bounds as never);
+    const southWest = square.getSouthWest();
+    const northEast = square.getNorthEast();
+    const center: [number, number] = [
+      (southWest.lat + northEast.lat) / 2,
+      (southWest.lng + northEast.lng) / 2,
+    ];
+    const northSouth = haversineMeters(center, [northEast.lat, center[1]]);
+    const eastWest = haversineMeters(center, [center[0], northEast.lng]);
+    expect(Math.abs(northSouth - eastWest)).toBeLessThan(1);
+    expect(eastWest).toBeLessThan(haversineMeters([53.345, -6.265], [53.345, -6.08]));
   });
 
   it("measures circle radius from center to nearest viewport edge", () => {

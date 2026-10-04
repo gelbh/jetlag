@@ -88,4 +88,31 @@ describe("usePlaceAreaSearch", () => {
     expect(result.current.selectedPlace?.id).toBe("cork");
     expect(result.current.searchLoading).toBe(false);
   });
+
+  it("always applies the first ranked result and keeps extras for switching", async () => {
+    const dublin = place("dublin", "Dublin", 53.35, -6.26);
+    const cork = place("cork", "Cork", 51.9, -8.5);
+    searchPlaces.mockResolvedValueOnce([dublin, cork]);
+    const onPlaceApplied = vi.fn();
+    const { result } = renderHook(() => usePlaceAreaSearch({ onPlaceApplied }));
+
+    act(() => {
+      result.current.setLocationQuery("Ireland");
+    });
+    await act(async () => {
+      await result.current.handleSearch();
+    });
+
+    expect(result.current.selectedPlace?.id).toBe("dublin");
+    expect(result.current.searchResults.map((item) => item.id)).toEqual(["dublin", "cork"]);
+    expect(onPlaceApplied).toHaveBeenCalledWith(dublin);
+
+    act(() => {
+      result.current.applyPlace(cork);
+    });
+
+    expect(result.current.selectedPlace?.id).toBe("cork");
+    expect(result.current.searchResults.map((item) => item.id)).toEqual(["dublin", "cork"]);
+    expect(onPlaceApplied).toHaveBeenLastCalledWith(cork);
+  });
 });

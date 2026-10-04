@@ -29,23 +29,31 @@ export interface SearchPlacesOptions {
   near?: LatLngTuple;
 }
 
-function geocodeSearchCacheKey(query: string): string {
+function nominatimAcceptLanguage(): string {
+  if (typeof navigator === "undefined") {
+    return "en";
+  }
+  const language = navigator.language?.trim();
+  return language && language.length > 0 ? language : "en";
+}
+
+function geocodeSearchCacheKey(query: string, language: string): string {
   return geographicCacheKey(
     {
       type: "Polygon",
       coordinates: [[[0, 0]]],
     },
-    `geocode:search:v3:${normalizeSearchQuery(query)}`,
+    `geocode:search:v7:${normalizeSearchQuery(query)}:${language}`,
   );
 }
 
-function geocodeSearchBiasCacheKey(query: string, near: LatLngTuple): string {
+function geocodeSearchBiasCacheKey(query: string, near: LatLngTuple, language: string): string {
   return geographicCacheKey(
     {
       type: "Polygon",
       coordinates: [[[near[0], near[1]]]],
     },
-    `geocode:search:bias:v2:${normalizeSearchQuery(query)}:${locationBucketKey(near)}`,
+    `geocode:search:bias:v4:${normalizeSearchQuery(query)}:${locationBucketKey(near)}:${language}`,
   );
 }
 
@@ -90,6 +98,7 @@ async function fetchNominatim(
         {
           headers: {
             Accept: "application/json",
+            "Accept-Language": nominatimAcceptLanguage(),
             "User-Agent": USER_AGENT,
           },
         },
@@ -126,6 +135,7 @@ async function fetchNominatimSearch(
   url.searchParams.set("limit", "5");
   url.searchParams.set("addressdetails", "1");
   url.searchParams.set("polygon_geojson", "1");
+  url.searchParams.set("accept-language", nominatimAcceptLanguage());
 
   if (options?.featureType) {
     url.searchParams.set("featureType", options.featureType);
@@ -192,8 +202,10 @@ export async function searchPlaces(
     return [];
   }
 
+  const language = nominatimAcceptLanguage();
+
   if (!options?.near) {
-    return getOrFetchCached(geocodeSearchCacheKey(trimmed), async () => {
+    return getOrFetchCached(geocodeSearchCacheKey(trimmed, language), async () => {
       const candidates = await fetchSearchCandidates(trimmed);
       return rankGeocodedPlaceCandidates(candidates, trimmed).slice(0, SEARCH_RESULT_LIMIT);
     });
@@ -202,13 +214,83 @@ export async function searchPlaces(
   const near = options.near;
   const [unbiasedCandidates, biasedCandidates] = await Promise.all([
     fetchSearchCandidates(trimmed),
-    getOrFetchCached(geocodeSearchBiasCacheKey(trimmed, near), () =>
+    getOrFetchCached(geocodeSearchBiasCacheKey(trimmed, near, language), () =>
       fetchSearchCandidates(trimmed, { viewbox: viewboxForPoint(near) }),
     ),
   ]);
 
   const merged = mergeSearchCandidates(unbiasedCandidates, biasedCandidates);
   return rankGeocodedPlaceCandidates(merged, trimmed, near).slice(0, SEARCH_RESULT_LIMIT);
+}
+
+const SUGGEST_REVERSE_ZOOMS = [10, 8, 5] as const;
+
+function geocodeReverseSuggestCacheKey(point: LatLngTuple, zoom: number, language: string): string {
+  return geographicCacheKey(
+    {
+      type: "Polygon",
+      coordinates: [[[point[0], point[1]]]],
+    },
+    `geocode:reverse-suggest:v1:${zoom}:${language}`,
+  );
+}
+
+function isNominatimPlaceResult(
+  payload: NominatimResult | NominatimResult[] | { error?: string },
+): payload is NominatimResult {
+  return (
+    typeof payload === "object" &&
+    payload !== null &&
+    !Array.isArray(payload) &&
+    "lat" in payload &&
+    "lon" in payload &&
+    "boundingbox" in payload
+  );
+}
+
+async function reverseSuggestCandidate(
+  point: LatLngTuple,
+  zoom: (typeof SUGGEST_REVERSE_ZOOMS)[number],
+): Promise<RankedGeocodedPlaceCandidate | null> {
+  const url = new URL(NOMINATIM_REVERSE_ENDPOINT);
+  url.searchParams.set("lat", String(point[0]));
+  url.searchParams.set("lon", String(point[1]));
+  url.searchParams.set("format", "json");
+  url.searchParams.set("addressdetails", "1");
+  url.searchParams.set("polygon_geojson", "1");
+  url.searchParams.set("zoom", String(zoom));
+  url.searchParams.set("accept-language", nominatimAcceptLanguage());
+
+  const payload = await fetchNominatim(url, "Reverse geocoding failed.");
+  if (!isNominatimPlaceResult(payload)) {
+    return null;
+  }
+
+  return {
+    place: await parseNominatimResult(payload),
+    importance: payload.importance ?? 0,
+    fromCityQuery: zoom >= 10,
+  };
+}
+
+/** Nearby playable admin areas (city / county / state) for a GPS point. */
+export async function suggestPlacesAtPoint(point: LatLngTuple): Promise<GeocodedPlace[]> {
+  const language = nominatimAcceptLanguage();
+  const groups = await Promise.all(
+    SUGGEST_REVERSE_ZOOMS.map((zoom) =>
+      getOrFetchCached(
+        geocodeReverseSuggestCacheKey(point, zoom, language),
+        async () => {
+          const candidate = await reverseSuggestCandidate(point, zoom);
+          return candidate ? [candidate] : [];
+        },
+        { persistEmpty: false },
+      ),
+    ),
+  );
+
+  const merged = mergeSearchCandidates(...groups);
+  return rankGeocodedPlaceCandidates(merged, "", point).slice(0, SEARCH_RESULT_LIMIT);
 }
 
 export async function reverseGeocodePoint(
@@ -224,6 +306,7 @@ export async function reverseGeocodePoint(
       url.searchParams.set("format", "json");
       url.searchParams.set("addressdetails", "1");
       url.searchParams.set("zoom", String(adminLevel));
+      url.searchParams.set("accept-language", nominatimAcceptLanguage());
 
       const payload = (await fetchNominatim(url, "Reverse geocoding failed.")) as NominatimResult;
       const adminLabel = adminLabelFromAddress(payload.address, adminLevel);
