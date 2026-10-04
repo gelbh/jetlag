@@ -157,4 +157,11 @@ describe("GameAreaSection create IA groups", () => {
     expect(status).toHaveTextContent("Couldn't use your location.");
     expect(status).toHaveStyle({ color: "var(--color-halt)" });
   });
+
+  it("uses inset groups and NativeSelect instead of field-input selects", () => {
+    renderSection();
+    expect(document.querySelector(".jl-inset-group")).toBeTruthy();
+    expect(document.querySelector("select.field-input")).toBeNull();
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toBeInTheDocument();
+  });
 });

@@ -1,8 +1,15 @@
-import { Button } from "@mantine/core";
+import { NativeSelect } from "@mantine/core";
+import {
+  BoundingBoxIcon,
+  FloppyDiskIcon,
+  MapPinIcon,
+  PlusCircleIcon,
+  UploadSimpleIcon,
+} from "@phosphor-icons/react";
 import { type ReactNode, type RefObject, useState } from "react";
 import { PlaceAreaSearchFields } from "@/components/session/framing/PlaceAreaSearchFields";
-import { SectionLabel } from "@/components/ui/entry/entryChrome";
-import { fieldFrameStyle, filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
+import { InsetGroup, insetTextInputStyles, SectionLabel } from "@/components/ui/entry/entryChrome";
+import { InsetHairline, InsetRow } from "@/components/ui/entry/InsetRow";
 import type { GameArea } from "../../domain/map/annotations";
 import type { TransitMetro } from "../../domain/map/transit";
 import type { BundledPresetSelectGroup } from "../../domain/regions/bundledPresetHierarchy";
@@ -84,119 +91,161 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
   const searchDisabled = searchLoading || importLoading;
   const [moreToolsOpen, setMoreToolsOpen] = useState(false);
 
+  const presetSelectData = [
+    { value: "", label: "Load preset…" },
+    ...(favouritePresetSelectOptions.length > 0
+      ? [
+          {
+            group: "Favourites",
+            items: favouritePresetSelectOptions.map((option) => ({
+              value: option.presetId,
+              label: option.name,
+            })),
+          },
+        ]
+      : []),
+    ...bundledPresetSelectGroups.map((group) => ({
+      group: group.label,
+      items: group.options.map((option) => ({
+        value: option.presetId,
+        label: option.name,
+      })),
+    })),
+    ...userPresets.map((preset) => ({
+      value: preset.id,
+      label: preset.name,
+    })),
+  ];
+
   return (
     <>
-      <div className="mt-4 space-y-3" style={fieldFrameStyle}>
-        <SectionLabel>Where</SectionLabel>
-        <select
-          disabled={loading || verifyingAccess}
-          className="field-input min-h-11 w-full"
-          defaultValue=""
-          aria-label="Game preset"
-          onChange={(event) => {
-            const presetId = event.target.value;
-            if (!presetId) {
-              return;
-            }
-            onPresetSelect(presetId);
+      <div className="mt-4 space-y-5 px-4">
+        <div>
+          <SectionLabel>Where</SectionLabel>
+          <InsetGroup>
+            <NativeSelect
+              aria-label="Game preset"
+              data={presetSelectData}
+              value=""
+              disabled={loading || verifyingAccess}
+              onChange={(event) => {
+                const presetId = event.currentTarget.value;
+                if (presetId) {
+                  onPresetSelect(presetId);
+                }
+              }}
+              styles={insetTextInputStyles}
+            />
+            <InsetHairline insetStart="1rem" />
+            <PlaceAreaSearchFields
+              locationQuery={locationQuery}
+              onLocationQueryChange={onLocationQueryChange}
+              onSearch={onSearch}
+              searchLoading={searchLoading}
+              searchResults={searchResults}
+              selectedPlaceId={selectedPlaceId}
+              selectedPlace={selectedPlace}
+              onSelectPlace={onApplyPlace}
+              disabled={searchDisabled}
+              variant="inset"
+            />
+            <InsetHairline insetStart="1rem" />
+            <InsetRow
+              label={locationBusy ? "Locating…" : "Use my location"}
+              icon={<MapPinIcon size={18} weight="bold" />}
+              onClick={onRequestLocationBias}
+              showChevron
+              disabled={searchDisabled || locationBusy}
+              aria-label={locationBusy ? "Locating…" : "Use my location"}
+            />
+          </InsetGroup>
+          {locationStatus ? (
+            <p
+              role="status"
+              style={{
+                color:
+                  locationStatusTone === "halt"
+                    ? "var(--color-halt)"
+                    : "var(--color-field-ink-muted)",
+              }}
+            >
+              {locationStatus}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <SectionLabel>Frame</SectionLabel>
+          <InsetGroup>
+            <InsetRow
+              label="Draw on map"
+              icon={<BoundingBoxIcon size={18} weight="bold" />}
+              onClick={onOpenFramingModal}
+              disabled={searchDisabled}
+            />
+          </InsetGroup>
+          {selectedAreas.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {selectedAreas.map((area, index) => (
+                <button
+                  key={`${index}-${area.type}`}
+                  type="button"
+                  onClick={() => onRemoveSelectedArea(index)}
+                  className="rounded-full border border-rule bg-canvas px-3 py-1.5 text-xs font-semibold text-field-ink"
+                >
+                  Area {index + 1} · Remove
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        <div>
+          <SectionLabel>Play</SectionLabel>
+          <InsetGroup>{settingsSlot}</InsetGroup>
+        </div>
+        <details
+          onToggle={(event) => {
+            setMoreToolsOpen(event.currentTarget.open);
           }}
         >
-          <option value="">Load preset…</option>
-          {favouritePresetSelectOptions.length > 0 ? (
-            <optgroup label="Favourites">
-              {favouritePresetSelectOptions.map((option) => (
-                <option key={option.presetId} value={option.presetId}>
-                  {option.name}
-                </option>
-              ))}
-            </optgroup>
-          ) : null}
-          {bundledPresetSelectGroups.map((group) => (
-            <optgroup key={group.label} label={group.label}>
-              {group.options.map((option) => (
-                <option key={option.presetId} value={option.presetId}>
-                  {option.name}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-          {userPresets.map((preset) => (
-            <option key={preset.id} value={preset.id}>
-              {preset.name}
-            </option>
-          ))}
-        </select>
-
-        <PlaceAreaSearchFields
-          locationQuery={locationQuery}
-          onLocationQueryChange={onLocationQueryChange}
-          onSearch={onSearch}
-          searchLoading={searchLoading}
-          searchResults={searchResults}
-          selectedPlaceId={selectedPlaceId}
-          selectedPlace={selectedPlace}
-          onSelectPlace={onApplyPlace}
-          disabled={searchDisabled}
-        />
-
-        <button
-          type="button"
-          onClick={onRequestLocationBias}
-          disabled={searchDisabled || locationBusy}
-          className="btn-secondary min-h-11 w-full disabled:opacity-50"
-        >
-          {locationBusy ? "Locating…" : "Use my location"}
-        </button>
-        {locationStatus ? (
-          <p
-            role="status"
-            className="text-sm leading-snug"
-            style={{
-              margin: 0,
-              color:
-                locationStatusTone === "halt"
-                  ? "var(--color-halt)"
-                  : "var(--color-field-ink-muted)",
-            }}
-          >
-            {locationStatus}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="mt-4 space-y-3" style={fieldFrameStyle}>
-        <SectionLabel>Frame</SectionLabel>
-        <p className="text-xs leading-snug text-field-ink-muted" style={{ margin: 0 }}>
-          Preview on the strip. Draw in fullscreen.
-        </p>
-        <Button
-          type="button"
-          fullWidth
-          styles={filledStyles}
-          onClick={onOpenFramingModal}
-          disabled={searchDisabled}
-        >
-          Draw on map
-        </Button>
-        {selectedAreas.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {selectedAreas.map((area, index) => (
-              <button
-                key={`${index}-${area.type}`}
-                type="button"
-                onClick={() => onRemoveSelectedArea(index)}
-                className="rounded-full border border-rule bg-canvas px-3 py-1.5 text-xs font-semibold text-field-ink"
-              >
-                Area {index + 1} · Remove
-              </button>
-            ))}
+          <summary className="min-h-11 cursor-pointer text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
+            More tools
+          </summary>
+          <div className="mt-3" hidden={!moreToolsOpen}>
+            <InsetGroup>
+              <InsetRow
+                label="Save as preset"
+                icon={<FloppyDiskIcon size={18} weight="bold" />}
+                onClick={onSavePreset}
+                disabled={loading || verifyingAccess}
+              />
+              <InsetRow
+                label="Add another area"
+                icon={<PlusCircleIcon size={18} weight="bold" />}
+                onClick={onAddCurrentArea}
+                disabled={!previewGameArea || searchDisabled}
+              />
+              <InsetRow
+                label={importLoading ? "Importing…" : "Import KML/KMZ"}
+                icon={<UploadSimpleIcon size={18} weight="bold" />}
+                onClick={() => importFileInputRef.current?.click()}
+                disabled={searchDisabled}
+              />
+              <NativeSelect
+                aria-label="Transit metro"
+                data={[
+                  { value: "", label: "Auto / none" },
+                  ...metros.map((metro) => ({
+                    value: metro.id,
+                    label: metro.label,
+                  })),
+                ]}
+                value={transitMetroId}
+                onChange={(event) => onTransitMetroChange(event.currentTarget.value)}
+                styles={insetTextInputStyles}
+              />
+            </InsetGroup>
           </div>
-        ) : null}
-      </div>
-
-      <div className="mt-4 space-y-3" style={fieldFrameStyle}>
-        <SectionLabel>Play</SectionLabel>
-        {settingsSlot}
+        </details>
       </div>
 
       <input
@@ -206,61 +255,6 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
         className="hidden"
         onChange={onBoundaryImport}
       />
-
-      <details
-        className="mt-4"
-        onToggle={(event) => {
-          setMoreToolsOpen(event.currentTarget.open);
-        }}
-      >
-        <summary className="min-h-11 cursor-pointer text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
-          More tools
-        </summary>
-        <div className="mt-3 space-y-3" hidden={!moreToolsOpen}>
-          <Button
-            type="button"
-            fullWidth
-            styles={grayStyles}
-            disabled={loading || verifyingAccess}
-            onClick={onSavePreset}
-          >
-            Save as preset
-          </Button>
-          <Button
-            type="button"
-            fullWidth
-            styles={grayStyles}
-            onClick={onAddCurrentArea}
-            disabled={!previewGameArea || searchDisabled}
-          >
-            Add another area
-          </Button>
-          <Button
-            type="button"
-            fullWidth
-            styles={grayStyles}
-            onClick={() => importFileInputRef.current?.click()}
-            disabled={searchDisabled}
-          >
-            {importLoading ? "Importing…" : "Import KML/KMZ"}
-          </Button>
-          <label className="field-label text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
-            Transit metro
-            <select
-              value={transitMetroId}
-              onChange={(event) => onTransitMetroChange(event.target.value)}
-              className="field-input"
-            >
-              <option value="">Auto / none</option>
-              {metros.map((metro) => (
-                <option key={metro.id} value={metro.id}>
-                  {metro.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </details>
     </>
   );
 }
