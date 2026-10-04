@@ -20,6 +20,7 @@ vi.mock("firebase/functions", () => ({
 
 vi.mock("./firebase", () => ({
   getFirebaseApp: vi.fn(() => ({ name: "app" })),
+  armAppCheckForEnforcedService: vi.fn(),
   getFirebaseAppCheck: vi.fn(() => null),
 }));
 

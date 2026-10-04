@@ -1,18 +1,20 @@
 import { type ReactNode, useEffect, useState } from "react";
-import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
+import { useAppCheckArmed } from "@/hooks/app/useAppCheckArmed";
 import type { AppCheckProbeResult } from "@/services/core/firebase/appCheckProbe";
 import { ContentBlockerErrorPage } from "./ContentBlockerErrorPage";
 
 /**
- * Keep the app mounted while probing. Only swap to the blocker page on a hard
- * blocked result — never unmount routes during the in-flight check.
+ * Content-blocker check for App Check / reCAPTCHA. Probes only after a real
+ * token consumer armed App Check, so the gate never loads reCAPTCHA itself on
+ * public shells or /join before submit. Keep the app mounted while probing;
+ * only swap to the blocker page on a hard blocked result.
  */
 export function AppCheckProbeGate({ children }: { children: ReactNode }) {
-  const authReady = useAuthBootstrapReady();
+  const appCheckArmed = useAppCheckArmed();
   const [probe, setProbe] = useState<AppCheckProbeResult | null>(null);
 
   useEffect(() => {
-    if (!authReady) {
+    if (!appCheckArmed) {
       return;
     }
 
@@ -31,7 +33,7 @@ export function AppCheckProbeGate({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [authReady]);
+  }, [appCheckArmed]);
 
   if (probe && !probe.ok) {
     return <ContentBlockerErrorPage />;
