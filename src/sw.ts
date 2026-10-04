@@ -8,12 +8,17 @@ import {
 } from "workbox-precaching";
 import { NavigationRoute, registerRoute } from "workbox-routing";
 import { CacheFirst, NetworkOnly, StaleWhileRevalidate } from "workbox-strategies";
+import { parseGameAreaSwMessage } from "./domain/device/pwa/gameAreaTileMessage";
 import {
+  PWA_GAME_AREA_TILE_CACHE_MAX_AGE_SECONDS,
+  PWA_GAME_AREA_TILE_CACHE_MAX_ENTRIES,
   PWA_TILE_CACHE_MAX_AGE_SECONDS,
   PWA_TILE_CACHE_MAX_ENTRIES,
   reportStoragePressureIfHigh,
 } from "./domain/device/pwa/pwaStorageBudget";
 import { isEsriTileUrl, isOpenFreeMapUrl } from "./domain/map/mapTileHosts";
+import { isTileInGameArea } from "./domain/map/tileBbox";
+import { createGameAreaBboxStore, SW_STATE_CACHE_NAME } from "./services/device/gameAreaBboxStore";
 import {
   ANNOTATION_SYNC_MESSAGE_TYPE,
   ANNOTATION_SYNC_TAG,
@@ -33,31 +38,47 @@ registerRoute(
 
 registerRoute(({ url }) => url.pathname.startsWith("/assets/"), new NetworkOnly());
 
-registerRoute(
-  ({ url }) => isEsriTileUrl(url.href),
-  new CacheFirst({
-    cacheName: "esri-satellite-tiles",
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: PWA_TILE_CACHE_MAX_ENTRIES,
-        maxAgeSeconds: PWA_TILE_CACHE_MAX_AGE_SECONDS,
-      }),
-    ],
-  }),
-);
+const gameAreaBbox = createGameAreaBboxStore(() => caches.open(SW_STATE_CACHE_NAME));
 
-registerRoute(
-  ({ url }) => isOpenFreeMapUrl(url.href),
-  new CacheFirst({
-    cacheName: "openfreemap-tiles",
+/**
+ * Viewed tiles only: both strategies cache what MapLibre already requested.
+ * Never prefetch tiles here (OSM tile usage policy forbids pre-emptive fetching).
+ * Tiles overlapping the session game area go to a separate cache with its own,
+ * larger budget so roaming elsewhere cannot evict play-area tiles.
+ */
+function registerSplitTileRoute(matches: (href: string) => boolean, cacheName: string): void {
+  const general = new CacheFirst({
+    cacheName,
     plugins: [
       new ExpirationPlugin({
         maxEntries: PWA_TILE_CACHE_MAX_ENTRIES,
         maxAgeSeconds: PWA_TILE_CACHE_MAX_AGE_SECONDS,
       }),
     ],
-  }),
-);
+  });
+  const gameArea = new CacheFirst({
+    cacheName: `${cacheName}-game-area`,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: PWA_GAME_AREA_TILE_CACHE_MAX_ENTRIES,
+        maxAgeSeconds: PWA_GAME_AREA_TILE_CACHE_MAX_AGE_SECONDS,
+      }),
+    ],
+  });
+
+  registerRoute(
+    ({ url }) => matches(url.href),
+    async (options) => {
+      const bbox = await gameAreaBbox.get();
+      const strategy = isTileInGameArea(options.url.href, bbox) ? gameArea : general;
+      return strategy.handle(options);
+    },
+  );
+}
+
+// Every host in src/domain/map/mapTileHosts.ts routes through the split.
+registerSplitTileRoute(isEsriTileUrl, "esri-satellite-tiles");
+registerSplitTileRoute(isOpenFreeMapUrl, "openfreemap-tiles");
 
 registerRoute(
   ({ url }) => /\/geo\/.*\.geojson$/i.test(url.pathname),
@@ -92,6 +113,12 @@ self.addEventListener("activate", (event: ExtendableEvent) => {
 self.addEventListener("message", (event: ExtendableMessageEvent) => {
   if (event.data?.type === "SKIP_WAITING") {
     void self.skipWaiting();
+    return;
+  }
+
+  const gameAreaMessage = parseGameAreaSwMessage(event.data);
+  if (gameAreaMessage) {
+    event.waitUntil(gameAreaBbox.set(gameAreaMessage.bbox));
   }
 });
 
