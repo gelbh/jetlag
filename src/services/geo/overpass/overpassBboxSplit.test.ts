@@ -75,7 +75,10 @@ describe("queryOverpassWithBboxSplit", () => {
   });
 
   it("does not split OverpassUnavailableError", async () => {
-    const query = vi.fn().mockRejectedValue(new OverpassUnavailableError());
+    type Payload = { elements: { id: number }[] };
+    const query = vi
+      .fn<(ql: string) => Promise<Payload>>()
+      .mockRejectedValue(new OverpassUnavailableError());
     await expect(
       queryOverpassWithBboxSplit(
         () => "q",
