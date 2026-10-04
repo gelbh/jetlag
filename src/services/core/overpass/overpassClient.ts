@@ -80,10 +80,6 @@ function isRetryableOverpassStatus(status: number): boolean {
 }
 
 function isRetryableOverpassError(error: unknown): boolean {
-  if (error instanceof FetchTimeoutError) {
-    return true;
-  }
-
   if (error instanceof TypeError) {
     return true;
   }

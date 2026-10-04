@@ -105,7 +105,7 @@ describe("overpassClient", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("failovers to the next endpoint after repeated gateway timeouts", async () => {
+  it("first 504 throws OverpassQueryTooExpensiveError, no endpoint failover", async () => {
     const fetchMock = vi.fn().mockImplementation(async (url: string) => {
       if (url.includes("overpass-api.de")) {
         return {
@@ -149,7 +149,7 @@ describe("overpassClient", () => {
     expect(fetchMock.mock.calls.some(([url]) => String(url).includes("mail.ru"))).toBe(true);
   });
 
-  it("failovers to the next endpoint after a fetch timeout", async () => {
+  it("first fetch timeout throws OverpassQueryTooExpensiveError, no endpoint failover", async () => {
     const fetchMock = vi.fn().mockImplementation(async (url: string) => {
       if (url.includes("overpass-api.de")) {
         throw new FetchTimeoutError(15_000);
@@ -166,7 +166,7 @@ describe("overpassClient", () => {
     expect(fetchMock.mock.calls.some(([url]) => String(url).includes("mail.ru"))).toBe(false);
   });
 
-  it("throws OverpassUnavailableError after repeated fetch timeouts", async () => {
+  it("throws OverpassQueryTooExpensiveError on fetch timeout", async () => {
     const fetchMock = vi.fn().mockImplementation(async () => {
       throw new FetchTimeoutError(15_000);
     });
