@@ -89,12 +89,13 @@ function nameMatchScore(displayName: string, query: string): number {
   const head = normalizeForMatch(normalizedName.split(",")[0] ?? "");
   const headTokens = head.split(" ").filter(Boolean);
   const queryTokens = normalizedQuery.split(" ").filter(Boolean);
+  const headTokenSet = new Set(headTokens);
 
   if (head === normalizedQuery) {
     return 3;
   }
 
-  if (queryTokens.length > 0 && queryTokens.every((token) => headTokens.includes(token))) {
+  if (queryTokens.length > 0 && queryTokens.every((token) => headTokenSet.has(token))) {
     return 3;
   }
 

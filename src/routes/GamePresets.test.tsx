@@ -28,7 +28,7 @@ vi.mock("../components/map/layers/FramingPreviewLayers", () => ({
 }));
 
 const searchPlaces = vi.hoisted(() =>
-  vi.fn(async () => [
+  vi.fn(async (_query?: string, _options?: unknown) => [
     {
       id: "dublin-ie",
       displayName: "Dublin, Ireland",
@@ -43,6 +43,17 @@ const searchPlaces = vi.hoisted(() =>
 vi.mock("../services/geo/geocoding", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../services/geo/geocoding")>()),
   searchPlaces,
+  searchPlacesSettled: async (query: string, options?: unknown) => {
+    try {
+      const places = await searchPlaces(query, options);
+      return { ok: true as const, places };
+    } catch (nextError) {
+      return {
+        ok: false as const,
+        message: nextError instanceof Error ? nextError.message : "Place search failed.",
+      };
+    }
+  },
 }));
 
 describe("GamePresetList", () => {

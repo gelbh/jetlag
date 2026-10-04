@@ -41,11 +41,24 @@ vi.mock("@/services/core/location/geolocation", async (importOriginal) => ({
   requestLocationAccess,
 }));
 
-const searchPlaces = vi.hoisted(() => vi.fn(async () => [] as unknown[]));
+const searchPlaces = vi.hoisted(() =>
+  vi.fn(async (_query?: string, _options?: unknown) => [] as unknown[]),
+);
 const suggestPlacesAtPoint = vi.hoisted(() => vi.fn(async () => [] as unknown[]));
 vi.mock("@/services/geo/geocoding", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/services/geo/geocoding")>()),
   searchPlaces,
+  searchPlacesSettled: async (query: string, options?: unknown) => {
+    try {
+      const places = await searchPlaces(query, options);
+      return { ok: true as const, places };
+    } catch (nextError) {
+      return {
+        ok: false as const,
+        message: nextError instanceof Error ? nextError.message : "Place search failed.",
+      };
+    }
+  },
   suggestPlacesAtPoint,
 }));
 

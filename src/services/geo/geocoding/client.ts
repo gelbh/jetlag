@@ -223,6 +223,25 @@ export async function searchPlaces(
   return rankGeocodedPlaceCandidates(merged, trimmed, near).slice(0, SEARCH_RESULT_LIMIT);
 }
 
+export type SearchPlacesSettled =
+  | { ok: true; places: GeocodedPlace[] }
+  | { ok: false; message: string };
+
+export async function searchPlacesSettled(
+  query: string,
+  options?: SearchPlacesOptions,
+): Promise<SearchPlacesSettled> {
+  try {
+    const places = await searchPlaces(query, options);
+    return { ok: true, places };
+  } catch (nextError) {
+    return {
+      ok: false,
+      message: nextError instanceof Error ? nextError.message : "Place search failed.",
+    };
+  }
+}
+
 const SUGGEST_REVERSE_ZOOMS = [10, 8, 5] as const;
 
 function geocodeReverseSuggestCacheKey(point: LatLngTuple, zoom: number, language: string): string {

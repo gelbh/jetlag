@@ -7,6 +7,17 @@ const searchPlaces = vi.hoisted(() => vi.fn());
 
 vi.mock("../../services/geo/geocoding", () => ({
   searchPlaces,
+  searchPlacesSettled: async (query: string, options?: unknown) => {
+    try {
+      const places = (await searchPlaces(query, options)) as GeocodedPlace[];
+      return { ok: true as const, places };
+    } catch (nextError) {
+      return {
+        ok: false as const,
+        message: nextError instanceof Error ? nextError.message : "Place search failed.",
+      };
+    }
+  },
 }));
 
 vi.mock("../../services/core/location/geolocation", () => ({

@@ -116,6 +116,36 @@ describe("GameAreaSection create wizard steps", () => {
     expect(screen.queryByRole("textbox", { name: /city, county, state, or country/i })).toBeNull();
   });
 
+  it("switches to Preset when a loaded preset id appears after Search", () => {
+    const { rerender } = renderSection(baseModel, undefined, "where");
+    expect(screen.getByRole("button", { name: "Search" })).toHaveAttribute("aria-pressed", "true");
+
+    rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <GameAreaSection
+          model={{
+            ...baseModel,
+            loadedPreset: {
+              id: "preset-dublin",
+              name: "Dublin medium",
+              createdAt: "2026-01-01T00:00:00.000Z",
+              updatedAt: "2026-01-01T00:00:00.000Z",
+              schemaVersion: 1,
+              gameSize: "medium",
+              distanceUnit: "metric",
+              advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+              placeLabel: "Dublin, Ireland",
+              migrationStatus: "ok",
+            },
+          }}
+          step="where"
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByRole("button", { name: "Preset" })).toHaveAttribute("aria-pressed", "true");
+  });
+
   it("shows loaded preset details on the Preset source", () => {
     renderSection(
       {

@@ -58,6 +58,81 @@ const locateControlStyles = {
   },
 } as const;
 
+function CreateSessionLocateControl({
+  locationBusy,
+  locationStatus,
+  locationStatusTone,
+  onRequestLocation,
+}: {
+  locationBusy: boolean;
+  locationStatus: string | null;
+  locationStatusTone: "ok" | "halt" | null;
+  onRequestLocation: () => void;
+}) {
+  return (
+    <div className="pointer-events-none absolute top-3 right-3 z-[var(--z-banner)] flex max-w-[min(16rem,calc(100%-1.5rem))] flex-col items-end gap-2">
+      <ActionIcon
+        type="button"
+        variant="default"
+        size={LOCATE_BTN_SIZE}
+        className="pointer-events-auto"
+        aria-label={locationBusy ? "Locating…" : "Use my location"}
+        disabled={locationBusy}
+        onClick={(event) => {
+          event.stopPropagation();
+          onRequestLocation();
+        }}
+        styles={locateControlStyles}
+      >
+        <JlIcon icon={CrosshairIcon} size={20} weight="bold" className="block" />
+      </ActionIcon>
+      {locationStatus ? (
+        <p
+          role="status"
+          className="rounded-[10px] px-2 py-1 text-right text-xs"
+          style={{
+            backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
+            color:
+              locationStatusTone === "halt" ? "var(--color-halt)" : "var(--color-field-ink-muted)",
+          }}
+        >
+          {locationStatus}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function CreateSessionMapHint({
+  previewGameArea,
+  selectedGameSize,
+  mapMounted,
+}: {
+  previewGameArea: GameArea | null;
+  selectedGameSize: GameSize;
+  mapMounted: boolean;
+}) {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3">
+      {previewGameArea ? (
+        <Paper className="max-w-full" radius={14} px="sm" py="xs" style={mapHintPanelStyles}>
+          <GameAreaFramingStats
+            gameArea={previewGameArea}
+            selectedGameSize={selectedGameSize}
+            compact
+          />
+        </Paper>
+      ) : mapMounted ? (
+        <Paper className="max-w-md" radius={14} px="sm" py="xs" style={mapHintPanelStyles}>
+          <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
+            Search a place, load a preset, or open Draw.
+          </Text>
+        </Paper>
+      ) : null}
+    </div>
+  );
+}
+
 interface CreateSessionMapPaneProps {
   mapStyle: MapStyle;
   focusBounds: MapBoundsExpression | null;
@@ -216,7 +291,6 @@ function CreateSessionMapPaneInner({
         </div>
       ) : null}
 
-      {/* Same slot before and after intent, so a focused facade stays mounted while busy. */}
       {!mapMounted && !(loading && loadingPlateExpired) ? (
         <CreateSessionMapFacade
           ref={facadeRef}
@@ -231,58 +305,20 @@ function CreateSessionMapPaneInner({
       </span>
 
       {onRequestLocation ? (
-        <div className="pointer-events-none absolute top-3 right-3 z-[var(--z-banner)] flex max-w-[min(16rem,calc(100%-1.5rem))] flex-col items-end gap-2">
-          <ActionIcon
-            type="button"
-            variant="default"
-            size={LOCATE_BTN_SIZE}
-            className="pointer-events-auto"
-            aria-label={locationBusy ? "Locating…" : "Use my location"}
-            disabled={locationBusy}
-            onClick={(event) => {
-              event.stopPropagation();
-              onRequestLocation();
-            }}
-            styles={locateControlStyles}
-          >
-            <JlIcon icon={CrosshairIcon} size={20} weight="bold" className="block" />
-          </ActionIcon>
-          {locationStatus ? (
-            <p
-              role="status"
-              className="rounded-[10px] px-2 py-1 text-right text-xs"
-              style={{
-                backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
-                color:
-                  locationStatusTone === "halt"
-                    ? "var(--color-halt)"
-                    : "var(--color-field-ink-muted)",
-              }}
-            >
-              {locationStatus}
-            </p>
-          ) : null}
-        </div>
+        <CreateSessionLocateControl
+          locationBusy={locationBusy}
+          locationStatus={locationStatus}
+          locationStatusTone={locationStatusTone}
+          onRequestLocation={onRequestLocation}
+        />
       ) : null}
 
       {mapRequested ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3">
-          {previewGameArea ? (
-            <Paper className="max-w-full" radius={14} px="sm" py="xs" style={mapHintPanelStyles}>
-              <GameAreaFramingStats
-                gameArea={previewGameArea}
-                selectedGameSize={selectedGameSize}
-                compact
-              />
-            </Paper>
-          ) : mapMounted ? (
-            <Paper className="max-w-md" radius={14} px="sm" py="xs" style={mapHintPanelStyles}>
-              <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
-                Search a place, load a preset, or open Draw.
-              </Text>
-            </Paper>
-          ) : null}
-        </div>
+        <CreateSessionMapHint
+          previewGameArea={previewGameArea}
+          selectedGameSize={selectedGameSize}
+          mapMounted={mapMounted}
+        />
       ) : null}
     </CreateSessionMapShell>
   );

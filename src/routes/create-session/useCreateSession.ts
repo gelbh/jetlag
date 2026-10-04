@@ -62,7 +62,7 @@ import { retryAsync } from "../../services/core/network/retryAsync";
 import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
 import {
   type GeocodedPlace,
-  searchPlaces,
+  searchPlacesSettled,
   suggestPlacesAtPoint,
 } from "../../services/geo/geocoding";
 import { loadRegionPackSessionBoundaries } from "../../services/geo/matching/regionPackBoundaries";
@@ -639,32 +639,26 @@ export function useCreateSession() {
     setSearchLoading(true);
     setError(null);
 
-    try {
-      const results = await searchPlaces(
-        trimmed,
-        userLocationRef.current ? { near: userLocationRef.current } : undefined,
-      );
-      if (!isLatestRequest(requestId)) {
-        return;
-      }
-      if (results.length === 0) {
-        setSearchResults([]);
-        setError("No matching places found. Try a more specific name.");
-        return;
-      }
-
-      setSearchResults(results.length > 1 ? results : []);
-      applyPlace(results[0]!, { loadMatchingPreset: results.length === 1 });
-    } catch (nextError) {
-      if (!isLatestRequest(requestId)) {
-        return;
-      }
-      setError(nextError instanceof Error ? nextError.message : "Place search failed.");
-    } finally {
-      if (isLatestRequest(requestId)) {
-        setSearchLoading(false);
-      }
+    const outcome = await searchPlacesSettled(
+      trimmed,
+      userLocationRef.current ? { near: userLocationRef.current } : undefined,
+    );
+    if (!isLatestRequest(requestId)) {
+      return;
     }
+    setSearchLoading(false);
+    if (!outcome.ok) {
+      setError(outcome.message);
+      return;
+    }
+    if (outcome.places.length === 0) {
+      setSearchResults([]);
+      setError("No matching places found. Try a more specific name.");
+      return;
+    }
+
+    setSearchResults(outcome.places.length > 1 ? outcome.places : []);
+    applyPlace(outcome.places[0]!, { loadMatchingPreset: outcome.places.length === 1 });
   };
 
   const hasExplicitGameArea = Boolean(

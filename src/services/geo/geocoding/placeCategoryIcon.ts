@@ -30,8 +30,3 @@ const PLACE_CATEGORY_ICONS: Record<string, ComponentType<IconProps>> = {
 export function placeCategoryIcon(category: string): ComponentType<IconProps> {
   return PLACE_CATEGORY_ICONS[category.trim().toLowerCase()] ?? MapPinIcon;
 }
-
-export function GeocodedPlaceLeading({ category }: { category: string }) {
-  const Icon = placeCategoryIcon(category);
-  return <Icon aria-hidden size={18} weight="bold" className="mt-0.5 shrink-0 text-current" />;
-}

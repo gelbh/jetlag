@@ -1,5 +1,12 @@
 export type { SearchPlacesOptions } from "./client";
-export { reverseGeocodePoint, searchPlaces, suggestPlacesAtPoint } from "./client";
+export {
+  reverseGeocodePoint,
+  type SearchPlacesSettled,
+  searchPlaces,
+  searchPlacesSettled,
+  suggestPlacesAtPoint,
+} from "./client";
+export { GeocodedPlaceLeading } from "./GeocodedPlaceLeading";
 export {
   formatPlaceSearchSubtitle,
   mergeRankedGeocodedPlaceCandidates,
@@ -22,4 +29,4 @@ export {
   placeHasBoundary,
   viewboxForPoint,
 } from "./normalize";
-export { GeocodedPlaceLeading, placeCategoryIcon } from "./placeCategoryIcon";
+export { placeCategoryIcon } from "./placeCategoryIcon";

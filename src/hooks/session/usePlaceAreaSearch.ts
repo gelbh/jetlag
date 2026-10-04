@@ -5,7 +5,7 @@ import {
   queryGeolocationPermission,
   requestLocationAccess,
 } from "../../services/core/location/geolocation";
-import { type GeocodedPlace, searchPlaces } from "../../services/geo/geocoding";
+import { type GeocodedPlace, searchPlacesSettled } from "../../services/geo/geocoding";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
 interface UsePlaceAreaSearchOptions {
@@ -80,32 +80,26 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
     setSearchLoading(true);
     setSearchError(null);
 
-    try {
-      const results = await searchPlaces(
-        trimmed,
-        userLocationRef.current ? { near: userLocationRef.current } : undefined,
-      );
-      if (!isLatestRequest(requestId)) {
-        return;
-      }
-      if (results.length === 0) {
-        setSearchResults([]);
-        setSearchError("No matching places found. Try a more specific name.");
-        return;
-      }
-
-      setSearchResults(results.length > 1 ? results : []);
-      applyPlace(results[0]!);
-    } catch (nextError) {
-      if (!isLatestRequest(requestId)) {
-        return;
-      }
-      setSearchError(nextError instanceof Error ? nextError.message : "Place search failed.");
-    } finally {
-      if (isLatestRequest(requestId)) {
-        setSearchLoading(false);
-      }
+    const outcome = await searchPlacesSettled(
+      trimmed,
+      userLocationRef.current ? { near: userLocationRef.current } : undefined,
+    );
+    if (!isLatestRequest(requestId)) {
+      return;
     }
+    setSearchLoading(false);
+    if (!outcome.ok) {
+      setSearchError(outcome.message);
+      return;
+    }
+    if (outcome.places.length === 0) {
+      setSearchResults([]);
+      setSearchError("No matching places found. Try a more specific name.");
+      return;
+    }
+
+    setSearchResults(outcome.places.length > 1 ? outcome.places : []);
+    applyPlace(outcome.places[0]!);
   }, [applyPlace, beginRequest, isLatestRequest, locationQuery]);
 
   const resetSearch = useCallback(() => {
