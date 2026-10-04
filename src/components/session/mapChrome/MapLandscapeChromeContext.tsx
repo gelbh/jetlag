@@ -40,7 +40,6 @@ export function MapLandscapeChromeProvider({
   queuedWrites,
   syncMessage,
 }: MapLandscapeChromeProviderProps) {
-  "use memo";
   const { mode, collapsed, active, toggle } = useMapLandscapeChromeReveal();
 
   const chip = active ? (

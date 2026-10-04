@@ -64,6 +64,21 @@ describe("DrawerSheet", () => {
     Element.prototype.releasePointerCapture = vi.fn();
   });
 
+  it("labels the dialog from ariaLabel without an aria-label on the drawer root", () => {
+    render(
+      withAppUi(
+        <DrawerSheet open onClose={vi.fn()} ariaLabel="Settings">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
+    const root = document.querySelector(".mantine-Drawer-root");
+    expect(root).not.toBeNull();
+    expect(root).not.toHaveAttribute("aria-label");
+  });
+
   it("applies translateY on the chrome wrapper while dragging (Verify #1 live follow)", () => {
     const onClose = vi.fn();
     render(

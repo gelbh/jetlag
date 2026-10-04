@@ -5,6 +5,7 @@ import {
   computeEndedCutoffIso,
   isAbandonedSessionPastRetention,
   isEndedSessionPastRetention,
+  purgeSelectedSessions,
   selectSessionsToPurge,
 } from "../session/purgeStaleSessions.mjs";
 
@@ -12,6 +13,43 @@ function fakeSnapshot(id, data) {
   return {
     id,
     data: () => data,
+  };
+}
+
+function makePurgeTarget(id, code) {
+  return {
+    id,
+    data: () => ({ code }),
+    ref: { path: `sessions/${id}` },
+  };
+}
+
+function makePurgeDb({ failSessionIds = new Set() } = {}) {
+  const deletedCodes = [];
+  const deletedRefs = [];
+
+  return {
+    deletedCodes,
+    deletedRefs,
+    db: {
+      recursiveDelete: async (ref) => {
+        const sessionId = String(ref.path).split("/")[1];
+        if (failSessionIds.has(sessionId)) {
+          throw new Error("354 deletes failed. The last delete failed with: ");
+        }
+        deletedRefs.push(ref.path);
+      },
+      collection: (name) => {
+        assert.equal(name, "sessionCodes");
+        return {
+          doc: (code) => ({
+            delete: async () => {
+              deletedCodes.push(code);
+            },
+          }),
+        };
+      },
+    },
   };
 }
 
@@ -82,4 +120,40 @@ test("selectSessionsToPurge caps work and deduplicates", () => {
     selected.map((snapshot) => snapshot.id),
     ["ended-1", "abandoned-1"],
   );
+});
+
+test("purgeSelectedSessions continues after per-session recursiveDelete failure", async () => {
+  const { db, deletedCodes, deletedRefs } = makePurgeDb({
+    failSessionIds: new Set(["bad"]),
+  });
+  const captured = [];
+
+  const deleted = await purgeSelectedSessions(
+    db,
+    [makePurgeTarget("bad", "BAD1"), makePurgeTarget("good", "GOOD1")],
+    {
+      captureException: (error) => {
+        captured.push(error);
+      },
+    },
+  );
+
+  assert.equal(deleted, 1);
+  assert.deepEqual(deletedRefs, ["sessions/good"]);
+  assert.deepEqual(deletedCodes, ["GOOD1"]);
+  assert.equal(captured.length, 1);
+  assert.match(String(captured[0].message), /354 deletes failed/);
+});
+
+test("purgeSelectedSessions deletes session code after recursiveDelete", async () => {
+  const { db, deletedCodes, deletedRefs } = makePurgeDb();
+
+  const deleted = await purgeSelectedSessions(db, [
+    makePurgeTarget("s1", "CODE1"),
+    makePurgeTarget("s2", ""),
+  ]);
+
+  assert.equal(deleted, 2);
+  assert.deepEqual(deletedRefs, ["sessions/s1", "sessions/s2"]);
+  assert.deepEqual(deletedCodes, ["CODE1"]);
 });
