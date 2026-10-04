@@ -150,7 +150,7 @@ test("inline module bodies with src-like text are kept", () => {
 
 const policy = {
   indexablePaths: ["/", "/premium"],
-  disallowPaths: ["/join", "/create"],
+  disallowPaths: ["/admin"],
 };
 
 test("prerenderTargets keeps perf-only paths separate from the index list", () => {
@@ -162,12 +162,12 @@ test("prerenderTargets keeps perf-only paths separate from the index list", () =
   ]);
 });
 
-test("prerenderTargets rejects a perf path that is indexable or crawlable", () => {
+test("prerenderTargets rejects a perf path that is indexable or robots-disallowed", () => {
   assert.throws(
     () => prerenderTargets(policy, ["/premium"]),
     /both indexablePaths and PERF_PRERENDER_PATHS/,
   );
-  assert.throws(() => prerenderTargets(policy, ["/stats"]), /must be in disallowPaths/);
+  assert.throws(() => prerenderTargets(policy, ["/admin"]), /must not be in disallowPaths/);
 });
 
 test("hasPrerenderedRootMarker reads the #root opening tag only", () => {

@@ -7,11 +7,12 @@ import { absoluteUrl, loadCrawlPolicy } from "./seo-build-lib.mjs";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = loadCrawlPolicy(root);
 
+// No <changefreq>/<priority> (Google ignores them) and no <lastmod>: per-page content spans
+// many shared components, so a build- or commit-date stamp would not track real page changes.
 const body = policy.indexablePaths
   .map(
     (path) => `  <url>
     <loc>${absoluteUrl(policy.siteOrigin, path)}</loc>
-    <changefreq>weekly</changefreq>
   </url>`,
   )
   .join("\n");

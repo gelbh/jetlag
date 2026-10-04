@@ -30,6 +30,7 @@ describe("Privacy", () => {
         </MemoryRouter>
       </MantineProvider>,
     );
-    expect(screen.getByRole("heading", { name: "Privacy Policy" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Privacy Policy" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
   });
 });

@@ -30,6 +30,7 @@ describe("Terms", () => {
         </MemoryRouter>
       </MantineProvider>,
     );
-    expect(screen.getByRole("heading", { name: "Terms of Service" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Terms of Service" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
   });
 });

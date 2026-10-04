@@ -32,8 +32,9 @@ export function LegalDocumentBody({
   return (
     <Stack gap={22} component="article">
       <Stack gap={6}>
+        {/* EntryHeader owns the page h1; one h1 per page for crawlers and screen readers. */}
         <Text
-          component="h1"
+          component="h2"
           fw={700}
           c="var(--color-field-ink)"
           style={{

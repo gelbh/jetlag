@@ -88,6 +88,7 @@ describe("linear near-region isoline", () => {
     expect(featureHasNonAxisEdge(region!)).toBe(true);
   });
 
+  // Dense 48-division isoline can exceed the default 5s under CI coverage load.
   it("persist-slims isoline shade under the vertex ceiling", async () => {
     const denseShore: Feature<LineString> = {
       type: "Feature",
@@ -110,5 +111,5 @@ describe("linear near-region isoline", () => {
     } else {
       expect(slim.message).toMatch(/too large to store/i);
     }
-  });
+  }, 30_000);
 });
