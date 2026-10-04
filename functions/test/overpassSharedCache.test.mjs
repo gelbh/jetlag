@@ -1,14 +1,15 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { OVERPASS_L2_ENV_KEYS as K } from "../proxies/overpassL2Env.mjs";
 import {
   clearOverpassCachesForTests,
   fetchCachedOverpassQuery,
 } from "../proxies/overpassProxyCore.mjs";
-import { OVERPASS_L2_ENV_KEYS as K } from "../proxies/overpassL2Env.mjs";
 import {
   createCloudflareL2Backend,
   createMemoryL2Backend,
+  createOverpassR2S3ClientConfig,
   overpassL2CacheKey,
   readOverpassL2,
   setOverpassL2BackendForTests,
@@ -33,10 +34,27 @@ describe("overpassSharedCache", () => {
     assert.equal(hit?.text, '{"elements":[]}');
   });
 
-  it("L2 cache key for premium includes colon and r2 object key prefixes overpass/", () => {
-    const key = overpassL2CacheKey("query", "premium");
-    assert.match(key, /^premium:[0-9a-f]{64}$/);
-    assert.equal(`overpass/${key}`.includes(":"), true);
+  it("R2 S3 client config opts out of default checksums for R2", () => {
+    const previous = {};
+    for (const envKey of Object.values(K)) {
+      previous[envKey] = process.env[envKey];
+      process.env[envKey] = `test-${envKey}`;
+    }
+    try {
+      const config = createOverpassR2S3ClientConfig();
+      assert.equal(config.requestChecksumCalculation, "WHEN_REQUIRED");
+      assert.equal(config.responseChecksumValidation, "WHEN_REQUIRED");
+      assert.equal(config.forcePathStyle, true);
+      assert.equal(config.region, "auto");
+    } finally {
+      for (const [envKey, value] of Object.entries(previous)) {
+        if (value === undefined) {
+          delete process.env[envKey];
+        } else {
+          process.env[envKey] = value;
+        }
+      }
+    }
   });
 
   it("cloudflare R2 put/get send S3 Key with premium colon prefix", async () => {

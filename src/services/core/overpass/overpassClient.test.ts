@@ -14,8 +14,9 @@ import {
 } from "./overpassClient";
 
 describe("overpass proxy timeout ladder", () => {
-  it("proxy attempt timeout is at least 60s", () => {
-    expect(OVERPASS_PROXY_FETCH_TIMEOUT_MS).toBeGreaterThanOrEqual(60_000);
+  it("proxy attempt timeout outlasts failover plus Postpass", () => {
+    expect(OVERPASS_PROXY_FETCH_TIMEOUT_MS).toBeGreaterThanOrEqual(80_000);
+    expect(OVERPASS_PROXY_FETCH_TIMEOUT_MS).toBeLessThan(90_000);
   });
 
   it("proxy allows at most one retry", () => {

@@ -11,11 +11,12 @@ export const OVERPASS_PROXY_MAX_RETRIES = 1;
 const OVERPASS_BASE_BACKOFF_MS = 750;
 const OVERPASS_DIRECT_FETCH_TIMEOUT_MS = 15_000;
 /**
- * Browser proxy attempt timeout. Must stay above server
- * `OVERPASS_FAILOVER_BUDGET_MS` (50s) so the client can receive structured JSON
- * errors instead of aborting mid-failover.
+ * Browser proxy attempt timeout. Must outlast server Overpass failover (50s)
+ * plus Postpass fallback (25s) so the client receives structured JSON 504
+ * instead of aborting mid-flight. Keep under `PROXY_TIMEOUT_SECONDS_CEILING`
+ * (90s).
  */
-export const OVERPASS_PROXY_FETCH_TIMEOUT_MS = 60_000;
+export const OVERPASS_PROXY_FETCH_TIMEOUT_MS = 80_000;
 
 const OVERPASS_UNAVAILABLE_MESSAGE = "Map data didn't load. Check your connection and try again.";
 

@@ -12,6 +12,9 @@ const OVERPASS_L2_TTL_MS = 60 * 60 * 1000;
 /** @type {OverpassL2Backend | null} */
 let testBackend = null;
 
+/** @type {OverpassL2Backend | null} */
+let cachedCloudflareBackend = null;
+
 export function overpassL2CacheKey(query, tier = "free") {
   const l1Key = createHash("sha256").update(query).digest("hex");
   return `${tier}:${l1Key}`;
@@ -19,6 +22,7 @@ export function overpassL2CacheKey(query, tier = "free") {
 
 export function setOverpassL2BackendForTests(backend) {
   testBackend = backend;
+  cachedCloudflareBackend = null;
 }
 
 export function createMemoryL2Backend() {
@@ -51,7 +55,10 @@ function resolveBackend() {
   if (!envConfigured()) {
     return null;
   }
-  return createCloudflareL2Backend();
+  if (!cachedCloudflareBackend) {
+    cachedCloudflareBackend = createCloudflareL2Backend();
+  }
+  return cachedCloudflareBackend;
 }
 
 function kvUrl(key) {
@@ -60,24 +67,31 @@ function kvUrl(key) {
   return `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/values/${encodeURIComponent(key)}`;
 }
 
-function defaultCreateS3Client() {
-  return new S3Client({
+/**
+ * R2-compatible S3 client options. Checksum WHEN_REQUIRED is required for
+ * `@aws-sdk/client-s3` ≥3.729 (default CRC32 FULL_OBJECT is unsupported by R2).
+ * @returns {ConstructorParameters<typeof S3Client>[0]}
+ */
+export function createOverpassR2S3ClientConfig() {
+  return {
     region: "auto",
     endpoint: process.env[K.R2_ENDPOINT],
+    forcePathStyle: true,
     credentials: {
       accessKeyId: process.env[K.R2_ACCESS_KEY_ID],
       secretAccessKey: process.env[K.R2_SECRET_ACCESS_KEY],
     },
-  });
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
+  };
+}
+
+function defaultCreateS3Client() {
+  return new S3Client(createOverpassR2S3ClientConfig());
 }
 
 function isR2NotFound(error) {
-  return (
-    error?.name === "NoSuchKey" ||
-    error?.name === "NotFound" ||
-    error?.Code === "NoSuchKey" ||
-    error?.$metadata?.httpStatusCode === 404
-  );
+  return error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404;
 }
 
 /**
@@ -125,12 +139,11 @@ export function createCloudflareL2Backend(options = {}) {
             Key: key,
           }),
         );
-        const body =
-          typeof response.Body?.transformToString === "function"
-            ? await response.Body.transformToString()
-            : String(response.Body ?? "");
+        if (typeof response.Body?.transformToString !== "function") {
+          throw new Error("R2 get failed: response body is not a readable stream");
+        }
         return {
-          body,
+          body: await response.Body.transformToString(),
           contentType: response.ContentType ?? "application/json",
         };
       } catch (error) {
