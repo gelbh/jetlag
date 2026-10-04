@@ -227,6 +227,7 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
+// persistedAuthHint.ts reads the browserLocal/browserSession entry this picks; keep them in step.
 async function configureAuthPersistence(
   firebaseAuth: Auth,
 ): Promise<"local" | "session" | "memory"> {

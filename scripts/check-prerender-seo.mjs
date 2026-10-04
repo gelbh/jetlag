@@ -105,6 +105,13 @@ for (const { path: urlPath, indexable } of targets) {
     failed = true;
   }
 
+  if (html.includes('id="fire_app_check_') || html.includes('class="grecaptcha')) {
+    console.error(
+      `${urlPath}: prerender HTML contains the App Check reCAPTCHA container (see finalizePrerenderDom)`,
+    );
+    failed = true;
+  }
+
   if (html.includes("http://127.0.0.1") || html.includes("http://localhost")) {
     console.error(`${urlPath}: prerender HTML still contains preview-origin absolute URLs`);
     failed = true;

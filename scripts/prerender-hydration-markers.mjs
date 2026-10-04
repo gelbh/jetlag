@@ -9,9 +9,12 @@
  * - `<!-- -->` between adjacent text nodes (serialization merges them into one),
  * - `data-prerendered="true"` on `#root` (the `src/main.tsx` hydrate switch),
  * and drops what the hydration render cannot reproduce: `#boot-splash`, Mantine floating
- * indicators (rendered only after a measuring re-render, and positioned for this viewport), and
- * the `<html>` boot/motion attributes App effects set for this headless session (the visitor's
- * own App sets them again once hydrated).
+ * indicators (rendered only after a measuring re-render, and positioned for this viewport), the
+ * `<html>` boot/motion attributes App effects set for this headless session (the visitor's
+ * own App sets them again once hydrated), and the App Check reCAPTCHA container this session's
+ * Firebase appended to `<body>` (shipped, it loads reCAPTCHA's iframe on every visit and makes
+ * the visitor's own App Check render into a non-empty element: "reCAPTCHA placeholder element
+ * must be empty").
  *
  * `useId` attributes keep the snapshot's client-format ids (React does not patch attributes
  * when hydrating); label/input pairs stay consistent with each other.
@@ -117,6 +120,9 @@ export function finalizePrerenderDom() {
     document.documentElement.removeAttribute(name);
   }
   for (const node of rootEl.querySelectorAll(".mantine-FloatingIndicator-root")) {
+    node.remove();
+  }
+  for (const node of document.querySelectorAll('[id^="fire_app_check_"]')) {
     node.remove();
   }
   rootEl.setAttribute("data-prerendered", "true");
