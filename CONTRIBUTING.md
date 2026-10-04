@@ -64,19 +64,21 @@ just dev-local
 # bootstraps deps/WASM as needed, then Firebase emulators + Vite (Doppler `dev_emulator`)
 # If default ports are busy, asks: kill those listeners, or bind the next free ports
 # (no TTY: next free ports). Prints the Vite and Emulator UI URLs it actually bound
-# Remapped stacks set VITE_FIREBASE_*_EMULATOR_PORT (+ VITE_DEV_PORT) for the client
-# Functions CORS allows http://localhost|127.0.0.1:5173-5200 for shifted Vite
+# Remapped stacks export client ports: VITE_FIREBASE_AUTH_EMULATOR_PORT,
+# VITE_FIRESTORE_EMULATOR_PORT, VITE_FIREBASE_STORAGE_EMULATOR_PORT,
+# VITE_FIREBASE_FUNCTIONS_EMULATOR_PORT. VITE_DEV_PORT is Vite --port only.
+# Functions CORS allows http://localhost|127.0.0.1:5173-5200; Vite remap stays in that window
 ```
 
-Two-terminal equivalent:
+Two-terminal equivalent (default ports, `firebase.json`):
 
 ```bash
 just emulators
 # other terminal:
 just dev-emulator
-# Optional: write firebase.dev-local.json (via a prior just dev-local) then
-# npm run emulators:local  # uses that config when present
 ```
+
+Do not run `npm run emulators:local` after a remapped `just dev-local` unless you also export those four client port vars (the npm script only reads `firebase.dev-local.json` when `VITE_FIREBASE_AUTH_EMULATOR_PORT` is set). Prefer `just emulators` for defaults.
 
 ### Expected emulator noise
 

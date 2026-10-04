@@ -164,10 +164,11 @@ free_port_from() {
 
 assign_service_port() {
   local preferred="$1"
+  local span="${2:-40}"
   if [[ "$PORT_MODE" == defaults ]]; then
     take_preferred_port "$preferred"
   else
-    free_port_from "$preferred"
+    free_port_from "$preferred" "$span"
   fi
 }
 
@@ -293,7 +294,8 @@ main() {
     "eventarc:9299" \
     "tasks:9499"
 
-  assign_service_port 5173
+  # CORS in functions/lib/cors.mjs allows Vite 5173-5200 only.
+  assign_service_port 5173 27
   vite_port="$FREE_PORT"
   assign_service_port "$auth_base"
   auth_port="$FREE_PORT"

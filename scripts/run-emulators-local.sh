@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Firebase emulator suite for local play. Prefers firebase.dev-local.json (written by
-# scripts/dev-local.sh) so remapped ports work; falls back to firebase.json.
+# Firebase emulator suite for local play. Use firebase.dev-local.json only when
+# the launcher (or the caller) exported remap ports; otherwise firebase.json so
+# a leftover remap file cannot split-brain two-terminal Vite on defaults.
 set -euo pipefail
-cfg="firebase.dev-local.json"
-if [[ ! -f "$cfg" ]]; then
-  cfg="firebase.json"
+cfg="firebase.json"
+if [[ -f firebase.dev-local.json && -n "${VITE_FIREBASE_AUTH_EMULATOR_PORT:-}" ]]; then
+  cfg="firebase.dev-local.json"
 fi
 exec firebase --config "$cfg" emulators:start --project demo-jetlag --only auth,firestore,storage,functions

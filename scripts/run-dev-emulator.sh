@@ -24,7 +24,9 @@ doppler_project() {
 }
 
 proj="$(doppler_project)"
-env_args=()
+# Always include VITE_DEV_PORT so env_args is never empty: macOS /bin/bash 3.2
+# with set -u treats "${arr[@]}" as unbound when the array has no elements.
+env_args=("VITE_DEV_PORT=${dev_port}")
 [[ -n "$auth_port" ]] && env_args+=("VITE_FIREBASE_AUTH_EMULATOR_PORT=${auth_port}")
 [[ -n "$firestore_port" ]] && env_args+=("VITE_FIRESTORE_EMULATOR_PORT=${firestore_port}")
 [[ -n "$storage_port" ]] && env_args+=("VITE_FIREBASE_STORAGE_EMULATOR_PORT=${storage_port}")
