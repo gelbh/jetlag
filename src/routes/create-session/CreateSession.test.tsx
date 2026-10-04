@@ -181,7 +181,7 @@ describe("CreateSession", () => {
     expect(screen.getByRole("link", { name: /^back$/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^create$/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Draw on map" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /confirm game area/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create game" })).toBeInTheDocument();
     const root = document.querySelector(".jl-create-session");
     expect(root).toBeTruthy();
   });
@@ -198,7 +198,7 @@ describe("CreateSession", () => {
 
     renderCreateSession();
 
-    const confirm = screen.getByRole("button", { name: /confirm game area/i });
+    const confirm = screen.getByRole("button", { name: "Create game" });
     expect(confirm).toBeDisabled();
 
     resolveAuth?.({ uid: "host-1" });
@@ -217,7 +217,7 @@ describe("CreateSession", () => {
       expect(screen.getByText(/couldn't sign in to create a session/i)).toBeInTheDocument();
     });
     expect(screen.getByRole("button", { name: /^retry$/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /confirm game area/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Create game" })).toBeDisabled();
   });
 
   it("lazy-loads the boundary parser and starts sea-level sampling on confirm", async () => {
@@ -232,7 +232,7 @@ describe("CreateSession", () => {
       expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
 
     await waitFor(() => {
       expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(IMPORTED_AREA, {
@@ -281,7 +281,7 @@ describe("CreateSession", () => {
   it("Confirm with no area awaits map mount, then frames the live viewport", async () => {
     renderCreateSession();
 
-    fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
 
     // Confirm is the intent: the map mounts, and nothing is submitted yet.
     expect(await screen.findByTestId("create-map")).toBeInTheDocument();
@@ -335,7 +335,7 @@ describe("CreateSession", () => {
     });
 
     loadMapWithDefaultViewport();
-    fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
 
     expect(
       await screen.findByText(
@@ -363,7 +363,7 @@ describe("CreateSession", () => {
     try {
       renderCreateSession();
 
-      fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
+      fireEvent.click(screen.getByRole("button", { name: "Create game" }));
       await act(async () => {
         await vi.advanceTimersByTimeAsync(10_000);
       });

@@ -25,7 +25,7 @@ test("@smoke creates a session from home and reaches the map", async ({ page }) 
       timeout: 10_000,
     });
     await expectCreatePageMapPreviewLoaded(page);
-    await page.getByRole("button", { name: "Confirm game area" }).click();
+    await page.getByRole("button", { name: "Create game" }).click();
   });
 
   await test.step("land on map with seeker chrome", async () => {

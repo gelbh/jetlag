@@ -77,7 +77,7 @@ test.describe("layout regression @ default mobile", () => {
     await page.goto("/create");
     await assertCreateAreaReady(page);
 
-    const confirm = page.getByRole("button", { name: "Confirm game area" });
+    const confirm = page.getByRole("button", { name: "Create game" });
     await expect(confirm).toBeVisible();
     // MobileSheet split layout: scroll body vs pinned footer (single-path chrome).
     await expect(page.locator(".jl-create-session .hud-sheet")).toHaveCount(1);
@@ -86,7 +86,7 @@ test.describe("layout regression @ default mobile", () => {
       const root = document.querySelector(".jl-create-session");
       const scroll = root?.querySelector(".hud-sheet .jl-scroll");
       const button = Array.from(root?.querySelectorAll("button") ?? []).find(
-        (el) => el.textContent?.trim() === "Confirm game area",
+        (el) => el.textContent?.trim() === "Create game",
       );
       if (!(scroll instanceof HTMLElement) || !(button instanceof HTMLElement)) {
         return { ok: false as const, reason: "missing nodes" };

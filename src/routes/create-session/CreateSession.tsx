@@ -112,7 +112,7 @@ export function CreateSession() {
                 styles={filledStyles}
                 busy={confirmBusy}
                 unavailable={session.requiresPremiumSignIn || !session.hostAuthReady}
-                idleLabel="Confirm game area"
+                idleLabel="Create game"
                 busyLabel={session.confirmLabel}
                 onClick={() => void session.handleConfirm()}
               />

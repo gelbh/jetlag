@@ -748,11 +748,7 @@ export function useCreateSession() {
     });
 
   const confirmBusy = loading || isSubmitting;
-  const confirmLabel = verifyingAccess
-    ? "Verifying…"
-    : confirmBusy
-      ? "Creating…"
-      : "Confirm game area";
+  const confirmLabel = verifyingAccess ? "Verifying…" : confirmBusy ? "Creating…" : "Create game";
 
   const handleLocationQueryChange = (value: string) => {
     setLocationQuery(value);

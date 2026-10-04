@@ -95,7 +95,7 @@ export async function createSessionFromCreatePage(page: Page) {
     timeout: 10_000,
   });
   await expectCreatePageMapPreviewLoaded(page);
-  await page.getByRole("button", { name: "Confirm game area" }).click();
+  await page.getByRole("button", { name: "Create game" }).click();
   await expect(page).toHaveURL(/\/map/, { timeout: 15_000 });
   await expect(page.getByRole("button", { name: "Radar" })).toBeVisible({
     timeout: 15_000,
