@@ -1,8 +1,14 @@
 import { useEffect, useRef } from "react";
-import { isQuestionAnswerDeadlineExpired, questionAnswerDeadlineMs } from "../../domain/questions";
+import {
+  activeDeadlineAnchor,
+  isQuestionAnswerDeadlineExpired,
+  questionAnswerDeadlineMs,
+} from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { SessionRulesInput } from "../../domain/session/rules";
+import { serverNow, serverNowIso } from "../../services/core/time/serverClock";
+import { commitWrite } from "../../services/firestore/commitWrite";
 import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
 
 const DEADLINE_EXPIRED_MESSAGE =
@@ -18,7 +24,7 @@ interface UseQuestionDeadlineEnforcementParams {
   hidingTimerRunning: boolean;
   pauseTimer: () => void;
   resumeTimer: () => void;
-  postSystemMessage: (text: string) => Promise<void>;
+  postSystemMessage: (text: string) => void;
 }
 
 function hasMoveInProgress(hidingZones: readonly HidingZoneRecord[]): boolean {
@@ -57,16 +63,17 @@ export function useQuestionDeadlineEnforcement({
     }
 
     const checkDeadlines = () => {
-      const nowMs = Date.now();
+      const nowMs = serverNow();
+      // A still-queued ask has not reached the hider: its window has not opened.
       const openQuestions = pendingQuestions.filter(
-        (question) => question.status === "pending" && question.answerableAt,
+        (question) => question.status === "pending" && activeDeadlineAnchor(question) !== undefined,
       );
 
       for (const question of openQuestions) {
         const deadlineMs = questionAnswerDeadlineMs(question.toolType, sessionRules);
         const expired =
           question.deadlineExpiredAt !== undefined ||
-          isQuestionAnswerDeadlineExpired(question.answerableAt, deadlineMs, nowMs);
+          isQuestionAnswerDeadlineExpired(activeDeadlineAnchor(question), deadlineMs, nowMs);
 
         if (!expired || expiryHandledRef.current.has(question.id)) {
           continue;
@@ -74,20 +81,20 @@ export function useQuestionDeadlineEnforcement({
 
         expiryHandledRef.current.add(question.id);
 
-        void (async () => {
-          if (!question.deadlineExpiredAt) {
-            await updatePendingQuestion(sessionId, question.id, {
-              deadlineExpiredAt: new Date().toISOString(),
-            });
-          }
+        if (!question.deadlineExpiredAt) {
+          commitWrite("question.update", () =>
+            updatePendingQuestion(sessionId, question.id, {
+              deadlineExpiredAt: serverNowIso(),
+            }),
+          );
+        }
 
-          await postSystemMessage(DEADLINE_EXPIRED_MESSAGE);
+        postSystemMessage(DEADLINE_EXPIRED_MESSAGE);
 
-          if (hidingTimerRunningRef.current) {
-            autoPausedQuestionRef.current = question.id;
-            pauseTimer();
-          }
-        })();
+        if (hidingTimerRunningRef.current) {
+          autoPausedQuestionRef.current = question.id;
+          pauseTimer();
+        }
       }
 
       const closedAfterExpiry = pendingQuestions.filter(
