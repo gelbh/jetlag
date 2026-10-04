@@ -6,7 +6,7 @@ Edge entry for the Jet Lag SPA host (`worker/index.ts`). Handles a few special A
 
 Handlers run in this order (first match wins for early returns):
 
-1. **Sentry tunnel** — `SENTRY_TUNNEL_PATH` → `handleSentryTunnelRequest`
+1. **Sentry envelope tunnel** — `SENTRY_TUNNEL_PATH` (`/api/envelope-tunnel`) → `handleSentryTunnelRequest` (host/project allowlist)
 2. **PostHog reverse proxy** — paths matched by `shouldHandlePosthogProxy` → `handlePosthogProxyRequest`
 3. **CSP report** — `POST /api/csp-report` (other methods → `204`) → logs truncated body
 4. **Incident email** — `INCIDENT_EMAIL_PATH` → `handleIncidentEmailRequest`
@@ -38,6 +38,8 @@ Injected at runtime via `wrangler secret put` (prod) or `.dev.vars` (local). Nev
 | `INCIDENT_EMAIL_SECRET` | yes (for email) | Bearer shared with Cloud Function |
 | `INCIDENT_ADMIN_EMAIL` | no | Admin recipient (code default if unset) |
 | `INCIDENT_EMAIL_FROM` | no | Verified Resend From (code default if unset) |
+| `SENTRY_TUNNEL_ALLOWED_HOST` | yes (for tunnel) | Exact ingest host from DSN (e.g. `o….ingest.de.sentry.io`) |
+| `SENTRY_TUNNEL_ALLOWED_PROJECT_IDS` | yes (for tunnel) | Comma-separated project ids; empty fails closed (403) |
 
 Copy `.dev.vars.example` → `.dev.vars` for `just preview-worker`.
 
