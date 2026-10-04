@@ -11,6 +11,7 @@ import {
   classifyClientSentryEvent,
   isFirestorePermissionDeniedEvent,
 } from "./sentryEventPolicy";
+import { isOpenFreeMapTileAbortSpan } from "./sentryHostNoiseSpans";
 import { CLIENT_SENTRY_IGNORE_SPANS } from "./sentryIgnoreSpans";
 import { createSentryReactRouterIntegration } from "./sentryReactRouter";
 
@@ -148,6 +149,12 @@ export function initSentry(): void {
     dataCollection: CLIENT_SENTRY_DATA_COLLECTION,
     integrations: [createSentryReactRouterIntegration()],
     beforeSend: scrubEvent,
+    beforeSendSpan(span) {
+      if (isOpenFreeMapTileAbortSpan(span)) {
+        return null;
+      }
+      return span;
+    },
     replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 0,
     replaysOnErrorSampleRate: 1.0,
   });

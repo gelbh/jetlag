@@ -5,6 +5,7 @@ import * as Sentry from "@sentry/node";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError } from "firebase-functions/v2/https";
 import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../session/expectedSessionUxHttpsErrors.mjs";
+import { isCloudflareKvMissSpan } from "./sentryHostNoiseSpans.mjs";
 
 const sentryDsnSecret = defineSecret("SENTRY_DSN");
 
@@ -241,6 +242,12 @@ export function initFunctionsSentry() {
         return null;
       }
       return event;
+    },
+    beforeSendSpan(span) {
+      if (isCloudflareKvMissSpan(span)) {
+        return null;
+      }
+      return span;
     },
   });
   initialized = true;
