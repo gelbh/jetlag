@@ -17,6 +17,8 @@ export const OVERPASS_FETCH_TIMEOUT_MS = 25_000;
  * Kept under the `proxy` Cloud Run timeout so we can return JSON 504 instead
  * of a naked platform kill. Do not raise without revisiting
  * {@link PROXY_TIMEOUT_SECONDS_CEILING}.
+ * Browser `OVERPASS_PROXY_FETCH_TIMEOUT_MS` must stay ≥ this budget so clients
+ * receive structured JSON errors instead of aborting mid-failover.
  */
 export const OVERPASS_FAILOVER_BUDGET_MS = 50_000;
 /**
