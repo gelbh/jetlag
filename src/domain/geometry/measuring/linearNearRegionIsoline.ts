@@ -244,7 +244,7 @@ export async function buildLinearNearRegionIsoline(
   );
   for (let row = 0; row < divisions; row += 1) {
     for (let col = 0; col < divisions; col += 1) {
-      if (grid[row][col] === "near" && !stamped[row]![col]) {
+      if (grid[row][col] === "near" && !boundary[row]![col]) {
         interiorGrid[row][col] = "near";
       }
     }

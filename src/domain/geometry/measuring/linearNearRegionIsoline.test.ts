@@ -1,6 +1,6 @@
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import type { Feature, LineString, Polygon } from "geojson";
+import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import { persistSlimPolygonFeature } from "../progressive/persistSlim";
@@ -33,8 +33,7 @@ const shore: Feature<LineString> = {
   },
 };
 
-function ringHasNonAxisEdge(feature: Feature<Polygon>): boolean {
-  const ring = feature.geometry.coordinates[0] ?? [];
+function ringHasNonAxisEdge(ring: number[][]): boolean {
   for (let i = 1; i < ring.length; i += 1) {
     const [x0, y0] = ring[i - 1]!;
     const [x1, y1] = ring[i]!;
@@ -45,6 +44,13 @@ function ringHasNonAxisEdge(feature: Feature<Polygon>): boolean {
   return false;
 }
 
+function featureHasNonAxisEdge(feature: Feature<Polygon | MultiPolygon>): boolean {
+  if (feature.geometry.type === "Polygon") {
+    return ringHasNonAxisEdge(feature.geometry.coordinates[0] ?? []);
+  }
+  return feature.geometry.coordinates.some((polygon) => ringHasNonAxisEdge(polygon[0] ?? []));
+}
+
 describe("linear near-region isoline", () => {
   it("is not a single axis-aligned rectangle on a large AABB shore", async () => {
     const region = await buildCoastlineNearRegionDistanceThreshold([shore], 5_000, gameArea, {
@@ -52,22 +58,11 @@ describe("linear near-region isoline", () => {
     });
     expect(region).not.toBeNull();
     expect(countPolygonVertices(region!)).toBeGreaterThan(5);
-    const polygon =
-      region!.geometry.type === "Polygon"
-        ? (region as Feature<Polygon>)
-        : {
-            type: "Feature" as const,
-            properties: {},
-            geometry: {
-              type: "Polygon" as const,
-              coordinates: region!.geometry.coordinates[0]!,
-            },
-          };
-    expect(ringHasNonAxisEdge(polygon)).toBe(true);
+    expect(featureHasNonAxisEdge(region!)).toBe(true);
     expect(booleanPointInPolygon(turfPoint([0, 51]), region!)).toBe(true);
   });
 
-  it("keeps unstamped remainder near-boundary cells as coarse rects", async () => {
+  it("covers unstamped remainder at coarse isoline membership", async () => {
     const parallels: Feature<LineString>[] = [];
     for (let index = 0; index < 10; index += 1) {
       const lat = 50.15 + index * 0.18;
@@ -87,8 +82,10 @@ describe("linear near-region isoline", () => {
       divisions: 24,
     });
     expect(region).not.toBeNull();
+    // Cap leaves some boundary cells unstamped; they stay in via coarse dual / MS, not full merge-rects.
     expect(booleanPointInPolygon(turfPoint([0, 50.15]), region!)).toBe(true);
     expect(booleanPointInPolygon(turfPoint([0, 50.15 + 9 * 0.18]), region!)).toBe(true);
+    expect(featureHasNonAxisEdge(region!)).toBe(true);
   });
 
   it("persist-slims isoline shade under the vertex ceiling", async () => {

@@ -801,7 +801,7 @@ fn build_isoline_near_region_from_grid(
     let mut interior_grid = vec![vec![CellClass::Skip; divisions]; divisions];
     for row in 0..divisions {
         for col in 0..divisions {
-            if grid[row][col] == CellClass::Near && !stamped[row][col] {
+            if grid[row][col] == CellClass::Near && !boundary[row][col] {
                 interior_grid[row][col] = CellClass::Near;
             }
         }
