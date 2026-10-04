@@ -35,6 +35,7 @@ import {
 import { generateLocalCode } from "../../domain/session/meta/sessionCode";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
+import { matchGamePresetForPlace } from "../../domain/session/presets/gamePresetSearch";
 import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/presetFavourites";
 import {
   type GameSize,
@@ -59,7 +60,11 @@ import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/f
 import { requestLocationAccess } from "../../services/core/location/geolocation";
 import { retryAsync } from "../../services/core/network/retryAsync";
 import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
-import { type GeocodedPlace, searchPlaces } from "../../services/geo/geocoding";
+import {
+  type GeocodedPlace,
+  searchPlacesSettled,
+  suggestPlacesAtPoint,
+} from "../../services/geo/geocoding";
 import { loadRegionPackSessionBoundaries } from "../../services/geo/matching/regionPackBoundaries";
 import { resolveSessionMatchingAreas } from "../../services/geo/matching/resolveSessionMatchingAreas";
 import { emitSessionStartedActivity } from "../../services/session/emitSessionActivity";
@@ -70,21 +75,18 @@ import {
 import { inferTransitMetroId, listTransitMetros } from "../../services/transit/transitCatalog";
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
-import {
-  CreateSessionMapMountAbortedError,
-  useCreateSessionMapMount,
-} from "./useCreateSessionMapMount";
-import { placeToFocusBounds } from "./utils";
+import { useCreateSessionMapMount } from "./useCreateSessionMapMount";
+import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const MISSING_GAME_AREA_ERROR =
-  "Search for a place, import a boundary, or move the map until the play area is framed.";
-const MAP_LOAD_FAILED_ERROR =
-  "The map couldn't load. Search for a place or import a boundary instead.";
+  "Search for a place, load a preset, or open Draw to set the play area.";
 
 export function useCreateSession() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { beginRequest, isLatestRequest } = useLatestRequest();
+  const { beginRequest: beginLocationBias, isLatestRequest: isLatestLocationBias } =
+    useLatestRequest();
   const { isSubmitting, runLocked } = useSubmitLock();
   const presets = useGamePresetStore((state) => state.presets);
   const favouritePresetIds = useGamePresetStore((state) => state.favouritePresetIds);
@@ -113,6 +115,7 @@ export function useCreateSession() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<GeocodedPlace | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [mapFocusToken, setMapFocusToken] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -121,6 +124,7 @@ export function useCreateSession() {
   const [tierManuallySet, setTierManuallySet] = useState(false);
   const [playerRole, setPlayerRole] = useState<PlayerRole>("seeker");
   const [gameSize, setGameSize] = useState<GameSize>("medium");
+  const [gameSizeUserOverrode, setGameSizeUserOverrode] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>("imperial");
   const [advancedSettings, setAdvancedSettings] = useState(() =>
     defaultAdvancedSessionSettings("medium", "imperial"),
@@ -134,6 +138,9 @@ export function useCreateSession() {
   const { entitlements: premiumEntitlements, refresh: refreshPremiumEntitlements } =
     usePremiumEntitlements();
   const [accessCodeExpanded, setAccessCodeExpanded] = useState(false);
+  const handleGameSizeUserOverride = useCallback(() => {
+    setGameSizeUserOverrode(true);
+  }, []);
   const handleGameSizeChange = useCallback(
     (size: GameSize) => {
       startTransition(() => {
@@ -153,9 +160,52 @@ export function useCreateSession() {
   const [importLoading, setImportLoading] = useState(false);
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
+  const [locationBusy, setLocationBusy] = useState(false);
+  const [locationStatus, setLocationStatus] = useState<string | null>(null);
+  const [locationStatusTone, setLocationStatusTone] = useState<"ok" | "halt" | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
   const presetApplyGenerationRef = useRef(0);
+  const [presetApplyNonce, setPresetApplyNonce] = useState(0);
   const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
+  const loadedPresetId = searchParams.get("preset");
+  const loadedPreset = useMemo(() => {
+    if (!loadedPresetId) {
+      return null;
+    }
+    return presets.find((entry) => entry.id === loadedPresetId) ?? null;
+  }, [loadedPresetId, presets]);
+
+  const selectPreset = useCallback(
+    (presetId: string) => {
+      appliedPresetRef.current = null;
+      setPresetApplyNonce((nonce) => nonce + 1);
+      setSearchParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          next.set("preset", presetId);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const clearLoadedPreset = useCallback(() => {
+    presetApplyGenerationRef.current += 1;
+    appliedPresetRef.current = null;
+    setSearchParams(
+      (current) => {
+        if (!current.has("preset")) {
+          return current;
+        }
+        const next = new URLSearchParams(current);
+        next.delete("preset");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
 
   useEffect(() => {
     const presetId = searchParams.get("preset");
@@ -221,9 +271,14 @@ export function useCreateSession() {
         hidingZoneRadiusMeters: hidingZoneRadiusMeters(resolvedGameSize, unit),
       };
 
+      setGameSizeUserOverrode(false);
       setGameSize(resolvedGameSize);
       setDistanceUnit(unit);
       setAdvancedSettings(resolvedAdvanced);
+      setSelectedPlaceId(null);
+      setSelectedPlace(null);
+      setSearchResults([]);
+      setSelectedAreas([]);
       if (draft.transitMetroId) {
         setTransitMetroOverride(draft.transitMetroId);
       }
@@ -233,7 +288,11 @@ export function useCreateSession() {
       }
       if (gameArea) {
         setImportedGameArea(gameArea);
+        framing.resetManualFraming();
         framing.applyFocusToGameArea(gameArea);
+        setMapFocusToken((token) => token + 1);
+      } else {
+        setImportedGameArea(null);
       }
       if (draft.placeLabel) {
         setLocationQuery(draft.placeLabel);
@@ -241,17 +300,109 @@ export function useCreateSession() {
     };
 
     void applyPreset();
-  }, [framing.applyFocusToGameArea, presets, requestMap, searchParams]);
+  }, [
+    framing.applyFocusToGameArea,
+    framing.resetManualFraming,
+    presetApplyNonce,
+    presets,
+    requestMap,
+    searchParams,
+  ]);
+
+  const applyPlace = useCallback(
+    (place: GeocodedPlace, options?: { loadMatchingPreset?: boolean }) => {
+      if (options?.loadMatchingPreset !== false) {
+        const matchedPreset = matchGamePresetForPlace(presets, place);
+        if (matchedPreset) {
+          selectPreset(matchedPreset.id);
+          return;
+        }
+      }
+
+      requestMap();
+      clearLoadedPreset();
+      setImportedGameArea(null);
+      setSelectedPlaceId(place.id);
+      setSelectedPlace(place);
+      setLocationQuery(place.displayName);
+      framing.resetManualFraming();
+      framing.applyFocusToGameArea(placeToGameArea(place));
+      setMapFocusToken((token) => token + 1);
+      setError(null);
+    },
+    [clearLoadedPreset, framing, presets, requestMap, selectPreset, setMapFocusToken],
+  );
 
   const requestLocationBias = useCallback(() => {
+    setLocationBusy(true);
+    setLocationStatus(null);
+    setLocationStatusTone(null);
+    const requestId = beginLocationBias();
     void requestLocationAccess({ highAccuracy: false, userGesture: true })
-      .then((reading) => {
+      .then(async (reading) => {
         userLocationRef.current = [reading.lat, reading.lng];
+        requestMap();
+        const keepExistingArea = Boolean(
+          importedGameArea || selectedAreas.length > 0 || framing.userFramed,
+        );
+        if (keepExistingArea) {
+          framing.applyFocusBounds(gpsReadingToFocusBounds(reading.lat, reading.lng));
+          setMapFocusToken((token) => token + 1);
+          return;
+        }
+
+        const places = await suggestPlacesAtPoint([reading.lat, reading.lng]);
+        if (!isLatestLocationBias(requestId)) {
+          return;
+        }
+        if (places.length === 0) {
+          framing.resetManualFraming();
+          framing.applyFocusBounds(gpsReadingToFocusBounds(reading.lat, reading.lng));
+          setMapFocusToken((token) => token + 1);
+          return;
+        }
+
+        setSearchResults(places.length > 1 ? places : []);
+        applyPlace(places[0]!, { loadMatchingPreset: places.length === 1 });
       })
       .catch(() => {
-        // Best-effort location bias only; search works without GPS.
+        if (!isLatestLocationBias(requestId)) {
+          return;
+        }
+        setLocationStatus("Couldn't use your location.");
+        setLocationStatusTone("halt");
+      })
+      .finally(() => {
+        if (isLatestLocationBias(requestId)) {
+          setLocationBusy(false);
+        }
       });
-  }, []);
+  }, [
+    beginLocationBias,
+    framing,
+    importedGameArea,
+    isLatestLocationBias,
+    requestMap,
+    selectedAreas,
+    applyPlace,
+    setMapFocusToken,
+  ]);
+
+  const openMapAtLocation = useCallback(() => {
+    requestMap();
+    void requestLocationAccess({ highAccuracy: false, userGesture: true })
+      .then((reading) => {
+        if (!Number.isFinite(reading.lat) || !Number.isFinite(reading.lng)) {
+          return;
+        }
+        userLocationRef.current = [reading.lat, reading.lng];
+        framing.applyFocusBounds(gpsReadingToFocusBounds(reading.lat, reading.lng));
+        setMapFocusToken((token) => token + 1);
+      })
+      .catch(() => {
+        // Prompt/denied: map still opens on the default viewport.
+      });
+  }, [framing, requestMap]);
 
   const bootstrapHostAuth = useCallback(async () => {
     if (!isFirebaseConfigured()) {
@@ -445,18 +596,6 @@ export function useCreateSession() {
     setError(null);
   };
 
-  const applyPlace = (place: GeocodedPlace) => {
-    requestMap();
-    setImportedGameArea(null);
-    setSelectedPlaceId(place.id);
-    setSelectedPlace(place);
-    setSearchResults([]);
-    setLocationQuery(place.displayName);
-    framing.resetManualFraming();
-    framing.applyFocusToGameArea(placeToGameArea(place));
-    setError(null);
-  };
-
   const handleBoundaryImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -500,39 +639,31 @@ export function useCreateSession() {
     setSearchLoading(true);
     setError(null);
 
-    try {
-      const results = await searchPlaces(
-        trimmed,
-        userLocationRef.current ? { near: userLocationRef.current } : undefined,
-      );
-      if (!isLatestRequest(requestId)) {
-        return;
-      }
-      if (results.length === 0) {
-        setSearchResults([]);
-        setError("No matching places found. Try a more specific name.");
-        return;
-      }
-
-      if (results.length === 1) {
-        applyPlace(results[0]);
-        return;
-      }
-
-      setSearchResults(results);
-    } catch (nextError) {
-      if (!isLatestRequest(requestId)) {
-        return;
-      }
-      setError(nextError instanceof Error ? nextError.message : "Place search failed.");
-    } finally {
-      if (isLatestRequest(requestId)) {
-        setSearchLoading(false);
-      }
+    const outcome = await searchPlacesSettled(
+      trimmed,
+      userLocationRef.current ? { near: userLocationRef.current } : undefined,
+    );
+    if (!isLatestRequest(requestId)) {
+      return;
     }
+    setSearchLoading(false);
+    if (!outcome.ok) {
+      setError(outcome.message);
+      return;
+    }
+    if (outcome.places.length === 0) {
+      setSearchResults([]);
+      setError("No matching places found. Try a more specific name.");
+      return;
+    }
+
+    setSearchResults(outcome.places.length > 1 ? outcome.places : []);
+    applyPlace(outcome.places[0]!, { loadMatchingPreset: outcome.places.length === 1 });
   };
 
-  const hasExplicitGameArea = Boolean(importedGameArea || framing.manualGameArea || selectedPlace);
+  const hasExplicitGameArea = Boolean(
+    importedGameArea || framing.manualGameArea || selectedPlace || selectedAreas.length > 0,
+  );
 
   const confirmSession = async () => {
     if (!hasExplicitGameArea) {
@@ -709,8 +840,7 @@ export function useCreateSession() {
     }
   };
 
-  // Confirm may await map mount; the continuation must read the post-mount
-  // render's framing state, not this render's closure.
+  // Confirm reads the latest render's framing state through this ref.
   const confirmSessionRef = useRef(confirmSession);
   useLayoutEffect(() => {
     confirmSessionRef.current = confirmSession;
@@ -718,26 +848,11 @@ export function useCreateSession() {
 
   const handleConfirm = () =>
     void runLocked(async () => {
-      if (!hasExplicitGameArea) {
-        try {
-          // Rectangle framing reads the live viewport (default view included).
-          await mapMount.ensureMapMounted();
-        } catch (mountError) {
-          if (!(mountError instanceof CreateSessionMapMountAbortedError)) {
-            setError(MAP_LOAD_FAILED_ERROR);
-          }
-          return;
-        }
-      }
       await confirmSessionRef.current();
     });
 
   const confirmBusy = loading || isSubmitting;
-  const confirmLabel = verifyingAccess
-    ? "Verifying…"
-    : confirmBusy
-      ? "Creating…"
-      : "Confirm game area";
+  const confirmLabel = verifyingAccess ? "Verifying…" : confirmBusy ? "Creating…" : "Create game";
 
   const handleLocationQueryChange = (value: string) => {
     setLocationQuery(value);
@@ -746,20 +861,12 @@ export function useCreateSession() {
     setImportedGameArea(null);
   };
 
-  const handleFramingModeChange = (mode: Parameters<typeof framing.setFramingMode>[0]) => {
-    // Circle / polygon framing is driven by taps on the live map.
-    requestMap();
-    setImportedGameArea(null);
-    framing.setFramingMode(mode);
-  };
-
   const handleFramingModalConfirm = (result: Parameters<typeof framing.loadFramingResult>[0]) => {
     requestMap();
-    if (framing.userFramed) {
-      setImportedGameArea(null);
-      setSelectedPlaceId(null);
-      setSelectedPlace(null);
-    }
+    clearLoadedPreset();
+    setImportedGameArea(null);
+    setSelectedPlaceId(null);
+    setSelectedPlace(null);
     framing.loadFramingResult(result);
   };
 
@@ -803,6 +910,9 @@ export function useCreateSession() {
     bundledPresetSelectGroups,
     favouritePresetSelectOptions,
     userPresets,
+    loadedPresetId,
+    loadedPreset,
+    selectPreset,
     loading: confirmBusy,
     verifyingAccess,
     searchLoading,
@@ -820,8 +930,10 @@ export function useCreateSession() {
     mapRequested: mapMount.mapRequested,
     mapMounted: mapMount.mapMounted,
     requestMap,
+    openMapAtLocation,
     handleMapMounted: mapMount.handleMapMounted,
     mapFocusBounds,
+    mapFocusToken,
     mapPreviewGameArea,
     transitMetroId,
     regionPackId,
@@ -831,6 +943,7 @@ export function useCreateSession() {
     playerRole,
     handlePlayerRoleChange,
     gameSize,
+    gameSizeUserOverrode,
     distanceUnit,
     advancedSettings,
     setAdvancedSettings,
@@ -853,6 +966,7 @@ export function useCreateSession() {
     showPremiumUnlockPanel,
     showAccessCodeField,
     handleGameSizeChange,
+    handleGameSizeUserOverride,
     handleUserViewportFramed,
     addCurrentArea,
     removeSelectedArea,
@@ -861,12 +975,14 @@ export function useCreateSession() {
     handleConfirm,
     applyPlace,
     handleLocationQueryChange,
-    handleFramingModeChange,
     handleFramingModalConfirm,
     handleAccessCodeChange,
     handleSessionTierChange,
     handleDistanceUnitChange,
     handlePremiumSignedIn,
     requestLocationBias,
+    locationStatus,
+    locationStatusTone,
+    locationBusy,
   };
 }

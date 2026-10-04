@@ -160,7 +160,7 @@ export function GameAreaFramingModal({
                   c="var(--color-field-ink)"
                   style={{ letterSpacing: "-0.02em" }}
                 >
-                  Frame area
+                  Draw area
                 </Title>
               </Box>
               <Group gap="xs" wrap="nowrap" className="shrink-0">
