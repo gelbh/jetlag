@@ -219,6 +219,10 @@ export function useMeasuringCommit({
       deferPoint: seekerAnchorPointFeature(measuringSeekerPoint),
       slim: persistSlimMeasuringGeometry,
     });
+    if (persisted.kind === "unavailable") {
+      setMeasuringError("Couldn't save this measuring question.");
+      return;
+    }
 
     const metadata: AnnotationRecord["metadata"] = {
       createdAt: new Date().toISOString(),
@@ -264,11 +268,19 @@ export function useMeasuringCommit({
       );
     }
 
-    const created = await createAnnotation({
-      type: "measuring",
-      geometry: persisted.geometry,
-      metadata,
-    });
+    let created: AnnotationRecord;
+    try {
+      created = await createAnnotation({
+        type: "measuring",
+        geometry: persisted.geometry,
+        metadata,
+      });
+    } catch (error) {
+      setMeasuringError(
+        error instanceof Error ? error.message : "Couldn't save this measuring question.",
+      );
+      return;
+    }
 
     if (sessionId) {
       const answerOption = closerFurtherAnswerOptions.find(

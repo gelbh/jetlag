@@ -226,6 +226,10 @@ export async function performMatchingCommit(input: CommitMatchingInput): Promise
       elimination: eliminationRegion,
       deferPoint: seekerAnchorPointFeature(matchingSeekerPoint),
     });
+    if (persisted.kind === "unavailable") {
+      setMatchingError("Couldn't save this match question.");
+      return;
+    }
     geometry = persisted.geometry;
   } else {
     geometry = seekerAnchorPointFeature(matchingSeekerPoint);

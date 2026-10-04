@@ -50,16 +50,15 @@ export async function resolveMeasuringPendingQuestion(
     return null;
   }
 
-  const deferPoint = deferredPointFromPendingPlacement(pending);
-  if (!deferPoint) {
-    return null;
-  }
-
   const persisted = persistEliminationOrDeferPoint({
     elimination: regions.elimination,
-    deferPoint,
+    deferPoint: deferredPointFromPendingPlacement(pending),
     slim: persistSlimMeasuringGeometry,
   });
+
+  if (persisted.kind === "unavailable") {
+    return null;
+  }
 
   return {
     type: "measuring",

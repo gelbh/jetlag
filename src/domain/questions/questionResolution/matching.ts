@@ -62,15 +62,14 @@ export async function resolveMatchingPendingQuestion(
   }
 
   const slimmedBoundary = persistSlimPolygonFeature(boundaryRegion);
-  const deferPoint = deferredPointFromPendingPlacement(pending);
-  if (!deferPoint) {
-    return null;
-  }
-
   const persisted = persistEliminationOrDeferPoint({
     elimination: eliminationRegion,
-    deferPoint,
+    deferPoint: deferredPointFromPendingPlacement(pending),
   });
+
+  if (persisted.kind === "unavailable") {
+    return null;
+  }
 
   return {
     type: "matching",

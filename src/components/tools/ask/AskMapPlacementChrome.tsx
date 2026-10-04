@@ -5,7 +5,7 @@
 
 import { Button } from "@mantine/core";
 import { CaretLeftIcon, CrosshairIcon } from "@phosphor-icons/react";
-import { type ReactNode, useEffect } from "react";
+import { type CSSProperties, type ReactNode, useEffect } from "react";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
 import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineError";
 import { compactFilledStyles, mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
@@ -76,6 +76,38 @@ export const askMapPlacementSendStyles = {
     fontSize: "0.8125rem",
   },
 } as const;
+
+
+function HaltErrorAlert({
+  testId,
+  title,
+  detail,
+  className,
+  style,
+}: {
+  testId: string;
+  title: string;
+  detail: string;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  return (
+    <div data-testid={testId} role="alert" className={className} style={style}>
+      <p
+        className="m-0 text-sm font-semibold leading-snug"
+        style={{ color: "var(--color-halt)" }}
+      >
+        {title}
+      </p>
+      <p
+        className="m-0 mt-1 text-xs leading-snug"
+        style={{ color: "var(--color-field-ink-muted)" }}
+      >
+        {detail}
+      </p>
+    </div>
+  );
+}
 
 function StatusSpinner() {
   return (
@@ -313,20 +345,12 @@ export function AskMapPlacementChrome({
             }}
           >
             {failedErrorCopy ? (
-              <div data-testid={`${testId}-error`} role="alert" className="px-1 pt-0.5">
-                <p
-                  className="m-0 text-sm font-semibold leading-snug"
-                  style={{ color: "var(--color-halt)" }}
-                >
-                  {failedErrorCopy.title}
-                </p>
-                <p
-                  className="m-0 mt-1 text-xs leading-snug"
-                  style={{ color: "var(--color-field-ink-muted)" }}
-                >
-                  {failedErrorCopy.detail}
-                </p>
-              </div>
+              <HaltErrorAlert
+                testId={`${testId}-error`}
+                title={failedErrorCopy.title}
+                detail={failedErrorCopy.detail}
+                className="px-1 pt-0.5"
+              />
             ) : null}
             <Button
               type="button"
@@ -374,9 +398,10 @@ export function AskMapPlacementChrome({
           </div>
         ) : null}
         {showAnswer && answerErrorCopy ? (
-          <div
-            data-testid={`${testId}-answer-error`}
-            role="alert"
+          <HaltErrorAlert
+            testId={`${testId}-answer-error`}
+            title={answerErrorCopy.title}
+            detail={answerErrorCopy.detail}
             className="mx-auto w-full max-w-[22rem] px-3 py-2.5"
             style={{
               ...mapChromeSurfaceStyles,
@@ -384,20 +409,7 @@ export function AskMapPlacementChrome({
               border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
               color: "var(--color-field-ink)",
             }}
-          >
-            <p
-              className="m-0 text-sm font-semibold leading-snug"
-              style={{ color: "var(--color-halt)" }}
-            >
-              {answerErrorCopy.title}
-            </p>
-            <p
-              className="m-0 mt-1 text-xs leading-snug"
-              style={{ color: "var(--color-field-ink-muted)" }}
-            >
-              {answerErrorCopy.detail}
-            </p>
-          </div>
+          />
         ) : null}
         {showAnswer ? answerSlot : null}
       </div>

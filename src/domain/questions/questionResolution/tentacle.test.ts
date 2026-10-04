@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "../../geometry/measuring/measuringGeometryBudgets";
 import type { GameArea } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { resolveTentaclePendingQuestion } from "./tentacle";
@@ -62,7 +63,9 @@ describe("resolveTentaclePendingQuestion elim-JSON soft-fail", () => {
   });
 
   it("returns Point annotation without elim JSON when elim throws", async () => {
-    tentacleEliminationJsonForAnswer.mockRejectedValue(new Error("over budget"));
+    tentacleEliminationJsonForAnswer.mockRejectedValue(
+      new Error(MEASURING_PERSIST_OVER_BUDGET_MESSAGE),
+    );
 
     const resolved = await resolveTentaclePendingQuestion(pending(), "poi-1", gameArea);
 

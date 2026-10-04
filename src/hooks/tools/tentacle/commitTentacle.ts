@@ -1,4 +1,6 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import { POLYGON_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/progressive/persistSlim";
 import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/tentacleGeometry";
 import type { AnnotationRecord, GameArea, TentaclePoi } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
@@ -147,9 +149,18 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
       outOfReach: tentacleOutOfReach,
       gameArea,
     });
-  } catch {
-    // Persist ceiling: keep Point annotation; shade rebuild omits elim JSON.
-    eliminationJson = undefined;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    // Persist ceiling only: keep Point; other failures still surface.
+    if (
+      message === MEASURING_PERSIST_OVER_BUDGET_MESSAGE ||
+      message === POLYGON_PERSIST_OVER_BUDGET_MESSAGE
+    ) {
+      eliminationJson = undefined;
+    } else {
+      setMapError(message || MEASURING_PERSIST_OVER_BUDGET_MESSAGE);
+      return;
+    }
   }
 
   const metadata: AnnotationRecord["metadata"] = {

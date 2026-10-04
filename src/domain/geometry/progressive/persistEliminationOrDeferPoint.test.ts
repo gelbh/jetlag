@@ -36,10 +36,13 @@ function samplePoint(): Feature<Point> {
 describe("persistEliminationOrDeferPoint", () => {
   it("returns stored geometry when slim succeeds", () => {
     const elimination = samplePolygon();
-    const deferPoint = samplePoint();
     const slim = vi.fn((): PersistSlimPolygonResult => ({ ok: true, feature: elimination }));
 
-    const result = persistEliminationOrDeferPoint({ elimination, deferPoint, slim });
+    const result = persistEliminationOrDeferPoint({
+      elimination,
+      deferPoint: null,
+      slim,
+    });
 
     expect(slim).toHaveBeenCalledWith(elimination);
     expect(result).toEqual({ kind: "stored", geometry: elimination });
@@ -59,13 +62,19 @@ describe("persistEliminationOrDeferPoint", () => {
     expect(result).toEqual({ kind: "deferred", geometry: deferPoint });
   });
 
-  it("invokes a custom slim adapter", () => {
+  it("returns unavailable when slim fails and defer Point is missing", () => {
     const elimination = samplePolygon();
-    const deferPoint = samplePoint();
-    const slim = vi.fn((): PersistSlimPolygonResult => ({ ok: true, feature: elimination }));
+    const slim = vi.fn((): PersistSlimPolygonResult => ({
+      ok: false,
+      message: "too large",
+    }));
 
-    persistEliminationOrDeferPoint({ elimination, deferPoint, slim });
+    const result = persistEliminationOrDeferPoint({
+      elimination,
+      deferPoint: null,
+      slim,
+    });
 
-    expect(slim).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ kind: "unavailable" });
   });
 });

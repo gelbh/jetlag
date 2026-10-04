@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import type { GameArea } from "@/domain/map/annotations";
 import { type CommitTentacleInput, commitTentacle } from "./commitTentacle";
 
@@ -68,7 +69,9 @@ describe("commitTentacle elim-JSON soft-fail", () => {
   });
 
   it("still creates Point annotation when elim JSON throws", async () => {
-    tentacleEliminationJsonForAnswer.mockRejectedValue(new Error("over budget"));
+    tentacleEliminationJsonForAnswer.mockRejectedValue(
+      new Error(MEASURING_PERSIST_OVER_BUDGET_MESSAGE),
+    );
     const createAnnotation = vi.fn(async (annotation) => ({
       ...annotation,
       id: "ann-1",
