@@ -1,11 +1,10 @@
 import { ActionIcon, Box, Group, Stack, Text, TextInput } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
+import { sendSocialMessage } from "@/services/session/socialChat";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
-import { createMessageId } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
-import { postSocialMessage } from "../../services/firestore/firestoreSessionExtras";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { PendingSyncBadge } from "./PendingSyncBadge";
 
@@ -29,7 +28,6 @@ export function SocialChatTab({
   readOnly = false,
 }: SocialChatTabProps) {
   const [draft, setDraft] = useState("");
-  const [sending, setSending] = useState(false);
   const socialMessages = useMemo(
     () =>
       messages
@@ -39,19 +37,17 @@ export function SocialChatTab({
   );
   const bottomRef = useStickScrollToBottom(socialMessages.length);
 
-  const send = async () => {
+  const send = () => {
     const text = draft.trim();
     if (!text) {
       return;
     }
-
-    setSending(true);
-    try {
-      await postSocialMessage(sessionId, senderUid, senderRole, text, createMessageId());
-      setDraft("");
-    } finally {
-      setSending(false);
-    }
+    setDraft("");
+    // Not awaited: offline the ack only arrives after reconnect. On a rejection
+    // WriteFailureNotifier surfaces it; give the text back if the box is still empty.
+    void sendSocialMessage(sessionId, senderUid, senderRole, text).acknowledged.catch(() => {
+      setDraft((current) => (current === "" ? text : current));
+    });
   };
 
   return (
@@ -113,7 +109,7 @@ export function SocialChatTab({
           component="form"
           onSubmit={(event) => {
             event.preventDefault();
-            void send();
+            send();
           }}
         >
           <TextInput
@@ -139,7 +135,7 @@ export function SocialChatTab({
             size={40}
             radius="xl"
             variant="filled"
-            disabled={sending || draft.trim().length === 0}
+            disabled={draft.trim().length === 0}
             aria-label="Send"
             styles={{
               root: {
