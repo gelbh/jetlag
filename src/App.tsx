@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, Suspense, useEffect, useLayoutEffect } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
+import { PlayerRouteViewTransition } from "./components/motion/PlayerRouteViewTransition";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
 import { WriteFailureNotifier } from "./components/session/status/WriteFailureNotifier";
@@ -77,12 +78,6 @@ const ChatLogGalleryLazy = import.meta.env.DEV
     )
   : null;
 
-const DevScenariosLazy = lazyWithChunkRetry(() =>
-  import("./routes/DevScenarios").then((m) => ({
-    default: m.DevScenarios,
-  })),
-);
-
 function RouteFallback() {
   return (
     <div
@@ -130,7 +125,9 @@ function EdgeSwipeBackBinder() {
 function PlayerPhoneShellOutlet() {
   return (
     <PlayerPhoneShell>
-      <Outlet />
+      <PlayerRouteViewTransition>
+        <Outlet />
+      </PlayerRouteViewTransition>
     </PlayerPhoneShell>
   );
 }
@@ -335,14 +332,6 @@ export default function App() {
                               }
                             />
                           ) : null}
-                          <Route
-                            path="/dev/scenarios"
-                            element={
-                              <LazyRoute>
-                                <DevScenariosLazy />
-                              </LazyRoute>
-                            }
-                          />
                           <Route
                             path="/presets"
                             element={

@@ -110,3 +110,34 @@ export function assertNoNestedArrays(value: unknown, path = "document"): void {
     assertNoNestedArrays(child, `${path}.${key}`);
   }
 }
+
+/** Firestore Timestamp (or its plain {seconds,nanoseconds} shape, or an ISO string) → ISO string. */
+export function deserializeFirestoreTimestamp(value: unknown): string | undefined {
+  if (
+    value &&
+    typeof value === "object" &&
+    "toDate" in value &&
+    typeof (value as { toDate: () => Date }).toDate === "function"
+  ) {
+    return (value as { toDate: () => Date }).toDate().toISOString();
+  }
+
+  if (
+    value &&
+    typeof value === "object" &&
+    "seconds" in value &&
+    typeof (value as { seconds: unknown }).seconds === "number"
+  ) {
+    const record = value as { seconds: number; nanoseconds?: number };
+    const seconds = record.seconds;
+    const nanoseconds = record.nanoseconds ?? 0;
+
+    return new Date(seconds * 1000 + nanoseconds / 1_000_000).toISOString();
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return undefined;
+}

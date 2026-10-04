@@ -1,7 +1,7 @@
 import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import type { GameArea } from "@/domain/map/annotations";
-import { buildOverpassAuditCases, type OverpassAuditCase } from "../../overpass/auditQueries";
-import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../overpass/endpoints";
+import { buildOverpassAuditCases, type OverpassAuditCase } from "../../geo/overpass/auditQueries";
+import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../geo/overpass/endpoints";
 
 export type { OverpassAuditCase };
 export { buildOverpassAuditCases };

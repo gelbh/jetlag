@@ -25,16 +25,24 @@ import {
   isMeasuringAdminBorderKind,
 } from "./adminDivisionAvailability";
 import { fetchCustomAdminBorderLineSegments } from "./adminDivisionLineStrings";
+import {
+  mergeOverpassElementPayloads,
+  type OverpassBbox,
+  queryOverpassWithBboxSplit,
+} from "./overpassBboxSplit";
 
 type OverpassWay = {
   type: string;
+  id: number;
   geometry?: Array<{ lat: number; lon: number }>;
 };
 
-export function buildLinearFeaturesQuery(gameArea: GameArea, selectors: readonly string[]): string {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const bbox = `${south},${west},${north},${east}`;
-  const clauses = selectors.map((selector) => `way${selector}(${bbox});`);
+export function buildLinearFeaturesQueryForBbox(
+  bbox: OverpassBbox,
+  selectors: readonly string[],
+): string {
+  const bboxStr = `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`;
+  const clauses = selectors.map((selector) => `way${selector}(${bboxStr});`);
 
   return `
     [out:json][timeout:25];
@@ -43,6 +51,10 @@ export function buildLinearFeaturesQuery(gameArea: GameArea, selectors: readonly
   );
   out geom;
   `;
+}
+
+export function buildLinearFeaturesQuery(gameArea: GameArea, selectors: readonly string[]): string {
+  return buildLinearFeaturesQueryForBbox(gameAreaToBoundingBox(gameArea), selectors);
 }
 
 function wayToLineString(nodes: Array<{ lat: number; lon: number }>): Feature<LineString> | null {
@@ -69,8 +81,11 @@ async function fetchMeasuringLinearSegmentsFromOverpass(
     return [];
   }
 
-  const payload = await queryOverpass<{ elements: OverpassWay[] }>(
-    buildLinearFeaturesQuery(gameArea, selectors),
+  const payload = await queryOverpassWithBboxSplit(
+    (bbox) => buildLinearFeaturesQueryForBbox(bbox, selectors),
+    gameAreaToBoundingBox(gameArea),
+    (ql) => queryOverpass<{ elements: OverpassWay[] }>(ql),
+    mergeOverpassElementPayloads,
   );
 
   return payload.elements
