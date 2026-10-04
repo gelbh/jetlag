@@ -22,3 +22,4 @@ export {
   placeHasBoundary,
   viewboxForPoint,
 } from "./normalize";
+export { GeocodedPlaceLeading, placeCategoryIcon } from "./placeCategoryIcon";
