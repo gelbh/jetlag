@@ -1,8 +1,7 @@
 import { getToken } from "firebase/app-check";
 import { getClientEnv } from "@/config/env";
-import { isEffectivelyOffline } from "@/domain/device/sync/sync";
+import { isDeviceEffectivelyOffline } from "@/services/core/network/deviceOffline";
 import { probeServerTime } from "@/services/core/time/serverClock";
-import { useSessionStore } from "@/state/sessionStore";
 import { captureAppCheckTokenFailure } from "../analytics/sentry";
 import {
   type AppCheckProbeFailureClass,
@@ -80,8 +79,7 @@ function reportProbeFailure(
  * `/api/time` means the network, not the player's extensions, is at fault.
  */
 async function isNetworkUnreachable(): Promise<boolean> {
-  const online = typeof navigator === "undefined" ? true : navigator.onLine !== false;
-  if (isEffectivelyOffline({ online, reachable: useSessionStore.getState().networkReachable })) {
+  if (isDeviceEffectivelyOffline()) {
     return true;
   }
   const { ok } = await probeServerTime(APP_CHECK_REACHABILITY_TIMEOUT_MS);
@@ -93,8 +91,7 @@ async function classifyThrownProbeFailure(message: string): Promise<AppCheckProb
   if (classification.allowApp || !(await isNetworkUnreachable())) {
     return classification;
   }
-  // Offline is a soft network failure, same as a probe timeout.
-  return classifyAppCheckProbeFailure("timeout");
+  return classifyAppCheckProbeFailure("offline");
 }
 
 async function runProbe(): Promise<AppCheckProbeResult> {

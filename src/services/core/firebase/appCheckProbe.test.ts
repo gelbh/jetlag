@@ -100,7 +100,7 @@ describe("appCheckProbe", () => {
     await expect(probeAppCheckAvailability()).resolves.toEqual({ ok: true });
     expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ reason: "timeout", soft: true }),
+      expect.objectContaining({ reason: "offline", soft: true }),
     );
     expect(probeServerTime).not.toHaveBeenCalled();
   });
@@ -119,7 +119,7 @@ describe("appCheckProbe", () => {
     expect(probeServerTime).toHaveBeenCalledTimes(1);
     expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ reason: "timeout", soft: true }),
+      expect.objectContaining({ reason: "offline", soft: true }),
     );
   });
 
