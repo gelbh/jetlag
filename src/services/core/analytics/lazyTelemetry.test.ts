@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   captureAuthBootstrapFailure: vi.fn(),
   captureAuthPersistenceFallback: vi.fn(),
   addRecoverableErrorBreadcrumb: vi.fn(),
+  syncSentryUser: vi.fn(),
 }));
 
 vi.mock("./analytics", () => ({
@@ -30,6 +31,7 @@ vi.mock("./sentry", () => ({
   setTransactionName: mocks.setTransactionName,
   captureErrorBoundaryException: mocks.captureErrorBoundaryException,
   addRecoverableErrorBreadcrumb: mocks.addRecoverableErrorBreadcrumb,
+  syncSentryUser: mocks.syncSentryUser,
 }));
 
 import { ANALYTICS_CONSENT_KEY } from "@/domain/device/consent/analyticsConsent";
@@ -45,6 +47,7 @@ import {
   setBootstrapTagLazy,
   setTransactionNameLazy,
   syncAnalyticsIdentityLazy,
+  syncSentryUserLazy,
   trackPageViewLazy,
 } from "./lazyTelemetry";
 
@@ -59,6 +62,14 @@ describe("lazyTelemetry", () => {
     syncAnalyticsIdentityLazy(user);
     await flush();
     expect(mocks.syncAnalyticsIdentity).toHaveBeenCalledWith(user);
+  });
+
+  it("forwards sentry user sync for set and clear", async () => {
+    syncSentryUserLazy({ uid: "u1" });
+    syncSentryUserLazy(null);
+    await flush();
+    expect(mocks.syncSentryUser).toHaveBeenNthCalledWith(1, { uid: "u1" });
+    expect(mocks.syncSentryUser).toHaveBeenNthCalledWith(2, null);
   });
 
   it("forwards sentry calls with their arguments in order", async () => {

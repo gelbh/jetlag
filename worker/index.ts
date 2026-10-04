@@ -8,7 +8,11 @@ import { CSP_REPORT_PATH, handleCspReportRequest } from "./cspReport";
 import { applyDocumentCspNonce, shouldApplyDocumentCsp } from "./documentCsp";
 import { handleIncidentEmailRequest, INCIDENT_EMAIL_PATH } from "./incidentEmail";
 import { handlePosthogProxyRequest, shouldHandlePosthogProxy } from "./posthogProxy";
-import { handleSentryTunnelRequest, SENTRY_TUNNEL_PATH } from "./sentryTunnel";
+import {
+  handleSentryTunnelRequest,
+  resolveSentryTunnelAllowlist,
+  SENTRY_TUNNEL_PATH,
+} from "./sentryTunnel";
 import { handleTimeRequest, TIME_ENDPOINT_PATH } from "./timeEndpoint";
 
 export { CSP_REPORT_PATH } from "./cspReport";
@@ -34,7 +38,7 @@ export default {
       return handleTimeRequest(request);
     }
     if (pathname === SENTRY_TUNNEL_PATH) {
-      return handleSentryTunnelRequest(request);
+      return handleSentryTunnelRequest(request, fetch, resolveSentryTunnelAllowlist(env));
     }
     if (shouldHandlePosthogProxy(pathname)) {
       return handlePosthogProxyRequest(request);
@@ -88,5 +92,6 @@ export {
 } from "./incidentEmail";
 export {
   handleSentryTunnelRequest,
+  resolveSentryTunnelAllowlist,
   SENTRY_TUNNEL_PATH,
 } from "./sentryTunnel";

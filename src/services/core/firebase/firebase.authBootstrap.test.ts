@@ -9,7 +9,11 @@ const authMocks = vi.hoisted(() => {
     auth,
     getAuth: vi.fn(() => auth),
     setPersistence: vi.fn(async () => undefined),
-    onAuthStateChanged: vi.fn(() => () => undefined),
+    onAuthStateChanged: vi.fn(
+      (_auth: unknown, _callback: (user: { uid: string; isAnonymous: boolean } | null) => void) =>
+        () =>
+          undefined,
+    ),
     signInAnonymously: vi.fn(async () => ({ user: { uid: "anon-1" } })),
   };
 });
@@ -47,12 +51,15 @@ vi.mock("firebase/firestore", () => ({
   persistentMultipleTabManager: vi.fn(),
 }));
 
-vi.mock("../analytics/lazyTelemetry", () => ({
+const lazyTelemetryMocks = vi.hoisted(() => ({
   captureAuthBootstrapFailureLazy: vi.fn(),
   captureAuthPersistenceFallbackLazy: vi.fn(),
   setBootstrapTagLazy: vi.fn(),
   syncAnalyticsIdentityLazy: vi.fn(),
+  syncSentryUserLazy: vi.fn(),
 }));
+
+vi.mock("../analytics/lazyTelemetry", () => lazyTelemetryMocks);
 
 vi.mock("../auth/accountAuth", () => ({
   completeOAuthRedirectIfPending,
@@ -120,5 +127,26 @@ describe("auth bootstrap start", () => {
     expect(authMocks.setPersistence).toHaveBeenCalledTimes(1);
     expect(authMocks.auth.authStateReady).toHaveBeenCalledTimes(1);
     expect(authMocks.onAuthStateChanged).toHaveBeenCalledTimes(1);
+  });
+
+  it("syncs analytics identity and sentry user on auth state changes", async () => {
+    const { startAuthBootstrap } = await import("./firebase");
+
+    startAuthBootstrap();
+
+    const authCallback = authMocks.onAuthStateChanged.mock.calls[0]?.[1] as (
+      user: { uid: string; isAnonymous: boolean } | null,
+    ) => void;
+
+    authCallback({ uid: "user-1", isAnonymous: false });
+    authCallback(null);
+
+    expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenNthCalledWith(1, {
+      uid: "user-1",
+      isAnonymous: false,
+    });
+    expect(lazyTelemetryMocks.syncSentryUserLazy).toHaveBeenNthCalledWith(1, { uid: "user-1" });
+    expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenNthCalledWith(2, null);
+    expect(lazyTelemetryMocks.syncSentryUserLazy).toHaveBeenNthCalledWith(2, null);
   });
 });

@@ -25,7 +25,7 @@ function renderHome(options?: { resetStores?: boolean }) {
   );
 }
 
-vi.mock("../services/core/firebase/firebase", () => ({
+vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
   isAuthBootstrapReady: () => true,
   subscribeAuthBootstrapReady: () => () => undefined,
@@ -33,17 +33,17 @@ vi.mock("../services/core/firebase/firebase", () => ({
   getFirebaseAuth: () => ({ currentUser: null, onAuthStateChanged: () => () => undefined }),
 }));
 
-vi.mock("../services/core/firebase/authBootstrapState", () => ({
+vi.mock("@/services/core/firebase/authBootstrapState", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
   isAuthBootstrapReady: () => true,
   subscribeAuthBootstrapReady: () => () => undefined,
 }));
 
-vi.mock("../services/core/firebase/firebaseAuthReady", () => ({
+vi.mock("@/services/core/firebase/firebaseAuthReady", () => ({
   waitForPermanentAuthReady: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../hooks/billing/usePremiumEntitlements", () => ({
+vi.mock("@/hooks/billing/usePremiumEntitlements", () => ({
   usePremiumEntitlements: () => ({
     entitlements: null,
     loading: false,
@@ -53,17 +53,21 @@ vi.mock("../hooks/billing/usePremiumEntitlements", () => ({
   }),
 }));
 
-vi.mock("../services/billing/premiumBilling", () => ({
+vi.mock("@/services/billing/premiumBilling", () => ({
   fetchPremiumEntitlements: vi.fn().mockResolvedValue(null),
 }));
 
-vi.mock("../services/firestore/sessionMembershipHeal", () => ({
+vi.mock("@/services/firestore/firestoreAnnotations", () => ({
+  isFirestorePermissionDenied: () => false,
+}));
+
+vi.mock("@/services/firestore/sessionMembershipHeal", () => ({
   getRemoteSessionById: (...args: unknown[]) => mockGetRemoteSessionById(...args),
   healSessionMembership: (...args: unknown[]) => mockEnsureRemoteSessionMembership(...args),
   lookupRemoteSessionByCode: vi.fn(),
 }));
 
-vi.mock("../hooks/navigation/useAppNavigate", () => ({
+vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => navigate,
 }));
 

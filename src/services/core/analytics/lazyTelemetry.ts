@@ -14,6 +14,7 @@ import type {
   reportSlowRouteTransition,
   setBootstrapTag,
   setTransactionName,
+  syncSentryUser,
 } from "./sentry";
 
 let analyticsModule: Promise<typeof import("./analytics")> | undefined;
@@ -39,6 +40,12 @@ function loadSentry(): Promise<typeof import("./sentry")> {
 export function syncAnalyticsIdentityLazy(...args: Parameters<typeof syncAnalyticsIdentity>): void {
   void loadAnalytics()
     .then((m) => m.syncAnalyticsIdentity(...args))
+    .catch(() => {});
+}
+
+export function syncSentryUserLazy(...args: Parameters<typeof syncSentryUser>): void {
+  void loadSentry()
+    .then((m) => m.syncSentryUser(...args))
     .catch(() => {});
 }
 
