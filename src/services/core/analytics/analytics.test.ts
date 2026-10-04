@@ -222,10 +222,30 @@ describe("analytics facade", () => {
 
     expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe("granted");
     expect(posthogInit).toHaveBeenCalledOnce();
-    expect(posthogCapture).toHaveBeenCalledWith("$pageview", {
-      path: "/join",
-      $pathname: "/join",
-    });
+    expect(posthogCapture.mock.calls[0]).toEqual([
+      "analytics_consent_accepted",
+      { surface: "banner" },
+    ]);
+    expect(posthogCapture.mock.calls[1]).toEqual([
+      "$pageview",
+      {
+        path: "/join",
+        $pathname: "/join",
+      },
+    ]);
+  });
+
+  it("denyAnalyticsConsent never captures analytics_consent_accepted", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+
+    denyAnalyticsConsent();
+
+    expect(
+      posthogCapture.mock.calls.some(
+        (call) => call[0] === ANALYTICS_EVENTS.analytics_consent_accepted,
+      ),
+    ).toBe(false);
   });
 
   it("denyAnalyticsConsent writes denied without init", () => {
