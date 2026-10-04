@@ -3,6 +3,7 @@ import { getClientEnv } from "@/config/env";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { scheduleIdleBootWork } from "@/domain/device/perf/scheduleAfterFirstPaint";
 import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
+import { parameterizedRoutePath } from "@/navigation/routeMetadata";
 import {
   applyClientSentryDisposition,
   CLIENT_SENTRY_IGNORE_ERRORS,
@@ -134,10 +135,15 @@ export function initSentry(): void {
     release: `jetlag@${APP_VERSION}`,
     dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
     tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
+    // SDK 11 defaults to span streaming, which names every pageload "Pageload" and sends LCP/CLS
+    // as standalone spans instead of `measurements.*` on the pageload. Static keeps route-named
+    // pageload transactions with LCP/CLS attached (what the Web Vitals views read); INP still
+    // goes out as its own span.
+    traceLifecycle: "static",
     ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
     integrations: [
       Sentry.browserTracingIntegration({
-        enableInp: true,
+        beforeStartSpan: (options) => ({ ...options, name: parameterizedRoutePath(options.name) }),
       }),
     ],
     beforeSend: scrubEvent,
@@ -305,8 +311,8 @@ export function addRecoverableErrorBreadcrumb(error: unknown, componentStack?: s
   });
 }
 
-export function setTransactionName(name: string): void {
-  Sentry.getCurrentScope().setTransactionName(name);
+export function setTransactionName(pathname: string): void {
+  Sentry.getCurrentScope().setTransactionName(parameterizedRoutePath(pathname));
 }
 
 export function captureException(error: unknown): void {
