@@ -87,7 +87,23 @@ export async function expectCreatePageMapPreviewLoaded(page: Page) {
   await expect.poll(async () => page.locator(".maplibregl-canvas").count()).toBeGreaterThan(0);
 }
 
-/** Advance Where → Frame → Play (or jump via Create steps Play tab). */
+/** Jump to Create Rules (Create steps tab, else Next from Where). */
+export async function goToCreateRulesStep(page: Page) {
+  const rulesTab = page.getByRole("tablist", { name: "Create steps" }).getByRole("tab", {
+    name: "Rules",
+  });
+  if (await rulesTab.isVisible().catch(() => false)) {
+    await rulesTab.click();
+  } else {
+    await page.getByRole("button", { name: "Next" }).click();
+  }
+
+  await expect(page.getByRole("radiogroup", { name: "Game size" })).toBeVisible({
+    timeout: 10_000,
+  });
+}
+
+/** Advance Where → Rules → Play (or jump via Create steps Play tab). */
 export async function goToCreatePlayStep(page: Page) {
   const createGame = page.getByRole("button", { name: "Create game" });
   if (await createGame.isVisible().catch(() => false)) {

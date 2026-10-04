@@ -69,7 +69,9 @@ test.describe("layout regression @ default mobile", () => {
     await prepareE2EPage(page);
     await page.goto("/create");
     await assertCreateAreaReady(page);
-    await expect(page.getByRole("combobox", { name: /game preset/i })).toBeVisible();
+    await expect(page.getByPlaceholder("Dublin, Ireland")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Find place" })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: /game preset/i })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Create game" })).toHaveCount(0);
     await assertLayoutSmoke(page);
@@ -98,7 +100,7 @@ test.describe("layout regression @ default mobile", () => {
 
       // Form content's nearest overflow-y-auto ancestor must be the sheet
       // scroller (fails if a nested overflow-y-auto returns).
-      const formMarker = root.querySelector('[aria-label="Game size"]');
+      const formMarker = root.querySelector('[aria-label="Player side"]');
       if (!(formMarker instanceof HTMLElement)) {
         return { ok: false as const, reason: "missing form marker" };
       }

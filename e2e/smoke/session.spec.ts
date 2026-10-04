@@ -21,7 +21,9 @@ test("@smoke creates a session from home and reaches the map", async ({ page }) 
   });
 
   await test.step("confirm Dublin game area", async () => {
-    await expect(page.getByRole("combobox", { name: /game preset/i })).toBeVisible();
+    await expect(page.getByPlaceholder("Dublin, Ireland")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Find place" })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: /game preset/i })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Create game" })).toHaveCount(0);
     await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
