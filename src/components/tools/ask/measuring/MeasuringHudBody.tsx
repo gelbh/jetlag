@@ -8,10 +8,6 @@ import {
   TrainIcon,
   TreeIcon,
 } from "@phosphor-icons/react";
-/**
- * Measuring Ask HUD — Matching twin: question header + icon catalog, then map-first.
- * Sheet path keeps anchor/target/answer chords when Mantine map-first is off.
- */
 import { type ComponentType, useState } from "react";
 import { HudMeasuringIcon } from "@/components/map/icons/ToolIcons";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
@@ -388,6 +384,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
           <SearchResultsList
             results={searchResults}
             onSelect={(place) => onSearchResultSelect(place, searchRole)}
+            renderLeading={(place) => <GeocodedPlaceLeading category={place.placeCategory} />}
           />
         </AskHudPanel>
       ) : null}

@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import type { MapBoundsExpression } from "../../domain/map/mapBounds";
 import { createTestGameArea } from "../../test/fixtures/sessions";
 import { useGameAreaFraming } from "./useGameAreaFraming";
@@ -10,7 +11,7 @@ const mockBounds = {
 };
 
 describe("useGameAreaFraming", () => {
-  it("builds a rectangle game area from viewport bounds", () => {
+  it("builds a square game area from a rectangular viewport", () => {
     const { result } = renderHook(() => useGameAreaFraming());
 
     act(() => {
@@ -20,23 +21,55 @@ describe("useGameAreaFraming", () => {
     });
 
     expect(result.current.manualGameArea?.type).toBe("Polygon");
+    const ring = result.current.manualGameArea?.coordinates[0];
+    expect(ring).toBeDefined();
+    const west = ring![0]![0];
+    const south = ring![0]![1];
+    const east = ring![2]![0];
+    const north = ring![2]![1];
+    if (
+      typeof west !== "number" ||
+      typeof south !== "number" ||
+      typeof east !== "number" ||
+      typeof north !== "number"
+    ) {
+      throw new Error("expected numeric polygon ring");
+    }
+    const centerLat = (south + north) / 2;
+    const centerLng = (west + east) / 2;
+    const ns = haversineMeters([centerLat, centerLng], [north, centerLng]);
+    const ew = haversineMeters([centerLat, centerLng], [centerLat, east]);
+    expect(Math.abs(ns - ew)).toBeLessThan(1);
     expect(result.current.hasValidDraft).toBe(true);
   });
 
-  it("builds a circle game area after center tap and bounds update", () => {
+  it("builds a circle game area from the viewport center when switching mode", () => {
     const { result } = renderHook(() => useGameAreaFraming());
 
     act(() => {
+      result.current.handleBoundsChange(mockBounds as never);
+      result.current.setFramingMode("circle");
+    });
+
+    expect(result.current.circleCenter?.[0]).toBeCloseTo(53.345, 5);
+    expect(result.current.circleCenter?.[1]).toBeCloseTo(-6.265, 5);
+    expect(result.current.manualGameArea?.type).toBe("Polygon");
+    expect(result.current.hasValidDraft).toBe(true);
+  });
+
+  it("moves the circle center on map tap after an immediate draft", () => {
+    const { result } = renderHook(() => useGameAreaFraming());
+
+    act(() => {
+      result.current.handleBoundsChange(mockBounds as never);
       result.current.setFramingMode("circle");
     });
 
     act(() => {
-      result.current.handleBoundsChange(mockBounds as never);
       result.current.handleMapClick(53.35, -6.26);
     });
 
     expect(result.current.circleCenter).toEqual([53.35, -6.26]);
-    expect(result.current.manualGameArea?.type).toBe("Polygon");
     expect(result.current.hasValidDraft).toBe(true);
   });
 
@@ -85,24 +118,26 @@ describe("useGameAreaFraming", () => {
     expect(result.current.manualGameArea).toBeNull();
   });
 
-  it("clears manual draft when switching shape mode", () => {
+  it("replaces the draft immediately when switching shape mode", () => {
     const { result } = renderHook(() => useGameAreaFraming());
 
     act(() => {
+      result.current.handleBoundsChange(mockBounds as never);
       result.current.setFramingMode("circle");
     });
 
-    act(() => {
-      result.current.handleBoundsChange(mockBounds as never);
-      result.current.handleMapClick(53.35, -6.26);
-    });
+    const circleArea = result.current.manualGameArea;
+    expect(circleArea).not.toBeNull();
+    expect(result.current.circleCenter?.[0]).toBeCloseTo(53.345, 5);
+    expect(result.current.circleCenter?.[1]).toBeCloseTo(-6.265, 5);
 
     act(() => {
       result.current.setFramingMode("rectangle");
     });
 
     expect(result.current.circleCenter).toBeNull();
-    expect(result.current.manualGameArea).toBeNull();
+    expect(result.current.manualGameArea).not.toBeNull();
+    expect(result.current.manualGameArea).not.toEqual(circleArea);
     expect(result.current.userFramed).toBe(true);
   });
 

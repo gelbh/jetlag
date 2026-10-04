@@ -4,9 +4,13 @@ import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
 import { createMapBounds } from "@/domain/map/mapBounds";
+import { mergeBundledPresets } from "@/domain/regions/bundledGamePresets";
+import { GAME_PRESET_SCHEMA_VERSION } from "@/domain/session/presets/gamePreset";
+import { defaultAdvancedSessionSettings } from "@/domain/session/tools/advancedSessionSettings";
+import { useGamePresetStore } from "@/state/gamePresetStore";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
-import { gpsReadingToFocusBounds } from "./utils";
+import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const ensureAnonymousUser = vi.hoisted(() => vi.fn(async () => ({ uid: "host-1" })));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => false));
@@ -38,9 +42,11 @@ vi.mock("@/services/core/location/geolocation", async (importOriginal) => ({
 }));
 
 const searchPlaces = vi.hoisted(() => vi.fn(async () => [] as unknown[]));
+const suggestPlacesAtPoint = vi.hoisted(() => vi.fn(async () => [] as unknown[]));
 vi.mock("@/services/geo/geocoding", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/services/geo/geocoding")>()),
   searchPlaces,
+  suggestPlacesAtPoint,
 }));
 
 vi.mock("@/components/map/layers/FramingPreviewLayers", () => ({
@@ -49,6 +55,31 @@ vi.mock("@/components/map/layers/FramingPreviewLayers", () => ({
 
 vi.mock("@/components/session/framing/prefetchCreateSessionMap", () => ({
   prefetchCreateSessionMap: vi.fn(async () => undefined),
+}));
+
+const loadRegionPackSessionBoundaries = vi.hoisted(() =>
+  vi.fn(async () => ({
+    playArea: {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [-6.3, 53.3],
+          [-6.2, 53.3],
+          [-6.2, 53.4],
+          [-6.3, 53.4],
+          [-6.3, 53.3],
+        ],
+      ],
+    },
+    customMatchingAreas: [],
+  })),
+);
+vi.mock("@/services/geo/matching/regionPackBoundaries", () => ({
+  loadRegionPackSessionBoundaries,
+}));
+
+vi.mock("@/services/geo/matching/resolveSessionMatchingAreas", () => ({
+  resolveSessionMatchingAreas: vi.fn(async () => []),
 }));
 
 vi.mock("@/components/map/layers/GameAreaMask", () => ({
@@ -132,13 +163,23 @@ function loadMapWithDefaultViewport() {
   });
 }
 
-function goToFrame() {
+function goToDrawSource() {
+  fireEvent.click(screen.getByRole("button", { name: /^Draw$/ }));
+}
+
+function goToRules() {
   fireEvent.click(screen.getByRole("button", { name: "Next" }));
 }
 
 function goToPlay() {
-  goToFrame();
+  goToRules();
   fireEvent.click(screen.getByRole("button", { name: "Next" }));
+}
+
+function openMoreTools() {
+  const disclosure = screen.getByText("More tools").closest("details") as HTMLDetailsElement;
+  disclosure.open = true;
+  fireEvent(disclosure, new Event("toggle"));
 }
 
 beforeEach(() => {
@@ -146,8 +187,17 @@ beforeEach(() => {
   startSeaLevelBackgroundSampling.mockReset();
   parseBoundaryFile.mockReset();
   requestLocationAccess.mockReset();
+  searchPlaces.mockReset();
+  searchPlaces.mockResolvedValue([]);
+  suggestPlacesAtPoint.mockReset();
+  suggestPlacesAtPoint.mockResolvedValue([]);
   isFirebaseConfigured.mockReturnValue(false);
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
+  loadRegionPackSessionBoundaries.mockClear();
+  useGamePresetStore.setState({
+    presets: mergeBundledPresets([]),
+    favouritePresetIds: [],
+  });
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -173,10 +223,10 @@ beforeEach(() => {
   vi.stubGlobal("cancelAnimationFrame", vi.fn());
 });
 
-function renderCreateSession() {
+function renderCreateSession(route = "/create") {
   return render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[route]}>
         <CreateSession />
       </MemoryRouter>
     </MantineProvider>,
@@ -191,6 +241,7 @@ describe("CreateSession", () => {
     expect(screen.getByRole("heading", { name: /^create$/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Find place" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Use my location" })).toBeInTheDocument();
     const root = document.querySelector(".jl-create-session");
     expect(root).toBeTruthy();
   });
@@ -206,19 +257,26 @@ describe("CreateSession", () => {
     expect(screen.getByRole("link", { name: /^back$/i })).toBeInTheDocument();
   });
 
-  it("Next then Next reveals Play and Create game; Back reverses", () => {
+  it("Next reveals Rules then Play; Back reverses", () => {
     renderCreateSession();
+    expect(screen.queryByRole("tab", { name: "Frame" })).toBeNull();
+    expect(screen.getByRole("tab", { name: "Rules" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    expect(screen.getByRole("button", { name: "Draw on map" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Create game" })).toBeNull();
+    expect(screen.getByRole("radiogroup", { name: "Game size" })).toBeInTheDocument();
+    expect(screen.getByText("More tools")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: /city, county, state, or country/i })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByRole("button", { name: "Create game" })).toBeInTheDocument();
-    expect(screen.getByRole("tablist", { name: "Your side" })).toBeInTheDocument();
-    expect(screen.queryByRole("textbox", { name: /city, county, state, or country/i })).toBeNull();
+    expect(screen.getByRole("radiogroup", { name: "Player side" })).toBeInTheDocument();
+    expect(screen.queryByRole("radiogroup", { name: "Game size" })).toBeNull();
+    expect(screen.queryByText("More tools")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
-    expect(screen.getByRole("button", { name: "Draw on map" })).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: "Game size" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByRole("button", { name: "Find place" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^Draw$/ }));
+    expect(screen.getByRole("button", { name: "Draw on map" })).toBeInTheDocument();
   });
 
   it("disables confirm until host auth is ready when Firebase is configured", async () => {
@@ -290,7 +348,13 @@ describe("CreateSession", () => {
     expect(await screen.findByText(/couldn't load the importer/i)).toBeInTheDocument();
   });
 
-  it("shows a map facade instead of constructing MapLibre on load", () => {
+  it("shows a map facade until Open map, then focuses GPS", async () => {
+    requestLocationAccess.mockResolvedValue({
+      lat: 53.35,
+      lng: -6.26,
+      accuracy: 12,
+      heading: null,
+    });
     renderCreateSession();
 
     expect(screen.queryByTestId("create-map")).not.toBeInTheDocument();
@@ -299,10 +363,14 @@ describe("CreateSession", () => {
 
     expect(screen.getByTestId("create-map")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Loading map…");
+    await waitFor(() => {
+      expect(mapView.model?.focusBounds).toEqual(gpsReadingToFocusBounds(53.35, -6.26));
+    });
 
     loadMapWithDefaultViewport();
 
     expect(screen.queryByText("Loading map…")).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue(/53\.35/)).not.toBeInTheDocument();
   });
 
   it("mounts the map on search intent", () => {
@@ -316,26 +384,168 @@ describe("CreateSession", () => {
     expect(screen.getByTestId("create-map")).toBeInTheDocument();
   });
 
-  it("Confirm with no area awaits map mount, then frames the live viewport", async () => {
+  it("loads a preset play area onto the map and shows preset details", async () => {
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([
+        {
+          id: "preset-cork",
+          name: "Cork weekend",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Cork, Ireland",
+          gameArea: IMPORTED_AREA,
+          focusBounds: { south: 53.3, west: -6.3, north: 53.4, east: -6.2 },
+          migrationStatus: "ok",
+        },
+      ]),
+    });
+
+    renderCreateSession("/create?preset=preset-cork");
+
+    await waitFor(() => {
+      expect(screen.getByText(/medium · metric · Cork, Ireland/i)).toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: "Preset" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("preset-cork");
+    await waitFor(() => {
+      expect(screen.getByTestId("create-map")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(mapView.model?.focusBounds).toEqual([
+        [53.3, -6.3],
+        [53.4, -6.2],
+      ]);
+    });
+    expect(mapView.model?.recenterToken).toBeGreaterThan(0);
+  });
+
+  it("auto-selects the top ranked place and pans again when switching results", async () => {
+    const dublin = {
+      id: "dublin",
+      displayName: "Dublin, Ireland",
+      center: [53.35, -6.26] as [number, number],
+      bounds: { south: 53.3, west: -6.4, north: 53.4, east: -6.1 },
+      placeCategory: "city" as const,
+      approximateAreaSqMi: 10,
+    };
+    const cork = {
+      id: "cork",
+      displayName: "Cork, Ireland",
+      center: [51.9, -8.47] as [number, number],
+      bounds: { south: 51.8, west: -8.6, north: 52.0, east: -8.3 },
+      placeCategory: "city" as const,
+      approximateAreaSqMi: 8,
+    };
+    searchPlaces.mockResolvedValueOnce([dublin, cork]);
+    renderCreateSession();
+
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Ireland" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Dublin, Ireland")).toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: /Cork, Ireland/ })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mapView.model?.focusBounds).toEqual(placeToFocusBounds(dublin));
+    });
+    const firstToken = mapView.model?.recenterToken ?? 0;
+
+    fireEvent.click(screen.getByRole("button", { name: /Cork, Ireland/ }));
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Cork, Ireland")).toBeInTheDocument();
+    });
+    expect(mapView.model?.focusBounds).toEqual(placeToFocusBounds(cork));
+    expect(mapView.model?.recenterToken).toBeGreaterThan(firstToken);
+  });
+
+  it("keeps London search on the result list so other Londons stay pickable", async () => {
+    const londonUk = {
+      id: "london-uk",
+      displayName: "London, England, United Kingdom",
+      center: [51.507, -0.128] as [number, number],
+      bounds: { south: 51.28, west: -0.51, north: 51.7, east: 0.33 },
+      placeCategory: "city" as const,
+      approximateAreaSqMi: 600,
+    };
+    const londonCanada = {
+      id: "london-on",
+      displayName: "London, Ontario, Canada",
+      center: [42.98, -81.25] as [number, number],
+      bounds: { south: 42.9, west: -81.4, north: 43.1, east: -81.1 },
+      placeCategory: "city" as const,
+      approximateAreaSqMi: 160,
+    };
+    searchPlaces.mockResolvedValueOnce([londonUk, londonCanada]);
+    renderCreateSession();
+
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "London" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("London, England, United Kingdom")).toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: /London, Ontario, Canada/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Search" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("combobox", { name: /game preset/i })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /London, Ontario, Canada/ }));
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("London, Ontario, Canada")).toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: "Search" })).toHaveAttribute("aria-pressed", "true");
+    expect(mapView.model?.focusBounds).toEqual(placeToFocusBounds(londonCanada));
+  });
+
+  it("loads the County Dublin preset when search hits that place", async () => {
+    searchPlaces.mockResolvedValueOnce([
+      {
+        id: "county-dublin",
+        displayName: "County Dublin, Ireland",
+        center: [53.35, -6.26],
+        bounds: { south: 53.2, west: -6.5, north: 53.5, east: -6.0 },
+        placeCategory: "county",
+        approximateAreaSqMi: 350,
+      },
+    ]);
+    renderCreateSession();
+
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "County Dublin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Preset" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue(
+      "bundled:dublin-county",
+    );
+  });
+
+  it("Confirm with no area asks for Search, Preset, or Draw", async () => {
     renderCreateSession();
     goToPlay();
 
     fireEvent.click(screen.getByRole("button", { name: "Create game" }));
 
-    // Confirm is the intent: the map mounts, and nothing is submitted yet.
-    expect(await screen.findByTestId("create-map")).toBeInTheDocument();
-    expect(startSeaLevelBackgroundSampling).not.toHaveBeenCalled();
     expect(
-      screen.queryByText(/move the map until the play area is framed/i),
-    ).not.toBeInTheDocument();
-
-    loadMapWithDefaultViewport();
-
-    await waitFor(() => {
-      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledTimes(1);
-    });
-    const [gameArea] = startSeaLevelBackgroundSampling.mock.calls[0]!;
-    expect(gameArea).toMatchObject({ type: "Polygon" });
+      await screen.findByText(/search for a place, load a preset, or open draw/i),
+    ).toBeInTheDocument();
+    expect(startSeaLevelBackgroundSampling).not.toHaveBeenCalled();
   });
 
   it("mounts the map on boundary import intent", () => {
@@ -349,12 +559,57 @@ describe("CreateSession", () => {
 
   it("opens the fullscreen framing map from Draw on map", () => {
     renderCreateSession();
-    goToFrame();
+    goToDrawSource();
 
     fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
 
-    expect(screen.getByRole("radio", { name: "Circle" })).toBeInTheDocument();
-    expect(screen.getByTestId("create-map")).toBeInTheDocument();
+    expect(screen.getByTestId("game-area-framing-modal")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Square" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "Circle" })).not.toBeChecked();
+    expect(screen.getAllByTestId("create-map").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("Use my location loads nearby suggested play areas", async () => {
+    const london = {
+      id: "london",
+      displayName: "London, England, United Kingdom",
+      center: [51.507, -0.128] as [number, number],
+      bounds: { south: 51.28, west: -0.51, north: 51.7, east: 0.33 },
+      placeCategory: "city" as const,
+      approximateAreaSqMi: 600,
+    };
+    const county = {
+      id: "greater-london",
+      displayName: "Greater London, England, United Kingdom",
+      center: [51.5, -0.12] as [number, number],
+      bounds: { south: 51.28, west: -0.51, north: 51.7, east: 0.33 },
+      placeCategory: "county" as const,
+      approximateAreaSqMi: 600,
+    };
+    suggestPlacesAtPoint.mockResolvedValue([london, county]);
+    requestLocationAccess.mockResolvedValue({
+      lat: 51.507,
+      lng: -0.128,
+      accuracy: 12,
+      heading: null,
+    });
+    renderCreateSession();
+
+    fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
+
+    expect(await screen.findByDisplayValue("London, England, United Kingdom")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Greater London/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Search" })).toHaveAttribute("aria-pressed", "true");
+    await waitFor(() => {
+      expect(mapView.model?.focusBounds).toEqual(placeToFocusBounds(london));
+    });
+
+    loadMapWithDefaultViewport();
+    goToPlay();
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalled();
+    });
   });
 
   it("Use my location focuses the map strip without inventing a game area", async () => {
@@ -368,8 +623,8 @@ describe("CreateSession", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
 
-    expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
-    expect(screen.getByTestId("create-map")).toBeInTheDocument();
+    expect(await screen.findByTestId("create-map")).toBeInTheDocument();
+    expect(screen.queryByText(/using your location/i)).toBeNull();
     await waitFor(() => {
       expect(mapView.model?.focusBounds).toEqual(gpsReadingToFocusBounds(53.35, -6.26));
     });
@@ -380,7 +635,7 @@ describe("CreateSession", () => {
 
     expect(
       await screen.findByText(
-        /search for a place, import a boundary, or move the map until the play area is framed/i,
+        /search for a place, load a preset, or open draw to set the play area/i,
       ),
     ).toBeInTheDocument();
     expect(startSeaLevelBackgroundSampling).not.toHaveBeenCalled();
@@ -405,7 +660,9 @@ describe("CreateSession", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
-    expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mapView.model?.focusBounds).toEqual(gpsReadingToFocusBounds(53.35, -6.26));
+    });
     expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
 
     goToPlay();
@@ -417,7 +674,7 @@ describe("CreateSession", () => {
     });
   });
 
-  it("Use my location keeps a searched place", async () => {
+  it("Use my location replaces a searched place with nearby suggestions", async () => {
     searchPlaces.mockResolvedValueOnce([
       {
         id: "dublin",
@@ -428,6 +685,15 @@ describe("CreateSession", () => {
         approximateAreaSqMi: 10,
       },
     ]);
+    const london = {
+      id: "london",
+      displayName: "London, England, United Kingdom",
+      center: [51.507, -0.128] as [number, number],
+      bounds: { south: 51.28, west: -0.51, north: 51.7, east: 0.33 },
+      placeCategory: "city" as const,
+      approximateAreaSqMi: 600,
+    };
+    suggestPlacesAtPoint.mockResolvedValue([london]);
     requestLocationAccess.mockResolvedValue({
       lat: 51.5,
       lng: -0.12,
@@ -445,9 +711,14 @@ describe("CreateSession", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
-    expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Dublin, Ireland")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("bundled:london");
+    });
+    expect(screen.queryByDisplayValue("Dublin, Ireland")).toBeNull();
 
+    await waitFor(() => {
+      expect(screen.getByText(/metric · London, United Kingdom/i)).toBeInTheDocument();
+    });
     goToPlay();
     fireEvent.click(screen.getByRole("button", { name: "Create game" }));
     await waitFor(() => {
@@ -464,14 +735,16 @@ describe("CreateSession", () => {
     });
     renderCreateSession();
 
-    goToFrame();
+    goToDrawSource();
     fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
     loadMapWithDefaultViewport();
+    fireEvent.click(screen.getByRole("radio", { name: "Circle" }));
     fireEvent.click(screen.getByRole("button", { name: "Done" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Back" }));
     fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
-    expect(await screen.findByText(/using your location/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mapView.model?.focusBounds).toEqual(gpsReadingToFocusBounds(53.35, -6.26));
+    });
     loadMapWithDefaultViewport();
 
     goToPlay();
@@ -480,9 +753,7 @@ describe("CreateSession", () => {
       expect(startSeaLevelBackgroundSampling).toHaveBeenCalledTimes(1);
     });
     expect(
-      screen.queryByText(
-        /search for a place, import a boundary, or move the map until the play area is framed/i,
-      ),
+      screen.queryByText(/search for a place, load a preset, or open draw to set the play area/i),
     ).not.toBeInTheDocument();
   });
 
@@ -498,21 +769,118 @@ describe("CreateSession", () => {
     expect(screen.queryByTestId("create-map")).not.toBeInTheDocument();
   });
 
-  it("Confirm reports a map load failure instead of blaming the player", async () => {
-    vi.useFakeTimers();
-    try {
-      renderCreateSession();
-      goToPlay();
+  it("clears a loaded preset recap after a place search", async () => {
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([
+        {
+          id: "preset-cork",
+          name: "Cork weekend",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Cork, Ireland",
+          gameArea: IMPORTED_AREA,
+          focusBounds: { south: 53.3, west: -6.3, north: 53.4, east: -6.2 },
+          migrationStatus: "ok",
+        },
+      ]),
+    });
+    searchPlaces.mockResolvedValueOnce([
+      {
+        id: "galway",
+        displayName: "Galway, Ireland",
+        center: [53.27, -9.05],
+        bounds: { south: 53.2, west: -9.2, north: 53.35, east: -8.9 },
+        placeCategory: "city",
+        approximateAreaSqMi: 20,
+      },
+    ]);
+    renderCreateSession("/create?preset=preset-cork");
+    await waitFor(() => {
+      expect(screen.getByText(/medium · metric · Cork, Ireland/i)).toBeInTheDocument();
+    });
 
-      fireEvent.click(screen.getByRole("button", { name: "Create game" }));
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(10_000);
-      });
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Galway" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Galway, Ireland")).toBeInTheDocument();
+    });
 
-      expect(screen.getByText(/the map couldn't load/i)).toBeInTheDocument();
-      expect(startSeaLevelBackgroundSampling).not.toHaveBeenCalled();
-    } finally {
-      vi.useRealTimers();
-    }
+    goToRules();
+    expect(screen.getByText("Playing in Galway, Ireland")).toBeInTheDocument();
+    expect(screen.queryByText("Playing in Cork weekend")).toBeNull();
+  });
+
+  it("keeps a searched place when Draw is cancelled", async () => {
+    searchPlaces.mockResolvedValueOnce([
+      {
+        id: "dublin",
+        displayName: "Dublin, Ireland",
+        center: [53.35, -6.26],
+        bounds: { south: 53.3, west: -6.4, north: 53.4, east: -6.1 },
+        placeCategory: "city",
+        approximateAreaSqMi: 10,
+      },
+    ]);
+    renderCreateSession();
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Dublin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Dublin, Ireland")).toBeInTheDocument();
+    });
+
+    goToDrawSource();
+    fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
+    expect(screen.getByTestId("game-area-framing-modal")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    goToRules();
+    expect(screen.getByText("Playing in Dublin, Ireland")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalled();
+    });
+  });
+
+  it("Create game uses areas stacked with Add another area", async () => {
+    searchPlaces.mockResolvedValueOnce([
+      {
+        id: "dublin",
+        displayName: "Dublin, Ireland",
+        center: [53.35, -6.26],
+        bounds: { south: 53.3, west: -6.4, north: 53.4, east: -6.1 },
+        placeCategory: "city",
+        approximateAreaSqMi: 10,
+      },
+    ]);
+    renderCreateSession();
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Dublin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Dublin, Ireland")).toBeInTheDocument();
+    });
+
+    goToRules();
+    openMoreTools();
+    fireEvent.click(screen.getByRole("button", { name: "Add another area" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalled();
+    });
+    expect(
+      screen.queryByText(/search for a place, load a preset, or open draw to set the play area/i),
+    ).toBeNull();
   });
 });
