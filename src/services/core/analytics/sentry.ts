@@ -3,6 +3,7 @@ import { getClientEnv } from "@/config/env";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { scheduleIdleBootWork } from "@/domain/device/perf/scheduleAfterFirstPaint";
 import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
+import { normalizeRoutePath } from "@/navigation/routeMetadata";
 import {
   applyClientSentryDisposition,
   CLIENT_SENTRY_IGNORE_ERRORS,
@@ -115,6 +116,14 @@ function scrubEvent(
   return next;
 }
 
+const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
+
+/** Parameterized route for pageload/navigation names, so ids don't explode cardinality. */
+export function sentryRouteName(pathname: string): string {
+  const route = normalizeRoutePath(pathname);
+  return ADMIN_INCIDENT_PATH_RE.test(route) ? "/admin/incidents/:incidentId" : route;
+}
+
 export function initSentry(): void {
   if (import.meta.env.MODE === "test" || import.meta.env.DEV) {
     return;
@@ -134,10 +143,15 @@ export function initSentry(): void {
     release: `jetlag@${APP_VERSION}`,
     dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
     tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
+    // SDK 11 defaults to span streaming, which names every pageload "Pageload" and sends LCP/CLS
+    // as standalone spans instead of `measurements.*` on the pageload. Static keeps route-named
+    // pageload transactions with LCP/CLS attached (what the Web Vitals views read); INP still
+    // goes out as its own span.
+    traceLifecycle: "static",
     ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
     integrations: [
       Sentry.browserTracingIntegration({
-        enableInp: true,
+        beforeStartSpan: (options) => ({ ...options, name: sentryRouteName(options.name) }),
       }),
     ],
     beforeSend: scrubEvent,
@@ -305,8 +319,8 @@ export function addRecoverableErrorBreadcrumb(error: unknown, componentStack?: s
   });
 }
 
-export function setTransactionName(name: string): void {
-  Sentry.getCurrentScope().setTransactionName(name);
+export function setTransactionName(pathname: string): void {
+  Sentry.getCurrentScope().setTransactionName(sentryRouteName(pathname));
 }
 
 export function captureException(error: unknown): void {

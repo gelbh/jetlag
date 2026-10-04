@@ -54,6 +54,7 @@ import {
   initSentry,
   reportFirestoreListenPermissionDenied,
   reportJoinPermissionDenied,
+  sentryRouteName,
 } from "./sentry";
 
 describe("initSentry", () => {
@@ -88,7 +89,6 @@ describe("initSentry", () => {
       replaysOnErrorSampleRate: number;
     };
     expect(options.integrations).toEqual([{ name: "BrowserTracing" }]);
-    expect(browserTracingIntegration).toHaveBeenCalledWith({ enableInp: true });
     expect(replayIntegration).not.toHaveBeenCalled();
     expect(options.replaysOnErrorSampleRate).toBe(1.0);
     expect(options).toHaveProperty("replaysSessionSampleRate");
@@ -105,6 +105,55 @@ describe("initSentry", () => {
 
     initSentry();
     expect(idleCallbacks).toHaveLength(1);
+  });
+
+  // SDK 11 span streaming renamed every pageload "Pageload" and moved LCP/CLS off the
+  // pageload (0 field pageloads with measurements.lcp on 0.17.1-1.0.x).
+  it("keeps route-named pageloads with LCP/CLS/INP on the static trace lifecycle", () => {
+    vi.stubEnv("MODE", "production");
+    vi.stubEnv("DEV", false);
+    getClientEnv.mockReturnValue({ VITE_SENTRY_DSN: "https://key@example.invalid/1" });
+    browserTracingIntegration.mockClear();
+
+    initSentry();
+
+    const options = init.mock.lastCall?.[0] as { traceLifecycle?: string };
+    expect(options.traceLifecycle).toBe("static");
+
+    expect(browserTracingIntegration).toHaveBeenCalledOnce();
+    const tracingOptions = (browserTracingIntegration.mock.calls[0] as unknown[])[0] as {
+      instrumentPageLoad?: boolean;
+      instrumentNavigation?: boolean;
+      enableInp?: boolean;
+      webVitals?: { ignore?: string[] };
+      beforeStartSpan?: (options: { name: string; op?: string }) => { name: string; op?: string };
+    };
+    expect(tracingOptions.instrumentPageLoad).not.toBe(false);
+    expect(tracingOptions.instrumentNavigation).not.toBe(false);
+    expect(tracingOptions.enableInp).not.toBe(false);
+    expect(tracingOptions.webVitals?.ignore ?? []).toEqual([]);
+
+    const beforeStartSpan = tracingOptions.beforeStartSpan;
+    expect(beforeStartSpan).toBeTypeOf("function");
+    expect(beforeStartSpan?.({ name: "/join", op: "pageload" })).toEqual({
+      name: "/join",
+      op: "pageload",
+    });
+    expect(beforeStartSpan?.({ name: "/presets/abc123/edit", op: "navigation" })).toEqual({
+      name: "/presets/:id/edit",
+      op: "navigation",
+    });
+  });
+});
+
+describe("sentryRouteName", () => {
+  it("keeps static routes and parameterizes id segments", () => {
+    expect(sentryRouteName("/")).toBe("/");
+    expect(sentryRouteName("/map")).toBe("/map");
+    expect(sentryRouteName("/join?code=ABCD")).toBe("/join");
+    expect(sentryRouteName("/presets/abc123/edit")).toBe("/presets/:id/edit");
+    expect(sentryRouteName("/admin/incidents")).toBe("/admin/incidents");
+    expect(sentryRouteName("/admin/incidents/inc_42")).toBe("/admin/incidents/:incidentId");
   });
 });
 
