@@ -142,7 +142,6 @@ export type HiderMapScreenController = {
     | "selectedStation"
     | "setSelectedStation"
     | "confirmTrap"
-    | "saving"
     | "error"
   >;
   myTrap: TimeTrapRecord | null;
@@ -594,10 +593,11 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
             onSearchThisArea={onTimeTrapSearchThisArea}
             searchDisabled={timeTrapTool.stationsLoading}
             existingTrapStationName={myTrap?.stationName ?? null}
-            onConfirm={() =>
-              void timeTrapTool.confirmTrap().then(() => onTimeTrapSheetOpenChange(false))
-            }
-            saving={timeTrapTool.saving}
+            onConfirm={() => {
+              if (timeTrapTool.confirmTrap()) {
+                onTimeTrapSheetOpenChange(false);
+              }
+            }}
             error={timeTrapTool.error}
             bonusMinutes={myTrap?.bonusMinutes ?? 5}
           />

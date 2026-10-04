@@ -7,6 +7,7 @@ export type WriteLabel =
   | "question.cancel"
   | "question.update"
   | "endgame.start"
+  | "endgame.reset"
   | "found.request"
   | "found.confirm"
   | "found.decline"
