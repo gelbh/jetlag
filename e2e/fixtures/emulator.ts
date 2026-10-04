@@ -16,23 +16,36 @@ export async function listPendingQuestionIds(page: Page, sessionId: string): Pro
   }, sessionId);
 }
 
-export async function patchPendingQuestionAnswerableAt(
-  page: Page,
+/** Must match firebase.json emulators.firestore.port and VITE_FIREBASE_PROJECT_ID in playwright.config.ts. */
+const FIRESTORE_EMULATOR_ORIGIN = "http://127.0.0.1:8180";
+const E2E_FIREBASE_PROJECT_ID = "demo-jetlag";
+
+/**
+ * Move a question's answer window into the past. Rules pin `receivedAt` to
+ * request.time, so no client can backdate it; the emulator's `Bearer owner`
+ * REST access bypasses rules. Both anchors move because the deadline counts
+ * from the later of the two.
+ */
+export async function backdatePendingQuestionDeadline(
   sessionId: string,
   questionId: string,
-  answerableAt: string,
+  anchorIso: string,
 ): Promise<void> {
-  await waitForE2EBridge(page);
-  await page.evaluate(
-    async ({ id, questionId: pendingQuestionId, answerableAt: nextAnswerableAt }) => {
-      const bridge = window.__JETLAG_E2E__;
-      if (!bridge?.patchPendingQuestionAnswerableAt) {
-        throw new Error("E2E bridge is not installed.");
-      }
-      await bridge.patchPendingQuestionAnswerableAt(id, pendingQuestionId, nextAnswerableAt);
-    },
-    { id: sessionId, questionId, answerableAt },
-  );
+  const path = `projects/${E2E_FIREBASE_PROJECT_ID}/databases/(default)/documents/sessions/${sessionId}/pendingQuestions/${questionId}`;
+  const mask = "updateMask.fieldPaths=answerableAt&updateMask.fieldPaths=receivedAt";
+  const response = await fetch(`${FIRESTORE_EMULATOR_ORIGIN}/v1/${path}?${mask}`, {
+    method: "PATCH",
+    headers: { Authorization: "Bearer owner", "Content-Type": "application/json" },
+    body: JSON.stringify({
+      fields: {
+        answerableAt: { stringValue: anchorIso },
+        receivedAt: { timestampValue: anchorIso },
+      },
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Backdating question ${questionId} failed: ${response.status}`);
+  }
 }
 
 export async function advanceLocalTimerElapsedMs(

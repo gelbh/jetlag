@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { serverNowIso } from "@/services/core/time/serverClock";
 import type { HeavyToolHostModel } from "../../components/tools/HeavyToolHost";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
@@ -120,7 +121,7 @@ export function useMapScreenTools({
           sessionId: session.id,
           toolType,
           createdByUid: uid,
-          createdAt: new Date().toISOString(),
+          createdAt: serverNowIso(),
           status: input.status ?? "pending",
           placement: input.placement,
           replyOptions: input.replyOptions,

@@ -26,12 +26,7 @@ type SeekerEffectsInput = Pick<
   | "annotations"
 > & {
   awaitHiderAnswer: boolean;
-  postSystemMessage: (
-    sessionId: string,
-    uid: string,
-    role: "seeker",
-    text: string,
-  ) => Promise<void>;
+  postSystemMessage: (sessionId: string, uid: string, role: "seeker", text: string) => void;
   cancelThermometerWalk: (args: {
     sessionId: string;
     pendingQuestionId: string;
@@ -63,12 +58,12 @@ export function useMapScreenSeekerEffects({
   setMapError,
 }: SeekerEffectsInput) {
   const postDeadlineSystemMessage = useCallback(
-    async (text: string) => {
+    (text: string) => {
       if (!session?.id || !uid) {
         return;
       }
 
-      await postSystemMessage(session.id, uid, "seeker", text);
+      postSystemMessage(session.id, uid, "seeker", text);
     },
     [postSystemMessage, session, uid],
   );
