@@ -149,6 +149,17 @@ export function initSentry(): void {
     beforeSend: scrubEvent,
     replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 0,
     replaysOnErrorSampleRate: 1.0,
+    // Queue envelopes in IndexedDB while offline and replay them on `online` / next boot.
+    // Events are queued after beforeSend, so scrubbing still applies; the URL stays the tunnel.
+    transport: Sentry.makeBrowserOfflineTransport(Sentry.makeFetchTransport),
+    // BrowserOptions types transportOptions for the fetch transport only, so check the keys
+    // against the offline transport's options and then widen.
+    transportOptions: {
+      maxQueueSize: 30,
+      flushAtStartup: true,
+    } satisfies Partial<
+      Parameters<ReturnType<typeof Sentry.makeBrowserOfflineTransport>>[0]
+    > as Sentry.BrowserOptions["transportOptions"],
   });
 
   scheduleLazyReplay();
