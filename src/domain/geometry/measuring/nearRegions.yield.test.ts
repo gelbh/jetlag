@@ -56,29 +56,11 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
     vi.doUnmock("../kernel/nearRegionKernelRunner");
   });
 
-  it("yields to the event loop when segment count exceeds the interval", async () => {
+  it("yields to the event loop on the test-only buffer-union helper", async () => {
     vi.resetModules();
-    vi.doMock("../kernel/kernelWasmReady", async () => {
-      const actual = await vi.importActual<typeof import("../kernel/kernelWasmReady")>(
-        "../kernel/kernelWasmReady",
-      );
-      return {
-        ...actual,
-        KERNEL_WASM_READY: {
-          ...actual.KERNEL_WASM_READY,
-          nearRegionBatch: false,
-        },
-        shouldUseWasm: (entrypoint: string) => {
-          if (entrypoint === "nearRegionBatch") {
-            return false;
-          }
-          return actual.shouldUseWasm(entrypoint as never);
-        },
-      };
-    });
 
     const {
-      buildCoastlineNearRegion,
+      buildCoastlineNearRegionUnionBufferForTests,
       clearCoastlineNearRegionCacheForTests,
       COASTLINE_NEAR_REGION_YIELD_EVERY,
       setCoastlineNearRegionYieldHookForTests,
@@ -93,7 +75,7 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
       lineSegment(index),
     );
 
-    await buildCoastlineNearRegion(segments, 5_000, sampleGameArea);
+    await buildCoastlineNearRegionUnionBufferForTests(segments, 5_000, sampleGameArea);
 
     expect(yieldCount).toBeGreaterThanOrEqual(1);
 
