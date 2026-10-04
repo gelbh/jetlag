@@ -1,5 +1,6 @@
 import type { FirebaseStorage } from "firebase/storage";
 import { clientEnvUsesFirebaseEmulator } from "@/config/env";
+import { firebaseEmulatorEndpoints } from "@/config/firebaseEmulatorEndpoints";
 import { getFirebaseApp } from "./firebase";
 
 let storage: FirebaseStorage | null = null;
@@ -13,7 +14,8 @@ function connectStorageEmulatorIfConfigured(
     return;
   }
 
-  connectStorageEmulator(firebaseStorage, "127.0.0.1", 9198);
+  const { host, storagePort } = firebaseEmulatorEndpoints();
+  connectStorageEmulator(firebaseStorage, host, storagePort);
   storageEmulatorConnected = true;
 }
 

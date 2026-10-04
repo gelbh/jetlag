@@ -32,4 +32,35 @@ describe("cors", () => {
 
     assert.equal(headers.get("Access-Control-Allow-Origin"), "https://jetlag.gelbhart.dev");
   });
+
+  it("reflects remapped local Vite origins", () => {
+    const headers = new Map();
+    const res = {
+      set(name, value) {
+        headers.set(name, value);
+      },
+    };
+
+    setCors(res, {
+      headers: { origin: "http://127.0.0.1:5174" },
+    });
+
+    assert.equal(headers.get("Access-Control-Allow-Origin"), "http://127.0.0.1:5174");
+    assert.equal(headers.get("Vary"), "Origin");
+  });
+
+  it("ignores non-Vite local ports", () => {
+    const headers = new Map();
+    const res = {
+      set(name, value) {
+        headers.set(name, value);
+      },
+    };
+
+    setCors(res, {
+      headers: { origin: "http://localhost:3000" },
+    });
+
+    assert.equal(headers.has("Access-Control-Allow-Origin"), false);
+  });
 });

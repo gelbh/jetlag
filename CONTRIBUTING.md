@@ -55,12 +55,27 @@ just dev-secrets
 # Doppler config `dev` → npm run dev → http://localhost:5173/
 ```
 
-Emulator stack:
+Emulator stack (preferred):
+
+```bash
+just dev-local
+# optional worktree: just dev-local <slug>
+# → ~/Projects/worktrees/jetlag/<slug>
+# bootstraps deps/WASM as needed, then Firebase emulators + Vite (Doppler `dev_emulator`)
+# If default ports are busy, asks: kill those listeners, or bind the next free ports
+# (no TTY: next free ports). Prints the Vite and Emulator UI URLs it actually bound
+# Remapped stacks set VITE_FIREBASE_*_EMULATOR_PORT (+ VITE_DEV_PORT) for the client
+# Functions CORS allows http://localhost|127.0.0.1:5173-5200 for shifted Vite
+```
+
+Two-terminal equivalent:
 
 ```bash
 just emulators
 # other terminal:
 just dev-emulator
+# Optional: write firebase.dev-local.json (via a prior just dev-local) then
+# npm run emulators:local  # uses that config when present
 ```
 
 If the map geometry kernel stubs with `jetlag-geometry-kernel pkg missing`, build WASM once:
