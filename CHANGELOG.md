@@ -6,6 +6,42 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.0.4 - 2026-10-04
+
+### Fixes
+
+- Coastline near-region shade fails closed when WASM is unavailable (no TypeScript distance-threshold fallback)
+- The game reconnects on its own after your phone wakes up or the signal comes back, instead of staying stuck on old data
+- End Game, found hider, time traps and card plays apply right away on a weak or lost signal instead of hanging or showing a false "check your connection" alert; they sync when you reconnect
+- Hider map blue-dot reuses the truth GPS watch instead of starting a second one
+- Losing signal while a screen is loading no longer reloads the app into a blank page; it waits for the connection to come back and then refreshes
+- The hider's answer timer now starts when your question reaches them, not when you tapped Ask without signal
+- Answering or cancelling on a patchy connection no longer leaves a question stuck half-done
+- Coastline and border measures recover when Overpass times out on a large custom play area
+- Matching and measuring place lists recover when Overpass times out on a large custom play area
+- Tentacle places recover when Overpass times out on a large search radius
+- Bottom sheets reopen fully after a grabber drag-to-dismiss
+- Hide optional app-update notices during a live session, including Home Continue
+- Do not auto-apply optional updates until the session is cleared
+
+### Improvements
+
+- When the connection looks fine but your moves aren't going through, the app notices quickly and shows you're offline
+- Create sheet uses iOS Settings-style grouped rows on Where, Rules, and Play
+- Create page groups Where, Rules, and Play, and tucks rare tools under More tools
+- Confirm button now says Create game
+- Create flow uses Where, Rules, and Play steps
+- Measuring coastline and linear near-region shade follows the distance band instead of a coarse cell grid.
+- Questions you ask without signal are saved on your phone and send as soon as signal returns
+- Privacy policy notes server-side Premium purchase analytics to PostHog after Stripe payment
+- Screen-to-screen moves use smoother page transitions when motion is allowed
+
+### Technical
+
+- Lighthouse CI audits the same prerendered HTML prod serves for every route, with ratcheted score floors
+- Restore route-named Sentry pageloads with LCP/CLS after the SDK 11 span-streaming default
+- Forward Sentry tunnel envelopes byte-exact so Session Replay uploads stop failing with 400
+
 ## 1.0.3 - 2026-10-04
 
 ### Fixes
