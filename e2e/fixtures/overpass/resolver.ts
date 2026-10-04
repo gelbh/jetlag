@@ -68,7 +68,8 @@ export function resolveOverpassResponse(query: string, profile: OverpassFixtureP
 
   const normalized = query.toLowerCase();
 
-  if (normalized.includes("around:")) {
+  // Tentacle uses unlimited `out center;` (not `out center 200` used by matching catalogs).
+  if (normalized.includes("around:") || /out center\s*;/.test(normalized)) {
     return fixtureBody(DUBLIN_TENTACLE);
   }
 

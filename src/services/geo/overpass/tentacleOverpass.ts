@@ -1,3 +1,4 @@
+import { expandBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { distanceBetweenPoints, type LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import {
@@ -16,7 +17,12 @@ import type {
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached, tentaclePoisCacheKey } from "../cache";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
-import { buildAroundTaggedQuery, overpassQueryTemplate } from "./queryHelpers";
+import {
+  mergeOverpassElementPayloads,
+  type OverpassBbox,
+  queryOverpassWithBboxSplit,
+} from "./overpassBboxSplit";
+import { formatOverpassBbox, overpassQueryTemplate } from "./query";
 import { fetchBundledTentaclePois, mergeTentaclePois } from "./regionPackPoi";
 
 type OverpassElement = {
@@ -32,26 +38,62 @@ function selectorToFilter(selector: string): string {
   return selector.replace(/^\[/, "").replace(/\]$/, "");
 }
 
+export function tentacleSearchBoundingBox(center: LatLngTuple, radiusMeters: number): OverpassBbox {
+  return expandBoundingBox(
+    { south: center[0], north: center[0], west: center[1], east: center[1] },
+    radiusMeters,
+  );
+}
+
+export function buildTentacleOverpassQueryForBbox(
+  bbox: OverpassBbox,
+  categoryId: TentacleExtendedCategoryId,
+  customCategories: readonly SessionCustomCategory[] = [],
+): string {
+  const bboxStr = formatOverpassBbox(bbox);
+
+  if (categoryId === "metro_line") {
+    return overpassQueryTemplate(`
+      (
+        relation["route"~"subway|light_rail|tram|monorail"]["name"](${bboxStr});
+      );
+      out center;
+    `);
+  }
+
+  const selectors = tentacleOverpassSelectorsForCategory(categoryId, customCategories);
+  const clauses = selectors.flatMap((selector) => [
+    `node${selector}(${bboxStr});`,
+    `way${selector}(${bboxStr});`,
+  ]);
+
+  return overpassQueryTemplate(`
+    (
+      ${clauses.join("\n      ")}
+    );
+    out center;
+  `);
+}
+
 export function buildTentacleOverpassQuery(
   center: LatLngTuple,
   radiusMeters: number,
   categoryId: TentacleExtendedCategoryId,
   customCategories: readonly SessionCustomCategory[] = [],
 ): string {
-  if (categoryId === "metro_line") {
-    return overpassQueryTemplate(`
-      (
-        relation(around:${radiusMeters},${center[0]},${center[1]})["route"~"subway|light_rail|tram|monorail"]["name"];
-      );
-      out center 40;
-    `);
-  }
-
-  return buildAroundTaggedQuery(
-    center,
-    radiusMeters,
-    tentacleOverpassSelectorsForCategory(categoryId, customCategories),
+  return buildTentacleOverpassQueryForBbox(
+    tentacleSearchBoundingBox(center, radiusMeters),
+    categoryId,
+    customCategories,
   );
+}
+
+function filterTentaclePoisByRadius(
+  pois: TentaclePoi[],
+  center: LatLngTuple,
+  radiusMeters: number,
+): TentaclePoi[] {
+  return pois.filter((poi) => distanceBetweenPoints(center, [poi.lat, poi.lng]) <= radiusMeters);
 }
 
 function isActiveTentaclePoi(tags: Record<string, string> | undefined): boolean {
@@ -193,11 +235,18 @@ async function fetchOverpassTentaclePois(
   cacheScope: string,
 ): Promise<TentaclePoi[]> {
   return getOrFetchCached(tentaclePoisCacheKey(center, radiusMeters, cacheScope), async () => {
-    const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-      buildTentacleOverpassQuery(center, radiusMeters, categoryId, customCategories),
+    const payload = await queryOverpassWithBboxSplit(
+      (bbox) => buildTentacleOverpassQueryForBbox(bbox, categoryId, customCategories),
+      tentacleSearchBoundingBox(center, radiusMeters),
+      (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
+      mergeOverpassElementPayloads,
     );
 
-    return parseTentaclePois(payload.elements, categoryId);
+    return filterTentaclePoisByRadius(
+      parseTentaclePois(payload.elements, categoryId),
+      center,
+      radiusMeters,
+    );
   });
 }
 
