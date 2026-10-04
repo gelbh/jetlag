@@ -163,7 +163,6 @@ export function DrawerSheet({
       keepMounted={false}
       zIndex={JETLAG_MODAL_Z_INDEX}
       title={ariaLabel}
-      aria-label={ariaLabel}
       transitionProps={transitionProps}
       overlayProps={{
         backgroundOpacity: 0.4,
