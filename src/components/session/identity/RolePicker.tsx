@@ -1,12 +1,14 @@
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { RadioCardGroup } from "../../ui/forms/RadioCardGroup";
+import { SegmentControl } from "../../ui/forms/SegmentControl";
 
 interface RolePickerProps {
   value: PlayerRole;
   onChange: (role: PlayerRole) => void;
   disabled?: boolean;
   includeObserver?: boolean;
+  compact?: boolean;
 }
 
 const BASE_ROLE_OPTIONS: Array<{
@@ -33,10 +35,26 @@ export function RolePicker({
   onChange,
   disabled,
   includeObserver = false,
+  compact = false,
 }: RolePickerProps) {
   const roleOptions = includeObserver
     ? [...BASE_ROLE_OPTIONS, OBSERVER_ROLE_OPTION]
     : BASE_ROLE_OPTIONS;
+
+  if (compact) {
+    return (
+      <SegmentControl
+        aria-label="Your side"
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        options={roleOptions.map((option) => ({
+          value: option.value,
+          label: playerRoleLabel(option.value),
+        }))}
+      />
+    );
+  }
 
   return (
     <RadioCardGroup

@@ -2,6 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { RolePicker } from "@/components/session/identity/RolePicker";
 import { jetlagTheme } from "@/theme/theme";
 import {
   GameAreaSection,
@@ -164,5 +165,13 @@ describe("GameAreaSection create IA groups", () => {
     expect(document.querySelector(".jl-inset-group")).toBeTruthy();
     expect(document.querySelector("select.field-input")).toBeNull();
     expect(screen.getByRole("combobox", { name: /game preset/i })).toBeInTheDocument();
+  });
+
+  it("Play settingsSlot renders compact role control inside the Play group", () => {
+    renderSection(baseModel, <RolePicker value="seeker" onChange={() => undefined} compact />);
+
+    expect(screen.getByRole("tablist", { name: "Your side" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Seeker" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Hider" })).toBeInTheDocument();
   });
 });

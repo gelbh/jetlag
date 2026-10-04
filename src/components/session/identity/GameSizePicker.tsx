@@ -1,6 +1,6 @@
-import { Text } from "@mantine/core";
+import { NativeSelect, Text } from "@mantine/core";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { SectionLabel } from "@/components/ui/entry/entryChrome";
+import { insetTextInputStyles, SectionLabel } from "@/components/ui/entry/entryChrome";
 import type { GameArea } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
@@ -22,6 +22,7 @@ interface GameSizePickerProps {
   onChange: (size: GameSize) => void;
   distanceUnit?: DistanceUnit;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 export function GameSizePicker({
@@ -30,6 +31,7 @@ export function GameSizePicker({
   onChange,
   distanceUnit = "imperial",
   disabled,
+  compact = false,
 }: GameSizePickerProps) {
   const recommended = useMemo(
     () => (gameArea ? recommendGameSize(gameArea, distanceUnit) : null),
@@ -65,6 +67,45 @@ export function GameSizePicker({
       ? gameAreaSquareKilometers(gameArea) < 25
       : gameAreaSquareMiles(gameArea) < 10
     : false;
+
+  const selectSize = (size: GameSize) => {
+    setUserOverrode(true);
+    onChange(size);
+  };
+
+  if (compact) {
+    return (
+      <div>
+        <div className="flex items-baseline justify-between gap-2 px-4 pt-2">
+          <SectionLabel>Game size</SectionLabel>
+          {playAreaSummary ? (
+            <Text size="xs" c="var(--color-field-ink-muted)">
+              {playAreaSummary}
+              {recommended ? ` · Rec ${gameSizeLabel(recommended, distanceUnit).label}` : ""}
+            </Text>
+          ) : null}
+        </div>
+        <NativeSelect
+          aria-label="Game size"
+          data={GAME_SIZE_OPTIONS.map((size) => ({
+            value: size,
+            label: gameSizeLabel(size, distanceUnit).label,
+          }))}
+          value={value}
+          disabled={disabled}
+          onChange={(event) => {
+            selectSize(event.currentTarget.value as GameSize);
+          }}
+          styles={insetTextInputStyles}
+        />
+        {compactArea ? (
+          <Text size="xs" c="var(--color-field-ink-muted)" px={16} pb={8}>
+            Compact area, good for a short local game.
+          </Text>
+        ) : null}
+      </div>
+    );
+  }
 
   const options = GAME_SIZE_OPTIONS.map((size) => {
     const meta = gameSizeLabel(size, distanceUnit);
@@ -109,10 +150,7 @@ export function GameSizePicker({
       <RadioCardGroup
         value={value}
         options={options}
-        onChange={(size) => {
-          setUserOverrode(true);
-          onChange(size);
-        }}
+        onChange={selectSize}
         aria-label="Game size"
         disabled={disabled}
       />
