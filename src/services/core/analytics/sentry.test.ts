@@ -118,7 +118,7 @@ describe("initSentry", () => {
     expect(idleCallbacks).toHaveLength(1);
   });
 
-  it("buffers envelopes offline through the tunnel with beforeSend scrubbing intact", () => {
+  it("wires the IndexedDB offline transport through the tunnel", () => {
     stubProdWithDsn();
     makeBrowserOfflineTransport.mockClear();
 
@@ -128,15 +128,24 @@ describe("initSentry", () => {
       tunnel?: string;
       transport?: unknown;
       transportOptions?: Record<string, unknown>;
-      beforeSend?: (event: Record<string, unknown>, hint: unknown) => unknown;
     };
     expect(makeBrowserOfflineTransport).toHaveBeenCalledExactlyOnceWith(fetchTransport);
     expect(options.transport).toBe(offlineTransport);
     expect(options.transportOptions).toEqual({ maxQueueSize: 30, flushAtStartup: true });
     // The SDK builds the transport URL from `tunnel`, so queued envelopes still hit the worker.
     expect(options.tunnel).toBe("/api/sentry-tunnel");
+  });
 
-    // Queued events are already scrubbed: beforeSend runs before the transport sees them.
+  // The SDK runs beforeSend before handing the envelope to the transport, so this is what
+  // gets queued offline.
+  it("keeps beforeSend scrubbing join codes and session ids", () => {
+    stubProdWithDsn();
+
+    initSentry();
+
+    const options = init.mock.lastCall?.[0] as {
+      beforeSend?: (event: Record<string, unknown>, hint: unknown) => unknown;
+    };
     const scrubbed = options.beforeSend?.(
       { message: "Join ABCD failed", extra: { sessionId: "s-1" } },
       {},
