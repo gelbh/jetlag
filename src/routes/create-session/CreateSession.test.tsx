@@ -114,7 +114,7 @@ const IMPORTED_AREA = {
 };
 
 function importBoundaryFile() {
-  const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+  const input = document.querySelector<HTMLInputElement>('input[accept=".kml,.kmz"]');
   expect(input).toBeTruthy();
   const file = new File(["<kml/>"], "dublin.kml", {
     type: "application/vnd.google-earth.kml+xml",
@@ -180,7 +180,7 @@ describe("CreateSession", () => {
 
     expect(screen.getByRole("link", { name: /^back$/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^create$/i })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /frame the game area/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Draw on map" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /confirm game area/i })).toBeInTheDocument();
     const root = document.querySelector(".jl-create-session");
     expect(root).toBeTruthy();
@@ -308,11 +308,12 @@ describe("CreateSession", () => {
     expect(screen.getByTestId("create-map")).toBeInTheDocument();
   });
 
-  it("mounts the map on framing-mode change (circle needs map taps)", () => {
+  it("opens the fullscreen framing map from Draw on map", () => {
     renderCreateSession();
 
-    fireEvent.click(screen.getByRole("radio", { name: "Circle" }));
+    fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
 
+    expect(screen.getByRole("radio", { name: "Circle" })).toBeInTheDocument();
     expect(screen.getByTestId("create-map")).toBeInTheDocument();
   });
 
