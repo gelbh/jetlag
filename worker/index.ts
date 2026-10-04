@@ -1,3 +1,4 @@
+import { isKnownAppPath } from "../src/domain/seo/appRoutePaths";
 import { applyCacheControlHeader } from "./assetCacheHeaders";
 import {
   fetchAssetsFollowingRedirects,
@@ -5,7 +6,11 @@ import {
   isPrerenderHomePath,
 } from "./assetFetch";
 import { CSP_REPORT_PATH, handleCspReportRequest } from "./cspReport";
-import { applyDocumentCspNonce, shouldApplyDocumentCsp } from "./documentCsp";
+import {
+  applyDocumentCspNonce,
+  isHtmlDocumentResponse,
+  shouldApplyDocumentCsp,
+} from "./documentCsp";
 import { handleIncidentEmailRequest, INCIDENT_EMAIL_PATH } from "./incidentEmail";
 import { handlePosthogProxyRequest, shouldHandlePosthogProxy } from "./posthogProxy";
 import { handleSentryTunnelRequest, SENTRY_TUNNEL_PATH } from "./sentryTunnel";
@@ -25,6 +30,29 @@ export function isSpaFallbackForAssetRequest(request: Request, response: Respons
 
   const contentType = response.headers.get("content-type") ?? "";
   return contentType.includes("text/html");
+}
+
+/**
+ * Workers Assets answers every unmatched path with the SPA shell and a 200 (soft 404). For HTML
+ * served at a path no app route renders, keep that shell body (React shows NotFound) but report
+ * 404. Explicit `.html` paths are real files (Workbox precaches them) and keep their status.
+ */
+export function isUnknownAppDocument(pathname: string, response: Response): boolean {
+  if (response.status !== 200 || !isHtmlDocumentResponse(response)) {
+    return false;
+  }
+  if (pathname.endsWith(".html")) {
+    return false;
+  }
+  return !isKnownAppPath(pathname);
+}
+
+function withNotFoundStatus(response: Response): Response {
+  const headers = new Headers(response.headers);
+  // Without validators, clients cannot revalidate this into a 304 that hides the 404.
+  headers.delete("ETag");
+  headers.delete("Last-Modified");
+  return new Response(response.body, { status: 404, headers });
 }
 
 export default {
@@ -55,8 +83,8 @@ export default {
     // Exact `/` serves prerendered home HTML; keep dist/index.html as the SPA shell
     // for nested-route fallbacks and the service worker.
     const assetRequest = pathname === "/" ? homePrerenderRequest(request) : request;
-    const assetResponse = await fetchAssetsFollowingRedirects(env, assetRequest);
-    if (isSpaFallbackForAssetRequest(request, assetResponse)) {
+    const fetched = await fetchAssetsFollowingRedirects(env, assetRequest);
+    if (isSpaFallbackForAssetRequest(request, fetched)) {
       return new Response("Not Found", {
         status: 404,
         headers: {
@@ -65,6 +93,9 @@ export default {
         },
       });
     }
+    const assetResponse = isUnknownAppDocument(pathname, fetched)
+      ? withNotFoundStatus(fetched)
+      : fetched;
 
     if (shouldApplyDocumentCsp(assetResponse)) {
       return applyCacheControlHeader(await applyDocumentCspNonce(assetResponse), pathname);

@@ -14,26 +14,7 @@ export type RouteSeo = {
 
 type RouteSeoSource = Omit<RouteSeo, "robots">;
 
-export const APP_ROUTE_PATHS = [
-  "/",
-  "/feedback",
-  "/stats",
-  "/friends",
-  "/leaderboard",
-  "/privacy",
-  "/terms",
-  "/premium",
-  "/create",
-  "/join",
-  "/admin",
-  "/admin/incidents",
-  "/admin/incidents/:incidentId",
-  "/admin/preload-requests",
-  "/presets",
-  "/presets/new",
-  "/presets/:id/edit",
-  "/map",
-] as const;
+export { APP_ROUTE_PATHS } from "./appRoutePaths";
 
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
 const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
