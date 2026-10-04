@@ -9,6 +9,7 @@ interface SearchResultsListProps<Item extends SearchResultItem> {
   results: readonly Item[];
   onSelect: (item: Item) => void;
   selectedId?: string | null;
+  renderLeading?: (item: Item) => ReactNode;
   renderSubtitle?: (item: Item) => ReactNode;
   variant?: "panel" | "compact";
 }
@@ -17,6 +18,7 @@ export function SearchResultsList<Item extends SearchResultItem>({
   results,
   onSelect,
   selectedId,
+  renderLeading,
   renderSubtitle,
   variant = "panel",
 }: SearchResultsListProps<Item>) {
@@ -35,18 +37,21 @@ export function SearchResultsList<Item extends SearchResultItem>({
               key={item.id}
               type="button"
               onClick={() => onSelect(item)}
-              className={`min-h-11 w-full px-3 py-2 text-left text-sm ${
+              className={`flex min-h-11 w-full items-start gap-2 px-3 py-2 text-left text-sm ${
                 selected
                   ? "bg-highlight-soft font-display font-semibold uppercase tracking-wide text-highlight"
                   : "bg-transparent text-ink hover:bg-surface-raised"
               }`}
             >
-              <span className="block">{item.displayName}</span>
-              {renderSubtitle ? (
-                <span className="mt-0.5 block text-xs font-normal normal-case tracking-normal text-ink-dim">
-                  {renderSubtitle(item)}
-                </span>
-              ) : null}
+              {renderLeading?.(item)}
+              <span className="min-w-0 flex-1">
+                <span className="block">{item.displayName}</span>
+                {renderSubtitle ? (
+                  <span className="mt-0.5 block text-xs font-normal normal-case tracking-normal text-ink-dim">
+                    {renderSubtitle(item)}
+                  </span>
+                ) : null}
+              </span>
             </button>
           );
         })}
@@ -61,9 +66,10 @@ export function SearchResultsList<Item extends SearchResultItem>({
           key={item.id}
           type="button"
           onClick={() => onSelect(item)}
-          className="btn-secondary min-h-12 w-full justify-start px-3 py-2 text-left text-sm"
+          className="btn-secondary flex min-h-12 w-full items-start justify-start gap-2 px-3 py-2 text-left text-sm"
         >
-          {item.displayName}
+          {renderLeading?.(item)}
+          <span className="min-w-0 flex-1">{item.displayName}</span>
         </button>
       ))}
     </div>

@@ -27,16 +27,33 @@ vi.mock("../components/map/layers/FramingPreviewLayers", () => ({
   FramingPreviewLayers: () => null,
 }));
 
-const dublinPlace = {
-  id: "dublin-ie",
-  displayName: "Dublin, Ireland",
-  bounds: { south: 53.2, west: -6.5, north: 53.5, east: -6.0 },
-  center: [53.35, -6.25] as [number, number],
-  category: "city" as const,
-};
+const searchPlaces = vi.hoisted(() =>
+  vi.fn(async (_query?: string, _options?: unknown) => [
+    {
+      id: "dublin-ie",
+      displayName: "Dublin, Ireland",
+      bounds: { south: 53.2, west: -6.5, north: 53.5, east: -6.0 },
+      center: [53.35, -6.25] as [number, number],
+      placeCategory: "city",
+      approximateAreaSqMi: 44,
+    },
+  ]),
+);
 
-vi.mock("../services/geo/geocoding", () => ({
-  searchPlaces: vi.fn(async () => [dublinPlace]),
+vi.mock("../services/geo/geocoding", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../services/geo/geocoding")>()),
+  searchPlaces,
+  searchPlacesSettled: async (query: string, options?: unknown) => {
+    try {
+      const places = await searchPlaces(query, options);
+      return { ok: true as const, places };
+    } catch (nextError) {
+      return {
+        ok: false as const,
+        message: nextError instanceof Error ? nextError.message : "Place search failed.",
+      };
+    }
+  },
 }));
 
 describe("GamePresetList", () => {

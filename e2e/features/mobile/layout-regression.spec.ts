@@ -8,6 +8,8 @@ import {
   assertNoSeriousAxeViolations,
   expect,
   expectCreatePageMapPreviewLoaded,
+  expectCreatePlaceSelected,
+  goToCreatePlayStep,
   openMapWithLocalSession,
   openPlayHub,
   openSocialRoute,
@@ -45,9 +47,7 @@ async function assertSocialLayoutSmoke(page: Page, path: SocialLayoutPath) {
 async function assertCreateAreaReady(page: Page) {
   await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
   await page.getByRole("button", { name: "Find place" }).click();
-  await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
-    timeout: 10_000,
-  });
+  await expectCreatePlaceSelected(page);
   await expectCreatePageMapPreviewLoaded(page);
 }
 
@@ -69,6 +69,11 @@ test.describe("layout regression @ default mobile", () => {
     await prepareE2EPage(page);
     await page.goto("/create");
     await assertCreateAreaReady(page);
+    await expect(page.getByPlaceholder("Dublin, Ireland")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Find place" })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: /game preset/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Create game" })).toHaveCount(0);
     await assertLayoutSmoke(page);
   });
 
@@ -76,8 +81,9 @@ test.describe("layout regression @ default mobile", () => {
     await prepareE2EPage(page);
     await page.goto("/create");
     await assertCreateAreaReady(page);
+    await goToCreatePlayStep(page);
 
-    const confirm = page.getByRole("button", { name: "Confirm game area" });
+    const confirm = page.getByRole("button", { name: "Create game" });
     await expect(confirm).toBeVisible();
     // MobileSheet split layout: scroll body vs pinned footer (single-path chrome).
     await expect(page.locator(".jl-create-session .hud-sheet")).toHaveCount(1);
@@ -86,7 +92,7 @@ test.describe("layout regression @ default mobile", () => {
       const root = document.querySelector(".jl-create-session");
       const scroll = root?.querySelector(".hud-sheet .jl-scroll");
       const button = Array.from(root?.querySelectorAll("button") ?? []).find(
-        (el) => el.textContent?.trim() === "Confirm game area",
+        (el) => el.textContent?.trim() === "Create game",
       );
       if (!(scroll instanceof HTMLElement) || !(button instanceof HTMLElement)) {
         return { ok: false as const, reason: "missing nodes" };
@@ -94,7 +100,7 @@ test.describe("layout regression @ default mobile", () => {
 
       // Form content's nearest overflow-y-auto ancestor must be the sheet
       // scroller (fails if a nested overflow-y-auto returns).
-      const formMarker = root.querySelector('[aria-label="Game preset"]');
+      const formMarker = root.querySelector('[aria-label="Player side"]');
       if (!(formMarker instanceof HTMLElement)) {
         return { ok: false as const, reason: "missing form marker" };
       }

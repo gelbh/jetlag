@@ -1,4 +1,9 @@
-import type { GeocodedPlace } from "@/services/geo/geocoding";
+import { ActionIcon, Text, TextInput, UnstyledButton } from "@mantine/core";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { Fragment, useRef } from "react";
+import { insetTextInputStyles } from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
+import { type GeocodedPlace, GeocodedPlaceLeading } from "@/services/geo/geocoding";
 import { formatPlaceSearchSubtitle } from "@/services/geo/geocoding/geocodingRank";
 import { SearchResultsList } from "../../tools/shared/controls/SearchResultsList";
 import { SearchField } from "../../ui/forms/SearchField";
@@ -13,6 +18,99 @@ interface PlaceAreaSearchFieldsProps {
   selectedPlace: GeocodedPlace | null;
   onSelectPlace: (place: GeocodedPlace) => void;
   disabled?: boolean;
+  variant?: "field" | "inset";
+  showResults?: boolean;
+}
+
+export function PlaceAreaSearchInsetResults({
+  searchResults,
+  selectedPlaceId,
+  onSelectPlace,
+  skipLeadingHairline = false,
+}: {
+  searchResults: GeocodedPlace[];
+  selectedPlaceId: string | null;
+  onSelectPlace: (place: GeocodedPlace) => void;
+  /** Omit the first row's prefix rule inside a grouped list. */
+  skipLeadingHairline?: boolean;
+}) {
+  return (
+    <>
+      {searchResults.map((place, index) => {
+        const selected = selectedPlaceId === place.id;
+        const showHairline = !(skipLeadingHairline && index === 0);
+
+        return (
+          <Fragment key={place.id}>
+            {showHairline ? <InsetHairline insetStart="3.25rem" /> : null}
+            <UnstyledButton
+              type="button"
+              onClick={() => onSelectPlace(place)}
+              styles={{
+                root: {
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "0.75rem",
+                  width: "100%",
+                  minHeight: "2.875rem",
+                  paddingInline: "1rem",
+                  paddingBlock: "0.625rem",
+                  color: selected ? "var(--color-flag)" : "var(--color-field-ink)",
+                  fontWeight: selected ? 600 : 400,
+                  fontSize: "1.0625rem",
+                  letterSpacing: "-0.01em",
+                  backgroundColor: selected
+                    ? "oklch(from var(--color-flag) l c h / 0.1)"
+                    : "transparent",
+                  transition: "background-color 120ms ease, transform 80ms ease, opacity 80ms ease",
+                  "&:hover": {
+                    backgroundColor: selected
+                      ? "oklch(from var(--color-flag) l c h / 0.14)"
+                      : "oklch(from var(--color-field-ink) l c h / 0.06)",
+                  },
+                  "&:active": {
+                    backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.12)",
+                    opacity: 0.88,
+                    transform: "scale(0.995)",
+                  },
+                },
+              }}
+            >
+              <GeocodedPlaceLeading category={place.placeCategory} />
+              <span className="min-w-0 flex-1">
+                <Text component="span" style={{ display: "block", lineHeight: 1.25 }}>
+                  {place.displayName}
+                </Text>
+                <Text
+                  component="span"
+                  c="var(--color-field-ink-muted)"
+                  style={{ display: "block", marginTop: "0.125rem", fontSize: "0.8125rem" }}
+                >
+                  {formatPlaceSearchSubtitle(place)}
+                </Text>
+              </span>
+            </UnstyledButton>
+          </Fragment>
+        );
+      })}
+    </>
+  );
+}
+
+function SelectedPlaceCaption({ place }: { place: GeocodedPlace }) {
+  return (
+    <p className="flex items-start gap-2 text-xs text-ink-dim">
+      <GeocodedPlaceLeading category={place.placeCategory} />
+      <span>{formatPlaceSearchSubtitle(place)}</span>
+    </p>
+  );
+}
+
+function selectAllInputText(target: EventTarget | null) {
+  if (!(target instanceof HTMLInputElement)) {
+    return;
+  }
+  target.select();
 }
 
 export function PlaceAreaSearchFields({
@@ -25,7 +123,77 @@ export function PlaceAreaSearchFields({
   selectedPlace,
   onSelectPlace,
   disabled = false,
+  variant = "field",
+  showResults = true,
 }: PlaceAreaSearchFieldsProps) {
+  const lastTouchTapMs = useRef(0);
+  const selectedCaption =
+    selectedPlace && searchResults.length === 0 ? (
+      <SelectedPlaceCaption place={selectedPlace} />
+    ) : null;
+
+  if (variant === "inset") {
+    return (
+      <>
+        <TextInput
+          aria-label="City, county, state, or country"
+          placeholder="Dublin, Ireland"
+          value={locationQuery}
+          onChange={(event) => onLocationQueryChange(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onSearch();
+            }
+          }}
+          onDoubleClick={(event) => selectAllInputText(event.currentTarget)}
+          onPointerUp={(event) => {
+            if (event.pointerType !== "touch") {
+              return;
+            }
+            const now = performance.now();
+            if (now - lastTouchTapMs.current < 400) {
+              selectAllInputText(event.currentTarget);
+            }
+            lastTouchTapMs.current = now;
+          }}
+          disabled={disabled || searchLoading}
+          styles={{
+            ...insetTextInputStyles,
+            input: {
+              ...insetTextInputStyles.input,
+              // inset paddingInline cancels Mantine's right-section gutter.
+              paddingInlineEnd: "2.75rem",
+            },
+          }}
+          enterKeyHint="search"
+          inputMode="search"
+          rightSectionWidth="2.75rem"
+          rightSectionPointerEvents="all"
+          rightSection={
+            <ActionIcon
+              type="button"
+              variant="subtle"
+              aria-label="Find place"
+              onClick={onSearch}
+              disabled={disabled || searchLoading}
+            >
+              <MagnifyingGlassIcon size={18} weight="bold" />
+            </ActionIcon>
+          }
+        />
+        {showResults !== false ? (
+          <PlaceAreaSearchInsetResults
+            searchResults={searchResults}
+            selectedPlaceId={selectedPlaceId}
+            onSelectPlace={onSelectPlace}
+          />
+        ) : null}
+        {selectedCaption}
+      </>
+    );
+  }
+
   return (
     <>
       <SearchField
@@ -39,18 +207,15 @@ export function PlaceAreaSearchFields({
         placeholder="Dublin, Ireland"
         disabled={disabled}
       />
-
       <SearchResultsList
         results={searchResults}
         onSelect={onSelectPlace}
         selectedId={selectedPlaceId}
+        renderLeading={(place) => <GeocodedPlaceLeading category={place.placeCategory} />}
         renderSubtitle={formatPlaceSearchSubtitle}
         variant="compact"
       />
-
-      {selectedPlace && searchResults.length === 0 ? (
-        <p className="text-xs text-ink-dim">{formatPlaceSearchSubtitle(selectedPlace)}</p>
-      ) : null}
+      {selectedCaption}
     </>
   );
 }

@@ -378,6 +378,7 @@ export const insetTextInputStyles = {
     fontWeight: 510,
     paddingInline: "1rem",
     paddingBlock: "0.5rem",
+    touchAction: "auto",
   },
 } as const;
 

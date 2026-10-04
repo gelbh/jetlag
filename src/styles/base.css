@@ -149,13 +149,18 @@ select,
 textarea,
 button {
   font: inherit;
+}
+
+button {
   touch-action: manipulation;
 }
 
+/* manipulation on fields drops iOS/Android double-tap text selection. */
 input,
-select,
-textarea {
+textarea,
+select {
   font-size: 16px;
+  touch-action: auto;
 }
 
 input,

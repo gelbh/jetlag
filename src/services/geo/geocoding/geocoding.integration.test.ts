@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearGeographicFeatureCacheForTests } from "../cache";
-import { searchPlaces } from "./index";
+import { searchPlaces, suggestPlacesAtPoint } from "./index";
 
 describe("geocoding integration", () => {
   beforeEach(async () => {
@@ -119,6 +119,28 @@ describe("geocoding integration", () => {
     await searchPlaces("Cork");
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("sends accept-language on nominatim search", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+    vi.stubGlobal("navigator", { language: "nl-NL" });
+
+    await searchPlaces("Amsterdam");
+
+    const urls = fetchMock.mock.calls.map(([input]) => new URL(String(input)));
+    expect(urls.length).toBeGreaterThan(0);
+    expect(urls.every((url) => url.searchParams.get("accept-language") === "nl-NL")).toBe(true);
+    expect(
+      fetchMock.mock.calls.every(([, init]) => {
+        const headers = (init as RequestInit | undefined)?.headers as Record<string, string>;
+        return headers?.["Accept-Language"] === "nl-NL";
+      }),
+    ).toBe(true);
   });
 
   it("includes viewbox when searching near the user", async () => {
@@ -318,5 +340,52 @@ describe("geocoding integration", () => {
     expect(results).toHaveLength(2);
     expect(results.map((place) => place.id).sort()).toEqual(["20", "21"]);
     expect(biasedCallCount).toBeGreaterThan(0);
+  });
+
+  it("suggests city, county, and state play areas at a GPS point", async () => {
+    const fetchMock = vi.fn().mockImplementation(async (input: string) => {
+      const zoom = new URL(input).searchParams.get("zoom");
+      const byZoom: Record<string, object> = {
+        "10": {
+          place_id: 1,
+          display_name: "Dublin, Ireland",
+          lat: "53.3498",
+          lon: "-6.2603",
+          boundingbox: ["53.3", "53.4", "-6.4", "-6.1"],
+          addresstype: "city",
+          importance: 0.7,
+        },
+        "8": {
+          place_id: 2,
+          display_name: "County Dublin, Ireland",
+          lat: "53.35",
+          lon: "-6.26",
+          boundingbox: ["53.2", "53.5", "-6.5", "-6.0"],
+          addresstype: "county",
+          importance: 0.5,
+        },
+        "5": {
+          place_id: 3,
+          display_name: "Leinster, Ireland",
+          lat: "53.4",
+          lon: "-6.5",
+          boundingbox: ["52.2", "54.1", "-8.3", "-5.9"],
+          addresstype: "state",
+          importance: 0.4,
+        },
+      };
+      return { ok: true, json: async () => byZoom[zoom ?? ""] ?? { error: "Unable to geocode" } };
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const results = await suggestPlacesAtPoint([53.35, -6.26]);
+    expect(results[0]?.placeCategory).toBe("city");
+    expect(results.map((place) => place.displayName)).toEqual([
+      "Dublin, Ireland",
+      "County Dublin, Ireland",
+      "Leinster, Ireland",
+    ]);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });

@@ -124,6 +124,10 @@ export async function requestLocationAccess(options?: {
   /** Required when permission state is `prompt` — call only from a user gesture. */
   userGesture?: boolean;
 }): Promise<GeolocationReading> {
+  if (options?.userGesture) {
+    return getCurrentPosition(options);
+  }
+
   const permission = await queryGeolocationPermission();
 
   if (permission === "unavailable") {
@@ -134,7 +138,7 @@ export async function requestLocationAccess(options?: {
     throw new Error(LOCATION_BLOCKED_MESSAGE);
   }
 
-  if (permission === "prompt" && !options?.userGesture) {
+  if (permission === "prompt") {
     throw new GeolocationPermissionRequiredError();
   }
 

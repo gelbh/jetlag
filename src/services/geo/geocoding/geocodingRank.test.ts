@@ -137,7 +137,141 @@ describe("geocodingRank", () => {
     expect(ranked[1]?.id).toBe("county");
   });
 
-  it("prefers smaller areas when category and name match tie", () => {
+  it("ranks the famous city ahead of smaller same-name towns", () => {
+    const ranked = rankGeocodedPlaceCandidates(
+      [
+        {
+          place: samplePlace({
+            id: "amsterdam-ny",
+            displayName: "Amsterdam, New York, United States",
+            center: [42.938, -74.19],
+            bounds: { south: 42.92, west: -74.22, north: 42.96, east: -74.16 },
+            placeCategory: "city",
+            approximateAreaSqMi: 6,
+          }),
+          importance: 0.32,
+          fromCityQuery: true,
+        },
+        {
+          place: samplePlace({
+            id: "amsterdam-ohio",
+            displayName: "Amsterdam, Ohio, United States",
+            center: [40.472, -80.937],
+            bounds: { south: 40.46, west: -80.95, north: 40.48, east: -80.92 },
+            placeCategory: "village",
+            approximateAreaSqMi: 0.3,
+          }),
+          importance: 0.18,
+          fromCityQuery: false,
+        },
+        {
+          place: samplePlace({
+            id: "amsterdam-nl",
+            displayName: "Amsterdam, North Holland, Netherlands",
+            center: [52.367, 4.9],
+            bounds: { south: 52.28, west: 4.73, north: 52.43, east: 5.08 },
+            placeCategory: "city",
+            approximateAreaSqMi: 85,
+          }),
+          importance: 0.82,
+          fromCityQuery: true,
+        },
+      ],
+      "amsterdam",
+    );
+
+    expect(ranked.map((place) => place.id)).toEqual([
+      "amsterdam-nl",
+      "amsterdam-ny",
+      "amsterdam-ohio",
+    ]);
+  });
+
+  it("ranks a well-known town ahead of an obscure same-name city", () => {
+    const ranked = rankGeocodedPlaceCandidates(
+      [
+        {
+          place: samplePlace({
+            id: "cambridge-md",
+            displayName: "Cambridge, Maryland, United States",
+            center: [38.563, -76.079],
+            bounds: { south: 38.54, west: -76.1, north: 38.58, east: -76.05 },
+            placeCategory: "city",
+            approximateAreaSqMi: 13,
+          }),
+          importance: 0.28,
+          fromCityQuery: true,
+        },
+        {
+          place: samplePlace({
+            id: "cambridge-uk",
+            displayName: "Cambridge, England, United Kingdom",
+            center: [52.205, 0.119],
+            bounds: { south: 52.16, west: 0.07, north: 52.24, east: 0.18 },
+            placeCategory: "town",
+            approximateAreaSqMi: 16,
+          }),
+          importance: 0.74,
+          fromCityQuery: false,
+        },
+      ],
+      "cambridge",
+    );
+
+    expect(ranked[0]?.id).toBe("cambridge-uk");
+    expect(ranked[1]?.id).toBe("cambridge-md");
+  });
+
+  it("ranks a famous distant namesake ahead of a nearer small city", () => {
+    const nearOntario: LatLngTuple = [43.65, -79.38];
+    const ranked = rankGeocodedPlaceCandidates(
+      [
+        {
+          place: samplePlace({
+            id: "london-on",
+            displayName: "London, Ontario, Canada",
+            center: [42.98, -81.25],
+            bounds: { south: 42.9, west: -81.4, north: 43.1, east: -81.1 },
+            placeCategory: "city",
+            approximateAreaSqMi: 160,
+          }),
+          importance: 0.48,
+          fromCityQuery: true,
+        },
+        {
+          place: samplePlace({
+            id: "greater-london",
+            displayName: "Greater London, England, United Kingdom",
+            center: [51.507, -0.128],
+            bounds: { south: 51.28, west: -0.51, north: 51.7, east: 0.33 },
+            placeCategory: "county",
+            approximateAreaSqMi: 600,
+          }),
+          importance: 0.91,
+          fromCityQuery: false,
+        },
+        {
+          place: samplePlace({
+            id: "london-uk",
+            displayName: "London, England, United Kingdom",
+            center: [51.507, -0.128],
+            bounds: { south: 51.28, west: -0.51, north: 51.7, east: 0.33 },
+            placeCategory: "city",
+            approximateAreaSqMi: 600,
+          }),
+          importance: 0.94,
+          fromCityQuery: true,
+        },
+      ],
+      "london",
+      nearOntario,
+    );
+
+    expect(ranked[0]?.id).toBe("london-uk");
+    expect(ranked.map((place) => place.id)).toContain("london-on");
+  });
+
+  it("prefers nominatim importance when two cities otherwise match", () => {
     const ranked = rankGeocodedPlaceCandidates(
       [
         {
@@ -158,6 +292,36 @@ describe("geocodingRank", () => {
             approximateAreaSqMi: 40,
           }),
           importance: 0.5,
+          fromCityQuery: true,
+        },
+      ],
+      "Dublin",
+    );
+
+    expect(ranked[0]?.id).toBe("large");
+  });
+
+  it("prefers smaller area only when importance and settlement class tie", () => {
+    const ranked = rankGeocodedPlaceCandidates(
+      [
+        {
+          place: samplePlace({
+            id: "large",
+            displayName: "Dublin, Ireland",
+            placeCategory: "city",
+            approximateAreaSqMi: 200,
+          }),
+          importance: 0.55,
+          fromCityQuery: true,
+        },
+        {
+          place: samplePlace({
+            id: "small",
+            displayName: "Dublin, Ireland",
+            placeCategory: "city",
+            approximateAreaSqMi: 40,
+          }),
+          importance: 0.55,
           fromCityQuery: true,
         },
       ],
@@ -204,7 +368,44 @@ describe("geocodingRank", () => {
     expect(ranked[1]?.id).toBe("dublin-ohio");
   });
 
-  it("ranks closer same-name results higher when neither contains the user", () => {
+  it("ranks a playable city ahead of a nearby natural feature even when GPS is local", () => {
+    const nearIreland: LatLngTuple = [53.35, -6.26];
+    const ranked = rankGeocodedPlaceCandidates(
+      [
+        {
+          place: samplePlace({
+            id: "amsterdam-rock",
+            displayName: "Amsterdam Rock, County Kerry, Ireland",
+            center: [51.85, -10.39],
+            bounds: { south: 51.849, west: -10.391, north: 51.851, east: -10.389 },
+            placeCategory: "rock",
+            approximateAreaSqMi: 0.01,
+          }),
+          importance: 0.12,
+          fromCityQuery: false,
+        },
+        {
+          place: samplePlace({
+            id: "amsterdam-nl",
+            displayName: "Amsterdam, North Holland, Netherlands",
+            center: [52.367, 4.9],
+            bounds: { south: 52.28, west: 4.73, north: 52.43, east: 5.08 },
+            placeCategory: "city",
+            approximateAreaSqMi: 85,
+          }),
+          importance: 0.82,
+          fromCityQuery: true,
+        },
+      ],
+      "amsterdam",
+      nearIreland,
+    );
+
+    expect(ranked[0]?.id).toBe("amsterdam-nl");
+    expect(ranked[1]?.id).toBe("amsterdam-rock");
+  });
+
+  it("ranks closer same-name cities higher when GPS is set", () => {
     const nearDublin: LatLngTuple = [53.35, -6.26];
     const ranked = rankGeocodedPlaceCandidates(
       [

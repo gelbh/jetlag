@@ -5,7 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
 import { createMapBounds } from "@/domain/map/mapBounds";
 import { jetlagTheme } from "@/theme/theme";
-import { CreateSessionMapPane } from "./CreateSessionMapPane";
+import {
+  CREATE_SESSION_FIT_PAD_PX,
+  CREATE_SESSION_STATS_OVERLAY_PAD_PX,
+  CreateSessionMapPane,
+} from "./CreateSessionMapPane";
 
 let lastMapViewModel: MapViewModel | null = null;
 const fakeCanvas = { focus: vi.fn() };
@@ -33,10 +37,6 @@ vi.mock("@/components/map/chrome/MapView", () => ({
     lastMapViewModel = model;
     return <div data-testid="create-session-map">{children}</div>;
   },
-}));
-
-vi.mock("@/components/map/layers/FramingPreviewLayers", () => ({
-  FramingPreviewLayers: () => null,
 }));
 
 vi.mock("@/components/map/layers/GameAreaMask", () => ({
@@ -76,17 +76,11 @@ function renderPane(overrides: Partial<PaneProps> = {}) {
     focusBounds: null,
     previewGameArea: null,
     selectedGameSize: "medium",
-    manualFramingActive: true,
-    framingMode: "rectangle",
-    circleCenter: null,
-    circleRadiusMeters: null,
-    polygonVertices: [],
     mapRequested: true,
     mapMounted: true,
     onRequestMap: vi.fn(),
     onMapMounted: vi.fn(),
     onBoundsChange: vi.fn(),
-    onUserViewportFramed: vi.fn(),
     ...overrides,
   };
   const view = render(
@@ -106,7 +100,7 @@ const usableBounds = createMapBounds({
 
 describe("CreateSessionMapPane", () => {
   it("hides zoom, map style, and compass chrome on the MapView model", () => {
-    renderPane({ manualFramingActive: false });
+    renderPane();
 
     expect(screen.getByTestId("create-session-map")).toBeInTheDocument();
     expect(lastMapViewModel).not.toBeNull();
@@ -115,6 +109,75 @@ describe("CreateSessionMapPane", () => {
     expect(lastMapViewModel?.showCompassControl).toBe(false);
     expect(lastMapViewModel?.mapStyle).toBe("standard");
     expect(lastMapViewModel).not.toHaveProperty("onMapStyleChange");
+    expect(lastMapViewModel?.onMapClick).toBeUndefined();
+    expect(lastMapViewModel?.onUserViewportFramed).toBeUndefined();
+  });
+
+  it("pads fitBounds below the play-area stats chip", () => {
+    renderPane({
+      previewGameArea: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-6.3, 53.3],
+            [-6.2, 53.3],
+            [-6.2, 53.4],
+            [-6.3, 53.4],
+            [-6.3, 53.3],
+          ],
+        ],
+      },
+    });
+
+    expect(lastMapViewModel?.fitBoundsPadding).toEqual([
+      CREATE_SESSION_FIT_PAD_PX,
+      CREATE_SESSION_FIT_PAD_PX,
+    ]);
+    expect(lastMapViewModel?.focusPaddingBias).toBe(CREATE_SESSION_STATS_OVERLAY_PAD_PX);
+  });
+
+  it("does not add stats fit padding without a game area", () => {
+    renderPane({ previewGameArea: null });
+
+    expect(lastMapViewModel?.focusPaddingBias).toBe(0);
+  });
+
+  it("puts Use my location on the map as a chrome icon", () => {
+    const onRequestLocation = vi.fn();
+    renderPane({
+      mapRequested: false,
+      mapMounted: false,
+      onRequestLocation,
+    });
+
+    const gps = screen.getByRole("button", { name: "Use my location" });
+    fireEvent.click(gps);
+    expect(onRequestLocation).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Open map" })).toBeInTheDocument();
+  });
+
+  it("disables the location control while busy and shows halt status", () => {
+    const { rerender, props } = renderPane({
+      onRequestLocation: vi.fn(),
+      locationBusy: true,
+    });
+
+    expect(screen.getByRole("button", { name: "Locating…" })).toBeDisabled();
+
+    rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <CreateSessionMapPane
+          {...props}
+          locationBusy={false}
+          locationStatus="Couldn't use your location."
+          locationStatusTone="halt"
+        />
+      </MantineProvider>,
+    );
+
+    const status = screen.getByText("Couldn't use your location.");
+    expect(status).toHaveAttribute("role", "status");
+    expect(status).toHaveStyle({ color: "var(--color-halt)" });
   });
 
   it("renders an accessible facade instead of the map until intent", () => {
@@ -123,7 +186,7 @@ describe("CreateSessionMapPane", () => {
     expect(screen.queryByTestId("create-session-map")).not.toBeInTheDocument();
     const facade = screen.getByRole("button", { name: "Open map" });
     expect(facade).toHaveAccessibleDescription(
-      "Frame your play area by hand, or search a place below.",
+      "Preview your play area here. Search, load a preset, or open Draw.",
     );
 
     fireEvent.click(facade);

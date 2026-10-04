@@ -26,6 +26,7 @@ import {
   type GeolocationPermissionState,
   queryGeolocationPermission,
 } from "../../services/core/location/geolocation";
+import { GeocodedPlaceLeading } from "../../services/geo/geocoding";
 import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
 import { useToolSession } from "./framework/useToolSession";
 import { measuringCommitReady } from "./measuring/helpers";
@@ -386,6 +387,7 @@ export function useMeasuringTool({
             <SearchResultsList
               results={draft.measuringSearchResults}
               onSelect={(place) => interactions.applySearchResult(place, "target")}
+              renderLeading={(place) => <GeocodedPlaceLeading category={place.placeCategory} />}
             />
           </div>
         ) : null}

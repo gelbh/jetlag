@@ -10,11 +10,16 @@ import {
   gameAreaToBoundsExpression,
   isUsableMapBounds,
   type LatLngTuple,
+  squareizeMapBounds,
   verticesToGameArea,
 } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapBounds, MapBoundsExpression } from "../../domain/map/mapBounds";
-import { boundingBoxToBoundsExpression, createMapBounds } from "../../domain/map/mapBounds";
+import {
+  boundingBoxToBoundsExpression,
+  createMapBounds,
+  toMapBounds,
+} from "../../domain/map/mapBounds";
 
 export type FramingMode = "rectangle" | "circle" | "polygon";
 
@@ -103,7 +108,9 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       vertices: LatLngTuple[],
     ): GameArea | null => {
       if (mode === "rectangle" && nextBounds && isUsableMapBounds(nextBounds)) {
-        return boundsToGameArea(insetMapBounds(nextBounds, RECTANGLE_VIEWPORT_INSET_FRACTION));
+        return boundsToGameArea(
+          squareizeMapBounds(insetMapBounds(nextBounds, RECTANGLE_VIEWPORT_INSET_FRACTION)),
+        );
       }
 
       if (mode === "circle" && center && nextBounds && isUsableMapBounds(nextBounds)) {
@@ -235,14 +242,44 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
     setManualDrawingEnabled(false);
   }, []);
 
-  const setFramingMode = useCallback((mode: FramingMode) => {
-    setFramingModeState(mode);
-    setCircleCenter(null);
-    setPolygonVertices([]);
-    setManualGameArea(null);
-    setManualDrawingEnabled(true);
-    setUserFramed(true);
-  }, []);
+  const setFramingMode = useCallback(
+    (mode: FramingMode) => {
+      setFramingModeState(mode);
+      setPolygonVertices([]);
+      setManualDrawingEnabled(true);
+      setUserFramed(true);
+
+      const currentBounds = boundsRef.current;
+
+      if (mode === "rectangle") {
+        setCircleCenter(null);
+        setManualGameArea(computeManualGameArea("rectangle", currentBounds, null, []));
+        return;
+      }
+
+      if (mode === "circle") {
+        if (currentBounds && isUsableMapBounds(currentBounds)) {
+          const southWest = currentBounds.getSouthWest();
+          const northEast = currentBounds.getNorthEast();
+          const center: LatLngTuple = [
+            (southWest.lat + northEast.lat) / 2,
+            (southWest.lng + northEast.lng) / 2,
+          ];
+          setCircleCenter(center);
+          setManualGameArea(computeManualGameArea("circle", currentBounds, center, []));
+          return;
+        }
+
+        setCircleCenter(null);
+        setManualGameArea(null);
+        return;
+      }
+
+      setCircleCenter(null);
+      setManualGameArea(null);
+    },
+    [computeManualGameArea],
+  );
 
   const loadFramingResult = useCallback(
     (result: GameAreaFramingResult) => {
@@ -258,15 +295,25 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
     [suppressViewportUpdates],
   );
 
-  const applyFocusToGameArea = useCallback(
-    (gameArea: GameArea) => {
-      const nextBounds = boundingBoxToMapBounds(gameAreaToBoundingBox(gameArea));
-      setFocusBounds(gameAreaToBoundsExpression(gameArea));
+  const applyFocusBounds = useCallback(
+    (expression: MapBoundsExpression) => {
+      const nextBounds = toMapBounds(expression);
+      setFocusBounds(expression);
+      // Pan-only: keep any existing draft, and do not let the next MapLibre
+      // viewport mint a rectangle from GPS / search fitBounds.
+      setManualDrawingEnabled(false);
       suppressViewportUpdates();
       boundsRef.current = nextBounds;
       setBounds(nextBounds);
     },
     [suppressViewportUpdates],
+  );
+
+  const applyFocusToGameArea = useCallback(
+    (gameArea: GameArea) => {
+      applyFocusBounds(gameAreaToBoundsExpression(gameArea));
+    },
+    [applyFocusBounds],
   );
 
   const previewGameArea = useMemo(() => manualGameArea, [manualGameArea]);
@@ -309,6 +356,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       resetPolygonVertices,
       resetManualFraming,
       loadFramingResult,
+      applyFocusBounds,
       applyFocusToGameArea,
     }),
     [
@@ -331,6 +379,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       resetPolygonVertices,
       resetManualFraming,
       loadFramingResult,
+      applyFocusBounds,
       applyFocusToGameArea,
     ],
   );

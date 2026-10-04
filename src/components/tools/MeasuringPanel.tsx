@@ -14,7 +14,7 @@ import {
   measuringTargetLabel,
 } from "../../domain/questions";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import type { GeocodedPlace } from "../../services/geo/geocoding";
+import { type GeocodedPlace, GeocodedPlaceLeading } from "../../services/geo/geocoding";
 import { SearchResultsList } from "./shared/controls/SearchResultsList";
 import { MeasuringAnchorStep } from "./shared/measuring/MeasuringAnchorStep";
 import { MeasuringSourceStep } from "./shared/measuring/MeasuringSourceStep";
@@ -277,6 +277,7 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
           <SearchResultsList
             results={searchResults}
             onSelect={(place) => onSearchResultSelect(place, searchRole)}
+            renderLeading={(place) => <GeocodedPlaceLeading category={place.placeCategory} />}
           />
         </div>
       ) : null}
