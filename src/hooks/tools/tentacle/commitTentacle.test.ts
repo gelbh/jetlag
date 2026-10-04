@@ -47,7 +47,7 @@ function baseInput(overrides: Partial<CommitTentacleInput> = {}): CommitTentacle
     sessionRules: { gameSize: "medium" },
     gameArea,
     awaitHiderAnswer: false,
-    distanceUnit: "miles",
+    distanceUnit: "imperial",
     cardDraw: 1,
     cardKeep: 1,
     createAnnotation: vi.fn(async (annotation) => ({
