@@ -22,6 +22,7 @@ import { useWakeLock } from "@/hooks/location/useWakeLock";
 import { useAnnotations } from "@/hooks/map/useAnnotations";
 import { useMapOverlayState } from "@/hooks/map/useMapOverlayState";
 import { useSessionAnnotations } from "@/hooks/map/useSessionAnnotations";
+import { useGameAreaTileCacheSync } from "@/hooks/session/useGameAreaTileCacheSync";
 import { useResolvedSessionRules } from "@/hooks/session/useResolvedSessionRules";
 import { useSessionDistanceUnit } from "@/hooks/session/useSessionDistanceUnit";
 import { useSharedSessionScreen } from "@/hooks/session/useSharedSessionScreen";
@@ -60,6 +61,7 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
   const { sessionRules, gameArea, matchingAreasReady, matchingAreasError, playAreaReady } =
     useResolvedSessionRules(session);
+  useGameAreaTileCacheSync(gameArea);
   const allAnnotations = useAnnotationStore((state) => state.annotations);
   const sessionId = session?.id;
   const annotations = useSessionAnnotations(sessionId);

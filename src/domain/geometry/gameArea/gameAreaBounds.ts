@@ -31,6 +31,37 @@ export function intersectBoundingBoxes(a: BoundingBox, b: BoundingBox): Bounding
 }
 
 /**
+ * Inclusive overlap test: unlike {@link intersectBoundingBoxesRaw}, boxes that only
+ * share an edge count as intersecting. No antimeridian wrap.
+ */
+export function boundingBoxesIntersect(a: BoundingBox, b: BoundingBox): boolean {
+  return a.west <= b.east && b.west <= a.east && a.south <= b.north && b.south <= a.north;
+}
+
+/** Finite, in-range, non-inverted lon/lat box. Guards untrusted input (SW messages, storage). */
+export function isValidBoundingBox(value: unknown): value is BoundingBox {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const { south, west, north, east } = value as Record<string, unknown>;
+  if (
+    typeof south !== "number" ||
+    typeof west !== "number" ||
+    typeof north !== "number" ||
+    typeof east !== "number" ||
+    !Number.isFinite(south) ||
+    !Number.isFinite(west) ||
+    !Number.isFinite(north) ||
+    !Number.isFinite(east)
+  ) {
+    return false;
+  }
+  return (
+    south >= -90 && north <= 90 && west >= -180 && east <= 180 && south <= north && west <= east
+  );
+}
+
+/**
  * Approximate bbox area in km² via mid-latitude equirectangular projection
  * using {@link METERS_PER_DEGREE_LAT}.
  */
