@@ -5,7 +5,24 @@ import { setPremiumApiContext } from "../auth/premiumApiContext";
 import * as firebase from "../firebase/firebase";
 import * as firebaseAuthReady from "../firebase/firebaseAuthReady";
 import { FetchTimeoutError } from "../network/fetchWithTimeout";
-import { OverpassUnavailableError, overpassErrorMessage, queryOverpass } from "./overpassClient";
+import {
+  OVERPASS_PROXY_FETCH_TIMEOUT_MS,
+  OVERPASS_PROXY_MAX_RETRIES,
+  OverpassUnavailableError,
+  overpassErrorMessage,
+  queryOverpass,
+} from "./overpassClient";
+
+describe("overpass proxy timeout ladder", () => {
+  it("proxy attempt timeout outlasts failover plus Postpass", () => {
+    expect(OVERPASS_PROXY_FETCH_TIMEOUT_MS).toBeGreaterThanOrEqual(80_000);
+    expect(OVERPASS_PROXY_FETCH_TIMEOUT_MS).toBeLessThan(90_000);
+  });
+
+  it("proxy allows at most one retry", () => {
+    expect(OVERPASS_PROXY_MAX_RETRIES).toBe(1);
+  });
+});
 
 function premiumSession(): SessionRecord {
   return {
