@@ -7,6 +7,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
@@ -20,6 +21,7 @@ import {
   sendPremiumEmailSignInLink,
   signOutToAnonymous,
 } from "../../services/core/auth/accountAuth";
+import { hasPersistedPermanentUserHint } from "../../services/core/auth/persistedAuthHint";
 import {
   ensureAnonymousUser,
   getFirebaseAuth,
@@ -48,9 +50,13 @@ export function AccountSignInGate({
   extraSignInProviders,
 }: AccountSignInGateProps) {
   const { user, isPermanent, authReady } = usePermanentAuthUser();
-  // Prerendered /premium can't know the visitor's sign-in state: show the checking state in
-  // the snapshot and the hydration render alike.
+  // Until auth restores, show the signed-out prompt with its controls disabled, so prerendered
+  // /premium paints its sign-in copy from HTML instead of waiting on Firebase (the snapshot and
+  // the hydration render can't know the visitor's state). Once hydrated, a stored account
+  // sign-in shows the checking line instead of a sign-in prompt that would vanish.
   const hydrated = useHydrated();
+  const checking = !hydrated || !authReady;
+  const expectPermanent = useMemo(() => hydrated && hasPersistedPermanentUserHint(), [hydrated]);
   const hasAuthUser = Boolean(user);
   const [email, setEmail] = useState("");
   const [busyAction, setBusyAction] = useState<"email" | null>(null);
@@ -58,7 +64,8 @@ export function AccountSignInGate({
   const [error, setError] = useState<string | null>(null);
   const [completingEmailLink, setCompletingEmailLink] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const oauthControlsDisabled = completingEmailLink || busyAction !== null || !hasAuthUser;
+  const oauthControlsDisabled =
+    checking || completingEmailLink || busyAction !== null || !hasAuthUser;
 
   const handleSignedIn = useCallback(async () => {
     setError(null);
@@ -148,7 +155,7 @@ export function AccountSignInGate({
     }
   };
 
-  if (!hydrated || !authReady) {
+  if (checking && expectPermanent) {
     return (
       <Text size="sm" c="var(--color-field-ink-muted)">
         Checking sign-in…
@@ -164,7 +171,7 @@ export function AccountSignInGate({
     );
   }
 
-  if (isPermanent) {
+  if (!checking && isPermanent) {
     const accountLabel = user?.email ?? user?.displayName ?? "your account";
 
     return (
@@ -239,7 +246,7 @@ export function AccountSignInGate({
             inputMode="email"
             autoComplete="email"
             placeholder="you@example.com"
-            disabled={busyAction !== null}
+            disabled={checking || busyAction !== null}
             styles={{
               input: {
                 border: "none",
@@ -256,7 +263,9 @@ export function AccountSignInGate({
           type="button"
           fullWidth
           busy={busyAction === "email"}
-          unavailable={(busyAction !== null && busyAction !== "email") || email.trim().length === 0}
+          unavailable={
+            checking || (busyAction !== null && busyAction !== "email") || email.trim().length === 0
+          }
           idleLabel="Email me a sign-in link"
           busyLabel="Sending…"
           onClick={() => void handleEmailLink()}
