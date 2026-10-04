@@ -5,7 +5,7 @@
 // (or `join.html`). The Worker follows those same-origin redirects, so the URL stays put.
 // Anything else falls back to the SPA shell (`not_found_handling: single-page-application`).
 // Plain `vite preview` only matches `/join/` and `/join.html`, so `/join` would get the shell.
-import { HOME_PRERENDER_PATH } from "../worker/assetFetch.ts";
+import { HOME_PRERENDER_PATH, isPrerenderHomePath } from "../worker/assetFetch.ts";
 
 /**
  * Returns the `dist/`-relative HTML file prod serves for `pathname`, or `null` when prod
@@ -19,12 +19,20 @@ export function resolveDocumentPath(pathname, fileExists) {
   if (pathname === "/") {
     return `${HOME_PRERENDER_PATH}index.html`;
   }
+  // Prod 308-redirects these to `/` (worker/index.ts); not audited, so no rewrite here.
+  if (isPrerenderHomePath(pathname)) {
+    return null;
+  }
   const trimmed = pathname.replace(/\/+$/, "");
   const lastSegment = trimmed.slice(trimmed.lastIndexOf("/") + 1);
   if (!trimmed || lastSegment.includes(".")) {
     return null;
   }
-  for (const candidate of [`${trimmed}/index.html`, `${trimmed}.html`]) {
+  // auto-trailing-slash prefers the file matching the requested form when both exist.
+  const candidates = pathname.endsWith("/")
+    ? [`${trimmed}/index.html`, `${trimmed}.html`]
+    : [`${trimmed}.html`, `${trimmed}/index.html`];
+  for (const candidate of candidates) {
     if (fileExists(candidate)) {
       return candidate;
     }
