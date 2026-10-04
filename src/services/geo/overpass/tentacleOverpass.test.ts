@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { expandBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import * as overpassClient from "../../core/overpass/overpassClient";
 import { clearGeographicFeatureCacheForTests } from "../cache";
+import { formatOverpassBbox } from "./query";
 import { clearBundledPoiCacheForTests } from "./regionPackPoi";
 import {
   buildTentacleOverpassQuery,
@@ -19,12 +21,30 @@ describe("tentacle overpass", () => {
   });
 
   it("builds a query for the selected category only", () => {
-    const query = buildTentacleOverpassQuery([51.5, -0.12], 1609.344, "museum");
+    const center: [number, number] = [51.5, -0.12];
+    const radiusMeters = 1609.344;
+    const query = buildTentacleOverpassQuery(center, radiusMeters, "museum");
+    const bbox = formatOverpassBbox(
+      expandBoundingBox(
+        { south: center[0], north: center[0], west: center[1], east: center[1] },
+        radiusMeters,
+      ),
+    );
 
     expect(query).toContain("tourism=museum");
     expect(query).toContain("amenity=museum");
     expect(query).not.toContain("amenity=library");
-    expect(query).toContain("around:1609.344,51.5,-0.12");
+    expect(query).not.toContain("around:");
+    expect(query).toContain(`(${bbox})`);
+    expect(query).toContain("out center 40");
+  });
+
+  it("builds metro queries without around", () => {
+    const query = buildTentacleOverpassQuery([51.5, -0.12], 1609.344, "metro_line");
+
+    expect(query).not.toContain("around:");
+    expect(query).toContain('route"~"subway|light_rail|tram|monorail"');
+    expect(query).toContain("out center 40");
   });
 
   it("drops unnamed or disused venues and assigns the selected category", () => {
@@ -117,6 +137,29 @@ describe("tentacle overpass", () => {
 
   it("returns null when no candidates exist", () => {
     expect(nearestTentaclePoi([51.5, -0.12], [])).toBeNull();
+  });
+
+  it("drops Overpass pois farther than the search radius", async () => {
+    vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          id: 1,
+          tags: { tourism: "museum", name: "Near" },
+          lat: 51.5,
+          lon: -0.12,
+        },
+        {
+          id: 2,
+          tags: { tourism: "museum", name: "Far" },
+          lat: 51.6,
+          lon: -0.12,
+        },
+      ],
+    });
+
+    const pois = await fetchTentaclePois([51.5, -0.12], 200, "museum");
+
+    expect(pois.map((poi) => poi.name)).toEqual(["Near"]);
   });
 
   it("fetches and parses tentacle POIs from Overpass", async () => {
