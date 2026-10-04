@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import { buildTimeTrapRecord, type TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import type { GameArea } from "../../domain/map/annotations";
@@ -36,6 +36,8 @@ export function useTimeTrapTool({
   const [selectedStation, setSelectedStation] = useState<TransitStation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { beginRequest, isLatestRequest } = useLatestRequest();
+  // Blocks a double tap before the listener's existingTrap re-renders the panel.
+  const placingRef = useRef(false);
 
   const filteredStations = useMemo(() => searchStations(query, stations), [query, stations]);
 
@@ -75,7 +77,7 @@ export function useTimeTrapTool({
 
   /** Returns whether the trap was placed (the write is queued, not yet acked). */
   const confirmTrap = useCallback((): boolean => {
-    if (!selectedStation || existingTrap) {
+    if (!selectedStation || existingTrap || placingRef.current) {
       return false;
     }
 
@@ -88,12 +90,17 @@ export function useTimeTrapTool({
 
     // Fire-and-track: the trap listener picks up the local write at once (which
     // also hides this panel via existingTrap); rejections reach WriteFailureNotifier.
+    // The chat announcement waits for the server ack so a rejected trap is never announced.
     const trap = buildTimeTrapRecord(sessionId, hiderUid, selectedStation);
-    commitWrite("timetrap.place", () => writeTimeTrap(sessionId, trap));
-    commitWrite("system.message", () =>
-      postSystemMessage(
-        `Time trap placed at ${selectedStation.name} (+${trap.bonusMinutes} min when passed through).`,
-      ),
+    const announcement = `Time trap placed at ${selectedStation.name} (+${trap.bonusMinutes} min when passed through).`;
+    placingRef.current = true;
+    commitWrite("timetrap.place", () => writeTimeTrap(sessionId, trap)).acknowledged.then(
+      () => {
+        commitWrite("system.message", () => postSystemMessage(announcement));
+      },
+      () => {
+        placingRef.current = false;
+      },
     );
     return true;
   }, [existingTrap, gameArea, hiderUid, postSystemMessage, selectedStation, sessionId]);

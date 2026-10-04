@@ -246,6 +246,13 @@ export function useMapSessionActions({
       return;
     }
 
+    const endGameSessionId = session.id;
+    const clearRequestOnly = isEndGamePending(session) && !isEndGameActive(session);
+    commitWrite("endgame.reset", () =>
+      clearRequestOnly
+        ? clearEndGameRequestSession(endGameSessionId)
+        : resetEndGameSession(endGameSessionId),
+    );
     setSession(
       {
         ...session,
@@ -256,11 +263,6 @@ export function useMapSessionActions({
         endGameRequestedByUid: undefined,
       },
       uid,
-    );
-    const sessionId = session.id;
-    const clearRequestOnly = isEndGamePending(session) && !isEndGameActive(session);
-    commitWrite("endgame.reset", () =>
-      clearRequestOnly ? clearEndGameRequestSession(sessionId) : resetEndGameSession(sessionId),
     );
   }, [session, setSession, uid]);
 

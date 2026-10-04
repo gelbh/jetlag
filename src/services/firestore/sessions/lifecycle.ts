@@ -1,4 +1,12 @@
-import { deleteField, doc, getDocs, setDoc, updateDoc, writeBatch } from "firebase/firestore";
+import {
+  deleteDoc,
+  deleteField,
+  doc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  writeBatch,
+} from "firebase/firestore";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { type TimerState, timerStateToRemote } from "@/domain/session/timer/timer";
 import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
@@ -19,21 +27,22 @@ import {
 
 /**
  * Client end write (fallback when the end callable is unavailable). The session
- * read is cache-capable and the update + code delete share one batch, so the
- * end applies locally and replays on reconnect instead of hanging offline.
+ * read is cache-capable and the code delete is issued without waiting for the
+ * end's ack, so both apply locally and replay on reconnect instead of hanging
+ * offline. The code delete stays a separate best-effort commit: batching it
+ * would let a missing code doc (rules deny deleting it) block the end itself.
  */
 export async function endRemoteSession(sessionId: string): Promise<void> {
   const session = await getRemoteSessionById(sessionId);
-  const batch = writeBatch(getFirestoreDb());
-  batch.update(doc(sessionsCollection(), sessionId), {
+  const ended = updateDoc(doc(sessionsCollection(), sessionId), {
     endedAt: serverNowIso(),
     status: "ended",
     code: deleteField(),
   });
   if (session?.code) {
-    batch.delete(sessionCodeDoc(session.code));
+    deleteDoc(sessionCodeDoc(session.code)).catch(() => {});
   }
-  await batch.commit();
+  await ended;
 }
 
 export async function updateSessionTimer(sessionId: string, state: TimerState): Promise<void> {
@@ -63,31 +72,27 @@ export async function startEndGameSession(
   anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
   endGameStartedAt: string = new Date().toISOString(),
 ): Promise<void> {
-  // Two separate commits, not one batch: session start rules require the freeze
-  // doc to already exist, and same-batch exists()+get() against large session docs
-  // has denied the write in e2e. Both are issued without waiting for the first ack
-  // — the SDK commits queued writes in order, so the rules still see the anchors —
-  // which lets End Game apply locally while offline.
-  const anchorsWrite = setDoc(endGameTruthAnchorsDoc(sessionId), { anchors });
-  const sessionWrite = updateDoc(doc(sessionsCollection(), sessionId), {
-    endGameStartedAt,
-    endGameStartedByUid: startedByUid,
-    // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
-    endGameTruthAnchors: deleteField(),
-    endGameRequestedAt: deleteField(),
-    endGameRequestedByUid: deleteField(),
-  });
+  // Sequential create-then-update: session start rules require the freeze doc to
+  // already exist. Same-batch exists()+get() against large session docs has denied
+  // the write in e2e (optimistic local banner, then permission error).
+  const anchorsRef = endGameTruthAnchorsDoc(sessionId);
+  let anchorsWritten = false;
   try {
-    await anchorsWrite;
-  } catch (error) {
-    sessionWrite.catch(() => {});
-    throw error;
-  }
-  try {
-    await sessionWrite;
+    await setDoc(anchorsRef, { anchors });
+    anchorsWritten = true;
+    await updateDoc(doc(sessionsCollection(), sessionId), {
+      endGameStartedAt,
+      endGameStartedByUid: startedByUid,
+      // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
+      endGameTruthAnchors: deleteField(),
+      endGameRequestedAt: deleteField(),
+      endGameRequestedByUid: deleteField(),
+    });
   } catch (error) {
     // Only roll back an anchors doc this call created — do not delete a prior freeze.
-    await clearEndGameTruthAnchorsDoc(sessionId);
+    if (anchorsWritten) {
+      await clearEndGameTruthAnchorsDoc(sessionId);
+    }
     throw error;
   }
 }

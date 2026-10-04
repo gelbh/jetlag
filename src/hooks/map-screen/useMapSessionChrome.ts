@@ -229,6 +229,7 @@ export function useMapSessionChrome({
         // Emulator / no Functions: fall back to the client end write. Not awaited —
         // it applies locally and replays on reconnect; rejections reach WriteFailureNotifier.
         commitWrite("session.end", () => endRemoteSession(sessionId));
+        // Counts the local end; a later rules rejection surfaces via the notifier.
         trackSessionEnded("fallback_client_end");
       }
     }
