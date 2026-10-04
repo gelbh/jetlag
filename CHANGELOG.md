@@ -6,6 +6,20 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.0.3 - 2026-10-04
+
+### Fixes
+
+- Map data loads more reliably after Overpass timeouts and shared cache misses
+- Freehand map strokes disable pan through the native MapLibre map
+
+### Technical
+
+- Restore Overpass R2 L2 via aws-sdk and raise proxy client timeout above Postpass
+- Drop leftover React Compiler "use memo" directives under full compile
+- Continue stale-session purge after a single delete failure
+- Drop expected session-ops agent-limit and IndexedDB createOrUpgrade abort noise from Sentry
+
 ## 1.0.2 - 2026-10-03
 
 ### Fixes

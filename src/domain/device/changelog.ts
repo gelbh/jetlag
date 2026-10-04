@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.0.2";
+export const APP_VERSION = "1.0.3";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,28 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.0.3",
+    date: "2026-10-04",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map data loads more reliably after Overpass timeouts and shared cache misses",
+          "Freehand map strokes disable pan through the native MapLibre map",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Restore Overpass R2 L2 via aws-sdk and raise proxy client timeout above Postpass",
+          'Drop leftover React Compiler "use memo" directives under full compile',
+          "Continue stale-session purge after a single delete failure",
+          "Drop expected session-ops agent-limit and IndexedDB createOrUpgrade abort noise from Sentry",
+        ],
+      },
+    ],
+  },
   {
     version: "1.0.2",
     date: "2026-10-03",
