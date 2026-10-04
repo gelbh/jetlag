@@ -1,4 +1,6 @@
+import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { DEFAULT_CALLABLE_TIMEOUT_MS } from "@/services/core/firebase/callWithResilience";
 import {
   cancelRoleJoinRequest,
   clearRolePasscodeRevealWarm,
@@ -47,7 +49,9 @@ describe("rolePasscodeLifecycle", () => {
       clientVersion: "0.2.0",
     });
 
-    expect(httpsCallable).toHaveBeenCalledWith({}, "joinSessionWithRole");
+    expect(httpsCallable).toHaveBeenCalledWith({}, "joinSessionWithRole", {
+      timeout: DEFAULT_CALLABLE_TIMEOUT_MS,
+    });
     expect(callable).toHaveBeenCalledWith({
       code: "WXYZ",
       role: "seeker",
@@ -62,7 +66,9 @@ describe("rolePasscodeLifecycle", () => {
 
     await leaveSessionMembership("sess-9");
 
-    expect(httpsCallable).toHaveBeenCalledWith({}, "leaveSessionMembership");
+    expect(httpsCallable).toHaveBeenCalledWith({}, "leaveSessionMembership", {
+      timeout: DEFAULT_CALLABLE_TIMEOUT_MS,
+    });
     expect(callable).toHaveBeenCalledWith({ sessionId: "sess-9" });
   });
 
@@ -159,8 +165,33 @@ describe("rolePasscodeLifecycle", () => {
 
     const result = await initSessionRoleGates("sess-1");
 
-    expect(httpsCallable).toHaveBeenCalledWith({}, "initSessionRoleGates");
+    expect(httpsCallable).toHaveBeenCalledWith({}, "initSessionRoleGates", {
+      timeout: 25_000,
+    });
     expect(result.observerPasscode).toBe("OBSV");
+  });
+
+  it("recovers initSessionRoleGates when a retry finds gates already initialized", async () => {
+    const random = vi.spyOn(Math, "random").mockReturnValue(0);
+    const init = vi
+      .fn()
+      .mockRejectedValueOnce(new FirebaseError("functions/deadline-exceeded", "deadline-exceeded"))
+      .mockRejectedValueOnce(
+        new FirebaseError("functions/failed-precondition", "Role gates already initialized."),
+      );
+    const reveal = vi.fn(async () => ({
+      data: { role: "observer", rolePasscode: "OBSV" },
+    }));
+    httpsCallable.mockImplementation((_functions: unknown, name: string) =>
+      name === "initSessionRoleGates" ? init : reveal,
+    );
+
+    await expect(initSessionRoleGates("sess-1")).resolves.toEqual({
+      observerPasscode: "OBSV",
+    });
+    expect(init).toHaveBeenCalledTimes(2);
+    expect(reveal).toHaveBeenCalledWith({ sessionId: "sess-1", role: "observer" });
+    random.mockRestore();
   });
 
   it("calls requestRoleJoin with session, role, and client version", async () => {
@@ -171,7 +202,9 @@ describe("rolePasscodeLifecycle", () => {
 
     const result = await requestRoleJoin("sess-1", "seeker");
 
-    expect(httpsCallable).toHaveBeenCalledWith({}, "requestRoleJoin");
+    expect(httpsCallable).toHaveBeenCalledWith({}, "requestRoleJoin", {
+      timeout: 25_000,
+    });
     expect(callable).toHaveBeenCalledWith({
       sessionId: "sess-1",
       role: "seeker",

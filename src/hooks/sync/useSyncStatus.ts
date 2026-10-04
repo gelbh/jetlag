@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useConnectionRecovery } from "@/hooks/sync/useConnectionRecovery";
 import { selectPendingCount, useWriteLedgerStore } from "@/state/writeLedgerStore";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import { resolveSyncStatus, type SyncStatus } from "../../domain/device/sync/sync";
@@ -25,10 +26,14 @@ export function useSyncStatus(): {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const setNetworkReachable = useSessionStore((state) => state.setNetworkReachable);
   const reachabilityProbeMs = getPowerProfile(lowPowerMode).reachabilityProbeMs;
-  const { reachable } = useReachability(reachabilityEnabled, reachabilityProbeMs);
+  const { reachable, probeNow } = useReachability(reachabilityEnabled, reachabilityProbeMs);
+  useConnectionRecovery(reachabilityEnabled, reachable, probeNow);
 
   useEffect(() => {
     setNetworkReachable(reachabilityEnabled ? reachable : null);
+    // Unmount (session exit) must not leave a stale `false` that blocks callables
+    // off-session, where no probe runs to clear it.
+    return () => setNetworkReachable(null);
   }, [reachabilityEnabled, reachable, setNetworkReachable]);
 
   useEffect(() => {

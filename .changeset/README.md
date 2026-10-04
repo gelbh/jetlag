@@ -6,7 +6,9 @@ Jetlag is a private web app. Changesets drive semver bumps and player-facing rel
 
 Add one on any PR that should show up in What’s new or bump the app version (player-visible fixes/features, ops-relevant version stories).
 
-CI runs `changeset status --since` on same-repo PRs (skips `changeset-release/*`). Skip with the `skip-changeset` PR label, or add an empty changeset (`npx changeset --empty`), for deps-only, docs-only, CI-only, or pure refactors with no version story.
+**Enforcement:** GitHub Actions job `changeset-status` runs `changeset status --since` on same-repo PRs (skips `changeset-release/*`). That job is a **required status check** for merge into `main`. Skip with the `skip-changeset` PR label, or add an empty changeset (`npx changeset --empty`), for deps-only, docs-only, CI-only, or pure refactors with no version story.
+
+Do **not** add a husky pre-commit or pre-push check for missing changesets. A changeset is a PR / release-story unit; local hooks cannot honor PR labels and punish WIP commits. Optional local preview (`npx changeset status --since=origin/main` after fetching) is fine; it must not be wired into husky as a hard fail.
 
 ## How to add
 
@@ -41,7 +43,7 @@ tech: Tighten release:check version alignment
 ## Version Packages flow
 
 1. Feature PRs merge to `main` with pending `.changeset/*.md` files.
-2. The release workflow opens/updates a Version Packages PR titled `chore(release): version packages` (`changeset version` → normalize sections → sync `changelog.ts`).
+2. The release workflow opens/updates a Version Packages PR titled `chore(release): version packages` (`changeset version` → normalize sections → sync and biome-format `changelog.ts`).
 3. Humans review `CHANGELOG.md` + version bump, then merge.
 4. Merge tags `vX.Y.Z` and opens a GitHub Release. `npm run release` runs `changeset publish` (private package tags only; no npm registry) then `scripts/create-github-release.mjs`, which extracts the dated `## X.Y.Z - YYYY-MM-DD` section from `CHANGELOG.md` (the Changesets Action built-in Release body matcher only accepts undated headings). Do not run a real version bump just to experiment on a feature branch without discarding it.
 
