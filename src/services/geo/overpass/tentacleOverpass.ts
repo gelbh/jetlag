@@ -57,7 +57,7 @@ export function buildTentacleOverpassQueryForBbox(
       (
         relation["route"~"subway|light_rail|tram|monorail"]["name"](${bboxStr});
       );
-      out center 40;
+      out center;
     `);
   }
 
@@ -71,7 +71,7 @@ export function buildTentacleOverpassQueryForBbox(
     (
       ${clauses.join("\n      ")}
     );
-    out center 40;
+    out center;
   `);
 }
 

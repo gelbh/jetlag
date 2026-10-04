@@ -36,7 +36,8 @@ describe("tentacle overpass", () => {
     expect(query).not.toContain("amenity=library");
     expect(query).not.toContain("around:");
     expect(query).toContain(`(${bbox})`);
-    expect(query).toContain("out center 40");
+    expect(query).toMatch(/out center\s*;/);
+    expect(query).not.toContain("out center 40");
   });
 
   it("builds metro queries without around", () => {
@@ -44,7 +45,8 @@ describe("tentacle overpass", () => {
 
     expect(query).not.toContain("around:");
     expect(query).toContain('route"~"subway|light_rail|tram|monorail"');
-    expect(query).toContain("out center 40");
+    expect(query).toMatch(/out center\s*;/);
+    expect(query).not.toContain("out center 40");
   });
 
   it("drops unnamed or disused venues and assigns the selected category", () => {
