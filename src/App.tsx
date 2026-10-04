@@ -77,12 +77,6 @@ const ChatLogGalleryLazy = import.meta.env.DEV
     )
   : null;
 
-const DevScenariosLazy = lazyWithChunkRetry(() =>
-  import("./routes/DevScenarios").then((m) => ({
-    default: m.DevScenarios,
-  })),
-);
-
 function RouteFallback() {
   return (
     <div
@@ -335,14 +329,6 @@ export default function App() {
                               }
                             />
                           ) : null}
-                          <Route
-                            path="/dev/scenarios"
-                            element={
-                              <LazyRoute>
-                                <DevScenariosLazy />
-                              </LazyRoute>
-                            }
-                          />
                           <Route
                             path="/presets"
                             element={
