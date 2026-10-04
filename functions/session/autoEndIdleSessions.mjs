@@ -1,3 +1,4 @@
+import { captureAnalyticsEvent } from "../lib/posthog.mjs";
 import { endSessionCanonical } from "./endSessionCanonical.mjs";
 
 export const IDLE_SESSION_HOURS = 24;
@@ -57,6 +58,23 @@ export function selectIdleActiveSessions(
   return selected;
 }
 
-export async function autoEndIdleSession(db, sessionDoc) {
-  await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
+export async function autoEndIdleSession(db, sessionDoc, options = {}) {
+  const outcome = await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
+  // Preserve terminal outcomes (e.g. found while status still active); only attribute abandoned.
+  if (outcome !== "abandoned") {
+    return;
+  }
+  const data = sessionDoc.data();
+  const hostUid = typeof data?.hostUid === "string" ? data.hostUid : "";
+  if (!hostUid) {
+    return;
+  }
+  await captureAnalyticsEvent({
+    apiKey: options.posthogApiKey ?? "",
+    distinctId: hostUid,
+    event: "session_ended",
+    uuidSeed: `session_ended:abandoned:${sessionDoc.id}`,
+    properties: { reason: "abandoned" },
+    captureImpl: options.captureImpl,
+  });
 }
