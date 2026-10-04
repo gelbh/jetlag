@@ -39,6 +39,9 @@ describe("PlayerStickyErrorAlert", () => {
       </MantineProvider>,
     );
 
+    expect(screen.getByText("Sync failed")).toBeInTheDocument();
+    expect(screen.getByText("Could not sync with the session.")).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     fireEvent.click(screen.getByRole("button", { name: "Return to join" }));
 

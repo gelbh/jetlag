@@ -17,6 +17,8 @@ describe("AnimatedBanner", () => {
       </AnimatedBanner>,
     );
 
+    expect(screen.getByRole("status")).toBeInTheDocument();
+
     rerender(
       <AnimatedBanner visible={false} onDismiss={onDismiss}>
         <p role="status">Timer alert</p>
