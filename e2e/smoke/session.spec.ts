@@ -4,6 +4,8 @@ import {
   dismissMapOnboarding,
   expect,
   expectCreatePageMapPreviewLoaded,
+  expectCreatePlaceSelected,
+  goToCreatePlayStep,
   joinAsRole,
   openPlayHub,
   prepareE2EPage,
@@ -19,12 +21,14 @@ test("@smoke creates a session from home and reaches the map", async ({ page }) 
   });
 
   await test.step("confirm Dublin game area", async () => {
+    await expect(page.getByRole("combobox", { name: /game preset/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Create game" })).toHaveCount(0);
     await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
     await page.getByRole("button", { name: "Find place" }).click();
-    await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
-      timeout: 10_000,
-    });
+    await expectCreatePlaceSelected(page);
     await expectCreatePageMapPreviewLoaded(page);
+    await goToCreatePlayStep(page);
     await page.getByRole("button", { name: "Create game" }).click();
   });
 

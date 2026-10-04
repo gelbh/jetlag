@@ -87,14 +87,39 @@ export async function expectCreatePageMapPreviewLoaded(page: Page) {
   await expect.poll(async () => page.locator(".maplibregl-canvas").count()).toBeGreaterThan(0);
 }
 
+/** Advance Where → Frame → Play (or jump via Create steps Play tab). */
+export async function goToCreatePlayStep(page: Page) {
+  const createGame = page.getByRole("button", { name: "Create game" });
+  if (await createGame.isVisible().catch(() => false)) {
+    return;
+  }
+
+  const playTab = page.getByRole("tablist", { name: "Create steps" }).getByRole("tab", {
+    name: "Play",
+  });
+  if (await playTab.isVisible().catch(() => false)) {
+    await playTab.click();
+  } else {
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
+  }
+
+  await expect(createGame).toBeVisible({ timeout: 10_000 });
+}
+
+export async function expectCreatePlaceSelected(page: Page, placeMatch = /Dublin/i) {
+  await expect(page.getByPlaceholder("Dublin, Ireland")).toHaveValue(placeMatch, {
+    timeout: 10_000,
+  });
+}
+
 export async function createSessionFromCreatePage(page: Page) {
   await page.goto("/create");
   await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
   await page.getByRole("button", { name: "Find place" }).click();
-  await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
-    timeout: 10_000,
-  });
+  await expectCreatePlaceSelected(page);
   await expectCreatePageMapPreviewLoaded(page);
+  await goToCreatePlayStep(page);
   await page.getByRole("button", { name: "Create game" }).click();
   await expect(page).toHaveURL(/\/map/, { timeout: 15_000 });
   await expect(page.getByRole("button", { name: "Radar" })).toBeVisible({
