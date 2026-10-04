@@ -15,6 +15,7 @@ import { resolveSpectatorLayers } from "../../domain/session/players/observerPer
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
+import { useGameAreaTileCacheSync } from "../../hooks/session/useGameAreaTileCacheSync";
 import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionRules";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
@@ -44,6 +45,7 @@ export function useObserverMapScreen() {
     playAreaReady: resolvedPlayAreaReady,
   } = useResolvedSessionRules(session);
   const resolvedGameArea = gameArea ?? session?.gameArea ?? null;
+  useGameAreaTileCacheSync(resolvedGameArea);
   // Join-preview / zero areas must not frame the camera (fitBoundsMode="once").
   const displayGameArea =
     resolvedPlayAreaReady && resolvedGameArea != null && !isPlaceholderGameArea(resolvedGameArea)

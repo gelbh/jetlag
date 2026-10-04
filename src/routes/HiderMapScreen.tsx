@@ -66,6 +66,7 @@ import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
 import { useAdminBoundaryFeatures } from "../hooks/map-screen/useAdminBoundaryFeatures";
 import { useMapSessionChrome } from "../hooks/map-screen/useMapSessionChrome";
 import { useBoardEconomy } from "../hooks/session/useBoardEconomy";
+import { useGameAreaTileCacheSync } from "../hooks/session/useGameAreaTileCacheSync";
 import { useHiderPendingPreviewEliminations } from "../hooks/session/useHiderPendingPreviewEliminations";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
@@ -110,6 +111,7 @@ export function HiderMapScreen() {
   const showAdminBoundaries = useMapStore((state) => state.showAdminBoundaries);
   const setShowAdminBoundaries = useMapStore((state) => state.setShowAdminBoundaries);
   const { sessionRules, gameArea } = useResolvedSessionRules(session);
+  useGameAreaTileCacheSync(gameArea);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
     useAdminBoundaryFeatures(gameArea, sessionRules, showAdminBoundaries);
   const distanceUnit = useSessionDistanceUnit();
