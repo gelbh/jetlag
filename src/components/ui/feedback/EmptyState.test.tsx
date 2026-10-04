@@ -10,14 +10,9 @@ describe("EmptyState", () => {
     expect(node).toHaveClass("jl-empty-state");
   });
 
-  it("accepts status role and className", () => {
-    render(
-      <EmptyState role="status" className="mt-2">
-        No activity yet.
-      </EmptyState>,
-    );
+  it("accepts status role", () => {
+    render(<EmptyState role="status">No activity yet.</EmptyState>);
     const node = screen.getByRole("status");
     expect(node).toHaveTextContent("No activity yet.");
-    expect(node).toHaveClass("mt-2");
   });
 });

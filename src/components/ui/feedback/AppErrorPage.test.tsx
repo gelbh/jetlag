@@ -29,7 +29,7 @@ function renderPage(ui: ReactElement) {
 
 describe("AppErrorPage", () => {
   it("omits role=alert for navigational errors", () => {
-    const { container } = renderPage(
+    renderPage(
       <AppErrorPage
         title="Page not found"
         message="That URL is not a route."
@@ -38,8 +38,7 @@ describe("AppErrorPage", () => {
     );
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /page not found/i })).toBeInTheDocument();
-    expect(container.querySelector(".mantine-Title-root")).toBeTruthy();
-    expect(container.querySelector(".mantine-Button-root")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /back home/i })).toBeInTheDocument();
   });
 
   it("uses role=alert and primary action for crashes", () => {
