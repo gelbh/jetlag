@@ -1,5 +1,5 @@
 import { Drawer } from "@mantine/core";
-import { type CSSProperties, type ReactNode, useRef } from "react";
+import { type CSSProperties, type ReactNode, useLayoutEffect, useRef } from "react";
 import { DrawerGrabber } from "@/components/ui/entry/entryChrome";
 import { bottomDrawerStyles } from "@/components/ui/entry/entryStyles";
 import { usePlayerPhoneShellPortalTarget } from "@/components/ui/layout/PlayerPhoneShellPortalContext";
@@ -130,13 +130,20 @@ export function DrawerSheet({
   const { decorativeAnimate } = useMotionProfile();
   const scrollRef = useRef<HTMLDivElement>(null);
   const gestureEnabled = dismissible && decorativeAnimate;
-  const { sheetRef, sheetStyle, handleProps } = useSheetGesture({
+  const { sheetRef, sheetStyle, handleProps, reset } = useSheetGesture({
     enabled: gestureEnabled,
     onDismiss: onClose,
     scrollRef,
     // Grabber sits outside the scroll body; do not block after scroll.
     gateStartOnScrollTop: false,
   });
+  // Drag-dismiss keeps offsetY for exit animation; host stays mounted while
+  // `open` toggles (changelog), so clear translate on present, not on close.
+  useLayoutEffect(() => {
+    if (open) {
+      reset();
+    }
+  }, [open, reset]);
   const transitionProps = resolveDrawerSheetTransitionProps(decorativeAnimate);
   const bodyInlinePadding = resolveDrawerBodyInlinePadding(padding);
   const bodyPadStyle: CSSProperties = {
@@ -163,7 +170,6 @@ export function DrawerSheet({
       keepMounted={false}
       zIndex={JETLAG_MODAL_Z_INDEX}
       title={ariaLabel}
-      aria-label={ariaLabel}
       transitionProps={transitionProps}
       overlayProps={{
         backgroundOpacity: 0.4,

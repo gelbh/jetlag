@@ -86,6 +86,19 @@ function nameMatchScore(displayName: string, query: string): number {
     return 0;
   }
 
+  const head = normalizeForMatch(normalizedName.split(",")[0] ?? "");
+  const headTokens = head.split(" ").filter(Boolean);
+  const queryTokens = normalizedQuery.split(" ").filter(Boolean);
+  const headTokenSet = new Set(headTokens);
+
+  if (head === normalizedQuery) {
+    return 3;
+  }
+
+  if (queryTokens.length > 0 && queryTokens.every((token) => headTokenSet.has(token))) {
+    return 3;
+  }
+
   if (normalizedName.startsWith(normalizedQuery)) {
     return 3;
   }
@@ -97,18 +110,36 @@ function nameMatchScore(displayName: string, query: string): number {
   return 1;
 }
 
-function settlementPreferenceScore(category: string): number {
+function playableSettlementScore(category: string): number {
   const lower = category.toLowerCase();
-
-  if (SETTLEMENT_CATEGORIES.has(lower)) {
-    return 2;
-  }
-
-  if (BROAD_ADMIN_CATEGORIES.has(lower)) {
+  if (BROAD_ADMIN_CATEGORIES.has(lower) || lower === "administrative area") {
     return 0;
   }
+  if (SETTLEMENT_CATEGORIES.has(lower)) {
+    return 1;
+  }
+  return 0;
+}
 
-  return 1;
+function settlementGradeScore(category: string): number {
+  const lower = category.toLowerCase();
+
+  switch (lower) {
+    case "city":
+    case "municipality":
+      return 4;
+    case "town":
+    case "borough":
+      return 3;
+    case "village":
+    case "suburb":
+      return 2;
+    case "hamlet":
+    case "neighbourhood":
+      return 1;
+    default:
+      return SETTLEMENT_CATEGORIES.has(lower) ? 2 : 0;
+  }
 }
 
 export interface RankedGeocodedPlaceCandidate {
@@ -173,14 +204,18 @@ function distanceToCenterScore(place: GeocodedPlace, near?: LatLngTuple): number
   return -haversineMeters(near, place.center);
 }
 
+const FAR_HOMONYM_METERS = 500_000;
+
 interface GeocodingRankScores {
   nameScore: number;
   containsScore: number;
   distanceScore: number;
-  settlementScore: number;
+  playableScore: number;
   fromCityQuery: boolean;
   areaSqMi: number;
   importance: number;
+  settlementGrade: number;
+  center: LatLngTuple;
 }
 
 function scoreGeocodedCandidate(
@@ -192,10 +227,12 @@ function scoreGeocodedCandidate(
     nameScore: nameMatchScore(candidate.place.displayName, query),
     containsScore: containsUserScore(candidate.place, near),
     distanceScore: distanceToCenterScore(candidate.place, near),
-    settlementScore: settlementPreferenceScore(candidate.place.placeCategory),
+    playableScore: playableSettlementScore(candidate.place.placeCategory),
     fromCityQuery: candidate.fromCityQuery,
     areaSqMi: candidate.place.approximateAreaSqMi,
     importance: candidate.importance,
+    settlementGrade: settlementGradeScore(candidate.place.placeCategory),
+    center: candidate.place.center,
   };
 }
 
@@ -210,26 +247,39 @@ function compareGeocodingRankScores(left: GeocodingRankScores, right: GeocodingR
     return containsDelta;
   }
 
+  const farHomonym = haversineMeters(left.center, right.center) > FAR_HOMONYM_METERS;
+  if (farHomonym) {
+    const importanceDelta = right.importance - left.importance;
+    if (importanceDelta !== 0) {
+      return importanceDelta;
+    }
+  }
+
+  const playableDelta = right.playableScore - left.playableScore;
+  if (playableDelta !== 0) {
+    return playableDelta;
+  }
+
   const distanceDelta = right.distanceScore - left.distanceScore;
   if (distanceDelta !== 0) {
     return distanceDelta;
   }
 
-  const settlementDelta = right.settlementScore - left.settlementScore;
-  if (settlementDelta !== 0) {
-    return settlementDelta;
+  const importanceDelta = right.importance - left.importance;
+  if (importanceDelta !== 0) {
+    return importanceDelta;
   }
 
   if (left.fromCityQuery !== right.fromCityQuery) {
     return left.fromCityQuery ? -1 : 1;
   }
 
-  const areaDelta = left.areaSqMi - right.areaSqMi;
-  if (areaDelta !== 0) {
-    return areaDelta;
+  const gradeDelta = right.settlementGrade - left.settlementGrade;
+  if (gradeDelta !== 0) {
+    return gradeDelta;
   }
 
-  return right.importance - left.importance;
+  return left.areaSqMi - right.areaSqMi;
 }
 
 export function rankGeocodedPlaceCandidates(

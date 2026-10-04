@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   attemptChunkReload,
+  cancelPendingChunkReloadRetry,
   clearChunkReloadFlag,
   hasChunkReloadBeenAttempted,
   isChunkLoadError,
@@ -88,18 +89,19 @@ describe("attemptChunkReload", () => {
     expect(wasChunkReloadDeferred()).toBe(true);
   });
 
-  it("reloads off the map even with an active session", () => {
+  it("defers reload off the map while a session is still active", () => {
     expect(
       attemptChunkReload({
         session: { id: "session-1" },
         pathname: "/",
         onNeedRefresh,
       }),
-    ).toBe(true);
+    ).toBe(false);
 
-    expect(reload).toHaveBeenCalledOnce();
-    expect(onNeedRefresh).not.toHaveBeenCalled();
-    expect(hasChunkReloadBeenAttempted()).toBe(true);
+    expect(reload).not.toHaveBeenCalled();
+    expect(onNeedRefresh).toHaveBeenCalledOnce();
+    expect(hasChunkReloadBeenAttempted()).toBe(false);
+    expect(wasChunkReloadDeferred()).toBe(true);
   });
 
   it("activates a waiting service worker before reload when available", () => {
@@ -124,6 +126,107 @@ describe("attemptChunkReload", () => {
   });
 });
 
+describe("attemptChunkReload while offline", () => {
+  const reload = vi.fn();
+  let offline = true;
+  const isOffline = () => offline;
+
+  beforeEach(() => {
+    sessionStorage.clear();
+    reload.mockReset();
+    offline = true;
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...window.location, reload },
+    });
+  });
+
+  afterEach(() => {
+    cancelPendingChunkReloadRetry();
+  });
+
+  it("defers instead of reloading and records the deferred flag", () => {
+    expect(attemptChunkReload({ isOffline })).toBe(false);
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(wasChunkReloadDeferred()).toBe(true);
+    expect(hasChunkReloadBeenAttempted()).toBe(false);
+  });
+
+  it("retries exactly once when the online event fires", () => {
+    attemptChunkReload({ isOffline });
+    attemptChunkReload({ isOffline });
+
+    offline = false;
+    window.dispatchEvent(new Event("online"));
+    window.dispatchEvent(new Event("online"));
+
+    expect(reload).toHaveBeenCalledOnce();
+    expect(hasChunkReloadBeenAttempted()).toBe(true);
+    expect(wasChunkReloadDeferred()).toBe(false);
+  });
+
+  it("keeps the in-session deferral when the network returns mid-game", () => {
+    const onNeedRefresh = vi.fn();
+    attemptChunkReload({
+      isOffline,
+      session: { id: "session-1" },
+      pathname: "/map",
+      onNeedRefresh,
+    });
+    expect(onNeedRefresh).not.toHaveBeenCalled();
+
+    offline = false;
+    window.dispatchEvent(new Event("online"));
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(onNeedRefresh).toHaveBeenCalledOnce();
+    expect(wasChunkReloadDeferred()).toBe(true);
+  });
+
+  it("re-reads the session when the network returns", () => {
+    const onNeedRefresh = vi.fn();
+    let session: unknown = null;
+    const resolveRetryOptions = () => ({ isOffline, session, pathname: "/map", onNeedRefresh });
+    attemptChunkReload({ ...resolveRetryOptions(), resolveRetryOptions });
+
+    session = { id: "session-1" };
+    offline = false;
+    window.dispatchEvent(new Event("online"));
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(onNeedRefresh).toHaveBeenCalledOnce();
+  });
+
+  it("does not retry after the pending retry is cancelled", () => {
+    attemptChunkReload({ isOffline });
+    cancelPendingChunkReloadRetry();
+
+    offline = false;
+    window.dispatchEvent(new Event("online"));
+
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("falls back to navigator.onLine when no checker is injected", () => {
+    const onLine = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    try {
+      expect(attemptChunkReload()).toBe(false);
+      expect(reload).not.toHaveBeenCalled();
+      expect(wasChunkReloadDeferred()).toBe(true);
+    } finally {
+      onLine.mockRestore();
+    }
+  });
+
+  it("reloads immediately when the checker reports online", () => {
+    offline = false;
+
+    expect(attemptChunkReload({ isOffline })).toBe(true);
+    expect(reload).toHaveBeenCalledOnce();
+  });
+});
+
 describe("tryApplyDeferredChunkReload", () => {
   const reload = vi.fn();
   const onNeedRefresh = vi.fn();
@@ -139,12 +242,12 @@ describe("tryApplyDeferredChunkReload", () => {
     });
   });
 
-  it("reloads after leaving the map when a chunk reload was deferred", () => {
+  it("reloads after the session ends when a chunk reload was deferred", () => {
     sessionStorage.setItem("jetlag:chunk-deferred", "1");
 
     expect(
       tryApplyDeferredChunkReload({
-        session: { id: "session-1" },
+        session: null,
         pathname: "/",
         onNeedRefresh,
       }),
@@ -154,7 +257,7 @@ describe("tryApplyDeferredChunkReload", () => {
     expect(wasChunkReloadDeferred()).toBe(false);
   });
 
-  it("does nothing while still on the map", () => {
+  it("does nothing while a session is still active", () => {
     sessionStorage.setItem("jetlag:chunk-deferred", "1");
 
     expect(

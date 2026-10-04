@@ -8,7 +8,10 @@ import {
   buildSeaLevelNearRegionWithLocalRefine,
   distanceFromSeaLevelMeters,
   type ElevationSampleCell,
+  LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS,
+  LINEAR_NEAR_REGION_COARSE_MIN_DIVISIONS,
   resolveGameAreaCellDivisions,
+  resolveLinearNearRegionCoarseDivisions,
   sampleGameAreaCells,
   subdivideElevationSampleCell,
 } from "./seaLevel";
@@ -60,6 +63,13 @@ describe("sea level measuring", () => {
 
   it("uses finer grid divisions for small play areas", () => {
     expect(resolveGameAreaCellDivisions(smallGameArea)).toBeGreaterThan(10);
+    expect(resolveGameAreaCellDivisions(largeGameArea)).toBeLessThanOrEqual(10);
+  });
+
+  it("linear coarse divisions stay in 8–16 and ignore the 600-cell sea-level cap", () => {
+    const linear = resolveLinearNearRegionCoarseDivisions(largeGameArea);
+    expect(linear).toBeGreaterThanOrEqual(LINEAR_NEAR_REGION_COARSE_MIN_DIVISIONS);
+    expect(linear).toBeLessThanOrEqual(LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS);
     expect(resolveGameAreaCellDivisions(largeGameArea)).toBeLessThanOrEqual(10);
   });
 

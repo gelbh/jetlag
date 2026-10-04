@@ -1,11 +1,14 @@
 import { type Browser, expect, type Page } from "@playwright/test";
-import { toLocalStorageSeed } from "../../src/test/scenarios/adapters/toLocalStorageSeed";
+import { createTestSession } from "../../src/test/fixtures/sessions";
 import { E2E_GEOLOCATION, MAP_CONTAINER_SELECTOR } from "./map";
 import type { BlockExternalAssetsOptions } from "./network";
 import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
 
 type PlayerRole = "seeker" | "hider";
 type GameSize = "small" | "medium" | "large";
+
+/** One-shot flag so reload keeps an advanced jetlag-timer (hiding-period smoke). */
+const E2E_TIMER_CLEARED_KEY = "jetlag-e2e-timer-cleared";
 
 export interface LocalSessionSeedOptions {
   code?: string;
@@ -18,24 +21,47 @@ export interface LocalSessionSeedOptions {
 }
 
 export async function seedLocalSession(page: Page, options: LocalSessionSeedOptions = {}) {
-  const { code, myRole, gameSize, sessionId, hidingPeriodMinutes, memberRoles } = options;
-  const seed = toLocalStorageSeed("dublin-local-map", {
+  const {
     code,
-    myRole,
+    myRole = "seeker",
     gameSize,
     sessionId,
     hidingPeriodMinutes,
     memberRoles,
+  } = options;
+  const session = createTestSession({
+    ...(sessionId !== undefined ? { id: sessionId } : {}),
+    ...(code !== undefined ? { code } : {}),
+    ...(gameSize !== undefined ? { gameSize } : {}),
+    ...(hidingPeriodMinutes !== undefined ? { hidingPeriodMinutes } : {}),
+    ...(memberRoles !== undefined ? { memberRoles } : {}),
+  });
+  const sessionBlob = JSON.stringify({
+    state: { session, myRole, myUid: null },
+    version: 0,
+  });
+  // Catalog seeded lowPowerMode; keep that one override, let mapStore fill the rest.
+  const mapBlob = JSON.stringify({
+    state: { lowPowerMode: true },
+    version: 0,
   });
 
-  await page.addInitScript(({ sessionBlob, mapBlob, annotationsBlob, clearTimer }) => {
-    localStorage.setItem("jetlag-session", sessionBlob);
-    localStorage.setItem("jetlag-map", mapBlob);
-    localStorage.setItem("jetlag-annotations", annotationsBlob);
-    if (clearTimer) {
-      localStorage.removeItem("jetlag-timer");
-    }
-  }, seed);
+  await page.addInitScript(
+    ({ sessionBlob: nextSession, mapBlob: nextMap, timerClearedKey }) => {
+      localStorage.setItem("jetlag-session", nextSession);
+      localStorage.setItem("jetlag-map", nextMap);
+      localStorage.removeItem("jetlag-annotations");
+      if (!sessionStorage.getItem(timerClearedKey)) {
+        sessionStorage.removeItem("jetlag-timer");
+        sessionStorage.setItem(timerClearedKey, "1");
+      }
+    },
+    {
+      sessionBlob,
+      mapBlob,
+      timerClearedKey: E2E_TIMER_CLEARED_KEY,
+    },
+  );
 }
 
 export async function openMapWithLocalSession(page: Page, options: LocalSessionSeedOptions = {}) {
@@ -61,15 +87,56 @@ export async function expectCreatePageMapPreviewLoaded(page: Page) {
   await expect.poll(async () => page.locator(".maplibregl-canvas").count()).toBeGreaterThan(0);
 }
 
+/** Jump to Create Rules (Create steps tab, else Next from Where). */
+export async function goToCreateRulesStep(page: Page) {
+  const rulesTab = page.getByRole("tablist", { name: "Create steps" }).getByRole("tab", {
+    name: "Rules",
+  });
+  if (await rulesTab.isVisible().catch(() => false)) {
+    await rulesTab.click();
+  } else {
+    await page.getByRole("button", { name: "Next" }).click();
+  }
+
+  await expect(page.getByRole("radiogroup", { name: "Game size" })).toBeVisible({
+    timeout: 10_000,
+  });
+}
+
+/** Advance Where → Rules → Play (or jump via Create steps Play tab). */
+export async function goToCreatePlayStep(page: Page) {
+  const createGame = page.getByRole("button", { name: "Create game" });
+  if (await createGame.isVisible().catch(() => false)) {
+    return;
+  }
+
+  const playTab = page.getByRole("tablist", { name: "Create steps" }).getByRole("tab", {
+    name: "Play",
+  });
+  if (await playTab.isVisible().catch(() => false)) {
+    await playTab.click();
+  } else {
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
+  }
+
+  await expect(createGame).toBeVisible({ timeout: 10_000 });
+}
+
+export async function expectCreatePlaceSelected(page: Page, placeMatch = /Dublin/i) {
+  await expect(page.getByPlaceholder("Dublin, Ireland")).toHaveValue(placeMatch, {
+    timeout: 10_000,
+  });
+}
+
 export async function createSessionFromCreatePage(page: Page) {
   await page.goto("/create");
   await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
   await page.getByRole("button", { name: "Find place" }).click();
-  await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
-    timeout: 10_000,
-  });
+  await expectCreatePlaceSelected(page);
   await expectCreatePageMapPreviewLoaded(page);
-  await page.getByRole("button", { name: "Confirm game area" }).click();
+  await goToCreatePlayStep(page);
+  await page.getByRole("button", { name: "Create game" }).click();
   await expect(page).toHaveURL(/\/map/, { timeout: 15_000 });
   await expect(page.getByRole("button", { name: "Radar" })).toBeVisible({
     timeout: 15_000,

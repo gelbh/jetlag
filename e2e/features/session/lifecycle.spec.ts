@@ -3,6 +3,9 @@ import {
   createMultiplayerContexts,
   endSessionInEmulator,
   expect,
+  expectCreatePlaceSelected,
+  goToCreatePlayStep,
+  goToCreateRulesStep,
   joinAsRole,
   openSettings,
   prepareE2EPage,
@@ -95,15 +98,18 @@ test.describe("session lifecycle", () => {
     await page.goto("/create");
     await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
     await page.getByRole("button", { name: "Find place" }).click();
-    await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
-      timeout: 10_000,
-    });
+    await expectCreatePlaceSelected(page);
+    await goToCreateRulesStep(page);
+    await expect(page.getByRole("radiogroup", { name: "Game size" })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: "Game size" })).toHaveCount(0);
+    await expect(page.getByText(/sq mi play area/i).first()).toBeVisible();
 
-    await expect(page.getByRole("radio", { name: /^Seeker\b/ })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /^Hider\b/ })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /Small/i })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /Medium/i })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /Large/i })).toBeVisible();
+    await goToCreatePlayStep(page);
+    await expect(page.getByRole("radiogroup", { name: "Player side" })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /^Seeker/ })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /^Hider/ })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Seeker" })).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: "Game size" })).toHaveCount(0);
   });
 
   test("continue shows error when persisted remote session has ended", async ({ browser }) => {

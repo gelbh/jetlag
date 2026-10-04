@@ -1,4 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { commitWrite } from "@/services/firestore/commitWrite";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import {
@@ -14,8 +15,8 @@ import { HidingZoneStationsLayer } from "../components/map/layers/HidingZoneStat
 import { HidingZonesLayer } from "../components/map/layers/HidingZonesLayer";
 import { LiveHiderLocationsLayer } from "../components/map/layers/LiveHiderLocationsLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/layers/LiveSeekerLocationsLayer";
-import { LiveUserLocationLayer } from "../components/map/layers/LiveUserLocationLayer";
 import { PendingQuestionLayer } from "../components/map/layers/PendingQuestionLayer";
+import { UserLocationLayer } from "../components/map/layers/UserLocationLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
@@ -162,11 +163,6 @@ export function HiderMapScreen() {
     uid,
     enabled: true,
   });
-  const [liveLocationError, setLiveLocationError] = useState<string | null>(null);
-  const handleLiveLocationError = useCallback((error: string | null) => {
-    setLiveLocationError(error);
-  }, []);
-  const locationError = liveLocationError ?? hiderLocationSyncError;
   const [recenterToken, setRecenterToken] = useState(0);
   const [truthReveal, setTruthReveal] = useState<HiderTruthRevealState | null>(null);
   const [chatAnswerError, setChatAnswerError] = useState<string | null>(null);
@@ -244,7 +240,7 @@ export function HiderMapScreen() {
   const stationCenter = useMemo(() => hiderStationCenter(myZone), [myZone]);
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
   const needsTruthLocation = pendingQuestions.some((question) => question.status === "pending");
-  const { reading: liveLocationReading } = useLiveLocation(
+  const { reading: liveLocationReading, error: liveLocationWatchError } = useLiveLocation(
     showCurrentLocation || needsTruthLocation,
     {
       highAccuracy: liveLocationProfile.highAccuracy,
@@ -252,6 +248,7 @@ export function HiderMapScreen() {
       minDistanceMeters: liveLocationProfile.minDistanceMeters,
     },
   );
+  const locationError = liveLocationWatchError ?? hiderLocationSyncError;
   const hidingPlace = useMemo((): LatLngTuple | null => {
     if (!liveLocationReading) {
       return null;
@@ -359,6 +356,18 @@ export function HiderMapScreen() {
       }
 
       const messageBeforeAnswer = messages.find((entry) => entry.id === messageId);
+      const rollBackOptimisticAnswer = (error: unknown) => {
+        setOptimisticAnswers((previous) => {
+          const next = new Map(previous);
+          if (next.get(pendingQuestionId) === selectedReply) {
+            next.delete(pendingQuestionId);
+          }
+          return next;
+        });
+        setChatAnswerError(
+          error instanceof Error ? error.message : "Could not save your answer. Try again.",
+        );
+      };
 
       try {
         setOptimisticAnswers((previous) => {
@@ -368,7 +377,8 @@ export function HiderMapScreen() {
         });
 
         const user = await ensureAnonymousUser();
-        await answerPendingQuestion(
+        // Not awaited: the answer is queued locally; only a server rejection undoes it.
+        const { acknowledged } = answerPendingQuestion(
           sessionId,
           pendingQuestionId,
           messageId,
@@ -382,6 +392,25 @@ export function HiderMapScreen() {
               }
             : undefined,
         );
+        // Cards only once the server accepts the answer: a rejected answer
+        // (e.g. the seeker cancelled meanwhile) must not leave a reward behind.
+        acknowledged.then(async () => {
+          if (deadlineExpired || !boardEconomyEnabled) {
+            return;
+          }
+          try {
+            const reward = await boardEconomy.applyAnswerReward(
+              pending.toolType,
+              pending.cardDraw,
+              pending.cardKeep,
+            );
+            if (reward && !reward.needsPick) {
+              setHandSheetOpen(true);
+            }
+          } catch {
+            // Best-effort: the answer itself is saved.
+          }
+        }, rollBackOptimisticAnswer);
 
         acknowledgeFingerprints([
           messageFingerprint(
@@ -398,17 +427,6 @@ export function HiderMapScreen() {
         ]);
 
         try {
-          if (!deadlineExpired && boardEconomyEnabled) {
-            const reward = await boardEconomy.applyAnswerReward(
-              pending.toolType,
-              pending.cardDraw,
-              pending.cardKeep,
-            );
-            if (reward && !reward.needsPick) {
-              setHandSheetOpen(true);
-            }
-          }
-
           const answerTruthReference = truthContext
             ? resolvePendingQuestionTruthReference(pending, truthContext)
             : { point: null as LatLngTuple | null };
@@ -429,19 +447,10 @@ export function HiderMapScreen() {
             setTruthReveal({ truth, selectedReply, selectedLabel });
           }
         } catch {
-          // Answer already saved; board/truth side effects are best-effort.
+          // Answer already queued; the truth reveal is best-effort.
         }
       } catch (error) {
-        setOptimisticAnswers((previous) => {
-          const next = new Map(previous);
-          if (next.get(pendingQuestionId) === selectedReply) {
-            next.delete(pendingQuestionId);
-          }
-          return next;
-        });
-        setChatAnswerError(
-          error instanceof Error ? error.message : "Could not save your answer. Try again.",
-        );
+        rollBackOptimisticAnswer(error);
       } finally {
         answerInFlightRef.current = false;
         setAnswerSubmitting(false);
@@ -483,7 +492,7 @@ export function HiderMapScreen() {
     }
   }, [session, setSession, uid]);
 
-  const handleAcceptFoundHider = useCallback(async () => {
+  const handleAcceptFoundHider = useCallback(() => {
     if (!session?.id || !uid || !isFoundHiderPending(session)) {
       return;
     }
@@ -509,14 +518,10 @@ export function HiderMapScreen() {
       return;
     }
 
-    try {
-      await confirmFoundHiderSession(session.id, uid);
-    } catch {
-      window.alert("Could not confirm found hider. Check your connection and try again.");
-    }
+    commitWrite("found.confirm", () => confirmFoundHiderSession(session.id, uid));
   }, [session, setSession, uid]);
 
-  const handleDeclineFoundHider = useCallback(async () => {
+  const handleDeclineFoundHider = useCallback(() => {
     if (!session?.id || !uid) {
       return;
     }
@@ -533,22 +538,18 @@ export function HiderMapScreen() {
       return;
     }
 
-    try {
-      await resetFoundHiderSession(session.id);
-      setSession(
-        {
-          ...session,
-          foundRequestedAt: undefined,
-          foundRequestedByUid: undefined,
-        },
-        uid,
-      );
-    } catch {
-      window.alert("Could not clear found hider request. Check your connection and try again.");
-    }
+    commitWrite("found.decline", () => resetFoundHiderSession(session.id));
+    setSession(
+      {
+        ...session,
+        foundRequestedAt: undefined,
+        foundRequestedByUid: undefined,
+      },
+      uid,
+    );
   }, [session, setSession, uid]);
 
-  const handleResetEndGame = useCallback(async () => {
+  const handleResetEndGame = useCallback(() => {
     if (!session?.id || !uid) {
       return;
     }
@@ -568,11 +569,13 @@ export function HiderMapScreen() {
       return;
     }
 
-    if (isEndGamePending(session) && !isEndGameActive(session)) {
-      await clearEndGameRequestSession(session.id);
-    } else {
-      await resetEndGameSession(session.id);
-    }
+    const endGameSessionId = session.id;
+    const clearRequestOnly = isEndGamePending(session) && !isEndGameActive(session);
+    commitWrite("endgame.reset", () =>
+      clearRequestOnly
+        ? clearEndGameRequestSession(endGameSessionId)
+        : resetEndGameSession(endGameSessionId),
+    );
     setSession(
       {
         ...session,
@@ -834,11 +837,7 @@ export function HiderMapScreen() {
             />
           </Suspense>
         ) : null}
-        <LiveUserLocationLayer
-          enabled={showCurrentLocation}
-          lowPowerMode={lowPowerMode}
-          onError={handleLiveLocationError}
-        />
+        {showCurrentLocation ? <UserLocationLayer reading={liveLocationReading} /> : null}
       </MapViewWithLandscapeInset>
     </div>
   );
@@ -941,7 +940,6 @@ export function HiderMapScreen() {
               selectedStation: timeTrapTool.selectedStation,
               setSelectedStation: timeTrapTool.setSelectedStation,
               confirmTrap: timeTrapTool.confirmTrap,
-              saving: timeTrapTool.saving,
               error: timeTrapTool.error,
             },
             myTrap,

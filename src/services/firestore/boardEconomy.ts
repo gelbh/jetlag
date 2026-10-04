@@ -2,6 +2,7 @@ import { doc, getDoc, onSnapshot, setDoc, type Unsubscribe, updateDoc } from "fi
 import type { BoardEconomyState } from "../../domain/boardEconomy";
 import { createInitialBoardEconomyState } from "../../domain/boardEconomy";
 import { getFirestoreDb } from "../core/firebase/firebase";
+import { commitWrite } from "./commitWrite";
 import { handleFirestoreListenError } from "./sessions/listenError";
 
 const STATE_DOC = "state";
@@ -104,7 +105,9 @@ export async function ensureBoardEconomyState(
     }
   }
   const initial = createInitialBoardEconomyState(seed);
-  await setDoc(ref, serializeBoardEconomyState(initial));
+  // Not awaited: the subscription is gated on this call, and an ack wait would
+  // never resolve offline. The local write is visible to listeners at once.
+  commitWrite("economy.update", () => setDoc(ref, serializeBoardEconomyState(initial)));
   return initial;
 }
 
