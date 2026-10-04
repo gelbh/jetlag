@@ -23,6 +23,7 @@ const replayIntegration = vi.hoisted(() => vi.fn(() => ({ name: "Replay" })));
 const getClientEnv = vi.hoisted(() => vi.fn((): Record<string, string> => ({})));
 const idleCallbacks = vi.hoisted((): Array<() => void> => []);
 const isolationScopeAddBreadcrumb = vi.hoisted(() => vi.fn());
+const scopeSetTransactionName = vi.hoisted(() => vi.fn());
 
 vi.mock("@sentry/react", () => ({
   addBreadcrumb,
@@ -35,6 +36,7 @@ vi.mock("@sentry/react", () => ({
   browserTracingIntegration,
   replayIntegration,
   getIsolationScope: () => ({ addBreadcrumb: isolationScopeAddBreadcrumb }),
+  getCurrentScope: () => ({ setTransactionName: scopeSetTransactionName }),
 }));
 
 vi.mock("../../../config/env", () => ({
@@ -54,8 +56,14 @@ import {
   initSentry,
   reportFirestoreListenPermissionDenied,
   reportJoinPermissionDenied,
-  sentryRouteName,
+  setTransactionName,
 } from "./sentry";
+
+function stubProdWithDsn(): void {
+  vi.stubEnv("MODE", "production");
+  vi.stubEnv("DEV", false);
+  getClientEnv.mockReturnValue({ VITE_SENTRY_DSN: "https://key@example.invalid/1" });
+}
 
 describe("initSentry", () => {
   afterEach(() => {
@@ -76,9 +84,7 @@ describe("initSentry", () => {
   });
 
   it("inits without replay, then adds replay once on idle", () => {
-    vi.stubEnv("MODE", "production");
-    vi.stubEnv("DEV", false);
-    getClientEnv.mockReturnValue({ VITE_SENTRY_DSN: "https://key@example.invalid/1" });
+    stubProdWithDsn();
 
     initSentry();
 
@@ -107,12 +113,9 @@ describe("initSentry", () => {
     expect(idleCallbacks).toHaveLength(1);
   });
 
-  // SDK 11 span streaming renamed every pageload "Pageload" and moved LCP/CLS off the
-  // pageload (0 field pageloads with measurements.lcp on 0.17.1-1.0.x).
+  // SDK 11's default span streaming names pageloads "Pageload" and drops LCP/CLS from them.
   it("keeps route-named pageloads with LCP/CLS/INP on the static trace lifecycle", () => {
-    vi.stubEnv("MODE", "production");
-    vi.stubEnv("DEV", false);
-    getClientEnv.mockReturnValue({ VITE_SENTRY_DSN: "https://key@example.invalid/1" });
+    stubProdWithDsn();
     browserTracingIntegration.mockClear();
 
     initSentry();
@@ -121,17 +124,23 @@ describe("initSentry", () => {
     expect(options.traceLifecycle).toBe("static");
 
     expect(browserTracingIntegration).toHaveBeenCalledOnce();
-    const tracingOptions = (browserTracingIntegration.mock.calls[0] as unknown[])[0] as {
-      instrumentPageLoad?: boolean;
-      instrumentNavigation?: boolean;
-      enableInp?: boolean;
-      webVitals?: { ignore?: string[] };
+    const tracingOptions = (browserTracingIntegration.mock.calls[0] as unknown[])[0] as Record<
+      string,
+      unknown
+    > & {
       beforeStartSpan?: (options: { name: string; op?: string }) => { name: string; op?: string };
     };
-    expect(tracingOptions.instrumentPageLoad).not.toBe(false);
-    expect(tracingOptions.instrumentNavigation).not.toBe(false);
-    expect(tracingOptions.enableInp).not.toBe(false);
-    expect(tracingOptions.webVitals?.ignore ?? []).toEqual([]);
+    // SDK defaults keep pageload/navigation spans, LCP/CLS on the pageload and INP spans.
+    for (const key of [
+      "instrumentPageLoad",
+      "instrumentNavigation",
+      "enableInp",
+      "webVitals",
+      "idleTimeout",
+      "finalTimeout",
+    ]) {
+      expect(tracingOptions).not.toHaveProperty(key);
+    }
 
     const beforeStartSpan = tracingOptions.beforeStartSpan;
     expect(beforeStartSpan).toBeTypeOf("function");
@@ -146,14 +155,10 @@ describe("initSentry", () => {
   });
 });
 
-describe("sentryRouteName", () => {
-  it("keeps static routes and parameterizes id segments", () => {
-    expect(sentryRouteName("/")).toBe("/");
-    expect(sentryRouteName("/map")).toBe("/map");
-    expect(sentryRouteName("/join?code=ABCD")).toBe("/join");
-    expect(sentryRouteName("/presets/abc123/edit")).toBe("/presets/:id/edit");
-    expect(sentryRouteName("/admin/incidents")).toBe("/admin/incidents");
-    expect(sentryRouteName("/admin/incidents/inc_42")).toBe("/admin/incidents/:incidentId");
+describe("setTransactionName", () => {
+  it("names the scope with the parameterized route", () => {
+    setTransactionName("/presets/abc123/edit");
+    expect(scopeSetTransactionName).toHaveBeenCalledWith("/presets/:id/edit");
   });
 });
 

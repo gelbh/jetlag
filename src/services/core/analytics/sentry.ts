@@ -3,7 +3,7 @@ import { getClientEnv } from "@/config/env";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { scheduleIdleBootWork } from "@/domain/device/perf/scheduleAfterFirstPaint";
 import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
-import { normalizeRoutePath } from "@/navigation/routeMetadata";
+import { parameterizedRoutePath } from "@/navigation/routeMetadata";
 import {
   applyClientSentryDisposition,
   CLIENT_SENTRY_IGNORE_ERRORS,
@@ -116,14 +116,6 @@ function scrubEvent(
   return next;
 }
 
-const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
-
-/** Parameterized route for pageload/navigation names, so ids don't explode cardinality. */
-export function sentryRouteName(pathname: string): string {
-  const route = normalizeRoutePath(pathname);
-  return ADMIN_INCIDENT_PATH_RE.test(route) ? "/admin/incidents/:incidentId" : route;
-}
-
 export function initSentry(): void {
   if (import.meta.env.MODE === "test" || import.meta.env.DEV) {
     return;
@@ -151,7 +143,7 @@ export function initSentry(): void {
     ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
     integrations: [
       Sentry.browserTracingIntegration({
-        beforeStartSpan: (options) => ({ ...options, name: sentryRouteName(options.name) }),
+        beforeStartSpan: (options) => ({ ...options, name: parameterizedRoutePath(options.name) }),
       }),
     ],
     beforeSend: scrubEvent,
@@ -320,7 +312,7 @@ export function addRecoverableErrorBreadcrumb(error: unknown, componentStack?: s
 }
 
 export function setTransactionName(pathname: string): void {
-  Sentry.getCurrentScope().setTransactionName(sentryRouteName(pathname));
+  Sentry.getCurrentScope().setTransactionName(parameterizedRoutePath(pathname));
 }
 
 export function captureException(error: unknown): void {

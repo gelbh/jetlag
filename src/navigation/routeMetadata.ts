@@ -1,5 +1,6 @@
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
 const ADMIN_PATH_RE = /^\/admin(?:\/|$)/;
+const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
 
 const LAZY_ROUTE_PATHS = new Set([
   "/map",
@@ -26,6 +27,17 @@ export function normalizeRoutePath(path: string): string {
   }
 
   return base || "/";
+}
+
+/**
+ * Route pattern for telemetry names (Sentry pageload/navigation), so ids don't explode
+ * cardinality. Unlike `normalizeRoutePath`, admin incident ids collapse too, and the
+ * `/join/` asset alias folds into `/join`.
+ */
+export function parameterizedRoutePath(path: string): string {
+  const route = normalizeRoutePath(path);
+  const trimmed = route.length > 1 ? route.replace(/\/$/, "") : route;
+  return ADMIN_INCIDENT_PATH_RE.test(trimmed) ? "/admin/incidents/:incidentId" : trimmed;
 }
 
 export function isLazyRoute(path: string): boolean {
