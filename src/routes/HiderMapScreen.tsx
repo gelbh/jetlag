@@ -98,7 +98,6 @@ import {
 import { AdminBoundariesLayer } from "./map-screen/lazyImports";
 
 export function HiderMapScreen() {
-  "use memo";
   const session = useSessionStore((state) => state.session);
   const setSession = useSessionStore((state) => state.setSession);
   const persistedMyUid = useSessionStore((state) => state.myUid);

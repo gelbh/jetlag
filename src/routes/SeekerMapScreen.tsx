@@ -17,7 +17,6 @@ function SeekerMapScreenBody({
   controller: MapScreenController;
   inactiveChrome: boolean;
 }) {
-  "use memo";
   const mapLayers = <MapScreenMapLayers controller={controller} />;
 
   const mapLayersContent = inactiveChrome ? (
@@ -50,7 +49,6 @@ function SeekerMapScreenBody({
 }
 
 export function SeekerMapScreen() {
-  "use memo";
   const controller = useMapScreenController();
   const syncMessage =
     controller.syncStatus.remoteUpdateNotice ??

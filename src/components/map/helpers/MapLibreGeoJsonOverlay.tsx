@@ -223,7 +223,6 @@ export function MapLibreGeoJsonOverlay({
   /** MapLibre fill/line opacity transition; omit for MapLibre defaults. */
   paintTransitionMs?: number;
 }) {
-  "use memo";
   const collection = useMemo(() => (data ? asFeatureCollection(data) : null), [data]);
 
   const resolvedLayers = useMemo((): MapLibreGeoJsonLayerSpec[] => {
