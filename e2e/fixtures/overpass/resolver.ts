@@ -68,7 +68,7 @@ export function resolveOverpassResponse(query: string, profile: OverpassFixtureP
 
   const normalized = query.toLowerCase();
 
-  if (normalized.includes("around:")) {
+  if (normalized.includes("around:") || normalized.includes("out center 40")) {
     return fixtureBody(DUBLIN_TENTACLE);
   }
 
