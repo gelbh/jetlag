@@ -1,5 +1,8 @@
 import { getToken } from "firebase/app-check";
 import { getClientEnv } from "@/config/env";
+import { isEffectivelyOffline } from "@/domain/device/sync/sync";
+import { probeServerTime } from "@/services/core/time/serverClock";
+import { useSessionStore } from "@/state/sessionStore";
 import { captureAppCheckTokenFailure } from "../analytics/sentry";
 import {
   type AppCheckProbeFailureClass,
@@ -9,6 +12,8 @@ import { getFirebaseAppCheck, isFirebaseConfigured } from "./firebase";
 
 export const APP_CHECK_PROBE_SKIP_KEY = "jl.appCheckProbe.skip";
 export const APP_CHECK_PROBE_TIMEOUT_MS = 15_000;
+/** Same-origin reachability check before blaming a content blocker. */
+export const APP_CHECK_REACHABILITY_TIMEOUT_MS = 2_000;
 
 export type AppCheckProbeResult = { ok: true } | { ok: false; reason: "blocked" };
 
@@ -69,6 +74,29 @@ function reportProbeFailure(
   return cachedProbe;
 }
 
+/**
+ * A dead network fails `getToken` with the same "Failed to fetch" a blocker
+ * produces. Blockers leave our own origin alone, so an unreachable
+ * `/api/time` means the network, not the player's extensions, is at fault.
+ */
+async function isNetworkUnreachable(): Promise<boolean> {
+  const online = typeof navigator === "undefined" ? true : navigator.onLine !== false;
+  if (isEffectivelyOffline({ online, reachable: useSessionStore.getState().networkReachable })) {
+    return true;
+  }
+  const { ok } = await probeServerTime(APP_CHECK_REACHABILITY_TIMEOUT_MS);
+  return !ok;
+}
+
+async function classifyThrownProbeFailure(message: string): Promise<AppCheckProbeFailureClass> {
+  const classification = classifyAppCheckProbeFailure({ message });
+  if (classification.allowApp || !(await isNetworkUnreachable())) {
+    return classification;
+  }
+  // Offline is a soft network failure, same as a probe timeout.
+  return classifyAppCheckProbeFailure("timeout");
+}
+
 async function runProbe(): Promise<AppCheckProbeResult> {
   if (shouldSkipAppCheckProbe() || !isFirebaseConfigured()) {
     cachedProbe = { ok: true };
@@ -112,6 +140,6 @@ async function runProbe(): Promise<AppCheckProbeResult> {
     return cachedProbe;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return reportProbeFailure(error, classifyAppCheckProbeFailure({ message }));
+    return reportProbeFailure(error, await classifyThrownProbeFailure(message));
   }
 }
