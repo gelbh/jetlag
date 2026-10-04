@@ -122,3 +122,51 @@ describe("measuringLinearFeatures — bundled region pack fallthrough", () => {
     expect(prepared.segments.length).toBeGreaterThan(0);
   });
 });
+
+describe("measuringLinearFeatures — Overpass bbox split", () => {
+  beforeEach(async () => {
+    await clearGeographicFeatureCacheForTests();
+  });
+
+  afterEach(async () => {
+    await clearGeographicFeatureCacheForTests();
+    vi.restoreAllMocks();
+  });
+
+  it("splits a too-expensive full AABB for high-speed rail", async () => {
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockRejectedValueOnce(new overpassClient.OverpassQueryTooExpensiveError())
+      .mockResolvedValue({
+        elements: [
+          {
+            type: "way",
+            id: 9,
+            geometry: [
+              { lat: 53.32, lon: -6.3 },
+              { lat: 53.33, lon: -6.29 },
+            ],
+          },
+        ],
+      });
+
+    const prepared = await fetchPreparedMeasuringLinearSegments(
+      dublinGameArea,
+      "high_speed_rail_line",
+    );
+
+    expect(queryOverpass.mock.calls.length).toBeGreaterThan(1);
+    expect(prepared.segments.length).toBeGreaterThan(0);
+  });
+
+  it("does not split OverpassUnavailableError for high-speed rail", async () => {
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockRejectedValue(new overpassClient.OverpassUnavailableError());
+
+    await expect(
+      fetchPreparedMeasuringLinearSegments(dublinGameArea, "high_speed_rail_line"),
+    ).rejects.toBeInstanceOf(overpassClient.OverpassUnavailableError);
+    expect(queryOverpass).toHaveBeenCalledTimes(1);
+  });
+});
