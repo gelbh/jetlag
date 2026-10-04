@@ -1,10 +1,13 @@
-import { createHash, createHmac } from "node:crypto";
+import { createHash } from "node:crypto";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { OVERPASS_L2_ENV_KEYS as K, OVERPASS_L2_ENV_KEY_LIST } from "./overpassL2Env.mjs";
 
 /** Match L1 TTL in overpassProxyCore.mjs */
 const OVERPASS_L2_TTL_MS = 60 * 60 * 1000;
 
 /** @typedef {{ kvGet: (key: string) => Promise<string | null>, kvPut: (key: string, value: string) => Promise<void>, r2Get: (key: string) => Promise<{ body: string, contentType: string } | null>, r2Put: (key: string, body: string, contentType: string) => Promise<void> }} OverpassL2Backend */
+
+/** @typedef {{ send: (command: unknown) => Promise<unknown> }} OverpassL2S3Client */
 
 /** @type {OverpassL2Backend | null} */
 let testBackend = null;
@@ -57,8 +60,36 @@ function kvUrl(key) {
   return `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/values/${encodeURIComponent(key)}`;
 }
 
-function createCloudflareL2Backend() {
+function defaultCreateS3Client() {
+  return new S3Client({
+    region: "auto",
+    endpoint: process.env[K.R2_ENDPOINT],
+    credentials: {
+      accessKeyId: process.env[K.R2_ACCESS_KEY_ID],
+      secretAccessKey: process.env[K.R2_SECRET_ACCESS_KEY],
+    },
+  });
+}
+
+function isR2NotFound(error) {
+  return (
+    error?.name === "NoSuchKey" ||
+    error?.name === "NotFound" ||
+    error?.Code === "NoSuchKey" ||
+    error?.$metadata?.httpStatusCode === 404
+  );
+}
+
+/**
+ * @param {{ createS3Client?: () => OverpassL2S3Client }} [options]
+ * @returns {OverpassL2Backend}
+ */
+export function createCloudflareL2Backend(options = {}) {
   const token = process.env[K.API_TOKEN];
+  const bucket = process.env[K.R2_BUCKET];
+  const createS3Client = options.createS3Client ?? defaultCreateS3Client;
+  const client = createS3Client();
+
   return {
     async kvGet(key) {
       const response = await fetch(kvUrl(key), {
@@ -87,105 +118,39 @@ function createCloudflareL2Backend() {
       }
     },
     async r2Get(key) {
-      const signed = await signR2Request("GET", key);
-      const response = await fetch(signed.url, { headers: signed.headers });
-      if (response.status === 404) {
-        return null;
+      try {
+        const response = await client.send(
+          new GetObjectCommand({
+            Bucket: bucket,
+            Key: key,
+          }),
+        );
+        const body =
+          typeof response.Body?.transformToString === "function"
+            ? await response.Body.transformToString()
+            : String(response.Body ?? "");
+        return {
+          body,
+          contentType: response.ContentType ?? "application/json",
+        };
+      } catch (error) {
+        if (isR2NotFound(error)) {
+          return null;
+        }
+        throw error;
       }
-      if (!response.ok) {
-        throw new Error(`R2 get failed: ${response.status}`);
-      }
-      return {
-        body: await response.text(),
-        contentType: response.headers.get("content-type") ?? "application/json",
-      };
     },
     async r2Put(key, body, contentType) {
-      const signed = await signR2Request("PUT", key, body, contentType);
-      const response = await fetch(signed.url, {
-        method: "PUT",
-        headers: signed.headers,
-        body,
-      });
-      if (!response.ok) {
-        throw new Error(`R2 put failed: ${response.status}`);
-      }
+      await client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: body,
+          ContentType: contentType,
+        }),
+      );
     },
   };
-}
-
-function sha256Hex(value) {
-  return createHash("sha256").update(value, "utf8").digest("hex");
-}
-
-function hmac(key, value) {
-  return createHmac("sha256", key).update(value, "utf8").digest();
-}
-
-async function signR2Request(method, objectKey, body = "", contentType = "application/json") {
-  const accessKeyId = process.env[K.R2_ACCESS_KEY_ID];
-  const secretAccessKey = process.env[K.R2_SECRET_ACCESS_KEY];
-  const bucket = process.env[K.R2_BUCKET];
-  const endpoint = process.env[K.R2_ENDPOINT].replace(/\/$/, "");
-  const url = new URL(`${endpoint}/${bucket}/${objectKey}`);
-  const amzDate = new Date().toISOString().replace(/[:-]|\.\d{3}/g, "");
-  const dateStamp = amzDate.slice(0, 8);
-  const region = "auto";
-  const service = "s3";
-  const payloadHash = sha256Hex(body);
-  // SigV4 requires CanonicalHeaders sorted alphabetically by header name.
-  const headerMap =
-    method === "PUT"
-      ? {
-          "content-type": contentType,
-          host: url.host,
-          "x-amz-content-sha256": payloadHash,
-          "x-amz-date": amzDate,
-        }
-      : {
-          host: url.host,
-          "x-amz-content-sha256": payloadHash,
-          "x-amz-date": amzDate,
-        };
-  const signedHeaderNames = Object.keys(headerMap).sort();
-  const canonicalHeaders = `${signedHeaderNames
-    .map((name) => `${name}:${headerMap[name]}`)
-    .join("\n")}\n`;
-  const signedHeaders = signedHeaderNames.join(";");
-  const canonicalRequest = [
-    method,
-    url.pathname,
-    "",
-    canonicalHeaders,
-    signedHeaders,
-    payloadHash,
-  ].join("\n");
-  const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
-  const stringToSign = [
-    "AWS4-HMAC-SHA256",
-    amzDate,
-    credentialScope,
-    sha256Hex(canonicalRequest),
-  ].join("\n");
-  const signingKey = hmac(
-    hmac(hmac(hmac(`AWS4${secretAccessKey}`, dateStamp), region), service),
-    "aws4_request",
-  );
-  const signature = createHmac("sha256", signingKey).update(stringToSign, "utf8").digest("hex");
-  const authorization =
-    `AWS4-HMAC-SHA256 Credential=${accessKeyId}/${credentialScope}, ` +
-    `SignedHeaders=${signedHeaders}, Signature=${signature}`;
-
-  /** @type {Record<string, string>} */
-  const headers = {
-    Authorization: authorization,
-    "x-amz-content-sha256": payloadHash,
-    "x-amz-date": amzDate,
-  };
-  if (method === "PUT") {
-    headers["Content-Type"] = contentType;
-  }
-  return { url: url.toString(), headers };
 }
 
 /**
