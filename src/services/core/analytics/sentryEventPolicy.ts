@@ -161,6 +161,15 @@ export function classifyClientSentryEvent(event: SentryEventLike): ClientSentryD
       return "drop";
     }
 
+    // Firestore IDB createOrUpgrade abort (JETLAG-41): FB in-app iOS, n=1.
+    if (
+      exception.type === "IndexedDbTransactionError" &&
+      /createOrUpgrade/i.test(value) &&
+      /aborted/i.test(value)
+    ) {
+      return "drop";
+    }
+
     if (exception.type === "ReferenceError" && /window is not defined/i.test(value)) {
       return "drop";
     }

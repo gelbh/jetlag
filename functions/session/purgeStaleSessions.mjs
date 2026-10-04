@@ -73,3 +73,35 @@ export function selectSessionsToPurge(
 
   return selected;
 }
+
+async function deleteSessionCodeIfPresent(db, code) {
+  if (typeof code !== "string" || code.length === 0) {
+    return;
+  }
+
+  await db.collection("sessionCodes").doc(code).delete();
+}
+
+/**
+ * Recursively delete selected session docs and their codes.
+ * Continues the batch when one session fails so a single BulkWriter
+ * aggregation error does not abort the rest of the purge.
+ * Returns the number of sessions successfully deleted.
+ */
+export async function purgeSelectedSessions(db, targets, { captureException } = {}) {
+  let deleted = 0;
+
+  for (const sessionDoc of targets) {
+    const code = sessionDoc.data().code;
+    try {
+      await db.recursiveDelete(sessionDoc.ref);
+      await deleteSessionCodeIfPresent(db, code);
+      deleted += 1;
+    } catch (error) {
+      console.error("purgeStaleSessions delete failed", sessionDoc.id, error);
+      captureException?.(error);
+    }
+  }
+
+  return deleted;
+}
