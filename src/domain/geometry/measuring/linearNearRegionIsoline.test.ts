@@ -64,4 +64,28 @@ describe("linear near-region isoline", () => {
     expect(ringHasNonAxisEdge(polygon)).toBe(true);
     expect(booleanPointInPolygon(turfPoint([0, 51]), region!)).toBe(true);
   });
+
+  it("keeps unstamped remainder near-boundary cells as coarse rects", async () => {
+    const parallels: Feature<LineString>[] = [];
+    for (let index = 0; index < 10; index += 1) {
+      const lat = 50.15 + index * 0.18;
+      parallels.push({
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-0.9, lat],
+            [0.9, lat],
+          ],
+        },
+      });
+    }
+    const region = await buildCoastlineNearRegionDistanceThreshold(parallels, 10_000, gameArea, {
+      divisions: 24,
+    });
+    expect(region).not.toBeNull();
+    expect(booleanPointInPolygon(turfPoint([0, 50.15]), region!)).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([0, 50.15 + 9 * 0.18]), region!)).toBe(true);
+  });
 });

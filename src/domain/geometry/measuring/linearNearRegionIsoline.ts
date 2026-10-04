@@ -99,57 +99,142 @@ export async function buildLinearNearRegionIsoline(
   const fineLatStep = latStep / LINEAR_NEAR_REGION_FINE_PER_COARSE;
   const fineLngStep = lngStep / LINEAR_NEAR_REGION_FINE_PER_COARSE;
 
-  const aabb = stampedAabb(stamped);
   const isolineParts: Feature<Polygon | MultiPolygon>[] = [];
-
-  if (aabb) {
-    const cornerSouth = aabb.minFineRow;
-    const cornerWest = aabb.minFineCol;
-    const cornerRows = aabb.maxFineRow - aabb.minFineRow + 2;
-    const cornerCols = aabb.maxFineCol - aabb.minFineCol + 2;
-    const cornerDistances: number[][] = Array.from({ length: cornerRows }, () =>
-      Array.from({ length: cornerCols }, () => Number.POSITIVE_INFINITY),
-    );
-
-    for (let cr = 0; cr < cornerRows; cr += 1) {
-      for (let cc = 0; cc < cornerCols; cc += 1) {
-        const fineRow = cornerSouth + cr;
-        const fineCol = cornerWest + cc;
-        const point: LatLngTuple = [south + fineRow * fineLatStep, west + fineCol * fineLngStep];
-        const nearest = nearestPointToCoastlines(point, prepared.segments, prepared);
-        cornerDistances[cr][cc] = nearest?.distanceMeters ?? Number.POSITIVE_INFINITY;
-        queryCount += 1;
-        if (queryCount % COASTLINE_NEAR_REGION_YIELD_EVERY === 0) {
-          await yieldCoastlineNearRegionBuild();
+  const stampedFineCells: Array<{ fineRow: number; fineCol: number }> = [];
+  for (let row = 0; row < divisions; row += 1) {
+    for (let col = 0; col < divisions; col += 1) {
+      if (!stamped[row]![col]) {
+        continue;
+      }
+      const baseRow = row * LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      const baseCol = col * LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      for (let fr = 0; fr < LINEAR_NEAR_REGION_FINE_PER_COARSE; fr += 1) {
+        for (let fc = 0; fc < LINEAR_NEAR_REGION_FINE_PER_COARSE; fc += 1) {
+          stampedFineCells.push({ fineRow: baseRow + fr, fineCol: baseCol + fc });
         }
       }
     }
+  }
 
-    for (let fineRow = aabb.minFineRow; fineRow <= aabb.maxFineRow; fineRow += 1) {
-      for (let fineCol = aabb.minFineCol; fineCol <= aabb.maxFineCol; fineCol += 1) {
-        const cr = fineRow - cornerSouth;
-        const cc = fineCol - cornerWest;
-        const sw: Position = [west + fineCol * fineLngStep, south + fineRow * fineLatStep];
-        const se: Position = [west + (fineCol + 1) * fineLngStep, south + fineRow * fineLatStep];
-        const ne: Position = [
-          west + (fineCol + 1) * fineLngStep,
-          south + (fineRow + 1) * fineLatStep,
-        ];
-        const nw: Position = [west + fineCol * fineLngStep, south + (fineRow + 1) * fineLatStep];
-        const rings = marchingSquareFillRings(
-          sw,
-          se,
-          ne,
-          nw,
-          cornerDistances[cr]![cc]!,
-          cornerDistances[cr]![cc + 1]!,
-          cornerDistances[cr + 1]![cc + 1]!,
-          cornerDistances[cr + 1]![cc]!,
-          radiusMeters,
-        );
-        for (const ring of rings) {
-          isolineParts.push(polygonFromRing(ring));
-        }
+  const cornerKeys = new Set<string>();
+  const cornersToSample: Array<[number, number]> = [];
+  const addCorner = (fineRow: number, fineCol: number) => {
+    const key = `${fineRow},${fineCol}`;
+    if (cornerKeys.has(key)) {
+      return;
+    }
+    cornerKeys.add(key);
+    cornersToSample.push([fineRow, fineCol]);
+  };
+  for (const cell of stampedFineCells) {
+    addCorner(cell.fineRow, cell.fineCol);
+    addCorner(cell.fineRow, cell.fineCol + 1);
+    addCorner(cell.fineRow + 1, cell.fineCol);
+    addCorner(cell.fineRow + 1, cell.fineCol + 1);
+  }
+
+  const cornerDistances = new Map<string, number>();
+  for (const [fineRow, fineCol] of cornersToSample) {
+    const point: LatLngTuple = [south + fineRow * fineLatStep, west + fineCol * fineLngStep];
+    const nearest = nearestPointToCoastlines(point, prepared.segments, prepared);
+    cornerDistances.set(
+      `${fineRow},${fineCol}`,
+      nearest?.distanceMeters ?? Number.POSITIVE_INFINITY,
+    );
+    queryCount += 1;
+    if (queryCount % COASTLINE_NEAR_REGION_YIELD_EVERY === 0) {
+      await yieldCoastlineNearRegionBuild();
+    }
+  }
+
+  const cornerDistance = (fineRow: number, fineCol: number): number =>
+    cornerDistances.get(`${fineRow},${fineCol}`) ?? Number.POSITIVE_INFINITY;
+
+  for (const { fineRow, fineCol } of stampedFineCells) {
+    const sw: Position = [west + fineCol * fineLngStep, south + fineRow * fineLatStep];
+    const se: Position = [west + (fineCol + 1) * fineLngStep, south + fineRow * fineLatStep];
+    const ne: Position = [west + (fineCol + 1) * fineLngStep, south + (fineRow + 1) * fineLatStep];
+    const nw: Position = [west + fineCol * fineLngStep, south + (fineRow + 1) * fineLatStep];
+    const rings = marchingSquareFillRings(
+      sw,
+      se,
+      ne,
+      nw,
+      cornerDistance(fineRow, fineCol),
+      cornerDistance(fineRow, fineCol + 1),
+      cornerDistance(fineRow + 1, fineCol + 1),
+      cornerDistance(fineRow + 1, fineCol),
+      radiusMeters,
+    );
+    for (const ring of rings) {
+      isolineParts.push(polygonFromRing(ring));
+    }
+  }
+
+  const remainder = remainderCoarseCells(stamped, boundary, divisions);
+  const remainderCorners: Array<[number, number]> = [];
+  const remainderCornerKeys = new Set<string>();
+  const addRemainderCorner = (fineRow: number, fineCol: number) => {
+    const key = `${fineRow},${fineCol}`;
+    if (remainderCornerKeys.has(key) || cornerKeys.has(key)) {
+      return;
+    }
+    remainderCornerKeys.add(key);
+    remainderCorners.push([fineRow, fineCol]);
+  };
+  for (let row = 0; row < divisions; row += 1) {
+    for (let col = 0; col < divisions; col += 1) {
+      if (!remainder[row]![col]) {
+        continue;
+      }
+      const southFine = row * LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      const westFine = col * LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      const northFine = southFine + LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      const eastFine = westFine + LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      addRemainderCorner(southFine, westFine);
+      addRemainderCorner(southFine, eastFine);
+      addRemainderCorner(northFine, westFine);
+      addRemainderCorner(northFine, eastFine);
+    }
+  }
+  for (const [fineRow, fineCol] of remainderCorners) {
+    const point: LatLngTuple = [south + fineRow * fineLatStep, west + fineCol * fineLngStep];
+    const nearest = nearestPointToCoastlines(point, prepared.segments, prepared);
+    cornerDistances.set(
+      `${fineRow},${fineCol}`,
+      nearest?.distanceMeters ?? Number.POSITIVE_INFINITY,
+    );
+    queryCount += 1;
+    if (queryCount % COASTLINE_NEAR_REGION_YIELD_EVERY === 0) {
+      await yieldCoastlineNearRegionBuild();
+    }
+  }
+  for (let row = 0; row < divisions; row += 1) {
+    for (let col = 0; col < divisions; col += 1) {
+      if (!remainder[row]![col]) {
+        continue;
+      }
+      const southFine = row * LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      const westFine = col * LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      const northFine = southFine + LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      const eastFine = westFine + LINEAR_NEAR_REGION_FINE_PER_COARSE;
+      const sw: Position = [west + col * lngStep, south + row * latStep];
+      const se: Position = [west + (col + 1) * lngStep, south + row * latStep];
+      const ne: Position = [west + (col + 1) * lngStep, south + (row + 1) * latStep];
+      const nw: Position = [west + col * lngStep, south + (row + 1) * latStep];
+      const rings = marchingSquareFillRings(
+        sw,
+        se,
+        ne,
+        nw,
+        cornerDistance(southFine, westFine),
+        cornerDistance(southFine, eastFine),
+        cornerDistance(northFine, eastFine),
+        cornerDistance(northFine, westFine),
+        radiusMeters,
+      );
+      for (const ring of rings) {
+        isolineParts.push(polygonFromRing(ring));
       }
     }
   }
@@ -159,7 +244,7 @@ export async function buildLinearNearRegionIsoline(
   );
   for (let row = 0; row < divisions; row += 1) {
     for (let col = 0; col < divisions; col += 1) {
-      if (grid[row][col] === "near" && !stamped[row]![col] && !boundary[row]![col]) {
+      if (grid[row][col] === "near" && !stamped[row]![col]) {
         interiorGrid[row][col] = "near";
       }
     }
@@ -293,39 +378,40 @@ function stampFineCoarseCells(boundary: boolean[][], divisions: number): boolean
   return stamped;
 }
 
-function stampedAabb(stamped: boolean[][]): {
-  minFineRow: number;
-  maxFineRow: number;
-  minFineCol: number;
-  maxFineCol: number;
-} | null {
-  let minRow = Number.POSITIVE_INFINITY;
-  let maxRow = Number.NEGATIVE_INFINITY;
-  let minCol = Number.POSITIVE_INFINITY;
-  let maxCol = Number.NEGATIVE_INFINITY;
-
-  for (let row = 0; row < stamped.length; row += 1) {
-    for (let col = 0; col < (stamped[row]?.length ?? 0); col += 1) {
-      if (!stamped[row]![col]) {
+function remainderCoarseCells(
+  stamped: boolean[][],
+  boundary: boolean[][],
+  divisions: number,
+): boolean[][] {
+  const remainder = Array.from({ length: divisions }, () =>
+    Array.from({ length: divisions }, () => false),
+  );
+  const haloOffsets: Array<[number, number]> = [
+    [0, 0],
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ];
+  for (let row = 0; row < divisions; row += 1) {
+    for (let col = 0; col < divisions; col += 1) {
+      if (stamped[row]![col]) {
         continue;
       }
-      minRow = Math.min(minRow, row);
-      maxRow = Math.max(maxRow, row);
-      minCol = Math.min(minCol, col);
-      maxCol = Math.max(maxCol, col);
+      for (const [dRow, dCol] of haloOffsets) {
+        const nRow = row + dRow;
+        const nCol = col + dCol;
+        if (nRow < 0 || nRow >= divisions || nCol < 0 || nCol >= divisions) {
+          continue;
+        }
+        if (boundary[nRow]![nCol]) {
+          remainder[row][col] = true;
+          break;
+        }
+      }
     }
   }
-
-  if (!Number.isFinite(minRow)) {
-    return null;
-  }
-
-  return {
-    minFineRow: minRow * LINEAR_NEAR_REGION_FINE_PER_COARSE,
-    maxFineRow: (maxRow + 1) * LINEAR_NEAR_REGION_FINE_PER_COARSE - 1,
-    minFineCol: minCol * LINEAR_NEAR_REGION_FINE_PER_COARSE,
-    maxFineCol: (maxCol + 1) * LINEAR_NEAR_REGION_FINE_PER_COARSE - 1,
-  };
+  return remainder;
 }
 
 function interpolateCrossing(
