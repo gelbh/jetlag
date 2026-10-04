@@ -15,6 +15,7 @@ import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
 } from "./nearRegions";
+import { LINEAR_NEAR_REGION_FINE_PER_COARSE } from "./seaLevel";
 
 function coastlineSeekerRayProbeBeyondRadius(
   nearestCoastLatLng: LatLngTuple,
@@ -96,7 +97,10 @@ describe("coastline near region oracle", () => {
   it("passes distance-threshold output and rejects union-buffer inflation", async () => {
     const prepared = prepareMeasuringLineSegments(fixtureSegments, fixtureGameArea);
     const divisions = 24;
-    const epsilon = coastlineNearRegionOracleEpsilonMeters(fixtureGameArea, divisions);
+    const epsilon = coastlineNearRegionOracleEpsilonMeters(
+      fixtureGameArea,
+      divisions * LINEAR_NEAR_REGION_FINE_PER_COARSE,
+    );
 
     const distanceThresholdRegion = await buildCoastlineNearRegionDistanceThreshold(
       fixtureSegments,

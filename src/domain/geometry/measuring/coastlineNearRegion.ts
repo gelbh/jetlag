@@ -3,20 +3,13 @@ import { point as turfPoint } from "@turf/helpers";
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import type { GameArea } from "../../map/annotations";
 import { gameAreaToBoundingBox } from "../gameArea/geometryCore";
+import { buildLinearNearRegionIsoline } from "./linearNearRegionIsoline";
 import {
-  COASTLINE_NEAR_REGION_YIELD_EVERY,
   nearestPointToCoastlines,
   type PreparedLinearSegments,
   prepareMeasuringLineSegments,
-  yieldCoastlineNearRegionBuild,
 } from "./nearRegions";
-import {
-  buildMeasuringNearRegionFromCellGrid,
-  resolveGameAreaCellDivisions,
-  sampleGameAreaCells,
-} from "./seaLevel";
-
-type CellClass = "near" | "far" | "skip";
+import { resolveGameAreaCellDivisions, sampleGameAreaCells } from "./seaLevel";
 
 export interface CoastlineNearRegionDistanceThresholdOptions {
   divisions?: number;
@@ -78,27 +71,5 @@ export async function buildCoastlineNearRegionDistanceThreshold(
     return null;
   }
 
-  const divisions = options.divisions ?? resolveGameAreaCellDivisions(gameArea);
-  const cells = sampleGameAreaCells(gameArea, divisions);
-  const grid: CellClass[][] = Array.from({ length: divisions }, () =>
-    Array.from({ length: divisions }, () => "skip" as CellClass),
-  );
-
-  for (let index = 0; index < cells.length; index += 1) {
-    const cell = cells[index]!;
-    const nearest = nearestPointToCoastlines(cell.point, prepared.segments, prepared);
-    const distanceMeters = nearest?.distanceMeters ?? Infinity;
-
-    if (distanceMeters <= radiusMeters) {
-      grid[cell.row][cell.col] = "near";
-    } else {
-      grid[cell.row][cell.col] = "far";
-    }
-
-    if ((index + 1) % COASTLINE_NEAR_REGION_YIELD_EVERY === 0 && index + 1 < cells.length) {
-      await yieldCoastlineNearRegionBuild();
-    }
-  }
-
-  return buildMeasuringNearRegionFromCellGrid(grid, gameArea, divisions);
+  return buildLinearNearRegionIsoline(prepared.segments, radiusMeters, gameArea, options);
 }

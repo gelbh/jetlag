@@ -4,6 +4,7 @@ pub mod coastline_near_region;
 pub mod geodesic;
 pub mod geodesic_buffer;
 pub mod half_plane;
+pub mod linear_near_region_isoline;
 pub mod mask;
 pub mod near_region;
 pub mod tentacle;

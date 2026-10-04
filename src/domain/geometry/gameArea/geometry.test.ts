@@ -204,8 +204,10 @@ describe("geometry helpers", () => {
       nearCoast,
     );
 
-    expect(nearCoast?.geometry.type).toBe("Polygon");
-    expect(eliminated?.geometry.type).toBe("Polygon");
+    expect(nearCoast).not.toBeNull();
+    expect(["Polygon", "MultiPolygon"]).toContain(nearCoast?.geometry.type);
+    expect(eliminated).not.toBeNull();
+    expect(["Polygon", "MultiPolygon"]).toContain(eliminated?.geometry.type);
     expect(isPointInGameArea([51.45, -0.15], sampleGameArea)).toBe(true);
   });
 
