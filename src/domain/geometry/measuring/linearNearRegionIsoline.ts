@@ -91,7 +91,7 @@ export async function buildLinearNearRegionIsoline(
 
   const epsilonMeters = coarseBoundaryEpsilonMeters(gameArea, divisions);
   const boundary = markBoundaryCells(grid, distances, radiusMeters, epsilonMeters, divisions);
-  const stamped = stampFineCoarseCells(boundary, divisions);
+  const { stamped, remainder } = stampFineCoarseCells(boundary, divisions);
 
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const latStep = (north - south) / divisions;
@@ -171,7 +171,6 @@ export async function buildLinearNearRegionIsoline(
     }
   }
 
-  const remainder = remainderCoarseCells(stamped, boundary, divisions);
   const remainderCorners: Array<[number, number]> = [];
   const remainderCornerKeys = new Set<string>();
   const addRemainderCorner = (fineRow: number, fineCol: number) => {
@@ -319,12 +318,17 @@ function markBoundaryCells(
   return boundary;
 }
 
-function stampFineCoarseCells(boundary: boolean[][], divisions: number): boolean[][] {
+function stampFineCoarseCells(
+  boundary: boolean[][],
+  divisions: number,
+): { stamped: boolean[][]; remainder: boolean[][] } {
   const stamped = Array.from({ length: divisions }, () =>
     Array.from({ length: divisions }, () => false),
   );
+  const remainder = Array.from({ length: divisions }, () =>
+    Array.from({ length: divisions }, () => false),
+  );
   const haloOffsets: Array<[number, number]> = [
-    [0, 0],
     [1, 0],
     [-1, 0],
     [0, 1],
@@ -346,9 +350,6 @@ function stampFineCoarseCells(boundary: boolean[][], divisions: number): boolean
       }
       let inHalo = false;
       for (const [dRow, dCol] of haloOffsets) {
-        if (dRow === 0 && dCol === 0) {
-          continue;
-        }
         const nRow = row + dRow;
         const nCol = col + dCol;
         if (nRow < 0 || nRow >= divisions || nCol < 0 || nCol >= divisions) {
@@ -366,52 +367,21 @@ function stampFineCoarseCells(boundary: boolean[][], divisions: number): boolean
   }
 
   let fineSamples = 0;
+  let overCap = false;
   const finePerCell = LINEAR_NEAR_REGION_FINE_PER_COARSE * LINEAR_NEAR_REGION_FINE_PER_COARSE;
   for (const candidate of candidates) {
-    if (fineSamples + finePerCell > LINEAR_NEAR_REGION_MAX_FINE_SAMPLES) {
-      break;
+    if (!overCap && fineSamples + finePerCell > LINEAR_NEAR_REGION_MAX_FINE_SAMPLES) {
+      overCap = true;
+    }
+    if (overCap) {
+      remainder[candidate.row][candidate.col] = true;
+      continue;
     }
     stamped[candidate.row][candidate.col] = true;
     fineSamples += finePerCell;
   }
 
-  return stamped;
-}
-
-function remainderCoarseCells(
-  stamped: boolean[][],
-  boundary: boolean[][],
-  divisions: number,
-): boolean[][] {
-  const remainder = Array.from({ length: divisions }, () =>
-    Array.from({ length: divisions }, () => false),
-  );
-  const haloOffsets: Array<[number, number]> = [
-    [0, 0],
-    [1, 0],
-    [-1, 0],
-    [0, 1],
-    [0, -1],
-  ];
-  for (let row = 0; row < divisions; row += 1) {
-    for (let col = 0; col < divisions; col += 1) {
-      if (stamped[row]![col]) {
-        continue;
-      }
-      for (const [dRow, dCol] of haloOffsets) {
-        const nRow = row + dRow;
-        const nCol = col + dCol;
-        if (nRow < 0 || nRow >= divisions || nCol < 0 || nCol >= divisions) {
-          continue;
-        }
-        if (boundary[nRow]![nCol]) {
-          remainder[row][col] = true;
-          break;
-        }
-      }
-    }
-  }
-  return remainder;
+  return { stamped, remainder };
 }
 
 function interpolateCrossing(
