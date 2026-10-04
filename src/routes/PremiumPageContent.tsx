@@ -18,7 +18,6 @@ import {
   startPremiumCheckout,
   startPremiumTrial,
 } from "../services/billing/premiumBilling";
-import { ANALYTICS_EVENTS, track } from "../services/core/analytics/analytics";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase/firebase";
 
 export function PremiumPageContent() {
@@ -64,7 +63,6 @@ export function PremiumPageContent() {
         : { kind: "muted", message: "Checkout canceled." },
     );
     if (checkoutState === "success") {
-      track(ANALYTICS_EVENTS.premium_purchase_completed, {});
       void refreshEntitlementsWithError();
     }
     setSearchParams({}, { replace: true });
