@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { OverpassPayloadTooLargeError } from "../../core/overpass/overpassClient";
+import {
+  OverpassPayloadTooLargeError,
+  OverpassQueryTooExpensiveError,
+  OverpassUnavailableError,
+} from "../../core/overpass/overpassClient";
 import {
   mergeOverpassElementPayloads,
   OVERPASS_SPLIT_MIN_SPAN_DEG,
@@ -46,6 +50,40 @@ describe("queryOverpassWithBboxSplit", () => {
         mergeOverpassElementPayloads,
       ),
     ).rejects.toBeInstanceOf(OverpassPayloadTooLargeError);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries too-expensive errors with four child bboxes and merges elements", async () => {
+    type Payload = { elements: { id: number }[] };
+    const query = vi
+      .fn<(ql: string) => Promise<Payload>>()
+      .mockRejectedValueOnce(new OverpassQueryTooExpensiveError())
+      .mockResolvedValueOnce({ elements: [{ id: 1 }] })
+      .mockResolvedValueOnce({ elements: [{ id: 2 }] })
+      .mockResolvedValueOnce({ elements: [{ id: 3 }] })
+      .mockResolvedValueOnce({ elements: [{ id: 4 }] });
+
+    const merged = await queryOverpassWithBboxSplit(
+      (bbox) => `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`,
+      { south: 0, west: 0, north: 1, east: 1 },
+      query,
+      mergeOverpassElementPayloads,
+    );
+
+    expect(query.mock.calls.length).toBe(5);
+    expect(merged.elements.map((el) => el.id).sort()).toEqual([1, 2, 3, 4]);
+  });
+
+  it("does not split OverpassUnavailableError", async () => {
+    const query = vi.fn().mockRejectedValue(new OverpassUnavailableError());
+    await expect(
+      queryOverpassWithBboxSplit(
+        () => "q",
+        { south: 0, west: 0, north: 1, east: 1 },
+        query,
+        mergeOverpassElementPayloads,
+      ),
+    ).rejects.toBeInstanceOf(OverpassUnavailableError);
     expect(query).toHaveBeenCalledTimes(1);
   });
 });
