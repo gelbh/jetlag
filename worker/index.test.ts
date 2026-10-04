@@ -601,6 +601,7 @@ describe("posthogProxy", () => {
     expect(shouldHandlePosthogProxy("/ph")).toBe(true);
     expect(shouldHandlePosthogProxy("/ph/e/")).toBe(true);
     expect(shouldHandlePosthogProxy("/ph/static/foo.js")).toBe(true);
+    expect(shouldHandlePosthogProxy("/api/envelope-tunnel")).toBe(false);
     expect(shouldHandlePosthogProxy("/api/sentry-tunnel")).toBe(false);
   });
 
