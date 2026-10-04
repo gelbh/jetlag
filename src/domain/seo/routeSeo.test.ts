@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { APP_ROUTE_PATHS, absoluteUrl, getRouteSeo, listIndexablePaths } from "./routeSeo";
 import crawlPolicy from "./seoCrawlPolicy.json";
@@ -76,5 +78,11 @@ describe("routeSeo", () => {
     for (const path of ["/join", "/map", "/create", "/presets", "/stats", "/feedback"]) {
       expect(getRouteSeo(path).robots).toBe("noindex,nofollow");
     }
+  });
+
+  it("keeps the noscript fallback free of headings so prerendered pages have one h1", () => {
+    const html = readFileSync(resolve(import.meta.dirname, "../../../index.html"), "utf8");
+    const noscript = html.match(/<noscript>([\s\S]*?)<\/noscript>/i)?.[1] ?? "";
+    expect(noscript).not.toMatch(/<h[1-6]\b/i);
   });
 });
