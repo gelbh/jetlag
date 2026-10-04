@@ -308,4 +308,36 @@ describe("tentacle overpass", () => {
       },
     ]);
   });
+
+  it("splits a too-expensive tentacle bbox into child bboxes", async () => {
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockRejectedValueOnce(new overpassClient.OverpassQueryTooExpensiveError())
+      .mockResolvedValue({
+        elements: [
+          {
+            id: 1,
+            tags: { tourism: "museum", name: "City Museum" },
+            lat: 51.5,
+            lon: -0.12,
+          },
+        ],
+      });
+
+    const pois = await fetchTentaclePois([51.5, -0.12], 24_140, "museum");
+
+    expect(queryOverpass.mock.calls.length).toBeGreaterThan(1);
+    expect(pois).toHaveLength(1);
+  });
+
+  it("does not split OverpassUnavailableError for tentacle", async () => {
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockRejectedValue(new overpassClient.OverpassUnavailableError());
+
+    await expect(fetchTentaclePois([51.5, -0.12], 24_140, "museum")).rejects.toBeInstanceOf(
+      overpassClient.OverpassUnavailableError,
+    );
+    expect(queryOverpass).toHaveBeenCalledTimes(1);
+  });
 });

@@ -17,7 +17,11 @@ import type {
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached, tentaclePoisCacheKey } from "../cache";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
-import type { OverpassBbox } from "./overpassBboxSplit";
+import {
+  mergeOverpassElementPayloads,
+  type OverpassBbox,
+  queryOverpassWithBboxSplit,
+} from "./overpassBboxSplit";
 import { formatOverpassBbox, overpassQueryTemplate } from "./query";
 import { fetchBundledTentaclePois, mergeTentaclePois } from "./regionPackPoi";
 
@@ -231,8 +235,11 @@ async function fetchOverpassTentaclePois(
   cacheScope: string,
 ): Promise<TentaclePoi[]> {
   return getOrFetchCached(tentaclePoisCacheKey(center, radiusMeters, cacheScope), async () => {
-    const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-      buildTentacleOverpassQuery(center, radiusMeters, categoryId, customCategories),
+    const payload = await queryOverpassWithBboxSplit(
+      (bbox) => buildTentacleOverpassQueryForBbox(bbox, categoryId, customCategories),
+      tentacleSearchBoundingBox(center, radiusMeters),
+      (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
+      mergeOverpassElementPayloads,
     );
 
     return filterTentaclePoisByRadius(
