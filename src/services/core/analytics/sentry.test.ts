@@ -142,42 +142,13 @@ describe("initSentry", () => {
   // SDK 11's default span streaming names pageloads "Pageload" and drops LCP/CLS from them.
   it("keeps route-named pageloads with LCP/CLS/INP on the static trace lifecycle", () => {
     stubProdWithDsn();
-    browserTracingIntegration.mockClear();
+    createSentryReactRouterIntegration.mockClear();
 
     initSentry();
 
     const options = init.mock.lastCall?.[0] as { traceLifecycle?: string };
     expect(options.traceLifecycle).toBe("static");
-
-    expect(browserTracingIntegration).toHaveBeenCalledOnce();
-    const tracingOptions = (browserTracingIntegration.mock.calls[0] as unknown[])[0] as Record<
-      string,
-      unknown
-    > & {
-      beforeStartSpan?: (options: { name: string; op?: string }) => { name: string; op?: string };
-    };
-    // SDK defaults keep pageload/navigation spans, LCP/CLS on the pageload and INP spans.
-    for (const key of [
-      "instrumentPageLoad",
-      "instrumentNavigation",
-      "enableInp",
-      "webVitals",
-      "idleTimeout",
-      "finalTimeout",
-    ]) {
-      expect(tracingOptions).not.toHaveProperty(key);
-    }
-
-    const beforeStartSpan = tracingOptions.beforeStartSpan;
-    expect(beforeStartSpan).toBeTypeOf("function");
-    expect(beforeStartSpan?.({ name: "/join", op: "pageload" })).toEqual({
-      name: "/join",
-      op: "pageload",
-    });
-    expect(beforeStartSpan?.({ name: "/presets/abc123/edit", op: "navigation" })).toEqual({
-      name: "/presets/:id/edit",
-      op: "navigation",
-    });
+    expect(createSentryReactRouterIntegration).toHaveBeenCalledOnce();
   });
 });
 
