@@ -1,4 +1,4 @@
-const HOME_PRERENDER_PATH = "/prerender/home/";
+export const HOME_PRERENDER_PATH = "/prerender/home/";
 const MAX_ASSET_REDIRECT_HOPS = 2;
 
 export function isPrerenderHomePath(pathname: string): boolean {
