@@ -81,14 +81,44 @@ export function wasChunkReloadDeferred(): boolean {
   return readDeferredFlag();
 }
 
-export function attemptChunkReload(options?: {
+export type ChunkReloadOptions = {
   session?: unknown;
   pathname?: string;
   onNeedRefresh?: () => void;
   registration?: ServiceWorkerRegistration;
   applyUpdate?: (reloadPage?: boolean) => Promise<void>;
-}): boolean {
+  /** Defaults to `navigator.onLine === false`; injectable for tests and richer reachability checks. */
+  isOffline?: () => boolean;
+};
+
+function isNavigatorOffline(): boolean {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
+}
+
+let pendingOnlineRetry: (() => void) | undefined;
+
+function scheduleRetryWhenOnline(options: ChunkReloadOptions | undefined): void {
+  if (pendingOnlineRetry || typeof window === "undefined") {
+    return;
+  }
+
+  pendingOnlineRetry = () => {
+    pendingOnlineRetry = undefined;
+    attemptChunkReload(options);
+  };
+  window.addEventListener("online", pendingOnlineRetry, { once: true });
+}
+
+export function attemptChunkReload(options?: ChunkReloadOptions): boolean {
   if (readSessionFlag()) {
+    return false;
+  }
+
+  // A reload while offline can't fetch the shell and lands on a blank page, so wait for the
+  // network and retry once. The guard flag stays unset so that retry is not swallowed.
+  if ((options?.isOffline ?? isNavigatorOffline)()) {
+    writeDeferredFlag();
+    scheduleRetryWhenOnline(options);
     return false;
   }
 
@@ -115,13 +145,9 @@ export function attemptChunkReload(options?: {
   return true;
 }
 
-export function tryApplyDeferredChunkReload(options: {
-  session: unknown;
-  pathname: string;
-  onNeedRefresh?: () => void;
-  registration?: ServiceWorkerRegistration;
-  applyUpdate?: (reloadPage?: boolean) => Promise<void>;
-}): boolean {
+export function tryApplyDeferredChunkReload(
+  options: ChunkReloadOptions & { session: unknown; pathname: string },
+): boolean {
   if (!wasChunkReloadDeferred()) {
     return false;
   }

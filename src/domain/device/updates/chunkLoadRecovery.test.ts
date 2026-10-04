@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   attemptChunkReload,
   clearChunkReloadFlag,
@@ -122,6 +122,87 @@ describe("attemptChunkReload", () => {
     );
     expect(reload).not.toHaveBeenCalled();
     expect(hasChunkReloadBeenAttempted()).toBe(true);
+  });
+});
+
+describe("attemptChunkReload while offline", () => {
+  const reload = vi.fn();
+  let offline = true;
+  const isOffline = () => offline;
+
+  beforeEach(() => {
+    sessionStorage.clear();
+    reload.mockReset();
+    offline = true;
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...window.location, reload },
+    });
+  });
+
+  afterEach(() => {
+    // Drain any retry still waiting for the network so it cannot leak into the next test.
+    offline = false;
+    sessionStorage.setItem("jetlag:chunk-reload", "1");
+    window.dispatchEvent(new Event("online"));
+    sessionStorage.clear();
+  });
+
+  it("defers instead of reloading and records the deferred flag", () => {
+    expect(attemptChunkReload({ isOffline })).toBe(false);
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(wasChunkReloadDeferred()).toBe(true);
+    expect(hasChunkReloadBeenAttempted()).toBe(false);
+  });
+
+  it("retries exactly once when the online event fires", () => {
+    attemptChunkReload({ isOffline });
+    attemptChunkReload({ isOffline });
+
+    offline = false;
+    window.dispatchEvent(new Event("online"));
+    window.dispatchEvent(new Event("online"));
+
+    expect(reload).toHaveBeenCalledOnce();
+    expect(hasChunkReloadBeenAttempted()).toBe(true);
+    expect(wasChunkReloadDeferred()).toBe(false);
+  });
+
+  it("keeps the in-session deferral when the network returns mid-game", () => {
+    const onNeedRefresh = vi.fn();
+    attemptChunkReload({
+      isOffline,
+      session: { id: "session-1" },
+      pathname: "/map",
+      onNeedRefresh,
+    });
+    expect(onNeedRefresh).not.toHaveBeenCalled();
+
+    offline = false;
+    window.dispatchEvent(new Event("online"));
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(onNeedRefresh).toHaveBeenCalledOnce();
+    expect(wasChunkReloadDeferred()).toBe(true);
+  });
+
+  it("falls back to navigator.onLine when no checker is injected", () => {
+    const onLine = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    try {
+      expect(attemptChunkReload()).toBe(false);
+      expect(reload).not.toHaveBeenCalled();
+      expect(wasChunkReloadDeferred()).toBe(true);
+    } finally {
+      onLine.mockRestore();
+    }
+  });
+
+  it("reloads immediately when the checker reports online", () => {
+    offline = false;
+
+    expect(attemptChunkReload({ isOffline })).toBe(true);
+    expect(reload).toHaveBeenCalledOnce();
   });
 });
 
