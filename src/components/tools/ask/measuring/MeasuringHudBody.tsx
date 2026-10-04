@@ -44,7 +44,7 @@ import {
   measuringTargetKind,
   measuringTargetLabel,
 } from "@/domain/questions";
-import type { GeocodedPlace } from "@/services/geo/geocoding";
+import { type GeocodedPlace, GeocodedPlaceLeading } from "@/services/geo/geocoding";
 import { measuringCategoryIcon } from "./measuringCategoryIcons";
 
 type GroupFilter = "all" | MeasuringGroupId;
