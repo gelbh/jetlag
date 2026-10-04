@@ -55,9 +55,9 @@ pub(crate) fn build_isoline_near_region_from_grid(
     let fine_lng_step = lng_step / LINEAR_NEAR_REGION_FINE_PER_COARSE as f64;
 
     let mut stamped_fine_cells: Vec<(usize, usize)> = Vec::new();
-    for row in 0..divisions {
-        for col in 0..divisions {
-            if !stamped[row][col] {
+    for (row, stamped_row) in stamped.iter().enumerate() {
+        for (col, &is_stamped) in stamped_row.iter().enumerate() {
+            if !is_stamped {
                 continue;
             }
             let base_row = row * LINEAR_NEAR_REGION_FINE_PER_COARSE;
@@ -103,9 +103,9 @@ pub(crate) fn build_isoline_near_region_from_grid(
         }
         remainder_corners.push(key);
     };
-    for row in 0..divisions {
-        for col in 0..divisions {
-            if !remainder[row][col] {
+    for (row, remainder_row) in remainder.iter().enumerate() {
+        for (col, &is_remainder) in remainder_row.iter().enumerate() {
+            if !is_remainder {
                 continue;
             }
             let south_fine = row * LINEAR_NEAR_REGION_FINE_PER_COARSE;
@@ -167,9 +167,9 @@ pub(crate) fn build_isoline_near_region_from_grid(
         );
     }
 
-    for row in 0..divisions {
-        for col in 0..divisions {
-            if !remainder[row][col] {
+    for (row, remainder_row) in remainder.iter().enumerate() {
+        for (col, &is_remainder) in remainder_row.iter().enumerate() {
+            if !is_remainder {
                 continue;
             }
             let south_fine = row * LINEAR_NEAR_REGION_FINE_PER_COARSE;
@@ -334,16 +334,16 @@ fn stamp_fine_coarse_cells(boundary: &[Vec<bool>], divisions: usize) -> StampPla
     let halo_offsets: [(isize, isize); 4] = [(1, 0), (-1, 0), (0, 1), (0, -1)];
     let mut candidates: Vec<(usize, usize)> = Vec::new();
 
-    for row in 0..divisions {
-        for col in 0..divisions {
-            if boundary[row][col] {
+    for (row, boundary_row) in boundary.iter().enumerate() {
+        for (col, &is_boundary) in boundary_row.iter().enumerate() {
+            if is_boundary {
                 candidates.push((row, col));
             }
         }
     }
-    for row in 0..divisions {
-        for col in 0..divisions {
-            if boundary[row][col] {
+    for (row, boundary_row) in boundary.iter().enumerate() {
+        for (col, &is_boundary) in boundary_row.iter().enumerate() {
+            if is_boundary {
                 continue;
             }
             let mut in_halo = false;
@@ -415,6 +415,7 @@ fn polygon_from_ring(mut ring: Vec<Coord<f64>>) -> Polygon<f64> {
     Polygon::new(LineString(ring), vec![])
 }
 
+#[allow(clippy::too_many_arguments)]
 fn marching_square_fill_rings(
     sw: Coord<f64>,
     se: Coord<f64>,
