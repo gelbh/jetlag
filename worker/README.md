@@ -22,7 +22,7 @@ Handlers run in this order (first match wins for early returns):
 
 | Path | Role |
 |------|------|
-| `sentryTunnel.ts` | Browser → Sentry envelope tunnel |
+| `sentryTunnel.ts` | Browser → Sentry envelope tunnel (byte-exact; allowlisted project only, else 403) |
 | `posthogProxy.ts` | First-party PostHog /ph proxy |
 | `documentCsp.ts` | Nonce generation + CSP header / HTML rewrite |
 | `assetCacheHeaders.ts` | Cache-Control by pathname |
