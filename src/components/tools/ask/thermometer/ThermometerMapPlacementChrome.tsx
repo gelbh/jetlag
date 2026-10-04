@@ -225,15 +225,6 @@ export function ThermometerMapPlacementChrome({
             Movement is shorter than the selected distance.
           </p>
         ) : null}
-        {error ? (
-          <p
-            data-testid="thermometer-map-placement-error"
-            className="m-0 px-1 text-xs leading-snug"
-            style={{ color: "var(--color-halt)" }}
-          >
-            {error}
-          </p>
-        ) : null}
         {pinsReady && awaitHiderAnswer ? (
           <p
             className="m-0 px-1 text-xs leading-snug"
