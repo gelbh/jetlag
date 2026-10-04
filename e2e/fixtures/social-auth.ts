@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
-import { seedUsernameProfileDocs } from "./firestore-seed";
 import { prepareE2EPage } from "./page-init";
+import { seedUsernameProfileDocs } from "./seedUsernameProfileDocs";
 
 export const E2E_LAYOUT_USERNAME = "e2e_layout_user";
 

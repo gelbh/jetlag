@@ -1,22 +1,27 @@
 #!/usr/bin/env node
-// LHCI server: `vite preview` of built `dist/` plus the production Worker's
-// exact-`/` remap to the prerendered home document (worker/assetFetch.ts).
-// Plain `vite preview` serves the SPA shell at `/`, and auditing
-// `/prerender/home/` directly hydrates the router's NotFound route, so neither
-// matches prod. `wrangler dev` is not used: local workerd rejects the
-// non-handler named exports on worker/index.ts.
+// LHCI server: `vite preview` of built `dist/` with prod's document routing in front
+// (scripts/lhci-document-route.mjs), so `/`, `/join`, `/premium`, … audit the same HTML file
+// the Worker serves. Auditing `/prerender/home/` directly hydrates the router's NotFound route.
+// `wrangler dev` is not used: local workerd rejects the non-handler named exports on
+// worker/index.ts.
+import { existsSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { preview } from "vite";
+import { resolveDocumentPath } from "./lhci-document-route.mjs";
 
-// Keep in sync with HOME_PRERENDER_PATH in worker/assetFetch.ts.
-const HOME_PRERENDER_PATH = "/prerender/home/";
+const distDir = resolve(import.meta.dirname, "..", "dist");
 
 /** @type {import("vite").Plugin} */
-const homePrerenderRemap = {
-  name: "lhci-home-prerender-remap",
+const prodDocumentRouting = {
+  name: "lhci-prod-document-routing",
   configurePreviewServer(server) {
     server.middlewares.use((req, _res, next) => {
-      if (req.url === "/") {
-        req.url = HOME_PRERENDER_PATH;
+      const url = new URL(req.url ?? "/", "http://lhci.local");
+      const documentPath = resolveDocumentPath(url.pathname, (path) =>
+        existsSync(join(distDir, path)),
+      );
+      if (documentPath) {
+        req.url = `${documentPath}${url.search}`;
       }
       next();
     });
@@ -25,7 +30,7 @@ const homePrerenderRemap = {
 
 // Host/port must match the collect URLs in lighthouserc.shared.cjs.
 const server = await preview({
-  plugins: [homePrerenderRemap],
+  plugins: [prodDocumentRouting],
   preview: { host: "127.0.0.1", port: 4173, strictPort: true },
 });
 server.printUrls();

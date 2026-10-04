@@ -1,13 +1,22 @@
-import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../overpass/endpoints";
-import { withOverpassConcurrencyLimit } from "../../overpass/requestQueue";
+import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../geo/overpass/endpoints";
+import { withOverpassConcurrencyLimit } from "../../geo/overpass/requestQueue";
 import { buildPremiumProxyHeaders } from "../auth/accessControl";
 import { getFirebaseAuth } from "../firebase/firebase";
 import { waitForRestoredFirebaseAuth } from "../firebase/firebaseAuthReady";
 import { FetchTimeoutError, fetchWithTimeout } from "../network/fetchWithTimeout";
 
 const OVERPASS_MAX_RETRIES = 3;
+/** Proxy path only: one retry so attempts ≤ 2 (direct keeps OVERPASS_MAX_RETRIES). */
+export const OVERPASS_PROXY_MAX_RETRIES = 1;
 const OVERPASS_BASE_BACKOFF_MS = 750;
-const OVERPASS_FETCH_TIMEOUT_MS = 15_000;
+const OVERPASS_DIRECT_FETCH_TIMEOUT_MS = 15_000;
+/**
+ * Browser proxy attempt timeout. Must outlast server Overpass failover (50s)
+ * plus Postpass fallback (25s) so the client receives structured JSON 504
+ * instead of aborting mid-flight. Keep under `PROXY_TIMEOUT_SECONDS_CEILING`
+ * (90s).
+ */
+export const OVERPASS_PROXY_FETCH_TIMEOUT_MS = 80_000;
 
 const OVERPASS_UNAVAILABLE_MESSAGE = "Map data didn't load. Check your connection and try again.";
 
@@ -15,6 +24,13 @@ export class OverpassUnavailableError extends Error {
   constructor(message = OVERPASS_UNAVAILABLE_MESSAGE) {
     super(message);
     this.name = "OverpassUnavailableError";
+  }
+}
+
+export class OverpassQueryTooExpensiveError extends Error {
+  constructor(message = OVERPASS_UNAVAILABLE_MESSAGE) {
+    super(message);
+    this.name = "OverpassQueryTooExpensiveError";
   }
 }
 
@@ -60,14 +76,10 @@ function overpassProxyUrl(): string | null {
 }
 
 function isRetryableOverpassStatus(status: number): boolean {
-  return status === 429 || status === 502 || status === 503 || status === 504;
+  return status === 429 || status === 502 || status === 503;
 }
 
 function isRetryableOverpassError(error: unknown): boolean {
-  if (error instanceof FetchTimeoutError) {
-    return true;
-  }
-
   if (error instanceof TypeError) {
     return true;
   }
@@ -91,6 +103,23 @@ function isNonRetryableOverpassFailure(error: unknown): boolean {
   );
 }
 
+function throwIfOverpassQueryTooExpensive(source: { status: number } | { error: unknown }): void {
+  if ("status" in source) {
+    if (source.status === 504) {
+      throw new OverpassQueryTooExpensiveError();
+    }
+    return;
+  }
+
+  if (source.error instanceof OverpassQueryTooExpensiveError) {
+    throw source.error;
+  }
+
+  if (source.error instanceof FetchTimeoutError) {
+    throw new OverpassQueryTooExpensiveError();
+  }
+}
+
 async function postOverpassQuery(endpoint: string, query: string): Promise<Response> {
   return fetchWithTimeout(
     endpoint,
@@ -102,7 +131,7 @@ async function postOverpassQuery(endpoint: string, query: string): Promise<Respo
       },
       body: `data=${encodeURIComponent(query)}`,
     },
-    OVERPASS_FETCH_TIMEOUT_MS,
+    OVERPASS_DIRECT_FETCH_TIMEOUT_MS,
   );
 }
 
@@ -117,6 +146,8 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
         if (response.ok) {
           return response;
         }
+
+        throwIfOverpassQueryTooExpensive({ status: response.status });
 
         if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
           lastError = new OverpassUnavailableError();
@@ -139,15 +170,7 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
           throw error;
         }
 
-        if (error instanceof FetchTimeoutError) {
-          lastError = new OverpassUnavailableError();
-          if (attempt < OVERPASS_MAX_RETRIES) {
-            await sleep(retryDelayMs(attempt, null));
-            continue;
-          }
-
-          break;
-        }
+        throwIfOverpassQueryTooExpensive({ error });
 
         if (!isRetryableOverpassError(error)) {
           throw error;
@@ -189,7 +212,7 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
 
   let lastError: Error | null = null;
 
-  for (let attempt = 0; attempt <= OVERPASS_MAX_RETRIES; attempt += 1) {
+  for (let attempt = 0; attempt <= OVERPASS_PROXY_MAX_RETRIES; attempt += 1) {
     try {
       const response = await fetchWithTimeout(
         proxyUrl,
@@ -201,7 +224,7 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
           },
           body: JSON.stringify({ query }),
         },
-        OVERPASS_FETCH_TIMEOUT_MS,
+        OVERPASS_PROXY_FETCH_TIMEOUT_MS,
       );
 
       if (response.status === 401) {
@@ -218,7 +241,9 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
         return response;
       }
 
-      if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
+      throwIfOverpassQueryTooExpensive({ status: response.status });
+
+      if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_PROXY_MAX_RETRIES) {
         lastError = new OverpassUnavailableError();
         await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
         continue;
@@ -238,12 +263,14 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
         throw error;
       }
 
+      throwIfOverpassQueryTooExpensive({ error });
+
       if (!isRetryableOverpassError(error)) {
         throw error;
       }
 
       lastError = new OverpassUnavailableError();
-      if (attempt < OVERPASS_MAX_RETRIES) {
+      if (attempt < OVERPASS_PROXY_MAX_RETRIES) {
         await sleep(retryDelayMs(attempt, null));
         continue;
       }

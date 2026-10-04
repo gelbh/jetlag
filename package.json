@@ -1,7 +1,7 @@
 {
   "name": "jetlag",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.3",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
@@ -16,12 +16,13 @@
     "lint": "biome ci --error-on-warnings .",
     "format": "biome check --write .",
     "lint:pr-title": "bash scripts/lint-pr-title.sh",
+    "doctor": "npx react-doctor@latest",
     "typecheck": "tsc -b --noEmit",
     "flags:sync": "node scripts/sync-region-flags.mjs",
     "test": "vitest run --project unit",
     "test:coverage": "vitest run --coverage --project unit",
     "test:changed": "vitest run --changed origin/main --passWithNoTests --project unit",
-    "test:changeset-map": "node --test .changeset/section-map.test.mjs scripts/normalize-changelog-sections.test.mjs scripts/changelog-release-body.test.mjs scripts/check-entry-budget.test.mjs scripts/seo-build-lib.test.mjs",
+    "test:changeset-map": "node --test .changeset/section-map.test.mjs scripts/normalize-changelog-sections.test.mjs scripts/changelog-release-body.test.mjs scripts/create-github-release.test.mjs scripts/check-entry-budget.test.mjs scripts/seo-build-lib.test.mjs scripts/lhci-document-route.test.mjs",
     "test:functions": "env -u npm_config_allow_scripts sh -c 'cd functions && npm ci && npm test'",
     "test:emulator": "firebase emulators:exec --project demo-jetlag --only auth,firestore,storage \"npm run test:emulator:vitest\"",
     "test:emulator:vitest": "vitest run --project emulator",

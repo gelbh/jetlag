@@ -1,5 +1,6 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { adminDb } from "../handlers/proxyShared.mjs";
+import { posthogProjectApiKey } from "../lib/posthog.mjs";
 import {
   captureFunctionsException,
   getSentryDsnSecret,
@@ -19,18 +20,11 @@ import {
   computeEndedCutoffIso,
   IDLE_PURGE_BATCH_LIMIT,
   PURGE_BATCH_LIMIT,
+  purgeSelectedSessions,
   selectSessionsToPurge,
 } from "../session/purgeStaleSessions.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
-
-async function deleteSessionCodeIfPresent(db, code) {
-  if (typeof code !== "string" || code.length === 0) {
-    return;
-  }
-
-  await db.collection("sessionCodes").doc(code).delete();
-}
 
 async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
   try {
@@ -62,7 +56,7 @@ async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
 }
 
 export const purgeStaleSessions = onSchedule(
-  { schedule: "0 4 * * *", secrets: [sentryDsnSecret] },
+  { schedule: "0 4 * * *", secrets: [sentryDsnSecret, posthogProjectApiKey] },
   withSentryEventHandler(async () => {
     const db = adminDb();
     const idleCutoffIso = computeIdleCutoffIso();
@@ -87,7 +81,9 @@ export const purgeStaleSessions = onSchedule(
 
     let autoEnded = 0;
     for (const sessionDoc of idleTargets) {
-      await autoEndIdleSession(db, sessionDoc);
+      await autoEndIdleSession(db, sessionDoc, {
+        posthogApiKey: posthogProjectApiKey.value(),
+      });
       autoEnded += 1;
     }
 
@@ -109,13 +105,9 @@ export const purgeStaleSessions = onSchedule(
       PURGE_BATCH_LIMIT,
     );
 
-    let deleted = 0;
-    for (const sessionDoc of targets) {
-      const code = sessionDoc.data().code;
-      await db.recursiveDelete(sessionDoc.ref);
-      await deleteSessionCodeIfPresent(db, code);
-      deleted += 1;
-    }
+    const deleted = await purgeSelectedSessions(db, targets, {
+      captureException: captureFunctionsException,
+    });
 
     console.info(
       `purgeStaleSessions autoEnded=${autoEnded} orphansDeleted=${orphansDeleted} deleted=${deleted}; idleCutoff=${idleCutoffIso}; endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,

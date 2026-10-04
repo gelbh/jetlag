@@ -24,7 +24,7 @@ import {
 } from "../kernel";
 import { unionPolygonFeaturesInSlices } from "../progressive/unionSlices";
 import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
-import { resolveGameAreaCellDivisions } from "./seaLevel";
+import { resolveLinearNearRegionCoarseDivisions } from "./seaLevel";
 
 type SegmentBoundingBox = {
   south: number;
@@ -443,62 +443,41 @@ export async function buildCoastlineNearRegion(
   distanceMeters: number,
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  if (shouldUseWasm("nearRegionBatch")) {
-    const cacheKey = coastlineNearRegionCacheKey(gameArea, distanceMeters, segments, "batch:wasm");
-    const cached = getCachedCoastlineNearRegion(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    try {
-      const prepared = prepareMeasuringLineSegments(segments, gameArea);
-      if (prepared.segments.length === 0) {
-        return null;
-      }
-
-      const result = await dispatchNearRegionBatch({
-        segments: prepared.segments,
-        distanceMeters,
-        disks: [],
-        gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
-        mode: "distanceThreshold",
-        divisions: resolveGameAreaCellDivisions(gameArea),
-      });
-
-      if (result) {
-        setCachedCoastlineNearRegion(cacheKey, result);
-      }
-      return result;
-    } catch (error) {
-      // Fall back to TS distance-threshold (local missing pkg / transient wasm errors).
-      console.warn(
-        "[geometry] coastline near-region wasm failed; falling back to TS distance-threshold",
-        error,
-      );
-    }
-  }
-
-  const { buildCoastlineNearRegionDistanceThreshold } = await import("./coastlineNearRegion");
   const cacheKey = coastlineNearRegionCacheKey(
     gameArea,
     distanceMeters,
     segments,
-    "distanceThreshold",
+    "batch:wasm:isoline",
   );
   const cached = getCachedCoastlineNearRegion(cacheKey);
   if (cached) {
     return cached;
   }
 
-  const result = await buildCoastlineNearRegionDistanceThreshold(
-    segments,
-    distanceMeters,
-    gameArea,
-  );
-  if (result) {
-    setCachedCoastlineNearRegion(cacheKey, result);
+  try {
+    const prepared = prepareMeasuringLineSegments(segments, gameArea);
+    if (prepared.segments.length === 0) {
+      return null;
+    }
+
+    // Fail closed via dispatchKernel (not-ready + wasm throw): no TS distance-threshold path.
+    const result = await dispatchNearRegionBatch({
+      segments: prepared.segments,
+      distanceMeters,
+      disks: [],
+      gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
+      mode: "distanceThreshold",
+      divisions: resolveLinearNearRegionCoarseDivisions(gameArea),
+    });
+
+    if (result) {
+      setCachedCoastlineNearRegion(cacheKey, result);
+    }
+    return result;
+  } catch (error) {
+    console.warn("[geometry] coastline near-region wasm failed; returning null", error);
+    return null;
   }
-  return result;
 }
 
 export { distanceBetweenPoints } from "../gameArea/distance";

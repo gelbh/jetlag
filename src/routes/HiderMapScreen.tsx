@@ -14,8 +14,8 @@ import { HidingZoneStationsLayer } from "../components/map/layers/HidingZoneStat
 import { HidingZonesLayer } from "../components/map/layers/HidingZonesLayer";
 import { LiveHiderLocationsLayer } from "../components/map/layers/LiveHiderLocationsLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/layers/LiveSeekerLocationsLayer";
-import { LiveUserLocationLayer } from "../components/map/layers/LiveUserLocationLayer";
 import { PendingQuestionLayer } from "../components/map/layers/PendingQuestionLayer";
+import { UserLocationLayer } from "../components/map/layers/UserLocationLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
@@ -98,7 +98,6 @@ import {
 import { AdminBoundariesLayer } from "./map-screen/lazyImports";
 
 export function HiderMapScreen() {
-  "use memo";
   const session = useSessionStore((state) => state.session);
   const setSession = useSessionStore((state) => state.setSession);
   const persistedMyUid = useSessionStore((state) => state.myUid);
@@ -161,11 +160,6 @@ export function HiderMapScreen() {
     uid,
     enabled: true,
   });
-  const [liveLocationError, setLiveLocationError] = useState<string | null>(null);
-  const handleLiveLocationError = useCallback((error: string | null) => {
-    setLiveLocationError(error);
-  }, []);
-  const locationError = liveLocationError ?? hiderLocationSyncError;
   const [recenterToken, setRecenterToken] = useState(0);
   const [truthReveal, setTruthReveal] = useState<HiderTruthRevealState | null>(null);
   const [chatAnswerError, setChatAnswerError] = useState<string | null>(null);
@@ -243,7 +237,7 @@ export function HiderMapScreen() {
   const stationCenter = useMemo(() => hiderStationCenter(myZone), [myZone]);
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
   const needsTruthLocation = pendingQuestions.some((question) => question.status === "pending");
-  const { reading: liveLocationReading } = useLiveLocation(
+  const { reading: liveLocationReading, error: liveLocationWatchError } = useLiveLocation(
     showCurrentLocation || needsTruthLocation,
     {
       highAccuracy: liveLocationProfile.highAccuracy,
@@ -251,6 +245,7 @@ export function HiderMapScreen() {
       minDistanceMeters: liveLocationProfile.minDistanceMeters,
     },
   );
+  const locationError = liveLocationWatchError ?? hiderLocationSyncError;
   const hidingPlace = useMemo((): LatLngTuple | null => {
     if (!liveLocationReading) {
       return null;
@@ -358,6 +353,18 @@ export function HiderMapScreen() {
       }
 
       const messageBeforeAnswer = messages.find((entry) => entry.id === messageId);
+      const rollBackOptimisticAnswer = (error: unknown) => {
+        setOptimisticAnswers((previous) => {
+          const next = new Map(previous);
+          if (next.get(pendingQuestionId) === selectedReply) {
+            next.delete(pendingQuestionId);
+          }
+          return next;
+        });
+        setChatAnswerError(
+          error instanceof Error ? error.message : "Could not save your answer. Try again.",
+        );
+      };
 
       try {
         setOptimisticAnswers((previous) => {
@@ -367,7 +374,8 @@ export function HiderMapScreen() {
         });
 
         const user = await ensureAnonymousUser();
-        await answerPendingQuestion(
+        // Not awaited: the answer is queued locally; only a server rejection undoes it.
+        const { acknowledged } = answerPendingQuestion(
           sessionId,
           pendingQuestionId,
           messageId,
@@ -381,6 +389,25 @@ export function HiderMapScreen() {
               }
             : undefined,
         );
+        // Cards only once the server accepts the answer: a rejected answer
+        // (e.g. the seeker cancelled meanwhile) must not leave a reward behind.
+        acknowledged.then(async () => {
+          if (deadlineExpired || !boardEconomyEnabled) {
+            return;
+          }
+          try {
+            const reward = await boardEconomy.applyAnswerReward(
+              pending.toolType,
+              pending.cardDraw,
+              pending.cardKeep,
+            );
+            if (reward && !reward.needsPick) {
+              setHandSheetOpen(true);
+            }
+          } catch {
+            // Best-effort: the answer itself is saved.
+          }
+        }, rollBackOptimisticAnswer);
 
         acknowledgeFingerprints([
           messageFingerprint(
@@ -397,17 +424,6 @@ export function HiderMapScreen() {
         ]);
 
         try {
-          if (!deadlineExpired && boardEconomyEnabled) {
-            const reward = await boardEconomy.applyAnswerReward(
-              pending.toolType,
-              pending.cardDraw,
-              pending.cardKeep,
-            );
-            if (reward && !reward.needsPick) {
-              setHandSheetOpen(true);
-            }
-          }
-
           const answerTruthReference = truthContext
             ? resolvePendingQuestionTruthReference(pending, truthContext)
             : { point: null as LatLngTuple | null };
@@ -428,19 +444,10 @@ export function HiderMapScreen() {
             setTruthReveal({ truth, selectedReply, selectedLabel });
           }
         } catch {
-          // Answer already saved; board/truth side effects are best-effort.
+          // Answer already queued; the truth reveal is best-effort.
         }
       } catch (error) {
-        setOptimisticAnswers((previous) => {
-          const next = new Map(previous);
-          if (next.get(pendingQuestionId) === selectedReply) {
-            next.delete(pendingQuestionId);
-          }
-          return next;
-        });
-        setChatAnswerError(
-          error instanceof Error ? error.message : "Could not save your answer. Try again.",
-        );
+        rollBackOptimisticAnswer(error);
       } finally {
         answerInFlightRef.current = false;
         setAnswerSubmitting(false);
@@ -833,11 +840,7 @@ export function HiderMapScreen() {
             />
           </Suspense>
         ) : null}
-        <LiveUserLocationLayer
-          enabled={showCurrentLocation}
-          lowPowerMode={lowPowerMode}
-          onError={handleLiveLocationError}
-        />
+        {showCurrentLocation ? <UserLocationLayer reading={liveLocationReading} /> : null}
       </MapViewWithLandscapeInset>
     </div>
   );

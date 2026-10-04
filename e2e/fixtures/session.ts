@@ -1,11 +1,14 @@
 import { type Browser, expect, type Page } from "@playwright/test";
-import { toLocalStorageSeed } from "../../src/test/scenarios/adapters/toLocalStorageSeed";
+import { createTestSession } from "../../src/test/fixtures/sessions";
 import { E2E_GEOLOCATION, MAP_CONTAINER_SELECTOR } from "./map";
 import type { BlockExternalAssetsOptions } from "./network";
 import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
 
 type PlayerRole = "seeker" | "hider";
 type GameSize = "small" | "medium" | "large";
+
+/** One-shot flag so reload keeps an advanced jetlag-timer (hiding-period smoke). */
+const E2E_TIMER_CLEARED_KEY = "jetlag-e2e-timer-cleared";
 
 export interface LocalSessionSeedOptions {
   code?: string;
@@ -18,24 +21,47 @@ export interface LocalSessionSeedOptions {
 }
 
 export async function seedLocalSession(page: Page, options: LocalSessionSeedOptions = {}) {
-  const { code, myRole, gameSize, sessionId, hidingPeriodMinutes, memberRoles } = options;
-  const seed = toLocalStorageSeed("dublin-local-map", {
+  const {
     code,
-    myRole,
+    myRole = "seeker",
     gameSize,
     sessionId,
     hidingPeriodMinutes,
     memberRoles,
+  } = options;
+  const session = createTestSession({
+    ...(sessionId !== undefined ? { id: sessionId } : {}),
+    ...(code !== undefined ? { code } : {}),
+    ...(gameSize !== undefined ? { gameSize } : {}),
+    ...(hidingPeriodMinutes !== undefined ? { hidingPeriodMinutes } : {}),
+    ...(memberRoles !== undefined ? { memberRoles } : {}),
+  });
+  const sessionBlob = JSON.stringify({
+    state: { session, myRole, myUid: null },
+    version: 0,
+  });
+  // Catalog seeded lowPowerMode; keep that one override, let mapStore fill the rest.
+  const mapBlob = JSON.stringify({
+    state: { lowPowerMode: true },
+    version: 0,
   });
 
-  await page.addInitScript(({ sessionBlob, mapBlob, annotationsBlob, clearTimer }) => {
-    localStorage.setItem("jetlag-session", sessionBlob);
-    localStorage.setItem("jetlag-map", mapBlob);
-    localStorage.setItem("jetlag-annotations", annotationsBlob);
-    if (clearTimer) {
-      localStorage.removeItem("jetlag-timer");
-    }
-  }, seed);
+  await page.addInitScript(
+    ({ sessionBlob: nextSession, mapBlob: nextMap, timerClearedKey }) => {
+      localStorage.setItem("jetlag-session", nextSession);
+      localStorage.setItem("jetlag-map", nextMap);
+      localStorage.removeItem("jetlag-annotations");
+      if (!sessionStorage.getItem(timerClearedKey)) {
+        sessionStorage.removeItem("jetlag-timer");
+        sessionStorage.setItem(timerClearedKey, "1");
+      }
+    },
+    {
+      sessionBlob,
+      mapBlob,
+      timerClearedKey: E2E_TIMER_CLEARED_KEY,
+    },
+  );
 }
 
 export async function openMapWithLocalSession(page: Page, options: LocalSessionSeedOptions = {}) {

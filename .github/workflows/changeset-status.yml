@@ -13,27 +13,51 @@ permissions:
 
 jobs:
   changeset-status:
-    if: >
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      !startsWith(github.head_ref, 'changeset-release/') &&
-      github.event.pull_request.user.login != 'dependabot[bot]' &&
-      !contains(github.event.pull_request.labels.*.name, 'skip-changeset')
+    # Keep this job name reporting success on release/dependabot/skip-labeled PRs.
+    # Skipping the job leaves the required check unmet and blocks merge.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
+      - name: Skip changeset requirement
+        if: >
+          startsWith(github.head_ref, 'changeset-release/') ||
+          github.event.pull_request.user.login == 'dependabot[bot]' ||
+          contains(github.event.pull_request.labels.*.name, 'skip-changeset')
+        run: echo "No changeset required for this PR."
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: >
+          !startsWith(github.head_ref, 'changeset-release/') &&
+          github.event.pull_request.user.login != 'dependabot[bot]' &&
+          !contains(github.event.pull_request.labels.*.name, 'skip-changeset')
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Fetch base branch
+        if: >
+          !startsWith(github.head_ref, 'changeset-release/') &&
+          github.event.pull_request.user.login != 'dependabot[bot]' &&
+          !contains(github.event.pull_request.labels.*.name, 'skip-changeset')
         env:
           BASE_REF: ${{ github.base_ref }}
         run: git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: >
+          !startsWith(github.head_ref, 'changeset-release/') &&
+          github.event.pull_request.user.login != 'dependabot[bot]' &&
+          !contains(github.event.pull_request.labels.*.name, 'skip-changeset')
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      - if: >
+          !startsWith(github.head_ref, 'changeset-release/') &&
+          github.event.pull_request.user.login != 'dependabot[bot]' &&
+          !contains(github.event.pull_request.labels.*.name, 'skip-changeset')
+        run: npm ci
       - name: Require changeset since base
+        if: >
+          !startsWith(github.head_ref, 'changeset-release/') &&
+          github.event.pull_request.user.login != 'dependabot[bot]' &&
+          !contains(github.event.pull_request.labels.*.name, 'skip-changeset')
         env:
           BASE_REF: ${{ github.base_ref }}
         run: npx changeset status --since="origin/${BASE_REF}"

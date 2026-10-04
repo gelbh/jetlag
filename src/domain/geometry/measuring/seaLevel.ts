@@ -80,6 +80,26 @@ export function resolveGameAreaCellDivisions(gameArea: GameArea): number {
   return Math.max(MIN_GAME_AREA_DIVISIONS, Math.min(DEFAULT_SEA_LEVEL_DIVISIONS, targetDivisions));
 }
 
+export const LINEAR_NEAR_REGION_COARSE_MAX_CELLS = 256;
+export const LINEAR_NEAR_REGION_FINE_PER_COARSE = 4;
+export const LINEAR_NEAR_REGION_MAX_FINE_SAMPLES = 2_048;
+export const LINEAR_NEAR_REGION_COARSE_MIN_DIVISIONS = 8;
+export const LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS = 16;
+
+export function resolveLinearNearRegionCoarseDivisions(gameArea: GameArea): number {
+  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const latSpan = north - south;
+  const lngSpan = east - west;
+  const areaRatio = (latSpan * lngSpan) / (MIN_GAME_AREA_LAT_SPAN * MIN_GAME_AREA_LNG_SPAN);
+  const targetDivisions = Math.floor(
+    Math.sqrt(LINEAR_NEAR_REGION_COARSE_MAX_CELLS / Math.max(areaRatio, 0.01)),
+  );
+  return Math.max(
+    LINEAR_NEAR_REGION_COARSE_MIN_DIVISIONS,
+    Math.min(LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS, targetDivisions),
+  );
+}
+
 const gameAreaCellMaskCache = new Map<string, boolean[]>();
 
 export function clearGameAreaCellMaskCacheForTests(): void {
