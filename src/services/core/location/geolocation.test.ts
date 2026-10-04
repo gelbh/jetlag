@@ -85,7 +85,28 @@ describe("geolocation permission gating", () => {
     await expect(requestLocationAccess({ userGesture: true })).rejects.toThrow(
       LOCATION_BLOCKED_MESSAGE,
     );
-    expect(navigator.geolocation.getCurrentPosition).not.toHaveBeenCalled();
+    expect(navigator.geolocation.getCurrentPosition).toHaveBeenCalledOnce();
+  });
+
+  it("requestLocationAccess with userGesture does not wait on Permissions API", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    const query = vi.fn(
+      () =>
+        new Promise<PermissionStatus>(() => {
+          /* hang: iOS prompt must not wait on this */
+        }),
+    );
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      geolocation: navigator.geolocation,
+      permissions: { query },
+    });
+
+    await expect(requestLocationAccess({ userGesture: true })).resolves.toMatchObject({
+      lat: 53.35,
+      lng: -6.26,
+    });
+    expect(query).not.toHaveBeenCalled();
   });
 
   it("requestLocationAccess proceeds when already granted", async () => {
