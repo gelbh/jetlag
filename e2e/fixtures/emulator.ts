@@ -55,7 +55,7 @@ export async function advanceLocalTimerElapsedMs(
 ): Promise<void> {
   await page.evaluate(
     ({ targetSessionId, targetElapsedMs }) => {
-      const raw = sessionStorage.getItem("jetlag-timer");
+      const raw = localStorage.getItem("jetlag-timer");
       const parsed = raw
         ? (JSON.parse(raw) as {
             state?: {
@@ -73,7 +73,7 @@ export async function advanceLocalTimerElapsedMs(
         accumulatedMs: targetElapsedMs,
         runningSince: Date.now(),
       };
-      sessionStorage.setItem("jetlag-timer", JSON.stringify(parsed));
+      localStorage.setItem("jetlag-timer", JSON.stringify(parsed));
     },
     { targetSessionId: sessionId, targetElapsedMs: elapsedMs },
   );

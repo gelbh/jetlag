@@ -52,6 +52,7 @@ export async function seedLocalSession(page: Page, options: LocalSessionSeedOpti
       localStorage.setItem("jetlag-map", nextMap);
       localStorage.removeItem("jetlag-annotations");
       if (!sessionStorage.getItem(timerClearedKey)) {
+        localStorage.removeItem("jetlag-timer");
         sessionStorage.removeItem("jetlag-timer");
         sessionStorage.setItem(timerClearedKey, "1");
       }
