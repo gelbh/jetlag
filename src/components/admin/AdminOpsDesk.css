@@ -1,4 +1,4 @@
-/* Admin ops desk — geometry / DnD / hit-target allowlist (Band 3). */
+/* Admin ops desk: geometry / DnD / hit-target allowlist (Band 3). */
 
 .jl-ops-desk {
   display: flex;
@@ -335,7 +335,7 @@
 }
 
 .jl-ops-preset-manage {
-  /* Position via inline fixed coords — escapes .jl-ops-desk overflow:hidden */
+  /* Position via inline fixed coords: escapes .jl-ops-desk overflow:hidden */
   min-width: 16rem;
   max-width: min(22rem, 90vw);
   display: flex;
