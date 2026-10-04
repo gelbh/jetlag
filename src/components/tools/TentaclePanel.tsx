@@ -10,7 +10,7 @@ import {
 } from "../../domain/questions";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import { TentacleLocationsChord } from "./ask/TentacleLocationsChord";
+import { TentacleLocationsChord } from "./ask/tentacle/TentacleLocationsChord";
 import { TentacleAnswerPicker } from "./shared/answers/TentacleAnswerPicker";
 import { AnchorControls } from "./shared/controls/AnchorControls";
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
