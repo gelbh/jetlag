@@ -121,6 +121,7 @@ export function useCreateSession() {
   const [tierManuallySet, setTierManuallySet] = useState(false);
   const [playerRole, setPlayerRole] = useState<PlayerRole>("seeker");
   const [gameSize, setGameSize] = useState<GameSize>("medium");
+  const [gameSizeUserOverrode, setGameSizeUserOverrode] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>("imperial");
   const [advancedSettings, setAdvancedSettings] = useState(() =>
     defaultAdvancedSessionSettings("medium", "imperial"),
@@ -134,6 +135,9 @@ export function useCreateSession() {
   const { entitlements: premiumEntitlements, refresh: refreshPremiumEntitlements } =
     usePremiumEntitlements();
   const [accessCodeExpanded, setAccessCodeExpanded] = useState(false);
+  const handleGameSizeUserOverride = useCallback(() => {
+    setGameSizeUserOverrode(true);
+  }, []);
   const handleGameSizeChange = useCallback(
     (size: GameSize) => {
       startTransition(() => {
@@ -224,6 +228,7 @@ export function useCreateSession() {
         hidingZoneRadiusMeters: hidingZoneRadiusMeters(resolvedGameSize, unit),
       };
 
+      setGameSizeUserOverrode(false);
       setGameSize(resolvedGameSize);
       setDistanceUnit(unit);
       setAdvancedSettings(resolvedAdvanced);
@@ -848,6 +853,7 @@ export function useCreateSession() {
     playerRole,
     handlePlayerRoleChange,
     gameSize,
+    gameSizeUserOverrode,
     distanceUnit,
     advancedSettings,
     setAdvancedSettings,
@@ -870,6 +876,7 @@ export function useCreateSession() {
     showPremiumUnlockPanel,
     showAccessCodeField,
     handleGameSizeChange,
+    handleGameSizeUserOverride,
     handleUserViewportFramed,
     addCurrentArea,
     removeSelectedArea,

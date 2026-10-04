@@ -23,6 +23,9 @@ interface GameSizePickerProps {
   distanceUnit?: DistanceUnit;
   disabled?: boolean;
   compact?: boolean;
+  /** When set by a parent that survives remount, skips recommend overwrite. */
+  userOverrode?: boolean;
+  onUserOverride?: () => void;
 }
 
 export function GameSizePicker({
@@ -32,6 +35,8 @@ export function GameSizePicker({
   distanceUnit = "imperial",
   disabled,
   compact = false,
+  userOverrode: userOverrodeProp,
+  onUserOverride,
 }: GameSizePickerProps) {
   const recommended = useMemo(
     () => (gameArea ? recommendGameSize(gameArea, distanceUnit) : null),
@@ -44,7 +49,8 @@ export function GameSizePicker({
 
     return formatPlayAreaSummary(playAreaValueForUnit(gameArea, distanceUnit), distanceUnit);
   }, [gameArea, distanceUnit]);
-  const [userOverrode, setUserOverrode] = useState(false);
+  const [localUserOverrode, setLocalUserOverrode] = useState(false);
+  const userOverrode = userOverrodeProp ?? localUserOverrode;
   const onChangeRef = useRef(onChange);
 
   useEffect(() => {
@@ -69,7 +75,8 @@ export function GameSizePicker({
     : false;
 
   const selectSize = (size: GameSize) => {
-    setUserOverrode(true);
+    setLocalUserOverrode(true);
+    onUserOverride?.();
     onChange(size);
   };
 

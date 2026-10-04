@@ -224,10 +224,12 @@ export function CreateSession() {
                 playerRole={session.playerRole}
                 onPlayerRoleChange={session.handlePlayerRoleChange}
                 gameSize={session.gameSize}
+                gameSizeUserOverrode={session.gameSizeUserOverrode}
                 distanceUnit={session.distanceUnit}
                 advancedSettings={session.advancedSettings}
                 onAdvancedSettingsChange={session.setAdvancedSettings}
                 onGameSizeChange={session.handleGameSizeChange}
+                onGameSizeUserOverride={session.handleGameSizeUserOverride}
                 onDistanceUnitChange={session.handleDistanceUnitChange}
                 resolvedSessionTier={session.resolvedSessionTier}
                 visibleTierOptions={session.visibleTierOptions}

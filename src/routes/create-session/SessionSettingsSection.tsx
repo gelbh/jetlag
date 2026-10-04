@@ -26,10 +26,12 @@ export interface SessionSettingsSectionProps {
   playerRole: PlayerRole;
   onPlayerRoleChange: (role: PlayerRole) => void;
   gameSize: GameSize;
+  gameSizeUserOverrode?: boolean;
   distanceUnit: DistanceUnit;
   advancedSettings: AdvancedSessionSettingsValue;
   onAdvancedSettingsChange: (value: AdvancedSessionSettingsValue) => void;
   onGameSizeChange: (size: GameSize) => void;
+  onGameSizeUserOverride?: () => void;
   onDistanceUnitChange: (unit: DistanceUnit) => void;
   resolvedSessionTier: SessionTier;
   visibleTierOptions: VisibleTierOption[];
@@ -46,10 +48,12 @@ export function SessionSettingsSection({
   playerRole,
   onPlayerRoleChange,
   gameSize,
+  gameSizeUserOverrode = false,
   distanceUnit,
   advancedSettings,
   onAdvancedSettingsChange,
   onGameSizeChange,
+  onGameSizeUserOverride,
   onDistanceUnitChange,
   resolvedSessionTier,
   visibleTierOptions,
@@ -110,6 +114,8 @@ export function SessionSettingsSection({
           value={gameSize}
           distanceUnit={distanceUnit}
           onChange={onGameSizeChange}
+          userOverrode={gameSizeUserOverrode}
+          onUserOverride={onGameSizeUserOverride}
           disabled={busy}
           compact
         />
