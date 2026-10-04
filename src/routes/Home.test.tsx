@@ -140,14 +140,18 @@ describe("Home", () => {
     renderHome({ resetStores: false });
     fireEvent.click(screen.getByRole("button", { name: /Return to map for session ABCD/i }));
 
-    await waitFor(() => {
-      expect(mockEnsureRemoteSessionMembership).toHaveBeenCalledWith(
-        remoteSession,
-        "user-new",
-        "seeker",
-        { returningMemberUid: "user-old", persistedMyUid: "user-old" },
-      );
-    });
+    // Under a full parallel run the async resume path can outlast waitFor's 1s default.
+    await waitFor(
+      () => {
+        expect(mockEnsureRemoteSessionMembership).toHaveBeenCalledWith(
+          remoteSession,
+          "user-new",
+          "seeker",
+          { returningMemberUid: "user-old", persistedMyUid: "user-old" },
+        );
+      },
+      { timeout: 5000 },
+    );
 
     expect(navigate).toHaveBeenCalledWith("/map");
     expect(screen.queryByText(/no longer a member/i)).not.toBeInTheDocument();
