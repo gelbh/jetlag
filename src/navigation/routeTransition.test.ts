@@ -15,6 +15,7 @@ import {
   labelForStep,
   resolveLoadingSteps,
 } from "./routeLoadingSteps";
+import { parameterizedRoutePath } from "./routeMetadata";
 import * as routePreloaders from "./routePreloaders";
 import {
   isLazyRoute,
@@ -339,5 +340,18 @@ describe("routeLoadingSteps", () => {
     expect(progress.destinationTitle).toBe("Map");
     expect(progress.currentStepIndex).toBe(0);
     expect(progress.currentStepLabel).toBe("Downloading screen…");
+  });
+});
+
+describe("parameterizedRoutePath", () => {
+  it("keeps static routes and parameterizes id segments for telemetry names", () => {
+    expect(parameterizedRoutePath("/")).toBe("/");
+    expect(parameterizedRoutePath("/map")).toBe("/map");
+    expect(parameterizedRoutePath("/join?code=ABCD")).toBe("/join");
+    expect(parameterizedRoutePath("/join/")).toBe("/join");
+    expect(parameterizedRoutePath("/join#x")).toBe("/join");
+    expect(parameterizedRoutePath("/presets/abc123/edit")).toBe("/presets/:id/edit");
+    expect(parameterizedRoutePath("/admin/incidents")).toBe("/admin/incidents");
+    expect(parameterizedRoutePath("/admin/incidents/inc_42")).toBe("/admin/incidents/:incidentId");
   });
 });

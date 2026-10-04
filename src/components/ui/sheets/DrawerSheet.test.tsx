@@ -64,6 +64,21 @@ describe("DrawerSheet", () => {
     Element.prototype.releasePointerCapture = vi.fn();
   });
 
+  it("labels the dialog from ariaLabel without an aria-label on the drawer root", () => {
+    render(
+      withAppUi(
+        <DrawerSheet open onClose={vi.fn()} ariaLabel="Settings">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
+    const root = document.querySelector(".mantine-Drawer-root");
+    expect(root).not.toBeNull();
+    expect(root).not.toHaveAttribute("aria-label");
+  });
+
   it("applies translateY on the chrome wrapper while dragging (Verify #1 live follow)", () => {
     const onClose = vi.fn();
     render(
@@ -111,6 +126,41 @@ describe("DrawerSheet", () => {
     dragGrabberDown(handle, 120);
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears stale drag translateY when reopening after grabber dismiss", () => {
+    const onClose = vi.fn();
+    const { rerender } = render(
+      withAppUi(
+        <DrawerSheet open onClose={onClose} ariaLabel="Changelog">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    const handle = screen.getByRole("button", {
+      name: "Drag sheet down to dismiss",
+    });
+    dragGrabberDown(handle, 120);
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    rerender(
+      withAppUi(
+        <DrawerSheet open={false} onClose={onClose} ariaLabel="Changelog">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+    rerender(
+      withAppUi(
+        <DrawerSheet open onClose={onClose} ariaLabel="Changelog">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    const sheet = screen.getByTestId("mantine-drawer-sheet");
+    expect(sheet.style.transform).not.toContain("translateY");
   });
 
   it("dismisses from grabber even when the host body is scrolled", () => {
