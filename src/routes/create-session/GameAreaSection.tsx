@@ -119,7 +119,7 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
 
   return (
     <>
-      <div className="mt-4 space-y-5 px-4">
+      <div className="mt-4 space-y-5">
         <div>
           <SectionLabel>Where</SectionLabel>
           <InsetGroup>

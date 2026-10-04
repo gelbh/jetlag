@@ -167,6 +167,14 @@ describe("GameAreaSection create IA groups", () => {
     expect(screen.getByRole("combobox", { name: /game preset/i })).toBeInTheDocument();
   });
 
+  it("does not double-pad the groups wrapper when NestedSplitLayout already pads", () => {
+    renderSection();
+    const groupsWrapper = document.querySelector(".jl-inset-group")?.closest(".mt-4");
+    expect(groupsWrapper).toBeTruthy();
+    expect(groupsWrapper).toHaveClass("space-y-5");
+    expect(groupsWrapper).not.toHaveClass("px-4");
+  });
+
   it("Play settingsSlot renders compact role control inside the Play group", () => {
     renderSection(baseModel, <RolePicker value="seeker" onChange={() => undefined} compact />);
 

@@ -57,9 +57,10 @@ describe("PlaceAreaSearchFields inset", () => {
     expect(find.closest("button")?.className ?? "").not.toMatch(/btn-secondary/);
   });
 
-  it("renders result rows with the place name", () => {
+  it("renders unboxed inset result rows that still select a place", () => {
     const onSelectPlace = vi.fn();
     renderInset({ searchResults: [dublin], onSelectPlace });
+    expect(document.querySelector(".border-2.border-border")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /Dublin, Ireland/ }));
     expect(onSelectPlace).toHaveBeenCalledWith(dublin);
   });
