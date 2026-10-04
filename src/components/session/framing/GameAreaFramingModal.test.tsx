@@ -72,7 +72,7 @@ describe("GameAreaFramingModal", () => {
     );
 
     expect(screen.getByTestId("game-area-framing-modal")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Frame area" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Draw area" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Done" })).toBeDisabled();
     expect(screen.getByRole("radiogroup", { name: "Play area shape" })).toBeInTheDocument();

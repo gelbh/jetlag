@@ -26,6 +26,7 @@ export function InsetRow({
   onClick,
   tone = "default",
   showChevron = true,
+  disabled = false,
   "aria-label": ariaLabel,
 }: {
   to?: string;
@@ -37,6 +38,7 @@ export function InsetRow({
   onClick?: () => void;
   tone?: "default" | "halt";
   showChevron?: boolean;
+  disabled?: boolean;
   "aria-label"?: string;
 }) {
   const ink = tone === "halt" ? "var(--color-halt)" : "var(--color-field-ink)";
@@ -90,6 +92,12 @@ export function InsetRow({
         opacity: 0.88,
         transform: "scale(0.995)",
       },
+      "&:disabled": {
+        opacity: 0.5,
+        cursor: "not-allowed",
+        transform: "none",
+        backgroundColor: "transparent",
+      },
     },
   } as const;
 
@@ -112,7 +120,13 @@ export function InsetRow({
           {content}
         </UnstyledButton>
       ) : (
-        <UnstyledButton type="button" onClick={onClick} aria-label={ariaLabel} styles={rootStyles}>
+        <UnstyledButton
+          type="button"
+          onClick={disabled ? undefined : onClick}
+          aria-label={ariaLabel}
+          disabled={disabled}
+          styles={rootStyles}
+        >
           {content}
         </UnstyledButton>
       )}
