@@ -65,6 +65,12 @@ describe("PlaceAreaSearchFields inset", () => {
     expect(onSelectPlace).toHaveBeenCalledWith(dublin);
   });
 
+  it("omits result rows when showResults is false", () => {
+    renderInset({ searchResults: [dublin], showResults: false });
+    expect(screen.queryByRole("button", { name: /Dublin, Ireland/ })).toBeNull();
+    expect(screen.getByRole("button", { name: "Find place" })).toBeInTheDocument();
+  });
+
   it("calls onSearch from Find place click and Enter on the textbox", () => {
     const onSearch = vi.fn();
     renderInset({ onSearch });

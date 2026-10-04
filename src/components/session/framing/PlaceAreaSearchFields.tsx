@@ -19,6 +19,78 @@ interface PlaceAreaSearchFieldsProps {
   onSelectPlace: (place: GeocodedPlace) => void;
   disabled?: boolean;
   variant?: "field" | "inset";
+  showResults?: boolean;
+}
+
+export function PlaceAreaSearchInsetResults({
+  searchResults,
+  selectedPlaceId,
+  onSelectPlace,
+}: {
+  searchResults: GeocodedPlace[];
+  selectedPlaceId: string | null;
+  onSelectPlace: (place: GeocodedPlace) => void;
+}) {
+  return (
+    <>
+      {searchResults.map((place) => {
+        const selected = selectedPlaceId === place.id;
+
+        return (
+          <Fragment key={place.id}>
+            <InsetHairline insetStart="1rem" />
+            <UnstyledButton
+              type="button"
+              onClick={() => onSelectPlace(place)}
+              styles={{
+                root: {
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "0.75rem",
+                  width: "100%",
+                  minHeight: "2.875rem",
+                  paddingInline: "1rem",
+                  paddingBlock: "0.625rem",
+                  color: selected ? "var(--color-flag)" : "var(--color-field-ink)",
+                  fontWeight: selected ? 600 : 400,
+                  fontSize: "1.0625rem",
+                  letterSpacing: "-0.01em",
+                  backgroundColor: selected
+                    ? "oklch(from var(--color-flag) l c h / 0.1)"
+                    : "transparent",
+                  transition: "background-color 120ms ease, transform 80ms ease, opacity 80ms ease",
+                  "&:hover": {
+                    backgroundColor: selected
+                      ? "oklch(from var(--color-flag) l c h / 0.14)"
+                      : "oklch(from var(--color-field-ink) l c h / 0.06)",
+                  },
+                  "&:active": {
+                    backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.12)",
+                    opacity: 0.88,
+                    transform: "scale(0.995)",
+                  },
+                },
+              }}
+            >
+              <GeocodedPlaceLeading category={place.placeCategory} />
+              <span className="min-w-0 flex-1">
+                <Text component="span" style={{ display: "block", lineHeight: 1.25 }}>
+                  {place.displayName}
+                </Text>
+                <Text
+                  component="span"
+                  c="var(--color-field-ink-muted)"
+                  style={{ display: "block", marginTop: "0.125rem", fontSize: "0.8125rem" }}
+                >
+                  {formatPlaceSearchSubtitle(place)}
+                </Text>
+              </span>
+            </UnstyledButton>
+          </Fragment>
+        );
+      })}
+    </>
+  );
 }
 
 function SelectedPlaceCaption({ place }: { place: GeocodedPlace }) {
@@ -41,6 +113,7 @@ export function PlaceAreaSearchFields({
   onSelectPlace,
   disabled = false,
   variant = "field",
+  showResults = true,
 }: PlaceAreaSearchFieldsProps) {
   const selectedCaption =
     selectedPlace && searchResults.length === 0 ? (
@@ -78,63 +151,13 @@ export function PlaceAreaSearchFields({
             </ActionIcon>
           }
         />
-        {searchResults.map((place) => {
-          const selected = selectedPlaceId === place.id;
-
-          return (
-            <Fragment key={place.id}>
-              <InsetHairline insetStart="1rem" />
-              <UnstyledButton
-                type="button"
-                onClick={() => onSelectPlace(place)}
-                styles={{
-                  root: {
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "0.75rem",
-                    width: "100%",
-                    minHeight: "2.875rem",
-                    paddingInline: "1rem",
-                    paddingBlock: "0.625rem",
-                    color: selected ? "var(--color-flag)" : "var(--color-field-ink)",
-                    fontWeight: selected ? 600 : 400,
-                    fontSize: "1.0625rem",
-                    letterSpacing: "-0.01em",
-                    backgroundColor: selected
-                      ? "oklch(from var(--color-flag) l c h / 0.1)"
-                      : "transparent",
-                    transition:
-                      "background-color 120ms ease, transform 80ms ease, opacity 80ms ease",
-                    "&:hover": {
-                      backgroundColor: selected
-                        ? "oklch(from var(--color-flag) l c h / 0.14)"
-                        : "oklch(from var(--color-field-ink) l c h / 0.06)",
-                    },
-                    "&:active": {
-                      backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.12)",
-                      opacity: 0.88,
-                      transform: "scale(0.995)",
-                    },
-                  },
-                }}
-              >
-                <GeocodedPlaceLeading category={place.placeCategory} />
-                <span className="min-w-0 flex-1">
-                  <Text component="span" style={{ display: "block", lineHeight: 1.25 }}>
-                    {place.displayName}
-                  </Text>
-                  <Text
-                    component="span"
-                    c="var(--color-field-ink-muted)"
-                    style={{ display: "block", marginTop: "0.125rem", fontSize: "0.8125rem" }}
-                  >
-                    {formatPlaceSearchSubtitle(place)}
-                  </Text>
-                </span>
-              </UnstyledButton>
-            </Fragment>
-          );
-        })}
+        {showResults !== false ? (
+          <PlaceAreaSearchInsetResults
+            searchResults={searchResults}
+            selectedPlaceId={selectedPlaceId}
+            onSelectPlace={onSelectPlace}
+          />
+        ) : null}
         {selectedCaption}
       </>
     );

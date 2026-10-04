@@ -7,7 +7,10 @@ import {
   UploadSimpleIcon,
 } from "@phosphor-icons/react";
 import { type ReactNode, type RefObject, useState } from "react";
-import { PlaceAreaSearchFields } from "@/components/session/framing/PlaceAreaSearchFields";
+import {
+  PlaceAreaSearchFields,
+  PlaceAreaSearchInsetResults,
+} from "@/components/session/framing/PlaceAreaSearchFields";
 import { InsetGroup, insetTextInputStyles, SectionLabel } from "@/components/ui/entry/entryChrome";
 import { InsetHairline, InsetRow } from "@/components/ui/entry/InsetRow";
 import type { GameArea } from "../../domain/map/annotations";
@@ -50,12 +53,15 @@ export type GameAreaSectionModel = {
   onTransitMetroChange: (metroId: string) => void;
 };
 
+export type CreateSheetStep = "where" | "frame" | "play";
+
 export type GameAreaSectionProps = {
   model: GameAreaSectionModel;
   settingsSlot?: ReactNode;
+  step: CreateSheetStep;
 };
 
-export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
+export function GameAreaSection({ model, settingsSlot, step }: GameAreaSectionProps) {
   const {
     bundledPresetSelectGroups,
     favouritePresetSelectOptions,
@@ -117,9 +123,60 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
     })),
   ];
 
-  return (
-    <>
-      <div className="mt-4 space-y-5">
+  const moreTools = (
+    <details
+      onToggle={(event) => {
+        setMoreToolsOpen(event.currentTarget.open);
+      }}
+    >
+      <summary className="min-h-11 cursor-pointer text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
+        More tools
+      </summary>
+      <div className="mt-3" hidden={!moreToolsOpen}>
+        <InsetGroup>
+          <InsetRow
+            label="Save as preset"
+            icon={<FloppyDiskIcon size={18} weight="bold" />}
+            onClick={onSavePreset}
+            disabled={loading || verifyingAccess}
+          />
+          <InsetRow
+            label="Add another area"
+            icon={<PlusCircleIcon size={18} weight="bold" />}
+            onClick={onAddCurrentArea}
+            disabled={!previewGameArea || searchDisabled}
+            showSeparator
+          />
+          <InsetRow
+            label={importLoading ? "Importing…" : "Import KML/KMZ"}
+            icon={<UploadSimpleIcon size={18} weight="bold" />}
+            onClick={() => importFileInputRef.current?.click()}
+            disabled={searchDisabled}
+            showSeparator
+          />
+          <InsetHairline insetStart="1rem" />
+          <NativeSelect
+            aria-label="Transit metro"
+            data={[
+              { value: "", label: "Auto / none" },
+              ...metros.map((metro) => ({
+                value: metro.id,
+                label: metro.label,
+              })),
+            ]}
+            value={transitMetroId}
+            onChange={(event) => onTransitMetroChange(event.currentTarget.value)}
+            styles={insetTextInputStyles}
+          />
+        </InsetGroup>
+      </div>
+    </details>
+  );
+
+  let stepBody: ReactNode;
+  switch (step) {
+    case "where":
+      stepBody = (
         <div>
           <SectionLabel>Where</SectionLabel>
           <InsetGroup>
@@ -148,13 +205,14 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
               onSelectPlace={onApplyPlace}
               disabled={searchDisabled}
               variant="inset"
+              showResults={false}
             />
             <InsetHairline insetStart="1rem" />
             <InsetRow
               label={locationBusy ? "Locating…" : "Use my location"}
               icon={<MapPinIcon size={18} weight="bold" />}
               onClick={onRequestLocationBias}
-              showChevron
+              showChevron={false}
               disabled={searchDisabled || locationBusy}
               aria-label={locationBusy ? "Locating…" : "Use my location"}
             />
@@ -173,7 +231,18 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
               {locationStatus}
             </p>
           ) : null}
+          {searchResults.length > 0 ? (
+            <PlaceAreaSearchInsetResults
+              searchResults={searchResults}
+              selectedPlaceId={selectedPlaceId}
+              onSelectPlace={onApplyPlace}
+            />
+          ) : null}
         </div>
+      );
+      break;
+    case "frame":
+      stepBody = (
         <div>
           <SectionLabel>Frame</SectionLabel>
           <InsetGroup>
@@ -199,58 +268,28 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
             </div>
           ) : null}
         </div>
-        <div>
-          <SectionLabel>Play</SectionLabel>
-          <InsetGroup>{settingsSlot}</InsetGroup>
-        </div>
-        <details
-          onToggle={(event) => {
-            setMoreToolsOpen(event.currentTarget.open);
-          }}
-        >
-          <summary className="min-h-11 cursor-pointer text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
-            More tools
-          </summary>
-          <div className="mt-3" hidden={!moreToolsOpen}>
-            <InsetGroup>
-              <InsetRow
-                label="Save as preset"
-                icon={<FloppyDiskIcon size={18} weight="bold" />}
-                onClick={onSavePreset}
-                disabled={loading || verifyingAccess}
-              />
-              <InsetRow
-                label="Add another area"
-                icon={<PlusCircleIcon size={18} weight="bold" />}
-                onClick={onAddCurrentArea}
-                disabled={!previewGameArea || searchDisabled}
-                showSeparator
-              />
-              <InsetRow
-                label={importLoading ? "Importing…" : "Import KML/KMZ"}
-                icon={<UploadSimpleIcon size={18} weight="bold" />}
-                onClick={() => importFileInputRef.current?.click()}
-                disabled={searchDisabled}
-                showSeparator
-              />
-              <InsetHairline insetStart="1rem" />
-              <NativeSelect
-                aria-label="Transit metro"
-                data={[
-                  { value: "", label: "Auto / none" },
-                  ...metros.map((metro) => ({
-                    value: metro.id,
-                    label: metro.label,
-                  })),
-                ]}
-                value={transitMetroId}
-                onChange={(event) => onTransitMetroChange(event.currentTarget.value)}
-                styles={insetTextInputStyles}
-              />
-            </InsetGroup>
+      );
+      break;
+    case "play":
+      stepBody = (
+        <>
+          <div>
+            <SectionLabel>Play</SectionLabel>
+            <div className="space-y-5">{settingsSlot}</div>
           </div>
-        </details>
-      </div>
+          {moreTools}
+        </>
+      );
+      break;
+    default: {
+      const _exhaustive: never = step;
+      stepBody = _exhaustive;
+    }
+  }
+
+  return (
+    <>
+      <div className="mt-4 space-y-5">{stepBody}</div>
 
       <input
         ref={importFileInputRef}

@@ -140,6 +140,7 @@ export function CreateSession() {
           }
         >
           <GameAreaSection
+            step="where"
             model={{
               bundledPresetSelectGroups: session.bundledPresetSelectGroups,
               favouritePresetSelectOptions: session.favouritePresetSelectOptions,
