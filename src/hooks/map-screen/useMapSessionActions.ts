@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { commitWrite } from "@/services/firestore/commitWrite";
 import { endGameChecklistCopy } from "../../domain/boardEconomy/checklists";
 import {
   foundHiderBlocked,
@@ -80,7 +81,7 @@ export function useMapSessionActions({
     !foundHiderBlocked(session) &&
     confirmedHidingZones.length > 0;
 
-  const handleStartEndGame = useCallback(async () => {
+  const handleStartEndGame = useCallback(() => {
     if (!session?.id || !uid || !canStartEndGame) {
       return;
     }
@@ -136,14 +137,12 @@ export function useMapSessionActions({
       return;
     }
 
-    try {
-      await startEndGameSession(session.id, uid, anchorsResult, frozenAt);
-    } catch {
-      window.alert("Could not start End Game. Check your connection and try again.");
-    }
+    commitWrite("endgame.start", () =>
+      startEndGameSession(session.id, uid, anchorsResult, frozenAt),
+    );
   }, [canStartEndGame, confirmedHidingZones, session, setSession, uid]);
 
-  const handleRequestFoundHider = useCallback(async () => {
+  const handleRequestFoundHider = useCallback(() => {
     if (!session?.id || !uid || !canRequestFoundHider) {
       return;
     }
@@ -167,14 +166,10 @@ export function useMapSessionActions({
       return;
     }
 
-    try {
-      await requestFoundHiderSession(session.id, uid);
-    } catch {
-      window.alert("Could not declare found hider. Check your connection and try again.");
-    }
+    commitWrite("found.request", () => requestFoundHiderSession(session.id, uid));
   }, [canRequestFoundHider, session, setSession, uid]);
 
-  const handleConfirmFoundHider = useCallback(async () => {
+  const handleConfirmFoundHider = useCallback(() => {
     if (!session?.id || !uid || !isFoundHiderPending(session)) {
       return;
     }
@@ -200,14 +195,10 @@ export function useMapSessionActions({
       return;
     }
 
-    try {
-      await confirmFoundHiderSession(session.id, uid);
-    } catch {
-      window.alert("Could not confirm found hider. Check your connection and try again.");
-    }
+    commitWrite("found.confirm", () => confirmFoundHiderSession(session.id, uid));
   }, [session, setSession, uid]);
 
-  const handleDeclineFoundHider = useCallback(async () => {
+  const handleDeclineFoundHider = useCallback(() => {
     if (!session?.id || !uid) {
       return;
     }
@@ -224,22 +215,18 @@ export function useMapSessionActions({
       return;
     }
 
-    try {
-      await resetFoundHiderSession(session.id);
-      setSession(
-        {
-          ...session,
-          foundRequestedAt: undefined,
-          foundRequestedByUid: undefined,
-        },
-        uid,
-      );
-    } catch {
-      window.alert("Could not clear found hider request. Check your connection and try again.");
-    }
+    commitWrite("found.decline", () => resetFoundHiderSession(session.id));
+    setSession(
+      {
+        ...session,
+        foundRequestedAt: undefined,
+        foundRequestedByUid: undefined,
+      },
+      uid,
+    );
   }, [session, setSession, uid]);
 
-  const handleResetEndGame = useCallback(async () => {
+  const handleResetEndGame = useCallback(() => {
     if (!session?.id || !uid) {
       return;
     }
@@ -259,6 +246,13 @@ export function useMapSessionActions({
       return;
     }
 
+    const endGameSessionId = session.id;
+    const clearRequestOnly = isEndGamePending(session) && !isEndGameActive(session);
+    commitWrite("endgame.reset", () =>
+      clearRequestOnly
+        ? clearEndGameRequestSession(endGameSessionId)
+        : resetEndGameSession(endGameSessionId),
+    );
     setSession(
       {
         ...session,
@@ -270,11 +264,6 @@ export function useMapSessionActions({
       },
       uid,
     );
-    if (isEndGamePending(session) && !isEndGameActive(session)) {
-      await clearEndGameRequestSession(session.id);
-    } else {
-      await resetEndGameSession(session.id);
-    }
   }, [session, setSession, uid]);
 
   const handleSaveGameRules = useCallback(async () => {

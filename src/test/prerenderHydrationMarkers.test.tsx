@@ -98,6 +98,9 @@ describe("finalizePrerenderDom", () => {
     await act(async () => {
       releaseLazy();
     });
+    const appCheckContainer = document.body.appendChild(document.createElement("div"));
+    appCheckContainer.id = "fire_app_check_[DEFAULT]";
+    appCheckContainer.innerHTML = '<div class="grecaptcha-badge"><iframe></iframe></div>';
     document.documentElement.dataset.bootComplete = "true";
     document.documentElement.dataset.motion = "css";
     expect(finalizePrerenderDom()).toMatchObject({ ready: true, boundaries: 4 });
@@ -105,6 +108,7 @@ describe("finalizePrerenderDom", () => {
     expect(document.documentElement.dataset.motion).toBeUndefined();
     expect(prerender.dataset.prerendered).toBe("true");
     expect(prerender.querySelector(".mantine-FloatingIndicator-root")).toBeNull();
+    expect(appCheckContainer.isConnected).toBe(false);
 
     const html = prerender.innerHTML;
     root.unmount();

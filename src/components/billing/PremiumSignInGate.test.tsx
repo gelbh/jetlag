@@ -1,8 +1,12 @@
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import type { ReactElement } from "react";
+import { act, type ReactElement } from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
+import { RouteTransitionTestProvider } from "../../test/RouteTransitionTestProvider";
 import { renderWithRouter } from "../../test/renderWithRouter";
 import { PremiumSignInGate } from "./PremiumSignInGate";
 
@@ -20,6 +24,11 @@ let mockUser: {
   displayName?: string | null;
 } | null = null;
 let mockAuthReady = true;
+let mockPermanentHint = false;
+
+vi.mock("@/services/core/auth/persistedAuthHint", () => ({
+  expectsPermanentSignIn: () => mockPermanentHint,
+}));
 
 vi.mock("../../services/core/auth/accountAuth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../services/core/auth/accountAuth")>();
@@ -83,6 +92,7 @@ describe("PremiumSignInGate", () => {
       email: "player@example.com",
     };
     mockAuthReady = true;
+    mockPermanentHint = false;
     mockEnsureAnonymousUser.mockResolvedValue({
       uid: "anon-1",
       isAnonymous: true,
@@ -92,6 +102,69 @@ describe("PremiumSignInGate", () => {
     mockRecoverPremiumEntitlements.mockResolvedValue(false);
     mockSignInWithGoogle.mockResolvedValue(undefined);
     mockSignOutToAnonymous.mockResolvedValue(undefined);
+  });
+
+  it("paints the disabled sign-in prompt while auth restores", () => {
+    mockAuthReady = false;
+    mockUser = null;
+
+    renderPremiumSignInGate(
+      <PremiumSignInGate>
+        <p>Premium content</p>
+      </PremiumSignInGate>,
+    );
+
+    expect(screen.getByText(/premium purchases and session credits follow/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Continue with Google/i })).toBeDisabled();
+    expect(screen.getByRole("textbox", { name: "Email" })).toBeDisabled();
+    expect(screen.queryByText("Premium content")).not.toBeInTheDocument();
+    expect(screen.queryByText("Checking sign-in…")).not.toBeInTheDocument();
+  });
+
+  it("shows the checking line while auth restores a stored account sign-in", () => {
+    mockAuthReady = false;
+    mockPermanentHint = true;
+
+    renderPremiumSignInGate(
+      <PremiumSignInGate>
+        <p>Premium content</p>
+      </PremiumSignInGate>,
+    );
+
+    expect(screen.getByText("Checking sign-in…")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Continue with Google/i })).not.toBeInTheDocument();
+    expect(screen.queryByText("Premium content")).not.toBeInTheDocument();
+  });
+
+  it("hydrates the prerendered prompt, then shows the checking line for a stored sign-in", async () => {
+    mockAuthReady = false;
+    mockUser = null;
+    mockPermanentHint = true;
+    const tree = (
+      <MemoryRouter>
+        <RouteTransitionTestProvider>
+          <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+            <PremiumSignInGate />
+          </MantineProvider>
+        </RouteTransitionTestProvider>
+      </MemoryRouter>
+    );
+
+    const container = document.body.appendChild(document.createElement("div"));
+    container.innerHTML = renderToString(tree);
+    expect(container.textContent).toMatch(/premium purchases and session credits follow/i);
+    expect(container.textContent).not.toContain("Checking sign-in…");
+
+    const errors: unknown[] = [];
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    await act(async () => {
+      root = hydrateRoot(container, tree, { onRecoverableError: (error) => errors.push(error) });
+    });
+
+    expect(errors).toEqual([]);
+    expect(container.textContent).toContain("Checking sign-in…");
+    root?.unmount();
+    container.remove();
   });
 
   it("shows the signed-in account strip and children for permanent users", () => {
