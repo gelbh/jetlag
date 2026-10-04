@@ -1,37 +1,15 @@
-import type { Feature, Point } from "geojson";
-import { parseGeometryJson } from "../../geometry/gameArea/geometryParsing";
 import { persistSlimMeasuringGeometry } from "../../geometry/measuring/measuringGeometryBudgets";
 import {
   buildMeasuringRegions,
   type MeasuringRegionInput,
 } from "../../geometry/measuring/measuringRegions";
+import { persistEliminationOrDeferPoint } from "../../geometry/progressive/persistEliminationOrDeferPoint";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import { seekerAnchorFromMetadata } from "../hiderTruth/shared";
+import { deferredPointFromPendingPlacement } from "../deferredSeekerPoint";
 import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
 import type { MeasuringAnswer } from "../measuringQuestions";
-
-function deferredMeasuringPointGeometry(pending: PendingQuestionRecord): Feature<Point> | null {
-  const parsed = parseGeometryJson(pending.placement.geometryJson);
-  if (parsed?.geometry.type === "Point") {
-    return parsed as Feature<Point>;
-  }
-
-  const anchor = seekerAnchorFromMetadata(pending.placement.metadata);
-  if (!anchor) {
-    return null;
-  }
-
-  return {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "Point",
-      coordinates: [anchor[1], anchor[0]],
-    },
-  };
-}
 
 export function measuringAnswerFromReplyId(replyId: string): MeasuringAnswer | null {
   if (replyId === "closer" || replyId === "further") {
@@ -72,31 +50,20 @@ export async function resolveMeasuringPendingQuestion(
     return null;
   }
 
-  const slimmedElim = persistSlimMeasuringGeometry(regions.elimination);
-  if (slimmedElim.ok) {
-    return {
-      type: "measuring",
-      geometry: slimmedElim.feature,
-      metadata: {
-        ...metadata,
-        createdAt: new Date().toISOString(),
-        measuringAnswer: answer,
-        measuringRegionInputJson,
-        color: MAP_ANNOTATION_COLORS.elimination,
-      },
-    };
-  }
-
-  // Persist ceiling (LMTS rail/airport closer): keep a Point + region JSON so
-  // the map can rebuild shade instead of cancelling the answered question.
-  const deferredPoint = deferredMeasuringPointGeometry(pending);
-  if (!deferredPoint) {
+  const deferPoint = deferredPointFromPendingPlacement(pending);
+  if (!deferPoint) {
     return null;
   }
 
+  const persisted = persistEliminationOrDeferPoint({
+    elimination: regions.elimination,
+    deferPoint,
+    slim: persistSlimMeasuringGeometry,
+  });
+
   return {
     type: "measuring",
-    geometry: deferredPoint,
+    geometry: persisted.geometry,
     metadata: {
       ...metadata,
       createdAt: new Date().toISOString(),
