@@ -215,6 +215,30 @@ describe("handleSentryTunnelRequest", () => {
     },
   );
 
+  it("treats Content-Encoding: identity as uncompressed", async () => {
+    const fetchImpl = okUpstream();
+    const response = await handleSentryTunnelRequest(
+      tunnelRequest(sessionEnvelope, { "Content-Encoding": "identity" }),
+      fetchImpl,
+    );
+
+    expect(response.status).toBe(200);
+    const forwarded = forwardedCall(fetchImpl);
+    expect(forwarded.body).toEqual(sessionEnvelope);
+    expect(forwarded.headers.has("Content-Encoding")).toBe(false);
+  });
+
+  it("returns 400 for a corrupt gzip body", async () => {
+    const fetchImpl = okUpstream();
+    const response = await handleSentryTunnelRequest(
+      tunnelRequest(sessionEnvelope, { "Content-Encoding": "gzip" }),
+      fetchImpl,
+    );
+
+    expect(response.status).toBe(400);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it("rejects unsupported content encodings", async () => {
     const fetchImpl = okUpstream();
     const response = await handleSentryTunnelRequest(
@@ -249,6 +273,14 @@ describe("handleSentryTunnelRequest", () => {
 
     expect(response.status).toBe(400);
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("returns 502 when the upstream fetch throws", async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockRejectedValue(new TypeError("network down"));
+
+    const response = await handleSentryTunnelRequest(tunnelRequest(sessionEnvelope), fetchImpl);
+
+    expect(response.status).toBe(502);
   });
 
   it("relays upstream status, body and rate-limit headers", async () => {

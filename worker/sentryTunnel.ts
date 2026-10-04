@@ -7,28 +7,33 @@ export interface SentryTunnelTarget {
 
 /**
  * Only the jetlag project is forwarded, so the tunnel can't relay to arbitrary Sentry projects.
- * Mirrors the host + project of `VITE_SENTRY_DSN` (Doppler); the DSN is public, it ships in the
- * client bundle. The public key is not pinned so a key rotation doesn't need a Worker deploy.
+ * Must match the host + project of `VITE_SENTRY_DSN` in every Doppler config (dev, stg, prd);
+ * moving the DSN to another project needs this list updated or every envelope gets a 403.
+ * The DSN is public (it ships in the client bundle). The public key is not pinned, so rotating
+ * it doesn't need a Worker deploy.
  */
 export const SENTRY_TUNNEL_ALLOWED_TARGETS: readonly SentryTunnelTarget[] = [
   { host: "o4511696039444480.ingest.de.sentry.io", projectId: "4511696137224272" },
 ];
 
-// Encodings DecompressionStream can undo to read the envelope header.
+const NEWLINE = 0x0a;
+// Envelope headers are a few hundred bytes; never decode (or decompress) more than this to find one.
+const MAX_HEADER_BYTES = 64 * 1024;
+
+// The browser SDK never compresses, but Sentry's server-side SDKs can gzip/deflate envelopes;
+// accept those so the tunnel stays a transparent relay instead of 400ing a valid envelope.
 type SupportedContentEncoding = "gzip" | "deflate";
 
 function isSupportedContentEncoding(value: string): value is SupportedContentEncoding {
   return value === "gzip" || value === "deflate";
 }
-const NEWLINE = 0x0a;
-// Envelope headers are a few hundred bytes; stop reading a compressed body well before its end.
-const MAX_HEADER_BYTES = 64 * 1024;
 
 /** Parses the DSN target from the envelope header (the bytes before the first newline). */
 export function parseSentryEnvelopeTarget(envelope: Uint8Array): SentryTunnelTarget | null {
-  const newline = envelope.indexOf(NEWLINE);
+  const head = envelope.subarray(0, MAX_HEADER_BYTES);
+  const newline = head.indexOf(NEWLINE);
   const headerLine = new TextDecoder()
-    .decode(newline === -1 ? envelope : envelope.subarray(0, newline))
+    .decode(newline === -1 ? head : head.subarray(0, newline))
     .trim();
   if (!headerLine) {
     return null;
@@ -63,7 +68,7 @@ export function parseSentryEnvelopeTarget(envelope: Uint8Array): SentryTunnelTar
   }
 }
 
-export function isAllowedSentryTunnelTarget(target: SentryTunnelTarget): boolean {
+function isAllowedSentryTunnelTarget(target: SentryTunnelTarget): boolean {
   return SENTRY_TUNNEL_ALLOWED_TARGETS.some(
     (allowed) => allowed.host === target.host && allowed.projectId === target.projectId,
   );
@@ -77,10 +82,7 @@ async function readEnvelopeHeaderBytes(
     return body;
   }
 
-  const stream = new Response(body).body;
-  if (!stream) {
-    return new Uint8Array();
-  }
+  const stream = new Response(body).body as ReadableStream<Uint8Array>;
   const reader = stream.pipeThrough(new DecompressionStream(contentEncoding)).getReader();
   const chunks: Uint8Array[] = [];
   let length = 0;
@@ -153,11 +155,16 @@ export async function handleSentryTunnelRequest(
     headers["Content-Encoding"] = contentEncoding;
   }
 
-  const upstream = await fetchImpl(`https://${target.host}/api/${target.projectId}/envelope/`, {
-    method: "POST",
-    body,
-    headers,
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetchImpl(`https://${target.host}/api/${target.projectId}/envelope/`, {
+      method: "POST",
+      body,
+      headers,
+    });
+  } catch {
+    return new Response("Failed to forward envelope to Sentry", { status: 502 });
+  }
 
   // The SDK reads the rate-limit headers to back off; keep them on the relayed response.
   const responseHeaders = new Headers();

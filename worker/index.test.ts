@@ -225,6 +225,22 @@ describe("document CSP nonce", () => {
 });
 
 describe("worker fetch", () => {
+  it("routes /api/sentry-tunnel to the tunnel before the asset fetch", async () => {
+    const env = {
+      ASSETS: {
+        fetch: vi.fn(),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/api/sentry-tunnel", { method: "GET" }),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+    expect(response.status).toBe(405);
+  });
+
   it("serves /api/time before the asset fetch", async () => {
     const env = {
       ASSETS: {
