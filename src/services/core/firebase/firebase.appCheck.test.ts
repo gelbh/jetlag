@@ -122,12 +122,28 @@ describe("firebase App Check lazy init", () => {
     expect(isAppCheckArmed()).toBe(true);
   });
 
-  it("arms App Check on first getFirebaseStorage (console-enforced)", async () => {
-    const { getFirebaseStorage } = await import("./firebaseStorage");
+  it("arms App Check before the first Storage use (console-enforced)", async () => {
+    const { getFirebaseStorage, resetFirebaseStorageForTests } = await import("./firebaseStorage");
+    const { isAppCheckArmed } = await import("./appCheckArmedState");
+    const { getStorage } = await import("firebase/storage");
+    resetFirebaseStorageForTests();
 
     await getFirebaseStorage();
 
     expect(initializeAppCheck).toHaveBeenCalledOnce();
+    expect(initializeAppCheck.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(getStorage).mock.invocationCallOrder[0]!,
+    );
+    expect(isAppCheckArmed()).toBe(true);
+  });
+
+  it("still initializes Firestore when App Check init throws", async () => {
+    initializeAppCheck.mockImplementationOnce(() => {
+      throw new Error("reCAPTCHA blocked");
+    });
+    const { getFirestoreDb } = await import("./firebase");
+
+    expect(getFirestoreDb()).toEqual({ name: "firestore" });
   });
 
   it("flags App Check armed under the emulator without initializing it", async () => {

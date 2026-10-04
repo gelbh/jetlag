@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-perf: Home, Join and the legal pages no longer load Google reCAPTCHA until you join, create or sign in
+improve: Home, Join and the legal pages load without Google's bot check (reCAPTCHA) until you enter a join code, create a game or sign in

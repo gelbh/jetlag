@@ -3,7 +3,9 @@
  * cookies), so only real token consumers arm it: Firestore and Storage (console
  * enforced), callables, and the premium proxy. Boot-path gates read this flag
  * instead of arming App Check themselves, which keeps reCAPTCHA off public shells
- * until the player acts. `firebase.ts` flips it on the first `getFirebaseAppCheck`.
+ * until the player acts. `firebase.ts` flips it on the first `getFirebaseAppCheck`,
+ * so it means "a consumer asked for App Check" — also true under the emulator or
+ * without a site key, where App Check itself stays off.
  */
 let appCheckArmed = false;
 const appCheckArmedListeners = new Set<() => void>();

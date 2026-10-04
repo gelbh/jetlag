@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { ClientMinVersionGate } from "./ClientMinVersionGate";
@@ -62,10 +62,27 @@ describe("ClientMinVersionGate", () => {
   it("does not subscribe (Firestore → App Check) until a consumer arms App Check", async () => {
     appCheckArmed.value = false;
 
-    renderGate(<div>app-content</div>);
+    const view = renderGate(<div>app-content</div>);
+    // Let the gate's dynamic listener import settle before asserting.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
 
-    expect(await screen.findByText("app-content")).toBeInTheDocument();
+    expect(screen.getByText("app-content")).toBeInTheDocument();
     expect(subscribeMock).not.toHaveBeenCalled();
+
+    appCheckArmed.value = true;
+    view.rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <ClientMinVersionGate>
+          <div>app-content</div>
+        </ClientMinVersionGate>
+      </MantineProvider>,
+    );
+
+    await waitFor(() => {
+      expect(subscribeMock).toHaveBeenCalledOnce();
+    });
   });
 
   it("blocks with update-required UI when below global min", async () => {
