@@ -23,6 +23,7 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "resource-exhausted:Too many recovery attempts. Try again tomorrow.",
   "failed-precondition:Incident has no linked session.",
   "invalid-argument:Invalid premium session payload.",
+  "resource-exhausted:Session-ops agent limit reached for this session.",
   ...EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
 ]);
 

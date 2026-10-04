@@ -19,18 +19,11 @@ import {
   computeEndedCutoffIso,
   IDLE_PURGE_BATCH_LIMIT,
   PURGE_BATCH_LIMIT,
+  purgeSelectedSessions,
   selectSessionsToPurge,
 } from "../session/purgeStaleSessions.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
-
-async function deleteSessionCodeIfPresent(db, code) {
-  if (typeof code !== "string" || code.length === 0) {
-    return;
-  }
-
-  await db.collection("sessionCodes").doc(code).delete();
-}
 
 async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
   try {
@@ -109,13 +102,9 @@ export const purgeStaleSessions = onSchedule(
       PURGE_BATCH_LIMIT,
     );
 
-    let deleted = 0;
-    for (const sessionDoc of targets) {
-      const code = sessionDoc.data().code;
-      await db.recursiveDelete(sessionDoc.ref);
-      await deleteSessionCodeIfPresent(db, code);
-      deleted += 1;
-    }
+    const deleted = await purgeSelectedSessions(db, targets, {
+      captureException: captureFunctionsException,
+    });
 
     console.info(
       `purgeStaleSessions autoEnded=${autoEnded} orphansDeleted=${orphansDeleted} deleted=${deleted}; idleCutoff=${idleCutoffIso}; endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,

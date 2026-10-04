@@ -29,6 +29,17 @@ describe("classifyClientSentryEvent", () => {
     expect(classifyClientSentryEvent(exc("AbortError", "This operation was aborted"))).toBe("drop");
   });
 
+  it("drops IndexedDbTransactionError createOrUpgrade abort (JETLAG-41)", () => {
+    expect(
+      classifyClientSentryEvent(
+        exc(
+          "IndexedDbTransactionError",
+          "IndexedDB transaction 'createOrUpgrade' failed: AbortError: The operation was aborted.",
+        ),
+      ),
+    ).toBe("drop");
+  });
+
   it("drops soft App Check throttle, probe timeout, and fetch-network-error", () => {
     expect(
       classifyClientSentryEvent(
