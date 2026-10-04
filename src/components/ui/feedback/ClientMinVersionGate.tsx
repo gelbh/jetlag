@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { isBelowClientMinVersion } from "@/domain/device/clientMinVersion";
+import { useAppCheckArmed } from "@/hooks/app/useAppCheckArmed";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { ClientUpdateRequiredPage } from "./ClientUpdateRequiredPage";
@@ -9,14 +10,17 @@ import { ClientUpdateRequiredPage } from "./ClientUpdateRequiredPage";
  * Blocking global floor (ops/clientMinVersion). Distinct from hotfix grace
  * (appConfig/runtime) and peer session hostAppVersion.
  * Keep the app mounted while loading — only swap on a hard below-min result.
+ * Firestore is App Check-enforced, so the listener waits until a real consumer
+ * armed App Check: subscribing first would load reCAPTCHA on public shells.
  */
 export function ClientMinVersionGate({ children }: { children: ReactNode }) {
   const authReady = useAuthBootstrapReady();
+  const appCheckArmed = useAppCheckArmed();
   const firebaseReady = isFirebaseConfigured();
   const [minVersion, setMinVersion] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
-    if (!authReady || !firebaseReady) {
+    if (!authReady || !appCheckArmed || !firebaseReady) {
       return;
     }
 
@@ -53,7 +57,7 @@ export function ClientMinVersionGate({ children }: { children: ReactNode }) {
       cancelled = true;
       unsubscribe?.();
     };
-  }, [authReady, firebaseReady]);
+  }, [authReady, appCheckArmed, firebaseReady]);
 
   if (
     authReady &&

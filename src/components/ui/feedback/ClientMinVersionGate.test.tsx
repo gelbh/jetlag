@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { ClientMinVersionGate } from "./ClientMinVersionGate";
@@ -8,6 +8,12 @@ const subscribeMock = vi.fn();
 
 vi.mock("@/hooks/app/useAuthBootstrapReady", () => ({
   useAuthBootstrapReady: () => true,
+}));
+
+const appCheckArmed = vi.hoisted(() => ({ value: true }));
+
+vi.mock("@/hooks/app/useAppCheckArmed", () => ({
+  useAppCheckArmed: () => appCheckArmed.value,
 }));
 
 vi.mock("@/services/core/firebase/authBootstrapState", () => ({
@@ -50,6 +56,33 @@ function renderGate(children: React.ReactNode) {
 describe("ClientMinVersionGate", () => {
   beforeEach(() => {
     subscribeMock.mockReset();
+    appCheckArmed.value = true;
+  });
+
+  it("does not subscribe (Firestore → App Check) until a consumer arms App Check", async () => {
+    appCheckArmed.value = false;
+
+    const view = renderGate(<div>app-content</div>);
+    // Let the gate's dynamic listener import settle before asserting.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(screen.getByText("app-content")).toBeInTheDocument();
+    expect(subscribeMock).not.toHaveBeenCalled();
+
+    appCheckArmed.value = true;
+    view.rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <ClientMinVersionGate>
+          <div>app-content</div>
+        </ClientMinVersionGate>
+      </MantineProvider>,
+    );
+
+    await waitFor(() => {
+      expect(subscribeMock).toHaveBeenCalledOnce();
+    });
   });
 
   it("blocks with update-required UI when below global min", async () => {

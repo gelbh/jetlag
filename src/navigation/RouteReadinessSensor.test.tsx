@@ -62,8 +62,16 @@ describe("RouteReadinessSensor", () => {
     },
   );
 
+  it.each(["/join", "/join/"])("reports %s ready without syncing entitlements", (pathname) => {
+    const report = renderAt(pathname);
+
+    expect(report).toHaveBeenLastCalledWith(true);
+    expect(mocks.usePremiumEntitlements).not.toHaveBeenCalled();
+    expect(mocks.usePermanentAuthUser).not.toHaveBeenCalled();
+  });
+
   it("keeps entitlements hydrated on in-app layout routes", () => {
-    const report = renderAt("/join");
+    const report = renderAt("/stats");
 
     expect(report).toHaveBeenLastCalledWith(true);
     expect(mocks.usePremiumEntitlements).toHaveBeenCalled();
