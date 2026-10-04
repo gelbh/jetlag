@@ -74,7 +74,9 @@ describe("DrawerSheet", () => {
     );
 
     expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
-    expect(document.querySelector(".mantine-Drawer-root[aria-label]")).toBeNull();
+    const root = document.querySelector(".mantine-Drawer-root");
+    expect(root).not.toBeNull();
+    expect(root).not.toHaveAttribute("aria-label");
   });
 
   it("applies translateY on the chrome wrapper while dragging (Verify #1 live follow)", () => {
