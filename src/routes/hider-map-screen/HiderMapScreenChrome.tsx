@@ -20,7 +20,6 @@ import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { HidingZoneHudBody } from "../../components/tools/ask/HidingZoneHudBody";
 import { HidingZoneMapPlacementChrome } from "../../components/tools/ask/HidingZoneMapPlacementChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
-import { AppUpdateMapChip } from "../../components/ui/banners/AppUpdateMapChip";
 import { PopupCloseButton } from "../../components/ui/brand/PopupCloseButton";
 import { activeModeCue } from "../../domain/ask/askHudModes";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
@@ -318,7 +317,6 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
         }}
       />
       <FirestorePersistenceBanner />
-      <AppUpdateMapChip />
       <HotfixGraceChip />
     </>
   );

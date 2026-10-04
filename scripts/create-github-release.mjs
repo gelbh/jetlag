@@ -21,7 +21,12 @@ function isCliMain() {
   return resolve(entry) === resolve(import.meta.filename);
 }
 
-async function createGithubRelease({ owner, repo, tag, name, body, token }) {
+function releaseAlreadyExists(payloadText) {
+  // GitHub puts code "already_exists" on errors[], with message "Validation Failed".
+  return /already_exists/i.test(payloadText) || /already exists/i.test(payloadText);
+}
+
+export async function createGithubRelease({ owner, repo, tag, name, body, token }) {
   const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases`, {
     method: "POST",
     headers: {
@@ -39,18 +44,16 @@ async function createGithubRelease({ owner, repo, tag, name, body, token }) {
     }),
   });
 
-  if (response.status === 422) {
-    const payload = await response.json().catch(() => ({}));
-    const message = String(payload.message ?? "");
-    if (/already_exists/i.test(message) || /already exists/i.test(message)) {
-      console.info(`GitHub Release for ${tag} already exists; skipping.`);
-      return;
-    }
+  // Read once: Response body streams can only be consumed a single time.
+  const payloadText = await response.text();
+
+  if (response.status === 422 && releaseAlreadyExists(payloadText)) {
+    console.info(`GitHub Release for ${tag} already exists; skipping.`);
+    return;
   }
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Failed to create GitHub Release ${tag}: ${response.status} ${text}`);
+    throw new Error(`Failed to create GitHub Release ${tag}: ${response.status} ${payloadText}`);
   }
 
   console.info(`Created GitHub Release ${tag}.`);

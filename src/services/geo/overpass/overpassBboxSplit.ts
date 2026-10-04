@@ -1,4 +1,7 @@
-import { OverpassPayloadTooLargeError } from "../../core/overpass/overpassClient";
+import {
+  OverpassPayloadTooLargeError,
+  OverpassQueryTooExpensiveError,
+} from "../../core/overpass/overpassClient";
 
 export const OVERPASS_SPLIT_MIN_SPAN_DEG = 0.02;
 
@@ -8,6 +11,12 @@ export type OverpassBbox = {
   north: number;
   east: number;
 };
+
+function isOverpassSplitError(error: unknown): boolean {
+  return (
+    error instanceof OverpassPayloadTooLargeError || error instanceof OverpassQueryTooExpensiveError
+  );
+}
 
 function bboxAtMinimum(bbox: OverpassBbox): boolean {
   return (
@@ -54,7 +63,7 @@ export async function queryOverpassWithBboxSplit<T>(
   try {
     return await query(buildQuery(bbox));
   } catch (error) {
-    if (!(error instanceof OverpassPayloadTooLargeError)) {
+    if (!isOverpassSplitError(error)) {
       throw error;
     }
     if (bboxAtMinimum(bbox)) {

@@ -1,6 +1,5 @@
 import type { AnnotationRecord, GameArea, SessionRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { toUnitFixture } from "../scenarios/adapters/toUnitFixture";
 import { DUBLIN_CITY_GAME_AREA } from "./dublinGameArea";
 
 export { DUBLIN_CITY_GAME_AREA };
@@ -13,8 +12,16 @@ export function createTestGameArea(overrides: Partial<GameArea> = {}): GameArea 
 }
 
 export function createTestSession(overrides: Partial<SessionRecord> = {}): SessionRecord {
-  const { session } = toUnitFixture("dublin-local-map");
-  return { ...session, ...overrides };
+  return {
+    id: LOCAL_SESSION_ID,
+    code: "TEST",
+    gameArea: DUBLIN_CITY_GAME_AREA,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    memberUids: [],
+    tier: "free",
+    gameSize: "medium",
+    ...overrides,
+  };
 }
 
 export function createTestRemoteSession(overrides: Partial<SessionRecord> = {}): SessionRecord {

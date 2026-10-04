@@ -13,6 +13,7 @@ export const ANALYTICS_EVENTS = {
   premium_checkout_failed: "premium_checkout_failed",
   premium_purchase_completed: "premium_purchase_completed",
   map_tool_used: "map_tool_used",
+  analytics_consent_accepted: "analytics_consent_accepted",
 } as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];
@@ -24,7 +25,8 @@ export type SessionEndedReason =
   | "fallback_client_end"
   | "expected_already_ended"
   | "game_over"
-  | "local";
+  | "local"
+  | "abandoned";
 
 export type AnalyticsEventProps = {
   session_created: {
@@ -49,8 +51,14 @@ export type AnalyticsEventProps = {
     productKey?: PremiumProductKey;
     message?: string;
   };
-  premium_purchase_completed: Record<string, never>;
+  premium_purchase_completed: {
+    productKey: PremiumProductKey;
+    source: "stripe_webhook";
+  };
   map_tool_used: {
     tool: Exclude<MapTool, "none">;
+  };
+  analytics_consent_accepted: {
+    surface: "banner";
   };
 };

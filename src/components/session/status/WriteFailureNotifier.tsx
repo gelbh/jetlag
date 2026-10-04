@@ -12,6 +12,7 @@ const LABEL_COPY: Record<WriteLabel, string> = {
   "question.ask": "Your question",
   "question.answer": "Your answer",
   "question.cancel": "Cancelling your question",
+  "question.update": "Question deadline update",
   "endgame.start": "Starting the End Game",
   "endgame.reset": "Resetting the End Game",
   "found.request": "Your found request",
