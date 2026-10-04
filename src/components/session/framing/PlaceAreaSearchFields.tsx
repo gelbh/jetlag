@@ -26,19 +26,23 @@ export function PlaceAreaSearchInsetResults({
   searchResults,
   selectedPlaceId,
   onSelectPlace,
+  skipLeadingHairline = false,
 }: {
   searchResults: GeocodedPlace[];
   selectedPlaceId: string | null;
   onSelectPlace: (place: GeocodedPlace) => void;
+  /** When results sit outside an InsetGroup, omit the first row's prefix rule. */
+  skipLeadingHairline?: boolean;
 }) {
   return (
     <>
-      {searchResults.map((place) => {
+      {searchResults.map((place, index) => {
         const selected = selectedPlaceId === place.id;
+        const showHairline = !(skipLeadingHairline && index === 0);
 
         return (
           <Fragment key={place.id}>
-            <InsetHairline insetStart="1rem" />
+            {showHairline ? <InsetHairline insetStart="1rem" /> : null}
             <UnstyledButton
               type="button"
               onClick={() => onSelectPlace(place)}

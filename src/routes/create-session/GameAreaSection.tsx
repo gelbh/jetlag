@@ -236,6 +236,7 @@ export function GameAreaSection({ model, settingsSlot, step }: GameAreaSectionPr
               searchResults={searchResults}
               selectedPlaceId={selectedPlaceId}
               onSelectPlace={onApplyPlace}
+              skipLeadingHairline
             />
           ) : null}
         </div>

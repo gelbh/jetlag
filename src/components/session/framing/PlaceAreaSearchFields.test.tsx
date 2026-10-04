@@ -4,7 +4,7 @@ import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
 import { jetlagTheme } from "@/theme/theme";
-import { PlaceAreaSearchFields } from "./PlaceAreaSearchFields";
+import { PlaceAreaSearchFields, PlaceAreaSearchInsetResults } from "./PlaceAreaSearchFields";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -69,6 +69,31 @@ describe("PlaceAreaSearchFields inset", () => {
     renderInset({ searchResults: [dublin], showResults: false });
     expect(screen.queryByRole("button", { name: /Dublin, Ireland/ })).toBeNull();
     expect(screen.getByRole("button", { name: "Find place" })).toBeInTheDocument();
+  });
+
+  it("skips the leading hairline when skipLeadingHairline is set", () => {
+    const cork: GeocodedPlace = {
+      id: "2",
+      displayName: "Cork, Ireland",
+      center: [51.9, -8.47],
+      bounds: { south: 51.8, west: -8.6, north: 52.0, east: -8.3 },
+      placeCategory: "city",
+      approximateAreaSqMi: 30,
+    };
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <PlaceAreaSearchInsetResults
+          searchResults={[dublin, cork]}
+          selectedPlaceId={null}
+          onSelectPlace={() => undefined}
+          skipLeadingHairline
+        />
+      </MantineProvider>,
+    );
+    const first = screen.getByRole("button", { name: /Dublin, Ireland/ });
+    expect(first.previousElementSibling?.getAttribute("aria-hidden")).not.toBe("true");
+    const second = screen.getByRole("button", { name: /Cork, Ireland/ });
+    expect(second.previousElementSibling?.getAttribute("aria-hidden")).toBe("true");
   });
 
   it("calls onSearch from Find place click and Enter on the textbox", () => {

@@ -145,6 +145,30 @@ describe("GameAreaSection create wizard steps", () => {
     expect(row.closest(".jl-inset-group")).toBeNull();
   });
 
+  it("skips the leading hairline before Where results outside the group", () => {
+    const dublin = {
+      id: "1",
+      displayName: "Dublin, Ireland",
+      center: [53.35, -6.26] as [number, number],
+      bounds: { south: 53.2, west: -6.5, north: 53.5, east: -6.0 },
+      placeCategory: "city" as const,
+      approximateAreaSqMi: 45,
+    };
+    const cork = {
+      id: "2",
+      displayName: "Cork, Ireland",
+      center: [51.9, -8.47] as [number, number],
+      bounds: { south: 51.8, west: -8.6, north: 52.0, east: -8.3 },
+      placeCategory: "city" as const,
+      approximateAreaSqMi: 30,
+    };
+    renderSection({ ...baseModel, searchResults: [dublin, cork] }, undefined, "where");
+    const first = screen.getByRole("button", { name: /Dublin, Ireland/ });
+    expect(first.previousElementSibling?.getAttribute("aria-hidden")).not.toBe("true");
+    const second = screen.getByRole("button", { name: /Cork, Ireland/ });
+    expect(second.previousElementSibling?.getAttribute("aria-hidden")).toBe("true");
+  });
+
   it("Play settingsSlot uses more than one inset group", () => {
     renderSection(
       baseModel,
