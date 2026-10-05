@@ -220,7 +220,7 @@ describe("computeLandmassFeatures fail-closed", () => {
       }),
     }));
     const martinez = vi.spyOn(
-      await import("@/domain/geometry/kernel/unionPolygonFeatures"),
+      await import("@/domain/geometry/masks/unionPolygonFeatures"),
       "unionPolygonFeatures",
     );
     const { computeLandmassFeatures: compute } = await import("./landmassFeatures");

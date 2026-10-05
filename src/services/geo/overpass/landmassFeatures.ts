@@ -110,12 +110,6 @@ function representativePointForBoundary(boundary: GameArea): LatLngTuple {
   return [latSum / count, lngSum / count];
 }
 
-async function unionObstacles(
-  obstacles: Feature<Polygon | MultiPolygon>[],
-): Promise<Feature<Polygon | MultiPolygon> | null> {
-  return runUnionPolygonFeatures(obstacles);
-}
-
 export async function obstacleFeaturesFromElements(
   elements: OverpassElement[],
 ): Promise<Feature<Polygon | MultiPolygon>[]> {
@@ -236,7 +230,7 @@ export async function computeLandmassFeatures(
   let remaining: Feature<Polygon | MultiPolygon> | null = gameFeature;
 
   if (obstacles.length > 0) {
-    const mergedObstacles = await unionObstacles(obstacles);
+    const mergedObstacles = await runUnionPolygonFeatures(obstacles);
     if (mergedObstacles) {
       remaining = difference({
         type: "FeatureCollection",
