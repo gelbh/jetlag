@@ -22,7 +22,7 @@ export const FAQ_CONTENT: LearnPageContent = {
     {
       id: "premium",
       heading: "What does Premium add?",
-      lead: "Premium adds live transit and faster map loads to the sessions you host. Live transit shows vehicle positions on the map in metro areas that support it. Faster map loads means the app fetches game area data in the background more quickly. Question tools are the same in free and Premium sessions.",
+      lead: "Premium adds live transit and faster map loads to the sessions you host. Live transit shows vehicle positions on the map in metro areas that support it. Faster map loads means the app preloads game area data, like places and transit, at a quicker pace. Question tools are the same in free and Premium sessions.",
       blocks: [
         {
           kind: "paragraph",

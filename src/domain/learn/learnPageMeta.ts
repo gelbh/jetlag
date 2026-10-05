@@ -1,6 +1,7 @@
 // Loaded by routeSeo (App chunk, critical path): titles and link labels only. Page bodies live
 // in learnContent.ts, which only the lazy LearnPage route imports.
-import type { LearnRoutePath } from "@/domain/seo/learnRoutePaths";
+import { isLearnRoutePath, type LearnRoutePath } from "@/domain/seo/learnRoutePaths";
+import type { LearnLinkPath } from "./learnContentTypes";
 
 export type LearnPageMeta = {
   /** Short sticky-bar title. */
@@ -101,13 +102,14 @@ const LEARN_PAGE_META: Record<LearnRoutePath, LearnPageMeta> = {
   },
 };
 
-const OTHER_LINK_LABELS = { "/premium": "Premium", "/privacy": "Privacy Policy" } as const;
+const OTHER_LINK_LABELS: Record<Exclude<LearnLinkPath, LearnRoutePath>, string> = {
+  "/premium": "Premium",
+  "/privacy": "Privacy Policy",
+};
 
 /** Link label for a "Keep reading" target. */
-export function learnLinkLabel(path: LearnRoutePath | keyof typeof OTHER_LINK_LABELS): string {
-  return path in OTHER_LINK_LABELS
-    ? OTHER_LINK_LABELS[path as keyof typeof OTHER_LINK_LABELS]
-    : LEARN_PAGE_META[path as LearnRoutePath].linkLabel;
+export function learnLinkLabel(path: LearnLinkPath): string {
+  return isLearnRoutePath(path) ? LEARN_PAGE_META[path].linkLabel : OTHER_LINK_LABELS[path];
 }
 
 export function learnPageMeta(path: LearnRoutePath): LearnPageMeta {

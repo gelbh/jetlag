@@ -6,8 +6,7 @@ import type { LearnPageContent } from "./learnContentTypes";
 
 const TOOL_RELATED = ["/tools", "/guide", "/faq"] as const satisfies LearnPageContent["related"];
 
-const SHADING_NOTE =
-  "Shaded area is ruled out. The shading lands on the seekers' shared map, so every answer narrows the search.";
+const SHADING_NOTE = "Shaded area is ruled out on the seekers' shared map.";
 
 export const TOOLS_INDEX_CONTENT: LearnPageContent = {
   path: "/tools",
@@ -41,7 +40,7 @@ export const TOOLS_INDEX_CONTENT: LearnPageContent = {
     {
       id: "game-size",
       heading: "Game size changes the options",
-      lead: "The app sizes each game from its play area: small, medium, or large. Bigger games unlock longer distances and more categories. Tentacles is off in small games, and the hardest Photo prompts only appear in large games.",
+      lead: "The app recommends a game size from the play area: small, medium, or large. Bigger games unlock longer distances and more categories. Tentacles is off in small games, and the hardest Photo prompts only appear in large games.",
       blocks: [
         {
           kind: "table",
@@ -81,7 +80,7 @@ export const TOOLS_INDEX_CONTENT: LearnPageContent = {
 export const RADAR_CONTENT: LearnPageContent = {
   path: "/tools/radar",
   intro:
-    "Radar draws a circle around the seekers and asks one question: is the hider inside it? It costs D2P1 and is the quickest way to cut the map down early.",
+    "Radar draws a circle around the seekers and asks one question: is the hider inside it? It costs D2P1 (the hider draws 2 cards and keeps 1) and is a simple first question for cutting the map down.",
   sections: [
     {
       id: "what-it-asks",
@@ -134,7 +133,7 @@ export const RADAR_CONTENT: LearnPageContent = {
 export const THERMOMETER_CONTENT: LearnPageContent = {
   path: "/tools/thermometer",
   intro:
-    "Thermometer tells the seekers whether a move took them toward the hider or away. It costs D2P1 and splits the map in two.",
+    "Thermometer tells the seekers whether a move took them toward the hider or away. It costs D2P1 (draw 2, keep 1) and splits the map in two.",
   sections: [
     {
       id: "what-it-asks",
@@ -191,7 +190,7 @@ export const THERMOMETER_CONTENT: LearnPageContent = {
 export const MATCHING_CONTENT: LearnPageContent = {
   path: "/tools/matching",
   intro:
-    "Matching asks whether the hider and the seekers share the same nearest place of some type, like the same airport or the same park. It costs D3P1.",
+    "Matching asks whether the hider and the seekers share the same nearest place of some type, like the same airport or the same park. It costs D3P1 (the hider draws 3 cards and keeps 1).",
   sections: [
     {
       id: "what-it-asks",
@@ -252,7 +251,7 @@ export const MATCHING_CONTENT: LearnPageContent = {
 export const MEASURING_CONTENT: LearnPageContent = {
   path: "/tools/measuring",
   intro:
-    "Measuring compares distances: is the hider closer to a type of place, like a coastline or a hospital, than the seekers are? It costs D3P1.",
+    "Measuring compares distances: is the hider closer to a type of place, like a coastline or a hospital, than the seekers are? It costs D3P1 (the hider draws 3 cards and keeps 1).",
   sections: [
     {
       id: "what-it-asks",
@@ -295,7 +294,7 @@ export const MEASURING_CONTENT: LearnPageContent = {
     {
       id: "tips",
       heading: "Tips",
-      lead: "Measuring is strongest when the seekers are at a middling distance from the target, so either answer removes a real share of the map.",
+      lead: "Measuring is strongest when the seekers are at a middling distance from the target, so either answer removes a large part of the map.",
       blocks: [
         {
           kind: "bullets",
@@ -313,7 +312,7 @@ export const MEASURING_CONTENT: LearnPageContent = {
 export const TENTACLES_CONTENT: LearnPageContent = {
   path: "/tools/tentacles",
   intro:
-    "Tentacles asks the hider to name which nearby place of a type they are closest to. It costs D4P2 and is available in medium and large games only.",
+    "Tentacles asks the hider to name which nearby place of a type they are closest to. It costs D4P2 (the hider draws 4 cards and keeps 2) and is available in medium and large games only.",
   sections: [
     {
       id: "what-it-asks",
@@ -365,7 +364,7 @@ export const TENTACLES_CONTENT: LearnPageContent = {
 export const PHOTO_CONTENT: LearnPageContent = {
   path: "/tools/photo",
   intro:
-    "Photo asks the hider to send a picture of something around them. It costs D1P1. It does not shade the map; the seekers study the photo instead.",
+    "Photo asks the hider to send a picture of something around them. It costs D1P1 (draw 1, keep 1) and gives the seekers a picture to study instead of map shading.",
   sections: [
     {
       id: "what-it-asks",
