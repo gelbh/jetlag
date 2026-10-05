@@ -35,12 +35,12 @@ describe("askInlineErrorCopy", () => {
 
 describe("AskInlineError", () => {
   it("renders a Mantine alert callout", () => {
-    const { container } = render(
+    render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskInlineError message="Timed out while waiting for your location." />
       </MantineProvider>,
     );
-    expect(container.querySelector(".mantine-Alert-root")).toBeTruthy();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByTestId("ask-inline-error")).toBeInTheDocument();
     expect(screen.getByText("Location timed out")).toBeInTheDocument();
   });
