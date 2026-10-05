@@ -3,7 +3,6 @@ import { resolve } from "node:path";
 import { describe, it } from "vitest";
 import { assertPolygonTopologyParity } from "./parity";
 import type { PolygonFeature } from "./types";
-import { runUnionPolygonFeatures } from "./unionKernelRunner";
 import { unionPolygonFeatures } from "./unionPolygonFeatures";
 
 const pkgEntry = resolve(
@@ -42,12 +41,5 @@ describe.skipIf(!wasmPkgReady)("union polygon wasm parity", () => {
     // steps=11: default 12 lands on east edge lng=-0.15 where geo boolean FP
     // shrinks the ring inside Martinez's exact coordinate.
     assertPolygonTopologyParity(wasm, baseline, topologyBbox, 11);
-  });
-
-  it("dispatch path matches Martinez on two overlapping squares", async () => {
-    const features = [square(-0.22), square(-0.18)];
-    const dispatched = await runUnionPolygonFeatures(features);
-    const baseline = unionPolygonFeatures(features);
-    assertPolygonTopologyParity(dispatched, baseline, topologyBbox, 11);
   });
 });

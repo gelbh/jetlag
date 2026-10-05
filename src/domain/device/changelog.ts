@@ -41,7 +41,6 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Technical",
         items: [
-          "Measuring progressive polygon unions use the WASM geometry kernel (same family as other kernel ops)",
           "Filter OpenFreeMap tile and Cloudflare KV miss spans from Sentry noise",
           "Harden Sentry SDK 11 privacy defaults, Overpass span filtering, and the first-party envelope tunnel",
           "Sync Firebase account id into Sentry and instrument React Router navigations",

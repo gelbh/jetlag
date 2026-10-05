@@ -1,7 +1,5 @@
-import { loadKernelWasm, parseWasmFeature, resetKernelWasmForTests } from "./kernelWasmPkg";
+import { loadKernelWasm, parseWasmFeature } from "./kernelWasmPkg";
 import type { PolygonFeature } from "./types";
-
-export const resetUnionWasmForTests = resetKernelWasmForTests;
 
 export async function wasmUnionPolygonFeatures(
   features: readonly PolygonFeature[],

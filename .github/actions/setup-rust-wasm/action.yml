@@ -1,5 +1,5 @@
 name: Setup Rust + wasm-pack
-description: Install stable Rust with wasm32 target and pinned wasm-pack for geometry mask builds
+description: Install rust-toolchain.toml pin with wasm32 target and pinned wasm-pack for geometry kernel builds
 
 inputs:
   wasm-pack-version:

@@ -1,7 +1,15 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import type { Feature, Polygon } from "geojson";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { countPolygonVertices } from "./polygonMetrics";
 import { POLYGON_UNION_SLICE_BATCH, unionPolygonFeaturesInSlices } from "./unionSlices";
+
+const pkgEntry = resolve(
+  import.meta.dirname,
+  "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
+);
+const wasmPkgReady = existsSync(pkgEntry);
 
 function unitSquare(i: number): Feature<Polygon> {
   return {
@@ -27,7 +35,7 @@ afterEach(() => {
   vi.resetModules();
 });
 
-describe("unionPolygonFeaturesInSlices", () => {
+describe.skipIf(!wasmPkgReady)("unionPolygonFeaturesInSlices live wasm", () => {
   it("unions more than POLYGON_UNION_SLICE_BATCH features without dropping any", async () => {
     const squares = Array.from({ length: 12 }, (_, i) => unitSquare(i));
     const united = await unionPolygonFeaturesInSlices(squares, {
@@ -46,7 +54,9 @@ describe("unionPolygonFeaturesInSlices", () => {
     );
     expect(yieldFn).toHaveBeenCalled();
   });
+});
 
+describe("unionPolygonFeaturesInSlices", () => {
   it("awaits runUnionPolygonFeatures for multi-feature input", async () => {
     vi.resetModules();
     const runUnionPolygonFeatures = vi.fn(async (features: readonly Feature<Polygon>[]) => {

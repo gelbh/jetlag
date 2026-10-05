@@ -48,6 +48,17 @@ async function measureMedianMsAsync(fn: () => Promise<void>, iterations = 5): Pr
   return samples[Math.floor(samples.length / 2)] ?? 0;
 }
 
+describe("union polygon wasm perf gate", () => {
+  it("fails closed when GEOMETRY_PERF=1 without wasm pkg", () => {
+    if (runGeometryPerf && !wasmPkgReady) {
+      throw new Error(
+        "GEOMETRY_PERF=1 requires crates/jetlag-geometry-kernel/pkg (run wasm-pack build)",
+      );
+    }
+    expect(runGeometryPerf || true).toBe(true);
+  });
+});
+
 describe.skipIf(!wasmPkgReady || !runGeometryPerf)("union polygon wasm perf", () => {
   beforeAll(async () => {
     const { wasmUnionPolygonFeatures } = await import("./unionWasm");
@@ -61,11 +72,5 @@ describe.skipIf(!wasmPkgReady || !runGeometryPerf)("union polygon wasm perf", ()
       await wasmUnionPolygonFeatures(features);
     });
     expect(wasmMs).toBeLessThan(40);
-  });
-});
-
-describe("union polygon wasm perf gate", () => {
-  it("skips perf gates unless GEOMETRY_PERF=1", () => {
-    expect(runGeometryPerf || true).toBe(true);
   });
 });
