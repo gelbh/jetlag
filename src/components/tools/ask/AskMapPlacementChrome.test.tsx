@@ -43,12 +43,12 @@ function renderChrome(
 }
 
 describe("AskMapPlacementChrome answer-phase errors", () => {
-  it("shows inline error detail when phase is answer", () => {
+  it("shows inline error under the question card when phase is answer", () => {
     renderChrome({
       testId: "measuring-map-placement",
       toolTitle: "Measuring",
       configureLabel: "Museum",
-      questionPrompt: "Is it closer or further?",
+      questionPrompt: "Compared to me, are you closer or further?",
       phase: "answer",
       error: "Couldn't save this measuring question.",
       statusTitle: "",
@@ -56,8 +56,10 @@ describe("AskMapPlacementChrome answer-phase errors", () => {
     });
 
     const alert = screen.getByTestId("measuring-map-placement-answer-error");
+    const question = screen.getByTestId("measuring-map-placement-question");
     expect(alert).toHaveAttribute("role", "alert");
     expect(alert.textContent).toMatch(/Couldn't save this measuring question/i);
+    expect(question.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByTestId("answer-slot")).toBeInTheDocument();
   });
 });

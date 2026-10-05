@@ -190,11 +190,8 @@ export function AskMapPlacementChrome({
   const failedErrorCopy = phase === "failed" && error ? askInlineErrorCopy(error) : null;
   const answerErrorCopy = phase === "answer" && error ? askInlineErrorCopy(error) : null;
 
-  const bottomClearance = bottomClearanceForPhase(
-    phase,
-    Boolean(failedErrorCopy || answerErrorCopy),
-    answerTall,
-  );
+  // Answer-phase errors sit under the top question card, so they do not inflate bottom clearance.
+  const bottomClearance = bottomClearanceForPhase(phase, Boolean(failedErrorCopy), answerTall);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -306,6 +303,20 @@ export function AskMapPlacementChrome({
             </p>
           </div>
         </div>
+        {showAnswer && answerErrorCopy ? (
+          <HaltErrorAlert
+            testId={`${testId}-answer-error`}
+            title={answerErrorCopy.title}
+            detail={answerErrorCopy.detail}
+            className="pointer-events-auto w-full px-3 py-2.5"
+            style={{
+              ...mapChromeSurfaceStyles,
+              borderRadius: 14,
+              border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
+              color: "var(--color-field-ink)",
+            }}
+          />
+        ) : null}
       </div>
 
       <div
@@ -410,20 +421,6 @@ export function AskMapPlacementChrome({
               </p>
             ) : null}
           </div>
-        ) : null}
-        {showAnswer && answerErrorCopy ? (
-          <HaltErrorAlert
-            testId={`${testId}-answer-error`}
-            title={answerErrorCopy.title}
-            detail={answerErrorCopy.detail}
-            className="mx-auto w-full max-w-[22rem] px-3 py-2.5"
-            style={{
-              ...mapChromeSurfaceStyles,
-              borderRadius: 14,
-              border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
-              color: "var(--color-field-ink)",
-            }}
-          />
         ) : null}
         {showAnswer ? (
           <div className="flex justify-end">
