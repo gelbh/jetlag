@@ -37,8 +37,83 @@ const BUNDLED_POI_PACKS = new Set<RegionPackId>(PACK_GEO_PACK_IDS);
 
 const bundleCache = new Map<string, BundledPoiCategory | null>();
 
+const WIKIDATA_QID_RE = /^Q\d+$/;
+
 function normalizePlaceName(name: string): string {
   return collapsePoiPlaceName(name);
+}
+
+function placeQid(place: { id: string; wikidataId?: string }): string | undefined {
+  if (place.wikidataId && WIKIDATA_QID_RE.test(place.wikidataId)) {
+    return place.wikidataId;
+  }
+  if (WIKIDATA_QID_RE.test(place.id)) {
+    return place.id;
+  }
+  return undefined;
+}
+
+function mergePlacesByIdentity<T extends { id: string; name: string; wikidataId?: string }>(
+  overpassPlaces: T[],
+  bundledPlaces: T[],
+): T[] {
+  const bundledByQid = new Map<string, T>();
+  for (const place of bundledPlaces) {
+    if (WIKIDATA_QID_RE.test(place.id)) {
+      bundledByQid.set(place.id, place);
+    }
+  }
+
+  const claimedQids = new Set<string>();
+  const seenIds = new Set<string>();
+  const seenNames = new Set<string>();
+  const seenQids = new Set<string>();
+  const merged: T[] = [];
+
+  const markSeen = (place: T, qid?: string) => {
+    seenIds.add(place.id);
+    seenNames.add(normalizePlaceName(place.name));
+    if (qid) {
+      seenQids.add(qid);
+    }
+  };
+
+  for (const place of overpassPlaces) {
+    const qid = placeQid(place);
+    if (qid && bundledByQid.has(qid)) {
+      if (!claimedQids.has(qid)) {
+        const bundled = bundledByQid.get(qid)!;
+        merged.push(bundled);
+        claimedQids.add(qid);
+        markSeen(bundled, qid);
+      }
+      continue;
+    }
+
+    merged.push(place);
+    markSeen(place, qid);
+  }
+
+  for (const place of bundledPlaces) {
+    if (seenIds.has(place.id)) {
+      continue;
+    }
+
+    const normalizedName = normalizePlaceName(place.name);
+    if (seenNames.has(normalizedName)) {
+      continue;
+    }
+
+    const qid = placeQid(place);
+    if (qid && (claimedQids.has(qid) || seenQids.has(qid))) {
+      continue;
+    }
+
+    markSeen(place, qid);
+    merged.push(place);
+  }
+
+  return merged;
 }
 
 async function loadBundledPoiCategory(
@@ -88,26 +163,7 @@ export function mergeTentaclePois(
   overpassPois: TentaclePoi[],
   bundledPois: TentaclePoi[],
 ): TentaclePoi[] {
-  const seenNames = new Set(overpassPois.map((poi) => normalizePlaceName(poi.name)));
-  const seenIds = new Set(overpassPois.map((poi) => poi.id));
-  const merged = [...overpassPois];
-
-  for (const poi of bundledPois) {
-    if (seenIds.has(poi.id)) {
-      continue;
-    }
-
-    const normalizedName = normalizePlaceName(poi.name);
-    if (seenNames.has(normalizedName)) {
-      continue;
-    }
-
-    seenNames.add(normalizedName);
-    seenIds.add(poi.id);
-    merged.push(poi);
-  }
-
-  return merged;
+  return mergePlacesByIdentity(overpassPois, bundledPois);
 }
 
 export async function fetchBundledTentaclePois(
@@ -155,26 +211,7 @@ export function mergeMeasuringPlaces(
   overpassPlaces: MeasuringPlace[],
   bundledPlaces: MeasuringPlace[],
 ): MeasuringPlace[] {
-  const seenNames = new Set(overpassPlaces.map((place) => normalizePlaceName(place.name)));
-  const seenIds = new Set(overpassPlaces.map((place) => place.id));
-  const merged = [...overpassPlaces];
-
-  for (const place of bundledPlaces) {
-    if (seenIds.has(place.id)) {
-      continue;
-    }
-
-    const normalizedName = normalizePlaceName(place.name);
-    if (seenNames.has(normalizedName)) {
-      continue;
-    }
-
-    seenNames.add(normalizedName);
-    seenIds.add(place.id);
-    merged.push(place);
-  }
-
-  return merged;
+  return mergePlacesByIdentity(overpassPlaces, bundledPlaces);
 }
 
 export async function fetchBundledMeasuringPlaces(
