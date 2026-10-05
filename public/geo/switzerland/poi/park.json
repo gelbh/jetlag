@@ -1,0 +1,1518 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q123268393",
+      "name": "Ackermätteli",
+      "lat": 47.578895,
+      "lng": 7.588934
+    },
+    {
+      "id": "Q27331422",
+      "name": "Albert-Steiner-Garten",
+      "lat": 47.408607,
+      "lng": 8.509766
+    },
+    {
+      "id": "Q27330573",
+      "name": "Alfred-Altherr-Terrasse",
+      "lat": 47.395056,
+      "lng": 8.552267
+    },
+    {
+      "id": "Q2650746",
+      "name": "Alpamare",
+      "lat": 47.1992,
+      "lng": 8.79083
+    },
+    {
+      "id": "Q56308609",
+      "name": "alpine botanical garden of Meyrin",
+      "lat": 46.226846,
+      "lng": 6.080416
+    },
+    {
+      "id": "Q27322855",
+      "name": "Andreaspark",
+      "lat": 47.41316,
+      "lng": 8.558239
+    },
+    {
+      "id": "Q2859157",
+      "name": "Aquaparc",
+      "lat": 46.389392,
+      "lng": 6.861906
+    },
+    {
+      "id": "Q2859199",
+      "name": "Aquatis",
+      "lat": 46.54086,
+      "lng": 6.65729
+    },
+    {
+      "id": "Q2859722",
+      "name": "Arboretum national du vallon de l’Aubonne",
+      "lat": 46.511049,
+      "lng": 6.36681
+    },
+    {
+      "id": "Q630465",
+      "name": "Arboretum Zürich",
+      "lat": 47.362722,
+      "lng": 8.536453
+    },
+    {
+      "id": "Q58212596",
+      "name": "Arosa Bärenland",
+      "lat": 46.78675,
+      "lng": 9.66452
+    },
+    {
+      "id": "Q1018919",
+      "name": "Bäckeranlage",
+      "lat": 47.3778,
+      "lng": 8.52374
+    },
+    {
+      "id": "Q125449311",
+      "name": "Bally-Park",
+      "lat": 47.366759,
+      "lng": 7.996224
+    },
+    {
+      "id": "Q20850350",
+      "name": "BärenPark Bern",
+      "lat": 46.948056,
+      "lng": 7.459167
+    },
+    {
+      "id": "Q220009",
+      "name": "Basel Zoo",
+      "lat": 47.547336,
+      "lng": 7.578764
+    },
+    {
+      "id": "Q113482088",
+      "name": "Bienne City Park",
+      "lat": 47.14128,
+      "lng": 7.25443
+    },
+    {
+      "id": "Q2404630",
+      "name": "Bois de la Bâtie",
+      "lat": 46.19828,
+      "lng": 6.12407
+    },
+    {
+      "id": "Q1720755",
+      "name": "Bois du Petit-Château",
+      "lat": 47.105833,
+      "lng": 6.822222
+    },
+    {
+      "id": "Q27479819",
+      "name": "Botanical garden \"La Thomasia\"",
+      "lat": 46.25096,
+      "lng": 7.11066
+    },
+    {
+      "id": "Q894639",
+      "name": "Botanical Garden Bern",
+      "lat": 46.9527,
+      "lng": 7.44491
+    },
+    {
+      "id": "Q118978190",
+      "name": "Botanical Garden of Brissago",
+      "lat": 46.132,
+      "lng": 8.7356
+    },
+    {
+      "id": "Q686324",
+      "name": "Botanical Garden of the University of Zurich",
+      "lat": 47.358647,
+      "lng": 8.561106
+    },
+    {
+      "id": "Q27488965",
+      "name": "Botanical Garden St. Gallen",
+      "lat": 47.439876,
+      "lng": 9.407532
+    },
+    {
+      "id": "Q123299258",
+      "name": "Breitematte",
+      "lat": 47.554162,
+      "lng": 7.611327
+    },
+    {
+      "id": "Q992100",
+      "name": "Bruckgut",
+      "lat": 47.51782,
+      "lng": 7.61968
+    },
+    {
+      "id": "Q996890",
+      "name": "Brüglingen",
+      "lat": 47.5365,
+      "lng": 7.61393
+    },
+    {
+      "id": "Q996940",
+      "name": "Brühlgutpark",
+      "lat": 47.4967,
+      "lng": 8.71397
+    },
+    {
+      "id": "Q123285117",
+      "name": "Buremichelskopfanlage",
+      "lat": 47.532118,
+      "lng": 7.585295
+    },
+    {
+      "id": "Q123296777",
+      "name": "Cécile Ines Loos-Anlage",
+      "lat": 47.556279,
+      "lng": 7.61375
+    },
+    {
+      "id": "Q29890842",
+      "name": "Château St-Vincent with parc",
+      "lat": 46.4554,
+      "lng": 6.29141
+    },
+    {
+      "id": "Q117479458",
+      "name": "Ciani Park",
+      "lat": 46.00434,
+      "lng": 8.95862
+    },
+    {
+      "id": "Q2327142",
+      "name": "city garden of Chur",
+      "lat": 46.84962,
+      "lng": 9.52976
+    },
+    {
+      "id": "Q126363413",
+      "name": "City park (1895/96)",
+      "lat": 47.0577,
+      "lng": 7.6237
+    },
+    {
+      "id": "Q138475",
+      "name": "Conny-Land",
+      "lat": 47.614167,
+      "lng": 9.056667
+    },
+    {
+      "id": "Q29786374",
+      "name": "Court with Spa Facilities and Park",
+      "lat": 47.000164,
+      "lng": 9.502209
+    },
+    {
+      "id": "Q29698384",
+      "name": "De Gady Manor House with park",
+      "lat": 46.765906,
+      "lng": 7.19556
+    },
+    {
+      "id": "Q1257186",
+      "name": "Drei Weieren Bathing Facilities",
+      "lat": 47.4217,
+      "lng": 9.38778
+    },
+    {
+      "id": "Q1257952",
+      "name": "Dreilindenpark",
+      "lat": 47.060834,
+      "lng": 8.321995
+    },
+    {
+      "id": "Q19668360",
+      "name": "Duftrosengarten Rapperswil",
+      "lat": 47.227567,
+      "lng": 8.818778
+    },
+    {
+      "id": "Q3364243",
+      "name": "Eglantyne-Jebb park",
+      "lat": 46.1905,
+      "lng": 6.13606
+    },
+    {
+      "id": "Q112957152",
+      "name": "Elisabethenanlage",
+      "lat": 47.54958,
+      "lng": 7.59063
+    },
+    {
+      "id": "Q27332056",
+      "name": "Emil-Oberhänsli-Anlage",
+      "lat": 47.417587,
+      "lng": 8.545151
+    },
+    {
+      "id": "Q56413444",
+      "name": "Engepromenade",
+      "lat": 46.96383,
+      "lng": 7.44137
+    },
+    {
+      "id": "Q123309249",
+      "name": "Ensemble Adlergarten, Parkanlage",
+      "lat": 47.496857,
+      "lng": 8.736904
+    },
+    {
+      "id": "Q123309574",
+      "name": "Ensemble Villa Frohberg, Gartenanlage",
+      "lat": 47.495835,
+      "lng": 8.72212
+    },
+    {
+      "id": "Q1355424",
+      "name": "Erlebniswelt Seeteufel",
+      "lat": 47.1117,
+      "lng": 7.31846
+    },
+    {
+      "id": "Q123284751",
+      "name": "Erlenmattpark",
+      "lat": 47.57251,
+      "lng": 7.600332
+    },
+    {
+      "id": "Q21037200",
+      "name": "Eulachpark",
+      "lat": 47.505406,
+      "lng": 8.763731
+    },
+    {
+      "id": "Q112196009",
+      "name": "Fäsenstaubpromenade",
+      "lat": 47.694807,
+      "lng": 8.628653
+    },
+    {
+      "id": "Q123258732",
+      "name": "Findlingsgarten Kappenbühl",
+      "lat": 47.4067,
+      "lng": 8.499497
+    },
+    {
+      "id": "Q1228821",
+      "name": "Flora Park Bern",
+      "lat": 46.9431,
+      "lng": 7.43694
+    },
+    {
+      "id": "Q27330333",
+      "name": "Flora-Ruchat-Roncati-Garten",
+      "lat": 47.409361,
+      "lng": 8.506994
+    },
+    {
+      "id": "Q5926366",
+      "name": "Flore-Alpe botanical garden",
+      "lat": 46.0328,
+      "lng": 7.11267
+    },
+    {
+      "id": "Q29880567",
+      "name": "Former Country Estate Hinter-Bleichenberg with Park",
+      "lat": 47.19671,
+      "lng": 7.56505
+    },
+    {
+      "id": "Q29891575",
+      "name": "Former Hotel Moser with outbuildings and park",
+      "lat": 46.4623,
+      "lng": 6.85332
+    },
+    {
+      "id": "Q1791682",
+      "name": "Forum Würth Chur",
+      "lat": 46.861,
+      "lng": 9.5282
+    },
+    {
+      "id": "Q29683014",
+      "name": "Friedhof Kannenfeld",
+      "lat": 47.564579,
+      "lng": 7.569707
+    },
+    {
+      "id": "Q19362280",
+      "name": "Garden Schmidlin",
+      "lat": 47.381736,
+      "lng": 8.046379
+    },
+    {
+      "id": "Q677516",
+      "name": "Geneva Botanic Garden",
+      "lat": 46.226118,
+      "lng": 6.146168
+    },
+    {
+      "id": "Q56876735",
+      "name": "Giardino di Sir Peter Smithers",
+      "lat": 45.92876,
+      "lng": 8.92118
+    },
+    {
+      "id": "Q123268117",
+      "name": "Giesslipark",
+      "lat": 47.579574,
+      "lng": 7.591543
+    },
+    {
+      "id": "Q5609635",
+      "name": "Griset de Forel château",
+      "lat": 46.768469,
+      "lng": 6.946574
+    },
+    {
+      "id": "Q29786379",
+      "name": "Grünenstein Castle with Park",
+      "lat": 47.40613,
+      "lng": 9.59571
+    },
+    {
+      "id": "Q71875924",
+      "name": "Grüzefeld",
+      "lat": 47.490769,
+      "lng": 8.755948
+    },
+    {
+      "id": "Q1555480",
+      "name": "Gustav-Ammann-Park",
+      "lat": 47.411278,
+      "lng": 8.534569
+    },
+    {
+      "id": "Q27329983",
+      "name": "Hans-Leibundgut-Garten",
+      "lat": 47.409815,
+      "lng": 8.508865
+    },
+    {
+      "id": "Q3127209",
+      "name": "Happyland",
+      "lat": 46.261944,
+      "lng": 7.455556
+    },
+    {
+      "id": "Q27325549",
+      "name": "Hardaupark",
+      "lat": 47.379533,
+      "lng": 8.509356
+    },
+    {
+      "id": "Q29479640",
+      "name": "Haus Schuler-Ganzoni mit Parkanlage",
+      "lat": 47.040773,
+      "lng": 9.063865
+    },
+    {
+      "id": "Q1534495",
+      "name": "Heidegg Castle with residential building and chapel",
+      "lat": 47.216758,
+      "lng": 8.273033
+    },
+    {
+      "id": "Q105554636",
+      "name": "Heididorf",
+      "lat": 47.01322,
+      "lng": 9.54544
+    },
+    {
+      "id": "Q19362411",
+      "name": "Heiternplatz",
+      "lat": 47.284167,
+      "lng": 7.954856
+    },
+    {
+      "id": "Q27325565",
+      "name": "Hermine-Raths-Garten",
+      "lat": 47.40743,
+      "lng": 8.508361
+    },
+    {
+      "id": "Q22640001",
+      "name": "Horben",
+      "lat": 47.21954,
+      "lng": 8.32592
+    },
+    {
+      "id": "Q123268917",
+      "name": "Horburgpark",
+      "lat": 47.572987,
+      "lng": 7.593745
+    },
+    {
+      "id": "Q29784985",
+      "name": "House with park",
+      "lat": 46.23571,
+      "lng": 9.12972
+    },
+    {
+      "id": "Q1083713",
+      "name": "Île Rousseau",
+      "lat": 46.2061,
+      "lng": 6.1475
+    },
+    {
+      "id": "Q27321720",
+      "name": "Im Hofgarten",
+      "lat": 47.395074,
+      "lng": 8.536883
+    },
+    {
+      "id": "Q27326775",
+      "name": "Im Tiergarten",
+      "lat": 47.365843,
+      "lng": 8.511952
+    },
+    {
+      "id": "Q138446102",
+      "name": "Inseli",
+      "lat": 47.04964,
+      "lng": 8.314129
+    },
+    {
+      "id": "Q960186",
+      "name": "Irchelpark",
+      "lat": 47.3964,
+      "lng": 8.54778
+    },
+    {
+      "id": "Q27331874",
+      "name": "J.-R.-von-Salis-Anlage",
+      "lat": 47.372458,
+      "lng": 8.547013
+    },
+    {
+      "id": "Q54683271",
+      "name": "Jardin alpin La Rambertia",
+      "lat": 46.431746,
+      "lng": 6.983042
+    },
+    {
+      "id": "Q1083364",
+      "name": "Jardin Anglais",
+      "lat": 46.204,
+      "lng": 6.152
+    },
+    {
+      "id": "Q140690073",
+      "name": "Jardin de la Demoiselle",
+      "lat": 47.105908,
+      "lng": 6.830465
+    },
+    {
+      "id": "Q121221884",
+      "name": "Jardin de la Paix",
+      "lat": 46.219581,
+      "lng": 6.12715
+    },
+    {
+      "id": "Q124166285",
+      "name": "Jardin des Disparus",
+      "lat": 46.229795,
+      "lng": 6.076073
+    },
+    {
+      "id": "Q140696650",
+      "name": "Jardin Henriette Grandjean",
+      "lat": 47.104334,
+      "lng": 6.823504
+    },
+    {
+      "id": "Q118436098",
+      "name": "Josefwiese",
+      "lat": 47.385851,
+      "lng": 8.523552
+    },
+    {
+      "id": "Q181016",
+      "name": "Jungfrau Park",
+      "lat": 46.682222,
+      "lng": 7.888056
+    },
+    {
+      "id": "Q1713816",
+      "name": "Juraparc",
+      "lat": 46.691646,
+      "lng": 6.340463
+    },
+    {
+      "id": "Q1683445",
+      "name": "Jurassica Museum (institution)",
+      "lat": 47.41422,
+      "lng": 7.07783
+    },
+    {
+      "id": "Q1604793",
+      "name": "Kannenfeldpark",
+      "lat": 47.565554,
+      "lng": 7.570364
+    },
+    {
+      "id": "Q1487222",
+      "name": "Kleine Schanze",
+      "lat": 46.94549,
+      "lng": 7.44037
+    },
+    {
+      "id": "Q688446",
+      "name": "Knie's Kinderzoo",
+      "lat": 47.223652,
+      "lng": 8.821989
+    },
+    {
+      "id": "Q1778094",
+      "name": "Kocherpark",
+      "lat": 46.946439,
+      "lng": 7.432939
+    },
+    {
+      "id": "Q123270512",
+      "name": "Kronenplatz",
+      "lat": 47.583069,
+      "lng": 7.592419
+    },
+    {
+      "id": "Q29015787",
+      "name": "Kurpark Baden AG",
+      "lat": 47.4794,
+      "lng": 8.3105
+    },
+    {
+      "id": "Q127418862",
+      "name": "Kurpark Davos",
+      "lat": 46.7997,
+      "lng": 9.82906
+    },
+    {
+      "id": "Q27322215",
+      "name": "Kurt-Guggenheim-Anlage",
+      "lat": 47.366868,
+      "lng": 8.54012
+    },
+    {
+      "id": "Q134581024",
+      "name": "La Balade de Séprais",
+      "lat": 47.364495,
+      "lng": 7.228779
+    },
+    {
+      "id": "Q29890920",
+      "name": "La Faraz, manor house, park with pond and grotto",
+      "lat": 46.454679,
+      "lng": 6.869491
+    },
+    {
+      "id": "Q115650564",
+      "name": "Landiwiese",
+      "lat": 47.350339,
+      "lng": 8.535181
+    },
+    {
+      "id": "Q2570812",
+      "name": "Langenberg Wildlife Park",
+      "lat": 47.2928,
+      "lng": 8.52917
+    },
+    {
+      "id": "Q940251",
+      "name": "Leutschenpark",
+      "lat": 47.418,
+      "lng": 8.55672
+    },
+    {
+      "id": "Q123298123",
+      "name": "Liesbergermatte",
+      "lat": 47.542073,
+      "lng": 7.596099
+    },
+    {
+      "id": "Q27330101",
+      "name": "Looächeranlage",
+      "lat": 47.424113,
+      "lng": 8.497814
+    },
+    {
+      "id": "Q30741184",
+      "name": "Louis-Bourget Park",
+      "lat": 46.51934,
+      "lng": 6.58836
+    },
+    {
+      "id": "Q1871416",
+      "name": "Louis-Häfliger-Park",
+      "lat": 47.4124,
+      "lng": 8.53381
+    },
+    {
+      "id": "Q29682158",
+      "name": "Mapprach Farm with Garden",
+      "lat": 47.41054,
+      "lng": 7.89202
+    },
+    {
+      "id": "Q1416783",
+      "name": "Max-Bill-Platz",
+      "lat": 47.4142,
+      "lng": 8.54086
+    },
+    {
+      "id": "Q110989577",
+      "name": "Mentona-Moser-Anlage",
+      "lat": 47.37457,
+      "lng": 8.52826
+    },
+    {
+      "id": "Q118902743",
+      "name": "Merian Gardens",
+      "lat": 47.538611,
+      "lng": 7.614722
+    },
+    {
+      "id": "Q488815",
+      "name": "MFO-Park",
+      "lat": 47.4122,
+      "lng": 8.54028
+    },
+    {
+      "id": "Q18003202",
+      "name": "Mon-Repos country estate",
+      "lat": 46.51898,
+      "lng": 6.64276
+    },
+    {
+      "id": "Q2242550",
+      "name": "Münchenwiler Castle",
+      "lat": 46.912222,
+      "lng": 7.126944
+    },
+    {
+      "id": "Q1425778",
+      "name": "Münster platform",
+      "lat": 46.946667,
+      "lng": 7.451944
+    },
+    {
+      "id": "Q96971026",
+      "name": "Murg Auen Park",
+      "lat": 47.56363,
+      "lng": 8.89613
+    },
+    {
+      "id": "Q1320084",
+      "name": "Natur- und Tierpark Goldau",
+      "lat": 47.0503,
+      "lng": 8.55306
+    },
+    {
+      "id": "Q114951734",
+      "name": "Neu Bechburg, medieval castle hill",
+      "lat": 47.295879,
+      "lng": 7.717987
+    },
+    {
+      "id": "Q1650264",
+      "name": "New and Old Wenkenhof with Park",
+      "lat": 47.575,
+      "lng": 7.652778
+    },
+    {
+      "id": "Q972732",
+      "name": "Oerliker Park",
+      "lat": 47.414614,
+      "lng": 8.537246
+    },
+    {
+      "id": "Q437802",
+      "name": "Old Botanical Garden, Zurich",
+      "lat": 47.371111,
+      "lng": 8.533611
+    },
+    {
+      "id": "Q453511",
+      "name": "Papiliorama",
+      "lat": 46.9892,
+      "lng": 7.20111
+    },
+    {
+      "id": "Q2397797",
+      "name": "Parc Barton",
+      "lat": 46.2224,
+      "lng": 6.15093
+    },
+    {
+      "id": "Q3363788",
+      "name": "Parc Beaulieu",
+      "lat": 46.2141,
+      "lng": 6.13791
+    },
+    {
+      "id": "Q102745244",
+      "name": "Parc Bernasconi",
+      "lat": 46.18707,
+      "lng": 6.12211
+    },
+    {
+      "id": "Q3363791",
+      "name": "Parc Bertrand",
+      "lat": 46.1926,
+      "lng": 6.1586
+    },
+    {
+      "id": "Q43267926",
+      "name": "Parc Chuit",
+      "lat": 46.191388,
+      "lng": 6.123998
+    },
+    {
+      "id": "Q2424620",
+      "name": "Parc de Contamines",
+      "lat": 46.1958,
+      "lng": 6.16023
+    },
+    {
+      "id": "Q3364177",
+      "name": "Parc de l'Ariana",
+      "lat": 46.2264,
+      "lng": 6.13786
+    },
+    {
+      "id": "Q3364181",
+      "name": "parc de l'Impératrice",
+      "lat": 46.2317,
+      "lng": 6.14147
+    },
+    {
+      "id": "Q140677720",
+      "name": "Parc de l'Ouest",
+      "lat": 47.102307,
+      "lng": 6.825982
+    },
+    {
+      "id": "Q3364136",
+      "name": "Parc de La Grange",
+      "lat": 46.206,
+      "lng": 6.167
+    },
+    {
+      "id": "Q1119058",
+      "name": "Parc de la Perle du Lac",
+      "lat": 46.220587,
+      "lng": 6.152408
+    },
+    {
+      "id": "Q3364149",
+      "name": "Parc de Mon-Repos",
+      "lat": 46.618889,
+      "lng": 6.634444
+    },
+    {
+      "id": "Q3364167",
+      "name": "Parc de Vermont",
+      "lat": 46.219,
+      "lng": 6.13993
+    },
+    {
+      "id": "Q3364247",
+      "name": "Parc des Bastions",
+      "lat": 46.19968,
+      "lng": 6.14537
+    },
+    {
+      "id": "Q3364253",
+      "name": "Parc des Chaumettes",
+      "lat": 46.19436,
+      "lng": 6.14828
+    },
+    {
+      "id": "Q3364260",
+      "name": "Parc des Cropettes",
+      "lat": 46.2124,
+      "lng": 6.1403
+    },
+    {
+      "id": "Q16854953",
+      "name": "Parc des Délices",
+      "lat": 46.2077,
+      "lng": 6.1332
+    },
+    {
+      "id": "Q3364261",
+      "name": "Parc des Eaux Vives",
+      "lat": 46.20792,
+      "lng": 6.16917
+    },
+    {
+      "id": "Q3364265",
+      "name": "Parc des Franchises",
+      "lat": 46.2109,
+      "lng": 6.11906
+    },
+    {
+      "id": "Q21634340",
+      "name": "Parc du Denantou",
+      "lat": 46.506111,
+      "lng": 6.639722
+    },
+    {
+      "id": "Q124152565",
+      "name": "Parc du port Choiseul",
+      "lat": 46.289392,
+      "lng": 6.170217
+    },
+    {
+      "id": "Q123477999",
+      "name": "Parc et sentier du Promeneur solitaire",
+      "lat": 46.2035,
+      "lng": 6.121712
+    },
+    {
+      "id": "Q3363816",
+      "name": "Parc Geisendorf",
+      "lat": 46.2098,
+      "lng": 6.1308
+    },
+    {
+      "id": "Q3363822",
+      "name": "parc Gourgas",
+      "lat": 46.1996,
+      "lng": 6.13553
+    },
+    {
+      "id": "Q120691204",
+      "name": "Parc Gustave et Léonard Hentsch",
+      "lat": 46.2091,
+      "lng": 6.1182
+    },
+    {
+      "id": "Q124153955",
+      "name": "Parc Lect",
+      "lat": 46.22826,
+      "lng": 6.08494
+    },
+    {
+      "id": "Q3363851",
+      "name": "parc Liotard",
+      "lat": 46.2143,
+      "lng": 6.12625
+    },
+    {
+      "id": "Q3363863",
+      "name": "Parc Mon Repos",
+      "lat": 46.2186,
+      "lng": 6.15073
+    },
+    {
+      "id": "Q3363869",
+      "name": "Parc Moynier",
+      "lat": 46.2204,
+      "lng": 6.15112
+    },
+    {
+      "id": "Q60847246",
+      "name": "Parc Navazza-Oltramare",
+      "lat": 46.18358,
+      "lng": 6.11494
+    },
+    {
+      "id": "Q121189398",
+      "name": "Parc Saint-Jean",
+      "lat": 46.205395,
+      "lng": 6.139043
+    },
+    {
+      "id": "Q3363921",
+      "name": "Parc Trembley",
+      "lat": 46.2185,
+      "lng": 6.12925
+    },
+    {
+      "id": "Q3363932",
+      "name": "Parc William-Rappard",
+      "lat": 46.2234,
+      "lng": 6.15056
+    },
+    {
+      "id": "Q56876733",
+      "name": "Parco San Grato",
+      "lat": 45.95015,
+      "lng": 8.93143
+    },
+    {
+      "id": "Q29527461",
+      "name": "Parco Scherrer",
+      "lat": 45.92406,
+      "lng": 8.91086
+    },
+    {
+      "id": "Q29479026",
+      "name": "Park \"Bois Murat\" with the villa of Count Abel-Henri-Georges Armand, known as the castle",
+      "lat": 46.79085,
+      "lng": 7.09661
+    },
+    {
+      "id": "Q20971135",
+      "name": "Park Baud-Bovy",
+      "lat": 46.1953,
+      "lng": 6.13853
+    },
+    {
+      "id": "Q1729273",
+      "name": "Park im Grüene",
+      "lat": 47.3003,
+      "lng": 8.55144
+    },
+    {
+      "id": "Q3364142",
+      "name": "Park of Malagnou",
+      "lat": 46.199,
+      "lng": 6.159
+    },
+    {
+      "id": "Q123296665",
+      "name": "Paul Sacher-Anlage",
+      "lat": 47.559039,
+      "lng": 7.611925
+    },
+    {
+      "id": "Q27322362",
+      "name": "Pestalozzianlage",
+      "lat": 47.375553,
+      "lng": 8.538804
+    },
+    {
+      "id": "Q1772465",
+      "name": "Pestalozziwiese",
+      "lat": 47.3756,
+      "lng": 8.53883
+    },
+    {
+      "id": "Q3390975",
+      "name": "Plaine de Plainpalais",
+      "lat": 46.198,
+      "lng": 6.1404
+    },
+    {
+      "id": "Q21973904",
+      "name": "Plättli Zoo",
+      "lat": 47.560556,
+      "lng": 8.915833
+    },
+    {
+      "id": "Q101563328",
+      "name": "Platz der Auslandschweizer",
+      "lat": 46.99347,
+      "lng": 8.60072
+    },
+    {
+      "id": "Q2098914",
+      "name": "Platzspitz park",
+      "lat": 47.380278,
+      "lng": 8.54
+    },
+    {
+      "id": "Q29522979",
+      "name": "Préfargier clinic, health centre and grounds",
+      "lat": 47.00633,
+      "lng": 7.00892
+    },
+    {
+      "id": "Q2114441",
+      "name": "Pruntrutermatte",
+      "lat": 47.544602,
+      "lng": 7.580116
+    },
+    {
+      "id": "Q19362402",
+      "name": "psychiatric clinic with park",
+      "lat": 47.481354,
+      "lng": 8.21543
+    },
+    {
+      "id": "Q126363462",
+      "name": "Public park (1911)",
+      "lat": 47.05571,
+      "lng": 7.62124
+    },
+    {
+      "id": "Q29785703",
+      "name": "Quaianlagen",
+      "lat": 47.054512,
+      "lng": 8.315148
+    },
+    {
+      "id": "Q14541552",
+      "name": "Rapperswil Rose Gardens",
+      "lat": 47.2264,
+      "lng": 8.81291
+    },
+    {
+      "id": "Q136001989",
+      "name": "Rechberggarten",
+      "lat": 47.373299,
+      "lng": 8.548481
+    },
+    {
+      "id": "Q29932574",
+      "name": "residential houses Sulzerhof with former washhouse, greenhouse and park grounds",
+      "lat": 47.49505,
+      "lng": 8.89282
+    },
+    {
+      "id": "Q692097",
+      "name": "Rieterpark",
+      "lat": 47.3585,
+      "lng": 8.53074
+    },
+    {
+      "id": "Q2167108",
+      "name": "Rose Garden Bern",
+      "lat": 46.9519,
+      "lng": 7.46028
+    },
+    {
+      "id": "Q123298876",
+      "name": "Rosenfeldpark",
+      "lat": 47.547502,
+      "lng": 7.596621
+    },
+    {
+      "id": "Q86195151",
+      "name": "Rosengarten",
+      "lat": 47.496058,
+      "lng": 8.724267
+    },
+    {
+      "id": "Q123298599",
+      "name": "Rosentalanlage",
+      "lat": 47.563866,
+      "lng": 7.602755
+    },
+    {
+      "id": "Q27331246",
+      "name": "Rötelterrasse",
+      "lat": 47.398653,
+      "lng": 8.529695
+    },
+    {
+      "id": "Q27330099",
+      "name": "Ruggächeranlage",
+      "lat": 47.423249,
+      "lng": 8.501037
+    },
+    {
+      "id": "Q597809",
+      "name": "Sarasinpark",
+      "lat": 47.5872,
+      "lng": 7.65131
+    },
+    {
+      "id": "Q123267994",
+      "name": "Schäfermatte",
+      "lat": 47.585495,
+      "lng": 7.594589
+    },
+    {
+      "id": "Q2140971",
+      "name": "Schützenmattpark",
+      "lat": 47.552721,
+      "lng": 7.574511
+    },
+    {
+      "id": "Q123299274",
+      "name": "Schwarzpark",
+      "lat": 47.549662,
+      "lng": 7.618229
+    },
+    {
+      "id": "Q18213068",
+      "name": "Schynige Platte Alpine Garden",
+      "lat": 46.6535,
+      "lng": 7.91161
+    },
+    {
+      "id": "Q682866",
+      "name": "Sculpture at Schoenthal",
+      "lat": 47.359402,
+      "lng": 7.772986
+    },
+    {
+      "id": "Q65115208",
+      "name": "sculpture park ZPK",
+      "lat": 46.94826,
+      "lng": 7.47627
+    },
+    {
+      "id": "Q112753060",
+      "name": "Seleger Moor",
+      "lat": 47.245474,
+      "lng": 8.507472
+    },
+    {
+      "id": "Q27326692",
+      "name": "Sigi-Feigel-Terrasse",
+      "lat": 47.375835,
+      "lng": 8.535179
+    },
+    {
+      "id": "Q56261042",
+      "name": "Sikypark",
+      "lat": 47.273611,
+      "lng": 7.456111
+    },
+    {
+      "id": "Q105414717",
+      "name": "Smilestones",
+      "lat": 47.67922,
+      "lng": 8.6179
+    },
+    {
+      "id": "Q110728500",
+      "name": "so-called forest cathedral of the Beromünster Abbey",
+      "lat": 47.20217,
+      "lng": 8.1842
+    },
+    {
+      "id": "Q123285164",
+      "name": "Solitudepark",
+      "lat": 47.558782,
+      "lng": 7.610229
+    },
+    {
+      "id": "Q139803635",
+      "name": "Splash & Spa Tamaro",
+      "lat": 46.126111,
+      "lng": 8.920833
+    },
+    {
+      "id": "Q383059",
+      "name": "St. Andrew's Castle (castle complex with outbuildings, chapel and park",
+      "lat": 47.178836,
+      "lng": 8.466256
+    },
+    {
+      "id": "Q87922569",
+      "name": "St. Johanns-Park",
+      "lat": 47.56785,
+      "lng": 7.58195
+    },
+    {
+      "id": "Q24037826",
+      "name": "Stadtgarten",
+      "lat": 47.500906,
+      "lng": 8.728239
+    },
+    {
+      "id": "Q123296784",
+      "name": "Steinbühlplatz",
+      "lat": 47.548682,
+      "lng": 7.558829
+    },
+    {
+      "id": "Q2364115",
+      "name": "Sukkulenten-Sammlung Zürich",
+      "lat": 47.356111,
+      "lng": 8.535
+    },
+    {
+      "id": "Q83397",
+      "name": "Swiss National Park",
+      "lat": 46.7,
+      "lng": 10.095
+    },
+    {
+      "id": "Q690223",
+      "name": "Swiss Vapeur Parc",
+      "lat": 46.383333,
+      "lng": 6.858333
+    },
+    {
+      "id": "Q687065",
+      "name": "Swissminiatur",
+      "lat": 45.953514,
+      "lng": 8.950847
+    },
+    {
+      "id": "Q1554373",
+      "name": "Tennisanlage Geiselweid",
+      "lat": 47.49882,
+      "lng": 8.74043
+    },
+    {
+      "id": "Q123291626",
+      "name": "Theodorsgrabenanlage",
+      "lat": 47.558134,
+      "lng": 7.597922
+    },
+    {
+      "id": "Q683361",
+      "name": "Tierpark Bern",
+      "lat": 46.9344,
+      "lng": 7.44972
+    },
+    {
+      "id": "Q1693413",
+      "name": "Tierpark Lange Erlen",
+      "lat": 47.5744,
+      "lng": 7.60778
+    },
+    {
+      "id": "Q2442063",
+      "name": "Toni's Zoo",
+      "lat": 47.107447,
+      "lng": 8.262156
+    },
+    {
+      "id": "Q1690700",
+      "name": "Tropenhaus Frutigen",
+      "lat": 46.593256,
+      "lng": 7.656081
+    },
+    {
+      "id": "Q27330112",
+      "name": "Ueberlandpark",
+      "lat": 47.409,
+      "lng": 8.568122
+    },
+    {
+      "id": "Q140001512",
+      "name": "Ufschötti",
+      "lat": 47.046556,
+      "lng": 8.32165
+    },
+    {
+      "id": "Q600792",
+      "name": "University of Basel Botanical Garden",
+      "lat": 47.558611,
+      "lng": 7.581667
+    },
+    {
+      "id": "Q22343324",
+      "name": "Vallée de la Jeunesse",
+      "lat": 46.521061,
+      "lng": 6.604703
+    },
+    {
+      "id": "Q29522419",
+      "name": "Villa Bellerive with park",
+      "lat": 47.056913,
+      "lng": 8.329999
+    },
+    {
+      "id": "Q816289",
+      "name": "Villa Belvoir",
+      "lat": 47.356736,
+      "lng": 8.533625
+    },
+    {
+      "id": "Q15852895",
+      "name": "Villa Boveri",
+      "lat": 47.470138,
+      "lng": 8.307842
+    },
+    {
+      "id": "Q137669084",
+      "name": "Villa Brandt",
+      "lat": 47.353066,
+      "lng": 8.563963
+    },
+    {
+      "id": "Q125602490",
+      "name": "Villa César with park (1899)",
+      "lat": 47.3837,
+      "lng": 8.23952
+    },
+    {
+      "id": "Q25399317",
+      "name": "Villa Ciani",
+      "lat": 46.00465,
+      "lng": 8.95654
+    },
+    {
+      "id": "Q2525093",
+      "name": "Villa Favorita",
+      "lat": 46,
+      "lng": 8.981389
+    },
+    {
+      "id": "Q19362791",
+      "name": "Villa Gedeon Thommen with parc",
+      "lat": 47.38611,
+      "lng": 7.7477
+    },
+    {
+      "id": "Q115616914",
+      "name": "Villa Jägerstein with coach house, park and grotto",
+      "lat": 47.14117,
+      "lng": 7.24174
+    },
+    {
+      "id": "Q29785594",
+      "name": "Villa Krämerstein with gatehouse and park",
+      "lat": 47.014857,
+      "lng": 8.339937
+    },
+    {
+      "id": "Q116842812",
+      "name": "Villa Lambert with park",
+      "lat": 47.199207,
+      "lng": 7.390551
+    },
+    {
+      "id": "Q29527526",
+      "name": "Villa Negroni",
+      "lat": 46.02801,
+      "lng": 8.93607
+    },
+    {
+      "id": "Q2525631",
+      "name": "Villa Rieter (Schönberg) with outbuildings",
+      "lat": 47.359557,
+      "lng": 8.530247
+    },
+    {
+      "id": "Q59586381",
+      "name": "Villette Park",
+      "lat": 47.178119,
+      "lng": 8.460268
+    },
+    {
+      "id": "Q126486259",
+      "name": "Vögeligärtli",
+      "lat": 47.04858,
+      "lng": 8.308076
+    },
+    {
+      "id": "Q137770188",
+      "name": "Vogelpark Ambigua",
+      "lat": 47.478581,
+      "lng": 8.079848
+    },
+    {
+      "id": "Q13530098",
+      "name": "Von Vigier little castle with gatehouse and park",
+      "lat": 47.20105,
+      "lng": 7.61998
+    },
+    {
+      "id": "Q2539700",
+      "name": "Wahlenpark",
+      "lat": 47.4157,
+      "lng": 8.54116
+    },
+    {
+      "id": "Q2441108",
+      "name": "Walter Zoo",
+      "lat": 47.419036,
+      "lng": 9.285153
+    },
+    {
+      "id": "Q1595081",
+      "name": "Wartegg castle and park",
+      "lat": 47.4785,
+      "lng": 9.53004
+    },
+    {
+      "id": "Q107832314",
+      "name": "Warteggpark",
+      "lat": 47.478553,
+      "lng": 9.530039
+    },
+    {
+      "id": "Q2244164",
+      "name": "Wil castle and park",
+      "lat": 46.908067,
+      "lng": 7.607996
+    },
+    {
+      "id": "Q107434467",
+      "name": "Wildpark Brienz",
+      "lat": 46.755744,
+      "lng": 8.043613
+    },
+    {
+      "id": "Q1372195",
+      "name": "Wildpark Bruderhaus",
+      "lat": 47.4772,
+      "lng": 8.72619
+    },
+    {
+      "id": "Q63256166",
+      "name": "Wildpark Mühletäli",
+      "lat": 47.342024,
+      "lng": 7.922579
+    },
+    {
+      "id": "Q2570828",
+      "name": "Wildpark Peter und Paul",
+      "lat": 47.4486,
+      "lng": 9.3875
+    },
+    {
+      "id": "Q22955412",
+      "name": "Wildpark Roggenhausen",
+      "lat": 47.377395,
+      "lng": 8.030185
+    },
+    {
+      "id": "Q123296460",
+      "name": "Winkelriedplatz",
+      "lat": 47.543337,
+      "lng": 7.588564
+    },
+    {
+      "id": "Q27328988",
+      "name": "Wipkingerpark",
+      "lat": 47.392668,
+      "lng": 8.521096
+    },
+    {
+      "id": "Q220112",
+      "name": "Zoo al Maglio",
+      "lat": 45.985,
+      "lng": 8.876667
+    },
+    {
+      "id": "Q220120",
+      "name": "Zoo de Servion",
+      "lat": 46.565,
+      "lng": 6.773889
+    },
+    {
+      "id": "Q220128",
+      "name": "Zoo La Garenne",
+      "lat": 46.477778,
+      "lng": 6.243056
+    },
+    {
+      "id": "Q220109",
+      "name": "Zürich Zoo",
+      "lat": 47.385,
+      "lng": 8.573056
+    },
+    {
+      "id": "Q1907213",
+      "name": "Zürich Zoo Masoala Hall",
+      "lat": 47.3847,
+      "lng": 8.57869
+    }
+  ]
+}

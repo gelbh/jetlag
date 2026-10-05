@@ -96,7 +96,9 @@ export function resolvePackAttachChrome(input: {
  *
  * Score = intersection area / pack reference bbox area (both km²).
  * A pack qualifies when intersection area ≥ max(α × packArea, β km²).
- * Among qualifying packs, the highest score wins.
+ * Among qualifying packs, the highest score wins. Equal scores break toward the
+ * larger absolute intersection (country-scale play prefers the national pack
+ * over nested specialty metros that also score 1.0).
  */
 export function suggestRegionPackForGameArea(
   gameArea: GameArea,
@@ -107,7 +109,7 @@ export function suggestRegionPackForGameArea(
 
   const gameBox = gameAreaToBoundingBoxRaw(gameArea);
 
-  let best: PackAttachSuggestion | null = null;
+  let best: (PackAttachSuggestion & { intersectionKm2: number }) | null = null;
 
   for (const packId of REGION_PACK_IDS) {
     const packBox = REGION_PACK_REFERENCE_BBOXES[packId];
@@ -128,10 +130,14 @@ export function suggestRegionPackForGameArea(
     }
 
     const score = intersectionKm2 / packAreaKm2;
-    if (!best || score > best.score) {
-      best = { packId, score };
+    const beatsBest =
+      !best ||
+      score > best.score ||
+      (score === best.score && intersectionKm2 > best.intersectionKm2);
+    if (beatsBest) {
+      best = { packId, score, intersectionKm2 };
     }
   }
 
-  return best;
+  return best ? { packId: best.packId, score: best.score } : null;
 }

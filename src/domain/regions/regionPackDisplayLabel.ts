@@ -8,6 +8,7 @@ const REGION_PACK_DISPLAY_LABELS: Record<RegionPackId, string> = {
   osaka: "Osaka",
   zurich: "Zurich",
   lucerne: "Lucerne",
+  switzerland: "Switzerland",
   "portland-maine": "Portland, Maine",
   "prince-rupert": "Prince Rupert",
 };

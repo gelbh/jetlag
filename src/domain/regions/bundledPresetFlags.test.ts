@@ -6,6 +6,7 @@ import {
   flagMarkForHierarchySegmentId,
   flagMarkForSegmentRow,
 } from "./bundledPresetFlags";
+import { SWISS_CANTON_IDS } from "./bundledPresets/swiss";
 
 describe("bundledPresetFlags", () => {
   it("uses local regional flags for Kansai and Kantō", () => {
@@ -129,5 +130,11 @@ describe("bundledPresetFlags", () => {
     expect(flagMarkForSegmentRow("canton-lucerne", [])).not.toBeNull();
     expect(flagMarkForSegmentRow("lucerne-metro", ["canton-lucerne"])).toBeNull();
     expect(flagMarkForSegmentRow("zurich-city", ["canton-zurich"])).toBeNull();
+  });
+
+  it("resolves flags for all Swiss canton segments", () => {
+    for (const cantonId of SWISS_CANTON_IDS) {
+      expect(flagMarkForSegmentRow(`canton-${cantonId}`, [])).not.toBeNull();
+    }
   });
 });

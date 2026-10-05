@@ -16,4 +16,19 @@ describe("bundled POI bundles", () => {
       payload.places.some((place: { id: string }) => place.id.startsWith("pme:openspace:")),
     ).toBe(false);
   });
+
+  it("ships dense Wikidata POIs for the Switzerland national pack", () => {
+    for (const category of ["museum", "hospital", "rail_station", "park", "mountain"] as const) {
+      const payload = JSON.parse(
+        readFileSync(resolve(ROOT, `public/geo/switzerland/poi/${category}.json`), "utf8"),
+      ) as {
+        source: string;
+        places: Array<{ id: string; name: string; lat: number; lng: number }>;
+      };
+      expect(payload.source, category).toBe("wikidata");
+      expect(payload.places.length, category).toBeGreaterThan(50);
+      expect(payload.places.every((place) => /^Q\d+$/.test(place.id))).toBe(true);
+      expect(payload.places.every((place) => place.name.trim().length > 0)).toBe(true);
+    }
+  });
 });
