@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
-import {
-  deferredPointFromPendingPlacement,
-  seekerAnchorPointFeature,
-} from "./deferredSeekerPoint";
+import { deferredPointFromPendingPlacement, seekerAnchorPointFeature } from "./deferredSeekerPoint";
 
 function basePending(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {

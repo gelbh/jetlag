@@ -51,10 +51,12 @@ describe("persistEliminationOrDeferPoint", () => {
   it("returns deferred Point when slim fails", () => {
     const elimination = samplePolygon();
     const deferPoint = samplePoint();
-    const slim = vi.fn((): PersistSlimPolygonResult => ({
-      ok: false,
-      message: "too large",
-    }));
+    const slim = vi.fn(
+      (): PersistSlimPolygonResult => ({
+        ok: false,
+        message: "too large",
+      }),
+    );
 
     const result = persistEliminationOrDeferPoint({ elimination, deferPoint, slim });
 
@@ -64,10 +66,12 @@ describe("persistEliminationOrDeferPoint", () => {
 
   it("returns unavailable when slim fails and defer Point is missing", () => {
     const elimination = samplePolygon();
-    const slim = vi.fn((): PersistSlimPolygonResult => ({
-      ok: false,
-      message: "too large",
-    }));
+    const slim = vi.fn(
+      (): PersistSlimPolygonResult => ({
+        ok: false,
+        message: "too large",
+      }),
+    );
 
     const result = persistEliminationOrDeferPoint({
       elimination,

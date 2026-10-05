@@ -1,8 +1,5 @@
 import type { Feature, MultiPolygon, Point, Polygon } from "geojson";
-import {
-  persistSlimPolygonFeature,
-  type PersistSlimPolygonResult,
-} from "./persistSlim";
+import { type PersistSlimPolygonResult, persistSlimPolygonFeature } from "./persistSlim";
 
 export type PersistOrDeferEliminationResult =
   | { kind: "stored"; geometry: Feature<Polygon | MultiPolygon> }
