@@ -1,4 +1,5 @@
 import { Button, Group } from "@mantine/core";
+import { type ReactNode, useMemo } from "react";
 import { MapFirstRunSheet } from "../../components/session/mapChrome/MapFirstRunSheet";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
@@ -13,6 +14,7 @@ import {
 } from "../../domain/ask/askHudModes";
 import { MAP_TOOL_DOCK_ENTRIES } from "../../domain/map/mapTools";
 import type { AskToolHudBundle } from "../../hooks/map-screen/heavyMapTools";
+import { useSheetExitSnapshot } from "../../hooks/motion/useSheetExitSnapshot";
 import type { MapScreenController } from "./useMapScreenController";
 
 type SeekerChromeOverlaysProps = {
@@ -105,6 +107,21 @@ function askHudFromTools(
   }
 }
 
+type HeldAskSnapshot = {
+  toolLabel: string;
+  cue: string;
+  costLabel: string | null;
+  canCommit: boolean;
+  commitLabel: string;
+  onCommit: () => void;
+  isSubmitting: boolean;
+  error: string | null;
+  modeBody: ReactNode;
+  showCue: boolean;
+  showCostChip: boolean;
+  showCommitStrip: boolean;
+};
+
 export function SeekerChromeOverlays({
   timer,
   activeTool,
@@ -157,6 +174,51 @@ export function SeekerChromeOverlays({
       })
     : "";
 
+  const askSheetOpen = Boolean(askHudOwned && askSurface && toolHud && !toolHud.suppressSheet);
+
+  // Identity must stay stable while fields are unchanged so exit snapshot can Object.is-latch.
+  const liveAsk = useMemo((): HeldAskSnapshot | null => {
+    if (!askSheetOpen || !askSurface || !toolHud) {
+      return null;
+    }
+    return {
+      toolLabel: dockEntry?.name ?? askSurface,
+      cue: askCue,
+      costLabel: toolHud.costLabel,
+      canCommit: askCanCommit,
+      commitLabel: askCommitLabel,
+      onCommit: toolHud.onCommit,
+      isSubmitting: toolHud.readiness.isSubmitting,
+      error: toolHud.suppressSheet ? null : toolHud.error,
+      modeBody: toolHud.modeBody,
+      showCue:
+        askSurface !== "matching" &&
+        askSurface !== "measuring" &&
+        askSurface !== "tentacle" &&
+        askSurface !== "photo" &&
+        askSurface !== "radar" &&
+        askSurface !== "thermometer",
+      showCostChip:
+        askSurface !== "matching" &&
+        askSurface !== "measuring" &&
+        askSurface !== "tentacle" &&
+        askSurface !== "photo" &&
+        askSurface !== "radar" &&
+        askSurface !== "thermometer",
+      showCommitStrip:
+        askSurface === "thermometer"
+          ? toolHud.commitKind === "endWalk"
+          : askSurface !== "matching" &&
+            askSurface !== "measuring" &&
+            askSurface !== "tentacle" &&
+            askSurface !== "photo" &&
+            askSurface !== "radar",
+    };
+  }, [askSheetOpen, askSurface, toolHud, dockEntry?.name, askCue, askCanCommit, askCommitLabel]);
+
+  const askHold = useSheetExitSnapshot(askSheetOpen, liveAsk);
+  const heldAsk = askHold.snapshot;
+
   const showFloatingPanel =
     activeTool !== "none" && !selectedAnnotation && !isAskHudOwnedTool(activeTool);
 
@@ -202,46 +264,27 @@ export function SeekerChromeOverlays({
         }}
       />
 
-      {askHudOwned && askSurface && toolHud && !toolHud.suppressSheet ? (
+      {askHold.mounted && heldAsk ? (
         <AskHudHost
-          cue={askCue}
-          toolLabel={dockEntry?.name ?? activeTool}
-          costLabel={toolHud.costLabel}
-          canCommit={askCanCommit}
-          commitLabel={askCommitLabel}
-          onCommit={toolHud.onCommit}
+          open={askHold.open}
+          cue={heldAsk.cue}
+          toolLabel={heldAsk.toolLabel}
+          costLabel={heldAsk.costLabel}
+          canCommit={heldAsk.canCommit}
+          commitLabel={heldAsk.commitLabel}
+          onCommit={heldAsk.onCommit}
           onDismiss={() => handleSelectTool("none")}
-          isSubmitting={toolHud.readiness.isSubmitting}
-          error={toolHud.suppressSheet ? null : toolHud.error}
-          modeBody={toolHud.modeBody}
-          showCue={
-            askSurface !== "matching" &&
-            askSurface !== "measuring" &&
-            askSurface !== "tentacle" &&
-            askSurface !== "photo" &&
-            askSurface !== "radar" &&
-            askSurface !== "thermometer"
-          }
-          showCostChip={
-            askSurface !== "matching" &&
-            askSurface !== "measuring" &&
-            askSurface !== "tentacle" &&
-            askSurface !== "photo" &&
-            askSurface !== "radar" &&
-            askSurface !== "thermometer"
-          }
-          showCommitStrip={
-            askSurface === "thermometer"
-              ? toolHud.commitKind === "endWalk"
-              : askSurface !== "matching" &&
-                askSurface !== "measuring" &&
-                askSurface !== "tentacle" &&
-                askSurface !== "photo" &&
-                askSurface !== "radar"
-          }
+          isSubmitting={heldAsk.isSubmitting}
+          error={heldAsk.error}
+          modeBody={heldAsk.modeBody}
+          showCue={heldAsk.showCue}
+          showCostChip={heldAsk.showCostChip}
+          showCommitStrip={heldAsk.showCommitStrip}
+          onExitTransitionEnd={askHold.onExitTransitionEnd}
         />
       ) : null}
       {askHudOwned && toolHud?.mapOverlay ? toolHud.mapOverlay : null}
+      {/* Preview sheets own open toggle; do not clone-hold (leaks when already closed). */}
       {askHudOwned && toolHud?.sheets ? toolHud.sheets : null}
 
       {showFloatingPanel ? (

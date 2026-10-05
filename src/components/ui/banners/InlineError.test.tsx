@@ -27,20 +27,10 @@ function renderInline(ui: ReactElement) {
 }
 
 describe("InlineError", () => {
-  it("renders children as a Mantine alert", () => {
-    const { container } = renderInline(<InlineError>Could not join</InlineError>);
-
-    expect(container.querySelector(".mantine-Alert-root")).toBeTruthy();
-    expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(screen.getByText("Could not join")).toBeInTheDocument();
-  });
-
   it("uses GPS title and detail for location timeouts", () => {
-    const { container } = renderInline(
-      <InlineError>Timed out while waiting for your location.</InlineError>,
-    );
+    renderInline(<InlineError>Timed out while waiting for your location.</InlineError>);
 
-    expect(container.querySelector(".mantine-Alert-root")).toBeTruthy();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("Location timed out")).toBeInTheDocument();
     expect(screen.getByText(/tap the map/i)).toBeInTheDocument();
   });

@@ -1,23 +1,12 @@
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { ComponentProps, ReactElement } from "react";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 
-const sheetOpenHistory: boolean[] = [];
-
-vi.mock("@/components/ui/sheets/SheetHost", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/components/ui/sheets/SheetHost")>();
-  return {
-    SheetHost: (props: ComponentProps<typeof actual.SheetHost>) => {
-      sheetOpenHistory.push(props.open);
-      return <actual.SheetHost {...props} />;
-    },
-  };
-});
-
 const hostProps = {
+  open: true,
   cue: "Pick a direction",
   toolLabel: "Radar",
   costLabel: "1 token",
@@ -36,7 +25,6 @@ function renderHost(ui: ReactElement) {
 }
 
 beforeEach(() => {
-  sheetOpenHistory.length = 0;
   hostProps.onDismiss = vi.fn();
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
@@ -51,14 +39,10 @@ beforeEach(() => {
 });
 
 describe("AskHudHost", () => {
-  it("presents SheetHost after mount so Drawer can animate open", async () => {
+  it("presents SheetHost dialog when mounted", async () => {
     renderHost(<AskHudHost {...hostProps} modeBody={<div>Mode body</div>} />);
 
-    // RTL flushes useEffect before render returns; assert the closed→open latch via prop history.
-    expect(sheetOpenHistory[0]).toBe(false);
-
     await waitFor(() => {
-      expect(sheetOpenHistory).toContain(true);
       expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
       expect(screen.getByRole("dialog")).toBeVisible();
     });
@@ -124,5 +108,13 @@ describe("AskHudHost", () => {
     expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
     expect(screen.queryByTestId("ask-cost-chip")).toBeNull();
     expect(screen.queryByText("PICK CATEGORY")).toBeNull();
+  });
+
+  it("keeps host mounted when open is false and gates body", () => {
+    renderHost(<AskHudHost {...hostProps} open={false} modeBody={<div>Mode body</div>} />);
+
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.queryByText("Mode body")).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });

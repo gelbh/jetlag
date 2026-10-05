@@ -1,12 +1,14 @@
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import { persistSlimPolygonFeature } from "../progressive/persistSlim";
 import { POLYGON_PERSIST_MAX_VERTICES } from "../progressive/polygonMetrics";
 import { buildCoastlineNearRegionDistanceThreshold } from "./coastlineNearRegion";
 import { countPolygonVertices } from "./measuringGeometryBudgets";
+import { setCoastlineNearRegionYieldHookForTests } from "./nearRegions";
+import { LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS } from "./seaLevel";
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -52,6 +54,10 @@ function featureHasNonAxisEdge(feature: Feature<Polygon | MultiPolygon>): boolea
 }
 
 describe("linear near-region isoline", () => {
+  afterEach(() => {
+    setCoastlineNearRegionYieldHookForTests(null);
+  });
+
   it("is not a single axis-aligned rectangle on a large AABB shore", async () => {
     const region = await buildCoastlineNearRegionDistanceThreshold([shore], 5_000, gameArea, {
       divisions: 24,
@@ -90,6 +96,7 @@ describe("linear near-region isoline", () => {
 
   // Dense 48-division isoline can exceed the default 5s under CI coverage load.
   it("persist-slims isoline shade under the vertex ceiling", async () => {
+    setCoastlineNearRegionYieldHookForTests(async () => {});
     const denseShore: Feature<LineString> = {
       type: "Feature",
       properties: {},
@@ -102,7 +109,7 @@ describe("linear near-region isoline", () => {
       },
     };
     const region = await buildCoastlineNearRegionDistanceThreshold([denseShore], 5_000, gameArea, {
-      divisions: 48,
+      divisions: LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS,
     });
     expect(region).not.toBeNull();
     const slim = persistSlimPolygonFeature(region!);
@@ -112,4 +119,29 @@ describe("linear near-region isoline", () => {
       expect(slim.message).toMatch(/too large to store/i);
     }
   }, 30_000);
+});
+
+describe("buildLinearNearRegionIsoline fail-closed", () => {
+  afterEach(() => {
+    vi.doUnmock("../kernel/unionKernelRunner");
+    vi.resetModules();
+  });
+
+  it("does not use Martinez when wasm union throws", async () => {
+    vi.resetModules();
+    vi.doMock("../kernel/unionKernelRunner", () => ({
+      runUnionPolygonFeatures: vi.fn(async () => {
+        throw new Error("wasm boom");
+      }),
+    }));
+    const martinez = vi.spyOn(
+      await import("../kernel/unionPolygonFeatures"),
+      "unionPolygonFeatures",
+    );
+    const { buildLinearNearRegionIsoline } = await import("./linearNearRegionIsoline");
+    await expect(
+      buildLinearNearRegionIsoline([shore], 5_000, gameArea, { divisions: 24 }),
+    ).rejects.toThrow("wasm boom");
+    expect(martinez).not.toHaveBeenCalled();
+  });
 });

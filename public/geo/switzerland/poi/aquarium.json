@@ -1,0 +1,18 @@
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q2859199",
+      "name": "Aquatis",
+      "lat": 46.54086,
+      "lng": 6.65729
+    }
+  ]
+}

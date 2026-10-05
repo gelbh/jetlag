@@ -96,6 +96,11 @@ async function rotateAnonymousAuth(): Promise<string> {
   return credential.user.uid;
 }
 
+/** Signed-in uid right now; resilience e2e asserts it survives offline / resume. */
+function currentUid(): string | null {
+  return getFirebaseAuth().currentUser?.uid ?? null;
+}
+
 declare global {
   interface Window {
     __JETLAG_E2E__?: {
@@ -104,6 +109,7 @@ declare global {
       patchSessionTimer: typeof patchSessionTimer;
       signInPermanentUserForCapture: typeof signInPermanentUserForCapture;
       rotateAnonymousAuth: typeof rotateAnonymousAuth;
+      currentUid: typeof currentUid;
       /** React `onRecoverableError` calls so far (hydration mismatches). */
       recoverableErrorCount: typeof getRecoverableErrorCount;
     };
@@ -121,6 +127,7 @@ export function installE2EBridgeIfConfigured(): void {
     patchSessionTimer,
     signInPermanentUserForCapture,
     rotateAnonymousAuth,
+    currentUid,
     recoverableErrorCount: getRecoverableErrorCount,
   };
 }

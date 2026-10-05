@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { KERNEL_WASM_READY, shouldUseWasm } from "./kernelWasmReady";
 
 describe("KERNEL_WASM_READY", () => {
-  it("marks all entrypoints ready", () => {
+  it("marks shipped entrypoints ready including unionPolygonFeatures", () => {
     expect(KERNEL_WASM_READY.maskFromUnionInput).toBe(true);
     expect(KERNEL_WASM_READY.endGameMaskFromDisks).toBe(true);
     expect(KERNEL_WASM_READY.halfPlane).toBe(true);
@@ -10,6 +10,7 @@ describe("KERNEL_WASM_READY", () => {
     expect(KERNEL_WASM_READY.spatialVoronoi).toBe(true);
     expect(KERNEL_WASM_READY.nearRegionBatch).toBe(true);
     expect(KERNEL_WASM_READY.tentacleEliminationRegion).toBe(true);
+    expect(KERNEL_WASM_READY.unionPolygonFeatures).toBe(true);
   });
 });
 
@@ -21,5 +22,6 @@ describe("shouldUseWasm", () => {
     expect(shouldUseWasm("nearRegionBatch")).toBe(true);
     expect(shouldUseWasm("spatialVoronoi")).toBe(true);
     expect(shouldUseWasm("tentacleEliminationRegion")).toBe(true);
+    expect(shouldUseWasm("unionPolygonFeatures")).toBe(true);
   });
 });

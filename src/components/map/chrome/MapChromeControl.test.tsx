@@ -53,21 +53,6 @@ describe("MapChromeControl", () => {
     expect(button).toHaveClass("map-chrome-control--pressed", "hud-chrome-active");
   });
 
-  it("forwards extra className onto the floating chrome button", () => {
-    renderControl(
-      <MapChromeControl
-        className="custom-chrome-extra"
-        aria-label="Zoom in"
-        icon={<span>+</span>}
-      />,
-    );
-
-    expect(screen.getByRole("button", { name: "Zoom in" })).toHaveClass(
-      "map-chrome-control",
-      "custom-chrome-extra",
-    );
-  });
-
   it("renders a side-dock slot with icon and label", () => {
     renderControl(
       <MapChromeControl

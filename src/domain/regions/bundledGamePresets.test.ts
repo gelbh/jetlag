@@ -27,6 +27,28 @@ describe("bundledGamePresets", () => {
     );
   });
 
+  it("ships switzerland country + 26 canton presets on the switzerland pack", () => {
+    const ids = BUNDLED_GAME_PRESET_DEFINITIONS.map((p) => p.id);
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        "bundled:switzerland",
+        "bundled:switzerland-zurich",
+        "bundled:switzerland-geneva",
+      ]),
+    );
+    const ch = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "switzerland");
+    expect(ch).toHaveLength(27); // country + 26 cantons
+    expect(ch.every((p) => p.distanceUnit === "metric")).toBe(true);
+    // specialty packs still present
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        "bundled:zurich-canton",
+        "bundled:zurich-city",
+        "bundled:lucerne-metro",
+      ]),
+    );
+  });
+
   it("keeps bundled presets ahead of user presets", () => {
     const merged = mergeBundledPresets([
       {

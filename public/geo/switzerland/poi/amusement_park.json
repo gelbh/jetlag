@@ -1,0 +1,60 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q2650746",
+      "name": "Alpamare",
+      "lat": 47.1992,
+      "lng": 8.79083
+    },
+    {
+      "id": "Q2859157",
+      "name": "Aquaparc",
+      "lat": 46.389392,
+      "lng": 6.861906
+    },
+    {
+      "id": "Q138475",
+      "name": "Conny-Land",
+      "lat": 47.614167,
+      "lng": 9.056667
+    },
+    {
+      "id": "Q123258732",
+      "name": "Findlingsgarten Kappenbühl",
+      "lat": 47.4067,
+      "lng": 8.499497
+    },
+    {
+      "id": "Q3127209",
+      "name": "Happyland",
+      "lat": 46.261944,
+      "lng": 7.455556
+    },
+    {
+      "id": "Q105554636",
+      "name": "Heididorf",
+      "lat": 47.01322,
+      "lng": 9.54544
+    },
+    {
+      "id": "Q181016",
+      "name": "Jungfrau Park",
+      "lat": 46.682222,
+      "lng": 7.888056
+    },
+    {
+      "id": "Q139803635",
+      "name": "Splash & Spa Tamaro",
+      "lat": 46.126111,
+      "lng": 8.920833
+    }
+  ]
+}

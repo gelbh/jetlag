@@ -4,6 +4,7 @@ import { DrawerGrabber } from "@/components/ui/entry/entryChrome";
 import { bottomDrawerStyles } from "@/components/ui/entry/entryStyles";
 import { usePlayerPhoneShellPortalTarget } from "@/components/ui/layout/PlayerPhoneShellPortalContext";
 import { resolveDrawerSheetTransitionProps } from "@/components/ui/sheets/drawerSheetTransition";
+import { useDrawerPresentOpen } from "@/hooks/motion/useDrawerPresentOpen";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { useSheetGesture } from "@/hooks/motion/useSheetGesture";
 import { cn } from "@/lib/cn";
@@ -41,6 +42,8 @@ export interface DrawerSheetProps {
    * Also disables outside-click dismiss so pin taps do not close the tool.
    */
   mapInteractive?: boolean;
+  /** After Drawer exit transition finishes (clear data / drop held hosts). */
+  onExitTransitionEnd?: () => void;
 }
 
 /** Chrome lives on the gesture wrapper so translateY moves radius/bg with the finger. */
@@ -119,7 +122,9 @@ export function DrawerSheet({
   scrollMode = "host",
   contentStyle,
   mapInteractive = false,
+  onExitTransitionEnd,
 }: DrawerSheetProps) {
+  const presentedOpen = useDrawerPresentOpen(open);
   const childScroll = scrollMode === "child";
   const baseStyles = bottomDrawerStyles(false);
   const portalTarget = usePlayerPhoneShellPortalTarget();
@@ -154,7 +159,7 @@ export function DrawerSheet({
 
   return (
     <Drawer
-      opened={open}
+      opened={presentedOpen}
       onClose={onClose}
       position="bottom"
       size="auto"
@@ -170,6 +175,7 @@ export function DrawerSheet({
       keepMounted={false}
       zIndex={JETLAG_MODAL_Z_INDEX}
       title={ariaLabel}
+      onExitTransitionEnd={onExitTransitionEnd}
       transitionProps={transitionProps}
       overlayProps={{
         backgroundOpacity: 0.4,

@@ -17,7 +17,7 @@ pub use half_plane::{
 };
 pub use mask::{
     build_end_game_mask_from_disks, build_mask_from_union_input, feature_contains_lng_lat,
-    DiskSpec, GameArea, UnionInput,
+    union_polygon_features_to_feature, DiskSpec, GameArea, UnionInput,
 };
 pub use types::{GameAreaGeometry, PolygonFeature};
 
@@ -88,6 +88,14 @@ fn parse_disks(disks_json: &str) -> Result<Vec<DiskSpec>, JsValue> {
             radius_meters: d.radius_meters,
         })
         .collect())
+}
+
+/// WASM export: unclipped polygon-feature union. JSON array in / JSON string or `undefined` out.
+#[wasm_bindgen]
+pub fn union_polygon_features_json(features_json: &str) -> Result<JsValue, JsValue> {
+    let features: Vec<PolygonFeature> =
+        serde_json::from_str(features_json).map_err(|e| js_err(format!("features: {e}")))?;
+    feature_to_js(union_polygon_features_to_feature(&features))
 }
 
 /// WASM export: JSON in / JSON string or `undefined` out.

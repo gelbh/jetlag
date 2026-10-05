@@ -142,7 +142,6 @@ export function ObserverMapScreenChrome({
   const codesSheet =
     myUid && canOpenCodes ? (
       <RoleCodesSheet
-        key={overlay.isCodesOpen ? "codes-open" : "codes-closed"}
         open={overlay.isCodesOpen}
         onClose={overlay.closeSheet}
         session={session}

@@ -38,26 +38,16 @@ function unionPolygonFeatures(
     return features[0]!;
   }
 
-  let combined = features[0]!;
-  for (let index = 1; index < features.length; index += 1) {
-    const next = features[index]!;
-    try {
-      const merged = union(featureCollection([combined, next]));
-      if (
-        merged &&
-        (merged.geometry.type === "Polygon" || merged.geometry.type === "MultiPolygon")
-      ) {
-        combined = merged as Feature<Polygon | MultiPolygon>;
-        continue;
-      }
-    } catch {
-      /* union can fail on invalid topology */
+  try {
+    const merged = union(featureCollection(features));
+    if (merged && (merged.geometry.type === "Polygon" || merged.geometry.type === "MultiPolygon")) {
+      return merged as Feature<Polygon | MultiPolygon>;
     }
-
-    throw new Error("Could not merge polygon boundaries in file.");
+  } catch {
+    /* union can fail on invalid topology */
   }
 
-  return combined;
+  throw new Error("Could not merge polygon boundaries in file.");
 }
 
 function parseKmlDocument(kmlText: string) {

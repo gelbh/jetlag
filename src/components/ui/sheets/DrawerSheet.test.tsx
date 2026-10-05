@@ -1,6 +1,6 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { ComponentProps, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
 import { useMapStore } from "@/state/mapStore";
@@ -8,6 +8,21 @@ import { resetAllStores } from "@/test/helpers/storeReset";
 import { jetlagTheme } from "@/theme/theme";
 import { DrawerSheet } from "./DrawerSheet";
 import { resolveDrawerSheetTransitionProps } from "./drawerSheetTransition";
+
+const drawerOpenedHistory: boolean[] = [];
+let lastDrawerProps: ComponentProps<typeof import("@mantine/core").Drawer> | null = null;
+
+vi.mock("@mantine/core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@mantine/core")>();
+  return {
+    ...actual,
+    Drawer: (props: ComponentProps<typeof actual.Drawer>) => {
+      drawerOpenedHistory.push(props.opened);
+      lastDrawerProps = props;
+      return <actual.Drawer {...props} />;
+    },
+  };
+});
 
 function withAppUi(ui: ReactNode) {
   return (
@@ -58,10 +73,50 @@ function stubSyncRaf() {
 describe("DrawerSheet", () => {
   beforeEach(() => {
     resetAllStores();
+    drawerOpenedHistory.length = 0;
+    lastDrawerProps = null;
     stubMatchMedia(false);
     stubSyncRaf();
     Element.prototype.setPointerCapture = vi.fn();
     Element.prototype.releasePointerCapture = vi.fn();
+  });
+
+  it("presents Drawer after mount so enter animation can run", async () => {
+    render(
+      withAppUi(
+        <DrawerSheet open onClose={vi.fn()} ariaLabel="Settings">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    // RTL flushes useEffect before render returns; assert closed→open via prop history.
+    expect(drawerOpenedHistory[0]).toBe(false);
+
+    await waitFor(() => {
+      expect(drawerOpenedHistory).toContain(true);
+      expect(screen.getByRole("dialog", { name: "Settings" })).toBeVisible();
+    });
+  });
+
+  it("forwards onExitTransitionEnd to Mantine Drawer", async () => {
+    const onExitTransitionEnd = vi.fn();
+    render(
+      withAppUi(
+        <DrawerSheet
+          open
+          onClose={vi.fn()}
+          ariaLabel="Settings"
+          onExitTransitionEnd={onExitTransitionEnd}
+        >
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    await waitFor(() => {
+      expect(lastDrawerProps?.onExitTransitionEnd).toBe(onExitTransitionEnd);
+    });
   });
 
   it("labels the dialog from ariaLabel without an aria-label on the drawer root", () => {

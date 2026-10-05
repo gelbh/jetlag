@@ -121,6 +121,7 @@ describe("TentacleHudBody", () => {
 
     renderHud(
       <AskHudHost
+        open
         cue={cue}
         toolLabel="Tentacles"
         costLabel="D4P2"
@@ -171,6 +172,7 @@ describe("TentacleHudBody", () => {
 
     renderHud(
       <AskHudHost
+        open
         cue={cue}
         toolLabel="Tentacles"
         costLabel="D4P2"

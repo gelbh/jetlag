@@ -44,12 +44,19 @@ type HiderHandSheetProps = {
   onPlayMove: (instanceId: string) => void;
 };
 
-/** Mount-gated so selection draft resets each open without an effect. */
+/** Stable host; content gate remounts selection draft each open. */
 export function HiderHandSheet(props: HiderHandSheetProps) {
-  if (!props.open) {
-    return null;
-  }
-  return <HiderHandSheetOpen {...props} />;
+  return (
+    <SheetHost
+      open={props.open}
+      onClose={props.onClose}
+      ariaLabel="Hider hand"
+      sheetClassName="mx-auto max-w-lg"
+      maxHeightClassName="max-h-[min(70dvh,560px)]"
+    >
+      {props.open ? <HiderHandSheetOpen {...props} /> : null}
+    </SheetHost>
+  );
 }
 
 function HiderHandSheetOpen({
@@ -80,13 +87,7 @@ function HiderHandSheetOpen({
   };
 
   return (
-    <SheetHost
-      open
-      onClose={onClose}
-      ariaLabel="Hider hand"
-      sheetClassName="mx-auto max-w-lg"
-      maxHeightClassName="max-h-[min(70dvh,560px)]"
-    >
+    <>
       <SheetHeader title="Hider hand" onClose={onClose} />
       <div className="space-y-3">
         <p className="text-sm text-ink-secondary">
@@ -261,6 +262,6 @@ function HiderHandSheetOpen({
           </div>
         ) : null}
       </div>
-    </SheetHost>
+    </>
   );
 }

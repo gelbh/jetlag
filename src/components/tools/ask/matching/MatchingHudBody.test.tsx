@@ -209,6 +209,7 @@ describe("MatchingHudBody", () => {
 
     renderMatching(
       <AskHudHost
+        open
         cue={cue}
         toolLabel="Matching"
         costLabel="D3P1"
@@ -257,6 +258,7 @@ describe("MatchingHudBody", () => {
 
     renderMatching(
       <AskHudHost
+        open
         cue={cue}
         toolLabel="Matching"
         costLabel="D3P1"

@@ -13,6 +13,7 @@ interface QuestionPreviewSheetProps {
   onConfirm: () => void;
   onCancel: () => void;
   isSubmitting?: boolean;
+  onExitTransitionEnd?: () => void;
 }
 
 export function QuestionPreviewSheet({
@@ -25,6 +26,7 @@ export function QuestionPreviewSheet({
   onConfirm,
   onCancel,
   isSubmitting = false,
+  onExitTransitionEnd,
 }: QuestionPreviewSheetProps) {
   return (
     <SheetHost
@@ -33,6 +35,7 @@ export function QuestionPreviewSheet({
       ariaLabel="Preview question before send"
       sheetClassName="mx-auto max-w-lg"
       maxHeightClassName="max-h-[min(60dvh,480px)]"
+      onExitTransitionEnd={onExitTransitionEnd}
     >
       <SheetHeader title="Preview question" onClose={onCancel} closeLabel="Back" />
 
