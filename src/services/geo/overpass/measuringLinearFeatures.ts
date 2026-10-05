@@ -161,6 +161,13 @@ function customBorderCacheSuffix(
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
 ): string {
+  const packSuffix = regionPackId ? `:pack-${regionPackId}` : "";
+
+  // Pack vs Overpass vs empty must not share one prepared-segments key.
+  if (kind === "international_border") {
+    return packSuffix;
+  }
+
   if (!isMeasuringAdminBorderKind(kind)) {
     return "";
   }
@@ -168,7 +175,6 @@ function customBorderCacheSuffix(
   const level = adminLevelForMeasuringBorderKind(kind) as MatchingAdminLevel;
   const custom = customMatchingAreas?.[level];
   const customSuffix = custom ? `:custom-${level}-${custom.length}` : "";
-  const packSuffix = regionPackId ? `:pack-${regionPackId}` : "";
   return `${customSuffix}${packSuffix}`;
 }
 

@@ -181,6 +181,41 @@ describe("measuringLinearFeatures — international_border pack-first", () => {
     expect(queryOverpass).toHaveBeenCalled();
     expect(prepared.segments.length).toBeGreaterThan(0);
   });
+
+  it("does not serve switzerland pack segments under a dublin pack cache key", async () => {
+    stubFetchForInternationalBorderPack({
+      switzerland: {
+        source: "switzerland-cantons-union",
+        segments: [switzerlandBorderSegment],
+      },
+      dublin: {
+        source: "none",
+        segments: [],
+      },
+    });
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockRejectedValue(new Error("Overpass should not be needed"));
+
+    const swiss = await fetchPreparedMeasuringLinearSegments(
+      switzerlandGameArea,
+      "international_border",
+      undefined,
+      "switzerland",
+    );
+    expect(swiss.segments.length).toBeGreaterThan(0);
+
+    // Same gameArea + kind; without a pack suffix this would reuse swiss segments.
+    const dublin = await fetchPreparedMeasuringLinearSegments(
+      switzerlandGameArea,
+      "international_border",
+      undefined,
+      "dublin",
+    );
+
+    expect(queryOverpass).not.toHaveBeenCalled();
+    expect(dublin.segments).toEqual([]);
+  });
 });
 
 describe("measuringLinearFeatures — bundled region pack fallthrough", () => {
