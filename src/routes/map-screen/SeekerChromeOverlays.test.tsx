@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { AskHudCommitKind, AskHudReadiness } from "@/domain/ask/askHudModes";
 import { renderWithAppUi } from "../../test/renderWithAppUi";
@@ -51,7 +52,7 @@ function emptyHud(
     error: null as string | null,
     onCommit: vi.fn(),
     modeBody: <div data-testid={bodyId} />,
-    sheets: null,
+    sheets: null as ReactNode,
     ...(surface === "thermometer" ? { commitKind: "send" as AskHudCommitKind } : {}),
   };
 }
