@@ -1,4 +1,4 @@
-import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
+import { Badge, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { resolveAdminSessionAreaLabel } from "../../../domain/admin/adminSessionAreaLabel";
 import { formatFreshnessAge } from "../../../domain/admin/formatAdminFreshness";
 import { adminSessionPhaseLabel } from "../../../domain/admin/sessionPhase";
@@ -28,37 +28,48 @@ export function AdminSessionRow({
   const areaLabel = resolveAdminSessionAreaLabel(summary);
 
   return (
-    <button
+    <UnstyledButton
       type="button"
       className={`admin-session-row admin-session-row-dense w-full items-start gap-2 px-3 py-2 text-left ${
         selected ? "ring-2 ring-brand-blue/50" : ""
       }`}
-      style={homeCardBtnStyle("secondary")}
+      style={{
+        display: "flex",
+        width: "100%",
+        borderRadius: "var(--jl-control-radius, 14px)",
+        border: "var(--jl-hairline, 0.33px) solid oklch(from var(--color-field-ink) l c h / 0.14)",
+        background: "oklch(from var(--color-canvas) calc(l + 0.04) c h)",
+        color: "var(--color-field-ink)",
+      }}
       data-feedback="tap"
       disabled={monitorJoinPending}
       onClick={() => onMonitor(summary)}
     >
-      <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="font-mono text-lg font-bold tracking-[0.18em] text-ink">
+      <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+        <Group gap={6} wrap="wrap">
+          <Text ff="monospace" size="lg" fw={700} style={{ letterSpacing: "0.18em" }}>
             {summary.code}
-          </span>
-          {areaLabel ? <span className="truncate text-sm text-ink">{areaLabel}</span> : null}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {summary.isLive ? (
-            <span className="rounded-full border border-status-success/40 bg-status-success-surface px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-status-success">
-              Live
-            </span>
+          </Text>
+          {areaLabel ? (
+            <Text size="sm" truncate>
+              {areaLabel}
+            </Text>
           ) : null}
-          <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
+        </Group>
+        <Group gap={6} wrap="wrap">
+          {summary.isLive ? (
+            <Badge size="xs" variant="light" color="green" radius="xl" tt="uppercase">
+              Live
+            </Badge>
+          ) : null}
+          <Badge size="xs" variant="outline" radius="xl" tt="uppercase" c="dimmed">
             {modeLabel(summary.mode)}
-          </span>
-          <span className="rounded-full border border-brand-blue/30 bg-brand-blue/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-blue">
+          </Badge>
+          <Badge size="xs" variant="light" radius="xl" tt="uppercase">
             {adminSessionPhaseLabel(summary.phase)}
-          </span>
-        </div>
-        <p className="text-xs text-ink-muted">
+          </Badge>
+        </Group>
+        <Text size="xs" c="dimmed">
           Activity {formatFreshnessAge(summary.lastActivityAt, nowMs)} · Location{" "}
           {formatFreshnessAge(summary.lastLocationAt, nowMs)} · {summary.roleCounts.seeker}S /{" "}
           {summary.roleCounts.hider}H
@@ -66,11 +77,18 @@ export function AdminSessionRow({
             ? ` · ${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"}`
             : ""}
           {summary.activeAnnotationCount > 0 ? ` · ${summary.activeAnnotationCount} ann` : ""}
-        </p>
-      </div>
-      <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-brand-blue">
+        </Text>
+      </Stack>
+      <Text
+        component="span"
+        size="xs"
+        fw={600}
+        tt="uppercase"
+        c="blue"
+        style={{ flexShrink: 0, letterSpacing: "0.04em" }}
+      >
         {joiningThisSession ? "Joining…" : "Monitor"}
-      </span>
-    </button>
+      </Text>
+    </UnstyledButton>
   );
 }

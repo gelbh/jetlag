@@ -1,7 +1,7 @@
+import { Alert, AppShell, Button, Group, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
 import type {
   AdminSessionModeFilter,
   AdminSessionSort,
@@ -50,8 +50,6 @@ import { useSessionStore } from "../../../state/sessionStore";
 import { PremiumSignInGate } from "../../billing/PremiumSignInGate";
 import { AppLink } from "../../navigation/AppLink";
 import { InlineError } from "../../ui/banners/InlineError";
-import { EntryScreenLayout } from "../../ui/layout/EntryScreenLayout";
-import { ScreenHeader, screenHeaderOffsetClassName } from "../../ui/layout/ScreenHeader";
 import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
 import { AdminIncidentInbox } from "../incident/AdminIncidentInbox";
@@ -72,15 +70,11 @@ const EMPTY_INCIDENTS: IncidentRecord[] = [];
 
 function AdminSessionSkeletonRows() {
   return (
-    <div className="space-y-2.5" aria-hidden="true">
+    <Stack gap="sm" aria-hidden="true">
       {[0, 1, 2].map((index) => (
-        <div
-          key={index}
-          className="h-[6.5rem] animate-pulse bg-surface-raised/40"
-          style={homeCardBtnStyle("secondary")}
-        />
+        <Skeleton key={index} height={104} radius="md" />
       ))}
-    </div>
+    </Stack>
   );
 }
 
@@ -145,7 +139,7 @@ export function AdminOpsDesk() {
   } = useAdminJoinSession({ onRefresh: refresh });
 
   const [query, setQuery] = useState("");
-  const [liveOnly, setLiveOnly] = useState(false);
+  const [liveOnly, setLiveOnly] = useState(true);
   const [annotatedOnly, setAnnotatedOnly] = useState(false);
   const [modeFilter, setModeFilter] = useState<AdminSessionModeFilter>("all");
   const [stateFilter, setStateFilter] = useState<AdminSessionStateChip>(null);
@@ -488,64 +482,83 @@ export function AdminOpsDesk() {
         : "sessions";
 
   const loadMoreButton = hasMore ? (
-    <button
+    <Button
       type="button"
-      className="btn-secondary min-h-10 w-full"
+      variant="default"
+      fullWidth
       disabled={loadingMore}
       onClick={() => void loadMore()}
     >
       {loadingMore ? "Loading…" : "Load more sessions"}
-    </button>
+    </Button>
   ) : null;
+
+  const sessionsErrorRetry = sessionsError ? (
+    <Stack gap="sm" mb={sessions.length > 0 ? "sm" : undefined}>
+      <InlineError>{sessionsError}</InlineError>
+      <Button type="button" variant="default" w="fit-content" onClick={() => void refresh()}>
+        Retry
+      </Button>
+    </Stack>
+  ) : null;
+
+  // Fail-only when the list has nothing retained; keep filters + rows when refresh/loadMore fails.
+  const sessionsFailedEmpty = Boolean(sessionsError) && sessions.length === 0;
 
   const sessionsBody = (
     <div className="jl-scroll jl-ops-panel-scroll" data-testid="admin-ops-sessions">
-      {sessionsError ? <InlineError>{sessionsError}</InlineError> : null}
       {observeError ? <InlineError>{observeError}</InlineError> : null}
-      <div className="mb-3">
-        <AdminSessionFilters
-          query={query}
-          liveOnly={liveOnly}
-          annotatedOnly={annotatedOnly}
-          mode={modeFilter}
-          state={stateFilter}
-          sort={sort}
-          onQueryChange={setQuery}
-          onLiveOnlyChange={setLiveOnly}
-          onAnnotatedOnlyChange={setAnnotatedOnly}
-          onModeChange={setModeFilter}
-          onStateChange={setStateFilter}
-          onSortChange={setSort}
-        />
-      </div>
-      {sessionsLoading ? (
-        <AdminSessionSkeletonRows />
-      ) : sessions.length === 0 ? (
-        <div className="jl-ops-empty">
-          <p className="jl-ops-empty-title">No live sessions</p>
-          <p className="jl-ops-empty-body">Games appear here while a host session is active.</p>
-        </div>
-      ) : filteredSessions.length === 0 ? (
-        <div className="space-y-2.5">
-          <div className="jl-ops-empty">
-            <p className="jl-ops-empty-title">No matching sessions</p>
-            <p className="jl-ops-empty-body">Try another code, area name, or phase filter.</p>
-          </div>
-          {loadMoreButton}
-        </div>
+      {sessionsFailedEmpty ? (
+        sessionsErrorRetry
       ) : (
-        <div className="jl-scroll admin-dashboard-list-scroll space-y-2.5">
-          {filteredSessions.map((summary) => (
-            <AdminSessionRow
-              key={summary.sessionId}
-              summary={summary}
-              observingCode={observingCode}
-              selected={selectedSessionId === summary.sessionId}
-              onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
+        <>
+          {sessionsErrorRetry}
+          <div className="mb-3">
+            <AdminSessionFilters
+              query={query}
+              liveOnly={liveOnly}
+              annotatedOnly={annotatedOnly}
+              mode={modeFilter}
+              state={stateFilter}
+              sort={sort}
+              onQueryChange={setQuery}
+              onLiveOnlyChange={setLiveOnly}
+              onAnnotatedOnlyChange={setAnnotatedOnly}
+              onModeChange={setModeFilter}
+              onStateChange={setStateFilter}
+              onSortChange={setSort}
             />
-          ))}
-          {loadMoreButton}
-        </div>
+          </div>
+          {sessionsLoading ? (
+            <AdminSessionSkeletonRows />
+          ) : sessions.length === 0 ? (
+            <div className="jl-ops-empty">
+              <p className="jl-ops-empty-title">{liveOnly ? "No live sessions" : "No sessions"}</p>
+              <p className="jl-ops-empty-body">Games appear here while a host session is active.</p>
+            </div>
+          ) : filteredSessions.length === 0 ? (
+            <div className="space-y-2.5">
+              <div className="jl-ops-empty">
+                <p className="jl-ops-empty-title">No matching sessions</p>
+                <p className="jl-ops-empty-body">Try another code, area name, or phase filter.</p>
+              </div>
+              {loadMoreButton}
+            </div>
+          ) : (
+            <div className="jl-scroll admin-dashboard-list-scroll space-y-2.5">
+              {filteredSessions.map((summary) => (
+                <AdminSessionRow
+                  key={summary.sessionId}
+                  summary={summary}
+                  observingCode={observingCode}
+                  selected={selectedSessionId === summary.sessionId}
+                  onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
+                />
+              ))}
+              {loadMoreButton}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -563,6 +576,7 @@ export function AdminOpsDesk() {
           active={monitorActive}
           sessionCode={activeSession?.code ?? null}
           errorMessage={monitorRoleError}
+          sessionsUnavailable={sessionsFailedEmpty}
           monitorLayout={monitorLayout}
           onMonitorLayoutChange={handleMonitorLayoutChange}
         />
@@ -600,93 +614,97 @@ export function AdminOpsDesk() {
 
   if (accessState === "loading" || !authReady) {
     return (
-      <EntryScreenLayout justify="start">
-        <ScreenHeader backTo="/" backLabel="Back" />
-        <div className={screenHeaderOffsetClassName}>
-          <AdminSessionSkeletonRows />
-        </div>
-      </EntryScreenLayout>
+      <Stack gap="md" p="md">
+        <Button component={AppLink} to="/" variant="default" size="compact-sm" w="fit-content">
+          Back
+        </Button>
+        <AdminSessionSkeletonRows />
+      </Stack>
     );
   }
 
   if (accessState === "unsigned") {
     return (
-      <EntryScreenLayout justify="start">
-        <ScreenHeader backTo="/" backLabel="Back" />
-        <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
-          <div className="space-y-2">
-            <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-ink">
-              Admin ops desk
-            </h1>
-            <p className="text-sm text-ink-muted">
-              Sign in with your Google account to open the admin panel.
-            </p>
-          </div>
-          <PremiumSignInGate
-            continuePath={continuePathForRoute(location.pathname, selectedIncidentId)}
-          />
-        </div>
-      </EntryScreenLayout>
+      <Stack gap="md" p="md" maw={480}>
+        <Button component={AppLink} to="/" variant="default" size="compact-sm" w="fit-content">
+          Back
+        </Button>
+        <Stack gap="xs">
+          <Title order={1} tt="uppercase">
+            Admin ops desk
+          </Title>
+          <Text size="sm" c="dimmed">
+            Sign in with your Google account to open the admin panel.
+          </Text>
+        </Stack>
+        <PremiumSignInGate
+          continuePath={continuePathForRoute(location.pathname, selectedIncidentId)}
+        />
+      </Stack>
     );
   }
 
   if (accessState === "denied") {
     return (
-      <EntryScreenLayout justify="start">
-        <ScreenHeader backTo="/" backLabel="Back" />
-        <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
-          <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-ink">
-            Access denied
-          </h1>
-          <p className="text-sm text-ink-muted">
-            Signed in as {user?.email ?? "unknown"}. This panel is restricted to the app owner.
-          </p>
-          {signOutError ? <InlineError>{signOutError}</InlineError> : null}
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className="btn-primary min-h-11 px-4"
-              onClick={() => void handleSignOut()}
-            >
-              Sign out
-            </button>
-            <AppLink to="/" className="btn-secondary inline-flex min-h-11 items-center px-4">
-              Back home
-            </AppLink>
-          </div>
-        </div>
-      </EntryScreenLayout>
+      <Stack gap="md" p="md" maw={480}>
+        <Button component={AppLink} to="/" variant="default" size="compact-sm" w="fit-content">
+          Back
+        </Button>
+        <Title order={1} tt="uppercase">
+          Access denied
+        </Title>
+        <Alert color="red" title="Restricted panel">
+          Signed in as {user?.email ?? "unknown"}. This panel is restricted to the app owner.
+        </Alert>
+        {signOutError ? <InlineError>{signOutError}</InlineError> : null}
+        <Group gap="xs" wrap="wrap">
+          <Button type="button" onClick={() => void handleSignOut()}>
+            Sign out
+          </Button>
+          <Button component={AppLink} to="/" variant="default">
+            Back home
+          </Button>
+        </Group>
+      </Stack>
     );
   }
 
+  const deskTopbar = (
+    <AdminDeskTopbar
+      openIncidents={openCount}
+      inQueue={visibleIncidents.length}
+      now={now}
+      activePresetId={store.activePresetId}
+      defaultPresetId={store.defaultPresetId}
+      presetOrder={store.presetOrder}
+      userPresets={store.userPresets}
+      onSelectPreset={handleSelectPreset}
+      onSaveCurrent={handleSaveCurrent}
+      onDeleteUserPreset={handleDeleteUserPreset}
+      onSetDefault={handleSetDefault}
+      onReorderPresets={handleReorderPresets}
+      onRenameUserPreset={handleRenameUserPreset}
+      onOverwriteUserPreset={handleOverwriteUserPreset}
+      onRefreshSessions={() => void refresh({ background: true })}
+      refreshing={refreshing}
+    />
+  );
+
   return (
-    <EntryScreenLayout justify="start" viewport={isDesktop}>
-      <div
-        className="jl-ops-desk"
-        data-testid="admin-ops-desk"
-        data-layout={isDesktop ? "desktop" : "mobile"}
-        data-resume-ready="true"
-      >
+    <AppShell
+      mode="static"
+      header={{ height: "3.25rem", offset: false }}
+      padding={0}
+      className="jl-ops-desk"
+      data-testid="admin-ops-desk"
+      data-admin-shell="mantine-static"
+      data-layout={isDesktop ? "desktop" : "mobile"}
+      data-resume-ready="true"
+    >
+      <AppShell.Header withBorder={false}>{deskTopbar}</AppShell.Header>
+      <AppShell.Main className="jl-ops-desk-main">
         {isDesktop ? (
           <>
-            <AdminDeskTopbar
-              openIncidents={openCount}
-              inQueue={visibleIncidents.length}
-              now={now}
-              activePresetId={store.activePresetId}
-              defaultPresetId={store.defaultPresetId}
-              presetOrder={store.presetOrder}
-              userPresets={store.userPresets}
-              onSelectPreset={handleSelectPreset}
-              onSaveCurrent={handleSaveCurrent}
-              onDeleteUserPreset={handleDeleteUserPreset}
-              onSetDefault={handleSetDefault}
-              onReorderPresets={handleReorderPresets}
-              onRenameUserPreset={handleRenameUserPreset}
-              onOverwriteUserPreset={handleOverwriteUserPreset}
-              onRefreshSessions={() => void refresh({ background: true })}
-              refreshing={refreshing}
-            />
             {incidentsError && visibleIncidents.length > 0 ? (
               <InlineError>{incidentsError}</InlineError>
             ) : null}
@@ -780,25 +798,9 @@ export function AdminOpsDesk() {
               }
             }}
             bodies={bodies}
-            openIncidents={openCount}
-            inQueue={visibleIncidents.length}
-            now={now}
-            activePresetId={store.activePresetId}
-            defaultPresetId={store.defaultPresetId}
-            presetOrder={store.presetOrder}
-            userPresets={store.userPresets}
-            onSelectPreset={handleSelectPreset}
-            onSaveCurrent={handleSaveCurrent}
-            onDeleteUserPreset={handleDeleteUserPreset}
-            onSetDefault={handleSetDefault}
-            onReorderPresets={handleReorderPresets}
-            onRenameUserPreset={handleRenameUserPreset}
-            onOverwriteUserPreset={handleOverwriteUserPreset}
-            onRefreshSessions={() => void refresh({ background: true })}
-            refreshing={refreshing}
           />
         )}
-      </div>
-    </EntryScreenLayout>
+      </AppShell.Main>
+    </AppShell>
   );
 }
