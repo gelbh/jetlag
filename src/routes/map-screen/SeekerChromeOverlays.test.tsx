@@ -385,4 +385,36 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("photo-float-panel")).toBeNull();
   });
+
+  it("keeps AskHudHost mounted with open false when ask tool clears", () => {
+    const tools = stubTools("radar");
+    const baseProps = {
+      timer: stubTimer() as never,
+      overlay: stubOverlay() as never,
+      firstRunDismissed: true as const,
+      setFirstRunDismissed: vi.fn(),
+      forceMapToolsGuide: false,
+      onDismissMapToolsGuide: vi.fn(),
+      selectedAnnotation: null,
+      geometryEditAnnotation: null,
+      geometryDraft: null,
+      mapPanning: false,
+      userMinimized: false,
+      setUserMinimized: vi.fn(),
+      handleSelectTool: vi.fn(),
+      cancelGeometryEdit: vi.fn(),
+      saveGeometryEdit: vi.fn(),
+      tools: tools as never,
+    };
+
+    const { rerender } = renderWithAppUi(
+      <SeekerChromeOverlays {...baseProps} activeTool="radar" />,
+    );
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.getByTestId("radar-hud-body")).toBeInTheDocument();
+
+    rerender(<SeekerChromeOverlays {...baseProps} activeTool="none" />);
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.queryByTestId("radar-hud-body")).toBeNull();
+  });
 });

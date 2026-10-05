@@ -37,6 +37,7 @@ import type {
 import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import type { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
+import { useSheetExitMount } from "../../hooks/motion/useSheetExitMount";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
@@ -364,6 +365,8 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     moveMode: zoneTool.moveMode,
     methodChosen: hidingZonePanelTool.methodChosen,
   });
+  const zoneAskOpen = zoneTool.wizardOpen && !sheetBlocksWizard && !mapFirstEligible;
+  const zoneAskExit = useSheetExitMount(zoneAskOpen);
 
   const toolDock = (
     <HiderToolDock
@@ -427,8 +430,9 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
                 }
           }
         />
-      ) : zoneTool.wizardOpen && !sheetBlocksWizard ? (
+      ) : zoneAskExit.mounted ? (
         <AskHudHost
+          open={zoneAskExit.open}
           cue={hidingZoneCue}
           toolLabel={zoneTool.moveMode ? "Move zone" : "Hiding zone"}
           costLabel={null}
@@ -436,16 +440,20 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           canCommit={false}
           commitLabel="CONFIRM"
           onCommit={() => undefined}
+          onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
           isSubmitting={false}
           error={hidingZonePanelTool.error}
           modeBody={
-            <HidingZoneHudBody
-              moveMode={zoneTool.moveMode}
-              zoneTool={hidingZonePanelTool}
-              onStepChange={onHidingZoneStepChange}
-              onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
-            />
+            zoneAskExit.open ? (
+              <HidingZoneHudBody
+                moveMode={zoneTool.moveMode}
+                zoneTool={hidingZonePanelTool}
+                onStepChange={onHidingZoneStepChange}
+                onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+              />
+            ) : null
           }
+          onExitTransitionEnd={zoneAskExit.onExitTransitionEnd}
         />
       ) : null}
 

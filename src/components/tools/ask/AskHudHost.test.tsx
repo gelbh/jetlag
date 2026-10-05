@@ -6,6 +6,7 @@ import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 
 const hostProps = {
+  open: true,
   cue: "Pick a direction",
   toolLabel: "Radar",
   costLabel: "1 token",
@@ -107,5 +108,13 @@ describe("AskHudHost", () => {
     expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
     expect(screen.queryByTestId("ask-cost-chip")).toBeNull();
     expect(screen.queryByText("PICK CATEGORY")).toBeNull();
+  });
+
+  it("keeps host mounted when open is false and gates body", () => {
+    renderHost(<AskHudHost {...hostProps} open={false} modeBody={<div>Mode body</div>} />);
+
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.queryByText("Mode body")).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });

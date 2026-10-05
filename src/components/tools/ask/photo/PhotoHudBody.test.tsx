@@ -90,6 +90,7 @@ describe("PhotoHudBody", () => {
     const onCategoryChange = vi.fn();
     renderPhoto(
       <AskHudHost
+        open
         cue="READY TO SEND"
         toolLabel="Photo"
         costLabel="D1P1"

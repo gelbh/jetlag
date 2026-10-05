@@ -168,6 +168,7 @@ describe("RadarHudBody", () => {
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskHudHost
+          open
           cue={cue}
           toolLabel="Radar"
           costLabel="D2P1"
@@ -223,6 +224,7 @@ describe("RadarHudBody", () => {
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskHudHost
+          open
           cue={cue}
           toolLabel="Radar"
           costLabel="D2P1"
