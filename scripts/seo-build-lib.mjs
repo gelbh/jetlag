@@ -208,7 +208,8 @@ export function metaDescriptionContent(html) {
   return undefined;
 }
 
-const SCRIPT_SPAN_RE = /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi;
+// Forgiving end tags (</script >, </script foo=…>) without matching script-*.
+const SCRIPT_SPAN_RE = /<script(?=[\s/>])[^>]*>[\s\S]*?<\/script(?=[\s/>])[^>]*>/gi;
 
 /** `<h1>` elements in live markup (comments, noscript, template, style and script excluded). */
 export function countLiveH1(html) {
