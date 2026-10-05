@@ -43,6 +43,7 @@ export * from "./mobile-dock";
 export * from "./multiplayer";
 export * from "./network";
 export * from "./page-init";
+export * from "./resilience";
 export * from "./seedUsernameProfileDocs";
 export * from "./session";
 export * from "./social-auth";
