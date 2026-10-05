@@ -48,6 +48,7 @@ import { useAnnotationStore } from "../../state/annotationStore";
 import type { LayerVisibility } from "../../state/sessionStore";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
+import { resolveHidingZoneHudPresence } from "./hidingZoneAskChrome";
 // ponytail yagni waiver: keep named helper + matrix tests (1 call site, readiness-reviewed).
 import { isHidingZoneMapFirstEligible } from "./hidingZoneMapFirst";
 
@@ -367,6 +368,10 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
   });
   const zoneAskOpen = zoneTool.wizardOpen && !sheetBlocksWizard && !mapFirstEligible;
   const zoneAskExit = useSheetExitMount(zoneAskOpen);
+  const zoneHudPresence = resolveHidingZoneHudPresence({
+    mapFirstEligible,
+    askExitMounted: zoneAskExit.mounted,
+  });
 
   const toolDock = (
     <HiderToolDock
@@ -413,7 +418,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
         onAnswerQuestion={chat.onAnswerQuestion}
       />
 
-      {mapFirstEligible ? (
+      {zoneHudPresence.showMapFirst ? (
         <HidingZoneMapPlacementChrome
           moveMode={zoneTool.moveMode}
           radiusLabel={hidingZoneRadiusLabel}
@@ -430,7 +435,8 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
                 }
           }
         />
-      ) : zoneAskExit.mounted ? (
+      ) : null}
+      {zoneHudPresence.showAsk ? (
         <AskHudHost
           open={zoneAskExit.open}
           cue={hidingZoneCue}
@@ -444,14 +450,12 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           isSubmitting={false}
           error={hidingZonePanelTool.error}
           modeBody={
-            zoneAskExit.open ? (
-              <HidingZoneHudBody
-                moveMode={zoneTool.moveMode}
-                zoneTool={hidingZonePanelTool}
-                onStepChange={onHidingZoneStepChange}
-                onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
-              />
-            ) : null
+            <HidingZoneHudBody
+              moveMode={zoneTool.moveMode}
+              zoneTool={hidingZonePanelTool}
+              onStepChange={onHidingZoneStepChange}
+              onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+            />
           }
           onExitTransitionEnd={zoneAskExit.onExitTransitionEnd}
         />
