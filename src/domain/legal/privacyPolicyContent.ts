@@ -52,8 +52,9 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     id: "errors-analytics",
     title: "Error reporting and analytics",
     paragraphs: [
-      "In production, the app may send crash and error reports to Sentry. Session codes and certain identifiers are scrubbed before reports leave your device.",
+      "In production, the app may send crash and error reports to Sentry, and may also send masked Session Replay samples (text and media are masked on device). Session codes and certain identifiers are scrubbed before reports leave your device. Reports may include a pseudonymous account identifier.",
       "If configured and you Accept the in-app analytics prompt, the app sends pseudonymous product analytics to PostHog in the EU. Events cover page views, page leaves, Core Web Vitals, and high-level actions such as creating a session or starting Premium checkout. After Accept, an anonymous analytics ID may be stored in local storage on this device. If you sign in with a non-anonymous account, that analytics ID may be linked to your account identifier. IP/GeoIP enrichment is disabled. Session codes, map content, Overpass payloads, and precise hide locations are not included. PostHog session replay is not used. Decline keeps analytics off and clears the analytics ID.",
+      "After a successful Premium Stripe payment, our server may send a minimal purchase analytics event to PostHog (your account identifier as the analytics distinct id and the product key; no card or payment details). That server event is independent of the in-app Accept prompt. All other product analytics remain Accept-gated.",
     ],
   },
   {

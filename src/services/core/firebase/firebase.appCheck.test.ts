@@ -56,9 +56,14 @@ vi.mock("firebase/auth", () => ({
   signInAnonymously: vi.fn(),
 }));
 
+vi.mock("firebase/storage", () => ({
+  getStorage: vi.fn(() => ({ name: "storage" })),
+  connectStorageEmulator: vi.fn(),
+}));
+
 vi.mock("firebase/firestore", () => ({
   connectFirestoreEmulator: vi.fn(),
-  initializeFirestore: vi.fn(),
+  initializeFirestore: vi.fn(() => ({ name: "firestore" })),
   memoryLocalCache: vi.fn(),
   persistentLocalCache: vi.fn(),
   persistentMultipleTabManager: vi.fn(),
@@ -90,6 +95,66 @@ describe("firebase App Check lazy init", () => {
     getFirebaseApp();
 
     expect(initializeAppCheck).not.toHaveBeenCalled();
+  });
+
+  it("does not arm App Check from auth bootstrap", async () => {
+    const { getFirebaseAuth } = await import("./firebase");
+    const { isAppCheckArmed } = await import("./appCheckArmedState");
+
+    getFirebaseAuth();
+
+    expect(initializeAppCheck).not.toHaveBeenCalled();
+    expect(isAppCheckArmed()).toBe(false);
+  });
+
+  it("arms App Check before the first Firestore request (console-enforced)", async () => {
+    const { getFirestoreDb } = await import("./firebase");
+    const { isAppCheckArmed } = await import("./appCheckArmedState");
+    const { initializeFirestore } = await import("firebase/firestore");
+
+    getFirestoreDb();
+    getFirestoreDb();
+
+    expect(initializeAppCheck).toHaveBeenCalledOnce();
+    expect(initializeAppCheck.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(initializeFirestore).mock.invocationCallOrder[0]!,
+    );
+    expect(isAppCheckArmed()).toBe(true);
+  });
+
+  it("arms App Check before the first Storage use (console-enforced)", async () => {
+    const { getFirebaseStorage, resetFirebaseStorageForTests } = await import("./firebaseStorage");
+    const { isAppCheckArmed } = await import("./appCheckArmedState");
+    const { getStorage } = await import("firebase/storage");
+    resetFirebaseStorageForTests();
+
+    await getFirebaseStorage();
+
+    expect(initializeAppCheck).toHaveBeenCalledOnce();
+    expect(initializeAppCheck.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(getStorage).mock.invocationCallOrder[0]!,
+    );
+    expect(isAppCheckArmed()).toBe(true);
+  });
+
+  it("still initializes Firestore when App Check init throws", async () => {
+    initializeAppCheck.mockImplementationOnce(() => {
+      throw new Error("reCAPTCHA blocked");
+    });
+    const { getFirestoreDb } = await import("./firebase");
+
+    expect(getFirestoreDb()).toEqual({ name: "firestore" });
+  });
+
+  it("flags App Check armed under the emulator without initializing it", async () => {
+    envMocks.clientEnvUsesFirebaseEmulator.mockReturnValue(true);
+    const { getFirebaseAppCheck } = await import("./firebase");
+    const { isAppCheckArmed } = await import("./appCheckArmedState");
+
+    getFirebaseAppCheck();
+
+    expect(initializeAppCheck).not.toHaveBeenCalled();
+    expect(isAppCheckArmed()).toBe(true);
   });
 
   it("initializes App Check on first getFirebaseAppCheck", async () => {

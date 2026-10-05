@@ -20,6 +20,7 @@ import {
   type TimerState,
 } from "@/domain/session/timer/timer";
 import { useStaleWalkNowMs } from "@/hooks/sync/useStaleWalkNowMs";
+import { serverNow } from "@/services/core/time/serverClock";
 import { useMapStore } from "@/state/mapStore";
 
 export type MapTimerClusterProps = {
@@ -88,11 +89,11 @@ export function MapTimerCluster({
     return null;
   }
 
-  const elapsed = computeElapsedMs(timerState);
+  const elapsed = computeElapsedMs(timerState, serverNow());
   const sessionLabel = formatElapsedTime(elapsed);
   const hidingActive = isHidingPeriodActive(sessionRules, elapsed);
   const hidingLabel = formatHidingPeriodCountdown(hidingPeriodRemainingMs(sessionRules, elapsed));
-  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules);
+  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules, serverNow());
 
   let secondaryLabel: string | null;
   let secondaryColor = "var(--color-field-ink-muted)";

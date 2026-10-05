@@ -1,7 +1,8 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, Suspense, useEffect, useLayoutEffect } from "react";
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, useLocation } from "react-router-dom";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
+import { PlayerRouteViewTransition } from "./components/motion/PlayerRouteViewTransition";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
 import { WriteFailureNotifier } from "./components/session/status/WriteFailureNotifier";
@@ -58,7 +59,8 @@ import {
   TermsLazy,
 } from "./navigation/routePreloaders";
 import { Home } from "./routes/Home";
-import { setTransactionNameLazy, trackPageViewLazy } from "./services/core/analytics/lazyTelemetry";
+import { trackPageViewLazy } from "./services/core/analytics/lazyTelemetry";
+import { SentryRoutes } from "./services/core/analytics/sentryReactRouter";
 import { useSessionStore } from "./state/sessionStore";
 
 const StatusDockGalleryLazy = import.meta.env.DEV
@@ -105,7 +107,6 @@ function AnalyticsPageViewTracker() {
   useEffect(() => {
     const path = `${location.pathname}${location.search}`;
     trackPageViewLazy(path);
-    setTransactionNameLazy(location.pathname);
   }, [location]);
 
   return null;
@@ -124,7 +125,9 @@ function EdgeSwipeBackBinder() {
 function PlayerPhoneShellOutlet() {
   return (
     <PlayerPhoneShell>
-      <Outlet />
+      <PlayerRouteViewTransition>
+        <Outlet />
+      </PlayerRouteViewTransition>
     </PlayerPhoneShell>
   );
 }
@@ -234,7 +237,7 @@ export default function App() {
                       <LowBatteryPrompt />
                       <LocationPermissionPrompt />
                       <WriteFailureNotifier />
-                      <Routes>
+                      <SentryRoutes>
                         <Route element={<PlayerPhoneShellOutlet />}>
                           <Route path="/" element={<Home />} />
                           <Route
@@ -405,7 +408,7 @@ export default function App() {
                             </LazyRoute>
                           }
                         />
-                      </Routes>
+                      </SentryRoutes>
                     </div>
                   </ClientMinVersionGate>
                 </AppCheckProbeGate>

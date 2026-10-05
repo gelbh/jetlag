@@ -17,8 +17,8 @@ import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettings
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
-import { HidingZoneHudBody } from "../../components/tools/ask/HidingZoneHudBody";
-import { HidingZoneMapPlacementChrome } from "../../components/tools/ask/HidingZoneMapPlacementChrome";
+import { HidingZoneHudBody } from "../../components/tools/ask/hiding-zone/HidingZoneHudBody";
+import { HidingZoneMapPlacementChrome } from "../../components/tools/ask/hiding-zone/HidingZoneMapPlacementChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { PopupCloseButton } from "../../components/ui/brand/PopupCloseButton";
 import { activeModeCue } from "../../domain/ask/askHudModes";
@@ -142,7 +142,6 @@ export type HiderMapScreenController = {
     | "selectedStation"
     | "setSelectedStation"
     | "confirmTrap"
-    | "saving"
     | "error"
   >;
   myTrap: TimeTrapRecord | null;
@@ -594,10 +593,11 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
             onSearchThisArea={onTimeTrapSearchThisArea}
             searchDisabled={timeTrapTool.stationsLoading}
             existingTrapStationName={myTrap?.stationName ?? null}
-            onConfirm={() =>
-              void timeTrapTool.confirmTrap().then(() => onTimeTrapSheetOpenChange(false))
-            }
-            saving={timeTrapTool.saving}
+            onConfirm={() => {
+              if (timeTrapTool.confirmTrap()) {
+                onTimeTrapSheetOpenChange(false);
+              }
+            }}
             error={timeTrapTool.error}
             bonusMinutes={myTrap?.bonusMinutes ?? 5}
           />
