@@ -77,7 +77,6 @@ export const askMapPlacementSendStyles = {
   },
 } as const;
 
-
 function HaltErrorAlert({
   testId,
   title,
@@ -93,10 +92,7 @@ function HaltErrorAlert({
 }) {
   return (
     <div data-testid={testId} role="alert" className={className} style={style}>
-      <p
-        className="m-0 text-sm font-semibold leading-snug"
-        style={{ color: "var(--color-halt)" }}
-      >
+      <p className="m-0 text-sm font-semibold leading-snug" style={{ color: "var(--color-halt)" }}>
         {title}
       </p>
       <p
