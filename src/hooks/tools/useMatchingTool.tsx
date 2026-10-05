@@ -717,6 +717,7 @@ export function useMatchingTool({
         costLabel={catalog.costLabel}
         phase={placementPhase}
         onUseGps={() => void handleGps()}
+        gpsLoading={gpsLoading}
         error={placementError}
         nearestPlaceName={matchingNearestFeatureName}
         awaitHiderAnswer={awaitHiderAnswer}

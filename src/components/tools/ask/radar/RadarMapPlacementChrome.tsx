@@ -29,6 +29,7 @@ export type RadarMapPlacementChromeProps = {
   costLabel?: string;
   phase: RadarMapPlacementPhase;
   onUseGps: () => void;
+  gpsLoading?: boolean;
   error?: string | null;
   awaitHiderAnswer?: boolean;
   answer?: RadarAnswer | null;
@@ -91,6 +92,7 @@ export function RadarMapPlacementChrome({
   costLabel,
   phase,
   onUseGps,
+  gpsLoading = false,
   error = null,
   awaitHiderAnswer = false,
   answer = null,
@@ -233,6 +235,7 @@ export function RadarMapPlacementChrome({
       costLabel={costLabel}
       phase={phase}
       onUseGps={onUseGps}
+      gpsLoading={gpsLoading}
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}

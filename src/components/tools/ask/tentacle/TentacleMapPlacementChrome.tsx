@@ -23,6 +23,7 @@ export type TentacleMapPlacementChromeProps = {
   costLabel?: string;
   phase: TentacleMapPlacementPhase;
   onUseGps: () => void;
+  gpsLoading?: boolean;
   error?: string | null;
   awaitHiderAnswer?: boolean;
   categoryId: TentacleExtendedCategoryId;
@@ -46,6 +47,7 @@ export function TentacleMapPlacementChrome({
   costLabel,
   phase,
   onUseGps,
+  gpsLoading = false,
   error = null,
   awaitHiderAnswer = false,
   categoryId,
@@ -126,6 +128,7 @@ export function TentacleMapPlacementChrome({
       costLabel={costLabel}
       phase={phase}
       onUseGps={onUseGps}
+      gpsLoading={gpsLoading}
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}

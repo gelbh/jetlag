@@ -407,6 +407,7 @@ export function useMeasuringTool({
         costLabel={questionCost.label}
         phase={placementPhase}
         onUseGps={() => void interactions.handleGps()}
+        gpsLoading={gpsLoading}
         error={placementError}
         awaitHiderAnswer={awaitHiderAnswer}
         answer={draft.measuringAnswer}

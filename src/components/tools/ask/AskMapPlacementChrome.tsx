@@ -27,6 +27,8 @@ export type AskMapPlacementChromeProps = {
   costLabel?: string;
   phase: AskMapPlacementPhase;
   onUseGps: () => void;
+  /** Disables snap + shows spinner while GPS refresh is in flight. */
+  gpsLoading?: boolean;
   error?: string | null;
   statusTitle: string;
   statusBody: string;
@@ -78,7 +80,7 @@ export const askMapPlacementSendStyles = {
 } as const;
 
 /** Floating icon-only GPS snap (answer phase); not the tall soft-flag permission CTA. */
-export const askMapPlacementSnapLocationStyles = {
+export const askMapPlacementSnapLocationStyles = (gpsLoading: boolean): CSSProperties => ({
   width: "2.75rem",
   height: "2.75rem",
   minWidth: "2.75rem",
@@ -89,11 +91,12 @@ export const askMapPlacementSnapLocationStyles = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  cursor: "pointer",
+  cursor: gpsLoading ? "wait" : "pointer",
   ...mapChromeSurfaceStyles,
   color: "var(--color-flag)",
   boxShadow: "0 8px 24px oklch(0.1 0.04 265 / 0.45)",
-} as const;
+  opacity: gpsLoading ? 0.85 : 1,
+});
 
 function HaltErrorAlert({
   testId,
@@ -171,6 +174,7 @@ export function AskMapPlacementChrome({
   costLabel,
   phase,
   onUseGps,
+  gpsLoading = false,
   error = null,
   statusTitle,
   statusBody,
@@ -427,11 +431,18 @@ export function AskMapPlacementChrome({
             <button
               type="button"
               data-testid={`${testId}-snap-location`}
-              aria-label="Snap pin to my location"
+              className="jl-map-chrome-press"
+              aria-label={gpsLoading ? "Getting your location" : "Snap pin to my location"}
+              aria-busy={gpsLoading || undefined}
+              disabled={gpsLoading}
               onClick={onUseGps}
-              style={askMapPlacementSnapLocationStyles}
+              style={askMapPlacementSnapLocationStyles(gpsLoading)}
             >
-              <CrosshairIcon size={20} weight="bold" aria-hidden />
+              {gpsLoading ? (
+                <StatusSpinner />
+              ) : (
+                <CrosshairIcon size={20} weight="bold" aria-hidden />
+              )}
             </button>
           </div>
         ) : null}

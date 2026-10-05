@@ -635,6 +635,7 @@ export function useTentacleTool({
           costLabel={costLabel}
           phase={placementPhase}
           onUseGps={() => void handleUseGps()}
+          gpsLoading={gpsLoading}
           error={placementError}
           awaitHiderAnswer={awaitHiderAnswer}
           categoryId={tentacleCategoryId}

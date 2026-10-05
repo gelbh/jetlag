@@ -90,4 +90,16 @@ describe("AskMapPlacementChrome answer-phase GPS snap", () => {
     expect(screen.queryByText("Allow location when prompted")).toBeNull();
     expect(screen.queryByRole("button", { name: /Snap pin to my location/i })).toBeNull();
   });
+
+  it("shows press class and busy spinner while gpsLoading", () => {
+    const { onUseGps } = renderChrome({ phase: "answer", gpsLoading: true });
+
+    const snap = screen.getByTestId("matching-map-placement-snap-location");
+    expect(snap).toHaveClass("jl-map-chrome-press");
+    expect(snap).toHaveAccessibleName("Getting your location");
+    expect(snap).toBeDisabled();
+    expect(snap).toHaveAttribute("aria-busy", "true");
+    fireEvent.click(snap);
+    expect(onUseGps).not.toHaveBeenCalled();
+  });
 });

@@ -27,6 +27,7 @@ export type MatchingMapPlacementChromeProps = {
   costLabel?: string;
   phase: MatchingMapPlacementPhase;
   onUseGps: () => void;
+  gpsLoading?: boolean;
   error?: string | null;
   nearestPlaceName?: string | null;
   awaitHiderAnswer?: boolean;
@@ -102,6 +103,7 @@ export function MatchingMapPlacementChrome({
   costLabel,
   phase,
   onUseGps,
+  gpsLoading = false,
   error = null,
   nearestPlaceName = null,
   awaitHiderAnswer = false,
@@ -243,6 +245,7 @@ export function MatchingMapPlacementChrome({
       costLabel={costLabel}
       phase={phase}
       onUseGps={onUseGps}
+      gpsLoading={gpsLoading}
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}

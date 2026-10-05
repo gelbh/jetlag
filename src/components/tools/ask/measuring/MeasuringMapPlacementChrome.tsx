@@ -29,6 +29,7 @@ export type MeasuringMapPlacementChromeProps = {
   costLabel?: string;
   phase: MeasuringMapPlacementPhase;
   onUseGps: () => void;
+  gpsLoading?: boolean;
   error?: string | null;
   awaitHiderAnswer?: boolean;
   answer?: MeasuringAnswer | null;
@@ -109,6 +110,7 @@ export function MeasuringMapPlacementChrome({
   costLabel,
   phase,
   onUseGps,
+  gpsLoading = false,
   error = null,
   awaitHiderAnswer = false,
   answer = null,
@@ -237,6 +239,7 @@ export function MeasuringMapPlacementChrome({
       costLabel={costLabel}
       phase={phase}
       onUseGps={onUseGps}
+      gpsLoading={gpsLoading}
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}
