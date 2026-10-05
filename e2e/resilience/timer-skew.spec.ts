@@ -13,7 +13,9 @@ test("a guest device clock 5 min fast still shows the host's elapsed time", asyn
   const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
   try {
     // Skew before first navigation so every Date.now() the app sees is 5 min ahead.
+    // install() alone leaves timers paused; resume so elapsed keeps ticking while skewed.
     await guestPage.clock.install({ time: Date.now() + 300_000 });
+    await guestPage.clock.resume();
 
     const { code } = await createHostSession(hostPage);
     await joinAsRole(guestPage, code, "seeker");
