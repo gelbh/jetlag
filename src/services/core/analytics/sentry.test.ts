@@ -27,6 +27,9 @@ const getClientEnv = vi.hoisted(() => vi.fn((): Record<string, string> => ({})))
 const idleCallbacks = vi.hoisted((): Array<() => void> => []);
 const isolationScopeAddBreadcrumb = vi.hoisted(() => vi.fn());
 const scopeSetTransactionName = vi.hoisted(() => vi.fn());
+const fetchTransport = vi.hoisted(() => vi.fn());
+const offlineTransport = vi.hoisted(() => vi.fn());
+const makeBrowserOfflineTransport = vi.hoisted(() => vi.fn(() => offlineTransport));
 
 vi.mock("@sentry/react", () => ({
   addBreadcrumb,
@@ -38,6 +41,8 @@ vi.mock("@sentry/react", () => ({
   init,
   addIntegration,
   replayIntegration,
+  makeBrowserOfflineTransport,
+  makeFetchTransport: fetchTransport,
   getIsolationScope: () => ({ addBreadcrumb: isolationScopeAddBreadcrumb }),
   getCurrentScope: () => ({ setTransactionName: scopeSetTransactionName }),
 }));
@@ -137,6 +142,42 @@ describe("initSentry", () => {
 
     initSentry();
     expect(idleCallbacks).toHaveLength(1);
+  });
+
+  it("wires the IndexedDB offline transport through the tunnel", () => {
+    stubProdWithDsn();
+    makeBrowserOfflineTransport.mockClear();
+
+    initSentry();
+
+    const options = init.mock.lastCall?.[0] as {
+      tunnel?: string;
+      transport?: unknown;
+      transportOptions?: Record<string, unknown>;
+    };
+    expect(makeBrowserOfflineTransport).toHaveBeenCalledExactlyOnceWith(fetchTransport);
+    expect(options.transport).toBe(offlineTransport);
+    expect(options.transportOptions).toEqual({ maxQueueSize: 30, flushAtStartup: true });
+    // The SDK builds the transport URL from `tunnel`, so queued envelopes still hit the worker.
+    expect(options.tunnel).toBe("/api/envelope-tunnel");
+  });
+
+  // The SDK runs beforeSend before handing the envelope to the transport, so this is what
+  // gets queued offline.
+  it("keeps beforeSend scrubbing join codes and session ids", () => {
+    stubProdWithDsn();
+
+    initSentry();
+
+    const options = init.mock.lastCall?.[0] as {
+      beforeSend?: (event: Record<string, unknown>, hint: unknown) => unknown;
+    };
+    const scrubbed = options.beforeSend?.(
+      { message: "Join ABCD failed", extra: { sessionId: "s-1" } },
+      {},
+    ) as { message: string; extra: Record<string, unknown> };
+    expect(scrubbed.message).toBe("Join **** failed");
+    expect(scrubbed.extra.sessionId).toBe("[redacted]");
   });
 
   // SDK 11's default span streaming names pageloads "Pageload" and drops LCP/CLS from them.
