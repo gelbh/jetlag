@@ -191,28 +191,47 @@ export function Home() {
                 </InsetGroup>
               </Stack>
 
-              <Group gap="xs" justify="center" component="nav" aria-label="Legal and feedback">
-                <Anchor component={Link} to="/privacy" size="sm" aria-label="Privacy Policy">
-                  Privacy
-                </Anchor>
-                <Text size="sm" c="dimmed" aria-hidden="true">
-                  ·
-                </Text>
-                <Anchor component={Link} to="/terms" size="sm" aria-label="Terms of Service">
-                  Terms
-                </Anchor>
-                <Text size="sm" c="dimmed" aria-hidden="true">
-                  ·
-                </Text>
-                <Anchor
-                  component={Link}
-                  to="/feedback"
-                  size="sm"
-                  aria-label="Feedback and suggestions"
-                >
-                  Feedback
-                </Anchor>
-              </Group>
+              <Stack gap={10} align="center">
+                <Group gap="xs" justify="center" component="nav" aria-label="Learn how to play">
+                  <Anchor component={Link} to="/guide" size="sm">
+                    How to play
+                  </Anchor>
+                  <Text size="sm" c="dimmed" aria-hidden="true">
+                    ·
+                  </Text>
+                  <Anchor component={Link} to="/tools" size="sm">
+                    Question tools
+                  </Anchor>
+                  <Text size="sm" c="dimmed" aria-hidden="true">
+                    ·
+                  </Text>
+                  <Anchor component={Link} to="/faq" size="sm">
+                    FAQ
+                  </Anchor>
+                </Group>
+                <Group gap="xs" justify="center" component="nav" aria-label="Legal and feedback">
+                  <Anchor component={Link} to="/privacy" size="sm" aria-label="Privacy Policy">
+                    Privacy
+                  </Anchor>
+                  <Text size="sm" c="dimmed" aria-hidden="true">
+                    ·
+                  </Text>
+                  <Anchor component={Link} to="/terms" size="sm" aria-label="Terms of Service">
+                    Terms
+                  </Anchor>
+                  <Text size="sm" c="dimmed" aria-hidden="true">
+                    ·
+                  </Text>
+                  <Anchor
+                    component={Link}
+                    to="/feedback"
+                    size="sm"
+                    aria-label="Feedback and suggestions"
+                  >
+                    Feedback
+                  </Anchor>
+                </Group>
+              </Stack>
             </Stack>
           </Stack>
         </Container>

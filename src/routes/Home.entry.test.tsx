@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
@@ -142,5 +142,25 @@ describe("Home", () => {
       "href",
       "/feedback",
     );
+  });
+
+  it("links to the how-to-play guide, question tools, and FAQ", () => {
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </MantineProvider>,
+    );
+    const learn = screen.getByRole("navigation", { name: "Learn how to play" });
+    expect(within(learn).getByRole("link", { name: "How to play" })).toHaveAttribute(
+      "href",
+      "/guide",
+    );
+    expect(within(learn).getByRole("link", { name: "Question tools" })).toHaveAttribute(
+      "href",
+      "/tools",
+    );
+    expect(within(learn).getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "/faq");
   });
 });
