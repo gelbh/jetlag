@@ -35,6 +35,21 @@ describe("dispatchKernel", () => {
   });
 
   it("runUnionPolygonFeatures throws while unionPolygonFeatures ready=false", async () => {
+    vi.resetModules();
+    vi.doMock("./kernelWasmReady", () => ({
+      KERNEL_WASM_READY: {
+        maskFromUnionInput: true,
+        endGameMaskFromDisks: true,
+        halfPlane: true,
+        geodesicLineBuffer: true,
+        spatialVoronoi: true,
+        tentacleEliminationRegion: true,
+        nearRegionBatch: true,
+        unionPolygonFeatures: false,
+      },
+      shouldUseWasm: (entrypoint: string) => entrypoint !== "unionPolygonFeatures",
+    }));
+
     const { runUnionPolygonFeatures } = await import("./unionKernelRunner");
     await expect(runUnionPolygonFeatures([])).rejects.toThrow(/not wasm-ready/);
   });
