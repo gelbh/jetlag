@@ -154,10 +154,12 @@ export function useRadarTool({
         return false;
       }
 
-      if (wizardStepRef.current !== "place") {
+      const wizardStep = wizardStepRef.current;
+      if (wizardStep !== "place" && wizardStep !== "ask") {
         return false;
       }
 
+      setRadarAnswer(null);
       setRadarCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
@@ -174,6 +176,7 @@ export function useRadarTool({
         return;
       }
 
+      setRadarAnswer(null);
       setRadarCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
