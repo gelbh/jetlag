@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import type { GameOutcome } from "@/domain/game/foundHider";
 import type { GameResultRecord } from "@/domain/game/gameResult";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
@@ -177,13 +177,18 @@ export function GameOverSheet({
   onRematch,
   onHome,
 }: GameOverSheetProps) {
+  // Result/open identity: reset replay without an effect so the always-mounted
+  // SheetHost can still exit-animate (keying the whole sheet would remount it).
+  const resultSessionKey =
+    open && gameResult != null
+      ? `${gameResult.sessionId}:${gameResult.roundNumber}:${gameResult.endedAt}`
+      : null;
   const [replayOpen, setReplayOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open || gameResult == null) {
-      setReplayOpen(false);
-    }
-  }, [open, gameResult]);
+  const [seenResultSessionKey, setSeenResultSessionKey] = useState(resultSessionKey);
+  if (seenResultSessionKey !== resultSessionKey) {
+    setSeenResultSessionKey(resultSessionKey);
+    setReplayOpen(false);
+  }
 
   const pinned: ReactNode =
     gameResult != null ? (
