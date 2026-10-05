@@ -6,7 +6,7 @@ import {
   gameAreaToPolygon,
   type LatLngTuple,
 } from "../gameArea/geometryCore";
-import { unionPolygonFeatures } from "../kernel/unionPolygonFeatures";
+import { runUnionPolygonFeatures } from "../kernel/unionKernelRunner";
 import {
   COASTLINE_NEAR_REGION_YIELD_EVERY,
   nearestPointToCoastlines,
@@ -255,7 +255,7 @@ export async function buildLinearNearRegionIsoline(
     return null;
   }
 
-  const united = unionPolygonFeatures(parts);
+  const united = await runUnionPolygonFeatures(parts);
   if (!united) {
     return null;
   }
