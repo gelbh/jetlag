@@ -59,7 +59,7 @@ const answerSegmentStyles = (selected: boolean, tone: "success" | "danger") => {
       height: "2.75rem",
       borderRadius: 10,
       paddingInline: "0.7rem",
-      fontSize: "0.9375rem",
+      fontSize: "1rem",
       fontWeight: 650,
       letterSpacing: "-0.02em",
       justifyContent: "center",
@@ -225,15 +225,6 @@ export function ThermometerMapPlacementChrome({
             Movement is shorter than the selected distance.
           </p>
         ) : null}
-        {error ? (
-          <p
-            data-testid="thermometer-map-placement-error"
-            className="m-0 px-1 text-xs leading-snug"
-            style={{ color: "var(--color-halt)" }}
-          >
-            {error}
-          </p>
-        ) : null}
         {pinsReady && awaitHiderAnswer ? (
           <p
             className="m-0 px-1 text-xs leading-snug"
@@ -309,7 +300,7 @@ export function ThermometerMapPlacementChrome({
       costLabel={costLabel}
       phase={phase}
       onUseGps={() => undefined}
-      error={null}
+      error={error}
       statusTitle=""
       statusBody=""
       toolIcon={<HudThermometerIcon width={20} height={20} />}

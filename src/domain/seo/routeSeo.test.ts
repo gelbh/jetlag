@@ -1,5 +1,13 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { APP_ROUTE_PATHS, absoluteUrl, getRouteSeo, listIndexablePaths } from "./routeSeo";
+import {
+  APP_ROUTE_PATHS,
+  absoluteUrl,
+  getRouteSeo,
+  HOME_TITLE,
+  listIndexablePaths,
+} from "./routeSeo";
 import crawlPolicy from "./seoCrawlPolicy.json";
 
 describe("routeSeo", () => {
@@ -56,14 +64,43 @@ describe("routeSeo", () => {
     }
   });
 
-  it("disallowPaths covers every non-indexable app route", () => {
-    const indexable = new Set(listIndexablePaths());
-    for (const path of APP_ROUTE_PATHS) {
-      if (indexable.has(path)) continue;
-      const covered = crawlPolicy.disallowPaths.some(
-        (prefix) => path === prefix || path.startsWith(`${prefix}/`),
-      );
-      expect(covered, `${path} missing from disallowPaths`).toBe(true);
+  it("robots-disallows only admin so crawlers can read noindex on public app routes", () => {
+    // A Disallowed URL never shows its noindex to Google, so shared links (e.g. /join?code=…)
+    // could be indexed as bare URLs. Only the admin desk stays Disallowed.
+    expect(crawlPolicy.disallowPaths).toEqual(["/admin"]);
+    const isDisallowed = (path: string) =>
+      crawlPolicy.disallowPaths.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+    for (const path of listIndexablePaths()) {
+      expect(isDisallowed(path), `${path} is indexable but disallowed`).toBe(false);
     }
+  });
+
+  it("keeps formerly disallowed app routes noindex", () => {
+    for (const path of ["/join", "/map", "/create", "/presets", "/stats", "/feedback"]) {
+      expect(getRouteSeo(path).robots).toBe("noindex,nofollow");
+    }
+  });
+
+  it("gives home a descriptive title within 60 chars and keeps the brand in JSON-LD", () => {
+    const home = getRouteSeo("/");
+    expect(home.title).toBe(HOME_TITLE);
+    expect(home.title).toBe("Jet Lag Map Companion · Live Hide + Seek Maps");
+    expect(home.title.length).toBeLessThanOrEqual(60);
+    expect(home.jsonLd?.name).toBe("Jet Lag Map Companion");
+    expect(home.description).toMatch(/unofficial/i);
+  });
+
+  it("keeps the static index.html title and share titles in sync with home SEO", () => {
+    const html = readFileSync(resolve(import.meta.dirname, "../../../index.html"), "utf8");
+    expect(html).toContain(`<title>${HOME_TITLE}</title>`);
+    expect(html).toContain(`<meta property="og:title" content="${HOME_TITLE}" />`);
+    expect(html).toContain(`<meta name="twitter:title" content="${HOME_TITLE}" />`);
+    expect(html).toContain('<meta property="og:site_name" content="Jet Lag Map Companion" />');
+  });
+
+  it("keeps the noscript fallback free of headings so prerendered pages have one h1", () => {
+    const html = readFileSync(resolve(import.meta.dirname, "../../../index.html"), "utf8");
+    const noscript = html.match(/<noscript>([\s\S]*?)<\/noscript>/i)?.[1] ?? "";
+    expect(noscript).not.toMatch(/<h[1-6]\b/i);
   });
 });

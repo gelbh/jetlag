@@ -1,6 +1,7 @@
 import type { FirebaseStorage } from "firebase/storage";
 import { clientEnvUsesFirebaseEmulator } from "@/config/env";
-import { getFirebaseApp } from "./firebase";
+import { firebaseEmulatorEndpoints } from "@/config/firebaseEmulatorEndpoints";
+import { armAppCheckForEnforcedService, getFirebaseApp } from "./firebase";
 
 let storage: FirebaseStorage | null = null;
 let storageEmulatorConnected = false;
@@ -13,13 +14,16 @@ function connectStorageEmulatorIfConfigured(
     return;
   }
 
-  connectStorageEmulator(firebaseStorage, "127.0.0.1", 9198);
+  const { host, storagePort } = firebaseEmulatorEndpoints();
+  connectStorageEmulator(firebaseStorage, host, storagePort);
   storageEmulatorConnected = true;
 }
 
 export async function getFirebaseStorage(): Promise<FirebaseStorage> {
   if (!storage) {
     const { connectStorageEmulator, getStorage } = await import("firebase/storage");
+    // Storage is App Check-enforced: arm it before the first upload/download.
+    armAppCheckForEnforcedService();
     storage = getStorage(getFirebaseApp());
     connectStorageEmulatorIfConfigured(storage, connectStorageEmulator);
   }

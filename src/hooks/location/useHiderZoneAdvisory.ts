@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { serverNow } from "@/services/core/time/serverClock";
 import { distanceBetweenPoints } from "../../domain/geometry/gameArea/geometry";
 import { isHidingPeriodActive } from "../../domain/session/hiding/hidingPeriod";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
@@ -30,7 +31,7 @@ export function useHiderZoneAdvisory({
       return false;
     }
 
-    const elapsed = computeElapsedMs(timerState);
+    const elapsed = computeElapsedMs(timerState, serverNow());
     if (isHidingPeriodActive(sessionRules, elapsed)) {
       return false;
     }

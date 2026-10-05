@@ -1,4 +1,6 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "../../geometry/measuring/measuringGeometryBudgets";
+import { POLYGON_PERSIST_OVER_BUDGET_MESSAGE } from "../../geometry/progressive/persistSlim";
 import { tentacleEliminationJsonForAnswer } from "../../geometry/tentacle/tentacleGeometry";
 import type { AnnotationRecord, GameArea, TentaclePoi } from "../../map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
@@ -40,8 +42,17 @@ export async function resolveTentaclePendingQuestion(
       outOfReach,
       gameArea,
     });
-  } catch {
-    return null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    // Persist ceiling only: keep Point; other failures cancel resolve.
+    if (
+      message === MEASURING_PERSIST_OVER_BUDGET_MESSAGE ||
+      message === POLYGON_PERSIST_OVER_BUDGET_MESSAGE
+    ) {
+      eliminationJson = undefined;
+    } else {
+      return null;
+    }
   }
 
   const resolvedMetadata: AnnotationRecord["metadata"] = {

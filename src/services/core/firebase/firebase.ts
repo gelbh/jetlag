@@ -26,12 +26,15 @@ import {
   getClientEnv,
   readFirebaseConfigFromEnv,
 } from "@/config/env";
+import { firebaseEmulatorEndpoints } from "@/config/firebaseEmulatorEndpoints";
 import {
   captureAuthBootstrapFailureLazy,
   captureAuthPersistenceFallbackLazy,
   setBootstrapTagLazy,
   syncAnalyticsIdentityLazy,
+  syncSentryUserLazy,
 } from "../analytics/lazyTelemetry";
+import { markAppCheckArmed, resetAppCheckArmedStateForTests } from "./appCheckArmedState";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
 import {
   isFirebaseConfigured,
@@ -83,7 +86,8 @@ function connectAuthEmulatorIfConfigured(firebaseAuth: Auth): void {
     return;
   }
 
-  connectAuthEmulator(firebaseAuth, "http://127.0.0.1:9199", {
+  const { host, authPort } = firebaseEmulatorEndpoints();
+  connectAuthEmulator(firebaseAuth, `http://${host}:${authPort}`, {
     disableWarnings: true,
   });
   authEmulatorConnected = true;
@@ -94,7 +98,8 @@ function connectFirestoreEmulatorIfConfigured(firestore: Firestore): void {
     return;
   }
 
-  connectFirestoreEmulator(firestore, "127.0.0.1", 8180);
+  const { host, firestorePort } = firebaseEmulatorEndpoints();
+  connectFirestoreEmulator(firestore, host, firestorePort);
   firestoreEmulatorConnected = true;
 }
 
@@ -159,10 +164,17 @@ function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
   }
 }
 
+/**
+ * Arms App Check (loads reCAPTCHA). Call only from real token consumers —
+ * Firestore, Storage, callables, the premium proxy — never from boot or gates.
+ */
 export function getFirebaseAppCheck(): AppCheck | null {
   if (!isFirebaseConfigured()) {
     return null;
   }
+
+  // Emulator skips App Check but still flips the flag, so gates behave like prod in e2e.
+  markAppCheckArmed();
 
   if (firebaseUsesEmulator()) {
     getFirebaseApp();
@@ -172,6 +184,20 @@ export function getFirebaseAppCheck(): AppCheck | null {
   const firebaseApp = getFirebaseApp();
   initializeAppCheckIfConfigured(firebaseApp);
   return appCheck;
+}
+
+/**
+ * Arm App Check ahead of an App Check-enforced SDK (Firestore, Storage) without
+ * making that SDK depend on reCAPTCHA init succeeding: on failure the SDK still
+ * initializes, enforcement surfaces as a normal permission error, and the
+ * content-blocker probe (which re-runs init) reports it.
+ */
+export function armAppCheckForEnforcedService(): void {
+  try {
+    getFirebaseAppCheck();
+  } catch {
+    // Reported by appCheckProbe; see above.
+  }
 }
 
 export function getFirebaseAuth(): Auth {
@@ -185,6 +211,8 @@ export function getFirebaseAuth(): Auth {
 
 function createFirestoreDb(): Firestore {
   const firebaseApp = getFirebaseApp();
+  // Firestore is App Check-enforced: arm it before the first request leaves.
+  armAppCheckForEnforcedService();
 
   if (firebaseUsesEmulator()) {
     const firestore = initializeFirestore(firebaseApp, {
@@ -298,6 +326,7 @@ export function startAuthBootstrap(): void {
 
   authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
     syncAnalyticsIdentityLazy(user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null);
+    syncSentryUserLazy(user ? { uid: user.uid } : null);
   });
 
   void getAuthBootstrapPromise();
@@ -377,4 +406,5 @@ export async function resetFirebaseForTests(): Promise<void> {
   anonymousSignInPromise = null;
   authStateReadyPromise = null;
   resetAuthBootstrapStateForTests();
+  resetAppCheckArmedStateForTests();
 }
