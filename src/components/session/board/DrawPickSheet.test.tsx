@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   beginSequentialRewardPick,
@@ -8,7 +8,24 @@ import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { DrawPickSheet } from "./DrawPickSheet";
 
 describe("DrawPickSheet", () => {
-  it("requires keep count and records keep/discard selection", () => {
+  it("keeps host mounted closed when pending is null", async () => {
+    const { rerender } = renderWithAppUi(
+      <DrawPickSheet pending={null} gameSize="medium" onConfirm={vi.fn()} />,
+    );
+    // Closed: no dialog / draw body. Host stays in React tree with open=false.
+    expect(screen.queryByRole("dialog", { name: "Choose cards to keep" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Pick which drawn cards/i)).not.toBeInTheDocument();
+
+    const started = beginSequentialRewardPick(createInitialBoardEconomyState("draw-ui"), [
+      { draw: 3, keep: 1 },
+    ]);
+    rerender(<DrawPickSheet pending={started.pendingPick} gameSize="medium" onConfirm={vi.fn()} />);
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: "Choose cards to keep" })).toBeInTheDocument();
+    });
+  });
+
+  it("requires keep count and records keep/discard selection", async () => {
     const started = beginSequentialRewardPick(createInitialBoardEconomyState("draw-ui"), [
       { draw: 3, keep: 1 },
     ]);
@@ -18,7 +35,9 @@ describe("DrawPickSheet", () => {
       <DrawPickSheet pending={started.pendingPick} gameSize="medium" onConfirm={onConfirm} />,
     );
 
-    expect(screen.getAllByLabelText("Choose cards to keep")[0]).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: "Choose cards to keep" })).toBeInTheDocument();
+    });
     fireEvent.click(screen.getByRole("button", { name: /Confirm keep/i }));
     expect(screen.getByRole("alert")).toHaveTextContent(/exactly 1/i);
     expect(onConfirm).not.toHaveBeenCalled();

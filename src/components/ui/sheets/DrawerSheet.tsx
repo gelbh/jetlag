@@ -4,6 +4,7 @@ import { DrawerGrabber } from "@/components/ui/entry/entryChrome";
 import { bottomDrawerStyles } from "@/components/ui/entry/entryStyles";
 import { usePlayerPhoneShellPortalTarget } from "@/components/ui/layout/PlayerPhoneShellPortalContext";
 import { resolveDrawerSheetTransitionProps } from "@/components/ui/sheets/drawerSheetTransition";
+import { useDrawerPresentOpen } from "@/hooks/motion/useDrawerPresentOpen";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { useSheetGesture } from "@/hooks/motion/useSheetGesture";
 import { cn } from "@/lib/cn";
@@ -120,6 +121,7 @@ export function DrawerSheet({
   contentStyle,
   mapInteractive = false,
 }: DrawerSheetProps) {
+  const presentedOpen = useDrawerPresentOpen(open);
   const childScroll = scrollMode === "child";
   const baseStyles = bottomDrawerStyles(false);
   const portalTarget = usePlayerPhoneShellPortalTarget();
@@ -154,7 +156,7 @@ export function DrawerSheet({
 
   return (
     <Drawer
-      opened={open}
+      opened={presentedOpen}
       onClose={onClose}
       position="bottom"
       size="auto"

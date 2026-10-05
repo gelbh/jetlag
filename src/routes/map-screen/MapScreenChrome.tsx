@@ -328,90 +328,88 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
         actions={gameOverActions}
       />
 
-      {overlay.settingsInStack ? (
-        <MapSettingsSheet
-          open={overlay.isSettingsOpen}
-          onClose={overlay.closeSheet}
-          pendingWrites={pendingWrites}
-          general={{
-            showCurrentLocation,
-            onShowCurrentLocationChange: setShowCurrentLocation,
-            showAdminBoundaries,
-            onShowAdminBoundariesChange: setShowAdminBoundaries,
-            keepScreenAwake,
-            onKeepScreenAwakeChange: setKeepScreenAwake,
-            lowPowerMode,
-            onLowPowerModeChange: setLowPowerMode,
-            distanceUnit,
-            onDistanceUnitChange: (unit) => {
-              void handleDistanceUnitChange(unit);
-            },
-            distanceUnitEditable: gameRulesEditable,
-            mapStyle: effectiveBasemapStyle,
-            onMapStyleChange: handleMapStyleChange,
-            streetBasemap,
-            onStreetBasemapChange: setStreetBasemap,
-            locationError: liveLocationError,
-            transitEnabled,
-            transitLiveEnabled,
-            transitLiveSupported,
-            sessionIsPremium,
-            transitRouteFilter,
-            metroLabel: transitMetro?.label ?? null,
-            loadingStatic: transitLoadingStatic,
-            loadingLive: transitLoadingLive,
-            liveDataStale: transitLiveDataStale,
-            stopCount: transitStaticData?.stops.length ?? 0,
-            routeCount: transitStaticData?.routes.length ?? 0,
-            vehicleCount: transitLiveData?.vehicles.length ?? 0,
-            lastUpdated: transitLiveData?.fetchedAt ?? transitStaticData?.fetchedAt,
-            transitError,
-            onToggleTransit: () => setTransitEnabled(!transitEnabled),
-            onToggleLiveTransit: () => setTransitLiveEnabled(!transitLiveEnabled),
-            onTransitRouteFilterChange: setTransitRouteFilter,
-          }}
-          layers={{
-            layerVisibility,
-            onLayerVisibilityChange: setLayerVisibility,
-          }}
-          rules={
-            draftAdvancedSettings
-              ? {
-                  gameRulesEditable: gameRulesEditable && isHost,
-                  gameSize: session!.gameSize ?? "medium",
-                  advancedSettings: draftAdvancedSettings,
-                  onAdvancedSettingsChange: setDraftAdvancedSettings,
-                  onSaveGameRules: handleSaveGameRules,
-                }
-              : undefined
-          }
-          session={{
-            sessionCode: session!.code,
-            remoteSession: isRemote,
-            session: session!,
-            myUid: uid ?? undefined,
-            onClearMap: handleClearMap,
-            endGameBlocked,
-            onExport: () => {
-              overlay.closeAllSheets();
-              void exportMap();
-            },
-            isHost,
-            onResetBoard: handleResetBoard,
-            onResetSession: () => void handleResetSession(),
-            onEndSession: () => void handleEndSession(),
-            onLeaveSession: () => void handleLeaveSession(),
-            expansionPackEnabled: session!.expansionPackEnabled === true,
-            onReviewMapTools: () => {
-              overlay.pushSheet("map-tools-guide");
-            },
-            onOpenCurseReference: () => {
-              overlay.pushSheet("curse-reference");
-            },
-          }}
-          onReportProblem={openReportProblem}
-        />
-      ) : null}
+      <MapSettingsSheet
+        open={overlay.isSettingsOpen}
+        onClose={overlay.closeSheet}
+        pendingWrites={pendingWrites}
+        general={{
+          showCurrentLocation,
+          onShowCurrentLocationChange: setShowCurrentLocation,
+          showAdminBoundaries,
+          onShowAdminBoundariesChange: setShowAdminBoundaries,
+          keepScreenAwake,
+          onKeepScreenAwakeChange: setKeepScreenAwake,
+          lowPowerMode,
+          onLowPowerModeChange: setLowPowerMode,
+          distanceUnit,
+          onDistanceUnitChange: (unit) => {
+            void handleDistanceUnitChange(unit);
+          },
+          distanceUnitEditable: gameRulesEditable,
+          mapStyle: effectiveBasemapStyle,
+          onMapStyleChange: handleMapStyleChange,
+          streetBasemap,
+          onStreetBasemapChange: setStreetBasemap,
+          locationError: liveLocationError,
+          transitEnabled,
+          transitLiveEnabled,
+          transitLiveSupported,
+          sessionIsPremium,
+          transitRouteFilter,
+          metroLabel: transitMetro?.label ?? null,
+          loadingStatic: transitLoadingStatic,
+          loadingLive: transitLoadingLive,
+          liveDataStale: transitLiveDataStale,
+          stopCount: transitStaticData?.stops.length ?? 0,
+          routeCount: transitStaticData?.routes.length ?? 0,
+          vehicleCount: transitLiveData?.vehicles.length ?? 0,
+          lastUpdated: transitLiveData?.fetchedAt ?? transitStaticData?.fetchedAt,
+          transitError,
+          onToggleTransit: () => setTransitEnabled(!transitEnabled),
+          onToggleLiveTransit: () => setTransitLiveEnabled(!transitLiveEnabled),
+          onTransitRouteFilterChange: setTransitRouteFilter,
+        }}
+        layers={{
+          layerVisibility,
+          onLayerVisibilityChange: setLayerVisibility,
+        }}
+        rules={
+          draftAdvancedSettings
+            ? {
+                gameRulesEditable: gameRulesEditable && isHost,
+                gameSize: session!.gameSize ?? "medium",
+                advancedSettings: draftAdvancedSettings,
+                onAdvancedSettingsChange: setDraftAdvancedSettings,
+                onSaveGameRules: handleSaveGameRules,
+              }
+            : undefined
+        }
+        session={{
+          sessionCode: session!.code,
+          remoteSession: isRemote,
+          session: session!,
+          myUid: uid ?? undefined,
+          onClearMap: handleClearMap,
+          endGameBlocked,
+          onExport: () => {
+            overlay.closeAllSheets();
+            void exportMap();
+          },
+          isHost,
+          onResetBoard: handleResetBoard,
+          onResetSession: () => void handleResetSession(),
+          onEndSession: () => void handleEndSession(),
+          onLeaveSession: () => void handleLeaveSession(),
+          expansionPackEnabled: session!.expansionPackEnabled === true,
+          onReviewMapTools: () => {
+            overlay.pushSheet("map-tools-guide");
+          },
+          onOpenCurseReference: () => {
+            overlay.pushSheet("curse-reference");
+          },
+        }}
+        onReportProblem={openReportProblem}
+      />
 
       <CurseReferenceSheet open={overlay.isCurseReferenceOpen} onClose={overlay.closeSheet} />
 

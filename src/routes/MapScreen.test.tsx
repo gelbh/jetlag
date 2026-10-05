@@ -120,13 +120,15 @@ describe("MapScreen", () => {
     expect(screen.getByTestId("map-screen-view")).toBeInTheDocument();
   });
 
-  it("opens map settings from the tool dock", () => {
+  it("opens map settings from the tool dock", async () => {
     useSessionStore.getState().setSession(createTestSession());
 
     renderWithRouter(<MapScreen />, { route: "/map", resetStores: false });
     dismissMapToolsGuide();
     fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
 
-    expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
+    });
   });
 });

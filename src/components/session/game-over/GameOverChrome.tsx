@@ -43,13 +43,9 @@ export function GameOverChrome({ sessionId, playerRole, myUid, actions }: GameOv
     );
   }
 
-  if (!gameOver.result) {
-    return null;
-  }
-
   return (
     <GameOverSheet
-      open
+      open={gameOver.result != null}
       gameResult={gameOver.result}
       playerRole={playerRole}
       myUid={myUid}

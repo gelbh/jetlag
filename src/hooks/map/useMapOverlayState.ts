@@ -24,8 +24,6 @@ export interface UseMapOverlayStateResult {
   isMapToolsGuideOpen: boolean;
   isReportProblemOpen: boolean;
   isCurseReferenceOpen: boolean;
-  /** Settings still in the stack (may be covered by a nested sheet). */
-  settingsInStack: boolean;
   /** Dock / peer open: replaces the whole stack. */
   openChat: () => void;
   openSettings: () => void;
@@ -93,7 +91,6 @@ export function useMapOverlayState(): UseMapOverlayStateResult {
       isMapToolsGuideOpen: sheet === "map-tools-guide",
       isReportProblemOpen: sheet === "report-problem",
       isCurseReferenceOpen: sheet === "curse-reference",
-      settingsInStack: stack.includes("settings"),
       openChat,
       openSettings,
       openLog,

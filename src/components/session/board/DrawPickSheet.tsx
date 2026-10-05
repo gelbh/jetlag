@@ -12,12 +12,23 @@ type DrawPickSheetProps = {
 };
 
 export function DrawPickSheet({ pending, gameSize, onConfirm }: DrawPickSheetProps) {
-  if (!pending) {
-    return null;
-  }
-  const cycleKey = pending.drawn.map((card) => card.instanceId).join("|") || "empty";
+  const cycleKey = pending?.drawn.map((c) => c.instanceId).join("|") || "empty";
   return (
-    <DrawPickSheetOpen key={cycleKey} pending={pending} gameSize={gameSize} onConfirm={onConfirm} />
+    <SheetHost
+      open={pending != null}
+      dismissible={false}
+      onClose={() => undefined}
+      ariaLabel="Choose cards to keep"
+    >
+      {pending ? (
+        <DrawPickSheetOpen
+          key={cycleKey}
+          pending={pending}
+          gameSize={gameSize}
+          onConfirm={onConfirm}
+        />
+      ) : null}
+    </SheetHost>
   );
 }
 
@@ -50,7 +61,7 @@ function DrawPickSheetOpen({
   };
 
   return (
-    <SheetHost open dismissible={false} onClose={() => undefined} ariaLabel="Choose cards to keep">
+    <>
       <SheetHeader
         title="Draw"
         eyebrow={
@@ -112,6 +123,6 @@ function DrawPickSheetOpen({
           Confirm keep ({selectedIds.length}/{need})
         </button>
       </div>
-    </SheetHost>
+    </>
   );
 }

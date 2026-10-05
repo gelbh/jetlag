@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createInitialBoardEconomyState } from "../../../domain/boardEconomy";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
@@ -13,7 +13,7 @@ const noopHandlers = {
 };
 
 describe("HiderHandSheet", () => {
-  it("shows hand counts and hides when closed", () => {
+  it("keeps host mounted and gates content on open", async () => {
     const state = createInitialBoardEconomyState("test");
     const withHand = {
       ...state,
@@ -31,7 +31,9 @@ describe("HiderHandSheet", () => {
         {...noopHandlers}
       />,
     );
-    expect(screen.queryByLabelText("Hider hand")).toBeNull();
+    // Closed: no dialog role / body (Drawer keepMounted=false). Host stays in React tree.
+    expect(screen.queryByRole("dialog", { name: "Hider hand" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/2 \/ 6 cards/)).not.toBeInTheDocument();
 
     rerender(
       <HiderHandSheet
@@ -44,11 +46,14 @@ describe("HiderHandSheet", () => {
         {...noopHandlers}
       />,
     );
-    expect(screen.getAllByLabelText("Hider hand")[0]).toBeTruthy();
+    // Present latch: first paint opened=false, then effect opens.
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: "Hider hand" })).toBeTruthy();
+    });
     expect(screen.getByText(/2 \/ 6 cards/)).toBeTruthy();
   });
 
-  it("exposes discard when over hand limit", () => {
+  it("exposes discard when over hand limit", async () => {
     const state = createInitialBoardEconomyState("over");
     const withHand = {
       ...state,
@@ -67,6 +72,9 @@ describe("HiderHandSheet", () => {
         {...noopHandlers}
       />,
     );
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: "Hider hand" })).toBeTruthy();
+    });
     const discardButtons = screen.getAllByRole("button", { name: "Discard" });
     expect(discardButtons.length).toBeGreaterThan(0);
     fireEvent.click(discardButtons[0]!);
