@@ -91,10 +91,15 @@ export function swissPresets(): BundledGamePresetDefinition[] {
       distanceUnit: "metric",
       advancedSettingsPatch: EXPANSION_OFF,
     }),
-    ...SWISS_CANTONS.map((canton) =>
-      attachPlayArea({
+    ...SWISS_CANTONS.map((canton) => {
+      // Specialty Zürich/Lucerne presets keep "Canton of …" / metro names; disambiguate depth.
+      const hasSpecialtyDepth = canton.id === "zurich" || canton.id === "lucerne";
+      const name = hasSpecialtyDepth
+        ? `Canton of ${canton.name} (municipalities)`
+        : `Canton of ${canton.name}`;
+      return attachPlayArea({
         id: `bundled:switzerland-${canton.id}`,
-        name: `Canton of ${canton.name}`,
+        name,
         description: `${canton.name} municipalities. Boundary data © swisstopo (swissBOUNDARIES3D).`,
         placeLabel: `${canton.name}, Switzerland`,
         regionPackId: SWITZERLAND_REGION_PACK_ID,
@@ -105,7 +110,7 @@ export function swissPresets(): BundledGamePresetDefinition[] {
         ],
         distanceUnit: "metric",
         advancedSettingsPatch: EXPANSION_OFF,
-      }),
-    ),
+      });
+    }),
   ];
 }
