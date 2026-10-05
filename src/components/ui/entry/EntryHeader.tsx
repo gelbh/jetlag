@@ -7,6 +7,11 @@ export interface EntryHeaderProps {
   title: string;
   backTo?: string;
   backLabel?: string;
+  /**
+   * `false` renders the bar title as plain text when the page body owns a longer, descriptive
+   * h1 (content pages); one h1 per page either way.
+   */
+  titleIsHeading?: boolean;
 }
 
 /** Product-mark back control: curved arrow, 44pt hit target. */
@@ -51,7 +56,12 @@ function BackControl({ to, label }: { to: string; label: string }) {
  * Shared Apple-native nav bar for Join / Create / Friends Mantine screens.
  * Safe-area inset + 52pt toolbar; sticky so it stays while the page scrolls.
  */
-export function EntryHeader({ title, backTo = "/", backLabel = "Back" }: EntryHeaderProps) {
+export function EntryHeader({
+  title,
+  backTo = "/",
+  backLabel = "Back",
+  titleIsHeading = true,
+}: EntryHeaderProps) {
   return (
     <Box
       component="header"
@@ -100,6 +110,7 @@ export function EntryHeader({ title, backTo = "/", backLabel = "Back" }: EntryHe
           <AppLogo variant="mark" size="sm" width={28} height={28} />
           <Title
             order={1}
+            renderRoot={titleIsHeading ? undefined : (props) => <p {...props} />}
             c="var(--color-field-ink)"
             fw={600}
             style={{

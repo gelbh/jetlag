@@ -1,5 +1,19 @@
 {
   "siteOrigin": "https://jetlag.gelbhart.dev",
-  "indexablePaths": ["/", "/premium", "/privacy", "/terms"],
+  "indexablePaths": [
+    "/",
+    "/guide",
+    "/tools",
+    "/tools/radar",
+    "/tools/thermometer",
+    "/tools/matching",
+    "/tools/measuring",
+    "/tools/tentacles",
+    "/tools/photo",
+    "/faq",
+    "/premium",
+    "/privacy",
+    "/terms"
+  ],
   "disallowPaths": ["/admin"]
 }

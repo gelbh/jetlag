@@ -58,6 +58,9 @@ export const importPremium = () =>
 
 export const importTerms = () => import("../routes/Terms").then((m) => ({ default: m.Terms }));
 
+export const importLearnPage = () =>
+  import("../routes/learn/LearnPage").then((m) => ({ default: m.LearnPage }));
+
 export const importNotFound = () =>
   import("../routes/NotFound").then((m) => ({ default: m.NotFound }));
 
@@ -81,6 +84,7 @@ export const routeImporter = {
   importPrivacy,
   importPremium,
   importTerms,
+  importLearnPage,
   importNotFound,
 };
 
@@ -98,6 +102,7 @@ export const FeedbackLazy = lazyWithChunkRetry(importFeedback);
 export const PrivacyLazy = lazyWithChunkRetry(importPrivacy);
 export const PremiumLazy = lazyWithChunkRetry(importPremium);
 export const TermsLazy = lazyWithChunkRetry(importTerms);
+export const LearnPageLazy = lazyWithChunkRetry(importLearnPage);
 export const NotFoundLazy = lazyWithChunkRetry(importNotFound);
 export const AppResumeWatchdogLazy = lazyWithChunkRetry(importAppResumeWatchdog);
 
@@ -117,6 +122,7 @@ const lazyRouteByLoaderKey: Record<LazyRouteLoaderKey, LazyRouteComponent> = {
   importStats: StatsLazy,
   importFriends: FriendsLazy,
   importLeaderboard: LeaderboardLazy,
+  importLearnPage: LearnPageLazy,
 };
 
 /**

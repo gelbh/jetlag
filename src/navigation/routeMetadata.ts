@@ -1,3 +1,5 @@
+import { isLearnRoutePath, LEARN_ROUTE_PATHS } from "@/domain/seo/learnRoutePaths";
+
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
 const ADMIN_PATH_RE = /^\/admin(?:\/|$)/;
 const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
@@ -17,6 +19,7 @@ const LAZY_ROUTE_PATHS = new Set([
   "/stats",
   "/friends",
   "/leaderboard",
+  ...LEARN_ROUTE_PATHS,
 ]);
 
 export function normalizeRoutePath(path: string): string {
@@ -61,12 +64,16 @@ export type LazyRouteLoaderKey =
   | "importTerms"
   | "importStats"
   | "importFriends"
-  | "importLeaderboard";
+  | "importLeaderboard"
+  | "importLearnPage";
 
 export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined {
   const normalizedPath = normalizeRoutePath(path);
   if (ADMIN_PATH_RE.test(normalizedPath)) {
     return "importAdminOpsDesk";
+  }
+  if (isLearnRoutePath(normalizedPath)) {
+    return "importLearnPage";
   }
   switch (normalizedPath) {
     case "/map":
