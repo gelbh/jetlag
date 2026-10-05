@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.0.4";
+export const APP_VERSION = "1.0.5";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,45 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.0.5",
+    date: "2026-10-05",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Session list stays on screen with Retry when a refresh fails",
+          "Empty and fail copy on Sessions, Monitor, and the incident queue is short and actionable",
+          "Opening the app with no signal no longer shows the content blocker error page",
+          "The app reloads to the latest version once you're back online if part of it failed to load offline",
+          "The Premium page shows its sign-in options right away instead of waiting on sign-in to load",
+          "Privacy policy discloses masked Sentry Session Replay and that error reports may include a pseudonymous account id",
+          "Hiding and round timers now stay in sync across phones even when a phone's clock is wrong, and a running timer survives the app being closed or killed.",
+          "Solo Measuring and Matching keep map shade when elimination geometry is too large to store, same as multiplayer. Tentacle still saves the Point answer if elim JSON exceeds budget. Map-first Ask tools show send errors in the answer phase instead of failing silently.",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Admin ops desk uses Mantine AppShell and controls with a locked desk viewport",
+          "Live sessions is the default filter; extra filters stay behind More filters",
+          "Map tiles you've viewed inside the play area stay available offline longer",
+          "Chat messages you send without signal now clear from the box right away and go out once you reconnect, without sending twice.",
+          "Home, Join and the legal pages load without Google's bot check (reCAPTCHA) until you enter a join code, create a game or sign in",
+          'The home page tab and link previews now read "Jet Lag Map Companion · Live Hide + Seek Maps"',
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Filter OpenFreeMap tile and Cloudflare KV miss spans from Sentry noise",
+          "Harden Sentry SDK 11 privacy defaults, Overpass span filtering, and the first-party envelope tunnel",
+          "Sync Firebase account id into Sentry and instrument React Router navigations",
+          "Unknown web addresses now answer with a real 404 (the app's not-found screen still shows), and search engines can see the noindex on shared join links",
+        ],
+      },
+    ],
+  },
   {
     version: "1.0.4",
     date: "2026-10-04",
