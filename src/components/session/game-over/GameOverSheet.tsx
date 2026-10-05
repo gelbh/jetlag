@@ -9,7 +9,7 @@ import { MapReplayLayer } from "./MapReplayLayer";
 
 interface GameOverSheetProps {
   open: boolean;
-  gameResult: GameResultRecord;
+  gameResult: GameResultRecord | null;
   playerRole: PlayerRole;
   myUid?: string;
   sessionId: string;
@@ -80,12 +80,13 @@ export function GameOverSheet({
 }: GameOverSheetProps) {
   const [replayOpen, setReplayOpen] = useState(false);
 
-  const myPlayer = myUid ? gameResult.players.find((player) => player.uid === myUid) : undefined;
+  const myPlayer =
+    gameResult && myUid ? gameResult.players.find((player) => player.uid === myUid) : undefined;
   const playerWon = myPlayer?.won;
-  const headline = outcomeHeadline(gameResult.outcome, playerWon);
-  const hidingPhaseMs = gameResult.hidingPhaseMs ?? 0;
-  const seekPhaseMs = gameResult.seekPhaseMs ?? 0;
-  const heroMs = playerRole === "hider" ? hidingPhaseMs : gameResult.seekTimeMs;
+  const headline = gameResult ? outcomeHeadline(gameResult.outcome, playerWon) : "";
+  const hidingPhaseMs = gameResult?.hidingPhaseMs ?? 0;
+  const seekPhaseMs = gameResult?.seekPhaseMs ?? 0;
+  const heroMs = gameResult ? (playerRole === "hider" ? hidingPhaseMs : gameResult.seekTimeMs) : 0;
 
   const handleRematch = useCallback(() => {
     void Promise.resolve(onRematch()).catch(() => {
@@ -93,7 +94,7 @@ export function GameOverSheet({
     });
   }, [onRematch]);
 
-  const footer = (
+  const footer = gameResult ? (
     <div className="space-y-2 border-t border-border bg-surface-panel px-4 pb-[max(1rem,var(--safe-area-bottom))] pt-3">
       {rematchError ? (
         <p className="text-center text-sm text-status-error" role="alert">
@@ -113,12 +114,12 @@ export function GameOverSheet({
         Home
       </Button>
     </div>
-  );
+  ) : null;
 
   return (
     <>
       <SheetHost
-        open={open && !replayOpen}
+        open={open && gameResult != null && !replayOpen}
         onClose={() => {}}
         dismissible={false}
         ariaLabel="Game over"
@@ -126,48 +127,53 @@ export function GameOverSheet({
         maxHeightClassName="max-h-[min(85dvh,560px)]"
         sheetClassName="mx-auto max-w-lg"
       >
-        <div className="space-y-4 px-4 pb-4 pt-2">
-          <div className="space-y-1 text-center">
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-status-success">
-              {formatOutcomeLabel(gameResult.outcome)}
-            </p>
-            <h2 className="text-lg font-semibold text-ink">{headline}</h2>
-            <p className="font-mono text-3xl font-bold tabular-nums text-ink">
-              {formatClockDurationFromMs(heroMs)}
-            </p>
-            <p className="text-xs text-ink-muted">
-              {playerRole === "hider" ? "Hiding time" : "Seek time"}
-            </p>
-          </div>
+        {gameResult && open ? (
+          <div className="space-y-4 px-4 pb-4 pt-2">
+            <div className="space-y-1 text-center">
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-status-success">
+                {formatOutcomeLabel(gameResult.outcome)}
+              </p>
+              <h2 className="text-lg font-semibold text-ink">{headline}</h2>
+              <p className="font-mono text-3xl font-bold tabular-nums text-ink">
+                {formatClockDurationFromMs(heroMs)}
+              </p>
+              <p className="text-xs text-ink-muted">
+                {playerRole === "hider" ? "Hiding time" : "Seek time"}
+              </p>
+            </div>
 
-          <div className="rounded-lg border border-border bg-surface-deep px-3">
-            <StatRow label="Total round" value={formatClockDurationFromMs(gameResult.durationMs)} />
-            <StatRow label="Hiding phase" value={formatClockDurationFromMs(hidingPhaseMs)} />
-            <StatRow label="Seek phase" value={formatClockDurationFromMs(seekPhaseMs)} />
-          </div>
+            <div className="rounded-lg border border-border bg-surface-deep px-3">
+              <StatRow
+                label="Total round"
+                value={formatClockDurationFromMs(gameResult.durationMs)}
+              />
+              <StatRow label="Hiding phase" value={formatClockDurationFromMs(hidingPhaseMs)} />
+              <StatRow label="Seek phase" value={formatClockDurationFromMs(seekPhaseMs)} />
+            </div>
 
-          <button
-            type="button"
-            onClick={() => setReplayOpen(true)}
-            className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface-deep p-3 text-left"
-            aria-label="Open map replay"
-          >
-            <span
-              className="flex h-16 w-24 shrink-0 items-center justify-center rounded-md border border-dashed border-border bg-surface-panel text-xs text-ink-muted"
-              aria-hidden="true"
+            <button
+              type="button"
+              onClick={() => setReplayOpen(true)}
+              className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface-deep p-3 text-left"
+              aria-label="Open map replay"
             >
-              Map
-            </span>
-            <span className="space-y-0.5">
-              <span className="block text-sm font-semibold text-ink">Map replay</span>
-              <span className="block text-xs text-ink-muted">Full scrubber coming soon</span>
-            </span>
-          </button>
-        </div>
+              <span
+                className="flex h-16 w-24 shrink-0 items-center justify-center rounded-md border border-dashed border-border bg-surface-panel text-xs text-ink-muted"
+                aria-hidden="true"
+              >
+                Map
+              </span>
+              <span className="space-y-0.5">
+                <span className="block text-sm font-semibold text-ink">Map replay</span>
+                <span className="block text-xs text-ink-muted">Full scrubber coming soon</span>
+              </span>
+            </button>
+          </div>
+        ) : null}
       </SheetHost>
 
       <MapReplayLayer
-        open={replayOpen}
+        open={replayOpen && gameResult != null}
         sessionId={sessionId}
         onClose={() => setReplayOpen(false)}
       />
