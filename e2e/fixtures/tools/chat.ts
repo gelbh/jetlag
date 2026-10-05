@@ -11,6 +11,14 @@ export function gameChatScroll(page: Page): Locator {
   return page.locator(".jl-game-chat-scroll");
 }
 
+/** Social-tab message list (the composer sits below it). */
+export function socialChatScroll(page: Page): Locator {
+  return page
+    .getByLabel("Chat tabs")
+    .locator("xpath=..")
+    .locator(".jl-scroll:not(.jl-game-chat-scroll)");
+}
+
 export async function openChat(page: Page) {
   if (
     await page
@@ -126,4 +134,10 @@ export async function expectChatAnswer(page: Page, answer: string) {
   await expect(page.getByLabel(new RegExp(`Answer:\\s*${answer}`, "i"))).toBeVisible({
     timeout: 20_000,
   });
+}
+
+export async function openSocialChat(page: Page) {
+  await openChat(page);
+  await page.getByLabel("Chat tabs").getByText("Social", { exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "Message" })).toBeVisible();
 }

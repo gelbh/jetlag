@@ -36,15 +36,19 @@ export type { EndGameTruthAnchor } from "../session/hiding/endGameTruthAnchors";
 export type { MemberRoles, PlayerRole } from "../session/players/playerRole";
 export type { GameSize } from "../session/size/gameSize";
 
-export type AnnotationType =
-  | "radar"
-  | "thermometer"
-  | "measuring"
-  | "zone"
-  | "pin"
-  | "draw"
-  | "tentacle"
-  | "matching";
+/** Must match `validAnnotationType` in firestore.rules (drift-guarded by a unit test). */
+export const ANNOTATION_TYPES = [
+  "radar",
+  "thermometer",
+  "measuring",
+  "zone",
+  "pin",
+  "draw",
+  "tentacle",
+  "matching",
+] as const;
+
+export type AnnotationType = (typeof ANNOTATION_TYPES)[number];
 
 export type AnnotationStatus = "active" | "deleted";
 
