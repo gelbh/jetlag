@@ -10,13 +10,14 @@ describe("useMapOverlayState sheet stack", () => {
       result.current.openSettings();
     });
     expect(result.current.sheet).toBe("settings");
-    expect(result.current.settingsInStack).toBe(true);
+    expect(result.current.isSettingsOpen).toBe(true);
+    expect(result.current.sheetStack).toEqual(["settings"]);
 
     act(() => {
       result.current.openChat();
     });
     expect(result.current.sheet).toBe("chat");
-    expect(result.current.settingsInStack).toBe(false);
+    expect(result.current.isSettingsOpen).toBe(false);
     expect(result.current.sheetStack).toEqual(["chat"]);
   });
 
@@ -30,7 +31,6 @@ describe("useMapOverlayState sheet stack", () => {
     expect(result.current.sheet).toBe("map-tools-guide");
     expect(result.current.isMapToolsGuideOpen).toBe(true);
     expect(result.current.isSettingsOpen).toBe(false);
-    expect(result.current.settingsInStack).toBe(true);
     expect(result.current.sheetStack).toEqual(["settings", "map-tools-guide"]);
 
     act(() => {
@@ -38,7 +38,7 @@ describe("useMapOverlayState sheet stack", () => {
     });
     expect(result.current.sheet).toBe("settings");
     expect(result.current.isSettingsOpen).toBe(true);
-    expect(result.current.settingsInStack).toBe(true);
+    expect(result.current.sheetStack).toEqual(["settings"]);
 
     act(() => {
       result.current.closeSheet();
