@@ -543,7 +543,6 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
 
       {uid ? (
         <RoleCodesSheet
-          key={overlay.isCodesOpen ? "codes-open" : "codes-closed"}
           open={overlay.isCodesOpen}
           onClose={overlay.closeSheet}
           session={session}

@@ -58,4 +58,31 @@ describe("RoleCodesSheet", () => {
 
     expect(await screen.findByText("WXYZ")).toBeInTheDocument();
   });
+
+  it("resets revealed codes when closed then reopened", async () => {
+    revealRolePasscode.mockResolvedValue({ rolePasscode: "WXYZ" });
+
+    const { rerender } = renderWithAppUi(
+      <RoleCodesSheet open onClose={vi.fn()} session={gatedSession} myUid="host-1" isHost />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Reveal Seeker code/i }));
+    expect(await screen.findByText("WXYZ")).toBeInTheDocument();
+
+    rerender(
+      <RoleCodesSheet
+        open={false}
+        onClose={vi.fn()}
+        session={gatedSession}
+        myUid="host-1"
+        isHost
+      />,
+    );
+    rerender(
+      <RoleCodesSheet open onClose={vi.fn()} session={gatedSession} myUid="host-1" isHost />,
+    );
+
+    expect(screen.getAllByText("••••").length).toBeGreaterThan(0);
+    expect(screen.queryByText("WXYZ")).not.toBeInTheDocument();
+  });
 });
