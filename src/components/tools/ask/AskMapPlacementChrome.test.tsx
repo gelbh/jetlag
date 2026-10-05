@@ -63,12 +63,12 @@ describe("AskMapPlacementChrome answer-phase errors", () => {
 });
 
 describe("AskMapPlacementChrome answer-phase GPS snap", () => {
-  it("shows My location snap control above answerSlot and calls onUseGps", () => {
+  it("shows floating icon-only snap control above answerSlot and calls onUseGps", () => {
     const { onUseGps } = renderChrome({ phase: "answer" });
 
     const snap = screen.getByTestId("matching-map-placement-snap-location");
     expect(snap).toHaveAccessibleName("Snap pin to my location");
-    expect(snap).toHaveTextContent("My location");
+    expect(snap).not.toHaveTextContent("My location");
     expect(snap.textContent).not.toMatch(/Allow location when prompted/i);
 
     const answerSlot = screen.getByTestId("answer-slot");
@@ -86,6 +86,6 @@ describe("AskMapPlacementChrome answer-phase GPS snap", () => {
     expect(screen.queryByTestId("matching-map-placement-snap-location")).toBeNull();
     expect(screen.queryByTestId("matching-map-placement-cta")).toBeNull();
     expect(screen.queryByText("Allow location when prompted")).toBeNull();
-    expect(screen.queryByRole("button", { name: /My location/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Snap pin to my location/i })).toBeNull();
   });
 });

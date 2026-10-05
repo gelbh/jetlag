@@ -11,6 +11,7 @@ import {
   type AskMapPlacementPhase,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
+import { binaryAnswerIcon } from "@/components/tools/shared/answers/binaryAnswerIcons";
 import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
   askInsetSurfaceStyle,
@@ -82,6 +83,7 @@ const compactChoiceStyles = (selected: boolean, tone: "success" | "danger" | "de
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
+      gap: 6,
       ...(selected
         ? {
             ...selectedSoft,
@@ -141,6 +143,7 @@ export function MeasuringMapPlacementChrome({
                 : option.activeClassName.includes("status-negative")
                   ? "danger"
                   : "default";
+              const Icon = binaryAnswerIcon(option.value);
               return (
                 <UnstyledButton
                   key={option.value}
@@ -149,6 +152,9 @@ export function MeasuringMapPlacementChrome({
                   onClick={() => onAnswerChange(option.value)}
                   styles={compactChoiceStyles(selected, tone)}
                 >
+                  {Icon ? (
+                    <Icon size={16} weight={selected ? "bold" : "regular"} aria-hidden />
+                  ) : null}
                   {option.label}
                 </UnstyledButton>
               );

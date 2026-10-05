@@ -10,6 +10,7 @@ import {
   type AskMapPlacementPhase,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
+import { binaryAnswerIcon } from "@/components/tools/shared/answers/binaryAnswerIcons";
 import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
   askInsetSurfaceStyle,
@@ -65,18 +66,17 @@ const compactChoiceStyles = (selected: boolean, tone: "success" | "danger" | "de
   return {
     root: {
       ...base.root,
-      width: "2.75rem",
-      height: "2.75rem",
-      minWidth: "2.75rem",
+      flex: 1,
       minHeight: "2.75rem",
-      padding: 0,
+      height: "2.75rem",
+      paddingInline: "0.7rem",
       borderRadius: 10,
       fontSize: "0.8125rem",
       fontWeight: 650,
-      flex: "0 0 auto",
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
+      gap: 6,
       ...(selected
         ? {
             ...selectedSoft,
@@ -142,6 +142,7 @@ export function MatchingMapPlacementChrome({
                 : option.activeClassName.includes("status-negative")
                   ? "danger"
                   : "default";
+              const Icon = binaryAnswerIcon(option.value);
               return (
                 <UnstyledButton
                   key={option.value}
@@ -150,6 +151,9 @@ export function MatchingMapPlacementChrome({
                   onClick={() => onAnswerChange(option.value)}
                   styles={compactChoiceStyles(selected, tone)}
                 >
+                  {Icon ? (
+                    <Icon size={16} weight={selected ? "bold" : "regular"} aria-hidden />
+                  ) : null}
                   {option.label}
                 </UnstyledButton>
               );

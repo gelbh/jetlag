@@ -77,20 +77,22 @@ export const askMapPlacementSendStyles = {
   },
 } as const;
 
-/** Densified secondary snap row (answer phase); not the tall soft-flag permission CTA. */
+/** Floating icon-only GPS snap (answer phase); not the tall soft-flag permission CTA. */
 export const askMapPlacementSnapLocationStyles = {
-  root: {
-    ...mapChromeSurfaceStyles,
-    minHeight: "2.75rem",
-    height: "2.75rem",
-    borderRadius: 12,
-    fontWeight: 590,
-    paddingInline: "0.65rem",
-    color: "var(--color-field-ink)",
-    "&:hover": {
-      backgroundColor: "oklch(from var(--color-canvas) l c h / 0.95)",
-    },
-  },
+  width: "2.75rem",
+  height: "2.75rem",
+  minWidth: "2.75rem",
+  minHeight: "2.75rem",
+  borderRadius: 14,
+  padding: 0,
+  border: "none",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  ...mapChromeSurfaceStyles,
+  color: "var(--color-flag)",
+  boxShadow: "0 8px 24px oklch(0.1 0.04 265 / 0.45)",
 } as const;
 
 function HaltErrorAlert({
@@ -144,11 +146,10 @@ function bottomClearanceForPhase(
   answerTall: boolean,
 ): string {
   if (phase === "answer") {
-    // +3rem for answer-phase My location snap row above answerSlot.
     if (hasInlineError) {
-      return answerTall ? "19rem" : "16.5rem";
+      return answerTall ? "16rem" : "13.5rem";
     }
-    return answerTall ? "15.5rem" : "13rem";
+    return answerTall ? "12.5rem" : "10rem";
   }
   if (phase === "failed") {
     return hasInlineError ? "13.5rem" : "10rem";
@@ -425,28 +426,17 @@ export function AskMapPlacementChrome({
           />
         ) : null}
         {showAnswer ? (
-          <Button
-            type="button"
-            fullWidth
-            data-testid={`${testId}-snap-location`}
-            aria-label="Snap pin to my location"
-            onClick={onUseGps}
-            styles={askMapPlacementSnapLocationStyles}
-            className="flex items-center justify-start gap-2.5"
-          >
-            <span
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center"
-              aria-hidden
-              style={{
-                borderRadius: 10,
-                backgroundColor: "oklch(from var(--color-flag) l c h / 0.18)",
-                color: "var(--color-flag)",
-              }}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              data-testid={`${testId}-snap-location`}
+              aria-label="Snap pin to my location"
+              onClick={onUseGps}
+              style={askMapPlacementSnapLocationStyles}
             >
-              <CrosshairIcon size={16} weight="bold" />
-            </span>
-            <span className="text-sm font-semibold">My location</span>
-          </Button>
+              <CrosshairIcon size={20} weight="bold" aria-hidden />
+            </button>
+          </div>
         ) : null}
         {showAnswer ? answerSlot : null}
       </div>
