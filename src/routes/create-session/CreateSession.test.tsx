@@ -195,11 +195,6 @@ function openMoreTools() {
   fireEvent(disclosure, new Event("toggle"));
 }
 
-function openCustomContent() {
-  openMoreTools();
-  fireEvent.click(screen.getByRole("button", { name: /^Custom content$/i }));
-}
-
 beforeEach(() => {
   mapView.model = null;
   startSeaLevelBackgroundSampling.mockReset();

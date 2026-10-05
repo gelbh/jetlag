@@ -4,7 +4,6 @@ import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
 import type { GameArea } from "@/domain/map/annotations";
-import { createMapBounds } from "@/domain/map/mapBounds";
 import { mergeBundledPresets } from "@/domain/regions/bundledGamePresets";
 import type { GamePreset } from "@/domain/session/presets/gamePreset";
 import { GAME_PRESET_SCHEMA_VERSION } from "@/domain/session/presets/gamePreset";
@@ -74,21 +73,26 @@ vi.mock("@/components/session/framing/prefetchCreateSessionMap", () => ({
 }));
 
 const loadRegionPackSessionBoundaries = vi.hoisted(() =>
-  vi.fn(async () => ({
-    playArea: {
-      type: "Polygon" as const,
-      coordinates: [
-        [
-          [-6.3, 53.3],
-          [-6.2, 53.3],
-          [-6.2, 53.4],
-          [-6.3, 53.4],
-          [-6.3, 53.3],
+  vi.fn(
+    async (): Promise<{
+      playArea: GameArea;
+      customMatchingAreas: Record<number, string>;
+    }> => ({
+      playArea: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-6.3, 53.3],
+            [-6.2, 53.3],
+            [-6.2, 53.4],
+            [-6.3, 53.4],
+            [-6.3, 53.3],
+          ],
         ],
-      ],
-    },
-    customMatchingAreas: {},
-  })),
+      },
+      customMatchingAreas: {},
+    }),
+  ),
 );
 vi.mock("@/services/geo/matching/regionPackBoundaries", () => ({
   loadRegionPackSessionBoundaries,
@@ -147,19 +151,6 @@ vi.mock("@/services/core/capture/kmzImport", () => ({
   parseBoundaryFile,
 }));
 
-const IMPORTED_AREA = {
-  type: "Polygon" as const,
-  coordinates: [
-    [
-      [-6.3, 53.3],
-      [-6.2, 53.3],
-      [-6.2, 53.4],
-      [-6.3, 53.4],
-      [-6.3, 53.3],
-    ],
-  ],
-};
-
 function importBoundaryFile() {
   const input = document.querySelector<HTMLInputElement>('input[accept=".kml,.kmz"]');
   expect(input).toBeTruthy();
@@ -170,25 +161,7 @@ function importBoundaryFile() {
   return file;
 }
 
-/** MapLibre `load` → first `onBoundsChange` with the default London viewport. */
-function loadMapWithDefaultViewport() {
-  act(() => {
-    mapView.model?.onBoundsChange?.(
-      createMapBounds({ south: 51.4, west: -0.25, north: 51.6, east: 0.05 }),
-    );
-  });
-}
-
-function goToDrawSource() {
-  fireEvent.click(screen.getByRole("button", { name: /^Draw$/ }));
-}
-
 function goToRules() {
-  fireEvent.click(screen.getByRole("button", { name: "Next" }));
-}
-
-function goToPlay() {
-  goToRules();
   fireEvent.click(screen.getByRole("button", { name: "Next" }));
 }
 
