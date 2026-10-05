@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTimerStore } from "@/state/timerStore";
 import {
   canSelectPremiumSessionTier,
   shouldDefaultSessionTierToPremium,
@@ -804,6 +805,9 @@ export function useCreateSession() {
           hidingZoneRadiusMeters:
             rulesPatch.hidingZoneRadiusMeters ?? hidingZoneRadiusMeters(gameSize, distanceUnit),
         };
+        // Local id is fixed and the timer now persists in localStorage: drop an
+        // abandoned local game's timer so the new game starts at zero.
+        useTimerStore.getState().clearTimer(LOCAL_SESSION_ID);
         setSession(localSession, "local");
         setPremiumApiContext(localSession);
         emitSessionStartedActivity(LOCAL_SESSION_ID, "local");

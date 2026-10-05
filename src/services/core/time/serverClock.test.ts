@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  computeElapsedMs,
+  INITIAL_TIMER_STATE,
+  startTimer,
+  type TimerState,
+} from "@/domain/session/timer/timer";
+import {
   probeServerTime,
   recordClockSample,
   resetServerClockForTests,
@@ -140,5 +146,53 @@ describe("serverClock", () => {
   it("formats serverNowIso from serverNow", () => {
     recordClockSample({ sentAtMs: 0, receivedAtMs: 0, serverMs: 0 });
     expect(Number.isNaN(Date.parse(serverNowIso()))).toBe(false);
+  });
+
+  describe("timer skew across devices", () => {
+    const TRUE_START_MS = Date.parse("2026-06-01T10:00:00.000Z");
+    const FAST_DEVICE_MS = 300_000;
+    const SLOW_DEVICE_MS = -120_000;
+    const PROBE_RTT_MS = 40;
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    /** Puts the test on a device whose clock is `skewMs` off, synced by one probe. */
+    function becomeDevice(skewMs: number, trueNowMs: number): void {
+      localStorage.clear();
+      resetServerClockForTests();
+      const sentAtMs = trueNowMs + skewMs;
+      vi.setSystemTime(sentAtMs + PROBE_RTT_MS);
+      recordClockSample({
+        sentAtMs,
+        receivedAtMs: sentAtMs + PROBE_RTT_MS,
+        serverMs: trueNowMs + PROBE_RTT_MS / 2,
+      });
+    }
+
+    function elapsedOn(skewMs: number, state: TimerState, trueNowMs: number): number {
+      becomeDevice(skewMs, trueNowMs);
+      return computeElapsedMs(state, serverNow());
+    }
+
+    it("keeps elapsed within 1s on devices at +5 min and -2 min", () => {
+      vi.useFakeTimers();
+
+      becomeDevice(FAST_DEVICE_MS, TRUE_START_MS);
+      const started = startTimer(INITIAL_TIMER_STATE, serverNow());
+
+      const trueReadMs = TRUE_START_MS + 7 * 60_000;
+      const fastView = elapsedOn(FAST_DEVICE_MS, started, trueReadMs);
+      const slowView = elapsedOn(SLOW_DEVICE_MS, started, trueReadMs);
+
+      expect(Math.abs(fastView - slowView)).toBeLessThan(1_000);
+      expect(Math.abs(fastView - 7 * 60_000)).toBeLessThan(1_000);
+
+      // Same reads on raw device clocks drift by the full 7 min skew gap.
+      const rawFast = computeElapsedMs(started, trueReadMs + FAST_DEVICE_MS);
+      const rawSlow = computeElapsedMs(started, trueReadMs + SLOW_DEVICE_MS);
+      expect(Math.abs(rawFast - rawSlow)).toBe(FAST_DEVICE_MS - SLOW_DEVICE_MS);
+    });
   });
 });

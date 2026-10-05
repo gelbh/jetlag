@@ -11,6 +11,8 @@ export function surveyPhaseLabel(
   sessionRules: SessionRulesInput,
   timerState: TimerState,
   moveInProgress: boolean,
+  /** Server-frame now (`serverNow()`), the frame `runningSince` is written in. */
+  nowMs: number,
 ): string {
   if (!timerHasStarted) {
     return "—";
@@ -18,7 +20,7 @@ export function surveyPhaseLabel(
   if (moveInProgress) {
     return "Moving";
   }
-  const elapsed = computeElapsedMs(timerState);
+  const elapsed = computeElapsedMs(timerState, nowMs);
   return isHidingPeriodActive(sessionRules, elapsed) ? "Hiding" : "Seeking";
 }
 
@@ -34,6 +36,8 @@ export function mapIslandSessionStatus(input: {
   moveInProgress: boolean;
   sessionRules: SessionRulesInput;
   timerState: TimerState;
+  /** Server-frame now (`serverNow()`), the frame `runningSince` is written in. */
+  nowMs: number;
   pendingQuestions?: readonly PendingQuestionRecord[];
 }): string {
   const {
@@ -44,6 +48,7 @@ export function mapIslandSessionStatus(input: {
     moveInProgress,
     sessionRules,
     timerState,
+    nowMs,
     pendingQuestions = [],
   } = input;
 
@@ -62,7 +67,7 @@ export function mapIslandSessionStatus(input: {
   if (moveInProgress) return "Moving";
   if (!timerRunning) return "Paused";
 
-  const elapsed = computeElapsedMs(timerState);
+  const elapsed = computeElapsedMs(timerState, nowMs);
   return isHidingPeriodActive(sessionRules, elapsed) ? "Hiding" : "Seeking";
 }
 

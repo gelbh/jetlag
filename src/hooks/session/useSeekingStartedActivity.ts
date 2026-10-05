@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { serverNow } from "@/services/core/time/serverClock";
 import { isHidingPeriodActive } from "../../domain/session/hiding/hidingPeriod";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import {
@@ -53,7 +54,7 @@ export function useSeekingStartedActivity({
     }
 
     const tryEmit = (): boolean => {
-      const elapsedMs = computeElapsedMs(timerState);
+      const elapsedMs = computeElapsedMs(timerState, serverNow());
       if (
         !shouldEmitSeekingStarted({
           canEmit,
