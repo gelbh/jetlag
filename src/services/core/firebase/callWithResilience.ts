@@ -2,8 +2,7 @@ import { FirebaseError } from "firebase/app";
 import { httpsCallable } from "firebase/functions";
 import { fullJitterDelayMs } from "@/domain/device/network/backoff";
 import { NeedsConnectionError } from "@/domain/device/network/needsConnectionError";
-import { isEffectivelyOffline } from "@/domain/device/sync/sync";
-import { useSessionStore } from "@/state/sessionStore";
+import { isDeviceEffectivelyOffline } from "@/services/core/network/deviceOffline";
 import { getFirebaseFunctions } from "./firebase";
 
 export { NeedsConnectionError };
@@ -43,15 +42,6 @@ export type CallWithResilienceOptions<Res = unknown> = {
   recoverAfterRetry?: (error: unknown) => Res | undefined | Promise<Res | undefined>;
 };
 
-function deviceIsEffectivelyOffline(): boolean {
-  // `!== false`: Node/test globals may expose navigator without onLine.
-  const online = typeof navigator === "undefined" ? true : navigator.onLine !== false;
-  return isEffectivelyOffline({
-    online,
-    reachable: useSessionStore.getState().networkReachable,
-  });
-}
-
 /** Match a callable HttpsError by code (without `functions/`) and optional exact message. */
 export function isCallableError(error: unknown, code: string, message?: string): boolean {
   return (
@@ -84,7 +74,7 @@ export async function callWithResilience<Req, Res>(
   const budgetMs = Math.max(opts.budgetMs ?? DEFAULT_CALLABLE_BUDGET_MS, timeoutMs);
   const maxAttempts = idempotent ? (opts.maxAttempts ?? 3) : 1;
 
-  if (deviceIsEffectivelyOffline()) {
+  if (isDeviceEffectivelyOffline()) {
     throw new NeedsConnectionError();
   }
 
@@ -115,7 +105,7 @@ export async function callWithResilience<Req, Res>(
       }
       await new Promise((resolve) => setTimeout(resolve, delayMs));
       // Signal dropped while backing off: stop instead of burning attempts.
-      if (deviceIsEffectivelyOffline()) {
+      if (isDeviceEffectivelyOffline()) {
         throw new NeedsConnectionError();
       }
     }

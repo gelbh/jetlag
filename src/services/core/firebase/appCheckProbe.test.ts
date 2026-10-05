@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useSessionStore } from "@/state/sessionStore";
 import { captureAppCheckTokenFailure } from "../analytics/sentry";
 import {
   APP_CHECK_PROBE_SKIP_KEY,
@@ -8,14 +9,16 @@ import {
   shouldSkipAppCheckProbe,
 } from "./appCheckProbe";
 
-const { getFirebaseAppCheck, getToken, isFirebaseConfigured, getClientEnv } = vi.hoisted(() => ({
-  getFirebaseAppCheck: vi.fn(),
-  getToken: vi.fn(),
-  isFirebaseConfigured: vi.fn(() => true),
-  getClientEnv: vi.fn(() => ({
-    VITE_FIREBASE_APP_CHECK_SITE_KEY: "test-site-key",
-  })),
-}));
+const { getFirebaseAppCheck, getToken, isFirebaseConfigured, getClientEnv, probeServerTime } =
+  vi.hoisted(() => ({
+    probeServerTime: vi.fn(async (_timeoutMs?: number) => ({ ok: true })),
+    getFirebaseAppCheck: vi.fn(),
+    getToken: vi.fn(),
+    isFirebaseConfigured: vi.fn(() => true),
+    getClientEnv: vi.fn(() => ({
+      VITE_FIREBASE_APP_CHECK_SITE_KEY: "test-site-key",
+    })),
+  }));
 
 vi.mock("firebase/app-check", () => ({
   getToken: (...args: unknown[]) => getToken(...args),
@@ -28,6 +31,10 @@ vi.mock("./firebase", () => ({
 
 vi.mock("../../../config/env", () => ({
   getClientEnv: () => getClientEnv(),
+}));
+
+vi.mock("@/services/core/time/serverClock", () => ({
+  probeServerTime: (timeoutMs?: number) => probeServerTime(timeoutMs),
 }));
 
 vi.mock("../analytics/sentry", () => ({
@@ -46,10 +53,14 @@ describe("appCheckProbe", () => {
     });
     getFirebaseAppCheck.mockReturnValue({ appCheck: true });
     getToken.mockResolvedValue({ token: "ok-token" });
+    probeServerTime.mockResolvedValue({ ok: true });
+    useSessionStore.setState({ networkReachable: null });
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
+    useSessionStore.setState({ networkReachable: null });
   });
 
   it("skips when sessionStorage skip flag is set", () => {
@@ -81,6 +92,41 @@ describe("appCheckProbe", () => {
       ok: false,
       reason: "blocked",
     });
+  });
+
+  it("soft-fails fetch-style failures while the browser is offline", async () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    getToken.mockRejectedValueOnce(new Error("Failed to fetch"));
+    await expect(probeAppCheckAvailability()).resolves.toEqual({ ok: true });
+    expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ reason: "offline", soft: true }),
+    );
+    expect(probeServerTime).not.toHaveBeenCalled();
+  });
+
+  it("soft-fails fetch-style failures when the reachability probe already failed", async () => {
+    useSessionStore.setState({ networkReachable: false });
+    getToken.mockRejectedValueOnce(new Error("Failed to fetch"));
+    await expect(probeAppCheckAvailability()).resolves.toEqual({ ok: true });
+    expect(probeServerTime).not.toHaveBeenCalled();
+  });
+
+  it("soft-fails fetch-style failures when our own origin is unreachable", async () => {
+    probeServerTime.mockResolvedValueOnce({ ok: false });
+    getToken.mockRejectedValueOnce(new Error("Failed to fetch"));
+    await expect(probeAppCheckAvailability()).resolves.toEqual({ ok: true });
+    expect(probeServerTime).toHaveBeenCalledTimes(1);
+    expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ reason: "offline", soft: true }),
+    );
+  });
+
+  it("skips the reachability check for failures that are already soft", async () => {
+    getToken.mockRejectedValueOnce(new Error("Internal App Check glitch"));
+    await probeAppCheckAvailability();
+    expect(probeServerTime).not.toHaveBeenCalled();
   });
 
   it("soft-fails unknown errors so the app still loads", async () => {

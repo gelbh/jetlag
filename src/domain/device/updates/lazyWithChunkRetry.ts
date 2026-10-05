@@ -29,6 +29,23 @@ export function getServiceWorkerChunkReloadContext(): Pick<
   return serviceWorkerChunkReloadContext;
 }
 
+/**
+ * Reload once for a stale chunk, honoring the app's reload context (deferred
+ * on the live map). Returns whether a reload is underway.
+ */
+export function reloadForChunkLoadError(
+  getReloadContext?: () => ChunkReloadContext,
+  isOffline?: () => boolean,
+): boolean {
+  const resolveContext = () => getReloadContext?.() ?? chunkReloadContextGetter?.();
+  // Re-resolved when an offline retry fires, so a session joined meanwhile isn't reloaded.
+  return attemptChunkReload({
+    ...resolveContext(),
+    isOffline,
+    resolveRetryOptions: resolveContext,
+  });
+}
+
 // React.lazy needs a wide component type across named-export modules.
 type LazyModule = { default: ComponentType<any> };
 
@@ -71,8 +88,7 @@ export function lazyWithChunkRetry(
       ? resolvedThenable(loaded)
       : load().catch((error) => {
           if (isChunkLoadError(error)) {
-            const resolveContext = () => getReloadContext?.() ?? chunkReloadContextGetter?.();
-            if (attemptChunkReload({ ...resolveContext(), resolveRetryOptions: resolveContext })) {
+            if (reloadForChunkLoadError(getReloadContext)) {
               return new Promise<never>(() => {});
             }
           }

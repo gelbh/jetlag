@@ -97,15 +97,19 @@ export function isAppCheckBlockedFetchMessage(message: string): boolean {
 }
 
 export type AppCheckProbeFailureClass =
-  | { soft: true; reason: "timeout" | "error"; allowApp: true }
+  | { soft: true; reason: "timeout" | "offline" | "error"; allowApp: true }
   | { soft: false; reason: "blocked"; allowApp: false };
 
 /** Single classifier for App Check probe soft vs hard outcomes. */
 export function classifyAppCheckProbeFailure(
-  outcome: "timeout" | "empty" | { message: string },
+  outcome: "timeout" | "offline" | "empty" | { message: string },
 ): AppCheckProbeFailureClass {
   if (outcome === "timeout") {
     return { soft: true, reason: "timeout", allowApp: true };
+  }
+  // A dead network fails like a blocker ("Failed to fetch"); never blame the player.
+  if (outcome === "offline") {
+    return { soft: true, reason: "offline", allowApp: true };
   }
   if (outcome === "empty") {
     return { soft: false, reason: "blocked", allowApp: false };

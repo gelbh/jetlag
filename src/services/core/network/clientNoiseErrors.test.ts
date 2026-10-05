@@ -165,6 +165,14 @@ describe("isAppCheckSoftFailureMessage", () => {
 });
 
 describe("classifyAppCheckProbeFailure", () => {
+  it("classifies an unreachable network as soft offline", () => {
+    expect(classifyAppCheckProbeFailure("offline")).toEqual({
+      soft: true,
+      reason: "offline",
+      allowApp: true,
+    });
+  });
+
   it("classifies timeout and empty token", () => {
     expect(classifyAppCheckProbeFailure("timeout")).toEqual({
       soft: true,
