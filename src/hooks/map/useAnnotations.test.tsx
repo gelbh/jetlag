@@ -181,9 +181,10 @@ describe("useAnnotations", () => {
       const { result } = renderHook(() => useAnnotations());
 
       await act(async () => {
-        await expect(result.current.createAnnotation(pin())).resolves.toMatchObject({
-          type: "pin",
-        });
+        // Awaiting question commits rely on this rejection to keep their draft.
+        await expect(result.current.createAnnotation(pin())).rejects.toThrow(
+          ANNOTATION_PERMISSION_DENIED_MESSAGE,
+        );
       });
 
       expect(getRemoteSessionByIdFromServer).toHaveBeenCalledTimes(1);

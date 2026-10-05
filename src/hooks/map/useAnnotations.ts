@@ -1,4 +1,6 @@
 import { useCallback } from "react";
+import { addWriteRejectedBreadcrumb } from "@/services/core/analytics/sentry";
+import { isFirestorePermissionDenied } from "@/services/firestore/sessions/shared";
 import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
@@ -9,7 +11,6 @@ import {
   writeRemoteAnnotationsBatch,
 } from "../../services/firestore/firestoreAnnotations";
 import { withSessionWriteAccess } from "../../services/firestore/sessionMembershipHeal";
-import { isFirestorePermissionDenied } from "../../services/firestore/sessions/shared";
 import { registerAnnotationBackgroundSync } from "../../services/session/backgroundSync";
 import {
   countOfflineQueueForSession,
@@ -20,7 +21,7 @@ import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { shouldQueueAnnotationOffline } from "./shouldQueueAnnotationOffline";
 
 export const ANNOTATION_PERMISSION_DENIED_MESSAGE =
-  "Couldn't save that map change. You may no longer have access to this session.";
+  "Couldn't save that map change. The server rejected it.";
 
 function annotationSyncErrorMessage(error: unknown): string {
   if (isFirestorePermissionDenied(error)) {
@@ -49,26 +50,6 @@ export function useAnnotations() {
     [setPendingWrites],
   );
 
-  // Annotation writes are fire-and-forget from UI handlers (`void
-  // deleteAnnotation(id)`), so failures must never reject: retriable errors go
-  // to the offline queue, everything else surfaces via lastSyncError.
-  const handleAnnotationWriteError = useCallback(
-    async (sessionId: string, annotations: readonly AnnotationRecord[], error: unknown) => {
-      let failure = error;
-      if (isRetriableSyncError(error)) {
-        try {
-          for (const annotation of annotations) {
-            await queueAnnotationWrite(sessionId, annotation);
-          }
-          return;
-        } catch (queueError) {
-          failure = queueError;
-        }
-      }
-      setLastSyncError(annotationSyncErrorMessage(failure));
-    },
-    [queueAnnotationWrite, setLastSyncError],
-  );
   const addAnnotation = useAnnotationStore((state) => state.addAnnotation);
   const softDeleteAnnotation = useAnnotationStore((state) => state.softDeleteAnnotation);
   const softDeleteAllForSession = useAnnotationStore((state) => state.softDeleteAllForSession);
@@ -78,10 +59,39 @@ export function useAnnotations() {
   const upsertAnnotation = useAnnotationStore((state) => state.upsertAnnotation);
   const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
 
+  // Edit/delete/undo/redo/clear are fire-and-forget from UI handlers (`void
+  // deleteAnnotation(id)`), so persistence never rejects: retriable errors go
+  // to the offline queue, anything else surfaces via lastSyncError and is
+  // returned so awaiting callers (createAnnotation) can react.
+  const handleAnnotationWriteError = useCallback(
+    async (
+      sessionId: string,
+      annotations: readonly AnnotationRecord[],
+      error: unknown,
+    ): Promise<string | null> => {
+      let failure = error;
+      if (isRetriableSyncError(error)) {
+        try {
+          for (const annotation of annotations) {
+            await queueAnnotationWrite(sessionId, annotation);
+          }
+          return null;
+        } catch (queueError) {
+          failure = queueError;
+        }
+      }
+      const message = annotationSyncErrorMessage(failure);
+      addWriteRejectedBreadcrumb("annotation", failure);
+      setLastSyncError(message);
+      return message;
+    },
+    [queueAnnotationWrite, setLastSyncError],
+  );
+
   const persistAnnotation = useCallback(
-    async (annotation: AnnotationRecord) => {
+    async (annotation: AnnotationRecord): Promise<string | null> => {
       if (!session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
-        return;
+        return null;
       }
 
       incrementPendingWrites();
@@ -98,7 +108,7 @@ export function useAnnotations() {
 
         if (shouldQueueAnnotationOffline()) {
           await queueAnnotationWrite(session.id, stampedAnnotation);
-          return;
+          return null;
         }
 
         await withSessionWriteAccess({
@@ -108,8 +118,9 @@ export function useAnnotations() {
           onSessionChange: (next) => setSession(next, user.uid),
           write: (sessionId) => writeRemoteAnnotation(sessionId, stampedAnnotation),
         });
+        return null;
       } catch (error) {
-        await handleAnnotationWriteError(session.id, [stampedAnnotation], error);
+        return handleAnnotationWriteError(session.id, [stampedAnnotation], error);
       } finally {
         decrementSyncInFlight();
         decrementPendingWrites();
@@ -143,7 +154,12 @@ export function useAnnotations() {
 
       clearRedoStack();
       markAnnotationPulse(created.id);
-      await persistAnnotation(created);
+      // Question commits await this and keep their draft / cancel on failure,
+      // so creation still rejects (error already in lastSyncError).
+      const failure = await persistAnnotation(created);
+      if (failure) {
+        throw new Error(failure);
+      }
       return created;
     },
     [addAnnotation, clearRedoStack, markAnnotationPulse, persistAnnotation, session?.id],
