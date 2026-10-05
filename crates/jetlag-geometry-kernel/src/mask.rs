@@ -94,9 +94,7 @@ pub fn feature_contains_lng_lat(feature: &PolygonFeature, lng: f64, lat: f64) ->
 }
 
 /// Unclipped polygon union for measuring progressive batches (no game-area clip).
-pub fn union_polygon_features_to_feature(
-    features: &[PolygonFeature],
-) -> Option<PolygonFeature> {
+pub fn union_polygon_features_to_feature(features: &[PolygonFeature]) -> Option<PolygonFeature> {
     let united = union_polygon_features(features)?;
     multipolygon_to_feature(&united)
 }
