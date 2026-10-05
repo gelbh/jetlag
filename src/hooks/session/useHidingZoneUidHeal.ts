@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { addWriteRejectedBreadcrumb } from "@/services/core/analytics/sentry";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
@@ -39,9 +40,11 @@ export function useHidingZoneUidHeal(
     }
 
     healedKeysRef.current.add(healKey);
-    void writeHidingZone(sessionId, {
+    // Best-effort heal: never an unhandled rejection, and the heal key stays
+    // set so the effect does not loop.
+    writeHidingZone(sessionId, {
       ...staleZone,
       hiderUid: uid,
-    });
+    }).catch((error: unknown) => addWriteRejectedBreadcrumb("hidingZone.uidHeal", error));
   }, [hidingZones, persistedUid, sessionId, uid]);
 }
