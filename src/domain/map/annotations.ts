@@ -116,6 +116,7 @@ export interface TentaclePoi {
   /** Absent = confirmed (legacy Overpass/bundle). */
   confirmStatus?: PoiConfirmStatus;
   osmId?: string;
+  wikidataId?: string;
 }
 
 export interface AnnotationRecord {

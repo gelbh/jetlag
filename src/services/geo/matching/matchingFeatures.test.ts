@@ -312,6 +312,68 @@ describe("matching features", () => {
     ]);
   });
 
+  it("parses primary tags.wikidata into wikidataId", () => {
+    const features = parseMatchingFeatures(
+      [
+        {
+          id: 766370217,
+          tags: {
+            name: "Aeroporto di Lugano-Agno",
+            wikidata: "Q661389",
+            aeroway: "aerodrome",
+            iata: "LUG",
+          },
+          lat: 51.45,
+          lon: -0.16,
+        },
+        {
+          id: 2,
+          tags: { name: "No Wiki Airport", aeroway: "aerodrome", iata: "XXX" },
+          lat: 51.45,
+          lon: -0.17,
+        },
+        {
+          id: 3,
+          tags: {
+            name: "Invalid Wiki Airport",
+            aeroway: "aerodrome",
+            iata: "YYY",
+            "brand:wikidata": "Q1",
+            wikidata: "not-a-qid",
+          },
+          lat: 51.45,
+          lon: -0.18,
+        },
+      ],
+      sampleGameArea,
+      "commercial_airport",
+    );
+
+    expect(features).toEqual([
+      {
+        id: "766370217",
+        name: "Aeroporto di Lugano-Agno",
+        point: [51.45, -0.16],
+        inPlayArea: true,
+        wikidataId: "Q661389",
+      },
+      {
+        id: "2",
+        name: "No Wiki Airport",
+        point: [51.45, -0.17],
+        inPlayArea: true,
+      },
+      {
+        id: "3",
+        name: "Invalid Wiki Airport",
+        point: [51.45, -0.18],
+        inPlayArea: true,
+      },
+    ]);
+    expect(features[1]?.wikidataId).toBeUndefined();
+    expect(features[2]?.wikidataId).toBeUndefined();
+  });
+
   it("excludes commercial airports outside the play area", async () => {
     vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
       elements: [
