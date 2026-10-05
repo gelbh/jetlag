@@ -32,7 +32,9 @@ import {
   captureAuthPersistenceFallbackLazy,
   setBootstrapTagLazy,
   syncAnalyticsIdentityLazy,
+  syncSentryUserLazy,
 } from "../analytics/lazyTelemetry";
+import { markAppCheckArmed, resetAppCheckArmedStateForTests } from "./appCheckArmedState";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
 import {
   isFirebaseConfigured,
@@ -162,10 +164,17 @@ function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
   }
 }
 
+/**
+ * Arms App Check (loads reCAPTCHA). Call only from real token consumers —
+ * Firestore, Storage, callables, the premium proxy — never from boot or gates.
+ */
 export function getFirebaseAppCheck(): AppCheck | null {
   if (!isFirebaseConfigured()) {
     return null;
   }
+
+  // Emulator skips App Check but still flips the flag, so gates behave like prod in e2e.
+  markAppCheckArmed();
 
   if (firebaseUsesEmulator()) {
     getFirebaseApp();
@@ -175,6 +184,20 @@ export function getFirebaseAppCheck(): AppCheck | null {
   const firebaseApp = getFirebaseApp();
   initializeAppCheckIfConfigured(firebaseApp);
   return appCheck;
+}
+
+/**
+ * Arm App Check ahead of an App Check-enforced SDK (Firestore, Storage) without
+ * making that SDK depend on reCAPTCHA init succeeding: on failure the SDK still
+ * initializes, enforcement surfaces as a normal permission error, and the
+ * content-blocker probe (which re-runs init) reports it.
+ */
+export function armAppCheckForEnforcedService(): void {
+  try {
+    getFirebaseAppCheck();
+  } catch {
+    // Reported by appCheckProbe; see above.
+  }
 }
 
 export function getFirebaseAuth(): Auth {
@@ -188,6 +211,8 @@ export function getFirebaseAuth(): Auth {
 
 function createFirestoreDb(): Firestore {
   const firebaseApp = getFirebaseApp();
+  // Firestore is App Check-enforced: arm it before the first request leaves.
+  armAppCheckForEnforcedService();
 
   if (firebaseUsesEmulator()) {
     const firestore = initializeFirestore(firebaseApp, {
@@ -230,6 +255,7 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
+// persistedAuthHint.ts reads the browserLocal/browserSession entry this picks; keep them in step.
 async function configureAuthPersistence(
   firebaseAuth: Auth,
 ): Promise<"local" | "session" | "memory"> {
@@ -300,6 +326,7 @@ export function startAuthBootstrap(): void {
 
   authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
     syncAnalyticsIdentityLazy(user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null);
+    syncSentryUserLazy(user ? { uid: user.uid } : null);
   });
 
   void getAuthBootstrapPromise();
@@ -379,4 +406,5 @@ export async function resetFirebaseForTests(): Promise<void> {
   anonymousSignInPromise = null;
   authStateReadyPromise = null;
   resetAuthBootstrapStateForTests();
+  resetAppCheckArmedStateForTests();
 }

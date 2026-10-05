@@ -1,4 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { commitWrite } from "@/services/firestore/commitWrite";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import {
@@ -66,6 +67,7 @@ import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
 import { useAdminBoundaryFeatures } from "../hooks/map-screen/useAdminBoundaryFeatures";
 import { useMapSessionChrome } from "../hooks/map-screen/useMapSessionChrome";
 import { useBoardEconomy } from "../hooks/session/useBoardEconomy";
+import { useGameAreaTileCacheSync } from "../hooks/session/useGameAreaTileCacheSync";
 import { useHiderPendingPreviewEliminations } from "../hooks/session/useHiderPendingPreviewEliminations";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
@@ -110,6 +112,7 @@ export function HiderMapScreen() {
   const showAdminBoundaries = useMapStore((state) => state.showAdminBoundaries);
   const setShowAdminBoundaries = useMapStore((state) => state.setShowAdminBoundaries);
   const { sessionRules, gameArea } = useResolvedSessionRules(session);
+  useGameAreaTileCacheSync(gameArea);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
     useAdminBoundaryFeatures(gameArea, sessionRules, showAdminBoundaries);
   const distanceUnit = useSessionDistanceUnit();
@@ -489,7 +492,7 @@ export function HiderMapScreen() {
     }
   }, [session, setSession, uid]);
 
-  const handleAcceptFoundHider = useCallback(async () => {
+  const handleAcceptFoundHider = useCallback(() => {
     if (!session?.id || !uid || !isFoundHiderPending(session)) {
       return;
     }
@@ -515,14 +518,10 @@ export function HiderMapScreen() {
       return;
     }
 
-    try {
-      await confirmFoundHiderSession(session.id, uid);
-    } catch {
-      window.alert("Could not confirm found hider. Check your connection and try again.");
-    }
+    commitWrite("found.confirm", () => confirmFoundHiderSession(session.id, uid));
   }, [session, setSession, uid]);
 
-  const handleDeclineFoundHider = useCallback(async () => {
+  const handleDeclineFoundHider = useCallback(() => {
     if (!session?.id || !uid) {
       return;
     }
@@ -539,22 +538,18 @@ export function HiderMapScreen() {
       return;
     }
 
-    try {
-      await resetFoundHiderSession(session.id);
-      setSession(
-        {
-          ...session,
-          foundRequestedAt: undefined,
-          foundRequestedByUid: undefined,
-        },
-        uid,
-      );
-    } catch {
-      window.alert("Could not clear found hider request. Check your connection and try again.");
-    }
+    commitWrite("found.decline", () => resetFoundHiderSession(session.id));
+    setSession(
+      {
+        ...session,
+        foundRequestedAt: undefined,
+        foundRequestedByUid: undefined,
+      },
+      uid,
+    );
   }, [session, setSession, uid]);
 
-  const handleResetEndGame = useCallback(async () => {
+  const handleResetEndGame = useCallback(() => {
     if (!session?.id || !uid) {
       return;
     }
@@ -574,11 +569,13 @@ export function HiderMapScreen() {
       return;
     }
 
-    if (isEndGamePending(session) && !isEndGameActive(session)) {
-      await clearEndGameRequestSession(session.id);
-    } else {
-      await resetEndGameSession(session.id);
-    }
+    const endGameSessionId = session.id;
+    const clearRequestOnly = isEndGamePending(session) && !isEndGameActive(session);
+    commitWrite("endgame.reset", () =>
+      clearRequestOnly
+        ? clearEndGameRequestSession(endGameSessionId)
+        : resetEndGameSession(endGameSessionId),
+    );
     setSession(
       {
         ...session,
@@ -943,7 +940,6 @@ export function HiderMapScreen() {
               selectedStation: timeTrapTool.selectedStation,
               setSelectedStation: timeTrapTool.setSelectedStation,
               confirmTrap: timeTrapTool.confirmTrap,
-              saving: timeTrapTool.saving,
               error: timeTrapTool.error,
             },
             myTrap,

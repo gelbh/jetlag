@@ -11,6 +11,7 @@ import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { type TimerState, timerStateToRemote } from "@/domain/session/timer/timer";
 import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
+import { serverNowIso } from "@/services/core/time/serverClock";
 import { emitGameEndedActivity } from "@/services/session/emitSessionActivity";
 import { cancelOpenPendingQuestions, postGameSystemMessage } from "../firestoreSessionExtras";
 import { sessionRulesPatchToFirestore } from "../serialization/serializeSession";
@@ -24,17 +25,24 @@ import {
   sessionsCollection,
 } from "./shared";
 
+/**
+ * Client end write (fallback when the end callable is unavailable). The session
+ * read is cache-capable and the code delete is issued without waiting for the
+ * end's ack, so both apply locally and replay on reconnect instead of hanging
+ * offline. The code delete stays a separate best-effort commit: batching it
+ * would let a missing code doc (rules deny deleting it) block the end itself.
+ */
 export async function endRemoteSession(sessionId: string): Promise<void> {
   const session = await getRemoteSessionById(sessionId);
-  await updateDoc(doc(sessionsCollection(), sessionId), {
-    endedAt: new Date().toISOString(),
+  const ended = updateDoc(doc(sessionsCollection(), sessionId), {
+    endedAt: serverNowIso(),
     status: "ended",
     code: deleteField(),
   });
-
   if (session?.code) {
-    await deleteDoc(sessionCodeDoc(session.code));
+    deleteDoc(sessionCodeDoc(session.code)).catch(() => {});
   }
+  await ended;
 }
 
 export async function updateSessionTimer(sessionId: string, state: TimerState): Promise<void> {

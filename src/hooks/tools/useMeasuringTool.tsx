@@ -1,9 +1,9 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
-import { MeasuringHudBody } from "@/components/tools/ask/MeasuringHudBody";
+import { MeasuringHudBody } from "@/components/tools/ask/measuring/MeasuringHudBody";
 import {
   MeasuringMapPlacementChrome,
   type MeasuringMapPlacementPhase,
-} from "@/components/tools/ask/MeasuringMapPlacementChrome";
+} from "@/components/tools/ask/measuring/MeasuringMapPlacementChrome";
 import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
 import { MeasuringTargetSection } from "@/components/tools/shared/measuring/MeasuringTargetStep";
@@ -26,6 +26,7 @@ import {
   type GeolocationPermissionState,
   queryGeolocationPermission,
 } from "../../services/core/location/geolocation";
+import { GeocodedPlaceLeading } from "../../services/geo/geocoding";
 import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
 import { useToolSession } from "./framework/useToolSession";
 import { measuringCommitReady } from "./measuring/helpers";
@@ -386,6 +387,7 @@ export function useMeasuringTool({
             <SearchResultsList
               results={draft.measuringSearchResults}
               onSelect={(place) => interactions.applySearchResult(place, "target")}
+              renderLeading={(place) => <GeocodedPlaceLeading category={place.placeCategory} />}
             />
           </div>
         ) : null}

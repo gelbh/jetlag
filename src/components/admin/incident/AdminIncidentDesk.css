@@ -1,0 +1,572 @@
+/* Admin incident desk: geometry / hit-target allowlist (Band 3). */
+
+.jl-incident-desk {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.jl-incident-panes {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  gap: 0.5rem;
+  overflow: hidden;
+  grid-template-columns: minmax(14rem, 1fr) minmax(0, 1.4fr);
+}
+
+.jl-incident-queue {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.jl-incident-queue-scroll {
+  min-height: 0;
+  flex: 1;
+  order: 2;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.375rem;
+}
+
+.jl-incident-queue-row {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-deep);
+  padding: 0.5rem 0.625rem;
+  text-align: left;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.jl-incident-queue-row + .jl-incident-queue-row {
+  margin-top: 0.375rem;
+}
+
+.jl-incident-queue-row:hover {
+  border-color: oklch(from var(--color-highlight) l c h / 55%);
+}
+
+.jl-incident-queue-row--active {
+  border-color: var(--color-action);
+  background: oklch(from var(--color-action) l c h / 8%);
+}
+
+html[data-motion="reduced"] .jl-incident-queue-row,
+html[data-motion="static"] .jl-incident-queue-row {
+  transition: none;
+}
+
+.jl-incident-queue-row-main {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.jl-incident-queue-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.jl-incident-queue-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.jl-incident-queue-id {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.jl-incident-queue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-ink-muted);
+}
+
+.jl-incident-detail {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.jl-incident-tabs {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.125rem;
+  overflow-x: auto;
+}
+
+.jl-incident-tab {
+  min-height: 2rem;
+  flex-shrink: 0;
+}
+
+.jl-incident-tab--active {
+  outline: 2px solid var(--color-action);
+  outline-offset: -2px;
+}
+
+.jl-incident-detail-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.jl-incident-prompt {
+  flex-shrink: 0;
+  max-height: 40%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jl-incident-chat {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.jl-incident-chat-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jl-incident-composer {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.375rem;
+}
+
+.jl-incident-diag-list {
+  margin: 0;
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jl-incident-timeline {
+  margin: 0;
+  min-height: 0;
+  flex: 1;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0;
+}
+
+.jl-incident-actions {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jl-incident-empty {
+  display: flex;
+  min-height: 8rem;
+  flex: 1;
+  flex-direction: column;
+}
+
+/* Restored Operate chrome paint (orphaned after Band 3 geometry prune). */
+
+.jl-incident-topbar {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  border-bottom: 2px solid var(--color-highlight);
+  background: var(--color-surface-deep);
+  padding: 0.375rem 0.625rem;
+}
+
+.jl-incident-brand {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+}
+
+.jl-incident-brand-mark {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-action);
+}
+
+.jl-incident-brand-title {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.jl-incident-top-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.jl-incident-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+}
+
+.jl-incident-stat dt {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-dim);
+}
+
+.jl-incident-stat dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+.jl-incident-pane-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.375rem 0.5rem;
+}
+
+.jl-incident-pane-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.jl-incident-pane-meta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-dim);
+}
+
+.jl-incident-queue-filter {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  order: 1;
+  padding: 0 0.625rem 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+
+.jl-incident-queue--empty .jl-incident-empty {
+  order: 1;
+}
+
+.jl-incident-queue--empty .jl-incident-queue-filter {
+  order: 2;
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  font-weight: 500;
+  color: var(--color-ink-dim);
+}
+
+.jl-incident-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.25rem;
+  border: 1px solid var(--color-border);
+  padding: 0 0.375rem;
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.jl-incident-chip--open {
+  border-color: oklch(from var(--color-action) l c h / 65%);
+  background: oklch(from var(--color-action) l c h / 14%);
+  color: var(--color-action);
+}
+
+.jl-incident-chip--active {
+  border-color: oklch(from var(--color-brand-blue) l c h / 55%);
+  background: oklch(from var(--color-brand-blue) l c h / 14%);
+  color: var(--color-brand-blue);
+}
+
+.jl-incident-chip--warning {
+  border-color: oklch(from var(--color-status-warning) l c h / 55%);
+  background: var(--color-status-warning-surface);
+  color: var(--color-status-warning);
+}
+
+.jl-incident-chip--critical {
+  border-color: oklch(from var(--color-status-error) l c h / 55%);
+  background: var(--color-status-error-surface);
+  color: var(--color-status-error);
+}
+
+.jl-incident-chip--muted {
+  border-color: var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-ink-dim);
+}
+
+.jl-incident-detail-header {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.5rem 0.625rem;
+}
+
+.jl-incident-detail-id {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.jl-incident-detail-meta {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  color: var(--color-ink-muted);
+}
+
+.jl-incident-prompt-label {
+  margin: 0 0 0.375rem;
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-highlight);
+}
+
+.jl-incident-prompt-body {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--color-ink-secondary);
+}
+
+.jl-incident-msg {
+  margin-bottom: 0.375rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.jl-incident-msg--player {
+  border-color: oklch(from var(--color-highlight) l c h / 35%);
+  background: var(--color-highlight-soft, oklch(from var(--color-highlight) l c h / 12%));
+}
+
+.jl-incident-msg--system {
+  background: var(--color-surface-deep);
+  color: var(--color-ink-secondary);
+}
+
+.jl-incident-msg-sender {
+  margin: 0 0 0.125rem;
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-dim);
+}
+
+.jl-incident-msg-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.jl-incident-timeline-item {
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.5rem 0;
+}
+
+.jl-incident-timeline-time {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-ink-dim);
+}
+
+.jl-incident-timeline-text {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-ink);
+}
+
+.jl-incident-module {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-deep);
+  padding: 0.5rem;
+}
+
+.jl-incident-module-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-brand-blue);
+}
+
+.jl-incident-module .field-input,
+.jl-incident-module select.field-input {
+  min-height: 2.25rem;
+  width: 100%;
+  font-size: 0.75rem;
+}
+
+.jl-incident-module .btn-primary,
+.jl-incident-module .btn-secondary {
+  min-height: 2.5rem;
+  width: 100%;
+  font-size: 0.75rem;
+}
+
+.jl-incident-module-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-ink-dim);
+}
+
+.jl-incident-empty-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.jl-incident-empty-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-ink-muted);
+}
+
+/* Minimal preload desk chrome (no prior CSS). */
+
+.jl-incident-status-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-panel);
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.jl-incident-queue-title {
+  font-weight: 650;
+  color: var(--color-ink);
+}
+.jl-incident-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.jl-incident-queue-age {
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+}
+.jl-incident-detail-fields {
+  display: grid;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+.jl-incident-detail-fields dt {
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+.jl-incident-detail-fields dd {
+  margin: 0;
+  color: var(--color-ink);
+}

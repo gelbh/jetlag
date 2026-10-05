@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   isStorageOverSoftCap,
+  PWA_GAME_AREA_TILE_CACHE_MAX_AGE_SECONDS,
+  PWA_GAME_AREA_TILE_CACHE_MAX_ENTRIES,
   PWA_SOFT_STORAGE_BYTES,
   PWA_TILE_CACHE_MAX_AGE_SECONDS,
   PWA_TILE_CACHE_MAX_ENTRIES,
@@ -17,6 +19,13 @@ describe("pwaStorageBudget", () => {
   it("keeps tile cache caps at play-day defaults", () => {
     expect(PWA_TILE_CACHE_MAX_ENTRIES).toBe(500);
     expect(PWA_TILE_CACHE_MAX_AGE_SECONDS).toBe(60 * 60 * 24 * 7);
+  });
+
+  it("gives game-area tiles a larger, longer-lived budget than the general cache", () => {
+    expect(PWA_GAME_AREA_TILE_CACHE_MAX_ENTRIES).toBeGreaterThan(PWA_TILE_CACHE_MAX_ENTRIES);
+    expect(PWA_GAME_AREA_TILE_CACHE_MAX_AGE_SECONDS).toBeGreaterThan(
+      PWA_TILE_CACHE_MAX_AGE_SECONDS,
+    );
   });
 
   it("detects usage over the soft storage cap", () => {

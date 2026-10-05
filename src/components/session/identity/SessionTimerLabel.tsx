@@ -5,6 +5,7 @@ import {
   isTimerRunning,
   type TimerState,
 } from "@/domain/session/timer/timer";
+import { serverNow } from "@/services/core/time/serverClock";
 
 interface SessionTimerLabelProps {
   timerState: TimerState;
@@ -60,5 +61,5 @@ export function SessionTimerLabel({ timerState }: SessionTimerLabelProps) {
   }, [timerState.runningSince]);
   void tick;
 
-  return formatElapsedTime(computeElapsedMs(timerState));
+  return formatElapsedTime(computeElapsedMs(timerState, serverNow()));
 }
