@@ -2,8 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSheetExitMount } from "./useSheetExitMount";
 
 /**
- * Mount-through-exit plus last live snapshot while open. Snapshot updates only
- * while open; cleared with the host after onExitTransitionEnd / timeout.
+ * Mount-through-exit plus last live snapshot while open. While open, snapshot
+ * tracks `live` (caller should keep `live` referentially stable when unchanged).
+ * Cleared when the host unmounts after exit.
  */
 export function useSheetExitSnapshot<T>(
   open: boolean,
@@ -17,19 +18,17 @@ export function useSheetExitSnapshot<T>(
   const exit = useSheetExitMount(open);
   const [snapshot, setSnapshot] = useState<T | null>(null);
   const openRef = useRef(open);
-  openRef.current = open;
 
   useEffect(() => {
-    if (open && live != null) {
-      setSnapshot(live);
-    }
-  }, [open, live]);
+    openRef.current = open;
+  }, [open]);
 
-  useEffect(() => {
-    if (!exit.mounted) {
-      setSnapshot(null);
-    }
-  }, [exit.mounted]);
+  if (open && live != null && !Object.is(snapshot, live)) {
+    setSnapshot(live);
+  }
+  if (!exit.mounted && snapshot != null) {
+    setSnapshot(null);
+  }
 
   const onExitTransitionEnd = useCallback(() => {
     exit.onExitTransitionEnd();
@@ -41,7 +40,7 @@ export function useSheetExitSnapshot<T>(
   return {
     mounted: exit.mounted,
     open: exit.open,
-    snapshot,
+    snapshot: open && live != null ? live : snapshot,
     onExitTransitionEnd,
   };
 }

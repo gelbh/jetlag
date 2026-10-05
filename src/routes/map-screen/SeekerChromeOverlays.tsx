@@ -1,5 +1,5 @@
 import { Button, Group } from "@mantine/core";
-import type { ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 import { MapFirstRunSheet } from "../../components/session/mapChrome/MapFirstRunSheet";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
@@ -176,42 +176,45 @@ export function SeekerChromeOverlays({
 
   const askSheetOpen = Boolean(askHudOwned && askSurface && toolHud && !toolHud.suppressSheet);
 
-  const liveAsk: HeldAskSnapshot | null =
-    askSheetOpen && askSurface && toolHud
-      ? {
-          toolLabel: dockEntry?.name ?? askSurface,
-          cue: askCue,
-          costLabel: toolHud.costLabel,
-          canCommit: askCanCommit,
-          commitLabel: askCommitLabel,
-          onCommit: toolHud.onCommit,
-          isSubmitting: toolHud.readiness.isSubmitting,
-          error: toolHud.suppressSheet ? null : toolHud.error,
-          modeBody: toolHud.modeBody,
-          showCue:
-            askSurface !== "matching" &&
+  // Identity must stay stable while fields are unchanged so exit snapshot can Object.is-latch.
+  const liveAsk = useMemo((): HeldAskSnapshot | null => {
+    if (!askSheetOpen || !askSurface || !toolHud) {
+      return null;
+    }
+    return {
+      toolLabel: dockEntry?.name ?? askSurface,
+      cue: askCue,
+      costLabel: toolHud.costLabel,
+      canCommit: askCanCommit,
+      commitLabel: askCommitLabel,
+      onCommit: toolHud.onCommit,
+      isSubmitting: toolHud.readiness.isSubmitting,
+      error: toolHud.suppressSheet ? null : toolHud.error,
+      modeBody: toolHud.modeBody,
+      showCue:
+        askSurface !== "matching" &&
+        askSurface !== "measuring" &&
+        askSurface !== "tentacle" &&
+        askSurface !== "photo" &&
+        askSurface !== "radar" &&
+        askSurface !== "thermometer",
+      showCostChip:
+        askSurface !== "matching" &&
+        askSurface !== "measuring" &&
+        askSurface !== "tentacle" &&
+        askSurface !== "photo" &&
+        askSurface !== "radar" &&
+        askSurface !== "thermometer",
+      showCommitStrip:
+        askSurface === "thermometer"
+          ? toolHud.commitKind === "endWalk"
+          : askSurface !== "matching" &&
             askSurface !== "measuring" &&
             askSurface !== "tentacle" &&
             askSurface !== "photo" &&
-            askSurface !== "radar" &&
-            askSurface !== "thermometer",
-          showCostChip:
-            askSurface !== "matching" &&
-            askSurface !== "measuring" &&
-            askSurface !== "tentacle" &&
-            askSurface !== "photo" &&
-            askSurface !== "radar" &&
-            askSurface !== "thermometer",
-          showCommitStrip:
-            askSurface === "thermometer"
-              ? toolHud.commitKind === "endWalk"
-              : askSurface !== "matching" &&
-                askSurface !== "measuring" &&
-                askSurface !== "tentacle" &&
-                askSurface !== "photo" &&
-                askSurface !== "radar",
-        }
-      : null;
+            askSurface !== "radar",
+    };
+  }, [askSheetOpen, askSurface, toolHud, dockEntry?.name, askCue, askCanCommit, askCommitLabel]);
 
   const askHold = useSheetExitSnapshot(askSheetOpen, liveAsk);
   const heldAsk = askHold.snapshot;

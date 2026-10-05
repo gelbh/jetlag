@@ -13,7 +13,10 @@ export function useSheetExitMount(open: boolean): {
 } {
   const [mounted, setMounted] = useState(open);
   const openRef = useRef(open);
-  openRef.current = open;
+
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
 
   if (open && !mounted) {
     setMounted(true);
