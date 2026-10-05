@@ -1,4 +1,4 @@
-import { type Page, type Route } from "@playwright/test";
+import { type BrowserContext, type Page, type Route } from "@playwright/test";
 import { isMapTileHostname } from "../../src/domain/map/mapTileHosts";
 import { type OverpassFixtureProfile, resolveOverpassResponse } from "./overpass/resolver";
 
@@ -11,6 +11,11 @@ const TILE_PNG = Buffer.from(
 
 export interface BlockExternalAssetsOptions {
   overpassProfile?: OverpassFixtureProfile;
+  /**
+   * `page.route` never sees fetches a service worker answers itself (tile
+   * CacheFirst routes), so with `serviceWorkers: "allow"` stub on the context.
+   */
+  routeScope?: "page" | "context";
 }
 
 function extractOverpassQuery(postData: string): string {
@@ -83,8 +88,9 @@ async function fulfillMoveTimerCallableIfMatched(route: Route, parsed: URL): Pro
 
 export async function blockExternalAssets(page: Page, options: BlockExternalAssetsOptions = {}) {
   const overpassProfile = options.overpassProfile ?? "default";
+  const target = options.routeScope === "context" ? page.context() : page;
 
-  await page.route("**/*", async (route) => {
+  await target.route("**/*", async (route) => {
     const url = route.request().url();
 
     let parsed: URL;
@@ -150,5 +156,49 @@ export async function blockExternalAssets(page: Page, options: BlockExternalAsse
     }
 
     await route.continue();
+  });
+}
+
+/**
+ * Chromium `setOffline` also drops Firestore's already-open WebChannel to the
+ * emulator: writes stay un-acked until `goOnline` (question-offline proves it),
+ * so no `page.route` abort on the emulator host is needed.
+ */
+export async function goOffline(context: BrowserContext): Promise<void> {
+  await context.setOffline(true);
+}
+
+export async function goOnline(context: BrowserContext): Promise<void> {
+  await context.setOffline(false);
+}
+
+export interface LieFiOptions {
+  latencyMs: number;
+  kbps: number;
+}
+
+/** Chromium-only (CDP). Slow-but-"online" link: `navigator.onLine` stays true. */
+export async function emulateLieFi(
+  page: Page,
+  opts: LieFiOptions = { latencyMs: 2_000, kbps: 20 },
+): Promise<void> {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Network.enable");
+  const bytesPerSecond = (opts.kbps * 1024) / 8;
+  await cdp.send("Network.emulateNetworkConditions", {
+    offline: false,
+    latency: opts.latencyMs,
+    downloadThroughput: bytesPerSecond,
+    uploadThroughput: bytesPerSecond,
+  });
+}
+
+export async function clearLieFi(page: Page): Promise<void> {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Network.emulateNetworkConditions", {
+    offline: false,
+    latency: 0,
+    downloadThroughput: -1,
+    uploadThroughput: -1,
   });
 }

@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import type { BlockExternalAssetsOptions } from "./e2e/fixtures/network";
 
 const firebaseEnv = {
   VITE_USE_FIREBASE_EMULATOR: "true",
@@ -10,12 +11,14 @@ const firebaseEnv = {
   VITE_FIREBASE_APP_ID: "1:1234567890:web:demo",
 };
 
+const previewCommand = "npm run preview -- --host 127.0.0.1 --port 4173 --strictPort";
+
 const mobileDevice = {
   ...devices["iPhone 13"],
   browserName: "chromium" as const,
 };
 
-export default defineConfig({
+export default defineConfig<{ e2eNetwork: BlockExternalAssetsOptions }>({
   testDir: "./e2e",
   fullyParallel: false,
   workers: 1,
@@ -50,10 +53,22 @@ export default defineConfig({
             testMatch: /e2e\/smoke\/.+\.spec\.ts/,
             use: mobileDevice,
           },
+          {
+            // Offline / lie-fi gameplay. Needs the real SW (precache, offline
+            // boot) against the preview build, so it opts back into workers.
+            name: "resilience",
+            testMatch: /e2e\/resilience\/.+\.spec\.ts/,
+            use: {
+              ...mobileDevice,
+              serviceWorkers: "allow",
+              e2eNetwork: { routeScope: "context" },
+            },
+          },
         ],
   webServer: {
     command: process.env.CI
-      ? "npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort"
+      ? // E2E_SKIP_BUILD: a second CI run in the same job reuses the first one's dist/.
+        `${process.env.E2E_SKIP_BUILD ? "" : "npm run build && "}${previewCommand}`
       : "npm run dev -- --host 127.0.0.1 --port 4173 --strictPort",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,

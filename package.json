@@ -31,6 +31,7 @@
     "test:emulator:vitest": "vitest run --project emulator",
     "test:e2e": "playwright test",
     "test:e2e:gate-smoke": "E2E_GATE_SMOKE=1 playwright test",
+    "test:e2e:resilience": "playwright test --project=resilience",
     "test:perf": "GEOMETRY_PERF=1 vitest run --project unit src/domain/geometry/gameArea/geometryPerf.test.ts src/domain/geometry/kernel/spatialVoronoiPerf.test.ts src/domain/geometry/kernel/nearRegionBatchPerf.test.ts src/domain/geometry/kernel/unionWasmPerf.test.ts --pool=forks --maxWorkers=1",
     "test:lighthouse": "node scripts/run-lighthouse.mjs",
     "deploy": "node scripts/deploy-production.mjs",
