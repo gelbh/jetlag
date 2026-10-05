@@ -77,6 +77,22 @@ export const askMapPlacementSendStyles = {
   },
 } as const;
 
+/** Densified secondary snap row (answer phase); not the tall soft-flag permission CTA. */
+export const askMapPlacementSnapLocationStyles = {
+  root: {
+    ...mapChromeSurfaceStyles,
+    minHeight: "2.75rem",
+    height: "2.75rem",
+    borderRadius: 12,
+    fontWeight: 590,
+    paddingInline: "0.65rem",
+    color: "var(--color-field-ink)",
+    "&:hover": {
+      backgroundColor: "oklch(from var(--color-canvas) l c h / 0.95)",
+    },
+  },
+} as const;
+
 function HaltErrorAlert({
   testId,
   title,
@@ -128,10 +144,11 @@ function bottomClearanceForPhase(
   answerTall: boolean,
 ): string {
   if (phase === "answer") {
+    // +3rem for answer-phase My location snap row above answerSlot.
     if (hasInlineError) {
-      return answerTall ? "16rem" : "13.5rem";
+      return answerTall ? "19rem" : "16.5rem";
     }
-    return answerTall ? "12.5rem" : "10rem";
+    return answerTall ? "15.5rem" : "13rem";
   }
   if (phase === "failed") {
     return hasInlineError ? "13.5rem" : "10rem";
@@ -406,6 +423,30 @@ export function AskMapPlacementChrome({
               color: "var(--color-field-ink)",
             }}
           />
+        ) : null}
+        {showAnswer ? (
+          <Button
+            type="button"
+            fullWidth
+            data-testid={`${testId}-snap-location`}
+            aria-label="Snap pin to my location"
+            onClick={onUseGps}
+            styles={askMapPlacementSnapLocationStyles}
+            className="flex items-center justify-start gap-2.5"
+          >
+            <span
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center"
+              aria-hidden
+              style={{
+                borderRadius: 10,
+                backgroundColor: "oklch(from var(--color-flag) l c h / 0.18)",
+                color: "var(--color-flag)",
+              }}
+            >
+              <CrosshairIcon size={16} weight="bold" />
+            </span>
+            <span className="text-sm font-semibold">My location</span>
+          </Button>
         ) : null}
         {showAnswer ? answerSlot : null}
       </div>
