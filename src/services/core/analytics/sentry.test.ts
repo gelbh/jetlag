@@ -159,7 +159,7 @@ describe("initSentry", () => {
     expect(options.transport).toBe(offlineTransport);
     expect(options.transportOptions).toEqual({ maxQueueSize: 30, flushAtStartup: true });
     // The SDK builds the transport URL from `tunnel`, so queued envelopes still hit the worker.
-    expect(options.tunnel).toBe("/api/sentry-tunnel");
+    expect(options.tunnel).toBe("/api/envelope-tunnel");
   });
 
   // The SDK runs beforeSend before handing the envelope to the transport, so this is what
