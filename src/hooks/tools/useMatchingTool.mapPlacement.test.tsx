@@ -70,8 +70,7 @@ vi.mock("./matching/commitMatching", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./matching/commitMatching")>();
   return {
     ...actual,
-    commitMatching: (...args: Parameters<typeof actual.commitMatching>) =>
-      commitMatchingHang.fn(...args),
+    commitMatching: () => commitMatchingHang.fn(),
   };
 });
 
