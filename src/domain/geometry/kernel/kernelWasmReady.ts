@@ -20,7 +20,7 @@ export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   spatialVoronoi: true,
   tentacleEliminationRegion: true,
   nearRegionBatch: true,
-  unionPolygonFeatures: false,
+  unionPolygonFeatures: true,
 };
 
 /** True when the entrypoint registry marks it ready for wasm. */
