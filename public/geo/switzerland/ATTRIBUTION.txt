@@ -1,3 +1,4 @@
 Swiss boundaries: swissBOUNDARIES3D © swisstopo
 Dataset year: 2026 (swissboundaries3d_2026-01 edition)
+CRS: source EPSG:2056 (CH1903+ / LV95) reprojected to EPSG:4326 via PROJ/pyproj
 Terms: see https://www.swisstopo.admin.ch/en/landscape-model-swissboundaries3d
