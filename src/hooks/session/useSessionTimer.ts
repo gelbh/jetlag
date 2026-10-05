@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { serverNow } from "@/services/core/time/serverClock";
 import {
   computeElapsedMs,
   hasTimerStarted,
@@ -95,7 +96,10 @@ export function useSessionTimer(
     }
 
     const local = resetChanged ? INITIAL_TIMER_STATE : getStoredTimer(sessionId);
-    const next = remoteSnapshot !== undefined ? reconcileTimerState(local, remoteSnapshot) : local;
+    const next =
+      remoteSnapshot !== undefined
+        ? reconcileTimerState(local, remoteSnapshot, serverNow())
+        : local;
     setTimerStateInternal(next);
     timerStateRef.current = next;
   }, [canControl, clearStoredTimer, getStoredTimer, remoteSnapshot, sessionId, sessionResetAt]);
@@ -123,7 +127,7 @@ export function useSessionTimer(
         return;
       }
 
-      const paused = pauseTimer(timerStateRef.current);
+      const paused = pauseTimer(timerStateRef.current, serverNow());
       setStoredTimer(sessionId, paused);
       onControlRef.current?.(paused);
     };
@@ -136,7 +140,7 @@ export function useSessionTimer(
 
     setTimerState((current) => {
       const wasStarted = hasTimerStarted(current);
-      const next = startTimer(current);
+      const next = startTimer(current, serverNow());
       onControlRef.current?.(next);
       if (sessionId && !wasStarted && hasTimerStarted(next)) {
         emitHidingTimerStartedActivity(sessionId);
@@ -152,7 +156,7 @@ export function useSessionTimer(
 
     const remote = remoteSnapshot ?? (remoteState === null ? undefined : remoteState);
     setTimerState((current) => {
-      const next = pausePreferringRemote(current, remote);
+      const next = pausePreferringRemote(current, remote, serverNow());
       onControlRef.current?.(next);
       return next;
     });
@@ -179,7 +183,7 @@ export function useSessionTimer(
     [setTimerState],
   );
 
-  const elapsedMs = computeElapsedMs(timerState);
+  const elapsedMs = computeElapsedMs(timerState, serverNow());
 
   return {
     elapsedMs,

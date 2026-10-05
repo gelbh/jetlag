@@ -30,7 +30,7 @@ export function mapLandscapeChipTimerLabel({
     return { phase: "SESSION", value: "Ready" };
   }
 
-  const elapsed = computeElapsedMs(timerState);
+  const elapsed = computeElapsedMs(timerState, serverNow());
   const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules, serverNow());
 
   if (questionTimer) {

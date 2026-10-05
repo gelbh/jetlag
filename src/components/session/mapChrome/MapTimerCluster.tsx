@@ -89,7 +89,7 @@ export function MapTimerCluster({
     return null;
   }
 
-  const elapsed = computeElapsedMs(timerState);
+  const elapsed = computeElapsedMs(timerState, serverNow());
   const sessionLabel = formatElapsedTime(elapsed);
   const hidingActive = isHidingPeriodActive(sessionRules, elapsed);
   const hidingLabel = formatHidingPeriodCountdown(hidingPeriodRemainingMs(sessionRules, elapsed));
