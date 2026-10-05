@@ -97,6 +97,7 @@ describe("HidingZoneHudBody", () => {
   it("stays method-only in the sheet (no place/confirm panels)", () => {
     renderHud(
       <AskHudHost
+        open
         cue="CHOOSE METHOD"
         toolLabel="Hiding zone"
         showCostChip={false}

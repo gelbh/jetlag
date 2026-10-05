@@ -96,6 +96,7 @@ describe("MeasuringHudBody", () => {
   it("shows catalog first with question text and cost in the body", () => {
     renderHud(
       <AskHudHost
+        open
         cue="PICK A SOURCE"
         toolLabel="Measuring"
         costLabel="D3P1"

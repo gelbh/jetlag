@@ -10,6 +10,8 @@ import { AskCostChip } from "./AskCostChip";
 import { AskModeCueTicker } from "./AskModeCueTicker";
 
 export type AskHudHostProps = {
+  /** Sheet open signal; keep host mounted and flip false for exit animation. */
+  open: boolean;
   cue: string;
   toolLabel: string;
   costLabel?: string | null;
@@ -26,9 +28,11 @@ export type AskHudHostProps = {
   showCostChip?: boolean;
   /** Hide GlanceVerb ticker (Matching embeds cost in the question box). */
   showCue?: boolean;
+  onExitTransitionEnd?: () => void;
 };
 
 export function AskHudHost({
+  open,
   cue,
   toolLabel,
   costLabel = null,
@@ -42,17 +46,19 @@ export function AskHudHost({
   showCommitStrip = true,
   showCostChip = true,
   showCue = true,
+  onExitTransitionEnd,
 }: AskHudHostProps) {
-  const cueTicker = showCue ? <AskModeCueTicker cue={cue} /> : null;
+  const cueTicker = open && showCue ? <AskModeCueTicker cue={cue} /> : null;
 
-  const costChip = showCostChip ? (
-    <div className="flex justify-start">
-      <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
-    </div>
-  ) : null;
+  const costChip =
+    open && showCostChip ? (
+      <div className="flex justify-start">
+        <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
+      </div>
+    ) : null;
 
   // Sheet path: hide muted "SEND/ASK — …" footer; cue already states the next step.
-  const sheetShowCommit = showCommitStrip && (canCommit || Boolean(error) || isSubmitting);
+  const sheetShowCommit = open && showCommitStrip && (canCommit || Boolean(error) || isSubmitting);
 
   const sheetCommit = sheetShowCommit ? (
     <AskCommitStrip
@@ -75,17 +81,20 @@ export function AskHudHost({
   return (
     <div data-testid="ask-hud-host" data-ask-composition="ask-first">
       <SheetHost
-        open
+        open={open}
         onClose={onDismiss ?? (() => undefined)}
         ariaLabel={toolLabel}
         maxHeightClassName="max-h-[min(72dvh,640px)]"
         padding="sm"
         pinned={pinned}
+        onExitTransitionEnd={onExitTransitionEnd}
       >
-        <Stack gap="md" pb="xs">
-          {modeBody}
-          {sheetCommit}
-        </Stack>
+        {open ? (
+          <Stack gap="md" pb="xs">
+            {modeBody}
+            {sheetCommit}
+          </Stack>
+        ) : null}
       </SheetHost>
     </div>
   );

@@ -10,6 +10,7 @@ import { DrawerSheet } from "./DrawerSheet";
 import { resolveDrawerSheetTransitionProps } from "./drawerSheetTransition";
 
 const drawerOpenedHistory: boolean[] = [];
+let lastDrawerProps: ComponentProps<typeof import("@mantine/core").Drawer> | null = null;
 
 vi.mock("@mantine/core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@mantine/core")>();
@@ -17,6 +18,7 @@ vi.mock("@mantine/core", async (importOriginal) => {
     ...actual,
     Drawer: (props: ComponentProps<typeof actual.Drawer>) => {
       drawerOpenedHistory.push(props.opened);
+      lastDrawerProps = props;
       return <actual.Drawer {...props} />;
     },
   };
@@ -72,6 +74,7 @@ describe("DrawerSheet", () => {
   beforeEach(() => {
     resetAllStores();
     drawerOpenedHistory.length = 0;
+    lastDrawerProps = null;
     stubMatchMedia(false);
     stubSyncRaf();
     Element.prototype.setPointerCapture = vi.fn();
@@ -93,6 +96,26 @@ describe("DrawerSheet", () => {
     await waitFor(() => {
       expect(drawerOpenedHistory).toContain(true);
       expect(screen.getByRole("dialog", { name: "Settings" })).toBeVisible();
+    });
+  });
+
+  it("forwards onExitTransitionEnd to Mantine Drawer", async () => {
+    const onExitTransitionEnd = vi.fn();
+    render(
+      withAppUi(
+        <DrawerSheet
+          open
+          onClose={vi.fn()}
+          ariaLabel="Settings"
+          onExitTransitionEnd={onExitTransitionEnd}
+        >
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    await waitFor(() => {
+      expect(lastDrawerProps?.onExitTransitionEnd).toBe(onExitTransitionEnd);
     });
   });
 
