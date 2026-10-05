@@ -66,7 +66,7 @@ describe("AskMapPlacementChrome answer-phase errors", () => {
 
 describe("AskMapPlacementChrome answer-phase GPS snap", () => {
   it("shows floating icon-only snap control above answerSlot and calls onUseGps", () => {
-    const { onUseGps } = renderChrome({ phase: "answer" });
+    const { onUseGps } = renderChrome({ phase: "answer", showSnapLocation: true });
 
     const snap = screen.getByTestId("matching-map-placement-snap-location");
     expect(snap).toHaveAccessibleName("Snap pin to my location");
@@ -82,8 +82,15 @@ describe("AskMapPlacementChrome answer-phase GPS snap", () => {
     expect(onUseGps).toHaveBeenCalledTimes(1);
   });
 
+  it("hides snap when showSnapLocation is false (Thermo/Photo/zone path)", () => {
+    renderChrome({ phase: "answer", showSnapLocation: false });
+
+    expect(screen.queryByTestId("matching-map-placement-snap-location")).toBeNull();
+    expect(screen.getByTestId("answer-slot")).toBeInTheDocument();
+  });
+
   it("hides snap control during locating (not the tall permission CTA)", () => {
-    renderChrome({ phase: "locating", answerSlot: undefined });
+    renderChrome({ phase: "locating", answerSlot: undefined, showSnapLocation: true });
 
     expect(screen.queryByTestId("matching-map-placement-snap-location")).toBeNull();
     expect(screen.queryByTestId("matching-map-placement-cta")).toBeNull();
@@ -92,13 +99,31 @@ describe("AskMapPlacementChrome answer-phase GPS snap", () => {
   });
 
   it("shows press class and busy spinner while gpsLoading", () => {
-    const { onUseGps } = renderChrome({ phase: "answer", gpsLoading: true });
+    const { onUseGps } = renderChrome({
+      phase: "answer",
+      showSnapLocation: true,
+      gpsLoading: true,
+    });
 
     const snap = screen.getByTestId("matching-map-placement-snap-location");
     expect(snap).toHaveClass("jl-map-chrome-press");
     expect(snap).toHaveAccessibleName("Getting your location");
     expect(snap).toBeDisabled();
     expect(snap).toHaveAttribute("aria-busy", "true");
+    fireEvent.click(snap);
+    expect(onUseGps).not.toHaveBeenCalled();
+  });
+
+  it("disables snap while isSubmitting", () => {
+    const { onUseGps } = renderChrome({
+      phase: "answer",
+      showSnapLocation: true,
+      isSubmitting: true,
+    });
+
+    const snap = screen.getByTestId("matching-map-placement-snap-location");
+    expect(snap).toHaveAccessibleName("Sending question");
+    expect(snap).toBeDisabled();
     fireEvent.click(snap);
     expect(onUseGps).not.toHaveBeenCalled();
   });

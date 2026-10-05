@@ -75,6 +75,7 @@ export function useMatchingTool({
   canSubmitQuestion = true,
 }: UseMatchingToolParams) {
   const wizardStepRef = useRef("place");
+  const submittingRef = useRef(false);
   const finishPlacementRef = useRef(finishPlacement);
   const mapStyle = useMapStore((state) => state.mapStyle);
   useEffect(() => {
@@ -370,7 +371,7 @@ export function useMatchingTool({
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
       const wizardStep = wizardStepRef.current;
-      if (!active || (wizardStep !== "place" && wizardStep !== "ask")) {
+      if (!active || submittingRef.current || (wizardStep !== "place" && wizardStep !== "ask")) {
         return false;
       }
 
@@ -401,6 +402,9 @@ export function useMatchingTool({
   );
 
   const handleGps = useCallback(async () => {
+    if (submittingRef.current) {
+      return;
+    }
     setMatchingError(null);
 
     try {
@@ -497,6 +501,7 @@ export function useMatchingTool({
       await commitMatching(buildCommitInput());
     },
   });
+  submittingRef.current = session.phase === "submitting";
 
   const commit = () => session.submit();
 

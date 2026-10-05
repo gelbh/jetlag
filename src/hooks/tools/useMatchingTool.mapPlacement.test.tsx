@@ -50,6 +50,31 @@ vi.mock("./matching/resolveMatchingAnchor", async (importOriginal) => {
   };
 });
 
+const commitMatchingHang = vi.hoisted(() => {
+  let release: (() => void) | null = null;
+  const fn = vi.fn(async () => {
+    await new Promise<void>((resolve) => {
+      release = resolve;
+    });
+  });
+  return {
+    fn,
+    release: () => {
+      release?.();
+      release = null;
+    },
+  };
+});
+
+vi.mock("./matching/commitMatching", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./matching/commitMatching")>();
+  return {
+    ...actual,
+    commitMatching: (...args: Parameters<typeof actual.commitMatching>) =>
+      commitMatchingHang.fn(...args),
+  };
+});
+
 describe("useMatchingTool map-first answer", () => {
   it("keeps the Ask sheet suppressed and reaches answer phase on the map", async () => {
     const mocks = createToolHookMocks();
@@ -236,5 +261,60 @@ describe("useMatchingTool map-first answer", () => {
 
     expect(accepted).toBe(true);
     expect(result.current.draft.matchingSeekerPoint).toEqual([53.36, -6.25]);
+  });
+
+  it("ignores map relocate while submitting", async () => {
+    commitMatchingHang.fn.mockClear();
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useMatchingTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        gpsLoading: mocks.gpsLoading,
+        mapError: mocks.mapError,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        awaitHiderAnswer: true,
+        canSubmitQuestion: true,
+      }),
+    );
+
+    await act(async () => {
+      result.current.panel.props.model.onCategoryChange("commercial_airport");
+    });
+
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.draft.seekerResolving).toBe(false);
+      expect(result.current.draft.matchingSeekerPoint).toEqual([53.35, -6.26]);
+    });
+
+    let commitPromise: Promise<void> | undefined;
+    act(() => {
+      commitPromise = result.current.commit();
+    });
+
+    await waitFor(() => {
+      expect(commitMatchingHang.fn).toHaveBeenCalled();
+    });
+
+    let accepted = true;
+    act(() => {
+      accepted = result.current.handleMapClick([53.36, -6.25]);
+    });
+    expect(accepted).toBe(false);
+    expect(result.current.draft.matchingSeekerPoint).toEqual([53.35, -6.26]);
+
+    await act(async () => {
+      commitMatchingHang.release();
+      await commitPromise;
+    });
   });
 });

@@ -29,6 +29,10 @@ export type AskMapPlacementChromeProps = {
   onUseGps: () => void;
   /** Disables snap + shows spinner while GPS refresh is in flight. */
   gpsLoading?: boolean;
+  /** Answer-phase floating GPS snap; opt-in so Thermo/Photo/zone stay clean. */
+  showSnapLocation?: boolean;
+  /** Disables snap while Send / commit is in flight. */
+  isSubmitting?: boolean;
   error?: string | null;
   statusTitle: string;
   statusBody: string;
@@ -80,7 +84,7 @@ export const askMapPlacementSendStyles = {
 } as const;
 
 /** Floating icon-only GPS snap (answer phase); not the tall soft-flag permission CTA. */
-export const askMapPlacementSnapLocationStyles = (gpsLoading: boolean): CSSProperties => ({
+const askMapPlacementSnapLocationStyles = (snapBusy: boolean): CSSProperties => ({
   width: "2.75rem",
   height: "2.75rem",
   minWidth: "2.75rem",
@@ -91,11 +95,11 @@ export const askMapPlacementSnapLocationStyles = (gpsLoading: boolean): CSSPrope
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  cursor: gpsLoading ? "wait" : "pointer",
+  cursor: snapBusy ? "wait" : "pointer",
   ...mapChromeSurfaceStyles,
   color: "var(--color-flag)",
   boxShadow: "0 8px 24px oklch(0.1 0.04 265 / 0.45)",
-  opacity: gpsLoading ? 0.85 : 1,
+  opacity: snapBusy ? 0.85 : 1,
 });
 
 function HaltErrorAlert({
@@ -175,6 +179,8 @@ export function AskMapPlacementChrome({
   phase,
   onUseGps,
   gpsLoading = false,
+  showSnapLocation = false,
+  isSubmitting = false,
   error = null,
   statusTitle,
   statusBody,
@@ -190,6 +196,8 @@ export function AskMapPlacementChrome({
   const showCta = phase === "needs_permission" || phase === "failed";
   const showMapBackup = phase === "failed";
   const showAnswer = phase === "answer";
+  const showSnap = showAnswer && showSnapLocation;
+  const snapBusy = gpsLoading || isSubmitting;
   const showStatus = phase === "locating" || phase === "resolving";
   const failedErrorCopy = phase === "failed" && error ? askInlineErrorCopy(error) : null;
   const answerErrorCopy = phase === "answer" && error ? askInlineErrorCopy(error) : null;
@@ -426,23 +434,25 @@ export function AskMapPlacementChrome({
             ) : null}
           </div>
         ) : null}
-        {showAnswer ? (
+        {showSnap ? (
           <div className="flex justify-end">
             <button
               type="button"
               data-testid={`${testId}-snap-location`}
               className="jl-map-chrome-press"
-              aria-label={gpsLoading ? "Getting your location" : "Snap pin to my location"}
-              aria-busy={gpsLoading || undefined}
-              disabled={gpsLoading}
+              aria-label={
+                isSubmitting
+                  ? "Sending question"
+                  : gpsLoading
+                    ? "Getting your location"
+                    : "Snap pin to my location"
+              }
+              aria-busy={snapBusy || undefined}
+              disabled={snapBusy}
               onClick={onUseGps}
-              style={askMapPlacementSnapLocationStyles(gpsLoading)}
+              style={askMapPlacementSnapLocationStyles(snapBusy)}
             >
-              {gpsLoading ? (
-                <StatusSpinner />
-              ) : (
-                <CrosshairIcon size={20} weight="bold" aria-hidden />
-              )}
+              {snapBusy ? <StatusSpinner /> : <CrosshairIcon size={20} weight="bold" aria-hidden />}
             </button>
           </div>
         ) : null}

@@ -91,6 +91,7 @@ export function useRadarTool({
   canSubmitQuestion = true,
 }: UseRadarToolParams) {
   const wizardStepRef = useRef("place");
+  const submittingRef = useRef(false);
   const finishPlacementRef = useRef(finishPlacement);
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
@@ -150,7 +151,7 @@ export function useRadarTool({
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
-      if (!active) {
+      if (!active || submittingRef.current) {
         return false;
       }
 
@@ -169,6 +170,9 @@ export function useRadarTool({
   );
 
   const handleUseGps = useCallback(async () => {
+    if (submittingRef.current) {
+      return;
+    }
     try {
       const reading = await refreshGps();
       const point: LatLngTuple = [reading.lat, reading.lng];
@@ -221,6 +225,7 @@ export function useRadarTool({
       });
     },
   });
+  submittingRef.current = session.phase === "submitting";
 
   const commit = () => session.submit();
 

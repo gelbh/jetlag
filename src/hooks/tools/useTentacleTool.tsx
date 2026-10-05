@@ -108,6 +108,7 @@ export function useTentacleTool({
   canSubmitQuestion = true,
 }: UseTentacleToolParams) {
   const wizardStepRef = useRef("place");
+  const submittingRef = useRef(false);
   const finishPlacementRef = useRef(finishPlacement);
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
@@ -287,7 +288,7 @@ export function useTentacleTool({
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
-      if (!active) {
+      if (!active || submittingRef.current) {
         return false;
       }
 
@@ -335,6 +336,9 @@ export function useTentacleTool({
   );
 
   const handleUseGps = useCallback(async () => {
+    if (submittingRef.current) {
+      return;
+    }
     try {
       const reading = await refreshGps();
       const point: LatLngTuple = [reading.lat, reading.lng];
@@ -414,6 +418,7 @@ export function useTentacleTool({
       });
     },
   });
+  submittingRef.current = session.phase === "submitting";
 
   const commit = () => session.submit();
 

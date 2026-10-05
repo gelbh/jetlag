@@ -236,6 +236,8 @@ export function RadarMapPlacementChrome({
       phase={phase}
       onUseGps={onUseGps}
       gpsLoading={gpsLoading}
+      showSnapLocation
+      isSubmitting={isSubmitting}
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}

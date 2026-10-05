@@ -246,6 +246,8 @@ export function MatchingMapPlacementChrome({
       phase={phase}
       onUseGps={onUseGps}
       gpsLoading={gpsLoading}
+      showSnapLocation
+      isSubmitting={isSubmitting}
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}
