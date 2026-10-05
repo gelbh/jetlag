@@ -9,7 +9,7 @@ import {
   createTestSession,
 } from "../../test/fixtures/sessions";
 import { resetAllStores } from "../../test/helpers/storeReset";
-import { useAnnotations } from "./useAnnotations";
+import { ANNOTATION_PERMISSION_DENIED_MESSAGE, useAnnotations } from "./useAnnotations";
 
 const firebaseConfigured = vi.hoisted(() => ({ value: false }));
 const getRemoteSessionByIdFromServer = vi.hoisted(() => vi.fn());
@@ -181,11 +181,49 @@ describe("useAnnotations", () => {
       const { result } = renderHook(() => useAnnotations());
 
       await act(async () => {
-        await expect(result.current.createAnnotation(pin())).rejects.toThrow();
+        await expect(result.current.createAnnotation(pin())).resolves.toMatchObject({
+          type: "pin",
+        });
       });
 
       expect(getRemoteSessionByIdFromServer).toHaveBeenCalledTimes(1);
       expect(writeRemoteAnnotation).toHaveBeenCalledTimes(2);
+      expect(useSessionStore.getState().lastSyncError).toBe(ANNOTATION_PERMISSION_DENIED_MESSAGE);
+      expect(useSessionStore.getState().pendingWrites).toBe(0);
+    });
+
+    // JETLAG-49 / JETLAG-4: UI handlers `void` these calls, so a rules
+    // rejection must surface via lastSyncError, never as an unhandled rejection.
+    it("does not reject fire-and-forget writes after a rules rejection", async () => {
+      const session = createTestRemoteSession({ memberUids: ["user-host"] });
+      useSessionStore.getState().setSession(session, "user-host");
+      getRemoteSessionByIdFromServer.mockResolvedValue(session);
+
+      const unhandled = vi.fn();
+      process.on("unhandledRejection", unhandled);
+      try {
+        const { result } = renderHook(() => useAnnotations());
+        let createdId = "";
+        await act(async () => {
+          createdId = (await result.current.createAnnotation(pin())).id;
+        });
+
+        writeRemoteAnnotation.mockRejectedValue(permissionDenied());
+        writeRemoteAnnotationsBatch.mockRejectedValue(permissionDenied());
+        await act(async () => {
+          void result.current.undoLastAnnotation();
+          void result.current.redoLastAnnotation();
+          void result.current.deleteAnnotation(createdId);
+          void result.current.clearAllAnnotations();
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(unhandled).not.toHaveBeenCalled();
+        expect(useSessionStore.getState().lastSyncError).toBe(ANNOTATION_PERMISSION_DENIED_MESSAGE);
+      } finally {
+        process.off("unhandledRejection", unhandled);
+      }
     });
 
     it("verifies membership on the server when the cached session lacks the uid", async () => {

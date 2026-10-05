@@ -1,5 +1,6 @@
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
+import { ANNOTATION_TYPES } from "@/domain/map/annotations";
 import { annotationPayload, bindRulesTestEnv, sessionPayload } from "./helpers";
 
 describe("firestore.rules — annotations", () => {
@@ -86,6 +87,21 @@ describe("firestore.rules — annotations", () => {
           ...annotationPayload(),
           type: "invalid",
         }),
+    );
+  });
+
+  it.each(ANNOTATION_TYPES)("allows seekers to write %s annotations", async (type) => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("annotations")
+        .doc(`ann-${type}`)
+        .set({ ...annotationPayload(), type }),
     );
   });
 });

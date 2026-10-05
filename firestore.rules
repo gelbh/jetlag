@@ -453,7 +453,7 @@ service cloud.firestore {
     }
 
     function validAnnotationType(type) {
-      return type in ['radar', 'thermometer', 'measuring', 'matching', 'zone', 'pin', 'tentacle'];
+      return type in ['radar', 'thermometer', 'measuring', 'matching', 'zone', 'pin', 'draw', 'tentacle'];
     }
 
     function validPendingQuestionToolType(type) {

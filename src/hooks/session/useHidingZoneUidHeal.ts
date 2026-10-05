@@ -39,9 +39,11 @@ export function useHidingZoneUidHeal(
     }
 
     healedKeysRef.current.add(healKey);
-    void writeHidingZone(sessionId, {
+    // Best-effort heal; a rules rejection must not escape as an unhandled
+    // rejection, and the heal key stays set so the effect does not loop.
+    writeHidingZone(sessionId, {
       ...staleZone,
       hiderUid: uid,
-    });
+    }).catch(() => {});
   }, [hidingZones, persistedUid, sessionId, uid]);
 }
