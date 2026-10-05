@@ -68,6 +68,9 @@ export function build_spatial_voronoi_rings() {
 export function build_near_region_json() {
   throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
 }
+export function union_polygon_features_json() {
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
+}
 export default {};
 `;
     },

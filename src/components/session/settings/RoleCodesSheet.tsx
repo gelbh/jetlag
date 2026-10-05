@@ -24,7 +24,9 @@ export function RoleCodesSheet({ open, onClose, session, myUid, isHost }: RoleCo
         </h2>
       }
     >
-      <RolePasscodeSettings session={session} myUid={myUid} isHost={isHost} embedded />
+      {open ? (
+        <RolePasscodeSettings session={session} myUid={myUid} isHost={isHost} embedded />
+      ) : null}
     </SheetHost>
   );
 }
