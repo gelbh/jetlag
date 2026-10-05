@@ -180,6 +180,11 @@ export function useCreateSession() {
   const silentReuseSuggestionMatchingKeysRef = useRef<Set<string>>(new Set());
   /** Pack-boundary matching keys last applied by silent reuse pack load. */
   const silentReusePackMatchingKeysRef = useRef<Set<string>>(new Set());
+  /**
+   * True while `regionPackId` was set by silent reuse (not Load-preset).
+   * Reframe-away clears that pack; Load-preset packs stay for the upgrade gate.
+   */
+  const silentAttachedPackRef = useRef(false);
   const [presetApplyNonce, setPresetApplyNonce] = useState(0);
   const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
   const loadedPresetId = searchParams.get("preset");
@@ -304,6 +309,7 @@ export function useCreateSession() {
       silentReusePinIdsRef.current = new Set();
       silentReuseSuggestionMatchingKeysRef.current = new Set();
       silentReusePackMatchingKeysRef.current = new Set();
+      silentAttachedPackRef.current = false;
       setAdvancedSettings(resolvedAdvanced);
       setSelectedPlaceId(null);
       setSelectedPlace(null);
@@ -617,7 +623,8 @@ export function useCreateSession() {
     const hadSilentReuse =
       silentReusePinIdsRef.current.size > 0 ||
       silentReuseSuggestionMatchingKeysRef.current.size > 0 ||
-      silentReusePackMatchingKeysRef.current.size > 0;
+      silentReusePackMatchingKeysRef.current.size > 0 ||
+      silentAttachedPackRef.current;
     const hasSuggestionSources = suggestion.sourcePresetIds.length > 0;
 
     if (!hasSuggestionSources && !hadSilentReuse) {
@@ -662,8 +669,15 @@ export function useCreateSession() {
       };
     });
 
-    // No pack in suggestion: keep any pack already set by Load preset (upgrade gate).
+    // No pack in suggestion: invalidate in-flight silent pack loads; clear silent-attached pack only.
     if (!nextPack) {
+      presetApplyGenerationRef.current += 1;
+      if (silentAttachedPackRef.current) {
+        silentAttachedPackRef.current = false;
+        setRegionPackId(undefined);
+        setRegionPackSubregionId(undefined);
+        setTransitMetroOverride(null);
+      }
       return;
     }
 
@@ -671,6 +685,7 @@ export function useCreateSession() {
       return;
     }
 
+    silentAttachedPackRef.current = true;
     setRegionPackId(nextPack);
     setRegionPackSubregionId(nextSub);
     if (suggestion.transitMetroId) {

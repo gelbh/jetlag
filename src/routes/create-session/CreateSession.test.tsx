@@ -217,16 +217,16 @@ const DUBLIN_CITY_NUDGED: GameArea = {
   ],
 };
 
-/** London-scale polygon far from Dublin presets (no silent reuse qualifiers). */
-const LONDON_CITY_GAME_AREA: GameArea = {
+/** Mid-Atlantic frame with no bundled/custom preset overlap (clears silent pack attach). */
+const OPEN_OCEAN_GAME_AREA: GameArea = {
   type: "Polygon",
   coordinates: [
     [
-      [-0.25, 51.45],
-      [0.05, 51.45],
-      [0.05, 51.55],
-      [-0.25, 51.55],
-      [-0.25, 51.45],
+      [-40.2, 30.1],
+      [-39.8, 30.1],
+      [-39.8, 30.4],
+      [-40.2, 30.4],
+      [-40.2, 30.1],
     ],
   ],
 };
@@ -1095,13 +1095,14 @@ describe("CreateSession", () => {
     expect(loadRegionPackSessionBoundaries).toHaveBeenCalledTimes(callsAfterAttach);
   });
 
-  it("clears silent-reuse pins after reframing away from the qualifying area", async () => {
+  it("clears silent-reuse pins and pack after reframing away from the qualifying area", async () => {
     seedCustomPresets(
       baseCustomPreset({
         id: "custom-dublin",
         name: "My Dublin",
         gameArea: DUBLIN_CITY_GAME_AREA,
         regionPackId: "dublin",
+        transitMetroId: "dublin",
         customLocationPins: [{ id: "dublin-pin", name: "Spire pin", point: [53.35, -6.26] }],
       }),
     );
@@ -1119,24 +1120,102 @@ describe("CreateSession", () => {
 
     // Back to game-area step and replace the frame (not Add another area).
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
-    parseBoundaryFile.mockResolvedValueOnce(LONDON_CITY_GAME_AREA);
+    parseBoundaryFile.mockResolvedValueOnce(OPEN_OCEAN_GAME_AREA);
     const input = document.querySelector<HTMLInputElement>('input[accept=".kml,.kmz"]');
     expect(input).toBeTruthy();
     fireEvent.change(input!, {
       target: {
         files: [
-          new File(["<kml/>"], "london.kml", { type: "application/vnd.google-earth.kml+xml" }),
+          new File(["<kml/>"], "ocean.kml", { type: "application/vnd.google-earth.kml+xml" }),
         ],
       },
     });
     await waitFor(() => {
-      expect(screen.getByDisplayValue("london.kml")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("ocean.kml")).toBeInTheDocument();
     });
 
     goToRules();
     openCustomContent();
     await waitFor(() => {
       expect(screen.queryByText("Spire pin")).toBeNull();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(OPEN_OCEAN_GAME_AREA, {
+        regionPackId: undefined,
+      });
+    });
+  });
+
+  it("ignores late silent pack boundary loads after reframing away", async () => {
+    seedCustomPresets(
+      baseCustomPreset({
+        id: "custom-dublin",
+        name: "My Dublin",
+        gameArea: DUBLIN_CITY_GAME_AREA,
+        regionPackId: "dublin",
+        customLocationPins: [{ id: "dublin-pin", name: "Spire pin", point: [53.35, -6.26] }],
+      }),
+    );
+
+    let resolveBoundaries:
+      | ((value: { playArea: GameArea; customMatchingAreas: Record<number, string> }) => void)
+      | undefined;
+    loadRegionPackSessionBoundaries.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveBoundaries = resolve;
+        }),
+    );
+
+    parseBoundaryFile.mockResolvedValueOnce(DUBLIN_CITY_GAME_AREA);
+    renderCreateSession();
+
+    importBoundaryFile();
+    await waitFor(() => {
+      expect(loadRegionPackSessionBoundaries).toHaveBeenCalledWith("dublin", undefined);
+    });
+
+    // Reframe before the Dublin pack load resolves (no new pack qualifiers).
+    parseBoundaryFile.mockResolvedValueOnce(OPEN_OCEAN_GAME_AREA);
+    const input = document.querySelector<HTMLInputElement>('input[accept=".kml,.kmz"]');
+    expect(input).toBeTruthy();
+    fireEvent.change(input!, {
+      target: {
+        files: [
+          new File(["<kml/>"], "ocean.kml", { type: "application/vnd.google-earth.kml+xml" }),
+        ],
+      },
+    });
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("ocean.kml")).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      resolveBoundaries?.({
+        playArea: DUBLIN_CITY_GAME_AREA,
+        customMatchingAreas: {
+          6: level8MatchingJson("late-pack-feat", DUBLIN_CITY_GAME_AREA),
+        },
+      });
+      await Promise.resolve();
+    });
+
+    goToRules();
+    openCustomContent();
+    await waitFor(() => {
+      expect(screen.queryByText("Spire pin")).toBeNull();
+    });
+    expect(screen.queryByText(/Uploaded/i)).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(OPEN_OCEAN_GAME_AREA, {
+        regionPackId: undefined,
+      });
     });
   });
 
