@@ -581,7 +581,9 @@ export function useCreateSession() {
     setTransitMetroOverride,
     presetApplyGenerationRef,
   });
-  resetSilentReuseOverlayRef.current = resetSilentReuseOverlay;
+  useLayoutEffect(() => {
+    resetSilentReuseOverlayRef.current = resetSilentReuseOverlay;
+  });
 
   const addCurrentArea = () => {
     if (!previewGameArea) {
