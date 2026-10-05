@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import * as overpassClient from "../../core/overpass/overpassClient";
@@ -184,5 +184,59 @@ describe("landmass features", () => {
     await expect(fetchLandmassFeaturesInArea(tinyGameArea)).rejects.toBeInstanceOf(
       overpassClient.OverpassPayloadTooLargeError,
     );
+  });
+});
+
+describe("computeLandmassFeatures fail-closed", () => {
+  afterEach(() => {
+    vi.doUnmock("@/domain/geometry/kernel/unionKernelRunner");
+    vi.doUnmock("@/domain/geometry/measuring/geodesicLineBuffer");
+    vi.resetModules();
+  });
+
+  it("does not use Martinez when wasm union throws", async () => {
+    vi.resetModules();
+    vi.doMock("@/domain/geometry/measuring/geodesicLineBuffer", () => ({
+      dispatchGeodesicLineBuffer: vi.fn(async () => ({
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [-0.151, 51.4],
+              [-0.149, 51.4],
+              [-0.149, 51.5],
+              [-0.151, 51.5],
+              [-0.151, 51.4],
+            ],
+          ],
+        },
+      })),
+    }));
+    vi.doMock("@/domain/geometry/kernel/unionKernelRunner", () => ({
+      runUnionPolygonFeatures: vi.fn(async () => {
+        throw new Error("wasm boom");
+      }),
+    }));
+    const martinez = vi.spyOn(
+      await import("@/domain/geometry/masks/unionPolygonFeatures"),
+      "unionPolygonFeatures",
+    );
+    const { computeLandmassFeatures: compute } = await import("./landmassFeatures");
+    await expect(
+      compute(sampleGameArea, [
+        {
+          type: "way",
+          id: 3,
+          tags: { waterway: "river" },
+          geometry: [
+            { lat: 51.4, lon: -0.15 },
+            { lat: 51.5, lon: -0.15 },
+          ],
+        },
+      ]),
+    ).rejects.toThrow("wasm boom");
+    expect(martinez).not.toHaveBeenCalled();
   });
 });
