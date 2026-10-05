@@ -241,6 +241,7 @@ test("countLiveH1 ignores h1 text inside scripts", () => {
     countLiveH1('<script type="application/ld+json">{"x":"<h1>"}</script><h1>A</h1>'),
     1,
   );
+  assert.equal(countLiveH1("<script>'<h1>'</script\t\n bar><h1>A</h1>"), 1);
 });
 
 test("inlineStyleText collects live style attributes only", () => {
