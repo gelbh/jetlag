@@ -180,6 +180,88 @@ describe("matching features", () => {
     ]);
   });
 
+  it("dedupes Overpass twin by wikidataId against pack Q id on enrich", async () => {
+    let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
+    const overpassStarted = new Promise<void>((resolveStarted) => {
+      vi.spyOn(overpassClient, "queryOverpass").mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveStarted();
+            resolveOverpass = resolve;
+          }),
+      );
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input) === "/geo/london/poi/museum.json") {
+          return {
+            ok: true,
+            json: async () => ({
+              category: "museum",
+              source: "wikidata",
+              places: [
+                {
+                  id: "Q6373",
+                  name: "British Museum",
+                  lat: 51.45,
+                  lng: -0.16,
+                },
+              ],
+            }),
+          };
+        }
+        throw new Error(`Unexpected fetch: ${String(input)}`);
+      }),
+    );
+
+    const enrich = vi.fn();
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "museum", {
+      regionPackId: "london",
+      onEnrich: enrich,
+    });
+
+    expect(features).toEqual([
+      {
+        id: "Q6373",
+        name: "British Museum",
+        point: [51.45, -0.16],
+        inPlayArea: true,
+      },
+    ]);
+
+    await overpassStarted;
+    resolveOverpass?.({
+      elements: [
+        {
+          id: 99,
+          tags: {
+            name: "Museo Britannico",
+            tourism: "museum",
+            wikidata: "Q6373",
+          },
+          lat: 51.451,
+          lon: -0.161,
+        },
+      ],
+    });
+
+    await vi.waitFor(() => {
+      expect(enrich).toHaveBeenCalledTimes(1);
+    });
+
+    const enriched = enrich.mock.calls[0]?.[0] ?? [];
+    expect(enriched).toEqual([
+      {
+        id: "Q6373",
+        name: "British Museum",
+        point: [51.45, -0.16],
+        inPlayArea: true,
+      },
+    ]);
+  });
+
   it("splits the Overpass bbox when the full-area query is too expensive", async () => {
     const fullAreaBbox = formatOverpassBboxFromGameArea(sampleGameArea);
     const querySpy = vi
