@@ -26,6 +26,8 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
   osaka: { south: 34.5865, west: 135.3435, north: 34.7688, east: 135.5993 },
   zurich: { south: 47.1637, west: 8.3589, north: 47.699, east: 8.986 },
   lucerne: { south: 46.775, west: 7.839, north: 47.2903, east: 8.5213 },
+  // Temporary national bbox; refine in Task 2 after measuring cantons.
+  switzerland: { south: 45.8, west: 5.9, north: 47.9, east: 10.6 },
   "portland-maine": {
     south: 43.4669,
     west: -70.492,
