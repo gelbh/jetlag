@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { LEARN_ROUTE_PATHS } from "../../src/domain/seo/learnRoutePaths";
 import { expect, prepareE2EPage, seedLocalSession, test } from "../fixtures";
 
 /**
@@ -11,6 +12,7 @@ const PRERENDERED_DOCUMENTS: Record<string, string> = {
   "/premium": "/premium/index.html",
   "/privacy": "/privacy/index.html",
   "/terms": "/terms/index.html",
+  ...Object.fromEntries(LEARN_ROUTE_PATHS.map((path) => [path, `${path}/index.html`])),
 };
 
 async function servePrerenderedDocuments(page: Page): Promise<void> {
@@ -139,7 +141,7 @@ test("@smoke prerendered join fills the invite code after hydrating", async ({ p
   await expectCleanHydration(page);
 });
 
-for (const path of ["/premium", "/privacy", "/terms"]) {
+for (const path of ["/premium", "/privacy", "/terms", ...LEARN_ROUTE_PATHS]) {
   test(`@smoke prerendered ${path} hydrates without recoverable errors`, async ({ page }) => {
     await prepareE2EPage(page);
     await openPrerendered(page, path);

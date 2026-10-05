@@ -2,10 +2,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  countLiveH1,
   diffHeadAssetKeys,
   extractHeadAssetKeys,
   hasBootSplashElement,
   hasPrerenderedRootMarker,
+  metaDescriptionContent,
   PERF_PRERENDER_PATHS,
   prerenderTargets,
   restoreTemplateHeadAssets,
@@ -213,4 +215,21 @@ test("robotsMetaContent finds the robots meta regardless of attribute order", ()
     "index,follow",
   );
   assert.equal(robotsMetaContent('<meta name="description" content="x">'), undefined);
+});
+
+test("metaDescriptionContent reads the description meta and skips inert markup", () => {
+  assert.equal(
+    metaDescriptionContent('<head><meta content="Play it" name="description"></head>'),
+    "Play it",
+  );
+  assert.equal(
+    metaDescriptionContent('<!-- <meta name="description" content="old"> --><meta name="x">'),
+    undefined,
+  );
+});
+
+test("countLiveH1 counts live h1 tags only", () => {
+  assert.equal(countLiveH1("<h1>A</h1><h10>no</h10>"), 1);
+  assert.equal(countLiveH1("<noscript><h1>Fallback</h1></noscript><h1 class=x>A</h1>"), 1);
+  assert.equal(countLiveH1("<header><h1>A</h1></header><article><h1>B</h1></article>"), 2);
 });

@@ -2,6 +2,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const MIN_ROOT_TEXT_CHARS = 40;
+/** Search-result truncation budgets for indexable pages. */
+export const MAX_TITLE_CHARS = 60;
+export const MAX_DESCRIPTION_CHARS = 160;
 
 export function loadCrawlPolicy(root) {
   return JSON.parse(readFileSync(join(root, "src/domain/seo/seoCrawlPolicy.json"), "utf8"));
@@ -192,4 +195,20 @@ export function robotsMetaContent(html) {
     }
   }
   return undefined;
+}
+
+/** `content` of `<meta name="description">`, or undefined. */
+export function metaDescriptionContent(html) {
+  const masked = maskInert(html);
+  for (const match of masked.matchAll(META_TAG_RE)) {
+    if (attr(match[0], "name")?.toLowerCase() === "description") {
+      return attr(match[0], "content");
+    }
+  }
+  return undefined;
+}
+
+/** `<h1>` elements in live markup (comments / noscript / template excluded). */
+export function countLiveH1(html) {
+  return (maskInert(html).match(/<h1\b/gi) ?? []).length;
 }

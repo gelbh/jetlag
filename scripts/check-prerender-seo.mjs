@@ -4,13 +4,17 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   absoluteUrl,
+  countLiveH1,
   diffHeadAssetKeys,
   distHtmlPath,
   extractHeadAssetKeys,
   hasBootSplashElement,
   hasPrerenderedRootMarker,
   loadCrawlPolicy,
+  MAX_DESCRIPTION_CHARS,
+  MAX_TITLE_CHARS,
   MIN_ROOT_TEXT_CHARS,
+  metaDescriptionContent,
   prerenderTargets,
   robotsMetaContent,
   spaShellPath,
@@ -78,6 +82,30 @@ for (const { path: urlPath, indexable } of targets) {
 
     if (robotsMetaContent(html) !== "index,follow") {
       console.error(`${urlPath}: missing robots index,follow`);
+      failed = true;
+    }
+
+    if (title.length > MAX_TITLE_CHARS) {
+      console.error(`${urlPath}: <title> is ${title.length} chars (max ${MAX_TITLE_CHARS})`);
+      failed = true;
+    }
+
+    const description = metaDescriptionContent(html) ?? "";
+    if (!description || description.length > MAX_DESCRIPTION_CHARS) {
+      console.error(
+        `${urlPath}: meta description must be 1-${MAX_DESCRIPTION_CHARS} chars (got ${description.length})`,
+      );
+      failed = true;
+    }
+
+    if (!sitemap.includes(`<loc>${canonical}</loc>`)) {
+      console.error(`${urlPath}: indexable page missing from dist/sitemap.xml`);
+      failed = true;
+    }
+
+    const h1Count = countLiveH1(html);
+    if (h1Count !== 1) {
+      console.error(`${urlPath}: expected exactly one <h1>, found ${h1Count}`);
       failed = true;
     }
   } else {
