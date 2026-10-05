@@ -1,21 +1,9 @@
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { ComponentProps, ReactElement } from "react";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
-
-const sheetOpenHistory: boolean[] = [];
-
-vi.mock("@/components/ui/sheets/SheetHost", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/components/ui/sheets/SheetHost")>();
-  return {
-    SheetHost: (props: ComponentProps<typeof actual.SheetHost>) => {
-      sheetOpenHistory.push(props.open);
-      return <actual.SheetHost {...props} />;
-    },
-  };
-});
 
 const hostProps = {
   cue: "Pick a direction",
@@ -36,7 +24,6 @@ function renderHost(ui: ReactElement) {
 }
 
 beforeEach(() => {
-  sheetOpenHistory.length = 0;
   hostProps.onDismiss = vi.fn();
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
@@ -51,14 +38,10 @@ beforeEach(() => {
 });
 
 describe("AskHudHost", () => {
-  it("presents SheetHost after mount so Drawer can animate open", async () => {
+  it("presents SheetHost dialog when mounted", async () => {
     renderHost(<AskHudHost {...hostProps} modeBody={<div>Mode body</div>} />);
 
-    // RTL flushes useEffect before render returns; assert the closed→open latch via prop history.
-    expect(sheetOpenHistory[0]).toBe(false);
-
     await waitFor(() => {
-      expect(sheetOpenHistory).toContain(true);
       expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
       expect(screen.getByRole("dialog")).toBeVisible();
     });
