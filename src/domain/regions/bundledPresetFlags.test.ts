@@ -130,4 +130,38 @@ describe("bundledPresetFlags", () => {
     expect(flagMarkForSegmentRow("lucerne-metro", ["canton-lucerne"])).toBeNull();
     expect(flagMarkForSegmentRow("zurich-city", ["canton-zurich"])).toBeNull();
   });
+
+  it("resolves flags for all Swiss canton segments", () => {
+    const CANTON_IDS = [
+      "zurich",
+      "bern",
+      "lucerne",
+      "uri",
+      "schwyz",
+      "obwalden",
+      "nidwalden",
+      "glarus",
+      "zug",
+      "fribourg",
+      "solothurn",
+      "basel-stadt",
+      "basel-landschaft",
+      "schaffhausen",
+      "appenzell-ausserrhoden",
+      "appenzell-innerrhoden",
+      "st-gallen",
+      "graubunden",
+      "aargau",
+      "thurgau",
+      "ticino",
+      "vaud",
+      "valais",
+      "neuchatel",
+      "geneva",
+      "jura",
+    ] as const;
+    for (const cantonId of CANTON_IDS) {
+      expect(flagMarkForSegmentRow(`canton-${cantonId}`, [])).not.toBeNull();
+    }
+  });
 });
