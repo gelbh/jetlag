@@ -299,17 +299,14 @@ async function unionBufferedFeaturesInSlices(
     return features[0] ?? null;
   }
 
-  try {
-    const united = await unionPolygonFeaturesInSlices(features, {
-      yieldFn: () => Promise.resolve(),
-    });
-    if (united) {
-      return united;
-    }
-  } catch {
-    // Fall back to a MultiPolygon shell; point-in-region semantics match union.
+  const united = await unionPolygonFeaturesInSlices(features, {
+    yieldFn: () => Promise.resolve(),
+  });
+  if (united) {
+    return united;
   }
 
+  // Null union only: MultiPolygon shell keeps point-in-region semantics. WASM throws propagate.
   return combinePolygonFeatures(features);
 }
 

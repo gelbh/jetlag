@@ -187,3 +187,75 @@ describe("buildCoastlineNearRegion fail-closed", () => {
     warn.mockRestore();
   });
 });
+
+describe("unionBufferedFeaturesInSlices fail-closed", () => {
+  afterEach(() => {
+    vi.resetModules();
+    vi.doUnmock("../progressive/unionSlices");
+    vi.doUnmock("./geodesicLineBuffer");
+  });
+
+  it("returns null when buffered union wasm throws (no MultiPolygon shell)", async () => {
+    vi.resetModules();
+    vi.doMock("./geodesicLineBuffer", () => ({
+      dispatchGeodesicLineBuffer: vi.fn(async () => ({
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [-0.15, 51.45],
+              [-0.14, 51.45],
+              [-0.14, 51.46],
+              [-0.15, 51.46],
+              [-0.15, 51.45],
+            ],
+          ],
+        },
+      })),
+    }));
+    vi.doMock("../progressive/unionSlices", () => ({
+      POLYGON_UNION_SLICE_BATCH: 8,
+      unionPolygonFeaturesInSlices: vi.fn(async () => {
+        throw new Error("wasm boom");
+      }),
+    }));
+
+    const { buildCoastlineNearRegionUnionBufferForTests, clearCoastlineNearRegionCacheForTests } =
+      await import("./nearRegions");
+    clearCoastlineNearRegionCacheForTests();
+
+    const segments: Feature<LineString>[] = [
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-0.2, 51.45],
+            [-0.19, 51.45],
+          ],
+        },
+      },
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-0.18, 51.45],
+            [-0.17, 51.45],
+          ],
+        },
+      },
+    ];
+
+    const result = await buildCoastlineNearRegionUnionBufferForTests(
+      segments,
+      1_000,
+      sampleGameArea,
+    );
+    expect(result).toBeNull();
+  });
+});
