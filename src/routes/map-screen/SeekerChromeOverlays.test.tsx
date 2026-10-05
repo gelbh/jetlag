@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { AskHudCommitKind, AskHudReadiness } from "@/domain/ask/askHudModes";
 import { renderWithAppUi } from "../../test/renderWithAppUi";
@@ -51,7 +52,7 @@ function emptyHud(
     error: null as string | null,
     onCommit: vi.fn(),
     modeBody: <div data-testid={bodyId} />,
-    sheets: null,
+    sheets: null as ReactNode,
     ...(surface === "thermometer" ? { commitKind: "send" as AskHudCommitKind } : {}),
   };
 }
@@ -384,5 +385,72 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
     expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("photo-float-panel")).toBeNull();
+  });
+
+  it("keeps AskHudHost mounted with open false when ask tool clears", () => {
+    const tools = stubTools("radar");
+    const baseProps = {
+      timer: stubTimer() as never,
+      overlay: stubOverlay() as never,
+      firstRunDismissed: true as const,
+      setFirstRunDismissed: vi.fn(),
+      forceMapToolsGuide: false,
+      onDismissMapToolsGuide: vi.fn(),
+      selectedAnnotation: null,
+      geometryEditAnnotation: null,
+      geometryDraft: null,
+      mapPanning: false,
+      userMinimized: false,
+      setUserMinimized: vi.fn(),
+      handleSelectTool: vi.fn(),
+      cancelGeometryEdit: vi.fn(),
+      saveGeometryEdit: vi.fn(),
+      tools: tools as never,
+    };
+
+    const { rerender } = renderWithAppUi(
+      <SeekerChromeOverlays {...baseProps} activeTool="radar" />,
+    );
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.getByTestId("radar-hud-body")).toBeInTheDocument();
+
+    rerender(<SeekerChromeOverlays {...baseProps} activeTool="none" />);
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.queryByTestId("radar-hud-body")).toBeNull();
+  });
+
+  it("drops preview sheets on tool clear without clone-holding a closed preview", () => {
+    const tools = stubTools("radar");
+    tools.radarTool.hud = {
+      ...tools.radarTool.hud,
+      sheets: <div data-testid="radar-preview-sheet" />,
+    };
+    const baseProps = {
+      timer: stubTimer() as never,
+      overlay: stubOverlay() as never,
+      firstRunDismissed: true as const,
+      setFirstRunDismissed: vi.fn(),
+      forceMapToolsGuide: false,
+      onDismissMapToolsGuide: vi.fn(),
+      selectedAnnotation: null,
+      geometryEditAnnotation: null,
+      geometryDraft: null,
+      mapPanning: false,
+      userMinimized: false,
+      setUserMinimized: vi.fn(),
+      handleSelectTool: vi.fn(),
+      cancelGeometryEdit: vi.fn(),
+      saveGeometryEdit: vi.fn(),
+      tools: tools as never,
+    };
+
+    const { rerender } = renderWithAppUi(
+      <SeekerChromeOverlays {...baseProps} activeTool="radar" />,
+    );
+    expect(screen.getByTestId("radar-preview-sheet")).toBeInTheDocument();
+
+    rerender(<SeekerChromeOverlays {...baseProps} activeTool="none" />);
+    expect(screen.queryByTestId("radar-preview-sheet")).toBeNull();
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
   });
 });

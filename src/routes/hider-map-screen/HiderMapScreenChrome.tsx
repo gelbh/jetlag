@@ -37,6 +37,7 @@ import type {
 import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import type { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
+import { useSheetExitMount } from "../../hooks/motion/useSheetExitMount";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
@@ -47,6 +48,7 @@ import { useAnnotationStore } from "../../state/annotationStore";
 import type { LayerVisibility } from "../../state/sessionStore";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
+import { resolveHidingZoneHudPresence } from "./hidingZoneAskChrome";
 // ponytail yagni waiver: keep named helper + matrix tests (1 call site, readiness-reviewed).
 import { isHidingZoneMapFirstEligible } from "./hidingZoneMapFirst";
 
@@ -364,6 +366,12 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     moveMode: zoneTool.moveMode,
     methodChosen: hidingZonePanelTool.methodChosen,
   });
+  const zoneAskOpen = zoneTool.wizardOpen && !sheetBlocksWizard && !mapFirstEligible;
+  const zoneAskExit = useSheetExitMount(zoneAskOpen);
+  const zoneHudPresence = resolveHidingZoneHudPresence({
+    mapFirstEligible,
+    askExitMounted: zoneAskExit.mounted,
+  });
 
   const toolDock = (
     <HiderToolDock
@@ -410,7 +418,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
         onAnswerQuestion={chat.onAnswerQuestion}
       />
 
-      {mapFirstEligible ? (
+      {zoneHudPresence.showMapFirst ? (
         <HidingZoneMapPlacementChrome
           moveMode={zoneTool.moveMode}
           radiusLabel={hidingZoneRadiusLabel}
@@ -427,8 +435,10 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
                 }
           }
         />
-      ) : zoneTool.wizardOpen && !sheetBlocksWizard ? (
+      ) : null}
+      {zoneHudPresence.showAsk ? (
         <AskHudHost
+          open={zoneAskExit.open}
           cue={hidingZoneCue}
           toolLabel={zoneTool.moveMode ? "Move zone" : "Hiding zone"}
           costLabel={null}
@@ -436,6 +446,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           canCommit={false}
           commitLabel="CONFIRM"
           onCommit={() => undefined}
+          onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
           isSubmitting={false}
           error={hidingZonePanelTool.error}
           modeBody={
@@ -446,6 +457,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
               onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
             />
           }
+          onExitTransitionEnd={zoneAskExit.onExitTransitionEnd}
         />
       ) : null}
 

@@ -122,6 +122,7 @@ describe("ThermometerHudBody", () => {
     const onCommit = vi.fn();
     renderHud(
       <AskHudHost
+        open
         cue=""
         toolLabel="Thermometer"
         costLabel="D2P1"

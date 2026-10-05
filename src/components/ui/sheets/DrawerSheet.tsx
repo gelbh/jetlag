@@ -42,6 +42,8 @@ export interface DrawerSheetProps {
    * Also disables outside-click dismiss so pin taps do not close the tool.
    */
   mapInteractive?: boolean;
+  /** After Drawer exit transition finishes (clear data / drop held hosts). */
+  onExitTransitionEnd?: () => void;
 }
 
 /** Chrome lives on the gesture wrapper so translateY moves radius/bg with the finger. */
@@ -120,6 +122,7 @@ export function DrawerSheet({
   scrollMode = "host",
   contentStyle,
   mapInteractive = false,
+  onExitTransitionEnd,
 }: DrawerSheetProps) {
   const presentedOpen = useDrawerPresentOpen(open);
   const childScroll = scrollMode === "child";
@@ -172,6 +175,7 @@ export function DrawerSheet({
       keepMounted={false}
       zIndex={JETLAG_MODAL_Z_INDEX}
       title={ariaLabel}
+      onExitTransitionEnd={onExitTransitionEnd}
       transitionProps={transitionProps}
       overlayProps={{
         backgroundOpacity: 0.4,

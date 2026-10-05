@@ -29,6 +29,8 @@ export interface SheetHostProps {
   contentStyle?: CSSProperties;
   /** Ask HUD: scrim stays visual; map taps pass through for placement. */
   mapInteractive?: boolean;
+  /** After Drawer exit transition finishes (clear data / drop held hosts). */
+  onExitTransitionEnd?: () => void;
 }
 
 export function SheetHost({
@@ -44,6 +46,7 @@ export function SheetHost({
   scrollMode,
   contentStyle,
   mapInteractive = false,
+  onExitTransitionEnd,
 }: SheetHostProps) {
   return (
     <DrawerSheet
@@ -58,6 +61,7 @@ export function SheetHost({
       scrollMode={scrollMode}
       contentStyle={contentStyle}
       mapInteractive={mapInteractive}
+      onExitTransitionEnd={onExitTransitionEnd}
     >
       {children}
     </DrawerSheet>
