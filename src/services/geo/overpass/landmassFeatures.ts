@@ -9,7 +9,7 @@ import {
   type LatLngTuple,
   simplifyGameArea,
 } from "@/domain/geometry/gameArea/geometry";
-import { unionPolygonFeatures } from "@/domain/geometry/masks/unionPolygonFeatures";
+import { runUnionPolygonFeatures } from "@/domain/geometry/kernel/unionKernelRunner";
 import { dispatchGeodesicLineBuffer } from "@/domain/geometry/measuring/geodesicLineBuffer";
 import type { GameArea } from "@/domain/map/annotations";
 import type { RegionPackId } from "@/domain/regions/regionPack";
@@ -110,10 +110,10 @@ function representativePointForBoundary(boundary: GameArea): LatLngTuple {
   return [latSum / count, lngSum / count];
 }
 
-function unionObstacles(
+async function unionObstacles(
   obstacles: Feature<Polygon | MultiPolygon>[],
-): Feature<Polygon | MultiPolygon> | null {
-  return unionPolygonFeatures(obstacles);
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  return runUnionPolygonFeatures(obstacles);
 }
 
 export async function obstacleFeaturesFromElements(
@@ -236,7 +236,7 @@ export async function computeLandmassFeatures(
   let remaining: Feature<Polygon | MultiPolygon> | null = gameFeature;
 
   if (obstacles.length > 0) {
-    const mergedObstacles = unionObstacles(obstacles);
+    const mergedObstacles = await unionObstacles(obstacles);
     if (mergedObstacles) {
       remaining = difference({
         type: "FeatureCollection",
