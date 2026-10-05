@@ -153,8 +153,8 @@ describe("packGeoManifest", () => {
     }
   });
 
-  it("ships dense complete sea_level_seed for london and tokyo", () => {
-    for (const packId of ["london", "tokyo"] as const) {
+  it("ships dense complete sea_level_seed for london, tokyo, and switzerland", () => {
+    for (const packId of ["london", "tokyo", "switzerland"] as const) {
       const seaLevelPath = resolve(publicRoot, packGeoSeaLevelSeedPublicPath(packId));
       const seaLevel = JSON.parse(readFileSync(seaLevelPath, "utf8")) as {
         source: string;

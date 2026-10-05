@@ -1,0 +1,2664 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q301235",
+      "name": "Aargau cantonal library",
+      "lat": 47.389911,
+      "lng": 8.044937
+    },
+    {
+      "id": "Q135992323",
+      "name": "Abbey district, Episcopal collection",
+      "lat": 47.4228,
+      "lng": 9.3764
+    },
+    {
+      "id": "Q689896",
+      "name": "Abbey library of St. Gallen",
+      "lat": 47.4228,
+      "lng": 9.3764
+    },
+    {
+      "id": "Q56887418",
+      "name": "ABC Amici della Biblioteca",
+      "lat": 45.968643,
+      "lng": 8.934421
+    },
+    {
+      "id": "Q27485106",
+      "name": "Academy of Architecture Library",
+      "lat": 45.86725,
+      "lng": 8.98326
+    },
+    {
+      "id": "Q383147",
+      "name": "Afghanistan Museum",
+      "lat": 47.45261,
+      "lng": 7.73657
+    },
+    {
+      "id": "Q56887415",
+      "name": "Agorateca",
+      "lat": 46.00561,
+      "lng": 8.96135
+    },
+    {
+      "id": "Q131937767",
+      "name": "Akademie - Kaufmännisches Berufs- und Weiterbildungszentrum",
+      "lat": 47.420653,
+      "lng": 9.358353
+    },
+    {
+      "id": "Q109302756",
+      "name": "Alpnach library",
+      "lat": 46.941064,
+      "lng": 8.268276
+    },
+    {
+      "id": "Q115327260",
+      "name": "Altes Primarschulhaus",
+      "lat": 47.443301,
+      "lng": 8.628141
+    },
+    {
+      "id": "Q27483733",
+      "name": "Archive and Library of the Federal Supreme Court",
+      "lat": 46.51975,
+      "lng": 6.64431
+    },
+    {
+      "id": "Q135569342",
+      "name": "Archive and Library of the Polish Museum",
+      "lat": 47.227137,
+      "lng": 8.815969
+    },
+    {
+      "id": "Q19362556",
+      "name": "Archives and Library of the Swiss Mennonite conference",
+      "lat": 47.211229,
+      "lng": 7.154829
+    },
+    {
+      "id": "Q56887487",
+      "name": "Archivio fotografico Luigi Gisep",
+      "lat": 46.32577,
+      "lng": 10.05847
+    },
+    {
+      "id": "Q56887484",
+      "name": "Archivio Ivan Bianchi",
+      "lat": 46.16854,
+      "lng": 8.79377
+    },
+    {
+      "id": "Q56877416",
+      "name": "Ascona public library",
+      "lat": 46.15358,
+      "lng": 8.76986
+    },
+    {
+      "id": "Q56887419",
+      "name": "Associazione biblioteca dei ragazzi di Cassarate La casa dei libri",
+      "lat": 46.00718,
+      "lng": 8.9654
+    },
+    {
+      "id": "Q56887407",
+      "name": "Babylonia",
+      "lat": 45.83669,
+      "lng": 9.02962
+    },
+    {
+      "id": "Q683842",
+      "name": "Basel University Library (institution)",
+      "lat": 47.5594,
+      "lng": 7.5812
+    },
+    {
+      "id": "Q19362825",
+      "name": "Basel University Library (main building)",
+      "lat": 47.559754,
+      "lng": 7.580909
+    },
+    {
+      "id": "Q68310620",
+      "name": "Basisbibliothek Unitobler",
+      "lat": 46.954391,
+      "lng": 7.430445
+    },
+    {
+      "id": "Q23783862",
+      "name": "Basler Afrika Bibliographien",
+      "lat": 47.551869,
+      "lng": 7.589958
+    },
+    {
+      "id": "Q27485140",
+      "name": "Benedictine monastery Mariastein, library and music collections",
+      "lat": 47.47616,
+      "lng": 7.49252
+    },
+    {
+      "id": "Q29890769",
+      "name": "Benjamin Constant Institute, Cantonal and University Library, Unithèque",
+      "lat": 46.522671,
+      "lng": 6.579487
+    },
+    {
+      "id": "Q68330328",
+      "name": "Bern University Library Storage Facility",
+      "lat": 46.953254,
+      "lng": 7.422538
+    },
+    {
+      "id": "Q56887412",
+      "name": "Biblio-Mediateca Fabio Schaub",
+      "lat": 46.00592,
+      "lng": 8.93984
+    },
+    {
+      "id": "Q56887413",
+      "name": "biblio.ludo.teca La sorgente",
+      "lat": 46.32579,
+      "lng": 10.05859
+    },
+    {
+      "id": "Q56887406",
+      "name": "Bibliodalpe",
+      "lat": 46.600576,
+      "lng": 8.755364
+    },
+    {
+      "id": "Q56887404",
+      "name": "Bibliomedia",
+      "lat": 46.362028,
+      "lng": 8.965472
+    },
+    {
+      "id": "Q56877391",
+      "name": "Biblioteca 'Sfogliare'",
+      "lat": 46.013764,
+      "lng": 8.904919
+    },
+    {
+      "id": "Q56877372",
+      "name": "Biblioteca \"Voglia di libri",
+      "lat": 46.05765,
+      "lng": 8.98986
+    },
+    {
+      "id": "Q56887348",
+      "name": "Biblioteca Amico del Libro",
+      "lat": 46.065694,
+      "lng": 8.921483
+    },
+    {
+      "id": "Q56887347",
+      "name": "Biblioteca Braille e del libro parlato",
+      "lat": 46.18258,
+      "lng": 8.85096
+    },
+    {
+      "id": "Q56887346",
+      "name": "Biblioteca Cà-dro libro",
+      "lat": 46.046663,
+      "lng": 8.986895
+    },
+    {
+      "id": "Q56887345",
+      "name": "Biblioteca cantonale di Mendrisio",
+      "lat": 45.86951,
+      "lng": 8.99036
+    },
+    {
+      "id": "Q56881849",
+      "name": "Biblioteca comunale",
+      "lat": 46.367583,
+      "lng": 9.222727
+    },
+    {
+      "id": "Q56881617",
+      "name": "Biblioteca comunale «Fondo giovani»",
+      "lat": 45.8658,
+      "lng": 8.98461
+    },
+    {
+      "id": "Q56887335",
+      "name": "Biblioteca comunale di Avegno",
+      "lat": 46.20616,
+      "lng": 8.74408
+    },
+    {
+      "id": "Q56887334",
+      "name": "Biblioteca comunale di Bellinzona",
+      "lat": 46.19646,
+      "lng": 9.02421
+    },
+    {
+      "id": "Q56887333",
+      "name": "Biblioteca comunale di Bodio",
+      "lat": 46.37839,
+      "lng": 8.9117
+    },
+    {
+      "id": "Q56887332",
+      "name": "Biblioteca comunale di Breggia",
+      "lat": 45.86112,
+      "lng": 9.0212
+    },
+    {
+      "id": "Q56887331",
+      "name": "Biblioteca comunale di Brusino Arsizio",
+      "lat": 45.92707,
+      "lng": 8.93712
+    },
+    {
+      "id": "Q56887340",
+      "name": "Biblioteca comunale di Caslano",
+      "lat": 45.97417,
+      "lng": 8.8761
+    },
+    {
+      "id": "Q56887329",
+      "name": "Biblioteca comunale di Castasegna",
+      "lat": 46.3334,
+      "lng": 9.51475
+    },
+    {
+      "id": "Q56881575",
+      "name": "Biblioteca comunale di Castione",
+      "lat": 46.22679,
+      "lng": 9.04377
+    },
+    {
+      "id": "Q56881931",
+      "name": "Biblioteca comunale di Cavergno",
+      "lat": 46.314716,
+      "lng": 8.602187
+    },
+    {
+      "id": "Q56881922",
+      "name": "biblioteca comunale di Chiasso",
+      "lat": 45.83784,
+      "lng": 9.03018
+    },
+    {
+      "id": "Q56881915",
+      "name": "Biblioteca comunale di Collina d'oro",
+      "lat": 45.98172,
+      "lng": 8.91782
+    },
+    {
+      "id": "Q56881568",
+      "name": "Biblioteca comunale di Curio",
+      "lat": 46.002577,
+      "lng": 8.862023
+    },
+    {
+      "id": "Q56881899",
+      "name": "Biblioteca comunale di Gambarogno",
+      "lat": 46.13395,
+      "lng": 8.80646
+    },
+    {
+      "id": "Q56887336",
+      "name": "Biblioteca comunale di Genestrerio",
+      "lat": 46.522755,
+      "lng": 8.872635
+    },
+    {
+      "id": "Q56881891",
+      "name": "Biblioteca comunale di Giubiasco",
+      "lat": 46.17333,
+      "lng": 9.00789
+    },
+    {
+      "id": "Q56881600",
+      "name": "Biblioteca comunale di Lamone",
+      "lat": 46.04428,
+      "lng": 8.92807
+    },
+    {
+      "id": "Q56881885",
+      "name": "Biblioteca comunale di Malvaglia",
+      "lat": 46.40853,
+      "lng": 8.98142
+    },
+    {
+      "id": "Q56881582",
+      "name": "Biblioteca comunale di Manno",
+      "lat": 46.03407,
+      "lng": 8.91938
+    },
+    {
+      "id": "Q56881880",
+      "name": "Biblioteca comunale di Maroggia",
+      "lat": 46.522755,
+      "lng": 8.872635
+    },
+    {
+      "id": "Q56881872",
+      "name": "Biblioteca comunale di Melide",
+      "lat": 45.95361,
+      "lng": 8.94505
+    },
+    {
+      "id": "Q56881865",
+      "name": "Biblioteca comunale di Novazzano",
+      "lat": 45.84176,
+      "lng": 8.9791
+    },
+    {
+      "id": "Q56881859",
+      "name": "Biblioteca comunale di Olivone",
+      "lat": 46.522755,
+      "lng": 8.872635
+    },
+    {
+      "id": "Q56881852",
+      "name": "Biblioteca comunale di Sant'Antonino",
+      "lat": 46.157448,
+      "lng": 8.975632
+    },
+    {
+      "id": "Q56881640",
+      "name": "Biblioteca comunale di Sopra Porta",
+      "lat": 46.360291,
+      "lng": 9.635669
+    },
+    {
+      "id": "Q56881633",
+      "name": "Biblioteca comunale di Sorengo",
+      "lat": 46.00113,
+      "lng": 8.93399
+    },
+    {
+      "id": "Q56881623",
+      "name": "Biblioteca comunale Fondo Angelo Casè",
+      "lat": 46.232576,
+      "lng": 8.711872
+    },
+    {
+      "id": "Q56881591",
+      "name": "Biblioteca comunale per ragazzi di Cadenazzo",
+      "lat": 46.15046,
+      "lng": 8.9506
+    },
+    {
+      "id": "Q56881560",
+      "name": "Biblioteca degli Amigos de la Lengua Española",
+      "lat": 46.166828,
+      "lng": 8.798486
+    },
+    {
+      "id": "Q56881445",
+      "name": "Biblioteca dei ragazzi di Intragna",
+      "lat": 46.17744,
+      "lng": 8.70142
+    },
+    {
+      "id": "Q56881546",
+      "name": "Biblioteca dei ragazzi di Loreto",
+      "lat": 45.99659,
+      "lng": 8.94307
+    },
+    {
+      "id": "Q56877195",
+      "name": "Biblioteca dei ragazzi di Lugano",
+      "lat": 46.00555,
+      "lng": 8.94217
+    },
+    {
+      "id": "Q56881540",
+      "name": "Biblioteca dei ragazzi di Minusio",
+      "lat": 46.17921,
+      "lng": 8.81609
+    },
+    {
+      "id": "Q56881528",
+      "name": "Biblioteca dei ragazzi di Riazzino",
+      "lat": 46.1759,
+      "lng": 8.896
+    },
+    {
+      "id": "Q56881553",
+      "name": "Biblioteca dei ragazzi di Viganello",
+      "lat": 46.01454,
+      "lng": 8.96806
+    },
+    {
+      "id": "Q56881447",
+      "name": "Biblioteca dei ragazzi Pregassona",
+      "lat": 46.01922,
+      "lng": 8.97282
+    },
+    {
+      "id": "Q56877331",
+      "name": "Biblioteca del Centro di informazione e documentazione statistica CIDS",
+      "lat": 46.17817,
+      "lng": 9.01378
+    },
+    {
+      "id": "Q56887409",
+      "name": "Biblioteca del Centro di produzione della Biblioteca Braille e del libro parlato",
+      "lat": 46.01516,
+      "lng": 8.9522
+    },
+    {
+      "id": "Q56877324",
+      "name": "Biblioteca del Centro di risorse didattiche e digitali",
+      "lat": 46.19436,
+      "lng": 9.01233
+    },
+    {
+      "id": "Q56881442",
+      "name": "Biblioteca del Centro di Studi Bancari",
+      "lat": 46.02784,
+      "lng": 8.93627
+    },
+    {
+      "id": "Q56877312",
+      "name": "Biblioteca del Centro professionale commerciale di Lugano",
+      "lat": 46.00945,
+      "lng": 8.94856
+    },
+    {
+      "id": "Q56877309",
+      "name": "Biblioteca del Centro Professionale di Mendrisio",
+      "lat": 45.862017,
+      "lng": 8.979355
+    },
+    {
+      "id": "Q56877308",
+      "name": "Biblioteca del Centro Professionale di Trevano",
+      "lat": 46.02984,
+      "lng": 8.963
+    },
+    {
+      "id": "Q56877307",
+      "name": "Biblioteca del Centro scolastico per le industrie artistiche",
+      "lat": 46.01839,
+      "lng": 8.96136
+    },
+    {
+      "id": "Q56881440",
+      "name": "Biblioteca del Circolo Culturale Sardo \"Coghinas",
+      "lat": 46.37947,
+      "lng": 8.90978
+    },
+    {
+      "id": "Q56746632",
+      "name": "Biblioteca del Gruppo Genitori del Locarnese",
+      "lat": 46.16162,
+      "lng": 8.79331
+    },
+    {
+      "id": "Q56877190",
+      "name": "Biblioteca del Liceo Cantonale di Bellinzona",
+      "lat": 46.19662,
+      "lng": 9.01396
+    },
+    {
+      "id": "Q56877189",
+      "name": "Biblioteca del Liceo cantonale Locarno",
+      "lat": 46.16306,
+      "lng": 8.78783
+    },
+    {
+      "id": "Q56877188",
+      "name": "Biblioteca del Liceo cantonale Lugano 1",
+      "lat": 46.00523,
+      "lng": 8.96024
+    },
+    {
+      "id": "Q56877186",
+      "name": "Biblioteca del Liceo cantonale Lugano 2",
+      "lat": 46.004726,
+      "lng": 8.946744
+    },
+    {
+      "id": "Q56887421",
+      "name": "Biblioteca del Museo delle Culture",
+      "lat": 45.99644,
+      "lng": 8.94658
+    },
+    {
+      "id": "Q56881437",
+      "name": "Biblioteca del Santuario della Madonna del Sasso",
+      "lat": 46.17535,
+      "lng": 8.79344
+    },
+    {
+      "id": "Q56881434",
+      "name": "Biblioteca del Tribunale d'appello",
+      "lat": 46.00695,
+      "lng": 8.95277
+    },
+    {
+      "id": "Q56881044",
+      "name": "Biblioteca dell'Alliance Française de Locarno",
+      "lat": 46.167282,
+      "lng": 8.799767
+    },
+    {
+      "id": "Q56881041",
+      "name": "Biblioteca dell'Istituto Comunale di Stabio",
+      "lat": 45.85488,
+      "lng": 8.93875
+    },
+    {
+      "id": "Q56881036",
+      "name": "Biblioteca dell'Istituto scolastico di Coldrerio",
+      "lat": 45.856207,
+      "lng": 8.987562
+    },
+    {
+      "id": "Q56880999",
+      "name": "Biblioteca dell'Istituto Universitario Federale per la Formazione Professionale",
+      "lat": 46.01075,
+      "lng": 8.937
+    },
+    {
+      "id": "Q56881431",
+      "name": "Biblioteca della Croce Rossa Svizzera",
+      "lat": 46.0156,
+      "lng": 8.9571
+    },
+    {
+      "id": "Q56881428",
+      "name": "Biblioteca della pieve \"Segnalibro",
+      "lat": 46.066128,
+      "lng": 8.956684
+    },
+    {
+      "id": "Q56877408",
+      "name": "Biblioteca della Residenza Rivabella",
+      "lat": 45.98383,
+      "lng": 8.8928
+    },
+    {
+      "id": "Q56881219",
+      "name": "Biblioteca della Scuola Media di Acquarossa",
+      "lat": 46.45891,
+      "lng": 8.93556
+    },
+    {
+      "id": "Q56881216",
+      "name": "Biblioteca della Scuola Media di Agno",
+      "lat": 46.00744,
+      "lng": 8.90581
+    },
+    {
+      "id": "Q56881210",
+      "name": "Biblioteca della Scuola Media di Ambrì",
+      "lat": 46.50999,
+      "lng": 8.68782
+    },
+    {
+      "id": "Q56881207",
+      "name": "Biblioteca della Scuola Media di Balerna",
+      "lat": 45.84812,
+      "lng": 9.00905
+    },
+    {
+      "id": "Q56881205",
+      "name": "Biblioteca della Scuola Media di Barbengo",
+      "lat": 45.958027,
+      "lng": 8.917085
+    },
+    {
+      "id": "Q56881201",
+      "name": "Biblioteca della Scuola Media di Bedigliora",
+      "lat": 46.00605,
+      "lng": 8.8473
+    },
+    {
+      "id": "Q56881199",
+      "name": "Biblioteca della Scuola Media di Bellinzona 1",
+      "lat": 46.19655,
+      "lng": 9.01936
+    },
+    {
+      "id": "Q56881196",
+      "name": "Biblioteca della Scuola Media di Bellinzona 2",
+      "lat": 46.207171,
+      "lng": 9.035063
+    },
+    {
+      "id": "Q56881192",
+      "name": "Biblioteca della Scuola Media di Biasca",
+      "lat": 46.35097,
+      "lng": 8.96936
+    },
+    {
+      "id": "Q56881191",
+      "name": "Biblioteca della Scuola Media di Breganzona",
+      "lat": 46.01093,
+      "lng": 8.93111
+    },
+    {
+      "id": "Q56881188",
+      "name": "Biblioteca della Scuola Media di Cadenazzo",
+      "lat": 46.15099,
+      "lng": 8.94186
+    },
+    {
+      "id": "Q56881186",
+      "name": "Biblioteca della Scuola Media di Camignolo",
+      "lat": 46.1098,
+      "lng": 8.93661
+    },
+    {
+      "id": "Q56881183",
+      "name": "Biblioteca della Scuola Media di Canobbio",
+      "lat": 46.03172,
+      "lng": 8.96349
+    },
+    {
+      "id": "Q56881182",
+      "name": "Biblioteca della Scuola Media di Castione",
+      "lat": 46.2262,
+      "lng": 9.04977
+    },
+    {
+      "id": "Q56881181",
+      "name": "Biblioteca della Scuola Media di Cevio",
+      "lat": 46.32081,
+      "lng": 8.60324
+    },
+    {
+      "id": "Q56881180",
+      "name": "Biblioteca della Scuola Media di Chiasso",
+      "lat": 45.837166,
+      "lng": 9.027637
+    },
+    {
+      "id": "Q56881179",
+      "name": "Biblioteca della Scuola Media di Giornico-Faido",
+      "lat": 46.40263,
+      "lng": 8.87039
+    },
+    {
+      "id": "Q56881178",
+      "name": "Biblioteca della Scuola Media di Giubiasco",
+      "lat": 46.17915,
+      "lng": 9.01989
+    },
+    {
+      "id": "Q56881176",
+      "name": "Biblioteca della Scuola Media di Gordola",
+      "lat": 46.17319,
+      "lng": 8.86413
+    },
+    {
+      "id": "Q56881174",
+      "name": "Biblioteca della Scuola Media di Gravesano",
+      "lat": 46.04087,
+      "lng": 8.91715
+    },
+    {
+      "id": "Q56881171",
+      "name": "Biblioteca della Scuola Media di Locarno 1",
+      "lat": 46.16369,
+      "lng": 8.79493
+    },
+    {
+      "id": "Q56881087",
+      "name": "Biblioteca della Scuola Media di Locarno 2",
+      "lat": 46.16288,
+      "lng": 8.78658
+    },
+    {
+      "id": "Q56881080",
+      "name": "Biblioteca della Scuola Media di Lugano 1",
+      "lat": 46.00523,
+      "lng": 8.96029
+    },
+    {
+      "id": "Q56881079",
+      "name": "Biblioteca della Scuola Media di Lugano 2",
+      "lat": 46.00791,
+      "lng": 8.94323
+    },
+    {
+      "id": "Q56881077",
+      "name": "Biblioteca della Scuola Media di Massagno",
+      "lat": 46.01335,
+      "lng": 8.94119
+    },
+    {
+      "id": "Q56881075",
+      "name": "Biblioteca della Scuola Media di Mendrisio",
+      "lat": 45.86333,
+      "lng": 8.98025
+    },
+    {
+      "id": "Q56881070",
+      "name": "Biblioteca della Scuola Media di Minusio",
+      "lat": 46.17667,
+      "lng": 8.82457
+    },
+    {
+      "id": "Q56881068",
+      "name": "Biblioteca della Scuola Media di Morbio Inferiore",
+      "lat": 45.84537,
+      "lng": 9.02445
+    },
+    {
+      "id": "Q56881066",
+      "name": "Biblioteca della Scuola Media di Pregassona",
+      "lat": 46.0262,
+      "lng": 8.97035
+    },
+    {
+      "id": "Q56881064",
+      "name": "Biblioteca della Scuola Media di Riva San Vitale",
+      "lat": 45.90383,
+      "lng": 8.97338
+    },
+    {
+      "id": "Q56881063",
+      "name": "Biblioteca della Scuola Media di Stabio",
+      "lat": 45.85585,
+      "lng": 8.94174
+    },
+    {
+      "id": "Q56881062",
+      "name": "Biblioteca della Scuola Media di Tesserete",
+      "lat": 46.06914,
+      "lng": 8.96532
+    },
+    {
+      "id": "Q56881058",
+      "name": "Biblioteca della Scuola Media di Viganello",
+      "lat": 46.0144,
+      "lng": 8.96178
+    },
+    {
+      "id": "Q56881056",
+      "name": "Biblioteca della Scuola Media Lodrino",
+      "lat": 46.29619,
+      "lng": 8.98144
+    },
+    {
+      "id": "Q56881053",
+      "name": "Biblioteca della Scuola specializzata per le professioni sanitarie e sociali",
+      "lat": 46.03172,
+      "lng": 8.96349
+    },
+    {
+      "id": "Q56881051",
+      "name": "Biblioteca della Scuola specializzata superiore in cure infermieristiche di Bellinzona",
+      "lat": 46.197371,
+      "lng": 9.026899
+    },
+    {
+      "id": "Q56881049",
+      "name": "Biblioteca della Scuola specializzata superiore in cure infermieristiche di Lugano",
+      "lat": 46.003749,
+      "lng": 8.944162
+    },
+    {
+      "id": "Q56881018",
+      "name": "Biblioteca dello Sport",
+      "lat": 46.003597,
+      "lng": 8.951197
+    },
+    {
+      "id": "Q56881017",
+      "name": "Biblioteca Il Gatto",
+      "lat": 46.06694,
+      "lng": 8.973619
+    },
+    {
+      "id": "Q56881015",
+      "name": "Biblioteca interculturale della Svizzera italiana - sede di Bellinzona",
+      "lat": 46.19123,
+      "lng": 9.02414
+    },
+    {
+      "id": "Q56881012",
+      "name": "Biblioteca interculturale della Svizzera italiana - sede di Lugano",
+      "lat": 46.01563,
+      "lng": 8.95492
+    },
+    {
+      "id": "Q56881009",
+      "name": "Biblioteca interculturale per la prima infanzia `Ricciogiramondo`",
+      "lat": 46.01319,
+      "lng": 8.95464
+    },
+    {
+      "id": "Q56881005",
+      "name": "Biblioteca Isone-Medeglia",
+      "lat": 46.12801,
+      "lng": 8.98379
+    },
+    {
+      "id": "Q56880995",
+      "name": "Biblioteca Mondan",
+      "lat": 46.235603,
+      "lng": 9.131456
+    },
+    {
+      "id": "Q56880988",
+      "name": "Biblioteca per ragazzi 'il Pirocchietto'",
+      "lat": 46.23324,
+      "lng": 8.729674
+    },
+    {
+      "id": "Q56880992",
+      "name": "Biblioteca per ragazzi di Agno",
+      "lat": 45.99839,
+      "lng": 8.89802
+    },
+    {
+      "id": "Q56880990",
+      "name": "Biblioteca per ragazzi di Comano",
+      "lat": 46.03629,
+      "lng": 8.95497
+    },
+    {
+      "id": "Q56880993",
+      "name": "Biblioteca per ragazzi di Gordevio",
+      "lat": 46.22392,
+      "lng": 8.74405
+    },
+    {
+      "id": "Q56877414",
+      "name": "Biblioteca pubblica di diritto",
+      "lat": 46.1912,
+      "lng": 9.02038
+    },
+    {
+      "id": "Q56875707",
+      "name": "Biblioteca regionale della regione Mesolcina",
+      "lat": 46.367556,
+      "lng": 9.222827
+    },
+    {
+      "id": "Q56877413",
+      "name": "Biblioteca regionale di Alto Malcantone",
+      "lat": 46.024479,
+      "lng": 8.935049
+    },
+    {
+      "id": "Q27484968",
+      "name": "Biblioteca Salita dei frati Lugano",
+      "lat": 46.00829,
+      "lng": 8.94918
+    },
+    {
+      "id": "Q56877396",
+      "name": "Biblioteca SCILA de Lengua Española",
+      "lat": 46.00547,
+      "lng": 8.96123
+    },
+    {
+      "id": "Q56877392",
+      "name": "Biblioteca scolastica e comunale di Airolo",
+      "lat": 46.528525,
+      "lng": 8.6116
+    },
+    {
+      "id": "Q56877390",
+      "name": "Biblioteca SUPSI del Dipartimento ambiente, costruzioni e design",
+      "lat": 46.02689,
+      "lng": 8.9613
+    },
+    {
+      "id": "Q56877389",
+      "name": "Biblioteca SUPSI del Dipartimento economia aziendale, sanità e sociale",
+      "lat": 46.035886,
+      "lng": 8.926865
+    },
+    {
+      "id": "Q56877388",
+      "name": "Biblioteca SUPSI del Dipartimento economia aziendale, sanità e sociale di Manno",
+      "lat": 46.029973,
+      "lng": 8.920525
+    },
+    {
+      "id": "Q56877387",
+      "name": "Biblioteca SUPSI del Dipartimento scienze aziendali e sociali",
+      "lat": 46.030087,
+      "lng": 8.920519
+    },
+    {
+      "id": "Q56877385",
+      "name": "Biblioteca SUPSI del Dipartimento tecnologie innovative",
+      "lat": 46.011478,
+      "lng": 8.960635
+    },
+    {
+      "id": "Q56877382",
+      "name": "Biblioteca Surgôt",
+      "lat": 46.46797,
+      "lng": 9.65099
+    },
+    {
+      "id": "Q27484979",
+      "name": "Biblioteca universitaria di Lugano",
+      "lat": 46.01139,
+      "lng": 8.9569
+    },
+    {
+      "id": "Q56877373",
+      "name": "Biblioteca Vagabonda",
+      "lat": 46.0095,
+      "lng": 8.95334
+    },
+    {
+      "id": "Q107148971",
+      "name": "Bibliothek Andreas Züst",
+      "lat": 47.410138,
+      "lng": 9.535966
+    },
+    {
+      "id": "Q107145685",
+      "name": "Bibliothek Breitenrain mit Ludothek",
+      "lat": 46.959171,
+      "lng": 7.455033
+    },
+    {
+      "id": "Q107145774",
+      "name": "Bibliothek Bümpliz",
+      "lat": 46.941145,
+      "lng": 7.39278
+    },
+    {
+      "id": "Q68330072",
+      "name": "Bibliothek Christkatholische Theologie - Universitätsbibliothek Bern",
+      "lat": 46.954921,
+      "lng": 7.429944
+    },
+    {
+      "id": "Q68330077",
+      "name": "Bibliothek Departement für Chemie und Biochemie - Universitätsbibliothek Bern",
+      "lat": 46.954921,
+      "lng": 7.429879
+    },
+    {
+      "id": "Q27481290",
+      "name": "Bibliothek der G.T. Mandl-Stiftung",
+      "lat": 47.064385,
+      "lng": 9.058498
+    },
+    {
+      "id": "Q27483801",
+      "name": "Bibliothek des Bundesgerichts",
+      "lat": 46.519787,
+      "lng": 6.646896
+    },
+    {
+      "id": "Q29522222",
+      "name": "Bibliothek des Kapuzinerklosters auf dem Wesemlin",
+      "lat": 47.06162,
+      "lng": 8.31334
+    },
+    {
+      "id": "Q27483337",
+      "name": "Bibliothek des Konservatoriums Lausanne",
+      "lat": 46.51874,
+      "lng": 6.63304
+    },
+    {
+      "id": "Q137823040",
+      "name": "Bibliothek des Kunstmuseums Basel mit Kunsthistorischem Seminar der Universität Basel",
+      "lat": 47.5541,
+      "lng": 7.5934
+    },
+    {
+      "id": "Q27483578",
+      "name": "Bibliothek des Medizinhistorischen Instituts der Universität Lausanne",
+      "lat": 46.5269,
+      "lng": 6.641
+    },
+    {
+      "id": "Q68330080",
+      "name": "Bibliothek Evangelische Theologie - Universitätsbibliothek Bern",
+      "lat": 46.954921,
+      "lng": 7.429879
+    },
+    {
+      "id": "Q107145798",
+      "name": "Bibliothek Gäbelbach",
+      "lat": 46.948453,
+      "lng": 7.376742
+    },
+    {
+      "id": "Q68330089",
+      "name": "Bibliothek Germanistik - Universitätsbibliothek Bern",
+      "lat": 46.954678,
+      "lng": 7.430428
+    },
+    {
+      "id": "Q107146615",
+      "name": "Bibliothek Holligen",
+      "lat": 46.947518,
+      "lng": 7.415197
+    },
+    {
+      "id": "Q118669483",
+      "name": "Bibliothek HSLU - Campus Zug-Rotkreuz",
+      "lat": 47.143741,
+      "lng": 8.435377
+    },
+    {
+      "id": "Q118669482",
+      "name": "Bibliothek HSLU - Design Film Kunst",
+      "lat": 47.07159,
+      "lng": 8.277611
+    },
+    {
+      "id": "Q118669484",
+      "name": "Bibliothek HSLU - Musik",
+      "lat": 47.033282,
+      "lng": 8.296855
+    },
+    {
+      "id": "Q118669486",
+      "name": "Bibliothek HSLU - Technik & Architektur",
+      "lat": 47.014258,
+      "lng": 8.305273
+    },
+    {
+      "id": "Q118669487",
+      "name": "Bibliothek HSLU - Wirtschaft",
+      "lat": 47.049065,
+      "lng": 8.308551
+    },
+    {
+      "id": "Q107145603",
+      "name": "Bibliothek im Berner GenerationenHaus",
+      "lat": 46.94803,
+      "lng": 7.439681
+    },
+    {
+      "id": "Q29933277",
+      "name": "Bibliothek in Münzkabinett und Antikensammlung der Stadt Winterthur",
+      "lat": 47.50308,
+      "lng": 8.73104
+    },
+    {
+      "id": "Q68330268",
+      "name": "Bibliothek Klassische Philologie und antike Philosophie - Universitätsbibliothek Bern",
+      "lat": 46.954696,
+      "lng": 7.43041
+    },
+    {
+      "id": "Q107145838",
+      "name": "Bibliothek Länggasse",
+      "lat": 46.954739,
+      "lng": 7.434916
+    },
+    {
+      "id": "Q68330273",
+      "name": "Bibliothek Lerchenweg - Universitätsbibliothek Bern",
+      "lat": 46.954696,
+      "lng": 7.43041
+    },
+    {
+      "id": "Q68330278",
+      "name": "Bibliothek Medizingeschichte - Universitätsbibliothek Bern",
+      "lat": 46.951528,
+      "lng": 7.429839
+    },
+    {
+      "id": "Q107146386",
+      "name": "Bibliothek Muri-Gümligen",
+      "lat": 46.932284,
+      "lng": 7.503194
+    },
+    {
+      "id": "Q68330282",
+      "name": "Bibliothek Musikwissenschaft - Universitätsbibliothek Bern",
+      "lat": 46.950373,
+      "lng": 7.436992
+    },
+    {
+      "id": "Q107146413",
+      "name": "Bibliothek Ostermundigen mit Ludothek",
+      "lat": 46.958134,
+      "lng": 7.490781
+    },
+    {
+      "id": "Q107146505",
+      "name": "Bibliothek Rossfeld",
+      "lat": 46.975384,
+      "lng": 7.451179
+    },
+    {
+      "id": "Q137774347",
+      "name": "Bibliothek Schlieren",
+      "lat": 47.398815,
+      "lng": 8.448351
+    },
+    {
+      "id": "Q107146721",
+      "name": "Bibliothek Tscharnergut",
+      "lat": 46.948251,
+      "lng": 7.389697
+    },
+    {
+      "id": "Q113977165",
+      "name": "Bibliothek und Archiv Aargau",
+      "lat": 47.389722,
+      "lng": 8.045
+    },
+    {
+      "id": "Q107146819",
+      "name": "Bibliothek Urtenen-Schönbühl",
+      "lat": 47.02065,
+      "lng": 7.4987
+    },
+    {
+      "id": "Q132854104",
+      "name": "Bibliothek Veltheim",
+      "lat": 47.509297,
+      "lng": 8.716
+    },
+    {
+      "id": "Q68330059",
+      "name": "Bibliothek Vorderasiatische Archäologie und altorientalische Sprachen - Universitätsbibliothek Bern",
+      "lat": 46.955742,
+      "lng": 7.435639
+    },
+    {
+      "id": "Q27481084",
+      "name": "Bibliotheken der Internationalen Arbeitsorganisation",
+      "lat": 46.22933,
+      "lng": 6.13434
+    },
+    {
+      "id": "Q56887338",
+      "name": "bibliothèque communale de Castelrotto",
+      "lat": 45.988535,
+      "lng": 8.841786
+    },
+    {
+      "id": "Q18031152",
+      "name": "Bibliothèque d'art et d'archéologie",
+      "lat": 46.198421,
+      "lng": 6.150841
+    },
+    {
+      "id": "Q131937750",
+      "name": "Bibliothèque de Bevaix",
+      "lat": 46.930631,
+      "lng": 6.812855
+    },
+    {
+      "id": "Q112760254",
+      "name": "Bibliothèque de Concise",
+      "lat": 46.8513,
+      "lng": 6.71817
+    },
+    {
+      "id": "Q117336487",
+      "name": "Bibliothèque de Crans-Montana",
+      "lat": 46.304409,
+      "lng": 7.469105
+    },
+    {
+      "id": "Q131937745",
+      "name": "Bibliothèque de jeunes",
+      "lat": 47.365269,
+      "lng": 7.342951
+    },
+    {
+      "id": "Q121433274",
+      "name": "Bibliothèque de la Cité",
+      "lat": 46.202922,
+      "lng": 6.145348
+    },
+    {
+      "id": "Q29785925",
+      "name": "Bibliothèque de la ville de La Chaux-de-Fonds",
+      "lat": 47.1043,
+      "lng": 6.82631
+    },
+    {
+      "id": "Q131937742",
+      "name": "Bibliothèque des adultes",
+      "lat": 47.364902,
+      "lng": 7.341134
+    },
+    {
+      "id": "Q117336382",
+      "name": "Bibliothèque des arts et métiers",
+      "lat": 46.808404,
+      "lng": 7.156676
+    },
+    {
+      "id": "Q125776194",
+      "name": "bibliothèque Des Femmes*",
+      "lat": 46.515957,
+      "lng": 6.640582
+    },
+    {
+      "id": "Q110242809",
+      "name": "Bibliothèque des jeunes de La Chaux-de-Fonds",
+      "lat": 47.105108,
+      "lng": 6.833379
+    },
+    {
+      "id": "Q131937746",
+      "name": "Bibliothèque des jeunes et ludothèque",
+      "lat": 47.416161,
+      "lng": 7.077267
+    },
+    {
+      "id": "Q27485315",
+      "name": "Bibliothèque des Pasteurs de Neuchâtel",
+      "lat": 46.99483,
+      "lng": 6.93555
+    },
+    {
+      "id": "Q27481180",
+      "name": "Bibliothèque du Conservatoire de Musique",
+      "lat": 46.200881,
+      "lng": 6.142489
+    },
+    {
+      "id": "Q29700225",
+      "name": "Bibliothèque Institut d'histoire de la Réformation - Musée Historique de la Réformation",
+      "lat": 46.20147,
+      "lng": 6.14823
+    },
+    {
+      "id": "Q131937748",
+      "name": "Bibliothèque municipale",
+      "lat": 47.417026,
+      "lng": 7.075945
+    },
+    {
+      "id": "Q27485190",
+      "name": "bibliothèque municipale de Morges",
+      "lat": 46.508686,
+      "lng": 6.499329
+    },
+    {
+      "id": "Q2901532",
+      "name": "bibliothèque sonore romande",
+      "lat": 46.5217,
+      "lng": 6.62855
+    },
+    {
+      "id": "Q56877367",
+      "name": "Bisbiglioteca",
+      "lat": 46.25352,
+      "lng": 9.02248
+    },
+    {
+      "id": "Q56877358",
+      "name": "Blesdel Biblioteca di lingua spagnola",
+      "lat": 46.00702,
+      "lng": 8.96893
+    },
+    {
+      "id": "Q884254",
+      "name": "Blindenleihbibliothek am Goetheanum",
+      "lat": 47.486312,
+      "lng": 7.619793
+    },
+    {
+      "id": "Q47459130",
+      "name": "Bodmer Library",
+      "lat": 46.215278,
+      "lng": 6.180556
+    },
+    {
+      "id": "Q56877351",
+      "name": "Book Nook - Ticino's English Library",
+      "lat": 46.00975,
+      "lng": 8.96862
+    },
+    {
+      "id": "Q130359207",
+      "name": "Bücherraum f",
+      "lat": 47.415102,
+      "lng": 8.5445
+    },
+    {
+      "id": "Q669509",
+      "name": "Burgerbibliothek of Berne",
+      "lat": 46.9473,
+      "lng": 7.4483
+    },
+    {
+      "id": "Q14956907",
+      "name": "Canton Hospital Basel-Land",
+      "lat": 47.488,
+      "lng": 7.73116
+    },
+    {
+      "id": "Q1440938",
+      "name": "Canton Thurgau library (collection)",
+      "lat": 47.556219,
+      "lng": 8.899439
+    },
+    {
+      "id": "Q29479079",
+      "name": "Cantonal and University Library of Fribourg (collection)",
+      "lat": 46.8067,
+      "lng": 7.15591
+    },
+    {
+      "id": "Q676831",
+      "name": "Cantonal library and library of the university of Lausanne",
+      "lat": 46.5228,
+      "lng": 6.5795
+    },
+    {
+      "id": "Q56229861",
+      "name": "Cantonal library collections (collection)",
+      "lat": 46.00424,
+      "lng": 8.95965
+    },
+    {
+      "id": "Q27484692",
+      "name": "Cantonal library Locarno",
+      "lat": 46.17078,
+      "lng": 8.79492
+    },
+    {
+      "id": "Q678331",
+      "name": "cantonal library Lugano",
+      "lat": 46.0043,
+      "lng": 8.95955
+    },
+    {
+      "id": "Q1434830",
+      "name": "Cantonal Library Nidwalden",
+      "lat": 46.9566,
+      "lng": 8.36982
+    },
+    {
+      "id": "Q1728093",
+      "name": "Cantonal Library Obwalden",
+      "lat": 46.89389,
+      "lng": 8.24824
+    },
+    {
+      "id": "Q539405",
+      "name": "Cantonal library of Appenzell Ausserrhoden",
+      "lat": 47.40833,
+      "lng": 9.46434
+    },
+    {
+      "id": "Q1664073",
+      "name": "Cantonal Library of Appenzell Innerrhoden",
+      "lat": 47.3312,
+      "lng": 9.40958
+    },
+    {
+      "id": "Q3639627",
+      "name": "Cantonal Library of Bellinzona",
+      "lat": 46.19326,
+      "lng": 9.012096
+    },
+    {
+      "id": "Q1713820",
+      "name": "cantonal library of Jura",
+      "lat": 47.417347,
+      "lng": 7.074156
+    },
+    {
+      "id": "Q1728087",
+      "name": "Cantonal library of the Basel-Landschaft",
+      "lat": 47.4857,
+      "lng": 7.73047
+    },
+    {
+      "id": "Q29785474",
+      "name": "cantonal library of the Jura, special archives",
+      "lat": 47.41577,
+      "lng": 7.0746
+    },
+    {
+      "id": "Q1343432",
+      "name": "Cantonal library Schwyz",
+      "lat": 47.0218,
+      "lng": 8.65586
+    },
+    {
+      "id": "Q915353",
+      "name": "Cantonal Library St. Gallen Vadiana",
+      "lat": 47.42935,
+      "lng": 9.38193
+    },
+    {
+      "id": "Q20652389",
+      "name": "Cantonal Library Uri",
+      "lat": 46.881,
+      "lng": 8.641417
+    },
+    {
+      "id": "Q3329515",
+      "name": "Cantonal Museum of Natural History",
+      "lat": 46.00414,
+      "lng": 8.96036
+    },
+    {
+      "id": "Q2901416",
+      "name": "Castle Library",
+      "lat": 46.57465,
+      "lng": 6.83746
+    },
+    {
+      "id": "Q68330333",
+      "name": "Center of Historical Collections - University Bern",
+      "lat": 46.950382,
+      "lng": 7.436861
+    },
+    {
+      "id": "Q28500438",
+      "name": "Centre BD de la Ville de Lausanne",
+      "lat": 46.52542,
+      "lng": 6.62438
+    },
+    {
+      "id": "Q2296824",
+      "name": "Centre de documentation et d'étude sur la langue internationale",
+      "lat": 47.1042,
+      "lng": 6.82634
+    },
+    {
+      "id": "Q68330272",
+      "name": "Centre for University Continuing Education Library - University Bern",
+      "lat": 46.950157,
+      "lng": 7.435791
+    },
+    {
+      "id": "Q670848",
+      "name": "Centre international de recherches sur l'anarchisme",
+      "lat": 46.5263,
+      "lng": 6.6454
+    },
+    {
+      "id": "Q85727087",
+      "name": "Centro de Recursos de Berna",
+      "lat": 46.940081,
+      "lng": 7.45258
+    },
+    {
+      "id": "Q3664826",
+      "name": "Centro di dialettologia e di etnografia",
+      "lat": 46.19309,
+      "lng": 9.01245
+    },
+    {
+      "id": "Q56877345",
+      "name": "Centro di documentazione del Dipartimento formazione e apprendimento",
+      "lat": 46.16743,
+      "lng": 8.79169
+    },
+    {
+      "id": "Q56877341",
+      "name": "Centro di documentazione del Servizio di promozione e di valutazione sanitaria",
+      "lat": 46.19184,
+      "lng": 9.01993
+    },
+    {
+      "id": "Q56877337",
+      "name": "Centro di documentazione e ricerca dell'Organizzazione sociopsichiatrica cantonale",
+      "lat": 45.86252,
+      "lng": 8.97489
+    },
+    {
+      "id": "Q27479875",
+      "name": "Ciäsa Granda Muesum",
+      "lat": 46.34294,
+      "lng": 9.59015
+    },
+    {
+      "id": "Q130712552",
+      "name": "City Library of Thun",
+      "lat": 46.756047,
+      "lng": 7.629687
+    },
+    {
+      "id": "Q17322888",
+      "name": "Cooperative Storage Library Switzerland",
+      "lat": 47.214269,
+      "lng": 8.087774
+    },
+    {
+      "id": "Q96197496",
+      "name": "corona-memory.ch",
+      "lat": 46.95578,
+      "lng": 7.4356
+    },
+    {
+      "id": "Q131399271",
+      "name": "CREPA Documentation Centre",
+      "lat": 46.078666,
+      "lng": 7.149478
+    },
+    {
+      "id": "Q27487301",
+      "name": "documentation center of the municipality of Riehen",
+      "lat": 47.584684,
+      "lng": 7.651414
+    },
+    {
+      "id": "Q15806227",
+      "name": "doku-zug.ch",
+      "lat": 47.16479,
+      "lng": 8.51507
+    },
+    {
+      "id": "Q27489824",
+      "name": "Dominikanerinnenkloster St. Katharina, Bibliothek",
+      "lat": 47.464844,
+      "lng": 9.050206
+    },
+    {
+      "id": "Q1273325",
+      "name": "e-rara.ch",
+      "lat": 47.376563,
+      "lng": 8.547585
+    },
+    {
+      "id": "Q106411923",
+      "name": "Eastern Switzerland University of Applied Sciences",
+      "lat": 47.422719,
+      "lng": 9.367511
+    },
+    {
+      "id": "Q55503918",
+      "name": "Eawag-Empa-Bibliothek",
+      "lat": 47.40483,
+      "lng": 8.609666
+    },
+    {
+      "id": "Q27483289",
+      "name": "Edouard Fleuret Library",
+      "lat": 46.522656,
+      "lng": 6.583527
+    },
+    {
+      "id": "Q125072234",
+      "name": "Einsiedeln Abbey",
+      "lat": 47.126667,
+      "lng": 8.751389
+    },
+    {
+      "id": "Q68330065",
+      "name": "English Department Library, University of Berne",
+      "lat": 46.954407,
+      "lng": 7.430375
+    },
+    {
+      "id": "Q27480131",
+      "name": "EPFL library",
+      "lat": 46.518333,
+      "lng": 6.568333
+    },
+    {
+      "id": "Q131937743",
+      "name": "Espace Renfer",
+      "lat": 47.417179,
+      "lng": 7.074325
+    },
+    {
+      "id": "Q684773",
+      "name": "ETH Library",
+      "lat": 47.376389,
+      "lng": 8.547778
+    },
+    {
+      "id": "Q107195551",
+      "name": "Fermento Anarchistische Bibliothek",
+      "lat": 47.372756,
+      "lng": 8.524921
+    },
+    {
+      "id": "Q131937744",
+      "name": "Fondation des Archives de l'ancien évêché de Bâle",
+      "lat": 47.415705,
+      "lng": 7.074836
+    },
+    {
+      "id": "Q56875822",
+      "name": "Fondazione Matasci",
+      "lat": 46.17498,
+      "lng": 8.8984
+    },
+    {
+      "id": "Q111747298",
+      "name": "Forschungsbibliothek Pestalozzianum",
+      "lat": 47.377904,
+      "lng": 8.534661
+    },
+    {
+      "id": "Q155336",
+      "name": "Foundation for the historical heritage of SBB",
+      "lat": 47.475401,
+      "lng": 8.205858
+    },
+    {
+      "id": "Q107195409",
+      "name": "Furia",
+      "lat": 46.948571,
+      "lng": 7.389324
+    },
+    {
+      "id": "Q122922502",
+      "name": "Gemeindebibliothek / Ludothek Wohlen",
+      "lat": 46.967841,
+      "lng": 7.378453
+    },
+    {
+      "id": "Q141125135",
+      "name": "Gemeindebibliothek Rosengarten Thalwil",
+      "lat": 47.29337,
+      "lng": 8.563357
+    },
+    {
+      "id": "Q107147023",
+      "name": "Gemeindebibliothek Worb",
+      "lat": 46.929159,
+      "lng": 7.561143
+    },
+    {
+      "id": "Q107147035",
+      "name": "Gemeindebibliothek Zollikofen",
+      "lat": 46.998464,
+      "lng": 7.459464
+    },
+    {
+      "id": "Q679689",
+      "name": "Geneva Library",
+      "lat": 46.198902,
+      "lng": 6.145301
+    },
+    {
+      "id": "Q68330084",
+      "name": "Geography Library - University Bern",
+      "lat": 46.953184,
+      "lng": 7.43514
+    },
+    {
+      "id": "Q1485494",
+      "name": "GGG Stadtbibliothek Basel (institution)",
+      "lat": 47.557181,
+      "lng": 7.5875
+    },
+    {
+      "id": "Q27480027",
+      "name": "Goetheanum archives",
+      "lat": 47.48603,
+      "lng": 7.62045
+    },
+    {
+      "id": "Q27488972",
+      "name": "Hauptbibliothek der Universität St. Gallen",
+      "lat": 47.433033,
+      "lng": 9.375182
+    },
+    {
+      "id": "Q131763782",
+      "name": "HfH-Bibliothek",
+      "lat": 47.403505,
+      "lng": 8.54713
+    },
+    {
+      "id": "Q2901436",
+      "name": "historical collection of the municipal library of Rolle",
+      "lat": 46.45861,
+      "lng": 6.34144
+    },
+    {
+      "id": "Q23783957",
+      "name": "Historische Bibliothek der Schweizerischen Pharmazie",
+      "lat": 46.951393,
+      "lng": 7.429896
+    },
+    {
+      "id": "Q107145398",
+      "name": "Infoladen Bern",
+      "lat": 46.952943,
+      "lng": 7.440284
+    },
+    {
+      "id": "Q107195305",
+      "name": "Infoladen Magazin",
+      "lat": 47.5772,
+      "lng": 7.591181
+    },
+    {
+      "id": "Q64021635",
+      "name": "Institut de recherche et de documentation de l'île de Quisqueya",
+      "lat": 46.200987,
+      "lng": 6.138582
+    },
+    {
+      "id": "Q27479961",
+      "name": "Institute of Architecture of the University of Geneva (IAUG) archives and library",
+      "lat": 46.188894,
+      "lng": 6.129895
+    },
+    {
+      "id": "Q31842442",
+      "name": "Interfakultäre Bibliothek für Geschichte und Theologie",
+      "lat": 46.806389,
+      "lng": 7.152917
+    },
+    {
+      "id": "Q99499481",
+      "name": "International Committee of the Red Cross Library",
+      "lat": 46.227865,
+      "lng": 6.137265
+    },
+    {
+      "id": "Q27481109",
+      "name": "International Labour Office",
+      "lat": 46.22935,
+      "lng": 6.13436
+    },
+    {
+      "id": "Q1312689",
+      "name": "Iron Library",
+      "lat": 47.684418,
+      "lng": 8.675844
+    },
+    {
+      "id": "Q50180387",
+      "name": "Jan Michalski Foundation",
+      "lat": 46.607929,
+      "lng": 6.377537
+    },
+    {
+      "id": "Q3075474",
+      "name": "Jean Monnet Foundation for Europe",
+      "lat": 46.52399,
+      "lng": 6.58237
+    },
+    {
+      "id": "Q27480002",
+      "name": "Jean-Marie Boursicot S.A. cinematheque",
+      "lat": 46.55418,
+      "lng": 6.57992
+    },
+    {
+      "id": "Q27481080",
+      "name": "Jewish library of Geneva \"Gérard Nordmann\"",
+      "lat": 46.19101,
+      "lng": 6.15647
+    },
+    {
+      "id": "Q68330325",
+      "name": "Juristische Forschungsbibliothek - University Bern",
+      "lat": 46.950294,
+      "lng": 7.43597
+    },
+    {
+      "id": "Q1728089",
+      "name": "Kantonsbibliothek Graubünden",
+      "lat": 46.849522,
+      "lng": 9.533856
+    },
+    {
+      "id": "Q107195625",
+      "name": "Kasama",
+      "lat": 47.378522,
+      "lng": 8.529275
+    },
+    {
+      "id": "Q75302625",
+      "name": "Kathryn and Shelby Cullom Davis Library",
+      "lat": 46.220782,
+      "lng": 6.14359
+    },
+    {
+      "id": "Q27490247",
+      "name": "Keystone Press AG",
+      "lat": 47.361164,
+      "lng": 8.512511
+    },
+    {
+      "id": "Q1784554",
+      "name": "Kornhausbibliotheken Bern",
+      "lat": 46.94883,
+      "lng": 7.447287
+    },
+    {
+      "id": "Q27481082",
+      "name": "La Musicale",
+      "lat": 46.20104,
+      "lng": 6.14164
+    },
+    {
+      "id": "Q56877193",
+      "name": "La soffitta di Nillo",
+      "lat": 46.088089,
+      "lng": 9.045354
+    },
+    {
+      "id": "Q64952252",
+      "name": "LaFilanda",
+      "lat": 45.869667,
+      "lng": 8.990172
+    },
+    {
+      "id": "Q107146362",
+      "name": "Lese- und Spielpavillon Münsterplattform",
+      "lat": 46.946471,
+      "lng": 7.451325
+    },
+    {
+      "id": "Q107146459",
+      "name": "Lesepavillon Rosengarten",
+      "lat": 46.951615,
+      "lng": 7.461036
+    },
+    {
+      "id": "Q1278450",
+      "name": "Lib4RI",
+      "lat": 47.4048,
+      "lng": 8.60967
+    },
+    {
+      "id": "Q68330281",
+      "name": "Library \"Mittelstrasse\" - University Library Bern",
+      "lat": 46.955808,
+      "lng": 7.435764
+    },
+    {
+      "id": "Q856466",
+      "name": "Library am Guisanplatz",
+      "lat": 46.95915,
+      "lng": 7.46293
+    },
+    {
+      "id": "Q68330062",
+      "name": "Library Archeology in the Mediterranean - University Bern",
+      "lat": 46.950346,
+      "lng": 7.436926
+    },
+    {
+      "id": "Q140822264",
+      "name": "Library at the Sprecher House",
+      "lat": 47.00764,
+      "lng": 9.531422
+    },
+    {
+      "id": "Q68319126",
+      "name": "Library for History University Bern",
+      "lat": 46.954342,
+      "lng": 7.430419
+    },
+    {
+      "id": "Q29890987",
+      "name": "Library for Law and Economics",
+      "lat": 46.52265,
+      "lng": 6.583814
+    },
+    {
+      "id": "Q68330304",
+      "name": "Library for Linguistics - University Bern",
+      "lat": 46.954407,
+      "lng": 7.430375
+    },
+    {
+      "id": "Q68330290",
+      "name": "Library for Philosophy - University Bern",
+      "lat": 46.954643,
+      "lng": 7.430465
+    },
+    {
+      "id": "Q68330299",
+      "name": "Library for Public Health & Primary Care Library PHC - University Bern",
+      "lat": 46.955818,
+      "lng": 7.435617
+    },
+    {
+      "id": "Q68330293",
+      "name": "Library for Romance Studies - University Bern",
+      "lat": 46.95466,
+      "lng": 7.430318
+    },
+    {
+      "id": "Q68330297",
+      "name": "Library for Slavic Languages and Literatures - University Bern",
+      "lat": 46.954407,
+      "lng": 7.430375
+    },
+    {
+      "id": "Q68330285",
+      "name": "Library for Sustainable Development - University Bern",
+      "lat": 46.95594,
+      "lng": 7.435622
+    },
+    {
+      "id": "Q56881610",
+      "name": "library in Grono",
+      "lat": 46.24811,
+      "lng": 9.14808
+    },
+    {
+      "id": "Q85848332",
+      "name": "Library in the Botanical Garden",
+      "lat": 47.359136,
+      "lng": 8.560081
+    },
+    {
+      "id": "Q107145814",
+      "name": "Library Ittigen",
+      "lat": 46.974376,
+      "lng": 7.481055
+    },
+    {
+      "id": "Q107145902",
+      "name": "Library Laubegg",
+      "lat": 46.94724,
+      "lng": 7.465465
+    },
+    {
+      "id": "Q107146048",
+      "name": "Library Münchenbuchsee",
+      "lat": 47.020148,
+      "lng": 7.452797
+    },
+    {
+      "id": "Q107146279",
+      "name": "Library Münsingen",
+      "lat": 46.875777,
+      "lng": 7.560465
+    },
+    {
+      "id": "Q68330071",
+      "name": "Library of Business Administration",
+      "lat": 46.954091,
+      "lng": 7.440461
+    },
+    {
+      "id": "Q68330313",
+      "name": "Library of Economics - University Bern",
+      "lat": 46.950057,
+      "lng": 7.435533
+    },
+    {
+      "id": "Q68330083",
+      "name": "Library of Exact Sciences",
+      "lat": 46.951657,
+      "lng": 7.438556
+    },
+    {
+      "id": "Q27490177",
+      "name": "Library of former Kapuzinerkloster St. Anna",
+      "lat": 47.16659,
+      "lng": 8.51736
+    },
+    {
+      "id": "Q68330323",
+      "name": "Library of Law - University Bern",
+      "lat": 46.950423,
+      "lng": 7.438162
+    },
+    {
+      "id": "Q27480245",
+      "name": "Library of the Abbey of Maigrauge (collection)",
+      "lat": 46.79995,
+      "lng": 7.15848
+    },
+    {
+      "id": "Q27488723",
+      "name": "Library of the Abbey of Saint-Maurice d'Agaune",
+      "lat": 46.21912,
+      "lng": 7.00346
+    },
+    {
+      "id": "Q87653595",
+      "name": "Library of the Basel School of Design",
+      "lat": 47.532556,
+      "lng": 7.611222
+    },
+    {
+      "id": "Q27480022",
+      "name": "Library of the Benedictine Monastery of Disentis",
+      "lat": 46.70671,
+      "lng": 8.85569
+    },
+    {
+      "id": "Q29890656",
+      "name": "library of the cantonal archives of the canton of Vaud",
+      "lat": 46.5256,
+      "lng": 6.5783
+    },
+    {
+      "id": "Q27488725",
+      "name": "library of the capuchin convent of Saint-Maurice",
+      "lat": 46.2196,
+      "lng": 7.00553
+    },
+    {
+      "id": "Q29890902",
+      "name": "library of the castle",
+      "lat": 46.6604,
+      "lng": 6.5143
+    },
+    {
+      "id": "Q29927870",
+      "name": "library of the cathedral chapter of the Cathedral of Sion",
+      "lat": 46.23384,
+      "lng": 7.3597
+    },
+    {
+      "id": "Q29479084",
+      "name": "Library of the Cordeliers convent (collection)",
+      "lat": 46.80768,
+      "lng": 7.16061
+    },
+    {
+      "id": "Q27485150",
+      "name": "library of the European Organization for Nuclear Research CERN, Building 52",
+      "lat": 46.23194,
+      "lng": 6.05403
+    },
+    {
+      "id": "Q137731162",
+      "name": "Library of the Franciscan Convent in Fribourg",
+      "lat": 46.80722,
+      "lng": 7.160755
+    },
+    {
+      "id": "Q29527666",
+      "name": "Library of the hospice of the Great St. Bernard",
+      "lat": 45.86894,
+      "lng": 7.17037
+    },
+    {
+      "id": "Q138351073",
+      "name": "Library of the Institute for the History of Medicine at the University of Lausanne",
+      "lat": 46.526907,
+      "lng": 6.64094
+    },
+    {
+      "id": "Q27490207",
+      "name": "Library of the Israelitische Cultusgemeinde Zürich",
+      "lat": 47.363056,
+      "lng": 8.5325
+    },
+    {
+      "id": "Q138351277",
+      "name": "Library of the Lausanne University of Music and Conservatory",
+      "lat": 46.518733,
+      "lng": 6.633142
+    },
+    {
+      "id": "Q14565345",
+      "name": "library of the Planta foundation",
+      "lat": 46.53436,
+      "lng": 9.8716
+    },
+    {
+      "id": "Q27481266",
+      "name": "Library of the Société de lecture de Genève",
+      "lat": 46.20234,
+      "lng": 6.1451
+    },
+    {
+      "id": "Q131937771",
+      "name": "Library of the University of St. Gallen",
+      "lat": 47.431695,
+      "lng": 9.375638
+    },
+    {
+      "id": "Q68330314",
+      "name": "Library of the World Trade Institute - University Bern",
+      "lat": 46.952434,
+      "lng": 7.435074
+    },
+    {
+      "id": "Q27479818",
+      "name": "library St. Michael Beromünster",
+      "lat": 47.2058,
+      "lng": 8.19031
+    },
+    {
+      "id": "Q856475",
+      "name": "Library Zug",
+      "lat": 47.1645,
+      "lng": 8.51518
+    },
+    {
+      "id": "Q681911",
+      "name": "Light Show / Bern Film Library",
+      "lat": 46.94049,
+      "lng": 7.44218
+    },
+    {
+      "id": "Q111844743",
+      "name": "Literaturhaus & Bibliothek Wyborada",
+      "lat": 47.42048,
+      "lng": 9.366907
+    },
+    {
+      "id": "Q104523679",
+      "name": "LivrÉchange",
+      "lat": 46.80175,
+      "lng": 7.14868
+    },
+    {
+      "id": "Q56881083",
+      "name": "Losone Junior High School Library",
+      "lat": 46.168,
+      "lng": 8.76714
+    },
+    {
+      "id": "Q189926",
+      "name": "Lucerne central and university library",
+      "lat": 47.048333,
+      "lng": 8.3075
+    },
+    {
+      "id": "Q131937774",
+      "name": "Ludothek",
+      "lat": 47.426474,
+      "lng": 9.381504
+    },
+    {
+      "id": "Q137778516",
+      "name": "M. Crist Fleming Library",
+      "lat": 45.981866,
+      "lng": 8.916603
+    },
+    {
+      "id": "Q56875825",
+      "name": "MASI Lugano",
+      "lat": 45.99934,
+      "lng": 8.94807
+    },
+    {
+      "id": "Q961468",
+      "name": "media center Valais Sion",
+      "lat": 46.23123,
+      "lng": 7.35556
+    },
+    {
+      "id": "Q98380085",
+      "name": "Media Library Basel",
+      "lat": 47.533575,
+      "lng": 7.611112
+    },
+    {
+      "id": "Q56876728",
+      "name": "Mediateca del Centro d'Arti e Mestieri",
+      "lat": 46.19072,
+      "lng": 9.0164
+    },
+    {
+      "id": "Q56876726",
+      "name": "Mediateca del Centro Professionale di Biasca",
+      "lat": 46.349111,
+      "lng": 8.969278
+    },
+    {
+      "id": "Q56876724",
+      "name": "Mediateca del Centro Professionale di Locarno",
+      "lat": 46.16504,
+      "lng": 8.79102
+    },
+    {
+      "id": "Q56876722",
+      "name": "Mediateca della Scuola specializzata per le professioni sanitarie e sociali",
+      "lat": 46.17649,
+      "lng": 9.01001
+    },
+    {
+      "id": "Q131937747",
+      "name": "Médiathèque du CIP",
+      "lat": 47.219226,
+      "lng": 7.102024
+    },
+    {
+      "id": "Q124707909",
+      "name": "médiathèque Valais St-Maurice",
+      "lat": 46.21671,
+      "lng": 7.00432
+    },
+    {
+      "id": "Q68330318",
+      "name": "Medical Library - University Bern",
+      "lat": 46.951992,
+      "lng": 7.428581
+    },
+    {
+      "id": "Q118669485",
+      "name": "Mediothek HSLU - Soziale Arbeit",
+      "lat": 47.048022,
+      "lng": 8.314806
+    },
+    {
+      "id": "Q27480201",
+      "name": "Monastic library",
+      "lat": 46.820578,
+      "lng": 8.409202
+    },
+    {
+      "id": "Q27479828",
+      "name": "Municipal Library",
+      "lat": 47.14011,
+      "lng": 7.24874
+    },
+    {
+      "id": "Q27489723",
+      "name": "Municipal Library of Vevey",
+      "lat": 46.45847,
+      "lng": 6.84474
+    },
+    {
+      "id": "Q27487029",
+      "name": "municipal library Olten",
+      "lat": 47.34998,
+      "lng": 7.90406
+    },
+    {
+      "id": "Q110901157",
+      "name": "Münstergasse library",
+      "lat": 46.94735,
+      "lng": 7.44884
+    },
+    {
+      "id": "Q27479764",
+      "name": "Museo Villa dei Cedri",
+      "lat": 46.1846,
+      "lng": 9.02043
+    },
+    {
+      "id": "Q27490270",
+      "name": "Neue Zürcher Zeitung, Redaktionsarchiv",
+      "lat": 47.36505,
+      "lng": 8.54745
+    },
+    {
+      "id": "Q30912983",
+      "name": "Olympic Studies Centre",
+      "lat": 46.50798,
+      "lng": 6.63446
+    },
+    {
+      "id": "Q29933182",
+      "name": "Paul Kläui-Bibliothek",
+      "lat": 47.3496,
+      "lng": 8.71344
+    },
+    {
+      "id": "Q2073008",
+      "name": "Pestalozzi Library Zurich",
+      "lat": 47.3748,
+      "lng": 8.54448
+    },
+    {
+      "id": "Q131937772",
+      "name": "PHSG - Standort St. Gallen",
+      "lat": 47.430284,
+      "lng": 9.382383
+    },
+    {
+      "id": "Q68330288",
+      "name": "Plant Sciences Library - University Bern",
+      "lat": 46.953738,
+      "lng": 7.445303
+    },
+    {
+      "id": "Q27490282",
+      "name": "Psychology Club Zürich",
+      "lat": 47.368919,
+      "lng": 8.552485
+    },
+    {
+      "id": "Q16964584",
+      "name": "PTT Archive",
+      "lat": 46.92408,
+      "lng": 7.41379
+    },
+    {
+      "id": "Q294149",
+      "name": "Public Library of Neuchâtel",
+      "lat": 46.9902,
+      "lng": 6.9311
+    },
+    {
+      "id": "Q2901502",
+      "name": "Public Library of Yverdon-les-Bains",
+      "lat": 46.78012,
+      "lng": 6.6393
+    },
+    {
+      "id": "Q131937768",
+      "name": "Quartierbibliothek St. Georgen",
+      "lat": 47.416417,
+      "lng": 9.38273
+    },
+    {
+      "id": "Q112232608",
+      "name": "Reference library Edition Moderne",
+      "lat": 47.382039,
+      "lng": 8.53415
+    },
+    {
+      "id": "Q1654770",
+      "name": "Ringier Bildarchiv",
+      "lat": 47.394547,
+      "lng": 8.051324
+    },
+    {
+      "id": "Q27478240",
+      "name": "Roberto Donetta Archive",
+      "lat": 46.44022,
+      "lng": 8.93679
+    },
+    {
+      "id": "Q109359672",
+      "name": "SAPA Foundation (Swiss Performing Arts Archive, Swiss Theater Collection) (additional locations in Zurich and Lausanne)",
+      "lat": 46.94903,
+      "lng": 7.43651
+    },
+    {
+      "id": "Q2205249",
+      "name": "SBS Swiss Library for the Blind, Visual Impaired and Print Disabled",
+      "lat": 47.362,
+      "lng": 8.51643
+    },
+    {
+      "id": "Q2326916",
+      "name": "Schaffhausen City Library",
+      "lat": 47.698872,
+      "lng": 8.636849
+    },
+    {
+      "id": "Q125928681",
+      "name": "Schema f",
+      "lat": 47.382988,
+      "lng": 8.530646
+    },
+    {
+      "id": "Q107145730",
+      "name": "Schul- und Gemeindebibliothek Bremgarten",
+      "lat": 46.976884,
+      "lng": 7.436363
+    },
+    {
+      "id": "Q27480013",
+      "name": "Schweizerhaus, Dokumentationsbibliothek",
+      "lat": 46.8012,
+      "lng": 9.8293
+    },
+    {
+      "id": "Q16856791",
+      "name": "Schweizerische Theatersammlung",
+      "lat": 46.949135,
+      "lng": 7.436426
+    },
+    {
+      "id": "Q56877317",
+      "name": "Servizio di documentazione del Centro di risorse didattiche e digitali",
+      "lat": 46.012104,
+      "lng": 8.941482
+    },
+    {
+      "id": "Q27488904",
+      "name": "Sion monastery library",
+      "lat": 46.23769,
+      "lng": 7.35908
+    },
+    {
+      "id": "Q131937769",
+      "name": "Sitterwerk Foundation Art Library and Materials Archive",
+      "lat": 47.410753,
+      "lng": 9.323374
+    },
+    {
+      "id": "Q112232841",
+      "name": "Special library ENTER museum",
+      "lat": 47.203488,
+      "lng": 7.542185
+    },
+    {
+      "id": "Q107146938",
+      "name": "Spitalbibliothek UPD",
+      "lat": 46.96535,
+      "lng": 7.480598
+    },
+    {
+      "id": "Q68330302",
+      "name": "Sport Science Library - University Bern",
+      "lat": 46.962179,
+      "lng": 7.431963
+    },
+    {
+      "id": "Q7590785",
+      "name": "St. Moritz Library",
+      "lat": 46.498694,
+      "lng": 9.8385
+    },
+    {
+      "id": "Q137821644",
+      "name": "Stadt- und Regionalbibliothek Uster",
+      "lat": 47.351015,
+      "lng": 8.716841
+    },
+    {
+      "id": "Q27489639",
+      "name": "Stadtarchiv und Kläui-Bibliothek Uster",
+      "lat": 47.348833,
+      "lng": 8.718403
+    },
+    {
+      "id": "Q25162956",
+      "name": "Stadtbibliothek Baden",
+      "lat": 47.47065,
+      "lng": 8.30436
+    },
+    {
+      "id": "Q55504292",
+      "name": "Stadtbibliothek Brugg",
+      "lat": 47.486539,
+      "lng": 8.207421
+    },
+    {
+      "id": "Q103826019",
+      "name": "Stadtbibliothek Wil",
+      "lat": 47.467682,
+      "lng": 9.050195
+    },
+    {
+      "id": "Q2585160",
+      "name": "Stadtbibliothek Winterthur",
+      "lat": 47.4987,
+      "lng": 8.7294
+    },
+    {
+      "id": "Q138911943",
+      "name": "Städtli-Bibliothek Lichtensteig",
+      "lat": 47.323803,
+      "lng": 9.087397
+    },
+    {
+      "id": "Q1274754",
+      "name": "State Library Glarus",
+      "lat": 47.041494,
+      "lng": 9.067172
+    },
+    {
+      "id": "Q27480189",
+      "name": "Stiftsbibliothek Einsiedeln",
+      "lat": 47.12685,
+      "lng": 8.75311
+    },
+    {
+      "id": "Q27480178",
+      "name": "Stiftung Bibliothek Werner Oechslin",
+      "lat": 47.125142,
+      "lng": 8.747626
+    },
+    {
+      "id": "Q27490308",
+      "name": "Studienbibliothek zur Geschichte der Arbeiterbewegung",
+      "lat": 47.385523,
+      "lng": 8.527598
+    },
+    {
+      "id": "Q688143",
+      "name": "Swiss Film Archive",
+      "lat": 46.520376,
+      "lng": 6.625025
+    },
+    {
+      "id": "Q18643284",
+      "name": "Swiss Foundation for Photography",
+      "lat": 47.4958,
+      "lng": 8.7383
+    },
+    {
+      "id": "Q29015150",
+      "name": "Swiss Library of Eastern Europe",
+      "lat": 46.952213,
+      "lng": 7.435063
+    },
+    {
+      "id": "Q15848220",
+      "name": "Swiss multimedia library of sports",
+      "lat": 47.138644,
+      "lng": 7.213637
+    },
+    {
+      "id": "Q201787",
+      "name": "Swiss National Library",
+      "lat": 46.941407,
+      "lng": 7.449703
+    },
+    {
+      "id": "Q56219566",
+      "name": "Swiss Social Archives (biblioteca)",
+      "lat": 47.366944,
+      "lng": 8.5475
+    },
+    {
+      "id": "Q64682406",
+      "name": "The library of Carouge",
+      "lat": 46.185279,
+      "lng": 6.137318
+    },
+    {
+      "id": "Q27481090",
+      "name": "United Nations Library & Archives Geneva",
+      "lat": 46.22661,
+      "lng": 6.14059
+    },
+    {
+      "id": "Q680212",
+      "name": "United Nations Office at Geneva",
+      "lat": 46.226667,
+      "lng": 6.140556
+    },
+    {
+      "id": "Q81164683",
+      "name": "University Library Schweizerische Osteuropabibliothek SOB",
+      "lat": 46.95235,
+      "lng": 7.43514
+    },
+    {
+      "id": "Q114044012",
+      "name": "University Library Zurich",
+      "lat": 47.375587,
+      "lng": 8.547932
+    },
+    {
+      "id": "Q27479796",
+      "name": "University of the Arts, music library",
+      "lat": 46.95528,
+      "lng": 7.46033
+    },
+    {
+      "id": "Q856547",
+      "name": "University of Zurich Law Library",
+      "lat": 47.3733,
+      "lng": 8.55056
+    },
+    {
+      "id": "Q27485042",
+      "name": "Valais film center",
+      "lat": 46.103043,
+      "lng": 7.075007
+    },
+    {
+      "id": "Q117301884",
+      "name": "Vera Oeri Library",
+      "lat": 47.555195,
+      "lng": 7.586031
+    },
+    {
+      "id": "Q68330308",
+      "name": "Vetsuisse Library - University Bern",
+      "lat": 46.956444,
+      "lng": 7.427086
+    },
+    {
+      "id": "Q27479840",
+      "name": "Vincenzo D'Alberti library",
+      "lat": 46.52951,
+      "lng": 8.94094
+    },
+    {
+      "id": "Q3152229",
+      "name": "Voltaire Institute and Museum",
+      "lat": 46.20756,
+      "lng": 6.13356
+    },
+    {
+      "id": "Q68330310",
+      "name": "vonRoll Library - University Bern",
+      "lat": 46.953508,
+      "lng": 7.422717
+    },
+    {
+      "id": "Q94402051",
+      "name": "World Council of Churches Library",
+      "lat": 46.34691,
+      "lng": 6.18455
+    },
+    {
+      "id": "Q190255",
+      "name": "Zentralbibliothek Solothurn",
+      "lat": 47.209722,
+      "lng": 7.529722
+    },
+    {
+      "id": "Q190260",
+      "name": "Zentralbibliothek Zürich",
+      "lat": 47.374167,
+      "lng": 8.545278
+    },
+    {
+      "id": "Q118669481",
+      "name": "ZHB Luzern - Standort UNI/PH-Gebäude",
+      "lat": 47.049491,
+      "lng": 8.31254
+    },
+    {
+      "id": "Q118718244",
+      "name": "ZHB Luzern Sempacherstrasse",
+      "lat": 47.048333,
+      "lng": 8.307222
+    },
+    {
+      "id": "Q19362414",
+      "name": "Zofingen City Library",
+      "lat": 47.28919,
+      "lng": 7.945955
+    }
+  ]
+}

@@ -44,6 +44,12 @@ import {
 } from "./princeRupertRegionPack";
 import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 import {
+  SWITZERLAND_GEO_ASSETS,
+  SWITZERLAND_MATCHING_LABEL_OVERRIDES,
+  SWITZERLAND_MEASURING_LABEL_OVERRIDES,
+  SWITZERLAND_REGION_PACK_ID,
+} from "./switzerlandRegionPack";
+import {
   TOKYO_GEO_ASSETS,
   TOKYO_MATCHING_LABEL_OVERRIDES,
   TOKYO_MEASURING_LABEL_OVERRIDES,
@@ -177,6 +183,18 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     playAreaLevel: "secondary",
     matchingLabelOverrides: LUCERNE_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: LUCERNE_MEASURING_LABEL_OVERRIDES,
+  }),
+  [SWITZERLAND_REGION_PACK_ID]: metroRegionPack({
+    id: SWITZERLAND_REGION_PACK_ID,
+    geoAssets: {
+      primary: SWITZERLAND_GEO_ASSETS.cantons,
+      secondary: SWITZERLAND_GEO_ASSETS.municipalities,
+      secondaryBySubregion: (subregionId) =>
+        SWITZERLAND_GEO_ASSETS.municipalitiesByCanton(subregionId),
+    },
+    subregionPropertyKey: "cantonId",
+    matchingLabelOverrides: SWITZERLAND_MATCHING_LABEL_OVERRIDES,
+    measuringLabelOverrides: SWITZERLAND_MEASURING_LABEL_OVERRIDES,
   }),
   [PORTLAND_MAINE_REGION_PACK_ID]: metroRegionPack({
     id: PORTLAND_MAINE_REGION_PACK_ID,

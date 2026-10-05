@@ -24,7 +24,6 @@ export function MapScreenRoleCodesSheet({
   }
   return (
     <RoleCodesSheet
-      key={isCodesOpen ? "codes-open" : "codes-closed"}
       open={isCodesOpen}
       onClose={onCloseSheet}
       session={session}

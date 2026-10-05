@@ -1,0 +1,1458 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q29700870",
+      "name": "Alhambra",
+      "lat": 46.202809,
+      "lng": 6.146574
+    },
+    {
+      "id": "Q50873010",
+      "name": "AllianzCinema Basel",
+      "lat": 47.55681,
+      "lng": 7.5912
+    },
+    {
+      "id": "Q50873017",
+      "name": "AllianzCinema Zürich",
+      "lat": 47.35284,
+      "lng": 8.5525
+    },
+    {
+      "id": "Q619102",
+      "name": "Apollo Cinerama",
+      "lat": 47.3741,
+      "lng": 8.52807
+    },
+    {
+      "id": "Q35721927",
+      "name": "Arena Cinemas",
+      "lat": 47.358482,
+      "lng": 8.522628
+    },
+    {
+      "id": "Q35722072",
+      "name": "Arthouse Alba",
+      "lat": 47.376061,
+      "lng": 8.544646
+    },
+    {
+      "id": "Q35722218",
+      "name": "Arthouse Le Paris",
+      "lat": 47.366414,
+      "lng": 8.547482
+    },
+    {
+      "id": "Q35721957",
+      "name": "Arthouse Movie 1 & 2",
+      "lat": 47.370786,
+      "lng": 8.54348
+    },
+    {
+      "id": "Q35722315",
+      "name": "Arthouse Piccadilly",
+      "lat": 47.365932,
+      "lng": 8.548957
+    },
+    {
+      "id": "Q35722518",
+      "name": "Arthouse Uto",
+      "lat": 47.374133,
+      "lng": 8.521333
+    },
+    {
+      "id": "Q35719068",
+      "name": "Aventic Cinéma",
+      "lat": 46.879784,
+      "lng": 7.040184
+    },
+    {
+      "id": "Q895178",
+      "name": "Bourbaki-Panorama",
+      "lat": 47.056972,
+      "lng": 8.311222
+    },
+    {
+      "id": "Q47361129",
+      "name": "Capitol",
+      "lat": 47.04593,
+      "lng": 8.30994
+    },
+    {
+      "id": "Q35719239",
+      "name": "Capitol Cinema",
+      "lat": 47.552668,
+      "lng": 7.588158
+    },
+    {
+      "id": "Q56557364",
+      "name": "Casino-Théâtre",
+      "lat": 47.05596,
+      "lng": 6.74704
+    },
+    {
+      "id": "Q60220423",
+      "name": "Centraltheater",
+      "lat": 47.3779,
+      "lng": 8.54412
+    },
+    {
+      "id": "Q35720588",
+      "name": "Ciné 17",
+      "lat": 46.202542,
+      "lng": 6.143546
+    },
+    {
+      "id": "Q35719691",
+      "name": "Ciné ABC",
+      "lat": 46.95701,
+      "lng": 7.453018
+    },
+    {
+      "id": "Q35719838",
+      "name": "Ciné Bubenberg",
+      "lat": 46.947484,
+      "lng": 7.437053
+    },
+    {
+      "id": "Q35719722",
+      "name": "Cine Camera",
+      "lat": 46.946531,
+      "lng": 7.434942
+    },
+    {
+      "id": "Q35719270",
+      "name": "Cine Mascotte",
+      "lat": 47.548969,
+      "lng": 7.589569
+    },
+    {
+      "id": "Q35718895",
+      "name": "Cine Rex",
+      "lat": 46.492878,
+      "lng": 7.562844
+    },
+    {
+      "id": "Q35719781",
+      "name": "Cine Royal",
+      "lat": 46.947503,
+      "lng": 7.436754
+    },
+    {
+      "id": "Q35719808",
+      "name": "Cine Sex",
+      "lat": 46.948717,
+      "lng": 7.442074
+    },
+    {
+      "id": "Q35721133",
+      "name": "Ciné-Theater Gstaad",
+      "lat": 46.47249,
+      "lng": 7.28144
+    },
+    {
+      "id": "Q47354349",
+      "name": "Ciné2520 – Cinéma de La Neuveville",
+      "lat": 47.06305,
+      "lng": 7.09453
+    },
+    {
+      "id": "Q47354329",
+      "name": "Cinécran",
+      "lat": 46.30812,
+      "lng": 7.46875
+    },
+    {
+      "id": "Q35718840",
+      "name": "Cinedome",
+      "lat": 47.41553,
+      "lng": 9.311557
+    },
+    {
+      "id": "Q47360992",
+      "name": "Cinedome Biel/Bienne",
+      "lat": 47.156,
+      "lng": 7.2819
+    },
+    {
+      "id": "Q47354344",
+      "name": "Cinélucarne",
+      "lat": 47.2241,
+      "lng": 6.9567
+    },
+    {
+      "id": "Q35720621",
+      "name": "Cinélux",
+      "lat": 46.201151,
+      "lng": 6.131435
+    },
+    {
+      "id": "Q112798413",
+      "name": "Cinema",
+      "lat": 47.07658,
+      "lng": 7.30427
+    },
+    {
+      "id": "Q47354384",
+      "name": "Cinema 8",
+      "lat": 47.3141,
+      "lng": 8.05337
+    },
+    {
+      "id": "Q47354419",
+      "name": "Cinema 89 - Kino im Kulturschuppen",
+      "lat": 46.87003,
+      "lng": 9.88063
+    },
+    {
+      "id": "Q35721984",
+      "name": "Cinema Abaton 1-12",
+      "lat": 47.389451,
+      "lng": 8.521481
+    },
+    {
+      "id": "Q47354342",
+      "name": "Cinéma ABC",
+      "lat": 47.10556,
+      "lng": 6.82976
+    },
+    {
+      "id": "Q35722011",
+      "name": "Cinema ABC 1, 2, 3, 4",
+      "lat": 47.376218,
+      "lng": 8.540883
+    },
+    {
+      "id": "Q136771078",
+      "name": "Cinema Apollo",
+      "lat": 47.136665,
+      "lng": 7.247371
+    },
+    {
+      "id": "Q35721870",
+      "name": "Cinema Astor",
+      "lat": 46.461483,
+      "lng": 6.842828
+    },
+    {
+      "id": "Q35720649",
+      "name": "Cinéma Auditorium Arditi",
+      "lat": 46.20104,
+      "lng": 6.140122
+    },
+    {
+      "id": "Q47354320",
+      "name": "Cinéma Bel-Air",
+      "lat": 46.78035,
+      "lng": 6.63674
+    },
+    {
+      "id": "Q35721269",
+      "name": "Cinéma Bellevaux",
+      "lat": 46.532947,
+      "lng": 6.630688
+    },
+    {
+      "id": "Q35720312",
+      "name": "Cinema Beluga",
+      "lat": 47.138429,
+      "lng": 7.245577
+    },
+    {
+      "id": "Q35720682",
+      "name": "Cinéma Bio",
+      "lat": 46.184387,
+      "lng": 6.141345
+    },
+    {
+      "id": "Q35720712",
+      "name": "Cinéma Broadway",
+      "lat": 46.207439,
+      "lng": 6.145395
+    },
+    {
+      "id": "Q35720741",
+      "name": "Cinéma Camera Movie",
+      "lat": 46.209304,
+      "lng": 6.144923
+    },
+    {
+      "id": "Q47354318",
+      "name": "Cinéma Casino",
+      "lat": 46.61297,
+      "lng": 6.50857
+    },
+    {
+      "id": "Q35720770",
+      "name": "Cinéma Central",
+      "lat": 46.208069,
+      "lng": 6.143112
+    },
+    {
+      "id": "Q56249340",
+      "name": "Cinema Centrale",
+      "lat": 46.19109,
+      "lng": 9.02278
+    },
+    {
+      "id": "Q35719870",
+      "name": "Cinema City",
+      "lat": 46.949727,
+      "lng": 7.44281
+    },
+    {
+      "id": "Q35720796",
+      "name": "Cinéma City",
+      "lat": 46.202274,
+      "lng": 6.156591
+    },
+    {
+      "id": "Q35721720",
+      "name": "Cinéma CityClub",
+      "lat": 46.511172,
+      "lng": 6.661961
+    },
+    {
+      "id": "Q35719897",
+      "name": "Cinema Club",
+      "lat": 46.947098,
+      "lng": 7.434981
+    },
+    {
+      "id": "Q47354341",
+      "name": "Cinéma Colisée",
+      "lat": 46.92208,
+      "lng": 6.63385
+    },
+    {
+      "id": "Q35721162",
+      "name": "Cinema Corso",
+      "lat": 47.117678,
+      "lng": 6.840567
+    },
+    {
+      "id": "Q35721583",
+      "name": "Cinéma Corso",
+      "lat": 46.097222,
+      "lng": 7.068899
+    },
+    {
+      "id": "Q47354339",
+      "name": "Cinéma des Arcades",
+      "lat": 46.99225,
+      "lng": 6.93172
+    },
+    {
+      "id": "Q35721328",
+      "name": "Cinema du Bourg",
+      "lat": 46.520134,
+      "lng": 6.636627
+    },
+    {
+      "id": "Q35721191",
+      "name": "Cinema Eden",
+      "lat": 47.099558,
+      "lng": 6.823571
+    },
+    {
+      "id": "Q35720470",
+      "name": "Cinéma Eden",
+      "lat": 46.474338,
+      "lng": 7.128192
+    },
+    {
+      "id": "Q56877179",
+      "name": "Cinema Forum",
+      "lat": 46.19504,
+      "lng": 9.02794
+    },
+    {
+      "id": "Q35720820",
+      "name": "Cinéma Forum",
+      "lat": 46.195631,
+      "lng": 6.191422
+    },
+    {
+      "id": "Q35720252",
+      "name": "Cinéma Grain d'Sel",
+      "lat": 46.252651,
+      "lng": 7.008328
+    },
+    {
+      "id": "Q35720848",
+      "name": "Cinéma Hollywood",
+      "lat": 46.202249,
+      "lng": 6.150261
+    },
+    {
+      "id": "Q47354423",
+      "name": "Cinema Iride",
+      "lat": 46.00501,
+      "lng": 8.95355
+    },
+    {
+      "id": "Q35720499",
+      "name": "Cinéma La Grange",
+      "lat": 47.365026,
+      "lng": 7.342277
+    },
+    {
+      "id": "Q35721298",
+      "name": "Cinéma Le Capitole",
+      "lat": 46.518617,
+      "lng": 6.635764
+    },
+    {
+      "id": "Q35720905",
+      "name": "Cinéma Le Plaza",
+      "lat": 46.207834,
+      "lng": 6.145386
+    },
+    {
+      "id": "Q35720418",
+      "name": "Cinema Le Prado",
+      "lat": 46.618704,
+      "lng": 7.055829
+    },
+    {
+      "id": "Q47354359",
+      "name": "Cinema Lenk",
+      "lat": 46.45809,
+      "lng": 7.44138
+    },
+    {
+      "id": "Q35718982",
+      "name": "Cinema Leuzinger",
+      "lat": 46.880028,
+      "lng": 8.641784
+    },
+    {
+      "id": "Q35718953",
+      "name": "Cinema Leventina",
+      "lat": 46.5297,
+      "lng": 8.60517
+    },
+    {
+      "id": "Q35721355",
+      "name": "Cinema Lido",
+      "lat": 46.520214,
+      "lng": 6.634749
+    },
+    {
+      "id": "Q35720528",
+      "name": "Cinéma Lido",
+      "lat": 47.364032,
+      "lng": 7.347945
+    },
+    {
+      "id": "Q35721809",
+      "name": "Cinéma Lumen",
+      "lat": 46.537971,
+      "lng": 6.585869
+    },
+    {
+      "id": "Q47354403",
+      "name": "Cinema Luna",
+      "lat": 47.55828,
+      "lng": 8.8958
+    },
+    {
+      "id": "Q35720443",
+      "name": "Cinema Lux",
+      "lat": 46.616162,
+      "lng": 7.05432
+    },
+    {
+      "id": "Q47354426",
+      "name": "Cinema Lux Arthouse",
+      "lat": 46.01222,
+      "lng": 8.9447
+    },
+    {
+      "id": "Q35719298",
+      "name": "Cinema Luxor",
+      "lat": 47.581092,
+      "lng": 7.591906
+    },
+    {
+      "id": "Q35721384",
+      "name": "Cinema Moderne",
+      "lat": 46.516622,
+      "lng": 6.625941
+    },
+    {
+      "id": "Q56877178",
+      "name": "Cinema Morettina",
+      "lat": 46.16478,
+      "lng": 8.78975
+    },
+    {
+      "id": "Q56739913",
+      "name": "Cinema Multisala Teatro & Plaza Eventi Live",
+      "lat": 45.87229,
+      "lng": 8.98614
+    },
+    {
+      "id": "Q35720877",
+      "name": "Cinéma Nord-Sud",
+      "lat": 46.212492,
+      "lng": 6.132626
+    },
+    {
+      "id": "Q47354379",
+      "name": "Cinema Odeon",
+      "lat": 47.48133,
+      "lng": 8.20867
+    },
+    {
+      "id": "Q35720223",
+      "name": "Cinéma Palace",
+      "lat": 47.237531,
+      "lng": 7.285655
+    },
+    {
+      "id": "Q126363307",
+      "name": "Cinema Palace (1923)",
+      "lat": 47.05953,
+      "lng": 7.62262
+    },
+    {
+      "id": "Q35721216",
+      "name": "Cinema Plaza",
+      "lat": 47.099753,
+      "lng": 6.82316
+    },
+    {
+      "id": "Q35719039",
+      "name": "Cinema Rex",
+      "lat": 46.467849,
+      "lng": 6.36621
+    },
+    {
+      "id": "Q35721409",
+      "name": "Cinema Richemont",
+      "lat": 46.519042,
+      "lng": 6.631105
+    },
+    {
+      "id": "Q47354324",
+      "name": "Cinéma Royal",
+      "lat": 46.82374,
+      "lng": 6.50075
+    },
+    {
+      "id": "Q56877176",
+      "name": "Cinema Sala-Cine Excelsior",
+      "lat": 45.83607,
+      "lng": 9.03041
+    },
+    {
+      "id": "Q35721242",
+      "name": "Cinema Scala",
+      "lat": 47.101213,
+      "lng": 6.825356
+    },
+    {
+      "id": "Q47354402",
+      "name": "Cinema Schwanen",
+      "lat": 47.65737,
+      "lng": 8.85844
+    },
+    {
+      "id": "Q47354415",
+      "name": "Cinema Sil Plaz",
+      "lat": 46.77472,
+      "lng": 9.2049
+    },
+    {
+      "id": "Q47354334",
+      "name": "Cinéma Sirius",
+      "lat": 46.5282,
+      "lng": 6.90047
+    },
+    {
+      "id": "Q35720965",
+      "name": "Cinéma Splendid",
+      "lat": 46.206479,
+      "lng": 6.143306
+    },
+    {
+      "id": "Q35718865",
+      "name": "Cinema Teatro Blenio",
+      "lat": 46.452304,
+      "lng": 8.938763
+    },
+    {
+      "id": "Q56876664",
+      "name": "Cinema Teatro Chiasso",
+      "lat": 45.83655,
+      "lng": 9.02661
+    },
+    {
+      "id": "Q29883819",
+      "name": "Cinema Theater",
+      "lat": 46.4509,
+      "lng": 8.94103
+    },
+    {
+      "id": "Q47354328",
+      "name": "Cinéma Verbier",
+      "lat": 46.09559,
+      "lng": 7.22944
+    },
+    {
+      "id": "Q35721636",
+      "name": "Cinémas Odéon",
+      "lat": 46.507878,
+      "lng": 6.495818
+    },
+    {
+      "id": "Q35719957",
+      "name": "CinemaStar",
+      "lat": 46.949783,
+      "lng": 7.440812
+    },
+    {
+      "id": "Q35719985",
+      "name": "Cinématte",
+      "lat": 46.946841,
+      "lng": 7.457095
+    },
+    {
+      "id": "Q47354336",
+      "name": "Cinemotion Les Rex",
+      "lat": 46.80168,
+      "lng": 7.1515
+    },
+    {
+      "id": "Q35720013",
+      "name": "CineMovie 1, 2, 3",
+      "lat": 46.94689,
+      "lng": 7.435324
+    },
+    {
+      "id": "Q35721020",
+      "name": "Cinérama Empire",
+      "lat": 46.192552,
+      "lng": 6.143702
+    },
+    {
+      "id": "Q47354332",
+      "name": "Cinésion",
+      "lat": 46.23023,
+      "lng": 7.36098
+    },
+    {
+      "id": "Q56877175",
+      "name": "CineStar Arena Cinemas Ticino",
+      "lat": 46.02441,
+      "lng": 8.96358
+    },
+    {
+      "id": "Q35721691",
+      "name": "Cinetoile Malley Lumiere",
+      "lat": 46.527353,
+      "lng": 6.602237
+    },
+    {
+      "id": "Q29933661",
+      "name": "Corso",
+      "lat": 47.366376,
+      "lng": 8.546727
+    },
+    {
+      "id": "Q35719325",
+      "name": "Corso Kino",
+      "lat": 47.561094,
+      "lng": 7.574469
+    },
+    {
+      "id": "Q35718926",
+      "name": "Cosmopolis Cinemas",
+      "lat": 46.316321,
+      "lng": 6.963288
+    },
+    {
+      "id": "Q35719352",
+      "name": "Eldorado Cinema",
+      "lat": 47.552083,
+      "lng": 7.588262
+    },
+    {
+      "id": "Q47354347",
+      "name": "Filmpodium Biel/Bienne",
+      "lat": 47.1389,
+      "lng": 7.23972
+    },
+    {
+      "id": "Q35722041",
+      "name": "Filmpodium der Stadt Zürich",
+      "lat": 47.372466,
+      "lng": 8.535732
+    },
+    {
+      "id": "Q35719013",
+      "name": "Flora Kino",
+      "lat": 47.548099,
+      "lng": 9.304473
+    },
+    {
+      "id": "Q35719382",
+      "name": "Forum Cinema",
+      "lat": 47.564366,
+      "lng": 7.5835
+    },
+    {
+      "id": "Q50873002",
+      "name": "fricks monti",
+      "lat": 47.50833,
+      "lng": 8.0203
+    },
+    {
+      "id": "Q35722161",
+      "name": "Frosch Studio",
+      "lat": 47.373328,
+      "lng": 8.544991
+    },
+    {
+      "id": "Q35720045",
+      "name": "Gotthard Cinema",
+      "lat": 46.94717,
+      "lng": 7.439513
+    },
+    {
+      "id": "Q13142677",
+      "name": "Häbse Theater",
+      "lat": 47.565004,
+      "lng": 7.597454
+    },
+    {
+      "id": "Q35721610",
+      "name": "Hollywood les Cinémas",
+      "lat": 46.436973,
+      "lng": 6.908548
+    },
+    {
+      "id": "Q47354350",
+      "name": "InsKino",
+      "lat": 47.00754,
+      "lng": 7.10385
+    },
+    {
+      "id": "Q35720075",
+      "name": "Jura 1,2,3",
+      "lat": 46.94659,
+      "lng": 7.439841
+    },
+    {
+      "id": "Q35720101",
+      "name": "Kellerkino",
+      "lat": 46.948114,
+      "lng": 7.450835
+    },
+    {
+      "id": "Q35721838",
+      "name": "Kinepolis Schaffhausen",
+      "lat": 47.713615,
+      "lng": 8.656356
+    },
+    {
+      "id": "Q118901200",
+      "name": "Kino Apollo",
+      "lat": 47.6527,
+      "lng": 9.1665
+    },
+    {
+      "id": "Q47354396",
+      "name": "Kino Cameo",
+      "lat": 47.49437,
+      "lng": 8.71802
+    },
+    {
+      "id": "Q35722101",
+      "name": "Kino Capitol",
+      "lat": 47.377834,
+      "lng": 8.544181
+    },
+    {
+      "id": "Q47354331",
+      "name": "Kino Capitol Brig",
+      "lat": 46.31766,
+      "lng": 7.98613
+    },
+    {
+      "id": "Q35720557",
+      "name": "Kino Exil",
+      "lat": 46.805394,
+      "lng": 7.163221
+    },
+    {
+      "id": "Q47354382",
+      "name": "Kino Freier Film",
+      "lat": 47.39449,
+      "lng": 8.05113
+    },
+    {
+      "id": "Q47354354",
+      "name": "Kino Grünegg",
+      "lat": 46.88205,
+      "lng": 7.62227
+    },
+    {
+      "id": "Q35722188",
+      "name": "Kino Houdini",
+      "lat": 47.374683,
+      "lng": 8.520766
+    },
+    {
+      "id": "Q35718760",
+      "name": "Kino Ideal",
+      "lat": 47.392981,
+      "lng": 8.046689
+    },
+    {
+      "id": "Q35719931",
+      "name": "Kino in der Reitschule",
+      "lat": 46.95293,
+      "lng": 7.440378
+    },
+    {
+      "id": "Q47354370",
+      "name": "Kino Lichtspiele",
+      "lat": 47.35041,
+      "lng": 7.90343
+    },
+    {
+      "id": "Q35719100",
+      "name": "Kino Lux",
+      "lat": 47.193294,
+      "lng": 8.524256
+    },
+    {
+      "id": "Q47354358",
+      "name": "Kino Meiringen",
+      "lat": 46.72807,
+      "lng": 8.1876
+    },
+    {
+      "id": "Q35722250",
+      "name": "Kino Metropol",
+      "lat": 47.373934,
+      "lng": 8.530424
+    },
+    {
+      "id": "Q47354412",
+      "name": "Kino Näfels",
+      "lat": 47.09756,
+      "lng": 9.06326
+    },
+    {
+      "id": "Q35722283",
+      "name": "Kino Nord-Süd",
+      "lat": 47.369039,
+      "lng": 8.543829
+    },
+    {
+      "id": "Q47354380",
+      "name": "Kino Orient",
+      "lat": 47.47005,
+      "lng": 8.31665
+    },
+    {
+      "id": "Q47354395",
+      "name": "Kino Orion",
+      "lat": 47.39941,
+      "lng": 8.62228
+    },
+    {
+      "id": "Q47354368",
+      "name": "Kino Palace",
+      "lat": 47.20793,
+      "lng": 7.53768
+    },
+    {
+      "id": "Q47354406",
+      "name": "Kino Passerelle",
+      "lat": 47.29692,
+      "lng": 9.08907
+    },
+    {
+      "id": "Q35722342",
+      "name": "Kino Radium",
+      "lat": 47.374385,
+      "lng": 8.543547
+    },
+    {
+      "id": "Q47354417",
+      "name": "Kino Rätia Thusis",
+      "lat": 46.69559,
+      "lng": 9.43902
+    },
+    {
+      "id": "Q35722370",
+      "name": "Kino Razzia",
+      "lat": 47.360867,
+      "lng": 8.551732
+    },
+    {
+      "id": "Q35719753",
+      "name": "Kino Rex",
+      "lat": 46.946675,
+      "lng": 7.439316
+    },
+    {
+      "id": "Q35722434",
+      "name": "Kino Riffraff",
+      "lat": 47.382618,
+      "lng": 8.529341
+    },
+    {
+      "id": "Q35722464",
+      "name": "Kino Roland",
+      "lat": 47.378949,
+      "lng": 8.527124
+    },
+    {
+      "id": "Q47354410",
+      "name": "Kino Rosental",
+      "lat": 47.44258,
+      "lng": 9.53345
+    },
+    {
+      "id": "Q111222400",
+      "name": "Kino Roxy",
+      "lat": 47.551667,
+      "lng": 7.623611
+    },
+    {
+      "id": "Q35718811",
+      "name": "Kino Royal",
+      "lat": 47.04221,
+      "lng": 7.27058
+    },
+    {
+      "id": "Q47354367",
+      "name": "Kino Scala",
+      "lat": 47.21012,
+      "lng": 7.78666
+    },
+    {
+      "id": "Q35718786",
+      "name": "Kino Schloss",
+      "lat": 47.393547,
+      "lng": 8.045172
+    },
+    {
+      "id": "Q47354392",
+      "name": "Kino Seehof",
+      "lat": 47.16921,
+      "lng": 8.51501
+    },
+    {
+      "id": "Q47354377",
+      "name": "Kino Sputnik",
+      "lat": 47.48404,
+      "lng": 7.7323
+    },
+    {
+      "id": "Q35719182",
+      "name": "Kino Sterk",
+      "lat": 47.474923,
+      "lng": 8.307617
+    },
+    {
+      "id": "Q35722490",
+      "name": "Kino Stüssihof",
+      "lat": 47.372324,
+      "lng": 8.543619
+    },
+    {
+      "id": "Q35719604",
+      "name": "Kino um die Ecke",
+      "lat": 46.890503,
+      "lng": 7.497233
+    },
+    {
+      "id": "Q35722550",
+      "name": "Kino Walche",
+      "lat": 47.380011,
+      "lng": 8.542203
+    },
+    {
+      "id": "Q13142736",
+      "name": "Kino Wildenmann",
+      "lat": 47.25305,
+      "lng": 8.69025
+    },
+    {
+      "id": "Q15136000",
+      "name": "Kino Xenix",
+      "lat": 47.375276,
+      "lng": 8.526113
+    },
+    {
+      "id": "Q47354363",
+      "name": "Kinogenossenschaft Kupferschmiede",
+      "lat": 46.9366,
+      "lng": 7.78719
+    },
+    {
+      "id": "Q140773770",
+      "name": "KINOKONI Basel",
+      "lat": 47.55264,
+      "lng": 7.58821
+    },
+    {
+      "id": "Q140773772",
+      "name": "KINOKONI Olten",
+      "lat": 47.34879,
+      "lng": 7.91056
+    },
+    {
+      "id": "Q140773743",
+      "name": "KINOKONI Zurich",
+      "lat": 47.3803,
+      "lng": 8.52908
+    },
+    {
+      "id": "Q47354408",
+      "name": "Kinotheater Madlen",
+      "lat": 47.41322,
+      "lng": 9.63018
+    },
+    {
+      "id": "Q50873013",
+      "name": "Kiwi Center",
+      "lat": 47.49877,
+      "lng": 8.72613
+    },
+    {
+      "id": "Q47354398",
+      "name": "Kiwi Loge",
+      "lat": 47.4986,
+      "lng": 8.73146
+    },
+    {
+      "id": "Q47354401",
+      "name": "Kiwi Scala",
+      "lat": 47.69618,
+      "lng": 8.63837
+    },
+    {
+      "id": "Q50873015",
+      "name": "Kosmos",
+      "lat": 47.37992,
+      "lng": 8.52927
+    },
+    {
+      "id": "Q47354365",
+      "name": "Krone inn / cinema",
+      "lat": 47.05618,
+      "lng": 7.6275
+    },
+    {
+      "id": "Q47354372",
+      "name": "kult.kino atelier",
+      "lat": 47.55359,
+      "lng": 7.5904
+    },
+    {
+      "id": "Q47354373",
+      "name": "kult.kino camera",
+      "lat": 47.56109,
+      "lng": 7.59407
+    },
+    {
+      "id": "Q50873007",
+      "name": "kult.kino club",
+      "lat": 47.55869,
+      "lng": 7.58709
+    },
+    {
+      "id": "Q50873009",
+      "name": "kult.kino movie",
+      "lat": 47.56191,
+      "lng": 7.59534
+    },
+    {
+      "id": "Q98399210",
+      "name": "Kursaal-Théâtre des Variétés",
+      "lat": 46.52256,
+      "lng": 6.62888
+    },
+    {
+      "id": "Q47354322",
+      "name": "La Bobine Le Sentier",
+      "lat": 46.60622,
+      "lng": 6.2288
+    },
+    {
+      "id": "Q131449587",
+      "name": "La Scala movie theater",
+      "lat": 47.101115,
+      "lng": 6.825397
+    },
+    {
+      "id": "Q47354338",
+      "name": "le cinéma Feuerwehrmagazin No 1",
+      "lat": 46.92776,
+      "lng": 7.11767
+    },
+    {
+      "id": "Q47354345",
+      "name": "Le Cinématographe",
+      "lat": 47.22277,
+      "lng": 7.10191
+    },
+    {
+      "id": "Q110463857",
+      "name": "Le Royal movie theater",
+      "lat": 47.221097,
+      "lng": 7.201774
+    },
+    {
+      "id": "Q35720990",
+      "name": "Le Spoutnik",
+      "lat": 46.203996,
+      "lng": 6.136277
+    },
+    {
+      "id": "Q35721663",
+      "name": "Les Cinémas Capitole",
+      "lat": 46.3832,
+      "lng": 6.23835
+    },
+    {
+      "id": "Q35721049",
+      "name": "Les Cinémas du Grütli",
+      "lat": 46.201107,
+      "lng": 6.141633
+    },
+    {
+      "id": "Q35720935",
+      "name": "Les Scala",
+      "lat": 46.204151,
+      "lng": 6.158158
+    },
+    {
+      "id": "Q35721751",
+      "name": "Leuzinger Cinema",
+      "lat": 47.227512,
+      "lng": 8.81933
+    },
+    {
+      "id": "Q35720365",
+      "name": "Lido Cinema",
+      "lat": 47.137952,
+      "lng": 7.245275
+    },
+    {
+      "id": "Q681911",
+      "name": "Light Show / Bern Film Library",
+      "lat": 46.94049,
+      "lng": 7.44218
+    },
+    {
+      "id": "Q50873012",
+      "name": "limelight",
+      "lat": 47.05572,
+      "lng": 8.31129
+    },
+    {
+      "id": "Q35719127",
+      "name": "Linde Kino",
+      "lat": 47.468505,
+      "lng": 8.297217
+    },
+    {
+      "id": "Q502053",
+      "name": "Locarno Film Festival",
+      "lat": 46.169623,
+      "lng": 8.796011
+    },
+    {
+      "id": "Q14537959",
+      "name": "Locomotive shed with water tower",
+      "lat": 47.4216,
+      "lng": 9.36608
+    },
+    {
+      "id": "Q47361272",
+      "name": "Maxx",
+      "lat": 47.06896,
+      "lng": 8.28029
+    },
+    {
+      "id": "Q29884508",
+      "name": "Mignon Cinema Theater",
+      "lat": 45.87218,
+      "lng": 8.98622
+    },
+    {
+      "id": "Q47361209",
+      "name": "Moderne",
+      "lat": 47.04845,
+      "lng": 8.30602
+    },
+    {
+      "id": "Q47354428",
+      "name": "Multisala Teatro Mignon Ciak",
+      "lat": 45.87237,
+      "lng": 8.98526
+    },
+    {
+      "id": "Q47354375",
+      "name": "Neues Kino",
+      "lat": 47.57601,
+      "lng": 7.5883
+    },
+    {
+      "id": "Q47354399",
+      "name": "Neues Kino Freienstein",
+      "lat": 47.52951,
+      "lng": 8.58335
+    },
+    {
+      "id": "Q29787622",
+      "name": "Orient cinema",
+      "lat": 47.696882,
+      "lng": 8.634861
+    },
+    {
+      "id": "Q50873005",
+      "name": "Oris",
+      "lat": 47.48428,
+      "lng": 7.73599
+    },
+    {
+      "id": "Q50873014",
+      "name": "Palace",
+      "lat": 47.49863,
+      "lng": 8.72498
+    },
+    {
+      "id": "Q35720392",
+      "name": "Palace Cinema",
+      "lat": 47.133679,
+      "lng": 7.244882
+    },
+    {
+      "id": "Q56877174",
+      "name": "PalaCinema Locarno",
+      "lat": 46.16807,
+      "lng": 8.79452
+    },
+    {
+      "id": "Q29527329",
+      "name": "Palazzi Il Cardo, La Piccionaia and cinema Corso",
+      "lat": 46.00622,
+      "lng": 8.95393
+    },
+    {
+      "id": "Q35721074",
+      "name": "Pathé Balexert",
+      "lat": 46.218968,
+      "lng": 6.113019
+    },
+    {
+      "id": "Q35792302",
+      "name": "Pathé Dietlikon",
+      "lat": 47.41404,
+      "lng": 8.62245
+    },
+    {
+      "id": "Q35721491",
+      "name": "Pathé Flon",
+      "lat": 46.521811,
+      "lng": 6.626804
+    },
+    {
+      "id": "Q17038112",
+      "name": "Pathé Küchlin",
+      "lat": 47.552492,
+      "lng": 7.588417
+    },
+    {
+      "id": "Q35721521",
+      "name": "Pathé Les Galeries",
+      "lat": 46.518071,
+      "lng": 6.62992
+    },
+    {
+      "id": "Q35719471",
+      "name": "Pathé Plaza",
+      "lat": 47.552315,
+      "lng": 7.589312
+    },
+    {
+      "id": "Q35721100",
+      "name": "Pathé Rex",
+      "lat": 46.203391,
+      "lng": 6.144675
+    },
+    {
+      "id": "Q35720165",
+      "name": "Pathé Westside",
+      "lat": 46.943711,
+      "lng": 7.371977
+    },
+    {
+      "id": "Q47354394",
+      "name": "qtopia Kino + Bar",
+      "lat": 47.34644,
+      "lng": 8.7178
+    },
+    {
+      "id": "Q127961238",
+      "name": "Railway Station Cinema",
+      "lat": 47.37788,
+      "lng": 8.54036
+    },
+    {
+      "id": "Q35721898",
+      "name": "Rex",
+      "lat": 46.461241,
+      "lng": 6.841178
+    },
+    {
+      "id": "Q35719504",
+      "name": "Rex Cinema",
+      "lat": 47.553508,
+      "lng": 7.588967
+    },
+    {
+      "id": "Q47361443",
+      "name": "Rex Studio",
+      "lat": 47.42682,
+      "lng": 9.37315
+    },
+    {
+      "id": "Q47354421",
+      "name": "Rialto il Cinema",
+      "lat": 46.17377,
+      "lng": 8.8019
+    },
+    {
+      "id": "Q50873011",
+      "name": "royal",
+      "lat": 47.56613,
+      "lng": 7.60702
+    },
+    {
+      "id": "Q35719154",
+      "name": "Royal Cinema",
+      "lat": 47.476246,
+      "lng": 8.30818
+    },
+    {
+      "id": "Q47361558",
+      "name": "Scala",
+      "lat": 47.42653,
+      "lng": 9.37628
+    },
+    {
+      "id": "Q35722612",
+      "name": "Scala Kino-Theater",
+      "lat": 47.373142,
+      "lng": 8.536221
+    },
+    {
+      "id": "Q35719533",
+      "name": "Scala Theater",
+      "lat": 47.555038,
+      "lng": 7.591233
+    },
+    {
+      "id": "Q35721781",
+      "name": "Schlosskino",
+      "lat": 47.225657,
+      "lng": 8.816406
+    },
+    {
+      "id": "Q35720194",
+      "name": "Splendid Palace",
+      "lat": 46.948573,
+      "lng": 7.441746
+    },
+    {
+      "id": "Q50873004",
+      "name": "Sputnik im Marabu",
+      "lat": 47.46513,
+      "lng": 7.85587
+    },
+    {
+      "id": "Q47354390",
+      "name": "St. Josefshalle",
+      "lat": 46.97685,
+      "lng": 8.75684
+    },
+    {
+      "id": "Q13142923",
+      "name": "Stadtkino",
+      "lat": 47.553141,
+      "lng": 7.590736
+    },
+    {
+      "id": "Q47354389",
+      "name": "Stattkino",
+      "lat": 47.05692,
+      "lng": 8.31142
+    },
+    {
+      "id": "Q35722644",
+      "name": "Sternen Erotic Cinema",
+      "lat": 47.408946,
+      "lng": 8.545522
+    },
+    {
+      "id": "Q35719579",
+      "name": "Studio Central",
+      "lat": 47.557111,
+      "lng": 7.587678
+    },
+    {
+      "id": "Q688143",
+      "name": "Swiss Film Archive",
+      "lat": 46.520376,
+      "lng": 6.625025
+    },
+    {
+      "id": "Q47354386",
+      "name": "TaB Atelierkino",
+      "lat": 47.25014,
+      "lng": 8.18546
+    },
+    {
+      "id": "Q56557751",
+      "name": "Talgarten-Lichtspiele",
+      "lat": 47.5017,
+      "lng": 8.72575
+    },
+    {
+      "id": "Q35721554",
+      "name": "Teatro di Locarno",
+      "lat": 46.169901,
+      "lng": 8.795248
+    },
+    {
+      "id": "Q35719209",
+      "name": "Trafo Kino",
+      "lat": 47.478669,
+      "lng": 8.305394
+    },
+    {
+      "id": "Q35721436",
+      "name": "Zinéma",
+      "lat": 46.524054,
+      "lng": 6.627341
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q619845",
+      "name": "Bern Airport",
+      "lat": 46.912222,
+      "lng": 7.499444
+    },
+    {
+      "id": "Q289972",
+      "name": "Geneva International Airport",
+      "lat": 46.238333,
+      "lng": 6.109444
+    },
+    {
+      "id": "Q687341",
+      "name": "Grenchen Airport",
+      "lat": 47.181389,
+      "lng": 7.416389
+    },
+    {
+      "id": "Q1433651",
+      "name": "Interlaken Airport",
+      "lat": 46.6747,
+      "lng": 7.87786
+    },
+    {
+      "id": "Q687493",
+      "name": "Les Eplatures Airport",
+      "lat": 47.084167,
+      "lng": 6.793333
+    },
+    {
+      "id": "Q661389",
+      "name": "Lugano Airport",
+      "lat": 46.003611,
+      "lng": 8.910278
+    },
+    {
+      "id": "Q20459424",
+      "name": "Porrentruy Airport",
+      "lat": 47.410555,
+      "lng": 7.051667
+    },
+    {
+      "id": "Q687436",
+      "name": "Samedan Airport",
+      "lat": 46.534444,
+      "lng": 9.884167
+    },
+    {
+      "id": "Q687463",
+      "name": "Sion Airport",
+      "lat": 46.219167,
+      "lng": 7.326944
+    },
+    {
+      "id": "Q15114",
+      "name": "Zurich Airport",
+      "lat": 47.458056,
+      "lng": 8.548056
+    }
+  ]
+}

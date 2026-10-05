@@ -70,6 +70,20 @@ describe("suggestRegionPackForGameArea", () => {
     expect(suggestion!.packId).toBe(expectedWinner);
   });
 
+  it("prefers zurich specialty over switzerland on zurich overlap", () => {
+    const box = REGION_PACK_REFERENCE_BBOXES.zurich;
+    const gameArea = boxPolygon(box.south, box.west, box.north, box.east);
+    const suggestion = suggestRegionPackForGameArea(gameArea);
+    expect(suggestion?.packId).toBe("zurich");
+  });
+
+  it("prefers switzerland on country-scale overlap when specialty packs also score 1.0", () => {
+    const box = REGION_PACK_REFERENCE_BBOXES.switzerland;
+    const gameArea = boxPolygon(box.south, box.west, box.north, box.east);
+    const suggestion = suggestRegionPackForGameArea(gameArea);
+    expect(suggestion?.packId).toBe("switzerland");
+  });
+
   it("returns null when intersection is below max(α×packArea, β km²)", () => {
     const nyc = REGION_PACK_REFERENCE_BBOXES.nyc;
     // Tiny sliver along the southern edge — well below default α and β.
