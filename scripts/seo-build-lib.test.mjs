@@ -3,10 +3,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   countLiveH1,
+  decodeBasicEntities,
   diffHeadAssetKeys,
   extractHeadAssetKeys,
   hasBootSplashElement,
   hasPrerenderedRootMarker,
+  inlineStyleText,
   metaDescriptionContent,
   PERF_PRERENDER_PATHS,
   prerenderTargets,
@@ -232,4 +234,21 @@ test("countLiveH1 counts live h1 tags only", () => {
   assert.equal(countLiveH1("<h1>A</h1><h10>no</h10>"), 1);
   assert.equal(countLiveH1("<noscript><h1>Fallback</h1></noscript><h1 class=x>A</h1>"), 1);
   assert.equal(countLiveH1("<header><h1>A</h1></header><article><h1>B</h1></article>"), 2);
+});
+
+test("countLiveH1 ignores h1 text inside scripts", () => {
+  assert.equal(
+    countLiveH1('<script type="application/ld+json">{"x":"<h1>"}</script><h1>A</h1>'),
+    1,
+  );
+});
+
+test("inlineStyleText collects live style attributes only", () => {
+  const html =
+    '<main style="view-transition-name: _t_0_"></main><!-- <p style="color: red"> --><p style=\'gap: 1px\'>';
+  assert.equal(inlineStyleText(html), "view-transition-name: _t_0_;gap: 1px");
+});
+
+test("decodeBasicEntities counts visible characters", () => {
+  assert.equal(decodeBasicEntities("Hide &amp; Seek &quot;FAQ&quot;"), 'Hide & Seek "FAQ"');
 });

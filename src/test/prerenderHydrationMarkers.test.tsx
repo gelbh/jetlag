@@ -137,4 +137,27 @@ describe("finalizePrerenderDom", () => {
     expect(container.querySelector("section p")).toBe(routeBody);
     hydrated?.unmount();
   });
+
+  it("waits for a running view transition and strips its inline names", async () => {
+    const prerender = document.body.appendChild(document.createElement("div"));
+    prerender.id = "root";
+    const root = createRoot(prerender);
+    await act(async () => {
+      root.render(<p>static</p>);
+    });
+    Object.defineProperty(document, "activeViewTransition", { value: {}, configurable: true });
+    expect(finalizePrerenderDom()).toEqual({ ready: false });
+    Reflect.deleteProperty(document, "activeViewTransition");
+
+    const main = prerender.querySelector("p")!;
+    main.style.setProperty("view-transition-name", "_t_0_");
+    main.style.setProperty("view-transition-class", "jl-route-reveal");
+    main.style.setProperty("isolation", "isolate");
+    document.documentElement.style.setProperty("view-transition-name", "none");
+
+    expect(finalizePrerenderDom()).toMatchObject({ ready: true });
+    expect(main.getAttribute("style")).toBe("isolation: isolate;");
+    expect(document.documentElement.hasAttribute("style")).toBe(false);
+    root.unmount();
+  });
 });

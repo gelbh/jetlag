@@ -5,11 +5,13 @@ import { fileURLToPath } from "node:url";
 import {
   absoluteUrl,
   countLiveH1,
+  decodeBasicEntities,
   diffHeadAssetKeys,
   distHtmlPath,
   extractHeadAssetKeys,
   hasBootSplashElement,
   hasPrerenderedRootMarker,
+  inlineStyleText,
   loadCrawlPolicy,
   MAX_DESCRIPTION_CHARS,
   MAX_TITLE_CHARS,
@@ -67,7 +69,7 @@ for (const { path: urlPath, indexable } of targets) {
   }
 
   const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
-  const title = titleMatch?.[1]?.trim() ?? "";
+  const title = decodeBasicEntities(titleMatch?.[1]?.trim() ?? "");
   if (!title) {
     console.error(`${urlPath}: missing <title>`);
     failed = true;
@@ -90,7 +92,7 @@ for (const { path: urlPath, indexable } of targets) {
       failed = true;
     }
 
-    const description = metaDescriptionContent(html) ?? "";
+    const description = decodeBasicEntities(metaDescriptionContent(html) ?? "");
     if (!description || description.length > MAX_DESCRIPTION_CHARS) {
       console.error(
         `${urlPath}: meta description must be 1-${MAX_DESCRIPTION_CHARS} chars (got ${description.length})`,
@@ -136,6 +138,13 @@ for (const { path: urlPath, indexable } of targets) {
   if (html.includes('id="fire_app_check_') || html.includes('class="grecaptcha')) {
     console.error(
       `${urlPath}: prerender HTML contains the App Check reCAPTCHA container (see finalizePrerenderDom)`,
+    );
+    failed = true;
+  }
+
+  if (/view-transition-(name|class)\s*:/i.test(inlineStyleText(html))) {
+    console.error(
+      `${urlPath}: prerender HTML carries inline view-transition styles from a running route transition (see finalizePrerenderDom)`,
     );
     failed = true;
   }

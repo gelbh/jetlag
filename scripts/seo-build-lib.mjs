@@ -208,7 +208,24 @@ export function metaDescriptionContent(html) {
   return undefined;
 }
 
-/** `<h1>` elements in live markup (comments / noscript / template excluded). */
+const SCRIPT_SPAN_RE = /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi;
+
+/** `<h1>` elements in live markup (comments, noscript, template, style and script excluded). */
 export function countLiveH1(html) {
-  return (maskInert(html).match(/<h1\b/gi) ?? []).length;
+  const masked = maskInert(html).replace(SCRIPT_SPAN_RE, " ");
+  return (masked.match(/<h1\b/gi) ?? []).length;
+}
+
+/** Concatenated `style="…"` attribute values from live markup. */
+export function inlineStyleText(html) {
+  return [...maskInert(html).matchAll(/\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)]
+    .map((m) => m[1] ?? m[2])
+    .join(";");
+}
+
+const ENTITIES = { "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'" };
+
+/** Decode the entities serializers emit, so length budgets count visible characters. */
+export function decodeBasicEntities(text) {
+  return text.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => ENTITIES[entity]);
 }
