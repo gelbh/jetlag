@@ -17,22 +17,34 @@ const hidingPeriodMs = resolveHidingPeriodMs(rules);
 
 describe("surveyPhaseLabel", () => {
   it("returns dash before the game starts", () => {
-    expect(surveyPhaseLabel(false, rules, timer, false)).toBe("—");
+    expect(surveyPhaseLabel(false, rules, timer, false, Date.now())).toBe("—");
   });
 
   it("returns Moving when a hide move is in progress", () => {
-    expect(surveyPhaseLabel(true, rules, timer, true)).toBe("Moving");
+    expect(surveyPhaseLabel(true, rules, timer, true, Date.now())).toBe("Moving");
   });
 
   it("returns Hiding during the hiding period", () => {
     expect(
-      surveyPhaseLabel(true, rules, { accumulatedMs: 30_000, runningSince: null }, false),
+      surveyPhaseLabel(
+        true,
+        rules,
+        { accumulatedMs: 30_000, runningSince: null },
+        false,
+        Date.now(),
+      ),
     ).toBe("Hiding");
   });
 
   it("returns Seeking after the hiding period", () => {
     expect(
-      surveyPhaseLabel(true, rules, { accumulatedMs: 3_600_000, runningSince: null }, false),
+      surveyPhaseLabel(
+        true,
+        rules,
+        { accumulatedMs: 3_600_000, runningSince: null },
+        false,
+        Date.now(),
+      ),
     ).toBe("Seeking");
   });
 
@@ -43,10 +55,17 @@ describe("surveyPhaseLabel", () => {
         rules,
         { accumulatedMs: hidingPeriodMs - 1, runningSince: null },
         false,
+        Date.now(),
       ),
     ).toBe("Hiding");
     expect(
-      surveyPhaseLabel(true, rules, { accumulatedMs: hidingPeriodMs, runningSince: null }, false),
+      surveyPhaseLabel(
+        true,
+        rules,
+        { accumulatedMs: hidingPeriodMs, runningSince: null },
+        false,
+        Date.now(),
+      ),
     ).toBe("Seeking");
   });
 });
@@ -62,6 +81,7 @@ describe("mapIslandSessionStatus", () => {
         moveInProgress: false,
         sessionRules: rules,
         timerState: timer,
+        nowMs: Date.now(),
       }),
     ).toBe("Syncing");
     expect(
@@ -73,6 +93,7 @@ describe("mapIslandSessionStatus", () => {
         moveInProgress: false,
         sessionRules: rules,
         timerState: timer,
+        nowMs: Date.now(),
       }),
     ).toBe("Ready");
     expect(
@@ -84,6 +105,7 @@ describe("mapIslandSessionStatus", () => {
         moveInProgress: false,
         sessionRules: rules,
         timerState: timer,
+        nowMs: Date.now(),
       }),
     ).toBe("Waiting");
   });
@@ -98,6 +120,7 @@ describe("mapIslandSessionStatus", () => {
         moveInProgress: false,
         sessionRules: rules,
         timerState: { accumulatedMs: 30_000, runningSince: Date.now() },
+        nowMs: Date.now(),
         pendingQuestions: [
           {
             id: "pq-walk",
@@ -115,6 +138,24 @@ describe("mapIslandSessionStatus", () => {
     ).toBe("Walking");
   });
 
+  it("reads running elapsed against the passed server-frame now", () => {
+    const runningSince = 1_000_000;
+    const status = (nowMs: number) =>
+      mapIslandSessionStatus({
+        timerHasStarted: true,
+        timerSyncing: false,
+        timerRunning: true,
+        canStartGame: false,
+        moveInProgress: false,
+        sessionRules: rules,
+        timerState: { accumulatedMs: 0, runningSince },
+        nowMs,
+      });
+
+    expect(status(runningSince + hidingPeriodMs - 1_000)).toBe("Hiding");
+    expect(status(runningSince + hidingPeriodMs)).toBe("Seeking");
+  });
+
   it("returns Paused when the session clock is stopped", () => {
     expect(
       mapIslandSessionStatus({
@@ -125,6 +166,7 @@ describe("mapIslandSessionStatus", () => {
         moveInProgress: false,
         sessionRules: rules,
         timerState: { accumulatedMs: 30_000, runningSince: null },
+        nowMs: Date.now(),
       }),
     ).toBe("Paused");
   });
