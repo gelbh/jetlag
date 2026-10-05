@@ -38,7 +38,7 @@ export const FAQ_CONTENT: LearnPageContent = {
     {
       id: "where",
       heading: "Where can I play?",
-      lead: "Anywhere with map data. You can search for any place, draw your own game area, or import a KML or KMZ file. Built-in presets cover Dublin, New York City, Portland (Maine), London, Tokyo, Osaka, Zürich and Lucerne, and Prince Rupert.",
+      lead: "Anywhere with map data. You can search for any place, draw your own game area, or import a KML or KMZ file. Built-in presets cover Dublin, New York City, Portland (Maine), London, Tokyo, Osaka, Switzerland and its cantons, and Prince Rupert.",
       blocks: [
         {
           kind: "paragraph",
