@@ -14,26 +14,7 @@ export type RouteSeo = {
 
 type RouteSeoSource = Omit<RouteSeo, "robots">;
 
-export const APP_ROUTE_PATHS = [
-  "/",
-  "/feedback",
-  "/stats",
-  "/friends",
-  "/leaderboard",
-  "/privacy",
-  "/terms",
-  "/premium",
-  "/create",
-  "/join",
-  "/admin",
-  "/admin/incidents",
-  "/admin/incidents/:incidentId",
-  "/admin/preload-requests",
-  "/presets",
-  "/presets/new",
-  "/presets/:id/edit",
-  "/map",
-] as const;
+export { APP_ROUTE_PATHS } from "./appRoutePaths";
 
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
 const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
@@ -42,6 +23,9 @@ const DEFAULT_OG_IMAGE_PATH = "/og-default.png";
 const INDEXABLE_PATHS = new Set(crawlPolicy.indexablePaths);
 const UNOFFICIAL_DISCLAIMER =
   "Unofficial fan companion. Not affiliated with Jet Lag: The Game, the board game, or Nebula.";
+
+/** Home tab/share title: brand plus what the app does (keep ≤ 60 chars; JSON-LD keeps the brand). */
+export const HOME_TITLE = `${LEGAL_APP_NAME} · Live Hide + Seek Maps`;
 
 const HOME_DESCRIPTION =
   "Jet Lag Map Companion is an unofficial fan companion for Jet Lag Hide + Seek. Host or join synced map sessions with live questions, zones, and tools.";
@@ -92,7 +76,7 @@ const TERMS_DESCRIPTION = `Terms of use for ${LEGAL_APP_NAME}, an unofficial fan
 
 const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
   "/": {
-    title: LEGAL_APP_NAME,
+    title: HOME_TITLE,
     description: HOME_DESCRIPTION,
     canonicalPath: "/",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,

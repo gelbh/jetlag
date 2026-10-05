@@ -2,6 +2,14 @@
 export const PWA_TILE_CACHE_MAX_ENTRIES = 500;
 export const PWA_TILE_CACHE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
+/**
+ * Game-area tile caches: tiles the player viewed inside the session play area.
+ * Separate budget from the general tile cache so roaming outside the play area
+ * cannot evict them. Viewed tiles only — never prefetched (OSM tile policy).
+ */
+export const PWA_GAME_AREA_TILE_CACHE_MAX_ENTRIES = 2000;
+export const PWA_GAME_AREA_TILE_CACHE_MAX_AGE_SECONDS = 14 * 24 * 60 * 60;
+
 /** Soft quota before logging storage pressure (~250 MB). */
 export const PWA_SOFT_STORAGE_BYTES = 250 * 1024 * 1024;
 
