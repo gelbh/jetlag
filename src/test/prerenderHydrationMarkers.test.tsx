@@ -82,6 +82,7 @@ function HydratedShell({ count }: { count: number }) {
 describe("finalizePrerenderDom", () => {
   afterEach(() => {
     document.body.innerHTML = "";
+    document.documentElement.removeAttribute("style");
   });
 
   it("adds the markers hydrateRoot needs so the prerendered DOM is kept", async () => {
@@ -146,8 +147,11 @@ describe("finalizePrerenderDom", () => {
       root.render(<p>static</p>);
     });
     Object.defineProperty(document, "activeViewTransition", { value: {}, configurable: true });
-    expect(finalizePrerenderDom()).toEqual({ ready: false });
-    Reflect.deleteProperty(document, "activeViewTransition");
+    try {
+      expect(finalizePrerenderDom()).toEqual({ ready: false });
+    } finally {
+      Reflect.deleteProperty(document, "activeViewTransition");
+    }
 
     const main = prerender.querySelector("p")!;
     main.style.setProperty("view-transition-name", "_t_0_");
