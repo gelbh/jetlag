@@ -1,6 +1,6 @@
 import { Button, Group, Modal, Stack, Text, TextInput } from "@mantine/core";
 import { useState } from "react";
-import { JETLAG_MODAL_Z_INDEX } from "../../theme/theme";
+import { JETLAG_MODAL_Z_INDEX } from "../../../theme/theme";
 
 export type AdminPresetDialogMode = "save" | "rename" | "overwrite";
 

@@ -2,8 +2,8 @@ import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
-import type { IncidentRecord } from "../../domain/incident/incidentTypes";
-import { jetlagTheme } from "../../theme/theme";
+import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
+import { jetlagTheme } from "../../../theme/theme";
 import { AdminIncidentInbox } from "./AdminIncidentInbox";
 
 function makeIncident(overrides: Partial<IncidentRecord> = {}): IncidentRecord {
