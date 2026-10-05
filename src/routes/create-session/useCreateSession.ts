@@ -1,4 +1,3 @@
-import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import {
   startTransition,
   useCallback,
@@ -35,16 +34,15 @@ import {
   BUNDLED_REGION_PACK_GEO_REVISION,
   type RegionPackId,
 } from "../../domain/regions/regionPack";
-import type {
-  CustomMatchingAreasByLevel,
-  MatchingAdminLevel,
-  SessionCustomLocationPin,
-} from "../../domain/session/catalog/sessionCustomContent";
 import { generateLocalCode } from "../../domain/session/meta/sessionCode";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { matchGamePresetForPlace } from "../../domain/session/presets/gamePresetSearch";
-import { suggestPresetDataReuseForGameArea } from "../../domain/session/presets/presetDataReuse";
+import {
+  applySilentReuseDraftGeo,
+  matchingAreaFeatureKeys,
+  suggestPresetDataReuseForGameArea,
+} from "../../domain/session/presets/presetDataReuse";
 import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/presetFavourites";
 import {
   type GameSize,
@@ -89,104 +87,6 @@ import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const MISSING_GAME_AREA_ERROR =
   "Search for a place, load a preset, or open Draw to set the play area.";
-
-const MATCHING_ADMIN_LEVELS: readonly MatchingAdminLevel[] = [4, 6, 8, 9];
-
-function matchingFeatureKey(feature: Feature): string | null {
-  if (typeof feature.id === "string" || typeof feature.id === "number") {
-    return String(feature.id);
-  }
-  const propsId = feature.properties?.id;
-  if (typeof propsId === "string" || typeof propsId === "number") {
-    return String(propsId);
-  }
-  return null;
-}
-
-function parseMatchingFeatureCollection(
-  raw: string | undefined,
-): Feature<Polygon | MultiPolygon>[] {
-  if (!raw) {
-    return [];
-  }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return [];
-  }
-  if (
-    !parsed ||
-    typeof parsed !== "object" ||
-    (parsed as FeatureCollection).type !== "FeatureCollection" ||
-    !Array.isArray((parsed as FeatureCollection).features)
-  ) {
-    return [];
-  }
-  const features: Feature<Polygon | MultiPolygon>[] = [];
-  for (const feature of (parsed as FeatureCollection).features) {
-    if (!feature?.geometry) {
-      continue;
-    }
-    if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon") {
-      continue;
-    }
-    features.push(feature as Feature<Polygon | MultiPolygon>);
-  }
-  return features;
-}
-
-function mergeMatchingLevels(
-  base: CustomMatchingAreasByLevel | undefined,
-  overlay: CustomMatchingAreasByLevel | undefined,
-): CustomMatchingAreasByLevel | undefined {
-  if (!overlay) {
-    return base;
-  }
-  if (!base) {
-    return overlay;
-  }
-
-  const merged: CustomMatchingAreasByLevel = { ...base };
-  for (const level of MATCHING_ADMIN_LEVELS) {
-    const overlayRaw = overlay[level];
-    if (!overlayRaw) {
-      continue;
-    }
-    const baseRaw = base[level];
-    if (!baseRaw) {
-      merged[level] = overlayRaw;
-      continue;
-    }
-
-    const byId = new Map<string, Feature<Polygon | MultiPolygon>>();
-    let nextAnonymous = 0;
-    for (const feature of [
-      ...parseMatchingFeatureCollection(baseRaw),
-      ...parseMatchingFeatureCollection(overlayRaw),
-    ]) {
-      const key = matchingFeatureKey(feature) ?? `anon:${level}:${nextAnonymous++}`;
-      if (!byId.has(key)) {
-        byId.set(key, feature);
-      }
-    }
-    merged[level] = JSON.stringify({
-      type: "FeatureCollection",
-      features: [...byId.values()],
-    } satisfies FeatureCollection);
-  }
-  return merged;
-}
-
-function dedupePins(pins: readonly SessionCustomLocationPin[]): SessionCustomLocationPin[] {
-  const byId = new Map<string, SessionCustomLocationPin>();
-  for (const pin of pins) {
-    if (!byId.has(pin.id)) {
-      byId.set(pin.id, pin);
-    }
-  }
-  return [...byId.values()];
-}
 
 export function useCreateSession() {
   const navigate = useAppNavigate();
@@ -274,6 +174,12 @@ export function useCreateSession() {
   /** Mirrors appliedPresetRef after a successful Load-preset apply (reuse exclude + effect wake). */
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
   const presetApplyGenerationRef = useRef(0);
+  /** Pin ids last overlaid by silent reuse (stripped on the next fingerprint apply). */
+  const silentReusePinIdsRef = useRef<Set<string>>(new Set());
+  /** Suggestion matching keys (`level:key`) last overlaid by silent reuse. */
+  const silentReuseSuggestionMatchingKeysRef = useRef<Set<string>>(new Set());
+  /** Pack-boundary matching keys last applied by silent reuse pack load. */
+  const silentReusePackMatchingKeysRef = useRef<Set<string>>(new Set());
   const [presetApplyNonce, setPresetApplyNonce] = useState(0);
   const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
   const loadedPresetId = searchParams.get("preset");
@@ -394,6 +300,10 @@ export function useCreateSession() {
       setGameSizeUserOverrode(false);
       setGameSize(resolvedGameSize);
       setDistanceUnit(unit);
+      // Load-preset becomes the non-reuse base; drop prior silent-reuse tracking.
+      silentReusePinIdsRef.current = new Set();
+      silentReuseSuggestionMatchingKeysRef.current = new Set();
+      silentReusePackMatchingKeysRef.current = new Set();
       setAdvancedSettings(resolvedAdvanced);
       setSelectedPlaceId(null);
       setSelectedPlace(null);
@@ -704,35 +614,59 @@ export function useCreateSession() {
       excludePresetIds: loadedPresetId ? [loadedPresetId] : undefined,
     });
 
-    if (suggestion.sourcePresetIds.length === 0) {
+    const hadSilentReuse =
+      silentReusePinIdsRef.current.size > 0 ||
+      silentReuseSuggestionMatchingKeysRef.current.size > 0 ||
+      silentReusePackMatchingKeysRef.current.size > 0;
+    const hasSuggestionSources = suggestion.sourcePresetIds.length > 0;
+
+    if (!hasSuggestionSources && !hadSilentReuse) {
       return;
     }
 
-    const hasCustomGeo =
-      Boolean(suggestion.customMatchingAreas) || (suggestion.customLocationPins?.length ?? 0) > 0;
+    const nextPack = suggestion.regionPackId;
+    const nextSub = suggestion.subregionId;
+    const packChanged =
+      Boolean(nextPack) && (nextPack !== regionPackId || nextSub !== regionPackSubregionId);
+    // Keep silent pack matching across same-pack fingerprint nudges; drop it on reframe-away or pack switch.
+    const stripPackMatching = !nextPack || packChanged || !hasSuggestionSources;
 
-    if (hasCustomGeo) {
-      setAdvancedSettings((prev) => ({
-        ...prev,
-        customMatchingAreas: mergeMatchingLevels(
-          prev.customMatchingAreas,
-          suggestion.customMatchingAreas,
-        ),
-        customLocationPins: dedupePins([
-          ...(prev.customLocationPins ?? []),
-          ...(suggestion.customLocationPins ?? []),
-        ]),
-      }));
+    const matchingKeysToStrip = new Set(silentReuseSuggestionMatchingKeysRef.current);
+    if (stripPackMatching) {
+      for (const key of silentReusePackMatchingKeysRef.current) {
+        matchingKeysToStrip.add(key);
+      }
     }
 
-    const nextPack = suggestion.regionPackId;
+    // Reconcile suggestion overlay against the current frame (strip prior reuse, keep Load/host).
+    setAdvancedSettings((prev) => {
+      const applied = applySilentReuseDraftGeo({
+        previousPins: prev.customLocationPins,
+        previousMatching: prev.customMatchingAreas,
+        previousReusePinIds: silentReusePinIdsRef.current,
+        previousReuseMatchingKeys: matchingKeysToStrip,
+        suggestionPins: suggestion.customLocationPins,
+        suggestionMatching: suggestion.customMatchingAreas,
+      });
+      silentReusePinIdsRef.current = applied.appliedPinIds;
+      silentReuseSuggestionMatchingKeysRef.current = matchingAreaFeatureKeys(
+        suggestion.customMatchingAreas,
+      );
+      if (stripPackMatching) {
+        silentReusePackMatchingKeysRef.current = new Set();
+      }
+      return {
+        ...prev,
+        customMatchingAreas: applied.customMatchingAreas ?? {},
+        customLocationPins: applied.customLocationPins,
+      };
+    });
+
     // No pack in suggestion: keep any pack already set by Load preset (upgrade gate).
     if (!nextPack) {
       return;
     }
 
-    const nextSub = suggestion.subregionId;
-    const packChanged = nextPack !== regionPackId || nextSub !== regionPackSubregionId;
     if (!packChanged) {
       return;
     }
@@ -749,17 +683,33 @@ export function useCreateSession() {
         if (generation !== presetApplyGenerationRef.current) {
           return;
         }
-        setAdvancedSettings((prev) => ({
-          ...prev,
-          customMatchingAreas: mergeMatchingLevels(
-            boundaries.customMatchingAreas,
+        const keysToStrip = new Set(silentReuseSuggestionMatchingKeysRef.current);
+        for (const key of silentReusePackMatchingKeysRef.current) {
+          keysToStrip.add(key);
+        }
+        setAdvancedSettings((prev) => {
+          const applied = applySilentReuseDraftGeo({
+            previousPins: prev.customLocationPins,
+            previousMatching: prev.customMatchingAreas,
+            previousReusePinIds: silentReusePinIdsRef.current,
+            previousReuseMatchingKeys: keysToStrip,
+            suggestionPins: suggestion.customLocationPins,
+            suggestionMatching: suggestion.customMatchingAreas,
+            packMatching: boundaries.customMatchingAreas,
+          });
+          silentReusePinIdsRef.current = applied.appliedPinIds;
+          silentReuseSuggestionMatchingKeysRef.current = matchingAreaFeatureKeys(
             suggestion.customMatchingAreas,
-          ),
-          customLocationPins: dedupePins([
-            ...(prev.customLocationPins ?? []),
-            ...(suggestion.customLocationPins ?? []),
-          ]),
-        }));
+          );
+          silentReusePackMatchingKeysRef.current = matchingAreaFeatureKeys(
+            boundaries.customMatchingAreas,
+          );
+          return {
+            ...prev,
+            customMatchingAreas: applied.customMatchingAreas ?? {},
+            customLocationPins: applied.customLocationPins,
+          };
+        });
         // Host-framed gameArea wins: never apply boundaries.playArea.
       })
       .catch(() => {

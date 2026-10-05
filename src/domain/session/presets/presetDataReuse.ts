@@ -144,7 +144,8 @@ function resolveBasePackScore(
   return base;
 }
 
-function featureKey(feature: Feature): string | null {
+/** Stable id for matching features; geometry JSON when the feature has no id. */
+export function matchingFeatureKey(feature: Feature): string {
   if (typeof feature.id === "string" || typeof feature.id === "number") {
     return String(feature.id);
   }
@@ -152,7 +153,199 @@ function featureKey(feature: Feature): string | null {
   if (typeof propsId === "string" || typeof propsId === "number") {
     return String(propsId);
   }
-  return null;
+  return `geom:${JSON.stringify(feature.geometry)}`;
+}
+
+function parseMatchingFeatureCollection(
+  raw: string | undefined,
+): Feature<Polygon | MultiPolygon>[] {
+  if (!raw) {
+    return [];
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    (parsed as FeatureCollection).type !== "FeatureCollection" ||
+    !Array.isArray((parsed as FeatureCollection).features)
+  ) {
+    return [];
+  }
+  const features: Feature<Polygon | MultiPolygon>[] = [];
+  for (const feature of (parsed as FeatureCollection).features) {
+    if (!feature?.geometry) {
+      continue;
+    }
+    if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon") {
+      continue;
+    }
+    features.push(feature as Feature<Polygon | MultiPolygon>);
+  }
+  return features;
+}
+
+export function matchingAreaFeatureKeys(
+  areas: CustomMatchingAreasByLevel | undefined,
+): Set<string> {
+  const keys = new Set<string>();
+  if (!areas) {
+    return keys;
+  }
+  for (const level of MATCHING_ADMIN_LEVELS) {
+    for (const feature of parseMatchingFeatureCollection(areas[level])) {
+      keys.add(`${level}:${matchingFeatureKey(feature)}`);
+    }
+  }
+  return keys;
+}
+
+export function dedupePins(pins: readonly SessionCustomLocationPin[]): SessionCustomLocationPin[] {
+  const byId = new Map<string, SessionCustomLocationPin>();
+  for (const pin of pins) {
+    if (!byId.has(pin.id)) {
+      byId.set(pin.id, pin);
+    }
+  }
+  return [...byId.values()];
+}
+
+export function mergeMatchingLevels(
+  base: CustomMatchingAreasByLevel | undefined,
+  overlay: CustomMatchingAreasByLevel | undefined,
+): CustomMatchingAreasByLevel | undefined {
+  if (!overlay) {
+    return base;
+  }
+  if (!base) {
+    return overlay;
+  }
+
+  const merged: CustomMatchingAreasByLevel = { ...base };
+  for (const level of MATCHING_ADMIN_LEVELS) {
+    const overlayRaw = overlay[level];
+    if (!overlayRaw) {
+      continue;
+    }
+    const baseRaw = base[level];
+    if (!baseRaw) {
+      merged[level] = overlayRaw;
+      continue;
+    }
+
+    const byId = new Map<string, Feature<Polygon | MultiPolygon>>();
+    for (const feature of [
+      ...parseMatchingFeatureCollection(baseRaw),
+      ...parseMatchingFeatureCollection(overlayRaw),
+    ]) {
+      const key = matchingFeatureKey(feature);
+      if (!byId.has(key)) {
+        byId.set(key, feature);
+      }
+    }
+    merged[level] = JSON.stringify({
+      type: "FeatureCollection",
+      features: [...byId.values()],
+    } satisfies FeatureCollection);
+  }
+  return merged;
+}
+
+export function stripReusePins(
+  pins: readonly SessionCustomLocationPin[] | undefined,
+  reuseIds: ReadonlySet<string>,
+): SessionCustomLocationPin[] {
+  if (!pins?.length || reuseIds.size === 0) {
+    return pins ? [...pins] : [];
+  }
+  return pins.filter((pin) => !reuseIds.has(pin.id));
+}
+
+export function stripReuseMatchingAreas(
+  areas: CustomMatchingAreasByLevel | undefined,
+  reuseKeys: ReadonlySet<string>,
+): CustomMatchingAreasByLevel | undefined {
+  if (!areas || reuseKeys.size === 0) {
+    return areas;
+  }
+
+  const next: CustomMatchingAreasByLevel = {};
+  let keptAny = false;
+  for (const level of MATCHING_ADMIN_LEVELS) {
+    const raw = areas[level];
+    if (!raw) {
+      continue;
+    }
+    const kept = parseMatchingFeatureCollection(raw).filter(
+      (feature) => !reuseKeys.has(`${level}:${matchingFeatureKey(feature)}`),
+    );
+    if (kept.length === 0) {
+      continue;
+    }
+    keptAny = true;
+    next[level] = JSON.stringify({
+      type: "FeatureCollection",
+      features: kept,
+    } satisfies FeatureCollection);
+  }
+  return keptAny ? next : undefined;
+}
+
+export type SilentReuseGeoApply = {
+  customMatchingAreas: CustomMatchingAreasByLevel | undefined;
+  customLocationPins: SessionCustomLocationPin[];
+  appliedPinIds: Set<string>;
+  appliedMatchingKeys: Set<string>;
+};
+
+/**
+ * Drop the previous silent-reuse overlay, keep host/Load base, then layer pack
+ * boundaries (optional) and the current suggestion.
+ */
+export function applySilentReuseDraftGeo(input: {
+  previousPins: readonly SessionCustomLocationPin[] | undefined;
+  previousMatching: CustomMatchingAreasByLevel | undefined;
+  previousReusePinIds: ReadonlySet<string>;
+  previousReuseMatchingKeys: ReadonlySet<string>;
+  suggestionPins?: readonly SessionCustomLocationPin[];
+  suggestionMatching?: CustomMatchingAreasByLevel;
+  packMatching?: CustomMatchingAreasByLevel;
+}): SilentReuseGeoApply {
+  const basePins = stripReusePins(input.previousPins, input.previousReusePinIds);
+  const baseMatching = stripReuseMatchingAreas(
+    input.previousMatching,
+    input.previousReuseMatchingKeys,
+  );
+
+  let nextMatching = baseMatching;
+  const appliedMatchingKeys = new Set<string>();
+
+  if (input.packMatching) {
+    nextMatching = mergeMatchingLevels(nextMatching, input.packMatching);
+    for (const key of matchingAreaFeatureKeys(input.packMatching)) {
+      appliedMatchingKeys.add(key);
+    }
+  }
+  if (input.suggestionMatching) {
+    nextMatching = mergeMatchingLevels(nextMatching, input.suggestionMatching);
+    for (const key of matchingAreaFeatureKeys(input.suggestionMatching)) {
+      appliedMatchingKeys.add(key);
+    }
+  }
+
+  const suggestionPins = input.suggestionPins ?? [];
+  const nextPins = dedupePins([...basePins, ...suggestionPins]);
+
+  return {
+    customMatchingAreas: nextMatching,
+    customLocationPins: nextPins,
+    appliedPinIds: new Set(suggestionPins.map((pin) => pin.id)),
+    appliedMatchingKeys,
+  };
 }
 
 function mergeMatchingAreas(
@@ -163,7 +356,6 @@ function mergeMatchingAreas(
 
   for (const level of MATCHING_ADMIN_LEVELS) {
     const byId = new Map<string, Feature<Polygon | MultiPolygon>>();
-    let nextAnonymous = 0;
 
     for (const { preset } of qualifiers) {
       const raw = preset.customMatchingAreas?.[level];
@@ -171,34 +363,11 @@ function mergeMatchingAreas(
         continue;
       }
 
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(raw);
-      } catch {
-        continue;
-      }
-
-      if (
-        !parsed ||
-        typeof parsed !== "object" ||
-        (parsed as FeatureCollection).type !== "FeatureCollection" ||
-        !Array.isArray((parsed as FeatureCollection).features)
-      ) {
-        continue;
-      }
-
-      for (const feature of (parsed as FeatureCollection).features) {
-        if (!feature?.geometry) {
-          continue;
-        }
-        if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon") {
-          continue;
-        }
-        const polyFeature = feature as Feature<Polygon | MultiPolygon>;
+      for (const polyFeature of parseMatchingFeatureCollection(raw)) {
         if (!booleanIntersects(polyFeature, framedPolygon)) {
           continue;
         }
-        const key = featureKey(polyFeature) ?? `anon:${level}:${nextAnonymous++}`;
+        const key = matchingFeatureKey(polyFeature);
         if (!byId.has(key)) {
           byId.set(key, polyFeature);
         }

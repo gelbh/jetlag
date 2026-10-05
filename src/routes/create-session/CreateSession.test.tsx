@@ -217,6 +217,34 @@ const DUBLIN_CITY_NUDGED: GameArea = {
   ],
 };
 
+/** London-scale polygon far from Dublin presets (no silent reuse qualifiers). */
+const LONDON_CITY_GAME_AREA: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [-0.25, 51.45],
+      [0.05, 51.45],
+      [0.05, 51.55],
+      [-0.25, 51.55],
+      [-0.25, 51.45],
+    ],
+  ],
+};
+
+function level8MatchingJson(id: string, polygon: GameArea): string {
+  return JSON.stringify({
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        id,
+        properties: { id, name: id },
+        geometry: polygon,
+      },
+    ],
+  });
+}
+
 function baseCustomPreset(
   partial: Partial<GamePreset> & Pick<GamePreset, "id" | "name">,
 ): GamePreset {
@@ -1065,5 +1093,93 @@ describe("CreateSession", () => {
       await Promise.resolve();
     });
     expect(loadRegionPackSessionBoundaries).toHaveBeenCalledTimes(callsAfterAttach);
+  });
+
+  it("clears silent-reuse pins after reframing away from the qualifying area", async () => {
+    seedCustomPresets(
+      baseCustomPreset({
+        id: "custom-dublin",
+        name: "My Dublin",
+        gameArea: DUBLIN_CITY_GAME_AREA,
+        regionPackId: "dublin",
+        customLocationPins: [{ id: "dublin-pin", name: "Spire pin", point: [53.35, -6.26] }],
+      }),
+    );
+    parseBoundaryFile.mockResolvedValueOnce(DUBLIN_CITY_GAME_AREA);
+    renderCreateSession();
+
+    importBoundaryFile();
+    await waitFor(() => {
+      expect(loadRegionPackSessionBoundaries).toHaveBeenCalledWith("dublin", undefined);
+    });
+
+    goToRules();
+    openCustomContent();
+    expect(await screen.findByText("Spire pin")).toBeInTheDocument();
+
+    // Back to game-area step and replace the frame (not Add another area).
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    parseBoundaryFile.mockResolvedValueOnce(LONDON_CITY_GAME_AREA);
+    const input = document.querySelector<HTMLInputElement>('input[accept=".kml,.kmz"]');
+    expect(input).toBeTruthy();
+    fireEvent.change(input!, {
+      target: {
+        files: [
+          new File(["<kml/>"], "london.kml", { type: "application/vnd.google-earth.kml+xml" }),
+        ],
+      },
+    });
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("london.kml")).toBeInTheDocument();
+    });
+
+    goToRules();
+    openCustomContent();
+    await waitFor(() => {
+      expect(screen.queryByText("Spire pin")).toBeNull();
+    });
+  });
+
+  it("keeps Load-preset custom matching when silent reuse loads pack boundaries", async () => {
+    seedCustomPresets(
+      baseCustomPreset({
+        id: "loaded",
+        name: "Loaded",
+        gameArea: DUBLIN_CITY_GAME_AREA,
+        // No pack: Load keeps customMatchingAreas; silent reuse attaches dublin.
+        customMatchingAreas: {
+          8: level8MatchingJson("load-feat", DUBLIN_CITY_GAME_AREA),
+        },
+        customLocationPins: [{ id: "loaded-pin", name: "Loaded pin", point: [53.35, -6.26] }],
+      }),
+      baseCustomPreset({
+        id: "other",
+        name: "Other",
+        gameArea: DUBLIN_CITY_GAME_AREA,
+        regionPackId: "dublin",
+        customLocationPins: [{ id: "other-pin", name: "Other pin", point: [53.34, -6.25] }],
+      }),
+    );
+
+    loadRegionPackSessionBoundaries.mockResolvedValueOnce({
+      playArea: DUBLIN_CITY_GAME_AREA,
+      customMatchingAreas: {
+        6: level8MatchingJson("pack-feat", DUBLIN_CITY_GAME_AREA),
+      },
+    });
+
+    renderCreateSession("/create?preset=loaded");
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("loaded");
+    });
+    await waitFor(() => {
+      expect(loadRegionPackSessionBoundaries).toHaveBeenCalledWith("dublin", undefined);
+    });
+
+    goToRules();
+    openCustomContent();
+    expect(await screen.findByText("Loaded pin")).toBeInTheDocument();
+    expect(screen.getByText("Other pin")).toBeInTheDocument();
+    expect(screen.getByText(/3rd division \(admin level 8\)/i).textContent).toMatch(/Uploaded/i);
   });
 });
