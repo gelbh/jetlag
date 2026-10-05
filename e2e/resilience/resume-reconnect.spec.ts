@@ -10,23 +10,17 @@ import {
   test,
 } from "../fixtures";
 
-test.setTimeout(120_000);
-
 async function dispatchVisibilityChange(page: Page) {
   await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
 }
 
-test("five minutes offline then resume: live again in < 10 s with the same uid", async ({
+// fixme: ~1/5 runs: offline lands mid membership-heal getDocFromServer; lastSyncError sticks as 'Sync issue' after reconnect
+test.fixme("five minutes offline then resume: live again in < 10 s with the same uid", async ({
   page,
   context,
-  e2eNetwork,
 }) => {
-  test.fixme(
-    true,
-    "~1/5 runs: offline lands mid membership-heal getDocFromServer; lastSyncError sticks as 'Sync issue' after reconnect",
-  );
   await page.clock.install();
-  await prepareE2EPage(page, e2eNetwork);
+  await prepareE2EPage(page);
   await createHostSession(page);
   await expect.poll(() => readSyncStatusLabel(page), { timeout: 15_000 }).toBe("Synced");
   const uidBefore = await readE2EUid(page);

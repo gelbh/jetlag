@@ -1,5 +1,4 @@
 import { defineConfig, devices } from "@playwright/test";
-import type { BlockExternalAssetsOptions } from "./e2e/fixtures/network";
 
 const firebaseEnv = {
   VITE_USE_FIREBASE_EMULATOR: "true",
@@ -11,6 +10,8 @@ const firebaseEnv = {
   VITE_FIREBASE_APP_ID: "1:1234567890:web:demo",
 };
 
+/** CI, or `test:e2e:resilience` (E2E_PREVIEW=1): build + vite preview instead of dev. */
+const usePreviewBuild = Boolean(process.env.CI || process.env.E2E_PREVIEW);
 const previewCommand = "npm run preview -- --host 127.0.0.1 --port 4173 --strictPort";
 
 const mobileDevice = {
@@ -18,7 +19,7 @@ const mobileDevice = {
   browserName: "chromium" as const,
 };
 
-export default defineConfig<{ e2eNetwork: BlockExternalAssetsOptions }>({
+export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
   workers: 1,
@@ -53,26 +54,27 @@ export default defineConfig<{ e2eNetwork: BlockExternalAssetsOptions }>({
             testMatch: /e2e\/smoke\/.+\.spec\.ts/,
             use: mobileDevice,
           },
-          {
-            // Offline / lie-fi gameplay. Needs the real SW (precache, offline
-            // boot) against the preview build, so it opts back into workers.
-            name: "resilience",
-            testMatch: /e2e\/resilience\/.+\.spec\.ts/,
-            use: {
-              ...mobileDevice,
-              serviceWorkers: "allow",
-              e2eNetwork: { routeScope: "context" },
-            },
-          },
+          // Offline / lie-fi gameplay needs the real SW (precache, offline boot),
+          // which only the preview build registers: listed only when preview runs.
+          ...(usePreviewBuild
+            ? [
+                {
+                  name: "resilience",
+                  testMatch: /e2e\/resilience\/.+\.spec\.ts/,
+                  timeout: 120_000,
+                  use: { ...mobileDevice, serviceWorkers: "allow" as const },
+                },
+              ]
+            : []),
         ],
   webServer: {
-    command: process.env.CI
+    command: usePreviewBuild
       ? // E2E_SKIP_BUILD: a second CI run in the same job reuses the first one's dist/.
         `${process.env.E2E_SKIP_BUILD ? "" : "npm run build && "}${previewCommand}`
       : "npm run dev -- --host 127.0.0.1 --port 4173 --strictPort",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
-    timeout: process.env.CI ? 180_000 : 120_000,
+    timeout: process.env.CI ? 180_000 : usePreviewBuild ? 300_000 : 120_000,
     env: firebaseEnv,
   },
 });

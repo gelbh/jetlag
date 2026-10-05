@@ -9,20 +9,18 @@ import {
   waitForServiceWorkerControl,
 } from "../fixtures";
 
-test.setTimeout(120_000);
-
 test("radar shades the map after an offline reload (geometry WASM is precached)", async ({
   page,
   context,
-  e2eNetwork,
 }) => {
-  await openMapWithLocalSession(page, { network: e2eNetwork });
+  await openMapWithLocalSession(page);
   await completeRadarSolo(page);
   await waitForServiceWorkerControl(page);
   expect(await listPrecachedUrls(page, /\.wasm$/)).not.toHaveLength(0);
 
   const failedAssets: string[] = [];
-  page.on("requestfailed", (request) => {
+  // Context-level: also sees fetches the service worker makes itself.
+  context.on("requestfailed", (request) => {
     if (new URL(request.url()).pathname.startsWith("/assets/")) {
       failedAssets.push(request.url());
     }

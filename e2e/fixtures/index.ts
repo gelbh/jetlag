@@ -1,5 +1,4 @@
 import { type BrowserContext, test as base, type Page } from "@playwright/test";
-import type { BlockExternalAssetsOptions } from "./network";
 import {
   createHostSession,
   createMultiplayerContexts,
@@ -16,18 +15,15 @@ export type HostHiderFixture = {
 };
 
 export const test = base.extend<{
-  /** Project-level stub options (resilience routes on the context for the SW). */
-  e2eNetwork: BlockExternalAssetsOptions;
   localMap: Page;
   hostHider: HostHiderFixture;
 }>({
-  e2eNetwork: [{}, { option: true }],
-  localMap: async ({ page, e2eNetwork }, runWithPage) => {
-    await openMapWithLocalSession(page, { network: e2eNetwork });
+  localMap: async ({ page }, runWithPage) => {
+    await openMapWithLocalSession(page);
     await runWithPage(page);
   },
-  hostHider: async ({ browser, e2eNetwork }, runFixture) => {
-    const ctx = await createMultiplayerContexts(browser, e2eNetwork);
+  hostHider: async ({ browser }, runFixture) => {
+    const ctx = await createMultiplayerContexts(browser);
     const { code } = await createHostSession(ctx.hostPage);
     await joinAsRole(ctx.guestPage, code, "hider");
     await runFixture({ ...ctx, code });

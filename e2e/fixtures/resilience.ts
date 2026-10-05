@@ -43,11 +43,11 @@ export async function readE2EUid(page: Page): Promise<string | null> {
   return page.evaluate(() => window.__JETLAG_E2E__?.currentUid() ?? null);
 }
 
-/** Resolves once the PWA worker has installed (precache done) and controls this page. */
+/**
+ * Resolves once the PWA worker has installed (precache done) and controls this
+ * page. Only the preview build registers it: run via `test:e2e:resilience`.
+ */
 export async function waitForServiceWorkerControl(page: Page): Promise<void> {
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-  });
   await page.waitForFunction(() => navigator.serviceWorker.controller != null, undefined, {
     timeout: 30_000,
   });

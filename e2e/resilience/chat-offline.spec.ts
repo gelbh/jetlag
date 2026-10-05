@@ -1,19 +1,20 @@
 import type { Page } from "@playwright/test";
-import { expect, goOffline, goOnline, openChat, pendingSyncBadges, test } from "../fixtures";
+import {
+  expect,
+  goOffline,
+  goOnline,
+  openSocialChat,
+  pendingSyncBadges,
+  socialChatScroll,
+  test,
+} from "../fixtures";
 
-test.setTimeout(120_000);
+const MESSAGES = ["rz-offline-a", "rz-offline-b", "rz-offline-c"];
 
-async function openSocialChat(page: Page) {
-  await openChat(page);
-  await page.getByLabel("Chat tabs").getByText("Social", { exact: true }).click();
-  await expect(page.getByRole("textbox", { name: "Message" })).toBeVisible();
-}
-
-/** Own + others' social bubbles in render order (the list is sorted by createdAt). */
-function socialBubbleTexts(page: Page) {
-  return page
-    .locator(".jl-scroll")
-    .getByText(/^[abc]$/)
+/** Bubbles render sorted by createdAt, so DOM order is delivery order. */
+function sentBubbleTexts(page: Page) {
+  return socialChatScroll(page)
+    .getByText(/^rz-offline-[abc]$/)
     .allTextContents()
     .then((texts) => texts.map((text) => text.trim()));
 }
@@ -26,18 +27,16 @@ test("chats sent offline arrive once each, in order", async ({ hostHider }) => {
 
   await goOffline(hostContext);
   const input = hostPage.getByRole("textbox", { name: "Message" });
-  for (const text of ["a", "b", "c"]) {
+  for (const text of MESSAGES) {
     await input.fill(text);
     await input.press("Enter");
     await expect(input).toHaveValue("");
   }
   await expect(pendingSyncBadges(hostPage)).toHaveCount(3, { timeout: 5_000 });
-  await expect.poll(() => socialBubbleTexts(guestPage)).toEqual([]);
+  await expect.poll(() => sentBubbleTexts(guestPage)).toEqual([]);
 
   await goOnline(hostContext);
 
   await expect(pendingSyncBadges(hostPage)).toHaveCount(0, { timeout: 10_000 });
-  await expect
-    .poll(() => socialBubbleTexts(guestPage), { timeout: 15_000 })
-    .toEqual(["a", "b", "c"]);
+  await expect.poll(() => sentBubbleTexts(guestPage), { timeout: 15_000 }).toEqual(MESSAGES);
 });

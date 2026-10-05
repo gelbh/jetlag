@@ -19,8 +19,6 @@ import {
   test,
 } from "../fixtures";
 
-test.setTimeout(120_000);
-
 test("question asked offline queues, then reaches the hider exactly once", async ({
   hostHider,
 }) => {

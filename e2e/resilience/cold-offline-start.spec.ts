@@ -11,8 +11,6 @@ import {
   waitForServiceWorkerControl,
 } from "../fixtures";
 
-test.setTimeout(120_000);
-
 /** One online visit installs the SW; then reload with the network gone. Returns the pre-offline uid. */
 async function coldStartOffline(
   page: Page,
@@ -34,25 +32,20 @@ async function coldStartOffline(
 test("offline cold start renders the shell and cached session, not a blocker page", async ({
   page,
   context,
-  e2eNetwork,
 }) => {
-  const uidBefore = await coldStartOffline(page, context, e2eNetwork);
+  const uidBefore = await coldStartOffline(page, context);
 
   await expect(page.getByText("Content blocker detected")).toHaveCount(0);
   // Offline map mount must reuse the persisted anonymous user, not mint a new one.
   expect(await readE2EUid(page)).toBe(uidBefore);
 });
 
-test("offline cold start sync chip reads Offline, not Sync issue", async ({
+// fixme: useEnsureSessionMembership heal calls getDocFromServer offline -> 'client is offline' -> lastSyncError
+test.fixme("offline cold start sync chip reads Offline, not Sync issue", async ({
   page,
   context,
-  e2eNetwork,
 }) => {
-  test.fixme(
-    true,
-    "useEnsureSessionMembership heal calls getDocFromServer offline -> 'client is offline' -> lastSyncError",
-  );
-  await coldStartOffline(page, context, e2eNetwork);
+  await coldStartOffline(page, context);
   // resolveSyncStatus ranks offline above stale, so the chip reads "Offline".
   await expect.poll(() => readSyncStatusLabel(page)).toMatch(/^Offline/);
 });

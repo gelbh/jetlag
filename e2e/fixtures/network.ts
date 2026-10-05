@@ -11,11 +11,6 @@ const TILE_PNG = Buffer.from(
 
 export interface BlockExternalAssetsOptions {
   overpassProfile?: OverpassFixtureProfile;
-  /**
-   * `page.route` never sees fetches a service worker answers itself (tile
-   * CacheFirst routes), so with `serviceWorkers: "allow"` stub on the context.
-   */
-  routeScope?: "page" | "context";
 }
 
 function extractOverpassQuery(postData: string): string {
@@ -88,9 +83,10 @@ async function fulfillMoveTimerCallableIfMatched(route: Route, parsed: URL): Pro
 
 export async function blockExternalAssets(page: Page, options: BlockExternalAssetsOptions = {}) {
   const overpassProfile = options.overpassProfile ?? "default";
-  const target = options.routeScope === "context" ? page.context() : page;
-
-  await target.route("**/*", async (route) => {
+  // Context, not page: `page.route` never sees fetches a service worker answers
+  // itself (tile CacheFirst routes), which matters once a project allows SWs.
+  // Page-level routes in specs still run first and can `fallback()` to this.
+  await page.context().route("**/*", async (route) => {
     const url = route.request().url();
 
     let parsed: URL;
@@ -177,11 +173,15 @@ export interface LieFiOptions {
   kbps: number;
 }
 
-/** Chromium-only (CDP). Slow-but-"online" link: `navigator.onLine` stays true. */
+/**
+ * Chromium-only (CDP). Slow-but-"online" link: `navigator.onLine` stays true.
+ * Returns a reset that clears the throttle on the same DevTools session
+ * (conditions are per session) and detaches it.
+ */
 export async function emulateLieFi(
   page: Page,
   opts: LieFiOptions = { latencyMs: 2_000, kbps: 20 },
-): Promise<void> {
+): Promise<() => Promise<void>> {
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Network.enable");
   const bytesPerSecond = (opts.kbps * 1024) / 8;
@@ -191,14 +191,13 @@ export async function emulateLieFi(
     downloadThroughput: bytesPerSecond,
     uploadThroughput: bytesPerSecond,
   });
-}
-
-export async function clearLieFi(page: Page): Promise<void> {
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send("Network.emulateNetworkConditions", {
-    offline: false,
-    latency: 0,
-    downloadThroughput: -1,
-    uploadThroughput: -1,
-  });
+  return async () => {
+    await cdp.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    });
+    await cdp.detach();
+  };
 }

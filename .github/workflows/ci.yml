@@ -218,7 +218,7 @@ jobs:
     needs: [changes, unit]
     if: ${{ needs.changes.outputs.code == 'true' }}
     # Gate-smoke + resilience on PR CI; full features suite is too hang-prone under emulators.
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -255,7 +255,9 @@ jobs:
         if: ${{ needs.changes.outputs.release_pr != 'true' && failure() }}
         with:
           name: playwright-report-e2e
-          path: playwright-report
+          path: |
+            playwright-report
+            test-results
 
   lighthouse:
     runs-on: ubuntu-latest

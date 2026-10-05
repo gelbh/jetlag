@@ -9,8 +9,6 @@ import {
   trackAlertDialogs,
 } from "../fixtures";
 
-test.setTimeout(120_000);
-
 test("declaring found offline never alerts and reaches the hider on reconnect", async ({
   hostHider,
 }) => {
