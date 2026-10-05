@@ -17,7 +17,7 @@ import {
   GEO_FETCH_TIMEOUT_MS,
   isTransientFetchError,
 } from "@/services/core/network/fetchWithTimeout";
-import { sanitizeBundledPoiPlaces } from "./bundledPoiHygiene";
+import { collapsePoiPlaceName, sanitizeBundledPoiPlaces } from "./bundledPoiHygiene";
 import type { MeasuringPlace } from "./measuringPlaces";
 
 export interface BundledPoiPlace {
@@ -38,7 +38,7 @@ const BUNDLED_POI_PACKS = new Set<RegionPackId>(PACK_GEO_PACK_IDS);
 const bundleCache = new Map<string, BundledPoiCategory | null>();
 
 function normalizePlaceName(name: string): string {
-  return name.trim().toLowerCase();
+  return collapsePoiPlaceName(name);
 }
 
 async function loadBundledPoiCategory(

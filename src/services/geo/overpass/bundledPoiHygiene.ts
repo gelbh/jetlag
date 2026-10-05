@@ -56,8 +56,11 @@ const ZOO_EXCLUSIONS: readonly RegExp[] = [
   /\banimal\s+shelter\b/,
 ];
 
-function collapseName(name: string): string {
+/** Shared name collapse for hygiene dedupe and pack↔Overpass exact-name keys. */
+export function collapsePoiPlaceName(name: string): string {
   let collapsed = name.trim().toLowerCase().replace(/\s+/g, " ");
+  collapsed = collapsed.replace(/&/g, " and ").replace(/\s+/g, " ");
+  collapsed = collapsed.replace(/\./g, "");
   for (const [pattern, replacement] of TYPO_FIXES) {
     collapsed = collapsed.replace(pattern, replacement);
   }
@@ -65,7 +68,7 @@ function collapseName(name: string): string {
 }
 
 export function normalizeBundledPoiName(name: string, category: string): string {
-  const collapsed = collapseName(name);
+  const collapsed = collapsePoiPlaceName(name);
   if (category === "park") {
     return collapsed.replace(PARK_NOISE_SUFFIX, "");
   }
@@ -122,7 +125,7 @@ function isEligibleMuseum(name: string): boolean {
 
 /** Category-specific exclusions for bundled POI hygiene. */
 export function isEligibleBundledPoi(place: BundledPoiPlaceLike, category: string): boolean {
-  const name = collapseName(place.name);
+  const name = collapsePoiPlaceName(place.name);
 
   switch (category) {
     case "park":
