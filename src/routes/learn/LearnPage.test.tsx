@@ -44,14 +44,14 @@ describe("LearnPage", () => {
     expect(h2s).toEqual(learnPageContent(path).sections.map((section) => section.heading));
   });
 
-  it("links tool pages back to the hub with a breadcrumb", () => {
+  it("links tool pages back to the hub", () => {
     renderPage("/tools/radar");
-    const crumbs = screen.getByRole("navigation", { name: "Breadcrumb" });
-    expect(within(crumbs).getByRole("link", { name: "Question tools" })).toHaveAttribute(
+    const keepReading = screen.getByRole("navigation", { name: "Keep reading" });
+    expect(within(keepReading).getByRole("link", { name: "All question tools" })).toHaveAttribute(
       "href",
       "/tools",
     );
-    expect(within(crumbs).getByText("Radar")).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/tools");
   });
 
   it("cross-links related pages and the play entry points", () => {

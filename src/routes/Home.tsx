@@ -24,6 +24,9 @@ import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSessi
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
+// 44px tap height without adding visual weight next to the Play actions.
+const learnLinkStyle = { display: "inline-flex", alignItems: "center", minHeight: 44 } as const;
+
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } = useContinueActiveSession();
   const showPremium = isFirebaseConfigured();
@@ -191,21 +194,21 @@ export function Home() {
                 </InsetGroup>
               </Stack>
 
-              <Stack gap={10} align="center">
+              <Stack gap={0} align="center">
                 <Group gap="xs" justify="center" component="nav" aria-label="Learn how to play">
-                  <Anchor component={Link} to="/guide" size="sm">
+                  <Anchor component={Link} to="/guide" size="sm" style={learnLinkStyle}>
                     How to play
                   </Anchor>
                   <Text size="sm" c="dimmed" aria-hidden="true">
                     ·
                   </Text>
-                  <Anchor component={Link} to="/tools" size="sm">
+                  <Anchor component={Link} to="/tools" size="sm" style={learnLinkStyle}>
                     Question tools
                   </Anchor>
                   <Text size="sm" c="dimmed" aria-hidden="true">
                     ·
                   </Text>
-                  <Anchor component={Link} to="/faq" size="sm">
+                  <Anchor component={Link} to="/faq" size="sm" style={learnLinkStyle}>
                     FAQ
                   </Anchor>
                 </Group>
