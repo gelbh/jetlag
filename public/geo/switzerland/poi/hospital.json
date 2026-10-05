@@ -1,1 +1,780 @@
-{ "category": "hospital", "source": "none", "places": [] }
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q1728146",
+      "name": "Aarau cantonal Hospital",
+      "lat": 47.388479,
+      "lng": 8.059351
+    },
+    {
+      "id": "Q115765490",
+      "name": "AarReha",
+      "lat": 47.457859,
+      "lng": 8.164774
+    },
+    {
+      "id": "Q29651875",
+      "name": "Alter Spittel",
+      "lat": 47.13947,
+      "lng": 7.3742
+    },
+    {
+      "id": "Q29479126",
+      "name": "Ancien hôpital des Bourgeois,",
+      "lat": 46.805517,
+      "lng": 7.15442
+    },
+    {
+      "id": "Q23783969",
+      "name": "AndreasKlinik",
+      "lat": 47.182095,
+      "lng": 8.455388
+    },
+    {
+      "id": "Q122816425",
+      "name": "Apotheke des Kantonsspital (ISP - Institut für Spitalpharmazie)",
+      "lat": 47.5633,
+      "lng": 7.5834
+    },
+    {
+      "id": "Q16832353",
+      "name": "Architectura Capucinorum Cod. Don. 879",
+      "lat": 47.562072,
+      "lng": 8.064155
+    },
+    {
+      "id": "Q1670503",
+      "name": "Barmelweid",
+      "lat": 47.421369,
+      "lng": 7.971439
+    },
+    {
+      "id": "Q810414",
+      "name": "Basler Hospital",
+      "lat": 46.8133,
+      "lng": 9.8525
+    },
+    {
+      "id": "Q33121165",
+      "name": "Bethesda Spital",
+      "lat": 47.548659,
+      "lng": 7.617067
+    },
+    {
+      "id": "Q1014903",
+      "name": "Burger Hospital",
+      "lat": 46.948056,
+      "lng": 7.439167
+    },
+    {
+      "id": "Q1021476",
+      "name": "Bürgerspital Basel",
+      "lat": 47.562467,
+      "lng": 7.583162
+    },
+    {
+      "id": "Q14544326",
+      "name": "Bürgerspital Rapperswil",
+      "lat": 47.225853,
+      "lng": 8.816033
+    },
+    {
+      "id": "Q14956907",
+      "name": "Canton Hospital Basel-Land",
+      "lat": 47.488,
+      "lng": 7.73116
+    },
+    {
+      "id": "Q14956909",
+      "name": "Canton Hospital Obwalden",
+      "lat": 46.889788,
+      "lng": 8.246258
+    },
+    {
+      "id": "Q137797764",
+      "name": "Chalet and Administration Building",
+      "lat": 46.249472,
+      "lng": 6.948327
+    },
+    {
+      "id": "Q1374004",
+      "name": "Children's Hospital Zurich",
+      "lat": 47.371586,
+      "lng": 8.55801
+    },
+    {
+      "id": "Q33121077",
+      "name": "Clinica Luganese Moncucco",
+      "lat": 46.005211,
+      "lng": 8.939939
+    },
+    {
+      "id": "Q23783973",
+      "name": "Clinique Cecil",
+      "lat": 46.520241,
+      "lng": 6.621908
+    },
+    {
+      "id": "Q2979294",
+      "name": "Clinique de Belle-Idée",
+      "lat": 46.2055,
+      "lng": 6.20814
+    },
+    {
+      "id": "Q121864163",
+      "name": "Clinique Joli-Mont",
+      "lat": 46.22106,
+      "lng": 6.11756
+    },
+    {
+      "id": "Q25388364",
+      "name": "Clinique La Source",
+      "lat": 46.527197,
+      "lng": 6.627854
+    },
+    {
+      "id": "Q28778458",
+      "name": "Daler Hospital",
+      "lat": 46.801045,
+      "lng": 7.140284
+    },
+    {
+      "id": "Q1205675",
+      "name": "Deutsches Haus",
+      "lat": 45.963056,
+      "lng": 8.908333
+    },
+    {
+      "id": "Q1296214",
+      "name": "Effingerhort",
+      "lat": 47.4321,
+      "lng": 8.17781
+    },
+    {
+      "id": "Q29891235",
+      "name": "Ehemaliges Bürgerspital",
+      "lat": 46.66795,
+      "lng": 6.79703
+    },
+    {
+      "id": "Q140175309",
+      "name": "Ehemaliges Spittel",
+      "lat": 47.08349,
+      "lng": 7.13404
+    },
+    {
+      "id": "Q29690356",
+      "name": "Eye Hospital",
+      "lat": 46.793074,
+      "lng": 7.153603
+    },
+    {
+      "id": "Q1403737",
+      "name": "Felix Platter University Centrum",
+      "lat": 47.564617,
+      "lng": 7.565428
+    },
+    {
+      "id": "Q33121341",
+      "name": "Fondation de Nant",
+      "lat": 46.479111,
+      "lng": 6.852642
+    },
+    {
+      "id": "Q10612433",
+      "name": "Foreign hospital and chapel",
+      "lat": 46.883001,
+      "lng": 8.641436
+    },
+    {
+      "id": "Q29651684",
+      "name": "Former baby and maternity home",
+      "lat": 46.9349,
+      "lng": 7.46431
+    },
+    {
+      "id": "Q114616177",
+      "name": "Former Hospital",
+      "lat": 47.04509,
+      "lng": 7.27652
+    },
+    {
+      "id": "Q29785923",
+      "name": "Former hospital and former Ateliers d'Art Réunis",
+      "lat": 47.10371,
+      "lng": 6.82572
+    },
+    {
+      "id": "Q123263432",
+      "name": "Former Leprosarium (1581–1596)",
+      "lat": 47.14862,
+      "lng": 7.25885
+    },
+    {
+      "id": "Q23013010",
+      "name": "Fribourg Hospital",
+      "lat": 46.80154,
+      "lng": 7.13744
+    },
+    {
+      "id": "Q28828053",
+      "name": "Geburtshaus Maternité Alpine",
+      "lat": 46.560663,
+      "lng": 7.373741
+    },
+    {
+      "id": "Q3145370",
+      "name": "Geneva University Hospitals",
+      "lat": 46.193333,
+      "lng": 6.149444
+    },
+    {
+      "id": "Q27926550",
+      "name": "Hirslanden Klinik Beau-Site",
+      "lat": 46.95278,
+      "lng": 7.44817
+    },
+    {
+      "id": "Q29015161",
+      "name": "Hirslanden Klinik Permanence",
+      "lat": 46.9444,
+      "lng": 7.39064
+    },
+    {
+      "id": "Q23783916",
+      "name": "Hirslanden Klinik Stephanshorn",
+      "lat": 47.445497,
+      "lng": 9.411155
+    },
+    {
+      "id": "Q61857547",
+      "name": "Höhenklinik Wald",
+      "lat": 47.276389,
+      "lng": 8.943333
+    },
+    {
+      "id": "Q121864320",
+      "name": "Hôpital Beau-Séjour",
+      "lat": 46.18854,
+      "lng": 6.14963
+    },
+    {
+      "id": "Q99889684",
+      "name": "hôpital de La Chaux-de-Fonds",
+      "lat": 47.114277,
+      "lng": 6.832155
+    },
+    {
+      "id": "Q30279814",
+      "name": "Hôpital de la Providence",
+      "lat": 46.995224,
+      "lng": 6.938906
+    },
+    {
+      "id": "Q30279818",
+      "name": "Hôpital de la Tour",
+      "lat": 46.228887,
+      "lng": 6.066468
+    },
+    {
+      "id": "Q137673873",
+      "name": "hôpital de Martigny",
+      "lat": 46.09983,
+      "lng": 7.06799
+    },
+    {
+      "id": "Q3145292",
+      "name": "hôpital de Sion",
+      "lat": 46.2353,
+      "lng": 7.38712
+    },
+    {
+      "id": "Q30279832",
+      "name": "Hôpital des Cadolles",
+      "lat": 47.000452,
+      "lng": 6.925401
+    },
+    {
+      "id": "Q123785975",
+      "name": "Hôpital psychiatrique de Belle-Idée",
+      "lat": 46.20646,
+      "lng": 6.20863
+    },
+    {
+      "id": "Q29927430",
+      "name": "Hospital",
+      "lat": 46.07874,
+      "lng": 7.14825
+    },
+    {
+      "id": "Q1675006",
+      "name": "Hospital Arlesheim",
+      "lat": 47.493889,
+      "lng": 7.614722
+    },
+    {
+      "id": "Q2311339",
+      "name": "Hospital Biel",
+      "lat": 47.1465,
+      "lng": 7.245
+    },
+    {
+      "id": "Q1621810",
+      "name": "Hospital Davos",
+      "lat": 46.8294,
+      "lng": 9.85629
+    },
+    {
+      "id": "Q3145291",
+      "name": "Hospital de Sierre",
+      "lat": 46.2922,
+      "lng": 7.5216
+    },
+    {
+      "id": "Q1728149",
+      "name": "Hospital Graubünden",
+      "lat": 46.864563,
+      "lng": 9.539287
+    },
+    {
+      "id": "Q2138872",
+      "name": "Hospital Hasliberg",
+      "lat": 46.7475,
+      "lng": 8.18194
+    },
+    {
+      "id": "Q999952",
+      "name": "Hospital Holistica Engiadina",
+      "lat": 46.749669,
+      "lng": 10.079978
+    },
+    {
+      "id": "Q2311218",
+      "name": "Hospital Interlaken",
+      "lat": 46.680872,
+      "lng": 7.843036
+    },
+    {
+      "id": "Q3145355",
+      "name": "Hospital Jules-Gonin",
+      "lat": 46.5248,
+      "lng": 6.62259
+    },
+    {
+      "id": "Q2979305",
+      "name": "Hospital la Lignière",
+      "lat": 46.4263,
+      "lng": 6.28921
+    },
+    {
+      "id": "Q1728150",
+      "name": "Hospital Laufen",
+      "lat": 47.488018,
+      "lng": 7.731161
+    },
+    {
+      "id": "Q1878385",
+      "name": "Hospital Luzern",
+      "lat": 47.05831,
+      "lng": 8.29764
+    },
+    {
+      "id": "Q1569628",
+      "name": "Hospital Meiringen",
+      "lat": 46.7197,
+      "lng": 8.18667
+    },
+    {
+      "id": "Q33121086",
+      "name": "Hospital Neuchâtel",
+      "lat": 46.996752,
+      "lng": 6.942959
+    },
+    {
+      "id": "Q1728152",
+      "name": "Hospital Nidwalden",
+      "lat": 46.96002,
+      "lng": 8.357345
+    },
+    {
+      "id": "Q2311225",
+      "name": "Hospital Oberengadin",
+      "lat": 46.539303,
+      "lng": 9.877922
+    },
+    {
+      "id": "Q14830615",
+      "name": "Hospital of Cery",
+      "lat": 46.5464,
+      "lng": 6.60798
+    },
+    {
+      "id": "Q29880252",
+      "name": "Hospital of the Holy Ghost",
+      "lat": 47.659813,
+      "lng": 8.860224
+    },
+    {
+      "id": "Q137673905",
+      "name": "Hospital of Visp",
+      "lat": 46.2879,
+      "lng": 7.88382
+    },
+    {
+      "id": "Q16642757",
+      "name": "Hospital Riviera-Chablais",
+      "lat": 46.3795,
+      "lng": 6.92108
+    },
+    {
+      "id": "Q1519815",
+      "name": "Hospital Waid",
+      "lat": 47.398772,
+      "lng": 8.519842
+    },
+    {
+      "id": "Q1728154",
+      "name": "Hospital Winterthur",
+      "lat": 47.507,
+      "lng": 8.729
+    },
+    {
+      "id": "Q678369",
+      "name": "Inselspital",
+      "lat": 46.947222,
+      "lng": 7.424444
+    },
+    {
+      "id": "Q1728147",
+      "name": "Kantonsspital Baden",
+      "lat": 47.454631,
+      "lng": 8.278189
+    },
+    {
+      "id": "Q1728153",
+      "name": "Kantonsspital St. Gallen",
+      "lat": 47.43008,
+      "lng": 9.387828
+    },
+    {
+      "id": "Q23783920",
+      "name": "Klinik Am Rosenberg",
+      "lat": 47.446218,
+      "lng": 9.527238
+    },
+    {
+      "id": "Q23783939",
+      "name": "Klinik Belair",
+      "lat": 47.701139,
+      "lng": 8.623808
+    },
+    {
+      "id": "Q10956789",
+      "name": "Klinik Beverin",
+      "lat": 46.731289,
+      "lng": 9.428096
+    },
+    {
+      "id": "Q23783965",
+      "name": "Klinik Birshof",
+      "lat": 47.527733,
+      "lng": 7.604665
+    },
+    {
+      "id": "Q23783912",
+      "name": "Klinik Hirslanden",
+      "lat": 47.351237,
+      "lng": 8.575898
+    },
+    {
+      "id": "Q23784014",
+      "name": "Klinik Im Park",
+      "lat": 47.352543,
+      "lng": 8.531654
+    },
+    {
+      "id": "Q104959125",
+      "name": "Klinik Meissenberg",
+      "lat": 47.15341,
+      "lng": 8.515
+    },
+    {
+      "id": "Q10964876",
+      "name": "Klinik Waldhaus",
+      "lat": 46.869298,
+      "lng": 9.540012
+    },
+    {
+      "id": "Q2945783",
+      "name": "Lausanne University Hospital",
+      "lat": 46.524875,
+      "lng": 6.643273
+    },
+    {
+      "id": "Q2282508",
+      "name": "Leprosarium and Chapel",
+      "lat": 47.062904,
+      "lng": 7.633983
+    },
+    {
+      "id": "Q30280704",
+      "name": "Lindenhof hospital",
+      "lat": 46.95818,
+      "lng": 7.42788
+    },
+    {
+      "id": "Q2845792",
+      "name": "Old Hospital",
+      "lat": 46.52144,
+      "lng": 6.63554
+    },
+    {
+      "id": "Q15280910",
+      "name": "Old Spittel",
+      "lat": 46.28979,
+      "lng": 7.88111
+    },
+    {
+      "id": "Q29479563",
+      "name": "Palais de Justice",
+      "lat": 46.2007,
+      "lng": 6.14967
+    },
+    {
+      "id": "Q30282576",
+      "name": "Polyclinic Medical University",
+      "lat": 46.525596,
+      "lng": 6.640958
+    },
+    {
+      "id": "Q99891743",
+      "name": "Pourtalès hospital",
+      "lat": 46.996667,
+      "lng": 6.943541
+    },
+    {
+      "id": "Q29700174",
+      "name": "Prison Saint-Antoine",
+      "lat": 46.20039,
+      "lng": 6.15064
+    },
+    {
+      "id": "Q123120881",
+      "name": "Privatklinik Lindberg",
+      "lat": 47.510236,
+      "lng": 8.730181
+    },
+    {
+      "id": "Q1449202",
+      "name": "Privatklinik Wyss",
+      "lat": 47.017875,
+      "lng": 7.449675
+    },
+    {
+      "id": "Q116983261",
+      "name": "Psychiatric Center Münsingen",
+      "lat": 46.88076,
+      "lng": 7.55327
+    },
+    {
+      "id": "Q60607340",
+      "name": "Psychiatrische Dienste Aargau",
+      "lat": 47.480278,
+      "lng": 8.217944
+    },
+    {
+      "id": "Q577131",
+      "name": "Psychiatrische Universitätsklinik Zürich",
+      "lat": 47.3527,
+      "lng": 8.5706
+    },
+    {
+      "id": "Q122828110",
+      "name": "REHAB Basel, Zentrum für Querschnittgelähmte und Hirnverletzte",
+      "lat": 47.5727,
+      "lng": 7.559
+    },
+    {
+      "id": "Q22001404",
+      "name": "Salem-Spital",
+      "lat": 46.952018,
+      "lng": 7.453744
+    },
+    {
+      "id": "Q30744842",
+      "name": "Samaritan Hospital",
+      "lat": 46.46099,
+      "lng": 6.854535
+    },
+    {
+      "id": "Q27921574",
+      "name": "Sanatorio Popolare Cantonale di Piotta",
+      "lat": 46.52,
+      "lng": 8.672222
+    },
+    {
+      "id": "Q16854951",
+      "name": "Schweizer Paraplegiker-Zentrum",
+      "lat": 47.1414,
+      "lng": 8.1312
+    },
+    {
+      "id": "Q137944030",
+      "name": "Siloah",
+      "lat": 46.9319,
+      "lng": 7.5178
+    },
+    {
+      "id": "Q101436222",
+      "name": "Sonnenhof Hospital",
+      "lat": 46.94318,
+      "lng": 7.47419
+    },
+    {
+      "id": "Q55503256",
+      "name": "Spital Männedorf",
+      "lat": 47.25088,
+      "lng": 8.69529
+    },
+    {
+      "id": "Q23783977",
+      "name": "Spital Zweisimmen",
+      "lat": 46.557854,
+      "lng": 7.37344
+    },
+    {
+      "id": "Q20614606",
+      "name": "St. Clara Hospital",
+      "lat": 47.566568,
+      "lng": 7.614079
+    },
+    {
+      "id": "Q30260723",
+      "name": "Swiss Leading Hospitals",
+      "lat": 46.932655,
+      "lng": 7.505084
+    },
+    {
+      "id": "Q29015629",
+      "name": "Tiefenauspital",
+      "lat": 46.97519,
+      "lng": 7.45376
+    },
+    {
+      "id": "Q1535635",
+      "name": "Triemli Hospital",
+      "lat": 47.365853,
+      "lng": 8.497769
+    },
+    {
+      "id": "Q121863605",
+      "name": "Trois-Chêne Hospital",
+      "lat": 46.20844,
+      "lng": 6.21567
+    },
+    {
+      "id": "Q2495952",
+      "name": "Universitäre Psychiatrische Kliniken Basel",
+      "lat": 47.55763,
+      "lng": 7.60367
+    },
+    {
+      "id": "Q2496240",
+      "name": "University Children's Hospital Basel",
+      "lat": 47.56389,
+      "lng": 7.5816
+    },
+    {
+      "id": "Q30254034",
+      "name": "University Children’s Hospital Bern",
+      "lat": 46.947054,
+      "lng": 7.425238
+    },
+    {
+      "id": "Q2494392",
+      "name": "University Hospital Balgrist",
+      "lat": 47.3531,
+      "lng": 8.57515
+    },
+    {
+      "id": "Q1689257",
+      "name": "University Hospital of Basel",
+      "lat": 47.562778,
+      "lng": 7.583056
+    },
+    {
+      "id": "Q450139",
+      "name": "University Hospital Zurich",
+      "lat": 47.376667,
+      "lng": 8.549722
+    },
+    {
+      "id": "Q33121428",
+      "name": "Valens Clinics",
+      "lat": 46.969449,
+      "lng": 9.482551
+    },
+    {
+      "id": "Q99933648",
+      "name": "Victoria hospital",
+      "lat": 46.9526,
+      "lng": 7.44997
+    },
+    {
+      "id": "Q108562220",
+      "name": "Villa Belle-Vue",
+      "lat": 47.65375,
+      "lng": 9.17303
+    },
+    {
+      "id": "Q2525487",
+      "name": "Villa Nager",
+      "lat": 47.329,
+      "lng": 8.59727
+    },
+    {
+      "id": "Q29883168",
+      "name": "Villa Roberta",
+      "lat": 47.65338,
+      "lng": 9.17326
+    },
+    {
+      "id": "Q18689545",
+      "name": "Voliere Zürich",
+      "lat": 47.3617,
+      "lng": 8.53583
+    },
+    {
+      "id": "Q2541082",
+      "name": "Waldau (former infirmary and smallpox house)",
+      "lat": 46.96534,
+      "lng": 7.48504
+    },
+    {
+      "id": "Q14654120",
+      "name": "Waldau sanatorium and nursing home",
+      "lat": 46.966962,
+      "lng": 7.481582
+    },
+    {
+      "id": "Q137298584",
+      "name": "YOUSEEZÜRI AG",
+      "lat": 47.374264,
+      "lng": 8.53864
+    },
+    {
+      "id": "Q17041712",
+      "name": "Ziegler Hospital",
+      "lat": 46.932142,
+      "lng": 7.434298
+    }
+  ]
+}

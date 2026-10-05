@@ -1,1 +1,30 @@
-{ "category": "golf_course", "source": "none", "places": [] }
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q16031368",
+      "name": "Golf & Country Club Schönenberg",
+      "lat": 47.205556,
+      "lng": 8.629444
+    },
+    {
+      "id": "Q138786236",
+      "name": "Parcours Jack Nicklaus",
+      "lat": 46.304015,
+      "lng": 7.47242
+    },
+    {
+      "id": "Q138786146",
+      "name": "Parcours Severiano Ballesteros",
+      "lat": 46.302711,
+      "lng": 7.463236
+    }
+  ]
+}

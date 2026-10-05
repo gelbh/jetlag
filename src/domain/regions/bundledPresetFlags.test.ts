@@ -6,6 +6,7 @@ import {
   flagMarkForHierarchySegmentId,
   flagMarkForSegmentRow,
 } from "./bundledPresetFlags";
+import { SWISS_CANTON_IDS } from "./bundledPresets/swiss";
 
 describe("bundledPresetFlags", () => {
   it("uses local regional flags for Kansai and Kantō", () => {
@@ -132,35 +133,7 @@ describe("bundledPresetFlags", () => {
   });
 
   it("resolves flags for all Swiss canton segments", () => {
-    const CANTON_IDS = [
-      "zurich",
-      "bern",
-      "lucerne",
-      "uri",
-      "schwyz",
-      "obwalden",
-      "nidwalden",
-      "glarus",
-      "zug",
-      "fribourg",
-      "solothurn",
-      "basel-stadt",
-      "basel-landschaft",
-      "schaffhausen",
-      "appenzell-ausserrhoden",
-      "appenzell-innerrhoden",
-      "st-gallen",
-      "graubunden",
-      "aargau",
-      "thurgau",
-      "ticino",
-      "vaud",
-      "valais",
-      "neuchatel",
-      "geneva",
-      "jura",
-    ] as const;
-    for (const cantonId of CANTON_IDS) {
+    for (const cantonId of SWISS_CANTON_IDS) {
       expect(flagMarkForSegmentRow(`canton-${cantonId}`, [])).not.toBeNull();
     }
   });

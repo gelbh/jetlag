@@ -4,7 +4,8 @@ import { ZURICH_REGION_PACK_ID } from "../zurichRegionPack";
 import { attachPlayArea } from "./attachPlayArea";
 import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
-const SWISS_CANTONS = [
+/** Canton slug + display name; ids match `cantonId` on switzerland pack geo. */
+export const SWISS_CANTONS = [
   { id: "zurich", name: "Zürich" },
   { id: "bern", name: "Bern" },
   { id: "lucerne", name: "Lucerne" },
@@ -32,6 +33,9 @@ const SWISS_CANTONS = [
   { id: "geneva", name: "Geneva" },
   { id: "jura", name: "Jura" },
 ] as const;
+
+/** Stable cantonId list for presets/tests (same order as SWISS_CANTONS). */
+export const SWISS_CANTON_IDS = SWISS_CANTONS.map((canton) => canton.id);
 
 export function swissPresets(): BundledGamePresetDefinition[] {
   const europe = [

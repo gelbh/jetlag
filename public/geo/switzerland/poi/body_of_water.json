@@ -1,1 +1,2562 @@
-{ "category": "body_of_water", "source": "none", "places": [] }
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q21036895",
+      "name": "Aabach-Weiher",
+      "lat": 47.231313,
+      "lng": 8.623229
+    },
+    {
+      "id": "Q29573919",
+      "name": "Accumulation Basin SFR",
+      "lat": 46.10914,
+      "lng": 7.00546
+    },
+    {
+      "id": "Q96000325",
+      "name": "Aegelsee",
+      "lat": 47.0053,
+      "lng": 7.442
+    },
+    {
+      "id": "Q252876",
+      "name": "Ägelsee",
+      "lat": 47.566111,
+      "lng": 7.879167
+    },
+    {
+      "id": "Q14507",
+      "name": "Ägerisee",
+      "lat": 47.12,
+      "lng": 8.616111
+    },
+    {
+      "id": "Q680252",
+      "name": "Albigna lake",
+      "lat": 46.327742,
+      "lng": 9.648486
+    },
+    {
+      "id": "Q90726629",
+      "name": "Albulasee",
+      "lat": 46.584139,
+      "lng": 9.848333
+    },
+    {
+      "id": "Q382503",
+      "name": "Alplersee",
+      "lat": 46.935556,
+      "lng": 8.653889
+    },
+    {
+      "id": "Q254822",
+      "name": "Älplisee",
+      "lat": 46.753325,
+      "lng": 9.643609
+    },
+    {
+      "id": "Q679875",
+      "name": "Alpnachersee",
+      "lat": 46.9625,
+      "lng": 8.306389
+    },
+    {
+      "id": "Q436526",
+      "name": "Alteinsee",
+      "lat": 46.7509,
+      "lng": 9.70091
+    },
+    {
+      "id": "Q474544",
+      "name": "Ampervreilsee",
+      "lat": 46.571389,
+      "lng": 9.151389
+    },
+    {
+      "id": "Q461904",
+      "name": "Amsoldingersee",
+      "lat": 46.723889,
+      "lng": 7.576944
+    },
+    {
+      "id": "Q115142453",
+      "name": "Änggelaueneseeli",
+      "lat": 46.89548,
+      "lng": 8.06174
+    },
+    {
+      "id": "Q2386062",
+      "name": "Arnisee",
+      "lat": 46.771944,
+      "lng": 8.643056
+    },
+    {
+      "id": "Q95986489",
+      "name": "Atzenholzweiher",
+      "lat": 47.4995,
+      "lng": 9.33934
+    },
+    {
+      "id": "Q22698258",
+      "name": "Ausee",
+      "lat": 47.24839,
+      "lng": 8.64015
+    },
+    {
+      "id": "Q690976",
+      "name": "Bachalpsee",
+      "lat": 46.669504,
+      "lng": 8.021359
+    },
+    {
+      "id": "Q4838989",
+      "name": "Bacino di Val Malvaglia",
+      "lat": 46.42566,
+      "lng": 9.026513
+    },
+    {
+      "id": "Q4856863",
+      "name": "Bannalpsee",
+      "lat": 46.868333,
+      "lng": 8.428889
+    },
+    {
+      "id": "Q60522663",
+      "name": "Barchetsee",
+      "lat": 47.615556,
+      "lng": 8.753056
+    },
+    {
+      "id": "Q14932130",
+      "name": "Baschalvasee",
+      "lat": 46.9946,
+      "lng": 9.4006
+    },
+    {
+      "id": "Q810425",
+      "name": "Baslerweiher",
+      "lat": 47.4268,
+      "lng": 7.6624
+    },
+    {
+      "id": "Q131717523",
+      "name": "bassin lémanique",
+      "lat": 46.42,
+      "lng": 6.44
+    },
+    {
+      "id": "Q663099",
+      "name": "Bellacher Weiher",
+      "lat": 47.213889,
+      "lng": 7.480833
+    },
+    {
+      "id": "Q72091679",
+      "name": "Bergseeli",
+      "lat": 46.50725,
+      "lng": 9.340083
+    },
+    {
+      "id": "Q672583",
+      "name": "Bettenauer Weiher",
+      "lat": 47.43,
+      "lng": 9.103333
+    },
+    {
+      "id": "Q2900219",
+      "name": "Bettmersee",
+      "lat": 46.39394,
+      "lng": 8.0607
+    },
+    {
+      "id": "Q4903605",
+      "name": "Bichelsee",
+      "lat": 47.4575,
+      "lng": 8.900278
+    },
+    {
+      "id": "Q105170350",
+      "name": "Blausee",
+      "lat": 46.771146,
+      "lng": 8.254173
+    },
+    {
+      "id": "Q4940891",
+      "name": "Bommer Weiher",
+      "lat": 47.618611,
+      "lng": 9.155
+    },
+    {
+      "id": "Q4942021",
+      "name": "Bonigersee",
+      "lat": 46.256111,
+      "lng": 7.844167
+    },
+    {
+      "id": "Q4946740",
+      "name": "Bortelsee",
+      "lat": 46.2875,
+      "lng": 8.108333
+    },
+    {
+      "id": "Q63681617",
+      "name": "Brauiweiher",
+      "lat": 47.424556,
+      "lng": 8.752278
+    },
+    {
+      "id": "Q906886",
+      "name": "Breitsee",
+      "lat": 47.576489,
+      "lng": 7.870353
+    },
+    {
+      "id": "Q5818676",
+      "name": "Bristensee",
+      "lat": 46.75037,
+      "lng": 8.69237
+    },
+    {
+      "id": "Q5818835",
+      "name": "Burgseewli",
+      "lat": 46.697778,
+      "lng": 7.885556
+    },
+    {
+      "id": "Q870259",
+      "name": "Canovasee",
+      "lat": 46.746389,
+      "lng": 9.450833
+    },
+    {
+      "id": "Q692270",
+      "name": "Caumasee",
+      "lat": 46.820278,
+      "lng": 9.295833
+    },
+    {
+      "id": "Q5073159",
+      "name": "Chapfensee",
+      "lat": 47.047806,
+      "lng": 9.381556
+    },
+    {
+      "id": "Q664691",
+      "name": "Chüebodensee",
+      "lat": 46.936389,
+      "lng": 9.134444
+    },
+    {
+      "id": "Q676804",
+      "name": "Cleuson Lake",
+      "lat": 46.11,
+      "lng": 7.322778
+    },
+    {
+      "id": "Q663139",
+      "name": "Crestasee",
+      "lat": 46.831667,
+      "lng": 9.321111
+    },
+    {
+      "id": "Q672064",
+      "name": "Daubensee",
+      "lat": 46.413889,
+      "lng": 7.620556
+    },
+    {
+      "id": "Q5282929",
+      "name": "Distelsee",
+      "lat": 46.463056,
+      "lng": 8.323056
+    },
+    {
+      "id": "Q461874",
+      "name": "Dittligsee",
+      "lat": 46.756111,
+      "lng": 7.533611
+    },
+    {
+      "id": "Q5347747",
+      "name": "Egelsee",
+      "lat": 46.94447,
+      "lng": 7.46487
+    },
+    {
+      "id": "Q1298144",
+      "name": "Eglisee",
+      "lat": 47.5708,
+      "lng": 7.61583
+    },
+    {
+      "id": "Q63436435",
+      "name": "Egolzwilersee",
+      "lat": 47.1845,
+      "lng": 7.999
+    },
+    {
+      "id": "Q366275",
+      "name": "Engstlensee",
+      "lat": 46.772778,
+      "lng": 8.356944
+    },
+    {
+      "id": "Q108486794",
+      "name": "Etang de Bollement",
+      "lat": 47.29555,
+      "lng": 7.12488
+    },
+    {
+      "id": "Q288984",
+      "name": "Etang de la Gruère",
+      "lat": 47.238889,
+      "lng": 7.046667
+    },
+    {
+      "id": "Q5820984",
+      "name": "Etang de la Montoie",
+      "lat": 47.413056,
+      "lng": 7.172222
+    },
+    {
+      "id": "Q5402429",
+      "name": "Etang de la Moubra",
+      "lat": 46.3043,
+      "lng": 7.4781
+    },
+    {
+      "id": "Q5402426",
+      "name": "Etang de Trente Pas",
+      "lat": 46.288333,
+      "lng": 7.281111
+    },
+    {
+      "id": "Q105086841",
+      "name": "Etang des Miriouges",
+      "lat": 46.291972,
+      "lng": 7.459444
+    },
+    {
+      "id": "Q2721193",
+      "name": "Etang Grenon",
+      "lat": 46.31,
+      "lng": 7.475833
+    },
+    {
+      "id": "Q105084861",
+      "name": "Etang Long",
+      "lat": 46.302833,
+      "lng": 7.467833
+    },
+    {
+      "id": "Q5818565",
+      "name": "Etangs de Bonfol",
+      "lat": 47.470278,
+      "lng": 7.163333
+    },
+    {
+      "id": "Q5408352",
+      "name": "Eugenisee",
+      "lat": 46.818694,
+      "lng": 8.390528
+    },
+    {
+      "id": "Q130861545",
+      "name": "Fa Stausee",
+      "lat": 46.128286,
+      "lng": 8.095719
+    },
+    {
+      "id": "Q870273",
+      "name": "Fälensee",
+      "lat": 47.251272,
+      "lng": 9.417078
+    },
+    {
+      "id": "Q672769",
+      "name": "Flachsee",
+      "lat": 47.328056,
+      "lng": 8.369444
+    },
+    {
+      "id": "Q5824551",
+      "name": "former Tschingelsee",
+      "lat": 46.55168,
+      "lng": 7.74279
+    },
+    {
+      "id": "Q1450467",
+      "name": "Franzosenweiher",
+      "lat": 47.4058,
+      "lng": 8.375
+    },
+    {
+      "id": "Q3247922",
+      "name": "Garichtisee",
+      "lat": 46.955833,
+      "lng": 9.1
+    },
+    {
+      "id": "Q3302083",
+      "name": "Gebidumsee",
+      "lat": 46.258333,
+      "lng": 7.940278
+    },
+    {
+      "id": "Q5530253",
+      "name": "Geisspfadsee",
+      "lat": 46.348611,
+      "lng": 8.253333
+    },
+    {
+      "id": "Q166359",
+      "name": "Geistsee",
+      "lat": 46.761389,
+      "lng": 7.534444
+    },
+    {
+      "id": "Q677862",
+      "name": "Gelmersee",
+      "lat": 46.616111,
+      "lng": 8.332222
+    },
+    {
+      "id": "Q667508",
+      "name": "Gerzensee",
+      "lat": 46.83,
+      "lng": 7.54667
+    },
+    {
+      "id": "Q673510",
+      "name": "Gibidum Reservoir",
+      "lat": 46.372778,
+      "lng": 8.002778
+    },
+    {
+      "id": "Q668465",
+      "name": "Gigerwaldsee",
+      "lat": 46.914167,
+      "lng": 9.373333
+    },
+    {
+      "id": "Q5567243",
+      "name": "Glattalpsee",
+      "lat": 46.919444,
+      "lng": 8.905556
+    },
+    {
+      "id": "Q5581051",
+      "name": "Golzernsee",
+      "lat": 46.775833,
+      "lng": 8.739722
+    },
+    {
+      "id": "Q43176",
+      "name": "Göscheneralpsee",
+      "lat": 46.645278,
+      "lng": 8.484444
+    },
+    {
+      "id": "Q101508857",
+      "name": "Gour de Comborsin",
+      "lat": 46.44574,
+      "lng": 7.20689
+    },
+    {
+      "id": "Q14906724",
+      "name": "Gräppelensee",
+      "lat": 47.2114,
+      "lng": 9.2875
+    },
+    {
+      "id": "Q5600028",
+      "name": "Great St Bernard Lake",
+      "lat": 45.868611,
+      "lng": 7.167222
+    },
+    {
+      "id": "Q14497",
+      "name": "Greifensee",
+      "lat": 47.35,
+      "lng": 8.683333
+    },
+    {
+      "id": "Q382519",
+      "name": "Griessee",
+      "lat": 46.4575,
+      "lng": 8.37
+    },
+    {
+      "id": "Q222022",
+      "name": "Grimselsee",
+      "lat": 46.5675,
+      "lng": 8.3075
+    },
+    {
+      "id": "Q109659674",
+      "name": "Grindjesee",
+      "lat": 46.0115,
+      "lng": 7.79144
+    },
+    {
+      "id": "Q104535855",
+      "name": "Gross Fläsch",
+      "lat": 46.9069,
+      "lng": 8.676
+    },
+    {
+      "id": "Q1552336",
+      "name": "Grünsee",
+      "lat": 46.7853,
+      "lng": 9.7091
+    },
+    {
+      "id": "Q5819490",
+      "name": "Gübsensee",
+      "lat": 47.398889,
+      "lng": 9.313611
+    },
+    {
+      "id": "Q104817342",
+      "name": "Guggisee",
+      "lat": 46.44455,
+      "lng": 7.8812
+    },
+    {
+      "id": "Q5619829",
+      "name": "Guraletschsee",
+      "lat": 46.561,
+      "lng": 9.1376
+    },
+    {
+      "id": "Q60468235",
+      "name": "Güttinger Wald",
+      "lat": 47.584167,
+      "lng": 9.268889
+    },
+    {
+      "id": "Q5638585",
+      "name": "Hagelseeli",
+      "lat": 46.666667,
+      "lng": 8.033333
+    },
+    {
+      "id": "Q5638900",
+      "name": "Hahnensee",
+      "lat": 46.4675,
+      "lng": 9.828611
+    },
+    {
+      "id": "Q141596958",
+      "name": "Hasemoosweier",
+      "lat": 47.09932,
+      "lng": 8.23995
+    },
+    {
+      "id": "Q664613",
+      "name": "Hasensee",
+      "lat": 47.607778,
+      "lng": 8.83
+    },
+    {
+      "id": "Q1589204",
+      "name": "Hauensee",
+      "lat": 46.7686,
+      "lng": 9.63565
+    },
+    {
+      "id": "Q135442883",
+      "name": "Häxenseeli",
+      "lat": 46.858381,
+      "lng": 9.115369
+    },
+    {
+      "id": "Q383633",
+      "name": "Heidsee",
+      "lat": 46.739722,
+      "lng": 9.550556
+    },
+    {
+      "id": "Q116843277",
+      "name": "Heubützlisee",
+      "lat": 46.94348,
+      "lng": 9.29807
+    },
+    {
+      "id": "Q5767537",
+      "name": "Hinterburgsee",
+      "lat": 46.718056,
+      "lng": 8.067222
+    },
+    {
+      "id": "Q5767594",
+      "name": "Hinterstockensee",
+      "lat": 46.685833,
+      "lng": 7.540278
+    },
+    {
+      "id": "Q22949157",
+      "name": "Hirschlensee",
+      "lat": 47.17636,
+      "lng": 8.97709
+    },
+    {
+      "id": "Q22640199",
+      "name": "Horgener Bergweiher",
+      "lat": 47.242681,
+      "lng": 8.598281
+    },
+    {
+      "id": "Q5819787",
+      "name": "Husemersee",
+      "lat": 47.621944,
+      "lng": 8.704444
+    },
+    {
+      "id": "Q492680",
+      "name": "Hüttnersee",
+      "lat": 47.183333,
+      "lng": 8.675
+    },
+    {
+      "id": "Q689321",
+      "name": "Hüttwilersee",
+      "lat": 47.610556,
+      "lng": 8.8425
+    },
+    {
+      "id": "Q65581237",
+      "name": "I Lagh da Mürüsciola",
+      "lat": 46.40132,
+      "lng": 10.09624
+    },
+    {
+      "id": "Q502389",
+      "name": "Iffigsee",
+      "lat": 46.386528,
+      "lng": 7.406528
+    },
+    {
+      "id": "Q492711",
+      "name": "Illsee",
+      "lat": 46.2575,
+      "lng": 7.6325
+    },
+    {
+      "id": "Q15229912",
+      "name": "Jöriseen",
+      "lat": 46.778611,
+      "lng": 9.967778
+    },
+    {
+      "id": "Q672290",
+      "name": "Katzensee",
+      "lat": 47.4325,
+      "lng": 8.492778
+    },
+    {
+      "id": "Q680864",
+      "name": "Klingnauer Stausee",
+      "lat": 47.583333,
+      "lng": 8.233333
+    },
+    {
+      "id": "Q664441",
+      "name": "Klöntalersee",
+      "lat": 47.025833,
+      "lng": 8.980556
+    },
+    {
+      "id": "Q664226",
+      "name": "Laaxersee",
+      "lat": 46.808056,
+      "lng": 9.257222
+    },
+    {
+      "id": "Q2855100",
+      "name": "Lac Bleu",
+      "lat": 46.0505,
+      "lng": 7.48
+    },
+    {
+      "id": "Q14482",
+      "name": "Lac Brenet",
+      "lat": 46.673056,
+      "lng": 6.323333
+    },
+    {
+      "id": "Q5819181",
+      "name": "Lac Coffy",
+      "lat": 46.615556,
+      "lng": 6.5875
+    },
+    {
+      "id": "Q104790843",
+      "name": "Lac d’Arpitettaz",
+      "lat": 46.104863,
+      "lng": 7.644379
+    },
+    {
+      "id": "Q23892375",
+      "name": "Lac d'Émosson",
+      "lat": 46.079905,
+      "lng": 6.916471
+    },
+    {
+      "id": "Q492685",
+      "name": "Lac d'Icogne",
+      "lat": 46.305203,
+      "lng": 7.456172
+    },
+    {
+      "id": "Q22642500",
+      "name": "Lac de Barberine",
+      "lat": 46.08597,
+      "lng": 6.91006
+    },
+    {
+      "id": "Q48756885",
+      "name": "Lac de Biaufond",
+      "lat": 47.165,
+      "lng": 6.847
+    },
+    {
+      "id": "Q870058",
+      "name": "Lac de Bret",
+      "lat": 46.511111,
+      "lng": 6.772222
+    },
+    {
+      "id": "Q3215385",
+      "name": "Lac de Bretaye",
+      "lat": 46.326,
+      "lng": 7.07261
+    },
+    {
+      "id": "Q3301689",
+      "name": "Lac de Champex",
+      "lat": 46.028333,
+      "lng": 7.116389
+    },
+    {
+      "id": "Q88870138",
+      "name": "lac de Chanrion",
+      "lat": 45.9356,
+      "lng": 7.3784
+    },
+    {
+      "id": "Q109341780",
+      "name": "Lac de Châteaupré",
+      "lat": 46.10494,
+      "lng": 7.58031
+    },
+    {
+      "id": "Q5922100",
+      "name": "Lac de Chermignon",
+      "lat": 46.3125,
+      "lng": 7.4675
+    },
+    {
+      "id": "Q3215422",
+      "name": "Lac de Chésery",
+      "lat": 46.202177,
+      "lng": 6.813723
+    },
+    {
+      "id": "Q3215424",
+      "name": "Lac de Conche",
+      "lat": 46.264722,
+      "lng": 6.8625
+    },
+    {
+      "id": "Q671159",
+      "name": "Lac de Derborence",
+      "lat": 46.278889,
+      "lng": 7.217222
+    },
+    {
+      "id": "Q2728344",
+      "name": "Lac de Géronde",
+      "lat": 46.289167,
+      "lng": 7.543056
+    },
+    {
+      "id": "Q107971000",
+      "name": "Lac de Jaman",
+      "lat": 46.44475,
+      "lng": 6.98479
+    },
+    {
+      "id": "Q14472",
+      "name": "Lac de Joux",
+      "lat": 46.639444,
+      "lng": 6.285833
+    },
+    {
+      "id": "Q680900",
+      "name": "Lac de l'Hongrin",
+      "lat": 46.424722,
+      "lng": 7.048333
+    },
+    {
+      "id": "Q682189",
+      "name": "Lac de la Gruyère",
+      "lat": 46.65,
+      "lng": 7.1
+    },
+    {
+      "id": "Q5820044",
+      "name": "Lac de Lessoc",
+      "lat": 46.496667,
+      "lng": 7.051944
+    },
+    {
+      "id": "Q663089",
+      "name": "Lac de Lona",
+      "lat": 46.152222,
+      "lng": 7.528611
+    },
+    {
+      "id": "Q6467964",
+      "name": "Lac de Louvie",
+      "lat": 46.05,
+      "lng": 7.308333
+    },
+    {
+      "id": "Q508239",
+      "name": "Lac de Lovenex",
+      "lat": 46.353333,
+      "lng": 6.79
+    },
+    {
+      "id": "Q103399642",
+      "name": "Lac de Luchet",
+      "lat": 46.33781,
+      "lng": 7.41896
+    },
+    {
+      "id": "Q5820202",
+      "name": "Lac de Lussy",
+      "lat": 46.544167,
+      "lng": 6.9
+    },
+    {
+      "id": "Q595629",
+      "name": "Lac de Mauvoisin",
+      "lat": 45.978292,
+      "lng": 7.354258
+    },
+    {
+      "id": "Q870046",
+      "name": "Lac de Moiry",
+      "lat": 46.130278,
+      "lng": 7.570556
+    },
+    {
+      "id": "Q667249",
+      "name": "Lac de Montsalvens",
+      "lat": 46.6125,
+      "lng": 7.139444
+    },
+    {
+      "id": "Q3215494",
+      "name": "Lac de Morgins",
+      "lat": 46.248611,
+      "lng": 6.846667
+    },
+    {
+      "id": "Q671274",
+      "name": "Lac de Moron",
+      "lat": 47.091389,
+      "lng": 6.740833
+    },
+    {
+      "id": "Q390468",
+      "name": "Lac de Pérolles",
+      "lat": 46.795917,
+      "lng": 7.162597
+    },
+    {
+      "id": "Q680375",
+      "name": "Lac de Salanfe",
+      "lat": 46.141307,
+      "lng": 6.959145
+    },
+    {
+      "id": "Q2741337",
+      "name": "Lac de Sauvabelin",
+      "lat": 46.5375,
+      "lng": 6.638333
+    },
+    {
+      "id": "Q670622",
+      "name": "Lac de Schiffenen",
+      "lat": 46.854444,
+      "lng": 7.166389
+    },
+    {
+      "id": "Q5823572",
+      "name": "Lac de Seedorf",
+      "lat": 46.795833,
+      "lng": 7.040556
+    },
+    {
+      "id": "Q6467993",
+      "name": "Lac de Tracouet",
+      "lat": 46.159722,
+      "lng": 7.283889
+    },
+    {
+      "id": "Q376008",
+      "name": "Lac de Tseuzier",
+      "lat": 46.350833,
+      "lng": 7.430556
+    },
+    {
+      "id": "Q6468023",
+      "name": "Lac des Audannes",
+      "lat": 46.344167,
+      "lng": 7.388056
+    },
+    {
+      "id": "Q689755",
+      "name": "Lac des Autannes",
+      "lat": 46.1328,
+      "lng": 7.5428
+    },
+    {
+      "id": "Q671624",
+      "name": "Lac des Brenets",
+      "lat": 47.069167,
+      "lng": 6.697778
+    },
+    {
+      "id": "Q2741317",
+      "name": "Lac des Chavonnes",
+      "lat": 46.333056,
+      "lng": 7.085833
+    },
+    {
+      "id": "Q5834768",
+      "name": "Lac des Dix",
+      "lat": 46.057151,
+      "lng": 7.397547
+    },
+    {
+      "id": "Q18611507",
+      "name": "Lac des Joncs",
+      "lat": 46.5131,
+      "lng": 6.9475
+    },
+    {
+      "id": "Q671611",
+      "name": "Lac des Taillères",
+      "lat": 46.966944,
+      "lng": 6.574722
+    },
+    {
+      "id": "Q677909",
+      "name": "Lac des Toules",
+      "lat": 45.919167,
+      "lng": 7.198889
+    },
+    {
+      "id": "Q6468040",
+      "name": "Lac des Vaux",
+      "lat": 46.107778,
+      "lng": 7.2725
+    },
+    {
+      "id": "Q65127345",
+      "name": "Lac des Vernes",
+      "lat": 46.236093,
+      "lng": 6.073783
+    },
+    {
+      "id": "Q6468065",
+      "name": "Lac du Grand Désert",
+      "lat": 46.089167,
+      "lng": 7.335556
+    },
+    {
+      "id": "Q6468069",
+      "name": "Lac du Mont d'Orge",
+      "lat": 46.233056,
+      "lng": 7.336944
+    },
+    {
+      "id": "Q3034609",
+      "name": "Lac du Vernex",
+      "lat": 46.463611,
+      "lng": 7.071667
+    },
+    {
+      "id": "Q376077",
+      "name": "Lac du Vieux Émosson",
+      "lat": 46.061451,
+      "lng": 6.88955
+    },
+    {
+      "id": "Q970497",
+      "name": "Lac Lioson",
+      "lat": 46.386389,
+      "lng": 7.128611
+    },
+    {
+      "id": "Q105089734",
+      "name": "Lac Louché",
+      "lat": 46.282,
+      "lng": 7.446694
+    },
+    {
+      "id": "Q141596960",
+      "name": "Lac Pourri",
+      "lat": 46.38467,
+      "lng": 6.9969
+    },
+    {
+      "id": "Q109037351",
+      "name": "Lac Retaud",
+      "lat": 46.36008,
+      "lng": 7.19932
+    },
+    {
+      "id": "Q22493678",
+      "name": "Lac Sup. de Fully",
+      "lat": 46.17852,
+      "lng": 7.09391
+    },
+    {
+      "id": "Q3215228",
+      "name": "Lac Ter",
+      "lat": 46.652778,
+      "lng": 6.293611
+    },
+    {
+      "id": "Q124429656",
+      "name": "lac Vert",
+      "lat": 46.04505,
+      "lng": 6.88856
+    },
+    {
+      "id": "Q15824999",
+      "name": "Lacs de Fenêtre",
+      "lat": 45.885722,
+      "lng": 7.141594
+    },
+    {
+      "id": "Q138736539",
+      "name": "Lag Brit",
+      "lat": 46.736111,
+      "lng": 8.844444
+    },
+    {
+      "id": "Q6471808",
+      "name": "Lag da Breil",
+      "lat": 46.771667,
+      "lng": 9.071667
+    },
+    {
+      "id": "Q690791",
+      "name": "Lag da Laus",
+      "lat": 46.702778,
+      "lng": 8.915833
+    },
+    {
+      "id": "Q5822624",
+      "name": "Lag da Pigniu",
+      "lat": 46.833333,
+      "lng": 9.1
+    },
+    {
+      "id": "Q1621359",
+      "name": "Lag digl Oberst",
+      "lat": 46.8,
+      "lng": 9.25278
+    },
+    {
+      "id": "Q690097",
+      "name": "Lag Prau Pulté",
+      "lat": 46.8266,
+      "lng": 9.274769
+    },
+    {
+      "id": "Q5824801",
+      "name": "Lag Tuleritg",
+      "lat": 46.821,
+      "lng": 9.283
+    },
+    {
+      "id": "Q5818318",
+      "name": "Lägh da Bitabergh",
+      "lat": 46.3903,
+      "lng": 9.6858
+    },
+    {
+      "id": "Q5818910",
+      "name": "Lägh da Cavloc",
+      "lat": 46.38,
+      "lng": 9.704722
+    },
+    {
+      "id": "Q100979596",
+      "name": "Lagh da la Cruseta",
+      "lat": 46.411539,
+      "lng": 10.024331
+    },
+    {
+      "id": "Q107110256",
+      "name": "Lagh da Scispadus",
+      "lat": 46.40236,
+      "lng": 10.12876
+    },
+    {
+      "id": "Q74090235",
+      "name": "Lagh de Calvaresc",
+      "lat": 46.365728,
+      "lng": 9.158146
+    },
+    {
+      "id": "Q108087167",
+      "name": "Lagh de Pian Doss",
+      "lat": 46.449167,
+      "lng": 9.204722
+    },
+    {
+      "id": "Q22538196",
+      "name": "Laghetto",
+      "lat": 46.396389,
+      "lng": 8.8
+    },
+    {
+      "id": "Q3825558",
+      "name": "Laghetto d'Orbello",
+      "lat": 46.205575,
+      "lng": 9.078698
+    },
+    {
+      "id": "Q3825564",
+      "name": "Laghetto di Cava alto",
+      "lat": 46.351265,
+      "lng": 9.02989
+    },
+    {
+      "id": "Q3825565",
+      "name": "Laghetto di Cava basso",
+      "lat": 46.351071,
+      "lng": 9.03323
+    },
+    {
+      "id": "Q1800366",
+      "name": "Laghetto Moesola",
+      "lat": 46.4933,
+      "lng": 9.17083
+    },
+    {
+      "id": "Q869695",
+      "name": "Lago Bianco",
+      "lat": 46.403056,
+      "lng": 10.021667
+    },
+    {
+      "id": "Q6472297",
+      "name": "Lago d'Alzasca",
+      "lat": 46.265974,
+      "lng": 8.584833
+    },
+    {
+      "id": "Q3215745",
+      "name": "Lago d'Isola",
+      "lat": 46.450889,
+      "lng": 9.187167
+    },
+    {
+      "id": "Q3247911",
+      "name": "Lago d'Origlio",
+      "lat": 46.051111,
+      "lng": 8.942222
+    },
+    {
+      "id": "Q375961",
+      "name": "Lago dei Cavagnöö",
+      "lat": 46.454722,
+      "lng": 8.501111
+    },
+    {
+      "id": "Q59866383",
+      "name": "Lago dei Morti",
+      "lat": 46.55352,
+      "lng": 8.57191
+    },
+    {
+      "id": "Q375992",
+      "name": "Lago del Narèt",
+      "lat": 46.477222,
+      "lng": 8.568889
+    },
+    {
+      "id": "Q673053",
+      "name": "Lago del Sambuco",
+      "lat": 46.463333,
+      "lng": 8.650556
+    },
+    {
+      "id": "Q870252",
+      "name": "Lago del Zött",
+      "lat": 46.433333,
+      "lng": 8.5
+    },
+    {
+      "id": "Q3825863",
+      "name": "Lago dell'Alpe di Lago",
+      "lat": 46.352337,
+      "lng": 9.021182
+    },
+    {
+      "id": "Q6472322",
+      "name": "Lago della Crosa",
+      "lat": 46.372222,
+      "lng": 8.487778
+    },
+    {
+      "id": "Q22538289",
+      "name": "Lago della Piazza",
+      "lat": 46.55651,
+      "lng": 8.56517
+    },
+    {
+      "id": "Q666423",
+      "name": "Lago della Sella",
+      "lat": 46.5635,
+      "lng": 8.5987
+    },
+    {
+      "id": "Q1446152",
+      "name": "Lago di Cama",
+      "lat": 46.254722,
+      "lng": 9.228889
+    },
+    {
+      "id": "Q106489048",
+      "name": "Lago di Carmena",
+      "lat": 46.166944,
+      "lng": 9.069167
+    },
+    {
+      "id": "Q115523318",
+      "name": "Lago di Chignolasc",
+      "lat": 46.32303,
+      "lng": 8.65949
+    },
+    {
+      "id": "Q15241262",
+      "name": "Lago di Chironico",
+      "lat": 46.396389,
+      "lng": 8.799722
+    },
+    {
+      "id": "Q108339207",
+      "name": "Lago di Fieud",
+      "lat": 46.53895,
+      "lng": 8.56458
+    },
+    {
+      "id": "Q656674",
+      "name": "Lago di Lei",
+      "lat": 46.45205,
+      "lng": 9.443236
+    },
+    {
+      "id": "Q672495",
+      "name": "Lago di Livigno",
+      "lat": 46.622222,
+      "lng": 10.193333
+    },
+    {
+      "id": "Q382479",
+      "name": "Lago di Lucendro",
+      "lat": 46.561944,
+      "lng": 8.541944
+    },
+    {
+      "id": "Q372407",
+      "name": "Lago di Luzzone",
+      "lat": 46.5675,
+      "lng": 8.976944
+    },
+    {
+      "id": "Q6472373",
+      "name": "Lago di Mognola",
+      "lat": 46.430278,
+      "lng": 8.688611
+    },
+    {
+      "id": "Q6472378",
+      "name": "Lago di Morghirolo",
+      "lat": 46.4491,
+      "lng": 8.719
+    },
+    {
+      "id": "Q2738959",
+      "name": "Lago di Muzzano",
+      "lat": 45.997222,
+      "lng": 8.928056
+    },
+    {
+      "id": "Q681738",
+      "name": "Lago di Palagnedra",
+      "lat": 46.159444,
+      "lng": 8.626944
+    },
+    {
+      "id": "Q14531",
+      "name": "Lago di Poschiavo",
+      "lat": 46.282222,
+      "lng": 10.090278
+    },
+    {
+      "id": "Q666398",
+      "name": "Lago di Robièi",
+      "lat": 46.445556,
+      "lng": 8.516944
+    },
+    {
+      "id": "Q3301741",
+      "name": "Lago di Saoseo",
+      "lat": 46.398,
+      "lng": 10.126
+    },
+    {
+      "id": "Q2312588",
+      "name": "Lago di Tom",
+      "lat": 46.550556,
+      "lng": 8.689444
+    },
+    {
+      "id": "Q5824897",
+      "name": "Lago di Val Viola",
+      "lat": 46.404167,
+      "lng": 10.138889
+    },
+    {
+      "id": "Q668659",
+      "name": "Lago di Vogorno",
+      "lat": 46.2,
+      "lng": 8.85
+    },
+    {
+      "id": "Q3825743",
+      "name": "Lago Nero",
+      "lat": 46.449306,
+      "lng": 8.539527
+    },
+    {
+      "id": "Q3825766",
+      "name": "Lago Retico",
+      "lat": 46.577222,
+      "lng": 8.891111
+    },
+    {
+      "id": "Q680999",
+      "name": "Lago Ritom",
+      "lat": 46.54,
+      "lng": 8.689167
+    },
+    {
+      "id": "Q3825787",
+      "name": "Lago Sfille",
+      "lat": 46.264578,
+      "lng": 8.495833
+    },
+    {
+      "id": "Q164570",
+      "name": "Lago Sfundau",
+      "lat": 46.4625,
+      "lng": 8.524444
+    },
+    {
+      "id": "Q870247",
+      "name": "Lago Tremorgio",
+      "lat": 46.479167,
+      "lng": 8.720278
+    },
+    {
+      "id": "Q22539893",
+      "name": "Lai Alv",
+      "lat": 46.5691,
+      "lng": 9.78809
+    },
+    {
+      "id": "Q115936642",
+      "name": "Lai Barnagn",
+      "lat": 46.59966,
+      "lng": 9.59036
+    },
+    {
+      "id": "Q5818464",
+      "name": "Lai Blos",
+      "lat": 46.535556,
+      "lng": 9.641944
+    },
+    {
+      "id": "Q92930833",
+      "name": "Lai da Burvagn",
+      "lat": 46.62243,
+      "lng": 9.58636
+    },
+    {
+      "id": "Q65581107",
+      "name": "Lai da Chazfora",
+      "lat": 46.59768,
+      "lng": 10.32821
+    },
+    {
+      "id": "Q666839",
+      "name": "Lai da Curnera",
+      "lat": 46.626667,
+      "lng": 8.713611
+    },
+    {
+      "id": "Q669889",
+      "name": "Lai da Marmorera",
+      "lat": 46.499722,
+      "lng": 9.636944
+    },
+    {
+      "id": "Q382528",
+      "name": "Lai da Nalps",
+      "lat": 46.6325,
+      "lng": 8.763333
+    },
+    {
+      "id": "Q5822456",
+      "name": "Lai da Ova Spin",
+      "lat": 46.671667,
+      "lng": 10.156944
+    },
+    {
+      "id": "Q675812",
+      "name": "Lai da Palpuogna",
+      "lat": 46.580833,
+      "lng": 9.785278
+    },
+    {
+      "id": "Q15241292",
+      "name": "Lai da Ravais-ch",
+      "lat": 46.680278,
+      "lng": 9.868611
+    },
+    {
+      "id": "Q5822805",
+      "name": "Lai da Rims",
+      "lat": 46.565404,
+      "lng": 10.388102
+    },
+    {
+      "id": "Q42308574",
+      "name": "Lai da Schmorras",
+      "lat": 46.53885,
+      "lng": 9.51165
+    },
+    {
+      "id": "Q668452",
+      "name": "Lai da Sontga Maria",
+      "lat": 46.575,
+      "lng": 8.795833
+    },
+    {
+      "id": "Q661427",
+      "name": "Lai da Tarasp",
+      "lat": 46.7771,
+      "lng": 10.2627
+    },
+    {
+      "id": "Q57207301",
+      "name": "Lai da Vons",
+      "lat": 46.58551,
+      "lng": 9.3854
+    },
+    {
+      "id": "Q88988486",
+      "name": "Lai dalla Stria",
+      "lat": 46.707298,
+      "lng": 8.739392
+    },
+    {
+      "id": "Q35155373",
+      "name": "Lai Grond",
+      "lat": 46.59778,
+      "lng": 9.69767
+    },
+    {
+      "id": "Q682014",
+      "name": "Lai Lung",
+      "lat": 46.5954,
+      "lng": 9.54694
+    },
+    {
+      "id": "Q35155995",
+      "name": "Lai Mort",
+      "lat": 46.60017,
+      "lng": 9.68531
+    },
+    {
+      "id": "Q5821245",
+      "name": "Lai Nair",
+      "lat": 46.776,
+      "lng": 10.278
+    },
+    {
+      "id": "Q5821727",
+      "name": "Lai Neir",
+      "lat": 46.535,
+      "lng": 9.638
+    },
+    {
+      "id": "Q1381551",
+      "name": "Lai Tigiel",
+      "lat": 46.605144,
+      "lng": 9.663944
+    },
+    {
+      "id": "Q390449",
+      "name": "lake Arnen",
+      "lat": 46.388206,
+      "lng": 7.216778
+    },
+    {
+      "id": "Q14509",
+      "name": "Lake Baldegg",
+      "lat": 47.198611,
+      "lng": 8.260556
+    },
+    {
+      "id": "Q14429",
+      "name": "Lake Biel",
+      "lat": 47.085556,
+      "lng": 7.174167
+    },
+    {
+      "id": "Q14442",
+      "name": "Lake Brienz",
+      "lat": 46.716667,
+      "lng": 7.95
+    },
+    {
+      "id": "Q689876",
+      "name": "lake Burgäschi (prehistoric lakeside settlement)",
+      "lat": 47.169444,
+      "lng": 7.668333
+    },
+    {
+      "id": "Q666439",
+      "name": "Lake Cadagno",
+      "lat": 46.549722,
+      "lng": 8.711389
+    },
+    {
+      "id": "Q140511418",
+      "name": "Lake Chabloz",
+      "lat": 46.295814,
+      "lng": 7.111308
+    },
+    {
+      "id": "Q4127",
+      "name": "Lake Constance",
+      "lat": 47.65,
+      "lng": 9.316667
+    },
+    {
+      "id": "Q6475547",
+      "name": "Lake Cristallina",
+      "lat": 46.467778,
+      "lng": 8.553889
+    },
+    {
+      "id": "Q690359",
+      "name": "Lake Davos",
+      "lat": 46.819722,
+      "lng": 9.854167
+    },
+    {
+      "id": "Q6403",
+      "name": "Lake Geneva",
+      "lat": 46.45,
+      "lng": 6.55
+    },
+    {
+      "id": "Q109287067",
+      "name": "lake Geschinen",
+      "lat": 46.49579,
+      "lng": 8.287294
+    },
+    {
+      "id": "Q14465",
+      "name": "Lake Hallwil",
+      "lat": 47.284167,
+      "lng": 8.216111
+    },
+    {
+      "id": "Q55189578",
+      "name": "Lake Hopschu",
+      "lat": 46.252533,
+      "lng": 8.023208
+    },
+    {
+      "id": "Q458858",
+      "name": "lake Inkwil",
+      "lat": 47.198684,
+      "lng": 7.662778
+    },
+    {
+      "id": "Q14518",
+      "name": "Lake Lauerz",
+      "lat": 47.033611,
+      "lng": 8.603333
+    },
+    {
+      "id": "Q14381",
+      "name": "Lake Lucerne",
+      "lat": 47.0194,
+      "lng": 8.4011
+    },
+    {
+      "id": "Q14418",
+      "name": "Lake Lugano",
+      "lat": 46,
+      "lng": 9
+    },
+    {
+      "id": "Q14379",
+      "name": "Lake Maggiore",
+      "lat": 46.098056,
+      "lng": 8.714722
+    },
+    {
+      "id": "Q680976",
+      "name": "lake Mattmark",
+      "lat": 46.038056,
+      "lng": 7.96
+    },
+    {
+      "id": "Q14448",
+      "name": "Lake Murten",
+      "lat": 46.933333,
+      "lng": 7.075
+    },
+    {
+      "id": "Q14375",
+      "name": "Lake Neuchâtel",
+      "lat": 46.9,
+      "lng": 6.85
+    },
+    {
+      "id": "Q53513431",
+      "name": "Lake Rämpen",
+      "lat": 47.14031,
+      "lng": 8.89671
+    },
+    {
+      "id": "Q14505",
+      "name": "Lake Sarnen",
+      "lat": 46.8625,
+      "lng": 8.208611
+    },
+    {
+      "id": "Q2265757",
+      "name": "Lake Seewen",
+      "lat": 47.4292,
+      "lng": 7.63863
+    },
+    {
+      "id": "Q14459",
+      "name": "Lake Sempach",
+      "lat": 47.15,
+      "lng": 8.15
+    },
+    {
+      "id": "Q5823927",
+      "name": "lake Sénin",
+      "lat": 46.3575,
+      "lng": 7.295556
+    },
+    {
+      "id": "Q14512",
+      "name": "Lake Sils",
+      "lat": 46.416667,
+      "lng": 9.733333
+    },
+    {
+      "id": "Q14515",
+      "name": "Lake Silvaplana",
+      "lat": 46.45,
+      "lng": 9.794444
+    },
+    {
+      "id": "Q664496",
+      "name": "Lake St. Moritz",
+      "lat": 46.494444,
+      "lng": 9.845833
+    },
+    {
+      "id": "Q3215563",
+      "name": "Lake Taney",
+      "lat": 46.345833,
+      "lng": 6.840556
+    },
+    {
+      "id": "Q14426",
+      "name": "Lake Thun",
+      "lat": 46.683333,
+      "lng": 7.716667
+    },
+    {
+      "id": "Q676659",
+      "name": "Lake Wohlen",
+      "lat": 46.968333,
+      "lng": 7.284444
+    },
+    {
+      "id": "Q14436",
+      "name": "Lake Zug",
+      "lat": 47.116667,
+      "lng": 8.483333
+    },
+    {
+      "id": "Q14407",
+      "name": "Lake Zurich",
+      "lat": 47.2475,
+      "lng": 8.6775
+    },
+    {
+      "id": "Q6710850",
+      "name": "Lämmerensee",
+      "lat": 46.399722,
+      "lng": 7.585278
+    },
+    {
+      "id": "Q487809",
+      "name": "Lauenensee",
+      "lat": 46.395,
+      "lng": 7.332222
+    },
+    {
+      "id": "Q35185263",
+      "name": "Leg Grevasalvas",
+      "lat": 46.45656,
+      "lng": 9.71603
+    },
+    {
+      "id": "Q695596",
+      "name": "Lej da Champfèr",
+      "lat": 46.4667,
+      "lng": 9.80306
+    },
+    {
+      "id": "Q690537",
+      "name": "Lej da Gravatscha",
+      "lat": 46.546111,
+      "lng": 9.900278
+    },
+    {
+      "id": "Q5824445",
+      "name": "Lej da la Tscheppa",
+      "lat": 46.45094,
+      "lng": 9.75148
+    },
+    {
+      "id": "Q40700226",
+      "name": "Lej da las Culuonnas",
+      "lat": 46.47026,
+      "lng": 9.7277
+    },
+    {
+      "id": "Q40498773",
+      "name": "Lej da Pischa",
+      "lat": 46.47162,
+      "lng": 9.97891
+    },
+    {
+      "id": "Q493417",
+      "name": "Lej da Staz",
+      "lat": 46.496111,
+      "lng": 9.868611
+    },
+    {
+      "id": "Q664253",
+      "name": "Lej da Vadret",
+      "lat": 46.4,
+      "lng": 9.849167
+    },
+    {
+      "id": "Q22386629",
+      "name": "Lej Languard",
+      "lat": 46.47504,
+      "lng": 9.95359
+    },
+    {
+      "id": "Q1816431",
+      "name": "Lej Marsch",
+      "lat": 46.4742,
+      "lng": 9.81917
+    },
+    {
+      "id": "Q690121",
+      "name": "Lej Minor",
+      "lat": 46.433714,
+      "lng": 10.036578
+    },
+    {
+      "id": "Q5821369",
+      "name": "Lej Nair",
+      "lat": 46.416111,
+      "lng": 10.007222
+    },
+    {
+      "id": "Q5821606",
+      "name": "Lej Nair (Surlej)",
+      "lat": 46.470833,
+      "lng": 9.818611
+    },
+    {
+      "id": "Q127633317",
+      "name": "Lej Pitschen",
+      "lat": 46.41878,
+      "lng": 10.00386
+    },
+    {
+      "id": "Q41372555",
+      "name": "Lej Tschüffer",
+      "lat": 46.47418,
+      "lng": 9.99541
+    },
+    {
+      "id": "Q60468236",
+      "name": "Lengwiler Weiher",
+      "lat": 47.6289,
+      "lng": 9.1819
+    },
+    {
+      "id": "Q106192382",
+      "name": "Lenkersee",
+      "lat": 46.448333,
+      "lng": 7.443056
+    },
+    {
+      "id": "Q681017",
+      "name": "Limmernsee",
+      "lat": 46.835556,
+      "lng": 9.014167
+    },
+    {
+      "id": "Q664706",
+      "name": "Lobsigensee",
+      "lat": 47.030833,
+      "lng": 7.298056
+    },
+    {
+      "id": "Q14527",
+      "name": "Lungerersee",
+      "lat": 46.8025,
+      "lng": 8.163333
+    },
+    {
+      "id": "Q671636",
+      "name": "Lunghinsee",
+      "lat": 46.417222,
+      "lng": 9.675
+    },
+    {
+      "id": "Q29015663",
+      "name": "Lutersee",
+      "lat": 46.62485,
+      "lng": 8.5434
+    },
+    {
+      "id": "Q676816",
+      "name": "Lützelsee",
+      "lat": 47.259722,
+      "lng": 8.7725
+    },
+    {
+      "id": "Q14932131",
+      "name": "Madseeli",
+      "lat": 47.0306,
+      "lng": 9.24116
+    },
+    {
+      "id": "Q677258",
+      "name": "Märjelensee",
+      "lat": 46.440767,
+      "lng": 8.091992
+    },
+    {
+      "id": "Q5820500",
+      "name": "Marscholsee",
+      "lat": 46.51,
+      "lng": 9.171
+    },
+    {
+      "id": "Q682594",
+      "name": "Mässersee",
+      "lat": 46.354861,
+      "lng": 8.226944
+    },
+    {
+      "id": "Q616773",
+      "name": "Mattenalpsee",
+      "lat": 46.630278,
+      "lng": 8.234167
+    },
+    {
+      "id": "Q680346",
+      "name": "Mauensee",
+      "lat": 47.172222,
+      "lng": 8.075
+    },
+    {
+      "id": "Q675997",
+      "name": "Melchsee",
+      "lat": 46.7725,
+      "lng": 8.2725
+    },
+    {
+      "id": "Q5820636",
+      "name": "Mettmenhaslisee",
+      "lat": 47.474444,
+      "lng": 8.491944
+    },
+    {
+      "id": "Q664238",
+      "name": "Moossee",
+      "lat": 47.0221,
+      "lng": 7.4803
+    },
+    {
+      "id": "Q5821049",
+      "name": "Morgetshofsee",
+      "lat": 47.728889,
+      "lng": 8.700833
+    },
+    {
+      "id": "Q129261804",
+      "name": "Mühleggweier",
+      "lat": 47.41917,
+      "lng": 9.37909
+    },
+    {
+      "id": "Q375968",
+      "name": "Murgseen",
+      "lat": 47.039444,
+      "lng": 9.161111
+    },
+    {
+      "id": "Q476249",
+      "name": "Muttsee",
+      "lat": 46.863778,
+      "lng": 9.026778
+    },
+    {
+      "id": "Q129167279",
+      "name": "Nidersee",
+      "lat": 46.781881,
+      "lng": 8.600209
+    },
+    {
+      "id": "Q5821829",
+      "name": "Niederriedsee",
+      "lat": 46.997778,
+      "lng": 7.241111
+    },
+    {
+      "id": "Q2309428",
+      "name": "Nussbaumersee",
+      "lat": 47.616111,
+      "lng": 8.817222
+    },
+    {
+      "id": "Q57540287",
+      "name": "Ober Surettasee",
+      "lat": 46.537641,
+      "lng": 9.353024
+    },
+    {
+      "id": "Q669587",
+      "name": "Oberaarsee",
+      "lat": 46.54449,
+      "lng": 8.2612
+    },
+    {
+      "id": "Q5822088",
+      "name": "Oberalpsee",
+      "lat": 46.660556,
+      "lng": 8.664167
+    },
+    {
+      "id": "Q663078",
+      "name": "Oberblegisee",
+      "lat": 46.980833,
+      "lng": 9.013333
+    },
+    {
+      "id": "Q5821123",
+      "name": "Oberer Murgsee",
+      "lat": 47.039444,
+      "lng": 9.154444
+    },
+    {
+      "id": "Q27889641",
+      "name": "Oberes Schwärziseeli",
+      "lat": 46.5625,
+      "lng": 8.4288
+    },
+    {
+      "id": "Q1751312",
+      "name": "Obersee",
+      "lat": 46.7845,
+      "lng": 9.68147
+    },
+    {
+      "id": "Q5822306",
+      "name": "Oberstockensee",
+      "lat": 46.688056,
+      "lng": 7.521389
+    },
+    {
+      "id": "Q14533",
+      "name": "Oeschinen Lake",
+      "lat": 46.498333,
+      "lng": 7.726944
+    },
+    {
+      "id": "Q167274",
+      "name": "Palü Lake",
+      "lat": 46.372778,
+      "lng": 10.025833
+    },
+    {
+      "id": "Q105075291",
+      "name": "Partnunsee",
+      "lat": 47.00687,
+      "lng": 9.85907
+    },
+    {
+      "id": "Q14514",
+      "name": "Pfäffikersee",
+      "lat": 47.352222,
+      "lng": 8.78
+    },
+    {
+      "id": "Q2115233",
+      "name": "Prätschseen",
+      "lat": 46.8008,
+      "lng": 9.67788
+    },
+    {
+      "id": "Q677934",
+      "name": "Räterichsbodensee",
+      "lat": 46.585278,
+      "lng": 8.328056
+    },
+    {
+      "id": "Q2147944",
+      "name": "Rheinsee",
+      "lat": 47.6625,
+      "lng": 8.960278
+    },
+    {
+      "id": "Q672967",
+      "name": "Riffelsee",
+      "lat": 45.983333,
+      "lng": 7.762222
+    },
+    {
+      "id": "Q4398635",
+      "name": "Rotelsee",
+      "lat": 46.244167,
+      "lng": 8.030833
+    },
+    {
+      "id": "Q105872397",
+      "name": "Rothallenweiher",
+      "lat": 47.514966,
+      "lng": 7.634828
+    },
+    {
+      "id": "Q16940",
+      "name": "Rotsee",
+      "lat": 47.069722,
+      "lng": 8.314167
+    },
+    {
+      "id": "Q109443647",
+      "name": "Rundsee",
+      "lat": 46.53534,
+      "lng": 8.29429
+    },
+    {
+      "id": "Q5822916",
+      "name": "Sägistalsee",
+      "lat": 46.679722,
+      "lng": 7.976389
+    },
+    {
+      "id": "Q387415",
+      "name": "Saint-Léonard underground lake",
+      "lat": 46.256389,
+      "lng": 7.425556
+    },
+    {
+      "id": "Q141221622",
+      "name": "Saline Schweizerhalle",
+      "lat": 47.531217,
+      "lng": 7.676054
+    },
+    {
+      "id": "Q668561",
+      "name": "Sämtisersee",
+      "lat": 47.271667,
+      "lng": 9.457778
+    },
+    {
+      "id": "Q135113648",
+      "name": "Sass Seeli",
+      "lat": 46.773873,
+      "lng": 8.56286
+    },
+    {
+      "id": "Q2259089",
+      "name": "Schönenbodensee",
+      "lat": 47.2074,
+      "lng": 9.36778
+    },
+    {
+      "id": "Q14932132",
+      "name": "Schottensee",
+      "lat": 46.9761,
+      "lng": 9.39295
+    },
+    {
+      "id": "Q5823021",
+      "name": "Schwarzsee",
+      "lat": 46.984167,
+      "lng": 9.396944
+    },
+    {
+      "id": "Q1412644",
+      "name": "Schwellisee",
+      "lat": 46.7647,
+      "lng": 9.64805
+    },
+    {
+      "id": "Q1800177",
+      "name": "Schwendisee",
+      "lat": 47.187,
+      "lng": 9.331
+    },
+    {
+      "id": "Q870267",
+      "name": "Seealpsee",
+      "lat": 47.268889,
+      "lng": 9.4
+    },
+    {
+      "id": "Q5823328",
+      "name": "Seebergsee",
+      "lat": 46.577222,
+      "lng": 7.443056
+    },
+    {
+      "id": "Q51064147",
+      "name": "Seefeldsee",
+      "lat": 46.7883,
+      "lng": 8.23138
+    },
+    {
+      "id": "Q458876",
+      "name": "Seeli",
+      "lat": 46.9586,
+      "lng": 8.57194
+    },
+    {
+      "id": "Q5823683",
+      "name": "Seeweidsee",
+      "lat": 47.256944,
+      "lng": 8.746111
+    },
+    {
+      "id": "Q5823820",
+      "name": "Seewlisee",
+      "lat": 46.811111,
+      "lng": 8.714444
+    },
+    {
+      "id": "Q134487426",
+      "name": "Sera",
+      "lat": 46.168781,
+      "lng": 8.120181
+    },
+    {
+      "id": "Q688846",
+      "name": "Sihlsee",
+      "lat": 47.116667,
+      "lng": 8.783333
+    },
+    {
+      "id": "Q458850",
+      "name": "Soppensee",
+      "lat": 47.090278,
+      "lng": 8.080833
+    },
+    {
+      "id": "Q5824079",
+      "name": "Spaneggsee",
+      "lat": 47.075,
+      "lng": 9.130556
+    },
+    {
+      "id": "Q114795850",
+      "name": "Speichersee Heidbüel",
+      "lat": 46.766013,
+      "lng": 9.530459
+    },
+    {
+      "id": "Q2308630",
+      "name": "Speichersee Hintere Hütte",
+      "lat": 46.7836,
+      "lng": 9.65529
+    },
+    {
+      "id": "Q114793924",
+      "name": "Speichersee Scharmoin",
+      "lat": 46.749742,
+      "lng": 9.577467
+    },
+    {
+      "id": "Q96227342",
+      "name": "Speichersee Viderjoch",
+      "lat": 46.976719,
+      "lng": 10.344769
+    },
+    {
+      "id": "Q639043",
+      "name": "Spilauersee",
+      "lat": 46.923333,
+      "lng": 8.693333
+    },
+    {
+      "id": "Q33216150",
+      "name": "Staanegger Weier",
+      "lat": 47.62004,
+      "lng": 8.8452
+    },
+    {
+      "id": "Q2334678",
+      "name": "Stausee Arosa",
+      "lat": 46.7798,
+      "lng": 9.69337
+    },
+    {
+      "id": "Q492714",
+      "name": "Stausee Ferden",
+      "lat": 46.387778,
+      "lng": 7.757222
+    },
+    {
+      "id": "Q5820291",
+      "name": "Stausee Mapragg",
+      "lat": 46.944444,
+      "lng": 9.480556
+    },
+    {
+      "id": "Q17332476",
+      "name": "Stausee Solis",
+      "lat": 46.673333,
+      "lng": 9.543889
+    },
+    {
+      "id": "Q3301707",
+      "name": "Steinibühlweiher",
+      "lat": 47.1375,
+      "lng": 8.208889
+    },
+    {
+      "id": "Q5824159",
+      "name": "Steinsee",
+      "lat": 46.725,
+      "lng": 8.433333
+    },
+    {
+      "id": "Q1626806",
+      "name": "Stellisee",
+      "lat": 46.013498,
+      "lng": 7.800605
+    },
+    {
+      "id": "Q492672",
+      "name": "Sternenweiher",
+      "lat": 47.195556,
+      "lng": 8.691944
+    },
+    {
+      "id": "Q112569023",
+      "name": "Stolzenbergweiher",
+      "lat": 47.42491,
+      "lng": 9.15352
+    },
+    {
+      "id": "Q671184",
+      "name": "Sufnersee",
+      "lat": 46.567222,
+      "lng": 9.371111
+    },
+    {
+      "id": "Q5824237",
+      "name": "Talalpsee",
+      "lat": 47.095556,
+      "lng": 9.133333
+    },
+    {
+      "id": "Q42725541",
+      "name": "Tambosee",
+      "lat": 46.5095,
+      "lng": 9.29872
+    },
+    {
+      "id": "Q492704",
+      "name": "Tannensee",
+      "lat": 46.773611,
+      "lng": 8.306111
+    },
+    {
+      "id": "Q492669",
+      "name": "Teufenbachweiher",
+      "lat": 47.180731,
+      "lng": 8.638539
+    },
+    {
+      "id": "Q14932137",
+      "name": "Tobelweiher (Berg)",
+      "lat": 47.5759,
+      "lng": 9.19118
+    },
+    {
+      "id": "Q690343",
+      "name": "Tomasee",
+      "lat": 46.6325,
+      "lng": 8.672222
+    },
+    {
+      "id": "Q120435122",
+      "name": "Tonisee",
+      "lat": 46.77233,
+      "lng": 8.57994
+    },
+    {
+      "id": "Q2443989",
+      "name": "Torfstichsee",
+      "lat": 47.166531,
+      "lng": 9.006936
+    },
+    {
+      "id": "Q669682",
+      "name": "Totensee",
+      "lat": 46.560292,
+      "lng": 8.339697
+    },
+    {
+      "id": "Q5824340",
+      "name": "Triebtenseewli",
+      "lat": 46.552778,
+      "lng": 8.297778
+    },
+    {
+      "id": "Q4463295",
+      "name": "Triftsee",
+      "lat": 46.6904,
+      "lng": 8.3591
+    },
+    {
+      "id": "Q664751",
+      "name": "Trübtensee",
+      "lat": 46.552778,
+      "lng": 8.298056
+    },
+    {
+      "id": "Q670173",
+      "name": "Trüebsee",
+      "lat": 46.793889,
+      "lng": 8.390833
+    },
+    {
+      "id": "Q6980388",
+      "name": "Trützisee",
+      "lat": 46.521389,
+      "lng": 8.251111
+    },
+    {
+      "id": "Q7352122",
+      "name": "Tschawinersee",
+      "lat": 46.148889,
+      "lng": 8.136111
+    },
+    {
+      "id": "Q5824706",
+      "name": "Tuetenseeli",
+      "lat": 47.071944,
+      "lng": 8.059167
+    },
+    {
+      "id": "Q676682",
+      "name": "Türlersee",
+      "lat": 47.268333,
+      "lng": 8.502778
+    },
+    {
+      "id": "Q16887814",
+      "name": "Turtmannsee",
+      "lat": 46.168611,
+      "lng": 7.693056
+    },
+    {
+      "id": "Q461864",
+      "name": "Uebeschisee",
+      "lat": 46.73403,
+      "lng": 7.56486
+    },
+    {
+      "id": "Q2498990",
+      "name": "Untersee",
+      "lat": 46.7792,
+      "lng": 9.68159
+    },
+    {
+      "id": "Q2500381",
+      "name": "Urdensee",
+      "lat": 46.7696,
+      "lng": 9.61473
+    },
+    {
+      "id": "Q371034",
+      "name": "Urnersee",
+      "lat": 46.95,
+      "lng": 8.6
+    },
+    {
+      "id": "Q14932134",
+      "name": "Viltersersee",
+      "lat": 46.9878,
+      "lng": 9.43427
+    },
+    {
+      "id": "Q664761",
+      "name": "Voralpsee",
+      "lat": 47.156389,
+      "lng": 9.376111
+    },
+    {
+      "id": "Q16887819",
+      "name": "Vordersee",
+      "lat": 46.441389,
+      "lng": 8.105556
+    },
+    {
+      "id": "Q675610",
+      "name": "Wägitalersee",
+      "lat": 47.089444,
+      "lng": 8.921111
+    },
+    {
+      "id": "Q5825066",
+      "name": "Waldisee",
+      "lat": 46.911667,
+      "lng": 8.840278
+    },
+    {
+      "id": "Q14444",
+      "name": "Walensee",
+      "lat": 47.116667,
+      "lng": 9.2
+    },
+    {
+      "id": "Q14932135",
+      "name": "Wangsersee",
+      "lat": 46.979,
+      "lng": 9.42356
+    },
+    {
+      "id": "Q16887820",
+      "name": "Weingartensee",
+      "lat": 46.063333,
+      "lng": 7.838889
+    },
+    {
+      "id": "Q2559044",
+      "name": "Wendelsee",
+      "lat": 46.6802,
+      "lng": 7.8602
+    },
+    {
+      "id": "Q55988356",
+      "name": "Wenigerweiher",
+      "lat": 47.418608,
+      "lng": 9.414202
+    },
+    {
+      "id": "Q664144",
+      "name": "Werdenbergersee",
+      "lat": 47.1675,
+      "lng": 9.463889
+    },
+    {
+      "id": "Q659676",
+      "name": "Wettingen Reservoir",
+      "lat": 47.4567,
+      "lng": 8.32135
+    },
+    {
+      "id": "Q664269",
+      "name": "Wichelsee",
+      "lat": 46.919444,
+      "lng": 8.2725
+    },
+    {
+      "id": "Q2265298",
+      "name": "Wijer",
+      "lat": 46.9611,
+      "lng": 8.57417
+    },
+    {
+      "id": "Q14932136",
+      "name": "Wildsee",
+      "lat": 46.9705,
+      "lng": 9.39485
+    },
+    {
+      "id": "Q5825174",
+      "name": "Wilersee",
+      "lat": 47.171111,
+      "lng": 8.618889
+    },
+    {
+      "id": "Q196793",
+      "name": "Zervreilasee",
+      "lat": 46.565833,
+      "lng": 9.097778
+    },
+    {
+      "id": "Q33747539",
+      "name": "Züesee",
+      "lat": 46.346733,
+      "lng": 8.245169
+    }
+  ]
+}

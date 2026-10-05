@@ -1,39 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { SWISS_CANTON_IDS } from "./bundledPresets/swiss";
 import { isRegionPackId, REGION_PACK_IDS } from "./regionPack";
 import { regionPackDisplayLabel } from "./regionPackDisplayLabel";
 import { getRegionPackConfig } from "./regionPackRegistry";
 
 const root = resolve(import.meta.dirname, "../../../public/geo/switzerland");
-const CANTON_IDS = [
-  "zurich",
-  "bern",
-  "lucerne",
-  "uri",
-  "schwyz",
-  "obwalden",
-  "nidwalden",
-  "glarus",
-  "zug",
-  "fribourg",
-  "solothurn",
-  "basel-stadt",
-  "basel-landschaft",
-  "schaffhausen",
-  "appenzell-ausserrhoden",
-  "appenzell-innerrhoden",
-  "st-gallen",
-  "graubunden",
-  "aargau",
-  "thurgau",
-  "ticino",
-  "vaud",
-  "valais",
-  "neuchatel",
-  "geneva",
-  "jura",
-] as const;
 
 describe("switzerland region pack wiring", () => {
   it("registers switzerland in the pack id union", () => {
@@ -62,11 +35,11 @@ describe("switzerland geo assets", () => {
     const ids = collection.features
       .map((f: { properties: { cantonId: string } }) => f.properties.cantonId)
       .sort();
-    expect(ids).toEqual([...CANTON_IDS].sort());
+    expect(ids).toEqual([...SWISS_CANTON_IDS].sort());
   });
 
   it("ships municipality slices for every cantonId", () => {
-    for (const cantonId of CANTON_IDS) {
+    for (const cantonId of SWISS_CANTON_IDS) {
       const path = resolve(root, `municipalities/${cantonId}.geojson`);
       expect(existsSync(path), path).toBe(true);
       const collection = JSON.parse(readFileSync(path, "utf8"));

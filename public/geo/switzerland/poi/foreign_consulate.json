@@ -1,1 +1,36 @@
-{ "category": "foreign_consulate", "source": "none", "places": [] }
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q73398462",
+      "name": "consulat général de France à Genève",
+      "lat": 46.19827,
+      "lng": 6.14715
+    },
+    {
+      "id": "Q58490406",
+      "name": "Consulate of Japan, Geneva",
+      "lat": 46.216528,
+      "lng": 6.148472
+    },
+    {
+      "id": "Q26980203",
+      "name": "Embassy of Hungary in Bern",
+      "lat": 46.942833,
+      "lng": 7.46475
+    },
+    {
+      "id": "Q75938888",
+      "name": "Permanent Mission of New Zealand to the United Nations at  Geneva",
+      "lat": 46.22631,
+      "lng": 6.123998
+    }
+  ]
+}
