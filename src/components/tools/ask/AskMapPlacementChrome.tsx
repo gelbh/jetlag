@@ -5,7 +5,7 @@
 
 import { Button } from "@mantine/core";
 import { CaretLeftIcon, CrosshairIcon } from "@phosphor-icons/react";
-import { type ReactNode, useEffect } from "react";
+import { type CSSProperties, type ReactNode, useEffect } from "react";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
 import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineError";
 import { compactFilledStyles, mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
@@ -77,6 +77,34 @@ export const askMapPlacementSendStyles = {
   },
 } as const;
 
+function HaltErrorAlert({
+  testId,
+  title,
+  detail,
+  className,
+  style,
+}: {
+  testId: string;
+  title: string;
+  detail: string;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  return (
+    <div data-testid={testId} role="alert" className={className} style={style}>
+      <p className="m-0 text-sm font-semibold leading-snug" style={{ color: "var(--color-halt)" }}>
+        {title}
+      </p>
+      <p
+        className="m-0 mt-1 text-xs leading-snug"
+        style={{ color: "var(--color-field-ink-muted)" }}
+      >
+        {detail}
+      </p>
+    </div>
+  );
+}
+
 function StatusSpinner() {
   return (
     <span
@@ -96,14 +124,17 @@ function StatusSpinner() {
 
 function bottomClearanceForPhase(
   phase: AskMapPlacementPhase,
-  hasFailedError: boolean,
+  hasInlineError: boolean,
   answerTall: boolean,
 ): string {
   if (phase === "answer") {
+    if (hasInlineError) {
+      return answerTall ? "16rem" : "13.5rem";
+    }
     return answerTall ? "12.5rem" : "10rem";
   }
   if (phase === "failed") {
-    return hasFailedError ? "13.5rem" : "10rem";
+    return hasInlineError ? "13.5rem" : "10rem";
   }
   if (phase === "needs_permission") {
     return "10rem";
@@ -139,8 +170,13 @@ export function AskMapPlacementChrome({
   const showAnswer = phase === "answer";
   const showStatus = phase === "locating" || phase === "resolving";
   const failedErrorCopy = phase === "failed" && error ? askInlineErrorCopy(error) : null;
+  const answerErrorCopy = phase === "answer" && error ? askInlineErrorCopy(error) : null;
 
-  const bottomClearance = bottomClearanceForPhase(phase, Boolean(failedErrorCopy), answerTall);
+  const bottomClearance = bottomClearanceForPhase(
+    phase,
+    Boolean(failedErrorCopy || answerErrorCopy),
+    answerTall,
+  );
 
   useEffect(() => {
     const root = document.documentElement;
@@ -233,7 +269,7 @@ export function AskMapPlacementChrome({
                 <span
                   data-testid="ask-cost-chip"
                   style={{
-                    fontSize: "0.625rem",
+                    fontSize: "0.8125rem",
                     fontWeight: 650,
                     letterSpacing: "0.02em",
                     color: "var(--color-field-ink-muted)",
@@ -273,7 +309,7 @@ export function AskMapPlacementChrome({
             <StatusSpinner />
             <div className="min-w-0 flex-1">
               <p
-                className="m-0 text-[0.6875rem] font-semibold leading-none"
+                className="m-0 text-xs font-semibold leading-none"
                 style={{ color: "var(--color-field-ink-muted)" }}
               >
                 {statusTitle}
@@ -305,20 +341,12 @@ export function AskMapPlacementChrome({
             }}
           >
             {failedErrorCopy ? (
-              <div data-testid={`${testId}-error`} role="alert" className="px-1 pt-0.5">
-                <p
-                  className="m-0 text-sm font-semibold leading-snug"
-                  style={{ color: "var(--color-halt)" }}
-                >
-                  {failedErrorCopy.title}
-                </p>
-                <p
-                  className="m-0 mt-1 text-xs leading-snug"
-                  style={{ color: "var(--color-field-ink-muted)" }}
-                >
-                  {failedErrorCopy.detail}
-                </p>
-              </div>
+              <HaltErrorAlert
+                testId={`${testId}-error`}
+                title={failedErrorCopy.title}
+                detail={failedErrorCopy.detail}
+                className="px-1 pt-0.5"
+              />
             ) : null}
             <Button
               type="button"
@@ -364,6 +392,20 @@ export function AskMapPlacementChrome({
               </p>
             ) : null}
           </div>
+        ) : null}
+        {showAnswer && answerErrorCopy ? (
+          <HaltErrorAlert
+            testId={`${testId}-answer-error`}
+            title={answerErrorCopy.title}
+            detail={answerErrorCopy.detail}
+            className="mx-auto w-full max-w-[22rem] px-3 py-2.5"
+            style={{
+              ...mapChromeSurfaceStyles,
+              borderRadius: 14,
+              border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
+              color: "var(--color-field-ink)",
+            }}
+          />
         ) : null}
         {showAnswer ? answerSlot : null}
       </div>

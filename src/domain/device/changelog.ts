@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.0.3";
+export const APP_VERSION = "1.0.5";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,91 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.0.5",
+    date: "2026-10-05",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Session list stays on screen with Retry when a refresh fails",
+          "Empty and fail copy on Sessions, Monitor, and the incident queue is short and actionable",
+          "Opening the app with no signal no longer shows the content blocker error page",
+          "The app reloads to the latest version once you're back online if part of it failed to load offline",
+          "The Premium page shows its sign-in options right away instead of waiting on sign-in to load",
+          "Privacy policy discloses masked Sentry Session Replay and that error reports may include a pseudonymous account id",
+          "Hiding and round timers now stay in sync across phones even when a phone's clock is wrong, and a running timer survives the app being closed or killed.",
+          "Solo Measuring and Matching keep map shade when elimination geometry is too large to store, same as multiplayer. Tentacle still saves the Point answer if elim JSON exceeds budget. Map-first Ask tools show send errors in the answer phase instead of failing silently.",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Admin ops desk uses Mantine AppShell and controls with a locked desk viewport",
+          "Live sessions is the default filter; extra filters stay behind More filters",
+          "Map tiles you've viewed inside the play area stay available offline longer",
+          "Chat messages you send without signal now clear from the box right away and go out once you reconnect, without sending twice.",
+          "Home, Join and the legal pages load without Google's bot check (reCAPTCHA) until you enter a join code, create a game or sign in",
+          'The home page tab and link previews now read "Jet Lag Map Companion · Live Hide + Seek Maps"',
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Filter OpenFreeMap tile and Cloudflare KV miss spans from Sentry noise",
+          "Harden Sentry SDK 11 privacy defaults, Overpass span filtering, and the first-party envelope tunnel",
+          "Sync Firebase account id into Sentry and instrument React Router navigations",
+          "Unknown web addresses now answer with a real 404 (the app's not-found screen still shows), and search engines can see the noindex on shared join links",
+        ],
+      },
+    ],
+  },
+  {
+    version: "1.0.4",
+    date: "2026-10-04",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Coastline near-region shade fails closed when WASM is unavailable (no TypeScript distance-threshold fallback)",
+          "The game reconnects on its own after your phone wakes up or the signal comes back, instead of staying stuck on old data",
+          'End Game, found hider, time traps and card plays apply right away on a weak or lost signal instead of hanging or showing a false "check your connection" alert; they sync when you reconnect',
+          "Hider map blue-dot reuses the truth GPS watch instead of starting a second one",
+          "Losing signal while a screen is loading no longer reloads the app into a blank page; it waits for the connection to come back and then refreshes",
+          "The hider's answer timer now starts when your question reaches them, not when you tapped Ask without signal",
+          "Answering or cancelling on a patchy connection no longer leaves a question stuck half-done",
+          "Coastline and border measures recover when Overpass times out on a large custom play area",
+          "Matching and measuring place lists recover when Overpass times out on a large custom play area",
+          "Tentacle places recover when Overpass times out on a large search radius",
+          "Bottom sheets reopen fully after a grabber drag-to-dismiss",
+          "Hide optional app-update notices during a live session, including Home Continue",
+          "Do not auto-apply optional updates until the session is cleared",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "When the connection looks fine but your moves aren't going through, the app notices quickly and shows you're offline",
+          "Create sheet uses iOS Settings-style grouped rows on Where, Rules, and Play",
+          "Create page groups Where, Rules, and Play, and tucks rare tools under More tools",
+          "Confirm button now says Create game",
+          "Create flow uses Where, Rules, and Play steps",
+          "Measuring coastline and linear near-region shade follows the distance band instead of a coarse cell grid.",
+          "Questions you ask without signal are saved on your phone and send as soon as signal returns",
+          "Privacy policy notes server-side Premium purchase analytics to PostHog after Stripe payment",
+          "Screen-to-screen moves use smoother page transitions when motion is allowed",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Lighthouse CI audits the same prerendered HTML prod serves for every route, with ratcheted score floors",
+          "Restore route-named Sentry pageloads with LCP/CLS after the SDK 11 span-streaming default",
+          "Forward Sentry tunnel envelopes byte-exact so Session Replay uploads stop failing with 400",
+        ],
+      },
+    ],
+  },
   {
     version: "1.0.3",
     date: "2026-10-04",

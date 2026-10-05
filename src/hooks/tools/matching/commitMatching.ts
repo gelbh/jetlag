@@ -6,6 +6,7 @@ import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "@/domain/geometry/measuring/matchingGeometry";
+import { persistEliminationOrDeferPoint } from "@/domain/geometry/progressive/persistEliminationOrDeferPoint";
 import { persistSlimPolygonFeature } from "@/domain/geometry/progressive/persistSlim";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
@@ -14,6 +15,7 @@ import {
   type MatchingCategoryId,
   matchingQuestionFor,
 } from "@/domain/questions";
+import { seekerAnchorPointFeature } from "@/domain/questions/deferredSeekerPoint";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import type { MatchingFeature } from "@/services/geo/matching";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
@@ -214,31 +216,24 @@ export async function performMatchingCommit(input: CommitMatchingInput): Promise
   let storedBoundary = boundaryRegion;
   if (storedBoundary) {
     const slimmedBoundary = persistSlimPolygonFeature(storedBoundary);
-    if (!slimmedBoundary.ok) {
-      setMatchingError(slimmedBoundary.message);
-      return;
-    }
-    storedBoundary = slimmedBoundary.feature;
+    // Boundary is best-effort: omit JSON when over budget (same as MP resolve).
+    storedBoundary = slimmedBoundary.ok ? slimmedBoundary.feature : null;
   }
 
-  let storedElim = eliminationRegion;
-  if (storedElim) {
-    const slimmed = persistSlimPolygonFeature(storedElim);
-    if (!slimmed.ok) {
-      setMatchingError(slimmed.message);
+  let geometry: Feature<Point | GeoPolygon | MultiPolygon>;
+  if (eliminationRegion) {
+    const persisted = persistEliminationOrDeferPoint({
+      elimination: eliminationRegion,
+      deferPoint: seekerAnchorPointFeature(matchingSeekerPoint),
+    });
+    if (persisted.kind === "unavailable") {
+      setMatchingError("Couldn't save this match question.");
       return;
     }
-    storedElim = slimmed.feature;
+    geometry = persisted.geometry;
+  } else {
+    geometry = seekerAnchorPointFeature(matchingSeekerPoint);
   }
-
-  const geometry: Feature<Point | GeoPolygon | MultiPolygon> = storedElim ?? {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "Point",
-      coordinates: [matchingSeekerPoint[1], matchingSeekerPoint[0]],
-    },
-  };
 
   try {
     const created = await createAnnotation({

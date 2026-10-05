@@ -1,5 +1,10 @@
 export type SyncStatus = "synced" | "saving" | "offline" | "degraded" | "stale" | "error";
 
+/** `!== false`: Node/test globals may expose navigator without onLine. */
+export function isBrowserOnline(): boolean {
+  return typeof navigator === "undefined" || navigator.onLine !== false;
+}
+
 export function isEffectivelyOffline(input: {
   online: boolean;
   reachable: boolean | null;

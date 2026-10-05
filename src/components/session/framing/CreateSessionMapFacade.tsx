@@ -82,7 +82,7 @@ export function CreateSessionMapFacade({
             id={hintId}
             className="max-w-[18rem] text-xs leading-snug text-field-ink-muted text-pretty [@media(max-height:30rem)]:hidden"
           >
-            Frame your play area by hand, or search a place below.
+            Preview your play area here. Search, load a preset, or open Draw.
           </span>
         )}
       </span>

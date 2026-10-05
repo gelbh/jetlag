@@ -13,7 +13,11 @@ dev-secrets:
   doppler run --config dev -- npm run dev
 
 dev-emulator:
-  doppler run --config dev_emulator -- npm run dev
+  npm run dev:emulator
+
+# Failproof emulator stack (deps/WASM/ports + emulators + Vite). Optional worktree slug.
+dev-local slug="":
+  ./scripts/dev-local.sh {{slug}}
 
 build-secrets:
   doppler run --config prd -- npm run build
