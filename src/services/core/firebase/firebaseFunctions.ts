@@ -1,5 +1,6 @@
 import type { Functions } from "firebase/functions";
 import { clientEnvUsesFirebaseEmulator } from "@/config/env";
+import { firebaseEmulatorEndpoints } from "@/config/firebaseEmulatorEndpoints";
 import { getFirebaseApp, getFirebaseAppCheck } from "./firebase";
 
 let functions: Functions | null = null;
@@ -25,7 +26,8 @@ export async function getFirebaseFunctions(): Promise<Functions> {
       functions = instance;
 
       if (firebaseUsesEmulator() && !functionsEmulatorConnected) {
-        connectFunctionsEmulator(instance, "127.0.0.1", 5001);
+        const { host, functionsPort } = firebaseEmulatorEndpoints();
+        connectFunctionsEmulator(instance, host, functionsPort);
         functionsEmulatorConnected = true;
       }
 

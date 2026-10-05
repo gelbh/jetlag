@@ -9,6 +9,9 @@
   "packageManager": "npm@11.16.0",
   "scripts": {
     "dev": "vite",
+    "dev:emulator": "bash scripts/run-dev-emulator.sh",
+    "dev:local": "bash scripts/dev-local.sh",
+    "emulators:local": "bash scripts/run-emulators-local.sh",
     "wasm:build": "wasm-pack build crates/jetlag-geometry-kernel --target bundler --out-dir pkg --release",
     "build": "node scripts/run-build.mjs",
     "preview": "vite preview",
@@ -111,6 +114,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "~6.1.1",
     "@vitest/coverage-v8": "~5.0.2",
+    "concurrently": "^10.0.5",
     "fake-indexeddb": "^6.2.5",
     "firebase-tools": "^15.31.0",
     "husky": "^9.1.7",

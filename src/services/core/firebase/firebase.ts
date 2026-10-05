@@ -26,6 +26,7 @@ import {
   getClientEnv,
   readFirebaseConfigFromEnv,
 } from "@/config/env";
+import { firebaseEmulatorEndpoints } from "@/config/firebaseEmulatorEndpoints";
 import {
   captureAuthBootstrapFailureLazy,
   captureAuthPersistenceFallbackLazy,
@@ -85,7 +86,8 @@ function connectAuthEmulatorIfConfigured(firebaseAuth: Auth): void {
     return;
   }
 
-  connectAuthEmulator(firebaseAuth, "http://127.0.0.1:9199", {
+  const { host, authPort } = firebaseEmulatorEndpoints();
+  connectAuthEmulator(firebaseAuth, `http://${host}:${authPort}`, {
     disableWarnings: true,
   });
   authEmulatorConnected = true;
@@ -96,7 +98,8 @@ function connectFirestoreEmulatorIfConfigured(firestore: Firestore): void {
     return;
   }
 
-  connectFirestoreEmulator(firestore, "127.0.0.1", 8180);
+  const { host, firestorePort } = firebaseEmulatorEndpoints();
+  connectFirestoreEmulator(firestore, host, firestorePort);
   firestoreEmulatorConnected = true;
 }
 
