@@ -18,30 +18,6 @@ beforeEach(() => {
 });
 
 describe("PlayerStickyErrorAlert", () => {
-  it("renders title, message, and action labels", () => {
-    render(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <PlayerStickyErrorAlert
-          error={{
-            title: "Session gone",
-            message: "That session no longer exists.",
-            action: "retry",
-            actionLabel: "Retry",
-            secondaryAction: "rejoin",
-            secondaryActionLabel: "Return to join",
-          }}
-          onAction={() => {}}
-          onSecondaryAction={() => {}}
-        />
-      </MantineProvider>,
-    );
-
-    expect(screen.getByText("Session gone")).toBeInTheDocument();
-    expect(screen.getByText("That session no longer exists.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Return to join" })).toBeInTheDocument();
-  });
-
   it("calls primary and secondary action callbacks on click", () => {
     const onAction = vi.fn();
     const onSecondaryAction = vi.fn();
@@ -62,6 +38,9 @@ describe("PlayerStickyErrorAlert", () => {
         />
       </MantineProvider>,
     );
+
+    expect(screen.getByText("Sync failed")).toBeInTheDocument();
+    expect(screen.getByText("Could not sync with the session.")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     fireEvent.click(screen.getByRole("button", { name: "Return to join" }));
