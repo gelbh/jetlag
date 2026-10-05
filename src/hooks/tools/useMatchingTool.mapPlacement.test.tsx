@@ -150,4 +150,91 @@ describe("useMatchingTool map-first answer", () => {
     expect(screen.getByText(matchingEmptyPlayAreaMessage("landmass"))).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /landmass/i })).toBeDisabled();
   });
+
+  it("re-pins on map tap while answering and clears solo answer", async () => {
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useMatchingTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        gpsLoading: mocks.gpsLoading,
+        mapError: mocks.mapError,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        awaitHiderAnswer: false,
+      }),
+    );
+
+    await act(async () => {
+      result.current.panel.props.model.onCategoryChange("commercial_airport");
+    });
+
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.draft.seekerResolving).toBe(false);
+      expect(result.current.draft.matchingSeekerPoint).toEqual([53.35, -6.26]);
+    });
+
+    act(() => {
+      result.current.panel.props.model.onAnswerChange("yes");
+    });
+
+    expect(result.current.panel.props.model.matchingAnswer).toBe("yes");
+
+    let accepted = false;
+    act(() => {
+      accepted = result.current.handleMapClick([53.36, -6.25]);
+    });
+
+    expect(accepted).toBe(true);
+    expect(result.current.draft.matchingSeekerPoint).toEqual([53.36, -6.25]);
+    expect(result.current.panel.props.model.matchingAnswer).toBeNull();
+  });
+
+  it("re-pins on map tap while answering in multiplayer", async () => {
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useMatchingTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        gpsLoading: mocks.gpsLoading,
+        mapError: mocks.mapError,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        awaitHiderAnswer: true,
+      }),
+    );
+
+    await act(async () => {
+      result.current.panel.props.model.onCategoryChange("commercial_airport");
+    });
+
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.draft.seekerResolving).toBe(false);
+      expect(result.current.draft.matchingSeekerPoint).toEqual([53.35, -6.26]);
+    });
+
+    let accepted = false;
+    act(() => {
+      accepted = result.current.handleMapClick([53.36, -6.25]);
+    });
+
+    expect(accepted).toBe(true);
+    expect(result.current.draft.matchingSeekerPoint).toEqual([53.36, -6.25]);
+  });
 });
