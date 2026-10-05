@@ -1,0 +1,180 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 45.798,
+    "west": 5.9359,
+    "north": 47.8285,
+    "east": 10.5121
+  },
+  "places": [
+    {
+      "id": "Q2859199",
+      "name": "Aquatis",
+      "lat": 46.54086,
+      "lng": 6.65729
+    },
+    {
+      "id": "Q58212596",
+      "name": "Arosa Bärenland",
+      "lat": 46.78675,
+      "lng": 9.66452
+    },
+    {
+      "id": "Q20850350",
+      "name": "BärenPark Bern",
+      "lat": 46.948056,
+      "lng": 7.459167
+    },
+    {
+      "id": "Q220009",
+      "name": "Basel Zoo",
+      "lat": 47.547336,
+      "lng": 7.578764
+    },
+    {
+      "id": "Q2404630",
+      "name": "Bois de la Bâtie",
+      "lat": 46.19828,
+      "lng": 6.12407
+    },
+    {
+      "id": "Q1720755",
+      "name": "Bois du Petit-Château",
+      "lat": 47.105833,
+      "lng": 6.822222
+    },
+    {
+      "id": "Q1355424",
+      "name": "Erlebniswelt Seeteufel",
+      "lat": 47.1117,
+      "lng": 7.31846
+    },
+    {
+      "id": "Q1713816",
+      "name": "Juraparc",
+      "lat": 46.691646,
+      "lng": 6.340463
+    },
+    {
+      "id": "Q688446",
+      "name": "Knie's Kinderzoo",
+      "lat": 47.223652,
+      "lng": 8.821989
+    },
+    {
+      "id": "Q2570812",
+      "name": "Langenberg Wildlife Park",
+      "lat": 47.2928,
+      "lng": 8.52917
+    },
+    {
+      "id": "Q1320084",
+      "name": "Natur- und Tierpark Goldau",
+      "lat": 47.0503,
+      "lng": 8.55306
+    },
+    {
+      "id": "Q453511",
+      "name": "Papiliorama",
+      "lat": 46.9892,
+      "lng": 7.20111
+    },
+    {
+      "id": "Q21973904",
+      "name": "Plättli Zoo",
+      "lat": 47.560556,
+      "lng": 8.915833
+    },
+    {
+      "id": "Q56261042",
+      "name": "Sikypark",
+      "lat": 47.273611,
+      "lng": 7.456111
+    },
+    {
+      "id": "Q683361",
+      "name": "Tierpark Bern",
+      "lat": 46.9344,
+      "lng": 7.44972
+    },
+    {
+      "id": "Q1693413",
+      "name": "Tierpark Lange Erlen",
+      "lat": 47.5744,
+      "lng": 7.60778
+    },
+    {
+      "id": "Q2442063",
+      "name": "Toni's Zoo",
+      "lat": 47.107447,
+      "lng": 8.262156
+    },
+    {
+      "id": "Q137770188",
+      "name": "Vogelpark Ambigua",
+      "lat": 47.478581,
+      "lng": 8.079848
+    },
+    {
+      "id": "Q2441108",
+      "name": "Walter Zoo",
+      "lat": 47.419036,
+      "lng": 9.285153
+    },
+    {
+      "id": "Q107434467",
+      "name": "Wildpark Brienz",
+      "lat": 46.755744,
+      "lng": 8.043613
+    },
+    {
+      "id": "Q1372195",
+      "name": "Wildpark Bruderhaus",
+      "lat": 47.4772,
+      "lng": 8.72619
+    },
+    {
+      "id": "Q63256166",
+      "name": "Wildpark Mühletäli",
+      "lat": 47.342024,
+      "lng": 7.922579
+    },
+    {
+      "id": "Q2570828",
+      "name": "Wildpark Peter und Paul",
+      "lat": 47.4486,
+      "lng": 9.3875
+    },
+    {
+      "id": "Q22955412",
+      "name": "Wildpark Roggenhausen",
+      "lat": 47.377395,
+      "lng": 8.030185
+    },
+    {
+      "id": "Q220112",
+      "name": "Zoo al Maglio",
+      "lat": 45.985,
+      "lng": 8.876667
+    },
+    {
+      "id": "Q220120",
+      "name": "Zoo de Servion",
+      "lat": 46.565,
+      "lng": 6.773889
+    },
+    {
+      "id": "Q220128",
+      "name": "Zoo La Garenne",
+      "lat": 46.477778,
+      "lng": 6.243056
+    },
+    {
+      "id": "Q220109",
+      "name": "Zürich Zoo",
+      "lat": 47.385,
+      "lng": 8.573056
+    }
+  ]
+}

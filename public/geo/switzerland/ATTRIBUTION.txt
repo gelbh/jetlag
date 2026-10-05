@@ -1,0 +1,3 @@
+Swiss boundaries: swissBOUNDARIES3D © swisstopo
+Dataset year: 2026 (swissboundaries3d_2026-01 edition)
+Terms: see https://www.swisstopo.admin.ch/en/landscape-model-swissboundaries3d

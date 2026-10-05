@@ -1,4 +1,4 @@
-// Keep in sync with the build-time POI hygiene mirror script.
+// Build-time fill scripts import this module via jiti (e.g. fill-switzerland-pack-geo.mjs).
 import { haversineMeters } from "@/domain/geometry/gameArea/distance";
 
 export interface BundledPoiPlaceLike {
