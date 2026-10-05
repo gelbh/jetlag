@@ -106,6 +106,14 @@ npm test
 just e2e-smoke
 ```
 
+Do not add a test that another test would already fail for. Prefer one specific case over two overlapping ones.
+
+**Delete (or do not add):** tautologies (`{children}` / title echo), duplicate predicates of the same branch, `className` forwarding, computed-style restatements of CSS, third-party passthrough with no local contract.
+
+**Keep:** unique regressions; empty/hidden states; a11y roles and names; emulator security rules (`src/test/emulator/`); import-ban tests; auth, App Check, billing, join/role gates, timer reconcile, offline writes; local wrapper contracts (`cn` merge, GPS copy in `InlineError`, frosted vs wash float tones, MapFloatSurface `title` → Alert branch); Playwright `@smoke` wiring. Collapse extra e2e only when a unit test already owns the rule and the e2e adds no wiring check.
+
+Coverage floors in `vitest.config.ts` (`src/domain/**`, `src/services/**`) must stay green. Do not delete emulator rules tests to shrink the suite.
+
 ## Release notes
 
 Player-visible changes need a changeset. See [`.changeset/README.md`](.changeset/README.md). Merge into `main` requires the `changeset-status` check (or an allowed skip / empty changeset). Husky does not enforce this.

@@ -20,13 +20,13 @@ beforeEach(() => {
 describe("ErrorWithRetry", () => {
   it("renders the error and calls onRetry", () => {
     const onRetry = vi.fn();
-    const { container } = render(
+    render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <ErrorWithRetry error="Matching failed" onRetry={onRetry} />
       </MantineProvider>,
     );
 
-    expect(container.querySelector(".mantine-Alert-root")).toBeTruthy();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("Matching failed")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     expect(onRetry).toHaveBeenCalledTimes(1);
