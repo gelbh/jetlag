@@ -3,11 +3,14 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
+import type { GameArea } from "@/domain/map/annotations";
 import { createMapBounds } from "@/domain/map/mapBounds";
 import { mergeBundledPresets } from "@/domain/regions/bundledGamePresets";
+import type { GamePreset } from "@/domain/session/presets/gamePreset";
 import { GAME_PRESET_SCHEMA_VERSION } from "@/domain/session/presets/gamePreset";
 import { defaultAdvancedSessionSettings } from "@/domain/session/tools/advancedSessionSettings";
 import { useGamePresetStore } from "@/state/gamePresetStore";
+import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
 import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
@@ -193,6 +196,47 @@ function openMoreTools() {
   const disclosure = screen.getByText("More tools").closest("details") as HTMLDetailsElement;
   disclosure.open = true;
   fireEvent(disclosure, new Event("toggle"));
+}
+
+function openCustomContent() {
+  openMoreTools();
+  fireEvent.click(screen.getByRole("button", { name: /^Custom content$/i }));
+}
+
+/** Slightly nudged Dublin city polygon: same pack winner, different fingerprint. */
+const DUBLIN_CITY_NUDGED: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [-6.44, 53.275],
+      [-6.09, 53.275],
+      [-6.09, 53.415],
+      [-6.44, 53.415],
+      [-6.44, 53.275],
+    ],
+  ],
+};
+
+function baseCustomPreset(
+  partial: Partial<GamePreset> & Pick<GamePreset, "id" | "name">,
+): GamePreset {
+  return {
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+    schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+    gameSize: "medium",
+    distanceUnit: "metric",
+    advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+    migrationStatus: "ok",
+    ...partial,
+  };
+}
+
+function seedCustomPresets(...presets: GamePreset[]) {
+  useGamePresetStore.setState({
+    presets: mergeBundledPresets(presets),
+    favouritePresetIds: [],
+  });
 }
 
 beforeEach(() => {
@@ -895,5 +939,131 @@ describe("CreateSession", () => {
     expect(
       screen.queryByText(/search for a place, load a preset, or open draw to set the play area/i),
     ).toBeNull();
+  });
+
+  it("silently attaches pack and in-area pins when free-framing over a custom preset", async () => {
+    seedCustomPresets(
+      baseCustomPreset({
+        id: "custom-dublin",
+        name: "My Dublin",
+        gameArea: DUBLIN_CITY_GAME_AREA,
+        regionPackId: "dublin",
+        transitMetroId: "dublin",
+        gameSize: "large",
+        customLocationPins: [
+          { id: "dublin-pin", name: "Spire pin", point: [53.35, -6.26] },
+          { id: "out-pin", name: "Far away", point: [0, 0] },
+        ],
+      }),
+    );
+    parseBoundaryFile.mockResolvedValue(DUBLIN_CITY_GAME_AREA);
+    renderCreateSession();
+
+    importBoundaryFile();
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(loadRegionPackSessionBoundaries).toHaveBeenCalledWith("dublin", undefined);
+    });
+
+    goToRules();
+    expect(screen.getByRole("radio", { name: /^Medium/i })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: /^Large/i })).toHaveAttribute("aria-checked", "false");
+
+    openCustomContent();
+    expect(await screen.findByText("Spire pin")).toBeInTheDocument();
+    expect(screen.queryByText("Far away")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(DUBLIN_CITY_GAME_AREA, {
+        regionPackId: "dublin",
+      });
+    });
+  });
+
+  it("layers overlapping custom pins after Load preset without overwriting gameSize", async () => {
+    seedCustomPresets(
+      baseCustomPreset({
+        id: "loaded",
+        name: "Loaded",
+        gameArea: DUBLIN_CITY_GAME_AREA,
+        regionPackId: "dublin",
+        gameSize: "small",
+        customLocationPins: [{ id: "loaded-pin", name: "Loaded pin", point: [53.35, -6.26] }],
+      }),
+      baseCustomPreset({
+        id: "other",
+        name: "Other",
+        gameArea: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [-6.4, 53.3],
+              [-6.1, 53.3],
+              [-6.1, 53.4],
+              [-6.4, 53.4],
+              [-6.4, 53.3],
+            ],
+          ],
+        },
+        regionPackId: "dublin",
+        gameSize: "large",
+        customLocationPins: [{ id: "other-pin", name: "Other pin", point: [53.34, -6.25] }],
+      }),
+    );
+
+    renderCreateSession("/create?preset=loaded");
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("loaded");
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/small · metric/i)).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(loadRegionPackSessionBoundaries).toHaveBeenCalled();
+    });
+
+    goToRules();
+    expect(screen.getByRole("radio", { name: /^Small/i })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: /^Large/i })).toHaveAttribute("aria-checked", "false");
+
+    openCustomContent();
+    expect(await screen.findByText("Other pin")).toBeInTheDocument();
+    expect(screen.getByText("Loaded pin")).toBeInTheDocument();
+  });
+
+  it("does not reload pack boundaries when fingerprint changes but pack identity is stable", async () => {
+    seedCustomPresets(
+      baseCustomPreset({
+        id: "custom-dublin",
+        name: "My Dublin",
+        gameArea: DUBLIN_CITY_GAME_AREA,
+        regionPackId: "dublin",
+        customLocationPins: [{ id: "dublin-pin", name: "Spire pin", point: [53.35, -6.26] }],
+      }),
+    );
+    parseBoundaryFile.mockResolvedValueOnce(DUBLIN_CITY_GAME_AREA);
+    renderCreateSession();
+
+    importBoundaryFile();
+    await waitFor(() => {
+      expect(loadRegionPackSessionBoundaries).toHaveBeenCalledWith("dublin", undefined);
+    });
+    const callsAfterAttach = loadRegionPackSessionBoundaries.mock.calls.length;
+
+    parseBoundaryFile.mockResolvedValueOnce(DUBLIN_CITY_NUDGED);
+    importBoundaryFile();
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
+    });
+
+    // Allow reuse effect to re-run on the nudged fingerprint.
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(loadRegionPackSessionBoundaries).toHaveBeenCalledTimes(callsAfterAttach);
   });
 });
