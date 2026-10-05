@@ -111,6 +111,8 @@ export interface PlacementCameraFingerprintInput {
   eliminationPreview?: boolean;
   walkActive?: boolean;
   walkCurrentPoint?: [number, number] | null;
+  /** Sync draft anchor — overlays rebuild async and must not gate pin-follow. */
+  draftAnchor?: [number, number] | null;
 }
 
 export function placementCameraFingerprint(input: PlacementCameraFingerprintInput): string {
@@ -136,6 +138,7 @@ export function placementCameraFingerprint(input: PlacementCameraFingerprintInpu
     eliminationPreview: input.eliminationPreview ?? false,
     walkActive: input.walkActive ?? false,
     walkCurrentPoint: input.walkCurrentPoint ?? null,
+    draftAnchor: input.draftAnchor ?? null,
     eliminationHash,
   });
 }

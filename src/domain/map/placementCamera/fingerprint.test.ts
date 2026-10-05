@@ -9,6 +9,24 @@ const markerOverlay = (id: string, point: [number, number]): MapDraftOverlay => 
 });
 
 describe("placementCameraFingerprint", () => {
+  it("changes when draftAnchor moves even with empty overlays", () => {
+    const atA = placementCameraFingerprint({
+      tool: "radar",
+      phase: "pick_radius",
+      overlays: [],
+      eliminationFeatures: [],
+      draftAnchor: [53.35, -6.26],
+    });
+    const atB = placementCameraFingerprint({
+      tool: "radar",
+      phase: "pick_radius",
+      overlays: [],
+      eliminationFeatures: [],
+      draftAnchor: [53.36, -6.25],
+    });
+    expect(atA).not.toBe(atB);
+  });
+
   it("excludes volatile thermometer walk polylines from the fingerprint", () => {
     const structural = markerOverlay("thermo-draft-a", [53.35, -6.26]);
     const walkOverlay: MapDraftOverlay = {

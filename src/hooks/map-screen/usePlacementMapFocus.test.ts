@@ -148,6 +148,45 @@ describe("usePlacementMapFocus", () => {
     expect(result.current.placementRecenterToken).toBe(0);
   });
 
+  it("bumps recenter token when draft pin moves with empty overlays", () => {
+    const idlePinDraft = placementCameraDraftFromOverlaySources({
+      ...pinSources,
+      pin: { point: null },
+    });
+    const pinAtA = placementCameraDraftFromOverlaySources({
+      ...pinSources,
+      pin: { point: [53.35, -6.26] },
+    });
+    const pinAtB = placementCameraDraftFromOverlaySources({
+      ...pinSources,
+      pin: { point: [53.36, -6.25] },
+    });
+
+    const { result, rerender } = renderHook(
+      ({ draft }: { draft: typeof pinAtA }) =>
+        usePlacementMapFocus({
+          activeTool: "pin",
+          draft,
+          overlays: [],
+          eliminationFeatures: [],
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          defaultFocusBounds: defaultBounds,
+          enabled: true,
+          panelMinimized: false,
+        }),
+      { initialProps: { draft: idlePinDraft } },
+    );
+
+    expect(result.current.placementRecenterToken).toBe(0);
+
+    rerender({ draft: pinAtA });
+    expect(result.current.placementRecenterToken).toBe(1);
+    expect(result.current.effectiveFocusBounds).not.toEqual(defaultBounds);
+
+    rerender({ draft: pinAtB });
+    expect(result.current.placementRecenterToken).toBe(2);
+  });
+
   it("bumps recenter token when structural overlays change", () => {
     const idlePinDraft = placementCameraDraftFromOverlaySources({
       ...pinSources,
