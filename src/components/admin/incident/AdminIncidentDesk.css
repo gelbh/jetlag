@@ -1,4 +1,4 @@
-/* Admin incident desk — probe-faithful three-pane; Broadcast HUD tokens only. */
+/* Admin incident desk: geometry / hit-target allowlist (Band 3). */
 
 .jl-incident-desk {
   display: flex;
@@ -8,6 +8,211 @@
   gap: 0.5rem;
   overflow: hidden;
 }
+
+.jl-incident-panes {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  gap: 0.5rem;
+  overflow: hidden;
+  grid-template-columns: minmax(14rem, 1fr) minmax(0, 1.4fr);
+}
+
+.jl-incident-queue {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.jl-incident-queue-scroll {
+  min-height: 0;
+  flex: 1;
+  order: 2;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.375rem;
+}
+
+.jl-incident-queue-row {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-deep);
+  padding: 0.5rem 0.625rem;
+  text-align: left;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.jl-incident-queue-row + .jl-incident-queue-row {
+  margin-top: 0.375rem;
+}
+
+.jl-incident-queue-row:hover {
+  border-color: oklch(from var(--color-highlight) l c h / 55%);
+}
+
+.jl-incident-queue-row--active {
+  border-color: var(--color-action);
+  background: oklch(from var(--color-action) l c h / 8%);
+}
+
+html[data-motion="reduced"] .jl-incident-queue-row,
+html[data-motion="static"] .jl-incident-queue-row {
+  transition: none;
+}
+
+.jl-incident-queue-row-main {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.jl-incident-queue-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.jl-incident-queue-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.jl-incident-queue-id {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.jl-incident-queue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-ink-muted);
+}
+
+.jl-incident-detail {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.jl-incident-tabs {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.125rem;
+  overflow-x: auto;
+}
+
+.jl-incident-tab {
+  min-height: 2rem;
+  flex-shrink: 0;
+}
+
+.jl-incident-tab--active {
+  outline: 2px solid var(--color-action);
+  outline-offset: -2px;
+}
+
+.jl-incident-detail-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.jl-incident-prompt {
+  flex-shrink: 0;
+  max-height: 40%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jl-incident-chat {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.jl-incident-chat-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jl-incident-composer {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.375rem;
+}
+
+.jl-incident-diag-list {
+  margin: 0;
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jl-incident-timeline {
+  margin: 0;
+  min-height: 0;
+  flex: 1;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0;
+}
+
+.jl-incident-actions {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jl-incident-empty {
+  display: flex;
+  min-height: 8rem;
+  flex: 1;
+  flex-direction: column;
+}
+
+/* Restored Operate chrome paint (orphaned after Band 3 geometry prune). */
 
 .jl-incident-topbar {
   display: flex;
@@ -79,32 +284,6 @@
   color: var(--color-ink);
 }
 
-.jl-incident-panes {
-  display: grid;
-  min-height: 0;
-  flex: 1;
-  gap: 0.5rem;
-  overflow: hidden;
-}
-
-.jl-incident-panes--desktop {
-  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr) minmax(14rem, 18rem);
-}
-
-.jl-incident-panes--mobile {
-  grid-template-columns: 1fr;
-}
-
-.jl-incident-pane {
-  display: flex;
-  min-height: 0;
-  min-width: 0;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-panel);
-}
-
 .jl-incident-pane-header {
   display: flex;
   flex-shrink: 0;
@@ -132,110 +311,28 @@
   color: var(--color-ink-dim);
 }
 
-.jl-incident-queue {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.jl-incident-queue-scroll {
-  min-height: 0;
-  flex: 1;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 0.375rem;
-}
-
-.jl-incident-queue-row {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  gap: 0.25rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-deep);
-  padding: 0.5rem 0.625rem;
-  text-align: left;
-  transition:
-    border-color 120ms ease,
-    background-color 120ms ease;
-}
-
 .jl-incident-queue-filter {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   gap: 0.5rem;
+  order: 1;
   padding: 0 0.625rem 0.375rem;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-ink-muted);
 }
 
-.jl-incident-queue-row-main {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  gap: 0.25rem;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  text-align: left;
-  color: inherit;
-  cursor: pointer;
+.jl-incident-queue--empty .jl-incident-empty {
+  order: 1;
 }
 
-.jl-incident-queue-row-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.jl-incident-queue-row + .jl-incident-queue-row {
-  margin-top: 0.375rem;
-}
-
-.jl-incident-queue-row:hover {
-  border-color: oklch(from var(--color-highlight) l c h / 55%);
-}
-
-.jl-incident-queue-row--active {
-  border-color: var(--color-action);
-  background: oklch(from var(--color-action) l c h / 8%);
-}
-
-html[data-motion="reduced"] .jl-incident-queue-row,
-html[data-motion="static"] .jl-incident-queue-row {
-  transition: none;
-}
-
-.jl-incident-queue-row-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.jl-incident-queue-id {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--color-ink);
-}
-
-.jl-incident-queue-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem 0.75rem;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  color: var(--color-ink-muted);
+.jl-incident-queue--empty .jl-incident-queue-filter {
+  order: 2;
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  font-weight: 500;
+  color: var(--color-ink-dim);
 }
 
 .jl-incident-chip {
@@ -282,14 +379,6 @@ html[data-motion="static"] .jl-incident-queue-row {
   color: var(--color-ink-dim);
 }
 
-.jl-incident-detail {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  overflow: hidden;
-}
-
 .jl-incident-detail-header {
   display: flex;
   flex-shrink: 0;
@@ -316,61 +405,6 @@ html[data-motion="static"] .jl-incident-queue-row {
   color: var(--color-ink-muted);
 }
 
-.jl-incident-tabs {
-  display: flex;
-  flex-shrink: 0;
-  gap: 0.125rem;
-  overflow-x: auto;
-  border-bottom: 1px solid var(--color-border);
-  padding: 0.375rem 0.5rem;
-}
-
-.jl-incident-tab {
-  min-height: 2rem;
-  flex-shrink: 0;
-  border-radius: var(--radius-hud-md);
-  padding: 0 0.625rem;
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-ink-muted);
-  transition:
-    background-color 150ms ease,
-    color 150ms ease;
-}
-
-html[data-motion="reduced"] .jl-incident-tab,
-html[data-motion="static"] .jl-incident-tab {
-  transition: none;
-}
-
-.jl-incident-tab--active {
-  background: var(--color-action);
-  color: var(--color-action-ink);
-}
-
-.jl-incident-detail-body {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.5rem;
-  overflow: hidden;
-  padding: 0.5rem;
-}
-
-.jl-incident-prompt {
-  flex-shrink: 0;
-  max-height: 40%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border: 2px solid oklch(from var(--color-highlight) l c h / 75%);
-  background: oklch(from var(--color-highlight) l c h / 8%);
-  padding: 0.5rem 0.625rem;
-}
-
 .jl-incident-prompt-label {
   margin: 0 0 0.375rem;
   font-family: var(--font-display);
@@ -388,22 +422,6 @@ html[data-motion="static"] .jl-incident-tab {
   font-size: 0.6875rem;
   line-height: 1.45;
   color: var(--color-ink-secondary);
-}
-
-.jl-incident-chat {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.5rem;
-  overflow: hidden;
-}
-
-.jl-incident-chat-scroll {
-  min-height: 0;
-  flex: 1;
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 .jl-incident-msg {
@@ -439,47 +457,6 @@ html[data-motion="static"] .jl-incident-tab {
   white-space: pre-wrap;
 }
 
-.jl-incident-composer {
-  display: flex;
-  flex-shrink: 0;
-  gap: 0.375rem;
-}
-
-.jl-incident-composer .field-input {
-  min-height: 2.5rem;
-  flex: 1;
-  font-size: 0.8125rem;
-}
-
-.jl-incident-composer .btn-primary {
-  min-height: 2.5rem;
-  padding-inline: 0.875rem;
-  font-size: 0.75rem;
-}
-
-.jl-incident-diag-list {
-  margin: 0;
-  min-height: 0;
-  flex: 1;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.jl-incident-diag-list .admin-diag-row {
-  border-bottom: 1px solid var(--color-border);
-  padding: 0.375rem 0;
-}
-
-.jl-incident-timeline {
-  margin: 0;
-  min-height: 0;
-  flex: 1;
-  list-style: none;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 0;
-}
-
 .jl-incident-timeline-item {
   border-bottom: 1px solid var(--color-border);
   padding: 0.5rem 0;
@@ -495,17 +472,6 @@ html[data-motion="static"] .jl-incident-tab {
   margin: 0.25rem 0 0;
   font-size: 0.8125rem;
   color: var(--color-ink);
-}
-
-.jl-incident-actions {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.5rem;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 0.5rem;
 }
 
 .jl-incident-module {
@@ -525,16 +491,6 @@ html[data-motion="static"] .jl-incident-tab {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-brand-blue);
-}
-
-.jl-incident-module-label {
-  margin: 0 0 0.25rem;
-  font-family: var(--font-display);
-  font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-ink-dim);
 }
 
 .jl-incident-module .field-input,
@@ -557,17 +513,6 @@ html[data-motion="static"] .jl-incident-tab {
   color: var(--color-ink-dim);
 }
 
-.jl-incident-empty {
-  display: flex;
-  min-height: 8rem;
-  flex: 1;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0.375rem;
-  padding: 1rem;
-}
-
 .jl-incident-empty-title {
   margin: 0;
   font-family: var(--font-display);
@@ -584,26 +529,44 @@ html[data-motion="static"] .jl-incident-tab {
   color: var(--color-ink-muted);
 }
 
-.jl-incident-mobile-back {
-  margin-bottom: 0.25rem;
-}
+/* Minimal preload desk chrome (no prior CSS). */
 
-.jl-incident-mobile-stack {
+.jl-incident-status-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-panel);
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.jl-incident-queue-title {
+  font-weight: 650;
+  color: var(--color-ink);
+}
+.jl-incident-queue-list {
   display: flex;
-  min-height: 0;
-  flex: 1;
   flex-direction: column;
   gap: 0.5rem;
-  overflow: hidden;
 }
-
-.jl-incident-mobile-stack .jl-incident-pane--detail {
-  min-height: 0;
-  flex: 1.4;
+.jl-incident-queue-age {
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
 }
-
-.jl-incident-mobile-stack .jl-incident-pane--actions {
-  min-height: 0;
-  flex: 1;
-  max-height: 45%;
+.jl-incident-detail-fields {
+  display: grid;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+.jl-incident-detail-fields dt {
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+.jl-incident-detail-fields dd {
+  margin: 0;
+  color: var(--color-ink);
 }

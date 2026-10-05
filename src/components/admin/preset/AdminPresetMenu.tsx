@@ -1,3 +1,4 @@
+import { ActionIcon, Button, Group } from "@mantine/core";
 import { type DragEvent, useEffect, useRef, useState } from "react";
 import {
   CUSTOM_PRESET_ID,
@@ -109,7 +110,7 @@ export function AdminPresetMenu({
   };
 
   return (
-    <div className="jl-ops-preset-row" data-testid="admin-ops-presets">
+    <Group className="jl-ops-preset-row" data-testid="admin-ops-presets" gap="xs" wrap="wrap">
       {orderedIds.map((presetId) => {
         const isDefault = defaultPresetId === presetId;
         const isActive = activePresetId === presetId;
@@ -124,8 +125,10 @@ export function AdminPresetMenu({
             onDragOver={handleDragOver}
             onDrop={(event) => handleDrop(event, presetId)}
           >
-            <button
+            <Button
               type="button"
+              variant="subtle"
+              size="compact-xs"
               className="jl-ops-preset-drag jl-ops-drag-handle"
               draggable
               aria-hidden="true"
@@ -134,17 +137,21 @@ export function AdminPresetMenu({
               onDragEnd={handleDragEnd}
             >
               ⠿
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant={isActive ? "light" : "default"}
+              size="compact-sm"
               className="jl-ops-preset-chip"
               aria-pressed={isActive}
               onClick={() => onSelectPreset(presetId)}
             >
               {label}
-            </button>
-            <button
+            </Button>
+            <ActionIcon
               type="button"
+              variant="subtle"
+              size="sm"
               className={
                 isDefault ? "jl-ops-preset-star jl-ops-preset-star--active" : "jl-ops-preset-star"
               }
@@ -153,14 +160,16 @@ export function AdminPresetMenu({
               onClick={() => onSetDefault(presetId)}
             >
               {isDefault ? "★" : "☆"}
-            </button>
+            </ActionIcon>
           </span>
         );
       })}
       <span className="jl-ops-preset-manage-anchor" ref={manageAnchorRef}>
-        <button
+        <Button
           type="button"
           ref={manageTriggerRef}
+          variant="default"
+          size="compact-sm"
           className="jl-ops-preset-chip"
           aria-expanded={manageOpen}
           onClick={() => {
@@ -181,7 +190,7 @@ export function AdminPresetMenu({
           }}
         >
           Manage
-        </button>
+        </Button>
         {manageOpen && managePos ? (
           <AdminPresetManageMenu
             orderedIds={orderedIds}
@@ -202,14 +211,26 @@ export function AdminPresetMenu({
           />
         ) : null}
       </span>
-      <button type="button" className="jl-ops-preset-chip" onClick={onSaveCurrent}>
+      <Button
+        type="button"
+        variant="default"
+        size="compact-sm"
+        className="jl-ops-preset-chip"
+        onClick={onSaveCurrent}
+      >
         Save as…
-      </button>
+      </Button>
       {userIds.has(activePresetId) ? (
-        <button type="button" className="jl-ops-preset-chip" onClick={onOverwriteUserPreset}>
+        <Button
+          type="button"
+          variant="default"
+          size="compact-sm"
+          className="jl-ops-preset-chip"
+          onClick={onOverwriteUserPreset}
+        >
           Update preset
-        </button>
+        </Button>
       ) : null}
-    </div>
+    </Group>
   );
 }

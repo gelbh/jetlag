@@ -31,12 +31,14 @@ export function AdminMonitorPane({
   active,
   sessionCode,
   errorMessage,
+  sessionsUnavailable = false,
   monitorLayout,
   onMonitorLayoutChange,
 }: {
   active: boolean;
   sessionCode?: string | null;
   errorMessage?: string | null;
+  sessionsUnavailable?: boolean;
   monitorLayout?: MonitorLayout;
   onMonitorLayoutChange?: (layout: MonitorLayout) => void;
 }) {
@@ -182,7 +184,9 @@ export function AdminMonitorPane({
             Monitor pane
           </p>
           <p className="text-sm text-ink-muted">
-            Select a live session to watch the map here on desktop.
+            {sessionsUnavailable
+              ? "Sessions unavailable. Retry from the Sessions panel."
+              : "Select a live session to watch the map here."}
           </p>
         </div>
       </div>

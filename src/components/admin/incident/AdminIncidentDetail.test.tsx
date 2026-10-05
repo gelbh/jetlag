@@ -1,4 +1,6 @@
+import { MantineProvider } from "@mantine/core";
 import { fireEvent, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
@@ -7,17 +9,27 @@ import type {
   IncidentRecord,
 } from "../../../domain/incident/incidentTypes";
 import { renderWithRouter } from "../../../test/renderWithRouter";
+import { jetlagTheme } from "../../../theme/theme";
 import { AdminOpsDesk } from "../ops/AdminOpsDesk";
 import { AdminIncidentActions } from "./AdminIncidentActions";
 import { AdminIncidentDetail } from "./AdminIncidentDetail";
 
-function renderDesk(route: string) {
+function renderAdmin(ui: ReactElement, route?: string) {
   return renderWithRouter(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+    route ? { route } : undefined,
+  );
+}
+
+function renderDesk(route: string) {
+  return renderAdmin(
     <Routes>
       <Route path="/admin/incidents" element={<AdminOpsDesk />} />
       <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
     </Routes>,
-    { route },
+    route,
   );
 }
 
@@ -166,14 +178,14 @@ function stubMatchMedia(matches: boolean) {
 
 describe("AdminIncidentDetail", () => {
   it("shows empty state when no incident is selected", () => {
-    renderWithRouter(<AdminIncidentDetail incidentId={null} />);
+    renderAdmin(<AdminIncidentDetail incidentId={null} />);
 
     expect(screen.getByText("Select an incident")).toBeInTheDocument();
     expect(screen.getByText(/Choose a report from the queue/i)).toBeInTheDocument();
   });
 
   it("shows error state when the incident fails to load", () => {
-    renderWithRouter(
+    renderAdmin(
       <AdminIncidentDetail
         incidentId="inc-missing"
         incidentOverride={null}
@@ -197,7 +209,7 @@ describe("AdminIncidentDetail", () => {
       },
     ];
 
-    renderWithRouter(
+    renderAdmin(
       <AdminIncidentDetail
         incidentId="inc-abc12345"
         incidentOverride={makeIncident()}
@@ -214,7 +226,7 @@ describe("AdminIncidentDetail", () => {
   });
 
   it("switches to support, hotfix, diagnostics, and timeline tabs", () => {
-    renderWithRouter(
+    renderAdmin(
       <AdminIncidentDetail
         incidentId="inc-abc12345"
         incidentOverride={makeIncident({
@@ -265,7 +277,7 @@ describe("AdminIncidentActions", () => {
       status: "launched",
     });
 
-    renderWithRouter(
+    renderAdmin(
       <AdminIncidentActions
         incidentId="inc-1"
         applyMitigationFn={applyMitigationFn}
@@ -290,7 +302,7 @@ describe("AdminIncidentActions", () => {
 
   it("opens Cursor agent when already launched", () => {
     const openExternalUrlFn = vi.fn();
-    renderWithRouter(
+    renderAdmin(
       <AdminIncidentActions
         incidentId="inc-1"
         agent={{
@@ -314,7 +326,7 @@ describe("AdminIncidentActions", () => {
       status: "launched",
     });
 
-    renderWithRouter(
+    renderAdmin(
       <AdminIncidentActions
         incidentId="inc-1"
         agent={{ status: "misconfigured", error: "CURSOR_HOTFIX_MISCONFIGURED" }}

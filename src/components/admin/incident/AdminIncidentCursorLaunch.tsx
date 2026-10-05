@@ -1,3 +1,4 @@
+import { Alert, Button, Stack, Text } from "@mantine/core";
 import { useState } from "react";
 import type { IncidentCodingAgentState } from "../../../domain/incident/incidentTypes";
 import {
@@ -13,9 +14,9 @@ function codingAgentHint(agent: IncidentCodingAgentState | null | undefined): st
     case "launched":
       return agent.forced ? "Cursor agent launched (admin force)." : "Cursor agent launched.";
     case "failed":
-      return "Last launch failed — retry when ready.";
+      return "Last launch failed - retry when ready.";
     case "misconfigured":
-      return "Cursor API is not configured — fix the secret, then retry.";
+      return "Cursor API is not configured - fix the secret, then retry.";
     default: {
       const _exhaustive: never = agent.status;
       return _exhaustive;
@@ -32,7 +33,7 @@ export interface AdminIncidentCursorLaunchProps {
 }
 
 /**
- * Actions module 2 — Launch / Open / Retry Cursor coding agent.
+ * Actions module 2 - Launch / Open / Retry Cursor coding agent.
  * Parent should pass `key={incidentId}` so local state resets on selection change.
  */
 export function AdminIncidentCursorLaunch({
@@ -88,19 +89,24 @@ export function AdminIncidentCursorLaunch({
   };
 
   return (
-    <div className="jl-incident-module">
+    <Stack className="jl-incident-module" gap="sm">
       <h3 className="jl-incident-module-title">2 · Launch Cursor agent</h3>
       <p className="jl-incident-module-hint">{codingAgentHint(effectiveAgent)}</p>
       {error ? (
-        <p className="text-sm font-semibold text-status-error" role="alert">
+        <Alert color="red" role="alert">
           {error}
-        </p>
+        </Alert>
       ) : null}
-      {ok ? <p className="text-sm text-status-success">{ok}</p> : null}
+      {ok ? (
+        <Text size="sm" c="green">
+          {ok}
+        </Text>
+      ) : null}
       {hasOpenableAgent ? (
-        <button
+        <Button
           type="button"
-          className="btn-secondary uppercase"
+          variant="default"
+          tt="uppercase"
           disabled={actionsDisabled}
           onClick={() => {
             if (agentUrl) {
@@ -109,24 +115,25 @@ export function AdminIncidentCursorLaunch({
           }}
         >
           Open Cursor agent
-        </button>
+        </Button>
       ) : (
         <>
-          <button
+          <Button
             type="button"
-            className="btn-secondary uppercase"
+            variant="default"
+            tt="uppercase"
             disabled={actionsDisabled || busy}
             onClick={() => void onLaunch()}
           >
             {busy ? "Launching…" : canRetry ? "Retry launch" : "Launch Cursor agent"}
-          </button>
+          </Button>
           {effectiveAgent?.cursorAgentId && !agentUrl ? (
             <p className="jl-incident-module-hint">
-              Agent id is set but no URL was returned — retry or check the hotfix thread.
+              Agent id is set but no URL was returned - retry or check the hotfix thread.
             </p>
           ) : null}
         </>
       )}
-    </div>
+    </Stack>
   );
 }
