@@ -38,11 +38,6 @@ import { generateLocalCode } from "../../domain/session/meta/sessionCode";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { matchGamePresetForPlace } from "../../domain/session/presets/gamePresetSearch";
-import {
-  applySilentReuseDraftGeo,
-  matchingAreaFeatureKeys,
-  suggestPresetDataReuseForGameArea,
-} from "../../domain/session/presets/presetDataReuse";
 import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/presetFavourites";
 import {
   type GameSize,
@@ -83,6 +78,7 @@ import { inferTransitMetroId, listTransitMetros } from "../../services/transit/t
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
 import { useCreateSessionMapMount } from "./useCreateSessionMapMount";
+import { useSilentPresetDataReuse } from "./useSilentPresetDataReuse";
 import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const MISSING_GAME_AREA_ERROR =
@@ -174,17 +170,7 @@ export function useCreateSession() {
   /** Mirrors appliedPresetRef after a successful Load-preset apply (reuse exclude + effect wake). */
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
   const presetApplyGenerationRef = useRef(0);
-  /** Pin ids last overlaid by silent reuse (stripped on the next fingerprint apply). */
-  const silentReusePinIdsRef = useRef<Set<string>>(new Set());
-  /** Suggestion matching keys (`level:key`) last overlaid by silent reuse. */
-  const silentReuseSuggestionMatchingKeysRef = useRef<Set<string>>(new Set());
-  /** Pack-boundary matching keys last applied by silent reuse pack load. */
-  const silentReusePackMatchingKeysRef = useRef<Set<string>>(new Set());
-  /**
-   * True while `regionPackId` was set by silent reuse (not Load-preset).
-   * Reframe-away clears that pack; Load-preset packs stay for the upgrade gate.
-   */
-  const silentAttachedPackRef = useRef(false);
+  const resetSilentReuseOverlayRef = useRef<() => void>(() => {});
   const [presetApplyNonce, setPresetApplyNonce] = useState(0);
   const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
   const loadedPresetId = searchParams.get("preset");
@@ -305,11 +291,7 @@ export function useCreateSession() {
       setGameSizeUserOverrode(false);
       setGameSize(resolvedGameSize);
       setDistanceUnit(unit);
-      // Load-preset becomes the non-reuse base; drop prior silent-reuse tracking.
-      silentReusePinIdsRef.current = new Set();
-      silentReuseSuggestionMatchingKeysRef.current = new Set();
-      silentReusePackMatchingKeysRef.current = new Set();
-      silentAttachedPackRef.current = false;
+      resetSilentReuseOverlayRef.current();
       setAdvancedSettings(resolvedAdvanced);
       setSelectedPlaceId(null);
       setSelectedPlace(null);
@@ -436,22 +418,25 @@ export function useCreateSession() {
         framing.applyFocusBounds(gpsReadingToFocusBounds(reading.lat, reading.lng));
         setMapFocusToken((token) => token + 1);
       })
-      .catch(() => {
-        // Prompt/denied: map still opens on the default viewport.
-      });
+      .catch(() => {});
   }, [framing, requestMap]);
 
-  const bootstrapHostAuth = useCallback(async () => {
+  const bootstrapHostAuth = useCallback(async (signal?: { cancelled: boolean }) => {
     if (!isFirebaseConfigured()) {
       return;
     }
-
     setHostAuthError(null);
     try {
       const user = await ensureAnonymousUser();
+      if (signal?.cancelled) {
+        return;
+      }
       setHostHasAccessClaim(await hasAccessClaim(user));
       setHostAuthReady(true);
     } catch {
+      if (signal?.cancelled) {
+        return;
+      }
       setHostHasAccessClaim(false);
       setHostAuthReady(false);
       setHostAuthError("Couldn't sign in to create a session. Tap Retry.");
@@ -459,35 +444,12 @@ export function useCreateSession() {
   }, []);
 
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
-      return;
-    }
-
-    let cancelled = false;
-
-    void (async () => {
-      try {
-        const user = await ensureAnonymousUser();
-        if (cancelled) {
-          return;
-        }
-
-        setHostHasAccessClaim(await hasAccessClaim(user));
-        setHostAuthReady(true);
-        setHostAuthError(null);
-      } catch {
-        if (!cancelled) {
-          setHostHasAccessClaim(false);
-          setHostAuthReady(false);
-          setHostAuthError("Couldn't sign in to create a session. Tap Retry.");
-        }
-      }
-    })();
-
+    const signal = { cancelled: false };
+    void bootstrapHostAuth(signal);
     return () => {
-      cancelled = true;
+      signal.cancelled = true;
     };
-  }, []);
+  }, [bootstrapHostAuth]);
 
   const retryHostAuth = useCallback(() => {
     void bootstrapHostAuth();
@@ -605,140 +567,21 @@ export function useCreateSession() {
     [mapPreviewGameArea],
   );
 
-  useEffect(() => {
-    const draftGameArea = mapPreviewGameArea;
-    if (!draftGameArea || !draftGameAreaFingerprint) {
-      return;
-    }
-
-    // Wait for explicit ?preset= apply to finish so reuse does not cancel its boundary load.
-    if (loadedPresetId && appliedPresetId !== loadedPresetId) {
-      return;
-    }
-
-    const suggestion = suggestPresetDataReuseForGameArea(draftGameArea, presets, {
-      excludePresetIds: loadedPresetId ? [loadedPresetId] : undefined,
-    });
-
-    const hadSilentReuse =
-      silentReusePinIdsRef.current.size > 0 ||
-      silentReuseSuggestionMatchingKeysRef.current.size > 0 ||
-      silentReusePackMatchingKeysRef.current.size > 0 ||
-      silentAttachedPackRef.current;
-    const hasSuggestionSources = suggestion.sourcePresetIds.length > 0;
-
-    if (!hasSuggestionSources && !hadSilentReuse) {
-      return;
-    }
-
-    const nextPack = suggestion.regionPackId;
-    const nextSub = suggestion.subregionId;
-    const packChanged =
-      Boolean(nextPack) && (nextPack !== regionPackId || nextSub !== regionPackSubregionId);
-    // Keep silent pack matching across same-pack fingerprint nudges; drop it on reframe-away or pack switch.
-    const stripPackMatching = !nextPack || packChanged || !hasSuggestionSources;
-
-    const matchingKeysToStrip = new Set(silentReuseSuggestionMatchingKeysRef.current);
-    if (stripPackMatching) {
-      for (const key of silentReusePackMatchingKeysRef.current) {
-        matchingKeysToStrip.add(key);
-      }
-    }
-
-    // Reconcile suggestion overlay against the current frame (strip prior reuse, keep Load/host).
-    setAdvancedSettings((prev) => {
-      const applied = applySilentReuseDraftGeo({
-        previousPins: prev.customLocationPins,
-        previousMatching: prev.customMatchingAreas,
-        previousReusePinIds: silentReusePinIdsRef.current,
-        previousReuseMatchingKeys: matchingKeysToStrip,
-        suggestionPins: suggestion.customLocationPins,
-        suggestionMatching: suggestion.customMatchingAreas,
-      });
-      silentReusePinIdsRef.current = applied.appliedPinIds;
-      silentReuseSuggestionMatchingKeysRef.current = matchingAreaFeatureKeys(
-        suggestion.customMatchingAreas,
-      );
-      if (stripPackMatching) {
-        silentReusePackMatchingKeysRef.current = new Set();
-      }
-      return {
-        ...prev,
-        customMatchingAreas: applied.customMatchingAreas ?? {},
-        customLocationPins: applied.customLocationPins,
-      };
-    });
-
-    // No pack in suggestion: invalidate in-flight silent pack loads; clear silent-attached pack only.
-    if (!nextPack) {
-      presetApplyGenerationRef.current += 1;
-      if (silentAttachedPackRef.current) {
-        silentAttachedPackRef.current = false;
-        setRegionPackId(undefined);
-        setRegionPackSubregionId(undefined);
-        setTransitMetroOverride(null);
-      }
-      return;
-    }
-
-    if (!packChanged) {
-      return;
-    }
-
-    silentAttachedPackRef.current = true;
-    setRegionPackId(nextPack);
-    setRegionPackSubregionId(nextSub);
-    if (suggestion.transitMetroId) {
-      setTransitMetroOverride(suggestion.transitMetroId);
-    }
-
-    const generation = ++presetApplyGenerationRef.current;
-    void loadRegionPackSessionBoundaries(nextPack, nextSub)
-      .then((boundaries) => {
-        if (generation !== presetApplyGenerationRef.current) {
-          return;
-        }
-        const keysToStrip = new Set(silentReuseSuggestionMatchingKeysRef.current);
-        for (const key of silentReusePackMatchingKeysRef.current) {
-          keysToStrip.add(key);
-        }
-        setAdvancedSettings((prev) => {
-          const applied = applySilentReuseDraftGeo({
-            previousPins: prev.customLocationPins,
-            previousMatching: prev.customMatchingAreas,
-            previousReusePinIds: silentReusePinIdsRef.current,
-            previousReuseMatchingKeys: keysToStrip,
-            suggestionPins: suggestion.customLocationPins,
-            suggestionMatching: suggestion.customMatchingAreas,
-            packMatching: boundaries.customMatchingAreas,
-          });
-          silentReusePinIdsRef.current = applied.appliedPinIds;
-          silentReuseSuggestionMatchingKeysRef.current = matchingAreaFeatureKeys(
-            suggestion.customMatchingAreas,
-          );
-          silentReusePackMatchingKeysRef.current = matchingAreaFeatureKeys(
-            boundaries.customMatchingAreas,
-          );
-          return {
-            ...prev,
-            customMatchingAreas: applied.customMatchingAreas ?? {},
-            customLocationPins: applied.customLocationPins,
-          };
-        });
-        // Host-framed gameArea wins: never apply boundaries.playArea.
-      })
-      .catch(() => {
-        // Non-fatal: keep framed area; pack id may still help live fetches.
-      });
-  }, [
-    appliedPresetId,
+  const { resetSilentReuseOverlay } = useSilentPresetDataReuse({
+    draftGameArea: mapPreviewGameArea,
     draftGameAreaFingerprint,
-    loadedPresetId,
-    mapPreviewGameArea,
     presets,
+    loadedPresetId,
+    appliedPresetId,
     regionPackId,
     regionPackSubregionId,
-  ]);
+    setAdvancedSettings,
+    setRegionPackId,
+    setRegionPackSubregionId,
+    setTransitMetroOverride,
+    presetApplyGenerationRef,
+  });
+  resetSilentReuseOverlayRef.current = resetSilentReuseOverlay;
 
   const addCurrentArea = () => {
     if (!previewGameArea) {
@@ -763,6 +606,7 @@ export function useCreateSession() {
 
   const applyImportedBoundary = (gameArea: GameArea, filename: string) => {
     requestMap();
+    clearLoadedPreset();
     setImportedGameArea(gameArea);
     setSelectedPlaceId(null);
     setSelectedPlace(null);
@@ -780,13 +624,11 @@ export function useCreateSession() {
       return;
     }
 
-    // Start constructing the map while the importer chunk and file parse run.
     requestMap();
     setImportLoading(true);
     setError(null);
 
     try {
-      // Dynamic: jszip / @xmldom/xmldom / @tmcw/togeojson stay off the /create route chunk.
       const { parseBoundaryFile } = await import("../../services/core/capture/kmzImport");
       const gameArea = await parseBoundaryFile(file);
       applyImportedBoundary(gameArea, file.name);
@@ -810,7 +652,6 @@ export function useCreateSession() {
       return;
     }
 
-    // Start constructing the map in parallel with the geocoder round trip.
     requestMap();
     const requestId = beginRequest();
     setSearchLoading(true);
@@ -922,9 +763,6 @@ export function useCreateSession() {
             }
           : {}),
       };
-      if (regionPackId) {
-        delete rulesPatch.customMatchingAreas;
-      }
 
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
@@ -981,8 +819,6 @@ export function useCreateSession() {
           hidingZoneRadiusMeters:
             rulesPatch.hidingZoneRadiusMeters ?? hidingZoneRadiusMeters(gameSize, distanceUnit),
         };
-        // Local id is fixed and the timer now persists in localStorage: drop an
-        // abandoned local game's timer so the new game starts at zero.
         useTimerStore.getState().clearTimer(LOCAL_SESSION_ID);
         setSession(localSession, "local");
         setPremiumApiContext(localSession);
@@ -999,17 +835,14 @@ export function useCreateSession() {
         const matchingAreas = await resolveSessionMatchingAreas({
           regionPackId,
           regionPackSubregionId,
-          customMatchingAreas: regionPackId ? undefined : advancedSettings.customMatchingAreas,
+          customMatchingAreas: advancedSettings.customMatchingAreas,
         });
         preloadGameAreaCaches(gameArea, matchingAreas, regionPackId, tier);
-        // Dynamic: submit-only sea-level sampling stays off the /create route chunk.
         void import("../../services/geo/elevation/seaLevelProgressive")
           .then(({ startSeaLevelBackgroundSampling }) => {
             startSeaLevelBackgroundSampling(gameArea, { regionPackId });
           })
-          .catch(() => {
-            // Head start only; /map restarts sampling on mount (deduped).
-          });
+          .catch(() => {});
         void preloadCriticalGameAreaCaches(gameArea, matchingAreas, regionPackId);
       }
       navigate("/map");
@@ -1020,7 +853,6 @@ export function useCreateSession() {
     }
   };
 
-  // Confirm reads the latest render's framing state through this ref.
   const confirmSessionRef = useRef(confirmSession);
   useLayoutEffect(() => {
     confirmSessionRef.current = confirmSession;
@@ -1105,8 +937,6 @@ export function useCreateSession() {
     selectedAreas,
     previewGameArea,
     manualFramingActive,
-    // Latched: every path that produces an area calls requestMap(), so the map
-    // never tears down back to the facade when an area is cleared.
     mapRequested: mapMount.mapRequested,
     mapMounted: mapMount.mapMounted,
     requestMap,
