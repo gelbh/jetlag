@@ -30,6 +30,7 @@ import {
   type OverpassBbox,
   queryOverpassWithBboxSplit,
 } from "./overpassBboxSplit";
+import { loadBundledInternationalBorderPack } from "./regionPackInternationalBorder";
 
 type OverpassWay = {
   type: string;
@@ -100,6 +101,16 @@ async function fetchMeasuringLinearSegmentsForKind(
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
 ): Promise<Feature<LineString>[]> {
+  if (kind === "international_border" && regionPackId) {
+    const pack = await loadBundledInternationalBorderPack(regionPackId);
+    if (pack && pack.segments.length > 0) {
+      return pack.segments;
+    }
+    if (!allowsOverpassAdminBorderFallthrough(regionPackId)) {
+      return [];
+    }
+  }
+
   if (isMeasuringAdminBorderKind(kind)) {
     const customSegments = await fetchCustomAdminBorderLineSegments(
       gameArea,
