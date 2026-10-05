@@ -153,20 +153,30 @@ describe("performMatchingCommit persist-slim", () => {
     slimSpy.mockRestore();
   });
 
-  it("sets a storage error and skips create when persist-slim fails", async () => {
+  it("defers to Point with features JSON when elim persist-slim fails", async () => {
     buildSameNearestRegion.mockResolvedValue(samplePolygon());
     buildMatchingEliminationRegion.mockResolvedValue(samplePolygon());
     const slimSpy = vi.spyOn(persistSlim, "persistSlimPolygonFeature").mockReturnValue({
       ok: false,
       message: POLYGON_PERSIST_OVER_BUDGET_MESSAGE,
     });
-    const createAnnotation = vi.fn();
+    const createAnnotation = vi.fn(async (annotation) => ({
+      ...annotation,
+      id: "ann-1",
+      sessionId: "s1",
+      status: "active" as const,
+    }));
     const setMatchingError = vi.fn();
 
     await performMatchingCommit(baseInput({ createAnnotation, setMatchingError }));
 
-    expect(setMatchingError).toHaveBeenCalledWith(POLYGON_PERSIST_OVER_BUDGET_MESSAGE);
-    expect(createAnnotation).not.toHaveBeenCalled();
+    expect(setMatchingError).not.toHaveBeenCalled();
+    expect(createAnnotation).toHaveBeenCalledTimes(1);
+    const created = createAnnotation.mock.calls[0]![0];
+    expect(created.geometry.geometry.type).toBe("Point");
+    expect(created.geometry.geometry.coordinates).toEqual([-0.15, 51.45]);
+    expect(typeof created.metadata.matchingFeaturesJson).toBe("string");
+    expect(created.metadata.matchingBoundaryJson).toBeUndefined();
     slimSpy.mockRestore();
   });
 });

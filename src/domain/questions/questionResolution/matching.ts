@@ -1,37 +1,15 @@
-import type { Feature, Point } from "geojson";
 import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
-import { parseGeometryJson } from "../../geometry/gameArea/geometryParsing";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "../../geometry/measuring/matchingGeometry";
+import { persistEliminationOrDeferPoint } from "../../geometry/progressive/persistEliminationOrDeferPoint";
 import { persistSlimPolygonFeature } from "../../geometry/progressive/persistSlim";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import { seekerAnchorFromMetadata } from "../hiderTruth/shared";
+import { deferredPointFromPendingPlacement } from "../deferredSeekerPoint";
 import type { MatchingAnswer } from "../matchingQuestions";
-
-function deferredMatchingPointGeometry(pending: PendingQuestionRecord): Feature<Point> | null {
-  const parsed = parseGeometryJson(pending.placement.geometryJson);
-  if (parsed?.geometry.type === "Point") {
-    return parsed as Feature<Point>;
-  }
-
-  const anchor = seekerAnchorFromMetadata(pending.placement.metadata);
-  if (!anchor) {
-    return null;
-  }
-
-  return {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "Point",
-      coordinates: [anchor[1], anchor[0]],
-    },
-  };
-}
 
 export function matchingAnswerFromReplyId(replyId: string): MatchingAnswer | null {
   if (replyId === "yes" || replyId === "no") {
@@ -84,34 +62,18 @@ export async function resolveMatchingPendingQuestion(
   }
 
   const slimmedBoundary = persistSlimPolygonFeature(boundaryRegion);
-  const slimmedElim = persistSlimPolygonFeature(eliminationRegion);
+  const persisted = persistEliminationOrDeferPoint({
+    elimination: eliminationRegion,
+    deferPoint: deferredPointFromPendingPlacement(pending),
+  });
 
-  if (slimmedElim.ok) {
-    return {
-      type: "matching",
-      geometry: slimmedElim.feature,
-      metadata: {
-        ...metadata,
-        createdAt: new Date().toISOString(),
-        matchingAnswer: answer,
-        ...(slimmedBoundary.ok
-          ? { matchingBoundaryJson: JSON.stringify(slimmedBoundary.feature) }
-          : {}),
-        color: MAP_ANNOTATION_COLORS.elimination,
-      },
-    };
-  }
-
-  // Persist ceiling (Landmass / Measuring twin): keep a Point + matching metadata so
-  // the map can rebuild shade instead of cancelling the answered question.
-  const deferredPoint = deferredMatchingPointGeometry(pending);
-  if (!deferredPoint) {
+  if (persisted.kind === "unavailable") {
     return null;
   }
 
   return {
     type: "matching",
-    geometry: deferredPoint,
+    geometry: persisted.geometry,
     metadata: {
       ...metadata,
       createdAt: new Date().toISOString(),

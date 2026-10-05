@@ -404,7 +404,7 @@ export function useRadarTool({
         costLabel={costLabel}
         phase={placementPhase}
         onUseGps={() => void handleUseGps()}
-        error={null}
+        error={placementError}
         awaitHiderAnswer={awaitHiderAnswer}
         answer={radarAnswer}
         onAnswerChange={setRadarAnswer}

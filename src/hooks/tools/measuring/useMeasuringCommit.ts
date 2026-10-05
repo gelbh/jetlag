@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import { persistSlimMeasuringGeometry } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { buildMeasuringRegions } from "@/domain/geometry/measuring/measuringRegions";
+import { persistEliminationOrDeferPoint } from "@/domain/geometry/progressive/persistEliminationOrDeferPoint";
 import { type AnnotationRecord, isActive } from "@/domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
@@ -12,6 +13,7 @@ import {
   measuringQuestionFor,
   questionCostBreakdown,
 } from "@/domain/questions";
+import { seekerAnchorPointFeature } from "@/domain/questions/deferredSeekerPoint";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { adminBorderKindAvailability } from "@/services/geo/overpass/adminDivisionAvailability";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
@@ -200,12 +202,27 @@ export function useMeasuringCommit({
       return;
     }
 
-    const slimmedElim = persistSlimMeasuringGeometry(regions.elimination);
-    if (!slimmedElim.ok) {
-      setMeasuringError(slimmedElim.message);
+    const regionInputWithoutAnswer = buildStoredMeasuringRegionInput({
+      measuringSubject,
+      measuringLocationCategory,
+      measuringDistanceMeters,
+      measuringTargetPoint,
+      measuringPlaces,
+      measuringCoastSegments: resolvedCoastSegments,
+      measuringSeaLevelNearRegion,
+      usesAllPlacesInArea,
+    });
+    const measuringRegionInputJson = JSON.stringify(regionInputWithoutAnswer);
+
+    const persisted = persistEliminationOrDeferPoint({
+      elimination: regions.elimination,
+      deferPoint: seekerAnchorPointFeature(measuringSeekerPoint),
+      slim: persistSlimMeasuringGeometry,
+    });
+    if (persisted.kind === "unavailable") {
+      setMeasuringError("Couldn't save this measuring question.");
       return;
     }
-    const elimination = slimmedElim.feature;
 
     const metadata: AnnotationRecord["metadata"] = {
       createdAt: new Date().toISOString(),
@@ -236,6 +253,7 @@ export function useMeasuringCommit({
             : undefined,
       measuringTargetName:
         measuringSubject === "sea_level" ? "Sea level" : (measuringTargetPlaceName ?? undefined),
+      measuringRegionInputJson,
       color: MAP_ANNOTATION_COLORS.elimination,
     };
 
@@ -250,11 +268,19 @@ export function useMeasuringCommit({
       );
     }
 
-    const created = await createAnnotation({
-      type: "measuring",
-      geometry: elimination,
-      metadata,
-    });
+    let created: AnnotationRecord;
+    try {
+      created = await createAnnotation({
+        type: "measuring",
+        geometry: persisted.geometry,
+        metadata,
+      });
+    } catch (error) {
+      setMeasuringError(
+        error instanceof Error ? error.message : "Couldn't save this measuring question.",
+      );
+      return;
+    }
 
     if (sessionId) {
       const answerOption = closerFurtherAnswerOptions.find(
