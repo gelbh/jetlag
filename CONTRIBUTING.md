@@ -12,6 +12,7 @@
 - On Apple Silicon, Node must be native arm64 (`node -p "process.arch"` → `arm64`). A Rosetta/x64 Node installs the wrong Biome/native optional deps and breaks `npm run lint`.
 - Git worktrees: run `npm ci` **inside each worktree**. Never copy or symlink `node_modules` between the main tree and a worktree.
 - Prefer `npm run lint` / `npx biome` over a global `biome` so the Biome version pinned in `package.json` is used.
+- Rust via `rust-toolchain.toml` (pin `1.98.1` + `wasm32-unknown-unknown`). Geometry WASM: `npm run wasm:build` after crate changes (pkg is gitignored).
 - [Doppler CLI](https://docs.doppler.com/docs/install-cli) for secrets
 - Optional: [`just`](https://github.com/casey/just) (`brew install just`) for maintainer recipes
 
