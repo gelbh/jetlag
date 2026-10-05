@@ -1,5 +1,5 @@
 name: Setup Rust + wasm-pack
-description: Install stable Rust with wasm32 target and pinned wasm-pack for geometry mask builds
+description: Install rust-toolchain.toml pin with wasm32 target and pinned wasm-pack for geometry kernel builds
 
 inputs:
   wasm-pack-version:
@@ -12,7 +12,8 @@ runs:
   steps:
     - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
       with:
-        toolchain: stable
+        # Must match rust-toolchain.toml channel (dtolnay requires this input).
+        toolchain: 1.98.1
         targets: wasm32-unknown-unknown
         components: rustfmt, clippy
 

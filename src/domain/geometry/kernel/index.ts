@@ -41,11 +41,13 @@ export type {
   LatLngTuple,
   PolygonFeature,
 } from "./types";
+export { runUnionPolygonFeatures } from "./unionKernelRunner";
 export {
   unionDiskSpecs,
   unionEliminationParts,
   unionPolygonFeatures,
 } from "./unionPolygonFeatures";
+export { wasmUnionPolygonFeatures } from "./unionWasm";
 export {
   resolveVoronoiCellPoiId,
   resolveVoronoiCellSiteId,
