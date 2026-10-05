@@ -198,7 +198,7 @@ describe("regionPackPoi", () => {
         name: "Aeroporto di Lugano-Agno",
         lat: 46.0040724,
         lng: 8.9098254,
-        category: "commercial_airport",
+        category: "museum",
         wikidataId: "Q661389",
       },
     ];
@@ -208,7 +208,7 @@ describe("regionPackPoi", () => {
         name: "Lugano Airport",
         lat: 46.003611,
         lng: 8.910278,
-        category: "commercial_airport",
+        category: "museum",
       },
     ];
 
@@ -219,7 +219,7 @@ describe("regionPackPoi", () => {
         name: "Lugano Airport",
         lat: 46.003611,
         lng: 8.910278,
-        category: "commercial_airport",
+        category: "museum",
       },
     ]);
   });

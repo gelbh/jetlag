@@ -17,6 +17,7 @@ import {
   GEO_FETCH_TIMEOUT_MS,
   isTransientFetchError,
 } from "@/services/core/network/fetchWithTimeout";
+import { isWikidataQid } from "../parseWikidataId";
 import { collapsePoiPlaceName, sanitizeBundledPoiPlaces } from "./bundledPoiHygiene";
 import type { MeasuringPlace } from "./measuringPlaces";
 
@@ -37,17 +38,11 @@ const BUNDLED_POI_PACKS = new Set<RegionPackId>(PACK_GEO_PACK_IDS);
 
 const bundleCache = new Map<string, BundledPoiCategory | null>();
 
-const WIKIDATA_QID_RE = /^Q\d+$/;
-
-function normalizePlaceName(name: string): string {
-  return collapsePoiPlaceName(name);
-}
-
 function placeQid(place: { id: string; wikidataId?: string }): string | undefined {
-  if (place.wikidataId && WIKIDATA_QID_RE.test(place.wikidataId)) {
+  if (place.wikidataId && isWikidataQid(place.wikidataId)) {
     return place.wikidataId;
   }
-  if (WIKIDATA_QID_RE.test(place.id)) {
+  if (isWikidataQid(place.id)) {
     return place.id;
   }
   return undefined;
@@ -59,12 +54,11 @@ function mergePlacesByIdentity<T extends { id: string; name: string; wikidataId?
 ): T[] {
   const bundledByQid = new Map<string, T>();
   for (const place of bundledPlaces) {
-    if (WIKIDATA_QID_RE.test(place.id)) {
+    if (isWikidataQid(place.id)) {
       bundledByQid.set(place.id, place);
     }
   }
 
-  const claimedQids = new Set<string>();
   const seenIds = new Set<string>();
   const seenNames = new Set<string>();
   const seenQids = new Set<string>();
@@ -72,7 +66,7 @@ function mergePlacesByIdentity<T extends { id: string; name: string; wikidataId?
 
   const markSeen = (place: T, qid?: string) => {
     seenIds.add(place.id);
-    seenNames.add(normalizePlaceName(place.name));
+    seenNames.add(collapsePoiPlaceName(place.name));
     if (qid) {
       seenQids.add(qid);
     }
@@ -81,10 +75,9 @@ function mergePlacesByIdentity<T extends { id: string; name: string; wikidataId?
   for (const place of overpassPlaces) {
     const qid = placeQid(place);
     if (qid && bundledByQid.has(qid)) {
-      if (!claimedQids.has(qid)) {
+      if (!seenQids.has(qid)) {
         const bundled = bundledByQid.get(qid)!;
         merged.push(bundled);
-        claimedQids.add(qid);
         markSeen(bundled, qid);
       }
       continue;
@@ -99,13 +92,13 @@ function mergePlacesByIdentity<T extends { id: string; name: string; wikidataId?
       continue;
     }
 
-    const normalizedName = normalizePlaceName(place.name);
+    const normalizedName = collapsePoiPlaceName(place.name);
     if (seenNames.has(normalizedName)) {
       continue;
     }
 
     const qid = placeQid(place);
-    if (qid && (claimedQids.has(qid) || seenQids.has(qid))) {
+    if (qid && seenQids.has(qid)) {
       continue;
     }
 

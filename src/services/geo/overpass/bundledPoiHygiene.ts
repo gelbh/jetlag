@@ -1,5 +1,6 @@
 // Build-time fill scripts import this module via jiti (e.g. fill-switzerland-pack-geo.mjs).
 import { haversineMeters } from "@/domain/geometry/gameArea/distance";
+import { isWikidataQid } from "../parseWikidataId";
 
 export interface BundledPoiPlaceLike {
   id: string;
@@ -145,7 +146,7 @@ export function isEligibleBundledPoi(place: BundledPoiPlaceLike, category: strin
 
 /** Wikidata entries win over regional supplements (pme:openspace:*, etc.). */
 function preferenceRank(id: string): number {
-  return /^Q\d+$/.test(id) ? 0 : 1;
+  return isWikidataQid(id) ? 0 : 1;
 }
 
 function withinProximity(a: BundledPoiPlaceLike, b: BundledPoiPlaceLike): boolean {

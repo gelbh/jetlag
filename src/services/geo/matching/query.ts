@@ -25,7 +25,8 @@ export function matchingFeaturesCacheKey(
           adminLevel,
         )
       : "";
-  return geographicCacheKey(gameArea, `matching:in:${categoryId}${customSuffix}`);
+  // v2: Overpass parse attaches optional wikidataId for pack QID merge.
+  return geographicCacheKey(gameArea, `matching:v2:in:${categoryId}${customSuffix}`);
 }
 
 export function matchingSearchBoundingBox(gameArea: GameArea): BoundingBox {
