@@ -207,7 +207,7 @@ export function useMeasuringInteractions({
         return true;
       }
 
-      if (wizardStep !== "place") {
+      if (wizardStep !== "place" && wizardStep !== "ask") {
         return false;
       }
 

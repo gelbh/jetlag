@@ -291,7 +291,8 @@ export function useTentacleTool({
         return false;
       }
 
-      if (wizardStepRef.current !== "place") {
+      const wizardStep = wizardStepRef.current;
+      if (wizardStep !== "place" && wizardStep !== "ask") {
         return false;
       }
 
