@@ -1,3 +1,4 @@
+import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import {
   startTransition,
   useCallback,
@@ -29,14 +30,21 @@ import {
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { buildBundledPresetSelectGroups } from "../../domain/regions/bundledPresetHierarchy";
+import { playAreaAttachFingerprint } from "../../domain/regions/packAttach";
 import {
   BUNDLED_REGION_PACK_GEO_REVISION,
   type RegionPackId,
 } from "../../domain/regions/regionPack";
+import type {
+  CustomMatchingAreasByLevel,
+  MatchingAdminLevel,
+  SessionCustomLocationPin,
+} from "../../domain/session/catalog/sessionCustomContent";
 import { generateLocalCode } from "../../domain/session/meta/sessionCode";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { matchGamePresetForPlace } from "../../domain/session/presets/gamePresetSearch";
+import { suggestPresetDataReuseForGameArea } from "../../domain/session/presets/presetDataReuse";
 import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/presetFavourites";
 import {
   type GameSize,
@@ -81,6 +89,104 @@ import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const MISSING_GAME_AREA_ERROR =
   "Search for a place, load a preset, or open Draw to set the play area.";
+
+const MATCHING_ADMIN_LEVELS: readonly MatchingAdminLevel[] = [4, 6, 8, 9];
+
+function matchingFeatureKey(feature: Feature): string | null {
+  if (typeof feature.id === "string" || typeof feature.id === "number") {
+    return String(feature.id);
+  }
+  const propsId = feature.properties?.id;
+  if (typeof propsId === "string" || typeof propsId === "number") {
+    return String(propsId);
+  }
+  return null;
+}
+
+function parseMatchingFeatureCollection(
+  raw: string | undefined,
+): Feature<Polygon | MultiPolygon>[] {
+  if (!raw) {
+    return [];
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    (parsed as FeatureCollection).type !== "FeatureCollection" ||
+    !Array.isArray((parsed as FeatureCollection).features)
+  ) {
+    return [];
+  }
+  const features: Feature<Polygon | MultiPolygon>[] = [];
+  for (const feature of (parsed as FeatureCollection).features) {
+    if (!feature?.geometry) {
+      continue;
+    }
+    if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon") {
+      continue;
+    }
+    features.push(feature as Feature<Polygon | MultiPolygon>);
+  }
+  return features;
+}
+
+function mergeMatchingLevels(
+  base: CustomMatchingAreasByLevel | undefined,
+  overlay: CustomMatchingAreasByLevel | undefined,
+): CustomMatchingAreasByLevel | undefined {
+  if (!overlay) {
+    return base;
+  }
+  if (!base) {
+    return overlay;
+  }
+
+  const merged: CustomMatchingAreasByLevel = { ...base };
+  for (const level of MATCHING_ADMIN_LEVELS) {
+    const overlayRaw = overlay[level];
+    if (!overlayRaw) {
+      continue;
+    }
+    const baseRaw = base[level];
+    if (!baseRaw) {
+      merged[level] = overlayRaw;
+      continue;
+    }
+
+    const byId = new Map<string, Feature<Polygon | MultiPolygon>>();
+    let nextAnonymous = 0;
+    for (const feature of [
+      ...parseMatchingFeatureCollection(baseRaw),
+      ...parseMatchingFeatureCollection(overlayRaw),
+    ]) {
+      const key = matchingFeatureKey(feature) ?? `anon:${level}:${nextAnonymous++}`;
+      if (!byId.has(key)) {
+        byId.set(key, feature);
+      }
+    }
+    merged[level] = JSON.stringify({
+      type: "FeatureCollection",
+      features: [...byId.values()],
+    } satisfies FeatureCollection);
+  }
+  return merged;
+}
+
+function dedupePins(pins: readonly SessionCustomLocationPin[]): SessionCustomLocationPin[] {
+  const byId = new Map<string, SessionCustomLocationPin>();
+  for (const pin of pins) {
+    if (!byId.has(pin.id)) {
+      byId.set(pin.id, pin);
+    }
+  }
+  return [...byId.values()];
+}
 
 export function useCreateSession() {
   const navigate = useAppNavigate();
@@ -165,6 +271,8 @@ export function useCreateSession() {
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [locationStatusTone, setLocationStatusTone] = useState<"ok" | "halt" | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
+  /** Mirrors appliedPresetRef after a successful Load-preset apply (reuse exclude + effect wake). */
+  const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
   const presetApplyGenerationRef = useRef(0);
   const [presetApplyNonce, setPresetApplyNonce] = useState(0);
   const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
@@ -179,6 +287,7 @@ export function useCreateSession() {
   const selectPreset = useCallback(
     (presetId: string) => {
       appliedPresetRef.current = null;
+      setAppliedPresetId(null);
       setPresetApplyNonce((nonce) => nonce + 1);
       setSearchParams(
         (current) => {
@@ -195,6 +304,7 @@ export function useCreateSession() {
   const clearLoadedPreset = useCallback(() => {
     presetApplyGenerationRef.current += 1;
     appliedPresetRef.current = null;
+    setAppliedPresetId(null);
     setSearchParams(
       (current) => {
         if (!current.has("preset")) {
@@ -212,6 +322,7 @@ export function useCreateSession() {
     const presetId = searchParams.get("preset");
     if (!presetId) {
       appliedPresetRef.current = null;
+      setAppliedPresetId(null);
       return;
     }
 
@@ -227,6 +338,11 @@ export function useCreateSession() {
     appliedPresetRef.current = presetId;
     const applyGeneration = ++presetApplyGenerationRef.current;
     const draft = gamePresetToCreateSessionDraft(preset);
+    const abandonStaleApply = () => {
+      if (appliedPresetRef.current === presetId) {
+        appliedPresetRef.current = null;
+      }
+    };
     const applyPreset = async () => {
       requestMap();
       let customMatchingAreas =
@@ -241,12 +357,14 @@ export function useCreateSession() {
         try {
           const boundaries = await loadRegionPackSessionBoundaries(draft.regionPackId, subregionId);
           if (applyGeneration !== presetApplyGenerationRef.current) {
+            abandonStaleApply();
             return;
           }
           customMatchingAreas = boundaries.customMatchingAreas;
           gameArea = boundaries.playArea;
         } catch (loadError) {
           if (applyGeneration !== presetApplyGenerationRef.current) {
+            abandonStaleApply();
             return;
           }
           setError(
@@ -259,6 +377,7 @@ export function useCreateSession() {
       }
 
       if (applyGeneration !== presetApplyGenerationRef.current) {
+        abandonStaleApply();
         return;
       }
 
@@ -298,6 +417,7 @@ export function useCreateSession() {
       if (draft.placeLabel) {
         setLocationQuery(draft.placeLabel);
       }
+      setAppliedPresetId(presetId);
     };
 
     void applyPreset();
@@ -563,6 +683,97 @@ export function useCreateSession() {
 
     return unionGameAreas(areas);
   }, [previewGameArea, selectedAreas]);
+
+  const draftGameAreaFingerprint = useMemo(
+    () => playAreaAttachFingerprint(mapPreviewGameArea),
+    [mapPreviewGameArea],
+  );
+
+  useEffect(() => {
+    const draftGameArea = mapPreviewGameArea;
+    if (!draftGameArea || !draftGameAreaFingerprint) {
+      return;
+    }
+
+    // Wait for explicit ?preset= apply to finish so reuse does not cancel its boundary load.
+    if (loadedPresetId && appliedPresetId !== loadedPresetId) {
+      return;
+    }
+
+    const suggestion = suggestPresetDataReuseForGameArea(draftGameArea, presets, {
+      excludePresetIds: loadedPresetId ? [loadedPresetId] : undefined,
+    });
+
+    if (suggestion.sourcePresetIds.length === 0) {
+      return;
+    }
+
+    const hasCustomGeo =
+      Boolean(suggestion.customMatchingAreas) || (suggestion.customLocationPins?.length ?? 0) > 0;
+
+    if (hasCustomGeo) {
+      setAdvancedSettings((prev) => ({
+        ...prev,
+        customMatchingAreas: mergeMatchingLevels(
+          prev.customMatchingAreas,
+          suggestion.customMatchingAreas,
+        ),
+        customLocationPins: dedupePins([
+          ...(prev.customLocationPins ?? []),
+          ...(suggestion.customLocationPins ?? []),
+        ]),
+      }));
+    }
+
+    const nextPack = suggestion.regionPackId;
+    // No pack in suggestion: keep any pack already set by Load preset (upgrade gate).
+    if (!nextPack) {
+      return;
+    }
+
+    const nextSub = suggestion.subregionId;
+    const packChanged = nextPack !== regionPackId || nextSub !== regionPackSubregionId;
+    if (!packChanged) {
+      return;
+    }
+
+    setRegionPackId(nextPack);
+    setRegionPackSubregionId(nextSub);
+    if (suggestion.transitMetroId) {
+      setTransitMetroOverride(suggestion.transitMetroId);
+    }
+
+    const generation = ++presetApplyGenerationRef.current;
+    void loadRegionPackSessionBoundaries(nextPack, nextSub)
+      .then((boundaries) => {
+        if (generation !== presetApplyGenerationRef.current) {
+          return;
+        }
+        setAdvancedSettings((prev) => ({
+          ...prev,
+          customMatchingAreas: mergeMatchingLevels(
+            boundaries.customMatchingAreas,
+            suggestion.customMatchingAreas,
+          ),
+          customLocationPins: dedupePins([
+            ...(prev.customLocationPins ?? []),
+            ...(suggestion.customLocationPins ?? []),
+          ]),
+        }));
+        // Host-framed gameArea wins: never apply boundaries.playArea.
+      })
+      .catch(() => {
+        // Non-fatal: keep framed area; pack id may still help live fetches.
+      });
+  }, [
+    appliedPresetId,
+    draftGameAreaFingerprint,
+    loadedPresetId,
+    mapPreviewGameArea,
+    presets,
+    regionPackId,
+    regionPackSubregionId,
+  ]);
 
   const addCurrentArea = () => {
     if (!previewGameArea) {
