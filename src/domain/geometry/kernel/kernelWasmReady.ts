@@ -5,7 +5,8 @@ export type KernelEntrypoint =
   | "geodesicLineBuffer"
   | "spatialVoronoi"
   | "tentacleEliminationRegion"
-  | "nearRegionBatch";
+  | "nearRegionBatch"
+  | "unionPolygonFeatures";
 
 /**
  * Per-entrypoint WASM readiness after topology + perf gates.
@@ -19,6 +20,7 @@ export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   spatialVoronoi: true,
   tentacleEliminationRegion: true,
   nearRegionBatch: true,
+  unionPolygonFeatures: false,
 };
 
 /** True when the entrypoint registry marks it ready for wasm. */

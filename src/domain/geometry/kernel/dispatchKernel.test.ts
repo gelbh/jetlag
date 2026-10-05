@@ -15,8 +15,10 @@ describe("dispatchKernel", () => {
         endGameMaskFromDisks: true,
         halfPlane: true,
         geodesicLineBuffer: false,
+        unionPolygonFeatures: false,
       },
-      shouldUseWasm: (entrypoint: string) => entrypoint !== "geodesicLineBuffer",
+      shouldUseWasm: (entrypoint: string) =>
+        entrypoint !== "geodesicLineBuffer" && entrypoint !== "unionPolygonFeatures",
     }));
 
     const { dispatchKernel: dispatch } = await import("./dispatchKernel");
@@ -30,6 +32,11 @@ describe("dispatchKernel", () => {
       }),
     ).rejects.toThrow(/not wasm-ready/);
     expect(runWasm).not.toHaveBeenCalled();
+  });
+
+  it("runUnionPolygonFeatures throws while unionPolygonFeatures ready=false", async () => {
+    const { runUnionPolygonFeatures } = await import("./unionKernelRunner");
+    await expect(runUnionPolygonFeatures([])).rejects.toThrow(/not wasm-ready/);
   });
 
   it("uses WASM for ready entrypoints", async () => {

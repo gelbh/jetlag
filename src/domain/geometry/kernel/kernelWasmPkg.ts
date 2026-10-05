@@ -39,6 +39,7 @@ export type KernelWasmModule = {
   ) => unknown;
   build_spatial_voronoi_rings: (coords: Float64Array | number[]) => Float64Array;
   build_near_region_json: (inputJson: string) => unknown;
+  union_polygon_features_json: (featuresJson: string) => unknown;
 };
 
 let wasmModulePromise: Promise<KernelWasmModule> | null = null;
