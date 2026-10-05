@@ -127,7 +127,9 @@ export function useMeasuringTool({
       await commitRef.current();
     },
   });
-  submittingRef.current = session.phase === "submitting";
+  useEffect(() => {
+    submittingRef.current = session.phase === "submitting";
+  }, [session.phase]);
 
   useToolSessionOptions({
     active: active && draft.measuringOptionChosen,

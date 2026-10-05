@@ -225,7 +225,9 @@ export function useRadarTool({
       });
     },
   });
-  submittingRef.current = session.phase === "submitting";
+  useEffect(() => {
+    submittingRef.current = session.phase === "submitting";
+  }, [session.phase]);
 
   const commit = () => session.submit();
 
