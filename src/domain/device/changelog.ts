@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.1.0";
+export const APP_VERSION = "1.2.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,25 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.2.0",
+    date: "2026-10-06",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "International border measuring uses bundled pack geometry on region presets",
+          "Collapse duplicate pack and Overpass POIs that share a Wikidata id",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Create silently reuses pack and custom pins/matching when you frame over a saved preset area",
+        ],
+      },
+    ],
+  },
   {
     version: "1.1.0",
     date: "2026-10-06",
