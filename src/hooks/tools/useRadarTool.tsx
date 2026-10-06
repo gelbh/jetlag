@@ -91,6 +91,7 @@ export function useRadarTool({
   canSubmitQuestion = true,
 }: UseRadarToolParams) {
   const wizardStepRef = useRef("place");
+  const submittingRef = useRef(false);
   const finishPlacementRef = useRef(finishPlacement);
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
@@ -150,14 +151,16 @@ export function useRadarTool({
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
-      if (!active) {
+      if (!active || submittingRef.current) {
         return false;
       }
 
-      if (wizardStepRef.current !== "place") {
+      const wizardStep = wizardStepRef.current;
+      if (wizardStep !== "place" && wizardStep !== "ask") {
         return false;
       }
 
+      setRadarAnswer(null);
       setRadarCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
@@ -167,6 +170,9 @@ export function useRadarTool({
   );
 
   const handleUseGps = useCallback(async () => {
+    if (submittingRef.current) {
+      return;
+    }
     try {
       const reading = await refreshGps();
       const point: LatLngTuple = [reading.lat, reading.lng];
@@ -174,6 +180,7 @@ export function useRadarTool({
         return;
       }
 
+      setRadarAnswer(null);
       setRadarCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
@@ -218,6 +225,9 @@ export function useRadarTool({
       });
     },
   });
+  useEffect(() => {
+    submittingRef.current = session.phase === "submitting";
+  }, [session.phase]);
 
   const commit = () => session.submit();
 
@@ -404,6 +414,7 @@ export function useRadarTool({
         costLabel={costLabel}
         phase={placementPhase}
         onUseGps={() => void handleUseGps()}
+        gpsLoading={gpsLoading}
         error={placementError}
         awaitHiderAnswer={awaitHiderAnswer}
         answer={radarAnswer}

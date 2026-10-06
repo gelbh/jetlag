@@ -305,4 +305,38 @@ describe("computePlacementCameraTarget", () => {
     expect(target?.paddingTopBiasPx).toBe(120);
     expect(boundsSpanMeters(target)).toBeLessThan(2_500);
   });
+
+  it("prefers draft radar center over a stale overlay marker", () => {
+    const staleCenter: [number, number] = [53.34, -6.27];
+    const draftCenter: [number, number] = [53.36, -6.25];
+    const draft = placementCameraDraftFromOverlaySources({
+      ...emptySources,
+      activeTool: "radar",
+      radar: { center: draftCenter, radiusMeters: 0, answer: null },
+    });
+
+    const target = computePlacementCameraTarget({
+      tool: "radar",
+      phase: resolvePlacementPhase("radar", draft),
+      draft,
+      gameArea: DUBLIN_CITY_GAME_AREA,
+      overlays: [
+        {
+          kind: "marker",
+          id: "radar-draft-center",
+          point: staleCenter,
+        },
+      ],
+      eliminationFeatures: [],
+      panelPeekHeightPx: 320,
+    });
+
+    expect(target).not.toBeNull();
+    const bounds = toMapBounds(target!.bounds);
+    const midLat = (bounds.getSouthWest().lat + bounds.getNorthEast().lat) / 2;
+    const midLng = (bounds.getSouthWest().lng + bounds.getNorthEast().lng) / 2;
+    expect(midLat).toBeCloseTo(draftCenter[0], 3);
+    expect(midLng).toBeCloseTo(draftCenter[1], 3);
+    expect(midLat).not.toBeCloseTo(staleCenter[0], 3);
+  });
 });

@@ -16,6 +16,8 @@ interface UseMeasuringInteractionsParams {
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   draft: MeasuringDraftState;
   loaders: MeasuringAnchorLoaders;
+  /** True while tool session phase is submitting (ignore relocate / GPS snap). */
+  submittingRef: { current: boolean };
 }
 
 export function useMeasuringInteractions({
@@ -25,6 +27,7 @@ export function useMeasuringInteractions({
   ensurePointInGameArea,
   draft,
   loaders,
+  submittingRef,
 }: UseMeasuringInteractionsParams) {
   const {
     wizardStepRef,
@@ -50,6 +53,9 @@ export function useMeasuringInteractions({
   const { setMeasuringTargetAnchor, setMeasuringSeekerAnchorAndResolve } = loaders;
 
   const handleGps = useCallback(async () => {
+    if (submittingRef.current) {
+      return;
+    }
     setMeasuringError(null);
 
     try {
@@ -64,7 +70,13 @@ export function useMeasuringInteractions({
     } catch (error) {
       setMeasuringError(error instanceof Error ? error.message : "GPS location unavailable.");
     }
-  }, [ensurePointInGameArea, refreshGps, setMeasuringError, setMeasuringSeekerAnchorAndResolve]);
+  }, [
+    ensurePointInGameArea,
+    refreshGps,
+    setMeasuringError,
+    setMeasuringSeekerAnchorAndResolve,
+    submittingRef,
+  ]);
 
   const handleSearch = useCallback(
     async (role: "seeker" | "target") => {
@@ -181,7 +193,7 @@ export function useMeasuringInteractions({
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
-      if (!active) {
+      if (!active || submittingRef.current) {
         return false;
       }
 
@@ -207,7 +219,7 @@ export function useMeasuringInteractions({
         return true;
       }
 
-      if (wizardStep !== "place") {
+      if (wizardStep !== "place" && wizardStep !== "ask") {
         return false;
       }
 
@@ -223,6 +235,7 @@ export function useMeasuringInteractions({
       measuringTargetPoint,
       resolveMeasuringMapTarget,
       setMeasuringSeekerAnchorAndResolve,
+      submittingRef,
       usesAllPlacesInArea,
       wizardStepRef,
     ],
