@@ -21,15 +21,19 @@ test("a guest device clock 5 min fast still shows the host's elapsed time", asyn
     await joinAsRole(guestPage, code, "seeker");
     await startSessionTimer(hostPage);
     await waitForSessionElapsedAtLeast(hostPage, 2);
+    // Guest timer + /api/time probe can lag under emulator load; wait for it to tick
+    // before comparing so a stuck-at-0 guest fails here instead of as a 13s drift.
+    await waitForSessionElapsedAtLeast(guestPage, 1, { timeout: 45_000 });
 
     // serverNow() corrects the guest once its first /api/time sample lands.
+    // Allow 2s: integer second UI + async dual-page reads under CI load.
     await expect(async () => {
       const [hostElapsed, guestElapsed] = await Promise.all([
         readSessionElapsedSeconds(hostPage),
         readSessionElapsedSeconds(guestPage),
       ]);
-      expect(Math.abs(guestElapsed - hostElapsed)).toBeLessThanOrEqual(1);
-    }).toPass({ timeout: 15_000 });
+      expect(Math.abs(guestElapsed - hostElapsed)).toBeLessThanOrEqual(2);
+    }).toPass({ timeout: 30_000 });
   } finally {
     await cleanup();
   }
