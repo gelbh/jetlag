@@ -93,6 +93,7 @@ function measuringPlacesToMatchingFeatures(
     name: place.name,
     point: place.point,
     inPlayArea: isPointInGameArea(place.point, gameArea),
+    ...(place.wikidataId ? { wikidataId: place.wikidataId } : {}),
   }));
 }
 
@@ -101,6 +102,7 @@ function matchingFeaturesToMeasuringPlaces(features: MatchingFeature[]): Measuri
     id: feature.id,
     name: feature.name,
     point: feature.point,
+    ...(feature.wikidataId ? { wikidataId: feature.wikidataId } : {}),
   }));
 }
 

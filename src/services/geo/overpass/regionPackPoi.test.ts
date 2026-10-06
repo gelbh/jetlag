@@ -35,6 +35,45 @@ describe("regionPackPoi", () => {
     ]);
   });
 
+  it("prefers bundled place when overpass wikidataId matches pack Q id", () => {
+    const overpass: MeasuringPlace[] = [
+      {
+        id: "766370217",
+        name: "Aeroporto di Lugano-Agno",
+        point: [46.0040724, 8.9098254],
+        wikidataId: "Q661389",
+      },
+    ];
+    const bundled: MeasuringPlace[] = [
+      { id: "Q661389", name: "Lugano Airport", point: [46.003611, 8.910278] },
+    ];
+
+    const merged = mergeMeasuringPlaces(overpass, bundled);
+    expect(merged).toEqual([
+      { id: "Q661389", name: "Lugano Airport", point: [46.003611, 8.910278] },
+    ]);
+  });
+
+  it("keeps both when overpass has no wikidataId and names differ", () => {
+    const overpass: MeasuringPlace[] = [
+      {
+        id: "766370217",
+        name: "Aeroporto di Lugano-Agno",
+        point: [46.0040724, 8.9098254],
+      },
+    ];
+    const bundled: MeasuringPlace[] = [
+      { id: "Q661389", name: "Lugano Airport", point: [46.003611, 8.910278] },
+    ];
+
+    const merged = mergeMeasuringPlaces(overpass, bundled);
+    expect(merged).toHaveLength(2);
+    expect(merged.map((place) => place.name)).toEqual([
+      "Aeroporto di Lugano-Agno",
+      "Lugano Airport",
+    ]);
+  });
+
   it("loads NYC museum bundle when present", async () => {
     const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } = await import(
       "./regionPackPoi"
@@ -150,6 +189,39 @@ describe("regionPackPoi", () => {
     const merged = mergeTentaclePois(overpass, bundled);
     expect(merged).toHaveLength(2);
     expect(merged.map((poi) => poi.name)).toEqual(["British Museum", "Wellcome Collection"]);
+  });
+
+  it("prefers bundled tentacle poi when overpass wikidataId matches pack Q id", () => {
+    const overpass: TentaclePoi[] = [
+      {
+        id: "766370217",
+        name: "Aeroporto di Lugano-Agno",
+        lat: 46.0040724,
+        lng: 8.9098254,
+        category: "museum",
+        wikidataId: "Q661389",
+      },
+    ];
+    const bundled: TentaclePoi[] = [
+      {
+        id: "Q661389",
+        name: "Lugano Airport",
+        lat: 46.003611,
+        lng: 8.910278,
+        category: "museum",
+      },
+    ];
+
+    const merged = mergeTentaclePois(overpass, bundled);
+    expect(merged).toEqual([
+      {
+        id: "Q661389",
+        name: "Lugano Airport",
+        lat: 46.003611,
+        lng: 8.910278,
+        category: "museum",
+      },
+    ]);
   });
 
   it("loads portland-maine park bundle when present", async () => {

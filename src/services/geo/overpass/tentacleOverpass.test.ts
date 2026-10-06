@@ -91,6 +91,68 @@ describe("tentacle overpass", () => {
     ]);
   });
 
+  it("parses primary tags.wikidata into wikidataId", () => {
+    const pois = parseTentaclePois(
+      [
+        {
+          id: 766370217,
+          tags: {
+            tourism: "museum",
+            name: "Aeroporto di Lugano-Agno",
+            wikidata: "Q661389",
+          },
+          lat: 51.5,
+          lon: -0.12,
+        },
+        {
+          id: 2,
+          tags: { tourism: "museum", name: "No Wiki Museum", wikidata: " Q999 " },
+          lat: 51.51,
+          lon: -0.11,
+        },
+        {
+          id: 3,
+          tags: {
+            tourism: "museum",
+            name: "Invalid Wiki Museum",
+            "brand:wikidata": "Q1",
+            wikidata: "P123",
+          },
+          lat: 51.52,
+          lon: -0.1,
+        },
+      ],
+      "museum",
+    );
+
+    expect(pois).toEqual([
+      {
+        id: "766370217",
+        name: "Aeroporto di Lugano-Agno",
+        lat: 51.5,
+        lng: -0.12,
+        category: "museum",
+        wikidataId: "Q661389",
+      },
+      {
+        id: "2",
+        name: "No Wiki Museum",
+        lat: 51.51,
+        lng: -0.11,
+        category: "museum",
+        wikidataId: "Q999",
+      },
+      {
+        id: "3",
+        name: "Invalid Wiki Museum",
+        lat: 51.52,
+        lng: -0.1,
+        category: "museum",
+      },
+    ]);
+    expect(pois[2]?.wikidataId).toBeUndefined();
+  });
+
   it("deduplicates repeated elements by id", () => {
     const pois = parseTentaclePois(
       [

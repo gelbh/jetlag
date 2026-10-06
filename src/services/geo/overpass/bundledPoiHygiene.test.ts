@@ -168,4 +168,59 @@ describe("bundledPoiHygiene", () => {
     );
     expect(places).toHaveLength(2);
   });
+
+  it("collapses punctuation so St. matches St", () => {
+    expect(normalizeBundledPoiName("St. Patrick's University Hospital", "hospital")).toBe(
+      normalizeBundledPoiName("St Patrick's University Hospital", "hospital"),
+    );
+  });
+
+  it("collapses ampersand to and", () => {
+    expect(normalizeBundledPoiName("London Toy & Model Museum", "museum")).toBe(
+      normalizeBundledPoiName("London Toy and Model Museum", "museum"),
+    );
+  });
+
+  it("dedupes St. vs St hospital pair within 150 m preferring Q id", () => {
+    const places = dedupeBundledPoiPlaces(
+      [
+        {
+          id: "pack:hospital:1",
+          name: "St Patrick's University Hospital",
+          lat: 53.336,
+          lng: -6.29,
+        },
+        {
+          id: "Q7588363",
+          name: "St. Patrick's University Hospital",
+          lat: 53.3361,
+          lng: -6.2901,
+        },
+      ],
+      "hospital",
+    );
+    expect(places).toHaveLength(1);
+    expect(places[0]?.id).toBe("Q7588363");
+  });
+
+  it("dedupes & vs and museum pair within 150 m", () => {
+    const places = dedupeBundledPoiPlaces(
+      [
+        {
+          id: "pack:museum:1",
+          name: "London Toy and Model Museum",
+          lat: 51.511,
+          lng: -0.18,
+        },
+        {
+          id: "Q1234567",
+          name: "London Toy & Model Museum",
+          lat: 51.5111,
+          lng: -0.1801,
+        },
+      ],
+      "museum",
+    );
+    expect(places).toHaveLength(1);
+  });
 });

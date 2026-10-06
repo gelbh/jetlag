@@ -11,6 +11,7 @@ export interface MeasuringPlace {
   /** Absent = confirmed (legacy Overpass/bundle). */
   confirmStatus?: PoiConfirmStatus;
   osmId?: string;
+  wikidataId?: string;
 }
 
 export interface MatchingFeature {
@@ -25,6 +26,7 @@ export interface MatchingFeature {
   /** Absent = confirmed (legacy Overpass/bundle). */
   confirmStatus?: PoiConfirmStatus;
   osmId?: string;
+  wikidataId?: string;
 }
 
 export interface AdminDivisionFeature {
