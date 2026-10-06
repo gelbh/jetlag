@@ -27,6 +27,12 @@ export type AskMapPlacementChromeProps = {
   costLabel?: string;
   phase: AskMapPlacementPhase;
   onUseGps: () => void;
+  /** Disables snap + shows spinner while GPS refresh is in flight. */
+  gpsLoading?: boolean;
+  /** Answer-phase floating GPS snap; opt-in so Thermo/Photo/zone stay clean. */
+  showSnapLocation?: boolean;
+  /** Disables snap while Send / commit is in flight. */
+  isSubmitting?: boolean;
   error?: string | null;
   statusTitle: string;
   statusBody: string;
@@ -76,6 +82,25 @@ export const askMapPlacementSendStyles = {
     fontSize: "0.8125rem",
   },
 } as const;
+
+/** Floating icon-only GPS snap (answer phase); not the tall soft-flag permission CTA. */
+const askMapPlacementSnapLocationStyles = (snapBusy: boolean): CSSProperties => ({
+  width: "2.75rem",
+  height: "2.75rem",
+  minWidth: "2.75rem",
+  minHeight: "2.75rem",
+  borderRadius: 14,
+  padding: 0,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: snapBusy ? "wait" : "pointer",
+  ...mapChromeSurfaceStyles,
+  border: "none",
+  color: "var(--color-flag)",
+  boxShadow: "0 8px 24px oklch(0.1 0.04 265 / 0.45)",
+  opacity: snapBusy ? 0.85 : 1,
+});
 
 function HaltErrorAlert({
   testId,
@@ -153,6 +178,9 @@ export function AskMapPlacementChrome({
   costLabel,
   phase,
   onUseGps,
+  gpsLoading = false,
+  showSnapLocation = false,
+  isSubmitting = false,
   error = null,
   statusTitle,
   statusBody,
@@ -168,15 +196,14 @@ export function AskMapPlacementChrome({
   const showCta = phase === "needs_permission" || phase === "failed";
   const showMapBackup = phase === "failed";
   const showAnswer = phase === "answer";
+  const showSnap = showAnswer && showSnapLocation;
+  const snapBusy = gpsLoading || isSubmitting;
   const showStatus = phase === "locating" || phase === "resolving";
   const failedErrorCopy = phase === "failed" && error ? askInlineErrorCopy(error) : null;
   const answerErrorCopy = phase === "answer" && error ? askInlineErrorCopy(error) : null;
 
-  const bottomClearance = bottomClearanceForPhase(
-    phase,
-    Boolean(failedErrorCopy || answerErrorCopy),
-    answerTall,
-  );
+  // Answer-phase errors sit under the top question card, so they do not inflate bottom clearance.
+  const bottomClearance = bottomClearanceForPhase(phase, Boolean(failedErrorCopy), answerTall);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -288,6 +315,20 @@ export function AskMapPlacementChrome({
             </p>
           </div>
         </div>
+        {showAnswer && answerErrorCopy ? (
+          <HaltErrorAlert
+            testId={`${testId}-answer-error`}
+            title={answerErrorCopy.title}
+            detail={answerErrorCopy.detail}
+            className="pointer-events-auto w-full px-3 py-2.5"
+            style={{
+              ...mapChromeSurfaceStyles,
+              borderRadius: 14,
+              border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
+              color: "var(--color-field-ink)",
+            }}
+          />
+        ) : null}
       </div>
 
       <div
@@ -393,19 +434,27 @@ export function AskMapPlacementChrome({
             ) : null}
           </div>
         ) : null}
-        {showAnswer && answerErrorCopy ? (
-          <HaltErrorAlert
-            testId={`${testId}-answer-error`}
-            title={answerErrorCopy.title}
-            detail={answerErrorCopy.detail}
-            className="mx-auto w-full max-w-[22rem] px-3 py-2.5"
-            style={{
-              ...mapChromeSurfaceStyles,
-              borderRadius: 14,
-              border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
-              color: "var(--color-field-ink)",
-            }}
-          />
+        {showSnap ? (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              data-testid={`${testId}-snap-location`}
+              className="jl-map-chrome-press"
+              aria-label={
+                isSubmitting
+                  ? "Sending question"
+                  : gpsLoading
+                    ? "Getting your location"
+                    : "Snap pin to my location"
+              }
+              aria-busy={snapBusy || undefined}
+              disabled={snapBusy}
+              onClick={onUseGps}
+              style={askMapPlacementSnapLocationStyles(snapBusy)}
+            >
+              {snapBusy ? <StatusSpinner /> : <CrosshairIcon size={20} weight="bold" aria-hidden />}
+            </button>
+          </div>
         ) : null}
         {showAnswer ? answerSlot : null}
       </div>

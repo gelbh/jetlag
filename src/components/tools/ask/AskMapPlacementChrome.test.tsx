@@ -1,28 +1,130 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { ComponentProps } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
 import { AskMapPlacementChrome } from "./AskMapPlacementChrome";
 
-describe("AskMapPlacementChrome answer-phase errors", () => {
-  it("shows inline error detail when phase is answer", () => {
-    render(
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
+function renderChrome(
+  props: Partial<ComponentProps<typeof AskMapPlacementChrome>> &
+    Pick<ComponentProps<typeof AskMapPlacementChrome>, "phase">,
+) {
+  const onUseGps = props.onUseGps ?? vi.fn();
+  render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <AskMapPlacementChrome
-        testId="measuring-map-placement"
-        toolTitle="Measuring"
-        configureLabel="Museum"
-        questionPrompt="Is it closer or further?"
-        phase="answer"
-        onUseGps={vi.fn()}
-        error="Couldn't save this measuring question."
-        statusTitle=""
-        statusBody=""
+        testId="matching-map-placement"
+        toolTitle="Matching"
+        configureLabel="Commercial Airport"
+        questionPrompt="Is your nearest commercial airport the same?"
+        onUseGps={onUseGps}
+        statusTitle="Finding location"
+        statusBody="Waiting for GPS…"
         toolIcon={<span />}
         answerSlot={<div data-testid="answer-slot">answers</div>}
-      />,
-    );
+        {...props}
+      />
+    </MantineProvider>,
+  );
+  return { onUseGps };
+}
+
+describe("AskMapPlacementChrome answer-phase errors", () => {
+  it("shows inline error under the question card when phase is answer", () => {
+    renderChrome({
+      testId: "measuring-map-placement",
+      toolTitle: "Measuring",
+      configureLabel: "Museum",
+      questionPrompt: "Compared to me, are you closer or further?",
+      phase: "answer",
+      error: "Couldn't save this measuring question.",
+      statusTitle: "",
+      statusBody: "",
+    });
 
     const alert = screen.getByTestId("measuring-map-placement-answer-error");
+    const question = screen.getByTestId("measuring-map-placement-question");
     expect(alert).toHaveAttribute("role", "alert");
     expect(alert.textContent).toMatch(/Couldn't save this measuring question/i);
+    expect(question.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByTestId("answer-slot")).toBeInTheDocument();
+  });
+});
+
+describe("AskMapPlacementChrome answer-phase GPS snap", () => {
+  it("shows floating icon-only snap control above answerSlot and calls onUseGps", () => {
+    const { onUseGps } = renderChrome({ phase: "answer", showSnapLocation: true });
+
+    const snap = screen.getByTestId("matching-map-placement-snap-location");
+    expect(snap).toHaveAccessibleName("Snap pin to my location");
+    expect(snap).not.toHaveTextContent("My location");
+    expect(snap.textContent).not.toMatch(/Allow location when prompted/i);
+
+    const answerSlot = screen.getByTestId("answer-slot");
+    expect(
+      snap.compareDocumentPosition(answerSlot) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    fireEvent.click(snap);
+    expect(onUseGps).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides snap when showSnapLocation is false (Thermo/Photo/zone path)", () => {
+    renderChrome({ phase: "answer", showSnapLocation: false });
+
+    expect(screen.queryByTestId("matching-map-placement-snap-location")).toBeNull();
+    expect(screen.getByTestId("answer-slot")).toBeInTheDocument();
+  });
+
+  it("hides snap control during locating (not the tall permission CTA)", () => {
+    renderChrome({ phase: "locating", answerSlot: undefined, showSnapLocation: true });
+
+    expect(screen.queryByTestId("matching-map-placement-snap-location")).toBeNull();
+    expect(screen.queryByTestId("matching-map-placement-cta")).toBeNull();
+    expect(screen.queryByText("Allow location when prompted")).toBeNull();
+    expect(screen.queryByRole("button", { name: /Snap pin to my location/i })).toBeNull();
+  });
+
+  it("shows press class and busy spinner while gpsLoading", () => {
+    const { onUseGps } = renderChrome({
+      phase: "answer",
+      showSnapLocation: true,
+      gpsLoading: true,
+    });
+
+    const snap = screen.getByTestId("matching-map-placement-snap-location");
+    expect(snap).toHaveClass("jl-map-chrome-press");
+    expect(snap).toHaveAccessibleName("Getting your location");
+    expect(snap).toBeDisabled();
+    expect(snap).toHaveAttribute("aria-busy", "true");
+    fireEvent.click(snap);
+    expect(onUseGps).not.toHaveBeenCalled();
+  });
+
+  it("disables snap while isSubmitting", () => {
+    const { onUseGps } = renderChrome({
+      phase: "answer",
+      showSnapLocation: true,
+      isSubmitting: true,
+    });
+
+    const snap = screen.getByTestId("matching-map-placement-snap-location");
+    expect(snap).toHaveAccessibleName("Sending question");
+    expect(snap).toBeDisabled();
+    fireEvent.click(snap);
+    expect(onUseGps).not.toHaveBeenCalled();
   });
 });
