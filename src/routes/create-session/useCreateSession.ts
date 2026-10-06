@@ -29,6 +29,7 @@ import {
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { buildBundledPresetSelectGroups } from "../../domain/regions/bundledPresetHierarchy";
+import { playAreaAttachFingerprint } from "../../domain/regions/packAttach";
 import {
   BUNDLED_REGION_PACK_GEO_REVISION,
   type RegionPackId,
@@ -77,6 +78,7 @@ import { inferTransitMetroId, listTransitMetros } from "../../services/transit/t
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
 import { useCreateSessionMapMount } from "./useCreateSessionMapMount";
+import { useSilentPresetDataReuse } from "./useSilentPresetDataReuse";
 import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const MISSING_GAME_AREA_ERROR =
@@ -165,7 +167,10 @@ export function useCreateSession() {
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [locationStatusTone, setLocationStatusTone] = useState<"ok" | "halt" | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
+  /** Mirrors appliedPresetRef after a successful Load-preset apply (reuse exclude + effect wake). */
+  const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
   const presetApplyGenerationRef = useRef(0);
+  const resetSilentReuseOverlayRef = useRef<() => void>(() => {});
   const [presetApplyNonce, setPresetApplyNonce] = useState(0);
   const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
   const loadedPresetId = searchParams.get("preset");
@@ -179,6 +184,7 @@ export function useCreateSession() {
   const selectPreset = useCallback(
     (presetId: string) => {
       appliedPresetRef.current = null;
+      setAppliedPresetId(null);
       setPresetApplyNonce((nonce) => nonce + 1);
       setSearchParams(
         (current) => {
@@ -195,6 +201,7 @@ export function useCreateSession() {
   const clearLoadedPreset = useCallback(() => {
     presetApplyGenerationRef.current += 1;
     appliedPresetRef.current = null;
+    setAppliedPresetId(null);
     setSearchParams(
       (current) => {
         if (!current.has("preset")) {
@@ -212,6 +219,7 @@ export function useCreateSession() {
     const presetId = searchParams.get("preset");
     if (!presetId) {
       appliedPresetRef.current = null;
+      setAppliedPresetId(null);
       return;
     }
 
@@ -227,6 +235,11 @@ export function useCreateSession() {
     appliedPresetRef.current = presetId;
     const applyGeneration = ++presetApplyGenerationRef.current;
     const draft = gamePresetToCreateSessionDraft(preset);
+    const abandonStaleApply = () => {
+      if (appliedPresetRef.current === presetId) {
+        appliedPresetRef.current = null;
+      }
+    };
     const applyPreset = async () => {
       requestMap();
       let customMatchingAreas =
@@ -241,12 +254,14 @@ export function useCreateSession() {
         try {
           const boundaries = await loadRegionPackSessionBoundaries(draft.regionPackId, subregionId);
           if (applyGeneration !== presetApplyGenerationRef.current) {
+            abandonStaleApply();
             return;
           }
           customMatchingAreas = boundaries.customMatchingAreas;
           gameArea = boundaries.playArea;
         } catch (loadError) {
           if (applyGeneration !== presetApplyGenerationRef.current) {
+            abandonStaleApply();
             return;
           }
           setError(
@@ -259,6 +274,7 @@ export function useCreateSession() {
       }
 
       if (applyGeneration !== presetApplyGenerationRef.current) {
+        abandonStaleApply();
         return;
       }
 
@@ -275,6 +291,7 @@ export function useCreateSession() {
       setGameSizeUserOverrode(false);
       setGameSize(resolvedGameSize);
       setDistanceUnit(unit);
+      resetSilentReuseOverlayRef.current();
       setAdvancedSettings(resolvedAdvanced);
       setSelectedPlaceId(null);
       setSelectedPlace(null);
@@ -298,6 +315,7 @@ export function useCreateSession() {
       if (draft.placeLabel) {
         setLocationQuery(draft.placeLabel);
       }
+      setAppliedPresetId(presetId);
     };
 
     void applyPreset();
@@ -400,22 +418,25 @@ export function useCreateSession() {
         framing.applyFocusBounds(gpsReadingToFocusBounds(reading.lat, reading.lng));
         setMapFocusToken((token) => token + 1);
       })
-      .catch(() => {
-        // Prompt/denied: map still opens on the default viewport.
-      });
+      .catch(() => {});
   }, [framing, requestMap]);
 
-  const bootstrapHostAuth = useCallback(async () => {
+  const bootstrapHostAuth = useCallback(async (signal?: { cancelled: boolean }) => {
     if (!isFirebaseConfigured()) {
       return;
     }
-
     setHostAuthError(null);
     try {
       const user = await ensureAnonymousUser();
+      if (signal?.cancelled) {
+        return;
+      }
       setHostHasAccessClaim(await hasAccessClaim(user));
       setHostAuthReady(true);
     } catch {
+      if (signal?.cancelled) {
+        return;
+      }
       setHostHasAccessClaim(false);
       setHostAuthReady(false);
       setHostAuthError("Couldn't sign in to create a session. Tap Retry.");
@@ -423,35 +444,12 @@ export function useCreateSession() {
   }, []);
 
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
-      return;
-    }
-
-    let cancelled = false;
-
-    void (async () => {
-      try {
-        const user = await ensureAnonymousUser();
-        if (cancelled) {
-          return;
-        }
-
-        setHostHasAccessClaim(await hasAccessClaim(user));
-        setHostAuthReady(true);
-        setHostAuthError(null);
-      } catch {
-        if (!cancelled) {
-          setHostHasAccessClaim(false);
-          setHostAuthReady(false);
-          setHostAuthError("Couldn't sign in to create a session. Tap Retry.");
-        }
-      }
-    })();
-
+    const signal = { cancelled: false };
+    void bootstrapHostAuth(signal);
     return () => {
-      cancelled = true;
+      signal.cancelled = true;
     };
-  }, []);
+  }, [bootstrapHostAuth]);
 
   const retryHostAuth = useCallback(() => {
     void bootstrapHostAuth();
@@ -564,6 +562,29 @@ export function useCreateSession() {
     return unionGameAreas(areas);
   }, [previewGameArea, selectedAreas]);
 
+  const draftGameAreaFingerprint = useMemo(
+    () => playAreaAttachFingerprint(mapPreviewGameArea),
+    [mapPreviewGameArea],
+  );
+
+  const { resetSilentReuseOverlay } = useSilentPresetDataReuse({
+    draftGameArea: mapPreviewGameArea,
+    draftGameAreaFingerprint,
+    presets,
+    loadedPresetId,
+    appliedPresetId,
+    regionPackId,
+    regionPackSubregionId,
+    setAdvancedSettings,
+    setRegionPackId,
+    setRegionPackSubregionId,
+    setTransitMetroOverride,
+    presetApplyGenerationRef,
+  });
+  useLayoutEffect(() => {
+    resetSilentReuseOverlayRef.current = resetSilentReuseOverlay;
+  });
+
   const addCurrentArea = () => {
     if (!previewGameArea) {
       setError("Frame or search for an area before adding another.");
@@ -587,6 +608,7 @@ export function useCreateSession() {
 
   const applyImportedBoundary = (gameArea: GameArea, filename: string) => {
     requestMap();
+    clearLoadedPreset();
     setImportedGameArea(gameArea);
     setSelectedPlaceId(null);
     setSelectedPlace(null);
@@ -604,13 +626,11 @@ export function useCreateSession() {
       return;
     }
 
-    // Start constructing the map while the importer chunk and file parse run.
     requestMap();
     setImportLoading(true);
     setError(null);
 
     try {
-      // Dynamic: jszip / @xmldom/xmldom / @tmcw/togeojson stay off the /create route chunk.
       const { parseBoundaryFile } = await import("../../services/core/capture/kmzImport");
       const gameArea = await parseBoundaryFile(file);
       applyImportedBoundary(gameArea, file.name);
@@ -634,7 +654,6 @@ export function useCreateSession() {
       return;
     }
 
-    // Start constructing the map in parallel with the geocoder round trip.
     requestMap();
     const requestId = beginRequest();
     setSearchLoading(true);
@@ -746,9 +765,6 @@ export function useCreateSession() {
             }
           : {}),
       };
-      if (regionPackId) {
-        delete rulesPatch.customMatchingAreas;
-      }
 
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
@@ -805,8 +821,6 @@ export function useCreateSession() {
           hidingZoneRadiusMeters:
             rulesPatch.hidingZoneRadiusMeters ?? hidingZoneRadiusMeters(gameSize, distanceUnit),
         };
-        // Local id is fixed and the timer now persists in localStorage: drop an
-        // abandoned local game's timer so the new game starts at zero.
         useTimerStore.getState().clearTimer(LOCAL_SESSION_ID);
         setSession(localSession, "local");
         setPremiumApiContext(localSession);
@@ -823,17 +837,14 @@ export function useCreateSession() {
         const matchingAreas = await resolveSessionMatchingAreas({
           regionPackId,
           regionPackSubregionId,
-          customMatchingAreas: regionPackId ? undefined : advancedSettings.customMatchingAreas,
+          customMatchingAreas: advancedSettings.customMatchingAreas,
         });
         preloadGameAreaCaches(gameArea, matchingAreas, regionPackId, tier);
-        // Dynamic: submit-only sea-level sampling stays off the /create route chunk.
         void import("../../services/geo/elevation/seaLevelProgressive")
           .then(({ startSeaLevelBackgroundSampling }) => {
             startSeaLevelBackgroundSampling(gameArea, { regionPackId });
           })
-          .catch(() => {
-            // Head start only; /map restarts sampling on mount (deduped).
-          });
+          .catch(() => {});
         void preloadCriticalGameAreaCaches(gameArea, matchingAreas, regionPackId);
       }
       navigate("/map");
@@ -844,7 +855,6 @@ export function useCreateSession() {
     }
   };
 
-  // Confirm reads the latest render's framing state through this ref.
   const confirmSessionRef = useRef(confirmSession);
   useLayoutEffect(() => {
     confirmSessionRef.current = confirmSession;
@@ -929,8 +939,6 @@ export function useCreateSession() {
     selectedAreas,
     previewGameArea,
     manualFramingActive,
-    // Latched: every path that produces an area calls requestMap(), so the map
-    // never tears down back to the facade when an area is cleared.
     mapRequested: mapMount.mapRequested,
     mapMounted: mapMount.mapMounted,
     requestMap,

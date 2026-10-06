@@ -84,7 +84,7 @@ const loadRegionPackSessionBoundaries = vi.hoisted(() =>
         ],
       ],
     },
-    customMatchingAreas: [],
+    customMatchingAreas: {},
   })),
 );
 vi.mock("@/services/geo/matching/regionPackBoundaries", () => ({
