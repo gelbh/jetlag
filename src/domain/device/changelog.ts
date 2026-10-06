@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.0.5";
+export const APP_VERSION = "1.1.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,39 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.1.0",
+    date: "2026-10-06",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Freehand lines now save to the shared map instead of being rejected by the server",
+          "A map change the server rejects now shows an error instead of failing silently",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Bundled location packs for all Swiss cantons",
+          "Map sheets slide open consistently (settings, codes, board)",
+          "Seekers can retap the map or use My location to move a draft question pin while answering (solo and multiplayer)",
+          "Switzerland pack boundaries use proper LV95 to WGS84 (PROJ)",
+          "Map Ask sheets finish their close animation before unmounting",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Merge multi-placemark KML/KMZ boundaries with one Turf FeatureCollection union",
+          "Route landmass obstacle union through the WASM fail-closed kernel",
+          "Route measuring isoline unions through WASM and fail closed on buffered-union errors",
+          "Add scripts/export-switzerland-boundaries.py for swissBOUNDARIES3D re-export",
+          "Measuring progressive polygon unions use the WASM geometry kernel (same family as other kernel ops)",
+        ],
+      },
+    ],
+  },
   {
     version: "1.0.5",
     date: "2026-10-05",
