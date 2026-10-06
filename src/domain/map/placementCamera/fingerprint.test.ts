@@ -9,6 +9,67 @@ const markerOverlay = (id: string, point: [number, number]): MapDraftOverlay => 
 });
 
 describe("placementCameraFingerprint", () => {
+  it("changes when draftAnchor moves even with empty overlays", () => {
+    const atA = placementCameraFingerprint({
+      tool: "radar",
+      phase: "pick_radius",
+      overlays: [],
+      eliminationFeatures: [],
+      draftAnchor: [53.35, -6.26],
+    });
+    const atB = placementCameraFingerprint({
+      tool: "radar",
+      phase: "pick_radius",
+      overlays: [],
+      eliminationFeatures: [],
+      draftAnchor: [53.36, -6.25],
+    });
+    expect(atA).not.toBe(atB);
+  });
+
+  it("ignores async overlay catch-up of the draft-anchored pin", () => {
+    const draftAnchor: [number, number] = [53.36, -6.25];
+    const beforeCatchUp = placementCameraFingerprint({
+      tool: "radar",
+      phase: "pick_radius",
+      overlays: [
+        {
+          kind: "marker",
+          id: "radar-draft-center",
+          point: [53.35, -6.26],
+        },
+        {
+          kind: "circle",
+          id: "radar-draft-range",
+          center: [53.35, -6.26],
+          radiusMeters: 800,
+        },
+      ],
+      eliminationFeatures: [],
+      draftAnchor,
+    });
+    const afterCatchUp = placementCameraFingerprint({
+      tool: "radar",
+      phase: "pick_radius",
+      overlays: [
+        {
+          kind: "marker",
+          id: "radar-draft-center",
+          point: draftAnchor,
+        },
+        {
+          kind: "circle",
+          id: "radar-draft-range",
+          center: draftAnchor,
+          radiusMeters: 800,
+        },
+      ],
+      eliminationFeatures: [],
+      draftAnchor,
+    });
+    expect(beforeCatchUp).toBe(afterCatchUp);
+  });
+
   it("excludes volatile thermometer walk polylines from the fingerprint", () => {
     const structural = markerOverlay("thermo-draft-a", [53.35, -6.26]);
     const walkOverlay: MapDraftOverlay = {
