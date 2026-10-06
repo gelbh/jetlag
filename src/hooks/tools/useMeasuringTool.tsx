@@ -74,6 +74,7 @@ export function useMeasuringTool({
   const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
   const draft = useMeasuringDraftState(annotations, pendingQuestions, sessionRules);
   const previews = useMeasuringPreviews(gameArea, draft);
+  const submittingRef = useRef(false);
 
   const loaders = useMeasuringAnchorLoaders({
     active,
@@ -90,6 +91,7 @@ export function useMeasuringTool({
     ensurePointInGameArea,
     draft,
     loaders,
+    submittingRef,
   });
 
   const { commit: commitMeasuring, performCommit } = useMeasuringCommit({
@@ -125,6 +127,9 @@ export function useMeasuringTool({
       await commitRef.current();
     },
   });
+  useEffect(() => {
+    submittingRef.current = session.phase === "submitting";
+  }, [session.phase]);
 
   useToolSessionOptions({
     active: active && draft.measuringOptionChosen,
@@ -407,6 +412,7 @@ export function useMeasuringTool({
         costLabel={questionCost.label}
         phase={placementPhase}
         onUseGps={() => void interactions.handleGps()}
+        gpsLoading={gpsLoading}
         error={placementError}
         awaitHiderAnswer={awaitHiderAnswer}
         answer={draft.measuringAnswer}
