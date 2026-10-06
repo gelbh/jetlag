@@ -121,6 +121,64 @@ describe("measuring places", () => {
     ]);
   });
 
+  it("parses primary tags.wikidata into wikidataId", () => {
+    const places = parseMeasuringPlaces(
+      [
+        {
+          id: 766370217,
+          tags: {
+            name: "Aeroporto di Lugano-Agno",
+            wikidata: "Q661389",
+            aeroway: "aerodrome",
+            iata: "LUG",
+          },
+          lat: 51.45,
+          lon: -0.16,
+        },
+        {
+          id: 2,
+          tags: { name: "No Wiki Airport", aeroway: "aerodrome", iata: "XXX" },
+          lat: 51.45,
+          lon: -0.17,
+        },
+        {
+          id: 3,
+          tags: {
+            name: "Brand Wiki Airport",
+            aeroway: "aerodrome",
+            iata: "YYY",
+            "brand:wikidata": "Q1",
+            wikidata: "not-a-qid",
+          },
+          lat: 51.45,
+          lon: -0.18,
+        },
+      ],
+      sampleGameArea,
+    );
+
+    expect(places).toEqual([
+      {
+        id: "766370217",
+        name: "Aeroporto di Lugano-Agno",
+        point: [51.45, -0.16],
+        wikidataId: "Q661389",
+      },
+      {
+        id: "2",
+        name: "No Wiki Airport",
+        point: [51.45, -0.17],
+      },
+      {
+        id: "3",
+        name: "Brand Wiki Airport",
+        point: [51.45, -0.18],
+      },
+    ]);
+    expect(places[1]?.wikidataId).toBeUndefined();
+    expect(places[2]?.wikidataId).toBeUndefined();
+  });
+
   it("limits map snaps to venues within the search radius", async () => {
     vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
       elements: [
