@@ -113,7 +113,7 @@ export function reportSlowRouteTransitionLazy(
     .catch(() => {});
 }
 
-/** Persists consent synchronously; posthog init/opt-out follows once loaded. */
+/** Persists consent synchronously; product enable / identity reset follows once loaded. */
 export function grantAnalyticsConsentLazy(): void {
   writeAnalyticsConsent("granted");
   void loadAnalytics()
@@ -125,5 +125,12 @@ export function denyAnalyticsConsentLazy(): void {
   writeAnalyticsConsent("denied");
   void loadAnalytics()
     .then((m) => m.denyAnalyticsConsent())
+    .catch(() => {});
+}
+
+/** Always-on PostHog core for scrubbed exceptions (no Accept required). */
+export function initPosthogCoreLazy(): void {
+  void loadAnalytics()
+    .then((m) => m.initPosthogCore())
     .catch(() => {});
 }
