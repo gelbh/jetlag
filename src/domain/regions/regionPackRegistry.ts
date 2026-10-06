@@ -91,6 +91,12 @@ const HIDE_COUNTRY_PROVINCE_MATCHING = new Set<"admin_division_1" | "admin_divis
 const HIDE_COUNTRY_PROVINCE_BORDERS = new Set<MeasuringFromKind>([
   "admin1_border",
   "admin2_border",
+  "international_border",
+]);
+
+const SWITZERLAND_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>([
+  "admin1_border",
+  "admin2_border",
 ]);
 
 type MetroRegionPackConfig = Omit<RegionPackConfig, "unsupportedMatching" | "unsupportedBorders">;
@@ -184,18 +190,21 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     matchingLabelOverrides: LUCERNE_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: LUCERNE_MEASURING_LABEL_OVERRIDES,
   }),
-  [SWITZERLAND_REGION_PACK_ID]: metroRegionPack({
-    id: SWITZERLAND_REGION_PACK_ID,
-    geoAssets: {
-      primary: SWITZERLAND_GEO_ASSETS.cantons,
-      secondary: SWITZERLAND_GEO_ASSETS.municipalities,
-      secondaryBySubregion: (subregionId) =>
-        SWITZERLAND_GEO_ASSETS.municipalitiesByCanton(subregionId),
-    },
-    subregionPropertyKey: "cantonId",
-    matchingLabelOverrides: SWITZERLAND_MATCHING_LABEL_OVERRIDES,
-    measuringLabelOverrides: SWITZERLAND_MEASURING_LABEL_OVERRIDES,
-  }),
+  [SWITZERLAND_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: SWITZERLAND_REGION_PACK_ID,
+      geoAssets: {
+        primary: SWITZERLAND_GEO_ASSETS.cantons,
+        secondary: SWITZERLAND_GEO_ASSETS.municipalities,
+        secondaryBySubregion: (subregionId) =>
+          SWITZERLAND_GEO_ASSETS.municipalitiesByCanton(subregionId),
+      },
+      subregionPropertyKey: "cantonId",
+      matchingLabelOverrides: SWITZERLAND_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: SWITZERLAND_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedBorders: SWITZERLAND_UNSUPPORTED_BORDERS,
+  },
   [PORTLAND_MAINE_REGION_PACK_ID]: metroRegionPack({
     id: PORTLAND_MAINE_REGION_PACK_ID,
     geoAssets: {

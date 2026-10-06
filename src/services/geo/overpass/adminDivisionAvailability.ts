@@ -239,12 +239,11 @@ export function adminBorderKindAvailability(
   counts: AdminDivisionCounts | null | undefined,
   regionPackId?: RegionPackId,
 ): boolean {
-  if (!isMeasuringAdminBorderKind(kind)) {
-    return true;
-  }
-
   if (!isMeasuringBorderKindSupportedForRegionPack(kind, regionPackId)) {
     return false;
+  }
+  if (!isMeasuringAdminBorderKind(kind)) {
+    return true;
   }
 
   switch (kind) {
