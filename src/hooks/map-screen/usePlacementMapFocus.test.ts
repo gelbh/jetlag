@@ -148,6 +148,83 @@ describe("usePlacementMapFocus", () => {
     expect(result.current.placementRecenterToken).toBe(0);
   });
 
+  it("bumps recenter token when draft pin moves with empty overlays", () => {
+    const idlePinDraft = placementCameraDraftFromOverlaySources({
+      ...pinSources,
+      pin: { point: null },
+    });
+    const pinAtA = placementCameraDraftFromOverlaySources({
+      ...pinSources,
+      pin: { point: [53.35, -6.26] },
+    });
+    const pinAtB = placementCameraDraftFromOverlaySources({
+      ...pinSources,
+      pin: { point: [53.36, -6.25] },
+    });
+
+    const { result, rerender } = renderHook(
+      ({ draft }: { draft: typeof pinAtA }) =>
+        usePlacementMapFocus({
+          activeTool: "pin",
+          draft,
+          overlays: [],
+          eliminationFeatures: [],
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          defaultFocusBounds: defaultBounds,
+          enabled: true,
+          panelMinimized: false,
+        }),
+      { initialProps: { draft: idlePinDraft } },
+    );
+
+    expect(result.current.placementRecenterToken).toBe(0);
+
+    rerender({ draft: pinAtA });
+    expect(result.current.placementRecenterToken).toBe(1);
+    expect(result.current.effectiveFocusBounds).not.toEqual(defaultBounds);
+
+    rerender({ draft: pinAtB });
+    expect(result.current.placementRecenterToken).toBe(2);
+  });
+
+  it("does not re-bump when overlays catch up to the same draft pin", () => {
+    const pinAtB = placementCameraDraftFromOverlaySources({
+      ...pinSources,
+      pin: { point: [53.36, -6.25] },
+    });
+    const staleOverlay: MapDraftOverlay = {
+      kind: "marker",
+      id: "pin-draft",
+      point: [53.35, -6.26],
+    };
+    const caughtUpOverlay: MapDraftOverlay = {
+      kind: "marker",
+      id: "pin-draft",
+      point: [53.36, -6.25],
+    };
+
+    const { result, rerender } = renderHook(
+      ({ overlays }: { overlays: MapDraftOverlay[] }) =>
+        usePlacementMapFocus({
+          activeTool: "pin",
+          draft: pinAtB,
+          overlays,
+          eliminationFeatures: [],
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          defaultFocusBounds: defaultBounds,
+          enabled: true,
+          panelMinimized: false,
+        }),
+      { initialProps: { overlays: [staleOverlay] } },
+    );
+
+    const tokenAfterDraft = result.current.placementRecenterToken;
+    expect(tokenAfterDraft).toBeGreaterThan(0);
+
+    rerender({ overlays: [caughtUpOverlay] });
+    expect(result.current.placementRecenterToken).toBe(tokenAfterDraft);
+  });
+
   it("bumps recenter token when structural overlays change", () => {
     const idlePinDraft = placementCameraDraftFromOverlaySources({
       ...pinSources,

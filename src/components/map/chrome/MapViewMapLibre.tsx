@@ -100,7 +100,7 @@ function MapFocus({
   preferFly?: boolean;
 }) {
   const mapRef = useMapLibreMap();
-  const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
+  const { prefersReducedMotion } = useMotionProfile();
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
   const lastOrientationRef = useRef(orientationResetToken);
@@ -110,7 +110,9 @@ function MapFocus({
   const focusPaddingTopBiasRef = useRef(focusPaddingTopBias);
   const focusMinZoomRef = useRef(focusMinZoom);
   const focusMaxZoomRef = useRef(focusMaxZoom);
-  const animate = !prefersReducedMotion && !lowPowerMode;
+  // Placement reframes are functional (keep the pin in view), not decorative —
+  // do not gate on lowPowerMode (that only kills ornament motion).
+  const animate = !prefersReducedMotion;
   const padY = fitBoundsPaddingProp?.[0] ?? 32;
   const padX = fitBoundsPaddingProp?.[1] ?? 32;
   const applyDependencyKeys = mapFocusApplyDependencyKeys({

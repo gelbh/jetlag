@@ -2,7 +2,7 @@
  * Map-first Radar chrome: shared placement shell + Yes/No + distance mid-strip.
  */
 import { Button, UnstyledButton } from "@mantine/core";
-import { CheckIcon, PaperPlaneTiltIcon, XIcon } from "@phosphor-icons/react";
+import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudRadarIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
@@ -10,6 +10,7 @@ import {
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { RadarDistancePicker } from "@/components/tools/RadarDistancePicker";
+import { binaryAnswerIcon } from "@/components/tools/shared/answers/binaryAnswerIcons";
 import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
   askInsetSurfaceStyle,
@@ -28,6 +29,7 @@ export type RadarMapPlacementChromeProps = {
   costLabel?: string;
   phase: RadarMapPlacementPhase;
   onUseGps: () => void;
+  gpsLoading?: boolean;
   error?: string | null;
   awaitHiderAnswer?: boolean;
   answer?: RadarAnswer | null;
@@ -90,6 +92,7 @@ export function RadarMapPlacementChrome({
   costLabel,
   phase,
   onUseGps,
+  gpsLoading = false,
   error = null,
   awaitHiderAnswer = false,
   answer = null,
@@ -159,7 +162,7 @@ export function RadarMapPlacementChrome({
             {yesNoAnswerOptions.map((option) => {
               const selected = answer === option.value;
               const tone = option.activeClassName.includes("status-success") ? "success" : "danger";
-              const Icon = option.value === "yes" ? CheckIcon : XIcon;
+              const Icon = binaryAnswerIcon(option.value);
               return (
                 <UnstyledButton
                   key={option.value}
@@ -168,7 +171,9 @@ export function RadarMapPlacementChrome({
                   onClick={() => onAnswerChange?.(option.value)}
                   styles={answerSegmentStyles(selected, tone)}
                 >
-                  <Icon size={16} weight={selected ? "bold" : "regular"} aria-hidden />
+                  {Icon ? (
+                    <Icon size={16} weight={selected ? "bold" : "regular"} aria-hidden />
+                  ) : null}
                   {option.label}
                 </UnstyledButton>
               );
@@ -230,6 +235,9 @@ export function RadarMapPlacementChrome({
       costLabel={costLabel}
       phase={phase}
       onUseGps={onUseGps}
+      gpsLoading={gpsLoading}
+      showSnapLocation
+      isSubmitting={isSubmitting}
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}

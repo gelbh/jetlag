@@ -422,19 +422,29 @@ export function useMapDraftOverlays(
   const generationRef = useRef(0);
   const tentacleLodCancelRef = useRef<(() => void) | null>(null);
 
+  const previousToolRef = useRef(activeTool);
+
   useEffect(() => {
     const generation = generationRef.current + 1;
     generationRef.current = generation;
     tentacleLodCancelRef.current?.();
     tentacleLodCancelRef.current = null;
-    queueMicrotask(() => {
-      if (generation !== generationRef.current) {
-        return;
-      }
-      setBuilt(EMPTY_DRAFT_RESULT);
-      setTentacleDisplayElim(null);
-      setTentacleLodPhase("complete");
-    });
+
+    // Clear only on tool change. Clearing on every pin move dropped markers to
+    // [] and made placement camera lose its target until the async rebuild
+    // finished (pin jump with no pan).
+    const toolChanged = previousToolRef.current !== activeTool;
+    previousToolRef.current = activeTool;
+    if (toolChanged) {
+      queueMicrotask(() => {
+        if (generation !== generationRef.current) {
+          return;
+        }
+        setBuilt(EMPTY_DRAFT_RESULT);
+        setTentacleDisplayElim(null);
+        setTentacleLodPhase("complete");
+      });
+    }
 
     void buildMapDraftOverlays(sources)
       .then((result) => {

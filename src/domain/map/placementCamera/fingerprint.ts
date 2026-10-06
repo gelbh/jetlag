@@ -9,6 +9,17 @@ function isVolatileWalkOverlay(overlay: MapDraftOverlay): boolean {
   return overlay.id.startsWith("thermo-draft-walk-");
 }
 
+/** Marker / circle ids whose position is owned by `draftAnchor` in the fingerprint. */
+const DRAFT_ANCHORED_OVERLAY_IDS = new Set([
+  "pin-draft",
+  "radar-draft-center",
+  "radar-draft-range",
+  "tentacle-draft-center",
+  "tentacle-draft-range",
+  "matching-draft-seeker",
+  "measuring-draft-seeker",
+]);
+
 function polygonFingerprint(
   overlay: Extract<MapDraftOverlay, { kind: "polygon" }>,
 ): Record<string, unknown> {
@@ -42,17 +53,30 @@ function polygonFingerprint(
   };
 }
 
-function overlayFingerprintEntry(overlay: MapDraftOverlay): Record<string, unknown> {
+function overlayFingerprintEntry(
+  overlay: MapDraftOverlay,
+  omitDraftAnchorPoint: boolean,
+): Record<string, unknown> {
+  const anchored = omitDraftAnchorPoint && DRAFT_ANCHORED_OVERLAY_IDS.has(overlay.id);
+
   switch (overlay.kind) {
     case "marker":
-      return { kind: overlay.kind, id: overlay.id, point: overlay.point };
+      return anchored
+        ? { kind: overlay.kind, id: overlay.id }
+        : { kind: overlay.kind, id: overlay.id, point: overlay.point };
     case "circle":
-      return {
-        kind: overlay.kind,
-        id: overlay.id,
-        radiusMeters: overlay.radiusMeters,
-        point: overlay.center,
-      };
+      return anchored
+        ? {
+            kind: overlay.kind,
+            id: overlay.id,
+            radiusMeters: overlay.radiusMeters,
+          }
+        : {
+            kind: overlay.kind,
+            id: overlay.id,
+            radiusMeters: overlay.radiusMeters,
+            point: overlay.center,
+          };
     case "polyline":
       return { kind: overlay.kind, id: overlay.id, positions: overlay.positions };
     case "polygon":
@@ -111,10 +135,15 @@ export interface PlacementCameraFingerprintInput {
   eliminationPreview?: boolean;
   walkActive?: boolean;
   walkCurrentPoint?: [number, number] | null;
+  /** Sync draft anchor — overlays rebuild async and must not gate pin-follow. */
+  draftAnchor?: [number, number] | null;
 }
 
 export function placementCameraFingerprint(input: PlacementCameraFingerprintInput): string {
   const structural = input.overlays.filter((overlay) => !isVolatileWalkOverlay(overlay));
+  // When draftAnchor is set, ignore async overlay catch-up of the same pin —
+  // a second fingerprint bump aborts the in-flight easeTo via effect cleanup.
+  const omitDraftAnchorPoint = input.draftAnchor != null;
 
   // Matching yes/no are complements of the same cell — keep the camera fingerprint
   // stable across flips so we do not flyTo on every tap.
@@ -128,7 +157,7 @@ export function placementCameraFingerprint(input: PlacementCameraFingerprintInpu
       : null;
 
   return JSON.stringify({
-    overlays: structural.map(overlayFingerprintEntry),
+    overlays: structural.map((overlay) => overlayFingerprintEntry(overlay, omitDraftAnchorPoint)),
     tool: input.tool,
     phase: input.phase,
     selectedPoiId: input.selectedPoiId ?? null,
@@ -136,6 +165,7 @@ export function placementCameraFingerprint(input: PlacementCameraFingerprintInpu
     eliminationPreview: input.eliminationPreview ?? false,
     walkActive: input.walkActive ?? false,
     walkCurrentPoint: input.walkCurrentPoint ?? null,
+    draftAnchor: input.draftAnchor ?? null,
     eliminationHash,
   });
 }

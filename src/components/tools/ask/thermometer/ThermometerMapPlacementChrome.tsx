@@ -3,19 +3,14 @@
  * Distance catalog stays on the sheet; live walk banner stays on the sheet.
  */
 import { Button, UnstyledButton } from "@mantine/core";
-import {
-  FlameIcon,
-  GpsFixIcon,
-  PaperPlaneTiltIcon,
-  PathIcon,
-  SnowflakeIcon,
-} from "@phosphor-icons/react";
+import { GpsFixIcon, PaperPlaneTiltIcon, PathIcon } from "@phosphor-icons/react";
 import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
   type AskMapPlacementPhase,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
+import { binaryAnswerIcon } from "@/components/tools/shared/answers/binaryAnswerIcons";
 import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
   askInsetSurfaceStyle,
@@ -249,7 +244,7 @@ export function ThermometerMapPlacementChrome({
             {hotterColderAnswerOptions.map((option) => {
               const selected = answer === option.value;
               const tone = option.activeClassName.includes("status-success") ? "success" : "danger";
-              const Icon = option.value === "hotter" ? FlameIcon : SnowflakeIcon;
+              const Icon = binaryAnswerIcon(option.value);
               return (
                 <UnstyledButton
                   key={option.value}
@@ -258,7 +253,9 @@ export function ThermometerMapPlacementChrome({
                   onClick={() => onAnswerChange?.(option.value)}
                   styles={answerSegmentStyles(selected, tone)}
                 >
-                  <Icon size={16} weight={selected ? "fill" : "regular"} aria-hidden />
+                  {Icon ? (
+                    <Icon size={16} weight={selected ? "fill" : "regular"} aria-hidden />
+                  ) : null}
                   {option.label}
                 </UnstyledButton>
               );

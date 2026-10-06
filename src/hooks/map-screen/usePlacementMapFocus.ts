@@ -5,6 +5,7 @@ import {
   PANEL_PEEK_HEIGHT_PX,
 } from "../../domain/device/motion/motionTokens";
 import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapBoundsExpression } from "../../domain/map/mapBounds";
 import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
@@ -19,6 +20,32 @@ import {
   WALK_REFRAME_INTERVAL_MS,
 } from "../../domain/map/placementCamera";
 import type { MapTool } from "../../state/sessionStore";
+
+function draftAnchorForTool(tool: MapTool, draft: PlacementCameraDraftState): LatLngTuple | null {
+  switch (tool) {
+    case "pin":
+      return draft.pin.point;
+    case "radar":
+      return draft.radar.center;
+    case "tentacle":
+      return draft.tentacle.center;
+    case "measuring":
+      return draft.measuring.seekerPoint;
+    case "matching":
+      return draft.matching.seekerPoint;
+    case "thermometer":
+      return draft.thermometer.walkCurrentPoint ?? draft.thermometer.thermoA;
+    case "zone":
+    case "draw":
+    case "photo":
+    case "none":
+      return null;
+    default: {
+      const unreachable: never = tool;
+      return unreachable;
+    }
+  }
+}
 
 export interface UsePlacementMapFocusOptions {
   activeTool: MapTool;
@@ -145,6 +172,8 @@ export function usePlacementMapFocus({
     return computePlacementCameraTarget(cameraContext);
   }, [cameraContext, placementActive]);
 
+  const draftAnchor = useMemo(() => draftAnchorForTool(activeTool, draft), [activeTool, draft]);
+
   const fingerprint = useMemo(
     () =>
       placementCameraFingerprint({
@@ -157,6 +186,7 @@ export function usePlacementMapFocus({
         eliminationPreview: draft.measuring.eliminationPreview || draft.matching.eliminationPreview,
         walkActive,
         walkCurrentPoint: draft.thermometer.walkCurrentPoint,
+        draftAnchor,
       }),
     [
       activeTool,
@@ -165,6 +195,7 @@ export function usePlacementMapFocus({
       draft.measuring.eliminationPreview,
       draft.measuring.seekerResolving,
       draft.thermometer.walkCurrentPoint,
+      draftAnchor,
       eliminationFeatures,
       overlays,
       phase,

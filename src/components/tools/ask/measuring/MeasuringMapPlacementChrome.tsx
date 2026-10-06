@@ -11,6 +11,7 @@ import {
   type AskMapPlacementPhase,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
+import { binaryAnswerIcon } from "@/components/tools/shared/answers/binaryAnswerIcons";
 import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
   askInsetSurfaceStyle,
@@ -28,6 +29,7 @@ export type MeasuringMapPlacementChromeProps = {
   costLabel?: string;
   phase: MeasuringMapPlacementPhase;
   onUseGps: () => void;
+  gpsLoading?: boolean;
   error?: string | null;
   awaitHiderAnswer?: boolean;
   answer?: MeasuringAnswer | null;
@@ -82,6 +84,7 @@ const compactChoiceStyles = (selected: boolean, tone: "success" | "danger" | "de
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
+      gap: 6,
       ...(selected
         ? {
             ...selectedSoft,
@@ -107,6 +110,7 @@ export function MeasuringMapPlacementChrome({
   costLabel,
   phase,
   onUseGps,
+  gpsLoading = false,
   error = null,
   awaitHiderAnswer = false,
   answer = null,
@@ -141,6 +145,7 @@ export function MeasuringMapPlacementChrome({
                 : option.activeClassName.includes("status-negative")
                   ? "danger"
                   : "default";
+              const Icon = binaryAnswerIcon(option.value);
               return (
                 <UnstyledButton
                   key={option.value}
@@ -149,6 +154,9 @@ export function MeasuringMapPlacementChrome({
                   onClick={() => onAnswerChange(option.value)}
                   styles={compactChoiceStyles(selected, tone)}
                 >
+                  {Icon ? (
+                    <Icon size={16} weight={selected ? "bold" : "regular"} aria-hidden />
+                  ) : null}
                   {option.label}
                 </UnstyledButton>
               );
@@ -231,6 +239,9 @@ export function MeasuringMapPlacementChrome({
       costLabel={costLabel}
       phase={phase}
       onUseGps={onUseGps}
+      gpsLoading={gpsLoading}
+      showSnapLocation
+      isSubmitting={isSubmitting}
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}

@@ -61,4 +61,65 @@ describe("useRadarTool map-first", () => {
     expect(result.current.draft.radarCenter).toEqual([53.35, -6.26]);
     expect(result.current.hud.suppressSheet).toBe(true);
   });
+
+  it("re-pins on map tap while answering and clears solo answer", async () => {
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useRadarTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameSize: "medium",
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: false,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: vi.fn(),
+        awaitHiderAnswer: false,
+      }),
+    );
+
+    const oneMile = milesToMeters(1);
+    act(() => {
+      (
+        result.current.panel as {
+          props: { onPresetSelect: (meters: number) => void };
+        }
+      ).props.onPresetSelect(oneMile);
+    });
+
+    await waitFor(() => {
+      expect(result.current.hud.suppressSheet).toBe(true);
+    });
+
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    expect(result.current.draft.radarCenter).toEqual([53.35, -6.26]);
+
+    act(() => {
+      (
+        result.current.panel as {
+          props: { onAnswerChange: (answer: "yes" | "no") => void };
+        }
+      ).props.onAnswerChange("yes");
+    });
+
+    expect(result.current.draft.radarAnswer).toBe("yes");
+
+    let accepted = false;
+    act(() => {
+      accepted = result.current.handleMapClick([53.36, -6.25]);
+    });
+
+    expect(accepted).toBe(true);
+    expect(result.current.draft.radarCenter).toEqual([53.36, -6.25]);
+    expect(result.current.draft.radarAnswer).toBeNull();
+  });
 });

@@ -233,6 +233,37 @@ describe("useMapDraftOverlays", () => {
     });
   });
 
+  it("keeps pin overlays visible while the next async rebuild is in flight", async () => {
+    const { useMapDraftOverlays } = await import("./useMapDraftOverlays");
+    const { act, waitFor } = await import("@testing-library/react");
+    const { result, rerender } = renderHook(
+      ({ point }: { point: [number, number] }) =>
+        useMapDraftOverlays({
+          ...emptySources,
+          activeTool: "pin",
+          pin: { point },
+        }),
+      { initialProps: { point: [53.35, -6.26] as [number, number] } },
+    );
+
+    await waitFor(() => {
+      expect(result.current.overlays.some((overlay) => overlay.id === "pin-draft")).toBe(true);
+    });
+    const overlaysAfterFirst = result.current.overlays;
+
+    act(() => {
+      rerender({ point: [53.36, -6.25] });
+    });
+
+    // Must not flash to [] between rebuilds — that broke placement camera pan.
+    expect(result.current.overlays).toBe(overlaysAfterFirst);
+
+    await waitFor(() => {
+      const pin = result.current.overlays.find((overlay) => overlay.id === "pin-draft");
+      expect(pin?.kind === "marker" && pin.point).toEqual([53.36, -6.25]);
+    });
+  });
+
   it("attaches the matching category icon id on the nearest-feature pin", async () => {
     const { buildMapDraftOverlays } = await import("./useMapDraftOverlays");
     const result = await buildMapDraftOverlays({
