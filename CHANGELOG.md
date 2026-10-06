@@ -6,6 +6,17 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.2.0 - 2026-10-06
+
+### Fixes
+
+- International border measuring uses bundled pack geometry on region presets
+- Collapse duplicate pack and Overpass POIs that share a Wikidata id
+
+### Improvements
+
+- Create silently reuses pack and custom pins/matching when you frame over a saved preset area
+
 ## 1.1.0 - 2026-10-06
 
 ### Fixes
