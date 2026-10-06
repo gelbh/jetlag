@@ -11,6 +11,7 @@ import { measuringOverpassSelectorsForKind } from "@/domain/session/catalog/sess
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached, measuringPlacesCacheKey } from "../cache";
+import { parseWikidataId } from "../parseWikidataId";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
 import { mergeOverpassElementPayloads, queryOverpassWithBboxSplit } from "./overpassBboxSplit";
 import {
@@ -54,6 +55,7 @@ export interface MeasuringPlace {
   id: string;
   name: string;
   point: LatLngTuple;
+  wikidataId?: string;
 }
 
 export const MEASURING_MAP_SNAP_RADIUS_METERS = 750;
@@ -144,10 +146,13 @@ export function parseMeasuringPlaces(
 
       seen.add(id);
 
+      const wikidataId = parseWikidataId(element.tags);
+
       return {
         id,
         name: element.tags?.name?.trim() ?? "",
         point,
+        ...(wikidataId ? { wikidataId } : {}),
       } satisfies MeasuringPlace;
     })
     .filter((place): place is MeasuringPlace => place !== null);
