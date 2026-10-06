@@ -180,6 +180,88 @@ describe("matching features", () => {
     ]);
   });
 
+  it("dedupes Overpass twin by wikidataId against pack Q id on enrich", async () => {
+    let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
+    const overpassStarted = new Promise<void>((resolveStarted) => {
+      vi.spyOn(overpassClient, "queryOverpass").mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveStarted();
+            resolveOverpass = resolve;
+          }),
+      );
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input) === "/geo/london/poi/museum.json") {
+          return {
+            ok: true,
+            json: async () => ({
+              category: "museum",
+              source: "wikidata",
+              places: [
+                {
+                  id: "Q6373",
+                  name: "British Museum",
+                  lat: 51.45,
+                  lng: -0.16,
+                },
+              ],
+            }),
+          };
+        }
+        throw new Error(`Unexpected fetch: ${String(input)}`);
+      }),
+    );
+
+    const enrich = vi.fn();
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "museum", {
+      regionPackId: "london",
+      onEnrich: enrich,
+    });
+
+    expect(features).toEqual([
+      {
+        id: "Q6373",
+        name: "British Museum",
+        point: [51.45, -0.16],
+        inPlayArea: true,
+      },
+    ]);
+
+    await overpassStarted;
+    resolveOverpass?.({
+      elements: [
+        {
+          id: 99,
+          tags: {
+            name: "Museo Britannico",
+            tourism: "museum",
+            wikidata: "Q6373",
+          },
+          lat: 51.451,
+          lon: -0.161,
+        },
+      ],
+    });
+
+    await vi.waitFor(() => {
+      expect(enrich).toHaveBeenCalledTimes(1);
+    });
+
+    const enriched = enrich.mock.calls[0]?.[0] ?? [];
+    expect(enriched).toEqual([
+      {
+        id: "Q6373",
+        name: "British Museum",
+        point: [51.45, -0.16],
+        inPlayArea: true,
+      },
+    ]);
+  });
+
   it("splits the Overpass bbox when the full-area query is too expensive", async () => {
     const fullAreaBbox = formatOverpassBboxFromGameArea(sampleGameArea);
     const querySpy = vi
@@ -310,6 +392,68 @@ describe("matching features", () => {
         inPlayArea: true,
       },
     ]);
+  });
+
+  it("parses primary tags.wikidata into wikidataId", () => {
+    const features = parseMatchingFeatures(
+      [
+        {
+          id: 766370217,
+          tags: {
+            name: "Aeroporto di Lugano-Agno",
+            wikidata: "Q661389",
+            aeroway: "aerodrome",
+            iata: "LUG",
+          },
+          lat: 51.45,
+          lon: -0.16,
+        },
+        {
+          id: 2,
+          tags: { name: "No Wiki Airport", aeroway: "aerodrome", iata: "XXX" },
+          lat: 51.45,
+          lon: -0.17,
+        },
+        {
+          id: 3,
+          tags: {
+            name: "Invalid Wiki Airport",
+            aeroway: "aerodrome",
+            iata: "YYY",
+            "brand:wikidata": "Q1",
+            wikidata: "not-a-qid",
+          },
+          lat: 51.45,
+          lon: -0.18,
+        },
+      ],
+      sampleGameArea,
+      "commercial_airport",
+    );
+
+    expect(features).toEqual([
+      {
+        id: "766370217",
+        name: "Aeroporto di Lugano-Agno",
+        point: [51.45, -0.16],
+        inPlayArea: true,
+        wikidataId: "Q661389",
+      },
+      {
+        id: "2",
+        name: "No Wiki Airport",
+        point: [51.45, -0.17],
+        inPlayArea: true,
+      },
+      {
+        id: "3",
+        name: "Invalid Wiki Airport",
+        point: [51.45, -0.18],
+        inPlayArea: true,
+      },
+    ]);
+    expect(features[1]?.wikidataId).toBeUndefined();
+    expect(features[2]?.wikidataId).toBeUndefined();
   });
 
   it("excludes commercial airports outside the play area", async () => {

@@ -3,6 +3,7 @@ import { isPointInGameArea, type LatLngTuple } from "@/domain/geometry/gameArea/
 import type { GameArea } from "@/domain/map/annotations";
 import type { MatchingCategoryId } from "@/domain/questions";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
+import { parseWikidataId } from "../parseWikidataId";
 import type { OverpassElement } from "./types";
 
 function isHonoraryConsulate(tags: Record<string, string>): boolean {
@@ -95,11 +96,14 @@ export function parseMatchingFeatures(
 
       seen.add(id);
 
+      const wikidataId = parseWikidataId(element.tags);
+
       return {
         id,
         name: matchingFeatureName(element.tags!) ?? "",
         point,
         inPlayArea,
+        ...(wikidataId ? { wikidataId } : {}),
       };
     })
     .filter((feature): feature is MatchingFeature => feature !== null);
