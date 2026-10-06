@@ -30,6 +30,7 @@ import {
   type OverpassBbox,
   queryOverpassWithBboxSplit,
 } from "./overpassBboxSplit";
+import { loadBundledInternationalBorderPack } from "./regionPackInternationalBorder";
 
 type OverpassWay = {
   type: string;
@@ -100,6 +101,16 @@ async function fetchMeasuringLinearSegmentsForKind(
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
 ): Promise<Feature<LineString>[]> {
+  if (kind === "international_border" && regionPackId) {
+    const pack = await loadBundledInternationalBorderPack(regionPackId);
+    if (pack && pack.segments.length > 0) {
+      return pack.segments;
+    }
+    if (!allowsOverpassAdminBorderFallthrough(regionPackId)) {
+      return [];
+    }
+  }
+
   if (isMeasuringAdminBorderKind(kind)) {
     const customSegments = await fetchCustomAdminBorderLineSegments(
       gameArea,
@@ -150,6 +161,13 @@ function customBorderCacheSuffix(
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
 ): string {
+  const packSuffix = regionPackId ? `:pack-${regionPackId}` : "";
+
+  // Pack vs Overpass vs empty must not share one prepared-segments key.
+  if (kind === "international_border") {
+    return packSuffix;
+  }
+
   if (!isMeasuringAdminBorderKind(kind)) {
     return "";
   }
@@ -157,7 +175,6 @@ function customBorderCacheSuffix(
   const level = adminLevelForMeasuringBorderKind(kind) as MatchingAdminLevel;
   const custom = customMatchingAreas?.[level];
   const customSuffix = custom ? `:custom-${level}-${custom.length}` : "";
-  const packSuffix = regionPackId ? `:pack-${regionPackId}` : "";
   return `${customSuffix}${packSuffix}`;
 }
 

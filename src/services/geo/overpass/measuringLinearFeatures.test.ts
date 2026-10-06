@@ -1,11 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import type { Feature, LineString } from "geojson";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import * as overpassClient from "../../core/overpass/overpassClient";
 import { clearGeographicFeatureCacheForTests } from "../cache";
 import { clearRegionPackGeoCacheForTests } from "../matching/regionPackBoundaries";
 import { fetchPreparedMeasuringLinearSegments } from "./measuringLinearFeatures";
+import { clearBundledInternationalBorderCacheForTests } from "./regionPackInternationalBorder";
 
 const ROOT = resolve(import.meta.dirname, "../../../..");
 
@@ -21,6 +23,46 @@ const dublinGameArea: GameArea = {
     ],
   ],
 };
+
+const switzerlandGameArea: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [5.9, 45.8],
+      [10.5, 45.8],
+      [10.5, 47.8],
+      [5.9, 47.8],
+      [5.9, 45.8],
+    ],
+  ],
+};
+
+const switzerlandBorderSegment: Feature<LineString> = {
+  type: "Feature",
+  properties: {},
+  geometry: {
+    type: "LineString",
+    coordinates: [
+      [6.0, 46.5],
+      [6.2, 46.7],
+      [6.4, 46.9],
+    ],
+  },
+};
+
+function stubFetchForInternationalBorderPack(
+  packs: Record<string, { source: string; segments: Feature<LineString>[] }>,
+) {
+  return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = String(input);
+    for (const [packId, payload] of Object.entries(packs)) {
+      if (url.includes(`/geo/${packId}/international_border.json`)) {
+        return new Response(JSON.stringify(payload), { status: 200 });
+      }
+    }
+    return new Response("missing", { status: 404 });
+  });
+}
 
 const bundledLeaGeoJson = JSON.stringify({
   type: "FeatureCollection",
@@ -60,6 +102,121 @@ function stubFetchForDublinPackAssets() {
     return new Response("missing", { status: 404 });
   });
 }
+
+describe("measuringLinearFeatures — international_border pack-first", () => {
+  beforeEach(async () => {
+    await clearGeographicFeatureCacheForTests();
+    clearBundledInternationalBorderCacheForTests();
+  });
+
+  afterEach(async () => {
+    await clearGeographicFeatureCacheForTests();
+    clearBundledInternationalBorderCacheForTests();
+    vi.restoreAllMocks();
+  });
+
+  it("returns switzerland pack segments when Overpass would throw", async () => {
+    stubFetchForInternationalBorderPack({
+      switzerland: {
+        source: "switzerland-cantons-union",
+        segments: [switzerlandBorderSegment],
+      },
+    });
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockRejectedValue(new Error("Overpass should not be needed"));
+
+    const prepared = await fetchPreparedMeasuringLinearSegments(
+      switzerlandGameArea,
+      "international_border",
+      undefined,
+      "switzerland",
+    );
+
+    expect(queryOverpass).not.toHaveBeenCalled();
+    expect(prepared.segments.length).toBeGreaterThan(0);
+  });
+
+  it("returns [] for dublin empty stub and never calls Overpass", async () => {
+    stubFetchForInternationalBorderPack({
+      dublin: {
+        source: "none",
+        segments: [],
+      },
+    });
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockResolvedValue({ elements: [] });
+
+    const prepared = await fetchPreparedMeasuringLinearSegments(
+      dublinGameArea,
+      "international_border",
+      undefined,
+      "dublin",
+    );
+
+    expect(queryOverpass).not.toHaveBeenCalled();
+    expect(prepared.segments).toEqual([]);
+  });
+
+  it("calls Overpass when regionPackId is undefined", async () => {
+    const queryOverpass = vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          type: "way",
+          id: 1,
+          geometry: [
+            { lat: 53.32, lon: -6.3 },
+            { lat: 53.33, lon: -6.29 },
+          ],
+        },
+      ],
+    });
+
+    const prepared = await fetchPreparedMeasuringLinearSegments(
+      dublinGameArea,
+      "international_border",
+    );
+
+    expect(queryOverpass).toHaveBeenCalled();
+    expect(prepared.segments.length).toBeGreaterThan(0);
+  });
+
+  it("does not serve switzerland pack segments under a dublin pack cache key", async () => {
+    stubFetchForInternationalBorderPack({
+      switzerland: {
+        source: "switzerland-cantons-union",
+        segments: [switzerlandBorderSegment],
+      },
+      dublin: {
+        source: "none",
+        segments: [],
+      },
+    });
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockRejectedValue(new Error("Overpass should not be needed"));
+
+    const swiss = await fetchPreparedMeasuringLinearSegments(
+      switzerlandGameArea,
+      "international_border",
+      undefined,
+      "switzerland",
+    );
+    expect(swiss.segments.length).toBeGreaterThan(0);
+
+    // Same gameArea + kind; without a pack suffix this would reuse swiss segments.
+    const dublin = await fetchPreparedMeasuringLinearSegments(
+      switzerlandGameArea,
+      "international_border",
+      undefined,
+      "dublin",
+    );
+
+    expect(queryOverpass).not.toHaveBeenCalled();
+    expect(dublin.segments).toEqual([]);
+  });
+});
 
 describe("measuringLinearFeatures — bundled region pack fallthrough", () => {
   beforeEach(async () => {

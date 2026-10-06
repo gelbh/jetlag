@@ -93,4 +93,9 @@ describe("adminDivisionAvailability", () => {
     expect(adminBorderKindAvailability("admin4_border", counts)).toBe(true);
     expect(adminBorderKindAvailability("rail_station", counts)).toBe(true);
   });
+
+  it("hides international_border on metro packs via unsupportedBorders", () => {
+    expect(adminBorderKindAvailability("international_border", null, "dublin")).toBe(false);
+    expect(adminBorderKindAvailability("international_border", null, "switzerland")).toBe(true);
+  });
 });

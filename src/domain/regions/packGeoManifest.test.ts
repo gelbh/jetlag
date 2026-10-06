@@ -10,6 +10,8 @@ import {
   PACK_GEO_POINT_CATEGORIES,
   packGeoCoastlinePublicPath,
   packGeoCoastlineUrl,
+  packGeoInternationalBorderPublicPath,
+  packGeoInternationalBorderUrl,
   packGeoPoiPublicPath,
   packGeoPoiUrl,
   packGeoSeaLevelSeedPublicPath,
@@ -83,9 +85,14 @@ describe("packGeoManifest", () => {
     }
   });
 
-  it("builds coastline and sea-level seed urls", () => {
+  it("builds coastline, international_border, and sea-level seed urls", () => {
     expect(packGeoCoastlineUrl("dublin")).toBe("/geo/dublin/coastline.json");
+    expect(packGeoInternationalBorderUrl("switzerland")).toBe(
+      "/geo/switzerland/international_border.json",
+    );
     expect(packGeoSeaLevelSeedUrl("tokyo")).toBe("/geo/tokyo/sea_level_seed.json");
+    expect(isPackGeoSupported("switzerland", "international_border")).toBe(true);
+    expect(isPackGeoSupported("switzerland", "international_border", "museum")).toBe(false);
   });
 
   it("has on-disk coastline and sea_level_seed json for every pack", () => {
@@ -113,6 +120,31 @@ describe("packGeoManifest", () => {
       expect(Array.isArray(seaLevel.cells)).toBe(true);
       expect(Array.isArray(seaLevel.cellElevations)).toBe(true);
     }
+  });
+
+  it("has on-disk international_border json for every pack", () => {
+    for (const packId of PACK_GEO_PACK_IDS) {
+      const borderPath = resolve(publicRoot, packGeoInternationalBorderPublicPath(packId));
+      expect(existsSync(borderPath), borderPath).toBe(true);
+
+      const border = JSON.parse(readFileSync(borderPath, "utf8")) as {
+        source: string;
+        segments: unknown[];
+      };
+      expect(typeof border.source).toBe("string");
+      expect(Array.isArray(border.segments)).toBe(true);
+    }
+
+    const switzerlandPath = resolve(
+      publicRoot,
+      packGeoInternationalBorderPublicPath("switzerland"),
+    );
+    const switzerland = JSON.parse(readFileSync(switzerlandPath, "utf8")) as {
+      source: string;
+      segments: unknown[];
+    };
+    expect(switzerland.source).not.toBe("none");
+    expect(switzerland.segments.length).toBeGreaterThan(0);
   });
 
   it("has a reference bbox for every RegionPackId", () => {

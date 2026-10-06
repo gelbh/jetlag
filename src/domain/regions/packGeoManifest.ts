@@ -8,7 +8,7 @@ import {
 import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 
 /** Static asset kinds under `/geo/{packId}/`. */
-export type PackGeoAssetKind = "poi" | "coastline" | "sea_level_seed";
+export type PackGeoAssetKind = "poi" | "coastline" | "sea_level_seed" | "international_border";
 
 /**
  * Per-pack reference bounding boxes for attach scoring (v1 embed).
@@ -97,6 +97,7 @@ export function isPackGeoSupported(
       return category !== undefined && isPackGeoPointCategory(category);
     case "coastline":
     case "sea_level_seed":
+    case "international_border":
       return category === undefined;
     default: {
       const _exhaustive: never = kind;
@@ -116,6 +117,10 @@ export function packGeoCoastlineUrl(packId: RegionPackId): string {
   return `/geo/${packId}/coastline.json`;
 }
 
+export function packGeoInternationalBorderUrl(packId: RegionPackId): string {
+  return `/geo/${packId}/international_border.json`;
+}
+
 export function packGeoSeaLevelSeedUrl(packId: RegionPackId): string {
   return `/geo/${packId}/sea_level_seed.json`;
 }
@@ -130,6 +135,10 @@ export function packGeoPoiPublicPath(
 
 export function packGeoCoastlinePublicPath(packId: RegionPackId): string {
   return `geo/${packId}/coastline.json`;
+}
+
+export function packGeoInternationalBorderPublicPath(packId: RegionPackId): string {
+  return `geo/${packId}/international_border.json`;
 }
 
 export function packGeoSeaLevelSeedPublicPath(packId: RegionPackId): string {
