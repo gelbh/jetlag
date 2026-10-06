@@ -46,8 +46,8 @@ export function landmassCacheKey(gameArea: GameArea, regionPackId?: RegionPackId
 }
 
 export function measuringPlacesCacheKey(gameArea: GameArea, category: string): string {
-  // v2: cache Overpass-only; callers merge bundled POI outside the cache.
-  return geographicCacheKey(gameArea, `measuring:v2:${category}`);
+  // v3: Overpass parse attaches optional wikidataId for pack QID merge.
+  return geographicCacheKey(gameArea, `measuring:v3:${category}`);
 }
 
 export function tentaclePoisCacheKey(
@@ -55,7 +55,8 @@ export function tentaclePoisCacheKey(
   radiusMeters: number,
   categoryId: string,
 ): string {
-  return `tentacle:${categoryId}:${center[0]},${center[1]}:${radiusMeters}`;
+  // v2: Overpass parse attaches optional wikidataId for pack QID merge.
+  return `tentacle:v2:${categoryId}:${center[0]},${center[1]}:${radiusMeters}`;
 }
 
 export function staticTransitCacheKey(gameArea: GameArea): string {
