@@ -141,7 +141,8 @@ function matchingAnsweredTarget(ctx: PlacementCameraContext): CameraTarget | nul
 }
 
 function computePinTarget(ctx: PlacementCameraContext): CameraTarget | null {
-  const point = findMarker(ctx.overlays, "pin-draft");
+  // Prefer draft over sticky overlays so re-pin frames the new point before async rebuild.
+  const point = ctx.draft.pin.point ?? findMarker(ctx.overlays, "pin-draft");
   if (!point) {
     return null;
   }
@@ -169,8 +170,14 @@ function computeRadarTarget(ctx: PlacementCameraContext): CameraTarget | null {
     return answeredEliminationTarget(ctx);
   }
 
-  const circle = findCircle(ctx.overlays, "radar-draft-range");
-  const center = findMarker(ctx.overlays, "radar-draft-center");
+  const draftCenter = ctx.draft.radar.center;
+  const draftRadius = ctx.draft.radar.radiusMeters;
+  const overlayCircle = findCircle(ctx.overlays, "radar-draft-range");
+  const circle =
+    draftCenter && draftRadius > 0
+      ? { center: draftCenter, radiusMeters: draftRadius }
+      : overlayCircle;
+  const center = draftCenter ?? findMarker(ctx.overlays, "radar-draft-center");
 
   if (circle) {
     return buildTarget(ctx, boundsForRadarCircle(circle.center, circle.radiusMeters), {
@@ -192,8 +199,12 @@ function computeTentacleTarget(ctx: PlacementCameraContext): CameraTarget | null
     return answeredEliminationTarget(ctx);
   }
 
-  const center = findMarker(ctx.overlays, "tentacle-draft-center");
-  const circle = findCircle(ctx.overlays, "tentacle-draft-range");
+  const center = ctx.draft.tentacle.center ?? findMarker(ctx.overlays, "tentacle-draft-center");
+  const overlayCircle = findCircle(ctx.overlays, "tentacle-draft-range");
+  const circle =
+    center && ctx.draft.tentacle.searchRadiusMeters > 0
+      ? { center, radiusMeters: ctx.draft.tentacle.searchRadiusMeters }
+      : overlayCircle;
 
   if (!center) {
     return null;
@@ -273,8 +284,10 @@ function computeMeasuringTarget(ctx: PlacementCameraContext): CameraTarget | nul
     return answeredEliminationTarget(ctx);
   }
 
-  const seeker = findMarker(ctx.overlays, "measuring-draft-seeker");
+  const seeker =
+    ctx.draft.measuring.seekerPoint ?? findMarker(ctx.overlays, "measuring-draft-seeker");
   const target =
+    ctx.draft.measuring.targetPoint ??
     findMarker(ctx.overlays, "measuring-draft-target") ??
     findMarker(ctx.overlays, "measuring-draft-place-1");
 
@@ -304,8 +317,10 @@ function computeMatchingTarget(ctx: PlacementCameraContext): CameraTarget | null
     return matchingAnsweredTarget(ctx);
   }
 
-  const seeker = findMarker(ctx.overlays, "matching-draft-seeker");
-  const nearest = findMarker(ctx.overlays, "matching-draft-nearest");
+  const seeker =
+    ctx.draft.matching.seekerPoint ?? findMarker(ctx.overlays, "matching-draft-seeker");
+  const nearest =
+    ctx.draft.matching.nearestFeaturePoint ?? findMarker(ctx.overlays, "matching-draft-nearest");
 
   if (seeker && nearest) {
     return buildTarget(ctx, boundsForTwoPoints(seeker, nearest));

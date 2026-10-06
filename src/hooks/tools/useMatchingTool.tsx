@@ -75,6 +75,7 @@ export function useMatchingTool({
   canSubmitQuestion = true,
 }: UseMatchingToolParams) {
   const wizardStepRef = useRef("place");
+  const submittingRef = useRef(false);
   const finishPlacementRef = useRef(finishPlacement);
   const mapStyle = useMapStore((state) => state.mapStyle);
   useEffect(() => {
@@ -369,7 +370,8 @@ export function useMatchingTool({
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
-      if (!active || wizardStepRef.current !== "place") {
+      const wizardStep = wizardStepRef.current;
+      if (!active || submittingRef.current || (wizardStep !== "place" && wizardStep !== "ask")) {
         return false;
       }
 
@@ -386,13 +388,23 @@ export function useMatchingTool({
             })[0]
           : null;
 
+      setMatchingAnswerSynced(null);
       setMatchingSeekerAnchor(tapHit?.point ?? point);
       return true;
     },
-    [active, matchingCategoryChosen, matchingCategoryId, setMatchingSeekerAnchor],
+    [
+      active,
+      matchingCategoryChosen,
+      matchingCategoryId,
+      setMatchingAnswerSynced,
+      setMatchingSeekerAnchor,
+    ],
   );
 
   const handleGps = useCallback(async () => {
+    if (submittingRef.current) {
+      return;
+    }
     setMatchingError(null);
 
     try {
@@ -403,11 +415,18 @@ export function useMatchingTool({
         return;
       }
 
+      setMatchingAnswerSynced(null);
       setMatchingSeekerAnchor(point);
     } catch (error) {
       setMatchingError(error instanceof Error ? error.message : "GPS location unavailable.");
     }
-  }, [ensurePointInGameArea, refreshGps, setMatchingError, setMatchingSeekerAnchor]);
+  }, [
+    ensurePointInGameArea,
+    refreshGps,
+    setMatchingAnswerSynced,
+    setMatchingError,
+    setMatchingSeekerAnchor,
+  ]);
 
   const handleGpsRef = useRef(handleGps);
 
@@ -482,6 +501,9 @@ export function useMatchingTool({
       await commitMatching(buildCommitInput());
     },
   });
+  useEffect(() => {
+    submittingRef.current = session.phase === "submitting";
+  }, [session.phase]);
 
   const commit = () => session.submit();
 
@@ -702,6 +724,7 @@ export function useMatchingTool({
         costLabel={catalog.costLabel}
         phase={placementPhase}
         onUseGps={() => void handleGps()}
+        gpsLoading={gpsLoading}
         error={placementError}
         nearestPlaceName={matchingNearestFeatureName}
         awaitHiderAnswer={awaitHiderAnswer}
