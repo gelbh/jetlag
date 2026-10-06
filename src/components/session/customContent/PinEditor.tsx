@@ -107,12 +107,10 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
           label="Name"
           value={pinDraft.name}
           disabled={disabled}
-          onChange={(event) =>
-            setPinDraft((current) => ({
-              ...current,
-              name: event.currentTarget.value,
-            }))
-          }
+          onChange={(event) => {
+            const name = event.currentTarget.value;
+            setPinDraft((current) => ({ ...current, name }));
+          }}
           styles={insetTextInputStyles}
         />
         <InsetHairline insetStart="1rem" />
@@ -121,12 +119,10 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
           value={pinDraft.lat}
           disabled={disabled}
           inputMode="decimal"
-          onChange={(event) =>
-            setPinDraft((current) => ({
-              ...current,
-              lat: event.currentTarget.value,
-            }))
-          }
+          onChange={(event) => {
+            const lat = event.currentTarget.value;
+            setPinDraft((current) => ({ ...current, lat }));
+          }}
           styles={insetTextInputStyles}
         />
         <InsetHairline insetStart="1rem" />
@@ -135,12 +131,10 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
           value={pinDraft.lng}
           disabled={disabled}
           inputMode="decimal"
-          onChange={(event) =>
-            setPinDraft((current) => ({
-              ...current,
-              lng: event.currentTarget.value,
-            }))
-          }
+          onChange={(event) => {
+            const lng = event.currentTarget.value;
+            setPinDraft((current) => ({ ...current, lng }));
+          }}
           styles={insetTextInputStyles}
         />
       </InsetGroup>

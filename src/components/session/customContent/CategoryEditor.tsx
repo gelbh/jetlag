@@ -111,12 +111,10 @@ export function CategoryEditor({ value, onChange, disabled }: CategoryEditorProp
           label="Label"
           value={categoryDraft.label}
           disabled={disabled}
-          onChange={(event) =>
-            setCategoryDraft((current) => ({
-              ...current,
-              label: event.currentTarget.value,
-            }))
-          }
+          onChange={(event) => {
+            const label = event.currentTarget.value;
+            setCategoryDraft((current) => ({ ...current, label }));
+          }}
           styles={insetTextInputStyles}
         />
         <InsetHairline insetStart="1rem" />
@@ -125,12 +123,10 @@ export function CategoryEditor({ value, onChange, disabled }: CategoryEditorProp
           value={categoryDraft.promptNoun}
           disabled={disabled}
           placeholder="police station"
-          onChange={(event) =>
-            setCategoryDraft((current) => ({
-              ...current,
-              promptNoun: event.currentTarget.value,
-            }))
-          }
+          onChange={(event) => {
+            const promptNoun = event.currentTarget.value;
+            setCategoryDraft((current) => ({ ...current, promptNoun }));
+          }}
           styles={insetTextInputStyles}
         />
         <InsetHairline insetStart="1rem" />
@@ -140,12 +136,10 @@ export function CategoryEditor({ value, onChange, disabled }: CategoryEditorProp
           disabled={disabled}
           rows={3}
           placeholder="[amenity=police]"
-          onChange={(event) =>
-            setCategoryDraft((current) => ({
-              ...current,
-              selectors: event.currentTarget.value,
-            }))
-          }
+          onChange={(event) => {
+            const selectors = event.currentTarget.value;
+            setCategoryDraft((current) => ({ ...current, selectors }));
+          }}
           styles={insetTextareaStyles}
         />
       </InsetGroup>
