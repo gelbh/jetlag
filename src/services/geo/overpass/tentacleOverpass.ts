@@ -16,6 +16,7 @@ import type {
 } from "@/domain/session/catalog/sessionCustomContent";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached, tentaclePoisCacheKey } from "../cache";
+import { parseWikidataId } from "../parseWikidataId";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
 import {
   mergeOverpassElementPayloads,
@@ -179,12 +180,15 @@ export function parseTentaclePois(
           ? `${element.tags!.name!.trim()} (${element.tags!.ref!.trim()})`
           : element.tags!.name!.trim();
 
+      const wikidataId = parseWikidataId(element.tags);
+
       return {
         id,
         name: displayName,
         lat,
         lng,
         category,
+        ...(wikidataId ? { wikidataId } : {}),
       } satisfies TentaclePoi;
     })
     .filter((poi) => poi !== null) as TentaclePoi[];
