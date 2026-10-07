@@ -223,14 +223,14 @@ const tentacleCatalogHelpers = buildCatalogHelpers<TentacleExtendedCategoryId>({
 });
 
 export function usedTentacleCategoryIds(
-  annotations: AnnotationRecord[],
+  annotations: readonly AnnotationRecord[],
   exceptAnnotationId?: string,
 ): Set<TentacleExtendedCategoryId> {
   return tentacleCatalogHelpers.usedOptionsFromAnnotations(annotations, exceptAnnotationId);
 }
 
 export function usedTentacleCategoryIdsForSession(
-  annotations: AnnotationRecord[],
+  annotations: readonly AnnotationRecord[],
   pendingQuestions: readonly PendingQuestionRecord[],
   exceptAnnotationId?: string,
 ): Set<TentacleExtendedCategoryId> {

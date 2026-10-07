@@ -1,4 +1,5 @@
 import type { PremiumProductKey } from "@/domain/billing/premiumProducts";
+import type { PowerUpId } from "@/domain/boardEconomy/types";
 import type { SessionTier } from "@/domain/map/annotations";
 import type { MapTool } from "@/domain/map/mapToolTypes";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
@@ -13,6 +14,7 @@ export const ANALYTICS_EVENTS = {
   premium_checkout_failed: "premium_checkout_failed",
   premium_purchase_completed: "premium_purchase_completed",
   map_tool_used: "map_tool_used",
+  hider_card_played: "hider_card_played",
   analytics_consent_accepted: "analytics_consent_accepted",
 } as const;
 
@@ -57,6 +59,9 @@ export type AnalyticsEventProps = {
   };
   map_tool_used: {
     tool: Exclude<MapTool, "none">;
+  };
+  hider_card_played: {
+    card: PowerUpId | "curse" | "move";
   };
   analytics_consent_accepted: {
     surface: "banner";

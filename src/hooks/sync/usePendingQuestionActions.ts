@@ -2,6 +2,7 @@ import type { Feature, LineString } from "geojson";
 import { useCallback, useRef } from "react";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { buildThermometerLineGeometry } from "@/domain/questions";
+import { VETO_ANSWER, VETO_SELECTED_REPLY } from "@/domain/questions/questionPowerUps";
 import {
   createMessageId,
   createPendingQuestionId,
@@ -30,6 +31,8 @@ import {
   isAnnotationQuestionTool,
 } from "@/services/session/emitSessionActivity";
 
+type QuestionCancelCard = "veto" | "randomize";
+
 export interface SubmitPendingQuestionInput {
   sessionId: string;
   senderUid: string;
@@ -50,6 +53,41 @@ export interface SubmitPendingQuestionInput {
  * write ledger instead of throwing to the caller.
  */
 export const SUBMIT_DOUBLE_TAP_COOLDOWN_MS = 750;
+
+/** Cancel a pending question and its chat row, and post a notice in one batch. */
+function commitQuestionCancel(options: {
+  sessionId: string;
+  pendingQuestionId: string;
+  messageId: string;
+  senderUid: string;
+  senderRole: PlayerRole;
+  notice: string;
+  card?: QuestionCancelCard;
+}): { acknowledged: Promise<void> } {
+  const isVeto = options.card === "veto";
+  return commitWrite("question.cancel", () =>
+    writePendingQuestionUpdateBatch(options.sessionId, {
+      questionId: options.pendingQuestionId,
+      questionPatch: isVeto
+        ? { status: "cancelled", answer: VETO_ANSWER }
+        : { status: "cancelled" },
+      gameMessage: {
+        id: options.messageId,
+        patch: isVeto
+          ? { status: "cancelled", selectedReply: VETO_SELECTED_REPLY }
+          : { status: "cancelled" },
+      },
+      newMessage: buildGameSystemMessage(
+        options.sessionId,
+        options.senderUid,
+        options.senderRole,
+        options.notice,
+        createMessageId(),
+        serverNowIso(),
+      ),
+    }),
+  );
+}
 
 export function usePendingQuestionActions() {
   const lastSubmitAtRef = useRef(Number.NEGATIVE_INFINITY);
@@ -270,6 +308,19 @@ export function usePendingQuestionActions() {
     [],
   );
 
+  /** Hider veto / randomize: closes the question with no card draw; veto sticks answer. */
+  const cancelPendingQuestionWithCard = useCallback(
+    (options: {
+      sessionId: string;
+      pendingQuestionId: string;
+      messageId: string;
+      senderUid: string;
+      notice: string;
+      card?: QuestionCancelCard;
+    }) => commitQuestionCancel({ ...options, senderRole: "hider" }),
+    [],
+  );
+
   const postSystemMessage = useCallback(
     (sessionId: string, senderUid: string, senderRole: PlayerRole, text: string): void => {
       commitWrite("system.message", () =>
@@ -346,21 +397,10 @@ export function usePendingQuestionActions() {
         return;
       }
 
-      commitWrite("question.cancel", () =>
-        writePendingQuestionUpdateBatch(options.sessionId, {
-          questionId: options.pendingQuestionId,
-          questionPatch: { status: "cancelled" },
-          gameMessage: { id: options.messageId, patch: { status: "cancelled" } },
-          newMessage: buildGameSystemMessage(
-            options.sessionId,
-            options.senderUid,
-            options.senderRole,
-            "Expired question dismissed. You can ask again.",
-            createMessageId(),
-            serverNowIso(),
-          ),
-        }),
-      );
+      commitQuestionCancel({
+        ...options,
+        notice: "Expired question dismissed. You can ask again.",
+      });
       emitQuestionCancelledActivity({
         sessionId: options.sessionId,
         toolType: options.toolType,
@@ -376,6 +416,7 @@ export function usePendingQuestionActions() {
     submitPendingQuestion,
     completeThermometerWalk,
     answerPendingQuestion,
+    cancelPendingQuestionWithCard,
     postSystemMessage,
     cancelThermometerWalk,
     dismissExpiredPendingQuestion,

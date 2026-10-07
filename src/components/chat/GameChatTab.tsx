@@ -23,7 +23,7 @@ import { serverNow } from "../../services/core/time/serverClock";
 import { HudToolIcon } from "../map/icons/ToolIcons";
 import { InlineError } from "../ui/banners/InlineError";
 import { EmptyState } from "../ui/feedback/EmptyState";
-import { HiderPendingQuestionAnswer } from "./HiderPendingQuestionAnswer";
+import { HiderPendingQuestionAnswer, type HiderQuestionCards } from "./HiderPendingQuestionAnswer";
 import { PendingSyncBadge } from "./PendingSyncBadge";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 
@@ -48,6 +48,7 @@ interface GameChatTabProps {
     deadlineExpired?: boolean,
   ) => Promise<void>;
   onDismissExpiredQuestion?: (pendingQuestionId: string, messageId: string) => Promise<void>;
+  questionCards?: HiderQuestionCards;
   readOnly?: boolean;
 }
 
@@ -152,6 +153,7 @@ export function GameChatTab({
   answeredPendingIds,
   onAnswerQuestion,
   onDismissExpiredQuestion,
+  questionCards,
   readOnly = false,
 }: GameChatTabProps) {
   const [nowMs, setNowMs] = useState(0);
@@ -276,6 +278,7 @@ export function GameChatTab({
                       answeredPendingIds?.has(message.pendingQuestionId) === true)
                   }
                   onAnswerQuestion={onAnswerQuestion}
+                  questionCards={questionCards}
                 />
               ) : showAnswerBox ? (
                 <Group

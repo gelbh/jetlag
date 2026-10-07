@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { ANALYTICS_EVENTS, track } from "@/services/core/analytics/analytics";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import {
   advanceUntilInteractivePick,
@@ -7,11 +8,14 @@ import {
   continueSequentialRewardPick,
   discardFromHand,
   enforceHandLimit,
+  heldQuestionPowerUps,
   markCurseCleared,
   playCurse,
   playDiscardDrawPowerUp,
   playExpandHand,
   playMoveCard,
+  playQuestionPowerUp,
+  type QuestionPowerUpId,
   rewardCyclesFromPendingCost,
 } from "../../domain/boardEconomy";
 import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
@@ -84,6 +88,21 @@ export function useBoardEconomy(params: {
     [enabled, sessionId],
   );
 
+  /** Engine plays return the same state when the card is not playable. */
+  const persistPlay = useCallback(
+    (current: BoardEconomyState, next: BoardEconomyState, playedInstanceId: string) => {
+      const played = current.hand.find((card) => card.instanceId === playedInstanceId);
+      if (next === current || !played || played.def.kind === "timeBonus") {
+        return;
+      }
+      persist(next);
+      track(ANALYTICS_EVENTS.hider_card_played, {
+        card: played.def.kind === "powerUp" ? played.def.id : played.def.kind,
+      });
+    },
+    [persist],
+  );
+
   const applyAnswerReward = useCallback(
     async (
       toolType: PendingQuestionToolType,
@@ -115,6 +134,24 @@ export function useBoardEconomy(params: {
     [enabled, persist, roundSeed, sessionId],
   );
 
+  /** Reads the stored state: callers play this after the question write lands. */
+  const playQuestionCard = useCallback(
+    async (powerUpId: QuestionPowerUpId): Promise<void> => {
+      if (!enabled || !sessionId || !roundSeed) {
+        return;
+      }
+      const current = await ensureBoardEconomyState(sessionId, roundSeed);
+      const card = current.hand.find(
+        (entry) => entry.def.kind === "powerUp" && entry.def.id === powerUpId,
+      );
+      if (!card || current.pendingPick) {
+        return;
+      }
+      persistPlay(current, playQuestionPowerUp(current, powerUpId), card.instanceId);
+    },
+    [enabled, persistPlay, roundSeed, sessionId],
+  );
+
   const confirmDrawPick = useCallback(
     async (keepInstanceIds: readonly string[]): Promise<boolean> => {
       if (!state?.pendingPick) {
@@ -144,9 +181,9 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persist(playExpandHand(state, instanceId, powerUpId));
+      persistPlay(state, playExpandHand(state, instanceId, powerUpId), instanceId);
     },
-    [persist, state],
+    [persistPlay, state],
   );
 
   const runDiscardDraw = useCallback(
@@ -154,9 +191,13 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persist(playDiscardDrawPowerUp(state, powerUpInstanceId, discardInstanceIds, drawN));
+      persistPlay(
+        state,
+        playDiscardDrawPowerUp(state, powerUpInstanceId, discardInstanceIds, drawN),
+        powerUpInstanceId,
+      );
     },
-    [persist, state],
+    [persistPlay, state],
   );
 
   const runMove = useCallback(
@@ -164,9 +205,9 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persist(playMoveCard(state, moveInstanceId));
+      persistPlay(state, playMoveCard(state, moveInstanceId), moveInstanceId);
     },
-    [persist, state],
+    [persistPlay, state],
   );
 
   const runPlayCurse = useCallback(
@@ -174,9 +215,13 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persist(playCurse(state, curseInstanceId, new Date().toISOString()));
+      persistPlay(
+        state,
+        playCurse(state, curseInstanceId, new Date().toISOString()),
+        curseInstanceId,
+      );
     },
-    [persist, state],
+    [persistPlay, state],
   );
 
   const runClearCurse = useCallback(
@@ -194,7 +239,9 @@ export function useBoardEconomy(params: {
     ready,
     pendingDraw: state?.pendingPick ?? null,
     mustDiscard: state ? enforceHandLimit(state.hand, state.handLimit).mustDiscard : 0,
+    heldQuestionCards: state ? heldQuestionPowerUps(state.hand) : [],
     applyAnswerReward,
+    playQuestionCard,
     confirmDrawPick,
     discardCards,
     runExpandHand,

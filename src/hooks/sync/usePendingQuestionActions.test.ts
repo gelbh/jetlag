@@ -309,4 +309,57 @@ describe("usePendingQuestionActions", () => {
       createdByUid: "seeker-1",
     });
   });
+
+  it("veto cancel writes sticky answer and selectedReply in one batch", () => {
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    act(() => {
+      result.current.cancelPendingQuestionWithCard({
+        sessionId: "session-1",
+        pendingQuestionId: "pq-1",
+        messageId: "msg-1",
+        senderUid: "hider-1",
+        notice: "Hider played Veto.",
+        card: "veto",
+      });
+    });
+
+    expect(commitWriteMock).toHaveBeenCalledWith("question.cancel", expect.any(Function));
+    expect(firestoreMocks.writePendingQuestionUpdateBatch).toHaveBeenCalledWith("session-1", {
+      questionId: "pq-1",
+      questionPatch: { status: "cancelled", answer: { kind: "veto" } },
+      gameMessage: {
+        id: "msg-1",
+        patch: { status: "cancelled", selectedReply: "veto" },
+      },
+      newMessage: expect.objectContaining({
+        kind: "system",
+        senderUid: "hider-1",
+        senderRole: "hider",
+        text: "Hider played Veto.",
+      }),
+    });
+  });
+
+  it("randomize cancel stays status-only", () => {
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    act(() => {
+      result.current.cancelPendingQuestionWithCard({
+        sessionId: "session-1",
+        pendingQuestionId: "pq-1",
+        messageId: "msg-1",
+        senderUid: "hider-1",
+        notice: "Hider played Randomize.",
+        card: "randomize",
+      });
+    });
+
+    expect(firestoreMocks.writePendingQuestionUpdateBatch).toHaveBeenCalledWith("session-1", {
+      questionId: "pq-1",
+      questionPatch: { status: "cancelled" },
+      gameMessage: { id: "msg-1", patch: { status: "cancelled" } },
+      newMessage: expect.objectContaining({ text: "Hider played Randomize." }),
+    });
+  });
 });

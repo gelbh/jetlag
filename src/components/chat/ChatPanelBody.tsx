@@ -9,6 +9,7 @@ import type {
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { GameChatTab } from "./GameChatTab";
+import type { HiderQuestionCards } from "./HiderPendingQuestionAnswer";
 import { SocialChatTab } from "./SocialChatTab";
 
 interface ChatPanelBodyProps {
@@ -33,6 +34,7 @@ interface ChatPanelBodyProps {
     deadlineExpired?: boolean,
   ) => Promise<void>;
   onDismissExpiredQuestion?: (pendingQuestionId: string, messageId: string) => Promise<void>;
+  questionCards?: HiderQuestionCards;
   readOnly?: boolean;
 }
 
@@ -71,6 +73,7 @@ export function ChatPanelBody({
   answeredPendingIds,
   onAnswerQuestion,
   onDismissExpiredQuestion,
+  questionCards,
   readOnly = false,
 }: ChatPanelBodyProps) {
   const [tab, setTab] = useState<"social" | "game">("game");
@@ -135,6 +138,7 @@ export function ChatPanelBody({
               answeredPendingIds={answeredPendingIds}
               onAnswerQuestion={onAnswerQuestion}
               onDismissExpiredQuestion={onDismissExpiredQuestion}
+              questionCards={questionCards}
               readOnly={readOnly}
             />
           </Box>

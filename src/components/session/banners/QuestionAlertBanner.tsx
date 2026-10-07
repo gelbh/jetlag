@@ -28,6 +28,7 @@ interface QuestionAlertBannerProps {
   answerSubmitting?: boolean;
   answeredPendingIds?: ReadonlySet<string>;
   onAnswerQuestion: HiderPendingQuestionAnswerProps["onAnswerQuestion"];
+  questionCards?: HiderPendingQuestionAnswerProps["questionCards"];
 }
 
 export function QuestionAlertBanner({
@@ -42,6 +43,7 @@ export function QuestionAlertBanner({
   answerSubmitting = false,
   answeredPendingIds,
   onAnswerQuestion,
+  questionCards,
 }: QuestionAlertBannerProps) {
   // Server clock: deadline anchors are server-stamped, and expiry marks answers late.
   const [nowMs, setNowMs] = useState(() => serverNow());
@@ -90,6 +92,7 @@ export function QuestionAlertBanner({
             nowMs={nowMs}
             disabled={answerSubmitting || answeredPendingIds?.has(target.pending.id) === true}
             onAnswerQuestion={onAnswerQuestion}
+            questionCards={questionCards}
           />
         </MapFloatSurface>
       ) : null}

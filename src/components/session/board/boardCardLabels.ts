@@ -1,8 +1,8 @@
-import type { BoardCardInstance } from "../../../domain/boardEconomy";
+import type { BoardCardInstance, PowerUpId } from "../../../domain/boardEconomy";
 import { timeBonusMinutesForGameSize } from "../../../domain/boardEconomy";
 import type { GameSize } from "../../../domain/session/size/gameSize";
 
-const POWER_UP_LABELS: Record<string, string> = {
+const POWER_UP_LABELS: Record<PowerUpId, string> = {
   veto: "Veto",
   randomize: "Randomize",
   duplicate: "Duplicate",
@@ -13,12 +13,16 @@ const POWER_UP_LABELS: Record<string, string> = {
   expandHand2: "Draw 1, expand hand +2",
 };
 
+export function powerUpLabel(id: PowerUpId): string {
+  return POWER_UP_LABELS[id] ?? id;
+}
+
 export function boardCardLabel(card: BoardCardInstance, gameSize: GameSize): string {
   switch (card.def.kind) {
     case "timeBonus":
       return `Time +${timeBonusMinutesForGameSize(card.def.durations, gameSize)} min`;
     case "powerUp":
-      return POWER_UP_LABELS[card.def.id] ?? card.def.id;
+      return powerUpLabel(card.def.id);
     case "curse":
       return `Curse of ${card.def.id.replace(/-/g, " ")}`;
     case "move":
