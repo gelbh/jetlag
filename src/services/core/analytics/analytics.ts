@@ -171,6 +171,7 @@ export function initPosthogCore(): void {
       capture_pageview: false,
       capture_pageleave: true,
       capture_performance: true,
+      // Recording stays off until Accept calls startSessionRecording; options below apply then.
       disable_session_recording: true,
       disable_external_dependency_loading: true,
       disable_surveys: true,
@@ -181,6 +182,8 @@ export function initPosthogCore(): void {
         maskTextSelector: "*",
         blockSelector: "img, video, audio, picture, source",
         sampleRate: 0.1,
+        // Pin off so PostHog remote config cannot enable MapLibre canvas frames.
+        captureCanvas: { recordCanvas: false },
       },
     });
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
