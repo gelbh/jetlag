@@ -10,6 +10,7 @@
   <a href="https://jetlag.gelbhart.dev"><img src="https://img.shields.io/website?url=https%3A%2F%2Fjetlag.gelbhart.dev&label=jetlag.gelbhart.dev&color=0E132C" alt="Live app" /></a>
   <a href="https://github.com/gelbh/jetlag/releases"><img src="https://img.shields.io/github/v/release/gelbh/jetlag?display_name=tag&sort=semver&color=C55B40" alt="Latest release" /></a>
   <a href="https://github.com/gelbh/jetlag"><img src="https://img.shields.io/github/stars/gelbh/jetlag?style=flat-square&color=C55B40" alt="GitHub stars" /></a>
+  <a href="https://github.com/gelbh/jetlag/security/policy"><img src="https://img.shields.io/github/security-policy/exists/gelbh/jetlag?label=security&color=0E132C" alt="Security policy" /></a>
 </p>
 
 Seekers ask questions on the live map. Hiders answer, set hiding zones, and watch the search unfold. Radar, zones, pins, and question tools stay in sync across the session.
