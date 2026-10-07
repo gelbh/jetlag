@@ -46,7 +46,11 @@ import {
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
-import { randomizedQuestionNotice, VETO_NOTICE } from "../domain/questions/randomizeQuestion";
+import {
+  randomizedQuestionNotice,
+  randomizeExcludeLabelsForPending,
+  VETO_NOTICE,
+} from "../domain/questions/randomizeQuestion";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import {
   hiderStationCenter,
@@ -484,15 +488,24 @@ export function HiderMapScreen() {
       return;
     }
     setChatAnswerError(null);
+    const sessionRules = session ?? DEFAULT_SESSION_RULES;
     const { acknowledged } = cancelPendingQuestionWithCard({
       sessionId,
       pendingQuestionId,
       messageId,
       senderUid: uid,
+      card,
       notice:
         card === "veto"
           ? VETO_NOTICE
-          : randomizedQuestionNotice(pending.toolType, session ?? DEFAULT_SESSION_RULES),
+          : randomizedQuestionNotice(pending.toolType, sessionRules, {
+              exclude: randomizeExcludeLabelsForPending(
+                pending,
+                sessionRules,
+                annotations,
+                pendingQuestions,
+              ),
+            }),
     });
     // Same as answer rewards: the card leaves the hand only once the server accepts.
     acknowledged.then(

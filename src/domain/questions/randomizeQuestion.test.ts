@@ -1,9 +1,26 @@
 import { describe, expect, it } from "vitest";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   pickRandomizeOptionLabel,
   questionOptionLabelsForTool,
   randomizedQuestionNotice,
+  randomizeExcludeLabelsForPending,
 } from "./randomizeQuestion";
+
+function matchingPending(
+  id: string,
+  category: string,
+  status: PendingQuestionRecord["status"] = "pending",
+  answer?: unknown,
+): PendingQuestionRecord {
+  return {
+    id,
+    toolType: "matching",
+    status,
+    answer,
+    placement: { metadata: { matchingCategory: category } },
+  } as unknown as PendingQuestionRecord;
+}
 
 describe("pickRandomizeOptionLabel", () => {
   it("excludes current and used labels from the pool", () => {
@@ -74,5 +91,24 @@ describe("randomizedQuestionNotice", () => {
     for (const label of [current, used]) {
       expect(notice).not.toContain(`: ${label}.`);
     }
+  });
+});
+
+describe("randomizeExcludeLabelsForPending", () => {
+  it("excludes current option and sticky-used veto labels for the tool", () => {
+    const session = { gameSize: "small" as const };
+    const current = matchingPending("pq-current", "landmass");
+    const vetoed = matchingPending("pq-veto", "park", "cancelled", { kind: "veto" });
+    const exclude = randomizeExcludeLabelsForPending(current, session, [], [current, vetoed]);
+
+    expect(exclude.has("Landmass")).toBe(true);
+    expect(exclude.has("Park")).toBe(true);
+
+    const notice = randomizedQuestionNotice("matching", session, {
+      exclude,
+      random: () => 0,
+    });
+    expect(notice).not.toContain(": Landmass.");
+    expect(notice).not.toContain(": Park.");
   });
 });

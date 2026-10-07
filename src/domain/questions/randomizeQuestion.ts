@@ -1,8 +1,14 @@
+import type { AnnotationRecord } from "../map/annotations";
 import { milesToMeters } from "../map/distance";
-import type { PendingQuestionToolType } from "../session/activity/sessionChat";
+import type {
+  PendingQuestionRecord,
+  PendingQuestionToolType,
+} from "../session/activity/sessionChat";
 import {
   availableMatchingCategories,
   availableMeasuringCatalog,
+  resolveAvailableMatchingCategory,
+  resolveAvailableMeasuringOption,
 } from "../session/catalog/sessionCatalogAvailability";
 import { sessionDistanceUnit } from "../session/meta/sessionDistanceUnit";
 import {
@@ -11,10 +17,34 @@ import {
   type SessionRulesInput,
   sessionGameSize,
 } from "../session/rules";
-import { photoCategoriesForGameSize, photoCategoryLabelForUnit } from "./photoQuestions";
-import { radarDistanceOptionLabel } from "./radarQuestions";
-import { tentacleCategoriesForSession } from "./tentacleQuestions";
-import { thermometerDistanceLabel } from "./thermometerQuestions";
+import {
+  readMatchingCategoryFromPending,
+  usedMatchingCategoryIdsForSession,
+} from "./matchingQuestions";
+import {
+  readMeasuringFromKindFromPending,
+  usedMeasuringFromKindsForSession,
+} from "./measuringQuestions";
+import {
+  photoCategoriesForGameSize,
+  photoCategoryLabelForUnit,
+  readPhotoCategoryId,
+  usedPhotoCategoryIds,
+} from "./photoQuestions";
+import {
+  radarDistanceOptionForPending,
+  radarDistanceOptionLabel,
+  usedRadarDistanceOptionsForSession,
+} from "./radarQuestions";
+import {
+  readTentacleCategoryFromPending,
+  tentacleCategoriesForSession,
+  usedTentacleCategoryIdsForSession,
+} from "./tentacleQuestions";
+import {
+  thermometerDistanceLabel,
+  usedThermometerDistanceOptionsForSession,
+} from "./thermometerQuestions";
 
 /** Questions the seekers could ask with this tool in this session. */
 export function questionOptionLabelsForTool(
@@ -44,6 +74,139 @@ export function questionOptionLabelsForTool(
     default:
       return [];
   }
+}
+
+/** Catalog label for one pending question option, or null when unknown. */
+export function questionOptionLabelForPending(
+  pending: PendingQuestionRecord,
+  session: SessionRulesInput,
+): string | null {
+  const unit = sessionDistanceUnit(session);
+  switch (pending.toolType) {
+    case "matching": {
+      const id = readMatchingCategoryFromPending(pending);
+      return id ? (resolveAvailableMatchingCategory(id, session)?.label ?? null) : null;
+    }
+    case "measuring": {
+      const id = readMeasuringFromKindFromPending(pending);
+      return id ? (resolveAvailableMeasuringOption(id, session)?.label ?? null) : null;
+    }
+    case "radar": {
+      const key = radarDistanceOptionForPending(pending, unit);
+      if (key === null || key === "choose") {
+        return null;
+      }
+      const miles = unit === "metric" ? Number(key) / milesToMeters(1) : Number(key);
+      return radarDistanceOptionLabel(miles, unit);
+    }
+    case "thermometer": {
+      const meters = pending.placement.metadata.thermometerDistanceMeters;
+      return typeof meters === "number" ? thermometerDistanceLabel(meters, unit) : null;
+    }
+    case "tentacle": {
+      const id = readTentacleCategoryFromPending(pending);
+      if (!id) {
+        return null;
+      }
+      return (
+        tentacleCategoriesForSession(session).find((category) => category.id === id)?.label ?? null
+      );
+    }
+    case "photo": {
+      const id = readPhotoCategoryId(pending);
+      return id ? photoCategoryLabelForUnit(id, unit) : null;
+    }
+    default:
+      return null;
+  }
+}
+
+/** Session-used option labels for a tool (annotations + sticky/open pending). */
+export function usedQuestionOptionLabelsForTool(
+  toolType: PendingQuestionToolType,
+  session: SessionRulesInput,
+  annotations: readonly AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[],
+): Set<string> {
+  const unit = sessionDistanceUnit(session);
+  const labels = new Set<string>();
+
+  switch (toolType) {
+    case "matching": {
+      for (const id of usedMatchingCategoryIdsForSession(annotations, pendingQuestions)) {
+        const label = resolveAvailableMatchingCategory(id, session)?.label;
+        if (label) {
+          labels.add(label);
+        }
+      }
+      return labels;
+    }
+    case "measuring": {
+      for (const id of usedMeasuringFromKindsForSession(annotations, pendingQuestions)) {
+        const label = resolveAvailableMeasuringOption(id, session)?.label;
+        if (label) {
+          labels.add(label);
+        }
+      }
+      return labels;
+    }
+    case "radar": {
+      for (const key of usedRadarDistanceOptionsForSession(annotations, pendingQuestions, unit)) {
+        if (key === "choose") {
+          continue;
+        }
+        const miles = unit === "metric" ? Number(key) / milesToMeters(1) : Number(key);
+        labels.add(radarDistanceOptionLabel(miles, unit));
+      }
+      return labels;
+    }
+    case "thermometer": {
+      for (const miles of usedThermometerDistanceOptionsForSession(annotations, pendingQuestions)) {
+        labels.add(thermometerDistanceLabel(milesToMeters(miles), unit));
+      }
+      return labels;
+    }
+    case "tentacle": {
+      const catalog = tentacleCategoriesForSession(session);
+      for (const id of usedTentacleCategoryIdsForSession(annotations, pendingQuestions)) {
+        const label = catalog.find((category) => category.id === id)?.label;
+        if (label) {
+          labels.add(label);
+        }
+      }
+      return labels;
+    }
+    case "photo": {
+      for (const id of usedPhotoCategoryIds(pendingQuestions)) {
+        labels.add(photoCategoryLabelForUnit(id, unit));
+      }
+      return labels;
+    }
+    default:
+      return labels;
+  }
+}
+
+/**
+ * Labels randomize must not suggest: session-used for the tool plus the current option.
+ */
+export function randomizeExcludeLabelsForPending(
+  pending: PendingQuestionRecord,
+  session: SessionRulesInput,
+  annotations: readonly AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[],
+): Set<string> {
+  const exclude = usedQuestionOptionLabelsForTool(
+    pending.toolType,
+    session,
+    annotations,
+    pendingQuestions,
+  );
+  const current = questionOptionLabelForPending(pending, session);
+  if (current) {
+    exclude.add(current);
+  }
+  return exclude;
 }
 
 export type PickRandomizeOptionLabelOptions = {
