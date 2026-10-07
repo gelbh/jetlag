@@ -235,7 +235,6 @@ describe("analytics facade", () => {
         maskTextSelector: "*",
         blockSelector: "img, video, audio, picture, source",
         sampleRate: 0.1,
-        recordCanvas: false,
       },
     });
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
