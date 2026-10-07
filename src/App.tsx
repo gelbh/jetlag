@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, Suspense, useEffect, useLayoutEffect } from "react";
-import { BrowserRouter, Navigate, Outlet, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { PlayerRouteViewTransition } from "./components/motion/PlayerRouteViewTransition";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
@@ -60,7 +60,6 @@ import {
 } from "./navigation/routePreloaders";
 import { Home } from "./routes/Home";
 import { trackPageViewLazy } from "./services/core/analytics/lazyTelemetry";
-import { SentryRoutes } from "./services/core/analytics/sentryReactRouter";
 import { useSessionStore } from "./state/sessionStore";
 
 const StatusDockGalleryLazy = import.meta.env.DEV
@@ -237,7 +236,7 @@ export default function App() {
                       <LowBatteryPrompt />
                       <LocationPermissionPrompt />
                       <WriteFailureNotifier />
-                      <SentryRoutes>
+                      <Routes>
                         <Route element={<PlayerPhoneShellOutlet />}>
                           <Route path="/" element={<Home />} />
                           <Route
@@ -408,7 +407,7 @@ export default function App() {
                             </LazyRoute>
                           }
                         />
-                      </SentryRoutes>
+                      </Routes>
                     </div>
                   </ClientMinVersionGate>
                 </AppCheckProbeGate>

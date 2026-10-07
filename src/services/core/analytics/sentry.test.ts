@@ -34,7 +34,6 @@ import {
   capturePendingResolveFailure,
   capturePhotoUploadFailure,
   captureResumeShellUnresponsive,
-  initSentry,
   reportFirestoreListenPermissionDenied,
   reportJoinPermissionDenied,
   reportSlowRouteTransition,
@@ -42,20 +41,17 @@ import {
   setTransactionName,
   syncSentryUser,
 } from "./sentry";
-import { CLIENT_SENTRY_IGNORE_SPANS } from "./sentryIgnoreSpans";
 
-describe("CLIENT_SENTRY_IGNORE_SPANS", () => {
-  it("includes a matcher that references proxy/overpass", () => {
-    const serialized = JSON.stringify(CLIENT_SENTRY_IGNORE_SPANS, (_key, value: unknown) =>
-      value instanceof RegExp ? value.source : value,
+describe("client facade module graph", () => {
+  it("does not import the browser Sentry package from the facade source", async () => {
+    const fs = await import("node:fs/promises");
+    const path = await import("node:path");
+    const banned = `@${"sentry/react"}`;
+    const src = await fs.readFile(
+      path.join(process.cwd(), "src/services/core/analytics/sentry.ts"),
+      "utf8",
     );
-    expect(serialized).toMatch(/proxy\/overpass/);
-  });
-});
-
-describe("initSentry", () => {
-  it("is a no-op", () => {
-    expect(() => initSentry()).not.toThrow();
+    expect(src.includes(banned)).toBe(false);
   });
 });
 
