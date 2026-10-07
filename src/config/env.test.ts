@@ -43,18 +43,29 @@ describe("parseClientEnv", () => {
     ).toThrow(/Firebase environment variables must all be set or all omitted/);
   });
 
-  it("accepts optional proxy, Sentry, and PostHog vars", () => {
+  it("accepts optional proxy and PostHog vars", () => {
     const env = parseClientEnv({
       ...validFirebaseEnv,
       VITE_OVERPASS_PROXY_URL: "https://proxy.example/overpass",
-      VITE_SENTRY_DSN: "https://examplePublicKey@o0.ingest.sentry.io/0",
-      VITE_SENTRY_ENVIRONMENT: "production",
       VITE_POSTHOG_KEY: "phc_test_key",
     });
 
     expect(env.VITE_OVERPASS_PROXY_URL).toBe("https://proxy.example/overpass");
-    expect(env.VITE_SENTRY_ENVIRONMENT).toBe("production");
     expect(env.VITE_POSTHOG_KEY).toBe("phc_test_key");
+  });
+
+  it("strips VITE_SENTRY_* as unknown client env keys", () => {
+    const env = parseClientEnv({
+      ...validFirebaseEnv,
+      VITE_SENTRY_DSN: "https://examplePublicKey@o0.ingest.sentry.io/0",
+      VITE_SENTRY_ENVIRONMENT: "production",
+      VITE_SENTRY_RELEASE_DIST: "abc123",
+    });
+
+    // After schema removal Zod strips these; while documented they survive parse.
+    expect(env).not.toHaveProperty("VITE_SENTRY_DSN");
+    expect(env).not.toHaveProperty("VITE_SENTRY_ENVIRONMENT");
+    expect(env).not.toHaveProperty("VITE_SENTRY_RELEASE_DIST");
   });
 
   it("rejects invalid proxy URLs", () => {
