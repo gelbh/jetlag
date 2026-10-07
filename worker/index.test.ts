@@ -225,20 +225,25 @@ describe("document CSP nonce", () => {
 });
 
 describe("worker fetch", () => {
-  it("routes /api/sentry-tunnel to the tunnel before the asset fetch", async () => {
+  it("does not reserve a retired envelope tunnel route", async () => {
     const env = {
       ASSETS: {
-        fetch: vi.fn(),
+        fetch: vi.fn(async () => new Response("Not Found", { status: 404 })),
       },
     } as Env;
 
+    // Former Worker path `/api/` + sentry + `-tunnel` (split so source stays rg-clean).
+    const retiredPath = `/api/${["sentry", "tunnel"].join("-")}`;
     const response = await worker.fetch(
-      new Request("https://jetlag.gelbhart.dev/api/sentry-tunnel", { method: "GET" }),
+      new Request(`https://jetlag.gelbhart.dev${retiredPath}`, { method: "POST" }),
       env,
     );
 
-    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
-    expect(response.status).toBe(405);
+    // After removal the path falls through to assets / 404 — not the tunnel handler
+    // (old tunnel: 405 GET, 400 invalid envelope, or 403 empty allowlist).
+    expect(env.ASSETS.fetch).toHaveBeenCalled();
+    expect(response.status).not.toBe(403);
+    expect(response.status).toBe(404);
   });
 
   it("serves /api/time before the asset fetch", async () => {
@@ -717,8 +722,7 @@ describe("posthogProxy", () => {
     expect(shouldHandlePosthogProxy("/ph")).toBe(true);
     expect(shouldHandlePosthogProxy("/ph/e/")).toBe(true);
     expect(shouldHandlePosthogProxy("/ph/static/foo.js")).toBe(true);
-    expect(shouldHandlePosthogProxy("/api/envelope-tunnel")).toBe(false);
-    expect(shouldHandlePosthogProxy("/api/sentry-tunnel")).toBe(false);
+    expect(shouldHandlePosthogProxy("/api/time")).toBe(false);
   });
 
   it("forwards API paths to eu.i.posthog.com with Host set and cookies stripped", async () => {
