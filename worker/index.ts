@@ -15,8 +15,6 @@ import { handleIncidentEmailRequest, INCIDENT_EMAIL_PATH } from "./incidentEmail
 import { handlePosthogProxyRequest, shouldHandlePosthogProxy } from "./posthogProxy";
 import { handleTimeRequest, TIME_ENDPOINT_PATH } from "./timeEndpoint";
 
-export { CSP_REPORT_PATH } from "./cspReport";
-
 export function isSpaFallbackForAssetRequest(request: Request, response: Response): boolean {
   const pathname = new URL(request.url).pathname;
   if (!pathname.startsWith("/assets/")) {
@@ -112,7 +110,4 @@ export {
   isHtmlDocumentResponse,
   shouldApplyDocumentCsp,
 } from "./documentCsp";
-export {
-  handleIncidentEmailRequest,
-  INCIDENT_EMAIL_PATH,
-} from "./incidentEmail";
+export { handleIncidentEmailRequest } from "./incidentEmail";
