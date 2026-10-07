@@ -181,7 +181,7 @@ describe("firestore.rules — batched question asks", () => {
     await assertSucceeds(answer.commit());
   });
 
-  it("allows the hider's veto batch: cancel question and chat row, post the card notice", async () => {
+  it("allows the hider's veto batch: sticky answer + selectedReply, post the card notice", async () => {
     const { db, sessionRef } = await seekerSession();
     const seed = db.batch();
     seed.set(sessionRef.collection("pendingQuestions").doc("pq-1"), questionPayload());
@@ -194,8 +194,14 @@ describe("firestore.rules — batched question asks", () => {
       .collection("sessions")
       .doc("session-1");
     const veto = hiderRef.firestore.batch();
-    veto.update(hiderRef.collection("pendingQuestions").doc("pq-1"), { status: "cancelled" });
-    veto.update(hiderRef.collection("messages").doc("msg-1"), { status: "cancelled" });
+    veto.update(hiderRef.collection("pendingQuestions").doc("pq-1"), {
+      status: "cancelled",
+      answer: { kind: "veto" },
+    });
+    veto.update(hiderRef.collection("messages").doc("msg-1"), {
+      status: "cancelled",
+      selectedReply: "veto",
+    });
     veto.set(hiderRef.collection("messages").doc("msg-veto"), {
       channel: "game",
       senderUid: "hider-1",
@@ -206,6 +212,35 @@ describe("firestore.rules — batched question asks", () => {
     });
 
     await assertSucceeds(veto.commit());
+  });
+
+  it("allows the hider's randomize-style status-only cancel batch", async () => {
+    const { db, sessionRef } = await seekerSession();
+    const seed = db.batch();
+    seed.set(sessionRef.collection("pendingQuestions").doc("pq-1"), questionPayload());
+    seed.set(sessionRef.collection("messages").doc("msg-1"), questionMessage);
+    await assertSucceeds(seed.commit());
+
+    const hiderRef = rules.testEnv
+      .authenticatedContext("hider-1")
+      .firestore()
+      .collection("sessions")
+      .doc("session-1");
+    const randomize = hiderRef.firestore.batch();
+    randomize.update(hiderRef.collection("pendingQuestions").doc("pq-1"), {
+      status: "cancelled",
+    });
+    randomize.update(hiderRef.collection("messages").doc("msg-1"), { status: "cancelled" });
+    randomize.set(hiderRef.collection("messages").doc("msg-randomize"), {
+      channel: "game",
+      senderUid: "hider-1",
+      senderRole: "hider",
+      createdAt: ASKED_AT,
+      kind: "system",
+      text: "Hider played Randomize. Seekers may ask a different question.",
+    });
+
+    await assertSucceeds(randomize.commit());
   });
 
   it("denies a hider cancel on a walking question", async () => {

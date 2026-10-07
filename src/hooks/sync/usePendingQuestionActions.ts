@@ -2,6 +2,7 @@ import type { Feature, LineString } from "geojson";
 import { useCallback, useRef } from "react";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { buildThermometerLineGeometry } from "@/domain/questions";
+import { VETO_ANSWER, VETO_SELECTED_REPLY } from "@/domain/questions/questionPowerUps";
 import {
   createMessageId,
   createPendingQuestionId,
@@ -29,6 +30,8 @@ import {
   emitThermometerWalkStartedActivity,
   isAnnotationQuestionTool,
 } from "@/services/session/emitSessionActivity";
+
+type QuestionCancelCard = "veto" | "randomize";
 
 export interface SubmitPendingQuestionInput {
   sessionId: string;
@@ -59,12 +62,21 @@ function commitQuestionCancel(options: {
   senderUid: string;
   senderRole: PlayerRole;
   notice: string;
+  card?: QuestionCancelCard;
 }): { acknowledged: Promise<void> } {
+  const isVeto = options.card === "veto";
   return commitWrite("question.cancel", () =>
     writePendingQuestionUpdateBatch(options.sessionId, {
       questionId: options.pendingQuestionId,
-      questionPatch: { status: "cancelled" },
-      gameMessage: { id: options.messageId, patch: { status: "cancelled" } },
+      questionPatch: isVeto
+        ? { status: "cancelled", answer: VETO_ANSWER }
+        : { status: "cancelled" },
+      gameMessage: {
+        id: options.messageId,
+        patch: isVeto
+          ? { status: "cancelled", selectedReply: VETO_SELECTED_REPLY }
+          : { status: "cancelled" },
+      },
       newMessage: buildGameSystemMessage(
         options.sessionId,
         options.senderUid,
@@ -296,7 +308,7 @@ export function usePendingQuestionActions() {
     [],
   );
 
-  /** Hider veto / randomize: closes the question with no answer and no card draw. */
+  /** Hider veto / randomize: closes the question with no card draw; veto sticks answer. */
   const cancelPendingQuestionWithCard = useCallback(
     (options: {
       sessionId: string;
@@ -304,6 +316,7 @@ export function usePendingQuestionActions() {
       messageId: string;
       senderUid: string;
       notice: string;
+      card?: QuestionCancelCard;
     }) => commitQuestionCancel({ ...options, senderRole: "hider" }),
     [],
   );

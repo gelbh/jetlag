@@ -476,9 +476,16 @@ service cloud.firestore {
       ];
     }
 
+    function isVetoAnswer(answer) {
+      return answer is map
+        && answer.keys().hasOnly(['kind'])
+        && answer.kind == 'veto';
+    }
+
     function validPhotoAnswer(answer) {
       return answer == null
         || answer is string
+        || isVetoAnswer(answer)
         || (
           answer is map
           && answer.kind is string
@@ -496,7 +503,7 @@ service cloud.firestore {
     function validHiderPendingAnswer(toolType, answer) {
       return toolType == 'photo'
         ? validPhotoAnswer(answer)
-        : (answer == null || answer is string);
+        : (answer == null || answer is string || isVetoAnswer(answer));
     }
 
     function isSessionHost(sessionId) {
@@ -834,13 +841,23 @@ service cloud.firestore {
           && request.resource.data.selectedReply is string
           && request.resource.data.status == 'answered'
         ) || (
-          // Seeker dismisses an expired ask; hider plays Veto or Randomize.
+          // Seeker dismisses an expired ask; hider plays Randomize (status-only).
           (isSeekerMember(sessionId) || isHiderMember(sessionId))
           && resource.data.channel == 'game'
           && resource.data.kind == 'question'
           && resource.data.status == 'pending'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
           && request.resource.data.status == 'cancelled'
+        ) || (
+          // Hider Veto: sticky selectedReply so the option stays used.
+          isHiderMember(sessionId)
+          && resource.data.channel == 'game'
+          && resource.data.kind == 'question'
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['status', 'selectedReply'])
+          && request.resource.data.status == 'cancelled'
+          && request.resource.data.selectedReply == 'veto'
         );
         allow delete: if false;
       }
@@ -867,11 +884,18 @@ service cloud.firestore {
           && request.resource.data.status == 'answered'
           && validHiderPendingAnswer(resource.data.toolType, request.resource.data.answer)
         ) || (
-          // Veto / Randomize card: honor system, like curses (hand is client-held).
+          // Randomize: status-only cancel. Veto: sticky { kind: 'veto' } answer.
           isHiderMember(sessionId)
           && resource.data.status == 'pending'
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
           && request.resource.data.status == 'cancelled'
+          && (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+            || (
+              request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['status', 'answer'])
+              && isVetoAnswer(request.resource.data.answer)
+            )
+          )
         ) || (
           isSeekerMember(sessionId)
           && resource.data.status == 'pending'
