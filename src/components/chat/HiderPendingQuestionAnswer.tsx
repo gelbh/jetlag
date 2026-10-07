@@ -1,4 +1,5 @@
-import { Box, Group, Stack, Text } from "@mantine/core";
+import { Box, Button, Group, Stack, Text } from "@mantine/core";
+import type { QuestionPowerUpId } from "../../domain/boardEconomy";
 import {
   type DockableMapTool,
   isQuestionDockTool,
@@ -18,8 +19,15 @@ import type {
 } from "../../domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { HudToolIcon } from "../map/icons/ToolIcons";
+import { powerUpLabel } from "../session/board/boardCardLabels";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
+
+export interface HiderQuestionCards {
+  /** Veto / randomize cards in the hider's hand; empty hides the actions. */
+  available: readonly QuestionPowerUpId[];
+  onPlay: (pendingQuestionId: string, messageId: string, card: QuestionPowerUpId) => void;
+}
 
 export interface HiderPendingQuestionAnswerProps {
   message: SessionMessageRecord;
@@ -38,6 +46,7 @@ export interface HiderPendingQuestionAnswerProps {
     selectedReply: string,
     deadlineExpired?: boolean,
   ) => Promise<void>;
+  questionCards?: HiderQuestionCards;
 }
 
 const QUESTION_DOCK_IDS = [
@@ -60,8 +69,10 @@ export function HiderPendingQuestionAnswer({
   nowMs,
   disabled = false,
   onAnswerQuestion,
+  questionCards,
 }: HiderPendingQuestionAnswerProps) {
   const walking = pending?.status === "walking";
+  const pendingQuestionId = message.pendingQuestionId;
   const cancelled = message.status === "cancelled" || pending?.status === "cancelled";
   const answered = message.status === "answered" || message.status === "resolved";
   const closed = answered || cancelled;
@@ -109,7 +120,6 @@ export function HiderPendingQuestionAnswer({
           truthReferenceMode={truthReferenceMode}
           disabled={disabled}
           onSelect={(option) => {
-            const pendingQuestionId = message.pendingQuestionId;
             if (!pendingQuestionId || disabled) {
               return;
             }
@@ -122,6 +132,23 @@ export function HiderPendingQuestionAnswer({
             );
           }}
         />
+      ) : null}
+      {!closed && !walking && pendingQuestionId && questionCards?.available.length ? (
+        <Group gap={8}>
+          {questionCards.available.map((card) => (
+            <Button
+              key={card}
+              variant="default"
+              size="sm"
+              radius="sm"
+              disabled={disabled}
+              styles={{ root: { minHeight: "2.75rem" } }}
+              onClick={() => questionCards.onPlay(pendingQuestionId, message.id, card)}
+            >
+              Play {powerUpLabel(card)}
+            </Button>
+          ))}
+        </Group>
       ) : null}
     </>
   );

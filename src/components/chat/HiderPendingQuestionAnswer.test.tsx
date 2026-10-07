@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type {
   PendingQuestionRecord,
@@ -98,5 +98,26 @@ describe("HiderPendingQuestionAnswer", () => {
     );
     expect(screen.queryByRole("button", { name: /^Yes$/i })).toBeNull();
     expect(screen.getByText(/Seeker is walking/i)).toBeInTheDocument();
+  });
+
+  it("plays a held veto card on the open question", () => {
+    const onPlay = vi.fn();
+    renderWithAppUi(
+      <HiderPendingQuestionAnswer
+        message={radarMessage}
+        pending={radarPending}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="s1"
+        truth={null}
+        truthsLoading={false}
+        truthReferenceMode="hidingZoneCenter"
+        nowMs={Date.now()}
+        onAnswerQuestion={vi.fn()}
+        questionCards={{ available: ["veto"], onPlay }}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "Play Randomize" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Play Veto" }));
+    expect(onPlay).toHaveBeenCalledWith("pq-radar", "msg-radar", "veto");
   });
 });

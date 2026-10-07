@@ -13,6 +13,9 @@ export type PowerUpId =
   | "expandHand1"
   | "expandHand2";
 
+/** Power-ups the hider plays on a pending question instead of answering it. */
+export type QuestionPowerUpId = Extract<PowerUpId, "veto" | "randomize">;
+
 export type TimeBonusId = "time-1" | "time-2" | "time-3" | "time-4" | "time-5";
 
 /** Minutes for [small, medium, large]. */

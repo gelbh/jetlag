@@ -10,6 +10,7 @@ import type { SessionRulesInput } from "../../domain/session/rules";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
+import type { HiderQuestionCards } from "./HiderPendingQuestionAnswer";
 
 export type ChatPanelModel = {
   open: boolean;
@@ -37,6 +38,7 @@ export type ChatPanelModel = {
     deadlineExpired?: boolean,
   ) => Promise<void>;
   onDismissExpiredQuestion?: (pendingQuestionId: string, messageId: string) => Promise<void>;
+  questionCards?: HiderQuestionCards;
   readOnly?: boolean;
 };
 
@@ -63,6 +65,7 @@ export function ChatPanel({ model }: ChatPanelProps) {
     answeredPendingIds,
     onAnswerQuestion,
     onDismissExpiredQuestion,
+    questionCards,
     readOnly = false,
   } = model;
   const keyboardInset = useVisualViewportBottomInset(open);
@@ -84,6 +87,7 @@ export function ChatPanel({ model }: ChatPanelProps) {
       answeredPendingIds={answeredPendingIds}
       onAnswerQuestion={onAnswerQuestion}
       onDismissExpiredQuestion={onDismissExpiredQuestion}
+      questionCards={questionCards}
       readOnly={readOnly}
     />
   );

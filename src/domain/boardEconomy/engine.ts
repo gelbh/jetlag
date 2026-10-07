@@ -6,6 +6,7 @@ import type {
   BoardEconomyState,
   DrawKeepCycle,
   PowerUpId,
+  QuestionPowerUpId,
 } from "./types";
 import { DEFAULT_HAND_LIMIT } from "./types";
 
@@ -388,6 +389,23 @@ export function playDiscardDrawPowerUp(
     hand: result.hand,
     discard: [...next.discard, ...result.discarded],
   };
+}
+
+/** Veto / randomize: the card leaves the hand; the caller resolves the question. */
+export function playQuestionPowerUp(
+  state: BoardEconomyState,
+  powerUpId: QuestionPowerUpId,
+): BoardEconomyState {
+  const card = state.hand.find((c) => c.def.kind === "powerUp" && c.def.id === powerUpId);
+  return card ? discardFromHand(state, [card.instanceId]) : state;
+}
+
+export const QUESTION_POWER_UP_IDS: readonly QuestionPowerUpId[] = ["veto", "randomize"];
+
+export function heldQuestionPowerUps(hand: readonly BoardCardInstance[]): QuestionPowerUpId[] {
+  return QUESTION_POWER_UP_IDS.filter((id) =>
+    hand.some((card) => card.def.kind === "powerUp" && card.def.id === id),
+  );
 }
 
 export function playMoveCard(state: BoardEconomyState, moveInstanceId: string): BoardEconomyState {

@@ -5,6 +5,7 @@ export * from "./matchingQuestions";
 export * from "./measuringQuestions";
 export * from "./photoQuestions";
 export * from "./photoUploadAccess";
+export * from "./questionPowerUps";
 export * from "./questionRules";
 export * from "./questionTimerDisplay";
 export * from "./radarQuestions";
