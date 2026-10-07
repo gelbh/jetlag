@@ -46,14 +46,37 @@ export function questionOptionLabelsForTool(
   }
 }
 
+export type PickRandomizeOptionLabelOptions = {
+  exclude?: ReadonlySet<string>;
+  random?: () => number;
+};
+
+/** Pick one label from `labels` after removing `exclude` (used + current). */
+export function pickRandomizeOptionLabel(
+  labels: readonly string[],
+  options: PickRandomizeOptionLabelOptions = {},
+): string | null {
+  const random = options.random ?? Math.random;
+  const exclude = options.exclude;
+  const pool = exclude ? labels.filter((label) => !exclude.has(label)) : labels;
+  if (pool.length === 0) {
+    return null;
+  }
+  return pool[Math.floor(random() * pool.length)] ?? null;
+}
+
+export type RandomizedQuestionNoticeOptions = PickRandomizeOptionLabelOptions;
+
 /** Feed text for a Randomize card: names one random question from the same category. */
 export function randomizedQuestionNotice(
   toolType: PendingQuestionToolType,
   session: SessionRulesInput,
-  random: () => number = Math.random,
+  randomOrOptions: (() => number) | RandomizedQuestionNoticeOptions = Math.random,
 ): string {
+  const options: RandomizedQuestionNoticeOptions =
+    typeof randomOrOptions === "function" ? { random: randomOrOptions } : randomOrOptions;
   const labels = questionOptionLabelsForTool(toolType, session);
-  const label = labels[Math.floor(random() * labels.length)];
+  const label = pickRandomizeOptionLabel(labels, options);
   return label
     ? `Hider played Randomize. Ask this ${toolType} question instead: ${label}.`
     : `Hider played Randomize. Ask a random ${toolType} question instead.`;
