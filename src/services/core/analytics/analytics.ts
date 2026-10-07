@@ -1,4 +1,5 @@
 import posthog from "posthog-js";
+import "posthog-js/dist/web-vitals";
 import { getClientEnv } from "@/config/env";
 import {
   readAnalyticsConsent,
