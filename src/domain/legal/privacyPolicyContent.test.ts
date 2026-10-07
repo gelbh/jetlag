@@ -40,6 +40,8 @@ describe("privacyPolicyContent", () => {
     expect(errorReporting).toMatch(/Sentry/i);
     expect(errorReporting).toMatch(/PostHog/i);
     expect(errorReporting).toMatch(/\bEU\b/);
+    expect(errorReporting).toMatch(/local storage/i);
+    expect(errorReporting).toMatch(/before you Accept/i);
     expect(copy).toContain("PostHog session replay is not used");
     expect(productAnalytics).toMatch(/Accept/i);
     expect(productAnalytics).toMatch(/product analytics/i);

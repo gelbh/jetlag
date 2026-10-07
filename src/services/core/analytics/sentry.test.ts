@@ -392,7 +392,10 @@ describe("captureException", () => {
 
     expect(sentryCaptureException).toHaveBeenCalledExactlyOnceWith(error);
     await vi.waitFor(() => {
-      expect(posthogCaptureException).toHaveBeenCalledExactlyOnceWith(error);
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+      const passed = posthogCaptureException.mock.calls[0]?.[0] as Error;
+      expect(passed).toBeInstanceOf(Error);
+      expect(passed.message).toBe("x");
     });
   });
 

@@ -13,39 +13,9 @@ import {
 } from "./sentryEventPolicy";
 import { CLIENT_SENTRY_IGNORE_SPANS } from "./sentryIgnoreSpans";
 import { createSentryReactRouterIntegration } from "./sentryReactRouter";
+import { SENSITIVE_EXTRA_KEYS, scrubString, scrubUnknown } from "./telemetryScrub";
 
-const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const REACT_REFRESH_FRAME = /@react-refresh/i;
-const SENSITIVE_EXTRA_KEYS = new Set(["sessionId", "authUid", "memberUids", "uid"]);
-
-function scrubString(value: string): string {
-  return value.replace(SESSION_CODE_PATTERN, "****");
-}
-
-function scrubUnknown(value: unknown): unknown {
-  if (typeof value === "string") {
-    return scrubString(value);
-  }
-
-  if (Array.isArray(value)) {
-    return value.map((entry) => scrubUnknown(entry));
-  }
-
-  if (value && typeof value === "object") {
-    const record = value as Record<string, unknown>;
-    const scrubbed: Record<string, unknown> = {};
-    for (const [key, entry] of Object.entries(record)) {
-      if (SENSITIVE_EXTRA_KEYS.has(key)) {
-        scrubbed[key] = "[redacted]";
-        continue;
-      }
-      scrubbed[key] = scrubUnknown(entry);
-    }
-    return scrubbed;
-  }
-
-  return value;
-}
 
 function isReactRefreshNoiseEvent(
   event: Parameters<NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>>[0],
