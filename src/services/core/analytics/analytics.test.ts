@@ -495,6 +495,19 @@ describe("analytics facade", () => {
     expect(passed.message).toBe("Join **** failed");
   });
 
+  it("capturePosthogException forwards scrubbed additional properties", () => {
+    resetAnalyticsForTests({ initialized: true });
+    capturePosthogException(new Error("boom"), {
+      photo_upload: "storage",
+      sessionCode: "ABCD",
+    });
+
+    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    const [, props] = posthogCaptureException.mock.calls[0] ?? [];
+    expect(props).toMatchObject({ photo_upload: "storage" });
+    expect(JSON.stringify(props)).not.toMatch(/ABCD/);
+  });
+
   it("trackSessionEnded captures session_ended with reason", () => {
     writeAnalyticsConsent("granted");
     resetAnalyticsForTests({ initialized: true });

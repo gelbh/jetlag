@@ -306,16 +306,22 @@ export function trackSessionEnded(reason: SessionEndedReason): void {
 }
 
 /**
- * Soft-fail PostHog sink for the client `captureException` dual-write (P1).
+ * Soft-fail PostHog sink for the client `captureException` facade.
  * No-op until `initPosthogCore`; never throws into callers.
  * Scrubs session-code-like strings before the SDK builds `$exception` properties.
  */
-export function capturePosthogException(error: unknown): void {
+export function capturePosthogException(
+  error: unknown,
+  additionalProperties?: Record<string, unknown>,
+): void {
   if (!coreInitialized) {
     return;
   }
   try {
-    posthog.captureException(scrubTelemetryError(error));
+    const scrubbedProps = additionalProperties
+      ? scrubAnalyticsProperties(additionalProperties)
+      : undefined;
+    posthog.captureException(scrubTelemetryError(error), scrubbedProps);
   } catch {
     // Soft-fail: exception reporting must never break the app.
   }

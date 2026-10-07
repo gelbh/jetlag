@@ -1,204 +1,26 @@
-import * as Sentry from "@sentry/react";
-import { getClientEnv } from "@/config/env";
-import { APP_VERSION } from "@/domain/device/changelog";
-import { scheduleIdleBootWork } from "@/domain/device/perf/scheduleAfterFirstPaint";
 import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
-import { parameterizedRoutePath } from "@/navigation/routeMetadata";
-import { CLIENT_SENTRY_DATA_COLLECTION } from "./sentryDataCollection";
-import {
-  applyClientSentryDisposition,
-  CLIENT_SENTRY_IGNORE_ERRORS,
-  classifyClientSentryEvent,
-  isFirestorePermissionDeniedEvent,
-} from "./sentryEventPolicy";
-import { CLIENT_SENTRY_IGNORE_SPANS } from "./sentryIgnoreSpans";
-import { createSentryReactRouterIntegration } from "./sentryReactRouter";
-import { SENSITIVE_EXTRA_KEYS, scrubString, scrubUnknown } from "./telemetryScrub";
+import { capturePosthogException } from "./analytics";
 
-const REACT_REFRESH_FRAME = /@react-refresh/i;
+// ponytail: no PostHog breadcrumb trail in P3; upgrade via $exception properties or custom events after Accept if needed.
 
-function isReactRefreshNoiseEvent(
-  event: Parameters<NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>>[0],
-): boolean {
-  if (event.environment === "development") {
-    for (const exception of event.exception?.values ?? []) {
-      for (const frame of exception.stacktrace?.frames ?? []) {
-        if (frame.filename && REACT_REFRESH_FRAME.test(frame.filename)) {
-          return true;
-        }
-      }
-    }
-  }
+export function initSentry(): void {}
 
-  return false;
-}
+export function syncSentryUser(_user: { uid: string } | null): void {}
 
-function scrubEvent(
-  event: Parameters<NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>>[0],
-): Parameters<NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>>[0] | null {
-  if (typeof event.message === "string") {
-    event.message = scrubString(event.message);
-  }
-
-  for (const exception of event.exception?.values ?? []) {
-    if (typeof exception.value === "string") {
-      exception.value = scrubString(exception.value);
-    }
-  }
-
-  if (event.extra) {
-    for (const [key, value] of Object.entries(event.extra)) {
-      if (SENSITIVE_EXTRA_KEYS.has(key)) {
-        event.extra[key] = "[redacted]";
-        continue;
-      }
-      event.extra[key] = scrubUnknown(value);
-    }
-  }
-
-  if (event.breadcrumbs) {
-    for (const breadcrumb of event.breadcrumbs) {
-      if (typeof breadcrumb.message === "string") {
-        breadcrumb.message = scrubString(breadcrumb.message);
-      }
-      if (breadcrumb.data) {
-        breadcrumb.data = scrubUnknown(breadcrumb.data) as Record<string, unknown>;
-      }
-    }
-  }
-
-  // Side effect only — disposition still comes from classifyClientSentryEvent.
-  if (isFirestorePermissionDeniedEvent(event)) {
-    Sentry.addBreadcrumb({
-      category: "firestore",
-      message: "permission-denied",
-      level: "warning",
-    });
-  }
-
-  const disposition = classifyClientSentryEvent(event);
-  const next = applyClientSentryDisposition(event, disposition, Math.random);
-  if (!next) {
-    return null;
-  }
-
-  if (isReactRefreshNoiseEvent(next)) {
-    return null;
-  }
-
-  return next;
-}
-
-export function initSentry(): void {
-  if (import.meta.env.MODE === "test" || import.meta.env.DEV) {
-    return;
-  }
-
-  const env = getClientEnv();
-  const dsn = env.VITE_SENTRY_DSN;
-  if (!dsn) {
-    return;
-  }
-
-  // ignoreErrors belt shares CLIENT_SENTRY_IGNORE_ERRORS with drop matchers (not canaries).
-  Sentry.init({
-    dsn,
-    tunnel: "/api/envelope-tunnel",
-    environment: env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
-    release: `jetlag@${APP_VERSION}`,
-    dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
-    tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
-    // SDK 11 defaults to span streaming, which names every pageload "Pageload" and sends LCP/CLS
-    // as standalone spans instead of `measurements.*` on the pageload. Static keeps route-named
-    // pageload transactions with LCP/CLS attached (what the Web Vitals views read); INP still
-    // goes out as its own span.
-    traceLifecycle: "static",
-    ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
-    ignoreSpans: CLIENT_SENTRY_IGNORE_SPANS,
-    dataCollection: CLIENT_SENTRY_DATA_COLLECTION,
-    integrations: [createSentryReactRouterIntegration()],
-    beforeSend: scrubEvent,
-    replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 0,
-    replaysOnErrorSampleRate: 1.0,
-    // Queue envelopes in IndexedDB while offline and replay them on `online` / next boot.
-    // Events are queued after beforeSend, so scrubbing still applies; the URL stays the tunnel.
-    transport: Sentry.makeBrowserOfflineTransport(Sentry.makeFetchTransport),
-    // BrowserOptions types transportOptions for the fetch transport only, so check the keys
-    // against the offline transport's options and then widen.
-    transportOptions: {
-      maxQueueSize: 30,
-      flushAtStartup: true,
-    } satisfies Partial<
-      Parameters<ReturnType<typeof Sentry.makeBrowserOfflineTransport>>[0]
-    > as Sentry.BrowserOptions["transportOptions"],
-  });
-
-  scheduleLazyReplay();
-}
-
-let replayScheduled = false;
-
-/**
- * Adds Session Replay after init on idle so its setup stays off the boot critical path.
- * Replay reads replays*SampleRate from the client options set in initSentry.
- * Static import on purpose: a same-package dynamic import does not split Replay
- * into its own chunk, and lazyLoadIntegration fetches from Sentry's CDN.
- */
-function scheduleLazyReplay(): void {
-  if (replayScheduled) {
-    return;
-  }
-  replayScheduled = true;
-
-  scheduleIdleBootWork(() => {
-    Sentry.addIntegration(
-      Sentry.replayIntegration({
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
-    );
-  });
-}
-
-function withSentryScope(run: (scope: Sentry.Scope) => void): void {
+export function setBootstrapTag(_phase: string): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
-
-  Sentry.withScope(run);
-}
-
-export function syncSentryUser(user: { uid: string } | null): void {
-  Sentry.setUser(user ? { id: user.uid } : null);
-}
-
-export function setBootstrapTag(phase: string): void {
-  withSentryScope((scope) => {
-    scope.setTag("bootstrap_phase", phase);
-    Sentry.addBreadcrumb({
-      category: "bootstrap",
-      message: phase,
-      level: "info",
-    });
-  });
 }
 
 export function captureAuthPersistenceFallback(mode: "session" | "memory", error?: unknown): void {
-  withSentryScope((scope) => {
-    scope.setTag("auth_persistence", mode);
-    if (error) {
-      Sentry.captureException(error);
-      return;
-    }
-    Sentry.captureMessage(`Auth persistence fell back to ${mode}`, "warning");
+  capturePosthogException(error ?? new Error(`Auth persistence fell back to ${mode}`), {
+    auth_persistence: mode,
   });
 }
 
 export function captureAuthBootstrapFailure(error: unknown): void {
-  withSentryScope((scope) => {
-    scope.setTag("bootstrap_phase", "auth_failed");
-    Sentry.captureException(error);
-  });
+  capturePosthogException(error, { bootstrap_phase: "auth_failed" });
 }
 
 export type AppCheckCaptureContext = {
@@ -211,128 +33,51 @@ export function captureAppCheckTokenFailure(
   error: unknown,
   context?: AppCheckCaptureContext,
 ): void {
-  if (import.meta.env.MODE === "test") {
+  if (context?.soft === true) {
     return;
   }
 
-  const soft = context?.soft === true;
-  const breadcrumbData = context
-    ? {
-        reason: context.reason,
-        source: context.source,
-        soft: soft || undefined,
-      }
-    : undefined;
-
-  if (soft) {
-    // Soft failures must not open a temporary scope — breadcrumbs would be discarded.
-    Sentry.addBreadcrumb({
-      category: "app_check",
-      message: "App Check soft failure",
-      level: "warning",
-      data: breadcrumbData,
-    });
-    return;
-  }
-
-  withSentryScope((scope) => {
-    scope.setTag("app_check_token", "failed");
-    if (context) {
-      for (const [key, value] of Object.entries(context)) {
-        scope.setExtra(key, value);
-      }
-    }
-    Sentry.addBreadcrumb({
-      category: "app_check",
-      message: "App Check token fetch failed",
-      level: "warning",
-      data: breadcrumbData,
-    });
-    Sentry.captureException(error);
+  const { soft: _soft, ...extras } = context ?? {};
+  capturePosthogException(error, {
+    app_check_token: "failed",
+    ...extras,
   });
 }
 
-/** Same capture shape as `Sentry.ErrorBoundary` (component stack + react mechanism). */
+/** Same capture shape as the former Sentry ErrorBoundary (component stack on the exception). */
 export function captureErrorBoundaryException(
   error: unknown,
   componentStack: string | null | undefined,
 ): void {
-  Sentry.captureReactException(
-    error,
-    { componentStack: componentStack ?? "" },
-    { mechanism: { handled: true, type: "auto.function.react.error_boundary" } },
-  );
-}
-
-function recoverableErrorMessage(error: unknown): string {
-  if (!(error instanceof Error)) {
-    return String(error);
-  }
-  // Hydration errors wrap the concrete mismatch in `cause`.
-  return error.cause instanceof Error
-    ? `${error.message} (cause: ${error.cause.message})`
-    : error.message;
-}
-
-/**
- * React `onRecoverableError` (hydration mismatch → client re-render). Breadcrumb only: the page
- * still works, so it should explain later issues, not raise its own. Written to the isolation
- * scope directly because it fires before `initSentry`, and `Sentry.addBreadcrumb` drops
- * breadcrumbs while no client exists.
- */
-export function addRecoverableErrorBreadcrumb(error: unknown, componentStack?: string): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-
-  Sentry.getIsolationScope().addBreadcrumb({
-    category: "react.recoverable",
-    message: recoverableErrorMessage(error).slice(0, 300),
-    level: "warning",
-    timestamp: Date.now() / 1000,
-    data: {
-      pathname: window.location.pathname,
-      componentStack: componentStack?.slice(0, 1000),
-    },
+  capturePosthogException(error, {
+    componentStack: componentStack ?? "",
   });
 }
 
-export function setTransactionName(pathname: string): void {
-  Sentry.getCurrentScope().setTransactionName(parameterizedRoutePath(pathname));
+export function addRecoverableErrorBreadcrumb(_error: unknown, _componentStack?: string): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
 }
 
+export function setTransactionName(_pathname: string): void {}
+
 export function captureException(error: unknown): void {
-  Sentry.captureException(error);
-  // Dynamic import keeps posthog out of every sentry caller's static graph.
   void import("./analytics").then((m) => m.capturePosthogException(error)).catch(() => {});
 }
 
-/** Expected join/heal permission-denied — breadcrumb only (no Sentry issue). */
-export function reportJoinPermissionDenied(phase: "initial" | "retry"): void {
+/** Expected join/heal permission-denied — breadcrumb only (no issue). */
+export function reportJoinPermissionDenied(_phase: "initial" | "retry"): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
-
-  Sentry.addBreadcrumb({
-    category: "join",
-    message: "Join permission denied",
-    level: "warning",
-    data: { op: "join", code: "permission-denied", phase },
-  });
 }
 
-/** Expected mid-session listen permission loss — breadcrumb only (no Sentry issue). */
+/** Expected mid-session listen permission loss — breadcrumb only (no issue). */
 export function reportFirestoreListenPermissionDenied(): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
-
-  Sentry.addBreadcrumb({
-    category: "firestore",
-    message: "Listen permission denied",
-    level: "warning",
-    data: { op: "listen", code: "permission-denied" },
-  });
 }
 
 export function capturePhotoUploadFailure(
@@ -340,18 +85,9 @@ export function capturePhotoUploadFailure(
   stage: "compress" | "storage" | "firestore",
   context?: Record<string, unknown>,
 ): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-
-  Sentry.withScope((scope) => {
-    scope.setTag("photo_upload", stage);
-    if (context) {
-      for (const [key, value] of Object.entries(context)) {
-        scope.setExtra(key, value);
-      }
-    }
-    Sentry.captureException(error);
+  capturePosthogException(error, {
+    photo_upload: stage,
+    ...(context ?? {}),
   });
 }
 
@@ -359,40 +95,17 @@ export function capturePendingResolveFailure(
   error: unknown,
   context: { toolType: string; pendingQuestionId?: string },
 ): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-
-  Sentry.withScope((scope) => {
-    scope.setTag("pending_resolve_failed", "true");
-    scope.setTag("toolType", context.toolType);
-    if (context.pendingQuestionId) {
-      scope.setExtra("pendingQuestionId", context.pendingQuestionId);
-    }
-    Sentry.addBreadcrumb({
-      category: "pending.resolve",
-      message: "Pending question resolve failed",
-      level: "error",
-      data: {
-        toolType: context.toolType,
-        pendingQuestionId: context.pendingQuestionId,
-      },
-    });
-    Sentry.captureException(error);
+  capturePosthogException(error, {
+    pending_resolve_failed: "true",
+    toolType: context.toolType,
+    ...(context.pendingQuestionId ? { pendingQuestionId: context.pendingQuestionId } : {}),
   });
 }
 
-export function addPhotoUploadBreadcrumb(details: Record<string, unknown>): void {
+export function addPhotoUploadBreadcrumb(_details: Record<string, unknown>): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
-
-  Sentry.addBreadcrumb({
-    category: "photo.upload",
-    message: "Photo upload attempt",
-    level: "info",
-    data: details,
-  });
 }
 
 export interface SlowRouteTransitionDetails {
@@ -406,26 +119,10 @@ export interface SlowRouteTransitionDetails {
   warm_ready: boolean;
 }
 
-export function reportSlowRouteTransition(details: SlowRouteTransitionDetails): void {
-  if (import.meta.env.MODE === "test" || details.total_ms <= 2000) {
+export function reportSlowRouteTransition(_details: SlowRouteTransitionDetails): void {
+  if (import.meta.env.MODE === "test") {
     return;
   }
-
-  withSentryScope((scope) => {
-    scope.setTag("route_transition", "slow");
-    scope.setTag("readiness_kind", details.readiness_kind);
-    scope.setTag("warm_chunk", String(details.warm_chunk));
-    scope.setTag("warm_ready", String(details.warm_ready));
-    for (const [key, value] of Object.entries(details)) {
-      scope.setExtra(key, value);
-    }
-    Sentry.addBreadcrumb({
-      category: "route_transition",
-      message: "Slow route transition",
-      level: "warning",
-      data: details,
-    });
-  });
 }
 
 export interface AppResumeContext {
@@ -435,30 +132,16 @@ export interface AppResumeContext {
   iosStandalone: boolean;
 }
 
-export function addAppResumeBreadcrumb(context: AppResumeContext): void {
+export function addAppResumeBreadcrumb(_context: AppResumeContext): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
-
-  Sentry.addBreadcrumb({
-    category: "app.resume",
-    message: "App resumed",
-    level: "info",
-    data: context,
-  });
 }
 
-export function addPwaStoragePressureBreadcrumb(snapshot: StorageEstimateSnapshot): void {
+export function addPwaStoragePressureBreadcrumb(_snapshot: StorageEstimateSnapshot): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
-
-  Sentry.addBreadcrumb({
-    category: "pwa.storage",
-    message: "PWA storage over soft cap",
-    level: "warning",
-    data: snapshot,
-  });
 }
 
 export function captureResumeShellUnresponsive(
@@ -467,67 +150,24 @@ export function captureResumeShellUnresponsive(
     adminRoute?: boolean;
   },
 ): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-
-  withSentryScope((scope) => {
-    scope.setTag("resume_watchdog", "unresponsive");
-    scope.setTag("standalone", String(context.standalone));
-    scope.setTag("ios_standalone", String(context.iosStandalone));
-    scope.setExtra("pathname", context.pathname);
-    scope.setExtra("backgroundMs", context.backgroundMs);
-    if (context.adminRoute) {
-      scope.setExtra("admin_route", true);
-    }
-    Sentry.addBreadcrumb({
-      category: "app.resume",
-      message: "resume_shell_unresponsive",
-      level: "error",
-      data: context,
-    });
-    Sentry.captureMessage("resume_shell_unresponsive", "error");
+  capturePosthogException(new Error("resume_shell_unresponsive"), {
+    resume_watchdog: "unresponsive",
+    pathname: context.pathname,
+    backgroundMs: context.backgroundMs,
+    standalone: context.standalone,
+    ios_standalone: context.iosStandalone,
+    ...(context.adminRoute ? { admin_route: true } : {}),
   });
 }
 
-export function addWriteRejectedBreadcrumb(label: string, error: unknown): void {
+export function addWriteRejectedBreadcrumb(_label: string, _error: unknown): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
-
-  Sentry.addBreadcrumb({
-    category: "firestore.write",
-    level: "warning",
-    message: `write rejected: ${label}`,
-    // Structural check: importing FirebaseError here would pull firebase/app into the boot chunk.
-    data: {
-      code:
-        typeof error === "object" &&
-        error !== null &&
-        "code" in error &&
-        typeof error.code === "string"
-          ? error.code
-          : null,
-    },
-  });
 }
 
-export function addIdbDeleteFailureBreadcrumb(error: unknown): void {
+export function addIdbDeleteFailureBreadcrumb(_error: unknown): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
-
-  const message =
-    error instanceof Error
-      ? error.message
-      : typeof error === "string"
-        ? error
-        : "IndexedDB delete failed";
-
-  Sentry.addBreadcrumb({
-    category: "idb",
-    message: "IndexedDB delete failed",
-    level: "warning",
-    data: { message },
-  });
 }
