@@ -235,6 +235,7 @@ describe("analytics facade", () => {
         maskTextSelector: "*",
         blockSelector: "img, video, audio, picture, source",
         sampleRate: 0.1,
+        captureCanvas: { recordCanvas: false },
       },
     });
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
@@ -246,15 +247,6 @@ describe("analytics facade", () => {
     writeAnalyticsConsent("granted");
 
     initAnalytics();
-
-    expect(posthogStartSessionRecording).toHaveBeenCalledOnce();
-  });
-
-  it("grantAnalyticsConsent starts session recording", () => {
-    vi.stubEnv("PROD", true);
-    vi.stubEnv("MODE", "production");
-
-    grantAnalyticsConsent();
 
     expect(posthogStartSessionRecording).toHaveBeenCalledOnce();
   });
@@ -280,6 +272,19 @@ describe("analytics facade", () => {
     expect(posthogStartSessionRecording).not.toHaveBeenCalled();
   });
 
+  it("deny then grant restarts session recording", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    expect(posthogStartSessionRecording).toHaveBeenCalledOnce();
+
+    denyAnalyticsConsent();
+    expect(posthogStopSessionRecording).toHaveBeenCalled();
+
+    grantAnalyticsConsent();
+    expect(posthogStartSessionRecording).toHaveBeenCalledTimes(2);
+  });
   it("strips query from pageview path", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
