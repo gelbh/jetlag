@@ -181,7 +181,6 @@ export function initPosthogCore(): void {
         maskTextSelector: "*",
         blockSelector: "img, video, audio, picture, source",
         sampleRate: 0.1,
-        recordCanvas: false,
       },
     });
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
