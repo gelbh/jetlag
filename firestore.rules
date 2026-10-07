@@ -834,7 +834,8 @@ service cloud.firestore {
           && request.resource.data.selectedReply is string
           && request.resource.data.status == 'answered'
         ) || (
-          isSeekerMember(sessionId)
+          // Seeker dismisses an expired ask; hider plays Veto or Randomize.
+          (isSeekerMember(sessionId) || isHiderMember(sessionId))
           && resource.data.channel == 'game'
           && resource.data.kind == 'question'
           && resource.data.status == 'pending'
@@ -865,6 +866,12 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer', 'status', 'answeredLate'])
           && request.resource.data.status == 'answered'
           && validHiderPendingAnswer(resource.data.toolType, request.resource.data.answer)
+        ) || (
+          // Veto / Randomize card: honor system, like curses (hand is client-held).
+          isHiderMember(sessionId)
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          && request.resource.data.status == 'cancelled'
         ) || (
           isSeekerMember(sessionId)
           && resource.data.status == 'pending'

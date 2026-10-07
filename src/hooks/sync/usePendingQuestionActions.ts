@@ -270,6 +270,33 @@ export function usePendingQuestionActions() {
     [],
   );
 
+  /** Hider veto / randomize: closes the question with no answer and no card draw. */
+  const cancelPendingQuestionWithCard = useCallback(
+    (options: {
+      sessionId: string;
+      pendingQuestionId: string;
+      messageId: string;
+      senderUid: string;
+      notice: string;
+    }): { acknowledged: Promise<void> } =>
+      commitWrite("question.cancel", () =>
+        writePendingQuestionUpdateBatch(options.sessionId, {
+          questionId: options.pendingQuestionId,
+          questionPatch: { status: "cancelled" },
+          gameMessage: { id: options.messageId, patch: { status: "cancelled" } },
+          newMessage: buildGameSystemMessage(
+            options.sessionId,
+            options.senderUid,
+            "hider",
+            options.notice,
+            createMessageId(),
+            serverNowIso(),
+          ),
+        }),
+      ),
+    [],
+  );
+
   const postSystemMessage = useCallback(
     (sessionId: string, senderUid: string, senderRole: PlayerRole, text: string): void => {
       commitWrite("system.message", () =>
@@ -376,6 +403,7 @@ export function usePendingQuestionActions() {
     submitPendingQuestion,
     completeThermometerWalk,
     answerPendingQuestion,
+    cancelPendingQuestionWithCard,
     postSystemMessage,
     cancelThermometerWalk,
     dismissExpiredPendingQuestion,

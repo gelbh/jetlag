@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+import {
+  ANALYTICS_EVENTS,
+  type AnalyticsEventProps,
+  track,
+} from "@/services/core/analytics/analytics";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import {
   advanceUntilInteractivePick,
@@ -12,6 +17,8 @@ import {
   playDiscardDrawPowerUp,
   playExpandHand,
   playMoveCard,
+  playQuestionPowerUp,
+  type QuestionPowerUpId,
   rewardCyclesFromPendingCost,
 } from "../../domain/boardEconomy";
 import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
@@ -84,6 +91,22 @@ export function useBoardEconomy(params: {
     [enabled, sessionId],
   );
 
+  /** Engine plays return the same state when the card is not playable. */
+  const persistPlay = useCallback(
+    (
+      current: BoardEconomyState,
+      next: BoardEconomyState,
+      card: AnalyticsEventProps["hider_card_played"]["card"],
+    ) => {
+      if (next === current) {
+        return;
+      }
+      persist(next);
+      track(ANALYTICS_EVENTS.hider_card_played, { card });
+    },
+    [persist],
+  );
+
   const applyAnswerReward = useCallback(
     async (
       toolType: PendingQuestionToolType,
@@ -115,6 +138,24 @@ export function useBoardEconomy(params: {
     [enabled, persist, roundSeed, sessionId],
   );
 
+  /** Reads the stored state: callers play this after the question write lands. */
+  const playQuestionCard = useCallback(
+    async (powerUpId: QuestionPowerUpId): Promise<void> => {
+      if (!enabled || !sessionId || !roundSeed) {
+        return;
+      }
+      const current = await ensureBoardEconomyState(sessionId, roundSeed);
+      const card = current.hand.find(
+        (entry) => entry.def.kind === "powerUp" && entry.def.id === powerUpId,
+      );
+      if (!card || current.pendingPick) {
+        return;
+      }
+      persistPlay(current, playQuestionPowerUp(current, card.instanceId, powerUpId), powerUpId);
+    },
+    [enabled, persistPlay, roundSeed, sessionId],
+  );
+
   const confirmDrawPick = useCallback(
     async (keepInstanceIds: readonly string[]): Promise<boolean> => {
       if (!state?.pendingPick) {
@@ -144,9 +185,9 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persist(playExpandHand(state, instanceId, powerUpId));
+      persistPlay(state, playExpandHand(state, instanceId, powerUpId), powerUpId);
     },
-    [persist, state],
+    [persistPlay, state],
   );
 
   const runDiscardDraw = useCallback(
@@ -154,9 +195,17 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persist(playDiscardDrawPowerUp(state, powerUpInstanceId, discardInstanceIds, drawN));
+      const powerUp = state.hand.find((card) => card.instanceId === powerUpInstanceId);
+      if (powerUp?.def.kind !== "powerUp") {
+        return;
+      }
+      persistPlay(
+        state,
+        playDiscardDrawPowerUp(state, powerUpInstanceId, discardInstanceIds, drawN),
+        powerUp.def.id,
+      );
     },
-    [persist, state],
+    [persistPlay, state],
   );
 
   const runMove = useCallback(
@@ -164,9 +213,9 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persist(playMoveCard(state, moveInstanceId));
+      persistPlay(state, playMoveCard(state, moveInstanceId), "move");
     },
-    [persist, state],
+    [persistPlay, state],
   );
 
   const runPlayCurse = useCallback(
@@ -174,9 +223,9 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persist(playCurse(state, curseInstanceId, new Date().toISOString()));
+      persistPlay(state, playCurse(state, curseInstanceId, new Date().toISOString()), "curse");
     },
-    [persist, state],
+    [persistPlay, state],
   );
 
   const runClearCurse = useCallback(
@@ -195,6 +244,7 @@ export function useBoardEconomy(params: {
     pendingDraw: state?.pendingPick ?? null,
     mustDiscard: state ? enforceHandLimit(state.hand, state.handLimit).mustDiscard : 0,
     applyAnswerReward,
+    playQuestionCard,
     confirmDrawPick,
     discardCards,
     runExpandHand,

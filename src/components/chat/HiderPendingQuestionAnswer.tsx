@@ -1,4 +1,5 @@
-import { Box, Group, Stack, Text } from "@mantine/core";
+import { Box, Button, Group, Stack, Text } from "@mantine/core";
+import type { QuestionPowerUpId } from "../../domain/boardEconomy";
 import {
   type DockableMapTool,
   isQuestionDockTool,
@@ -21,6 +22,17 @@ import { HudToolIcon } from "../map/icons/ToolIcons";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 
+export interface HiderQuestionCards {
+  /** Veto / randomize cards in the hider's hand; empty hides the actions. */
+  available: readonly QuestionPowerUpId[];
+  onPlay: (pendingQuestionId: string, messageId: string, card: QuestionPowerUpId) => void;
+}
+
+const QUESTION_CARD_LABELS: Record<QuestionPowerUpId, string> = {
+  veto: "Play Veto",
+  randomize: "Play Randomize",
+};
+
 export interface HiderPendingQuestionAnswerProps {
   message: SessionMessageRecord;
   pending: PendingQuestionRecord | undefined;
@@ -38,6 +50,7 @@ export interface HiderPendingQuestionAnswerProps {
     selectedReply: string,
     deadlineExpired?: boolean,
   ) => Promise<void>;
+  questionCards?: HiderQuestionCards;
 }
 
 const QUESTION_DOCK_IDS = [
@@ -60,6 +73,7 @@ export function HiderPendingQuestionAnswer({
   nowMs,
   disabled = false,
   onAnswerQuestion,
+  questionCards,
 }: HiderPendingQuestionAnswerProps) {
   const walking = pending?.status === "walking";
   const cancelled = message.status === "cancelled" || pending?.status === "cancelled";
@@ -122,6 +136,27 @@ export function HiderPendingQuestionAnswer({
             );
           }}
         />
+      ) : null}
+      {!closed && !walking && message.pendingQuestionId && questionCards?.available.length ? (
+        <Group gap={8}>
+          {questionCards.available.map((card) => (
+            <Button
+              key={card}
+              variant="default"
+              size="sm"
+              radius="sm"
+              disabled={disabled}
+              styles={{ root: { minHeight: "2.75rem" } }}
+              onClick={() => {
+                if (message.pendingQuestionId) {
+                  questionCards.onPlay(message.pendingQuestionId, message.id, card);
+                }
+              }}
+            >
+              {QUESTION_CARD_LABELS[card]}
+            </Button>
+          ))}
+        </Group>
       ) : null}
     </>
   );

@@ -1,5 +1,6 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { commitWrite } from "@/services/firestore/commitWrite";
+import type { HiderQuestionCards } from "../components/chat/HiderPendingQuestionAnswer";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import {
@@ -20,6 +21,7 @@ import { UserLocationLayer } from "../components/map/layers/UserLocationLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
+import type { QuestionPowerUpId } from "../domain/boardEconomy";
 import { messageFingerprint } from "../domain/device/chrome/chatUnread";
 import {
   applyMapStylePreferenceChange,
@@ -44,6 +46,7 @@ import {
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
+import { randomizedQuestionNotice, VETO_NOTICE } from "../domain/questions/randomizeQuestion";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import {
   hiderStationCenter,
@@ -305,7 +308,8 @@ export function HiderMapScreen() {
     timerState: timer.timerState,
   });
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
-  const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
+  const { answerPendingQuestion, cancelPendingQuestionWithCard, postSystemMessage } =
+    usePendingQuestionActions();
 
   useEffect(() => {
     setOptimisticAnswers((previous) => {
@@ -469,6 +473,44 @@ export function HiderMapScreen() {
       truthContext,
     ],
   );
+
+  const playQuestionCard = (
+    pendingQuestionId: string,
+    messageId: string,
+    card: QuestionPowerUpId,
+  ) => {
+    const pending = pendingQuestions.find((question) => question.id === pendingQuestionId);
+    if (!sessionId || !uid || !pending || answerInFlightRef.current) {
+      return;
+    }
+    setChatAnswerError(null);
+    const { acknowledged } = cancelPendingQuestionWithCard({
+      sessionId,
+      pendingQuestionId,
+      messageId,
+      senderUid: uid,
+      notice:
+        card === "veto"
+          ? VETO_NOTICE
+          : randomizedQuestionNotice(pending.toolType, session ?? DEFAULT_SESSION_RULES),
+    });
+    // Same as answer rewards: the card leaves the hand only once the server accepts.
+    acknowledged.then(
+      () => boardEconomy.playQuestionCard(card).catch(() => undefined),
+      () => setChatAnswerError("Could not play that card. Try again."),
+    );
+  };
+
+  const heldQuestionCards = boardEconomy.state?.hand ?? [];
+  const questionCards: HiderQuestionCards | undefined =
+    boardEconomyEnabled && !boardEconomy.pendingDraw
+      ? {
+          available: (["veto", "randomize"] as const).filter((id) =>
+            heldQuestionCards.some((card) => card.def.kind === "powerUp" && card.def.id === id),
+          ),
+          onPlay: playQuestionCard,
+        }
+      : undefined;
 
   const postGameSystem = useCallback(
     async (text: string) => {
@@ -978,6 +1020,7 @@ export function HiderMapScreen() {
               answerSubmitting,
               answeredPendingIds,
               onAnswerQuestion: submitHiderAnswer,
+              questionCards,
             },
           }}
         />

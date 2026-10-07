@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import { ChatPanel } from "../../components/chat/ChatPanel";
+import type { HiderQuestionCards } from "../../components/chat/HiderPendingQuestionAnswer";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
 import { ExpansionHiderMenu } from "../../components/hider/ExpansionHiderMenu";
 import { HiderZoneWizardShell } from "../../components/hider/HiderZoneWizardShell";
@@ -188,6 +189,7 @@ export type HiderMapScreenController = {
       selectedReply: string,
       deadlineExpired?: boolean,
     ) => Promise<void>;
+    questionCards?: HiderQuestionCards;
   };
   /** HUD root for pan-hide (`data-map-interacting`): same as seeker. */
   chromeHudRef?: RefObject<HTMLDivElement | null>;
@@ -416,6 +418,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
         answerSubmitting={chat.answerSubmitting}
         answeredPendingIds={chat.answeredPendingIds}
         onAnswerQuestion={chat.onAnswerQuestion}
+        questionCards={chat.questionCards}
       />
 
       {zoneHudPresence.showMapFirst ? (
@@ -480,6 +483,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           answerSubmitting: chat.answerSubmitting,
           answeredPendingIds: chat.answeredPendingIds,
           onAnswerQuestion: chat.onAnswerQuestion,
+          questionCards: chat.questionCards,
         }}
       />
 

@@ -180,4 +180,52 @@ describe("firestore.rules — batched question asks", () => {
 
     await assertSucceeds(answer.commit());
   });
+
+  it("allows the hider's veto batch: cancel question and chat row, post the card notice", async () => {
+    const { db, sessionRef } = await seekerSession();
+    const seed = db.batch();
+    seed.set(sessionRef.collection("pendingQuestions").doc("pq-1"), questionPayload());
+    seed.set(sessionRef.collection("messages").doc("msg-1"), questionMessage);
+    await assertSucceeds(seed.commit());
+
+    const hiderRef = rules.testEnv
+      .authenticatedContext("hider-1")
+      .firestore()
+      .collection("sessions")
+      .doc("session-1");
+    const veto = hiderRef.firestore.batch();
+    veto.update(hiderRef.collection("pendingQuestions").doc("pq-1"), { status: "cancelled" });
+    veto.update(hiderRef.collection("messages").doc("msg-1"), { status: "cancelled" });
+    veto.set(hiderRef.collection("messages").doc("msg-veto"), {
+      channel: "game",
+      senderUid: "hider-1",
+      senderRole: "hider",
+      createdAt: ASKED_AT,
+      kind: "system",
+      text: "Hider played Veto. No answer and no card draw for this question.",
+    });
+
+    await assertSucceeds(veto.commit());
+  });
+
+  it("denies a hider cancel on a walking question", async () => {
+    const { sessionRef } = await seekerSession();
+    const { answerableAt: _omit, ...walking } = questionPayload({
+      toolType: "thermometer",
+      status: "walking",
+      replyOptions: [],
+    });
+    await assertSucceeds(sessionRef.collection("pendingQuestions").doc("pq-1").set(walking));
+
+    await assertFails(
+      rules.testEnv
+        .authenticatedContext("hider-1")
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-1")
+        .update({ status: "cancelled" }),
+    );
+  });
 });
