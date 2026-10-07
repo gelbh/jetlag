@@ -18,7 +18,7 @@ export function posthogBeforeSend(
   if (capture.event === "$exception") {
     const scrubbed: CaptureResult = {
       ...capture,
-      properties: scrubPosthogExceptionProperties(capture.properties),
+      properties: scrubPosthogExceptionProperties(capture.properties) ?? capture.properties,
     };
     return filterPosthogException(scrubbed, random);
   }
