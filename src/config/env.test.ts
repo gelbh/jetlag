@@ -62,7 +62,7 @@ describe("parseClientEnv", () => {
       VITE_SENTRY_RELEASE_DIST: "abc123",
     });
 
-    // After schema removal Zod strips these; while documented they survive parse.
+    // After schema removal Zod strips unknown VITE_SENTRY_* keys.
     expect(env).not.toHaveProperty("VITE_SENTRY_DSN");
     expect(env).not.toHaveProperty("VITE_SENTRY_ENVIRONMENT");
     expect(env).not.toHaveProperty("VITE_SENTRY_RELEASE_DIST");

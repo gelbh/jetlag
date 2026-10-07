@@ -314,7 +314,7 @@ jobs:
             exit 1
           fi
           if ! grep -qiE 'uploaded|source maps' build.log; then
-            echo "::warning::Sentry source map upload was not confirmed in build output."
+            echo "::warning::Source map upload was not confirmed in build output."
           fi
       # Allowlist CLOUDFLARE_* only; mask before wrangler (no full-catalog doppler run / GITHUB_ENV dump).
       - name: Deploy to Cloudflare
