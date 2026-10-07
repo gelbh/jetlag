@@ -508,6 +508,27 @@ describe("analytics facade", () => {
     expect(JSON.stringify(props)).not.toMatch(/ABCD/);
   });
 
+  it("capturePosthogException keeps firebase diagnostic codes and scrubs string leaves", () => {
+    resetAnalyticsForTests({ initialized: true });
+    capturePosthogException(new Error("boom"), {
+      code: "storage/unauthorized",
+      note: "Join ABCD failed",
+      sessionId: "sess-1",
+      uid: "user-1",
+    });
+
+    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    const [, props] = posthogCaptureException.mock.calls[0] ?? [];
+    expect(props).toMatchObject({
+      firebase_code: "storage/unauthorized",
+      note: "Join **** failed",
+    });
+    expect(props).not.toHaveProperty("code");
+    expect(props).not.toHaveProperty("sessionId");
+    expect(props).not.toHaveProperty("uid");
+    expect(JSON.stringify(props)).not.toMatch(/ABCD/);
+  });
+
   it("trackSessionEnded captures session_ended with reason", () => {
     writeAnalyticsConsent("granted");
     resetAnalyticsForTests({ initialized: true });
