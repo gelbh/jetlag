@@ -127,10 +127,3 @@ export function denyAnalyticsConsentLazy(): void {
     .then((m) => m.denyAnalyticsConsent())
     .catch(() => {});
 }
-
-/** Always-on PostHog core for scrubbed exceptions (no Accept required). */
-export function initPosthogCoreLazy(): void {
-  void loadAnalytics()
-    .then((m) => m.initPosthogCore())
-    .catch(() => {});
-}
