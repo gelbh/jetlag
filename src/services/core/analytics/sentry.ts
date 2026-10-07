@@ -11,8 +11,6 @@ function captureClientException(
     .catch(() => {});
 }
 
-export function initSentry(): void {}
-
 export function syncSentryUser(_user: { uid: string } | null): void {}
 
 export function setBootstrapTag(_phase: string): void {

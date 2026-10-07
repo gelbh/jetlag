@@ -131,7 +131,7 @@ export function isFirestorePermissionDeniedEvent(event: SentryEventLike): boolea
  * Does not filter module-script import failures or WebKit "Load failed" canaries.
  */
 export function classifyClientSentryEvent(event: SentryEventLike): ClientSentryDisposition {
-  // Overpass proxy spans are dropped via CLIENT_SENTRY_IGNORE_SPANS (SDK 11 stream mode).
+  // Overpass proxy spans were dropped via client ignoreSpans (SDK 11 stream mode; retired with browser SDK).
   // Do not filter event.type === "transaction" here; those events are no longer produced.
 
   for (const exception of event.exception?.values ?? []) {
