@@ -26,20 +26,32 @@ describe("posthogBeforeSend", () => {
 
   it("keeps $exception when consent is denied", () => {
     writeAnalyticsConsent("denied");
-    const capture = { event: "$exception", properties: { $exception_list: [] } };
-    expect(posthogBeforeSend(capture as CaptureResult)).not.toBeNull();
+    const capture = {
+      uuid: "test-uuid",
+      event: "$exception",
+      properties: { $exception_list: [] },
+    } satisfies CaptureResult;
+    expect(posthogBeforeSend(capture)).not.toBeNull();
   });
 
   it("drops session_created when consent is denied", () => {
     writeAnalyticsConsent("denied");
-    const capture = { event: "session_created", properties: {} };
-    expect(posthogBeforeSend(capture as CaptureResult)).toBeNull();
+    const capture = {
+      uuid: "test-uuid",
+      event: "session_created",
+      properties: {},
+    } satisfies CaptureResult;
+    expect(posthogBeforeSend(capture)).toBeNull();
   });
 
   it("keeps session_created when consent is granted", () => {
     writeAnalyticsConsent("granted");
-    const capture = { event: "session_created", properties: {} };
-    expect(posthogBeforeSend(capture as CaptureResult)).not.toBeNull();
+    const capture = {
+      uuid: "test-uuid",
+      event: "session_created",
+      properties: {},
+    } satisfies CaptureResult;
+    expect(posthogBeforeSend(capture)).not.toBeNull();
   });
 
   it("drops noise $exception via filterPosthogException regardless of consent", () => {

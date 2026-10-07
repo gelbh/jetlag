@@ -37,11 +37,17 @@ export function createPosthogPlugins(opts: { appVersion: string }): PluginOption
   let posthogPlugin: PosthogRollupPluginFactory;
   try {
     const require = createRequire(import.meta.url);
-    const mod = require("@posthog/rollup-plugin") as {
-      default?: PosthogRollupPluginFactory;
-    } & PosthogRollupPluginFactory;
-    posthogPlugin = typeof mod === "function" ? mod : mod.default!;
-    if (typeof posthogPlugin !== "function") {
+    const mod: unknown = require("@posthog/rollup-plugin");
+    if (typeof mod === "function") {
+      posthogPlugin = mod as PosthogRollupPluginFactory;
+    } else if (
+      mod &&
+      typeof mod === "object" &&
+      "default" in mod &&
+      typeof (mod as { default: unknown }).default === "function"
+    ) {
+      posthogPlugin = (mod as { default: PosthogRollupPluginFactory }).default;
+    } else {
       return [];
     }
   } catch {
