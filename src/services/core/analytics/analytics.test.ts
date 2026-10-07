@@ -241,6 +241,46 @@ describe("analytics facade", () => {
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
   });
 
+  it("starts session recording when initAnalytics runs with granted consent", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+
+    initAnalytics();
+
+    expect(posthogStartSessionRecording).toHaveBeenCalledOnce();
+  });
+
+  it("grantAnalyticsConsent starts session recording", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+
+    grantAnalyticsConsent();
+
+    expect(posthogStartSessionRecording).toHaveBeenCalledOnce();
+  });
+
+  it("does not start session recording when consent is denied", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("denied");
+
+    initPosthogCore();
+    initAnalytics();
+
+    expect(posthogStartSessionRecording).not.toHaveBeenCalled();
+  });
+
+  it("does not start session recording when consent is unset", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+
+    initPosthogCore();
+    initAnalytics();
+
+    expect(posthogStartSessionRecording).not.toHaveBeenCalled();
+  });
+
   it("strips query from pageview path", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");

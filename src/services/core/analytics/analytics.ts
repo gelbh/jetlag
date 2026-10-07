@@ -208,6 +208,7 @@ export function initAnalytics(): void {
     posthog.opt_in_capturing();
     initialized = true;
     applyIdentity(lastSeenIdentity);
+    posthog.startSessionRecording();
   } catch {
     // Soft-fail: analytics must never break app boot.
   }
