@@ -31,6 +31,7 @@ const {
   posthogOptIn,
   posthogIdentify,
   posthogStopSessionRecording,
+  posthogStartSessionRecording,
 } = vi.hoisted(() => ({
   posthogInit: vi.fn(),
   posthogCapture: vi.fn(),
@@ -41,6 +42,7 @@ const {
   posthogOptIn: vi.fn(),
   posthogIdentify: vi.fn(),
   posthogStopSessionRecording: vi.fn(),
+  posthogStartSessionRecording: vi.fn(),
 }));
 
 vi.mock("posthog-js", () => ({
@@ -54,6 +56,7 @@ vi.mock("posthog-js", () => ({
     opt_in_capturing: posthogOptIn,
     identify: posthogIdentify,
     stopSessionRecording: posthogStopSessionRecording,
+    startSessionRecording: posthogStartSessionRecording,
   },
 }));
 
@@ -117,6 +120,7 @@ describe("analytics facade", () => {
     posthogOptIn.mockReset();
     posthogIdentify.mockReset();
     posthogStopSessionRecording.mockReset();
+    posthogStartSessionRecording.mockReset();
   });
 
   afterEach(() => {
@@ -226,6 +230,13 @@ describe("analytics facade", () => {
       disable_surveys: true,
       person_profiles: "identified_only",
       before_send: posthogBeforeSend,
+      session_recording: {
+        maskAllInputs: true,
+        maskTextSelector: "*",
+        blockSelector: "img, video, audio, picture, source",
+        sampleRate: 0.1,
+        recordCanvas: false,
+      },
     });
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
   });

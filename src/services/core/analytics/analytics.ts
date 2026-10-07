@@ -1,5 +1,6 @@
 import posthog from "posthog-js";
 import "posthog-js/dist/web-vitals";
+import "posthog-js/dist/posthog-recorder";
 import { getClientEnv } from "@/config/env";
 import {
   readAnalyticsConsent,
@@ -175,6 +176,13 @@ export function initPosthogCore(): void {
       disable_surveys: true,
       person_profiles: "identified_only",
       before_send: posthogBeforeSend,
+      session_recording: {
+        maskAllInputs: true,
+        maskTextSelector: "*",
+        blockSelector: "img, video, audio, picture, source",
+        sampleRate: 0.1,
+        recordCanvas: false,
+      },
     });
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
     posthog.register({ $geoip_disable: true });
