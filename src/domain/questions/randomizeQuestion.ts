@@ -1,4 +1,4 @@
-import { formatPresetDistance } from "../map/distance";
+import { milesToMeters } from "../map/distance";
 import type { PendingQuestionToolType } from "../session/activity/sessionChat";
 import {
   availableMatchingCategories,
@@ -12,7 +12,9 @@ import {
   sessionGameSize,
 } from "../session/rules";
 import { photoCategoriesForGameSize, photoCategoryLabelForUnit } from "./photoQuestions";
+import { radarDistanceOptionLabel } from "./radarQuestions";
 import { tentacleCategoriesForSession } from "./tentacleQuestions";
+import { thermometerDistanceLabel } from "./thermometerQuestions";
 
 /** Questions the seekers could ask with this tool in this session. */
 export function questionOptionLabelsForTool(
@@ -26,10 +28,12 @@ export function questionOptionLabelsForTool(
     case "measuring":
       return availableMeasuringCatalog(session).map((option) => option.label);
     case "radar":
-      return resolveRadarPresetsMeters(session).map((meters) => formatPresetDistance(meters, unit));
+      return resolveRadarPresetsMeters(session).map((meters) =>
+        radarDistanceOptionLabel(meters / milesToMeters(1), unit),
+      );
     case "thermometer":
       return resolveThermometerPresetsMeters(session).map((meters) =>
-        formatPresetDistance(meters, unit),
+        thermometerDistanceLabel(meters, unit),
       );
     case "tentacle":
       return tentacleCategoriesForSession(session).map((category) => category.label);

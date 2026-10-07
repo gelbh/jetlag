@@ -501,15 +501,9 @@ export function HiderMapScreen() {
     );
   };
 
-  const heldQuestionCards = boardEconomy.state?.hand ?? [];
   const questionCards: HiderQuestionCards | undefined =
     boardEconomyEnabled && !boardEconomy.pendingDraw
-      ? {
-          available: (["veto", "randomize"] as const).filter((id) =>
-            heldQuestionCards.some((card) => card.def.kind === "powerUp" && card.def.id === id),
-          ),
-          onPlay: playQuestionCard,
-        }
+      ? { available: boardEconomy.heldQuestionCards, onPlay: playQuestionCard }
       : undefined;
 
   const postGameSystem = useCallback(

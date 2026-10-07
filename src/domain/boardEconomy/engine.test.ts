@@ -10,6 +10,7 @@ import {
   drawFromDeck,
   drawKeep,
   enforceHandLimit,
+  heldQuestionPowerUps,
   playQuestionPowerUp,
   resolveDrawKeep,
   rewardForQuestion,
@@ -132,17 +133,16 @@ describe("board economy engine", () => {
     expect(tooMany.ok).toBe(false);
   });
 
-  it("playQuestionPowerUp discards only the matching veto or randomize card", () => {
+  it("playQuestionPowerUp discards only a held veto or randomize card", () => {
     const state = createInitialBoardEconomyState("veto");
     const veto = state.deck.find((c) => c.def.kind === "powerUp" && c.def.id === "veto")!;
     const other = state.deck.find((c) => c.def.kind === "timeBonus")!;
     const holding = { ...state, hand: [veto, other] };
 
-    const played = playQuestionPowerUp(holding, veto.instanceId, "veto");
+    expect(heldQuestionPowerUps(holding.hand)).toEqual(["veto"]);
+    const played = playQuestionPowerUp(holding, "veto");
     expect(played.hand.map((c) => c.instanceId)).toEqual([other.instanceId]);
     expect(played.discard.map((c) => c.instanceId)).toEqual([veto.instanceId]);
-
-    expect(playQuestionPowerUp(holding, veto.instanceId, "randomize")).toBe(holding);
-    expect(playQuestionPowerUp(holding, other.instanceId, "veto")).toBe(holding);
+    expect(playQuestionPowerUp(holding, "randomize")).toBe(holding);
   });
 });

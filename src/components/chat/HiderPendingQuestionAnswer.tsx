@@ -19,6 +19,7 @@ import type {
 } from "../../domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { HudToolIcon } from "../map/icons/ToolIcons";
+import { powerUpLabel } from "../session/board/boardCardLabels";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 
@@ -27,11 +28,6 @@ export interface HiderQuestionCards {
   available: readonly QuestionPowerUpId[];
   onPlay: (pendingQuestionId: string, messageId: string, card: QuestionPowerUpId) => void;
 }
-
-const QUESTION_CARD_LABELS: Record<QuestionPowerUpId, string> = {
-  veto: "Play Veto",
-  randomize: "Play Randomize",
-};
 
 export interface HiderPendingQuestionAnswerProps {
   message: SessionMessageRecord;
@@ -76,6 +72,7 @@ export function HiderPendingQuestionAnswer({
   questionCards,
 }: HiderPendingQuestionAnswerProps) {
   const walking = pending?.status === "walking";
+  const pendingQuestionId = message.pendingQuestionId;
   const cancelled = message.status === "cancelled" || pending?.status === "cancelled";
   const answered = message.status === "answered" || message.status === "resolved";
   const closed = answered || cancelled;
@@ -123,7 +120,6 @@ export function HiderPendingQuestionAnswer({
           truthReferenceMode={truthReferenceMode}
           disabled={disabled}
           onSelect={(option) => {
-            const pendingQuestionId = message.pendingQuestionId;
             if (!pendingQuestionId || disabled) {
               return;
             }
@@ -137,7 +133,7 @@ export function HiderPendingQuestionAnswer({
           }}
         />
       ) : null}
-      {!closed && !walking && message.pendingQuestionId && questionCards?.available.length ? (
+      {!closed && !walking && pendingQuestionId && questionCards?.available.length ? (
         <Group gap={8}>
           {questionCards.available.map((card) => (
             <Button
@@ -147,13 +143,9 @@ export function HiderPendingQuestionAnswer({
               radius="sm"
               disabled={disabled}
               styles={{ root: { minHeight: "2.75rem" } }}
-              onClick={() => {
-                if (message.pendingQuestionId) {
-                  questionCards.onPlay(message.pendingQuestionId, message.id, card);
-                }
-              }}
+              onClick={() => questionCards.onPlay(pendingQuestionId, message.id, card)}
             >
-              {QUESTION_CARD_LABELS[card]}
+              Play {powerUpLabel(card)}
             </Button>
           ))}
         </Group>

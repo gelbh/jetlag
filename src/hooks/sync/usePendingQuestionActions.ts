@@ -51,6 +51,32 @@ export interface SubmitPendingQuestionInput {
  */
 export const SUBMIT_DOUBLE_TAP_COOLDOWN_MS = 750;
 
+/** Cancel a pending question and its chat row, and post a notice in one batch. */
+function commitQuestionCancel(options: {
+  sessionId: string;
+  pendingQuestionId: string;
+  messageId: string;
+  senderUid: string;
+  senderRole: PlayerRole;
+  notice: string;
+}): { acknowledged: Promise<void> } {
+  return commitWrite("question.cancel", () =>
+    writePendingQuestionUpdateBatch(options.sessionId, {
+      questionId: options.pendingQuestionId,
+      questionPatch: { status: "cancelled" },
+      gameMessage: { id: options.messageId, patch: { status: "cancelled" } },
+      newMessage: buildGameSystemMessage(
+        options.sessionId,
+        options.senderUid,
+        options.senderRole,
+        options.notice,
+        createMessageId(),
+        serverNowIso(),
+      ),
+    }),
+  );
+}
+
 export function usePendingQuestionActions() {
   const lastSubmitAtRef = useRef(Number.NEGATIVE_INFINITY);
 
@@ -278,22 +304,7 @@ export function usePendingQuestionActions() {
       messageId: string;
       senderUid: string;
       notice: string;
-    }): { acknowledged: Promise<void> } =>
-      commitWrite("question.cancel", () =>
-        writePendingQuestionUpdateBatch(options.sessionId, {
-          questionId: options.pendingQuestionId,
-          questionPatch: { status: "cancelled" },
-          gameMessage: { id: options.messageId, patch: { status: "cancelled" } },
-          newMessage: buildGameSystemMessage(
-            options.sessionId,
-            options.senderUid,
-            "hider",
-            options.notice,
-            createMessageId(),
-            serverNowIso(),
-          ),
-        }),
-      ),
+    }) => commitQuestionCancel({ ...options, senderRole: "hider" }),
     [],
   );
 
@@ -373,21 +384,10 @@ export function usePendingQuestionActions() {
         return;
       }
 
-      commitWrite("question.cancel", () =>
-        writePendingQuestionUpdateBatch(options.sessionId, {
-          questionId: options.pendingQuestionId,
-          questionPatch: { status: "cancelled" },
-          gameMessage: { id: options.messageId, patch: { status: "cancelled" } },
-          newMessage: buildGameSystemMessage(
-            options.sessionId,
-            options.senderUid,
-            options.senderRole,
-            "Expired question dismissed. You can ask again.",
-            createMessageId(),
-            serverNowIso(),
-          ),
-        }),
-      );
+      commitQuestionCancel({
+        ...options,
+        notice: "Expired question dismissed. You can ask again.",
+      });
       emitQuestionCancelledActivity({
         sessionId: options.sessionId,
         toolType: options.toolType,

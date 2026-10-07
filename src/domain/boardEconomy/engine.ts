@@ -394,14 +394,18 @@ export function playDiscardDrawPowerUp(
 /** Veto / randomize: the card leaves the hand; the caller resolves the question. */
 export function playQuestionPowerUp(
   state: BoardEconomyState,
-  instanceId: string,
   powerUpId: QuestionPowerUpId,
 ): BoardEconomyState {
-  const card = state.hand.find((c) => c.instanceId === instanceId);
-  if (!card || card.def.kind !== "powerUp" || card.def.id !== powerUpId) {
-    return state;
-  }
-  return discardFromHand(state, [instanceId]);
+  const card = state.hand.find((c) => c.def.kind === "powerUp" && c.def.id === powerUpId);
+  return card ? discardFromHand(state, [card.instanceId]) : state;
+}
+
+export const QUESTION_POWER_UP_IDS: readonly QuestionPowerUpId[] = ["veto", "randomize"];
+
+export function heldQuestionPowerUps(hand: readonly BoardCardInstance[]): QuestionPowerUpId[] {
+  return QUESTION_POWER_UP_IDS.filter((id) =>
+    hand.some((card) => card.def.kind === "powerUp" && card.def.id === id),
+  );
 }
 
 export function playMoveCard(state: BoardEconomyState, moveInstanceId: string): BoardEconomyState {

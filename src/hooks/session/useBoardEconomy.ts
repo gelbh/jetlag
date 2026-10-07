@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  ANALYTICS_EVENTS,
-  type AnalyticsEventProps,
-  track,
-} from "@/services/core/analytics/analytics";
+import { ANALYTICS_EVENTS, track } from "@/services/core/analytics/analytics";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import {
   advanceUntilInteractivePick,
@@ -12,6 +8,7 @@ import {
   continueSequentialRewardPick,
   discardFromHand,
   enforceHandLimit,
+  heldQuestionPowerUps,
   markCurseCleared,
   playCurse,
   playDiscardDrawPowerUp,
@@ -93,16 +90,15 @@ export function useBoardEconomy(params: {
 
   /** Engine plays return the same state when the card is not playable. */
   const persistPlay = useCallback(
-    (
-      current: BoardEconomyState,
-      next: BoardEconomyState,
-      card: AnalyticsEventProps["hider_card_played"]["card"],
-    ) => {
-      if (next === current) {
+    (current: BoardEconomyState, next: BoardEconomyState, playedInstanceId: string) => {
+      const played = current.hand.find((card) => card.instanceId === playedInstanceId);
+      if (next === current || !played || played.def.kind === "timeBonus") {
         return;
       }
       persist(next);
-      track(ANALYTICS_EVENTS.hider_card_played, { card });
+      track(ANALYTICS_EVENTS.hider_card_played, {
+        card: played.def.kind === "powerUp" ? played.def.id : played.def.kind,
+      });
     },
     [persist],
   );
@@ -151,7 +147,7 @@ export function useBoardEconomy(params: {
       if (!card || current.pendingPick) {
         return;
       }
-      persistPlay(current, playQuestionPowerUp(current, card.instanceId, powerUpId), powerUpId);
+      persistPlay(current, playQuestionPowerUp(current, powerUpId), card.instanceId);
     },
     [enabled, persistPlay, roundSeed, sessionId],
   );
@@ -185,7 +181,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persistPlay(state, playExpandHand(state, instanceId, powerUpId), powerUpId);
+      persistPlay(state, playExpandHand(state, instanceId, powerUpId), instanceId);
     },
     [persistPlay, state],
   );
@@ -195,14 +191,10 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      const powerUp = state.hand.find((card) => card.instanceId === powerUpInstanceId);
-      if (powerUp?.def.kind !== "powerUp") {
-        return;
-      }
       persistPlay(
         state,
         playDiscardDrawPowerUp(state, powerUpInstanceId, discardInstanceIds, drawN),
-        powerUp.def.id,
+        powerUpInstanceId,
       );
     },
     [persistPlay, state],
@@ -213,7 +205,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persistPlay(state, playMoveCard(state, moveInstanceId), "move");
+      persistPlay(state, playMoveCard(state, moveInstanceId), moveInstanceId);
     },
     [persistPlay, state],
   );
@@ -223,7 +215,11 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      persistPlay(state, playCurse(state, curseInstanceId, new Date().toISOString()), "curse");
+      persistPlay(
+        state,
+        playCurse(state, curseInstanceId, new Date().toISOString()),
+        curseInstanceId,
+      );
     },
     [persistPlay, state],
   );
@@ -243,6 +239,7 @@ export function useBoardEconomy(params: {
     ready,
     pendingDraw: state?.pendingPick ?? null,
     mustDiscard: state ? enforceHandLimit(state.hand, state.handLimit).mustDiscard : 0,
+    heldQuestionCards: state ? heldQuestionPowerUps(state.hand) : [],
     applyAnswerReward,
     playQuestionCard,
     confirmDrawPick,
