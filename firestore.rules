@@ -485,7 +485,6 @@ service cloud.firestore {
     function validPhotoAnswer(answer) {
       return answer == null
         || answer is string
-        || isVetoAnswer(answer)
         || (
           answer is map
           && answer.kind is string
@@ -503,7 +502,7 @@ service cloud.firestore {
     function validHiderPendingAnswer(toolType, answer) {
       return toolType == 'photo'
         ? validPhotoAnswer(answer)
-        : (answer == null || answer is string || isVetoAnswer(answer));
+        : (answer == null || answer is string);
     }
 
     function isSessionHost(sessionId) {

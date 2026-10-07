@@ -181,6 +181,25 @@ describe("firestore.rules — batched question asks", () => {
     await assertSucceeds(answer.commit());
   });
 
+  it("denies hider pending → answered with a veto answer map", async () => {
+    const { db, sessionRef } = await seekerSession();
+    const seed = db.batch();
+    seed.set(sessionRef.collection("pendingQuestions").doc("pq-1"), questionPayload());
+    seed.set(sessionRef.collection("messages").doc("msg-1"), questionMessage);
+    await assertSucceeds(seed.commit());
+
+    await assertFails(
+      rules.testEnv
+        .authenticatedContext("hider-1")
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-1")
+        .update({ status: "answered", answer: { kind: "veto" } }),
+    );
+  });
+
   it("allows the hider's veto batch: sticky answer + selectedReply, post the card notice", async () => {
     const { db, sessionRef } = await seekerSession();
     const seed = db.batch();

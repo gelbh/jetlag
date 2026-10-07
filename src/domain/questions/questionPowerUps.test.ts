@@ -7,12 +7,15 @@ describe("isVetoAnswer", () => {
     expect(isVetoAnswer({ kind: "veto" })).toBe(true);
   });
 
+  it("accepts forward-compat veto maps with extra keys", () => {
+    expect(isVetoAnswer({ kind: "veto", extra: true })).toBe(true);
+  });
+
   it("rejects non-veto answers", () => {
     expect(isVetoAnswer(null)).toBe(false);
     expect(isVetoAnswer(undefined)).toBe(false);
     expect(isVetoAnswer("veto")).toBe(false);
     expect(isVetoAnswer({ kind: "yes" })).toBe(false);
-    expect(isVetoAnswer({ kind: "veto", extra: true })).toBe(true);
   });
 });
 
