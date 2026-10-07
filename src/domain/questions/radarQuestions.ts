@@ -125,7 +125,7 @@ function radarPresetHelpersForUnit(unit: DistanceUnit) {
 }
 
 export function usedRadarDistanceOptions(
-  annotations: AnnotationRecord[],
+  annotations: readonly AnnotationRecord[],
   unit: DistanceUnit = "imperial",
   exceptAnnotationId?: string,
 ): Set<RadarDistanceOptionKey> {
@@ -136,7 +136,7 @@ export function usedRadarDistanceOptions(
 }
 
 export function usedRadarDistanceOptionsForSession(
-  annotations: AnnotationRecord[],
+  annotations: readonly AnnotationRecord[],
   pendingQuestions: readonly PendingQuestionRecord[],
   unit: DistanceUnit = "imperial",
   exceptAnnotationId?: string,

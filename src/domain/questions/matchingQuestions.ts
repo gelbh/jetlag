@@ -111,14 +111,14 @@ export function isMatchingCategoryEnabled(categoryId: MatchingCategoryId): boole
 }
 
 export function usedMatchingCategoryIds(
-  annotations: AnnotationRecord[],
+  annotations: readonly AnnotationRecord[],
   exceptAnnotationId?: string,
 ): Set<MatchingCategoryId> {
   return matchingCatalogHelpers.usedOptionsFromAnnotations(annotations, exceptAnnotationId);
 }
 
 export function usedMatchingCategoryIdsForSession(
-  annotations: AnnotationRecord[],
+  annotations: readonly AnnotationRecord[],
   pendingQuestions: readonly PendingQuestionRecord[],
   exceptAnnotationId?: string,
 ): Set<MatchingCategoryId> {
