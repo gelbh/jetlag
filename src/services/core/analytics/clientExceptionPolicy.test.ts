@@ -1,22 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyClientSentryDisposition,
-  classifyClientSentryEvent,
+  applyClientExceptionDisposition,
+  type ClientExceptionEventLike,
+  classifyClientExceptionEvent,
   QUOTA_SAMPLE_RATE,
-  type SentryEventLike,
-} from "./sentryEventPolicy";
+} from "./clientExceptionPolicy";
 
-function exc(type: string, value: string): SentryEventLike {
+function exc(type: string, value: string): ClientExceptionEventLike {
   return { exception: { values: [{ type, value }] } };
 }
 
-describe("classifyClientSentryEvent", () => {
+describe("classifyClientExceptionEvent", () => {
   it("meters QuotaExceededError with quota message", () => {
     expect(
-      classifyClientSentryEvent(exc("QuotaExceededError", "The quota has been exceeded.")),
+      classifyClientExceptionEvent(exc("QuotaExceededError", "The quota has been exceeded.")),
     ).toBe("meter_quota");
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc(
           "QuotaExceededError",
           "Failed to execute 'setItem' on 'Storage': Setting the value of 'jetlag-annotations' exceeded the quota.",
@@ -26,12 +26,14 @@ describe("classifyClientSentryEvent", () => {
   });
 
   it("drops AbortError aborted operation", () => {
-    expect(classifyClientSentryEvent(exc("AbortError", "This operation was aborted"))).toBe("drop");
+    expect(classifyClientExceptionEvent(exc("AbortError", "This operation was aborted"))).toBe(
+      "drop",
+    );
   });
 
   it("drops IndexedDbTransactionError createOrUpgrade abort (JETLAG-41)", () => {
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc(
           "IndexedDbTransactionError",
           "IndexedDB transaction 'createOrUpgrade' failed: AbortError: The operation was aborted.",
@@ -42,7 +44,7 @@ describe("classifyClientSentryEvent", () => {
 
   it("drops soft App Check throttle, probe timeout, and fetch-network-error", () => {
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc(
           "FirebaseError",
           "AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle).",
@@ -50,16 +52,16 @@ describe("classifyClientSentryEvent", () => {
       ),
     ).toBe("drop");
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc(
           "FirebaseError",
           "AppCheck: Requests throttled due to previous 403 error. Attempts allowed again after 20h:49m:23s (appCheck/throttled).",
         ),
       ),
     ).toBe("drop");
-    expect(classifyClientSentryEvent(exc("Error", "App Check probe timed out"))).toBe("drop");
+    expect(classifyClientExceptionEvent(exc("Error", "App Check probe timed out"))).toBe("drop");
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc(
           "FirebaseError",
           "AppCheck: Fetch failed to connect to a network. Check Internet connection. Original error: Load failed (content-firebaseappcheck.googleapis.com). (appCheck/fetch-network-error).",
@@ -69,13 +71,13 @@ describe("classifyClientSentryEvent", () => {
   });
 
   it("drops expected leave messages", () => {
-    expect(classifyClientSentryEvent(exc("Error", "Session already ended."))).toBe("drop");
-    expect(classifyClientSentryEvent(exc("Error", "Only the host can do that."))).toBe("drop");
+    expect(classifyClientExceptionEvent(exc("Error", "Session already ended."))).toBe("drop");
+    expect(classifyClientExceptionEvent(exc("Error", "Only the host can do that."))).toBe("drop");
   });
 
   it("drops Firestore b815 persistence noise", () => {
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc(
           "Error",
           'FIRESTORE (12.16.0) INTERNAL ASSERTION FAILED: Unexpected state (ID: b815) CONTEXT: {"el":"Error storing new key generator value in database"}',
@@ -85,17 +87,17 @@ describe("classifyClientSentryEvent", () => {
   });
 
   it("drops IDB closing/hidden and Safari object-store lookup noise", () => {
-    expect(classifyClientSentryEvent(exc("InvalidStateError", "Database is closing/hidden"))).toBe(
-      "drop",
-    );
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(exc("InvalidStateError", "Database is closing/hidden")),
+    ).toBe("drop");
+    expect(
+      classifyClientExceptionEvent(
         exc("UnknownError", "Error looking up record in object store by key range"),
       ),
     ).toBe("drop");
-    expect(classifyClientSentryEvent({ message: "Database is closing/hidden" })).toBe("drop");
+    expect(classifyClientExceptionEvent({ message: "Database is closing/hidden" })).toBe("drop");
     expect(
-      classifyClientSentryEvent({
+      classifyClientExceptionEvent({
         message: "Error looking up record in object store by key range",
       }),
     ).toBe("drop");
@@ -103,12 +105,12 @@ describe("classifyClientSentryEvent", () => {
 
   it("drops view-transition abort and visibility-hidden skips", () => {
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc("InvalidStateError", "Transition was aborted because of invalid state"),
       ),
     ).toBe("drop");
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc(
           "InvalidStateError",
           "Skipping view transition because document visibility state has become hidden.",
@@ -116,28 +118,28 @@ describe("classifyClientSentryEvent", () => {
       ),
     ).toBe("drop");
     expect(
-      classifyClientSentryEvent({
+      classifyClientExceptionEvent({
         message: "Skipping view transition because document visibility state has become hidden.",
       }),
     ).toBe("drop");
   });
 
   it("drops view transition skipped wording (JETLAG-3V)", () => {
-    expect(classifyClientSentryEvent(exc("Error", "AbortError: Transition was skipped"))).toBe(
+    expect(classifyClientExceptionEvent(exc("Error", "AbortError: Transition was skipped"))).toBe(
       "drop",
     );
   });
 
   it("drops Firefox Firestore IDB NS_ERROR_FAILURE noise (JETLAG-3Z)", () => {
-    expect(classifyClientSentryEvent(exc("NS_ERROR_FAILURE", "No error message"))).toBe("drop");
-    expect(classifyClientSentryEvent(exc("Error", "NS_ERROR_FAILURE: No error message"))).toBe(
+    expect(classifyClientExceptionEvent(exc("NS_ERROR_FAILURE", "No error message"))).toBe("drop");
+    expect(classifyClientExceptionEvent(exc("Error", "NS_ERROR_FAILURE: No error message"))).toBe(
       "drop",
     );
   });
 
   it("drops IDB index lookup without in-progress transaction (JETLAG-3S)", () => {
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc(
           "UnknownError",
           "Attempt to get all index records from database without an in-progress transaction",
@@ -148,13 +150,13 @@ describe("classifyClientSentryEvent", () => {
 
   it("sends Firestore missing-or-insufficient-permissions (reopened)", () => {
     expect(
-      classifyClientSentryEvent(exc("FirebaseError", "Missing or insufficient permissions.")),
+      classifyClientExceptionEvent(exc("FirebaseError", "Missing or insufficient permissions.")),
     ).toBe("send");
   });
 
   it("sends storage/unauthorized (reopened)", () => {
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc(
           "FirebaseError",
           "Firebase Storage: User does not have permission to access 'sessions/x/photo.jpg'. (storage/unauthorized)",
@@ -165,7 +167,7 @@ describe("classifyClientSentryEvent", () => {
 
   it("drops expected join permission-denied captureMessage", () => {
     expect(
-      classifyClientSentryEvent({
+      classifyClientExceptionEvent({
         message: "Join permission denied",
         level: "warning",
       }),
@@ -187,10 +189,10 @@ describe("classifyClientSentryEvent", () => {
       "Session uses legacy join.",
     ];
     for (const message of fixtures) {
-      expect(classifyClientSentryEvent(exc("FirebaseError", message))).toBe("drop");
-      expect(classifyClientSentryEvent({ message })).toBe("drop");
+      expect(classifyClientExceptionEvent(exc("FirebaseError", message))).toBe("drop");
+      expect(classifyClientExceptionEvent({ message })).toBe("drop");
       expect(
-        classifyClientSentryEvent({
+        classifyClientExceptionEvent({
           message: `failed-precondition ${message}`,
         }),
       ).toBe("drop");
@@ -198,53 +200,44 @@ describe("classifyClientSentryEvent", () => {
   });
 
   it("keeps module script import failure and WebKit Load failed", () => {
-    expect(classifyClientSentryEvent(exc("TypeError", "Importing a module script failed."))).toBe(
-      "send",
-    );
-    expect(classifyClientSentryEvent(exc("TypeError", "Load failed"))).toBe("send");
-    expect(classifyClientSentryEvent(exc("TypeError", "Load failed (jetlag.gelbhart.dev)"))).toBe(
-      "send",
-    );
+    expect(
+      classifyClientExceptionEvent(exc("TypeError", "Importing a module script failed.")),
+    ).toBe("send");
+    expect(classifyClientExceptionEvent(exc("TypeError", "Load failed"))).toBe("send");
+    expect(
+      classifyClientExceptionEvent(exc("TypeError", "Load failed (jetlag.gelbhart.dev)")),
+    ).toBe("send");
   });
 
   it("does not denylist isCorePipeline, getImage, deadline-exceeded, or dynamic import failures", () => {
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc("TypeError", "Cannot read properties of null (reading 'isCorePipeline')"),
       ),
     ).toBe("send");
     expect(
-      classifyClientSentryEvent(
+      classifyClientExceptionEvent(
         exc("TypeError", "Cannot read properties of undefined (reading 'getImage')"),
       ),
     ).toBe("send");
-    expect(classifyClientSentryEvent(exc("FirebaseError", "deadline-exceeded"))).toBe("send");
+    expect(classifyClientExceptionEvent(exc("FirebaseError", "deadline-exceeded"))).toBe("send");
     expect(
-      classifyClientSentryEvent(exc("TypeError", "Failed to fetch dynamically imported module")),
+      classifyClientExceptionEvent(exc("TypeError", "Failed to fetch dynamically imported module")),
     ).toBe("send");
-  });
-
-  it("does not special-case transaction-type Overpass events (stream mode)", () => {
-    expect(
-      classifyClientSentryEvent({
-        type: "transaction",
-        spans: [{ description: "POST /proxy/overpass" }],
-      }),
-    ).toBe("send"); // errors path; span drop is ignoreSpans, not classify
   });
 });
 
-describe("applyClientSentryDisposition", () => {
+describe("applyClientExceptionDisposition", () => {
   it("samples quota at rate and fingerprints", () => {
     const event = exc("QuotaExceededError", "The quota has been exceeded.");
     const justBelow = Math.max(0, QUOTA_SAMPLE_RATE - Number.EPSILON);
-    const sent = applyClientSentryDisposition(event, "meter_quota", () => justBelow);
+    const sent = applyClientExceptionDisposition(event, "meter_quota", () => justBelow);
     expect(sent).not.toBeNull();
     expect(sent?.fingerprint).toEqual(["storage-quota-exceeded"]);
     expect(sent?.level).toBe("warning");
-    const atRate = applyClientSentryDisposition(event, "meter_quota", () => QUOTA_SAMPLE_RATE);
+    const atRate = applyClientExceptionDisposition(event, "meter_quota", () => QUOTA_SAMPLE_RATE);
     expect(atRate).toBeNull();
-    const above = applyClientSentryDisposition(
+    const above = applyClientExceptionDisposition(
       event,
       "meter_quota",
       () => QUOTA_SAMPLE_RATE + 0.01,

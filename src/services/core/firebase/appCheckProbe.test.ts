@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSessionStore } from "@/state/sessionStore";
-import { captureAppCheckTokenFailure } from "../analytics/sentry";
+import { captureAppCheckTokenFailure } from "../analytics/clientErrors";
 import {
   APP_CHECK_PROBE_SKIP_KEY,
   APP_CHECK_PROBE_TIMEOUT_MS,
@@ -37,7 +37,7 @@ vi.mock("@/services/core/time/serverClock", () => ({
   probeServerTime: (timeoutMs?: number) => probeServerTime(timeoutMs),
 }));
 
-vi.mock("../analytics/sentry", () => ({
+vi.mock("../analytics/clientErrors", () => ({
   captureAppCheckTokenFailure: vi.fn(),
 }));
 

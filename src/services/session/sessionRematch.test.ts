@@ -15,7 +15,7 @@ vi.mock("../core/firebase/firebase", () => ({
   isFirebaseConfigured,
 }));
 
-vi.mock("../core/analytics/sentry", () => ({
+vi.mock("../core/analytics/clientErrors", () => ({
   captureAppCheckTokenFailure,
 }));
 

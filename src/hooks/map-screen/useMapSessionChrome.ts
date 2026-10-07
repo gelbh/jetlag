@@ -8,7 +8,7 @@ import { isActive, LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { isSessionRoleGated } from "../../domain/session/players/roleGates";
 import { trackSessionEnded } from "../../services/core/analytics/analytics";
-import { captureException } from "../../services/core/analytics/sentry";
+import { captureException } from "../../services/core/analytics/clientErrors";
 import { forceRgbCssColorsInClone } from "../../services/core/capture/html2canvasColors";
 import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/capture/html2canvasErrors";
 import { ensureAnonymousUser } from "../../services/core/firebase/firebase";

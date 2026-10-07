@@ -2,7 +2,7 @@ import { getToken } from "firebase/app-check";
 import { getClientEnv } from "@/config/env";
 import { isDeviceEffectivelyOffline } from "@/services/core/network/deviceOffline";
 import { probeServerTime } from "@/services/core/time/serverClock";
-import { captureAppCheckTokenFailure } from "../analytics/sentry";
+import { captureAppCheckTokenFailure } from "../analytics/clientErrors";
 import {
   type AppCheckProbeFailureClass,
   classifyAppCheckProbeFailure,

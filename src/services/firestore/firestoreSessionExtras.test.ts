@@ -66,9 +66,8 @@ vi.mock("../core/firebase/firebase", () => ({
   getFirestoreDb: () => ({}),
 }));
 
-vi.mock("../core/analytics/sentry", () => ({
+vi.mock("../core/analytics/clientErrors", () => ({
   captureException: mockCaptureException,
-  reportFirestoreListenPermissionDenied: vi.fn(),
 }));
 
 import { onSnapshot } from "firebase/firestore";

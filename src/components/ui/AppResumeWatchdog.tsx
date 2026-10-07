@@ -15,10 +15,7 @@ import {
 } from "../../domain/device/updates/chunkLoadRecovery";
 import { clearActiveRevealTransition } from "../../navigation/revealRouteTransition";
 import { useRouteTransition } from "../../navigation/useRouteTransition";
-import {
-  addAppResumeBreadcrumb,
-  captureResumeShellUnresponsive,
-} from "../../services/core/analytics/sentry";
+import { captureResumeShellUnresponsive } from "../../services/core/analytics/clientErrors";
 
 export const RESUME_WATCHDOG_RELOAD_KEY = "jetlag:resume-watchdog-reload";
 
@@ -100,12 +97,6 @@ export function AppResumeWatchdog() {
     resetStuckTransition();
 
     const backgroundMs = hiddenAtRef.current === null ? 0 : Date.now() - hiddenAtRef.current;
-    addAppResumeBreadcrumb({
-      pathname: pathnameRef.current,
-      backgroundMs,
-      standalone: isStandalonePwa(),
-      iosStandalone: isIosStandalonePwa(),
-    });
 
     cancelWatchdog();
 

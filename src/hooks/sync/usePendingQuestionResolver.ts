@@ -3,7 +3,7 @@ import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { resolvePendingAnnotationFromReply } from "../../domain/questions/questionResolution/resolvePendingAnnotationFromReply";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { isStaleAfterReset } from "../../domain/session/meta/sessionReset";
-import { capturePendingResolveFailure } from "../../services/core/analytics/sentry";
+import { capturePendingResolveFailure } from "../../services/core/analytics/clientErrors";
 import {
   getPendingQuestionStatus,
   updatePendingQuestion,

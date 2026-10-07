@@ -20,12 +20,6 @@ vi.mock("posthog-js", () => ({
 
 import { resetAnalyticsForTests } from "./analytics";
 import {
-  addAppResumeBreadcrumb,
-  addIdbDeleteFailureBreadcrumb,
-  addPhotoUploadBreadcrumb,
-  addPwaStoragePressureBreadcrumb,
-  addRecoverableErrorBreadcrumb,
-  addWriteRejectedBreadcrumb,
   captureAppCheckTokenFailure,
   captureAuthBootstrapFailure,
   captureAuthPersistenceFallback,
@@ -34,13 +28,7 @@ import {
   capturePendingResolveFailure,
   capturePhotoUploadFailure,
   captureResumeShellUnresponsive,
-  reportFirestoreListenPermissionDenied,
-  reportJoinPermissionDenied,
-  reportSlowRouteTransition,
-  setBootstrapTag,
-  setTransactionName,
-  syncSentryUser,
-} from "./sentry";
+} from "./clientErrors";
 
 describe("client facade module graph", () => {
   it("does not import the browser Sentry package from the facade source", async () => {
@@ -48,67 +36,10 @@ describe("client facade module graph", () => {
     const path = await import("node:path");
     const banned = `@${"sentry/react"}`;
     const src = await fs.readFile(
-      path.join(process.cwd(), "src/services/core/analytics/sentry.ts"),
+      path.join(process.cwd(), "src/services/core/analytics/clientErrors.ts"),
       "utf8",
     );
     expect(src.includes(banned)).toBe(false);
-  });
-});
-
-describe("no-op breadcrumbs and tracing", () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-    posthogCapture.mockClear();
-    posthogCaptureException.mockClear();
-  });
-
-  it("breadcrumb-only helpers do not throw or call PostHog product capture", () => {
-    vi.stubEnv("MODE", "production");
-
-    expect(() => reportJoinPermissionDenied("initial")).not.toThrow();
-    expect(() => reportJoinPermissionDenied("retry")).not.toThrow();
-    expect(() => reportFirestoreListenPermissionDenied()).not.toThrow();
-    expect(() => addPhotoUploadBreadcrumb({ stage: "compress" })).not.toThrow();
-    expect(() =>
-      addAppResumeBreadcrumb({
-        pathname: "/",
-        backgroundMs: 1000,
-        standalone: false,
-        iosStandalone: false,
-      }),
-    ).not.toThrow();
-    expect(() =>
-      addPwaStoragePressureBreadcrumb({
-        usage: 1,
-        quota: 2,
-        usageDetails: {},
-      } as never),
-    ).not.toThrow();
-    expect(() => addWriteRejectedBreadcrumb("write", new Error("denied"))).not.toThrow();
-    expect(() => addIdbDeleteFailureBreadcrumb(new Error("idb"))).not.toThrow();
-    expect(() => addRecoverableErrorBreadcrumb(new Error("hydrate"))).not.toThrow();
-    expect(() => setBootstrapTag("auth_start")).not.toThrow();
-    expect(() => setTransactionName("/presets/abc123/edit")).not.toThrow();
-    expect(() => syncSentryUser({ uid: "firebase-uid-1" })).not.toThrow();
-    expect(() => syncSentryUser(null)).not.toThrow();
-    expect(() =>
-      reportSlowRouteTransition({
-        preload_ms: 100,
-        ready_wait_ms: 100,
-        total_ms: 3000,
-        target_path: "/home",
-        final_path: "/home",
-        readiness_kind: "idle",
-        warm_chunk: false,
-        warm_ready: false,
-      }),
-    ).not.toThrow();
-    expect(() =>
-      captureAppCheckTokenFailure(new Error("soft"), { soft: true, source: "probe" }),
-    ).not.toThrow();
-
-    expect(posthogCapture).not.toHaveBeenCalled();
-    expect(posthogCaptureException).not.toHaveBeenCalled();
   });
 });
 
@@ -178,6 +109,15 @@ describe("tagged captures", () => {
     expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
       auth_persistence: "memory",
     });
+  });
+
+  it("captureAppCheckTokenFailure soft path does not capture", async () => {
+    resetAnalyticsForTests({ initialized: true });
+    expect(() =>
+      captureAppCheckTokenFailure(new Error("soft"), { soft: true, source: "probe" }),
+    ).not.toThrow();
+    await vi.dynamicImportSettled();
+    expect(posthogCaptureException).not.toHaveBeenCalled();
   });
 
   it("captureAppCheckTokenFailure hard path captures with extras", async () => {

@@ -285,7 +285,7 @@ test("EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS are all allowlisted", () => {
 test("client EXPECTED_JOIN_UX_MESSAGES lists every session UX SoT message", () => {
   const testDir = dirname(fileURLToPath(import.meta.url));
   const clientPolicy = readFileSync(
-    resolve(testDir, "../../src/services/core/analytics/sentryEventPolicy.ts"),
+    resolve(testDir, "../../src/services/core/analytics/clientExceptionPolicy.ts"),
     "utf8",
   );
   for (const key of EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS) {
