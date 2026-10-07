@@ -7,6 +7,7 @@ import { defineConfig } from "vite";
 import wasm from "vite-plugin-wasm";
 import { clientChunkGroups } from "./vite.chunk-groups";
 import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
+import { createPosthogPlugins } from "./vite.posthog";
 import { createPwaPlugin } from "./vite.pwa";
 import { sharedAlias } from "./vite.resolve-shared";
 import { createSentryPlugins } from "./vite.sentry";
@@ -61,6 +62,7 @@ export default defineConfig(({ mode }) => ({
     optionalKernelWasmPkg(),
     wasm(),
     ...createSentryPlugins({ appVersion }),
+    ...createPosthogPlugins({ appVersion }),
     // React Compiler full compile; exclude violators with "use no memo" (CONTRIBUTING.md)
     react({ compiler: true }),
     tailwindcss(),
