@@ -1,7 +1,15 @@
 import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
-import { capturePosthogException } from "./analytics";
 
 // ponytail: no PostHog breadcrumb trail in P3; upgrade via $exception properties or custom events after Accept if needed.
+
+function captureClientException(
+  error: unknown,
+  additionalProperties?: Record<string, unknown>,
+): void {
+  void import("./analytics")
+    .then((m) => m.capturePosthogException(error, additionalProperties))
+    .catch(() => {});
+}
 
 export function initSentry(): void {}
 
@@ -14,13 +22,13 @@ export function setBootstrapTag(_phase: string): void {
 }
 
 export function captureAuthPersistenceFallback(mode: "session" | "memory", error?: unknown): void {
-  capturePosthogException(error ?? new Error(`Auth persistence fell back to ${mode}`), {
+  captureClientException(error ?? new Error(`Auth persistence fell back to ${mode}`), {
     auth_persistence: mode,
   });
 }
 
 export function captureAuthBootstrapFailure(error: unknown): void {
-  capturePosthogException(error, { bootstrap_phase: "auth_failed" });
+  captureClientException(error, { bootstrap_phase: "auth_failed" });
 }
 
 export type AppCheckCaptureContext = {
@@ -38,7 +46,7 @@ export function captureAppCheckTokenFailure(
   }
 
   const { soft: _soft, ...extras } = context ?? {};
-  capturePosthogException(error, {
+  captureClientException(error, {
     app_check_token: "failed",
     ...extras,
   });
@@ -49,7 +57,7 @@ export function captureErrorBoundaryException(
   error: unknown,
   componentStack: string | null | undefined,
 ): void {
-  capturePosthogException(error, {
+  captureClientException(error, {
     componentStack: componentStack ?? "",
   });
 }
@@ -63,7 +71,7 @@ export function addRecoverableErrorBreadcrumb(_error: unknown, _componentStack?:
 export function setTransactionName(_pathname: string): void {}
 
 export function captureException(error: unknown): void {
-  void import("./analytics").then((m) => m.capturePosthogException(error)).catch(() => {});
+  captureClientException(error);
 }
 
 /** Expected join/heal permission-denied — breadcrumb only (no issue). */
@@ -85,7 +93,7 @@ export function capturePhotoUploadFailure(
   stage: "compress" | "storage" | "firestore",
   context?: Record<string, unknown>,
 ): void {
-  capturePosthogException(error, {
+  captureClientException(error, {
     photo_upload: stage,
     ...(context ?? {}),
   });
@@ -95,7 +103,7 @@ export function capturePendingResolveFailure(
   error: unknown,
   context: { toolType: string; pendingQuestionId?: string },
 ): void {
-  capturePosthogException(error, {
+  captureClientException(error, {
     pending_resolve_failed: "true",
     toolType: context.toolType,
     ...(context.pendingQuestionId ? { pendingQuestionId: context.pendingQuestionId } : {}),
@@ -150,7 +158,7 @@ export function captureResumeShellUnresponsive(
     adminRoute?: boolean;
   },
 ): void {
-  capturePosthogException(new Error("resume_shell_unresponsive"), {
+  captureClientException(new Error("resume_shell_unresponsive"), {
     resume_watchdog: "unresponsive",
     pathname: context.pathname,
     backgroundMs: context.backgroundMs,

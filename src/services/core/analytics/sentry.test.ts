@@ -122,20 +122,22 @@ describe("tagged captures", () => {
     posthogCaptureException.mockClear();
   });
 
-  it("capturePhotoUploadFailure forwards stage as scrubbed properties", () => {
+  it("capturePhotoUploadFailure forwards stage as scrubbed properties", async () => {
     resetAnalyticsForTests({ initialized: true });
     const error = new Error("upload failed");
 
     capturePhotoUploadFailure(error, "storage", { sessionCode: "ABCD" });
 
-    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
     const [passed, props] = posthogCaptureException.mock.calls[0] ?? [];
     expect(passed).toBeInstanceOf(Error);
     expect(props).toMatchObject({ photo_upload: "storage" });
     expect(JSON.stringify(props)).not.toMatch(/ABCD/);
   });
 
-  it("capturePendingResolveFailure forwards tool tags", () => {
+  it("capturePendingResolveFailure forwards tool tags", async () => {
     resetAnalyticsForTests({ initialized: true });
     const error = new Error("resolve failed");
 
@@ -144,7 +146,9 @@ describe("tagged captures", () => {
       pendingQuestionId: "q-1",
     });
 
-    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
     expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
       pending_resolve_failed: "true",
       toolType: "radar",
@@ -152,37 +156,43 @@ describe("tagged captures", () => {
     });
   });
 
-  it("captureAuthBootstrapFailure tags bootstrap phase", () => {
+  it("captureAuthBootstrapFailure tags bootstrap phase", async () => {
     resetAnalyticsForTests({ initialized: true });
     const error = new Error("auth boom");
 
     captureAuthBootstrapFailure(error);
 
-    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
     expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
       bootstrap_phase: "auth_failed",
     });
   });
 
-  it("captureAuthPersistenceFallback captures with mode tag", () => {
+  it("captureAuthPersistenceFallback captures with mode tag", async () => {
     resetAnalyticsForTests({ initialized: true });
     const error = new Error("persist");
 
     captureAuthPersistenceFallback("memory", error);
 
-    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
     expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
       auth_persistence: "memory",
     });
   });
 
-  it("captureAppCheckTokenFailure hard path captures with extras", () => {
+  it("captureAppCheckTokenFailure hard path captures with extras", async () => {
     resetAnalyticsForTests({ initialized: true });
     const error = new Error("token");
 
     captureAppCheckTokenFailure(error, { source: "probe", reason: "timeout" });
 
-    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
     expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
       app_check_token: "failed",
       source: "probe",
@@ -190,19 +200,21 @@ describe("tagged captures", () => {
     });
   });
 
-  it("captureErrorBoundaryException forwards componentStack", () => {
+  it("captureErrorBoundaryException forwards componentStack", async () => {
     resetAnalyticsForTests({ initialized: true });
     const error = new Error("boom");
 
     captureErrorBoundaryException(error, "\n    at Boom");
 
-    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
     expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
       componentStack: "\n    at Boom",
     });
   });
 
-  it("captureResumeShellUnresponsive captures with resume context", () => {
+  it("captureResumeShellUnresponsive captures with resume context", async () => {
     resetAnalyticsForTests({ initialized: true });
 
     captureResumeShellUnresponsive({
@@ -213,7 +225,9 @@ describe("tagged captures", () => {
       adminRoute: true,
     });
 
-    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
     const [passed, props] = posthogCaptureException.mock.calls[0] ?? [];
     expect(passed).toBeInstanceOf(Error);
     expect(props).toMatchObject({
