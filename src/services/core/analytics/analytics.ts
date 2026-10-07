@@ -285,6 +285,21 @@ export function trackSessionEnded(reason: SessionEndedReason): void {
   track(ANALYTICS_EVENTS.session_ended, { reason });
 }
 
+/**
+ * Soft-fail PostHog sink for the client `captureException` dual-write (P1).
+ * No-op until `initPosthogCore`; never throws into callers.
+ */
+export function capturePosthogException(error: unknown): void {
+  if (!coreInitialized) {
+    return;
+  }
+  try {
+    posthog.captureException(error);
+  } catch {
+    // Soft-fail: exception reporting must never break the app.
+  }
+}
+
 export function resetAnalyticsForTests(options?: { initialized?: boolean }): void {
   coreInitialized = options?.initialized ?? false;
   initialized = options?.initialized ?? false;

@@ -333,6 +333,8 @@ export function setTransactionName(pathname: string): void {
 
 export function captureException(error: unknown): void {
   Sentry.captureException(error);
+  // Dynamic import keeps posthog out of every sentry caller's static graph.
+  void import("./analytics").then((m) => m.capturePosthogException(error)).catch(() => {});
 }
 
 /** Expected join/heal permission-denied — breadcrumb only (no Sentry issue). */
