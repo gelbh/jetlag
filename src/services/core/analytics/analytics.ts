@@ -13,6 +13,7 @@ import {
   type SessionEndedReason,
 } from "./analyticsEvents";
 import { posthogBeforeSend } from "./posthogBeforeSend";
+import { scrubTelemetryError } from "./telemetryScrub";
 
 export {
   ANALYTICS_EVENTS,
@@ -117,8 +118,12 @@ function runtimeEnabled(): boolean {
   );
 }
 
+/**
+ * Link signed-in uid for ungated scrubbed `$exception` once core is up.
+ * Product capture stays Accept-gated via `initialized` + `before_send`.
+ */
 function applyIdentity(user: AnalyticsIdentity | null): void {
-  if (!initialized) {
+  if (!coreInitialized) {
     return;
   }
   try {
@@ -173,6 +178,7 @@ export function initPosthogCore(): void {
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
     posthog.register({ $geoip_disable: true });
     coreInitialized = true;
+    applyIdentity(lastSeenIdentity);
   } catch {
     // Soft-fail: analytics must never break app boot.
   }
@@ -218,6 +224,8 @@ export function denyAnalyticsConsent(): void {
   }
   identifiedUid = null;
   initialized = false;
+  // Re-link signed-in uid for ungated error reports after product reset.
+  applyIdentity(lastSeenIdentity);
 }
 
 export function syncAnalyticsIdentity(user: AnalyticsIdentity | null): void {
@@ -288,13 +296,14 @@ export function trackSessionEnded(reason: SessionEndedReason): void {
 /**
  * Soft-fail PostHog sink for the client `captureException` dual-write (P1).
  * No-op until `initPosthogCore`; never throws into callers.
+ * Scrubs session-code-like strings before the SDK builds `$exception` properties.
  */
 export function capturePosthogException(error: unknown): void {
   if (!coreInitialized) {
     return;
   }
   try {
-    posthog.captureException(error);
+    posthog.captureException(scrubTelemetryError(error));
   } catch {
     // Soft-fail: exception reporting must never break the app.
   }

@@ -6,6 +6,7 @@ import {
 } from "@/domain/device/consent/analyticsConsent";
 import {
   ANALYTICS_EVENTS,
+  capturePosthogException,
   denyAnalyticsConsent,
   grantAnalyticsConsent,
   initAnalytics,
@@ -23,6 +24,7 @@ import { posthogBeforeSend } from "./posthogBeforeSend";
 const {
   posthogInit,
   posthogCapture,
+  posthogCaptureException,
   posthogRegister,
   posthogReset,
   posthogOptOut,
@@ -32,6 +34,7 @@ const {
 } = vi.hoisted(() => ({
   posthogInit: vi.fn(),
   posthogCapture: vi.fn(),
+  posthogCaptureException: vi.fn(),
   posthogRegister: vi.fn(),
   posthogReset: vi.fn(),
   posthogOptOut: vi.fn(),
@@ -44,6 +47,7 @@ vi.mock("posthog-js", () => ({
   default: {
     init: posthogInit,
     capture: posthogCapture,
+    captureException: posthogCaptureException,
     register: posthogRegister,
     reset: posthogReset,
     opt_out_capturing: posthogOptOut,
@@ -106,6 +110,7 @@ describe("analytics facade", () => {
     localStorage.clear();
     posthogInit.mockReset();
     posthogCapture.mockReset();
+    posthogCaptureException.mockReset();
     posthogRegister.mockReset();
     posthogReset.mockReset();
     posthogOptOut.mockReset();
@@ -412,9 +417,27 @@ describe("analytics facade", () => {
     expect(posthogIdentify).not.toHaveBeenCalled();
   });
 
-  it("no-ops identity sync when product is not enabled", () => {
+  it("no-ops identity sync when PostHog core is not ready", () => {
     syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
     expect(posthogIdentify).not.toHaveBeenCalled();
+  });
+
+  it("identifies signed-in users after core init without product Accept", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    syncAnalyticsIdentity({ uid: "user-error", isAnonymous: false });
+    expect(posthogIdentify).toHaveBeenCalledOnce();
+    expect(posthogIdentify).toHaveBeenCalledWith("user-error");
+    expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
+  it("capturePosthogException scrubs session codes before the PostHog sink", () => {
+    resetAnalyticsForTests({ initialized: true });
+    capturePosthogException(new Error("Join ABCD failed"));
+    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    const passed = posthogCaptureException.mock.calls[0]?.[0] as Error;
+    expect(passed.message).toBe("Join **** failed");
   });
 
   it("trackSessionEnded captures session_ended with reason", () => {

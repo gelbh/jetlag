@@ -49,6 +49,14 @@ describe("posthogBeforeSend", () => {
     ).toBeNull();
   });
 
+  it("scrubs session-code-like strings on kept $exception captures", () => {
+    writeAnalyticsConsent("denied");
+    const result = posthogBeforeSend(exceptionCapture("Error", "Join ABCD failed"));
+    expect(result).not.toBeNull();
+    const list = result?.properties?.$exception_list as Array<{ value: string }>;
+    expect(list[0]?.value).toBe("Join **** failed");
+  });
+
   it("drops product events when consent is unset", () => {
     const capture: CaptureResult = {
       uuid: "test-uuid",

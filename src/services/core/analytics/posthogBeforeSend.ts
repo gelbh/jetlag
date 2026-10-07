@@ -5,6 +5,7 @@
 import type { CaptureResult } from "posthog-js";
 import { readAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
 import { filterPosthogException } from "./posthogExceptionPolicy";
+import { scrubPosthogExceptionProperties } from "./telemetryScrub";
 
 export function posthogBeforeSend(
   capture: CaptureResult | null,
@@ -15,7 +16,11 @@ export function posthogBeforeSend(
   }
 
   if (capture.event === "$exception") {
-    return filterPosthogException(capture, random);
+    const scrubbed: CaptureResult = {
+      ...capture,
+      properties: scrubPosthogExceptionProperties(capture.properties),
+    };
+    return filterPosthogException(scrubbed, random);
   }
 
   if (readAnalyticsConsent() !== "granted") {
