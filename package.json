@@ -154,7 +154,6 @@
     "morgan": "1.12.1"
   },
   "allowScripts": {
-    "@sentry/cli@2.58.6": true,
     "esbuild@0.28.1": true,
     "protobufjs@7.6.5": true,
     "workerd@1.20260923.1": true,
