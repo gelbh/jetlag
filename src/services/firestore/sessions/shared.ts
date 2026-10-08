@@ -9,7 +9,6 @@ import {
 } from "firebase/firestore";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { buildMembershipHealState } from "@/domain/session/players/returningMember";
-import { reportJoinPermissionDenied } from "@/services/core/analytics/sentry";
 import { forceRefreshIdToken } from "@/services/core/auth/forceRefreshIdToken";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
 import { repairGhostHost } from "@/services/session/sessionLifecycle";
@@ -122,13 +121,11 @@ export async function withJoinPermissionRetry<T>(operation: () => Promise<T>): P
       throw error;
     }
 
-    reportJoinPermissionDenied("initial");
     try {
       await forceRefreshIdToken();
       return await operation();
     } catch (retryError) {
       if (isPermissionDeniedForAuthRetry(retryError)) {
-        reportJoinPermissionDenied("retry");
         throw new Error(AUTH_FAILURE_MESSAGE, { cause: retryError });
       }
       throw retryError;

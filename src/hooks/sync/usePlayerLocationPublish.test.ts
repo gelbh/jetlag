@@ -25,7 +25,7 @@ vi.mock("@/services/firestore/firestoreSessionExtras", () => ({
   appendPlayerTrailPoint,
 }));
 
-vi.mock("@/services/core/analytics/sentry", () => ({ captureException }));
+vi.mock("@/services/core/analytics/clientErrors", () => ({ captureException }));
 
 async function flushMicrotasks() {
   await act(async () => {

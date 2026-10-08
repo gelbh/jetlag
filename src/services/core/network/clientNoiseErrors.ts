@@ -12,7 +12,7 @@ const IDB_INDEX_WITHOUT_TRANSACTION =
   /Attempt to get all index records from database without an in-progress transaction/i;
 /**
  * Firefox Firestore IDB removeItem / zombie-client shutdown (combined message form).
- * Prefer pairing with type `NS_ERROR_FAILURE` in classifyClientSentryEvent.
+ * Prefer pairing with type `NS_ERROR_FAILURE` in classifyClientExceptionEvent.
  */
 const FIREFOX_NS_ERROR_FAILURE = /NS_ERROR_FAILURE:\s*No error message/i;
 const RECAPTCHA_TIMEOUT = /^reCAPTCHA Timeout\s*\(/i;

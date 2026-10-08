@@ -30,7 +30,7 @@ import {
 } from "../../domain/session/activity/sessionChat";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { captureException } from "../core/analytics/sentry";
+import { captureException } from "../core/analytics/clientErrors";
 import { getFirestoreDb } from "../core/firebase/firebase";
 import { emitQuestionCancelledActivity } from "../session/emitSessionActivity";
 import { arePlayerLocationPublishesBlocked } from "../session/playerLocationPublishGate";

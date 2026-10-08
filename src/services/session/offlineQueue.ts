@@ -1,5 +1,4 @@
 import type { AnnotationRecord } from "../../domain/map/annotations";
-import { addIdbDeleteFailureBreadcrumb } from "../core/analytics/sentry";
 import { isRetriableDatabaseError } from "./indexedDbErrors";
 
 const DB_NAME = "jetlag-offline-queue";
@@ -208,7 +207,6 @@ export async function removeOfflineWrite(id: string): Promise<void> {
           return;
         }
         settled = true;
-        addIdbDeleteFailureBreadcrumb(error);
         reject(error instanceof Error ? error : new Error("Queue delete failed"));
       };
 

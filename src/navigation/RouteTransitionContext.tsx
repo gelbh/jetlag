@@ -1,6 +1,5 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type NavigateOptions, type To, useLocation, useNavigate } from "react-router-dom";
-import { reportSlowRouteTransitionLazy } from "@/services/core/analytics/lazyTelemetry";
 import { useMotionProfile } from "../hooks/motion/useMotionProfile";
 import {
   type NavRevealDirection,
@@ -9,7 +8,6 @@ import {
 } from "./revealRouteTransition";
 import { computeLoadingProgress, type RouteLoadingProgress } from "./routeLoadingSteps";
 import {
-  isLazyRoute,
   preloadRoute,
   resolveNavigateDestinationKey,
   resolveNavigatePath,
@@ -20,7 +18,7 @@ import {
   RouteTransitionContext,
   type RouteTransitionPhase,
 } from "./routeTransitionContextInstance";
-import { getSyncRouteReady, isRouteImportWarm, isWarmFastPathEligible } from "./routeWarmState";
+import { getSyncRouteReady, isWarmFastPathEligible } from "./routeWarmState";
 import { routeReadinessKind } from "./useRouteScreenReady";
 
 export type { BeginTransitionOptions, RouteTransitionPhase };
@@ -171,12 +169,8 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
 
   const beginTransition = useCallback(
     async (to: To, options?: BeginTransitionOptions) => {
-      const startedAt = Date.now();
       const targetPath = resolveNavigatePath(to);
       const destinationKey = resolveNavigateDestinationKey(to);
-      const readinessKind = routeReadinessKind(targetPath);
-      const warmChunk = !isLazyRoute(targetPath) || isRouteImportWarm(targetPath);
-      const warmReady = getSyncRouteReady(targetPath);
       const warmFastPath = isWarmFastPathEligible(targetPath);
       // Keep RR viewTransition off: revealRouteTransition owns VT after warm/settle.
       const navigateOptions: RouteNavigateOptions = {
@@ -235,13 +229,11 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       setPhase("settling");
 
       try {
-        const preloadStartedAt = Date.now();
         try {
           await preloadRoute(targetPath);
         } catch {
           // Warm-up only; the rendered lazy route retries chunk failures itself.
         }
-        const preloadMs = Date.now() - preloadStartedAt;
 
         if (transitionGenerationRef.current !== myGeneration) {
           return;
@@ -249,7 +241,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
 
         setLoadingProgress(computeLoadingProgress(targetPath, screenReadyRef.current));
 
-        // Navigate immediately — destination shell/skeleton mounts while
+        // Navigate immediately - destination shell/skeleton mounts while
         // readiness settles in-shell (no full-bleed load overlay).
         setNavDirection(revealDirectionRef.current);
         try {
@@ -260,24 +252,13 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           navigate(to, navigateOptions);
         }
 
-        const readyWaitMs = await waitForScreenReady();
+        await waitForScreenReady();
 
         if (transitionGenerationRef.current !== myGeneration) {
           return;
         }
 
         setLoadingProgress(computeLoadingProgress(targetPath, screenReadyRef.current));
-
-        reportSlowRouteTransitionLazy({
-          preload_ms: preloadMs,
-          ready_wait_ms: readyWaitMs,
-          total_ms: Date.now() - startedAt,
-          target_path: targetPath,
-          final_path: pathnameRef.current,
-          readiness_kind: readinessKind,
-          warm_chunk: warmChunk,
-          warm_ready: warmReady,
-        });
       } finally {
         if (transitionGenerationRef.current === myGeneration) {
           loadingTargetRef.current = null;

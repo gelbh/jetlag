@@ -5,7 +5,6 @@ import { reportStoragePressureIfHigh } from "../../domain/device/pwa/pwaStorageB
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
 import { filterAnnotationsAfterReset } from "../../domain/session/meta/sessionReset";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
-import { addPwaStoragePressureBreadcrumb } from "../../services/core/analytics/sentry";
 import {
   getFirestoreDb,
   isFirebaseConfigured,
@@ -233,7 +232,6 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
 
       void reportStoragePressureIfHigh({
         source: "client",
-        onPressure: addPwaStoragePressureBreadcrumb,
       });
 
       const pendingForSession = await readOfflineQueueForSession(sessionId);

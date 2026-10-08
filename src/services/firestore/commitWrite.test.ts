@@ -1,7 +1,6 @@
 import { FirebaseError } from "firebase/app";
 import type { Firestore } from "firebase/firestore";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { addWriteRejectedBreadcrumb } from "@/services/core/analytics/sentry";
 import {
   selectFailedEntries,
   selectPendingCount,
@@ -9,17 +8,12 @@ import {
 } from "@/state/writeLedgerStore";
 import { commitWrite, RESTORED_WRITES_GRACE_MS, trackRestoredWrites } from "./commitWrite";
 
-vi.mock("@/services/core/analytics/sentry", () => ({
-  addWriteRejectedBreadcrumb: vi.fn(),
-}));
-
 const waitForPendingWrites = vi.hoisted(() => vi.fn());
 vi.mock("firebase/firestore", () => ({ waitForPendingWrites }));
 
 describe("commitWrite", () => {
   beforeEach(() => {
     useWriteLedgerStore.setState({ entries: {} });
-    vi.mocked(addWriteRejectedBreadcrumb).mockClear();
   });
 
   it("returns synchronously and tracks pending until ack", async () => {
@@ -44,10 +38,6 @@ describe("commitWrite", () => {
     await expect(acknowledged).rejects.toThrow();
     const failed = selectFailedEntries(useWriteLedgerStore.getState());
     expect(failed[0]?.label).toBe("found.confirm");
-    expect(addWriteRejectedBreadcrumb).toHaveBeenCalledWith(
-      "found.confirm",
-      expect.any(FirebaseError),
-    );
   });
 
   it("captures synchronous throws from run()", async () => {

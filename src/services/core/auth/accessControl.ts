@@ -2,7 +2,7 @@ import { FirebaseError } from "firebase/app";
 import { getToken } from "firebase/app-check";
 import type { User } from "firebase/auth";
 import { httpsCallable } from "firebase/functions";
-import { captureAppCheckTokenFailure } from "../analytics/sentry";
+import { captureAppCheckTokenFailure } from "../analytics/clientErrors";
 import {
   getFirebaseAppCheck,
   getFirebaseAuth,

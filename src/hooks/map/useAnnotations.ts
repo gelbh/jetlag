@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { addWriteRejectedBreadcrumb } from "@/services/core/analytics/sentry";
 import { isFirestorePermissionDenied } from "@/services/firestore/sessions/shared";
 import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
@@ -81,7 +80,6 @@ export function useAnnotations() {
         }
       }
       const message = annotationSyncErrorMessage(failure);
-      addWriteRejectedBreadcrumb("annotation", failure);
       setLastSyncError(message);
       return message;
     },

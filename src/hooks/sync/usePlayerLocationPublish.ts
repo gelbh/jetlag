@@ -6,7 +6,7 @@ import type {
   PlayerLocationRecord,
   PlayerLocationRole,
 } from "@/domain/session/activity/sessionChat";
-import { captureException } from "@/services/core/analytics/sentry";
+import { captureException } from "@/services/core/analytics/clientErrors";
 import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
 import type { GeolocationReading } from "@/services/core/location/geolocation";
 import { isFirestorePermissionDenied } from "@/services/firestore/firestoreAnnotations";
