@@ -29,9 +29,6 @@ const clientEnvSchema = firebaseEnvSchema
     VITE_OVERPASS_PROXY_URL: optionalUrl,
     VITE_TRANSIT_PROXY_URL: optionalUrl,
     VITE_TRANSITLAND_PROXY_URL: optionalUrl,
-    VITE_SENTRY_DSN: optionalUrl,
-    VITE_SENTRY_ENVIRONMENT: optionalNonEmptyString,
-    VITE_SENTRY_RELEASE_DIST: optionalNonEmptyString,
     VITE_POSTHOG_KEY: optionalNonEmptyString,
   })
   .superRefine((env, ctx) => {
@@ -111,9 +108,6 @@ function readRawClientEnv(): Record<string, unknown> {
     VITE_OVERPASS_PROXY_URL: import.meta.env.VITE_OVERPASS_PROXY_URL,
     VITE_TRANSIT_PROXY_URL: import.meta.env.VITE_TRANSIT_PROXY_URL,
     VITE_TRANSITLAND_PROXY_URL: import.meta.env.VITE_TRANSITLAND_PROXY_URL,
-    VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
-    VITE_SENTRY_ENVIRONMENT: import.meta.env.VITE_SENTRY_ENVIRONMENT,
-    VITE_SENTRY_RELEASE_DIST: import.meta.env.VITE_SENTRY_RELEASE_DIST,
     VITE_POSTHOG_KEY: import.meta.env.VITE_POSTHOG_KEY,
   };
 

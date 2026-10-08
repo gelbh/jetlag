@@ -15,7 +15,7 @@ import {
   type SessionEndedReason,
 } from "./analyticsEvents";
 import { posthogBeforeSend } from "./posthogBeforeSend";
-import { scrubTelemetryError } from "./telemetryScrub";
+import { scrubPosthogExceptionProperties, scrubTelemetryError } from "./telemetryScrub";
 
 export {
   ANALYTICS_EVENTS,
@@ -306,16 +306,41 @@ export function trackSessionEnded(reason: SessionEndedReason): void {
 }
 
 /**
- * Soft-fail PostHog sink for the client `captureException` dual-write (P1).
+ * Exception capture props: keep product forbidden-key drops (geo / session codes / uids)
+ * but remaps Firebase-style `code` → `firebase_code` so diagnostics survive, then scrub
+ * session-code-like string leaves via `scrubPosthogExceptionProperties`.
+ */
+export function scrubExceptionCaptureProperties(
+  props: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
+  if (!props) {
+    return undefined;
+  }
+  const normalized: Record<string, unknown> = { ...props };
+  if ("code" in normalized) {
+    if (normalized.firebase_code === undefined) {
+      normalized.firebase_code = normalized.code;
+    }
+    delete normalized.code;
+  }
+  return scrubPosthogExceptionProperties(scrubAnalyticsProperties(normalized));
+}
+
+/**
+ * Soft-fail PostHog sink for the client `captureException` facade.
  * No-op until `initPosthogCore`; never throws into callers.
  * Scrubs session-code-like strings before the SDK builds `$exception` properties.
  */
-export function capturePosthogException(error: unknown): void {
+export function capturePosthogException(
+  error: unknown,
+  additionalProperties?: Record<string, unknown>,
+): void {
   if (!coreInitialized) {
     return;
   }
   try {
-    posthog.captureException(scrubTelemetryError(error));
+    const scrubbedProps = scrubExceptionCaptureProperties(additionalProperties);
+    posthog.captureException(scrubTelemetryError(error), scrubbedProps);
   } catch {
     // Soft-fail: exception reporting must never break the app.
   }

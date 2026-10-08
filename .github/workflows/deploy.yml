@@ -229,7 +229,6 @@ jobs:
               - 'index.html'
               - 'vite.config.ts'
               - 'vite.chunk-groups.ts'
-              - 'vite.sentry.ts'
               - 'vite.pwa.ts'
               - 'vite.resolve-shared.ts'
               - 'wrangler.jsonc'
@@ -303,7 +302,6 @@ jobs:
         run: doppler run --config prd -- npm run build 2>&1 | tee build.log
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-          VITE_SENTRY_RELEASE_DIST: ${{ github.sha }}
       - name: Verify source maps are not shipped
         if: steps.changes.outputs.frontend == 'true'
         run: |
@@ -316,7 +314,7 @@ jobs:
             exit 1
           fi
           if ! grep -qiE 'uploaded|source maps' build.log; then
-            echo "::warning::Sentry source map upload was not confirmed in build output."
+            echo "::warning::Source map upload was not confirmed in build output."
           fi
       # Allowlist CLOUDFLARE_* only; mask before wrangler (no full-catalog doppler run / GITHUB_ENV dump).
       - name: Deploy to Cloudflare

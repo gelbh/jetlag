@@ -11,8 +11,8 @@ interface AppErrorBoundaryState {
 }
 
 /**
- * Root error boundary. Replaces `Sentry.ErrorBoundary` so `@sentry/react`
- * stays off the App chunk's static graph; capture goes through the lazy facade.
+ * Root error boundary. Capture goes through the lazy PostHog-backed facade so
+ * analytics stays off the App chunk's static graph.
  */
 export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
   state: AppErrorBoundaryState = { hasError: false };
