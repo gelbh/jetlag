@@ -93,7 +93,7 @@ export function InsetRow({
         transform: "scale(0.995)",
       },
       // InsetGroup clips overflow, so an outer focus ring would be cut off.
-      "&:focus-visible": {
+      "&:focusVisible": {
         outline: "2px solid var(--color-flag)",
         outlineOffset: -2,
       },

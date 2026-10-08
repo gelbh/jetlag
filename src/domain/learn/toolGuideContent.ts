@@ -23,6 +23,12 @@ export const TOOLS_INDEX_CONTENT: LearnPageContent = {
           text: "Card costs only matter when the host turns on Simulate hider deck in the session settings. It is off by default.",
         },
         {
+          kind: "showcase",
+          showcase: "tools-hub",
+          caption:
+            "Tap a tool to open its guide. These are the same icons as the Ask dock in a live session.",
+        },
+        {
           kind: "table",
           caption: "Question tools and card costs",
           head: ["Tool", "What it asks"],
@@ -88,6 +94,12 @@ export const RADAR_CONTENT: LearnPageContent = {
       lead: "The seekers pick a distance and send “Are you within [distance] of me?” The circle is centered on the seekers' position. You can tap a preset distance or type a custom one, up to the largest preset for your game size.",
       blocks: [
         {
+          kind: "showcase",
+          showcase: "radar",
+          caption:
+            "Pick a distance, then try Yes or No. In a real game you place the circle center on the map first; here the center is already pinned so you can answer.",
+        },
+        {
           kind: "table",
           caption: "Radar distances",
           head: ["Game size", "Distances"],
@@ -140,6 +152,12 @@ export const THERMOMETER_CONTENT: LearnPageContent = {
       heading: "What Thermometer asks",
       lead: "The seekers choose a distance, travel that far, and ask “After traveling [distance], am I hotter or colder?” You can record the move with a GPS track as you go, or place the start and end pins on the map by hand.",
       blocks: [
+        {
+          kind: "showcase",
+          showcase: "thermometer",
+          caption:
+            "Tap a walk distance. On the map you would then start a GPS track or place start and end pins; Hotter/Colder answers live there too.",
+        },
         {
           kind: "table",
           caption: "Thermometer distances",
@@ -197,6 +215,12 @@ export const MATCHING_CONTENT: LearnPageContent = {
       heading: "What Matching asks",
       lead: "The seekers pick a category and send “Is your nearest [place] the same as my nearest [place]?” The app finds the seekers' nearest one from OpenStreetMap data and shows the rule for that category before you send.",
       blocks: [
+        {
+          kind: "showcase",
+          showcase: "matching",
+          caption:
+            "Pick a place type, then answer Yes or No. The nearest name here is a demo stand-in for what the map would resolve.",
+        },
         {
           kind: "table",
           caption: "Matching categories",
@@ -259,6 +283,12 @@ export const MEASURING_CONTENT: LearnPageContent = {
       lead: "The seekers pick a category and send “Compared to me, are you closer to or further from [place]?” The app finds the seekers' nearest one and measures how far away it is.",
       blocks: [
         {
+          kind: "showcase",
+          showcase: "measuring",
+          caption:
+            "Pick what to measure from, then answer Closer or Further. Anchor and target pins are simulated for this page.",
+        },
+        {
           kind: "table",
           caption: "Measuring categories",
           head: ["Group", "Categories"],
@@ -320,6 +350,12 @@ export const TENTACLES_CONTENT: LearnPageContent = {
       lead: "The seekers pick a category and send “Within [distance] of me, which [places] are you nearest to?” The question only counts if the hider is also within that distance. The app lists every place of that type inside the circle.",
       blocks: [
         {
+          kind: "showcase",
+          showcase: "tentacles",
+          caption:
+            "Pick a place type, then choose which nearby place the hider is closest to (or Out of reach).",
+        },
+        {
           kind: "table",
           caption: "Tentacles categories",
           head: ["Game size", "Categories and distance"],
@@ -371,6 +407,11 @@ export const PHOTO_CONTENT: LearnPageContent = {
       heading: "What Photo asks",
       lead: "The seekers pick a prompt and send “Send me a photo of [subject].” Each prompt comes with its own rule for what a valid photo shows. Larger games unlock more prompts.",
       blocks: [
+        {
+          kind: "showcase",
+          showcase: "photo",
+          caption: "Pick a photo ask. In a live game the hider replies with a picture in chat.",
+        },
         {
           kind: "table",
           caption: "Photo prompts by game size",

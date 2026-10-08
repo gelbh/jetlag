@@ -96,6 +96,12 @@ export const GUIDE_CONTENT: LearnPageContent = {
       lead: "When the hiding period ends, the seekers start asking. Each question tool sets up on the map and goes to the hider in game chat. The hider usually has 5 minutes to answer. Once they do, the app shades the part of the map where the hider cannot be.",
       blocks: [
         {
+          kind: "showcase",
+          showcase: "tools-hub",
+          caption:
+            "Open any question tool guide from here. The rail uses the same icons as the live Ask dock.",
+        },
+        {
           kind: "bullets",
           items: [
             "Matching: is your nearest airport, park, or museum the same as ours?",

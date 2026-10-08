@@ -3,6 +3,16 @@ import type { LearnRoutePath } from "@/domain/seo/learnRoutePaths";
 /** Pages a learn article may link to under "Keep reading". */
 export type LearnLinkPath = LearnRoutePath | "/premium" | "/privacy";
 
+/** Interactive product showcases mounted inside learn articles. */
+export type LearnShowcaseId =
+  | "radar"
+  | "thermometer"
+  | "matching"
+  | "measuring"
+  | "tentacles"
+  | "photo"
+  | "tools-hub";
+
 export type LearnBlock =
   | { kind: "paragraph"; text: string }
   | { kind: "steps"; items: readonly string[] }
@@ -12,6 +22,12 @@ export type LearnBlock =
       caption: string;
       head: readonly [string, string];
       rows: readonly (readonly [string, string])[];
+    }
+  | {
+      kind: "showcase";
+      showcase: LearnShowcaseId;
+      /** Visible caption under the demo frame (also used as accessible name). */
+      caption: string;
     };
 
 export type LearnSection = {

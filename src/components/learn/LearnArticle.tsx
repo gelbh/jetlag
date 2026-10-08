@@ -1,6 +1,7 @@
 import { Box, Stack, Text, Title } from "@mantine/core";
 import { BookOpenTextIcon, PlusCircleIcon, SignInIcon } from "@phosphor-icons/react";
 import type { CSSProperties } from "react";
+import { LearnShowcase } from "@/components/learn/LearnShowcase";
 import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import type { LearnBlock, LearnPageContent, LearnSection } from "@/domain/learn/learnContentTypes";
@@ -59,6 +60,8 @@ function Block({ block }: { block: LearnBlock }) {
           ))}
         </ul>
       );
+    case "showcase":
+      return <LearnShowcase showcase={block.showcase} caption={block.caption} />;
     case "table":
       return (
         <InsetGroup>
