@@ -47,9 +47,12 @@ function scheduleDeferredObservability(): void {
       setBootstrapTag("render");
       initSentry();
     });
-    void import("./services/core/analytics/analytics.ts").then(({ initAnalytics }) => {
-      initAnalytics();
-    });
+    void import("./services/core/analytics/analytics.ts").then(
+      ({ initPosthogCore, initAnalytics }) => {
+        initPosthogCore();
+        initAnalytics();
+      },
+    );
   });
 }
 

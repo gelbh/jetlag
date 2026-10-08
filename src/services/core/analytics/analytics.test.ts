@@ -6,9 +6,11 @@ import {
 } from "@/domain/device/consent/analyticsConsent";
 import {
   ANALYTICS_EVENTS,
+  capturePosthogException,
   denyAnalyticsConsent,
   grantAnalyticsConsent,
   initAnalytics,
+  initPosthogCore,
   resetAnalyticsForTests,
   scrubAnalyticsProperties,
   shouldEnableAnalytics,
@@ -17,35 +19,41 @@ import {
   trackPageView,
   trackSessionEnded,
 } from "./analytics";
-import { filterPosthogException } from "./posthogExceptionPolicy";
+import { posthogBeforeSend } from "./posthogBeforeSend";
 
 const {
   posthogInit,
   posthogCapture,
+  posthogCaptureException,
   posthogRegister,
   posthogReset,
   posthogOptOut,
   posthogOptIn,
   posthogIdentify,
+  posthogStopSessionRecording,
 } = vi.hoisted(() => ({
   posthogInit: vi.fn(),
   posthogCapture: vi.fn(),
+  posthogCaptureException: vi.fn(),
   posthogRegister: vi.fn(),
   posthogReset: vi.fn(),
   posthogOptOut: vi.fn(),
   posthogOptIn: vi.fn(),
   posthogIdentify: vi.fn(),
+  posthogStopSessionRecording: vi.fn(),
 }));
 
 vi.mock("posthog-js", () => ({
   default: {
     init: posthogInit,
     capture: posthogCapture,
+    captureException: posthogCaptureException,
     register: posthogRegister,
     reset: posthogReset,
     opt_out_capturing: posthogOptOut,
     opt_in_capturing: posthogOptIn,
     identify: posthogIdentify,
+    stopSessionRecording: posthogStopSessionRecording,
   },
 }));
 
@@ -102,11 +110,13 @@ describe("analytics facade", () => {
     localStorage.clear();
     posthogInit.mockReset();
     posthogCapture.mockReset();
+    posthogCaptureException.mockReset();
     posthogRegister.mockReset();
     posthogReset.mockReset();
     posthogOptOut.mockReset();
     posthogOptIn.mockReset();
     posthogIdentify.mockReset();
+    posthogStopSessionRecording.mockReset();
   });
 
   afterEach(() => {
@@ -119,6 +129,7 @@ describe("analytics facade", () => {
 
   it("does not init PostHog outside production", () => {
     writeAnalyticsConsent("granted");
+    initPosthogCore();
     initAnalytics();
     trackPageView("/home");
     track(ANALYTICS_EVENTS.session_ended, { reason: "host_end" });
@@ -127,7 +138,53 @@ describe("analytics facade", () => {
     expect(posthogCapture).not.toHaveBeenCalled();
   });
 
-  it("does not init PostHog when consent is unset", () => {
+  it("initPosthogCore inits once when consent is unset", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+
+    initPosthogCore();
+    initPosthogCore();
+
+    expect(posthogInit).toHaveBeenCalledOnce();
+    expect(posthogInit.mock.calls[0]?.[1]).toMatchObject({
+      api_host: "/ph",
+      ui_host: "https://eu.posthog.com",
+      disable_session_recording: true,
+      before_send: posthogBeforeSend,
+    });
+    expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
+  });
+
+  it("initPosthogCore inits once when consent is denied", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("denied");
+
+    initPosthogCore();
+
+    expect(posthogInit).toHaveBeenCalledOnce();
+    expect(posthogInit.mock.calls[0]?.[1]).toMatchObject({
+      disable_session_recording: true,
+      before_send: posthogBeforeSend,
+    });
+  });
+
+  it("track no-ops until consent is granted after core init", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+
+    initPosthogCore();
+    track(ANALYTICS_EVENTS.session_created, {
+      tier: "free",
+      gameSize: "medium",
+      role: "seeker",
+    });
+    trackPageView("/home");
+
+    expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
+  it("initAnalytics does not enable product capture when consent is unset", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
 
@@ -135,11 +192,10 @@ describe("analytics facade", () => {
     trackPageView("/home");
     track(ANALYTICS_EVENTS.session_ended, { reason: "host_end" });
 
-    expect(posthogInit).not.toHaveBeenCalled();
     expect(posthogCapture).not.toHaveBeenCalled();
   });
 
-  it("does not init PostHog when consent is denied", () => {
+  it("initAnalytics does not enable product capture when consent is denied", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
     writeAnalyticsConsent("denied");
@@ -147,7 +203,6 @@ describe("analytics facade", () => {
     initAnalytics();
     trackPageView("/home");
 
-    expect(posthogInit).not.toHaveBeenCalled();
     expect(posthogCapture).not.toHaveBeenCalled();
   });
 
@@ -170,7 +225,7 @@ describe("analytics facade", () => {
       disable_external_dependency_loading: true,
       disable_surveys: true,
       person_profiles: "identified_only",
-      before_send: filterPosthogException,
+      before_send: posthogBeforeSend,
     });
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
   });
@@ -248,25 +303,26 @@ describe("analytics facade", () => {
     ).toBe(false);
   });
 
-  it("denyAnalyticsConsent writes denied without init", () => {
+  it("deny after core init does not opt out capturing", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
-
+    initPosthogCore();
     denyAnalyticsConsent();
-    initAnalytics();
 
     expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe("denied");
-    expect(posthogInit).not.toHaveBeenCalled();
+    expect(posthogOptOut).not.toHaveBeenCalled();
+    expect(posthogReset).toHaveBeenCalledWith(true);
+    expect(posthogStopSessionRecording).toHaveBeenCalled();
   });
 
-  it("denyAnalyticsConsent opts out, resets, and stops capture", () => {
+  it("denyAnalyticsConsent resets identity and stops product capture", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
     writeAnalyticsConsent("granted");
     initAnalytics();
     denyAnalyticsConsent();
     trackPageView("/home");
-    expect(posthogOptOut).toHaveBeenCalledOnce();
+    expect(posthogOptOut).not.toHaveBeenCalled();
     expect(posthogReset).toHaveBeenCalledWith(true);
     expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe("denied");
     expect(posthogCapture).not.toHaveBeenCalled();
@@ -287,7 +343,7 @@ describe("analytics facade", () => {
     });
   });
 
-  it("deny clears initialized so capture stops", () => {
+  it("deny clears product so capture stops while core stays ready", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
     writeAnalyticsConsent("granted");
@@ -299,6 +355,7 @@ describe("analytics facade", () => {
     track(ANALYTICS_EVENTS.session_ended, { reason: "host_end" });
 
     expect(posthogCapture).not.toHaveBeenCalled();
+    expect(posthogOptOut).not.toHaveBeenCalled();
   });
 
   it("applies stashed identity on init after sync before consent", () => {
@@ -311,7 +368,7 @@ describe("analytics facade", () => {
     expect(posthogIdentify).toHaveBeenCalledWith("user-accept");
   });
 
-  it("deny then grant calls opt_in and init twice", () => {
+  it("deny then grant reuses core init and opts product back in", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
     vi.stubGlobal("location", { pathname: "/", search: "" });
@@ -319,8 +376,9 @@ describe("analytics facade", () => {
     initAnalytics();
     denyAnalyticsConsent();
     grantAnalyticsConsent();
-    expect(posthogOptIn).toHaveBeenCalledTimes(2);
-    expect(posthogInit).toHaveBeenCalledTimes(2);
+    expect(posthogInit).toHaveBeenCalledOnce();
+    expect(posthogOptIn).toHaveBeenCalled();
+    expect(posthogOptOut).not.toHaveBeenCalled();
   });
 
   it("identifies permanent users once and resets when they sign out", () => {
@@ -359,9 +417,27 @@ describe("analytics facade", () => {
     expect(posthogIdentify).not.toHaveBeenCalled();
   });
 
-  it("no-ops identity sync when not initialized", () => {
+  it("no-ops identity sync when PostHog core is not ready", () => {
     syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
     expect(posthogIdentify).not.toHaveBeenCalled();
+  });
+
+  it("identifies signed-in users after core init without product Accept", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    syncAnalyticsIdentity({ uid: "user-error", isAnonymous: false });
+    expect(posthogIdentify).toHaveBeenCalledOnce();
+    expect(posthogIdentify).toHaveBeenCalledWith("user-error");
+    expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
+  it("capturePosthogException scrubs session codes before the PostHog sink", () => {
+    resetAnalyticsForTests({ initialized: true });
+    capturePosthogException(new Error("Join ABCD failed"));
+    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    const passed = posthogCaptureException.mock.calls[0]?.[0] as Error;
+    expect(passed.message).toBe("Join **** failed");
   });
 
   it("trackSessionEnded captures session_ended with reason", () => {

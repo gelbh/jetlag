@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const addBreadcrumb = vi.hoisted(() => vi.fn());
 const captureMessage = vi.hoisted(() => vi.fn());
 const setUser = vi.hoisted(() => vi.fn());
+const sentryCaptureException = vi.hoisted(() => vi.fn());
+const posthogCaptureException = vi.hoisted(() => vi.fn());
 const withScope = vi.hoisted(() =>
   vi.fn(
     (
@@ -36,7 +38,7 @@ vi.mock("@sentry/react", () => ({
   captureMessage,
   setUser,
   withScope,
-  captureException: vi.fn(),
+  captureException: sentryCaptureException,
   captureReactException,
   init,
   addIntegration,
@@ -45,6 +47,20 @@ vi.mock("@sentry/react", () => ({
   makeFetchTransport: fetchTransport,
   getIsolationScope: () => ({ addBreadcrumb: isolationScopeAddBreadcrumb }),
   getCurrentScope: () => ({ setTransactionName: scopeSetTransactionName }),
+}));
+
+vi.mock("posthog-js", () => ({
+  default: {
+    captureException: posthogCaptureException,
+    init: vi.fn(),
+    capture: vi.fn(),
+    register: vi.fn(),
+    reset: vi.fn(),
+    opt_out_capturing: vi.fn(),
+    opt_in_capturing: vi.fn(),
+    identify: vi.fn(),
+    stopSessionRecording: vi.fn(),
+  },
 }));
 
 vi.mock("./sentryReactRouter", () => ({
@@ -62,9 +78,11 @@ vi.mock("@/domain/device/perf/scheduleAfterFirstPaint", () => ({
   }),
 }));
 
+import { resetAnalyticsForTests } from "./analytics";
 import {
   addRecoverableErrorBreadcrumb,
   captureErrorBoundaryException,
+  captureException,
   initSentry,
   reportFirestoreListenPermissionDenied,
   reportJoinPermissionDenied,
@@ -356,5 +374,39 @@ describe("syncSentryUser", () => {
     syncSentryUser(null);
 
     expect(setUser).toHaveBeenCalledExactlyOnceWith(null);
+  });
+});
+
+describe("captureException", () => {
+  afterEach(() => {
+    resetAnalyticsForTests();
+    sentryCaptureException.mockClear();
+    posthogCaptureException.mockClear();
+  });
+
+  it("dual-writes to Sentry and PostHog when core is inited", async () => {
+    resetAnalyticsForTests({ initialized: true });
+    const error = new Error("x");
+
+    captureException(error);
+
+    expect(sentryCaptureException).toHaveBeenCalledExactlyOnceWith(error);
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+      const passed = posthogCaptureException.mock.calls[0]?.[0] as Error;
+      expect(passed).toBeInstanceOf(Error);
+      expect(passed.message).toBe("x");
+    });
+  });
+
+  it("soft-fails when PostHog core is not inited", async () => {
+    resetAnalyticsForTests();
+    const error = new Error("x");
+
+    expect(() => captureException(error)).not.toThrow();
+    expect(sentryCaptureException).toHaveBeenCalledExactlyOnceWith(error);
+    await vi.dynamicImportSettled();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(posthogCaptureException).not.toHaveBeenCalled();
   });
 });

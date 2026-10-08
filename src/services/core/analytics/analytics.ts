@@ -12,7 +12,8 @@ import {
   type AnalyticsEventProps,
   type SessionEndedReason,
 } from "./analyticsEvents";
-import { filterPosthogException } from "./posthogExceptionPolicy";
+import { posthogBeforeSend } from "./posthogBeforeSend";
+import { scrubTelemetryError } from "./telemetryScrub";
 
 export {
   ANALYTICS_EVENTS,
@@ -59,6 +60,9 @@ const FORBIDDEN_PROP_KEYS = new Set([
   "sessionid",
 ]);
 
+/** PostHog SDK ready for scrubbed `$exception` (consent-independent). */
+let coreInitialized = false;
+/** Product analytics (track / pageview / identify) enabled after Accept. */
 let initialized = false;
 let identifiedUid: string | null = null;
 /** Last auth identity seen — applied on init so Accept-after-sign-in still identifies. */
@@ -114,8 +118,12 @@ function runtimeEnabled(): boolean {
   );
 }
 
+/**
+ * Link signed-in uid for ungated scrubbed `$exception` once core is up.
+ * Product capture stays Accept-gated via `initialized` + `before_send`.
+ */
 function applyIdentity(user: AnalyticsIdentity | null): void {
-  if (!initialized) {
+  if (!coreInitialized) {
     return;
   }
   try {
@@ -135,11 +143,13 @@ function applyIdentity(user: AnalyticsIdentity | null): void {
   }
 }
 
-export function initAnalytics(): void {
-  if (!runtimeEnabled() || initialized) {
-    return;
-  }
-  if (readAnalyticsConsent() !== "granted") {
+/**
+ * Always-on PostHog boot for ungated scrubbed exceptions.
+ * Product events stay gated via `posthogBeforeSend` + the `initialized` product flag.
+ * Do not call `opt_out_capturing` for Deny — that blocks `$exception`.
+ */
+export function initPosthogCore(): void {
+  if (!runtimeEnabled() || coreInitialized) {
     return;
   }
 
@@ -149,7 +159,7 @@ export function initAnalytics(): void {
   }
 
   try {
-    // Sticky persistence can retain opt-out across deny → Accept; clear before init.
+    // Clear sticky opt-out from older Deny paths so exceptions can flow.
     posthog.opt_in_capturing();
     posthog.init(key, {
       api_host: resolvePosthogApiHost(),
@@ -163,10 +173,30 @@ export function initAnalytics(): void {
       disable_external_dependency_loading: true,
       disable_surveys: true,
       person_profiles: "identified_only",
-      before_send: filterPosthogException,
+      before_send: posthogBeforeSend,
     });
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
     posthog.register({ $geoip_disable: true });
+    coreInitialized = true;
+    applyIdentity(lastSeenIdentity);
+  } catch {
+    // Soft-fail: analytics must never break app boot.
+  }
+}
+
+/** Enables product analytics when consent is already granted (boot + Accept path). */
+export function initAnalytics(): void {
+  initPosthogCore();
+  if (!coreInitialized || initialized) {
+    return;
+  }
+  if (readAnalyticsConsent() !== "granted") {
+    return;
+  }
+
+  try {
+    // Sticky persistence can retain opt-out across deny → Accept; clear before product enable.
+    posthog.opt_in_capturing();
     initialized = true;
     applyIdentity(lastSeenIdentity);
   } catch {
@@ -186,13 +216,16 @@ export function grantAnalyticsConsent(): void {
 export function denyAnalyticsConsent(): void {
   writeAnalyticsConsent("denied");
   try {
-    posthog.opt_out_capturing();
+    // Keep capturing on so scrubbed `$exception` can still flow (gated by before_send).
+    posthog.stopSessionRecording();
     posthog.reset(true);
   } catch {
     // Soft-fail: consent must still clear locally.
   }
   identifiedUid = null;
   initialized = false;
+  // Re-link signed-in uid for ungated error reports after product reset.
+  applyIdentity(lastSeenIdentity);
 }
 
 export function syncAnalyticsIdentity(user: AnalyticsIdentity | null): void {
@@ -260,7 +293,24 @@ export function trackSessionEnded(reason: SessionEndedReason): void {
   track(ANALYTICS_EVENTS.session_ended, { reason });
 }
 
+/**
+ * Soft-fail PostHog sink for the client `captureException` dual-write (P1).
+ * No-op until `initPosthogCore`; never throws into callers.
+ * Scrubs session-code-like strings before the SDK builds `$exception` properties.
+ */
+export function capturePosthogException(error: unknown): void {
+  if (!coreInitialized) {
+    return;
+  }
+  try {
+    posthog.captureException(scrubTelemetryError(error));
+  } catch {
+    // Soft-fail: exception reporting must never break the app.
+  }
+}
+
 export function resetAnalyticsForTests(options?: { initialized?: boolean }): void {
+  coreInitialized = options?.initialized ?? false;
   initialized = options?.initialized ?? false;
   identifiedUid = null;
   lastSeenIdentity = null;
