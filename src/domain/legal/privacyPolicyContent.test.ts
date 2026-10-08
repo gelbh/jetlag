@@ -28,4 +28,22 @@ describe("privacyPolicyContent", () => {
     expect(copy).toMatch(/pseudonymous account identifier/i);
     expect(copy).toContain("PostHog session replay is not used");
   });
+
+  it("discloses ungated scrubbed error reports to Sentry and PostHog EU", () => {
+    const section = PRIVACY_POLICY_SECTIONS.find((entry) => entry.id === "errors-analytics");
+    const paragraphs = section?.paragraphs ?? [];
+    const errorReporting = paragraphs[0] ?? "";
+    const productAnalytics = paragraphs[1] ?? "";
+    const copy = paragraphs.join(" ");
+
+    expect(errorReporting).toMatch(/scrubbed/i);
+    expect(errorReporting).toMatch(/Sentry/i);
+    expect(errorReporting).toMatch(/PostHog/i);
+    expect(errorReporting).toMatch(/\bEU\b/);
+    expect(errorReporting).toMatch(/local storage/i);
+    expect(errorReporting).toMatch(/before you Accept/i);
+    expect(copy).toContain("PostHog session replay is not used");
+    expect(productAnalytics).toMatch(/Accept/i);
+    expect(productAnalytics).toMatch(/product analytics/i);
+  });
 });
