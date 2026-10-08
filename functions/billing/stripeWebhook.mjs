@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { setCors } from "../lib/cors.mjs";
+import { captureFunctionsException } from "../lib/functionsException.mjs";
 import { captureAnalyticsEvent } from "../lib/posthog.mjs";
-import { captureFunctionsException } from "../lib/sentry.mjs";
 import { markStripeEventProcessed } from "./premiumEntitlements.mjs";
 import {
   applyCheckoutSessionCompleted,

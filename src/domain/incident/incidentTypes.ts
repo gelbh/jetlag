@@ -44,6 +44,12 @@ export interface IncidentClientError {
   message?: string;
   /** ISO timestamp of when the error was captured. */
   at: string;
+  /** PostHog exception / issue id when the client attached one. */
+  posthogExceptionId?: string;
+  /**
+   * Legacy client diagnostics field. Prefer {@link posthogExceptionId}.
+   * Dual-read in collect/triage until old docs age out.
+   */
   sentryEventId?: string;
 }
 

@@ -1,6 +1,6 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { withSentryEventHandler } from "../../lib/sentry.mjs";
+import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import { endSessionHandler, leaveHostSessionHandler } from "../../session/hostLeave.mjs";
 import {
   INIT_ALREADY_INITIALIZED,
@@ -26,13 +26,13 @@ import {
   mapJoinSessionWithRoleError,
   mapLeaveError,
   mapMembershipLeaveError,
+  posthogProjectApiKey,
   requireAuthSessionId,
-  sentryDsnSecret,
 } from "./shared.mjs";
 
 export const resetSessionForRematch = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
 
@@ -56,8 +56,8 @@ export const resetSessionForRematch = onCall(
 );
 
 export const leaveHostSession = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
 
@@ -70,8 +70,8 @@ export const leaveHostSession = onCall(
 );
 
 export const leaveSessionMembership = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
 
@@ -84,8 +84,8 @@ export const leaveSessionMembership = onCall(
 );
 
 export const joinSessionWithRole = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -101,8 +101,8 @@ export const joinSessionWithRole = onCall(
 );
 
 export const initSessionRoleGates = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
 
@@ -124,8 +124,8 @@ export const initSessionRoleGates = onCall(
 );
 
 export const endSession = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
 
@@ -138,8 +138,8 @@ export const endSession = onCall(
 );
 
 export const repairGhostHost = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
 

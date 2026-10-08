@@ -1,5 +1,8 @@
 import { onRequest } from "firebase-functions/v2/https";
-import { getSentryDsnSecret, withSentryHttpHandler } from "../../lib/sentry.mjs";
+import {
+  posthogProjectApiKey,
+  withFunctionsExceptionHandler,
+} from "../../lib/functionsException.mjs";
 import { OVERPASS_L2_PARAMS, OVERPASS_L2_SECRETS } from "../overpassL2Secrets.mjs";
 import { OVERPASS_PAID_SECRETS } from "../overpassPaidEnv.mjs";
 import { PROXY_TIMEOUT_SECONDS_CEILING } from "../overpassProxyCore.mjs";
@@ -12,8 +15,6 @@ import {
   vehiclesHandler,
 } from "./vehicles.mjs";
 
-const sentryDsnSecret = getSentryDsnSecret();
-
 const proxyRouter = createProxyRouter({
   overpass: overpassHandler,
   transitland: transitlandHandler,
@@ -23,7 +24,7 @@ const proxyRouter = createProxyRouter({
 export const proxy = onRequest(
   {
     secrets: [
-      sentryDsnSecret,
+      posthogProjectApiKey,
       transitlandApiKeySecret,
       ctaBusTrackerApiKeySecret,
       ctaTrainTrackerApiKeySecret,
@@ -41,5 +42,5 @@ export const proxy = onRequest(
     // so clients get JSON errors instead of naked Cloud Run 504s.
     timeoutSeconds: PROXY_TIMEOUT_SECONDS_CEILING,
   },
-  withSentryHttpHandler(proxyRouter),
+  withFunctionsExceptionHandler(proxyRouter),
 );

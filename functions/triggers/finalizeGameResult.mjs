@@ -1,16 +1,14 @@
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { adminDb } from "../handlers/proxyShared.mjs";
-import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
+import { posthogProjectApiKey, withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import { handleFinalizeGameResultWrite } from "../session/finalizeGameResult.mjs";
-
-const sentryDsnSecret = getSentryDsnSecret();
 
 export const finalizeGameResult = onDocumentWritten(
   {
     document: "sessions/{sessionId}",
-    secrets: [sentryDsnSecret],
+    secrets: [posthogProjectApiKey],
   },
-  withSentryEventHandler(async (event) => {
+  withFunctionsExceptionHandler(async (event) => {
     await handleFinalizeGameResultWrite(adminDb(), event);
   }),
 );

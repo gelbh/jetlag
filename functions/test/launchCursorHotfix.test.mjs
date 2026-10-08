@@ -69,7 +69,7 @@ const clearBugDiagnostics = {
       name: "TypeError",
       message: "mask.union is not a function",
       at: "2026-07-25T12:00:00.000Z",
-      sentryEventId: "evt-1",
+      posthogExceptionId: "evt-1",
     },
   ],
   recentOps: ["open-map", "apply-mask"],
@@ -81,7 +81,7 @@ test("buildCursorHotfixPrompt stays structured and omits raw chat dumps", () => 
     diagnostics: clearBugDiagnostics,
     triage: {
       outcome: "agent",
-      reason: "sentry_event",
+      reason: "posthog_exception",
       matchedErrorName: "TypeError",
     },
     adminPrompt: "## Incident report\n\n- Incident: `inc-1`",
@@ -157,7 +157,7 @@ test("launchCursorHotfixForIncident writes agent_meta into hotfix thread", async
       adminPrompt: "## Incident report",
       triage: {
         outcome: "agent",
-        reason: "sentry_event",
+        reason: "posthog_exception",
         matchedErrorName: "TypeError",
       },
     },

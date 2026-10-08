@@ -4,8 +4,12 @@ import { requestHostConfirm } from "../../incident/hostConfirm.mjs";
 import { consumeSessionOpsTool } from "../../incident/sessionOpsCaps.mjs";
 import { executeSessionOpsTool } from "../../incident/sessionOpsExecute.mjs";
 import { handleSessionOpsMcpRequest } from "../../incident/sessionOpsMcp.mjs";
-import { withSentryHttpHandler } from "../../lib/sentry.mjs";
-import { buildSessionOpsExecuteDeps, sentryDsnSecret, sessionOpsMcpAuthSecret } from "./shared.mjs";
+import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
+import {
+  buildSessionOpsExecuteDeps,
+  posthogProjectApiKey,
+  sessionOpsMcpAuthSecret,
+} from "./shared.mjs";
 
 /**
  * Parse JSON body from an Express-style request.
@@ -31,12 +35,12 @@ function readJsonBody(req) {
  */
 export const sessionOpsMcp = onRequest(
   {
-    secrets: [sentryDsnSecret, sessionOpsMcpAuthSecret],
+    secrets: [posthogProjectApiKey, sessionOpsMcpAuthSecret],
     enforceAppCheck: false,
     cors: false,
     timeoutSeconds: 60,
   },
-  withSentryHttpHandler(async (req, res) => {
+  withFunctionsExceptionHandler(async (req, res) => {
     if (req.method === "GET" || req.method === "HEAD") {
       res.status(200).json({ ok: true, service: "jetlag-session-ops-mcp" });
       return;

@@ -42,8 +42,9 @@ function normalizeError(error: IncidentClientError): IncidentClientError {
   if (error.message !== undefined) {
     normalized.message = truncate(error.message, INCIDENT_MAX_ERROR_MESSAGE_LENGTH);
   }
-  if (error.sentryEventId !== undefined) {
-    normalized.sentryEventId = error.sentryEventId;
+  const exceptionId = error.posthogExceptionId ?? error.sentryEventId;
+  if (exceptionId !== undefined) {
+    normalized.posthogExceptionId = exceptionId;
   }
   return normalized;
 }
