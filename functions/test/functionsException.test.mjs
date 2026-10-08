@@ -246,6 +246,43 @@ test("captureFunctionsExceptionAsync sends unexpected errors to PostHog", async 
   setFunctionsExceptionClientForTests(null);
 });
 
+test("captureFunctionsException returns a promise that settles after Immediate capture", async () => {
+  const { captureFunctionsException } = await import("../lib/functionsException.mjs");
+  let settled = false;
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async () => {
+      await new Promise((r) => setTimeout(r, 15));
+      settled = true;
+    },
+  });
+  const pending = captureFunctionsException(new Error("await me"));
+  assert.equal(typeof pending?.then, "function");
+  assert.equal(settled, false);
+  await pending;
+  assert.equal(settled, true);
+  setFunctionsExceptionClientForTests(null);
+});
+
+test("captureFunctionsExceptionWithTags returns a promise that settles after Immediate capture", async () => {
+  const { captureFunctionsExceptionWithTags } = await import("../lib/functionsException.mjs");
+  let settled = false;
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async () => {
+      await new Promise((r) => setTimeout(r, 15));
+      settled = true;
+    },
+  });
+  const pending = captureFunctionsExceptionWithTags(new Error("await tags"), {
+    name: "proxy",
+    extraTags: { proxy_route: "overpass" },
+  });
+  assert.equal(typeof pending?.then, "function");
+  assert.equal(settled, false);
+  await pending;
+  assert.equal(settled, true);
+  setFunctionsExceptionClientForTests(null);
+});
+
 test("EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS are all allowlisted", () => {
   for (const key of EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS) {
     const colon = key.indexOf(":");

@@ -23,7 +23,7 @@ export const pollSessionOpsAgentRuns = onSchedule(
         apiKey: cursorApiKey.value(),
       });
     } catch (error) {
-      captureFunctionsException(error);
+      await captureFunctionsException(error);
       throw error;
     }
   }),

@@ -91,7 +91,7 @@ export const purgeStaleSessions = onSchedule(
       });
     } catch (error) {
       console.error("purgeStaleSessions orphan sweep failed", error);
-      captureFunctionsException(error);
+      await captureFunctionsException(error);
     }
 
     const targets = selectSessionsToPurge(

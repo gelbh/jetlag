@@ -31,11 +31,14 @@ function formatErrors(diagnostics) {
     .slice(0, 10)
     .map((error) => {
       const detail = error?.message ? `: ${error.message}` : "";
-      const exceptionId =
-        (typeof error?.posthogExceptionId === "string" && error.posthogExceptionId) ||
-        (typeof error?.sentryEventId === "string" && error.sentryEventId) ||
-        "";
-      const exceptionLabel = exceptionId ? ` (posthog:${exceptionId})` : "";
+      const posthogId =
+        typeof error?.posthogExceptionId === "string" ? error.posthogExceptionId.trim() : "";
+      const sentryId = typeof error?.sentryEventId === "string" ? error.sentryEventId.trim() : "";
+      const exceptionLabel = posthogId
+        ? ` (posthog:${posthogId})`
+        : sentryId
+          ? ` (sentry:${sentryId})`
+          : "";
       return `- \`${error?.at ?? "?"}\` ${error?.name ?? "Error"}${detail}${exceptionLabel}`;
     })
     .join("\n");

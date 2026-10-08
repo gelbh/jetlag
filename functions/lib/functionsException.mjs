@@ -270,8 +270,9 @@ export async function captureFunctionsExceptionAsync(error, options = {}) {
   });
 }
 
+/** @returns {Promise<void>} */
 export function captureFunctionsException(error) {
-  void captureFunctionsExceptionAsync(error);
+  return captureFunctionsExceptionAsync(error);
 }
 
 /**
@@ -280,9 +281,10 @@ export function captureFunctionsException(error) {
  *
  * @param {unknown} error
  * @param {{ name?: string | null, extraTags?: Record<string, string> }} [options]
+ * @returns {Promise<void>}
  */
 export function captureFunctionsExceptionWithTags(error, options = {}) {
-  void captureFunctionsExceptionAsync(error, options);
+  return captureFunctionsExceptionAsync(error, options);
 }
 
 /**

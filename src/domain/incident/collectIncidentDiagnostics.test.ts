@@ -124,4 +124,36 @@ describe("collectIncidentDiagnostics", () => {
 
     expect(diagnostics.reportedAt).toBe("2020-01-01T00:00:00.000Z");
   });
+
+  it("maps posthogExceptionId onto the normalized error", () => {
+    const diagnostics = collectIncidentDiagnostics({
+      ...base,
+      lastClientErrors: [
+        {
+          name: "TypeError",
+          at: "2026-07-25T00:00:00Z",
+          posthogExceptionId: "ph-1",
+        },
+      ],
+    });
+
+    expect(diagnostics.lastClientErrors[0]?.posthogExceptionId).toBe("ph-1");
+    expect(diagnostics.lastClientErrors[0]?.sentryEventId).toBeUndefined();
+  });
+
+  it("dual-reads legacy sentryEventId when posthogExceptionId is empty", () => {
+    const diagnostics = collectIncidentDiagnostics({
+      ...base,
+      lastClientErrors: [
+        {
+          name: "TypeError",
+          at: "2026-07-25T00:00:00Z",
+          posthogExceptionId: "   ",
+          sentryEventId: "legacy-1",
+        },
+      ],
+    });
+
+    expect(diagnostics.lastClientErrors[0]?.posthogExceptionId).toBe("legacy-1");
+  });
 });

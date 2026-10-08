@@ -34,6 +34,15 @@ function truncate(value: string, max: number): string {
   return value.length > max ? value.slice(0, max) : value;
 }
 
+/** Prefer non-empty trimmed ids so empty `posthogExceptionId` does not block legacy. */
+function nonEmptyExceptionId(value: string | undefined): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 function normalizeError(error: IncidentClientError): IncidentClientError {
   const normalized: IncidentClientError = {
     name: truncate(error.name, INCIDENT_MAX_ERROR_MESSAGE_LENGTH),
@@ -42,7 +51,8 @@ function normalizeError(error: IncidentClientError): IncidentClientError {
   if (error.message !== undefined) {
     normalized.message = truncate(error.message, INCIDENT_MAX_ERROR_MESSAGE_LENGTH);
   }
-  const exceptionId = error.posthogExceptionId ?? error.sentryEventId;
+  const exceptionId =
+    nonEmptyExceptionId(error.posthogExceptionId) ?? nonEmptyExceptionId(error.sentryEventId);
   if (exceptionId !== undefined) {
     normalized.posthogExceptionId = exceptionId;
   }

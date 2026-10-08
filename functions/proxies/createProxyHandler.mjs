@@ -49,7 +49,7 @@ export function createProxyHandler({
     try {
       await handler(req, res, authResult);
     } catch (error) {
-      captureFunctionsExceptionWithTags(error, {
+      await captureFunctionsExceptionWithTags(error, {
         name: resolveDeployedFunctionName() ?? "proxy",
         extraTags: { proxy_route: routeName },
       });
