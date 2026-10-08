@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.2.0";
+export const APP_VERSION = "1.3.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,30 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.3.0",
+    date: "2026-10-08",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Typing in custom POI and pin fields no longer crashes the app after the second character",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Hiders can play Veto and Randomize cards on an open question. The seekers see the card in the game chat.",
+          "New How to play guide covering roles, creating and joining a session, game size, hiding, questions, and the end game",
+          "New question tool pages for Matching, Measuring, Thermometer, Radar, Tentacles, and Photo, with distances, categories, and how each answer shades the map",
+          "New FAQ covering free vs Premium, offline play, supported areas, installing, and location privacy",
+          "Home links to How to play, Question tools, and FAQ",
+          "Interactive Try it demos on the How to play and question tool pages using the real Ask HUD",
+          "Privacy policy discloses scrubbed crash reports to Sentry and PostHog (EU), including that an anonymous PostHog ID may sit in local storage before Accept; PostHog session replay remains unused",
+        ],
+      },
+    ],
+  },
   {
     version: "1.2.0",
     date: "2026-10-06",
