@@ -7,12 +7,12 @@ import {
   supportAgentTurnHandler,
 } from "../../incident/supportAgentTurn.mjs";
 import { consumeRateLimit } from "../../lib/firestoreRateLimit.mjs";
-import { withSentryEventHandler } from "../../lib/sentry.mjs";
+import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import {
   buildSessionOpsExecuteDeps,
   cursorApiKey,
   mapIncidentError,
-  sentryDsnSecret,
+  posthogProjectApiKey,
   sessionOpsMcpAuthSecret,
   sessionOpsMcpUrl,
 } from "./shared.mjs";
@@ -34,8 +34,8 @@ function readSupportAgentCursorConfig() {
 
 /** Host approves a pending destructive session-ops confirm and executes once. */
 export const approveHostConfirm = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -62,8 +62,8 @@ export const approveHostConfirm = onCall(
 
 /** Host denies a pending confirm without executing. */
 export const denyHostConfirm = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -87,10 +87,10 @@ export const denyHostConfirm = onCall(
  */
 export const postSupportAgentTurn = onCall(
   {
-    secrets: [sentryDsnSecret, cursorApiKey, sessionOpsMcpAuthSecret],
+    secrets: [posthogProjectApiKey, cursorApiKey, sessionOpsMcpAuthSecret],
     enforceAppCheck: true,
   },
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }

@@ -1,11 +1,10 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { adminDb } from "../handlers/proxyShared.mjs";
-import { posthogProjectApiKey } from "../lib/posthog.mjs";
 import {
   captureFunctionsException,
-  getSentryDsnSecret,
-  withSentryEventHandler,
-} from "../lib/sentry.mjs";
+  posthogProjectApiKey,
+  withFunctionsExceptionHandler,
+} from "../lib/functionsException.mjs";
 import {
   autoEndIdleSession,
   computeIdleCutoffIso,
@@ -23,8 +22,6 @@ import {
   purgeSelectedSessions,
   selectSessionsToPurge,
 } from "../session/purgeStaleSessions.mjs";
-
-const sentryDsnSecret = getSentryDsnSecret();
 
 async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
   try {
@@ -56,8 +53,8 @@ async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
 }
 
 export const purgeStaleSessions = onSchedule(
-  { schedule: "0 4 * * *", secrets: [sentryDsnSecret, posthogProjectApiKey] },
-  withSentryEventHandler(async () => {
+  { schedule: "0 4 * * *", secrets: [posthogProjectApiKey] },
+  withFunctionsExceptionHandler(async () => {
     const db = adminDb();
     const idleCutoffIso = computeIdleCutoffIso();
     const endedCutoffIso = computeEndedCutoffIso();
@@ -94,7 +91,7 @@ export const purgeStaleSessions = onSchedule(
       });
     } catch (error) {
       console.error("purgeStaleSessions orphan sweep failed", error);
-      captureFunctionsException(error);
+      await captureFunctionsException(error);
     }
 
     const targets = selectSessionsToPurge(

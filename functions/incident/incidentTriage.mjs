@@ -30,10 +30,14 @@ export function triageIncidentDiagnostics(diagnostics) {
   const errors = Array.isArray(diagnostics?.lastClientErrors) ? diagnostics.lastClientErrors : [];
 
   for (const error of errors) {
-    if (typeof error?.sentryEventId === "string" && error.sentryEventId.trim().length > 0) {
+    const exceptionId =
+      (typeof error?.posthogExceptionId === "string" && error.posthogExceptionId.trim()) ||
+      (typeof error?.sentryEventId === "string" && error.sentryEventId.trim()) ||
+      "";
+    if (exceptionId) {
       return {
         outcome: TRIAGE_OUTCOME_AGENT,
-        reason: "sentry_event",
+        reason: "posthog_exception",
         matchedErrorName: typeof error.name === "string" && error.name ? error.name : null,
       };
     }

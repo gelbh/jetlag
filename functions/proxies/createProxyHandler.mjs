@@ -4,7 +4,10 @@ import {
   requireProxyAccess,
 } from "../handlers/proxyShared.mjs";
 import { setCors } from "../lib/cors.mjs";
-import { captureFunctionsExceptionWithTags, resolveDeployedFunctionName } from "../lib/sentry.mjs";
+import {
+  captureFunctionsExceptionWithTags,
+  resolveDeployedFunctionName,
+} from "../lib/functionsException.mjs";
 
 /**
  * Shared HTTP proxy pipeline: CORS, auth, rate limit, handler.
@@ -46,7 +49,7 @@ export function createProxyHandler({
     try {
       await handler(req, res, authResult);
     } catch (error) {
-      captureFunctionsExceptionWithTags(error, {
+      await captureFunctionsExceptionWithTags(error, {
         name: resolveDeployedFunctionName() ?? "proxy",
         extraTags: { proxy_route: routeName },
       });

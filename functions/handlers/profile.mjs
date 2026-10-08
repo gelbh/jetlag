@@ -1,6 +1,6 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
+import { posthogProjectApiKey, withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import {
   CLAIM_USERNAME_ALREADY_SET,
   CLAIM_USERNAME_INVALID,
@@ -18,11 +18,9 @@ import {
   profileFriendsHandler,
 } from "../profile/profileFriends.mjs";
 
-const sentryDsnSecret = getSentryDsnSecret();
-
 export const claimUsername = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -53,8 +51,8 @@ export const claimUsername = onCall(
 );
 
 export const profileFriends = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     try {
       return await profileFriendsHandler(getFirestore(), request.auth, request.data ?? {});
     } catch (error) {

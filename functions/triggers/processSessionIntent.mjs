@@ -1,10 +1,8 @@
 import { logger } from "firebase-functions/logger";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { adminDb } from "../handlers/proxyShared.mjs";
-import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
+import { posthogProjectApiKey, withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import { INTENT_MAX_AGE_MS, processSessionIntentHandler } from "../session/sessionIntents.mjs";
-
-const sentryDsnSecret = getSentryDsnSecret();
 
 /**
  * Offline-queued server actions (Move timer pause/resume). `retry: true` is safe
@@ -16,9 +14,9 @@ export const processSessionIntent = onDocumentCreated(
   {
     document: "sessions/{sessionId}/intents/{intentId}",
     retry: true,
-    secrets: [sentryDsnSecret],
+    secrets: [posthogProjectApiKey],
   },
-  withSentryEventHandler(async (event) => {
+  withFunctionsExceptionHandler(async (event) => {
     const { sessionId, intentId } = event.params;
     const eventAgeMs = Date.now() - Date.parse(event.time);
     if (eventAgeMs > INTENT_MAX_AGE_MS) {

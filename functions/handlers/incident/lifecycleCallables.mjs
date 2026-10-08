@@ -13,7 +13,7 @@ import { publishIncidentHotfixHandler } from "../../incident/publishIncidentHotf
 import { sendIncidentEmail } from "../../incident/sendIncidentEmail.mjs";
 import { updateIncidentStatusHandler } from "../../incident/updateIncidentStatus.mjs";
 import { consumeRateLimit } from "../../lib/firestoreRateLimit.mjs";
-import { withSentryEventHandler } from "../../lib/sentry.mjs";
+import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import {
   cursorApiKey,
   cursorHotfixRepoUrl,
@@ -21,15 +21,15 @@ import {
   incidentEmailSecret,
   incidentWorkerBaseUrl,
   mapIncidentError,
-  sentryDsnSecret,
+  posthogProjectApiKey,
 } from "./shared.mjs";
 
 export const createIncident = onCall(
   {
-    secrets: [sentryDsnSecret, incidentEmailSecret, cursorApiKey],
+    secrets: [posthogProjectApiKey, incidentEmailSecret, cursorApiKey],
     enforceAppCheck: true,
   },
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -75,8 +75,8 @@ export const createIncident = onCall(
 );
 
 export const postIncidentMessage = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -102,8 +102,8 @@ export const postIncidentMessage = onCall(
 );
 
 export const applyIncidentMitigation = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const db = getFirestore();
@@ -130,10 +130,10 @@ export const applyIncidentMitigation = onCall(
 
 export const updateIncidentStatus = onCall(
   {
-    secrets: [sentryDsnSecret, incidentEmailSecret],
+    secrets: [posthogProjectApiKey, incidentEmailSecret],
     enforceAppCheck: true,
   },
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const db = getFirestore();
@@ -182,8 +182,8 @@ export const updateIncidentStatus = onCall(
 );
 
 export const publishIncidentHotfix = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const db = getFirestore();
@@ -203,10 +203,10 @@ export const publishIncidentHotfix = onCall(
 /** Admin force-launch of Cursor coding agent (private hotfix thread). */
 export const launchIncidentCursorAgent = onCall(
   {
-    secrets: [sentryDsnSecret, cursorApiKey],
+    secrets: [posthogProjectApiKey, cursorApiKey],
     enforceAppCheck: true,
   },
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const db = getFirestore();

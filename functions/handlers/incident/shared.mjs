@@ -57,9 +57,9 @@ import {
   INCIDENT_INVALID_STATUS,
   INCIDENT_INVALID_TRANSITION,
 } from "../../incident/updateIncidentStatus.mjs";
-import { getSentryDsnSecret } from "../../lib/sentry.mjs";
+import { posthogProjectApiKey } from "../../lib/posthog.mjs";
 
-export const sentryDsnSecret = getSentryDsnSecret();
+export { posthogProjectApiKey };
 export const incidentEmailSecret = defineSecret("INCIDENT_EMAIL_SECRET");
 /** Cursor Cloud Agents API key (hotfix + session-ops). Never client-side. */
 export const cursorApiKey = defineSecret("CURSOR_API_KEY");

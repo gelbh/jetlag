@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { captureAnalyticsEvent, uuidFromSeed } from "../lib/posthog.mjs";
+import {
+  captureAnalyticsEvent,
+  capturePosthogException,
+  FUNCTIONS_EXCEPTION_DISTINCT_ID,
+  resetFunctionsExceptionClientForTests,
+  uuidFromSeed,
+} from "../lib/posthog.mjs";
 
 describe("posthog helper", () => {
   it("uuidFromSeed is stable for the same seed", () => {
@@ -85,5 +91,36 @@ describe("posthog helper", () => {
       captureImpl,
     });
     assert.equal(called, false);
+  });
+
+  it("capturePosthogException uses captureExceptionImmediate when present", async () => {
+    resetFunctionsExceptionClientForTests();
+    const calls = [];
+    await capturePosthogException({
+      error: new Error("x"),
+      properties: { function_name: "proxy" },
+      clientImpl: {
+        captureExceptionImmediate: async (error, distinctId, properties) => {
+          calls.push({ error, distinctId, properties });
+        },
+      },
+    });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].distinctId, FUNCTIONS_EXCEPTION_DISTINCT_ID);
+    assert.equal(calls[0].properties.function_name, "proxy");
+  });
+
+  it("capturePosthogException soft-fails when capture throws", async () => {
+    resetFunctionsExceptionClientForTests();
+    await assert.doesNotReject(() =>
+      capturePosthogException({
+        error: new Error("x"),
+        clientImpl: {
+          captureExceptionImmediate: async () => {
+            throw new Error("network");
+          },
+        },
+      }),
+    );
   });
 });
