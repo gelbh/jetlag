@@ -42,7 +42,7 @@ function matchingPending(
   id: string,
   category: TestOption,
   status: PendingQuestionRecord["status"] = "pending",
-  answer?: string | null,
+  answer?: unknown,
 ): PendingQuestionRecord {
   return {
     id,
@@ -117,6 +117,13 @@ describe("buildCatalogHelpers", () => {
 
   it("treats cancelled-with-answer pending as used", () => {
     const used = helpers.usedOptionsFromPending([matchingPending("p1", "a", "cancelled", "yes")]);
+    expect(used).toEqual(new Set(["a"]));
+  });
+
+  it("treats cancelled veto answer pending as used", () => {
+    const used = helpers.usedOptionsFromPending([
+      matchingPending("p1", "a", "cancelled", { kind: "veto" }),
+    ]);
     expect(used).toEqual(new Set(["a"]));
   });
 

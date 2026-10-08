@@ -40,6 +40,15 @@ describe("isUsedOptionPendingQuestion", () => {
       } as never),
     ).toBe(false);
   });
+
+  it("counts cancelled with veto answer object as sticky used", () => {
+    expect(
+      isUsedOptionPendingQuestion({
+        status: "cancelled",
+        answer: { kind: "veto" },
+      } as never),
+    ).toBe(true);
+  });
 });
 
 describe("questionRules", () => {

@@ -68,14 +68,14 @@ const thermometerPresetHelpers = buildPresetCatalogHelpers<ThermometerDistanceOp
 });
 
 export function usedThermometerDistanceOptions(
-  annotations: AnnotationRecord[],
+  annotations: readonly AnnotationRecord[],
   exceptAnnotationId?: string,
 ): Set<ThermometerDistanceOptionMiles> {
   return thermometerPresetHelpers.usedOptionsFromAnnotations(annotations, exceptAnnotationId);
 }
 
 export function usedThermometerDistanceOptionsForSession(
-  annotations: AnnotationRecord[],
+  annotations: readonly AnnotationRecord[],
   pendingQuestions: readonly PendingQuestionRecord[],
   exceptAnnotationId?: string,
 ): Set<ThermometerDistanceOptionMiles> {
