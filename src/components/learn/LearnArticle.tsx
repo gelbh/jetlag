@@ -36,6 +36,21 @@ const cellStyle: CSSProperties = {
   lineHeight: 1.4,
 };
 
+function learnBlockKey(block: LearnBlock): string {
+  switch (block.kind) {
+    case "paragraph":
+      return `paragraph:${block.text}`;
+    case "steps":
+      return `steps:${block.items.join("|")}`;
+    case "bullets":
+      return `bullets:${block.items.join("|")}`;
+    case "table":
+      return `table:${block.caption}`;
+    case "showcase":
+      return `showcase:${block.showcase}`;
+  }
+}
+
 function Block({ block }: { block: LearnBlock }) {
   switch (block.kind) {
     case "paragraph":
@@ -128,9 +143,8 @@ function Section({ section }: { section: LearnSection }) {
       <Text c="var(--color-field-ink)" style={bodyTextStyle}>
         {section.lead}
       </Text>
-      {section.blocks?.map((block, index) => (
-        // Static copy in a fixed order, so the index is a stable key.
-        <Block key={index} block={block} />
+      {section.blocks?.map((block) => (
+        <Block key={learnBlockKey(block)} block={block} />
       ))}
     </Stack>
   );

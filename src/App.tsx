@@ -33,6 +33,7 @@ import {
   setChunkReloadContextGetter,
 } from "./domain/device/updates/lazyWithChunkRetry";
 import { notifyAppNeedRefresh } from "./domain/device/updates/serviceWorkerRefresh";
+import { LEARN_ROUTE_PATHS } from "./domain/seo/learnRoutePaths";
 import { useEdgeSwipeBack } from "./hooks/navigation/useEdgeSwipeBack";
 import { useRouteSeo } from "./hooks/navigation/useRouteSeo";
 import { appQueryClient } from "./lib/queryClient";
@@ -297,78 +298,17 @@ export default function App() {
                               </LazyRoute>
                             }
                           />
-                          <Route
-                            path="/guide"
-                            element={
-                              <LazyRoute>
-                                <LearnPageLazy path="/guide" />
-                              </LazyRoute>
-                            }
-                          />
-                          <Route
-                            path="/tools"
-                            element={
-                              <LazyRoute>
-                                <LearnPageLazy path="/tools" />
-                              </LazyRoute>
-                            }
-                          />
-                          <Route
-                            path="/tools/radar"
-                            element={
-                              <LazyRoute>
-                                <LearnPageLazy path="/tools/radar" />
-                              </LazyRoute>
-                            }
-                          />
-                          <Route
-                            path="/tools/thermometer"
-                            element={
-                              <LazyRoute>
-                                <LearnPageLazy path="/tools/thermometer" />
-                              </LazyRoute>
-                            }
-                          />
-                          <Route
-                            path="/tools/matching"
-                            element={
-                              <LazyRoute>
-                                <LearnPageLazy path="/tools/matching" />
-                              </LazyRoute>
-                            }
-                          />
-                          <Route
-                            path="/tools/measuring"
-                            element={
-                              <LazyRoute>
-                                <LearnPageLazy path="/tools/measuring" />
-                              </LazyRoute>
-                            }
-                          />
-                          <Route
-                            path="/tools/tentacles"
-                            element={
-                              <LazyRoute>
-                                <LearnPageLazy path="/tools/tentacles" />
-                              </LazyRoute>
-                            }
-                          />
-                          <Route
-                            path="/tools/photo"
-                            element={
-                              <LazyRoute>
-                                <LearnPageLazy path="/tools/photo" />
-                              </LazyRoute>
-                            }
-                          />
-                          <Route
-                            path="/faq"
-                            element={
-                              <LazyRoute>
-                                <LearnPageLazy path="/faq" />
-                              </LazyRoute>
-                            }
-                          />
+                          {LEARN_ROUTE_PATHS.map((path) => (
+                            <Route
+                              key={path}
+                              path={path}
+                              element={
+                                <LazyRoute>
+                                  <LearnPageLazy path={path} />
+                                </LazyRoute>
+                              }
+                            />
+                          ))}
                           <Route
                             path="/create"
                             element={
