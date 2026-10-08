@@ -113,7 +113,7 @@ export function reportSlowRouteTransitionLazy(
     .catch(() => {});
 }
 
-/** Persists consent synchronously; posthog init/opt-out follows once loaded. */
+/** Persists consent synchronously; product enable / identity reset follows once loaded. */
 export function grantAnalyticsConsentLazy(): void {
   writeAnalyticsConsent("granted");
   void loadAnalytics()
