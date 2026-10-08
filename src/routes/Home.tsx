@@ -24,6 +24,9 @@ import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSessi
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
+// Footer links: 44px tap height without adding visual weight next to the Play actions.
+const footerLinkStyle = { display: "inline-flex", alignItems: "center", minHeight: 44 } as const;
+
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } = useContinueActiveSession();
   const showPremium = isFirebaseConfigured();
@@ -191,28 +194,60 @@ export function Home() {
                 </InsetGroup>
               </Stack>
 
-              <Group gap="xs" justify="center" component="nav" aria-label="Legal and feedback">
-                <Anchor component={Link} to="/privacy" size="sm" aria-label="Privacy Policy">
-                  Privacy
-                </Anchor>
-                <Text size="sm" c="dimmed" aria-hidden="true">
-                  ·
-                </Text>
-                <Anchor component={Link} to="/terms" size="sm" aria-label="Terms of Service">
-                  Terms
-                </Anchor>
-                <Text size="sm" c="dimmed" aria-hidden="true">
-                  ·
-                </Text>
-                <Anchor
-                  component={Link}
-                  to="/feedback"
-                  size="sm"
-                  aria-label="Feedback and suggestions"
-                >
-                  Feedback
-                </Anchor>
-              </Group>
+              <Stack gap={0} align="center">
+                <Group gap="xs" justify="center" component="nav" aria-label="Learn how to play">
+                  <Anchor component={Link} to="/guide" size="sm" style={footerLinkStyle}>
+                    How to play
+                  </Anchor>
+                  <Text size="sm" c="dimmed" aria-hidden="true">
+                    ·
+                  </Text>
+                  <Anchor component={Link} to="/tools" size="sm" style={footerLinkStyle}>
+                    Question tools
+                  </Anchor>
+                  <Text size="sm" c="dimmed" aria-hidden="true">
+                    ·
+                  </Text>
+                  <Anchor component={Link} to="/faq" size="sm" style={footerLinkStyle}>
+                    FAQ
+                  </Anchor>
+                </Group>
+                <Group gap="xs" justify="center" component="nav" aria-label="Legal and feedback">
+                  <Anchor
+                    component={Link}
+                    to="/privacy"
+                    size="sm"
+                    style={footerLinkStyle}
+                    aria-label="Privacy Policy"
+                  >
+                    Privacy
+                  </Anchor>
+                  <Text size="sm" c="dimmed" aria-hidden="true">
+                    ·
+                  </Text>
+                  <Anchor
+                    component={Link}
+                    to="/terms"
+                    size="sm"
+                    style={footerLinkStyle}
+                    aria-label="Terms of Service"
+                  >
+                    Terms
+                  </Anchor>
+                  <Text size="sm" c="dimmed" aria-hidden="true">
+                    ·
+                  </Text>
+                  <Anchor
+                    component={Link}
+                    to="/feedback"
+                    size="sm"
+                    style={footerLinkStyle}
+                    aria-label="Feedback and suggestions"
+                  >
+                    Feedback
+                  </Anchor>
+                </Group>
+              </Stack>
             </Stack>
           </Stack>
         </Container>

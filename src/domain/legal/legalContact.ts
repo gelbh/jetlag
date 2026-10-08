@@ -6,6 +6,8 @@ export const LEGAL_EFFECTIVE_DATE = "2026-07-11";
 export const LEGAL_PRIVACY_PATH = "/privacy";
 export const LEGAL_TERMS_PATH = "/terms";
 export const LEGAL_FEEDBACK_URL = githubIssuesUrl();
+export const UNOFFICIAL_DISCLAIMER =
+  "Unofficial fan companion. Not affiliated with Jet Lag: The Game, the board game, or Nebula.";
 
 export interface LegalSection {
   id: string;

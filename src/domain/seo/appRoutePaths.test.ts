@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { APP_REDIRECT_ROUTE_PATHS, APP_ROUTE_PATHS, isKnownAppPath } from "./appRoutePaths";
+import { LEARN_ROUTE_PATHS } from "./learnRoutePaths";
 
 const ROOT = resolve(import.meta.dirname, "../../..");
 
@@ -9,7 +10,12 @@ const ROOT = resolve(import.meta.dirname, "../../..");
 function appTsxRoutePaths(): string[] {
   const source = readFileSync(resolve(ROOT, "src/App.tsx"), "utf8");
   const paths = [...source.matchAll(/<Route\b[^>]*?\bpath="([^"]+)"/g)].map((m) => m[1]);
-  return paths.filter((path) => path !== "*" && !path.startsWith("/dev/"));
+  const filtered = paths.filter((path) => path !== "*" && !path.startsWith("/dev/"));
+  // Learn pages are mounted via LEARN_ROUTE_PATHS.map (no string path literals).
+  if (source.includes("LEARN_ROUTE_PATHS.map")) {
+    return [...new Set([...filtered, ...LEARN_ROUTE_PATHS])];
+  }
+  return filtered;
 }
 
 describe("appRoutePaths", () => {

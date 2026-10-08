@@ -8,6 +8,13 @@ describe("isPublicShellPath", () => {
     expect(isPublicShellPath("/terms")).toBe(true);
   });
 
+  it("matches the how-to-play pages", () => {
+    expect(isPublicShellPath("/guide")).toBe(true);
+    expect(isPublicShellPath("/tools/radar")).toBe(true);
+    expect(isPublicShellPath("/faq/")).toBe(true);
+    expect(isPublicShellPath("/tools/unknown")).toBe(false);
+  });
+
   it("tolerates a trailing slash", () => {
     expect(isPublicShellPath("/privacy/")).toBe(true);
     expect(isPublicShellPath("/terms/")).toBe(true);

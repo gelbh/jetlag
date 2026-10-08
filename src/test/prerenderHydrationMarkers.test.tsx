@@ -82,6 +82,7 @@ function HydratedShell({ count }: { count: number }) {
 describe("finalizePrerenderDom", () => {
   afterEach(() => {
     document.body.innerHTML = "";
+    document.documentElement.removeAttribute("style");
   });
 
   it("adds the markers hydrateRoot needs so the prerendered DOM is kept", async () => {
@@ -136,5 +137,31 @@ describe("finalizePrerenderDom", () => {
     expect(container.querySelector("h1")).toBe(heading);
     expect(container.querySelector("section p")).toBe(routeBody);
     hydrated?.unmount();
+  });
+
+  it("waits for a running view transition and strips its inline names", async () => {
+    const prerender = document.body.appendChild(document.createElement("div"));
+    prerender.id = "root";
+    const root = createRoot(prerender);
+    await act(async () => {
+      root.render(<p>static</p>);
+    });
+    Object.defineProperty(document, "activeViewTransition", { value: {}, configurable: true });
+    try {
+      expect(finalizePrerenderDom()).toEqual({ ready: false });
+    } finally {
+      Reflect.deleteProperty(document, "activeViewTransition");
+    }
+
+    const main = prerender.querySelector("p")!;
+    main.style.setProperty("view-transition-name", "_t_0_");
+    main.style.setProperty("view-transition-class", "jl-route-reveal");
+    main.style.setProperty("isolation", "isolate");
+    document.documentElement.style.setProperty("view-transition-name", "none");
+
+    expect(finalizePrerenderDom()).toMatchObject({ ready: true });
+    expect(main.getAttribute("style")).toBe("isolation: isolate;");
+    expect(document.documentElement.hasAttribute("style")).toBe(false);
+    root.unmount();
   });
 });

@@ -2,6 +2,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const MIN_ROOT_TEXT_CHARS = 40;
+/** Search-result truncation budgets for indexable pages. */
+export const MAX_TITLE_CHARS = 60;
+export const MAX_DESCRIPTION_CHARS = 160;
 
 export function loadCrawlPolicy(root) {
   return JSON.parse(readFileSync(join(root, "src/domain/seo/seoCrawlPolicy.json"), "utf8"));
@@ -192,4 +195,38 @@ export function robotsMetaContent(html) {
     }
   }
   return undefined;
+}
+
+/** `content` of `<meta name="description">`, or undefined. */
+export function metaDescriptionContent(html) {
+  const masked = maskInert(html);
+  for (const match of masked.matchAll(META_TAG_RE)) {
+    if (attr(match[0], "name")?.toLowerCase() === "description") {
+      return attr(match[0], "content");
+    }
+  }
+  return undefined;
+}
+
+// Forgiving end tags (</script >, </script foo=…>) without matching script-*.
+const SCRIPT_SPAN_RE = /<script(?=[\s/>])[^>]*>[\s\S]*?<\/script(?=[\s/>])[^>]*>/gi;
+
+/** `<h1>` elements in live markup (comments, noscript, template, style and script excluded). */
+export function countLiveH1(html) {
+  const masked = maskInert(html).replace(SCRIPT_SPAN_RE, " ");
+  return (masked.match(/<h1\b/gi) ?? []).length;
+}
+
+/** Concatenated `style="…"` attribute values from live markup. */
+export function inlineStyleText(html) {
+  return [...maskInert(html).matchAll(/\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)]
+    .map((m) => m[1] ?? m[2])
+    .join(";");
+}
+
+const ENTITIES = { "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'" };
+
+/** Decode the entities serializers emit, so length budgets count visible characters. */
+export function decodeBasicEntities(text) {
+  return text.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => ENTITIES[entity]);
 }
