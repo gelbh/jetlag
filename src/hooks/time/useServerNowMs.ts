@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { serverNow } from "@/services/core/time/serverClock";
 
 /**
@@ -8,7 +8,7 @@ import { serverNow } from "@/services/core/time/serverClock";
 export function useServerNowMs(tickMs: number | null): number {
   const [nowMs, setNowMs] = useState(() => serverNow());
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (tickMs === null) {
       return;
     }
