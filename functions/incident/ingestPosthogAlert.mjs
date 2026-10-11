@@ -13,6 +13,9 @@ const ISSUE_ID_PATTERN = /^[A-Za-z0-9-]{1,64}$/;
 const POSTHOG_ISSUE_URL_PREFIX = "https://eu.posthog.com/";
 const NAME_MAX_LENGTH = 200;
 const DESCRIPTION_MAX_LENGTH = 300;
+const RUNTIME_PATTERN = /^[a-z0-9-]{1,40}$/;
+const METHOD_PATTERN = /^[A-Z]{1,10}$/;
+const PATH_MAX_LENGTH = 200;
 /** Firestore `ALREADY_EXISTS` from `DocumentReference.create`. */
 const ALREADY_EXISTS_CODE = 6;
 
@@ -39,12 +42,18 @@ function parsePayload(payload) {
     !Number.isNaN(Date.parse(payload.exceptionTimestamp))
       ? new Date(payload.exceptionTimestamp).toISOString()
       : null;
+  const runtime = clampString(payload.runtime, 40);
+  const method = clampString(payload.method, 10);
+  const path = clampString(payload.path, PATH_MAX_LENGTH);
   return {
     issueId,
     name,
     description: clampString(payload.description, DESCRIPTION_MAX_LENGTH),
     issueUrl: issueUrl?.startsWith(POSTHOG_ISSUE_URL_PREFIX) ? issueUrl : null,
     exceptionAt,
+    runtime: runtime && RUNTIME_PATTERN.test(runtime) ? runtime : null,
+    method: method && METHOD_PATTERN.test(method) ? method : null,
+    path: path?.startsWith("/") ? path : null,
   };
 }
 
@@ -75,15 +84,18 @@ export async function ingestPosthogAlert(db, payload, deps) {
   const incidentId = `posthog-${alert.issueId}`;
   const nowIso = now().toISOString();
   const status = "open";
+  const request = alert.path ? [alert.method, alert.path].filter(Boolean).join(" ") : null;
+  const origin = alert.runtime ? [alert.runtime, request].filter(Boolean).join(" ") : null;
+  const label = origin ? `${alert.name} (${origin})` : alert.name;
   const diagnostics = {
     appVersion: "unknown",
-    route: "posthog",
+    route: (alert.runtime && request) || "posthog",
     sessionId: null,
     sessionCode: null,
     playerRole: null,
     uid: null,
     userAgent: "",
-    platform: "web",
+    platform: alert.runtime ?? "web",
     online: true,
     visibilityState: "n/a",
     lastClientErrors: [
@@ -97,7 +109,7 @@ export async function ingestPosthogAlert(db, payload, deps) {
     recentOps: [],
     reportedAt: nowIso,
   };
-  const playerNote = `PostHog alert: ${alert.name}`;
+  const playerNote = `PostHog alert: ${label}`;
   const adminPrompt = buildAdminPrompt({ incidentId, status, playerNote, diagnostics });
 
   const incidentRef = db.collection("incidents").doc(incidentId);
@@ -137,7 +149,7 @@ export async function ingestPosthogAlert(db, payload, deps) {
     let email;
     try {
       const result = await deps.sendEmail({
-        subject: `Jet Lag PostHog issue: ${alert.name}`,
+        subject: `Jet Lag PostHog issue: ${label}`,
         text: [
           adminPrompt,
           alert.issueUrl ? `PostHog issue: ${alert.issueUrl}` : null,
