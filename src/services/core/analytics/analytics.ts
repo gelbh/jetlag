@@ -8,6 +8,7 @@ import {
   writeAnalyticsConsent,
 } from "@/domain/device/consent/analyticsConsent";
 import { isEmbedMode } from "@/domain/device/embed/embedMode";
+import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
 import { shouldEnableAnalytics } from "./analyticsEnabled";
 import {
   ANALYTICS_EVENTS,
@@ -194,7 +195,13 @@ export function initPosthogCore(): void {
       },
     });
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
-    posthog.register({ $geoip_disable: true });
+    posthog.register({
+      $geoip_disable: true,
+      display_mode: isStandalonePwa() ? "standalone" : "browser",
+    });
+    window.addEventListener("appinstalled", () => track(ANALYTICS_EVENTS.pwa_installed), {
+      once: true,
+    });
     coreInitialized = true;
     applyIdentity(lastSeenIdentity);
   } catch {
