@@ -22,6 +22,7 @@ export {
   createIncident,
   denyHostConfirm,
   launchIncidentCursorAgent,
+  posthogErrorAlert,
   postIncidentMessage,
   postSupportAgentTurn,
   publishIncidentHotfix,

@@ -346,6 +346,25 @@ function AdminIncidentDetailBody({
                 ],
                 ["User agent", incident.diagnostics.userAgent || "-"],
                 ["Player note", incident.playerNote?.trim() || "-"],
+                ...(incident.posthogIssue
+                  ? [
+                      [
+                        "PostHog issue",
+                        incident.posthogIssue.url ? (
+                          <a
+                            key="posthog-issue"
+                            href={incident.posthogIssue.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {incident.posthogIssue.name}
+                          </a>
+                        ) : (
+                          incident.posthogIssue.name
+                        ),
+                      ] as const,
+                    ]
+                  : []),
               ] as const
             ).map(([label, value]) => (
               <div key={label} className="admin-diag-row">
