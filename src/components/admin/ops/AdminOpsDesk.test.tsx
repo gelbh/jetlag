@@ -165,7 +165,6 @@ vi.mock("../../../services/admin/adminIncidents", async () => {
       return () => undefined;
     },
     subscribeIncident: incidentState.subscribeIncident,
-    countOpenIncidents: () => 0,
   };
 });
 
@@ -815,13 +814,17 @@ describe("AdminOpsDesk", () => {
       makeLiveSession({ sessionId: "s2", memberCount: 4 }),
       makeLiveSession({ sessionId: "s3", memberCount: 9, isLive: false }),
     ];
+    incidentState.list = [
+      makeIncident({ id: "inc-open", status: "open" }),
+      makeIncident({ id: "inc-done", status: "resolved" }),
+    ];
     mockViewport(true);
 
     renderOpsDesk();
 
     expect(screen.getByLabelText("Live games")).toHaveTextContent("2");
     expect(screen.getByLabelText("Runners")).toHaveTextContent("7");
-    expect(screen.getByLabelText("Needs you")).toHaveTextContent("0");
+    expect(screen.getByLabelText("Needs you")).toHaveTextContent("1");
   });
 
   it("returns to sessions mode from the strip event centre link on desktop", async () => {
