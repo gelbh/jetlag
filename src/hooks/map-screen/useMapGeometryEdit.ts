@@ -1,10 +1,12 @@
 import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon, Point } from "geojson";
 import { useCallback, useMemo, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import type { PolygonFeature } from "../../domain/geometry/kernel";
 import { tentacleEliminationJsonForAnswer } from "../../domain/geometry/tentacle/tentacleGeometry";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../domain/map/distance";
 import { useAnnotationStore, useMapStore } from "../../state/sessionStore";
+import { clipZoneToGameArea, ZONE_OUTSIDE_PLAY_AREA_MESSAGE } from "../tools/useZoneTool";
 
 interface UseMapGeometryEditParams {
   annotations: AnnotationRecord[];
@@ -96,9 +98,25 @@ export function useMapGeometryEdit({
       record = { ...record, metadata: meta };
     }
 
+    if (geometryEditAnnotation.type === "zone") {
+      const clipped = clipZoneToGameArea(geometryDraft as PolygonFeature, gameArea);
+      if (!clipped) {
+        setMapError(ZONE_OUTSIDE_PLAY_AREA_MESSAGE);
+        return;
+      }
+      record = { ...record, geometry: clipped };
+    }
+
     await updateAnnotation(record);
     cancelGeometryEdit();
-  }, [cancelGeometryEdit, gameArea, geometryDraft, geometryEditAnnotation, updateAnnotation]);
+  }, [
+    cancelGeometryEdit,
+    gameArea,
+    geometryDraft,
+    geometryEditAnnotation,
+    setMapError,
+    updateAnnotation,
+  ]);
 
   const handleGeometryEditClick = useCallback(
     (point: LatLngTuple) => {
@@ -106,7 +124,7 @@ export function useMapGeometryEdit({
         return false;
       }
 
-      if (!ensurePointInGameArea(point)) {
+      if (geometryEditAnnotation.type !== "zone" && !ensurePointInGameArea(point)) {
         return true;
       }
 
@@ -144,18 +162,19 @@ export function useMapGeometryEdit({
       }
 
       if (geometryEditAnnotation.type === "zone") {
-        const polygon = geometryDraft.geometry as GeoPolygon;
-        const ring = polygon.coordinates[0]
-          .slice(0, -1)
-          .map(([lng, lat]) => [lng, lat] as [number, number]);
+        const shape = geometryDraft.geometry as GeoPolygon | MultiPolygon;
+        // ponytail: multi-part zones only grow their first part; per-part editing needs a part picker.
+        const [first, ...rest] =
+          shape.type === "MultiPolygon" ? shape.coordinates : [shape.coordinates];
+        const ring = first[0].slice(0, -1);
         ring.push([point[1], point[0]]);
         ring.push(ring[0]);
         setGeometryDraft({
           ...geometryDraft,
-          geometry: {
-            type: "Polygon",
-            coordinates: [ring],
-          },
+          geometry:
+            rest.length > 0
+              ? { type: "MultiPolygon", coordinates: [[ring], ...rest] }
+              : { type: "Polygon", coordinates: [ring] },
         });
         return true;
       }

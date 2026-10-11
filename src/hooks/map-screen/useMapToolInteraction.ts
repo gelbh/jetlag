@@ -57,7 +57,7 @@ export function useMapToolInteraction({
         return;
       }
 
-      if (!ensurePointInGameArea(point)) {
+      if (activeTool !== "zone" && !ensurePointInGameArea(point)) {
         return;
       }
 

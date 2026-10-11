@@ -83,4 +83,17 @@ describe("useMapToolInteraction", () => {
 
     expect(radarTool.handleMapClick).not.toHaveBeenCalled();
   });
+
+  it("lets zone taps land outside the play area", () => {
+    const { result, zoneTool } = renderInteraction({
+      activeTool: "zone",
+      ensurePointInGameArea: vi.fn(() => false),
+    });
+
+    act(() => {
+      result.current.handleMapClick(53.35, -6.26);
+    });
+
+    expect(zoneTool.handleMapClick).toHaveBeenCalledWith([53.35, -6.26]);
+  });
 });
