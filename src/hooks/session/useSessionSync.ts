@@ -43,16 +43,22 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const replaceAnnotations = useAnnotationStore((state) => state.setAnnotations);
   const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
+  const sessionId = session?.id;
 
   useEffect(() => {
-    if (!syncEnabled || !session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+    if (
+      !syncEnabled ||
+      sessionId == null ||
+      sessionId === LOCAL_SESSION_ID ||
+      !isFirebaseConfigured()
+    ) {
       return;
     }
 
     const setSessionFromCache = useSessionStore.getState().setSessionFromCache;
     let staleTimer: ReturnType<typeof setTimeout> | undefined;
     const unsubscribe = subscribeToSession(
-      session.id,
+      sessionId,
       (remoteSession) => {
         const previous = useSessionStore.getState().session;
         const preservedAnchors =
@@ -90,8 +96,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       unsubscribe();
       setSessionFromCache(false);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
-  }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled]);
+  }, [myUid, sessionId, setLastSyncError, setSession, syncEnabled]);
 
   const endGameSessionId = session?.id;
   const endGameMemberRoles = session?.memberRoles;

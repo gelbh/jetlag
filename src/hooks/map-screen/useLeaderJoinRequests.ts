@@ -78,9 +78,8 @@ export function useLeaderJoinRequests({
         await resolveRoleJoinRequest(sessionId, pendingRequest.id, decision);
       } catch (error) {
         setResolveError(mapLeaderJoinResolveError(error));
-      } finally {
-        setBusy(false);
       }
+      setBusy(false);
     },
     [busy, pendingRequest, sessionId],
   );
