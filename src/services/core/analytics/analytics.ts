@@ -122,6 +122,15 @@ function runtimeEnabled(): boolean {
   );
 }
 
+/** `posthog.reset` clears persisted super properties, so call this after every reset. */
+function registerSuperProperties(): void {
+  // IP is personal data; PostHog's `ip: false` is a no-op, so disable GeoIP enrichment.
+  posthog.register({
+    $geoip_disable: true,
+    display_mode: isStandalonePwa() ? "standalone" : "browser",
+  });
+}
+
 /**
  * Link signed-in uid for ungated scrubbed `$exception` once core is up.
  * Product capture stays Accept-gated via `initialized` + `before_send`.
@@ -140,6 +149,7 @@ function applyIdentity(user: AnalyticsIdentity | null): void {
     }
     if (identifiedUid !== null) {
       posthog.reset(true);
+      registerSuperProperties();
       identifiedUid = null;
     }
   } catch {
@@ -194,11 +204,7 @@ export function initPosthogCore(): void {
         captureCanvas: { recordCanvas: false },
       },
     });
-    // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
-    posthog.register({
-      $geoip_disable: true,
-      display_mode: isStandalonePwa() ? "standalone" : "browser",
-    });
+    registerSuperProperties();
     window.addEventListener("appinstalled", () => track(ANALYTICS_EVENTS.pwa_installed), {
       once: true,
     });
@@ -245,6 +251,7 @@ export function denyAnalyticsConsent(): void {
     // Keep capturing on so scrubbed `$exception` can still flow (gated by before_send).
     posthog.stopSessionRecording();
     posthog.reset(true);
+    registerSuperProperties();
   } catch {
     // Soft-fail: consent must still clear locally.
   }

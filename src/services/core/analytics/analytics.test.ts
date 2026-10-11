@@ -448,6 +448,39 @@ describe("analytics facade", () => {
     expect(posthogStopSessionRecording).toHaveBeenCalled();
   });
 
+  it("re-registers super properties after deny reset", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    posthogRegister.mockClear();
+
+    denyAnalyticsConsent();
+
+    expect(posthogRegister).toHaveBeenCalledWith({
+      $geoip_disable: true,
+      display_mode: expect.any(String),
+    });
+    expect(posthogRegister.mock.invocationCallOrder[0]).toBeGreaterThan(
+      posthogReset.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
+    );
+  });
+
+  it("re-registers super properties after sign-out reset", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    posthogRegister.mockClear();
+
+    syncAnalyticsIdentity(null);
+
+    expect(posthogReset).toHaveBeenCalledWith(true);
+    expect(posthogRegister).toHaveBeenCalledWith({
+      $geoip_disable: true,
+      display_mode: expect.any(String),
+    });
+  });
+
   it("denyAnalyticsConsent resets identity and stops product capture", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
