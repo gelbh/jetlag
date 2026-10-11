@@ -62,6 +62,8 @@ vi.mock("../../hooks/billing/usePermanentAuthUser", () => ({
 }));
 
 vi.mock("firebase/auth", () => ({
+  EmailAuthProvider: { PROVIDER_ID: "password" },
+  GoogleAuthProvider: { PROVIDER_ID: "google.com" },
   isSignInWithEmailLink: () => false,
 }));
 

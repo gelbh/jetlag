@@ -155,6 +155,7 @@ export async function commitRadar(input: CommitRadarInput): Promise<void> {
         annotationId: created.id,
         answerSummary: answerOption?.label ?? String(radarAnswer),
         createdByUid: senderUid ?? undefined,
+        analyticsMode: "self_recorded",
       });
     }
 

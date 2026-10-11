@@ -201,6 +201,7 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
         ? TENTACLE_NOT_WITHIN_REACH_LABEL
         : (selectedPoi?.name ?? selectedPoiId ?? undefined),
       createdByUid: senderUid ?? undefined,
+      analyticsMode: "self_recorded",
     });
   }
 

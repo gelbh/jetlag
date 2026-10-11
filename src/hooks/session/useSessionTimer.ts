@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
+import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
 import { serverNow } from "@/services/core/time/serverClock";
 import {
   computeElapsedMs,
@@ -46,6 +48,8 @@ export function useSessionTimer(
   const onControlRef = useRef(onControl);
   const lastSessionIdRef = useRef<string | undefined>(undefined);
   const lastSessionResetAtRef = useRef<string | undefined>(undefined);
+  // React can defer start updaters, so timerStateRef alone misses same-frame double starts.
+  const gameStartedTrackedRef = useRef(false);
 
   useEffect(() => {
     timerStateRef.current = timerState;
@@ -72,6 +76,7 @@ export function useSessionTimer(
     if (!sessionId) {
       lastSessionIdRef.current = undefined;
       lastSessionResetAtRef.current = undefined;
+      gameStartedTrackedRef.current = false;
       setTimerStateInternal(INITIAL_TIMER_STATE);
       return;
     }
@@ -84,6 +89,7 @@ export function useSessionTimer(
     if (sessionChanged) {
       lastSessionIdRef.current = sessionId;
       lastSessionResetAtRef.current = sessionResetAt;
+      gameStartedTrackedRef.current = false;
     }
 
     const resetChanged =
@@ -92,6 +98,7 @@ export function useSessionTimer(
       sessionResetAt !== lastSessionResetAtRef.current;
     if (resetChanged) {
       lastSessionResetAtRef.current = sessionResetAt;
+      gameStartedTrackedRef.current = false;
       clearStoredTimer(sessionId);
     }
 
@@ -138,6 +145,7 @@ export function useSessionTimer(
       return;
     }
 
+    const isFirstStart = !hasTimerStarted(timerStateRef.current);
     setTimerState((current) => {
       const wasStarted = hasTimerStarted(current);
       const next = startTimer(current, serverNow());
@@ -147,6 +155,10 @@ export function useSessionTimer(
       }
       return next;
     });
+    if (sessionId && isFirstStart && !gameStartedTrackedRef.current) {
+      gameStartedTrackedRef.current = true;
+      trackLazy(ANALYTICS_EVENTS.game_started);
+    }
   }, [canControl, sessionId, setTimerState]);
 
   const pause = useCallback(() => {
@@ -168,6 +180,7 @@ export function useSessionTimer(
     }
 
     const next = resetTimer();
+    gameStartedTrackedRef.current = false;
     setTimerState(next);
     onControlRef.current?.(next);
 

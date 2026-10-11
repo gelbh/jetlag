@@ -293,6 +293,7 @@ export function useMeasuringCommit({
         annotationId: created.id,
         answerSummary: answerOption?.label ?? String(measuringAnswer),
         createdByUid: senderUid ?? undefined,
+        analyticsMode: "self_recorded",
       });
     }
 

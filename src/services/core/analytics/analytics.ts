@@ -8,6 +8,7 @@ import {
   writeAnalyticsConsent,
 } from "@/domain/device/consent/analyticsConsent";
 import { isEmbedMode } from "@/domain/device/embed/embedMode";
+import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
 import { shouldEnableAnalytics } from "./analyticsEnabled";
 import {
   ANALYTICS_EVENTS,
@@ -70,6 +71,7 @@ let initialized = false;
 let identifiedUid: string | null = null;
 /** Last auth identity seen — applied on init so Accept-after-sign-in still identifies. */
 let lastSeenIdentity: AnalyticsIdentity | null = null;
+let appInstalledHandler: (() => void) | null = null;
 
 export type AnalyticsIdentity = {
   uid: string;
@@ -121,6 +123,15 @@ function runtimeEnabled(): boolean {
   );
 }
 
+/** `posthog.reset` clears persisted super properties, so call this after every reset. */
+function registerSuperProperties(): void {
+  // IP is personal data; PostHog's `ip: false` is a no-op, so disable GeoIP enrichment.
+  posthog.register({
+    $geoip_disable: true,
+    display_mode: isStandalonePwa() ? "standalone" : "browser",
+  });
+}
+
 /**
  * Link signed-in uid for ungated scrubbed `$exception` once core is up.
  * Product capture stays Accept-gated via `initialized` + `before_send`.
@@ -139,6 +150,7 @@ function applyIdentity(user: AnalyticsIdentity | null): void {
     }
     if (identifiedUid !== null) {
       posthog.reset(true);
+      registerSuperProperties();
       identifiedUid = null;
     }
   } catch {
@@ -193,8 +205,9 @@ export function initPosthogCore(): void {
         captureCanvas: { recordCanvas: false },
       },
     });
-    // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
-    posthog.register({ $geoip_disable: true });
+    registerSuperProperties();
+    appInstalledHandler = () => track(ANALYTICS_EVENTS.pwa_installed);
+    window.addEventListener("appinstalled", appInstalledHandler, { once: true });
     coreInitialized = true;
     applyIdentity(lastSeenIdentity);
   } catch {
@@ -238,6 +251,7 @@ export function denyAnalyticsConsent(): void {
     // Keep capturing on so scrubbed `$exception` can still flow (gated by before_send).
     posthog.stopSessionRecording();
     posthog.reset(true);
+    registerSuperProperties();
   } catch {
     // Soft-fail: consent must still clear locally.
   }
@@ -358,4 +372,8 @@ export function resetAnalyticsForTests(options?: { initialized?: boolean }): voi
   initialized = options?.initialized ?? false;
   identifiedUid = null;
   lastSeenIdentity = null;
+  if (appInstalledHandler) {
+    window.removeEventListener("appinstalled", appInstalledHandler);
+    appInstalledHandler = null;
+  }
 }

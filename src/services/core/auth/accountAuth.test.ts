@@ -10,6 +10,7 @@ import {
   OAUTH_REDIRECT_PENDING_KEY,
   OAuthRedirectInProgressError,
   resetOAuthRedirectRecoveryForTests,
+  signInWithApple,
   signInWithGoogle,
   signInWithGoogleIdToken,
 } from "./accountAuth";
@@ -26,6 +27,8 @@ const {
   credentialFromError,
   isSignInWithEmailLink,
   credentialWithLink,
+  signInWithEmailLink,
+  trackLazy,
 } = vi.hoisted(() => ({
   mockAuth: {
     currentUser: null as { isAnonymous: boolean; uid: string } | null,
@@ -40,19 +43,31 @@ const {
   credentialFromError: vi.fn(),
   isSignInWithEmailLink: vi.fn(),
   credentialWithLink: vi.fn(),
+  signInWithEmailLink: vi.fn(),
+  trackLazy: vi.fn(),
 }));
+
+vi.mock("../analytics/lazyTelemetry", () => ({ trackLazy }));
 
 vi.mock("firebase/auth", () => ({
   EmailAuthProvider: {
+    PROVIDER_ID: "password",
     credentialWithLink: (...args: unknown[]) => credentialWithLink(...args),
   },
   GoogleAuthProvider: class {
+    static PROVIDER_ID = "google.com";
+    providerId = "google.com";
     static credential = vi.fn(() => ({
       providerId: "google.com",
       token: "id-token",
     }));
   },
   OAuthProvider: class {
+    providerId: string;
+    constructor(providerId: string) {
+      this.providerId = providerId;
+    }
+    addScope() {}
     static credentialFromError = (...args: unknown[]) => credentialFromError(...args);
   },
   getRedirectResult: (...args: unknown[]) => getRedirectResult(...args),
@@ -62,7 +77,7 @@ vi.mock("firebase/auth", () => ({
   linkWithRedirect: (...args: unknown[]) => linkWithRedirect(...args),
   sendSignInLinkToEmail: vi.fn(),
   signInWithCredential: (...args: unknown[]) => signInWithCredential(...args),
-  signInWithEmailLink: vi.fn(),
+  signInWithEmailLink: (...args: unknown[]) => signInWithEmailLink(...args),
   signInWithPopup: (...args: unknown[]) => signInWithPopup(...args),
   signInWithRedirect: (...args: unknown[]) => signInWithRedirect(...args),
 }));
@@ -308,5 +323,241 @@ describe("accountAuth", () => {
 
     expect(user?.uid).toBe("existing-email");
     expect(window.localStorage.getItem("premiumEmailForSignIn")).toBeNull();
+  });
+
+  describe("account_linked tracking", () => {
+    const upgraded = { uid: "u", isAnonymous: false };
+
+    it("tracks a linked Google ID token", async () => {
+      mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
+      linkWithCredential.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "link",
+        providerId: "google.com",
+      });
+
+      await signInWithGoogleIdToken("google-id-token");
+
+      expect(trackLazy).toHaveBeenCalledOnce();
+      expect(trackLazy).toHaveBeenCalledWith("account_linked", {
+        provider: "google",
+        outcome: "linked",
+      });
+    });
+
+    it("tracks signing in to an existing Google account after credential-already-in-use", async () => {
+      mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
+      linkWithCredential.mockRejectedValueOnce(
+        new FirebaseError("auth/credential-already-in-use", "Already linked."),
+      );
+      signInWithCredential.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "signIn",
+        providerId: "google.com",
+      });
+
+      await signInWithGoogleIdToken("google-id-token");
+
+      expect(trackLazy).toHaveBeenCalledOnce();
+      expect(trackLazy).toHaveBeenCalledWith("account_linked", {
+        provider: "google",
+        outcome: "signed_in_existing",
+      });
+    });
+
+    it("tracks a Google popup sign-in for a permanent user", async () => {
+      mockAuth.currentUser = { isAnonymous: false, uid: "perm" };
+      signInWithPopup.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "signIn",
+        providerId: "google.com",
+      });
+
+      await signInWithGoogle();
+
+      expect(trackLazy).toHaveBeenCalledOnce();
+      expect(trackLazy).toHaveBeenCalledWith("account_linked", {
+        provider: "google",
+        outcome: "signed_in_existing",
+      });
+    });
+
+    it("tracks an Apple popup link", async () => {
+      mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
+      linkWithPopup.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "link",
+        providerId: "apple.com",
+      });
+
+      await signInWithApple();
+
+      expect(trackLazy).toHaveBeenCalledOnce();
+      expect(trackLazy).toHaveBeenCalledWith("account_linked", {
+        provider: "apple",
+        outcome: "linked",
+      });
+    });
+
+    it("tracks an Apple popup credential-already-in-use fallback", async () => {
+      mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
+      linkWithPopup.mockRejectedValueOnce(
+        new FirebaseError("auth/credential-already-in-use", "Already linked."),
+      );
+      credentialFromError.mockReturnValueOnce({ providerId: "apple.com" });
+      signInWithCredential.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "signIn",
+        providerId: "apple.com",
+      });
+
+      await signInWithApple();
+
+      expect(trackLazy).toHaveBeenCalledOnce();
+      expect(trackLazy).toHaveBeenCalledWith("account_linked", {
+        provider: "apple",
+        outcome: "signed_in_existing",
+      });
+    });
+
+    it("tracks an email link that links an anonymous user when providerId is null", async () => {
+      mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
+      isSignInWithEmailLink.mockReturnValueOnce(true);
+      window.localStorage.setItem("premiumEmailForSignIn", "player@example.com");
+      credentialWithLink.mockReturnValueOnce({ providerId: "password" });
+      linkWithCredential.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "link",
+        providerId: null,
+      });
+
+      await completePremiumEmailSignInLink("https://localhost/premium");
+
+      expect(trackLazy).toHaveBeenCalledOnce();
+      expect(trackLazy).toHaveBeenCalledWith("account_linked", {
+        provider: "email",
+        outcome: "linked",
+      });
+    });
+
+    it("tracks an email link sign-in for a permanent user when providerId is null", async () => {
+      mockAuth.currentUser = { isAnonymous: false, uid: "perm" };
+      isSignInWithEmailLink.mockReturnValueOnce(true);
+      window.localStorage.setItem("premiumEmailForSignIn", "player@example.com");
+      signInWithEmailLink.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "signIn",
+        providerId: null,
+      });
+
+      await completePremiumEmailSignInLink("https://localhost/premium");
+
+      expect(trackLazy).toHaveBeenCalledOnce();
+      expect(trackLazy).toHaveBeenCalledWith("account_linked", {
+        provider: "email",
+        outcome: "signed_in_existing",
+      });
+    });
+
+    it("tracks a redirect result credential once across concurrent completions", async () => {
+      getRedirectResult.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "link",
+        providerId: "google.com",
+      });
+
+      await Promise.all([completeOAuthRedirectIfPending(), completeOAuthRedirectIfPending()]);
+
+      expect(trackLazy).toHaveBeenCalledOnce();
+      expect(trackLazy).toHaveBeenCalledWith("account_linked", {
+        provider: "google",
+        outcome: "linked",
+      });
+    });
+
+    it("tracks the redirect credential-already-in-use fallback", async () => {
+      mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
+      getRedirectResult.mockRejectedValueOnce(
+        new FirebaseError("auth/credential-already-in-use", "Already linked."),
+      );
+      credentialFromError.mockReturnValueOnce({ providerId: "google.com" });
+      linkWithCredential.mockRejectedValueOnce(
+        new FirebaseError("auth/credential-already-in-use", "Already linked."),
+      );
+      signInWithCredential.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "signIn",
+        providerId: "google.com",
+      });
+
+      await completeOAuthRedirectIfPending();
+
+      expect(trackLazy).toHaveBeenCalledOnce();
+      expect(trackLazy).toHaveBeenCalledWith("account_linked", {
+        provider: "google",
+        outcome: "signed_in_existing",
+      });
+    });
+
+    it("does not track a null redirect result", async () => {
+      getRedirectResult.mockResolvedValueOnce(null);
+      await completeOAuthRedirectIfPending();
+
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
+
+    it("does not track pending-promise recovery", async () => {
+      mockAuth.currentUser = { uid: "redirect-user", isAnonymous: false };
+      getRedirectResult.mockRejectedValueOnce(
+        new Error("INTERNAL ASSERTION FAILED: Pending promise was never set"),
+      );
+      await completeOAuthRedirectIfPending();
+
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
+
+    it("does not track when the redirect starts", async () => {
+      mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
+      linkWithPopup.mockRejectedValueOnce(new FirebaseError("auth/popup-blocked", "Blocked."));
+      linkWithRedirect.mockResolvedValueOnce(undefined);
+
+      await expect(signInWithGoogle()).rejects.toBeInstanceOf(OAuthRedirectInProgressError);
+
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
+
+    it("does not track auth errors", async () => {
+      mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
+      linkWithCredential.mockRejectedValueOnce(
+        new FirebaseError("auth/network-request-failed", "Network error."),
+      );
+
+      await expect(signInWithGoogleIdToken("google-id-token")).rejects.toBeTruthy();
+
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
+
+    it("does not track unknown providers", async () => {
+      mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
+      linkWithCredential.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "link",
+        providerId: "github.com",
+      });
+      await signInWithGoogleIdToken("google-id-token");
+
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
+
+    it("does not track reauthentication", async () => {
+      getRedirectResult.mockResolvedValueOnce({
+        user: upgraded,
+        operationType: "reauthenticate",
+        providerId: "google.com",
+      });
+      await completeOAuthRedirectIfPending();
+
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
   });
 });

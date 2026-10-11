@@ -3,6 +3,8 @@ import { useState } from "react";
 import { filledStyles, grayStyles } from "@/components/ui/entry/entryChrome";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
 import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
+import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
+import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
 import {
   buildSessionInviteUrl,
   resolveSessionInviteOrigin,
@@ -32,15 +34,23 @@ export function ShareCode({ code, remote = false, compact = false }: ShareCodePr
 
   const handleCopyCode = async () => {
     setCopyTarget("code");
-    await copy(code);
+    if (await copy(code)) {
+      trackLazy(ANALYTICS_EVENTS.invite_shared, { method: "copy_code" });
+    }
+  };
+
+  const copyLink = async (url: string) => {
+    setCopyTarget("link");
+    if (await copy(url)) {
+      trackLazy(ANALYTICS_EVENTS.invite_shared, { method: "copy_link" });
+    }
   };
 
   const handleCopyLink = async () => {
     if (!inviteUrl) {
       return;
     }
-    setCopyTarget("link");
-    await copy(inviteUrl);
+    await copyLink(inviteUrl);
   };
 
   const handleInvite = async () => {
@@ -55,6 +65,7 @@ export function ShareCode({ code, remote = false, compact = false }: ShareCodePr
           text: `Join with code ${code}`,
           url: inviteUrl,
         });
+        trackLazy(ANALYTICS_EVENTS.invite_shared, { method: "native_share" });
         return;
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
@@ -63,8 +74,7 @@ export function ShareCode({ code, remote = false, compact = false }: ShareCodePr
       }
     }
 
-    setCopyTarget("link");
-    await copy(inviteUrl);
+    await copyLink(inviteUrl);
   };
 
   if (compact) {
