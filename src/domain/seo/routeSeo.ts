@@ -1,4 +1,6 @@
-import { LEGAL_APP_NAME } from "../legal/legalContact";
+import { learnBreadcrumbs, learnPageMeta } from "../learn/learnPageMeta";
+import { LEGAL_APP_NAME, UNOFFICIAL_DISCLAIMER } from "../legal/legalContact";
+import { LEARN_ROUTE_PATHS, type LearnRoutePath } from "./learnRoutePaths";
 import crawlPolicy from "./seoCrawlPolicy.json";
 
 export type SeoRobots = "index,follow" | "noindex,nofollow";
@@ -21,8 +23,6 @@ const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
 const DEFAULT_OG_IMAGE_PATH = "/og-default.png";
 
 const INDEXABLE_PATHS = new Set(crawlPolicy.indexablePaths);
-const UNOFFICIAL_DISCLAIMER =
-  "Unofficial fan companion. Not affiliated with Jet Lag: The Game, the board game, or Nebula.";
 
 /** Home tab/share title: brand plus what the app does (keep ≤ 60 chars; JSON-LD keeps the brand). */
 export const HOME_TITLE = `${LEGAL_APP_NAME} · Live Hide + Seek Maps`;
@@ -43,6 +43,48 @@ function webPageJsonLd(path: string, title: string, description: string): Record
     description,
     disclaimer: UNOFFICIAL_DISCLAIMER,
   };
+}
+
+/** `WebPage` plus a `BreadcrumbList` for pages nested under a hub (e.g. `/tools/radar`). */
+function learnPageJsonLd(path: LearnRoutePath): Record<string, unknown> {
+  const { seoTitle, description } = learnPageMeta(path);
+  const crumbs = learnBreadcrumbs(path);
+  const page = webPageJsonLd(path, seoTitle, description);
+  if (crumbs.length < 3) return page;
+  const { "@context": context, ...pageNode } = page;
+  return {
+    "@context": context,
+    "@graph": [
+      pageNode,
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: crumbs.map((crumb, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: crumb.name,
+          item: absoluteUrl(crumb.path),
+        })),
+      },
+    ],
+  };
+}
+
+function learnRouteSeoEntries(): Record<string, RouteSeoSource> {
+  return Object.fromEntries(
+    LEARN_ROUTE_PATHS.map((path) => {
+      const { seoTitle, description } = learnPageMeta(path);
+      return [
+        path,
+        {
+          title: seoTitle,
+          description,
+          canonicalPath: path,
+          ogImagePath: DEFAULT_OG_IMAGE_PATH,
+          jsonLd: learnPageJsonLd(path),
+        },
+      ];
+    }),
+  );
 }
 
 export function absoluteUrl(path: string): string {
@@ -75,6 +117,7 @@ const TERMS_TITLE = titleFor("Terms");
 const TERMS_DESCRIPTION = `Terms of use for ${LEGAL_APP_NAME}, an unofficial fan companion for Jet Lag Hide + Seek.`;
 
 const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
+  ...learnRouteSeoEntries(),
   "/": {
     title: HOME_TITLE,
     description: HOME_DESCRIPTION,
