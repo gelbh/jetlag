@@ -1,17 +1,17 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { withSentryEventHandler } from "../../lib/sentry.mjs";
+import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import {
   cancelRoleJoinRequestHandler,
   requestRoleJoinHandler,
   resolveRoleJoinRequestHandler,
 } from "../../session/joinRequest.mjs";
-import { mapJoinRequestError, sentryDsnSecret } from "./shared.mjs";
+import { mapJoinRequestError, posthogProjectApiKey } from "./shared.mjs";
 
 export const requestRoleJoin = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -27,8 +27,8 @@ export const requestRoleJoin = onCall(
 );
 
 export const cancelRoleJoinRequest = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -44,8 +44,8 @@ export const cancelRoleJoinRequest = onCall(
 );
 
 export const resolveRoleJoinRequest = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }

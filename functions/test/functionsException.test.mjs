@@ -5,16 +5,15 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { HttpsError } from "firebase-functions/v2/https";
 import {
-  FUNCTIONS_SENTRY_DATA_COLLECTION,
-  isAbortErrorEvent,
   isAbortErrorNoise,
   isExpectedFunctionsError,
   isOverpassTransportNoise,
-  isOverpassTransportNoiseEvent,
   readAppVersion,
   resolveDeployedFunctionName,
-  resolveFunctionsSentryEnvironment,
-} from "../lib/sentry.mjs";
+  resolveFunctionsExceptionEnvironment,
+  setFunctionsExceptionClientForTests,
+  shouldSkipFunctionsException,
+} from "../lib/functionsException.mjs";
 import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../session/expectedSessionUxHttpsErrors.mjs";
 
 function fetchFailedWithCause(cause) {
@@ -30,15 +29,6 @@ test("isAbortErrorNoise matches AbortError Error and DOMException", () => {
   assert.equal(isAbortErrorNoise(new DOMException("Aborted", "AbortError")), true);
   assert.equal(isAbortErrorNoise(new Error("Overpass timed out.")), false);
   assert.equal(isAbortErrorNoise(null), false);
-});
-
-test("isAbortErrorEvent matches Discover AbortError title shape", () => {
-  const event = {
-    exception: {
-      values: [{ type: "AbortError", value: "This operation was aborted" }],
-    },
-  };
-  assert.equal(isAbortErrorEvent(event), true);
 });
 
 test("isExpectedFunctionsError treats AbortError as expected noise", () => {
@@ -69,57 +59,19 @@ test("isOverpassTransportNoise does not drop unrelated fetch failed", () => {
   assert.equal(isOverpassTransportNoise(null), false);
 });
 
-test("isOverpassTransportNoiseEvent matches ConnectTimeout / EPIPE chains", () => {
-  assert.equal(
-    isOverpassTransportNoiseEvent({
-      exception: {
-        values: [
-          { type: "TypeError", value: "fetch failed" },
-          {
-            type: "ConnectTimeoutError",
-            value: "Connect Timeout Error (UND_ERR_CONNECT_TIMEOUT)",
-          },
-        ],
-      },
-    }),
-    true,
-  );
-  assert.equal(
-    isOverpassTransportNoiseEvent({
-      exception: {
-        values: [
-          { type: "TypeError", value: "fetch failed" },
-          { type: "Error", value: "connect EPIPE 203.0.113.10:443" },
-        ],
-      },
-    }),
-    true,
-  );
-  assert.equal(
-    isOverpassTransportNoiseEvent({
-      exception: {
-        values: [
-          { type: "TypeError", value: "fetch failed" },
-          { type: "Error", value: "getaddrinfo ENOTFOUND overpass.example" },
-        ],
-      },
-    }),
-    false,
-  );
-});
-
-// Abort-parity: transport fetch-failed is not an expectedFunctionsError (final
-// path remaps via toOverpassUpstreamError → 504 "Overpass timed out." without
-// capture, same as Abort). Residual superseded envelopes drop in beforeSend.
-test("isExpectedFunctionsError does not treat overpass transport fetch-failed as expected", () => {
+// Transport fetch-failed is not an expected HttpsError, but shouldSkip gates it
+// (former Sentry beforeSend residual drop).
+test("shouldSkipFunctionsException drops overpass transport fetch-failed", () => {
   const cause = new Error("Connect Timeout Error");
   cause.name = "ConnectTimeoutError";
   cause.code = "UND_ERR_CONNECT_TIMEOUT";
   assert.equal(isExpectedFunctionsError(fetchFailedWithCause(cause)), false);
+  assert.equal(shouldSkipFunctionsException(fetchFailedWithCause(cause)), true);
 
   const epipe = new Error("connect EPIPE 203.0.113.10:443");
   epipe.code = "EPIPE";
   assert.equal(isExpectedFunctionsError(fetchFailedWithCause(epipe)), false);
+  assert.equal(shouldSkipFunctionsException(fetchFailedWithCause(epipe)), true);
 });
 
 test("isExpectedFunctionsError matches host-only leave HttpsError", () => {
@@ -254,7 +206,13 @@ test("isExpectedFunctionsError matches join-request-expired HttpsError", () => {
 });
 
 test("captureFunctionsException no-ops for expected join HttpsErrors", async () => {
-  const { captureFunctionsException } = await import("../lib/sentry.mjs");
+  const { captureFunctionsException } = await import("../lib/functionsException.mjs");
+  const calls = [];
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async (...args) => {
+      calls.push(args);
+    },
+  });
   const expected = [
     new HttpsError("permission-denied", "Wrong role code."),
     new HttpsError("failed-precondition", "Join without a request — this side is empty."),
@@ -263,9 +221,66 @@ test("captureFunctionsException no-ops for expected join HttpsErrors", async () 
   ];
   for (const error of expected) {
     assert.equal(isExpectedFunctionsError(error), true);
-    // Expected gate runs before Sentry.captureException; must not throw.
     assert.doesNotThrow(() => captureFunctionsException(error));
   }
+  await new Promise((r) => setTimeout(r, 20));
+  assert.equal(calls.length, 0);
+  setFunctionsExceptionClientForTests(null);
+});
+
+test("captureFunctionsExceptionAsync sends unexpected errors to PostHog", async () => {
+  const { captureFunctionsExceptionAsync } = await import("../lib/functionsException.mjs");
+  const calls = [];
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async (error, distinctId, properties) => {
+      calls.push({ error, distinctId, properties });
+    },
+  });
+  const boom = new Error("unexpected boom");
+  await captureFunctionsExceptionAsync(boom, { name: "proxy" });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].error, boom);
+  assert.equal(calls[0].distinctId, "jetlag-functions");
+  assert.equal(calls[0].properties.function_name, "proxy");
+  assert.equal(calls[0].properties.callable, "proxy");
+  setFunctionsExceptionClientForTests(null);
+});
+
+test("captureFunctionsException returns a promise that settles after Immediate capture", async () => {
+  const { captureFunctionsException } = await import("../lib/functionsException.mjs");
+  let settled = false;
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async () => {
+      await new Promise((r) => setTimeout(r, 15));
+      settled = true;
+    },
+  });
+  const pending = captureFunctionsException(new Error("await me"));
+  assert.equal(typeof pending?.then, "function");
+  assert.equal(settled, false);
+  await pending;
+  assert.equal(settled, true);
+  setFunctionsExceptionClientForTests(null);
+});
+
+test("captureFunctionsExceptionWithTags returns a promise that settles after Immediate capture", async () => {
+  const { captureFunctionsExceptionWithTags } = await import("../lib/functionsException.mjs");
+  let settled = false;
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async () => {
+      await new Promise((r) => setTimeout(r, 15));
+      settled = true;
+    },
+  });
+  const pending = captureFunctionsExceptionWithTags(new Error("await tags"), {
+    name: "proxy",
+    extraTags: { proxy_route: "overpass" },
+  });
+  assert.equal(typeof pending?.then, "function");
+  assert.equal(settled, false);
+  await pending;
+  assert.equal(settled, true);
+  setFunctionsExceptionClientForTests(null);
 });
 
 test("EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS are all allowlisted", () => {
@@ -357,23 +372,21 @@ test("isExpectedFunctionsError ignores unrelated HttpsErrors and plain Errors", 
   assert.equal(isExpectedFunctionsError(null), false);
 });
 
-test("resolveFunctionsSentryEnvironment prefers emulator then SENTRY_ENVIRONMENT", () => {
+test("resolveFunctionsExceptionEnvironment prefers emulator then FUNCTIONS_EXCEPTION_ENVIRONMENT", () => {
   assert.equal(
-    resolveFunctionsSentryEnvironment({
+    resolveFunctionsExceptionEnvironment({
       FUNCTIONS_EMULATOR: "true",
-      SENTRY_ENVIRONMENT: "staging",
+      FUNCTIONS_EXCEPTION_ENVIRONMENT: "staging",
     }),
     "emulator",
   );
-  assert.equal(resolveFunctionsSentryEnvironment({ SENTRY_ENVIRONMENT: " staging " }), "staging");
-  assert.equal(resolveFunctionsSentryEnvironment({}), "production");
-  assert.equal(resolveFunctionsSentryEnvironment({ SENTRY_ENVIRONMENT: "  " }), "production");
-});
-
-test("FUNCTIONS_SENTRY_DATA_COLLECTION keeps v10-equivalent privacy baseline", () => {
-  assert.equal(FUNCTIONS_SENTRY_DATA_COLLECTION.userInfo, false);
-  assert.equal(FUNCTIONS_SENTRY_DATA_COLLECTION.cookies, false);
-  assert.deepEqual(FUNCTIONS_SENTRY_DATA_COLLECTION.httpBodies, []);
-  assert.equal(FUNCTIONS_SENTRY_DATA_COLLECTION.databaseQueryData, false);
-  assert.deepEqual(FUNCTIONS_SENTRY_DATA_COLLECTION.genAI, { inputs: false, outputs: false });
+  assert.equal(
+    resolveFunctionsExceptionEnvironment({ FUNCTIONS_EXCEPTION_ENVIRONMENT: " staging " }),
+    "staging",
+  );
+  assert.equal(resolveFunctionsExceptionEnvironment({}), "production");
+  assert.equal(
+    resolveFunctionsExceptionEnvironment({ FUNCTIONS_EXCEPTION_ENVIRONMENT: "  " }),
+    "production",
+  );
 });

@@ -22,24 +22,18 @@ import {
 } from "../billing/stripeConfig.mjs";
 import { handleStripeWebhook } from "../billing/stripeWebhook.mjs";
 import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
+import { withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import { posthogProjectApiKey } from "../lib/posthog.mjs";
-import {
-  getSentryDsnSecret,
-  withSentryEventHandler,
-  withSentryHttpHandler,
-} from "../lib/sentry.mjs";
 import { adminDb } from "./proxyShared.mjs";
 
-const sentryDsnSecret = getSentryDsnSecret();
-
 const stripeBillingOptions = {
-  secrets: [...STRIPE_BILLING_SECRETS, sentryDsnSecret],
+  secrets: [...STRIPE_BILLING_SECRETS, posthogProjectApiKey],
   params: STRIPE_BILLING_PARAMS,
 };
 
 export const getPremiumEntitlements = onCall(
   stripeBillingOptions,
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -50,7 +44,7 @@ export const getPremiumEntitlements = onCall(
 
 export const createCheckoutSession = onCall(
   { ...stripeBillingOptions, enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -75,8 +69,8 @@ export const createCheckoutSession = onCall(
 );
 
 export const startPremiumTrial = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -88,7 +82,7 @@ export const startPremiumTrial = onCall(
 
 export const createBillingPortalSession = onCall(
   { ...stripeBillingOptions, enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -106,7 +100,7 @@ export const createBillingPortalSession = onCall(
 
 export const createPremiumSession = onCall(
   { ...stripeBillingOptions, enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -118,7 +112,7 @@ export const createPremiumSession = onCall(
 
 export const recoverPremiumByStripeEmail = onCall(
   { ...stripeBillingOptions, enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -148,9 +142,9 @@ export const recoverPremiumByStripeEmail = onCall(
 // Stripe webhooks authenticate via signature verification only — App Check is not applicable.
 export const stripeWebhook = onRequest(
   {
-    secrets: [stripeWebhookSecret, sentryDsnSecret, posthogProjectApiKey],
+    secrets: [stripeWebhookSecret, posthogProjectApiKey],
   },
-  withSentryHttpHandler(async (req, res) => {
+  withFunctionsExceptionHandler(async (req, res) => {
     await handleStripeWebhook(adminDb(), stripeWebhookSecret.value(), req, res, {
       posthogApiKey: posthogProjectApiKey.value(),
     });

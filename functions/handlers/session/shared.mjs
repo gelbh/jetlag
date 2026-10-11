@@ -1,5 +1,5 @@
 import { HttpsError } from "firebase-functions/v2/https";
-import { getSentryDsnSecret } from "../../lib/sentry.mjs";
+import { posthogProjectApiKey } from "../../lib/posthog.mjs";
 import { CLIENT_UPDATE_REQUIRED } from "../../session/clientMinVersion.mjs";
 import {
   MOVE_TIMER_INVALID_ACTION,
@@ -55,8 +55,6 @@ import {
   REVEAL_SESSION_NOT_FOUND,
 } from "../../session/rolePasscodeReveal.mjs";
 
-export const sentryDsnSecret = getSentryDsnSecret();
-
 export {
   EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
   HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
@@ -69,6 +67,7 @@ export {
   HTTPS_MSG_LEGACY_JOIN,
   HTTPS_MSG_ROLE_CODE_REQUIRED,
   HTTPS_MSG_WRONG_ROLE_CODE,
+  posthogProjectApiKey,
 };
 
 function throwIfClientUpdateRequired(error) {
