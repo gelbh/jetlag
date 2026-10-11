@@ -7,25 +7,39 @@ function sqlStringLiteral(value) {
 }
 
 /**
- * @param {{ key: string, op: "eq" | "regex", value: string }} pred
+ * Overpass `~` is an unanchored POSIX regex match.
+ *
+ * @param {import("./postpassClassify.mjs").OverpassFilter} pred
  * @returns {string}
  */
 export function tagPredicateSql(pred) {
   const key = sqlStringLiteral(pred.key);
-  if (pred.op === "regex") {
-    return `tags->>${key} ~ ${sqlStringLiteral(`^(${pred.value})$`)}`;
+  switch (pred.op) {
+    case "exists":
+      return `tags ? ${key}`;
+    case "eq":
+      return `tags->>${key} = ${sqlStringLiteral(pred.value)}`;
+    case "regex":
+      return `tags->>${key} ~ ${sqlStringLiteral(pred.value)}`;
+    case "iregex":
+      return `tags->>${key} ~* ${sqlStringLiteral(pred.value)}`;
+    default: {
+      const _exhaustive = pred.op;
+      throw new Error(`Unsupported Postpass tag op: ${_exhaustive}`);
+    }
   }
-  return `tags->>${key} = ${sqlStringLiteral(pred.value)}`;
 }
 
 /**
- * @param {Array<{ key: string, op: "eq" | "regex", value: string }>} tags
- * @param {string[]} [skipKeys]
- * @returns {string[]}
+ * @param {unknown} clauses
+ * @param {string} family
+ * @returns {string}
  */
-function tagWhereClauses(tags, skipKeys = []) {
-  const skip = new Set(skipKeys);
-  return tags.filter((pred) => !skip.has(pred.key)).map((pred) => tagPredicateSql(pred));
+function clausesSql(clauses, family) {
+  if (!Array.isArray(clauses) || clauses.length === 0) {
+    throw new Error(`Postpass ${family} SQL requires clauses.`);
+  }
+  return `(${clauses.map((clause) => `(${clause.map(tagPredicateSql).join(" AND ")})`).join(" OR ")})`;
 }
 
 /**
@@ -41,19 +55,26 @@ export function envelopeSql(bbox) {
  * @returns {string}
  */
 export function dwithinSql(around) {
-  return `ST_DWithin(geom::geography, ST_MakePoint(${around.lon}, ${around.lat})::geography, ${around.radiusMeters})`;
+  const point = `ST_SetSRID(ST_MakePoint(${around.lon}, ${around.lat}), 4326)`;
+  // Degree box covering the radius so the geom index can prefilter; geography cast cannot use it.
+  const cosLat = Math.max(Math.cos((around.lat * Math.PI) / 180), 0.01);
+  const degrees = around.radiusMeters / (111_320 * cosLat);
+  return `geom && ST_Expand(${point}, ${degrees}) AND ST_DWithin(geom::geography, ${point}::geography, ${around.radiusMeters})`;
 }
+
+const POINT_ON_SURFACE_GEOM = "ST_PointOnSurface(geom) AS geom";
 
 /**
  * @param {string} table
  * @param {string[]} wheres
  * @param {number} [limit]
+ * @param {string} [geomSql]
  * @returns {string}
  */
-function selectSql(table, wheres, limit) {
+function selectSql(table, wheres, limit, geomSql = "geom") {
   const where = wheres.length > 0 ? ` WHERE ${wheres.join(" AND ")}` : "";
   const lim = limit != null ? ` LIMIT ${limit}` : "";
-  return `SELECT osm_id, osm_type, tags, geom FROM ${table}${where}${lim}`;
+  return `SELECT osm_id, osm_type, tags, ${geomSql} FROM ${table}${where}${lim}`;
 }
 
 /**
@@ -62,7 +83,6 @@ function selectSql(table, wheres, limit) {
  */
 export function buildPostpassSql(classification) {
   const { family, meta } = classification;
-  const tags = Array.isArray(meta.tags) ? meta.tags : [];
   const bbox = meta.bbox;
   const around = meta.around;
 
@@ -125,17 +145,24 @@ export function buildPostpassSql(classification) {
       if (!around) {
         throw new Error("Postpass around SQL requires around.");
       }
-      const wheres = [...tagWhereClauses(tags), dwithinSql(around)];
-      return selectSql("postpass_point", wheres, 40);
+      return selectSql(
+        "postpass_pointlinepolygon",
+        [clausesSql(meta.clauses, family), dwithinSql(around)],
+        40,
+        POINT_ON_SURFACE_GEOM,
+      );
     }
     case "linear": {
       if (!bbox) {
         throw new Error("Postpass linear SQL requires bbox.");
       }
-      return selectSql("postpass_line", [...tagWhereClauses(tags), `geom && ${envelopeSql(bbox)}`]);
+      return selectSql("postpass_line", [
+        clausesSql(meta.clauses, family),
+        `geom && ${envelopeSql(bbox)}`,
+      ]);
     }
     case "places": {
-      const wheres = tagWhereClauses(tags);
+      const wheres = [clausesSql(meta.clauses, family)];
       if (bbox) {
         wheres.push(`geom && ${envelopeSql(bbox)}`);
       } else if (around) {
@@ -143,7 +170,7 @@ export function buildPostpassSql(classification) {
       } else {
         throw new Error("Postpass places SQL requires bbox or around.");
       }
-      return selectSql("postpass_point", wheres, 200);
+      return selectSql("postpass_pointlinepolygon", wheres, 200, POINT_ON_SURFACE_GEOM);
     }
     default: {
       const _exhaustive = family;

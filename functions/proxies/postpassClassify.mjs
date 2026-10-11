@@ -34,6 +34,13 @@ export function extractOverpassBbox(ql) {
  * @returns {{ radiusMeters: number, lat: number, lon: number } | null}
  */
 export function extractAround(ql) {
+  // One SQL radius cannot mirror unions with different around filters.
+  const distinct = new Set(
+    (String(ql).match(/around\s*:[^)]*/gi) ?? []).map((a) => a.replace(/\s+/g, "")),
+  );
+  if (distinct.size > 1) {
+    return null;
+  }
   const match = String(ql).match(
     /around\s*:\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/i,
   );
@@ -70,6 +77,80 @@ export function extractTagPredicates(ql) {
 }
 
 /**
+ * @typedef {{ key: string, op: "eq" | "regex" | "iregex" | "exists", value?: string }} OverpassFilter
+ */
+
+const OVERPASS_STATEMENT_RE =
+  /\b(?:node|way|rel|relation|nwr)\b(?:\s*\(\s*around\s*:[^)]*\))?\s*((?:\[[^\]]*\]\s*)+)/g;
+const OVERPASS_KEYWORD_RE = /\b(?:node|way|rel|relation|nwr|nw|nr|wr)\b/g;
+
+// Quoted ("…", no escapes) or bare Overpass identifier.
+const FILTER_TOKEN = String.raw`(?:"([^"\\]*)"|([A-Za-z0-9_]+))`;
+const FILTER_EXISTS_RE = new RegExp(String.raw`^\[\s*${FILTER_TOKEN}\s*\]$`);
+const FILTER_COMPARE_RE = new RegExp(
+  String.raw`^\[\s*${FILTER_TOKEN}\s*(=|~)\s*${FILTER_TOKEN}\s*(,\s*i\s*)?\]$`,
+);
+
+/**
+ * Strict: negation, key regex, escaped quotes, or `=…,i` return null so callers fail closed.
+ *
+ * @param {string} raw
+ * @returns {OverpassFilter | null}
+ */
+export function parseOverpassFilter(raw) {
+  const exists = raw.match(FILTER_EXISTS_RE);
+  if (exists) {
+    const key = exists[1] ?? exists[2];
+    return key ? { key, op: "exists" } : null;
+  }
+  const match = raw.match(FILTER_COMPARE_RE);
+  if (!match) {
+    return null;
+  }
+  const [, quotedKey, bareKey, operator, quotedValue, bareValue, caseInsensitive] = match;
+  const key = quotedKey ?? bareKey;
+  const value = quotedValue ?? bareValue;
+  if (!key) {
+    return null;
+  }
+  if (operator === "=") {
+    return caseInsensitive ? null : { key, op: "eq", value };
+  }
+  return { key, op: caseInsensitive ? "iregex" : "regex", value };
+}
+
+/**
+ * Overpass union statements → OR of clauses; filters within a statement are ANDed.
+ * Any statement the regex cannot read returns null so callers fail closed.
+ *
+ * @param {string} ql
+ * @returns {OverpassFilter[][] | null}
+ */
+export function extractClauses(ql) {
+  const text = String(ql);
+  const statements = [...text.matchAll(OVERPASS_STATEMENT_RE)];
+  const keywords = text.replace(/"[^"]*"|\[[^\]]*\]/g, "").match(OVERPASS_KEYWORD_RE) ?? [];
+  if (keywords.length !== statements.length) {
+    return null;
+  }
+  /** @type {Map<string, OverpassFilter[]>} */
+  const unique = new Map();
+  for (const statement of statements) {
+    /** @type {OverpassFilter[]} */
+    const clause = [];
+    for (const raw of statement[1].match(/\[[^\]]*\]/g) ?? []) {
+      const filter = parseOverpassFilter(raw);
+      if (!filter) {
+        return null;
+      }
+      clause.push(filter);
+    }
+    unique.set(JSON.stringify(clause), clause);
+  }
+  return unique.size > 0 ? [...unique.values()] : null;
+}
+
+/**
  * @param {string} ql
  * @returns {PostpassClassification | null}
  */
@@ -78,6 +159,7 @@ export function classifyOverpassQuery(ql) {
   const tags = extractTagPredicates(text);
   const bbox = extractOverpassBbox(text);
   const around = extractAround(text);
+  const clauses = extractClauses(text);
 
   if (text.includes('natural"="water"') && (text.includes("waterway") || text.includes("place"))) {
     // Fail closed: landmass needs a bbox (never unbounded PostGIS).
@@ -106,8 +188,8 @@ export function classifyOverpassQuery(ql) {
     !text.includes('natural"="coastline"');
 
   if (isLinearWayGeom && !isAdminRelation) {
-    if (!bbox) return null;
-    return { family: "linear", meta: { bbox, tags } };
+    if (!bbox || !clauses) return null;
+    return { family: "linear", meta: { bbox, clauses } };
   }
 
   if (isAdminRelation) {
@@ -124,17 +206,18 @@ export function classifyOverpassQuery(ql) {
   }
 
   if (around) {
-    return { family: "around", meta: { around, tags, bbox } };
+    if (!clauses) return null;
+    return { family: "around", meta: { around, clauses, bbox } };
   }
 
   if (isLinearWayGeom) {
-    if (!bbox) return null;
-    return { family: "linear", meta: { bbox, tags } };
+    if (!bbox || !clauses) return null;
+    return { family: "linear", meta: { bbox, clauses } };
   }
 
   if (/\bout\s+center\b/i.test(text)) {
-    if (!bbox && !around) return null;
-    return { family: "places", meta: { bbox, tags, around } };
+    if ((!bbox && !around) || !clauses) return null;
+    return { family: "places", meta: { bbox, clauses, around } };
   }
 
   return null;
