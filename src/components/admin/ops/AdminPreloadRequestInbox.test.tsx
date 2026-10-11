@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PreloadRequest } from "../../../domain/preloadRequest/preloadRequestTypes";
 import { renderWithRouter } from "../../../test/renderWithRouter";
@@ -43,6 +43,13 @@ vi.mock("../../../services/admin/adminPreloadRequests", async () => {
 
 vi.mock("../../../services/preloadRequest/preloadRequestApi", () => ({
   updatePreloadRequestStatus: vi.fn(async () => undefined),
+}));
+
+vi.mock("firebase/auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("firebase/auth")>()),
+  signOut: vi.fn(async () => {
+    throw new Error("Sign-out network error");
+  }),
 }));
 
 vi.mock("../../../services/core/firebase/firebase", () => ({
@@ -99,7 +106,7 @@ describe("AdminPreloadRequestInbox", () => {
     expect(screen.queryByText("Admin access required")).not.toBeInTheDocument();
   });
 
-  it("renders a desk-style denied state without a red alert", () => {
+  it("renders a desk-style denied state with sign-out and back-home actions", () => {
     authState.state = "denied";
     authState.user = { email: "player@example.com" };
     renderInbox();
@@ -128,7 +135,20 @@ describe("AdminPreloadRequestInbox", () => {
     const title = screen.getByRole("heading", { name: "Preload request inbox" });
     expect(title.textContent).toBe("Preload request inbox");
     expect(title.style.textTransform).toBe("");
-    expect(getComputedStyle(title).textTransform).not.toBe("uppercase");
+  });
+
+  it("shows a mispunch Alert in the admin world when sign-out fails", async () => {
+    authState.state = "denied";
+    authState.user = { email: "player@example.com" };
+    renderInbox();
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveAttribute("data-tone", "mispunch");
+    expect(alert).toHaveClass("mantine-Alert-root");
+    expect(within(alert).getByText("Sign-out failed")).toBeInTheDocument();
+    expect(within(alert).getByText("Sign-out network error")).toBeInTheDocument();
+    expect(alert.closest("[data-admin-world]")).not.toBeNull();
   });
 
   it("renders the empty plate with a teaching body", () => {

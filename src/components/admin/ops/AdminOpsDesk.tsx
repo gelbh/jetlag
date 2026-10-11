@@ -1,4 +1,4 @@
-import { AppShell, Button, Group, Modal, Skeleton, Stack, Text, Title } from "@mantine/core";
+import { Alert, AppShell, Button, Group, Modal, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
@@ -420,7 +420,11 @@ function AdminOpsDeskContent() {
             </Group>
           }
         />
-        {signOutError ? <InlineError>{signOutError}</InlineError> : null}
+        {signOutError ? (
+          <Alert role="alert" title="Sign-out failed" data-tone="mispunch">
+            {signOutError}
+          </Alert>
+        ) : null}
       </Stack>
     );
   }
