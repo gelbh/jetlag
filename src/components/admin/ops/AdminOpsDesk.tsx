@@ -16,7 +16,11 @@ import { useAdminJoinSession } from "../../../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../../../hooks/admin/useAdminSessionList";
 import { useMinWidth } from "../../../hooks/layout/useMinWidth";
 import { useAppNavigate } from "../../../hooks/navigation/useAppNavigate";
-import { countOpenIncidents, subscribeIncidentList } from "../../../services/admin/adminIncidents";
+import {
+  countOpenIncidents,
+  subscribeIncident,
+  subscribeIncidentList,
+} from "../../../services/admin/adminIncidents";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
 import { getFirebaseAuth } from "../../../services/core/firebase/firebase";
 import { useSessionStore } from "../../../state/sessionStore";
@@ -43,7 +47,7 @@ function AdminSessionSkeletonRows() {
   return (
     <Stack gap="sm" aria-hidden="true">
       {[0, 1, 2].map((index) => (
-        <Skeleton key={index} height={104} radius="md" />
+        <Skeleton key={index} height={80} radius={0} />
       ))}
     </Stack>
   );
@@ -77,6 +81,7 @@ export function AdminOpsDesk() {
   const [incidentsLoading, setIncidentsLoading] = useState(enabled);
   const [incidentsError, setIncidentsError] = useState<string | null>(null);
   const [enabledState, setEnabledState] = useState(enabled);
+  const [fetchedIncident, setFetchedIncident] = useState<IncidentRecord | null>(null);
   const activeSession = useSessionStore((state) => state.session);
   const activeRole = useSessionStore((state) => state.myRole);
   const {
@@ -93,7 +98,6 @@ export function AdminOpsDesk() {
     joinSession,
     joiningCode: observingCode,
     error: observeError,
-    setError: setObserveError,
   } = useAdminJoinSession({ onRefresh: refresh });
 
   const [query, setQuery] = useState("");
@@ -151,6 +155,24 @@ export function AdminOpsDesk() {
 
   const visibleIncidents = enabled ? incidents : EMPTY_INCIDENTS;
   const openCount = useMemo(() => countOpenIncidents(visibleIncidents), [visibleIncidents]);
+  const listIncident =
+    selectedIncidentId == null
+      ? null
+      : (visibleIncidents.find((row) => row.id === selectedIncidentId) ?? null);
+  const listHasSelected = listIncident != null;
+
+  useEffect(() => {
+    if (!enabled || incidentsLoading || !selectedIncidentId || listHasSelected) return;
+    return subscribeIncident(
+      selectedIncidentId,
+      (next) => setFetchedIncident(next),
+      () => setFetchedIncident(null),
+    );
+  }, [enabled, incidentsLoading, listHasSelected, selectedIncidentId]);
+
+  const selectedIncident =
+    listIncident ??
+    (enabled && fetchedIncident?.id === selectedIncidentId ? fetchedIncident : null);
 
   const filteredSessions = useMemo(
     () =>
@@ -176,32 +198,28 @@ export function AdminOpsDesk() {
     activeSession?.id === monitorSessionId &&
     activeRole === "admin";
 
-  const handleMonitor = useCallback(
+  const joinForMonitor = useCallback(
     async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
       const requestId = ++monitorRequestRef.current;
-      setObserveError(null);
-      setSelectedSessionId(summary.sessionId);
-      setMonitorSessionId(null);
-
-      if (isDesktop) {
-        const joined = await joinSession(summary, { navigate: false });
-        if (monitorRequestRef.current !== requestId) return;
-        if (!joined) {
-          setSelectedSessionId(null);
-          return;
-        }
-        setMonitorSessionId(summary.sessionId);
-        return;
-      }
-
-      const joined = await joinSession(summary, { navigate: true });
+      const joined = await joinSession(summary, { navigate: !isDesktop });
       if (monitorRequestRef.current !== requestId) return;
       if (!joined) {
-        setSelectedSessionId(null);
+        setSelectedSessionId((current) => (current === summary.sessionId ? null : current));
+        return;
+      }
+      setSelectedSessionId(summary.sessionId);
+      if (isDesktop) {
+        setMonitorSessionId(summary.sessionId);
       }
     },
-    [isDesktop, joinSession, setObserveError],
+    [isDesktop, joinSession],
   );
+
+  const handleMonitor = (summary: AdminSessionSummary) => {
+    setSelectedSessionId(summary.sessionId);
+    setMonitorSessionId(null);
+    void joinForMonitor(summary);
+  };
 
   const incidentMonitorKeyRef = useRef<string | null>(null);
 
@@ -209,7 +227,7 @@ export function AdminOpsDesk() {
     if (!isDesktop || !selectedIncidentId) {
       return;
     }
-    const incident = incidents.find((row) => row.id === selectedIncidentId);
+    const incident = selectedIncident;
     if (!incident?.sessionId || !incident.sessionCode) {
       return;
     }
@@ -220,16 +238,27 @@ export function AdminOpsDesk() {
     if (incidentMonitorKeyRef.current === selectedIncidentId) {
       return;
     }
+    const fromList = sessions.find((row) => row.sessionId === incident.sessionId);
+    if (!fromList && !listIncident) {
+      return;
+    }
     incidentMonitorKeyRef.current = selectedIncidentId;
 
-    const fromList = sessions.find((row) => row.sessionId === incident.sessionId);
     const summary = fromList ?? {
       sessionId: incident.sessionId,
       code: incident.sessionCode,
     };
 
-    void handleMonitor(summary);
-  }, [handleMonitor, incidents, isDesktop, monitorSessionId, selectedIncidentId, sessions]);
+    void joinForMonitor(summary);
+  }, [
+    isDesktop,
+    joinForMonitor,
+    listIncident,
+    monitorSessionId,
+    selectedIncident,
+    selectedIncidentId,
+    sessions,
+  ]);
 
   const handleSelectIncident = (incidentId: string) => {
     void navigate(`/admin/incidents/${encodeURIComponent(incidentId)}`);
@@ -317,7 +346,7 @@ export function AdminOpsDesk() {
                   summary={summary}
                   observingCode={observingCode}
                   selected={selectedSessionId === summary.sessionId}
-                  onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
+                  onMonitor={handleMonitor}
                 />
               ))}
               {loadMoreButton}
@@ -327,11 +356,6 @@ export function AdminOpsDesk() {
       )}
     </div>
   );
-
-  const selectedIncident =
-    selectedIncidentId == null
-      ? null
-      : (visibleIncidents.find((row) => row.id === selectedIncidentId) ?? null);
 
   const bodies: AdminPanelBodies = {
     sessions: sessionsBody,

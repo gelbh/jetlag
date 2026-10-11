@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useMapLibreMap } from "../../../components/map/helpers/useMapLibreMap";
 import { useAdminMonitorFocus } from "../../../domain/admin/adminMonitorFocus";
 import { usePlayerLocationsSync } from "../../../hooks/session/useSessionExtrasSync";
@@ -9,9 +9,11 @@ export function AdminMonitorPlayerFocus() {
   const sessionId = useSessionStore((state) => state.session?.id);
   const locations = usePlayerLocationsSync(sessionId);
   const focusedPlayerUid = useAdminMonitorFocus((state) => state.focusedPlayerUid);
+  const focusRequest = useAdminMonitorFocus((state) => state.focusRequest);
+  const flownRequestRef = useRef(0);
 
   useEffect(() => {
-    if (!focusedPlayerUid) {
+    if (!focusedPlayerUid || flownRequestRef.current === focusRequest) {
       return;
     }
 
@@ -20,12 +22,13 @@ export function AdminMonitorPlayerFocus() {
       return;
     }
 
+    flownRequestRef.current = focusRequest;
     map.flyTo({
       center: [location.lng, location.lat],
       zoom: Math.max(map.getZoom(), 14),
       duration: 500,
     });
-  }, [focusedPlayerUid, locations, map]);
+  }, [focusedPlayerUid, focusRequest, locations, map]);
 
   return null;
 }
