@@ -13,6 +13,7 @@ import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
 import { type DistanceUnit, formatPresetDistance } from "@/domain/map/distance";
 import {
   availableThermometerDistancePresetsForSession,
+  THERMOMETER_SEND_BLOCK_MESSAGES,
   type ThermometerAnswer,
   type ThermometerDistanceOptionMiles,
   thermometerPresetMilesForMeters,
@@ -35,6 +36,8 @@ export type ThermometerHudBodyProps = {
   step: "a" | "b" | "ready";
   placementMode: PlacementMode;
   walkingActive: boolean;
+  /** Live walk has no GPS sample yet, so END WALK is still disarmed. */
+  waitingForGps?: boolean;
   presetUseCount: number;
   usedDistanceOptions?: ReadonlySet<ThermometerDistanceOptionMiles>;
   costLabel: string;
@@ -59,6 +62,7 @@ export function ThermometerHudBody({
   step: mapStep,
   placementMode,
   walkingActive,
+  waitingForGps = false,
   presetUseCount,
   usedDistanceOptions = new Set(),
   costLabel,
@@ -129,9 +133,19 @@ export function ThermometerHudBody({
           </span>
           {targetLabel}
         </p>
-        <p className="mt-1 text-xs text-field-ink-muted">
-          Line updates live for hiders. End walk on the strip when ready.
-        </p>
+        {waitingForGps ? (
+          <p
+            data-testid="ask-walk-gps-waiting"
+            className="mt-1 text-xs"
+            style={{ color: "var(--color-halt)" }}
+          >
+            {THERMOMETER_SEND_BLOCK_MESSAGES.gps_waiting}
+          </p>
+        ) : (
+          <p className="mt-1 text-xs text-field-ink-muted">
+            Line updates live for hiders. End walk on the strip when ready.
+          </p>
+        )}
       </div>
     ) : null;
 

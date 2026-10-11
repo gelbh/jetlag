@@ -90,7 +90,12 @@ export async function commitThermometerManual(input: CommitThermometerManualInpu
 
   const promptText = thermometerQuestionPrompt(distanceMeters, distanceUnit);
 
-  if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
+  if (awaitHiderAnswer) {
+    if (!submitPendingQuestion || !sessionId || !senderUid) {
+      setMapError("Session is still loading. Try again in a moment.");
+      return;
+    }
+
     await submitPendingQuestion({
       promptText,
       replyOptions: hotterColderAnswerOptions.map((option) => ({
