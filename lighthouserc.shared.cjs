@@ -6,17 +6,18 @@ const END = "/?(\\?.*)?$";
 
 /**
  * Every audited route gets the same a11y / CLS / target-size gates plus its own perf floor.
- * Perf uses the median of `numberOfRuns` (program spec: "median of 3"), not LHCI's default
- * best-run aggregation. Floors only ratchet up; lowering one needs a written reason in the PR.
+ * Perf uses the median of `numberOfRuns` (program spec: "median of 3" minimum), not LHCI's
+ * default best-run aggregation. Floors only ratchet up; lowering one needs a written reason in the PR.
  *
  * @param {{
  *   perf: { home: number, join: number, premium: number, create: number },
+ *   numberOfRuns?: number,
  *   createMaxTbtMs?: number,
  *   outputDir: string,
  *   collectSettings: Record<string, unknown> & { skipAudits?: string[] },
  * }} options
  */
-function createLhciConfig({ perf, createMaxTbtMs, outputDir, collectSettings }) {
+function createLhciConfig({ perf, numberOfRuns = 3, createMaxTbtMs, outputDir, collectSettings }) {
   // Native-feel PWA locks browser page zoom (user-scalable=no). Skip meta-viewport
   // so the a11y category score is not dragged below the gate; map zoom is separate.
   const skipAudits = [...new Set([...(collectSettings.skipAudits ?? []), "meta-viewport"])];
@@ -39,7 +40,7 @@ function createLhciConfig({ perf, createMaxTbtMs, outputDir, collectSettings }) 
         startServerCommand: "npm run preview:lhci",
         // Match plain console line from lhci-preview-server.mjs (Vite 8 ANSI breaks /Local:/i).
         startServerReadyPattern: "LHCI preview ready",
-        numberOfRuns: 3,
+        numberOfRuns,
         settings: {
           ...collectSettings,
           skipAudits,
