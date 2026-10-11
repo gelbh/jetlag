@@ -104,6 +104,26 @@ describe("matching features", () => {
     expect(nearest?.distanceMeters).toBeGreaterThan(0);
   });
 
+  it("adds tagged POI pins as point candidates", async () => {
+    vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [{ id: 1, tags: { name: "Far Museum" }, lat: 51.42, lon: -0.19 }],
+    });
+
+    const options = {
+      poiPins: [{ id: "pin-1", name: "Pop-up museum", point: [51.46, -0.15] as [number, number] }],
+    };
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "museum", options);
+    expect(features.map((feature) => feature.id)).toEqual(["1", "pin-1"]);
+
+    const nearest = await findNearestMatchingFeature(
+      [51.46, -0.15],
+      sampleGameArea,
+      "museum",
+      options,
+    );
+    expect(nearest?.name).toBe("Pop-up museum");
+  });
+
   it("resolves from the pack without awaiting slow Overpass when onEnrich is set", async () => {
     let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
     const overpassStarted = new Promise<void>((resolveStarted) => {
