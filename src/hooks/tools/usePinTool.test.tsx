@@ -11,6 +11,7 @@ describe("usePinTool", () => {
         active: true,
         createAnnotation: mocks.createAnnotation,
         finishPlacement: mocks.finishPlacement,
+        postSystemMessage: vi.fn(),
       }),
     );
 
@@ -29,6 +30,7 @@ describe("usePinTool", () => {
         active: true,
         createAnnotation: mocks.createAnnotation,
         finishPlacement: mocks.finishPlacement,
+        postSystemMessage: vi.fn(),
       }),
     );
 
@@ -50,6 +52,65 @@ describe("usePinTool", () => {
     expect(mocks.finishPlacement).toHaveBeenCalled();
   });
 
+  it("tags the pin as a POI and announces it in game chat", async () => {
+    const mocks = createToolHookMocks();
+    const postSystemMessage = vi.fn();
+    const { result } = renderHook(() =>
+      usePinTool({
+        active: true,
+        createAnnotation: mocks.createAnnotation,
+        finishPlacement: mocks.finishPlacement,
+        postSystemMessage,
+      }),
+    );
+
+    act(() => {
+      result.current.handleMapClick([51.5, -0.12]);
+      result.current.panel.props.onLabelChange("Dublin Zoo");
+      result.current.panel.props.onPoiCategoryChange("zoo");
+    });
+
+    await act(async () => {
+      await result.current.panel.props.onCommit();
+    });
+
+    expect(mocks.createAnnotation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({ label: "Dublin Zoo", poiCategory: "zoo" }),
+      }),
+    );
+    expect(postSystemMessage).toHaveBeenCalledWith("Seeker added Zoo pin: Dublin Zoo");
+  });
+
+  it("does not tag or announce a plain marker", async () => {
+    const mocks = createToolHookMocks();
+    const postSystemMessage = vi.fn();
+    const { result } = renderHook(() =>
+      usePinTool({
+        active: true,
+        createAnnotation: mocks.createAnnotation,
+        finishPlacement: mocks.finishPlacement,
+        postSystemMessage,
+      }),
+    );
+
+    act(() => {
+      result.current.handleMapClick([51.5, -0.12]);
+      result.current.panel.props.onLabelChange("Camp");
+    });
+
+    await act(async () => {
+      await result.current.panel.props.onCommit();
+    });
+
+    expect(mocks.createAnnotation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.not.objectContaining({ poiCategory: expect.anything() }),
+      }),
+    );
+    expect(postSystemMessage).not.toHaveBeenCalled();
+  });
+
   it("locks double commit while createAnnotation is in flight", async () => {
     let resolveCreate!: (value: unknown) => void;
     const createAnnotation = vi.fn(
@@ -64,6 +125,7 @@ describe("usePinTool", () => {
         active: true,
         createAnnotation: createAnnotation as never,
         finishPlacement,
+        postSystemMessage: vi.fn(),
       }),
     );
 

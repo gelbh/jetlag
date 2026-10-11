@@ -1,8 +1,19 @@
+import { POI_PIN_CATEGORIES, type PoiPinCategoryId } from "../../domain/map/poiPinCategories";
+import { SimpleSelectField } from "../ui/forms/GroupedSelectField";
 import { TextAreaField } from "../ui/forms/TextAreaField";
+
+const JUST_A_MARKER = "none";
+
+const POI_CATEGORY_OPTIONS = [
+  { value: JUST_A_MARKER, label: "Just a marker" },
+  ...POI_PIN_CATEGORIES.map(({ id, label }) => ({ value: id, label })),
+];
 
 interface PinPanelProps {
   label: string;
   onLabelChange: (value: string) => void;
+  poiCategory: PoiPinCategoryId | null;
+  onPoiCategoryChange: (value: PoiPinCategoryId | null) => void;
   onCommit: () => void;
   hasPoint: boolean;
   isSubmitting?: boolean;
@@ -11,6 +22,8 @@ interface PinPanelProps {
 export function PinPanel({
   label,
   onLabelChange,
+  poiCategory,
+  onPoiCategoryChange,
   onCommit,
   hasPoint,
   isSubmitting = false,
@@ -31,6 +44,20 @@ export function PinPanel({
         onChange={(event) => onLabelChange(event.target.value)}
         placeholder="Closer to the train station than us"
       />
+      <SimpleSelectField
+        label="Counts as"
+        value={poiCategory ?? JUST_A_MARKER}
+        placeholder="Counts as"
+        options={POI_CATEGORY_OPTIONS}
+        onChange={(value) =>
+          onPoiCategoryChange(value === JUST_A_MARKER ? null : (value as PoiPinCategoryId))
+        }
+      />
+      {poiCategory ? (
+        <p className="text-xs text-ink-dim">
+          Counts for questions asked after it is added. Everyone sees it in game chat.
+        </p>
+      ) : null}
       <button
         type="button"
         onClick={onCommit}
