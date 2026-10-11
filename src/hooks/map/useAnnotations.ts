@@ -156,9 +156,13 @@ export function useAnnotations() {
       clearRedoStack();
       markAnnotationPulse(created.id);
       // Question commits await this and keep their draft / cancel on failure,
-      // so creation still rejects (error already in lastSyncError).
+      // so creation still rejects (error already in lastSyncError) and the
+      // server-rejected annotation must not linger locally for other tools.
       const failure = await persistAnnotation(created);
       if (failure) {
+        useAnnotationStore.setState((state) => ({
+          annotations: state.annotations.filter((item) => item.id !== created.id),
+        }));
         throw new Error(failure);
       }
       return created;
