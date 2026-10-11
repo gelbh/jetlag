@@ -36,7 +36,7 @@ export function LearnShowcase({
   caption: string;
 }) {
   return (
-    <LearnShowcaseFrame caption={caption}>
+    <LearnShowcaseFrame showcase={showcase} caption={caption}>
       <ShowcaseBody showcase={showcase} />
     </LearnShowcaseFrame>
   );

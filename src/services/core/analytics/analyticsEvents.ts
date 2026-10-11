@@ -1,7 +1,9 @@
 import type { PremiumProductKey } from "@/domain/billing/premiumProducts";
 import type { PowerUpId } from "@/domain/boardEconomy/types";
+import type { LearnShowcaseId } from "@/domain/learn/learnContentTypes";
 import type { SessionTier } from "@/domain/map/annotations";
 import type { MapTool } from "@/domain/map/mapToolTypes";
+import type { LearnRoutePath } from "@/domain/seo/learnRoutePaths";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { GameSize } from "@/domain/session/size/gameSize";
 
@@ -16,6 +18,8 @@ export const ANALYTICS_EVENTS = {
   map_tool_used: "map_tool_used",
   hider_card_played: "hider_card_played",
   analytics_consent_accepted: "analytics_consent_accepted",
+  learn_showcase_interacted: "learn_showcase_interacted",
+  learn_cta_clicked: "learn_cta_clicked",
 } as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];
@@ -65,5 +69,12 @@ export type AnalyticsEventProps = {
   };
   analytics_consent_accepted: {
     surface: "banner";
+  };
+  learn_showcase_interacted: {
+    showcase: LearnShowcaseId;
+  };
+  learn_cta_clicked: {
+    cta: "join" | "create";
+    path: LearnRoutePath;
   };
 };
