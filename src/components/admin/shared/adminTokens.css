@@ -1,0 +1,37 @@
+@import "@fontsource-variable/archivo/wdth.css";
+
+[data-admin-world] {
+  color-scheme: light dark;
+  --adm-font: "Archivo Variable", system-ui, sans-serif;
+  --adm-paper: light-dark(oklch(0.975 0.008 95), oklch(0.19 0.025 260));
+  --adm-paper-raised: light-dark(oklch(0.995 0.004 95), oklch(0.23 0.025 260));
+  --adm-ink: light-dark(oklch(0.22 0.01 60), oklch(0.94 0.01 90));
+  --adm-ink-muted: light-dark(oklch(0.45 0.015 60), oklch(0.74 0.015 90));
+  --adm-rule: light-dark(oklch(0.62 0.07 60), oklch(0.48 0.05 60));
+  --adm-overprint: light-dark(oklch(0.52 0.22 350), oklch(0.72 0.19 350));
+  --adm-overprint-ink: light-dark(oklch(0.98 0.01 350), oklch(0.18 0.03 350));
+  --adm-overprint-soft: light-dark(oklch(0.52 0.22 350 / 0.12), oklch(0.72 0.19 350 / 0.18));
+  --adm-live: light-dark(oklch(0.9 0.13 95), oklch(0.42 0.09 95));
+  --adm-ok: light-dark(oklch(0.5 0.13 145), oklch(0.74 0.14 145));
+  --adm-info: light-dark(oklch(0.55 0.13 240), oklch(0.74 0.11 240));
+  --adm-mispunch: light-dark(oklch(0.52 0.19 25), oklch(0.72 0.16 25));
+  --adm-cell: 2.75rem;
+
+  /* Mantine bridge: components inside admin read admin roles */
+  --mantine-color-body: var(--adm-paper);
+  --mantine-color-text: var(--adm-ink);
+  --mantine-color-dimmed: var(--adm-ink-muted);
+  --mantine-color-default: var(--adm-paper-raised);
+  --mantine-color-default-color: var(--adm-ink);
+  --mantine-color-default-border: var(--adm-rule);
+  --mantine-color-default-hover: var(--adm-overprint-soft);
+  --mantine-primary-color-filled: var(--adm-overprint);
+  --mantine-primary-color-contrast: var(--adm-overprint-ink);
+  --mantine-font-family: var(--adm-font);
+  --mantine-font-family-headings: var(--adm-font);
+
+  background: var(--adm-paper);
+  color: var(--adm-ink);
+  font-family: var(--adm-font);
+  font-variant-numeric: tabular-nums;
+}
