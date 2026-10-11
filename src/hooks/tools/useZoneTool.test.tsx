@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import type { Polygon as GeoPolygon, MultiPolygon } from "geojson";
 import { describe, expect, it } from "vitest";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
@@ -90,7 +91,9 @@ describe("useZoneTool", () => {
 
     function expectInsideSquare(mocks: ReturnType<typeof createToolHookMocks>) {
       expect(mocks.createAnnotation).toHaveBeenCalledTimes(1);
-      const saved = mocks.createAnnotation.mock.calls[0]![0].geometry.geometry;
+      const saved = mocks.createAnnotation.mock.calls[0]![0].geometry.geometry as
+        | GeoPolygon
+        | MultiPolygon;
       const positions =
         saved.type === "Polygon" ? saved.coordinates.flat() : saved.coordinates.flat(2);
       for (const [lng, lat] of positions) {
