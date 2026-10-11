@@ -7,12 +7,15 @@ function logFailover(fields) {
   console.log(JSON.stringify({ type: "overpass_failover", ...fields }));
 }
 
+/** Families whose Postpass SQL is a superset of the Overpass query, so empty means no data. */
+export const POSTPASS_TRUSTED_EMPTY_FAMILIES = new Set(["admin"]);
+
 /**
  * Postpass fallback after Overpass pool exhaustion.
- * Returns normalized Overpass-shaped JSON text, or null when unclassified.
+ * Returns normalized Overpass-shaped JSON text, or null when unclassified or untrusted empty.
  *
  * @param {string} query
- * @returns {Promise<string | null>}
+ * @returns {Promise<{ text: string, empty: boolean } | null>}
  */
 export async function tryPostpassForOverpassQuery(query) {
   const classification = classifyOverpassQuery(query);
@@ -28,25 +31,26 @@ export async function tryPostpassForOverpassQuery(query) {
     const sql = buildPostpassSql(classification);
     const fc = await fetchPostpassGeoJson(sql);
     const normalized = geoJsonToOverpassElements(fc, classification.family);
-    // Empty Postpass must not poison L1/L2 or skip stale Overpass L2.
     if (!Array.isArray(normalized.elements) || normalized.elements.length === 0) {
+      const served = POSTPASS_TRUSTED_EMPTY_FAMILIES.has(classification.family);
       logFailover({
         backend: "postpass",
         family: classification.family,
         endpoint: "postpass.geofabrik.de",
         error: "empty",
+        served,
         // Game-area bbox only; never log `around` (a player position).
         bbox: classification.meta.bbox ?? null,
         adminLevel: classification.meta.adminLevel ?? null,
       });
-      return null;
+      return served ? { text: JSON.stringify({ elements: [] }), empty: true } : null;
     }
     logFailover({
       backend: "postpass",
       family: classification.family,
       endpoint: "postpass.geofabrik.de",
     });
-    return JSON.stringify(normalized);
+    return { text: JSON.stringify(normalized), empty: false };
   } catch (error) {
     logFailover({
       backend: "postpass",

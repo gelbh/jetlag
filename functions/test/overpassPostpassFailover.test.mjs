@@ -4,6 +4,11 @@ import {
   clearOverpassCachesForTests,
   fetchCachedOverpassQuery,
 } from "../proxies/overpassProxyCore.mjs";
+import {
+  createMemoryL2Backend,
+  overpassL2CacheKey,
+  setOverpassL2BackendForTests,
+} from "../proxies/overpassSharedCache.mjs";
 
 describe("overpass Postpass failover", () => {
   const originalFetch = globalThis.fetch;
@@ -11,6 +16,7 @@ describe("overpass Postpass failover", () => {
   afterEach(() => {
     globalThis.fetch = originalFetch;
     clearOverpassCachesForTests();
+    setOverpassL2BackendForTests(null);
   });
 
   it("all Overpass fail → Postpass success → elements JSON", async () => {
@@ -101,5 +107,57 @@ describe("overpass Postpass failover", () => {
     };
     await assert.rejects(() => fetchCachedOverpassQuery(query));
     assert.equal(postpassCalls, 1);
+  });
+
+  const ADMIN_QUERY = `[out:json][timeout:25];(relation["boundary"="administrative"]["admin_level"="8"]["name"](55.8188,-3.4495,56.004,-3.075););out center;>;out geom qt;`;
+
+  function emptyPostpassFetch(counter) {
+    return async (url) => {
+      const u = String(url);
+      if (u.includes("postpass.geofabrik.de")) {
+        counter.postpass += 1;
+        return new Response(JSON.stringify({ type: "FeatureCollection", features: [] }), {
+          status: 200,
+        });
+      }
+      if (u.includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      return new Response("", { status: 503 });
+    };
+  }
+
+  it("empty admin Postpass returns empty elements without caching", async () => {
+    const backend = createMemoryL2Backend();
+    setOverpassL2BackendForTests(backend);
+    const counter = { postpass: 0 };
+    globalThis.fetch = emptyPostpassFetch(counter);
+
+    assert.equal(await fetchCachedOverpassQuery(ADMIN_QUERY), '{"elements":[]}');
+    assert.equal(await fetchCachedOverpassQuery(ADMIN_QUERY), '{"elements":[]}');
+    assert.equal(counter.postpass, 2);
+    assert.equal(await backend.kvGet(overpassL2CacheKey(ADMIN_QUERY, "free")), null);
+  });
+
+  it("stale L2 wins over an empty admin Postpass result", async () => {
+    const backend = createMemoryL2Backend();
+    setOverpassL2BackendForTests(backend);
+    const key = overpassL2CacheKey(ADMIN_QUERY, "free");
+    const staleText = '{"elements":[{"type":"relation","id":1}]}';
+    await backend.r2Put(`overpass/${key}`, staleText, "application/json");
+    await backend.kvPut(
+      key,
+      JSON.stringify({
+        r2Key: `overpass/${key}`,
+        expiresAt: Date.now() - 1,
+        contentType: "application/json",
+        status: 200,
+      }),
+    );
+    const counter = { postpass: 0 };
+    globalThis.fetch = emptyPostpassFetch(counter);
+
+    assert.equal(await fetchCachedOverpassQuery(ADMIN_QUERY), staleText);
+    assert.equal(counter.postpass, 1);
   });
 });
