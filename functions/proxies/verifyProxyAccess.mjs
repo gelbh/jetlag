@@ -76,28 +76,33 @@ export async function verifyProxyAccess(auth, db, req) {
 export async function verifyOverpassProxyAccess(auth, db, req) {
   const token = readBearerToken(req);
   if (!token) {
-    return { ok: false, status: 401, error: "Missing authorization." };
+    return { ok: false, status: 401, error: "Missing authorization.", reason: "missing_token" };
   }
 
   let decoded;
   try {
     decoded = await auth.verifyIdToken(token);
   } catch {
-    return { ok: false, status: 401, error: "Invalid authorization." };
+    return { ok: false, status: 401, error: "Invalid authorization.", reason: "invalid_token" };
   }
 
   const sessionId = readSessionId(req);
   if (!sessionId) {
-    return { ok: false, status: 403, error: "Session membership required." };
+    return {
+      ok: false,
+      status: 403,
+      error: "Session membership required.",
+      reason: "no_session_id",
+    };
   }
 
   const sessionDoc = await db.collection("sessions").doc(sessionId).get();
   if (!sessionDoc.exists) {
-    return { ok: false, status: 403, error: "Session not found." };
+    return { ok: false, status: 403, error: "Session not found.", reason: "session_not_found" };
   }
 
   if (!isSessionMember(sessionDoc.data(), decoded.uid)) {
-    return { ok: false, status: 403, error: "Session membership required." };
+    return { ok: false, status: 403, error: "Session membership required.", reason: "not_member" };
   }
 
   const sessionData = sessionDoc.data();

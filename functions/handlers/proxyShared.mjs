@@ -89,6 +89,13 @@ export async function requireProxyAccess(req, res) {
 export async function requireOverpassProxyAccess(req, res) {
   const authResult = await verifyOverpassProxyAccess(adminAuth(), adminDb(), req);
   if (!authResult.ok) {
+    console.warn(
+      JSON.stringify({
+        type: "overpass_proxy_denied",
+        reason: authResult.reason,
+        status: authResult.status,
+      }),
+    );
     sendProxyAuthFailure(res, authResult);
     return null;
   }
