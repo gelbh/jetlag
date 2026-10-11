@@ -67,7 +67,7 @@ describe("postpassTranslate", () => {
     const c = classifyOverpassQuery(ql);
     assert.equal(c.family, "places");
     const sql = buildPostpassSql(c);
-    assert.match(sql, /postpass_point/i);
+    assert.match(sql, /FROM postpass_pointlinepolygon /);
     assert.match(sql, /ST_MakeEnvelope/i);
     assert.match(sql, /amenity/);
   });
@@ -81,7 +81,7 @@ describe("postpassTranslate", () => {
     const c = classifyOverpassQuery(ql);
     assert.equal(c.family, "around");
     const sql = buildPostpassSql(c);
-    assert.match(sql, /postpass_point/i);
+    assert.match(sql, /FROM postpass_pointlinepolygon /);
     assert.match(sql, /ST_DWithin/i);
   });
 
@@ -229,5 +229,90 @@ describe("postpassTranslate", () => {
   it("fails closed when places QL has no bbox or around", () => {
     const c = classifyOverpassQuery(`[out:json];(node["amenity"="cafe"];);out center;`);
     assert.equal(c, null);
+  });
+
+  it("ORs union selectors and dedupes node/way/relation clauses", () => {
+    const ql = `
+      [out:json][timeout:25];
+      (
+        node["railway"="station"](51.48,-0.2,51.55,0.0);
+        way["railway"="station"](51.48,-0.2,51.55,0.0);
+        relation["railway"="station"](51.48,-0.2,51.55,0.0);
+        node["railway"="halt"](51.48,-0.2,51.55,0.0);
+        way["railway"="halt"](51.48,-0.2,51.55,0.0);
+        relation["railway"="halt"](51.48,-0.2,51.55,0.0);
+      );
+      out center 200;
+    `;
+    const c = classifyOverpassQuery(ql);
+    assert.equal(c.family, "places");
+    assert.equal(c.meta.clauses.length, 2);
+    const sql = buildPostpassSql(c);
+    assert.match(sql, /FROM postpass_pointlinepolygon /);
+    assert.match(sql, /\(\(tags->>'railway' = 'station'\) OR \(tags->>'railway' = 'halt'\)\)/);
+  });
+
+  it("keeps filters inside one clause ANDed and maps ,i to ~*", () => {
+    const ql = `
+      [out:json][timeout:25];
+      ( node["amenity"="fast_food"]["name"~"McDonald",i](53.3,-6.3,53.4,-6.2); );
+      out center 200;
+    `;
+    const sql = buildPostpassSql(classifyOverpassQuery(ql));
+    assert.match(sql, /\(tags->>'amenity' = 'fast_food' AND tags->>'name' ~\* 'McDonald'\)/);
+  });
+
+  it("translates existence filters", () => {
+    const ql = `
+      [out:json][timeout:25];
+      ( way["highway"]["name"](53.3,-6.3,53.4,-6.2); );
+      out center 200;
+    `;
+    const sql = buildPostpassSql(classifyOverpassQuery(ql));
+    assert.match(sql, /\(tags \? 'highway' AND tags \? 'name'\)/);
+  });
+
+  it("leaves regex unanchored for around queries", () => {
+    const ql = `
+      [out:json][timeout:25];
+      (
+        node(around:1609.344,51.5,-0.12)["amenity"~"cafe|restaurant"];
+        way(around:1609.344,51.5,-0.12)["amenity"~"cafe|restaurant"];
+      );
+      out center 40;
+    `;
+    const c = classifyOverpassQuery(ql);
+    assert.equal(c.family, "around");
+    assert.equal(c.meta.clauses.length, 1);
+    const sql = buildPostpassSql(c);
+    assert.match(sql, /FROM postpass_pointlinepolygon /);
+    assert.match(sql, /tags->>'amenity' ~ 'cafe\|restaurant'/);
+    assert.doesNotMatch(sql, /\^\(/);
+  });
+
+  it("ORs linear union clauses on postpass_line", () => {
+    const ql = `
+      [out:json][timeout:25];
+      (
+        way["railway"="rail"]["highspeed"="yes"](53.2,-6.4,53.4,-6.1);
+        way["railway"="light_rail"](53.2,-6.4,53.4,-6.1);
+      );
+      out geom;
+    `;
+    const c = classifyOverpassQuery(ql);
+    assert.equal(c.family, "linear");
+    const sql = buildPostpassSql(c);
+    assert.match(sql, /FROM postpass_line /);
+    assert.match(
+      sql,
+      /\(\(tags->>'railway' = 'rail' AND tags->>'highspeed' = 'yes'\) OR \(tags->>'railway' = 'light_rail'\)\)/,
+    );
+  });
+
+  it("fails closed on filters Postpass SQL cannot mirror", () => {
+    for (const filter of ['["amenity"!="cafe"]', '[!"name"]', '[~"^addr"~"."]', '["name"="x",i]']) {
+      const ql = `[out:json];( node${filter}(53.3,-6.3,53.4,-6.2); );out center 200;`;
+      assert.equal(classifyOverpassQuery(ql), null, filter);
+    }
   });
 });

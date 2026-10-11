@@ -7,25 +7,35 @@ function sqlStringLiteral(value) {
 }
 
 /**
- * @param {{ key: string, op: "eq" | "regex", value: string }} pred
+ * Overpass `~` is an unanchored POSIX regex match.
+ *
+ * @param {{ key: string, op: "eq" | "regex" | "iregex" | "exists", value?: string }} pred
  * @returns {string}
  */
 export function tagPredicateSql(pred) {
   const key = sqlStringLiteral(pred.key);
-  if (pred.op === "regex") {
-    return `tags->>${key} ~ ${sqlStringLiteral(`^(${pred.value})$`)}`;
+  switch (pred.op) {
+    case "exists":
+      return `tags ? ${key}`;
+    case "regex":
+      return `tags->>${key} ~ ${sqlStringLiteral(pred.value)}`;
+    case "iregex":
+      return `tags->>${key} ~* ${sqlStringLiteral(pred.value)}`;
+    default:
+      return `tags->>${key} = ${sqlStringLiteral(pred.value)}`;
   }
-  return `tags->>${key} = ${sqlStringLiteral(pred.value)}`;
 }
 
 /**
- * @param {Array<{ key: string, op: "eq" | "regex", value: string }>} tags
- * @param {string[]} [skipKeys]
- * @returns {string[]}
+ * @param {unknown} clauses
+ * @param {string} family
+ * @returns {string}
  */
-function tagWhereClauses(tags, skipKeys = []) {
-  const skip = new Set(skipKeys);
-  return tags.filter((pred) => !skip.has(pred.key)).map((pred) => tagPredicateSql(pred));
+function clausesSql(clauses, family) {
+  if (!Array.isArray(clauses) || clauses.length === 0) {
+    throw new Error(`Postpass ${family} SQL requires clauses.`);
+  }
+  return `(${clauses.map((clause) => `(${clause.map(tagPredicateSql).join(" AND ")})`).join(" OR ")})`;
 }
 
 /**
@@ -62,7 +72,6 @@ function selectSql(table, wheres, limit) {
  */
 export function buildPostpassSql(classification) {
   const { family, meta } = classification;
-  const tags = Array.isArray(meta.tags) ? meta.tags : [];
   const bbox = meta.bbox;
   const around = meta.around;
 
@@ -125,17 +134,23 @@ export function buildPostpassSql(classification) {
       if (!around) {
         throw new Error("Postpass around SQL requires around.");
       }
-      const wheres = [...tagWhereClauses(tags), dwithinSql(around)];
-      return selectSql("postpass_point", wheres, 40);
+      return selectSql(
+        "postpass_pointlinepolygon",
+        [clausesSql(meta.clauses, family), dwithinSql(around)],
+        40,
+      );
     }
     case "linear": {
       if (!bbox) {
         throw new Error("Postpass linear SQL requires bbox.");
       }
-      return selectSql("postpass_line", [...tagWhereClauses(tags), `geom && ${envelopeSql(bbox)}`]);
+      return selectSql("postpass_line", [
+        clausesSql(meta.clauses, family),
+        `geom && ${envelopeSql(bbox)}`,
+      ]);
     }
     case "places": {
-      const wheres = tagWhereClauses(tags);
+      const wheres = [clausesSql(meta.clauses, family)];
       if (bbox) {
         wheres.push(`geom && ${envelopeSql(bbox)}`);
       } else if (around) {
@@ -143,7 +158,7 @@ export function buildPostpassSql(classification) {
       } else {
         throw new Error("Postpass places SQL requires bbox or around.");
       }
-      return selectSql("postpass_point", wheres, 200);
+      return selectSql("postpass_pointlinepolygon", wheres, 200);
     }
     default: {
       const _exhaustive = family;

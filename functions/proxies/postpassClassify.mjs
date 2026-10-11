@@ -70,6 +70,59 @@ export function extractTagPredicates(ql) {
 }
 
 /**
+ * @typedef {{ key: string, op: "eq" | "regex" | "iregex" | "exists", value?: string }} OverpassFilter
+ */
+
+const OVERPASS_STATEMENT_RE =
+  /\b(?:node|way|relation|nwr)\b(?:\s*\(\s*around\s*:[^)]*\))?\s*((?:\[[^\]]*\]\s*)+)/g;
+
+/**
+ * Strict: negation, key regex, escaped quotes, or `=…,i` return null so callers fail closed.
+ *
+ * @param {string} raw
+ * @returns {OverpassFilter | null}
+ */
+export function parseOverpassFilter(raw) {
+  const exists = raw.match(/^\[\s*"([^"\\]+)"\s*\]$/);
+  if (exists) {
+    return { key: exists[1], op: "exists" };
+  }
+  const match = raw.match(/^\[\s*"([^"\\]+)"\s*(=|~)\s*"([^"\\]*)"\s*(,\s*i\s*)?\]$/);
+  if (!match) {
+    return null;
+  }
+  const [, key, operator, value, caseInsensitive] = match;
+  if (operator === "=") {
+    return caseInsensitive ? null : { key, op: "eq", value };
+  }
+  return { key, op: caseInsensitive ? "iregex" : "regex", value };
+}
+
+/**
+ * Overpass union statements → OR of clauses; filters within a statement are ANDed.
+ *
+ * @param {string} ql
+ * @returns {OverpassFilter[][] | null}
+ */
+export function extractClauses(ql) {
+  /** @type {Map<string, OverpassFilter[]>} */
+  const unique = new Map();
+  for (const statement of String(ql).matchAll(OVERPASS_STATEMENT_RE)) {
+    /** @type {OverpassFilter[]} */
+    const clause = [];
+    for (const raw of statement[1].match(/\[[^\]]*\]/g) ?? []) {
+      const filter = parseOverpassFilter(raw);
+      if (!filter) {
+        return null;
+      }
+      clause.push(filter);
+    }
+    unique.set(JSON.stringify(clause), clause);
+  }
+  return unique.size > 0 ? [...unique.values()] : null;
+}
+
+/**
  * @param {string} ql
  * @returns {PostpassClassification | null}
  */
@@ -78,6 +131,7 @@ export function classifyOverpassQuery(ql) {
   const tags = extractTagPredicates(text);
   const bbox = extractOverpassBbox(text);
   const around = extractAround(text);
+  const clauses = extractClauses(text);
 
   if (text.includes('natural"="water"') && (text.includes("waterway") || text.includes("place"))) {
     // Fail closed: landmass needs a bbox (never unbounded PostGIS).
@@ -106,8 +160,8 @@ export function classifyOverpassQuery(ql) {
     !text.includes('natural"="coastline"');
 
   if (isLinearWayGeom && !isAdminRelation) {
-    if (!bbox) return null;
-    return { family: "linear", meta: { bbox, tags } };
+    if (!bbox || !clauses) return null;
+    return { family: "linear", meta: { bbox, clauses } };
   }
 
   if (isAdminRelation) {
@@ -124,17 +178,18 @@ export function classifyOverpassQuery(ql) {
   }
 
   if (around) {
-    return { family: "around", meta: { around, tags, bbox } };
+    if (!clauses) return null;
+    return { family: "around", meta: { around, clauses, bbox } };
   }
 
   if (isLinearWayGeom) {
-    if (!bbox) return null;
-    return { family: "linear", meta: { bbox, tags } };
+    if (!bbox || !clauses) return null;
+    return { family: "linear", meta: { bbox, clauses } };
   }
 
   if (/\bout\s+center\b/i.test(text)) {
-    if (!bbox && !around) return null;
-    return { family: "places", meta: { bbox, tags, around } };
+    if ((!bbox && !around) || !clauses) return null;
+    return { family: "places", meta: { bbox, clauses, around } };
   }
 
   return null;
