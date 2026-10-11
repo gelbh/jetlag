@@ -111,6 +111,13 @@ export interface IncidentCodingAgentState {
   updatedAt?: string;
 }
 
+/** PostHog Error Tracking issue that raised an alert-sourced incident. */
+export interface IncidentPosthogIssue {
+  id: string;
+  name: string;
+  url: string | null;
+}
+
 export interface IncidentRecord {
   id: string;
   status: IncidentStatus;
@@ -126,6 +133,8 @@ export interface IncidentRecord {
   email?: IncidentEmailState;
   mitigations?: IncidentMitigationRecord[];
   hotfix?: IncidentHotfixState;
+  /** Set when the incident came from a PostHog error alert instead of a player. */
+  posthogIssue?: IncidentPosthogIssue;
   /** Cursor coding-agent launch state (admin hotfix thread). */
   agent?: IncidentCodingAgentState | null;
   /** Active session-ops summon id when a fix agent is running. */

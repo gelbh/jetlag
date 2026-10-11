@@ -21,6 +21,7 @@ import {
   type IncidentMessageSender,
   type IncidentMitigationRecord,
   type IncidentMitigationType,
+  type IncidentPosthogIssue,
   type IncidentRecord,
   type IncidentStatus,
   isIncidentStatus,
@@ -141,6 +142,18 @@ function parseMitigations(value: unknown): IncidentMitigationRecord[] | undefine
   return mitigations.length > 0 ? mitigations : undefined;
 }
 
+function parsePosthogIssue(value: unknown): IncidentPosthogIssue | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.id !== "string" || typeof raw.name !== "string") {
+    return undefined;
+  }
+  const url = typeof raw.url === "string" && raw.url.startsWith("https://") ? raw.url : null;
+  return { id: raw.id, name: raw.name, url };
+}
+
 function parseHotfix(value: unknown): IncidentHotfixState | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
@@ -233,6 +246,10 @@ export function deserializeIncidentFromFirestore(
     mitigations: parseMitigations(data.mitigations),
     hotfix: parseHotfix(data.hotfix),
   };
+  const posthogIssue = parsePosthogIssue(data.posthogIssue);
+  if (posthogIssue) {
+    record.posthogIssue = posthogIssue;
+  }
   if (options.includeCodingAgent) {
     const agent = parseCodingAgent(data.agent);
     if (agent) {

@@ -257,6 +257,23 @@ describe("AdminIncidentDetail", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Timeline" }));
     expect(screen.getByText(/Mitigation applied: soft_reload/i)).toBeInTheDocument();
   });
+
+  it("links the PostHog issue on diagnostics for alert-sourced incidents", () => {
+    const url = "https://eu.posthog.com/project/232295/error_tracking/fingerprint/fp-1";
+    renderAdmin(
+      <AdminIncidentDetail
+        incidentId="posthog-iss-1"
+        incidentOverride={makeIncident({
+          id: "posthog-iss-1",
+          posthogIssue: { id: "iss-1", name: "TypeError", url },
+        })}
+        messagesOverride={[]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Diagnostics" }));
+    expect(screen.getByRole("link", { name: "TypeError" })).toHaveAttribute("href", url);
+  });
 });
 
 describe("AdminIncidentActions", () => {
