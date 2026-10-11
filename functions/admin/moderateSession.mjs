@@ -1,5 +1,6 @@
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { enforceAppCheck } from "../lib/appCheck.mjs";
 import { posthogProjectApiKey, withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import { requireAdminAuth } from "./adminAccess.mjs";
 
@@ -95,7 +96,7 @@ async function moderateSession(db, sessionId, action, adminUid) {
 }
 
 export const adminModerateSession = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
