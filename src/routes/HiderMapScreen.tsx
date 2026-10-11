@@ -392,6 +392,7 @@ export function HiderMapScreen() {
           messageId,
           answer,
           selectedReply,
+          pending.toolType,
           deadlineExpired
             ? {
                 deadlineExpired: true,

@@ -8,6 +8,8 @@ import {
 } from "../../domain/session/activity/sessionActivityLog";
 import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
 import { trackSessionEnded } from "../core/analytics/analytics";
+import { ANALYTICS_EVENTS } from "../core/analytics/analyticsEvents";
+import { trackLazy } from "../core/analytics/lazyTelemetry";
 import { appendSessionActivityEvent } from "./sessionActivityLog";
 
 /** Fire-and-forget append; lifecycle writers must not fail the primary action. */
@@ -138,6 +140,10 @@ export function emitQuestionAnsweredActivity(input: {
       answeredLate: input.answeredLate,
     },
   });
+  // No pendingQuestionId: a seeker recorded the answer locally. Hider replies are tracked in answerPendingQuestion.
+  if (!input.pendingQuestionId) {
+    trackLazy(ANALYTICS_EVENTS.question_answered, { tool: input.toolType, mode: "self_recorded" });
+  }
 }
 
 export function emitQuestionCancelledActivity(input: {

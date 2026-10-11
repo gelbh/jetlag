@@ -4,14 +4,21 @@ import {
   PHOTO_REPLY_OPTIONS,
   PHOTO_SENT_EXTERNALLY_LABEL,
 } from "../../domain/questions/photoQuestions";
-import { answerSummaryFromPendingReply, emitGameEndedActivity } from "./emitSessionActivity";
+import {
+  answerSummaryFromPendingReply,
+  emitGameEndedActivity,
+  emitQuestionAnsweredActivity,
+} from "./emitSessionActivity";
 
 const trackSessionEnded = vi.hoisted(() => vi.fn());
+const trackLazy = vi.hoisted(() => vi.fn());
 const appendSessionActivityEvent = vi.hoisted(() => vi.fn(async () => ({ wrote: true })));
 
 vi.mock("../core/analytics/analytics", () => ({
   trackSessionEnded,
 }));
+
+vi.mock("../core/analytics/lazyTelemetry", () => ({ trackLazy }));
 
 vi.mock("./sessionActivityLog", () => ({
   appendSessionActivityEvent,
@@ -72,5 +79,34 @@ describe("emitGameEndedActivity analytics", () => {
       summary: "Session ended",
     });
     expect(trackSessionEnded).not.toHaveBeenCalled();
+  });
+});
+
+describe("emitQuestionAnsweredActivity analytics", () => {
+  beforeEach(() => {
+    trackLazy.mockClear();
+  });
+
+  it("tracks a locally recorded answer as self_recorded", () => {
+    emitQuestionAnsweredActivity({
+      sessionId: "session-1",
+      toolType: "radar",
+      promptText: "Within 1 mile?",
+    });
+    expect(trackLazy).toHaveBeenCalledOnce();
+    expect(trackLazy).toHaveBeenCalledWith("question_answered", {
+      tool: "radar",
+      mode: "self_recorded",
+    });
+  });
+
+  it("does not track answers resolved from a pending question", () => {
+    emitQuestionAnsweredActivity({
+      sessionId: "session-1",
+      toolType: "radar",
+      promptText: "Within 1 mile?",
+      pendingQuestionId: "pq-1",
+    });
+    expect(trackLazy).not.toHaveBeenCalled();
   });
 });

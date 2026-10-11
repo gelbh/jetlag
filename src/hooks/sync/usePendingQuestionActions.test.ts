@@ -53,6 +53,10 @@ const activityMocks = vi.hoisted(() => ({
 
 vi.mock("@/services/session/emitSessionActivity", () => activityMocks);
 
+const trackLazy = vi.hoisted(() => vi.fn());
+
+vi.mock("@/services/core/analytics/lazyTelemetry", () => ({ trackLazy }));
+
 const radarAsk = {
   sessionId: "session-1",
   senderUid: "seeker-1",
@@ -186,13 +190,14 @@ describe("usePendingQuestionActions", () => {
     const { result } = renderHook(() => usePendingQuestionActions());
 
     act(() => {
-      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes", {
+      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes", "radar", {
         deadlineExpired: true,
         senderUid: "hider-1",
         senderRole: "hider",
       });
     });
 
+    expect(trackLazy).not.toHaveBeenCalled();
     expect(commitWriteMock).toHaveBeenCalledWith("question.answer", expect.any(Function));
     expect(firestoreMocks.writePendingQuestionUpdateBatch).toHaveBeenCalledWith("session-1", {
       questionId: "pq-1",
@@ -204,6 +209,46 @@ describe("usePendingQuestionActions", () => {
         text: "Answer received late. Hider forfeits card draw for this question.",
       }),
     });
+  });
+
+  it.each([
+    { label: "annotation", toolType: "radar" as const },
+    { label: "photo", toolType: "photo" as const },
+  ])("tracks question_asked once for a $label ask despite a double tap", ({ toolType }) => {
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    act(() => {
+      result.current.submitPendingQuestion({ ...radarAsk, toolType });
+      result.current.submitPendingQuestion({ ...radarAsk, toolType });
+    });
+
+    expect(trackLazy).toHaveBeenCalledOnce();
+    expect(trackLazy).toHaveBeenCalledWith("question_asked", { tool: toolType });
+  });
+
+  it("tracks question_answered as a hider reply", () => {
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    act(() => {
+      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes", "radar");
+    });
+
+    expect(trackLazy).toHaveBeenCalledOnce();
+    expect(trackLazy).toHaveBeenCalledWith("question_answered", {
+      tool: "radar",
+      mode: "hider_reply",
+    });
+  });
+
+  it("does not track question_answered without a tool type", () => {
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    act(() => {
+      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes", undefined);
+    });
+
+    expect(trackLazy).not.toHaveBeenCalled();
+    expect(commitWriteMock).toHaveBeenCalledWith("question.answer", expect.any(Function));
   });
 
   it("cancels a thermometer walk and its announcement atomically", async () => {
