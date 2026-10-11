@@ -110,7 +110,13 @@ export function InsetRow({
     <>
       {showSeparator ? <InsetHairline /> : null}
       {to ? (
-        <UnstyledButton component={Link} to={to} aria-label={ariaLabel} styles={rootStyles}>
+        <UnstyledButton
+          component={Link}
+          to={to}
+          onClick={onClick}
+          aria-label={ariaLabel}
+          styles={rootStyles}
+        >
           {content}
         </UnstyledButton>
       ) : href ? (

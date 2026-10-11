@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   syncAnalyticsIdentity: vi.fn(),
   trackPageView: vi.fn(),
+  track: vi.fn(),
   grantAnalyticsConsent: vi.fn(),
   denyAnalyticsConsent: vi.fn(),
   captureException: vi.fn(),
@@ -14,6 +15,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("./analytics", () => ({
   syncAnalyticsIdentity: mocks.syncAnalyticsIdentity,
   trackPageView: mocks.trackPageView,
+  track: mocks.track,
   grantAnalyticsConsent: mocks.grantAnalyticsConsent,
   denyAnalyticsConsent: mocks.denyAnalyticsConsent,
 }));
@@ -33,6 +35,7 @@ import {
   denyAnalyticsConsentLazy,
   grantAnalyticsConsentLazy,
   syncAnalyticsIdentityLazy,
+  trackLazy,
   trackPageViewLazy,
 } from "./lazyTelemetry";
 
@@ -86,6 +89,12 @@ describe("lazyTelemetry", () => {
       expect(mocks.trackPageView).toHaveBeenCalledWith("/stats?x=1");
       expect(mocks.captureException).toHaveBeenCalledWith(err);
     });
+  });
+
+  it("forwards typed product events", async () => {
+    trackLazy("learn_cta_clicked", { cta: "join", path: "/guide" });
+    await flush();
+    expect(mocks.track).toHaveBeenCalledWith("learn_cta_clicked", { cta: "join", path: "/guide" });
   });
 
   it("persists consent synchronously before loading analytics", async () => {

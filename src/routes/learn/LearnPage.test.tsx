@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { learnPageContent } from "@/domain/learn/learnContent";
@@ -9,7 +9,14 @@ import { jetlagTheme } from "@/theme/theme";
 import { RouteTransitionTestProvider } from "../../test/RouteTransitionTestProvider";
 import { LearnPage } from "./LearnPage";
 
+const { track } = vi.hoisted(() => ({ track: vi.fn() }));
+
+vi.mock("@/services/core/analytics/lazyTelemetry", () => ({
+  trackLazy: track,
+}));
+
 beforeEach(() => {
+  track.mockClear();
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -64,6 +71,21 @@ describe("LearnPage", () => {
     expect(screen.getByRole("link", { name: "Create session" })).toHaveAttribute("href", "/create");
     expect(screen.getByRole("link", { name: "Join session" })).toHaveAttribute("href", "/join");
     expect(screen.getByText(/Not affiliated with Jet Lag: The Game/)).toBeInTheDocument();
+  });
+
+  it("tracks Join and Create CTA clicks with the page path", () => {
+    renderPage("/tools/radar");
+    fireEvent.click(screen.getByRole("link", { name: "Create session" }));
+    fireEvent.click(screen.getByRole("link", { name: "Join session" }));
+    expect(track).toHaveBeenCalledTimes(2);
+    expect(track).toHaveBeenCalledWith("learn_cta_clicked", {
+      cta: "create",
+      path: "/tools/radar",
+    });
+    expect(track).toHaveBeenCalledWith("learn_cta_clicked", {
+      cta: "join",
+      path: "/tools/radar",
+    });
   });
 
   it("links the tools hub to every tool page", () => {

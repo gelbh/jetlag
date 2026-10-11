@@ -7,6 +7,8 @@ import { InsetRow } from "@/components/ui/entry/InsetRow";
 import type { LearnBlock, LearnPageContent, LearnSection } from "@/domain/learn/learnContentTypes";
 import { learnLinkLabel, learnPageMeta } from "@/domain/learn/learnPageMeta";
 import { UNOFFICIAL_DISCLAIMER } from "@/domain/legal/legalContact";
+import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
+import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
 
 // Inline styles only: prerendered HTML keeps the SPA shell's <head> assets, so a lazy route
 // stylesheet would arrive after first paint and shift the page.
@@ -196,12 +198,18 @@ export function LearnArticle({ content }: { content: LearnPageContent }) {
             to="/join"
             label="Join session"
             icon={<SignInIcon size={22} weight="regular" />}
+            onClick={() =>
+              trackLazy(ANALYTICS_EVENTS.learn_cta_clicked, { cta: "join", path: content.path })
+            }
           />
           <InsetRow
             showSeparator
             to="/create"
             label="Create session"
             icon={<PlusCircleIcon size={22} weight="regular" />}
+            onClick={() =>
+              trackLazy(ANALYTICS_EVENTS.learn_cta_clicked, { cta: "create", path: content.path })
+            }
           />
         </InsetGroup>
         <Text size="sm" c="var(--color-field-ink)" px={4} style={bodyTextStyle}>
