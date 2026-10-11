@@ -215,16 +215,17 @@ export function useMapScreenController() {
     zoneTool,
   });
 
+  const selectTentacleDraftPoi = tentacleTool.selectDraftPoi;
   const handleDraftMarkerActivate = useCallback(
     (overlayId: string): boolean => {
       const poiId = tentacleDraftPoiIdFromOverlayId(overlayId);
       if (!poiId) {
         return false;
       }
-      tentacleTool.selectDraftPoi(poiId);
+      selectTentacleDraftPoi(poiId);
       return true;
     },
-    [tentacleTool.selectDraftPoi],
+    [selectTentacleDraftPoi],
   );
 
   const sessionActions = useMapSessionActions({
@@ -427,12 +428,13 @@ export function useMapScreenController() {
     viewportFrame: placementViewportFrame,
   });
 
+  const closeOverlaySheet = overlay.closeSheet;
   const dismissTransientUi = useCallback(() => {
-    overlay.closeSheet();
+    closeOverlaySheet();
     setSelectedAnnotationId(null);
     cancelGeometryEdit();
     setAwaitingPlacement(false);
-  }, [cancelGeometryEdit, overlay.closeSheet, setSelectedAnnotationId, setAwaitingPlacement]);
+  }, [cancelGeometryEdit, closeOverlaySheet, setSelectedAnnotationId, setAwaitingPlacement]);
 
   const handleSelectTool = useCallback(
     (tool: MapTool) => {

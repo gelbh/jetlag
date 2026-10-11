@@ -117,10 +117,10 @@ export function useHiderZoneTool({
         }
 
         setStationsError("Couldn't load transit stations for this area.");
-      } finally {
-        if (isLatestRequest(requestId)) {
-          setStationsLoading(false);
-        }
+      }
+
+      if (isLatestRequest(requestId)) {
+        setStationsLoading(false);
       }
     },
     [beginRequest, gameArea, isLatestRequest],
@@ -380,9 +380,8 @@ export function useHiderZoneTool({
       }
     } catch (nextError) {
       setError(zoneWriteErrorMessage(nextError));
-    } finally {
-      setSaving(false);
     }
+    setSaving(false);
   }, [
     ensureWriteAccessIfOnline,
     existingZone,

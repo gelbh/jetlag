@@ -228,7 +228,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       phaseRef.current = "settling";
       setPhase("settling");
 
-      try {
+      const settle = async () => {
         try {
           await preloadRoute(targetPath);
         } catch {
@@ -259,7 +259,9 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         }
 
         setLoadingProgress(computeLoadingProgress(targetPath, screenReadyRef.current));
-      } finally {
+      };
+
+      await settle().finally(() => {
         if (transitionGenerationRef.current === myGeneration) {
           loadingTargetRef.current = null;
           loadingTargetPathRef.current = null;
@@ -268,7 +270,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           setLoadingReason(null);
           setLoadingProgress(null);
         }
-      }
+      });
     },
     [decorativeAnimate, navigate, runWarmTransition, waitForScreenReady],
   );

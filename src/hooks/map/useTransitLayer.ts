@@ -46,9 +46,8 @@ export function useTransitLayer({
       setStaticData(next);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Transit lines didn't load.");
-    } finally {
-      setLoadingStatic(false);
     }
+    setLoadingStatic(false);
   }, [gameArea]);
 
   const refreshLive = useCallback(async () => {
@@ -71,9 +70,8 @@ export function useTransitLayer({
             ? "Live data delayed. Showing last update."
             : "Live vehicles didn't refresh.",
       );
-    } finally {
-      setLoadingLive(false);
     }
+    setLoadingLive(false);
   }, [gameArea, metroId]);
 
   useEffect(() => {
@@ -100,10 +98,10 @@ export function useTransitLayer({
         }
 
         setError(nextError instanceof Error ? nextError.message : "Transit lines didn't load.");
-      } finally {
-        if (!cancelled) {
-          setLoadingStatic(false);
-        }
+      }
+
+      if (!cancelled) {
+        setLoadingStatic(false);
       }
     })();
 
