@@ -6,6 +6,32 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.3.0 - 2026-10-11
+
+### Fixes
+
+- Typing in custom POI and pin fields no longer crashes the app after the second character
+- Places, nearby, and measuring searches load more often when public Overpass servers are down
+- Games set up by search, current location, a boundary import, or a saved preset now play inside the area you framed instead of switching to a nearby council or borough (for example Fingal no longer becomes Dublin City)
+- Pack places and matching areas for those games now come from the council or borough covering the area, or the whole region when it spans several
+
+### Improvements
+
+- Hiders can play Veto and Randomize cards on an open question. The seekers see the card in the game chat.
+- New How to play guide covering roles, creating and joining a session, game size, hiding, questions, and the end game
+- New question tool pages for Matching, Measuring, Thermometer, Radar, Tentacles, and Photo, with distances, categories, and how each answer shades the map
+- New FAQ covering free vs Premium, offline play, supported areas, installing, and location privacy
+- Home links to How to play, Question tools, and FAQ
+- Interactive Try it demos on the How to play and question tool pages using the real Ask HUD
+- Privacy policy discloses Accept-gated masked PostHog session replay (dual with Sentry)
+- Admin ops desk uses a fixed layout that widens incidents on the incidents route; desk presets and saved layouts are removed and Settings opens from the top bar
+- Privacy policy: client errors and session replay are PostHog-only after Sentry browser cutover
+- Privacy policy discloses scrubbed crash reports to Sentry and PostHog (EU), including that an anonymous PostHog ID may sit in local storage before Accept; PostHog session replay remains unused
+
+### Technical
+
+- Privacy policy: third-party processors no longer list Sentry after Functions exceptions move to PostHog.
+
 ## 1.2.0 - 2026-10-06
 
 ### Fixes
