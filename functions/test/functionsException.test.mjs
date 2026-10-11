@@ -59,8 +59,7 @@ test("isOverpassTransportNoise does not drop unrelated fetch failed", () => {
   assert.equal(isOverpassTransportNoise(null), false);
 });
 
-// Transport fetch-failed is not an expected HttpsError, but shouldSkip gates it
-// (former Sentry beforeSend residual drop).
+// Transport fetch-failed is not an expected HttpsError, but shouldSkip gates it.
 test("shouldSkipFunctionsException drops overpass transport fetch-failed", () => {
   const cause = new Error("Connect Timeout Error");
   cause.name = "ConnectTimeoutError";

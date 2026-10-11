@@ -17,7 +17,7 @@ type PosthogRollupPluginFactory = (options: {
 }) => PluginOption;
 
 /**
- * Env-gated PostHog source-map upload (mirrors `createSentryPlugins`).
+ * Env-gated PostHog source-map upload.
  * No secrets → []. Secrets present but `@posthog/rollup-plugin` missing → []
  * (install the optional CI dep when enabling upload).
  *

@@ -60,7 +60,7 @@ export async function enforceRateLimit(res, route, uid, tier = "free", deps = {}
   try {
     result = await consume(db, { route, uid, limit, windowMs });
   } catch (error) {
-    // Retries exhausted — soft-fail with log signal instead of Sentry (JETLAG-26).
+    // Retries exhausted — soft-fail with log signal instead of an exception (JETLAG-26).
     if (isFirestoreContentionError(error)) {
       sendContentionFailure(res, route);
       return false;

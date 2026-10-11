@@ -1,5 +1,5 @@
 /**
- * Shared sensitive-string scrubbing for Sentry beforeSend and PostHog exception sinks.
+ * Shared sensitive-string scrubbing for PostHog exception sinks.
  */
 
 export const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
