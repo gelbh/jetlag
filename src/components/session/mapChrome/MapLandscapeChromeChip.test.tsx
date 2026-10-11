@@ -83,6 +83,37 @@ describe("MapLandscapeChromeChip", () => {
     }
   });
 
+  it("ticks a question countdown while the game is paused", () => {
+    vi.useFakeTimers();
+    try {
+      const anchor = new Date(clock.now - 10_000).toISOString();
+      renderChip({
+        ...chipProps,
+        timerState: { runningSince: null, accumulatedMs: 4_000_000 },
+        pendingQuestions: [
+          {
+            id: "pq-1",
+            sessionId: "session-1",
+            toolType: "radar",
+            createdByUid: "seeker-1",
+            createdAt: anchor,
+            status: "pending",
+            placement: { geometryJson: "{}", metadata: {} },
+            replyOptions: [],
+            promptText: "Radar",
+            answerableAt: anchor,
+          },
+        ],
+      });
+      expect(screen.getByText("4:50")).toBeInTheDocument();
+      clock.now = 11_000;
+      act(() => vi.advanceTimersByTime(1000));
+      expect(screen.getByText("4:49")).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("mounts Mantine chip", () => {
     const { container } = renderChip();
     expect(

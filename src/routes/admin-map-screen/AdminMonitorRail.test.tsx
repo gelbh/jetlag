@@ -57,7 +57,6 @@ function createController(): ObserverMapScreenController {
       timerState: { accumulatedMs: 0, runningSince: null },
       running: false,
       hasStarted: false,
-      elapsedMs: 0,
       start: vi.fn(),
       pause: vi.fn(),
       reset: vi.fn(),

@@ -58,7 +58,7 @@ export function mapIslandSessionStatus(input: {
     return "Waiting";
   }
 
-  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules);
+  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules, nowMs);
   if (questionTimer) {
     if (questionTimer.countdownLabel === "WALKING") return "Walking";
     return "Asking";
