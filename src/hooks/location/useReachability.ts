@@ -49,7 +49,7 @@ export function useReachability(
       }
       inFlight = true;
       const probeGeneration = generation;
-      try {
+      const probe = async () => {
         const { ok } = await probeServerTime(PROBE_TIMEOUT_MS);
         if (cancelled || probeGeneration !== generation) {
           return;
@@ -66,13 +66,15 @@ export function useReachability(
         }
 
         setLastProbeAt(Date.now());
-      } finally {
+      };
+
+      await probe().finally(() => {
         inFlight = false;
         if (rerunAfterFlight && !cancelled) {
           rerunAfterFlight = false;
           void runProbe();
         }
-      }
+      });
     };
 
     // Unlike handleResume, lie-fi callers must not reset the failure count, or

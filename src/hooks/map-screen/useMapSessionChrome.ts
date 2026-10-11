@@ -43,6 +43,8 @@ function alertIfNeedsConnection(error: unknown): boolean {
 
 const MAP_EXPORT_BACKGROUND = "#0f172a";
 
+const loadHtml2Canvas = () => import("html2canvas");
+
 interface UseMapSessionChromeParams {
   session: SessionRecord | null;
   isHost: boolean;
@@ -149,38 +151,42 @@ export function useMapSessionChrome({
     resetInFlightRef.current = true;
     const sessionId = session.id;
 
-    try {
-      const user = await ensureAnonymousUser();
-      const hostRole = session.memberRoles?.[user.uid];
-      if (!hostRole) {
-        window.alert("Could not reset session: your role in this session is unknown.");
-        return;
+    const reset = async () => {
+      try {
+        const user = await ensureAnonymousUser();
+        const hostRole = session.memberRoles?.[user.uid];
+        if (!hostRole) {
+          window.alert("Could not reset session: your role in this session is unknown.");
+          return;
+        }
+
+        const resetAt = await resetRemoteSession(sessionId, user.uid, hostRole);
+
+        setSession({
+          ...session,
+          sessionResetAt: resetAt,
+          timerAccumulatedMs: 0,
+          timerRunningSince: null,
+          endGameStartedAt: undefined,
+          endGameStartedByUid: undefined,
+          endGameTruthAnchors: undefined,
+          endGameRequestedAt: undefined,
+          endGameRequestedByUid: undefined,
+        });
+        resetTimer();
+        teardownSessionUiState();
+        setSelectedAnnotationId(null);
+        await clearAllAnnotations();
+        await clearSessionLocalArtifacts(sessionId);
+        closeSettingsPanel();
+      } catch {
+        window.alert("Could not reset session. Check your connection and try again.");
       }
+    };
 
-      const resetAt = await resetRemoteSession(sessionId, user.uid, hostRole);
-
-      setSession({
-        ...session,
-        sessionResetAt: resetAt,
-        timerAccumulatedMs: 0,
-        timerRunningSince: null,
-        endGameStartedAt: undefined,
-        endGameStartedByUid: undefined,
-        endGameTruthAnchors: undefined,
-        endGameRequestedAt: undefined,
-        endGameRequestedByUid: undefined,
-      });
-      resetTimer();
-      teardownSessionUiState();
-      setSelectedAnnotationId(null);
-      await clearAllAnnotations();
-      await clearSessionLocalArtifacts(sessionId);
-      closeSettingsPanel();
-    } catch {
-      window.alert("Could not reset session. Check your connection and try again.");
-    } finally {
+    await reset().finally(() => {
       resetInFlightRef.current = false;
-    }
+    });
   }, [
     clearAllAnnotations,
     closeSettingsPanel,
@@ -363,7 +369,7 @@ export function useMapSessionChrome({
     }
 
     try {
-      const { default: html2canvas } = await import("html2canvas");
+      const { default: html2canvas } = await loadHtml2Canvas();
       const canvas = await html2canvas(mapShellRef.current, {
         useCORS: true,
         backgroundColor: MAP_EXPORT_BACKGROUND,
@@ -378,16 +384,14 @@ export function useMapSessionChrome({
       link.click();
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      if (isHtml2CanvasUnsupportedColorMessage(message)) {
-        window.alert("Could not export the map. Try again, or take a screenshot instead.");
-        return;
+      if (!isHtml2CanvasUnsupportedColorMessage(message)) {
+        captureException(error);
       }
-      captureException(error);
       window.alert("Could not export the map. Try again, or take a screenshot instead.");
-    } finally {
-      if (exportLegendRef.current) {
-        exportLegendRef.current.style.display = "none";
-      }
+    }
+
+    if (exportLegendRef.current) {
+      exportLegendRef.current.style.display = "none";
     }
   }, [exportLegendRef, mapShellRef, session]);
 

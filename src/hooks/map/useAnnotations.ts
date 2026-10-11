@@ -101,28 +101,32 @@ export function useAnnotations() {
         updatedAt: new Date().toISOString(),
       };
 
-      try {
-        const user = await ensureAnonymousUser();
+      const write = async (): Promise<string | null> => {
+        try {
+          const user = await ensureAnonymousUser();
 
-        if (shouldQueueAnnotationOffline()) {
-          await queueAnnotationWrite(session.id, stampedAnnotation);
+          if (shouldQueueAnnotationOffline()) {
+            await queueAnnotationWrite(session.id, stampedAnnotation);
+            return null;
+          }
+
+          await withSessionWriteAccess({
+            session,
+            uid: user.uid,
+            myUid,
+            onSessionChange: (next) => setSession(next, user.uid),
+            write: (sessionId) => writeRemoteAnnotation(sessionId, stampedAnnotation),
+          });
           return null;
+        } catch (error) {
+          return handleAnnotationWriteError(session.id, [stampedAnnotation], error);
         }
+      };
 
-        await withSessionWriteAccess({
-          session,
-          uid: user.uid,
-          myUid,
-          onSessionChange: (next) => setSession(next, user.uid),
-          write: (sessionId) => writeRemoteAnnotation(sessionId, stampedAnnotation),
-        });
-        return null;
-      } catch (error) {
-        return handleAnnotationWriteError(session.id, [stampedAnnotation], error);
-      } finally {
+      return write().finally(() => {
         decrementSyncInFlight();
         decrementPendingWrites();
-      }
+      });
     },
     [
       decrementPendingWrites,
@@ -291,29 +295,33 @@ export function useAnnotations() {
       }),
     );
 
-    try {
-      const user = await ensureAnonymousUser();
+    const write = async () => {
+      try {
+        const user = await ensureAnonymousUser();
 
-      if (shouldQueueAnnotationOffline()) {
-        for (const annotation of deleted) {
-          await queueAnnotationWrite(session.id, annotation);
+        if (shouldQueueAnnotationOffline()) {
+          for (const annotation of deleted) {
+            await queueAnnotationWrite(session.id, annotation);
+          }
+          return;
         }
-        return;
-      }
 
-      await withSessionWriteAccess({
-        session,
-        uid: user.uid,
-        myUid,
-        onSessionChange: (next) => setSession(next, user.uid),
-        write: (sessionId) => writeRemoteAnnotationsBatch(sessionId, deleted),
-      });
-    } catch (error) {
-      await handleAnnotationWriteError(session.id, deleted, error);
-    } finally {
+        await withSessionWriteAccess({
+          session,
+          uid: user.uid,
+          myUid,
+          onSessionChange: (next) => setSession(next, user.uid),
+          write: (sessionId) => writeRemoteAnnotationsBatch(sessionId, deleted),
+        });
+      } catch (error) {
+        await handleAnnotationWriteError(session.id, deleted, error);
+      }
+    };
+
+    await write().finally(() => {
       decrementSyncInFlight();
       decrementPendingWrites();
-    }
+    });
   }, [
     clearRedoStack,
     decrementPendingWrites,

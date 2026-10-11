@@ -68,32 +68,30 @@ export function useAdminBoundaryFeatures(
         ? availableLevelKey.split(",").map((level) => Number(level))
         : [];
 
-      try {
-        const levelFeatures = await Promise.all(
-          availableLevels.map(async (level) => {
-            const divisions = await fetchAdminDivisionFeaturesInArea(
-              gameArea,
-              level,
-              customMatchingAreas?.[level as MatchingAdminLevel],
-            );
+      const levelFeatures = await Promise.all(
+        availableLevels.map(async (level) => {
+          const divisions = await fetchAdminDivisionFeaturesInArea(
+            gameArea,
+            level,
+            customMatchingAreas?.[level as MatchingAdminLevel],
+          );
 
-            return divisions.map((division) =>
-              boundaryToFeature(division.id, division.adminLevel, division.boundary),
-            );
-          }),
-        );
+          return divisions.map((division) =>
+            boundaryToFeature(division.id, division.adminLevel, division.boundary),
+          );
+        }),
+      );
 
-        if (!cancelled) {
-          setFeatures(levelFeatures.flat());
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+      if (!cancelled) {
+        setFeatures(levelFeatures.flat());
       }
     };
 
-    void load();
+    void load().finally(() => {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    });
 
     return () => {
       cancelled = true;

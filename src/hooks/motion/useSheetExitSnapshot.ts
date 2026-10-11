@@ -15,7 +15,7 @@ export function useSheetExitSnapshot<T>(
   snapshot: T | null;
   onExitTransitionEnd: () => void;
 } {
-  const exit = useSheetExitMount(open);
+  const { mounted, open: exitOpen, onExitTransitionEnd: endExit } = useSheetExitMount(open);
   const [snapshot, setSnapshot] = useState<T | null>(null);
   const openRef = useRef(open);
 
@@ -26,20 +26,20 @@ export function useSheetExitSnapshot<T>(
   if (open && live != null && !Object.is(snapshot, live)) {
     setSnapshot(live);
   }
-  if (!exit.mounted && snapshot != null) {
+  if (!mounted && snapshot != null) {
     setSnapshot(null);
   }
 
   const onExitTransitionEnd = useCallback(() => {
-    exit.onExitTransitionEnd();
+    endExit();
     if (!openRef.current) {
       setSnapshot(null);
     }
-  }, [exit.onExitTransitionEnd]);
+  }, [endExit]);
 
   return {
-    mounted: exit.mounted,
-    open: exit.open,
+    mounted,
+    open: exitOpen,
     snapshot: open && live != null ? live : snapshot,
     onExitTransitionEnd,
   };
