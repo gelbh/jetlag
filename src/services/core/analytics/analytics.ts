@@ -1,4 +1,6 @@
 import posthog from "posthog-js";
+import "posthog-js/dist/web-vitals";
+import "posthog-js/dist/posthog-recorder";
 import { getClientEnv } from "@/config/env";
 import {
   readAnalyticsConsent,
@@ -169,11 +171,20 @@ export function initPosthogCore(): void {
       capture_pageview: false,
       capture_pageleave: true,
       capture_performance: true,
+      // Recording stays off until Accept calls startSessionRecording; options below apply then.
       disable_session_recording: true,
       disable_external_dependency_loading: true,
       disable_surveys: true,
       person_profiles: "identified_only",
       before_send: posthogBeforeSend,
+      session_recording: {
+        maskAllInputs: true,
+        maskTextSelector: "*",
+        blockSelector: "img, video, audio, picture, source",
+        sampleRate: 0.1,
+        // Pin off so PostHog remote config cannot enable MapLibre canvas frames.
+        captureCanvas: { recordCanvas: false },
+      },
     });
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
     posthog.register({ $geoip_disable: true });
@@ -199,6 +210,7 @@ export function initAnalytics(): void {
     posthog.opt_in_capturing();
     initialized = true;
     applyIdentity(lastSeenIdentity);
+    posthog.startSessionRecording();
   } catch {
     // Soft-fail: analytics must never break app boot.
   }
