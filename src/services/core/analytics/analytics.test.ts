@@ -225,6 +225,11 @@ describe("analytics facade", () => {
       persistence: "localStorage",
       capture_pageleave: true,
       capture_performance: true,
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
       disable_session_recording: true,
       disable_external_dependency_loading: true,
       disable_surveys: true,
