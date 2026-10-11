@@ -40,8 +40,8 @@ export function LocationPermissionPrompt() {
     }
 
     let cancelled = false;
-    setHydrating(true);
     void (async () => {
+      setHydrating(true);
       const restore = await restoreLocationAccessIfPersisted({
         highAccuracy: false,
       });
