@@ -6,6 +6,7 @@ import {
   OVERPASS_USER_AGENT,
   overpassEndpointHost,
 } from "./overpassEndpoints.mjs";
+import { isOverpassHostCooled, recordOverpassHostCooldown } from "./overpassHostCooldown.mjs";
 import { enqueueOverpassFetch } from "./overpassQueue.mjs";
 import { overpassL2CacheKey, readOverpassL2, writeOverpassL2 } from "./overpassSharedCache.mjs";
 import { orderOverpassEndpointsByStatus } from "./overpassStatus.mjs";
@@ -145,7 +146,9 @@ function cancelResponseBody(response) {
 export async function fetchOverpassWithFailover(query, options = {}) {
   let lastError = null;
   const now = options.now ?? Date.now;
-  const endpoints = await orderOverpassEndpointsByStatus(buildOverpassEndpointList(process.env));
+  const endpoints = await orderOverpassEndpointsByStatus(
+    buildOverpassEndpointList(process.env, { query }),
+  );
   const deadlineMs =
     typeof options.deadlineMs === "number"
       ? options.deadlineMs
@@ -165,6 +168,11 @@ export async function fetchOverpassWithFailover(query, options = {}) {
     }
 
     const host = overpassEndpointHost(endpoint);
+    if (isOverpassHostCooled(host, now())) {
+      logFailover({ backend: "overpass", endpoint: host, reason: "host_cooldown" });
+      continue;
+    }
+
     const attemptTimeoutMs = Math.min(OVERPASS_FETCH_TIMEOUT_MS, remainingMs);
     attempts += 1;
     try {
@@ -187,6 +195,9 @@ export async function fetchOverpassWithFailover(query, options = {}) {
 
       logFailover({ backend: "overpass", endpoint: host, status: response.status });
       cancelResponseBody(response);
+      if (response.status === 429 || response.status === 406) {
+        recordOverpassHostCooldown(host, now());
+      }
       lastError = new Error(
         isTimeoutLikeOverpassStatus(response.status)
           ? "Overpass timed out."

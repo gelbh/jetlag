@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it, mock } from "node:test";
-import { OVERPASS_ENDPOINTS } from "../proxies/overpassEndpoints.mjs";
+import { OVERPASS_ENDPOINTS, overpassEndpointHost } from "../proxies/overpassEndpoints.mjs";
+import {
+  clearOverpassHostCooldownsForTests,
+  isOverpassHostCooled,
+} from "../proxies/overpassHostCooldown.mjs";
 import {
   fetchOverpassWithFailover,
   isTimeoutLikeOverpassStatus,
@@ -69,6 +73,7 @@ describe("fetchOverpassWithFailover", () => {
   afterEach(() => {
     globalThis.fetch = originalFetch;
     mock.restoreAll();
+    clearOverpassHostCooldownsForTests();
   });
 
   it("all endpoints AbortError → throws Overpass timed out.", async () => {
@@ -180,6 +185,52 @@ describe("fetchOverpassWithFailover", () => {
     assert.equal(response.status, 200);
     assert.ok(interpreterOrder.length >= 1);
     assert.match(interpreterOrder[0], /private\.coffee/);
+  });
+
+  it("skips a host cooled by 429 without waiting 30s wall clock", async () => {
+    const interpreterCalls = [];
+    globalThis.fetch = async (url) => {
+      const u = String(url);
+      if (u.includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      if (u.includes("/interpreter")) {
+        interpreterCalls.push(u);
+        if (u.includes("overpass-api.de")) {
+          return jsonResponse(429);
+        }
+        if (u.includes("private.coffee")) {
+          return jsonResponse(200, '{"elements":[]}');
+        }
+        return jsonResponse(503);
+      }
+      return jsonResponse(500);
+    };
+
+    const response = await fetchOverpassWithFailover("[out:json];out;");
+    assert.equal(response.status, 200);
+    assert.equal(interpreterCalls.filter((u) => u.includes("overpass-api.de")).length, 1);
+    assert.ok(interpreterCalls.some((u) => u.includes("private.coffee")));
+    assert.equal(isOverpassHostCooled("overpass-api.de"), true);
+  });
+
+  it("records cooldown on 406 the same as 429", async () => {
+    globalThis.fetch = async (url) => {
+      const u = String(url);
+      if (u.includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      if (u.includes("overpass-api.de") && u.includes("/interpreter")) {
+        return jsonResponse(406);
+      }
+      if (u.includes("/interpreter")) {
+        return jsonResponse(200, '{"elements":[]}');
+      }
+      return jsonResponse(500);
+    };
+
+    await fetchOverpassWithFailover("[out:json];out;");
+    assert.equal(isOverpassHostCooled(overpassEndpointHost(OVERPASS_ENDPOINTS[0])), true);
   });
 
   it("stops peer attempts when failover budget is exhausted", async () => {
