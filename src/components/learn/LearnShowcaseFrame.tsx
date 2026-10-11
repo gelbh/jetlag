@@ -1,6 +1,5 @@
 import { Box, Text } from "@mantine/core";
 import { type CSSProperties, type ReactNode, useRef } from "react";
-import { useLocation } from "react-router-dom";
 import type { LearnShowcaseId } from "@/domain/learn/learnContentTypes";
 import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
 import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
@@ -42,14 +41,13 @@ export function LearnShowcaseFrame({
   caption: string;
   children: ReactNode;
 }) {
-  const { pathname } = useLocation();
   const trackedRef = useRef(false);
 
   // Capture phase: demo handlers may stop propagation.
   const trackFirstInteraction = () => {
     if (trackedRef.current) return;
     trackedRef.current = true;
-    trackLazy(ANALYTICS_EVENTS.learn_showcase_interacted, { showcase, path: pathname });
+    trackLazy(ANALYTICS_EVENTS.learn_showcase_interacted, { showcase });
   };
 
   return (
@@ -58,8 +56,8 @@ export function LearnShowcaseFrame({
       data-testid="learn-showcase"
       style={frameStyle}
       aria-label={caption}
-      onPointerDownCapture={trackFirstInteraction}
-      onKeyDownCapture={trackFirstInteraction}
+      onClickCapture={trackFirstInteraction}
+      onChangeCapture={trackFirstInteraction}
     >
       <Text component="p" style={labelStyle}>
         Try it

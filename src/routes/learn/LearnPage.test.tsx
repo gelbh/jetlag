@@ -77,6 +77,7 @@ describe("LearnPage", () => {
     renderPage("/tools/radar");
     fireEvent.click(screen.getByRole("link", { name: "Create session" }));
     fireEvent.click(screen.getByRole("link", { name: "Join session" }));
+    expect(track).toHaveBeenCalledTimes(2);
     expect(track).toHaveBeenCalledWith("learn_cta_clicked", {
       cta: "create",
       path: "/tools/radar",

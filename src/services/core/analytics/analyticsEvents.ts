@@ -72,7 +72,6 @@ export type AnalyticsEventProps = {
   };
   learn_showcase_interacted: {
     showcase: LearnShowcaseId;
-    path: string;
   };
   learn_cta_clicked: {
     cta: "join" | "create";
