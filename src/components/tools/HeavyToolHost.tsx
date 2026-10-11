@@ -151,30 +151,18 @@ interface HeavyToolHookParams {
   canSubmitQuestion?: boolean;
 }
 
-const HEAVY_TOOL_HOOKS: {
-  [K in HeavyToolName]: (
-    params: HeavyToolHookParams,
-  ) => MatchingToolApi | MeasuringToolApi | TentacleToolApi;
-} = {
-  matching: useMatchingTool,
-  measuring: useMeasuringTool,
-  tentacle: useTentacleTool,
-};
+type HeavyToolRunnerProps = Omit<HeavyToolHostModel, "activeTool">;
 
-interface HeavyToolRunnerProps extends Omit<HeavyToolHostModel, "activeTool"> {
-  toolName: HeavyToolName;
-}
-
-/** Must remount (via key) when toolName changes so the underlying hook stays stable. */
-function HeavyToolRunner({
-  toolName,
-  onToolsChange,
-  awaitHiderAnswer,
-  submitToolQuestion,
-  ...sharedProps
-}: HeavyToolRunnerProps) {
-  const useHeavyTool = HEAVY_TOOL_HOOKS[toolName];
-  const tool = useHeavyTool({
+function heavyToolParams(
+  toolName: HeavyToolName,
+  {
+    onToolsChange: _onToolsChange,
+    awaitHiderAnswer,
+    submitToolQuestion,
+    ...sharedProps
+  }: HeavyToolRunnerProps,
+): HeavyToolHookParams {
+  return {
     ...sharedProps,
     active: true,
     awaitHiderAnswer,
@@ -182,12 +170,32 @@ function HeavyToolRunner({
       awaitHiderAnswer && submitToolQuestion
         ? (input) => submitToolQuestion(toolName, input).then(() => undefined)
         : undefined,
-  });
+  };
+}
 
-  usePublishHeavyTool(toolName, tool, onToolsChange);
-
+function MatchingToolRunner(props: HeavyToolRunnerProps) {
+  const tool = useMatchingTool(heavyToolParams("matching", props));
+  usePublishHeavyTool("matching", tool, props.onToolsChange);
   return null;
 }
+
+function MeasuringToolRunner(props: HeavyToolRunnerProps) {
+  const tool = useMeasuringTool(heavyToolParams("measuring", props));
+  usePublishHeavyTool("measuring", tool, props.onToolsChange);
+  return null;
+}
+
+function TentacleToolRunner(props: HeavyToolRunnerProps) {
+  const tool = useTentacleTool(heavyToolParams("tentacle", props));
+  usePublishHeavyTool("tentacle", tool, props.onToolsChange);
+  return null;
+}
+
+const HEAVY_TOOL_RUNNERS = {
+  matching: MatchingToolRunner,
+  measuring: MeasuringToolRunner,
+  tentacle: TentacleToolRunner,
+} satisfies Record<HeavyToolName, (props: HeavyToolRunnerProps) => null>;
 
 /** Mounts one heavy seeker tool at a time and publishes its API to the map controller.
  * Tool hooks share the useToolSession open/submit/close machine; registry API is unchanged. */
@@ -197,5 +205,6 @@ export function HeavyToolHost({ model }: HeavyToolHostProps) {
     return null;
   }
 
-  return <HeavyToolRunner key={activeTool} toolName={activeTool} {...sharedProps} />;
+  const Runner = HEAVY_TOOL_RUNNERS[activeTool];
+  return <Runner key={activeTool} {...sharedProps} />;
 }

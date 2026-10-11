@@ -86,7 +86,7 @@ export function WizardStepNextButton({
 export function WizardStepNav({
   stepIndex,
   stepCount,
-  canGoBack = stepIndex > 0,
+  canGoBack,
   canGoNext = true,
   onBack,
   onNext,
@@ -96,7 +96,7 @@ export function WizardStepNav({
 }: WizardStepNavProps) {
   return (
     <div className="flex shrink-0 items-center gap-1">
-      <WizardStepBackButton canGoBack={canGoBack} onBack={onBack} />
+      <WizardStepBackButton canGoBack={canGoBack ?? stepIndex > 0} onBack={onBack} />
       <WizardStepNextButton
         stepIndex={stepIndex}
         stepCount={stepCount}

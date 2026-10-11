@@ -87,9 +87,8 @@ export function useThermometerWalk({
       onErrorRef.current?.(
         error instanceof Error ? error.message : "Thermometer walk could not finish. Try again.",
       );
-    } finally {
-      stoppingRef.current = false;
     }
+    stoppingRef.current = false;
   }, []);
 
   useEffect(() => {

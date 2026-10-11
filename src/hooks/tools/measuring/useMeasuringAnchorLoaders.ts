@@ -210,18 +210,15 @@ export function useMeasuringAnchorLoaders({
 
         applyAllPlacesResult(requestId, seekerPoint, category, places, 0);
       } catch (error) {
-        if (requestId !== placesRequestIdRef.current) {
-          return;
-        }
-
-        setMeasuringPlaces([]);
-        setMeasuringDistanceMeters(null);
-        setMeasuringTargetPlaceName(null);
-        setMeasuringError(overpassErrorMessage(error, "Places in the play area didn't load."));
-      } finally {
         if (requestId === placesRequestIdRef.current) {
-          setMeasuringLoading(false);
+          setMeasuringPlaces([]);
+          setMeasuringDistanceMeters(null);
+          setMeasuringTargetPlaceName(null);
+          setMeasuringError(overpassErrorMessage(error, "Places in the play area didn't load."));
         }
+      }
+      if (requestId === placesRequestIdRef.current) {
+        setMeasuringLoading(false);
       }
     },
     [
@@ -277,26 +274,19 @@ export function useMeasuringAnchorLoaders({
           },
         });
 
-        if (requestId !== seaLevelRequestIdRef.current) {
-          return;
-        }
-
         applySeaLevelResult(result);
       } catch (error) {
-        if (requestId !== seaLevelRequestIdRef.current) {
-          return;
-        }
-
-        setMeasuringSeaLevelNearRegion(null);
-        setMeasuringAnchorElevationMeters(null);
-        setMeasuringDistanceMeters(null);
-        setMeasuringSeaLevelEdgeCase(null);
-        setMeasuringSeaLevelNote(null);
-        setMeasuringError(error instanceof Error ? error.message : "Elevation unavailable.");
-      } finally {
         if (requestId === seaLevelRequestIdRef.current) {
-          setMeasuringLoading(false);
+          setMeasuringSeaLevelNearRegion(null);
+          setMeasuringAnchorElevationMeters(null);
+          setMeasuringDistanceMeters(null);
+          setMeasuringSeaLevelEdgeCase(null);
+          setMeasuringSeaLevelNote(null);
+          setMeasuringError(error instanceof Error ? error.message : "Elevation unavailable.");
         }
+      }
+      if (requestId === seaLevelRequestIdRef.current) {
+        setMeasuringLoading(false);
       }
     },
     [
@@ -362,32 +352,24 @@ export function useMeasuringAnchorLoaders({
           },
         });
 
-        if (requestId !== coastlineRequestIdRef.current) {
-          return;
-        }
-
-        if (!result.ok) {
+        if (result.ok) {
+          applyCoastlineOk(result);
+        } else if (requestId === coastlineRequestIdRef.current) {
           setMeasuringTargetPoint(null);
           setMeasuringDistanceMeters(null);
           setMeasuringCoastSegments([]);
           setMeasuringError(result.message);
-          return;
         }
-
-        applyCoastlineOk(result);
       } catch (error) {
-        if (requestId !== coastlineRequestIdRef.current) {
-          return;
-        }
-
-        setMeasuringTargetPoint(null);
-        setMeasuringDistanceMeters(null);
-        setMeasuringCoastSegments([]);
-        setMeasuringError(overpassErrorMessage(error, "Coastline not found."));
-      } finally {
         if (requestId === coastlineRequestIdRef.current) {
-          setMeasuringLoading(false);
+          setMeasuringTargetPoint(null);
+          setMeasuringDistanceMeters(null);
+          setMeasuringCoastSegments([]);
+          setMeasuringError(overpassErrorMessage(error, "Coastline not found."));
         }
+      }
+      if (requestId === coastlineRequestIdRef.current) {
+        setMeasuringLoading(false);
       }
     },
     [
@@ -425,37 +407,31 @@ export function useMeasuringAnchorLoaders({
           sessionRules?.regionPackId,
         );
 
-        if (requestId !== linearRequestIdRef.current) {
-          return;
+        if (requestId === linearRequestIdRef.current) {
+          if (result.ok) {
+            setMeasuringTargetPoint(result.point);
+            setMeasuringTargetPlaceName(null);
+            setMeasuringDistanceMeters(result.distanceMeters);
+            setMeasuringCoastSegments(result.segments);
+          } else {
+            setMeasuringTargetPoint(null);
+            setMeasuringTargetPlaceName(null);
+            setMeasuringDistanceMeters(null);
+            setMeasuringCoastSegments([]);
+            setMeasuringError(result.message);
+          }
         }
-
-        if (!result.ok) {
+      } catch (error) {
+        if (requestId === linearRequestIdRef.current) {
           setMeasuringTargetPoint(null);
           setMeasuringTargetPlaceName(null);
           setMeasuringDistanceMeters(null);
           setMeasuringCoastSegments([]);
-          setMeasuringError(result.message);
-          return;
+          setMeasuringError(overpassErrorMessage(error, measuringLinearNotFoundMessage(kind)));
         }
-
-        setMeasuringTargetPoint(result.point);
-        setMeasuringTargetPlaceName(null);
-        setMeasuringDistanceMeters(result.distanceMeters);
-        setMeasuringCoastSegments(result.segments);
-      } catch (error) {
-        if (requestId !== linearRequestIdRef.current) {
-          return;
-        }
-
-        setMeasuringTargetPoint(null);
-        setMeasuringTargetPlaceName(null);
-        setMeasuringDistanceMeters(null);
-        setMeasuringCoastSegments([]);
-        setMeasuringError(overpassErrorMessage(error, measuringLinearNotFoundMessage(kind)));
-      } finally {
-        if (requestId === linearRequestIdRef.current) {
-          setMeasuringLoading(false);
-        }
+      }
+      if (requestId === linearRequestIdRef.current) {
+        setMeasuringLoading(false);
       }
     },
     [
