@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.3.0";
+export const APP_VERSION = "1.3.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,38 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.3.1",
+    date: "2026-10-11",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Admin incident links open incidents outside the loaded list, with actions",
+          "Admin monitor stops re-centering on every player location update",
+          "Game timers tick every second again",
+          "Map searches recover faster when an Overpass server is rate limiting, and use the Swiss Overpass server for games inside Switzerland",
+          "Admin area checks finish quickly during Overpass outages when an area has no divisions at that level, instead of retrying for minutes",
+          "Map data errors show quickly during Overpass outages instead of retrying smaller areas for minutes",
+          "Thermometer End walk arms again during multiplayer GPS walks once GPS updates",
+          "Thermometer map overlay says why Send or Start track is disabled instead of leaving a dead button",
+          "Zone corners can go outside the play area; the zone is trimmed to the play area when closed",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Admin monitor uses a fixed map with a tools column (player roster plus Overview, Log, Chat, Sync, Map and Mod tabs) instead of draggable panels",
+          "Admin on phones uses Sessions and Incidents tabs, with incidents opening into a single detail view",
+          "Admin session list uses compact rows, toggle filters, and a tighter incident column",
+        ],
+      },
+      {
+        title: "Technical",
+        items: ["Track thermometer_send_blocked with the block reason"],
+      },
+    ],
+  },
   {
     version: "1.3.0",
     date: "2026-10-11",
