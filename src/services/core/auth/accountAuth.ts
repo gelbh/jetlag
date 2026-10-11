@@ -99,11 +99,10 @@ function isFirebasePendingPromiseAssertion(error: unknown): boolean {
 
 type AccountLinkedProps = AnalyticsEventProps[typeof ANALYTICS_EVENTS.account_linked];
 
-const ACCOUNT_PROVIDER_BY_ID: Record<string, AccountLinkedProps["provider"]> = {
-  "google.com": "google",
+const ACCOUNT_PROVIDER_BY_ID: Partial<Record<string, AccountLinkedProps["provider"]>> = {
+  [GoogleAuthProvider.PROVIDER_ID]: "google",
   "apple.com": "apple",
-  password: "email",
-  emailLink: "email",
+  [EmailAuthProvider.PROVIDER_ID]: "email",
 };
 
 const ACCOUNT_OUTCOME_BY_OPERATION: Partial<
@@ -386,7 +385,7 @@ export async function completePremiumEmailSignInLink(
     }
 
     const credential = await signInWithEmailLink(auth, storedEmail, linkUrl);
-    trackAccountLinked(credential, "password");
+    trackAccountLinked(credential, EmailAuthProvider.PROVIDER_ID);
     window.localStorage.removeItem(EMAIL_LINK_STORAGE_KEY);
     return credential.user;
   } catch (error) {

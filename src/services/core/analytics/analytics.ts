@@ -71,6 +71,7 @@ let initialized = false;
 let identifiedUid: string | null = null;
 /** Last auth identity seen — applied on init so Accept-after-sign-in still identifies. */
 let lastSeenIdentity: AnalyticsIdentity | null = null;
+let appInstalledHandler: (() => void) | null = null;
 
 export type AnalyticsIdentity = {
   uid: string;
@@ -205,9 +206,8 @@ export function initPosthogCore(): void {
       },
     });
     registerSuperProperties();
-    window.addEventListener("appinstalled", () => track(ANALYTICS_EVENTS.pwa_installed), {
-      once: true,
-    });
+    appInstalledHandler = () => track(ANALYTICS_EVENTS.pwa_installed);
+    window.addEventListener("appinstalled", appInstalledHandler, { once: true });
     coreInitialized = true;
     applyIdentity(lastSeenIdentity);
   } catch {
@@ -372,4 +372,8 @@ export function resetAnalyticsForTests(options?: { initialized?: boolean }): voi
   initialized = options?.initialized ?? false;
   identifiedUid = null;
   lastSeenIdentity = null;
+  if (appInstalledHandler) {
+    window.removeEventListener("appinstalled", appInstalledHandler);
+    appInstalledHandler = null;
+  }
 }

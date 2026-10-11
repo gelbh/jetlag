@@ -59,7 +59,20 @@ describe("useSessionTimer", () => {
     expect(trackLazy).toHaveBeenCalledOnce();
   });
 
-  it("tracks game_started once for two starts in the same frame and again after reset", () => {
+  it("does not track game_started when start runs on an already running remote timer", () => {
+    const { result } = renderHook(() => useSessionTimer("session-1"));
+
+    act(() => {
+      result.current.applyRemoteState(startTimer(INITIAL_TIMER_STATE));
+    });
+    act(() => {
+      result.current.start();
+    });
+
+    expect(trackLazy).not.toHaveBeenCalled();
+  });
+
+  it("tracks game_started once when two same-frame starts run as deferred state updaters, and again after reset", () => {
     const { result } = renderHook(() => useSessionTimer("session-1"));
 
     act(() => {

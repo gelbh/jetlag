@@ -51,9 +51,11 @@ vi.mock("../analytics/lazyTelemetry", () => ({ trackLazy }));
 
 vi.mock("firebase/auth", () => ({
   EmailAuthProvider: {
+    PROVIDER_ID: "password",
     credentialWithLink: (...args: unknown[]) => credentialWithLink(...args),
   },
   GoogleAuthProvider: class {
+    static PROVIDER_ID = "google.com";
     providerId = "google.com";
     static credential = vi.fn(() => ({
       providerId: "google.com",
@@ -497,11 +499,14 @@ describe("accountAuth", () => {
       });
     });
 
-    it("does not track a null redirect result or pending-promise recovery", async () => {
+    it("does not track a null redirect result", async () => {
       getRedirectResult.mockResolvedValueOnce(null);
       await completeOAuthRedirectIfPending();
 
-      resetOAuthRedirectRecoveryForTests();
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
+
+    it("does not track pending-promise recovery", async () => {
       mockAuth.currentUser = { uid: "redirect-user", isAnonymous: false };
       getRedirectResult.mockRejectedValueOnce(
         new Error("INTERNAL ASSERTION FAILED: Pending promise was never set"),
@@ -532,7 +537,7 @@ describe("accountAuth", () => {
       expect(trackLazy).not.toHaveBeenCalled();
     });
 
-    it("does not track unknown providers or reauthentication", async () => {
+    it("does not track unknown providers", async () => {
       mockAuth.currentUser = { isAnonymous: true, uid: "anon" };
       linkWithCredential.mockResolvedValueOnce({
         user: upgraded,
@@ -541,6 +546,10 @@ describe("accountAuth", () => {
       });
       await signInWithGoogleIdToken("google-id-token");
 
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
+
+    it("does not track reauthentication", async () => {
       getRedirectResult.mockResolvedValueOnce({
         user: upgraded,
         operationType: "reauthenticate",

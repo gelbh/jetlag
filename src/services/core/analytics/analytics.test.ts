@@ -109,8 +109,6 @@ describe("scrubAnalyticsProperties", () => {
 describe("analytics facade", () => {
   beforeEach(() => {
     resetAnalyticsForTests();
-    // Drain once-listeners left by earlier inits; product capture is off so this no-ops.
-    window.dispatchEvent(new Event("appinstalled"));
     resetClientEnvForTests();
     localStorage.clear();
     posthogInit.mockReset();
