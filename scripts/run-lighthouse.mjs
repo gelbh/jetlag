@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { cpus } from "node:os";
 import { delimiter, resolve } from "node:path";
 import { readLhrs, summarizeRunner } from "./lighthouse-runner-summary.mjs";
 
+const require = createRequire(import.meta.url);
 const root = resolve(import.meta.dirname, "..");
 const bin = resolve(root, "node_modules", ".bin");
 const env = {
@@ -28,10 +30,12 @@ const m = lhci("lighthouserc.cjs");
 const d = lhci("lighthouserc.desktop.cjs");
 
 try {
+  const { model, runnerClass } = require(resolve(root, "lighthouserc.cjs"));
   const summary = summarizeRunner({
-    model: cpus()[0]?.model ?? "unknown",
+    model: model || "unknown",
     cores: cpus().length,
     lhrs: readLhrs(resolve(root, ".lighthouseci", "mobile")),
+    runnerClass,
   });
   console.log(summary);
   if (process.env.GITHUB_STEP_SUMMARY)
