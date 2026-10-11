@@ -9,7 +9,6 @@ import type {
 } from "../../../domain/admin/adminSessionFilters";
 import { filterAdminSessions } from "../../../domain/admin/adminSessionFilters";
 import { clearLegacyOpsDeskStorage } from "../../../domain/admin/clearLegacyOpsDeskStorage";
-import type { PanelId } from "../../../domain/admin/opsDeskLayout";
 import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
 import { useAdminAccessState } from "../../../hooks/admin/useAdminAccessState";
 import { useAdminJoinSession } from "../../../hooks/admin/useAdminJoinSession";
@@ -31,7 +30,6 @@ import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
 import { AdminIncidentInbox } from "../incident/AdminIncidentInbox";
 import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
-import type { AdminPanelBodies } from "../shared/AdminPanelBody";
 import { AdminDeskTopbar } from "./AdminDeskTopbar";
 import { AdminFixedDesk } from "./AdminFixedDesk";
 import { AdminMobileDesk } from "./AdminMobileDesk";
@@ -74,8 +72,6 @@ export function AdminOpsDesk() {
   const selectedIncidentId = routeIncidentId?.trim() || null;
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
 
-  const [mobilePanel, setMobilePanel] = useState<PanelId | null>(null);
-  const [mobileRouteKey, setMobileRouteKey] = useState<string | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
   const [incidentsLoading, setIncidentsLoading] = useState(enabled);
@@ -111,14 +107,6 @@ export function AdminOpsDesk() {
   const monitorRequestRef = useRef(0);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-
-  const incidentsRouteKey = onIncidentsRoute ? location.pathname : null;
-  if (incidentsRouteKey !== mobileRouteKey) {
-    setMobileRouteKey(incidentsRouteKey);
-    if (incidentsRouteKey) {
-      setMobilePanel(selectedIncidentId != null ? "detail" : (mobilePanel ?? "inbox"));
-    }
-  }
 
   if (enabled !== enabledState) {
     setEnabledState(enabled);
@@ -273,8 +261,6 @@ export function AdminOpsDesk() {
     }
   };
 
-  const mobilePanelId: PanelId = mobilePanel ?? (onIncidentsRoute ? "inbox" : "sessions");
-
   const loadMoreButton = hasMore ? (
     <Button
       type="button"
@@ -357,45 +343,27 @@ export function AdminOpsDesk() {
     </div>
   );
 
-  const bodies: AdminPanelBodies = {
-    sessions: sessionsBody,
-    monitor: (
-      <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-        <AdminMonitorPane
-          active={monitorActive}
-          errorMessage={monitorRoleError}
-          sessionsUnavailable={sessionsFailedEmpty}
-        />
-      </div>
-    ),
-    inbox: (
-      <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-        <AdminIncidentInbox
-          incidents={visibleIncidents}
-          selectedId={selectedIncidentId}
-          openCount={openCount}
-          loading={enabled ? incidentsLoading : false}
-          error={enabled ? incidentsError : null}
-          onSelect={handleSelectIncident}
-        />
-      </div>
-    ),
-    detail: (
-      <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-        <AdminIncidentDetail incidentId={selectedIncidentId} />
-      </div>
-    ),
-    actions: (
-      <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-        <AdminIncidentActions
-          incidentId={selectedIncidentId}
-          status={selectedIncident?.status ?? null}
-          agent={selectedIncident?.agent ?? null}
-          disabled={!selectedIncidentId}
-        />
-      </div>
-    ),
-  };
+  const incidentDetail = <AdminIncidentDetail incidentId={selectedIncidentId} />;
+  const incidentActions = (
+    <AdminIncidentActions
+      incidentId={selectedIncidentId}
+      status={selectedIncident?.status ?? null}
+      agent={selectedIncident?.agent ?? null}
+      disabled={!selectedIncidentId}
+    />
+  );
+  const inboxBody = (
+    <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+      <AdminIncidentInbox
+        incidents={visibleIncidents}
+        selectedId={selectedIncidentId}
+        openCount={openCount}
+        loading={enabled ? incidentsLoading : false}
+        error={enabled ? incidentsError : null}
+        onSelect={handleSelectIncident}
+      />
+    </div>
+  );
 
   if (accessState === "loading" || !authReady) {
     return (
@@ -483,30 +451,54 @@ export function AdminOpsDesk() {
             ) : null}
             <AdminFixedDesk
               mode={onIncidentsRoute ? "incidents" : "sessions"}
-              sessions={bodies.sessions}
-              monitor={bodies.monitor}
-              inbox={bodies.inbox}
-              detail={bodies.detail}
-              actions={bodies.actions}
+              sessions={sessionsBody}
+              monitor={
+                <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+                  <AdminMonitorPane
+                    active={monitorActive}
+                    errorMessage={monitorRoleError}
+                    sessionsUnavailable={sessionsFailedEmpty}
+                  />
+                </div>
+              }
+              inbox={inboxBody}
+              detail={
+                <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+                  {incidentDetail}
+                </div>
+              }
+              actions={
+                <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+                  {incidentActions}
+                </div>
+              }
             />
           </>
         ) : (
           <AdminMobileDesk
-            activePanelId={mobilePanelId}
-            onSelectPanel={(panelId) => {
-              setMobilePanel(panelId);
-              if (
-                (panelId === "detail" || panelId === "actions" || panelId === "inbox") &&
-                !onIncidentsRoute
-              ) {
-                void navigate(
-                  selectedIncidentId
-                    ? `/admin/incidents/${encodeURIComponent(selectedIncidentId)}`
-                    : "/admin/incidents",
-                );
-              }
-            }}
-            bodies={bodies}
+            tab={onIncidentsRoute ? "incidents" : "sessions"}
+            onSelectTab={(tab) =>
+              void navigate(tab === "incidents" ? "/admin/incidents" : "/admin")
+            }
+            sessions={sessionsBody}
+            incidents={
+              selectedIncidentId ? (
+                <div className="jl-scroll jl-ops-panel-scroll jl-ops-mobile-drill">
+                  <Button
+                    type="button"
+                    variant="default"
+                    className="jl-ops-mobile-back"
+                    onClick={() => void navigate("/admin/incidents")}
+                  >
+                    Back to inbox
+                  </Button>
+                  {incidentDetail}
+                  {incidentActions}
+                </div>
+              ) : (
+                inboxBody
+              )
+            }
           />
         )}
       </AppShell.Main>

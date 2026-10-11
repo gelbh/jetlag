@@ -643,6 +643,98 @@ describe("AdminOpsDesk", () => {
     });
   });
 
+  describe("mobile desk", () => {
+    function renderMobile(route: string) {
+      authState.state = "admin";
+      authState.authReady = true;
+      authState.user = { email: "admin@example.com", emailVerified: true };
+      sessionListState.sessions = [];
+      mockViewport(false);
+      renderOpsDesk(
+        <Routes>
+          <Route path="/admin" element={<AdminOpsDesk />} />
+          <Route path="/admin/incidents" element={<AdminOpsDesk />} />
+          <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
+        </Routes>,
+        route,
+      );
+    }
+
+    it("offers only Sessions and Incidents tabs", () => {
+      renderMobile("/admin");
+
+      expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+        "Sessions",
+        "Incidents",
+      ]);
+    });
+
+    it("shows the session list on /admin", () => {
+      renderMobile("/admin");
+
+      expect(screen.getByRole("tab", { name: "Sessions" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(screen.getByTestId("admin-ops-sessions")).toBeInTheDocument();
+      expect(screen.queryByRole("region", { name: "Incident queue" })).not.toBeInTheDocument();
+    });
+
+    it("shows the inbox alone on /admin/incidents", () => {
+      renderMobile("/admin/incidents");
+
+      expect(screen.getByRole("tab", { name: "Incidents" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(screen.getByRole("region", { name: "Incident queue" })).toBeInTheDocument();
+      expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("admin-ops-sessions")).not.toBeInTheDocument();
+    });
+
+    it("drills into detail and actions for a selected incident, with Back to the inbox", async () => {
+      incidentState.list = [makeIncident({ id: "inc-listed01" })];
+      renderMobile("/admin/incidents/inc-listed01");
+
+      expect(screen.queryByRole("region", { name: "Incident queue" })).not.toBeInTheDocument();
+      expect(
+        within(screen.getByTestId("admin-incident-detail")).getByText("inc-listed01"),
+      ).toBeInTheDocument();
+      const actions = screen.getByRole("complementary", { name: "Incident actions" });
+      expect(within(actions).getByRole("button", { name: "Resolve" })).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "Back to inbox" }));
+
+      expect(await screen.findByRole("region", { name: "Incident queue" })).toBeInTheDocument();
+      expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
+    });
+
+    it("opens an incident from the inbox", async () => {
+      incidentState.list = [makeIncident({ id: "inc-listed01" })];
+      renderMobile("/admin/incidents");
+
+      const inbox = screen.getByRole("region", { name: "Incident queue" });
+      const row = within(inbox)
+        .getByText(/7G2LJH/)
+        .closest("button");
+      expect(row).not.toBeNull();
+      fireEvent.click(row as HTMLElement);
+
+      expect(await screen.findByTestId("admin-incident-detail")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Back to inbox" })).toBeInTheDocument();
+    });
+
+    it("switches tabs by route", async () => {
+      renderMobile("/admin");
+
+      fireEvent.click(screen.getByRole("tab", { name: "Incidents" }));
+      expect(await screen.findByRole("region", { name: "Incident queue" })).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("tab", { name: "Sessions" }));
+      expect(await screen.findByTestId("admin-ops-sessions")).toBeInTheDocument();
+    });
+  });
+
   it("returns to sessions mode from the topbar brand link on desktop", async () => {
     authState.state = "admin";
     authState.authReady = true;

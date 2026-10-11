@@ -37,14 +37,25 @@
 .jl-ops-mobile-chips {
   display: flex;
   flex-shrink: 0;
+  flex-wrap: nowrap;
   gap: 0.25rem;
-  overflow-x: auto;
   padding: 0 0.125rem;
 }
 
 .jl-ops-mobile-chip {
-  min-height: 2.25rem;
-  flex-shrink: 0;
+  min-height: 2.75rem;
+  flex: 1;
+}
+
+.jl-ops-mobile-drill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.jl-ops-mobile-back {
+  min-height: 2.75rem;
+  align-self: flex-start;
 }
 
 /* Surgical mobile density: less topbar wrap before Sessions body. */
