@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useLayoutEffect, useState } from "react";
 import { serverNow } from "@/services/core/time/serverClock";
 import { distanceBetweenPoints } from "../../domain/geometry/gameArea/geometry";
 import { isHidingPeriodActive } from "../../domain/session/hiding/hidingPeriod";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { SessionRulesInput } from "../../domain/session/rules";
+import { resolveHidingPeriodMs } from "../../domain/session/rules";
 import type { TimerState } from "../../domain/session/timer/timer";
 import { computeElapsedMs } from "../../domain/session/timer/timer";
 
@@ -26,22 +27,41 @@ export function useHiderZoneAdvisory({
   sessionRules,
   timerState,
 }: UseHiderZoneAdvisoryParams): boolean {
-  return useMemo(() => {
-    if (!enabled || !zone || zone.status !== "confirmed" || !location) {
-      return false;
+  const [nowMs, setNowMs] = useState(() => serverNow());
+  const { accumulatedMs, runningSince } = timerState;
+  const hidingPeriodMs = resolveHidingPeriodMs(sessionRules);
+
+  // One-shot wake at hiding end instead of a per-second tick: this hook runs at screen level.
+  useLayoutEffect(() => {
+    if (!enabled) {
+      return;
     }
+    let timeout: number | undefined;
+    const sync = () => {
+      const now = serverNow();
+      setNowMs(now);
+      const remainingMs = hidingPeriodMs - computeElapsedMs({ accumulatedMs, runningSince }, now);
+      if (runningSince !== null && remainingMs > 0) {
+        timeout = window.setTimeout(sync, Math.max(1000, remainingMs));
+      }
+    };
+    sync();
+    return () => window.clearTimeout(timeout);
+  }, [enabled, hidingPeriodMs, accumulatedMs, runningSince]);
 
-    const elapsed = computeElapsedMs(timerState, serverNow());
-    if (isHidingPeriodActive(sessionRules, elapsed)) {
-      return false;
-    }
+  if (!enabled || !zone || zone.status !== "confirmed" || !location) {
+    return false;
+  }
 
-    const bufferMeters = Math.max(accuracyMeters ?? 0, MIN_GPS_BUFFER_METERS);
-    const distance = distanceBetweenPoints(
-      [location.lat, location.lng],
-      [zone.center.lat, zone.center.lng],
-    );
+  if (isHidingPeriodActive(sessionRules, computeElapsedMs(timerState, nowMs))) {
+    return false;
+  }
 
-    return distance > zone.radiusMeters + bufferMeters;
-  }, [accuracyMeters, enabled, location, sessionRules, timerState, zone]);
+  const bufferMeters = Math.max(accuracyMeters ?? 0, MIN_GPS_BUFFER_METERS);
+  const distance = distanceBetweenPoints(
+    [location.lat, location.lng],
+    [zone.center.lat, zone.center.lng],
+  );
+
+  return distance > zone.radiusMeters + bufferMeters;
 }
