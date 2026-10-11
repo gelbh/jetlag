@@ -24,8 +24,6 @@ import {
   thermometerUseCountFromPending,
   usedThermometerDistanceOptionsForSession,
 } from "../../domain/questions";
-import { ANALYTICS_EVENTS } from "../../services/core/analytics/analyticsEvents";
-import { trackLazy } from "../../services/core/analytics/lazyTelemetry";
 import { useLiveLocation } from "../location/useLiveLocation";
 import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
 import { useToolSession } from "./framework/useToolSession";
@@ -81,8 +79,6 @@ export function useThermometerTool({
   const finishPlacementRef = useRef(finishPlacement);
   const resetAfterSuccessRef = useRef(() => undefined as void);
   const reportErrorRef = useRef(setMapError);
-  const trackSentRef = useRef(() => undefined as void);
-
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
@@ -201,7 +197,6 @@ export function useThermometerTool({
         createAnnotation,
         setMapError: (message) => reportErrorRef.current(message),
         onSuccess: () => {
-          trackSentRef.current();
           resetAfterSuccessRef.current();
           finishPlacementRef.current();
         },
@@ -228,16 +223,6 @@ export function useThermometerTool({
   useEffect(() => {
     reportErrorRef.current = reportError;
   }, [reportError]);
-
-  const trackSent = useCallback(() => {
-    trackLazy(ANALYTICS_EVENTS.thermometer_question_sent, {
-      placementMode: config.placementMode,
-      awaitHiderAnswer,
-    });
-  }, [awaitHiderAnswer, config.placementMode]);
-  useEffect(() => {
-    trackSentRef.current = trackSent;
-  }, [trackSent]);
 
   const walkingQuestionId = config.localWalkingQuestionId ?? syncedWalkDraft?.questionId ?? null;
   const thermoA =
@@ -296,10 +281,7 @@ export function useThermometerTool({
         cardKeep,
         completeThermometerWalk,
         patchConfig,
-        onRemoteSuccess: () => {
-          trackSentRef.current();
-          finishPlacementRef.current();
-        },
+        onRemoteSuccess: () => finishPlacementRef.current(),
       });
     },
     [

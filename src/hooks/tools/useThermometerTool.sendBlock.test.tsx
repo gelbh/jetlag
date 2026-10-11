@@ -129,48 +129,6 @@ describe("useThermometerTool send blocks", () => {
       });
     });
   });
-
-  it("tracks a sent question after a solo manual commit", async () => {
-    const mocks = createToolHookMocks();
-    const { result } = renderHook(() =>
-      useThermometerTool({
-        active: true,
-        annotations: mocks.annotations,
-        sessionRules: { gameSize: "large" },
-        createAnnotation: mocks.createAnnotation,
-        distanceUnit: mocks.distanceUnit,
-        finishPlacement: mocks.finishPlacement,
-        setMapError: mocks.setMapError,
-        awaitHiderAnswer: false,
-      }),
-    );
-
-    act(() => chooseDistance(result));
-    act(() => {
-      (overlayProps(result).onPlacementModeChange as (mode: "manual") => void)("manual");
-    });
-    act(() => {
-      result.current.handleMapClick([53.35, -6.26]);
-    });
-    act(() => {
-      result.current.handleMapClick([53.37, -6.24]);
-    });
-    act(() => {
-      (overlayProps(result).onAnswerChange as (answer: "hotter") => void)("hotter");
-    });
-
-    expect(overlayProps(result).blockReason).toBeNull();
-    expect(overlayProps(result).canCommit).toBe(true);
-
-    await act(async () => {
-      await result.current.commit();
-    });
-
-    expect(trackLazy).toHaveBeenCalledWith("thermometer_question_sent", {
-      placementMode: "manual",
-      awaitHiderAnswer: false,
-    });
-  });
 });
 
 describe("useThermometerSendBlockedTracking", () => {

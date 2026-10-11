@@ -9,7 +9,7 @@ export const THERMOMETER_GPS_WAIT_BLOCK_MS = 15_000;
 
 /**
  * Emits `thermometer_send_blocked` once per reason while the tool stays open,
- * so silent disabled states show up next to `thermometer_question_sent`.
+ * so silent disabled states show up next to `question_asked`.
  */
 export function useThermometerSendBlockedTracking({
   active,

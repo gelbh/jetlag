@@ -28,7 +28,6 @@ export const ANALYTICS_EVENTS = {
   invite_shared: "invite_shared",
   account_linked: "account_linked",
   pwa_installed: "pwa_installed",
-  thermometer_question_sent: "thermometer_question_sent",
   thermometer_send_blocked: "thermometer_send_blocked",
 } as const;
 
@@ -87,7 +86,6 @@ export type AnalyticsEventProps = {
     cta: "join" | "create";
     path: LearnRoutePath;
   };
-<<<<<<< HEAD
   question_asked: {
     tool: PendingQuestionToolType;
   };
@@ -104,10 +102,6 @@ export type AnalyticsEventProps = {
     outcome: "linked" | "signed_in_existing";
   };
   pwa_installed: Record<string, never>;
-  thermometer_question_sent: {
-    placementMode: "gps" | "manual";
-    awaitHiderAnswer: boolean;
-  };
   thermometer_send_blocked: {
     reason: ThermometerSendBlockReason;
     placementMode: "gps" | "manual";
