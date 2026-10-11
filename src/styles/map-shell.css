@@ -226,17 +226,16 @@
     }
   }
 
-  @container admin-monitor (min-width: 40rem) {
-    .admin-monitor-code-badge {
-      display: none;
-    }
-  }
-
   .admin-map-shell {
     --admin-rail-width: var(--ops-rail-width);
     --admin-rail-collapsed-width: var(--ops-rail-collapsed-width);
     --admin-status-height: 2.5rem;
     --admin-map-control-inset-right: 0px;
+  }
+
+  /* cqi, not %: keeps the grid track and --admin-map-control-inset-right equal; % would resolve against whichever box consumes the inset. */
+  .admin-monitor-pane .admin-map-shell {
+    --admin-rail-width: min(var(--ops-rail-width), 50cqi);
   }
 
   .admin-map-shell--wide {
@@ -314,6 +313,12 @@
     gap: 0.5rem;
     border-bottom: 1px solid var(--color-border);
     padding: 0.25rem 0.5rem;
+  }
+
+  .admin-monitor-rail__roster {
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.375rem 0.5rem;
   }
 
   .admin-monitor-rail__tabs {
@@ -431,18 +436,4 @@
     font-weight: 700;
     color: var(--color-ink);
   }
-}
-
-.admin-monitor-pane--nested-wm {
-  position: relative;
-}
-
-.admin-monitor-grid-workspace {
-  height: 100%;
-  min-height: 0;
-  overflow-x: hidden;
-}
-
-.admin-monitor-stack-body {
-  min-height: 0;
 }
