@@ -47,7 +47,7 @@ describe("filterPosthogException", () => {
     ).toBeNull();
   });
 
-  it("keeps Firestore permission-denied (Sentry policy sends it too)", () => {
+  it("keeps Firestore permission-denied", () => {
     const capture = exceptionCapture("FirebaseError", "Missing or insufficient permissions.");
     expect(filterPosthogException(capture)).toBe(capture);
   });

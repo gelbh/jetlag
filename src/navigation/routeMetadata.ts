@@ -33,8 +33,7 @@ export function normalizeRoutePath(path: string): string {
 }
 
 /**
- * Route pattern for telemetry names (Sentry pageload/navigation), so ids don't explode
- * cardinality. Unlike `normalizeRoutePath`, admin incident ids collapse too, and the
+ * Route pattern with dynamic ids collapsed, so ids don't explode cardinality. Unlike `normalizeRoutePath`, admin incident ids collapse too, and the
  * `/join/` asset alias folds into `/join`.
  */
 export function parameterizedRoutePath(path: string): string {
