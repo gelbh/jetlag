@@ -26,7 +26,6 @@ describe("privacyPolicyContent", () => {
     expect(copy).toMatch(/Session Replay/i);
     expect(copy).toMatch(/masked/i);
     expect(copy).toMatch(/pseudonymous account identifier/i);
-    expect(copy).toContain("PostHog session replay is not used");
   });
 
   it("discloses ungated scrubbed error reports to Sentry and PostHog EU", () => {
@@ -34,7 +33,6 @@ describe("privacyPolicyContent", () => {
     const paragraphs = section?.paragraphs ?? [];
     const errorReporting = paragraphs[0] ?? "";
     const productAnalytics = paragraphs[1] ?? "";
-    const copy = paragraphs.join(" ");
 
     expect(errorReporting).toMatch(/scrubbed/i);
     expect(errorReporting).toMatch(/Sentry/i);
@@ -42,8 +40,17 @@ describe("privacyPolicyContent", () => {
     expect(errorReporting).toMatch(/\bEU\b/);
     expect(errorReporting).toMatch(/local storage/i);
     expect(errorReporting).toMatch(/before you Accept/i);
-    expect(copy).toContain("PostHog session replay is not used");
     expect(productAnalytics).toMatch(/Accept/i);
     expect(productAnalytics).toMatch(/product analytics/i);
+  });
+
+  it("discloses Accept-gated masked PostHog session replay", () => {
+    const section = PRIVACY_POLICY_SECTIONS.find((entry) => entry.id === "errors-analytics");
+    const productAnalytics = section?.paragraphs[1] ?? "";
+
+    expect(productAnalytics).toMatch(/Accept/i);
+    expect(productAnalytics).toMatch(/masked/i);
+    expect(productAnalytics).toMatch(/PostHog session replay/i);
+    expect(productAnalytics).not.toContain("PostHog session replay is not used");
   });
 });

@@ -31,6 +31,7 @@ const {
   posthogOptIn,
   posthogIdentify,
   posthogStopSessionRecording,
+  posthogStartSessionRecording,
 } = vi.hoisted(() => ({
   posthogInit: vi.fn(),
   posthogCapture: vi.fn(),
@@ -41,6 +42,7 @@ const {
   posthogOptIn: vi.fn(),
   posthogIdentify: vi.fn(),
   posthogStopSessionRecording: vi.fn(),
+  posthogStartSessionRecording: vi.fn(),
 }));
 
 vi.mock("posthog-js", () => ({
@@ -54,6 +56,7 @@ vi.mock("posthog-js", () => ({
     opt_in_capturing: posthogOptIn,
     identify: posthogIdentify,
     stopSessionRecording: posthogStopSessionRecording,
+    startSessionRecording: posthogStartSessionRecording,
   },
 }));
 
@@ -117,6 +120,7 @@ describe("analytics facade", () => {
     posthogOptIn.mockReset();
     posthogIdentify.mockReset();
     posthogStopSessionRecording.mockReset();
+    posthogStartSessionRecording.mockReset();
   });
 
   afterEach(() => {
@@ -226,10 +230,61 @@ describe("analytics facade", () => {
       disable_surveys: true,
       person_profiles: "identified_only",
       before_send: posthogBeforeSend,
+      session_recording: {
+        maskAllInputs: true,
+        maskTextSelector: "*",
+        blockSelector: "img, video, audio, picture, source",
+        sampleRate: 0.1,
+        captureCanvas: { recordCanvas: false },
+      },
     });
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
   });
 
+  it("starts session recording when initAnalytics runs with granted consent", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+
+    initAnalytics();
+
+    expect(posthogStartSessionRecording).toHaveBeenCalledOnce();
+  });
+
+  it("does not start session recording when consent is denied", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("denied");
+
+    initPosthogCore();
+    initAnalytics();
+
+    expect(posthogStartSessionRecording).not.toHaveBeenCalled();
+  });
+
+  it("does not start session recording when consent is unset", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+
+    initPosthogCore();
+    initAnalytics();
+
+    expect(posthogStartSessionRecording).not.toHaveBeenCalled();
+  });
+
+  it("deny then grant restarts session recording", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    expect(posthogStartSessionRecording).toHaveBeenCalledOnce();
+
+    denyAnalyticsConsent();
+    expect(posthogStopSessionRecording).toHaveBeenCalled();
+
+    grantAnalyticsConsent();
+    expect(posthogStartSessionRecording).toHaveBeenCalledTimes(2);
+  });
   it("strips query from pageview path", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
