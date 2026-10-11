@@ -1,4 +1,4 @@
-import { Alert, AppShell, Button, Group, Modal, Skeleton, Stack, Text, Title } from "@mantine/core";
+import { AppShell, Button, Group, Modal, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
@@ -30,6 +30,8 @@ import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
 import { AdminIncidentInbox } from "../incident/AdminIncidentInbox";
 import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
+import { AdminEmptyState } from "../shared/AdminEmptyState";
+import { AdminWorld } from "../shared/AdminWorld";
 import { AdminFixedDesk } from "./AdminFixedDesk";
 import { AdminMobileDesk } from "./AdminMobileDesk";
 import { AdminSessionFilters } from "./AdminSessionFilters";
@@ -62,6 +64,14 @@ function continuePathForRoute(pathname: string, incidentId: string | null): stri
 }
 
 export function AdminOpsDesk() {
+  return (
+    <AdminWorld>
+      <AdminOpsDeskContent />
+    </AdminWorld>
+  );
+}
+
+function AdminOpsDeskContent() {
   const { incidentId: routeIncidentId } = useParams<{ incidentId?: string }>();
   const location = useLocation();
   const navigate = useAppNavigate();
@@ -377,9 +387,7 @@ export function AdminOpsDesk() {
           Back
         </Button>
         <Stack gap="xs">
-          <Title order={1} tt="uppercase">
-            Admin ops desk
-          </Title>
+          <Title order={1}>Admin event centre</Title>
           <Text size="sm" c="dimmed">
             Sign in with your Google account to open the admin panel.
           </Text>
@@ -398,18 +406,21 @@ export function AdminOpsDesk() {
           Back
         </Button>
         <Title order={1}>Access denied</Title>
-        <Alert title="Restricted panel">
-          Signed in as {user?.email ?? "unknown"}. This panel is restricted to the app owner.
-        </Alert>
+        <AdminEmptyState
+          title="Restricted panel"
+          body={`Signed in as ${user?.email ?? "unknown"}. This panel is restricted to the app owner.`}
+          action={
+            <Group gap="xs" wrap="wrap">
+              <Button type="button" onClick={() => void handleSignOut()}>
+                Sign out
+              </Button>
+              <Button component={AppLink} to="/" variant="default">
+                Back home
+              </Button>
+            </Group>
+          }
+        />
         {signOutError ? <InlineError>{signOutError}</InlineError> : null}
-        <Group gap="xs" wrap="wrap">
-          <Button type="button" onClick={() => void handleSignOut()}>
-            Sign out
-          </Button>
-          <Button component={AppLink} to="/" variant="default">
-            Back home
-          </Button>
-        </Group>
       </Stack>
     );
   }

@@ -1,5 +1,4 @@
 import {
-  Alert,
   Button,
   Checkbox,
   Group,
@@ -32,6 +31,8 @@ import { updatePreloadRequestStatus } from "../../../services/preloadRequest/pre
 import { PremiumSignInGate } from "../../billing/PremiumSignInGate";
 import { AppLink } from "../../navigation/AppLink";
 import { InlineError } from "../../ui/banners/InlineError";
+import { AdminEmptyState } from "../shared/AdminEmptyState";
+import { AdminWorld } from "../shared/AdminWorld";
 import "../incident/AdminIncidentDesk.css";
 
 const CLOSED = new Set<PreloadRequestStatus>(["declined", "shipped"]);
@@ -86,9 +87,7 @@ function PreloadInboxGate({
       <Stack gap="md" p="md" maw={480} data-testid="admin-preload-inbox">
         {back}
         <Stack gap="xs">
-          <Title order={1} tt="uppercase">
-            Preload request inbox
-          </Title>
+          <Title order={1}>Preload request inbox</Title>
           <Text size="sm" c="dimmed">
             Sign in with your Google account to manage preload requests.
           </Text>
@@ -102,23 +101,34 @@ function PreloadInboxGate({
     <Stack gap="md" p="md" maw={480} data-testid="admin-preload-inbox">
       {back}
       <Title order={1}>Access denied</Title>
-      <Alert title="Restricted panel">
-        Signed in as {email ?? "unknown"}. Preload requests are restricted to the app owner.
-      </Alert>
+      <AdminEmptyState
+        title="Restricted panel"
+        body={`Signed in as ${email ?? "unknown"}. Preload requests are restricted to the app owner.`}
+        action={
+          <Group gap="xs" wrap="wrap">
+            <Button type="button" onClick={() => void handleSignOut()}>
+              Sign out
+            </Button>
+            <Button component={AppLink} to="/" variant="default">
+              Back home
+            </Button>
+          </Group>
+        }
+      />
       {signOutError ? <InlineError>{signOutError}</InlineError> : null}
-      <Group gap="xs" wrap="wrap">
-        <Button type="button" onClick={() => void handleSignOut()}>
-          Sign out
-        </Button>
-        <Button component={AppLink} to="/" variant="default">
-          Back home
-        </Button>
-      </Group>
     </Stack>
   );
 }
 
 export function AdminPreloadRequestInbox() {
+  return (
+    <AdminWorld>
+      <PreloadRequestInboxContent />
+    </AdminWorld>
+  );
+}
+
+function PreloadRequestInboxContent() {
   const { state: accessState, user } = useAdminAccessState();
   const enabled = accessState === "admin";
   const [requests, setRequests] = useState<PreloadRequest[]>([]);
