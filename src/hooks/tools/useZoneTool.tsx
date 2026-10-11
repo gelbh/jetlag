@@ -1,9 +1,19 @@
-import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { useCallback, useState } from "react";
 import { ZonePanel } from "../../components/tools/ZonePanel";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
-import type { AnnotationRecord } from "../../domain/map/annotations";
+import { clipMaskToGameArea, type PolygonFeature } from "../../domain/geometry/kernel";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+
+export const ZONE_OUTSIDE_PLAY_AREA_MESSAGE = "That zone doesn't overlap the play area.";
+
+/** Trims a zone to the play area; null when nothing overlaps. Unclipped without a play area. */
+export function clipZoneToGameArea(
+  zone: PolygonFeature,
+  gameArea: GameArea | null,
+): PolygonFeature | null {
+  return gameArea ? clipMaskToGameArea(zone, gameArea) : zone;
+}
 
 interface UseZoneToolParams {
   active: boolean;
@@ -11,9 +21,17 @@ interface UseZoneToolParams {
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
   finishPlacement: () => void;
+  gameArea: GameArea | null;
+  setMapError: (message: string | null) => void;
 }
 
-export function useZoneTool({ active, createAnnotation, finishPlacement }: UseZoneToolParams) {
+export function useZoneTool({
+  active,
+  createAnnotation,
+  finishPlacement,
+  gameArea,
+  setMapError,
+}: UseZoneToolParams) {
   const [zoneVertices, setZoneVertices] = useState<LatLngTuple[]>([]);
   const [zoneLabel, setZoneLabel] = useState("");
 
@@ -33,14 +51,21 @@ export function useZoneTool({ active, createAnnotation, finishPlacement }: UseZo
 
     const ring = zoneVertices.map(([lat, lng]) => [lng, lat]);
     ring.push(ring[0]);
-    const geometry: Feature<GeoPolygon> = {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Polygon",
-        coordinates: [ring],
+    const geometry = clipZoneToGameArea(
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [ring],
+        },
       },
-    };
+      gameArea,
+    );
+    if (!geometry) {
+      setMapError(ZONE_OUTSIDE_PLAY_AREA_MESSAGE);
+      return;
+    }
 
     await createAnnotation({
       type: "zone",
@@ -54,7 +79,15 @@ export function useZoneTool({ active, createAnnotation, finishPlacement }: UseZo
 
     resetDraft();
     finishPlacement();
-  }, [createAnnotation, finishPlacement, resetDraft, zoneLabel, zoneVertices]);
+  }, [
+    createAnnotation,
+    finishPlacement,
+    gameArea,
+    resetDraft,
+    setMapError,
+    zoneLabel,
+    zoneVertices,
+  ]);
 
   const placementCrosshair = active && zoneVertices.length === 0;
 
