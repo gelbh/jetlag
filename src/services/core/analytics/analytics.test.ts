@@ -223,13 +223,16 @@ describe("analytics facade", () => {
     vi.stubEnv("MODE", "production");
     const addListener = vi.spyOn(window, "addEventListener");
 
-    initPosthogCore();
-    initPosthogCore();
+    try {
+      initPosthogCore();
+      initPosthogCore();
 
-    expect(addListener.mock.calls.filter(([type]) => String(type) === "appinstalled")).toHaveLength(
-      1,
-    );
-    addListener.mockRestore();
+      expect(
+        addListener.mock.calls.filter(([type]) => String(type) === "appinstalled"),
+      ).toHaveLength(1);
+    } finally {
+      addListener.mockRestore();
+    }
   });
 
   it("initPosthogCore inits once when consent is denied", () => {

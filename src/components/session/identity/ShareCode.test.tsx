@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { copyToClipboard } from "@/platform/copyToClipboard";
@@ -193,6 +193,9 @@ describe("ShareCode", () => {
     fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
 
     await waitFor(() => expect(share).toHaveBeenCalled());
+    await act(async () => {
+      await share.mock.results[0]?.value.catch(() => undefined);
+    });
     expect(trackLazy).not.toHaveBeenCalled();
   });
 

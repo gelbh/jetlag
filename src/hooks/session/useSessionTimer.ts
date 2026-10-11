@@ -48,6 +48,8 @@ export function useSessionTimer(
   const onControlRef = useRef(onControl);
   const lastSessionIdRef = useRef<string | undefined>(undefined);
   const lastSessionResetAtRef = useRef<string | undefined>(undefined);
+  // React can defer start updaters, so timerStateRef alone misses same-frame double starts.
+  const gameStartedTrackedRef = useRef(false);
 
   useEffect(() => {
     timerStateRef.current = timerState;
@@ -74,6 +76,7 @@ export function useSessionTimer(
     if (!sessionId) {
       lastSessionIdRef.current = undefined;
       lastSessionResetAtRef.current = undefined;
+      gameStartedTrackedRef.current = false;
       setTimerStateInternal(INITIAL_TIMER_STATE);
       return;
     }
@@ -86,6 +89,7 @@ export function useSessionTimer(
     if (sessionChanged) {
       lastSessionIdRef.current = sessionId;
       lastSessionResetAtRef.current = sessionResetAt;
+      gameStartedTrackedRef.current = false;
     }
 
     const resetChanged =
@@ -94,6 +98,7 @@ export function useSessionTimer(
       sessionResetAt !== lastSessionResetAtRef.current;
     if (resetChanged) {
       lastSessionResetAtRef.current = sessionResetAt;
+      gameStartedTrackedRef.current = false;
       clearStoredTimer(sessionId);
     }
 
@@ -150,7 +155,8 @@ export function useSessionTimer(
       }
       return next;
     });
-    if (sessionId && isFirstStart) {
+    if (sessionId && isFirstStart && !gameStartedTrackedRef.current) {
+      gameStartedTrackedRef.current = true;
       trackLazy(ANALYTICS_EVENTS.game_started);
     }
   }, [canControl, sessionId, setTimerState]);
@@ -174,6 +180,7 @@ export function useSessionTimer(
     }
 
     const next = resetTimer();
+    gameStartedTrackedRef.current = false;
     setTimerState(next);
     onControlRef.current?.(next);
 

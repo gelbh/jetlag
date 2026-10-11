@@ -59,6 +59,28 @@ describe("useSessionTimer", () => {
     expect(trackLazy).toHaveBeenCalledOnce();
   });
 
+  it("tracks game_started once for two starts in the same frame and again after reset", () => {
+    const { result } = renderHook(() => useSessionTimer("session-1"));
+
+    act(() => {
+      // A queued update makes React defer the start updaters, so the ref stays stale.
+      result.current.applyRemoteState({ ...INITIAL_TIMER_STATE });
+      result.current.start();
+      result.current.start();
+    });
+
+    expect(trackLazy).toHaveBeenCalledOnce();
+
+    act(() => {
+      result.current.reset();
+    });
+    act(() => {
+      result.current.start();
+    });
+
+    expect(trackLazy).toHaveBeenCalledTimes(2);
+  });
+
   it("does not track game_started when the client cannot control the timer", () => {
     const { result } = renderHook(() => useSessionTimer("session-1", { canControl: false }));
 
