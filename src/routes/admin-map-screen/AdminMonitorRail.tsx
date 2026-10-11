@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import { ChatPanelBody } from "../../components/chat/ChatPanelBody";
 import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
 import { SessionLogBody } from "../../components/session/log/SessionLogBody";
@@ -42,6 +42,7 @@ interface AdminMonitorRailProps {
   mapViewport: MapViewportState | null;
   onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
   onLowPowerModeChange: (enabled: boolean) => void;
+  roster?: ReactNode;
 }
 
 export function AdminMonitorRail({
@@ -60,6 +61,7 @@ export function AdminMonitorRail({
   mapViewport,
   onLayerVisibilityChange,
   onLowPowerModeChange,
+  roster,
 }: AdminMonitorRailProps) {
   const events = useSessionActivityLog(session.id);
   const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
@@ -119,6 +121,12 @@ export function AdminMonitorRail({
         </nav>
       ) : (
         <>
+          {roster ? (
+            <section aria-label="Player roster" className="admin-monitor-rail__roster">
+              {roster}
+            </section>
+          ) : null}
+
           <div
             className="jl-scroll admin-monitor-rail__tabs"
             role="tablist"

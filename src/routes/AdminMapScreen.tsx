@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminMonitorPlayerFocus } from "../components/admin/monitor/AdminMonitorPlayerFocus";
+import { AdminPlayerRoster } from "../components/admin/monitor/AdminPlayerRoster";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { MapView } from "../components/map/chrome/MapView";
 import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
@@ -10,6 +11,7 @@ import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
+import { usePlayerLocationsSync } from "../hooks/session/useSessionExtrasSync";
 import { AppNavigate } from "../navigation/AppNavigate";
 import { adminModerateSession } from "../services/admin/adminModeration";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
@@ -34,6 +36,9 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
     embedded: embeddedMonitor,
     ready: controller.playAreaReady,
   });
+  const playerLocations = usePlayerLocationsSync(
+    embeddedMonitor ? controller.session?.id : undefined,
+  );
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [moderationBusy, setModerationBusy] = useState(false);
   const [moderationError, setModerationError] = useState<string | null>(null);
@@ -159,7 +164,11 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
     </MapView>
   );
 
-  return (
+  const roster = embeddedMonitor ? (
+    <AdminPlayerRoster session={controller.session} locations={playerLocations} />
+  ) : undefined;
+
+  const shell = (
     <div
       ref={shellRef}
       className={`map-screen-shell admin-map-shell ${
@@ -200,6 +209,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           mapViewport={controller.mapViewport}
           onLayerVisibilityChange={setLayerVisibility}
           onLowPowerModeChange={setLowPowerMode}
+          roster={roster}
         />
       ) : null}
 
@@ -261,6 +271,31 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           </InlineError>
         </div>
       ) : null}
+    </div>
+  );
+
+  if (!embeddedMonitor) {
+    return shell;
+  }
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        {shell}
+        {isWide ? null : (
+          <p className="admin-monitor-code-badge pointer-events-none absolute bottom-3 left-3 z-[var(--z-panel)] rounded-md border border-border bg-surface-panel/90 px-2 py-1 font-mono text-xs tracking-[0.18em] text-ink">
+            {controller.session.code}
+          </p>
+        )}
+      </div>
+      {isWide ? null : (
+        <section aria-label="Player roster" className="max-h-48 shrink-0 overflow-hidden px-2 pb-2">
+          <p className="mb-1 px-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            Player roster
+          </p>
+          {roster}
+        </section>
+      )}
     </div>
   );
 }
