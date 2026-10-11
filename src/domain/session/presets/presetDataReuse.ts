@@ -14,6 +14,7 @@ import {
 } from "@/domain/regions/packAttach";
 import { REGION_PACK_REFERENCE_BBOXES } from "@/domain/regions/packGeoManifest";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import { REGION_PACK_SUBREGION_REFERENCE_BBOXES } from "@/domain/regions/subregionReferenceBboxes";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
@@ -22,6 +23,10 @@ import type {
 import type { GamePreset } from "./gamePreset";
 
 const MATCHING_ADMIN_LEVELS: readonly MatchingAdminLevel[] = [4, 6, 8, 9];
+/** A subregion scopes matching areas, so it attaches only when it covers most of the frame. */
+const SUBREGION_MIN_FRAME_COVERAGE = 0.8;
+/** Within this much of the top score, the smallest pack reference box wins (Zurich over Switzerland). */
+const PACK_NEAR_TIE_SCORE = 0.02;
 
 export type PresetDataReuseOptions = {
   excludePresetIds?: readonly string[];
@@ -45,11 +50,20 @@ type Qualifier = {
   preset: GamePreset;
   score: number;
   referenceAreaKm2: number;
+  frameCoverage: number;
+  packAreaKm2: number;
 };
 
 function referenceBoxForPreset(preset: GamePreset): BoundingBox | null {
   if (preset.gameArea) {
     return gameAreaToBoundingBoxRaw(preset.gameArea);
+  }
+  if (preset.regionPackId && preset.subregionId) {
+    const subregionBox =
+      REGION_PACK_SUBREGION_REFERENCE_BBOXES[preset.regionPackId]?.[preset.subregionId];
+    if (subregionBox) {
+      return subregionBox;
+    }
   }
   if (preset.regionPackId) {
     return REGION_PACK_REFERENCE_BBOXES[preset.regionPackId] ?? null;
@@ -84,27 +98,54 @@ function scorePresetAgainstFrame(
     return null;
   }
 
+  const framedAreaKm2 = boundingBoxAreaKm2(framedBox);
+  const packBox = preset.regionPackId
+    ? REGION_PACK_REFERENCE_BBOXES[preset.regionPackId]
+    : undefined;
   return {
     preset,
-    score: intersectionKm2 / referenceAreaKm2,
+    score: intersectionKm2 / (framedAreaKm2 + referenceAreaKm2 - intersectionKm2),
     referenceAreaKm2,
+    frameCoverage: framedAreaKm2 > 0 ? intersectionKm2 / framedAreaKm2 : 0,
+    packAreaKm2: packBox ? boundingBoxAreaKm2(packBox) : Number.POSITIVE_INFINITY,
   };
 }
 
+function canWinPack(qualifier: Qualifier): boolean {
+  if (!qualifier.preset.regionPackId) {
+    return false;
+  }
+  return (
+    qualifier.preset.subregionId === undefined ||
+    qualifier.frameCoverage >= SUBREGION_MIN_FRAME_COVERAGE
+  );
+}
+
+function beatsPackWinner(candidate: Qualifier, best: Qualifier): boolean {
+  if (candidate.packAreaKm2 !== best.packAreaKm2) {
+    return candidate.packAreaKm2 < best.packAreaKm2;
+  }
+  if (candidate.score !== best.score) {
+    return candidate.score > best.score;
+  }
+  if (candidate.referenceAreaKm2 !== best.referenceAreaKm2) {
+    return candidate.referenceAreaKm2 < best.referenceAreaKm2;
+  }
+  return candidate.preset.id < best.preset.id;
+}
+
 function pickPackWinner(qualifiers: readonly Qualifier[]): Qualifier | null {
+  const eligible = qualifiers.filter(canWinPack);
+  if (eligible.length === 0) {
+    return null;
+  }
+  const topScore = Math.max(...eligible.map((qualifier) => qualifier.score));
   let best: Qualifier | null = null;
-  for (const candidate of qualifiers) {
-    if (!candidate.preset.regionPackId) {
+  for (const candidate of eligible) {
+    if (topScore - candidate.score > PACK_NEAR_TIE_SCORE) {
       continue;
     }
-    if (
-      !best ||
-      candidate.score > best.score ||
-      (candidate.score === best.score &&
-        (candidate.referenceAreaKm2 < best.referenceAreaKm2 ||
-          (candidate.referenceAreaKm2 === best.referenceAreaKm2 &&
-            candidate.preset.id < best.preset.id)))
-    ) {
+    if (!best || beatsPackWinner(candidate, best)) {
       best = candidate;
     }
   }

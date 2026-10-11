@@ -209,6 +209,9 @@ export function sessionRulesPatchToFirestore(patch: SessionRulesPatch): Record<s
   if (typeof patch.bundledGeoRevision === "number") {
     payload.bundledGeoRevision = patch.bundledGeoRevision;
   }
+  if (typeof patch.playAreaFromPack === "boolean") {
+    payload.playAreaFromPack = patch.playAreaFromPack;
+  }
   if (typeof patch.gameAreaLabel === "string" && patch.gameAreaLabel.trim()) {
     payload.gameAreaLabel = patch.gameAreaLabel.trim();
   }
@@ -328,6 +331,8 @@ export function deserializeSessionFromFirestore(
         : undefined,
     bundledGeoRevision:
       typeof document.bundledGeoRevision === "number" ? document.bundledGeoRevision : undefined,
+    playAreaFromPack:
+      typeof document.playAreaFromPack === "boolean" ? document.playAreaFromPack : undefined,
     expansionPackEnabled:
       typeof document.expansionPackEnabled === "boolean"
         ? document.expansionPackEnabled

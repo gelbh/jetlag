@@ -172,6 +172,11 @@ export function useCreateSession() {
   const presetApplyGenerationRef = useRef(0);
   const resetSilentReuseOverlayRef = useRef<() => void>(() => {});
   const [presetApplyNonce, setPresetApplyNonce] = useState(0);
+  const packPlayAreaRef = useRef<{
+    area: GameArea;
+    packId: RegionPackId;
+    subregionId: string | undefined;
+  } | null>(null);
   const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
   const loadedPresetId = searchParams.get("preset");
   const loadedPreset = useMemo(() => {
@@ -258,7 +263,14 @@ export function useCreateSession() {
             return;
           }
           customMatchingAreas = boundaries.customMatchingAreas;
-          gameArea = boundaries.playArea;
+          if (!gameArea) {
+            gameArea = boundaries.playArea;
+            packPlayAreaRef.current = {
+              area: boundaries.playArea,
+              packId: draft.regionPackId,
+              subregionId,
+            };
+          }
         } catch (loadError) {
           if (applyGeneration !== presetApplyGenerationRef.current) {
             abandonStaleApply();
@@ -756,6 +768,10 @@ export function useCreateSession() {
           ? {
               regionPackId,
               bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+              playAreaFromPack:
+                gameArea === packPlayAreaRef.current?.area &&
+                regionPackId === packPlayAreaRef.current.packId &&
+                regionPackSubregionId === packPlayAreaRef.current.subregionId,
               ...(regionPackSubregionId ? { regionPackSubregionId } : {}),
             }
           : {}),

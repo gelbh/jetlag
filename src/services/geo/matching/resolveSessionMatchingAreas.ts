@@ -8,10 +8,11 @@ import {
   playAreaCacheKey,
   resolvedPlayAreaCache,
   type SessionPlayAreaInput,
+  sessionUsesPackPlayArea,
 } from "./playAreaReadiness";
 import { loadRegionPackMatchingAreas, loadRegionPackPlayArea } from "./regionPackBoundaries";
 
-export { isPlayAreaReadySync, playAreaCacheKey };
+export { isPlayAreaReadySync, playAreaCacheKey, sessionUsesPackPlayArea };
 
 const MATCHING_ADMIN_LEVELS = [8, 9] as const;
 
@@ -86,25 +87,20 @@ export async function resolveSessionMatchingAreas(
 export function peekResolvedPlayArea(
   session: SessionPlayAreaInput | null | undefined,
 ): GameArea | undefined {
-  if (!session) {
+  if (!sessionUsesPackPlayArea(session)) {
     return undefined;
   }
 
-  const packId = session.regionPackId;
-  if (!isKnownRegionPack(packId)) {
-    return undefined;
-  }
-
-  const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
+  const cacheKey = playAreaCacheKey(session.regionPackId, session.regionPackSubregionId);
   return resolvedPlayAreaCache.get(cacheKey);
 }
 
 export async function resolveSessionPlayArea(session: SessionPlayAreaInput): Promise<GameArea> {
-  const packId = session.regionPackId;
-  if (!isKnownRegionPack(packId)) {
+  if (!sessionUsesPackPlayArea(session)) {
     return session.gameArea;
   }
 
+  const packId = session.regionPackId;
   const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
   const cached = resolvedPlayAreaCache.get(cacheKey);
   if (cached) {
