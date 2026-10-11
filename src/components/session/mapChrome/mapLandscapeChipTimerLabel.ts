@@ -8,7 +8,6 @@ import {
 } from "@/domain/session/hiding/hidingPeriod";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { computeElapsedMs, formatElapsedTime, type TimerState } from "@/domain/session/timer/timer";
-import { serverNow } from "@/services/core/time/serverClock";
 
 export type LandscapeChipTimerLabel = {
   phase: string;
@@ -20,18 +19,20 @@ export function mapLandscapeChipTimerLabel({
   timerState,
   timerHasStarted,
   pendingQuestions = [],
+  nowMs,
 }: {
   sessionRules: SessionRulesInput;
   timerState: TimerState;
   timerHasStarted: boolean;
   pendingQuestions?: readonly PendingQuestionRecord[];
+  nowMs: number;
 }): LandscapeChipTimerLabel {
   if (!timerHasStarted) {
     return { phase: "SESSION", value: "Ready" };
   }
 
-  const elapsed = computeElapsedMs(timerState, serverNow());
-  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules, serverNow());
+  const elapsed = computeElapsedMs(timerState, nowMs);
+  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules, nowMs);
 
   if (questionTimer) {
     return {

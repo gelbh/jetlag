@@ -8,6 +8,7 @@ describe("mapLandscapeChipTimerLabel", () => {
         sessionRules: { gameSize: "medium" },
         timerState: { runningSince: null, accumulatedMs: 0 },
         timerHasStarted: false,
+        nowMs: 0,
       }),
     ).toEqual({ phase: "SESSION", value: "Ready" });
   });
@@ -21,6 +22,7 @@ describe("mapLandscapeChipTimerLabel", () => {
           accumulatedMs: 4_000_000,
         },
         timerHasStarted: true,
+        nowMs: 0,
       }).phase,
     ).toBe("SEEK");
   });
