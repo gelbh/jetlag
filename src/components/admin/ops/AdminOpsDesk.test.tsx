@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -45,6 +45,38 @@ function expectStaticAppShell(layout: "desktop" | "mobile") {
 }
 
 const SEEKER_HIDER_META = /1S \/ 1H/i;
+
+function makeLiveSession(overrides: Partial<AdminSessionSummary> = {}): AdminSessionSummary {
+  return {
+    sessionId: "session-1",
+    code: "ABCD",
+    phase: "seek",
+    tier: "free",
+    gameSize: "medium",
+    roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
+    hostUid: "host-1",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    memberCount: 2,
+    timerAccumulatedMs: 0,
+    timerRunningSince: "2026-01-01T00:00:00.000Z",
+    endGameStartedAt: null,
+    endGameRequestedAt: null,
+    hostAppVersion: null,
+    hidingPeriodMinutes: null,
+    regionPackId: null,
+    regionPackSubregionId: null,
+    transitMetroId: null,
+    gameAreaLabel: "Dublin",
+    lastActivityAt: "2026-01-02T00:00:00.000Z",
+    lastLocationAt: "2026-01-02T00:00:00.000Z",
+    lastAnnotationAt: null,
+    activeAnnotationCount: 0,
+    mode: "multiplayer",
+    isLive: true,
+    liveMultiplayer: true,
+    ...overrides,
+  };
+}
 
 function makeIncident(overrides: Partial<IncidentRecord> = {}): IncidentRecord {
   return {
@@ -99,8 +131,14 @@ vi.mock("../../../hooks/admin/useAdminAccessState", () => ({
   useAdminAccessState: () => authState,
 }));
 
+// The compiler memoizes row JSX, so desk renders are counted via the hook call.
+const deskRenderCount = vi.hoisted(() => ({ value: 0 }));
+
 vi.mock("../../../hooks/admin/useAdminSessionList", () => ({
-  useAdminSessionList: () => sessionListState,
+  useAdminSessionList: () => {
+    deskRenderCount.value += 1;
+    return sessionListState;
+  },
 }));
 
 vi.mock("../../billing/PremiumSignInGate", () => ({
@@ -148,6 +186,19 @@ vi.mock("../../../services/core/firebase/firebase", () => ({
   getFirebaseAuth: () => ({}),
   ensureAnonymousUser: vi.fn(async () => ({ uid: "anon-test" })),
 }));
+
+const sessionRowRenderCount = vi.hoisted(() => ({ value: 0 }));
+const sessionRowRenders = () => sessionRowRenderCount.value;
+
+vi.mock("./AdminSessionRow", async () => {
+  const actual = await vi.importActual<typeof import("./AdminSessionRow")>("./AdminSessionRow");
+  return {
+    AdminSessionRow: (props: Parameters<typeof actual.AdminSessionRow>[0]) => {
+      sessionRowRenderCount.value += 1;
+      return <actual.AdminSessionRow {...props} />;
+    },
+  };
+});
 
 vi.mock("../../../hooks/admin/useAdminJoinSession", () => ({
   useAdminJoinSession: () => ({
@@ -735,7 +786,45 @@ describe("AdminOpsDesk", () => {
     });
   });
 
-  it("returns to sessions mode from the topbar brand link on desktop", async () => {
+  it("does not re-render session rows on clock ticks", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [makeLiveSession()];
+    mockViewport(true);
+    vi.useFakeTimers();
+    try {
+      renderOpsDesk(<AdminOpsDesk />, "/admin");
+      const before = sessionRowRenders();
+      const deskBefore = deskRenderCount.value;
+      expect(before).toBeGreaterThan(0);
+      await act(() => vi.advanceTimersByTimeAsync(3000));
+      expect(sessionRowRenders()).toBe(before);
+      expect(deskRenderCount.value).toBe(deskBefore);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("feeds live games and runners from live sessions into the status strip", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [
+      makeLiveSession({ sessionId: "s1", memberCount: 3 }),
+      makeLiveSession({ sessionId: "s2", memberCount: 4 }),
+      makeLiveSession({ sessionId: "s3", memberCount: 9, isLive: false }),
+    ];
+    mockViewport(true);
+
+    renderOpsDesk();
+
+    expect(screen.getByLabelText("Live games")).toHaveTextContent("2");
+    expect(screen.getByLabelText("Runners")).toHaveTextContent("7");
+    expect(screen.getByLabelText("Needs you")).toHaveTextContent("0");
+  });
+
+  it("returns to sessions mode from the strip event centre link on desktop", async () => {
     authState.state = "admin";
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
@@ -745,7 +834,7 @@ describe("AdminOpsDesk", () => {
     renderOpsDesk(<AdminOpsDesk />, "/admin/incidents");
 
     expect(screen.getByTestId("admin-fixed-desk")).toHaveAttribute("data-desk-mode", "incidents");
-    fireEvent.click(screen.getByRole("link", { name: /admin ops/i }));
+    fireEvent.click(screen.getByRole("link", { name: /event centre/i }));
 
     await waitFor(() =>
       expect(screen.getByTestId("admin-fixed-desk")).toHaveAttribute("data-desk-mode", "sessions"),

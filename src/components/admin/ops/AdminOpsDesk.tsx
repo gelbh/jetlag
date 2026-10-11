@@ -30,12 +30,12 @@ import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
 import { AdminIncidentInbox } from "../incident/AdminIncidentInbox";
 import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
-import { AdminDeskTopbar } from "./AdminDeskTopbar";
 import { AdminFixedDesk } from "./AdminFixedDesk";
 import { AdminMobileDesk } from "./AdminMobileDesk";
 import { AdminSessionFilters } from "./AdminSessionFilters";
 import { AdminSessionRow } from "./AdminSessionRow";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
+import { AdminStatusStrip } from "./AdminStatusStrip";
 import "../incident/AdminIncidentDesk.css";
 import "./AdminOpsDesk.css";
 
@@ -72,7 +72,6 @@ export function AdminOpsDesk() {
   const selectedIncidentId = routeIncidentId?.trim() || null;
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
 
-  const [now, setNow] = useState(() => new Date());
   const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
   const [incidentsLoading, setIncidentsLoading] = useState(enabled);
   const [incidentsError, setIncidentsError] = useState<string | null>(null);
@@ -118,11 +117,6 @@ export function AdminOpsDesk() {
 
   useEffect(() => {
     clearLegacyOpsDeskStorage();
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -420,14 +414,15 @@ export function AdminOpsDesk() {
     );
   }
 
-  const deskTopbar = (
-    <AdminDeskTopbar
-      openIncidents={openCount}
-      inQueue={visibleIncidents.length}
-      now={now}
-      onOpenSettings={() => setSettingsOpen(true)}
-      onRefreshSessions={() => void refresh({ background: true })}
+  const liveSessions = sessions.filter((row) => row.isLive);
+  const statusStrip = (
+    <AdminStatusStrip
+      liveCount={liveSessions.length}
+      runnerCount={liveSessions.reduce((sum, row) => sum + row.memberCount, 0)}
+      needsYouCount={openCount}
       refreshing={refreshing}
+      onRefresh={() => void refresh({ background: true })}
+      onOpenSettings={() => setSettingsOpen(true)}
     />
   );
 
@@ -442,7 +437,7 @@ export function AdminOpsDesk() {
       data-layout={isDesktop ? "desktop" : "mobile"}
       data-resume-ready="true"
     >
-      <AppShell.Header withBorder={false}>{deskTopbar}</AppShell.Header>
+      <AppShell.Header withBorder={false}>{statusStrip}</AppShell.Header>
       <AppShell.Main className="jl-ops-desk-main">
         {isDesktop ? (
           <>
