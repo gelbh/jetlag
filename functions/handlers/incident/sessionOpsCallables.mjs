@@ -6,6 +6,7 @@ import {
   SESSION_OPS_AGENT_FAILED,
   supportAgentTurnHandler,
 } from "../../incident/supportAgentTurn.mjs";
+import { enforceAppCheck } from "../../lib/appCheck.mjs";
 import { consumeRateLimit } from "../../lib/firestoreRateLimit.mjs";
 import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import {
@@ -34,7 +35,7 @@ function readSupportAgentCursorConfig() {
 
 /** Host approves a pending destructive session-ops confirm and executes once. */
 export const approveHostConfirm = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -62,7 +63,7 @@ export const approveHostConfirm = onCall(
 
 /** Host denies a pending confirm without executing. */
 export const denyHostConfirm = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -88,7 +89,7 @@ export const denyHostConfirm = onCall(
 export const postSupportAgentTurn = onCall(
   {
     secrets: [posthogProjectApiKey, cursorApiKey, sessionOpsMcpAuthSecret],
-    enforceAppCheck: true,
+    enforceAppCheck,
   },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {

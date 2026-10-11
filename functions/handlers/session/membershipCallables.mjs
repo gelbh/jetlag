@@ -1,5 +1,6 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { enforceAppCheck } from "../../lib/appCheck.mjs";
 import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import { endSessionHandler, leaveHostSessionHandler } from "../../session/hostLeave.mjs";
 import {
@@ -31,7 +32,7 @@ import {
 } from "./shared.mjs";
 
 export const resetSessionForRematch = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
@@ -56,7 +57,7 @@ export const resetSessionForRematch = onCall(
 );
 
 export const leaveHostSession = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
@@ -70,7 +71,7 @@ export const leaveHostSession = onCall(
 );
 
 export const leaveSessionMembership = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
@@ -84,7 +85,7 @@ export const leaveSessionMembership = onCall(
 );
 
 export const joinSessionWithRole = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -101,7 +102,7 @@ export const joinSessionWithRole = onCall(
 );
 
 export const initSessionRoleGates = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
@@ -124,7 +125,7 @@ export const initSessionRoleGates = onCall(
 );
 
 export const endSession = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();
@@ -138,7 +139,7 @@ export const endSession = onCall(
 );
 
 export const repairGhostHost = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const db = getFirestore();

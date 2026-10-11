@@ -1,6 +1,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { enforceAppCheck } from "../../lib/appCheck.mjs";
 import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import {
   cancelRoleJoinRequestHandler,
@@ -10,7 +11,7 @@ import {
 import { mapJoinRequestError, posthogProjectApiKey } from "./shared.mjs";
 
 export const requestRoleJoin = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -27,7 +28,7 @@ export const requestRoleJoin = onCall(
 );
 
 export const cancelRoleJoinRequest = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -44,7 +45,7 @@ export const cancelRoleJoinRequest = onCall(
 );
 
 export const resolveRoleJoinRequest = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");

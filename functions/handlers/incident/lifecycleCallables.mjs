@@ -12,6 +12,7 @@ import { postIncidentMessageHandler } from "../../incident/postIncidentMessage.m
 import { publishIncidentHotfixHandler } from "../../incident/publishIncidentHotfix.mjs";
 import { sendIncidentEmail } from "../../incident/sendIncidentEmail.mjs";
 import { updateIncidentStatusHandler } from "../../incident/updateIncidentStatus.mjs";
+import { enforceAppCheck } from "../../lib/appCheck.mjs";
 import { consumeRateLimit } from "../../lib/firestoreRateLimit.mjs";
 import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import {
@@ -27,7 +28,7 @@ import {
 export const createIncident = onCall(
   {
     secrets: [posthogProjectApiKey, incidentEmailSecret, cursorApiKey],
-    enforceAppCheck: true,
+    enforceAppCheck,
   },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
@@ -75,7 +76,7 @@ export const createIncident = onCall(
 );
 
 export const postIncidentMessage = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -102,7 +103,7 @@ export const postIncidentMessage = onCall(
 );
 
 export const applyIncidentMitigation = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
@@ -131,7 +132,7 @@ export const applyIncidentMitigation = onCall(
 export const updateIncidentStatus = onCall(
   {
     secrets: [posthogProjectApiKey, incidentEmailSecret],
-    enforceAppCheck: true,
+    enforceAppCheck,
   },
   withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
@@ -182,7 +183,7 @@ export const updateIncidentStatus = onCall(
 );
 
 export const publishIncidentHotfix = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
@@ -204,7 +205,7 @@ export const publishIncidentHotfix = onCall(
 export const launchIncidentCursorAgent = onCall(
   {
     secrets: [posthogProjectApiKey, cursorApiKey],
-    enforceAppCheck: true,
+    enforceAppCheck,
   },
   withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);

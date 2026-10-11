@@ -1,5 +1,6 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { enforceAppCheck } from "../lib/appCheck.mjs";
 import { posthogProjectApiKey, withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import {
   CLAIM_USERNAME_ALREADY_SET,
@@ -19,7 +20,7 @@ import {
 } from "../profile/profileFriends.mjs";
 
 export const claimUsername = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -51,7 +52,7 @@ export const claimUsername = onCall(
 );
 
 export const profileFriends = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     try {
       return await profileFriendsHandler(getFirestore(), request.auth, request.data ?? {});

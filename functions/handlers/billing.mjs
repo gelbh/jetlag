@@ -21,6 +21,7 @@ import {
   stripeWebhookSecret,
 } from "../billing/stripeConfig.mjs";
 import { handleStripeWebhook } from "../billing/stripeWebhook.mjs";
+import { enforceAppCheck } from "../lib/appCheck.mjs";
 import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
 import { withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import { posthogProjectApiKey } from "../lib/posthog.mjs";
@@ -43,7 +44,7 @@ export const getPremiumEntitlements = onCall(
 );
 
 export const createCheckoutSession = onCall(
-  { ...stripeBillingOptions, enforceAppCheck: true },
+  { ...stripeBillingOptions, enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -69,7 +70,7 @@ export const createCheckoutSession = onCall(
 );
 
 export const startPremiumTrial = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -81,7 +82,7 @@ export const startPremiumTrial = onCall(
 );
 
 export const createBillingPortalSession = onCall(
-  { ...stripeBillingOptions, enforceAppCheck: true },
+  { ...stripeBillingOptions, enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -99,7 +100,7 @@ export const createBillingPortalSession = onCall(
 );
 
 export const createPremiumSession = onCall(
-  { ...stripeBillingOptions, enforceAppCheck: true },
+  { ...stripeBillingOptions, enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -111,7 +112,7 @@ export const createPremiumSession = onCall(
 );
 
 export const recoverPremiumByStripeEmail = onCall(
-  { ...stripeBillingOptions, enforceAppCheck: true },
+  { ...stripeBillingOptions, enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");

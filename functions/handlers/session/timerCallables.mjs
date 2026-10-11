@@ -1,11 +1,12 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { onCall } from "firebase-functions/v2/https";
+import { enforceAppCheck } from "../../lib/appCheck.mjs";
 import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import { controlSessionTimerForMoveHandler } from "../../session/controlSessionTimerForMove.mjs";
 import { mapMoveTimerError, posthogProjectApiKey, requireAuthSessionId } from "./shared.mjs";
 
 export const controlSessionTimerForMove = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const action = request.data?.action;
