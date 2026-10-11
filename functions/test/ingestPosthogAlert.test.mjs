@@ -119,6 +119,54 @@ test("creates an admin-visible incident with a PostHog issue link and emails the
   assert.match(d._emails[0].text, /https:\/\/eu\.posthog\.com\/project\/232295/);
 });
 
+test("labels Worker exceptions with runtime and request path", async () => {
+  const db = mockDb();
+  const d = deps();
+  const result = await ingestPosthogAlert(
+    db,
+    payload({ name: "Error", runtime: "cloudflare-worker", method: "GET", path: "/join/****" }),
+    d,
+  );
+
+  const doc = db._incidents.get(result.incidentId);
+  assert.equal(doc.diagnostics.route, "GET /join/****");
+  assert.equal(doc.diagnostics.platform, "cloudflare-worker");
+  assert.equal(doc.playerNote, "PostHog alert: Error (cloudflare-worker GET /join/****)");
+  assert.equal(
+    d._emails[0].subject,
+    "Jet Lag PostHog issue: Error (cloudflare-worker GET /join/****)",
+  );
+});
+
+test("missing or junk exception context keeps the default labels", async () => {
+  for (const extra of [
+    {},
+    { runtime: null, method: null, path: null },
+    { runtime: "", method: "", path: "" },
+    { runtime: "Cloudflare Worker!", method: "get", path: "join" },
+    { method: "GET", path: "/join/****" },
+  ]) {
+    const db = mockDb();
+    const d = deps();
+    const result = await ingestPosthogAlert(db, payload(extra), d);
+    const doc = db._incidents.get(result.incidentId);
+    assert.equal(doc.diagnostics.route, "posthog");
+    assert.equal(doc.diagnostics.platform, "web");
+    assert.equal(doc.playerNote, "PostHog alert: TypeError");
+    assert.equal(d._emails[0].subject, "Jet Lag PostHog issue: TypeError");
+  }
+});
+
+test("clamps the exception path", async () => {
+  const db = mockDb();
+  const result = await ingestPosthogAlert(
+    db,
+    payload({ runtime: "cloudflare-worker", path: `/${"p".repeat(500)}` }),
+    deps(),
+  );
+  assert.equal(db._incidents.get(result.incidentId).diagnostics.route.length, 200);
+});
+
 test("a repeated alert for the same issue is a no-op", async () => {
   const db = mockDb();
   const d = deps();
