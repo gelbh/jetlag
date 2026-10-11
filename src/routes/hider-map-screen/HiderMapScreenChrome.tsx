@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { type ReactNode, type RefObject, useState } from "react";
 import { ChatPanel } from "../../components/chat/ChatPanel";
 import type { HiderQuestionCards } from "../../components/chat/HiderPendingQuestionAnswer";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
@@ -151,6 +151,9 @@ export type HiderMapScreenController = {
   onTimeTrapSearchThisArea: () => void;
   curseSheetOpen: boolean;
   onCurseSheetOpenChange: (open: boolean) => void;
+  pinSheetOpen: boolean;
+  onPinSheetOpenChange: (open: boolean) => void;
+  pinPanel: ReactNode;
   onClearMap?: () => void;
   onResetBoard?: () => void;
   onResetSession?: () => void;
@@ -250,6 +253,9 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     onTimeTrapSearchThisArea,
     curseSheetOpen,
     onCurseSheetOpenChange,
+    pinSheetOpen,
+    onPinSheetOpenChange,
+    pinPanel,
     onClearMap,
     onResetBoard,
     onResetSession,
@@ -259,6 +265,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     chat,
     chromeHudRef,
   } = controller;
+  const [pinPeeked, setPinPeeked] = useState(false);
   const { messages: displayMessages, pendingQuestions: displayPendingQuestions } =
     useDevMockSessionFeed(session.id, messages, pendingQuestions);
   const syncMessage = syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError;
@@ -385,6 +392,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
       inactive={inactiveChrome}
       showExpansion={expansionPackEnabled}
       onExpansion={() => onExpansionMenuOpenChange(true)}
+      onAddPin={zoneTool.moveMode ? undefined : () => onPinSheetOpenChange(true)}
       onOpenChat={onOpenChat}
       onOpenLog={onOpenLog}
       onOpenSettings={onOpenSettings}
@@ -614,6 +622,16 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
             error={timeTrapTool.error}
             bonusMinutes={myTrap?.bonusMinutes ?? 5}
           />
+        </div>
+      </HiderZoneWizardShell>
+
+      <HiderZoneWizardShell open={pinSheetOpen} peeked={pinPeeked} onPeekedChange={setPinPeeked}>
+        <div className="relative space-y-2">
+          <PopupCloseButton label="Close pin" onClick={() => onPinSheetOpenChange(false)} />
+          <p className="font-display pr-10 text-xs font-semibold uppercase tracking-[0.12em] text-highlight">
+            Add pin
+          </p>
+          {pinPanel}
         </div>
       </HiderZoneWizardShell>
 

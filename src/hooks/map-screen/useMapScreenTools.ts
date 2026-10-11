@@ -236,6 +236,8 @@ export function useMapScreenTools({
     useHeavyMapToolsState(activeTool);
   const pinTool = usePinTool({
     active: activeTool === "pin",
+    role: "seeker",
+    uid: uid ?? null,
     createAnnotation,
     finishPlacement,
     postSystemMessage: (text) => {

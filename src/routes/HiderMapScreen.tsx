@@ -86,6 +86,7 @@ import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import { useHiderLocationSync } from "../hooks/sync/useHiderLocationSync";
 import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
+import { usePinTool } from "../hooks/tools/usePinTool";
 import { AppNavigate } from "../navigation/AppNavigate";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase/firebase";
 import {
@@ -193,7 +194,7 @@ export function HiderMapScreen() {
     distanceUnit === "metric" ? "metric" : "imperial",
   );
   const annotations = useSessionAnnotations(sessionId);
-  const { clearAllAnnotations } = useAnnotations();
+  const { clearAllAnnotations, createAnnotation } = useAnnotations();
   const selectedAnnotationId = useAnnotationStore((state) => state.selectedAnnotationId);
   const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const mapShellRef = useRef<HTMLDivElement>(null);
@@ -230,6 +231,7 @@ export function HiderMapScreen() {
   const [timeTrapSheetOpen, setTimeTrapSheetOpen] = useState(false);
   const [timeTrapPeeked, setTimeTrapPeeked] = useState(false);
   const [curseSheetOpen, setCurseSheetOpen] = useState(false);
+  const [pinSheetOpen, setPinSheetOpen] = useState(false);
   const activeThermometerWalk = useActiveThermometerWalk({
     pendingQuestions,
     seekerLocations,
@@ -529,6 +531,15 @@ export function HiderMapScreen() {
     [postSystemMessage, sessionId, uid],
   );
 
+  const pinTool = usePinTool({
+    active: pinSheetOpen,
+    role: "hider",
+    uid: uid ?? null,
+    createAnnotation,
+    finishPlacement: () => setPinSheetOpen(false),
+    postSystemMessage: (text) => void postGameSystem(text),
+  });
+
   const ensureHiderWriteAccess = useCallback(async () => {
     if (!session || !uid) {
       throw new Error("Sign in and rejoin the session as Hider, then try again.");
@@ -749,6 +760,11 @@ export function HiderMapScreen() {
 
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
+      if (pinSheetOpen) {
+        pinTool.handleMapClick([lat, lng]);
+        return;
+      }
+
       if (timeTrapSheetOpen && !myTrap) {
         const station = nearestStation([lat, lng], timeTrapTool.stations);
         if (station) {
@@ -759,7 +775,29 @@ export function HiderMapScreen() {
 
       zoneTool.handleMapClick([lat, lng]);
     },
-    [myTrap, timeTrapSheetOpen, timeTrapTool.setSelectedStation, timeTrapTool.stations, zoneTool],
+    [
+      myTrap,
+      pinSheetOpen,
+      pinTool.handleMapClick,
+      timeTrapSheetOpen,
+      timeTrapTool.setSelectedStation,
+      timeTrapTool.stations,
+      zoneTool,
+    ],
+  );
+
+  const setPinSheetOpenExclusive = useCallback(
+    (open: boolean) => {
+      if (open) {
+        overlay.closeSheet();
+        zoneTool.closeWizard();
+        setTimeTrapSheetOpen(false);
+      } else {
+        pinTool.resetDraft();
+      }
+      setPinSheetOpen(open);
+    },
+    [overlay.closeSheet, pinTool.resetDraft, zoneTool.closeWizard],
   );
 
   const chromeHudRef = useRef<HTMLDivElement>(null);
@@ -776,7 +814,8 @@ export function HiderMapScreen() {
     overlay.isSettingsOpen ||
     overlay.isLogOpen ||
     overlay.isCodesOpen ||
-    timeTrapSheetOpen;
+    timeTrapSheetOpen ||
+    pinSheetOpen;
 
   const mapLayers = (
     <div className="absolute inset-0">
@@ -857,6 +896,21 @@ export function HiderMapScreen() {
               color: MAP_ANNOTATION_COLORS.hidingZoneOwn,
               width: 2,
               dashArray: cssPxDashToMapLibre("6 6", 2),
+            }}
+          />
+        ) : null}
+        {pinSheetOpen && pinTool.draft.pinPoint ? (
+          <MapLibreGeoJsonOverlay
+            id="hider-pin-draft"
+            data={{
+              type: "Point",
+              coordinates: [pinTool.draft.pinPoint[1], pinTool.draft.pinPoint[0]],
+            }}
+            circle={{
+              radius: 8,
+              color: MAP_ANNOTATION_COLORS.pin,
+              strokeColor: "#ffffff",
+              strokeWidth: 2,
             }}
           />
         ) : null}
@@ -994,6 +1048,9 @@ export function HiderMapScreen() {
             onTimeTrapSearchThisArea: handleTimeTrapSearchThisArea,
             curseSheetOpen,
             onCurseSheetOpenChange: setCurseSheetOpen,
+            pinSheetOpen,
+            onPinSheetOpenChange: setPinSheetOpenExclusive,
+            pinPanel: pinTool.panel,
             onClearMap: isHost ? handleClearMap : undefined,
             onResetBoard: isHost ? handleResetBoard : undefined,
             onResetSession: isHost ? handleResetSession : undefined,

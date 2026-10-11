@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
-import { usePinTool } from "./usePinTool";
+import { HIDER_PIN_LABEL_MAX_LENGTH, usePinTool } from "./usePinTool";
 
 describe("usePinTool", () => {
   it("stores the tapped map point in draft state", () => {
@@ -9,6 +9,8 @@ describe("usePinTool", () => {
     const { result } = renderHook(() =>
       usePinTool({
         active: true,
+        role: "seeker",
+        uid: "seeker-1",
         createAnnotation: mocks.createAnnotation,
         finishPlacement: mocks.finishPlacement,
         postSystemMessage: vi.fn(),
@@ -28,6 +30,8 @@ describe("usePinTool", () => {
     const { result } = renderHook(() =>
       usePinTool({
         active: true,
+        role: "seeker",
+        uid: "seeker-1",
         createAnnotation: mocks.createAnnotation,
         finishPlacement: mocks.finishPlacement,
         postSystemMessage: vi.fn(),
@@ -58,6 +62,8 @@ describe("usePinTool", () => {
     const { result } = renderHook(() =>
       usePinTool({
         active: true,
+        role: "seeker",
+        uid: "seeker-1",
         createAnnotation: mocks.createAnnotation,
         finishPlacement: mocks.finishPlacement,
         postSystemMessage,
@@ -82,12 +88,49 @@ describe("usePinTool", () => {
     expect(postSystemMessage).toHaveBeenCalledWith("Seeker added Zoo pin: Dublin Zoo");
   });
 
+  it("stamps a hider pin with their uid, caps the label, and names the hider in chat", async () => {
+    const mocks = createToolHookMocks();
+    const postSystemMessage = vi.fn();
+    const { result } = renderHook(() =>
+      usePinTool({
+        active: true,
+        role: "hider",
+        uid: "hider-1",
+        createAnnotation: mocks.createAnnotation,
+        finishPlacement: mocks.finishPlacement,
+        postSystemMessage,
+      }),
+    );
+
+    expect(result.current.panel.props.labelMaxLength).toBe(HIDER_PIN_LABEL_MAX_LENGTH);
+
+    act(() => {
+      result.current.handleMapClick([51.5, -0.12]);
+      result.current.panel.props.onLabelChange("Town museum");
+      result.current.panel.props.onPoiCategoryChange("museum");
+    });
+
+    await act(async () => {
+      await result.current.panel.props.onCommit();
+    });
+
+    expect(mocks.createAnnotation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "pin",
+        metadata: expect.objectContaining({ createdByUid: "hider-1", poiCategory: "museum" }),
+      }),
+    );
+    expect(postSystemMessage).toHaveBeenCalledWith("Hider added Museum pin: Town museum");
+  });
+
   it("does not tag or announce a plain marker", async () => {
     const mocks = createToolHookMocks();
     const postSystemMessage = vi.fn();
     const { result } = renderHook(() =>
       usePinTool({
         active: true,
+        role: "seeker",
+        uid: "seeker-1",
         createAnnotation: mocks.createAnnotation,
         finishPlacement: mocks.finishPlacement,
         postSystemMessage,
@@ -123,6 +166,8 @@ describe("usePinTool", () => {
     const { result } = renderHook(() =>
       usePinTool({
         active: true,
+        role: "seeker",
+        uid: "seeker-1",
         createAnnotation: createAnnotation as never,
         finishPlacement,
         postSystemMessage: vi.fn(),
