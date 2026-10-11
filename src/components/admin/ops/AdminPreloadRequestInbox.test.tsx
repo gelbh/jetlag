@@ -107,6 +107,28 @@ describe("AdminPreloadRequestInbox", () => {
     expect(screen.queryByText("Admin access required")).not.toBeInTheDocument();
     expect(screen.getByText(/player@example\.com/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back home" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
+  });
+
+  it.each(["loading", "unsigned", "denied", "admin"] as const)(
+    "renders the %s state inside the admin world",
+    (state) => {
+      authState.state = state;
+      renderInbox();
+      expect(
+        screen.getByTestId("admin-preload-inbox").closest("[data-admin-world]"),
+      ).not.toBeNull();
+      expect(document.querySelectorAll("[data-admin-world]")).toHaveLength(1);
+    },
+  );
+
+  it("titles the signed-out gate in source case", () => {
+    authState.state = "unsigned";
+    renderInbox();
+    const title = screen.getByRole("heading", { name: "Preload request inbox" });
+    expect(title.textContent).toBe("Preload request inbox");
+    expect(title.style.textTransform).toBe("");
+    expect(getComputedStyle(title).textTransform).not.toBe("uppercase");
   });
 
   it("renders the empty plate with a teaching body", () => {

@@ -236,7 +236,9 @@ describe("AdminOpsDesk", () => {
     authState.user = null;
     renderOpsDesk();
 
-    expect(document.querySelector(".mantine-Skeleton-root")).toBeInTheDocument();
+    const skeleton = document.querySelector(".mantine-Skeleton-root");
+    expect(skeleton).toBeInTheDocument();
+    expect(skeleton?.closest("[data-admin-world]")).not.toBeNull();
   });
 
   it("shows the sign-in gate for signed-out users", () => {
@@ -249,6 +251,21 @@ describe("AdminOpsDesk", () => {
 
     expect(screen.getByText(/Sign in with your Google account/i)).toBeInTheDocument();
     expect(screen.getByTestId("premium-sign-in-gate")).toHaveTextContent("/admin");
+    expect(screen.getByTestId("premium-sign-in-gate").closest("[data-admin-world]")).not.toBeNull();
+  });
+
+  it("titles the signed-out gate in source case", () => {
+    authState.state = "unsigned";
+    authState.authReady = true;
+    authState.user = null;
+
+    renderOpsDesk();
+
+    const title = screen.getByRole("heading", { name: "Admin event centre" });
+    expect(title.textContent).toBe("Admin event centre");
+    expect(title.style.textTransform).toBe("");
+    expect(getComputedStyle(title).textTransform).not.toBe("uppercase");
+    expect(title.closest("[data-admin-world]")).not.toBeNull();
   });
 
   it("shows access denied for non-admin permanent users", () => {
@@ -262,6 +279,21 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByText("Restricted panel")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back home" })).toHaveAttribute("href", "/");
+    expect(
+      screen.getByRole("heading", { name: "Access denied" }).closest("[data-admin-world]"),
+    ).not.toBeNull();
+  });
+
+  it("renders the signed-in desk inside the admin world", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    mockViewport(true);
+
+    renderOpsDesk();
+
+    expect(screen.getByTestId("admin-ops-desk").closest("[data-admin-world]")).not.toBeNull();
+    expect(document.querySelectorAll("[data-admin-world]")).toHaveLength(1);
   });
 
   it("opens settings in a dialog from the topbar", async () => {
