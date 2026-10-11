@@ -1,6 +1,7 @@
 import posthog from "posthog-js";
 import "posthog-js/dist/web-vitals";
 import "posthog-js/dist/posthog-recorder";
+import "posthog-js/dist/exception-autocapture";
 import { getClientEnv } from "@/config/env";
 import {
   readAnalyticsConsent,
@@ -171,6 +172,12 @@ export function initPosthogCore(): void {
       capture_pageview: false,
       capture_pageleave: true,
       capture_performance: true,
+      // Uncaught errors bypass the facade; before_send still scrubs and filters them.
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
       // Recording stays off until Accept calls startSessionRecording; options below apply then.
       disable_session_recording: true,
       disable_external_dependency_loading: true,
