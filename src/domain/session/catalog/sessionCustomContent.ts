@@ -1,4 +1,5 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import { POI_PIN_CATEGORIES, type PoiPinCategoryId } from "../../map/poiPinCategories";
 import type { MatchingCategoryId } from "../../questions/matchingQuestions";
 
 export type MatchingAdminLevel = 4 | 6 | 8 | 9;
@@ -14,6 +15,8 @@ export interface SessionCustomLocationPin {
   id: string;
   name: string;
   point: LatLngTuple;
+  /** Absent: offered for every Tentacle / Measuring category. */
+  category?: PoiPinCategoryId;
 }
 
 export type CustomMatchingAreasByLevel = Partial<Record<MatchingAdminLevel, string>>;
@@ -113,11 +116,14 @@ export function parseCustomLocationPins(value: unknown): SessionCustomLocationPi
       return [];
     }
 
+    const category = POI_PIN_CATEGORIES.find((entry) => entry.id === record.category)?.id;
+
     return [
       {
         id,
         name,
         point: [point[0], point[1]] as LatLngTuple,
+        ...(category ? { category } : {}),
       } satisfies SessionCustomLocationPin,
     ];
   });

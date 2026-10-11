@@ -335,7 +335,12 @@ export function useMatchingTool({
         gameArea,
         matchingFetchOptions: {
           ...catalog.matchingFetchOptions,
-          poiPins: poiPinsForCategory(activeAnnotationsRef.current, categoryId),
+          poiPins: [
+            ...(sessionRules?.customLocationPins ?? []).filter(
+              (pin) => pin.category === categoryId,
+            ),
+            ...poiPinsForCategory(activeAnnotationsRef.current, categoryId),
+          ],
         },
         onEnrich: (enriched) => {
           applyResolveResult(requestId, enriched, 1, categoryId);
@@ -353,6 +358,7 @@ export function useMatchingTool({
       catalog.matchingFetchOptions,
       gameArea,
       isLatestRequest,
+      sessionRules,
       setMatchingError,
       setMatchingLoading,
     ],

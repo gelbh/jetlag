@@ -15,7 +15,10 @@ import {
   measuringMultiPlaceTargetLabel,
   measuringUsesAllPlacesInArea,
 } from "@/domain/questions";
-import { manualPinAsMeasuringPlace } from "@/domain/session/catalog/sessionCustomCatalog";
+import {
+  manualPinAsMeasuringPlace,
+  setupPinsForCategory,
+} from "@/domain/session/catalog/sessionCustomCatalog";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
@@ -122,7 +125,9 @@ export function useMeasuringAnchorLoaders({
       placesApplyPhaseRef.current.set(requestId, phase);
 
       const pinPlaces = [
-        ...(sessionRules?.customLocationPins ?? []).map(manualPinAsMeasuringPlace),
+        ...setupPinsForCategory(sessionRules?.customLocationPins ?? [], category).map(
+          manualPinAsMeasuringPlace,
+        ),
         ...poiPinsForCategory(annotations, category),
       ];
       const seen = new Set(fetchedPlaces.map((place) => place.id));
