@@ -9,6 +9,23 @@ export function isOverpassResponseTooLarge(text) {
   return text.length > OVERPASS_MAX_RESPONSE_BYTES;
 }
 
+/**
+ * @param {unknown} error
+ * @returns {503 | 504 | null}
+ */
+export function overpassUpstreamErrorStatus(error) {
+  if (!(error instanceof Error)) {
+    return null;
+  }
+  if (error.message === "Overpass unavailable.") {
+    return 503;
+  }
+  if (error.message === "Overpass timed out.") {
+    return 504;
+  }
+  return null;
+}
+
 export const overpassHandler = createProxyHandler({
   routeName: "overpass",
   methods: ["POST"],
@@ -31,8 +48,9 @@ export const overpassHandler = createProxyHandler({
 
       res.status(200).type("application/json").send(text);
     } catch (error) {
-      if (error instanceof Error && error.message === "Overpass timed out.") {
-        res.status(504).json({ error: "Overpass timed out." });
+      const status = overpassUpstreamErrorStatus(error);
+      if (status != null) {
+        res.status(status).json({ error: error.message });
         return;
       }
 
