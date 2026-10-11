@@ -172,6 +172,45 @@ describe("overpassSharedCache", () => {
     assert.equal(await readOverpassL2("free:abc"), null);
   });
 
+  it("L2 write error logs one structured error line without the raw error", async () => {
+    setOverpassL2BackendForTests({
+      async kvGet() {
+        return null;
+      },
+      async kvPut() {},
+      async r2Get() {
+        return null;
+      },
+      async r2Put() {
+        const error = new Error("The request signature we calculated does not match");
+        error.name = "SignatureDoesNotMatch";
+        error.$metadata = { httpStatusCode: 403 };
+        error.StringToSign = "secret-ish";
+        throw error;
+      },
+    });
+
+    const lines = [];
+    const originalError = console.error;
+    console.error = (...args) => lines.push(args);
+    try {
+      await writeOverpassL2("free:abc", "{}", "application/json");
+    } finally {
+      console.error = originalError;
+    }
+
+    assert.equal(lines.length, 1);
+    assert.equal(lines[0].length, 1);
+    const entry = JSON.parse(lines[0][0]);
+    assert.deepEqual(entry, {
+      type: "overpass_l2_error",
+      op: "write",
+      error: "SignatureDoesNotMatch",
+      status: 403,
+      message: "The request signature we calculated does not match",
+    });
+  });
+
   it("fetchCachedOverpassQuery serves L2 after L1 miss", async () => {
     const backend = createMemoryL2Backend();
     setOverpassL2BackendForTests(backend);

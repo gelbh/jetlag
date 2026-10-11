@@ -90,6 +90,19 @@ function defaultCreateS3Client() {
   return new S3Client(createOverpassR2S3ClientConfig());
 }
 
+// S3 SDK errors carry signing material (StringToSign, CanonicalRequest); never log the raw object.
+function logL2Error(op, error) {
+  console.error(
+    JSON.stringify({
+      type: "overpass_l2_error",
+      op,
+      error: error?.name ?? "Error",
+      status: error?.$metadata?.httpStatusCode ?? null,
+      message: String(error?.message ?? "").slice(0, 200),
+    }),
+  );
+}
+
 function isR2NotFound(error) {
   return error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404;
 }
@@ -206,7 +219,7 @@ export async function readOverpassL2(key, options = {}) {
     }
     return { text: object.body, stale: expired };
   } catch (error) {
-    console.warn("overpass L2 read failed", error);
+    logL2Error("read", error);
     return null;
   }
 }
@@ -233,6 +246,6 @@ export async function writeOverpassL2(key, text, contentType = "application/json
     await backend.r2Put(r2Key, text, contentType);
     await backend.kvPut(key, JSON.stringify(meta));
   } catch (error) {
-    console.warn("overpass L2 write failed", error);
+    logL2Error("write", error);
   }
 }
