@@ -190,7 +190,8 @@ describe("usePendingQuestionActions", () => {
     const { result } = renderHook(() => usePendingQuestionActions());
 
     act(() => {
-      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes", "radar", {
+      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes", {
+        toolType: "radar",
         deadlineExpired: true,
         senderUid: "hider-1",
         senderRole: "hider",
@@ -234,7 +235,9 @@ describe("usePendingQuestionActions", () => {
     const { result } = renderHook(() => usePendingQuestionActions());
 
     act(() => {
-      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes", "radar");
+      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes", {
+        toolType: "radar",
+      });
     });
 
     expect(trackLazy).toHaveBeenCalledOnce();
@@ -242,13 +245,19 @@ describe("usePendingQuestionActions", () => {
       tool: "radar",
       mode: "hider_reply",
     });
+    expect(firestoreMocks.writePendingQuestionUpdateBatch).toHaveBeenCalledWith("session-1", {
+      questionId: "pq-1",
+      questionPatch: { answer: "yes", status: "answered" },
+      gameMessage: { id: "msg-1", patch: { selectedReply: "yes", status: "answered" } },
+      newMessage: undefined,
+    });
   });
 
   it("does not track question_answered without a tool type", () => {
     const { result } = renderHook(() => usePendingQuestionActions());
 
     act(() => {
-      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes", undefined);
+      result.current.answerPendingQuestion("session-1", "pq-1", "msg-1", "yes", "yes");
     });
 
     expect(trackLazy).not.toHaveBeenCalled();

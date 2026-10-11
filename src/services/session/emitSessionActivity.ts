@@ -121,6 +121,7 @@ export function emitQuestionAnsweredActivity(input: {
   answerSummary?: string;
   answeredLate?: boolean;
   createdByUid?: string;
+  analyticsMode?: "self_recorded";
 }): void {
   const id = input.pendingQuestionId
     ? pendingActivityEventId(input.pendingQuestionId, "answered")
@@ -140,9 +141,12 @@ export function emitQuestionAnsweredActivity(input: {
       answeredLate: input.answeredLate,
     },
   });
-  // No pendingQuestionId: a seeker recorded the answer locally. Hider replies are tracked in answerPendingQuestion.
-  if (!input.pendingQuestionId) {
-    trackLazy(ANALYTICS_EVENTS.question_answered, { tool: input.toolType, mode: "self_recorded" });
+  // Hider replies are tracked in answerPendingQuestion; the resolver must not pass analyticsMode.
+  if (input.analyticsMode) {
+    trackLazy(ANALYTICS_EVENTS.question_answered, {
+      tool: input.toolType,
+      mode: input.analyticsMode,
+    });
   }
 }
 

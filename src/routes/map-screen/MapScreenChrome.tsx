@@ -488,14 +488,12 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
               messageId,
               answer,
               selectedReply,
-              pending?.toolType,
-              deadlineExpired
-                ? {
-                    deadlineExpired: true,
-                    senderUid: uid ?? "",
-                    senderRole: "seeker",
-                  }
-                : undefined,
+              {
+                toolType: pending?.toolType,
+                ...(deadlineExpired
+                  ? { deadlineExpired: true, senderUid: uid ?? "", senderRole: "seeker" as const }
+                  : {}),
+              },
             );
           },
           onDismissExpiredQuestion: async (pendingQuestionId, messageId) => {

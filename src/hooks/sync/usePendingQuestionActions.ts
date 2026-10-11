@@ -277,8 +277,8 @@ export function usePendingQuestionActions() {
       messageId: string,
       answer: unknown,
       selectedReply: string,
-      toolType: PendingQuestionToolType | undefined,
       options?: {
+        toolType?: PendingQuestionToolType;
         deadlineExpired?: boolean;
         senderUid?: string;
         senderRole?: PlayerRole;
@@ -296,8 +296,11 @@ export function usePendingQuestionActions() {
             )
           : undefined;
 
-      if (toolType) {
-        trackLazy(ANALYTICS_EVENTS.question_answered, { tool: toolType, mode: "hider_reply" });
+      if (options?.toolType) {
+        trackLazy(ANALYTICS_EVENTS.question_answered, {
+          tool: options.toolType,
+          mode: "hider_reply",
+        });
       }
 
       return commitWrite("question.answer", () =>

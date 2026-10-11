@@ -392,14 +392,12 @@ export function HiderMapScreen() {
           messageId,
           answer,
           selectedReply,
-          pending.toolType,
-          deadlineExpired
-            ? {
-                deadlineExpired: true,
-                senderUid: user.uid,
-                senderRole: "hider",
-              }
-            : undefined,
+          {
+            toolType: pending.toolType,
+            ...(deadlineExpired
+              ? { deadlineExpired: true, senderUid: user.uid, senderRole: "hider" as const }
+              : {}),
+          },
         );
         // Cards only once the server accepts the answer: a rejected answer
         // (e.g. the seeker cancelled meanwhile) must not leave a reward behind.

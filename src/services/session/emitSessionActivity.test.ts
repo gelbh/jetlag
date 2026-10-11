@@ -92,12 +92,22 @@ describe("emitQuestionAnsweredActivity analytics", () => {
       sessionId: "session-1",
       toolType: "radar",
       promptText: "Within 1 mile?",
+      analyticsMode: "self_recorded",
     });
     expect(trackLazy).toHaveBeenCalledOnce();
     expect(trackLazy).toHaveBeenCalledWith("question_answered", {
       tool: "radar",
       mode: "self_recorded",
     });
+  });
+
+  it("does not track without an analytics mode", () => {
+    emitQuestionAnsweredActivity({
+      sessionId: "session-1",
+      toolType: "radar",
+      promptText: "Within 1 mile?",
+    });
+    expect(trackLazy).not.toHaveBeenCalled();
   });
 
   it("does not track answers resolved from a pending question", () => {
