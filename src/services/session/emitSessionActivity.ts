@@ -8,6 +8,8 @@ import {
 } from "../../domain/session/activity/sessionActivityLog";
 import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
 import { trackSessionEnded } from "../core/analytics/analytics";
+import { ANALYTICS_EVENTS } from "../core/analytics/analyticsEvents";
+import { trackLazy } from "../core/analytics/lazyTelemetry";
 import { appendSessionActivityEvent } from "./sessionActivityLog";
 
 /** Fire-and-forget append; lifecycle writers must not fail the primary action. */
@@ -119,6 +121,7 @@ export function emitQuestionAnsweredActivity(input: {
   answerSummary?: string;
   answeredLate?: boolean;
   createdByUid?: string;
+  analyticsMode?: "self_recorded";
 }): void {
   const id = input.pendingQuestionId
     ? pendingActivityEventId(input.pendingQuestionId, "answered")
@@ -138,6 +141,13 @@ export function emitQuestionAnsweredActivity(input: {
       answeredLate: input.answeredLate,
     },
   });
+  // Hider replies are tracked in answerPendingQuestion; the resolver must not pass analyticsMode.
+  if (input.analyticsMode) {
+    trackLazy(ANALYTICS_EVENTS.question_answered, {
+      tool: input.toolType,
+      mode: input.analyticsMode,
+    });
+  }
 }
 
 export function emitQuestionCancelledActivity(input: {

@@ -156,7 +156,81 @@ describe("analytics facade", () => {
       disable_session_recording: true,
       before_send: posthogBeforeSend,
     });
-    expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
+    expect(posthogRegister).toHaveBeenCalledWith(expect.objectContaining({ $geoip_disable: true }));
+  });
+
+  it("registers display_mode browser when not standalone", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({ matches: false })),
+    );
+
+    initPosthogCore();
+
+    expect(posthogRegister).toHaveBeenCalledOnce();
+    expect(posthogRegister).toHaveBeenCalledWith({
+      $geoip_disable: true,
+      display_mode: "browser",
+    });
+  });
+
+  it("registers display_mode standalone for installed PWA", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({ matches: query === "(display-mode: standalone)" })),
+    );
+
+    initPosthogCore();
+
+    expect(posthogRegister).toHaveBeenCalledWith(
+      expect.objectContaining({ display_mode: "standalone" }),
+    );
+  });
+
+  it("captures pwa_installed once on appinstalled after consent", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+
+    window.dispatchEvent(new Event("appinstalled"));
+    window.dispatchEvent(new Event("appinstalled"));
+
+    const installs = posthogCapture.mock.calls.filter(
+      (call) => call[0] === ANALYTICS_EVENTS.pwa_installed,
+    );
+    expect(installs).toHaveLength(1);
+  });
+
+  it("does not capture pwa_installed without consent", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+
+    window.dispatchEvent(new Event("appinstalled"));
+
+    expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
+  it("registers one appinstalled listener across repeated core init", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    const addListener = vi.spyOn(window, "addEventListener");
+
+    try {
+      initPosthogCore();
+      initPosthogCore();
+
+      expect(
+        addListener.mock.calls.filter(([type]) => String(type) === "appinstalled"),
+      ).toHaveLength(1);
+    } finally {
+      addListener.mockRestore();
+    }
   });
 
   it("initPosthogCore inits once when consent is denied", () => {
@@ -243,7 +317,7 @@ describe("analytics facade", () => {
         captureCanvas: { recordCanvas: false },
       },
     });
-    expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
+    expect(posthogRegister).toHaveBeenCalledWith(expect.objectContaining({ $geoip_disable: true }));
   });
 
   it("starts session recording when initAnalytics runs with granted consent", () => {
@@ -373,6 +447,39 @@ describe("analytics facade", () => {
     expect(posthogOptOut).not.toHaveBeenCalled();
     expect(posthogReset).toHaveBeenCalledWith(true);
     expect(posthogStopSessionRecording).toHaveBeenCalled();
+  });
+
+  it("re-registers super properties after deny reset", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    posthogRegister.mockClear();
+
+    denyAnalyticsConsent();
+
+    expect(posthogRegister).toHaveBeenCalledWith({
+      $geoip_disable: true,
+      display_mode: expect.any(String),
+    });
+    expect(posthogRegister.mock.invocationCallOrder[0]).toBeGreaterThan(
+      posthogReset.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
+    );
+  });
+
+  it("re-registers super properties after sign-out reset", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    posthogRegister.mockClear();
+
+    syncAnalyticsIdentity(null);
+
+    expect(posthogReset).toHaveBeenCalledWith(true);
+    expect(posthogRegister).toHaveBeenCalledWith({
+      $geoip_disable: true,
+      display_mode: expect.any(String),
+    });
   });
 
   it("denyAnalyticsConsent resets identity and stops product capture", () => {

@@ -4,6 +4,7 @@ import type { LearnShowcaseId } from "@/domain/learn/learnContentTypes";
 import type { SessionTier } from "@/domain/map/annotations";
 import type { MapTool } from "@/domain/map/mapToolTypes";
 import type { LearnRoutePath } from "@/domain/seo/learnRoutePaths";
+import type { PendingQuestionToolType } from "@/domain/session/activity/sessionChat";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { GameSize } from "@/domain/session/size/gameSize";
 
@@ -20,6 +21,12 @@ export const ANALYTICS_EVENTS = {
   analytics_consent_accepted: "analytics_consent_accepted",
   learn_showcase_interacted: "learn_showcase_interacted",
   learn_cta_clicked: "learn_cta_clicked",
+  question_asked: "question_asked",
+  question_answered: "question_answered",
+  game_started: "game_started",
+  invite_shared: "invite_shared",
+  account_linked: "account_linked",
+  pwa_installed: "pwa_installed",
 } as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];
@@ -77,4 +84,20 @@ export type AnalyticsEventProps = {
     cta: "join" | "create";
     path: LearnRoutePath;
   };
+  question_asked: {
+    tool: PendingQuestionToolType;
+  };
+  question_answered: {
+    tool: PendingQuestionToolType;
+    mode: "hider_reply" | "self_recorded";
+  };
+  game_started: Record<string, never>;
+  invite_shared: {
+    method: "native_share" | "copy_link" | "copy_code";
+  };
+  account_linked: {
+    provider: "google" | "apple" | "email";
+    outcome: "linked" | "signed_in_existing";
+  };
+  pwa_installed: Record<string, never>;
 };

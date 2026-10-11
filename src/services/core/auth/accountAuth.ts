@@ -17,7 +17,10 @@ import {
   signInWithRedirect,
   signOut,
   type User,
+  type UserCredential,
 } from "firebase/auth";
+import { ANALYTICS_EVENTS, type AnalyticsEventProps } from "../analytics/analyticsEvents";
+import { trackLazy } from "../analytics/lazyTelemetry";
 import { ensureAnonymousUser, getFirebaseAuth } from "../firebase/firebase";
 import { OAUTH_REDIRECT_PENDING_KEY } from "./persistedAuthHint";
 
@@ -94,16 +97,42 @@ function isFirebasePendingPromiseAssertion(error: unknown): boolean {
   return error instanceof Error && error.message.includes("Pending promise was never set");
 }
 
+type AccountLinkedProps = AnalyticsEventProps[typeof ANALYTICS_EVENTS.account_linked];
+
+const ACCOUNT_PROVIDER_BY_ID: Partial<Record<string, AccountLinkedProps["provider"]>> = {
+  [GoogleAuthProvider.PROVIDER_ID]: "google",
+  "apple.com": "apple",
+  [EmailAuthProvider.PROVIDER_ID]: "email",
+};
+
+const ACCOUNT_OUTCOME_BY_OPERATION: Partial<
+  Record<UserCredential["operationType"], AccountLinkedProps["outcome"]>
+> = {
+  link: "linked",
+  signIn: "signed_in_existing",
+};
+
+/** Email-link UserCredentials carry providerId null, so callers pass the provider they used. */
+function trackAccountLinked(result: UserCredential, fallbackProviderId?: string): void {
+  const providerId = result.providerId ?? fallbackProviderId;
+  const provider = providerId ? ACCOUNT_PROVIDER_BY_ID[providerId] : undefined;
+  const outcome = ACCOUNT_OUTCOME_BY_OPERATION[result.operationType];
+  if (!provider || !outcome) return;
+  trackLazy(ANALYTICS_EVENTS.account_linked, { provider, outcome });
+}
+
 async function linkCredentialOrSignInExisting(credential: AuthCredential): Promise<User> {
   const auth = getFirebaseAuth();
 
   if (!auth.currentUser?.isAnonymous) {
     const signedIn = await signInWithCredential(auth, credential);
+    trackAccountLinked(signedIn, credential.providerId);
     return signedIn.user;
   }
 
   try {
     const linked = await linkWithCredential(auth.currentUser, credential);
+    trackAccountLinked(linked, credential.providerId);
     return linked.user;
   } catch (error) {
     if (!isCredentialAlreadyInUse(error)) {
@@ -111,6 +140,7 @@ async function linkCredentialOrSignInExisting(credential: AuthCredential): Promi
     }
 
     const signedIn = await signInWithCredential(auth, credential);
+    trackAccountLinked(signedIn, credential.providerId);
     return signedIn.user;
   }
 }
@@ -121,6 +151,7 @@ async function linkWithPopupOrSignInExisting(provider: AuthProvider): Promise<Us
   if (!auth.currentUser?.isAnonymous) {
     try {
       const signedIn = await signInWithPopup(auth, provider);
+      trackAccountLinked(signedIn, provider.providerId);
       return signedIn.user;
     } catch (error) {
       if (isPopupBlockedError(error)) {
@@ -132,6 +163,7 @@ async function linkWithPopupOrSignInExisting(provider: AuthProvider): Promise<Us
 
   try {
     const linked = await linkWithPopup(auth.currentUser, provider);
+    trackAccountLinked(linked, provider.providerId);
     return linked.user;
   } catch (error) {
     if (isPopupBlockedError(error)) {
@@ -148,6 +180,7 @@ async function linkWithPopupOrSignInExisting(provider: AuthProvider): Promise<Us
     }
 
     const signedIn = await signInWithCredential(auth, credential);
+    trackAccountLinked(signedIn, credential.providerId);
     return signedIn.user;
   }
 }
@@ -274,6 +307,9 @@ async function completeOAuthRedirectOnce(): Promise<User | null> {
 
   try {
     const result = await getRedirectResult(auth);
+    if (result) {
+      trackAccountLinked(result);
+    }
     return resolveRedirectUser(result?.user ?? null, wasPending);
   } catch (error) {
     if (isFirebasePendingPromiseAssertion(error)) {
@@ -349,6 +385,7 @@ export async function completePremiumEmailSignInLink(
     }
 
     const credential = await signInWithEmailLink(auth, storedEmail, linkUrl);
+    trackAccountLinked(credential, EmailAuthProvider.PROVIDER_ID);
     window.localStorage.removeItem(EMAIL_LINK_STORAGE_KEY);
     return credential.user;
   } catch (error) {

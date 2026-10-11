@@ -135,6 +135,7 @@ export async function commitThermometerManual(input: CommitThermometerManualInpu
       annotationId: created.id,
       answerSummary: answerOption?.label ?? String(answer),
       createdByUid: senderUid ?? undefined,
+      analyticsMode: "self_recorded",
     });
   }
 

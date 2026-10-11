@@ -274,6 +274,7 @@ export async function performMatchingCommit(input: CommitMatchingInput): Promise
         annotationId: created.id,
         answerSummary: answerOption?.label ?? String(matchingAnswer),
         createdByUid: senderUid ?? undefined,
+        analyticsMode: "self_recorded",
       });
     }
   } catch (error) {

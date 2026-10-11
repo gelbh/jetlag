@@ -11,6 +11,8 @@ import {
   type PendingQuestionToolType,
 } from "@/domain/session/activity/sessionChat";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
+import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
+import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
 import { serverNowIso } from "@/services/core/time/serverClock";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import {
@@ -162,6 +164,7 @@ export function usePendingQuestionActions() {
               },
         ),
       );
+      trackLazy(ANALYTICS_EVENTS.question_asked, { tool: toolType });
 
       if (walking) {
         emitThermometerWalkStartedActivity({
@@ -275,6 +278,7 @@ export function usePendingQuestionActions() {
       answer: unknown,
       selectedReply: string,
       options?: {
+        toolType?: PendingQuestionToolType;
         deadlineExpired?: boolean;
         senderUid?: string;
         senderRole?: PlayerRole;
@@ -291,6 +295,13 @@ export function usePendingQuestionActions() {
               serverNowIso(),
             )
           : undefined;
+
+      if (options?.toolType) {
+        trackLazy(ANALYTICS_EVENTS.question_answered, {
+          tool: options.toolType,
+          mode: "hider_reply",
+        });
+      }
 
       return commitWrite("question.answer", () =>
         writePendingQuestionUpdateBatch(sessionId, {

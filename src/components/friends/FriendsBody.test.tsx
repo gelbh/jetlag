@@ -1,10 +1,16 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { copyToClipboard } from "@/platform/copyToClipboard";
 import { jetlagTheme } from "@/theme/theme";
 import { searchFriends } from "../../services/profile/profileFriends";
 import { FriendsBody } from "./FriendsBody";
+
+const trackLazy = vi.hoisted(() => vi.fn());
+
+vi.mock("@/services/core/analytics/lazyTelemetry", () => ({ trackLazy }));
+vi.mock("@/platform/copyToClipboard", () => ({ copyToClipboard: vi.fn() }));
 
 vi.mock("../../services/profile/profileFriends", () => ({
   listFriends: vi.fn(async () => ({
@@ -139,5 +145,77 @@ describe("FriendsBody", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Remove friend" }));
     expect(screen.getByRole("button", { name: "Confirm remove" })).toBeInTheDocument();
+  });
+
+  describe("invite to session analytics", () => {
+    beforeEach(() => {
+      localStorage.setItem("jl.friends.mock", "1");
+      trackLazy.mockReset();
+      vi.mocked(copyToClipboard).mockReset();
+      vi.mocked(copyToClipboard).mockResolvedValue(true);
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    async function clickInvite() {
+      renderBody();
+      await waitFor(() => {
+        expect(screen.getByText("ally")).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByText("ally"));
+      fireEvent.click(await screen.findByRole("button", { name: /Invite to PLAY/i }));
+    }
+
+    it("tracks invite_shared after a native share resolves", async () => {
+      const share = vi.fn().mockResolvedValue(undefined);
+      vi.stubGlobal("navigator", { ...navigator, share });
+
+      await clickInvite();
+
+      await waitFor(() => {
+        expect(trackLazy).toHaveBeenCalledWith("invite_shared", { method: "native_share" });
+      });
+      expect(trackLazy).toHaveBeenCalledOnce();
+    });
+
+    it("does not track invite_shared when native share is cancelled", async () => {
+      const share = vi.fn().mockRejectedValue(new DOMException("Share canceled", "AbortError"));
+      vi.stubGlobal("navigator", { ...navigator, share });
+
+      await clickInvite();
+
+      await waitFor(() => expect(share).toHaveBeenCalled());
+      await act(async () => {
+        await share.mock.results[0]?.value.catch(() => undefined);
+      });
+      expect(copyToClipboard).not.toHaveBeenCalled();
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
+
+    it("tracks invite_shared after the clipboard fallback copies the link", async () => {
+      vi.stubGlobal("navigator", { ...navigator, share: undefined });
+
+      await clickInvite();
+
+      await waitFor(() => {
+        expect(trackLazy).toHaveBeenCalledWith("invite_shared", { method: "copy_link" });
+      });
+      expect(trackLazy).toHaveBeenCalledOnce();
+    });
+
+    it("does not track invite_shared when the clipboard fallback fails", async () => {
+      vi.mocked(copyToClipboard).mockResolvedValue(false);
+      vi.stubGlobal("navigator", { ...navigator, share: undefined });
+
+      await clickInvite();
+
+      await waitFor(() => expect(copyToClipboard).toHaveBeenCalled());
+      await act(async () => {
+        await vi.mocked(copyToClipboard).mock.results[0]?.value;
+      });
+      expect(trackLazy).not.toHaveBeenCalled();
+    });
   });
 });
