@@ -1,5 +1,6 @@
 import { FieldPath, getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { enforceAppCheck } from "../lib/appCheck.mjs";
 import { posthogProjectApiKey, withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import { requireAdminAuth } from "./adminAccess.mjs";
 
@@ -291,7 +292,7 @@ export async function mapWithConcurrency(items, concurrency, mapper) {
 }
 
 export const listActiveSessions = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 

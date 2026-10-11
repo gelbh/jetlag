@@ -2,6 +2,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { adminAuth } from "../../handlers/proxyShared.mjs";
+import { enforceAppCheck } from "../../lib/appCheck.mjs";
 import {
   clearGrantAccessFailures,
   getGrantAccessFailureCount,
@@ -25,7 +26,7 @@ function adminDb() {
 export const grantAccess = onCall(
   {
     secrets: [accessCodeSecret, posthogProjectApiKey],
-    enforceAppCheck: true,
+    enforceAppCheck,
   },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
