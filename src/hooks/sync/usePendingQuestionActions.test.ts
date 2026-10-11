@@ -197,7 +197,11 @@ describe("usePendingQuestionActions", () => {
       });
     });
 
-    expect(trackLazy).not.toHaveBeenCalled();
+    expect(trackLazy).toHaveBeenCalledOnce();
+    expect(trackLazy).toHaveBeenCalledWith("question_answered", {
+      tool: "radar",
+      mode: "hider_reply",
+    });
     expect(commitWriteMock).toHaveBeenCalledWith("question.answer", expect.any(Function));
     expect(firestoreMocks.writePendingQuestionUpdateBatch).toHaveBeenCalledWith("session-1", {
       questionId: "pq-1",

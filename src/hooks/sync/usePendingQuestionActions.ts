@@ -296,7 +296,7 @@ export function usePendingQuestionActions() {
             )
           : undefined;
 
-      if (toolType && !options?.deadlineExpired) {
+      if (toolType) {
         trackLazy(ANALYTICS_EVENTS.question_answered, { tool: toolType, mode: "hider_reply" });
       }
 
