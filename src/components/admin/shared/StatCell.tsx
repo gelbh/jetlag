@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 export function StatCell({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <Stack gap={0} aria-label={label}>
+    <Stack gap={0} role="group" aria-label={label}>
       <Text size="xs" c="dimmed">
         {label}
       </Text>

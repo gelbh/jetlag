@@ -1,11 +1,11 @@
+import { Button } from "@mantine/core";
 import { screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
 import { SessionCode } from "@/components/admin/shared/SessionCode";
 import { StatCell } from "@/components/admin/shared/StatCell";
 import { StatusMark } from "@/components/admin/shared/StatusMark";
 import { renderWithAppUi } from "@/test/renderWithAppUi";
-import { adminTheme } from "@/theme/adminTheme";
 
 describe("admin shared primitives", () => {
   it("renders the session code in one form at every size", () => {
@@ -48,21 +48,39 @@ describe("admin shared primitives", () => {
     expect(container.querySelector("[data-admin-world]")).not.toBeNull();
   });
 
-  it("themes every admin desk component", () => {
-    expect(Object.keys(adminTheme.components ?? {}).sort()).toEqual(
-      [
-        "Accordion",
-        "ActionIcon",
-        "Alert",
-        "Badge",
-        "Button",
-        "Drawer",
-        "Kbd",
-        "Paper",
-        "Table",
-        "Tabs",
-        "TextInput",
-      ].sort(),
+  it("fills the live tone with ink text for contrast", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <StatusMark tone="live" label="Live" />
+      </AdminWorld>,
     );
+    const mark = screen.getByText("Live").closest<HTMLElement>("[data-tone]");
+    expect(mark?.style.getPropertyValue("--badge-bg")).toBe("var(--adm-live)");
+    expect(mark?.style.getPropertyValue("--badge-color")).toBe("var(--adm-ink)");
+  });
+
+  it("reports a blank status label in dev", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      renderWithAppUi(
+        <AdminWorld>
+          <StatusMark tone="ok" label=" " />
+        </AdminWorld>,
+      );
+      expect(error).toHaveBeenCalledWith("StatusMark needs a visible label");
+    } finally {
+      error.mockRestore();
+    }
+  });
+
+  it("fills admin buttons with overprint instead of the app primary", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Button>Go</Button>
+      </AdminWorld>,
+    );
+    const button = screen.getByRole("button", { name: "Go" });
+    expect(button.style.getPropertyValue("--button-bg")).toBe("var(--adm-overprint)");
+    expect(button.style.getPropertyValue("--button-color")).toBe("var(--adm-overprint-ink)");
   });
 });
