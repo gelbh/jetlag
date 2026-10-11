@@ -8,6 +8,8 @@ type EntryRouteShellProps = {
   title: string;
   backTo?: string;
   backLabel?: string;
+  /** See `EntryHeader` `titleIsHeading`. */
+  titleIsHeading?: boolean;
   children: ReactNode;
   /** Join centers the form column in the remaining viewport. */
   centerBody?: boolean;
@@ -17,6 +19,7 @@ export function EntryRouteShell({
   title,
   backTo,
   backLabel,
+  titleIsHeading,
   children,
   centerBody = false,
 }: EntryRouteShellProps) {
@@ -32,7 +35,12 @@ export function EntryRouteShell({
 
   return (
     <EntryScreenLayout justify="start" skin="plain" flush>
-      <EntryHeader title={title} backTo={backTo} backLabel={backLabel} />
+      <EntryHeader
+        title={title}
+        backTo={backTo}
+        backLabel={backLabel}
+        titleIsHeading={titleIsHeading}
+      />
       <Container
         size="xs"
         w="100%"

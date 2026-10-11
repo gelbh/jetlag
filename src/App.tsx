@@ -33,6 +33,7 @@ import {
   setChunkReloadContextGetter,
 } from "./domain/device/updates/lazyWithChunkRetry";
 import { notifyAppNeedRefresh } from "./domain/device/updates/serviceWorkerRefresh";
+import { LEARN_ROUTE_PATHS } from "./domain/seo/learnRoutePaths";
 import { useEdgeSwipeBack } from "./hooks/navigation/useEdgeSwipeBack";
 import { useRouteSeo } from "./hooks/navigation/useRouteSeo";
 import { appQueryClient } from "./lib/queryClient";
@@ -51,6 +52,7 @@ import {
   GamePresetListLazy,
   JoinSessionLazy,
   LeaderboardLazy,
+  LearnPageLazy,
   MapScreenLazy,
   NotFoundLazy,
   PremiumLazy,
@@ -296,6 +298,17 @@ export default function App() {
                               </LazyRoute>
                             }
                           />
+                          {LEARN_ROUTE_PATHS.map((path) => (
+                            <Route
+                              key={path}
+                              path={path}
+                              element={
+                                <LazyRoute>
+                                  <LearnPageLazy path={path} />
+                                </LazyRoute>
+                              }
+                            />
+                          ))}
                           <Route
                             path="/create"
                             element={

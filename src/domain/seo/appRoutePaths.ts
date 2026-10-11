@@ -1,5 +1,6 @@
 // Imported by the Cloudflare Worker (worker/index.ts) as well as the app: keep this module
 // dependency-free and DOM-free.
+import { LEARN_ROUTE_PATHS } from "./learnRoutePaths";
 
 /** Every production `<Route path>` in `src/App.tsx` that renders a screen (excludes `*`). */
 export const APP_ROUTE_PATHS = [
@@ -11,6 +12,7 @@ export const APP_ROUTE_PATHS = [
   "/privacy",
   "/terms",
   "/premium",
+  ...LEARN_ROUTE_PATHS,
   "/create",
   "/join",
   "/admin",
