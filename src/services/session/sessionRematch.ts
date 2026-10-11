@@ -1,5 +1,5 @@
 import { getToken } from "firebase/app-check";
-import { captureAppCheckTokenFailure } from "../core/analytics/sentry";
+import { captureAppCheckTokenFailure } from "../core/analytics/clientErrors";
 import { callWithResilience } from "../core/firebase/callWithResilience";
 import { getFirebaseAppCheck, isFirebaseConfigured } from "../core/firebase/firebase";
 

@@ -6,7 +6,6 @@ import { AppResumeWatchdog, RESUME_WATCHDOG_RELOAD_KEY } from "./AppResumeWatchd
 
 const resetStuckTransition = vi.fn();
 const captureResumeShellUnresponsiveMock = vi.fn();
-const addAppResumeBreadcrumbMock = vi.fn();
 
 vi.mock("../../navigation/useRouteTransition", () => ({
   useRouteTransition: () => ({
@@ -19,8 +18,7 @@ vi.mock("../../navigation/useRouteTransition", () => ({
   }),
 }));
 
-vi.mock("../../services/core/analytics/sentry", () => ({
-  addAppResumeBreadcrumb: (...args: unknown[]) => addAppResumeBreadcrumbMock(...args),
+vi.mock("../../services/core/analytics/clientErrors", () => ({
   captureResumeShellUnresponsive: (...args: unknown[]) =>
     captureResumeShellUnresponsiveMock(...args),
 }));
@@ -119,7 +117,6 @@ describe("AppResumeWatchdog", () => {
     expect(reload).not.toHaveBeenCalled();
     expect(captureResumeShellUnresponsiveMock).not.toHaveBeenCalled();
     expect(resetStuckTransition).toHaveBeenCalled();
-    expect(addAppResumeBreadcrumbMock).toHaveBeenCalled();
   });
 
   it("reloads once when #root stays empty after the budget", async () => {
@@ -166,7 +163,6 @@ describe("AppResumeWatchdog", () => {
 
     expect(reload).not.toHaveBeenCalled();
     expect(captureResumeShellUnresponsiveMock).not.toHaveBeenCalled();
-    expect(addAppResumeBreadcrumbMock).not.toHaveBeenCalled();
   });
 
   it("runs recovery on bfcache pageshow when shell stays empty", async () => {

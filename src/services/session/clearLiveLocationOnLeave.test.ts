@@ -9,7 +9,7 @@ vi.mock("../firestore/firestoreSessionExtras", () => ({
   deletePlayerLocation: mockDelete,
 }));
 
-vi.mock("../core/analytics/sentry", () => ({
+vi.mock("../core/analytics/clientErrors", () => ({
   captureException: mockCapture,
 }));
 

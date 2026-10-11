@@ -1,9 +1,8 @@
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
+import { posthogProjectApiKey, withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import { requireAdminAuth } from "./adminAccess.mjs";
 
-const sentryDsnSecret = getSentryDsnSecret();
 const FIRESTORE_BATCH_LIMIT = 500;
 
 const VALID_ACTIONS = new Set(["end", "resetBoard", "cleanupCode"]);
@@ -96,8 +95,8 @@ async function moderateSession(db, sessionId, action, adminUid) {
 }
 
 export const adminModerateSession = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const sessionId = typeof request.data?.sessionId === "string" ? request.data.sessionId : "";

@@ -1,20 +1,20 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { onCall } from "firebase-functions/v2/https";
-import { withSentryEventHandler } from "../../lib/sentry.mjs";
+import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import {
   regenerateRolePasscodeHandler,
   revealRolePasscodeHandler,
 } from "../../session/rolePasscodeReveal.mjs";
 import {
   mapRevealError,
+  posthogProjectApiKey,
   requireAuthSessionId,
   requireSessionRole,
-  sentryDsnSecret,
 } from "./shared.mjs";
 
 export const revealRolePasscode = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const role = requireSessionRole(request);
     const db = getFirestore();
@@ -28,8 +28,8 @@ export const revealRolePasscode = onCall(
 );
 
 export const regenerateRolePasscode = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const role = requireSessionRole(request);
     const db = getFirestore();

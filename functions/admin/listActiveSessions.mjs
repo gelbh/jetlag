@@ -1,9 +1,8 @@
 import { FieldPath, getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
+import { posthogProjectApiKey, withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import { requireAdminAuth } from "./adminAccess.mjs";
 
-const sentryDsnSecret = getSentryDsnSecret();
 const DEFAULT_PAGE_LIMIT = 50;
 const MAX_PAGE_LIMIT = 100;
 const SUMMARY_CONCURRENCY = 5;
@@ -292,8 +291,8 @@ export async function mapWithConcurrency(items, concurrency, mapper) {
 }
 
 export const listActiveSessions = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const db = getFirestore();

@@ -99,7 +99,7 @@ export async function purgeSelectedSessions(db, targets, { captureException } = 
       deleted += 1;
     } catch (error) {
       console.error("purgeStaleSessions delete failed", sessionDoc.id, error);
-      captureException?.(error);
+      await captureException?.(error);
     }
   }
 

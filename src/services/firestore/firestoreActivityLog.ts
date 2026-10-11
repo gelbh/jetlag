@@ -11,7 +11,7 @@ import {
 } from "firebase/firestore";
 import type { SessionActivityEvent } from "../../domain/session/activity/sessionActivityLog";
 import { sortActivityEventsDesc } from "../../domain/session/activity/sessionActivityLog";
-import { captureException } from "../core/analytics/sentry";
+import { captureException } from "../core/analytics/clientErrors";
 import { getFirestoreDb } from "../core/firebase/firebase";
 import {
   buildActivityLogDocument,

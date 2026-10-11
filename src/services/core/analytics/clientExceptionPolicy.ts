@@ -1,5 +1,5 @@
 /**
- * Client Sentry drop / keep / meter policy.
+ * Client exception drop / keep / meter policy.
  * Retuned or newly added denylist entries require a production message fixture in tests.
  */
 
@@ -21,7 +21,6 @@ export const QUOTA_SAMPLE_RATE = 0.05;
 
 /** Chrome: "…exceeded the quota."; Firefox/WebKit often "quota has been exceeded". */
 const STORAGE_QUOTA_EXCEEDED = /exceeded the quota|quota has been exceeded/i;
-const FIRESTORE_PERMISSION_DENIED = /missing or insufficient permissions/i;
 const AUTH_NETWORK_FAILED = /auth\/network-request-failed/i;
 const LEAFLET_POS_ERROR = /_leaflet_pos/i;
 const LEAFLET_CLASSLIST_ERROR = /evaluating 'e\.classList'/i;
@@ -71,27 +70,14 @@ function isExpectedJoinUxMessage(message: string): boolean {
   );
 }
 
-/** Belt-and-suspenders for Sentry.init ignoreErrors — high-volume drop subset only (not the full classify matrix; not canaries). */
-export const CLIENT_SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
-  "This operation was aborted",
-  "App Check probe timed out",
-  /appCheck\/(?:initial-throttle|throttled|fetch-network-error)/i,
-  "Session already ended.",
-  "Only the host can do that.",
-  JOIN_PERMISSION_DENIED_MESSAGE,
-  ...EXPECTED_JOIN_UX_MESSAGES,
-];
-
-export type SentryEventLike = {
-  type?: string;
+export type ClientExceptionEventLike = {
   message?: string;
   exception?: { values?: Array<{ type?: string; value?: string }> };
   fingerprint?: string[];
   level?: string;
-  spans?: Array<{ description?: string }>;
 };
 
-export type ClientSentryDisposition = "drop" | "send" | "meter_quota";
+export type ClientExceptionDisposition = "drop" | "send" | "meter_quota";
 
 function isGenericClientNoiseMessage(message: string): boolean {
   return (
@@ -112,28 +98,13 @@ function isGenericClientNoiseMessage(message: string): boolean {
   );
 }
 
-/** True when any exception is Firebase permission-denied (for breadcrumb side effect). */
-export function isFirestorePermissionDeniedEvent(event: SentryEventLike): boolean {
-  for (const exception of event.exception?.values ?? []) {
-    if (
-      exception.type === "FirebaseError" &&
-      typeof exception.value === "string" &&
-      FIRESTORE_PERMISSION_DENIED.test(exception.value)
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
-
 /**
- * Classify whether a client Sentry event should drop, send, or meter quota.
+ * Classify whether a client exception event should drop, send, or meter quota.
  * Does not filter module-script import failures or WebKit "Load failed" canaries.
  */
-export function classifyClientSentryEvent(event: SentryEventLike): ClientSentryDisposition {
-  // Overpass proxy spans were dropped via client ignoreSpans (SDK 11 stream mode; retired with browser SDK).
-  // Do not filter event.type === "transaction" here; those events are no longer produced.
-
+export function classifyClientExceptionEvent(
+  event: ClientExceptionEventLike,
+): ClientExceptionDisposition {
   for (const exception of event.exception?.values ?? []) {
     const value = exception.value;
     if (typeof value !== "string") {
@@ -206,11 +177,11 @@ export function classifyClientSentryEvent(event: SentryEventLike): ClientSentryD
 
 /**
  * Apply disposition. Mutates `event` in place for meter_quota (fingerprint/level)
- * so Sentry beforeSend can return the same object reference.
+ * so callers can return the same object reference.
  */
-export function applyClientSentryDisposition<T extends SentryEventLike>(
+export function applyClientExceptionDisposition<T extends ClientExceptionEventLike>(
   event: T,
-  disposition: ClientSentryDisposition,
+  disposition: ClientExceptionDisposition,
   random: () => number,
 ): T | null {
   switch (disposition) {

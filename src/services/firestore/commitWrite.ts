@@ -1,5 +1,4 @@
 import { type Firestore, waitForPendingWrites } from "firebase/firestore";
-import { addWriteRejectedBreadcrumb } from "@/services/core/analytics/sentry";
 import { useWriteLedgerStore, type WriteLabel } from "@/state/writeLedgerStore";
 
 /**
@@ -27,7 +26,6 @@ export function commitWrite(
     (error: unknown) => {
       const message = error instanceof Error ? error.message : String(error);
       useWriteLedgerStore.getState().fail(id, message);
-      addWriteRejectedBreadcrumb(label, error);
       throw error;
     },
   );

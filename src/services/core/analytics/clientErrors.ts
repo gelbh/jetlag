@@ -1,7 +1,3 @@
-import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
-
-// ponytail: no PostHog breadcrumb trail in P3; upgrade via $exception properties or custom events after Accept if needed.
-
 function captureClientException(
   error: unknown,
   additionalProperties?: Record<string, unknown>,
@@ -9,14 +5,6 @@ function captureClientException(
   void import("./analytics")
     .then((m) => m.capturePosthogException(error, additionalProperties))
     .catch(() => {});
-}
-
-export function syncSentryUser(_user: { uid: string } | null): void {}
-
-export function setBootstrapTag(_phase: string): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
 }
 
 export function captureAuthPersistenceFallback(mode: "session" | "memory", error?: unknown): void {
@@ -50,7 +38,7 @@ export function captureAppCheckTokenFailure(
   });
 }
 
-/** Same capture shape as the former Sentry ErrorBoundary (component stack on the exception). */
+/** Same capture shape as the former ErrorBoundary helper (component stack on the exception). */
 export function captureErrorBoundaryException(
   error: unknown,
   componentStack: string | null | undefined,
@@ -60,30 +48,8 @@ export function captureErrorBoundaryException(
   });
 }
 
-export function addRecoverableErrorBreadcrumb(_error: unknown, _componentStack?: string): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-}
-
-export function setTransactionName(_pathname: string): void {}
-
 export function captureException(error: unknown): void {
   captureClientException(error);
-}
-
-/** Expected join/heal permission-denied — breadcrumb only (no issue). */
-export function reportJoinPermissionDenied(_phase: "initial" | "retry"): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-}
-
-/** Expected mid-session listen permission loss — breadcrumb only (no issue). */
-export function reportFirestoreListenPermissionDenied(): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
 }
 
 export function capturePhotoUploadFailure(
@@ -108,46 +74,11 @@ export function capturePendingResolveFailure(
   });
 }
 
-export function addPhotoUploadBreadcrumb(_details: Record<string, unknown>): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-}
-
-export interface SlowRouteTransitionDetails {
-  preload_ms: number;
-  ready_wait_ms: number;
-  total_ms: number;
-  target_path: string;
-  final_path: string;
-  readiness_kind: string;
-  warm_chunk: boolean;
-  warm_ready: boolean;
-}
-
-export function reportSlowRouteTransition(_details: SlowRouteTransitionDetails): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-}
-
 export interface AppResumeContext {
   pathname: string;
   backgroundMs: number;
   standalone: boolean;
   iosStandalone: boolean;
-}
-
-export function addAppResumeBreadcrumb(_context: AppResumeContext): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-}
-
-export function addPwaStoragePressureBreadcrumb(_snapshot: StorageEstimateSnapshot): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
 }
 
 export function captureResumeShellUnresponsive(
@@ -164,16 +95,4 @@ export function captureResumeShellUnresponsive(
     ios_standalone: context.iosStandalone,
     ...(context.adminRoute ? { admin_route: true } : {}),
   });
-}
-
-export function addWriteRejectedBreadcrumb(_label: string, _error: unknown): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
-}
-
-export function addIdbDeleteFailureBreadcrumb(_error: unknown): void {
-  if (import.meta.env.MODE === "test") {
-    return;
-  }
 }

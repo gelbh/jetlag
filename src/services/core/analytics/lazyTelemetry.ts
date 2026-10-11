@@ -1,5 +1,5 @@
 /**
- * Fire-and-forget facades over the PostHog-backed error facade and analytics.
+ * Fire-and-forget facades over the PostHog-backed client error module and analytics.
  * Static imports would pull posthog into the entry critical path; dynamic
  * import of the facade module keeps analytics off that path.
  * Calls to one module resolve in call order (same import promise).
@@ -7,19 +7,14 @@
 import { writeAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
 import type { syncAnalyticsIdentity, trackPageView } from "./analytics";
 import type {
-  addRecoverableErrorBreadcrumb,
   captureAuthBootstrapFailure,
   captureAuthPersistenceFallback,
   captureErrorBoundaryException,
   captureException,
-  reportSlowRouteTransition,
-  setBootstrapTag,
-  setTransactionName,
-  syncSentryUser,
-} from "./sentry";
+} from "./clientErrors";
 
 let analyticsModule: Promise<typeof import("./analytics")> | undefined;
-let sentryModule: Promise<typeof import("./sentry")> | undefined;
+let clientErrorsModule: Promise<typeof import("./clientErrors")> | undefined;
 
 function loadAnalytics(): Promise<typeof import("./analytics")> {
   analyticsModule ??= import("./analytics").catch((error: unknown) => {
@@ -30,12 +25,12 @@ function loadAnalytics(): Promise<typeof import("./analytics")> {
   return analyticsModule;
 }
 
-function loadSentry(): Promise<typeof import("./sentry")> {
-  sentryModule ??= import("./sentry").catch((error: unknown) => {
-    sentryModule = undefined;
+function loadClientErrors(): Promise<typeof import("./clientErrors")> {
+  clientErrorsModule ??= import("./clientErrors").catch((error: unknown) => {
+    clientErrorsModule = undefined;
     throw error;
   });
-  return sentryModule;
+  return clientErrorsModule;
 }
 
 export function syncAnalyticsIdentityLazy(...args: Parameters<typeof syncAnalyticsIdentity>): void {
@@ -44,22 +39,10 @@ export function syncAnalyticsIdentityLazy(...args: Parameters<typeof syncAnalyti
     .catch(() => {});
 }
 
-export function syncSentryUserLazy(...args: Parameters<typeof syncSentryUser>): void {
-  void loadSentry()
-    .then((m) => m.syncSentryUser(...args))
-    .catch(() => {});
-}
-
-export function setBootstrapTagLazy(...args: Parameters<typeof setBootstrapTag>): void {
-  void loadSentry()
-    .then((m) => m.setBootstrapTag(...args))
-    .catch(() => {});
-}
-
 export function captureAuthBootstrapFailureLazy(
   ...args: Parameters<typeof captureAuthBootstrapFailure>
 ): void {
-  void loadSentry()
+  void loadClientErrors()
     .then((m) => m.captureAuthBootstrapFailure(...args))
     .catch(() => {});
 }
@@ -67,7 +50,7 @@ export function captureAuthBootstrapFailureLazy(
 export function captureAuthPersistenceFallbackLazy(
   ...args: Parameters<typeof captureAuthPersistenceFallback>
 ): void {
-  void loadSentry()
+  void loadClientErrors()
     .then((m) => m.captureAuthPersistenceFallback(...args))
     .catch(() => {});
 }
@@ -79,38 +62,16 @@ export function trackPageViewLazy(...args: Parameters<typeof trackPageView>): vo
 }
 
 export function captureExceptionLazy(...args: Parameters<typeof captureException>): void {
-  void loadSentry()
+  void loadClientErrors()
     .then((m) => m.captureException(...args))
-    .catch(() => {});
-}
-
-export function setTransactionNameLazy(...args: Parameters<typeof setTransactionName>): void {
-  void loadSentry()
-    .then((m) => m.setTransactionName(...args))
     .catch(() => {});
 }
 
 export function captureErrorBoundaryExceptionLazy(
   ...args: Parameters<typeof captureErrorBoundaryException>
 ): void {
-  void loadSentry()
+  void loadClientErrors()
     .then((m) => m.captureErrorBoundaryException(...args))
-    .catch(() => {});
-}
-
-export function addRecoverableErrorBreadcrumbLazy(
-  ...args: Parameters<typeof addRecoverableErrorBreadcrumb>
-): void {
-  void loadSentry()
-    .then((m) => m.addRecoverableErrorBreadcrumb(...args))
-    .catch(() => {});
-}
-
-export function reportSlowRouteTransitionLazy(
-  ...args: Parameters<typeof reportSlowRouteTransition>
-): void {
-  void loadSentry()
-    .then((m) => m.reportSlowRouteTransition(...args))
     .catch(() => {});
 }
 

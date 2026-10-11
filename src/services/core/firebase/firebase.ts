@@ -30,9 +30,7 @@ import { firebaseEmulatorEndpoints } from "@/config/firebaseEmulatorEndpoints";
 import {
   captureAuthBootstrapFailureLazy,
   captureAuthPersistenceFallbackLazy,
-  setBootstrapTagLazy,
   syncAnalyticsIdentityLazy,
-  syncSentryUserLazy,
 } from "../analytics/lazyTelemetry";
 import { markAppCheckArmed, resetAppCheckArmedStateForTests } from "./appCheckArmedState";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
@@ -290,19 +288,13 @@ async function configureAuthPersistence(
 
 async function bootstrapAuthState(): Promise<void> {
   const firebaseAuth = getFirebaseAuth();
-  setBootstrapTagLazy("auth_start");
-
-  const persistenceMode = await configureAuthPersistence(firebaseAuth);
-  setBootstrapTagLazy(`auth_persistence_${persistenceMode}`);
-
+  await configureAuthPersistence(firebaseAuth);
   const { completeOAuthRedirectIfPending } = await import("../auth/accountAuth");
 
   await Promise.race([
     Promise.all([completeOAuthRedirectIfPending(), firebaseAuth.authStateReady()]),
     sleep(AUTH_BOOTSTRAP_TIMEOUT_MS),
   ]);
-
-  setBootstrapTagLazy("auth_ready");
 }
 
 let authAnalyticsUnsubscribe: (() => void) | null = null;
@@ -326,7 +318,6 @@ export function startAuthBootstrap(): void {
 
   authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
     syncAnalyticsIdentityLazy(user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null);
-    syncSentryUserLazy(user ? { uid: user.uid } : null);
   });
 
   void getAuthBootstrapPromise();

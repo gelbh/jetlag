@@ -24,7 +24,6 @@ const getDoc = vi.hoisted(() => vi.fn());
 const getDocFromServer = vi.hoisted(() => vi.fn());
 const updateDoc = vi.hoisted(() => vi.fn(async () => undefined));
 const getIdToken = vi.hoisted(() => vi.fn().mockResolvedValue("token"));
-const reportJoinPermissionDenied = vi.hoisted(() => vi.fn());
 const forceRefreshIdToken = vi.hoisted(() =>
   vi.fn(async () => {
     await getIdToken(true);
@@ -60,9 +59,7 @@ vi.mock("../core/auth/forceRefreshIdToken", () => ({
   forceRefreshIdToken,
 }));
 
-vi.mock("../core/analytics/sentry", () => ({
-  reportJoinPermissionDenied,
-  reportFirestoreListenPermissionDenied: vi.fn(),
+vi.mock("../core/analytics/clientErrors", () => ({
   captureException: vi.fn(),
 }));
 
@@ -124,7 +121,6 @@ describe("joinRemoteSessionByCode without initial read", () => {
     updateDoc.mockResolvedValue(undefined);
     getIdToken.mockReset();
     getIdToken.mockResolvedValue("token");
-    reportJoinPermissionDenied.mockReset();
   });
 
   it("re-reads the session after membership update and returns real gameArea", async () => {
@@ -256,7 +252,6 @@ describe("joinRemoteSessionByCode without initial read", () => {
 
     expect(result.status).toBe("joined");
     expect(getIdToken).toHaveBeenCalledWith(true);
-    expect(reportJoinPermissionDenied).toHaveBeenCalledWith("initial");
     expect(updateDoc.mock.calls.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -289,8 +284,6 @@ describe("joinRemoteSessionByCode without initial read", () => {
     );
 
     expect(getIdToken).toHaveBeenCalledWith(true);
-    expect(reportJoinPermissionDenied).toHaveBeenCalledWith("initial");
-    expect(reportJoinPermissionDenied).toHaveBeenCalledWith("retry");
     expect(updateDoc).toHaveBeenCalledTimes(2);
   });
 });

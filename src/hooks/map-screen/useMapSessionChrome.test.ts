@@ -33,7 +33,7 @@ vi.mock("../../services/core/firebase/firebase", () => ({
   ensureAnonymousUser: vi.fn(async () => ({ uid: "host-1" })),
 }));
 
-vi.mock("../../services/core/analytics/sentry", () => ({
+vi.mock("../../services/core/analytics/clientErrors", () => ({
   captureException: mockCaptureException,
 }));
 

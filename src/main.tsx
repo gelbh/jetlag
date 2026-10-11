@@ -52,17 +52,12 @@ function scheduleDeferredObservability(): void {
   });
 }
 
-/** Hydration mismatch: React already re-rendered on the client, so only leave a trace. */
+/** Hydration mismatch: React already re-rendered on the client; count + DEV log only. */
 function onRecoverableError(error: unknown, errorInfo: ErrorInfo): void {
   countRecoverableError();
   if (import.meta.env.DEV) {
     console.error("Recoverable React error", error, errorInfo.componentStack);
   }
-  void import("./services/core/analytics/lazyTelemetry.ts")
-    .then(({ addRecoverableErrorBreadcrumbLazy }) => {
-      addRecoverableErrorBreadcrumbLazy(error, errorInfo.componentStack);
-    })
-    .catch(() => {});
 }
 
 function appTree(App: ComponentType): ReactNode {

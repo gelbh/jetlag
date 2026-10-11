@@ -1,15 +1,17 @@
 /**
  * PostHog `before_send` for `$exception` events.
- * Reuses the client Sentry drop / keep / meter matrix so both reporters share one noise definition.
+ * Reuses the client exception drop / keep / meter matrix so exception capture shares one noise definition.
  */
 import type { CaptureResult } from "posthog-js";
 import {
-  applyClientSentryDisposition,
-  classifyClientSentryEvent,
-  type SentryEventLike,
-} from "./sentryEventPolicy";
+  applyClientExceptionDisposition,
+  type ClientExceptionEventLike,
+  classifyClientExceptionEvent,
+} from "./clientExceptionPolicy";
 
-function toSentryEventLike(properties: CaptureResult["properties"]): SentryEventLike {
+function toClientExceptionEventLike(
+  properties: CaptureResult["properties"],
+): ClientExceptionEventLike {
   const list: unknown = properties.$exception_list;
   const values = Array.isArray(list)
     ? list.map((entry: unknown) => {
@@ -31,17 +33,17 @@ export function filterPosthogException(
     return capture;
   }
 
-  const policyEvent = toSentryEventLike(capture.properties);
-  const next = applyClientSentryDisposition(
+  const policyEvent = toClientExceptionEventLike(capture.properties);
+  const next = applyClientExceptionDisposition(
     policyEvent,
-    classifyClientSentryEvent(policyEvent),
+    classifyClientExceptionEvent(policyEvent),
     random,
   );
   if (!next) {
     return null;
   }
 
-  // meter_quota: mirror Sentry's grouping + level via PostHog's custom exception properties.
+  // meter_quota: mirror grouping + level via PostHog's custom exception properties.
   if (next.fingerprint) {
     capture.properties.$exception_fingerprint = next.fingerprint.join(":");
   }
