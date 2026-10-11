@@ -15,17 +15,18 @@ export function useGeolocation() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    setLoading(true);
     setError(null);
+
+    const live = getFreshLiveLocationReading();
+    if (live) {
+      setReading(live);
+      return live;
+    }
+
+    setLoading(true);
 
     const read = async () => {
       try {
-        const live = getFreshLiveLocationReading();
-        if (live) {
-          setReading(live);
-          return live;
-        }
-
         const next = await confirmAndRequestLocationAccess({
           highAccuracy: false,
           maximumAge: LIVE_LOCATION_FRESH_MS,
