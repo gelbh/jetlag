@@ -19,10 +19,13 @@ import {
   type ThermometerDistanceOptionMiles,
   thermometerPresetMilesForMeters,
   thermometerQuestionPrompt,
+  thermometerSendBlockReason,
   thermometerUseCount,
   thermometerUseCountFromPending,
   usedThermometerDistanceOptionsForSession,
 } from "../../domain/questions";
+import { ANALYTICS_EVENTS } from "../../services/core/analytics/analyticsEvents";
+import { trackLazy } from "../../services/core/analytics/lazyTelemetry";
 import { useLiveLocation } from "../location/useLiveLocation";
 import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
 import { useToolSession } from "./framework/useToolSession";
@@ -30,6 +33,7 @@ import { commitThermometerManual } from "./thermometer/commitThermometer";
 import { completeThermometerWalkStep } from "./thermometer/completeThermometerWalk";
 import { startThermometerGpsWalk } from "./thermometer/startThermometerWalk";
 import type { ThermometerSessionConfig, UseThermometerToolParams } from "./thermometer/types";
+import { useThermometerSendBlockedTracking } from "./thermometer/useThermometerSendBlockedTracking";
 import { useThermometerWalk } from "./useThermometerWalk";
 
 export type { UseThermometerToolParams } from "./thermometer/types";
@@ -76,6 +80,8 @@ export function useThermometerTool({
   const [editingSetup, setEditingSetup] = useState(true);
   const finishPlacementRef = useRef(finishPlacement);
   const resetAfterSuccessRef = useRef(() => undefined as void);
+  const reportErrorRef = useRef(setMapError);
+  const trackSentRef = useRef(() => undefined as void);
 
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
@@ -128,8 +134,15 @@ export function useThermometerTool({
   }, [pendingQuestions]);
 
   const usedThermometerOptions = useMemo(
-    () => usedThermometerDistanceOptionsForSession(activeAnnotations, pendingQuestions),
-    [activeAnnotations, pendingQuestions],
+    () =>
+      usedThermometerDistanceOptionsForSession(
+        activeAnnotations,
+        pendingQuestions,
+        undefined,
+        // The live walk must not mark its own distance as used, or END WALK never arms.
+        syncedWalkingQuestion?.id,
+      ),
+    [activeAnnotations, pendingQuestions, syncedWalkingQuestion?.id],
   );
   const usedThermometerOptionsRef = useRef(usedThermometerOptions);
   useEffect(() => {
@@ -186,8 +199,9 @@ export function useThermometerTool({
         cardKeep,
         usedThermometerOptions: usedThermometerOptionsRef.current,
         createAnnotation,
-        setMapError,
+        setMapError: (message) => reportErrorRef.current(message),
         onSuccess: () => {
+          trackSentRef.current();
           resetAfterSuccessRef.current();
           finishPlacementRef.current();
         },
@@ -202,6 +216,28 @@ export function useThermometerTool({
 
   const config = session.config ?? createInitialConfig();
   const patchConfig = session.setConfig;
+
+  // Light tools do not render mapError; mirror into panelError so the overlay shows it.
+  const reportError = useCallback(
+    (message: string | null) => {
+      setMapError(message);
+      patchConfig({ panelError: message });
+    },
+    [patchConfig, setMapError],
+  );
+  useEffect(() => {
+    reportErrorRef.current = reportError;
+  }, [reportError]);
+
+  const trackSent = useCallback(() => {
+    trackLazy(ANALYTICS_EVENTS.thermometer_question_sent, {
+      placementMode: config.placementMode,
+      awaitHiderAnswer,
+    });
+  }, [awaitHiderAnswer, config.placementMode]);
+  useEffect(() => {
+    trackSentRef.current = trackSent;
+  }, [trackSent]);
 
   const walkingQuestionId = config.localWalkingQuestionId ?? syncedWalkDraft?.questionId ?? null;
   const thermoA =
@@ -260,7 +296,10 @@ export function useThermometerTool({
         cardKeep,
         completeThermometerWalk,
         patchConfig,
-        onRemoteSuccess: () => finishPlacementRef.current(),
+        onRemoteSuccess: () => {
+          trackSentRef.current();
+          finishPlacementRef.current();
+        },
       });
     },
     [
@@ -282,7 +321,7 @@ export function useThermometerTool({
     startPoint: thermoA,
     targetDistanceMeters: activeDistanceMeters,
     onAutoStop: handleWalkComplete,
-    onError: setMapError,
+    onError: reportError,
   });
 
   const resetDraft = useCallback(() => {
@@ -380,9 +419,15 @@ export function useThermometerTool({
 
   const walkingActive = thermoStep === "walking";
   const pinsReady = thermoStep === "ready";
-  const distanceAvailable =
-    isThermometerDistanceOptionAvailableForSession(sessionRules, activeDistanceMeters) &&
-    isThermometerDistanceOptionAvailable(usedThermometerOptions, activeDistanceMeters);
+  const distanceAvailableForSession = isThermometerDistanceOptionAvailableForSession(
+    sessionRules,
+    activeDistanceMeters,
+  );
+  const distanceUnused = isThermometerDistanceOptionAvailable(
+    usedThermometerOptions,
+    activeDistanceMeters,
+  );
+  const distanceAvailable = distanceAvailableForSession && distanceUnused;
   const liveTravelMeters = walkTracker.distanceTraveledMeters ?? thermoTravelMeters;
   const travelTooShort = liveTravelMeters !== null && liveTravelMeters + 1 < activeDistanceMeters;
   // While walking, END WALK arms only after a GPS sample (non-null travel).
@@ -390,6 +435,14 @@ export function useThermometerTool({
   const configureReady = walkingActive
     ? distanceAvailable && liveTravelMeters !== null
     : distanceAvailable && !travelTooShort;
+  const sendBlockReason = thermometerSendBlockReason({
+    walkingActive,
+    canSubmitQuestion,
+    distanceAvailableForSession,
+    distanceUnused,
+    travelTooShort,
+    liveTravelMeters,
+  });
 
   // Drive map-click routing without mounting ThermometerPanel wizard.
   useEffect(() => {
@@ -412,7 +465,8 @@ export function useThermometerTool({
     answerReady: walkingActive || awaitHiderAnswer || config.answer !== null,
     awaitHiderAnswer,
     isSubmitting: session.isBusy,
-    viewOnly: !canSubmitQuestion,
+    // Our own walk is the open question; it must stay endable.
+    viewOnly: !canSubmitQuestion && !walkingActive,
   };
 
   const onHudCommit = () => {
@@ -443,6 +497,19 @@ export function useThermometerTool({
     (awaitHiderAnswer || config.answer !== null);
 
   const placementError = config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError;
+
+  // Count blocks only where a commit control is on screen: End walk, Start track, or Send.
+  const commitControlVisible =
+    walkingActive ||
+    (mapPlacementActive &&
+      (pinsReady ? awaitHiderAnswer || config.answer !== null : config.placementMode === "gps"));
+
+  useThermometerSendBlockedTracking({
+    active,
+    reason: commitControlVisible ? sendBlockReason : null,
+    placementMode: config.placementMode,
+    awaitHiderAnswer,
+  });
 
   const reopenSetup = () => {
     setEditingSetup(true);
@@ -477,7 +544,7 @@ export function useThermometerTool({
         gpsLoading={gpsLoading}
         canStartWalk={distanceAvailable && canSubmitQuestion && !session.isBusy}
         travelLabel={travelLabel}
-        travelTooShort={travelTooShort}
+        blockReason={sendBlockReason}
         error={placementError}
         awaitHiderAnswer={awaitHiderAnswer}
         answer={config.answer}
@@ -498,6 +565,7 @@ export function useThermometerTool({
         step={thermoStep === "walking" ? "b" : thermoStep}
         placementMode={config.placementMode}
         walkingActive={walkingActive}
+        waitingForGps={walkingActive && sendBlockReason === "gps_waiting"}
         presetUseCount={presetUseCount}
         usedDistanceOptions={usedThermometerOptions}
         costLabel={costLabel}

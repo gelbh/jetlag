@@ -13,4 +13,5 @@ export * from "./selectPrimaryHiderAnswerTarget";
 
 export * from "./tentacleQuestions";
 export * from "./thermometerQuestions";
+export * from "./thermometerSendBlock";
 export * from "./thermometerWalk";
