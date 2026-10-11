@@ -3,6 +3,7 @@ import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
 import type { SyncStatus } from "@/domain/device/sync/sync";
+import { hasOpenQuestionCountdown } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { isTimerRunning, type TimerState } from "@/domain/session/timer/timer";
@@ -35,7 +36,11 @@ export function MapLandscapeChromeChip({
   queuedWrites,
   syncMessage,
 }: MapLandscapeChromeChipProps) {
-  const nowMs = useServerNowMs(timerHasStarted && isTimerRunning(timerState) ? 1000 : null);
+  const nowMs = useServerNowMs(
+    timerHasStarted && (isTimerRunning(timerState) || hasOpenQuestionCountdown(pendingQuestions))
+      ? 1000
+      : null,
+  );
   const timer = mapLandscapeChipTimerLabel({
     sessionRules,
     timerState,

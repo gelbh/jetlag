@@ -1,6 +1,10 @@
 import { Stack, Text } from "@mantine/core";
 import { getPowerProfile } from "@/domain/device/power/powerProfile";
-import { isStaleThermometerWalk, selectPrimaryQuestionTimer } from "@/domain/questions";
+import {
+  hasOpenQuestionCountdown,
+  isStaleThermometerWalk,
+  selectPrimaryQuestionTimer,
+} from "@/domain/questions";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
@@ -67,7 +71,11 @@ export function MapTimerCluster({
 }: MapTimerClusterProps) {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const timerTickMs = getPowerProfile(lowPowerMode).timerTickMs;
-  const nowMs = useServerNowMs(timerHasStarted && isTimerRunning(timerState) ? timerTickMs : null);
+  const nowMs = useServerNowMs(
+    timerHasStarted && (isTimerRunning(timerState) || hasOpenQuestionCountdown(pendingQuestions))
+      ? timerTickMs
+      : null,
+  );
   const staleWalkNowMs = useStaleWalkNowMs();
 
   if (!timerHasStarted) {
