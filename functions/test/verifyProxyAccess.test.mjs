@@ -70,6 +70,21 @@ describe("verifyProxyAccess helpers", () => {
     });
     assert.equal(missingSession.ok, false);
     assert.equal(missingSession.status, 403);
+    assert.equal(missingSession.reason, "no_session_id");
+
+    const unknownSession = await verifyOverpassProxyAccess(auth, db, {
+      headers: { authorization: "Bearer token", "x-session-id": "session-gone" },
+    });
+    assert.equal(unknownSession.status, 403);
+    assert.equal(unknownSession.reason, "session_not_found");
+
+    const outsider = await verifyOverpassProxyAccess(
+      { verifyIdToken: async () => ({ uid: "stranger" }) },
+      db,
+      { headers: { authorization: "Bearer token", "x-session-id": "session-1" } },
+    );
+    assert.equal(outsider.status, 403);
+    assert.equal(outsider.reason, "not_member");
 
     const member = await verifyOverpassProxyAccess(auth, db, {
       headers: {
