@@ -252,16 +252,17 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
     logCache("miss", tier, { backend: "overpass" });
     return text;
   } catch (error) {
+    let postpass = null;
     try {
-      const postpassText = await tryPostpassForOverpassQuery(query);
-      if (postpassText != null) {
-        overpassResponseCache.set(l1Key, postpassText);
-        await writeOverpassL2(l2Key, postpassText, "application/json");
-        logCache("miss", tier, { backend: "postpass" });
-        return postpassText;
-      }
+      postpass = await tryPostpassForOverpassQuery(query);
     } catch {
       // Logged in tryPostpassForOverpassQuery; fall through to stale L2.
+    }
+    if (postpass && !postpass.empty) {
+      overpassResponseCache.set(l1Key, postpass.text);
+      await writeOverpassL2(l2Key, postpass.text, "application/json");
+      logCache("miss", tier, { backend: "postpass" });
+      return postpass.text;
     }
 
     const stale = await readOverpassL2(l2Key, { allowExpired: true });
@@ -269,6 +270,11 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
       overpassResponseCache.set(l1Key, stale.text);
       logCache("stale", tier);
       return stale.text;
+    }
+    if (postpass?.empty) {
+      // Not cached: a trusted empty is cheap to recompute once Overpass recovers.
+      logCache("miss", tier, { backend: "postpass", empty: true });
+      return postpass.text;
     }
     if (error instanceof Error && error.message === "Overpass timed out.") {
       logTimeout({ reason: "upstream_exhausted", tier });
