@@ -8,7 +8,7 @@ import {
   captureFunctionsExceptionWithTags,
   resolveDeployedFunctionName,
 } from "../lib/functionsException.mjs";
-import { checkProxyAppCheck, PROXY_APP_CHECK_ENFORCED } from "./verifyProxyAppCheck.mjs";
+import { requireProxyAppCheck } from "./verifyProxyAppCheck.mjs";
 
 /**
  * Shared HTTP proxy pipeline: CORS, App Check, auth, rate limit, handler.
@@ -16,7 +16,7 @@ import { checkProxyAppCheck, PROXY_APP_CHECK_ENFORCED } from "./verifyProxyAppCh
 export function createProxyHandler({
   routeName,
   methods = ["GET"],
-  checkAppCheck = checkProxyAppCheck,
+  requireAppCheck = requireProxyAppCheck,
   requireAccess = requireProxyAccess,
   rateLimitRoute,
   resolveRateLimitTier = (authResult) => authResult.tier ?? "free",
@@ -36,20 +36,8 @@ export function createProxyHandler({
       return;
     }
 
-    const appCheck = await checkAppCheck(req);
-    if (appCheck !== "valid") {
-      console.warn(
-        JSON.stringify({
-          type: "proxy_app_check",
-          result: appCheck,
-          route: routeName,
-          enforced: PROXY_APP_CHECK_ENFORCED,
-        }),
-      );
-      if (PROXY_APP_CHECK_ENFORCED) {
-        res.status(401).json({ error: "App Check required." });
-        return;
-      }
+    if (!(await requireAppCheck(req, res, { route: routeName }))) {
+      return;
     }
 
     const authResult = await requireAccess(req, res);
