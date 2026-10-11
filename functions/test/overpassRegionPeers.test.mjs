@@ -36,8 +36,14 @@ describe("overpassRegionPeers", () => {
       { query: "[out:json];node(40.6,-74.1,40.9,-73.7);out;" },
     );
     const hosts = list.map((u) => overpassEndpointHost(u));
-    assert.equal(hosts.includes("overpass.osm.ch"), false);
-    assert.equal(hosts.includes("overpass.atownsend.org.uk"), false);
+    assert.equal(
+      hosts.some((h) => h === "overpass.osm.ch"),
+      false,
+    );
+    assert.equal(
+      hosts.some((h) => h === "overpass.atownsend.org.uk"),
+      false,
+    );
   });
 
   it("keeps regional before Geofabrik when both apply", () => {
@@ -55,7 +61,7 @@ describe("overpassRegionPeers", () => {
       { query: "[out:json];node(53.2,-6.4,53.5,-6.1);out;" },
     );
     assert.equal(
-      list.map((u) => overpassEndpointHost(u)).includes("overpass.atownsend.org.uk"),
+      list.some((u) => overpassEndpointHost(u) === "overpass.atownsend.org.uk"),
       false,
     );
   });
