@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Checkbox,
   Group,
@@ -115,7 +116,11 @@ function PreloadInboxGate({
           </Group>
         }
       />
-      {signOutError ? <InlineError>{signOutError}</InlineError> : null}
+      {signOutError ? (
+        <Alert role="alert" title="Sign-out failed" data-tone="mispunch">
+          {signOutError}
+        </Alert>
+      ) : null}
     </Stack>
   );
 }

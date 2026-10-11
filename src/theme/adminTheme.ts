@@ -171,16 +171,28 @@ export const adminTheme: MantineThemeOverride = {
     }),
     Alert: Alert.extend({
       defaultProps: { radius: 0 },
+      // Always set: the app theme's default `color: "halt"` merges in and would tint the icon.
+      vars: (_theme, props) => {
+        const tone = (props as { "data-tone"?: StatusTone })["data-tone"];
+        const color = tone ? toneColor[tone] : "var(--adm-ink)";
+        return {
+          root: {
+            "--alert-bg": "var(--adm-paper-raised)",
+            "--alert-color": color,
+            "--alert-bd": tone ? `1px solid ${color}` : rule,
+          },
+        };
+      },
       styles: {
         root: {
           fontFamily: "var(--adm-font)",
-          backgroundColor: "var(--adm-paper-raised)",
-          border: rule,
+          backgroundColor: "var(--alert-bg)",
+          border: "var(--alert-bd)",
           backdropFilter: "none",
           WebkitBackdropFilter: "none",
           boxShadow: "none",
         },
-        title: { color: "var(--adm-ink)", fontWeight: 700 },
+        title: { color: "var(--alert-color)", fontWeight: 700 },
         message: { color: "var(--adm-ink)" },
       },
     }),

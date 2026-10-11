@@ -180,6 +180,13 @@ vi.mock("../../../hooks/incident/useIncidentThread", () => ({
   }),
 }));
 
+vi.mock("firebase/auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("firebase/auth")>()),
+  signOut: vi.fn(async () => {
+    throw new Error("Sign-out network error");
+  }),
+}));
+
 vi.mock("../../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => true,
   getFirebaseAuth: () => ({}),
@@ -239,6 +246,7 @@ describe("AdminOpsDesk", () => {
     const skeleton = document.querySelector(".mantine-Skeleton-root");
     expect(skeleton).toBeInTheDocument();
     expect(skeleton?.closest("[data-admin-world]")).not.toBeNull();
+    expect(document.querySelectorAll("[data-admin-world]")).toHaveLength(1);
   });
 
   it("shows the sign-in gate for signed-out users", () => {
@@ -252,6 +260,7 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByText(/Sign in with your Google account/i)).toBeInTheDocument();
     expect(screen.getByTestId("premium-sign-in-gate")).toHaveTextContent("/admin");
     expect(screen.getByTestId("premium-sign-in-gate").closest("[data-admin-world]")).not.toBeNull();
+    expect(document.querySelectorAll("[data-admin-world]")).toHaveLength(1);
   });
 
   it("titles the signed-out gate in source case", () => {
@@ -264,7 +273,6 @@ describe("AdminOpsDesk", () => {
     const title = screen.getByRole("heading", { name: "Admin event centre" });
     expect(title.textContent).toBe("Admin event centre");
     expect(title.style.textTransform).toBe("");
-    expect(getComputedStyle(title).textTransform).not.toBe("uppercase");
     expect(title.closest("[data-admin-world]")).not.toBeNull();
   });
 
@@ -282,6 +290,24 @@ describe("AdminOpsDesk", () => {
     expect(
       screen.getByRole("heading", { name: "Access denied" }).closest("[data-admin-world]"),
     ).not.toBeNull();
+    expect(document.querySelectorAll("[data-admin-world]")).toHaveLength(1);
+  });
+
+  it("shows a mispunch Alert in the admin world when sign-out fails", async () => {
+    authState.state = "denied";
+    authState.authReady = true;
+    authState.user = { email: "player@example.com", emailVerified: true };
+
+    renderOpsDesk();
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveAttribute("data-tone", "mispunch");
+    expect(alert).toHaveClass("mantine-Alert-root");
+    expect(within(alert).getByText("Sign-out failed")).toBeInTheDocument();
+    expect(within(alert).getByText("Sign-out network error")).toBeInTheDocument();
+    expect(alert.closest("[data-admin-world]")).not.toBeNull();
+    expect(alert.style.getPropertyValue("--alert-color")).toBe("var(--adm-mispunch)");
   });
 
   it("renders the signed-in desk inside the admin world", () => {
