@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { defaultMonitorLayout } from "../../../domain/admin/opsDeskLayout";
+import type { MonitorLayout } from "../../../domain/admin/opsDeskLayout";
 import { createTestSession } from "../../../test/fixtures/sessions";
 import { AdminMonitorPane } from "./AdminMonitorPane";
 
@@ -13,7 +13,19 @@ vi.mock("../../../routes/AdminMapScreen", () => ({
 }));
 
 vi.mock("./AdminMonitorGridWorkspace", () => ({
-  AdminMonitorGridWorkspace: () => <div data-testid="admin-monitor-grid">nested grid</div>,
+  AdminMonitorGridWorkspace: ({
+    layout,
+    onCloseActive,
+  }: {
+    layout: MonitorLayout;
+    onCloseActive: (stackId: string) => void;
+  }) => (
+    <div data-testid="admin-monitor-grid" data-stack-count={layout.stacks.length}>
+      <button type="button" onClick={() => onCloseActive("monitor-log")}>
+        Close log
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock("../../../routes/observer-map-screen/useObserverMapScreen", () => ({
@@ -99,34 +111,31 @@ describe("AdminMonitorPane", () => {
   });
 
   it("uses compact embed path without nested grid when container is narrow", () => {
-    render(
-      <AdminMonitorPane
-        active
-        sessionCode="ABCD"
-        monitorLayout={defaultMonitorLayout()}
-        onMonitorLayoutChange={vi.fn()}
-      />,
-    );
+    render(<AdminMonitorPane active sessionCode="ABCD" />);
 
     expect(screen.getByTestId("admin-monitor-compact")).toBeInTheDocument();
     expect(screen.getByTestId("admin-map-screen-embed")).toBeInTheDocument();
     expect(screen.queryByTestId("admin-monitor-grid")).not.toBeInTheDocument();
   });
 
-  it("renders nested monitor grid when wide and layout handler is provided", () => {
+  it("renders nested monitor grid when wide", () => {
     mockedUseAdminMapWideLayout.mockReturnValue(true);
 
-    render(
-      <AdminMonitorPane
-        active
-        sessionCode="ABCD"
-        monitorLayout={defaultMonitorLayout()}
-        onMonitorLayoutChange={vi.fn()}
-      />,
-    );
+    render(<AdminMonitorPane active sessionCode="ABCD" />);
 
     expect(screen.getByTestId("admin-monitor-nested-wm")).toBeInTheDocument();
     expect(screen.getByTestId("admin-monitor-grid")).toBeInTheDocument();
     expect(screen.queryByTestId("admin-map-screen-embed")).not.toBeInTheDocument();
+  });
+
+  it("owns the nested monitor layout and applies panel mutations", () => {
+    mockedUseAdminMapWideLayout.mockReturnValue(true);
+
+    render(<AdminMonitorPane active sessionCode="ABCD" />);
+
+    const grid = screen.getByTestId("admin-monitor-grid");
+    expect(grid).toHaveAttribute("data-stack-count", "4");
+    fireEvent.click(screen.getByRole("button", { name: "Close log" }));
+    expect(grid).toHaveAttribute("data-stack-count", "3");
   });
 });

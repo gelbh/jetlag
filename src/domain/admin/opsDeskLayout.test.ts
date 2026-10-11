@@ -1,192 +1,110 @@
 import { describe, expect, it } from "vitest";
 import {
-  CUSTOM_PRESET_ID,
-  clampLayoutToCols,
-  cloneLayout,
+  clampMonitorLayoutToCols,
+  cloneMonitorLayout,
   DEFAULT_COLS,
-  DEFAULT_ROW_HEIGHT,
-  type DeskLayout,
   defaultMonitorLayout,
-  defaultScratchLayout,
-  ensureIncidentPanelsVisible,
-  FORMER_BUILTIN_IDS,
-  type GridStack,
-  hidePanel,
-  layoutForFormerBuiltinId,
-  mergePanelOntoStack,
-  migrateLayoutToCols,
+  hideMonitorPanel,
+  type MonitorLayout,
+  type MonitorStack,
+  mergeMonitorPanelOntoStack,
   PANEL_IDS,
-  reorderPanelInStack,
-  setCollapsed,
-  setPinned,
-  showPanel,
-  unstackPanelToCell,
+  reorderMonitorPanelInStack,
+  showMonitorPanel,
+  unstackMonitorPanelToCell,
 } from "./opsDeskLayout";
 
-function stack(partial: Partial<GridStack> & Pick<GridStack, "id" | "panelIds">): GridStack {
-  return {
-    activeIndex: 0,
-    x: 0,
-    y: 0,
-    w: 4,
-    h: 4,
-    ...partial,
-  };
+function stack(
+  partial: Partial<MonitorStack> & Pick<MonitorStack, "id" | "panelIds">,
+): MonitorStack {
+  return { activeIndex: 0, x: 0, y: 0, w: 6, h: 4, ...partial };
 }
 
-function layoutOf(...stacks: GridStack[]): DeskLayout {
-  return {
-    cols: DEFAULT_COLS,
-    rowHeight: DEFAULT_ROW_HEIGHT,
-    stacks,
-    hiddenPanelIds: [],
-  };
+function layoutOf(...stacks: MonitorStack[]): MonitorLayout {
+  return { cols: 24, rowHeight: 24, stacks, hiddenPanelIds: [] };
 }
 
 describe("opsDeskLayout", () => {
-  it("exposes six panel ids, Scratch id, and former builtin migrate ids only", () => {
-    expect(PANEL_IDS).toEqual(["sessions", "monitor", "inbox", "detail", "actions", "settings"]);
-    expect(CUSTOM_PRESET_ID).toBe("custom");
-    expect(FORMER_BUILTIN_IDS).toEqual(["session-watch", "incident-triage", "ops-overview"]);
-    const scratch = defaultScratchLayout();
-    expect(scratch.cols).toBe(DEFAULT_COLS);
-    expect(scratch.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
-    expect(scratch.stacks.map((s) => s.panelIds[0])).toEqual(["sessions", "monitor"]);
-    expect(layoutForFormerBuiltinId("session-watch")).toEqual(scratch);
-    expect(layoutForFormerBuiltinId("not-a-builtin")).toBeNull();
+  it("exposes five panel ids", () => {
+    expect(PANEL_IDS).toEqual(["sessions", "monitor", "inbox", "detail", "actions"]);
   });
 
-  it("cloneLayout deep-clones MonitorLayout", () => {
-    const layout = defaultScratchLayout();
-    layout.monitor = defaultMonitorLayout();
-    const cloned = cloneLayout(layout);
-    expect(cloned.monitor).toEqual(defaultMonitorLayout());
-    cloned.monitor!.cols = 8;
-    expect(layout.monitor?.cols).toBe(DEFAULT_COLS);
+  it("cloneMonitorLayout deep-clones stacks and hidden ids", () => {
+    const layout = defaultMonitorLayout();
+    const cloned = cloneMonitorLayout(layout);
+    cloned.cols = 8;
+    cloned.stacks[0]!.panelIds.push("chat");
+    cloned.hiddenPanelIds.push("map");
+    expect(layout).toEqual(defaultMonitorLayout());
   });
 
-  it("defaultMonitorLayout seeds Probe A panels and hides the rest", () => {
+  it("defaultMonitorLayout shows map, roster, overview and log and hides the rest", () => {
     const monitor = defaultMonitorLayout();
     const visible = monitor.stacks.flatMap((s) => s.panelIds);
     expect(visible).toEqual(["map", "roster", "overview", "log"]);
     expect(monitor.hiddenPanelIds).toEqual(["chat", "sync", "mapTools", "mod"]);
+    expect(monitor.cols).toBe(DEFAULT_COLS);
   });
 
-  it("migrates 12-col layouts to 24 and clamps overflow", () => {
-    const legacy: DeskLayout = {
-      cols: 12,
-      rowHeight: 36,
-      stacks: [
-        {
-          id: "a",
-          panelIds: ["sessions"],
-          activeIndex: 0,
-          x: 6,
-          y: 0,
-          w: 6,
-          h: 4,
-        },
-      ],
-      hiddenPanelIds: [],
-    };
-
-    const migrated = migrateLayoutToCols(legacy, 24);
-    expect(migrated.cols).toBe(24);
-    expect(migrated.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
-    expect(migrated.stacks[0]).toMatchObject({ x: 12, w: 12 });
-
-    const overflow: DeskLayout = {
+  it("clampMonitorLayoutToCols pulls overflowing stacks back inside the grid", () => {
+    const overflow: MonitorLayout = {
       cols: 24,
       rowHeight: 24,
-      stacks: [
-        {
-          id: "b",
-          panelIds: ["monitor"],
-          activeIndex: 0,
-          x: 20,
-          y: 0,
-          w: 10,
-          h: 4,
-        },
-      ],
+      stacks: [{ id: "b", panelIds: ["map"], activeIndex: 0, x: 20, y: 0, w: 10, h: 4 }],
       hiddenPanelIds: [],
     };
-    const clamped = clampLayoutToCols(overflow);
+    const clamped = clampMonitorLayoutToCols(overflow);
     expect(clamped.stacks[0]).toMatchObject({ x: 14, w: 10 });
     expect(clamped.stacks[0]!.x + clamped.stacks[0]!.w).toBe(24);
   });
 
-  it("mergePanelOntoStack moves a panel into the target stack and removes empty source", () => {
+  it("mergeMonitorPanelOntoStack moves a panel into the target stack and removes an empty source", () => {
     const layout = layoutOf(
-      stack({ id: "a", panelIds: ["sessions"], x: 0, y: 0, w: 6, h: 6 }),
-      stack({ id: "b", panelIds: ["inbox"], x: 6, y: 0, w: 6, h: 6 }),
+      stack({ id: "a", panelIds: ["chat"], x: 0, w: 6 }),
+      stack({ id: "b", panelIds: ["log"], x: 6, w: 6 }),
     );
 
-    const next = mergePanelOntoStack(layout, "a", "sessions", "b");
+    const next = mergeMonitorPanelOntoStack(layout, "a", "chat", "b");
 
     expect(next.stacks).toHaveLength(1);
     expect(next.stacks[0]).toMatchObject({
       id: "b",
-      panelIds: ["inbox", "sessions"],
+      panelIds: ["log", "chat"],
       activeIndex: 1,
       x: 6,
-      y: 0,
       w: 6,
-      h: 6,
     });
-    expect(next.hiddenPanelIds).toEqual([]);
   });
 
-  it("mergePanelOntoStack keeps remaining panels on the source stack", () => {
+  it("mergeMonitorPanelOntoStack keeps remaining panels on the source stack", () => {
     const layout = layoutOf(
-      stack({
-        id: "a",
-        panelIds: ["sessions", "monitor"],
-        activeIndex: 1,
-        x: 0,
-        y: 0,
-        w: 4,
-        h: 5,
-      }),
-      stack({ id: "b", panelIds: ["inbox"], x: 4, y: 0, w: 4, h: 5 }),
+      stack({ id: "a", panelIds: ["overview", "sync"], activeIndex: 1 }),
+      stack({ id: "b", panelIds: ["log"], x: 6 }),
     );
 
-    const next = mergePanelOntoStack(layout, "a", "monitor", "b");
+    const next = mergeMonitorPanelOntoStack(layout, "a", "sync", "b");
 
-    expect(next.stacks).toHaveLength(2);
     expect(next.stacks.find((s) => s.id === "a")).toMatchObject({
-      panelIds: ["sessions"],
+      panelIds: ["overview"],
       activeIndex: 0,
     });
     expect(next.stacks.find((s) => s.id === "b")).toMatchObject({
-      panelIds: ["inbox", "monitor"],
+      panelIds: ["log", "sync"],
       activeIndex: 1,
     });
   });
 
-  it("unstackPanelToCell pulls a tab into a new stack at the given cell", () => {
-    const layout = layoutOf(
-      stack({
-        id: "a",
-        panelIds: ["inbox", "detail"],
-        activeIndex: 1,
-        x: 0,
-        y: 0,
-        w: 6,
-        h: 6,
-      }),
-    );
+  it("unstackMonitorPanelToCell pulls a tab into a new stack at the given cell", () => {
+    const layout = layoutOf(stack({ id: "a", panelIds: ["log", "chat"], activeIndex: 1 }));
 
-    const next = unstackPanelToCell(layout, "a", "detail", 6, 0, 6, 4);
+    const next = unstackMonitorPanelToCell(layout, "a", "chat", 6, 0, 6, 4);
 
-    expect(next.stacks).toHaveLength(2);
     expect(next.stacks.find((s) => s.id === "a")).toMatchObject({
-      panelIds: ["inbox"],
+      panelIds: ["log"],
       activeIndex: 0,
     });
-    const created = next.stacks.find((s) => s.id !== "a");
-    expect(created).toMatchObject({
-      panelIds: ["detail"],
+    expect(next.stacks.find((s) => s.id !== "a")).toMatchObject({
+      panelIds: ["chat"],
       activeIndex: 0,
       x: 6,
       y: 0,
@@ -195,153 +113,78 @@ describe("opsDeskLayout", () => {
     });
   });
 
-  it("reorderPanelInStack moves a middle tab to the front and follows activeIndex", () => {
-    const layout = layoutOf(
-      stack({
-        id: "a",
-        panelIds: ["inbox", "detail", "actions"],
-        activeIndex: 1,
-      }),
-    );
+  it("unstackMonitorPanelToCell moves a single-panel stack and clamps it inside the grid", () => {
+    const layout = layoutOf(stack({ id: "a", panelIds: ["map"], collapsed: true }));
 
-    const next = reorderPanelInStack(layout, "a", 1, 0);
+    const next = unstackMonitorPanelToCell(layout, "a", "map", 20, 2, 10, 5);
 
-    expect(next.stacks[0]).toMatchObject({
-      panelIds: ["detail", "inbox", "actions"],
-      activeIndex: 0,
-    });
+    expect(next.stacks).toHaveLength(1);
+    expect(next.stacks[0]).toMatchObject({ id: "a", x: 14, y: 2, w: 10, h: 5, collapsed: false });
   });
 
-  it("reorderPanelInStack is a no-op for the same index", () => {
-    const layout = layoutOf(
-      stack({
-        id: "a",
-        panelIds: ["inbox", "detail"],
-        activeIndex: 1,
-      }),
-    );
+  it("reorderMonitorPanelInStack moves a tab and keeps the active panel selected", () => {
+    const layout = layoutOf(stack({ id: "a", panelIds: ["log", "chat", "sync"], activeIndex: 1 }));
 
-    expect(reorderPanelInStack(layout, "a", 1, 1)).toBe(layout);
+    const next = reorderMonitorPanelInStack(layout, "a", 1, 0);
+
+    expect(next.stacks[0]).toMatchObject({ panelIds: ["chat", "log", "sync"], activeIndex: 0 });
   });
 
-  it("reorderPanelInStack clamps out-of-bounds toIndex", () => {
-    const layout = layoutOf(
-      stack({
-        id: "a",
-        panelIds: ["inbox", "detail", "actions"],
-        activeIndex: 0,
-      }),
-    );
+  it("reorderMonitorPanelInStack returns the same layout for a no-op move", () => {
+    const layout = layoutOf(stack({ id: "a", panelIds: ["log", "chat"], activeIndex: 1 }));
 
-    const next = reorderPanelInStack(layout, "a", 0, 99);
-
-    expect(next.stacks[0]).toMatchObject({
-      panelIds: ["detail", "actions", "inbox"],
-      activeIndex: 2,
-    });
+    expect(reorderMonitorPanelInStack(layout, "a", 1, 1)).toBe(layout);
+    expect(reorderMonitorPanelInStack(layout, "a", 1, 99)).toBe(layout);
   });
 
-  it("ensureIncidentPanelsVisible unhides inbox/detail/actions when hidden", () => {
-    const layout: DeskLayout = {
-      cols: 12,
-      rowHeight: 36,
-      stacks: [stack({ id: "sessions", panelIds: ["sessions"], x: 0, y: 0, w: 12, h: 8 })],
-      hiddenPanelIds: ["inbox", "detail", "actions", "monitor", "settings"],
-    };
+  it("reorderMonitorPanelInStack clamps an out-of-bounds target index", () => {
+    const layout = layoutOf(stack({ id: "a", panelIds: ["log", "chat", "sync"], activeIndex: 0 }));
 
-    const next = ensureIncidentPanelsVisible(layout);
+    const next = reorderMonitorPanelInStack(layout, "a", 0, 99);
 
-    const visible = new Set(next.stacks.flatMap((s) => s.panelIds));
-    expect(visible.has("inbox")).toBe(true);
-    expect(visible.has("detail")).toBe(true);
-    expect(visible.has("actions")).toBe(true);
-    expect(next.hiddenPanelIds).not.toContain("inbox");
-    expect(next.hiddenPanelIds).not.toContain("detail");
-    expect(next.hiddenPanelIds).not.toContain("actions");
+    expect(next.stacks[0]).toMatchObject({ panelIds: ["chat", "sync", "log"], activeIndex: 2 });
   });
 
-  it("setPinned does not alter x/y/w/h", () => {
+  it("hideMonitorPanel hides the panel and removes the stack it emptied", () => {
     const layout = layoutOf(
-      stack({
-        id: "a",
-        panelIds: ["sessions"],
-        x: 2,
-        y: 3,
-        w: 5,
-        h: 7,
-        pinned: false,
-      }),
+      stack({ id: "a", panelIds: ["roster"] }),
+      stack({ id: "b", panelIds: ["log"], x: 6 }),
     );
 
-    const next = setPinned(layout, "a", true);
-    expect(next.stacks[0]).toMatchObject({
-      id: "a",
-      x: 2,
-      y: 3,
-      w: 5,
-      h: 7,
-      pinned: true,
-    });
-  });
-
-  it("setCollapsed does not alter x/y/w", () => {
-    const layout = layoutOf(
-      stack({
-        id: "a",
-        panelIds: ["monitor"],
-        x: 1,
-        y: 2,
-        w: 4,
-        h: 6,
-        collapsed: false,
-      }),
-    );
-
-    const next = setCollapsed(layout, "a", true);
-    expect(next.stacks[0]).toMatchObject({
-      x: 1,
-      y: 2,
-      w: 4,
-      h: 6,
-      collapsed: true,
-    });
-  });
-
-  it("hidePanel moves the panel into hiddenPanelIds and removes empty stacks", () => {
-    const layout = layoutOf(
-      stack({ id: "a", panelIds: ["sessions"], x: 0, y: 0, w: 6, h: 4 }),
-      stack({ id: "b", panelIds: ["inbox"], x: 6, y: 0, w: 6, h: 4 }),
-    );
-
-    const next = hidePanel(layout, "sessions");
+    const next = hideMonitorPanel(layout, "roster");
 
     expect(next.stacks.map((s) => s.id)).toEqual(["b"]);
-    expect(next.hiddenPanelIds).toContain("sessions");
+    expect(next.hiddenPanelIds).toEqual(["roster"]);
   });
 
-  it("showPanel restores a hidden panel onto a new stack", () => {
-    const layout: DeskLayout = {
-      cols: 12,
-      rowHeight: 36,
-      stacks: [stack({ id: "a", panelIds: ["sessions"], x: 0, y: 0, w: 12, h: 6 })],
-      hiddenPanelIds: ["settings"],
+  it("showMonitorPanel restores a hidden panel onto a new stack at the placement", () => {
+    const layout = {
+      ...layoutOf(stack({ id: "a", panelIds: ["map"], w: 24, h: 6 })),
+      hiddenPanelIds: ["chat" as const],
     };
 
-    const next = showPanel(layout, "settings", { x: 0, y: 6, w: 4, h: 4 });
+    const next = showMonitorPanel(layout, "chat", { x: 0, y: 6, w: 8, h: 4 });
 
-    expect(next.hiddenPanelIds).not.toContain("settings");
-    expect(next.stacks.some((s) => s.panelIds.includes("settings"))).toBe(true);
+    expect(next.hiddenPanelIds).toEqual([]);
+    expect(next.stacks.find((s) => s.panelIds.includes("chat"))).toMatchObject({
+      x: 0,
+      y: 6,
+      w: 8,
+      h: 4,
+    });
   });
 
-  it("cloneLayout deep-copies stacks and hidden ids", () => {
-    const layout = layoutOf(stack({ id: "a", panelIds: ["sessions", "monitor"], activeIndex: 1 }));
-    layout.hiddenPanelIds = ["settings"];
+  it("showMonitorPanel stacks below the lowest panel when no placement is given", () => {
+    const layout = {
+      ...layoutOf(
+        stack({ id: "a", panelIds: ["map"], y: 0, h: 6 }),
+        stack({ id: "b", panelIds: ["log"], y: 6, h: 3 }),
+      ),
+      hiddenPanelIds: ["mod" as const],
+    };
 
-    const cloned = cloneLayout(layout);
-    cloned.stacks[0]!.panelIds.push("inbox");
-    cloned.hiddenPanelIds.push("detail");
+    const next = showMonitorPanel(layout, "mod");
 
-    expect(layout.stacks[0]!.panelIds).toEqual(["sessions", "monitor"]);
-    expect(layout.hiddenPanelIds).toEqual(["settings"]);
+    expect(next.stacks.find((s) => s.panelIds.includes("mod"))).toMatchObject({ x: 0, y: 9 });
   });
 });

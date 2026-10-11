@@ -32,16 +32,13 @@ export function AdminMonitorPane({
   sessionCode,
   errorMessage,
   sessionsUnavailable = false,
-  monitorLayout,
-  onMonitorLayoutChange,
 }: {
   active: boolean;
   sessionCode?: string | null;
   errorMessage?: string | null;
   sessionsUnavailable?: boolean;
-  monitorLayout?: MonitorLayout;
-  onMonitorLayoutChange?: (layout: MonitorLayout) => void;
 }) {
+  const [monitorLayout, setMonitorLayout] = useState<MonitorLayout>(defaultMonitorLayout);
   const session = useSessionStore((state) => state.session);
   const locations = usePlayerLocationsSync(active ? session?.id : undefined);
   const setFocusedPlayerUid = useAdminMonitorFocus((state) => state.setFocusedPlayerUid);
@@ -57,24 +54,18 @@ export function AdminMonitorPane({
     ready: active && controller.playAreaReady,
   });
 
-  const resolvedLayout = monitorLayout ?? defaultMonitorLayout();
-
   useEffect(() => {
     if (!active) {
       setFocusedPlayerUid(null);
     }
   }, [active, setFocusedPlayerUid]);
 
-  const mutateMonitorLayout = useCallback(
-    (mutator: (layout: MonitorLayout) => MonitorLayout) => {
-      if (!onMonitorLayoutChange) return;
-      const current = resolvedLayout;
+  const mutateMonitorLayout = (mutator: (layout: MonitorLayout) => MonitorLayout) => {
+    setMonitorLayout((current) => {
       const next = clampMonitorLayoutToCols(mutator(current));
-      if (monitorLayoutsEqual(current, next)) return;
-      onMonitorLayoutChange(next);
-    },
-    [onMonitorLayoutChange, resolvedLayout],
-  );
+      return monitorLayoutsEqual(current, next) ? current : next;
+    });
+  };
 
   const handleModerationAction = useCallback(
     async (action: "end" | "resetBoard" | "cleanupCode") => {
@@ -193,7 +184,7 @@ export function AdminMonitorPane({
     );
   }
 
-  if (isWide && onMonitorLayoutChange && panelBodies && controller.playAreaReady) {
+  if (isWide && panelBodies && controller.playAreaReady) {
     return (
       <div
         ref={shellRef}
@@ -206,9 +197,9 @@ export function AdminMonitorPane({
           </p>
         ) : null}
         <AdminMonitorGridWorkspace
-          layout={resolvedLayout}
+          layout={monitorLayout}
           bodies={panelBodies}
-          onLayoutChange={onMonitorLayoutChange}
+          onLayoutChange={(next) => mutateMonitorLayout(() => next)}
           onMergePanel={(targetStackId, payload) => {
             mutateMonitorLayout((layout) =>
               mergeMonitorPanelOntoStack(

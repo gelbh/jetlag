@@ -20,8 +20,6 @@ export function AdminPanelBody({ panelId, bodies }: AdminPanelBodyProps) {
       return <>{bodies.detail}</>;
     case "actions":
       return <>{bodies.actions}</>;
-    case "settings":
-      return <>{bodies.settings}</>;
     default: {
       const _exhaustive: never = panelId;
       return _exhaustive;

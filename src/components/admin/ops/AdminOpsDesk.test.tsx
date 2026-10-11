@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
@@ -7,12 +7,29 @@ import { renderWithRouter } from "../../../test/renderWithRouter";
 import { jetlagTheme } from "../../../theme/theme";
 import { AdminOpsDesk } from "./AdminOpsDesk";
 
-function renderOpsDesk(ui: ReactElement = <AdminOpsDesk />) {
+function renderOpsDesk(ui: ReactElement = <AdminOpsDesk />, route = "/admin") {
   return renderWithRouter(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
+    { route },
   );
+}
+
+function mockViewport(desktop: boolean) {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: desktop && query === "(min-width: 1024px)",
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
 }
 
 function expectStaticAppShell(layout: "desktop" | "mobile") {
@@ -59,12 +76,28 @@ vi.mock("../../billing/PremiumSignInGate", () => ({
   ),
 }));
 
-vi.mock("../../../services/admin/adminIncidents", () => ({
-  subscribeIncidentList: (onNext: (incidents: unknown[]) => void) => {
-    onNext([]);
-    return () => undefined;
-  },
-  countOpenIncidents: () => 0,
+vi.mock("../../../services/admin/adminIncidents", async () => {
+  const actual = await vi.importActual<typeof import("../../../services/admin/adminIncidents")>(
+    "../../../services/admin/adminIncidents",
+  );
+  return {
+    ...actual,
+    subscribeIncidentList: (onNext: (incidents: unknown[]) => void) => {
+      onNext([]);
+      return () => undefined;
+    },
+    countOpenIncidents: () => 0,
+  };
+});
+
+vi.mock("../../../hooks/incident/useIncidentThread", () => ({
+  useIncidentThread: () => ({
+    incident: null,
+    messages: [],
+    error: null,
+    sending: false,
+    sendMessage: vi.fn(),
+  }),
 }));
 
 vi.mock("../../../services/core/firebase/firebase", () => ({
@@ -80,18 +113,6 @@ vi.mock("../../../hooks/admin/useAdminJoinSession", () => ({
     error: null,
     setError: vi.fn(),
   }),
-}));
-
-vi.mock("react-grid-layout", () => ({
-  default: ({ children }: { children: unknown }) => (
-    <div data-testid="mock-grid">{children as never}</div>
-  ),
-  useContainerWidth: () => ({
-    width: 1200,
-    containerRef: { current: null },
-    mounted: true,
-  }),
-  verticalCompactor: {},
 }));
 
 describe("AdminOpsDesk", () => {
@@ -141,6 +162,39 @@ describe("AdminOpsDesk", () => {
     renderOpsDesk();
 
     expect(screen.getByRole("heading", { name: "Access denied" })).toBeInTheDocument();
+    expect(screen.getByText("Restricted panel")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back home" })).toHaveAttribute("href", "/");
+  });
+
+  it("opens settings in a dialog from the topbar", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [];
+    mockViewport(true);
+
+    renderOpsDesk();
+
+    expect(screen.queryByTestId("admin-settings-panel")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^settings$/i }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Desk settings" });
+    expect(within(dialog).getByTestId("admin-settings-panel")).toBeInTheDocument();
+  });
+
+  it("has no Settings tab in the mobile panel picker", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [];
+    mockViewport(false);
+
+    renderOpsDesk();
+
+    expect(screen.getByRole("tab", { name: "Sessions" })).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Settings" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^settings$/i })).toBeInTheDocument();
   });
 
   it("defaults Live on and shows no-live empty title when the list is empty", () => {
@@ -340,20 +394,7 @@ describe("AdminOpsDesk", () => {
         liveMultiplayer: true,
       },
     ];
-
-    Object.defineProperty(window, "matchMedia", {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === "(min-width: 1024px)",
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
-    });
+    mockViewport(true);
 
     renderOpsDesk();
 
@@ -370,19 +411,7 @@ describe("AdminOpsDesk", () => {
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.sessions = [];
 
-    Object.defineProperty(window, "matchMedia", {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
-    });
+    mockViewport(false);
 
     renderOpsDesk();
 
@@ -390,6 +419,70 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
     expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
+  });
+
+  it("sets data-desk-mode to sessions on /admin desktop", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [];
+    mockViewport(true);
+
+    renderOpsDesk(<AdminOpsDesk />, "/admin");
+
+    const desk = screen.getByTestId("admin-fixed-desk");
+    expect(desk).toHaveAttribute("data-desk-mode", "sessions");
+    expect(screen.getByTestId("admin-ops-sessions")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
+  });
+
+  it("sets data-desk-mode to incidents on /admin/incidents desktop", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [];
+    mockViewport(true);
+
+    renderOpsDesk(<AdminOpsDesk />, "/admin/incidents");
+
+    const desk = screen.getByTestId("admin-fixed-desk");
+    expect(desk).toHaveAttribute("data-desk-mode", "incidents");
+    expect(screen.getByRole("region", { name: "Incidents" })).toBeInTheDocument();
+    expect(screen.getByTestId("admin-ops-sessions")).toBeInTheDocument();
+    expect(screen.getByTestId("admin-incident-inbox-empty")).toBeInTheDocument();
+    expect(screen.getByTestId("admin-incident-detail")).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Incident actions" })).toBeInTheDocument();
+  });
+
+  it("returns to sessions mode from the topbar brand link on desktop", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [];
+    mockViewport(true);
+
+    renderOpsDesk(<AdminOpsDesk />, "/admin/incidents");
+
+    expect(screen.getByTestId("admin-fixed-desk")).toHaveAttribute("data-desk-mode", "incidents");
+    fireEvent.click(screen.getByRole("link", { name: /admin ops/i }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("admin-fixed-desk")).toHaveAttribute("data-desk-mode", "sessions"),
+    );
+  });
+
+  it("clears retired desk layout storage on mount", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [];
+    localStorage.setItem("jetlag.adminOpsDesk.v1", "{}");
+    localStorage.setItem("jetlag.adminOpsDesk.v1:uid-admin", "{}");
+
+    renderOpsDesk();
+
+    expect(localStorage.getItem("jetlag.adminOpsDesk.v1")).toBeNull();
+    expect(localStorage.getItem("jetlag.adminOpsDesk.v1:uid-admin")).toBeNull();
   });
 
   it("loads more sessions from the list footer", () => {

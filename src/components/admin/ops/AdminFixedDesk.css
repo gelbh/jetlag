@@ -1,0 +1,40 @@
+.jl-ops-fixed-desk {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  gap: 0.5rem;
+  overflow: hidden;
+  padding: 0.5rem;
+}
+
+.jl-ops-fixed-desk[data-desk-mode="sessions"] {
+  grid-template-columns: minmax(14rem, 22fr) minmax(0, 78fr);
+  grid-template-areas: "sessions monitor";
+}
+
+.jl-ops-fixed-desk[data-desk-mode="incidents"] {
+  grid-template-columns: minmax(12rem, 18fr) minmax(0, 40fr) minmax(16rem, 42fr);
+  grid-template-areas: "sessions monitor incidents";
+}
+
+.jl-ops-fixed-region {
+  min-height: 0;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.jl-ops-fixed-region--sessions {
+  grid-area: sessions;
+}
+
+.jl-ops-fixed-region--monitor {
+  grid-area: monitor;
+}
+
+.jl-ops-fixed-region--incidents {
+  grid-area: incidents;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 0.9fr);
+  gap: 0.5rem;
+}
