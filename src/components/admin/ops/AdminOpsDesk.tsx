@@ -1,4 +1,4 @@
-import { Alert, AppShell, Button, Group, Skeleton, Stack, Text, Title } from "@mantine/core";
+import { Alert, AppShell, Button, Group, Modal, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
@@ -8,35 +8,8 @@ import type {
   AdminSessionStateChip,
 } from "../../../domain/admin/adminSessionFilters";
 import { filterAdminSessions } from "../../../domain/admin/adminSessionFilters";
-import {
-  CUSTOM_PRESET_ID,
-  clampLayoutToCols,
-  clampMonitorLayoutToCols,
-  cloneLayout,
-  type DeskLayout,
-  defaultMonitorLayout,
-  deleteUserPreset,
-  ensureIncidentPanelsVisible,
-  hidePanel,
-  layoutsEqual,
-  type MonitorLayout,
-  mergePanelOntoStack,
-  PANEL_IDS,
-  type PanelId,
-  reorderPanelInStack,
-  resolvePresetLayout,
-  setCollapsed,
-  setPinned,
-  setStackActiveIndex,
-  showPanel,
-  unstackPanelToCell,
-  upsertUserPreset,
-} from "../../../domain/admin/opsDeskLayout";
-import {
-  coldStartOpsDeskStore,
-  type OpsDeskStoreV1,
-  saveOpsDeskStore,
-} from "../../../domain/admin/opsDeskPersistence";
+import { clearLegacyOpsDeskStorage } from "../../../domain/admin/clearLegacyOpsDeskStorage";
+import type { PanelId } from "../../../domain/admin/opsDeskLayout";
 import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
 import { useAdminAccessState } from "../../../hooks/admin/useAdminAccessState";
 import { useAdminJoinSession } from "../../../hooks/admin/useAdminJoinSession";
@@ -54,11 +27,9 @@ import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
 import { AdminIncidentInbox } from "../incident/AdminIncidentInbox";
 import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
-import { AdminPresetDialog, type AdminPresetDialogMode } from "../preset/AdminPresetDialog";
 import type { AdminPanelBodies } from "../shared/AdminPanelBody";
-import type { PanelMergePayload } from "../shared/AdminPanelStack";
 import { AdminDeskTopbar } from "./AdminDeskTopbar";
-import { AdminGridWorkspace } from "./AdminGridWorkspace";
+import { AdminFixedDesk } from "./AdminFixedDesk";
 import { AdminMobileDesk } from "./AdminMobileDesk";
 import { AdminSessionFilters } from "./AdminSessionFilters";
 import { AdminSessionRow } from "./AdminSessionRow";
@@ -88,10 +59,6 @@ function continuePathForRoute(pathname: string, incidentId: string | null): stri
   return "/admin";
 }
 
-function firstVisiblePanel(layout: DeskLayout): PanelId {
-  return layout.stacks[0]?.panelIds[0] ?? "sessions";
-}
-
 export function AdminOpsDesk() {
   const { incidentId: routeIncidentId } = useParams<{ incidentId?: string }>();
   const location = useLocation();
@@ -103,22 +70,13 @@ export function AdminOpsDesk() {
   const selectedIncidentId = routeIncidentId?.trim() || null;
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
 
-  const [store, setStore] = useState<OpsDeskStoreV1>(() =>
-    coldStartOpsDeskStore(user?.uid ?? null),
-  );
-  const [storeUid, setStoreUid] = useState<string | null>(user?.uid ?? null);
+  const [mobilePanel, setMobilePanel] = useState<PanelId | null>(null);
+  const [mobileRouteKey, setMobileRouteKey] = useState<string | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
   const [incidentsLoading, setIncidentsLoading] = useState(enabled);
   const [incidentsError, setIncidentsError] = useState<string | null>(null);
   const [enabledState, setEnabledState] = useState(enabled);
-  const [deepLinkKey, setDeepLinkKey] = useState<string | null>(null);
-  const [presetDialog, setPresetDialog] = useState<{
-    mode: AdminPresetDialogMode;
-    presetId?: string;
-    initialName?: string;
-  } | null>(null);
-
   const activeSession = useSessionStore((state) => state.session);
   const activeRole = useSessionStore((state) => state.myRole);
   const {
@@ -148,13 +106,14 @@ export function AdminOpsDesk() {
   const [monitorSessionId, setMonitorSessionId] = useState<string | null>(null);
   const monitorRequestRef = useRef(0);
   const [signOutError, setSignOutError] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const uid = user?.uid ?? null;
-
-  if (uid !== storeUid) {
-    setStoreUid(uid);
-    setStore(coldStartOpsDeskStore(uid));
-    setDeepLinkKey(null);
+  const incidentsRouteKey = onIncidentsRoute ? location.pathname : null;
+  if (incidentsRouteKey !== mobileRouteKey) {
+    setMobileRouteKey(incidentsRouteKey);
+    if (incidentsRouteKey) {
+      setMobilePanel(selectedIncidentId != null ? "detail" : (mobilePanel ?? "inbox"));
+    }
   }
 
   if (enabled !== enabledState) {
@@ -164,6 +123,10 @@ export function AdminOpsDesk() {
       setIncidentsError(null);
     }
   }
+
+  useEffect(() => {
+    clearLegacyOpsDeskStorage();
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -185,85 +148,6 @@ export function AdminOpsDesk() {
     );
     return unsubscribe;
   }, [enabled]);
-
-  const persistStore = useCallback(
-    (next: OpsDeskStoreV1) => {
-      setStore(next);
-      saveOpsDeskStore(uid, next);
-    },
-    [uid],
-  );
-
-  const deskLayout = useMemo(
-    () => resolvePresetLayout(store.activePresetId, store.customLayout, store.userPresets),
-    [store.activePresetId, store.customLayout, store.userPresets],
-  );
-
-  const monitorLayout = useMemo(
-    () => deskLayout.monitor ?? defaultMonitorLayout(),
-    [deskLayout.monitor],
-  );
-
-  const mutateLayout = useCallback(
-    (mutator: (layout: DeskLayout) => DeskLayout) => {
-      setStore((prev) => {
-        const current = resolvePresetLayout(
-          prev.activePresetId,
-          prev.customLayout,
-          prev.userPresets,
-        );
-        const nextLayout = clampLayoutToCols(mutator(current));
-        if (layoutsEqual(current, nextLayout)) return prev;
-        const next: OpsDeskStoreV1 = {
-          ...prev,
-          activePresetId: CUSTOM_PRESET_ID,
-          customLayout: nextLayout,
-        };
-        saveOpsDeskStore(uid, next);
-        return next;
-      });
-    },
-    [uid],
-  );
-
-  const handleMonitorLayoutChange = useCallback(
-    (nextMonitor: MonitorLayout) => {
-      mutateLayout((layout) => ({
-        ...layout,
-        monitor: clampMonitorLayoutToCols(nextMonitor),
-      }));
-    },
-    [mutateLayout],
-  );
-
-  useEffect(() => {
-    if (!enabled || !onIncidentsRoute) return;
-    const key = `${location.pathname}:${uid ?? "anon"}`;
-    if (deepLinkKey === key) return;
-
-    setStore((prev) => {
-      const current = resolvePresetLayout(prev.activePresetId, prev.customLayout, prev.userPresets);
-      const ensured = ensureIncidentPanelsVisible(current);
-      const layoutChanged = !layoutsEqual(current, ensured);
-      const nextMobile: PanelId =
-        selectedIncidentId != null
-          ? "detail"
-          : prev.lastMobilePanelId &&
-              (PANEL_IDS as readonly string[]).includes(prev.lastMobilePanelId)
-            ? prev.lastMobilePanelId
-            : "inbox";
-
-      const next: OpsDeskStoreV1 = {
-        ...prev,
-        activePresetId: layoutChanged ? CUSTOM_PRESET_ID : prev.activePresetId,
-        customLayout: layoutChanged ? ensured : prev.customLayout,
-        lastMobilePanelId: nextMobile,
-      };
-      saveOpsDeskStore(uid, next);
-      return next;
-    });
-    setDeepLinkKey(key);
-  }, [deepLinkKey, enabled, location.pathname, onIncidentsRoute, selectedIncidentId, uid]);
 
   const visibleIncidents = enabled ? incidents : EMPTY_INCIDENTS;
   const openCount = useMemo(() => countOpenIncidents(visibleIncidents), [visibleIncidents]);
@@ -360,126 +244,7 @@ export function AdminOpsDesk() {
     }
   };
 
-  const handleSelectPreset = (presetId: string) => {
-    setStore((prev) => {
-      const layout = resolvePresetLayout(presetId, prev.customLayout, prev.userPresets);
-      const next: OpsDeskStoreV1 = {
-        ...prev,
-        activePresetId: presetId,
-        lastMobilePanelId: firstVisiblePanel(layout),
-      };
-      saveOpsDeskStore(uid, next);
-      return next;
-    });
-  };
-
-  const handleSaveCurrent = () => {
-    setPresetDialog({ mode: "save", initialName: "" });
-  };
-
-  const handleRenameUserPreset = (presetId: string) => {
-    const preset = store.userPresets.find((p) => p.id === presetId);
-    if (!preset) return;
-    setPresetDialog({
-      mode: "rename",
-      presetId,
-      initialName: preset.name,
-    });
-  };
-
-  const handleOverwriteUserPreset = () => {
-    const preset = store.userPresets.find((p) => p.id === store.activePresetId);
-    if (!preset) return;
-    setPresetDialog({
-      mode: "overwrite",
-      presetId: preset.id,
-      initialName: preset.name,
-    });
-  };
-
-  const handlePresetDialogConfirm = (name: string) => {
-    if (!presetDialog) return;
-    if (presetDialog.mode === "rename" && presetDialog.presetId) {
-      const trimmed = name.trim();
-      if (!trimmed) return;
-      persistStore({
-        ...store,
-        userPresets: store.userPresets.map((preset) =>
-          preset.id === presetDialog.presetId ? { ...preset, name: trimmed } : preset,
-        ),
-      });
-      setPresetDialog(null);
-      return;
-    }
-
-    if (presetDialog.mode === "overwrite" && presetDialog.presetId) {
-      const result = upsertUserPreset(
-        store.userPresets,
-        presetDialog.initialName ?? name,
-        deskLayout,
-        { overwriteId: presetDialog.presetId },
-      );
-      if (!result.ok) return;
-      persistStore({
-        ...store,
-        activePresetId: result.preset.id,
-        userPresets: result.presets,
-        customLayout: cloneLayout(deskLayout),
-      });
-      setPresetDialog(null);
-      return;
-    }
-
-    const existing = store.userPresets.find(
-      (p) => p.name.trim().toLowerCase() === name.trim().toLowerCase(),
-    );
-    if (existing) {
-      setPresetDialog({
-        mode: "overwrite",
-        presetId: existing.id,
-        initialName: existing.name,
-      });
-      return;
-    }
-    const result = upsertUserPreset(store.userPresets, name, deskLayout);
-    if (!result.ok) return;
-    persistStore({
-      ...store,
-      activePresetId: result.preset.id,
-      userPresets: result.presets,
-      presetOrder: [...store.presetOrder, result.preset.id].filter(
-        (id, index, all) => all.indexOf(id) === index,
-      ),
-      customLayout: cloneLayout(deskLayout),
-    });
-    setPresetDialog(null);
-  };
-
-  const handleDeleteUserPreset = (presetId: string) => {
-    persistStore({
-      ...store,
-      userPresets: deleteUserPreset(store.userPresets, presetId),
-      presetOrder: store.presetOrder.filter((id) => id !== presetId),
-      defaultPresetId:
-        store.defaultPresetId === presetId ? CUSTOM_PRESET_ID : store.defaultPresetId,
-      activePresetId: store.activePresetId === presetId ? CUSTOM_PRESET_ID : store.activePresetId,
-    });
-  };
-
-  const handleSetDefault = (presetId: string) => {
-    persistStore({ ...store, defaultPresetId: presetId });
-  };
-
-  const handleReorderPresets = (orderedIds: string[]) => {
-    persistStore({ ...store, presetOrder: orderedIds });
-  };
-
-  const mobilePanelId: PanelId =
-    store.lastMobilePanelId && (PANEL_IDS as readonly string[]).includes(store.lastMobilePanelId)
-      ? store.lastMobilePanelId
-      : onIncidentsRoute
-        ? "inbox"
-        : "sessions";
+  const mobilePanelId: PanelId = mobilePanel ?? (onIncidentsRoute ? "inbox" : "sessions");
 
   const loadMoreButton = hasMore ? (
     <Button
@@ -577,8 +342,6 @@ export function AdminOpsDesk() {
           sessionCode={activeSession?.code ?? null}
           errorMessage={monitorRoleError}
           sessionsUnavailable={sessionsFailedEmpty}
-          monitorLayout={monitorLayout}
-          onMonitorLayoutChange={handleMonitorLayoutChange}
         />
       </div>
     ),
@@ -609,7 +372,6 @@ export function AdminOpsDesk() {
         />
       </div>
     ),
-    settings: <AdminSettingsPanel />,
   };
 
   if (accessState === "loading" || !authReady) {
@@ -650,10 +412,8 @@ export function AdminOpsDesk() {
         <Button component={AppLink} to="/" variant="default" size="compact-sm" w="fit-content">
           Back
         </Button>
-        <Title order={1} tt="uppercase">
-          Access denied
-        </Title>
-        <Alert color="red" title="Restricted panel">
+        <Title order={1}>Access denied</Title>
+        <Alert title="Restricted panel">
           Signed in as {user?.email ?? "unknown"}. This panel is restricted to the app owner.
         </Alert>
         {signOutError ? <InlineError>{signOutError}</InlineError> : null}
@@ -674,17 +434,7 @@ export function AdminOpsDesk() {
       openIncidents={openCount}
       inQueue={visibleIncidents.length}
       now={now}
-      activePresetId={store.activePresetId}
-      defaultPresetId={store.defaultPresetId}
-      presetOrder={store.presetOrder}
-      userPresets={store.userPresets}
-      onSelectPreset={handleSelectPreset}
-      onSaveCurrent={handleSaveCurrent}
-      onDeleteUserPreset={handleDeleteUserPreset}
-      onSetDefault={handleSetDefault}
-      onReorderPresets={handleReorderPresets}
-      onRenameUserPreset={handleRenameUserPreset}
-      onOverwriteUserPreset={handleOverwriteUserPreset}
+      onOpenSettings={() => setSettingsOpen(true)}
       onRefreshSessions={() => void refresh({ background: true })}
       refreshing={refreshing}
     />
@@ -708,84 +458,20 @@ export function AdminOpsDesk() {
             {incidentsError && visibleIncidents.length > 0 ? (
               <InlineError>{incidentsError}</InlineError>
             ) : null}
-            <AdminGridWorkspace
-              layout={deskLayout}
-              bodies={bodies}
-              onLayoutChange={(next) => mutateLayout(() => next)}
-              onMergePanel={(targetStackId, payload: PanelMergePayload) => {
-                mutateLayout((layout) =>
-                  mergePanelOntoStack(
-                    layout,
-                    payload.sourceStackId,
-                    payload.panelId,
-                    targetStackId,
-                  ),
-                );
-              }}
-              onReorderPanel={(stackId, fromIndex, toIndex) => {
-                mutateLayout((layout) => reorderPanelInStack(layout, stackId, fromIndex, toIndex));
-              }}
-              onUnstackPanel={(sourceStackId, panelId, x, y, w, h) => {
-                mutateLayout((layout) =>
-                  unstackPanelToCell(layout, sourceStackId, panelId, x, y, w, h),
-                );
-              }}
-              onPlacePanel={(panelId, x, y, w, h) => {
-                mutateLayout((layout) => showPanel(layout, panelId, { x, y, w, h }));
-              }}
-              onActiveIndexChange={(stackId, activeIndex) => {
-                mutateLayout((layout) => setStackActiveIndex(layout, stackId, activeIndex));
-              }}
-              onPinToggle={(stackId) => {
-                mutateLayout((layout) => {
-                  const stack = layout.stacks.find((s) => s.id === stackId);
-                  if (!stack) return layout;
-                  return setPinned(layout, stackId, !stack.pinned);
-                });
-              }}
-              onCollapseToggle={(stackId) => {
-                mutateLayout((layout) => {
-                  const stack = layout.stacks.find((s) => s.id === stackId);
-                  if (!stack) return layout;
-                  return setCollapsed(layout, stackId, !stack.collapsed);
-                });
-              }}
-              onCloseActive={(stackId) => {
-                mutateLayout((layout) => {
-                  const stack = layout.stacks.find((s) => s.id === stackId);
-                  if (!stack) return layout;
-                  const panelId = stack.panelIds[stack.activeIndex] ?? stack.panelIds[0];
-                  if (!panelId) return layout;
-                  return hidePanel(layout, panelId);
-                });
-              }}
-            />
-            <AdminPresetDialog
-              key={
-                presetDialog
-                  ? `${presetDialog.mode}:${presetDialog.presetId ?? "new"}:${presetDialog.initialName ?? ""}`
-                  : "closed"
-              }
-              open={presetDialog != null}
-              mode={presetDialog?.mode ?? "save"}
-              initialName={presetDialog?.initialName ?? ""}
-              title={
-                presetDialog?.mode === "rename"
-                  ? "Rename preset"
-                  : presetDialog?.mode === "overwrite"
-                    ? "Update preset"
-                    : "Save layout as…"
-              }
-              confirmLabel={presetDialog?.mode === "overwrite" ? "Overwrite" : "Save"}
-              onCancel={() => setPresetDialog(null)}
-              onConfirm={handlePresetDialogConfirm}
+            <AdminFixedDesk
+              mode={onIncidentsRoute ? "incidents" : "sessions"}
+              sessions={bodies.sessions}
+              monitor={bodies.monitor}
+              inbox={bodies.inbox}
+              detail={bodies.detail}
+              actions={bodies.actions}
             />
           </>
         ) : (
           <AdminMobileDesk
             activePanelId={mobilePanelId}
             onSelectPanel={(panelId) => {
-              persistStore({ ...store, lastMobilePanelId: panelId });
+              setMobilePanel(panelId);
               if (
                 (panelId === "detail" || panelId === "actions" || panelId === "inbox") &&
                 !onIncidentsRoute
@@ -801,6 +487,9 @@ export function AdminOpsDesk() {
           />
         )}
       </AppShell.Main>
+      <Modal opened={settingsOpen} onClose={() => setSettingsOpen(false)} title="Desk settings">
+        <AdminSettingsPanel />
+      </Modal>
     </AppShell>
   );
 }
