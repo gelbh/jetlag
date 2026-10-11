@@ -79,8 +79,8 @@ export function isAppCheckFetchNetworkErrorMessage(message: string): boolean {
 }
 
 /**
- * Soft App Check probe outcomes that must not land as Sentry errors
- * (beforeSend safety net for uncaught leftovers).
+ * Soft App Check probe outcomes that must not land as exception reports
+ * (client exception policy safety net for uncaught leftovers).
  */
 export function isAppCheckSoftFailureMessage(message: string): boolean {
   return (

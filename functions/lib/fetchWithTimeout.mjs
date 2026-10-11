@@ -32,7 +32,7 @@ export async function fetchWithTimeout(url, init, timeoutMs) {
       signal: controller.signal,
     });
   } catch (error) {
-    // Convert AbortError at the timeout boundary so callers / Sentry never see
+    // Convert AbortError at the timeout boundary so callers / exception capture never see
     // raw abort noise (JETLAG-T). Overpass failover still maps remaining aborts.
     if (isAbortError(error)) {
       throw new FetchTimeoutError(timeoutMs);

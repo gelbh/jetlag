@@ -1,4 +1,4 @@
-/** Human-facing HttpsError messages for expected join/role UX (Sentry allowlist SoT). */
+/** Human-facing HttpsError messages for expected join/role UX (exception allowlist SoT). */
 export const HTTPS_MSG_WRONG_ROLE_CODE = "Wrong role code.";
 export const HTTPS_MSG_ROLE_CODE_REQUIRED = "Role code is required.";
 export const HTTPS_MSG_APP_VERSION_INCOMPATIBLE = "App version incompatible.";
@@ -11,7 +11,7 @@ export const HTTPS_MSG_JOIN_NOT_ALLOWED = "Not allowed for this join request.";
 export const HTTPS_MSG_LEGACY_JOIN = "Session uses legacy join.";
 
 /**
- * Expected session join/role UX HttpsError keys (`code:message`) for Sentry.
+ * Expected session join/role UX HttpsError keys (`code:message`) skipped by exception capture.
  * Keep in sync with mapJoinSessionWithRoleError / mapJoinRequestError throws.
  */
 export const EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS = [

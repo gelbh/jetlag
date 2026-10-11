@@ -20,9 +20,9 @@ export const JS_LIMIT_KB = 80;
 // (the rest is app CSS: map chrome, motion, Tailwind utilities, fonts).
 export const CSS_LIMIT_KB = 36;
 
-const FORBIDDEN_SRC = /node_modules\/(firebase|posthog-js|@sentry|@turf|maplibre-gl)\//;
-// `sentry` / `analytics` are the app-owned wrappers that pull @sentry / posthog.
-const FORBIDDEN_NAME = /^(vendor-firebase|vendor-turf)|^(sentry|analytics)$/;
+const FORBIDDEN_SRC = /node_modules\/(firebase|posthog-js|@turf|maplibre-gl)\//;
+// `analytics` is the app-owned wrapper that pulls posthog.
+const FORBIDDEN_NAME = /^(vendor-firebase|vendor-turf)|^analytics$/;
 export const APP_CHUNK_KEY = "src/App.tsx";
 
 const kb = (bytes) => bytes / 1024;

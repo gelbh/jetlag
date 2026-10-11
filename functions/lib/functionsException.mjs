@@ -129,8 +129,6 @@ export function isExpectedFunctionsError(error) {
 
 /**
  * True when capture should skip (expected UX errors or Overpass transport noise).
- * Overpass fetch-failed residuals were previously dropped in Sentry beforeSend;
- * without that hook they must be gated here.
  * @param {unknown} error
  * @returns {boolean}
  */

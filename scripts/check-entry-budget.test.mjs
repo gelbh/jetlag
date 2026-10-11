@@ -84,7 +84,7 @@ test("forbidden chunk statically reachable from the App chunk fails", () => {
       dynamicImports: ["lazy.js"],
     };
     m["mid.js"] = { file: "mid.js", name: "analyticsConsent" };
-    m["lazy.js"] = { file: "lazy.js", name: "sentry", imports: ["fb.js"] };
+    m["lazy.js"] = { file: "lazy.js", name: "analytics", imports: ["fb.js"] };
     return m;
   };
 
@@ -96,9 +96,7 @@ test("forbidden chunk statically reachable from the App chunk fails", () => {
   for (const patch of [
     { name: "vendor-firebase" },
     { name: "vendor-turf" },
-    { name: "sentry" },
     { name: "analytics" },
-    { src: "node_modules/@sentry/core/index.js" },
     { src: "node_modules/posthog-js/dist/module.js" },
   ]) {
     const m = withApp();
