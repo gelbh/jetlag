@@ -21,19 +21,34 @@ test("triageIncidentDiagnostics returns agent for TypeError", () => {
   assert.equal(result.matchedErrorName, "TypeError");
 });
 
-test("triageIncidentDiagnostics returns agent when sentryEventId present", () => {
+test("triageIncidentDiagnostics returns agent when posthogExceptionId present", () => {
   const result = triageIncidentDiagnostics({
     lastClientErrors: [
       {
         name: "Error",
         message: "something odd",
         at: "2026-07-25T12:00:00.000Z",
-        sentryEventId: "abc123",
+        posthogExceptionId: "abc123",
       },
     ],
   });
   assert.equal(result.outcome, TRIAGE_OUTCOME_AGENT);
-  assert.equal(result.reason, "sentry_event");
+  assert.equal(result.reason, "posthog_exception");
+});
+
+test("triageIncidentDiagnostics dual-reads legacy sentryEventId as posthog_exception", () => {
+  const result = triageIncidentDiagnostics({
+    lastClientErrors: [
+      {
+        name: "Error",
+        message: "legacy id",
+        at: "2026-07-25T12:00:00.000Z",
+        sentryEventId: "legacy-evt",
+      },
+    ],
+  });
+  assert.equal(result.outcome, TRIAGE_OUTCOME_AGENT);
+  assert.equal(result.reason, "posthog_exception");
 });
 
 test("triageIncidentDiagnostics returns human without clear bug signals", () => {

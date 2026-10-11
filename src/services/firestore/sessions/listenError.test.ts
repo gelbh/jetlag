@@ -2,11 +2,9 @@ import { FirebaseError } from "firebase/app";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const captureException = vi.hoisted(() => vi.fn());
-const reportFirestoreListenPermissionDenied = vi.hoisted(() => vi.fn());
 
-vi.mock("../../core/analytics/sentry", () => ({
+vi.mock("../../core/analytics/clientErrors", () => ({
   captureException,
-  reportFirestoreListenPermissionDenied,
 }));
 
 import { handleFirestoreListenError } from "./listenError";
@@ -14,16 +12,14 @@ import { handleFirestoreListenError } from "./listenError";
 describe("handleFirestoreListenError", () => {
   afterEach(() => {
     captureException.mockClear();
-    reportFirestoreListenPermissionDenied.mockClear();
   });
 
-  it("breadcrumbs expected permission-denied without captureException", () => {
+  it("skips captureException for expected permission-denied", () => {
     const onError = vi.fn();
     const error = new FirebaseError("permission-denied", "Missing or insufficient permissions.");
 
     handleFirestoreListenError(error, onError);
 
-    expect(reportFirestoreListenPermissionDenied).toHaveBeenCalledOnce();
     expect(captureException).not.toHaveBeenCalled();
     expect(onError).toHaveBeenCalledExactlyOnceWith(error);
   });
@@ -34,7 +30,6 @@ describe("handleFirestoreListenError", () => {
 
     handleFirestoreListenError(error, onError);
 
-    expect(reportFirestoreListenPermissionDenied).not.toHaveBeenCalled();
     expect(captureException).toHaveBeenCalledExactlyOnceWith(error);
     expect(onError).toHaveBeenCalledExactlyOnceWith(error);
   });

@@ -1,7 +1,7 @@
 import type { CaptureResult } from "posthog-js";
 import { describe, expect, it } from "vitest";
+import { QUOTA_SAMPLE_RATE } from "./clientExceptionPolicy";
 import { filterPosthogException } from "./posthogExceptionPolicy";
-import { QUOTA_SAMPLE_RATE } from "./sentryEventPolicy";
 
 function exceptionCapture(type: string, value: string): CaptureResult {
   return {

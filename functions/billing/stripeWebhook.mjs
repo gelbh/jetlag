@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { setCors } from "../lib/cors.mjs";
+import { captureFunctionsException } from "../lib/functionsException.mjs";
 import { captureAnalyticsEvent } from "../lib/posthog.mjs";
-import { captureFunctionsException } from "../lib/sentry.mjs";
 import { markStripeEventProcessed } from "./premiumEntitlements.mjs";
 import {
   applyCheckoutSessionCompleted,
@@ -105,7 +105,7 @@ export async function handleStripeWebhook(db, webhookSecret, req, res, options) 
       return;
     }
 
-    captureFunctionsException(error);
+    await captureFunctionsException(error);
     res.status(400).send("Webhook signature verification failed");
     return;
   }
@@ -163,7 +163,7 @@ export async function handleStripeWebhook(db, webhookSecret, req, res, options) 
 
     res.status(200).json({ received: true });
   } catch (error) {
-    captureFunctionsException(error);
+    await captureFunctionsException(error);
     res.status(500).send("Webhook handler failed");
   }
 }

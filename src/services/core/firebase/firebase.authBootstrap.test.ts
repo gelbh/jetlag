@@ -54,9 +54,7 @@ vi.mock("firebase/firestore", () => ({
 const lazyTelemetryMocks = vi.hoisted(() => ({
   captureAuthBootstrapFailureLazy: vi.fn(),
   captureAuthPersistenceFallbackLazy: vi.fn(),
-  setBootstrapTagLazy: vi.fn(),
   syncAnalyticsIdentityLazy: vi.fn(),
-  syncSentryUserLazy: vi.fn(),
 }));
 
 vi.mock("../analytics/lazyTelemetry", () => lazyTelemetryMocks);
@@ -129,7 +127,7 @@ describe("auth bootstrap start", () => {
     expect(authMocks.onAuthStateChanged).toHaveBeenCalledTimes(1);
   });
 
-  it("syncs analytics identity and sentry user on auth state changes", async () => {
+  it("syncs analytics identity on auth state changes", async () => {
     const { startAuthBootstrap } = await import("./firebase");
 
     startAuthBootstrap();
@@ -145,8 +143,6 @@ describe("auth bootstrap start", () => {
       uid: "user-1",
       isAnonymous: false,
     });
-    expect(lazyTelemetryMocks.syncSentryUserLazy).toHaveBeenNthCalledWith(1, { uid: "user-1" });
     expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenNthCalledWith(2, null);
-    expect(lazyTelemetryMocks.syncSentryUserLazy).toHaveBeenNthCalledWith(2, null);
   });
 });

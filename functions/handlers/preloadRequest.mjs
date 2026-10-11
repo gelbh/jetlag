@@ -4,7 +4,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { requireAdminAuth, resolveAdminEmail } from "../admin/adminAccess.mjs";
 import { sendIncidentEmail } from "../incident/sendIncidentEmail.mjs";
 import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
-import { withSentryEventHandler } from "../lib/sentry.mjs";
+import { withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import {
   createPreloadRequestHandler,
   PRELOAD_INVALID_SNAPSHOT,
@@ -19,7 +19,11 @@ import {
   PRELOAD_REQUEST_NOT_FOUND,
   updatePreloadRequestStatusHandler,
 } from "../preloadRequest/updatePreloadRequestStatus.mjs";
-import { incidentEmailSecret, incidentWorkerBaseUrl, sentryDsnSecret } from "./incident/shared.mjs";
+import {
+  incidentEmailSecret,
+  incidentWorkerBaseUrl,
+  posthogProjectApiKey,
+} from "./incident/shared.mjs";
 
 function mapPreloadError(error) {
   if (!(error instanceof Error)) {
@@ -55,10 +59,10 @@ function mapPreloadError(error) {
 
 export const createPreloadRequest = onCall(
   {
-    secrets: [sentryDsnSecret, incidentEmailSecret],
+    secrets: [posthogProjectApiKey, incidentEmailSecret],
     enforceAppCheck: true,
   },
-  withSentryEventHandler(async (request) => {
+  withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -98,8 +102,8 @@ export const createPreloadRequest = onCall(
 );
 
 export const updatePreloadRequestStatus = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  withSentryEventHandler(async (request) => {
+  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const db = getFirestore();

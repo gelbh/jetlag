@@ -54,9 +54,8 @@ vi.mock("../core/firebase/firebase", () => ({
   getFirestoreDb: () => ({}),
 }));
 
-vi.mock("../core/analytics/sentry", () => ({
+vi.mock("../core/analytics/clientErrors", () => ({
   captureException,
-  reportFirestoreListenPermissionDenied: vi.fn(),
 }));
 
 import { createActivityLogEventIfAbsent, subscribeActivityLog } from "./firestoreActivityLog";

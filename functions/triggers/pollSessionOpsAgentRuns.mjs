@@ -1,8 +1,8 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { cursorApiKey, sentryDsnSecret } from "../handlers/incident/shared.mjs";
+import { cursorApiKey, posthogProjectApiKey } from "../handlers/incident/shared.mjs";
 import { pollSessionOpsRuns } from "../incident/sessionOpsRunPoller.mjs";
-import { captureFunctionsException, withSentryEventHandler } from "../lib/sentry.mjs";
+import { withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 
 /**
  * Poll Cursor session-ops runs every minute and persist terminal results.
@@ -10,18 +10,13 @@ import { captureFunctionsException, withSentryEventHandler } from "../lib/sentry
 export const pollSessionOpsAgentRuns = onSchedule(
   {
     schedule: "every 1 minutes",
-    secrets: [sentryDsnSecret, cursorApiKey],
+    secrets: [posthogProjectApiKey, cursorApiKey],
     timeoutSeconds: 60,
   },
-  withSentryEventHandler(async () => {
+  withFunctionsExceptionHandler(async () => {
     const db = getFirestore();
-    try {
-      await pollSessionOpsRuns(db, {
-        apiKey: cursorApiKey.value(),
-      });
-    } catch (error) {
-      captureFunctionsException(error);
-      throw error;
-    }
+    await pollSessionOpsRuns(db, {
+      apiKey: cursorApiKey.value(),
+    });
   }),
 );

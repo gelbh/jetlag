@@ -24,8 +24,7 @@ vi.mock("../firebase/firebase", () => ({
   getFirebaseStorage: vi.fn(async () => ({ bucket: "demo" })),
 }));
 
-vi.mock("../analytics/sentry", () => ({
-  addPhotoUploadBreadcrumb: vi.fn(),
+vi.mock("../analytics/clientErrors", () => ({
   capturePhotoUploadFailure: vi.fn(),
 }));
 
@@ -36,7 +35,6 @@ vi.mock("../../firestore/firestoreAnnotations", () => ({
 }));
 
 import { deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
-import { addPhotoUploadBreadcrumb } from "../analytics/sentry";
 
 const hiderSession = {
   id: "session-1",
@@ -131,13 +129,6 @@ describe("photoStorage", () => {
 
     expect(ensureHiderPhotoUploadAccess).toHaveBeenCalledWith(hiderSession, "hider-1", "hider-1");
     expect(uploadBytes).toHaveBeenCalledOnce();
-    expect(addPhotoUploadBreadcrumb).toHaveBeenCalledWith(
-      expect.objectContaining({
-        authUid: "hider-1",
-        serverMemberRole: "hider",
-        authUidMatchesServerHider: true,
-      }),
-    );
 
     vi.mocked(Date.now).mockRestore();
   });

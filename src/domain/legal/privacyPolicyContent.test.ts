@@ -44,4 +44,12 @@ describe("privacyPolicyContent", () => {
     expect(productAnalytics).toMatch(/masked/i);
     expect(productAnalytics).toMatch(/PostHog session replay/i);
   });
+
+  it("third-parties omit Sentry after Functions exception cutover", () => {
+    const mapSection = PRIVACY_POLICY_SECTIONS.find((section) => section.id === "third-parties");
+    const copy = mapSection?.paragraphs.join(" ") ?? "";
+
+    expect(copy).toMatch(/PostHog/i);
+    expect(copy).not.toMatch(/Sentry/i);
+  });
 });

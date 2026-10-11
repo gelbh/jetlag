@@ -14,7 +14,7 @@ import {
   photoUploadServerDiagnostics,
 } from "@/domain/questions";
 import { ensureHiderPhotoUploadAccess } from "../../firestore/firestoreAnnotations";
-import { addPhotoUploadBreadcrumb, capturePhotoUploadFailure } from "../analytics/sentry";
+import { capturePhotoUploadFailure } from "../analytics/clientErrors";
 import { ensureAnonymousUser, getFirebaseStorage } from "../firebase/firebase";
 
 const MAX_DIMENSION = 1920;
@@ -160,30 +160,6 @@ async function attemptUpload(
   await uploadBytes(storageRef, blob, metadata);
 }
 
-function uploadBreadcrumbData(
-  authUid: string,
-  session: Pick<SessionRecord, "memberUids" | "memberRoles">,
-  myUid: string | null | undefined,
-  sessionId: string,
-  questionId: string,
-  file: File,
-): Record<string, unknown> {
-  const diagnostics = photoUploadServerDiagnostics(session, authUid);
-
-  return {
-    authUid,
-    myUid: myUid ?? null,
-    memberUids: session.memberUids ?? [],
-    memberRole: session.memberRoles?.[authUid] ?? null,
-    serverMemberRole: diagnostics.serverMemberRole,
-    authUidMatchesServerHider: diagnostics.authUidMatchesServerHider,
-    sessionId,
-    questionId,
-    fileType: file.type || null,
-    fileSize: file.size,
-  };
-}
-
 export async function deletePhotoAnswer(storagePath: string): Promise<void> {
   const storageRef = ref(await getFirebaseStorage(), storagePath);
   await deleteObject(storageRef);
@@ -205,10 +181,6 @@ export async function uploadPhotoAnswer(
   }
 
   let activeSession = await ensureHiderPhotoUploadAccess(session, authUid, myUid);
-
-  addPhotoUploadBreadcrumb(
-    uploadBreadcrumbData(authUid, activeSession, myUid, sessionId, questionId, file),
-  );
 
   let blob: Blob;
   try {

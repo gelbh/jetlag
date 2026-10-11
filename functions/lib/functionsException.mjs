@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import * as Sentry from "@sentry/node";
-import { defineSecret } from "firebase-functions/params";
 import { HttpsError } from "firebase-functions/v2/https";
 import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../session/expectedSessionUxHttpsErrors.mjs";
-import { CLOUDFLARE_KV_VALUES_IGNORE_SPAN } from "./sentryHostNoiseSpans.mjs";
-
-const sentryDsnSecret = defineSecret("SENTRY_DSN");
+import {
+  capturePosthogException,
+  getOrCreateFunctionsExceptionClient,
+  posthogProjectApiKey,
+} from "./posthog.mjs";
 
 /**
  * Expected callable HttpsError outcomes — not product bugs.
@@ -29,6 +29,13 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
 ]);
 
 let initialized = false;
+
+/** @type {{
+ *   captureException?: Function,
+ *   captureExceptionImmediate?: Function,
+ *   flush?: Function,
+ * } | null} */
+let testClientImpl = null;
 
 /**
  * Upstream fetch timeout / client disconnect aborts — not product bugs.
@@ -109,8 +116,6 @@ export function isOverpassTransportNoise(error) {
  * @returns {boolean}
  */
 export function isExpectedFunctionsError(error) {
-  // Overpass ConnectTimeout/EPIPE: wrap via toOverpassUpstreamError (504) on the
-  // final path; residual superseded fetch-failed envelopes stay in beforeSend only.
   if (isAbortErrorNoise(error)) {
     return true;
   }
@@ -123,54 +128,14 @@ export function isExpectedFunctionsError(error) {
 }
 
 /**
- * @param {import("@sentry/node").ErrorEvent} event
+ * True when capture should skip (expected UX errors or Overpass transport noise).
+ * Overpass fetch-failed residuals were previously dropped in Sentry beforeSend;
+ * without that hook they must be gated here.
+ * @param {unknown} error
  * @returns {boolean}
  */
-export function isAbortErrorEvent(event) {
-  for (const exception of event.exception?.values ?? []) {
-    if (exception.type === "AbortError") {
-      return true;
-    }
-    if (typeof exception.value === "string" && /operation was aborted/i.test(exception.value)) {
-      return true;
-    }
-  }
-
-  if (
-    typeof event.message === "string" &&
-    (/AbortError/i.test(event.message) || /operation was aborted/i.test(event.message))
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * @param {import("@sentry/node").ErrorEvent} event
- * @returns {boolean}
- */
-export function isOverpassTransportNoiseEvent(event) {
-  const values = event.exception?.values ?? [];
-  const hasFetchFailed = values.some(
-    (exception) =>
-      exception.type === "TypeError" &&
-      typeof exception.value === "string" &&
-      /fetch failed/i.test(exception.value),
-  );
-  if (!hasFetchFailed) {
-    return false;
-  }
-
-  return values.some((exception) => {
-    if (exception.type === "ConnectTimeoutError") {
-      return true;
-    }
-    if (typeof exception.value !== "string") {
-      return false;
-    }
-    return /UND_ERR_CONNECT_TIMEOUT/i.test(exception.value) || /\bEPIPE\b/.test(exception.value);
-  });
+export function shouldSkipFunctionsException(error) {
+  return isExpectedFunctionsError(error) || isOverpassTransportNoise(error);
 }
 
 export function readAppVersion() {
@@ -184,69 +149,21 @@ export function readAppVersion() {
   }
 }
 
-export function getSentryDsnSecret() {
-  return sentryDsnSecret;
-}
-
-/**
- * Explicit v10-equivalent dataCollection baseline for SDK 11 (duplicated from client;
- * Functions cannot import src/).
- * @see https://docs.sentry.io/platforms/javascript/guides/node/migration/v10-to-v11/
- */
-export const FUNCTIONS_SENTRY_DATA_COLLECTION = {
-  userInfo: false,
-  cookies: false,
-  httpHeaders: {
-    request: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
-    response: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
-  },
-  httpBodies: [],
-  urlQueryParams: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
-  genAI: { inputs: false, outputs: false },
-  databaseQueryData: false,
-  graphQL: { document: false, variables: false },
-};
-
 /**
  * @param {NodeJS.ProcessEnv} [env]
  * @returns {string}
  */
-export function resolveFunctionsSentryEnvironment(env = process.env) {
+export function resolveFunctionsExceptionEnvironment(env = process.env) {
   if (env.FUNCTIONS_EMULATOR === "true") {
     return "emulator";
   }
-  if (typeof env.SENTRY_ENVIRONMENT === "string" && env.SENTRY_ENVIRONMENT.trim()) {
-    return env.SENTRY_ENVIRONMENT.trim();
+  if (
+    typeof env.FUNCTIONS_EXCEPTION_ENVIRONMENT === "string" &&
+    env.FUNCTIONS_EXCEPTION_ENVIRONMENT.trim()
+  ) {
+    return env.FUNCTIONS_EXCEPTION_ENVIRONMENT.trim();
   }
   return "production";
-}
-
-export function initFunctionsSentry() {
-  if (initialized) {
-    return;
-  }
-
-  const dsn = sentryDsnSecret.value();
-  if (!dsn) {
-    return;
-  }
-
-  Sentry.init({
-    dsn,
-    environment: resolveFunctionsSentryEnvironment(),
-    release: `jetlag@${readAppVersion()}`,
-    tracesSampleRate: 0.1,
-    dataCollection: FUNCTIONS_SENTRY_DATA_COLLECTION,
-    // Mutable: Sentry ignoreSpans rejects readonly tuples (same as client).
-    ignoreSpans: [CLOUDFLARE_KV_VALUES_IGNORE_SPAN],
-    beforeSend(event) {
-      if (isAbortErrorEvent(event) || isOverpassTransportNoiseEvent(event)) {
-        return null;
-      }
-      return event;
-    },
-  });
-  initialized = true;
 }
 
 /**
@@ -271,42 +188,69 @@ export function resolveDeployedFunctionName(explicit) {
 }
 
 /**
- * @param {import("@sentry/node").Scope} scope
- * @param {string | null} name
+ * Idempotent: ensures the PostHog exception client can be created from the secret.
+ * Soft no-op when the secret is unset (local/tests without GSM).
  */
-function applyFunctionNameTags(scope, name) {
-  if (!name) {
-    return;
-  }
-  scope.setTag("function_name", name);
-  scope.setTag("callable", name);
-}
-
-export function captureFunctionsException(error) {
-  if (!initialized) {
+export function initFunctionsExceptionCapture() {
+  if (initialized) {
     return;
   }
 
-  if (isExpectedFunctionsError(error)) {
+  const client = getOrCreateFunctionsExceptionClient(
+    testClientImpl ? { clientImpl: testClientImpl } : {},
+  );
+  if (!client) {
     return;
   }
 
-  Sentry.captureException(error);
+  initialized = true;
 }
 
 /**
- * Capture with function_name/callable (+ optional extra tags) in one place so
- * proxy / callable catch paths cannot drift.
- *
+ * Test-only: inject a mock PostHog client and mark capture initialized.
+ * @param {{
+ *   captureException?: Function,
+ *   captureExceptionImmediate?: Function,
+ *   flush?: Function,
+ * } | null} clientImpl
+ */
+export function setFunctionsExceptionClientForTests(clientImpl) {
+  testClientImpl = clientImpl;
+  initialized = Boolean(clientImpl);
+}
+
+/**
+ * @param {Record<string, unknown>} properties
+ * @param {string | null} name
+ * @param {Record<string, string> | undefined} extraTags
+ */
+function applyFunctionNameProperties(properties, name, extraTags) {
+  if (name) {
+    properties.function_name = name;
+    properties.callable = name;
+  }
+  if (extraTags) {
+    for (const [key, value] of Object.entries(extraTags)) {
+      if (typeof value === "string") {
+        properties[key] = value;
+      }
+    }
+  }
+  properties.environment = resolveFunctionsExceptionEnvironment();
+  properties.release = `jetlag@${readAppVersion()}`;
+}
+
+/**
  * @param {unknown} error
  * @param {{ name?: string | null, extraTags?: Record<string, string> }} [options]
  */
-export function captureFunctionsExceptionWithTags(error, options = {}) {
+export async function captureFunctionsExceptionAsync(error, options = {}) {
+  initFunctionsExceptionCapture();
   if (!initialized) {
     return;
   }
 
-  if (isExpectedFunctionsError(error)) {
+  if (shouldSkipFunctionsException(error)) {
     return;
   }
 
@@ -315,18 +259,32 @@ export function captureFunctionsExceptionWithTags(error, options = {}) {
       ? options.name.trim()
       : resolveDeployedFunctionName();
 
-  Sentry.withScope((scope) => {
-    applyFunctionNameTags(scope, name);
-    const extraTags = options.extraTags;
-    if (extraTags) {
-      for (const [key, value] of Object.entries(extraTags)) {
-        if (typeof value === "string") {
-          scope.setTag(key, value);
-        }
-      }
-    }
-    Sentry.captureException(error);
+  /** @type {Record<string, unknown>} */
+  const properties = {};
+  applyFunctionNameProperties(properties, name, options.extraTags);
+
+  await capturePosthogException({
+    error,
+    properties,
+    clientImpl: testClientImpl ?? undefined,
   });
+}
+
+/** @returns {Promise<void>} */
+export function captureFunctionsException(error) {
+  return captureFunctionsExceptionAsync(error);
+}
+
+/**
+ * Capture with function_name/callable (+ optional extra tags) in one place so
+ * proxy / callable catch paths cannot drift.
+ *
+ * @param {unknown} error
+ * @param {{ name?: string | null, extraTags?: Record<string, string> }} [options]
+ * @returns {Promise<void>}
+ */
+export function captureFunctionsExceptionWithTags(error, options = {}) {
+  return captureFunctionsExceptionAsync(error, options);
 }
 
 /**
@@ -335,22 +293,18 @@ export function captureFunctionsExceptionWithTags(error, options = {}) {
  * @param {string | undefined} [explicitName]
  * @returns {T}
  */
-export function withSentryHttpHandler(handler, explicitName) {
+export function withFunctionsExceptionHandler(handler, explicitName) {
   return async (...args) => {
-    initFunctionsSentry();
+    initFunctionsExceptionCapture();
     const name = resolveDeployedFunctionName(explicitName);
-    return await Sentry.withScope(async (scope) => {
-      applyFunctionNameTags(scope, name);
-      try {
-        return await handler(...args);
-      } catch (error) {
-        captureFunctionsException(error);
-        await Sentry.flush(2000);
-        throw error;
-      }
-    });
+    try {
+      return await handler(...args);
+    } catch (error) {
+      await captureFunctionsExceptionAsync(error, { name });
+      throw error;
+    }
   };
 }
 
-/** Same wrapper as HTTP — callables/triggers share tagging + flush. */
-export const withSentryEventHandler = withSentryHttpHandler;
+/** Re-export secret for handler `secrets: [...]` wiring. */
+export { posthogProjectApiKey };
