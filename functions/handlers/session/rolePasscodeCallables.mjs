@@ -1,5 +1,6 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { onCall } from "firebase-functions/v2/https";
+import { enforceAppCheck } from "../../lib/appCheck.mjs";
 import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import {
   regenerateRolePasscodeHandler,
@@ -13,7 +14,7 @@ import {
 } from "./shared.mjs";
 
 export const revealRolePasscode = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const role = requireSessionRole(request);
@@ -28,7 +29,7 @@ export const revealRolePasscode = onCall(
 );
 
 export const regenerateRolePasscode = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     const { uid, sessionId } = requireAuthSessionId(request);
     const role = requireSessionRole(request);

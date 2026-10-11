@@ -3,6 +3,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { requireAdminAuth, resolveAdminEmail } from "../admin/adminAccess.mjs";
 import { sendIncidentEmail } from "../incident/sendIncidentEmail.mjs";
+import { enforceAppCheck } from "../lib/appCheck.mjs";
 import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
 import { withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import {
@@ -60,7 +61,7 @@ function mapPreloadError(error) {
 export const createPreloadRequest = onCall(
   {
     secrets: [posthogProjectApiKey, incidentEmailSecret],
-    enforceAppCheck: true,
+    enforceAppCheck,
   },
   withFunctionsExceptionHandler(async (request) => {
     if (!request.auth) {
@@ -102,7 +103,7 @@ export const createPreloadRequest = onCall(
 );
 
 export const updatePreloadRequestStatus = onCall(
-  { secrets: [posthogProjectApiKey], enforceAppCheck: true },
+  { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
     requireAdminAuth(request.auth);
 
