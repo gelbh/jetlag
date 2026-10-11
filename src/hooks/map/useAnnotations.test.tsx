@@ -191,6 +191,7 @@ describe("useAnnotations", () => {
       expect(writeRemoteAnnotation).toHaveBeenCalledTimes(2);
       expect(useSessionStore.getState().lastSyncError).toBe(ANNOTATION_PERMISSION_DENIED_MESSAGE);
       expect(useSessionStore.getState().pendingWrites).toBe(0);
+      expect(useAnnotationStore.getState().annotations).toEqual([]);
     });
 
     // JETLAG-49 / JETLAG-4: UI handlers `void` these calls, so a rules
