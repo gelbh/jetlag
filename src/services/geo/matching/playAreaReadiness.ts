@@ -9,8 +9,16 @@ import { isKnownRegionPack } from "@/domain/regions/regionPackRegistry";
 
 export type SessionPlayAreaInput = Pick<
   SessionRecord,
-  "gameArea" | "regionPackId" | "regionPackSubregionId"
+  "gameArea" | "regionPackId" | "regionPackSubregionId" | "playAreaFromPack"
 >;
+
+export function sessionUsesPackPlayArea(
+  session: SessionPlayAreaInput | null | undefined,
+): session is SessionPlayAreaInput & { regionPackId: RegionPackId } {
+  return Boolean(
+    session && isKnownRegionPack(session.regionPackId) && session.playAreaFromPack !== false,
+  );
+}
 
 export const resolvedPlayAreaCache = new Map<string, GameArea>();
 /** Pack keys that failed to load — ready for settle, but no geometry cached. */
@@ -28,15 +36,10 @@ export function playAreaCacheKey(
 }
 
 export function isPlayAreaReadySync(session: SessionPlayAreaInput | null | undefined): boolean {
-  if (!session) {
+  if (!sessionUsesPackPlayArea(session)) {
     return true;
   }
 
-  const packId = session.regionPackId;
-  if (!isKnownRegionPack(packId)) {
-    return true;
-  }
-
-  const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
+  const cacheKey = playAreaCacheKey(session.regionPackId, session.regionPackSubregionId);
   return resolvedPlayAreaCache.has(cacheKey) || failedPlayAreaKeys.has(cacheKey);
 }

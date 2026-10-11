@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
-import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
+import { buildBundledGamePresets } from "@/domain/regions/bundledGamePresets";
+import { REGION_PACK_REFERENCE_BBOXES } from "@/domain/regions/packGeoManifest";
+import { DUBLIN_CITY_GAME_AREA, DUBLIN_COUNTY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import { defaultAdvancedSessionSettings } from "../tools/advancedSessionSettings";
 import type { GamePreset } from "./gamePreset";
 import { GAME_PRESET_SCHEMA_VERSION } from "./gamePreset";
@@ -144,16 +146,68 @@ describe("suggestPresetDataReuseForGameArea", () => {
 
   it("qualifies bundled presets via pack reference bbox", () => {
     const bundled = basePreset({
-      id: "bundled:dublin-city",
-      name: "Dublin City",
+      id: "bundled:dublin-county",
+      name: "County Dublin",
       bundled: true,
       regionPackId: "dublin",
-      subregionId: "dcc",
       transitMetroId: "dublin",
     });
     const suggestion = suggestPresetDataReuseForGameArea(DUBLIN_CITY_GAME_AREA, [bundled]);
     expect(suggestion.regionPackId).toBe("dublin");
     expect(suggestion.transitMetroId).toBe("dublin");
+  });
+
+  it("attaches fingal (not dcc) for a Fingal Nominatim frame", () => {
+    const fingalFrame = boxPolygon(53.353519, -6.4750377, 53.6347143, -5.9945041);
+    const s = suggestPresetDataReuseForGameArea(fingalFrame, buildBundledGamePresets());
+    expect(s.regionPackId).toBe("dublin");
+    expect(s.subregionId).toBe("fingal");
+  });
+
+  it("attaches Dublin county parent (no council) for the pack reference frame", () => {
+    const s = suggestPresetDataReuseForGameArea(DUBLIN_COUNTY_GAME_AREA, buildBundledGamePresets());
+    expect(s.regionPackId).toBe("dublin");
+    expect(s.subregionId).toBeUndefined();
+  });
+
+  it("attaches the enclosing council for a small frame inside it", () => {
+    const s = suggestPresetDataReuseForGameArea(
+      boxPolygon(53.32, -6.32, 53.39, -6.2),
+      buildBundledGamePresets(),
+    );
+    expect(s.regionPackId).toBe("dublin");
+    expect(s.subregionId).toBe("dcc");
+  });
+
+  it("attaches the pack parent when the frame spans several boroughs", () => {
+    const manhattanAndBrooklyn = boxPolygon(40.57, -74.05, 40.88, -73.85);
+    const s = suggestPresetDataReuseForGameArea(manhattanAndBrooklyn, buildBundledGamePresets());
+    expect(s.regionPackId).toBe("nyc");
+    expect(s.subregionId).toBeUndefined();
+  });
+
+  it("keeps an exact custom preset over a council box inside a nudged frame", () => {
+    const custom = basePreset({
+      id: "custom-dublin",
+      name: "My Dublin",
+      gameArea: DUBLIN_CITY_GAME_AREA,
+      regionPackId: "dublin",
+      transitMetroId: "custom-metro",
+    });
+    const nudged = boxPolygon(53.271, -6.449, 53.421, -6.079);
+    const s = suggestPresetDataReuseForGameArea(nudged, [custom, ...buildBundledGamePresets()]);
+    expect(s.regionPackId).toBe("dublin");
+    expect(s.subregionId).toBeUndefined();
+    expect(s.transitMetroId).toBe("custom-metro");
+  });
+
+  it("prefers the dedicated Zurich pack over the Switzerland canton on a near tie", () => {
+    const { south, west, north, east } = REGION_PACK_REFERENCE_BBOXES.zurich;
+    const s = suggestPresetDataReuseForGameArea(
+      boxPolygon(south, west, north, east),
+      buildBundledGamePresets(),
+    );
+    expect(s.regionPackId).toBe("zurich");
   });
 
   it("does not surface customCategories", () => {
