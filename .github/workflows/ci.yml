@@ -141,7 +141,6 @@ jobs:
               - 'vite.optional-kernel-wasm-pkg.ts'
               - 'vite.config.ts'
               - 'vite.chunk-groups.ts'
-              - 'vite.sentry.ts'
               - 'vite.pwa.ts'
               - 'vite.resolve-shared.ts'
               - 'vitest.config.ts'

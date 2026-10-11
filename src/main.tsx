@@ -43,10 +43,6 @@ if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true") {
 }
 function scheduleDeferredObservability(): void {
   scheduleAfterFirstPaint(() => {
-    void import("./services/core/analytics/sentry.ts").then(({ initSentry, setBootstrapTag }) => {
-      setBootstrapTag("render");
-      initSentry();
-    });
     void import("./services/core/analytics/analytics.ts").then(
       ({ initPosthogCore, initAnalytics }) => {
         initPosthogCore();

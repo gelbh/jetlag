@@ -7,8 +7,6 @@ interface __BaseEnv_Env {
 	INCIDENT_EMAIL_SECRET: string;
 	INCIDENT_ADMIN_EMAIL: string;
 	INCIDENT_EMAIL_FROM: string;
-	SENTRY_TUNNEL_ALLOWED_HOST: string;
-	SENTRY_TUNNEL_ALLOWED_PROJECT_IDS: string;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {
@@ -21,7 +19,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "RESEND_API_KEY" | "INCIDENT_EMAIL_SECRET" | "INCIDENT_ADMIN_EMAIL" | "INCIDENT_EMAIL_FROM" | "SENTRY_TUNNEL_ALLOWED_HOST" | "SENTRY_TUNNEL_ALLOWED_PROJECT_IDS">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "RESEND_API_KEY" | "INCIDENT_EMAIL_SECRET" | "INCIDENT_ADMIN_EMAIL" | "INCIDENT_EMAIL_FROM">> {}
 }
 
 // Begin runtime types
