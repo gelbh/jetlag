@@ -29,3 +29,22 @@ export function writeAnalyticsConsent(value: WritableAnalyticsConsent): void {
     // localStorage unavailable
   }
 }
+
+/** Sticky per device: set on admin sign-in, never cleared by sign-out (clearing site data resets it). */
+export const ANALYTICS_INTERNAL_DEVICE_KEY = "jl.analytics.internal";
+
+export function readInternalDevice(): boolean {
+  try {
+    return localStorage.getItem(ANALYTICS_INTERNAL_DEVICE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markInternalDevice(): void {
+  try {
+    localStorage.setItem(ANALYTICS_INTERNAL_DEVICE_KEY, "1");
+  } catch {
+    // localStorage unavailable
+  }
+}
