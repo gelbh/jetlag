@@ -13,6 +13,7 @@ import {
   overpassErrorMessage,
   queryOverpass,
 } from "./overpassClient";
+import { clearOverpassHostCooldownsForTests, isOverpassHostCooled } from "./overpassHostCooldown";
 
 describe("overpass proxy timeout ladder", () => {
   it("proxy attempt timeout outlasts failover plus Postpass", () => {
@@ -60,34 +61,42 @@ describe("overpassClient", () => {
   beforeEach(() => {
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "");
     setPremiumApiContext(null);
+    clearOverpassHostCooldownsForTests();
   });
 
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
+    clearOverpassHostCooldownsForTests();
   });
 
   async function runQueuedOverpassTimers(): Promise<void> {
     await vi.runAllTimersAsync();
   }
 
-  it("retries rate limits before succeeding", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 429,
-        headers: new Headers({ "Retry-After": "0" }),
-        text: async () => "",
-      })
-      .mockResolvedValue(mockOverpassResponse({ elements: [] }));
+  it("failovers to the next endpoint on 429 and cools the host", async () => {
+    const fetchMock = vi.fn().mockImplementation(async (url: string) => {
+      if (String(url).includes("overpass-api.de")) {
+        return {
+          ok: false,
+          status: 429,
+          headers: new Headers(),
+          text: async () => "",
+        };
+      }
+      return mockOverpassResponse({ elements: [] });
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(queryOverpass<{ elements: unknown[] }>("[out:json];")).resolves.toEqual({
       elements: [],
     });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(
+      fetchMock.mock.calls.filter(([url]) => String(url).includes("overpass-api.de")),
+    ).toHaveLength(1);
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes("mail.ru"))).toBe(true);
+    expect(isOverpassHostCooled("overpass-api.de")).toBe(true);
   });
 
   it("throws OverpassQueryTooExpensiveError on the first 504", async () => {

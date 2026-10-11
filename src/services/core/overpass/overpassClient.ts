@@ -4,6 +4,7 @@ import { buildPremiumProxyHeaders } from "../auth/accessControl";
 import { getFirebaseAuth } from "../firebase/firebase";
 import { waitForRestoredFirebaseAuth } from "../firebase/firebaseAuthReady";
 import { FetchTimeoutError, fetchWithTimeout } from "../network/fetchWithTimeout";
+import { isOverpassHostCooled, recordOverpassHostCooldown } from "./overpassHostCooldown";
 
 const OVERPASS_MAX_RETRIES = 3;
 /** Proxy path only: one retry so attempts ≤ 2 (direct keeps OVERPASS_MAX_RETRIES). */
@@ -75,7 +76,21 @@ function overpassProxyUrl(): string | null {
   return proxyUrl && proxyUrl.length > 0 ? proxyUrl : null;
 }
 
-function isRetryableOverpassStatus(status: number): boolean {
+function overpassEndpointHostname(endpoint: string): string {
+  try {
+    return new URL(endpoint).host;
+  } catch {
+    return "unknown";
+  }
+}
+
+/** Upstream Overpass: short-backoff retry for transient gateway errors only (not 429/406). */
+function isRetryableUpstreamOverpassStatus(status: number): boolean {
+  return status === 502 || status === 503;
+}
+
+/** Our Functions proxy: 429 is our rate limit and may carry Retry-After. */
+function isRetryableProxyStatus(status: number): boolean {
   return status === 429 || status === 502 || status === 503;
 }
 
@@ -139,6 +154,12 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
   let lastError: Error | null = null;
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
+    const host = overpassEndpointHostname(endpoint);
+    if (isOverpassHostCooled(host)) {
+      lastError = new OverpassUnavailableError();
+      continue;
+    }
+
     for (let attempt = 0; attempt <= OVERPASS_MAX_RETRIES; attempt += 1) {
       try {
         const response = await postOverpassQuery(endpoint, query);
@@ -149,13 +170,19 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
 
         throwIfOverpassQueryTooExpensive({ status: response.status });
 
-        if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
+        if (response.status === 429 || response.status === 406) {
+          recordOverpassHostCooldown(host);
+          lastError = new OverpassUnavailableError();
+          break;
+        }
+
+        if (isRetryableUpstreamOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
           lastError = new OverpassUnavailableError();
           await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
           continue;
         }
 
-        if (isRetryableOverpassStatus(response.status)) {
+        if (isRetryableUpstreamOverpassStatus(response.status)) {
           lastError = new OverpassUnavailableError();
           break;
         }
@@ -243,13 +270,13 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
 
       throwIfOverpassQueryTooExpensive({ status: response.status });
 
-      if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_PROXY_MAX_RETRIES) {
+      if (isRetryableProxyStatus(response.status) && attempt < OVERPASS_PROXY_MAX_RETRIES) {
         lastError = new OverpassUnavailableError();
         await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
         continue;
       }
 
-      if (isRetryableOverpassStatus(response.status)) {
+      if (isRetryableProxyStatus(response.status)) {
         throw new OverpassUnavailableError();
       }
 
