@@ -11,6 +11,10 @@ vi.mock("../../../platform/copyToClipboard", () => ({
   copyToClipboard: vi.fn(),
 }));
 
+const trackLazy = vi.hoisted(() => vi.fn());
+
+vi.mock("@/services/core/analytics/lazyTelemetry", () => ({ trackLazy }));
+
 function renderShareCode(ui: ReactElement) {
   return renderWithRouter(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
@@ -21,6 +25,7 @@ function renderShareCode(ui: ReactElement) {
 
 describe("ShareCode", () => {
   beforeEach(() => {
+    trackLazy.mockReset();
     vi.mocked(copyToClipboard).mockReset();
     vi.mocked(copyToClipboard).mockResolvedValue(true);
     vi.stubGlobal("matchMedia", (query: string) => ({
@@ -130,6 +135,80 @@ describe("ShareCode", () => {
     await waitFor(() => {
       expect(screen.getByText("Couldn't copy the join link.")).toBeInTheDocument();
     });
+  });
+
+  it("tracks invite_shared after copying the code", async () => {
+    renderShareCode(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Copy session code WXYZ" }));
+
+    await waitFor(() => {
+      expect(trackLazy).toHaveBeenCalledWith("invite_shared", { method: "copy_code" });
+    });
+    expect(trackLazy).toHaveBeenCalledOnce();
+  });
+
+  it("tracks invite_shared after copying the join link", async () => {
+    vi.stubGlobal("navigator", { ...navigator, share: undefined });
+
+    renderShareCode(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Copy join link" }));
+
+    await waitFor(() => {
+      expect(trackLazy).toHaveBeenCalledWith("invite_shared", { method: "copy_link" });
+    });
+    expect(trackLazy).toHaveBeenCalledOnce();
+  });
+
+  it("does not track invite_shared when copying fails", async () => {
+    vi.mocked(copyToClipboard).mockResolvedValue(false);
+    vi.stubGlobal("navigator", { ...navigator, share: undefined });
+
+    renderShareCode(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Copy join link" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Couldn't copy the join link.")).toBeInTheDocument();
+    });
+    expect(trackLazy).not.toHaveBeenCalled();
+  });
+
+  it("tracks invite_shared after a native share resolves", async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("navigator", { ...navigator, share });
+
+    renderShareCode(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
+
+    await waitFor(() => {
+      expect(trackLazy).toHaveBeenCalledWith("invite_shared", { method: "native_share" });
+    });
+    expect(trackLazy).toHaveBeenCalledOnce();
+  });
+
+  it("does not track invite_shared when native share is cancelled", async () => {
+    const share = vi.fn().mockRejectedValue(new DOMException("Share canceled", "AbortError"));
+    vi.stubGlobal("navigator", { ...navigator, share });
+
+    renderShareCode(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
+
+    await waitFor(() => expect(share).toHaveBeenCalled());
+    expect(trackLazy).not.toHaveBeenCalled();
+  });
+
+  it("tracks only the copy fallback when native share fails", async () => {
+    const share = vi
+      .fn()
+      .mockRejectedValue(new DOMException("Share unavailable", "NotAllowedError"));
+    vi.stubGlobal("navigator", { ...navigator, share });
+
+    renderShareCode(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
+
+    await waitFor(() => {
+      expect(trackLazy).toHaveBeenCalledWith("invite_shared", { method: "copy_link" });
+    });
+    expect(trackLazy).toHaveBeenCalledOnce();
   });
 
   it("hides invite actions for local-only sessions", () => {

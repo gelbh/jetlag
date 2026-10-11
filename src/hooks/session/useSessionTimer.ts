@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
+import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
 import { serverNow } from "@/services/core/time/serverClock";
 import {
   computeElapsedMs,
@@ -138,6 +140,7 @@ export function useSessionTimer(
       return;
     }
 
+    const isFirstStart = !hasTimerStarted(timerStateRef.current);
     setTimerState((current) => {
       const wasStarted = hasTimerStarted(current);
       const next = startTimer(current, serverNow());
@@ -147,6 +150,9 @@ export function useSessionTimer(
       }
       return next;
     });
+    if (sessionId && isFirstStart) {
+      trackLazy(ANALYTICS_EVENTS.game_started);
+    }
   }, [canControl, sessionId, setTimerState]);
 
   const pause = useCallback(() => {
