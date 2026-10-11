@@ -11,7 +11,10 @@
  * and drops what the hydration render cannot reproduce: `#boot-splash`, Mantine floating
  * indicators (rendered only after a measuring re-render, and positioned for this viewport), the
  * `<html>` boot/motion attributes App effects set for this headless session (the visitor's
- * own App sets them again once hydrated), and the App Check reCAPTCHA container this session's
+ * own App sets them again once hydrated), the inline `view-transition-name` / `-class` React
+ * writes while a route-reveal `<ViewTransition>` runs (hydration never patches styles, so a
+ * shipped `_t_0_` name collides with names React assigns later and disables the root
+ * cross-fade), and the App Check reCAPTCHA container this session's
  * Firebase appended to `<body>` (shipped, it loads reCAPTCHA's iframe on every visit and makes
  * the visitor's own App Check render into a non-empty element: "reCAPTCHA placeholder element
  * must be empty").
@@ -51,6 +54,10 @@ export function finalizePrerenderDom() {
   };
   visit(hostRoot.child);
   if (boundaries.some((b) => b.memoizedState !== null)) {
+    return { ready: false };
+  }
+  // A running view transition still owns inline names on its elements; let it finish.
+  if (document.activeViewTransition) {
     return { ready: false };
   }
 
@@ -124,6 +131,11 @@ export function finalizePrerenderDom() {
   }
   for (const node of document.querySelectorAll('[id^="fire_app_check_"]')) {
     node.remove();
+  }
+  for (const node of [document.documentElement, ...rootEl.querySelectorAll("[style]")]) {
+    node.style.removeProperty("view-transition-name");
+    node.style.removeProperty("view-transition-class");
+    if (node.getAttribute("style")?.trim() === "") node.removeAttribute("style");
   }
   rootEl.setAttribute("data-prerendered", "true");
   // Serialize in the same task so no React commit can land between marking and snapshotting.
