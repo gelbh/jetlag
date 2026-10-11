@@ -8,14 +8,15 @@ import {
   captureFunctionsExceptionWithTags,
   resolveDeployedFunctionName,
 } from "../lib/functionsException.mjs";
+import { requireProxyAppCheck } from "./verifyProxyAppCheck.mjs";
 
 /**
- * Shared HTTP proxy pipeline: CORS, auth, rate limit, handler.
- * App Check is enforced on the parent `proxy` onRequest function.
+ * Shared HTTP proxy pipeline: CORS, App Check, auth, rate limit, handler.
  */
 export function createProxyHandler({
   routeName,
   methods = ["GET"],
+  requireAppCheck = requireProxyAppCheck,
   requireAccess = requireProxyAccess,
   rateLimitRoute,
   resolveRateLimitTier = (authResult) => authResult.tier ?? "free",
@@ -32,6 +33,10 @@ export function createProxyHandler({
 
     if (!methods.includes(req.method)) {
       res.status(405).json({ error: "Method not allowed." });
+      return;
+    }
+
+    if (!(await requireAppCheck(req, res, { route: routeName }))) {
       return;
     }
 
