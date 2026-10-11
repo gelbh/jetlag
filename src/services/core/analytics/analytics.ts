@@ -4,7 +4,9 @@ import "posthog-js/dist/posthog-recorder";
 import "posthog-js/dist/exception-autocapture";
 import { getClientEnv } from "@/config/env";
 import {
+  markInternalDevice,
   readAnalyticsConsent,
+  readInternalDevice,
   writeAnalyticsConsent,
 } from "@/domain/device/consent/analyticsConsent";
 import { isEmbedMode } from "@/domain/device/embed/embedMode";
@@ -76,6 +78,7 @@ let appInstalledHandler: (() => void) | null = null;
 export type AnalyticsIdentity = {
   uid: string;
   isAnonymous: boolean;
+  isInternal: boolean;
 };
 
 export { shouldEnableAnalytics };
@@ -129,6 +132,7 @@ function registerSuperProperties(): void {
   posthog.register({
     $geoip_disable: true,
     display_mode: isStandalonePwa() ? "standalone" : "browser",
+    ...(readInternalDevice() && { is_internal: true }),
   });
 }
 
@@ -263,6 +267,16 @@ export function denyAnalyticsConsent(): void {
 
 export function syncAnalyticsIdentity(user: AnalyticsIdentity | null): void {
   lastSeenIdentity = user;
+  if (user?.isInternal && !readInternalDevice()) {
+    markInternalDevice();
+    if (coreInitialized) {
+      try {
+        registerSuperProperties();
+      } catch {
+        // Soft-fail: tagging must never break analytics.
+      }
+    }
+  }
   applyIdentity(user);
 }
 

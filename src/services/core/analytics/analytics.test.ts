@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetClientEnvForTests } from "@/config/env";
 import {
   ANALYTICS_CONSENT_KEY,
+  ANALYTICS_INTERNAL_DEVICE_KEY,
   writeAnalyticsConsent,
 } from "@/domain/device/consent/analyticsConsent";
 import {
@@ -470,7 +471,7 @@ describe("analytics facade", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
     initPosthogCore();
-    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false, isInternal: false });
     posthogRegister.mockClear();
 
     syncAnalyticsIdentity(null);
@@ -528,7 +529,7 @@ describe("analytics facade", () => {
   it("applies stashed identity on init after sync before consent", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
-    syncAnalyticsIdentity({ uid: "user-accept", isAnonymous: false });
+    syncAnalyticsIdentity({ uid: "user-accept", isAnonymous: false, isInternal: false });
     writeAnalyticsConsent("granted");
     initAnalytics();
     expect(posthogIdentify).toHaveBeenCalledOnce();
@@ -554,12 +555,12 @@ describe("analytics facade", () => {
     writeAnalyticsConsent("granted");
     initAnalytics();
 
-    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
-    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false, isInternal: false });
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false, isInternal: false });
     expect(posthogIdentify).toHaveBeenCalledTimes(1);
     expect(posthogIdentify).toHaveBeenCalledWith("user-1");
 
-    syncAnalyticsIdentity({ uid: "anon-9", isAnonymous: true });
+    syncAnalyticsIdentity({ uid: "anon-9", isAnonymous: true, isInternal: false });
     expect(posthogReset).toHaveBeenCalledWith(true);
   });
 
@@ -568,7 +569,7 @@ describe("analytics facade", () => {
     vi.stubEnv("MODE", "production");
     writeAnalyticsConsent("granted");
     initAnalytics();
-    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false, isInternal: false });
     posthogReset.mockClear();
     syncAnalyticsIdentity(null);
     expect(posthogReset).toHaveBeenCalledWith(true);
@@ -580,12 +581,12 @@ describe("analytics facade", () => {
     vi.stubEnv("MODE", "production");
     writeAnalyticsConsent("granted");
     initAnalytics();
-    syncAnalyticsIdentity({ uid: "anon-1", isAnonymous: true });
+    syncAnalyticsIdentity({ uid: "anon-1", isAnonymous: true, isInternal: false });
     expect(posthogIdentify).not.toHaveBeenCalled();
   });
 
   it("no-ops identity sync when PostHog core is not ready", () => {
-    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false, isInternal: false });
     expect(posthogIdentify).not.toHaveBeenCalled();
   });
 
@@ -593,10 +594,74 @@ describe("analytics facade", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
     initPosthogCore();
-    syncAnalyticsIdentity({ uid: "user-error", isAnonymous: false });
+    syncAnalyticsIdentity({ uid: "user-error", isAnonymous: false, isInternal: false });
     expect(posthogIdentify).toHaveBeenCalledOnce();
     expect(posthogIdentify).toHaveBeenCalledWith("user-error");
     expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
+  const lastRegistered = () => posthogRegister.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+  const registeredAfterReset = () =>
+    posthogReset.mock.invocationCallOrder[0] <
+    (posthogRegister.mock.invocationCallOrder.at(-1) ?? 0);
+
+  it("tags the device internal when an admin identity syncs", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    posthogRegister.mockClear();
+    syncAnalyticsIdentity({ uid: "admin-1", isAnonymous: false, isInternal: true });
+    expect(localStorage.getItem(ANALYTICS_INTERNAL_DEVICE_KEY)).toBe("1");
+    expect(lastRegistered()).toMatchObject({ $geoip_disable: true, is_internal: true });
+  });
+
+  it("re-registers the internal tag after sign-out reset", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    syncAnalyticsIdentity({ uid: "admin-1", isAnonymous: false, isInternal: true });
+    posthogRegister.mockClear();
+    syncAnalyticsIdentity(null);
+    expect(posthogReset).toHaveBeenCalledWith(true);
+    expect(lastRegistered()).toMatchObject({ $geoip_disable: true, is_internal: true });
+    expect(registeredAfterReset()).toBe(true);
+    expect(localStorage.getItem(ANALYTICS_INTERNAL_DEVICE_KEY)).toBe("1");
+  });
+
+  it("registers the internal tag at core init only when the device flag is set", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    expect(lastRegistered()).not.toHaveProperty("is_internal");
+
+    resetAnalyticsForTests();
+    posthogRegister.mockClear();
+    localStorage.setItem(ANALYTICS_INTERNAL_DEVICE_KEY, "1");
+    initPosthogCore();
+    expect(lastRegistered()).toMatchObject({ is_internal: true });
+  });
+
+  it("re-registers the internal tag after consent deny", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    localStorage.setItem(ANALYTICS_INTERNAL_DEVICE_KEY, "1");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    posthogRegister.mockClear();
+    denyAnalyticsConsent();
+    expect(lastRegistered()).toMatchObject({ $geoip_disable: true, is_internal: true });
+    expect(registeredAfterReset()).toBe(true);
+  });
+
+  it("does not tag non-admin identities", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    initPosthogCore();
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false, isInternal: false });
+    expect(localStorage.getItem(ANALYTICS_INTERNAL_DEVICE_KEY)).toBeNull();
+    for (const [props] of posthogRegister.mock.calls) {
+      expect(props).not.toHaveProperty("is_internal");
+    }
   });
 
   it("capturePosthogException scrubs session codes before the PostHog sink", () => {

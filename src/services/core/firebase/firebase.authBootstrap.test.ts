@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ADMIN_EMAIL } from "@/domain/admin/adminAccess";
 
 const authMocks = vi.hoisted(() => {
   const auth = {
@@ -133,16 +134,28 @@ describe("auth bootstrap start", () => {
     startAuthBootstrap();
 
     const authCallback = authMocks.onAuthStateChanged.mock.calls[0]?.[1] as (
-      user: { uid: string; isAnonymous: boolean } | null,
+      user: {
+        uid: string;
+        isAnonymous: boolean;
+        email?: string;
+        emailVerified?: boolean;
+      } | null,
     ) => void;
 
     authCallback({ uid: "user-1", isAnonymous: false });
     authCallback(null);
+    authCallback({ uid: "admin-1", isAnonymous: false, email: ADMIN_EMAIL, emailVerified: true });
 
     expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenNthCalledWith(1, {
       uid: "user-1",
       isAnonymous: false,
+      isInternal: false,
     });
     expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenNthCalledWith(2, null);
+    expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenNthCalledWith(3, {
+      uid: "admin-1",
+      isAnonymous: false,
+      isInternal: true,
+    });
   });
 });
