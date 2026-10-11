@@ -1,5 +1,11 @@
 // Public peer list mirrored in src/services/geo/overpass/endpoints.ts (Vite).
 // Paid Geofabrik peer + status/Postpass failover are Functions-only.
+// Regional peers (gated ship set) prepend when options.query bbox is fully inside coverage.
+
+import {
+  parseOverpassQueryBbox,
+  regionalOverpassEndpointsForBbox,
+} from "./overpassRegionPeers.mjs";
 
 export const OVERPASS_USER_AGENT = "jetlag-map-companion/1.0";
 
@@ -11,20 +17,20 @@ export const OVERPASS_ENDPOINTS = [
 
 /**
  * Public peers plus optional paid Geofabrik Overpass when
- * `GEOFABRIK_OVERPASS_API_KEY` is set (Functions only — never Vite).
+ * `GEOFABRIK_OVERPASS_API_KEY` is set (Functions only, never Vite).
+ * Order: matching regional peers (if any), then Geofabrik, then public.
  *
  * @param {NodeJS.ProcessEnv | Record<string, string | undefined>} [env]
+ * @param {{ query?: string }} [options]
  * @returns {string[]}
  */
-export function buildOverpassEndpointList(env = process.env) {
+export function buildOverpassEndpointList(env = process.env, options = {}) {
   const key = String(env.GEOFABRIK_OVERPASS_API_KEY ?? "").trim();
-  if (!key) {
-    return [...OVERPASS_ENDPOINTS];
-  }
-  return [
-    `https://overpass.geofabrik.de/${encodeURIComponent(key)}/api/interpreter`,
-    ...OVERPASS_ENDPOINTS,
-  ];
+  const paid = key
+    ? [`https://overpass.geofabrik.de/${encodeURIComponent(key)}/api/interpreter`]
+    : [];
+  const bbox = typeof options.query === "string" ? parseOverpassQueryBbox(options.query) : null;
+  return [...regionalOverpassEndpointsForBbox(bbox), ...paid, ...OVERPASS_ENDPOINTS];
 }
 
 /**
