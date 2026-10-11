@@ -10,7 +10,6 @@ import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 import { createPosthogPlugins } from "./vite.posthog";
 import { createPwaPlugin } from "./vite.pwa";
 import { sharedAlias } from "./vite.resolve-shared";
-import { createSentryPlugins } from "./vite.sentry";
 import { timeEndpointPlugin } from "./vite.time-endpoint";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -61,7 +60,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     optionalKernelWasmPkg(),
     wasm(),
-    ...createSentryPlugins({ appVersion }),
     ...createPosthogPlugins({ appVersion }),
     // React Compiler full compile; exclude violators with "use no memo" (CONTRIBUTING.md)
     react({ compiler: true }),

@@ -48,7 +48,6 @@
     "@mantine/hooks": "^9.6.1",
     "@mantine/notifications": "^9.6.1",
     "@phosphor-icons/react": "^2.1.10",
-    "@sentry/react": "11.2.0",
     "@tanstack/react-query": "^5.104.0",
     "@tmcw/togeojson": "^7.1.2",
     "@turf/area": "^7.4.0",
@@ -104,7 +103,6 @@
     "@firebase/rules-unit-testing": "^5.0.2",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.63.0",
-    "@sentry/vite-plugin": "^5.4.0",
     "@tailwindcss/vite": "~4.3.3",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
@@ -156,7 +154,6 @@
     "morgan": "1.12.1"
   },
   "allowScripts": {
-    "@sentry/cli@2.58.6": true,
     "esbuild@0.28.1": true,
     "protobufjs@7.6.5": true,
     "workerd@1.20260923.1": true,

@@ -1,6 +1,7 @@
 /**
- * Fire-and-forget facades over sentry/analytics. Static imports would pull
- * posthog and @sentry into the entry critical path; dynamic import defers them.
+ * Fire-and-forget facades over the PostHog-backed error facade and analytics.
+ * Static imports would pull posthog into the entry critical path; dynamic
+ * import of the facade module keeps analytics off that path.
  * Calls to one module resolve in call order (same import promise).
  */
 import { writeAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";

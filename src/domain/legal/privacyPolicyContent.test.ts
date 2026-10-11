@@ -19,29 +19,21 @@ describe("privacyPolicyContent", () => {
     expect(copy).not.toMatch(/CARTO/i);
   });
 
-  it("discloses Sentry Session Replay and pseudonymous account id", () => {
+  it("discloses ungated scrubbed PostHog EU errors without client Sentry", () => {
     const section = PRIVACY_POLICY_SECTIONS.find((entry) => entry.id === "errors-analytics");
-    const copy = section?.paragraphs.join(" ") ?? "";
-
-    expect(copy).toMatch(/Session Replay/i);
-    expect(copy).toMatch(/masked/i);
-    expect(copy).toMatch(/pseudonymous account identifier/i);
-  });
-
-  it("discloses ungated scrubbed error reports to Sentry and PostHog EU", () => {
-    const section = PRIVACY_POLICY_SECTIONS.find((entry) => entry.id === "errors-analytics");
-    const paragraphs = section?.paragraphs ?? [];
-    const errorReporting = paragraphs[0] ?? "";
-    const productAnalytics = paragraphs[1] ?? "";
+    const errorReporting = section?.paragraphs[0] ?? "";
+    const productAnalytics = section?.paragraphs[1] ?? "";
 
     expect(errorReporting).toMatch(/scrubbed/i);
-    expect(errorReporting).toMatch(/Sentry/i);
     expect(errorReporting).toMatch(/PostHog/i);
     expect(errorReporting).toMatch(/\bEU\b/);
+    expect(errorReporting).not.toMatch(/Sentry/i);
     expect(errorReporting).toMatch(/local storage/i);
     expect(errorReporting).toMatch(/before you Accept/i);
-    expect(productAnalytics).toMatch(/Accept/i);
-    expect(productAnalytics).toMatch(/product analytics/i);
+    expect(errorReporting).toMatch(/pseudonymous account identifier/i);
+    expect(productAnalytics).toMatch(/PostHog session replay/i);
+    expect(productAnalytics).not.toMatch(/dual with Sentry/i);
+    expect(productAnalytics).not.toContain("PostHog session replay is not used");
   });
 
   it("discloses Accept-gated masked PostHog session replay", () => {
@@ -51,6 +43,5 @@ describe("privacyPolicyContent", () => {
     expect(productAnalytics).toMatch(/Accept/i);
     expect(productAnalytics).toMatch(/masked/i);
     expect(productAnalytics).toMatch(/PostHog session replay/i);
-    expect(productAnalytics).not.toContain("PostHog session replay is not used");
   });
 });

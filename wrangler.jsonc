@@ -14,11 +14,6 @@
     "enabled": true
   },
   // Secrets: see worker/README.md (wrangler secret put / .dev.vars). Never commit values.
-  // Tunnel allowlist: set real host/project from VITE_SENTRY_DSN before deploy (empty → 403).
-  "vars": {
-    "SENTRY_TUNNEL_ALLOWED_HOST": "",
-    "SENTRY_TUNNEL_ALLOWED_PROJECT_IDS": ""
-  },
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application",
