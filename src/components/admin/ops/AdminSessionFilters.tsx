@@ -1,4 +1,4 @@
-import { Button, Group, NativeSelect, Stack, TextInput } from "@mantine/core";
+import { NativeSelect, Stack, TextInput, UnstyledButton } from "@mantine/core";
 import { useState } from "react";
 import type {
   AdminSessionModeFilter,
@@ -47,80 +47,72 @@ export function AdminSessionFilters({
 
   return (
     <Stack gap="sm">
-      <Group gap="xs" wrap="wrap" align="flex-end">
-        <Button
-          type="button"
-          size="compact-xs"
-          radius="xl"
-          variant={liveOnly ? "light" : "default"}
-          aria-pressed={liveOnly}
-          onClick={() => onLiveOnlyChange(!liveOnly)}
-          tt="uppercase"
-        >
-          Live
-        </Button>
-        <Button
-          type="button"
-          size="compact-xs"
-          radius="xl"
-          variant={annotatedOnly ? "light" : "default"}
-          aria-pressed={annotatedOnly}
-          onClick={() => onAnnotatedOnlyChange(!annotatedOnly)}
-          tt="uppercase"
-        >
-          Annotated
-        </Button>
-        <TextInput
-          label="Search"
-          type="search"
-          value={query}
-          onChange={(event) => onQueryChange(event.currentTarget.value)}
-          placeholder="Code, area, or host version"
-          autoComplete="off"
-          spellCheck={false}
-          style={{ flex: 1, minWidth: "12rem" }}
-        />
+      <TextInput
+        label="Search"
+        type="search"
+        value={query}
+        onChange={(event) => onQueryChange(event.currentTarget.value)}
+        placeholder="Code, area, or host version"
+        autoComplete="off"
+        spellCheck={false}
+      />
+      <div className="jl-ops-filter-row">
+        <div className="jl-ops-toggle-group">
+          <UnstyledButton
+            type="button"
+            className="jl-ops-toggle"
+            aria-pressed={liveOnly}
+            onClick={() => onLiveOnlyChange(!liveOnly)}
+          >
+            Live
+          </UnstyledButton>
+          <UnstyledButton
+            type="button"
+            className="jl-ops-toggle"
+            aria-pressed={annotatedOnly}
+            onClick={() => onAnnotatedOnlyChange(!annotatedOnly)}
+          >
+            Annotated
+          </UnstyledButton>
+        </div>
         <NativeSelect
           label="Sort"
+          className="jl-ops-filter-sort"
           value={sort}
           onChange={(event) => onSortChange(event.currentTarget.value as AdminSessionSort)}
           data={SORT_OPTIONS}
-          w={176}
+          w="100%"
         />
-        <Button
+        <UnstyledButton
           type="button"
-          size="compact-xs"
-          variant="subtle"
+          className="jl-ops-toggle"
           aria-expanded={moreOpen}
           aria-controls="admin-session-more-filters"
           onClick={() => setMoreOpen((open) => !open)}
         >
           More filters
-        </Button>
-      </Group>
+        </UnstyledButton>
+      </div>
 
       {moreOpen ? (
-        <Group gap="xs" wrap="wrap" id="admin-session-more-filters">
-          <Group gap={6} wrap="wrap" role="group" aria-label="Session mode">
+        <div className="jl-ops-filter-row" id="admin-session-more-filters">
+          <div className="jl-ops-toggle-group" role="group" aria-label="Session mode">
             {(["singleplayer", "multiplayer"] as const).map((option) => {
               const selected = mode === option;
               return (
-                <Button
+                <UnstyledButton
                   key={option}
                   type="button"
-                  size="compact-xs"
-                  radius="xl"
-                  variant={selected ? "light" : "default"}
+                  className="jl-ops-toggle"
                   aria-pressed={selected}
                   onClick={() => onModeChange(selected ? "all" : option)}
-                  tt="uppercase"
                 >
                   {option === "singleplayer" ? "Singleplayer" : "Multiplayer"}
-                </Button>
+                </UnstyledButton>
               );
             })}
-          </Group>
-          <Group gap={6} wrap="wrap" role="group" aria-label="Session state">
+          </div>
+          <div className="jl-ops-toggle-group" role="group" aria-label="Session state">
             {(
               [
                 ["hiding", "Hiding"],
@@ -130,22 +122,19 @@ export function AdminSessionFilters({
             ).map(([option, label]) => {
               const selected = state === option;
               return (
-                <Button
+                <UnstyledButton
                   key={option}
                   type="button"
-                  size="compact-xs"
-                  radius="xl"
-                  variant={selected ? "light" : "default"}
+                  className="jl-ops-toggle"
                   aria-pressed={selected}
                   onClick={() => onStateChange(selected ? null : option)}
-                  tt="uppercase"
                 >
                   {label}
-                </Button>
+                </UnstyledButton>
               );
             })}
-          </Group>
-        </Group>
+          </div>
+        </div>
       ) : null}
     </Stack>
   );

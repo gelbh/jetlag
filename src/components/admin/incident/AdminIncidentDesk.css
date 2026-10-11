@@ -291,7 +291,7 @@ html[data-motion="static"] .jl-incident-queue-row {
   justify-content: space-between;
   gap: 0.5rem;
   border-bottom: 1px solid var(--color-rule);
-  padding: 0.375rem 0.5rem;
+  padding: 0.5rem 0.625rem;
 }
 
 .jl-incident-pane-title {

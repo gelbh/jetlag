@@ -1,4 +1,15 @@
-import { Alert, Button, Checkbox, Group, Stack, UnstyledButton } from "@mantine/core";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Group,
+  Skeleton,
+  Stack,
+  Text,
+  Title,
+  UnstyledButton,
+} from "@mantine/core";
+import { signOut } from "firebase/auth";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatFreshnessAge } from "../../../domain/admin/formatAdminFreshness";
 import { canTransitionPreloadRequestStatus } from "../../../domain/preloadRequest/preloadRequestAdmin";
@@ -6,14 +17,19 @@ import type {
   PreloadRequest,
   PreloadRequestStatus,
 } from "../../../domain/preloadRequest/preloadRequestTypes";
-import { useAdminAccessState } from "../../../hooks/admin/useAdminAccessState";
+import {
+  type AdminAccessState,
+  useAdminAccessState,
+} from "../../../hooks/admin/useAdminAccessState";
 import {
   countOpenPreloadRequests,
   preloadRequestStatusChipLabel,
   preloadRequestStatusChipTone,
   subscribePreloadRequestList,
 } from "../../../services/admin/adminPreloadRequests";
+import { getFirebaseAuth } from "../../../services/core/firebase/firebase";
 import { updatePreloadRequestStatus } from "../../../services/preloadRequest/preloadRequestApi";
+import { PremiumSignInGate } from "../../billing/PremiumSignInGate";
 import { AppLink } from "../../navigation/AppLink";
 import { InlineError } from "../../ui/banners/InlineError";
 import "../incident/AdminIncidentDesk.css";
@@ -28,9 +44,82 @@ const ACTION_STATUSES: readonly PreloadRequestStatus[] = [
   "open",
 ];
 
+function PreloadInboxGate({
+  state,
+  email,
+}: {
+  state: Exclude<AdminAccessState, "admin">;
+  email?: string | null;
+}) {
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+
+  const handleSignOut = async () => {
+    setSignOutError(null);
+    try {
+      await signOut(getFirebaseAuth());
+    } catch (error) {
+      setSignOutError(error instanceof Error ? error.message : "Could not sign out.");
+    }
+  };
+
+  const back = (
+    <Button component={AppLink} to="/" variant="default" size="compact-sm" w="fit-content">
+      Back
+    </Button>
+  );
+
+  if (state === "loading") {
+    return (
+      <Stack gap="md" p="md" data-testid="admin-preload-inbox">
+        {back}
+        <Stack gap="sm" aria-hidden="true">
+          {[0, 1, 2].map((index) => (
+            <Skeleton key={index} height={80} radius={0} />
+          ))}
+        </Stack>
+      </Stack>
+    );
+  }
+
+  if (state === "unsigned") {
+    return (
+      <Stack gap="md" p="md" maw={480} data-testid="admin-preload-inbox">
+        {back}
+        <Stack gap="xs">
+          <Title order={1} tt="uppercase">
+            Preload request inbox
+          </Title>
+          <Text size="sm" c="dimmed">
+            Sign in with your Google account to manage preload requests.
+          </Text>
+        </Stack>
+        <PremiumSignInGate continuePath="/admin/preload-requests" />
+      </Stack>
+    );
+  }
+
+  return (
+    <Stack gap="md" p="md" maw={480} data-testid="admin-preload-inbox">
+      {back}
+      <Title order={1}>Access denied</Title>
+      <Alert title="Restricted panel">
+        Signed in as {email ?? "unknown"}. Preload requests are restricted to the app owner.
+      </Alert>
+      {signOutError ? <InlineError>{signOutError}</InlineError> : null}
+      <Group gap="xs" wrap="wrap">
+        <Button type="button" onClick={() => void handleSignOut()}>
+          Sign out
+        </Button>
+        <Button component={AppLink} to="/" variant="default">
+          Back home
+        </Button>
+      </Group>
+    </Stack>
+  );
+}
+
 export function AdminPreloadRequestInbox() {
-  const { state: accessState } = useAdminAccessState();
-  const accessLoading = accessState === "loading";
+  const { state: accessState, user } = useAdminAccessState();
   const enabled = accessState === "admin";
   const [requests, setRequests] = useState<PreloadRequest[]>([]);
   const [listLoading, setListLoading] = useState(false);
@@ -99,25 +188,8 @@ export function AdminPreloadRequestInbox() {
     }
   };
 
-  if (accessLoading) {
-    return (
-      <Stack className="jl-incident-desk" gap="md" p="md" data-testid="admin-preload-inbox">
-        <Alert title="Checking admin access…">Please wait.</Alert>
-      </Stack>
-    );
-  }
-
-  if (!enabled) {
-    return (
-      <Stack className="jl-incident-desk" gap="md" p="md" data-testid="admin-preload-inbox">
-        <Alert color="red" title="Admin access required">
-          Sign in with an admin account to manage preload requests.
-        </Alert>
-        <Button component={AppLink} to="/" variant="default">
-          Back home
-        </Button>
-      </Stack>
-    );
+  if (accessState !== "admin") {
+    return <PreloadInboxGate state={accessState} email={user?.email} />;
   }
 
   return (
@@ -154,43 +226,57 @@ export function AdminPreloadRequestInbox() {
             onChange={(event) => setShowClosed(event.currentTarget.checked)}
           />
 
-          {listError && enabled ? <InlineError>{listError}</InlineError> : null}
-          {enabled && listLoading ? (
-            <p className="jl-incident-empty">Loading…</p>
-          ) : visible.length === 0 ? (
-            <p className="jl-incident-empty">No preload requests.</p>
-          ) : (
-            <ul className="jl-incident-queue-list">
-              {visible.map((request) => {
-                const tone = preloadRequestStatusChipTone(request.status);
-                const selectedRow = request.id === selectedId;
-                return (
-                  <li key={request.id}>
-                    <UnstyledButton
-                      type="button"
-                      aria-current={selectedRow ? "true" : undefined}
-                      className={
-                        selectedRow ? "jl-incident-queue-row is-selected" : "jl-incident-queue-row"
-                      }
-                      onClick={() => setSelectedId(request.id)}
-                      style={{ display: "block", width: "100%", textAlign: "left" }}
-                    >
-                      <span className="jl-incident-queue-id">
-                        {request.id.slice(0, 10).toUpperCase()}
-                      </span>
-                      <span className="jl-incident-queue-title">{request.presetSnapshot.name}</span>
-                      <span className={`jl-incident-status-chip tone-${tone}`} data-tone={tone}>
-                        {preloadRequestStatusChipLabel(request.status)}
-                      </span>
-                      <span className="jl-incident-queue-age">
-                        {formatFreshnessAge(request.updatedAt)}
-                      </span>
-                    </UnstyledButton>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <div className="jl-scroll jl-incident-queue-scroll">
+            {listError && enabled ? <InlineError>{listError}</InlineError> : null}
+            {enabled && listLoading ? (
+              <div className="jl-incident-empty" aria-busy="true">
+                <p className="jl-incident-empty-title">Loading</p>
+                <p className="jl-incident-empty-body">Fetching preload requests…</p>
+              </div>
+            ) : visible.length === 0 ? (
+              <div className="jl-incident-empty">
+                <p className="jl-incident-empty-title">No preload requests</p>
+                <p className="jl-incident-empty-body">
+                  Preload requests from players appear here when they submit one.
+                </p>
+              </div>
+            ) : (
+              <ul className="jl-incident-queue-list">
+                {visible.map((request) => {
+                  const tone = preloadRequestStatusChipTone(request.status);
+                  const selectedRow = request.id === selectedId;
+                  return (
+                    <li key={request.id}>
+                      <UnstyledButton
+                        type="button"
+                        aria-current={selectedRow ? "true" : undefined}
+                        className={
+                          selectedRow
+                            ? "jl-incident-queue-row jl-incident-queue-row--active"
+                            : "jl-incident-queue-row"
+                        }
+                        onClick={() => setSelectedId(request.id)}
+                        style={{ display: "block", width: "100%", textAlign: "left" }}
+                      >
+                        <span className="jl-incident-queue-id">
+                          {request.id.slice(0, 10).toUpperCase()}
+                        </span>
+                        <span className="jl-incident-queue-title">
+                          {request.presetSnapshot.name}
+                        </span>
+                        <span className={`jl-incident-status-chip tone-${tone}`} data-tone={tone}>
+                          {preloadRequestStatusChipLabel(request.status)}
+                        </span>
+                        <span className="jl-incident-queue-age">
+                          {formatFreshnessAge(request.updatedAt)}
+                        </span>
+                      </UnstyledButton>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </section>
 
         <section className="jl-incident-detail" aria-label="Preload request detail">

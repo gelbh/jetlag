@@ -1,4 +1,4 @@
-import { Badge, Group, Stack, Text, UnstyledButton } from "@mantine/core";
+import { UnstyledButton } from "@mantine/core";
 import { resolveAdminSessionAreaLabel } from "../../../domain/admin/adminSessionAreaLabel";
 import { formatFreshnessAge } from "../../../domain/admin/formatAdminFreshness";
 import { adminSessionPhaseLabel } from "../../../domain/admin/sessionPhase";
@@ -30,46 +30,26 @@ export function AdminSessionRow({
   return (
     <UnstyledButton
       type="button"
-      className={`admin-session-row admin-session-row-dense w-full items-start gap-2 px-3 py-2 text-left ${
-        selected ? "ring-2 ring-brand-blue/50" : ""
-      }`}
-      style={{
-        display: "flex",
-        width: "100%",
-        borderRadius: "var(--jl-control-radius, 14px)",
-        border: "var(--jl-hairline, 0.33px) solid oklch(from var(--color-field-ink) l c h / 0.14)",
-        background: "oklch(from var(--color-canvas) calc(l + 0.04) c h)",
-        color: "var(--color-field-ink)",
-      }}
+      className="jl-ops-session-row"
+      aria-current={selected ? "true" : undefined}
+      data-live={summary.isLive ? "true" : undefined}
       data-feedback="tap"
       disabled={monitorJoinPending}
       onClick={() => onMonitor(summary)}
     >
-      <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
-        <Group gap={6} wrap="wrap">
-          <Text ff="monospace" size="lg" fw={700} style={{ letterSpacing: "0.18em" }}>
-            {summary.code}
-          </Text>
-          {areaLabel ? (
-            <Text size="sm" truncate>
-              {areaLabel}
-            </Text>
-          ) : null}
-        </Group>
-        <Group gap={6} wrap="wrap">
+      <span className="jl-ops-session-body">
+        <span className="jl-ops-session-head">
+          <span className="jl-ops-session-code">{summary.code}</span>
+          {areaLabel ? <span className="jl-ops-session-area">{areaLabel}</span> : null}
+        </span>
+        <span className="jl-ops-session-chips">
           {summary.isLive ? (
-            <Badge size="xs" variant="light" color="green" radius="xl" tt="uppercase">
-              Live
-            </Badge>
+            <span className="jl-ops-session-chip jl-ops-session-chip--live">Live</span>
           ) : null}
-          <Badge size="xs" variant="outline" radius="xl" tt="uppercase" c="dimmed">
-            {modeLabel(summary.mode)}
-          </Badge>
-          <Badge size="xs" variant="light" radius="xl" tt="uppercase">
-            {adminSessionPhaseLabel(summary.phase)}
-          </Badge>
-        </Group>
-        <Text size="xs" c="dimmed">
+          <span className="jl-ops-session-chip">{modeLabel(summary.mode)}</span>
+          <span className="jl-ops-session-chip">{adminSessionPhaseLabel(summary.phase)}</span>
+        </span>
+        <span className="jl-ops-session-meta">
           Activity {formatFreshnessAge(summary.lastActivityAt, nowMs)} · Location{" "}
           {formatFreshnessAge(summary.lastLocationAt, nowMs)} · {summary.roleCounts.seeker}S /{" "}
           {summary.roleCounts.hider}H
@@ -77,18 +57,9 @@ export function AdminSessionRow({
             ? ` · ${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"}`
             : ""}
           {summary.activeAnnotationCount > 0 ? ` · ${summary.activeAnnotationCount} ann` : ""}
-        </Text>
-      </Stack>
-      <Text
-        component="span"
-        size="xs"
-        fw={600}
-        tt="uppercase"
-        c="blue"
-        style={{ flexShrink: 0, letterSpacing: "0.04em" }}
-      >
-        {joiningThisSession ? "Joining…" : "Monitor"}
-      </Text>
+        </span>
+      </span>
+      <span className="jl-ops-session-action">{joiningThisSession ? "Joining…" : "Monitor"}</span>
     </UnstyledButton>
   );
 }

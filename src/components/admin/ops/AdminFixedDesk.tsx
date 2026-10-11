@@ -35,17 +35,20 @@ function RegionTitle({ id, children }: { id: string; children: string }) {
 function DeskPane({
   className,
   title,
+  label,
   children,
 }: {
   className: string;
   title?: string;
+  label?: string;
   children: ReactNode;
 }) {
   const titleId = useId();
   return (
     <Paper
-      component={title ? "section" : "div"}
+      component={title || label ? "section" : "div"}
       aria-labelledby={title ? titleId : undefined}
+      aria-label={label}
       withBorder
       radius={0}
       shadow="none"
@@ -68,7 +71,6 @@ export function AdminFixedDesk({
   detail,
   actions,
 }: AdminFixedDeskProps) {
-  const incidentsTitleId = useId();
   return (
     <div className="jl-ops-fixed-desk" data-testid="admin-fixed-desk" data-desk-mode={mode}>
       <DeskPane className="jl-ops-fixed-region jl-ops-fixed-region--sessions" title="Sessions">
@@ -80,11 +82,12 @@ export function AdminFixedDesk({
       {mode === "incidents" ? (
         <section
           className="jl-ops-fixed-region jl-ops-fixed-region--incidents"
-          aria-labelledby={incidentsTitleId}
+          aria-label="Incidents"
         >
-          <RegionTitle id={incidentsTitleId}>Incidents</RegionTitle>
           <DeskPane className="jl-ops-fixed-region">{inbox}</DeskPane>
-          <DeskPane className="jl-ops-fixed-region">{detail}</DeskPane>
+          <DeskPane className="jl-ops-fixed-region" label="Incident detail">
+            {detail}
+          </DeskPane>
           <DeskPane className="jl-ops-fixed-region">{actions}</DeskPane>
         </section>
       ) : null}
