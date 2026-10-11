@@ -11,6 +11,7 @@ import {
   isHtmlDocumentResponse,
   shouldApplyDocumentCsp,
 } from "./documentCsp";
+import { captureWorkerException } from "./exceptionCapture";
 import { handleIncidentEmailRequest, INCIDENT_EMAIL_PATH } from "./incidentEmail";
 import { handlePosthogProxyRequest, shouldHandlePosthogProxy } from "./posthogProxy";
 import { handleTimeRequest, TIME_ENDPOINT_PATH } from "./timeEndpoint";
@@ -54,53 +55,62 @@ function withNotFoundStatus(response: Response): Response {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const pathname = new URL(request.url).pathname;
-    if (pathname === TIME_ENDPOINT_PATH) {
-      return handleTimeRequest(request);
+  async fetch(request: Request, env: Env, ctx?: ExecutionContext): Promise<Response> {
+    try {
+      return await handleRequest(request, env);
+    } catch (error) {
+      captureWorkerException(error, request, env, ctx);
+      throw error;
     }
-    if (shouldHandlePosthogProxy(pathname)) {
-      return handlePosthogProxyRequest(request);
-    }
-    if (pathname === CSP_REPORT_PATH) {
-      return handleCspReportRequest(request);
-    }
-    if (pathname === INCIDENT_EMAIL_PATH) {
-      return handleIncidentEmailRequest(request, env);
-    }
-
-    if (isPrerenderHomePath(pathname)) {
-      const target = new URL("/", request.url);
-      target.search = new URL(request.url).search;
-      return Response.redirect(target.toString(), 308);
-    }
-
-    // Exact `/` serves prerendered home HTML; keep dist/index.html as the SPA shell
-    // for nested-route fallbacks and the service worker.
-    const assetRequest = pathname === "/" ? homePrerenderRequest(request) : request;
-    const fetched = await fetchAssetsFollowingRedirects(env, assetRequest);
-    if (isSpaFallbackForAssetRequest(request, fetched)) {
-      return new Response("Not Found", {
-        status: 404,
-        headers: {
-          "Content-Type": "text/plain;charset=UTF-8",
-          "Cache-Control": "no-store",
-        },
-      });
-    }
-    if (isUnknownAppDocument(pathname, fetched)) {
-      // Skip path-based Cache-Control: the 404 keeps no-cache even under long-lived prefixes.
-      const notFound = withNotFoundStatus(fetched);
-      return shouldApplyDocumentCsp(notFound) ? applyDocumentCspNonce(notFound) : notFound;
-    }
-
-    if (shouldApplyDocumentCsp(fetched)) {
-      return applyCacheControlHeader(await applyDocumentCspNonce(fetched), pathname);
-    }
-
-    return applyCacheControlHeader(fetched, pathname);
   },
 } satisfies ExportedHandler<Env>;
+
+async function handleRequest(request: Request, env: Env): Promise<Response> {
+  const pathname = new URL(request.url).pathname;
+  if (pathname === TIME_ENDPOINT_PATH) {
+    return handleTimeRequest(request);
+  }
+  if (shouldHandlePosthogProxy(pathname)) {
+    return handlePosthogProxyRequest(request);
+  }
+  if (pathname === CSP_REPORT_PATH) {
+    return handleCspReportRequest(request);
+  }
+  if (pathname === INCIDENT_EMAIL_PATH) {
+    return handleIncidentEmailRequest(request, env);
+  }
+
+  if (isPrerenderHomePath(pathname)) {
+    const target = new URL("/", request.url);
+    target.search = new URL(request.url).search;
+    return Response.redirect(target.toString(), 308);
+  }
+
+  // Exact `/` serves prerendered home HTML; keep dist/index.html as the SPA shell
+  // for nested-route fallbacks and the service worker.
+  const assetRequest = pathname === "/" ? homePrerenderRequest(request) : request;
+  const fetched = await fetchAssetsFollowingRedirects(env, assetRequest);
+  if (isSpaFallbackForAssetRequest(request, fetched)) {
+    return new Response("Not Found", {
+      status: 404,
+      headers: {
+        "Content-Type": "text/plain;charset=UTF-8",
+        "Cache-Control": "no-store",
+      },
+    });
+  }
+  if (isUnknownAppDocument(pathname, fetched)) {
+    // Skip path-based Cache-Control: the 404 keeps no-cache even under long-lived prefixes.
+    const notFound = withNotFoundStatus(fetched);
+    return shouldApplyDocumentCsp(notFound) ? applyDocumentCspNonce(notFound) : notFound;
+  }
+
+  if (shouldApplyDocumentCsp(fetched)) {
+    return applyCacheControlHeader(await applyDocumentCspNonce(fetched), pathname);
+  }
+
+  return applyCacheControlHeader(fetched, pathname);
+}
 
 export {
   addScriptNonceToCsp,
