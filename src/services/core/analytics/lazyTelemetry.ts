@@ -6,6 +6,7 @@
  */
 import { writeAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
 import type { syncAnalyticsIdentity, trackPageView } from "./analytics";
+import type { AnalyticsEventName, AnalyticsEventProps } from "./analyticsEvents";
 import type {
   captureAuthBootstrapFailure,
   captureAuthPersistenceFallback,
@@ -58,6 +59,15 @@ export function captureAuthPersistenceFallbackLazy(
 export function trackPageViewLazy(...args: Parameters<typeof trackPageView>): void {
   void loadAnalytics()
     .then((m) => m.trackPageView(...args))
+    .catch(() => {});
+}
+
+export function trackLazy<E extends AnalyticsEventName>(
+  event: E,
+  props?: AnalyticsEventProps[E],
+): void {
+  void loadAnalytics()
+    .then((m) => m.track(event, props))
     .catch(() => {});
 }
 

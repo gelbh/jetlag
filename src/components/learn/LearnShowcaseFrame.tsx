@@ -2,7 +2,8 @@ import { Box, Text } from "@mantine/core";
 import { type CSSProperties, type ReactNode, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import type { LearnShowcaseId } from "@/domain/learn/learnContentTypes";
-import { ANALYTICS_EVENTS, track } from "@/services/core/analytics/analytics";
+import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
+import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
 
 const frameStyle: CSSProperties = {
   border: "1px solid var(--color-rule)",
@@ -48,7 +49,7 @@ export function LearnShowcaseFrame({
   const trackFirstInteraction = () => {
     if (trackedRef.current) return;
     trackedRef.current = true;
-    track(ANALYTICS_EVENTS.learn_showcase_interacted, { showcase, path: pathname });
+    trackLazy(ANALYTICS_EVENTS.learn_showcase_interacted, { showcase, path: pathname });
   };
 
   return (
