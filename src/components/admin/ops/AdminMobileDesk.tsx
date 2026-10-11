@@ -25,15 +25,7 @@ export function AdminMobileDesk({ activePanelId, onSelectPanel, bodies }: AdminM
           style={{ flexWrap: "nowrap", overflowX: "auto" }}
         >
           {PANEL_IDS.map((panelId) => (
-            <Tabs.Tab
-              key={panelId}
-              value={panelId}
-              className={
-                activePanelId === panelId
-                  ? "jl-ops-mobile-chip jl-ops-mobile-chip--active"
-                  : "jl-ops-mobile-chip"
-              }
-            >
+            <Tabs.Tab key={panelId} value={panelId} className="jl-ops-mobile-chip">
               {PANEL_LABELS[panelId]}
             </Tabs.Tab>
           ))}

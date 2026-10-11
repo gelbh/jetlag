@@ -47,13 +47,28 @@ describe("AdminSessionFilters", () => {
   it("reveals mode and phase chips when More filters is expanded", () => {
     renderFilters();
 
-    fireEvent.click(screen.getByRole("button", { name: "More filters" }));
+    const more = screen.getByRole("button", { name: "More filters" });
+    fireEvent.click(more);
 
-    expect(screen.getByRole("button", { name: "More filters" })).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
+    expect(more).toHaveAttribute("aria-expanded", "true");
+    expect(document.getElementById(more.getAttribute("aria-controls") ?? "")).not.toBeNull();
     expect(screen.getByRole("button", { name: "Singleplayer" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Hiding" })).toBeInTheDocument();
+  });
+
+  it("exposes toggle state through aria-pressed", () => {
+    renderFilters({ liveOnly: true, annotatedOnly: false, mode: "multiplayer" });
+
+    expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Annotated" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "More filters" }));
+    expect(screen.getByRole("button", { name: "Multiplayer" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 });

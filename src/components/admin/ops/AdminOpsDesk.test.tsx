@@ -1,7 +1,9 @@
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
 import { renderWithRouter } from "../../../test/renderWithRouter";
 import { jetlagTheme } from "../../../theme/theme";
@@ -44,6 +46,37 @@ function expectStaticAppShell(layout: "desktop" | "mobile") {
 
 const SEEKER_HIDER_META = /1S \/ 1H/i;
 
+function makeIncident(overrides: Partial<IncidentRecord> = {}): IncidentRecord {
+  return {
+    id: "inc-abc12345",
+    status: "open",
+    createdAt: "2026-07-25T12:00:00Z",
+    updatedAt: "2026-07-25T12:05:00Z",
+    sessionId: "sess-1",
+    sessionCode: "7G2LJH",
+    reporterUid: "uid-1",
+    reporterRole: "seeker",
+    playerNote: "map froze",
+    diagnostics: {
+      appVersion: "0.9.5",
+      route: "/map",
+      sessionId: "sess-1",
+      sessionCode: "7G2LJH",
+      playerRole: "seeker",
+      uid: "uid-1",
+      userAgent: "TestAgent/1.0",
+      platform: "web",
+      online: true,
+      visibilityState: "visible",
+      lastClientErrors: [],
+      recentOps: [],
+      reportedAt: "2026-07-25T12:00:00Z",
+    },
+    adminPrompt: "## Incident report",
+    ...overrides,
+  };
+}
+
 const authState = vi.hoisted(() => ({
   state: "loading" as "loading" | "unsigned" | "denied" | "admin",
   user: null as { email: string; emailVerified: boolean } | null,
@@ -76,23 +109,33 @@ vi.mock("../../billing/PremiumSignInGate", () => ({
   ),
 }));
 
+const incidentState = vi.hoisted(() => ({
+  list: [] as IncidentRecord[],
+  byId: null as IncidentRecord | null,
+  subscribeIncident: vi.fn(),
+  joinSession: vi.fn(),
+}));
+
 vi.mock("../../../services/admin/adminIncidents", async () => {
   const actual = await vi.importActual<typeof import("../../../services/admin/adminIncidents")>(
     "../../../services/admin/adminIncidents",
   );
   return {
     ...actual,
-    subscribeIncidentList: (onNext: (incidents: unknown[]) => void) => {
-      onNext([]);
+    subscribeIncidentList: (onNext: (incidents: IncidentRecord[]) => void) => {
+      onNext(incidentState.list);
       return () => undefined;
     },
+    subscribeIncident: incidentState.subscribeIncident,
     countOpenIncidents: () => 0,
   };
 });
 
 vi.mock("../../../hooks/incident/useIncidentThread", () => ({
-  useIncidentThread: () => ({
-    incident: null,
+  useIncidentThread: (incidentId: string | null) => ({
+    incident:
+      incidentState.list.find((row) => row.id === incidentId) ??
+      (incidentState.byId?.id === incidentId ? incidentState.byId : null),
     messages: [],
     error: null,
     sending: false,
@@ -108,7 +151,7 @@ vi.mock("../../../services/core/firebase/firebase", () => ({
 
 vi.mock("../../../hooks/admin/useAdminJoinSession", () => ({
   useAdminJoinSession: () => ({
-    joinSession: vi.fn(),
+    joinSession: incidentState.joinSession,
     joiningCode: null,
     error: null,
     setError: vi.fn(),
@@ -131,6 +174,10 @@ describe("AdminOpsDesk", () => {
     sessionListState.error = null;
     sessionListState.refresh.mockClear();
     sessionListState.loadMore.mockClear();
+    incidentState.list = [];
+    incidentState.byId = null;
+    incidentState.subscribeIncident.mockReset();
+    incidentState.joinSession.mockReset();
   });
 
   it("shows skeleton rows while auth is loading", () => {
@@ -452,6 +499,148 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByTestId("admin-incident-inbox-empty")).toBeInTheDocument();
     expect(screen.getByTestId("admin-incident-detail")).toBeInTheDocument();
     expect(screen.getByRole("complementary", { name: "Incident actions" })).toBeInTheDocument();
+  });
+
+  it("labels each incidents pane without a visible Incidents heading", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [];
+    mockViewport(true);
+
+    renderOpsDesk(<AdminOpsDesk />, "/admin/incidents");
+
+    const incidents = screen.getByRole("region", { name: "Incidents" });
+    expect(within(incidents).getByRole("region", { name: "Incident queue" })).toBeInTheDocument();
+    expect(within(incidents).getByRole("region", { name: "Incident detail" })).toBeInTheDocument();
+    expect(
+      within(incidents).getByRole("complementary", { name: "Incident actions" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Incidents" })).not.toBeInTheDocument();
+  });
+
+  describe("incident deep link", () => {
+    function setDesktopAdmin() {
+      authState.state = "admin";
+      authState.authReady = true;
+      authState.user = { email: "admin@example.com", emailVerified: true };
+      sessionListState.sessions = [];
+      mockViewport(true);
+    }
+
+    function renderIncidentRoute(incidentId: string) {
+      renderOpsDesk(
+        <Routes>
+          <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
+        </Routes>,
+        `/admin/incidents/${incidentId}`,
+      );
+    }
+
+    it("selects an incident from the list without a by-id subscription", () => {
+      setDesktopAdmin();
+      incidentState.list = [makeIncident({ id: "inc-listed01" })];
+
+      renderIncidentRoute("inc-listed01");
+
+      const inbox = screen.getByRole("region", { name: "Incident queue" });
+      expect(inbox.querySelector('[aria-current="true"]')).not.toBeNull();
+      expect(
+        within(screen.getByTestId("admin-incident-detail")).getByText("inc-listed01"),
+      ).toBeInTheDocument();
+      const actions = screen.getByRole("complementary", { name: "Incident actions" });
+      expect(within(actions).getByRole("button", { name: "Resolve" })).toBeInTheDocument();
+      expect(incidentState.subscribeIncident).not.toHaveBeenCalled();
+    });
+
+    const outside = makeIncident({
+      id: "inc-outside1",
+      sessionId: "sess-outside",
+      sessionCode: "ZZ99QQ",
+    });
+
+    function serveById(incident: IncidentRecord | null) {
+      incidentState.byId = incident;
+      incidentState.subscribeIncident.mockImplementation(
+        (_id: string, onChange: (next: IncidentRecord | null) => void) => {
+          onChange(incident);
+          return () => undefined;
+        },
+      );
+    }
+
+    it("fetches an incident outside the list by id and monitors its live session", async () => {
+      setDesktopAdmin();
+      sessionListState.sessions = [
+        {
+          sessionId: "sess-outside",
+          code: "ZZ99QQ",
+          phase: "seek",
+          tier: "free",
+          gameSize: "medium",
+          roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
+          hostUid: "host-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          memberCount: 2,
+          timerAccumulatedMs: 0,
+          timerRunningSince: "2026-01-01T00:00:00.000Z",
+          endGameStartedAt: null,
+          endGameRequestedAt: null,
+          hostAppVersion: null,
+          hidingPeriodMinutes: null,
+          regionPackId: null,
+          regionPackSubregionId: null,
+          transitMetroId: null,
+          gameAreaLabel: null,
+          lastActivityAt: null,
+          lastLocationAt: null,
+          lastAnnotationAt: null,
+          activeAnnotationCount: 0,
+          mode: "multiplayer",
+          isLive: true,
+          liveMultiplayer: true,
+        },
+      ];
+      serveById(outside);
+
+      renderIncidentRoute("inc-outside1");
+
+      expect(incidentState.subscribeIncident).toHaveBeenCalledWith(
+        "inc-outside1",
+        expect.any(Function),
+        expect.any(Function),
+      );
+      const actions = screen.getByRole("complementary", { name: "Incident actions" });
+      expect(await within(actions).findByRole("button", { name: "Resolve" })).toBeInTheDocument();
+      await waitFor(() =>
+        expect(incidentState.joinSession).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: "sess-outside", code: "ZZ99QQ" }),
+          { navigate: false },
+        ),
+      );
+    });
+
+    it("does not auto-join a fetched incident whose session is not live", async () => {
+      setDesktopAdmin();
+      serveById(outside);
+
+      renderIncidentRoute("inc-outside1");
+
+      const actions = screen.getByRole("complementary", { name: "Incident actions" });
+      expect(await within(actions).findByRole("button", { name: "Resolve" })).toBeInTheDocument();
+      expect(incidentState.joinSession).not.toHaveBeenCalled();
+    });
+
+    it("offers no actions when the deep-linked incident does not exist", () => {
+      setDesktopAdmin();
+      serveById(null);
+
+      renderIncidentRoute("inc-missing1");
+
+      const actions = screen.getByRole("complementary", { name: "Incident actions" });
+      expect(within(actions).queryByRole("button", { name: "Resolve" })).toBeNull();
+      expect(incidentState.joinSession).not.toHaveBeenCalled();
+    });
   });
 
   it("returns to sessions mode from the topbar brand link on desktop", async () => {
