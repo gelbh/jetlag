@@ -115,6 +115,28 @@ describe("fetchOverpassWithFailover", () => {
     );
   });
 
+  it("all endpoints transport timeout → throws Overpass unavailable.", async () => {
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      const connectTimeout = new Error("Connect Timeout Error");
+      connectTimeout.name = "ConnectTimeoutError";
+      connectTimeout.code = "UND_ERR_CONNECT_TIMEOUT";
+      const fetchFailed = new TypeError("fetch failed");
+      fetchFailed.cause = connectTimeout;
+      throw fetchFailed;
+    };
+
+    await assert.rejects(
+      () => fetchOverpassWithFailover("[out:json];out;"),
+      (error) => {
+        assert.equal(error.message, "Overpass unavailable.");
+        return true;
+      },
+    );
+  });
+
   it("504 then aborts → throws Overpass unavailable.", async () => {
     let interpreterCalls = 0;
     globalThis.fetch = async (url) => {

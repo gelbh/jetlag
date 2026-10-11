@@ -55,8 +55,8 @@ function isAbortOrTimeoutError(error) {
 
 /**
  * ConnectTimeout / EPIPE transport failures (incl. undici TypeError: fetch failed).
- * Map to the same timeout message as Abort so total outage returns 504, not a
- * silenced raw fetch-failed capture.
+ * Map to the same timeout message as Abort so total outage returns 503 (Overpass
+ * unavailable), not a silenced raw fetch-failed capture.
  * @param {unknown} error
  * @returns {boolean}
  */
