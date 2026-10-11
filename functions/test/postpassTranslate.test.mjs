@@ -309,8 +309,51 @@ describe("postpassTranslate", () => {
     );
   });
 
+  it("ORs unquoted catalog-shaped bbox union selectors", () => {
+    const b = "51.48,-0.2,51.55,0.0";
+    const selectors = ["[tourism=museum]", "[amenity=museum]"]
+      .flatMap((s) => ["node", "way", "relation"].map((t) => `${t}${s}(${b});`))
+      .join("");
+    const c = classifyOverpassQuery(`[out:json][timeout:25];(${selectors});out center 200;`);
+    assert.equal(c.family, "places");
+    assert.equal(c.meta.clauses.length, 2);
+    const sql = buildPostpassSql(c);
+    assert.match(sql, /FROM postpass_pointlinepolygon /);
+    assert.match(sql, /\(\(tags->>'tourism' = 'museum'\) OR \(tags->>'amenity' = 'museum'\)\)/);
+  });
+
+  it("ANDs unquoted multi-filter clauses with existence", () => {
+    const ql = `[out:json][timeout:25];(node[aeroway=aerodrome][iata](51.48,-0.2,51.55,0.0);way[aeroway=aerodrome][iata](51.48,-0.2,51.55,0.0););out center 200;`;
+    const sql = buildPostpassSql(classifyOverpassQuery(ql));
+    assert.match(sql, /\(tags->>'aeroway' = 'aerodrome' AND tags \? 'iata'\)/);
+  });
+
+  it("translates unquoted around (tentacle-shaped) selectors", () => {
+    const ql = `[out:json][timeout:25];(node(around:1609.344,51.5,-0.12)[amenity=hospital];way(around:1609.344,51.5,-0.12)[amenity=hospital];);out center 40;`;
+    const c = classifyOverpassQuery(ql);
+    assert.equal(c.family, "around");
+    assert.equal(c.meta.clauses.length, 1);
+    assert.match(buildPostpassSql(c), /FROM postpass_pointlinepolygon /);
+  });
+
+  it("classifies nwr statements", () => {
+    const c = classifyOverpassQuery(
+      `[out:json];( nwr["amenity"="cafe"](53.3,-6.3,53.4,-6.2); );out center 200;`,
+    );
+    assert.equal(c.family, "places");
+    assert.equal(c.meta.clauses.length, 1);
+  });
+
   it("fails closed on filters Postpass SQL cannot mirror", () => {
-    for (const filter of ['["amenity"!="cafe"]', '[!"name"]', '[~"^addr"~"."]', '["name"="x",i]']) {
+    for (const filter of [
+      '["amenity"!="cafe"]',
+      '[!"name"]',
+      '[~"^addr"~"."]',
+      '["name"="x",i]',
+      '["name"!~"x"]',
+      "[amenity!=cafe]",
+      "[!name]",
+    ]) {
       const ql = `[out:json];( node${filter}(53.3,-6.3,53.4,-6.2); );out center 200;`;
       assert.equal(classifyOverpassQuery(ql), null, filter);
     }

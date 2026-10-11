@@ -76,6 +76,13 @@ export function extractTagPredicates(ql) {
 const OVERPASS_STATEMENT_RE =
   /\b(?:node|way|relation|nwr)\b(?:\s*\(\s*around\s*:[^)]*\))?\s*((?:\[[^\]]*\]\s*)+)/g;
 
+// Quoted ("…", no escapes) or bare Overpass identifier.
+const FILTER_TOKEN = String.raw`(?:"([^"\\]*)"|([A-Za-z0-9_]+))`;
+const FILTER_EXISTS_RE = new RegExp(String.raw`^\[\s*${FILTER_TOKEN}\s*\]$`);
+const FILTER_COMPARE_RE = new RegExp(
+  String.raw`^\[\s*${FILTER_TOKEN}\s*(=|~)\s*${FILTER_TOKEN}\s*(,\s*i\s*)?\]$`,
+);
+
 /**
  * Strict: negation, key regex, escaped quotes, or `=…,i` return null so callers fail closed.
  *
@@ -83,15 +90,21 @@ const OVERPASS_STATEMENT_RE =
  * @returns {OverpassFilter | null}
  */
 export function parseOverpassFilter(raw) {
-  const exists = raw.match(/^\[\s*"([^"\\]+)"\s*\]$/);
+  const exists = raw.match(FILTER_EXISTS_RE);
   if (exists) {
-    return { key: exists[1], op: "exists" };
+    const key = exists[1] ?? exists[2];
+    return key ? { key, op: "exists" } : null;
   }
-  const match = raw.match(/^\[\s*"([^"\\]+)"\s*(=|~)\s*"([^"\\]*)"\s*(,\s*i\s*)?\]$/);
+  const match = raw.match(FILTER_COMPARE_RE);
   if (!match) {
     return null;
   }
-  const [, key, operator, value, caseInsensitive] = match;
+  const [, quotedKey, bareKey, operator, quotedValue, bareValue, caseInsensitive] = match;
+  const key = quotedKey ?? bareKey;
+  const value = quotedValue ?? bareValue;
+  if (!key) {
+    return null;
+  }
   if (operator === "=") {
     return caseInsensitive ? null : { key, op: "eq", value };
   }
