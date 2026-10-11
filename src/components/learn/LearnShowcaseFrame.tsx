@@ -1,5 +1,8 @@
 import { Box, Text } from "@mantine/core";
-import type { CSSProperties, ReactNode } from "react";
+import { type CSSProperties, type ReactNode, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import type { LearnShowcaseId } from "@/domain/learn/learnContentTypes";
+import { ANALYTICS_EVENTS, track } from "@/services/core/analytics/analytics";
 
 const frameStyle: CSSProperties = {
   border: "1px solid var(--color-rule)",
@@ -30,14 +33,33 @@ const captionStyle: CSSProperties = {
 
 /** Stake-plate frame for live Ask HUD demos on learn pages. */
 export function LearnShowcaseFrame({
+  showcase,
   caption,
   children,
 }: {
+  showcase: LearnShowcaseId;
   caption: string;
   children: ReactNode;
 }) {
+  const { pathname } = useLocation();
+  const trackedRef = useRef(false);
+
+  // Capture phase: demo handlers may stop propagation.
+  const trackFirstInteraction = () => {
+    if (trackedRef.current) return;
+    trackedRef.current = true;
+    track(ANALYTICS_EVENTS.learn_showcase_interacted, { showcase, path: pathname });
+  };
+
   return (
-    <Box component="figure" data-testid="learn-showcase" style={frameStyle} aria-label={caption}>
+    <Box
+      component="figure"
+      data-testid="learn-showcase"
+      style={frameStyle}
+      aria-label={caption}
+      onPointerDownCapture={trackFirstInteraction}
+      onKeyDownCapture={trackFirstInteraction}
+    >
       <Text component="p" style={labelStyle}>
         Try it
       </Text>
