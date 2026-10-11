@@ -14,6 +14,7 @@ import {
   playAreaCacheKey,
   resolveSessionMatchingAreas,
   resolveSessionPlayArea,
+  sessionUsesPackPlayArea,
 } from "../../services/geo/matching/resolveSessionMatchingAreas";
 
 function sessionHasBundledMatchingLevels(session: SessionRecord | null | undefined): boolean {
@@ -38,10 +39,6 @@ function sessionNeedsAsyncMatchingAreas(session: SessionRecord | null | undefine
   }
 
   return isKnownRegionPack(session.regionPackId);
-}
-
-function sessionNeedsAsyncPlayArea(session: SessionRecord | null | undefined): boolean {
-  return Boolean(session && isKnownRegionPack(session.regionPackId));
 }
 
 export interface ResolvedSessionRulesState {
@@ -79,7 +76,7 @@ export function useResolvedSessionRules(
   );
 
   const needsAsyncResolve = sessionNeedsAsyncMatchingAreas(session);
-  const needsPlayAreaResolve = sessionNeedsAsyncPlayArea(session);
+  const needsPlayAreaResolve = sessionUsesPackPlayArea(session);
 
   const [resolvedAreas, setResolvedAreas] =
     useState<SessionRulesInput["customMatchingAreas"]>(undefined);
@@ -177,7 +174,10 @@ export function useResolvedSessionRules(
     [baseRules, resolvedAreas],
   );
 
-  const gameArea = resolvedGameArea ?? peekResolvedPlayArea(session) ?? session?.gameArea ?? null;
+  const gameArea =
+    (needsPlayAreaResolve ? (resolvedGameArea ?? peekResolvedPlayArea(session)) : undefined) ??
+    session?.gameArea ??
+    null;
 
   const matchingAreasReady =
     !session || !needsAsyncResolve || resolvedAreas !== undefined || matchingAreasError !== null;

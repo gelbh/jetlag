@@ -56,6 +56,7 @@ const SESSION_RECORD_SCALAR_KEYS = [
   "regionPackId",
   "regionPackSubregionId",
   "bundledGeoRevision",
+  "playAreaFromPack",
   "expansionPackEnabled",
   "boardEconomyEnabled",
   "customQuestionPackEnabled",
