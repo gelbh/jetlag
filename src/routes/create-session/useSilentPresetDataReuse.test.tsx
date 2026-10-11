@@ -10,7 +10,7 @@ import { GAME_PRESET_SCHEMA_VERSION } from "@/domain/session/presets/gamePreset"
 import { defaultAdvancedSessionSettings } from "@/domain/session/tools/advancedSessionSettings";
 import { useGamePresetStore } from "@/state/gamePresetStore";
 import { useSessionStore } from "@/state/sessionStore";
-import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
+import { DUBLIN_CITY_GAME_AREA, DUBLIN_COUNTY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
 
@@ -358,7 +358,7 @@ describe("CreateSession silent preset data reuse", () => {
         name: "Loaded",
         gameArea: DUBLIN_CITY_GAME_AREA,
         regionPackId: "dublin",
-        gameSize: "small",
+        gameSize: "medium",
         customLocationPins: [{ id: "loaded-pin", name: "Loaded pin", point: [53.35, -6.26] }],
       }),
       baseCustomPreset({
@@ -387,14 +387,14 @@ describe("CreateSession silent preset data reuse", () => {
       expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("loaded");
     });
     await waitFor(() => {
-      expect(screen.getByText(/small · metric/i)).toBeInTheDocument();
+      expect(screen.getByText(/medium · metric/i)).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(loadRegionPackSessionBoundaries).toHaveBeenCalled();
     });
 
     goToRules();
-    expect(screen.getByRole("radio", { name: /^Small/i })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: /^Medium/i })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("radio", { name: /^Large/i })).toHaveAttribute("aria-checked", "false");
 
     openCustomContent();
@@ -711,6 +711,7 @@ describe("CreateSession silent preset data reuse", () => {
 
     const session = useSessionStore.getState().session;
     expect(session?.regionPackId).toBe("dublin");
+    expect(session?.playAreaFromPack).toBe(false);
     expect(session?.customMatchingAreas?.[8]).toEqual(
       level8MatchingJson("silent-feat", DUBLIN_CITY_GAME_AREA),
     );
@@ -741,6 +742,31 @@ describe("CreateSession silent preset data reuse", () => {
     importBoundaryFile();
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: /game preset/i })).not.toHaveValue("loaded");
+    });
+  });
+
+  it.each([
+    { label: "a pack preset without its own area", gameArea: undefined, expected: true },
+    { label: "a saved preset with its own area", gameArea: DUBLIN_CITY_GAME_AREA, expected: false },
+  ])("Load preset of $label sets playAreaFromPack $expected", async ({ gameArea, expected }) => {
+    seedCustomPresets(
+      baseCustomPreset({ id: "loaded", name: "Loaded", gameArea, regionPackId: "dublin" }),
+    );
+    loadRegionPackSessionBoundaries.mockResolvedValue({
+      playArea: DUBLIN_COUNTY_GAME_AREA,
+      customMatchingAreas: {},
+    });
+
+    renderCreateSession("/create?preset=loaded");
+    await waitFor(() => {
+      expect(loadRegionPackSessionBoundaries).toHaveBeenCalled();
+    });
+
+    goToRules();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => {
+      expect(useSessionStore.getState().session?.playAreaFromPack).toBe(expected);
     });
   });
 });

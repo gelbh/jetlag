@@ -38,6 +38,7 @@ export const sessionDocumentSchema = z
     regionPackId: z.string().optional(),
     regionPackSubregionId: z.string().optional(),
     bundledGeoRevision: z.number().int().positive().optional(),
+    playAreaFromPack: z.boolean().optional(),
     expansionPackEnabled: z.boolean().optional(),
     boardEconomyEnabled: z.boolean().optional(),
     customQuestionPackEnabled: z.boolean().optional(),

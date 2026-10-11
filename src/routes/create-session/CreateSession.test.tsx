@@ -148,11 +148,11 @@ const IMPORTED_AREA = {
   type: "Polygon" as const,
   coordinates: [
     [
-      [-6.3, 53.3],
-      [-6.2, 53.3],
-      [-6.2, 53.4],
-      [-6.3, 53.4],
-      [-6.3, 53.3],
+      [-8.55, 51.85],
+      [-8.4, 51.85],
+      [-8.4, 51.95],
+      [-8.55, 51.95],
+      [-8.55, 51.85],
     ],
   ],
 };
@@ -411,7 +411,7 @@ describe("CreateSession", () => {
           advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
           placeLabel: "Cork, Ireland",
           gameArea: IMPORTED_AREA,
-          focusBounds: { south: 53.3, west: -6.3, north: 53.4, east: -6.2 },
+          focusBounds: { south: 51.85, west: -8.55, north: 51.95, east: -8.4 },
           migrationStatus: "ok",
         },
       ]),
@@ -429,8 +429,8 @@ describe("CreateSession", () => {
     });
     await waitFor(() => {
       expect(mapView.model?.focusBounds).toEqual([
-        [53.3, -6.3],
-        [53.4, -6.2],
+        [51.85, -8.55],
+        [51.95, -8.4],
       ]);
     });
     expect(mapView.model?.recenterToken).toBeGreaterThan(0);
@@ -796,7 +796,7 @@ describe("CreateSession", () => {
           advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
           placeLabel: "Cork, Ireland",
           gameArea: IMPORTED_AREA,
-          focusBounds: { south: 53.3, west: -6.3, north: 53.4, east: -6.2 },
+          focusBounds: { south: 51.85, west: -8.55, north: 51.95, east: -8.4 },
           migrationStatus: "ok",
         },
       ]),

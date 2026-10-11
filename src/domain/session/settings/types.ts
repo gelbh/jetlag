@@ -56,6 +56,7 @@ export type SessionRulesPatch = Pick<
   | "regionPackId"
   | "regionPackSubregionId"
   | "bundledGeoRevision"
+  | "playAreaFromPack"
   | "expansionPackEnabled"
   | "boardEconomyEnabled"
   | "customQuestionPackEnabled"

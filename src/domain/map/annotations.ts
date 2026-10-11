@@ -169,6 +169,8 @@ export interface SessionRecord {
   regionPackId?: RegionPackId;
   regionPackSubregionId?: string;
   bundledGeoRevision?: number;
+  /** True: play the pack/subregion boundary. False: play the host-framed gameArea. Absent (legacy): pack boundary. */
+  playAreaFromPack?: boolean;
   expansionPackEnabled?: boolean;
   /** Ops-admin-only hider deck simulation. Default false. */
   boardEconomyEnabled?: boolean;

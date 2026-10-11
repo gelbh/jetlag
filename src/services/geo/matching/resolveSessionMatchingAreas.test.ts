@@ -160,4 +160,26 @@ describe("resolveSessionPlayArea", () => {
     expect(isPlayAreaReadySync(session)).toBe(true);
     expect(peekResolvedPlayArea(session)).toBeUndefined();
   });
+
+  it("loads the pack boundary for legacy sessions without playAreaFromPack", async () => {
+    const session = createTestSession({ regionPackId: "dublin", regionPackSubregionId: "fingal" });
+    const packArea = { ...session.gameArea } as GameArea;
+    vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockResolvedValue(packArea);
+
+    expect(isPlayAreaReadySync(session)).toBe(false);
+    await expect(resolveSessionPlayArea(session)).resolves.toBe(packArea);
+    expect(regionPackBoundaries.loadRegionPackPlayArea).toHaveBeenCalledWith("dublin", "fingal");
+  });
+
+  it("keeps the host-framed gameArea when playAreaFromPack is false", async () => {
+    const session = createTestSession({
+      regionPackId: "dublin",
+      regionPackSubregionId: "fingal",
+      playAreaFromPack: false,
+    });
+
+    expect(isPlayAreaReadySync(session)).toBe(true);
+    await expect(resolveSessionPlayArea(session)).resolves.toBe(session.gameArea);
+    expect(regionPackBoundaries.loadRegionPackPlayArea).not.toHaveBeenCalled();
+  });
 });

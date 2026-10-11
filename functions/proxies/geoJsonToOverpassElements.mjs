@@ -237,34 +237,21 @@ function featureToElements(feature, family, nextWayId) {
     return elements;
   }
 
-  if (geometry?.type === "Point") {
-    const [lon, lat] = geometry.coordinates;
-    return [
-      {
-        type: "node",
-        id,
-        lat: Number(lat),
-        lon: Number(lon),
-        tags,
-      },
-    ];
-  }
-
+  const { type: osmType } = osmIdentity(properties);
   const center = geometryCentroid(geometry);
   if (center) {
     return [
       {
-        type: "node",
+        type: osmType,
         id,
         lat: center.lat,
         lon: center.lon,
-        center,
+        ...(osmType === "node" ? {} : { center }),
         tags,
       },
     ];
   }
 
-  const { type: osmType } = osmIdentity(properties);
   return [
     {
       type: osmType,
