@@ -3,6 +3,7 @@ import type { PowerUpId } from "@/domain/boardEconomy/types";
 import type { LearnShowcaseId } from "@/domain/learn/learnContentTypes";
 import type { SessionTier } from "@/domain/map/annotations";
 import type { MapTool } from "@/domain/map/mapToolTypes";
+import type { ThermometerSendBlockReason } from "@/domain/questions/thermometerSendBlock";
 import type { LearnRoutePath } from "@/domain/seo/learnRoutePaths";
 import type { PendingQuestionToolType } from "@/domain/session/activity/sessionChat";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
@@ -27,6 +28,7 @@ export const ANALYTICS_EVENTS = {
   invite_shared: "invite_shared",
   account_linked: "account_linked",
   pwa_installed: "pwa_installed",
+  thermometer_send_blocked: "thermometer_send_blocked",
 } as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];
@@ -100,4 +102,9 @@ export type AnalyticsEventProps = {
     outcome: "linked" | "signed_in_existing";
   };
   pwa_installed: Record<string, never>;
+  thermometer_send_blocked: {
+    reason: ThermometerSendBlockReason;
+    placementMode: "gps" | "manual";
+    awaitHiderAnswer: boolean;
+  };
 };

@@ -44,6 +44,35 @@ describe("commitThermometerManual used-distance guard", () => {
     expect(createAnnotation).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
+
+  it("reports a loading session instead of silently dropping a multiplayer send", async () => {
+    const setMapError = vi.fn();
+    const createAnnotation = vi.fn();
+    const onSuccess = vi.fn();
+
+    await commitThermometerManual({
+      thermoA: [51.5, -0.12],
+      thermoB: [51.52, -0.1],
+      thermoTravelMeters: milesToMeters(4),
+      distanceMeters: milesToMeters(3),
+      answer: null,
+      pendingQuestions: [],
+      awaitHiderAnswer: true,
+      submitPendingQuestion: vi.fn(),
+      sessionId: "s1",
+      senderUid: null,
+      distanceUnit: "imperial",
+      cardDraw: 2,
+      cardKeep: 1,
+      createAnnotation,
+      setMapError,
+      onSuccess,
+    });
+
+    expect(setMapError).toHaveBeenCalledWith("Session is still loading. Try again in a moment.");
+    expect(createAnnotation).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
 });
 
 describe("commitThermometerManual analytics", () => {

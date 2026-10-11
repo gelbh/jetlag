@@ -99,6 +99,14 @@ describe("ThermometerHudBody", () => {
     expect(screen.queryByRole("button", { name: /end walk/i })).toBeNull();
   });
 
+  it("explains the disarmed END WALK while the walk waits for GPS", () => {
+    renderHud(<ThermometerHudBody {...baseProps} walkingActive waitingForGps step="b" />);
+
+    expect(screen.getByTestId("ask-walk-gps-waiting")).toHaveTextContent(
+      /waiting for a gps update/i,
+    );
+  });
+
   it("keeps END WALK only on PrimedCommitStrip via AskHudHost", () => {
     const readiness: AskHudReadiness = {
       surface: "thermometer",

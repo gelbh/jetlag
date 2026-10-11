@@ -18,7 +18,11 @@ import {
   filledStyles,
   mapChromeSurfaceStyles,
 } from "@/components/ui/entry/entryChrome";
-import type { ThermometerAnswer } from "@/domain/questions";
+import {
+  THERMOMETER_SEND_BLOCK_MESSAGES,
+  type ThermometerAnswer,
+  type ThermometerSendBlockReason,
+} from "@/domain/questions";
 
 type PlacementMode = "gps" | "manual";
 
@@ -33,7 +37,8 @@ export type ThermometerMapPlacementChromeProps = {
   gpsLoading?: boolean;
   canStartWalk?: boolean;
   travelLabel?: string | null;
-  travelTooShort?: boolean;
+  /** Why Start track / Send is disabled; shown instead of a silent dead button. */
+  blockReason?: ThermometerSendBlockReason | null;
   error?: string | null;
   awaitHiderAnswer?: boolean;
   answer?: ThermometerAnswer | null;
@@ -90,7 +95,7 @@ export function ThermometerMapPlacementChrome({
   gpsLoading = false,
   canStartWalk = false,
   travelLabel = null,
-  travelTooShort = false,
+  blockReason = null,
   error = null,
   awaitHiderAnswer = false,
   answer = null,
@@ -215,9 +220,14 @@ export function ThermometerMapPlacementChrome({
             <p className="m-0 min-w-0 truncate text-sm font-semibold">Movement: {travelLabel}</p>
           </div>
         ) : null}
-        {travelTooShort ? (
-          <p className="m-0 px-1 text-xs leading-snug" style={{ color: "var(--color-halt)" }}>
-            Movement is shorter than the selected distance.
+        {blockReason ? (
+          <p
+            data-testid="thermometer-map-placement-block-reason"
+            className="m-0 px-1 text-xs leading-snug"
+            role="status"
+            style={{ color: "var(--color-halt)" }}
+          >
+            {THERMOMETER_SEND_BLOCK_MESSAGES[blockReason]}
           </p>
         ) : null}
         {pinsReady && awaitHiderAnswer ? (

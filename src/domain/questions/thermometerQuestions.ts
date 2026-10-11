@@ -78,9 +78,13 @@ export function usedThermometerDistanceOptionsForSession(
   annotations: readonly AnnotationRecord[],
   pendingQuestions: readonly PendingQuestionRecord[],
   exceptAnnotationId?: string,
+  exceptQuestionId?: string,
 ): Set<ThermometerDistanceOptionMiles> {
   const used = usedThermometerDistanceOptions(annotations, exceptAnnotationId);
-  for (const id of thermometerPresetHelpers.usedOptionsFromPending(pendingQuestions)) {
+  for (const id of thermometerPresetHelpers.usedOptionsFromPending(
+    pendingQuestions,
+    exceptQuestionId,
+  )) {
     used.add(id);
   }
   return used;
