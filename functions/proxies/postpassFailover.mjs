@@ -35,6 +35,9 @@ export async function tryPostpassForOverpassQuery(query) {
         family: classification.family,
         endpoint: "postpass.geofabrik.de",
         error: "empty",
+        // Game-area bbox only; never log `around` (a player position).
+        bbox: classification.meta.bbox ?? null,
+        adminLevel: classification.meta.adminLevel ?? null,
       });
       return null;
     }
