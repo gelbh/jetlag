@@ -243,6 +243,8 @@ export function useMapScreenTools({
     active: activeTool === "zone",
     createAnnotation,
     finishPlacement,
+    gameArea,
+    setMapError,
   });
   const drawTool = useDrawTool({
     active: activeTool === "draw",
