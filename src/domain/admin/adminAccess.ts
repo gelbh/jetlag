@@ -1,5 +1,4 @@
 import type { User } from "firebase/auth";
-import { isPermanentUser } from "@/services/core/auth/accountAuth";
 
 export const ADMIN_EMAIL = "gelbharttomer@gmail.com";
 
@@ -18,7 +17,7 @@ export function isAdminEmail(email: string | null | undefined): boolean {
 }
 
 export function isAdminUser(user: User | null | undefined): boolean {
-  if (!user || !isPermanentUser(user)) {
+  if (!user || user.isAnonymous) {
     return false;
   }
 
@@ -38,7 +37,7 @@ export function claimsLookAdmin(
 export async function resolveAdminAccess(
   user: User | null | undefined,
 ): Promise<AdminAccessResolution> {
-  if (!user || !isPermanentUser(user)) {
+  if (!user || user.isAnonymous) {
     return "unsigned";
   }
   if (!isAdminEmail(user.email)) {
