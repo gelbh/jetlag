@@ -68,21 +68,62 @@ describe("postpassTranslate", () => {
     assert.equal(c.family, "places");
     const sql = buildPostpassSql(c);
     assert.match(sql, /FROM postpass_pointlinepolygon /);
+    assert.match(sql, /SELECT osm_id, osm_type, tags, ST_PointOnSurface\(geom\) AS geom /);
     assert.match(sql, /ST_MakeEnvelope/i);
     assert.match(sql, /amenity/);
   });
 
-  it("classifies around QL with DWithin", () => {
-    const ql = `
-      [out:json][timeout:25];
-      ( node(around:1609.344,51.5,-0.12)["amenity"="cafe"]; );
-      out center 40;
-    `;
+  it("classifies unquoted (tentacle-shaped) around QL with prefiltered DWithin", () => {
+    const ql = `[out:json][timeout:25];(node(around:1609.344,51.5,-0.12)[amenity=hospital];way(around:1609.344,51.5,-0.12)[amenity=hospital];);out center 40;`;
     const c = classifyOverpassQuery(ql);
     assert.equal(c.family, "around");
+    assert.deepEqual(c.meta.clauses, [[{ key: "amenity", op: "eq", value: "hospital" }]]);
     const sql = buildPostpassSql(c);
     assert.match(sql, /FROM postpass_pointlinepolygon /);
+    assert.match(sql, /ST_PointOnSurface\(geom\) AS geom/);
+    assert.match(sql, /geom && ST_Expand\(/);
     assert.match(sql, /ST_DWithin/i);
+  });
+
+  it("keeps way identity for places rows so way N and node N do not collide", () => {
+    const { elements } = geoJsonToOverpassElements(
+      {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: { osm_type: "W", osm_id: 5, tags: { leisure: "park" } },
+            geometry: { type: "Point", coordinates: [-0.15, 51.5] },
+          },
+          {
+            type: "Feature",
+            properties: { osm_type: "N", osm_id: 5, tags: { leisure: "park" } },
+            geometry: { type: "Point", coordinates: [-0.1, 51.51] },
+          },
+        ],
+      },
+      "places",
+    );
+    assert.deepEqual(elements[0], {
+      type: "way",
+      id: 5,
+      lat: 51.5,
+      lon: -0.15,
+      center: { lat: 51.5, lon: -0.15 },
+      tags: { leisure: "park" },
+    });
+    assert.deepEqual(elements[1], {
+      type: "node",
+      id: 5,
+      lat: 51.51,
+      lon: -0.1,
+      tags: { leisure: "park" },
+    });
+  });
+
+  it("quotes apostrophes in filter values", () => {
+    const ql = `[out:json];( node["name"="McDonald's"](53.3,-6.3,53.4,-6.2); );out center 200;`;
+    assert.match(buildPostpassSql(classifyOverpassQuery(ql)), /tags->>'name' = 'McDonald''s'/);
   });
 
   it("classifies metro QL", () => {
@@ -328,14 +369,6 @@ describe("postpassTranslate", () => {
     assert.match(sql, /\(tags->>'aeroway' = 'aerodrome' AND tags \? 'iata'\)/);
   });
 
-  it("translates unquoted around (tentacle-shaped) selectors", () => {
-    const ql = `[out:json][timeout:25];(node(around:1609.344,51.5,-0.12)[amenity=hospital];way(around:1609.344,51.5,-0.12)[amenity=hospital];);out center 40;`;
-    const c = classifyOverpassQuery(ql);
-    assert.equal(c.family, "around");
-    assert.equal(c.meta.clauses.length, 1);
-    assert.match(buildPostpassSql(c), /FROM postpass_pointlinepolygon /);
-  });
-
   it("classifies nwr statements", () => {
     const c = classifyOverpassQuery(
       `[out:json];( nwr["amenity"="cafe"](53.3,-6.3,53.4,-6.2); );out center 200;`,
@@ -357,5 +390,30 @@ describe("postpassTranslate", () => {
       const ql = `[out:json];( node${filter}(53.3,-6.3,53.4,-6.2); );out center 200;`;
       assert.equal(classifyOverpassQuery(ql), null, filter);
     }
+  });
+
+  it("fails closed when a union statement cannot be parsed", () => {
+    const b = "53.3,-6.3,53.4,-6.2";
+    for (const statement of [
+      `way(${b})["amenity"="pub"];`,
+      `node(area.a)["amenity"="pub"];`,
+      `nw["amenity"="pub"](${b});`,
+      `node(${b});`,
+    ]) {
+      const ql = `[out:json];( node["amenity"="cafe"](${b}); ${statement} );out center 200;`;
+      assert.equal(classifyOverpassQuery(ql), null, statement);
+    }
+  });
+
+  it("parses rel shorthand statements", () => {
+    const c = classifyOverpassQuery(
+      `[out:json];( node["amenity"="cafe"](53.3,-6.3,53.4,-6.2); rel["amenity"="pub"](53.3,-6.3,53.4,-6.2); );out center 200;`,
+    );
+    assert.equal(c.meta.clauses.length, 2);
+  });
+
+  it("fails closed on unions with different around filters", () => {
+    const ql = `[out:json];( node(around:100,51.5,-0.12)["amenity"="cafe"]; node(around:9000,51.5,-0.12)["amenity"="pub"]; );out center 40;`;
+    assert.equal(classifyOverpassQuery(ql), null);
   });
 });

@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-fix: Places and nearby searches load more often when public Overpass servers are down
+fix: Places, nearby, and measuring searches load more often when public Overpass servers are down

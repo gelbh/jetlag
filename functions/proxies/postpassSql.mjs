@@ -9,7 +9,7 @@ function sqlStringLiteral(value) {
 /**
  * Overpass `~` is an unanchored POSIX regex match.
  *
- * @param {{ key: string, op: "eq" | "regex" | "iregex" | "exists", value?: string }} pred
+ * @param {import("./postpassClassify.mjs").OverpassFilter} pred
  * @returns {string}
  */
 export function tagPredicateSql(pred) {
@@ -17,12 +17,16 @@ export function tagPredicateSql(pred) {
   switch (pred.op) {
     case "exists":
       return `tags ? ${key}`;
+    case "eq":
+      return `tags->>${key} = ${sqlStringLiteral(pred.value)}`;
     case "regex":
       return `tags->>${key} ~ ${sqlStringLiteral(pred.value)}`;
     case "iregex":
       return `tags->>${key} ~* ${sqlStringLiteral(pred.value)}`;
-    default:
-      return `tags->>${key} = ${sqlStringLiteral(pred.value)}`;
+    default: {
+      const _exhaustive = pred.op;
+      throw new Error(`Unsupported Postpass tag op: ${_exhaustive}`);
+    }
   }
 }
 
@@ -51,19 +55,26 @@ export function envelopeSql(bbox) {
  * @returns {string}
  */
 export function dwithinSql(around) {
-  return `ST_DWithin(geom::geography, ST_MakePoint(${around.lon}, ${around.lat})::geography, ${around.radiusMeters})`;
+  const point = `ST_SetSRID(ST_MakePoint(${around.lon}, ${around.lat}), 4326)`;
+  // Degree box covering the radius so the geom index can prefilter; geography cast cannot use it.
+  const cosLat = Math.max(Math.cos((around.lat * Math.PI) / 180), 0.01);
+  const degrees = around.radiusMeters / (111_320 * cosLat);
+  return `geom && ST_Expand(${point}, ${degrees}) AND ST_DWithin(geom::geography, ${point}::geography, ${around.radiusMeters})`;
 }
+
+const POINT_ON_SURFACE_GEOM = "ST_PointOnSurface(geom) AS geom";
 
 /**
  * @param {string} table
  * @param {string[]} wheres
  * @param {number} [limit]
+ * @param {string} [geomSql]
  * @returns {string}
  */
-function selectSql(table, wheres, limit) {
+function selectSql(table, wheres, limit, geomSql = "geom") {
   const where = wheres.length > 0 ? ` WHERE ${wheres.join(" AND ")}` : "";
   const lim = limit != null ? ` LIMIT ${limit}` : "";
-  return `SELECT osm_id, osm_type, tags, geom FROM ${table}${where}${lim}`;
+  return `SELECT osm_id, osm_type, tags, ${geomSql} FROM ${table}${where}${lim}`;
 }
 
 /**
@@ -138,6 +149,7 @@ export function buildPostpassSql(classification) {
         "postpass_pointlinepolygon",
         [clausesSql(meta.clauses, family), dwithinSql(around)],
         40,
+        POINT_ON_SURFACE_GEOM,
       );
     }
     case "linear": {
@@ -158,7 +170,7 @@ export function buildPostpassSql(classification) {
       } else {
         throw new Error("Postpass places SQL requires bbox or around.");
       }
-      return selectSql("postpass_pointlinepolygon", wheres, 200);
+      return selectSql("postpass_pointlinepolygon", wheres, 200, POINT_ON_SURFACE_GEOM);
     }
     default: {
       const _exhaustive = family;

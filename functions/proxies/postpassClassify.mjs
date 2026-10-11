@@ -34,6 +34,13 @@ export function extractOverpassBbox(ql) {
  * @returns {{ radiusMeters: number, lat: number, lon: number } | null}
  */
 export function extractAround(ql) {
+  // One SQL radius cannot mirror unions with different around filters.
+  const distinct = new Set(
+    (String(ql).match(/around\s*:[^)]*/gi) ?? []).map((a) => a.replace(/\s+/g, "")),
+  );
+  if (distinct.size > 1) {
+    return null;
+  }
   const match = String(ql).match(
     /around\s*:\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/i,
   );
@@ -74,7 +81,8 @@ export function extractTagPredicates(ql) {
  */
 
 const OVERPASS_STATEMENT_RE =
-  /\b(?:node|way|relation|nwr)\b(?:\s*\(\s*around\s*:[^)]*\))?\s*((?:\[[^\]]*\]\s*)+)/g;
+  /\b(?:node|way|rel|relation|nwr)\b(?:\s*\(\s*around\s*:[^)]*\))?\s*((?:\[[^\]]*\]\s*)+)/g;
+const OVERPASS_KEYWORD_RE = /\b(?:node|way|rel|relation|nwr|nw|nr|wr)\b/g;
 
 // Quoted ("…", no escapes) or bare Overpass identifier.
 const FILTER_TOKEN = String.raw`(?:"([^"\\]*)"|([A-Za-z0-9_]+))`;
@@ -113,14 +121,21 @@ export function parseOverpassFilter(raw) {
 
 /**
  * Overpass union statements → OR of clauses; filters within a statement are ANDed.
+ * Any statement the regex cannot read returns null so callers fail closed.
  *
  * @param {string} ql
  * @returns {OverpassFilter[][] | null}
  */
 export function extractClauses(ql) {
+  const text = String(ql);
+  const statements = [...text.matchAll(OVERPASS_STATEMENT_RE)];
+  const keywords = text.replace(/"[^"]*"|\[[^\]]*\]/g, "").match(OVERPASS_KEYWORD_RE) ?? [];
+  if (keywords.length !== statements.length) {
+    return null;
+  }
   /** @type {Map<string, OverpassFilter[]>} */
   const unique = new Map();
-  for (const statement of String(ql).matchAll(OVERPASS_STATEMENT_RE)) {
+  for (const statement of statements) {
     /** @type {OverpassFilter[]} */
     const clause = [];
     for (const raw of statement[1].match(/\[[^\]]*\]/g) ?? []) {
