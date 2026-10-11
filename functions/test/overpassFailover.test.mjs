@@ -98,6 +98,46 @@ describe("fetchOverpassWithFailover", () => {
     assert.deepEqual(interpreterTargets, [...OVERPASS_ENDPOINTS]);
   });
 
+  it("all endpoints 504 → throws Overpass unavailable.", async () => {
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      return jsonResponse(504);
+    };
+
+    await assert.rejects(
+      () => fetchOverpassWithFailover("[out:json];out;"),
+      (error) => {
+        assert.equal(error.message, "Overpass unavailable.");
+        return true;
+      },
+    );
+  });
+
+  it("504 then aborts → throws Overpass unavailable.", async () => {
+    let interpreterCalls = 0;
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      interpreterCalls += 1;
+      if (interpreterCalls === 1) {
+        return jsonResponse(504);
+      }
+      throw abortError();
+    };
+
+    await assert.rejects(
+      () => fetchOverpassWithFailover("[out:json];out;"),
+      (error) => {
+        assert.equal(error.message, "Overpass unavailable.");
+        return true;
+      },
+    );
+    assert.equal(interpreterCalls, OVERPASS_ENDPOINTS.length);
+  });
+
   it("504 then 200 → success", async () => {
     let interpreterCalls = 0;
     globalThis.fetch = async (url) => {
@@ -253,7 +293,7 @@ describe("fetchOverpassWithFailover", () => {
           now: () => clock,
         }),
       (error) => {
-        assert.equal(error.message, "Overpass timed out.");
+        assert.equal(error.message, "Overpass unavailable.");
         return true;
       },
     );
