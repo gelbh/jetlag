@@ -26,6 +26,7 @@ Handlers run in this order (first match wins for early returns):
 | `documentCsp.ts` | Nonce generation + CSP header / HTML rewrite |
 | `assetCacheHeaders.ts` | Cache-Control by pathname |
 | `incidentEmail.ts` | Incident desk email webhook |
+| `exceptionCapture.ts` | Uncaught `fetch` exceptions → PostHog Error Tracking (re-thrown after capture) |
 
 ## Secrets (Worker env)
 
@@ -39,6 +40,12 @@ Injected at runtime via `wrangler secret put` (prod) or `.dev.vars` (local). Nev
 | `INCIDENT_EMAIL_FROM` | no | Verified Resend From (code default if unset) |
 
 Copy `.dev.vars.example` → `.dev.vars` for `just preview-worker`.
+
+## Vars (committed)
+
+| Binding | Purpose |
+|---------|---------|
+| `POSTHOG_PROJECT_KEY` | Public PostHog project key for Worker exception capture. Empty in `.dev.vars` disables capture locally. |
 
 ## Config notes
 
