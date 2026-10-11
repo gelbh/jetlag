@@ -202,11 +202,13 @@ describe("overpassSharedCache", () => {
     assert.equal(lines.length, 1);
     assert.equal(lines[0].length, 1);
     const entry = JSON.parse(lines[0][0]);
-    assert.deepEqual(
-      { type: entry.type, op: entry.op, error: entry.error, status: entry.status },
-      { type: "overpass_l2_error", op: "write", error: "SignatureDoesNotMatch", status: 403 },
-    );
-    assert.doesNotMatch(lines[0][0], /secret-ish|stack/);
+    assert.deepEqual(entry, {
+      type: "overpass_l2_error",
+      op: "write",
+      error: "SignatureDoesNotMatch",
+      status: 403,
+      message: "The request signature we calculated does not match",
+    });
   });
 
   it("fetchCachedOverpassQuery serves L2 after L1 miss", async () => {
