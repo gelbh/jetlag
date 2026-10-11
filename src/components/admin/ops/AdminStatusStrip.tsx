@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Box,
   Divider,
   Group,
   Text,
@@ -36,28 +37,44 @@ export function AdminStatusStrip({
   onOpenSettings,
 }: AdminStatusStripProps) {
   return (
-    <Group h="100%" px="sm" gap="md" wrap="nowrap">
-      <ActionIcon component={AppLink} to="/" variant="default" aria-label="Home">
-        <HudHomeIcon width={16} height={16} aria-hidden="true" />
-      </ActionIcon>
-      <UnstyledButton component={AppLink} to="/admin">
-        <Group gap="xs" wrap="nowrap" align="baseline">
-          <Text fw={800}>Jetlag</Text>
-          <Text size="sm">Event centre</Text>
-          <Text size="xs" c="dimmed">{`v${APP_VERSION}`}</Text>
-        </Group>
-      </UnstyledButton>
-      <Divider orientation="vertical" />
-      <StatCell label="Live games" value={liveCount} />
-      <Divider orientation="vertical" />
-      <StatCell label="Runners" value={runnerCount} />
-      <Divider orientation="vertical" />
-      <UnstyledButton component={AppLink} to="/admin/incidents">
-        <StatCell label="Needs you" value={needsYouCount} />
-      </UnstyledButton>
+    <Group h="100%" px="sm" gap="md" wrap="nowrap" justify="space-between">
+      <Group gap="md" wrap="nowrap" miw={0} flex={1}>
+        <ActionIcon component={AppLink} to="/" variant="default" aria-label="Home">
+          <HudHomeIcon width={16} height={16} aria-hidden="true" />
+        </ActionIcon>
+        <UnstyledButton component={AppLink} to="/admin" aria-label="Event centre" miw={0}>
+          <Group gap="xs" wrap="nowrap" align="baseline">
+            <Text fw={800} truncate>
+              Jetlag
+            </Text>
+            <Text size="sm" visibleFrom="sm">
+              Event centre
+            </Text>
+            <Text size="xs" c="dimmed" visibleFrom="sm">{`v${APP_VERSION}`}</Text>
+          </Group>
+        </UnstyledButton>
+        <Divider orientation="vertical" visibleFrom="sm" />
+        <Box visibleFrom="sm">
+          <StatCell label="Live games" value={liveCount} />
+        </Box>
+        <Divider orientation="vertical" visibleFrom="sm" />
+        <Box visibleFrom="sm">
+          <StatCell label="Runners" value={runnerCount} />
+        </Box>
+        <Divider orientation="vertical" visibleFrom="sm" />
+        <UnstyledButton
+          component={AppLink}
+          to="/admin/incidents"
+          aria-label={`Needs you: ${needsYouCount} open`}
+        >
+          <StatCell label="Needs you" value={needsYouCount} />
+        </UnstyledButton>
+      </Group>
       <VisuallyHidden aria-live="polite">{`${needsYouCount} open incidents`}</VisuallyHidden>
-      <Group gap="xs" wrap="nowrap" ml="auto">
-        <AdminUtcClock />
+      <Group gap="xs" wrap="nowrap" flex="none">
+        <Box visibleFrom="sm">
+          <AdminUtcClock />
+        </Box>
         <Tooltip label="Preload requests">
           <ActionIcon
             component={AppLink}
