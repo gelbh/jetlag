@@ -200,6 +200,7 @@ describe("useAnnotations", () => {
       expect(writeRemoteAnnotation).toHaveBeenCalledTimes(2);
       expect(useSessionStore.getState().lastSyncError).toBe(ANNOTATION_PERMISSION_DENIED_MESSAGE);
       expect(useSessionStore.getState().pendingWrites).toBe(0);
+      expect(useAnnotationStore.getState().annotations).toEqual([]);
     });
 
     it("keeps a retriable failure queued in pending writes", async () => {
