@@ -44,6 +44,8 @@ import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { USERNAME_MAX_LENGTH } from "@/domain/game/playerProfile";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
 import { copyToClipboard } from "@/platform/copyToClipboard";
+import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
+import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
 import {
   type FriendSheetProfile,
   getFriendSheetProfile,
@@ -543,6 +545,7 @@ function FriendDetailDrawer({
             text: `Join ${entry.username} and me with code ${inviteSessionCode}`,
             url,
           });
+          trackLazy(ANALYTICS_EVENTS.invite_shared, { method: "native_share" });
           const message = `Invite shared with ${entry.username} (${inviteSessionCode}).`;
           setInviteNote(message);
           onInviteCopied(message);
@@ -556,6 +559,9 @@ function FriendDetailDrawer({
       }
 
       const copied = await copyToClipboard(url);
+      if (copied) {
+        trackLazy(ANALYTICS_EVENTS.invite_shared, { method: "copy_link" });
+      }
       const message = copied
         ? `Invite link copied for ${entry.username} (${inviteSessionCode}).`
         : `Invite code ${inviteSessionCode} ready for ${entry.username}.`;
