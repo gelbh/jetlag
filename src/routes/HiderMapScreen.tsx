@@ -179,10 +179,10 @@ export function HiderMapScreen() {
     () => new Map(),
   );
   const answeredPendingIds = useMemo(() => new Set(optimisticAnswers.keys()), [optimisticAnswers]);
-  const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
+  const mapViewportRef = useRef<MapViewportState | null>(null);
 
   const handleMapViewportChange = useCallback((viewport: MapViewportState | null) => {
-    setMapViewport(viewport);
+    mapViewportRef.current = viewport;
   }, []);
 
   const hidingZoneRadius = session
@@ -458,10 +458,10 @@ export function HiderMapScreen() {
         }
       } catch (error) {
         rollBackOptimisticAnswer(error);
-      } finally {
-        answerInFlightRef.current = false;
-        setAnswerSubmitting(false);
       }
+      // Not `finally`: React Compiler skips any component containing one, and the catch never rethrows.
+      answerInFlightRef.current = false;
+      setAnswerSubmitting(false);
     },
     [
       acknowledgeFingerprints,
@@ -656,9 +656,13 @@ export function HiderMapScreen() {
     ...hiderBoardEconomyZoneOpts(boardEconomyEnabled, boardEconomy.state, boardEconomy.runMove),
   });
 
+  // Destructured so hand-memo deps match what React Compiler infers (member calls bind the object).
+  const { searchStationsInArea, openWizard, closeWizard, moveMode } = zoneTool;
+  const { closeSheet, openChat, openSettings, openCodes, openLog } = overlay;
+
   const searchViewportBounds = useCallback((): MapViewportBounds => {
-    return mapViewport?.bounds ?? gameAreaToBoundingBox(gameArea ?? fallbackGameArea());
-  }, [gameArea, mapViewport?.bounds]);
+    return mapViewportRef.current?.bounds ?? gameAreaToBoundingBox(gameArea ?? fallbackGameArea());
+  }, [gameArea]);
 
   const handleHidingZoneStepChange = useCallback((stepId: HidingZoneStepId) => {
     setHidingZoneStepId(stepId);
@@ -667,8 +671,8 @@ export function HiderMapScreen() {
   const mapAttentionActive = zoneTool.wizardOpen && isWizardPlacePhaseStep(hidingZoneStepId);
 
   const handleSearchThisArea = useCallback(() => {
-    void zoneTool.searchStationsInArea(searchViewportBounds());
-  }, [searchViewportBounds, zoneTool.searchStationsInArea]);
+    void searchStationsInArea(searchViewportBounds());
+  }, [searchViewportBounds, searchStationsInArea]);
 
   const myTrap = uid ? timeTrapForHider(timeTraps, uid) : null;
   const timeTrapTool = useTimeTrapTool({
@@ -706,60 +710,61 @@ export function HiderMapScreen() {
   );
 
   const openWizardExclusive = useCallback(() => {
-    overlay.closeSheet();
-    zoneTool.openWizard();
-  }, [overlay.closeSheet, zoneTool.openWizard]);
+    closeSheet();
+    openWizard();
+  }, [closeSheet, openWizard]);
 
   const openChatExclusive = useCallback(() => {
-    if (zoneTool.moveMode) {
+    if (moveMode) {
       return;
     }
-    zoneTool.closeWizard();
+    closeWizard();
     setChatAnswerError(null);
-    overlay.openChat();
-  }, [overlay.openChat, zoneTool.closeWizard, zoneTool.moveMode]);
+    openChat();
+  }, [openChat, closeWizard, moveMode]);
 
   const dismissTruthReveal = useCallback(() => {
     setTruthReveal(null);
   }, []);
 
   const openSettingsExclusive = useCallback(() => {
-    if (zoneTool.moveMode) {
+    if (moveMode) {
       return;
     }
-    zoneTool.closeWizard();
-    overlay.openSettings();
-  }, [overlay.openSettings, zoneTool.closeWizard, zoneTool.moveMode]);
+    closeWizard();
+    openSettings();
+  }, [openSettings, closeWizard, moveMode]);
 
   const openCodesExclusive = useCallback(() => {
-    if (zoneTool.moveMode) {
+    if (moveMode) {
       return;
     }
-    zoneTool.closeWizard();
-    overlay.openCodes();
-  }, [overlay.openCodes, zoneTool.closeWizard, zoneTool.moveMode]);
+    closeWizard();
+    openCodes();
+  }, [openCodes, closeWizard, moveMode]);
 
   const openLogExclusive = useCallback(() => {
-    if (zoneTool.moveMode) {
+    if (moveMode) {
       return;
     }
-    zoneTool.closeWizard();
-    overlay.openLog();
-  }, [overlay.openLog, zoneTool.closeWizard, zoneTool.moveMode]);
+    closeWizard();
+    openLog();
+  }, [openLog, closeWizard, moveMode]);
 
+  const { stations: timeTrapStations, setSelectedStation: selectTimeTrapStation } = timeTrapTool;
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
       if (timeTrapSheetOpen && !myTrap) {
-        const station = nearestStation([lat, lng], timeTrapTool.stations);
+        const station = nearestStation([lat, lng], timeTrapStations);
         if (station) {
-          timeTrapTool.setSelectedStation(station);
+          selectTimeTrapStation(station);
         }
         return;
       }
 
       zoneTool.handleMapClick([lat, lng]);
     },
-    [myTrap, timeTrapSheetOpen, timeTrapTool.setSelectedStation, timeTrapTool.stations, zoneTool],
+    [myTrap, timeTrapSheetOpen, selectTimeTrapStation, timeTrapStations, zoneTool],
   );
 
   const chromeHudRef = useRef<HTMLDivElement>(null);
