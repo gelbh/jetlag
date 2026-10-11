@@ -101,15 +101,13 @@ export function useAnnotations() {
         updatedAt: new Date().toISOString(),
       };
 
-      const write = async (): Promise<string | null> => {
-        try {
-          const user = await ensureAnonymousUser();
+      let failure: { error: unknown } | undefined;
+      try {
+        const user = await ensureAnonymousUser();
 
-          if (shouldQueueAnnotationOffline()) {
-            await queueAnnotationWrite(session.id, stampedAnnotation);
-            return null;
-          }
-
+        if (shouldQueueAnnotationOffline()) {
+          await queueAnnotationWrite(session.id, stampedAnnotation);
+        } else {
           await withSessionWriteAccess({
             session,
             uid: user.uid,
@@ -117,16 +115,17 @@ export function useAnnotations() {
             onSessionChange: (next) => setSession(next, user.uid),
             write: (sessionId) => writeRemoteAnnotation(sessionId, stampedAnnotation),
           });
-          return null;
-        } catch (error) {
-          return handleAnnotationWriteError(session.id, [stampedAnnotation], error);
         }
-      };
+      } catch (error) {
+        failure = { error };
+      }
 
-      return write().finally(() => {
-        decrementSyncInFlight();
-        decrementPendingWrites();
-      });
+      decrementSyncInFlight();
+      decrementPendingWrites();
+
+      return failure
+        ? handleAnnotationWriteError(session.id, [stampedAnnotation], failure.error)
+        : null;
     },
     [
       decrementPendingWrites,
@@ -295,7 +294,7 @@ export function useAnnotations() {
       }),
     );
 
-    const write = async () => {
+    const persist = async () => {
       try {
         const user = await ensureAnonymousUser();
 
@@ -318,7 +317,7 @@ export function useAnnotations() {
       }
     };
 
-    await write().finally(() => {
+    await persist().finally(() => {
       decrementSyncInFlight();
       decrementPendingWrites();
     });

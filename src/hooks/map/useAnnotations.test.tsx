@@ -34,6 +34,15 @@ vi.mock("../../services/firestore/firestoreAnnotations", () => ({
   writeRemoteAnnotationsBatch,
 }));
 
+vi.mock("../../services/session/offlineQueue", () => ({
+  countOfflineQueueForSession: vi.fn(async () => 1),
+  enqueueOfflineWrite: vi.fn(async () => undefined),
+}));
+
+vi.mock("../../services/session/backgroundSync", () => ({
+  registerAnnotationBackgroundSync: vi.fn(async () => undefined),
+}));
+
 vi.mock("./shouldQueueAnnotationOffline", () => ({
   shouldQueueAnnotationOffline: () => false,
 }));
@@ -191,6 +200,22 @@ describe("useAnnotations", () => {
       expect(writeRemoteAnnotation).toHaveBeenCalledTimes(2);
       expect(useSessionStore.getState().lastSyncError).toBe(ANNOTATION_PERMISSION_DENIED_MESSAGE);
       expect(useSessionStore.getState().pendingWrites).toBe(0);
+    });
+
+    it("keeps a retriable failure queued in pending writes", async () => {
+      useSessionStore
+        .getState()
+        .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
+      writeRemoteAnnotation.mockRejectedValue(new FirebaseError("unavailable", "offline"));
+
+      const { result } = renderHook(() => useAnnotations());
+
+      await act(async () => {
+        await result.current.createAnnotation(pin());
+      });
+
+      expect(useSessionStore.getState().pendingWrites).toBe(1);
+      expect(useSessionStore.getState().lastSyncError).toBeNull();
     });
 
     // JETLAG-49 / JETLAG-4: UI handlers `void` these calls, so a rules
