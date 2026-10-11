@@ -30,6 +30,50 @@ describe("useAdminMapWideLayout", () => {
     expect(result.current).toBe(false);
   });
 
+  function stubContainerWidth(width: number) {
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        private readonly callback: ResizeObserverCallback;
+        constructor(callback: ResizeObserverCallback) {
+          this.callback = callback;
+        }
+        observe() {
+          this.callback(
+            [{ contentRect: { width } } as ResizeObserverEntry],
+            this as unknown as ResizeObserver,
+          );
+        }
+        disconnect() {}
+      },
+    );
+  }
+
+  it("returns true for embedded monitor when the container is 560px wide", () => {
+    stubContainerWidth(560);
+    const shellRef = { current: document.createElement("div") };
+    const { result } = renderHook(() => useAdminMapWideLayout(shellRef, { embedded: true }));
+
+    expect(result.current).toBe(true);
+  });
+
+  it("returns false for full-screen at a 560px container with a narrow viewport", () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        matches: false,
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    stubContainerWidth(560);
+    const shellRef = { current: document.createElement("div") };
+    const { result } = renderHook(() => useAdminMapWideLayout(shellRef));
+
+    expect(result.current).toBe(false);
+  });
+
   it("reattaches container measurement when ready becomes true", () => {
     const shellRef = createRef<HTMLDivElement>();
     const observe = vi.fn();

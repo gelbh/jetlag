@@ -30,7 +30,17 @@ vi.mock("./spectator-map/SpectatorMapLayers", () => ({
   SpectatorMapLayers: () => null,
 }));
 
+vi.mock("../components/admin/monitor/AdminMonitorPlayerFocus", () => ({
+  AdminMonitorPlayerFocus: () => null,
+}));
+
+vi.mock("../hooks/session/useSessionExtrasSync", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../hooks/session/useSessionExtrasSync")>()),
+  usePlayerLocationsSync: vi.fn(() => []),
+}));
+
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
+import { usePlayerLocationsSync } from "../hooks/session/useSessionExtrasSync";
 import {
   type ObserverMapScreenController,
   useObserverMapScreen,
@@ -38,6 +48,7 @@ import {
 
 const mockedUseAdminMapWideLayout = vi.mocked(useAdminMapWideLayout);
 const mockedUseObserverMapScreen = vi.mocked(useObserverMapScreen);
+const mockedUsePlayerLocationsSync = vi.mocked(usePlayerLocationsSync);
 
 function mockController(): ObserverMapScreenController {
   const session = createTestSession();
@@ -135,6 +146,36 @@ describe("AdminMapScreen", () => {
     expect(screen.getByLabelText("Admin monitor rail")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Force end" })).not.toBeInTheDocument();
   });
+
+  it.each([
+    { layout: "wide", wide: true },
+    { layout: "narrow", wide: false },
+  ])("embedded $layout monitor renders one roster from one location subscription", ({ wide }) => {
+    const controller = mockController();
+    mockedUseObserverMapScreen.mockReturnValue(controller);
+    mockedUseAdminMapWideLayout.mockReturnValue(wide);
+    mockedUsePlayerLocationsSync.mockClear();
+
+    const { container } = renderWithRouter(<AdminMapScreen embeddedMonitor />, {
+      route: "/admin",
+    });
+
+    expect(screen.getAllByRole("region", { name: "Player roster" })).toHaveLength(1);
+    expect(mockedUsePlayerLocationsSync).toHaveBeenLastCalledWith(controller.session?.id);
+    expect(container.querySelector(".admin-monitor-code-badge") !== null).toBe(!wide);
+  });
+
+  it.each([true, false])(
+    "standalone map (wide=%s) has no roster or location subscription",
+    (wide) => {
+      mockedUseAdminMapWideLayout.mockReturnValue(wide);
+
+      renderWithRouter(<AdminMapScreen />, { route: "/map" });
+
+      expect(screen.queryByRole("region", { name: "Player roster" })).not.toBeInTheDocument();
+      expect(mockedUsePlayerLocationsSync).toHaveBeenLastCalledWith(undefined);
+    },
+  );
 
   it("opens session log and chat from compact dock actions", () => {
     const controller = mockController();

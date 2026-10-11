@@ -339,7 +339,6 @@ export function AdminOpsDesk() {
       <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
         <AdminMonitorPane
           active={monitorActive}
-          sessionCode={activeSession?.code ?? null}
           errorMessage={monitorRoleError}
           sessionsUnavailable={sessionsFailedEmpty}
         />

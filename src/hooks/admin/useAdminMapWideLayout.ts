@@ -3,6 +3,7 @@ import { useMinWidth } from "../layout/useMinWidth";
 
 const VIEWPORT_WIDE_PX = 768;
 const CONTAINER_WIDE_PX = 640;
+const EMBEDDED_CONTAINER_WIDE_PX = 480;
 
 function useContainerMinWidth(
   ref: RefObject<HTMLElement | null>,
@@ -43,7 +44,11 @@ export function useAdminMapWideLayout(
   options?: { embedded?: boolean; ready?: boolean },
 ): boolean {
   const viewportWide = useMinWidth(VIEWPORT_WIDE_PX);
-  const containerWide = useContainerMinWidth(shellRef, CONTAINER_WIDE_PX, options?.ready ?? true);
+  const containerWide = useContainerMinWidth(
+    shellRef,
+    options?.embedded ? EMBEDDED_CONTAINER_WIDE_PX : CONTAINER_WIDE_PX,
+    options?.ready ?? true,
+  );
 
   if (options?.embedded) {
     return containerWide;
