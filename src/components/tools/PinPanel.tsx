@@ -1,4 +1,8 @@
-import { POI_PIN_CATEGORIES, type PoiPinCategoryId } from "../../domain/map/poiPinCategories";
+import {
+  POI_PIN_CATEGORIES,
+  type PoiPinCategoryId,
+  parsePoiPinCategory,
+} from "../../domain/map/poiPinCategories";
 import { SimpleSelectField } from "../ui/forms/GroupedSelectField";
 import { TextAreaField } from "../ui/forms/TextAreaField";
 
@@ -49,9 +53,7 @@ export function PinPanel({
         value={poiCategory ?? JUST_A_MARKER}
         placeholder="Counts as"
         options={POI_CATEGORY_OPTIONS}
-        onChange={(value) =>
-          onPoiCategoryChange(value === JUST_A_MARKER ? null : (value as PoiPinCategoryId))
-        }
+        onChange={(value) => onPoiCategoryChange(parsePoiPinCategory(value) ?? null)}
       />
       {poiCategory ? (
         <p className="text-xs text-ink-dim">

@@ -1,4 +1,3 @@
-import type { Point } from "geojson";
 import type { LatLngTuple } from "../geometry/kernel/types";
 import { BASE_MEASURING_CATALOG } from "../questions/measuring/measuringCatalog";
 import type { AnnotationRecord } from "./annotations";
@@ -17,20 +16,29 @@ export const POI_PIN_CATEGORIES: readonly { id: PoiPinCategoryId; label: string 
       option.targetKind === "point" && option.id !== "body_of_water",
   ).map(({ id, label }) => ({ id, label }));
 
+export function parsePoiPinCategory(value: unknown): PoiPinCategoryId | undefined {
+  return POI_PIN_CATEGORIES.find((category) => category.id === value)?.id;
+}
+
+export function poiPinCategoryLabel(value: unknown): string | undefined {
+  return POI_PIN_CATEGORIES.find((category) => category.id === value)?.label;
+}
+
 export function poiPinsForCategory(
   annotations: readonly AnnotationRecord[],
   categoryId: string,
 ): { id: string; name: string; point: LatLngTuple }[] {
-  return annotations
-    .filter(
-      (annotation) =>
-        annotation.type === "pin" &&
-        annotation.status === "active" &&
-        annotation.metadata.poiCategory === categoryId &&
-        annotation.geometry.geometry.type === "Point",
-    )
-    .map((annotation) => {
-      const [lng, lat] = (annotation.geometry.geometry as Point).coordinates;
-      return { id: annotation.id, name: annotation.metadata.label ?? "Pin", point: [lat, lng] };
-    });
+  return annotations.flatMap((annotation) => {
+    const { geometry } = annotation.geometry;
+    if (
+      annotation.type !== "pin" ||
+      annotation.status !== "active" ||
+      annotation.metadata.poiCategory !== categoryId ||
+      geometry.type !== "Point"
+    ) {
+      return [];
+    }
+    const [lng, lat] = geometry.coordinates;
+    return [{ id: annotation.id, name: annotation.metadata.label ?? "Pin", point: [lat, lng] }];
+  });
 }

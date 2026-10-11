@@ -9,7 +9,11 @@ import {
 } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import { POI_PIN_CATEGORIES, type PoiPinCategoryId } from "@/domain/map/poiPinCategories";
+import {
+  POI_PIN_CATEGORIES,
+  parsePoiPinCategory,
+  poiPinCategoryLabel,
+} from "@/domain/map/poiPinCategories";
 import type { SessionCustomLocationPin } from "@/domain/session/catalog/sessionCustomContent";
 import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 
@@ -44,11 +48,12 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
       return;
     }
 
+    const category = parsePoiPinCategory(pinDraft.category);
     const pin: SessionCustomLocationPin = {
       id: createPinId(),
       name,
       point: [lat, lng] as LatLngTuple,
-      ...(pinDraft.category ? { category: pinDraft.category as PoiPinCategoryId } : {}),
+      ...(category ? { category } : {}),
     };
 
     onChange({
@@ -62,8 +67,9 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
     <Stack gap="xs">
       <SectionLabel>Manual location pins</SectionLabel>
       <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
-        Named points for Measuring and Tentacle when map data is missing. Pick a category to count
-        the pin only there, and in Matching too.
+        Named points for when map data is missing. Untagged pins count for every Measuring and
+        Tentacle category. Tag a pin to limit it to that category; tagged pins also count in
+        Matching where that category exists.
       </Text>
 
       {value.customLocationPins.length > 0 ? (
@@ -86,8 +92,8 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
                   </Text>
                   <Text size="xs" c="var(--color-field-ink-muted)">
                     {pin.point[0].toFixed(5)}, {pin.point[1].toFixed(5)}
-                    {pin.category
-                      ? ` · ${POI_PIN_CATEGORIES.find((entry) => entry.id === pin.category)?.label}`
+                    {poiPinCategoryLabel(pin.category)
+                      ? ` · ${poiPinCategoryLabel(pin.category)}`
                       : ""}
                   </Text>
                 </Box>

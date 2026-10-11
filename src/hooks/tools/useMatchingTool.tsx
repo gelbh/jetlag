@@ -25,6 +25,7 @@ import {
   matchingQuestionFor,
   usedMatchingCategoryIdsForSession,
 } from "../../domain/questions";
+import { taggedSetupPinsForCategory } from "../../domain/session/catalog/sessionCustomCatalog";
 import {
   type GeolocationPermissionState,
   queryGeolocationPermission,
@@ -336,9 +337,7 @@ export function useMatchingTool({
         matchingFetchOptions: {
           ...catalog.matchingFetchOptions,
           poiPins: [
-            ...(sessionRules?.customLocationPins ?? []).filter(
-              (pin) => pin.category === categoryId,
-            ),
+            ...taggedSetupPinsForCategory(sessionRules?.customLocationPins ?? [], categoryId),
             ...poiPinsForCategory(activeAnnotationsRef.current, categoryId),
           ],
         },

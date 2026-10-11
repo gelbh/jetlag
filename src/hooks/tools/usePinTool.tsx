@@ -3,7 +3,7 @@ import { PinPanel } from "../../components/tools/PinPanel";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
-import { POI_PIN_CATEGORIES, type PoiPinCategoryId } from "../../domain/map/poiPinCategories";
+import { type PoiPinCategoryId, poiPinCategoryLabel } from "../../domain/map/poiPinCategories";
 import { useToolSession } from "./framework/useToolSession";
 
 interface PinSessionConfig {
@@ -71,7 +71,7 @@ export function usePinTool({
         },
       });
 
-      const categoryLabel = POI_PIN_CATEGORIES.find((c) => c.id === poiCategory)?.label;
+      const categoryLabel = poiPinCategoryLabel(poiCategory);
       if (categoryLabel) {
         postSystemMessage(`Seeker added ${categoryLabel} pin: ${label}`);
       }

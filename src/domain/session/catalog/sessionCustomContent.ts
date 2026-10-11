@@ -1,5 +1,5 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import { POI_PIN_CATEGORIES, type PoiPinCategoryId } from "../../map/poiPinCategories";
+import { type PoiPinCategoryId, parsePoiPinCategory } from "../../map/poiPinCategories";
 import type { MatchingCategoryId } from "../../questions/matchingQuestions";
 
 export type MatchingAdminLevel = 4 | 6 | 8 | 9;
@@ -116,7 +116,7 @@ export function parseCustomLocationPins(value: unknown): SessionCustomLocationPi
       return [];
     }
 
-    const category = POI_PIN_CATEGORIES.find((entry) => entry.id === record.category)?.id;
+    const category = parsePoiPinCategory(record.category);
 
     return [
       {

@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { createTestPinAnnotation } from "../../test/fixtures/sessions";
 import { MATCHING_CATEGORIES } from "../questions/matching/matchingCatalog";
-import { MEASURING_CATALOG } from "../questions/measuring/measuringCatalog";
 import { TENTACLE_LOCATION_CATEGORY_IDS } from "../questions/tentacleQuestions";
-import { POI_PIN_CATEGORIES, type PoiPinCategoryId, poiPinsForCategory } from "./poiPinCategories";
+import {
+  POI_PIN_CATEGORIES,
+  type PoiPinCategoryId,
+  parsePoiPinCategory,
+  poiPinCategoryLabel,
+  poiPinsForCategory,
+} from "./poiPinCategories";
 
 function pin(id: string, poiCategory?: PoiPinCategoryId, status: "active" | "deleted" = "active") {
   const base = createTestPinAnnotation();
@@ -31,22 +36,26 @@ describe("poiPinsForCategory", () => {
 });
 
 describe("POI_PIN_CATEGORIES", () => {
-  it("only lists ids that a Tentacle, Measuring, or Matching catalog uses", () => {
-    const known = new Set<string>([
+  it("covers every Tentacle and Matching point category", () => {
+    const ids = POI_PIN_CATEGORIES.map((category) => category.id);
+    const pointCategoryIds = [
       ...TENTACLE_LOCATION_CATEGORY_IDS,
       "zoo",
       "aquarium",
       "amusement_park",
-      ...MEASURING_CATALOG.map((option) => option.id),
-      ...MATCHING_CATEGORIES.map((category) => category.id),
-    ]);
+      ...MATCHING_CATEGORIES.filter((category) => category.resolver === "overpassPoint").map(
+        (category) => category.id,
+      ),
+    ];
 
-    expect(POI_PIN_CATEGORIES.length).toBeGreaterThan(0);
-    for (const category of POI_PIN_CATEGORIES) {
-      expect(known.has(category.id)).toBe(true);
-      expect(category.label).toBeTruthy();
-    }
-    expect(POI_PIN_CATEGORIES.map((c) => c.id)).not.toContain("body_of_water");
-    expect(POI_PIN_CATEGORIES.map((c) => c.id)).not.toContain("custom_place");
+    expect(ids).toEqual(expect.arrayContaining(pointCategoryIds));
+    expect(ids).not.toContain("body_of_water");
+  });
+
+  it("parses and labels known ids only", () => {
+    expect(parsePoiPinCategory("zoo")).toBe("zoo");
+    expect(parsePoiPinCategory("volcano")).toBeUndefined();
+    expect(poiPinCategoryLabel("zoo")).toBeTruthy();
+    expect(poiPinCategoryLabel(undefined)).toBeUndefined();
   });
 });

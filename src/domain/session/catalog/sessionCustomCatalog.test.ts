@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { manualPinsWithinRadius, setupPinsForCategory } from "./sessionCustomCatalog";
+import {
+  manualPinsWithinRadius,
+  setupPinsForCategory,
+  taggedSetupPinsForCategory,
+} from "./sessionCustomCatalog";
 import { parseCustomLocationPins, type SessionCustomLocationPin } from "./sessionCustomContent";
 
 const untagged: SessionCustomLocationPin = { id: "a", name: "Any", point: [53.35, -6.26] };
@@ -25,6 +29,11 @@ describe("setupPinsForCategory", () => {
   it("offers untagged pins everywhere and tagged pins only for their category", () => {
     expect(setupPinsForCategory([untagged, zoo], "zoo")).toEqual([untagged, zoo]);
     expect(setupPinsForCategory([untagged, zoo], "museum")).toEqual([untagged]);
+  });
+
+  it("offers only tagged pins to Matching", () => {
+    expect(taggedSetupPinsForCategory([untagged, zoo], "zoo")).toEqual([zoo]);
+    expect(taggedSetupPinsForCategory([untagged, zoo], "museum")).toEqual([]);
   });
 
   it("filters tagged pins out of other tentacle categories", () => {
