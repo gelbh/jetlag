@@ -4,3 +4,5 @@ RESEND_API_KEY=re_replace_me
 INCIDENT_EMAIL_SECRET=replace_me
 INCIDENT_ADMIN_EMAIL=admin@example.com
 INCIDENT_EMAIL_FROM=Jet Lag Incidents <incidents@example.com>
+# Empty disables Worker exception capture locally (overrides the wrangler.jsonc var).
+POSTHOG_PROJECT_KEY=

@@ -13,6 +13,10 @@
   "observability": {
     "enabled": true
   },
+  // Public PostHog project key (write-only, already shipped in the client bundle).
+  "vars": {
+    "POSTHOG_PROJECT_KEY": "phc_BVsCXFET7zpKZFxAZQoLNx46uqLpmrGEmqsKMWWayMcP"
+  },
   // Secrets: see worker/README.md (wrangler secret put / .dev.vars). Never commit values.
   "assets": {
     "directory": "./dist",
