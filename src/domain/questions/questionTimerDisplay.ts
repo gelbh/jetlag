@@ -16,6 +16,14 @@ function toolLabelForQuestion(question: PendingQuestionRecord): string {
   return mapToolDockShortLabel(question.toolType as QuestionToolType);
 }
 
+export function hasOpenQuestionCountdown(
+  pendingQuestions: readonly PendingQuestionRecord[],
+): boolean {
+  return pendingQuestions.some(
+    (question) => question.status === "pending" && activeDeadlineAnchor(question) !== undefined,
+  );
+}
+
 /** Pass `nowMs` from the server clock: anchors are server-stamped. */
 export function selectPrimaryQuestionTimer(
   pendingQuestions: readonly PendingQuestionRecord[],
