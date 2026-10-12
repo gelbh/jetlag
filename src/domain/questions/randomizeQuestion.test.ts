@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import { availableMatchingCategories } from "../session/catalog/sessionCatalogAvailability";
 import {
-  pickRandomizeOptionLabel,
-  questionOptionLabelsForTool,
+  pickRandomizeOption,
+  questionOptionsForTool,
   randomizedQuestionNotice,
   randomizeExcludeLabelsForPending,
 } from "./randomizeQuestion";
@@ -22,75 +23,59 @@ function matchingPending(
   } as unknown as PendingQuestionRecord;
 }
 
-describe("pickRandomizeOptionLabel", () => {
-  it("excludes current and used labels from the pool", () => {
-    const labels = ["A", "B", "C"];
-    expect(
-      pickRandomizeOptionLabel(labels, {
-        exclude: new Set(["A", "C"]),
-        random: () => 0,
-      }),
-    ).toBe("B");
+describe("questionOptionsForTool", () => {
+  it("keys radar and thermometer options by meters", () => {
+    const session = { gameSize: "small" as const };
+    for (const tool of ["radar", "thermometer"] as const) {
+      const options = questionOptionsForTool(tool, session);
+      expect(options.length).toBeGreaterThan(0);
+      for (const option of options) {
+        expect(typeof option.optionKey).toBe("number");
+      }
+    }
   });
 
-  it("returns null when every label is excluded", () => {
-    expect(
-      pickRandomizeOptionLabel(["A", "B"], {
-        exclude: new Set(["A", "B"]),
-        random: () => 0,
-      }),
-    ).toBeNull();
+  it("keys string-id tools by catalog id", () => {
+    const session = { gameSize: "small" as const };
+    expect(questionOptionsForTool("matching", session)).toEqual(
+      availableMatchingCategories(session).map((category) => ({
+        optionKey: category.id,
+        label: category.label,
+      })),
+    );
+  });
+});
+
+describe("pickRandomizeOption", () => {
+  const session = { gameSize: "small" as const };
+
+  it("skips the current option", () => {
+    const options = questionOptionsForTool("matching", session);
+    const current = matchingPending("pq-1", String(options[0]!.optionKey));
+    expect(pickRandomizeOption(current, session, [], [current], () => 0)).toEqual(options[1]);
+  });
+
+  it("skips options already used this session", () => {
+    const options = questionOptionsForTool("matching", session);
+    const current = matchingPending("pq-1", String(options[0]!.optionKey));
+    const used = matchingPending("pq-0", String(options[1]!.optionKey), "answered", "yes");
+    expect(pickRandomizeOption(current, session, [], [used, current], () => 0)).toEqual(options[2]);
+  });
+
+  it("returns null when every option is current or used", () => {
+    const options = questionOptionsForTool("matching", session);
+    const pending = options.map((option, index) =>
+      matchingPending(`pq-${index}`, String(option.optionKey)),
+    );
+    expect(pickRandomizeOption(pending[0]!, session, [], pending, () => 0)).toBeNull();
   });
 });
 
 describe("randomizedQuestionNotice", () => {
-  it("names a question from the same category that the session allows", () => {
-    const session = { gameSize: "small" as const };
-    const labels = questionOptionLabelsForTool("matching", session);
-    expect(labels.length).toBeGreaterThan(1);
-
-    expect(randomizedQuestionNotice("matching", session, () => 0)).toBe(
-      `Hider played Randomize. Ask this matching question instead: ${labels[0]}.`,
+  it("names the rolled option", () => {
+    expect(randomizedQuestionNotice("matching", "Airport")).toBe(
+      "Hider played Randomize. Ask this matching question instead: Airport.",
     );
-    expect(randomizedQuestionNotice("matching", session, () => 0.9999)).toContain(
-      labels[labels.length - 1]!,
-    );
-  });
-
-  it("falls back to a generic notice when the category has no options", () => {
-    expect(randomizedQuestionNotice("tentacle", { gameSize: "small" }, () => 0)).toBe(
-      "Hider played Randomize. Ask a random tentacle question instead.",
-    );
-  });
-
-  it("falls back when exclude empties the eligible pool", () => {
-    const session = { gameSize: "small" as const };
-    const labels = questionOptionLabelsForTool("matching", session);
-    expect(
-      randomizedQuestionNotice("matching", session, {
-        exclude: new Set(labels),
-        random: () => 0,
-      }),
-    ).toBe("Hider played Randomize. Ask a random matching question instead.");
-  });
-
-  it("picks only from labels outside the exclude set", () => {
-    const session = { gameSize: "small" as const };
-    const labels = questionOptionLabelsForTool("matching", session);
-    expect(labels.length).toBeGreaterThan(2);
-    const current = labels[0]!;
-    const used = labels[1]!;
-    const eligible = labels.filter((label) => label !== current && label !== used);
-    const notice = randomizedQuestionNotice("matching", session, {
-      exclude: new Set([current, used]),
-      random: () => 0,
-    });
-    expect(notice).toBe(
-      `Hider played Randomize. Ask this matching question instead: ${eligible[0]}.`,
-    );
-    for (const label of [current, used]) {
-      expect(notice).not.toContain(`: ${label}.`);
-    }
   });
 });
 
@@ -104,11 +89,9 @@ describe("randomizeExcludeLabelsForPending", () => {
     expect(exclude.has("Landmass")).toBe(true);
     expect(exclude.has("Park")).toBe(true);
 
-    const notice = randomizedQuestionNotice("matching", session, {
-      exclude,
-      random: () => 0,
-    });
-    expect(notice).not.toContain(": Landmass.");
-    expect(notice).not.toContain(": Park.");
+    const picked = pickRandomizeOption(current, session, [], [current, vetoed], () => 0);
+    expect(picked).not.toBeNull();
+    expect(picked?.label).not.toBe("Landmass");
+    expect(picked?.label).not.toBe("Park");
   });
 });

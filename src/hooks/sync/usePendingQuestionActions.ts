@@ -9,6 +9,7 @@ import {
   type GameReplyOption,
   type PendingQuestionPlacement,
   type PendingQuestionToolType,
+  type RandomizedTo,
 } from "@/domain/session/activity/sessionChat";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
@@ -65,6 +66,7 @@ function commitQuestionCancel(options: {
   senderRole: PlayerRole;
   notice: string;
   card?: QuestionCancelCard;
+  randomizedTo?: RandomizedTo;
 }): { acknowledged: Promise<void> } {
   const isVeto = options.card === "veto";
   return commitWrite("question.cancel", () =>
@@ -72,7 +74,10 @@ function commitQuestionCancel(options: {
       questionId: options.pendingQuestionId,
       questionPatch: isVeto
         ? { status: "cancelled", answer: VETO_ANSWER }
-        : { status: "cancelled" },
+        : {
+            status: "cancelled",
+            ...(options.randomizedTo ? { randomizedTo: options.randomizedTo } : {}),
+          },
       gameMessage: {
         id: options.messageId,
         patch: isVeto
@@ -328,6 +333,7 @@ export function usePendingQuestionActions() {
       senderUid: string;
       notice: string;
       card?: QuestionCancelCard;
+      randomizedTo?: RandomizedTo;
     }) => commitQuestionCancel({ ...options, senderRole: "hider" }),
     [],
   );

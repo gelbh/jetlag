@@ -262,6 +262,55 @@ describe("firestore.rules — batched question asks", () => {
     await assertSucceeds(randomize.commit());
   });
 
+  async function hiderCancel(patch: Record<string, unknown>) {
+    const { sessionRef } = await seekerSession();
+    await assertSucceeds(
+      sessionRef.collection("pendingQuestions").doc("pq-1").set(questionPayload()),
+    );
+    return rules.testEnv
+      .authenticatedContext("hider-1")
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .collection("pendingQuestions")
+      .doc("pq-1")
+      .update({ status: "cancelled", ...patch });
+  }
+
+  it("allows a hider randomize cancel that carries the roll", async () => {
+    await assertSucceeds(hiderCancel({ randomizedTo: { optionKey: 3218.688, label: "2 mi" } }));
+    await rules.testEnv.clearFirestore();
+    await assertSucceeds(hiderCancel({ randomizedTo: { optionKey: "airport", label: "Airport" } }));
+  });
+
+  it("denies a roll with extra keys", async () => {
+    await assertFails(
+      hiderCancel({ randomizedTo: { optionKey: "airport", label: "Airport", promptText: "x" } }),
+    );
+  });
+
+  it("denies a roll without a string label", async () => {
+    await assertFails(hiderCancel({ randomizedTo: { optionKey: "airport", label: 7 } }));
+    await rules.testEnv.clearFirestore();
+    await assertFails(hiderCancel({ randomizedTo: { optionKey: "airport" } }));
+  });
+
+  it("denies an oversized roll", async () => {
+    await assertFails(
+      hiderCancel({ randomizedTo: { optionKey: "airport", label: "x".repeat(121) } }),
+    );
+    await rules.testEnv.clearFirestore();
+    await assertFails(
+      hiderCancel({ randomizedTo: { optionKey: "k".repeat(65), label: "Airport" } }),
+    );
+  });
+
+  it("denies a roll alongside other fields", async () => {
+    await assertFails(
+      hiderCancel({ randomizedTo: { optionKey: "airport", label: "Airport" }, promptText: "x" }),
+    );
+  });
+
   it("denies a hider cancel on a walking question", async () => {
     const { sessionRef } = await seekerSession();
     const { answerableAt: _omit, ...walking } = questionPayload({

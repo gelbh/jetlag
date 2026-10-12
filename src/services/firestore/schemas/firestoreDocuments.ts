@@ -123,6 +123,8 @@ export const pendingQuestionDocumentSchema = z
     resolvedAnnotationId: z.string().optional(),
     cardDraw: z.number().finite().optional(),
     cardKeep: z.number().finite().optional(),
+    /** Validated in the deserializer so a malformed roll never fails the whole document. */
+    randomizedTo: z.unknown().optional(),
   })
   .passthrough();
 

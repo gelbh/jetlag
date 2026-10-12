@@ -3,6 +3,7 @@ import { milesToMeters } from "../map/distance";
 import type {
   PendingQuestionRecord,
   PendingQuestionToolType,
+  RandomizedTo,
 } from "../session/activity/sessionChat";
 import {
   availableMatchingCategories,
@@ -46,31 +47,43 @@ import {
   usedThermometerDistanceOptionsForSession,
 } from "./thermometerQuestions";
 
-/** Questions the seekers could ask with this tool in this session. */
-export function questionOptionLabelsForTool(
+/** Questions the seekers could ask with this tool in this session, keyed by tool-native id. */
+export function questionOptionsForTool(
   toolType: PendingQuestionToolType,
   session: SessionRulesInput,
-): string[] {
+): RandomizedTo[] {
   const unit = sessionDistanceUnit(session);
   switch (toolType) {
     case "matching":
-      return availableMatchingCategories(session).map((category) => category.label);
+      return availableMatchingCategories(session).map((category) => ({
+        optionKey: category.id,
+        label: category.label,
+      }));
     case "measuring":
-      return availableMeasuringCatalog(session).map((option) => option.label);
+      return availableMeasuringCatalog(session).map((option) => ({
+        optionKey: option.id,
+        label: option.label,
+      }));
     case "radar":
-      return resolveRadarPresetsMeters(session).map((meters) =>
-        radarDistanceOptionLabel(meters / milesToMeters(1), unit),
-      );
+      return resolveRadarPresetsMeters(session).map((meters) => ({
+        optionKey: meters,
+        label: radarDistanceOptionLabel(meters / milesToMeters(1), unit),
+      }));
     case "thermometer":
-      return resolveThermometerPresetsMeters(session).map((meters) =>
-        thermometerDistanceLabel(meters, unit),
-      );
+      return resolveThermometerPresetsMeters(session).map((meters) => ({
+        optionKey: meters,
+        label: thermometerDistanceLabel(meters, unit),
+      }));
     case "tentacle":
-      return tentacleCategoriesForSession(session).map((category) => category.label);
+      return tentacleCategoriesForSession(session).map((category) => ({
+        optionKey: category.id,
+        label: category.label,
+      }));
     case "photo":
-      return photoCategoriesForGameSize(sessionGameSize(session)).map((category) =>
-        photoCategoryLabelForUnit(category.id, unit),
-      );
+      return photoCategoriesForGameSize(sessionGameSize(session)).map((category) => ({
+        optionKey: category.id,
+        label: photoCategoryLabelForUnit(category.id, unit),
+      }));
     default:
       return [];
   }
@@ -209,40 +222,23 @@ export function randomizeExcludeLabelsForPending(
   return exclude;
 }
 
-export type PickRandomizeOptionLabelOptions = {
-  exclude?: ReadonlySet<string>;
-  random?: () => number;
-};
-
-/** Pick one label from `labels` after removing `exclude` (used + current). */
-export function pickRandomizeOptionLabel(
-  labels: readonly string[],
-  options: PickRandomizeOptionLabelOptions = {},
-): string | null {
-  const random = options.random ?? Math.random;
-  const exclude = options.exclude;
-  const pool = exclude ? labels.filter((label) => !exclude.has(label)) : labels;
-  if (pool.length === 0) {
-    return null;
-  }
+/** One option the seekers have not used yet (and not the current one), or null when none is left. */
+export function pickRandomizeOption(
+  pending: PendingQuestionRecord,
+  session: SessionRulesInput,
+  annotations: readonly AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[],
+  random: () => number = Math.random,
+): RandomizedTo | null {
+  const exclude = randomizeExcludeLabelsForPending(pending, session, annotations, pendingQuestions);
+  const pool = questionOptionsForTool(pending.toolType, session).filter(
+    (option) => !exclude.has(option.label),
+  );
   return pool[Math.floor(random() * pool.length)] ?? null;
 }
 
-export type RandomizedQuestionNoticeOptions = PickRandomizeOptionLabelOptions;
-
-/** Feed text for a Randomize card: names one random question from the same category. */
-export function randomizedQuestionNotice(
-  toolType: PendingQuestionToolType,
-  session: SessionRulesInput,
-  randomOrOptions: (() => number) | RandomizedQuestionNoticeOptions = Math.random,
-): string {
-  const options: RandomizedQuestionNoticeOptions =
-    typeof randomOrOptions === "function" ? { random: randomOrOptions } : randomOrOptions;
-  const labels = questionOptionLabelsForTool(toolType, session);
-  const label = pickRandomizeOptionLabel(labels, options);
-  return label
-    ? `Hider played Randomize. Ask this ${toolType} question instead: ${label}.`
-    : `Hider played Randomize. Ask a random ${toolType} question instead.`;
+export function randomizedQuestionNotice(toolType: PendingQuestionToolType, label: string): string {
+  return `Hider played Randomize. Ask this ${toolType} question instead: ${label}.`;
 }
 
 export const VETO_NOTICE = "Hider played Veto. No answer and no card draw for this question.";
