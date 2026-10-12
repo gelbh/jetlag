@@ -38,6 +38,28 @@ describe("mapStore", () => {
     expect(useMapStore.getState().lowPowerMode).toBe(true);
   });
 
+  it("opens a tool preset without changing the active tool", () => {
+    useMapStore.getState().openToolPreset("radar", 1609.344);
+
+    expect(useMapStore.getState().toolPreset).toEqual({ tool: "radar", optionKey: 1609.344 });
+    expect(useMapStore.getState().activeTool).toBe("none");
+  });
+
+  it("keeps a preset when another tool consumes", () => {
+    useMapStore.getState().openToolPreset("radar", 1609.344);
+
+    expect(useMapStore.getState().consumeToolPreset("photo")).toBeNull();
+    expect(useMapStore.getState().toolPreset).toEqual({ tool: "radar", optionKey: 1609.344 });
+  });
+
+  it("consumes a preset once for its tool", () => {
+    useMapStore.getState().openToolPreset("radar", 1609.344);
+
+    expect(useMapStore.getState().consumeToolPreset("radar")).toBe(1609.344);
+    expect(useMapStore.getState().toolPreset).toBeNull();
+    expect(useMapStore.getState().consumeToolPreset("radar")).toBeNull();
+  });
+
   it("defaults streetBasemap to light and persists dark", () => {
     expect(useMapStore.getState().streetBasemap).toBe("light");
     useMapStore.getState().setStreetBasemap("dark");

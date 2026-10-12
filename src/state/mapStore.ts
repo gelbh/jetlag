@@ -3,8 +3,14 @@ import { persist } from "zustand/middleware";
 import type { AnnotationType } from "../domain/map/annotations";
 import type { DistanceUnit } from "../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../domain/map/mapBasemaps";
+import type { DockableMapTool } from "../domain/map/mapTools";
 import type { MapTool } from "../domain/map/mapToolTypes";
 import type { TransitRouteFilter } from "../domain/map/transit";
+
+export interface ToolPreset {
+  tool: DockableMapTool;
+  optionKey: string | number;
+}
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
 
@@ -33,6 +39,7 @@ export const useMapStore = create<{
   mapStyle: MapStyle;
   streetBasemap: StreetBasemap;
   layerVisibility: LayerVisibility;
+  toolPreset: ToolPreset | null;
   setActiveTool: (tool: MapTool) => void;
   setTransitEnabled: (enabled: boolean) => void;
   setTransitLiveEnabled: (enabled: boolean) => void;
@@ -45,9 +52,11 @@ export const useMapStore = create<{
   setMapStyle: (style: MapStyle) => void;
   setStreetBasemap: (streetBasemap: StreetBasemap) => void;
   setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
+  openToolPreset: (tool: DockableMapTool, optionKey: string | number) => void;
+  consumeToolPreset: (tool: DockableMapTool) => string | number | null;
 }>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       activeTool: "none",
       transitEnabled: false,
       transitLiveEnabled: false,
@@ -60,6 +69,7 @@ export const useMapStore = create<{
       mapStyle: "standard",
       streetBasemap: "light",
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
+      toolPreset: null,
       setActiveTool: (activeTool) => set({ activeTool }),
       setTransitEnabled: (transitEnabled) => set({ transitEnabled }),
       setTransitLiveEnabled: (transitLiveEnabled) => set({ transitLiveEnabled }),
@@ -78,6 +88,13 @@ export const useMapStore = create<{
             [layer]: visible,
           },
         })),
+      openToolPreset: (tool, optionKey) => set({ toolPreset: { tool, optionKey } }),
+      consumeToolPreset: (tool) => {
+        const preset = get().toolPreset;
+        if (preset?.tool !== tool) return null;
+        set({ toolPreset: null });
+        return preset.optionKey;
+      },
     }),
     {
       name: "jetlag-map",

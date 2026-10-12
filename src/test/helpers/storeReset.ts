@@ -41,6 +41,7 @@ export function resetAllStores(): void {
       draw: true,
       transit: true,
     },
+    toolPreset: null,
   });
   useTimerStore.setState({ bySessionId: {} });
 }
