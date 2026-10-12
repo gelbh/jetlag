@@ -408,16 +408,6 @@ export function heldQuestionPowerUps(hand: readonly BoardCardInstance[]): Questi
   );
 }
 
-/** Physical deck (no simulated hand): both cards, honor system. Simulated: held cards, none mid-draw. */
-export function playableQuestionPowerUps(
-  simulatedHand: { held: readonly QuestionPowerUpId[]; pendingDraw: boolean } | null,
-): readonly QuestionPowerUpId[] {
-  if (!simulatedHand) {
-    return QUESTION_POWER_UP_IDS;
-  }
-  return simulatedHand.pendingDraw ? [] : simulatedHand.held;
-}
-
 export function playMoveCard(state: BoardEconomyState, moveInstanceId: string): BoardEconomyState {
   const move = state.hand.find((c) => c.instanceId === moveInstanceId);
   if (!move || move.def.kind !== "move") {
