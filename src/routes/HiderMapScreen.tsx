@@ -21,7 +21,7 @@ import { UserLocationLayer } from "../components/map/layers/UserLocationLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
-import type { QuestionPowerUpId } from "../domain/boardEconomy";
+import { playableQuestionPowerUps, type QuestionPowerUpId } from "../domain/boardEconomy";
 import { messageFingerprint } from "../domain/device/chrome/chatUnread";
 import {
   applyMapStylePreferenceChange,
@@ -513,10 +513,14 @@ export function HiderMapScreen() {
     );
   };
 
-  const questionCards: HiderQuestionCards | undefined =
-    boardEconomyEnabled && !boardEconomy.pendingDraw
-      ? { available: boardEconomy.heldQuestionCards, onPlay: playQuestionCard }
-      : undefined;
+  const questionCards: HiderQuestionCards = {
+    available: playableQuestionPowerUps(
+      boardEconomyEnabled
+        ? { held: boardEconomy.heldQuestionCards, pendingDraw: Boolean(boardEconomy.pendingDraw) }
+        : null,
+    ),
+    onPlay: playQuestionCard,
+  };
 
   const postGameSystem = useCallback(
     async (text: string) => {
