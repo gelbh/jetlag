@@ -3,6 +3,7 @@ import {
   Alert,
   Checkbox,
   Group,
+  List,
   Skeleton,
   Stack,
   Text,
@@ -248,7 +249,7 @@ function PreloadQueue({
         />
       ) : null}
       {rows.length > 0 ? (
-        <Stack component="ul" gap={0} m={0} p={0}>
+        <List listStyleType="none" size="sm">
           {rows.map((request) => (
             <li key={request.id}>
               <UnstyledButton
@@ -272,7 +273,7 @@ function PreloadQueue({
               </UnstyledButton>
             </li>
           ))}
-        </Stack>
+        </List>
       ) : null}
     </Stack>
   );
@@ -336,7 +337,7 @@ function IncidentQueue({
           <Text size="xs" fw={600} c="dimmed">
             {INCIDENT_PROGRESS_LABEL[progress]}
           </Text>
-          <Stack component="ul" gap={0} aria-label={INCIDENT_PROGRESS_LABEL[progress]} m={0} p={0}>
+          <List listStyleType="none" size="sm" aria-label={INCIDENT_PROGRESS_LABEL[progress]}>
             {rows.map((incident) => (
               <li key={incident.id}>
                 <UnstyledButton
@@ -363,7 +364,7 @@ function IncidentQueue({
                 </UnstyledButton>
               </li>
             ))}
-          </Stack>
+          </List>
         </Stack>
       ))}
     </Stack>

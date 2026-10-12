@@ -8,6 +8,7 @@ const require = createRequire(import.meta.url);
 const coreRoot = resolve(dirname(require.resolve("@mantine/core")), "..");
 const notificationsRoot = resolve(dirname(require.resolve("@mantine/notifications")), "..");
 const componentsDir = join(coreRoot, "esm/components");
+const utilsDir = join(coreRoot, "esm/utils");
 const cssFor = (name: string) => join(coreRoot, "styles", `${name}.layer.css`);
 const srcDir = resolve(__dirname, "..");
 
@@ -40,12 +41,13 @@ function withInternalDeps(roots: Iterable<string>): Set<string> {
   while (queue.length) {
     const name = queue.pop()!;
     if (seen.has(name)) continue;
-    const dir = join(componentsDir, name);
-    if (!existsSync(dir)) continue; // hooks, utils, providers
+    const dir = [join(componentsDir, name), join(utilsDir, name)].find(existsSync);
+    if (!dir) continue; // hooks, providers
     seen.add(name);
     for (const file of walkFiles(dir, /\.mjs$/)) {
       const source = readFileSync(file, "utf8");
-      for (const [, dep] of source.matchAll(/(?:from|import)\s+["']\.\.\/([A-Za-z]+)\//g)) {
+      const deps = /(?:from|import)\s+["']\.\.\/(?:\.\.\/(?:utils|components)\/)?([A-Za-z]+)\//g;
+      for (const [, dep] of source.matchAll(deps)) {
         queue.push(dep);
       }
     }
@@ -98,6 +100,7 @@ describe("Mantine per-component CSS", () => {
   it("follows Mantine internal deps (guards the dep walk itself)", () => {
     expect(withInternalDeps(["Button"])).toContain("UnstyledButton");
     expect(withInternalDeps(["Drawer"])).toContain("ModalBase");
+    expect(withInternalDeps(["Checkbox"])).toContain("InlineInput");
   });
 
   it("imports only existing, non-duplicated layer CSS files", () => {

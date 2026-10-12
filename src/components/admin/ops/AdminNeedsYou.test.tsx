@@ -158,6 +158,18 @@ describe("AdminNeedsYou", () => {
     expect(screen.getAllByRole("checkbox", { name: "Show closed" })).toHaveLength(1);
   });
 
+  it("renders incident and preload lists without bullets", () => {
+    renderNeedsYou({
+      incidents: [makeIncident()],
+      preloadRequests: [makeRequest()],
+      openGroups: ["incidents", "preload"],
+    });
+
+    const lists = screen.getAllByRole("list");
+    expect(lists).toHaveLength(2);
+    for (const list of lists) expect(list).toHaveStyle({ listStyleType: "none" });
+  });
+
   it("selects an incident from its row", () => {
     const { onSelectIncident } = renderNeedsYou({
       incidents: [makeIncident({ id: "inc-pick" })],
