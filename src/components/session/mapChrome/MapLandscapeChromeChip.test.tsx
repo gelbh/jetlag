@@ -1,20 +1,24 @@
 import { MantineProvider } from "@mantine/core";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { MapLandscapeChromeChip, type MapLandscapeChromeChipProps } from "./MapLandscapeChromeChip";
+
+const clock = vi.hoisted(() => ({ now: 10_000 }));
+vi.mock("@/services/core/time/serverClock", () => ({ serverNow: () => clock.now }));
 
 const chipProps: MapLandscapeChromeChipProps = {
   collapsed: true,
   onToggle: () => undefined,
   sessionRules: { gameSize: "medium" },
-  timerState: { runningSince: Date.now() - 60_000, accumulatedMs: 0 },
+  timerState: { runningSince: 10_000 - 60_000, accumulatedMs: 0 },
   timerHasStarted: true,
   syncStatus: "offline",
   queuedWrites: 2,
 };
 
 beforeEach(() => {
+  clock.now = 10_000;
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -60,6 +64,54 @@ describe("MapLandscapeChromeChip", () => {
       "aria-expanded",
       "true",
     );
+  });
+
+  it("ticks a running timer from the server clock", () => {
+    vi.useFakeTimers();
+    try {
+      renderChip({
+        ...chipProps,
+        timerState: { runningSince: 10_000, accumulatedMs: 4_000_000 },
+      });
+      expect(screen.getByText("SEEK")).toBeInTheDocument();
+      expect(screen.getByText("06:40")).toBeInTheDocument();
+      clock.now = 11_000;
+      act(() => vi.advanceTimersByTime(1000));
+      expect(screen.getByText("06:41")).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("ticks a question countdown while the game is paused", () => {
+    vi.useFakeTimers();
+    try {
+      const anchor = new Date(clock.now - 10_000).toISOString();
+      renderChip({
+        ...chipProps,
+        timerState: { runningSince: null, accumulatedMs: 4_000_000 },
+        pendingQuestions: [
+          {
+            id: "pq-1",
+            sessionId: "session-1",
+            toolType: "radar",
+            createdByUid: "seeker-1",
+            createdAt: anchor,
+            status: "pending",
+            placement: { geometryJson: "{}", metadata: {} },
+            replyOptions: [],
+            promptText: "Radar",
+            answerableAt: anchor,
+          },
+        ],
+      });
+      expect(screen.getByText("4:50")).toBeInTheDocument();
+      clock.now = 11_000;
+      act(() => vi.advanceTimersByTime(1000));
+      expect(screen.getByText("4:49")).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("mounts Mantine chip", () => {

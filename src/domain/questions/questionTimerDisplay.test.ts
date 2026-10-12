@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { questionAnswerDeadlineMs } from "./questionRules";
-import { selectPrimaryQuestionTimer } from "./questionTimerDisplay";
+import { hasOpenQuestionCountdown, selectPrimaryQuestionTimer } from "./questionTimerDisplay";
 
 const rules = { gameSize: "medium" } as const;
 const T0 = Date.parse("2026-01-01T10:00:00.000Z");
@@ -38,5 +38,17 @@ describe("selectPrimaryQuestionTimer", () => {
     expect(
       selectPrimaryQuestionTimer([question({ pendingSync: true })], rules, T0 + 60_000),
     ).toBeNull();
+  });
+});
+
+describe("hasOpenQuestionCountdown", () => {
+  it("is true for a pending question with a deadline anchor", () => {
+    expect(hasOpenQuestionCountdown([question()])).toBe(true);
+  });
+
+  it("is false for walking, unanchored, and answered questions", () => {
+    expect(hasOpenQuestionCountdown([question({ status: "walking" })])).toBe(false);
+    expect(hasOpenQuestionCountdown([question({ pendingSync: true })])).toBe(false);
+    expect(hasOpenQuestionCountdown([question({ status: "answered" })])).toBe(false);
   });
 });

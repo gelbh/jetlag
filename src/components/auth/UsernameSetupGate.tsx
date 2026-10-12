@@ -43,9 +43,8 @@ export function UsernameSetupGate({
       onClaimed?.(result.username);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not claim username.");
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   };
 
   return (

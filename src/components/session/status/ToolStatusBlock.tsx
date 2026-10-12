@@ -19,7 +19,7 @@ import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { type TimerState } from "@/domain/session/timer/timer";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
-import { serverNow } from "@/services/core/time/serverClock";
+import { useServerNowMs } from "@/hooks/time/useServerNowMs";
 import type { MapTool } from "@/state/sessionStore";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { MapTimerCluster } from "../mapChrome/MapTimerCluster";
@@ -103,6 +103,7 @@ export function ToolStatusBlock({
   void _activeTool;
   void _playerRole;
   const comfortableWidth = useMinWidth(380) && !forceNarrow;
+  const nowMs = useServerNowMs(timerHasStarted && timerRunning ? 1000 : null);
   const status = mapIslandSessionStatus({
     timerHasStarted,
     timerSyncing,
@@ -111,7 +112,7 @@ export function ToolStatusBlock({
     moveInProgress,
     sessionRules,
     timerState,
-    nowMs: serverNow(),
+    nowMs,
     pendingQuestions,
   });
   const statusLabel = comfortableWidth ? status : mapIslandSessionStatusCompact(status);

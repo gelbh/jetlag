@@ -3,7 +3,6 @@ import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
 import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
 import { serverNow } from "@/services/core/time/serverClock";
 import {
-  computeElapsedMs,
   hasTimerStarted,
   INITIAL_TIMER_STATE,
   isTimerRunning,
@@ -196,10 +195,7 @@ export function useSessionTimer(
     [setTimerState],
   );
 
-  const elapsedMs = computeElapsedMs(timerState, serverNow());
-
   return {
-    elapsedMs,
     running: isTimerRunning(timerState),
     hasStarted: hasTimerStarted(timerState),
     timerState,

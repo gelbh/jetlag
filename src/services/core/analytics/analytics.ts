@@ -1,5 +1,5 @@
 import posthog from "posthog-js";
-import "posthog-js/dist/web-vitals";
+import "posthog-js/dist/web-vitals-with-attribution";
 import "posthog-js/dist/posthog-recorder";
 import "posthog-js/dist/exception-autocapture";
 import { getClientEnv } from "@/config/env";

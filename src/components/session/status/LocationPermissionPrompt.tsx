@@ -42,26 +42,24 @@ export function LocationPermissionPrompt() {
     let cancelled = false;
     void (async () => {
       setHydrating(true);
-      try {
-        const restore = await restoreLocationAccessIfPersisted({
-          highAccuracy: false,
-        });
-        if (cancelled) {
-          return;
-        }
-        if (restore.status === "denied") {
-          setForceDenied(true);
-        }
-        const next = await queryGeolocationPermission();
-        if (!cancelled) {
-          setPermission(next);
-        }
-      } finally {
-        if (!cancelled) {
-          setHydrating(false);
-        }
+      const restore = await restoreLocationAccessIfPersisted({
+        highAccuracy: false,
+      });
+      if (cancelled) {
+        return;
       }
-    })();
+      if (restore.status === "denied") {
+        setForceDenied(true);
+      }
+      const next = await queryGeolocationPermission();
+      if (!cancelled) {
+        setPermission(next);
+      }
+    })().finally(() => {
+      if (!cancelled) {
+        setHydrating(false);
+      }
+    });
 
     return () => {
       cancelled = true;
@@ -105,22 +103,23 @@ export function LocationPermissionPrompt() {
   const onAllow = async () => {
     setBusy(true);
     setActionError(null);
-    try {
-      await confirmAndRequestLocationAccess({ highAccuracy: false });
-      setForceDenied(false);
-      const next = await queryGeolocationPermission();
-      setPermission(next);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : LOCATION_BLOCKED_MESSAGE;
-      setActionError(message);
-      if (message === LOCATION_BLOCKED_MESSAGE) {
-        setForceDenied(true);
+    const request = async () => {
+      try {
+        await confirmAndRequestLocationAccess({ highAccuracy: false });
+        setForceDenied(false);
+        const next = await queryGeolocationPermission();
+        setPermission(next);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : LOCATION_BLOCKED_MESSAGE;
+        setActionError(message);
+        if (message === LOCATION_BLOCKED_MESSAGE) {
+          setForceDenied(true);
+        }
+        const next = await queryGeolocationPermission();
+        setPermission(next);
       }
-      const next = await queryGeolocationPermission();
-      setPermission(next);
-    } finally {
-      setBusy(false);
-    }
+    };
+    await request().finally(() => setBusy(false));
   };
 
   return (

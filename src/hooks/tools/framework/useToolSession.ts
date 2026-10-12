@@ -101,9 +101,8 @@ export function useToolSession<TConfig>({
         const message = caught instanceof Error ? caught.message : "Something went wrong.";
         setError(message);
         setPhase("error");
-      } finally {
-        inFlightRef.current = false;
       }
+      inFlightRef.current = false;
     },
     [],
   );

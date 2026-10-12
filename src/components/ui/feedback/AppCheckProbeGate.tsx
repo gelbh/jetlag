@@ -3,6 +3,9 @@ import { useAppCheckArmed } from "@/hooks/app/useAppCheckArmed";
 import type { AppCheckProbeResult } from "@/services/core/firebase/appCheckProbe";
 import { ContentBlockerErrorPage } from "./ContentBlockerErrorPage";
 
+// Dynamic: keeps firebase/app-check off the App chunk's static graph.
+const loadAppCheckProbe = () => import("@/services/core/firebase/appCheckProbe");
+
 /**
  * Content-blocker check for App Check / reCAPTCHA. Probes only after a real
  * token consumer armed App Check, so the gate never loads reCAPTCHA itself on
@@ -19,8 +22,7 @@ export function AppCheckProbeGate({ children }: { children: ReactNode }) {
     }
 
     let cancelled = false;
-    // Dynamic: keeps firebase/app-check off the App chunk's static graph.
-    void import("@/services/core/firebase/appCheckProbe")
+    void loadAppCheckProbe()
       .then(({ probeAppCheckAvailability }) => probeAppCheckAvailability())
       .then((result) => {
         if (!cancelled) {

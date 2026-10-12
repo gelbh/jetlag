@@ -6,6 +6,9 @@ import {
   sessionUsesPackPlayArea,
 } from "@/services/geo/matching/playAreaReadiness";
 
+const loadResolveSessionMatchingAreas = () =>
+  import("@/services/geo/matching/resolveSessionMatchingAreas");
+
 /**
  * Play-area readiness only (route readiness on the App boot path). Unlike
  * `useResolvedSessionRules`, the turf-backed loader is dynamic-imported so the
@@ -25,7 +28,7 @@ export function usePlayAreaReady(session: SessionRecord | null | undefined): boo
 
     let cancelled = false;
     const snapshot = session;
-    void import("@/services/geo/matching/resolveSessionMatchingAreas")
+    void loadResolveSessionMatchingAreas()
       .then(({ resolveSessionPlayArea }) => resolveSessionPlayArea(snapshot))
       .catch(() => undefined)
       .then(() => {

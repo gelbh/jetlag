@@ -79,6 +79,21 @@ describe("useResolvedSessionRules play area readiness", () => {
     expect(regionPackBoundaries.loadRegionPackPlayArea).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps sessionRules identity until the rules snapshot changes", () => {
+    const base = createTestSession();
+    const { result, rerender } = renderHook(({ session }) => useResolvedSessionRules(session), {
+      initialProps: { session: base },
+    });
+    const initial = result.current.sessionRules;
+
+    rerender({ session: { ...base, timerAccumulatedMs: 1 } });
+    expect(result.current.sessionRules).toBe(initial);
+
+    rerender({ session: { ...base, hidingZoneRadiusMeters: 300 } });
+    expect(result.current.sessionRules).not.toBe(initial);
+    expect(result.current.sessionRules.hidingZoneRadiusMeters).toBe(300);
+  });
+
   it("marks playAreaReady on load reject with session gameArea fallback", async () => {
     const session = createTestSession({
       regionPackId: "london",

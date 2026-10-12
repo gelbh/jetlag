@@ -525,13 +525,14 @@ function FriendDetailDrawer({
         ? "Outgoing"
         : "Friend";
 
-  const inviteToSession = async () => {
+  const inviteToSession = () => {
     if (!inviteSessionCode || inviting) {
-      return;
+      return Promise.resolve();
     }
     setInviting(true);
     setInviteNote(null);
-    try {
+    // React Compiler skips any component containing `finally`, so cleanup uses Promise#finally.
+    const shareInvite = async () => {
       const origin = resolveSessionInviteOrigin(window.location.origin, crawlPolicy.siteOrigin);
       const url = buildSessionInviteUrl(origin, inviteSessionCode);
       if (!url) {
@@ -567,9 +568,8 @@ function FriendDetailDrawer({
         : `Invite code ${inviteSessionCode} ready for ${entry.username}.`;
       setInviteNote(message);
       onInviteCopied(message);
-    } finally {
-      setInviting(false);
-    }
+    };
+    return shareInvite().finally(() => setInviting(false));
   };
 
   const startNewGame = () => {

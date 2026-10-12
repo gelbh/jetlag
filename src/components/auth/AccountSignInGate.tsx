@@ -112,10 +112,9 @@ export function AccountSignInGate({
         } catch {
           // Keep the original sign-in error visible.
         }
-      } finally {
-        if (!cancelled) {
-          setCompletingEmailLink(false);
-        }
+      }
+      if (!cancelled) {
+        setCompletingEmailLink(false);
       }
     })();
 
@@ -136,9 +135,8 @@ export function AccountSignInGate({
       await signOutToAnonymous();
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not sign out.");
-    } finally {
-      setSigningOut(false);
     }
+    setSigningOut(false);
   };
 
   const handleEmailLink = async () => {
@@ -151,9 +149,8 @@ export function AccountSignInGate({
       setEmailLinkSent(true);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not send sign-in link.");
-    } finally {
-      setBusyAction(null);
     }
+    setBusyAction(null);
   };
 
   if (checking && expectPermanent) {

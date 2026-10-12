@@ -107,6 +107,21 @@ describe("scrubAnalyticsProperties", () => {
   });
 });
 
+describe("web vitals bundle", () => {
+  it("bundles the callback flavor posthog requests for capture_performance: true", () => {
+    const extensions = (
+      window as unknown as {
+        __PosthogExtensions__?: {
+          postHogWebVitalsCallbacksByFlavor?: Record<string, unknown>;
+        };
+      }
+    ).__PosthogExtensions__;
+    expect(
+      extensions?.postHogWebVitalsCallbacksByFlavor?.["web-vitals-with-attribution"],
+    ).toBeDefined();
+  });
+});
+
 describe("analytics facade", () => {
   beforeEach(() => {
     resetAnalyticsForTests();

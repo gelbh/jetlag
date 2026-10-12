@@ -21,7 +21,7 @@ import { UserLocationLayer } from "../components/map/layers/UserLocationLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
-import type { QuestionPowerUpId } from "../domain/boardEconomy";
+import { QUESTION_POWER_UP_IDS, type QuestionPowerUpId } from "../domain/boardEconomy";
 import { messageFingerprint } from "../domain/device/chrome/chatUnread";
 import {
   applyMapStylePreferenceChange,
@@ -87,6 +87,7 @@ import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import { useHiderLocationSync } from "../hooks/sync/useHiderLocationSync";
 import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
 import { AppNavigate } from "../navigation/AppNavigate";
+import { ANALYTICS_EVENTS, track } from "../services/core/analytics/analytics";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase/firebase";
 import {
   clearEndGameRequestSession,
@@ -179,10 +180,10 @@ export function HiderMapScreen() {
     () => new Map(),
   );
   const answeredPendingIds = useMemo(() => new Set(optimisticAnswers.keys()), [optimisticAnswers]);
-  const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
+  const mapViewportRef = useRef<MapViewportState | null>(null);
 
   const handleMapViewportChange = useCallback((viewport: MapViewportState | null) => {
-    setMapViewport(viewport);
+    mapViewportRef.current = viewport;
   }, []);
 
   const hidingZoneRadius = session
@@ -458,10 +459,10 @@ export function HiderMapScreen() {
         }
       } catch (error) {
         rollBackOptimisticAnswer(error);
-      } finally {
-        answerInFlightRef.current = false;
-        setAnswerSubmitting(false);
       }
+      // Not `finally`: React Compiler skips any component containing one, and the catch never rethrows.
+      answerInFlightRef.current = false;
+      setAnswerSubmitting(false);
     },
     [
       acknowledgeFingerprints,
@@ -506,17 +507,34 @@ export function HiderMapScreen() {
               ),
             }),
     });
+    // A second tap before the local snapshot updates would send a cancel the rules reject.
+    answerInFlightRef.current = true;
     // Same as answer rewards: the card leaves the hand only once the server accepts.
     acknowledged.then(
-      () => boardEconomy.playQuestionCard(card).catch(() => undefined),
-      () => setChatAnswerError("Could not play that card. Try again."),
+      () => {
+        answerInFlightRef.current = false;
+        if (boardEconomyEnabled) {
+          void boardEconomy.playQuestionCard(card).catch(() => undefined);
+        } else {
+          track(ANALYTICS_EVENTS.hider_card_played, { card, deck: "physical" });
+        }
+      },
+      () => {
+        answerInFlightRef.current = false;
+        setChatAnswerError("Could not play that card. Try again.");
+      },
     );
   };
 
-  const questionCards: HiderQuestionCards | undefined =
-    boardEconomyEnabled && !boardEconomy.pendingDraw
-      ? { available: boardEconomy.heldQuestionCards, onPlay: playQuestionCard }
-      : undefined;
+  // Physical deck: both cards on the honor system. Simulated: held cards, none mid-draw.
+  const questionCards: HiderQuestionCards = {
+    available: !boardEconomyEnabled
+      ? QUESTION_POWER_UP_IDS
+      : boardEconomy.pendingDraw
+        ? []
+        : boardEconomy.heldQuestionCards,
+    onPlay: playQuestionCard,
+  };
 
   const postGameSystem = useCallback(
     async (text: string) => {
@@ -656,9 +674,13 @@ export function HiderMapScreen() {
     ...hiderBoardEconomyZoneOpts(boardEconomyEnabled, boardEconomy.state, boardEconomy.runMove),
   });
 
+  // Destructured so hand-memo deps match what React Compiler infers (member calls bind the object).
+  const { searchStationsInArea, openWizard, closeWizard, moveMode } = zoneTool;
+  const { closeSheet, openChat, openSettings, openCodes, openLog } = overlay;
+
   const searchViewportBounds = useCallback((): MapViewportBounds => {
-    return mapViewport?.bounds ?? gameAreaToBoundingBox(gameArea ?? fallbackGameArea());
-  }, [gameArea, mapViewport?.bounds]);
+    return mapViewportRef.current?.bounds ?? gameAreaToBoundingBox(gameArea ?? fallbackGameArea());
+  }, [gameArea]);
 
   const handleHidingZoneStepChange = useCallback((stepId: HidingZoneStepId) => {
     setHidingZoneStepId(stepId);
@@ -667,8 +689,8 @@ export function HiderMapScreen() {
   const mapAttentionActive = zoneTool.wizardOpen && isWizardPlacePhaseStep(hidingZoneStepId);
 
   const handleSearchThisArea = useCallback(() => {
-    void zoneTool.searchStationsInArea(searchViewportBounds());
-  }, [searchViewportBounds, zoneTool.searchStationsInArea]);
+    void searchStationsInArea(searchViewportBounds());
+  }, [searchViewportBounds, searchStationsInArea]);
 
   const myTrap = uid ? timeTrapForHider(timeTraps, uid) : null;
   const timeTrapTool = useTimeTrapTool({
@@ -706,60 +728,61 @@ export function HiderMapScreen() {
   );
 
   const openWizardExclusive = useCallback(() => {
-    overlay.closeSheet();
-    zoneTool.openWizard();
-  }, [overlay.closeSheet, zoneTool.openWizard]);
+    closeSheet();
+    openWizard();
+  }, [closeSheet, openWizard]);
 
   const openChatExclusive = useCallback(() => {
-    if (zoneTool.moveMode) {
+    if (moveMode) {
       return;
     }
-    zoneTool.closeWizard();
+    closeWizard();
     setChatAnswerError(null);
-    overlay.openChat();
-  }, [overlay.openChat, zoneTool.closeWizard, zoneTool.moveMode]);
+    openChat();
+  }, [openChat, closeWizard, moveMode]);
 
   const dismissTruthReveal = useCallback(() => {
     setTruthReveal(null);
   }, []);
 
   const openSettingsExclusive = useCallback(() => {
-    if (zoneTool.moveMode) {
+    if (moveMode) {
       return;
     }
-    zoneTool.closeWizard();
-    overlay.openSettings();
-  }, [overlay.openSettings, zoneTool.closeWizard, zoneTool.moveMode]);
+    closeWizard();
+    openSettings();
+  }, [openSettings, closeWizard, moveMode]);
 
   const openCodesExclusive = useCallback(() => {
-    if (zoneTool.moveMode) {
+    if (moveMode) {
       return;
     }
-    zoneTool.closeWizard();
-    overlay.openCodes();
-  }, [overlay.openCodes, zoneTool.closeWizard, zoneTool.moveMode]);
+    closeWizard();
+    openCodes();
+  }, [openCodes, closeWizard, moveMode]);
 
   const openLogExclusive = useCallback(() => {
-    if (zoneTool.moveMode) {
+    if (moveMode) {
       return;
     }
-    zoneTool.closeWizard();
-    overlay.openLog();
-  }, [overlay.openLog, zoneTool.closeWizard, zoneTool.moveMode]);
+    closeWizard();
+    openLog();
+  }, [openLog, closeWizard, moveMode]);
 
+  const { stations: timeTrapStations, setSelectedStation: selectTimeTrapStation } = timeTrapTool;
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
       if (timeTrapSheetOpen && !myTrap) {
-        const station = nearestStation([lat, lng], timeTrapTool.stations);
+        const station = nearestStation([lat, lng], timeTrapStations);
         if (station) {
-          timeTrapTool.setSelectedStation(station);
+          selectTimeTrapStation(station);
         }
         return;
       }
 
       zoneTool.handleMapClick([lat, lng]);
     },
-    [myTrap, timeTrapSheetOpen, timeTrapTool.setSelectedStation, timeTrapTool.stations, zoneTool],
+    [myTrap, timeTrapSheetOpen, selectTimeTrapStation, timeTrapStations, zoneTool],
   );
 
   const chromeHudRef = useRef<HTMLDivElement>(null);
