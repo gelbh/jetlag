@@ -10,6 +10,13 @@ import { StatusMark } from "@/components/admin/shared/StatusMark";
 import { renderWithAppUi } from "@/test/renderWithAppUi";
 import { type StatusTone, toneColor } from "@/theme/adminTone";
 
+const motion = vi.hoisted(() => ({ reduced: false }));
+
+vi.mock("@mantine/hooks", async (importActual) => ({
+  ...(await importActual<typeof import("@mantine/hooks")>()),
+  useReducedMotion: () => motion.reduced,
+}));
+
 describe("admin shared primitives", () => {
   it("renders the session code in one form at every size", () => {
     renderWithAppUi(
@@ -233,6 +240,45 @@ describe("admin shared primitives", () => {
     const never = screen.getByText("never");
     expect(never).not.toHaveAttribute("data-flash");
     expect(never).not.toHaveAttribute("datetime");
+  });
+
+  it("lets a non-scrolling region body fill without a scroll area", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <AdminRegion title="Course" scroll={false}>
+          <span>map</span>
+        </AdminRegion>
+      </AdminWorld>,
+    );
+    const map = screen.getByText("map");
+    expect(map.closest(".mantine-ScrollArea-root")).toBeNull();
+    expect(screen.getByRole("region", { name: "Course" })).toContainElement(map);
+  });
+
+  it("animates the punch flash, or holds a static fill under reduced motion", () => {
+    const at = new Date().toISOString();
+    try {
+      motion.reduced = false;
+      const { unmount } = renderWithAppUi(
+        <AdminWorld>
+          <PunchTime at={at} flashing />
+        </AdminWorld>,
+      );
+      expect(screen.getByText("just now").getAttribute("style")).toContain("adm-punch");
+      unmount();
+
+      motion.reduced = true;
+      renderWithAppUi(
+        <AdminWorld>
+          <PunchTime at={at} flashing />
+        </AdminWorld>,
+      );
+      const style = screen.getByText("just now").getAttribute("style") ?? "";
+      expect(style).toContain("var(--adm-overprint-soft)");
+      expect(style).not.toContain("animation");
+    } finally {
+      motion.reduced = false;
+    }
   });
 
   it("portals combobox dropdowns into the admin world", async () => {
