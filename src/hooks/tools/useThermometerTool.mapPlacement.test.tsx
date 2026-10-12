@@ -1,10 +1,15 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { isValidElement } from "react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useThermometerTool } from "./useThermometerTool";
 
 describe("useThermometerTool map-first", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("thermometer");
+  });
+
   it("suppresses the Ask sheet after choosing a distance", async () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>

@@ -52,7 +52,6 @@ export function usePinTool({
 
   const session = useToolSession<PinSessionConfig>({
     toolId: "pin",
-    active,
     createInitialConfig: () => ({ ready: true }),
     onSubmit: async () => {
       const label = pinLabel.trim();

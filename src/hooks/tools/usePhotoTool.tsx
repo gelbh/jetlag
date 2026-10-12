@@ -92,7 +92,6 @@ export function usePhotoTool({
 
   const session = useToolSession<PhotoSessionConfig>({
     toolId: "photo",
-    active: active && awaitHiderAnswer,
     createInitialConfig: () => ({ ready: true }),
     onSubmit: async () => {
       setMapError(null);

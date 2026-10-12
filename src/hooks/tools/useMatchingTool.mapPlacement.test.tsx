@@ -1,8 +1,9 @@
 import { MantineProvider } from "@mantine/core";
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { matchingEmptyPlayAreaMessage } from "@/services/geo/matching";
 import { jetlagTheme } from "@/theme/theme";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import type { ResolveMatchingAnchorResult } from "./matching/resolveMatchingAnchor";
 import { useMatchingTool } from "./useMatchingTool";
@@ -75,6 +76,10 @@ vi.mock("./matching/commitMatching", async (importOriginal) => {
 });
 
 describe("useMatchingTool map-first answer", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("matching");
+  });
+
   it("keeps the Ask sheet suppressed and reaches answer phase on the map", async () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>

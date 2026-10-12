@@ -122,7 +122,6 @@ export function useMeasuringTool({
 
   const session = useToolSession<MeasuringSessionConfig>({
     toolId: "measuring",
-    active,
     createInitialConfig: () => ({ ready: true }),
     onSubmit: async () => {
       await commitRef.current();
