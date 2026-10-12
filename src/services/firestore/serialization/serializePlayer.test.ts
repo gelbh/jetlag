@@ -129,6 +129,14 @@ describe("deserializePendingQuestionFromFirestore randomizedTo", () => {
     expect(record.randomizedTo).toEqual({ optionKey: "airport", label: "Airport" });
   });
 
+  it("reads a numeric option key", () => {
+    const record = deserializePendingQuestionFromFirestore("pq-1", "s-1", {
+      ...base,
+      randomizedTo: { optionKey: 1609.344, label: "1 mi" },
+    });
+    expect(record.randomizedTo).toEqual({ optionKey: 1609.344, label: "1 mi" });
+  });
+
   it("drops a malformed roll", () => {
     const record = deserializePendingQuestionFromFirestore("pq-1", "s-1", {
       ...base,

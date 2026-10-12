@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import { availableMatchingCategories } from "../session/catalog/sessionCatalogAvailability";
 import {
   pickRandomizeOption,
-  questionOptionLabelsForTool,
   questionOptionsForTool,
   randomizedQuestionNotice,
   randomizeExcludeLabelsForPending,
@@ -35,10 +35,13 @@ describe("questionOptionsForTool", () => {
     }
   });
 
-  it("keeps labels in step with questionOptionLabelsForTool", () => {
+  it("keys string-id tools by catalog id", () => {
     const session = { gameSize: "small" as const };
-    expect(questionOptionsForTool("matching", session).map((option) => option.label)).toEqual(
-      questionOptionLabelsForTool("matching", session),
+    expect(questionOptionsForTool("matching", session)).toEqual(
+      availableMatchingCategories(session).map((category) => ({
+        optionKey: category.id,
+        label: category.label,
+      })),
     );
   });
 });
@@ -87,6 +90,7 @@ describe("randomizeExcludeLabelsForPending", () => {
     expect(exclude.has("Park")).toBe(true);
 
     const picked = pickRandomizeOption(current, session, [], [current, vetoed], () => 0);
+    expect(picked).not.toBeNull();
     expect(picked?.label).not.toBe("Landmass");
     expect(picked?.label).not.toBe("Park");
   });

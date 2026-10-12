@@ -89,13 +89,6 @@ export function questionOptionsForTool(
   }
 }
 
-export function questionOptionLabelsForTool(
-  toolType: PendingQuestionToolType,
-  session: SessionRulesInput,
-): string[] {
-  return questionOptionsForTool(toolType, session).map((option) => option.label);
-}
-
 /** Catalog label for one pending question option, or null when unknown. */
 export function questionOptionLabelForPending(
   pending: PendingQuestionRecord,
