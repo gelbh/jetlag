@@ -12,8 +12,8 @@ const VERIFY_SESSION_TIMEOUT_MS = 15_000;
 const VERIFY_SESSION_TIMEOUT_MESSAGE =
   "Couldn't verify the session. Check your connection and try again.";
 
-// Dynamic: Home is prerendered on the App chunk; keep firestore off it.
 const loadSessionExit = () => import("@/services/session/sessionExit");
+// Dynamic: Home is prerendered on the App chunk; keep firestore off it.
 const loadFirebase = () => import("@/services/core/firebase/firebase");
 const loadFirestoreAnnotations = () => import("@/services/firestore/firestoreAnnotations");
 const loadSessionMembershipHeal = () => import("@/services/firestore/sessionMembershipHeal");
@@ -47,7 +47,7 @@ export function useContinueActiveSession(): {
     setContinueError(null);
     setContinuing(true);
 
-    await (async () => {
+    const continueSession = async () => {
       try {
         if (!isFirebaseConfigured() || session.id === LOCAL_SESSION_ID) {
           navigate("/map");
@@ -147,7 +147,9 @@ export function useContinueActiveSession(): {
         }
         setContinueError(message);
       }
-    })().finally(() => {
+    };
+
+    await continueSession().finally(() => {
       setContinuing(false);
     });
   };

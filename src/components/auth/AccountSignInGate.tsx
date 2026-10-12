@@ -93,13 +93,12 @@ export function AccountSignInGate({
         }
         if (!cancelled && oauthCompleted && isPermanentUser(oauthCompleted)) {
           await handleSignedIn();
-          return;
-        }
-
-        await ensureAnonymousUser();
-        const completed = await completePremiumEmailSignInLink();
-        if (!cancelled && completed && isPermanentUser(completed)) {
-          await handleSignedIn();
+        } else {
+          await ensureAnonymousUser();
+          const completed = await completePremiumEmailSignInLink();
+          if (!cancelled && completed && isPermanentUser(completed)) {
+            await handleSignedIn();
+          }
         }
       } catch (nextError) {
         if (!cancelled) {
