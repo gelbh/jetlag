@@ -118,6 +118,7 @@ function AdminOpsDeskContent() {
     loadingMore,
     hasMore,
     error: sessionsError,
+    loadMoreError,
     refresh,
     loadMore,
     lastFetchedAt,
@@ -337,6 +338,7 @@ function AdminOpsDeskContent() {
       onRetry={() => void refresh()}
       hasMore={hasMore}
       loadingMore={loadingMore}
+      loadMoreError={loadMoreError}
       onLoadMore={() => void loadMore()}
       observingCode={observingCode}
       joinError={observeError}

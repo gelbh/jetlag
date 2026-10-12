@@ -60,6 +60,7 @@ function props(overrides: Partial<Props> = {}): Props {
     onRetry: vi.fn(),
     hasMore: false,
     loadingMore: false,
+    loadMoreError: null,
     onLoadMore: vi.fn(),
     observingCode: null,
     joinError: null,
@@ -275,6 +276,26 @@ describe("AdminStartList", () => {
     expect(within(alert).getByText("Network down")).toBeInTheDocument();
     fireEvent.click(within(alert).getByRole("button", { name: "Retry" }));
     expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows a failed load more next to Load more and keeps the rows", () => {
+    const onLoadMore = vi.fn();
+    renderList({ hasMore: true, loadMoreError: "Page down", onLoadMore });
+
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveAttribute("data-tone", "mispunch");
+    expect(within(alert).getByText("Couldn't load more sessions")).toBeInTheDocument();
+    expect(within(alert).getByText("Page down")).toBeInTheDocument();
+    expect(screen.queryByText("Couldn't load sessions")).toBeNull();
+    expect(bodyRows()).toHaveLength(2);
+
+    const table = screen.getByRole("table");
+    const loadMore = screen.getByRole("button", { name: "Load more sessions" });
+    expect(table.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(alert.compareDocumentPosition(loadMore) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+    fireEvent.click(within(alert).getByRole("button", { name: "Retry" }));
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
   it("shows a monitor failure as a mispunch alert above the list", () => {
