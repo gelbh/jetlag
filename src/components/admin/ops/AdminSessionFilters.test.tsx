@@ -1,8 +1,8 @@
-import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { jetlagTheme } from "../../../theme/theme";
+import { AdminWorld } from "@/components/admin/shared/AdminWorld";
+import { renderWithAppUi } from "@/test/renderWithAppUi";
 import { AdminSessionFilters } from "./AdminSessionFilters";
 
 function renderFilters(props: Partial<ComponentProps<typeof AdminSessionFilters>> = {}) {
@@ -21,10 +21,10 @@ function renderFilters(props: Partial<ComponentProps<typeof AdminSessionFilters>
     onSortChange: vi.fn(),
   };
 
-  return render(
-    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+  return renderWithAppUi(
+    <AdminWorld>
       <AdminSessionFilters {...defaults} {...props} />
-    </MantineProvider>,
+    </AdminWorld>,
   );
 }
 
@@ -32,43 +32,53 @@ describe("AdminSessionFilters", () => {
   it("keeps mode and phase chips behind More filters by default", () => {
     renderFilters();
 
-    expect(screen.getByRole("button", { name: "Live" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Annotated" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Search")).toBeInTheDocument();
-    expect(screen.getByLabelText("Sort")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Live" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Annotated" })).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Search" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Sort" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "More filters" })).toHaveAttribute(
       "aria-expanded",
       "false",
     );
-    expect(screen.queryByRole("button", { name: "Singleplayer" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Hiding" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "Singleplayer" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "Hiding" })).not.toBeInTheDocument();
   });
 
-  it("reveals mode and phase chips when More filters is expanded", () => {
+  // Floating UI hides the jsdom dropdown as detached (zero rects), so its content queries use `hidden`.
+  it("reveals mode and phase chips when More filters is expanded", async () => {
     renderFilters();
 
     const more = screen.getByRole("button", { name: "More filters" });
     fireEvent.click(more);
 
     expect(more).toHaveAttribute("aria-expanded", "true");
+    expect(
+      await screen.findByRole("checkbox", { name: "Singleplayer", hidden: true }),
+    ).toBeInTheDocument();
     expect(document.getElementById(more.getAttribute("aria-controls") ?? "")).not.toBeNull();
-    expect(screen.getByRole("button", { name: "Singleplayer" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Hiding" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Hiding", hidden: true })).toBeInTheDocument();
   });
 
-  it("exposes toggle state through aria-pressed", () => {
-    renderFilters({ liveOnly: true, annotatedOnly: false, mode: "multiplayer" });
+  it("exposes chip state as checked and deselects back to all", async () => {
+    const onModeChange = vi.fn();
+    const onLiveOnlyChange = vi.fn();
+    renderFilters({
+      liveOnly: true,
+      annotatedOnly: false,
+      mode: "multiplayer",
+      onModeChange,
+      onLiveOnlyChange,
+    });
 
-    expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Annotated" })).toHaveAttribute(
-      "aria-pressed",
-      "false",
-    );
+    expect(screen.getByRole("checkbox", { name: "Live" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Annotated" })).not.toBeChecked();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Live" }));
+    expect(onLiveOnlyChange).toHaveBeenCalledWith(false);
 
     fireEvent.click(screen.getByRole("button", { name: "More filters" }));
-    expect(screen.getByRole("button", { name: "Multiplayer" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    const multiplayer = await screen.findByRole("checkbox", { name: "Multiplayer", hidden: true });
+    expect(multiplayer).toBeChecked();
+    fireEvent.click(multiplayer);
+    expect(onModeChange).toHaveBeenCalledWith("all");
   });
 });

@@ -1,9 +1,10 @@
-import { MantineProvider } from "@mantine/core";
-import { render, screen, within } from "@testing-library/react";
-import type { ReactElement } from "react";
+import { Table } from "@mantine/core";
+import { screen, within } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
-import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
-import { jetlagTheme } from "../../../theme/theme";
+import { AdminWorld } from "@/components/admin/shared/AdminWorld";
+import type { AdminSessionSummary } from "@/services/admin/adminSessions";
+import { renderWithAppUi } from "@/test/renderWithAppUi";
 import { AdminSessionRow } from "./AdminSessionRow";
 
 function makeSummary(overrides: Partial<AdminSessionSummary> = {}): AdminSessionSummary {
@@ -38,38 +39,45 @@ function makeSummary(overrides: Partial<AdminSessionSummary> = {}): AdminSession
   };
 }
 
-function renderRows(ui: ReactElement) {
-  return render(
-    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-      {ui}
-    </MantineProvider>,
+function renderRows(rows: ReactNode) {
+  return renderWithAppUi(
+    <AdminWorld>
+      <Table>
+        <Table.Tbody>{rows}</Table.Tbody>
+      </Table>
+    </AdminWorld>,
   );
 }
 
 describe("AdminSessionRow", () => {
-  it("marks the selected row with aria-current", () => {
+  it("reverses the monitored row and outlines the cursor row", () => {
     renderRows(
       <>
         <AdminSessionRow
           summary={makeSummary()}
           observingCode={null}
-          selected
+          monitored
           onMonitor={vi.fn()}
         />
         <AdminSessionRow
           summary={makeSummary({ sessionId: "session-2", code: "ABCDEF" })}
           observingCode={null}
+          cursor
           onMonitor={vi.fn()}
         />
       </>,
     );
 
-    const [selectedRow, otherRow] = screen.getAllByRole("button");
-    expect(selectedRow).toHaveAttribute("aria-current", "true");
-    expect(otherRow).not.toHaveAttribute("aria-current");
+    const [monitoredRow, cursorRow] = screen.getAllByRole("row");
+    expect(monitoredRow).toHaveAttribute("aria-current", "true");
+    expect(monitoredRow.style.background).toContain("var(--adm-ink)");
+    expect(monitoredRow).not.toHaveAttribute("aria-selected");
+    expect(cursorRow).not.toHaveAttribute("aria-current");
+    expect(cursorRow).toHaveAttribute("aria-selected", "true");
+    expect(cursorRow.style.outline).toContain("var(--adm-overprint)");
   });
 
-  it("joining shows Joining… and disables all rows' buttons via observingCode", () => {
+  it("loads the joining row and disables every row while a join is pending", () => {
     renderRows(
       <>
         <AdminSessionRow summary={makeSummary()} observingCode="7G2LJH" onMonitor={vi.fn()} />
@@ -81,15 +89,15 @@ describe("AdminSessionRow", () => {
       </>,
     );
 
-    const [joiningRow, otherRow] = screen.getAllByRole("button");
-    expect(joiningRow).toBeDisabled();
-    expect(otherRow).toBeDisabled();
-    expect(within(joiningRow).getByText("Joining…")).toBeInTheDocument();
-    expect(within(otherRow).queryByText("Joining…")).toBeNull();
-    expect(within(otherRow).getByText("Monitor")).toBeInTheDocument();
+    const joining = screen.getByRole("button", { name: "Monitor 7G2LJH" });
+    const other = screen.getByRole("button", { name: "Monitor ABCDEF" });
+    expect(joining).toBeDisabled();
+    expect(joining).toHaveAttribute("data-loading");
+    expect(other).toBeDisabled();
+    expect(other).not.toHaveAttribute("data-loading");
   });
 
-  it("shows the Live chip only when the session is live", () => {
+  it("marks the phase live only for live sessions", () => {
     renderRows(
       <>
         <AdminSessionRow summary={makeSummary()} observingCode={null} onMonitor={vi.fn()} />
@@ -101,10 +109,14 @@ describe("AdminSessionRow", () => {
       </>,
     );
 
-    const [liveRow, idleRow] = screen.getAllByRole("button");
-    expect(within(liveRow).getByText("Live")).toBeInTheDocument();
-    expect(liveRow).toHaveAttribute("data-live", "true");
-    expect(within(idleRow).queryByText("Live")).toBeNull();
-    expect(idleRow).not.toHaveAttribute("data-live");
+    const [liveRow, idleRow] = screen.getAllByRole("row");
+    expect(within(liveRow).getByText("Seek").closest("[data-tone]")).toHaveAttribute(
+      "data-tone",
+      "live",
+    );
+    expect(within(idleRow).getByText("Seek").closest("[data-tone]")).toHaveAttribute(
+      "data-tone",
+      "neutral",
+    );
   });
 });

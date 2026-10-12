@@ -2,12 +2,6 @@ import { Alert, AppShell, Button, Group, Modal, Skeleton, Stack, Text, Title } f
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import type {
-  AdminSessionModeFilter,
-  AdminSessionSort,
-  AdminSessionStateChip,
-} from "../../../domain/admin/adminSessionFilters";
-import { filterAdminSessions } from "../../../domain/admin/adminSessionFilters";
 import { clearLegacyOpsDeskStorage } from "../../../domain/admin/clearLegacyOpsDeskStorage";
 import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
 import { useAdminAccessState } from "../../../hooks/admin/useAdminAccessState";
@@ -17,6 +11,7 @@ import { useMinWidth } from "../../../hooks/layout/useMinWidth";
 import { useAppNavigate } from "../../../hooks/navigation/useAppNavigate";
 import {
   countOpenIncidents,
+  isOpenIncident,
   subscribeIncident,
   subscribeIncidentList,
 } from "../../../services/admin/adminIncidents";
@@ -34,9 +29,8 @@ import { AdminEmptyState } from "../shared/AdminEmptyState";
 import { AdminWorld } from "../shared/AdminWorld";
 import { AdminFixedDesk } from "./AdminFixedDesk";
 import { AdminMobileDesk } from "./AdminMobileDesk";
-import { AdminSessionFilters } from "./AdminSessionFilters";
-import { AdminSessionRow } from "./AdminSessionRow";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
+import { AdminStartList } from "./AdminStartList";
 import { AdminStatusStrip } from "./AdminStatusStrip";
 import "../incident/AdminIncidentDesk.css";
 import "./AdminOpsDesk.css";
@@ -105,12 +99,6 @@ function AdminOpsDeskContent() {
     error: observeError,
   } = useAdminJoinSession({ onRefresh: refresh });
 
-  const [query, setQuery] = useState("");
-  const [liveOnly, setLiveOnly] = useState(true);
-  const [annotatedOnly, setAnnotatedOnly] = useState(false);
-  const [modeFilter, setModeFilter] = useState<AdminSessionModeFilter>("all");
-  const [stateFilter, setStateFilter] = useState<AdminSessionStateChip>(null);
-  const [sort, setSort] = useState<AdminSessionSort>("lastActivity");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [monitorSessionId, setMonitorSessionId] = useState<string | null>(null);
   const monitorRequestRef = useRef(0);
@@ -147,6 +135,15 @@ function AdminOpsDeskContent() {
 
   const visibleIncidents = enabled ? incidents : EMPTY_INCIDENTS;
   const openCount = useMemo(() => countOpenIncidents(visibleIncidents), [visibleIncidents]);
+  const mispunchBySession = new Map<string, number>();
+  for (const incident of visibleIncidents) {
+    if (incident.sessionId && isOpenIncident(incident)) {
+      mispunchBySession.set(
+        incident.sessionId,
+        (mispunchBySession.get(incident.sessionId) ?? 0) + 1,
+      );
+    }
+  }
   const listIncident =
     selectedIncidentId == null
       ? null
@@ -165,19 +162,6 @@ function AdminOpsDeskContent() {
   const selectedIncident =
     listIncident ??
     (enabled && fetchedIncident?.id === selectedIncidentId ? fetchedIncident : null);
-
-  const filteredSessions = useMemo(
-    () =>
-      filterAdminSessions(sessions, {
-        query,
-        liveOnly,
-        annotatedOnly,
-        mode: modeFilter,
-        state: stateFilter,
-        sort,
-      }),
-    [annotatedOnly, liveOnly, modeFilter, query, sessions, sort, stateFilter],
-  );
 
   const monitorRoleError =
     monitorSessionId != null && activeSession?.id === monitorSessionId && activeRole !== "admin"
@@ -265,86 +249,23 @@ function AdminOpsDeskContent() {
     }
   };
 
-  const loadMoreButton = hasMore ? (
-    <Button
-      type="button"
-      variant="default"
-      fullWidth
-      disabled={loadingMore}
-      onClick={() => void loadMore()}
-    >
-      {loadingMore ? "Loading…" : "Load more sessions"}
-    </Button>
-  ) : null;
-
-  const sessionsErrorRetry = sessionsError ? (
-    <Stack gap="sm" mb={sessions.length > 0 ? "sm" : undefined}>
-      <InlineError>{sessionsError}</InlineError>
-      <Button type="button" variant="default" w="fit-content" onClick={() => void refresh()}>
-        Retry
-      </Button>
-    </Stack>
-  ) : null;
-
-  // Fail-only when the list has nothing retained; keep filters + rows when refresh/loadMore fails.
   const sessionsFailedEmpty = Boolean(sessionsError) && sessions.length === 0;
 
   const sessionsBody = (
-    <div className="jl-scroll jl-ops-panel-scroll" data-testid="admin-ops-sessions">
-      {observeError ? <InlineError>{observeError}</InlineError> : null}
-      {sessionsFailedEmpty ? (
-        sessionsErrorRetry
-      ) : (
-        <>
-          {sessionsErrorRetry}
-          <div className="mb-3">
-            <AdminSessionFilters
-              query={query}
-              liveOnly={liveOnly}
-              annotatedOnly={annotatedOnly}
-              mode={modeFilter}
-              state={stateFilter}
-              sort={sort}
-              onQueryChange={setQuery}
-              onLiveOnlyChange={setLiveOnly}
-              onAnnotatedOnlyChange={setAnnotatedOnly}
-              onModeChange={setModeFilter}
-              onStateChange={setStateFilter}
-              onSortChange={setSort}
-            />
-          </div>
-          {sessionsLoading ? (
-            <AdminSessionSkeletonRows />
-          ) : sessions.length === 0 ? (
-            <div className="jl-ops-empty">
-              <p className="jl-ops-empty-title">{liveOnly ? "No live sessions" : "No sessions"}</p>
-              <p className="jl-ops-empty-body">Games appear here while a host session is active.</p>
-            </div>
-          ) : filteredSessions.length === 0 ? (
-            <div className="space-y-2.5">
-              <div className="jl-ops-empty">
-                <p className="jl-ops-empty-title">No matching sessions</p>
-                <p className="jl-ops-empty-body">Try another code, area name, or phase filter.</p>
-              </div>
-              {loadMoreButton}
-            </div>
-          ) : (
-            <div className="jl-scroll admin-dashboard-list-scroll space-y-2.5">
-              {filteredSessions.map((summary) => (
-                <AdminSessionRow
-                  key={summary.sessionId}
-                  summary={summary}
-                  observingCode={observingCode}
-                  selected={selectedSessionId === summary.sessionId}
-                  onMonitor={handleMonitor}
-                />
-              ))}
-              {loadMoreButton}
-            </div>
-          )}
-        </>
-      )}
-    </div>
+    <AdminStartList
+      sessions={sessions}
+      loading={sessionsLoading}
+      error={sessionsError}
+      onRetry={() => void refresh()}
+      hasMore={hasMore}
+      loadingMore={loadingMore}
+      onLoadMore={() => void loadMore()}
+      observingCode={observingCode}
+      joinError={observeError}
+      monitoredSessionId={selectedSessionId}
+      mispunchBySession={mispunchBySession}
+      onMonitor={handleMonitor}
+    />
   );
 
   const incidentDetail = <AdminIncidentDetail incidentId={selectedIncidentId} />;

@@ -1,5 +1,15 @@
-import { NativeSelect, Stack, TextInput, UnstyledButton } from "@mantine/core";
-import { useState } from "react";
+import {
+  Button,
+  Chip,
+  Group,
+  Kbd,
+  Popover,
+  Select,
+  Stack,
+  TextInput,
+  Tooltip,
+} from "@mantine/core";
+import type { Ref } from "react";
 import type {
   AdminSessionModeFilter,
   AdminSessionSort,
@@ -13,6 +23,7 @@ interface AdminSessionFiltersProps {
   mode: AdminSessionModeFilter;
   state: AdminSessionStateChip;
   sort: AdminSessionSort;
+  searchRef?: Ref<HTMLInputElement>;
   onQueryChange: (query: string) => void;
   onLiveOnlyChange: (value: boolean) => void;
   onAnnotatedOnlyChange: (value: boolean) => void;
@@ -29,6 +40,12 @@ const SORT_OPTIONS: { value: AdminSessionSort; label: string }[] = [
   { value: "created", label: "Created" },
 ];
 
+const STATE_OPTIONS = [
+  ["hiding", "Hiding"],
+  ["seek", "Seeking"],
+  ["end-game", "End game"],
+] as const;
+
 export function AdminSessionFilters({
   query,
   liveOnly,
@@ -36,6 +53,7 @@ export function AdminSessionFilters({
   mode,
   state,
   sort,
+  searchRef,
   onQueryChange,
   onLiveOnlyChange,
   onAnnotatedOnlyChange,
@@ -43,99 +61,84 @@ export function AdminSessionFilters({
   onStateChange,
   onSortChange,
 }: AdminSessionFiltersProps) {
-  const [moreOpen, setMoreOpen] = useState(false);
-
   return (
-    <Stack gap="sm">
-      <TextInput
-        label="Search"
-        type="search"
-        value={query}
-        onChange={(event) => onQueryChange(event.currentTarget.value)}
-        placeholder="Code, area, or host version"
-        autoComplete="off"
-        spellCheck={false}
-      />
-      <div className="jl-ops-filter-row">
-        <div className="jl-ops-toggle-group">
-          <UnstyledButton
-            type="button"
-            className="jl-ops-toggle"
-            aria-pressed={liveOnly}
-            onClick={() => onLiveOnlyChange(!liveOnly)}
-          >
-            Live
-          </UnstyledButton>
-          <UnstyledButton
-            type="button"
-            className="jl-ops-toggle"
-            aria-pressed={annotatedOnly}
-            onClick={() => onAnnotatedOnlyChange(!annotatedOnly)}
-          >
-            Annotated
-          </UnstyledButton>
-        </div>
-        <NativeSelect
-          label="Sort"
-          className="jl-ops-filter-sort"
-          value={sort}
-          onChange={(event) => onSortChange(event.currentTarget.value as AdminSessionSort)}
-          data={SORT_OPTIONS}
-          w="100%"
+    <Stack gap="xs">
+      <Tooltip
+        label={
+          <>
+            Press <Kbd>/</Kbd> to search
+          </>
+        }
+      >
+        <TextInput
+          ref={searchRef}
+          label="Search"
+          type="search"
+          value={query}
+          onChange={(event) => onQueryChange(event.currentTarget.value)}
+          placeholder="Code, area, or host version"
+          autoComplete="off"
+          spellCheck={false}
         />
-        <UnstyledButton
-          type="button"
-          className="jl-ops-toggle"
-          aria-expanded={moreOpen}
-          aria-controls="admin-session-more-filters"
-          onClick={() => setMoreOpen((open) => !open)}
-        >
-          More filters
-        </UnstyledButton>
-      </div>
-
-      {moreOpen ? (
-        <div className="jl-ops-filter-row" id="admin-session-more-filters">
-          <div className="jl-ops-toggle-group" role="group" aria-label="Session mode">
-            {(["singleplayer", "multiplayer"] as const).map((option) => {
-              const selected = mode === option;
-              return (
-                <UnstyledButton
-                  key={option}
-                  type="button"
-                  className="jl-ops-toggle"
-                  aria-pressed={selected}
-                  onClick={() => onModeChange(selected ? "all" : option)}
-                >
-                  {option === "singleplayer" ? "Singleplayer" : "Multiplayer"}
-                </UnstyledButton>
-              );
-            })}
-          </div>
-          <div className="jl-ops-toggle-group" role="group" aria-label="Session state">
-            {(
-              [
-                ["hiding", "Hiding"],
-                ["seek", "Seeking"],
-                ["end-game", "End game"],
-              ] as const
-            ).map(([option, label]) => {
-              const selected = state === option;
-              return (
-                <UnstyledButton
-                  key={option}
-                  type="button"
-                  className="jl-ops-toggle"
-                  aria-pressed={selected}
-                  onClick={() => onStateChange(selected ? null : option)}
-                >
-                  {label}
-                </UnstyledButton>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
+      </Tooltip>
+      <Group gap="xs" wrap="wrap">
+        <Chip size="xs" checked={liveOnly} onChange={onLiveOnlyChange}>
+          Live
+        </Chip>
+        <Chip size="xs" checked={annotatedOnly} onChange={onAnnotatedOnlyChange}>
+          Annotated
+        </Chip>
+        <Popover position="bottom-start">
+          <Popover.Target>
+            <Button type="button" variant="outline" size="compact-sm">
+              More filters
+            </Button>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Stack gap="xs">
+              <Group gap="xs" role="group" aria-label="Session mode">
+                {(["singleplayer", "multiplayer"] as const).map((option) => {
+                  const selected = mode === option;
+                  return (
+                    <Chip
+                      key={option}
+                      size="xs"
+                      checked={selected}
+                      onChange={() => onModeChange(selected ? "all" : option)}
+                    >
+                      {option === "singleplayer" ? "Singleplayer" : "Multiplayer"}
+                    </Chip>
+                  );
+                })}
+              </Group>
+              <Group gap="xs" role="group" aria-label="Session state">
+                {STATE_OPTIONS.map(([option, label]) => {
+                  const selected = state === option;
+                  return (
+                    <Chip
+                      key={option}
+                      size="xs"
+                      checked={selected}
+                      onChange={() => onStateChange(selected ? null : option)}
+                    >
+                      {label}
+                    </Chip>
+                  );
+                })}
+              </Group>
+            </Stack>
+          </Popover.Dropdown>
+        </Popover>
+      </Group>
+      <Select
+        label="Sort"
+        data={SORT_OPTIONS}
+        value={sort}
+        allowDeselect={false}
+        onChange={(value) => {
+          if (value) onSortChange(value as AdminSessionSort);
+        }}
+      />
     </Stack>
   );
 }
