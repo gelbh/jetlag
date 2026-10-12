@@ -47,6 +47,24 @@ type PendingJoinRequest = {
   expiresAt: string;
 };
 
+async function loadAcceptedJoinSession(
+  request: PendingJoinRequest,
+  uid: string,
+): Promise<SessionRecord> {
+  const joinedSession = await getRemoteSessionByIdFromServer(request.sessionId);
+  if (!joinedSession) {
+    throw new Error("Couldn't load the session after approval.");
+  }
+  if (request.role !== "hider") {
+    return joinedSession;
+  }
+  const confirmed = await waitForServerHiderRole(joinedSession.id, uid);
+  if (!confirmed || confirmed.memberRoles?.[uid] !== "hider") {
+    throw new Error("Couldn't confirm your hider role. Wait a moment and try again.");
+  }
+  return confirmed;
+}
+
 function isJoinRequestRole(role: PlayerRole): role is JoinRequestRole {
   return role === "seeker" || role === "hider" || role === "observer";
 }
@@ -169,18 +187,7 @@ export function useJoinSession({
 
       try {
         const user = await retryAsync(() => ensureFreshAnonymousUser());
-        let joinedSession = await getRemoteSessionByIdFromServer(pendingRequest.sessionId);
-        if (!joinedSession) {
-          throw new Error("Couldn't load the session after approval.");
-        }
-
-        if (pendingRequest.role === "hider") {
-          const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
-          if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
-            throw new Error("Couldn't confirm your hider role. Wait a moment and try again.");
-          }
-          joinedSession = confirmed;
-        }
+        const joinedSession = await loadAcceptedJoinSession(pendingRequest, user.uid);
 
         const joinedRole = pendingRequest.role;
         setPendingRequest(null);
@@ -201,10 +208,9 @@ export function useJoinSession({
       } catch (nextError) {
         setPendingRequest(null);
         setError(nextError instanceof Error ? nextError.message : "Couldn't join that session.");
-      } finally {
-        setLoading(false);
-        setRequestBusy(false);
       }
+      setLoading(false);
+      setRequestBusy(false);
     };
 
     const handleRequestUpdate = (request: RoleJoinRequest | null) => {
@@ -316,69 +322,67 @@ export function useJoinSession({
       try {
         if (!isFirebaseConfigured()) {
           setError("Firebase is not configured. Create a local session instead.");
-          return;
-        }
-
-        await withTimeout(
-          (async () => {
-            const user = await retryAsync(() => ensureFreshAnonymousUser());
-            const joinOptions =
-              session?.code === normalized && myUid
-                ? {
-                    returningMemberUid: myUid,
-                    persistedMyUid: myUid,
-                    rolePasscode: values.rolePasscode || undefined,
-                  }
-                : { rolePasscode: values.rolePasscode || undefined };
-            const result = await retryAsync(() =>
-              joinRemoteSessionByCode(
-                normalized,
-                user.uid,
-                values.playerRole,
-                APP_VERSION,
-                joinOptions,
-              ),
-            );
-            if (result.status === "missing") {
-              setError("No session found for that code.");
-              return;
-            }
-
-            if (result.status === "ended") {
-              setError("That session has ended. Ask the host for a new code.");
-              return;
-            }
-
-            if (result.status === "incompatible") {
-              setError(sessionVersionMismatchMessage(result.hostVersion, APP_VERSION));
-              return;
-            }
-
-            let joinedSession = result.session;
-            if (values.playerRole === "hider") {
-              const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
-              if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
-                setError("Couldn't confirm your hider role. Wait a moment and try again.");
+        } else {
+          await withTimeout(
+            (async () => {
+              const user = await retryAsync(() => ensureFreshAnonymousUser());
+              const joinOptions =
+                session?.code === normalized && myUid
+                  ? {
+                      returningMemberUid: myUid,
+                      persistedMyUid: myUid,
+                      rolePasscode: values.rolePasscode || undefined,
+                    }
+                  : { rolePasscode: values.rolePasscode || undefined };
+              const result = await retryAsync(() =>
+                joinRemoteSessionByCode(
+                  normalized,
+                  user.uid,
+                  values.playerRole,
+                  APP_VERSION,
+                  joinOptions,
+                ),
+              );
+              if (result.status === "missing") {
+                setError("No session found for that code.");
                 return;
               }
-              joinedSession = confirmed;
-            }
 
-            await enterJoinedSession(
-              joinedSession,
-              user.uid,
-              values.playerRole,
-              result.rolePasscode,
-            );
-          })(),
-          VERIFY_SESSION_TIMEOUT_MS,
-          VERIFY_SESSION_TIMEOUT_MESSAGE,
-        );
+              if (result.status === "ended") {
+                setError("That session has ended. Ask the host for a new code.");
+                return;
+              }
+
+              if (result.status === "incompatible") {
+                setError(sessionVersionMismatchMessage(result.hostVersion, APP_VERSION));
+                return;
+              }
+
+              let joinedSession = result.session;
+              if (values.playerRole === "hider") {
+                const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
+                if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
+                  setError("Couldn't confirm your hider role. Wait a moment and try again.");
+                  return;
+                }
+                joinedSession = confirmed;
+              }
+
+              await enterJoinedSession(
+                joinedSession,
+                user.uid,
+                values.playerRole,
+                result.rolePasscode,
+              );
+            })(),
+            VERIFY_SESSION_TIMEOUT_MS,
+            VERIFY_SESSION_TIMEOUT_MESSAGE,
+          );
+        }
       } catch (nextError) {
         setError(nextError instanceof Error ? nextError.message : "Couldn't join that session.");
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     });
 
   const onJoinValidationError = (message: string) => {
@@ -397,22 +401,20 @@ export function useJoinSession({
       try {
         if (!isFirebaseConfigured()) {
           setError("Firebase is not configured. Create a local session instead.");
-          return;
+        } else {
+          await ensureFreshAnonymousUser();
+          const result = await requestRoleJoin(previewSession.id, playerRole);
+          setPendingRequest({
+            requestId: result.requestId,
+            sessionId: previewSession.id,
+            role: playerRole,
+            expiresAt: result.expiresAt,
+          });
         }
-
-        await ensureFreshAnonymousUser();
-        const result = await requestRoleJoin(previewSession.id, playerRole);
-        setPendingRequest({
-          requestId: result.requestId,
-          sessionId: previewSession.id,
-          role: playerRole,
-          expiresAt: result.expiresAt,
-        });
       } catch (nextError) {
         setError(mapJoinRequestError(nextError));
-      } finally {
-        setRequestBusy(false);
       }
+      setRequestBusy(false);
     });
 
   const handleCancelRequest = () =>
@@ -430,9 +432,8 @@ export function useJoinSession({
         setError("Join request cancelled.");
       } catch (nextError) {
         setError(mapJoinRequestError(nextError));
-      } finally {
-        setRequestBusy(false);
       }
+      setRequestBusy(false);
     });
 
   return {

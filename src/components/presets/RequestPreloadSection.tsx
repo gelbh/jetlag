@@ -58,10 +58,9 @@ export function RequestPreloadSection({
           ? submitError.message
           : "Could not submit the preload request.";
       setError(message);
-    } finally {
-      inFlightRef.current = false;
-      setSubmitting(false);
     }
+    inFlightRef.current = false;
+    setSubmitting(false);
   }
 
   return (
