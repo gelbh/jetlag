@@ -189,7 +189,9 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         onToggleDiagnostics={isWide ? undefined : () => setDiagnosticsOpen((open) => !open)}
       />
 
-      <div className={isWide ? "admin-map-shell__map" : "absolute inset-0"}>{mapLayers}</div>
+      <div className={isWide ? "admin-map-shell__map" : "absolute inset-0"} data-map-dock-frame="">
+        \ {mapLayers}
+      </div>
 
       {isWide ? (
         <AdminMonitorRail
