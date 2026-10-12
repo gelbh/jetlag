@@ -27,6 +27,7 @@ import "@mantine/core/styles/ModalBase.layer.css";
 import "@mantine/core/styles/Input.layer.css";
 import "@mantine/core/styles/Combobox.layer.css";
 import "@mantine/core/styles/FloatingIndicator.layer.css";
+import "@mantine/core/styles/Accordion.layer.css";
 import "@mantine/core/styles/Alert.layer.css";
 import "@mantine/core/styles/AppShell.layer.css";
 import "@mantine/core/styles/Text.layer.css";
