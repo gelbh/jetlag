@@ -86,9 +86,8 @@ export function useDrawTool({
       } catch {
         // Surfaced via lastSyncError; drop the stroke so a retry can't duplicate it.
         resetDraft();
-      } finally {
-        setBusy(false);
       }
+      setBusy(false);
     },
     [busy, createAnnotation, finishPlacement, resetDraft],
   );

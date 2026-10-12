@@ -240,15 +240,12 @@ export function useTentacleTool({
 
         applyTentaclePoisResult(requestId, pois, 0);
       } catch (error) {
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
-        setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
-      } finally {
         if (isLatestRequest(requestId)) {
-          setTentacleLoading(false);
+          setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
         }
+      }
+      if (isLatestRequest(requestId)) {
+        setTentacleLoading(false);
       }
     },
     [applyTentaclePoisResult, beginRequest, isLatestRequest, searchRadiusMeters, sessionRules],
