@@ -1,4 +1,14 @@
-import { Alert, AppShell, Button, Group, Modal, Skeleton, Stack, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  AppShell,
+  Button,
+  Drawer,
+  Group,
+  Skeleton,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
@@ -20,14 +30,13 @@ import { getFirebaseAuth } from "../../../services/core/firebase/firebase";
 import { useSessionStore } from "../../../state/sessionStore";
 import { PremiumSignInGate } from "../../billing/PremiumSignInGate";
 import { AppLink } from "../../navigation/AppLink";
-import { InlineError } from "../../ui/banners/InlineError";
 import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
 import { AdminIncidentInbox } from "../incident/AdminIncidentInbox";
 import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
 import { AdminEmptyState } from "../shared/AdminEmptyState";
+import { AdminRegion } from "../shared/AdminRegion";
 import { AdminWorld } from "../shared/AdminWorld";
-import { AdminFixedDesk } from "./AdminFixedDesk";
 import { AdminMobileDesk } from "./AdminMobileDesk";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
 import { AdminStartList } from "./AdminStartList";
@@ -73,6 +82,7 @@ function AdminOpsDeskContent() {
   const isAdmin = accessState === "admin";
   const enabled = isAdmin;
   const isDesktop = useMinWidth(1024);
+  const wide = useMinWidth(1440);
   const selectedIncidentId = routeIncidentId?.trim() || null;
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
 
@@ -92,6 +102,7 @@ function AdminOpsDeskContent() {
     error: sessionsError,
     refresh,
     loadMore,
+    lastFetchedAt,
   } = useAdminSessionList(enabled);
   const {
     joinSession,
@@ -104,6 +115,7 @@ function AdminOpsDeskContent() {
   const monitorRequestRef = useRef(0);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [needsYouOpen, setNeedsYouOpen] = useState(false);
 
   if (enabled !== enabledState) {
     setEnabledState(enabled);
@@ -111,6 +123,10 @@ function AdminOpsDeskContent() {
       setIncidentsLoading(true);
       setIncidentsError(null);
     }
+  }
+
+  if (needsYouOpen && (wide || !isDesktop)) {
+    setNeedsYouOpen(false);
   }
 
   useEffect(() => {
@@ -277,17 +293,29 @@ function AdminOpsDeskContent() {
       disabled={!selectedIncidentId}
     />
   );
+  const inbox = (
+    <AdminIncidentInbox
+      incidents={visibleIncidents}
+      selectedId={selectedIncidentId}
+      openCount={openCount}
+      loading={enabled ? incidentsLoading : false}
+      error={enabled ? incidentsError : null}
+      onSelect={handleSelectIncident}
+    />
+  );
   const inboxBody = (
-    <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-      <AdminIncidentInbox
-        incidents={visibleIncidents}
-        selectedId={selectedIncidentId}
-        openCount={openCount}
-        loading={enabled ? incidentsLoading : false}
-        error={enabled ? incidentsError : null}
-        onSelect={handleSelectIncident}
-      />
-    </div>
+    <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">{inbox}</div>
+  );
+  const incidentStack = (
+    <>
+      {inbox}
+      {selectedIncidentId ? (
+        <>
+          {incidentDetail}
+          {incidentActions}
+        </>
+      ) : null}
+    </>
   );
 
   if (accessState === "loading" || !authReady) {
@@ -361,6 +389,9 @@ function AdminOpsDeskContent() {
       refreshing={refreshing}
       onRefresh={() => void refresh({ background: true })}
       onOpenSettings={() => setSettingsOpen(true)}
+      onOpenNeedsYou={isDesktop && !wide ? () => setNeedsYouOpen(true) : undefined}
+      dataFetchedAt={lastFetchedAt}
+      syncFailed={Boolean(sessionsError)}
     />
   );
 
@@ -368,6 +399,12 @@ function AdminOpsDeskContent() {
     <AppShell
       mode="static"
       header={{ height: "3.25rem", offset: false }}
+      navbar={isDesktop ? { width: "22rem", breakpoint: "64em" } : undefined}
+      aside={
+        isDesktop
+          ? { width: "24rem", breakpoint: "64em", collapsed: { desktop: !wide } }
+          : undefined
+      }
       padding={0}
       className="jl-ops-desk"
       data-testid="admin-ops-desk"
@@ -376,37 +413,20 @@ function AdminOpsDeskContent() {
       data-resume-ready="true"
     >
       <AppShell.Header withBorder={false}>{statusStrip}</AppShell.Header>
-      <AppShell.Main className="jl-ops-desk-main">
+      {isDesktop ? (
+        <AppShell.Navbar mih={0} p="xs">
+          {sessionsBody}
+        </AppShell.Navbar>
+      ) : null}
+      <AppShell.Main className="jl-ops-desk-main" p={isDesktop ? "xs" : undefined}>
         {isDesktop ? (
-          <>
-            {incidentsError && visibleIncidents.length > 0 ? (
-              <InlineError>{incidentsError}</InlineError>
-            ) : null}
-            <AdminFixedDesk
-              mode={onIncidentsRoute ? "incidents" : "sessions"}
-              sessions={sessionsBody}
-              monitor={
-                <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-                  <AdminMonitorPane
-                    active={monitorActive}
-                    errorMessage={monitorRoleError}
-                    sessionsUnavailable={sessionsFailedEmpty}
-                  />
-                </div>
-              }
-              inbox={inboxBody}
-              detail={
-                <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-                  {incidentDetail}
-                </div>
-              }
-              actions={
-                <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-                  {incidentActions}
-                </div>
-              }
+          <AdminRegion title="Course" scroll={false}>
+            <AdminMonitorPane
+              active={monitorActive}
+              errorMessage={monitorRoleError}
+              sessionsUnavailable={sessionsFailedEmpty}
             />
-          </>
+          </AdminRegion>
         ) : (
           <AdminMobileDesk
             tab={onIncidentsRoute ? "incidents" : "sessions"}
@@ -435,9 +455,30 @@ function AdminOpsDeskContent() {
           />
         )}
       </AppShell.Main>
-      <Modal opened={settingsOpen} onClose={() => setSettingsOpen(false)} title="Desk settings">
+      {isDesktop && wide ? (
+        <AppShell.Aside mih={0} p="xs">
+          <AdminRegion title="Needs you" count={openCount}>
+            {incidentStack}
+          </AdminRegion>
+        </AppShell.Aside>
+      ) : null}
+      <Drawer
+        opened={needsYouOpen}
+        onClose={() => setNeedsYouOpen(false)}
+        position="right"
+        size="24rem"
+        title="Needs you"
+      >
+        {incidentStack}
+      </Drawer>
+      <Drawer
+        opened={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        position="right"
+        title="Desk settings"
+      >
         <AdminSettingsPanel />
-      </Modal>
+      </Drawer>
     </AppShell>
   );
 }

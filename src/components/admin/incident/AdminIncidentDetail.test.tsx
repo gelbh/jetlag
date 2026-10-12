@@ -404,7 +404,7 @@ describe("AdminOpsDesk gate + mobile stack", () => {
     renderDesk("/admin/incidents");
 
     expect(screen.getByText("No incidents")).toBeInTheDocument();
-    expect(screen.getByText("Select an incident")).toBeInTheDocument();
+    expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
   });
 
   it("shows queue error state", () => {
