@@ -1,7 +1,7 @@
 @import "@fontsource-variable/archivo/wdth.css";
 
 [data-admin-world] {
-  color-scheme: light dark;
+  color-scheme: dark;
   --adm-font: "Archivo Variable", system-ui, sans-serif;
   --adm-paper: light-dark(oklch(0.975 0.008 95), oklch(0.19 0.025 260));
   --adm-paper-raised: light-dark(oklch(0.995 0.004 95), oklch(0.23 0.025 260));
@@ -30,6 +30,11 @@
   --mantine-font-family: var(--adm-font);
   --mantine-font-family-headings: var(--adm-font);
 
+  /* Desk roots fill their parent (height: 100% / flex: 1) and scroll inside. */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100dvh;
   background: var(--adm-paper);
   color: var(--adm-ink);
   font-family: var(--adm-font);
