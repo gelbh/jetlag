@@ -1,7 +1,12 @@
 import { useCallback } from "react";
+import { randomizeManualNotice } from "@/domain/questions/randomizeQuestion";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { isHidingTimerEffectivelyRunning } from "@/domain/session/timer/timer";
 import { useQuestionDeadlineEnforcement } from "@/hooks/session/useQuestionDeadlineEnforcement";
+import {
+  type UseRandomizeAutoAskParams,
+  useRandomizeAutoAsk,
+} from "@/hooks/session/useRandomizeAutoAsk";
 import { useCancelOrphanThermometerWalks } from "@/hooks/sync/useCancelOrphanThermometerWalks";
 import { usePendingQuestionResolver } from "@/hooks/sync/usePendingQuestionResolver";
 import { useSeekerLocationSync } from "@/hooks/sync/useSeekerLocationSync";
@@ -26,6 +31,8 @@ type SeekerEffectsInput = Pick<
   | "annotations"
 > & {
   awaitHiderAnswer: boolean;
+  canSubmitQuestion: boolean;
+  submitToolQuestion: UseRandomizeAutoAskParams["submitToolQuestion"];
   postSystemMessage: (sessionId: string, uid: string, role: "seeker", text: string) => void;
   cancelThermometerWalk: (args: {
     sessionId: string;
@@ -53,6 +60,8 @@ export function useMapScreenSeekerEffects({
   deleteAnnotation,
   annotations,
   awaitHiderAnswer,
+  canSubmitQuestion,
+  submitToolQuestion,
   postSystemMessage,
   cancelThermometerWalk,
   setMapError,
@@ -103,6 +112,18 @@ export function useMapScreenSeekerEffects({
       .sort()
       .join("\0"),
     knownAnnotationIds: new Set(annotations.map((annotation) => annotation.id)),
+  });
+
+  useRandomizeAutoAsk({
+    sessionId: session?.id,
+    uid,
+    enabled: myRole === "seeker" && awaitHiderAnswer,
+    pendingQuestions,
+    sessionRules,
+    annotations,
+    canSubmitQuestion,
+    submitToolQuestion,
+    onManual: (_toolType, label) => setMapError(randomizeManualNotice(label)),
   });
 
   useCancelOrphanThermometerWalks({
