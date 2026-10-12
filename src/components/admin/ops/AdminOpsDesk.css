@@ -47,17 +47,6 @@
   flex: 1;
 }
 
-.jl-ops-mobile-drill {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.jl-ops-mobile-back {
-  min-height: 2.75rem;
-  align-self: flex-start;
-}
-
 .jl-ops-mobile-body {
   display: flex;
   min-height: 0;

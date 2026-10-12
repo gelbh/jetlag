@@ -634,8 +634,7 @@ describe("AdminOpsDesk", () => {
 
       expect(screen.getByRole("region", { name: "Start list" })).toBeInTheDocument();
       expect(screen.getByRole("region", { name: "Course" })).toBeInTheDocument();
-      const needsYou = screen.getByRole("region", { name: "Needs you" });
-      expect(within(needsYou).getByRole("region", { name: "Incident queue" })).toBeInTheDocument();
+      expect(screen.getByRole("region", { name: "Needs you" })).toBeInTheDocument();
       expect(document.querySelector("[data-desk-mode]")).toBeNull();
       expect(document.querySelector(".mantine-AppShell-navbar")?.getAttribute("style")).toContain(
         "border-inline-end",
@@ -661,6 +660,49 @@ describe("AdminOpsDesk", () => {
     expect(
       within(needsYou).getByRole("complementary", { name: "Incident actions" }),
     ).toBeInTheDocument();
+    expect(within(needsYou).queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
+  });
+
+  it("opens the Incidents group on /admin/incidents and resets toggles on route change", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    incidentState.list = [makeIncident({ id: "inc-listed01" })];
+    mockViewport(1440);
+
+    renderDeskRoutes("/admin/incidents");
+
+    const control = screen.getByRole("button", { name: "Incidents" });
+    expect(control).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(control);
+    expect(screen.getByRole("button", { name: "Incidents" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+
+    fireEvent.click(screen.getByRole("link", { name: /event centre/i }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Incidents" })).toHaveAttribute(
+        "aria-expanded",
+        "true",
+      ),
+    );
+  });
+
+  it("returns from the drill-in to /admin/incidents with Back", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    incidentState.list = [makeIncident({ id: "inc-listed01" })];
+    mockViewport(1440);
+
+    renderDeskRoutes("/admin/incidents/inc-listed01");
+
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(await screen.findByRole("region", { name: "Incidents" })).toBeInTheDocument();
+    expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
   });
 
   it("opens Needs you in a drawer from the strip between 1024 and 1439", async () => {
@@ -675,7 +717,7 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByRole("region", { name: "Start list" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Course" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Needs you" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Incident queue" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
 
     const trigger = screen.getByRole("button", { name: "Needs you: 1 open" });
     expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
@@ -684,7 +726,7 @@ describe("AdminOpsDesk", () => {
 
     const dialog = await screen.findByRole("dialog", { name: "Needs you" });
     expect(dialog).toHaveClass("mantine-Drawer-content");
-    const inbox = within(dialog).getByRole("region", { name: "Incident queue" });
+    const inbox = within(dialog).getByRole("region", { name: "Incidents" });
 
     fireEvent.click(
       within(inbox)
@@ -695,6 +737,13 @@ describe("AdminOpsDesk", () => {
       await within(screen.getByRole("dialog", { name: "Needs you" })).findByTestId(
         "admin-incident-detail",
       ),
+    ).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByRole("dialog", { name: "Needs you" }), { key: "Escape" });
+    expect(
+      await within(screen.getByRole("dialog", { name: "Needs you" })).findByRole("region", {
+        name: "Incidents",
+      }),
     ).toBeInTheDocument();
 
     fireEvent.keyDown(screen.getByRole("dialog", { name: "Needs you" }), { key: "Escape" });
@@ -755,8 +804,7 @@ describe("AdminOpsDesk", () => {
 
       renderIncidentRoute("inc-listed01");
 
-      const inbox = screen.getByRole("region", { name: "Incident queue" });
-      expect(inbox.querySelector('[aria-current="true"]')).not.toBeNull();
+      expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
       expect(
         within(screen.getByTestId("admin-incident-detail")).getByText("inc-listed01"),
       ).toBeInTheDocument();
@@ -822,6 +870,7 @@ describe("AdminOpsDesk", () => {
         expect.any(Function),
         expect.any(Function),
       );
+      expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
       const actions = screen.getByRole("complementary", { name: "Incident actions" });
       expect(await within(actions).findByRole("button", { name: "Resolve" })).toBeInTheDocument();
       await waitFor(() =>
@@ -889,7 +938,7 @@ describe("AdminOpsDesk", () => {
         "true",
       );
       expect(screen.getByTestId("admin-ops-sessions")).toBeInTheDocument();
-      expect(screen.queryByRole("region", { name: "Incident queue" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
     });
 
     it("shows the inbox alone on /admin/incidents", () => {
@@ -899,25 +948,25 @@ describe("AdminOpsDesk", () => {
         "aria-selected",
         "true",
       );
-      expect(screen.getByRole("region", { name: "Incident queue" })).toBeInTheDocument();
+      expect(screen.getByRole("region", { name: "Incidents" })).toBeInTheDocument();
       expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
       expect(screen.queryByTestId("admin-ops-sessions")).not.toBeInTheDocument();
     });
 
-    it("drills into detail and actions for a selected incident, with Back to the inbox", async () => {
+    it("drills into detail and actions for a selected incident, with Back to the queue", async () => {
       incidentState.list = [makeIncident({ id: "inc-listed01" })];
       renderMobile("/admin/incidents/inc-listed01");
 
-      expect(screen.queryByRole("region", { name: "Incident queue" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
       expect(
         within(screen.getByTestId("admin-incident-detail")).getByText("inc-listed01"),
       ).toBeInTheDocument();
       const actions = screen.getByRole("complementary", { name: "Incident actions" });
       expect(within(actions).getByRole("button", { name: "Resolve" })).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: "Back to inbox" }));
+      fireEvent.click(screen.getByRole("button", { name: "Back" }));
 
-      expect(await screen.findByRole("region", { name: "Incident queue" })).toBeInTheDocument();
+      expect(await screen.findByRole("region", { name: "Incidents" })).toBeInTheDocument();
       expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
     });
 
@@ -925,7 +974,7 @@ describe("AdminOpsDesk", () => {
       incidentState.list = [makeIncident({ id: "inc-listed01" })];
       renderMobile("/admin/incidents");
 
-      const inbox = screen.getByRole("region", { name: "Incident queue" });
+      const inbox = screen.getByRole("region", { name: "Incidents" });
       const row = within(inbox)
         .getByText(/7G2LJH/)
         .closest("button");
@@ -933,14 +982,14 @@ describe("AdminOpsDesk", () => {
       fireEvent.click(row as HTMLElement);
 
       expect(await screen.findByTestId("admin-incident-detail")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Back to inbox" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
     });
 
     it("switches tabs by route", async () => {
       renderMobile("/admin");
 
       fireEvent.click(screen.getByRole("tab", { name: "Incidents" }));
-      expect(await screen.findByRole("region", { name: "Incident queue" })).toBeInTheDocument();
+      expect(await screen.findByRole("region", { name: "Incidents" })).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("tab", { name: "Sessions" }));
       expect(await screen.findByTestId("admin-ops-sessions")).toBeInTheDocument();

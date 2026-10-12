@@ -1,4 +1,5 @@
 import {
+  Accordion,
   ActionIcon,
   Alert,
   AppShell,
@@ -277,6 +278,15 @@ export const adminTheme: MantineThemeOverride = {
       styles: (_theme, props) => ({
         root: props.orientation === "vertical" ? { borderInlineStart: rule } : { borderTop: rule },
       }),
+    }),
+    Accordion: Accordion.extend({
+      defaultProps: { radius: 0 },
+      // Inline borders: the app's `@layer base` border reset outranks Mantine's class rule.
+      styles: {
+        item: { borderBottom: rule },
+        control: { fontWeight: 600 },
+        chevron: { color: "var(--adm-ink)" },
+      },
     }),
     Paper: Paper.extend({
       defaultProps: { radius: 0, shadow: "none", withBorder: true },
