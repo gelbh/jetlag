@@ -127,7 +127,9 @@ describe("preloadRoute", () => {
   }, 20000);
 
   it("invokes the lazy loader for /map and query-bearing paths", async () => {
-    const mapLoader = vi.spyOn(routePreloaders.routeImporter, "importMapScreen");
+    const mapLoader = vi
+      .spyOn(routePreloaders.routeImporter, "importMapScreen")
+      .mockResolvedValue({ default: () => null } as never);
     const mapLibreLoader = routePreloaders.mapShellWarmers.importMapViewMapLibre;
 
     await preloadRoute("/map");

@@ -297,17 +297,24 @@ describe("overpassClient", () => {
     );
   });
 
-  it("retries the proxy with a refreshed token after 401", async () => {
+  it("force-refreshes the token and rebuilds proxy headers for the 401 retry", async () => {
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
     setPremiumApiContext(premiumSession());
-    vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockResolvedValue({
-      Authorization: "Bearer stale-token",
+    const retryHeaders = {
+      Authorization: "Bearer fresh-uid-token",
       "X-Session-Id": "session-premium",
-    });
+      "X-Firebase-AppCheck": "retry-app-check",
+    };
+    const buildHeaders = vi
+      .spyOn(accessControl, "buildPremiumProxyHeaders")
+      .mockResolvedValueOnce({
+        Authorization: "Bearer stale-token",
+        "X-Session-Id": "session-premium",
+      })
+      .mockResolvedValueOnce(retryHeaders);
+    const getIdToken = vi.fn().mockResolvedValue("fresh-token");
     vi.spyOn(firebase, "getFirebaseAuth").mockReturnValue({
-      currentUser: {
-        getIdToken: vi.fn().mockResolvedValue("fresh-token"),
-      },
+      currentUser: { getIdToken },
     } as never);
 
     const fetchMock = vi
@@ -325,8 +332,9 @@ describe("overpassClient", () => {
       elements: [{ id: 1 }],
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[1]?.[1]?.headers?.Authorization).toBe("Bearer fresh-token");
+    expect(getIdToken).toHaveBeenCalledWith(true);
+    expect(buildHeaders).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]?.[1]?.headers).toMatchObject(retryHeaders);
   });
 
   it("throws immediately for other failed responses", async () => {
