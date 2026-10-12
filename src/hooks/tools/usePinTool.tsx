@@ -3,6 +3,7 @@ import { PinPanel } from "../../components/tools/PinPanel";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import { type PoiPinCategoryId, poiPinCategoryLabel } from "../../domain/map/poiPinCategories";
 import { useToolSession } from "./framework/useToolSession";
 
 interface PinSessionConfig {
@@ -15,11 +16,18 @@ interface UsePinToolParams {
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
   finishPlacement: () => void;
+  postSystemMessage: (text: string) => void;
 }
 
-export function usePinTool({ active, createAnnotation, finishPlacement }: UsePinToolParams) {
+export function usePinTool({
+  active,
+  createAnnotation,
+  finishPlacement,
+  postSystemMessage,
+}: UsePinToolParams) {
   const [pinLabel, setPinLabel] = useState("");
   const [pinPoint, setPinPoint] = useState<LatLngTuple | null>(null);
+  const [poiCategory, setPoiCategory] = useState<PoiPinCategoryId | null>(null);
   const finishPlacementRef = useRef(finishPlacement);
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
@@ -28,6 +36,7 @@ export function usePinTool({ active, createAnnotation, finishPlacement }: UsePin
   const resetDraft = useCallback(() => {
     setPinLabel("");
     setPinPoint(null);
+    setPoiCategory(null);
   }, []);
 
   const handleMapClick = useCallback((point: LatLngTuple) => {
@@ -39,7 +48,8 @@ export function usePinTool({ active, createAnnotation, finishPlacement }: UsePin
     active,
     createInitialConfig: () => ({ ready: true }),
     onSubmit: async () => {
-      if (!pinPoint || pinLabel.trim().length === 0) {
+      const label = pinLabel.trim();
+      if (!pinPoint || label.length === 0) {
         return;
       }
 
@@ -55,10 +65,16 @@ export function usePinTool({ active, createAnnotation, finishPlacement }: UsePin
         },
         metadata: {
           createdAt: new Date().toISOString(),
-          label: pinLabel.trim(),
+          label,
           color: MAP_ANNOTATION_COLORS.pin,
+          ...(poiCategory ? { poiCategory } : {}),
         },
       });
+
+      const categoryLabel = poiPinCategoryLabel(poiCategory);
+      if (categoryLabel) {
+        postSystemMessage(`Seeker added ${categoryLabel} pin: ${label}`);
+      }
 
       resetDraft();
       finishPlacementRef.current();
@@ -71,6 +87,8 @@ export function usePinTool({ active, createAnnotation, finishPlacement }: UsePin
     <PinPanel
       label={pinLabel}
       onLabelChange={setPinLabel}
+      poiCategory={poiCategory}
+      onPoiCategoryChange={setPoiCategory}
       onCommit={() => void session.submit()}
       hasPoint={pinPoint !== null}
       isSubmitting={session.isBusy}

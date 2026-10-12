@@ -167,6 +167,11 @@ async function fetchOverpassPointMatchingFeaturesInArea(
       ? []
       : await fetchBundledMeasuringPlaces(gameArea, measuringCategory, options?.regionPackId);
   const bundledFeatures = measuringPlacesToMatchingFeatures(bundledPlaces, gameArea);
+  const pinFeatures = measuringPlacesToMatchingFeatures([...(options?.poiPins ?? [])], gameArea);
+  const withPins = (features: MatchingFeature[]): MatchingFeature[] => {
+    const seen = new Set(features.map((feature) => feature.id));
+    return [...features, ...pinFeatures.filter((feature) => !seen.has(feature.id))];
+  };
 
   const mergeWithOverpass = async (): Promise<MatchingFeature[]> => {
     const overpassFeatures = filterHygieneMatchingFeatures(
@@ -175,12 +180,14 @@ async function fetchOverpassPointMatchingFeaturesInArea(
     );
 
     if (bundledFeatures.length === 0) {
-      return overpassFeatures;
+      return withPins(overpassFeatures);
     }
 
-    return measuringPlacesToMatchingFeatures(
-      mergeMeasuringPlaces(matchingFeaturesToMeasuringPlaces(overpassFeatures), bundledPlaces),
-      gameArea,
+    return withPins(
+      measuringPlacesToMatchingFeatures(
+        mergeMeasuringPlaces(matchingFeaturesToMeasuringPlaces(overpassFeatures), bundledPlaces),
+        gameArea,
+      ),
     );
   };
 
@@ -192,7 +199,7 @@ async function fetchOverpassPointMatchingFeaturesInArea(
       .catch(() => {
         // Soft-fail Overpass enrich; keep the bundle result.
       });
-    return bundledFeatures;
+    return withPins(bundledFeatures);
   }
 
   return mergeWithOverpass();

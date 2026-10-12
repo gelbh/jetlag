@@ -5,6 +5,7 @@ import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry
 import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
 import { fetchMeasuringPlacesInArea } from "@/services/geo/overpass/measuringPlaces";
 import { useMapStore } from "@/state/mapStore";
+import { createTestPinAnnotation } from "@/test/fixtures/sessions";
 import { fetchMeasuringCoastlineContext } from "../measuringToolResolvers";
 import { useMeasuringAnchorLoaders } from "./useMeasuringAnchorLoaders";
 import { useMeasuringDraftState } from "./useMeasuringDraftState";
@@ -243,5 +244,53 @@ describe("useMeasuringAnchorLoaders coastline pack seed", () => {
 
     expect(result.current.draft.measuringLoading).toBe(false);
     expect(result.current.draft.measuringCoastSegments).toEqual([packCoastSegment]);
+  });
+});
+
+describe("useMeasuringAnchorLoaders POI pins", () => {
+  beforeEach(() => {
+    useMapStore.setState({ mapStyle: "standard" });
+    fetchMock.mockReset();
+    fetchMock.mockResolvedValue([]);
+    registerMapLibreMap({
+      getStyle: () => ({ sources: { openmaptiles: {} }, layers: [] }),
+      querySourceFeatures: () => [],
+    } as never);
+  });
+
+  it("offers a tagged pin only for its own category", async () => {
+    const zooPin = createTestPinAnnotation({
+      id: "pin-zoo",
+      geometry: {
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Point", coordinates: [-6.3, 53.35] },
+      },
+      metadata: { createdAt: "2026-01-01T00:00:00.000Z", label: "Pop-up zoo", poiCategory: "zoo" },
+    });
+
+    const { result } = renderHook(() => {
+      const draft = useMeasuringDraftState([]);
+      const loaders = useMeasuringAnchorLoaders({
+        active: true,
+        gameArea: dublinishArea as never,
+        annotations: [zooPin],
+        setMapError: vi.fn(),
+        draft,
+      });
+      return { draft, loaders };
+    });
+
+    await act(async () => {
+      await result.current.loaders.loadAllPlacesAt([53.34, -6.3], "zoo");
+    });
+    expect(result.current.draft.measuringPlaces).toEqual([
+      { id: "pin-zoo", name: "Pop-up zoo", point: [53.35, -6.3] },
+    ]);
+
+    await act(async () => {
+      await result.current.loaders.loadAllPlacesAt([53.34, -6.3], "museum");
+    });
+    expect(result.current.draft.measuringPlaces.map((place) => place.id)).not.toContain("pin-zoo");
   });
 });

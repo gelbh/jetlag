@@ -5,6 +5,7 @@ import * as previewBasemapPoisModule from "@/services/geo/maplibre/previewBasema
 import { useMapStore } from "@/state/mapStore";
 import { tentacleSearchRadiusMetersForSession } from "../../domain/questions";
 import * as tentacleOverpassModule from "../../services/geo/overpass/tentacleOverpass";
+import { createTestPinAnnotation } from "../../test/fixtures/sessions";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useTentacleTool } from "./useTentacleTool";
 
@@ -276,6 +277,55 @@ describe("useTentacleTool", () => {
     // Submit filters provisional POIs out; Send must stay disabled instead of no-op.
     expect(overlay!.props.canCommit).toBe(false);
     expect(result.current.hud.readiness.resolveReady).toBe(false);
+  });
+
+  it("passes tagged POI pins for the chosen category next to setup pins", async () => {
+    vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([]);
+    const fetchSpy = vi.spyOn(tentacleOverpassModule, "fetchTentaclePois").mockResolvedValue([]);
+    const tagged = (id: string, poiCategory: "museum" | "zoo") =>
+      createTestPinAnnotation({
+        id,
+        metadata: { createdAt: "2026-01-01T00:00:00.000Z", label: id, poiCategory },
+      });
+    const setupPin = {
+      id: "setup-1",
+      name: "Setup pin",
+      point: [53.36, -6.27] as [number, number],
+    };
+
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useTentacleTool({
+        active: true,
+        annotations: [tagged("pin-museum", "museum"), tagged("pin-zoo", "zoo")],
+        gameArea: mocks.gameArea,
+        sessionRules: { gameSize: "medium", customLocationPins: [setupPin] },
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: mocks.awaitingPlacement,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: mocks.armPlacement,
+      }),
+    );
+
+    act(() => {
+      result.current.panel.props.model.onCategoryChange("museum");
+    });
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalled();
+    });
+    const pins = fetchSpy.mock.calls.at(-1)?.[3]?.customLocationPins?.map((pin) => pin.id);
+    expect(pins).toEqual(["setup-1", "pin-museum"]);
   });
 
   it("arms map-first Send when Overpass POIs are confirmed (multiplayer)", async () => {

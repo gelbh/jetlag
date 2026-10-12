@@ -21,6 +21,7 @@ import {
   type TentaclePoi,
 } from "../../domain/map/annotations";
 import { type DistanceUnit, formatDistance } from "../../domain/map/distance";
+import { poiPinsForCategory } from "../../domain/map/poiPinCategories";
 import {
   firstAvailableTentacleCategoryIdForSession,
   isTentacleCategoryAvailableInSession,
@@ -114,6 +115,11 @@ export function useTentacleTool({
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
   const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
+  // Read at fetch time so live annotation sync does not refetch and clear the POI pick.
+  const activeAnnotationsRef = useRef(activeAnnotations);
+  useEffect(() => {
+    activeAnnotationsRef.current = activeAnnotations;
+  }, [activeAnnotations]);
   const usedTentacleCategories = useMemo(
     () => usedTentacleCategoryIdsForSession(activeAnnotations, pendingQuestions),
     [activeAnnotations, pendingQuestions],
@@ -231,7 +237,10 @@ export function useTentacleTool({
       try {
         const pois = await fetchTentaclePois(center, searchRadiusMeters, categoryId, {
           customCategories: sessionRules.customCategories,
-          customLocationPins: sessionRules.customLocationPins,
+          customLocationPins: [
+            ...(sessionRules.customLocationPins ?? []),
+            ...poiPinsForCategory(activeAnnotationsRef.current, categoryId),
+          ],
           regionPackId: sessionRules.regionPackId,
           onEnrich: (enrichedPois) => {
             applyTentaclePoisResult(requestId, enrichedPois, 1);
