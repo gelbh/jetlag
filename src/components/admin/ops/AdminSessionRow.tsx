@@ -51,7 +51,7 @@ export function AdminSessionRow({
       c={monitored ? "var(--adm-paper)" : undefined}
       style={cursor ? cursorOutline : undefined}
     >
-      <Table.Td colSpan={3} style={cellStyle}>
+      <Table.Td colSpan={2} style={cellStyle}>
         <Button
           type="button"
           variant="subtle"
@@ -85,7 +85,7 @@ export function AdminSessionRow({
         </Stack>
       </Table.Td>
       <Table.Td style={cellStyle}>{summary.memberCount}</Table.Td>
-      <Table.Td style={cellStyle}>
+      <Table.Td colSpan={2} style={cellStyle}>
         <PunchTime at={summary.lastActivityAt} flashing={flashing} />
       </Table.Td>
       <Table.Td>

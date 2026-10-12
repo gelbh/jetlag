@@ -115,7 +115,15 @@ function AdminOpsDeskContent() {
   const monitorRequestRef = useRef(0);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [needsYouOpen, setNeedsYouOpen] = useState(selectedIncidentId !== null);
+  const [needsYouOpen, setNeedsYouOpen] = useState(onIncidentsRoute);
+  const [drawerIncidentId, setDrawerIncidentId] = useState(selectedIncidentId);
+
+  if (selectedIncidentId !== drawerIncidentId) {
+    setDrawerIncidentId(selectedIncidentId);
+    if (selectedIncidentId) {
+      setNeedsYouOpen(true);
+    }
+  }
 
   if (enabled !== enabledState) {
     setEnabledState(enabled);

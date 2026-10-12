@@ -105,6 +105,14 @@ describe("MapDraggableFixedStack (nav)", () => {
       };
     });
 
+    const computedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, "getComputedStyle").mockImplementation((el, pseudo) => {
+      const style = computedStyle(el, pseudo);
+      return el instanceof HTMLElement && el.hasAttribute("data-map-dock-frame")
+        ? ({ contain: "layout" } as CSSStyleDeclaration)
+        : style;
+    });
+
     const { container } = render(
       <div data-map-dock-frame="">
         <Harness initial={{ side: "left", topRatio: 1 }} />

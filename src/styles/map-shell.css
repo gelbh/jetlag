@@ -252,10 +252,7 @@
     position: relative;
     min-width: 0;
     min-height: 0;
-  }
-
-  /* Fixed containing block for map chrome docks (MapDraggableFixedStack). */
-  [data-map-dock-frame] {
+    /* Fixed containing block for map chrome docks ([data-map-dock-frame]). */
     contain: layout;
   }
 

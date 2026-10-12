@@ -719,6 +719,18 @@ describe("AdminOpsDesk", () => {
     expect(within(dialog).getByTestId("admin-incident-detail")).toBeInTheDocument();
   });
 
+  it("opens the Needs you drawer on /admin/incidents between 1024 and 1439", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    incidentState.list = [makeIncident({ id: "inc-listed01" })];
+    mockViewport(1280);
+
+    renderDeskRoutes("/admin/incidents");
+
+    expect(await screen.findByRole("dialog", { name: "Needs you" })).toBeInTheDocument();
+  });
+
   describe("incident deep link", () => {
     function setDesktopAdmin() {
       authState.state = "admin";
