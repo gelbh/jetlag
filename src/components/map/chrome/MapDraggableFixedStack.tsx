@@ -60,12 +60,12 @@ function viewportFrame(): DockFrame {
 }
 
 /**
- * Nearest `[data-map-dock-frame]` ancestor, else the viewport. The frame must
- * establish the fixed containing block (e.g. `contain: layout`).
+ * Nearest `[data-map-dock-frame]` ancestor while it has layout containment
+ * (so it is the fixed containing block), else the viewport.
  */
 function dockFrame(node: HTMLElement | null): DockFrame {
   const frame = node?.closest<HTMLElement>("[data-map-dock-frame]");
-  if (!frame) {
+  if (!frame || !/layout|content|strict/.test(getComputedStyle(frame).contain)) {
     return viewportFrame();
   }
   const { left, top, width, height } = frame.getBoundingClientRect();

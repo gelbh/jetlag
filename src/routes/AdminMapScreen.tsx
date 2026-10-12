@@ -190,7 +190,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
       />
 
       <div className={isWide ? "admin-map-shell__map" : "absolute inset-0"} data-map-dock-frame="">
-        \ {mapLayers}
+        {mapLayers}
       </div>
 
       {isWide ? (

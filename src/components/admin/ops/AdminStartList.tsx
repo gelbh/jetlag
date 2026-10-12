@@ -171,12 +171,12 @@ export function AdminStartList({
           </colgroup>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th colSpan={3}>Course</Table.Th>
+              <Table.Th colSpan={2}>Course</Table.Th>
               <Table.Th colSpan={4}>Phase</Table.Th>
               <Table.Th>
                 <abbr title="Runners">Rn</abbr>
               </Table.Th>
-              <Table.Th>
+              <Table.Th colSpan={2}>
                 <abbr title="Last punch">Last</abbr>
               </Table.Th>
               <Table.Th>
