@@ -1,4 +1,4 @@
-import { Button } from "@mantine/core";
+import { Badge, Button } from "@mantine/core";
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
@@ -57,6 +57,16 @@ describe("admin shared primitives", () => {
     const mark = screen.getByText("Live").closest<HTMLElement>("[data-tone]");
     expect(mark?.style.getPropertyValue("--badge-bg")).toBe("var(--adm-live)");
     expect(mark?.style.getPropertyValue("--badge-color")).toBe("var(--adm-ink)");
+  });
+
+  it("falls back to the neutral tone for an unknown data-tone", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Badge data-tone="bogus">Odd</Badge>
+      </AdminWorld>,
+    );
+    const badge = screen.getByText("Odd").closest<HTMLElement>("[data-tone]");
+    expect(badge?.style.getPropertyValue("--badge-bd")).toBe("1px solid var(--adm-ink-muted)");
   });
 
   it("reports a blank status label in dev", () => {

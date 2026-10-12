@@ -42,8 +42,8 @@ export function AdminStatusStrip({
         <ActionIcon component={AppLink} to="/" variant="default" aria-label="Home">
           <HudHomeIcon width={16} height={16} aria-hidden="true" />
         </ActionIcon>
-        <UnstyledButton component={AppLink} to="/admin" aria-label="Event centre" miw={0}>
-          <Group gap="xs" wrap="nowrap" align="baseline">
+        <UnstyledButton component={AppLink} to="/admin" aria-label="Jetlag event centre" miw={0}>
+          <Group gap="xs" wrap="nowrap" align="baseline" miw={0}>
             <Text fw={800} truncate>
               Jetlag
             </Text>
