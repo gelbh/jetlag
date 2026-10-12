@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { deserializeGameResultFromFirestore } from "./serializePlayer";
+import {
+  deserializeGameResultFromFirestore,
+  deserializePendingQuestionFromFirestore,
+} from "./serializePlayer";
 
 describe("serializePlayer", () => {
   it("deserializes game results from Firestore documents", () => {
@@ -104,5 +107,41 @@ describe("serializePlayer", () => {
     expect(result.hidingPhaseMs).toBe(600_000);
     expect(result.seekPhaseMs).toBe(300_000);
     expect(result.seekTimeMs).toBe(300_000);
+  });
+});
+
+describe("deserializePendingQuestionFromFirestore randomizedTo", () => {
+  const base = {
+    toolType: "radar",
+    createdByUid: "seeker-1",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    status: "cancelled",
+    placement: { geometryJson: "{}", metadata: {} },
+    replyOptions: [],
+    promptText: "Q",
+  };
+
+  it("reads a well-formed roll", () => {
+    const record = deserializePendingQuestionFromFirestore("pq-1", "s-1", {
+      ...base,
+      randomizedTo: { optionKey: "airport", label: "Airport" },
+    });
+    expect(record.randomizedTo).toEqual({ optionKey: "airport", label: "Airport" });
+  });
+
+  it("reads a numeric option key", () => {
+    const record = deserializePendingQuestionFromFirestore("pq-1", "s-1", {
+      ...base,
+      randomizedTo: { optionKey: 1609.344, label: "1 mi" },
+    });
+    expect(record.randomizedTo).toEqual({ optionKey: 1609.344, label: "1 mi" });
+  });
+
+  it("drops a malformed roll", () => {
+    const record = deserializePendingQuestionFromFirestore("pq-1", "s-1", {
+      ...base,
+      randomizedTo: { optionKey: true, label: 3 },
+    });
+    expect(record.randomizedTo).toBeUndefined();
   });
 });

@@ -420,4 +420,30 @@ describe("usePendingQuestionActions", () => {
       newMessage: expect.objectContaining({ text: "Hider played Randomize." }),
     });
   });
+
+  it("randomize cancel carries the rolled option", () => {
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    act(() => {
+      result.current.cancelPendingQuestionWithCard({
+        sessionId: "session-1",
+        pendingQuestionId: "pq-1",
+        messageId: "msg-1",
+        senderUid: "hider-1",
+        notice: "Hider played Randomize.",
+        card: "randomize",
+        randomizedTo: { optionKey: 1609.344, label: "1 mi" },
+      });
+    });
+
+    expect(firestoreMocks.writePendingQuestionUpdateBatch).toHaveBeenCalledWith("session-1", {
+      questionId: "pq-1",
+      questionPatch: {
+        status: "cancelled",
+        randomizedTo: { optionKey: 1609.344, label: "1 mi" },
+      },
+      gameMessage: { id: "msg-1", patch: { status: "cancelled" } },
+      newMessage: expect.objectContaining({ text: "Hider played Randomize." }),
+    });
+  });
 });

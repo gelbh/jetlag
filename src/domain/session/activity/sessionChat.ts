@@ -38,6 +38,12 @@ export interface PendingQuestionPlacement {
   metadata: Record<string, unknown>;
 }
 
+/** Hider's Randomize roll, written onto the cancelled question for the asking seeker. */
+export interface RandomizedTo {
+  optionKey: string | number;
+  label: string;
+}
+
 export interface PendingQuestionRecord {
   id: string;
   sessionId: string;
@@ -57,6 +63,7 @@ export interface PendingQuestionRecord {
   resolvedAnnotationId?: string;
   cardDraw?: number;
   cardKeep?: number;
+  randomizedTo?: RandomizedTo;
   /** View-only: local write not yet acked by the server. Never serialized. */
   pendingSync?: boolean;
 }
