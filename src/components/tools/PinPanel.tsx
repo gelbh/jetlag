@@ -21,6 +21,7 @@ interface PinPanelProps {
   onCommit: () => void;
   hasPoint: boolean;
   isSubmitting?: boolean;
+  labelMaxLength?: number;
 }
 
 export function PinPanel({
@@ -31,6 +32,7 @@ export function PinPanel({
   onCommit,
   hasPoint,
   isSubmitting = false,
+  labelMaxLength,
 }: PinPanelProps) {
   return (
     <div className="space-y-3">
@@ -46,6 +48,7 @@ export function PinPanel({
         inputClassName="mt-1 min-h-20 w-full rounded-xl border border-border bg-surface-base px-3 py-2 text-sm"
         value={label}
         onChange={(event) => onLabelChange(event.target.value)}
+        maxLength={labelMaxLength}
         placeholder="Closer to the train station than us"
       />
       <SimpleSelectField
