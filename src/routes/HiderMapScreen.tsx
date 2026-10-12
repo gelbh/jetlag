@@ -47,8 +47,8 @@ import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
 import {
+  pickRandomizeOption,
   randomizedQuestionNotice,
-  randomizeExcludeLabelsForPending,
   VETO_NOTICE,
 } from "../domain/questions/randomizeQuestion";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
@@ -491,23 +491,24 @@ export function HiderMapScreen() {
     }
     setChatAnswerError(null);
     const sessionRules = session ?? DEFAULT_SESSION_RULES;
+    const randomizedTo =
+      card === "randomize"
+        ? pickRandomizeOption(pending, sessionRules, annotations, pendingQuestions)
+        : null;
+    if (card === "randomize" && !randomizedTo) {
+      setChatAnswerError(`No other ${pending.toolType} questions left to randomize to.`);
+      return;
+    }
     const { acknowledged } = cancelPendingQuestionWithCard({
       sessionId,
       pendingQuestionId,
       messageId,
       senderUid: uid,
       card,
-      notice:
-        card === "veto"
-          ? VETO_NOTICE
-          : randomizedQuestionNotice(pending.toolType, sessionRules, {
-              exclude: randomizeExcludeLabelsForPending(
-                pending,
-                sessionRules,
-                annotations,
-                pendingQuestions,
-              ),
-            }),
+      notice: randomizedTo
+        ? randomizedQuestionNotice(pending.toolType, randomizedTo.label)
+        : VETO_NOTICE,
+      randomizedTo: randomizedTo ?? undefined,
     });
     // A second tap before the local snapshot updates would send a cancel the rules reject.
     answerInFlightRef.current = true;
