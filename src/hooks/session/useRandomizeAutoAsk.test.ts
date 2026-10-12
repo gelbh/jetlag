@@ -73,6 +73,7 @@ describe("useRandomizeAutoAsk", () => {
     const [toolType, input] = submitToolQuestion.mock.calls[0];
     expect(toolType).toBe("radar");
     expect(input.placement.metadata.randomizedFrom).toBe("pq-1");
+    expect(input.placement.metadata.radiusMeters).toBe(radarRoll.optionKey);
 
     first.rerender({ ...props, pendingQuestions: [...props.pendingQuestions] });
     first.unmount();

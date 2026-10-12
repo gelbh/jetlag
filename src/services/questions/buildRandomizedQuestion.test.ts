@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { PHOTO_REPLY_OPTIONS, radarQuestionPrompt } from "../../domain/questions";
+import {
+  PHOTO_REPLY_OPTIONS,
+  type PhotoCategoryId,
+  photoQuestionPrompt,
+  radarQuestionPrompt,
+} from "../../domain/questions";
 import { questionOptionsForTool } from "../../domain/questions/randomizeQuestion";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { buildRandomizedQuestion } from "./buildRandomizedQuestion";
@@ -112,11 +117,53 @@ describe("buildRandomizedQuestion", () => {
       photoCategoryId: roll.optionKey,
       randomizedFrom: original.id,
     });
+    expect(built.input.promptText).toBe(
+      photoQuestionPrompt(roll.optionKey as PhotoCategoryId, "imperial"),
+    );
     expect(built.input.replyOptions.map((option) => option.id)).toEqual(
       PHOTO_REPLY_OPTIONS.map((option) => option.id),
     );
     expect(built.input.cardDraw).toBe(2);
     expect(built.input.cardKeep).toBe(1);
+  });
+
+  it("ignores the hider label for the photo prompt", async () => {
+    const original = pending({ toolType: "photo" });
+    const categoryId = questionOptionsForTool("photo", session)[0]!.optionKey as PhotoCategoryId;
+
+    const built = await buildRandomizedQuestion(
+      original,
+      { optionKey: categoryId, label: "<b>evil</b>" },
+      ctx([original]),
+    );
+
+    expect(built.kind).toBe("submit");
+    if (built.kind !== "submit") return;
+    expect(built.input.promptText).toBe(photoQuestionPrompt(categoryId, "imperial"));
+    expect(built.input.promptText).not.toContain("evil");
+  });
+
+  it("falls back to manual with the catalog label when the photo category is used", async () => {
+    const original = pending({ toolType: "photo" });
+    const option = questionOptionsForTool("photo", session)[0]!;
+    const used = pending({
+      id: "pq-0",
+      toolType: "photo",
+      status: "answered",
+      answer: { kind: "sent_externally" },
+      placement: {
+        geometryJson: pointGeometry,
+        metadata: { photoCategoryId: option.optionKey },
+      },
+    });
+
+    expect(
+      await buildRandomizedQuestion(
+        original,
+        { optionKey: option.optionKey, label: "hider text" },
+        ctx([used, original]),
+      ),
+    ).toEqual({ kind: "manual", label: option.label });
   });
 
   it("returns the catalog label as manual for thermometer", async () => {
