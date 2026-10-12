@@ -1,11 +1,37 @@
-import { act, render, renderHook, screen } from "@testing-library/react";
+import { act, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { photoQuestionPrompt } from "../../domain/questions";
 import { useMapStore } from "../../state/mapStore";
+import { resetAllStores } from "../../test/helpers/storeReset";
 import { usePhotoTool } from "./usePhotoTool";
 
 describe("usePhotoTool", () => {
   beforeEach(() => {
+    resetAllStores();
     useMapStore.getState().setActiveTool("photo");
+  });
+
+  it("opens to the pending preset category", async () => {
+    useMapStore.getState().openToolPreset("photo", "widest_street");
+
+    const { result } = renderHook(() =>
+      usePhotoTool({
+        active: true,
+        gameSize: "medium",
+        pendingQuestions: [],
+        awaitHiderAnswer: true,
+        submitPendingQuestion: vi.fn(async () => undefined),
+        sessionId: "session-1",
+        senderUid: "seeker-1",
+        finishPlacement: vi.fn(),
+        setMapError: vi.fn(),
+        mapError: null,
+      }),
+    );
+
+    await waitFor(() => expect(useMapStore.getState().toolPreset).toBeNull());
+    render(result.current.panel!);
+    expect(screen.getByText(photoQuestionPrompt("widest_street", "imperial"))).toBeInTheDocument();
   });
 
   it("submits a photo pending question when a hider is in the session", async () => {
