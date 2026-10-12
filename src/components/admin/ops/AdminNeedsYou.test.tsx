@@ -336,6 +336,16 @@ describe("AdminNeedsYou", () => {
       ).toBeInTheDocument();
     });
 
+    it("points at Show closed when only closed requests exist", () => {
+      renderPreload({ preloadRequests: [makeRequest({ status: "shipped" })] });
+
+      expect(within(panel()).queryByText("No preload requests")).not.toBeInTheDocument();
+      expect(within(panel()).getByText("No open preload requests")).toBeInTheDocument();
+      expect(
+        within(panel()).getByText("Turn on Show closed to see shipped and declined requests."),
+      ).toBeInTheDocument();
+    });
+
     it("keeps retained rows when the list errors", () => {
       renderPreload({ preloadRequests: [makeRequest()], preloadError: "permission-denied" });
 
@@ -359,7 +369,10 @@ describe("AdminNeedsYou", () => {
       });
 
       const row = within(panel()).getByRole("button", { name: /Dublin core/ });
-      expect(within(row).getByText("OPEN").closest("[data-tone]")).toBeInTheDocument();
+      expect(within(row).getByText("OPEN").closest("[data-tone]")).toHaveAttribute(
+        "data-tone",
+        "mispunch",
+      );
       expect(row.querySelector("time")).toHaveAttribute("datetime", today);
       expect(within(panel()).queryByText("Cork loop")).not.toBeInTheDocument();
 

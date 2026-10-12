@@ -144,6 +144,9 @@ function AdminOpsDeskContent() {
     setOpenGroupsPath(location.pathname);
     setOpenGroups(openGroupsForRoute(location.pathname));
     setSelectedPreloadId(null);
+    if (onPreloadRoute) {
+      setNeedsYouOpen(true);
+    }
   }
 
   if (selectedIncidentId !== drawerIncidentId) {
@@ -207,6 +210,9 @@ function AdminOpsDeskContent() {
   const needsYouCount = openCount + countOpenPreloadRequests(visiblePreloadRequests);
   const selectedPreload =
     visiblePreloadRequests.find((request) => request.id === selectedPreloadId) ?? null;
+  if (selectedPreloadId && !selectedPreload) {
+    setSelectedPreloadId(null);
+  }
   const mispunchBySession = new Map<string, number>();
   for (const incident of visibleIncidents) {
     if (incident.sessionId && isOpenIncident(incident)) {

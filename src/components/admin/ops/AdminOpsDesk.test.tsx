@@ -167,7 +167,10 @@ vi.mock("../../../services/admin/adminIncidents", async () => {
   };
 });
 
-const preloadState = vi.hoisted(() => ({ list: [] as PreloadRequest[] }));
+const preloadState = vi.hoisted(() => ({
+  list: [] as PreloadRequest[],
+  emit: (_rows: PreloadRequest[]) => {},
+}));
 
 vi.mock("../../../services/admin/adminPreloadRequests", async () => {
   const actual = await vi.importActual<
@@ -176,6 +179,7 @@ vi.mock("../../../services/admin/adminPreloadRequests", async () => {
   return {
     ...actual,
     subscribePreloadRequestList: (onNext: (rows: PreloadRequest[]) => void) => {
+      preloadState.emit = onNext;
       onNext(preloadState.list);
       return () => undefined;
     },
@@ -695,6 +699,44 @@ describe("AdminOpsDesk", () => {
       expect(screen.getByRole("heading", { name: "Dublin core" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Mark accepted" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Mark shipped" })).toBeInTheDocument();
+    });
+
+    it("leaves the drill-in when its request disappears and does not re-drill later", async () => {
+      setAdmin();
+      const request = makeRequest();
+      preloadState.list = [request];
+      mockViewport(1440);
+
+      renderDeskRoutes("/admin/preload-requests");
+      fireEvent.click(
+        within(screen.getByRole("region", { name: "Preload requests" })).getByRole("button", {
+          name: /Dublin core/,
+        }),
+      );
+      expect(await screen.findByRole("button", { name: "Back" })).toHaveFocus();
+
+      act(() => preloadState.emit([]));
+      expect(screen.getByRole("button", { name: "Preload requests" })).toHaveFocus();
+
+      act(() => preloadState.emit([request]));
+      expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+      expect(screen.getByRole("region", { name: "Preload requests" })).toBeInTheDocument();
+    });
+
+    it("opens the Needs you drawer on the Preload item from the strip at 1280", async () => {
+      setAdmin();
+      preloadState.list = [makeRequest()];
+      mockViewport(1280);
+
+      renderDeskRoutes("/admin");
+      expect(screen.queryByRole("dialog", { name: "Needs you" })).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("link", { name: "Preload requests" }));
+
+      const dialog = await screen.findByRole("dialog", { name: "Needs you" });
+      expect(within(dialog).getByRole("button", { name: "Preload requests" })).toHaveAttribute(
+        "aria-expanded",
+        "true",
+      );
     });
 
     it("counts open incidents plus open preload requests in the strip", () => {
