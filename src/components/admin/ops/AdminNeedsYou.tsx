@@ -107,7 +107,17 @@ export function AdminNeedsYou({
   const preloadQueueRef = useRef<HTMLDivElement>(null);
   const preloadControlRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<{ group: NeedsYouGroup; id: string } | null>(null);
-  const drilledIn = selectedIncidentId != null || selectedPreload != null;
+  const lastPreloadIdRef = useRef<string | null>(null);
+  const selectedPreloadId = selectedPreload?.id ?? null;
+  const drilledIn = selectedIncidentId != null || selectedPreloadId != null;
+
+  useEffect(() => {
+    const previous = lastPreloadIdRef.current;
+    lastPreloadIdRef.current = selectedPreloadId;
+    if (previous && !selectedPreloadId) {
+      returnFocusRef.current = { group: "preload", id: previous };
+    }
+  }, [selectedPreloadId]);
 
   useEffect(() => {
     const target = returnFocusRef.current;
@@ -139,12 +149,8 @@ export function AdminNeedsYou({
   }
 
   if (selectedPreload) {
-    const back = () => {
-      returnFocusRef.current = { group: "preload", id: selectedPreload.id };
-      onSelectPreload(null);
-    };
     return (
-      <DrillIn title={selectedPreload.presetSnapshot.name} onBack={back}>
+      <DrillIn title={selectedPreload.presetSnapshot.name} onBack={() => onSelectPreload(null)}>
         <Group gap="xs">
           <StatusMark
             tone={PRELOAD_TONE[preloadRequestStatusChipTone(selectedPreload.status)]}
@@ -233,8 +239,12 @@ function PreloadQueue({
       ) : null}
       {!loading && !error && rows.length === 0 ? (
         <AdminEmptyState
-          title="No preload requests"
-          body="Preload requests from players appear here when they submit one."
+          title={requests.length > 0 ? "No open preload requests" : "No preload requests"}
+          body={
+            requests.length > 0
+              ? "Turn on Show closed to see shipped and declined requests."
+              : "Preload requests from players appear here when they submit one."
+          }
         />
       ) : null}
       {rows.length > 0 ? (
