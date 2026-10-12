@@ -17,7 +17,7 @@ const writeRemoteAnnotation = vi.hoisted(() => vi.fn());
 const writeRemoteAnnotationsBatch = vi.hoisted(() => vi.fn());
 const queueOffline = vi.hoisted(() => ({ value: false }));
 const offlineQueue = vi.hoisted(() => ({ items: [] as unknown[] }));
-const enqueueOfflineWrite = vi.hoisted(() => vi.fn());
+const enqueueOfflineWrites = vi.hoisted(() => vi.fn());
 
 vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => firebaseConfigured.value,
@@ -39,7 +39,7 @@ vi.mock("../../services/firestore/firestoreAnnotations", () => ({
 
 vi.mock("../../services/session/offlineQueue", () => ({
   countOfflineQueueForSession: vi.fn(async () => offlineQueue.items.length),
-  enqueueOfflineWrite,
+  enqueueOfflineWrites,
 }));
 
 vi.mock("../../services/session/backgroundSync", () => ({
@@ -61,8 +61,8 @@ describe("useAnnotations", () => {
     firebaseConfigured.value = false;
     queueOffline.value = false;
     offlineQueue.items = [];
-    enqueueOfflineWrite.mockReset().mockImplementation(async (_sessionId, annotation) => {
-      offlineQueue.items.push(annotation);
+    enqueueOfflineWrites.mockReset().mockImplementation(async (_sessionId, annotations) => {
+      offlineQueue.items.push(...annotations);
     });
     getRemoteSessionByIdFromServer.mockReset();
     writeRemoteAnnotation.mockReset().mockResolvedValue(undefined);
@@ -362,7 +362,7 @@ describe("useAnnotations", () => {
         .getState()
         .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
       queueOffline.value = true;
-      enqueueOfflineWrite.mockRejectedValueOnce(new Error("Storage quota exceeded"));
+      enqueueOfflineWrites.mockRejectedValueOnce(new Error("Storage quota exceeded"));
 
       const { result } = renderHook(() => useAnnotations());
 

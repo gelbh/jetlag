@@ -13,7 +13,7 @@ import { withSessionWriteAccess } from "../../services/firestore/sessionMembersh
 import { registerAnnotationBackgroundSync } from "../../services/session/backgroundSync";
 import {
   countOfflineQueueForSession,
-  enqueueOfflineWrite,
+  enqueueOfflineWrites,
 } from "../../services/session/offlineQueue";
 import type { MapTool } from "../../state/sessionStore";
 import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
@@ -40,17 +40,6 @@ export function useAnnotations() {
   const setSession = useSessionStore((state) => state.setSession);
   const myUid = useSessionStore((state) => state.myUid);
 
-  // ponytail: resetting to the queue count drops in-flight increments from
-  // concurrent remote writes; separate queued and in-flight counters fix that.
-  const queueAnnotationWrite = useCallback(
-    async (sessionId: string, annotation: AnnotationRecord) => {
-      await enqueueOfflineWrite(sessionId, annotation);
-      await registerAnnotationBackgroundSync();
-      setPendingWrites(await countOfflineQueueForSession(sessionId));
-    },
-    [setPendingWrites],
-  );
-
   const addAnnotation = useAnnotationStore((state) => state.addAnnotation);
   const softDeleteAnnotation = useAnnotationStore((state) => state.softDeleteAnnotation);
   const softDeleteAllForSession = useAnnotationStore((state) => state.softDeleteAllForSession);
@@ -69,26 +58,24 @@ export function useAnnotations() {
     [setLastSyncError],
   );
 
-  // queueAnnotationWrite resets pendingWrites to the queue count, which absorbs
-  // the caller's increment, so callers must not also decrement it. Leaving it
-  // up until the reset keeps the sync indicator from flashing "synced".
+  // Resetting pendingWrites to the queue count absorbs the caller's increment,
+  // so callers must not also decrement it. Leaving it up until the reset keeps
+  // the sync indicator from flashing "synced".
+  // ponytail: resetting to the queue count drops in-flight increments from
+  // concurrent remote writes; separate queued and in-flight counters fix that.
   const queueAnnotationWrites = useCallback(
     async (sessionId: string, annotations: readonly AnnotationRecord[]): Promise<string | null> => {
-      let queued = 0;
       try {
-        for (const annotation of annotations) {
-          await queueAnnotationWrite(sessionId, annotation);
-          queued += 1;
-        }
+        await enqueueOfflineWrites(sessionId, annotations);
+        await registerAnnotationBackgroundSync();
+        setPendingWrites(await countOfflineQueueForSession(sessionId));
         return null;
       } catch (queueError) {
-        if (queued === 0) {
-          decrementPendingWrites();
-        }
+        decrementPendingWrites();
         return reportAnnotationWriteError(queueError);
       }
     },
-    [decrementPendingWrites, queueAnnotationWrite, reportAnnotationWriteError],
+    [decrementPendingWrites, reportAnnotationWriteError, setPendingWrites],
   );
 
   // Edit/delete/undo/redo/clear are fire-and-forget from UI handlers (`void

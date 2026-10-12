@@ -115,19 +115,29 @@ export async function enqueueOfflineWrite(
   sessionId: string,
   annotation: AnnotationRecord,
 ): Promise<void> {
+  await enqueueOfflineWrites(sessionId, [annotation]);
+}
+
+/** Queues all annotations in one transaction, so either every write lands or none do. */
+export async function enqueueOfflineWrites(
+  sessionId: string,
+  annotations: readonly AnnotationRecord[],
+): Promise<void> {
   await withDatabaseRetry(async (database) => {
     const transaction = database.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
-    const entry: QueuedWrite = {
-      kind: "annotation",
-      id: annotation.id,
-      sessionId,
-      annotation,
-      createdAt: new Date().toISOString(),
-      failureCount: 0,
-    };
-
-    store.put(entry);
+    const createdAt = new Date().toISOString();
+    for (const annotation of annotations) {
+      const entry: QueuedWrite = {
+        kind: "annotation",
+        id: annotation.id,
+        sessionId,
+        annotation,
+        createdAt,
+        failureCount: 0,
+      };
+      store.put(entry);
+    }
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
