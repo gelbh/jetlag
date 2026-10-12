@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
@@ -82,7 +82,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: ${{ needs.changes.outputs.release_pr == 'true' }}
         with:
           node-version: 24
@@ -105,7 +105,7 @@ jobs:
         run: cargo clippy --locked -p jetlag-geometry-kernel -- -D warnings
       - if: ${{ needs.changes.outputs.release_pr != 'true' }}
         run: cargo test --locked -p jetlag-geometry-kernel
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           node-version: 24
@@ -165,7 +165,7 @@ jobs:
         run: echo "Skipping full build on changeset-release PR."
       - uses: ./.github/actions/setup-rust-wasm
         if: ${{ needs.changes.outputs.release_pr != 'true' }}
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           node-version: 24
@@ -194,7 +194,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           node-version: 24
@@ -231,7 +231,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           node-version: 24
@@ -250,7 +250,7 @@ jobs:
             firebase-emulators-${{ runner.os }}-
       - if: ${{ needs.changes.outputs.release_pr != 'true' }}
         run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e:gate-smoke && E2E_SKIP_BUILD=1 npm run test:e2e:resilience"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ needs.changes.outputs.release_pr != 'true' && failure() }}
         with:
           name: playwright-report-e2e
@@ -270,7 +270,7 @@ jobs:
         run: echo "Skipping Lighthouse on changeset-release PR."
       - uses: ./.github/actions/setup-rust-wasm
         if: ${{ needs.changes.outputs.release_pr != 'true' }}
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           node-version: 24
@@ -283,7 +283,7 @@ jobs:
         run: npm run build
       - if: ${{ needs.changes.outputs.release_pr != 'true' }}
         run: npm run test:lighthouse
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ needs.changes.outputs.release_pr != 'true' && always() }}
         with:
           name: lighthouse-results
