@@ -7,6 +7,7 @@ export function AdminWorld({ children }: { children: ReactNode }) {
   return (
     <div data-admin-world>
       <MantineThemeProvider theme={adminTheme}>{children}</MantineThemeProvider>
+      <div data-admin-portal />
     </div>
   );
 }

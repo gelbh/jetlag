@@ -7,6 +7,7 @@ import {
   Drawer,
   type MantineThemeOverride,
   Paper,
+  Portal,
   Tabs,
   TextInput,
 } from "@mantine/core";
@@ -60,6 +61,8 @@ export const adminTheme: MantineThemeOverride = {
   headings: { fontFamily: "var(--adm-font)", fontWeight: "700" },
   defaultRadius: 0,
   components: {
+    // One AdminWorld per page: Portal resolves the first matching host.
+    Portal: Portal.extend({ defaultProps: { target: "[data-admin-portal]" } }),
     Tabs: Tabs.extend({
       styles: {
         list: { borderColor: "var(--adm-rule)" },

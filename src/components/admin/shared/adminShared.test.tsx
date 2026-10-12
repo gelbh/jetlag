@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Divider } from "@mantine/core";
+import { Alert, Badge, Button, Divider, Drawer, Select } from "@mantine/core";
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
@@ -152,5 +152,30 @@ describe("admin shared primitives", () => {
     const button = screen.getByRole("button", { name: "Go" });
     expect(button.style.getPropertyValue("--button-bg")).toBe("var(--adm-overprint)");
     expect(button.style.getPropertyValue("--button-color")).toBe("var(--adm-overprint-ink)");
+  });
+
+  it("portals a Drawer into the admin world so it reads --adm-paper", async () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Drawer opened onClose={() => {}} title="Settings">
+          drawer body
+        </Drawer>
+      </AdminWorld>,
+    );
+    const body = await screen.findByText("drawer body");
+    expect(body.closest("[data-admin-world]")).not.toBeNull();
+    expect(body.closest(".mantine-Drawer-content")?.getAttribute("style")).toContain(
+      "var(--adm-paper)",
+    );
+  });
+
+  it("portals combobox dropdowns into the admin world", async () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Select label="Sort" data={["Last activity", "Created"]} defaultDropdownOpened />
+      </AdminWorld>,
+    );
+    const option = await screen.findByRole("option", { name: "Created" });
+    expect(option.closest("[data-admin-world]")).not.toBeNull();
   });
 });
