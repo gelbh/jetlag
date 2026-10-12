@@ -96,9 +96,8 @@ export function PremiumPageContent() {
       setEntitlements(next);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not start free trial.");
-    } finally {
-      setTrialLoading(false);
     }
+    setTrialLoading(false);
   };
 
   const handlePortal = async () => {

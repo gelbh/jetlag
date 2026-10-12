@@ -73,6 +73,7 @@ export function GameAreaSection({
   step,
 }: GameAreaSectionProps) {
   const [whereSource, setWhereSource] = useWhereSource(model.loadedPreset?.id);
+  const { importFileInputRef, onBoundaryImport } = model;
 
   let stepBody: ReactNode;
   switch (step) {
@@ -104,11 +105,11 @@ export function GameAreaSection({
       <div className="mt-4 space-y-5">{stepBody}</div>
 
       <input
-        ref={model.importFileInputRef}
+        ref={importFileInputRef}
         type="file"
         accept=".kml,.kmz"
         className="hidden"
-        onChange={model.onBoundaryImport}
+        onChange={onBoundaryImport}
       />
     </>
   );

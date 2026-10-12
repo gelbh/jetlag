@@ -6,6 +6,9 @@ import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { ClientUpdateRequiredPage } from "./ClientUpdateRequiredPage";
 
+// Dynamic: keeps firestore off the App chunk's static graph.
+const loadClientMinVersion = () => import("@/services/firestore/clientMinVersion");
+
 /**
  * Blocking global floor (ops/clientMinVersion). Distinct from hotfix grace
  * (appConfig/runtime) and peer session hostAppVersion.
@@ -26,8 +29,7 @@ export function ClientMinVersionGate({ children }: { children: ReactNode }) {
 
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
-    // Dynamic: keeps firestore off the App chunk's static graph.
-    void import("@/services/firestore/clientMinVersion")
+    void loadClientMinVersion()
       .then(({ subscribeClientMinVersion }) => {
         if (cancelled) {
           return;

@@ -80,6 +80,8 @@ const ChatLogGalleryLazy = import.meta.env.DEV
     )
   : null;
 
+const loadSessionCleanup = () => import("./services/session/sessionCleanup");
+
 function RouteFallback() {
   return (
     <div
@@ -184,7 +186,7 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     const cancelIdle = scheduleIdleBootWork(() => {
-      void import("./services/session/sessionCleanup")
+      void loadSessionCleanup()
         .then(({ pruneStaleTimerSessions }) => {
           if (!cancelled) {
             pruneStaleTimerSessions();

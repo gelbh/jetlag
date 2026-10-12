@@ -11,12 +11,10 @@ export function useSubmitLock() {
 
     inFlightRef.current = true;
     setIsSubmitting(true);
-    try {
-      await fn();
-    } finally {
+    await (async () => fn())().finally(() => {
       inFlightRef.current = false;
       setIsSubmitting(false);
-    }
+    });
   }, []);
 
   return { isSubmitting, runLocked };

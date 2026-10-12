@@ -12,6 +12,12 @@ const VERIFY_SESSION_TIMEOUT_MS = 15_000;
 const VERIFY_SESSION_TIMEOUT_MESSAGE =
   "Couldn't verify the session. Check your connection and try again.";
 
+// Dynamic: Home is prerendered on the App chunk; keep firestore off it.
+const loadSessionExit = () => import("@/services/session/sessionExit");
+const loadFirebase = () => import("@/services/core/firebase/firebase");
+const loadFirestoreAnnotations = () => import("@/services/firestore/firestoreAnnotations");
+const loadSessionMembershipHeal = () => import("@/services/firestore/sessionMembershipHeal");
+
 export function useContinueActiveSession(): {
   session: SessionRecord | null;
   myRole: PlayerRole | null;
@@ -23,7 +29,7 @@ export function useContinueActiveSession(): {
   // Not useSessionExit: its static sessionExit → sessionCleanup graph pulls
   // firestore/turf into the prerendered Home (App chunk).
   const exitSession = async (params: Omit<ExitSessionParams, "navigate">) => {
-    const { exitSession: runExit } = await import("@/services/session/sessionExit");
+    const { exitSession: runExit } = await loadSessionExit();
     await runExit({ ...params, navigate });
   };
   const session = useSessionStore((state) => state.session);
@@ -41,46 +47,58 @@ export function useContinueActiveSession(): {
     setContinueError(null);
     setContinuing(true);
 
-    try {
-      if (!isFirebaseConfigured() || session.id === LOCAL_SESSION_ID) {
-        navigate("/map");
-        return;
-      }
+    await (async () => {
+      try {
+        if (!isFirebaseConfigured() || session.id === LOCAL_SESSION_ID) {
+          navigate("/map");
+          return;
+        }
 
-      await withTimeout(
-        (async () => {
-          // Dynamic: Home is prerendered on the App chunk; keep firestore off it.
-          const [
-            { ensureFreshAnonymousUser },
-            { isFirestorePermissionDenied },
-            { getRemoteSessionById, healSessionMembership, lookupRemoteSessionByCode },
-          ] = await Promise.all([
-            import("@/services/core/firebase/firebase"),
-            import("@/services/firestore/firestoreAnnotations"),
-            import("@/services/firestore/sessionMembershipHeal"),
-          ]);
-          const user = await ensureFreshAnonymousUser();
-          let remoteSession = null;
-          try {
-            remoteSession = await getRemoteSessionById(session.id);
-          } catch (error) {
-            if (!isFirestorePermissionDenied(error)) {
-              throw error;
+        await withTimeout(
+          (async () => {
+            const [
+              { ensureFreshAnonymousUser },
+              { isFirestorePermissionDenied },
+              { getRemoteSessionById, healSessionMembership, lookupRemoteSessionByCode },
+            ] = await Promise.all([
+              loadFirebase(),
+              loadFirestoreAnnotations(),
+              loadSessionMembershipHeal(),
+            ]);
+            const user = await ensureFreshAnonymousUser();
+            let remoteSession = null;
+            try {
+              remoteSession = await getRemoteSessionById(session.id);
+            } catch (error) {
+              if (!isFirestorePermissionDenied(error)) {
+                throw error;
+              }
             }
-          }
 
-          if (!remoteSession) {
-            const lookup = await lookupRemoteSessionByCode(session.code);
-            if (lookup.status === "missing") {
-              await exitSession({
-                reason: "reset",
-                sessionId: session.id,
-                animate: false,
-              });
-              setContinueError("That session no longer exists.");
-              return;
+            if (!remoteSession) {
+              const lookup = await lookupRemoteSessionByCode(session.code);
+              if (lookup.status === "missing") {
+                await exitSession({
+                  reason: "reset",
+                  sessionId: session.id,
+                  animate: false,
+                });
+                setContinueError("That session no longer exists.");
+                return;
+              }
+              if (lookup.status === "ended") {
+                await exitSession({
+                  reason: "reset",
+                  sessionId: session.id,
+                  animate: false,
+                });
+                setContinueError("That session has ended. Join or create a new one.");
+                return;
+              }
+              remoteSession = lookup.session;
             }
-            if (lookup.status === "ended") {
+
+            if (remoteSession.endedAt) {
               await exitSession({
                 reason: "reset",
                 sessionId: session.id,
@@ -89,60 +107,49 @@ export function useContinueActiveSession(): {
               setContinueError("That session has ended. Join or create a new one.");
               return;
             }
-            remoteSession = lookup.session;
-          }
 
-          if (remoteSession.endedAt) {
-            await exitSession({
-              reason: "reset",
-              sessionId: session.id,
-              animate: false,
+            const resumeRole =
+              myRole ?? resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
+            const activeSession = await healSessionMembership(remoteSession, user.uid, resumeRole, {
+              returningMemberUid: myUid,
+              persistedMyUid: myUid,
             });
-            setContinueError("That session has ended. Join or create a new one.");
-            return;
-          }
 
-          const resumeRole =
-            myRole ?? resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
-          const activeSession = await healSessionMembership(remoteSession, user.uid, resumeRole, {
-            returningMemberUid: myUid,
-            persistedMyUid: myUid,
+            const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
+            if (
+              myRole &&
+              activeSession.memberRoles &&
+              activeSession.memberRoles[user.uid] &&
+              myRole !== role
+            ) {
+              setContinueError("Your role changed for this session. Rejoin with a new code.");
+              return;
+            }
+
+            setSession(activeSession, user.uid);
+            setPremiumApiContext(activeSession);
+            navigate("/map");
+          })(),
+          VERIFY_SESSION_TIMEOUT_MS,
+          VERIFY_SESSION_TIMEOUT_MESSAGE,
+        );
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Couldn't continue that session.";
+        if (
+          message === "That session no longer exists." ||
+          message === "That session has ended. Join or create a new one."
+        ) {
+          await exitSession({
+            reason: "reset",
+            sessionId: session.id,
+            animate: false,
           });
-
-          const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
-          if (
-            myRole &&
-            activeSession.memberRoles &&
-            activeSession.memberRoles[user.uid] &&
-            myRole !== role
-          ) {
-            setContinueError("Your role changed for this session. Rejoin with a new code.");
-            return;
-          }
-
-          setSession(activeSession, user.uid);
-          setPremiumApiContext(activeSession);
-          navigate("/map");
-        })(),
-        VERIFY_SESSION_TIMEOUT_MS,
-        VERIFY_SESSION_TIMEOUT_MESSAGE,
-      );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Couldn't continue that session.";
-      if (
-        message === "That session no longer exists." ||
-        message === "That session has ended. Join or create a new one."
-      ) {
-        await exitSession({
-          reason: "reset",
-          sessionId: session.id,
-          animate: false,
-        });
+        }
+        setContinueError(message);
       }
-      setContinueError(message);
-    } finally {
+    })().finally(() => {
       setContinuing(false);
-    }
+    });
   };
 
   return {
