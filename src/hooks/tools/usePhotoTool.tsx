@@ -20,6 +20,7 @@ import type { PendingQuestionRecord } from "../../domain/session/activity/sessio
 import type { GameSize } from "../../domain/session/size/gameSize";
 import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
 import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
+import { useToolPreset } from "./framework/useToolPreset";
 import { useToolSession } from "./framework/useToolSession";
 
 interface PhotoSessionConfig {
@@ -146,6 +147,10 @@ export function usePhotoTool({
     setSelectedCategoryId(id);
     setCategoryChosen(true);
   };
+
+  useToolPreset("photo", active && awaitHiderAnswer, (key) => {
+    if (typeof key === "string") handleCategoryChange(key as PhotoCategoryId);
+  });
 
   const reopenCategoryPicker = () => {
     setCategoryChosen(false);

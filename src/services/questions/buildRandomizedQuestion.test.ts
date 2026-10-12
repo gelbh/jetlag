@@ -53,6 +53,7 @@ describe("buildRandomizedQuestion", () => {
     expect(built.input.replyOptions.map((option) => option.id)).toEqual(["yes", "no"]);
     expect(built.input.cardDraw).toBe(2);
     expect(built.input.cardKeep).toBe(1);
+    expect(built.input.pendingQuestionId).toBe("pq-1~rnd");
   });
 
   it("ignores the hider label for the radar prompt", async () => {
@@ -97,7 +98,7 @@ describe("buildRandomizedQuestion", () => {
         { optionKey: option.optionKey, label: "hider text" },
         ctx([used, original]),
       ),
-    ).toEqual({ kind: "manual", label: option.label });
+    ).toStrictEqual({ kind: "manual", label: option.label });
   });
 
   it("builds a photo submit with an empty feature collection", async () => {
@@ -125,6 +126,7 @@ describe("buildRandomizedQuestion", () => {
     );
     expect(built.input.cardDraw).toBe(2);
     expect(built.input.cardKeep).toBe(1);
+    expect(built.input.pendingQuestionId).toBe("pq-1~rnd");
   });
 
   it("ignores the hider label for the photo prompt", async () => {
@@ -163,10 +165,10 @@ describe("buildRandomizedQuestion", () => {
         { optionKey: option.optionKey, label: "hider text" },
         ctx([used, original]),
       ),
-    ).toEqual({ kind: "manual", label: option.label });
+    ).toStrictEqual({ kind: "manual", label: option.label });
   });
 
-  it("returns the catalog label as manual for thermometer", async () => {
+  it("returns the catalog label and preset key as manual for thermometer", async () => {
     const original = pending({ toolType: "thermometer" });
     const option = questionOptionsForTool("thermometer", session)[0]!;
 
@@ -176,6 +178,44 @@ describe("buildRandomizedQuestion", () => {
         { optionKey: option.optionKey, label: "hider text" },
         ctx(),
       ),
-    ).toEqual({ kind: "manual", label: option.label });
+    ).toStrictEqual({ kind: "manual", label: option.label, presetKey: option.optionKey });
+  });
+
+  it("returns the preset key for an unused matching roll", async () => {
+    const original = pending({ toolType: "matching" });
+    const option = questionOptionsForTool("matching", session)[0]!;
+
+    expect(await buildRandomizedQuestion(original, option, ctx([original]))).toStrictEqual({
+      kind: "manual",
+      label: option.label,
+      presetKey: option.optionKey,
+    });
+  });
+
+  it("omits the preset key when the thermometer distance is used", async () => {
+    const original = pending({ toolType: "thermometer" });
+    const option = questionOptionsForTool("thermometer", session)[0]!;
+    const used = pending({
+      id: "pq-0",
+      toolType: "thermometer",
+      status: "pending",
+      placement: {
+        geometryJson: pointGeometry,
+        metadata: { thermometerDistanceMeters: option.optionKey },
+      },
+    });
+
+    expect(await buildRandomizedQuestion(original, option, ctx([used, original]))).toStrictEqual({
+      kind: "manual",
+      label: option.label,
+    });
+  });
+
+  it("omits the preset key for an unknown key", async () => {
+    const roll = { optionKey: "not-a-category", label: "Mystery" };
+
+    expect(
+      await buildRandomizedQuestion(pending({ toolType: "matching" }), roll, ctx()),
+    ).toStrictEqual({ kind: "manual", label: roll.label });
   });
 });

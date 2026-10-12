@@ -12,6 +12,7 @@ import { useCancelOrphanThermometerWalks } from "@/hooks/sync/useCancelOrphanThe
 import { usePendingQuestionResolver } from "@/hooks/sync/usePendingQuestionResolver";
 import { useSeekerLocationSync } from "@/hooks/sync/useSeekerLocationSync";
 import { captureException } from "@/services/core/analytics/clientErrors";
+import { useMapStore } from "@/state/mapStore";
 import type { MapScreenCore } from "./useMapScreenCore";
 
 type SeekerEffectsInput = Pick<
@@ -124,11 +125,15 @@ export function useMapScreenSeekerEffects({
     annotations,
     canSubmitQuestion,
     submitToolQuestion,
-    onManual: (_toolType, label) =>
+    onManual: (toolType, label, presetKey) => {
       showEphemeralPlayerNotification({
         title: "Randomize",
         message: randomizeManualNotice(label),
-      }),
+      });
+      if (presetKey !== undefined) {
+        useMapStore.getState().openToolPreset(toolType, presetKey);
+      }
+    },
   });
 
   useCancelOrphanThermometerWalks({

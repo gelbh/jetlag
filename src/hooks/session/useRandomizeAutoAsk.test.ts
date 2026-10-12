@@ -128,7 +128,7 @@ describe("useRandomizeAutoAsk", () => {
     expect(submitToolQuestion).not.toHaveBeenCalled();
   });
 
-  it("hands a thermometer roll to onManual with the catalog label", async () => {
+  it("hands a thermometer roll to onManual with the catalog label and preset key", async () => {
     const original = radarOriginal({
       toolType: "thermometer",
       randomizedTo: thermometerRoll,
@@ -138,7 +138,11 @@ describe("useRandomizeAutoAsk", () => {
     renderHook(() => useRandomizeAutoAsk(props));
 
     await waitFor(() =>
-      expect(onManual).toHaveBeenCalledExactlyOnceWith("thermometer", thermometerRoll.label),
+      expect(onManual).toHaveBeenCalledExactlyOnceWith(
+        "thermometer",
+        thermometerRoll.label,
+        thermometerRoll.optionKey,
+      ),
     );
     expect(submitToolQuestion).not.toHaveBeenCalled();
   });

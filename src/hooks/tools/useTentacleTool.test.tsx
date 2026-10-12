@@ -6,15 +6,45 @@ import { useMapStore } from "@/state/mapStore";
 import { tentacleSearchRadiusMetersForSession } from "../../domain/questions";
 import * as tentacleOverpassModule from "../../services/geo/overpass/tentacleOverpass";
 import { createTestPinAnnotation } from "../../test/fixtures/sessions";
+import { resetAllStores } from "../../test/helpers/storeReset";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useTentacleTool } from "./useTentacleTool";
 
 describe("useTentacleTool", () => {
   beforeEach(() => {
+    resetAllStores();
     useMapStore.setState({ mapStyle: "standard" });
     useMapStore.getState().setActiveTool("tentacle");
     registerMapLibreMap(null);
     vi.restoreAllMocks();
+  });
+
+  it("opens to the pending preset category", async () => {
+    useMapStore.getState().openToolPreset("tentacle", "library");
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useTentacleTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        sessionRules: { gameSize: "medium" },
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: mocks.awaitingPlacement,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: mocks.armPlacement,
+      }),
+    );
+
+    await waitFor(() => expect(useMapStore.getState().toolPreset).toBeNull());
+    expect(result.current.panel.props.model.categoryId).toBe("library");
+    expect(result.current.panel.props.model.categoryChosen).toBe(true);
   });
 
   it("resolves search radius before category and anchor are chosen", () => {

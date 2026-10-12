@@ -26,6 +26,7 @@ import {
 } from "../../domain/questions";
 import { useLiveLocation } from "../location/useLiveLocation";
 import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
+import { useToolPreset } from "./framework/useToolPreset";
 import { useToolSession } from "./framework/useToolSession";
 import { commitThermometerManual } from "./thermometer/commitThermometer";
 import { completeThermometerWalkStep } from "./thermometer/completeThermometerWalk";
@@ -506,6 +507,15 @@ export function useThermometerTool({
     patchConfig({ distanceMeters });
     setEditingSetup(false);
   };
+
+  // patchConfig is a no-op until the session opens; never swap distance mid-walk.
+  useToolPreset(
+    "thermometer",
+    active && session.config !== null && walkingQuestionId === null,
+    (key) => {
+      if (typeof key === "number") setDistanceMeters(key);
+    },
+  );
 
   const hud: AskToolHudBundle = {
     readiness,

@@ -27,6 +27,7 @@ import { useMapSessionActions } from "../../hooks/map-screen/useMapSessionAction
 import { useMapSessionChrome } from "../../hooks/map-screen/useMapSessionChrome";
 import { useMapToolInteraction } from "../../hooks/map-screen/useMapToolInteraction";
 import { usePlacementMapFocus } from "../../hooks/map-screen/usePlacementMapFocus";
+import { useOpenToolPreset } from "../../hooks/tools/framework/useToolPreset";
 import { useWizardSheetSnap } from "../../hooks/wizard/useWizardSheetSnap";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import type { MapTool } from "../../state/sessionStore";
@@ -459,6 +460,14 @@ export function useMapScreenController() {
     },
     [awaitHiderAnswer, dismissTransientUi, resetToolDrafts, session, setActiveTool, setMapError],
   );
+
+  useOpenToolPreset({
+    activeTool,
+    canOpen: activeTool === "none" && !geometryEditAnnotation,
+    isToolEnabled: (tool) =>
+      !session || resolveToolDockEnabled(session, tool, { hasHiders: awaitHiderAnswer }),
+    selectTool: handleSelectTool,
+  });
 
   const { handleOpenChat, handleOpenSettings, handleOpenLog, handleOpenCodes } =
     useMapOverlayActions({

@@ -165,6 +165,25 @@ describe("usePendingQuestionActions", () => {
     );
   });
 
+  it("writes the question under a caller-supplied id", () => {
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    let questionId: string | undefined;
+    act(() => {
+      questionId = result.current.submitPendingQuestion({
+        ...radarAsk,
+        pendingQuestionId: "pq-1~rnd",
+      });
+    });
+
+    expect(questionId).toBe("pq-1~rnd");
+    expect(firestoreMocks.writeAskedQuestionBatch).toHaveBeenCalledWith(
+      "session-1",
+      expect.objectContaining({ id: "pq-1~rnd" }),
+      expect.objectContaining({ kind: "question", pendingQuestionId: "pq-1~rnd" }),
+    );
+  });
+
   it("starts a walking thermometer as one batch with a system row and no answer window", () => {
     const { result } = renderHook(() => usePendingQuestionActions());
 

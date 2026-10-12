@@ -27,6 +27,7 @@ import type { PendingQuestionRecord } from "../../domain/session/activity/sessio
 import type { GameSize } from "../../domain/session/size/gameSize";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
+import { useToolPreset } from "./framework/useToolPreset";
 import { useToolSession } from "./framework/useToolSession";
 import { commitRadar } from "./radar/commitRadar";
 
@@ -242,6 +243,10 @@ export function useRadarTool({
     setRadarRadius(radiusMeters);
     setEditingDistance(false);
   };
+
+  useToolPreset("radar", active, (key) => {
+    if (typeof key === "number") onPresetSelect(key);
+  });
 
   const onChooseSelect = () => {
     if (!distanceCatalogArmed) {

@@ -25,6 +25,7 @@ import { firstUnusedCatalogOption } from "../../domain/session/tools/toolSession
 import { GeocodedPlaceLeading } from "../../services/geo/geocoding";
 import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
 import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
+import { useToolPreset } from "./framework/useToolPreset";
 import { useToolSession } from "./framework/useToolSession";
 import { measuringCommitReady } from "./measuring/helpers";
 import { MeasuringToolPanel } from "./measuring/MeasuringToolPanel";
@@ -137,6 +138,10 @@ export function useMeasuringTool({
     pickNext: (usedOptions) =>
       firstUnusedCatalogOption<MeasuringFromKind>(draft.measuringCatalog, usedOptions),
     onUnavailable: loaders.handleUnavailableMeasuringOption,
+  });
+
+  useToolPreset("measuring", active, (key) => {
+    if (typeof key === "string") loaders.handleMeasureFromChange(key as MeasuringFromKind);
   });
 
   const hasMeasuringTarget = useHasMeasuringTarget(draft);
