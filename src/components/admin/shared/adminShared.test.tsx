@@ -1,4 +1,4 @@
-import { Badge, Button } from "@mantine/core";
+import { Alert, Badge, Button, Divider } from "@mantine/core";
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
@@ -6,28 +6,56 @@ import { SessionCode } from "@/components/admin/shared/SessionCode";
 import { StatCell } from "@/components/admin/shared/StatCell";
 import { StatusMark } from "@/components/admin/shared/StatusMark";
 import { renderWithAppUi } from "@/test/renderWithAppUi";
+import { type StatusTone, toneColor } from "@/theme/adminTone";
 
 describe("admin shared primitives", () => {
   it("renders the session code in one form at every size", () => {
     renderWithAppUi(
       <AdminWorld>
-        <SessionCode code="ABCD" size="lg" />
+        {(["sm", "md", "lg"] as const).map((size) => (
+          <SessionCode key={size} code={`CODE-${size}`} size={size} />
+        ))}
       </AdminWorld>,
     );
-    expect(screen.getByText("ABCD")).toHaveStyle({ fontStretch: "125%" });
+    for (const size of ["sm", "md", "lg"]) {
+      expect(screen.getByText(`CODE-${size}`)).toHaveStyle({ fontStretch: "125%" });
+    }
   });
 
   it("pairs every status tone with a visible label", () => {
+    const tones = Object.keys(toneColor) as StatusTone[];
     renderWithAppUi(
       <AdminWorld>
-        <StatusMark tone="mispunch" label="Mispunch" />
+        {tones.map((tone) => (
+          <StatusMark key={tone} tone={tone} label={`Tone ${tone}`} />
+        ))}
       </AdminWorld>,
     );
-    expect(screen.getByText("Mispunch")).toBeVisible();
-    expect(screen.getByText("Mispunch").closest("[data-tone]")).toHaveAttribute(
-      "data-tone",
-      "mispunch",
+    for (const tone of tones) {
+      const label = screen.getByText(`Tone ${tone}`);
+      expect(label).toBeVisible();
+      expect(label.closest("[data-tone]")).toHaveAttribute("data-tone", tone);
+    }
+  });
+
+  it("keeps error alerts in the mispunch tone", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Alert color="red">Red</Alert>
+        <Alert>Default</Alert>
+        <Alert data-tone="ok">Toned</Alert>
+        <Alert color="blue">Blue</Alert>
+      </AdminWorld>,
     );
+    const alertVar = (text: string) =>
+      screen
+        .getByText(text)
+        .closest<HTMLElement>(".mantine-Alert-root")
+        ?.style.getPropertyValue("--alert-color");
+    expect(alertVar("Red")).toBe("var(--adm-mispunch)");
+    expect(alertVar("Default")).toBe("var(--adm-mispunch)");
+    expect(alertVar("Toned")).toBe("var(--adm-ok)");
+    expect(alertVar("Blue")).not.toBe("var(--adm-ink)");
   });
 
   it("labels stat cells for assistive tech", () => {
@@ -104,6 +132,15 @@ describe("admin shared primitives", () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it("draws vertical dividers inline so the base border reset can't hide them", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Divider orientation="vertical" />
+      </AdminWorld>,
+    );
+    expect(screen.getByRole("separator").style.borderInlineStart).toBe("1px solid var(--adm-rule)");
   });
 
   it("fills admin buttons with overprint instead of the app primary", () => {
