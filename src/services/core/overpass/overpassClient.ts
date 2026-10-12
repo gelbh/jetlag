@@ -333,11 +333,8 @@ async function fetchOverpass(query: string): Promise<Response> {
     throw new OverpassUnavailableError("Map data unavailable. Sign in and try again.");
   }
 
-  const freshToken = await user.getIdToken(true);
-  proxyHeaders = {
-    ...(proxyHeaders as Record<string, string>),
-    Authorization: `Bearer ${freshToken}`,
-  };
+  await user.getIdToken(true);
+  proxyHeaders = await buildPremiumProxyHeaders();
   response = await fetchOverpassViaProxy(query, proxyHeaders);
   if (response.status === 401 || response.status === 403) {
     throw new OverpassUnavailableError(

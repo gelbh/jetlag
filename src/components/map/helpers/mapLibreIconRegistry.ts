@@ -37,7 +37,9 @@ export function transitVehicleIconId(mode: TransitRouteMode): string {
 
 /**
  * Guard before hasImage/addImage — MapLibre throws when `style` is undefined
- * (teardown / mid-setStyle) or the map was removed.
+ * (teardown / mid-setStyle) or the map was removed. Do not require
+ * isStyleLoaded(): the missing-image resolver runs while tiles parse, when
+ * sources are still loading.
  */
 function canMutateMapImages(map: MapLibreMap): boolean {
   if (map._removed) {
@@ -45,10 +47,7 @@ function canMutateMapImages(map: MapLibreMap): boolean {
   }
   try {
     // `style` is public on MapLibre Map; undefined during style swap/teardown.
-    if (!map.style) {
-      return false;
-    }
-    return map.isStyleLoaded() === true;
+    return map.style != null;
   } catch {
     return false;
   }
