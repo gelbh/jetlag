@@ -34,6 +34,7 @@ import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/ad
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { useLatestRequest } from "../forms/useLatestRequest";
 import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
+import { useToolPreset } from "./framework/useToolPreset";
 import { useToolSession } from "./framework/useToolSession";
 import {
   type CommitMatchingInput,
@@ -529,6 +530,10 @@ export function useMatchingTool({
 
     selectCategory(categoryId);
   };
+
+  useToolPreset("matching", active, (key) => {
+    if (typeof key === "string") handleCategoryChange(key as MatchingCategoryId);
+  });
 
   const previewQuestion =
     matchingCategoryId !== null

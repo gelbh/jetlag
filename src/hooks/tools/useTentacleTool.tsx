@@ -43,6 +43,7 @@ import { fetchTentaclePois } from "../../services/geo/overpass/tentacleOverpass"
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { useLatestRequest } from "../forms/useLatestRequest";
 import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
+import { useToolPreset } from "./framework/useToolPreset";
 import { useToolSession } from "./framework/useToolSession";
 import { commitTentacle } from "./tentacle/commitTentacle";
 import { useToolSessionOptions } from "./useToolSessionOptions";
@@ -444,6 +445,10 @@ export function useTentacleTool({
     setSelectedPoiId(null);
     setTentacleError(null);
   };
+
+  useToolPreset("tentacle", active, (key) => {
+    if (typeof key === "string") handleCategoryChange(key as TentacleExtendedCategoryId);
+  });
 
   const handleSelectPoi = useCallback(
     (poiId: string) => {

@@ -2,8 +2,10 @@ import { MantineProvider } from "@mantine/core";
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { matchingEmptyPlayAreaMessage } from "@/services/geo/matching";
+import { useMapStore } from "@/state/mapStore";
 import { jetlagTheme } from "@/theme/theme";
-import { useMapStore } from "../../state/mapStore";
+import type { AnnotationRecord } from "../../domain/map/annotations";
+import { resetAllStores } from "../../test/helpers/storeReset";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import type { ResolveMatchingAnchorResult } from "./matching/resolveMatchingAnchor";
 import { useMatchingTool } from "./useMatchingTool";
@@ -73,6 +75,68 @@ vi.mock("./matching/commitMatching", async (importOriginal) => {
     ...actual,
     commitMatching: () => commitMatchingHang.fn(),
   };
+});
+
+describe("useMatchingTool preset", () => {
+  beforeEach(() => {
+    resetAllStores();
+    useMapStore.getState().setActiveTool("matching");
+  });
+
+  function renderMatching(annotations: AnnotationRecord[] = []) {
+    const mocks = createToolHookMocks();
+    return renderHook(() =>
+      useMatchingTool({
+        active: true,
+        annotations,
+        gameArea: mocks.gameArea,
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        gpsLoading: mocks.gpsLoading,
+        mapError: mocks.mapError,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        awaitHiderAnswer: true,
+      }),
+    );
+  }
+
+  it("opens to the pending preset category", async () => {
+    useMapStore.getState().openToolPreset("matching", "park");
+
+    const { result } = renderMatching();
+
+    await waitFor(() => expect(useMapStore.getState().toolPreset).toBeNull());
+    expect(result.current.panel.props.model.categoryId).toBe("park");
+    expect(result.current.panel.props.model.categoryChosen).toBe(true);
+  });
+
+  it("ignores a preset to an already-used category but still consumes it", async () => {
+    useMapStore.getState().openToolPreset("matching", "park");
+    const usedPark: AnnotationRecord = {
+      id: "match-park",
+      sessionId: "local",
+      type: "matching",
+      status: "active",
+      geometry: {
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Point", coordinates: [0, 0] },
+      },
+      metadata: {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        matchingCategory: "park",
+        matchingAnswer: "yes",
+      },
+    };
+
+    const { result } = renderMatching([usedPark]);
+
+    await waitFor(() => expect(useMapStore.getState().toolPreset).toBeNull());
+    expect(result.current.panel.props.model.categoryId).toBeNull();
+    expect(result.current.panel.props.model.categoryChosen).toBe(false);
+  });
 });
 
 describe("useMatchingTool map-first answer", () => {
