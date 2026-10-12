@@ -342,6 +342,7 @@ export type PendingQuestionPatch = Partial<
     | "answeredLate"
     | "cardDraw"
     | "cardKeep"
+    | "randomizedTo"
   >
 >;
 

@@ -124,6 +124,20 @@ export function buildPendingQuestionDocument(
   return payload;
 }
 
+function deserializeRandomizedTo(value: unknown): PendingQuestionRecord["randomizedTo"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+  const { optionKey, label } = value as Record<string, unknown>;
+  if (
+    typeof label !== "string" ||
+    (typeof optionKey !== "string" && typeof optionKey !== "number")
+  ) {
+    return undefined;
+  }
+  return { optionKey, label };
+}
+
 export function deserializePendingQuestionFromFirestore(
   id: string,
   sessionId: string,
@@ -168,6 +182,7 @@ export function deserializePendingQuestionFromFirestore(
       typeof document.resolvedAnnotationId === "string" ? document.resolvedAnnotationId : undefined,
     cardDraw: typeof document.cardDraw === "number" ? document.cardDraw : undefined,
     cardKeep: typeof document.cardKeep === "number" ? document.cardKeep : undefined,
+    randomizedTo: deserializeRandomizedTo(document.randomizedTo),
   };
 }
 
