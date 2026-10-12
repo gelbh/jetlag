@@ -1,4 +1,3 @@
-import type { Feature, Point } from "geojson";
 import { useCallback } from "react";
 import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import { persistSlimMeasuringGeometry } from "@/domain/geometry/measuring/measuringGeometryBudgets";
@@ -19,6 +18,7 @@ import { adminBorderKindAvailability } from "@/services/geo/overpass/adminDivisi
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { buildStoredMeasuringRegionInput, measuringCommitReady } from "./helpers";
+import { buildMeasuringPendingInput } from "./measuringPendingInput";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
 
@@ -101,67 +101,6 @@ export function useMeasuringCommit({
     const question = measuringQuestionFor(measuringSubject, locationCategory);
 
     if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-      const regionInputWithoutAnswer = buildStoredMeasuringRegionInput({
-        measuringSubject,
-        measuringLocationCategory,
-        measuringDistanceMeters,
-        measuringTargetPoint,
-        measuringPlaces,
-        measuringCoastSegments: resolvedCoastSegments,
-        measuringSeaLevelNearRegion,
-        usesAllPlacesInArea,
-      });
-
-      const geometry: Feature<Point> = {
-        type: "Feature",
-        properties: {},
-        geometry: {
-          type: "Point",
-          coordinates: [measuringSeekerPoint[1], measuringSeekerPoint[0]],
-        },
-      };
-
-      const metadata: Record<string, unknown> = {
-        measuringSubject,
-        measuringLocationCategory:
-          measuringSubject === "location" ? measuringLocationCategory : undefined,
-        measuringDistanceMeters,
-        measuringAnchor: {
-          lat: measuringSeekerPoint[0],
-          lng: measuringSeekerPoint[1],
-        },
-        measuringAnchorAltitudeMeters:
-          measuringSubject === "sea_level"
-            ? (measuringAnchorElevationMeters ?? undefined)
-            : undefined,
-        measuringCoastPoint:
-          measuringSubject === "sea_level"
-            ? {
-                lat: measuringSeekerPoint[0],
-                lng: measuringSeekerPoint[1],
-              }
-            : measuringTargetPoint
-              ? {
-                  lat: measuringTargetPoint[0],
-                  lng: measuringTargetPoint[1],
-                }
-              : undefined,
-        measuringTargetName:
-          measuringSubject === "sea_level" ? "Sea level" : (measuringTargetPlaceName ?? undefined),
-        measuringRegionInputJson: JSON.stringify(regionInputWithoutAnswer),
-      };
-
-      if (usesAllPlacesInArea) {
-        metadata.measuringPlacesJson = JSON.stringify(
-          measuringPlaces.map((place) => ({
-            id: place.id,
-            name: place.name,
-            lat: place.point[0],
-            lng: place.point[1],
-          })),
-        );
-      }
-
       const { draw: cardDraw, keep: cardKeep } = questionCostBreakdown(
         "D3P1",
         Math.max(
@@ -170,19 +109,23 @@ export function useMeasuringCommit({
         ),
       );
 
-      await submitPendingQuestion({
-        promptText: question.prompt,
-        replyOptions: closerFurtherAnswerOptions.map((option) => ({
-          id: option.value,
-          label: option.label,
-        })),
-        placement: {
-          geometryJson: JSON.stringify(geometry),
-          metadata,
-        },
-        cardDraw,
-        cardKeep,
-      });
+      await submitPendingQuestion(
+        buildMeasuringPendingInput({
+          seekerPoint: measuringSeekerPoint,
+          subject: measuringSubject,
+          locationCategory: measuringLocationCategory,
+          distanceMeters: measuringDistanceMeters,
+          targetPoint: measuringTargetPoint,
+          targetName: measuringTargetPlaceName,
+          places: measuringPlaces,
+          coastSegments: resolvedCoastSegments,
+          seaLevelNearRegion: measuringSeaLevelNearRegion,
+          anchorElevationMeters: measuringAnchorElevationMeters,
+          usesAllPlacesInArea,
+          cardDraw,
+          cardKeep,
+        }),
+      );
 
       resetDraft(committedKind);
       finishPlacement();
