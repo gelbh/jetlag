@@ -194,7 +194,7 @@ export function HiderMapScreen() {
     distanceUnit === "metric" ? "metric" : "imperial",
   );
   const annotations = useSessionAnnotations(sessionId);
-  const { clearAllAnnotations, createAnnotation } = useAnnotations();
+  const { clearAllAnnotations, createAnnotation, deleteAnnotation } = useAnnotations();
   const selectedAnnotationId = useAnnotationStore((state) => state.selectedAnnotationId);
   const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const mapShellRef = useRef<HTMLDivElement>(null);
@@ -1051,6 +1051,7 @@ export function HiderMapScreen() {
             pinSheetOpen,
             onPinSheetOpenChange: setPinSheetOpenExclusive,
             pinPanel: pinTool.panel,
+            onDeletePin: (id) => void deleteAnnotation(id),
             onClearMap: isHost ? handleClearMap : undefined,
             onResetBoard: isHost ? handleResetBoard : undefined,
             onResetSession: isHost ? handleResetSession : undefined,

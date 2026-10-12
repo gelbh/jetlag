@@ -3,6 +3,7 @@ import { ChatPanel } from "../../components/chat/ChatPanel";
 import type { HiderQuestionCards } from "../../components/chat/HiderPendingQuestionAnswer";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
 import { ExpansionHiderMenu } from "../../components/hider/ExpansionHiderMenu";
+import { HiderPinSheet } from "../../components/hider/HiderPinSheet";
 import { HiderZoneWizardShell } from "../../components/hider/HiderZoneWizardShell";
 import type { HidingZoneStepId } from "../../components/hider/hidingZoneSteps";
 import { TimeTrapPanel } from "../../components/hider/TimeTrapPanel";
@@ -154,6 +155,7 @@ export type HiderMapScreenController = {
   pinSheetOpen: boolean;
   onPinSheetOpenChange: (open: boolean) => void;
   pinPanel: ReactNode;
+  onDeletePin: (id: string) => void;
   onClearMap?: () => void;
   onResetBoard?: () => void;
   onResetSession?: () => void;
@@ -256,6 +258,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     pinSheetOpen,
     onPinSheetOpenChange,
     pinPanel,
+    onDeletePin,
     onClearMap,
     onResetBoard,
     onResetSession,
@@ -280,6 +283,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     closeSheet: overlay.closeAllSheets,
   });
   const roleConfig = getMapScreenRoleConfig("hider");
+  const selectedAnnotationId = useAnnotationStore((state) => state.selectedAnnotationId);
   const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
 
@@ -634,6 +638,16 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           {pinPanel}
         </div>
       </HiderZoneWizardShell>
+
+      <HiderPinSheet
+        annotation={annotations.find((item) => item.id === selectedAnnotationId) ?? null}
+        uid={uid}
+        onClose={() => setSelectedAnnotationId(null)}
+        onDelete={(id) => {
+          onDeletePin(id);
+          setSelectedAnnotationId(null);
+        }}
+      />
 
       <CurseReferenceSheet
         open={overlay.isCurseReferenceOpen || curseSheetOpen}
