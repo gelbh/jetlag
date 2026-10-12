@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useThermometerTool } from "./useThermometerTool";
@@ -103,5 +104,37 @@ describe("useThermometerTool", () => {
     expect(mocks.createAnnotation).toHaveBeenCalledWith(
       expect.objectContaining({ type: "thermometer" }),
     );
+  });
+
+  it("moves off the picked distance once another question uses it", () => {
+    const mocks = createToolHookMocks();
+    const { result, rerender } = renderHook(
+      ({ pendingQuestions }) =>
+        useThermometerTool({
+          active: true,
+          annotations: mocks.annotations,
+          pendingQuestions,
+          sessionRules: { gameSize: "large" },
+          createAnnotation: mocks.createAnnotation,
+          distanceUnit: mocks.distanceUnit,
+          finishPlacement: mocks.finishPlacement,
+          setMapError: mocks.setMapError,
+        }),
+      { initialProps: { pendingQuestions: [] as PendingQuestionRecord[] } },
+    );
+    const picked = result.current.draft.thermometerDistanceMeters;
+
+    rerender({
+      pendingQuestions: [
+        {
+          id: "pq-thermo",
+          toolType: "thermometer",
+          status: "pending",
+          placement: { metadata: { thermometerDistanceMeters: picked } },
+        } as unknown as PendingQuestionRecord,
+      ],
+    });
+
+    expect(result.current.draft.thermometerDistanceMeters).not.toBe(picked);
   });
 });

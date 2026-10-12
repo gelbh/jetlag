@@ -26,10 +26,7 @@ import {
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
-import {
-  type GeolocationPermissionState,
-  queryGeolocationPermission,
-} from "../../services/core/location/geolocation";
+import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
 import { useToolSession } from "./framework/useToolSession";
 import { commitRadar } from "./radar/commitRadar";
 
@@ -279,48 +276,12 @@ export function useRadarTool({
 
   const mapFirstEligible = distanceSelectionAvailable && !editingDistance;
 
-  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
-    GeolocationPermissionState | "checking"
-  >("checking");
-  const autoGpsForDistanceRef = useRef<number | null>(null);
-  const handleUseGpsRef = useRef(handleUseGps);
-  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
-
-  useEffect(() => {
-    handleUseGpsRef.current = handleUseGps;
-  }, [handleUseGps]);
-
-  useEffect(() => {
-    if (!mapFirstEligible) {
-      autoGpsForDistanceRef.current = null;
-      return;
-    }
-
-    let cancelled = false;
-    void (async () => {
-      const permission = await queryGeolocationPermission();
-      if (cancelled) {
-        return;
-      }
-      setEligiblePlacementGeo(permission);
-      if (
-        permission === "granted" &&
-        radarCenter === null &&
-        autoGpsForDistanceRef.current !== resolvedForReady
-      ) {
-        autoGpsForDistanceRef.current = resolvedForReady;
-        void handleUseGpsRef.current();
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [mapFirstEligible, resolvedForReady]);
-
-  useEffect(() => {
-    autoGpsForDistanceRef.current = null;
-  }, [resolvedForReady]);
+  const placementGeo = useAutoPlacementGps({
+    eligible: mapFirstEligible,
+    entryKey: resolvedForReady,
+    hasPoint: radarCenter !== null,
+    requestGps: handleUseGps,
+  });
 
   useEffect(() => {
     return () => {

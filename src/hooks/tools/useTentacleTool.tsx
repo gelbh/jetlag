@@ -38,14 +38,11 @@ import type { PendingQuestionRecord } from "../../domain/session/activity/sessio
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { sessionGameSize } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
-import {
-  type GeolocationPermissionState,
-  queryGeolocationPermission,
-} from "../../services/core/location/geolocation";
 import { overpassErrorMessage } from "../../services/core/overpass/overpassClient";
 import { fetchTentaclePois } from "../../services/geo/overpass/tentacleOverpass";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { useLatestRequest } from "../forms/useLatestRequest";
+import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
 import { useToolSession } from "./framework/useToolSession";
 import { commitTentacle } from "./tentacle/commitTentacle";
 import { useToolSessionOptions } from "./useToolSessionOptions";
@@ -531,48 +528,12 @@ export function useTentacleTool({
   const mapFirstEligible =
     tentacleCategoryChosen && tentacleCategoryId !== null && categorySelectionAvailable;
 
-  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
-    GeolocationPermissionState | "checking"
-  >("checking");
-  const autoGpsForCategoryRef = useRef<TentacleExtendedCategoryId | null>(null);
-  const handleUseGpsRef = useRef(handleUseGps);
-  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
-
-  useEffect(() => {
-    handleUseGpsRef.current = handleUseGps;
-  }, [handleUseGps]);
-
-  useEffect(() => {
-    if (!mapFirstEligible) {
-      autoGpsForCategoryRef.current = null;
-      return;
-    }
-
-    let cancelled = false;
-    void (async () => {
-      const permission = await queryGeolocationPermission();
-      if (cancelled) {
-        return;
-      }
-      setEligiblePlacementGeo(permission);
-      if (
-        permission === "granted" &&
-        tentacleCenter === null &&
-        autoGpsForCategoryRef.current !== tentacleCategoryId
-      ) {
-        autoGpsForCategoryRef.current = tentacleCategoryId;
-        void handleUseGpsRef.current();
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [mapFirstEligible, tentacleCategoryId]);
-
-  useEffect(() => {
-    autoGpsForCategoryRef.current = null;
-  }, [tentacleCategoryId]);
+  const placementGeo = useAutoPlacementGps({
+    eligible: mapFirstEligible,
+    entryKey: tentacleCategoryId,
+    hasPoint: tentacleCenter !== null,
+    requestGps: handleUseGps,
+  });
 
   const mapPlacementActive = Boolean(mapFirstEligible);
   const placementError =

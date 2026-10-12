@@ -54,6 +54,21 @@ function createThermometerConfig(
   };
 }
 
+/** A picked preset that has since been used falls through to the first unused one. */
+function unusedThermometerDistanceMeters(
+  distanceMeters: number,
+  sessionRules: UseThermometerToolParams["sessionRules"],
+  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+): number {
+  const miles = thermometerPresetMilesForMeters(distanceMeters);
+  if (miles === null || !usedOptions.has(miles)) {
+    return distanceMeters;
+  }
+  return (
+    firstAvailableThermometerDistanceMetersForSession(sessionRules, usedOptions) ?? distanceMeters
+  );
+}
+
 export function useThermometerTool({
   active,
   annotations,
@@ -165,7 +180,11 @@ export function useThermometerTool({
         walkingQuestionId === synced.questionId &&
         synced.distanceMeters !== null
           ? synced.distanceMeters
-          : config.distanceMeters;
+          : unusedThermometerDistanceMeters(
+              config.distanceMeters,
+              sessionRules,
+              usedThermometerOptionsRef.current,
+            );
 
       if (!thermoA || !config.thermoB) {
         return;
@@ -235,7 +254,11 @@ export function useThermometerTool({
     walkingQuestionId === syncedWalkDraft.questionId &&
     syncedWalkDraft.distanceMeters !== null
       ? syncedWalkDraft.distanceMeters
-      : config.distanceMeters;
+      : unusedThermometerDistanceMeters(
+          config.distanceMeters,
+          sessionRules,
+          usedThermometerOptions,
+        );
 
   const { reading: gpsReading } = useLiveLocation(active && config.placementMode === "gps", {
     highAccuracy: true,
@@ -347,30 +370,6 @@ export function useThermometerTool({
     setMapError,
     submitPendingQuestion,
     usedThermometerOptions,
-  ]);
-
-  useEffect(() => {
-    if (!active || walkingQuestionId !== null) {
-      return;
-    }
-    const miles = thermometerPresetMilesForMeters(config.distanceMeters);
-    if (miles === null || !usedThermometerOptions.has(miles)) {
-      return;
-    }
-    const next = firstAvailableThermometerDistanceMetersForSession(
-      sessionRules,
-      usedThermometerOptions,
-    );
-    if (next !== null && next !== config.distanceMeters) {
-      patchConfig({ distanceMeters: next });
-    }
-  }, [
-    active,
-    config.distanceMeters,
-    patchConfig,
-    sessionRules,
-    usedThermometerOptions,
-    walkingQuestionId,
   ]);
 
   const handleMapClick = useCallback(

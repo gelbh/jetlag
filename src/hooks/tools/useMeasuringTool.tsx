@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef } from "react";
 import { MeasuringHudBody } from "@/components/tools/ask/measuring/MeasuringHudBody";
 import {
   MeasuringMapPlacementChrome,
@@ -22,12 +22,9 @@ import {
   questionCostBreakdown,
 } from "../../domain/questions";
 import { firstUnusedCatalogOption } from "../../domain/session/tools/toolSessionOptions";
-import {
-  type GeolocationPermissionState,
-  queryGeolocationPermission,
-} from "../../services/core/location/geolocation";
 import { GeocodedPlaceLeading } from "../../services/geo/geocoding";
 import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
+import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
 import { useToolSession } from "./framework/useToolSession";
 import { measuringCommitReady } from "./measuring/helpers";
 import { MeasuringToolPanel } from "./measuring/MeasuringToolPanel";
@@ -216,51 +213,13 @@ export function useMeasuringTool({
 
   const mapFirstEligible = draft.measuringOptionChosen;
 
-  const autoGpsForOptionRef = useRef<string | null>(null);
-  const handleGpsRef = useRef(interactions.handleGps);
-
-  useEffect(() => {
-    handleGpsRef.current = interactions.handleGps;
-  }, [interactions.handleGps]);
-
   const measureFromKey = measuringFromKind(draft.measuringSubject, draft.measuringLocationCategory);
-
-  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
-    GeolocationPermissionState | "checking"
-  >("checking");
-  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
-
-  useEffect(() => {
-    if (!mapFirstEligible) {
-      autoGpsForOptionRef.current = null;
-      return;
-    }
-
-    let cancelled = false;
-    void (async () => {
-      const permission = await queryGeolocationPermission();
-      if (cancelled) {
-        return;
-      }
-      setEligiblePlacementGeo(permission);
-      if (
-        permission === "granted" &&
-        draft.measuringSeekerPoint === null &&
-        autoGpsForOptionRef.current !== measureFromKey
-      ) {
-        autoGpsForOptionRef.current = measureFromKey;
-        void handleGpsRef.current();
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [mapFirstEligible, measureFromKey]);
-
-  useEffect(() => {
-    autoGpsForOptionRef.current = null;
-  }, [measureFromKey]);
+  const placementGeo = useAutoPlacementGps({
+    eligible: mapFirstEligible,
+    entryKey: measureFromKey,
+    hasPoint: draft.measuringSeekerPoint !== null,
+    requestGps: interactions.handleGps,
+  });
 
   const mapPlacementActive = Boolean(mapFirstEligible);
   const placementError =
