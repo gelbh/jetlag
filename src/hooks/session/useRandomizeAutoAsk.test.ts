@@ -4,7 +4,10 @@ import type { GameArea } from "@/domain/map/annotations";
 import { questionOptionsForTool } from "@/domain/questions/randomizeQuestion";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "@/domain/session/join/joinPreviewGameArea";
-import { resolveRandomizedMatching } from "@/services/questions/resolveRandomizedHeavyQuestion";
+import {
+  resolveRandomizedMatching,
+  resolveRandomizedMeasuring,
+} from "@/services/questions/resolveRandomizedHeavyQuestion";
 import {
   nextRandomizedQuestion,
   type UseRandomizeAutoAskParams,
@@ -13,6 +16,7 @@ import {
 
 vi.mock("@/services/questions/resolveRandomizedHeavyQuestion", () => ({
   resolveRandomizedMatching: vi.fn(async () => null),
+  resolveRandomizedMeasuring: vi.fn(async () => null),
   resolveRandomizedTentacle: vi.fn(async () => null),
 }));
 
@@ -20,6 +24,7 @@ const session = { gameSize: "small" as const };
 const [radarOriginalOption, radarRoll] = questionOptionsForTool("radar", session);
 const [thermometerRoll] = questionOptionsForTool("thermometer", session);
 const [matchingRoll] = questionOptionsForTool("matching", session);
+const [measuringRoll] = questionOptionsForTool("measuring", session);
 const gameArea: GameArea = {
   type: "Polygon",
   coordinates: [
@@ -54,10 +59,13 @@ function radarOriginal(overrides: Partial<PendingQuestionRecord> = {}): PendingQ
   };
 }
 
-function matchingOriginal(): PendingQuestionRecord {
+function matchingOriginal(
+  toolType: "matching" | "measuring" = "matching",
+  randomizedTo = matchingRoll,
+): PendingQuestionRecord {
   return radarOriginal({
-    toolType: "matching",
-    randomizedTo: matchingRoll,
+    toolType,
+    randomizedTo,
     placement: {
       geometryJson: JSON.stringify({
         type: "Feature",
@@ -106,6 +114,7 @@ describe("useRandomizeAutoAsk", () => {
   beforeEach(() => {
     sessionStorage.clear();
     vi.mocked(resolveRandomizedMatching).mockClear();
+    vi.mocked(resolveRandomizedMeasuring).mockClear();
   });
 
   it("submits the randomized radar exactly once across rerender and remount", async () => {
@@ -247,6 +256,25 @@ describe("useRandomizeAutoAsk", () => {
     await waitFor(() => expect(submitToolQuestion).toHaveBeenCalledTimes(1));
     await settle();
     expect(submitToolQuestion).toHaveBeenCalledTimes(1);
+    expect(onManual).not.toHaveBeenCalled();
+  });
+
+  it("waits for the play area before resolving a measuring roll", async () => {
+    vi.mocked(resolveRandomizedMeasuring).mockResolvedValueOnce(matchingPayload);
+    const { props, submitToolQuestion, onManual } = setup({
+      pendingQuestions: [matchingOriginal("measuring", measuringRoll)],
+      gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
+    });
+    const view = renderHook((p: UseRandomizeAutoAskParams) => useRandomizeAutoAsk(p), {
+      initialProps: props,
+    });
+    await settle();
+    expect(resolveRandomizedMeasuring).not.toHaveBeenCalled();
+    expect(onManual).not.toHaveBeenCalled();
+
+    view.rerender({ ...props, gameArea });
+    await waitFor(() => expect(submitToolQuestion).toHaveBeenCalledTimes(1));
+    expect(submitToolQuestion.mock.calls[0][0]).toBe("measuring");
     expect(onManual).not.toHaveBeenCalled();
   });
 

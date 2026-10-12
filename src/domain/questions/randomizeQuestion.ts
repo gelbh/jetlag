@@ -237,21 +237,11 @@ export function pickRandomizeOption(
   return pool[Math.floor(random() * pool.length)] ?? null;
 }
 
-const AUTO_ASK_TOOLS: ReadonlySet<PendingQuestionToolType> = new Set([
-  "radar",
-  "photo",
-  "matching",
-  "tentacle",
-]);
-
 export function randomizedQuestionNotice(toolType: PendingQuestionToolType, label: string): string {
-  if (AUTO_ASK_TOOLS.has(toolType)) {
-    return `Hider played Randomize. Sending: ${label}.`;
-  }
   if (toolType === "thermometer") {
     return `Hider played Randomize. Walk the ${label} thermometer instead.`;
   }
-  return `Hider played Randomize. Ask this ${toolType} question instead: ${label}.`;
+  return `Hider played Randomize. Sending: ${label}.`;
 }
 
 export function randomizeManualNotice(label: string): string {

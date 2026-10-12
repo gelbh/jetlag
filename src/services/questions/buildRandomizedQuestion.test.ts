@@ -12,11 +12,13 @@ import type { PendingQuestionRecord } from "../../domain/session/activity/sessio
 import { buildRandomizedQuestion } from "./buildRandomizedQuestion";
 import {
   resolveRandomizedMatching,
+  resolveRandomizedMeasuring,
   resolveRandomizedTentacle,
 } from "./resolveRandomizedHeavyQuestion";
 
 vi.mock("./resolveRandomizedHeavyQuestion", () => ({
   resolveRandomizedMatching: vi.fn(async () => null),
+  resolveRandomizedMeasuring: vi.fn(async () => null),
   resolveRandomizedTentacle: vi.fn(async () => null),
 }));
 
@@ -79,6 +81,7 @@ describe("buildRandomizedQuestion", () => {
   beforeEach(() => {
     vi.mocked(resolveRandomizedMatching).mockReset().mockResolvedValue(null);
     vi.mocked(resolveRandomizedTentacle).mockReset().mockResolvedValue(null);
+    vi.mocked(resolveRandomizedMeasuring).mockReset().mockResolvedValue(null);
   });
 
   it("builds a radar submit at the rolled meters on the original center", async () => {
@@ -344,6 +347,43 @@ describe("buildRandomizedQuestion", () => {
       randomizedFrom: original.id,
     });
     expect(built.input.pendingQuestionId).toBe("pq-1~rnd");
+  });
+
+  it("submits the resolved measuring payload at the original anchor", async () => {
+    const original = pending({ toolType: "measuring" });
+    const option = questionOptionsForTool("measuring", session)[0]!;
+    vi.mocked(resolveRandomizedMeasuring).mockResolvedValue(
+      heavyPayload({ measuringSubject: option.optionKey }),
+    );
+
+    const built = await buildRandomizedQuestion(original, option, ctx([original]));
+
+    expect(resolveRandomizedMeasuring).toHaveBeenCalledWith(
+      [51.5, -0.1],
+      option.optionKey,
+      { cardDraw: 2, cardKeep: 1 },
+      expect.objectContaining({ gameArea, distanceUnit: "imperial" }),
+    );
+    expect(built.kind).toBe("submit");
+    if (built.kind !== "submit") return;
+    expect(built.toolType).toBe("measuring");
+    expect(built.input.placement.metadata).toEqual({
+      measuringSubject: option.optionKey,
+      randomizedFrom: original.id,
+    });
+    expect(built.input.pendingQuestionId).toBe("pq-1~rnd");
+  });
+
+  it("returns the preset key when the measuring resolver gives up", async () => {
+    const original = pending({ toolType: "measuring" });
+    const option = questionOptionsForTool("measuring", session)[0]!;
+
+    expect(await buildRandomizedQuestion(original, option, ctx([original]))).toStrictEqual({
+      kind: "manual",
+      label: option.label,
+      presetKey: option.optionKey,
+    });
+    expect(resolveRandomizedMeasuring).toHaveBeenCalledTimes(1);
   });
 
   it("omits the preset key when the thermometer distance is used", async () => {

@@ -86,17 +86,14 @@ describe("randomizedQuestionNotice", () => {
     expect(randomizedQuestionNotice("tentacle", "Museum")).toBe(
       "Hider played Randomize. Sending: Museum.",
     );
+    expect(randomizedQuestionNotice("measuring", "Sea level")).toBe(
+      "Hider played Randomize. Sending: Sea level.",
+    );
   });
 
   it("asks for a new walk on thermometer", () => {
     expect(randomizedQuestionNotice("thermometer", "1 mi")).toBe(
       "Hider played Randomize. Walk the 1 mi thermometer instead.",
-    );
-  });
-
-  it("keeps the ask-instead copy for tools without auto-ask yet", () => {
-    expect(randomizedQuestionNotice("measuring", "Airport")).toBe(
-      "Hider played Randomize. Ask this measuring question instead: Airport.",
     );
   });
 });
