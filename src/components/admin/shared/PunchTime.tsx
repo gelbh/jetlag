@@ -12,6 +12,7 @@ export function PunchTime({ at, flashing }: { at: string | null; flashing: boole
 
   return (
     <Text
+      key={at}
       component="time"
       dateTime={at ?? undefined}
       size="sm"

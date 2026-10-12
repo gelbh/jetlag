@@ -282,6 +282,29 @@ describe("admin shared primitives", () => {
     }
   });
 
+  it("restarts the punch flash when a second punch lands while flashing", () => {
+    const first = new Date().toISOString();
+    const second = new Date(Date.now() + 1000).toISOString();
+    const { rerender } = renderWithAppUi(
+      <AdminWorld>
+        <PunchTime at={first} flashing />
+      </AdminWorld>,
+    );
+    const before = screen.getByText("just now");
+
+    rerender(
+      <AdminWorld>
+        <PunchTime at={second} flashing />
+      </AdminWorld>,
+    );
+
+    const after = screen.getByText("just now");
+    expect(after).toHaveAttribute("datetime", second);
+    expect(after.getAttribute("style")).toContain("adm-punch");
+    expect(after).not.toBe(before);
+    expect(before.isConnected).toBe(false);
+  });
+
   it("portals combobox dropdowns into the admin world", async () => {
     renderWithAppUi(
       <AdminWorld>
