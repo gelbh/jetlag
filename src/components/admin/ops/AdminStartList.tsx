@@ -41,7 +41,7 @@ interface AdminStartListProps {
   onMonitor: (summary: AdminSessionSummary) => void;
 }
 
-const GRID_CELLS = 8;
+export const START_LIST_GRID_CELLS = 10;
 
 function dialogIsOpen() {
   return (
@@ -163,16 +163,16 @@ export function AdminStartList({
   } else {
     listBody = (
       <>
-        <Table ref={tableRef} layout="fixed" w={`calc(var(--adm-cell) * ${GRID_CELLS})`}>
+        <Table ref={tableRef} layout="fixed" w={`calc(var(--adm-cell) * ${START_LIST_GRID_CELLS})`}>
           <colgroup>
-            {Array.from({ length: GRID_CELLS }, (_, index) => (
+            {Array.from({ length: START_LIST_GRID_CELLS }, (_, index) => (
               <Box key={index} component="col" w="var(--adm-cell)" />
             ))}
           </colgroup>
           <Table.Thead>
             <Table.Tr>
               <Table.Th colSpan={3}>Course</Table.Th>
-              <Table.Th colSpan={2}>Phase</Table.Th>
+              <Table.Th colSpan={4}>Phase</Table.Th>
               <Table.Th>
                 <abbr title="Runners">Rn</abbr>
               </Table.Th>

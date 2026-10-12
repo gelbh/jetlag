@@ -176,6 +176,7 @@ describe("admin shared primitives", () => {
     expect(body.closest(".mantine-Drawer-content")?.getAttribute("style")).toContain(
       "var(--adm-paper)",
     );
+    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
   });
 
   it("names a region by its title and shows the count", () => {

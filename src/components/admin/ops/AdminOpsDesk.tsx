@@ -39,7 +39,7 @@ import { AdminRegion } from "../shared/AdminRegion";
 import { AdminWorld } from "../shared/AdminWorld";
 import { AdminMobileDesk } from "./AdminMobileDesk";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
-import { AdminStartList } from "./AdminStartList";
+import { AdminStartList, START_LIST_GRID_CELLS } from "./AdminStartList";
 import { AdminStatusStrip } from "./AdminStatusStrip";
 import "../incident/AdminIncidentDesk.css";
 import "./AdminOpsDesk.css";
@@ -400,7 +400,14 @@ function AdminOpsDeskContent() {
       mode="static"
       header={{ height: "3.25rem", offset: false }}
       navbar={
-        isDesktop ? { width: "22rem", breakpoint: "64em", collapsed: { mobile: true } } : undefined
+        isDesktop
+          ? {
+              // Grid cells plus the navbar's xs padding and border.
+              width: `calc(var(--adm-cell) * ${START_LIST_GRID_CELLS} + 1.5rem)`,
+              breakpoint: "64em",
+              collapsed: { mobile: true },
+            }
+          : undefined
       }
       aside={
         isDesktop

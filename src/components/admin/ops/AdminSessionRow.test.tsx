@@ -109,11 +109,11 @@ describe("AdminSessionRow", () => {
     );
 
     const row = screen.getByRole("row");
-    const marks = [within(row).getByText("Seek, idle"), within(row).getByText("1")].map(
+    const marks = [within(row).getByText("Seek"), within(row).getByText("1")].map(
       (label) => label.closest("[data-tone]") as HTMLElement,
     );
     for (const mark of marks) {
-      expect(mark.parentElement?.tagName).toBe("TD");
+      expect(mark.closest("td")).not.toBeNull();
       expect(mark.style.getPropertyValue("--badge-bg")).toContain("var(--adm-paper)");
       expect(mark.style.getPropertyValue("--badge-bg")).not.toContain("transparent");
       for (let node: HTMLElement | null = mark; node && node !== row; node = node.parentElement) {
@@ -162,9 +162,10 @@ describe("AdminSessionRow", () => {
       "live",
     );
     expect(within(liveRow).queryByText(/idle/)).toBeNull();
-    expect(within(idleRow).getByText("Seek, idle").closest("[data-tone]")).toHaveAttribute(
+    expect(within(idleRow).getByText("Seek").closest("[data-tone]")).toHaveAttribute(
       "data-tone",
       "neutral",
     );
+    expect(within(idleRow).getByText("idle")).toBeInTheDocument();
   });
 });

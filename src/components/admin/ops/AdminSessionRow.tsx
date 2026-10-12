@@ -74,11 +74,15 @@ export function AdminSessionRow({
           </Stack>
         </Button>
       </Table.Td>
-      <Table.Td colSpan={2}>
-        <StatusMark
-          tone={summary.isLive ? "live" : "neutral"}
-          label={summary.isLive ? phaseLabel : `${phaseLabel}, idle`}
-        />
+      <Table.Td colSpan={4}>
+        <Stack gap={0} align="flex-start">
+          <StatusMark tone={summary.isLive ? "live" : "neutral"} label={phaseLabel} />
+          {summary.isLive ? null : (
+            <Text component="span" size="xs" c="dimmed" style={cellStyle}>
+              idle
+            </Text>
+          )}
+        </Stack>
       </Table.Td>
       <Table.Td style={cellStyle}>{summary.memberCount}</Table.Td>
       <Table.Td style={cellStyle}>
