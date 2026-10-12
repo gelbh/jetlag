@@ -6,6 +6,33 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.4.0 - 2026-10-12
+
+### Fixes
+
+- A map change the server rejects no longer stays on your map or feeds later questions
+- The pending sync count no longer comes up one short after you change the map offline or clear it during a dropped connection
+- Tapping the map right after picking a question option no longer gets replaced by your GPS location
+- Double-tapping Veto or Randomize no longer shows a "Could not play that card" error
+- Map data no longer fails briefly after rejoining a session
+- Question countdowns keep ticking while the game is paused
+- randomize now sends matching and tentacle questions automatically
+- randomize now sends measuring questions automatically
+- randomize sends the rolled radar or photo question for the seeker who asked, and tells them when it has to be asked by hand
+- randomize is refused, and the card kept, when no other question of that tool is left
+- when randomize cannot send the rolled question, the seeker's tool opens with that option already picked
+- Send to hiders no longer silently does nothing when you reopen a question tool after sending from it
+
+### Improvements
+
+- Map pins can count as a POI (zoo, museum, hospital, and more) for Tentacles, Measuring, and Matching, with a game chat notice when one is added
+- Setup location pins can be limited to one POI category, which also makes them count in Matching where that category exists
+- Veto and Randomize sit in their own row under the answers, match the map style, and need a second tap to play
+- Hiders only see the reply that matches their location (all replies show if it cannot be worked out)
+- Hiders can add map pins too, including pins that count as a POI for questions, with a game chat notice when one is added
+- Hiders playing with a physical deck can Veto or Randomize a question from the question card, without turning on the simulated deck
+- Hiders can tap one of their own map pins to delete it
+
 ## 1.3.1 - 2026-10-11
 
 ### Fixes
