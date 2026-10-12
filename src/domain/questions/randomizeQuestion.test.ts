@@ -6,6 +6,7 @@ import {
   questionOptionsForTool,
   randomizedQuestionNotice,
   randomizeExcludeLabelsForPending,
+  randomizeManualNotice,
 } from "./randomizeQuestion";
 
 function matchingPending(
@@ -72,9 +73,32 @@ describe("pickRandomizeOption", () => {
 });
 
 describe("randomizedQuestionNotice", () => {
-  it("names the rolled option", () => {
+  it("says the question is being sent for auto-ask tools", () => {
+    expect(randomizedQuestionNotice("radar", "1 mi")).toBe(
+      "Hider played Randomize. Sending: 1 mi.",
+    );
+    expect(randomizedQuestionNotice("photo", "A tree")).toBe(
+      "Hider played Randomize. Sending: A tree.",
+    );
+  });
+
+  it("asks for a new walk on thermometer", () => {
+    expect(randomizedQuestionNotice("thermometer", "1 mi")).toBe(
+      "Hider played Randomize. Walk the 1 mi thermometer instead.",
+    );
+  });
+
+  it("keeps the ask-instead copy for tools without auto-ask yet", () => {
     expect(randomizedQuestionNotice("matching", "Airport")).toBe(
       "Hider played Randomize. Ask this matching question instead: Airport.",
+    );
+  });
+});
+
+describe("randomizeManualNotice", () => {
+  it("tells the seeker to ask it from the tool", () => {
+    expect(randomizeManualNotice("Airport")).toBe(
+      "Randomize rolled Airport. Could not build it automatically; ask it from the tool.",
     );
   });
 });
