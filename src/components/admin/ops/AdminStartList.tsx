@@ -33,6 +33,7 @@ interface AdminStartListProps {
   onRetry: () => void;
   hasMore: boolean;
   loadingMore: boolean;
+  loadMoreError: string | null;
   onLoadMore: () => void;
   observingCode: string | null;
   joinError: string | null;
@@ -57,6 +58,7 @@ export function AdminStartList({
   onRetry,
   hasMore,
   loadingMore,
+  loadMoreError,
   onLoadMore,
   observingCode,
   joinError,
@@ -111,9 +113,27 @@ export function AdminStartList({
   ]);
 
   const loadMoreButton = hasMore ? (
-    <Button type="button" variant="default" fullWidth disabled={loadingMore} onClick={onLoadMore}>
-      {loadingMore ? "Loading…" : "Load more sessions"}
-    </Button>
+    <Stack gap="xs">
+      {loadMoreError ? (
+        <Alert role="alert" data-tone="mispunch" title="Couldn't load more sessions">
+          <Stack gap="xs" align="flex-start">
+            <Text size="sm">{loadMoreError}</Text>
+            <Button
+              type="button"
+              variant="default"
+              size="compact-sm"
+              disabled={loadingMore}
+              onClick={onLoadMore}
+            >
+              Retry
+            </Button>
+          </Stack>
+        </Alert>
+      ) : null}
+      <Button type="button" variant="default" fullWidth disabled={loadingMore} onClick={onLoadMore}>
+        {loadingMore ? "Loading…" : "Load more sessions"}
+      </Button>
+    </Stack>
   ) : null;
 
   const errorAlert = error ? (

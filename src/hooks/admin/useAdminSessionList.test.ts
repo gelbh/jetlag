@@ -431,6 +431,62 @@ describe("useAdminSessionList", () => {
       expect(fetchAdminSessionsPage).toHaveBeenLastCalledWith(null);
     });
 
+    it("keeps a failed load more off the sync error and keeps polling", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [sampleSession],
+        nextPageToken: "p2",
+      });
+      const { result } = renderHook(() => useAdminSessionList(true));
+      await settle();
+
+      fetchAdminSessionsPage.mockRejectedValueOnce(new Error("page 2 down"));
+      await act(async () => {
+        await result.current.loadMore();
+      });
+
+      expect(result.current.error).toBeNull();
+      expect(result.current.loadMoreError).toBe("page 2 down");
+      expect(result.current.sessions).toEqual([sampleSession]);
+      expect(result.current.hasMore).toBe(true);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(ADMIN_SESSION_POLL_MS);
+      });
+
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(3);
+      expect(fetchAdminSessionsPage).toHaveBeenLastCalledWith(null);
+      expect(result.current.loadMoreError).toBeNull();
+    });
+
+    it("clears the load more error on the next successful load more", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [sampleSession],
+        nextPageToken: "p2",
+      });
+      const { result } = renderHook(() => useAdminSessionList(true));
+      await settle();
+
+      fetchAdminSessionsPage.mockRejectedValueOnce(new Error("page 2 down"));
+      await act(async () => {
+        await result.current.loadMore();
+      });
+      expect(result.current.loadMoreError).toBe("page 2 down");
+
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [otherSession],
+        nextPageToken: null,
+      });
+      await act(async () => {
+        await result.current.loadMore();
+      });
+
+      expect(result.current.loadMoreError).toBeNull();
+      expect(result.current.error).toBeNull();
+      expect(result.current.sessions).toEqual([sampleSession, otherSession]);
+    });
+
     it("never polls when disabled", async () => {
       vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
       renderHook(() => useAdminSessionList(false));

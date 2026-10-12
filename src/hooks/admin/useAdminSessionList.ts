@@ -63,6 +63,7 @@ export function useAdminSessionList(enabled: boolean) {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(() => initial.lastFetchedAt);
   const [nextPageToken, setNextPageToken] = useState<string | null>(() => initial.nextPageToken);
   const [enabledState, setEnabledState] = useState(enabled);
@@ -90,6 +91,7 @@ export function useAdminSessionList(enabled: boolean) {
         setLoading(true);
       }
       setError(null);
+      setLoadMoreError(null);
     }
   }
 
@@ -125,6 +127,7 @@ export function useAdminSessionList(enabled: boolean) {
             if (requestGeneration === requestGenerationRef.current) {
               const fetchedAt = new Date();
               extraPagesLoadedRef.current = false;
+              setLoadMoreError(null);
               setSessions(page.sessions);
               setNextPageToken(page.nextPageToken);
               setLastFetchedAt(fetchedAt);
@@ -179,12 +182,12 @@ export function useAdminSessionList(enabled: boolean) {
     setRefreshing(false);
     setLoadingMore(true);
     loadingMoreRef.current = true;
-    setError(null);
 
     try {
       const page = await fetchAdminSessionsPage(pageToken);
       if (requestGeneration === requestGenerationRef.current) {
         extraPagesLoadedRef.current = true;
+        setLoadMoreError(null);
         setSessions((current) => {
           const merged = mergeSessionsById(current, page.sessions);
           writeAdminSessionListCache({
@@ -196,10 +199,10 @@ export function useAdminSessionList(enabled: boolean) {
         });
         setNextPageToken(page.nextPageToken);
       }
-    } catch (loadMoreError) {
+    } catch (pageError) {
       if (requestGeneration === requestGenerationRef.current) {
-        setError(
-          loadMoreError instanceof Error ? loadMoreError.message : "Couldn't load more sessions.",
+        setLoadMoreError(
+          pageError instanceof Error ? pageError.message : "Couldn't load more sessions.",
         );
       }
     }
@@ -240,6 +243,7 @@ export function useAdminSessionList(enabled: boolean) {
     loadingMore: enabled ? loadingMore : false,
     hasMore: enabled ? nextPageToken != null : false,
     error: enabled ? error : null,
+    loadMoreError: enabled ? loadMoreError : null,
     lastFetchedAt: enabled ? lastFetchedAt : null,
     refresh,
     loadMore,
