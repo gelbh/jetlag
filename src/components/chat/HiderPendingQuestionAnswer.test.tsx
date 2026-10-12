@@ -118,6 +118,8 @@ describe("HiderPendingQuestionAnswer", () => {
     );
     expect(screen.queryByRole("button", { name: "Play Randomize" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Play Veto" }));
+    expect(onPlay).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Tap again to play Veto" }));
     expect(onPlay).toHaveBeenCalledWith("pq-radar", "msg-radar", "veto");
   });
 
@@ -139,6 +141,7 @@ describe("HiderPendingQuestionAnswer", () => {
     );
     expect(screen.getByRole("button", { name: "Play Veto" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Play Randomize" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tap again to play Randomize" }));
     expect(onPlay).toHaveBeenCalledWith("pq-radar", "msg-radar", "randomize");
   });
 });
