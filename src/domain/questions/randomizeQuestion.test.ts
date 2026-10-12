@@ -80,6 +80,12 @@ describe("randomizedQuestionNotice", () => {
     expect(randomizedQuestionNotice("photo", "A tree")).toBe(
       "Hider played Randomize. Sending: A tree.",
     );
+    expect(randomizedQuestionNotice("matching", "Airport")).toBe(
+      "Hider played Randomize. Sending: Airport.",
+    );
+    expect(randomizedQuestionNotice("tentacle", "Museum")).toBe(
+      "Hider played Randomize. Sending: Museum.",
+    );
   });
 
   it("asks for a new walk on thermometer", () => {
@@ -89,8 +95,8 @@ describe("randomizedQuestionNotice", () => {
   });
 
   it("keeps the ask-instead copy for tools without auto-ask yet", () => {
-    expect(randomizedQuestionNotice("matching", "Airport")).toBe(
-      "Hider played Randomize. Ask this matching question instead: Airport.",
+    expect(randomizedQuestionNotice("measuring", "Airport")).toBe(
+      "Hider played Randomize. Ask this measuring question instead: Airport.",
     );
   });
 });
