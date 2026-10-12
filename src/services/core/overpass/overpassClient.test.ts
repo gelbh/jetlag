@@ -304,6 +304,45 @@ describe("overpassClient", () => {
       Authorization: "Bearer stale-token",
       "X-Session-Id": "session-premium",
     });
+    const getIdToken = vi.fn().mockResolvedValue("fresh-token");
+    vi.spyOn(firebase, "getFirebaseAuth").mockReturnValue({
+      currentUser: { getIdToken },
+    } as never);
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        headers: new Headers(),
+        text: async () => "",
+      })
+      .mockResolvedValue(mockOverpassResponse({ elements: [{ id: 1 }] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(queryOverpass<{ elements: unknown[] }>("[out:json];")).resolves.toEqual({
+      elements: [{ id: 1 }],
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(getIdToken).toHaveBeenCalledWith(true);
+  });
+
+  it("rebuilds proxy headers for the 401 retry", async () => {
+    vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
+    setPremiumApiContext(premiumSession());
+    const retryHeaders = {
+      Authorization: "Bearer fresh-uid-token",
+      "X-Session-Id": "session-premium",
+      "X-Firebase-AppCheck": "retry-app-check",
+    };
+    const buildHeaders = vi
+      .spyOn(accessControl, "buildPremiumProxyHeaders")
+      .mockResolvedValueOnce({
+        Authorization: "Bearer stale-token",
+        "X-Session-Id": "session-premium",
+      })
+      .mockResolvedValueOnce(retryHeaders);
     vi.spyOn(firebase, "getFirebaseAuth").mockReturnValue({
       currentUser: {
         getIdToken: vi.fn().mockResolvedValue("fresh-token"),
@@ -325,8 +364,8 @@ describe("overpassClient", () => {
       elements: [{ id: 1 }],
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[1]?.[1]?.headers?.Authorization).toBe("Bearer fresh-token");
+    expect(buildHeaders).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]?.[1]?.headers).toMatchObject(retryHeaders);
   });
 
   it("throws immediately for other failed responses", async () => {
