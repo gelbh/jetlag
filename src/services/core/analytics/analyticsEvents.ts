@@ -75,6 +75,7 @@ export type AnalyticsEventProps = {
   };
   hider_card_played: {
     card: PowerUpId | "curse" | "move";
+    deck?: "physical";
   };
   analytics_consent_accepted: {
     surface: "banner";

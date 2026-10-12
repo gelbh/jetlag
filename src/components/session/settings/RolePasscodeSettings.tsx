@@ -79,9 +79,8 @@ export function RolePasscodeSettings({
       setRevealedCodes((prev) => ({ ...prev, [role]: result.rolePasscode }));
     } catch (error) {
       setError(callableErrorMessage(error, "Couldn't load that role code. Try again."));
-    } finally {
-      setBusyRole(null);
     }
+    setBusyRole(null);
   };
 
   const handleCopy = async (role: RevealRole) => {
@@ -115,9 +114,8 @@ export function RolePasscodeSettings({
       await copy(result.rolePasscode);
     } catch (error) {
       setError(callableErrorMessage(error, "Couldn't regenerate that role code. Try again."));
-    } finally {
-      setBusyRole(null);
     }
+    setBusyRole(null);
   };
 
   return (

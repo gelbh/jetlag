@@ -309,8 +309,8 @@ export function useThermometerTool({
   const resetDraft = useCallback(() => {
     setEditingSetup(true);
     walkTracker.cancelWalk();
-    session.open();
-  }, [session.open, walkTracker]);
+    openSession();
+  }, [openSession, walkTracker]);
 
   const startGpsWalk = useCallback(async () => {
     await startThermometerGpsWalk({

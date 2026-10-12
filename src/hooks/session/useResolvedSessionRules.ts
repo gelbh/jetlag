@@ -2,11 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { GameArea, SessionRecord } from "../../domain/map/annotations";
 import { BUNDLED_REGION_PACK_GEO_REVISION } from "../../domain/regions/regionPack";
 import { isKnownRegionPack } from "../../domain/regions/regionPackRegistry";
-import {
-  type SessionRulesInput,
-  sessionRulesFromRecord,
-  sessionRulesSnapshot,
-} from "../../domain/session/rules";
+import { type SessionRulesInput, sessionRulesSnapshot } from "../../domain/session/rules";
 import {
   isPlayAreaReadySync,
   matchingAreasCacheKey,
@@ -53,7 +49,10 @@ export function useResolvedSessionRules(
   session: SessionRecord | null | undefined,
 ): ResolvedSessionRulesState {
   const sessionRulesKey = sessionRulesSnapshot(session);
-  const baseRules = useMemo(() => sessionRulesFromRecord(session), [sessionRulesKey]);
+  const baseRules = useMemo(
+    () => JSON.parse(sessionRulesKey) as SessionRulesInput,
+    [sessionRulesKey],
+  );
 
   const regionPackId = session?.regionPackId;
   const regionPackSubregionId = session?.regionPackSubregionId;

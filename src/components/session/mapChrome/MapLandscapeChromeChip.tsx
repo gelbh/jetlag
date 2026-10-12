@@ -3,9 +3,11 @@ import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
 import type { SyncStatus } from "@/domain/device/sync/sync";
+import { hasOpenQuestionCountdown } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
-import type { TimerState } from "@/domain/session/timer/timer";
+import { isTimerRunning, type TimerState } from "@/domain/session/timer/timer";
+import { useServerNowMs } from "@/hooks/time/useServerNowMs";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
@@ -34,11 +36,17 @@ export function MapLandscapeChromeChip({
   queuedWrites,
   syncMessage,
 }: MapLandscapeChromeChipProps) {
+  const nowMs = useServerNowMs(
+    timerHasStarted && (isTimerRunning(timerState) || hasOpenQuestionCountdown(pendingQuestions))
+      ? 1000
+      : null,
+  );
   const timer = mapLandscapeChipTimerLabel({
     sessionRules,
     timerState,
     timerHasStarted,
     pendingQuestions,
+    nowMs,
   });
   const syncDisplay = syncRailDisplay(syncStatus, queuedWrites, syncMessage);
   const syncLabel = surveySyncShortLabel(syncStatus, queuedWrites);

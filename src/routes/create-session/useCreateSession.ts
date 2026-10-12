@@ -84,6 +84,9 @@ import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 const MISSING_GAME_AREA_ERROR =
   "Search for a place, load a preset, or open Draw to set the play area.";
 
+const loadKmzImport = () => import("../../services/core/capture/kmzImport");
+const loadSeaLevelProgressive = () => import("../../services/geo/elevation/seaLevelProgressive");
+
 export function useCreateSession() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -643,7 +646,7 @@ export function useCreateSession() {
     setError(null);
 
     try {
-      const { parseBoundaryFile } = await import("../../services/core/capture/kmzImport");
+      const { parseBoundaryFile } = await loadKmzImport();
       const gameArea = await parseBoundaryFile(file);
       applyImportedBoundary(gameArea, file.name);
     } catch (nextError) {
@@ -654,9 +657,8 @@ export function useCreateSession() {
             ? nextError.message
             : "Could not import boundary file.",
       );
-    } finally {
-      setImportLoading(false);
     }
+    setImportLoading(false);
   };
 
   const handleSearch = async () => {
@@ -708,167 +710,173 @@ export function useCreateSession() {
     setAccessCodeError(null);
 
     try {
-      const manualArea =
-        framing.userFramed &&
-        framing.manualGameArea &&
-        boundingBoxHasMinimumSpan(gameAreaToBoundingBox(framing.manualGameArea))
-          ? framing.manualGameArea
-          : null;
-      const draftArea = importedGameArea
-        ? importedGameArea
-        : manualArea
-          ? manualArea
-          : selectedPlace
-            ? placeToGameArea(selectedPlace)
-            : framing.manualGameArea;
+      await (async () => {
+        const manualArea =
+          framing.userFramed &&
+          framing.manualGameArea &&
+          boundingBoxHasMinimumSpan(gameAreaToBoundingBox(framing.manualGameArea))
+            ? framing.manualGameArea
+            : null;
+        const draftArea = importedGameArea
+          ? importedGameArea
+          : manualArea
+            ? manualArea
+            : selectedPlace
+              ? placeToGameArea(selectedPlace)
+              : framing.manualGameArea;
 
-      const areasForSession = draftArea ? [...selectedAreas, draftArea] : selectedAreas;
+        const areasForSession = draftArea ? [...selectedAreas, draftArea] : selectedAreas;
 
-      const gameArea =
-        areasForSession.length === 0
-          ? null
-          : areasForSession.length === 1
-            ? areasForSession[0]!
-            : unionGameAreas(areasForSession);
+        const gameArea =
+          areasForSession.length === 0
+            ? null
+            : areasForSession.length === 1
+              ? areasForSession[0]!
+              : unionGameAreas(areasForSession);
 
-      if (!gameArea) {
-        setError(MISSING_GAME_AREA_ERROR);
-        return;
-      }
-
-      const metroId = transitMetroId || undefined;
-      const tier = resolveSubmitTier();
-      let useAccessClaimForPremium = hostHasAccessClaim;
-
-      if (tier === "premium" && !useAccessClaimForPremium && !paidPremiumHost) {
-        const trimmedCode = accessCode.trim();
-        if (!trimmedCode) {
-          setAccessCodeError("Unlock premium or enter a host access code.");
+        if (!gameArea) {
+          setError(MISSING_GAME_AREA_ERROR);
           return;
         }
 
-        setVerifyingAccess(true);
-        try {
-          await grantAccess(trimmedCode);
-          setHostHasAccessClaim(true);
-          useAccessClaimForPremium = true;
-        } catch (nextError) {
-          setAccessCodeError(
-            nextError instanceof Error ? nextError.message : "Invalid access code.",
-          );
-          return;
-        } finally {
+        const metroId = transitMetroId || undefined;
+        const tier = resolveSubmitTier();
+        let useAccessClaimForPremium = hostHasAccessClaim;
+
+        if (tier === "premium" && !useAccessClaimForPremium && !paidPremiumHost) {
+          const trimmedCode = accessCode.trim();
+          if (!trimmedCode) {
+            setAccessCodeError("Unlock premium or enter a host access code.");
+            return;
+          }
+
+          setVerifyingAccess(true);
+          let grantError: string | null = null;
+          try {
+            await grantAccess(trimmedCode);
+            setHostHasAccessClaim(true);
+            useAccessClaimForPremium = true;
+          } catch (nextError) {
+            grantError = nextError instanceof Error ? nextError.message : "Invalid access code.";
+          }
           setVerifyingAccess(false);
-        }
-      }
-
-      const rulesPatch = {
-        ...sessionRulesPatchFromAdvancedSettings(gameSize, advancedSettings, distanceUnit),
-        ...(regionPackId
-          ? {
-              regionPackId,
-              bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
-              playAreaFromPack:
-                gameArea === packPlayAreaRef.current?.area &&
-                regionPackId === packPlayAreaRef.current.packId &&
-                regionPackSubregionId === packPlayAreaRef.current.subregionId,
-              ...(regionPackSubregionId ? { regionPackSubregionId } : {}),
-            }
-          : {}),
-        ...(selectedPlace?.displayName?.trim() || locationQuery.trim()
-          ? {
-              gameAreaLabel: selectedPlace?.displayName.trim() || locationQuery.trim(),
-            }
-          : {}),
-      };
-
-      if (isFirebaseConfigured()) {
-        const user = await retryAsync(() => ensureAnonymousUser());
-        const premiumSubmitError = validatePremiumHostSubmit(user, tier, useAccessClaimForPremium);
-        if (premiumSubmitError) {
-          setError(premiumSubmitError);
-          return;
+          if (grantError !== null) {
+            setAccessCodeError(grantError);
+            return;
+          }
         }
 
-        const usePremiumCallable =
-          tier === "premium" && !useAccessClaimForPremium && paidPremiumHost;
-        const session = usePremiumCallable
-          ? await retryAsync(() =>
-              createPremiumRemoteSession({
-                gameArea,
-                hostUid: user.uid,
-                tier,
-                transitMetroId: metroId,
-                hostRole: playerRole,
-                gameSize,
-                rulesPatch,
-                distanceUnit,
-                hostAppVersion: APP_VERSION,
-              }),
-            )
-          : await retryAsync(() =>
-              createRemoteSession(
-                gameArea,
-                user.uid,
-                tier,
-                metroId,
-                playerRole,
-                gameSize,
-                rulesPatch,
-                distanceUnit,
-              ),
-            );
-        setSession(session, user.uid);
-        setPremiumApiContext(session);
-        emitSessionStartedActivity(session.id, user.uid);
-      } else {
-        const localSession = {
-          id: LOCAL_SESSION_ID,
-          code: generateLocalCode(),
-          gameArea,
-          createdAt: new Date().toISOString(),
-          memberUids: [],
-          memberRoles: { local: playerRole },
-          gameSize,
-          distanceUnit,
-          tier: "free" as const,
-          transitMetroId: metroId,
-          ...rulesPatch,
-          hidingZoneRadiusMeters:
-            rulesPatch.hidingZoneRadiusMeters ?? hidingZoneRadiusMeters(gameSize, distanceUnit),
+        const rulesPatch = {
+          ...sessionRulesPatchFromAdvancedSettings(gameSize, advancedSettings, distanceUnit),
+          ...(regionPackId
+            ? {
+                regionPackId,
+                bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+                playAreaFromPack:
+                  gameArea === packPlayAreaRef.current?.area &&
+                  regionPackId === packPlayAreaRef.current.packId &&
+                  regionPackSubregionId === packPlayAreaRef.current.subregionId,
+                ...(regionPackSubregionId ? { regionPackSubregionId } : {}),
+              }
+            : {}),
+          ...(selectedPlace?.displayName?.trim() || locationQuery.trim()
+            ? {
+                gameAreaLabel: selectedPlace?.displayName.trim() || locationQuery.trim(),
+              }
+            : {}),
         };
-        useTimerStore.getState().clearTimer(LOCAL_SESSION_ID);
-        setSession(localSession, "local");
-        setPremiumApiContext(localSession);
-        emitSessionStartedActivity(LOCAL_SESSION_ID, "local");
-      }
 
-      track(ANALYTICS_EVENTS.session_created, {
-        tier: isFirebaseConfigured() ? tier : "free",
-        gameSize,
-        role: playerRole,
-      });
+        if (isFirebaseConfigured()) {
+          const user = await retryAsync(() => ensureAnonymousUser());
+          const premiumSubmitError = validatePremiumHostSubmit(
+            user,
+            tier,
+            useAccessClaimForPremium,
+          );
+          if (premiumSubmitError) {
+            setError(premiumSubmitError);
+            return;
+          }
 
-      if (!lowPowerMode) {
-        const matchingAreas = await resolveSessionMatchingAreas({
-          regionPackId,
-          regionPackSubregionId,
-          customMatchingAreas: advancedSettings.customMatchingAreas,
+          const usePremiumCallable =
+            tier === "premium" && !useAccessClaimForPremium && paidPremiumHost;
+          const session = usePremiumCallable
+            ? await retryAsync(() =>
+                createPremiumRemoteSession({
+                  gameArea,
+                  hostUid: user.uid,
+                  tier,
+                  transitMetroId: metroId,
+                  hostRole: playerRole,
+                  gameSize,
+                  rulesPatch,
+                  distanceUnit,
+                  hostAppVersion: APP_VERSION,
+                }),
+              )
+            : await retryAsync(() =>
+                createRemoteSession(
+                  gameArea,
+                  user.uid,
+                  tier,
+                  metroId,
+                  playerRole,
+                  gameSize,
+                  rulesPatch,
+                  distanceUnit,
+                ),
+              );
+          setSession(session, user.uid);
+          setPremiumApiContext(session);
+          emitSessionStartedActivity(session.id, user.uid);
+        } else {
+          const localSession = {
+            id: LOCAL_SESSION_ID,
+            code: generateLocalCode(),
+            gameArea,
+            createdAt: new Date().toISOString(),
+            memberUids: [],
+            memberRoles: { local: playerRole },
+            gameSize,
+            distanceUnit,
+            tier: "free" as const,
+            transitMetroId: metroId,
+            ...rulesPatch,
+            hidingZoneRadiusMeters:
+              rulesPatch.hidingZoneRadiusMeters ?? hidingZoneRadiusMeters(gameSize, distanceUnit),
+          };
+          useTimerStore.getState().clearTimer(LOCAL_SESSION_ID);
+          setSession(localSession, "local");
+          setPremiumApiContext(localSession);
+          emitSessionStartedActivity(LOCAL_SESSION_ID, "local");
+        }
+
+        track(ANALYTICS_EVENTS.session_created, {
+          tier: isFirebaseConfigured() ? tier : "free",
+          gameSize,
+          role: playerRole,
         });
-        preloadGameAreaCaches(gameArea, matchingAreas, regionPackId, tier);
-        void import("../../services/geo/elevation/seaLevelProgressive")
-          .then(({ startSeaLevelBackgroundSampling }) => {
-            startSeaLevelBackgroundSampling(gameArea, { regionPackId });
-          })
-          .catch(() => {});
-        void preloadCriticalGameAreaCaches(gameArea, matchingAreas, regionPackId);
-      }
-      navigate("/map");
+
+        if (!lowPowerMode) {
+          const matchingAreas = await resolveSessionMatchingAreas({
+            regionPackId,
+            regionPackSubregionId,
+            customMatchingAreas: advancedSettings.customMatchingAreas,
+          });
+          preloadGameAreaCaches(gameArea, matchingAreas, regionPackId, tier);
+          void loadSeaLevelProgressive()
+            .then(({ startSeaLevelBackgroundSampling }) => {
+              startSeaLevelBackgroundSampling(gameArea, { regionPackId });
+            })
+            .catch(() => {});
+          void preloadCriticalGameAreaCaches(gameArea, matchingAreas, regionPackId);
+        }
+        navigate("/map");
+      })();
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Couldn't create session.");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const confirmSessionRef = useRef(confirmSession);

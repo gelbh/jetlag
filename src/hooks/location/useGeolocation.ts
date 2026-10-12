@@ -15,29 +15,32 @@ export function useGeolocation() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    setLoading(true);
     setError(null);
 
-    try {
-      const live = getFreshLiveLocationReading();
-      if (live) {
-        setReading(live);
-        return live;
-      }
-
-      const next = await confirmAndRequestLocationAccess({
-        highAccuracy: false,
-        maximumAge: LIVE_LOCATION_FRESH_MS,
-      });
-      setReading(next);
-      return next;
-    } catch (nextError) {
-      const message = unknownGeolocationErrorMessage(nextError);
-      setError(message);
-      throw nextError;
-    } finally {
-      setLoading(false);
+    const live = getFreshLiveLocationReading();
+    if (live) {
+      setReading(live);
+      return live;
     }
+
+    setLoading(true);
+
+    const read = async () => {
+      try {
+        const next = await confirmAndRequestLocationAccess({
+          highAccuracy: false,
+          maximumAge: LIVE_LOCATION_FRESH_MS,
+        });
+        setReading(next);
+        return next;
+      } catch (nextError) {
+        const message = unknownGeolocationErrorMessage(nextError);
+        setError(message);
+        throw nextError;
+      }
+    };
+
+    return read().finally(() => setLoading(false));
   }, []);
 
   return {

@@ -97,19 +97,15 @@ export function useMeasuringInteractions({
 
       try {
         const results = await searchPlaces(trimmed);
-        if (results.length === 0) {
-          setMeasuringSearchResults([]);
-          setMeasuringError("No matching places found. Try a more specific name.");
-          return;
-        }
-
         setMeasuringSearchResults(results);
+        if (results.length === 0) {
+          setMeasuringError("No matching places found. Try a more specific name.");
+        }
       } catch (error) {
         setMeasuringSearchResults([]);
         setMeasuringError(error instanceof Error ? error.message : "Place search failed.");
-      } finally {
-        setMeasuringSearchLoading(false);
       }
+      setMeasuringSearchLoading(false);
     },
     [
       measuringSearchQuery,
@@ -169,17 +165,15 @@ export function useMeasuringInteractions({
       try {
         const nearest = await fetchMeasuringMapTarget(point, gameArea, measuringLocationCategory);
 
-        if (!nearest.ok) {
+        if (nearest.ok) {
+          setMeasuringTargetAnchor(nearest.point, nearest.name);
+        } else {
           setMeasuringError(nearest.message);
-          return;
         }
-
-        setMeasuringTargetAnchor(nearest.point, nearest.name);
       } catch (error) {
         setMeasuringError(overpassErrorMessage(error, "That venue wasn't found on the map."));
-      } finally {
-        setMeasuringLoading(false);
       }
+      setMeasuringLoading(false);
     },
     [
       gameArea,
@@ -256,26 +250,24 @@ export function useMeasuringInteractions({
         measuringLocationCategory,
       );
 
-      if (!nearest.ok) {
+      if (nearest.ok) {
+        setMeasuringTargetPoint(nearest.point);
+        setMeasuringTargetPlaceName(nearest.name);
+        setMeasuringDistanceMeters(nearest.distanceMeters);
+        setMeasuringAnswer(null);
+      } else {
         setMeasuringTargetPoint(null);
         setMeasuringTargetPlaceName(null);
         setMeasuringDistanceMeters(null);
         setMeasuringError(nearest.message);
-        return;
       }
-
-      setMeasuringTargetPoint(nearest.point);
-      setMeasuringTargetPlaceName(nearest.name);
-      setMeasuringDistanceMeters(nearest.distanceMeters);
-      setMeasuringAnswer(null);
     } catch (error) {
       setMeasuringTargetPoint(null);
       setMeasuringTargetPlaceName(null);
       setMeasuringDistanceMeters(null);
       setMeasuringError(overpassErrorMessage(error, "Nearest place wasn't found."));
-    } finally {
-      setMeasuringLoading(false);
     }
+    setMeasuringLoading(false);
   }, [
     gameArea,
     measuringLocationCategory,
