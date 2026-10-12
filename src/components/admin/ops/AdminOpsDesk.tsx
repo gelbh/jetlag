@@ -30,14 +30,12 @@ import { getFirebaseAuth } from "../../../services/core/firebase/firebase";
 import { useSessionStore } from "../../../state/sessionStore";
 import { PremiumSignInGate } from "../../billing/PremiumSignInGate";
 import { AppLink } from "../../navigation/AppLink";
-import { AdminIncidentActions } from "../incident/AdminIncidentActions";
-import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
-import { AdminIncidentInbox } from "../incident/AdminIncidentInbox";
 import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
 import { AdminEmptyState } from "../shared/AdminEmptyState";
 import { AdminRegion } from "../shared/AdminRegion";
 import { AdminWorld } from "../shared/AdminWorld";
 import { AdminMobileDesk } from "./AdminMobileDesk";
+import { AdminNeedsYou, type NeedsYouGroup } from "./AdminNeedsYou";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
 import { AdminStartList, START_LIST_GRID_CELLS } from "./AdminStartList";
 import { AdminStatusStrip } from "./AdminStatusStrip";
@@ -64,6 +62,12 @@ function continuePathForRoute(pathname: string, incidentId: string | null): stri
     return "/admin/incidents";
   }
   return "/admin";
+}
+
+function openGroupsForRoute(pathname: string): NeedsYouGroup[] {
+  if (pathname.startsWith("/admin/incidents")) return ["incidents"];
+  if (pathname.startsWith("/admin/preload-requests")) return ["preload"];
+  return ["incidents", "preload"];
 }
 
 export function AdminOpsDesk() {
@@ -117,6 +121,15 @@ function AdminOpsDeskContent() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [needsYouOpen, setNeedsYouOpen] = useState(onIncidentsRoute);
   const [drawerIncidentId, setDrawerIncidentId] = useState(selectedIncidentId);
+  const [openGroups, setOpenGroups] = useState<string[]>(() =>
+    openGroupsForRoute(location.pathname),
+  );
+  const [openGroupsPath, setOpenGroupsPath] = useState(location.pathname);
+
+  if (location.pathname !== openGroupsPath) {
+    setOpenGroupsPath(location.pathname);
+    setOpenGroups(openGroupsForRoute(location.pathname));
+  }
 
   if (selectedIncidentId !== drawerIncidentId) {
     setDrawerIncidentId(selectedIncidentId);
@@ -292,38 +305,18 @@ function AdminOpsDeskContent() {
     />
   );
 
-  const incidentDetail = <AdminIncidentDetail incidentId={selectedIncidentId} />;
-  const incidentActions = (
-    <AdminIncidentActions
-      incidentId={selectedIncidentId}
-      status={selectedIncident?.status ?? null}
-      agent={selectedIncident?.agent ?? null}
-      disabled={!selectedIncidentId}
-    />
-  );
-  const inbox = (
-    <AdminIncidentInbox
+  const needsYou = (
+    <AdminNeedsYou
       incidents={visibleIncidents}
-      selectedId={selectedIncidentId}
-      openCount={openCount}
-      loading={enabled ? incidentsLoading : false}
-      error={enabled ? incidentsError : null}
-      onSelect={handleSelectIncident}
+      incidentsLoading={enabled ? incidentsLoading : false}
+      incidentsError={enabled ? incidentsError : null}
+      selectedIncidentId={selectedIncidentId}
+      selectedIncident={selectedIncident}
+      onSelectIncident={handleSelectIncident}
+      onBackFromIncident={() => void navigate("/admin/incidents")}
+      openGroups={openGroups}
+      onOpenGroupsChange={setOpenGroups}
     />
-  );
-  const inboxBody = (
-    <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">{inbox}</div>
-  );
-  const incidentStack = (
-    <>
-      {inbox}
-      {selectedIncidentId ? (
-        <>
-          {incidentDetail}
-          {incidentActions}
-        </>
-      ) : null}
-    </>
   );
 
   if (accessState === "loading" || !authReady) {
@@ -452,22 +445,9 @@ function AdminOpsDeskContent() {
             }
             sessions={sessionsBody}
             incidents={
-              selectedIncidentId ? (
-                <div className="jl-scroll jl-ops-panel-scroll jl-ops-mobile-drill">
-                  <Button
-                    type="button"
-                    variant="default"
-                    className="jl-ops-mobile-back"
-                    onClick={() => void navigate("/admin/incidents")}
-                  >
-                    Back to inbox
-                  </Button>
-                  {incidentDetail}
-                  {incidentActions}
-                </div>
-              ) : (
-                inboxBody
-              )
+              <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+                {needsYou}
+              </div>
             }
           />
         )}
@@ -475,7 +455,7 @@ function AdminOpsDeskContent() {
       {isDesktop && wide ? (
         <AppShell.Aside mih={0} p="xs">
           <AdminRegion title="Needs you" count={openCount}>
-            {incidentStack}
+            {needsYou}
           </AdminRegion>
         </AppShell.Aside>
       ) : null}
@@ -485,8 +465,9 @@ function AdminOpsDeskContent() {
         position="right"
         size="24rem"
         title="Needs you"
+        closeOnEscape={!selectedIncidentId}
       >
-        {incidentStack}
+        {needsYou}
       </Drawer>
       <Drawer
         opened={settingsOpen}

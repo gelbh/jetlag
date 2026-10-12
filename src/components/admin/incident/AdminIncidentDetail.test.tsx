@@ -432,7 +432,7 @@ describe("AdminOpsDesk gate + mobile stack", () => {
     expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "mobile");
     expect(screen.getByTestId("admin-ops-mobile")).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Incidents" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("button", { name: "Back to inbox" })).toBeInTheDocument();
-    expect(screen.queryByLabelText("Incident queue")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
   });
 });
