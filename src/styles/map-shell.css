@@ -204,6 +204,8 @@
   .admin-monitor-pane {
     container-type: inline-size;
     container-name: admin-monitor;
+    /* Keeps the rail's z-index under desk overlays (Needs you drawer). */
+    isolation: isolate;
   }
 
   @media (width >= 1024px) {
