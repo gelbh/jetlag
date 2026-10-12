@@ -6,13 +6,20 @@ import { AdminStatusStrip } from "./AdminStatusStrip";
 import { AdminUtcClock } from "./AdminUtcClock";
 
 function strip(
-  overrides: { needsYouCount?: number; onRefresh?: () => void; onOpenSettings?: () => void } = {},
+  overrides: {
+    needsYouCount?: number;
+    incidentsLoading?: boolean;
+    onRefresh?: () => void;
+    onOpenSettings?: () => void;
+  } = {},
 ) {
   return (
     <AdminStatusStrip
       liveCount={3}
       runnerCount={11}
       needsYouCount={overrides.needsYouCount ?? 2}
+      inQueueCount={7}
+      incidentsLoading={overrides.incidentsLoading ?? false}
       refreshing={false}
       onRefresh={overrides.onRefresh ?? vi.fn()}
       onOpenSettings={overrides.onOpenSettings ?? vi.fn()}
@@ -37,6 +44,7 @@ describe("AdminStatusStrip", () => {
     expect(screen.getByLabelText("Live games")).toHaveTextContent("3");
     expect(screen.getByLabelText("Runners")).toHaveTextContent("11");
     expect(screen.getByLabelText("Needs you")).toHaveTextContent("2");
+    expect(screen.getByLabelText("In queue")).toHaveTextContent("7");
     expect(screen.queryByText(/broadcast/i)).toBeNull();
   });
 
@@ -73,6 +81,7 @@ describe("AdminStatusStrip", () => {
       screen.getByText("Event centre"),
       screen.getByLabelText("Live games"),
       screen.getByLabelText("Runners"),
+      screen.getByLabelText("In queue"),
       document.querySelector("time"),
     ]) {
       expect(detail?.closest(HIDDEN_ON_MOBILE)).not.toBeNull();
@@ -82,9 +91,14 @@ describe("AdminStatusStrip", () => {
   it("announces Needs you changes in a polite live region", () => {
     const { rerender } = renderStrip({ needsYouCount: 2 });
     const live = document.querySelector('[aria-live="polite"]');
-    expect(live).toHaveTextContent("2 open incidents");
+    expect(live).toHaveTextContent("Needs you: 2 open");
     rerender(strip({ needsYouCount: 5 }));
-    expect(live).toHaveTextContent("5 open incidents");
+    expect(live).toHaveTextContent("Needs you: 5 open");
+  });
+
+  it("holds the live region until incidents finish loading", () => {
+    renderStrip({ needsYouCount: 0, incidentsLoading: true });
+    expect(document.querySelector('[aria-live="polite"]')).toBeNull();
   });
 
   it("wires Refresh and Settings", () => {

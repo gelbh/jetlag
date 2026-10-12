@@ -23,6 +23,8 @@ interface AdminStatusStripProps {
   liveCount: number;
   runnerCount: number;
   needsYouCount: number;
+  inQueueCount: number;
+  incidentsLoading: boolean;
   refreshing: boolean;
   onRefresh: () => void;
   onOpenSettings: () => void;
@@ -32,6 +34,8 @@ export function AdminStatusStrip({
   liveCount,
   runnerCount,
   needsYouCount,
+  inQueueCount,
+  incidentsLoading,
   refreshing,
   onRefresh,
   onOpenSettings,
@@ -69,8 +73,15 @@ export function AdminStatusStrip({
         >
           <StatCell label="Needs you" value={needsYouCount} />
         </UnstyledButton>
+        <Divider orientation="vertical" visibleFrom="sm" />
+        <Box visibleFrom="sm">
+          <StatCell label="In queue" value={inQueueCount} />
+        </Box>
       </Group>
-      <VisuallyHidden aria-live="polite">{`${needsYouCount} open incidents`}</VisuallyHidden>
+      {/* Mounted after the first snapshot so opening the desk doesn't announce the initial count. */}
+      {incidentsLoading ? null : (
+        <VisuallyHidden aria-live="polite">{`Needs you: ${needsYouCount} open`}</VisuallyHidden>
+      )}
       <Group gap="xs" wrap="nowrap" flex="none">
         <Box visibleFrom="sm">
           <AdminUtcClock />
