@@ -28,9 +28,9 @@ import { AppUpdateContext, type AppUpdateContextValue } from "./appUpdateContext
 
 type ServiceWorkerReloader = (reloadPage?: boolean) => Promise<void>;
 
+const loadPwaRegister = () => import("virtual:pwa-register");
 // Dynamic: keeps firestore off the App chunk's static graph.
 const loadFirestoreIncidents = () => import("@/services/firestore/firestoreIncidents");
-const loadPwaRegister = () => import("virtual:pwa-register");
 
 function pickHigherVersion(left: string | undefined, right: string | undefined): string | null {
   if (!left && !right) {

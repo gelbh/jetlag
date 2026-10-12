@@ -80,4 +80,30 @@ describe("OAuthSignInButton", () => {
     });
     expect(onSignIn).not.toHaveBeenCalled();
   });
+
+  it("reports a Firebase config error instead of rejecting unhandled", async () => {
+    getFirebaseAuth.mockImplementationOnce(() => {
+      throw new Error("Firebase environment variables are not configured.");
+    });
+    const onSignIn = vi.fn(async () => undefined);
+    const onError = vi.fn();
+
+    render(
+      <OAuthSignInButton
+        provider="google"
+        onSignIn={onSignIn}
+        onSuccess={vi.fn()}
+        onError={onError}
+        label="Continue with Google"
+        icon={<span>G</span>}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledWith("Firebase environment variables are not configured.");
+    });
+    expect(onSignIn).not.toHaveBeenCalled();
+  });
 });

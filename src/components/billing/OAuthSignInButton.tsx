@@ -29,11 +29,21 @@ export function OAuthSignInButton({
 }: OAuthSignInButtonProps) {
   const [busy, setBusy] = useState(false);
 
+  const failureMessage = `${provider === "apple" ? "Apple" : "Google"} sign-in failed.`;
+
   const handleClick = async () => {
-    // Never await before opening the popup — Chrome spends the user gesture
+    // Never await before opening the popup, since Chrome spends the user gesture
     // on any prior await and returns auth/popup-blocked → redirect fallback.
-    if (!getFirebaseAuth().currentUser) {
-      onError("Sign-in isn’t ready yet. Wait a moment and try again.");
+    let notReadyMessage: string | null = null;
+    try {
+      if (!getFirebaseAuth().currentUser) {
+        notReadyMessage = "Sign-in isn’t ready yet. Wait a moment and try again.";
+      }
+    } catch (error) {
+      notReadyMessage = error instanceof Error ? error.message : failureMessage;
+    }
+    if (notReadyMessage !== null) {
+      onError(notReadyMessage);
       return;
     }
     setBusy(true);
@@ -45,11 +55,7 @@ export function OAuthSignInButton({
       if (isOAuthRedirectInProgress(error)) {
         return;
       }
-      onError(
-        error instanceof Error
-          ? error.message
-          : `${provider === "apple" ? "Apple" : "Google"} sign-in failed.`,
-      );
+      onError(error instanceof Error ? error.message : failureMessage);
       setBusy(false);
     }
   };
