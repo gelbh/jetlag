@@ -78,9 +78,8 @@ export function AdminIncidentActions({
       setMitigationError(
         error instanceof Error ? error.message : "Could not apply the mitigation.",
       );
-    } finally {
-      setMitigationBusy(false);
     }
+    setMitigationBusy(false);
   };
 
   const onPublishHotfix = async () => {
@@ -105,9 +104,8 @@ export function AdminIncidentActions({
       );
     } catch (error) {
       setHotfixError(error instanceof Error ? error.message : "Could not publish the hotfix.");
-    } finally {
-      setHotfixBusy(false);
     }
+    setHotfixBusy(false);
   };
 
   const onUpdateStatus = async (
@@ -126,9 +124,8 @@ export function AdminIncidentActions({
       setStatusError(
         error instanceof Error ? error.message : "Could not update the incident status.",
       );
-    } finally {
-      setStatusBusy(false);
     }
+    setStatusBusy(false);
   };
 
   return (

@@ -118,33 +118,31 @@ export function useAdminSessionList(enabled: boolean) {
 
           try {
             const page = await fetchAdminSessionsPage(null);
-            if (requestGeneration !== requestGenerationRef.current) {
-              return;
-            }
-
-            const fetchedAt = new Date();
-            setSessions(page.sessions);
-            setNextPageToken(page.nextPageToken);
-            setLastFetchedAt(fetchedAt);
-            writeAdminSessionListCache({
-              sessions: page.sessions,
-              nextPageToken: page.nextPageToken,
-              lastFetchedAt: fetchedAt,
-            });
-          } catch (refreshError) {
-            if (requestGeneration !== requestGenerationRef.current) {
-              return;
-            }
-
-            setError(
-              refreshError instanceof Error ? refreshError.message : "Couldn't load live sessions.",
-            );
-          } finally {
             if (requestGeneration === requestGenerationRef.current) {
-              setLoading(false);
-              setRefreshing(false);
+              const fetchedAt = new Date();
+              setSessions(page.sessions);
+              setNextPageToken(page.nextPageToken);
+              setLastFetchedAt(fetchedAt);
+              writeAdminSessionListCache({
+                sessions: page.sessions,
+                nextPageToken: page.nextPageToken,
+                lastFetchedAt: fetchedAt,
+              });
+            }
+          } catch (refreshError) {
+            if (requestGeneration === requestGenerationRef.current) {
+              setError(
+                refreshError instanceof Error
+                  ? refreshError.message
+                  : "Couldn't load live sessions.",
+              );
             }
           }
+          if (requestGeneration !== requestGenerationRef.current) {
+            return;
+          }
+          setLoading(false);
+          setRefreshing(false);
 
           const trailing = trailingRefreshOptionsRef.current;
           trailingRefreshOptionsRef.current = null;
@@ -156,13 +154,11 @@ export function useAdminSessionList(enabled: boolean) {
       })();
 
       inFlightRefreshRef.current = run;
-      try {
-        await run;
-      } finally {
+      await run.finally(() => {
         if (inFlightRefreshRef.current === run) {
           inFlightRefreshRef.current = null;
         }
-      }
+      });
     },
     [enabled],
   );
@@ -181,32 +177,27 @@ export function useAdminSessionList(enabled: boolean) {
 
     try {
       const page = await fetchAdminSessionsPage(pageToken);
-      if (requestGeneration !== requestGenerationRef.current) {
-        return;
-      }
-
-      setSessions((current) => {
-        const merged = mergeSessionsById(current, page.sessions);
-        writeAdminSessionListCache({
-          sessions: merged,
-          nextPageToken: page.nextPageToken,
-          lastFetchedAt: lastFetchedAtRef.current ?? new Date(),
-        });
-        return merged;
-      });
-      setNextPageToken(page.nextPageToken);
-    } catch (loadMoreError) {
-      if (requestGeneration !== requestGenerationRef.current) {
-        return;
-      }
-
-      setError(
-        loadMoreError instanceof Error ? loadMoreError.message : "Couldn't load more sessions.",
-      );
-    } finally {
       if (requestGeneration === requestGenerationRef.current) {
-        setLoadingMore(false);
+        setSessions((current) => {
+          const merged = mergeSessionsById(current, page.sessions);
+          writeAdminSessionListCache({
+            sessions: merged,
+            nextPageToken: page.nextPageToken,
+            lastFetchedAt: lastFetchedAtRef.current ?? new Date(),
+          });
+          return merged;
+        });
+        setNextPageToken(page.nextPageToken);
       }
+    } catch (loadMoreError) {
+      if (requestGeneration === requestGenerationRef.current) {
+        setError(
+          loadMoreError instanceof Error ? loadMoreError.message : "Couldn't load more sessions.",
+        );
+      }
+    }
+    if (requestGeneration === requestGenerationRef.current) {
+      setLoadingMore(false);
     }
   }, [enabled, loadingMore, nextPageToken]);
 
