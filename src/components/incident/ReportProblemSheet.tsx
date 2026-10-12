@@ -166,9 +166,8 @@ function ReportProblemSheetContent({
       setIncidentId(result.incidentId);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Could not submit the report.");
-    } finally {
-      setSubmitting(false);
     }
+    setSubmitting(false);
   };
 
   if (incidentId) {

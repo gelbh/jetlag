@@ -72,12 +72,10 @@ export function useIncidentThread(incidentId: string | null | undefined): UseInc
       }
       sendInFlightRef.current = true;
       setSending(true);
-      try {
-        await postIncidentMessage(normalizedIncidentId, text);
-      } finally {
+      await postIncidentMessage(normalizedIncidentId, text).finally(() => {
         sendInFlightRef.current = false;
         setSending(false);
-      }
+      });
     },
     [normalizedIncidentId],
   );

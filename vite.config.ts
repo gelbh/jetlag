@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => ({
     wasm(),
     ...createPosthogPlugins({ appVersion }),
     // React Compiler full compile; exclude violators with "use no memo" (CONTRIBUTING.md)
-    react({ compiler: true }),
+    react({ compiler: { logDiagnostics: true } }),
     tailwindcss(),
     createPwaPlugin(),
     timeEndpointPlugin(),

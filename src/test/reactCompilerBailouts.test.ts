@@ -3,22 +3,10 @@ import { join } from "node:path";
 import { transform } from "oxc-transform-react";
 import { describe, expect, it } from "vitest";
 
-// Files React Compiler currently skips in production builds. Delete a line once its file
-// compiles; never add one (fix the bailout, or opt out with "use no memo" and a reason).
+// Files React Compiler skips in production builds. Keep this empty: fix the bailout, or opt
+// out with "use no memo" and a reason.
 // Sweep plan: .superpowers/plans/2026-10-11-react-compiler-bailout-sweep.md
-const KNOWN_BAILOUTS = new Set([
-  "src/components/admin/incident/AdminIncidentActions.tsx",
-  "src/components/admin/incident/AdminIncidentCursorLaunch.tsx",
-  "src/components/admin/incident/AdminIncidentInbox.tsx",
-  "src/components/admin/ops/AdminPreloadRequestInbox.tsx",
-  "src/components/incident/HostConfirmSheet.tsx",
-  "src/components/incident/ReportProblemSheet.tsx",
-  "src/hooks/admin/useAdminJoinSession.ts",
-  "src/hooks/admin/useAdminSessionList.ts",
-  "src/hooks/incident/useIncidentThread.ts",
-  "src/hooks/incident/useSupportThread.ts",
-  "src/routes/AdminMapScreen.tsx",
-]);
+const KNOWN_BAILOUTS = new Set<string>();
 
 const repoRoot = join(import.meta.dirname, "../..");
 const srcDir = join(repoRoot, "src");

@@ -32,6 +32,10 @@ export interface AdminIncidentCursorLaunchProps {
   openExternalUrlFn?: (url: string) => void;
 }
 
+function openInNewTab(url: string) {
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 /**
  * Actions module 2 - Launch / Open / Retry Cursor coding agent.
  * Parent should pass `key={incidentId}` so local state resets on selection change.
@@ -41,9 +45,7 @@ export function AdminIncidentCursorLaunch({
   agent = null,
   disabled = false,
   launchCursorAgentFn = launchIncidentCursorAgent,
-  openExternalUrlFn = (url) => {
-    window.open(url, "_blank", "noopener,noreferrer");
-  },
+  openExternalUrlFn = openInNewTab,
 }: AdminIncidentCursorLaunchProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,9 +85,8 @@ export function AdminIncidentCursorLaunch({
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not launch the Cursor agent.");
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   };
 
   return (
