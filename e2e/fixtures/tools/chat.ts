@@ -92,6 +92,7 @@ async function resolveAnswerButton(page: Page, name: string | RegExp): Promise<L
   return resolved;
 }
 
+// `label` must equal the computed hider truth: once truth is known, only that reply is offered.
 export async function answerInChat(page: Page, label: string) {
   const answerButton = await resolveAnswerButton(page, label);
   await answerButton.click();

@@ -26,8 +26,13 @@ export function HiderAnswerPicker({
   disabled = false,
   onSelect,
 }: HiderAnswerPickerProps) {
-  const truthAvailable = truth !== null && !truth.unavailable && truth.replyId.length > 0;
-  const cols = replyOptions.length > 2 ? 1 : 2;
+  const truthOption =
+    truth !== null && !truth.unavailable
+      ? replyOptions.find((option) => option.id === truth.replyId)
+      : undefined;
+  const truthAvailable = truthOption !== undefined;
+  const visibleOptions = truthOption ? [truthOption] : loading ? [] : replyOptions;
+  const cols = visibleOptions.length === 2 ? 2 : 1;
   const referenceLabel = hiderTruthReferenceLabel(truthReferenceMode);
 
   return (
@@ -38,7 +43,7 @@ export function HiderAnswerPicker({
         <Text size="xs" c={jetlagBrand.halt}>
           {truth.label}
         </Text>
-      ) : truthAvailable ? (
+      ) : truthAvailable && truth ? (
         <Text size="xs" c={jetlagBrand.fieldInkMuted}>
           <Text span fw={600} c={jetlagBrand.signal}>
             {referenceLabel}
@@ -51,8 +56,8 @@ export function HiderAnswerPicker({
       ) : null}
 
       <SimpleGrid cols={cols} spacing={8}>
-        {replyOptions.map((option) => {
-          const isRecommended = truthAvailable && option.id === truth.replyId;
+        {visibleOptions.map((option) => {
+          const isRecommended = truthAvailable;
           const buttonLabel = option.label;
 
           return (
@@ -60,11 +65,7 @@ export function HiderAnswerPicker({
               key={option.id}
               disabled={disabled}
               onClick={() => onSelect(option)}
-              aria-label={
-                isRecommended
-                  ? `${buttonLabel} (recommended ${referenceLabel.toLowerCase()})`
-                  : buttonLabel
-              }
+              aria-label={buttonLabel}
               size="md"
               radius="sm"
               styles={{

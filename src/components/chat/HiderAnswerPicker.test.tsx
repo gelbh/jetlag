@@ -1,0 +1,45 @@
+import { screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
+import { HiderAnswerPicker } from "./HiderAnswerPicker";
+
+const replyOptions = [
+  { id: "yes", label: "Yes" },
+  { id: "no", label: "No" },
+];
+
+function renderPicker(props: Partial<Parameters<typeof HiderAnswerPicker>[0]>) {
+  return renderWithAppUi(
+    <HiderAnswerPicker
+      replyOptions={replyOptions}
+      truth={null}
+      loading={false}
+      truthReferenceMode="hidingZoneCenter"
+      onSelect={vi.fn()}
+      {...props}
+    />,
+  );
+}
+
+describe("HiderAnswerPicker", () => {
+  it("offers only the true reply when truth is known", () => {
+    renderPicker({ truth: { replyId: "yes", label: "Yes" } });
+    expect(screen.getByRole("button", { name: "Yes" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^No/ })).toBeNull();
+  });
+
+  it("offers no replies while truth is loading", () => {
+    renderPicker({ loading: true });
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("offers every reply when truth is unavailable", () => {
+    renderPicker({ truth: { replyId: "", label: "Truth unavailable.", unavailable: true } });
+    expect(screen.getAllByRole("button")).toHaveLength(2);
+  });
+
+  it("offers every reply when truth matches no option", () => {
+    renderPicker({ truth: { replyId: "closer", label: "Closer" } });
+    expect(screen.getAllByRole("button")).toHaveLength(2);
+  });
+});
