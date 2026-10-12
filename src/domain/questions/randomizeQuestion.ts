@@ -237,8 +237,20 @@ export function pickRandomizeOption(
   return pool[Math.floor(random() * pool.length)] ?? null;
 }
 
+const AUTO_ASK_TOOLS: ReadonlySet<PendingQuestionToolType> = new Set(["radar", "photo"]);
+
 export function randomizedQuestionNotice(toolType: PendingQuestionToolType, label: string): string {
+  if (AUTO_ASK_TOOLS.has(toolType)) {
+    return `Hider played Randomize. Sending: ${label}.`;
+  }
+  if (toolType === "thermometer") {
+    return `Hider played Randomize. Walk the ${label} thermometer instead.`;
+  }
   return `Hider played Randomize. Ask this ${toolType} question instead: ${label}.`;
+}
+
+export function randomizeManualNotice(label: string): string {
+  return `Randomize rolled ${label}. Could not build it automatically; ask it from the tool.`;
 }
 
 export const VETO_NOTICE = "Hider played Veto. No answer and no card draw for this question.";
