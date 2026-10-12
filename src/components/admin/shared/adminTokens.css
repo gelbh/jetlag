@@ -58,6 +58,7 @@
   --color-status-success: var(--adm-ok);
   --color-halt: var(--adm-mispunch);
   --color-status-error: var(--adm-mispunch);
+  --color-status-warning: var(--adm-ink);
 
   /* Desk roots fill their parent (height: 100% / flex: 1) and scroll inside. */
   display: flex;
