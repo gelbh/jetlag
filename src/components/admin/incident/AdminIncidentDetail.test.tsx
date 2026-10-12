@@ -124,6 +124,19 @@ vi.mock("../../../services/admin/adminIncidents", async () => {
   };
 });
 
+vi.mock("../../../services/admin/adminPreloadRequests", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../../services/admin/adminPreloadRequests")
+  >("../../../services/admin/adminPreloadRequests");
+  return {
+    ...actual,
+    subscribePreloadRequestList: (onChange: (requests: []) => void) => {
+      onChange([]);
+      return () => {};
+    },
+  };
+});
+
 vi.mock("../../../hooks/incident/useIncidentThread", () => ({
   useIncidentThread: () => ({
     incident: null,

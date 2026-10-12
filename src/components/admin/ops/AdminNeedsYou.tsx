@@ -15,8 +15,17 @@ import {
   incidentProgress,
 } from "@/domain/admin/incidentProgress";
 import type { IncidentRecord } from "@/domain/incident/incidentTypes";
+import type { PreloadStatusChipTone } from "@/domain/preloadRequest/preloadRequestAdmin";
+import type {
+  PreloadRequest,
+  PreloadRequestStatus,
+} from "@/domain/preloadRequest/preloadRequestTypes";
 import { useFreshnessClock } from "@/hooks/time/useFreshnessClock";
 import { formatIncidentQueueId, incidentStatusChipLabel } from "@/services/admin/adminIncidents";
+import {
+  preloadRequestStatusChipLabel,
+  preloadRequestStatusChipTone,
+} from "@/services/admin/adminPreloadRequests";
 import type { StatusTone } from "@/theme/adminTone";
 import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
@@ -25,8 +34,18 @@ import { DrillIn } from "../shared/DrillIn";
 import { PunchTime } from "../shared/PunchTime";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
+import { AdminPreloadRequestDetail } from "./AdminPreloadRequestDetail";
 
 export type NeedsYouGroup = "incidents" | "preload";
+
+const CLOSED_PRELOAD = new Set<PreloadRequestStatus>(["declined", "shipped"]);
+
+const PRELOAD_TONE: Record<PreloadStatusChipTone, StatusTone> = {
+  open: "mispunch",
+  active: "live",
+  warning: "neutral",
+  muted: "ok",
+};
 
 const PROGRESS_ORDER: IncidentProgress[] = [
   "new",
@@ -58,6 +77,11 @@ export function AdminNeedsYou({
   selectedIncident,
   onSelectIncident,
   onBackFromIncident,
+  preloadRequests,
+  preloadLoading,
+  preloadError,
+  selectedPreload,
+  onSelectPreload,
   openGroups,
   onOpenGroupsChange,
 }: {
@@ -68,27 +92,38 @@ export function AdminNeedsYou({
   selectedIncident: IncidentRecord | null;
   onSelectIncident: (incidentId: string) => void;
   onBackFromIncident: () => void;
+  preloadRequests: readonly PreloadRequest[];
+  preloadLoading: boolean;
+  preloadError: string | null;
+  selectedPreload: PreloadRequest | null;
+  onSelectPreload: (requestId: string | null) => void;
   openGroups: NeedsYouGroup[];
   onOpenGroupsChange: (groups: NeedsYouGroup[]) => void;
 }) {
   const [showClosed, setShowClosed] = useState(false);
+  const [showClosedPreload, setShowClosedPreload] = useState(false);
   const queueRef = useRef<HTMLDivElement>(null);
   const controlRef = useRef<HTMLButtonElement>(null);
-  const returnFocusIdRef = useRef<string | null>(null);
+  const preloadQueueRef = useRef<HTMLDivElement>(null);
+  const preloadControlRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<{ group: NeedsYouGroup; id: string } | null>(null);
+  const drilledIn = selectedIncidentId != null || selectedPreload != null;
 
   useEffect(() => {
-    const incidentId = returnFocusIdRef.current;
-    if (selectedIncidentId || !incidentId) return;
-    returnFocusIdRef.current = null;
-    const row = queueRef.current?.querySelector<HTMLElement>(
-      `[data-incident-id="${CSS.escape(incidentId)}"]`,
-    );
-    (row ?? controlRef.current)?.focus();
-  }, [selectedIncidentId]);
+    const target = returnFocusRef.current;
+    if (drilledIn || !target) return;
+    returnFocusRef.current = null;
+    const [queue, control, attr] =
+      target.group === "incidents"
+        ? [queueRef, controlRef, "data-incident-id"]
+        : [preloadQueueRef, preloadControlRef, "data-preload-id"];
+    const row = queue.current?.querySelector<HTMLElement>(`[${attr}="${CSS.escape(target.id)}"]`);
+    (row ?? control.current)?.focus();
+  }, [drilledIn]);
 
   if (selectedIncidentId) {
     const back = () => {
-      returnFocusIdRef.current = selectedIncidentId;
+      returnFocusRef.current = { group: "incidents", id: selectedIncidentId };
       onBackFromIncident();
     };
     return (
@@ -99,6 +134,25 @@ export function AdminNeedsYou({
           status={selectedIncident?.status ?? null}
           agent={selectedIncident?.agent ?? null}
         />
+      </DrillIn>
+    );
+  }
+
+  if (selectedPreload) {
+    const back = () => {
+      returnFocusRef.current = { group: "preload", id: selectedPreload.id };
+      onSelectPreload(null);
+    };
+    return (
+      <DrillIn title={selectedPreload.presetSnapshot.name} onBack={back}>
+        <Group gap="xs">
+          <StatusMark
+            tone={PRELOAD_TONE[preloadRequestStatusChipTone(selectedPreload.status)]}
+            label={preloadRequestStatusChipLabel(selectedPreload.status)}
+          />
+          <PunchTime at={selectedPreload.updatedAt} flashing={false} />
+        </Group>
+        <AdminPreloadRequestDetail key={selectedPreload.id} request={selectedPreload} />
       </DrillIn>
     );
   }
@@ -122,7 +176,95 @@ export function AdminNeedsYou({
           />
         </Accordion.Panel>
       </Accordion.Item>
+      <Accordion.Item value="preload">
+        <Accordion.Control ref={preloadControlRef}>Preload requests</Accordion.Control>
+        <Accordion.Panel ref={preloadQueueRef}>
+          <PreloadQueue
+            requests={preloadRequests}
+            loading={preloadLoading}
+            error={preloadError}
+            onSelect={onSelectPreload}
+            showClosed={showClosedPreload}
+            onShowClosedChange={setShowClosedPreload}
+          />
+        </Accordion.Panel>
+      </Accordion.Item>
     </Accordion>
+  );
+}
+
+function PreloadQueue({
+  requests,
+  loading,
+  error,
+  onSelect,
+  showClosed,
+  onShowClosedChange,
+}: {
+  requests: readonly PreloadRequest[];
+  loading: boolean;
+  error: string | null;
+  onSelect: (requestId: string) => void;
+  showClosed: boolean;
+  onShowClosedChange: (showClosed: boolean) => void;
+}) {
+  const rows = showClosed
+    ? requests
+    : requests.filter((request) => !CLOSED_PRELOAD.has(request.status));
+
+  return (
+    <Stack gap="sm">
+      {error ? (
+        <Alert role="alert" title="Couldn't load preload requests" data-tone="mispunch">
+          {error}
+        </Alert>
+      ) : null}
+      <Checkbox
+        size="xs"
+        label="Show closed"
+        checked={showClosed}
+        onChange={(event) => onShowClosedChange(event.currentTarget.checked)}
+      />
+      {loading && requests.length === 0 && !error ? (
+        <Stack gap="xs" aria-busy="true">
+          <Skeleton height={40} />
+          <Skeleton height={40} />
+        </Stack>
+      ) : null}
+      {!loading && !error && rows.length === 0 ? (
+        <AdminEmptyState
+          title="No preload requests"
+          body="Preload requests from players appear here when they submit one."
+        />
+      ) : null}
+      {rows.length > 0 ? (
+        <Stack component="ul" gap={0} m={0} p={0}>
+          {rows.map((request) => (
+            <li key={request.id}>
+              <UnstyledButton
+                type="button"
+                w="100%"
+                mih={44}
+                py={6}
+                data-preload-id={request.id}
+                onClick={() => onSelect(request.id)}
+              >
+                <Group gap="xs" wrap="nowrap">
+                  <Text component="span" size="sm" lineClamp={1} flex={1}>
+                    {request.presetSnapshot.name}
+                  </Text>
+                  <StatusMark
+                    tone={PRELOAD_TONE[preloadRequestStatusChipTone(request.status)]}
+                    label={preloadRequestStatusChipLabel(request.status)}
+                  />
+                  <PunchTime at={request.updatedAt} flashing={false} />
+                </Group>
+              </UnstyledButton>
+            </li>
+          ))}
+        </Stack>
+      ) : null}
+    </Stack>
   );
 }
 

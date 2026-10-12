@@ -4,8 +4,9 @@ import { type ComponentProps, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
 import type { IncidentRecord } from "@/domain/incident/incidentTypes";
+import type { PreloadRequest } from "@/domain/preloadRequest/preloadRequestTypes";
 import { renderWithAppUi } from "@/test/renderWithAppUi";
-import { AdminNeedsYou } from "./AdminNeedsYou";
+import { AdminNeedsYou, type NeedsYouGroup } from "./AdminNeedsYou";
 
 vi.mock("../incident/AdminIncidentDetail", () => ({
   AdminIncidentDetail: ({ incidentId }: { incidentId: string | null }) => (
@@ -19,6 +20,24 @@ vi.mock("../incident/AdminIncidentDetail", () => ({
 vi.mock("../incident/AdminIncidentActions", () => ({
   AdminIncidentActions: () => <aside aria-label="Incident actions" />,
 }));
+
+const updateStatus = vi.hoisted(() => vi.fn(async () => undefined));
+
+vi.mock("@/services/preloadRequest/preloadRequestApi", () => ({
+  updatePreloadRequestStatus: updateStatus,
+}));
+
+function makeRequest(overrides: Partial<PreloadRequest> = {}): PreloadRequest {
+  return {
+    id: "req-abc12345",
+    createdAt: today,
+    updatedAt: today,
+    status: "open",
+    reporterUid: "uid-1",
+    presetSnapshot: { name: "Dublin core", gameSize: "medium", distanceUnit: "metric" },
+    ...overrides,
+  } as PreloadRequest;
+}
 
 const today = new Date().toISOString();
 
@@ -62,6 +81,11 @@ function renderNeedsYou(props: Partial<ComponentProps<typeof AdminNeedsYou>> = {
     selectedIncident: null,
     onSelectIncident: vi.fn(),
     onBackFromIncident: vi.fn(),
+    preloadRequests: [],
+    preloadLoading: false,
+    preloadError: null,
+    selectedPreload: null,
+    onSelectPreload: vi.fn(),
     openGroups: ["incidents"],
     onOpenGroupsChange: vi.fn(),
   };
@@ -207,8 +231,17 @@ describe("AdminNeedsYou", () => {
   });
 
   describe("focus", () => {
-    function Harness({ incidents }: { incidents: IncidentRecord[] }) {
+    function Harness({
+      incidents = [],
+      requests = [],
+      groups = ["incidents"],
+    }: {
+      incidents?: IncidentRecord[];
+      requests?: PreloadRequest[];
+      groups?: NeedsYouGroup[];
+    }) {
       const [selectedId, setSelectedId] = useState<string | null>(null);
+      const [preloadId, setPreloadId] = useState<string | null>(null);
       return (
         <AdminWorld>
           <AdminNeedsYou
@@ -219,12 +252,35 @@ describe("AdminNeedsYou", () => {
             selectedIncident={incidents.find((row) => row.id === selectedId) ?? null}
             onSelectIncident={setSelectedId}
             onBackFromIncident={() => setSelectedId(null)}
-            openGroups={["incidents"]}
+            preloadRequests={requests}
+            preloadLoading={false}
+            preloadError={null}
+            selectedPreload={requests.find((row) => row.id === preloadId) ?? null}
+            onSelectPreload={setPreloadId}
+            openGroups={groups}
             onOpenGroupsChange={vi.fn()}
           />
         </AdminWorld>
       );
     }
+
+    it("returns focus to the preload row and keeps its Show closed after a drill-in", () => {
+      renderWithAppUi(
+        <Harness
+          requests={[makeRequest({ id: "req-done1", status: "shipped" })]}
+          groups={["preload"]}
+        />,
+      );
+      const panel = () => screen.getByRole("region", { name: "Preload requests" });
+
+      fireEvent.click(within(panel()).getByRole("checkbox", { name: "Show closed" }));
+      fireEvent.click(within(panel()).getByRole("button", { name: /Dublin core/ }));
+      expect(screen.getByRole("button", { name: "Back" })).toHaveFocus();
+
+      fireEvent.click(screen.getByRole("button", { name: "Back" }));
+      expect(within(panel()).getByRole("checkbox", { name: "Show closed" })).toBeChecked();
+      expect(within(panel()).getByRole("button", { name: /Dublin core/ })).toHaveFocus();
+    });
 
     it("focuses Back on entering and the row on leaving the drill-in", () => {
       renderWithAppUi(<Harness incidents={[makeIncident({ id: "inc-focus1" })]} />);
@@ -261,6 +317,94 @@ describe("AdminNeedsYou", () => {
       fireEvent.click(screen.getByRole("button", { name: "Back" }));
 
       expect(screen.getByRole("button", { name: "Incidents" })).toHaveFocus();
+    });
+  });
+
+  describe("preload requests", () => {
+    const renderPreload = (props: Partial<ComponentProps<typeof AdminNeedsYou>>) =>
+      renderNeedsYou({ openGroups: ["preload"], ...props });
+    const panel = () => screen.getByRole("region", { name: "Preload requests" });
+
+    it("renders the empty plate with a teaching body", () => {
+      renderPreload({});
+
+      expect(within(panel()).getByText("No preload requests")).toBeInTheDocument();
+      expect(
+        within(panel()).getByText(
+          "Preload requests from players appear here when they submit one.",
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("keeps retained rows when the list errors", () => {
+      renderPreload({ preloadRequests: [makeRequest()], preloadError: "permission-denied" });
+
+      const alert = within(panel()).getByRole("alert");
+      expect(alert).toHaveAttribute("data-tone", "mispunch");
+      expect(within(alert).getByText("Couldn't load preload requests")).toBeInTheDocument();
+      expect(within(alert).getByText("permission-denied")).toBeInTheDocument();
+      expect(within(panel()).getByText("Dublin core")).toBeInTheDocument();
+    });
+
+    it("lists open requests with a status mark and age, closed only after Show closed", () => {
+      renderPreload({
+        preloadRequests: [
+          makeRequest({ id: "req-open1" }),
+          makeRequest({
+            id: "req-done1",
+            status: "shipped",
+            presetSnapshot: { name: "Cork loop", gameSize: "small", distanceUnit: "metric" },
+          } as Partial<PreloadRequest>),
+        ],
+      });
+
+      const row = within(panel()).getByRole("button", { name: /Dublin core/ });
+      expect(within(row).getByText("OPEN").closest("[data-tone]")).toBeInTheDocument();
+      expect(row.querySelector("time")).toHaveAttribute("datetime", today);
+      expect(within(panel()).queryByText("Cork loop")).not.toBeInTheDocument();
+
+      fireEvent.click(within(panel()).getByRole("checkbox", { name: "Show closed" }));
+
+      expect(within(panel()).getByText("Cork loop")).toBeInTheDocument();
+    });
+
+    it("selects a request from its row", () => {
+      const { onSelectPreload } = renderPreload({
+        preloadRequests: [makeRequest({ id: "req-pick" })],
+      });
+
+      fireEvent.click(within(panel()).getByRole("button", { name: /Dublin core/ }));
+
+      expect(onSelectPreload).toHaveBeenCalledWith("req-pick");
+    });
+
+    it("drills into detail with status actions and goes back on Escape", () => {
+      const request = makeRequest();
+      const { onSelectPreload } = renderPreload({
+        preloadRequests: [request],
+        selectedPreload: request,
+      });
+
+      expect(screen.getByRole("heading", { name: "Dublin core" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Mark declined" })).toBeInTheDocument();
+      expect(screen.queryByRole("region", { name: "Preload requests" })).not.toBeInTheDocument();
+
+      fireEvent.keyDown(document.body, { key: "Escape" });
+      expect(onSelectPreload).toHaveBeenCalledWith(null);
+    });
+
+    it("shows a titled mispunch Alert when a status update fails", async () => {
+      updateStatus.mockRejectedValueOnce(new Error("network down"));
+      const request = makeRequest();
+      renderPreload({ preloadRequests: [request], selectedPreload: request });
+
+      fireEvent.click(screen.getByRole("button", { name: "Mark accepted" }));
+
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveAttribute("data-tone", "mispunch");
+      expect(within(alert).getByText("Couldn't update request")).toBeInTheDocument();
+      expect(within(alert).getByText("network down")).toBeInTheDocument();
+      expect(updateStatus).toHaveBeenCalledWith("req-abc12345", "accepted");
     });
   });
 });
