@@ -107,6 +107,8 @@ export interface AnnotationMetadata {
   transitMetroId?: string;
   /** Pin annotations only: the POI category this pin counts as. */
   poiCategory?: PoiPinCategoryId;
+  /** Pin annotations only: author uid. Firestore rules require it for hider pins. */
+  createdByUid?: string;
 }
 
 export interface TentaclePoi {

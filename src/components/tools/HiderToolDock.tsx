@@ -1,7 +1,7 @@
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { MapChromeControl } from "../map/chrome/MapChromeControl";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
-import { HudPinIcon } from "../map/icons/ToolIcons";
+import { HudPinIcon, HudZoneIcon } from "../map/icons/ToolIcons";
 import { HudLayersIcon, HudPlusIcon } from "../ui/brand/HudIcons";
 import { ToolDeckGroup } from "./ToolDeck";
 
@@ -15,6 +15,7 @@ interface HiderToolDockProps {
   handDisabled?: boolean;
   showExpansion: boolean;
   onExpansion: () => void;
+  onAddPin?: () => void;
   onOpenChat: () => void;
   onOpenSettings: () => void;
   onOpenCodes?: () => void;
@@ -34,6 +35,7 @@ export function HiderToolDock({
   handDisabled = false,
   showExpansion,
   onExpansion,
+  onAddPin,
   onOpenChat,
   onOpenSettings,
   onOpenCodes,
@@ -54,7 +56,7 @@ export function HiderToolDock({
             onClick={onZoneAction}
             disabled={zoneDisabled || inactive}
             aria-label={zoneLabel}
-            icon={<HudPinIcon className="h-5 w-5 shrink-0" />}
+            icon={<HudZoneIcon className="h-5 w-5 shrink-0" />}
             label={zoneLabel}
           />
 
@@ -66,6 +68,17 @@ export function HiderToolDock({
               aria-label={handLabel}
               icon={<HudLayersIcon className="h-5 w-5 shrink-0" />}
               label={handLabel}
+            />
+          ) : null}
+
+          {onAddPin ? (
+            <MapChromeControl
+              variant="slot"
+              onClick={onAddPin}
+              disabled={inactive}
+              aria-label="Add pin"
+              icon={<HudPinIcon className="h-5 w-5 shrink-0" />}
+              label="Add pin"
             />
           ) : null}
 

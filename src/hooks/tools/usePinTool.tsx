@@ -10,8 +10,13 @@ interface PinSessionConfig {
   ready: true;
 }
 
+/** Firestore rules cap hider pin labels at this length. */
+export const HIDER_PIN_LABEL_MAX_LENGTH = 60;
+
 interface UsePinToolParams {
   active: boolean;
+  role: "seeker" | "hider";
+  uid: string | null;
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
@@ -21,6 +26,8 @@ interface UsePinToolParams {
 
 export function usePinTool({
   active,
+  role,
+  uid,
   createAnnotation,
   finishPlacement,
   postSystemMessage,
@@ -67,13 +74,16 @@ export function usePinTool({
           createdAt: new Date().toISOString(),
           label,
           color: MAP_ANNOTATION_COLORS.pin,
+          ...(uid ? { createdByUid: uid } : {}),
           ...(poiCategory ? { poiCategory } : {}),
         },
       });
 
       const categoryLabel = poiPinCategoryLabel(poiCategory);
       if (categoryLabel) {
-        postSystemMessage(`Seeker added ${categoryLabel} pin: ${label}`);
+        postSystemMessage(
+          `${role === "hider" ? "Hider" : "Seeker"} added ${categoryLabel} pin: ${label}`,
+        );
       }
 
       resetDraft();
@@ -92,6 +102,7 @@ export function usePinTool({
       onCommit={() => void session.submit()}
       hasPoint={pinPoint !== null}
       isSubmitting={session.isBusy}
+      labelMaxLength={role === "hider" ? HIDER_PIN_LABEL_MAX_LENGTH : undefined}
     />
   );
 

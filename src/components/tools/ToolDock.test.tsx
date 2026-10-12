@@ -414,4 +414,29 @@ describe("HiderToolDock", () => {
     fireEvent.click(screen.getByRole("button", { name: "Hand 2/6" }));
     expect(onOpenHand).toHaveBeenCalledTimes(1);
   });
+
+  it("shows Add pin before Expansion when onAddPin is provided", () => {
+    const onAddPin = vi.fn();
+    renderDock(
+      <HiderToolDock
+        zoneLabel="Set zone"
+        onZoneAction={vi.fn()}
+        showExpansion
+        onExpansion={vi.fn()}
+        onAddPin={onAddPin}
+        onOpenChat={vi.fn()}
+        onOpenLog={vi.fn()}
+        onOpenSettings={vi.fn()}
+        onOpenReportProblem={vi.fn()}
+      />,
+    );
+
+    const hunt = document.querySelector('[data-island="hunt"]');
+    const huntLabels = [...(hunt?.querySelectorAll(DOCK_LABEL) ?? [])].map(
+      (node) => node.textContent?.trim() ?? "",
+    );
+    expect(huntLabels).toEqual(["Set zone", "Add pin", "Expansion"]);
+    fireEvent.click(screen.getByRole("button", { name: "Add pin" }));
+    expect(onAddPin).toHaveBeenCalledTimes(1);
+  });
 });

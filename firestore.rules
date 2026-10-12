@@ -759,6 +759,22 @@ service cloud.firestore {
           && request.resource.data.status == 'deleted'
           && request.resource.data.updatedAt is string
         );
+        // Hiders may add their own pins and soft-delete them; nothing else.
+        allow create: if isHiderMember(sessionId)
+          && request.resource.data.type == 'pin'
+          && request.resource.data.status == 'active'
+          && request.resource.data.geometryJson is string
+          && request.resource.data.metadata is map
+          && request.resource.data.metadata.createdByUid == request.auth.uid
+          && request.resource.data.metadata.label is string
+          && request.resource.data.metadata.label.size() <= 60;
+        allow update: if isHiderMember(sessionId)
+          && resource.data.type == 'pin'
+          && resource.data.status == 'active'
+          && resource.data.metadata.createdByUid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+          && request.resource.data.status == 'deleted'
+          && request.resource.data.updatedAt == request.time;
         allow delete: if false;
       }
 
