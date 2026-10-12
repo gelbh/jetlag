@@ -9,7 +9,10 @@ import {
   usedPhotoCategoryIds,
   usedRadarDistanceOptionsForSession,
 } from "../../domain/questions";
-import { questionOptionsForTool } from "../../domain/questions/randomizeQuestion";
+import {
+  questionOptionsForTool,
+  usedQuestionOptionLabelsForTool,
+} from "../../domain/questions/randomizeQuestion";
 import type {
   PendingQuestionRecord,
   PendingQuestionToolType,
@@ -26,7 +29,7 @@ export type RandomizedQuestionInput = Omit<
 
 export type BuiltRandomizedQuestion =
   | { kind: "submit"; toolType: PendingQuestionToolType; input: RandomizedQuestionInput }
-  | { kind: "manual"; label: string };
+  | { kind: "manual"; label: string; presetKey?: string | number };
 
 export interface BuildRandomizedQuestionContext {
   session: SessionRulesInput;
@@ -71,6 +74,7 @@ export async function buildRandomizedQuestion(
         },
         cardDraw: original.cardDraw,
         cardKeep: original.cardKeep,
+        pendingQuestionId: `${original.id}~rnd`,
       },
     };
   }
@@ -92,9 +96,16 @@ export async function buildRandomizedQuestion(
         },
         cardDraw: original.cardDraw,
         cardKeep: original.cardKeep,
+        pendingQuestionId: `${original.id}~rnd`,
       },
     };
   }
 
-  return manual;
+  const used = usedQuestionOptionLabelsForTool(
+    original.toolType,
+    ctx.session,
+    ctx.annotations,
+    ctx.pendingQuestions,
+  );
+  return used.has(option.label) ? manual : { ...manual, presetKey: option.optionKey };
 }

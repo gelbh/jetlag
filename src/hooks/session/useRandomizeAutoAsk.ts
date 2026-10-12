@@ -24,7 +24,7 @@ export interface UseRandomizeAutoAskParams {
     toolType: PendingQuestionToolType,
     input: RandomizedQuestionInput,
   ) => Promise<string | undefined>;
-  onManual: (toolType: PendingQuestionToolType, label: string) => void;
+  onManual: (toolType: PendingQuestionToolType, label: string, presetKey?: string | number) => void;
 }
 
 function handledStorageKey(sessionId: string): string {
@@ -122,7 +122,7 @@ export function useRandomizeAutoAsk({
     })
       .then(async (built) => {
         if (built.kind === "manual") {
-          onManual(original.toolType, built.label);
+          onManual(original.toolType, built.label, built.presetKey);
           return;
         }
         const questionId = await submitToolQuestion(built.toolType, built.input);

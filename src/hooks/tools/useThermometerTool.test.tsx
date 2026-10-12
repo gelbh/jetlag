@@ -1,13 +1,39 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import { resolveThermometerPresetsMeters } from "../../domain/session/rules/thermometerRules";
 import { useMapStore } from "../../state/mapStore";
+import { resetAllStores } from "../../test/helpers/storeReset";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useThermometerTool } from "./useThermometerTool";
 
 describe("useThermometerTool", () => {
   beforeEach(() => {
+    resetAllStores();
     useMapStore.getState().setActiveTool("thermometer");
+  });
+
+  it("opens to the pending preset distance", async () => {
+    const mocks = createToolHookMocks();
+    const presets = resolveThermometerPresetsMeters({ gameSize: "medium" });
+    const preset = presets[presets.length - 1];
+    useMapStore.getState().openToolPreset("thermometer", preset);
+
+    const { result } = renderHook(() =>
+      useThermometerTool({
+        active: true,
+        annotations: mocks.annotations,
+        sessionRules: { gameSize: "medium" },
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+      }),
+    );
+
+    expect(preset).not.toBe(presets[0]);
+    await waitFor(() => expect(result.current.draft.thermometerDistanceMeters).toBe(preset));
+    expect(useMapStore.getState().toolPreset).toBeNull();
   });
 
   it("collects thermometer endpoints A and B in manual mode", () => {
