@@ -1,5 +1,5 @@
 import { Button, SimpleGrid, Stack, Text, UnstyledButton, VisuallyHidden } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { jetlagBrand } from "@/theme/theme";
 import type { QuestionPowerUpId } from "../../domain/boardEconomy";
 import { powerUpLabel } from "../session/board/boardCardLabels";
@@ -25,12 +25,19 @@ export function HiderQuestionCardRow({
     setArmed(null);
   }
   const armedCard = armed && armed.key === resetKey && !disabled ? armed.card : null;
+  const armedButtonRef = useRef<HTMLButtonElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!armedCard) {
       return;
     }
-    const timer = window.setTimeout(() => setArmed(null), DISARM_AFTER_MS);
+    const timer = window.setTimeout(() => {
+      if (document.activeElement === cancelRef.current) {
+        armedButtonRef.current?.focus();
+      }
+      setArmed(null);
+    }, DISARM_AFTER_MS);
     return () => window.clearTimeout(timer);
   }, [armedCard]);
 
@@ -46,6 +53,7 @@ export function HiderQuestionCardRow({
           return (
             <Button
               key={card}
+              ref={isArmed ? armedButtonRef : undefined}
               disabled={disabled}
               size="md"
               radius="sm"
@@ -86,7 +94,11 @@ export function HiderQuestionCardRow({
       </SimpleGrid>
       {armedCard ? (
         <UnstyledButton
-          onClick={() => setArmed(null)}
+          ref={cancelRef}
+          onClick={() => {
+            armedButtonRef.current?.focus();
+            setArmed(null);
+          }}
           style={{
             alignSelf: "flex-start",
             minHeight: "2.75rem",

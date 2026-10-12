@@ -24,6 +24,23 @@ describe("HiderQuestionCardRow", () => {
     expect(screen.getByRole("button", { name: "Play Veto" })).toBeInTheDocument();
   });
 
+  it("returns focus to the card on Cancel", () => {
+    renderWithAppUi(<HiderQuestionCardRow cards={["veto"]} resetKey="q1" onPlay={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Play Veto" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.getByRole("button", { name: "Play Veto" })).toHaveFocus();
+  });
+
+  it("returns focus to the card when the timer disarms while Cancel is focused", () => {
+    renderWithAppUi(<HiderQuestionCardRow cards={["veto"]} resetKey="q1" onPlay={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Play Veto" }));
+    screen.getByRole("button", { name: "Cancel" }).focus();
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
+    expect(screen.getByRole("button", { name: "Play Veto" })).toHaveFocus();
+  });
+
   it("disarms after 4 seconds", () => {
     renderWithAppUi(<HiderQuestionCardRow cards={["veto"]} resetKey="q1" onPlay={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Play Veto" }));
