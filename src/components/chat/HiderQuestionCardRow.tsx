@@ -59,9 +59,12 @@ export function HiderQuestionCardRow({
                 root: {
                   minHeight: "2.75rem",
                   border: `1px solid ${isArmed ? jetlagBrand.halt : jetlagBrand.rule}`,
-                  backgroundColor: jetlagBrand.canvas,
-                  color: isArmed ? jetlagBrand.halt : jetlagBrand.fieldInk,
+                  backgroundColor: isArmed
+                    ? `oklch(from ${jetlagBrand.halt} l c h / 0.16)`
+                    : jetlagBrand.canvas,
+                  color: jetlagBrand.fieldInk,
                   fontWeight: 600,
+                  opacity: disabled ? 0.5 : undefined,
                 },
               }}
             >
