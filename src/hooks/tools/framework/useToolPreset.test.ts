@@ -69,17 +69,21 @@ describe("useOpenToolPreset", () => {
     resetAllStores();
   });
 
-  function renderOpen(activeTool: MapTool, enabled: boolean) {
+  function renderOpen(activeTool: MapTool, enabled: boolean, canOpen = true) {
     const selectTool = vi.fn<(tool: DockableMapTool) => void>();
     const isToolEnabled = () => enabled;
-    renderHook(() => useOpenToolPreset({ activeTool, isToolEnabled, selectTool }));
-    return selectTool;
+    const view = renderHook(
+      (props: { activeTool: MapTool; canOpen: boolean }) =>
+        useOpenToolPreset({ ...props, isToolEnabled, selectTool }),
+      { initialProps: { activeTool, canOpen } },
+    );
+    return { selectTool, ...view };
   }
 
   it("selects the preset's tool and leaves the preset for the tool hook", () => {
     useMapStore.getState().openToolPreset("radar", 1609.344);
 
-    const selectTool = renderOpen("none", true);
+    const { selectTool } = renderOpen("none", true);
 
     expect(selectTool).toHaveBeenCalledTimes(1);
     expect(selectTool).toHaveBeenCalledWith("radar");
@@ -89,7 +93,7 @@ describe("useOpenToolPreset", () => {
   it("does not reselect the active tool", () => {
     useMapStore.getState().openToolPreset("radar", 1609.344);
 
-    const selectTool = renderOpen("radar", true);
+    const { selectTool } = renderOpen("radar", true);
 
     expect(selectTool).not.toHaveBeenCalled();
   });
@@ -97,9 +101,39 @@ describe("useOpenToolPreset", () => {
   it("drops the preset when its tool is disabled", () => {
     useMapStore.getState().openToolPreset("radar", 1609.344);
 
-    const selectTool = renderOpen("none", false);
+    const { selectTool } = renderOpen("none", false);
 
     expect(selectTool).not.toHaveBeenCalled();
+    expect(useMapStore.getState().toolPreset).toBeNull();
+  });
+
+  it("drops the preset when the user leaves the tool before it is consumed", () => {
+    useMapStore.getState().openToolPreset("radar", 1609.344);
+
+    const { selectTool, rerender } = renderOpen("none", true);
+    rerender({ activeTool: "radar", canOpen: false });
+    rerender({ activeTool: "none", canOpen: true });
+
+    expect(selectTool).toHaveBeenCalledTimes(1);
+    expect(useMapStore.getState().toolPreset).toBeNull();
+  });
+
+  it("drops the preset when the map is not idle", () => {
+    useMapStore.getState().openToolPreset("radar", 1609.344);
+
+    const { selectTool } = renderOpen("none", true, false);
+
+    expect(selectTool).not.toHaveBeenCalled();
+    expect(useMapStore.getState().toolPreset).toBeNull();
+  });
+
+  it("clears the preset on unmount", () => {
+    useMapStore.getState().openToolPreset("radar", 1609.344);
+
+    const { unmount } = renderOpen("radar", true);
+    expect(useMapStore.getState().toolPreset).not.toBeNull();
+
+    unmount();
     expect(useMapStore.getState().toolPreset).toBeNull();
   });
 });

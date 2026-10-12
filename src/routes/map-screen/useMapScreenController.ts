@@ -463,6 +463,7 @@ export function useMapScreenController() {
 
   useOpenToolPreset({
     activeTool,
+    canOpen: activeTool === "none" && !geometryEditAnnotation,
     isToolEnabled: (tool) =>
       !session || resolveToolDockEnabled(session, tool, { hasHiders: awaitHiderAnswer }),
     selectTool: handleSelectTool,
