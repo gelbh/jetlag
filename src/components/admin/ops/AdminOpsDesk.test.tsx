@@ -690,6 +690,25 @@ describe("AdminOpsDesk", () => {
     );
   });
 
+  it("closes Settings on Escape without leaving a drilled-in incident", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    incidentState.list = [makeIncident({ id: "inc-listed01" })];
+    mockViewport(1440);
+
+    renderDeskRoutes("/admin/incidents/inc-listed01");
+    fireEvent.click(screen.getByRole("button", { name: /^settings$/i }));
+    const settings = await screen.findByRole("dialog", { name: "Desk settings" });
+
+    fireEvent.keyDown(settings, { key: "Escape" });
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Desk settings" })).not.toBeInTheDocument(),
+    );
+    expect(screen.getByTestId("admin-incident-detail")).toBeInTheDocument();
+  });
+
   it("returns from the drill-in to /admin/incidents with Back", async () => {
     authState.state = "admin";
     authState.authReady = true;

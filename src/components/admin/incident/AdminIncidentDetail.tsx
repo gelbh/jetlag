@@ -199,7 +199,7 @@ function AdminIncidentDetailBody({
     <div className="jl-incident-detail" data-testid="admin-incident-detail">
       <header className="jl-incident-detail-header">
         <div>
-          <h2 className="jl-incident-detail-id">{incident.id}</h2>
+          <p className="jl-incident-detail-id">{incident.id}</p>
           <p className="jl-incident-detail-meta">
             Session {incident.sessionCode?.trim() ? incident.sessionCode.trim().toUpperCase() : "-"}{" "}
             · {formatFreshnessAge(incident.updatedAt || incident.createdAt)}
