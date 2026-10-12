@@ -26,10 +26,7 @@ import {
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
-import {
-  type GeolocationPermissionState,
-  queryGeolocationPermission,
-} from "../../services/core/location/geolocation";
+import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
 import { useToolSession } from "./framework/useToolSession";
 import { commitRadar } from "./radar/commitRadar";
 
@@ -161,25 +158,31 @@ export function useRadarTool({
     [active, setAwaitingPlacement, setMapError],
   );
 
-  const handleUseGps = useCallback(async () => {
-    if (submittingRef.current) {
-      return;
-    }
-    try {
-      const reading = await refreshGps();
-      const point: LatLngTuple = [reading.lat, reading.lng];
-      if (!ensurePointInGameArea(point)) {
+  const handleUseGps = useCallback(
+    async (shouldApply?: () => boolean) => {
+      if (submittingRef.current) {
         return;
       }
+      try {
+        const reading = await refreshGps();
+        if (shouldApply && !shouldApply()) {
+          return;
+        }
+        const point: LatLngTuple = [reading.lat, reading.lng];
+        if (!ensurePointInGameArea(point)) {
+          return;
+        }
 
-      setRadarAnswer(null);
-      setRadarCenter(point);
-      setAwaitingPlacement(false);
-      setMapError(null);
-    } catch (error) {
-      setMapError(error instanceof Error ? error.message : "GPS location unavailable.");
-    }
-  }, [ensurePointInGameArea, refreshGps, setAwaitingPlacement, setMapError]);
+        setRadarAnswer(null);
+        setRadarCenter(point);
+        setAwaitingPlacement(false);
+        setMapError(null);
+      } catch (error) {
+        setMapError(error instanceof Error ? error.message : "GPS location unavailable.");
+      }
+    },
+    [ensurePointInGameArea, refreshGps, setAwaitingPlacement, setMapError],
+  );
 
   const clearAfterCommit = useCallback(() => {
     setRadarCenter(null);
@@ -279,48 +282,12 @@ export function useRadarTool({
 
   const mapFirstEligible = distanceSelectionAvailable && !editingDistance;
 
-  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
-    GeolocationPermissionState | "checking"
-  >("checking");
-  const autoGpsForDistanceRef = useRef<number | null>(null);
-  const handleUseGpsRef = useRef(handleUseGps);
-  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
-
-  useEffect(() => {
-    handleUseGpsRef.current = handleUseGps;
-  }, [handleUseGps]);
-
-  useEffect(() => {
-    if (!mapFirstEligible) {
-      autoGpsForDistanceRef.current = null;
-      return;
-    }
-
-    let cancelled = false;
-    void (async () => {
-      const permission = await queryGeolocationPermission();
-      if (cancelled) {
-        return;
-      }
-      setEligiblePlacementGeo(permission);
-      if (
-        permission === "granted" &&
-        radarCenter === null &&
-        autoGpsForDistanceRef.current !== resolvedForReady
-      ) {
-        autoGpsForDistanceRef.current = resolvedForReady;
-        void handleUseGpsRef.current();
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [mapFirstEligible, resolvedForReady]);
-
-  useEffect(() => {
-    autoGpsForDistanceRef.current = null;
-  }, [resolvedForReady]);
+  const placementGeo = useAutoPlacementGps({
+    eligible: mapFirstEligible,
+    entryKey: resolvedForReady,
+    hasPoint: radarCenter !== null,
+    requestGps: handleUseGps,
+  });
 
   useEffect(() => {
     return () => {

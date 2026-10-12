@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useMeasuringTool } from "./useMeasuringTool";
 
@@ -21,6 +22,10 @@ vi.mock("./measuringToolResolvers", () => ({
 }));
 
 describe("useMeasuringTool", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("measuring");
+  });
+
   it("stores the seeker point from the first map tap", () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>

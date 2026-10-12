@@ -58,6 +58,7 @@ export function useToolSession<TConfig>({
   const open = useCallback((initial?: Partial<TConfig>) => {
     const next = mergeConfig(createInitialConfigRef.current(), initial);
     configRef.current = next;
+    phaseRef.current = "configuring";
     setConfigState(next);
     setError(null);
     setPhase("configuring");

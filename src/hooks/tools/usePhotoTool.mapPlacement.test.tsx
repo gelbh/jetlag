@@ -1,9 +1,14 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { usePhotoTool } from "./usePhotoTool";
 
 describe("usePhotoTool map-first", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("photo");
+  });
+
   it("suppresses the Ask sheet after a photo category is chosen", async () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>
