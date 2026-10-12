@@ -1,6 +1,6 @@
 import { filterConfirmedTentaclePois } from "../../domain/geo/poiCandidateAdapters";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
-import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import type { AnnotationRecord, GameArea, TentaclePoi } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
 import { poiPinsForCategory } from "../../domain/map/poiPinCategories";
 import {
@@ -90,16 +90,20 @@ export async function resolveRandomizedTentacle(
   if (!isTentacleCategoryAvailableInSession(session, categoryId)) return null;
 
   const searchRadiusMeters = tentacleSearchRadiusMetersForSession(session, categoryId);
-  const pois = filterConfirmedTentaclePois(
-    await fetchTentaclePois(anchor, searchRadiusMeters, categoryId, {
+  let fetched: TentaclePoi[];
+  try {
+    fetched = await fetchTentaclePois(anchor, searchRadiusMeters, categoryId, {
       customCategories: session.customCategories,
       customLocationPins: [
         ...(session.customLocationPins ?? []),
         ...poiPinsForCategory(annotations, categoryId),
       ],
       regionPackId: session.regionPackId,
-    }),
-  );
+    });
+  } catch {
+    return null;
+  }
+  const pois = filterConfirmedTentaclePois(fetched);
   if (pois.length === 0) return null;
 
   return buildTentaclePendingInput({

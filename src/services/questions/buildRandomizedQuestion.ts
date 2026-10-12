@@ -1,5 +1,4 @@
 import { yesNoAnswerOptions } from "../../components/tools/shared/answers/binaryAnswerOptions";
-import { ZERO_GAME_AREA } from "../../domain/geometry/core/gameAreaConvert";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
 import {
@@ -23,6 +22,7 @@ import type {
   PendingQuestionToolType,
   RandomizedTo,
 } from "../../domain/session/activity/sessionChat";
+import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGameArea";
 import { sessionDistanceUnit } from "../../domain/session/meta/sessionDistanceUnit";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
@@ -124,7 +124,7 @@ export async function buildRandomizedQuestion(
     typeof option.optionKey === "string"
   ) {
     const point = deferredPointFromPendingPlacement(original);
-    if (ctx.gameArea === ZERO_GAME_AREA || !point) {
+    if (isPlaceholderGameArea(ctx.gameArea) || !point) {
       return preset;
     }
     const [lng, lat] = point.geometry.coordinates;

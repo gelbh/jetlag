@@ -7,6 +7,7 @@ import type {
   PendingQuestionToolType,
   RandomizedTo,
 } from "../../domain/session/activity/sessionChat";
+import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGameArea";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import {
   buildRandomizedQuestion,
@@ -102,6 +103,11 @@ export function useRandomizeAutoAsk({
   onManual,
 }: UseRandomizeAutoAskParams): void {
   const handledRef = useRef(new Set<string>());
+  const canSubmitRef = useRef(canSubmitQuestion);
+
+  useEffect(() => {
+    canSubmitRef.current = canSubmitQuestion;
+  }, [canSubmitQuestion]);
 
   useEffect(() => {
     if (!enabled || !sessionId || !uid || !canSubmitQuestion) {
@@ -112,6 +118,12 @@ export function useRandomizeAutoAsk({
     const handled = new Set([...handledRef.current, ...loadHandled(storageKey)]);
     const original = nextRandomizedQuestion(pendingQuestions, uid, handled);
     if (!original) {
+      return;
+    }
+    if (
+      (original.toolType === "matching" || original.toolType === "tentacle") &&
+      isPlaceholderGameArea(gameArea)
+    ) {
       return;
     }
 
@@ -130,6 +142,9 @@ export function useRandomizeAutoAsk({
       .then(async (built) => {
         if (built.kind === "manual") {
           onManual(original.toolType, built.label, built.presetKey);
+          return;
+        }
+        if (!canSubmitRef.current) {
           return;
         }
         const questionId = await submitToolQuestion(built.toolType, built.input);

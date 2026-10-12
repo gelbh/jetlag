@@ -144,6 +144,12 @@ describe("resolveRandomizedTentacle", () => {
     expect(await resolveRandomizedTentacle(anchor, "museum", cards, ctx())).toBeNull();
   });
 
+  it("returns null when the POI fetch rejects", async () => {
+    vi.mocked(fetchTentaclePois).mockRejectedValue(new Error("overpass down"));
+
+    expect(await resolveRandomizedTentacle(anchor, "museum", cards, ctx())).toBeNull();
+  });
+
   it("returns null without fetching for a category unavailable in the session", async () => {
     expect(
       await resolveRandomizedTentacle(anchor, "museum", cards, ctx({ tentaclesEnabled: false })),
