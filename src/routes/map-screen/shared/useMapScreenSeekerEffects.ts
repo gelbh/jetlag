@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { showEphemeralPlayerNotification } from "@/components/ui/notifications/showEphemeralPlayerNotification";
 import { randomizeManualNotice } from "@/domain/questions/randomizeQuestion";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { isHidingTimerEffectivelyRunning } from "@/domain/session/timer/timer";
@@ -123,7 +124,11 @@ export function useMapScreenSeekerEffects({
     annotations,
     canSubmitQuestion,
     submitToolQuestion,
-    onManual: (_toolType, label) => setMapError(randomizeManualNotice(label)),
+    onManual: (_toolType, label) =>
+      showEphemeralPlayerNotification({
+        title: "Randomize",
+        message: randomizeManualNotice(label),
+      }),
   });
 
   useCancelOrphanThermometerWalks({
