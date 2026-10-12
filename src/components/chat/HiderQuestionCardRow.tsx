@@ -21,6 +21,9 @@ export function HiderQuestionCardRow({
   onPlay,
 }: HiderQuestionCardRowProps) {
   const [armed, setArmed] = useState<{ card: QuestionPowerUpId; key: string } | null>(null);
+  if (disabled && armed !== null) {
+    setArmed(null);
+  }
   const armedCard = armed && armed.key === resetKey && !disabled ? armed.card : null;
 
   useEffect(() => {
@@ -44,7 +47,6 @@ export function HiderQuestionCardRow({
             <Button
               key={card}
               disabled={disabled}
-              aria-pressed={isArmed}
               size="md"
               radius="sm"
               onClick={() => {
@@ -58,6 +60,9 @@ export function HiderQuestionCardRow({
               styles={{
                 root: {
                   minHeight: "2.75rem",
+                  height: "auto",
+                  paddingBlock: 8,
+                  paddingInline: 12,
                   border: `1px solid ${isArmed ? jetlagBrand.halt : jetlagBrand.rule}`,
                   backgroundColor: isArmed
                     ? `oklch(from ${jetlagBrand.halt} l c h / 0.16)`
@@ -65,6 +70,12 @@ export function HiderQuestionCardRow({
                   color: jetlagBrand.fieldInk,
                   fontWeight: 600,
                   opacity: disabled ? 0.5 : undefined,
+                },
+                label: {
+                  whiteSpace: "normal",
+                  overflow: "visible",
+                  textAlign: "center",
+                  lineHeight: 1.25,
                 },
               }}
             >

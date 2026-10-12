@@ -42,6 +42,16 @@ describe("HiderQuestionCardRow", () => {
     expect(screen.getByRole("button", { name: "Play Veto" })).toBeInTheDocument();
   });
 
+  it("stays disarmed after being disabled and re-enabled", () => {
+    const { rerender } = renderWithAppUi(
+      <HiderQuestionCardRow cards={["veto"]} resetKey="q1" onPlay={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Play Veto" }));
+    rerender(<HiderQuestionCardRow cards={["veto"]} disabled resetKey="q1" onPlay={vi.fn()} />);
+    rerender(<HiderQuestionCardRow cards={["veto"]} resetKey="q1" onPlay={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Play Veto" })).toBeInTheDocument();
+  });
+
   it("arming one card disarms the other", () => {
     renderWithAppUi(
       <HiderQuestionCardRow cards={["veto", "randomize"]} resetKey="q1" onPlay={vi.fn()} />,
