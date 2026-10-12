@@ -30,7 +30,7 @@ async function compilerErrors(path: string): Promise<string[]> {
 }
 
 describe("React Compiler coverage", () => {
-  it("only known files bail out, and known files still do", { timeout: 60_000 }, async () => {
+  it("no source file bails out of React Compiler", { timeout: 60_000 }, async () => {
     const newBailouts: string[] = [];
     const nowCompiling: string[] = [];
     for (const path of sourceFiles()) {
