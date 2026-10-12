@@ -28,6 +28,10 @@ import { AppUpdateContext, type AppUpdateContextValue } from "./appUpdateContext
 
 type ServiceWorkerReloader = (reloadPage?: boolean) => Promise<void>;
 
+// Dynamic: keeps firestore off the App chunk's static graph.
+const loadFirestoreIncidents = () => import("@/services/firestore/firestoreIncidents");
+const loadPwaRegister = () => import("virtual:pwa-register");
+
 function pickHigherVersion(left: string | undefined, right: string | undefined): string | null {
   if (!left && !right) {
     return null;
@@ -66,8 +70,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
 
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
-    // Dynamic: keeps firestore off the App chunk's static graph.
-    void import("@/services/firestore/firestoreIncidents")
+    void loadFirestoreIncidents()
       .then(({ subscribeAppConfigRuntime }) => {
         if (cancelled) {
           return;
@@ -148,7 +151,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     let stopScheduledChecks = () => {};
 
-    void import("virtual:pwa-register").then(({ registerSW }) => {
+    void loadPwaRegister().then(({ registerSW }) => {
       if (cancelled) {
         return;
       }

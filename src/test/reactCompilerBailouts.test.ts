@@ -7,33 +7,17 @@ import { describe, expect, it } from "vitest";
 // compiles; never add one (fix the bailout, or opt out with "use no memo" and a reason).
 // Sweep plan: .superpowers/plans/2026-10-11-react-compiler-bailout-sweep.md
 const KNOWN_BAILOUTS = new Set([
-  "src/App.tsx",
   "src/components/admin/incident/AdminIncidentActions.tsx",
   "src/components/admin/incident/AdminIncidentCursorLaunch.tsx",
   "src/components/admin/incident/AdminIncidentInbox.tsx",
   "src/components/admin/ops/AdminPreloadRequestInbox.tsx",
-  "src/components/auth/AccountSignInGate.tsx",
-  "src/components/auth/UsernameSetupGate.tsx",
-  "src/components/billing/OAuthSignInButton.tsx",
-  "src/components/friends/useFriendsPanelModel.ts",
   "src/components/incident/HostConfirmSheet.tsx",
   "src/components/incident/ReportProblemSheet.tsx",
-  "src/components/presets/RequestPreloadSection.tsx",
-  "src/components/session/settings/RolePasscodeSettings.tsx",
-  "src/components/ui/banners/AppUpdateProvider.tsx",
-  "src/components/ui/feedback/AppCheckProbeGate.tsx",
-  "src/components/ui/feedback/ClientMinVersionGate.tsx",
   "src/hooks/admin/useAdminJoinSession.ts",
   "src/hooks/admin/useAdminSessionList.ts",
-  "src/hooks/forms/useSubmitLock.ts",
   "src/hooks/incident/useIncidentThread.ts",
   "src/hooks/incident/useSupportThread.ts",
-  "src/hooks/session/useContinueActiveSession.ts",
   "src/routes/AdminMapScreen.tsx",
-  "src/routes/PremiumPageContent.tsx",
-  "src/routes/create-session/GameAreaSection.tsx",
-  "src/routes/create-session/useCreateSession.ts",
-  "src/routes/join-session/useJoinSession.ts",
 ]);
 
 const repoRoot = join(import.meta.dirname, "../..");

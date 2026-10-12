@@ -30,13 +30,14 @@ export function OAuthSignInButton({
   const [busy, setBusy] = useState(false);
 
   const handleClick = async () => {
+    // Never await before opening the popup — Chrome spends the user gesture
+    // on any prior await and returns auth/popup-blocked → redirect fallback.
+    if (!getFirebaseAuth().currentUser) {
+      onError("Sign-in isn’t ready yet. Wait a moment and try again.");
+      return;
+    }
     setBusy(true);
     try {
-      // Never await before opening the popup — Chrome spends the user gesture
-      // on any prior await and returns auth/popup-blocked → redirect fallback.
-      if (!getFirebaseAuth().currentUser) {
-        throw new Error("Sign-in isn’t ready yet. Wait a moment and try again.");
-      }
       await onSignIn();
       await onSuccess();
       setBusy(false);

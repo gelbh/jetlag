@@ -68,22 +68,19 @@ export function useFriendsPanelModel() {
     setError(null);
     try {
       const next = await listFriends();
-      if (cancelledRef.current) {
-        return;
-      }
-      setFriends(next.friends);
-      setIncoming(next.incoming);
-      setOutgoing(next.outgoing);
-    } catch (nextError) {
-      if (cancelledRef.current) {
-        return;
-      }
-      setError(nextError instanceof Error ? nextError.message : "Could not load friends.");
-      void feedback("error");
-    } finally {
       if (!cancelledRef.current) {
-        setLoadingList(false);
+        setFriends(next.friends);
+        setIncoming(next.incoming);
+        setOutgoing(next.outgoing);
       }
+    } catch (nextError) {
+      if (!cancelledRef.current) {
+        setError(nextError instanceof Error ? nextError.message : "Could not load friends.");
+        void feedback("error");
+      }
+    }
+    if (!cancelledRef.current) {
+      setLoadingList(false);
     }
   }, []);
 
@@ -92,14 +89,14 @@ export function useFriendsPanelModel() {
       return;
     }
     setRefreshing(true);
-    try {
+    await (async () => {
       await refresh({ soft: true });
       void feedback("selection");
-    } finally {
+    })().finally(() => {
       if (!cancelledRef.current) {
         setRefreshing(false);
       }
-    }
+    });
   }, [refresh, refreshing]);
 
   useEffect(() => {
@@ -158,23 +155,20 @@ export function useFriendsPanelModel() {
       setError(null);
       try {
         const next = await searchFriends(validated.normalized);
-        if (!isLatestRequest(requestId) || cancelledRef.current) {
-          return;
-        }
-        setSearchResults(next.results);
-        setHasSearched(true);
-      } catch (nextError) {
-        if (!isLatestRequest(requestId) || cancelledRef.current) {
-          return;
-        }
-        setSearchResults([]);
-        setHasSearched(true);
-        setError(nextError instanceof Error ? nextError.message : "Search failed.");
-        void feedback("error");
-      } finally {
         if (isLatestRequest(requestId) && !cancelledRef.current) {
-          setSearching(false);
+          setSearchResults(next.results);
+          setHasSearched(true);
         }
+      } catch (nextError) {
+        if (isLatestRequest(requestId) && !cancelledRef.current) {
+          setSearchResults([]);
+          setHasSearched(true);
+          setError(nextError instanceof Error ? nextError.message : "Search failed.");
+          void feedback("error");
+        }
+      }
+      if (isLatestRequest(requestId) && !cancelledRef.current) {
+        setSearching(false);
       }
     },
     [beginRequest, isLatestRequest],
@@ -224,9 +218,8 @@ export function useFriendsPanelModel() {
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Action failed.");
       void feedback("error");
-    } finally {
-      setBusyUid(null);
     }
+    setBusyUid(null);
   };
 
   const relationshipUids = useMemo(
