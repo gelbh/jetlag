@@ -52,6 +52,8 @@ function initialFromCache(enabled: boolean): {
   };
 }
 
+export const ADMIN_SESSION_POLL_MS = 30_000;
+
 type RefreshOptions = { background?: boolean };
 
 export function useAdminSessionList(enabled: boolean) {
@@ -207,6 +209,18 @@ export function useAdminSessionList(enabled: boolean) {
     }
     const cached = readAdminSessionListCache();
     void refresh(cached != null ? { background: true } : undefined);
+  }, [enabled, refresh]);
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void refresh({ background: true });
+      }
+    }, ADMIN_SESSION_POLL_MS);
+    return () => clearInterval(id);
   }, [enabled, refresh]);
 
   return {
