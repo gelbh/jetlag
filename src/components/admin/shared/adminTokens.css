@@ -38,3 +38,12 @@
   font-family: var(--adm-font);
   font-variant-numeric: tabular-nums;
 }
+
+@keyframes adm-punch {
+  from {
+    background-color: var(--adm-overprint-soft);
+  }
+  to {
+    background-color: transparent;
+  }
+}

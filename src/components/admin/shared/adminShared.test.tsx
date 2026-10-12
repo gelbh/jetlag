@@ -1,7 +1,9 @@
 import { Alert, Badge, Button, Divider, Drawer, Select } from "@mantine/core";
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { AdminRegion } from "@/components/admin/shared/AdminRegion";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
+import { PunchTime } from "@/components/admin/shared/PunchTime";
 import { SessionCode } from "@/components/admin/shared/SessionCode";
 import { StatCell } from "@/components/admin/shared/StatCell";
 import { StatusMark } from "@/components/admin/shared/StatusMark";
@@ -167,6 +169,70 @@ describe("admin shared primitives", () => {
     expect(body.closest(".mantine-Drawer-content")?.getAttribute("style")).toContain(
       "var(--adm-paper)",
     );
+  });
+
+  it("names a region by its title and shows the count", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <AdminRegion title="Start list" count={3} data-testid="start-list">
+          <span>rows</span>
+        </AdminRegion>
+      </AdminWorld>,
+    );
+    const region = screen.getByRole("region", { name: "Start list" });
+    expect(region).toHaveAttribute("data-testid", "start-list");
+    expect(screen.getByRole("heading", { name: "Start list" })).toBeVisible();
+    expect(region).toHaveTextContent("3");
+    expect(screen.getByText("rows")).toBeVisible();
+  });
+
+  it("swaps the region body for error, then loading, then empty", () => {
+    const { rerender } = renderWithAppUi(
+      <AdminWorld>
+        <AdminRegion title="Course" error="Broke" loading="Loading" empty="Nothing">
+          <span>rows</span>
+        </AdminRegion>
+      </AdminWorld>,
+    );
+    expect(screen.getByText("Broke")).toBeVisible();
+    expect(screen.queryByText("Loading")).toBeNull();
+
+    rerender(
+      <AdminWorld>
+        <AdminRegion title="Course" loading="Loading" empty="Nothing">
+          <span>rows</span>
+        </AdminRegion>
+      </AdminWorld>,
+    );
+    expect(screen.getByText("Loading")).toBeVisible();
+    expect(screen.queryByText("Nothing")).toBeNull();
+
+    rerender(
+      <AdminWorld>
+        <AdminRegion title="Course" empty="Nothing">
+          <span>rows</span>
+        </AdminRegion>
+      </AdminWorld>,
+    );
+    expect(screen.getByText("Nothing")).toBeVisible();
+    expect(screen.queryByText("rows")).toBeNull();
+  });
+
+  it("punches a fresh stamp as just now and flags the flash", () => {
+    const at = new Date().toISOString();
+    renderWithAppUi(
+      <AdminWorld>
+        <PunchTime at={at} flashing />
+        <PunchTime at={null} flashing={false} />
+      </AdminWorld>,
+    );
+    const fresh = screen.getByText("just now");
+    expect(fresh.tagName).toBe("TIME");
+    expect(fresh).toHaveAttribute("datetime", at);
+    expect(fresh).toHaveAttribute("data-flash");
+    const never = screen.getByText("never");
+    expect(never).not.toHaveAttribute("data-flash");
+    expect(never).not.toHaveAttribute("datetime");
   });
 
   it("portals combobox dropdowns into the admin world", async () => {
