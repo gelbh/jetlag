@@ -70,6 +70,8 @@ export function useAdminSessionList(enabled: boolean) {
   const inFlightRefreshRef = useRef<Promise<void> | null>(null);
   const trailingRefreshOptionsRef = useRef<RefreshOptions | null>(null);
   const lastFetchedAtRef = useRef<Date | null>(initial.lastFetchedAt);
+  const loadingMoreRef = useRef(false);
+  const extraPagesLoadedRef = useRef(false);
 
   useEffect(() => {
     lastFetchedAtRef.current = lastFetchedAt;
@@ -122,6 +124,7 @@ export function useAdminSessionList(enabled: boolean) {
             const page = await fetchAdminSessionsPage(null);
             if (requestGeneration === requestGenerationRef.current) {
               const fetchedAt = new Date();
+              extraPagesLoadedRef.current = false;
               setSessions(page.sessions);
               setNextPageToken(page.nextPageToken);
               setLastFetchedAt(fetchedAt);
@@ -175,11 +178,13 @@ export function useAdminSessionList(enabled: boolean) {
     setLoading(false);
     setRefreshing(false);
     setLoadingMore(true);
+    loadingMoreRef.current = true;
     setError(null);
 
     try {
       const page = await fetchAdminSessionsPage(pageToken);
       if (requestGeneration === requestGenerationRef.current) {
+        extraPagesLoadedRef.current = true;
         setSessions((current) => {
           const merged = mergeSessionsById(current, page.sessions);
           writeAdminSessionListCache({
@@ -198,6 +203,7 @@ export function useAdminSessionList(enabled: boolean) {
         );
       }
     }
+    loadingMoreRef.current = false;
     if (requestGeneration === requestGenerationRef.current) {
       setLoadingMore(false);
     }
@@ -216,6 +222,10 @@ export function useAdminSessionList(enabled: boolean) {
       return;
     }
     const id = setInterval(() => {
+      // ponytail: deep-paged lists stop auto-refreshing until a manual Refresh; upgrade by merging page 1 by id.
+      if (loadingMoreRef.current || extraPagesLoadedRef.current) {
+        return;
+      }
       if (document.visibilityState === "visible") {
         void refresh({ background: true });
       }
