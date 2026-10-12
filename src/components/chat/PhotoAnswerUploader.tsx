@@ -60,9 +60,8 @@ export function PhotoAnswerUploader({
       );
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Could not save your answer.");
-    } finally {
-      setSubmitting(false);
     }
+    setSubmitting(false);
   };
 
   return (
