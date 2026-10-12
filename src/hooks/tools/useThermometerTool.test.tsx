@@ -137,4 +137,42 @@ describe("useThermometerTool", () => {
 
     expect(result.current.draft.thermometerDistanceMeters).not.toBe(picked);
   });
+
+  it("keeps the walk distance once the walk has started", async () => {
+    const mocks = createToolHookMocks();
+    const { result, rerender } = renderHook(
+      ({ pendingQuestions }) =>
+        useThermometerTool({
+          active: true,
+          annotations: mocks.annotations,
+          pendingQuestions,
+          sessionRules: { gameSize: "large" },
+          createAnnotation: mocks.createAnnotation,
+          distanceUnit: mocks.distanceUnit,
+          finishPlacement: mocks.finishPlacement,
+          setMapError: mocks.setMapError,
+          refreshGps: async () => ({ lat: 53.35, lng: -6.26, accuracy: 5, heading: null }),
+        }),
+      { initialProps: { pendingQuestions: [] as PendingQuestionRecord[] } },
+    );
+    const picked = result.current.draft.thermometerDistanceMeters;
+
+    await act(async () => {
+      result.current.panel.props.onStartWalk();
+    });
+    expect(result.current.draft.thermoA).toEqual([53.35, -6.26]);
+
+    rerender({
+      pendingQuestions: [
+        {
+          id: "pq-thermo",
+          toolType: "thermometer",
+          status: "pending",
+          placement: { metadata: { thermometerDistanceMeters: picked } },
+        } as unknown as PendingQuestionRecord,
+      ],
+    });
+
+    expect(result.current.draft.thermometerDistanceMeters).toBe(picked);
+  });
 });
