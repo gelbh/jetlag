@@ -739,6 +739,24 @@ describe("AdminOpsDesk", () => {
       );
     });
 
+    it("reopens the Needs you drawer from the strip's Preload item on the preload route at 1280", async () => {
+      setAdmin();
+      preloadState.list = [makeRequest()];
+      mockViewport(1280);
+
+      renderDeskRoutes("/admin/preload-requests");
+      fireEvent.keyDown(await screen.findByRole("dialog", { name: "Needs you" }), {
+        key: "Escape",
+      });
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog", { name: "Needs you" })).not.toBeInTheDocument(),
+      );
+
+      fireEvent.click(screen.getByRole("link", { name: "Preload requests" }));
+
+      expect(await screen.findByRole("dialog", { name: "Needs you" })).toBeInTheDocument();
+    });
+
     it("counts open incidents plus open preload requests in the strip", () => {
       setAdmin();
       incidentState.list = [makeIncident({ id: "inc-listed01" })];
