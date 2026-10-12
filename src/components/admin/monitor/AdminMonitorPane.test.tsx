@@ -30,8 +30,10 @@ describe("AdminMonitorPane", () => {
   it("shows the error state when the monitor is unavailable", () => {
     renderWithAppUi(<AdminMonitorPane active errorMessage="Session load failed." />);
 
-    expect(screen.getByText("Monitor unavailable")).toBeInTheDocument();
-    expect(screen.getByText("Session load failed.")).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveAttribute("data-tone", "mispunch");
+    expect(alert).toHaveTextContent("Monitor unavailable");
+    expect(alert).toHaveTextContent("Session load failed.");
   });
 
   it("renders the embedded map when active", () => {

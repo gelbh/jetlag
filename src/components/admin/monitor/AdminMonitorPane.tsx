@@ -1,7 +1,7 @@
+import { Alert } from "@mantine/core";
 import { useEffect } from "react";
 import { useAdminMonitorFocus } from "../../../domain/admin/adminMonitorFocus";
 import { AdminMapScreen } from "../../../routes/AdminMapScreen";
-import { InlineError } from "../../ui/banners/InlineError";
 
 export function AdminMonitorPane({
   active,
@@ -23,12 +23,9 @@ export function AdminMonitorPane({
   if (errorMessage) {
     return (
       <div className="admin-monitor-pane flex h-full min-h-0 items-center justify-center rounded-xl border border-dashed border-status-error/40 bg-status-error-surface/40 px-6 py-10 text-center">
-        <div className="max-w-sm space-y-3">
-          <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
-            Monitor unavailable
-          </p>
-          <InlineError>{errorMessage}</InlineError>
-        </div>
+        <Alert role="alert" title="Monitor unavailable" data-tone="mispunch" maw={384}>
+          {errorMessage}
+        </Alert>
       </div>
     );
   }
