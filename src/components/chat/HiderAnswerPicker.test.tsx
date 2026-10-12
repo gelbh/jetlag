@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
@@ -31,6 +31,15 @@ describe("HiderAnswerPicker", () => {
   it("offers no replies while truth is loading", () => {
     renderPicker({ loading: true });
     expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("keeps a stale true reply visible but inert while truth refetches", () => {
+    const onSelect = vi.fn();
+    renderPicker({ truth: { replyId: "yes", label: "Yes" }, loading: true, onSelect });
+    const button = screen.getByRole("button", { name: "Yes" });
+    expect(button).toHaveAttribute("aria-disabled", "true");
+    fireEvent.click(button);
+    expect(onSelect).not.toHaveBeenCalled();
   });
 
   it("offers every reply when truth is unavailable", () => {

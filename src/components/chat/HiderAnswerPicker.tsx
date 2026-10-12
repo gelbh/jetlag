@@ -31,6 +31,7 @@ export function HiderAnswerPicker({
       ? replyOptions.find((option) => option.id === truth.replyId)
       : undefined;
   const truthAvailable = truthOption !== undefined;
+  const staleTruth = loading && truthAvailable;
   const visibleOptions = truthOption ? [truthOption] : loading ? [] : replyOptions;
   const cols = visibleOptions.length === 2 ? 2 : 1;
   const referenceLabel = hiderTruthReferenceLabel(truthReferenceMode);
@@ -64,7 +65,12 @@ export function HiderAnswerPicker({
             <Button
               key={option.id}
               disabled={disabled}
-              onClick={() => onSelect(option)}
+              aria-disabled={staleTruth || undefined}
+              onClick={() => {
+                if (!staleTruth) {
+                  onSelect(option);
+                }
+              }}
               aria-label={buttonLabel}
               size="md"
               radius="sm"
@@ -77,6 +83,7 @@ export function HiderAnswerPicker({
                   backgroundColor: isRecommended ? jetlagBrand.flag : jetlagBrand.canvas,
                   color: isRecommended ? jetlagBrand.flagInk : jetlagBrand.fieldInk,
                   fontWeight: 600,
+                  opacity: staleTruth ? 0.5 : undefined,
                   "&:disabled": { opacity: 0.5 },
                 },
               }}
