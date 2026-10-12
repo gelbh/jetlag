@@ -21,7 +21,7 @@ import { UserLocationLayer } from "../components/map/layers/UserLocationLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
-import { playableQuestionPowerUps, type QuestionPowerUpId } from "../domain/boardEconomy";
+import { QUESTION_POWER_UP_IDS, type QuestionPowerUpId } from "../domain/boardEconomy";
 import { messageFingerprint } from "../domain/device/chrome/chatUnread";
 import {
   applyMapStylePreferenceChange,
@@ -87,6 +87,7 @@ import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import { useHiderLocationSync } from "../hooks/sync/useHiderLocationSync";
 import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
 import { AppNavigate } from "../navigation/AppNavigate";
+import { ANALYTICS_EVENTS, track } from "../services/core/analytics/analytics";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase/firebase";
 import {
   clearEndGameRequestSession,
@@ -506,19 +507,32 @@ export function HiderMapScreen() {
               ),
             }),
     });
+    // A second tap before the local snapshot updates would send a cancel the rules reject.
+    answerInFlightRef.current = true;
     // Same as answer rewards: the card leaves the hand only once the server accepts.
     acknowledged.then(
-      () => boardEconomy.playQuestionCard(card).catch(() => undefined),
-      () => setChatAnswerError("Could not play that card. Try again."),
+      () => {
+        answerInFlightRef.current = false;
+        if (boardEconomyEnabled) {
+          void boardEconomy.playQuestionCard(card).catch(() => undefined);
+        } else {
+          track(ANALYTICS_EVENTS.hider_card_played, { card, deck: "physical" });
+        }
+      },
+      () => {
+        answerInFlightRef.current = false;
+        setChatAnswerError("Could not play that card. Try again.");
+      },
     );
   };
 
+  // Physical deck: both cards on the honor system. Simulated: held cards, none mid-draw.
   const questionCards: HiderQuestionCards = {
-    available: playableQuestionPowerUps(
-      boardEconomyEnabled
-        ? { held: boardEconomy.heldQuestionCards, pendingDraw: Boolean(boardEconomy.pendingDraw) }
-        : null,
-    ),
+    available: !boardEconomyEnabled
+      ? QUESTION_POWER_UP_IDS
+      : boardEconomy.pendingDraw
+        ? []
+        : boardEconomy.heldQuestionCards,
     onPlay: playQuestionCard,
   };
 
