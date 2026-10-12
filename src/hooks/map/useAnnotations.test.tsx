@@ -43,8 +43,10 @@ vi.mock("../../services/session/backgroundSync", () => ({
   registerAnnotationBackgroundSync: vi.fn(async () => undefined),
 }));
 
+const queueOffline = vi.hoisted(() => ({ value: false }));
+
 vi.mock("./shouldQueueAnnotationOffline", () => ({
-  shouldQueueAnnotationOffline: () => false,
+  shouldQueueAnnotationOffline: () => queueOffline.value,
 }));
 
 function permissionDenied(): FirebaseError {
@@ -56,6 +58,7 @@ describe("useAnnotations", () => {
     resetAllStores();
     useSessionStore.getState().setNetworkReachable(null);
     firebaseConfigured.value = false;
+    queueOffline.value = false;
     getRemoteSessionByIdFromServer.mockReset();
     writeRemoteAnnotation.mockReset().mockResolvedValue(undefined);
     writeRemoteAnnotationsBatch.mockReset().mockResolvedValue(undefined);
@@ -288,6 +291,45 @@ describe("useAnnotations", () => {
 
       expect(getRemoteSessionByIdFromServer).not.toHaveBeenCalled();
       expect(writeRemoteAnnotationsBatch).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps a retriable clear-all failure queued in pending writes", async () => {
+      useSessionStore
+        .getState()
+        .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
+      writeRemoteAnnotationsBatch.mockRejectedValue(new FirebaseError("unavailable", "offline"));
+
+      const { result } = renderHook(() => useAnnotations());
+
+      await act(async () => {
+        await result.current.createAnnotation(pin());
+      });
+      await act(async () => {
+        await result.current.clearAllAnnotations();
+      });
+
+      expect(useSessionStore.getState().pendingWrites).toBe(1);
+      expect(useSessionStore.getState().lastSyncError).toBeNull();
+    });
+
+    it("keeps offline-queued writes in pending writes", async () => {
+      useSessionStore
+        .getState()
+        .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
+      queueOffline.value = true;
+
+      const { result } = renderHook(() => useAnnotations());
+
+      await act(async () => {
+        await result.current.createAnnotation(pin());
+      });
+      expect(useSessionStore.getState().pendingWrites).toBe(1);
+
+      await act(async () => {
+        await result.current.clearAllAnnotations();
+      });
+      expect(useSessionStore.getState().pendingWrites).toBe(1);
+      expect(writeRemoteAnnotation).not.toHaveBeenCalled();
     });
   });
 });
