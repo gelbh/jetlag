@@ -43,7 +43,10 @@ describe("AdminStatusStrip", () => {
   it("keeps Home, event centre, incidents, and preload navigation reachable", () => {
     renderStrip();
     expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: "Event centre" })).toHaveAttribute("href", "/admin");
+    expect(screen.getByRole("link", { name: "Jetlag event centre" })).toHaveAttribute(
+      "href",
+      "/admin",
+    );
     const needsYou = screen.getByRole("link", { name: "Needs you: 2 open" });
     expect(needsYou).toHaveAttribute("href", "/admin/incidents");
     expect(needsYou).toContainElement(screen.getByRole("group", { name: "Needs you" }));
@@ -58,7 +61,7 @@ describe("AdminStatusStrip", () => {
     renderStrip();
     for (const control of [
       screen.getByRole("link", { name: /^home$/i }),
-      screen.getByRole("link", { name: "Event centre" }),
+      screen.getByRole("link", { name: "Jetlag event centre" }),
       screen.getByRole("link", { name: "Needs you: 2 open" }),
       screen.getByRole("link", { name: "Preload requests" }),
       screen.getByRole("button", { name: "Refresh live sessions" }),

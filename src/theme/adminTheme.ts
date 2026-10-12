@@ -105,7 +105,7 @@ export const adminTheme: MantineThemeOverride = {
       vars: (_theme, props) => {
         const tone = (props as { "data-tone"?: StatusTone })["data-tone"];
         if (!tone && props.color) return { root: {} };
-        const color = toneColor[tone ?? "neutral"];
+        const color = toneColor[tone ?? "neutral"] ?? toneColor.neutral;
         return {
           root: {
             "--badge-bg":
@@ -174,7 +174,7 @@ export const adminTheme: MantineThemeOverride = {
       // Always set: the app theme's default `color: "halt"` merges in and would tint the icon.
       vars: (_theme, props) => {
         const tone = (props as { "data-tone"?: StatusTone })["data-tone"];
-        const color = tone ? toneColor[tone] : "var(--adm-ink)";
+        const color = tone ? (toneColor[tone] ?? toneColor.neutral) : "var(--adm-ink)";
         return {
           root: {
             "--alert-bg": "var(--adm-paper-raised)",
