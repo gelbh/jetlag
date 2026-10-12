@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { milesToMeters } from "../../domain/map/distance";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useRadarTool } from "./useRadarTool";
 
@@ -13,6 +14,10 @@ vi.mock("../../services/core/location/geolocation", async (importOriginal) => {
 });
 
 describe("useRadarTool map-first", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("radar");
+  });
+
   it("suppresses the Ask sheet after a distance is chosen", async () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>

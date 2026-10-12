@@ -12,6 +12,7 @@ import { useTentacleTool } from "./useTentacleTool";
 describe("useTentacleTool", () => {
   beforeEach(() => {
     useMapStore.setState({ mapStyle: "standard" });
+    useMapStore.getState().setActiveTool("tentacle");
     registerMapLibreMap(null);
     vi.restoreAllMocks();
   });

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { canCommit } from "../../domain/ask/askHudModes";
 import { milesToMeters } from "../../domain/map/distance";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import {
   THERMOMETER_GPS_WAIT_BLOCK_MS,
@@ -62,6 +63,10 @@ beforeEach(() => {
 });
 
 describe("useThermometerTool send blocks", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("thermometer");
+  });
+
   it("keeps END WALK endable during a synced multiplayer walk once GPS updates", async () => {
     const mocks = createToolHookMocks();
     const { result, rerender } = renderHook(() =>
