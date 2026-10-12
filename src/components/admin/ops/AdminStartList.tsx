@@ -46,7 +46,7 @@ const GRID_CELLS = 8;
 function dialogIsOpen() {
   return (
     document.activeElement?.closest('[role="dialog"]') != null ||
-    document.querySelector('[role="dialog"], [aria-modal="true"]') != null
+    document.querySelector('[aria-modal="true"]') != null
   );
 }
 

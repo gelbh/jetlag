@@ -186,6 +186,35 @@ describe("AdminStartList", () => {
     expect(bodyRows().some((row) => row.hasAttribute("aria-selected"))).toBe(false);
   });
 
+  it("keeps the keyboard while a non-modal dialog banner is mounted", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <AdminStartList {...props()} />
+        <div role="dialog" aria-label="Analytics consent">
+          <button type="button">Accept</button>
+        </div>
+      </AdminWorld>,
+    );
+
+    fireEvent.keyDown(document.body, { key: "j" });
+
+    expect(bodyRows()[0]).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("button", { name: "Monitor ABCD, Dublin" })).toHaveFocus();
+  });
+
+  it("leaves the keyboard alone while a modal dialog is open", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <AdminStartList {...props()} />
+        <div role="dialog" aria-modal="true" aria-label="Desk settings" />
+      </AdminWorld>,
+    );
+
+    fireEvent.keyDown(document.body, { key: "j" });
+
+    expect(bodyRows().some((row) => row.hasAttribute("aria-selected"))).toBe(false);
+  });
+
   it("drops the cursor when its session leaves the filtered list", () => {
     const { rerenderList } = renderList();
     fireEvent.keyDown(document.body, { key: "j" });
