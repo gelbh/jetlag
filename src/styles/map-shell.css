@@ -201,11 +201,6 @@
   }
 
   /* Admin map: mission-control layout (tablet/desktop) */
-  .admin-dashboard-list-scroll {
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
-  }
-
   .admin-monitor-pane {
     container-type: inline-size;
     container-name: admin-monitor;
