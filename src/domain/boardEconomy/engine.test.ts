@@ -11,6 +11,7 @@ import {
   drawKeep,
   enforceHandLimit,
   heldQuestionPowerUps,
+  playableQuestionPowerUps,
   playQuestionPowerUp,
   resolveDrawKeep,
   rewardForQuestion,
@@ -144,5 +145,13 @@ describe("board economy engine", () => {
     expect(played.hand.map((c) => c.instanceId)).toEqual([other.instanceId]);
     expect(played.discard.map((c) => c.instanceId)).toEqual([veto.instanceId]);
     expect(playQuestionPowerUp(holding, "randomize")).toBe(holding);
+  });
+
+  it("offers both question cards with a physical deck and only held ones when simulated", () => {
+    expect(playableQuestionPowerUps(null)).toEqual(["veto", "randomize"]);
+    expect(playableQuestionPowerUps({ held: ["randomize"], pendingDraw: false })).toEqual([
+      "randomize",
+    ]);
+    expect(playableQuestionPowerUps({ held: ["veto"], pendingDraw: true })).toEqual([]);
   });
 });
