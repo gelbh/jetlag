@@ -26,6 +26,11 @@ describe("waitForSessionMembership", () => {
     vi.useRealTimers();
   });
 
+  it("resolves immediately when the uid is already a member", async () => {
+    setPremiumApiContext(session(["me"]));
+    expect(await isSettled(waitForSessionMembership("me", 10_000))).toBe(true);
+  });
+
   it("resolves when a later session update lists the uid", async () => {
     setPremiumApiContext(session(["old"]));
     const wait = waitForSessionMembership("new", 10_000);

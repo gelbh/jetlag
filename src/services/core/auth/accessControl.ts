@@ -50,12 +50,6 @@ export async function getAccessToken(): Promise<string | null> {
 }
 
 export async function buildPremiumProxyHeaders(): Promise<HeadersInit> {
-  const headers: Record<string, string> = {};
-  const token = await getAccessToken();
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
   const { getPremiumApiContext, PROXY_MEMBERSHIP_WAIT_MS, waitForSessionMembership } = await import(
     "./premiumApiContext"
   );
@@ -63,6 +57,13 @@ export async function buildPremiumProxyHeaders(): Promise<HeadersInit> {
   if (uid) {
     await waitForSessionMembership(uid, PROXY_MEMBERSHIP_WAIT_MS);
   }
+
+  const headers: Record<string, string> = {};
+  const token = await getAccessToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const { sessionId } = getPremiumApiContext();
   if (sessionId) {
     headers["X-Session-Id"] = sessionId;
