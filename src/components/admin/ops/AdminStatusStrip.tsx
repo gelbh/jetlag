@@ -119,6 +119,7 @@ export function AdminStatusStrip({
           <ActionIcon
             component={AppLink}
             to="/admin/preload-requests"
+            onClick={onOpenNeedsYou}
             variant="default"
             aria-label="Preload requests"
           >
