@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Table, Text } from "@mantine/core";
+import { Button, Stack, Table, Text } from "@mantine/core";
 import type { CSSProperties } from "react";
 import { resolveAdminSessionAreaLabel } from "../../../domain/admin/adminSessionAreaLabel";
 import { adminSessionPhaseLabel } from "../../../domain/admin/sessionPhase";
@@ -42,8 +42,6 @@ export function AdminSessionRow({
   const areaLabel = resolveAdminSessionAreaLabel(summary);
   const phaseLabel = adminSessionPhaseLabel(summary.phase);
   const cellStyle = monitored ? reversedInk : undefined;
-  // Light tones mix toward transparent, so on the reversed row they need a paper ground.
-  const markGround = monitored ? "var(--adm-paper)" : undefined;
 
   return (
     <Table.Tr
@@ -77,23 +75,17 @@ export function AdminSessionRow({
         </Button>
       </Table.Td>
       <Table.Td colSpan={2}>
-        <Box component="span" display="inline-flex" bg={markGround}>
-          <StatusMark
-            tone={summary.isLive ? "live" : "neutral"}
-            label={summary.isLive ? phaseLabel : `${phaseLabel}, idle`}
-          />
-        </Box>
+        <StatusMark
+          tone={summary.isLive ? "live" : "neutral"}
+          label={summary.isLive ? phaseLabel : `${phaseLabel}, idle`}
+        />
       </Table.Td>
       <Table.Td style={cellStyle}>{summary.memberCount}</Table.Td>
       <Table.Td style={cellStyle}>
         <PunchTime at={summary.lastActivityAt} flashing={flashing} />
       </Table.Td>
       <Table.Td>
-        {mispunchCount > 0 ? (
-          <Box component="span" display="inline-flex" bg={markGround}>
-            <StatusMark tone="mispunch" label={String(mispunchCount)} />
-          </Box>
-        ) : null}
+        {mispunchCount > 0 ? <StatusMark tone="mispunch" label={String(mispunchCount)} /> : null}
       </Table.Td>
     </Table.Tr>
   );

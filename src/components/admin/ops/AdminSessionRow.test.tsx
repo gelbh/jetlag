@@ -97,10 +97,10 @@ describe("AdminSessionRow", () => {
     expect(other).not.toHaveAttribute("data-loading");
   });
 
-  it("keeps status marks out of the monitored row's reversed ink", () => {
+  it("keeps opaque status marks out of the monitored row's reversed ink", () => {
     renderRows(
       <AdminSessionRow
-        summary={makeSummary()}
+        summary={makeSummary({ isLive: false })}
         observingCode={null}
         monitored
         mispunchCount={1}
@@ -109,12 +109,15 @@ describe("AdminSessionRow", () => {
     );
 
     const row = screen.getByRole("row");
-    const marks = [within(row).getByText("Seek"), within(row).getByText("1")].map((label) =>
-      label.closest("[data-tone]"),
+    const marks = [within(row).getByText("Seek, idle"), within(row).getByText("1")].map(
+      (label) => label.closest("[data-tone]") as HTMLElement,
     );
     for (const mark of marks) {
-      for (let node = mark; node && node !== row; node = node.parentElement) {
-        expect((node as HTMLElement).style.getPropertyValue("--adm-ink")).toBe("");
+      expect(mark.parentElement?.tagName).toBe("TD");
+      expect(mark.style.getPropertyValue("--badge-bg")).toContain("var(--adm-paper)");
+      expect(mark.style.getPropertyValue("--badge-bg")).not.toContain("transparent");
+      for (let node: HTMLElement | null = mark; node && node !== row; node = node.parentElement) {
+        expect(node.style.getPropertyValue("--adm-ink")).toBe("");
       }
     }
     const button = screen.getByRole("button", { name: "Monitor 7G2LJH" });

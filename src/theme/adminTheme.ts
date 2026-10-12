@@ -96,7 +96,7 @@ export const adminTheme: MantineThemeOverride = {
         return {
           root: {
             "--badge-bg":
-              tone === "live" ? color : `color-mix(in oklch, ${color} 14%, transparent)`,
+              tone === "live" ? color : `color-mix(in oklch, ${color} 14%, var(--adm-paper))`,
             "--badge-color": "var(--adm-ink)",
             "--badge-bd": `1px solid ${color}`,
           },
