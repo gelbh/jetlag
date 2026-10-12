@@ -1,28 +1,18 @@
 import {
-  Accordion,
   ActionIcon,
   Alert,
   Badge,
   Button,
+  Divider,
   Drawer,
-  Kbd,
   type MantineThemeOverride,
   Paper,
-  Table,
   Tabs,
   TextInput,
 } from "@mantine/core";
-import type { StatusTone } from "@/components/admin/shared/StatusMark";
+import { type StatusTone, toneColor } from "@/theme/adminTone";
 
 const rule = "1px solid var(--adm-rule)";
-
-const toneColor: Record<StatusTone, string> = {
-  live: "var(--adm-live)",
-  ok: "var(--adm-ok)",
-  info: "var(--adm-info)",
-  mispunch: "var(--adm-mispunch)",
-  neutral: "var(--adm-ink-muted)",
-};
 
 /** Overprint replaces the app's primary colour on controls without an explicit `color`. */
 function controlColors(variant: string | undefined) {
@@ -65,25 +55,11 @@ function controlColors(variant: string | undefined) {
   }
 }
 
-/** Orienteering control sheet: paper, ink, contour rules, overprint accent. Flat. */
 export const adminTheme: MantineThemeOverride = {
   fontFamily: "var(--adm-font)",
   headings: { fontFamily: "var(--adm-font)", fontWeight: "700" },
   defaultRadius: 0,
   components: {
-    Table: Table.extend({
-      defaultProps: {
-        stickyHeader: true,
-        highlightOnHover: true,
-        verticalSpacing: 6,
-        horizontalSpacing: "xs",
-      },
-      styles: {
-        table: { borderColor: "var(--adm-rule)", fontVariantNumeric: "tabular-nums" },
-        th: { color: "var(--adm-ink-muted)", fontWeight: 600, background: "var(--adm-paper)" },
-        td: { borderColor: "var(--adm-rule)" },
-      },
-    }),
     Tabs: Tabs.extend({
       styles: {
         list: { borderColor: "var(--adm-rule)" },
@@ -92,12 +68,6 @@ export const adminTheme: MantineThemeOverride = {
       vars: (_theme, props) => ({
         root: props.color ? {} : { "--tabs-color": "var(--adm-overprint)" },
       }),
-    }),
-    Accordion: Accordion.extend({
-      styles: {
-        item: { borderColor: "var(--adm-rule)", background: "transparent" },
-        control: { color: "var(--adm-ink)" },
-      },
     }),
     Badge: Badge.extend({
       defaultProps: { variant: "light" },
@@ -171,9 +141,12 @@ export const adminTheme: MantineThemeOverride = {
     }),
     Alert: Alert.extend({
       defaultProps: { radius: 0 },
-      // Always set: the app theme's default `color: "halt"` merges in and would tint the icon.
+      // The app theme's default `color: "halt"` always merges in, so `color` alone can't mean "caller chose".
       vars: (_theme, props) => {
-        const tone = (props as { "data-tone"?: StatusTone })["data-tone"];
+        const tone =
+          (props as { "data-tone"?: StatusTone })["data-tone"] ??
+          (props.color === "red" || props.color === "halt" ? "mispunch" : undefined);
+        if (!tone && props.color) return { root: {} };
         const color = tone ? (toneColor[tone] ?? toneColor.neutral) : "var(--adm-ink)";
         return {
           root: {
@@ -211,23 +184,18 @@ export const adminTheme: MantineThemeOverride = {
         title: { fontWeight: 700, letterSpacing: "normal" },
       },
     }),
+    Divider: Divider.extend({
+      // Inline styles: the app's `@layer base` border reset outranks Mantine's class rule.
+      styles: (_theme, props) => ({
+        root: props.orientation === "vertical" ? { borderInlineStart: rule } : { borderTop: rule },
+      }),
+    }),
     Paper: Paper.extend({
       defaultProps: { radius: 0, shadow: "none", withBorder: true },
       styles: {
         root: {
           backgroundColor: "var(--adm-paper-raised)",
           borderColor: "var(--adm-rule)",
-          boxShadow: "none",
-        },
-      },
-    }),
-    Kbd: Kbd.extend({
-      styles: {
-        root: {
-          fontFamily: "var(--adm-font)",
-          background: "var(--adm-paper-raised)",
-          color: "var(--adm-ink)",
-          border: rule,
           boxShadow: "none",
         },
       },

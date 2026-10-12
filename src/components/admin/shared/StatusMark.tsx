@@ -1,6 +1,5 @@
 import { Badge } from "@mantine/core";
-
-export type StatusTone = "live" | "ok" | "info" | "mispunch" | "neutral";
+import type { StatusTone } from "@/theme/adminTone";
 
 export function StatusMark({ tone, label }: { tone: StatusTone; label: string }) {
   if (import.meta.env.DEV && !label.trim()) console.error("StatusMark needs a visible label");
