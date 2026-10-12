@@ -4,6 +4,7 @@ import type { DistanceUnit } from "../../domain/map/distance";
 import {
   isRadarDistanceOptionUsed,
   type MatchingCategoryId,
+  type MeasuringFromKind,
   PHOTO_REPLY_OPTIONS,
   type PhotoCategoryId,
   photoQuestionPrompt,
@@ -43,6 +44,13 @@ export interface BuildRandomizedQuestionContext {
   gameArea: GameArea;
   distanceUnit: DistanceUnit;
 }
+
+/** Tools whose randomized roll needs the play area and the dynamically imported heavy resolvers. */
+export const HEAVY_RANDOMIZE_TOOLS: ReadonlySet<PendingQuestionToolType> = new Set([
+  "matching",
+  "tentacle",
+  "measuring",
+]);
 
 /** Rebuilds the hider's Randomize roll from the seeker's own catalog; never trusts `roll.label` for the prompt. */
 export async function buildRandomizedQuestion(
@@ -119,10 +127,7 @@ export async function buildRandomizedQuestion(
   }
   const preset: BuiltRandomizedQuestion = { ...manual, presetKey: option.optionKey };
 
-  if (
-    (original.toolType === "matching" || original.toolType === "tentacle") &&
-    typeof option.optionKey === "string"
-  ) {
+  if (HEAVY_RANDOMIZE_TOOLS.has(original.toolType) && typeof option.optionKey === "string") {
     const point = deferredPointFromPendingPlacement(original);
     if (isPlaceholderGameArea(ctx.gameArea) || !point) {
       return preset;
@@ -138,12 +143,19 @@ export async function buildRandomizedQuestion(
             cards,
             ctx,
           )
-        : await heavy.resolveRandomizedTentacle(
-            [lat, lng],
-            option.optionKey as TentacleExtendedCategoryId,
-            cards,
-            ctx,
-          );
+        : original.toolType === "tentacle"
+          ? await heavy.resolveRandomizedTentacle(
+              [lat, lng],
+              option.optionKey as TentacleExtendedCategoryId,
+              cards,
+              ctx,
+            )
+          : await heavy.resolveRandomizedMeasuring(
+              [lat, lng],
+              option.optionKey as MeasuringFromKind,
+              cards,
+              ctx,
+            );
     if (!payload) {
       return preset;
     }
