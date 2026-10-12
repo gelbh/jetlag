@@ -11,6 +11,7 @@ import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGame
 import type { SessionRulesInput } from "../../domain/session/rules";
 import {
   buildRandomizedQuestion,
+  HEAVY_RANDOMIZE_TOOLS,
   type RandomizedQuestionInput,
 } from "../../services/questions/buildRandomizedQuestion";
 
@@ -120,10 +121,7 @@ export function useRandomizeAutoAsk({
     if (!original) {
       return;
     }
-    if (
-      (original.toolType === "matching" || original.toolType === "tentacle") &&
-      isPlaceholderGameArea(gameArea)
-    ) {
+    if (HEAVY_RANDOMIZE_TOOLS.has(original.toolType) && isPlaceholderGameArea(gameArea)) {
       return;
     }
 

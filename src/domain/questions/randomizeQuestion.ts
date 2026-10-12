@@ -242,6 +242,7 @@ const AUTO_ASK_TOOLS: ReadonlySet<PendingQuestionToolType> = new Set([
   "photo",
   "matching",
   "tentacle",
+  "measuring",
 ]);
 
 export function randomizedQuestionNotice(toolType: PendingQuestionToolType, label: string): string {
