@@ -43,7 +43,6 @@ import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
 import {
   AdminOpsDeskLazy,
-  AdminPreloadRequestInboxLazy,
   AppResumeWatchdogLazy,
   CreateSessionLazy,
   FeedbackLazy,
@@ -418,7 +417,7 @@ export default function App() {
                           path="/admin/preload-requests"
                           element={
                             <LazyRoute>
-                              <AdminPreloadRequestInboxLazy />
+                              <AdminOpsDeskLazy />
                             </LazyRoute>
                           }
                         />

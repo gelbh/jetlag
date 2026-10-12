@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { clearLegacyOpsDeskStorage } from "../../../domain/admin/clearLegacyOpsDeskStorage";
 import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
+import type { PreloadRequest } from "../../../domain/preloadRequest/preloadRequestTypes";
 import { useAdminAccessState } from "../../../hooks/admin/useAdminAccessState";
 import { useAdminJoinSession } from "../../../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../../../hooks/admin/useAdminSessionList";
@@ -25,6 +26,10 @@ import {
   subscribeIncident,
   subscribeIncidentList,
 } from "../../../services/admin/adminIncidents";
+import {
+  countOpenPreloadRequests,
+  subscribePreloadRequestList,
+} from "../../../services/admin/adminPreloadRequests";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
 import { getFirebaseAuth } from "../../../services/core/firebase/firebase";
 import { useSessionStore } from "../../../state/sessionStore";
@@ -43,6 +48,7 @@ import "../incident/AdminIncidentDesk.css";
 import "./AdminOpsDesk.css";
 
 const EMPTY_INCIDENTS: IncidentRecord[] = [];
+const EMPTY_PRELOAD_REQUESTS: PreloadRequest[] = [];
 
 function AdminSessionSkeletonRows() {
   return (
@@ -60,6 +66,9 @@ function continuePathForRoute(pathname: string, incidentId: string | null): stri
   }
   if (pathname.startsWith("/admin/incidents")) {
     return "/admin/incidents";
+  }
+  if (pathname.startsWith("/admin/preload-requests")) {
+    return "/admin/preload-requests";
   }
   return "/admin";
 }
@@ -89,10 +98,15 @@ function AdminOpsDeskContent() {
   const wide = useMinWidth(1440);
   const selectedIncidentId = routeIncidentId?.trim() || null;
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
+  const onPreloadRoute = location.pathname.startsWith("/admin/preload-requests");
 
   const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
   const [incidentsLoading, setIncidentsLoading] = useState(enabled);
   const [incidentsError, setIncidentsError] = useState<string | null>(null);
+  const [preloadRequests, setPreloadRequests] = useState<PreloadRequest[]>([]);
+  const [preloadLoading, setPreloadLoading] = useState(enabled);
+  const [preloadError, setPreloadError] = useState<string | null>(null);
+  const [selectedPreloadId, setSelectedPreloadId] = useState<string | null>(null);
   const [enabledState, setEnabledState] = useState(enabled);
   const [fetchedIncident, setFetchedIncident] = useState<IncidentRecord | null>(null);
   const activeSession = useSessionStore((state) => state.session);
@@ -119,7 +133,7 @@ function AdminOpsDeskContent() {
   const monitorRequestRef = useRef(0);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [needsYouOpen, setNeedsYouOpen] = useState(onIncidentsRoute);
+  const [needsYouOpen, setNeedsYouOpen] = useState(onIncidentsRoute || onPreloadRoute);
   const [drawerIncidentId, setDrawerIncidentId] = useState(selectedIncidentId);
   const [openGroups, setOpenGroups] = useState<NeedsYouGroup[]>(() =>
     openGroupsForRoute(location.pathname),
@@ -129,6 +143,7 @@ function AdminOpsDeskContent() {
   if (location.pathname !== openGroupsPath) {
     setOpenGroupsPath(location.pathname);
     setOpenGroups(openGroupsForRoute(location.pathname));
+    setSelectedPreloadId(null);
   }
 
   if (selectedIncidentId !== drawerIncidentId) {
@@ -143,6 +158,8 @@ function AdminOpsDeskContent() {
     if (enabled) {
       setIncidentsLoading(true);
       setIncidentsError(null);
+      setPreloadLoading(true);
+      setPreloadError(null);
     }
   }
 
@@ -170,8 +187,26 @@ function AdminOpsDeskContent() {
     return unsubscribe;
   }, [enabled]);
 
+  useEffect(() => {
+    if (!enabled) return;
+    return subscribePreloadRequestList(
+      (next) => {
+        setPreloadRequests(next);
+        setPreloadLoading(false);
+      },
+      (error) => {
+        setPreloadError(error.message);
+        setPreloadLoading(false);
+      },
+    );
+  }, [enabled]);
+
   const visibleIncidents = enabled ? incidents : EMPTY_INCIDENTS;
   const openCount = useMemo(() => countOpenIncidents(visibleIncidents), [visibleIncidents]);
+  const visiblePreloadRequests = enabled ? preloadRequests : EMPTY_PRELOAD_REQUESTS;
+  const needsYouCount = openCount + countOpenPreloadRequests(visiblePreloadRequests);
+  const selectedPreload =
+    visiblePreloadRequests.find((request) => request.id === selectedPreloadId) ?? null;
   const mispunchBySession = new Map<string, number>();
   for (const incident of visibleIncidents) {
     if (incident.sessionId && isOpenIncident(incident)) {
@@ -314,6 +349,11 @@ function AdminOpsDeskContent() {
       selectedIncident={selectedIncident}
       onSelectIncident={handleSelectIncident}
       onBackFromIncident={() => void navigate("/admin/incidents")}
+      preloadRequests={visiblePreloadRequests}
+      preloadLoading={enabled ? preloadLoading : false}
+      preloadError={enabled ? preloadError : null}
+      selectedPreload={selectedPreload}
+      onSelectPreload={setSelectedPreloadId}
       openGroups={openGroups}
       onOpenGroupsChange={setOpenGroups}
     />
@@ -384,7 +424,7 @@ function AdminOpsDeskContent() {
     <AdminStatusStrip
       liveCount={liveSessions.length}
       runnerCount={liveSessions.reduce((sum, row) => sum + row.memberCount, 0)}
-      needsYouCount={openCount}
+      needsYouCount={needsYouCount}
       inQueueCount={visibleIncidents.length}
       incidentsLoading={enabled && incidentsLoading}
       refreshing={refreshing}
@@ -439,7 +479,7 @@ function AdminOpsDeskContent() {
           </AdminRegion>
         ) : (
           <AdminMobileDesk
-            tab={onIncidentsRoute ? "incidents" : "sessions"}
+            tab={onIncidentsRoute || onPreloadRoute ? "incidents" : "sessions"}
             onSelectTab={(tab) =>
               void navigate(tab === "incidents" ? "/admin/incidents" : "/admin")
             }
@@ -454,7 +494,7 @@ function AdminOpsDeskContent() {
       </AppShell.Main>
       {isDesktop && wide ? (
         <AppShell.Aside mih={0} p="xs">
-          <AdminRegion title="Needs you" count={openCount}>
+          <AdminRegion title="Needs you" count={needsYouCount}>
             {needsYou}
           </AdminRegion>
         </AppShell.Aside>
@@ -465,7 +505,7 @@ function AdminOpsDeskContent() {
         position="right"
         size="24rem"
         title="Needs you"
-        closeOnEscape={!selectedIncidentId}
+        closeOnEscape={!selectedIncidentId && !selectedPreload}
       >
         {needsYou}
       </Drawer>

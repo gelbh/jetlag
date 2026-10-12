@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
+import type { PreloadRequest } from "../../../domain/preloadRequest/preloadRequestTypes";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
 import { renderWithRouter } from "../../../test/renderWithRouter";
 import { jetlagTheme } from "../../../theme/theme";
@@ -166,6 +167,37 @@ vi.mock("../../../services/admin/adminIncidents", async () => {
   };
 });
 
+const preloadState = vi.hoisted(() => ({ list: [] as PreloadRequest[] }));
+
+vi.mock("../../../services/admin/adminPreloadRequests", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../../services/admin/adminPreloadRequests")
+  >("../../../services/admin/adminPreloadRequests");
+  return {
+    ...actual,
+    subscribePreloadRequestList: (onNext: (rows: PreloadRequest[]) => void) => {
+      onNext(preloadState.list);
+      return () => undefined;
+    },
+  };
+});
+
+vi.mock("../../../services/preloadRequest/preloadRequestApi", () => ({
+  updatePreloadRequestStatus: vi.fn(async () => undefined),
+}));
+
+function makeRequest(overrides: Partial<PreloadRequest> = {}): PreloadRequest {
+  return {
+    id: "req-abc12345",
+    createdAt: "2026-10-01T12:00:00Z",
+    updatedAt: "2026-10-01T12:05:00Z",
+    status: "open",
+    reporterUid: "uid-1",
+    presetSnapshot: { name: "Dublin core", gameSize: "medium", distanceUnit: "metric" },
+    ...overrides,
+  } as PreloadRequest;
+}
+
 vi.mock("../../../hooks/incident/useIncidentThread", () => ({
   useIncidentThread: (incidentId: string | null) => ({
     incident:
@@ -231,6 +263,7 @@ describe("AdminOpsDesk", () => {
     sessionListState.refresh.mockClear();
     sessionListState.loadMore.mockClear();
     incidentState.list = [];
+    preloadState.list = [];
     incidentState.byId = null;
     incidentState.subscribeIncident.mockReset();
     incidentState.joinSession.mockReset();
@@ -616,10 +649,100 @@ describe("AdminOpsDesk", () => {
         <Route path="/admin" element={<AdminOpsDesk />} />
         <Route path="/admin/incidents" element={<AdminOpsDesk />} />
         <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
+        <Route path="/admin/preload-requests" element={<AdminOpsDesk />} />
       </Routes>,
       route,
     );
   }
+
+  function setAdmin() {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+  }
+
+  describe("preload requests", () => {
+    it("opens only the Preload group in the three-region desk at 1440", () => {
+      setAdmin();
+      preloadState.list = [makeRequest()];
+      mockViewport(1440);
+
+      renderDeskRoutes("/admin/preload-requests");
+
+      expect(screen.getByRole("region", { name: "Start list" })).toBeInTheDocument();
+      expect(screen.getByRole("region", { name: "Course" })).toBeInTheDocument();
+      const needsYou = screen.getByRole("region", { name: "Needs you" });
+      expect(within(needsYou).getByRole("button", { name: "Preload requests" })).toHaveAttribute(
+        "aria-expanded",
+        "true",
+      );
+      expect(within(needsYou).getByRole("button", { name: "Incidents" })).toHaveAttribute(
+        "aria-expanded",
+        "false",
+      );
+    });
+
+    it("drills into a request and shows its status actions", async () => {
+      setAdmin();
+      preloadState.list = [makeRequest()];
+      mockViewport(1440);
+
+      renderDeskRoutes("/admin/preload-requests");
+      const panel = screen.getByRole("region", { name: "Preload requests" });
+      fireEvent.click(within(panel).getByRole("button", { name: /Dublin core/ }));
+
+      expect(await screen.findByRole("button", { name: "Back" })).toHaveFocus();
+      expect(screen.getByRole("heading", { name: "Dublin core" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Mark accepted" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Mark shipped" })).toBeInTheDocument();
+    });
+
+    it("counts open incidents plus open preload requests in the strip", () => {
+      setAdmin();
+      incidentState.list = [makeIncident({ id: "inc-listed01" })];
+      preloadState.list = [
+        makeRequest({ id: "req-open1" }),
+        makeRequest({ id: "req-open2", status: "accepted" }),
+        makeRequest({ id: "req-done", status: "shipped" }),
+      ];
+      mockViewport(1280);
+
+      renderDeskRoutes("/admin");
+
+      expect(screen.getByRole("button", { name: "Needs you: 2 open" })).toBeInTheDocument();
+    });
+
+    it("leaves a preload drill-in on Escape before closing the drawer", async () => {
+      setAdmin();
+      preloadState.list = [makeRequest()];
+      mockViewport(1280);
+
+      renderDeskRoutes("/admin/preload-requests");
+      const dialog = await screen.findByRole("dialog", { name: "Needs you" });
+      fireEvent.click(within(dialog).getByRole("button", { name: /Dublin core/ }));
+      expect(await within(dialog).findByRole("button", { name: "Mark accepted" })).toBeVisible();
+
+      fireEvent.keyDown(screen.getByRole("dialog", { name: "Needs you" }), { key: "Escape" });
+
+      expect(
+        await within(screen.getByRole("dialog", { name: "Needs you" })).findByRole("region", {
+          name: "Preload requests",
+        }),
+      ).toBeInTheDocument();
+    });
+
+    it("continues sign-in back to /admin/preload-requests", () => {
+      authState.state = "unsigned";
+      authState.authReady = true;
+      authState.user = null;
+
+      renderDeskRoutes("/admin/preload-requests");
+
+      expect(screen.getByTestId("premium-sign-in-gate")).toHaveTextContent(
+        "/admin/preload-requests",
+      );
+    });
+  });
 
   it.each(["/admin", "/admin/incidents", "/admin/incidents/inc-listed01"])(
     "lays out Start list, Course, and Needs you on %s at 1440",
@@ -935,10 +1058,24 @@ describe("AdminOpsDesk", () => {
           <Route path="/admin" element={<AdminOpsDesk />} />
           <Route path="/admin/incidents" element={<AdminOpsDesk />} />
           <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
+          <Route path="/admin/preload-requests" element={<AdminOpsDesk />} />
         </Routes>,
         route,
       );
     }
+
+    it("shows preload requests on the Incidents tab on /admin/preload-requests", () => {
+      preloadState.list = [makeRequest()];
+      renderMobile("/admin/preload-requests");
+
+      expect(screen.getByRole("tab", { name: "Incidents" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(
+        within(screen.getByRole("region", { name: "Preload requests" })).getByText("Dublin core"),
+      ).toBeInTheDocument();
+    });
 
     it("offers only Sessions and Incidents tabs", () => {
       renderMobile("/admin");
