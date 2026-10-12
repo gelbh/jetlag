@@ -141,14 +141,6 @@ export function useRadarTool({
     setEditingDistance(false);
   }, []);
 
-  useEffect(() => {
-    if (active) {
-      return;
-    }
-
-    resetDraft();
-  }, [active, resetDraft]);
-
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
       if (!active || submittingRef.current) {
@@ -200,8 +192,8 @@ export function useRadarTool({
 
   const session = useToolSession<RadarSessionConfig>({
     toolId: "radar",
-    active,
     createInitialConfig: () => ({ ready: true }),
+    onClose: resetDraft,
     onSubmit: async () => {
       await commitRadar({
         canSubmitQuestion,

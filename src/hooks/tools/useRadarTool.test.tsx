@@ -1,10 +1,15 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { milesToMeters } from "../../domain/map/distance";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useRadarTool } from "./useRadarTool";
 
 describe("useRadarTool", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("radar");
+  });
+
   it("stores radar center from map taps", () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>
@@ -31,6 +36,12 @@ describe("useRadarTool", () => {
     });
 
     expect(result.current.draft.radarCenter).toEqual([53.35, -6.26]);
+
+    act(() => {
+      useMapStore.getState().setActiveTool("none");
+    });
+
+    expect(result.current.draft.radarCenter).toBeNull();
   });
 
   it("commits a radar annotation when center and answer are set", async () => {

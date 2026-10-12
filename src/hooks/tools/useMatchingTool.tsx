@@ -509,7 +509,6 @@ export function useMatchingTool({
 
   const session = useToolSession<MatchingSessionConfig>({
     toolId: "matching",
-    active,
     createInitialConfig: () => ({ ready: true }),
     onSubmit: async () => {
       await commitMatching(buildCommitInput());

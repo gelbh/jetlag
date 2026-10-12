@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useMapStore } from "../../../state/mapStore";
 import type { ToolSessionControls, ToolSessionPhase, UseToolSessionOptions } from "./types";
 
 function mergeConfig<TConfig>(base: TConfig, initial?: Partial<TConfig>): TConfig {
@@ -13,21 +14,26 @@ function mergeConfig<TConfig>(base: TConfig, initial?: Partial<TConfig>): TConfi
  * Tools keep domain-specific draft logic; this owns phase + submit lock + error.
  */
 export function useToolSession<TConfig>({
-  active,
+  toolId,
   createInitialConfig,
   onSubmit,
   onClose,
 }: UseToolSessionOptions<TConfig>): ToolSessionControls<TConfig> {
-  const [phase, setPhase] = useState<ToolSessionPhase>("idle");
-  const [config, setConfigState] = useState<TConfig | null>(null);
+  const [initialConfig] = useState(() =>
+    useMapStore.getState().activeTool === toolId ? createInitialConfig() : null,
+  );
+  const initialPhase: ToolSessionPhase = initialConfig === null ? "idle" : "configuring";
+  const [phase, setPhase] = useState<ToolSessionPhase>(initialPhase);
+  const [config, setConfigState] = useState<TConfig | null>(initialConfig);
   const [error, setError] = useState<string | null>(null);
 
   const createInitialConfigRef = useRef(createInitialConfig);
   const onSubmitRef = useRef(onSubmit);
   const onCloseRef = useRef(onClose);
   const inFlightRef = useRef(false);
-  const configRef = useRef<TConfig | null>(null);
-  const phaseRef = useRef<ToolSessionPhase>("idle");
+  const configRef = useRef<TConfig | null>(initialConfig);
+  const phaseRef = useRef<ToolSessionPhase>(initialPhase);
+  const sessionEpochRef = useRef(0);
 
   useEffect(() => {
     createInitialConfigRef.current = createInitialConfig;
@@ -58,8 +64,10 @@ export function useToolSession<TConfig>({
   }, []);
 
   const close = useCallback(() => {
+    sessionEpochRef.current += 1;
     inFlightRef.current = false;
     configRef.current = null;
+    phaseRef.current = "idle";
     setConfigState(null);
     setError(null);
     setPhase("idle");
@@ -67,14 +75,13 @@ export function useToolSession<TConfig>({
   }, []);
 
   const setConfig = useCallback((updater: Partial<TConfig> | ((prev: TConfig) => TConfig)) => {
-    setConfigState((prev) => {
-      if (prev === null) {
-        return prev;
-      }
-      const next = typeof updater === "function" ? updater(prev) : { ...prev, ...updater };
-      configRef.current = next;
-      return next;
-    });
+    const prev = configRef.current;
+    if (prev === null) {
+      return;
+    }
+    const next = typeof updater === "function" ? updater(prev) : { ...prev, ...updater };
+    configRef.current = next;
+    setConfigState(next);
     if (phaseRef.current === "error") {
       setPhase("configuring");
     }
@@ -86,6 +93,7 @@ export function useToolSession<TConfig>({
         return;
       }
 
+      const epoch = sessionEpochRef.current;
       inFlightRef.current = true;
       setError(null);
       setPhase("submitting");
@@ -93,16 +101,24 @@ export function useToolSession<TConfig>({
       try {
         await action({
           setResolving: () => {
-            setPhase("resolving");
+            if (sessionEpochRef.current === epoch) {
+              setPhase("resolving");
+            }
           },
         });
-        setPhase("configuring");
+        if (sessionEpochRef.current === epoch) {
+          setPhase("configuring");
+        }
       } catch (caught) {
-        const message = caught instanceof Error ? caught.message : "Something went wrong.";
-        setError(message);
-        setPhase("error");
+        if (sessionEpochRef.current === epoch) {
+          const message = caught instanceof Error ? caught.message : "Something went wrong.";
+          setError(message);
+          setPhase("error");
+        }
       }
-      inFlightRef.current = false;
+      if (sessionEpochRef.current === epoch) {
+        inFlightRef.current = false;
+      }
     },
     [],
   );
@@ -118,18 +134,22 @@ export function useToolSession<TConfig>({
     });
   }, [runAction]);
 
-  useEffect(() => {
-    if (active) {
-      if (phaseRef.current === "idle") {
-        open();
-      }
-      return;
-    }
-
-    if (phaseRef.current !== "idle") {
-      close();
-    }
-  }, [active, close, open]);
+  // activeTool also changes outside React (session teardown), so follow the
+  // store directly; updates land in the same render as the tool switch.
+  useEffect(
+    () =>
+      useMapStore.subscribe((state, prev) => {
+        if (state.activeTool === prev.activeTool) {
+          return;
+        }
+        if (state.activeTool === toolId) {
+          open();
+        } else if (prev.activeTool === toolId) {
+          close();
+        }
+      }),
+    [close, open, toolId],
+  );
 
   return {
     phase,
