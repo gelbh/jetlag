@@ -106,16 +106,14 @@ export function useToolSession<TConfig>({
           setPhase("configuring");
         }
       } catch (caught) {
-        if (sessionEpochRef.current !== epoch) {
-          return;
-        }
-        const message = caught instanceof Error ? caught.message : "Something went wrong.";
-        setError(message);
-        setPhase("error");
-      } finally {
         if (sessionEpochRef.current === epoch) {
-          inFlightRef.current = false;
+          const message = caught instanceof Error ? caught.message : "Something went wrong.";
+          setError(message);
+          setPhase("error");
         }
+      }
+      if (sessionEpochRef.current === epoch) {
+        inFlightRef.current = false;
       }
     },
     [],
