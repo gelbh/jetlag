@@ -4,7 +4,6 @@ import { poiCandidateToMeasuringPlace } from "@/domain/geo/poiCandidateAdapters"
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { distanceBetweenPoints } from "@/domain/geometry/gameArea/geometry";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
-import { poiPinsForCategory } from "@/domain/map/poiPinCategories";
 import {
   applyMeasuringFromKind,
   isMeasuringLinearLocation,
@@ -12,13 +11,8 @@ import {
   type MeasuringLocationCategory,
   type MeasuringTargetMode,
   measuringFromKind,
-  measuringMultiPlaceTargetLabel,
   measuringUsesAllPlacesInArea,
 } from "@/domain/questions";
-import {
-  manualPinAsMeasuringPlace,
-  setupPinsForCategory,
-} from "@/domain/session/catalog/sessionCustomCatalog";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
@@ -35,6 +29,7 @@ import {
   fetchMeasuringLinearContext,
   fetchMeasuringSeaLevelContext,
 } from "../measuringToolResolvers";
+import { resolveAllPlacesTarget } from "./allPlacesTarget";
 import { ANCHOR_RESOLVE_DEBOUNCE_MS } from "./constants";
 import { usesDebouncedSeekerResolve } from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
@@ -124,25 +119,25 @@ export function useMeasuringAnchorLoaders({
       }
       placesApplyPhaseRef.current.set(requestId, phase);
 
-      const pinPlaces = [
-        ...setupPinsForCategory(sessionRules?.customLocationPins ?? [], category).map(
-          manualPinAsMeasuringPlace,
-        ),
-        ...poiPinsForCategory(annotations, category),
-      ];
-      const seen = new Set(fetchedPlaces.map((place) => place.id));
-      const places = [...fetchedPlaces, ...pinPlaces.filter((place) => !seen.has(place.id))];
+      const target = resolveAllPlacesTarget({
+        seekerPoint,
+        fetched: fetchedPlaces,
+        customLocationPins: sessionRules?.customLocationPins ?? [],
+        annotations,
+        category,
+        kind: measureFromKind,
+      });
 
       // Keep seeker answer + nearest target stable once chosen; enrich only refreshes the list.
       if (measuringAnswerRef.current !== null) {
-        if (places.length > 0) {
+        if (target) {
           setMeasuringError(null);
-          setMeasuringPlaces(places);
+          setMeasuringPlaces(target.places);
         }
         return;
       }
 
-      if (places.length === 0) {
+      if (!target) {
         const notice = measuringPlaceNotFoundMessage(category);
         const kind = measuringFromKind("location", category);
         setUnavailableMeasuringFromKinds((prev) => {
@@ -156,22 +151,11 @@ export function useMeasuringAnchorLoaders({
         return;
       }
 
-      let nearestDistance = Infinity;
-      let nearestPlace = places[0];
-
-      for (const place of places) {
-        const distanceMeters = distanceBetweenPoints(seekerPoint, place.point);
-        if (distanceMeters < nearestDistance) {
-          nearestDistance = distanceMeters;
-          nearestPlace = place;
-        }
-      }
-
       setMeasuringError(null);
-      setMeasuringPlaces(places);
-      setMeasuringDistanceMeters(nearestDistance);
-      setMeasuringTargetPoint(nearestPlace.point);
-      setMeasuringTargetPlaceName(measuringMultiPlaceTargetLabel(places.length, measureFromKind));
+      setMeasuringPlaces(target.places);
+      setMeasuringDistanceMeters(target.distanceMeters);
+      setMeasuringTargetPoint(target.targetPoint);
+      setMeasuringTargetPlaceName(target.targetName);
     },
     [
       annotations,
