@@ -2,9 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { captureAppCheckTokenFailure } from "../analytics/clientErrors";
 import { buildPremiumProxyHeaders } from "./accessControl";
 
+const { waitForSessionMembership } = vi.hoisted(() => ({
+  waitForSessionMembership: vi.fn(async (_uid: string, _timeoutMs: number) => undefined),
+}));
+
 vi.mock("../firebase/firebase", () => ({
   getFirebaseAuth: () => ({
     currentUser: {
+      uid: "uid-1",
       getIdToken: vi.fn(async () => "token-123"),
     },
   }),
@@ -17,6 +22,9 @@ vi.mock("firebase/app-check", () => ({
 
 vi.mock("./premiumApiContext", () => ({
   getPremiumApiContext: () => ({ sessionId: "session-abc" }),
+  waitForSessionMembership: (uid: string, timeoutMs: number) =>
+    waitForSessionMembership(uid, timeoutMs),
+  PROXY_MEMBERSHIP_WAIT_MS: 10_000,
 }));
 
 vi.mock("../analytics/clientErrors", () => ({
@@ -54,5 +62,26 @@ describe("accessControl", () => {
     expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(tokenError, {
       source: "buildPremiumProxyHeaders",
     });
+  });
+
+  it("waits for session membership before returning headers", async () => {
+    let release: () => void = () => undefined;
+    waitForSessionMembership.mockImplementationOnce(
+      () =>
+        new Promise<undefined>((resolve) => {
+          release = () => resolve(undefined);
+        }),
+    );
+
+    let resolved = false;
+    const pending = buildPremiumProxyHeaders().then((headers) => {
+      resolved = true;
+      return headers;
+    });
+    await vi.waitFor(() => expect(waitForSessionMembership).toHaveBeenCalledWith("uid-1", 10_000));
+    expect(resolved).toBe(false);
+
+    release();
+    await expect(pending).resolves.toMatchObject({ "X-Session-Id": "session-abc" });
   });
 });

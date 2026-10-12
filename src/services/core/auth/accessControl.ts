@@ -56,7 +56,13 @@ export async function buildPremiumProxyHeaders(): Promise<HeadersInit> {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const { getPremiumApiContext } = await import("./premiumApiContext");
+  const { getPremiumApiContext, PROXY_MEMBERSHIP_WAIT_MS, waitForSessionMembership } = await import(
+    "./premiumApiContext"
+  );
+  const uid = getFirebaseAuth().currentUser?.uid;
+  if (uid) {
+    await waitForSessionMembership(uid, PROXY_MEMBERSHIP_WAIT_MS);
+  }
   const { sessionId } = getPremiumApiContext();
   if (sessionId) {
     headers["X-Session-Id"] = sessionId;
