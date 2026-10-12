@@ -101,14 +101,14 @@ describe("AdminStartList", () => {
       expect(within(region).getByRole("columnheader", { name })).toBeInTheDocument();
     }
     expect(bodyRows()).toHaveLength(2);
-    expect(screen.queryByRole("button", { name: "Monitor IJKL" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Monitor IJKL, Dublin" })).toBeNull();
   });
 
   it("monitors from the course button and marks the monitored row", () => {
     const onMonitor = vi.fn();
     renderList({ onMonitor, monitoredSessionId: "s2" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Monitor ABCD" }));
+    fireEvent.click(screen.getByRole("button", { name: "Monitor ABCD, Dublin" }));
     expect(onMonitor).toHaveBeenCalledWith(expect.objectContaining({ sessionId: "s1" }));
 
     const [first, second] = bodyRows();
@@ -143,7 +143,7 @@ describe("AdminStartList", () => {
     let [first, second] = bodyRows();
     expect(second).toHaveAttribute("aria-selected", "true");
     expect(first).not.toHaveAttribute("aria-selected");
-    expect(screen.getByRole("button", { name: "Monitor EFGH" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Monitor EFGH, Dublin" })).toHaveFocus();
 
     fireEvent.keyDown(document.activeElement ?? document.body, { key: "j" });
     expect(bodyRows()[1]).toHaveAttribute("aria-selected", "true");
@@ -152,7 +152,38 @@ describe("AdminStartList", () => {
     [first, second] = bodyRows();
     expect(first).toHaveAttribute("aria-selected", "true");
     expect(second).not.toHaveAttribute("aria-selected");
-    expect(screen.getByRole("button", { name: "Monitor ABCD" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Monitor ABCD, Dublin" })).toHaveFocus();
+  });
+
+  it("pins the filters above the scrolling list body", () => {
+    renderList();
+
+    const search = screen.getByRole("searchbox", { name: "Search" });
+    expect(search.closest(".mantine-ScrollArea-root")).toBeNull();
+    expect(screen.getByRole("table").closest(".mantine-ScrollArea-root")).not.toBeNull();
+
+    fireEvent.change(search, { target: { value: "zzzz" } });
+    expect(screen.getByText("No matching sessions")).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Search" })).toBe(search);
+  });
+
+  it("leaves the keyboard alone while focus is inside a dialog", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <AdminStartList {...props()} />
+        <div role="dialog" aria-label="Desk settings">
+          <button type="button">Inside dialog</button>
+        </div>
+      </AdminWorld>,
+    );
+    const inside = screen.getByRole("button", { name: "Inside dialog" });
+    inside.focus();
+
+    fireEvent.keyDown(inside, { key: "j" });
+    fireEvent.keyDown(inside, { key: "/" });
+
+    expect(inside).toHaveFocus();
+    expect(bodyRows().some((row) => row.hasAttribute("aria-selected"))).toBe(false);
   });
 
   it("drops the cursor when its session leaves the filtered list", () => {
@@ -185,7 +216,7 @@ describe("AdminStartList", () => {
     fireEvent.click(live);
 
     expect(live).not.toBeChecked();
-    expect(screen.getByRole("button", { name: "Monitor IJKL" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Monitor IJKL, Dublin" })).toBeInTheDocument();
   });
 
   it("keeps the empty state copy", () => {

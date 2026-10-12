@@ -4,6 +4,7 @@ import {
   Button,
   Group,
   Kbd,
+  ScrollArea,
   Skeleton,
   Stack,
   Table,
@@ -41,6 +42,13 @@ interface AdminStartListProps {
 }
 
 const GRID_CELLS = 8;
+
+function dialogIsOpen() {
+  return (
+    document.activeElement?.closest('[role="dialog"]') != null ||
+    document.querySelector('[role="dialog"], [aria-modal="true"]') != null
+  );
+}
 
 export function AdminStartList({
   sessions,
@@ -88,10 +96,18 @@ export function AdminStartList({
     tableRef.current?.tBodies[0]?.rows[next]?.querySelector("button")?.focus();
   };
 
+  // Not default-prevented up front: a dialog keeps its own `/`, `j` and `k` keystrokes.
+  const unlessDialog = (run: () => void) => (event: KeyboardEvent) => {
+    if (dialogIsOpen()) return;
+    event.preventDefault();
+    run();
+  };
+  const passive = { preventDefault: false };
+
   useHotkeys([
-    ["/", () => searchRef.current?.focus()],
-    ["j", () => moveCursor(1)],
-    ["k", () => moveCursor(-1)],
+    ["/", unlessDialog(() => searchRef.current?.focus()), passive],
+    ["j", unlessDialog(() => moveCursor(1)), passive],
+    ["k", unlessDialog(() => moveCursor(-1)), passive],
   ]);
 
   const loadMoreButton = hasMore ? (
@@ -191,6 +207,7 @@ export function AdminStartList({
   return (
     <AdminRegion
       title="Start list"
+      scroll={false}
       data-testid="admin-ops-sessions"
       actions={
         <Tooltip label="Move between rows">
@@ -209,7 +226,7 @@ export function AdminStartList({
         ) : null
       }
     >
-      <Stack gap="sm">
+      <Stack gap="sm" flex={1} mih={0}>
         {joinAlert}
         {errorAlert}
         <AdminSessionFilters
@@ -227,7 +244,9 @@ export function AdminStartList({
           onStateChange={setStateFilter}
           onSortChange={setSort}
         />
-        {listBody}
+        <ScrollArea flex={1} mih={0}>
+          {listBody}
+        </ScrollArea>
       </Stack>
     </AdminRegion>
   );

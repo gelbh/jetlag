@@ -97,7 +97,51 @@ describe("AdminSessionRow", () => {
     expect(other).not.toHaveAttribute("data-loading");
   });
 
-  it("marks the phase live only for live sessions", () => {
+  it("keeps status marks out of the monitored row's reversed ink", () => {
+    renderRows(
+      <AdminSessionRow
+        summary={makeSummary()}
+        observingCode={null}
+        monitored
+        mispunchCount={1}
+        onMonitor={vi.fn()}
+      />,
+    );
+
+    const row = screen.getByRole("row");
+    const marks = [within(row).getByText("Seek"), within(row).getByText("1")].map((label) =>
+      label.closest("[data-tone]"),
+    );
+    for (const mark of marks) {
+      for (let node = mark; node && node !== row; node = node.parentElement) {
+        expect((node as HTMLElement).style.getPropertyValue("--adm-ink")).toBe("");
+      }
+    }
+    const button = screen.getByRole("button", { name: "Monitor 7G2LJH" });
+    expect(button.closest("td")?.style.getPropertyValue("--adm-ink")).toBe("var(--adm-paper)");
+  });
+
+  it("names the monitor button with the area when there is one", () => {
+    renderRows(
+      <>
+        <AdminSessionRow
+          summary={makeSummary({ gameAreaLabel: "Dublin" })}
+          observingCode={null}
+          onMonitor={vi.fn()}
+        />
+        <AdminSessionRow
+          summary={makeSummary({ sessionId: "session-2", code: "ABCDEF" })}
+          observingCode={null}
+          onMonitor={vi.fn()}
+        />
+      </>,
+    );
+
+    expect(screen.getByRole("button", { name: "Monitor 7G2LJH, Dublin" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Monitor ABCDEF" })).toBeInTheDocument();
+  });
+
+  it("labels idle sessions in words, not only by tone", () => {
     renderRows(
       <>
         <AdminSessionRow summary={makeSummary()} observingCode={null} onMonitor={vi.fn()} />
@@ -114,7 +158,8 @@ describe("AdminSessionRow", () => {
       "data-tone",
       "live",
     );
-    expect(within(idleRow).getByText("Seek").closest("[data-tone]")).toHaveAttribute(
+    expect(within(liveRow).queryByText(/idle/)).toBeNull();
+    expect(within(idleRow).getByText("Seek, idle").closest("[data-tone]")).toHaveAttribute(
       "data-tone",
       "neutral",
     );

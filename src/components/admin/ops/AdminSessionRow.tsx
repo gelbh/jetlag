@@ -1,4 +1,4 @@
-import { Button, Stack, Table, Text } from "@mantine/core";
+import { Box, Button, Stack, Table, Text } from "@mantine/core";
 import type { CSSProperties } from "react";
 import { resolveAdminSessionAreaLabel } from "../../../domain/admin/adminSessionAreaLabel";
 import { adminSessionPhaseLabel } from "../../../domain/admin/sessionPhase";
@@ -17,7 +17,8 @@ interface AdminSessionRowProps {
   onMonitor: (summary: AdminSessionSummary) => void;
 }
 
-// Set on cells, not the row: the row's own `var(--adm-ink)` background must resolve unswapped.
+// Set on plain cells, not the row (its `var(--adm-ink)` background must resolve unswapped)
+// and not on status cells, whose badges keep ink on their tone ground.
 const reversedInk = {
   "--adm-ink": "var(--adm-paper)",
   "--mantine-color-text": "var(--adm-paper)",
@@ -39,7 +40,10 @@ export function AdminSessionRow({
   onMonitor,
 }: AdminSessionRowProps) {
   const areaLabel = resolveAdminSessionAreaLabel(summary);
+  const phaseLabel = adminSessionPhaseLabel(summary.phase);
   const cellStyle = monitored ? reversedInk : undefined;
+  // Light tones mix toward transparent, so on the reversed row they need a paper ground.
+  const markGround = monitored ? "var(--adm-paper)" : undefined;
 
   return (
     <Table.Tr
@@ -57,7 +61,7 @@ export function AdminSessionRow({
           justify="flex-start"
           h="var(--adm-cell)"
           px={0}
-          aria-label={`Monitor ${summary.code}`}
+          aria-label={`Monitor ${summary.code}${areaLabel ? `, ${areaLabel}` : ""}`}
           loading={observingCode === summary.code}
           disabled={observingCode !== null}
           onClick={() => onMonitor(summary)}
@@ -72,18 +76,24 @@ export function AdminSessionRow({
           </Stack>
         </Button>
       </Table.Td>
-      <Table.Td colSpan={2} style={cellStyle}>
-        <StatusMark
-          tone={summary.isLive ? "live" : "neutral"}
-          label={adminSessionPhaseLabel(summary.phase)}
-        />
+      <Table.Td colSpan={2}>
+        <Box component="span" display="inline-flex" bg={markGround}>
+          <StatusMark
+            tone={summary.isLive ? "live" : "neutral"}
+            label={summary.isLive ? phaseLabel : `${phaseLabel}, idle`}
+          />
+        </Box>
       </Table.Td>
       <Table.Td style={cellStyle}>{summary.memberCount}</Table.Td>
       <Table.Td style={cellStyle}>
         <PunchTime at={summary.lastActivityAt} flashing={flashing} />
       </Table.Td>
-      <Table.Td style={cellStyle}>
-        {mispunchCount > 0 ? <StatusMark tone="mispunch" label={String(mispunchCount)} /> : null}
+      <Table.Td>
+        {mispunchCount > 0 ? (
+          <Box component="span" display="inline-flex" bg={markGround}>
+            <StatusMark tone="mispunch" label={String(mispunchCount)} />
+          </Box>
+        ) : null}
       </Table.Td>
     </Table.Tr>
   );

@@ -510,7 +510,9 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText("Dublin")).toBeInTheDocument();
     expect(screen.getAllByText("Seek").length).toBeGreaterThan(0);
-    const row = screen.getByRole("button", { name: "Monitor ABCD" }).closest("tr") as HTMLElement;
+    const row = screen
+      .getByRole("button", { name: "Monitor ABCD, Dublin" })
+      .closest("tr") as HTMLElement;
     expect(within(row).getAllByRole("cell")[2]).toHaveTextContent("2");
   });
 
@@ -902,7 +904,9 @@ describe("AdminOpsDesk", () => {
 
     renderOpsDesk();
 
-    const row = screen.getByRole("button", { name: "Monitor ABCD" }).closest("tr") as HTMLElement;
+    const row = screen
+      .getByRole("button", { name: "Monitor ABCD, Dublin" })
+      .closest("tr") as HTMLElement;
     expect(within(row).getAllByRole("cell")[4]).toHaveTextContent("2");
   });
 
