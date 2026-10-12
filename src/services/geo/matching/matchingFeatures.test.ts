@@ -104,6 +104,66 @@ describe("matching features", () => {
     expect(nearest?.distanceMeters).toBeGreaterThan(0);
   });
 
+  it("adds tagged POI pins as point candidates", async () => {
+    vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [{ id: 1, tags: { name: "Far Museum" }, lat: 51.42, lon: -0.19 }],
+    });
+
+    const options = {
+      poiPins: [{ id: "pin-1", name: "Pop-up museum", point: [51.46, -0.15] as [number, number] }],
+    };
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "museum", options);
+    expect(features.map((feature) => feature.id)).toEqual(["1", "pin-1"]);
+
+    const nearest = await findNearestMatchingFeature(
+      [51.46, -0.15],
+      sampleGameArea,
+      "museum",
+      options,
+    );
+    expect(nearest?.name).toBe("Pop-up museum");
+  });
+
+  it("appends POI pins to the pack result and the enrich result, skipping duplicate ids", async () => {
+    let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
+    vi.spyOn(overpassClient, "queryOverpass").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveOverpass = resolve;
+        }),
+    );
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          category: "museum",
+          source: "wikidata",
+          places: [{ id: "Q6373", name: "British Museum", lat: 51.45, lng: -0.16 }],
+        }),
+      })),
+    );
+
+    const enrich = vi.fn();
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "museum", {
+      regionPackId: "london",
+      onEnrich: enrich,
+      poiPins: [
+        { id: "pin-1", name: "Pop-up museum", point: [51.46, -0.15] },
+        { id: "Q6373", name: "Duplicate", point: [51.41, -0.11] },
+      ],
+    });
+    expect(features.map((feature) => feature.id)).toEqual(["Q6373", "pin-1"]);
+
+    await vi.waitFor(() => expect(resolveOverpass).toBeDefined());
+    resolveOverpass?.({ elements: [] });
+    await vi.waitFor(() => expect(enrich).toHaveBeenCalledTimes(1));
+    expect(enrich.mock.calls[0]?.[0].map((feature: { id: string }) => feature.id)).toEqual([
+      "Q6373",
+      "pin-1",
+    ]);
+  });
+
   it("resolves from the pack without awaiting slow Overpass when onEnrich is set", async () => {
     let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
     const overpassStarted = new Promise<void>((resolveStarted) => {

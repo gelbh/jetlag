@@ -80,6 +80,7 @@ export function useMeasuringTool({
     active,
     gameArea,
     sessionRules,
+    annotations: activeAnnotations,
     setMapError,
     draft,
   });

@@ -3,7 +3,8 @@ import { startTransition, useCallback, useEffect, useRef } from "react";
 import { poiCandidateToMeasuringPlace } from "@/domain/geo/poiCandidateAdapters";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { distanceBetweenPoints } from "@/domain/geometry/gameArea/geometry";
-import type { GameArea } from "@/domain/map/annotations";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
+import { poiPinsForCategory } from "@/domain/map/poiPinCategories";
 import {
   applyMeasuringFromKind,
   isMeasuringLinearLocation,
@@ -14,7 +15,10 @@ import {
   measuringMultiPlaceTargetLabel,
   measuringUsesAllPlacesInArea,
 } from "@/domain/questions";
-import { manualPinAsMeasuringPlace } from "@/domain/session/catalog/sessionCustomCatalog";
+import {
+  manualPinAsMeasuringPlace,
+  setupPinsForCategory,
+} from "@/domain/session/catalog/sessionCustomCatalog";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
@@ -39,14 +43,19 @@ interface UseMeasuringAnchorLoadersParams {
   active: boolean;
   gameArea: GameArea;
   sessionRules?: SessionRulesInput;
+  /** Active annotations; tagged POI pins join the places list for their category. */
+  annotations?: readonly AnnotationRecord[];
   setMapError: (message: string | null) => void;
   draft: MeasuringDraftState;
 }
+
+const NO_ANNOTATIONS: readonly AnnotationRecord[] = [];
 
 export function useMeasuringAnchorLoaders({
   active,
   gameArea,
   sessionRules,
+  annotations = NO_ANNOTATIONS,
   setMapError,
   draft,
 }: UseMeasuringAnchorLoadersParams) {
@@ -115,7 +124,12 @@ export function useMeasuringAnchorLoaders({
       }
       placesApplyPhaseRef.current.set(requestId, phase);
 
-      const pinPlaces = (sessionRules?.customLocationPins ?? []).map(manualPinAsMeasuringPlace);
+      const pinPlaces = [
+        ...setupPinsForCategory(sessionRules?.customLocationPins ?? [], category).map(
+          manualPinAsMeasuringPlace,
+        ),
+        ...poiPinsForCategory(annotations, category),
+      ];
       const seen = new Set(fetchedPlaces.map((place) => place.id));
       const places = [...fetchedPlaces, ...pinPlaces.filter((place) => !seen.has(place.id))];
 
@@ -160,6 +174,7 @@ export function useMeasuringAnchorLoaders({
       setMeasuringTargetPlaceName(measuringMultiPlaceTargetLabel(places.length, measureFromKind));
     },
     [
+      annotations,
       measureFromKind,
       placesRequestIdRef,
       reopenCatalog,

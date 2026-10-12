@@ -31,6 +31,7 @@ import type { GameSize } from "../session/size/gameSize";
 import type { DistanceUnit } from "./distance";
 import { DEFAULT_RADIUS_METERS } from "./distance";
 import type { MapTool } from "./mapToolTypes";
+import type { PoiPinCategoryId } from "./poiPinCategories";
 
 export type { EndGameTruthAnchor } from "../session/hiding/endGameTruthAnchors";
 export type { MemberRoles, PlayerRole } from "../session/players/playerRole";
@@ -104,6 +105,8 @@ export interface AnnotationMetadata {
   matchingFeaturesJson?: string;
   /** Metro used for GTFS-backed transit_line matching truth. */
   transitMetroId?: string;
+  /** Pin annotations only: the POI category this pin counts as. */
+  poiCategory?: PoiPinCategoryId;
 }
 
 export interface TentaclePoi {

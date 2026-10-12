@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Text, TextInput } from "@mantine/core";
+import { Box, Button, NativeSelect, Stack, Text, TextInput } from "@mantine/core";
 import { useState } from "react";
 import {
   compactDangerStyles,
@@ -9,6 +9,11 @@ import {
 } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import {
+  POI_PIN_CATEGORIES,
+  parsePoiPinCategory,
+  poiPinCategoryLabel,
+} from "@/domain/map/poiPinCategories";
 import type { SessionCustomLocationPin } from "@/domain/session/catalog/sessionCustomContent";
 import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 
@@ -17,6 +22,11 @@ interface PinEditorProps {
   onChange: (value: AdvancedSessionSettingsValue) => void;
   disabled?: boolean;
 }
+
+const POI_CATEGORY_OPTIONS = [
+  { value: "", label: "Any category" },
+  ...POI_PIN_CATEGORIES.map(({ id, label }) => ({ value: id, label })),
+];
 
 function createPinId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -27,7 +37,7 @@ function createPinId(): string {
 }
 
 export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
-  const [pinDraft, setPinDraft] = useState({ name: "", lat: "", lng: "" });
+  const [pinDraft, setPinDraft] = useState({ name: "", lat: "", lng: "", category: "" });
 
   const addPin = () => {
     const name = pinDraft.name.trim();
@@ -38,24 +48,28 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
       return;
     }
 
+    const category = parsePoiPinCategory(pinDraft.category);
     const pin: SessionCustomLocationPin = {
       id: createPinId(),
       name,
       point: [lat, lng] as LatLngTuple,
+      ...(category ? { category } : {}),
     };
 
     onChange({
       ...value,
       customLocationPins: [...value.customLocationPins, pin],
     });
-    setPinDraft({ name: "", lat: "", lng: "" });
+    setPinDraft({ name: "", lat: "", lng: "", category: "" });
   };
 
   return (
     <Stack gap="xs">
       <SectionLabel>Manual location pins</SectionLabel>
       <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
-        Named points for Measuring and Tentacle when map data is missing.
+        Named points for when map data is missing. Untagged pins count for every Measuring and
+        Tentacle category. Tag a pin to limit it to that category; tagged pins also count in
+        Matching where that category exists.
       </Text>
 
       {value.customLocationPins.length > 0 ? (
@@ -78,6 +92,9 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
                   </Text>
                   <Text size="xs" c="var(--color-field-ink-muted)">
                     {pin.point[0].toFixed(5)}, {pin.point[1].toFixed(5)}
+                    {poiPinCategoryLabel(pin.category)
+                      ? ` · ${poiPinCategoryLabel(pin.category)}`
+                      : ""}
                   </Text>
                 </Box>
                 <Button
@@ -134,6 +151,18 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
           onChange={(event) => {
             const lng = event.currentTarget.value;
             setPinDraft((current) => ({ ...current, lng }));
+          }}
+          styles={insetTextInputStyles}
+        />
+        <InsetHairline insetStart="1rem" />
+        <NativeSelect
+          label="Counts as"
+          data={POI_CATEGORY_OPTIONS}
+          value={pinDraft.category}
+          disabled={disabled}
+          onChange={(event) => {
+            const category = event.currentTarget.value;
+            setPinDraft((current) => ({ ...current, category }));
           }}
           styles={insetTextInputStyles}
         />

@@ -13,6 +13,7 @@ import { useMapStore } from "@/state/mapStore";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isActive } from "../../domain/map/annotations";
 import { formatDistance } from "../../domain/map/distance";
+import { poiPinsForCategory } from "../../domain/map/poiPinCategories";
 import {
   defaultMatchingCategoryId,
   firstAvailableMatchingCategoryId,
@@ -24,6 +25,7 @@ import {
   matchingQuestionFor,
   usedMatchingCategoryIdsForSession,
 } from "../../domain/questions";
+import { taggedSetupPinsForCategory } from "../../domain/session/catalog/sessionCustomCatalog";
 import {
   type GeolocationPermissionState,
   queryGeolocationPermission,
@@ -129,6 +131,11 @@ export function useMatchingTool({
   );
 
   const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
+  // Read at resolve time so live annotation sync does not re-resolve the anchor.
+  const activeAnnotationsRef = useRef(activeAnnotations);
+  useEffect(() => {
+    activeAnnotationsRef.current = activeAnnotations;
+  }, [activeAnnotations]);
   const usedMatchingCategories = useMemo(
     () => usedMatchingCategoryIdsForSession(activeAnnotations, pendingQuestions),
     [activeAnnotations, pendingQuestions],
@@ -327,7 +334,13 @@ export function useMatchingTool({
         seekerPoint,
         categoryId,
         gameArea,
-        matchingFetchOptions: catalog.matchingFetchOptions,
+        matchingFetchOptions: {
+          ...catalog.matchingFetchOptions,
+          poiPins: [
+            ...taggedSetupPinsForCategory(sessionRules?.customLocationPins ?? [], categoryId),
+            ...poiPinsForCategory(activeAnnotationsRef.current, categoryId),
+          ],
+        },
         onEnrich: (enriched) => {
           applyResolveResult(requestId, enriched, 1, categoryId);
         },
@@ -344,6 +357,7 @@ export function useMatchingTool({
       catalog.matchingFetchOptions,
       gameArea,
       isLatestRequest,
+      sessionRules,
       setMatchingError,
       setMatchingLoading,
     ],

@@ -116,13 +116,28 @@ export function manualPinAsMeasuringPlace(pin: SessionCustomLocationPin): Measur
   };
 }
 
+export function setupPinsForCategory(
+  pins: readonly SessionCustomLocationPin[],
+  categoryId: string,
+): SessionCustomLocationPin[] {
+  return pins.filter((pin) => !pin.category || pin.category === categoryId);
+}
+
+/** Matching has no "any category" fallback, so only explicitly tagged pins count there. */
+export function taggedSetupPinsForCategory(
+  pins: readonly SessionCustomLocationPin[],
+  categoryId: string,
+): SessionCustomLocationPin[] {
+  return pins.filter((pin) => pin.category === categoryId);
+}
+
 export function manualPinsWithinRadius(
   pins: readonly SessionCustomLocationPin[],
   center: LatLngTuple,
   radiusMeters: number,
   categoryId: TentacleExtendedCategoryId,
 ): TentaclePoi[] {
-  return pins
+  return setupPinsForCategory(pins, categoryId)
     .map((pin) => ({
       id: pin.id,
       name: pin.name,

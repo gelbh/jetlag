@@ -238,6 +238,11 @@ export function useMapScreenTools({
     active: activeTool === "pin",
     createAnnotation,
     finishPlacement,
+    postSystemMessage: (text) => {
+      if (session?.id && uid) {
+        postSystemMessage(session.id, uid, "seeker", text);
+      }
+    },
   });
   const zoneTool = useZoneTool({
     active: activeTool === "zone",
