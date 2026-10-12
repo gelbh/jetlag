@@ -70,14 +70,13 @@ export function useToolSession<TConfig>({
   }, []);
 
   const setConfig = useCallback((updater: Partial<TConfig> | ((prev: TConfig) => TConfig)) => {
-    setConfigState((prev) => {
-      if (prev === null) {
-        return prev;
-      }
-      const next = typeof updater === "function" ? updater(prev) : { ...prev, ...updater };
-      configRef.current = next;
-      return next;
-    });
+    const prev = configRef.current;
+    if (prev === null) {
+      return;
+    }
+    const next = typeof updater === "function" ? updater(prev) : { ...prev, ...updater };
+    configRef.current = next;
+    setConfigState(next);
     if (phaseRef.current === "error") {
       setPhase("configuring");
     }
