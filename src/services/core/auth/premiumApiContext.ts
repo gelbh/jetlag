@@ -26,10 +26,10 @@ export function setPremiumApiContext(session: SessionRecord | null): void {
       : {
           sessionId: session.id,
           tier: isPremiumSession(session) ? "premium" : "free",
-          memberUids: session.memberUids ?? [],
+          memberUids: session.memberUids,
         };
 
-  for (const listener of [...contextListeners]) {
+  for (const listener of contextListeners) {
     listener();
   }
 }
