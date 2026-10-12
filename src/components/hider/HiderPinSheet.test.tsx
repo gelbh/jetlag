@@ -42,6 +42,18 @@ describe("HiderPinSheet", () => {
     expect(onDelete).toHaveBeenCalledWith("pin-1");
   });
 
+  it("closes without deleting", () => {
+    const onClose = vi.fn();
+    const onDelete = vi.fn();
+    render(
+      <HiderPinSheet annotation={pin()} uid="hider-1" onClose={onClose} onDelete={onDelete} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(onClose).toHaveBeenCalledOnce();
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["another player's pin", pin(), "hider-2"],
     ["a deleted pin", pin({ status: "deleted" }), "hider-1"],

@@ -795,9 +795,10 @@ export function HiderMapScreen() {
       } else {
         pinTool.resetDraft();
       }
+      setSelectedAnnotationId(null);
       setPinSheetOpen(open);
     },
-    [overlay.closeSheet, pinTool.resetDraft, zoneTool.closeWizard],
+    [overlay.closeSheet, pinTool.resetDraft, setSelectedAnnotationId, zoneTool.closeWizard],
   );
 
   const chromeHudRef = useRef<HTMLDivElement>(null);

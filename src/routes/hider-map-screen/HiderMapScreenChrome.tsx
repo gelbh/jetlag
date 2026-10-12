@@ -284,6 +284,10 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
   });
   const roleConfig = getMapScreenRoleConfig("hider");
   const selectedAnnotationId = useAnnotationStore((state) => state.selectedAnnotationId);
+  const selectedPin =
+    pinSheetOpen || timeTrapSheetOpen || zoneTool.wizardOpen
+      ? null
+      : (annotations.find((item) => item.id === selectedAnnotationId) ?? null);
   const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
 
@@ -640,7 +644,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
       </HiderZoneWizardShell>
 
       <HiderPinSheet
-        annotation={annotations.find((item) => item.id === selectedAnnotationId) ?? null}
+        annotation={selectedPin}
         uid={uid}
         onClose={() => setSelectedAnnotationId(null)}
         onDelete={(id) => {
