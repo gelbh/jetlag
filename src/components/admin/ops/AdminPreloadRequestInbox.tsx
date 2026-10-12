@@ -182,10 +182,9 @@ export function AdminPreloadRequestInbox() {
       await updatePreloadRequestStatus(requestId, status);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Could not update status.");
-    } finally {
-      busyRef.current = false;
-      setBusyId(null);
     }
+    busyRef.current = false;
+    setBusyId(null);
   };
 
   if (accessState !== "admin") {

@@ -29,11 +29,9 @@ export function useAdminJoinSession(options: UseAdminJoinSessionOptions = {}) {
         return false;
       }
 
-      setJoiningCode(summary.code);
-      setError(null);
-
-      try {
-        const result = await joinRemoteSessionByCode(summary.code, user.uid, "admin");
+      const uid = user.uid;
+      const joinAsAdmin = async () => {
+        const result = await joinRemoteSessionByCode(summary.code, uid, "admin");
 
         if (result.status === "missing") {
           setError("That session is no longer available.");
@@ -52,8 +50,8 @@ export function useAdminJoinSession(options: UseAdminJoinSessionOptions = {}) {
           return false;
         }
 
-        setSession(result.session, user.uid);
-        const joinedRole = resolvePlayerRole(result.session.memberRoles, user.uid);
+        setSession(result.session, uid);
+        const joinedRole = resolvePlayerRole(result.session.memberRoles, uid);
         if (joinedRole !== "admin") {
           setError("Couldn't join as admin monitor.");
           return false;
@@ -64,12 +62,19 @@ export function useAdminJoinSession(options: UseAdminJoinSessionOptions = {}) {
           navigate("/map");
         }
         return true;
+      };
+
+      setJoiningCode(summary.code);
+      setError(null);
+
+      let joined = false;
+      try {
+        joined = await joinAsAdmin();
       } catch (joinError) {
         setError(joinError instanceof Error ? joinError.message : "Couldn't join as admin.");
-        return false;
-      } finally {
-        setJoiningCode(null);
       }
+      setJoiningCode(null);
+      return joined;
     },
     [navigate, onRefresh, setSession, user],
   );

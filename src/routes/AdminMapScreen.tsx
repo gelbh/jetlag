@@ -81,9 +81,8 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         }
       } catch (error) {
         setModerationError(error instanceof Error ? error.message : "Moderation failed.");
-      } finally {
-        setModerationBusy(false);
       }
+      setModerationBusy(false);
     },
     [controller.session?.id, handleLeave],
   );

@@ -43,9 +43,8 @@ export function HostConfirmSheet({
       onClose();
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not approve the change.");
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   };
 
   const handleDeny = async () => {
@@ -61,9 +60,8 @@ export function HostConfirmSheet({
       setError(
         nextError instanceof Error ? nextError.message : "Could not dismiss the confirmation.",
       );
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   };
 
   return (

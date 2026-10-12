@@ -44,4 +44,22 @@ describe("useIncidentThread", () => {
       resolvePost();
     });
   });
+
+  it("rethrows a failed send and unlocks the next one", async () => {
+    postIncidentMessage
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce(undefined);
+
+    const { result } = renderHook(() => useIncidentThread("inc-1"));
+
+    await act(async () => {
+      await expect(result.current.sendMessage("one")).rejects.toThrow("offline");
+    });
+    expect(result.current.sending).toBe(false);
+
+    await act(async () => {
+      await result.current.sendMessage("two");
+    });
+    expect(postIncidentMessage).toHaveBeenCalledTimes(2);
+  });
 });

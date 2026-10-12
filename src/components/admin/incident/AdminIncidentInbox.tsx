@@ -51,9 +51,8 @@ export function AdminIncidentInbox({
       await updateStatusFn(incidentId, status);
     } catch (err) {
       setRowError(err instanceof Error ? err.message : "Could not update status.");
-    } finally {
-      setBusyId(null);
     }
+    setBusyId(null);
   };
 
   return (

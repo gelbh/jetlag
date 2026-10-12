@@ -79,15 +79,14 @@ export function useSupportThread(incidentId: string | null | undefined): UseSupp
       if (!normalizedIncidentId) {
         throw new Error("No incident selected.");
       }
-      setSending(true);
-      try {
+      const postTurn = async () => {
         const result = await postSupportAgentTurn(normalizedIncidentId, text, summonId);
         if (result.summonId) {
           setSummonId(result.summonId);
         }
-      } finally {
-        setSending(false);
-      }
+      };
+      setSending(true);
+      await postTurn().finally(() => setSending(false));
     },
     [normalizedIncidentId, summonId],
   );

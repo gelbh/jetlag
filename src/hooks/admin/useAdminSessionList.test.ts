@@ -239,6 +239,48 @@ describe("useAdminSessionList", () => {
     expect(result.current.loading).toBe(false);
   });
 
+  it("drops a loadMore page that a newer refresh made stale", async () => {
+    fetchAdminSessionsPage.mockResolvedValueOnce({
+      sessions: [sampleSession],
+      nextPageToken: "page-2",
+    });
+
+    const { result } = renderHook(() => useAdminSessionList(true));
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    let resolveMore!: (value: {
+      sessions: (typeof sampleSession)[];
+      nextPageToken: string | null;
+    }) => void;
+    fetchAdminSessionsPage.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveMore = resolve;
+      }),
+    );
+    let loadMore!: Promise<void>;
+    act(() => {
+      loadMore = result.current.loadMore();
+    });
+    expect(result.current.loadingMore).toBe(true);
+
+    fetchAdminSessionsPage.mockResolvedValueOnce({ sessions: [otherSession], nextPageToken: null });
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    await act(async () => {
+      resolveMore({ sessions: [sampleSession, otherSession], nextPageToken: "page-3" });
+      await loadMore;
+    });
+
+    expect(result.current.sessions).toEqual([otherSession]);
+    expect(result.current.hasMore).toBe(false);
+    expect(result.current.loadingMore).toBe(false);
+    expect(result.current.loading).toBe(false);
+  });
+
   it("stops loading after a successful empty page", async () => {
     fetchAdminSessionsPage.mockResolvedValue({
       sessions: [],
