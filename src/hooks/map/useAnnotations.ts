@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { isFirestorePermissionDenied } from "@/services/firestore/sessions/shared";
 import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
-import type { AnnotationRecord } from "../../domain/map/annotations";
+import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
 import { findLastRedoableAnnotation, findLastUndoableAnnotation } from "../../domain/map/mapTools";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
@@ -40,6 +40,8 @@ export function useAnnotations() {
   const setSession = useSessionStore((state) => state.setSession);
   const myUid = useSessionStore((state) => state.myUid);
 
+  // ponytail: resetting to the queue count drops in-flight increments from
+  // concurrent remote writes; separate queued and in-flight counters fix that.
   const queueAnnotationWrite = useCallback(
     async (sessionId: string, annotation: AnnotationRecord) => {
       await enqueueOfflineWrite(sessionId, annotation);
@@ -67,52 +69,41 @@ export function useAnnotations() {
     [setLastSyncError],
   );
 
-  // Queueing resets pendingWrites to the queue count, so callers must settle
-  // their own in-flight increment before calling this.
+  // queueAnnotationWrite resets pendingWrites to the queue count, which absorbs
+  // the caller's increment, so callers must not also decrement it. Leaving it
+  // up until the reset keeps the sync indicator from flashing "synced".
   const queueAnnotationWrites = useCallback(
     async (sessionId: string, annotations: readonly AnnotationRecord[]): Promise<string | null> => {
+      let queued = 0;
       try {
         for (const annotation of annotations) {
           await queueAnnotationWrite(sessionId, annotation);
+          queued += 1;
         }
         return null;
       } catch (queueError) {
+        if (queued === 0) {
+          decrementPendingWrites();
+        }
         return reportAnnotationWriteError(queueError);
       }
     },
-    [queueAnnotationWrite, reportAnnotationWriteError],
+    [decrementPendingWrites, queueAnnotationWrite, reportAnnotationWriteError],
   );
 
   // Edit/delete/undo/redo/clear are fire-and-forget from UI handlers (`void
   // deleteAnnotation(id)`), so persistence never rejects: retriable errors go
   // to the offline queue, anything else surfaces via lastSyncError and is
   // returned so awaiting callers (createAnnotation) can react.
-  const handleAnnotationWriteError = useCallback(
+  const persistAnnotations = useCallback(
     async (
-      sessionId: string,
+      remoteSession: SessionRecord,
       annotations: readonly AnnotationRecord[],
-      error: unknown,
-    ): Promise<string | null> =>
-      isRetriableSyncError(error)
-        ? queueAnnotationWrites(sessionId, annotations)
-        : reportAnnotationWriteError(error),
-    [queueAnnotationWrites, reportAnnotationWriteError],
-  );
-
-  const persistAnnotation = useCallback(
-    async (annotation: AnnotationRecord): Promise<string | null> => {
-      if (!session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
-        return null;
-      }
-
+      write: (sessionId: string) => Promise<void>,
+    ): Promise<string | null> => {
       incrementPendingWrites();
       incrementSyncInFlight();
       setLastSyncError(null);
-
-      const stampedAnnotation: AnnotationRecord = {
-        ...annotation,
-        updatedAt: new Date().toISOString(),
-      };
 
       let failure: { error: unknown } | undefined;
       let queueOffline = false;
@@ -123,11 +114,11 @@ export function useAnnotations() {
           queueOffline = true;
         } else {
           await withSessionWriteAccess({
-            session,
+            session: remoteSession,
             uid: user.uid,
             myUid,
             onSessionChange: (next) => setSession(next, user.uid),
-            write: (sessionId) => writeRemoteAnnotation(sessionId, stampedAnnotation),
+            write,
           });
         }
       } catch (error) {
@@ -135,27 +126,42 @@ export function useAnnotations() {
       }
 
       decrementSyncInFlight();
-      decrementPendingWrites();
 
-      if (queueOffline) {
-        return queueAnnotationWrites(session.id, [stampedAnnotation]);
+      if (queueOffline || (failure && isRetriableSyncError(failure.error))) {
+        return queueAnnotationWrites(remoteSession.id, annotations);
       }
-      return failure
-        ? handleAnnotationWriteError(session.id, [stampedAnnotation], failure.error)
-        : null;
+      decrementPendingWrites();
+      return failure ? reportAnnotationWriteError(failure.error) : null;
     },
     [
       decrementPendingWrites,
       decrementSyncInFlight,
-      handleAnnotationWriteError,
       incrementPendingWrites,
       incrementSyncInFlight,
-      session,
+      myUid,
       queueAnnotationWrites,
+      reportAnnotationWriteError,
       setLastSyncError,
       setSession,
-      myUid,
     ],
+  );
+
+  const persistAnnotation = useCallback(
+    async (annotation: AnnotationRecord): Promise<string | null> => {
+      if (!session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+        return null;
+      }
+
+      const stampedAnnotation: AnnotationRecord = {
+        ...annotation,
+        updatedAt: new Date().toISOString(),
+      };
+
+      return persistAnnotations(session, [stampedAnnotation], (sessionId) =>
+        writeRemoteAnnotation(sessionId, stampedAnnotation),
+      );
+    },
+    [persistAnnotations, session],
   );
 
   const createAnnotation = useCallback(
@@ -303,10 +309,6 @@ export function useAnnotations() {
       return;
     }
 
-    incrementPendingWrites();
-    incrementSyncInFlight();
-    setLastSyncError(null);
-
     const deleted = active.map(
       (annotation): AnnotationRecord => ({
         ...annotation,
@@ -315,48 +317,10 @@ export function useAnnotations() {
       }),
     );
 
-    let failure: { error: unknown } | undefined;
-    let queueOffline = false;
-    try {
-      const user = await ensureAnonymousUser();
-
-      if (shouldQueueAnnotationOffline()) {
-        queueOffline = true;
-      } else {
-        await withSessionWriteAccess({
-          session,
-          uid: user.uid,
-          myUid,
-          onSessionChange: (next) => setSession(next, user.uid),
-          write: (sessionId) => writeRemoteAnnotationsBatch(sessionId, deleted),
-        });
-      }
-    } catch (error) {
-      failure = { error };
-    }
-
-    decrementSyncInFlight();
-    decrementPendingWrites();
-
-    if (queueOffline) {
-      await queueAnnotationWrites(session.id, deleted);
-    } else if (failure) {
-      await handleAnnotationWriteError(session.id, deleted, failure.error);
-    }
-  }, [
-    clearRedoStack,
-    decrementPendingWrites,
-    decrementSyncInFlight,
-    handleAnnotationWriteError,
-    incrementPendingWrites,
-    incrementSyncInFlight,
-    queueAnnotationWrites,
-    myUid,
-    session,
-    setLastSyncError,
-    setSession,
-    softDeleteAllForSession,
-  ]);
+    await persistAnnotations(session, deleted, (sessionId) =>
+      writeRemoteAnnotationsBatch(sessionId, deleted),
+    );
+  }, [clearRedoStack, persistAnnotations, session, softDeleteAllForSession]);
 
   return {
     createAnnotation,

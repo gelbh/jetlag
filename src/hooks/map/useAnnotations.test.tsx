@@ -15,6 +15,9 @@ const firebaseConfigured = vi.hoisted(() => ({ value: false }));
 const getRemoteSessionByIdFromServer = vi.hoisted(() => vi.fn());
 const writeRemoteAnnotation = vi.hoisted(() => vi.fn());
 const writeRemoteAnnotationsBatch = vi.hoisted(() => vi.fn());
+const queueOffline = vi.hoisted(() => ({ value: false }));
+const offlineQueue = vi.hoisted(() => ({ items: [] as unknown[] }));
+const enqueueOfflineWrite = vi.hoisted(() => vi.fn());
 
 vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => firebaseConfigured.value,
@@ -35,15 +38,13 @@ vi.mock("../../services/firestore/firestoreAnnotations", () => ({
 }));
 
 vi.mock("../../services/session/offlineQueue", () => ({
-  countOfflineQueueForSession: vi.fn(async () => 1),
-  enqueueOfflineWrite: vi.fn(async () => undefined),
+  countOfflineQueueForSession: vi.fn(async () => offlineQueue.items.length),
+  enqueueOfflineWrite,
 }));
 
 vi.mock("../../services/session/backgroundSync", () => ({
   registerAnnotationBackgroundSync: vi.fn(async () => undefined),
 }));
-
-const queueOffline = vi.hoisted(() => ({ value: false }));
 
 vi.mock("./shouldQueueAnnotationOffline", () => ({
   shouldQueueAnnotationOffline: () => queueOffline.value,
@@ -59,6 +60,10 @@ describe("useAnnotations", () => {
     useSessionStore.getState().setNetworkReachable(null);
     firebaseConfigured.value = false;
     queueOffline.value = false;
+    offlineQueue.items = [];
+    enqueueOfflineWrite.mockReset().mockImplementation(async (_sessionId, annotation) => {
+      offlineQueue.items.push(annotation);
+    });
     getRemoteSessionByIdFromServer.mockReset();
     writeRemoteAnnotation.mockReset().mockResolvedValue(undefined);
     writeRemoteAnnotationsBatch.mockReset().mockResolvedValue(undefined);
@@ -312,7 +317,7 @@ describe("useAnnotations", () => {
       expect(useSessionStore.getState().lastSyncError).toBeNull();
     });
 
-    it("keeps offline-queued writes in pending writes", async () => {
+    it("counts offline-queued draw and clear-all in pending writes", async () => {
       useSessionStore
         .getState()
         .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
@@ -328,8 +333,48 @@ describe("useAnnotations", () => {
       await act(async () => {
         await result.current.clearAllAnnotations();
       });
-      expect(useSessionStore.getState().pendingWrites).toBe(1);
+      expect(useSessionStore.getState().pendingWrites).toBe(2);
       expect(writeRemoteAnnotation).not.toHaveBeenCalled();
+      expect(writeRemoteAnnotationsBatch).not.toHaveBeenCalled();
+    });
+
+    it("never shows zero pending writes while queueing offline", async () => {
+      useSessionStore
+        .getState()
+        .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
+      queueOffline.value = true;
+      const seen: number[] = [];
+      const unsubscribe = useSessionStore.subscribe((state) => seen.push(state.pendingWrites));
+
+      const { result } = renderHook(() => useAnnotations());
+
+      await act(async () => {
+        await result.current.createAnnotation(pin());
+      });
+      unsubscribe();
+
+      expect(seen).not.toContain(0);
+      expect(useSessionStore.getState().pendingWrites).toBe(1);
+    });
+
+    it("surfaces an offline queue failure without leaking pending writes", async () => {
+      useSessionStore
+        .getState()
+        .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
+      queueOffline.value = true;
+      enqueueOfflineWrite.mockRejectedValueOnce(new Error("Storage quota exceeded"));
+
+      const { result } = renderHook(() => useAnnotations());
+
+      await act(async () => {
+        await expect(result.current.createAnnotation(pin())).rejects.toThrow(
+          "Storage quota exceeded",
+        );
+      });
+
+      expect(useSessionStore.getState().lastSyncError).toBe("Storage quota exceeded");
+      expect(useSessionStore.getState().pendingWrites).toBe(0);
+      expect(useAnnotationStore.getState().annotations).toEqual([]);
     });
   });
 });
