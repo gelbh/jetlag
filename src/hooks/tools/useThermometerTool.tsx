@@ -54,6 +54,33 @@ function createThermometerConfig(
   };
 }
 
+/**
+ * A synced walk keeps its own distance. Outside a walk, a picked preset that has
+ * since been used falls through to the first unused one; during a walk it stays
+ * put, because the walk's own question can count as used.
+ */
+function effectiveThermometerDistanceMeters(
+  config: ThermometerSessionConfig,
+  syncedWalk: { distanceMeters: number | null } | null,
+  sessionRules: UseThermometerToolParams["sessionRules"],
+  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+): number {
+  if (config.localWalkingQuestionId === null && syncedWalk?.distanceMeters != null) {
+    return syncedWalk.distanceMeters;
+  }
+  const { distanceMeters } = config;
+  if (config.localWalkingQuestionId !== null || syncedWalk !== null) {
+    return distanceMeters;
+  }
+  const miles = thermometerPresetMilesForMeters(distanceMeters);
+  if (miles === null || !usedOptions.has(miles)) {
+    return distanceMeters;
+  }
+  return (
+    firstAvailableThermometerDistanceMetersForSession(sessionRules, usedOptions) ?? distanceMeters
+  );
+}
+
 export function useThermometerTool({
   active,
   annotations,
@@ -159,13 +186,12 @@ export function useThermometerTool({
       const thermoA =
         config.localThermoA ??
         (synced && walkingQuestionId === synced.questionId ? synced.startPoint : null);
-      const distanceMeters =
-        config.localWalkingQuestionId === null &&
-        synced &&
-        walkingQuestionId === synced.questionId &&
-        synced.distanceMeters !== null
-          ? synced.distanceMeters
-          : config.distanceMeters;
+      const distanceMeters = effectiveThermometerDistanceMeters(
+        config,
+        synced,
+        sessionRules,
+        usedThermometerOptionsRef.current,
+      );
 
       if (!thermoA || !config.thermoB) {
         return;
@@ -229,13 +255,12 @@ export function useThermometerTool({
     (syncedWalkDraft && walkingQuestionId === syncedWalkDraft.questionId
       ? syncedWalkDraft.startPoint
       : null);
-  const activeDistanceMeters =
-    config.localWalkingQuestionId === null &&
-    syncedWalkDraft &&
-    walkingQuestionId === syncedWalkDraft.questionId &&
-    syncedWalkDraft.distanceMeters !== null
-      ? syncedWalkDraft.distanceMeters
-      : config.distanceMeters;
+  const activeDistanceMeters = effectiveThermometerDistanceMeters(
+    config,
+    syncedWalkDraft,
+    sessionRules,
+    usedThermometerOptions,
+  );
 
   const { reading: gpsReading } = useLiveLocation(active && config.placementMode === "gps", {
     highAccuracy: true,
@@ -347,30 +372,6 @@ export function useThermometerTool({
     setMapError,
     submitPendingQuestion,
     usedThermometerOptions,
-  ]);
-
-  useEffect(() => {
-    if (!active || walkingQuestionId !== null) {
-      return;
-    }
-    const miles = thermometerPresetMilesForMeters(config.distanceMeters);
-    if (miles === null || !usedThermometerOptions.has(miles)) {
-      return;
-    }
-    const next = firstAvailableThermometerDistanceMetersForSession(
-      sessionRules,
-      usedThermometerOptions,
-    );
-    if (next !== null && next !== config.distanceMeters) {
-      patchConfig({ distanceMeters: next });
-    }
-  }, [
-    active,
-    config.distanceMeters,
-    patchConfig,
-    sessionRules,
-    usedThermometerOptions,
-    walkingQuestionId,
   ]);
 
   const handleMapClick = useCallback(

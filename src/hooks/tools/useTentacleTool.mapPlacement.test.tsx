@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as previewBasemapPoisModule from "@/services/geo/maplibre/previewBasemapPois";
+import { useMapStore } from "../../state/mapStore";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useTentacleTool } from "./useTentacleTool";
@@ -32,6 +33,10 @@ vi.mock("../../services/geo/overpass/tentacleOverpass", () => ({
 }));
 
 describe("useTentacleTool map-first", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("tentacle");
+  });
+
   it("suppresses the Ask sheet after a category is chosen", async () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>

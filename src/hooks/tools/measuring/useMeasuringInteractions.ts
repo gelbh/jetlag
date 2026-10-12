@@ -52,31 +52,37 @@ export function useMeasuringInteractions({
 
   const { setMeasuringTargetAnchor, setMeasuringSeekerAnchorAndResolve } = loaders;
 
-  const handleGps = useCallback(async () => {
-    if (submittingRef.current) {
-      return;
-    }
-    setMeasuringError(null);
-
-    try {
-      const reading = await refreshGps();
-      const point: LatLngTuple = [reading.lat, reading.lng];
-      if (!ensurePointInGameArea(point)) {
-        setMeasuringError("That point is outside the play area.");
+  const handleGps = useCallback(
+    async (shouldApply?: () => boolean) => {
+      if (submittingRef.current) {
         return;
       }
+      setMeasuringError(null);
 
-      setMeasuringSeekerAnchorAndResolve(point);
-    } catch (error) {
-      setMeasuringError(error instanceof Error ? error.message : "GPS location unavailable.");
-    }
-  }, [
-    ensurePointInGameArea,
-    refreshGps,
-    setMeasuringError,
-    setMeasuringSeekerAnchorAndResolve,
-    submittingRef,
-  ]);
+      try {
+        const reading = await refreshGps();
+        if (shouldApply && !shouldApply()) {
+          return;
+        }
+        const point: LatLngTuple = [reading.lat, reading.lng];
+        if (!ensurePointInGameArea(point)) {
+          setMeasuringError("That point is outside the play area.");
+          return;
+        }
+
+        setMeasuringSeekerAnchorAndResolve(point);
+      } catch (error) {
+        setMeasuringError(error instanceof Error ? error.message : "GPS location unavailable.");
+      }
+    },
+    [
+      ensurePointInGameArea,
+      refreshGps,
+      setMeasuringError,
+      setMeasuringSeekerAnchorAndResolve,
+      submittingRef,
+    ],
+  );
 
   const handleSearch = useCallback(
     async (role: "seeker" | "target") => {

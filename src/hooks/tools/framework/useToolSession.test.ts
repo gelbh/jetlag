@@ -142,6 +142,26 @@ describe("useToolSession", () => {
     expect(onSubmit).toHaveBeenCalledTimes(2);
   });
 
+  it("submits right after reopening, before effects flush", async () => {
+    useMapStore.getState().setActiveTool("radar");
+    const onSubmit = vi.fn(async () => undefined);
+    const { result } = renderHook(() =>
+      useToolSession<DemoConfig>({
+        toolId: "radar",
+        createInitialConfig: () => ({ value: 1, label: "a" }),
+        onSubmit,
+      }),
+    );
+
+    await act(async () => {
+      useMapStore.getState().setActiveTool("none");
+      useMapStore.getState().setActiveTool("radar");
+      await result.current.submit();
+    });
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
   it.each(["resolve", "reject"] as const)(
     "ignores a stale submit that settles (%s) after close and reopen",
     async (outcome) => {

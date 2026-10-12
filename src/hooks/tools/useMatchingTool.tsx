@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { MatchingHudBody } from "@/components/tools/ask/matching/MatchingHudBody";
 import {
   MatchingMapPlacementChrome,
@@ -27,16 +27,13 @@ import {
 } from "../../domain/questions";
 import { taggedSetupPinsForCategory } from "../../domain/session/catalog/sessionCustomCatalog";
 import {
-  type GeolocationPermissionState,
-  queryGeolocationPermission,
-} from "../../services/core/location/geolocation";
-import {
   matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
 } from "../../services/geo/matching";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { useLatestRequest } from "../forms/useLatestRequest";
+import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
 import { useToolSession } from "./framework/useToolSession";
 import {
   type CommitMatchingInput,
@@ -415,38 +412,38 @@ export function useMatchingTool({
     ],
   );
 
-  const handleGps = useCallback(async () => {
-    if (submittingRef.current) {
-      return;
-    }
-    setMatchingError(null);
-
-    try {
-      const reading = await refreshGps();
-      const point: LatLngTuple = [reading.lat, reading.lng];
-      if (!ensurePointInGameArea(point)) {
-        setMatchingError("That point is outside the play area.");
+  const handleGps = useCallback(
+    async (shouldApply?: () => boolean) => {
+      if (submittingRef.current) {
         return;
       }
+      setMatchingError(null);
 
-      setMatchingAnswerSynced(null);
-      setMatchingSeekerAnchor(point);
-    } catch (error) {
-      setMatchingError(error instanceof Error ? error.message : "GPS location unavailable.");
-    }
-  }, [
-    ensurePointInGameArea,
-    refreshGps,
-    setMatchingAnswerSynced,
-    setMatchingError,
-    setMatchingSeekerAnchor,
-  ]);
+      try {
+        const reading = await refreshGps();
+        if (shouldApply && !shouldApply()) {
+          return;
+        }
+        const point: LatLngTuple = [reading.lat, reading.lng];
+        if (!ensurePointInGameArea(point)) {
+          setMatchingError("That point is outside the play area.");
+          return;
+        }
 
-  const handleGpsRef = useRef(handleGps);
-
-  useEffect(() => {
-    handleGpsRef.current = handleGps;
-  }, [handleGps]);
+        setMatchingAnswerSynced(null);
+        setMatchingSeekerAnchor(point);
+      } catch (error) {
+        setMatchingError(error instanceof Error ? error.message : "GPS location unavailable.");
+      }
+    },
+    [
+      ensurePointInGameArea,
+      refreshGps,
+      setMatchingAnswerSynced,
+      setMatchingError,
+      setMatchingSeekerAnchor,
+    ],
+  );
 
   const buildCommitInput = useCallback((): CommitMatchingInput => {
     return {
@@ -614,44 +611,12 @@ export function useMatchingTool({
 
   const mapFirstEligible = matchingCategoryChosen && matchingCategoryId !== null;
 
-  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
-    GeolocationPermissionState | "checking"
-  >("checking");
-  const autoGpsForCategoryRef = useRef<MatchingCategoryId | null>(null);
-  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
-
-  useEffect(() => {
-    if (!mapFirstEligible) {
-      autoGpsForCategoryRef.current = null;
-      return;
-    }
-
-    let cancelled = false;
-    void (async () => {
-      const permission = await queryGeolocationPermission();
-      if (cancelled) {
-        return;
-      }
-      setEligiblePlacementGeo(permission);
-      if (
-        permission === "granted" &&
-        matchingSeekerPoint === null &&
-        autoGpsForCategoryRef.current !== matchingCategoryId
-      ) {
-        autoGpsForCategoryRef.current = matchingCategoryId;
-        void handleGpsRef.current();
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-    // matchingSeekerPoint intentionally omitted: only gate auto-GPS at entry
-  }, [mapFirstEligible, matchingCategoryId]);
-
-  useEffect(() => {
-    autoGpsForCategoryRef.current = null;
-  }, [matchingCategoryId]);
+  const placementGeo = useAutoPlacementGps({
+    eligible: mapFirstEligible,
+    entryKey: matchingCategoryId,
+    hasPoint: matchingSeekerPoint !== null,
+    requestGps: handleGps,
+  });
 
   // Stay map-first for the whole post-category flow (locate → resolve → answer/send).
   const mapPlacementActive = Boolean(mapFirstEligible);

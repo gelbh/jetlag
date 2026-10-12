@@ -1,9 +1,14 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useMatchingTool } from "./useMatchingTool";
 
 describe("useMatchingTool", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("matching");
+  });
+
   it("stores the seeker anchor from map taps", () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>
