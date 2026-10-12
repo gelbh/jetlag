@@ -1,16 +1,36 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { GameArea } from "@/domain/map/annotations";
 import { questionOptionsForTool } from "@/domain/questions/randomizeQuestion";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import { resolveRandomizedMatching } from "@/services/questions/resolveRandomizedHeavyQuestion";
 import {
   nextRandomizedQuestion,
   type UseRandomizeAutoAskParams,
   useRandomizeAutoAsk,
 } from "./useRandomizeAutoAsk";
 
+vi.mock("@/services/questions/resolveRandomizedHeavyQuestion", () => ({
+  resolveRandomizedMatching: vi.fn(async () => null),
+  resolveRandomizedTentacle: vi.fn(async () => null),
+}));
+
 const session = { gameSize: "small" as const };
 const [radarOriginalOption, radarRoll] = questionOptionsForTool("radar", session);
 const [thermometerRoll] = questionOptionsForTool("thermometer", session);
+const [matchingRoll] = questionOptionsForTool("matching", session);
+const gameArea: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [-6.3, 53.3],
+      [-6.2, 53.3],
+      [-6.2, 53.4],
+      [-6.3, 53.4],
+      [-6.3, 53.3],
+    ],
+  ],
+};
 
 function radarOriginal(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {
@@ -45,6 +65,8 @@ function setup(overrides: Partial<UseRandomizeAutoAskParams> = {}) {
     pendingQuestions: [radarOriginal()],
     sessionRules: session,
     annotations: [],
+    gameArea,
+    distanceUnit: "metric",
     canSubmitQuestion: true,
     submitToolQuestion,
     onManual,
@@ -145,6 +167,37 @@ describe("useRandomizeAutoAsk", () => {
       ),
     );
     expect(submitToolQuestion).not.toHaveBeenCalled();
+  });
+
+  it("forwards the play area and distance unit to the matching resolver", async () => {
+    vi.mocked(resolveRandomizedMatching).mockResolvedValueOnce({
+      promptText: "Matching",
+      replyOptions: [],
+      placement: { geometryJson: "{}", metadata: {} },
+    });
+    const original = radarOriginal({
+      toolType: "matching",
+      randomizedTo: matchingRoll,
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+        }),
+        metadata: {},
+      },
+    });
+    const { props, submitToolQuestion } = setup({ pendingQuestions: [original] });
+    renderHook(() => useRandomizeAutoAsk(props));
+
+    await waitFor(() => expect(submitToolQuestion).toHaveBeenCalledTimes(1));
+    expect(resolveRandomizedMatching).toHaveBeenCalledWith(
+      [53.35, -6.26],
+      matchingRoll.optionKey,
+      { cardDraw: 1, cardKeep: 1 },
+      expect.objectContaining({ gameArea, distanceUnit: "metric" }),
+    );
+    expect(submitToolQuestion.mock.calls[0][0]).toBe("matching");
   });
 
   it("tells the seeker when the submit is refused", async () => {

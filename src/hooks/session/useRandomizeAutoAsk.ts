@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { captureException } from "@/services/core/analytics/clientErrors";
-import type { AnnotationRecord } from "../../domain/map/annotations";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import type { DistanceUnit } from "../../domain/map/distance";
 import type {
   PendingQuestionRecord,
   PendingQuestionToolType,
@@ -19,6 +20,8 @@ export interface UseRandomizeAutoAskParams {
   pendingQuestions: readonly PendingQuestionRecord[];
   sessionRules: SessionRulesInput;
   annotations: readonly AnnotationRecord[];
+  gameArea: GameArea;
+  distanceUnit: DistanceUnit;
   canSubmitQuestion: boolean;
   submitToolQuestion: (
     toolType: PendingQuestionToolType,
@@ -92,6 +95,8 @@ export function useRandomizeAutoAsk({
   pendingQuestions,
   sessionRules,
   annotations,
+  gameArea,
+  distanceUnit,
   canSubmitQuestion,
   submitToolQuestion,
   onManual,
@@ -119,6 +124,8 @@ export function useRandomizeAutoAsk({
       session: sessionRules,
       annotations,
       pendingQuestions,
+      gameArea,
+      distanceUnit,
     })
       .then(async (built) => {
         if (built.kind === "manual") {
@@ -142,6 +149,8 @@ export function useRandomizeAutoAsk({
     pendingQuestions,
     sessionRules,
     annotations,
+    gameArea,
+    distanceUnit,
     submitToolQuestion,
     onManual,
   ]);
