@@ -106,4 +106,52 @@ describe("useToolSession", () => {
     });
     expect(onSubmit).toHaveBeenCalledTimes(2);
   });
+
+  it.each(["resolve", "reject"] as const)(
+    "ignores a stale submit that settles (%s) after close and reopen",
+    async (outcome) => {
+      let settle: { resolve: () => void; reject: (error: Error) => void } | undefined;
+      const onSubmit = vi.fn(async () => undefined);
+      onSubmit.mockImplementationOnce(
+        () =>
+          new Promise<undefined>((resolve, reject) => {
+            settle = { resolve: () => resolve(undefined), reject };
+          }),
+      );
+      const { result, rerender } = renderHook(
+        ({ active }) =>
+          useToolSession<DemoConfig>({
+            toolId: "demo",
+            active,
+            createInitialConfig: () => ({ value: 1, label: "a" }),
+            onSubmit,
+          }),
+        { initialProps: { active: true } },
+      );
+
+      let stale: Promise<void> | undefined;
+      act(() => {
+        stale = result.current.submit();
+      });
+      rerender({ active: false });
+      rerender({ active: true });
+      await act(async () => {
+        if (outcome === "resolve") {
+          settle?.resolve();
+        } else {
+          settle?.reject(new Error("stale"));
+        }
+        await stale;
+      });
+
+      expect(result.current.phase).toBe("configuring");
+      expect(result.current.config).toEqual({ value: 1, label: "a" });
+      expect(result.current.error).toBeNull();
+
+      await act(async () => {
+        await result.current.submit();
+      });
+      expect(onSubmit).toHaveBeenCalledTimes(2);
+    },
+  );
 });
