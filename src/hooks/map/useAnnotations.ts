@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { isFirestorePermissionDenied } from "@/services/firestore/sessions/shared";
 import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
-import type { AnnotationRecord } from "../../domain/map/annotations";
+import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
 import { findLastRedoableAnnotation, findLastUndoableAnnotation } from "../../domain/map/mapTools";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
@@ -13,7 +13,7 @@ import { withSessionWriteAccess } from "../../services/firestore/sessionMembersh
 import { registerAnnotationBackgroundSync } from "../../services/session/backgroundSync";
 import {
   countOfflineQueueForSession,
-  enqueueOfflineWrite,
+  enqueueOfflineWrites,
 } from "../../services/session/offlineQueue";
 import type { MapTool } from "../../state/sessionStore";
 import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
@@ -40,15 +40,6 @@ export function useAnnotations() {
   const setSession = useSessionStore((state) => state.setSession);
   const myUid = useSessionStore((state) => state.myUid);
 
-  const queueAnnotationWrite = useCallback(
-    async (sessionId: string, annotation: AnnotationRecord) => {
-      await enqueueOfflineWrite(sessionId, annotation);
-      await registerAnnotationBackgroundSync();
-      setPendingWrites(await countOfflineQueueForSession(sessionId));
-    },
-    [setPendingWrites],
-  );
-
   const addAnnotation = useAnnotationStore((state) => state.addAnnotation);
   const softDeleteAnnotation = useAnnotationStore((state) => state.softDeleteAnnotation);
   const softDeleteAllForSession = useAnnotationStore((state) => state.softDeleteAllForSession);
@@ -58,32 +49,88 @@ export function useAnnotations() {
   const upsertAnnotation = useAnnotationStore((state) => state.upsertAnnotation);
   const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
 
+  const reportAnnotationWriteError = useCallback(
+    (error: unknown): string => {
+      const message = annotationSyncErrorMessage(error);
+      setLastSyncError(message);
+      return message;
+    },
+    [setLastSyncError],
+  );
+
+  // Resetting pendingWrites to the queue count absorbs the caller's increment,
+  // so callers must not also decrement it. Leaving it up until the reset keeps
+  // the sync indicator from flashing "synced".
+  // ponytail: resetting to the queue count drops in-flight increments from
+  // concurrent remote writes; separate queued and in-flight counters fix that.
+  const queueAnnotationWrites = useCallback(
+    async (sessionId: string, annotations: readonly AnnotationRecord[]): Promise<string | null> => {
+      try {
+        await enqueueOfflineWrites(sessionId, annotations);
+        await registerAnnotationBackgroundSync();
+        setPendingWrites(await countOfflineQueueForSession(sessionId));
+        return null;
+      } catch (queueError) {
+        decrementPendingWrites();
+        return reportAnnotationWriteError(queueError);
+      }
+    },
+    [decrementPendingWrites, reportAnnotationWriteError, setPendingWrites],
+  );
+
   // Edit/delete/undo/redo/clear are fire-and-forget from UI handlers (`void
   // deleteAnnotation(id)`), so persistence never rejects: retriable errors go
   // to the offline queue, anything else surfaces via lastSyncError and is
   // returned so awaiting callers (createAnnotation) can react.
-  const handleAnnotationWriteError = useCallback(
+  const persistAnnotations = useCallback(
     async (
-      sessionId: string,
+      remoteSession: SessionRecord,
       annotations: readonly AnnotationRecord[],
-      error: unknown,
+      write: (sessionId: string) => Promise<void>,
     ): Promise<string | null> => {
-      let failure = error;
-      if (isRetriableSyncError(error)) {
-        try {
-          for (const annotation of annotations) {
-            await queueAnnotationWrite(sessionId, annotation);
-          }
-          return null;
-        } catch (queueError) {
-          failure = queueError;
+      incrementPendingWrites();
+      incrementSyncInFlight();
+      setLastSyncError(null);
+
+      let failure: { error: unknown } | undefined;
+      let queueOffline = false;
+      try {
+        const user = await ensureAnonymousUser();
+
+        if (shouldQueueAnnotationOffline()) {
+          queueOffline = true;
+        } else {
+          await withSessionWriteAccess({
+            session: remoteSession,
+            uid: user.uid,
+            myUid,
+            onSessionChange: (next) => setSession(next, user.uid),
+            write,
+          });
         }
+      } catch (error) {
+        failure = { error };
       }
-      const message = annotationSyncErrorMessage(failure);
-      setLastSyncError(message);
-      return message;
+
+      decrementSyncInFlight();
+
+      if (queueOffline || (failure && isRetriableSyncError(failure.error))) {
+        return queueAnnotationWrites(remoteSession.id, annotations);
+      }
+      decrementPendingWrites();
+      return failure ? reportAnnotationWriteError(failure.error) : null;
     },
-    [queueAnnotationWrite, setLastSyncError],
+    [
+      decrementPendingWrites,
+      decrementSyncInFlight,
+      incrementPendingWrites,
+      incrementSyncInFlight,
+      myUid,
+      queueAnnotationWrites,
+      reportAnnotationWriteError,
+      setLastSyncError,
+      setSession,
+    ],
   );
 
   const persistAnnotation = useCallback(
@@ -92,53 +139,16 @@ export function useAnnotations() {
         return null;
       }
 
-      incrementPendingWrites();
-      incrementSyncInFlight();
-      setLastSyncError(null);
-
       const stampedAnnotation: AnnotationRecord = {
         ...annotation,
         updatedAt: new Date().toISOString(),
       };
 
-      let failure: { error: unknown } | undefined;
-      try {
-        const user = await ensureAnonymousUser();
-
-        if (shouldQueueAnnotationOffline()) {
-          await queueAnnotationWrite(session.id, stampedAnnotation);
-        } else {
-          await withSessionWriteAccess({
-            session,
-            uid: user.uid,
-            myUid,
-            onSessionChange: (next) => setSession(next, user.uid),
-            write: (sessionId) => writeRemoteAnnotation(sessionId, stampedAnnotation),
-          });
-        }
-      } catch (error) {
-        failure = { error };
-      }
-
-      decrementSyncInFlight();
-      decrementPendingWrites();
-
-      return failure
-        ? handleAnnotationWriteError(session.id, [stampedAnnotation], failure.error)
-        : null;
+      return persistAnnotations(session, [stampedAnnotation], (sessionId) =>
+        writeRemoteAnnotation(sessionId, stampedAnnotation),
+      );
     },
-    [
-      decrementPendingWrites,
-      decrementSyncInFlight,
-      handleAnnotationWriteError,
-      incrementPendingWrites,
-      incrementSyncInFlight,
-      session,
-      queueAnnotationWrite,
-      setLastSyncError,
-      setSession,
-      myUid,
-    ],
+    [persistAnnotations, session],
   );
 
   const createAnnotation = useCallback(
@@ -286,10 +296,6 @@ export function useAnnotations() {
       return;
     }
 
-    incrementPendingWrites();
-    incrementSyncInFlight();
-    setLastSyncError(null);
-
     const deleted = active.map(
       (annotation): AnnotationRecord => ({
         ...annotation,
@@ -298,47 +304,10 @@ export function useAnnotations() {
       }),
     );
 
-    const persist = async () => {
-      try {
-        const user = await ensureAnonymousUser();
-
-        if (shouldQueueAnnotationOffline()) {
-          for (const annotation of deleted) {
-            await queueAnnotationWrite(session.id, annotation);
-          }
-          return;
-        }
-
-        await withSessionWriteAccess({
-          session,
-          uid: user.uid,
-          myUid,
-          onSessionChange: (next) => setSession(next, user.uid),
-          write: (sessionId) => writeRemoteAnnotationsBatch(sessionId, deleted),
-        });
-      } catch (error) {
-        await handleAnnotationWriteError(session.id, deleted, error);
-      }
-    };
-
-    await persist().finally(() => {
-      decrementSyncInFlight();
-      decrementPendingWrites();
-    });
-  }, [
-    clearRedoStack,
-    decrementPendingWrites,
-    decrementSyncInFlight,
-    handleAnnotationWriteError,
-    incrementPendingWrites,
-    incrementSyncInFlight,
-    queueAnnotationWrite,
-    myUid,
-    session,
-    setLastSyncError,
-    setSession,
-    softDeleteAllForSession,
-  ]);
+    await persistAnnotations(session, deleted, (sessionId) =>
+      writeRemoteAnnotationsBatch(sessionId, deleted),
+    );
+  }, [clearRedoStack, persistAnnotations, session, softDeleteAllForSession]);
 
   return {
     createAnnotation,

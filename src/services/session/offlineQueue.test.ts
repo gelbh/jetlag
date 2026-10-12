@@ -3,6 +3,7 @@ import type { AnnotationRecord } from "../../domain/map/annotations";
 import {
   clearOfflineQueueForSession,
   enqueueOfflineWrite,
+  enqueueOfflineWrites,
   readOfflineQueue,
   readOfflineQueueForSession,
   recordOfflineWriteFailure,
@@ -38,6 +39,13 @@ describe("offlineQueue", () => {
 
     await removeOfflineWrite("ann-offline");
     expect(await readOfflineQueue()).toHaveLength(0);
+  });
+
+  it("queues a batch of writes together", async () => {
+    await enqueueOfflineWrites("session-1", [annotation, { ...annotation, id: "ann-offline-2" }]);
+
+    const queued = await readOfflineQueueForSession("session-1");
+    expect(queued.map((entry) => entry.id).sort()).toEqual(["ann-offline", "ann-offline-2"]);
   });
 
   it("dedupes writes by annotation id", async () => {

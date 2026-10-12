@@ -15,6 +15,9 @@ const firebaseConfigured = vi.hoisted(() => ({ value: false }));
 const getRemoteSessionByIdFromServer = vi.hoisted(() => vi.fn());
 const writeRemoteAnnotation = vi.hoisted(() => vi.fn());
 const writeRemoteAnnotationsBatch = vi.hoisted(() => vi.fn());
+const queueOffline = vi.hoisted(() => ({ value: false }));
+const offlineQueue = vi.hoisted(() => ({ items: [] as unknown[] }));
+const enqueueOfflineWrites = vi.hoisted(() => vi.fn());
 
 vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => firebaseConfigured.value,
@@ -35,8 +38,8 @@ vi.mock("../../services/firestore/firestoreAnnotations", () => ({
 }));
 
 vi.mock("../../services/session/offlineQueue", () => ({
-  countOfflineQueueForSession: vi.fn(async () => 1),
-  enqueueOfflineWrite: vi.fn(async () => undefined),
+  countOfflineQueueForSession: vi.fn(async () => offlineQueue.items.length),
+  enqueueOfflineWrites,
 }));
 
 vi.mock("../../services/session/backgroundSync", () => ({
@@ -44,7 +47,7 @@ vi.mock("../../services/session/backgroundSync", () => ({
 }));
 
 vi.mock("./shouldQueueAnnotationOffline", () => ({
-  shouldQueueAnnotationOffline: () => false,
+  shouldQueueAnnotationOffline: () => queueOffline.value,
 }));
 
 function permissionDenied(): FirebaseError {
@@ -56,6 +59,11 @@ describe("useAnnotations", () => {
     resetAllStores();
     useSessionStore.getState().setNetworkReachable(null);
     firebaseConfigured.value = false;
+    queueOffline.value = false;
+    offlineQueue.items = [];
+    enqueueOfflineWrites.mockReset().mockImplementation(async (_sessionId, annotations) => {
+      offlineQueue.items.push(...annotations);
+    });
     getRemoteSessionByIdFromServer.mockReset();
     writeRemoteAnnotation.mockReset().mockResolvedValue(undefined);
     writeRemoteAnnotationsBatch.mockReset().mockResolvedValue(undefined);
@@ -288,6 +296,85 @@ describe("useAnnotations", () => {
 
       expect(getRemoteSessionByIdFromServer).not.toHaveBeenCalled();
       expect(writeRemoteAnnotationsBatch).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps a retriable clear-all failure queued in pending writes", async () => {
+      useSessionStore
+        .getState()
+        .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
+      writeRemoteAnnotationsBatch.mockRejectedValue(new FirebaseError("unavailable", "offline"));
+
+      const { result } = renderHook(() => useAnnotations());
+
+      await act(async () => {
+        await result.current.createAnnotation(pin());
+      });
+      await act(async () => {
+        await result.current.clearAllAnnotations();
+      });
+
+      expect(useSessionStore.getState().pendingWrites).toBe(1);
+      expect(useSessionStore.getState().lastSyncError).toBeNull();
+    });
+
+    it("counts offline-queued draw and clear-all in pending writes", async () => {
+      useSessionStore
+        .getState()
+        .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
+      queueOffline.value = true;
+
+      const { result } = renderHook(() => useAnnotations());
+
+      await act(async () => {
+        await result.current.createAnnotation(pin());
+      });
+      expect(useSessionStore.getState().pendingWrites).toBe(1);
+
+      await act(async () => {
+        await result.current.clearAllAnnotations();
+      });
+      expect(useSessionStore.getState().pendingWrites).toBe(2);
+      expect(writeRemoteAnnotation).not.toHaveBeenCalled();
+      expect(writeRemoteAnnotationsBatch).not.toHaveBeenCalled();
+    });
+
+    it("never shows zero pending writes while queueing offline", async () => {
+      useSessionStore
+        .getState()
+        .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
+      queueOffline.value = true;
+      const seen: number[] = [];
+      const unsubscribe = useSessionStore.subscribe((state) => seen.push(state.pendingWrites));
+
+      const { result } = renderHook(() => useAnnotations());
+
+      await act(async () => {
+        await result.current.createAnnotation(pin());
+      });
+      unsubscribe();
+
+      expect(seen).not.toContain(0);
+      expect(useSessionStore.getState().pendingWrites).toBe(1);
+    });
+
+    it("surfaces an offline queue failure without leaking pending writes", async () => {
+      useSessionStore
+        .getState()
+        .setSession(createTestRemoteSession({ memberUids: ["user-host"] }), "user-host");
+      queueOffline.value = true;
+      enqueueOfflineWrites.mockRejectedValueOnce(new Error("Storage quota exceeded"));
+
+      const { result } = renderHook(() => useAnnotations());
+
+      await act(async () => {
+        await expect(result.current.createAnnotation(pin())).rejects.toThrow(
+          "Storage quota exceeded",
+        );
+      });
+
+      expect(useSessionStore.getState().lastSyncError).toBe("Storage quota exceeded");
+      expect(useSessionStore.getState().pendingWrites).toBe(0);
+      expect(useAnnotationStore.getState().annotations).toEqual([]);
     });
   });
 });
