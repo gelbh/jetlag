@@ -212,6 +212,17 @@ describe("mapLibreIconRegistry", () => {
     });
   });
 
+  it("resolver adds images while tiles are still loading (isStyleLoaded false)", async () => {
+    await withDelayedMockImage(async () => {
+      const mock = createMockMap();
+      mock.isStyleLoaded = () => false;
+      const map = mock as unknown as MapLibreMap;
+      attachMapLibreMissingMarkerImageResolver(map);
+      await mock.missingResolver?.(JL_ICON_USER_LOCATION_PLAIN);
+      expect(mock.hasImage(JL_ICON_USER_LOCATION_PLAIN)).toBe(true);
+    });
+  });
+
   it("resolver ignores non-jl-icon ids", async () => {
     const mock = createMockMap();
     const map = mock as unknown as MapLibreMap;
