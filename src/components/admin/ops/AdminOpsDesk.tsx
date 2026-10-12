@@ -435,6 +435,8 @@ function AdminOpsDeskContent() {
       liveCount={liveSessions.length}
       runnerCount={liveSessions.reduce((sum, row) => sum + row.memberCount, 0)}
       needsYouCount={openCount}
+      inQueueCount={visibleIncidents.length}
+      incidentsLoading={enabled && incidentsLoading}
       refreshing={refreshing}
       onRefresh={() => void refresh({ background: true })}
       onOpenSettings={() => setSettingsOpen(true)}
