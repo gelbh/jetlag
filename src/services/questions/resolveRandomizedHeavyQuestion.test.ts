@@ -339,6 +339,32 @@ describe("resolveRandomizedMeasuring", () => {
     expect(fetchMeasuringLinearContext).not.toHaveBeenCalled();
   });
 
+  it("routes an available admin border through the linear fetch", async () => {
+    preload.adminDivisionCounts = {
+      admin_division_1: 5,
+      admin_division_2: 5,
+      admin_division_3: 5,
+      admin_division_4: 5,
+    };
+    vi.mocked(fetchMeasuringLinearContext).mockResolvedValue({
+      ok: true,
+      point: [51.45, -0.12],
+      distanceMeters: 2_000,
+      segments: [segment],
+    });
+    const base = ctx();
+
+    const built = await resolveRandomizedMeasuring(anchor, "admin1_border", cards, {
+      ...base,
+      session: { ...base.session, regionPackId: undefined },
+    });
+
+    expect(built?.placement.metadata.measuringLocationCategory).toBe("admin1_border");
+    const [, , subject, category] = vi.mocked(fetchMeasuringLinearContext).mock.calls[0]!;
+    expect(subject).toBe("location");
+    expect(category).toBe("admin1_border");
+  });
+
   it.each(["sea_level", "custom_place", "custom:x", "custom_geo:x"] as const)(
     "returns null without fetching for %s",
     async (kind) => {
