@@ -1,4 +1,4 @@
-import { Box, Button, Group, Stack, Text } from "@mantine/core";
+import { Box, Group, Stack, Text } from "@mantine/core";
 import type { QuestionPowerUpId } from "../../domain/boardEconomy";
 import {
   type DockableMapTool,
@@ -19,8 +19,8 @@ import type {
 } from "../../domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { HudToolIcon } from "../map/icons/ToolIcons";
-import { powerUpLabel } from "../session/board/boardCardLabels";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
+import { HiderQuestionCardRow } from "./HiderQuestionCardRow";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 
 export interface HiderQuestionCards {
@@ -134,21 +134,12 @@ export function HiderPendingQuestionAnswer({
         />
       ) : null}
       {!closed && !walking && pendingQuestionId && questionCards?.available.length ? (
-        <Group gap={8}>
-          {questionCards.available.map((card) => (
-            <Button
-              key={card}
-              variant="default"
-              size="sm"
-              radius="sm"
-              disabled={disabled}
-              styles={{ root: { minHeight: "2.75rem" } }}
-              onClick={() => questionCards.onPlay(pendingQuestionId, message.id, card)}
-            >
-              Play {powerUpLabel(card)}
-            </Button>
-          ))}
-        </Group>
+        <HiderQuestionCardRow
+          cards={questionCards.available}
+          disabled={disabled}
+          resetKey={pendingQuestionId}
+          onPlay={(card) => questionCards.onPlay(pendingQuestionId, message.id, card)}
+        />
       ) : null}
     </>
   );

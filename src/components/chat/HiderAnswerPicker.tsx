@@ -26,8 +26,14 @@ export function HiderAnswerPicker({
   disabled = false,
   onSelect,
 }: HiderAnswerPickerProps) {
-  const truthAvailable = truth !== null && !truth.unavailable && truth.replyId.length > 0;
-  const cols = replyOptions.length > 2 ? 1 : 2;
+  const truthOption =
+    truth !== null && !truth.unavailable
+      ? replyOptions.find((option) => option.id === truth.replyId)
+      : undefined;
+  const truthAvailable = truthOption !== undefined;
+  const staleTruth = loading && truthAvailable;
+  const visibleOptions = truthOption ? [truthOption] : loading ? [] : replyOptions;
+  const cols = visibleOptions.length === 2 ? 2 : 1;
   const referenceLabel = hiderTruthReferenceLabel(truthReferenceMode);
 
   return (
@@ -38,7 +44,7 @@ export function HiderAnswerPicker({
         <Text size="xs" c={jetlagBrand.halt}>
           {truth.label}
         </Text>
-      ) : truthAvailable ? (
+      ) : truthAvailable && truth ? (
         <Text size="xs" c={jetlagBrand.fieldInkMuted}>
           <Text span fw={600} c={jetlagBrand.signal}>
             {referenceLabel}
@@ -51,20 +57,21 @@ export function HiderAnswerPicker({
       ) : null}
 
       <SimpleGrid cols={cols} spacing={8}>
-        {replyOptions.map((option) => {
-          const isRecommended = truthAvailable && option.id === truth.replyId;
+        {visibleOptions.map((option) => {
+          const isRecommended = truthAvailable;
           const buttonLabel = option.label;
 
           return (
             <Button
               key={option.id}
               disabled={disabled}
-              onClick={() => onSelect(option)}
-              aria-label={
-                isRecommended
-                  ? `${buttonLabel} (recommended ${referenceLabel.toLowerCase()})`
-                  : buttonLabel
-              }
+              aria-disabled={staleTruth || undefined}
+              onClick={() => {
+                if (!staleTruth) {
+                  onSelect(option);
+                }
+              }}
+              aria-label={buttonLabel}
               size="md"
               radius="sm"
               styles={{
@@ -76,6 +83,7 @@ export function HiderAnswerPicker({
                   backgroundColor: isRecommended ? jetlagBrand.flag : jetlagBrand.canvas,
                   color: isRecommended ? jetlagBrand.flagInk : jetlagBrand.fieldInk,
                   fontWeight: 600,
+                  opacity: staleTruth ? 0.5 : undefined,
                   "&:disabled": { opacity: 0.5 },
                 },
               }}
