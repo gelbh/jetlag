@@ -14,7 +14,7 @@ interface PremiumApiContext {
 const EMPTY_CONTEXT: PremiumApiContext = { sessionId: null, tier: "free", memberUids: [] };
 
 /** Covers the rejoin heal window (~7 s observed) without hanging map data. */
-export const PROXY_MEMBERSHIP_WAIT_MS = 10_000;
+const PROXY_MEMBERSHIP_WAIT_MS = 10_000;
 
 let context: PremiumApiContext = EMPTY_CONTEXT;
 const contextListeners = new Set<() => void>();
@@ -42,14 +42,25 @@ export function shouldUsePremiumProxies(): boolean {
   return context.tier === "premium";
 }
 
+let timedOutKey: string | null = null;
+
 /**
- * Resolves once `uid` is a member of the current session, the session changes,
- * or `timeoutMs` passes. Never rejects: the proxy stays the authority.
+ * Resolves once the current uid is a member of the current session, there is no
+ * session or uid, or `timeoutMs` passes. Never rejects: the proxy stays the
+ * authority. A session + uid pair that already timed out skips the wait so a
+ * removed player's queued requests fail fast instead of each waiting again.
  */
-export function waitForSessionMembership(uid: string, timeoutMs: number): Promise<void> {
-  const sessionId = context.sessionId;
-  const ready = () => context.sessionId !== sessionId || context.memberUids.includes(uid);
-  if (!sessionId || ready()) {
+export function waitForSessionMembership(
+  getUid: () => string | undefined,
+  timeoutMs = PROXY_MEMBERSHIP_WAIT_MS,
+): Promise<void> {
+  const ready = () => {
+    const uid = getUid();
+    return !context.sessionId || !uid || context.memberUids.includes(uid);
+  };
+  const key = () => `${context.sessionId}:${getUid()}`;
+  const startKey = key();
+  if (ready() || startKey === timedOutKey) {
     return Promise.resolve();
   }
 
@@ -64,7 +75,12 @@ export function waitForSessionMembership(uid: string, timeoutMs: number): Promis
         finish();
       }
     };
-    const timer = setTimeout(finish, timeoutMs);
+    const timer = setTimeout(() => {
+      if (key() === startKey) {
+        timedOutKey = startKey;
+      }
+      finish();
+    }, timeoutMs);
     contextListeners.add(check);
   });
 }

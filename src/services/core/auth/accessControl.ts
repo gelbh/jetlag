@@ -50,13 +50,8 @@ export async function getAccessToken(): Promise<string | null> {
 }
 
 export async function buildPremiumProxyHeaders(): Promise<HeadersInit> {
-  const { getPremiumApiContext, PROXY_MEMBERSHIP_WAIT_MS, waitForSessionMembership } = await import(
-    "./premiumApiContext"
-  );
-  const uid = getFirebaseAuth().currentUser?.uid;
-  if (uid) {
-    await waitForSessionMembership(uid, PROXY_MEMBERSHIP_WAIT_MS);
-  }
+  const { getPremiumApiContext, waitForSessionMembership } = await import("./premiumApiContext");
+  await waitForSessionMembership(() => getFirebaseAuth().currentUser?.uid);
 
   const headers: Record<string, string> = {};
   const token = await getAccessToken();

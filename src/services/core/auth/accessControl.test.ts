@@ -3,7 +3,7 @@ import { captureAppCheckTokenFailure } from "../analytics/clientErrors";
 import { buildPremiumProxyHeaders } from "./accessControl";
 
 const { waitForSessionMembership } = vi.hoisted(() => ({
-  waitForSessionMembership: vi.fn(async (_uid: string, _timeoutMs: number) => undefined),
+  waitForSessionMembership: vi.fn(async (_getUid: () => string | undefined) => undefined),
 }));
 
 vi.mock("../firebase/firebase", () => ({
@@ -22,9 +22,7 @@ vi.mock("firebase/app-check", () => ({
 
 vi.mock("./premiumApiContext", () => ({
   getPremiumApiContext: () => ({ sessionId: "session-abc" }),
-  waitForSessionMembership: (uid: string, timeoutMs: number) =>
-    waitForSessionMembership(uid, timeoutMs),
-  PROXY_MEMBERSHIP_WAIT_MS: 10_000,
+  waitForSessionMembership,
 }));
 
 vi.mock("../analytics/clientErrors", () => ({
@@ -78,7 +76,8 @@ describe("accessControl", () => {
       resolved = true;
       return headers;
     });
-    await vi.waitFor(() => expect(waitForSessionMembership).toHaveBeenCalledWith("uid-1", 10_000));
+    await vi.waitFor(() => expect(waitForSessionMembership).toHaveBeenCalledTimes(1));
+    expect(waitForSessionMembership.mock.calls[0]?.[0]()).toBe("uid-1");
     expect(resolved).toBe(false);
 
     release();
