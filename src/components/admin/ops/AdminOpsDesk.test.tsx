@@ -18,11 +18,11 @@ function renderOpsDesk(ui: ReactElement = <AdminOpsDesk />, route = "/admin") {
   );
 }
 
-function mockViewport(desktop: boolean) {
+function mockViewport(widthPx: number) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({
-      matches: desktop && query === "(min-width: 1024px)",
+      matches: widthPx >= Number(/\(min-width: (\d+)px\)/.exec(query)?.[1] ?? Infinity),
       media: query,
       onchange: null,
       addListener: vi.fn(),
@@ -227,6 +227,7 @@ describe("AdminOpsDesk", () => {
     sessionListState.loadingMore = false;
     sessionListState.hasMore = false;
     sessionListState.error = null;
+    sessionListState.lastFetchedAt = null;
     sessionListState.refresh.mockClear();
     sessionListState.loadMore.mockClear();
     incidentState.list = [];
@@ -312,7 +313,7 @@ describe("AdminOpsDesk", () => {
     authState.state = "admin";
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
-    mockViewport(true);
+    mockViewport(1440);
 
     renderOpsDesk();
 
@@ -320,12 +321,12 @@ describe("AdminOpsDesk", () => {
     expect(document.querySelectorAll("[data-admin-world]")).toHaveLength(1);
   });
 
-  it("opens settings in a dialog from the topbar", async () => {
+  it("opens settings in a drawer from the topbar", async () => {
     authState.state = "admin";
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.sessions = [];
-    mockViewport(true);
+    mockViewport(1440);
 
     renderOpsDesk();
 
@@ -333,7 +334,37 @@ describe("AdminOpsDesk", () => {
     fireEvent.click(screen.getByRole("button", { name: /^settings$/i }));
 
     const dialog = await screen.findByRole("dialog", { name: "Desk settings" });
+    expect(dialog).toHaveClass("mantine-Drawer-content");
     expect(within(dialog).getByTestId("admin-settings-panel")).toBeInTheDocument();
+  });
+
+  it("shows data age in the strip after the list loads", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.lastFetchedAt = new Date();
+    mockViewport(1440);
+
+    renderOpsDesk();
+
+    expect(screen.getByText("Synced just now")).toBeInTheDocument();
+  });
+
+  it("shows Sync failed in the strip when the list errors", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.lastFetchedAt = new Date();
+    sessionListState.error = "Couldn't load live sessions.";
+    mockViewport(1440);
+
+    renderOpsDesk();
+
+    expect(screen.getByText("Sync failed").closest("[data-tone]")).toHaveAttribute(
+      "data-tone",
+      "mispunch",
+    );
+    expect(screen.queryByText(/^Synced/)).not.toBeInTheDocument();
   });
 
   it("has no Settings tab in the mobile panel picker", () => {
@@ -341,7 +372,7 @@ describe("AdminOpsDesk", () => {
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.sessions = [];
-    mockViewport(false);
+    mockViewport(375);
 
     renderOpsDesk();
 
@@ -550,15 +581,13 @@ describe("AdminOpsDesk", () => {
         liveMultiplayer: true,
       },
     ];
-    mockViewport(true);
+    mockViewport(1440);
 
     renderOpsDesk();
 
-    expect(
-      within(screen.getByTestId("admin-ops-sessions"))
-        .getByRole("table")
-        .closest(".mantine-ScrollArea-root"),
-    ).not.toBeNull();
+    const startList = screen.getByTestId("admin-ops-sessions");
+    expect(startList.closest(".mantine-AppShell-navbar")).not.toBeNull();
+    expect(within(startList).getByRole("table").closest(".mantine-ScrollArea-root")).not.toBeNull();
     expectStaticAppShell("desktop");
     expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
@@ -571,7 +600,7 @@ describe("AdminOpsDesk", () => {
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.sessions = [];
 
-    mockViewport(false);
+    mockViewport(375);
 
     renderOpsDesk();
 
@@ -581,55 +610,100 @@ describe("AdminOpsDesk", () => {
     expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
   });
 
-  it("sets data-desk-mode to sessions on /admin desktop", () => {
+  function renderDeskRoutes(route: string) {
+    renderOpsDesk(
+      <Routes>
+        <Route path="/admin" element={<AdminOpsDesk />} />
+        <Route path="/admin/incidents" element={<AdminOpsDesk />} />
+        <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
+      </Routes>,
+      route,
+    );
+  }
+
+  it.each(["/admin", "/admin/incidents", "/admin/incidents/inc-listed01"])(
+    "lays out Start list, Course, and Needs you on %s at 1440",
+    (route) => {
+      authState.state = "admin";
+      authState.authReady = true;
+      authState.user = { email: "admin@example.com", emailVerified: true };
+      incidentState.list = [makeIncident({ id: "inc-listed01" })];
+      mockViewport(1440);
+
+      renderDeskRoutes(route);
+
+      expect(screen.getByRole("region", { name: "Start list" })).toBeInTheDocument();
+      expect(screen.getByRole("region", { name: "Course" })).toBeInTheDocument();
+      const needsYou = screen.getByRole("region", { name: "Needs you" });
+      expect(within(needsYou).getByRole("region", { name: "Incident queue" })).toBeInTheDocument();
+      expect(document.querySelector("[data-desk-mode]")).toBeNull();
+      expect(document.querySelector(".mantine-AppShell-navbar")?.getAttribute("style")).toContain(
+        "border-inline-end",
+      );
+      expect(document.querySelector(".mantine-AppShell-aside")?.getAttribute("style")).toContain(
+        "border-inline-start",
+      );
+      expect(screen.queryByRole("button", { name: /^Needs you/ })).not.toBeInTheDocument();
+    },
+  );
+
+  it("shows the selected incident's detail and actions inside Needs you", () => {
     authState.state = "admin";
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [];
-    mockViewport(true);
+    incidentState.list = [makeIncident({ id: "inc-listed01" })];
+    mockViewport(1440);
 
-    renderOpsDesk(<AdminOpsDesk />, "/admin");
+    renderDeskRoutes("/admin/incidents/inc-listed01");
 
-    const desk = screen.getByTestId("admin-fixed-desk");
-    expect(desk).toHaveAttribute("data-desk-mode", "sessions");
-    expect(screen.getByTestId("admin-ops-sessions")).toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
-  });
-
-  it("sets data-desk-mode to incidents on /admin/incidents desktop", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [];
-    mockViewport(true);
-
-    renderOpsDesk(<AdminOpsDesk />, "/admin/incidents");
-
-    const desk = screen.getByTestId("admin-fixed-desk");
-    expect(desk).toHaveAttribute("data-desk-mode", "incidents");
-    expect(screen.getByRole("region", { name: "Incidents" })).toBeInTheDocument();
-    expect(screen.getByTestId("admin-ops-sessions")).toBeInTheDocument();
-    expect(screen.getByTestId("admin-incident-inbox-empty")).toBeInTheDocument();
-    expect(screen.getByTestId("admin-incident-detail")).toBeInTheDocument();
-    expect(screen.getByRole("complementary", { name: "Incident actions" })).toBeInTheDocument();
-  });
-
-  it("labels each incidents pane without a visible Incidents heading", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [];
-    mockViewport(true);
-
-    renderOpsDesk(<AdminOpsDesk />, "/admin/incidents");
-
-    const incidents = screen.getByRole("region", { name: "Incidents" });
-    expect(within(incidents).getByRole("region", { name: "Incident queue" })).toBeInTheDocument();
-    expect(within(incidents).getByRole("region", { name: "Incident detail" })).toBeInTheDocument();
+    const needsYou = screen.getByRole("region", { name: "Needs you" });
+    expect(within(needsYou).getByTestId("admin-incident-detail")).toBeInTheDocument();
     expect(
-      within(incidents).getByRole("complementary", { name: "Incident actions" }),
+      within(needsYou).getByRole("complementary", { name: "Incident actions" }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Incidents" })).not.toBeInTheDocument();
+  });
+
+  it("opens Needs you in a drawer from the strip between 1024 and 1439", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    incidentState.list = [makeIncident({ id: "inc-listed01" })];
+    mockViewport(1280);
+
+    renderDeskRoutes("/admin");
+
+    expect(screen.getByRole("region", { name: "Start list" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Course" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Needs you" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Incident queue" })).not.toBeInTheDocument();
+
+    const trigger = screen.getByRole("button", { name: "Needs you: 1 open" });
+    expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    const dialog = await screen.findByRole("dialog", { name: "Needs you" });
+    expect(dialog).toHaveClass("mantine-Drawer-content");
+    const inbox = within(dialog).getByRole("region", { name: "Incident queue" });
+
+    fireEvent.click(
+      within(inbox)
+        .getByText(/7G2LJH/)
+        .closest("button") as HTMLElement,
+    );
+    expect(
+      await within(screen.getByRole("dialog", { name: "Needs you" })).findByTestId(
+        "admin-incident-detail",
+      ),
+    ).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByRole("dialog", { name: "Needs you" }), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Needs you" })).not.toBeInTheDocument(),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Needs you: 1 open" })).toHaveFocus(),
+    );
   });
 
   describe("incident deep link", () => {
@@ -638,7 +712,7 @@ describe("AdminOpsDesk", () => {
       authState.authReady = true;
       authState.user = { email: "admin@example.com", emailVerified: true };
       sessionListState.sessions = [];
-      mockViewport(true);
+      mockViewport(1440);
     }
 
     function renderIncidentRoute(incidentId: string) {
@@ -762,7 +836,7 @@ describe("AdminOpsDesk", () => {
       authState.authReady = true;
       authState.user = { email: "admin@example.com", emailVerified: true };
       sessionListState.sessions = [];
-      mockViewport(false);
+      mockViewport(375);
       renderOpsDesk(
         <Routes>
           <Route path="/admin" element={<AdminOpsDesk />} />
@@ -853,7 +927,7 @@ describe("AdminOpsDesk", () => {
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.sessions = [makeLiveSession()];
-    mockViewport(true);
+    mockViewport(1440);
     vi.useFakeTimers();
     try {
       renderOpsDesk(<AdminOpsDesk />, "/admin");
@@ -881,13 +955,13 @@ describe("AdminOpsDesk", () => {
       makeIncident({ id: "inc-open", status: "open" }),
       makeIncident({ id: "inc-done", status: "resolved" }),
     ];
-    mockViewport(true);
+    mockViewport(1440);
 
     renderOpsDesk();
 
     expect(screen.getByLabelText("Live games")).toHaveTextContent("2");
     expect(screen.getByLabelText("Runners")).toHaveTextContent("7");
-    expect(screen.getByLabelText("Needs you")).toHaveTextContent("1");
+    expect(screen.getByRole("group", { name: "Needs you" })).toHaveTextContent("1");
   });
 
   it("counts open incidents per session in the start list MP column", () => {
@@ -900,7 +974,7 @@ describe("AdminOpsDesk", () => {
       makeIncident({ id: "inc-b", status: "chatting" }),
       makeIncident({ id: "inc-c", status: "resolved" }),
     ];
-    mockViewport(true);
+    mockViewport(1440);
 
     renderOpsDesk();
 
@@ -910,21 +984,21 @@ describe("AdminOpsDesk", () => {
     expect(within(row).getAllByRole("cell")[4]).toHaveTextContent("2");
   });
 
-  it("returns to sessions mode from the strip event centre link on desktop", async () => {
+  it("leaves the incident drill-in from the strip event centre link on desktop", async () => {
     authState.state = "admin";
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.sessions = [];
-    mockViewport(true);
+    incidentState.list = [makeIncident({ id: "inc-listed01" })];
+    mockViewport(1440);
 
-    renderOpsDesk(<AdminOpsDesk />, "/admin/incidents");
+    renderDeskRoutes("/admin/incidents/inc-listed01");
 
-    expect(screen.getByTestId("admin-fixed-desk")).toHaveAttribute("data-desk-mode", "incidents");
+    expect(screen.getByTestId("admin-incident-detail")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("link", { name: /event centre/i }));
 
-    await waitFor(() =>
-      expect(screen.getByTestId("admin-fixed-desk")).toHaveAttribute("data-desk-mode", "sessions"),
-    );
+    await waitFor(() => expect(screen.queryByTestId("admin-incident-detail")).toBeNull());
+    expect(screen.getByRole("region", { name: "Needs you" })).toBeInTheDocument();
   });
 
   it("clears retired desk layout storage on mount", () => {

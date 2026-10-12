@@ -8,7 +8,9 @@ import {
   UnstyledButton,
   VisuallyHidden,
 } from "@mantine/core";
+import { formatFreshnessAge } from "../../../domain/admin/formatAdminFreshness";
 import { APP_VERSION } from "../../../domain/device/changelog";
+import { useFreshnessClock } from "../../../hooks/time/useFreshnessClock";
 import { AppLink } from "../../navigation/AppLink";
 import {
   HudHomeIcon,
@@ -17,6 +19,7 @@ import {
   HudSettingsIcon,
 } from "../../ui/brand/HudIcons";
 import { StatCell } from "../shared/StatCell";
+import { StatusMark } from "../shared/StatusMark";
 import { AdminUtcClock } from "./AdminUtcClock";
 
 interface AdminStatusStripProps {
@@ -28,6 +31,18 @@ interface AdminStatusStripProps {
   refreshing: boolean;
   onRefresh: () => void;
   onOpenSettings: () => void;
+  onOpenNeedsYou?: () => void;
+  dataFetchedAt: Date | null;
+  syncFailed: boolean;
+}
+
+function DataAge({ fetchedAt, failed }: { fetchedAt: Date | null; failed: boolean }) {
+  const nowMs = useFreshnessClock();
+  if (failed) return <StatusMark tone="mispunch" label="Sync failed" />;
+  if (!fetchedAt) return null;
+  return (
+    <StatusMark tone="ok" label={`Synced ${formatFreshnessAge(fetchedAt.toISOString(), nowMs)}`} />
+  );
 }
 
 export function AdminStatusStrip({
@@ -39,7 +54,12 @@ export function AdminStatusStrip({
   refreshing,
   onRefresh,
   onOpenSettings,
+  onOpenNeedsYou,
+  dataFetchedAt,
+  syncFailed,
 }: AdminStatusStripProps) {
+  const needsYouLabel = `Needs you: ${needsYouCount} open`;
+  const needsYouCell = <StatCell label="Needs you" value={needsYouCount} />;
   return (
     <Group h="100%" px="sm" gap="md" wrap="nowrap" justify="space-between">
       <Group gap="md" wrap="nowrap" miw={0} flex={1}>
@@ -66,13 +86,19 @@ export function AdminStatusStrip({
           <StatCell label="Runners" value={runnerCount} />
         </Box>
         <Divider orientation="vertical" visibleFrom="sm" />
-        <UnstyledButton
-          component={AppLink}
-          to="/admin/incidents"
-          aria-label={`Needs you: ${needsYouCount} open`}
-        >
-          <StatCell label="Needs you" value={needsYouCount} />
-        </UnstyledButton>
+        {onOpenNeedsYou ? (
+          <UnstyledButton
+            onClick={onOpenNeedsYou}
+            aria-label={needsYouLabel}
+            aria-haspopup="dialog"
+          >
+            {needsYouCell}
+          </UnstyledButton>
+        ) : (
+          <UnstyledButton component={AppLink} to="/admin/incidents" aria-label={needsYouLabel}>
+            {needsYouCell}
+          </UnstyledButton>
+        )}
         <Divider orientation="vertical" visibleFrom="sm" />
         <Box visibleFrom="sm">
           <StatCell label="In queue" value={inQueueCount} />
@@ -80,9 +106,12 @@ export function AdminStatusStrip({
       </Group>
       {/* Mounted after the first snapshot so opening the desk doesn't announce the initial count. */}
       {incidentsLoading ? null : (
-        <VisuallyHidden aria-live="polite">{`Needs you: ${needsYouCount} open`}</VisuallyHidden>
+        <VisuallyHidden aria-live="polite">{needsYouLabel}</VisuallyHidden>
       )}
       <Group gap="xs" wrap="nowrap" flex="none">
+        <Box visibleFrom="sm">
+          <DataAge fetchedAt={dataFetchedAt} failed={syncFailed} />
+        </Box>
         <Box visibleFrom="sm">
           <AdminUtcClock />
         </Box>

@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Alert,
+  AppShell,
   Badge,
   Button,
   Chip,
@@ -259,6 +260,12 @@ export const adminTheme: MantineThemeOverride = {
         },
         header: { backgroundColor: "var(--adm-paper)", borderBottom: rule },
         title: { fontWeight: 700, letterSpacing: "normal" },
+      },
+    }),
+    AppShell: AppShell.extend({
+      styles: {
+        navbar: { borderInlineEnd: rule },
+        aside: { borderInlineStart: rule },
       },
     }),
     Divider: Divider.extend({

@@ -11,6 +11,9 @@ function strip(
     incidentsLoading?: boolean;
     onRefresh?: () => void;
     onOpenSettings?: () => void;
+    onOpenNeedsYou?: () => void;
+    dataFetchedAt?: Date | null;
+    syncFailed?: boolean;
   } = {},
 ) {
   return (
@@ -23,6 +26,9 @@ function strip(
       refreshing={false}
       onRefresh={overrides.onRefresh ?? vi.fn()}
       onOpenSettings={overrides.onOpenSettings ?? vi.fn()}
+      onOpenNeedsYou={overrides.onOpenNeedsYou}
+      dataFetchedAt={overrides.dataFetchedAt ?? null}
+      syncFailed={overrides.syncFailed ?? false}
     />
   );
 }
@@ -113,6 +119,46 @@ describe("AdminStatusStrip", () => {
     expect(settings).toHaveAttribute("aria-haspopup", "dialog");
     fireEvent.click(settings);
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it("turns Needs you into a dialog button when the desk asks for the drawer", () => {
+    const onOpenNeedsYou = vi.fn();
+    renderStrip({ onOpenNeedsYou });
+
+    expect(screen.queryByRole("link", { name: "Needs you: 2 open" })).toBeNull();
+    const needsYou = screen.getByRole("button", { name: "Needs you: 2 open" });
+    expect(needsYou).toHaveAttribute("aria-haspopup", "dialog");
+    fireEvent.click(needsYou);
+    expect(onOpenNeedsYou).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows how long ago the list synced and ages it with the clock", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-26T12:00:00.000Z"));
+    renderStrip({ dataFetchedAt: new Date("2026-07-26T12:00:00.000Z") });
+    expect(screen.getByText("Synced just now").closest("[data-tone]")).toHaveAttribute(
+      "data-tone",
+      "ok",
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(3 * 60_000);
+    });
+    expect(screen.getByText("Synced 3m ago")).toBeInTheDocument();
+  });
+
+  it("shows Sync failed when the list errors", () => {
+    renderStrip({ dataFetchedAt: new Date(), syncFailed: true });
+    expect(screen.getByText("Sync failed").closest("[data-tone]")).toHaveAttribute(
+      "data-tone",
+      "mispunch",
+    );
+    expect(screen.queryByText(/^Synced/)).toBeNull();
+  });
+
+  it("renders no data age before the first fetch", () => {
+    renderStrip();
+    expect(screen.queryByText(/^Synced|Sync failed/)).toBeNull();
   });
 });
 
