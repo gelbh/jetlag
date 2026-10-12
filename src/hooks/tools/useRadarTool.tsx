@@ -158,25 +158,31 @@ export function useRadarTool({
     [active, setAwaitingPlacement, setMapError],
   );
 
-  const handleUseGps = useCallback(async () => {
-    if (submittingRef.current) {
-      return;
-    }
-    try {
-      const reading = await refreshGps();
-      const point: LatLngTuple = [reading.lat, reading.lng];
-      if (!ensurePointInGameArea(point)) {
+  const handleUseGps = useCallback(
+    async (shouldApply?: () => boolean) => {
+      if (submittingRef.current) {
         return;
       }
+      try {
+        const reading = await refreshGps();
+        if (shouldApply && !shouldApply()) {
+          return;
+        }
+        const point: LatLngTuple = [reading.lat, reading.lng];
+        if (!ensurePointInGameArea(point)) {
+          return;
+        }
 
-      setRadarAnswer(null);
-      setRadarCenter(point);
-      setAwaitingPlacement(false);
-      setMapError(null);
-    } catch (error) {
-      setMapError(error instanceof Error ? error.message : "GPS location unavailable.");
-    }
-  }, [ensurePointInGameArea, refreshGps, setAwaitingPlacement, setMapError]);
+        setRadarAnswer(null);
+        setRadarCenter(point);
+        setAwaitingPlacement(false);
+        setMapError(null);
+      } catch (error) {
+        setMapError(error instanceof Error ? error.message : "GPS location unavailable.");
+      }
+    },
+    [ensurePointInGameArea, refreshGps, setAwaitingPlacement, setMapError],
+  );
 
   const clearAfterCommit = useCallback(() => {
     setRadarCenter(null);

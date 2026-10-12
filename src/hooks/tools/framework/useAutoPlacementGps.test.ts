@@ -15,7 +15,7 @@ vi.mock("../../../services/core/location/geolocation", () => ({
 }));
 
 describe("useAutoPlacementGps", () => {
-  const requestGps = vi.fn(async () => undefined);
+  const requestGps = vi.fn(async (_shouldApply: () => boolean) => undefined);
 
   beforeEach(() => {
     requestGps.mockClear();
@@ -49,6 +49,21 @@ describe("useAutoPlacementGps", () => {
     await act(async () => permission.resolve("granted"));
 
     expect(requestGps).not.toHaveBeenCalled();
+  });
+
+  it("lets a point placed while GPS is resolving win", async () => {
+    const { rerender } = renderHook(
+      ({ hasPoint }) =>
+        useAutoPlacementGps({ eligible: true, entryKey: "a", hasPoint, requestGps }),
+      { initialProps: { hasPoint: false } },
+    );
+
+    await act(async () => permission.resolve("granted"));
+    const shouldApply = requestGps.mock.calls[0]?.[0];
+    expect(shouldApply?.()).toBe(true);
+
+    rerender({ hasPoint: true });
+    expect(shouldApply?.()).toBe(false);
   });
 
   it("reports checking and skips GPS while not eligible", () => {

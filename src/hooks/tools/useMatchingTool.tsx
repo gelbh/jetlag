@@ -412,32 +412,38 @@ export function useMatchingTool({
     ],
   );
 
-  const handleGps = useCallback(async () => {
-    if (submittingRef.current) {
-      return;
-    }
-    setMatchingError(null);
-
-    try {
-      const reading = await refreshGps();
-      const point: LatLngTuple = [reading.lat, reading.lng];
-      if (!ensurePointInGameArea(point)) {
-        setMatchingError("That point is outside the play area.");
+  const handleGps = useCallback(
+    async (shouldApply?: () => boolean) => {
+      if (submittingRef.current) {
         return;
       }
+      setMatchingError(null);
 
-      setMatchingAnswerSynced(null);
-      setMatchingSeekerAnchor(point);
-    } catch (error) {
-      setMatchingError(error instanceof Error ? error.message : "GPS location unavailable.");
-    }
-  }, [
-    ensurePointInGameArea,
-    refreshGps,
-    setMatchingAnswerSynced,
-    setMatchingError,
-    setMatchingSeekerAnchor,
-  ]);
+      try {
+        const reading = await refreshGps();
+        if (shouldApply && !shouldApply()) {
+          return;
+        }
+        const point: LatLngTuple = [reading.lat, reading.lng];
+        if (!ensurePointInGameArea(point)) {
+          setMatchingError("That point is outside the play area.");
+          return;
+        }
+
+        setMatchingAnswerSynced(null);
+        setMatchingSeekerAnchor(point);
+      } catch (error) {
+        setMatchingError(error instanceof Error ? error.message : "GPS location unavailable.");
+      }
+    },
+    [
+      ensurePointInGameArea,
+      refreshGps,
+      setMatchingAnswerSynced,
+      setMatchingError,
+      setMatchingSeekerAnchor,
+    ],
+  );
 
   const buildCommitInput = useCallback((): CommitMatchingInput => {
     return {

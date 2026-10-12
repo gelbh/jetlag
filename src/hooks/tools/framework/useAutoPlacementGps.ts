@@ -11,7 +11,8 @@ interface UseAutoPlacementGpsOptions<TKey> {
   entryKey: TKey;
   /** A seeker point is already placed; never overwrite it with GPS. */
   hasPoint: boolean;
-  requestGps: () => Promise<unknown>;
+  /** Must skip applying the reading when `shouldApply()` is false once GPS resolves. */
+  requestGps: (shouldApply: () => boolean) => Promise<unknown>;
 }
 
 /**
@@ -47,10 +48,11 @@ export function useAutoPlacementGps<TKey>({
         return;
       }
       setPermission(next);
-      // Read the point after the await: a map tap during the permission check wins.
+      // Read the point after each await: a map tap during the permission check
+      // or the GPS fix wins.
       if (next === "granted" && !hasPointRef.current && firedForKeyRef.current !== entryKey) {
         firedForKeyRef.current = entryKey;
-        void requestGpsRef.current();
+        void requestGpsRef.current(() => !hasPointRef.current);
       }
     })();
 

@@ -338,30 +338,36 @@ export function useTentacleTool({
     ],
   );
 
-  const handleUseGps = useCallback(async () => {
-    if (submittingRef.current) {
-      return;
-    }
-    try {
-      const reading = await refreshGps();
-      const point: LatLngTuple = [reading.lat, reading.lng];
-      if (!ensurePointInGameArea(point)) {
+  const handleUseGps = useCallback(
+    async (shouldApply?: () => boolean) => {
+      if (submittingRef.current) {
         return;
       }
+      try {
+        const reading = await refreshGps();
+        if (shouldApply && !shouldApply()) {
+          return;
+        }
+        const point: LatLngTuple = [reading.lat, reading.lng];
+        if (!ensurePointInGameArea(point)) {
+          return;
+        }
 
-      cancelRequests();
-      setTentacleLoading(false);
-      setTentaclePois([]);
-      setTentacleOutOfReach(false);
-      setSelectedPoiId(null);
-      setTentacleCenter(point);
-      setAwaitingPlacement(false);
-      setMapError(null);
-      setTentacleError(null);
-    } catch (error) {
-      setMapError(error instanceof Error ? error.message : "GPS location unavailable.");
-    }
-  }, [cancelRequests, ensurePointInGameArea, refreshGps, setAwaitingPlacement, setMapError]);
+        cancelRequests();
+        setTentacleLoading(false);
+        setTentaclePois([]);
+        setTentacleOutOfReach(false);
+        setSelectedPoiId(null);
+        setTentacleCenter(point);
+        setAwaitingPlacement(false);
+        setMapError(null);
+        setTentacleError(null);
+      } catch (error) {
+        setMapError(error instanceof Error ? error.message : "GPS location unavailable.");
+      }
+    },
+    [cancelRequests, ensurePointInGameArea, refreshGps, setAwaitingPlacement, setMapError],
+  );
 
   const clearAfterCommit = useCallback(() => {
     cancelRequests();
