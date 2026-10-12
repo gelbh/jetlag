@@ -74,6 +74,7 @@ export async function buildRandomizedQuestion(
         },
         cardDraw: original.cardDraw,
         cardKeep: original.cardKeep,
+        pendingQuestionId: `${original.id}~rnd`,
       },
     };
   }
@@ -95,6 +96,7 @@ export async function buildRandomizedQuestion(
         },
         cardDraw: original.cardDraw,
         cardKeep: original.cardKeep,
+        pendingQuestionId: `${original.id}~rnd`,
       },
     };
   }

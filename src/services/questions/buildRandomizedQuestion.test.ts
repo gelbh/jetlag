@@ -53,6 +53,7 @@ describe("buildRandomizedQuestion", () => {
     expect(built.input.replyOptions.map((option) => option.id)).toEqual(["yes", "no"]);
     expect(built.input.cardDraw).toBe(2);
     expect(built.input.cardKeep).toBe(1);
+    expect(built.input.pendingQuestionId).toBe("pq-1~rnd");
   });
 
   it("ignores the hider label for the radar prompt", async () => {
@@ -125,6 +126,7 @@ describe("buildRandomizedQuestion", () => {
     );
     expect(built.input.cardDraw).toBe(2);
     expect(built.input.cardKeep).toBe(1);
+    expect(built.input.pendingQuestionId).toBe("pq-1~rnd");
   });
 
   it("ignores the hider label for the photo prompt", async () => {

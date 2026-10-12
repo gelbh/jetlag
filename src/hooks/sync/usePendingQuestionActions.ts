@@ -47,6 +47,7 @@ export interface SubmitPendingQuestionInput {
   status?: "pending" | "walking";
   cardDraw?: number;
   cardKeep?: number;
+  pendingQuestionId?: string;
 }
 
 /**
@@ -111,6 +112,7 @@ export function usePendingQuestionActions() {
       status = "pending",
       cardDraw,
       cardKeep,
+      pendingQuestionId: requestedId,
     }: SubmitPendingQuestionInput): string | undefined => {
       // The body no longer spans network time, so an in-flight flag would clear
       // before a second tap lands; a short cooldown absorbs the double tap
@@ -121,7 +123,7 @@ export function usePendingQuestionActions() {
       }
       lastSubmitAtRef.current = nowMs;
 
-      const pendingQuestionId = createPendingQuestionId();
+      const pendingQuestionId = requestedId ?? createPendingQuestionId();
       const messageId = createMessageId();
       const createdAt = serverNowIso();
       const walking = status === "walking";
