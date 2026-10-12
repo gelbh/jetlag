@@ -8,7 +8,7 @@ import {
   Text,
   UnstyledButton,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   INCIDENT_PROGRESS_LABEL,
   type IncidentProgress,
@@ -68,12 +68,31 @@ export function AdminNeedsYou({
   selectedIncident: IncidentRecord | null;
   onSelectIncident: (incidentId: string) => void;
   onBackFromIncident: () => void;
-  openGroups: string[];
-  onOpenGroupsChange: (groups: string[]) => void;
+  openGroups: NeedsYouGroup[];
+  onOpenGroupsChange: (groups: NeedsYouGroup[]) => void;
 }) {
+  const [showClosed, setShowClosed] = useState(false);
+  const queueRef = useRef<HTMLDivElement>(null);
+  const controlRef = useRef<HTMLButtonElement>(null);
+  const returnFocusIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const incidentId = returnFocusIdRef.current;
+    if (selectedIncidentId || !incidentId) return;
+    returnFocusIdRef.current = null;
+    const row = queueRef.current?.querySelector<HTMLElement>(
+      `[data-incident-id="${CSS.escape(incidentId)}"]`,
+    );
+    (row ?? controlRef.current)?.focus();
+  }, [selectedIncidentId]);
+
   if (selectedIncidentId) {
+    const back = () => {
+      returnFocusIdRef.current = selectedIncidentId;
+      onBackFromIncident();
+    };
     return (
-      <DrillIn title={formatIncidentQueueId(selectedIncidentId)} onBack={onBackFromIncident}>
+      <DrillIn title={formatIncidentQueueId(selectedIncidentId)} onBack={back}>
         <AdminIncidentDetail incidentId={selectedIncidentId} />
         <AdminIncidentActions
           incidentId={selectedIncidentId}
@@ -85,15 +104,21 @@ export function AdminNeedsYou({
   }
 
   return (
-    <Accordion multiple value={openGroups} onChange={onOpenGroupsChange}>
+    <Accordion
+      multiple
+      value={openGroups}
+      onChange={(groups) => onOpenGroupsChange(groups as NeedsYouGroup[])}
+    >
       <Accordion.Item value="incidents">
-        <Accordion.Control>Incidents</Accordion.Control>
-        <Accordion.Panel>
+        <Accordion.Control ref={controlRef}>Incidents</Accordion.Control>
+        <Accordion.Panel ref={queueRef}>
           <IncidentQueue
             incidents={incidents}
             loading={incidentsLoading}
             error={incidentsError}
             onSelect={onSelectIncident}
+            showClosed={showClosed}
+            onShowClosedChange={setShowClosed}
           />
         </Accordion.Panel>
       </Accordion.Item>
@@ -106,14 +131,17 @@ function IncidentQueue({
   loading,
   error,
   onSelect,
+  showClosed,
+  onShowClosedChange,
 }: {
   incidents: readonly IncidentRecord[];
   loading: boolean;
   error: string | null;
   onSelect: (incidentId: string) => void;
+  showClosed: boolean;
+  onShowClosedChange: (showClosed: boolean) => void;
 }) {
   const nowMs = useFreshnessClock();
-  const [showClosed, setShowClosed] = useState(false);
 
   const groups = PROGRESS_ORDER.filter((progress) => showClosed || progress !== "closed")
     .map((progress) => ({
@@ -133,7 +161,7 @@ function IncidentQueue({
         size="xs"
         label="Show closed"
         checked={showClosed}
-        onChange={(event) => setShowClosed(event.currentTarget.checked)}
+        onChange={(event) => onShowClosedChange(event.currentTarget.checked)}
       />
       {loading && incidents.length === 0 && !error ? (
         <Stack gap="xs" aria-busy="true">
@@ -159,7 +187,14 @@ function IncidentQueue({
           <Stack component="ul" gap={0} aria-label={INCIDENT_PROGRESS_LABEL[progress]} m={0} p={0}>
             {rows.map((incident) => (
               <li key={incident.id}>
-                <UnstyledButton type="button" w="100%" py={6} onClick={() => onSelect(incident.id)}>
+                <UnstyledButton
+                  type="button"
+                  w="100%"
+                  mih={44}
+                  py={6}
+                  data-incident-id={incident.id}
+                  onClick={() => onSelect(incident.id)}
+                >
                   <Group gap="xs" wrap="nowrap">
                     {incident.sessionCode?.trim() ? (
                       <SessionCode code={incident.sessionCode.trim().toUpperCase()} size="sm" />

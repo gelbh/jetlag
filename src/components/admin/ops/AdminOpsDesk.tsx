@@ -121,7 +121,7 @@ function AdminOpsDeskContent() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [needsYouOpen, setNeedsYouOpen] = useState(onIncidentsRoute);
   const [drawerIncidentId, setDrawerIncidentId] = useState(selectedIncidentId);
-  const [openGroups, setOpenGroups] = useState<string[]>(() =>
+  const [openGroups, setOpenGroups] = useState<NeedsYouGroup[]>(() =>
     openGroupsForRoute(location.pathname),
   );
   const [openGroupsPath, setOpenGroupsPath] = useState(location.pathname);

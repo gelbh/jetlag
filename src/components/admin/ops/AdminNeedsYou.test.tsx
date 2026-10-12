@@ -1,6 +1,6 @@
 import { TextInput } from "@mantine/core";
 import { fireEvent, screen, within } from "@testing-library/react";
-import type { ComponentProps } from "react";
+import { type ComponentProps, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
 import type { IncidentRecord } from "@/domain/incident/incidentTypes";
@@ -189,6 +189,78 @@ describe("AdminNeedsYou", () => {
 
       fireEvent.keyDown(document.body, { key: "Escape" });
       expect(onBackFromIncident).toHaveBeenCalledTimes(1);
+    });
+
+    it("leaves Escape to another open dialog", () => {
+      const { onBackFromIncident } = renderDrillIn();
+      const other = document.createElement("div");
+      other.setAttribute("role", "dialog");
+      other.setAttribute("aria-modal", "true");
+      document.body.append(other);
+      try {
+        fireEvent.keyDown(other, { key: "Escape" });
+        expect(onBackFromIncident).not.toHaveBeenCalled();
+      } finally {
+        other.remove();
+      }
+    });
+  });
+
+  describe("focus", () => {
+    function Harness({ incidents }: { incidents: IncidentRecord[] }) {
+      const [selectedId, setSelectedId] = useState<string | null>(null);
+      return (
+        <AdminWorld>
+          <AdminNeedsYou
+            incidents={incidents}
+            incidentsLoading={false}
+            incidentsError={null}
+            selectedIncidentId={selectedId}
+            selectedIncident={incidents.find((row) => row.id === selectedId) ?? null}
+            onSelectIncident={setSelectedId}
+            onBackFromIncident={() => setSelectedId(null)}
+            openGroups={["incidents"]}
+            onOpenGroupsChange={vi.fn()}
+          />
+        </AdminWorld>
+      );
+    }
+
+    it("focuses Back on entering and the row on leaving the drill-in", () => {
+      renderWithAppUi(<Harness incidents={[makeIncident({ id: "inc-focus1" })]} />);
+
+      fireEvent.click(screen.getByRole("button", { name: /map froze/ }));
+      expect(screen.getByRole("button", { name: "Back" })).toHaveFocus();
+
+      fireEvent.click(screen.getByRole("button", { name: "Back" }));
+      expect(screen.getByRole("button", { name: /map froze/ })).toHaveFocus();
+    });
+
+    it("keeps Show closed across a drill-in", () => {
+      renderWithAppUi(
+        <Harness
+          incidents={[
+            makeIncident({ id: "inc-old", status: "dismissed", updatedAt: "2020-01-01T00:00:00Z" }),
+          ]}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("checkbox", { name: "Show closed" }));
+      fireEvent.click(screen.getByRole("button", { name: /map froze/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+      expect(screen.getByRole("checkbox", { name: "Show closed" })).toBeChecked();
+      expect(screen.getByRole("button", { name: /map froze/ })).toHaveFocus();
+    });
+
+    it("focuses the Incidents control when the left incident has no row", () => {
+      const { rerender } = renderWithAppUi(<Harness incidents={[makeIncident()]} />);
+      fireEvent.click(screen.getByRole("button", { name: /map froze/ }));
+
+      rerender(<Harness incidents={[]} />);
+      fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+      expect(screen.getByRole("button", { name: "Incidents" })).toHaveFocus();
     });
   });
 });
