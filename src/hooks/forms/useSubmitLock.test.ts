@@ -21,4 +21,25 @@ describe("useSubmitLock", () => {
 
     expect(runs).toBe(1);
   });
+
+  it("releases the lock and rethrows when the run rejects", async () => {
+    const { result } = renderHook(() => useSubmitLock());
+
+    await act(async () => {
+      await expect(
+        result.current.runLocked(async () => {
+          throw new Error("boom");
+        }),
+      ).rejects.toThrow("boom");
+    });
+
+    expect(result.current.isSubmitting).toBe(false);
+    let ran = false;
+    await act(async () => {
+      await result.current.runLocked(async () => {
+        ran = true;
+      });
+    });
+    expect(ran).toBe(true);
+  });
 });

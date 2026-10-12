@@ -47,7 +47,7 @@ type PendingJoinRequest = {
   expiresAt: string;
 };
 
-async function loadAcceptedJoinSession(
+async function fetchAcceptedJoinSession(
   request: PendingJoinRequest,
   uid: string,
 ): Promise<SessionRecord> {
@@ -187,7 +187,7 @@ export function useJoinSession({
 
       try {
         const user = await retryAsync(() => ensureFreshAnonymousUser());
-        const joinedSession = await loadAcceptedJoinSession(pendingRequest, user.uid);
+        const joinedSession = await fetchAcceptedJoinSession(pendingRequest, user.uid);
 
         const joinedRole = pendingRequest.role;
         setPendingRequest(null);
