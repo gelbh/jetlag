@@ -8,6 +8,7 @@ export function AdminRegion({
   loading,
   empty,
   error,
+  scroll = true,
   children,
   "data-testid": testId,
 }: {
@@ -17,6 +18,7 @@ export function AdminRegion({
   loading?: ReactNode;
   empty?: ReactNode;
   error?: ReactNode;
+  scroll?: boolean;
   children?: ReactNode;
   "data-testid"?: string;
 }) {
@@ -41,11 +43,16 @@ export function AdminRegion({
         </Group>
         {actions}
       </Group>
-      {body ?? (
-        <ScrollArea flex={1} mih={0}>
-          {children}
-        </ScrollArea>
-      )}
+      {body ??
+        (scroll ? (
+          <ScrollArea flex={1} mih={0}>
+            {children}
+          </ScrollArea>
+        ) : (
+          <Stack gap={0} flex={1} mih={0}>
+            {children}
+          </Stack>
+        ))}
     </Stack>
   );
 }
