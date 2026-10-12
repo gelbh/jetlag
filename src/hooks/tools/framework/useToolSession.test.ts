@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { create } from "zustand";
 import { useToolSession } from "./useToolSession";
 
 interface DemoConfig {
@@ -70,5 +71,39 @@ describe("useToolSession", () => {
 
     expect(result.current.phase).toBe("error");
     expect(result.current.error).toBe("boom");
+  });
+
+  it("re-opens after onSubmit closes the tool mid-submit", async () => {
+    const useToolStore = create<{ tool: string; setTool: (tool: string) => void }>((set) => ({
+      tool: "radar",
+      setTool: (tool) => set({ tool }),
+    }));
+    const onSubmit = vi.fn(async () => {
+      useToolStore.getState().setTool("none");
+    });
+    const { result } = renderHook(() => {
+      const tool = useToolStore((state) => state.tool);
+      return useToolSession<DemoConfig>({
+        toolId: "demo",
+        active: tool === "radar",
+        createInitialConfig: () => ({ value: 1, label: "a" }),
+        onSubmit,
+      });
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+    expect(result.current.phase).toBe("idle");
+
+    act(() => {
+      useToolStore.getState().setTool("radar");
+    });
+    expect(result.current.config).toEqual({ value: 1, label: "a" });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+    expect(onSubmit).toHaveBeenCalledTimes(2);
   });
 });

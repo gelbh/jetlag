@@ -28,6 +28,7 @@ export function useToolSession<TConfig>({
   const inFlightRef = useRef(false);
   const configRef = useRef<TConfig | null>(null);
   const phaseRef = useRef<ToolSessionPhase>("idle");
+  const sessionEpochRef = useRef(0);
 
   useEffect(() => {
     createInitialConfigRef.current = createInitialConfig;
@@ -58,8 +59,10 @@ export function useToolSession<TConfig>({
   }, []);
 
   const close = useCallback(() => {
+    sessionEpochRef.current += 1;
     inFlightRef.current = false;
     configRef.current = null;
+    phaseRef.current = "idle";
     setConfigState(null);
     setError(null);
     setPhase("idle");
@@ -86,6 +89,7 @@ export function useToolSession<TConfig>({
         return;
       }
 
+      const epoch = sessionEpochRef.current;
       inFlightRef.current = true;
       setError(null);
       setPhase("submitting");
@@ -93,16 +97,26 @@ export function useToolSession<TConfig>({
       try {
         await action({
           setResolving: () => {
-            setPhase("resolving");
+            if (sessionEpochRef.current === epoch) {
+              setPhase("resolving");
+            }
           },
         });
-        setPhase("configuring");
+        if (sessionEpochRef.current === epoch) {
+          setPhase("configuring");
+        }
       } catch (caught) {
+        if (sessionEpochRef.current !== epoch) {
+          return;
+        }
         const message = caught instanceof Error ? caught.message : "Something went wrong.";
         setError(message);
         setPhase("error");
+      } finally {
+        if (sessionEpochRef.current === epoch) {
+          inFlightRef.current = false;
+        }
       }
-      inFlightRef.current = false;
     },
     [],
   );
@@ -120,7 +134,7 @@ export function useToolSession<TConfig>({
 
   useEffect(() => {
     if (active) {
-      if (phaseRef.current === "idle") {
+      if (phaseRef.current === "idle" || configRef.current === null) {
         open();
       }
       return;
