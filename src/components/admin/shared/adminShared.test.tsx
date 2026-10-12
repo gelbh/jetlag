@@ -73,6 +73,29 @@ describe("admin shared primitives", () => {
     }
   });
 
+  it("stays dark when the OS prefers light", () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      onchange: null,
+      dispatchEvent: () => false,
+    }));
+    try {
+      renderWithAppUi(
+        <AdminWorld>
+          <span>x</span>
+        </AdminWorld>,
+      );
+      expect(document.documentElement).toHaveAttribute("data-mantine-color-scheme", "dark");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("fills admin buttons with overprint instead of the app primary", () => {
     renderWithAppUi(
       <AdminWorld>
