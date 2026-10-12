@@ -37,7 +37,7 @@ function controlColors(variant: string | undefined) {
     case "filled":
       return {
         bg: "var(--adm-overprint)",
-        hover: "var(--adm-overprint)",
+        hover: "color-mix(in oklch, var(--adm-overprint) 86%, var(--adm-ink))",
         color: "var(--adm-overprint-ink)",
         hoverColor: "var(--adm-overprint-ink)",
         bd: "1px solid transparent",
@@ -45,7 +45,7 @@ function controlColors(variant: string | undefined) {
     case "light":
       return {
         bg: "var(--adm-overprint-soft)",
-        hover: "var(--adm-overprint-soft)",
+        hover: "color-mix(in oklch, var(--adm-overprint) 24%, transparent)",
         color: "var(--adm-ink)",
         hoverColor: "var(--adm-ink)",
         bd: "1px solid transparent",
