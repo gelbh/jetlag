@@ -237,7 +237,12 @@ export function pickRandomizeOption(
   return pool[Math.floor(random() * pool.length)] ?? null;
 }
 
-const AUTO_ASK_TOOLS: ReadonlySet<PendingQuestionToolType> = new Set(["radar", "photo"]);
+const AUTO_ASK_TOOLS: ReadonlySet<PendingQuestionToolType> = new Set([
+  "radar",
+  "photo",
+  "matching",
+  "tentacle",
+]);
 
 export function randomizedQuestionNotice(toolType: PendingQuestionToolType, label: string): string {
   if (AUTO_ASK_TOOLS.has(toolType)) {

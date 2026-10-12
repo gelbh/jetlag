@@ -1,14 +1,18 @@
 import { yesNoAnswerOptions } from "../../components/tools/shared/answers/binaryAnswerOptions";
-import type { AnnotationRecord } from "../../domain/map/annotations";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import type { DistanceUnit } from "../../domain/map/distance";
 import {
   isRadarDistanceOptionUsed,
+  type MatchingCategoryId,
   PHOTO_REPLY_OPTIONS,
   type PhotoCategoryId,
   photoQuestionPrompt,
   radarQuestionPrompt,
+  type TentacleExtendedCategoryId,
   usedPhotoCategoryIds,
   usedRadarDistanceOptionsForSession,
 } from "../../domain/questions";
+import { deferredPointFromPendingPlacement } from "../../domain/questions/deferredSeekerPoint";
 import {
   questionOptionsForTool,
   usedQuestionOptionLabelsForTool,
@@ -18,6 +22,7 @@ import type {
   PendingQuestionToolType,
   RandomizedTo,
 } from "../../domain/session/activity/sessionChat";
+import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGameArea";
 import { sessionDistanceUnit } from "../../domain/session/meta/sessionDistanceUnit";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
@@ -35,6 +40,8 @@ export interface BuildRandomizedQuestionContext {
   session: SessionRulesInput;
   annotations: readonly AnnotationRecord[];
   pendingQuestions: readonly PendingQuestionRecord[];
+  gameArea: GameArea;
+  distanceUnit: DistanceUnit;
 }
 
 /** Rebuilds the hider's Randomize roll from the seeker's own catalog; never trusts `roll.label` for the prompt. */
@@ -107,5 +114,52 @@ export async function buildRandomizedQuestion(
     ctx.annotations,
     ctx.pendingQuestions,
   );
-  return used.has(option.label) ? manual : { ...manual, presetKey: option.optionKey };
+  if (used.has(option.label)) {
+    return manual;
+  }
+  const preset: BuiltRandomizedQuestion = { ...manual, presetKey: option.optionKey };
+
+  if (
+    (original.toolType === "matching" || original.toolType === "tentacle") &&
+    typeof option.optionKey === "string"
+  ) {
+    const point = deferredPointFromPendingPlacement(original);
+    if (isPlaceholderGameArea(ctx.gameArea) || !point) {
+      return preset;
+    }
+    const [lng, lat] = point.geometry.coordinates;
+    const cards = { cardDraw: original.cardDraw, cardKeep: original.cardKeep };
+    const heavy = await import("./resolveRandomizedHeavyQuestion");
+    const payload =
+      original.toolType === "matching"
+        ? await heavy.resolveRandomizedMatching(
+            [lat, lng],
+            option.optionKey as MatchingCategoryId,
+            cards,
+            ctx,
+          )
+        : await heavy.resolveRandomizedTentacle(
+            [lat, lng],
+            option.optionKey as TentacleExtendedCategoryId,
+            cards,
+            ctx,
+          );
+    if (!payload) {
+      return preset;
+    }
+    return {
+      kind: "submit",
+      toolType: original.toolType,
+      input: {
+        ...payload,
+        placement: {
+          ...payload.placement,
+          metadata: { ...payload.placement.metadata, randomizedFrom: original.id },
+        },
+        pendingQuestionId: `${original.id}~rnd`,
+      },
+    };
+  }
+
+  return preset;
 }

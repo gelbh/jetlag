@@ -1,11 +1,13 @@
 import { useEffect, useRef } from "react";
 import { captureException } from "@/services/core/analytics/clientErrors";
-import type { AnnotationRecord } from "../../domain/map/annotations";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import type { DistanceUnit } from "../../domain/map/distance";
 import type {
   PendingQuestionRecord,
   PendingQuestionToolType,
   RandomizedTo,
 } from "../../domain/session/activity/sessionChat";
+import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGameArea";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import {
   buildRandomizedQuestion,
@@ -19,6 +21,8 @@ export interface UseRandomizeAutoAskParams {
   pendingQuestions: readonly PendingQuestionRecord[];
   sessionRules: SessionRulesInput;
   annotations: readonly AnnotationRecord[];
+  gameArea: GameArea;
+  distanceUnit: DistanceUnit;
   canSubmitQuestion: boolean;
   submitToolQuestion: (
     toolType: PendingQuestionToolType,
@@ -92,11 +96,18 @@ export function useRandomizeAutoAsk({
   pendingQuestions,
   sessionRules,
   annotations,
+  gameArea,
+  distanceUnit,
   canSubmitQuestion,
   submitToolQuestion,
   onManual,
 }: UseRandomizeAutoAskParams): void {
   const handledRef = useRef(new Set<string>());
+  const canSubmitRef = useRef(canSubmitQuestion);
+
+  useEffect(() => {
+    canSubmitRef.current = canSubmitQuestion;
+  }, [canSubmitQuestion]);
 
   useEffect(() => {
     if (!enabled || !sessionId || !uid || !canSubmitQuestion) {
@@ -109,6 +120,12 @@ export function useRandomizeAutoAsk({
     if (!original) {
       return;
     }
+    if (
+      (original.toolType === "matching" || original.toolType === "tentacle") &&
+      isPlaceholderGameArea(gameArea)
+    ) {
+      return;
+    }
 
     handled.add(original.id);
     handledRef.current = handled;
@@ -119,10 +136,15 @@ export function useRandomizeAutoAsk({
       session: sessionRules,
       annotations,
       pendingQuestions,
+      gameArea,
+      distanceUnit,
     })
       .then(async (built) => {
         if (built.kind === "manual") {
           onManual(original.toolType, built.label, built.presetKey);
+          return;
+        }
+        if (!canSubmitRef.current) {
           return;
         }
         const questionId = await submitToolQuestion(built.toolType, built.input);
@@ -142,6 +164,8 @@ export function useRandomizeAutoAsk({
     pendingQuestions,
     sessionRules,
     annotations,
+    gameArea,
+    distanceUnit,
     submitToolQuestion,
     onManual,
   ]);
