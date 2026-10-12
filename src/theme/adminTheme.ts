@@ -248,7 +248,11 @@ export const adminTheme: MantineThemeOverride = {
       },
     }),
     Drawer: Drawer.extend({
-      defaultProps: { radius: 0, overlayProps: { backgroundOpacity: 0.4, blur: 0 } },
+      defaultProps: {
+        radius: 0,
+        overlayProps: { backgroundOpacity: 0.4, blur: 0 },
+        closeButtonProps: { "aria-label": "Close" },
+      },
       styles: {
         content: {
           backgroundColor: "var(--adm-paper)",
