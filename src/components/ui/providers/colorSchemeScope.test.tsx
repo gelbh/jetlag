@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { AdminWorld } from "@/components/admin/shared/AdminWorld";
 import { AppUiProvider } from "./AppUiProvider";
 import { useAdminColorSchemeScope } from "./colorSchemeScope";
 
@@ -49,6 +50,22 @@ describe("admin color scheme scope", () => {
         <div>player</div>
       </AppUiProvider>,
     );
+    expect(scheme()).toBe("dark");
+  });
+
+  it("stays light until the last admin world unmounts", () => {
+    mockPrefersDark(false);
+    const worlds = (a: boolean, b: boolean) => (
+      <AppUiProvider>
+        {a && <AdminWorld>a</AdminWorld>}
+        {b && <AdminWorld>b</AdminWorld>}
+      </AppUiProvider>
+    );
+    const { rerender } = render(worlds(true, true));
+    expect(scheme()).toBe("light");
+    rerender(worlds(false, true));
+    expect(scheme()).toBe("light");
+    rerender(worlds(false, false));
     expect(scheme()).toBe("dark");
   });
 

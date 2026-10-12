@@ -20,8 +20,7 @@ export function useColorSchemeScope(): "admin" | null {
   );
 }
 
-// ponytail: no caller yet (admin ships dark-only). The PR that calls this must also flip
-// `[data-admin-world]` to `color-scheme: light dark`, or tokens stay dark while Mantine goes light.
+// Pairs with `color-scheme: light dark` on `[data-admin-world]`, or tokens stay dark while Mantine goes light.
 export function useAdminColorSchemeScope(): void {
   useEffect(() => {
     adminScopes += 1;
