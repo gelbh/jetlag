@@ -120,4 +120,25 @@ describe("HiderPendingQuestionAnswer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Play Veto" }));
     expect(onPlay).toHaveBeenCalledWith("pq-radar", "msg-radar", "veto");
   });
+
+  it("offers both question cards for a physical deck", () => {
+    const onPlay = vi.fn();
+    renderWithAppUi(
+      <HiderPendingQuestionAnswer
+        message={radarMessage}
+        pending={radarPending}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="s1"
+        truth={null}
+        truthsLoading={false}
+        truthReferenceMode="hidingZoneCenter"
+        nowMs={Date.now()}
+        onAnswerQuestion={vi.fn()}
+        questionCards={{ available: ["veto", "randomize"], onPlay }}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Play Veto" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Play Randomize" }));
+    expect(onPlay).toHaveBeenCalledWith("pq-radar", "msg-radar", "randomize");
+  });
 });

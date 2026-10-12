@@ -55,8 +55,8 @@ function isAbortOrTimeoutError(error) {
 
 /**
  * ConnectTimeout / EPIPE transport failures (incl. undici TypeError: fetch failed).
- * Map to the same timeout message as Abort so total outage returns 504, not a
- * silenced raw fetch-failed capture.
+ * Map to the same timeout message as Abort so total outage returns 503 (Overpass
+ * unavailable), not a silenced raw fetch-failed capture.
  * @param {unknown} error
  * @returns {boolean}
  */
@@ -154,6 +154,12 @@ export async function fetchOverpassWithFailover(query, options = {}) {
       ? options.deadlineMs
       : now() + OVERPASS_FAILOVER_BUDGET_MS;
   let attempts = 0;
+  let sawUnavailable = false;
+  // Fast 5xx / transport / cooldown means an outage (503); only all-abort means too expensive (504).
+  const exhaustedError = () =>
+    sawUnavailable && (lastError == null || lastError.message === "Overpass timed out.")
+      ? new Error("Overpass unavailable.")
+      : (lastError ?? new Error("Overpass timed out."));
 
   for (const endpoint of endpoints) {
     const remainingMs = deadlineMs - now();
@@ -164,12 +170,13 @@ export async function fetchOverpassWithFailover(query, options = {}) {
         remainingMs: Math.max(0, remainingMs),
         budgetMs: OVERPASS_FAILOVER_BUDGET_MS,
       });
-      throw lastError ?? new Error("Overpass timed out.");
+      throw exhaustedError();
     }
 
     const host = overpassEndpointHost(endpoint);
     if (isOverpassHostCooled(host, now())) {
       logFailover({ backend: "overpass", endpoint: host, reason: "host_cooldown" });
+      sawUnavailable = true;
       continue;
     }
 
@@ -195,6 +202,9 @@ export async function fetchOverpassWithFailover(query, options = {}) {
 
       logFailover({ backend: "overpass", endpoint: host, status: response.status });
       cancelResponseBody(response);
+      if (isTimeoutLikeOverpassStatus(response.status)) {
+        sawUnavailable = true;
+      }
       if (response.status === 429 || response.status === 406) {
         recordOverpassHostCooldown(host, now());
       }
@@ -205,6 +215,9 @@ export async function fetchOverpassWithFailover(query, options = {}) {
       );
     } catch (error) {
       const timeoutLike = isAbortOrTimeoutError(error);
+      if (!timeoutLike) {
+        sawUnavailable = true;
+      }
       logFailover({
         backend: "overpass",
         endpoint: host,
@@ -222,7 +235,7 @@ export async function fetchOverpassWithFailover(query, options = {}) {
     }
   }
 
-  throw lastError ?? new Error("Overpass timed out.");
+  throw exhaustedError();
 }
 
 export async function fetchCachedOverpassQuery(query, tier = "free") {
@@ -276,8 +289,15 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
       logCache("miss", tier, { backend: "postpass", empty: true });
       return postpass.text;
     }
-    if (error instanceof Error && error.message === "Overpass timed out.") {
-      logTimeout({ reason: "upstream_exhausted", tier });
+    if (
+      error instanceof Error &&
+      (error.message === "Overpass timed out." || error.message === "Overpass unavailable.")
+    ) {
+      logTimeout({
+        reason: "upstream_exhausted",
+        tier,
+        cause: error.message === "Overpass unavailable." ? "unavailable" : "timeout",
+      });
     }
     logCache("upstream_error", tier);
     throw error;

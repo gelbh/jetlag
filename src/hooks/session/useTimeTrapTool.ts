@@ -66,10 +66,10 @@ export function useTimeTrapTool({
         setStationsError(
           loadError instanceof Error ? loadError.message : "Couldn't load stations.",
         );
-      } finally {
-        if (isLatestRequest(requestId)) {
-          setStationsLoading(false);
-        }
+      }
+
+      if (isLatestRequest(requestId)) {
+        setStationsLoading(false);
       }
     },
     [beginRequest, enabled, gameArea, isLatestRequest],

@@ -1,7 +1,10 @@
 import { Stack, Text } from "@mantine/core";
-import { useEffect, useState } from "react";
 import { getPowerProfile } from "@/domain/device/power/powerProfile";
-import { isStaleThermometerWalk, selectPrimaryQuestionTimer } from "@/domain/questions";
+import {
+  hasOpenQuestionCountdown,
+  isStaleThermometerWalk,
+  selectPrimaryQuestionTimer,
+} from "@/domain/questions";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
@@ -20,7 +23,7 @@ import {
   type TimerState,
 } from "@/domain/session/timer/timer";
 import { useStaleWalkNowMs } from "@/hooks/sync/useStaleWalkNowMs";
-import { serverNow } from "@/services/core/time/serverClock";
+import { useServerNowMs } from "@/hooks/time/useServerNowMs";
 import { useMapStore } from "@/state/mapStore";
 
 export type MapTimerClusterProps = {
@@ -68,32 +71,22 @@ export function MapTimerCluster({
 }: MapTimerClusterProps) {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const timerTickMs = getPowerProfile(lowPowerMode).timerTickMs;
-  const [tick, setTick] = useState(0);
-
-  useEffect(() => {
-    if (!timerHasStarted || !isTimerRunning(timerState)) {
-      return;
-    }
-
-    const interval = window.setInterval(() => {
-      setTick((value) => value + 1);
-    }, timerTickMs);
-
-    return () => window.clearInterval(interval);
-  }, [timerHasStarted, timerState.runningSince, timerTickMs]);
-
-  void tick;
+  const nowMs = useServerNowMs(
+    timerHasStarted && (isTimerRunning(timerState) || hasOpenQuestionCountdown(pendingQuestions))
+      ? timerTickMs
+      : null,
+  );
   const staleWalkNowMs = useStaleWalkNowMs();
 
   if (!timerHasStarted) {
     return null;
   }
 
-  const elapsed = computeElapsedMs(timerState, serverNow());
+  const elapsed = computeElapsedMs(timerState, nowMs);
   const sessionLabel = formatElapsedTime(elapsed);
   const hidingActive = isHidingPeriodActive(sessionRules, elapsed);
   const hidingLabel = formatHidingPeriodCountdown(hidingPeriodRemainingMs(sessionRules, elapsed));
-  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules, serverNow());
+  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules, nowMs);
 
   let secondaryLabel: string | null;
   let secondaryColor = "var(--color-field-ink-muted)";

@@ -51,6 +51,11 @@ function createPublishState(): PublishState {
 
 let nextWriteToken = 0;
 
+function takeWriteToken(): number {
+  nextWriteToken += 1;
+  return nextWriteToken;
+}
+
 /**
  * Publishes live location readings, latest-only while effectively offline so
  * the persisted Firestore queue gains at most one location write per player
@@ -106,7 +111,7 @@ export function usePlayerLocationPublish({
         return;
       }
 
-      const token = ++nextWriteToken;
+      const token = takeWriteToken();
       state.pending = null;
       state.inFlight = token;
 
