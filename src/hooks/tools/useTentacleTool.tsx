@@ -371,7 +371,6 @@ export function useTentacleTool({
 
   const session = useToolSession<TentacleSessionConfig>({
     toolId: "tentacle",
-    active,
     createInitialConfig: () => ({ ready: true }),
     onSubmit: async () => {
       const confirmedPois = filterConfirmedTentaclePois(tentaclePois);

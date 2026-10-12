@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createViewportTrackerHandlers } from "../../components/map/helpers/createViewportTrackerHandlers";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useMatchingTool } from "../tools/useMatchingTool";
 import { useRadarTool } from "../tools/useRadarTool";
@@ -15,6 +16,7 @@ import { useToolPanelChrome } from "./useToolPanelChrome";
 describe("pan while placing questions", () => {
   it("thermometer: A → pan start/end → B keeps draft and place step", () => {
     const mocks = createToolHookMocks();
+    useMapStore.getState().setActiveTool("thermometer");
     const chrome = renderHook(() => useToolPanelChrome("thermometer", { sheetSnap: "peek" }));
     const thermo = renderHook(() =>
       useThermometerTool({
@@ -65,6 +67,7 @@ describe("pan while placing questions", () => {
 
   it("radar: pan mid-place then tap still places and does not close tool", () => {
     const mocks = createToolHookMocks();
+    useMapStore.getState().setActiveTool("radar");
     const chrome = renderHook(() => useToolPanelChrome("radar", { sheetSnap: "peek" }));
     const radar = renderHook(() =>
       useRadarTool({
@@ -107,6 +110,7 @@ describe("pan while placing questions", () => {
 
   it("matching: pan then place keeps tool open", () => {
     const mocks = createToolHookMocks();
+    useMapStore.getState().setActiveTool("matching");
     const chrome = renderHook(() => useToolPanelChrome("matching", { sheetSnap: "peek" }));
     const matching = renderHook(() =>
       useMatchingTool({

@@ -36,7 +36,6 @@ export function usePinTool({ active, createAnnotation, finishPlacement }: UsePin
 
   const session = useToolSession<PinSessionConfig>({
     toolId: "pin",
-    active,
     createInitialConfig: () => ({ ready: true }),
     onSubmit: async () => {
       if (!pinPoint || pinLabel.trim().length === 0) {

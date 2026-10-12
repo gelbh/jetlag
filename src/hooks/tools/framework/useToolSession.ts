@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useMapStore } from "../../../state/mapStore";
 import type { ToolSessionControls, ToolSessionPhase, UseToolSessionOptions } from "./types";
 
 function mergeConfig<TConfig>(base: TConfig, initial?: Partial<TConfig>): TConfig {
@@ -13,21 +14,25 @@ function mergeConfig<TConfig>(base: TConfig, initial?: Partial<TConfig>): TConfi
  * Tools keep domain-specific draft logic; this owns phase + submit lock + error.
  */
 export function useToolSession<TConfig>({
-  active,
+  toolId,
   createInitialConfig,
   onSubmit,
   onClose,
 }: UseToolSessionOptions<TConfig>): ToolSessionControls<TConfig> {
-  const [phase, setPhase] = useState<ToolSessionPhase>("idle");
-  const [config, setConfigState] = useState<TConfig | null>(null);
+  const [initialConfig] = useState(() =>
+    useMapStore.getState().activeTool === toolId ? createInitialConfig() : null,
+  );
+  const initialPhase: ToolSessionPhase = initialConfig === null ? "idle" : "configuring";
+  const [phase, setPhase] = useState<ToolSessionPhase>(initialPhase);
+  const [config, setConfigState] = useState<TConfig | null>(initialConfig);
   const [error, setError] = useState<string | null>(null);
 
   const createInitialConfigRef = useRef(createInitialConfig);
   const onSubmitRef = useRef(onSubmit);
   const onCloseRef = useRef(onClose);
   const inFlightRef = useRef(false);
-  const configRef = useRef<TConfig | null>(null);
-  const phaseRef = useRef<ToolSessionPhase>("idle");
+  const configRef = useRef<TConfig | null>(initialConfig);
+  const phaseRef = useRef<ToolSessionPhase>(initialPhase);
   const sessionEpochRef = useRef(0);
 
   useEffect(() => {
@@ -129,18 +134,22 @@ export function useToolSession<TConfig>({
     });
   }, [runAction]);
 
-  useEffect(() => {
-    if (active) {
-      if (phaseRef.current === "idle" || configRef.current === null) {
-        open();
-      }
-      return;
-    }
-
-    if (phaseRef.current !== "idle") {
-      close();
-    }
-  }, [active, close, open]);
+  // activeTool also changes outside React (session teardown), so follow the
+  // store directly; updates land in the same render as the tool switch.
+  useEffect(
+    () =>
+      useMapStore.subscribe((state, prev) => {
+        if (state.activeTool === prev.activeTool) {
+          return;
+        }
+        if (state.activeTool === toolId) {
+          open();
+        } else if (prev.activeTool === toolId) {
+          close();
+        }
+      }),
+    [close, open, toolId],
+  );
 
   return {
     phase,

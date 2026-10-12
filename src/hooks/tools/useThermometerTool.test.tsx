@@ -1,9 +1,14 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { useThermometerTool } from "./useThermometerTool";
 
 describe("useThermometerTool", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("thermometer");
+  });
+
   it("collects thermometer endpoints A and B in manual mode", () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>

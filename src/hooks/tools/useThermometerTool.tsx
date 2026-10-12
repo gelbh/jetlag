@@ -152,7 +152,6 @@ export function useThermometerTool({
 
   const session = useToolSession<ThermometerSessionConfig>({
     toolId: "thermometer",
-    active,
     createInitialConfig,
     onSubmit: async (config) => {
       const synced = syncedWalkDraftRef.current;

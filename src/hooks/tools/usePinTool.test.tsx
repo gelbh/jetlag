@@ -1,9 +1,14 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useMapStore } from "../../state/mapStore";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { usePinTool } from "./usePinTool";
 
 describe("usePinTool", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("pin");
+  });
+
   it("stores the tapped map point in draft state", () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>

@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { create } from "zustand";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { MapTool } from "../../../domain/map/mapToolTypes";
+import { useMapStore } from "../../../state/mapStore";
 import { useToolSession } from "./useToolSession";
 
 interface DemoConfig {
@@ -8,34 +9,75 @@ interface DemoConfig {
   label: string;
 }
 
+function setActiveTool(tool: MapTool) {
+  act(() => {
+    useMapStore.getState().setActiveTool(tool);
+  });
+}
+
 describe("useToolSession", () => {
-  it("opens into configuring when active becomes true", () => {
-    const { result, rerender } = renderHook(
-      ({ active }) =>
-        useToolSession<DemoConfig>({
-          toolId: "demo",
-          active,
-          createInitialConfig: () => ({ value: 1, label: "a" }),
-          onSubmit: async () => undefined,
-        }),
-      { initialProps: { active: false } },
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("none");
+  });
+
+  it("opens into configuring when the tool becomes active", () => {
+    const { result } = renderHook(() =>
+      useToolSession<DemoConfig>({
+        toolId: "radar",
+        createInitialConfig: () => ({ value: 1, label: "a" }),
+        onSubmit: async () => undefined,
+      }),
     );
 
     expect(result.current.phase).toBe("idle");
     expect(result.current.config).toBeNull();
 
-    rerender({ active: true });
+    setActiveTool("radar");
 
     expect(result.current.phase).toBe("configuring");
     expect(result.current.config).toEqual({ value: 1, label: "a" });
   });
 
+  it("starts open when mounted while the tool is active", () => {
+    useMapStore.getState().setActiveTool("radar");
+    const { result } = renderHook(() =>
+      useToolSession<DemoConfig>({
+        toolId: "radar",
+        createInitialConfig: () => ({ value: 1, label: "a" }),
+        onSubmit: async () => undefined,
+      }),
+    );
+
+    expect(result.current.phase).toBe("configuring");
+    expect(result.current.config).toEqual({ value: 1, label: "a" });
+  });
+
+  it("never renders the newly active tool with stale idle state", () => {
+    const phases: string[] = [];
+    renderHook(() => {
+      const tool = useMapStore((state) => state.activeTool);
+      const session = useToolSession<DemoConfig>({
+        toolId: "radar",
+        createInitialConfig: () => ({ value: 1, label: "a" }),
+        onSubmit: async () => undefined,
+      });
+      phases.push(`${tool}:${session.phase}`);
+      return session;
+    });
+
+    setActiveTool("radar");
+    setActiveTool("none");
+
+    expect(phases).not.toContain("radar:idle");
+    expect(phases).not.toContain("none:configuring");
+  });
+
   it("submits through onSubmit and returns to configuring", async () => {
+    useMapStore.getState().setActiveTool("radar");
     const onSubmit = vi.fn(async () => undefined);
     const { result } = renderHook(() =>
       useToolSession<DemoConfig>({
-        toolId: "demo",
-        active: true,
+        toolId: "radar",
         createInitialConfig: () => ({ value: 2, label: "b" }),
         onSubmit,
       }),
@@ -54,10 +96,10 @@ describe("useToolSession", () => {
   });
 
   it("enters error phase when onSubmit throws", async () => {
+    useMapStore.getState().setActiveTool("radar");
     const { result } = renderHook(() =>
       useToolSession<DemoConfig>({
-        toolId: "demo",
-        active: true,
+        toolId: "radar",
         createInitialConfig: () => ({ value: 3, label: "c" }),
         onSubmit: async () => {
           throw new Error("boom");
@@ -74,31 +116,24 @@ describe("useToolSession", () => {
   });
 
   it("re-opens after onSubmit closes the tool mid-submit", async () => {
-    const useToolStore = create<{ tool: string; setTool: (tool: string) => void }>((set) => ({
-      tool: "radar",
-      setTool: (tool) => set({ tool }),
-    }));
+    useMapStore.getState().setActiveTool("radar");
     const onSubmit = vi.fn(async () => {
-      useToolStore.getState().setTool("none");
+      useMapStore.getState().setActiveTool("none");
     });
-    const { result } = renderHook(() => {
-      const tool = useToolStore((state) => state.tool);
-      return useToolSession<DemoConfig>({
-        toolId: "demo",
-        active: tool === "radar",
+    const { result } = renderHook(() =>
+      useToolSession<DemoConfig>({
+        toolId: "radar",
         createInitialConfig: () => ({ value: 1, label: "a" }),
         onSubmit,
-      });
-    });
+      }),
+    );
 
     await act(async () => {
       await result.current.submit();
     });
     expect(result.current.phase).toBe("idle");
 
-    act(() => {
-      useToolStore.getState().setTool("radar");
-    });
+    setActiveTool("radar");
     expect(result.current.config).toEqual({ value: 1, label: "a" });
 
     await act(async () => {
@@ -110,6 +145,7 @@ describe("useToolSession", () => {
   it.each(["resolve", "reject"] as const)(
     "ignores a stale submit that settles (%s) after close and reopen",
     async (outcome) => {
+      useMapStore.getState().setActiveTool("radar");
       let settle: { resolve: () => void; reject: (error: Error) => void } | undefined;
       const onSubmit = vi.fn(async () => undefined);
       onSubmit.mockImplementationOnce(
@@ -118,23 +154,20 @@ describe("useToolSession", () => {
             settle = { resolve: () => resolve(undefined), reject };
           }),
       );
-      const { result, rerender } = renderHook(
-        ({ active }) =>
-          useToolSession<DemoConfig>({
-            toolId: "demo",
-            active,
-            createInitialConfig: () => ({ value: 1, label: "a" }),
-            onSubmit,
-          }),
-        { initialProps: { active: true } },
+      const { result } = renderHook(() =>
+        useToolSession<DemoConfig>({
+          toolId: "radar",
+          createInitialConfig: () => ({ value: 1, label: "a" }),
+          onSubmit,
+        }),
       );
 
       let stale: Promise<void> | undefined;
       act(() => {
         stale = result.current.submit();
       });
-      rerender({ active: false });
-      rerender({ active: true });
+      setActiveTool("none");
+      setActiveTool("radar");
       await act(async () => {
         if (outcome === "resolve") {
           settle?.resolve();

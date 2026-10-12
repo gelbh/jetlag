@@ -1,3 +1,5 @@
+import type { MapTool } from "../../../domain/map/mapToolTypes";
+
 export type ToolSessionPhase = "idle" | "configuring" | "submitting" | "resolving" | "error";
 
 export interface ToolSessionSubmitContext {
@@ -21,8 +23,8 @@ export interface ToolSessionControls<TConfig> {
 }
 
 export interface UseToolSessionOptions<TConfig> {
-  toolId: string;
-  active: boolean;
+  /** Session opens and closes as `useMapStore` activeTool enters and leaves this tool. */
+  toolId: MapTool;
   createInitialConfig: () => TConfig;
   onSubmit: (config: TConfig, ctx: ToolSessionSubmitContext) => Promise<void>;
   onClose?: () => void;

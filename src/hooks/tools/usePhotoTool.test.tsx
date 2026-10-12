@@ -1,8 +1,13 @@
 import { act, render, renderHook, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useMapStore } from "../../state/mapStore";
 import { usePhotoTool } from "./usePhotoTool";
 
 describe("usePhotoTool", () => {
+  beforeEach(() => {
+    useMapStore.getState().setActiveTool("photo");
+  });
+
   it("submits a photo pending question when a hider is in the session", async () => {
     const submitPendingQuestion = vi.fn(async () => undefined);
     const finishPlacement = vi.fn();
