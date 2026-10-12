@@ -488,7 +488,7 @@ service cloud.firestore {
         && value.keys().hasOnly(['optionKey', 'label'])
         && value.label is string
         && value.label.size() <= 120
-        && (value.optionKey is string || value.optionKey is number);
+        && ((value.optionKey is string && value.optionKey.size() <= 64) || value.optionKey is number);
     }
 
     function validPhotoAnswer(answer) {

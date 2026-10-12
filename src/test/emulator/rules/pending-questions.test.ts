@@ -295,6 +295,16 @@ describe("firestore.rules — batched question asks", () => {
     await assertFails(hiderCancel({ randomizedTo: { optionKey: "airport" } }));
   });
 
+  it("denies an oversized roll", async () => {
+    await assertFails(
+      hiderCancel({ randomizedTo: { optionKey: "airport", label: "x".repeat(121) } }),
+    );
+    await rules.testEnv.clearFirestore();
+    await assertFails(
+      hiderCancel({ randomizedTo: { optionKey: "k".repeat(65), label: "Airport" } }),
+    );
+  });
+
   it("denies a roll alongside other fields", async () => {
     await assertFails(
       hiderCancel({ randomizedTo: { optionKey: "airport", label: "Airport" }, promptText: "x" }),
