@@ -254,6 +254,11 @@
     min-height: 0;
   }
 
+  /* Fixed containing block for map chrome docks (MapDraggableFixedStack). */
+  [data-map-dock-frame] {
+    contain: layout;
+  }
+
   .admin-map-shell__rail {
     grid-column: 2;
     grid-row: 1 / -1;

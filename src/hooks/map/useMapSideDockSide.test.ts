@@ -103,6 +103,13 @@ describe("separateFromPeerRect", () => {
     });
     expect(next.top).toBeGreaterThanOrEqual(240 + 14 - 0.01);
   });
+
+  it("clamps to a dock frame instead of the viewport", () => {
+    const frame = { left: 400, top: 100, width: 300, height: 500 };
+    const next = separateFromPeerRect(900, 900, 52, 80, null, 14, frame);
+    expect(next.left).toBe(300 - 52 - 12);
+    expect(next.top + 80).toBeLessThanOrEqual(500);
+  });
 });
 
 describe("useMapSideDockSide", () => {

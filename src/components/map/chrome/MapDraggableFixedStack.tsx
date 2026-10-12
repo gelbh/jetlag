@@ -47,11 +47,40 @@ type DragSession = {
   width: number;
   height: number;
   armed: boolean;
+  frame: DockFrame;
 };
 
 type DragPos = { left: number; top: number };
 type PeerRect = Pick<DOMRect, "left" | "top" | "right" | "bottom" | "height">;
 type SettleFrame = { left: number; top: number; scale: number };
+type DockFrame = { left: number; top: number; width: number; height: number };
+
+function viewportFrame(): DockFrame {
+  return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+}
+
+/**
+ * Nearest `[data-map-dock-frame]` ancestor, else the viewport. The frame must
+ * establish the fixed containing block (e.g. `contain: layout`).
+ */
+function dockFrame(node: HTMLElement | null): DockFrame {
+  const frame = node?.closest<HTMLElement>("[data-map-dock-frame]");
+  if (!frame) {
+    return viewportFrame();
+  }
+  const { left, top, width, height } = frame.getBoundingClientRect();
+  return { left, top, width, height };
+}
+
+function frameLocalRect(rect: PeerRect, frame: DockFrame): PeerRect {
+  return {
+    left: rect.left - frame.left,
+    right: rect.right - frame.left,
+    top: rect.top - frame.top,
+    bottom: rect.bottom - frame.top,
+    height: rect.height,
+  };
+}
 
 export type MapDraggableFixedStackProps = {
   placement: MapChromeDockPlacement;
@@ -86,10 +115,16 @@ function suppressNextClick(): void {
   }, 500);
 }
 
-function clampDragPos(left: number, top: number, width: number, height: number): DragPos {
+function clampDragPos(
+  left: number,
+  top: number,
+  width: number,
+  height: number,
+  frame: DockFrame,
+): DragPos {
   const pad = edgePadPx();
-  const maxLeft = Math.max(pad, window.innerWidth - width - pad);
-  const { minTop, maxBottom } = resolveUsableVerticalBand(window.innerHeight);
+  const maxLeft = Math.max(pad, frame.width - width - pad);
+  const { minTop, maxBottom } = resolveUsableVerticalBand(frame.height);
   const maxTop = Math.max(minTop, maxBottom - height);
   return {
     left: Math.min(maxLeft, Math.max(pad, left)),
@@ -124,8 +159,10 @@ export function separateFromPeerRect(
   height: number,
   peer: PeerRect | null,
   gap = PEER_GAP_PX,
+  frame: DockFrame = viewportFrame(),
 ): DragPos {
-  const desired = clampDragPos(left, top, width, height);
+  const clamp = (l: number, t: number) => clampDragPos(l, t, width, height, frame);
+  const desired = clamp(left, top);
   if (!peer) {
     return desired;
   }
@@ -139,10 +176,10 @@ export function separateFromPeerRect(
   const exclBottom = peer.bottom + gap;
 
   const candidates: DragPos[] = [
-    clampDragPos(exclLeft - width, desired.top, width, height),
-    clampDragPos(exclRight, desired.top, width, height),
-    clampDragPos(desired.left, exclTop - height, width, height),
-    clampDragPos(desired.left, exclBottom, width, height),
+    clamp(exclLeft - width, desired.top),
+    clamp(exclRight, desired.top),
+    clamp(desired.left, exclTop - height),
+    clamp(desired.left, exclBottom),
   ];
 
   let best: DragPos | null = null;
@@ -168,15 +205,15 @@ export function separateFromPeerRect(
   const pushDown = exclBottom - desired.top;
   const minPush = Math.min(pushLeft, pushRight, pushUp, pushDown);
   if (minPush === pushLeft) {
-    return clampDragPos(desired.left - pushLeft, desired.top, width, height);
+    return clamp(desired.left - pushLeft, desired.top);
   }
   if (minPush === pushRight) {
-    return clampDragPos(desired.left + pushRight, desired.top, width, height);
+    return clamp(desired.left + pushRight, desired.top);
   }
   if (minPush === pushUp) {
-    return clampDragPos(desired.left, desired.top - pushUp, width, height);
+    return clamp(desired.left, desired.top - pushUp);
   }
-  return clampDragPos(desired.left, desired.top + pushDown, width, height);
+  return clamp(desired.left, desired.top + pushDown);
 }
 
 function peerStackEl(self: HTMLElement | null): HTMLElement | null {
@@ -260,6 +297,9 @@ export function MapDraggableFixedStack({
   const [dragging, setDragging] = useState(false);
   const [settling, setSettling] = useState(false);
   const [stackHeight, setStackHeight] = useState(200);
+  const [frameHeight, setFrameHeight] = useState(() =>
+    typeof window !== "undefined" ? window.innerHeight : 800,
+  );
   const [edgePad] = useState(() => (typeof window !== "undefined" ? edgePadPx() : EDGE_PAD_PX));
   const sessionRef = useRef<DragSession | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -282,15 +322,37 @@ export function MapDraggableFixedStack({
     if (height > 0 && Math.abs(height - stackHeight) > 1) {
       setStackHeight(height);
     }
-  }, [dragging, dragPos, placement, stackHeight, children]);
+    const frame = dockFrame(node);
+    if (frame.height > 0 && Math.abs(frame.height - frameHeight) > 1) {
+      setFrameHeight(frame.height);
+    }
+  }, [dragging, dragPos, placement, stackHeight, frameHeight, children]);
+
+  // The stack can mount inside a map container that is not attached yet, so the
+  // frame is resolved once the stack itself gets a layout box.
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node || typeof ResizeObserver === "undefined") {
+      return;
+    }
+    let frameEl: HTMLElement | null = null;
+    const observer = new ResizeObserver(() => {
+      const nextFrameEl = node.closest<HTMLElement>("[data-map-dock-frame]");
+      if (nextFrameEl && nextFrameEl !== frameEl) {
+        frameEl = nextFrameEl;
+        observer.observe(nextFrameEl);
+      }
+      const { height } = dockFrame(node);
+      if (height > 0) {
+        setFrameHeight(height);
+      }
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const safeTop = typeof window !== "undefined" ? resolveSafeAreaTopPx() : 0;
-  const restTop = topPxFromTopRatio(
-    placement.topRatio,
-    stackHeight,
-    typeof window !== "undefined" ? window.innerHeight : 800,
-    safeTop,
-  );
+  const restTop = topPxFromTopRatio(placement.topRatio, stackHeight, frameHeight, safeTop);
 
   /** Capture pre-update rect when shared store changes (peer push). */
   useEffect(() => {
@@ -362,14 +424,15 @@ export function MapDraggableFixedStack({
       }
       if (snapped && session && node) {
         const from = node.getBoundingClientRect();
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
+        const { frame } = session;
+        const vh = frame.height;
         const safeTop = resolveSafeAreaTopPx();
-        const side = sideFromPointX(session.lastX, vw);
+        const side = sideFromPointX(session.lastX - frame.left, frame.width);
         const height = Math.max(session.height, from.height);
-        let moverTop = from.top;
+        let moverTop = from.top - frame.top;
         const peerEl = peerStackEl(node);
-        const peerRect = peerEl?.getBoundingClientRect() ?? null;
+        const peerBox = peerEl?.getBoundingClientRect();
+        const peerRect = peerBox ? frameLocalRect(peerBox, frame) : null;
         const peerSide = peerEl?.dataset.side as "left" | "right" | undefined;
 
         settleFromRef.current = {
@@ -379,7 +442,7 @@ export function MapDraggableFixedStack({
         };
 
         if (peerRect && peerSide === side) {
-          const preferAbove = from.top + from.height / 2 <= (peerRect.top + peerRect.bottom) / 2;
+          const preferAbove = moverTop + from.height / 2 <= (peerRect.top + peerRect.bottom) / 2;
           const stacked = resolveStackedTops({
             moverTop,
             moverHeight: height,
@@ -462,19 +525,21 @@ export function MapDraggableFixedStack({
           const grown = node.getBoundingClientRect();
           live.width = grown.width;
           live.height = grown.height;
-          live.startLeft = grown.left - (event.clientX - live.originX);
-          live.startTop = grown.top - (event.clientY - live.originY);
+          live.startLeft = grown.left - live.frame.left - (event.clientX - live.originX);
+          live.startTop = grown.top - live.frame.top - (event.clientY - live.originY);
         });
       }
       event.preventDefault();
-      const peer = peerStackEl(rootRef.current)?.getBoundingClientRect() ?? null;
+      const peerBox = peerStackEl(rootRef.current)?.getBoundingClientRect();
       setDragPos(
         separateFromPeerRect(
           session.startLeft + dx,
           session.startTop + dy,
           session.width,
           session.height,
-          peer,
+          peerBox ? frameLocalRect(peerBox, session.frame) : null,
+          PEER_GAP_PX,
+          session.frame,
         ),
       );
     };
@@ -516,17 +581,19 @@ export function MapDraggableFixedStack({
     settleAnimRef.current = null;
     settleFromRef.current = null;
     const rect = node.getBoundingClientRect();
+    const frame = dockFrame(node);
     sessionRef.current = {
       pointerId: event.pointerId,
       originX: event.clientX,
       originY: event.clientY,
       lastX: event.clientX,
       lastY: event.clientY,
-      startLeft: rect.left,
-      startTop: rect.top,
+      startLeft: rect.left - frame.left,
+      startTop: rect.top - frame.top,
       width: rect.width,
       height: rect.height,
       armed: false,
+      frame,
     };
     setDragPos(null);
     setDragging(false);
