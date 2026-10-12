@@ -482,6 +482,15 @@ service cloud.firestore {
         && answer.kind == 'veto';
     }
 
+    function validRandomizedTo(value) {
+      return value is map
+        && value.keys().hasAll(['optionKey', 'label'])
+        && value.keys().hasOnly(['optionKey', 'label'])
+        && value.label is string
+        && value.label.size() <= 120
+        && (value.optionKey is string || value.optionKey is number);
+    }
+
     function validPhotoAnswer(answer) {
       return answer == null
         || answer is string
@@ -899,12 +908,17 @@ service cloud.firestore {
           && request.resource.data.status == 'answered'
           && validHiderPendingAnswer(resource.data.toolType, request.resource.data.answer)
         ) || (
-          // Randomize: status-only cancel. Veto: sticky { kind: 'veto' } answer.
+          // Randomize: status cancel, optionally with the rolled option. Veto: sticky { kind: 'veto' } answer.
           isHiderMember(sessionId)
           && resource.data.status == 'pending'
           && request.resource.data.status == 'cancelled'
           && (
             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+            || (
+              request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['status', 'randomizedTo'])
+              && validRandomizedTo(request.resource.data.randomizedTo)
+            )
             || (
               request.resource.data.diff(resource.data).affectedKeys()
                 .hasOnly(['status', 'answer'])
