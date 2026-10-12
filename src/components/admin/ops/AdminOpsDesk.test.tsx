@@ -44,8 +44,6 @@ function expectStaticAppShell(layout: "desktop" | "mobile") {
   ).toBeTruthy();
 }
 
-const SEEKER_HIDER_META = /1S \/ 1H/i;
-
 function makeLiveSession(overrides: Partial<AdminSessionSummary> = {}): AdminSessionSummary {
   return {
     sessionId: "session-1",
@@ -362,14 +360,14 @@ describe("AdminOpsDesk", () => {
 
     renderOpsDesk();
 
-    expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("checkbox", { name: "Live" })).toBeChecked();
     expect(screen.getByText("No live sessions")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "More filters" })).toHaveAttribute(
       "aria-expanded",
       "false",
     );
-    expect(screen.queryByRole("button", { name: "Singleplayer" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Hiding" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "Singleplayer" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "Hiding" })).not.toBeInTheDocument();
   });
 
   it("shows No sessions when Live is off and the list is empty", () => {
@@ -382,9 +380,9 @@ describe("AdminOpsDesk", () => {
 
     renderOpsDesk();
 
-    fireEvent.click(screen.getByRole("button", { name: "Live" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Live" }));
 
-    expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("checkbox", { name: "Live" })).not.toBeChecked();
     expect(screen.getByText("No sessions")).toBeInTheDocument();
     expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
   });
@@ -402,7 +400,7 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByText("Couldn't load live sessions.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
     expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Live" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "Live" })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Search")).not.toBeInTheDocument();
   });
 
@@ -463,13 +461,13 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByText("Couldn't load live sessions.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
     expect(screen.getByText("ABCD")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Live" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Live" })).toBeInTheDocument();
     expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "More filters" })).toHaveAttribute(
       "aria-expanded",
       "false",
     );
-    expect(screen.queryByRole("button", { name: "Singleplayer" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "Singleplayer" })).not.toBeInTheDocument();
   });
 
   it("renders session phase labels for admin users", () => {
@@ -512,7 +510,8 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText("Dublin")).toBeInTheDocument();
     expect(screen.getAllByText("Seek").length).toBeGreaterThan(0);
-    expect(screen.getByText(SEEKER_HIDER_META)).toBeInTheDocument();
+    const row = screen.getByRole("button", { name: "Monitor ABCD" }).closest("tr") as HTMLElement;
+    expect(within(row).getAllByRole("cell")[2]).toHaveTextContent("2");
   });
 
   it("uses a scrollable session list column on desktop", () => {
@@ -553,7 +552,11 @@ describe("AdminOpsDesk", () => {
 
     renderOpsDesk();
 
-    expect(document.querySelector(".admin-dashboard-list-scroll")).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("admin-ops-sessions"))
+        .getByRole("table")
+        .closest(".mantine-ScrollArea-root"),
+    ).not.toBeNull();
     expectStaticAppShell("desktop");
     expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
@@ -885,6 +888,24 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByLabelText("Needs you")).toHaveTextContent("1");
   });
 
+  it("counts open incidents per session in the start list MP column", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [makeLiveSession({ sessionId: "sess-1" })];
+    incidentState.list = [
+      makeIncident({ id: "inc-a", status: "open" }),
+      makeIncident({ id: "inc-b", status: "chatting" }),
+      makeIncident({ id: "inc-c", status: "resolved" }),
+    ];
+    mockViewport(true);
+
+    renderOpsDesk();
+
+    const row = screen.getByRole("button", { name: "Monitor ABCD" }).closest("tr") as HTMLElement;
+    expect(within(row).getAllByRole("cell")[4]).toHaveTextContent("2");
+  });
+
   it("returns to sessions mode from the strip event centre link on desktop", async () => {
     authState.state = "admin";
     authState.authReady = true;
@@ -1001,7 +1022,7 @@ describe("AdminOpsDesk", () => {
     renderOpsDesk();
 
     // Default Live filter hides the non-live row; keep Load more for the filter miss.
-    expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("checkbox", { name: "Live" })).toBeChecked();
     expect(screen.getByText("No matching sessions")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Load more sessions" })).toBeInTheDocument();
   });

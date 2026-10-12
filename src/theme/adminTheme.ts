@@ -3,17 +3,31 @@ import {
   Alert,
   Badge,
   Button,
+  Chip,
   Divider,
   Drawer,
+  Kbd,
   type MantineThemeOverride,
   Paper,
+  Popover,
   Portal,
+  Select,
+  Table,
   Tabs,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import { type StatusTone, toneColor } from "@/theme/adminTone";
 
 const rule = "1px solid var(--adm-rule)";
+
+const inputStyles = {
+  fontFamily: "var(--adm-font)",
+  background: "var(--adm-paper-raised)",
+  color: "var(--adm-ink)",
+  border: rule,
+  letterSpacing: "normal",
+};
 
 /** Overprint replaces the app's primary colour on controls without an explicit `color`. */
 function controlColors(variant: string | undefined) {
@@ -132,14 +146,74 @@ export const adminTheme: MantineThemeOverride = {
     }),
     TextInput: TextInput.extend({
       defaultProps: { radius: 0 },
+      styles: { input: inputStyles },
+    }),
+    Select: Select.extend({
+      defaultProps: { radius: 0 },
       styles: {
-        input: {
-          fontFamily: "var(--adm-font)",
+        input: inputStyles,
+        dropdown: {
+          background: "var(--adm-paper-raised)",
+          border: rule,
+          boxShadow: "none",
+        },
+        option: { fontFamily: "var(--adm-font)", color: "var(--adm-ink)" },
+      },
+    }),
+    Chip: Chip.extend({
+      styles: (_theme, props) => ({
+        label: props.checked
+          ? {
+              borderRadius: 0,
+              fontFamily: "var(--adm-font)",
+              background: "var(--adm-overprint)",
+              color: "var(--adm-overprint-ink)",
+              border: "1px solid var(--adm-overprint)",
+            }
+          : {
+              borderRadius: 0,
+              fontFamily: "var(--adm-font)",
+              background: "transparent",
+              color: "var(--adm-ink)",
+              border: rule,
+            },
+      }),
+    }),
+    Popover: Popover.extend({
+      defaultProps: { radius: 0, shadow: "none" },
+      styles: {
+        dropdown: {
           background: "var(--adm-paper-raised)",
           color: "var(--adm-ink)",
           border: rule,
-          letterSpacing: "normal",
+          boxShadow: "none",
         },
+      },
+    }),
+    Tooltip: Tooltip.extend({
+      defaultProps: { radius: 0 },
+      styles: {
+        tooltip: {
+          fontFamily: "var(--adm-font)",
+          background: "var(--adm-ink)",
+          color: "var(--adm-paper)",
+        },
+      },
+    }),
+    Kbd: Kbd.extend({
+      styles: { root: { fontFamily: "var(--adm-font)", border: rule } },
+    }),
+    Table: Table.extend({
+      defaultProps: { stickyHeader: true, verticalSpacing: 0, horizontalSpacing: 6 },
+      // Inline borders: the app's `@layer base` border reset outranks Mantine's class rule.
+      styles: {
+        th: {
+          height: "var(--adm-cell)",
+          borderBottom: rule,
+          color: "var(--adm-ink-muted)",
+          fontWeight: 600,
+        },
+        td: { height: "var(--adm-cell)", borderBottom: rule },
       },
     }),
     Alert: Alert.extend({
