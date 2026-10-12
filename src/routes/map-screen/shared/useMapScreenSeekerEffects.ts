@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { showEphemeralPlayerNotification } from "@/components/ui/notifications/showEphemeralPlayerNotification";
 import { randomizeManualNotice } from "@/domain/questions/randomizeQuestion";
+import { sessionDistanceUnit } from "@/domain/session/meta/sessionDistanceUnit";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { isHidingTimerEffectivelyRunning } from "@/domain/session/timer/timer";
 import { useQuestionDeadlineEnforcement } from "@/hooks/session/useQuestionDeadlineEnforcement";
@@ -123,6 +124,8 @@ export function useMapScreenSeekerEffects({
     pendingQuestions,
     sessionRules,
     annotations,
+    gameArea: toolGameArea,
+    distanceUnit: sessionDistanceUnit(session),
     canSubmitQuestion,
     submitToolQuestion,
     onManual: (toolType, label, presetKey) => {

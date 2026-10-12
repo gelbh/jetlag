@@ -1,16 +1,37 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { GameArea } from "@/domain/map/annotations";
 import { questionOptionsForTool } from "@/domain/questions/randomizeQuestion";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "@/domain/session/join/joinPreviewGameArea";
+import { resolveRandomizedMatching } from "@/services/questions/resolveRandomizedHeavyQuestion";
 import {
   nextRandomizedQuestion,
   type UseRandomizeAutoAskParams,
   useRandomizeAutoAsk,
 } from "./useRandomizeAutoAsk";
 
+vi.mock("@/services/questions/resolveRandomizedHeavyQuestion", () => ({
+  resolveRandomizedMatching: vi.fn(async () => null),
+  resolveRandomizedTentacle: vi.fn(async () => null),
+}));
+
 const session = { gameSize: "small" as const };
 const [radarOriginalOption, radarRoll] = questionOptionsForTool("radar", session);
 const [thermometerRoll] = questionOptionsForTool("thermometer", session);
+const [matchingRoll] = questionOptionsForTool("matching", session);
+const gameArea: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [-6.3, 53.3],
+      [-6.2, 53.3],
+      [-6.2, 53.4],
+      [-6.3, 53.4],
+      [-6.3, 53.3],
+    ],
+  ],
+};
 
 function radarOriginal(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {
@@ -33,6 +54,27 @@ function radarOriginal(overrides: Partial<PendingQuestionRecord> = {}): PendingQ
   };
 }
 
+function matchingOriginal(): PendingQuestionRecord {
+  return radarOriginal({
+    toolType: "matching",
+    randomizedTo: matchingRoll,
+    placement: {
+      geometryJson: JSON.stringify({
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+      }),
+      metadata: {},
+    },
+  });
+}
+
+const matchingPayload = {
+  promptText: "Matching",
+  replyOptions: [],
+  placement: { geometryJson: "{}", metadata: {} },
+};
+
 function setup(overrides: Partial<UseRandomizeAutoAskParams> = {}) {
   const submitToolQuestion = vi.fn<UseRandomizeAutoAskParams["submitToolQuestion"]>(
     async () => "pq-new",
@@ -45,6 +87,8 @@ function setup(overrides: Partial<UseRandomizeAutoAskParams> = {}) {
     pendingQuestions: [radarOriginal()],
     sessionRules: session,
     annotations: [],
+    gameArea,
+    distanceUnit: "metric",
     canSubmitQuestion: true,
     submitToolQuestion,
     onManual,
@@ -61,6 +105,7 @@ async function settle() {
 describe("useRandomizeAutoAsk", () => {
   beforeEach(() => {
     sessionStorage.clear();
+    vi.mocked(resolveRandomizedMatching).mockClear();
   });
 
   it("submits the randomized radar exactly once across rerender and remount", async () => {
@@ -145,6 +190,64 @@ describe("useRandomizeAutoAsk", () => {
       ),
     );
     expect(submitToolQuestion).not.toHaveBeenCalled();
+  });
+
+  it("forwards the play area and distance unit to the matching resolver", async () => {
+    vi.mocked(resolveRandomizedMatching).mockResolvedValueOnce(matchingPayload);
+    const { props, submitToolQuestion } = setup({ pendingQuestions: [matchingOriginal()] });
+    renderHook(() => useRandomizeAutoAsk(props));
+
+    await waitFor(() => expect(submitToolQuestion).toHaveBeenCalledTimes(1));
+    expect(resolveRandomizedMatching).toHaveBeenCalledWith(
+      [53.35, -6.26],
+      matchingRoll.optionKey,
+      { cardDraw: 1, cardKeep: 1 },
+      expect.objectContaining({ gameArea, distanceUnit: "metric" }),
+    );
+    expect(submitToolQuestion.mock.calls[0][0]).toBe("matching");
+  });
+
+  it("skips the send when the seeker asked manually while the resolver ran", async () => {
+    let resolvePayload: (payload: typeof matchingPayload) => void = () => {};
+    vi.mocked(resolveRandomizedMatching).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolvePayload = resolve;
+      }),
+    );
+    const { props, submitToolQuestion, onManual } = setup({
+      pendingQuestions: [matchingOriginal()],
+    });
+    const view = renderHook((p: UseRandomizeAutoAskParams) => useRandomizeAutoAsk(p), {
+      initialProps: props,
+    });
+    await waitFor(() => expect(resolveRandomizedMatching).toHaveBeenCalledTimes(1));
+
+    view.rerender({ ...props, canSubmitQuestion: false });
+    resolvePayload(matchingPayload);
+    await settle();
+
+    expect(submitToolQuestion).not.toHaveBeenCalled();
+    expect(onManual).not.toHaveBeenCalled();
+  });
+
+  it("waits for the play area before resolving a matching roll", async () => {
+    vi.mocked(resolveRandomizedMatching).mockResolvedValueOnce(matchingPayload);
+    const { props, submitToolQuestion, onManual } = setup({
+      pendingQuestions: [matchingOriginal()],
+      gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
+    });
+    const view = renderHook((p: UseRandomizeAutoAskParams) => useRandomizeAutoAsk(p), {
+      initialProps: props,
+    });
+    await settle();
+    expect(resolveRandomizedMatching).not.toHaveBeenCalled();
+    expect(onManual).not.toHaveBeenCalled();
+
+    view.rerender({ ...props, gameArea });
+    await waitFor(() => expect(submitToolQuestion).toHaveBeenCalledTimes(1));
+    await settle();
+    expect(submitToolQuestion).toHaveBeenCalledTimes(1);
+    expect(onManual).not.toHaveBeenCalled();
   });
 
   it("tells the seeker when the submit is refused", async () => {

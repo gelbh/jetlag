@@ -20,6 +20,7 @@ import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCust
 import type { MatchingFeature } from "@/services/geo/matching";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
+import { buildMatchingPendingInput } from "./matchingPendingInput";
 
 export interface CommitMatchingInput {
   canSubmitQuestion: boolean;
@@ -136,51 +137,24 @@ export async function performMatchingCommit(input: CommitMatchingInput): Promise
   const question = matchingQuestionFor(matchingCategoryId, customCategories);
 
   if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-    const geometry: Feature<Point> = {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Point",
-        coordinates: [matchingSeekerPoint[1], matchingSeekerPoint[0]],
-      },
-    };
-
     try {
-      await submitPendingQuestion({
-        promptText: question.prompt,
-        replyOptions: [
-          ...yesNoAnswerOptions.map((option) => ({
-            id: option.value,
-            label: option.label,
-          })),
-          ...(matchingNullAnswer ? [{ id: "null", label: "Null (not in play area)" }] : []),
-        ],
-        placement: {
-          geometryJson: JSON.stringify(geometry),
-          metadata: {
-            matchingCategory: matchingCategoryId,
-            matchingAnchor: {
-              lat: matchingSeekerPoint[0],
-              lng: matchingSeekerPoint[1],
-            },
-            matchingNearestFeatureId: matchingNearestFeatureId ?? undefined,
-            matchingNearestFeatureName: matchingNearestFeatureName ?? undefined,
-            matchingNearestFeaturePoint: matchingNearestFeaturePoint
-              ? {
-                  lat: matchingNearestFeaturePoint[0],
-                  lng: matchingNearestFeaturePoint[1],
-                }
-              : undefined,
-            matchingDistanceMeters: matchingDistanceMeters ?? undefined,
-            matchingFeatureCount: matchingFeatureCount ?? undefined,
-            matchingNullAnswer,
-            matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
-            ...(matchingTransitMetroId ? { transitMetroId: matchingTransitMetroId } : {}),
-          },
-        },
-        cardDraw,
-        cardKeep,
-      });
+      await submitPendingQuestion(
+        buildMatchingPendingInput({
+          seekerPoint: matchingSeekerPoint,
+          categoryId: matchingCategoryId,
+          customCategories,
+          nullAnswer: matchingNullAnswer,
+          nearestFeatureId: matchingNearestFeatureId,
+          nearestFeatureName: matchingNearestFeatureName,
+          nearestFeaturePoint: matchingNearestFeaturePoint,
+          distanceMeters: matchingDistanceMeters,
+          featureCount: matchingFeatureCount,
+          features: matchingFeatures,
+          transitMetroId: matchingTransitMetroId,
+          cardDraw,
+          cardKeep,
+        }),
+      );
     } catch (error) {
       setMatchingError(
         error instanceof Error ? error.message : "Couldn't send this match question.",

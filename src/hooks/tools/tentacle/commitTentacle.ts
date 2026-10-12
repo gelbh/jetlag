@@ -14,6 +14,7 @@ import {
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
+import { buildTentaclePendingInput } from "./tentaclePendingInput";
 
 export interface CommitTentacleInput {
   canSubmitQuestion: boolean;
@@ -91,43 +92,18 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
     return;
   }
 
-  const geometry = {
-    type: "Feature" as const,
-    properties: {},
-    geometry: {
-      type: "Point" as const,
-      coordinates: [tentacleCenter[1], tentacleCenter[0]],
-    },
-  };
-
   if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-    await submitPendingQuestion({
-      promptText: tentacleQuestionPrompt(tentacleCategoryId, distanceUnit, searchRadiusMeters),
-      replyOptions: [
-        ...tentaclePois.map((poi) => ({
-          id: poi.id,
-          label: poi.name,
-        })),
-        {
-          id: "out-of-reach",
-          label: TENTACLE_NOT_WITHIN_REACH_LABEL,
-        },
-      ],
-      placement: {
-        geometryJson: JSON.stringify(geometry),
-        metadata: {
-          tentacleCategoryId,
-          radiusMeters: searchRadiusMeters,
-          centerJson: JSON.stringify({
-            lat: tentacleCenter[0],
-            lng: tentacleCenter[1],
-          }),
-          poisJson: JSON.stringify(tentaclePois),
-        },
-      },
-      cardDraw,
-      cardKeep,
-    });
+    await submitPendingQuestion(
+      buildTentaclePendingInput({
+        center: tentacleCenter,
+        categoryId: tentacleCategoryId,
+        pois: tentaclePois,
+        searchRadiusMeters,
+        distanceUnit,
+        cardDraw,
+        cardKeep,
+      }),
+    );
 
     onSuccess();
     return;
