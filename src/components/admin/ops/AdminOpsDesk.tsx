@@ -115,7 +115,7 @@ function AdminOpsDeskContent() {
   const monitorRequestRef = useRef(0);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [needsYouOpen, setNeedsYouOpen] = useState(false);
+  const [needsYouOpen, setNeedsYouOpen] = useState(selectedIncidentId !== null);
 
   if (enabled !== enabledState) {
     setEnabledState(enabled);
@@ -399,10 +399,12 @@ function AdminOpsDeskContent() {
     <AppShell
       mode="static"
       header={{ height: "3.25rem", offset: false }}
-      navbar={isDesktop ? { width: "22rem", breakpoint: "64em" } : undefined}
+      navbar={
+        isDesktop ? { width: "22rem", breakpoint: "64em", collapsed: { mobile: true } } : undefined
+      }
       aside={
         isDesktop
-          ? { width: "24rem", breakpoint: "64em", collapsed: { desktop: !wide } }
+          ? { width: "24rem", breakpoint: "64em", collapsed: { mobile: true, desktop: !wide } }
           : undefined
       }
       padding={0}
