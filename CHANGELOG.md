@@ -6,6 +6,25 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.4.1 - 2026-10-14
+
+### Fixes
+
+- Admin and hider maps show seekers and hiders together instead of flipping between them, and admin player counts skip locations already gone from the map.
+- Thermometer distance presets work in metric sessions (no false "already used")
+- Leaving a session no longer gets stuck on "Couldn't leave the session" when the device was already removed from it
+
+### Improvements
+
+- Admin course view shows a leg strip of questions asked, a floating runner board, and restyled monitor tabs.
+- Admin event centre shows a dense start list, the live course, and what needs you side by side, and refreshes every 30 seconds.
+- Admin event centre gathers incidents and preload requests into one Needs you queue and follows your system light or dark mode.
+- Admin desk gets a new event centre look with a live status strip.
+
+### Technical
+
+- Align thermometer GameSize helpers with radar naming
+
 ## 1.4.0 - 2026-10-12
 
 ### Fixes
