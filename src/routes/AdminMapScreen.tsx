@@ -202,7 +202,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
             onLeave={() => void handleLeave()}
           />
           <Divider />
-          <AdminLegStrip questions={controller.pendingQuestions} />
+          <AdminLegStrip key={controller.session.id} questions={controller.pendingQuestions} />
           <Divider />
         </Box>
       ) : (
