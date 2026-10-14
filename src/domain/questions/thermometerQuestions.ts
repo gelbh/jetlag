@@ -148,15 +148,32 @@ export function isThermometerDistanceOptionUsed(
   return key !== null && usedOptions.has(key);
 }
 
+/** Full thermometer distance presets for game size (does not filter used). Radar twin. */
+export function thermometerDistancePresetsForGameSize(
+  gameSize: GameSize,
+  unit: DistanceUnit = "imperial",
+): number[] {
+  return thermometerPresetsMetersForGameSize(gameSize, unit);
+}
+
+/** Whether distanceMeters is a preset allowed for gameSize + unit. Radar twin of isRadarRadiusAllowedForGameSize. */
+export function isThermometerDistanceAllowedForGameSize(
+  gameSize: GameSize,
+  distanceMeters: number,
+  unit: DistanceUnit = "imperial",
+): boolean {
+  return thermometerDistancePresetsForGameSize(gameSize, unit).some(
+    (preset) => Math.abs(preset - distanceMeters) < THERMOMETER_PRESET_MATCH_TOLERANCE_METERS,
+  );
+}
+
 export function isThermometerDistanceOptionAvailable(
   gameSizeOrUsedOptions: GameSize | ReadonlySet<ThermometerDistanceOptionKey>,
   distanceMeters: number,
   unit: DistanceUnit = "imperial",
 ): boolean {
   if (typeof gameSizeOrUsedOptions === "string") {
-    return availableThermometerDistancePresets(gameSizeOrUsedOptions, unit).some(
-      (preset) => Math.abs(preset - distanceMeters) < THERMOMETER_PRESET_MATCH_TOLERANCE_METERS,
-    );
+    return isThermometerDistanceAllowedForGameSize(gameSizeOrUsedOptions, distanceMeters, unit);
   }
 
   const key = thermometerPresetForDistance(distanceMeters, unit);
@@ -168,7 +185,7 @@ export function availableThermometerDistancePresets(
   unit: DistanceUnit = "imperial",
 ): number[] {
   if (typeof gameSizeOrUsedOptions === "string") {
-    return thermometerPresetsMetersForGameSize(gameSizeOrUsedOptions, unit);
+    return thermometerDistancePresetsForGameSize(gameSizeOrUsedOptions, unit);
   }
 
   const ladder =
