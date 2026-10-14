@@ -13,6 +13,14 @@ interface AdminPlayerRosterProps {
   locations: readonly PlayerLocationRecord[];
 }
 
+/** Members plus anyone reporting a location (a fix can land before membership syncs). */
+export function rosterUids(
+  session: SessionRecord,
+  locations: readonly PlayerLocationRecord[],
+): string[] {
+  return [...new Set([...(session.memberUids ?? []), ...locations.map((l) => l.uid)])];
+}
+
 export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps) {
   const nowMs = useFreshnessClock();
   const focusedPlayerUid = useAdminMonitorFocus((state) => state.focusedPlayerUid);
@@ -23,9 +31,9 @@ export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps
   }
 
   const locationByUid = new Map(locations.map((location) => [location.uid, location]));
-  const rosterUids = [...new Set([...(session.memberUids ?? []), ...locationByUid.keys()])];
+  const uids = rosterUids(session, locations);
 
-  if (rosterUids.length === 0) {
+  if (uids.length === 0) {
     return (
       <Text size="sm" c="dimmed" px="sm" pb="sm">
         No runners yet. They appear here when players join the session.
@@ -44,7 +52,7 @@ export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {rosterUids.map((uid) => {
+          {uids.map((uid) => {
             const shortUid = uid.length > 10 ? `${uid.slice(0, 8)}…` : uid;
             const role = playerRoleLabel(resolvePlayerRole(session.memberRoles, uid));
             const selected = focusedPlayerUid === uid;

@@ -4,7 +4,7 @@ import "../theme/mantineAdminStyles";
 import { AdminCourseHeader } from "../components/admin/monitor/AdminCourseHeader";
 import { AdminLegStrip } from "../components/admin/monitor/AdminLegStrip";
 import { AdminMonitorPlayerFocus } from "../components/admin/monitor/AdminMonitorPlayerFocus";
-import { AdminPlayerRoster } from "../components/admin/monitor/AdminPlayerRoster";
+import { AdminPlayerRoster, rosterUids } from "../components/admin/monitor/AdminPlayerRoster";
 import { AdminSplitBoard } from "../components/admin/monitor/AdminSplitBoard";
 import { SessionCode } from "../components/admin/shared/SessionCode";
 import { ChatPanel } from "../components/chat/ChatPanel";
@@ -171,10 +171,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
 
   const splitBoard = embeddedMonitor ? (
     <AdminSplitBoard
-      count={
-        new Set([...(controller.session.memberUids ?? []), ...playerLocations.map((l) => l.uid)])
-          .size
-      }
+      count={rosterUids(controller.session, playerLocations).length}
       // Folded: beside the rail the course map is ~18rem at 1440, and an open board hides it.
       defaultOpen={false}
       placement={isWide ? "top" : "bottom"}
