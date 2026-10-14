@@ -318,23 +318,21 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <div className="relative min-h-0 flex-1 overflow-hidden">
-        {shell}
-        {isWide ? null : (
-          <Paper
-            data-testid="admin-monitor-code"
-            pos="absolute"
-            bottom={12}
-            left={12}
-            px="xs"
-            py={4}
-            style={{ zIndex: "var(--z-panel)", pointerEvents: "none" }}
-          >
-            <SessionCode code={controller.session.code} size="sm" />
-          </Paper>
-        )}
-      </div>
-    </div>
+    <Box pos="relative" flex={1} mih={0} style={{ overflow: "hidden" }}>
+      {shell}
+      {isWide ? null : (
+        <Paper
+          data-testid="admin-monitor-code"
+          pos="absolute"
+          bottom={12}
+          left={12}
+          px="xs"
+          py={4}
+          style={{ zIndex: "var(--z-panel)", pointerEvents: "none" }}
+        >
+          <SessionCode code={controller.session.code} size="sm" />
+        </Paper>
+      )}
+    </Box>
   );
 }
