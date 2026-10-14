@@ -11,11 +11,12 @@ interface HidingZoneStationsLayerProps {
   stations: readonly TransitStation[];
   selectedStation: TransitStation | null;
   onSelectStation: (station: TransitStation) => void;
+  /** Distinct per mount: two station pickers on one map must not share a source. */
+  id?: string;
 }
 
-const STATIONS_HIT_PREFIX = jlMarkerLayerId("hiding-stations");
-
 export function HidingZoneStationsLayer({
+  id = "hiding-stations",
   stations,
   selectedStation,
   onSelectStation,
@@ -48,7 +49,7 @@ export function HidingZoneStationsLayer({
   }, [selectedStation?.id, stations]);
 
   useMapFeatureHitTest(
-    STATIONS_HIT_PREFIX,
+    jlMarkerLayerId(id),
     useCallback(
       (result) => {
         const hitId = featureHitId(result.feature);
@@ -66,5 +67,5 @@ export function HidingZoneStationsLayer({
     ),
   );
 
-  return <MapLibrePointMarkers id="hiding-stations" interactive markers={markers} />;
+  return <MapLibrePointMarkers id={id} interactive markers={markers} />;
 }
