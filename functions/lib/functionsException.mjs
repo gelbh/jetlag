@@ -129,38 +129,40 @@ export function isExpectedFunctionsError(error) {
 }
 
 /**
- * Expected only for specific callables (lowercased; gen2 K_SERVICE is lowercase).
- * Leave by a non-member means the leave already happened; rematch/repair keep capturing.
- * Keys assume ungrouped default-codebase exports; grouped or codebase-prefixed deploys change K_SERVICE and the skip would stop matching.
+ * Expected only for leaveSessionMembership (lowercased; gen2 K_SERVICE is
+ * lowercase). A leave by a non-member means the leave already happened;
+ * rematch/repair keep capturing. Assumes ungrouped default-codebase exports:
+ * grouped or codebase-prefixed deploys change K_SERVICE and the skip would
+ * stop matching.
  */
-const EXPECTED_HTTPS_ERROR_KEYS_BY_FUNCTION = new Map([
-  ["leavesessionmembership", new Set(["permission-denied:Session membership required."])],
-]);
+const LEAVE_FUNCTION_NAME = "leavesessionmembership";
+const LEAVE_MEMBERSHIP_KEY = "permission-denied:Session membership required.";
 
 /**
  * @param {unknown} error
  * @param {string | null | undefined} name
  * @returns {boolean}
  */
-function isExpectedForFunction(error, name) {
-  if (!(error instanceof HttpsError) || typeof name !== "string") {
-    return false;
-  }
-  const keys = EXPECTED_HTTPS_ERROR_KEYS_BY_FUNCTION.get(name.trim().toLowerCase());
-  return keys?.has(`${error.code}:${error.message}`) ?? false;
+function isExpectedLeaveError(error, name) {
+  return (
+    error instanceof HttpsError &&
+    typeof name === "string" &&
+    name.trim().toLowerCase() === LEAVE_FUNCTION_NAME &&
+    `${error.code}:${error.message}` === LEAVE_MEMBERSHIP_KEY
+  );
 }
 
 /**
  * True when capture should skip (expected UX errors or Overpass transport noise).
  * @param {unknown} error
- * @param {string | null} [name] deployed function name, when known
+ * @param {string | null | undefined} [name] deployed function name, when known
  * @returns {boolean}
  */
 export function shouldSkipFunctionsException(error, name = null) {
   return (
     isExpectedFunctionsError(error) ||
     isOverpassTransportNoise(error) ||
-    isExpectedForFunction(error, name)
+    isExpectedLeaveError(error, name)
   );
 }
 
