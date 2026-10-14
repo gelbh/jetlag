@@ -2,6 +2,7 @@ import { Box, Divider, Paper } from "@mantine/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../theme/mantineAdminStyles";
 import { AdminCourseHeader } from "../components/admin/monitor/AdminCourseHeader";
+import { AdminLegStrip } from "../components/admin/monitor/AdminLegStrip";
 import { AdminMonitorPlayerFocus } from "../components/admin/monitor/AdminMonitorPlayerFocus";
 import { AdminPlayerRoster } from "../components/admin/monitor/AdminPlayerRoster";
 import { SessionCode } from "../components/admin/shared/SessionCode";
@@ -189,6 +190,8 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
             syncStatus={controller.syncStatus.status}
             onLeave={() => void handleLeave()}
           />
+          <Divider />
+          <AdminLegStrip questions={controller.pendingQuestions} />
           <Divider />
         </Box>
       ) : (
