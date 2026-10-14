@@ -4,9 +4,9 @@ import {
   availableThermometerDistancePresetsForSession,
   isThermometerDistanceOptionAvailable,
   isThermometerDistanceOptionAvailableForSession,
+  isThermometerDistanceOptionUsed,
   type ThermometerAnswer,
-  type ThermometerDistanceOptionMiles,
-  thermometerPresetMilesForMeters,
+  type ThermometerDistanceOptionKey,
   thermometerQuestionPrompt,
 } from "../../domain/questions";
 import type { SessionRulesInput } from "../../domain/session/rules";
@@ -35,7 +35,7 @@ interface ThermometerPanelProps {
   answer: ThermometerAnswer | null;
   step: "a" | "b" | "ready";
   presetUseCount: number;
-  usedDistanceOptions?: ReadonlySet<ThermometerDistanceOptionMiles>;
+  usedDistanceOptions?: ReadonlySet<ThermometerDistanceOptionKey>;
   costLabel: string;
   placementMode: PlacementMode;
   walkingActive: boolean;
@@ -112,7 +112,7 @@ export function ThermometerPanel({
   const availableDistancePresets = availableThermometerDistancePresetsForSession(sessionRules);
   const distanceAvailable =
     isThermometerDistanceOptionAvailableForSession(sessionRules, distanceMeters) &&
-    isThermometerDistanceOptionAvailable(usedDistanceOptions, distanceMeters);
+    isThermometerDistanceOptionAvailable(usedDistanceOptions, distanceMeters, distanceUnit);
   const pinsReady = mapStep === "ready";
   const canCommit =
     pinsReady &&
@@ -239,8 +239,11 @@ export function ThermometerPanel({
             </p>
             <OptionChipRow>
               {availableDistancePresets.map((preset) => {
-                const presetMiles = thermometerPresetMilesForMeters(preset);
-                const used = presetMiles !== null && usedDistanceOptions.has(presetMiles);
+                const used = isThermometerDistanceOptionUsed(
+                  usedDistanceOptions,
+                  preset,
+                  distanceUnit,
+                );
                 const reuse = presetUseCount > 0 && preset === distanceMeters ? costLabel : null;
                 return (
                   <OptionChip

@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type AskHudReadiness, canCommit, primedCommitLabel } from "@/domain/ask/askHudModes";
 import type { DistanceUnit } from "@/domain/map/distance";
-import type { ThermometerDistanceOptionMiles } from "@/domain/questions";
+import type { ThermometerDistanceOptionKey } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "../AskHudHost";
@@ -46,7 +46,7 @@ const baseProps = {
   placementMode: "gps" as const,
   walkingActive: false,
   presetUseCount: 0,
-  usedDistanceOptions: new Set<ThermometerDistanceOptionMiles>(),
+  usedDistanceOptions: new Set<ThermometerDistanceOptionKey>(),
   costLabel: "D2P1",
   gpsLoading: false,
   canSubmitQuestion: true,
