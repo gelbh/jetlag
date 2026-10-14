@@ -145,14 +145,19 @@
     "@opentelemetry/core": "^2.8.0",
     "tmp": "^0.2.6",
     "@hono/node-server": "^2.0.5",
-    "js-yaml@3": "3.15.2",
+    "js-yaml@3": {
+      ".": "3.15.2",
+      "argparse": "^2.0.1"
+    },
     "js-yaml@4": "4.3.2",
     "undici@7": "7.30.0",
     "sharp": "0.35.5",
     "shell-quote": "1.11.0",
     "@grpc/grpc-js": "^1.14.5",
     "fast-uri": "3.1.8",
-    "morgan": "1.12.1"
+    "morgan": "1.12.1",
+    "basic-ftp": "6.2.3",
+    "@puppeteer/browsers": "3.2.4"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,
