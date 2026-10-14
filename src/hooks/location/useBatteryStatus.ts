@@ -37,6 +37,7 @@ const INITIAL_STATUS: BatteryStatus = {
 export function useBatteryStatus(): BatteryStatus {
   const [status, setStatus] = useState<BatteryStatus>(INITIAL_STATUS);
 
+  // react-doctor-disable-next-line react-doctor/effect-needs-cleanup -- cleanup below sets cancelled and removes both battery listeners
   useEffect(() => {
     const navigatorWithBattery = navigator as NavigatorWithBattery;
     if (!navigatorWithBattery.getBattery) {

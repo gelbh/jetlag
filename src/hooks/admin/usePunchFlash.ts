@@ -27,6 +27,7 @@ export function usePunchFlash(sessions: readonly PunchSession[]): ReadonlySet<st
     };
   }, []);
 
+  // react-doctor-disable-next-line react-doctor/effect-needs-cleanup -- timers live in timersRef; the mount effect above clears them on unmount
   useEffect(() => {
     const seen = seenRef.current;
     if (!seen) {
