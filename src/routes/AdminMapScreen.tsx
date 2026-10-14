@@ -1,7 +1,10 @@
+import { Box, Divider, Paper } from "@mantine/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../theme/mantineAdminStyles";
+import { AdminCourseHeader } from "../components/admin/monitor/AdminCourseHeader";
 import { AdminMonitorPlayerFocus } from "../components/admin/monitor/AdminMonitorPlayerFocus";
 import { AdminPlayerRoster } from "../components/admin/monitor/AdminPlayerRoster";
+import { SessionCode } from "../components/admin/shared/SessionCode";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { MapView } from "../components/map/chrome/MapView";
 import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
@@ -175,20 +178,35 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         isWide ? "admin-map-shell--wide" : "admin-map-shell--compact"
       } ${isWide && railCollapsed ? "admin-map-shell--rail-collapsed" : ""}`}
     >
-      <AdminMapScreenChrome
-        session={controller.session}
-        myRole="admin"
-        timer={controller.timer}
-        overlay={controller.overlay}
-        onLeave={() => void handleLeave()}
-        isWide={isWide}
-        syncStatus={controller.syncStatus.status}
-        moderationBusy={moderationBusy}
-        moderationError={moderationError}
-        onModerationAction={(action) => void handleModerationAction(action)}
-        diagnosticsOpen={diagnosticsOpen}
-        onToggleDiagnostics={isWide ? undefined : () => setDiagnosticsOpen((open) => !open)}
-      />
+      {embeddedMonitor && isWide ? (
+        <Box className="admin-map-shell__top" bg="var(--adm-paper)">
+          <AdminCourseHeader
+            code={controller.session.code}
+            timerState={controller.timer.timerState}
+            seekerCount={controller.seekerLocations.length}
+            hiderCount={controller.hiderLocations.length}
+            questionCount={controller.pendingQuestions.length}
+            syncStatus={controller.syncStatus.status}
+            onLeave={() => void handleLeave()}
+          />
+          <Divider />
+        </Box>
+      ) : (
+        <AdminMapScreenChrome
+          session={controller.session}
+          myRole="admin"
+          timer={controller.timer}
+          overlay={controller.overlay}
+          onLeave={() => void handleLeave()}
+          isWide={isWide}
+          syncStatus={controller.syncStatus.status}
+          moderationBusy={moderationBusy}
+          moderationError={moderationError}
+          onModerationAction={(action) => void handleModerationAction(action)}
+          diagnosticsOpen={diagnosticsOpen}
+          onToggleDiagnostics={isWide ? undefined : () => setDiagnosticsOpen((open) => !open)}
+        />
+      )}
 
       <div className={isWide ? "admin-map-shell__map" : "absolute inset-0"} data-map-dock-frame="">
         {mapLayers}
@@ -285,9 +303,17 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
       <div className="relative min-h-0 flex-1 overflow-hidden">
         {shell}
         {isWide ? null : (
-          <p className="admin-monitor-code-badge pointer-events-none absolute bottom-3 left-3 z-[var(--z-panel)] rounded-md border border-border bg-surface-panel/90 px-2 py-1 font-mono text-xs tracking-[0.18em] text-ink">
-            {controller.session.code}
-          </p>
+          <Paper
+            data-testid="admin-monitor-code"
+            pos="absolute"
+            bottom={12}
+            left={12}
+            px="xs"
+            py={4}
+            style={{ zIndex: "var(--z-panel)", pointerEvents: "none" }}
+          >
+            <SessionCode code={controller.session.code} size="sm" />
+          </Paper>
         )}
       </div>
       {isWide ? null : (
