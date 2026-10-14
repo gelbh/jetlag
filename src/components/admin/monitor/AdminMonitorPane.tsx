@@ -50,7 +50,7 @@ export function AdminMonitorPane({
   }
 
   return (
-    // Class keeps the container query and stacking context the map shell CSS needs until P4.
+    // The class carries the map shell's container query and the stacking context that keeps the rail under the Needs you drawer.
     <Stack
       className="admin-monitor-pane"
       gap={0}

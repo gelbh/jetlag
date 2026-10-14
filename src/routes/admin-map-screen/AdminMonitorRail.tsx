@@ -1,5 +1,4 @@
 import { ActionIcon, Box, Divider, Group, ScrollArea, Stack, Tabs, Text } from "@mantine/core";
-import { useMemo } from "react";
 import { ChatPanelBody } from "../../components/chat/ChatPanelBody";
 import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
 import { SessionLogBody } from "../../components/session/log/SessionLogBody";
@@ -71,10 +70,7 @@ export function AdminMonitorRail({
   const events = useSessionActivityLog(session.id);
   const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
-  const activeLabel = useMemo(
-    () => TABS.find((tab) => tab.id === activeTab)?.label ?? "Overview",
-    [activeTab],
-  );
+  const activeLabel = TABS.find((tab) => tab.id === activeTab)?.label ?? "Overview";
 
   return (
     <Group

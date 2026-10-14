@@ -34,7 +34,7 @@ export function AdminSessionRow({
 }: AdminSessionRowProps) {
   const areaLabel = resolveAdminSessionAreaLabel(summary);
   const phaseLabel = adminSessionPhaseLabel(summary.phase);
-  const cellStyle = monitored ? (reversedInk as CSSProperties) : undefined;
+  const cellStyle = monitored ? reversedInk : undefined;
 
   return (
     <Table.Tr

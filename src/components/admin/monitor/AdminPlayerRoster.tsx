@@ -1,5 +1,4 @@
 import { ScrollArea, Table, Text, UnstyledButton } from "@mantine/core";
-import type { CSSProperties } from "react";
 import { useAdminMonitorFocus } from "../../../domain/admin/adminMonitorFocus";
 import { formatFreshnessAge } from "../../../domain/admin/formatAdminFreshness";
 import type { SessionRecord } from "../../../domain/map/annotations";
@@ -56,12 +55,11 @@ export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps
             const shortUid = uid.length > 10 ? `${uid.slice(0, 8)}…` : uid;
             const role = playerRoleLabel(resolvePlayerRole(session.memberRoles, uid));
             const selected = focusedPlayerUid === uid;
-            const cellStyle = selected ? (reversedInk as CSSProperties) : undefined;
+            const cellStyle = selected ? reversedInk : undefined;
             return (
               // The runner button is the keyboard stop; the row widens the pointer target.
               <Table.Tr
                 key={uid}
-                aria-selected={selected || undefined}
                 bg={selected ? "var(--adm-ink)" : undefined}
                 style={{ cursor: "pointer" }}
                 onClick={() => setFocusedPlayerUid(uid)}
@@ -73,6 +71,7 @@ export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps
                     fw={700}
                     title={uid}
                     aria-label={`Follow ${shortUid}`}
+                    aria-pressed={selected}
                   >
                     {shortUid}
                   </UnstyledButton>

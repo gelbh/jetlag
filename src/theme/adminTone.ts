@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 export type StatusTone = "live" | "ok" | "info" | "mispunch" | "neutral";
 
 export const toneColor: Record<StatusTone, string> = {
@@ -16,4 +18,4 @@ export const reversedInk = {
   "--adm-ink": "var(--adm-paper)",
   "--mantine-color-text": "var(--adm-paper)",
   "--mantine-color-dimmed": "var(--adm-paper)",
-} as const;
+} as CSSProperties;

@@ -79,6 +79,8 @@
 :root {
   --adm-player-canvas: var(--color-canvas);
   --adm-player-field-ink: var(--color-field-ink);
+  --adm-player-field-ink-muted: var(--color-field-ink-muted);
+  --adm-player-rule: var(--color-rule);
   --adm-player-flag: var(--color-flag);
   --adm-player-flag-ink: var(--color-flag-ink);
 }
@@ -86,6 +88,8 @@
 [data-admin-world] [data-player-map] {
   --color-canvas: var(--adm-player-canvas);
   --color-field-ink: var(--adm-player-field-ink);
+  --color-field-ink-muted: var(--adm-player-field-ink-muted);
+  --color-rule: var(--adm-player-rule);
   --color-flag: var(--adm-player-flag);
   --color-flag-ink: var(--adm-player-flag-ink);
 }

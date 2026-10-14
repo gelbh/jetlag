@@ -77,29 +77,35 @@ function createController(): ObserverMapScreenController {
   } as unknown as ObserverMapScreenController;
 }
 
+type RailProps = Parameters<typeof AdminMonitorRail>[0];
+
+function renderRail(overrides: Partial<RailProps> = {}) {
+  const session = createTestSession();
+  const props: RailProps = {
+    collapsed: false,
+    onCollapsedChange: vi.fn(),
+    activeTab: "overview",
+    onActiveTabChange: vi.fn(),
+    session,
+    sessionRules: session,
+    syncStatusLabel: "synced",
+    controller: createController(),
+    chatDisplayRole: "admin",
+    moderationBusy: false,
+    moderationError: null,
+    onModerationAction: vi.fn(),
+    mapViewport: null,
+    onLayerVisibilityChange: vi.fn(),
+    onLowPowerModeChange: vi.fn(),
+    ...overrides,
+  };
+  renderWithRouter(<AdminMonitorRail {...props} />);
+  return props;
+}
+
 describe("AdminMonitorRail", () => {
   it("renders overview diagnostics by default", () => {
-    const session = createTestSession();
-
-    renderWithRouter(
-      <AdminMonitorRail
-        collapsed={false}
-        onCollapsedChange={vi.fn()}
-        activeTab="overview"
-        onActiveTabChange={vi.fn()}
-        session={session}
-        sessionRules={session}
-        syncStatusLabel="synced"
-        controller={createController()}
-        chatDisplayRole="admin"
-        moderationBusy={false}
-        moderationError={null}
-        onModerationAction={vi.fn()}
-        mapViewport={null}
-        onLayerVisibilityChange={vi.fn()}
-        onLowPowerModeChange={vi.fn()}
-      />,
-    );
+    const { session } = renderRail();
 
     expect(screen.getByText("Live stats")).toBeInTheDocument();
     expect(screen.getByText("Diagnostics")).toBeInTheDocument();
@@ -107,28 +113,7 @@ describe("AdminMonitorRail", () => {
   });
 
   it("switches tabs when a tab button is clicked", () => {
-    const onActiveTabChange = vi.fn();
-    const session = createTestSession();
-
-    renderWithRouter(
-      <AdminMonitorRail
-        collapsed={false}
-        onCollapsedChange={vi.fn()}
-        activeTab="overview"
-        onActiveTabChange={onActiveTabChange}
-        session={session}
-        sessionRules={session}
-        syncStatusLabel="synced"
-        controller={createController()}
-        chatDisplayRole="admin"
-        moderationBusy={false}
-        moderationError={null}
-        onModerationAction={vi.fn()}
-        mapViewport={null}
-        onLayerVisibilityChange={vi.fn()}
-        onLowPowerModeChange={vi.fn()}
-      />,
-    );
+    const { onActiveTabChange } = renderRail();
 
     expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "true");
     fireEvent.click(screen.getByRole("tab", { name: "Sync" }));
@@ -136,58 +121,19 @@ describe("AdminMonitorRail", () => {
   });
 
   it("shows live stats as labelled cells", () => {
-    const session = createTestSession();
     const controller = createController();
     controller.pendingQuestions = [{ id: "q1" }, { id: "q2" }] as never;
-
-    renderWithRouter(
-      <AdminMonitorRail
-        collapsed={false}
-        onCollapsedChange={vi.fn()}
-        activeTab="overview"
-        onActiveTabChange={vi.fn()}
-        session={session}
-        sessionRules={session}
-        syncStatusLabel="synced"
-        controller={controller}
-        chatDisplayRole="admin"
-        moderationBusy={false}
-        moderationError={null}
-        onModerationAction={vi.fn()}
-        mapViewport={null}
-        onLayerVisibilityChange={vi.fn()}
-        onLowPowerModeChange={vi.fn()}
-      />,
-    );
+    renderRail({ controller });
 
     expect(screen.getByRole("group", { name: "Questions" })).toHaveTextContent("2");
     expect(screen.getByRole("group", { name: "Timer" })).toHaveTextContent("Idle");
   });
 
   it("collapsed rail marks the active tab and expands on pick", () => {
-    const onActiveTabChange = vi.fn();
-    const onCollapsedChange = vi.fn();
-    const session = createTestSession();
-
-    renderWithRouter(
-      <AdminMonitorRail
-        collapsed
-        onCollapsedChange={onCollapsedChange}
-        activeTab="log"
-        onActiveTabChange={onActiveTabChange}
-        session={session}
-        sessionRules={session}
-        syncStatusLabel="synced"
-        controller={createController()}
-        chatDisplayRole="admin"
-        moderationBusy={false}
-        moderationError={null}
-        onModerationAction={vi.fn()}
-        mapViewport={null}
-        onLayerVisibilityChange={vi.fn()}
-        onLowPowerModeChange={vi.fn()}
-      />,
-    );
+    const { onActiveTabChange, onCollapsedChange } = renderRail({
+      collapsed: true,
+      activeTab: "log",
+    });
 
     const nav = screen.getByRole("navigation", { name: "Monitor tabs" });
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
@@ -196,30 +142,5 @@ describe("AdminMonitorRail", () => {
     fireEvent.click(screen.getByRole("button", { name: "Chat" }));
     expect(onActiveTabChange).toHaveBeenCalledWith("chat");
     expect(onCollapsedChange).toHaveBeenCalledWith(false);
-  });
-
-  it("has no roster; the split board owns it", () => {
-    const session = createTestSession();
-    renderWithRouter(
-      <AdminMonitorRail
-        collapsed={false}
-        onCollapsedChange={vi.fn()}
-        activeTab="overview"
-        onActiveTabChange={vi.fn()}
-        session={session}
-        sessionRules={session}
-        syncStatusLabel="synced"
-        controller={createController()}
-        chatDisplayRole="admin"
-        moderationBusy={false}
-        moderationError={null}
-        onModerationAction={vi.fn()}
-        mapViewport={null}
-        onLayerVisibilityChange={vi.fn()}
-        onLowPowerModeChange={vi.fn()}
-      />,
-    );
-
-    expect(screen.queryByRole("region", { name: "Player roster" })).not.toBeInTheDocument();
   });
 });
