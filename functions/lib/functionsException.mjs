@@ -131,6 +131,7 @@ export function isExpectedFunctionsError(error) {
 /**
  * Expected only for specific callables (lowercased; gen2 K_SERVICE is lowercase).
  * Leave by a non-member means the leave already happened; rematch/repair keep capturing.
+ * Keys assume ungrouped default-codebase exports; grouped or codebase-prefixed deploys change K_SERVICE and the skip would stop matching.
  */
 const EXPECTED_HTTPS_ERROR_KEYS_BY_FUNCTION = new Map([
   ["leavesessionmembership", new Set(["permission-denied:Session membership required."])],

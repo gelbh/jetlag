@@ -245,6 +245,34 @@ test("captureFunctionsExceptionAsync sends unexpected errors to PostHog", async 
   setFunctionsExceptionClientForTests(null);
 });
 
+test("captureFunctionsExceptionAsync skips leave non-member only for the deployed leave function", async () => {
+  const { captureFunctionsExceptionAsync } = await import("../lib/functionsException.mjs");
+  const calls = [];
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async (error, distinctId, properties) => {
+      calls.push({ error, distinctId, properties });
+    },
+  });
+  const previous = process.env.K_SERVICE;
+  const error = new HttpsError("permission-denied", "Session membership required.");
+  try {
+    process.env.K_SERVICE = "leavesessionmembership";
+    await captureFunctionsExceptionAsync(error);
+    assert.equal(calls.length, 0);
+
+    process.env.K_SERVICE = "resetsessionforrematch";
+    await captureFunctionsExceptionAsync(error);
+    assert.equal(calls.length, 1);
+  } finally {
+    if (previous === undefined) {
+      delete process.env.K_SERVICE;
+    } else {
+      process.env.K_SERVICE = previous;
+    }
+    setFunctionsExceptionClientForTests(null);
+  }
+});
+
 test("captureFunctionsException returns a promise that settles after Immediate capture", async () => {
   const { captureFunctionsException } = await import("../lib/functionsException.mjs");
   let settled = false;
