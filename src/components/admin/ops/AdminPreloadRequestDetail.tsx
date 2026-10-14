@@ -44,10 +44,9 @@ export function AdminPreloadRequestDetail({ request }: { request: PreloadRequest
       await updatePreloadRequestStatus(request.id, status);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Could not update status.");
-    } finally {
-      busyRef.current = false;
-      setBusy(false);
     }
+    busyRef.current = false;
+    setBusy(false);
   };
 
   return (
