@@ -6,12 +6,14 @@ import {
   availableThermometerDistancePresets,
   DEFAULT_THERMOMETER_DISTANCE_METERS,
   firstAvailableThermometerDistanceMetersForSession,
+  isThermometerDistanceAllowedForGameSize,
   isThermometerDistanceOptionAvailable,
   isThermometerDistanceOptionUsed,
   THERMOMETER_DISTANCE_PRESETS,
   THERMOMETER_DISTANCE_PRESETS_MILES,
   thermometerDistanceLabel,
   thermometerDistanceOptionForAnnotation,
+  thermometerDistancePresetsForGameSize,
   thermometerHotterTowards,
   thermometerPresetForDistance,
   thermometerQuestionPrompt,
@@ -103,8 +105,24 @@ describe("thermometerQuestions", () => {
     expect(usedThermometerDistanceOptionsForSession([], [cancelled])).toEqual(new Set([3]));
     expect(isThermometerDistanceOptionAvailable("large", threeMiles)).toBe(true);
     expect(availableThermometerDistancePresets("large")).toEqual(THERMOMETER_DISTANCE_PRESETS);
-    expect(isThermometerDistanceOptionAvailable("medium", 1000, "metric")).toBe(true);
-    expect(availableThermometerDistancePresets("medium", "metric")).toContain(1000);
+  });
+
+  it("honors unit on GameSize thermometer availability (metric)", () => {
+    const oneKm = 1000;
+    const fiveKm = 5000;
+    const fifteenKm = 15000;
+
+    expect(thermometerDistancePresetsForGameSize("medium", "metric")).toEqual(
+      expect.arrayContaining([oneKm, fiveKm, fifteenKm]),
+    );
+    expect(isThermometerDistanceAllowedForGameSize("medium", oneKm, "metric")).toBe(true);
+    expect(isThermometerDistanceAllowedForGameSize("medium", fiveKm, "metric")).toBe(true);
+    expect(isThermometerDistanceOptionAvailable("medium", oneKm, "metric")).toBe(true);
+    expect(availableThermometerDistancePresets("medium", "metric")).toEqual(
+      thermometerDistancePresetsForGameSize("medium", "metric"),
+    );
+    // Imperial mile ladder must not gate metric meter presets.
+    expect(isThermometerDistanceAllowedForGameSize("medium", oneKm, "imperial")).toBe(false);
   });
 
   it("treats unused metric presets as available (not false distance_used)", () => {
