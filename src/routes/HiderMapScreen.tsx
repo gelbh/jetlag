@@ -893,6 +893,7 @@ export function HiderMapScreen() {
         ) : null}
         {timeTrapSheetOpen && !myTrap ? (
           <HidingZoneStationsLayer
+            id="time-trap-stations"
             stations={timeTrapTool.stations}
             selectedStation={timeTrapTool.selectedStation}
             onSelectStation={timeTrapTool.setSelectedStation}
