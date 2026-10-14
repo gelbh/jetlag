@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { AdminMonitorPane } from "./AdminMonitorPane";
@@ -8,34 +8,36 @@ vi.mock("../../../routes/AdminMapScreen", () => ({
 }));
 
 describe("AdminMonitorPane", () => {
-  it("shows viewport-neutral idle copy without on-desktop wording", () => {
-    render(<AdminMonitorPane active={false} />);
+  it("teaches how to open a course when idle", () => {
+    renderWithAppUi(<AdminMonitorPane active={false} />);
 
-    expect(screen.getByText("Monitor pane")).toBeInTheDocument();
-    expect(screen.getByText("Select a live session to watch the map here.")).toBeInTheDocument();
+    expect(screen.getByText("No course open")).toBeInTheDocument();
+    expect(
+      screen.getByText("Pick a live game in the start list to watch its map here."),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/on desktop/i)).not.toBeInTheDocument();
   });
 
-  it("shows sessions unavailable idle copy when the sessions list failed", () => {
-    render(<AdminMonitorPane active={false} sessionsUnavailable />);
+  it("points at Refresh when the start list failed to load", () => {
+    renderWithAppUi(<AdminMonitorPane active={false} sessionsUnavailable />);
 
+    expect(screen.getByText("Start list unavailable")).toBeInTheDocument();
     expect(
-      screen.getByText("Sessions unavailable. Retry from the Sessions panel."),
+      screen.getByText("Games could not be loaded. Use Refresh in the status strip to try again."),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByText("Select a live session to watch the map here."),
-    ).not.toBeInTheDocument();
   });
 
   it("shows the error state when the monitor is unavailable", () => {
     renderWithAppUi(<AdminMonitorPane active errorMessage="Session load failed." />);
 
-    expect(screen.getByText("Monitor unavailable")).toBeInTheDocument();
-    expect(screen.getByText("Session load failed.")).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveAttribute("data-tone", "mispunch");
+    expect(alert).toHaveTextContent("Monitor unavailable");
+    expect(alert).toHaveTextContent("Session load failed.");
   });
 
   it("renders the embedded map when active", () => {
-    render(<AdminMonitorPane active />);
+    renderWithAppUi(<AdminMonitorPane active />);
 
     expect(screen.getByTestId("admin-monitor-fixed")).toBeInTheDocument();
     expect(screen.getByTestId("admin-map-screen-embed")).toBeInTheDocument();

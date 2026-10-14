@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { adminTheme } from "./adminTheme";
 import {
   JETLAG_DOCK_Z_INDEX,
   JETLAG_MODAL_Z_INDEX,
@@ -48,5 +49,24 @@ describe("jetlagTheme", () => {
     expect(resolved.variables?.["--jl-z-dock"]).toBe("1000");
     expect(resolved.variables?.["--jl-z-modal"]).toBe("1100");
     expect(resolved.dark?.["--mantine-color-body"]).toBe(jetlagBrand.canvas);
+  });
+});
+
+describe("adminTheme", () => {
+  type VarsResolver = (
+    theme: never,
+    props: { variant: string },
+    ctx: never,
+  ) => { root: Record<string, string> };
+
+  it.each([
+    ["Button", "--button"],
+    ["ActionIcon", "--ai"],
+  ] as const)("gives %s filled and light controls a distinct hover", (component, prefix) => {
+    const vars = adminTheme.components?.[component]?.vars as unknown as VarsResolver;
+    for (const variant of ["filled", "light"]) {
+      const { root } = vars({} as never, { variant }, {} as never);
+      expect(root[`${prefix}-hover`]).not.toBe(root[`${prefix}-bg`]);
+    }
   });
 });

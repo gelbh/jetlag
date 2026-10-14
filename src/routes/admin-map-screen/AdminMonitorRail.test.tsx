@@ -1,5 +1,4 @@
 import { fireEvent, screen } from "@testing-library/react";
-import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createTestSession } from "../../test/fixtures/sessions";
 import { renderWithRouter } from "../../test/renderWithRouter";
@@ -78,29 +77,35 @@ function createController(): ObserverMapScreenController {
   } as unknown as ObserverMapScreenController;
 }
 
+type RailProps = Parameters<typeof AdminMonitorRail>[0];
+
+function renderRail(overrides: Partial<RailProps> = {}) {
+  const session = createTestSession();
+  const props: RailProps = {
+    collapsed: false,
+    onCollapsedChange: vi.fn(),
+    activeTab: "overview",
+    onActiveTabChange: vi.fn(),
+    session,
+    sessionRules: session,
+    syncStatusLabel: "synced",
+    controller: createController(),
+    chatDisplayRole: "admin",
+    moderationBusy: false,
+    moderationError: null,
+    onModerationAction: vi.fn(),
+    mapViewport: null,
+    onLayerVisibilityChange: vi.fn(),
+    onLowPowerModeChange: vi.fn(),
+    ...overrides,
+  };
+  renderWithRouter(<AdminMonitorRail {...props} />);
+  return props;
+}
+
 describe("AdminMonitorRail", () => {
   it("renders overview diagnostics by default", () => {
-    const session = createTestSession();
-
-    renderWithRouter(
-      <AdminMonitorRail
-        collapsed={false}
-        onCollapsedChange={vi.fn()}
-        activeTab="overview"
-        onActiveTabChange={vi.fn()}
-        session={session}
-        sessionRules={session}
-        syncStatusLabel="synced"
-        controller={createController()}
-        chatDisplayRole="admin"
-        moderationBusy={false}
-        moderationError={null}
-        onModerationAction={vi.fn()}
-        mapViewport={null}
-        onLayerVisibilityChange={vi.fn()}
-        onLowPowerModeChange={vi.fn()}
-      />,
-    );
+    const { session } = renderRail();
 
     expect(screen.getByText("Live stats")).toBeInTheDocument();
     expect(screen.getByText("Diagnostics")).toBeInTheDocument();
@@ -108,79 +113,34 @@ describe("AdminMonitorRail", () => {
   });
 
   it("switches tabs when a tab button is clicked", () => {
-    const onActiveTabChange = vi.fn();
-    const session = createTestSession();
+    const { onActiveTabChange } = renderRail();
 
-    renderWithRouter(
-      <AdminMonitorRail
-        collapsed={false}
-        onCollapsedChange={vi.fn()}
-        activeTab="overview"
-        onActiveTabChange={onActiveTabChange}
-        session={session}
-        sessionRules={session}
-        syncStatusLabel="synced"
-        controller={createController()}
-        chatDisplayRole="admin"
-        moderationBusy={false}
-        moderationError={null}
-        onModerationAction={vi.fn()}
-        mapViewport={null}
-        onLayerVisibilityChange={vi.fn()}
-        onLowPowerModeChange={vi.fn()}
-      />,
-    );
-
+    expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "true");
     fireEvent.click(screen.getByRole("tab", { name: "Sync" }));
     expect(onActiveTabChange).toHaveBeenCalledWith("sync");
   });
 
-  describe("roster slot", () => {
-    function renderRail({ collapsed, roster }: { collapsed: boolean; roster?: ReactNode }) {
-      const session = createTestSession();
-      return renderWithRouter(
-        <AdminMonitorRail
-          collapsed={collapsed}
-          onCollapsedChange={vi.fn()}
-          activeTab="overview"
-          onActiveTabChange={vi.fn()}
-          session={session}
-          sessionRules={session}
-          syncStatusLabel="synced"
-          controller={createController()}
-          chatDisplayRole="admin"
-          moderationBusy={false}
-          moderationError={null}
-          onModerationAction={vi.fn()}
-          mapViewport={null}
-          onLayerVisibilityChange={vi.fn()}
-          onLowPowerModeChange={vi.fn()}
-          roster={roster}
-        />,
-      );
-    }
+  it("shows live stats as labelled cells", () => {
+    const controller = createController();
+    controller.pendingQuestions = [{ id: "q1" }, { id: "q2" }] as never;
+    renderRail({ controller });
 
-    it("renders the roster region before the tablist when expanded", () => {
-      renderRail({ collapsed: false, roster: <p>Roster content</p> });
+    expect(screen.getByRole("group", { name: "Questions" })).toHaveTextContent("2");
+    expect(screen.getByRole("group", { name: "Timer" })).toHaveTextContent("Idle");
+  });
 
-      const region = screen.getByRole("region", { name: "Player roster" });
-      expect(region).toHaveTextContent("Roster content");
-      const tablist = screen.getByRole("tablist", { name: "Monitor sections" });
-      expect(
-        region.compareDocumentPosition(tablist) & Node.DOCUMENT_POSITION_FOLLOWING,
-      ).toBeTruthy();
+  it("collapsed rail marks the active tab and expands on pick", () => {
+    const { onActiveTabChange, onCollapsedChange } = renderRail({
+      collapsed: true,
+      activeTab: "log",
     });
 
-    it("hides the roster region when collapsed", () => {
-      renderRail({ collapsed: true, roster: <p>Roster content</p> });
+    const nav = screen.getByRole("navigation", { name: "Monitor tabs" });
+    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+    expect(nav.querySelector('[aria-current="page"]')).toHaveAccessibleName("Log");
 
-      expect(screen.queryByRole("region", { name: "Player roster" })).not.toBeInTheDocument();
-    });
-
-    it("omits the roster region when no roster is provided", () => {
-      renderRail({ collapsed: false });
-
-      expect(screen.queryByRole("region", { name: "Player roster" })).not.toBeInTheDocument();
-    });
+    fireEvent.click(screen.getByRole("button", { name: "Chat" }));
+    expect(onActiveTabChange).toHaveBeenCalledWith("chat");
+    expect(onCollapsedChange).toHaveBeenCalledWith(false);
   });
 });

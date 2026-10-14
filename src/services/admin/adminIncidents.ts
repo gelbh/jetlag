@@ -70,14 +70,17 @@ export function formatIncidentQueueId(id: string): string {
   return trimmed.slice(0, 10).toUpperCase();
 }
 
+export function isOpenIncident(incident: Pick<IncidentRecord, "status">): boolean {
+  return (
+    incident.status === "open" ||
+    incident.status === "chatting" ||
+    incident.status === "mitigating" ||
+    incident.status === "hotfix_pending"
+  );
+}
+
 export function countOpenIncidents(incidents: readonly IncidentRecord[]): number {
-  return incidents.filter(
-    (incident) =>
-      incident.status === "open" ||
-      incident.status === "chatting" ||
-      incident.status === "mitigating" ||
-      incident.status === "hotfix_pending",
-  ).length;
+  return incidents.filter(isOpenIncident).length;
 }
 
 export const INCIDENT_MITIGATION_OPTIONS: readonly {

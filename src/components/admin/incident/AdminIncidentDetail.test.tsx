@@ -124,6 +124,19 @@ vi.mock("../../../services/admin/adminIncidents", async () => {
   };
 });
 
+vi.mock("../../../services/admin/adminPreloadRequests", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../../services/admin/adminPreloadRequests")
+  >("../../../services/admin/adminPreloadRequests");
+  return {
+    ...actual,
+    subscribePreloadRequestList: (onChange: (requests: []) => void) => {
+      onChange([]);
+      return () => {};
+    },
+  };
+});
+
 vi.mock("../../../hooks/incident/useIncidentThread", () => ({
   useIncidentThread: () => ({
     incident: null,
@@ -404,7 +417,7 @@ describe("AdminOpsDesk gate + mobile stack", () => {
     renderDesk("/admin/incidents");
 
     expect(screen.getByText("No incidents")).toBeInTheDocument();
-    expect(screen.getByText("Select an incident")).toBeInTheDocument();
+    expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
   });
 
   it("shows queue error state", () => {
@@ -432,7 +445,7 @@ describe("AdminOpsDesk gate + mobile stack", () => {
     expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "mobile");
     expect(screen.getByTestId("admin-ops-mobile")).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Incidents" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("button", { name: "Back to inbox" })).toBeInTheDocument();
-    expect(screen.queryByLabelText("Incident queue")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
   });
 });

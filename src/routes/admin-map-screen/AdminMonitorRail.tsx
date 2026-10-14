@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from "react";
+import { ActionIcon, Box, Divider, Group, ScrollArea, Stack, Tabs, Text } from "@mantine/core";
 import { ChatPanelBody } from "../../components/chat/ChatPanelBody";
 import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
 import { SessionLogBody } from "../../components/session/log/SessionLogBody";
@@ -26,6 +26,12 @@ const TABS: Array<{ id: AdminMonitorRailTab; label: string; short: string }> = [
   { id: "mod", label: "Mod", short: "Mod" },
 ];
 
+// The rail is a fixed-height column: the list stays put and the active panel scrolls.
+const TAB_LAYOUT = {
+  root: { display: "flex", flexDirection: "column", flex: 1, minHeight: 0 },
+  panel: { flex: 1, minHeight: 0 },
+} as const;
+
 interface AdminMonitorRailProps {
   collapsed: boolean;
   onCollapsedChange: (collapsed: boolean) => void;
@@ -42,7 +48,6 @@ interface AdminMonitorRailProps {
   mapViewport: MapViewportState | null;
   onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
   onLowPowerModeChange: (enabled: boolean) => void;
-  roster?: ReactNode;
 }
 
 export function AdminMonitorRail({
@@ -61,171 +66,175 @@ export function AdminMonitorRail({
   mapViewport,
   onLayerVisibilityChange,
   onLowPowerModeChange,
-  roster,
 }: AdminMonitorRailProps) {
   const events = useSessionActivityLog(session.id);
   const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
-  const activeLabel = useMemo(
-    () => TABS.find((tab) => tab.id === activeTab)?.label ?? "Overview",
-    [activeTab],
-  );
+  const activeLabel = TABS.find((tab) => tab.id === activeTab)?.label ?? "Overview";
 
   return (
-    <aside
-      className={`admin-monitor-rail admin-map-shell__rail ${
-        collapsed ? "admin-monitor-rail--collapsed" : ""
-      }`}
+    <Group
+      component="aside"
+      className="admin-map-shell__rail"
       aria-label="Admin monitor rail"
+      h="100%"
+      gap={0}
+      wrap="nowrap"
+      align="stretch"
+      bg="var(--mantine-color-body)"
     >
-      <div className="admin-monitor-rail__header">
-        <button
-          type="button"
-          className="hud-chrome inline-flex min-h-9 min-w-9 items-center justify-center"
-          aria-label={collapsed ? "Expand monitor rail" : "Collapse monitor rail"}
-          aria-expanded={!collapsed}
-          onClick={() => onCollapsedChange(!collapsed)}
-        >
-          {collapsed ? (
-            <HudChevronLeftIcon className="size-4" />
-          ) : (
-            <HudChevronRightIcon className="size-4" />
+      <Divider orientation="vertical" />
+      <Stack gap={0} flex={1} miw={0} mih={0}>
+        <Group h={44} px={6} gap="xs" wrap="nowrap" flex="none">
+          <ActionIcon
+            variant="subtle"
+            aria-label={collapsed ? "Expand monitor rail" : "Collapse monitor rail"}
+            aria-expanded={!collapsed}
+            onClick={() => onCollapsedChange(!collapsed)}
+          >
+            {collapsed ? (
+              <HudChevronLeftIcon width={16} height={16} aria-hidden="true" />
+            ) : (
+              <HudChevronRightIcon width={16} height={16} aria-hidden="true" />
+            )}
+          </ActionIcon>
+          {collapsed ? null : (
+            <Text fw={700} truncate>
+              {activeLabel}
+            </Text>
           )}
-        </button>
-        {!collapsed ? (
-          <span className="min-w-0 truncate font-display text-xs font-semibold uppercase tracking-wide text-ink">
-            {activeLabel}
-          </span>
-        ) : null}
-      </div>
+        </Group>
+        <Divider />
 
-      {collapsed ? (
-        <nav className="flex flex-1 flex-col gap-1 p-1" aria-label="Monitor tabs">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`admin-monitor-rail__icon-tab ${
-                activeTab === tab.id ? "admin-monitor-rail__icon-tab--active" : ""
-              }`}
-              aria-label={tab.label}
-              aria-current={activeTab === tab.id ? "page" : undefined}
-              onClick={() => {
-                onActiveTabChange(tab.id);
-                onCollapsedChange(false);
-              }}
-            >
-              {tab.short}
-            </button>
-          ))}
-        </nav>
-      ) : (
-        <>
-          {roster ? (
-            <section aria-label="Player roster" className="admin-monitor-rail__roster">
-              {roster}
-            </section>
-          ) : null}
-
-          <div
-            className="jl-scroll admin-monitor-rail__tabs"
-            role="tablist"
-            aria-label="Monitor sections"
-          >
+        {collapsed ? (
+          <Stack component="nav" aria-label="Monitor tabs" gap={4} p={4}>
             {TABS.map((tab) => (
-              <button
+              <ActionIcon
                 key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                className={`admin-monitor-rail__tab ${
-                  activeTab === tab.id ? "admin-monitor-rail__tab--active" : ""
-                }`}
-                onClick={() => onActiveTabChange(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <div
-            className="jl-scroll admin-monitor-rail__panel"
-            role="tabpanel"
-            aria-label={activeLabel}
-          >
-            {activeTab === "overview" ? (
-              <OverviewPanel
-                session={session}
-                syncStatusLabel={syncStatusLabel}
-                annotationCount={controller.annotations.length}
-                seekerCount={controller.seekerLocations.length}
-                hiderCount={controller.hiderLocations.length}
-                questionCount={controller.pendingQuestions.length}
-                messageCount={controller.chatMessages.length}
-                timerState={controller.timer.timerState}
-              />
-            ) : null}
-
-            {activeTab === "log" ? (
-              <SessionLogBody
-                events={events}
-                annotations={controller.annotations}
-                onDelete={() => undefined}
-                onEdit={() => undefined}
-                readOnly
-                compact
-                onSelect={(id) => {
-                  setSelectedAnnotationId(id);
-                  markAnnotationPulse(id);
+                variant={activeTab === tab.id ? "filled" : "subtle"}
+                w="100%"
+                size="lg"
+                aria-label={tab.label}
+                aria-current={activeTab === tab.id ? "page" : undefined}
+                onClick={() => {
+                  onActiveTabChange(tab.id);
+                  onCollapsedChange(false);
                 }}
-              />
-            ) : null}
+              >
+                <Text fz={11} fw={700} inherit>
+                  {tab.short}
+                </Text>
+              </ActionIcon>
+            ))}
+          </Stack>
+        ) : (
+          <Tabs
+            value={activeTab}
+            onChange={(value) => value && onActiveTabChange(value as AdminMonitorRailTab)}
+            keepMounted={false}
+            styles={TAB_LAYOUT}
+          >
+            <Tabs.List aria-label="Monitor sections">
+              {TABS.map((tab) => (
+                <Tabs.Tab key={tab.id} value={tab.id}>
+                  {tab.label}
+                </Tabs.Tab>
+              ))}
+            </Tabs.List>
 
-            {activeTab === "chat" && controller.sessionId && controller.uid ? (
-              <ChatPanelBody
-                messages={controller.chatMessages}
-                pendingQuestions={controller.pendingQuestions}
-                sessionRules={sessionRules}
-                sessionId={controller.sessionId}
-                senderUid={controller.uid}
-                senderRole={chatDisplayRole}
-                isHider={chatDisplayRole === "hider"}
-                onAnswerQuestion={async () => undefined}
-                readOnly
-              />
-            ) : null}
+            <Tabs.Panel value="overview">
+              <ScrollArea h="100%">
+                <Box p="sm">
+                  <OverviewPanel
+                    session={session}
+                    syncStatusLabel={syncStatusLabel}
+                    annotationCount={controller.annotations.length}
+                    seekerCount={controller.seekerLocations.length}
+                    hiderCount={controller.hiderLocations.length}
+                    questionCount={controller.pendingQuestions.length}
+                    messageCount={controller.chatMessages.length}
+                    timerState={controller.timer.timerState}
+                  />
+                </Box>
+              </ScrollArea>
+            </Tabs.Panel>
 
-            {activeTab === "sync" ? (
-              <SyncPanel
-                status={controller.syncStatus.status}
-                queuedWrites={controller.syncStatus.queuedWrites}
-                lastSyncError={controller.syncStatus.lastSyncError}
-                remoteUpdateNotice={controller.syncStatus.remoteUpdateNotice}
-              />
-            ) : null}
+            <Tabs.Panel value="log">
+              <ScrollArea h="100%">
+                <SessionLogBody
+                  events={events}
+                  annotations={controller.annotations}
+                  onDelete={() => undefined}
+                  onEdit={() => undefined}
+                  readOnly
+                  compact
+                  onSelect={(id) => {
+                    setSelectedAnnotationId(id);
+                    markAnnotationPulse(id);
+                  }}
+                />
+              </ScrollArea>
+            </Tabs.Panel>
 
-            {activeTab === "map" ? (
-              <MapPanel
-                mapViewport={mapViewport}
-                layerVisibility={controller.layerVisibility}
-                effectiveBasemapStyle={controller.effectiveBasemapStyle}
-                lowPowerMode={controller.lowPowerMode}
-                onLayerVisibilityChange={onLayerVisibilityChange}
-                onMapStyleChange={controller.handleMapStyleChange}
-                onLowPowerModeChange={onLowPowerModeChange}
-              />
-            ) : null}
+            <Tabs.Panel value="chat">
+              {controller.sessionId && controller.uid ? (
+                <Box p="sm" h="100%">
+                  <ChatPanelBody
+                    messages={controller.chatMessages}
+                    pendingQuestions={controller.pendingQuestions}
+                    sessionRules={sessionRules}
+                    sessionId={controller.sessionId}
+                    senderUid={controller.uid}
+                    senderRole={chatDisplayRole}
+                    isHider={chatDisplayRole === "hider"}
+                    onAnswerQuestion={async () => undefined}
+                    readOnly
+                  />
+                </Box>
+              ) : null}
+            </Tabs.Panel>
 
-            {activeTab === "mod" ? (
-              <ModPanel
-                moderationBusy={moderationBusy}
-                moderationError={moderationError}
-                onModerationAction={onModerationAction}
-              />
-            ) : null}
-          </div>
-        </>
-      )}
-    </aside>
+            <Tabs.Panel value="sync">
+              <ScrollArea h="100%">
+                <Box p="sm">
+                  <SyncPanel
+                    status={controller.syncStatus.status}
+                    queuedWrites={controller.syncStatus.queuedWrites}
+                    lastSyncError={controller.syncStatus.lastSyncError}
+                    remoteUpdateNotice={controller.syncStatus.remoteUpdateNotice}
+                  />
+                </Box>
+              </ScrollArea>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="map">
+              <ScrollArea h="100%">
+                <Box p="sm">
+                  <MapPanel
+                    mapViewport={mapViewport}
+                    layerVisibility={controller.layerVisibility}
+                    effectiveBasemapStyle={controller.effectiveBasemapStyle}
+                    lowPowerMode={controller.lowPowerMode}
+                    onLayerVisibilityChange={onLayerVisibilityChange}
+                    onMapStyleChange={controller.handleMapStyleChange}
+                    onLowPowerModeChange={onLowPowerModeChange}
+                  />
+                </Box>
+              </ScrollArea>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="mod">
+              <Box p="sm">
+                <ModPanel
+                  moderationBusy={moderationBusy}
+                  moderationError={moderationError}
+                  onModerationAction={onModerationAction}
+                />
+              </Box>
+            </Tabs.Panel>
+          </Tabs>
+        )}
+      </Stack>
+    </Group>
   );
 }
