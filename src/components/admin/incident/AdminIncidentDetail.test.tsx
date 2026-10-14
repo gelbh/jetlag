@@ -231,7 +231,12 @@ describe("AdminIncidentDetail", () => {
     );
 
     expect(screen.getByText("inc-abc12345")).toBeInTheDocument();
-    expect(screen.getByText("OPEN")).toBeInTheDocument();
+    // Same tone as the incident's row in Needs you (new = mispunch).
+    expect(screen.getByText("OPEN").closest("[data-tone]")).toHaveAttribute(
+      "data-tone",
+      "mispunch",
+    );
+    expect(screen.getByText("7G2LJH")).toBeInTheDocument();
     expect(screen.getByText(/Pinned prompt for admins/i)).toBeInTheDocument();
     expect(screen.getByText("Still stuck on the map")).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Chat" })).toHaveAttribute("aria-selected", "true");
@@ -443,8 +448,7 @@ describe("AdminOpsDesk gate + mobile stack", () => {
     renderDesk("/admin/incidents/inc-abc12345");
 
     expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "mobile");
-    expect(screen.getByTestId("admin-ops-mobile")).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Incidents" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("radio", { name: "Needs you" })).toBeChecked();
     expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
   });

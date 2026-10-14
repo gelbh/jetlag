@@ -50,9 +50,9 @@ export function AdminMonitorPane({
   }
 
   return (
-    // The class carries the map shell's container query and the stacking context that keeps the rail under the Needs you drawer.
+    // Container for the rail's cqi width; the stacking context keeps the rail under the Needs you drawer.
     <Stack
-      className="admin-monitor-pane"
+      style={{ containerType: "inline-size", isolation: "isolate" }}
       gap={0}
       h="100%"
       mih={0}

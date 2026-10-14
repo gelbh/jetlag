@@ -1,4 +1,4 @@
-import { Alert, Button, Group, NativeSelect, Stack, Text, TextInput } from "@mantine/core";
+import { Alert, Button, Group, NativeSelect, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useState } from "react";
 import { APP_VERSION } from "../../../domain/device/changelog";
 import type {
@@ -129,15 +129,17 @@ export function AdminIncidentActions({
   };
 
   return (
-    <aside className="jl-scroll jl-incident-actions" aria-label="Incident actions">
-      <div className="jl-incident-pane-header">
-        <h2 className="jl-incident-pane-title">Actions</h2>
-      </div>
+    <Stack component="aside" gap="md" aria-label="Incident actions">
+      <Title order={2} size="h5">
+        Actions
+      </Title>
 
-      <Stack className="jl-incident-module" gap="sm">
-        <h3 className="jl-incident-module-title">0 · Queue</h3>
+      <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
+        <Title order={3} size="h6">
+          0 · Queue
+        </Title>
         {statusError ? (
-          <Alert color="red" role="alert">
+          <Alert data-tone="mispunch" role="alert">
             {statusError}
           </Alert>
         ) : null}
@@ -178,14 +180,16 @@ export function AdminIncidentActions({
           </Button>
         ) : null}
         {!canClose && !canReopen ? (
-          <p className="jl-incident-module-hint">
+          <Text size="xs" c="dimmed">
             Select an incident to resolve, dismiss, or reopen.
-          </p>
+          </Text>
         ) : null}
       </Stack>
 
-      <Stack className="jl-incident-module" gap="sm">
-        <h3 className="jl-incident-module-title">1 · Apply mitigation</h3>
+      <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
+        <Title order={3} size="h6">
+          1 · Apply mitigation
+        </Title>
         <NativeSelect
           label="Mitigation"
           aria-label="Mitigation type"
@@ -200,7 +204,7 @@ export function AdminIncidentActions({
           }))}
         />
         {mitigationError ? (
-          <Alert color="red" role="alert">
+          <Alert data-tone="mispunch" role="alert">
             {mitigationError}
           </Alert>
         ) : null}
@@ -228,8 +232,10 @@ export function AdminIncidentActions({
         openExternalUrlFn={openExternalUrlFn}
       />
 
-      <Stack className="jl-incident-module" gap="sm">
-        <h3 className="jl-incident-module-title">3 · Publish hotfix</h3>
+      <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
+        <Title order={3} size="h6">
+          3 · Publish hotfix
+        </Title>
         <TextInput
           label="Hotfix target version"
           value={toVersion}
@@ -248,7 +254,7 @@ export function AdminIncidentActions({
           onChange={(event) => setGraceSeconds(event.currentTarget.value)}
         />
         {hotfixError ? (
-          <Alert color="red" role="alert">
+          <Alert data-tone="mispunch" role="alert">
             {hotfixError}
           </Alert>
         ) : null}
@@ -266,6 +272,6 @@ export function AdminIncidentActions({
           {hotfixBusy ? "Publishing…" : "Publish hotfix"}
         </Button>
       </Stack>
-    </aside>
+    </Stack>
   );
 }

@@ -1,6 +1,7 @@
 import { Alert, Badge, Button, Divider, Drawer, Select } from "@mantine/core";
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { AdminDiagRow } from "@/components/admin/shared/AdminDiagRow";
 import { AdminRegion } from "@/components/admin/shared/AdminRegion";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
 import { PunchTime } from "@/components/admin/shared/PunchTime";
@@ -18,6 +19,20 @@ vi.mock("@mantine/hooks", async (importActual) => ({
 }));
 
 describe("admin shared primitives", () => {
+  it("renders a selectable diagnostics term/value pair outside the admin world", () => {
+    // Standalone /map renders the monitor panels under the player theme.
+    renderWithAppUi(
+      <dl>
+        <AdminDiagRow label="Bounds">51.5, -0.12</AdminDiagRow>
+      </dl>,
+    );
+    const term = screen.getByText("Bounds");
+    const value = screen.getByText("51.5, -0.12");
+    expect(term.tagName).toBe("DT");
+    expect(value.tagName).toBe("DD");
+    expect(term.parentElement).toHaveStyle({ userSelect: "text" });
+  });
+
   it("renders the session code in one form at every size", () => {
     renderWithAppUi(
       <AdminWorld>

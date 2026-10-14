@@ -3,6 +3,7 @@ import type { MapViewportState } from "@/components/map/chrome/MapViewportTracke
 import { LayerVisibilityGrid } from "@/components/session/mapChrome/LayerVisibilityGrid";
 import type { MapStyle } from "@/domain/map/mapBasemaps";
 import type { LayerVisibility } from "@/state/sessionStore";
+import { AdminDiagRow } from "../../../components/admin/shared/AdminDiagRow";
 
 interface MapPanelProps {
   mapViewport: MapViewportState | null;
@@ -44,14 +45,8 @@ export function MapPanel({
           Viewport
         </Title>
         <Stack component="dl" gap="xs" m={0}>
-          <div className="admin-diag-row">
-            <dt>Bounds</dt>
-            <dd>{formatBounds(mapViewport)}</dd>
-          </div>
-          <div className="admin-diag-row">
-            <dt>Basemap</dt>
-            <dd>{effectiveBasemapStyle}</dd>
-          </div>
+          <AdminDiagRow label="Bounds">{formatBounds(mapViewport)}</AdminDiagRow>
+          <AdminDiagRow label="Basemap">{effectiveBasemapStyle}</AdminDiagRow>
         </Stack>
       </Stack>
 

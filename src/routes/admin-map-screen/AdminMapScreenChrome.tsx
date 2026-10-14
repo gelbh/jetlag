@@ -13,6 +13,7 @@ import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayStat
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
+import { adminShellCell } from "./adminShellLayout";
 
 interface AdminMapScreenChromeProps {
   session: SessionRecord;
@@ -52,7 +53,7 @@ export function AdminMapScreenChrome({
       <MapScreenChromeSlots
         layout="fragments"
         header={
-          <header className="admin-map-shell__top" aria-label="Monitor status">
+          <header data-shell-cell="top" aria-label="Monitor status" style={adminShellCell.top}>
             <Paper radius={0} px="sm" py={4} style={{ pointerEvents: "auto" }}>
               <Group gap="sm" wrap="nowrap">
                 <Box miw={0} flex={1}>

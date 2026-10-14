@@ -1,7 +1,6 @@
 /* map-shell.css: map shell and status chrome */
 @layer components {
   .jl-stamp-code,
-  .admin-diag-row,
   .jl-game-chat-scroll {
     user-select: text;
     -webkit-touch-callout: default;
@@ -29,12 +28,6 @@
   html.jl-standalone-shell .map-screen-shell {
     min-height: 100vh;
     min-height: 100lvh;
-  }
-
-  .admin-monitor-pane .map-screen-shell {
-    position: absolute;
-    inset: 0;
-    min-height: 0;
   }
 
   /* Phone shell column: keep map chrome inside the 440px host (not viewport-fixed). */
@@ -197,99 +190,5 @@
       flex-direction: column;
       align-items: stretch;
     }
-  }
-
-  /* Admin map: mission-control layout (tablet/desktop) */
-  .admin-monitor-pane {
-    container-type: inline-size;
-    container-name: admin-monitor;
-    /* Keeps the rail's z-index under desk overlays (Needs you drawer). */
-    isolation: isolate;
-  }
-
-  @media (width >= 1024px) {
-    .admin-monitor-pane {
-      height: 100%;
-      min-height: 0;
-    }
-  }
-
-  .admin-map-shell {
-    --admin-rail-width: var(--ops-rail-width);
-    --admin-rail-collapsed-width: var(--ops-rail-collapsed-width);
-    --admin-status-height: 2.5rem;
-    --admin-map-control-inset-right: 0px;
-  }
-
-  /* cqi, not %: keeps the grid track and --admin-map-control-inset-right equal; % would resolve against whichever box consumes the inset. */
-  .admin-monitor-pane .admin-map-shell {
-    --admin-rail-width: min(var(--ops-rail-width), 50cqi);
-  }
-
-  .admin-map-shell--wide {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, var(--admin-rail-width));
-    grid-template-rows: auto minmax(0, 1fr);
-
-    --admin-map-control-inset-right: var(--admin-rail-width);
-  }
-
-  .admin-map-shell--wide.admin-map-shell--rail-collapsed {
-    grid-template-columns: minmax(0, 1fr) minmax(0, var(--admin-rail-collapsed-width));
-
-    --admin-map-control-inset-right: var(--admin-rail-collapsed-width);
-  }
-
-  .admin-map-shell__top {
-    grid-column: 1;
-    grid-row: 1;
-    min-width: 0;
-    z-index: var(--z-dock);
-  }
-
-  .admin-map-shell__map {
-    grid-column: 1;
-    grid-row: 2;
-    position: relative;
-    min-width: 0;
-    min-height: 0;
-    /* Fixed containing block for map chrome docks ([data-map-dock-frame]). */
-    contain: layout;
-  }
-
-  .admin-map-shell__rail {
-    grid-column: 2;
-    grid-row: 1 / -1;
-    min-width: 0;
-    min-height: 0;
-    z-index: var(--z-panel);
-  }
-
-  .admin-map-shell--compact .admin-map-shell__map {
-    position: absolute;
-    inset: 0;
-  }
-
-  .admin-diag-row {
-    display: grid;
-    grid-template-columns: 7rem 1fr;
-    gap: 0.5rem;
-    font-size: 0.8125rem;
-  }
-
-  .admin-diag-row dt {
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--color-ink-dim);
-  }
-
-  .admin-diag-row dd {
-    margin: 0;
-    overflow-wrap: anywhere;
-    font-family: ui-monospace, monospace;
-    color: var(--color-ink);
   }
 }

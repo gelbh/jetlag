@@ -1,15 +1,29 @@
-import { Alert, Button, Group, Tabs, TextInput } from "@mantine/core";
+import {
+  Alert,
+  Button,
+  Group,
+  Paper,
+  ScrollArea,
+  Stack,
+  Tabs,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { useMemo, useState } from "react";
 import { formatFreshnessAge } from "../../../domain/admin/formatAdminFreshness";
+import { incidentProgress } from "../../../domain/admin/incidentProgress";
 import type { IncidentMessageRecord, IncidentRecord } from "../../../domain/incident/incidentTypes";
 import { useIncidentThread } from "../../../hooks/incident/useIncidentThread";
 import { useStickScrollToBottom } from "../../../hooks/ui/useStickScrollToBottom";
-import {
-  incidentStatusChipLabel,
-  incidentStatusChipTone,
-} from "../../../services/admin/adminIncidents";
+import { incidentStatusChipLabel } from "../../../services/admin/adminIncidents";
+import { incidentProgressTone } from "../../../theme/adminTone";
 import { SupportAgentChat } from "../../incident/SupportAgentChat";
+import { AdminDiagRow } from "../shared/AdminDiagRow";
+import { AdminEmptyState } from "../shared/AdminEmptyState";
+import { SessionCode } from "../shared/SessionCode";
+import { StatusMark } from "../shared/StatusMark";
 import { AdminHotfixThread } from "./AdminHotfixThread";
+import { AdminIncidentMessage, formatIncidentClock } from "./AdminIncidentMessage";
 
 export type AdminIncidentDetailTab = "chat" | "support" | "hotfix" | "diagnostics" | "timeline";
 
@@ -48,18 +62,12 @@ function senderLabel(sender: IncidentMessageRecord["sender"]): string {
   }
 }
 
-function formatClock(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return iso || "-";
-  }
-  return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
-}
+const detailFrame = {
+  gap: "xs",
+  flex: 1,
+  mih: 0,
+  style: { overflow: "hidden" },
+} as const;
 
 export function AdminIncidentDetail({
   incidentId,
@@ -73,12 +81,9 @@ export function AdminIncidentDetail({
 }: AdminIncidentDetailProps) {
   if (!incidentId) {
     return (
-      <div className="jl-incident-detail" data-testid="admin-incident-detail">
-        <div className="jl-incident-empty">
-          <p className="jl-incident-empty-title">{emptyTitle}</p>
-          <p className="jl-incident-empty-body">{emptyBody}</p>
-        </div>
-      </div>
+      <Stack {...detailFrame} data-testid="admin-incident-detail">
+        <AdminEmptyState title={emptyTitle} body={emptyBody} />
+      </Stack>
     );
   }
 
@@ -111,6 +116,8 @@ function AdminIncidentDetailBody({
   const sendMessage = onSendOverride ?? live.sendMessage;
 
   const [tab, setTab] = useState<AdminIncidentDetailTab>("chat");
+  // Resolved-today vs closed only needs the time the detail opened.
+  const [openedAtMs] = useState(() => Date.now());
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef = useStickScrollToBottom(`${tab}:${messages.length}`);
@@ -160,26 +167,23 @@ function AdminIncidentDetailBody({
 
   if (error && !incident) {
     return (
-      <div className="jl-incident-detail" data-testid="admin-incident-detail">
-        <Alert className="jl-incident-empty" color="red" title="Incident error" role="alert">
+      <Stack {...detailFrame} data-testid="admin-incident-detail">
+        <Alert data-tone="mispunch" title="Incident error" role="alert">
           {error.message}
         </Alert>
-      </div>
+      </Stack>
     );
   }
 
   if (!incident) {
     return (
-      <div className="jl-incident-detail" data-testid="admin-incident-detail">
-        <div className="jl-incident-empty" aria-busy="true">
-          <p className="jl-incident-empty-title">Loading</p>
-          <p className="jl-incident-empty-body">Opening incident…</p>
-        </div>
-      </div>
+      <Stack {...detailFrame} data-testid="admin-incident-detail" aria-busy="true">
+        <AdminEmptyState title="Loading" body="Opening incident…" />
+      </Stack>
     );
   }
 
-  const tone = incidentStatusChipTone(incident.status);
+  const sessionCode = incident.sessionCode?.trim().toUpperCase();
 
   const send = async () => {
     const text = draft.trim();
@@ -196,19 +200,25 @@ function AdminIncidentDetailBody({
   };
 
   return (
-    <div className="jl-incident-detail" data-testid="admin-incident-detail">
-      <header className="jl-incident-detail-header">
-        <div>
-          <p className="jl-incident-detail-id">{incident.id}</p>
-          <p className="jl-incident-detail-meta">
-            Session {incident.sessionCode?.trim() ? incident.sessionCode.trim().toUpperCase() : "-"}{" "}
-            · {formatFreshnessAge(incident.updatedAt || incident.createdAt)}
-          </p>
-        </div>
-        <span className={`jl-incident-chip jl-incident-chip--${tone}`}>
-          {incidentStatusChipLabel(incident.status)}
-        </span>
-      </header>
+    <Stack {...detailFrame} data-testid="admin-incident-detail">
+      <Group component="header" justify="space-between" align="flex-start" wrap="nowrap" gap="xs">
+        <Stack gap={2} miw={0}>
+          <Text size="sm" ff="monospace" truncate="end" title={incident.id}>
+            {incident.id}
+          </Text>
+          <Group gap="xs" wrap="nowrap">
+            {sessionCode ? <SessionCode code={sessionCode} size="sm" /> : null}
+            <Text size="xs" c="dimmed">
+              {sessionCode ? "" : "No session · "}
+              {formatFreshnessAge(incident.updatedAt || incident.createdAt)}
+            </Text>
+          </Group>
+        </Stack>
+        <StatusMark
+          tone={incidentProgressTone[incidentProgress(incident, openedAtMs)]}
+          label={incidentStatusChipLabel(incident.status)}
+        />
+      </Group>
 
       <Tabs
         value={tab}
@@ -224,90 +234,93 @@ function AdminIncidentDetailBody({
           }
         }}
       >
-        <Tabs.List
-          className="jl-scroll jl-incident-tabs"
-          aria-label="Incident views"
-          style={{ flexWrap: "nowrap", overflowX: "auto" }}
-        >
+        <Tabs.List aria-label="Incident views" style={{ flexWrap: "nowrap", overflowX: "auto" }}>
           {DETAIL_TABS.map(({ value, label }) => (
-            <Tabs.Tab
-              key={value}
-              value={value}
-              className={`jl-incident-tab${tab === value ? " jl-incident-tab--active" : ""}`}
-            >
+            <Tabs.Tab key={value} value={value} style={{ flexShrink: 0 }}>
               {label}
             </Tabs.Tab>
           ))}
         </Tabs.List>
       </Tabs>
 
-      <div className="jl-incident-detail-body">
+      <Stack gap="xs" flex={1} mih={0} style={{ overflow: "hidden" }}>
         {tab === "chat" ? (
           <>
             {incident.adminPrompt.trim() ? (
-              <section className="jl-scroll jl-incident-prompt" aria-label="Admin prompt">
-                <p className="jl-incident-prompt-label">System (pinned) - admin prompt</p>
-                <pre className="jl-incident-prompt-body">{incident.adminPrompt}</pre>
-              </section>
+              <Paper component="section" aria-label="Admin prompt" p="xs">
+                <Text size="xs" fw={600} tt="uppercase" lts="0.04em" c="dimmed">
+                  System (pinned) - admin prompt
+                </Text>
+                <ScrollArea.Autosize mah="12rem" type="auto">
+                  <Text
+                    component="pre"
+                    m={0}
+                    size="xs"
+                    ff="monospace"
+                    style={{ whiteSpace: "pre-wrap" }}
+                  >
+                    {incident.adminPrompt}
+                  </Text>
+                </ScrollArea.Autosize>
+              </Paper>
             ) : null}
 
             {error ? (
-              <Alert color="red" role="alert">
+              <Alert data-tone="mispunch" role="alert">
                 {error.message}
               </Alert>
             ) : null}
 
-            <div className="jl-incident-chat">
-              <div className="jl-scroll jl-incident-chat-scroll">
+            <ScrollArea flex={1} mih={0} type="auto" offsetScrollbars>
+              <Stack gap="xs">
                 {chatMessages.length === 0 ? (
-                  <p className="text-sm text-ink-dim">No messages yet.</p>
+                  <Text size="sm" c="dimmed">
+                    No messages yet.
+                  </Text>
                 ) : (
                   chatMessages.map((message) => (
-                    <div
+                    <AdminIncidentMessage
                       key={message.id}
-                      className={`jl-incident-msg jl-incident-msg--${message.sender}`}
-                    >
-                      <p className="jl-incident-msg-sender">
-                        {senderLabel(message.sender)} · {formatClock(message.createdAt)}
-                      </p>
-                      <p className="jl-incident-msg-text">{message.text}</p>
-                    </div>
+                      tone={message.sender}
+                      meta={`${senderLabel(message.sender)} · ${formatIncidentClock(message.createdAt)}`}
+                      text={message.text}
+                    />
                   ))
                 )}
                 <div ref={bottomRef} />
-              </div>
+              </Stack>
+            </ScrollArea>
 
-              {sendError ? (
-                <Alert color="red" role="alert">
-                  {sendError}
-                </Alert>
-              ) : null}
+            {sendError ? (
+              <Alert data-tone="mispunch" role="alert">
+                {sendError}
+              </Alert>
+            ) : null}
 
-              <Group className="jl-incident-composer" gap="xs" wrap="nowrap" align="flex-end">
-                <TextInput
-                  style={{ flex: 1 }}
-                  value={draft}
-                  onChange={(event) => setDraft(event.currentTarget.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      void send();
-                    }
-                  }}
-                  placeholder="Message player…"
-                  aria-label="Incident message"
-                  disabled={sending}
-                />
-                <Button
-                  type="button"
-                  tt="uppercase"
-                  disabled={sending || draft.trim().length === 0}
-                  onClick={() => void send()}
-                >
-                  Send
-                </Button>
-              </Group>
-            </div>
+            <Group gap="xs" wrap="nowrap" align="flex-end">
+              <TextInput
+                style={{ flex: 1 }}
+                value={draft}
+                onChange={(event) => setDraft(event.currentTarget.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void send();
+                  }
+                }}
+                placeholder="Message player…"
+                aria-label="Incident message"
+                disabled={sending}
+              />
+              <Button
+                type="button"
+                tt="uppercase"
+                disabled={sending || draft.trim().length === 0}
+                onClick={() => void send()}
+              >
+                Send
+              </Button>
+            </Group>
           </>
         ) : null}
 
@@ -316,85 +329,88 @@ function AdminIncidentDetailBody({
         {tab === "hotfix" ? <AdminHotfixThread incidentId={incidentId} /> : null}
 
         {tab === "diagnostics" ? (
-          <dl className="jl-scroll jl-incident-diag-list">
-            {(
-              [
-                ["Route", incident.diagnostics.route],
-                ["App version", incident.diagnostics.appVersion],
-                ["Platform", incident.diagnostics.platform],
-                ["Online", incident.diagnostics.online ? "yes" : "no"],
-                ["Visibility", incident.diagnostics.visibilityState],
-                ["Player role", incident.diagnostics.playerRole ?? "-"],
-                ["Session id", incident.diagnostics.sessionId ?? "-"],
-                ["Reporter uid", incident.diagnostics.uid ?? "-"],
-                ["Reported at", incident.diagnostics.reportedAt],
+          <ScrollArea flex={1} mih={0} type="auto" offsetScrollbars>
+            <Stack component="dl" gap="xs" m={0}>
+              {(
                 [
-                  "Last error",
-                  incident.diagnostics.lastClientErrors[0]
-                    ? `${incident.diagnostics.lastClientErrors[0].name}${
-                        incident.diagnostics.lastClientErrors[0].message
-                          ? `: ${incident.diagnostics.lastClientErrors[0].message}`
-                          : ""
-                      }`
-                    : "-",
-                ],
-                [
-                  "Recent ops",
-                  incident.diagnostics.recentOps.length > 0
-                    ? incident.diagnostics.recentOps.join(", ")
-                    : "-",
-                ],
-                ["User agent", incident.diagnostics.userAgent || "-"],
-                ["Player note", incident.playerNote?.trim() || "-"],
-                ...(incident.posthogIssue
-                  ? [
-                      [
-                        "PostHog issue",
-                        incident.posthogIssue.url ? (
-                          <a
-                            key="posthog-issue"
-                            href={incident.posthogIssue.url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {incident.posthogIssue.name}
-                          </a>
-                        ) : (
-                          incident.posthogIssue.name
-                        ),
-                      ] as const,
-                    ]
-                  : []),
-              ] as const
-            ).map(([label, value]) => (
-              <div key={label} className="admin-diag-row">
-                <dt>{label}</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
-          </dl>
+                  ["Route", incident.diagnostics.route],
+                  ["App version", incident.diagnostics.appVersion],
+                  ["Platform", incident.diagnostics.platform],
+                  ["Online", incident.diagnostics.online ? "yes" : "no"],
+                  ["Visibility", incident.diagnostics.visibilityState],
+                  ["Player role", incident.diagnostics.playerRole ?? "-"],
+                  ["Session id", incident.diagnostics.sessionId ?? "-"],
+                  ["Reporter uid", incident.diagnostics.uid ?? "-"],
+                  ["Reported at", incident.diagnostics.reportedAt],
+                  [
+                    "Last error",
+                    incident.diagnostics.lastClientErrors[0]
+                      ? `${incident.diagnostics.lastClientErrors[0].name}${
+                          incident.diagnostics.lastClientErrors[0].message
+                            ? `: ${incident.diagnostics.lastClientErrors[0].message}`
+                            : ""
+                        }`
+                      : "-",
+                  ],
+                  [
+                    "Recent ops",
+                    incident.diagnostics.recentOps.length > 0
+                      ? incident.diagnostics.recentOps.join(", ")
+                      : "-",
+                  ],
+                  ["User agent", incident.diagnostics.userAgent || "-"],
+                  ["Player note", incident.playerNote?.trim() || "-"],
+                  ...(incident.posthogIssue
+                    ? [
+                        [
+                          "PostHog issue",
+                          incident.posthogIssue.url ? (
+                            <a
+                              key="posthog-issue"
+                              href={incident.posthogIssue.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {incident.posthogIssue.name}
+                            </a>
+                          ) : (
+                            incident.posthogIssue.name
+                          ),
+                        ] as const,
+                      ]
+                    : []),
+                ] as const
+              ).map(([label, value]) => (
+                <AdminDiagRow key={label} label={label}>
+                  {value}
+                </AdminDiagRow>
+              ))}
+            </Stack>
+          </ScrollArea>
         ) : null}
 
         {tab === "timeline" ? (
           timelineItems.length === 0 ? (
-            <div className="jl-incident-empty">
-              <p className="jl-incident-empty-title">No timeline events</p>
-              <p className="jl-incident-empty-body">
-                Mitigations and hotfixes appear here when applied.
-              </p>
-            </div>
+            <AdminEmptyState
+              title="No timeline events"
+              body="Mitigations and hotfixes appear here when applied."
+            />
           ) : (
-            <ul className="jl-scroll jl-incident-timeline">
-              {timelineItems.map((item) => (
-                <li key={item.id} className="jl-incident-timeline-item">
-                  <span className="jl-incident-timeline-time">{formatClock(item.createdAt)}</span>
-                  <p className="jl-incident-timeline-text">{item.text}</p>
-                </li>
-              ))}
-            </ul>
+            <ScrollArea flex={1} mih={0} type="auto" offsetScrollbars>
+              <Stack component="ul" gap="xs" m={0} p={0} style={{ listStyle: "none" }}>
+                {timelineItems.map((item) => (
+                  <Group component="li" key={item.id} gap="sm" wrap="nowrap" align="baseline">
+                    <Text size="xs" ff="monospace" c="dimmed" style={{ flexShrink: 0 }}>
+                      {formatIncidentClock(item.createdAt)}
+                    </Text>
+                    <Text size="sm">{item.text}</Text>
+                  </Group>
+                ))}
+              </Stack>
+            </ScrollArea>
           )
         ) : null}
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 }

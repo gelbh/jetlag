@@ -13,6 +13,7 @@ import {
   Paper,
   Popover,
   Portal,
+  SegmentedControl,
   Select,
   Table,
   Tabs,
@@ -275,6 +276,7 @@ export const adminTheme: MantineThemeOverride = {
       styles: {
         navbar: { borderInlineEnd: rule },
         aside: { borderInlineStart: rule },
+        footer: { borderTop: rule, backgroundColor: "var(--adm-paper)" },
       },
     }),
     Divider: Divider.extend({
@@ -291,6 +293,31 @@ export const adminTheme: MantineThemeOverride = {
         control: { fontWeight: 600 },
         chevron: { color: "var(--adm-ink)" },
       },
+    }),
+    SegmentedControl: SegmentedControl.extend({
+      defaultProps: { radius: 0 },
+      styles: {
+        root: { backgroundColor: "var(--adm-paper)", border: rule, padding: 2 },
+        // 44px touch target (spec #9); the selected plate is reversed in overprint.
+        label: {
+          minHeight: "2.75rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--adm-font)",
+          fontWeight: 600,
+          letterSpacing: "normal",
+        },
+      },
+      vars: () => ({
+        root: {
+          "--sc-color": "var(--adm-overprint)",
+          "--sc-label-color": "var(--adm-overprint-ink)",
+          // Mantine colours inactive labels gray-7 (light) / dark-1 (dark); inline color would also beat the active rule.
+          "--mantine-color-gray-7": "var(--adm-ink)",
+          "--mantine-color-dark-1": "var(--adm-ink)",
+        },
+      }),
     }),
     Paper: Paper.extend({
       defaultProps: { radius: 0, shadow: "none", withBorder: true },
