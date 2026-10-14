@@ -97,7 +97,7 @@ export function AdminStartList({
   };
 
   // Not default-prevented up front: a dialog keeps its own `/`, `j` and `k` keystrokes.
-  const unlessDialog = (run: () => void) => (event: KeyboardEvent) => {
+  const unlessDialog = (event: KeyboardEvent, run: () => void) => {
     if (dialogIsOpen()) return;
     event.preventDefault();
     run();
@@ -105,9 +105,9 @@ export function AdminStartList({
   const passive = { preventDefault: false };
 
   useHotkeys([
-    ["/", unlessDialog(() => searchRef.current?.focus()), passive],
-    ["j", unlessDialog(() => moveCursor(1)), passive],
-    ["k", unlessDialog(() => moveCursor(-1)), passive],
+    ["/", (event) => unlessDialog(event, () => searchRef.current?.focus()), passive],
+    ["j", (event) => unlessDialog(event, () => moveCursor(1)), passive],
+    ["k", (event) => unlessDialog(event, () => moveCursor(-1)), passive],
   ]);
 
   const loadMoreButton = hasMore ? (
