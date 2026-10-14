@@ -19,6 +19,7 @@ import {
   track,
   trackPageView,
   trackSessionEnded,
+  trackSessionLeaveAlreadyLeft,
 } from "./analytics";
 import { posthogBeforeSend } from "./posthogBeforeSend";
 
@@ -730,6 +731,15 @@ describe("analytics facade", () => {
     expect(posthogCapture).toHaveBeenCalledWith("session_ended", {
       reason: "host_end",
     });
+  });
+
+  it("trackSessionLeaveAlreadyLeft captures session_leave_already_left", () => {
+    writeAnalyticsConsent("granted");
+    resetAnalyticsForTests({ initialized: true });
+
+    trackSessionLeaveAlreadyLeft();
+
+    expect(posthogCapture).toHaveBeenCalledWith("session_leave_already_left", undefined);
   });
 
   it("skips pageviews for static assets and prerender paths", () => {

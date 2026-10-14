@@ -21,6 +21,7 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "invalid-argument:Access code required.",
   "resource-exhausted:Too many attempts. Try again later.",
   "permission-denied:Invalid access code.",
+  "permission-denied:Not allowed to view that role code.",
   "resource-exhausted:Too many recovery attempts. Try again tomorrow.",
   "failed-precondition:Incident has no linked session.",
   "invalid-argument:Invalid premium session payload.",
@@ -128,12 +129,41 @@ export function isExpectedFunctionsError(error) {
 }
 
 /**
- * True when capture should skip (expected UX errors or Overpass transport noise).
+ * Expected only for leaveSessionMembership (lowercased; gen2 K_SERVICE is
+ * lowercase). A leave by a non-member means the leave already happened;
+ * rematch/repair keep capturing. Assumes ungrouped default-codebase exports:
+ * grouped or codebase-prefixed deploys change K_SERVICE and the skip would
+ * stop matching.
+ */
+const LEAVE_FUNCTION_NAME = "leavesessionmembership";
+const LEAVE_MEMBERSHIP_KEY = "permission-denied:Session membership required.";
+
+/**
  * @param {unknown} error
+ * @param {string | null | undefined} name
  * @returns {boolean}
  */
-export function shouldSkipFunctionsException(error) {
-  return isExpectedFunctionsError(error) || isOverpassTransportNoise(error);
+function isExpectedLeaveError(error, name) {
+  return (
+    error instanceof HttpsError &&
+    typeof name === "string" &&
+    name.trim().toLowerCase() === LEAVE_FUNCTION_NAME &&
+    `${error.code}:${error.message}` === LEAVE_MEMBERSHIP_KEY
+  );
+}
+
+/**
+ * True when capture should skip (expected UX errors or Overpass transport noise).
+ * @param {unknown} error
+ * @param {string | null | undefined} [name] deployed function name, when known
+ * @returns {boolean}
+ */
+export function shouldSkipFunctionsException(error, name = null) {
+  return (
+    isExpectedFunctionsError(error) ||
+    isOverpassTransportNoise(error) ||
+    isExpectedLeaveError(error, name)
+  );
 }
 
 export function readAppVersion() {
@@ -248,14 +278,14 @@ export async function captureFunctionsExceptionAsync(error, options = {}) {
     return;
   }
 
-  if (shouldSkipFunctionsException(error)) {
-    return;
-  }
-
   const name =
     typeof options.name === "string" && options.name.trim()
       ? options.name.trim()
       : resolveDeployedFunctionName();
+
+  if (shouldSkipFunctionsException(error, name)) {
+    return;
+  }
 
   /** @type {Record<string, unknown>} */
   const properties = {};

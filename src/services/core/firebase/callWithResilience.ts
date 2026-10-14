@@ -43,7 +43,11 @@ export type CallWithResilienceOptions<Res = unknown> = {
 };
 
 /** Match a callable HttpsError by code (without `functions/`) and optional exact message. */
-export function isCallableError(error: unknown, code: string, message?: string): boolean {
+export function isCallableError(
+  error: unknown,
+  code: string,
+  message?: string,
+): error is FirebaseError {
   return (
     error instanceof FirebaseError &&
     error.code === `functions/${code}` &&
