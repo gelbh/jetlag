@@ -112,9 +112,11 @@ describe("thermometerQuestions", () => {
     const fiveKm = 5000;
     const fifteenKm = 15000;
 
-    expect(thermometerDistancePresetsForGameSize("medium", "metric")).toEqual(
-      expect.arrayContaining([oneKm, fiveKm, fifteenKm]),
-    );
+    expect(thermometerDistancePresetsForGameSize("medium", "metric")).toEqual([
+      oneKm,
+      fiveKm,
+      fifteenKm,
+    ]);
     expect(isThermometerDistanceAllowedForGameSize("medium", oneKm, "metric")).toBe(true);
     expect(isThermometerDistanceAllowedForGameSize("medium", fiveKm, "metric")).toBe(true);
     expect(isThermometerDistanceOptionAvailable("medium", oneKm, "metric")).toBe(true);
