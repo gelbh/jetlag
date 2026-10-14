@@ -1,6 +1,6 @@
+import { Button, Group, Stack, Switch, Title } from "@mantine/core";
 import type { MapViewportState } from "@/components/map/chrome/MapViewportTracker";
 import { LayerVisibilityGrid } from "@/components/session/mapChrome/LayerVisibilityGrid";
-import { toggleRowStyle } from "@/components/ui/entry/entryStyles";
 import type { MapStyle } from "@/domain/map/mapBasemaps";
 import type { LayerVisibility } from "@/state/sessionStore";
 
@@ -13,6 +13,11 @@ interface MapPanelProps {
   onMapStyleChange: (style: MapStyle) => void;
   onLowPowerModeChange: (enabled: boolean) => void;
 }
+
+const BASEMAPS: Array<{ style: MapStyle; label: string }> = [
+  { style: "standard", label: "Standard" },
+  { style: "satellite", label: "Satellite" },
+];
 
 function formatBounds(mapViewport: MapViewportState | null): string {
   if (!mapViewport) {
@@ -33,12 +38,12 @@ export function MapPanel({
   onLowPowerModeChange,
 }: MapPanelProps) {
   return (
-    <div className="space-y-4">
-      <section aria-label="Map viewport">
-        <h3 className="mb-2 font-display text-xs font-semibold uppercase tracking-wide text-ink-dim">
+    <Stack gap="md">
+      <Stack component="section" aria-label="Map viewport" gap="xs">
+        <Title order={3} size="sm">
           Viewport
-        </h3>
-        <dl className="space-y-2">
+        </Title>
+        <Stack component="dl" gap="xs" m={0}>
           <div className="admin-diag-row">
             <dt>Bounds</dt>
             <dd>{formatBounds(mapViewport)}</dd>
@@ -47,59 +52,42 @@ export function MapPanel({
             <dt>Basemap</dt>
             <dd>{effectiveBasemapStyle}</dd>
           </div>
-        </dl>
-      </section>
+        </Stack>
+      </Stack>
 
-      <section aria-label="Basemap and power">
-        <h3 className="mb-2 font-display text-xs font-semibold uppercase tracking-wide text-ink-dim">
+      <Stack component="section" aria-label="Basemap and power" gap="xs">
+        <Title order={3} size="sm">
           Display
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className={`min-h-9 rounded-md px-3 text-xs font-semibold uppercase tracking-wide ${
-              effectiveBasemapStyle === "standard"
-                ? "bg-action text-action-ink"
-                : "bg-surface-raised text-ink"
-            }`}
-            onClick={() => onMapStyleChange("standard")}
-          >
-            Standard
-          </button>
-          <button
-            type="button"
-            className={`min-h-9 rounded-md px-3 text-xs font-semibold uppercase tracking-wide ${
-              effectiveBasemapStyle === "satellite"
-                ? "bg-action text-action-ink"
-                : "bg-surface-raised text-ink"
-            }`}
-            onClick={() => onMapStyleChange("satellite")}
-          >
-            Satellite
-          </button>
-        </div>
-        <label className="mt-3 text-sm" style={toggleRowStyle}>
-          <span className="font-display text-xs font-semibold uppercase tracking-wide">
-            Low power mode
-          </span>
-          <input
-            type="checkbox"
-            checked={lowPowerMode}
-            onChange={(event) => onLowPowerModeChange(event.target.checked)}
-            className="h-5 w-5 accent-action"
-          />
-        </label>
-      </section>
+        </Title>
+        <Group gap="xs">
+          {BASEMAPS.map(({ style, label }) => (
+            <Button
+              key={style}
+              size="xs"
+              variant={effectiveBasemapStyle === style ? "filled" : "default"}
+              aria-pressed={effectiveBasemapStyle === style}
+              onClick={() => onMapStyleChange(style)}
+            >
+              {label}
+            </Button>
+          ))}
+        </Group>
+        <Switch
+          label="Low power mode"
+          checked={lowPowerMode}
+          onChange={(event) => onLowPowerModeChange(event.currentTarget.checked)}
+        />
+      </Stack>
 
-      <section aria-label="Layer visibility">
-        <h3 className="mb-2 font-display text-xs font-semibold uppercase tracking-wide text-ink-dim">
+      <Stack component="section" aria-label="Layer visibility" gap="xs">
+        <Title order={3} size="sm">
           Layers
-        </h3>
+        </Title>
         <LayerVisibilityGrid
           layerVisibility={layerVisibility}
           onLayerVisibilityChange={onLayerVisibilityChange}
         />
-      </section>
-    </div>
+      </Stack>
+    </Stack>
   );
 }
