@@ -1,10 +1,10 @@
 import { Badge, Group, ScrollArea, Text, Tooltip } from "@mantine/core";
-import { useReducedMotion } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
 import type {
   PendingQuestionRecord,
   PendingQuestionStatus,
 } from "@/domain/session/activity/sessionChat";
+import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import type { StatusTone } from "@/theme/adminTone";
 
 const STATUS: Record<PendingQuestionStatus, { tone: StatusTone; word: string }> = {
@@ -24,17 +24,25 @@ function idsOf(questions: readonly PendingQuestionRecord[]): ReadonlySet<string>
   return new Set(questions.map((q) => q.id));
 }
 
-export function AdminLegStrip({ questions }: { questions: readonly PendingQuestionRecord[] }) {
+export function AdminLegStrip({
+  sessionId,
+  questions,
+}: {
+  sessionId: string;
+  questions: readonly PendingQuestionRecord[];
+}) {
+  // The question listener hands back the previous course for a render after a switch.
+  const course = questions.filter((q) => q.sessionId === sessionId);
   // Questions on the board at mount, or in the first snapshot, are history, not punches.
   const [baseline, setBaseline] = useState<ReadonlySet<string> | null>(() =>
-    questions.length > 0 ? idsOf(questions) : null,
+    course.length > 0 ? idsOf(course) : null,
   );
-  const reduceMotion = useReducedMotion();
+  const { decorativeAnimate } = useMotionProfile();
   const viewportRef = useRef<HTMLDivElement>(null);
-  const legs = questions.toSorted((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const legs = course.toSorted((a, b) => a.createdAt.localeCompare(b.createdAt));
 
-  if (baseline === null && questions.length > 0) {
-    setBaseline(idsOf(questions));
+  if (baseline === null && course.length > 0) {
+    setBaseline(idsOf(course));
   }
 
   useEffect(() => {
@@ -43,12 +51,14 @@ export function AdminLegStrip({ questions }: { questions: readonly PendingQuesti
     return () => clearTimeout(timer);
   }, [baseline]);
 
-  // Keep the newest control in view as the course grows.
   useEffect(() => {
     const viewport = viewportRef.current;
     if (legs.length === 0 || !viewport) return;
-    viewport.scrollTo?.({ left: viewport.scrollWidth, behavior: reduceMotion ? "auto" : "smooth" });
-  }, [legs.length, reduceMotion]);
+    viewport.scrollTo?.({
+      left: viewport.scrollWidth,
+      behavior: decorativeAnimate ? "smooth" : "auto",
+    });
+  }, [legs.length, decorativeAnimate]);
 
   return (
     <ScrollArea type="hover" scrollbarSize={4} viewportRef={viewportRef}>
@@ -63,7 +73,7 @@ export function AdminLegStrip({ questions }: { questions: readonly PendingQuesti
             <Tooltip key={q.id} label={`${q.toolType}: ${q.promptText}`}>
               <Badge
                 role="listitem"
-                aria-label={`Question ${index + 1}, ${q.toolType}, ${word}`}
+                aria-label={`Question ${index + 1}, ${q.toolType}, ${word}: ${q.promptText}`}
                 data-tone={tone}
                 data-latest={index === legs.length - 1 || undefined}
                 data-stamp={stamp || undefined}
@@ -71,7 +81,7 @@ export function AdminLegStrip({ questions }: { questions: readonly PendingQuesti
                 miw={28}
                 px={6}
                 flex="none"
-                style={stamp && !reduceMotion ? STAMP : undefined}
+                style={stamp && decorativeAnimate ? STAMP : undefined}
               >
                 {index + 1}
               </Badge>
