@@ -11,10 +11,11 @@ function question(
   createdAt: string,
   status: PendingQuestionRecord["status"] = "answered",
   toolType: PendingQuestionRecord["toolType"] = "radar",
+  sessionId = "s1",
 ): PendingQuestionRecord {
   return {
     id,
-    sessionId: "s1",
+    sessionId,
     toolType,
     createdByUid: "seeker",
     createdAt,
@@ -27,10 +28,10 @@ function question(
 
 const T = (minute: number) => `2026-10-14T10:${String(minute).padStart(2, "0")}:00.000Z`;
 
-function strip(questions: PendingQuestionRecord[]) {
+function strip(questions: PendingQuestionRecord[], sessionId = "s1") {
   return (
     <AdminWorld>
-      <AdminLegStrip questions={questions} />
+      <AdminLegStrip key={sessionId} sessionId={sessionId} questions={questions} />
     </AdminWorld>
   );
 }
@@ -47,7 +48,7 @@ describe("AdminLegStrip", () => {
   it("runs from the start chip through questions in asked order", () => {
     renderWithAppUi(strip([question("b", T(5)), question("a", T(1)), question("c", T(9))]));
     expect(chips().map((chip) => chip.textContent)).toEqual(["S", "1", "2", "3"]);
-    expect(screen.getByLabelText("Question 1, radar, answered")).toBeInTheDocument();
+    expect(screen.getByLabelText("Question 1, radar, answered: Prompt a")).toBeInTheDocument();
   });
 
   it.each([
@@ -58,7 +59,7 @@ describe("AdminLegStrip", () => {
     ["cancelled", "neutral", "cancelled"],
   ] as const)("marks a %s question as %s", (status, tone, word) => {
     renderWithAppUi(strip([question("a", T(1), status, "thermometer")]));
-    const chip = screen.getByLabelText(`Question 1, thermometer, ${word}`);
+    const chip = screen.getByLabelText(`Question 1, thermometer, ${word}: Prompt a`);
     expect(chip).toHaveAttribute("data-tone", tone);
     if (status === "cancelled") {
       expect(chip).toHaveStyle({ textDecoration: "line-through" });
@@ -80,6 +81,25 @@ describe("AdminLegStrip", () => {
     const { rerender } = renderWithAppUi(strip([]));
     rerender(strip([question("a", T(1)), question("b", T(2)), question("c", T(3))]));
     expect(document.querySelectorAll("[data-stamp]")).toHaveLength(0);
+  });
+
+  it("does not stamp the next course's history while the last course's questions linger", () => {
+    const previous = [question("a", T(1)), question("b", T(2))];
+    const { rerender } = renderWithAppUi(strip(previous, "s1"));
+    // The question listener still returns the previous course for one render after a switch.
+    rerender(strip(previous, "s2"));
+    rerender(strip([], "s2"));
+    rerender(
+      strip(
+        [
+          question("x", T(1), "answered", "radar", "s2"),
+          question("y", T(2), "answered", "radar", "s2"),
+        ],
+        "s2",
+      ),
+    );
+    expect(document.querySelectorAll("[data-stamp]")).toHaveLength(0);
+    expect(chips()).toHaveLength(3);
   });
 
   it("stamps the first question of a fresh game once the strip has settled", () => {
