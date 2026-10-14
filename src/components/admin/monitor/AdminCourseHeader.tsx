@@ -1,4 +1,4 @@
-import { ActionIcon, Divider, Group, Tooltip } from "@mantine/core";
+import { ActionIcon, Group, Tooltip } from "@mantine/core";
 import { SessionTimerLabel } from "@/components/session/identity/SessionTimerLabel";
 import { HudHomeIcon } from "@/components/ui/brand/HudIcons";
 import type { SyncStatus } from "@/domain/device/sync/sync";
@@ -46,10 +46,11 @@ export function AdminCourseHeader({
       gap="md"
       wrap="nowrap"
       justify="space-between"
+      align="flex-start"
     >
-      <Group gap="md" wrap="nowrap" miw={0}>
+      {/* The course column can be narrow beside the rail: cells wrap rather than collide. */}
+      <Group gap="sm" wrap="wrap" miw={0} flex={1}>
         <SessionCode code={code} size="md" />
-        <Divider orientation="vertical" />
         <StatCell label="Clock" value={<SessionTimerLabel timerState={timerState} />} />
         <StatCell label="Seekers" value={seekerCount} />
         <StatCell label="Hiders" value={hiderCount} />

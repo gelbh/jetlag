@@ -171,13 +171,12 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
 
   const splitBoard = embeddedMonitor ? (
     <AdminSplitBoard
-      // Remount on width change so the fold resets to that width's default.
-      key={isWide ? "wide" : "narrow"}
       count={
         new Set([...(controller.session.memberUids ?? []), ...playerLocations.map((l) => l.uid)])
           .size
       }
-      defaultOpen={isWide}
+      // Folded: beside the rail the course map is ~18rem at 1440, and an open board hides it.
+      defaultOpen={false}
       placement={isWide ? "top" : "bottom"}
     >
       <AdminPlayerRoster session={controller.session} locations={playerLocations} />
