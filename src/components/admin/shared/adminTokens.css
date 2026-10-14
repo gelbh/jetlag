@@ -71,6 +71,25 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Monitor map keeps the player map look (spec non-goal: no restyling player map layers).
+ * :root captures the player values before [data-admin-world] shadows them; the player
+ * tokens are literal (no light-dark()), so the captured value is the player value.
+ */
+:root {
+  --adm-player-canvas: var(--color-canvas);
+  --adm-player-field-ink: var(--color-field-ink);
+  --adm-player-flag: var(--color-flag);
+  --adm-player-flag-ink: var(--color-flag-ink);
+}
+
+[data-admin-world] [data-player-map] {
+  --color-canvas: var(--adm-player-canvas);
+  --color-field-ink: var(--adm-player-field-ink);
+  --color-flag: var(--adm-player-flag);
+  --color-flag-ink: var(--adm-player-flag-ink);
+}
+
 @keyframes adm-punch {
   from {
     background-color: var(--adm-overprint-soft);

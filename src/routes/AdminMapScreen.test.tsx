@@ -182,6 +182,20 @@ describe("AdminMapScreen", () => {
     expect(screen.queryByRole("banner", { name: "Monitor status" })).not.toBeInTheDocument();
   });
 
+  it.each([true, false])("embedded map (wide=%s) keeps player map tokens", (wide) => {
+    mockedUseAdminMapWideLayout.mockReturnValue(wide);
+
+    renderWithRouter(<AdminMapScreen embeddedMonitor />, { route: "/admin" });
+
+    expect(screen.getByTestId("admin-map-view").closest("[data-player-map]")).not.toBeNull();
+  });
+
+  it("standalone map has no player map token scope", () => {
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+
+    expect(screen.getByTestId("admin-map-view").closest("[data-player-map]")).toBeNull();
+  });
+
   it("standalone wide map keeps its own chrome", () => {
     mockedUseAdminMapWideLayout.mockReturnValue(true);
 
