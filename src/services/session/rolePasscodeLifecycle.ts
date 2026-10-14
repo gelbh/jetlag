@@ -92,7 +92,7 @@ function isAlreadyLeftError(error: unknown): boolean {
   );
 }
 
-export async function leaveSessionMembership(sessionId: string): Promise<void> {
+export async function leaveSessionMembership(sessionId: string): Promise<"left" | "already_left"> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
@@ -103,10 +103,12 @@ export async function leaveSessionMembership(sessionId: string): Promise<void> {
       { sessionId },
       { idempotent: true },
     );
+    return "left";
   } catch (error) {
     if (!isAlreadyLeftError(error)) {
       throw error;
     }
+    return "already_left";
   } finally {
     clearRolePasscodeRevealWarm(sessionId);
   }

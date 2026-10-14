@@ -1,5 +1,5 @@
 import { FirebaseError } from "firebase/app";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_CALLABLE_TIMEOUT_MS } from "@/services/core/firebase/callWithResilience";
 import {
   cancelRoleJoinRequest,
@@ -37,6 +37,10 @@ describe("rolePasscodeLifecycle", () => {
     clearRolePasscodeRevealWarm();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("calls joinSessionWithRole with the join payload", async () => {
     const callable = vi.fn(async () => ({
       data: { sessionId: "sess-1", becameLeader: true, rolePasscode: "ABCD" },
@@ -64,7 +68,7 @@ describe("rolePasscodeLifecycle", () => {
     const callable = vi.fn(async () => ({ data: { ok: true } }));
     httpsCallable.mockReturnValue(callable);
 
-    await leaveSessionMembership("sess-9");
+    await expect(leaveSessionMembership("sess-9")).resolves.toBe("left");
 
     expect(httpsCallable).toHaveBeenCalledWith({}, "leaveSessionMembership", {
       timeout: DEFAULT_CALLABLE_TIMEOUT_MS,
@@ -80,10 +84,27 @@ describe("rolePasscodeLifecycle", () => {
       });
       httpsCallable.mockReturnValue(callable);
 
-      await expect(leaveSessionMembership("sess-9")).resolves.toBeUndefined();
+      await expect(leaveSessionMembership("sess-9")).resolves.toBe("already_left");
       expect(callable).toHaveBeenCalledTimes(1);
     },
   );
+
+  it("treats a membership rejection after a lost-response retry as already left", async () => {
+    vi.useFakeTimers();
+    const callable = vi
+      .fn()
+      .mockRejectedValueOnce(new FirebaseError("functions/deadline-exceeded", "deadline-exceeded"))
+      .mockRejectedValueOnce(
+        new FirebaseError("functions/permission-denied", "Session membership required."),
+      );
+    httpsCallable.mockReturnValue(callable);
+
+    const result = leaveSessionMembership("sess-9");
+    await vi.runAllTimersAsync();
+
+    await expect(result).resolves.toBe("already_left");
+    expect(callable).toHaveBeenCalledTimes(2);
+  });
 
   it("still throws other permission-denied leave errors", async () => {
     httpsCallable.mockReturnValue(

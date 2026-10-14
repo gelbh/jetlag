@@ -340,6 +340,11 @@ export function trackSessionEnded(reason: SessionEndedReason): void {
   track(ANALYTICS_EVENTS.session_ended, { reason });
 }
 
+/** Leave was a no-op server-side: the player had already been removed. */
+export function trackSessionLeaveAlreadyLeft(): void {
+  track(ANALYTICS_EVENTS.session_leave_already_left);
+}
+
 /**
  * Exception capture props: keep product forbidden-key drops (geo / session codes / uids)
  * but remaps Firebase-style `code` → `firebase_code` so diagnostics survive, then scrub
