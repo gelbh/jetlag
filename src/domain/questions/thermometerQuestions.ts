@@ -13,7 +13,10 @@ import {
   type SessionRulesInput,
 } from "../session/rules";
 import type { GameSize } from "../session/size/gameSize";
-import { thermometerPresetsMetersForGameSize } from "../session/size/gameSizeRules";
+import {
+  isThermometerPresetAvailableForGameSize,
+  thermometerPresetsMetersForGameSize,
+} from "../session/size/gameSizeRules";
 import { buildPresetCatalogHelpers, presetMilesForDistanceMeters } from "./distancePresets";
 
 export type ThermometerAnswer = "hotter" | "colder";
@@ -156,15 +159,13 @@ export function thermometerDistancePresetsForGameSize(
   return thermometerPresetsMetersForGameSize(gameSize, unit);
 }
 
-/** Whether distanceMeters is a preset allowed for gameSize + unit. Radar twin of isRadarRadiusAllowedForGameSize. */
+/** Whether distanceMeters is a preset allowed for gameSize + unit. Twin of isRadarPresetMetersForGameSize. */
 export function isThermometerDistanceAllowedForGameSize(
   gameSize: GameSize,
   distanceMeters: number,
   unit: DistanceUnit = "imperial",
 ): boolean {
-  return thermometerDistancePresetsForGameSize(gameSize, unit).some(
-    (preset) => Math.abs(preset - distanceMeters) < THERMOMETER_PRESET_MATCH_TOLERANCE_METERS,
-  );
+  return isThermometerPresetAvailableForGameSize(gameSize, distanceMeters, unit);
 }
 
 export function isThermometerDistanceOptionAvailable(
