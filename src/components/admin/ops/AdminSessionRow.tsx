@@ -1,65 +1,89 @@
-import { UnstyledButton } from "@mantine/core";
+import { Button, Stack, Table, Text } from "@mantine/core";
+import type { CSSProperties } from "react";
 import { resolveAdminSessionAreaLabel } from "../../../domain/admin/adminSessionAreaLabel";
-import { formatFreshnessAge } from "../../../domain/admin/formatAdminFreshness";
 import { adminSessionPhaseLabel } from "../../../domain/admin/sessionPhase";
-import { useFreshnessClock } from "../../../hooks/time/useFreshnessClock";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
+import { reversedInk } from "../../../theme/adminTone";
+import { PunchTime } from "../shared/PunchTime";
+import { SessionCode } from "../shared/SessionCode";
+import { StatusMark } from "../shared/StatusMark";
 
 interface AdminSessionRowProps {
   summary: AdminSessionSummary;
   observingCode: string | null;
-  selected?: boolean;
+  monitored?: boolean;
+  cursor?: boolean;
+  flashing?: boolean;
+  mispunchCount?: number;
   onMonitor: (summary: AdminSessionSummary) => void;
 }
 
-function modeLabel(mode: AdminSessionSummary["mode"]): string {
-  return mode === "multiplayer" ? "MP" : "SP";
-}
+const cursorOutline: CSSProperties = {
+  outline: "2px solid var(--adm-overprint)",
+  outlineOffset: "-2px",
+};
 
 export function AdminSessionRow({
   summary,
   observingCode,
-  selected = false,
+  monitored = false,
+  cursor = false,
+  flashing = false,
+  mispunchCount = 0,
   onMonitor,
 }: AdminSessionRowProps) {
-  const nowMs = useFreshnessClock();
-  const joiningThisSession = observingCode === summary.code;
-  const monitorJoinPending = observingCode !== null;
   const areaLabel = resolveAdminSessionAreaLabel(summary);
+  const phaseLabel = adminSessionPhaseLabel(summary.phase);
+  const cellStyle = monitored ? reversedInk : undefined;
 
   return (
-    <UnstyledButton
-      type="button"
-      className="jl-ops-session-row"
-      aria-current={selected ? "true" : undefined}
-      data-live={summary.isLive ? "true" : undefined}
-      data-feedback="tap"
-      disabled={monitorJoinPending}
-      onClick={() => onMonitor(summary)}
+    <Table.Tr
+      aria-current={monitored ? "true" : undefined}
+      aria-selected={cursor ? "true" : undefined}
+      bg={monitored ? "var(--adm-ink)" : undefined}
+      c={monitored ? "var(--adm-paper)" : undefined}
+      style={cursor ? cursorOutline : undefined}
     >
-      <span className="jl-ops-session-body">
-        <span className="jl-ops-session-head">
-          <span className="jl-ops-session-code">{summary.code}</span>
-          {areaLabel ? <span className="jl-ops-session-area">{areaLabel}</span> : null}
-        </span>
-        <span className="jl-ops-session-chips">
-          {summary.isLive ? (
-            <span className="jl-ops-session-chip jl-ops-session-chip--live">Live</span>
-          ) : null}
-          <span className="jl-ops-session-chip">{modeLabel(summary.mode)}</span>
-          <span className="jl-ops-session-chip">{adminSessionPhaseLabel(summary.phase)}</span>
-        </span>
-        <span className="jl-ops-session-meta">
-          Activity {formatFreshnessAge(summary.lastActivityAt, nowMs)} · Location{" "}
-          {formatFreshnessAge(summary.lastLocationAt, nowMs)} · {summary.roleCounts.seeker}S /{" "}
-          {summary.roleCounts.hider}H
-          {summary.roleCounts.observer > 0
-            ? ` · ${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"}`
-            : ""}
-          {summary.activeAnnotationCount > 0 ? ` · ${summary.activeAnnotationCount} ann` : ""}
-        </span>
-      </span>
-      <span className="jl-ops-session-action">{joiningThisSession ? "Joining…" : "Monitor"}</span>
-    </UnstyledButton>
+      <Table.Td colSpan={2} style={cellStyle}>
+        <Button
+          type="button"
+          variant="subtle"
+          fullWidth
+          justify="flex-start"
+          h="var(--adm-cell)"
+          px={0}
+          aria-label={`Monitor ${summary.code}${areaLabel ? `, ${areaLabel}` : ""}`}
+          loading={observingCode === summary.code}
+          disabled={observingCode !== null}
+          onClick={() => onMonitor(summary)}
+        >
+          <Stack component="span" gap={0} align="flex-start" maw="100%">
+            <SessionCode code={summary.code} />
+            {areaLabel ? (
+              <Text component="span" size="xs" c="dimmed" fw={400} maw="100%" truncate>
+                {areaLabel}
+              </Text>
+            ) : null}
+          </Stack>
+        </Button>
+      </Table.Td>
+      <Table.Td colSpan={4}>
+        <Stack gap={0} align="flex-start">
+          <StatusMark tone={summary.isLive ? "live" : "neutral"} label={phaseLabel} />
+          {summary.isLive ? null : (
+            <Text component="span" size="xs" c="dimmed" style={cellStyle}>
+              idle
+            </Text>
+          )}
+        </Stack>
+      </Table.Td>
+      <Table.Td style={cellStyle}>{summary.memberCount}</Table.Td>
+      <Table.Td colSpan={2} style={cellStyle}>
+        <PunchTime at={summary.lastActivityAt} flashing={flashing} />
+      </Table.Td>
+      <Table.Td>
+        {mispunchCount > 0 ? <StatusMark tone="mispunch" label={String(mispunchCount)} /> : null}
+      </Table.Td>
+    </Table.Tr>
   );
 }

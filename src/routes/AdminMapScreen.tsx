@@ -1,6 +1,12 @@
+import { Alert, Box, Divider, Paper } from "@mantine/core";
 import { useCallback, useEffect, useRef, useState } from "react";
+import "../theme/mantineAdminStyles";
+import { AdminCourseHeader } from "../components/admin/monitor/AdminCourseHeader";
+import { AdminLegStrip } from "../components/admin/monitor/AdminLegStrip";
 import { AdminMonitorPlayerFocus } from "../components/admin/monitor/AdminMonitorPlayerFocus";
-import { AdminPlayerRoster } from "../components/admin/monitor/AdminPlayerRoster";
+import { AdminPlayerRoster, rosterUids } from "../components/admin/monitor/AdminPlayerRoster";
+import { AdminSplitBoard } from "../components/admin/monitor/AdminSplitBoard";
+import { SessionCode } from "../components/admin/shared/SessionCode";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { MapView } from "../components/map/chrome/MapView";
 import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
@@ -163,9 +169,16 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
     </MapView>
   );
 
-  const roster = embeddedMonitor ? (
-    <AdminPlayerRoster session={controller.session} locations={playerLocations} />
-  ) : undefined;
+  const splitBoard = embeddedMonitor ? (
+    <AdminSplitBoard
+      count={rosterUids(controller.session, playerLocations).length}
+      // Folded: beside the rail the course map is ~18rem at 1440, and an open board hides it.
+      defaultOpen={false}
+      placement={isWide ? "top" : "bottom"}
+    >
+      <AdminPlayerRoster session={controller.session} locations={playerLocations} />
+    </AdminSplitBoard>
+  ) : null;
 
   const shell = (
     <div
@@ -174,22 +187,56 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         isWide ? "admin-map-shell--wide" : "admin-map-shell--compact"
       } ${isWide && railCollapsed ? "admin-map-shell--rail-collapsed" : ""}`}
     >
-      <AdminMapScreenChrome
-        session={controller.session}
-        myRole="admin"
-        timer={controller.timer}
-        overlay={controller.overlay}
-        onLeave={() => void handleLeave()}
-        isWide={isWide}
-        syncStatus={controller.syncStatus.status}
-        moderationBusy={moderationBusy}
-        moderationError={moderationError}
-        onModerationAction={(action) => void handleModerationAction(action)}
-        diagnosticsOpen={diagnosticsOpen}
-        onToggleDiagnostics={isWide ? undefined : () => setDiagnosticsOpen((open) => !open)}
-      />
+      {embeddedMonitor && isWide ? (
+        <Box className="admin-map-shell__top" bg="var(--adm-paper)">
+          <AdminCourseHeader
+            code={controller.session.code}
+            timerState={controller.timer.timerState}
+            seekerCount={controller.seekerLocations.length}
+            hiderCount={controller.hiderLocations.length}
+            questionCount={controller.pendingQuestions.length}
+            syncStatus={controller.syncStatus.status}
+            onLeave={() => void handleLeave()}
+          />
+          <Divider />
+          <AdminLegStrip
+            key={controller.session.id}
+            sessionId={controller.session.id}
+            questions={controller.pendingQuestions}
+          />
+          <Divider />
+          {/* In flow, not an overlay: the header's height varies as its cells wrap. */}
+          {controller.syncStatus.lastSyncError ? (
+            <Alert data-tone="mispunch" title="Sync issue" m="xs" py={6}>
+              {controller.syncStatus.lastSyncError}
+            </Alert>
+          ) : null}
+        </Box>
+      ) : (
+        <AdminMapScreenChrome
+          session={controller.session}
+          myRole="admin"
+          timer={controller.timer}
+          overlay={controller.overlay}
+          onLeave={() => void handleLeave()}
+          isWide={isWide}
+          syncStatus={controller.syncStatus.status}
+          moderationBusy={moderationBusy}
+          moderationError={moderationError}
+          onModerationAction={(action) => void handleModerationAction(action)}
+          diagnosticsOpen={diagnosticsOpen}
+          onToggleDiagnostics={isWide ? undefined : () => setDiagnosticsOpen((open) => !open)}
+        />
+      )}
 
-      <div className={isWide ? "admin-map-shell__map" : "absolute inset-0"}>{mapLayers}</div>
+      <div
+        className={isWide ? "admin-map-shell__map" : "absolute inset-0"}
+        data-map-dock-frame=""
+        data-player-map={embeddedMonitor ? "" : undefined}
+      >
+        {mapLayers}
+        {splitBoard}
+      </div>
 
       {isWide ? (
         <AdminMonitorRail
@@ -208,7 +255,6 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           mapViewport={controller.mapViewport}
           onLayerVisibilityChange={setLayerVisibility}
           onLowPowerModeChange={setLowPowerMode}
-          roster={roster}
         />
       ) : null}
 
@@ -263,7 +309,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
             />
           ) : null}
         </>
-      ) : controller.syncStatus.lastSyncError ? (
+      ) : !embeddedMonitor && controller.syncStatus.lastSyncError ? (
         <div className="pointer-events-none absolute inset-x-0 top-[var(--admin-status-height)] z-[var(--z-panel)] px-3">
           <InlineError className="pointer-events-auto mx-auto max-w-xl">
             {controller.syncStatus.lastSyncError}
@@ -278,23 +324,21 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <div className="relative min-h-0 flex-1 overflow-hidden">
-        {shell}
-        {isWide ? null : (
-          <p className="admin-monitor-code-badge pointer-events-none absolute bottom-3 left-3 z-[var(--z-panel)] rounded-md border border-border bg-surface-panel/90 px-2 py-1 font-mono text-xs tracking-[0.18em] text-ink">
-            {controller.session.code}
-          </p>
-        )}
-      </div>
+    <Box pos="relative" flex={1} mih={0} style={{ overflow: "hidden" }}>
+      {shell}
       {isWide ? null : (
-        <section aria-label="Player roster" className="max-h-48 shrink-0 overflow-hidden px-2 pb-2">
-          <p className="mb-1 px-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-            Player roster
-          </p>
-          {roster}
-        </section>
+        <Paper
+          data-testid="admin-monitor-code"
+          pos="absolute"
+          bottom={12}
+          left={12}
+          px="xs"
+          py={4}
+          style={{ zIndex: "var(--z-panel)", pointerEvents: "none" }}
+        >
+          <SessionCode code={controller.session.code} size="sm" />
+        </Paper>
       )}
-    </div>
+    </Box>
   );
 }

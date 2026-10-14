@@ -4,10 +4,9 @@
  * Entry CSS is render-blocking, and the full `styles.layer.css` bundle ships
  * ~100 components the app never renders. We list only the components the app
  * imports plus Mantine's internal deps (e.g. UnstyledButton for Button, Input
- * for TextInput, ModalBase/Overlay for Drawer). Lazy-only components stay here
- * too: a separate lazy stylesheet saved <2 KB gz and let a new route render
- * unstyled with tests green. `mantineStyles.test.ts` fails when an imported
- * component's CSS is missing.
+ * for TextInput, ModalBase/Overlay for Drawer). Lazy player routes stay here
+ * too; only admin-only components live in `mantineAdminStyles.ts`.
+ * `mantineStyles.test.ts` fails when an imported component's CSS is missing.
  *
  * Order mirrors Mantine's own `styles.layer.css`.
  */
@@ -27,6 +26,7 @@ import "@mantine/core/styles/Group.layer.css";
 import "@mantine/core/styles/ModalBase.layer.css";
 import "@mantine/core/styles/Input.layer.css";
 import "@mantine/core/styles/Combobox.layer.css";
+import "@mantine/core/styles/InlineInput.layer.css";
 import "@mantine/core/styles/FloatingIndicator.layer.css";
 import "@mantine/core/styles/Alert.layer.css";
 import "@mantine/core/styles/AppShell.layer.css";

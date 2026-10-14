@@ -1,15 +1,20 @@
-import { Alert, AppShell, Button, Group, Modal, Skeleton, Stack, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  AppShell,
+  Button,
+  Drawer,
+  Group,
+  Skeleton,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import type {
-  AdminSessionModeFilter,
-  AdminSessionSort,
-  AdminSessionStateChip,
-} from "../../../domain/admin/adminSessionFilters";
-import { filterAdminSessions } from "../../../domain/admin/adminSessionFilters";
 import { clearLegacyOpsDeskStorage } from "../../../domain/admin/clearLegacyOpsDeskStorage";
 import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
+import type { PreloadRequest } from "../../../domain/preloadRequest/preloadRequestTypes";
 import { useAdminAccessState } from "../../../hooks/admin/useAdminAccessState";
 import { useAdminJoinSession } from "../../../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../../../hooks/admin/useAdminSessionList";
@@ -17,29 +22,33 @@ import { useMinWidth } from "../../../hooks/layout/useMinWidth";
 import { useAppNavigate } from "../../../hooks/navigation/useAppNavigate";
 import {
   countOpenIncidents,
+  isOpenIncident,
   subscribeIncident,
   subscribeIncidentList,
 } from "../../../services/admin/adminIncidents";
+import {
+  countOpenPreloadRequests,
+  subscribePreloadRequestList,
+} from "../../../services/admin/adminPreloadRequests";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
 import { getFirebaseAuth } from "../../../services/core/firebase/firebase";
 import { useSessionStore } from "../../../state/sessionStore";
 import { PremiumSignInGate } from "../../billing/PremiumSignInGate";
 import { AppLink } from "../../navigation/AppLink";
-import { InlineError } from "../../ui/banners/InlineError";
-import { AdminIncidentActions } from "../incident/AdminIncidentActions";
-import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
-import { AdminIncidentInbox } from "../incident/AdminIncidentInbox";
 import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
-import { AdminDeskTopbar } from "./AdminDeskTopbar";
-import { AdminFixedDesk } from "./AdminFixedDesk";
+import { AdminEmptyState } from "../shared/AdminEmptyState";
+import { AdminRegion } from "../shared/AdminRegion";
+import { AdminWorld } from "../shared/AdminWorld";
 import { AdminMobileDesk } from "./AdminMobileDesk";
-import { AdminSessionFilters } from "./AdminSessionFilters";
-import { AdminSessionRow } from "./AdminSessionRow";
+import { AdminNeedsYou, type NeedsYouGroup } from "./AdminNeedsYou";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
+import { AdminStartList, START_LIST_GRID_CELLS } from "./AdminStartList";
+import { AdminStatusStrip } from "./AdminStatusStrip";
 import "../incident/AdminIncidentDesk.css";
 import "./AdminOpsDesk.css";
 
 const EMPTY_INCIDENTS: IncidentRecord[] = [];
+const EMPTY_PRELOAD_REQUESTS: PreloadRequest[] = [];
 
 function AdminSessionSkeletonRows() {
   return (
@@ -58,10 +67,27 @@ function continuePathForRoute(pathname: string, incidentId: string | null): stri
   if (pathname.startsWith("/admin/incidents")) {
     return "/admin/incidents";
   }
+  if (pathname.startsWith("/admin/preload-requests")) {
+    return "/admin/preload-requests";
+  }
   return "/admin";
 }
 
+function openGroupsForRoute(pathname: string): NeedsYouGroup[] {
+  if (pathname.startsWith("/admin/incidents")) return ["incidents"];
+  if (pathname.startsWith("/admin/preload-requests")) return ["preload"];
+  return ["incidents", "preload"];
+}
+
 export function AdminOpsDesk() {
+  return (
+    <AdminWorld>
+      <AdminOpsDeskContent />
+    </AdminWorld>
+  );
+}
+
+function AdminOpsDeskContent() {
   const { incidentId: routeIncidentId } = useParams<{ incidentId?: string }>();
   const location = useLocation();
   const navigate = useAppNavigate();
@@ -69,13 +95,18 @@ export function AdminOpsDesk() {
   const isAdmin = accessState === "admin";
   const enabled = isAdmin;
   const isDesktop = useMinWidth(1024);
+  const wide = useMinWidth(1440);
   const selectedIncidentId = routeIncidentId?.trim() || null;
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
+  const onPreloadRoute = location.pathname.startsWith("/admin/preload-requests");
 
-  const [now, setNow] = useState(() => new Date());
   const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
   const [incidentsLoading, setIncidentsLoading] = useState(enabled);
   const [incidentsError, setIncidentsError] = useState<string | null>(null);
+  const [preloadRequests, setPreloadRequests] = useState<PreloadRequest[]>([]);
+  const [preloadLoading, setPreloadLoading] = useState(enabled);
+  const [preloadError, setPreloadError] = useState<string | null>(null);
+  const [selectedPreloadId, setSelectedPreloadId] = useState<string | null>(null);
   const [enabledState, setEnabledState] = useState(enabled);
   const [fetchedIncident, setFetchedIncident] = useState<IncidentRecord | null>(null);
   const activeSession = useSessionStore((state) => state.session);
@@ -87,8 +118,10 @@ export function AdminOpsDesk() {
     loadingMore,
     hasMore,
     error: sessionsError,
+    loadMoreError,
     refresh,
     loadMore,
+    lastFetchedAt,
   } = useAdminSessionList(enabled);
   const {
     joinSession,
@@ -96,33 +129,50 @@ export function AdminOpsDesk() {
     error: observeError,
   } = useAdminJoinSession({ onRefresh: refresh });
 
-  const [query, setQuery] = useState("");
-  const [liveOnly, setLiveOnly] = useState(true);
-  const [annotatedOnly, setAnnotatedOnly] = useState(false);
-  const [modeFilter, setModeFilter] = useState<AdminSessionModeFilter>("all");
-  const [stateFilter, setStateFilter] = useState<AdminSessionStateChip>(null);
-  const [sort, setSort] = useState<AdminSessionSort>("lastActivity");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [monitorSessionId, setMonitorSessionId] = useState<string | null>(null);
   const monitorRequestRef = useRef(0);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [needsYouOpen, setNeedsYouOpen] = useState(onIncidentsRoute || onPreloadRoute);
+  const [drawerIncidentId, setDrawerIncidentId] = useState(selectedIncidentId);
+  const [openGroups, setOpenGroups] = useState<NeedsYouGroup[]>(() =>
+    openGroupsForRoute(location.pathname),
+  );
+  const [openGroupsPath, setOpenGroupsPath] = useState(location.pathname);
+
+  if (location.pathname !== openGroupsPath) {
+    setOpenGroupsPath(location.pathname);
+    setOpenGroups(openGroupsForRoute(location.pathname));
+    setSelectedPreloadId(null);
+    if (onPreloadRoute) {
+      setNeedsYouOpen(true);
+    }
+  }
+
+  if (selectedIncidentId !== drawerIncidentId) {
+    setDrawerIncidentId(selectedIncidentId);
+    if (selectedIncidentId) {
+      setNeedsYouOpen(true);
+    }
+  }
 
   if (enabled !== enabledState) {
     setEnabledState(enabled);
     if (enabled) {
       setIncidentsLoading(true);
       setIncidentsError(null);
+      setPreloadLoading(true);
+      setPreloadError(null);
     }
+  }
+
+  if (needsYouOpen && (wide || !isDesktop)) {
+    setNeedsYouOpen(false);
   }
 
   useEffect(() => {
     clearLegacyOpsDeskStorage();
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -141,8 +191,38 @@ export function AdminOpsDesk() {
     return unsubscribe;
   }, [enabled]);
 
+  useEffect(() => {
+    if (!enabled) return;
+    return subscribePreloadRequestList(
+      (next) => {
+        setPreloadRequests(next);
+        setPreloadLoading(false);
+      },
+      (error) => {
+        setPreloadError(error.message);
+        setPreloadLoading(false);
+      },
+    );
+  }, [enabled]);
+
   const visibleIncidents = enabled ? incidents : EMPTY_INCIDENTS;
   const openCount = useMemo(() => countOpenIncidents(visibleIncidents), [visibleIncidents]);
+  const visiblePreloadRequests = enabled ? preloadRequests : EMPTY_PRELOAD_REQUESTS;
+  const needsYouCount = openCount + countOpenPreloadRequests(visiblePreloadRequests);
+  const selectedPreload =
+    visiblePreloadRequests.find((request) => request.id === selectedPreloadId) ?? null;
+  if (selectedPreloadId && !selectedPreload) {
+    setSelectedPreloadId(null);
+  }
+  const mispunchBySession = new Map<string, number>();
+  for (const incident of visibleIncidents) {
+    if (incident.sessionId && isOpenIncident(incident)) {
+      mispunchBySession.set(
+        incident.sessionId,
+        (mispunchBySession.get(incident.sessionId) ?? 0) + 1,
+      );
+    }
+  }
   const listIncident =
     selectedIncidentId == null
       ? null
@@ -161,19 +241,6 @@ export function AdminOpsDesk() {
   const selectedIncident =
     listIncident ??
     (enabled && fetchedIncident?.id === selectedIncidentId ? fetchedIncident : null);
-
-  const filteredSessions = useMemo(
-    () =>
-      filterAdminSessions(sessions, {
-        query,
-        liveOnly,
-        annotatedOnly,
-        mode: modeFilter,
-        state: stateFilter,
-        sort,
-      }),
-    [annotatedOnly, liveOnly, modeFilter, query, sessions, sort, stateFilter],
-  );
 
   const monitorRoleError =
     monitorSessionId != null && activeSession?.id === monitorSessionId && activeRole !== "admin"
@@ -261,108 +328,43 @@ export function AdminOpsDesk() {
     }
   };
 
-  const loadMoreButton = hasMore ? (
-    <Button
-      type="button"
-      variant="default"
-      fullWidth
-      disabled={loadingMore}
-      onClick={() => void loadMore()}
-    >
-      {loadingMore ? "Loading…" : "Load more sessions"}
-    </Button>
-  ) : null;
-
-  const sessionsErrorRetry = sessionsError ? (
-    <Stack gap="sm" mb={sessions.length > 0 ? "sm" : undefined}>
-      <InlineError>{sessionsError}</InlineError>
-      <Button type="button" variant="default" w="fit-content" onClick={() => void refresh()}>
-        Retry
-      </Button>
-    </Stack>
-  ) : null;
-
-  // Fail-only when the list has nothing retained; keep filters + rows when refresh/loadMore fails.
   const sessionsFailedEmpty = Boolean(sessionsError) && sessions.length === 0;
 
   const sessionsBody = (
-    <div className="jl-scroll jl-ops-panel-scroll" data-testid="admin-ops-sessions">
-      {observeError ? <InlineError>{observeError}</InlineError> : null}
-      {sessionsFailedEmpty ? (
-        sessionsErrorRetry
-      ) : (
-        <>
-          {sessionsErrorRetry}
-          <div className="mb-3">
-            <AdminSessionFilters
-              query={query}
-              liveOnly={liveOnly}
-              annotatedOnly={annotatedOnly}
-              mode={modeFilter}
-              state={stateFilter}
-              sort={sort}
-              onQueryChange={setQuery}
-              onLiveOnlyChange={setLiveOnly}
-              onAnnotatedOnlyChange={setAnnotatedOnly}
-              onModeChange={setModeFilter}
-              onStateChange={setStateFilter}
-              onSortChange={setSort}
-            />
-          </div>
-          {sessionsLoading ? (
-            <AdminSessionSkeletonRows />
-          ) : sessions.length === 0 ? (
-            <div className="jl-ops-empty">
-              <p className="jl-ops-empty-title">{liveOnly ? "No live sessions" : "No sessions"}</p>
-              <p className="jl-ops-empty-body">Games appear here while a host session is active.</p>
-            </div>
-          ) : filteredSessions.length === 0 ? (
-            <div className="space-y-2.5">
-              <div className="jl-ops-empty">
-                <p className="jl-ops-empty-title">No matching sessions</p>
-                <p className="jl-ops-empty-body">Try another code, area name, or phase filter.</p>
-              </div>
-              {loadMoreButton}
-            </div>
-          ) : (
-            <div className="jl-scroll admin-dashboard-list-scroll space-y-2.5">
-              {filteredSessions.map((summary) => (
-                <AdminSessionRow
-                  key={summary.sessionId}
-                  summary={summary}
-                  observingCode={observingCode}
-                  selected={selectedSessionId === summary.sessionId}
-                  onMonitor={handleMonitor}
-                />
-              ))}
-              {loadMoreButton}
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-
-  const incidentDetail = <AdminIncidentDetail incidentId={selectedIncidentId} />;
-  const incidentActions = (
-    <AdminIncidentActions
-      incidentId={selectedIncidentId}
-      status={selectedIncident?.status ?? null}
-      agent={selectedIncident?.agent ?? null}
-      disabled={!selectedIncidentId}
+    <AdminStartList
+      sessions={sessions}
+      loading={sessionsLoading}
+      error={sessionsError}
+      onRetry={() => void refresh()}
+      hasMore={hasMore}
+      loadingMore={loadingMore}
+      loadMoreError={loadMoreError}
+      onLoadMore={() => void loadMore()}
+      observingCode={observingCode}
+      joinError={observeError}
+      monitoredSessionId={selectedSessionId}
+      mispunchBySession={mispunchBySession}
+      onMonitor={handleMonitor}
     />
   );
-  const inboxBody = (
-    <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-      <AdminIncidentInbox
-        incidents={visibleIncidents}
-        selectedId={selectedIncidentId}
-        openCount={openCount}
-        loading={enabled ? incidentsLoading : false}
-        error={enabled ? incidentsError : null}
-        onSelect={handleSelectIncident}
-      />
-    </div>
+
+  const needsYou = (
+    <AdminNeedsYou
+      incidents={visibleIncidents}
+      incidentsLoading={enabled ? incidentsLoading : false}
+      incidentsError={enabled ? incidentsError : null}
+      selectedIncidentId={selectedIncidentId}
+      selectedIncident={selectedIncident}
+      onSelectIncident={handleSelectIncident}
+      onBackFromIncident={() => void navigate("/admin/incidents")}
+      preloadRequests={visiblePreloadRequests}
+      preloadLoading={enabled ? preloadLoading : false}
+      preloadError={enabled ? preloadError : null}
+      selectedPreload={selectedPreload}
+      onSelectPreload={setSelectedPreloadId}
+      openGroups={openGroups}
+      onOpenGroupsChange={setOpenGroups}
+    />
   );
 
   if (accessState === "loading" || !authReady) {
@@ -383,9 +385,7 @@ export function AdminOpsDesk() {
           Back
         </Button>
         <Stack gap="xs">
-          <Title order={1} tt="uppercase">
-            Admin ops desk
-          </Title>
+          <Title order={1}>Admin event centre</Title>
           <Text size="sm" c="dimmed">
             Sign in with your Google account to open the admin panel.
           </Text>
@@ -404,30 +404,43 @@ export function AdminOpsDesk() {
           Back
         </Button>
         <Title order={1}>Access denied</Title>
-        <Alert title="Restricted panel">
-          Signed in as {user?.email ?? "unknown"}. This panel is restricted to the app owner.
-        </Alert>
-        {signOutError ? <InlineError>{signOutError}</InlineError> : null}
-        <Group gap="xs" wrap="wrap">
-          <Button type="button" onClick={() => void handleSignOut()}>
-            Sign out
-          </Button>
-          <Button component={AppLink} to="/" variant="default">
-            Back home
-          </Button>
-        </Group>
+        <AdminEmptyState
+          title="Restricted panel"
+          body={`Signed in as ${user?.email ?? "unknown"}. This panel is restricted to the app owner.`}
+          action={
+            <Group gap="xs" wrap="wrap">
+              <Button type="button" onClick={() => void handleSignOut()}>
+                Sign out
+              </Button>
+              <Button component={AppLink} to="/" variant="default">
+                Back home
+              </Button>
+            </Group>
+          }
+        />
+        {signOutError ? (
+          <Alert role="alert" title="Sign-out failed" data-tone="mispunch">
+            {signOutError}
+          </Alert>
+        ) : null}
       </Stack>
     );
   }
 
-  const deskTopbar = (
-    <AdminDeskTopbar
-      openIncidents={openCount}
-      inQueue={visibleIncidents.length}
-      now={now}
-      onOpenSettings={() => setSettingsOpen(true)}
-      onRefreshSessions={() => void refresh({ background: true })}
+  const liveSessions = sessions.filter((row) => row.isLive);
+  const statusStrip = (
+    <AdminStatusStrip
+      liveCount={liveSessions.length}
+      runnerCount={liveSessions.reduce((sum, row) => sum + row.memberCount, 0)}
+      needsYouCount={needsYouCount}
+      inQueueCount={visibleIncidents.length}
+      incidentsLoading={enabled && incidentsLoading}
       refreshing={refreshing}
+      onRefresh={() => void refresh({ background: true })}
+      onOpenSettings={() => setSettingsOpen(true)}
+      onOpenNeedsYou={isDesktop && !wide ? () => setNeedsYouOpen(true) : undefined}
+      dataFetchedAt={lastFetchedAt}
+      syncFailed={Boolean(sessionsError)}
     />
   );
 
@@ -435,6 +448,21 @@ export function AdminOpsDesk() {
     <AppShell
       mode="static"
       header={{ height: "3.25rem", offset: false }}
+      navbar={
+        isDesktop
+          ? {
+              // Grid cells plus the navbar's xs padding and border.
+              width: `calc(var(--adm-cell) * ${START_LIST_GRID_CELLS} + 1.5rem)`,
+              breakpoint: "64em",
+              collapsed: { mobile: true },
+            }
+          : undefined
+      }
+      aside={
+        isDesktop
+          ? { width: "24rem", breakpoint: "64em", collapsed: { mobile: true, desktop: !wide } }
+          : undefined
+      }
       padding={0}
       className="jl-ops-desk"
       data-testid="admin-ops-desk"
@@ -442,69 +470,61 @@ export function AdminOpsDesk() {
       data-layout={isDesktop ? "desktop" : "mobile"}
       data-resume-ready="true"
     >
-      <AppShell.Header withBorder={false}>{deskTopbar}</AppShell.Header>
-      <AppShell.Main className="jl-ops-desk-main">
+      <AppShell.Header withBorder={false}>{statusStrip}</AppShell.Header>
+      {isDesktop ? (
+        <AppShell.Navbar mih={0} p="xs">
+          {sessionsBody}
+        </AppShell.Navbar>
+      ) : null}
+      <AppShell.Main className="jl-ops-desk-main" p={isDesktop ? "xs" : undefined}>
         {isDesktop ? (
-          <>
-            {incidentsError && visibleIncidents.length > 0 ? (
-              <InlineError>{incidentsError}</InlineError>
-            ) : null}
-            <AdminFixedDesk
-              mode={onIncidentsRoute ? "incidents" : "sessions"}
-              sessions={sessionsBody}
-              monitor={
-                <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-                  <AdminMonitorPane
-                    active={monitorActive}
-                    errorMessage={monitorRoleError}
-                    sessionsUnavailable={sessionsFailedEmpty}
-                  />
-                </div>
-              }
-              inbox={inboxBody}
-              detail={
-                <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-                  {incidentDetail}
-                </div>
-              }
-              actions={
-                <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-                  {incidentActions}
-                </div>
-              }
+          <AdminRegion title="Course" scroll={false}>
+            <AdminMonitorPane
+              active={monitorActive}
+              errorMessage={monitorRoleError}
+              sessionsUnavailable={sessionsFailedEmpty}
             />
-          </>
+          </AdminRegion>
         ) : (
           <AdminMobileDesk
-            tab={onIncidentsRoute ? "incidents" : "sessions"}
+            tab={onIncidentsRoute || onPreloadRoute ? "incidents" : "sessions"}
             onSelectTab={(tab) =>
               void navigate(tab === "incidents" ? "/admin/incidents" : "/admin")
             }
             sessions={sessionsBody}
             incidents={
-              selectedIncidentId ? (
-                <div className="jl-scroll jl-ops-panel-scroll jl-ops-mobile-drill">
-                  <Button
-                    type="button"
-                    variant="default"
-                    className="jl-ops-mobile-back"
-                    onClick={() => void navigate("/admin/incidents")}
-                  >
-                    Back to inbox
-                  </Button>
-                  {incidentDetail}
-                  {incidentActions}
-                </div>
-              ) : (
-                inboxBody
-              )
+              <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+                {needsYou}
+              </div>
             }
           />
         )}
       </AppShell.Main>
-      <Modal opened={settingsOpen} onClose={() => setSettingsOpen(false)} title="Desk settings">
+      {isDesktop && wide ? (
+        <AppShell.Aside mih={0} p="xs">
+          <AdminRegion title="Needs you" count={needsYouCount}>
+            {needsYou}
+          </AdminRegion>
+        </AppShell.Aside>
+      ) : null}
+      <Drawer
+        opened={needsYouOpen}
+        onClose={() => setNeedsYouOpen(false)}
+        position="right"
+        size="24rem"
+        title="Needs you"
+        closeOnEscape={!selectedIncidentId && !selectedPreload}
+      >
+        {needsYou}
+      </Drawer>
+      <Drawer
+        opened={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        position="right"
+        title="Desk settings"
+      >
         <AdminSettingsPanel />
-      </Modal>
+      </Drawer>
     </AppShell>
   );
 }

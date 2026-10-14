@@ -1,0 +1,187 @@
+import { act, fireEvent, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
+import { renderWithRouter } from "../../../test/renderWithRouter";
+import { AdminStatusStrip } from "./AdminStatusStrip";
+import { AdminUtcClock } from "./AdminUtcClock";
+
+function strip(
+  overrides: {
+    needsYouCount?: number;
+    incidentsLoading?: boolean;
+    onRefresh?: () => void;
+    onOpenSettings?: () => void;
+    onOpenNeedsYou?: () => void;
+    dataFetchedAt?: Date | null;
+    syncFailed?: boolean;
+  } = {},
+) {
+  return (
+    <AdminStatusStrip
+      liveCount={3}
+      runnerCount={11}
+      needsYouCount={overrides.needsYouCount ?? 2}
+      inQueueCount={7}
+      incidentsLoading={overrides.incidentsLoading ?? false}
+      refreshing={false}
+      onRefresh={overrides.onRefresh ?? vi.fn()}
+      onOpenSettings={overrides.onOpenSettings ?? vi.fn()}
+      onOpenNeedsYou={overrides.onOpenNeedsYou}
+      dataFetchedAt={overrides.dataFetchedAt ?? null}
+      syncFailed={overrides.syncFailed ?? false}
+    />
+  );
+}
+
+function renderStrip(overrides: Parameters<typeof strip>[0] = {}) {
+  return renderWithRouter(strip(overrides), { route: "/admin" });
+}
+
+const HIDDEN_ON_MOBILE = ".mantine-visible-from-sm";
+
+describe("AdminStatusStrip", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("labels the desk as the event centre without Broadcast or Survey copy", () => {
+    renderStrip();
+    expect(screen.getByText("Event centre")).toBeInTheDocument();
+    expect(screen.getByLabelText("Live games")).toHaveTextContent("3");
+    expect(screen.getByLabelText("Runners")).toHaveTextContent("11");
+    expect(screen.getByLabelText("Needs you")).toHaveTextContent("2");
+    expect(screen.getByLabelText("In queue")).toHaveTextContent("7");
+    expect(screen.queryByText(/broadcast/i)).toBeNull();
+  });
+
+  it("keeps Home, event centre, incidents, and preload navigation reachable", () => {
+    renderStrip();
+    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Jetlag event centre" })).toHaveAttribute(
+      "href",
+      "/admin",
+    );
+    const needsYou = screen.getByRole("link", { name: "Needs you: 2 open" });
+    expect(needsYou).toHaveAttribute("href", "/admin/incidents");
+    expect(needsYou).toContainElement(screen.getByRole("group", { name: "Needs you" }));
+    expect(screen.getByRole("group", { name: "Needs you" })).toHaveTextContent("2");
+    expect(screen.getByRole("link", { name: "Preload requests" })).toHaveAttribute(
+      "href",
+      "/admin/preload-requests",
+    );
+  });
+
+  it("keeps navigation and actions visible below sm and hides secondary detail", () => {
+    renderStrip();
+    for (const control of [
+      screen.getByRole("link", { name: /^home$/i }),
+      screen.getByRole("link", { name: "Jetlag event centre" }),
+      screen.getByRole("link", { name: "Needs you: 2 open" }),
+      screen.getByRole("link", { name: "Preload requests" }),
+      screen.getByRole("button", { name: "Refresh live sessions" }),
+      screen.getByRole("button", { name: /^settings$/i }),
+    ]) {
+      expect(control.closest(HIDDEN_ON_MOBILE)).toBeNull();
+    }
+    for (const detail of [
+      screen.getByText("Event centre"),
+      screen.getByLabelText("Live games"),
+      screen.getByLabelText("Runners"),
+      screen.getByLabelText("In queue"),
+      document.querySelector("time"),
+    ]) {
+      expect(detail?.closest(HIDDEN_ON_MOBILE)).not.toBeNull();
+    }
+  });
+
+  it("announces Needs you changes in a polite live region", () => {
+    const { rerender } = renderStrip({ needsYouCount: 2 });
+    const live = document.querySelector('[aria-live="polite"]');
+    expect(live).toHaveTextContent("Needs you: 2 open");
+    rerender(strip({ needsYouCount: 5 }));
+    expect(live).toHaveTextContent("Needs you: 5 open");
+  });
+
+  it("holds the live region until incidents finish loading", () => {
+    renderStrip({ needsYouCount: 0, incidentsLoading: true });
+    expect(document.querySelector('[aria-live="polite"]')).toBeNull();
+  });
+
+  it("wires Refresh and Settings", () => {
+    const onRefresh = vi.fn();
+    const onOpenSettings = vi.fn();
+    renderStrip({ onRefresh, onOpenSettings });
+
+    fireEvent.click(screen.getByRole("button", { name: "Refresh live sessions" }));
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+
+    const settings = screen.getByRole("button", { name: /^settings$/i });
+    expect(settings).toHaveAttribute("aria-haspopup", "dialog");
+    fireEvent.click(settings);
+    expect(onOpenSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it("turns Needs you into a dialog button when the desk asks for the drawer", () => {
+    const onOpenNeedsYou = vi.fn();
+    renderStrip({ onOpenNeedsYou });
+
+    expect(screen.queryByRole("link", { name: "Needs you: 2 open" })).toBeNull();
+    const needsYou = screen.getByRole("button", { name: "Needs you: 2 open" });
+    expect(needsYou).toHaveAttribute("aria-haspopup", "dialog");
+    fireEvent.click(needsYou);
+    expect(onOpenNeedsYou).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows how long ago the list synced and ages it with the clock", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-26T12:00:00.000Z"));
+    renderStrip({ dataFetchedAt: new Date("2026-07-26T12:00:00.000Z") });
+    expect(screen.getByText("Synced just now").closest("[data-tone]")).toHaveAttribute(
+      "data-tone",
+      "ok",
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(3 * 60_000);
+    });
+    expect(screen.getByText("Synced 3m ago")).toBeInTheDocument();
+  });
+
+  it("shows Sync failed when the list errors", () => {
+    renderStrip({ dataFetchedAt: new Date(), syncFailed: true });
+    expect(screen.getByText("Sync failed").closest("[data-tone]")).toHaveAttribute(
+      "data-tone",
+      "mispunch",
+    );
+    expect(screen.queryByText(/^Synced/)).toBeNull();
+  });
+
+  it("renders no data age before the first fetch", () => {
+    renderStrip();
+    expect(screen.queryByText(/^Synced|Sync failed/)).toBeNull();
+  });
+});
+
+describe("AdminUtcClock", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("ticks every second in UTC and clears its interval on unmount", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-26T12:00:00.000Z"));
+    const { unmount } = renderWithAppUi(<AdminUtcClock />);
+    const time = document.querySelector("time");
+    expect(time).toHaveTextContent("12:00:00 UTC");
+    expect(time).toHaveAttribute("dateTime", "2026-07-26T12:00:00.000Z");
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(time).toHaveTextContent("12:00:02 UTC");
+
+    const timersBeforeUnmount = vi.getTimerCount();
+    unmount();
+    expect(vi.getTimerCount()).toBe(timersBeforeUnmount - 1);
+  });
+});

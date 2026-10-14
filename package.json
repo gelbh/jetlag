@@ -41,6 +41,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
     "@fontsource/barlow-semi-condensed": "^5.2.7",
     "@fontsource/source-sans-3": "^5.2.9",
     "@mantine/core": "^9.7.1",

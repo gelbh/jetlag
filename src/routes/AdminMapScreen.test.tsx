@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestSession } from "../test/fixtures/sessions";
 import { renderWithRouter } from "../test/renderWithRouter";
@@ -155,13 +155,75 @@ describe("AdminMapScreen", () => {
     mockedUseAdminMapWideLayout.mockReturnValue(wide);
     mockedUsePlayerLocationsSync.mockClear();
 
-    const { container } = renderWithRouter(<AdminMapScreen embeddedMonitor />, {
+    renderWithRouter(<AdminMapScreen embeddedMonitor />, {
       route: "/admin",
     });
 
-    expect(screen.getAllByRole("region", { name: "Player roster" })).toHaveLength(1);
+    const rosters = screen.getAllByRole("region", { name: "Player roster" });
+    expect(rosters).toHaveLength(1);
+    expect(rosters[0].closest("[data-map-dock-frame]")).not.toBeNull();
     expect(mockedUsePlayerLocationsSync).toHaveBeenLastCalledWith(controller.session?.id);
-    expect(container.querySelector(".admin-monitor-code-badge") !== null).toBe(!wide);
+    expect(screen.queryByTestId("admin-monitor-code") !== null).toBe(!wide);
+  });
+
+  it("embedded wide monitor shows the course header instead of the status bar", () => {
+    const controller = mockController();
+    mockedUseObserverMapScreen.mockReturnValue(controller);
+    mockedUseAdminMapWideLayout.mockReturnValue(true);
+
+    renderWithRouter(<AdminMapScreen embeddedMonitor />, {
+      route: "/admin",
+    });
+
+    const header = screen.getByRole("region", { name: "Course header" });
+    expect(header).toHaveTextContent(controller.session?.code ?? "");
+    expect(within(header).getByRole("group", { name: "Questions" })).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Leg strip" })).toBeInTheDocument();
+    expect(screen.queryByRole("banner", { name: "Monitor status" })).not.toBeInTheDocument();
+  });
+
+  it.each([true, false])("embedded map (wide=%s) keeps player map tokens", (wide) => {
+    mockedUseAdminMapWideLayout.mockReturnValue(wide);
+
+    renderWithRouter(<AdminMapScreen embeddedMonitor />, { route: "/admin" });
+
+    expect(screen.getByTestId("admin-map-view").closest("[data-player-map]")).not.toBeNull();
+  });
+
+  it("standalone map has no player map token scope", () => {
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+
+    expect(screen.getByTestId("admin-map-view").closest("[data-player-map]")).toBeNull();
+  });
+
+  it.each([
+    { embedded: true, inHeader: true },
+    { embedded: false, inHeader: false },
+  ])(
+    "wide sync error sits in the course header row (embedded=$embedded)",
+    ({ embedded, inHeader }) => {
+      const controller = mockController();
+      controller.syncStatus.lastSyncError = "Write rejected by rules";
+      mockedUseObserverMapScreen.mockReturnValue(controller);
+      mockedUseAdminMapWideLayout.mockReturnValue(true);
+
+      renderWithRouter(<AdminMapScreen embeddedMonitor={embedded} />, {
+        route: embedded ? "/admin" : "/map",
+      });
+
+      const error = screen.getByText("Write rejected by rules");
+      expect(error.closest(".admin-map-shell__top") !== null).toBe(inHeader);
+    },
+  );
+
+  it("standalone wide map keeps its own chrome", () => {
+    mockedUseAdminMapWideLayout.mockReturnValue(true);
+
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+
+    expect(screen.queryByRole("region", { name: "Course header" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("list", { name: "Leg strip" })).not.toBeInTheDocument();
+    expect(screen.getByRole("banner", { name: "Monitor status" })).toBeInTheDocument();
   });
 
   it.each([true, false])(

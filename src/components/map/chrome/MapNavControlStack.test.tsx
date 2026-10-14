@@ -5,6 +5,7 @@ import {
   MAP_CHROME_DOCKS_STORAGE_KEY,
   MAP_NAV_DOCK_STORAGE_KEY,
   type MapChromeDockPlacement,
+  topPxFromTopRatio,
 } from "@/hooks/map/mapChromeDockPlacement";
 import { MapDraggableFixedStack } from "./MapDraggableFixedStack";
 
@@ -81,6 +82,44 @@ describe("MapDraggableFixedStack (nav)", () => {
     ) as HTMLElement;
     expect(rightStack.style.right).toBe("12px");
     expect(rightStack.style.left).toBe("auto");
+  });
+
+  it("rests inside a dock frame using the frame height", () => {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const frame = this.hasAttribute("data-map-dock-frame");
+      const [left, top, width, height] = frame ? [400, 100, 300, 400] : [412, 300, 52, 200];
+      return {
+        x: left,
+        y: top,
+        left,
+        top,
+        right: left + width,
+        bottom: top + height,
+        width,
+        height,
+        toJSON() {
+          return {};
+        },
+      };
+    });
+
+    const computedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, "getComputedStyle").mockImplementation((el, pseudo) => {
+      const style = computedStyle(el, pseudo);
+      return el instanceof HTMLElement && el.hasAttribute("data-map-dock-frame")
+        ? ({ contain: "layout" } as CSSStyleDeclaration)
+        : style;
+    });
+
+    const { container } = render(
+      <div data-map-dock-frame="">
+        <Harness initial={{ side: "left", topRatio: 1 }} />
+      </div>,
+    );
+    const stack = container.querySelector('[data-testid="map-nav-dock-stack"]') as HTMLElement;
+    expect(stack.style.top).toBe(`${topPxFromTopRatio(1, 200, 400)}px`);
   });
 
   it("does not complete settle on animation cancel (Strict Mode safe)", () => {
