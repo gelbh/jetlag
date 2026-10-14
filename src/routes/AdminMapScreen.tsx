@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import "../theme/mantineAdminStyles";
 import { AdminMonitorPlayerFocus } from "../components/admin/monitor/AdminMonitorPlayerFocus";
 import { AdminPlayerRoster } from "../components/admin/monitor/AdminPlayerRoster";
 import { ChatPanel } from "../components/chat/ChatPanel";
