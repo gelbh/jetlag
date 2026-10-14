@@ -22,6 +22,14 @@ export function isLiveLocationGone(updatedAt: string, nowMs: number): boolean {
   return ageMs >= LIVE_LOCATION_GONE_MS;
 }
 
+/** Locations still drawn on the map (not yet gone). */
+export function countLiveLocations(
+  locations: readonly { updatedAt: string }[],
+  nowMs: number,
+): number {
+  return locations.filter((location) => !isLiveLocationGone(location.updatedAt, nowMs)).length;
+}
+
 /** Linear fade from 1 (fresh) to 0 (gone). Gone ages return 0. */
 export function liveLocationFillOpacity(updatedAt: string, nowMs: number): number {
   const ageMs = liveLocationAgeMs(updatedAt, nowMs);

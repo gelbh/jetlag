@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  countLiveLocations,
   formatLiveLocationLastSeen,
   isLiveLocationGone,
   LIVE_LOCATION_GONE_MS,
@@ -27,6 +28,15 @@ describe("liveLocationFreshness", () => {
     expect(isLiveLocationGone(isoAgo(sixtyMinutesMs - 1), NOW)).toBe(false);
     expect(isLiveLocationGone(isoAgo(sixtyMinutesMs), NOW)).toBe(true);
     expect(isLiveLocationGone("bad", NOW)).toBe(true);
+  });
+
+  it("counts only locations still drawn on the map", () => {
+    const locations = [
+      { updatedAt: isoAgo(30_000) },
+      { updatedAt: isoAgo(LIVE_LOCATION_GONE_MS) },
+      { updatedAt: "bad" },
+    ];
+    expect(countLiveLocations(locations, NOW)).toBe(1);
   });
 
   it("fades opacity linearly until gone", () => {

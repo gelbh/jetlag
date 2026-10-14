@@ -36,5 +36,5 @@ export function LivePlayerLocationsLayer({
     });
   }, [locations, myUid, nowMs, role]);
 
-  return <MapLibrePointMarkers id="live-players" markers={markers} />;
+  return <MapLibrePointMarkers id={`live-${role}s`} markers={markers} />;
 }
