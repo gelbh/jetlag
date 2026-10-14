@@ -1,4 +1,3 @@
-import { FirebaseError } from "firebase/app";
 import { APP_VERSION } from "../../domain/device/changelog";
 import type { JoinRequestRole } from "../../domain/session/players/joinRequest";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
@@ -81,11 +80,14 @@ export async function initSessionRoleGates(sessionId: string): Promise<InitSessi
   );
 }
 
-/** Caller is no longer a member: the leave already happened (or a lost retry committed it). */
+/**
+ * Caller is no longer a member: the leave already happened, whether the first
+ * attempt or a lost retry was rejected. Prefix match is deliberate: production
+ * captures carry a " [403]" suffix on the message.
+ */
 function isAlreadyLeftError(error: unknown): boolean {
   return (
-    error instanceof FirebaseError &&
-    error.code === "functions/permission-denied" &&
+    isCallableError(error, "permission-denied") &&
     error.message.startsWith("Session membership required")
   );
 }
