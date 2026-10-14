@@ -27,7 +27,7 @@ import {
   preloadRequestStatusChipLabel,
   preloadRequestStatusChipTone,
 } from "@/services/admin/adminPreloadRequests";
-import type { StatusTone } from "@/theme/adminTone";
+import { incidentProgressTone, type StatusTone } from "@/theme/adminTone";
 import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
 import { AdminEmptyState } from "../shared/AdminEmptyState";
@@ -55,14 +55,6 @@ const PROGRESS_ORDER: IncidentProgress[] = [
   "resolved_today",
   "closed",
 ];
-
-const PROGRESS_TONE: Record<IncidentProgress, StatusTone> = {
-  new: "mispunch",
-  diagnosed: "info",
-  fix_proposed: "live",
-  resolved_today: "ok",
-  closed: "neutral",
-};
 
 function incidentSummary(incident: IncidentRecord): string {
   return (
@@ -356,7 +348,7 @@ function IncidentQueue({
                       {incidentSummary(incident)}
                     </Text>
                     <StatusMark
-                      tone={PROGRESS_TONE[progress]}
+                      tone={incidentProgressTone[progress]}
                       label={incidentStatusChipLabel(incident.status)}
                     />
                     <PunchTime at={incident.updatedAt || incident.createdAt} flashing={false} />

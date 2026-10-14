@@ -12,6 +12,7 @@ import { useSessionActivityLog } from "../../hooks/session/useSessionActivityLog
 import { useAnnotationStore } from "../../state/annotationStore";
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
+import { adminShellCell } from "./adminShellLayout";
 import { MapPanel } from "./panels/MapPanel";
 import { ModPanel } from "./panels/ModPanel";
 import { OverviewPanel } from "./panels/OverviewPanel";
@@ -78,7 +79,7 @@ export function AdminMonitorRail({
   return (
     <Group
       component="aside"
-      className="admin-map-shell__rail"
+      style={adminShellCell.rail}
       aria-label="Admin monitor rail"
       h="100%"
       gap={0}

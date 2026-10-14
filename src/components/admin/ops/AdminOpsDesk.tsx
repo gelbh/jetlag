@@ -4,6 +4,7 @@ import {
   Button,
   Drawer,
   Group,
+  ScrollArea,
   Skeleton,
   Stack,
   Text,
@@ -39,13 +40,11 @@ import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
 import { AdminEmptyState } from "../shared/AdminEmptyState";
 import { AdminRegion } from "../shared/AdminRegion";
 import { AdminWorld } from "../shared/AdminWorld";
-import { AdminMobileDesk } from "./AdminMobileDesk";
+import { AdminMobileBar } from "./AdminMobileBar";
 import { AdminNeedsYou, type NeedsYouGroup } from "./AdminNeedsYou";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
 import { AdminStartList, START_LIST_GRID_CELLS } from "./AdminStartList";
 import { AdminStatusStrip } from "./AdminStatusStrip";
-import "../incident/AdminIncidentDesk.css";
-import "./AdminOpsDesk.css";
 
 const EMPTY_INCIDENTS: IncidentRecord[] = [];
 const EMPTY_PRELOAD_REQUESTS: PreloadRequest[] = [];
@@ -428,6 +427,7 @@ function AdminOpsDeskContent() {
   }
 
   const liveSessions = sessions.filter((row) => row.isLive);
+  const mobileSection = onIncidentsRoute || onPreloadRoute ? "needs-you" : "start-list";
   const statusStrip = (
     <AdminStatusStrip
       liveCount={liveSessions.length}
@@ -463,8 +463,12 @@ function AdminOpsDeskContent() {
           ? { width: "24rem", breakpoint: "64em", collapsed: { mobile: true, desktop: !wide } }
           : undefined
       }
+      footer={isDesktop ? undefined : { height: "calc(3.5rem + env(safe-area-inset-bottom))" }}
       padding={0}
-      className="jl-ops-desk"
+      // Fill .app-scroll-root; no display:flex here (fights the static AppShell grid).
+      h="100%"
+      mih={0}
+      style={{ overflow: "hidden" }}
       data-testid="admin-ops-desk"
       data-admin-shell="mantine-static"
       data-layout={isDesktop ? "desktop" : "mobile"}
@@ -476,7 +480,12 @@ function AdminOpsDeskContent() {
           {sessionsBody}
         </AppShell.Navbar>
       ) : null}
-      <AppShell.Main className="jl-ops-desk-main" p={isDesktop ? "xs" : undefined}>
+      <AppShell.Main
+        display="flex"
+        mih={0}
+        p={isDesktop ? "xs" : undefined}
+        style={{ flexDirection: "column", overflow: "hidden" }}
+      >
         {isDesktop ? (
           <AdminRegion title="Course" scroll={false}>
             <AdminMonitorPane
@@ -485,21 +494,24 @@ function AdminOpsDeskContent() {
               sessionsUnavailable={sessionsFailedEmpty}
             />
           </AdminRegion>
+        ) : mobileSection === "needs-you" ? (
+          <ScrollArea flex={1} mih={0} type="auto" offsetScrollbars>
+            {needsYou}
+          </ScrollArea>
         ) : (
-          <AdminMobileDesk
-            tab={onIncidentsRoute || onPreloadRoute ? "incidents" : "sessions"}
-            onSelectTab={(tab) =>
-              void navigate(tab === "incidents" ? "/admin/incidents" : "/admin")
-            }
-            sessions={sessionsBody}
-            incidents={
-              <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
-                {needsYou}
-              </div>
-            }
-          />
+          sessionsBody
         )}
       </AppShell.Main>
+      {isDesktop ? null : (
+        <AppShell.Footer p="xs" pb="calc(var(--mantine-spacing-xs) + env(safe-area-inset-bottom))">
+          <AdminMobileBar
+            value={mobileSection}
+            onChange={(section) =>
+              void navigate(section === "needs-you" ? "/admin/incidents" : "/admin")
+            }
+          />
+        </AppShell.Footer>
+      )}
       {isDesktop && wide ? (
         <AppShell.Aside mih={0} p="xs">
           <AdminRegion title="Needs you" count={needsYouCount}>

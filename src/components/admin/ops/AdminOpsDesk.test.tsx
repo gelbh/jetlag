@@ -404,7 +404,7 @@ describe("AdminOpsDesk", () => {
     expect(screen.queryByText(/^Synced/)).not.toBeInTheDocument();
   });
 
-  it("has no Settings tab in the mobile panel picker", () => {
+  it("has no Settings option in the mobile bottom bar", () => {
     authState.state = "admin";
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
@@ -413,8 +413,8 @@ describe("AdminOpsDesk", () => {
 
     renderOpsDesk();
 
-    expect(screen.getByRole("tab", { name: "Sessions" })).toBeInTheDocument();
-    expect(screen.queryByRole("tab", { name: "Settings" })).not.toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Start list" })).toBeInTheDocument();
+    expect(screen.queryByRole("radio", { name: "Settings" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^settings$/i })).toBeInTheDocument();
   });
 
@@ -626,6 +626,7 @@ describe("AdminOpsDesk", () => {
     expect(startList.closest(".mantine-AppShell-navbar")).not.toBeNull();
     expect(within(startList).getByRole("table").closest(".mantine-ScrollArea-root")).not.toBeNull();
     expectStaticAppShell("desktop");
+    expect(screen.queryByRole("radiogroup", { name: "Desk sections" })).toBeNull();
     expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
     expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
@@ -1124,35 +1125,35 @@ describe("AdminOpsDesk", () => {
       );
     }
 
-    it("shows preload requests on the Incidents tab on /admin/preload-requests", () => {
+    it("shows preload requests under Needs you on /admin/preload-requests", () => {
       preloadState.list = [makeRequest()];
       renderMobile("/admin/preload-requests");
 
-      expect(screen.getByRole("tab", { name: "Incidents" })).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+      expect(screen.getByRole("radio", { name: "Needs you" })).toBeChecked();
       expect(
         within(screen.getByRole("region", { name: "Preload requests" })).getByText("Dublin core"),
       ).toBeInTheDocument();
     });
 
-    it("offers only Sessions and Incidents tabs", () => {
+    it("has a bottom bar with exactly Start list and Needs you", () => {
       renderMobile("/admin");
 
-      expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
-        "Sessions",
-        "Incidents",
-      ]);
+      const bar = screen.getByRole("radiogroup", { name: "Desk sections" });
+      expect(bar.closest("footer")).not.toBeNull();
+      const labels = within(bar)
+        .getAllByRole<HTMLInputElement>("radio")
+        .map((option) => option.labels?.[0]);
+      expect(labels.map((label) => label?.textContent)).toEqual(["Start list", "Needs you"]);
+      // Spec #9: 44px touch targets.
+      for (const label of labels) {
+        expect(label?.style.minHeight).toBe("2.75rem");
+      }
     });
 
     it("shows the session list on /admin", () => {
       renderMobile("/admin");
 
-      expect(screen.getByRole("tab", { name: "Sessions" })).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+      expect(screen.getByRole("radio", { name: "Start list" })).toBeChecked();
       expect(screen.getByTestId("admin-ops-sessions")).toBeInTheDocument();
       expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
     });
@@ -1160,10 +1161,7 @@ describe("AdminOpsDesk", () => {
     it("shows the inbox alone on /admin/incidents", () => {
       renderMobile("/admin/incidents");
 
-      expect(screen.getByRole("tab", { name: "Incidents" })).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+      expect(screen.getByRole("radio", { name: "Needs you" })).toBeChecked();
       expect(screen.getByRole("region", { name: "Incidents" })).toBeInTheDocument();
       expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
       expect(screen.queryByTestId("admin-ops-sessions")).not.toBeInTheDocument();
@@ -1201,13 +1199,13 @@ describe("AdminOpsDesk", () => {
       expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
     });
 
-    it("switches tabs by route", async () => {
+    it("switches sections by route", async () => {
       renderMobile("/admin");
 
-      fireEvent.click(screen.getByRole("tab", { name: "Incidents" }));
+      fireEvent.click(screen.getByRole("radio", { name: "Needs you" }));
       expect(await screen.findByRole("region", { name: "Incidents" })).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("tab", { name: "Sessions" }));
+      fireEvent.click(screen.getByRole("radio", { name: "Start list" }));
       expect(await screen.findByTestId("admin-ops-sessions")).toBeInTheDocument();
     });
   });
