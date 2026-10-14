@@ -1,4 +1,4 @@
-import { Box, Divider, Paper } from "@mantine/core";
+import { Alert, Box, Divider, Paper } from "@mantine/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../theme/mantineAdminStyles";
 import { AdminCourseHeader } from "../components/admin/monitor/AdminCourseHeader";
@@ -208,6 +208,12 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
             questions={controller.pendingQuestions}
           />
           <Divider />
+          {/* In flow, not an overlay: the header's height varies as its cells wrap. */}
+          {controller.syncStatus.lastSyncError ? (
+            <Alert data-tone="mispunch" title="Sync issue" m="xs" py={6}>
+              {controller.syncStatus.lastSyncError}
+            </Alert>
+          ) : null}
         </Box>
       ) : (
         <AdminMapScreenChrome
@@ -306,7 +312,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
             />
           ) : null}
         </>
-      ) : controller.syncStatus.lastSyncError ? (
+      ) : !embeddedMonitor && controller.syncStatus.lastSyncError ? (
         <div className="pointer-events-none absolute inset-x-0 top-[var(--admin-status-height)] z-[var(--z-panel)] px-3">
           <InlineError className="pointer-events-auto mx-auto max-w-xl">
             {controller.syncStatus.lastSyncError}
