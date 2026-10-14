@@ -82,7 +82,7 @@ export const adminTheme: MantineThemeOverride = {
     Tabs: Tabs.extend({
       styles: {
         list: { borderColor: "var(--adm-rule)" },
-        tab: { color: "var(--adm-ink)", fontWeight: 600 },
+        tab: { color: "var(--adm-ink)", fontWeight: 600, paddingInline: 10 },
       },
       vars: (_theme, props) => ({
         root: props.color ? {} : { "--tabs-color": "var(--adm-overprint)" },
