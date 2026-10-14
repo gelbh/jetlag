@@ -4,10 +4,9 @@
  * Entry CSS is render-blocking, and the full `styles.layer.css` bundle ships
  * ~100 components the app never renders. We list only the components the app
  * imports plus Mantine's internal deps (e.g. UnstyledButton for Button, Input
- * for TextInput, ModalBase/Overlay for Drawer). Lazy-only components stay here
- * too: a separate lazy stylesheet saved <2 KB gz and let a new route render
- * unstyled with tests green. `mantineStyles.test.ts` fails when an imported
- * component's CSS is missing.
+ * for TextInput, ModalBase/Overlay for Drawer). Lazy player routes stay here
+ * too; only admin-only components live in `mantineAdminStyles.ts`.
+ * `mantineStyles.test.ts` fails when an imported component's CSS is missing.
  *
  * Order mirrors Mantine's own `styles.layer.css`.
  */
@@ -36,21 +35,16 @@ import "@mantine/core/styles/Badge.layer.css";
 import "@mantine/core/styles/Button.layer.css";
 import "@mantine/core/styles/Center.layer.css";
 import "@mantine/core/styles/Checkbox.layer.css";
-import "@mantine/core/styles/Chip.layer.css";
 import "@mantine/core/styles/Container.layer.css";
-import "@mantine/core/styles/Divider.layer.css";
 import "@mantine/core/styles/Drawer.layer.css";
-import "@mantine/core/styles/Kbd.layer.css";
 import "@mantine/core/styles/Modal.layer.css";
 import "@mantine/core/styles/Notification.layer.css";
 import "@mantine/core/styles/Progress.layer.css";
-import "@mantine/core/styles/Tooltip.layer.css";
 import "@mantine/core/styles/SegmentedControl.layer.css";
 import "@mantine/core/styles/SimpleGrid.layer.css";
 import "@mantine/core/styles/Skeleton.layer.css";
 import "@mantine/core/styles/Stack.layer.css";
 import "@mantine/core/styles/Switch.layer.css";
-import "@mantine/core/styles/Table.layer.css";
 import "@mantine/core/styles/Tabs.layer.css";
 import "@mantine/core/styles/Title.layer.css";
 import "@mantine/notifications/styles.layer.css";
