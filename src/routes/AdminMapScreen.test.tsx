@@ -196,6 +196,26 @@ describe("AdminMapScreen", () => {
     expect(screen.getByTestId("admin-map-view").closest("[data-player-map]")).toBeNull();
   });
 
+  it.each([
+    { embedded: true, inHeader: true },
+    { embedded: false, inHeader: false },
+  ])(
+    "wide sync error sits in the course header row (embedded=$embedded)",
+    ({ embedded, inHeader }) => {
+      const controller = mockController();
+      controller.syncStatus.lastSyncError = "Write rejected by rules";
+      mockedUseObserverMapScreen.mockReturnValue(controller);
+      mockedUseAdminMapWideLayout.mockReturnValue(true);
+
+      renderWithRouter(<AdminMapScreen embeddedMonitor={embedded} />, {
+        route: embedded ? "/admin" : "/map",
+      });
+
+      const error = screen.getByText("Write rejected by rules");
+      expect(error.closest(".admin-map-shell__top") !== null).toBe(inHeader);
+    },
+  );
+
   it("standalone wide map keeps its own chrome", () => {
     mockedUseAdminMapWideLayout.mockReturnValue(true);
 
