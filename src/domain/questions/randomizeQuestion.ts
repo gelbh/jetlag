@@ -177,8 +177,6 @@ export function usedQuestionOptionLabelsForTool(
       for (const key of usedThermometerDistanceOptionsForSession(
         annotations,
         pendingQuestions,
-        undefined,
-        undefined,
         unit,
       )) {
         const meters = unit === "metric" ? Number(key) : milesToMeters(Number(key));

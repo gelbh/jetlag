@@ -4,9 +4,9 @@ import {
   availableThermometerDistancePresetsForSession,
   isThermometerDistanceOptionAvailable,
   isThermometerDistanceOptionAvailableForSession,
+  isThermometerDistanceOptionUsed,
   type ThermometerAnswer,
   type ThermometerDistanceOptionKey,
-  thermometerPresetForDistance,
   thermometerQuestionPrompt,
 } from "../../domain/questions";
 import type { SessionRulesInput } from "../../domain/session/rules";
@@ -239,8 +239,11 @@ export function ThermometerPanel({
             </p>
             <OptionChipRow>
               {availableDistancePresets.map((preset) => {
-                const presetKey = thermometerPresetForDistance(preset, distanceUnit);
-                const used = presetKey !== null && usedDistanceOptions.has(presetKey);
+                const used = isThermometerDistanceOptionUsed(
+                  usedDistanceOptions,
+                  preset,
+                  distanceUnit,
+                );
                 const reuse = presetUseCount > 0 && preset === distanceMeters ? costLabel : null;
                 return (
                   <OptionChip

@@ -13,10 +13,10 @@ import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
 import { type DistanceUnit, formatPresetDistance } from "@/domain/map/distance";
 import {
   availableThermometerDistancePresetsForSession,
+  isThermometerDistanceOptionUsed,
   THERMOMETER_SEND_BLOCK_MESSAGES,
   type ThermometerAnswer,
   type ThermometerDistanceOptionKey,
-  thermometerPresetForDistance,
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
 
@@ -91,14 +91,13 @@ export function ThermometerHudBody({
   const targetLabel = formatPresetDistance(distanceMeters, distanceUnit);
 
   const distanceRows = availableDistancePresets.map((preset) => {
-    const presetKey = thermometerPresetForDistance(preset, distanceUnit);
     return {
       id: String(preset),
       label:
         presetUseCount > 0 && preset === distanceMeters
           ? `${formatPresetDistance(preset, distanceUnit)} · ${costLabel}`
           : formatPresetDistance(preset, distanceUnit),
-      disabled: presetKey !== null && usedDistanceOptions.has(presetKey),
+      disabled: isThermometerDistanceOptionUsed(usedDistanceOptions, preset, distanceUnit),
       icon: <CrosshairIcon size={20} weight="duotone" color="currentColor" aria-hidden />,
     };
   });

@@ -163,10 +163,10 @@ export function useThermometerTool({
       usedThermometerDistanceOptionsForSession(
         activeAnnotations,
         pendingQuestions,
+        distanceUnit,
         undefined,
         // The live walk must not mark its own distance as used, or END WALK never arms.
         syncedWalkingQuestion?.id,
-        distanceUnit,
       ),
     [activeAnnotations, pendingQuestions, syncedWalkingQuestion?.id, distanceUnit],
   );
@@ -203,13 +203,8 @@ export function useThermometerTool({
 
       const travelMeters = distanceBetweenPoints(thermoA, config.thermoB);
       const useCount = Math.max(
-        thermometerUseCount(activeAnnotationsRef.current, distanceMeters, undefined, distanceUnit),
-        thermometerUseCountFromPending(
-          pendingQuestionsRef.current,
-          distanceMeters,
-          undefined,
-          distanceUnit,
-        ),
+        thermometerUseCount(activeAnnotationsRef.current, distanceMeters, distanceUnit),
+        thermometerUseCountFromPending(pendingQuestionsRef.current, distanceMeters, distanceUnit),
       );
       const { draw: cardDraw, keep: cardKeep } = questionCostBreakdown("D2P1", useCount);
 
@@ -288,8 +283,8 @@ export function useThermometerTool({
     thermoA && config.thermoB ? distanceBetweenPoints(thermoA, config.thermoB) : null;
 
   const presetUseCount = Math.max(
-    thermometerUseCount(activeAnnotations, activeDistanceMeters, undefined, distanceUnit),
-    thermometerUseCountFromPending(pendingQuestions, activeDistanceMeters, undefined, distanceUnit),
+    thermometerUseCount(activeAnnotations, activeDistanceMeters, distanceUnit),
+    thermometerUseCountFromPending(pendingQuestions, activeDistanceMeters, distanceUnit),
   );
   const {
     label: costLabel,
