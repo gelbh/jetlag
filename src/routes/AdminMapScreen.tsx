@@ -5,6 +5,7 @@ import { AdminCourseHeader } from "../components/admin/monitor/AdminCourseHeader
 import { AdminLegStrip } from "../components/admin/monitor/AdminLegStrip";
 import { AdminMonitorPlayerFocus } from "../components/admin/monitor/AdminMonitorPlayerFocus";
 import { AdminPlayerRoster } from "../components/admin/monitor/AdminPlayerRoster";
+import { AdminSplitBoard } from "../components/admin/monitor/AdminSplitBoard";
 import { SessionCode } from "../components/admin/shared/SessionCode";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { MapView } from "../components/map/chrome/MapView";
@@ -168,9 +169,20 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
     </MapView>
   );
 
-  const roster = embeddedMonitor ? (
-    <AdminPlayerRoster session={controller.session} locations={playerLocations} />
-  ) : undefined;
+  const splitBoard = embeddedMonitor ? (
+    <AdminSplitBoard
+      // Remount on width change so the fold resets to that width's default.
+      key={isWide ? "wide" : "narrow"}
+      count={
+        new Set([...(controller.session.memberUids ?? []), ...playerLocations.map((l) => l.uid)])
+          .size
+      }
+      defaultOpen={isWide}
+      placement={isWide ? "top" : "bottom"}
+    >
+      <AdminPlayerRoster session={controller.session} locations={playerLocations} />
+    </AdminSplitBoard>
+  ) : null;
 
   const shell = (
     <div
@@ -213,6 +225,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
 
       <div className={isWide ? "admin-map-shell__map" : "absolute inset-0"} data-map-dock-frame="">
         {mapLayers}
+        {splitBoard}
       </div>
 
       {isWide ? (
@@ -232,7 +245,6 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           mapViewport={controller.mapViewport}
           onLayerVisibilityChange={setLayerVisibility}
           onLowPowerModeChange={setLowPowerMode}
-          roster={roster}
         />
       ) : null}
 
@@ -319,14 +331,6 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           </Paper>
         )}
       </div>
-      {isWide ? null : (
-        <section aria-label="Player roster" className="max-h-48 shrink-0 overflow-hidden px-2 pb-2">
-          <p className="mb-1 px-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-            Player roster
-          </p>
-          {roster}
-        </section>
-      )}
     </div>
   );
 }

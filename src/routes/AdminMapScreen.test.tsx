@@ -159,7 +159,9 @@ describe("AdminMapScreen", () => {
       route: "/admin",
     });
 
-    expect(screen.getAllByRole("region", { name: "Player roster" })).toHaveLength(1);
+    const rosters = screen.getAllByRole("region", { name: "Player roster" });
+    expect(rosters).toHaveLength(1);
+    expect(rosters[0].closest("[data-map-dock-frame]")).not.toBeNull();
     expect(mockedUsePlayerLocationsSync).toHaveBeenLastCalledWith(controller.session?.id);
     expect(screen.queryByTestId("admin-monitor-code") !== null).toBe(!wide);
   });
