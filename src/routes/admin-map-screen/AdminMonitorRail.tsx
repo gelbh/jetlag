@@ -125,7 +125,7 @@ export function AdminMonitorRail({
                   onCollapsedChange(false);
                 }}
               >
-                <Text size="xs" fw={700} inherit>
+                <Text fz={11} fw={700} inherit>
                   {tab.short}
                 </Text>
               </ActionIcon>
@@ -182,17 +182,19 @@ export function AdminMonitorRail({
 
             <Tabs.Panel value="chat">
               {controller.sessionId && controller.uid ? (
-                <ChatPanelBody
-                  messages={controller.chatMessages}
-                  pendingQuestions={controller.pendingQuestions}
-                  sessionRules={sessionRules}
-                  sessionId={controller.sessionId}
-                  senderUid={controller.uid}
-                  senderRole={chatDisplayRole}
-                  isHider={chatDisplayRole === "hider"}
-                  onAnswerQuestion={async () => undefined}
-                  readOnly
-                />
+                <Box p="sm" h="100%">
+                  <ChatPanelBody
+                    messages={controller.chatMessages}
+                    pendingQuestions={controller.pendingQuestions}
+                    sessionRules={sessionRules}
+                    sessionId={controller.sessionId}
+                    senderUid={controller.uid}
+                    senderRole={chatDisplayRole}
+                    isHider={chatDisplayRole === "hider"}
+                    onAnswerQuestion={async () => undefined}
+                    readOnly
+                  />
+                </Box>
               ) : null}
             </Tabs.Panel>
 

@@ -53,7 +53,7 @@ export function AdminLegStrip({ questions }: { questions: readonly PendingQuesti
   return (
     <ScrollArea type="hover" scrollbarSize={4} viewportRef={viewportRef}>
       <Group role="list" aria-label="Leg strip" gap={6} wrap="nowrap" px="sm" py={6}>
-        <Badge role="listitem" aria-label="Start" data-tone="neutral" miw={28}>
+        <Badge role="listitem" aria-label="Start" data-tone="neutral" miw={28} px={6} flex="none">
           S
         </Badge>
         {legs.map((q, index) => {
@@ -69,6 +69,8 @@ export function AdminLegStrip({ questions }: { questions: readonly PendingQuesti
                 data-stamp={stamp || undefined}
                 td={q.status === "cancelled" ? "line-through" : undefined}
                 miw={28}
+                px={6}
+                flex="none"
                 style={stamp && !reduceMotion ? STAMP : undefined}
               >
                 {index + 1}
