@@ -176,6 +176,7 @@ describe("AdminMapScreen", () => {
     const header = screen.getByRole("region", { name: "Course header" });
     expect(header).toHaveTextContent(controller.session?.code ?? "");
     expect(screen.getByRole("group", { name: "Questions" })).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Leg strip" })).toBeInTheDocument();
     expect(container.querySelector(".admin-status-bar")).toBeNull();
   });
 
@@ -185,6 +186,7 @@ describe("AdminMapScreen", () => {
     const { container } = renderWithRouter(<AdminMapScreen />, { route: "/map" });
 
     expect(screen.queryByRole("region", { name: "Course header" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("list", { name: "Leg strip" })).not.toBeInTheDocument();
     expect(container.querySelector(".admin-status-bar")).not.toBeNull();
   });
 

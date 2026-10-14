@@ -92,7 +92,10 @@ export const adminTheme: MantineThemeOverride = {
       defaultProps: { variant: "light" },
       styles: { root: { fontWeight: 700, letterSpacing: "0.04em" } },
       vars: (_theme, props) => {
-        const tone = (props as { "data-tone"?: StatusTone })["data-tone"];
+        const { "data-tone": tone, "data-latest": latest } = props as {
+          "data-tone"?: StatusTone;
+          "data-latest"?: boolean;
+        };
         if (!tone && props.color) return { root: {} };
         const color = toneColor[tone ?? "neutral"] ?? toneColor.neutral;
         return {
@@ -100,7 +103,8 @@ export const adminTheme: MantineThemeOverride = {
             "--badge-bg":
               tone === "live" ? color : `color-mix(in oklch, ${color} 14%, var(--adm-paper))`,
             "--badge-color": "var(--adm-ink)",
-            "--badge-bd": `1px solid ${color}`,
+            // Latest leg strip control: overprint ring, the course colour on an O-map.
+            "--badge-bd": latest ? "2px solid var(--adm-overprint)" : `1px solid ${color}`,
           },
         };
       },
