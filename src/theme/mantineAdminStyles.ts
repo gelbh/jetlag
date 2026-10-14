@@ -6,6 +6,7 @@
  *
  * Order mirrors Mantine's own `styles.layer.css`.
  */
+import "@mantine/core/styles/Accordion.layer.css";
 import "@mantine/core/styles/Chip.layer.css";
 import "@mantine/core/styles/Divider.layer.css";
 import "@mantine/core/styles/Kbd.layer.css";
