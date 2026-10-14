@@ -80,24 +80,35 @@ export async function initSessionRoleGates(sessionId: string): Promise<InitSessi
   );
 }
 
-export async function leaveSessionMembership(sessionId: string): Promise<void> {
+/**
+ * Caller is no longer a member: the leave already happened, whether the first
+ * attempt or a lost retry was rejected. Prefix match is deliberate: production
+ * captures carry a " [403]" suffix on the message.
+ */
+function isAlreadyLeftError(error: unknown): boolean {
+  return (
+    isCallableError(error, "permission-denied") &&
+    error.message.startsWith("Session membership required")
+  );
+}
+
+export async function leaveSessionMembership(sessionId: string): Promise<"left" | "already_left"> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
 
   try {
-    // A retry after a committed-but-lost leave sees "membership required".
     await callWithResilience<{ sessionId: string }, { ok: boolean }>(
       "leaveSessionMembership",
       { sessionId },
-      {
-        idempotent: true,
-        recoverAfterRetry: (error) =>
-          isCallableError(error, "permission-denied", "Session membership required.")
-            ? { ok: true }
-            : undefined,
-      },
+      { idempotent: true },
     );
+    return "left";
+  } catch (error) {
+    if (!isAlreadyLeftError(error)) {
+      throw error;
+    }
+    return "already_left";
   } finally {
     clearRolePasscodeRevealWarm(sessionId);
   }

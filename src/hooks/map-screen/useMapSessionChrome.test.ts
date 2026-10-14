@@ -10,6 +10,7 @@ const mockResetRemoteSession = vi.hoisted(() => vi.fn(async () => "2026-01-02T00
 const mockClearLiveLocationOnLeave = vi.hoisted(() => vi.fn(async () => undefined));
 const mockCaptureException = vi.hoisted(() => vi.fn());
 const mockTrackSessionEnded = vi.hoisted(() => vi.fn());
+const mockTrackSessionLeaveAlreadyLeft = vi.hoisted(() => vi.fn());
 const mockLeaveHostSession = vi.hoisted(() =>
   vi.fn(
     async (): Promise<{ action: "ended" } | { action: "promoted"; newHostUid: string }> => ({
@@ -17,7 +18,9 @@ const mockLeaveHostSession = vi.hoisted(() =>
     }),
   ),
 );
-const mockLeaveSessionMembership = vi.hoisted(() => vi.fn(async () => undefined));
+const mockLeaveSessionMembership = vi.hoisted(() =>
+  vi.fn(async (): Promise<"left" | "already_left"> => "left"),
+);
 const mockEndSession = vi.hoisted(() =>
   vi.fn(async () => {
     mockTrackSessionEnded("host_end");
@@ -39,6 +42,7 @@ vi.mock("../../services/core/analytics/clientErrors", () => ({
 
 vi.mock("../../services/core/analytics/analytics", () => ({
   trackSessionEnded: mockTrackSessionEnded,
+  trackSessionLeaveAlreadyLeft: mockTrackSessionLeaveAlreadyLeft,
 }));
 
 vi.mock("../../services/session/sessionLifecycle", () => ({
@@ -125,6 +129,8 @@ describe("useMapSessionChrome", () => {
     mockLeaveHostSession.mockClear();
     mockLeaveHostSession.mockResolvedValue({ action: "ended" });
     mockLeaveSessionMembership.mockClear();
+    mockLeaveSessionMembership.mockResolvedValue("left");
+    mockTrackSessionLeaveAlreadyLeft.mockClear();
     mockEndSession.mockClear();
     mockEndSession.mockImplementation(async () => {
       mockTrackSessionEnded("host_end");
@@ -503,7 +509,41 @@ describe("useMapSessionChrome", () => {
     });
 
     expect(mockLeaveSessionMembership).toHaveBeenCalledWith("session-remote");
+    expect(mockTrackSessionLeaveAlreadyLeft).not.toHaveBeenCalled();
     expect(mockLeaveHostSession).not.toHaveBeenCalled();
+    expect(exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
+    );
+  });
+
+  it("tracks already_left when the gated non-host leave finds the player removed", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    mockLeaveSessionMembership.mockResolvedValueOnce("already_left");
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: {
+          ...remoteSession,
+          hostUid: "other-host",
+          memberUids: ["other-host", "host-1"],
+          roleGates: { version: 1, leaders: { seeker: "other-host" } },
+        },
+        isHost: false,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleLeaveSession();
+    });
+
+    expect(mockTrackSessionLeaveAlreadyLeft).toHaveBeenCalledTimes(1);
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
     );

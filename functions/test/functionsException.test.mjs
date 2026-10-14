@@ -245,6 +245,34 @@ test("captureFunctionsExceptionAsync sends unexpected errors to PostHog", async 
   setFunctionsExceptionClientForTests(null);
 });
 
+test("captureFunctionsExceptionAsync skips leave non-member only for the deployed leave function", async () => {
+  const { captureFunctionsExceptionAsync } = await import("../lib/functionsException.mjs");
+  const calls = [];
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async (error, distinctId, properties) => {
+      calls.push({ error, distinctId, properties });
+    },
+  });
+  const previous = process.env.K_SERVICE;
+  const error = new HttpsError("permission-denied", "Session membership required.");
+  try {
+    process.env.K_SERVICE = "leavesessionmembership";
+    await captureFunctionsExceptionAsync(error);
+    assert.equal(calls.length, 0);
+
+    process.env.K_SERVICE = "resetsessionforrematch";
+    await captureFunctionsExceptionAsync(error);
+    assert.equal(calls.length, 1);
+  } finally {
+    if (previous === undefined) {
+      delete process.env.K_SERVICE;
+    } else {
+      process.env.K_SERVICE = previous;
+    }
+    setFunctionsExceptionClientForTests(null);
+  }
+});
+
 test("captureFunctionsException returns a promise that settles after Immediate capture", async () => {
   const { captureFunctionsException } = await import("../lib/functionsException.mjs");
   let settled = false;
@@ -388,4 +416,19 @@ test("resolveFunctionsExceptionEnvironment prefers emulator then FUNCTIONS_EXCEP
     resolveFunctionsExceptionEnvironment({ FUNCTIONS_EXCEPTION_ENVIRONMENT: "  " }),
     "production",
   );
+});
+
+test("shouldSkipFunctionsException drops reveal permission-denied everywhere", () => {
+  const error = new HttpsError("permission-denied", "Not allowed to view that role code.");
+  assert.equal(shouldSkipFunctionsException(error), true);
+  assert.equal(shouldSkipFunctionsException(error, "revealrolepasscode"), true);
+});
+
+test("shouldSkipFunctionsException drops membership permission-denied only on leave", () => {
+  const error = new HttpsError("permission-denied", "Session membership required.");
+  assert.equal(shouldSkipFunctionsException(error, "leaveSessionMembership"), true);
+  assert.equal(shouldSkipFunctionsException(error, "leavesessionmembership"), true);
+  assert.equal(shouldSkipFunctionsException(error, "resetsessionforrematch"), false);
+  assert.equal(shouldSkipFunctionsException(error, "repairghosthost"), false);
+  assert.equal(shouldSkipFunctionsException(error), false);
 });

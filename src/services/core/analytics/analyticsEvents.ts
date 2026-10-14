@@ -13,6 +13,7 @@ export const ANALYTICS_EVENTS = {
   session_created: "session_created",
   session_joined: "session_joined",
   session_ended: "session_ended",
+  session_leave_already_left: "session_leave_already_left",
   role_selected: "role_selected",
   premium_checkout_started: "premium_checkout_started",
   premium_checkout_failed: "premium_checkout_failed",
@@ -55,6 +56,7 @@ export type AnalyticsEventProps = {
   session_ended: {
     reason: SessionEndedReason;
   };
+  session_leave_already_left: Record<string, never>;
   role_selected: {
     role: PlayerRole;
     surface: "create" | "join";

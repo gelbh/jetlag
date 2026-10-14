@@ -7,7 +7,10 @@ import type { AnnotationRecord } from "../../domain/map/annotations";
 import { isActive, LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { isSessionRoleGated } from "../../domain/session/players/roleGates";
-import { trackSessionEnded } from "../../services/core/analytics/analytics";
+import {
+  trackSessionEnded,
+  trackSessionLeaveAlreadyLeft,
+} from "../../services/core/analytics/analytics";
 import { captureException } from "../../services/core/analytics/clientErrors";
 import { forceRgbCssColorsInClone } from "../../services/core/capture/html2canvasColors";
 import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/capture/html2canvasErrors";
@@ -325,7 +328,9 @@ export function useMapSessionChrome({
     if (!isLocalSession && user) {
       if (isSessionRoleGated(session) && !isRemoteHost) {
         try {
-          await leaveSessionMembership(session.id);
+          if ((await leaveSessionMembership(session.id)) === "already_left") {
+            trackSessionLeaveAlreadyLeft();
+          }
         } catch (error) {
           if (alertIfNeedsConnection(error)) {
             allowPlayerLocationPublishes();
