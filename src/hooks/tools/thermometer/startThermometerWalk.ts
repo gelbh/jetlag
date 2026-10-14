@@ -5,7 +5,7 @@ import {
   isThermometerDistanceOptionAvailableForSession,
   isThermometerDistanceOptionUsed,
   LOCAL_THERMOMETER_WALK_ID,
-  type ThermometerDistanceOptionMiles,
+  type ThermometerDistanceOptionKey,
   thermometerQuestionPrompt,
 } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
@@ -32,7 +32,7 @@ export interface StartThermometerWalkInput {
   senderUid?: string | null;
   distanceUnit: DistanceUnit;
   distanceMeters: number;
-  usedThermometerOptions?: ReadonlySet<ThermometerDistanceOptionMiles>;
+  usedThermometerOptions?: ReadonlySet<ThermometerDistanceOptionKey>;
   setMapError: (message: string | null) => void;
   patchConfig: (patch: Partial<ThermometerSessionConfig>) => void;
 }
@@ -73,7 +73,7 @@ export async function startThermometerGpsWalk(input: StartThermometerWalkInput):
     return;
   }
 
-  if (isThermometerDistanceOptionUsed(usedThermometerOptions, distanceMeters)) {
+  if (isThermometerDistanceOptionUsed(usedThermometerOptions, distanceMeters, distanceUnit)) {
     patchConfig({
       panelError: "That thermometer distance was already used this session.",
     });
