@@ -1,3 +1,4 @@
+import { ActionIcon, Badge, Box, Group, Paper, Text } from "@mantine/core";
 import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
 import { MapChromeControl } from "../../components/map/chrome/MapChromeControl";
 import { SessionTimerLabel } from "../../components/session/identity/SessionTimerLabel";
@@ -51,38 +52,31 @@ export function AdminMapScreenChrome({
       <MapScreenChromeSlots
         layout="fragments"
         header={
-          <header className="admin-map-shell__top pointer-events-none px-0 pt-0">
-            <div className="admin-status-bar pointer-events-auto">
-              <div className="min-w-0 flex-1">
-                <p className="font-mono text-xs font-bold tracking-[0.18em] text-ink">
-                  {session.code}
-                </p>
-                <p className="text-[0.8125rem] tabular-nums text-ink-muted">
-                  <SessionTimerLabel timerState={timer.timerState} />
-                </p>
-              </div>
-
-              <span className="shrink-0 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[0.8125rem] font-semibold uppercase tracking-wide text-brand-blue">
-                {roleLabel}
-              </span>
-
-              <span
-                className="inline-flex shrink-0 items-center gap-1.5 text-[0.8125rem] font-semibold uppercase tracking-wide text-ink-muted"
-                aria-label={syncBeaconAriaLabel(syncStatus)}
-              >
-                <SyncStatusBeacon status={syncStatus} size="sm" />
-                Sync
-              </span>
-
-              <button
-                type="button"
-                className="hud-chrome inline-flex min-h-9 min-w-9 items-center justify-center"
-                aria-label="Leave admin monitor"
-                onClick={onLeave}
-              >
-                <HudHomeIcon className="size-4" />
-              </button>
-            </div>
+          <header className="admin-map-shell__top" aria-label="Monitor status">
+            <Paper radius={0} px="sm" py={4} style={{ pointerEvents: "auto" }}>
+              <Group gap="sm" wrap="nowrap">
+                <Box miw={0} flex={1}>
+                  <Text size="xs" fw={700} lts="0.18em">
+                    {session.code}
+                  </Text>
+                  <Text size="sm" c="dimmed">
+                    <SessionTimerLabel timerState={timer.timerState} />
+                  </Text>
+                </Box>
+                <Badge variant="light" color="blue">
+                  {roleLabel}
+                </Badge>
+                <Group gap={6} wrap="nowrap" aria-label={syncBeaconAriaLabel(syncStatus)}>
+                  <SyncStatusBeacon status={syncStatus} size="sm" />
+                  <Text size="sm" fw={600} c="dimmed">
+                    Sync
+                  </Text>
+                </Group>
+                <ActionIcon variant="default" aria-label="Leave admin monitor" onClick={onLeave}>
+                  <HudHomeIcon width={16} height={16} aria-hidden="true" />
+                </ActionIcon>
+              </Group>
+            </Paper>
           </header>
         }
       />

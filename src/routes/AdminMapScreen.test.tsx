@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestSession } from "../test/fixtures/sessions";
 import { renderWithRouter } from "../test/renderWithRouter";
@@ -171,25 +171,25 @@ describe("AdminMapScreen", () => {
     mockedUseObserverMapScreen.mockReturnValue(controller);
     mockedUseAdminMapWideLayout.mockReturnValue(true);
 
-    const { container } = renderWithRouter(<AdminMapScreen embeddedMonitor />, {
+    renderWithRouter(<AdminMapScreen embeddedMonitor />, {
       route: "/admin",
     });
 
     const header = screen.getByRole("region", { name: "Course header" });
     expect(header).toHaveTextContent(controller.session?.code ?? "");
-    expect(screen.getByRole("group", { name: "Questions" })).toBeInTheDocument();
+    expect(within(header).getByRole("group", { name: "Questions" })).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "Leg strip" })).toBeInTheDocument();
-    expect(container.querySelector(".admin-status-bar")).toBeNull();
+    expect(screen.queryByRole("banner", { name: "Monitor status" })).not.toBeInTheDocument();
   });
 
   it("standalone wide map keeps its own chrome", () => {
     mockedUseAdminMapWideLayout.mockReturnValue(true);
 
-    const { container } = renderWithRouter(<AdminMapScreen />, { route: "/map" });
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
 
     expect(screen.queryByRole("region", { name: "Course header" })).not.toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Leg strip" })).not.toBeInTheDocument();
-    expect(container.querySelector(".admin-status-bar")).not.toBeNull();
+    expect(screen.getByRole("banner", { name: "Monitor status" })).toBeInTheDocument();
   });
 
   it.each([true, false])(
