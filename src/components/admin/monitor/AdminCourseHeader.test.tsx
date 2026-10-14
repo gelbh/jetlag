@@ -37,6 +37,8 @@ describe("AdminCourseHeader", () => {
     ["saving", "Saving changes", "info"],
     ["error", "Sync issue", "mispunch"],
     ["offline", "Offline", "neutral"],
+    ["degraded", "Unstable connection", "info"],
+    ["stale", "Showing last known state", "info"],
   ] as const)("labels sync %s as a %s mark", (status, label, tone) => {
     renderHeader(status);
     expect(screen.getByText(label).closest("[data-tone]")).toHaveAttribute("data-tone", tone);

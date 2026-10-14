@@ -1,5 +1,6 @@
 import { Button, Stack, Text } from "@mantine/core";
 
+// Standalone /map renders this panel outside the admin world, where --adm-* is unset.
 const MISPUNCH = "var(--adm-mispunch, var(--color-halt))";
 
 interface ModPanelProps {
