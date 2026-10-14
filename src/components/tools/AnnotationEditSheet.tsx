@@ -67,8 +67,9 @@ function AnnotationEditSheetForm({
       usedThermometerDistanceOptions(
         annotations.filter(isActive),
         annotation.type === "thermometer" ? annotation.id : undefined,
+        distanceUnit,
       ),
-    [annotations, annotation],
+    [annotations, annotation, distanceUnit],
   );
   const [savePayload, setSavePayload] = useState<EditSavePayload | null>(null);
 

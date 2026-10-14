@@ -1,6 +1,12 @@
 import type { AnnotationRecord } from "../map/annotations";
 import { type DistanceUnit, formatPresetDistance, milesToMeters } from "../map/distance";
+import {
+  METRIC_THERMOMETER_PRESET_METERS,
+  matchPresetMeters,
+  UI_PRESET_MATCH_TOLERANCE_METERS,
+} from "../map/distancePresets";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import { sessionDistanceUnit } from "../session/meta/sessionDistanceUnit";
 import {
   resolveIsThermometerPresetAvailable,
   resolveThermometerPresetsMeters,
@@ -15,6 +21,11 @@ export type ThermometerAnswer = "hotter" | "colder";
 export const THERMOMETER_DISTANCE_PRESETS_MILES = [0.5, 3, 10, 50] as const;
 
 export type ThermometerDistanceOptionMiles = (typeof THERMOMETER_DISTANCE_PRESETS_MILES)[number];
+
+/** Used-set keys: imperial mile ladders or metric meter ladders (radar twin). */
+export type ThermometerDistanceOptionKey =
+  | ThermometerDistanceOptionMiles
+  | (typeof METRIC_THERMOMETER_PRESET_METERS)[number];
 
 export const THERMOMETER_DISTANCE_PRESETS = THERMOMETER_DISTANCE_PRESETS_MILES.map(milesToMeters);
 
@@ -33,9 +44,26 @@ export function thermometerPresetMilesForMeters(
   );
 }
 
+export function thermometerPresetForDistance(
+  distanceMeters: number,
+  unit: DistanceUnit = "imperial",
+): ThermometerDistanceOptionKey | null {
+  if (unit === "metric") {
+    const preset = matchPresetMeters(
+      distanceMeters,
+      METRIC_THERMOMETER_PRESET_METERS,
+      UI_PRESET_MATCH_TOLERANCE_METERS,
+    );
+    return preset as ThermometerDistanceOptionKey | null;
+  }
+
+  return thermometerPresetMilesForMeters(distanceMeters);
+}
+
 export function thermometerDistanceOptionForAnnotation(
   annotation: AnnotationRecord,
-): ThermometerDistanceOptionMiles | null {
+  unit: DistanceUnit = "imperial",
+): ThermometerDistanceOptionKey | null {
   if (
     annotation.type !== "thermometer" ||
     annotation.metadata.thermometerDistanceMeters === undefined
@@ -43,12 +71,13 @@ export function thermometerDistanceOptionForAnnotation(
     return null;
   }
 
-  return thermometerPresetMilesForMeters(annotation.metadata.thermometerDistanceMeters);
+  return thermometerPresetForDistance(annotation.metadata.thermometerDistanceMeters, unit);
 }
 
 function thermometerDistanceOptionForPending(
   question: PendingQuestionRecord,
-): ThermometerDistanceOptionMiles | null {
+  unit: DistanceUnit = "imperial",
+): ThermometerDistanceOptionKey | null {
   if (question.toolType !== "thermometer") {
     return null;
   }
@@ -58,20 +87,27 @@ function thermometerDistanceOptionForPending(
     return null;
   }
 
-  return thermometerPresetMilesForMeters(pendingDistance);
+  return thermometerPresetForDistance(pendingDistance, unit);
 }
 
-const thermometerPresetHelpers = buildPresetCatalogHelpers<ThermometerDistanceOptionMiles>({
-  toolType: "thermometer",
-  readOptionFromAnnotation: thermometerDistanceOptionForAnnotation,
-  readOptionFromPending: thermometerDistanceOptionForPending,
-});
+function thermometerPresetHelpersForUnit(unit: DistanceUnit) {
+  return buildPresetCatalogHelpers<ThermometerDistanceOptionKey>({
+    toolType: "thermometer",
+    readOptionFromAnnotation: (annotation) =>
+      thermometerDistanceOptionForAnnotation(annotation, unit),
+    readOptionFromPending: (question) => thermometerDistanceOptionForPending(question, unit),
+  });
+}
 
 export function usedThermometerDistanceOptions(
   annotations: readonly AnnotationRecord[],
   exceptAnnotationId?: string,
-): Set<ThermometerDistanceOptionMiles> {
-  return thermometerPresetHelpers.usedOptionsFromAnnotations(annotations, exceptAnnotationId);
+  unit: DistanceUnit = "imperial",
+): Set<ThermometerDistanceOptionKey> {
+  return thermometerPresetHelpersForUnit(unit).usedOptionsFromAnnotations(
+    annotations,
+    exceptAnnotationId,
+  );
 }
 
 export function usedThermometerDistanceOptionsForSession(
@@ -79,21 +115,30 @@ export function usedThermometerDistanceOptionsForSession(
   pendingQuestions: readonly PendingQuestionRecord[],
   exceptAnnotationId?: string,
   exceptQuestionId?: string,
-): Set<ThermometerDistanceOptionMiles> {
-  const used = usedThermometerDistanceOptions(annotations, exceptAnnotationId);
-  for (const id of thermometerPresetHelpers.usedOptionsFromPending(
-    pendingQuestions,
-    exceptQuestionId,
-  )) {
+  unit: DistanceUnit = "imperial",
+): Set<ThermometerDistanceOptionKey> {
+  const helpers = thermometerPresetHelpersForUnit(unit);
+  const used = helpers.usedOptionsFromAnnotations(annotations, exceptAnnotationId);
+  for (const id of helpers.usedOptionsFromPending(pendingQuestions, exceptQuestionId)) {
     used.add(id);
   }
   return used;
 }
 
 export function firstAvailableThermometerDistanceMeters(
-  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+  usedOptions: ReadonlySet<ThermometerDistanceOptionKey>,
+  unit: DistanceUnit = "imperial",
 ): number | null {
-  const miles = thermometerPresetHelpers.firstUnusedFromPresets(
+  if (unit === "metric") {
+    for (const preset of METRIC_THERMOMETER_PRESET_METERS) {
+      if (!usedOptions.has(preset)) {
+        return preset;
+      }
+    }
+    return null;
+  }
+
+  const miles = thermometerPresetHelpersForUnit(unit).firstUnusedFromPresets(
     THERMOMETER_DISTANCE_PRESETS_MILES,
     usedOptions,
   );
@@ -102,11 +147,12 @@ export function firstAvailableThermometerDistanceMeters(
 
 export function firstAvailableThermometerDistanceMetersForSession(
   session: SessionRulesInput,
-  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+  usedOptions: ReadonlySet<ThermometerDistanceOptionKey>,
 ): number | null {
+  const unit = sessionDistanceUnit(session);
   for (const preset of availableThermometerDistancePresetsForSession(session)) {
-    const miles = thermometerPresetMilesForMeters(preset);
-    if (miles !== null && !usedOptions.has(miles)) {
+    const key = thermometerPresetForDistance(preset, unit);
+    if (key !== null && !usedOptions.has(key)) {
       return preset;
     }
   }
@@ -114,16 +160,18 @@ export function firstAvailableThermometerDistanceMetersForSession(
 }
 
 export function isThermometerDistanceOptionUsed(
-  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+  usedOptions: ReadonlySet<ThermometerDistanceOptionKey>,
   distanceMeters: number,
+  unit: DistanceUnit = "imperial",
 ): boolean {
-  const miles = thermometerPresetMilesForMeters(distanceMeters);
-  return miles !== null && usedOptions.has(miles);
+  const key = thermometerPresetForDistance(distanceMeters, unit);
+  return key !== null && usedOptions.has(key);
 }
 
 export function isThermometerDistanceOptionAvailable(
-  gameSizeOrUsedOptions: GameSize | ReadonlySet<ThermometerDistanceOptionMiles>,
+  gameSizeOrUsedOptions: GameSize | ReadonlySet<ThermometerDistanceOptionKey>,
   distanceMeters: number,
+  unit: DistanceUnit = "imperial",
 ): boolean {
   if (typeof gameSizeOrUsedOptions === "string") {
     return availableThermometerDistancePresets(gameSizeOrUsedOptions).some(
@@ -131,20 +179,23 @@ export function isThermometerDistanceOptionAvailable(
     );
   }
 
-  const presetMiles = thermometerPresetMilesForMeters(distanceMeters);
-  return thermometerPresetHelpers.isOptionAvailable(presetMiles, gameSizeOrUsedOptions);
+  const key = thermometerPresetForDistance(distanceMeters, unit);
+  return thermometerPresetHelpersForUnit(unit).isOptionAvailable(key, gameSizeOrUsedOptions);
 }
 
 export function availableThermometerDistancePresets(
-  gameSizeOrUsedOptions: GameSize | ReadonlySet<ThermometerDistanceOptionMiles>,
+  gameSizeOrUsedOptions: GameSize | ReadonlySet<ThermometerDistanceOptionKey>,
+  unit: DistanceUnit = "imperial",
 ): number[] {
   if (typeof gameSizeOrUsedOptions === "string") {
-    return thermometerPresetsMetersForGameSize(gameSizeOrUsedOptions);
+    return thermometerPresetsMetersForGameSize(gameSizeOrUsedOptions, unit);
   }
 
-  return THERMOMETER_DISTANCE_PRESETS.filter((presetMeters) => {
-    const presetMiles = thermometerPresetMilesForMeters(presetMeters);
-    return presetMiles !== null && !gameSizeOrUsedOptions.has(presetMiles);
+  const ladder =
+    unit === "metric" ? [...METRIC_THERMOMETER_PRESET_METERS] : THERMOMETER_DISTANCE_PRESETS;
+  return ladder.filter((presetMeters) => {
+    const key = thermometerPresetForDistance(presetMeters, unit);
+    return key !== null && !gameSizeOrUsedOptions.has(key);
   });
 }
 
@@ -192,13 +243,14 @@ export function thermometerUseCount(
   annotations: readonly AnnotationRecord[],
   distanceMeters: number,
   exceptAnnotationId?: string,
+  unit: DistanceUnit = "imperial",
 ): number {
-  const target = thermometerPresetMilesForMeters(distanceMeters);
+  const target = thermometerPresetForDistance(distanceMeters, unit);
   if (target === null) {
     return 0;
   }
 
-  return thermometerPresetHelpers.optionUseCountFromAnnotations(
+  return thermometerPresetHelpersForUnit(unit).optionUseCountFromAnnotations(
     annotations,
     target,
     exceptAnnotationId,
@@ -209,13 +261,14 @@ export function thermometerUseCountFromPending(
   pendingQuestions: readonly PendingQuestionRecord[],
   distanceMeters: number,
   exceptQuestionId?: string,
+  unit: DistanceUnit = "imperial",
 ): number {
-  const target = thermometerPresetMilesForMeters(distanceMeters);
+  const target = thermometerPresetForDistance(distanceMeters, unit);
   if (target === null) {
     return 0;
   }
 
-  return thermometerPresetHelpers.optionUseCountFromPending(
+  return thermometerPresetHelpersForUnit(unit).optionUseCountFromPending(
     pendingQuestions,
     target,
     exceptQuestionId,

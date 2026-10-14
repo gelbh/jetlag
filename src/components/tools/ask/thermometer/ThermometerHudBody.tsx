@@ -15,8 +15,8 @@ import {
   availableThermometerDistancePresetsForSession,
   THERMOMETER_SEND_BLOCK_MESSAGES,
   type ThermometerAnswer,
-  type ThermometerDistanceOptionMiles,
-  thermometerPresetMilesForMeters,
+  type ThermometerDistanceOptionKey,
+  thermometerPresetForDistance,
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
 
@@ -39,7 +39,7 @@ export type ThermometerHudBodyProps = {
   /** Live walk has no GPS sample yet, so END WALK is still disarmed. */
   waitingForGps?: boolean;
   presetUseCount: number;
-  usedDistanceOptions?: ReadonlySet<ThermometerDistanceOptionMiles>;
+  usedDistanceOptions?: ReadonlySet<ThermometerDistanceOptionKey>;
   costLabel: string;
   gpsLoading: boolean;
   canSubmitQuestion: boolean;
@@ -91,14 +91,14 @@ export function ThermometerHudBody({
   const targetLabel = formatPresetDistance(distanceMeters, distanceUnit);
 
   const distanceRows = availableDistancePresets.map((preset) => {
-    const presetMiles = thermometerPresetMilesForMeters(preset);
+    const presetKey = thermometerPresetForDistance(preset, distanceUnit);
     return {
       id: String(preset),
       label:
         presetUseCount > 0 && preset === distanceMeters
           ? `${formatPresetDistance(preset, distanceUnit)} · ${costLabel}`
           : formatPresetDistance(preset, distanceUnit),
-      disabled: presetMiles !== null && usedDistanceOptions.has(presetMiles),
+      disabled: presetKey !== null && usedDistanceOptions.has(presetKey),
       icon: <CrosshairIcon size={20} weight="duotone" color="currentColor" aria-hidden />,
     };
   });

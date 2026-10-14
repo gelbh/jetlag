@@ -6,12 +6,15 @@ import {
   availableThermometerDistancePresets,
   DEFAULT_THERMOMETER_DISTANCE_METERS,
   firstAvailableThermometerDistanceMeters,
+  firstAvailableThermometerDistanceMetersForSession,
   isThermometerDistanceOptionAvailable,
+  isThermometerDistanceOptionUsed,
   THERMOMETER_DISTANCE_PRESETS,
   THERMOMETER_DISTANCE_PRESETS_MILES,
   thermometerDistanceLabel,
   thermometerDistanceOptionForAnnotation,
   thermometerHotterTowards,
+  thermometerPresetForDistance,
   thermometerPresetMilesForMeters,
   thermometerQuestionPrompt,
   thermometerShadedSide,
@@ -97,6 +100,37 @@ describe("thermometerQuestions", () => {
     expect(usedThermometerDistanceOptionsForSession([], [cancelled])).toEqual(new Set([3]));
     expect(isThermometerDistanceOptionAvailable("large", threeMiles)).toBe(true);
     expect(availableThermometerDistancePresets("large")).toEqual(THERMOMETER_DISTANCE_PRESETS);
+  });
+
+  it("treats unused metric presets as available (not false distance_used)", () => {
+    const oneKm = 1000;
+    const fiveKm = 5000;
+    const session = { gameSize: "medium" as const, distanceUnit: "metric" as const };
+
+    expect(thermometerPresetForDistance(oneKm, "metric")).toBe(1000);
+    expect(isThermometerDistanceOptionAvailable(new Set(), oneKm, "metric")).toBe(true);
+    expect(isThermometerDistanceOptionUsed(new Set(), oneKm, "metric")).toBe(false);
+    expect(firstAvailableThermometerDistanceMetersForSession(session, new Set())).toBe(oneKm);
+
+    const pending = {
+      id: "pq-thermo-1km",
+      toolType: "thermometer",
+      status: "pending",
+      placement: {
+        metadata: { thermometerDistanceMeters: oneKm },
+      },
+    } as unknown as PendingQuestionRecord;
+    const used = usedThermometerDistanceOptionsForSession(
+      [],
+      [pending],
+      undefined,
+      undefined,
+      "metric",
+    );
+    expect(used).toEqual(new Set([1000]));
+    expect(isThermometerDistanceOptionAvailable(used, oneKm, "metric")).toBe(false);
+    expect(isThermometerDistanceOptionAvailable(used, fiveKm, "metric")).toBe(true);
+    expect(firstAvailableThermometerDistanceMetersForSession(session, used)).toBe(fiveKm);
   });
 });
 
