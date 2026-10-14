@@ -389,3 +389,18 @@ test("resolveFunctionsExceptionEnvironment prefers emulator then FUNCTIONS_EXCEP
     "production",
   );
 });
+
+test("shouldSkipFunctionsException drops reveal permission-denied everywhere", () => {
+  const error = new HttpsError("permission-denied", "Not allowed to view that role code.");
+  assert.equal(shouldSkipFunctionsException(error), true);
+  assert.equal(shouldSkipFunctionsException(error, "revealrolepasscode"), true);
+});
+
+test("shouldSkipFunctionsException drops membership permission-denied only on leave", () => {
+  const error = new HttpsError("permission-denied", "Session membership required.");
+  assert.equal(shouldSkipFunctionsException(error, "leaveSessionMembership"), true);
+  assert.equal(shouldSkipFunctionsException(error, "leavesessionmembership"), true);
+  assert.equal(shouldSkipFunctionsException(error, "resetsessionforrematch"), false);
+  assert.equal(shouldSkipFunctionsException(error, "repairghosthost"), false);
+  assert.equal(shouldSkipFunctionsException(error), false);
+});

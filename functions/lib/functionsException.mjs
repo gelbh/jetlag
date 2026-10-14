@@ -21,6 +21,7 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "invalid-argument:Access code required.",
   "resource-exhausted:Too many attempts. Try again later.",
   "permission-denied:Invalid access code.",
+  "permission-denied:Not allowed to view that role code.",
   "resource-exhausted:Too many recovery attempts. Try again tomorrow.",
   "failed-precondition:Incident has no linked session.",
   "invalid-argument:Invalid premium session payload.",
@@ -128,12 +129,38 @@ export function isExpectedFunctionsError(error) {
 }
 
 /**
- * True when capture should skip (expected UX errors or Overpass transport noise).
+ * Expected only for specific callables (lowercased; gen2 K_SERVICE is lowercase).
+ * Leave by a non-member means the leave already happened; rematch/repair keep capturing.
+ */
+const EXPECTED_HTTPS_ERROR_KEYS_BY_FUNCTION = new Map([
+  ["leavesessionmembership", new Set(["permission-denied:Session membership required."])],
+]);
+
+/**
  * @param {unknown} error
+ * @param {string | null | undefined} name
  * @returns {boolean}
  */
-export function shouldSkipFunctionsException(error) {
-  return isExpectedFunctionsError(error) || isOverpassTransportNoise(error);
+function isExpectedForFunction(error, name) {
+  if (!(error instanceof HttpsError) || typeof name !== "string") {
+    return false;
+  }
+  const keys = EXPECTED_HTTPS_ERROR_KEYS_BY_FUNCTION.get(name.trim().toLowerCase());
+  return keys?.has(`${error.code}:${error.message}`) ?? false;
+}
+
+/**
+ * True when capture should skip (expected UX errors or Overpass transport noise).
+ * @param {unknown} error
+ * @param {string | null} [name] deployed function name, when known
+ * @returns {boolean}
+ */
+export function shouldSkipFunctionsException(error, name = null) {
+  return (
+    isExpectedFunctionsError(error) ||
+    isOverpassTransportNoise(error) ||
+    isExpectedForFunction(error, name)
+  );
 }
 
 export function readAppVersion() {
@@ -248,14 +275,14 @@ export async function captureFunctionsExceptionAsync(error, options = {}) {
     return;
   }
 
-  if (shouldSkipFunctionsException(error)) {
-    return;
-  }
-
   const name =
     typeof options.name === "string" && options.name.trim()
       ? options.name.trim()
       : resolveDeployedFunctionName();
+
+  if (shouldSkipFunctionsException(error, name)) {
+    return;
+  }
 
   /** @type {Record<string, unknown>} */
   const properties = {};
