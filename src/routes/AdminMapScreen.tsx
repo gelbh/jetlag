@@ -15,7 +15,9 @@ import { SessionLog } from "../components/session/log/SessionLog";
 import { InlineError } from "../components/ui/banners/InlineError";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
+import { countLiveLocations } from "../domain/session/live/liveLocationFreshness";
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
+import { useLiveLocationNowMs } from "../hooks/map/useLiveLocationNowMs";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { usePlayerLocationsSync } from "../hooks/session/useSessionExtrasSync";
 import { AppNavigate } from "../navigation/AppNavigate";
@@ -45,6 +47,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const playerLocations = usePlayerLocationsSync(
     embeddedMonitor ? controller.session?.id : undefined,
   );
+  const liveNowMs = useLiveLocationNowMs();
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [moderationBusy, setModerationBusy] = useState(false);
   const [moderationError, setModerationError] = useState<string | null>(null);
@@ -192,8 +195,8 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           <AdminCourseHeader
             code={controller.session.code}
             timerState={controller.timer.timerState}
-            seekerCount={controller.seekerLocations.length}
-            hiderCount={controller.hiderLocations.length}
+            seekerCount={countLiveLocations(controller.seekerLocations, liveNowMs)}
+            hiderCount={countLiveLocations(controller.hiderLocations, liveNowMs)}
             questionCount={controller.pendingQuestions.length}
             syncStatus={controller.syncStatus.status}
             onLeave={() => void handleLeave()}

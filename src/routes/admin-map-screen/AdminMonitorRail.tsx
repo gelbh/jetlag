@@ -4,8 +4,10 @@ import type { MapViewportState } from "../../components/map/chrome/MapViewportTr
 import { SessionLogBody } from "../../components/session/log/SessionLogBody";
 import { HudChevronLeftIcon, HudChevronRightIcon } from "../../components/ui/brand/HudIcons";
 import type { SessionRecord } from "../../domain/map/annotations";
+import { countLiveLocations } from "../../domain/session/live/liveLocationFreshness";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { SessionRulesInput } from "../../domain/session/rules";
+import { useLiveLocationNowMs } from "../../hooks/map/useLiveLocationNowMs";
 import { useSessionActivityLog } from "../../hooks/session/useSessionActivityLog";
 import { useAnnotationStore } from "../../state/annotationStore";
 import type { LayerVisibility } from "../../state/sessionStore";
@@ -68,6 +70,7 @@ export function AdminMonitorRail({
   onLowPowerModeChange,
 }: AdminMonitorRailProps) {
   const events = useSessionActivityLog(session.id);
+  const liveNowMs = useLiveLocationNowMs();
   const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
   const activeLabel = TABS.find((tab) => tab.id === activeTab)?.label ?? "Overview";
@@ -149,8 +152,8 @@ export function AdminMonitorRail({
                     session={session}
                     syncStatusLabel={syncStatusLabel}
                     annotationCount={controller.annotations.length}
-                    seekerCount={controller.seekerLocations.length}
-                    hiderCount={controller.hiderLocations.length}
+                    seekerCount={countLiveLocations(controller.seekerLocations, liveNowMs)}
+                    hiderCount={countLiveLocations(controller.hiderLocations, liveNowMs)}
                     questionCount={controller.pendingQuestions.length}
                     messageCount={controller.chatMessages.length}
                     timerState={controller.timer.timerState}
