@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { resolveAdminSessionAreaLabel } from "../../../domain/admin/adminSessionAreaLabel";
 import { adminSessionPhaseLabel } from "../../../domain/admin/sessionPhase";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
+import { reversedInk } from "../../../theme/adminTone";
 import { PunchTime } from "../shared/PunchTime";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
@@ -16,14 +17,6 @@ interface AdminSessionRowProps {
   mispunchCount?: number;
   onMonitor: (summary: AdminSessionSummary) => void;
 }
-
-// Set on plain cells, not the row (its `var(--adm-ink)` background must resolve unswapped)
-// and not on status cells, whose badges keep ink on their tone ground.
-const reversedInk = {
-  "--adm-ink": "var(--adm-paper)",
-  "--mantine-color-text": "var(--adm-paper)",
-  "--mantine-color-dimmed": "var(--adm-paper)",
-} as CSSProperties;
 
 const cursorOutline: CSSProperties = {
   outline: "2px solid var(--adm-overprint)",
@@ -41,7 +34,7 @@ export function AdminSessionRow({
 }: AdminSessionRowProps) {
   const areaLabel = resolveAdminSessionAreaLabel(summary);
   const phaseLabel = adminSessionPhaseLabel(summary.phase);
-  const cellStyle = monitored ? reversedInk : undefined;
+  const cellStyle = monitored ? (reversedInk as CSSProperties) : undefined;
 
   return (
     <Table.Tr

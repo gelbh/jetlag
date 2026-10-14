@@ -1,5 +1,4 @@
 import { fireEvent, screen } from "@testing-library/react";
-import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createTestSession } from "../../test/fixtures/sessions";
 import { renderWithRouter } from "../../test/renderWithRouter";
@@ -135,52 +134,28 @@ describe("AdminMonitorRail", () => {
     expect(onActiveTabChange).toHaveBeenCalledWith("sync");
   });
 
-  describe("roster slot", () => {
-    function renderRail({ collapsed, roster }: { collapsed: boolean; roster?: ReactNode }) {
-      const session = createTestSession();
-      return renderWithRouter(
-        <AdminMonitorRail
-          collapsed={collapsed}
-          onCollapsedChange={vi.fn()}
-          activeTab="overview"
-          onActiveTabChange={vi.fn()}
-          session={session}
-          sessionRules={session}
-          syncStatusLabel="synced"
-          controller={createController()}
-          chatDisplayRole="admin"
-          moderationBusy={false}
-          moderationError={null}
-          onModerationAction={vi.fn()}
-          mapViewport={null}
-          onLayerVisibilityChange={vi.fn()}
-          onLowPowerModeChange={vi.fn()}
-          roster={roster}
-        />,
-      );
-    }
+  it("has no roster; the split board owns it", () => {
+    const session = createTestSession();
+    renderWithRouter(
+      <AdminMonitorRail
+        collapsed={false}
+        onCollapsedChange={vi.fn()}
+        activeTab="overview"
+        onActiveTabChange={vi.fn()}
+        session={session}
+        sessionRules={session}
+        syncStatusLabel="synced"
+        controller={createController()}
+        chatDisplayRole="admin"
+        moderationBusy={false}
+        moderationError={null}
+        onModerationAction={vi.fn()}
+        mapViewport={null}
+        onLayerVisibilityChange={vi.fn()}
+        onLowPowerModeChange={vi.fn()}
+      />,
+    );
 
-    it("renders the roster region before the tablist when expanded", () => {
-      renderRail({ collapsed: false, roster: <p>Roster content</p> });
-
-      const region = screen.getByRole("region", { name: "Player roster" });
-      expect(region).toHaveTextContent("Roster content");
-      const tablist = screen.getByRole("tablist", { name: "Monitor sections" });
-      expect(
-        region.compareDocumentPosition(tablist) & Node.DOCUMENT_POSITION_FOLLOWING,
-      ).toBeTruthy();
-    });
-
-    it("hides the roster region when collapsed", () => {
-      renderRail({ collapsed: true, roster: <p>Roster content</p> });
-
-      expect(screen.queryByRole("region", { name: "Player roster" })).not.toBeInTheDocument();
-    });
-
-    it("omits the roster region when no roster is provided", () => {
-      renderRail({ collapsed: false });
-
-      expect(screen.queryByRole("region", { name: "Player roster" })).not.toBeInTheDocument();
-    });
+    expect(screen.queryByRole("region", { name: "Player roster" })).not.toBeInTheDocument();
   });
 });

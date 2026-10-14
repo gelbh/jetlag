@@ -1,75 +1,83 @@
+import { ScrollArea, Table, Text, UnstyledButton } from "@mantine/core";
+import type { CSSProperties } from "react";
 import { useAdminMonitorFocus } from "../../../domain/admin/adminMonitorFocus";
 import { formatFreshnessAge } from "../../../domain/admin/formatAdminFreshness";
 import type { SessionRecord } from "../../../domain/map/annotations";
 import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
 import { playerRoleLabel, resolvePlayerRole } from "../../../domain/session/players/playerRole";
 import { useFreshnessClock } from "../../../hooks/time/useFreshnessClock";
+import { reversedInk } from "../../../theme/adminTone";
 
 interface AdminPlayerRosterProps {
   session: SessionRecord | null;
   locations: readonly PlayerLocationRecord[];
 }
 
-function resolveRoleLabel(uid: string, session: SessionRecord): string {
-  return playerRoleLabel(resolvePlayerRole(session.memberRoles, uid));
-}
-
 export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps) {
   const nowMs = useFreshnessClock();
+  const focusedPlayerUid = useAdminMonitorFocus((state) => state.focusedPlayerUid);
   const setFocusedPlayerUid = useAdminMonitorFocus((state) => state.setFocusedPlayerUid);
 
   if (!session) {
     return null;
   }
 
-  const memberUids = session.memberUids ?? [];
   const locationByUid = new Map(locations.map((location) => [location.uid, location]));
-  const rosterUids = [...new Set([...memberUids, ...locations.map((l) => l.uid)])];
+  const rosterUids = [...new Set([...(session.memberUids ?? []), ...locationByUid.keys()])];
 
   if (rosterUids.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-surface-panel/80 px-3 py-2 text-sm text-ink-muted">
-        No players in this session yet.
-      </div>
+      <Text size="sm" c="dimmed" px="sm" pb="sm">
+        No runners yet. They appear here when players join the session.
+      </Text>
     );
   }
 
   return (
-    <div className="jl-scroll max-h-40 overflow-y-auto rounded-lg border border-border bg-surface-panel/90">
-      <table className="w-full text-left text-xs">
-        <thead className="sticky top-0 border-b border-border bg-surface-raised/70 text-ink-muted">
-          <tr>
-            <th className="px-2 py-1.5 font-semibold uppercase tracking-wide">Role</th>
-            <th className="px-2 py-1.5 font-semibold uppercase tracking-wide">Player</th>
-            <th className="px-2 py-1.5 font-semibold uppercase tracking-wide">Location</th>
-          </tr>
-        </thead>
-        <tbody>
+    <ScrollArea.Autosize mah="16rem">
+      <Table>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Runner</Table.Th>
+            <Table.Th>Role</Table.Th>
+            <Table.Th ta="end">Last fix</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
           {rosterUids.map((uid) => {
-            const location = locationByUid.get(uid);
-            const role = resolveRoleLabel(uid, session);
             const shortUid = uid.length > 10 ? `${uid.slice(0, 8)}…` : uid;
-            const freshness = formatFreshnessAge(location?.updatedAt ?? null, nowMs);
-
+            const role = playerRoleLabel(resolvePlayerRole(session.memberRoles, uid));
+            const selected = focusedPlayerUid === uid;
+            const cellStyle = selected ? (reversedInk as CSSProperties) : undefined;
             return (
-              <tr key={uid} className="border-b border-border/60 last:border-b-0">
-                <td className="px-2 py-1.5 text-ink">{role}</td>
-                <td className="px-2 py-1.5 font-mono text-ink">{shortUid}</td>
-                <td className="px-2 py-1.5">
-                  <button
-                    type="button"
-                    className="text-brand-blue underline-offset-2 hover:underline"
-                    aria-label={`Focus ${shortUid} on map (${freshness})`}
-                    onClick={() => setFocusedPlayerUid(uid)}
+              // The runner button is the keyboard stop; the row widens the pointer target.
+              <Table.Tr
+                key={uid}
+                aria-selected={selected || undefined}
+                bg={selected ? "var(--adm-ink)" : undefined}
+                style={{ cursor: "pointer" }}
+                onClick={() => setFocusedPlayerUid(uid)}
+              >
+                <Table.Td style={cellStyle}>
+                  <UnstyledButton
+                    w="100%"
+                    h="var(--adm-cell)"
+                    fw={700}
+                    title={uid}
+                    aria-label={`Follow ${shortUid}`}
                   >
-                    {freshness}
-                  </button>
-                </td>
-              </tr>
+                    {shortUid}
+                  </UnstyledButton>
+                </Table.Td>
+                <Table.Td style={cellStyle}>{role}</Table.Td>
+                <Table.Td ta="end" style={cellStyle}>
+                  {formatFreshnessAge(locationByUid.get(uid)?.updatedAt ?? null, nowMs)}
+                </Table.Td>
+              </Table.Tr>
             );
           })}
-        </tbody>
-      </table>
-    </div>
+        </Table.Tbody>
+      </Table>
+    </ScrollArea.Autosize>
   );
 }
