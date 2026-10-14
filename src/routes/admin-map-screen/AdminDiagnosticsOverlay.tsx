@@ -1,3 +1,5 @@
+import { Stack } from "@mantine/core";
+import { AdminDiagRow } from "../../components/admin/shared/AdminDiagRow";
 import { APP_VERSION } from "../../domain/device/changelog";
 import type { SessionRecord } from "../../domain/map/annotations";
 
@@ -54,14 +56,13 @@ export function AdminDiagnosticsOverlay({
             Close
           </button>
         </div>
-        <dl className="space-y-2 text-xs">
+        <Stack component="dl" gap="xs" m={0}>
           {rows.map((row) => (
-            <div key={row.label} className="admin-diag-row">
-              <dt>{row.label}</dt>
-              <dd>{row.value}</dd>
-            </div>
+            <AdminDiagRow key={row.label} label={row.label}>
+              {row.value}
+            </AdminDiagRow>
           ))}
-        </dl>
+        </Stack>
       </section>
     </div>
   );

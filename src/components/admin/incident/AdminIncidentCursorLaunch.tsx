@@ -1,4 +1,4 @@
-import { Alert, Button, Stack, Text } from "@mantine/core";
+import { Alert, Button, Stack, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import type { IncidentCodingAgentState } from "../../../domain/incident/incidentTypes";
 import {
@@ -90,11 +90,15 @@ export function AdminIncidentCursorLaunch({
   };
 
   return (
-    <Stack className="jl-incident-module" gap="sm">
-      <h3 className="jl-incident-module-title">2 · Launch Cursor agent</h3>
-      <p className="jl-incident-module-hint">{codingAgentHint(effectiveAgent)}</p>
+    <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
+      <Title order={3} size="h6">
+        2 · Launch Cursor agent
+      </Title>
+      <Text size="xs" c="dimmed">
+        {codingAgentHint(effectiveAgent)}
+      </Text>
       {error ? (
-        <Alert color="red" role="alert">
+        <Alert data-tone="mispunch" role="alert">
           {error}
         </Alert>
       ) : null}
@@ -129,9 +133,9 @@ export function AdminIncidentCursorLaunch({
             {busy ? "Launching…" : canRetry ? "Retry launch" : "Launch Cursor agent"}
           </Button>
           {effectiveAgent?.cursorAgentId && !agentUrl ? (
-            <p className="jl-incident-module-hint">
+            <Text size="xs" c="dimmed">
               Agent id is set but no URL was returned - retry or check the hotfix thread.
-            </p>
+            </Text>
           ) : null}
         </>
       )}

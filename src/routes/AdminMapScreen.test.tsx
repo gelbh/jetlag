@@ -190,6 +190,25 @@ describe("AdminMapScreen", () => {
     expect(screen.getByTestId("admin-map-view").closest("[data-player-map]")).not.toBeNull();
   });
 
+  it.each([
+    { embedded: true, position: "absolute" },
+    { embedded: false, position: "" },
+  ])("wide shell is a two-column grid (embedded=$embedded)", ({ embedded, position }) => {
+    mockedUseAdminMapWideLayout.mockReturnValue(true);
+
+    renderWithRouter(<AdminMapScreen embeddedMonitor={embedded} />, {
+      route: embedded ? "/admin" : "/map",
+    });
+
+    const shell = screen.getByTestId("admin-map-view").closest(".map-screen-shell") as HTMLElement;
+    expect(shell.style.display).toBe("grid");
+    expect(shell.style.gridTemplateColumns).toMatch(/^minmax\(0, 1fr\) minmax\(0, /);
+    // Embedded sits in the course region; standalone keeps the player shell's fixed frame.
+    expect(shell.style.position).toBe(position);
+    const mapCell = screen.getByTestId("admin-map-view").closest("[data-map-dock-frame]");
+    expect((mapCell as HTMLElement).style.contain).toBe("layout");
+  });
+
   it("standalone map has no player map token scope", () => {
     renderWithRouter(<AdminMapScreen />, { route: "/map" });
 
@@ -212,7 +231,7 @@ describe("AdminMapScreen", () => {
       });
 
       const error = screen.getByText("Write rejected by rules");
-      expect(error.closest(".admin-map-shell__top") !== null).toBe(inHeader);
+      expect(error.closest('[data-shell-cell="top"]') !== null).toBe(inHeader);
     },
   );
 

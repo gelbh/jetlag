@@ -28,6 +28,7 @@ import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { AdminDiagnosticsOverlay } from "./admin-map-screen/AdminDiagnosticsOverlay";
 import { AdminMapScreenChrome } from "./admin-map-screen/AdminMapScreenChrome";
 import { AdminMonitorRail, type AdminMonitorRailTab } from "./admin-map-screen/AdminMonitorRail";
+import { adminShellCell, adminShellStyle } from "./admin-map-screen/adminShellLayout";
 import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
 import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
 
@@ -186,12 +187,11 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const shell = (
     <div
       ref={shellRef}
-      className={`map-screen-shell admin-map-shell ${
-        isWide ? "admin-map-shell--wide" : "admin-map-shell--compact"
-      } ${isWide && railCollapsed ? "admin-map-shell--rail-collapsed" : ""}`}
+      className="map-screen-shell"
+      style={adminShellStyle({ isWide, railCollapsed, embedded: embeddedMonitor })}
     >
       {embeddedMonitor && isWide ? (
-        <Box className="admin-map-shell__top" bg="var(--adm-paper)">
+        <Box data-shell-cell="top" bg="var(--adm-paper)" style={adminShellCell.top}>
           <AdminCourseHeader
             code={controller.session.code}
             timerState={controller.timer.timerState}
@@ -233,7 +233,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
       )}
 
       <div
-        className={isWide ? "admin-map-shell__map" : "absolute inset-0"}
+        style={isWide ? adminShellCell.map : { position: "absolute", inset: 0 }}
         data-map-dock-frame=""
         data-player-map={embeddedMonitor ? "" : undefined}
       >
@@ -313,11 +313,18 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           ) : null}
         </>
       ) : !embeddedMonitor && controller.syncStatus.lastSyncError ? (
-        <div className="pointer-events-none absolute inset-x-0 top-[var(--admin-status-height)] z-[var(--z-panel)] px-3">
+        <Box
+          pos="absolute"
+          left={0}
+          right={0}
+          top="2.5rem"
+          px="sm"
+          style={{ zIndex: "var(--z-panel)", pointerEvents: "none" }}
+        >
           <InlineError className="pointer-events-auto mx-auto max-w-xl">
             {controller.syncStatus.lastSyncError}
           </InlineError>
-        </div>
+        </Box>
       ) : null}
     </div>
   );
