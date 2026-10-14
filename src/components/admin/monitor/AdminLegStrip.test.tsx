@@ -1,9 +1,10 @@
 import { screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act } from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { renderWithAppUi } from "@/test/renderWithAppUi";
-import { AdminLegStrip } from "./AdminLegStrip";
+import { AdminLegStrip, LEG_STRIP_SETTLE_MS } from "./AdminLegStrip";
 
 function question(
   id: string,
@@ -39,6 +40,10 @@ function chips() {
 }
 
 describe("AdminLegStrip", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("runs from the start chip through questions in asked order", () => {
     renderWithAppUi(strip([question("b", T(5)), question("a", T(1)), question("c", T(9))]));
     expect(chips().map((chip) => chip.textContent)).toEqual(["S", "1", "2", "3"]);
@@ -69,6 +74,22 @@ describe("AdminLegStrip", () => {
     const stamped = document.querySelectorAll("[data-stamp]");
     expect(stamped).toHaveLength(1);
     expect(stamped[0]).toHaveTextContent("3");
+  });
+
+  it("treats a late first snapshot as history, not punches", () => {
+    const { rerender } = renderWithAppUi(strip([]));
+    rerender(strip([question("a", T(1)), question("b", T(2)), question("c", T(3))]));
+    expect(document.querySelectorAll("[data-stamp]")).toHaveLength(0);
+  });
+
+  it("stamps the first question of a fresh game once the strip has settled", () => {
+    vi.useFakeTimers();
+    const { rerender } = renderWithAppUi(strip([]));
+    act(() => {
+      vi.advanceTimersByTime(LEG_STRIP_SETTLE_MS);
+    });
+    rerender(strip([question("a", T(1), "pending")]));
+    expect(document.querySelectorAll("[data-stamp]")).toHaveLength(1);
   });
 
   it("does not stamp a status change on an existing question", () => {
