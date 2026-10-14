@@ -1,3 +1,4 @@
+import { FirebaseError } from "firebase/app";
 import { APP_VERSION } from "../../domain/device/changelog";
 import type { JoinRequestRole } from "../../domain/session/players/joinRequest";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
@@ -80,24 +81,30 @@ export async function initSessionRoleGates(sessionId: string): Promise<InitSessi
   );
 }
 
+/** Caller is no longer a member: the leave already happened (or a lost retry committed it). */
+function isAlreadyLeftError(error: unknown): boolean {
+  return (
+    error instanceof FirebaseError &&
+    error.code === "functions/permission-denied" &&
+    error.message.startsWith("Session membership required")
+  );
+}
+
 export async function leaveSessionMembership(sessionId: string): Promise<void> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
 
   try {
-    // A retry after a committed-but-lost leave sees "membership required".
     await callWithResilience<{ sessionId: string }, { ok: boolean }>(
       "leaveSessionMembership",
       { sessionId },
-      {
-        idempotent: true,
-        recoverAfterRetry: (error) =>
-          isCallableError(error, "permission-denied", "Session membership required.")
-            ? { ok: true }
-            : undefined,
-      },
+      { idempotent: true },
     );
+  } catch (error) {
+    if (!isAlreadyLeftError(error)) {
+      throw error;
+    }
   } finally {
     clearRolePasscodeRevealWarm(sessionId);
   }

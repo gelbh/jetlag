@@ -72,6 +72,29 @@ describe("rolePasscodeLifecycle", () => {
     expect(callable).toHaveBeenCalledWith({ sessionId: "sess-9" });
   });
 
+  it.each(["Session membership required.", "Session membership required. [403]"])(
+    "treats first-attempt %j rejection on leave as done",
+    async (message) => {
+      const callable = vi.fn(async () => {
+        throw new FirebaseError("functions/permission-denied", message);
+      });
+      httpsCallable.mockReturnValue(callable);
+
+      await expect(leaveSessionMembership("sess-9")).resolves.toBeUndefined();
+      expect(callable).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("still throws other permission-denied leave errors", async () => {
+    httpsCallable.mockReturnValue(
+      vi.fn(async () => {
+        throw new FirebaseError("functions/permission-denied", "Only the host can do that.");
+      }),
+    );
+
+    await expect(leaveSessionMembership("sess-9")).rejects.toThrow("Only the host can do that.");
+  });
+
   it("calls reveal and regenerate role passcode callables", async () => {
     const reveal = vi.fn(async () => ({ data: { role: "observer", rolePasscode: "OBSV" } }));
     const regenerate = vi.fn(async () => ({ data: { role: "seeker", rolePasscode: "SEEK" } }));
