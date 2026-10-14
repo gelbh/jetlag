@@ -1,7 +1,8 @@
+import { Alert, Center, Stack } from "@mantine/core";
 import { useEffect } from "react";
 import { useAdminMonitorFocus } from "../../../domain/admin/adminMonitorFocus";
 import { AdminMapScreen } from "../../../routes/AdminMapScreen";
-import { InlineError } from "../../ui/banners/InlineError";
+import { AdminEmptyState } from "../shared/AdminEmptyState";
 
 export function AdminMonitorPane({
   active,
@@ -22,40 +23,42 @@ export function AdminMonitorPane({
 
   if (errorMessage) {
     return (
-      <div className="admin-monitor-pane flex h-full min-h-0 items-center justify-center rounded-xl border border-dashed border-status-error/40 bg-status-error-surface/40 px-6 py-10 text-center">
-        <div className="max-w-sm space-y-3">
-          <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
-            Monitor unavailable
-          </p>
-          <InlineError>{errorMessage}</InlineError>
-        </div>
-      </div>
+      <Center h="100%" mih={0} p="xl">
+        <Alert role="alert" title="Monitor unavailable" data-tone="mispunch" maw={384}>
+          {errorMessage}
+        </Alert>
+      </Center>
     );
   }
 
   if (!active) {
     return (
-      <div className="admin-monitor-pane flex h-full min-h-0 items-center justify-center rounded-xl border border-dashed border-border bg-surface-panel/60 px-6 py-10 text-center">
-        <div className="space-y-2">
-          <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
-            Monitor pane
-          </p>
-          <p className="text-sm text-ink-muted">
-            {sessionsUnavailable
-              ? "Sessions unavailable. Retry from the Sessions panel."
-              : "Select a live session to watch the map here."}
-          </p>
-        </div>
-      </div>
+      <Center h="100%" mih={0} p="xl">
+        {sessionsUnavailable ? (
+          <AdminEmptyState
+            title="Start list unavailable"
+            body="Games could not be loaded. Use Refresh in the status strip to try again."
+          />
+        ) : (
+          <AdminEmptyState
+            title="No course open"
+            body="Pick a live game in the start list to watch its map here."
+          />
+        )}
+      </Center>
     );
   }
 
   return (
-    <div
-      className="admin-monitor-pane flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-surface-deep"
+    // The class carries the map shell's container query and the stacking context that keeps the rail under the Needs you drawer.
+    <Stack
+      className="admin-monitor-pane"
+      gap={0}
+      h="100%"
+      mih={0}
       data-testid="admin-monitor-fixed"
     >
       <AdminMapScreen embeddedMonitor />
-    </div>
+    </Stack>
   );
 }

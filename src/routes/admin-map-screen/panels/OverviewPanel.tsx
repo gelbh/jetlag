@@ -1,3 +1,5 @@
+import { SimpleGrid, Stack, Title } from "@mantine/core";
+import { StatCell } from "@/components/admin/shared/StatCell";
 import { APP_VERSION } from "@/domain/device/changelog";
 import type { SessionRecord } from "@/domain/map/annotations";
 import type { TimerState } from "@/domain/session/timer/timer";
@@ -65,34 +67,31 @@ export function OverviewPanel({
   ];
 
   return (
-    <div className="space-y-4">
-      <section aria-label="Live stats">
-        <h3 className="mb-2 font-display text-xs font-semibold uppercase tracking-wide text-ink-dim">
+    <Stack gap="md">
+      <Stack component="section" aria-label="Live stats" gap="xs">
+        <Title order={3} size="sm">
           Live stats
-        </h3>
-        <dl className="admin-stat-grid">
+        </Title>
+        <SimpleGrid cols={2} spacing="sm" verticalSpacing="xs">
           {stats.map((stat) => (
-            <div key={stat.label} className="admin-stat-cell">
-              <dt>{stat.label}</dt>
-              <dd>{stat.value}</dd>
-            </div>
+            <StatCell key={stat.label} label={stat.label} value={stat.value} />
           ))}
-        </dl>
-      </section>
+        </SimpleGrid>
+      </Stack>
 
-      <section aria-label="Session diagnostics">
-        <h3 className="mb-2 font-display text-xs font-semibold uppercase tracking-wide text-ink-dim">
+      <Stack component="section" aria-label="Session diagnostics" gap="xs">
+        <Title order={3} size="sm">
           Diagnostics
-        </h3>
-        <dl className="space-y-2">
+        </Title>
+        <Stack component="dl" gap="xs" m={0}>
           {diagnosticRows.map((row) => (
             <div key={row.label} className="admin-diag-row">
               <dt>{row.label}</dt>
               <dd>{row.value}</dd>
             </div>
           ))}
-        </dl>
-      </section>
-    </div>
+        </Stack>
+      </Stack>
+    </Stack>
   );
 }

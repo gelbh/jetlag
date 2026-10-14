@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAdminSessionListCacheForTests } from "../../services/admin/adminSessionListCache";
-import { useAdminSessionList } from "./useAdminSessionList";
+import { ADMIN_SESSION_POLL_MS, useAdminSessionList } from "./useAdminSessionList";
 
 const { fetchAdminSessionsPage } = vi.hoisted(() => ({
   fetchAdminSessionsPage: vi.fn(),
@@ -295,5 +295,208 @@ describe("useAdminSessionList", () => {
 
     expect(result.current.sessions).toEqual([]);
     expect(result.current.lastFetchedAt).not.toBeNull();
+  });
+
+  describe("background poll", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      fetchAdminSessionsPage.mockResolvedValue({ sessions: [sampleSession], nextPageToken: null });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    async function settle() {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+    }
+
+    it("background-refreshes every ADMIN_SESSION_POLL_MS while visible", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      const { result } = renderHook(() => useAdminSessionList(true));
+      await settle();
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(1);
+
+      fetchAdminSessionsPage.mockImplementation(
+        () =>
+          new Promise(() => {
+            /* leave hanging */
+          }),
+      );
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(ADMIN_SESSION_POLL_MS);
+      });
+
+      expect(ADMIN_SESSION_POLL_MS).toBe(30_000);
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(2);
+      expect(fetchAdminSessionsPage).toHaveBeenLastCalledWith(null);
+      expect(result.current.refreshing).toBe(true);
+      expect(result.current.loading).toBe(false);
+    });
+
+    it("skips the poll while the tab is hidden", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+      renderHook(() => useAdminSessionList(true));
+      await settle();
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(ADMIN_SESSION_POLL_MS);
+      });
+
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(1);
+    });
+
+    it("skips the poll once a later page is loaded", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [sampleSession],
+        nextPageToken: "p2",
+      });
+      const { result } = renderHook(() => useAdminSessionList(true));
+      await settle();
+
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [otherSession],
+        nextPageToken: null,
+      });
+      await act(async () => {
+        await result.current.loadMore();
+      });
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(2);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(ADMIN_SESSION_POLL_MS);
+      });
+
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(2);
+      expect(result.current.sessions).toEqual([sampleSession, otherSession]);
+    });
+
+    it("skips the poll while load more is in flight", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [sampleSession],
+        nextPageToken: "p2",
+      });
+      const { result } = renderHook(() => useAdminSessionList(true));
+      await settle();
+
+      fetchAdminSessionsPage.mockImplementation(
+        () =>
+          new Promise(() => {
+            /* leave hanging */
+          }),
+      );
+      act(() => {
+        void result.current.loadMore();
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(ADMIN_SESSION_POLL_MS);
+      });
+
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(2);
+      expect(fetchAdminSessionsPage).not.toHaveBeenLastCalledWith(null);
+    });
+
+    it("resumes polling after a manual refresh following load more", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [sampleSession],
+        nextPageToken: "p2",
+      });
+      const { result } = renderHook(() => useAdminSessionList(true));
+      await settle();
+
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [otherSession],
+        nextPageToken: null,
+      });
+      await act(async () => {
+        await result.current.loadMore();
+      });
+      await act(async () => {
+        await result.current.refresh();
+      });
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(3);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(ADMIN_SESSION_POLL_MS);
+      });
+
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(4);
+      expect(fetchAdminSessionsPage).toHaveBeenLastCalledWith(null);
+    });
+
+    it("keeps a failed load more off the sync error and keeps polling", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [sampleSession],
+        nextPageToken: "p2",
+      });
+      const { result } = renderHook(() => useAdminSessionList(true));
+      await settle();
+
+      fetchAdminSessionsPage.mockRejectedValueOnce(new Error("page 2 down"));
+      await act(async () => {
+        await result.current.loadMore();
+      });
+
+      expect(result.current.error).toBeNull();
+      expect(result.current.loadMoreError).toBe("page 2 down");
+      expect(result.current.sessions).toEqual([sampleSession]);
+      expect(result.current.hasMore).toBe(true);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(ADMIN_SESSION_POLL_MS);
+      });
+
+      expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(3);
+      expect(fetchAdminSessionsPage).toHaveBeenLastCalledWith(null);
+      expect(result.current.loadMoreError).toBeNull();
+    });
+
+    it("clears the load more error on the next successful load more", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [sampleSession],
+        nextPageToken: "p2",
+      });
+      const { result } = renderHook(() => useAdminSessionList(true));
+      await settle();
+
+      fetchAdminSessionsPage.mockRejectedValueOnce(new Error("page 2 down"));
+      await act(async () => {
+        await result.current.loadMore();
+      });
+      expect(result.current.loadMoreError).toBe("page 2 down");
+
+      fetchAdminSessionsPage.mockResolvedValueOnce({
+        sessions: [otherSession],
+        nextPageToken: null,
+      });
+      await act(async () => {
+        await result.current.loadMore();
+      });
+
+      expect(result.current.loadMoreError).toBeNull();
+      expect(result.current.error).toBeNull();
+      expect(result.current.sessions).toEqual([sampleSession, otherSession]);
+    });
+
+    it("never polls when disabled", async () => {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      renderHook(() => useAdminSessionList(false));
+      await settle();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(ADMIN_SESSION_POLL_MS * 2);
+      });
+
+      expect(fetchAdminSessionsPage).not.toHaveBeenCalled();
+    });
   });
 });
