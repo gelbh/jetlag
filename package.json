@@ -101,7 +101,7 @@
     "@cloudflare/workers-types": "^5.20261009.1",
     "@commitlint/cli": "~21.2.3",
     "@commitlint/config-conventional": "~21.2.0",
-    "@firebase/rules-unit-testing": "^5.0.2",
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.64.0",
     "@tailwindcss/vite": "~4.3.3",
