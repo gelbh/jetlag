@@ -72,7 +72,7 @@
     "clsx": "^2.1.1",
     "comlink": "^4.4.2",
     "date-fns": "^4.4.0",
-    "firebase": "^12.19.0",
+    "firebase": "^13.0.0",
     "flatbush": "^4.6.2",
     "geoflatbush": "^2.2.1",
     "geokdbush": "^2.1.0",
