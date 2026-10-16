@@ -16,6 +16,7 @@ interface HiderAnswerPickerProps {
   truthReferenceMode: HiderTruthReferenceMode;
   disabled?: boolean;
   onSelect: (option: GameReplyOption) => void;
+  onSetHidingZone?: () => void;
 }
 
 export function HiderAnswerPicker({
@@ -25,7 +26,37 @@ export function HiderAnswerPicker({
   truthReferenceMode,
   disabled = false,
   onSelect,
+  onSetHidingZone,
 }: HiderAnswerPickerProps) {
+  if (truthReferenceMode === "noHidingZone") {
+    return (
+      <Stack gap={8} mt={8}>
+        <Text size="xs" c={jetlagBrand.halt}>
+          Set your hiding zone to answer.
+        </Text>
+        {onSetHidingZone ? (
+          <Button
+            disabled={disabled}
+            onClick={onSetHidingZone}
+            size="md"
+            radius="sm"
+            styles={{
+              root: {
+                minHeight: "2.75rem",
+                border: `1px solid ${jetlagBrand.flag}`,
+                backgroundColor: jetlagBrand.flag,
+                color: jetlagBrand.flagInk,
+                fontWeight: 600,
+              },
+            }}
+          >
+            Set hiding zone
+          </Button>
+        ) : null}
+      </Stack>
+    );
+  }
+
   const truthOption =
     truth !== null && !truth.unavailable
       ? replyOptions.find((option) => option.id === truth.replyId)

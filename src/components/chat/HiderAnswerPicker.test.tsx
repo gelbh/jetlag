@@ -51,4 +51,22 @@ describe("HiderAnswerPicker", () => {
     renderPicker({ truth: { replyId: "closer", label: "Closer" } });
     expect(screen.getAllByRole("button")).toHaveLength(2);
   });
+
+  it("replaces replies with a set-zone prompt when the hider has no zone", () => {
+    const onSetHidingZone = vi.fn();
+    renderPicker({ truthReferenceMode: "noHidingZone", loading: true, onSetHidingZone });
+    expect(screen.getByText("Set your hiding zone to answer.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Yes" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "No" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Set hiding zone" }));
+    expect(onSetHidingZone).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps manual replies during end game without an anchor", () => {
+    renderPicker({
+      truthReferenceMode: "unavailable",
+      truth: { replyId: "", label: "Truth unavailable.", unavailable: true },
+    });
+    expect(screen.getAllByRole("button")).toHaveLength(2);
+  });
 });
