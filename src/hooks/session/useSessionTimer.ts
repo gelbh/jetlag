@@ -47,7 +47,7 @@ export function useSessionTimer(
   const onControlRef = useRef(onControl);
   const lastSessionIdRef = useRef<string | undefined>(undefined);
   const lastSessionResetAtRef = useRef<string | undefined>(undefined);
-  // Controls commit through timerStateRef synchronously; this ref keeps game_started to once per session or reset.
+  // Keeps game_started to once per session or reset; remote state can rewind to unstarted.
   const gameStartedTrackedRef = useRef(false);
 
   useEffect(() => {

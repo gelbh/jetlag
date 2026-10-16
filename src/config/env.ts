@@ -105,7 +105,6 @@ function readRawClientEnv(): Record<string, unknown> {
     VITE_FIREBASE_MESSAGING_SENDER_ID: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     VITE_FIREBASE_APP_ID: import.meta.env.VITE_FIREBASE_APP_ID,
     VITE_FIREBASE_APP_CHECK_SITE_KEY: import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY,
-    // react-doctor-disable-next-line react-doctor/public-env-secret-name -- App Check debug token, read only when import.meta.env.DEV
     VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN: import.meta.env.DEV
       ? import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN
       : undefined,

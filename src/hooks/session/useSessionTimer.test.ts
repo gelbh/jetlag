@@ -73,11 +73,10 @@ describe("useSessionTimer", () => {
     expect(trackLazy).not.toHaveBeenCalled();
   });
 
-  it("tracks game_started once when two same-frame starts run as deferred state updaters, and again after reset", () => {
+  it("tracks game_started once for two same-frame starts, and again after reset", () => {
     const { result } = renderHook(() => useSessionTimer("session-1"));
 
     act(() => {
-      // A queued update makes React defer the start updaters, so the ref stays stale.
       result.current.applyRemoteState({ ...INITIAL_TIMER_STATE });
       result.current.start();
       result.current.start();
