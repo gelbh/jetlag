@@ -302,7 +302,7 @@ export function AdminIncidentActions({
       <AdminConfirm
         opened={pending === "hotfix"}
         title="Publish hotfix?"
-        consequence={`Require version ${version} in every active session? The requirement takes effect after a ${grace}s grace period.`}
+        consequence={`Require version ${version} in every session with an active join code? The requirement takes effect after a ${grace}s grace period.`}
         confirmLabel={`Publish ${version}`}
         busyLabel="Publishing…"
         destructive

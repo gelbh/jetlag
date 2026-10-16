@@ -71,7 +71,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
     async (action: ModerationAction) => {
       const sessionId = controller.session?.id;
       if (!sessionId || sessionId === LOCAL_SESSION_ID) {
-        return;
+        throw new Error("Moderation needs a live session.");
       }
       setModerationBusy(true);
       try {

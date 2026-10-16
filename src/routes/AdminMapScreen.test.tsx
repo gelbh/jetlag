@@ -159,6 +159,14 @@ describe("AdminMapScreen", () => {
     );
   });
 
+  it("reports moderation as failed when the session is local", async () => {
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+    fireEvent.click(screen.getByRole("button", { name: "Force end" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Start end game" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Moderation needs a live session.");
+    expect(adminModerateSession).not.toHaveBeenCalled();
+  });
+
   it("renders the side rail in wide layout", () => {
     mockedUseAdminMapWideLayout.mockReturnValue(true);
 
