@@ -68,7 +68,9 @@ describe("endGameTruthAnchors", () => {
       return;
     }
 
-    expect(Object.keys(result)).toEqual(["hider-a"]);
+    expect(result).toEqual({
+      "hider-a": { lat: 51.1, lng: -0.1, frozenAt: "2026-01-01T00:00:00.000Z" },
+    });
   });
 
   it("reports missing when a confirmed hider has no zone center", () => {
