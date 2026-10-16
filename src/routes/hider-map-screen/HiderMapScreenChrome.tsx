@@ -195,6 +195,7 @@ export type HiderMapScreenController = {
       deadlineExpired?: boolean,
     ) => Promise<void>;
     questionCards?: HiderQuestionCards;
+    onSetHidingZone?: () => void;
   };
   /** HUD root for pan-hide (`data-map-interacting`): same as seeker. */
   chromeHudRef?: RefObject<HTMLDivElement | null>;
@@ -435,6 +436,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
         answeredPendingIds={chat.answeredPendingIds}
         onAnswerQuestion={chat.onAnswerQuestion}
         questionCards={chat.questionCards}
+        onSetHidingZone={chat.onSetHidingZone}
       />
 
       {zoneHudPresence.showMapFirst ? (
@@ -500,6 +502,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           answeredPendingIds: chat.answeredPendingIds,
           onAnswerQuestion: chat.onAnswerQuestion,
           questionCards: chat.questionCards,
+          onSetHidingZone: chat.onSetHidingZone,
         }}
       />
 

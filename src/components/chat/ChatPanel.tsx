@@ -39,6 +39,7 @@ export type ChatPanelModel = {
   ) => Promise<void>;
   onDismissExpiredQuestion?: (pendingQuestionId: string, messageId: string) => Promise<void>;
   questionCards?: HiderQuestionCards;
+  onSetHidingZone?: () => void;
   readOnly?: boolean;
 };
 
@@ -66,6 +67,7 @@ export function ChatPanel({ model }: ChatPanelProps) {
     onAnswerQuestion,
     onDismissExpiredQuestion,
     questionCards,
+    onSetHidingZone,
     readOnly = false,
   } = model;
   const keyboardInset = useVisualViewportBottomInset(open);
@@ -88,6 +90,7 @@ export function ChatPanel({ model }: ChatPanelProps) {
       onAnswerQuestion={onAnswerQuestion}
       onDismissExpiredQuestion={onDismissExpiredQuestion}
       questionCards={questionCards}
+      onSetHidingZone={onSetHidingZone}
       readOnly={readOnly}
     />
   );

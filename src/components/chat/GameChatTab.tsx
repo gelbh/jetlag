@@ -49,6 +49,7 @@ interface GameChatTabProps {
   ) => Promise<void>;
   onDismissExpiredQuestion?: (pendingQuestionId: string, messageId: string) => Promise<void>;
   questionCards?: HiderQuestionCards;
+  onSetHidingZone?: () => void;
   readOnly?: boolean;
 }
 
@@ -154,6 +155,7 @@ export function GameChatTab({
   onAnswerQuestion,
   onDismissExpiredQuestion,
   questionCards,
+  onSetHidingZone,
   readOnly = false,
 }: GameChatTabProps) {
   const [nowMs, setNowMs] = useState(0);
@@ -279,6 +281,7 @@ export function GameChatTab({
                   }
                   onAnswerQuestion={onAnswerQuestion}
                   questionCards={questionCards}
+                  onSetHidingZone={onSetHidingZone}
                 />
               ) : showAnswerBox ? (
                 <Group

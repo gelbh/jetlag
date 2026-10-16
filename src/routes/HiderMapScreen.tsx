@@ -1089,6 +1089,7 @@ export function HiderMapScreen() {
               answeredPendingIds,
               onAnswerQuestion: submitHiderAnswer,
               questionCards,
+              onSetHidingZone: openWizardExclusive,
             },
           }}
         />
