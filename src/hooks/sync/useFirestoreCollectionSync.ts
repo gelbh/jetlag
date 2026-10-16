@@ -66,9 +66,9 @@ export function useFirestoreCollectionSyncWithStatus<T>(
 
     return () => {
       unsubscribe();
+      setLoadedFor(null);
       queueMicrotask(() => {
         setItems([]);
-        setLoadedFor(null);
       });
     };
   }, [enabled, sessionId, subscribe]);
