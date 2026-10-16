@@ -135,6 +135,7 @@ export function AdminNeedsYou({
         <AdminIncidentActions
           incidentId={selectedIncidentId}
           status={selectedIncident?.status ?? null}
+          sessionCode={selectedIncident?.sessionCode ?? null}
           agent={selectedIncident?.agent ?? null}
         />
       </DrillIn>
