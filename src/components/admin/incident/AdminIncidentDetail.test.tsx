@@ -321,9 +321,9 @@ describe("AdminIncidentActions", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Launch Cursor agent" }));
+    fireEvent.click(screen.getByRole("button", { name: "Launch agent" }));
     expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
-    expect(await screen.findByRole("button", { name: "Open Cursor agent" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Open agent" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Apply mitigation" }));
     expect(applyMitigationFn).not.toHaveBeenCalled();
@@ -411,7 +411,7 @@ describe("AdminIncidentActions", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Open Cursor agent" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open agent" }));
     expect(openExternalUrlFn).toHaveBeenCalledWith("https://cursor.com/agents/bc-live");
   });
 
@@ -433,7 +433,21 @@ describe("AdminIncidentActions", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Retry launch" }));
     expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
-    expect(await screen.findByRole("button", { name: "Open Cursor agent" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Open agent" })).toBeInTheDocument();
+  });
+
+  it("shows a waiting state when the agent launched without a link", () => {
+    const launchCursorAgentFn = vi.fn();
+    renderAdmin(
+      <AdminIncidentActions
+        incidentId="inc-1"
+        agent={{ status: "launched", cursorAgentId: "bc-1", cursorAgentUrl: null }}
+        launchCursorAgentFn={launchCursorAgentFn}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Agent launched, waiting for link" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
   });
 });
 
