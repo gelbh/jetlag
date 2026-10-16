@@ -17,6 +17,7 @@ export const JOIN_NOT_GATED = "JOIN_NOT_GATED";
 export const JOIN_WRONG_PASSCODE = "JOIN_WRONG_PASSCODE";
 export const JOIN_PASSCODE_REQUIRED = "JOIN_PASSCODE_REQUIRED";
 export const JOIN_INCOMPATIBLE_VERSION = "JOIN_INCOMPATIBLE_VERSION";
+export const JOIN_HEAL_ROLE_MISMATCH = "JOIN_HEAL_ROLE_MISMATCH";
 
 const VALID_JOIN_ROLES = new Set(["seeker", "hider", "observer", "admin"]);
 
@@ -190,45 +191,51 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
     }
 
     const gated = isRoleGatedSession(data);
-    const healing = returningMemberUid != null && returningMemberUid !== uid;
+    const membership = readMembershipFields(data);
+    const { memberUids, memberRoles, memberAppVersions, hostUid } = membership;
+
+    // returningMemberUid is client-supplied, so a heal may only take over a
+    // current member's seat in that member's role. A non-member uid is not a heal.
+    let healFromUid = returningMemberUid;
+    if (healFromUid != null && healFromUid !== uid && !memberUids.includes(healFromUid)) {
+      healFromUid = undefined;
+    }
+    const healing = healFromUid != null && healFromUid !== uid;
     if (!gated && !healing) {
       throw new Error(JOIN_NOT_GATED);
+    }
+    if (healing && role !== "admin" && memberRoles[healFromUid] !== role) {
+      throw new Error(JOIN_HEAL_ROLE_MISMATCH);
     }
 
     if (
       role !== "admin" &&
-      !sessionVersionCompatible(data, clientVersion, uid, returningMemberUid, role)
+      !sessionVersionCompatible(data, clientVersion, uid, healFromUid, role)
     ) {
       throw new Error(JOIN_INCOMPATIBLE_VERSION);
     }
 
+    // Neither branch writes hostUid: a heal must not move host (repairGhostHost does).
     if (!gated) {
-      const ungatedMembership = readMembershipFields(data);
       const ungatedHeal = buildMembershipHealState({
-        existingMemberUids: ungatedMembership.memberUids,
-        existingRoles: ungatedMembership.memberRoles,
-        existingAppVersions: ungatedMembership.memberAppVersions,
+        existingMemberUids: memberUids,
+        existingRoles: memberRoles,
+        existingAppVersions: memberAppVersions,
         uid,
         role,
         clientVersion,
-        returningMemberUid,
-        currentHostUid: ungatedMembership.hostUid,
+        returningMemberUid: healFromUid,
+        currentHostUid: hostUid,
       });
-      const ungatedUpdate = {
+      tx.update(sessionRef, {
         memberUids: ungatedHeal.memberUids,
         memberRoles: ungatedHeal.memberRoles,
         memberAppVersions: ungatedHeal.memberAppVersions,
-      };
-      if (ungatedHeal.nextHostUid != null) {
-        ungatedUpdate.hostUid = ungatedHeal.nextHostUid;
-      }
-      tx.update(sessionRef, ungatedUpdate);
+      });
       result = { sessionId, rolePasscode: undefined, becameLeader: false };
       return;
     }
 
-    const membership = readMembershipFields(data);
-    const { memberUids, memberRoles, memberAppVersions, hostUid } = membership;
     let roleGates = {
       version: 1,
       leaders: { ...(data.roleGates?.leaders ?? {}) },
@@ -266,14 +273,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
             secretsPatch: null,
             roleGatesPatch: null,
           }
-        : assertRolePasscodeForJoin(
-            role,
-            memberRoles,
-            uid,
-            rolePasscode,
-            secrets,
-            returningMemberUid,
-          );
+        : assertRolePasscodeForJoin(role, memberRoles, uid, rolePasscode, secrets, healFromUid);
 
     if (passcodeResult.secretsPatch) {
       Object.assign(secrets, passcodeResult.secretsPatch);
@@ -292,7 +292,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       uid,
       role,
       clientVersion,
-      returningMemberUid,
+      returningMemberUid: healFromUid,
       currentHostUid: hostUid,
     });
 
@@ -311,9 +311,6 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       memberAppVersions: heal.memberAppVersions,
       roleGates,
     };
-    if (heal.nextHostUid != null) {
-      sessionUpdate.hostUid = heal.nextHostUid;
-    }
 
     tx.update(sessionRef, sessionUpdate);
     // Full replace so vacated role keys are deleted (merge:true would leave them).
