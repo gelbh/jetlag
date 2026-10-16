@@ -31,7 +31,7 @@ async function fetchJoinPreview(normalized: string): Promise<{
 }> {
   return withTimeout(
     (async () => {
-      const user = await ensureAnonymousUser();
+      const user = await retryAsync(() => ensureAnonymousUser());
       const result = await retryAsync(() => lookupRemoteSessionByCode(normalized));
       return { result, uid: user.uid };
     })(),
@@ -60,7 +60,7 @@ export function useJoinSessionPreview(code: string): JoinSessionPreviewState {
     enabled,
     staleTime: JOIN_PREVIEW_TTL_MS,
     gcTime: JOIN_PREVIEW_TTL_MS,
-    // retryAsync already retries network errors; a query retry would double a hung wait.
+    // Both the auth and lookup calls retry network errors via retryAsync; a query-level retry would stack on that and double a hung wait.
     retry: false,
   });
 

@@ -277,7 +277,7 @@ describe("useJoinSession", () => {
     mockUseJoinSessionPreview.mockReturnValue({
       previewSession: createTestRemoteSession({
         code: "ABCD",
-        memberRoles: { leader: "seeker", "auth-uid": "seeker" },
+        memberRoles: { leader: "seeker", u1: "seeker" },
       }),
       previewPremium: false,
       lookupLoading: false,
