@@ -45,12 +45,9 @@ export function buildHiderTruthFetchKey(
     openQuestionsContentKey(openQuestions),
     context.hiderUid,
     pointKey(context.zoneCenter),
-    String(context.zoneRadiusMeters ?? "none"),
     context.session?.endGameStartedAt ?? "none",
     context.session?.endGameTruthAnchors
       ? JSON.stringify(context.session.endGameTruthAnchors)
       : "none",
-    "place:omitted",
-    "seeker:omitted",
   ].join("|");
 }

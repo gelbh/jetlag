@@ -249,9 +249,8 @@ export function HiderMapScreen() {
   );
   const stationCenter = useMemo(() => hiderStationCenter(myZone), [myZone]);
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
-  const needsTruthLocation = pendingQuestions.some((question) => question.status === "pending");
   const { reading: liveLocationReading, error: liveLocationWatchError } = useLiveLocation(
-    showCurrentLocation || needsTruthLocation,
+    showCurrentLocation,
     {
       highAccuracy: liveLocationProfile.highAccuracy,
       minIntervalMs: liveLocationProfile.minIntervalMs,
@@ -259,34 +258,12 @@ export function HiderMapScreen() {
     },
   );
   const locationError = liveLocationWatchError ?? hiderLocationSyncError;
-  const hidingPlace = useMemo((): LatLngTuple | null => {
-    if (!liveLocationReading) {
-      return null;
-    }
-    return [liveLocationReading.lat, liveLocationReading.lng];
-  }, [liveLocationReading]);
-  const seekerPlacesByUid = useMemo(() => {
-    const places: Record<string, LatLngTuple> = {};
-    for (const location of seekerLocations) {
-      if (Number.isFinite(location.lat) && Number.isFinite(location.lng)) {
-        places[location.uid] = [location.lat, location.lng];
-      }
-    }
-    return places;
-  }, [seekerLocations]);
   const truthContext = useMemo(() => {
     if (!uid) {
       return null;
     }
-    return {
-      hiderUid: uid,
-      zoneCenter: stationCenter,
-      hidingPlace,
-      zoneRadiusMeters: myZone?.radiusMeters ?? null,
-      seekerPlacesByUid,
-      session,
-    };
-  }, [hidingPlace, myZone?.radiusMeters, seekerPlacesByUid, session, stationCenter, uid]);
+    return { hiderUid: uid, zoneCenter: stationCenter, session };
+  }, [session, stationCenter, uid]);
   useHidingZoneUidHeal(sessionId, uid, hidingZones, persistedMyUid);
   const truthReferenceReady = authReady && uid !== null;
   const {

@@ -6,269 +6,55 @@ import {
 } from "./resolveHiderTruthReference";
 
 const zoneCenter: [number, number] = [51.45, -0.15];
-const liveGps: [number, number] = [51.451, -0.149];
-const outsideAsk: [number, number] = [51.48, -0.12];
-const insideAsk: [number, number] = [51.4505, -0.1502];
-const zoneRadiusMeters = 500;
+const endGameSession = {
+  endGameStartedAt: "2026-01-01T00:00:00.000Z",
+  endGameTruthAnchors: {
+    "hider-1": { lat: 51.46, lng: -0.14, frozenAt: "2026-01-01T00:00:00.000Z" },
+  },
+};
 
 describe("resolveHiderTruthReference", () => {
-  it("returns zone center before end game when ask is outside the zone", () => {
+  it("returns zone center before end game", () => {
+    const result = resolveHiderTruthReference({ hiderUid: "hider-1", zoneCenter, session: null });
+    expect(result).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
+  });
+
+  it("returns noHidingZone before end game when the hider has no zone", () => {
     const result = resolveHiderTruthReference({
       hiderUid: "hider-1",
-      zoneCenter,
-      hidingPlace: liveGps,
-      askOrigin: outsideAsk,
-      zoneRadiusMeters,
+      zoneCenter: null,
       session: null,
     });
-
-    expect(result.mode).toBe("hidingZoneCenter");
-    expect(result.point).toEqual(zoneCenter);
+    expect(result).toEqual({ point: null, mode: "noHidingZone" });
   });
 
-  it("returns zone center before end game when ask origin is inside the zone", () => {
+  it("returns the frozen anchor over the zone center during end game", () => {
     const result = resolveHiderTruthReference({
       hiderUid: "hider-1",
       zoneCenter,
-      hidingPlace: liveGps,
-      askOrigin: insideAsk,
-      zoneRadiusMeters,
-      session: null,
+      session: endGameSession,
     });
-
-    expect(result.mode).toBe("hidingZoneCenter");
-    expect(result.point).toEqual(zoneCenter);
+    expect(result).toEqual({ point: [51.46, -0.14], mode: "endGameFreeze" });
   });
 
-  it("returns zone center when hiding place is missing", () => {
-    const result = resolveHiderTruthReference({
-      hiderUid: "hider-1",
-      zoneCenter,
-      hidingPlace: null,
-      originInsideZone: true,
-      session: null,
-    });
-
-    expect(result.mode).toBe("hidingZoneCenter");
-    expect(result.point).toEqual(zoneCenter);
-  });
-
-  it("returns frozen anchor when end game is active", () => {
-    const result = resolveHiderTruthReference({
-      hiderUid: "hider-1",
-      zoneCenter,
-      hidingPlace: liveGps,
-      originInsideZone: true,
-      session: {
-        endGameStartedAt: "2026-01-01T00:00:00.000Z",
-        endGameTruthAnchors: {
-          "hider-1": {
-            lat: 51.46,
-            lng: -0.14,
-            frozenAt: "2026-01-01T00:00:00.000Z",
-          },
-        },
-      },
-    });
-
-    expect(result.mode).toBe("endGameFreeze");
-    expect(result.point).toEqual([51.46, -0.14]);
-  });
-
-  it("prefers freeze over hiding place after end game starts", () => {
-    const result = resolveHiderTruthReference({
-      hiderUid: "hider-1",
-      zoneCenter: liveGps,
-      hidingPlace: liveGps,
-      originInsideZone: true,
-      session: {
-        endGameStartedAt: "2026-01-01T00:00:00.000Z",
-        endGameTruthAnchors: {
-          "hider-1": {
-            lat: 51.46,
-            lng: -0.14,
-            frozenAt: "2026-01-01T00:00:00.000Z",
-          },
-        },
-      },
-    });
-
-    expect(result.mode).toBe("endGameFreeze");
-    expect(result.point).toEqual([51.46, -0.14]);
-    expect(result.point).not.toEqual(liveGps);
-  });
-
-  it("returns unavailable when end game is active without that hider anchor", () => {
+  it("returns unavailable during end game when that hider has no anchor", () => {
     const result = resolveHiderTruthReference({
       hiderUid: "hider-2",
       zoneCenter: null,
-      session: {
-        endGameStartedAt: "2026-01-01T00:00:00.000Z",
-        endGameTruthAnchors: {
-          "hider-1": {
-            lat: 51.46,
-            lng: -0.14,
-            frozenAt: "2026-01-01T00:00:00.000Z",
-          },
-        },
-      },
+      session: endGameSession,
     });
-
-    expect(result.mode).toBe("unavailable");
-    expect(result.point).toBeNull();
-  });
-
-  it("returns unavailable when no zone center before end game", () => {
-    const result = resolveHiderTruthReference({
-      hiderUid: "hider-1",
-      zoneCenter: null,
-      session: null,
-    });
-
-    expect(result.mode).toBe("unavailable");
-    expect(result.point).toBeNull();
+    expect(result).toEqual({ point: null, mode: "unavailable" });
   });
 });
 
 describe("resolvePendingQuestionTruthReference", () => {
-  function pendingAt(
-    origin: [number, number],
-    extras: Partial<PendingQuestionRecord> = {},
-  ): PendingQuestionRecord {
-    return {
-      id: "q-1",
-      status: "pending",
-      createdByUid: "seeker-1",
-      placement: {
-        geometryJson: JSON.stringify({
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "Point",
-            coordinates: [origin[1], origin[0]],
-          },
-        }),
-      },
-      ...extras,
-    } as PendingQuestionRecord;
-  }
-
-  it("uses zone center for in-zone and out-of-zone asks before end game", () => {
-    const context = {
+  it("ignores the question and uses the hider reference", () => {
+    const question = { id: "q-1", status: "pending" } as PendingQuestionRecord;
+    const result = resolvePendingQuestionTruthReference(question, {
       hiderUid: "hider-1",
       zoneCenter,
-      hidingPlace: liveGps,
-      zoneRadiusMeters,
       session: null,
-    };
-
-    expect(resolvePendingQuestionTruthReference(pendingAt(insideAsk), context)).toEqual({
-      point: zoneCenter,
-      mode: "hidingZoneCenter",
     });
-    expect(resolvePendingQuestionTruthReference(pendingAt(outsideAsk), context)).toEqual({
-      point: zoneCenter,
-      mode: "hidingZoneCenter",
-    });
-  });
-
-  it("returns zone center for empty photo geometryJson", () => {
-    const photoPending = {
-      id: "q-photo",
-      status: "pending",
-      placement: { geometryJson: "{}" },
-    } as PendingQuestionRecord;
-
-    expect(
-      resolvePendingQuestionTruthReference(photoPending, {
-        hiderUid: "hider-1",
-        zoneCenter,
-        hidingPlace: liveGps,
-        zoneRadiusMeters,
-        session: null,
-      }),
-    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
-  });
-
-  it.each(["tentacle", "matching", "measuring", "thermometer"] as const)(
-    "uses zone center for %s when the pin is in-zone but the seeker is not",
-    (toolType) => {
-      const context = {
-        hiderUid: "hider-1",
-        zoneCenter,
-        hidingPlace: liveGps,
-        zoneRadiusMeters,
-        session: null,
-        seekerPlacesByUid: { "seeker-1": outsideAsk },
-      };
-
-      expect(
-        resolvePendingQuestionTruthReference(pendingAt(insideAsk, { toolType }), context),
-      ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
-    },
-  );
-
-  it.each(["tentacle", "matching", "measuring", "thermometer"] as const)(
-    "uses zone center for %s when the seeker is inside the zone",
-    (toolType) => {
-      const context = {
-        hiderUid: "hider-1",
-        zoneCenter,
-        hidingPlace: liveGps,
-        zoneRadiusMeters,
-        session: null,
-        seekerPlacesByUid: { "seeker-1": insideAsk },
-      };
-
-      expect(
-        resolvePendingQuestionTruthReference(pendingAt(outsideAsk, { toolType }), context),
-      ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
-    },
-  );
-
-  it("uses zone center for tentacle when seeker GPS is missing", () => {
-    expect(
-      resolvePendingQuestionTruthReference(pendingAt(insideAsk, { toolType: "tentacle" }), {
-        hiderUid: "hider-1",
-        zoneCenter,
-        hidingPlace: liveGps,
-        zoneRadiusMeters,
-        session: null,
-      }),
-    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
-  });
-
-  it("uses zone center for tentacle when createdByUid has no live place", () => {
-    expect(
-      resolvePendingQuestionTruthReference(
-        pendingAt(insideAsk, {
-          toolType: "tentacle",
-          createdByUid: "other-seeker",
-        }),
-        {
-          hiderUid: "hider-1",
-          zoneCenter,
-          hidingPlace: liveGps,
-          zoneRadiusMeters,
-          session: null,
-          seekerPlacesByUid: { "seeker-1": insideAsk },
-        },
-      ),
-    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
-  });
-
-  it("uses zone center for radar when ask placement is inside the zone", () => {
-    const context = {
-      hiderUid: "hider-1",
-      zoneCenter,
-      hidingPlace: liveGps,
-      zoneRadiusMeters,
-      session: null,
-      seekerPlacesByUid: { "seeker-1": outsideAsk },
-    };
-
-    expect(
-      resolvePendingQuestionTruthReference(pendingAt(insideAsk, { toolType: "radar" }), context),
-    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
+    expect(result.mode).toBe("hidingZoneCenter");
   });
 });

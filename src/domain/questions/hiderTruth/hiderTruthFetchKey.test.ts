@@ -6,7 +6,6 @@ import type { HiderQuestionTruthContextInput } from "./resolveHiderTruthReferenc
 
 const zoneCenter: [number, number] = [51.5, -0.12];
 const outsideAsk: [number, number] = [51.6, -0.12];
-const insideAsk: [number, number] = [51.5001, -0.1201];
 
 function radarPending(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {
@@ -39,93 +38,10 @@ function radarPending(overrides: Partial<PendingQuestionRecord> = {}): PendingQu
 function baseContext(
   overrides: Partial<HiderQuestionTruthContextInput> = {},
 ): HiderQuestionTruthContextInput {
-  return {
-    hiderUid: "hider-1",
-    zoneCenter,
-    hidingPlace: [51.5, -0.12],
-    zoneRadiusMeters: 500,
-    seekerPlacesByUid: { "seeker-1": [51.51, -0.11] },
-    session: null,
-    ...overrides,
-  };
+  return { hiderUid: "hider-1", zoneCenter, session: null, ...overrides };
 }
 
 describe("buildHiderTruthFetchKey", () => {
-  it("omits live hidingPlace regardless of ask placement", () => {
-    const outside = [radarPending()];
-    const inside = [
-      radarPending({
-        placement: {
-          geometryJson: JSON.stringify({
-            type: "Feature",
-            properties: {},
-            geometry: {
-              type: "Point",
-              coordinates: [insideAsk[1], insideAsk[0]],
-            },
-          }),
-          metadata: { radiusMeters: milesToMeters(1) },
-        },
-      }),
-    ];
-    for (const open of [outside, inside]) {
-      const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
-      const b = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.501, -0.121] }));
-      expect(a).toBe(b);
-      expect(a).toContain("place:omitted");
-    }
-  });
-
-  it("omits live hidingPlace during end game", () => {
-    const open = [radarPending()];
-    const session = {
-      endGameStartedAt: "2026-01-01T00:00:00.000Z",
-      endGameTruthAnchors: {
-        "hider-1": {
-          lat: 51.5,
-          lng: -0.12,
-          frozenAt: "2026-01-01T00:00:00.000Z",
-        },
-      },
-    };
-    const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12], session }));
-    const b = buildHiderTruthFetchKey(
-      open,
-      baseContext({ hidingPlace: [51.501, -0.121], session }),
-    );
-    expect(a).toBe(b);
-    expect(a).toContain("place:omitted");
-  });
-
-  it("omits live seeker GPS for map-pin tools", () => {
-    const open = [
-      radarPending({
-        toolType: "tentacle",
-        placement: {
-          geometryJson: JSON.stringify({
-            type: "Feature",
-            properties: {},
-            geometry: {
-              type: "Point",
-              coordinates: [insideAsk[1], insideAsk[0]],
-            },
-          }),
-          metadata: {},
-        },
-      }),
-    ];
-    const a = buildHiderTruthFetchKey(
-      open,
-      baseContext({ seekerPlacesByUid: { "seeker-1": [51.51, -0.11] } }),
-    );
-    const b = buildHiderTruthFetchKey(
-      open,
-      baseContext({ seekerPlacesByUid: { "seeker-1": [51.52, -0.1] } }),
-    );
-    expect(a).toBe(b);
-    expect(a).toContain("seeker:omitted");
-  });
-
   it("changes when open question placement geometry changes under the same id", () => {
     const openA = [
       radarPending({
@@ -161,5 +77,12 @@ describe("buildHiderTruthFetchKey", () => {
     expect(buildHiderTruthFetchKey(openA, context)).not.toBe(
       buildHiderTruthFetchKey(openB, context),
     );
+  });
+
+  it("changes when the zone center changes or is cleared", () => {
+    const open = [radarPending()];
+    const set = buildHiderTruthFetchKey(open, baseContext());
+    expect(buildHiderTruthFetchKey(open, baseContext({ zoneCenter: [51.6, -0.1] }))).not.toBe(set);
+    expect(buildHiderTruthFetchKey(open, baseContext({ zoneCenter: null }))).not.toBe(set);
   });
 });
