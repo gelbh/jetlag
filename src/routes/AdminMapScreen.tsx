@@ -79,9 +79,11 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         if (action === "cleanupCode") {
           await handleLeave();
         }
-      } finally {
+      } catch (error) {
         setModerationBusy(false);
+        throw error;
       }
+      setModerationBusy(false);
     },
     [controller.session?.id, handleLeave],
   );
