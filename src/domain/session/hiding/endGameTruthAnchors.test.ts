@@ -56,34 +56,6 @@ describe("endGameTruthAnchors", () => {
     expect(missingHiderUidsForAnchors(["hider-a", "hider-b"], locations)).toEqual(["hider-a"]);
   });
 
-  it("assembles start anchors preferring hiding place over zone center", () => {
-    const result = assembleEndGameStartAnchors({
-      hiderUids: ["hider-a", "hider-b"],
-      hidingPlaces: [{ uid: "hider-a", lat: 52.0, lng: -1.0 }],
-      zoneCenters: [
-        { uid: "hider-a", lat: 51.1, lng: -0.1 },
-        { uid: "hider-b", lat: 51.2, lng: -0.2 },
-      ],
-      frozenAt: "2026-01-01T00:00:00.000Z",
-    });
-
-    expect("missing" in result).toBe(false);
-    if ("missing" in result) {
-      return;
-    }
-
-    expect(result["hider-a"]).toEqual({
-      lat: 52.0,
-      lng: -1.0,
-      frozenAt: "2026-01-01T00:00:00.000Z",
-    });
-    expect(result["hider-b"]).toEqual({
-      lat: 51.2,
-      lng: -0.2,
-      frozenAt: "2026-01-01T00:00:00.000Z",
-    });
-  });
-
   it("assembles start anchors from zone centers alone", () => {
     const result = assembleEndGameStartAnchors({
       hiderUids: ["hider-a"],
@@ -99,10 +71,9 @@ describe("endGameTruthAnchors", () => {
     expect(Object.keys(result)).toEqual(["hider-a"]);
   });
 
-  it("reports missing when a confirmed hider has neither hiding place nor zone center", () => {
+  it("reports missing when a confirmed hider has no zone center", () => {
     const result = assembleEndGameStartAnchors({
       hiderUids: ["hider-a", "hider-b"],
-      hidingPlaces: [],
       zoneCenters: [{ uid: "hider-a", lat: 51.1, lng: -0.1 }],
       frozenAt: "2026-01-01T00:00:00.000Z",
     });
