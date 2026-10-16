@@ -4,6 +4,14 @@ import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { callWithResilience, isCallableError } from "../core/firebase/callWithResilience";
 import { isFirebaseConfigured } from "../core/firebase/firebase";
 
+/** Server message substrings for join failures. Shared with the join_failed reason map. */
+export const JOIN_ERROR_MARKERS = {
+  wrongRoleCode: "Wrong role code",
+  roleCodeRequired: "Role code is required",
+  versionIncompatible: "App version incompatible",
+  clientUpdateRequired: "Client update required.",
+} as const;
+
 export type JoinSessionWithRoleResult = {
   sessionId: string;
   rolePasscode?: string;
@@ -255,11 +263,10 @@ export async function resolveRoleJoinRequest(
 
 const CLIENT_UPDATE_REQUIRED_COPY = "Update the app to continue. Refresh to load the latest build.";
 
-/** Player copy when an occupied side is joined without its role code. */
 export const ROLE_CODE_REQUIRED_COPY = "Enter the role code for that side.";
 
 function isClientUpdateRequiredMessage(message: string): boolean {
-  return message.includes("Client update required.");
+  return message.includes(JOIN_ERROR_MARKERS.clientUpdateRequired);
 }
 
 export function mapRolePasscodeJoinError(error: unknown): string {
@@ -268,13 +275,13 @@ export function mapRolePasscodeJoinError(error: unknown): string {
   }
 
   const message = error.message;
-  if (message.includes("Wrong role code")) {
+  if (message.includes(JOIN_ERROR_MARKERS.wrongRoleCode)) {
     return "Wrong role code. Ask your team for the current code.";
   }
-  if (message.includes("Role code is required")) {
+  if (message.includes(JOIN_ERROR_MARKERS.roleCodeRequired)) {
     return ROLE_CODE_REQUIRED_COPY;
   }
-  if (message.includes("App version incompatible")) {
+  if (message.includes(JOIN_ERROR_MARKERS.versionIncompatible)) {
     return "Update the app to join this session.";
   }
   if (isClientUpdateRequiredMessage(message)) {
