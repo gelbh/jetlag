@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { callableErrorMessage } from "@/domain/device/feedback/userErrors";
 import { isNeedsConnectionError } from "@/domain/device/network/needsConnectionError";
 import { commitWrite } from "@/services/firestore/commitWrite";
@@ -34,6 +34,7 @@ import {
 import { isExpectedSessionLeaveError } from "../../services/session/sessionLeaveErrors";
 import { endSession, leaveHostSession } from "../../services/session/sessionLifecycle";
 import { useSessionStore } from "../../state/sessionStore";
+import { useSubmitLock } from "../forms/useSubmitLock";
 import { useSessionExit } from "../session/useSessionExit";
 
 /** Offline fail-fast: tell the player instead of reporting or falling back to a client write. */
@@ -82,8 +83,7 @@ export function useMapSessionChrome({
   const exitSession = useSessionExit();
   const setSession = useSessionStore((state) => state.setSession);
   const resetInFlightRef = useRef(false);
-  const endInFlightRef = useRef(false);
-  const [endInFlight, setEndInFlight] = useState(false);
+  const { isSubmitting: endInFlight, runLocked: runEndLocked } = useSubmitLock();
 
   const handleClearMap = useCallback(() => {
     if (endGameBlocked) {
@@ -207,16 +207,11 @@ export function useMapSessionChrome({
   ]);
 
   const handleEndSession = useCallback(async () => {
-    if (!session || session.id === LOCAL_SESSION_ID || endInFlightRef.current) {
+    if (!session || session.id === LOCAL_SESSION_ID) {
       return;
     }
 
-    endInFlightRef.current = true;
-    setEndInFlight(true);
-
-    // Same shape as handleResetSession: promise .finally() instead of try/finally,
-    // which keeps the hook compatible with the React Compiler.
-    const end = async () => {
+    await runEndLocked(async () => {
       let user: { uid: string };
       try {
         user = await withTimeout(
@@ -269,13 +264,8 @@ export function useMapSessionChrome({
         replace: true,
         closeOverlays: closeSettingsPanel,
       });
-    };
-
-    await end().finally(() => {
-      endInFlightRef.current = false;
-      setEndInFlight(false);
     });
-  }, [closeSettingsPanel, exitSession, session]);
+  }, [closeSettingsPanel, exitSession, runEndLocked, session]);
 
   const handleLeaveSession = useCallback(async () => {
     if (!session) {
