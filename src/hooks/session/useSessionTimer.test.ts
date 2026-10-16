@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { createElement, StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { INITIAL_TIMER_STATE, startTimer } from "../../domain/session/timer/timer";
 import { useTimerStore } from "../../state/timerStore";
@@ -92,6 +93,24 @@ describe("useSessionTimer", () => {
     });
 
     expect(trackLazy).toHaveBeenCalledTimes(2);
+  });
+
+  it("runs start side effects once under StrictMode", () => {
+    const onControl = vi.fn();
+    const setTimerSpy = vi.spyOn(useTimerStore.getState(), "setTimer");
+    const { result } = renderHook(() => useSessionTimer("session-strict", { onControl }), {
+      wrapper: ({ children }) => createElement(StrictMode, null, children),
+    });
+    onControl.mockClear();
+    setTimerSpy.mockClear();
+
+    act(() => {
+      result.current.start();
+    });
+
+    expect(onControl).toHaveBeenCalledTimes(1);
+    expect(setTimerSpy).toHaveBeenCalledTimes(1);
+    setTimerSpy.mockRestore();
   });
 
   it("does not track game_started when the client cannot control the timer", () => {
