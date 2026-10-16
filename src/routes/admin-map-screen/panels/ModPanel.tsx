@@ -1,19 +1,19 @@
 import { Button, Stack, Text } from "@mantine/core";
+import type { ModerationAction } from "../useModerationConfirm";
 
 // Standalone /map renders this panel outside the admin world, where --adm-* is unset.
 const MISPUNCH = "var(--adm-mispunch, var(--color-halt))";
 
 interface ModPanelProps {
   moderationBusy: boolean;
-  moderationError: string | null;
-  onModerationAction: (action: "end" | "resetBoard" | "cleanupCode") => void;
+  onModerationAction: (action: ModerationAction) => void;
 }
 
-export function ModPanel({ moderationBusy, moderationError, onModerationAction }: ModPanelProps) {
+export function ModPanel({ moderationBusy, onModerationAction }: ModPanelProps) {
   return (
     <Stack gap="sm">
       <Text size="sm" c="dimmed">
-        Moderation actions apply immediately to the live session.
+        Each action asks before it runs.
       </Text>
       <Stack gap="xs">
         <Button
@@ -39,11 +39,6 @@ export function ModPanel({ moderationBusy, moderationError, onModerationAction }
           Cleanup code
         </Button>
       </Stack>
-      {moderationError ? (
-        <Text size="sm" c={MISPUNCH} role="alert">
-          {moderationError}
-        </Text>
-      ) : null}
     </Stack>
   );
 }

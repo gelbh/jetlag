@@ -29,6 +29,10 @@ import { AdminDiagnosticsOverlay } from "./admin-map-screen/AdminDiagnosticsOver
 import { AdminMapScreenChrome } from "./admin-map-screen/AdminMapScreenChrome";
 import { AdminMonitorRail, type AdminMonitorRailTab } from "./admin-map-screen/AdminMonitorRail";
 import { adminShellCell, adminShellStyle } from "./admin-map-screen/adminShellLayout";
+import {
+  type ModerationAction,
+  useModerationConfirm,
+} from "./admin-map-screen/useModerationConfirm";
 import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
 import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
 
@@ -51,7 +55,6 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const liveNowMs = useLiveLocationNowMs();
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [moderationBusy, setModerationBusy] = useState(false);
-  const [moderationError, setModerationError] = useState<string | null>(null);
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [railTab, setRailTab] = useState<AdminMonitorRailTab>("overview");
 
@@ -64,38 +67,29 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
     navigate("/admin");
   }, [controller.session?.id, navigate, setSession]);
 
-  const handleModerationAction = useCallback(
-    async (action: "end" | "resetBoard" | "cleanupCode") => {
+  const runModeration = useCallback(
+    async (action: ModerationAction) => {
       const sessionId = controller.session?.id;
       if (!sessionId || sessionId === LOCAL_SESSION_ID) {
         return;
       }
-
-      const labels = {
-        end: "Force end this game?",
-        resetBoard: "Reset the board for this session?",
-        cleanupCode: "End this session and retire its join code?",
-      } as const;
-
-      if (!window.confirm(labels[action])) {
-        return;
-      }
-
       setModerationBusy(true);
-      setModerationError(null);
-
       try {
         await adminModerateSession(sessionId, action);
         if (action === "cleanupCode") {
           await handleLeave();
         }
-      } catch (error) {
-        setModerationError(error instanceof Error ? error.message : "Moderation failed.");
+      } finally {
+        setModerationBusy(false);
       }
-      setModerationBusy(false);
     },
     [controller.session?.id, handleLeave],
   );
+
+  const moderation = useModerationConfirm({
+    sessionCode: controller.session?.code ?? null,
+    run: runModeration,
+  });
 
   useEffect(() => {
     if (!isWide) {
@@ -225,8 +219,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           isWide={isWide}
           syncStatus={controller.syncStatus.status}
           moderationBusy={moderationBusy}
-          moderationError={moderationError}
-          onModerationAction={(action) => void handleModerationAction(action)}
+          onModerationAction={moderation.request}
           diagnosticsOpen={diagnosticsOpen}
           onToggleDiagnostics={isWide ? undefined : () => setDiagnosticsOpen((open) => !open)}
         />
@@ -253,13 +246,14 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           controller={controller}
           chatDisplayRole={chatDisplayRole}
           moderationBusy={moderationBusy}
-          moderationError={moderationError}
-          onModerationAction={(action) => void handleModerationAction(action)}
+          onModerationAction={moderation.request}
           mapViewport={controller.mapViewport}
           onLayerVisibilityChange={setLayerVisibility}
           onLowPowerModeChange={setLowPowerMode}
         />
       ) : null}
+
+      {moderation.confirm}
 
       {!isWide ? (
         <>
