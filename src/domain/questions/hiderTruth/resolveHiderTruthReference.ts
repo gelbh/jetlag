@@ -36,7 +36,7 @@ function isUsablePoint(point: LatLngTuple | null | undefined): point is LatLngTu
 
 export type HiderQuestionTruthContextInput = ResolveHiderTruthReferenceInput;
 
-/** Per-question truth reference (zone center until end-game freeze). */
+/** Per-question truth reference: zone center before end game (noHidingZone without one), frozen anchor during it. */
 export function resolvePendingQuestionTruthReference(
   _question: PendingQuestionRecord,
   context: HiderQuestionTruthContextInput,
