@@ -10,6 +10,7 @@ import {
   Drawer,
   Kbd,
   type MantineThemeOverride,
+  Modal,
   Paper,
   Popover,
   Portal,
@@ -280,6 +281,25 @@ export const adminTheme: MantineThemeOverride = {
           boxShadow: "none",
         },
         header: { backgroundColor: "var(--adm-paper)", borderBottom: rule },
+        title: { fontWeight: 700, letterSpacing: "normal" },
+      },
+    }),
+    Modal: Modal.extend({
+      defaultProps: {
+        radius: 0,
+        overlayProps: { backgroundOpacity: 0.4, blur: 0 },
+        closeButtonProps: { "aria-label": "Close" },
+      },
+      styles: {
+        content: {
+          backgroundColor: "var(--adm-paper-raised)",
+          color: "var(--adm-ink)",
+          border: rule,
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          boxShadow: "none",
+        },
+        header: { backgroundColor: "var(--adm-paper-raised)", borderBottom: rule },
         title: { fontWeight: 700, letterSpacing: "normal" },
       },
     }),

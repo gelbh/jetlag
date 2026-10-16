@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Divider, Drawer, Select } from "@mantine/core";
+import { Alert, Badge, Button, Divider, Drawer, Modal, Select } from "@mantine/core";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -194,6 +194,21 @@ describe("admin shared primitives", () => {
       "var(--adm-paper)",
     );
     expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
+  });
+
+  it("portals a Modal into the admin world on admin paper", async () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Modal opened onClose={() => {}} title="Confirm">
+          modal body
+        </Modal>
+      </AdminWorld>,
+    );
+    const body = await screen.findByText("modal body");
+    expect(body.closest("[data-admin-world]")).not.toBeNull();
+    expect(body.closest(".mantine-Modal-content")?.getAttribute("style")).toContain(
+      "var(--adm-paper-raised)",
+    );
   });
 
   it("names a region by its title and shows the count", () => {
