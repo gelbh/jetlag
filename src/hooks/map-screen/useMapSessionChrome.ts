@@ -15,6 +15,7 @@ import { captureException } from "../../services/core/analytics/clientErrors";
 import { forceRgbCssColorsInClone } from "../../services/core/capture/html2canvasColors";
 import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/capture/html2canvasErrors";
 import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
+import { withTimeout } from "../../services/core/withTimeout";
 import {
   endRemoteSession,
   resetRemoteSession,
@@ -45,6 +46,9 @@ function alertIfNeedsConnection(error: unknown): boolean {
 }
 
 const MAP_EXPORT_BACKGROUND = "#0f172a";
+
+/** Bounds auth so a hung sign-in cannot leave the End button disabled forever. */
+const END_SESSION_AUTH_TIMEOUT_MS = 10_000;
 
 const loadHtml2Canvas = () => import("html2canvas");
 
@@ -215,7 +219,11 @@ export function useMapSessionChrome({
     const end = async () => {
       let user: { uid: string };
       try {
-        user = await ensureAnonymousUser();
+        user = await withTimeout(
+          ensureAnonymousUser(),
+          END_SESSION_AUTH_TIMEOUT_MS,
+          "Couldn't end the session. Try again.",
+        );
       } catch (error) {
         captureException(error);
         window.alert("Couldn't end the session. Try again.");

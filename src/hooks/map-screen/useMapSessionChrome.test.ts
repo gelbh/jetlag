@@ -3,6 +3,7 @@ import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
 import { useMapSessionChrome } from "./useMapSessionChrome";
 
 const exitSession = vi.hoisted(() => vi.fn(async () => undefined));
@@ -435,6 +436,45 @@ describe("useMapSessionChrome", () => {
     expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
     expect(window.confirm).toHaveBeenCalledOnce();
     expect(result.current.endInFlight).toBe(false);
+  });
+
+  it("alerts and clears the end guard when auth never settles", async () => {
+    vi.useFakeTimers();
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => undefined);
+    vi.mocked(ensureAnonymousUser).mockImplementationOnce(() => new Promise(() => undefined));
+    try {
+      const { result } = renderHook(() =>
+        useMapSessionChrome({
+          session: remoteSession,
+          isHost: true,
+          annotations: [],
+          mapShellRef: { current: null },
+          exportLegendRef: { current: null },
+          clearAllAnnotations: vi.fn(async () => undefined),
+          setSelectedAnnotationId: vi.fn(),
+          closeSettingsPanel: vi.fn(),
+          resetTimer: vi.fn(),
+        }),
+      );
+
+      act(() => {
+        void result.current.handleEndSession();
+      });
+      expect(result.current.endInFlight).toBe(true);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(10_000);
+      });
+
+      expect(alertSpy).toHaveBeenCalledWith("Couldn't end the session. Try again.");
+      expect(mockEndSession).not.toHaveBeenCalled();
+      expect(result.current.endInFlight).toBe(false);
+    } finally {
+      vi.useRealTimers();
+      alertSpy.mockRestore();
+      confirmSpy.mockRestore();
+    }
   });
 
   it("tracks host_leave_ended when alone host leave ends the session", async () => {

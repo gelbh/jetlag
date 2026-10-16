@@ -1,6 +1,6 @@
 import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { MapSettingsSessionTab, type MapSettingsSessionTabProps } from "./SessionTab";
 
@@ -21,6 +21,10 @@ function renderTab(props: Partial<MapSettingsSessionTabProps> = {}) {
     </MantineProvider>,
   );
 }
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
