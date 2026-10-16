@@ -222,12 +222,71 @@ describe("useJoinSession", () => {
         await vi.advanceTimersByTimeAsync(0);
       });
 
+      // The late failure's specific copy replaces the timeout copy; tracking stays at one event.
       expect(mockTrack).toHaveBeenCalledTimes(1);
+      expect(result.current.error).toBe("No session found for that code.");
+      expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it("enters the joined session when the late join succeeds, clearing the timeout error", async () => {
+      vi.useFakeTimers();
+      const session = createTestRemoteSession({ code: "ABCD" });
+      let resolveJoin!: (value: { status: "joined"; session: typeof session }) => void;
+      mockJoinRemoteSessionByCode.mockReturnValue(
+        new Promise<{ status: "joined"; session: typeof session }>((resolve) => {
+          resolveJoin = resolve;
+        }),
+      );
+
+      const { result } = renderHook(() =>
+        useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+      );
+
+      await act(async () => {
+        result.current.runJoin(joinValues);
+        await vi.advanceTimersByTimeAsync(15_000);
+      });
+
       expect(result.current.error).toBe(
         "Couldn't verify the session. Check your connection and try again.",
       );
-      expect(navigate).not.toHaveBeenCalled();
+
+      await act(async () => {
+        resolveJoin({ status: "joined", session });
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(setSession).toHaveBeenCalledWith(session, "u1");
+      expect(navigate).toHaveBeenCalledWith("/map");
+      expect(result.current.error).toBeNull();
+      expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
+        ["join_failed", { role: "seeker", reason: "timeout" }],
+      ]);
     });
+  });
+
+  it("shows an error thrown after a successful join is claimed, without tracking join_failed", async () => {
+    mockJoinRemoteSessionByCode.mockResolvedValue({
+      status: "joined",
+      session: createTestRemoteSession({ code: "ABCD" }),
+    });
+    setSession.mockImplementationOnce(() => {
+      throw new Error("Couldn't save the session locally.");
+    });
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("Couldn't save the session locally.");
+    });
+    expect(navigate).not.toHaveBeenCalled();
+    expect(mockTrack).not.toHaveBeenCalledWith("join_failed", expect.anything());
   });
 
   it("tracks join_failed with reason other when the hider role is not confirmed", async () => {

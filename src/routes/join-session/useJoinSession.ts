@@ -321,23 +321,23 @@ export function useJoinSession({
     navigate("/map");
   };
 
-  const failJoin = (message: string, role: PlayerRole, reason: JoinFailureReason) => {
-    setError(message);
+  const trackJoinFailed = (role: PlayerRole, reason: JoinFailureReason) => {
     track(ANALYTICS_EVENTS.join_failed, { role, reason });
   };
 
   const runJoin = (values: JoinSessionFormValues) =>
     void runLocked(async () => {
       const normalized = values.code;
-      // Per-submit: once settled (failed by the client timeout, or a late result already
-      // reported), later results from the still-running inner call must not emit or navigate.
+      // Per-submit: `settled` gates only the join_failed track call, so each submit emits at most
+      // one join_failed. The user-visible error is always shown.
       let settled = false;
       const fail = (message: string, role: PlayerRole, reason: JoinFailureReason) => {
+        setError(message);
         if (settled) {
           return;
         }
         settled = true;
-        failJoin(message, role, reason);
+        trackJoinFailed(role, reason);
       };
       if (
         !values.rolePasscode &&
@@ -415,10 +415,10 @@ export function useJoinSession({
                 joinedSession = confirmed;
               }
 
-              if (settled) {
-                return;
-              }
+              // A late success after the client timeout still enters the session: the server
+              // already joined the player. Clear the timeout copy before navigating.
               settled = true;
+              setError(null);
               await enterJoinedSession(
                 joinedSession,
                 user.uid,
