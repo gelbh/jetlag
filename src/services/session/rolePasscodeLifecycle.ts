@@ -255,6 +255,9 @@ export async function resolveRoleJoinRequest(
 
 const CLIENT_UPDATE_REQUIRED_COPY = "Update the app to continue. Refresh to load the latest build.";
 
+/** Player copy when an occupied side is joined without its role code. */
+export const ROLE_CODE_REQUIRED_COPY = "Enter the role code for that side.";
+
 function isClientUpdateRequiredMessage(message: string): boolean {
   return message.includes("Client update required.");
 }
@@ -269,7 +272,7 @@ export function mapRolePasscodeJoinError(error: unknown): string {
     return "Wrong role code. Ask your team for the current code.";
   }
   if (message.includes("Role code is required")) {
-    return "Enter the role code for that side.";
+    return ROLE_CODE_REQUIRED_COPY;
   }
   if (message.includes("App version incompatible")) {
     return "Update the app to join this session.";

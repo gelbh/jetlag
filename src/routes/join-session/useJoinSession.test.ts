@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "@/domain/session/join/joinPreviewGameArea";
 import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
 
@@ -207,6 +208,93 @@ describe("useJoinSession", () => {
       expect(mockCancelRoleJoinRequest).toHaveBeenCalledWith("sess-1", "req-1");
       expect(result.current.pendingRequest).toBeNull();
       expect(result.current.error).toBe("Join request cancelled.");
+    });
+  });
+
+  it("blocks a blank role code when the chosen side is occupied", async () => {
+    mockUseJoinSessionPreview.mockReturnValue({
+      previewSession: createTestRemoteSession({
+        code: "ABCD",
+        id: "sess-1",
+        memberRoles: { leader: "seeker" },
+      }),
+      previewPremium: false,
+      lookupLoading: false,
+      existingRole: null,
+    } as never);
+    mockJoinRemoteSessionByCode.mockResolvedValue({
+      status: "joined",
+      session: createTestRemoteSession({ code: "ABCD" }),
+    });
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("Enter the role code for that side.");
+    });
+    expect(mockJoinRemoteSessionByCode).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("lets a blank role code through when occupancy is unknown", async () => {
+    const session = createTestRemoteSession({ code: "ABCD" });
+    mockUseJoinSessionPreview.mockReturnValue({
+      previewSession: createTestRemoteSession({
+        code: "ABCD",
+        gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
+        memberRoles: {},
+      }),
+      previewPremium: false,
+      lookupLoading: false,
+      existingRole: null,
+    } as never);
+    mockJoinRemoteSessionByCode.mockResolvedValue({ status: "joined", session });
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    expect(result.current.rolePasscodeOccupancyKnown).toBe(false);
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith("/map");
+    });
+    expect(mockJoinRemoteSessionByCode).toHaveBeenCalledOnce();
+  });
+
+  it("lets a returning member on the same side through without a code", async () => {
+    const session = createTestRemoteSession({ code: "ABCD" });
+    mockUseJoinSessionPreview.mockReturnValue({
+      previewSession: createTestRemoteSession({
+        code: "ABCD",
+        memberRoles: { leader: "seeker", "auth-uid": "seeker" },
+      }),
+      previewPremium: false,
+      lookupLoading: false,
+      existingRole: "seeker",
+    } as never);
+    mockJoinRemoteSessionByCode.mockResolvedValue({ status: "joined", session });
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith("/map");
     });
   });
 });

@@ -92,6 +92,7 @@ export function JoinSession() {
     previewPremium,
     lookupLoading,
     needsRolePasscode,
+    rolePasscodeOccupancyKnown,
     canRequestAccess,
     error,
     loading,
@@ -293,7 +294,9 @@ export function JoinSession() {
                   <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
                     {playerRole === "observer"
                       ? "Ask the host for the observer code."
-                      : "Leave blank if you're first on that side; otherwise ask a teammate for the role code."}
+                      : rolePasscodeOccupancyKnown
+                        ? "Ask a teammate on that side for the role code."
+                        : "Leave blank if you're first on that side; otherwise ask a teammate for the role code."}
                   </Text>
                 </Stack>
               ) : null}
@@ -303,7 +306,7 @@ export function JoinSession() {
                   type="submit"
                   fullWidth
                   busy={joinBusy}
-                  unavailable={requestBusy}
+                  unavailable={requestBusy || lookupLoading}
                   idleLabel="Join session"
                   busyLabel="Joining…"
                   styles={filledStyles}

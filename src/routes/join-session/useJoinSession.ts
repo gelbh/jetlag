@@ -11,7 +11,10 @@ import {
   type RoleJoinRequest,
 } from "@/domain/session/players/joinRequest";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { joinRequiresRolePasscode } from "@/domain/session/players/roleGates";
+import {
+  isRolePasscodeRequired,
+  joinRequiresRolePasscode,
+} from "@/domain/session/players/roleGates";
 import { useSubmitLock } from "@/hooks/forms/useSubmitLock";
 import { useAppNavigate } from "@/hooks/navigation/useAppNavigate";
 import { useJoinSessionPreview } from "@/hooks/session/useJoinSessionPreview";
@@ -32,6 +35,7 @@ import { listenOwnJoinRequest } from "@/services/session/joinRequestListen";
 import {
   cancelRoleJoinRequest,
   mapJoinRequestError,
+  ROLE_CODE_REQUIRED_COPY,
   requestRoleJoin,
 } from "@/services/session/rolePasscodeLifecycle";
 import { useSessionStore } from "@/state/sessionStore";
@@ -133,13 +137,16 @@ export function useJoinSession({
   const { previewSession, previewPremium, lookupLoading, existingRole } =
     useJoinSessionPreview(code);
 
+  const rolePasscodeOccupancyKnown = Boolean(
+    previewSession && !isPlaceholderGameArea(previewSession.gameArea),
+  );
   const needsRolePasscode = Boolean(
     previewSession &&
       joinRequiresRolePasscode(
         previewSession.memberRoles,
         playerRole,
         myUid ?? undefined,
-        !isPlaceholderGameArea(previewSession.gameArea),
+        rolePasscodeOccupancyKnown,
       ),
   );
   const canRequestAccess =
@@ -316,6 +323,14 @@ export function useJoinSession({
   const runJoin = (values: JoinSessionFormValues) =>
     void runLocked(async () => {
       const normalized = values.code;
+      if (
+        !values.rolePasscode &&
+        existingRole !== values.playerRole &&
+        isRolePasscodeRequired(previewSession, values.playerRole, myUid ?? undefined)
+      ) {
+        setError(ROLE_CODE_REQUIRED_COPY);
+        return;
+      }
       setLoading(true);
       setError(null);
 
@@ -442,6 +457,7 @@ export function useJoinSession({
     lookupLoading,
     existingRole,
     needsRolePasscode,
+    rolePasscodeOccupancyKnown,
     canRequestAccess,
     error,
     setError,
