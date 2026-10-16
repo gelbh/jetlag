@@ -22,12 +22,6 @@ export function truthUnavailable(reason = UNAVAILABLE_GENERIC): HiderTruthResult
   };
 }
 
-export function truthUnavailableForReference(
-  mode: "noHidingZone" | "unavailable",
-): HiderTruthResult {
-  return truthUnavailable(mode === "noHidingZone" ? UNAVAILABLE_NO_ZONE : UNAVAILABLE_NO_ANCHOR);
-}
-
 export function resultFromReplyId(
   pending: PendingQuestionRecord,
   replyId: string,

@@ -7,7 +7,7 @@ import {
   type ResolveHiderTruthReferenceInput,
   resolveHiderTruthReference,
 } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
-import { truthUnavailableForReference } from "../../domain/questions/hiderTruth/shared";
+import { truthUnavailable, UNAVAILABLE_NO_ANCHOR } from "../../domain/questions/hiderTruth/shared";
 import { computeHiderTruthReplyAsync, type HiderTruthResult } from "../../domain/questions/ui";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useLatestRequest } from "../forms/useLatestRequest";
@@ -87,9 +87,11 @@ export function useHiderQuestionTruths(
       const entries = await Promise.all(
         open.map(async (question) => {
           const truth =
-            reference.mode === "noHidingZone" || reference.mode === "unavailable"
-              ? truthUnavailableForReference(reference.mode)
-              : await computeHiderTruthReplyAsync(question, reference.point, gameArea);
+            reference.mode === "noHidingZone"
+              ? null
+              : reference.mode === "unavailable"
+                ? truthUnavailable(UNAVAILABLE_NO_ANCHOR)
+                : await computeHiderTruthReplyAsync(question, reference.point, gameArea);
           return [question.id, truth] as const;
         }),
       );
