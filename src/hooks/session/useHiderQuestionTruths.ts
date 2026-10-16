@@ -3,9 +3,9 @@ import type { GameArea } from "../../domain/map/annotations";
 import { buildHiderTruthFetchKey } from "../../domain/questions/hiderTruth/hiderTruthFetchKey";
 import { reuseHiderTruthMapIfEqual } from "../../domain/questions/hiderTruth/hiderTruthMapReuse";
 import {
-  type HiderQuestionTruthContextInput,
   type HiderTruthReferenceMode,
-  resolvePendingQuestionTruthReference,
+  type ResolveHiderTruthReferenceInput,
+  resolveHiderTruthReference,
 } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import { truthUnavailableForReference } from "../../domain/questions/hiderTruth/shared";
 import { computeHiderTruthReplyAsync, type HiderTruthResult } from "../../domain/questions/ui";
@@ -21,11 +21,9 @@ function openPendingQuestions(
   return pendingQuestions.filter((question) => question.status === "pending");
 }
 
-export type HiderQuestionTruthContext = HiderQuestionTruthContextInput;
-
 export function useHiderQuestionTruths(
   pendingQuestions: readonly PendingQuestionRecord[],
-  truthContext: HiderQuestionTruthContext | null,
+  truthContext: ResolveHiderTruthReferenceInput | null,
   gameArea?: GameArea,
   options?: {
     truthReferenceReady?: boolean;
@@ -64,9 +62,10 @@ export function useHiderQuestionTruths(
     if (!truthReferenceReady || !truthContext || openQuestions.length === 0) {
       return EMPTY_MODES;
     }
+    const { mode } = resolveHiderTruthReference(truthContext);
     const modes = new Map<string, HiderTruthReferenceMode>();
     for (const question of openQuestions) {
-      modes.set(question.id, resolvePendingQuestionTruthReference(question, truthContext).mode);
+      modes.set(question.id, mode);
     }
     return modes;
   }, [openQuestions, truthContext, truthReferenceReady]);
@@ -82,11 +81,11 @@ export function useHiderQuestionTruths(
     }
 
     const requestId = beginRequest();
+    const reference = resolveHiderTruthReference(context);
 
     void (async () => {
       const entries = await Promise.all(
         open.map(async (question) => {
-          const reference = resolvePendingQuestionTruthReference(question, context);
           const truth =
             reference.mode === "noHidingZone" || reference.mode === "unavailable"
               ? truthUnavailableForReference(reference.mode)

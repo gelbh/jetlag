@@ -45,7 +45,7 @@ import {
 } from "../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
-import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
+import { resolveHiderTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
 import {
   pickRandomizeOption,
   randomizedQuestionNotice,
@@ -416,7 +416,7 @@ export function HiderMapScreen() {
 
         try {
           const answerTruthReference = truthContext
-            ? resolvePendingQuestionTruthReference(pending, truthContext)
+            ? resolveHiderTruthReference(truthContext)
             : { point: null as LatLngTuple | null };
           const truth = await computeHiderTruthReplyAsync(
             pending,

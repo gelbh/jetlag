@@ -1,6 +1,5 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { isEndGameActive, type SessionRecord } from "../../map/annotations";
-import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export type { EndGameTruthAnchor } from "../../session/hiding/endGameTruthAnchors";
 
@@ -34,16 +33,7 @@ function isUsablePoint(point: LatLngTuple | null | undefined): point is LatLngTu
   return point != null && isUsableLatLng(point[0], point[1]);
 }
 
-export type HiderQuestionTruthContextInput = ResolveHiderTruthReferenceInput;
-
-/** Per-question truth reference: zone center before end game (noHidingZone without one), frozen anchor during it. */
-export function resolvePendingQuestionTruthReference(
-  _question: PendingQuestionRecord,
-  context: HiderQuestionTruthContextInput,
-): HiderTruthReference {
-  return resolveHiderTruthReference(context);
-}
-
+/** Zone center before end game (noHidingZone without one), frozen anchor during it. */
 export function resolveHiderTruthReference({
   hiderUid,
   zoneCenter,

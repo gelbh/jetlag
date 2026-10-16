@@ -1,6 +1,6 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import type { HiderQuestionTruthContextInput } from "./resolveHiderTruthReference";
+import type { ResolveHiderTruthReferenceInput } from "./resolveHiderTruthReference";
 
 function pointKey(point: LatLngTuple | null | undefined): string {
   return point ? point.join(",") : "none";
@@ -39,7 +39,7 @@ function openQuestionsContentKey(openQuestions: readonly PendingQuestionRecord[]
 
 export function buildHiderTruthFetchKey(
   openQuestions: readonly PendingQuestionRecord[],
-  context: HiderQuestionTruthContextInput,
+  context: ResolveHiderTruthReferenceInput,
 ): string {
   return [
     openQuestionsContentKey(openQuestions),

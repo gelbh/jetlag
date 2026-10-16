@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { milesToMeters } from "../../map/distance";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { buildHiderTruthFetchKey } from "./hiderTruthFetchKey";
-import type { HiderQuestionTruthContextInput } from "./resolveHiderTruthReference";
+import type { ResolveHiderTruthReferenceInput } from "./resolveHiderTruthReference";
 
 const zoneCenter: [number, number] = [51.5, -0.12];
 const outsideAsk: [number, number] = [51.6, -0.12];
@@ -36,8 +36,8 @@ function radarPending(overrides: Partial<PendingQuestionRecord> = {}): PendingQu
 }
 
 function baseContext(
-  overrides: Partial<HiderQuestionTruthContextInput> = {},
-): HiderQuestionTruthContextInput {
+  overrides: Partial<ResolveHiderTruthReferenceInput> = {},
+): ResolveHiderTruthReferenceInput {
   return { hiderUid: "hider-1", zoneCenter, session: null, ...overrides };
 }
 

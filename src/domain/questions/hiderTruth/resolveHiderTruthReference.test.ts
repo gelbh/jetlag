@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import {
-  resolveHiderTruthReference,
-  resolvePendingQuestionTruthReference,
-} from "./resolveHiderTruthReference";
+import { resolveHiderTruthReference } from "./resolveHiderTruthReference";
 
 const zoneCenter: [number, number] = [51.45, -0.15];
 const endGameSession = {
@@ -44,17 +40,5 @@ describe("resolveHiderTruthReference", () => {
       session: endGameSession,
     });
     expect(result).toEqual({ point: null, mode: "unavailable" });
-  });
-});
-
-describe("resolvePendingQuestionTruthReference", () => {
-  it("ignores the question and uses the hider reference", () => {
-    const question = { id: "q-1", status: "pending" } as PendingQuestionRecord;
-    const result = resolvePendingQuestionTruthReference(question, {
-      hiderUid: "hider-1",
-      zoneCenter,
-      session: null,
-    });
-    expect(result.mode).toBe("hidingZoneCenter");
   });
 });
