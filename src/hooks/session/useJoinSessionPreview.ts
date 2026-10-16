@@ -60,7 +60,7 @@ export function useJoinSessionPreview(code: string): JoinSessionPreviewState {
     enabled,
     staleTime: JOIN_PREVIEW_TTL_MS,
     gcTime: JOIN_PREVIEW_TTL_MS,
-    // Both the auth and lookup calls retry network errors via retryAsync; a query-level retry would stack on that and double a hung wait.
+    // retryAsync already retries auth and lookup; a query retry would stack on that.
     retry: false,
   });
 

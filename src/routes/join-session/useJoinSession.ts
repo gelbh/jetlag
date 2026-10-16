@@ -334,7 +334,7 @@ export function useJoinSession({
       // Per-submit: `settled` gates only the join_failed track call, so each submit emits at most
       // one join_failed. The user-visible error is always shown.
       let settled = false;
-      // `claimed` is set once a join succeeds and the session is being entered.
+      // Set once the join succeeded: a client timeout that fires while the session is being entered must not show copy or track.
       let claimed = false;
       const fail = (message: string, role: PlayerRole, reason: JoinFailureReason) => {
         setError(message);
@@ -458,11 +458,9 @@ export function useJoinSession({
         // A timeout after the join was claimed means the timer fired while enterJoinedSession
         // was still running. The join succeeded, so show nothing and track nothing.
         if (!(claimed && isVerifyTimeout)) {
-          const reason: JoinFailureReason = settled
-            ? "other"
-            : isVerifyTimeout
-              ? "timeout"
-              : joinFailureReason(nextError);
+          const reason: JoinFailureReason = isVerifyTimeout
+            ? "timeout"
+            : joinFailureReason(nextError);
           fail(
             nextError instanceof Error ? nextError.message : "Couldn't join that session.",
             values.playerRole,

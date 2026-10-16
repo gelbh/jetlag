@@ -50,6 +50,7 @@ const MAP_EXPORT_BACKGROUND = "#0f172a";
 
 /** Bounds auth so a hung sign-in cannot leave the End button disabled forever. */
 const END_SESSION_AUTH_TIMEOUT_MS = 10_000;
+const END_SESSION_ERROR_MESSAGE = "Couldn't end the session. Try again.";
 
 const loadHtml2Canvas = () => import("html2canvas");
 
@@ -217,11 +218,11 @@ export function useMapSessionChrome({
         user = await withTimeout(
           ensureAnonymousUser(),
           END_SESSION_AUTH_TIMEOUT_MS,
-          "Couldn't end the session. Try again.",
+          END_SESSION_ERROR_MESSAGE,
         );
       } catch (error) {
         captureException(error);
-        window.alert("Couldn't end the session. Try again.");
+        window.alert(END_SESSION_ERROR_MESSAGE);
         return;
       }
 
