@@ -206,6 +206,7 @@ export function HiderMapScreen() {
     handleResetBoard,
     handleResetSession,
     handleEndSession,
+    endInFlight,
     handleLeaveSession,
   } = useMapSessionChrome({
     session,
@@ -1083,6 +1084,7 @@ export function HiderMapScreen() {
             onResetBoard: isHost ? handleResetBoard : undefined,
             onResetSession: isHost ? handleResetSession : undefined,
             onEndSession: isHost ? handleEndSession : undefined,
+            endSessionInFlight: endInFlight,
             onLeaveSession: handleLeaveSession,
             mapSettings: {
               showCurrentLocation,

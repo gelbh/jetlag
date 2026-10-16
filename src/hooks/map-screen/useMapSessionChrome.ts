@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { callableErrorMessage } from "@/domain/device/feedback/userErrors";
 import { isNeedsConnectionError } from "@/domain/device/network/needsConnectionError";
 import { commitWrite } from "@/services/firestore/commitWrite";
@@ -78,6 +78,8 @@ export function useMapSessionChrome({
   const exitSession = useSessionExit();
   const setSession = useSessionStore((state) => state.setSession);
   const resetInFlightRef = useRef(false);
+  const endInFlightRef = useRef(false);
+  const [endInFlight, setEndInFlight] = useState(false);
 
   const handleClearMap = useCallback(() => {
     if (endGameBlocked) {
@@ -201,57 +203,69 @@ export function useMapSessionChrome({
   ]);
 
   const handleEndSession = useCallback(async () => {
-    if (!session || session.id === LOCAL_SESSION_ID) {
+    if (!session || session.id === LOCAL_SESSION_ID || endInFlightRef.current) {
       return;
     }
 
-    let user: { uid: string };
-    try {
-      user = await ensureAnonymousUser();
-    } catch (error) {
-      captureException(error);
-      window.alert("Couldn't end the session. Try again.");
-      return;
-    }
+    endInFlightRef.current = true;
+    setEndInFlight(true);
 
-    // Prefer live hostUid over the isHost prop so stale host chrome cannot
-    // call the host-only end callable after a transfer.
-    if (session.hostUid !== user.uid) {
-      return;
-    }
-
-    if (!window.confirm("End this session for all players?")) {
-      return;
-    }
-
-    const sessionId = session.id;
-    try {
-      await endSession(sessionId);
-    } catch (error) {
-      if (alertIfNeedsConnection(error)) {
+    // Same shape as handleResetSession: promise .finally() instead of try/finally,
+    // which keeps the hook compatible with the React Compiler.
+    const end = async () => {
+      let user: { uid: string };
+      try {
+        user = await ensureAnonymousUser();
+      } catch (error) {
+        captureException(error);
+        window.alert("Couldn't end the session. Try again.");
         return;
       }
-      if (isExpectedSessionLeaveError(error)) {
-        trackSessionEnded("expected_already_ended");
-      } else {
-        captureException(error);
-        // Emulator / no Functions: fall back to the client end write. Not awaited —
-        // it applies locally and replays on reconnect; rejections reach WriteFailureNotifier.
-        commitWrite("session.end", () => endRemoteSession(sessionId));
-        // Counts the local end; a later rules rejection surfaces via the notifier.
-        trackSessionEnded("fallback_client_end");
+
+      // Prefer live hostUid over the isHost prop so stale host chrome cannot
+      // call the host-only end callable after a transfer.
+      if (session.hostUid !== user.uid) {
+        return;
       }
-    }
-    // Activity only — session_ended already tracked via endSession / paths above.
-    emitGameEndedActivity(sessionId, {
-      outcome: "ended_early",
-      summary: "Session ended",
-    });
-    await exitSession({
-      reason: "end",
-      sessionId,
-      replace: true,
-      closeOverlays: closeSettingsPanel,
+
+      if (!window.confirm("End this session for all players?")) {
+        return;
+      }
+
+      const sessionId = session.id;
+      try {
+        await endSession(sessionId);
+      } catch (error) {
+        if (alertIfNeedsConnection(error)) {
+          return;
+        }
+        if (isExpectedSessionLeaveError(error)) {
+          trackSessionEnded("expected_already_ended");
+        } else {
+          captureException(error);
+          // Emulator / no Functions: fall back to the client end write. Not awaited —
+          // it applies locally and replays on reconnect; rejections reach WriteFailureNotifier.
+          commitWrite("session.end", () => endRemoteSession(sessionId));
+          // Counts the local end; a later rules rejection surfaces via the notifier.
+          trackSessionEnded("fallback_client_end");
+        }
+      }
+      // Activity only — session_ended already tracked via endSession / paths above.
+      emitGameEndedActivity(sessionId, {
+        outcome: "ended_early",
+        summary: "Session ended",
+      });
+      await exitSession({
+        reason: "end",
+        sessionId,
+        replace: true,
+        closeOverlays: closeSettingsPanel,
+      });
+    };
+
+    await end().finally(() => {
+      endInFlightRef.current = false;
+      setEndInFlight(false);
     });
   }, [closeSettingsPanel, exitSession, session]);
 
@@ -405,6 +419,7 @@ export function useMapSessionChrome({
     handleResetBoard,
     handleResetSession,
     handleEndSession,
+    endInFlight,
     handleLeaveSession,
     exportMap,
   };

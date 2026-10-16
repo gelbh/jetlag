@@ -390,6 +390,53 @@ describe("useMapSessionChrome", () => {
     );
   });
 
+  it("ignores a second end while the first is in flight", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    let releaseEnd: () => void = () => undefined;
+    mockEndSession.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseEnd = () => {
+            mockTrackSessionEnded("host_end");
+            resolve();
+          };
+        }),
+    );
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: remoteSession,
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    let first: Promise<void> = Promise.resolve();
+    await act(async () => {
+      first = result.current.handleEndSession();
+      await result.current.handleEndSession();
+    });
+
+    await waitFor(() => expect(mockEndSession).toHaveBeenCalledOnce());
+    expect(result.current.endInFlight).toBe(true);
+
+    await act(async () => {
+      releaseEnd();
+      await first;
+    });
+
+    expect(mockEndSession).toHaveBeenCalledOnce();
+    expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
+    expect(window.confirm).toHaveBeenCalledOnce();
+    expect(result.current.endInFlight).toBe(false);
+  });
+
   it("tracks host_leave_ended when alone host leave ends the session", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
 

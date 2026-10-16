@@ -160,6 +160,7 @@ export type HiderMapScreenController = {
   onResetBoard?: () => void;
   onResetSession?: () => void;
   onEndSession?: () => void;
+  endSessionInFlight?: boolean;
   onLeaveSession?: () => void;
   mapSettings: {
     showCurrentLocation: boolean;
@@ -263,6 +264,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     onResetBoard,
     onResetSession,
     onEndSession,
+    endSessionInFlight,
     onLeaveSession,
     mapSettings,
     chat,
@@ -560,6 +562,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           onResetBoard,
           onResetSession: onResetSession ? () => void onResetSession() : undefined,
           onEndSession: onEndSession ? () => void onEndSession() : undefined,
+          endSessionInFlight,
           onLeaveSession: onLeaveSession ? () => void onLeaveSession() : undefined,
           expansionPackEnabled,
           onOpenCurseReference: () => {
