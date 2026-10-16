@@ -12,17 +12,26 @@ type CollectionSubscriber<T> = (
   onError: () => void,
 ) => () => void;
 
+interface LoadedFor<T> {
+  sessionId: string;
+  subscribe: CollectionSubscriber<T>;
+}
+
 /**
  * Subscribes to a Firestore collection for the session. `subscribe` is an
  * effect dependency: pass a module-level (or memoized) subscriber, or the
  * subscription is torn down and recreated on every render.
+ *
+ * `loaded` is false until the first snapshot (or error) of an enabled remote
+ * subscription; it is true when there is nothing to wait for.
  */
-export function useFirestoreCollectionSync<T>(
+export function useFirestoreCollectionSyncWithStatus<T>(
   sessionId: string | undefined,
   subscribe: CollectionSubscriber<T>,
   { enabled = true, onSyncError }: { enabled?: boolean; onSyncError?: () => void } = {},
-): T[] {
+): { items: T[]; loaded: boolean } {
   const [items, setItems] = useState<T[]>([]);
+  const [loadedFor, setLoadedFor] = useState<LoadedFor<T> | null>(null);
   const onSyncErrorRef = useRef(onSyncError);
 
   useEffect(() => {
@@ -34,22 +43,47 @@ export function useFirestoreCollectionSync<T>(
       return;
     }
 
-    const unsubscribe = subscribe(sessionId, setItems, () => {
-      const handler = onSyncErrorRef.current;
-      if (handler) {
-        handler();
-      } else {
-        setItems([]);
-      }
-    });
+    const markLoaded = () => {
+      setLoadedFor({ sessionId, subscribe });
+    };
+
+    const unsubscribe = subscribe(
+      sessionId,
+      (nextItems) => {
+        setItems(nextItems);
+        markLoaded();
+      },
+      () => {
+        const handler = onSyncErrorRef.current;
+        if (handler) {
+          handler();
+        } else {
+          setItems([]);
+        }
+        markLoaded();
+      },
+    );
 
     return () => {
       unsubscribe();
       queueMicrotask(() => {
         setItems([]);
+        setLoadedFor(null);
       });
     };
   }, [enabled, sessionId, subscribe]);
 
-  return items;
+  const waiting = enabled && isRemoteSession(sessionId);
+  const loaded =
+    !waiting || (loadedFor?.sessionId === sessionId && loadedFor.subscribe === subscribe);
+
+  return { items, loaded };
+}
+
+export function useFirestoreCollectionSync<T>(
+  sessionId: string | undefined,
+  subscribe: CollectionSubscriber<T>,
+  options: { enabled?: boolean; onSyncError?: () => void } = {},
+): T[] {
+  return useFirestoreCollectionSyncWithStatus(sessionId, subscribe, options).items;
 }

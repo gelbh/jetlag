@@ -153,6 +153,7 @@ export function HiderMapScreen() {
     canControlTimer,
     pendingQuestions,
     hidingZones,
+    hidingZonesLoaded,
     seekerLocations,
     hiderLocations,
     chatMessages: messages,
@@ -265,7 +266,7 @@ export function HiderMapScreen() {
     return { hiderUid: uid, zoneCenter: stationCenter, session };
   }, [session, stationCenter, uid]);
   useHidingZoneUidHeal(sessionId, uid, hidingZones, persistedMyUid);
-  const truthReferenceReady = authReady && uid !== null;
+  const truthReferenceReady = authReady && uid !== null && hidingZonesLoaded;
   const {
     questionTruths,
     loading: truthsLoading,

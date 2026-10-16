@@ -59,8 +59,9 @@ export function useHiderQuestionTruths(
       ? buildHiderTruthFetchKey(openQuestions, truthContext)
       : "none";
 
+  const truthReferenceReady = options?.truthReferenceReady ?? true;
   const truthReferenceModes = useMemo(() => {
-    if (!truthContext || openQuestions.length === 0) {
+    if (!truthReferenceReady || !truthContext || openQuestions.length === 0) {
       return EMPTY_MODES;
     }
     const modes = new Map<string, HiderTruthReferenceMode>();
@@ -68,8 +69,7 @@ export function useHiderQuestionTruths(
       modes.set(question.id, resolvePendingQuestionTruthReference(question, truthContext).mode);
     }
     return modes;
-  }, [openQuestions, truthContext]);
-  const truthReferenceReady = options?.truthReferenceReady ?? true;
+  }, [openQuestions, truthContext, truthReferenceReady]);
   const loading =
     openQuestions.length > 0 && (!truthReferenceReady || resolvedFetchKey !== fetchKey);
 

@@ -1,7 +1,10 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { useFirestoreCollectionSync } from "./useFirestoreCollectionSync";
+import {
+  useFirestoreCollectionSync,
+  useFirestoreCollectionSyncWithStatus,
+} from "./useFirestoreCollectionSync";
 
 vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: vi.fn(() => true),
@@ -117,5 +120,25 @@ describe("useFirestoreCollectionSync", () => {
     const { result } = renderHook(() => useFirestoreCollectionSync("remote-session", subscribe));
 
     expect(result.current).toEqual([]);
+  });
+
+  it("reports loaded only after the first snapshot", async () => {
+    let emit: ((items: string[]) => void) | undefined;
+    const subscribe = vi.fn((_sessionId: string, onData: (items: string[]) => void) => {
+      emit = onData;
+      return vi.fn();
+    });
+
+    const { result } = renderHook(() =>
+      useFirestoreCollectionSyncWithStatus("remote-session", subscribe),
+    );
+
+    expect(result.current).toEqual({ items: [], loaded: false });
+
+    act(() => {
+      emit?.(["alpha"]);
+    });
+
+    expect(result.current).toEqual({ items: ["alpha"], loaded: true });
   });
 });
