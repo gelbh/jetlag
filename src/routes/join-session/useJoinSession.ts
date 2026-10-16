@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { APP_VERSION } from "@/domain/device/changelog";
 import type { SessionRecord } from "@/domain/map/annotations";
+import { type JoinFailureReason, joinFailureReason } from "@/domain/session/join/joinFailureReason";
 import { isPlaceholderGameArea } from "@/domain/session/join/joinPreviewGameArea";
 import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
 import { sessionVersionMismatchMessage } from "@/domain/session/meta/sessionVersion";
@@ -320,6 +321,11 @@ export function useJoinSession({
     navigate("/map");
   };
 
+  const failJoin = (message: string, role: PlayerRole, reason: JoinFailureReason) => {
+    setError(message);
+    track(ANALYTICS_EVENTS.join_failed, { role, reason });
+  };
+
   const runJoin = (values: JoinSessionFormValues) =>
     void runLocked(async () => {
       const normalized = values.code;
@@ -328,7 +334,7 @@ export function useJoinSession({
         existingRole !== values.playerRole &&
         isRolePasscodeRequired(previewSession, values.playerRole, myUid ?? undefined)
       ) {
-        setError(ROLE_CODE_REQUIRED_COPY);
+        failJoin(ROLE_CODE_REQUIRED_COPY, values.playerRole, "role_code_required");
         return;
       }
       setLoading(true);
@@ -359,17 +365,25 @@ export function useJoinSession({
                 ),
               );
               if (result.status === "missing") {
-                setError("No session found for that code.");
+                failJoin("No session found for that code.", values.playerRole, "session_missing");
                 return;
               }
 
               if (result.status === "ended") {
-                setError("That session has ended. Ask the host for a new code.");
+                failJoin(
+                  "That session has ended. Ask the host for a new code.",
+                  values.playerRole,
+                  "session_ended",
+                );
                 return;
               }
 
               if (result.status === "incompatible") {
-                setError(sessionVersionMismatchMessage(result.hostVersion, APP_VERSION));
+                failJoin(
+                  sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
+                  values.playerRole,
+                  "version_mismatch",
+                );
                 return;
               }
 
@@ -377,7 +391,11 @@ export function useJoinSession({
               if (values.playerRole === "hider") {
                 const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
                 if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
-                  setError("Couldn't confirm your hider role. Wait a moment and try again.");
+                  failJoin(
+                    "Couldn't confirm your hider role. Wait a moment and try again.",
+                    values.playerRole,
+                    "other",
+                  );
                   return;
                 }
                 joinedSession = confirmed;
@@ -395,7 +413,15 @@ export function useJoinSession({
           );
         }
       } catch (nextError) {
-        setError(nextError instanceof Error ? nextError.message : "Couldn't join that session.");
+        const reason: JoinFailureReason =
+          nextError instanceof Error && nextError.message === VERIFY_SESSION_TIMEOUT_MESSAGE
+            ? "timeout"
+            : joinFailureReason(nextError);
+        failJoin(
+          nextError instanceof Error ? nextError.message : "Couldn't join that session.",
+          values.playerRole,
+          reason,
+        );
       }
       setLoading(false);
     });

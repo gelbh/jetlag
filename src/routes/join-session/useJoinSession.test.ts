@@ -12,6 +12,7 @@ const mockJoinRemoteSessionByCode = vi.fn();
 const mockRequestRoleJoin = vi.fn();
 const mockCancelRoleJoinRequest = vi.fn();
 const mockListenOwnJoinRequest = vi.fn(() => () => undefined);
+const mockTrack = vi.fn();
 const mockUseJoinSessionPreview = vi.fn(() => ({
   previewSession: null,
   previewPremium: false,
@@ -68,8 +69,8 @@ vi.mock("@/platform/copyToClipboard", () => ({
 }));
 
 vi.mock("@/services/core/analytics/analytics", () => ({
-  ANALYTICS_EVENTS: { session_joined: "session_joined" },
-  track: vi.fn(),
+  ANALYTICS_EVENTS: { session_joined: "session_joined", join_failed: "join_failed" },
+  track: (...args: unknown[]) => mockTrack(...args),
 }));
 
 vi.mock("@/services/core/auth/premiumApiContext", () => ({
@@ -101,6 +102,7 @@ describe("useJoinSession", () => {
     mockJoinRemoteSessionByCode.mockReset();
     mockRequestRoleJoin.mockReset();
     mockCancelRoleJoinRequest.mockReset();
+    mockTrack.mockClear();
     mockListenOwnJoinRequest.mockClear();
     mockListenOwnJoinRequest.mockReturnValue(() => undefined);
     mockUseJoinSessionPreview.mockReturnValue({
@@ -295,6 +297,79 @@ describe("useJoinSession", () => {
 
     await waitFor(() => {
       expect(navigate).toHaveBeenCalledWith("/map");
+    });
+  });
+
+  it("tracks join_failed with role_code_required when the server rejects a blank code", async () => {
+    mockJoinRemoteSessionByCode.mockRejectedValue(
+      new Error("Enter the role code for that side.", {
+        cause: Object.assign(new Error("Role code is required."), {
+          code: "functions/invalid-argument",
+        }),
+      }),
+    );
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("Enter the role code for that side.");
+    });
+    expect(mockTrack).toHaveBeenCalledTimes(1);
+    expect(mockTrack).toHaveBeenCalledWith("join_failed", {
+      role: "seeker",
+      reason: "role_code_required",
+    });
+  });
+
+  it("tracks join_failed once when the client blocks a blank code", async () => {
+    mockUseJoinSessionPreview.mockReturnValue({
+      previewSession: createTestRemoteSession({ code: "ABCD", memberRoles: { leader: "seeker" } }),
+      previewPremium: false,
+      lookupLoading: false,
+      existingRole: null,
+    } as never);
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("Enter the role code for that side.");
+    });
+    expect(mockTrack).toHaveBeenCalledTimes(1);
+    expect(mockTrack).toHaveBeenCalledWith("join_failed", {
+      role: "seeker",
+      reason: "role_code_required",
+    });
+  });
+
+  it("tracks session_missing for a missing session", async () => {
+    mockJoinRemoteSessionByCode.mockResolvedValue({ status: "missing" });
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("No session found for that code.");
+    });
+    expect(mockTrack).toHaveBeenCalledWith("join_failed", {
+      role: "seeker",
+      reason: "session_missing",
     });
   });
 });
