@@ -19,6 +19,41 @@ interface HiderAnswerPickerProps {
   onSetHidingZone?: () => void;
 }
 
+function HiderSetZonePrompt({
+  disabled,
+  onSetHidingZone,
+}: {
+  disabled: boolean;
+  onSetHidingZone?: () => void;
+}) {
+  return (
+    <Stack gap={8} mt={8}>
+      <Text size="xs" c={jetlagBrand.halt}>
+        Set your hiding zone to answer.
+      </Text>
+      {onSetHidingZone ? (
+        <Button
+          disabled={disabled}
+          onClick={onSetHidingZone}
+          size="md"
+          radius="sm"
+          styles={{
+            root: {
+              minHeight: "2.75rem",
+              border: `1px solid ${jetlagBrand.flag}`,
+              backgroundColor: jetlagBrand.flag,
+              color: jetlagBrand.flagInk,
+              fontWeight: 600,
+            },
+          }}
+        >
+          Set hiding zone
+        </Button>
+      ) : null}
+    </Stack>
+  );
+}
+
 export function HiderAnswerPicker({
   replyOptions,
   truth,
@@ -29,32 +64,7 @@ export function HiderAnswerPicker({
   onSetHidingZone,
 }: HiderAnswerPickerProps) {
   if (truthReferenceMode === "noHidingZone") {
-    return (
-      <Stack gap={8} mt={8}>
-        <Text size="xs" c={jetlagBrand.halt}>
-          Set your hiding zone to answer.
-        </Text>
-        {onSetHidingZone ? (
-          <Button
-            disabled={disabled}
-            onClick={onSetHidingZone}
-            size="md"
-            radius="sm"
-            styles={{
-              root: {
-                minHeight: "2.75rem",
-                border: `1px solid ${jetlagBrand.flag}`,
-                backgroundColor: jetlagBrand.flag,
-                color: jetlagBrand.flagInk,
-                fontWeight: 600,
-              },
-            }}
-          >
-            Set hiding zone
-          </Button>
-        ) : null}
-      </Stack>
-    );
+    return <HiderSetZonePrompt disabled={disabled} onSetHidingZone={onSetHidingZone} />;
   }
 
   const truthOption =
