@@ -189,7 +189,9 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       throw new Error(JOIN_SESSION_ENDED);
     }
 
-    if (!isRoleGatedSession(data)) {
+    const gated = isRoleGatedSession(data);
+    const healing = returningMemberUid != null && returningMemberUid !== uid;
+    if (!gated && !healing) {
       throw new Error(JOIN_NOT_GATED);
     }
 
@@ -198,6 +200,31 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       !sessionVersionCompatible(data, clientVersion, uid, returningMemberUid, role)
     ) {
       throw new Error(JOIN_INCOMPATIBLE_VERSION);
+    }
+
+    if (!gated) {
+      const ungatedMembership = readMembershipFields(data);
+      const ungatedHeal = buildMembershipHealState({
+        existingMemberUids: ungatedMembership.memberUids,
+        existingRoles: ungatedMembership.memberRoles,
+        existingAppVersions: ungatedMembership.memberAppVersions,
+        uid,
+        role,
+        clientVersion,
+        returningMemberUid,
+        currentHostUid: ungatedMembership.hostUid,
+      });
+      const ungatedUpdate = {
+        memberUids: ungatedHeal.memberUids,
+        memberRoles: ungatedHeal.memberRoles,
+        memberAppVersions: ungatedHeal.memberAppVersions,
+      };
+      if (ungatedHeal.nextHostUid != null) {
+        ungatedUpdate.hostUid = ungatedHeal.nextHostUid;
+      }
+      tx.update(sessionRef, ungatedUpdate);
+      result = { sessionId, rolePasscode: undefined, becameLeader: false };
+      return;
     }
 
     const membership = readMembershipFields(data);

@@ -5,6 +5,7 @@ import {
   clearClientMinVersionCache,
 } from "../session/clientMinVersion.mjs";
 import {
+  JOIN_NOT_GATED,
   JOIN_PASSCODE_REQUIRED,
   JOIN_WRONG_PASSCODE,
   joinSessionWithRoleHandler,
@@ -324,4 +325,59 @@ test("global client min rejects 0.10.8 and allows 0.11.0", async () => {
   );
   assert.equal(result.sessionId, "sess-1");
   assert.equal(sessionData.memberRoles["seeker-ok"], "seeker");
+});
+
+test("ungated returning member heal swaps uid and keeps the role", async () => {
+  const writes = [];
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host", "old-hider"],
+    memberRoles: { host: "seeker", "old-hider": "hider" },
+    memberAppVersions: { host: "0.2.0", "old-hider": "0.2.0" },
+  };
+  const db = buildMockDb({ sessionData, writes });
+
+  const result = await joinSessionWithRoleHandler(
+    db,
+    { uid: "new-hider" },
+    {
+      code: "ABCD",
+      role: "hider",
+      clientVersion: "0.2.0",
+      returningMemberUid: "old-hider",
+      persistedMyUid: "old-hider",
+    },
+  );
+
+  assert.equal(result.sessionId, "sess-1");
+  assert.equal(result.becameLeader, false);
+  assert.deepEqual([...sessionData.memberUids].sort(), ["host", "new-hider"]);
+  assert.equal(sessionData.memberRoles["new-hider"], "hider");
+  assert.equal(sessionData.memberRoles["old-hider"], undefined);
+  assert.equal(sessionData.memberRoles.host, "seeker");
+  assert.equal("roleGates" in writes[0], false);
+});
+
+test("ungated first join without heal still throws JOIN_NOT_GATED", async () => {
+  const writes = [];
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host"],
+    memberRoles: { host: "seeker" },
+  };
+  const db = buildMockDb({ sessionData, writes });
+
+  await assert.rejects(
+    joinSessionWithRoleHandler(
+      db,
+      { uid: "guest" },
+      { code: "ABCD", role: "hider", clientVersion: "0.2.0" },
+    ),
+    (error) => error.message === JOIN_NOT_GATED,
+  );
+  assert.equal(writes.length, 0);
 });
