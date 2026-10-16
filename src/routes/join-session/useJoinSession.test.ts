@@ -612,4 +612,42 @@ describe("useJoinSession", () => {
       reason: "session_missing",
     });
   });
+
+  it("tracks session_ended once when the join reports an ended session", async () => {
+    mockJoinRemoteSessionByCode.mockResolvedValue({ status: "ended" });
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("That session has ended. Ask the host for a new code.");
+    });
+    expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
+      ["join_failed", { role: "seeker", reason: "session_ended" }],
+    ]);
+  });
+
+  it("tracks version_mismatch once when the host runs an incompatible version", async () => {
+    mockJoinRemoteSessionByCode.mockResolvedValue({ status: "incompatible", hostVersion: "9.9.9" });
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toEqual(expect.stringContaining("9.9.9"));
+    });
+    expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
+      ["join_failed", { role: "seeker", reason: "version_mismatch" }],
+    ]);
+  });
 });

@@ -1281,6 +1281,25 @@ describe("AdminOpsDesk", () => {
     expect(within(row).getAllByRole("cell")[4]).toHaveTextContent("2");
   });
 
+  it("keeps the monitor pane inactive when the Monitor join fails", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [makeLiveSession()];
+    mockViewport(1440);
+    incidentState.joinSession.mockResolvedValue(false);
+
+    renderOpsDesk();
+
+    fireEvent.click(screen.getByRole("button", { name: "Monitor ABCD, Dublin" }));
+    await waitFor(() => expect(incidentState.joinSession).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(screen.getByTestId("admin-monitor-pane")).toHaveAttribute("data-active", "false");
+  });
+
   it("does not rejoin when Monitor is activated on the monitored session", async () => {
     authState.state = "admin";
     authState.authReady = true;
