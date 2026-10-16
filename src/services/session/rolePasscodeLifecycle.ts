@@ -1,16 +1,9 @@
 import { APP_VERSION } from "../../domain/device/changelog";
+import { JOIN_ERROR_MARKERS } from "../../domain/session/join/joinErrorMarkers";
 import type { JoinRequestRole } from "../../domain/session/players/joinRequest";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { callWithResilience, isCallableError } from "../core/firebase/callWithResilience";
 import { isFirebaseConfigured } from "../core/firebase/firebase";
-
-/** Server message substrings for join failures. Shared with the join_failed reason map. */
-export const JOIN_ERROR_MARKERS = {
-  wrongRoleCode: "Wrong role code",
-  roleCodeRequired: "Role code is required",
-  versionIncompatible: "App version incompatible",
-  clientUpdateRequired: "Client update required.",
-} as const;
 
 export type JoinSessionWithRoleResult = {
   sessionId: string;
