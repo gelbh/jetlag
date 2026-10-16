@@ -329,12 +329,22 @@ export function useJoinSession({
   const runJoin = (values: JoinSessionFormValues) =>
     void runLocked(async () => {
       const normalized = values.code;
+      // Per-submit: once settled (failed by the client timeout, or a late result already
+      // reported), later results from the still-running inner call must not emit or navigate.
+      let settled = false;
+      const fail = (message: string, role: PlayerRole, reason: JoinFailureReason) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        failJoin(message, role, reason);
+      };
       if (
         !values.rolePasscode &&
         existingRole !== values.playerRole &&
         isRolePasscodeRequired(previewSession, values.playerRole, myUid ?? undefined)
       ) {
-        failJoin(ROLE_CODE_REQUIRED_COPY, values.playerRole, "role_code_required");
+        fail(ROLE_CODE_REQUIRED_COPY, values.playerRole, "role_code_required");
         return;
       }
       setLoading(true);
@@ -342,7 +352,11 @@ export function useJoinSession({
 
       try {
         if (!isFirebaseConfigured()) {
-          setError("Firebase is not configured. Create a local session instead.");
+          fail(
+            "Firebase is not configured. Create a local session instead.",
+            values.playerRole,
+            "other",
+          );
         } else {
           await withTimeout(
             (async () => {
@@ -365,12 +379,12 @@ export function useJoinSession({
                 ),
               );
               if (result.status === "missing") {
-                failJoin("No session found for that code.", values.playerRole, "session_missing");
+                fail("No session found for that code.", values.playerRole, "session_missing");
                 return;
               }
 
               if (result.status === "ended") {
-                failJoin(
+                fail(
                   "That session has ended. Ask the host for a new code.",
                   values.playerRole,
                   "session_ended",
@@ -379,7 +393,7 @@ export function useJoinSession({
               }
 
               if (result.status === "incompatible") {
-                failJoin(
+                fail(
                   sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
                   values.playerRole,
                   "version_mismatch",
@@ -391,7 +405,7 @@ export function useJoinSession({
               if (values.playerRole === "hider") {
                 const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
                 if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
-                  failJoin(
+                  fail(
                     "Couldn't confirm your hider role. Wait a moment and try again.",
                     values.playerRole,
                     "other",
@@ -401,6 +415,10 @@ export function useJoinSession({
                 joinedSession = confirmed;
               }
 
+              if (settled) {
+                return;
+              }
+              settled = true;
               await enterJoinedSession(
                 joinedSession,
                 user.uid,
@@ -417,7 +435,7 @@ export function useJoinSession({
           nextError instanceof Error && nextError.message === VERIFY_SESSION_TIMEOUT_MESSAGE
             ? "timeout"
             : joinFailureReason(nextError);
-        failJoin(
+        fail(
           nextError instanceof Error ? nextError.message : "Couldn't join that session.",
           values.playerRole,
           reason,

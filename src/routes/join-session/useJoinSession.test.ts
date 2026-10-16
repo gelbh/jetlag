@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "@/domain/session/join/joinPreviewGameArea";
 import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
@@ -158,6 +158,103 @@ describe("useJoinSession", () => {
       expect(result.current.error).toMatch(/firebase is not configured/i);
     });
     expect(navigate).not.toHaveBeenCalled();
+    expect(mockTrack).toHaveBeenCalledTimes(1);
+    expect(mockTrack).toHaveBeenCalledWith("join_failed", {
+      role: "seeker",
+      reason: "other",
+    });
+  });
+
+  it("does not track join_failed on a successful join", async () => {
+    mockJoinRemoteSessionByCode.mockResolvedValue({
+      status: "joined",
+      session: createTestRemoteSession({ code: "ABCD" }),
+    });
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith("/map");
+    });
+    expect(mockTrack).not.toHaveBeenCalledWith("join_failed", expect.anything());
+  });
+
+  describe("when verification outlives the client timeout", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("emits one join_failed with reason timeout and ignores the late missing result", async () => {
+      vi.useFakeTimers();
+      let resolveJoin!: (value: { status: "missing" }) => void;
+      mockJoinRemoteSessionByCode.mockReturnValue(
+        new Promise<{ status: "missing" }>((resolve) => {
+          resolveJoin = resolve;
+        }),
+      );
+
+      const { result } = renderHook(() =>
+        useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+      );
+
+      await act(async () => {
+        result.current.runJoin(joinValues);
+        await vi.advanceTimersByTimeAsync(15_000);
+      });
+
+      expect(result.current.error).toBe(
+        "Couldn't verify the session. Check your connection and try again.",
+      );
+      expect(mockTrack).toHaveBeenCalledTimes(1);
+      expect(mockTrack).toHaveBeenCalledWith("join_failed", {
+        role: "seeker",
+        reason: "timeout",
+      });
+
+      await act(async () => {
+        resolveJoin({ status: "missing" });
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(mockTrack).toHaveBeenCalledTimes(1);
+      expect(result.current.error).toBe(
+        "Couldn't verify the session. Check your connection and try again.",
+      );
+      expect(navigate).not.toHaveBeenCalled();
+    });
+  });
+
+  it("tracks join_failed with reason other when the hider role is not confirmed", async () => {
+    mockJoinRemoteSessionByCode.mockResolvedValue({
+      status: "joined",
+      session: createTestRemoteSession({ code: "ABCD" }),
+    });
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "hider", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin({ ...joinValues, playerRole: "hider" });
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe(
+        "Couldn't confirm your hider role. Wait a moment and try again.",
+      );
+    });
+    expect(navigate).not.toHaveBeenCalled();
+    expect(mockTrack).toHaveBeenCalledTimes(1);
+    expect(mockTrack).toHaveBeenCalledWith("join_failed", {
+      role: "hider",
+      reason: "other",
+    });
   });
 
   it("requests access then cancels pending request", async () => {
