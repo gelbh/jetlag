@@ -43,7 +43,8 @@ vi.mock("../core/firebase/firebase", () => ({
   getFirebaseFunctions: async () => ({}),
 }));
 
-vi.mock("../session/rolePasscodeLifecycle", () => ({
+vi.mock("../session/rolePasscodeLifecycle", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../session/rolePasscodeLifecycle")>()),
   initSessionRoleGates: vi.fn(),
   joinSessionWithRole: vi.fn(async () => {
     throw new Error("Session uses legacy join.");

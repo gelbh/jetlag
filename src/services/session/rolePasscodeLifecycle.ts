@@ -259,12 +259,37 @@ function isClientUpdateRequiredMessage(message: string): boolean {
   return message.includes("Client update required.");
 }
 
+/**
+ * Copy `mapRolePasscodeJoinError` returns for join outcomes that callers branch
+ * on. Compare a mapped message against these, never against literal copy.
+ */
+export const JOIN_ERROR_SESSION_NOT_FOUND = "Session not found.";
+export const JOIN_ERROR_SESSION_ENDED = "Session already ended.";
+export const JOIN_ERROR_APP_VERSION_INCOMPATIBLE = "Update the app to join this session.";
+export const JOIN_ERROR_LEGACY_JOIN = "Session uses legacy join.";
+export const JOIN_ERROR_HEAL_ROLE_MISMATCH =
+  "Rejoin with the role you had before, or ask the host for help.";
+
 export function mapRolePasscodeJoinError(error: unknown): string {
   if (!(error instanceof Error)) {
     return "Couldn't join the session.";
   }
 
+  // not-found is unique to a missing session; failed-precondition is shared, so
+  // those cases also need the server message.
+  if (isCallableError(error, "not-found")) {
+    return JOIN_ERROR_SESSION_NOT_FOUND;
+  }
   const message = error.message;
+  if (message.includes("Session already ended")) {
+    return JOIN_ERROR_SESSION_ENDED;
+  }
+  if (message.includes("legacy join")) {
+    return JOIN_ERROR_LEGACY_JOIN;
+  }
+  if (message.includes("Rejoin in your previous role")) {
+    return JOIN_ERROR_HEAL_ROLE_MISMATCH;
+  }
   if (message.includes("Wrong role code")) {
     return "Wrong role code. Ask your team for the current code.";
   }
@@ -272,7 +297,7 @@ export function mapRolePasscodeJoinError(error: unknown): string {
     return "Enter the role code for that side.";
   }
   if (message.includes("App version incompatible")) {
-    return "Update the app to join this session.";
+    return JOIN_ERROR_APP_VERSION_INCOMPATIBLE;
   }
   if (isClientUpdateRequiredMessage(message)) {
     return CLIENT_UPDATE_REQUIRED_COPY;

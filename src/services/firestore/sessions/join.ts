@@ -22,6 +22,12 @@ import {
   sanitizeReturningMemberUid,
 } from "@/domain/session/players/returningMember";
 import { isSessionRoleGated } from "@/domain/session/players/roleGates";
+import {
+  JOIN_ERROR_APP_VERSION_INCOMPATIBLE,
+  JOIN_ERROR_LEGACY_JOIN,
+  JOIN_ERROR_SESSION_ENDED,
+  JOIN_ERROR_SESSION_NOT_FOUND,
+} from "@/services/session/rolePasscodeLifecycle";
 import { cancelWalkingThermometersAfterIdentityHeal } from "../firestoreSessionExtras";
 import { joinGatedRemoteSessionByCode } from "../joinGatedRemoteSession";
 import { deserializeSessionFromFirestore } from "../serialization/serializeSession";
@@ -297,6 +303,10 @@ function callJoinGatedRemoteSession(
   });
 }
 
+function isLegacyJoinError(error: unknown): boolean {
+  return error instanceof Error && error.message === JOIN_ERROR_LEGACY_JOIN;
+}
+
 /**
  * The callable throws mapped copy for ended, missing, and incompatible
  * sessions; heal callers expect the status shape the client join returned.
@@ -309,18 +319,19 @@ function healFailureFromCallableError(
   if (!(error instanceof Error)) {
     return null;
   }
-  if (error.message === "Session not found.") {
+  if (error.message === JOIN_ERROR_SESSION_NOT_FOUND) {
     return { status: "missing" };
   }
-  if (error.message === "Session already ended.") {
+  if (error.message === JOIN_ERROR_SESSION_ENDED) {
     return { status: "ended" };
   }
-  if (error.message === "Update the app to join this session.") {
+  if (error.message === JOIN_ERROR_APP_VERSION_INCOMPATIBLE) {
     return { status: "incompatible", hostVersion: codeRecord.hostAppVersion ?? clientVersion };
   }
   return null;
 }
 
+/** Resolves null when the callable says this is not a heal (old uid is not a member). */
 async function healReturningMemberViaCallable(
   code: string,
   codeRecord: SessionCodeRecord,
@@ -329,7 +340,7 @@ async function healReturningMemberViaCallable(
   clientVersion: string,
   returningMemberUid: string,
   options: JoinRemoteSessionOptions,
-): Promise<JoinRemoteSessionResult> {
+): Promise<JoinRemoteSessionResult | null> {
   let healed: JoinRemoteSessionResult;
   try {
     healed = await callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
@@ -338,6 +349,9 @@ async function healReturningMemberViaCallable(
       rolePasscode: options.rolePasscode,
     });
   } catch (error) {
+    if (isLegacyJoinError(error)) {
+      return null;
+    }
     const failure = healFailureFromCallableError(error, codeRecord, clientVersion);
     if (failure) {
       return failure;
@@ -366,7 +380,7 @@ async function joinRemoteSessionByCodeOnce(
   options: JoinRemoteSessionOptions = {},
 ): Promise<JoinRemoteSessionResult> {
   if (returningMemberUid != null && returningMemberUid !== uid) {
-    return healReturningMemberViaCallable(
+    const healed = await healReturningMemberViaCallable(
       code,
       codeRecord,
       uid,
@@ -375,6 +389,14 @@ async function joinRemoteSessionByCodeOnce(
       returningMemberUid,
       options,
     );
+    if (healed) {
+      return healed;
+    }
+    // Ungated session and the old uid already left: join as a new member.
+    return joinRemoteSessionByCodeOnce(code, codeRecord, uid, role, clientVersion, undefined, {
+      ...options,
+      returningMemberUid: undefined,
+    });
   }
 
   let sessionDoc: Awaited<ReturnType<typeof getDoc>>;
@@ -419,7 +441,7 @@ async function joinRemoteSessionByCodeOnce(
           rolePasscode: options.rolePasscode,
         });
       } catch (gatedError) {
-        if (gatedError instanceof Error && gatedError.message.includes("legacy join")) {
+        if (isLegacyJoinError(gatedError)) {
           throw legacyJoinError;
         }
         throw gatedError;
