@@ -127,6 +127,7 @@ export function useJoinSession({
   const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
   const onExistingRoleRef = useRef(onExistingRole);
+  const joinAttemptRef = useRef(0);
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -327,10 +328,14 @@ export function useJoinSession({
 
   const runJoin = (values: JoinSessionFormValues) =>
     void runLocked(async () => {
+      const attempt = ++joinAttemptRef.current;
+      const isCurrent = () => joinAttemptRef.current === attempt;
       const normalized = values.code;
       // Per-submit: `settled` gates only the join_failed track call, so each submit emits at most
       // one join_failed. The user-visible error is always shown.
       let settled = false;
+      // `claimed` is set once a join succeeds and the session is being entered.
+      let claimed = false;
       const fail = (message: string, role: PlayerRole, reason: JoinFailureReason) => {
         setError(message);
         if (settled) {
@@ -379,11 +384,17 @@ export function useJoinSession({
                 ),
               );
               if (result.status === "missing") {
+                if (!isCurrent()) {
+                  return;
+                }
                 fail("No session found for that code.", values.playerRole, "session_missing");
                 return;
               }
 
               if (result.status === "ended") {
+                if (!isCurrent()) {
+                  return;
+                }
                 fail(
                   "That session has ended. Ask the host for a new code.",
                   values.playerRole,
@@ -393,6 +404,9 @@ export function useJoinSession({
               }
 
               if (result.status === "incompatible") {
+                if (!isCurrent()) {
+                  return;
+                }
                 fail(
                   sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
                   values.playerRole,
@@ -405,6 +419,9 @@ export function useJoinSession({
               if (values.playerRole === "hider") {
                 const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
                 if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
+                  if (!isCurrent()) {
+                    return;
+                  }
                   fail(
                     "Couldn't confirm your hider role. Wait a moment and try again.",
                     values.playerRole,
@@ -416,8 +433,13 @@ export function useJoinSession({
               }
 
               // A late success after the client timeout still enters the session: the server
-              // already joined the player. Clear the timeout copy before navigating.
+              // already joined the player. Clear the timeout copy before navigating. A newer
+              // submit owns the form state, so a superseded attempt must not touch it.
+              if (!isCurrent()) {
+                return;
+              }
               settled = true;
+              claimed = true;
               setError(null);
               await enterJoinedSession(
                 joinedSession,
@@ -431,15 +453,22 @@ export function useJoinSession({
           );
         }
       } catch (nextError) {
-        const reason: JoinFailureReason =
-          nextError instanceof Error && nextError.message === VERIFY_SESSION_TIMEOUT_MESSAGE
-            ? "timeout"
-            : joinFailureReason(nextError);
-        fail(
-          nextError instanceof Error ? nextError.message : "Couldn't join that session.",
-          values.playerRole,
-          reason,
-        );
+        const isVerifyTimeout =
+          nextError instanceof Error && nextError.message === VERIFY_SESSION_TIMEOUT_MESSAGE;
+        // A timeout after the join was claimed means the timer fired while enterJoinedSession
+        // was still running. The join succeeded, so show nothing and track nothing.
+        if (!(claimed && isVerifyTimeout)) {
+          const reason: JoinFailureReason = settled
+            ? "other"
+            : isVerifyTimeout
+              ? "timeout"
+              : joinFailureReason(nextError);
+          fail(
+            nextError instanceof Error ? nextError.message : "Couldn't join that session.",
+            values.playerRole,
+            reason,
+          );
+        }
       }
       setLoading(false);
     });

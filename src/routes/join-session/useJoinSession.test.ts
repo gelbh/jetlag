@@ -64,8 +64,10 @@ vi.mock("@/services/session/joinRequestListen", () => ({
   listenOwnJoinRequest: (...args: unknown[]) => mockListenOwnJoinRequest(...(args as [])),
 }));
 
+const mockCopyToClipboard = vi.fn(async () => true);
+
 vi.mock("@/platform/copyToClipboard", () => ({
-  copyToClipboard: vi.fn(async () => true),
+  copyToClipboard: (...args: unknown[]) => mockCopyToClipboard(...(args as [])),
 }));
 
 vi.mock("@/services/core/analytics/analytics", () => ({
@@ -226,6 +228,88 @@ describe("useJoinSession", () => {
       expect(mockTrack).toHaveBeenCalledTimes(1);
       expect(result.current.error).toBe("No session found for that code.");
       expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it("ignores a late success from a superseded attempt when a newer submit has settled", async () => {
+      vi.useFakeTimers();
+      const session = createTestRemoteSession({ code: "ABCD" });
+      let resolveFirst!: (value: { status: "joined"; session: typeof session }) => void;
+      mockJoinRemoteSessionByCode
+        .mockReturnValueOnce(
+          new Promise<{ status: "joined"; session: typeof session }>((resolve) => {
+            resolveFirst = resolve;
+          }),
+        )
+        .mockResolvedValueOnce({ status: "missing" });
+
+      const { result } = renderHook(() =>
+        useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+      );
+
+      await act(async () => {
+        result.current.runJoin(joinValues);
+        await vi.advanceTimersByTimeAsync(15_000);
+      });
+
+      await act(async () => {
+        result.current.runJoin(joinValues);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(result.current.error).toBe("No session found for that code.");
+
+      await act(async () => {
+        resolveFirst({ status: "joined", session });
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(setSession).not.toHaveBeenCalled();
+      expect(navigate).not.toHaveBeenCalled();
+      expect(result.current.error).toBe("No session found for that code.");
+      expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
+        ["join_failed", { role: "seeker", reason: "timeout" }],
+        ["join_failed", { role: "seeker", reason: "session_missing" }],
+      ]);
+    });
+
+    it("does not show the timeout copy when the timer fires during enterJoinedSession", async () => {
+      vi.useFakeTimers();
+      const session = createTestRemoteSession({ code: "ABCD" });
+      mockJoinRemoteSessionByCode.mockResolvedValue({
+        status: "joined",
+        session,
+        rolePasscode: "9999",
+      });
+      let resolveCopy!: (value: boolean) => void;
+      mockCopyToClipboard.mockReturnValueOnce(
+        new Promise<boolean>((resolve) => {
+          resolveCopy = resolve;
+        }),
+      );
+      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => undefined);
+
+      const { result } = renderHook(() =>
+        useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+      );
+
+      await act(async () => {
+        result.current.runJoin(joinValues);
+        await vi.advanceTimersByTimeAsync(15_000);
+      });
+
+      expect(result.current.error).toBeNull();
+      expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([]);
+
+      await act(async () => {
+        resolveCopy(true);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(setSession).toHaveBeenCalledWith(session, "u1");
+      expect(navigate).toHaveBeenCalledWith("/map");
+      expect(result.current.error).toBeNull();
+      expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([]);
+      alertSpy.mockRestore();
     });
 
     it("enters the joined session when the late join succeeds, clearing the timeout error", async () => {
