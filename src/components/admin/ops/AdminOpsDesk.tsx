@@ -272,7 +272,7 @@ function AdminOpsDeskContent() {
 
   const handleMonitor = (summary: AdminSessionSummary) => {
     setSelectedSessionId(summary.sessionId);
-    // Rejoining the open course remounts the embedded map; skip it.
+    // Rejoining the monitored session remounts the embedded map; skip it.
     if (monitorActive && monitorSessionId === summary.sessionId) {
       return;
     }
