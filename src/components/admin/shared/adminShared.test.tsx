@@ -1,6 +1,8 @@
 import { Alert, Badge, Button, Divider, Drawer, Select } from "@mantine/core";
-import { screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { AdminConfirm } from "@/components/admin/shared/AdminConfirm";
 import { AdminDiagRow } from "@/components/admin/shared/AdminDiagRow";
 import { AdminRegion } from "@/components/admin/shared/AdminRegion";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
@@ -328,5 +330,75 @@ describe("admin shared primitives", () => {
     );
     const option = await screen.findByRole("option", { name: "Created" });
     expect(option.closest("[data-admin-world]")).not.toBeNull();
+  });
+});
+
+describe("AdminConfirm", () => {
+  function renderConfirm(overrides: Partial<ComponentProps<typeof AdminConfirm>> = {}) {
+    const props = {
+      opened: true,
+      title: "Start the end game?",
+      consequence: "Start the end game for ABCD now?",
+      confirmLabel: "Start end game",
+      destructive: true,
+      onConfirm: vi.fn().mockResolvedValue(undefined),
+      onClose: vi.fn(),
+      ...overrides,
+    };
+    renderWithAppUi(
+      <AdminWorld>
+        <AdminConfirm {...props} />
+      </AdminWorld>,
+    );
+    return props;
+  }
+
+  it("calls onConfirm then onClose when confirmed", async () => {
+    const props = renderConfirm();
+    expect(screen.getByText(props.consequence)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Start end game" }));
+    await waitFor(() => expect(props.onClose).toHaveBeenCalledTimes(1));
+    expect(props.onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it("Cancel closes without confirming", () => {
+    const props = renderConfirm();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(props.onClose).toHaveBeenCalledTimes(1);
+    expect(props.onConfirm).not.toHaveBeenCalled();
+  });
+
+  it("keeps the modal open and shows the error when onConfirm throws", async () => {
+    const props = renderConfirm({
+      onConfirm: vi.fn().mockRejectedValue(new Error("Session already ended.")),
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Start end game" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Session already ended.");
+    expect(props.onClose).not.toHaveBeenCalled();
+  });
+
+  it("fills destructive admin buttons with the mispunch token", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Button color="red">Stop</Button>
+      </AdminWorld>,
+    );
+    const button = screen.getByRole("button", { name: "Stop" });
+    expect(button.style.getPropertyValue("--button-bg")).toBe("var(--adm-mispunch)");
+    expect(button.style.getPropertyValue("--button-color")).toBe("var(--adm-paper)");
+  });
+
+  it("renders outside the admin world without admin tokens", () => {
+    renderWithAppUi(
+      <AdminConfirm
+        opened
+        title="Reset board?"
+        consequence="Clear the board for ABCD?"
+        confirmLabel="Reset board"
+        onConfirm={vi.fn().mockResolvedValue(undefined)}
+        onClose={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Reset board" })).toBeInTheDocument();
   });
 });

@@ -113,6 +113,17 @@ export const adminTheme: MantineThemeOverride = {
     Button: Button.extend({
       defaultProps: { radius: 0 },
       vars: (_theme, props) => {
+        if (props.color === "red" && (props.variant ?? "filled") === "filled") {
+          return {
+            root: {
+              "--button-bg": "var(--adm-mispunch)",
+              "--button-hover": "color-mix(in oklch, var(--adm-mispunch) 86%, var(--adm-ink))",
+              "--button-color": "var(--adm-paper)",
+              "--button-hover-color": "var(--adm-paper)",
+              "--button-bd": "1px solid transparent",
+            },
+          };
+        }
         const colors = props.color ? null : controlColors(props.variant);
         if (!colors) return { root: {} };
         return {
