@@ -6,6 +6,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
 import type { PreloadRequest } from "../../../domain/preloadRequest/preloadRequestTypes";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
+import { useSessionStore } from "../../../state/sessionStore";
+import { createTestRemoteSession } from "../../../test/fixtures/sessions";
 import { renderWithRouter } from "../../../test/renderWithRouter";
 import { jetlagTheme } from "../../../theme/theme";
 import { AdminOpsDesk } from "./AdminOpsDesk";
@@ -249,6 +251,12 @@ vi.mock("../../../hooks/admin/useAdminJoinSession", () => ({
   }),
 }));
 
+vi.mock("../monitor/AdminMonitorPane", () => ({
+  AdminMonitorPane: ({ active }: { active: boolean }) => (
+    <div data-testid="admin-monitor-pane" data-active={active ? "true" : "false"} />
+  ),
+}));
+
 describe("AdminOpsDesk", () => {
   const originalMatchMedia = window.matchMedia;
 
@@ -271,6 +279,7 @@ describe("AdminOpsDesk", () => {
     incidentState.byId = null;
     incidentState.subscribeIncident.mockReset();
     incidentState.joinSession.mockReset();
+    useSessionStore.getState().setSession(null, null);
   });
 
   it("shows skeleton rows while auth is loading", () => {
@@ -1270,6 +1279,43 @@ describe("AdminOpsDesk", () => {
       .getByRole("button", { name: "Monitor ABCD, Dublin" })
       .closest("tr") as HTMLElement;
     expect(within(row).getAllByRole("cell")[4]).toHaveTextContent("2");
+  });
+
+  it("does not rejoin when Monitor is activated on the monitored session", async () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [makeLiveSession()];
+    mockViewport(1440);
+    incidentState.joinSession.mockImplementation(
+      async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
+        useSessionStore.getState().setSession(
+          createTestRemoteSession({
+            id: summary.sessionId,
+            code: summary.code,
+            memberUids: ["admin-1"],
+            memberRoles: { "admin-1": "admin" },
+          }),
+          "admin-1",
+        );
+        return true;
+      },
+    );
+
+    renderOpsDesk();
+
+    fireEvent.click(screen.getByRole("button", { name: "Monitor ABCD, Dublin" }));
+    await waitFor(() =>
+      expect(screen.getByTestId("admin-monitor-pane")).toHaveAttribute("data-active", "true"),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Monitor ABCD, Dublin" }));
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(incidentState.joinSession).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("admin-monitor-pane")).toHaveAttribute("data-active", "true");
   });
 
   it("leaves the incident drill-in from the strip event centre link on desktop", async () => {
