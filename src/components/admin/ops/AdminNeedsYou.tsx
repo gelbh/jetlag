@@ -133,8 +133,10 @@ export function AdminNeedsYou({
       <DrillIn title={formatIncidentQueueId(selectedIncidentId)} onBack={back}>
         <AdminIncidentDetail incidentId={selectedIncidentId} />
         <AdminIncidentActions
+          key={selectedIncidentId}
           incidentId={selectedIncidentId}
           status={selectedIncident?.status ?? null}
+          sessionCode={selectedIncident?.sessionCode ?? null}
           agent={selectedIncident?.agent ?? null}
         />
       </DrillIn>
