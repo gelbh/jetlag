@@ -199,6 +199,9 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            functions/package-lock.json
       - if: ${{ needs.changes.outputs.release_pr != 'true' }}
         run: npm ci
       - if: ${{ needs.changes.outputs.release_pr != 'true' }}
