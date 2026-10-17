@@ -1,8 +1,13 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { adminModerateSession } from "../services/admin/adminModeration";
 import { createTestSession } from "../test/fixtures/sessions";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { AdminMapScreen } from "./AdminMapScreen";
+
+vi.mock("../services/admin/adminModeration", () => ({
+  adminModerateSession: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("../hooks/admin/useAdminMapWideLayout", () => ({
   useAdminMapWideLayout: vi.fn(() => false),
@@ -126,6 +131,7 @@ describe("AdminMapScreen", () => {
   beforeEach(() => {
     mockedUseObserverMapScreen.mockReturnValue(mockController());
     mockedUseAdminMapWideLayout.mockReturnValue(false);
+    vi.mocked(adminModerateSession).mockClear();
   });
 
   it("keeps phone sheets and moderation overlay in compact layout", () => {
@@ -135,6 +141,30 @@ describe("AdminMapScreen", () => {
     expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Force end" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Admin monitor rail")).not.toBeInTheDocument();
+  });
+
+  it("asks before force ending from the compact overlay", async () => {
+    const session = createTestSession({ id: "session-1" });
+    mockedUseObserverMapScreen.mockReturnValue({
+      ...mockController(),
+      session,
+      sessionRules: session,
+    });
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+    fireEvent.click(screen.getByRole("button", { name: "Force end" }));
+    expect(adminModerateSession).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByRole("button", { name: "Start end game" }));
+    await waitFor(() =>
+      expect(adminModerateSession).toHaveBeenCalledWith(expect.any(String), "end"),
+    );
+  });
+
+  it("reports moderation as failed when the session is local", async () => {
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+    fireEvent.click(screen.getByRole("button", { name: "Force end" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Start end game" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Moderation needs a live session.");
+    expect(adminModerateSession).not.toHaveBeenCalled();
   });
 
   it("renders the side rail in wide layout", () => {
