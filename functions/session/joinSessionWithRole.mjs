@@ -1,6 +1,7 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import { isAdminAuth } from "../admin/adminAccess.mjs";
 import { assertClientMeetsConfiguredMin } from "./clientMinVersion.mjs";
+import { HTTPS_MSG_SESSION_NOT_FOUND } from "./expectedSessionUxHttpsErrors.mjs";
 import {
   buildMembershipHealState,
   countMembersWithRole,
@@ -172,13 +173,13 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
 
   const codeSnap = await db.collection("sessionCodes").doc(code).get();
   if (!codeSnap.exists) {
-    throw new HttpsError("not-found", "Session not found.");
+    throw new HttpsError("not-found", HTTPS_MSG_SESSION_NOT_FOUND);
   }
 
   const codeData = codeSnap.data() ?? {};
   const sessionId = typeof codeData.sessionId === "string" ? codeData.sessionId : "";
   if (!sessionId) {
-    throw new HttpsError("not-found", "Session not found.");
+    throw new HttpsError("not-found", HTTPS_MSG_SESSION_NOT_FOUND);
   }
 
   const sessionRef = db.collection("sessions").doc(sessionId);

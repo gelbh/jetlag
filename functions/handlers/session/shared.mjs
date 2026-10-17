@@ -19,6 +19,8 @@ import {
   HTTPS_MSG_JOIN_SIDE_EMPTY,
   HTTPS_MSG_LEGACY_JOIN,
   HTTPS_MSG_ROLE_CODE_REQUIRED,
+  HTTPS_MSG_SESSION_ENDED,
+  HTTPS_MSG_SESSION_NOT_FOUND,
   HTTPS_MSG_WRONG_ROLE_CODE,
 } from "../../session/expectedSessionUxHttpsErrors.mjs";
 import {
@@ -122,10 +124,10 @@ export function mapJoinSessionWithRoleError(error) {
     throw error;
   }
   if (error.message === JOIN_SESSION_NOT_FOUND) {
-    throw new HttpsError("not-found", "Session not found.");
+    throw new HttpsError("not-found", HTTPS_MSG_SESSION_NOT_FOUND);
   }
   if (error.message === JOIN_SESSION_ENDED) {
-    throw new HttpsError("failed-precondition", "Session already ended.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_SESSION_ENDED);
   }
   if (error.message === JOIN_NOT_GATED) {
     throw new HttpsError("failed-precondition", HTTPS_MSG_LEGACY_JOIN);

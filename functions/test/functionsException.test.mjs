@@ -384,8 +384,28 @@ test("resolveDeployedFunctionName falls back to FUNCTION_TARGET", () => {
   }
 });
 
+test("isExpectedFunctionsError matches callable heal join outcomes", () => {
+  assert.equal(isExpectedFunctionsError(new HttpsError("not-found", "Session not found.")), true);
+  assert.equal(
+    isExpectedFunctionsError(new HttpsError("failed-precondition", "Session already ended.")),
+    true,
+  );
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError("failed-precondition", "Rejoin in your previous role."),
+    ),
+    true,
+  );
+  for (const key of [
+    "not-found:Session not found.",
+    "failed-precondition:Session already ended.",
+    "failed-precondition:Rejoin in your previous role.",
+  ]) {
+    assert.ok(EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS.includes(key), `missing SoT key: ${key}`);
+  }
+});
+
 test("isExpectedFunctionsError ignores unrelated HttpsErrors and plain Errors", () => {
-  assert.equal(isExpectedFunctionsError(new HttpsError("not-found", "Session not found.")), false);
   assert.equal(
     isExpectedFunctionsError(new HttpsError("permission-denied", "Session membership required.")),
     false,

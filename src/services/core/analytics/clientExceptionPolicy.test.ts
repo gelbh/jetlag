@@ -187,6 +187,9 @@ describe("classifyClientExceptionEvent", () => {
       "Invalid join request.",
       "Not allowed for this join request.",
       "Session uses legacy join.",
+      "Session not found.",
+      "Session already ended.",
+      "Rejoin in your previous role.",
     ];
     for (const message of fixtures) {
       expect(classifyClientExceptionEvent(exc("FirebaseError", message))).toBe("drop");
