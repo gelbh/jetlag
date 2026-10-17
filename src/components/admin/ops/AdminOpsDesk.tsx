@@ -259,6 +259,7 @@ function AdminOpsDeskContent() {
       if (monitorRequestRef.current !== requestId) return;
       if (!joined) {
         setSelectedSessionId((current) => (current === summary.sessionId ? null : current));
+        setMonitorSessionId((current) => (current === summary.sessionId ? null : current));
         return;
       }
       setSelectedSessionId(summary.sessionId);
@@ -271,7 +272,13 @@ function AdminOpsDeskContent() {
 
   const handleMonitor = (summary: AdminSessionSummary) => {
     setSelectedSessionId(summary.sessionId);
-    setMonitorSessionId(null);
+    // Rejoining the monitored session remounts the embedded map; skip it.
+    if (monitorActive && monitorSessionId === summary.sessionId) {
+      return;
+    }
+    if (observingCode === summary.code) {
+      return;
+    }
     void joinForMonitor(summary);
   };
 
