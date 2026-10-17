@@ -35,6 +35,7 @@ interface ChatPanelBodyProps {
   ) => Promise<void>;
   onDismissExpiredQuestion?: (pendingQuestionId: string, messageId: string) => Promise<void>;
   questionCards?: HiderQuestionCards;
+  onSetHidingZone?: () => void;
   readOnly?: boolean;
 }
 
@@ -74,6 +75,7 @@ export function ChatPanelBody({
   onAnswerQuestion,
   onDismissExpiredQuestion,
   questionCards,
+  onSetHidingZone,
   readOnly = false,
 }: ChatPanelBodyProps) {
   const [tab, setTab] = useState<"social" | "game">("game");
@@ -139,6 +141,7 @@ export function ChatPanelBody({
               onAnswerQuestion={onAnswerQuestion}
               onDismissExpiredQuestion={onDismissExpiredQuestion}
               questionCards={questionCards}
+              onSetHidingZone={onSetHidingZone}
               readOnly={readOnly}
             />
           </Box>

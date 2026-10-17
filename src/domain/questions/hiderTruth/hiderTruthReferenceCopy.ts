@@ -12,10 +12,10 @@ export function hiderTruthReferenceLoadingLabel(mode: HiderTruthReferenceMode): 
   switch (mode) {
     case "endGameFreeze":
       return "Checking end-game location…";
-    case "hidingPlace":
-      return "Checking hiding place…";
     case "hidingZoneCenter":
       return "Checking hiding-zone center…";
+    case "noHidingZone":
+      return "Checking hiding zone…";
     case "unavailable":
       return "Checking answer reference…";
     default: {
@@ -29,10 +29,10 @@ export function hiderTruthReferenceLabel(mode: HiderTruthReferenceMode): string 
   switch (mode) {
     case "endGameFreeze":
       return "At your end-game location";
-    case "hidingPlace":
-      return "At your hiding place";
     case "hidingZoneCenter":
       return "At hiding-zone center";
+    case "noHidingZone":
+      return "";
     case "unavailable":
       return "";
     default: {
@@ -46,10 +46,10 @@ export function hiderTruthReferenceMapTooltip(mode: HiderTruthReferenceMode): st
   switch (mode) {
     case "endGameFreeze":
       return "Answer reference · End-game location";
-    case "hidingPlace":
-      return "Answer reference · Hiding place";
     case "hidingZoneCenter":
       return "Answer reference · Hiding-zone center";
+    case "noHidingZone":
+      return "Answer reference";
     case "unavailable":
       return "Answer reference";
     default: {

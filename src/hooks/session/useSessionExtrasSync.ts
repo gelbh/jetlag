@@ -19,7 +19,10 @@ import {
   subscribeToSessionMessages,
 } from "../../services/firestore/firestoreSessionExtras";
 import { useSessionStore } from "../../state/sessionStore";
-import { useFirestoreCollectionSync } from "../sync/useFirestoreCollectionSync";
+import {
+  useFirestoreCollectionSync,
+  useFirestoreCollectionSyncWithStatus,
+} from "../sync/useFirestoreCollectionSync";
 
 function useSessionResetAt(): string | undefined {
   return useSessionStore((state) => state.session?.sessionResetAt);
@@ -86,12 +89,16 @@ export function useHiderLocationsSync(sessionId: string | undefined, enabled = t
 
 export function useHidingZonesSync(sessionId: string | undefined) {
   const sessionResetAt = useSessionResetAt();
-  const items = useFirestoreCollectionSync<HidingZoneRecord>(sessionId, subscribeToHidingZones);
+  const { items, loaded } = useFirestoreCollectionSyncWithStatus<HidingZoneRecord>(
+    sessionId,
+    subscribeToHidingZones,
+  );
 
-  return useMemo(
+  const zones = useMemo(
     () => filterExtrasAfterReset(items, sessionResetAt, (zone) => zone.confirmedAt),
     [items, sessionResetAt],
   );
+  return { zones, loaded };
 }
 
 export function useSessionMessagesSync(sessionId: string | undefined) {
