@@ -219,7 +219,8 @@ export function useMeasuringInteractions({
         return true;
       }
 
-      if (wizardStep !== "place" && wizardStep !== "ask") {
+      // "target" also covers a slow or failed auto-resolve; the tap re-pins the anchor.
+      if (wizardStep !== "place" && wizardStep !== "target" && wizardStep !== "ask") {
         return false;
       }
 
