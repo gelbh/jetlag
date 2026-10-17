@@ -25,6 +25,11 @@ function normalizeSessionCode(code) {
   return typeof code === "string" ? code.trim().toUpperCase() : "";
 }
 
+// A member without a stored role plays as seeker (the client resolvePlayerRole default).
+function storedMemberRole(memberRoles, memberUid) {
+  return memberRoles[memberUid] ?? "seeker";
+}
+
 function sanitizeReturningMemberUid(persistedMyUid, candidate) {
   if (
     typeof persistedMyUid !== "string" ||
@@ -97,7 +102,8 @@ function assertRolePasscodeForJoin(
   // the prior uid (auth drift). Do not require a passcode to reclaim membership.
   const alreadyInRole =
     memberRoles[uid] === role ||
-    (typeof returningMemberUid === "string" && memberRoles[returningMemberUid] === role);
+    (typeof returningMemberUid === "string" &&
+      storedMemberRole(memberRoles, returningMemberUid) === role);
   if (alreadyInRole) {
     return {
       becameLeader: false,
@@ -204,9 +210,11 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
     if (!gated && !healing) {
       throw new Error(JOIN_NOT_GATED);
     }
-    if (healing && role !== "admin" && memberRoles[healFromUid] !== role) {
+    if (healing && storedMemberRole(memberRoles, healFromUid) !== role) {
       throw new Error(JOIN_HEAL_ROLE_MISMATCH);
     }
+    // The healed uid keeps the host seat; promoting another member would hand host away.
+    const hostPatch = healing && healFromUid === hostUid ? { hostUid: uid } : {};
 
     if (
       role !== "admin" &&
@@ -215,7 +223,6 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       throw new Error(JOIN_INCOMPATIBLE_VERSION);
     }
 
-    // Neither branch writes hostUid: a heal must not move host (repairGhostHost does).
     if (!gated) {
       const ungatedHeal = buildMembershipHealState({
         existingMemberUids: memberUids,
@@ -231,6 +238,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
         memberUids: ungatedHeal.memberUids,
         memberRoles: ungatedHeal.memberRoles,
         memberAppVersions: ungatedHeal.memberAppVersions,
+        ...hostPatch,
       });
       result = { sessionId, rolePasscode: undefined, becameLeader: false };
       return;
@@ -310,6 +318,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       memberRoles: heal.memberRoles,
       memberAppVersions: heal.memberAppVersions,
       roleGates,
+      ...hostPatch,
     };
 
     tx.update(sessionRef, sessionUpdate);

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
+import { ADMIN_EMAIL_DEFAULT } from "../admin/adminAccess.mjs";
 import { mapJoinSessionWithRoleError } from "../handlers/session/shared.mjs";
 import {
   CLIENT_UPDATE_REQUIRED,
@@ -475,7 +476,7 @@ test("gated heal from a non-member uid is a normal join under passcode rules", a
   assert.equal(writes.length, 0);
 });
 
-test("ungated heal of the host seat keeps hostUid unchanged", async () => {
+test("ungated heal of the host seat moves hostUid to the healed uid", async () => {
   const writes = [];
   const sessionData = {
     status: "active",
@@ -494,13 +495,13 @@ test("ungated heal of the host seat keeps hostUid unchanged", async () => {
 
   assert.equal(result.sessionId, "sess-1");
   assert.equal(writes.length, 1);
-  assert.equal("hostUid" in writes[0], false);
-  assert.equal(sessionData.hostUid, "old-host");
+  assert.equal(writes[0].hostUid, "new-host");
+  assert.equal(sessionData.hostUid, "new-host");
   assert.deepEqual([...sessionData.memberUids].sort(), ["aaa-seeker", "new-host"]);
   assert.equal(sessionData.memberRoles["new-host"], "hider");
 });
 
-test("gated heal of the host seat keeps hostUid unchanged", async () => {
+test("gated heal of the host seat moves hostUid to the healed uid", async () => {
   const writes = [];
   const sessionData = {
     status: "active",
@@ -515,9 +516,109 @@ test("gated heal of the host seat keeps hostUid unchanged", async () => {
   await joinSessionWithRoleHandler(db, { uid: "new-host" }, healInput("hider", "old-host"));
 
   assert.equal(writes.length, 1);
-  assert.equal("hostUid" in writes[0], false);
-  assert.equal(sessionData.hostUid, "old-host");
+  assert.equal(writes[0].hostUid, "new-host");
+  assert.equal(sessionData.hostUid, "new-host");
   assert.equal(sessionData.roleGates.leaders.hider, "new-host");
+});
+
+test("heal of a non-host seat does not write hostUid", async () => {
+  const writes = [];
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host", "old-hider"],
+    memberRoles: { host: "seeker", "old-hider": "hider" },
+  };
+  const db = buildMockDb({ sessionData, writes });
+
+  await joinSessionWithRoleHandler(db, { uid: "new-hider" }, healInput("hider", "old-hider"));
+
+  assert.equal("hostUid" in writes[0], false);
+  assert.equal(sessionData.hostUid, "host");
+});
+
+test("ungated heal of an old uid without a stored role defaults to seeker", async () => {
+  const sessionData = () => ({
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host", "old-uid"],
+    memberRoles: { host: "hider" },
+  });
+
+  const seekerWrites = [];
+  const seekerSession = sessionData();
+  await joinSessionWithRoleHandler(
+    buildMockDb({ sessionData: seekerSession, writes: seekerWrites }),
+    { uid: "new-uid" },
+    healInput("seeker", "old-uid"),
+  );
+  assert.equal(seekerSession.memberRoles["new-uid"], "seeker");
+  assert.ok(!seekerSession.memberUids.includes("old-uid"));
+
+  const hiderWrites = [];
+  const hiderSession = sessionData();
+  await assert.rejects(
+    joinSessionWithRoleHandler(
+      buildMockDb({ sessionData: hiderSession, writes: hiderWrites }),
+      { uid: "new-uid" },
+      healInput("hider", "old-uid"),
+    ),
+    (error) => error.message === JOIN_HEAL_ROLE_MISMATCH,
+  );
+  assert.equal(hiderWrites.length, 0);
+});
+
+test("gated heal of an old uid without a stored role reclaims seeker without a passcode", async () => {
+  const writes = [];
+  const seekerSecret = newRoleSecret();
+  const secrets = { seeker: seekerSecret };
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host", "seeker-1", "old-uid"],
+    memberRoles: { host: "hider", "seeker-1": "seeker" },
+    roleGates: { version: 1, leaders: { hider: "host", seeker: "seeker-1" } },
+  };
+  const db = buildMockDb({ sessionData, secrets, writes });
+
+  const result = await joinSessionWithRoleHandler(
+    db,
+    { uid: "new-uid" },
+    healInput("seeker", "old-uid"),
+  );
+
+  assert.equal(result.becameLeader, false);
+  assert.equal(result.rolePasscode, undefined);
+  assert.equal(sessionData.memberRoles["new-uid"], "seeker");
+  assert.equal(sessionData.roleGates.leaders.seeker, "seeker-1");
+  assert.deepEqual(secrets, { seeker: seekerSecret });
+});
+
+test("admin heal into a seeker seat with role admin is rejected without writes", async () => {
+  const writes = [];
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host", "old-seeker"],
+    memberRoles: { host: "hider", "old-seeker": "seeker" },
+    roleGates: { version: 1, leaders: { hider: "host", seeker: "old-seeker" } },
+  };
+  const db = buildMockDb({ sessionData, secrets: { seeker: newRoleSecret() }, writes });
+  const adminAuth = {
+    uid: "new-admin",
+    token: { email: ADMIN_EMAIL_DEFAULT, email_verified: true },
+  };
+
+  await assert.rejects(
+    joinSessionWithRoleHandler(db, adminAuth, healInput("admin", "old-seeker")),
+    (error) => error.message === JOIN_HEAL_ROLE_MISMATCH,
+  );
+  assert.equal(writes.length, 0);
+  assert.deepEqual(sessionData.memberUids, ["host", "old-seeker"]);
 });
 
 test("ended ungated session rejects a heal with JOIN_SESSION_ENDED", async () => {
