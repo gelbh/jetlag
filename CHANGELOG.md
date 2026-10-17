@@ -6,6 +6,25 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.4.2 - 2026-10-17
+
+### Fixes
+
+- Join waits for the session check and tells players to ask for the role code unless they know they are first on that side
+- Ending a session for everyone sends one request even on a double tap
+- Admin Monitor no longer rejoins a session that is already open in the course pane
+
+### Improvements
+
+- Admin desk on phones has a bottom bar for the start list and Needs you, and incident details use the admin look.
+- Admin asks for confirmation before dismissing an incident, applying a mitigation, publishing a hotfix or moderating a session.
+- Hiders without a hiding zone are asked to set one before answering a question, and the hider map no longer keeps GPS on just because a question is pending.
+- Thermometer GameSize allow-check reuses the session size helper (same as radar).
+
+### Technical
+
+- Track join failures by reason in product analytics
+
 ## 1.4.1 - 2026-10-14
 
 ### Fixes
