@@ -63,3 +63,38 @@ test("triageIncidentDiagnostics returns human when errors empty", () => {
   const result = triageIncidentDiagnostics({ lastClientErrors: [] });
   assert.equal(result.outcome, TRIAGE_OUTCOME_HUMAN);
 });
+
+test("triageIncidentDiagnostics returns human when the only errors are known noise", () => {
+  const result = triageIncidentDiagnostics({
+    lastClientErrors: [
+      {
+        name: "TypeError",
+        message:
+          "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')",
+        at: "2026-10-17T15:27:38.560Z",
+      },
+    ],
+  });
+  assert.equal(result.outcome, TRIAGE_OUTCOME_HUMAN);
+  assert.equal(result.reason, "no_clear_bug_signal");
+});
+
+test("triageIncidentDiagnostics still returns agent when a real error sits beside noise", () => {
+  const result = triageIncidentDiagnostics({
+    lastClientErrors: [
+      {
+        name: "TypeError",
+        message:
+          "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')",
+        at: "2026-10-17T15:27:38.560Z",
+      },
+      {
+        name: "TypeError",
+        message: "x.map is not a function",
+        at: "2026-10-17T15:27:40.000Z",
+      },
+    ],
+  });
+  assert.equal(result.outcome, TRIAGE_OUTCOME_AGENT);
+  assert.equal(result.reason, "client_exception");
+});
