@@ -6,12 +6,14 @@ import type { MapTool } from "@/domain/map/mapToolTypes";
 import type { ThermometerSendBlockReason } from "@/domain/questions/thermometerSendBlock";
 import type { LearnRoutePath } from "@/domain/seo/learnRoutePaths";
 import type { PendingQuestionToolType } from "@/domain/session/activity/sessionChat";
+import type { JoinFailureReason } from "@/domain/session/join/joinFailureReason";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { GameSize } from "@/domain/session/size/gameSize";
 
 export const ANALYTICS_EVENTS = {
   session_created: "session_created",
   session_joined: "session_joined",
+  join_failed: "join_failed",
   session_ended: "session_ended",
   session_leave_already_left: "session_leave_already_left",
   role_selected: "role_selected",
@@ -52,6 +54,10 @@ export type AnalyticsEventProps = {
   };
   session_joined: {
     role: PlayerRole;
+  };
+  join_failed: {
+    role: PlayerRole;
+    reason: JoinFailureReason;
   };
   session_ended: {
     reason: SessionEndedReason;

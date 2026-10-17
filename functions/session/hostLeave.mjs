@@ -57,6 +57,7 @@ export async function endSessionHandler(db, uid, sessionId) {
   const sessionRef = db.collection("sessions").doc(sessionId);
   const sessionDoc = await sessionRef.get();
   assertHostSession(sessionDoc, uid);
-  await endSessionCanonical(db, sessionDoc, { gameOutcome: "ended_early" });
-  return { ok: true };
+  const applied = await endSessionCanonical(db, sessionDoc, { gameOutcome: "ended_early" });
+  // A racing end can pass the precheck and find the session ended in the transaction.
+  return { ok: true, alreadyEnded: applied === false };
 }

@@ -127,6 +127,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
     handleResetBoard,
     handleResetSession,
     handleEndSession,
+    endInFlight,
     handleLeaveSession,
     handleSaveGameRules,
     handleDistanceUnitChange,
@@ -399,6 +400,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
           onResetBoard: handleResetBoard,
           onResetSession: () => void handleResetSession(),
           onEndSession: () => void handleEndSession(),
+          endSessionInFlight: endInFlight,
           onLeaveSession: () => void handleLeaveSession(),
           expansionPackEnabled: session!.expansionPackEnabled === true,
           onReviewMapTools: () => {

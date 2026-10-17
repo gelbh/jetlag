@@ -2,6 +2,8 @@ const cache = new Map<string, { value: unknown; expiresAt: number }>();
 
 export const JOIN_PREVIEW_TTL_MS = 45_000;
 export const JOIN_PREVIEW_DEBOUNCE_MS = 300;
+/** Ends a hung preview (auth or Firestore read) so the Join button cannot stay disabled. */
+export const JOIN_PREVIEW_TIMEOUT_MS = 8_000;
 
 export function getCachedJoinPreview<T>(code: string): T | undefined {
   const entry = cache.get(code);
