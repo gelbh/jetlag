@@ -296,7 +296,7 @@ export function JoinSession() {
                       ? "Ask the host for the observer code."
                       : rolePasscodeOccupancyKnown
                         ? "Ask a teammate on that side for the role code."
-                        : "Leave blank if you're first on that side; otherwise ask a teammate for the role code."}
+                        : "If anyone is already on that side, ask them for the role code. Leave it blank only if you know you're first."}
                   </Text>
                 </Stack>
               ) : null}

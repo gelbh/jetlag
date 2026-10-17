@@ -94,10 +94,10 @@ describe("JoinSession", () => {
     renderJoin();
 
     expect(screen.getByText("Ask a teammate on that side for the role code.")).toBeInTheDocument();
-    expect(screen.queryByText(/Leave blank if you're first/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Leave it blank only if/)).not.toBeInTheDocument();
   });
 
-  it("keeps the blank-code hint when occupancy is unknown", () => {
+  it("asks for the role code first when occupancy is unknown", () => {
     previewState.value = {
       ...previewState.value,
       previewSession: createTestRemoteSession({
@@ -108,6 +108,10 @@ describe("JoinSession", () => {
 
     renderJoin();
 
-    expect(screen.getByText(/Leave blank if you're first on that side/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "If anyone is already on that side, ask them for the role code. Leave it blank only if you know you're first.",
+      ),
+    ).toBeInTheDocument();
   });
 });
