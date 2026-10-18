@@ -9,6 +9,7 @@ export const HTTPS_MSG_JOIN_EXPIRED = "Join request expired.";
 export const HTTPS_MSG_INVALID_JOIN_REQUEST = "Invalid join request.";
 export const HTTPS_MSG_JOIN_NOT_ALLOWED = "Not allowed for this join request.";
 export const HTTPS_MSG_LEGACY_JOIN = "Session uses legacy join.";
+/** Not in the allowlist below: a heal into another role can be a seat takeover attempt. */
 export const HTTPS_MSG_HEAL_ROLE_MISMATCH = "Rejoin in your previous role.";
 export const HTTPS_MSG_SESSION_NOT_FOUND = "Session not found.";
 export const HTTPS_MSG_SESSION_ENDED = "Session already ended.";
@@ -28,7 +29,6 @@ export const EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS = [
   `invalid-argument:${HTTPS_MSG_INVALID_JOIN_REQUEST}`,
   `permission-denied:${HTTPS_MSG_JOIN_NOT_ALLOWED}`,
   `failed-precondition:${HTTPS_MSG_LEGACY_JOIN}`,
-  `failed-precondition:${HTTPS_MSG_HEAL_ROLE_MISMATCH}`,
   `not-found:${HTTPS_MSG_SESSION_NOT_FOUND}`,
   `failed-precondition:${HTTPS_MSG_SESSION_ENDED}`,
 ];
