@@ -1,6 +1,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import type { HiderQuestionCards } from "../components/chat/HiderPendingQuestionAnswer";
+import { HidingZoneStationFocus } from "../components/hider/HidingZoneStationFocus";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import {
@@ -846,6 +847,7 @@ export function HiderMapScreen() {
         }}
       >
         <MapViewportTracker onViewportChange={handleMapViewportChange} />
+        {zoneTool.wizardOpen ? <HidingZoneStationFocus station={zoneTool.selectedStation} /> : null}
         <GameAreaMask gameArea={gameArea} />
         <AnnotationLayer
           annotations={annotations}
