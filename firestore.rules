@@ -1065,6 +1065,22 @@ service cloud.firestore {
           && request.resource.data.createdAt == request.time;
         allow update, delete: if false;
       }
+
+      // Heal identity proof: SHA-256 of a device-held secret. The join callable
+      // verifies it and moves it to the healed uid; clients only create their
+      // own, once. `get` must not read resource.data so a missing-proof probe works.
+      match /memberProofs/{uid} {
+        allow get: if isSignedIn() && request.auth.uid == uid;
+        allow list: if false;
+        allow create: if isSessionMember(sessionId)
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['hash', 'createdAt'])
+          && request.resource.data.keys().hasAll(['hash', 'createdAt'])
+          && request.resource.data.hash is string
+          && request.resource.data.hash.matches('^[0-9a-f]{64}$')
+          && request.resource.data.createdAt is string;
+        allow update, delete: if false;
+      }
     }
 
     match /sessionCodes/{code} {

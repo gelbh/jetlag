@@ -456,3 +456,13 @@ test("shouldSkipFunctionsException drops membership permission-denied only on le
   assert.equal(shouldSkipFunctionsException(error, "repairghosthost"), false);
   assert.equal(shouldSkipFunctionsException(error), false);
 });
+
+test("isExpectedFunctionsError reports heal proof rejections as takeover signals", () => {
+  assert.equal(
+    isExpectedFunctionsError(new HttpsError("failed-precondition", "Heal proof invalid.")),
+    false,
+  );
+  assert.ok(
+    !EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS.includes("failed-precondition:Heal proof invalid."),
+  );
+});
