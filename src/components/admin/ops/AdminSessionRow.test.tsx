@@ -97,7 +97,7 @@ describe("AdminSessionRow", () => {
     expect(other).not.toHaveAttribute("data-loading");
   });
 
-  it("keeps opaque status marks out of the monitored row's reversed ink", () => {
+  it("keeps status marks free of the monitored row's reversed ink", () => {
     renderRows(
       <AdminSessionRow
         summary={makeSummary({ isLive: false })}
@@ -114,8 +114,8 @@ describe("AdminSessionRow", () => {
     );
     for (const mark of marks) {
       expect(mark.closest("td")).not.toBeNull();
-      expect(mark.style.getPropertyValue("--badge-bg")).toContain("var(--adm-paper)");
-      expect(mark.style.getPropertyValue("--badge-bg")).not.toContain("transparent");
+      expect(mark.style.color).toMatch(/^var\(--color-/);
+      expect(mark.style.getPropertyValue("background")).toBe("");
       for (let node: HTMLElement | null = mark; node && node !== row; node = node.parentElement) {
         expect(node.style.getPropertyValue("--adm-ink")).toBe("");
       }

@@ -25,7 +25,7 @@ function renderHeader(syncStatus: SyncStatus = "synced", onLeave = vi.fn()) {
 describe("AdminCourseHeader", () => {
   it("shows the code and the course stat cells", () => {
     renderHeader();
-    expect(screen.getByText("ABCD")).toHaveStyle({ fontStretch: "125%" });
+    expect(screen.getByText("ABCD").style.letterSpacing).toBe("0.08em");
     expect(screen.getByRole("group", { name: "Clock" })).toHaveTextContent("01:05");
     expect(screen.getByRole("group", { name: "Seekers" })).toHaveTextContent("3");
     expect(screen.getByRole("group", { name: "Hiders" })).toHaveTextContent("1");

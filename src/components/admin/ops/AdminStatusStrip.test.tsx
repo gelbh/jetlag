@@ -21,7 +21,6 @@ function strip(
       liveCount={3}
       runnerCount={11}
       needsYouCount={overrides.needsYouCount ?? 2}
-      inQueueCount={7}
       incidentsLoading={overrides.incidentsLoading ?? false}
       refreshing={false}
       onRefresh={overrides.onRefresh ?? vi.fn()}
@@ -46,11 +45,12 @@ describe("AdminStatusStrip", () => {
 
   it("labels the desk as the event centre without Broadcast or Survey copy", () => {
     renderStrip();
-    expect(screen.getByText("Event centre")).toBeInTheDocument();
+    expect(screen.getByText("Admin")).toBeInTheDocument();
     expect(screen.getByLabelText("Live games")).toHaveTextContent("3");
-    expect(screen.getByLabelText("Runners")).toHaveTextContent("11");
+    expect(screen.getByLabelText("Players")).toHaveTextContent("11");
     expect(screen.getByLabelText("Needs you")).toHaveTextContent("2");
-    expect(screen.getByLabelText("In queue")).toHaveTextContent("7");
+    expect(screen.queryByLabelText("In queue")).toBeNull();
+    expect(screen.getByText("2", { selector: "span" }).style.color).toBe("var(--color-flag)");
     expect(screen.queryByText(/broadcast/i)).toBeNull();
   });
 
@@ -84,10 +84,8 @@ describe("AdminStatusStrip", () => {
       expect(control.closest(HIDDEN_ON_MOBILE)).toBeNull();
     }
     for (const detail of [
-      screen.getByText("Event centre"),
       screen.getByLabelText("Live games"),
-      screen.getByLabelText("Runners"),
-      screen.getByLabelText("In queue"),
+      screen.getByLabelText("Players"),
       document.querySelector("time"),
     ]) {
       expect(detail?.closest(HIDDEN_ON_MOBILE)).not.toBeNull();

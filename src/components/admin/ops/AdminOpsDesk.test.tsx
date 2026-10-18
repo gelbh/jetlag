@@ -1257,7 +1257,7 @@ describe("AdminOpsDesk", () => {
     renderOpsDesk();
 
     expect(screen.getByLabelText("Live games")).toHaveTextContent("2");
-    expect(screen.getByLabelText("Runners")).toHaveTextContent("7");
+    expect(screen.getByLabelText("Players")).toHaveTextContent("7");
     expect(screen.getByRole("group", { name: "Needs you" })).toHaveTextContent("1");
   });
 

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AdminConfirm } from "@/components/admin/shared/AdminConfirm";
 import { AdminDiagRow } from "@/components/admin/shared/AdminDiagRow";
 import { AdminRegion } from "@/components/admin/shared/AdminRegion";
+import { AdminSegmented } from "@/components/admin/shared/AdminSegmented";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
 import { PunchTime } from "@/components/admin/shared/PunchTime";
 import { SessionCode } from "@/components/admin/shared/SessionCode";
@@ -43,8 +44,13 @@ describe("admin shared primitives", () => {
         ))}
       </AdminWorld>,
     );
-    for (const size of ["sm", "md", "lg"]) {
-      expect(screen.getByText(`CODE-${size}`)).toHaveStyle({ fontStretch: "125%" });
+    const px = { sm: "14px", md: "16px", lg: "20px" };
+    for (const size of ["sm", "md", "lg"] as const) {
+      const { style } = screen.getByText(`CODE-${size}`);
+      expect(style.fontFamily).toBe("ui-monospace, SFMono-Regular, Menlo, monospace");
+      expect(style.fontWeight).toBe("700");
+      expect(style.letterSpacing).toBe("0.08em");
+      expect(style.fontSize).toBe(px[size]);
     }
   });
 
@@ -102,15 +108,26 @@ describe("admin shared primitives", () => {
     expect(container.querySelector("[data-admin-world]")).not.toBeNull();
   });
 
-  it("fills the live tone with ink text for contrast", () => {
+  it("draws each status tone as a dot plus word in its player token", () => {
+    const expected: Record<StatusTone, string> = {
+      live: "var(--color-signal)",
+      ok: "var(--color-trail)",
+      info: "var(--color-brand-blue)",
+      mispunch: "var(--color-status-error)",
+      neutral: "var(--color-ink-muted)",
+    };
     renderWithAppUi(
       <AdminWorld>
-        <StatusMark tone="live" label="Live" />
+        {(Object.keys(expected) as StatusTone[]).map((tone) => (
+          <StatusMark key={tone} tone={tone} label={`Mark ${tone}`} />
+        ))}
       </AdminWorld>,
     );
-    const mark = screen.getByText("Live").closest<HTMLElement>("[data-tone]");
-    expect(mark?.style.getPropertyValue("--badge-bg")).toBe("var(--adm-live)");
-    expect(mark?.style.getPropertyValue("--badge-color")).toBe("var(--adm-ink)");
+    for (const [tone, color] of Object.entries(expected)) {
+      const mark = screen.getByText(`Mark ${tone}`);
+      expect(mark.style.color).toBe(color);
+      expect(mark.querySelector('[aria-hidden="true"]')).not.toBeNull();
+    }
   });
 
   it("falls back to the neutral tone for an unknown data-tone", () => {
@@ -223,6 +240,8 @@ describe("admin shared primitives", () => {
     expect(region).toHaveAttribute("data-testid", "start-list");
     expect(screen.getByRole("heading", { name: "Start list" })).toBeVisible();
     expect(region).toHaveTextContent("3");
+    expect(region.style.borderRadius).toBe("16px");
+    expect(region.style.background).toContain("var(--color-canvas)");
     expect(screen.getByText("rows")).toBeVisible();
   });
 
@@ -345,6 +364,27 @@ describe("admin shared primitives", () => {
     );
     const option = await screen.findByRole("option", { name: "Created" });
     expect(option.closest("[data-admin-world]")).not.toBeNull();
+  });
+});
+
+describe("AdminSegmented", () => {
+  const data = [
+    { value: "live", label: "Live" },
+    { value: "triage", label: "Triage", badge: 3 },
+  ];
+
+  it("renders options with a count badge and reports a change", () => {
+    const onChange = vi.fn();
+    renderWithAppUi(
+      <AdminWorld>
+        <AdminSegmented aria-label="Desk view" value="live" onChange={onChange} data={data} />
+      </AdminWorld>,
+    );
+    expect(screen.getByRole("radiogroup", { name: "Desk view" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Live" })).toBeChecked();
+    expect(screen.getByText("3")).toBeVisible();
+    fireEvent.click(screen.getByRole("radio", { name: /Triage/ }));
+    expect(onChange).toHaveBeenCalledWith("triage");
   });
 });
 

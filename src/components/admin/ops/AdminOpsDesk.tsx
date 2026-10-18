@@ -440,7 +440,6 @@ function AdminOpsDeskContent() {
       liveCount={liveSessions.length}
       runnerCount={liveSessions.reduce((sum, row) => sum + row.memberCount, 0)}
       needsYouCount={needsYouCount}
-      inQueueCount={visibleIncidents.length}
       incidentsLoading={enabled && incidentsLoading}
       refreshing={refreshing}
       onRefresh={() => void refresh({ background: true })}
@@ -454,7 +453,7 @@ function AdminOpsDeskContent() {
   return (
     <AppShell
       mode="static"
-      header={{ height: "3.25rem", offset: false }}
+      header={{ height: "4.25rem", offset: false }}
       navbar={
         isDesktop
           ? {
