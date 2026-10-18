@@ -14,6 +14,7 @@ import {
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "@/domain/questions";
+import { createLoadTask } from "@/services/core/progress/loadTask";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "../AskHudHost";
 import { MatchingHudBody } from "./MatchingHudBody";
@@ -288,5 +289,45 @@ describe("MatchingHudBody", () => {
     expect(strip).toHaveAttribute("data-armed", "true");
     fireEvent.click(strip);
     expect(onCommit).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("MatchingHudBody load progress", () => {
+  const searchStage = {
+    kind: "fetch" as const,
+    label: "Searching map data",
+    historyKey: "test:matching-hud",
+    expectedMs: 4_000,
+  };
+
+  it("shows a progress bar with Cancel while a resolve task runs", () => {
+    const task = createLoadTask({ label: "Finding nearest museum" });
+    task.stage(searchStage).start();
+    renderMatching(
+      <MatchingHudBody
+        {...baseProps}
+        categoryId={"museum" as MatchingCategoryId}
+        categoryChosen
+        hasSeekerPoint
+        loading
+        loadTask={task}
+      />,
+    );
+    expect(screen.getByRole("progressbar", { name: "Finding nearest museum" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(task.signal.aborted).toBe(true);
+  });
+
+  it("falls back to the spinner text without a task", () => {
+    renderMatching(
+      <MatchingHudBody
+        {...baseProps}
+        categoryId={"museum" as MatchingCategoryId}
+        categoryChosen
+        hasSeekerPoint
+        loading
+      />,
+    );
+    expect(screen.queryByRole("progressbar")).toBeNull();
   });
 });

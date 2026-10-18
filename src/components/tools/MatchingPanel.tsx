@@ -1,4 +1,6 @@
 import { type RefObject } from "react";
+import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { satelliteBasemapPoiUnavailableMessage } from "@/services/geo/maplibre/previewBasemapPois";
 import { type DistanceUnit, formatDistance } from "../../domain/map/distance";
 import {
@@ -59,6 +61,10 @@ export type MatchingPanelModel = {
   nearestOutsidePlayArea: boolean;
   nullAnswer: boolean;
   loading: boolean;
+  /** Live progress for the current resolve; replaces the spinner while running. */
+  loadTask?: LoadTask | null;
+  /** Background Overpass enrich after a bundled preview. */
+  enrichTask?: LoadTask | null;
   /** Tile preview nearest while Overpass/bundle confirm runs. */
   nearestProvisional?: boolean;
   /** Street tile pick unavailable (satellite basemap). */
@@ -101,6 +107,8 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     nearestOutsidePlayArea,
     nullAnswer,
     loading,
+    loadTask = null,
+    enrichTask = null,
     nearestProvisional = false,
     satelliteBasemap = false,
     gpsLoading,
@@ -185,7 +193,11 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     : null;
 
   const loadingIndicator =
-    loadingMessage !== null ? <LoadingReadout>{loadingMessage}</LoadingReadout> : null;
+    loadingMessage !== null ? (
+      <LoadingReadout task={loadTask}>{loadingMessage}</LoadingReadout>
+    ) : enrichTask ? (
+      <LoadProgress task={enrichTask} variant="compact" />
+    ) : null;
 
   const satelliteHint =
     satelliteBasemap && !usesContainmentMatching ? (

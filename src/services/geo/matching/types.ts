@@ -5,8 +5,9 @@ import type {
   CustomMatchingAreasByLevel,
   SessionCustomCategory,
 } from "@/domain/session/catalog/sessionCustomContent";
+import type { PackThenOverpassProgress } from "../overpass/overpassLoad";
 
-export interface MatchingFetchOptions {
+export interface MatchingFetchOptions extends PackThenOverpassProgress {
   customMatchingAreas?: CustomMatchingAreasByLevel;
   customCategories?: readonly SessionCustomCategory[];
   regionPackId?: RegionPackId;

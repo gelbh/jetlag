@@ -11,6 +11,7 @@ import {
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
+import type { StageSpec } from "@/domain/progress/progressTree";
 import {
   adminLevelForMatchingCategory,
   getMatchingCategory,
@@ -26,7 +27,6 @@ import type {
   CustomMatchingAreasByLevel,
   SessionCustomCategory,
 } from "@/domain/session/catalog/sessionCustomContent";
-import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached } from "../cache";
 import {
   classifyAdminDivisionAtPoint,
@@ -39,10 +39,17 @@ import {
   landmassToMatchingFeature,
 } from "../overpass/landmassFeatures";
 import type { MeasuringPlace } from "../overpass/measuringPlaces";
+import { mergeOverpassElementPayloads } from "../overpass/overpassBboxSplit";
 import {
-  mergeOverpassElementPayloads,
-  queryOverpassWithBboxSplit,
-} from "../overpass/overpassBboxSplit";
+  cachedFetchOptions,
+  enrichInBackground,
+  type OverpassLoad,
+  overpassLoadFromFetch,
+  overpassLoadFromTask,
+  overpassSearchStage,
+  queryOverpassSplitLoaded,
+  withBundleStage,
+} from "../overpass/overpassLoad";
 import { fetchBundledMeasuringPlaces, mergeMeasuringPlaces } from "../overpass/regionPackPoi";
 import { parseMatchingFeatures } from "./parse";
 import { buildMatchingFeaturesQueryForBbox, matchingFeaturesCacheKey } from "./query";
@@ -128,30 +135,37 @@ function filterHygieneMatchingFeatures(
   );
 }
 
+const MATCHING_POINT_HISTORY_KEY = "overpass:matching-point";
+
 async function fetchOverpassMatchingFeaturesCached(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
   customCategories: readonly SessionCustomCategory[],
   options?: MatchingFetchOptions,
+  load?: OverpassLoad,
 ): Promise<MatchingFeature[]> {
   const selectors = matchingOverpassSelectorsForCategory(categoryId, customCategories);
   if (selectors.length === 0) {
+    load?.node?.finish();
     return [];
   }
 
+  const bbox = gameAreaToBoundingBox(gameArea);
   return getOrFetchCached(
     matchingFeaturesCacheKey(gameArea, categoryId, options),
-    async () => {
-      const payload = await queryOverpassWithBboxSplit(
-        (bbox) => buildMatchingFeaturesQueryForBbox(bbox, selectors),
-        gameAreaToBoundingBox(gameArea),
-        (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
+    async (context) => {
+      const payload = await queryOverpassSplitLoaded<{ elements: OverpassElement[] }>(
+        (child) => buildMatchingFeaturesQueryForBbox(child, selectors),
+        bbox,
         mergeOverpassElementPayloads,
+        overpassLoadFromFetch(context),
       );
 
       return parseMatchingFeatures(payload.elements, gameArea, categoryId, customCategories);
     },
-    { persistEmpty: false },
+    cachedFetchOptions(load, overpassSearchStage(MATCHING_POINT_HISTORY_KEY, bbox), {
+      persistEmpty: false,
+    }),
   );
 }
 
@@ -161,11 +175,18 @@ async function fetchOverpassPointMatchingFeaturesInArea(
   customCategories: readonly SessionCustomCategory[],
   options?: MatchingFetchOptions,
 ): Promise<MatchingFeature[]> {
+  const task = options?.task;
   const measuringCategory = asBundledMeasuringCategory(categoryId);
+  const searchSpec = overpassSearchStage(
+    MATCHING_POINT_HISTORY_KEY,
+    gameAreaToBoundingBox(gameArea),
+  );
   const bundledPlaces =
     measuringCategory === null
       ? []
-      : await fetchBundledMeasuringPlaces(gameArea, measuringCategory, options?.regionPackId);
+      : await withBundleStage(task, () =>
+          fetchBundledMeasuringPlaces(gameArea, measuringCategory, options?.regionPackId),
+        );
   const bundledFeatures = measuringPlacesToMatchingFeatures(bundledPlaces, gameArea);
   const pinFeatures = measuringPlacesToMatchingFeatures([...(options?.poiPins ?? [])], gameArea);
   const withPins = (features: MatchingFeature[]): MatchingFeature[] => {
@@ -173,9 +194,15 @@ async function fetchOverpassPointMatchingFeaturesInArea(
     return [...features, ...pinFeatures.filter((feature) => !seen.has(feature.id))];
   };
 
-  const mergeWithOverpass = async (): Promise<MatchingFeature[]> => {
+  const mergeWithOverpass = async (load?: OverpassLoad): Promise<MatchingFeature[]> => {
     const overpassFeatures = filterHygieneMatchingFeatures(
-      await fetchOverpassMatchingFeaturesCached(gameArea, categoryId, customCategories, options),
+      await fetchOverpassMatchingFeaturesCached(
+        gameArea,
+        categoryId,
+        customCategories,
+        options,
+        load,
+      ),
       categoryId,
     );
 
@@ -192,23 +219,20 @@ async function fetchOverpassPointMatchingFeaturesInArea(
   };
 
   if (bundledFeatures.length > 0 && options?.onEnrich) {
-    void mergeWithOverpass()
-      .then((merged) => {
-        options.onEnrich?.(merged);
-      })
-      .catch(() => {
-        // Soft-fail Overpass enrich; keep the bundle result.
-      });
+    enrichInBackground(options.createEnrichTask, searchSpec, mergeWithOverpass, (merged) => {
+      options.onEnrich?.(merged);
+    });
     return withPins(bundledFeatures);
   }
 
-  return mergeWithOverpass();
+  return mergeWithOverpass(overpassLoadFromTask(task, searchSpec));
 }
 
 async function fetchAdminMatchingFeaturesInArea(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
   customMatchingAreas?: CustomMatchingAreasByLevel,
+  load?: OverpassLoad,
 ): Promise<MatchingFeature[]> {
   const adminLevel = adminLevelForMatchingCategory(categoryId);
   if (adminLevel === null) {
@@ -217,15 +241,16 @@ async function fetchAdminMatchingFeaturesInArea(
 
   const customJson = customMatchingAreas?.[adminLevel as keyof CustomMatchingAreasByLevel];
 
-  const divisions = await fetchAdminDivisionFeaturesInArea(gameArea, adminLevel, customJson);
+  const divisions = await fetchAdminDivisionFeaturesInArea(gameArea, adminLevel, customJson, load);
   return divisions.map(adminDivisionToMatchingFeature);
 }
 
 async function fetchLandmassMatchingFeaturesInArea(
   gameArea: GameArea,
   regionPackId?: RegionPackId,
+  load?: OverpassLoad,
 ): Promise<MatchingFeature[]> {
-  const landmasses = await fetchLandmassFeaturesInArea(gameArea, regionPackId);
+  const landmasses = await fetchLandmassFeaturesInArea(gameArea, regionPackId, load);
   return landmasses.map(landmassToMatchingFeature);
 }
 
@@ -248,21 +273,24 @@ export async function fetchMatchingFeaturesInArea(
     );
   }
 
+  const stage = matchingResolverStage(resolver, gameArea);
   return getOrFetchCached(
     matchingFeaturesCacheKey(gameArea, categoryId, options),
-    async () => {
+    async (context) => {
+      const load = overpassLoadFromFetch(context);
       switch (resolver) {
         case "streetPath":
-          return fetchStreetPathFeaturesInArea(gameArea);
+          return fetchStreetPathFeaturesInArea(gameArea, load);
         case "stationNameLength":
-          return buildStationNameLengthFeatures(await fetchStationFeaturesInArea(gameArea));
+          return buildStationNameLengthFeatures(await fetchStationFeaturesInArea(gameArea, load));
         case "stationFirstLetter":
-          return buildStationFirstLetterFeatures(await fetchStationFeaturesInArea(gameArea));
+          return buildStationFirstLetterFeatures(await fetchStationFeaturesInArea(gameArea, load));
         case "letterZone": {
           const divisions = await fetchAdminDivisionFeaturesInArea(
             gameArea,
             4,
             options?.customMatchingAreas?.[4],
+            load,
           );
           return buildLetterZoneFeatures(divisions);
         }
@@ -271,19 +299,39 @@ export async function fetchMatchingFeaturesInArea(
             gameArea,
             categoryId,
             options?.customMatchingAreas,
+            load,
           );
         case "landmass":
-          return fetchLandmassMatchingFeaturesInArea(gameArea, options?.regionPackId);
+          return fetchLandmassMatchingFeaturesInArea(gameArea, options?.regionPackId, load);
         case "transitLine":
-          return fetchTransitLineMatchingFeaturesInArea(gameArea);
+          return fetchTransitLineMatchingFeaturesInArea(gameArea, load);
         default: {
           const _exhaustive: never = resolver;
           return _exhaustive;
         }
       }
     },
-    { persistEmpty: false },
+    cachedFetchOptions(overpassLoadFromTask(options?.task, stage), stage, { persistEmpty: false }),
   );
+}
+
+function matchingResolverStage(
+  resolver: Exclude<ReturnType<typeof getMatchingCategory>["resolver"], "overpassPoint">,
+  gameArea: GameArea,
+): StageSpec {
+  const bbox = gameAreaToBoundingBox(gameArea);
+  switch (resolver) {
+    case "reverseGeocodeAdmin":
+    case "letterZone":
+      return {
+        ...overpassSearchStage("overpass:admin-geom", bbox),
+        label: "Loading area boundaries",
+      };
+    case "landmass":
+      return { kind: "group", label: "Finding landmasses", historyKey: "matching:landmass" };
+    default:
+      return { ...overpassSearchStage("overpass:transit", bbox), label: "Searching transit data" };
+  }
 }
 
 export function pickMatchingFeatureForAnchor(

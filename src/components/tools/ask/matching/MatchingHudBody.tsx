@@ -32,6 +32,7 @@ import {
   filterChipStyles,
   filterChipTrackStyle,
 } from "@/components/ui/entry/entryChrome";
+import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
 import { type DistanceUnit, formatDistance } from "@/domain/map/distance";
 import {
   isMatchingCategoryAvailable,
@@ -44,6 +45,7 @@ import {
   type MatchingCategoryId,
   matchingQuestionFor,
 } from "@/domain/questions";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { matchingEmptyPlayAreaMessage, matchingFeatureCountLabel } from "@/services/geo/matching";
 import { matchingCategoryIcon } from "./matchingCategoryIcons";
 
@@ -91,6 +93,10 @@ export type MatchingHudBodyProps = {
   nearestOutsidePlayArea: boolean;
   nullAnswer: boolean;
   loading: boolean;
+  /** Live progress for the current resolve; replaces the spinner while running. */
+  loadTask?: LoadTask | null;
+  /** Background Overpass enrich after a bundled preview. */
+  enrichTask?: LoadTask | null;
   nearestProvisional?: boolean;
   gpsLoading: boolean;
   answer: MatchingAnswer | null;
@@ -121,6 +127,8 @@ export function MatchingHudBody({
   nearestOutsidePlayArea,
   nullAnswer,
   loading,
+  loadTask = null,
+  enrichTask = null,
   nearestProvisional = false,
   gpsLoading,
   answer,
@@ -311,7 +319,11 @@ export function MatchingHudBody({
             </div>
           ) : null}
           <AnchorControls gpsLoading={gpsLoading} hasAnchor={hasSeekerPoint} onUseGps={onUseGps} />
-          {loadingMessage !== null ? <LoadingReadout>{loadingMessage}</LoadingReadout> : null}
+          {loadingMessage !== null ? (
+            <LoadingReadout task={loadTask}>{loadingMessage}</LoadingReadout>
+          ) : enrichTask ? (
+            <LoadProgress task={enrichTask} variant="compact" />
+          ) : null}
           {nullAnswer && categoryId ? (
             <ResolvedReadout variant="warning">
               {matchingEmptyPlayAreaMessage(categoryId)}

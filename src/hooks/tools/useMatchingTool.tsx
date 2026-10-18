@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MatchingHudBody } from "@/components/tools/ask/matching/MatchingHudBody";
 import {
   MatchingMapPlacementChrome,
@@ -8,6 +8,8 @@ import { QuestionPreviewSheet } from "@/components/tools/shared/controls/Questio
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { canCommit as askCanCommit } from "@/domain/ask/askHudModes";
 import { poiCandidateToMatchingFeature } from "@/domain/geo/poiCandidateAdapters";
+import { isAbortError } from "@/services/core/network/anySignal";
+import { createLoadTask, type LoadTask } from "@/services/core/progress/loadTask";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import { useMapStore } from "@/state/mapStore";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
@@ -166,7 +168,9 @@ export function useMatchingTool({
     onUnavailable: selectCategory,
   });
 
-  const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
+  const { beginRequest, cancelRequests, isLatestRequest, requestSignal } = useLatestRequest();
+  const [matchingLoadTask, setMatchingLoadTask] = useState<LoadTask | null>(null);
+  const [matchingEnrichTask, setMatchingEnrichTask] = useState<LoadTask | null>(null);
   const matchingApplyPhaseRef = useRef(new Map<number, number>());
   const matchingAnswerRef = useRef(matchingAnswer);
   const matchingNearestFeatureIdRef = useRef(matchingNearestFeatureId);
@@ -328,21 +332,53 @@ export function useMatchingTool({
         }
       }
 
-      const result = await resolveMatchingAnchor({
-        seekerPoint,
-        categoryId,
-        gameArea,
-        matchingFetchOptions: {
-          ...catalog.matchingFetchOptions,
-          poiPins: [
-            ...taggedSetupPinsForCategory(sessionRules?.customLocationPins ?? [], categoryId),
-            ...poiPinsForCategory(activeAnnotationsRef.current, categoryId),
-          ],
-        },
-        onEnrich: (enriched) => {
-          applyResolveResult(requestId, enriched, 1, categoryId);
-        },
-      });
+      const signal = requestSignal();
+      const task = createLoadTask({ label: matchingTaskLabel(categoryId), signal });
+      setMatchingLoadTask(task);
+      setMatchingEnrichTask(null);
+
+      let result: Awaited<ReturnType<typeof resolveMatchingAnchor>>;
+      try {
+        result = await resolveMatchingAnchor({
+          seekerPoint,
+          categoryId,
+          gameArea,
+          matchingFetchOptions: {
+            ...catalog.matchingFetchOptions,
+            poiPins: [
+              ...taggedSetupPinsForCategory(sessionRules?.customLocationPins ?? [], categoryId),
+              ...poiPinsForCategory(activeAnnotationsRef.current, categoryId),
+            ],
+            task,
+            createEnrichTask: () => {
+              const enrichTask = createLoadTask({
+                label: "Confirming with map data",
+                signal,
+                cancellable: false,
+              });
+              if (isLatestRequest(requestId)) {
+                setMatchingEnrichTask(enrichTask);
+              }
+              return enrichTask;
+            },
+          },
+          onEnrich: (enriched) => {
+            applyResolveResult(requestId, enriched, 1, categoryId);
+          },
+        });
+        task.complete();
+      } catch (error) {
+        if (!isAbortError(error)) {
+          throw error;
+        }
+        task.cancel();
+        // A user Cancel (not a newer request) returns to the category step quietly.
+        if (isLatestRequest(requestId)) {
+          setMatchingLoading(false);
+          reopenCategoryPicker();
+        }
+        return;
+      }
 
       applyResolveResult(requestId, result, 0, categoryId);
       if (isLatestRequest(requestId)) {
@@ -355,6 +391,8 @@ export function useMatchingTool({
       catalog.matchingFetchOptions,
       gameArea,
       isLatestRequest,
+      reopenCategoryPicker,
+      requestSignal,
       sessionRules,
       setMatchingError,
       setMatchingLoading,
@@ -562,6 +600,8 @@ export function useMatchingTool({
         matchingNearestOutsidePlayArea,
         matchingNullAnswer,
         matchingLoading,
+        matchingLoadTask,
+        matchingEnrichTask,
         nearestProvisional,
         satelliteBasemap: mapStyle === "satellite",
         gpsLoading,
@@ -743,6 +783,8 @@ export function useMatchingTool({
         nearestOutsidePlayArea={matchingNearestOutsidePlayArea}
         nullAnswer={matchingNullAnswer}
         loading={matchingLoading}
+        loadTask={matchingLoadTask}
+        enrichTask={matchingEnrichTask}
         nearestProvisional={nearestProvisional}
         gpsLoading={gpsLoading}
         answer={matchingAnswer}
@@ -795,4 +837,17 @@ export function useMatchingTool({
     panel,
     hud,
   };
+}
+
+function matchingTaskLabel(categoryId: MatchingCategoryId): string {
+  const category = getMatchingCategory(categoryId);
+  const label = category.label.toLowerCase();
+  switch (category.resolver) {
+    case "reverseGeocodeAdmin":
+    case "letterZone":
+    case "landmass":
+      return `Finding ${label} at your anchor`;
+    default:
+      return `Finding nearest ${label}`;
+  }
 }
