@@ -1,14 +1,15 @@
-import { AccordionChevron, Collapse, Group, Paper, Text, UnstyledButton } from "@mantine/core";
+import { AccordionChevron, Box, Collapse, Group, Text, UnstyledButton } from "@mantine/core";
 import { type ReactNode, useId, useState } from "react";
 
 interface AdminSplitBoardProps {
   count: number;
   defaultOpen: boolean;
-  /** Narrow course: sit above the code plate at the bottom instead of the top corner. */
+  /** Narrow course: sit above the code plate at the bottom instead of the corner. */
   placement?: "top" | "bottom";
   children: ReactNode;
 }
 
+/** Comp `players`: a frosted floating panel bottom-left of the map, header then rows. */
 export function AdminSplitBoard({
   count,
   defaultOpen,
@@ -19,28 +20,46 @@ export function AdminSplitBoard({
   const bodyId = useId();
 
   return (
-    <Paper
+    <Box
       component="section"
       aria-label="Player roster"
-      pos="absolute"
-      left={12}
-      top={placement === "top" ? 12 : undefined}
-      bottom={placement === "bottom" ? 56 : undefined}
-      w="min(18rem, calc(100% - 24px))"
-      style={{ zIndex: "var(--z-panel)" }}
+      style={{
+        position: "absolute",
+        left: 12,
+        bottom: placement === "bottom" ? 56 : 12,
+        width: "min(300px, calc(100% - 24px))",
+        overflow: "hidden",
+        zIndex: "var(--z-panel)",
+        background: "color-mix(in oklch, var(--color-canvas) 92%, transparent)",
+        backdropFilter: "blur(20px) saturate(1.4)",
+        border: "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+        borderRadius: 16,
+        boxShadow: "0 8px 24px 0 oklch(0.1 0.04 265 / 0.45)",
+      }}
     >
       <UnstyledButton
         w="100%"
-        h="var(--adm-cell)"
-        px="sm"
+        h={48}
+        px={16}
         aria-expanded={open}
         aria-controls={bodyId}
         onClick={() => setOpen((value) => !value)}
       >
         <Group justify="space-between" wrap="nowrap">
-          <Group gap="xs" wrap="nowrap" align="baseline">
-            <Text fw={700}>Runners</Text>
-            <Text fw={700} c="dimmed">
+          <Group gap={10} wrap="nowrap" align="baseline">
+            <Text
+              component="span"
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: "var(--color-ink-muted)",
+              }}
+            >
+              Players
+            </Text>
+            <Text component="span" fw={700} c="var(--color-ink)">
               {count}
             </Text>
           </Group>
@@ -56,6 +75,6 @@ export function AdminSplitBoard({
       <Collapse expanded={open} id={bodyId}>
         {children}
       </Collapse>
-    </Paper>
+    </Box>
   );
 }
