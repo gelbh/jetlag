@@ -3,6 +3,8 @@ import { isLearnRoutePath, LEARN_ROUTE_PATHS } from "@/domain/seo/learnRoutePath
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
 const ADMIN_PATH_RE = /^\/admin(?:\/|$)/;
 const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
+const ADMIN_SESSION_PATH_RE = /^\/admin\/sessions\/[^/]+$/;
+const ADMIN_REQUEST_PATH_RE = /^\/admin\/preload-requests\/[^/]+$/;
 
 const LAZY_ROUTE_PATHS = new Set([
   "/map",
@@ -40,7 +42,10 @@ export function normalizeRoutePath(path: string): string {
 export function parameterizedRoutePath(path: string): string {
   const route = normalizeRoutePath(path);
   const trimmed = route.length > 1 ? route.replace(/\/$/, "") : route;
-  return ADMIN_INCIDENT_PATH_RE.test(trimmed) ? "/admin/incidents/:incidentId" : trimmed;
+  if (ADMIN_INCIDENT_PATH_RE.test(trimmed)) return "/admin/incidents/:incidentId";
+  if (ADMIN_SESSION_PATH_RE.test(trimmed)) return "/admin/sessions/:sessionId";
+  if (ADMIN_REQUEST_PATH_RE.test(trimmed)) return "/admin/preload-requests/:requestId";
+  return trimmed;
 }
 
 export function isLazyRoute(path: string): boolean {
