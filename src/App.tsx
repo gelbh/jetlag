@@ -17,6 +17,7 @@ import { ClientMinVersionGate } from "./components/ui/feedback/ClientMinVersionG
 import { MapErrorBoundary } from "./components/ui/feedback/MapErrorBoundary";
 import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
 import { PlayerPhoneShell } from "./components/ui/layout/PlayerPhoneShell";
+import { PlayerRouteOnly } from "./components/ui/layout/PlayerRouteOnly";
 import { AppUiProvider } from "./components/ui/providers/AppUiProvider";
 import { removeBootSplash } from "./domain/device/chrome/bootSplash";
 import { markPlayDay, PWA_MARK_APP_READY } from "./domain/device/perf/playDayMarks";
@@ -232,7 +233,9 @@ export default function App() {
                     <LazyRouteQuiet>
                       <AppResumeWatchdogLazy />
                     </LazyRouteQuiet>
-                    <PwaInstallTipBanner />
+                    <PlayerRouteOnly>
+                      <PwaInstallTipBanner />
+                    </PlayerRouteOnly>
                     <AnalyticsConsentBanner />
                     <AppEntryBackdrop />
                     <div className="jl-scroll app-scroll-root">
