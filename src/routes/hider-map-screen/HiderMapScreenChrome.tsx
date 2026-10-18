@@ -73,6 +73,7 @@ type HidingZonePanelTool = {
   methodChosen: boolean;
   choosePlacementMethod: HiderZoneToolState["choosePlacementMethod"];
   manualCenter: LatLngTuple | null;
+  snapping: boolean;
   hasPlacement: boolean;
   confirmZone: () => Promise<void>;
   saving: boolean;

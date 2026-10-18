@@ -1,17 +1,21 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
+import { withTimeout } from "@/services/core/withTimeout";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import { enqueueMoveTimerIntent } from "@/services/session/sessionIntents";
+import { expandBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import {
   buildHidingZoneCircle,
+  dedupeTransitStations,
   type HidingZoneRecord,
   haversineMeters,
   MANUAL_STATION_ID,
   nearestStation,
+  STATION_SNAP_METERS,
   searchStations,
   type TransitStation,
 } from "../../domain/session/hiding/hidingZone";
@@ -21,14 +25,10 @@ import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/ma
 import { useLatestRequest } from "../forms/useLatestRequest";
 
 const MOVE_MIN_DISTANCE_METERS = 50;
-/** Half-width of the Overpass box searched around a map tap; covers nearestStation's 200 m snap. */
-const TAP_SNAP_SEARCH_METERS = 250;
-
-function boundsAroundPoint([lat, lng]: LatLngTuple, meters: number): MapViewportBounds {
-  const dLat = meters / 111_320;
-  const dLng = meters / (111_320 * Math.cos((lat * Math.PI) / 180));
-  return { south: lat - dLat, north: lat + dLat, west: lng - dLng, east: lng + dLng };
-}
+/** Half-width of the Overpass box searched around a map tap; the margin keeps the snap radius inside it. */
+const TAP_SNAP_SEARCH_METERS = STATION_SNAP_METERS + 50;
+/** Overpass retries can take minutes; past this the tap keeps its own point so Confirm stays usable. */
+const TAP_SNAP_TIMEOUT_MS = 4000;
 const MOVE_PLAYED_MESSAGE =
   "Move card played. Timer paused. Seekers must stay put. Hider is relocating.";
 
@@ -84,8 +84,6 @@ export function useHiderZoneTool({
   const [methodChosen, setMethodChosen] = useState(false);
   const [manualCenter, setManualCenter] = useState<LatLngTuple | null>(null);
   const [snapping, setSnapping] = useState(false);
-  /** Bumped per map tap so a slow station lookup cannot snap a stale tap. */
-  const snapRequestRef = useRef(0);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [moveMode, setMoveMode] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -93,8 +91,17 @@ export function useHiderZoneTool({
   /** Bumped per Play Move and cleared on confirm, so a late rejection only rolls back the live attempt. */
   const moveAttemptRef = useRef(0);
 
+  const { beginRequest, cancelRequests, isLatestRequest, requestIdRef } = useLatestRequest();
+  const {
+    beginRequest: beginSnapRequest,
+    cancelRequests: cancelSnapRequests,
+    isLatestRequest: isLatestSnapRequest,
+  } = useLatestRequest();
+
   const resetWizardDraft = useCallback(() => {
-    snapRequestRef.current += 1;
+    cancelRequests();
+    cancelSnapRequests();
+    setStationsLoading(false);
     setSnapping(false);
     setSelectedStation(null);
     setManualCenter(null);
@@ -104,9 +111,7 @@ export function useHiderZoneTool({
     setError(null);
     setStations([]);
     setStationsError(null);
-  }, []);
-
-  const { beginRequest, isLatestRequest } = useLatestRequest();
+  }, [cancelRequests, cancelSnapRequests]);
 
   const searchStationsInArea = useCallback(
     async (viewport: MapViewportBounds) => {
@@ -268,27 +273,38 @@ export function useHiderZoneTool({
     writesEnabled,
   ]);
 
-  /** Tap-map placement still prefers a real stop: snap to the nearest one within 200 m. */
+  /** Nothing loaded nearby is the common case in Tap map mode, so look stations up around the tap. */
   const snapTapToNearestStation = useCallback(
     async (point: LatLngTuple) => {
-      const requestId = snapRequestRef.current + 1;
-      snapRequestRef.current = requestId;
+      const requestId = beginSnapRequest();
+      const stationsEpoch = requestIdRef.current;
 
       let station = nearestStation(point, stations);
-      if (!station) {
+      if (!station && !isEffectivelyOfflineNow()) {
         setSnapping(true);
-        try {
-          const nearby = await fetchTransitStationsForHidingZoneViewport(
-            boundsAroundPoint(point, TAP_SNAP_SEARCH_METERS),
-            gameArea,
-          );
-          station = nearestStation(point, nearby);
-        } catch {
-          station = null;
-        }
+        const lookup = fetchTransitStationsForHidingZoneViewport(
+          expandBoundingBox(
+            { south: point[0], north: point[0], west: point[1], east: point[1] },
+            TAP_SNAP_SEARCH_METERS,
+          ),
+          gameArea,
+        ).then(
+          (nearby) => {
+            // Cache even late results so the next nearby tap resolves without Overpass.
+            if (nearby.length > 0 && isLatestRequest(stationsEpoch)) {
+              setStations((current) => dedupeTransitStations([...current, ...nearby]));
+            }
+            return nearby;
+          },
+          (): TransitStation[] => [],
+        );
+        const nearby = await withTimeout(lookup, TAP_SNAP_TIMEOUT_MS).catch(
+          (): TransitStation[] => [],
+        );
+        station = nearestStation(point, nearby);
       }
 
-      if (snapRequestRef.current !== requestId) {
+      if (!isLatestSnapRequest(requestId)) {
         return;
       }
       setSnapping(false);
@@ -297,7 +313,7 @@ export function useHiderZoneTool({
         setSelectedStation(station);
       }
     },
-    [gameArea, stations],
+    [beginSnapRequest, gameArea, isLatestRequest, isLatestSnapRequest, requestIdRef, stations],
   );
 
   const handleMapClick = useCallback(
@@ -340,6 +356,10 @@ export function useHiderZoneTool({
   const confirmZone = useCallback(async () => {
     if (!writesEnabled || !hiderUid) {
       setError("Sign in and rejoin the session as Hider, then try again.");
+      return;
+    }
+
+    if (snapping) {
       return;
     }
 
@@ -440,18 +460,24 @@ export function useHiderZoneTool({
     resumeTimerForMove,
     selectedStation,
     sessionId,
+    snapping,
     writesEnabled,
   ]);
 
-  const choosePlacementMethod = useCallback((manual: boolean) => {
-    snapRequestRef.current += 1;
-    setSnapping(false);
-    setManualMode(manual);
-    setMethodChosen(true);
-    setSelectedStation(null);
-    setManualCenter(null);
-    setError(null);
-  }, []);
+  const choosePlacementMethod = useCallback(
+    (manual: boolean) => {
+      cancelRequests();
+      cancelSnapRequests();
+      setStationsLoading(false);
+      setSnapping(false);
+      setManualMode(manual);
+      setMethodChosen(true);
+      setSelectedStation(null);
+      setManualCenter(null);
+      setError(null);
+    },
+    [cancelRequests, cancelSnapRequests],
+  );
 
   const clearStationSelection = useCallback(() => {
     setSelectedStation(null);

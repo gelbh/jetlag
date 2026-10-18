@@ -42,6 +42,7 @@ function baseZoneTool(overrides: Partial<HidingZoneToolPanelState> = {}): Hiding
     methodChosen: false,
     choosePlacementMethod: vi.fn(),
     manualCenter: null,
+    snapping: false,
     hasPlacement: false,
     confirmZone: vi.fn(),
     saving: false,
