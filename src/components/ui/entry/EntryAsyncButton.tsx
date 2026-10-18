@@ -8,6 +8,9 @@ import {
   useRef,
 } from "react";
 import { LoadingSpinnerRing } from "@/components/ui/feedback/LoadingSpinner";
+import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
+import { useLoadTask } from "@/hooks/progress/useLoadTask";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 
 export type EntryAsyncButtonProps = Omit<
   ButtonProps & ComponentPropsWithoutRef<"button">,
@@ -21,6 +24,8 @@ export type EntryAsyncButtonProps = Omit<
   showSpinner?: boolean;
   /** Polite status text while busy; defaults to stringified busyLabel when string. */
   statusMessage?: string;
+  /** While running, shows its stage as the busy label and a thin bar under the button. */
+  task?: LoadTask | null;
 };
 
 export function EntryAsyncButton({
@@ -30,13 +35,16 @@ export function EntryAsyncButton({
   unavailable = false,
   showSpinner = true,
   statusMessage,
+  task = null,
   leftSection,
   onClick,
   ...rest
 }: EntryAsyncButtonProps): React.JSX.Element {
   const statusId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const label = busy ? busyLabel : idleLabel;
+  const taskSnapshot = useLoadTask(task);
+  const taskRunning = busy && taskSnapshot?.status === "running";
+  const label = busy ? (taskRunning ? `${taskSnapshot.stageLabel}…` : busyLabel) : idleLabel;
   const statusText = busy
     ? (statusMessage ?? (typeof busyLabel === "string" ? busyLabel : "Working…"))
     : "";
@@ -86,7 +94,7 @@ export function EntryAsyncButton({
         disabled={gated}
         aria-disabled={blockActivation ? true : undefined}
         aria-busy={busy || undefined}
-        aria-describedby={busy ? statusId : undefined}
+        aria-describedby={busy && !taskRunning ? statusId : undefined}
         leftSection={
           busy && showSpinner ? (
             <LoadingSpinnerRing size="sm" className="text-current" />
@@ -98,7 +106,8 @@ export function EntryAsyncButton({
       >
         {label}
       </Button>
-      {busy ? (
+      {busy && taskRunning && task ? <LoadProgress task={task} variant="compact" /> : null}
+      {busy && !taskRunning ? (
         <span id={statusId} role="status" aria-live="polite" className="sr-only">
           {statusText}
         </span>

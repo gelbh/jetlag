@@ -139,6 +139,7 @@ export function CreateSession() {
                       fullWidth
                       styles={filledStyles}
                       busy={confirmBusy}
+                      task={session.createTask}
                       unavailable={session.requiresPremiumSignIn || !session.hostAuthReady}
                       idleLabel="Create game"
                       busyLabel={session.confirmLabel}

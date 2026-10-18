@@ -24,6 +24,7 @@ import { ANALYTICS_EVENTS, track } from "@/services/core/analytics/analytics";
 import { setPremiumApiContext } from "@/services/core/auth/premiumApiContext";
 import { ensureFreshAnonymousUser, isFirebaseConfigured } from "@/services/core/firebase/firebase";
 import { retryAsync } from "@/services/core/network/retryAsync";
+import { createLoadTask, type LoadTask } from "@/services/core/progress/loadTask";
 import { withTimeout } from "@/services/core/withTimeout";
 import {
   getRemoteSessionByIdFromServer,
@@ -115,6 +116,13 @@ export type UseJoinSessionArgs = {
   onExistingRole?: (role: PlayerRole) => void;
 };
 
+const JOIN_STAGES = {
+  signIn: { kind: "fetch", label: "Signing in", historyKey: "session:sign-in" },
+  join: { kind: "fetch", label: "Joining session", historyKey: "session:join" },
+  hiderRole: { kind: "fetch", label: "Confirming hider role", historyKey: "session:hider-role" },
+  openMap: { kind: "fetch", label: "Opening map", historyKey: "session:open-map" },
+} as const;
+
 export function useJoinSession({
   code,
   playerRole,
@@ -131,6 +139,7 @@ export function useJoinSession({
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [joinTask, setJoinTask] = useState<LoadTask | null>(null);
   const { isSubmitting, runLocked } = useSubmitLock();
   const joinBusy = loading || isSubmitting;
   const [pendingRequest, setPendingRequest] = useState<PendingJoinRequest | null>(null);
@@ -354,6 +363,13 @@ export function useJoinSession({
       }
       setLoading(true);
       setError(null);
+      const task = createLoadTask({ label: "Joining session", cancellable: false });
+      const signInStage = task.stage(JOIN_STAGES.signIn);
+      const joinStage = task.stage(JOIN_STAGES.join);
+      const roleStage =
+        values.playerRole === "hider" ? task.stage(JOIN_STAGES.hiderRole) : undefined;
+      const openStage = task.stage(JOIN_STAGES.openMap);
+      setJoinTask(task);
 
       try {
         if (!isFirebaseConfigured()) {
@@ -365,7 +381,10 @@ export function useJoinSession({
         } else {
           await withTimeout(
             (async () => {
+              signInStage.start();
               const user = await retryAsync(() => ensureFreshAnonymousUser());
+              signInStage.finish();
+              joinStage.start();
               const joinOptions =
                 session?.code === normalized && myUid
                   ? {
@@ -415,9 +434,12 @@ export function useJoinSession({
                 return;
               }
 
+              joinStage.finish();
               let joinedSession = result.session;
               if (values.playerRole === "hider") {
+                roleStage?.start();
                 const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
+                roleStage?.finish();
                 if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
                   if (!isCurrent()) {
                     return;
@@ -441,6 +463,7 @@ export function useJoinSession({
               settled = true;
               claimed = true;
               setError(null);
+              openStage.start();
               await enterJoinedSession(
                 joinedSession,
                 user.uid,
@@ -468,6 +491,7 @@ export function useJoinSession({
           );
         }
       }
+      task.complete();
       setLoading(false);
     });
 
@@ -534,6 +558,7 @@ export function useJoinSession({
     setError,
     loading,
     joinBusy,
+    joinTask,
     requestBusy,
     formBusy,
     pendingRequest,

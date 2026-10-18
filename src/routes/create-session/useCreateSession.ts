@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "react-router-dom";
+import { createLoadTask, type LoadTask } from "@/services/core/progress/loadTask";
 import { useTimerStore } from "@/state/timerStore";
 import {
   canSelectPremiumSessionTier,
@@ -87,6 +88,18 @@ const MISSING_GAME_AREA_ERROR =
 const loadKmzImport = () => import("../../services/core/capture/kmzImport");
 const loadSeaLevelProgressive = () => import("../../services/geo/elevation/seaLevelProgressive");
 
+const CREATE_STAGES = {
+  playArea: { kind: "compute", label: "Building play area", historyKey: "session:play-area" },
+  verifyAccess: { kind: "fetch", label: "Verifying access", historyKey: "session:verify-access" },
+  signIn: { kind: "fetch", label: "Signing in", historyKey: "session:sign-in" },
+  create: { kind: "fetch", label: "Creating session", historyKey: "session:create" },
+  matchingAreas: {
+    kind: "fetch",
+    label: "Loading matching areas",
+    historyKey: "session:matching-areas",
+  },
+} as const;
+
 export function useCreateSession() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -125,6 +138,7 @@ export function useCreateSession() {
   const [error, setError] = useState<string | null>(null);
   const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [createTask, setCreateTask] = useState<LoadTask | null>(null);
   const [verifyingAccess, setVerifyingAccess] = useState(false);
   const [sessionTier, setSessionTier] = useState<SessionTier>("free");
   const [tierManuallySet, setTierManuallySet] = useState(false);
@@ -708,8 +722,12 @@ export function useCreateSession() {
     setLoading(true);
     setError(null);
     setAccessCodeError(null);
+    const task = createLoadTask({ label: "Creating game", cancellable: false });
+    const playAreaStage = task.stage(CREATE_STAGES.playArea);
+    setCreateTask(task);
 
     const submitSession = async () => {
+      playAreaStage.start();
       const manualArea =
         framing.userFramed &&
         framing.manualGameArea &&
@@ -737,6 +755,7 @@ export function useCreateSession() {
         setError(MISSING_GAME_AREA_ERROR);
         return;
       }
+      playAreaStage.finish();
 
       const metroId = transitMetroId || undefined;
       const tier = resolveSubmitTier();
@@ -750,9 +769,11 @@ export function useCreateSession() {
         }
 
         setVerifyingAccess(true);
+        const verifyStage = task.stage(CREATE_STAGES.verifyAccess).start();
         let grantError: string | null = null;
         try {
           await grantAccess(trimmedCode);
+          verifyStage.finish();
           setHostHasAccessClaim(true);
           useAccessClaimForPremium = true;
         } catch (nextError) {
@@ -785,8 +806,14 @@ export function useCreateSession() {
           : {}),
       };
 
+      const signInStage = isFirebaseConfigured() ? task.stage(CREATE_STAGES.signIn) : undefined;
+      const createStage = isFirebaseConfigured() ? task.stage(CREATE_STAGES.create) : undefined;
+      const areasStage = lowPowerMode ? undefined : task.stage(CREATE_STAGES.matchingAreas);
       if (isFirebaseConfigured()) {
+        signInStage?.start();
         const user = await retryAsync(() => ensureAnonymousUser());
+        signInStage?.finish();
+        createStage?.start();
         const premiumSubmitError = validatePremiumHostSubmit(user, tier, useAccessClaimForPremium);
         if (premiumSubmitError) {
           setError(premiumSubmitError);
@@ -821,6 +848,7 @@ export function useCreateSession() {
                 distanceUnit,
               ),
             );
+        createStage?.finish();
         setSession(session, user.uid);
         setPremiumApiContext(session);
         emitSessionStartedActivity(session.id, user.uid);
@@ -853,6 +881,7 @@ export function useCreateSession() {
       });
 
       if (!lowPowerMode) {
+        areasStage?.start();
         const matchingAreas = await resolveSessionMatchingAreas({
           regionPackId,
           regionPackSubregionId,
@@ -871,8 +900,14 @@ export function useCreateSession() {
 
     try {
       await submitSession();
+      task.complete();
     } catch (nextError) {
+      task.fail(nextError);
       setError(nextError instanceof Error ? nextError.message : "Couldn't create session.");
+    }
+    if (task.getSnapshot().status === "running") {
+      // Returned early (validation): nothing finished worth timing.
+      task.cancel();
     }
     setLoading(false);
   };
@@ -950,6 +985,7 @@ export function useCreateSession() {
     loadedPreset,
     selectPreset,
     loading: confirmBusy,
+    createTask,
     verifyingAccess,
     searchLoading,
     importLoading,

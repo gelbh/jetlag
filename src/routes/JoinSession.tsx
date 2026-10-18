@@ -97,6 +97,7 @@ export function JoinSession() {
     error,
     loading,
     joinBusy,
+    joinTask,
     requestBusy,
     formBusy,
     pendingRequest,
@@ -306,6 +307,7 @@ export function JoinSession() {
                   type="submit"
                   fullWidth
                   busy={joinBusy}
+                  task={joinTask}
                   unavailable={requestBusy || lookupLoading}
                   idleLabel="Join session"
                   busyLabel="Joining…"
