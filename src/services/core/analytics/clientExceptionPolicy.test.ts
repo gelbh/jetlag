@@ -187,6 +187,8 @@ describe("classifyClientExceptionEvent", () => {
       "Invalid join request.",
       "Not allowed for this join request.",
       "Session uses legacy join.",
+      "Session not found.",
+      "Session already ended.",
     ];
     for (const message of fixtures) {
       expect(classifyClientExceptionEvent(exc("FirebaseError", message))).toBe("drop");
@@ -197,6 +199,12 @@ describe("classifyClientExceptionEvent", () => {
         }),
       ).toBe("drop");
     }
+  });
+
+  it("keeps heal role mismatch reported as a seat takeover signal", () => {
+    const message = "Rejoin in your previous role.";
+    expect(classifyClientExceptionEvent(exc("FirebaseError", message))).toBe("send");
+    expect(classifyClientExceptionEvent({ message })).toBe("send");
   });
 
   it("keeps module script import failure and WebKit Load failed", () => {

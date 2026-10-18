@@ -11,6 +11,7 @@ import {
   EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
   HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
   HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+  HTTPS_MSG_HEAL_ROLE_MISMATCH,
   HTTPS_MSG_INVALID_JOIN_REQUEST,
   HTTPS_MSG_JOIN_EXPIRED,
   HTTPS_MSG_JOIN_NOT_ALLOWED,
@@ -18,6 +19,8 @@ import {
   HTTPS_MSG_JOIN_SIDE_EMPTY,
   HTTPS_MSG_LEGACY_JOIN,
   HTTPS_MSG_ROLE_CODE_REQUIRED,
+  HTTPS_MSG_SESSION_ENDED,
+  HTTPS_MSG_SESSION_NOT_FOUND,
   HTTPS_MSG_WRONG_ROLE_CODE,
 } from "../../session/expectedSessionUxHttpsErrors.mjs";
 import {
@@ -39,6 +42,7 @@ import {
   JOIN_REQ_SIDE_EMPTY,
 } from "../../session/joinRequest.mjs";
 import {
+  JOIN_HEAL_ROLE_MISMATCH,
   JOIN_INCOMPATIBLE_VERSION,
   JOIN_NOT_GATED,
   JOIN_PASSCODE_REQUIRED,
@@ -59,6 +63,7 @@ export {
   EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
   HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
   HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+  HTTPS_MSG_HEAL_ROLE_MISMATCH,
   HTTPS_MSG_INVALID_JOIN_REQUEST,
   HTTPS_MSG_JOIN_EXPIRED,
   HTTPS_MSG_JOIN_NOT_ALLOWED,
@@ -119,10 +124,10 @@ export function mapJoinSessionWithRoleError(error) {
     throw error;
   }
   if (error.message === JOIN_SESSION_NOT_FOUND) {
-    throw new HttpsError("not-found", "Session not found.");
+    throw new HttpsError("not-found", HTTPS_MSG_SESSION_NOT_FOUND);
   }
   if (error.message === JOIN_SESSION_ENDED) {
-    throw new HttpsError("failed-precondition", "Session already ended.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_SESSION_ENDED);
   }
   if (error.message === JOIN_NOT_GATED) {
     throw new HttpsError("failed-precondition", HTTPS_MSG_LEGACY_JOIN);
@@ -135,6 +140,9 @@ export function mapJoinSessionWithRoleError(error) {
   }
   if (error.message === JOIN_INCOMPATIBLE_VERSION) {
     throw new HttpsError("failed-precondition", HTTPS_MSG_APP_VERSION_INCOMPATIBLE);
+  }
+  if (error.message === JOIN_HEAL_ROLE_MISMATCH) {
+    throw new HttpsError("failed-precondition", HTTPS_MSG_HEAL_ROLE_MISMATCH);
   }
   throwIfClientUpdateRequired(error);
   throw error;
