@@ -121,6 +121,7 @@ function enableAppCheckDebugProviderIfDev(): void {
     return;
   }
 
+  // react-doctor-disable-next-line react-doctor/public-env-secret-name -- App Check debug token, read only when import.meta.env.DEV
   const debugToken = getClientEnv().VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN;
   const globalScope = globalThis as typeof globalThis & {
     FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean | string;

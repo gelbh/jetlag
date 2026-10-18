@@ -336,6 +336,7 @@ export function MapDraggableFixedStack({
       return;
     }
     let frameEl: HTMLElement | null = null;
+    // react-doctor-disable-next-line react-doctor/effect-observer-needs-disconnect -- cleanup returns observer.disconnect(); rule misses observe() inside the callback
     const observer = new ResizeObserver(() => {
       const nextFrameEl = node.closest<HTMLElement>("[data-map-dock-frame]");
       if (nextFrameEl && nextFrameEl !== frameEl) {
