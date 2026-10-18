@@ -11,6 +11,7 @@ import {
   EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
   HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
   HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+  HTTPS_MSG_HEAL_PROOF_INVALID,
   HTTPS_MSG_HEAL_ROLE_MISMATCH,
   HTTPS_MSG_INVALID_JOIN_REQUEST,
   HTTPS_MSG_JOIN_EXPIRED,
@@ -42,6 +43,7 @@ import {
   JOIN_REQ_SIDE_EMPTY,
 } from "../../session/joinRequest.mjs";
 import {
+  JOIN_HEAL_PROOF_INVALID,
   JOIN_HEAL_ROLE_MISMATCH,
   JOIN_INCOMPATIBLE_VERSION,
   JOIN_NOT_GATED,
@@ -143,6 +145,9 @@ export function mapJoinSessionWithRoleError(error) {
   }
   if (error.message === JOIN_HEAL_ROLE_MISMATCH) {
     throw new HttpsError("failed-precondition", HTTPS_MSG_HEAL_ROLE_MISMATCH);
+  }
+  if (error.message === JOIN_HEAL_PROOF_INVALID) {
+    throw new HttpsError("failed-precondition", HTTPS_MSG_HEAL_PROOF_INVALID);
   }
   throwIfClientUpdateRequired(error);
   throw error;
