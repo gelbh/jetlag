@@ -1,3 +1,5 @@
+import { ELIMINATION_MASK_TASK } from "@/hooks/map/useCombinedEliminationMask";
+import { useLoadTask, useNamedLoadTask } from "@/hooks/progress/useLoadTask";
 import { HotfixGraceChip } from "../../../components/incident/HotfixGraceChip";
 import { FirestorePersistenceBanner } from "../../../components/session/banners/FirestorePersistenceBanner";
 import { MeasuringRefineMapChip } from "../../../components/ui/banners/MeasuringRefineMapChip";
@@ -21,11 +23,18 @@ export function MapScreenChromeBanners({
     ...MEASURING_REFINE,
     visible: measuringLodRefining,
   };
+  const maskTask = useNamedLoadTask(ELIMINATION_MASK_TASK);
+  const maskSnapshot = useLoadTask(maskTask);
+  const showMask = !chip.visible && maskSnapshot?.status === "running";
 
   return (
     <>
       <FirestorePersistenceBanner />
-      <MeasuringRefineMapChip visible={chip.visible} title={chip.title} body={chip.body} />
+      {showMask ? (
+        <MeasuringRefineMapChip visible title="Updating shaded area" task={maskTask} />
+      ) : (
+        <MeasuringRefineMapChip visible={chip.visible} title={chip.title} body={chip.body} />
+      )}
       <HotfixGraceChip />
     </>
   );

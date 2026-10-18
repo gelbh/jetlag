@@ -6,6 +6,7 @@ import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import {
   annotationsToEndGameDisks,
   computeEliminationUnionInput,
+  type UnionInputProgress,
 } from "../adapter/eliminationMask";
 import { gameAreaFingerprint } from "../core/gameAreaConvert";
 import type { DiskSpec, EliminationUnionInput, PolygonFeature } from "../kernel/types";
@@ -101,14 +102,28 @@ function getWorkerApi(): Remote<EliminationMaskWorkerApi> {
   return workerApi;
 }
 
+/** Optional hooks so a caller can show progress while the mask rebuilds. */
+export interface MaskBuildProgress {
+  onPrepare?: UnionInputProgress;
+  /** The worker union is starting. */
+  onUnion?: () => void;
+}
+
 async function buildFullMask(
   api: Remote<EliminationMaskWorkerApi>,
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
   draftFeatures: readonly Feature<GeoPolygon | MultiPolygon>[],
   pendingFailure: Promise<never>,
+  progress?: MaskBuildProgress,
 ): Promise<PolygonFeature | null> {
-  const input = await computeEliminationUnionInput(annotations, gameArea, draftFeatures);
+  const input = await computeEliminationUnionInput(
+    annotations,
+    gameArea,
+    draftFeatures,
+    progress?.onPrepare,
+  );
+  progress?.onUnion?.();
   return await Promise.race([api.buildMaskFromUnionInput(input, gameArea), pendingFailure]);
 }
 
@@ -118,8 +133,15 @@ async function buildIncrementalMask(
   newAnnotations: readonly AnnotationRecord[],
   gameArea: GameArea,
   pendingFailure: Promise<never>,
+  progress?: MaskBuildProgress,
 ): Promise<PolygonFeature | null> {
-  const newInput = await computeEliminationUnionInput(newAnnotations, gameArea, []);
+  const newInput = await computeEliminationUnionInput(
+    newAnnotations,
+    gameArea,
+    [],
+    progress?.onPrepare,
+  );
+  progress?.onUnion?.();
   const input: EliminationUnionInput = {
     polygons: [priorMask, ...newInput.polygons],
     disks: newInput.disks,
@@ -132,6 +154,7 @@ export async function requestCombinedEliminationMask(
   gameArea: GameArea,
   draftFeatures: readonly Feature<GeoPolygon | MultiPolygon>[],
   endGameHidingZones: readonly HidingZoneRecord[],
+  progress?: MaskBuildProgress,
 ): Promise<PolygonFeature | null> {
   const api = getWorkerApi();
   let releasePending: (() => void) | undefined;
@@ -178,7 +201,14 @@ export async function requestCombinedEliminationMask(
 
     if (!annotationKey && !draftKey) {
       clearMaskCache();
-      const mask = await buildFullMask(api, annotations, gameArea, draftFeatures, pendingFailure);
+      const mask = await buildFullMask(
+        api,
+        annotations,
+        gameArea,
+        draftFeatures,
+        pendingFailure,
+        progress,
+      );
       return mask;
     }
 
@@ -200,6 +230,7 @@ export async function requestCombinedEliminationMask(
           newAnnotations,
           gameArea,
           pendingFailure,
+          progress,
         );
         // Incremental null → full rebuild once (below), same as throw.
         if (mask !== null) {
@@ -216,7 +247,14 @@ export async function requestCombinedEliminationMask(
       }
     }
 
-    const mask = await buildFullMask(api, annotations, gameArea, draftFeatures, pendingFailure);
+    const mask = await buildFullMask(
+      api,
+      annotations,
+      gameArea,
+      draftFeatures,
+      pendingFailure,
+      progress,
+    );
     return storeMaskCache({
       annotationKey,
       gameAreaKey,

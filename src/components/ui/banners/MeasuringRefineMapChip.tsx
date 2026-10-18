@@ -1,4 +1,6 @@
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { jetlagBrand } from "@/theme/theme";
+import { LoadProgress } from "../feedback/LoadProgress";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatSurface } from "./MapFloatSurface";
 
@@ -11,10 +13,13 @@ export function MeasuringRefineMapChip({
   visible,
   title = DEFAULT_TITLE,
   body = DEFAULT_BODY,
+  task = null,
 }: {
   visible: boolean;
   title?: string;
   body?: string;
+  /** Replaces the body with a progress bar while the task runs. */
+  task?: LoadTask | null;
 }) {
   return (
     <HudBanner visible={visible} className={MAP_STATUS_CHIP_CLASS}>
@@ -44,12 +49,16 @@ export function MeasuringRefineMapChip({
           >
             {title}
           </p>
-          <p
-            className="m-0 mt-1 text-sm font-medium leading-snug"
-            style={{ color: jetlagBrand.fieldInk }}
-          >
-            {body}
-          </p>
+          {task ? (
+            <LoadProgress task={task} variant="compact" className="mt-1" />
+          ) : (
+            <p
+              className="m-0 mt-1 text-sm font-medium leading-snug"
+              style={{ color: jetlagBrand.fieldInk }}
+            >
+              {body}
+            </p>
+          )}
         </div>
         <style>{`
           @keyframes jl-refine-spin {

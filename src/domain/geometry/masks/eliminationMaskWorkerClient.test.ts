@@ -30,6 +30,7 @@ const computeEliminationUnionInput = vi.fn(
     annotations: readonly AnnotationRecord[],
     _gameArea: unknown,
     draftFeatures: readonly unknown[] = [],
+    _onProgress?: unknown,
   ) => ({
     polygons: [...draftFeatures, ...annotations.map((annotation) => annotation.geometry)],
     disks: [],
