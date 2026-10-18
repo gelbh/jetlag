@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "react-router-dom";
+import { sizeBucket } from "@/domain/progress/stagePriors";
 import { createLoadTask, type LoadTask } from "@/services/core/progress/loadTask";
 import { useTimerStore } from "@/state/timerStore";
 import {
@@ -659,11 +660,28 @@ export function useCreateSession() {
     setImportLoading(true);
     setError(null);
 
+    const task = createLoadTask({ label: "Importing boundary", global: true, cancellable: false });
+    const loaderStage = task.stage({
+      kind: "fetch",
+      label: "Loading importer",
+      historyKey: "import:loader",
+    });
+    const convertStage = task.stage({
+      kind: "compute",
+      label: "Converting boundary",
+      historyKey: "import:convert",
+      sizeBucket: sizeBucket(file.size / 1024),
+    });
     try {
+      loaderStage.start();
       const { parseBoundaryFile } = await loadKmzImport();
+      loaderStage.finish();
+      convertStage.start();
       const gameArea = await parseBoundaryFile(file);
+      task.complete();
       applyImportedBoundary(gameArea, file.name);
     } catch (nextError) {
+      task.fail(nextError);
       setError(
         isChunkLoadError(nextError)
           ? "Couldn't load the importer. Check your connection and try again."

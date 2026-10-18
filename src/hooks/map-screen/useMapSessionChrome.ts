@@ -2,6 +2,8 @@ import type { RefObject } from "react";
 import { useCallback, useRef } from "react";
 import { callableErrorMessage } from "@/domain/device/feedback/userErrors";
 import { isNeedsConnectionError } from "@/domain/device/network/needsConnectionError";
+import { createLoadTask } from "@/services/core/progress/loadTask";
+import { yieldToMain } from "@/services/core/progress/yieldToMain";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { isActive, LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
@@ -386,8 +388,24 @@ export function useMapSessionChrome({
       exportLegendRef.current.style.display = "block";
     }
 
+    const task = createLoadTask({ label: "Exporting map", global: true, cancellable: false });
+    const loaderStage = task.stage({
+      kind: "fetch",
+      label: "Loading capture tool",
+      historyKey: "capture:loader",
+    });
+    const renderStage = task.stage({
+      kind: "compute",
+      label: "Capturing map",
+      historyKey: "capture:render",
+    });
     try {
+      loaderStage.start();
       const { default: html2canvas } = await loadHtml2Canvas();
+      loaderStage.finish();
+      renderStage.start();
+      // Let the chip paint before html2canvas blocks the main thread.
+      await yieldToMain();
       const canvas = await html2canvas(mapShellRef.current, {
         useCORS: true,
         backgroundColor: MAP_EXPORT_BACKGROUND,
@@ -399,8 +417,10 @@ export function useMapSessionChrome({
       const link = document.createElement("a");
       link.download = `jetlag-map-${session.code}.png`;
       link.href = canvas.toDataURL("image/png");
+      task.complete();
       link.click();
     } catch (error) {
+      task.fail(error);
       const message = error instanceof Error ? error.message : String(error);
       if (!isHtml2CanvasUnsupportedColorMessage(message)) {
         captureException(error);
