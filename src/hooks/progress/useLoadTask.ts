@@ -1,9 +1,11 @@
 import { useSyncExternalStore } from "react";
 import {
   getGlobalLoadTasks,
+  getNamedLoadTask,
   type LoadTask,
   type LoadTaskSnapshot,
   subscribeGlobalLoadTasks,
+  subscribeNamedLoadTasks,
 } from "@/services/core/progress/loadTask";
 
 const noopSubscribe = () => () => {};
@@ -21,4 +23,13 @@ export function useLoadTask(task: LoadTask | null | undefined): LoadTaskSnapshot
 /** Tasks currently shown in the global activity chip. */
 export function useGlobalLoadTasks(): readonly LoadTask[] {
   return useSyncExternalStore(subscribeGlobalLoadTasks, getGlobalLoadTasks, getGlobalLoadTasks);
+}
+
+/** Task published under `name` with `setNamedLoadTask`. */
+export function useNamedLoadTask(name: string): LoadTask | null {
+  return useSyncExternalStore(
+    subscribeNamedLoadTasks,
+    () => getNamedLoadTask(name),
+    () => getNamedLoadTask(name),
+  );
 }

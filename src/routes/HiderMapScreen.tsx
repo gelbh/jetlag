@@ -1,4 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createLoadTask } from "@/services/core/progress/loadTask";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import type { HiderQuestionCards } from "../components/chat/HiderPendingQuestionAnswer";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
@@ -419,11 +420,19 @@ export function HiderMapScreen() {
           const answerTruthReference = truthContext
             ? resolveHiderTruthReference(truthContext)
             : { point: null as LatLngTuple | null };
+          const revealTask = createLoadTask({
+            label: "Checking your answer",
+            global: true,
+            cancellable: false,
+          });
+          revealTask
+            .stage({ kind: "compute", label: "Checking your answer", historyKey: "truth:reveal" })
+            .start();
           const truth = await computeHiderTruthReplyAsync(
             pending,
             answerTruthReference.point,
             gameArea ?? undefined,
-          );
+          ).finally(() => revealTask.complete());
           if (
             truth &&
             !truth.unavailable &&

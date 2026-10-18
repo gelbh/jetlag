@@ -29,6 +29,7 @@ export const STAGE_PRIORS_MS: Readonly<Record<string, number>> = {
   "truth:matching": 1_000,
   "truth:measuring": 3_000,
   "truth:gtfs": 2_000,
+  "truth:other": 300,
   "mask:wasm": 600,
   "mask:prepare": 300,
   "mask:union": 800,

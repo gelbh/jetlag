@@ -288,3 +288,32 @@ export function createDetachedProgressRoot(label: string): ProgressNode {
     onStageFinish: (spec, durationMs) => recordStageDuration(spec, durationMs),
   });
 }
+
+const namedTasks = new Map<string, LoadTask>();
+const namedListeners = new Set<() => void>();
+
+/**
+ * Publishes the current task for a well-known load (e.g. "hider-truths") so a
+ * deeply nested readout can show it without threading props through every layer.
+ */
+export function setNamedLoadTask(name: string, task: LoadTask | null): void {
+  if (task) {
+    namedTasks.set(name, task);
+  } else {
+    namedTasks.delete(name);
+  }
+  for (const listener of namedListeners) {
+    listener();
+  }
+}
+
+export function getNamedLoadTask(name: string): LoadTask | null {
+  return namedTasks.get(name) ?? null;
+}
+
+export function subscribeNamedLoadTasks(listener: () => void): () => void {
+  namedListeners.add(listener);
+  return () => {
+    namedListeners.delete(listener);
+  };
+}

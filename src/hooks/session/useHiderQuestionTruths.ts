@@ -1,4 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  createLoadTask,
+  getNamedLoadTask,
+  setNamedLoadTask,
+} from "@/services/core/progress/loadTask";
 import type { GameArea } from "../../domain/map/annotations";
 import { buildHiderTruthFetchKey } from "../../domain/questions/hiderTruth/hiderTruthFetchKey";
 import { reuseHiderTruthMapIfEqual } from "../../domain/questions/hiderTruth/hiderTruthMapReuse";
@@ -82,20 +87,49 @@ export function useHiderQuestionTruths(
 
     const requestId = beginRequest();
     const reference = resolveHiderTruthReference(context);
+    const task = createLoadTask({
+      label: open.length === 1 ? "Checking the question" : `Checking ${open.length} questions`,
+      cancellable: false,
+    });
+    const checks = task.stage({
+      kind: "group",
+      label: "Checking questions",
+      historyKey: "truth:batch",
+      parallel: true,
+    });
+    for (const question of open) {
+      checks.stage({
+        kind: "compute",
+        label: "Checking questions",
+        historyKey: truthHistoryKey(question),
+      });
+    }
+    setNamedLoadTask(HIDER_TRUTHS_TASK, task);
 
     void (async () => {
+      let resolved = 0;
       const entries = await Promise.all(
-        open.map(async (question) => {
+        open.map(async (question, index) => {
+          const stage = checks.children[index]?.start();
           const truth =
             reference.mode === "noHidingZone"
               ? null
               : reference.mode === "unavailable"
                 ? truthUnavailable(UNAVAILABLE_NO_ANCHOR)
                 : await computeHiderTruthReplyAsync(question, reference.point, gameArea);
+          stage?.finish();
+          resolved += 1;
+          if (open.length > 1) {
+            checks.setLabel(`Checking ${resolved} of ${open.length} questions`);
+          }
           return [question.id, truth] as const;
         }),
       );
 
+      task.complete();
+      if (getNamedLoadTask(HIDER_TRUTHS_TASK) === task) {
+        setNamedLoadTask(HIDER_TRUTHS_TASK, null);
+      }
       if (!isLatestRequest(requestId)) {
         return;
       }
@@ -117,4 +151,18 @@ export function useHiderQuestionTruths(
     loading: openQuestions.length === 0 ? false : loading,
     truthReferenceModes: openQuestions.length === 0 ? EMPTY_MODES : truthReferenceModes,
   };
+}
+
+/** Name of the published truth-check task, read by the answer picker. */
+export const HIDER_TRUTHS_TASK = "hider-truths";
+
+function truthHistoryKey(question: { toolType?: string }): string {
+  switch (question.toolType) {
+    case "matching":
+      return "truth:matching";
+    case "measuring":
+      return "truth:measuring";
+    default:
+      return "truth:other";
+  }
 }

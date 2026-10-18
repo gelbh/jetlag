@@ -33,6 +33,7 @@ import {
 } from "../../hooks/tools/measuringToolResolvers";
 import { buildTentaclePendingInput } from "../../hooks/tools/tentacle/tentaclePendingInput";
 import { usePreloadStore } from "../../state/preloadStore";
+import type { LoadTask } from "../core/progress/loadTask";
 import { adminBorderKindAvailability } from "../geo/overpass/adminDivisionAvailability";
 import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
 import { fetchTentaclePois } from "../geo/overpass/tentacleOverpass";
@@ -43,6 +44,7 @@ export interface HeavyResolveContext {
   annotations: readonly AnnotationRecord[];
   gameArea: GameArea;
   distanceUnit: DistanceUnit;
+  task?: LoadTask;
 }
 
 type RandomizedCards = { cardDraw?: number; cardKeep?: number };
@@ -68,6 +70,7 @@ export async function resolveRandomizedMatching(
         ...taggedSetupPinsForCategory(session.customLocationPins ?? [], categoryId),
         ...poiPinsForCategory(annotations, categoryId),
       ],
+      task: ctx.task,
     },
   });
 
@@ -114,6 +117,7 @@ export async function resolveRandomizedTentacle(
         ...poiPinsForCategory(annotations, categoryId),
       ],
       regionPackId: session.regionPackId,
+      task: ctx.task,
     });
   } catch {
     return null;
@@ -151,6 +155,7 @@ async function resolveMeasuringTarget(
   if (subject === "coastline") {
     const result = await fetchMeasuringCoastlineContext(anchor, gameArea, {
       regionPackId: session.regionPackId,
+      task: ctx.task,
     });
     if (!result.ok || result.segments.length === 0) return null;
     return {
@@ -171,6 +176,7 @@ async function resolveMeasuringTarget(
       session.customMeasureGeometries ?? [],
       session.customMatchingAreas,
       session.regionPackId,
+      ctx.task,
     );
     if (!result.ok) return null;
     return {
@@ -188,6 +194,7 @@ async function resolveMeasuringTarget(
       locationCategory,
       session.customCategories ?? [],
       session.regionPackId,
+      ctx.task ? { task: ctx.task } : undefined,
     );
     const target = resolveAllPlacesTarget({
       seekerPoint: anchor,

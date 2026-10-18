@@ -1,4 +1,6 @@
 import { Button, SimpleGrid, Stack, Text } from "@mantine/core";
+import { useNamedLoadTask } from "@/hooks/progress/useLoadTask";
+import { HIDER_TRUTHS_TASK } from "@/hooks/session/useHiderQuestionTruths";
 import { jetlagBrand } from "@/theme/theme";
 import {
   hiderTruthReferenceLabel,
@@ -63,6 +65,7 @@ export function HiderAnswerPicker({
   onSelect,
   onSetHidingZone,
 }: HiderAnswerPickerProps) {
+  const truthTask = useNamedLoadTask(HIDER_TRUTHS_TASK);
   if (truthReferenceMode === "noHidingZone") {
     return <HiderSetZonePrompt disabled={disabled} onSetHidingZone={onSetHidingZone} />;
   }
@@ -80,7 +83,9 @@ export function HiderAnswerPicker({
   return (
     <Stack gap={8} mt={8}>
       {loading ? (
-        <LoadingReadout>{hiderTruthReferenceLoadingLabel(truthReferenceMode)}</LoadingReadout>
+        <LoadingReadout task={truthTask}>
+          {hiderTruthReferenceLoadingLabel(truthReferenceMode)}
+        </LoadingReadout>
       ) : truth?.unavailable ? (
         <Text size="xs" c={jetlagBrand.halt}>
           {truth.label}
