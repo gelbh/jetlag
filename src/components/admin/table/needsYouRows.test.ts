@@ -92,7 +92,7 @@ describe("toNeedsYouRows", () => {
     expect(row.summary).toBe("Dublin · medium");
     expect(row.kind).toBe("preload");
     expect(row.code).toBeNull();
-    expect(row.status.label).toBe("OPEN");
+    expect(row.status.label).toBe("Open");
     const [named] = toNeedsYouRows(
       [],
       [

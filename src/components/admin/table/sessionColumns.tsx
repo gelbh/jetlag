@@ -24,6 +24,13 @@ const PHASE_ORDER: AdminSessionPhase[] = [
   "end-game-active",
 ];
 
+export function sessionPhaseMark(row: Row): { tone: StatusTone; label: string } {
+  return {
+    tone: phaseTone(row),
+    label: row.isLive ? adminSessionPhaseLabel(row.phase) : "Idle",
+  };
+}
+
 function phaseTone(row: Row): StatusTone {
   if (!row.isLive) return "neutral";
   if (row.phase === "waiting") return "neutral";
@@ -36,7 +43,7 @@ function time(iso: string | null): number | null {
   return Number.isNaN(ms) ? null : ms;
 }
 
-function elapsedMs(row: Row, now = Date.now()): number {
+export function sessionElapsedMs(row: Row, now = Date.now()): number {
   const { accumulatedMs, runningSince } = adminSessionTimerState(row);
   return accumulatedMs + (runningSince == null ? 0 : Math.max(0, now - runningSince));
 }
@@ -91,12 +98,10 @@ export function buildSessionColumns(
       id: "phase",
       label: "Phase",
       defaultVisible: true,
-      render: (row) => (
-        <StatusMark
-          tone={phaseTone(row)}
-          label={row.isLive ? adminSessionPhaseLabel(row.phase) : "Idle"}
-        />
-      ),
+      render: (row) => {
+        const mark = sessionPhaseMark(row);
+        return <StatusMark tone={mark.tone} label={mark.label} />;
+      },
       sortValue: (row) => PHASE_ORDER.indexOf(row.phase),
     },
     {
@@ -112,8 +117,8 @@ export function buildSessionColumns(
       label: "Game clock",
       defaultVisible: true,
       numeric: true,
-      render: (row) => formatClockDurationFromMs(elapsedMs(row)),
-      sortValue: (row) => elapsedMs(row),
+      render: (row) => formatClockDurationFromMs(sessionElapsedMs(row)),
+      sortValue: (row) => sessionElapsedMs(row),
     },
     {
       id: "lastActivity",

@@ -1,5 +1,6 @@
-import { Alert, Button, Group, Stack, Text } from "@mantine/core";
+import { Alert, Box, Button, Group, Stack, Text } from "@mantine/core";
 import { type ReactNode, useRef, useState } from "react";
+import { formatBytes } from "../../../domain/admin/formatBytes";
 import { canTransitionPreloadRequestStatus } from "../../../domain/preloadRequest/preloadRequestAdmin";
 import type {
   PreloadRequest,
@@ -14,13 +15,33 @@ const ACTION_STATUSES: readonly PreloadRequestStatus[] = [
   "open",
 ];
 
+const ACTION_LABEL: Record<PreloadRequestStatus, string> = {
+  accepted: "Accept",
+  declined: "Decline",
+  shipped: "Mark shipped",
+  open: "Reopen",
+};
+
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <Text component="dt" size="xs" c="dimmed">
+      <Text
+        component="dt"
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          color: "var(--color-ink-muted)",
+        }}
+      >
         {label}
       </Text>
-      <Text component="dd" size="sm" m={0}>
+      <Text
+        component="dd"
+        m={0}
+        style={{ color: "var(--color-ink)", fontWeight: 600, overflowWrap: "anywhere" }}
+      >
         {children}
       </Text>
     </div>
@@ -51,14 +72,23 @@ export function AdminPreloadRequestDetail({ request }: { request: PreloadRequest
 
   return (
     <Stack gap="sm">
-      <Stack component="dl" gap="xs" m={0}>
+      <Box
+        component="dl"
+        m={0}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: "12px 20px",
+          userSelect: "text",
+        }}
+      >
         <Field label="Place">{snapshot.placeLabel ?? "-"}</Field>
         <Field label="Size / units">
           {snapshot.gameSize} · {snapshot.distanceUnit}
         </Field>
         <Field label="Region pack">{snapshot.regionPackId ?? "-"}</Field>
         <Field label="Preset id">{snapshot.presetId ?? "-"}</Field>
-        <Field label="Game area bytes">{snapshot.gameAreaBytes ?? "-"}</Field>
+        <Field label="Game area size">{formatBytes(snapshot.gameAreaBytes)}</Field>
         <Field label="Reporter">
           <code>{request.reporterUid}</code>
         </Field>
@@ -75,7 +105,7 @@ export function AdminPreloadRequestDetail({ request }: { request: PreloadRequest
             <code>{JSON.stringify(snapshot.focusBounds)}</code>
           </Field>
         ) : null}
-      </Stack>
+      </Box>
 
       {actionError ? (
         <Alert role="alert" title="Couldn't update request" data-tone="mispunch">
@@ -83,19 +113,21 @@ export function AdminPreloadRequestDetail({ request }: { request: PreloadRequest
         </Alert>
       ) : null}
 
-      <Group gap="xs" wrap="wrap">
+      <Group gap={8} wrap="wrap">
         {ACTION_STATUSES.filter((status) =>
           canTransitionPreloadRequestStatus(request.status, status),
         ).map((status) => (
           <Button
             key={status}
             type="button"
-            variant="default"
-            size="compact-sm"
+            h={36}
+            radius={12}
+            // Accept is the one filled action; the rest stay neutral.
+            variant={status === "accepted" ? "filled" : "default"}
             disabled={busy}
             onClick={() => void onStatus(status)}
           >
-            Mark {status}
+            {ACTION_LABEL[status]}
           </Button>
         ))}
       </Group>

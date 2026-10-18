@@ -32,6 +32,10 @@ const PRELOAD_TONE: Record<PreloadStatusChipTone, StatusTone> = {
   muted: "ok",
 };
 
+function titleCase(label: string): string {
+  return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+}
+
 const NO_NOTE = "No note from the player";
 
 function firstSentence(text: string): string {
@@ -40,7 +44,7 @@ function firstSentence(text: string): string {
   return match?.[0].trim() ?? "";
 }
 
-function incidentSummary(incident: IncidentRecord): string {
+export function incidentSummary(incident: IncidentRecord): string {
   return (
     incident.playerNote?.trim() ||
     incident.posthogIssue?.name ||
@@ -77,7 +81,7 @@ function preloadRow(request: PreloadRequest): NeedsYouRow {
     summary: `${presetSnapshot.placeLabel ?? presetSnapshot.name} · ${presetSnapshot.gameSize}`,
     status: {
       tone: PRELOAD_TONE[preloadRequestStatusChipTone(request.status)],
-      label: preloadRequestStatusChipLabel(request.status),
+      label: titleCase(preloadRequestStatusChipLabel(request.status)),
     },
     open: request.status === "open",
     reporterRole: null,

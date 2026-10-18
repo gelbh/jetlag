@@ -1,5 +1,5 @@
 import { ActionIcon, Box, Button, Menu, TextInput } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 
 export interface AdminChipOption {
   value: string;
@@ -11,16 +11,19 @@ export interface AdminTableToolbarProps {
   query: string;
   onQueryChange(query: string): void;
   searchPlaceholder?: string;
-  liveOnly: boolean;
-  onLiveOnlyChange(on: boolean): void;
-  phase: string | null;
-  phaseOptions: AdminChipOption[];
-  onPhaseChange(phase: string | null): void;
-  tier: string | null;
-  tierOptions: AdminChipOption[];
-  onTierChange(tier: string | null): void;
-  hasIncident: boolean;
-  onHasIncidentChange(on: boolean): void;
+  searchRef?: Ref<HTMLInputElement>;
+  /** Replaces the Sessions chips (Needs you brings its own). */
+  chips?: ReactNode;
+  liveOnly?: boolean;
+  onLiveOnlyChange?(on: boolean): void;
+  phase?: string | null;
+  phaseOptions?: AdminChipOption[];
+  onPhaseChange?(phase: string | null): void;
+  tier?: string | null;
+  tierOptions?: AdminChipOption[];
+  onTierChange?(tier: string | null): void;
+  hasIncident?: boolean;
+  onHasIncidentChange?(on: boolean): void;
   /** The `AdminColumnPicker`, which renders the "Columns · N of M" button. */
   picker: ReactNode;
   density: "comfortable" | "compact";
@@ -28,8 +31,8 @@ export interface AdminTableToolbarProps {
   onCollapse?(): void;
 }
 
-const chipStyle = (on: boolean) => ({
-  height: 28,
+const chipStyle = (on: boolean, height = 28) => ({
+  height,
   padding: "0 10px",
   borderRadius: 14,
   border: on
@@ -46,21 +49,23 @@ const chipStyle = (on: boolean) => ({
   color: on ? "var(--color-ink)" : "var(--color-ink-secondary)",
 });
 
-function ToggleChip({
+export function ToggleChip({
   label,
   on,
   onToggle,
+  height,
 }: {
   label: string;
   on: boolean;
   onToggle(on: boolean): void;
+  height?: number;
 }) {
   return (
     <Box
       component="button"
       type="button"
       aria-pressed={on}
-      style={chipStyle(on)}
+      style={chipStyle(on, height)}
       onClick={() => onToggle(!on)}
     >
       {label}
@@ -68,7 +73,7 @@ function ToggleChip({
   );
 }
 
-function MenuChip({
+export function MenuChip({
   name,
   value,
   options,
@@ -99,22 +104,26 @@ function MenuChip({
   );
 }
 
+function noop() {}
+
 /** Comp `.tool`: 10px/14px padding, 32px controls, 28px chips. */
 export function AdminTableToolbar({
   tabs,
   query,
   onQueryChange,
   searchPlaceholder = "Search code, area or host",
-  liveOnly,
-  onLiveOnlyChange,
-  phase,
-  phaseOptions,
-  onPhaseChange,
-  tier,
-  tierOptions,
-  onTierChange,
-  hasIncident,
-  onHasIncidentChange,
+  searchRef,
+  chips,
+  liveOnly = false,
+  onLiveOnlyChange = noop,
+  phase = null,
+  phaseOptions = [],
+  onPhaseChange = noop,
+  tier = null,
+  tierOptions = [],
+  onTierChange = noop,
+  hasIncident = false,
+  onHasIncidentChange = noop,
   picker,
   density,
   onDensityChange,
@@ -138,16 +147,21 @@ export function AdminTableToolbar({
       <TextInput
         aria-label="Search sessions"
         placeholder={searchPlaceholder}
+        ref={searchRef}
         radius={12}
         w={220}
         value={query}
         onChange={(event) => onQueryChange(event.currentTarget.value)}
         styles={{ input: { height: 32, minHeight: 32, fontSize: 13 } }}
       />
-      <ToggleChip label="Live only" on={liveOnly} onToggle={onLiveOnlyChange} />
-      <MenuChip name="Phase" value={phase} options={phaseOptions} onChange={onPhaseChange} />
-      <MenuChip name="Tier" value={tier} options={tierOptions} onChange={onTierChange} />
-      <ToggleChip label="Has incident" on={hasIncident} onToggle={onHasIncidentChange} />
+      {chips ?? (
+        <>
+          <ToggleChip label="Live only" on={liveOnly} onToggle={onLiveOnlyChange} />
+          <MenuChip name="Phase" value={phase} options={phaseOptions} onChange={onPhaseChange} />
+          <MenuChip name="Tier" value={tier} options={tierOptions} onChange={onTierChange} />
+          <ToggleChip label="Has incident" on={hasIncident} onToggle={onHasIncidentChange} />
+        </>
+      )}
       <Box style={{ flex: 1 }} />
       {picker}
       <Button

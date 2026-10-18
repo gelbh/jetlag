@@ -116,6 +116,7 @@ export function filterAdminSessions(
     const hostVersion = summary.hostAppVersion?.toLowerCase() ?? "";
     return (
       summary.code.toLowerCase().includes(normalizedQuery) ||
+      (summary.hostUid ?? "").toLowerCase().includes(normalizedQuery) ||
       areaLabel.includes(normalizedQuery) ||
       hostVersion.includes(normalizedQuery)
     );
