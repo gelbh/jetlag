@@ -75,6 +75,8 @@ describe("AppUiProvider", () => {
       removeEventListener: () => {},
       dispatchEvent: () => false,
     }));
+    // A returning user may still hold the old admin's "auto" value; the forced dark scheme must win.
+    localStorage.setItem("mantine-color-scheme-value", "auto");
 
     render(
       <AppUiProvider>
@@ -83,5 +85,6 @@ describe("AppUiProvider", () => {
     );
 
     expect(document.documentElement.getAttribute("data-mantine-color-scheme")).toBe("dark");
+    localStorage.removeItem("mantine-color-scheme-value");
   });
 });

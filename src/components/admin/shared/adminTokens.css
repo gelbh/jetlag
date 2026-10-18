@@ -39,9 +39,7 @@
 }
 
 /*
- * Monitor map keeps the player map look (spec non-goal: no restyling player map layers).
- * :root captures the player values before [data-admin-world] shadows them; the player
- * tokens are literal, so the captured value is the player value.
+ * Monitor map keeps the player map look. The admin world no longer overrides player tokens, so these blocks only restate them; P2b deletes this file.
  */
 :root {
   --adm-player-canvas: var(--color-canvas);
