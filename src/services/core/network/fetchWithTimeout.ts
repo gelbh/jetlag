@@ -1,4 +1,6 @@
 // Parallel implementation: functions/fetchWithTimeout.mjs (Cloud Functions runtime).
+import { anySignal, throwIfAborted } from "./anySignal";
+
 /** Upper bound for raw geo asset / public geo API requests so flaky networks fail fast. */
 export const GEO_FETCH_TIMEOUT_MS = 15_000;
 
@@ -28,16 +30,21 @@ export async function fetchAndReadWithTimeout<T>(
   timeoutMs: number,
   read: (response: Response) => Promise<T>,
 ): Promise<T> {
+  const outerSignal = init?.signal ?? undefined;
+  throwIfAborted(outerSignal);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(input, {
       ...init,
-      signal: controller.signal,
+      signal: anySignal([controller.signal, outerSignal]),
     });
     return await read(response);
   } catch (error) {
+    // A caller abort is a cancel, not a timeout: Overpass treats timeouts as
+    // "query too expensive" and would split the bbox into more requests.
+    throwIfAborted(outerSignal);
     if (controller.signal.aborted) {
       throw new FetchTimeoutError(timeoutMs);
     }

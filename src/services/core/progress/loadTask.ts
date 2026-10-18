@@ -275,3 +275,16 @@ export async function withStage<T>(
   node?.finish();
   return result;
 }
+
+/**
+ * Progress root that belongs to no task, for work shared between callers
+ * (an in-flight cache fetch). Callers follow it with `node.mirror()`.
+ */
+export function createDetachedProgressRoot(label: string): ProgressNode {
+  void hydrateDurationHistory();
+  return createProgressRoot(label, {
+    now: () => Date.now(),
+    expectedMs: (spec) => expectedStageMs(spec),
+    onStageFinish: (spec, durationMs) => recordStageDuration(spec, durationMs),
+  });
+}

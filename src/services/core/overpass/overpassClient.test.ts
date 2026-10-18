@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionRecord } from "@/domain/map/annotations";
+import { createProgressRoot } from "@/domain/progress/progressTree";
+import { overpassQueueStateForTests } from "../../geo/overpass/requestQueue";
 import * as accessControl from "../auth/accessControl";
 import { setPremiumApiContext } from "../auth/premiumApiContext";
 import * as firebase from "../firebase/firebase";
@@ -348,6 +350,51 @@ describe("overpassClient", () => {
 
     await expect(queryOverpass("[out:json];")).rejects.toThrow("Overpass query failed.");
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects a cancel during fetch with AbortError, without retry or split error", async () => {
+    const controller = new AbortController();
+    const fetchMock = vi.fn().mockImplementation(
+      (_url: string, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init.signal?.addEventListener("abort", () => {
+            reject(new DOMException("aborted", "AbortError"));
+          });
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = queryOverpass("[out:json];", { signal: controller.signal });
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    controller.abort(new DOMException("Cancelled.", "AbortError"));
+
+    await expect(result).rejects.toMatchObject({ name: "AbortError" });
+    await expect(result).rejects.not.toBeInstanceOf(OverpassQueryTooExpensiveError);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(overpassQueueStateForTests()).toEqual({ active: 0, waiting: 0 });
+  });
+
+  it("ends a backoff sleep immediately on cancel", async () => {
+    vi.useFakeTimers();
+    const controller = new AbortController();
+    const fetchMock = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = queryOverpass("[out:json];", { signal: controller.signal });
+    const settled = expect(result).rejects.toMatchObject({ name: "AbortError" });
+    await vi.advanceTimersByTimeAsync(1);
+    controller.abort(new DOMException("Cancelled.", "AbortError"));
+    await settled;
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("drives a progress node: started on slot, finished on success", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockOverpassResponse({ elements: [] })));
+    let now = 0;
+    const root = createProgressRoot("Task", { now: () => now++, expectedMs: () => 1_000 });
+    const node = root.stage({ kind: "fetch", label: "Searching map data", historyKey: "x" });
+    await queryOverpass("[out:json];", { node });
+    expect(node.isFinished).toBe(true);
   });
 
   it("maps OverpassUnavailableError to a user-facing message", () => {

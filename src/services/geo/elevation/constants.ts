@@ -19,6 +19,8 @@ export type ElevationFetchProfile = "background" | "foreground";
 
 export interface FetchElevationsOptions {
   profile?: ElevationFetchProfile;
+  /** Stops before the next batch, retry, or backoff; requests already sent finish. */
+  signal?: AbortSignal;
 }
 
 export interface OpenMeteoElevationResponse {

@@ -1,4 +1,5 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { abortableSleep } from "@/services/core/network/anySignal";
 import { readPersistedEntry, writePersistedEntry } from "../cache/indexedDb";
 import { elevationPointCacheKey } from "../cache/keys";
 import { memoryCache, readCachedMemoryEntry, writeMemoryEntry } from "../cache/memory";
@@ -69,10 +70,8 @@ export async function hydrateElevationCacheFromIdb(keys: string[]): Promise<void
   await Promise.all(keys.map((key) => readPersistedEntry<number>(key)));
 }
 
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+export function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return abortableSleep(ms, signal);
 }
 
 export function retryDelayMs(attempt: number, retryAfterHeader: string | null): number {
@@ -86,7 +85,7 @@ export function retryDelayMs(attempt: number, retryAfterHeader: string | null): 
   return Math.min(ELEVATION_MAX_BACKOFF_MS, ELEVATION_BASE_BACKOFF_MS * 2 ** attempt);
 }
 
-export async function waitForElevationBatchGap(): Promise<void> {
+export async function waitForElevationBatchGap(signal?: AbortSignal): Promise<void> {
   if (lastElevationRequestAt === 0) {
     return;
   }
@@ -95,7 +94,7 @@ export async function waitForElevationBatchGap(): Promise<void> {
   const elapsed = Date.now() - lastElevationRequestAt;
   const remaining = requiredGap - elapsed;
   if (remaining > 0) {
-    await sleep(remaining);
+    await sleep(remaining, signal);
   }
 }
 
