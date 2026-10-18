@@ -1,10 +1,11 @@
+import { Alert, ScrollArea, Stack, Text } from "@mantine/core";
 import { useHotfixThread } from "../../../hooks/incident/useHotfixThread";
 import { useStickScrollToBottom } from "../../../hooks/ui/useStickScrollToBottom";
 import type { IncidentThreadMessageRecord } from "../../../services/firestore/firestoreIncidentThreads";
+import { AdminIncidentMessage, formatIncidentClock } from "./AdminIncidentMessage";
 
 export interface AdminHotfixThreadProps {
   incidentId: string;
-  className?: string;
   /** Injectable for tests. */
   messagesOverride?: IncidentThreadMessageRecord[];
   errorOverride?: Error | null;
@@ -29,17 +30,9 @@ function senderLabel(sender: IncidentThreadMessageRecord["sender"]): string {
   }
 }
 
-function formatClock(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return iso || "—";
-  }
-  return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
+function messageTone(sender: IncidentThreadMessageRecord["sender"]): "player" | "admin" | "system" {
+  if (sender === "player" || sender === "admin") return sender;
+  return "system";
 }
 
 /**
@@ -47,7 +40,6 @@ function formatClock(iso: string): string {
  */
 export function AdminHotfixThread({
   incidentId,
-  className = "",
   messagesOverride,
   errorOverride,
 }: AdminHotfixThreadProps) {
@@ -57,44 +49,43 @@ export function AdminHotfixThread({
   const bottomRef = useStickScrollToBottom(messages.length);
 
   return (
-    <div className={`jl-incident-chat ${className}`.trim()} data-testid="admin-hotfix-thread">
-      <p className="jl-incident-prompt-label">Private hotfix thread</p>
-      <p className="text-sm text-ink-muted">
-        Coding-agent status only — players cannot read this thread.
-      </p>
+    <Stack gap="xs" flex={1} mih={0} data-testid="admin-hotfix-thread">
+      <div>
+        <Text size="xs" fw={600} tt="uppercase" lts="0.04em">
+          Private hotfix thread
+        </Text>
+        <Text size="sm" c="dimmed">
+          Coding-agent status only. Players cannot read this thread.
+        </Text>
+      </div>
 
       {error ? (
-        <p
-          className="border border-status-error/40 bg-status-error-surface px-2 py-1.5 text-sm font-semibold text-status-error"
-          role="alert"
-        >
+        <Alert role="alert" data-tone="mispunch">
           {error.message}
-        </p>
+        </Alert>
       ) : null}
 
-      <div className="jl-scroll jl-incident-chat-scroll">
-        {messages.length === 0 ? (
-          <p className="text-sm text-ink-dim">
-            No coding-agent activity yet. Clear-bug triage launches here automatically.
-          </p>
-        ) : (
-          messages.map((message) => (
-            <div
-              key={message.id}
-              className={`jl-incident-msg jl-incident-msg--${
-                message.sender === "hotfix_agent" ? "system" : message.sender
-              }`}
-            >
-              <p className="jl-incident-msg-sender">
-                {senderLabel(message.sender)} · {formatClock(message.createdAt)}
-                {message.kind === "agent_meta" ? " · meta" : ""}
-              </p>
-              <p className="jl-incident-msg-text">{message.text}</p>
-            </div>
-          ))
-        )}
-        <div ref={bottomRef} />
-      </div>
-    </div>
+      <ScrollArea flex={1} mih={0} type="auto" offsetScrollbars>
+        <Stack gap="xs">
+          {messages.length === 0 ? (
+            <Text size="sm" c="dimmed">
+              No coding-agent activity yet. Clear-bug triage launches here automatically.
+            </Text>
+          ) : (
+            messages.map((message) => (
+              <AdminIncidentMessage
+                key={message.id}
+                tone={messageTone(message.sender)}
+                meta={`${senderLabel(message.sender)} · ${formatIncidentClock(message.createdAt)}${
+                  message.kind === "agent_meta" ? " · meta" : ""
+                }`}
+                text={message.text}
+              />
+            ))
+          )}
+          <div ref={bottomRef} />
+        </Stack>
+      </ScrollArea>
+    </Stack>
   );
 }

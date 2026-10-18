@@ -174,8 +174,13 @@ export function usedQuestionOptionLabelsForTool(
       return labels;
     }
     case "thermometer": {
-      for (const miles of usedThermometerDistanceOptionsForSession(annotations, pendingQuestions)) {
-        labels.add(thermometerDistanceLabel(milesToMeters(miles), unit));
+      for (const key of usedThermometerDistanceOptionsForSession(
+        annotations,
+        pendingQuestions,
+        unit,
+      )) {
+        const meters = unit === "metric" ? Number(key) : milesToMeters(Number(key));
+        labels.add(thermometerDistanceLabel(meters, unit));
       }
       return labels;
     }

@@ -16,8 +16,8 @@ import {
   isThermometerWalkActive,
   parseThermometerStartPoint,
   questionCostBreakdown,
-  type ThermometerDistanceOptionMiles,
-  thermometerPresetMilesForMeters,
+  type ThermometerDistanceOptionKey,
+  thermometerPresetForDistance,
   thermometerQuestionPrompt,
   thermometerSendBlockReason,
   thermometerUseCount,
@@ -39,7 +39,7 @@ export type { UseThermometerToolParams } from "./thermometer/types";
 
 function createThermometerConfig(
   sessionRules: UseThermometerToolParams["sessionRules"],
-  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles> = new Set(),
+  usedOptions: ReadonlySet<ThermometerDistanceOptionKey> = new Set(),
 ): ThermometerSessionConfig {
   return {
     placementMode: "gps",
@@ -64,7 +64,8 @@ function effectiveThermometerDistanceMeters(
   config: ThermometerSessionConfig,
   syncedWalk: { distanceMeters: number | null } | null,
   sessionRules: UseThermometerToolParams["sessionRules"],
-  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+  usedOptions: ReadonlySet<ThermometerDistanceOptionKey>,
+  unit: UseThermometerToolParams["distanceUnit"],
 ): number {
   if (config.localWalkingQuestionId === null && syncedWalk?.distanceMeters != null) {
     return syncedWalk.distanceMeters;
@@ -73,8 +74,8 @@ function effectiveThermometerDistanceMeters(
   if (config.localWalkingQuestionId !== null || syncedWalk !== null) {
     return distanceMeters;
   }
-  const miles = thermometerPresetMilesForMeters(distanceMeters);
-  if (miles === null || !usedOptions.has(miles)) {
+  const key = thermometerPresetForDistance(distanceMeters, unit);
+  if (key === null || !usedOptions.has(key)) {
     return distanceMeters;
   }
   return (
@@ -162,11 +163,12 @@ export function useThermometerTool({
       usedThermometerDistanceOptionsForSession(
         activeAnnotations,
         pendingQuestions,
+        distanceUnit,
         undefined,
         // The live walk must not mark its own distance as used, or END WALK never arms.
         syncedWalkingQuestion?.id,
       ),
-    [activeAnnotations, pendingQuestions, syncedWalkingQuestion?.id],
+    [activeAnnotations, pendingQuestions, syncedWalkingQuestion?.id, distanceUnit],
   );
   const usedThermometerOptionsRef = useRef(usedThermometerOptions);
   useEffect(() => {
@@ -192,6 +194,7 @@ export function useThermometerTool({
         synced,
         sessionRules,
         usedThermometerOptionsRef.current,
+        distanceUnit,
       );
 
       if (!thermoA || !config.thermoB) {
@@ -200,8 +203,8 @@ export function useThermometerTool({
 
       const travelMeters = distanceBetweenPoints(thermoA, config.thermoB);
       const useCount = Math.max(
-        thermometerUseCount(activeAnnotationsRef.current, distanceMeters),
-        thermometerUseCountFromPending(pendingQuestionsRef.current, distanceMeters),
+        thermometerUseCount(activeAnnotationsRef.current, distanceMeters, distanceUnit),
+        thermometerUseCountFromPending(pendingQuestionsRef.current, distanceMeters, distanceUnit),
       );
       const { draw: cardDraw, keep: cardKeep } = questionCostBreakdown("D2P1", useCount);
 
@@ -261,6 +264,7 @@ export function useThermometerTool({
     syncedWalkDraft,
     sessionRules,
     usedThermometerOptions,
+    distanceUnit,
   );
 
   const { reading: gpsReading } = useLiveLocation(active && config.placementMode === "gps", {
@@ -279,8 +283,8 @@ export function useThermometerTool({
     thermoA && config.thermoB ? distanceBetweenPoints(thermoA, config.thermoB) : null;
 
   const presetUseCount = Math.max(
-    thermometerUseCount(activeAnnotations, activeDistanceMeters),
-    thermometerUseCountFromPending(pendingQuestions, activeDistanceMeters),
+    thermometerUseCount(activeAnnotations, activeDistanceMeters, distanceUnit),
+    thermometerUseCountFromPending(pendingQuestions, activeDistanceMeters, distanceUnit),
   );
   const {
     label: costLabel,
@@ -409,6 +413,7 @@ export function useThermometerTool({
   const distanceUnused = isThermometerDistanceOptionAvailable(
     usedThermometerOptions,
     activeDistanceMeters,
+    distanceUnit,
   );
   const distanceAvailable = distanceAvailableForSession && distanceUnused;
   const liveTravelMeters = walkTracker.distanceTraveledMeters ?? thermoTravelMeters;

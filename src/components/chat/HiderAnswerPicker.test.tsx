@@ -33,6 +33,15 @@ describe("HiderAnswerPicker", () => {
     expect(screen.queryByRole("button")).toBeNull();
   });
 
+  it("disables the set-zone button when the picker is disabled", () => {
+    renderPicker({
+      truthReferenceMode: "noHidingZone",
+      disabled: true,
+      onSetHidingZone: vi.fn(),
+    });
+    expect(screen.getByRole("button", { name: "Set hiding zone" })).toBeDisabled();
+  });
+
   it("keeps a stale true reply visible but inert while truth refetches", () => {
     const onSelect = vi.fn();
     renderPicker({ truth: { replyId: "yes", label: "Yes" }, loading: true, onSelect });
@@ -42,13 +51,26 @@ describe("HiderAnswerPicker", () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it("offers every reply when truth is unavailable", () => {
-    renderPicker({ truth: { replyId: "", label: "Truth unavailable.", unavailable: true } });
+  it("offers every reply when truth is unavailable, including end game without an anchor", () => {
+    renderPicker({
+      truthReferenceMode: "unavailable",
+      truth: { replyId: "", label: "Truth unavailable.", unavailable: true },
+    });
     expect(screen.getAllByRole("button")).toHaveLength(2);
   });
 
   it("offers every reply when truth matches no option", () => {
     renderPicker({ truth: { replyId: "closer", label: "Closer" } });
     expect(screen.getAllByRole("button")).toHaveLength(2);
+  });
+
+  it("replaces replies with a set-zone prompt when the hider has no zone", () => {
+    const onSetHidingZone = vi.fn();
+    renderPicker({ truthReferenceMode: "noHidingZone", loading: true, onSetHidingZone });
+    expect(screen.getByText("Set your hiding zone to answer.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Yes" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "No" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Set hiding zone" }));
+    expect(onSetHidingZone).toHaveBeenCalledTimes(1);
   });
 });

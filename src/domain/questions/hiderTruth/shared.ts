@@ -10,6 +10,7 @@ export interface HiderTruthResult {
 }
 
 export const UNAVAILABLE_NO_ZONE = "Truth unavailable. Set your hiding zone first.";
+export const UNAVAILABLE_NO_ANCHOR = "Truth unavailable. No end-game location was frozen for you.";
 export const UNAVAILABLE_GENERIC = "Truth unavailable. Cannot compute.";
 
 export function truthUnavailable(reason = UNAVAILABLE_GENERIC): HiderTruthResult {

@@ -79,32 +79,15 @@ export function withLocalHiderLocationOverride(
   return locationsByUid;
 }
 
-/**
- * Direct End Game start anchors: prefer usable hiding place, else zone center.
- * Does not require hider Accept. Seekers typically pass zone centers only.
- */
+/** Direct End Game start anchors from each hider's confirmed zone center. */
 export function assembleEndGameStartAnchors(input: {
   hiderUids: readonly string[];
-  hidingPlaces?: readonly { uid: string; lat: number; lng: number }[];
   zoneCenters: readonly { uid: string; lat: number; lng: number }[];
   frozenAt: string;
 }): Record<string, EndGameTruthAnchor> | { missing: string[] } {
-  const hidingByUid = playerLocationsByUid(input.hidingPlaces ?? []);
-  const zoneByUid = playerLocationsByUid(input.zoneCenters);
-  const preferred = new Map<string, PlayerLocationPoint>();
-
-  for (const hiderUid of input.hiderUids) {
-    const hidingPlace = hidingByUid.get(hiderUid);
-    if (isUsablePlayerLocation(hidingPlace)) {
-      preferred.set(hiderUid, hidingPlace);
-      continue;
-    }
-
-    const zoneCenter = zoneByUid.get(hiderUid);
-    if (isUsablePlayerLocation(zoneCenter)) {
-      preferred.set(hiderUid, zoneCenter);
-    }
-  }
-
-  return buildEndGameTruthAnchors(input.hiderUids, preferred, input.frozenAt);
+  return buildEndGameTruthAnchors(
+    input.hiderUids,
+    playerLocationsByUid(input.zoneCenters),
+    input.frozenAt,
+  );
 }

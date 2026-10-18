@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -231,7 +231,12 @@ describe("AdminIncidentDetail", () => {
     );
 
     expect(screen.getByText("inc-abc12345")).toBeInTheDocument();
-    expect(screen.getByText("OPEN")).toBeInTheDocument();
+    // Same tone as the incident's row in Needs you (new = mispunch).
+    expect(screen.getByText("OPEN").closest("[data-tone]")).toHaveAttribute(
+      "data-tone",
+      "mispunch",
+    );
+    expect(screen.getByText("7G2LJH")).toBeInTheDocument();
     expect(screen.getByText(/Pinned prompt for admins/i)).toBeInTheDocument();
     expect(screen.getByText("Still stuck on the map")).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Chat" })).toHaveAttribute("aria-selected", "true");
@@ -316,18 +321,80 @@ describe("AdminIncidentActions", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Launch Cursor agent" }));
+    fireEvent.click(screen.getByRole("button", { name: "Launch agent" }));
     expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
-    expect(await screen.findByRole("button", { name: "Open Cursor agent" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Open agent" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Apply mitigation" }));
-    expect(applyMitigationFn).toHaveBeenCalledWith("inc-1", "soft_reload");
+    expect(applyMitigationFn).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByRole("button", { name: "Apply Soft reload" }));
+    await waitFor(() => expect(applyMitigationFn).toHaveBeenCalledWith("inc-1", "soft_reload"));
 
     fireEvent.change(screen.getByLabelText("Hotfix target version"), {
       target: { value: "0.9.5.1" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Publish hotfix" }));
-    expect(publishHotfixFn).toHaveBeenCalledWith("inc-1", "0.9.5.1", 30);
+    expect(publishHotfixFn).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByRole("button", { name: "Publish 0.9.5.1" }));
+    await waitFor(() => expect(publishHotfixFn).toHaveBeenCalledWith("inc-1", "0.9.5.1", 30));
+  });
+
+  it("dismisses only after confirm, and Cancel calls nothing", async () => {
+    const updateStatusFn = vi.fn().mockResolvedValue({ status: "dismissed" });
+    renderAdmin(
+      <AdminIncidentActions incidentId="inc-1" status="open" updateStatusFn={updateStatusFn} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+    expect(updateStatusFn).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Dismiss incident" }));
+    await waitFor(() => expect(updateStatusFn).toHaveBeenCalledWith("inc-1", "dismissed"));
+  });
+
+  it("names the session when ending it", async () => {
+    renderAdmin(
+      <AdminIncidentActions
+        incidentId="inc-1"
+        status="open"
+        sessionCode="ABCD"
+        applyMitigationFn={vi.fn().mockResolvedValue({ mitigationId: "m", type: "end_session" })}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Mitigation type"), {
+      target: { value: "end_session" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Apply mitigation" }));
+    expect(await screen.findByText("Start the end game for ABCD now?")).toBeInTheDocument();
+  });
+
+  it("resolves without a confirm and is the only filled action", () => {
+    const updateStatusFn = vi.fn().mockResolvedValue({ status: "resolved" });
+    renderAdmin(
+      <AdminIncidentActions incidentId="inc-1" status="open" updateStatusFn={updateStatusFn} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Resolve" }));
+    expect(updateStatusFn).toHaveBeenCalledWith("inc-1", "resolved");
+    for (const name of ["Dismiss", "Apply mitigation", "Publish hotfix"]) {
+      expect(screen.getByRole("button", { name })).toHaveAttribute("data-variant", "default");
+    }
+  });
+
+  it("closes the dismiss confirm when the incident is resolved elsewhere", async () => {
+    const { rerender } = renderAdmin(
+      <AdminIncidentActions incidentId="inc-1" status="open" updateStatusFn={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    expect(await screen.findByRole("button", { name: "Dismiss incident" })).toBeInTheDocument();
+    rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <AdminIncidentActions incidentId="inc-1" status="resolved" updateStatusFn={vi.fn()} />
+      </MantineProvider>,
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Dismiss incident" })).not.toBeInTheDocument(),
+    );
   });
 
   it("opens Cursor agent when already launched", () => {
@@ -344,7 +411,7 @@ describe("AdminIncidentActions", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Open Cursor agent" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open agent" }));
     expect(openExternalUrlFn).toHaveBeenCalledWith("https://cursor.com/agents/bc-live");
   });
 
@@ -366,7 +433,21 @@ describe("AdminIncidentActions", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Retry launch" }));
     expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
-    expect(await screen.findByRole("button", { name: "Open Cursor agent" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Open agent" })).toBeInTheDocument();
+  });
+
+  it("shows a waiting state when the agent launched without a link", () => {
+    const launchCursorAgentFn = vi.fn();
+    renderAdmin(
+      <AdminIncidentActions
+        incidentId="inc-1"
+        agent={{ status: "launched", cursorAgentId: "bc-1", cursorAgentUrl: null }}
+        launchCursorAgentFn={launchCursorAgentFn}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Agent launched, waiting for link" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
   });
 });
 
@@ -443,8 +524,7 @@ describe("AdminOpsDesk gate + mobile stack", () => {
     renderDesk("/admin/incidents/inc-abc12345");
 
     expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "mobile");
-    expect(screen.getByTestId("admin-ops-mobile")).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Incidents" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("radio", { name: "Needs you" })).toBeChecked();
     expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
   });

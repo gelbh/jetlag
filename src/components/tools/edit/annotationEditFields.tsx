@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
-import type { RadarDistanceOptionKey, ThermometerDistanceOptionMiles } from "@/domain/questions";
+import type { RadarDistanceOptionKey, ThermometerDistanceOptionKey } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import { type MatchingAnnotation, MatchingEditFields } from "./MatchingEditFields";
 import { type MeasuringAnnotation, MeasuringEditFields } from "./MeasuringEditFields";
@@ -16,7 +16,7 @@ export interface AnnotationEditFieldsContext {
   distanceUnit: DistanceUnit;
   gameSize: GameSize;
   usedRadarOptions: ReadonlySet<RadarDistanceOptionKey>;
-  usedThermometerOptions: ReadonlySet<ThermometerDistanceOptionMiles>;
+  usedThermometerOptions: ReadonlySet<ThermometerDistanceOptionKey>;
   onSavePayloadChange: (payload: EditSavePayload) => void;
 }
 

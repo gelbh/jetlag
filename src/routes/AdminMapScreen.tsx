@@ -15,7 +15,9 @@ import { SessionLog } from "../components/session/log/SessionLog";
 import { InlineError } from "../components/ui/banners/InlineError";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
+import { countLiveLocations } from "../domain/session/live/liveLocationFreshness";
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
+import { useLiveLocationNowMs } from "../hooks/map/useLiveLocationNowMs";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { usePlayerLocationsSync } from "../hooks/session/useSessionExtrasSync";
 import { AppNavigate } from "../navigation/AppNavigate";
@@ -26,6 +28,11 @@ import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { AdminDiagnosticsOverlay } from "./admin-map-screen/AdminDiagnosticsOverlay";
 import { AdminMapScreenChrome } from "./admin-map-screen/AdminMapScreenChrome";
 import { AdminMonitorRail, type AdminMonitorRailTab } from "./admin-map-screen/AdminMonitorRail";
+import { adminShellCell, adminShellStyle } from "./admin-map-screen/adminShellLayout";
+import {
+  type ModerationAction,
+  useModerationConfirm,
+} from "./admin-map-screen/useModerationConfirm";
 import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
 import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
 
@@ -45,9 +52,9 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const playerLocations = usePlayerLocationsSync(
     embeddedMonitor ? controller.session?.id : undefined,
   );
+  const liveNowMs = useLiveLocationNowMs();
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [moderationBusy, setModerationBusy] = useState(false);
-  const [moderationError, setModerationError] = useState<string | null>(null);
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [railTab, setRailTab] = useState<AdminMonitorRailTab>("overview");
 
@@ -60,38 +67,31 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
     navigate("/admin");
   }, [controller.session?.id, navigate, setSession]);
 
-  const handleModerationAction = useCallback(
-    async (action: "end" | "resetBoard" | "cleanupCode") => {
+  const runModeration = useCallback(
+    async (action: ModerationAction) => {
       const sessionId = controller.session?.id;
       if (!sessionId || sessionId === LOCAL_SESSION_ID) {
-        return;
+        throw new Error("Moderation needs a live session.");
       }
-
-      const labels = {
-        end: "Force end this game?",
-        resetBoard: "Reset the board for this session?",
-        cleanupCode: "End this session and retire its join code?",
-      } as const;
-
-      if (!window.confirm(labels[action])) {
-        return;
-      }
-
       setModerationBusy(true);
-      setModerationError(null);
-
       try {
         await adminModerateSession(sessionId, action);
         if (action === "cleanupCode") {
           await handleLeave();
         }
       } catch (error) {
-        setModerationError(error instanceof Error ? error.message : "Moderation failed.");
+        setModerationBusy(false);
+        throw error;
       }
       setModerationBusy(false);
     },
     [controller.session?.id, handleLeave],
   );
+
+  const moderation = useModerationConfirm({
+    sessionCode: controller.session?.code ?? null,
+    run: runModeration,
+  });
 
   useEffect(() => {
     if (!isWide) {
@@ -183,17 +183,16 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const shell = (
     <div
       ref={shellRef}
-      className={`map-screen-shell admin-map-shell ${
-        isWide ? "admin-map-shell--wide" : "admin-map-shell--compact"
-      } ${isWide && railCollapsed ? "admin-map-shell--rail-collapsed" : ""}`}
+      className="map-screen-shell"
+      style={adminShellStyle({ isWide, railCollapsed, embedded: embeddedMonitor })}
     >
       {embeddedMonitor && isWide ? (
-        <Box className="admin-map-shell__top" bg="var(--adm-paper)">
+        <Box data-shell-cell="top" bg="var(--adm-paper)" style={adminShellCell.top}>
           <AdminCourseHeader
             code={controller.session.code}
             timerState={controller.timer.timerState}
-            seekerCount={controller.seekerLocations.length}
-            hiderCount={controller.hiderLocations.length}
+            seekerCount={countLiveLocations(controller.seekerLocations, liveNowMs)}
+            hiderCount={countLiveLocations(controller.hiderLocations, liveNowMs)}
             questionCount={controller.pendingQuestions.length}
             syncStatus={controller.syncStatus.status}
             onLeave={() => void handleLeave()}
@@ -222,15 +221,14 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           isWide={isWide}
           syncStatus={controller.syncStatus.status}
           moderationBusy={moderationBusy}
-          moderationError={moderationError}
-          onModerationAction={(action) => void handleModerationAction(action)}
+          onModerationAction={moderation.request}
           diagnosticsOpen={diagnosticsOpen}
           onToggleDiagnostics={isWide ? undefined : () => setDiagnosticsOpen((open) => !open)}
         />
       )}
 
       <div
-        className={isWide ? "admin-map-shell__map" : "absolute inset-0"}
+        style={isWide ? adminShellCell.map : { position: "absolute", inset: 0 }}
         data-map-dock-frame=""
         data-player-map={embeddedMonitor ? "" : undefined}
       >
@@ -250,13 +248,14 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           controller={controller}
           chatDisplayRole={chatDisplayRole}
           moderationBusy={moderationBusy}
-          moderationError={moderationError}
-          onModerationAction={(action) => void handleModerationAction(action)}
+          onModerationAction={moderation.request}
           mapViewport={controller.mapViewport}
           onLayerVisibilityChange={setLayerVisibility}
           onLowPowerModeChange={setLowPowerMode}
         />
       ) : null}
+
+      {moderation.confirm}
 
       {!isWide ? (
         <>
@@ -310,11 +309,18 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           ) : null}
         </>
       ) : !embeddedMonitor && controller.syncStatus.lastSyncError ? (
-        <div className="pointer-events-none absolute inset-x-0 top-[var(--admin-status-height)] z-[var(--z-panel)] px-3">
+        <Box
+          pos="absolute"
+          left={0}
+          right={0}
+          top="2.5rem"
+          px="sm"
+          style={{ zIndex: "var(--z-panel)", pointerEvents: "none" }}
+        >
           <InlineError className="pointer-events-auto mx-auto max-w-xl">
             {controller.syncStatus.lastSyncError}
           </InlineError>
-        </div>
+        </Box>
       ) : null}
     </div>
   );

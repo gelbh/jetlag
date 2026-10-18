@@ -10,9 +10,11 @@ import {
   Drawer,
   Kbd,
   type MantineThemeOverride,
+  Modal,
   Paper,
   Popover,
   Portal,
+  SegmentedControl,
   Select,
   Table,
   Tabs,
@@ -112,6 +114,17 @@ export const adminTheme: MantineThemeOverride = {
     Button: Button.extend({
       defaultProps: { radius: 0 },
       vars: (_theme, props) => {
+        if (props.color === "red" && (props.variant ?? "filled") === "filled") {
+          return {
+            root: {
+              "--button-bg": "var(--adm-mispunch)",
+              "--button-hover": "color-mix(in oklch, var(--adm-mispunch) 86%, var(--adm-ink))",
+              "--button-color": "var(--adm-paper)",
+              "--button-hover-color": "var(--adm-paper)",
+              "--button-bd": "1px solid transparent",
+            },
+          };
+        }
         const colors = props.color ? null : controlColors(props.variant);
         if (!colors) return { root: {} };
         return {
@@ -271,10 +284,30 @@ export const adminTheme: MantineThemeOverride = {
         title: { fontWeight: 700, letterSpacing: "normal" },
       },
     }),
+    Modal: Modal.extend({
+      defaultProps: {
+        radius: 0,
+        overlayProps: { backgroundOpacity: 0.4, blur: 0 },
+        closeButtonProps: { "aria-label": "Close" },
+      },
+      styles: {
+        content: {
+          backgroundColor: "var(--adm-paper-raised)",
+          color: "var(--adm-ink)",
+          border: rule,
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          boxShadow: "none",
+        },
+        header: { backgroundColor: "var(--adm-paper-raised)", borderBottom: rule },
+        title: { fontWeight: 700, letterSpacing: "normal" },
+      },
+    }),
     AppShell: AppShell.extend({
       styles: {
         navbar: { borderInlineEnd: rule },
         aside: { borderInlineStart: rule },
+        footer: { borderTop: rule, backgroundColor: "var(--adm-paper)" },
       },
     }),
     Divider: Divider.extend({
@@ -291,6 +324,31 @@ export const adminTheme: MantineThemeOverride = {
         control: { fontWeight: 600 },
         chevron: { color: "var(--adm-ink)" },
       },
+    }),
+    SegmentedControl: SegmentedControl.extend({
+      defaultProps: { radius: 0 },
+      styles: {
+        root: { backgroundColor: "var(--adm-paper)", border: rule, padding: 2 },
+        // 44px touch target (spec #9); the selected plate is reversed in overprint.
+        label: {
+          minHeight: "2.75rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--adm-font)",
+          fontWeight: 600,
+          letterSpacing: "normal",
+        },
+      },
+      vars: () => ({
+        root: {
+          "--sc-color": "var(--adm-overprint)",
+          "--sc-label-color": "var(--adm-overprint-ink)",
+          // Mantine colours inactive labels gray-7 (light) / dark-1 (dark); inline color would also beat the active rule.
+          "--mantine-color-gray-7": "var(--adm-ink)",
+          "--mantine-color-dark-1": "var(--adm-ink)",
+        },
+      }),
     }),
     Paper: Paper.extend({
       defaultProps: { radius: 0, shadow: "none", withBorder: true },

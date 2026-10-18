@@ -220,10 +220,61 @@ test("endSessionHandler ends for host", async () => {
   };
 
   const result = await endSessionHandler(db, "host", "sess-1");
-  assert.deepEqual(result, { ok: true });
+  assert.deepEqual(result, { ok: true, alreadyEnded: false });
   assert.equal(updates[0].status, "ended");
   assert.equal(updates[0].gameOutcome, "ended_early");
   assert.deepEqual(ended.deleted, [{ name: "sessionCodes", id: "ZZZZ" }]);
+});
+
+test("endSessionHandler reports alreadyEnded when a racing end committed first", async () => {
+  const updates = [];
+  const activeData = {
+    hostUid: "host",
+    status: "active",
+    memberUids: ["host", "s1"],
+    memberRoles: { host: "seeker", s1: "hider" },
+    code: "QQQQ",
+  };
+  const endedData = {
+    ...activeData,
+    status: "ended",
+    endedAt: "2026-01-01T00:00:00.000Z",
+    gameOutcome: "ended_early",
+  };
+  const sessionRef = {
+    id: "sess-1",
+    get: async () => ({
+      exists: true,
+      data: () => activeData,
+      ref: sessionRef,
+    }),
+  };
+  const db = {
+    collection: (name) => {
+      if (name === "sessions") {
+        return { doc: () => sessionRef };
+      }
+      if (name === "sessionCodes") {
+        return { doc: (id) => ({ name, id }) };
+      }
+      throw new Error(`unexpected ${name}`);
+    },
+    runTransaction: async (fn) =>
+      fn({
+        get: async () => ({
+          exists: true,
+          data: () => endedData,
+        }),
+        update: async (_ref, payload) => {
+          updates.push(payload);
+        },
+        delete: async () => {},
+      }),
+  };
+
+  const result = await endSessionHandler(db, "host", "sess-1");
+  assert.deepEqual(result, { ok: true, alreadyEnded: true });
+  assert.equal(updates.length, 0);
 });
 
 test("endSessionHandler rejects already ended", async () => {

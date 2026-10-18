@@ -15,6 +15,7 @@ import { captureException } from "../../services/core/analytics/clientErrors";
 import { forceRgbCssColorsInClone } from "../../services/core/capture/html2canvasColors";
 import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/capture/html2canvasErrors";
 import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
+import { withTimeout } from "../../services/core/withTimeout";
 import {
   endRemoteSession,
   resetRemoteSession,
@@ -33,6 +34,7 @@ import {
 import { isExpectedSessionLeaveError } from "../../services/session/sessionLeaveErrors";
 import { endSession, leaveHostSession } from "../../services/session/sessionLifecycle";
 import { useSessionStore } from "../../state/sessionStore";
+import { useSubmitLock } from "../forms/useSubmitLock";
 import { useSessionExit } from "../session/useSessionExit";
 
 /** Offline fail-fast: tell the player instead of reporting or falling back to a client write. */
@@ -45,6 +47,10 @@ function alertIfNeedsConnection(error: unknown): boolean {
 }
 
 const MAP_EXPORT_BACKGROUND = "#0f172a";
+
+/** Bounds auth so a hung sign-in cannot leave the End button disabled forever. */
+const END_SESSION_AUTH_TIMEOUT_MS = 10_000;
+const END_SESSION_ERROR_MESSAGE = "Couldn't end the session. Try again.";
 
 const loadHtml2Canvas = () => import("html2canvas");
 
@@ -78,6 +84,7 @@ export function useMapSessionChrome({
   const exitSession = useSessionExit();
   const setSession = useSessionStore((state) => state.setSession);
   const resetInFlightRef = useRef(false);
+  const { isSubmitting: endInFlight, runLocked: runEndLocked } = useSubmitLock();
 
   const handleClearMap = useCallback(() => {
     if (endGameBlocked) {
@@ -205,55 +212,61 @@ export function useMapSessionChrome({
       return;
     }
 
-    let user: { uid: string };
-    try {
-      user = await ensureAnonymousUser();
-    } catch (error) {
-      captureException(error);
-      window.alert("Couldn't end the session. Try again.");
-      return;
-    }
-
-    // Prefer live hostUid over the isHost prop so stale host chrome cannot
-    // call the host-only end callable after a transfer.
-    if (session.hostUid !== user.uid) {
-      return;
-    }
-
-    if (!window.confirm("End this session for all players?")) {
-      return;
-    }
-
-    const sessionId = session.id;
-    try {
-      await endSession(sessionId);
-    } catch (error) {
-      if (alertIfNeedsConnection(error)) {
+    await runEndLocked(async () => {
+      let user: { uid: string };
+      try {
+        user = await withTimeout(
+          ensureAnonymousUser(),
+          END_SESSION_AUTH_TIMEOUT_MS,
+          END_SESSION_ERROR_MESSAGE,
+        );
+      } catch (error) {
+        captureException(error);
+        window.alert(END_SESSION_ERROR_MESSAGE);
         return;
       }
-      if (isExpectedSessionLeaveError(error)) {
-        trackSessionEnded("expected_already_ended");
-      } else {
-        captureException(error);
-        // Emulator / no Functions: fall back to the client end write. Not awaited —
-        // it applies locally and replays on reconnect; rejections reach WriteFailureNotifier.
-        commitWrite("session.end", () => endRemoteSession(sessionId));
-        // Counts the local end; a later rules rejection surfaces via the notifier.
-        trackSessionEnded("fallback_client_end");
+
+      // Prefer live hostUid over the isHost prop so stale host chrome cannot
+      // call the host-only end callable after a transfer.
+      if (session.hostUid !== user.uid) {
+        return;
       }
-    }
-    // Activity only — session_ended already tracked via endSession / paths above.
-    emitGameEndedActivity(sessionId, {
-      outcome: "ended_early",
-      summary: "Session ended",
+
+      if (!window.confirm("End this session for all players?")) {
+        return;
+      }
+
+      const sessionId = session.id;
+      try {
+        await endSession(sessionId);
+      } catch (error) {
+        if (alertIfNeedsConnection(error)) {
+          return;
+        }
+        if (isExpectedSessionLeaveError(error)) {
+          trackSessionEnded("expected_already_ended");
+        } else {
+          captureException(error);
+          // Emulator / no Functions: fall back to the client end write. Not awaited —
+          // it applies locally and replays on reconnect; rejections reach WriteFailureNotifier.
+          commitWrite("session.end", () => endRemoteSession(sessionId));
+          // Counts the local end; a later rules rejection surfaces via the notifier.
+          trackSessionEnded("fallback_client_end");
+        }
+      }
+      // Activity only — session_ended already tracked via endSession / paths above.
+      emitGameEndedActivity(sessionId, {
+        outcome: "ended_early",
+        summary: "Session ended",
+      });
+      await exitSession({
+        reason: "end",
+        sessionId,
+        replace: true,
+        closeOverlays: closeSettingsPanel,
+      });
     });
-    await exitSession({
-      reason: "end",
-      sessionId,
-      replace: true,
-      closeOverlays: closeSettingsPanel,
-    });
-  }, [closeSettingsPanel, exitSession, session]);
+  }, [closeSettingsPanel, exitSession, runEndLocked, session]);
 
   const handleLeaveSession = useCallback(async () => {
     if (!session) {
@@ -405,6 +418,7 @@ export function useMapSessionChrome({
     handleResetBoard,
     handleResetSession,
     handleEndSession,
+    endInFlight,
     handleLeaveSession,
     exportMap,
   };

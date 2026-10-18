@@ -30,7 +30,13 @@ function parsePort(raw: string | undefined, fallback: number, envKey: string): n
 }
 
 export function firebaseEmulatorEndpoints(
-  env: Record<string, string | undefined> = import.meta.env as Record<string, string | undefined>,
+  env: Record<string, string | undefined> = {
+    VITE_FIREBASE_EMULATOR_HOST: import.meta.env.VITE_FIREBASE_EMULATOR_HOST,
+    VITE_FIREBASE_AUTH_EMULATOR_PORT: import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_PORT,
+    VITE_FIRESTORE_EMULATOR_PORT: import.meta.env.VITE_FIRESTORE_EMULATOR_PORT,
+    VITE_FIREBASE_STORAGE_EMULATOR_PORT: import.meta.env.VITE_FIREBASE_STORAGE_EMULATOR_PORT,
+    VITE_FIREBASE_FUNCTIONS_EMULATOR_PORT: import.meta.env.VITE_FIREBASE_FUNCTIONS_EMULATOR_PORT,
+  },
 ): FirebaseEmulatorEndpoints {
   const host = (env.VITE_FIREBASE_EMULATOR_HOST ?? "").trim() || FIREBASE_EMULATOR_DEFAULTS.host;
   return {

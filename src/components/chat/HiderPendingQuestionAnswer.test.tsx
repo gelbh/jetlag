@@ -144,4 +144,24 @@ describe("HiderPendingQuestionAnswer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Tap again to play Randomize" }));
     expect(onPlay).toHaveBeenCalledWith("pq-radar", "msg-radar", "randomize");
   });
+
+  it("routes the set-zone prompt to the hiding zone handler", () => {
+    const onSetHidingZone = vi.fn();
+    renderWithAppUi(
+      <HiderPendingQuestionAnswer
+        message={radarMessage}
+        pending={radarPending}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="s1"
+        truth={null}
+        truthsLoading={false}
+        truthReferenceMode="noHidingZone"
+        nowMs={Date.now()}
+        onAnswerQuestion={vi.fn()}
+        onSetHidingZone={onSetHidingZone}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Set hiding zone" }));
+    expect(onSetHidingZone).toHaveBeenCalledTimes(1);
+  });
 });

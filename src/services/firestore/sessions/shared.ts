@@ -11,8 +11,6 @@ import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { buildMembershipHealState } from "@/domain/session/players/returningMember";
 import { forceRefreshIdToken } from "@/services/core/auth/forceRefreshIdToken";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
-import { repairGhostHost } from "@/services/session/sessionLifecycle";
-import { cancelWalkingThermometersAfterIdentityHeal } from "../firestoreSessionExtras";
 
 export const HIDER_ROLE_POLL_MS = 250;
 export const HIDER_ROLE_POLL_MAX_MS = 3000;
@@ -190,45 +188,6 @@ export async function writeSessionMembershipPatch(
     }
     await updateDoc(sessionRef, legacyPatch);
   }
-}
-
-export async function applyReturningMemberHealWrite(
-  sessionRef: DocumentReference,
-  sessionId: string,
-  data: Record<string, unknown>,
-  uid: string,
-  role: PlayerRole,
-  clientVersion: string,
-  returningMemberUid: string,
-  fallbackHostUid?: string,
-): Promise<ReturnType<typeof buildMembershipHealState>> {
-  const fields = readSessionMembershipFields(data);
-  const heal = buildMembershipHealState({
-    existingMemberUids: fields.memberUids,
-    existingRoles: fields.memberRoles,
-    existingAppVersions: fields.memberAppVersions,
-    uid,
-    role,
-    clientVersion,
-    returningMemberUid,
-    currentHostUid: fields.hostUid || fallbackHostUid || "",
-  });
-  await writeSessionMembershipPatch(sessionRef, membershipPatchFromHealState(heal));
-  void cancelWalkingThermometersAfterIdentityHeal(sessionId, returningMemberUid, uid, role);
-
-  // hostUid is Admin-only — repair ghost host after membership heal removes it.
-  if (heal.nextHostUid != null) {
-    try {
-      const repaired = await repairGhostHost(sessionId);
-      if (repaired.action === "repaired") {
-        return { ...heal, hostUid: repaired.newHostUid, nextHostUid: repaired.newHostUid };
-      }
-    } catch {
-      // Membership heal already landed; host repair can retry on next join.
-    }
-  }
-
-  return heal;
 }
 
 export async function touchSessionLastActive(sessionId: string): Promise<void> {

@@ -1,7 +1,7 @@
 {
   "name": "jetlag",
   "private": true,
-  "version": "1.4.0",
+  "version": "1.4.1",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
@@ -27,7 +27,7 @@
     "test:changed": "vitest run --changed origin/main --passWithNoTests --project unit",
     "test:changeset-map": "node --test .changeset/section-map.test.mjs scripts/normalize-changelog-sections.test.mjs scripts/changelog-release-body.test.mjs scripts/create-github-release.test.mjs scripts/check-entry-budget.test.mjs scripts/seo-build-lib.test.mjs scripts/lhci-document-route.test.mjs scripts/lighthouse-runner-summary.test.mjs scripts/lighthouserc-runner-class.test.mjs",
     "test:functions": "env -u npm_config_allow_scripts sh -c 'cd functions && npm ci && npm test'",
-    "test:emulator": "firebase emulators:exec --project demo-jetlag --only auth,firestore,storage \"npm run test:emulator:vitest\"",
+    "test:emulator": "firebase emulators:exec --project demo-jetlag --only auth,firestore,storage,functions \"npm run test:emulator:vitest\"",
     "test:emulator:vitest": "vitest run --project emulator",
     "test:e2e": "playwright test",
     "test:e2e:gate-smoke": "E2E_GATE_SMOKE=1 playwright test",
@@ -145,14 +145,19 @@
     "@opentelemetry/core": "^2.8.0",
     "tmp": "^0.2.6",
     "@hono/node-server": "^2.0.5",
-    "js-yaml@3": "3.15.2",
+    "js-yaml@3": {
+      ".": "3.15.2",
+      "argparse": "^2.0.1"
+    },
     "js-yaml@4": "4.3.2",
     "undici@7": "7.30.0",
     "sharp": "0.35.5",
     "shell-quote": "1.11.0",
     "@grpc/grpc-js": "^1.14.5",
     "fast-uri": "3.1.8",
-    "morgan": "1.12.1"
+    "morgan": "1.12.1",
+    "basic-ftp": "6.2.3",
+    "@puppeteer/browsers": "3.2.4"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,

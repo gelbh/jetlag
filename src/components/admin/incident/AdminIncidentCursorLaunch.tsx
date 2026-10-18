@@ -1,4 +1,4 @@
-import { Alert, Button, Stack, Text } from "@mantine/core";
+import { Alert, Button, Group, Stack, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import type { IncidentCodingAgentState } from "../../../domain/incident/incidentTypes";
 import {
@@ -59,10 +59,8 @@ export function AdminIncidentCursorLaunch({
       ? effectiveAgent.cursorAgentUrl.trim()
       : null;
   const hasOpenableAgent = Boolean(effectiveAgent?.cursorAgentId && agentUrl);
-  const canRetry =
-    effectiveAgent?.status === "failed" ||
-    effectiveAgent?.status === "misconfigured" ||
-    Boolean(effectiveAgent?.cursorAgentId && !agentUrl);
+  const failed = effectiveAgent?.status === "failed" || effectiveAgent?.status === "misconfigured";
+  const waitingForLink = Boolean(effectiveAgent?.cursorAgentId && !agentUrl && !failed);
 
   const onLaunch = async () => {
     if (!incidentId) {
@@ -90,11 +88,15 @@ export function AdminIncidentCursorLaunch({
   };
 
   return (
-    <Stack className="jl-incident-module" gap="sm">
-      <h3 className="jl-incident-module-title">2 · Launch Cursor agent</h3>
-      <p className="jl-incident-module-hint">{codingAgentHint(effectiveAgent)}</p>
+    <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
+      <Title order={3} size="h6">
+        2 · Coding agent
+      </Title>
+      <Text size="xs" c="dimmed">
+        {codingAgentHint(effectiveAgent)}
+      </Text>
       {error ? (
-        <Alert color="red" role="alert">
+        <Alert data-tone="mispunch" role="alert">
           {error}
         </Alert>
       ) : null}
@@ -115,25 +117,33 @@ export function AdminIncidentCursorLaunch({
             }
           }}
         >
-          Open Cursor agent
+          Open agent
         </Button>
-      ) : (
-        <>
+      ) : waitingForLink ? (
+        <Group gap="xs" wrap="nowrap">
+          <Button type="button" variant="default" tt="uppercase" disabled>
+            Agent launched, waiting for link
+          </Button>
           <Button
             type="button"
-            variant="default"
-            tt="uppercase"
+            variant="subtle"
+            size="compact-sm"
             disabled={actionsDisabled || busy}
             onClick={() => void onLaunch()}
           >
-            {busy ? "Launching…" : canRetry ? "Retry launch" : "Launch Cursor agent"}
+            {busy ? "Launching…" : "Retry"}
           </Button>
-          {effectiveAgent?.cursorAgentId && !agentUrl ? (
-            <p className="jl-incident-module-hint">
-              Agent id is set but no URL was returned - retry or check the hotfix thread.
-            </p>
-          ) : null}
-        </>
+        </Group>
+      ) : (
+        <Button
+          type="button"
+          variant="default"
+          tt="uppercase"
+          disabled={actionsDisabled || busy}
+          onClick={() => void onLaunch()}
+        >
+          {busy ? "Launching…" : failed ? "Retry launch" : "Launch agent"}
+        </Button>
       )}
     </Stack>
   );

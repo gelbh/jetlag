@@ -1,28 +1,17 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import {
-  parseGeometryJson,
-  pointFromGeometryFeature,
-} from "../../geometry/gameArea/geometryParsing";
 import { isEndGameActive, type SessionRecord } from "../../map/annotations";
-import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export type { EndGameTruthAnchor } from "../../session/hiding/endGameTruthAnchors";
 
 export type HiderTruthReferenceMode =
-  | "hidingPlace"
   | "hidingZoneCenter"
   | "endGameFreeze"
+  | "noHidingZone"
   | "unavailable";
 
-/** Pre-end-game ignores hidingPlace/askOrigin/originInsideZone/seekerPlacesByUid. */
 export interface ResolveHiderTruthReferenceInput {
   hiderUid: string;
   zoneCenter: LatLngTuple | null;
-  hidingPlace?: LatLngTuple | null;
-  askOrigin?: LatLngTuple | null;
-  originInsideZone?: boolean;
-  zoneRadiusMeters?: number | null;
-  seekerPlacesByUid?: Readonly<Record<string, LatLngTuple>> | null;
   session: Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors"> | null | undefined;
 }
 
@@ -44,41 +33,7 @@ function isUsablePoint(point: LatLngTuple | null | undefined): point is LatLngTu
   return point != null && isUsableLatLng(point[0], point[1]);
 }
 
-const MAP_PIN_TRUTH_TOOLS = new Set(["tentacle", "matching", "measuring", "thermometer"]);
-
-export function isMapPinTruthTool(toolType: string): boolean {
-  return MAP_PIN_TRUTH_TOOLS.has(toolType);
-}
-
-export function askOriginFromPendingQuestion(
-  question: PendingQuestionRecord,
-  seekerPlacesByUid?: Readonly<Record<string, LatLngTuple>> | null,
-): LatLngTuple | null {
-  if (isMapPinTruthTool(question.toolType)) {
-    const seekerPlace = question.createdByUid
-      ? seekerPlacesByUid?.[question.createdByUid]
-      : undefined;
-    return isUsablePoint(seekerPlace) ? seekerPlace : null;
-  }
-
-  // Photo pending questions use geometryJson "{}" — parse must return null, not throw.
-  const feature = parseGeometryJson(question.placement.geometryJson);
-  return feature ? pointFromGeometryFeature(feature) : null;
-}
-
-export type HiderQuestionTruthContextInput = Omit<
-  ResolveHiderTruthReferenceInput,
-  "askOrigin" | "originInsideZone"
->;
-
-/** Per-question truth reference (zone center until end-game freeze). */
-export function resolvePendingQuestionTruthReference(
-  _question: PendingQuestionRecord,
-  context: HiderQuestionTruthContextInput,
-): HiderTruthReference {
-  return resolveHiderTruthReference(context);
-}
-
+/** Zone center before end game (noHidingZone without one), frozen anchor during it. */
 export function resolveHiderTruthReference({
   hiderUid,
   zoneCenter,
@@ -100,5 +55,5 @@ export function resolveHiderTruthReference({
     return { point: zoneCenter, mode: "hidingZoneCenter" };
   }
 
-  return { point: null, mode: "unavailable" };
+  return { point: null, mode: "noHidingZone" };
 }

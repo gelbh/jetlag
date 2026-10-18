@@ -1,5 +1,7 @@
+import { Stack } from "@mantine/core";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "@/components/session/status/syncRailDisplay";
 import type { SyncStatus } from "@/domain/device/sync/sync";
+import { AdminDiagRow } from "../../../components/admin/shared/AdminDiagRow";
 
 interface SyncPanelProps {
   status: SyncStatus;
@@ -47,14 +49,13 @@ export function SyncPanel({
         </p>
       ) : null}
 
-      <dl className="space-y-2">
+      <Stack component="dl" gap="xs" m={0}>
         {rows.map((row) => (
-          <div key={row.label} className="admin-diag-row">
-            <dt>{row.label}</dt>
-            <dd>{row.value}</dd>
-          </div>
+          <AdminDiagRow key={row.label} label={row.label}>
+            {row.value}
+          </AdminDiagRow>
         ))}
-      </dl>
+      </Stack>
     </div>
   );
 }

@@ -39,7 +39,10 @@ describe("AdminMonitorPane", () => {
   it("renders the embedded map when active", () => {
     renderWithAppUi(<AdminMonitorPane active />);
 
-    expect(screen.getByTestId("admin-monitor-fixed")).toBeInTheDocument();
+    const pane = screen.getByTestId("admin-monitor-fixed");
+    // Container for the rail's cqi width; stacking context keeps the rail under the Needs you drawer.
+    expect(pane.style.containerType).toBe("inline-size");
+    expect(pane.style.isolation).toBe("isolate");
     expect(screen.getByTestId("admin-map-screen-embed")).toBeInTheDocument();
   });
 });

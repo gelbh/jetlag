@@ -47,6 +47,7 @@ export interface HiderPendingQuestionAnswerProps {
     deadlineExpired?: boolean,
   ) => Promise<void>;
   questionCards?: HiderQuestionCards;
+  onSetHidingZone?: () => void;
 }
 
 const QUESTION_DOCK_IDS = [
@@ -70,6 +71,7 @@ export function HiderPendingQuestionAnswer({
   disabled = false,
   onAnswerQuestion,
   questionCards,
+  onSetHidingZone,
 }: HiderPendingQuestionAnswerProps) {
   const walking = pending?.status === "walking";
   const pendingQuestionId = message.pendingQuestionId;
@@ -115,6 +117,7 @@ export function HiderPendingQuestionAnswer({
       {!closed && !walking && !isPhotoQuestion && message.replyOptions ? (
         <HiderAnswerPicker
           replyOptions={message.replyOptions}
+          onSetHidingZone={onSetHidingZone}
           truth={truth}
           loading={truthsLoading}
           truthReferenceMode={truthReferenceMode}

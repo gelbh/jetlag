@@ -92,7 +92,6 @@ function renderRail(overrides: Partial<RailProps> = {}) {
     controller: createController(),
     chatDisplayRole: "admin",
     moderationBusy: false,
-    moderationError: null,
     onModerationAction: vi.fn(),
     mapViewport: null,
     onLayerVisibilityChange: vi.fn(),

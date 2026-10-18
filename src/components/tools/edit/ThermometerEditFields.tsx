@@ -6,7 +6,7 @@ import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,
   isThermometerDistanceOptionAvailable,
   type ThermometerAnswer,
-  type ThermometerDistanceOptionMiles,
+  type ThermometerDistanceOptionKey,
   thermometerHotterTowards,
   thermometerQuestionPrompt,
 } from "@/domain/questions";
@@ -23,7 +23,7 @@ export type ThermometerAnnotation = AnnotationRecord & { type: "thermometer" };
 interface ThermometerEditFieldsProps {
   annotation: ThermometerAnnotation;
   distanceUnit: DistanceUnit;
-  usedThermometerOptions: ReadonlySet<ThermometerDistanceOptionMiles>;
+  usedThermometerOptions: ReadonlySet<ThermometerDistanceOptionKey>;
   onSavePayloadChange: (payload: EditSavePayload) => void;
 }
 
@@ -42,9 +42,16 @@ export function ThermometerEditFields({
 
   const canSave =
     thermometerAnswer !== null &&
-    isThermometerDistanceOptionAvailable(usedThermometerOptions, thermometerDistanceMeters);
+    isThermometerDistanceOptionAvailable(
+      usedThermometerOptions,
+      thermometerDistanceMeters,
+      distanceUnit,
+    );
 
-  const availableThermometerPresets = availableThermometerDistancePresets(usedThermometerOptions);
+  const availableThermometerPresets = availableThermometerDistancePresets(
+    usedThermometerOptions,
+    distanceUnit,
+  );
 
   const save = useCallback(() => {
     if (!canSave || !thermometerAnswer) {

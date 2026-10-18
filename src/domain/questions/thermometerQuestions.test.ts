@@ -5,14 +5,17 @@ import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   availableThermometerDistancePresets,
   DEFAULT_THERMOMETER_DISTANCE_METERS,
-  firstAvailableThermometerDistanceMeters,
+  firstAvailableThermometerDistanceMetersForSession,
+  isThermometerDistanceAllowedForGameSize,
   isThermometerDistanceOptionAvailable,
+  isThermometerDistanceOptionUsed,
   THERMOMETER_DISTANCE_PRESETS,
   THERMOMETER_DISTANCE_PRESETS_MILES,
   thermometerDistanceLabel,
   thermometerDistanceOptionForAnnotation,
+  thermometerDistancePresetsForGameSize,
   thermometerHotterTowards,
-  thermometerPresetMilesForMeters,
+  thermometerPresetForDistance,
   thermometerQuestionPrompt,
   thermometerShadedSide,
   usedThermometerDistanceOptions,
@@ -71,12 +74,17 @@ describe("thermometerQuestions", () => {
       status: "active" as const,
     };
 
-    expect(thermometerPresetMilesForMeters(halfMile)).toBe(0.5);
+    expect(thermometerPresetForDistance(halfMile, "imperial")).toBe(0.5);
     expect(thermometerDistanceOptionForAnnotation(thermometer)).toBe(3);
     expect(usedThermometerDistanceOptions([thermometer])).toEqual(new Set([3]));
-    expect(usedThermometerDistanceOptions([thermometer], "thermo-1")).toEqual(new Set());
+    expect(usedThermometerDistanceOptions([thermometer], "imperial", "thermo-1")).toEqual(
+      new Set(),
+    );
     expect(
-      firstAvailableThermometerDistanceMeters(usedThermometerDistanceOptions([thermometer])),
+      firstAvailableThermometerDistanceMetersForSession(
+        { gameSize: "large", distanceUnit: "imperial" },
+        usedThermometerDistanceOptions([thermometer]),
+      ),
     ).toBe(halfMile);
 
     const pending = {
@@ -97,6 +105,51 @@ describe("thermometerQuestions", () => {
     expect(usedThermometerDistanceOptionsForSession([], [cancelled])).toEqual(new Set([3]));
     expect(isThermometerDistanceOptionAvailable("large", threeMiles)).toBe(true);
     expect(availableThermometerDistancePresets("large")).toEqual(THERMOMETER_DISTANCE_PRESETS);
+  });
+
+  it("honors unit on GameSize thermometer availability (metric)", () => {
+    const oneKm = 1000;
+    const fiveKm = 5000;
+    const fifteenKm = 15000;
+
+    expect(thermometerDistancePresetsForGameSize("medium", "metric")).toEqual([
+      oneKm,
+      fiveKm,
+      fifteenKm,
+    ]);
+    expect(isThermometerDistanceAllowedForGameSize("medium", oneKm, "metric")).toBe(true);
+    expect(isThermometerDistanceAllowedForGameSize("medium", fiveKm, "metric")).toBe(true);
+    expect(isThermometerDistanceOptionAvailable("medium", oneKm, "metric")).toBe(true);
+    expect(availableThermometerDistancePresets("medium", "metric")).toEqual(
+      thermometerDistancePresetsForGameSize("medium", "metric"),
+    );
+    // Imperial mile ladder must not gate metric meter presets.
+    expect(isThermometerDistanceAllowedForGameSize("medium", oneKm, "imperial")).toBe(false);
+  });
+
+  it("treats unused metric presets as available (not false distance_used)", () => {
+    const oneKm = 1000;
+    const fiveKm = 5000;
+    const session = { gameSize: "medium" as const, distanceUnit: "metric" as const };
+
+    expect(thermometerPresetForDistance(oneKm, "metric")).toBe(1000);
+    expect(isThermometerDistanceOptionAvailable(new Set(), oneKm, "metric")).toBe(true);
+    expect(isThermometerDistanceOptionUsed(new Set(), oneKm, "metric")).toBe(false);
+    expect(firstAvailableThermometerDistanceMetersForSession(session, new Set())).toBe(oneKm);
+
+    const pending = {
+      id: "pq-thermo-1km",
+      toolType: "thermometer",
+      status: "pending",
+      placement: {
+        metadata: { thermometerDistanceMeters: oneKm },
+      },
+    } as unknown as PendingQuestionRecord;
+    const used = usedThermometerDistanceOptionsForSession([], [pending], "metric");
+    expect(used).toEqual(new Set([1000]));
+    expect(isThermometerDistanceOptionAvailable(used, oneKm, "metric")).toBe(false);
+    expect(isThermometerDistanceOptionAvailable(used, fiveKm, "metric")).toBe(true);
+    expect(firstAvailableThermometerDistanceMetersForSession(session, used)).toBe(fiveKm);
   });
 });
 

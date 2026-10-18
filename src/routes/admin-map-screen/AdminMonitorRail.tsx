@@ -4,16 +4,20 @@ import type { MapViewportState } from "../../components/map/chrome/MapViewportTr
 import { SessionLogBody } from "../../components/session/log/SessionLogBody";
 import { HudChevronLeftIcon, HudChevronRightIcon } from "../../components/ui/brand/HudIcons";
 import type { SessionRecord } from "../../domain/map/annotations";
+import { countLiveLocations } from "../../domain/session/live/liveLocationFreshness";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { SessionRulesInput } from "../../domain/session/rules";
+import { useLiveLocationNowMs } from "../../hooks/map/useLiveLocationNowMs";
 import { useSessionActivityLog } from "../../hooks/session/useSessionActivityLog";
 import { useAnnotationStore } from "../../state/annotationStore";
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
+import { adminShellCell } from "./adminShellLayout";
 import { MapPanel } from "./panels/MapPanel";
 import { ModPanel } from "./panels/ModPanel";
 import { OverviewPanel } from "./panels/OverviewPanel";
 import { SyncPanel } from "./panels/SyncPanel";
+import type { ModerationAction } from "./useModerationConfirm";
 
 export type AdminMonitorRailTab = "overview" | "log" | "chat" | "sync" | "map" | "mod";
 
@@ -43,8 +47,7 @@ interface AdminMonitorRailProps {
   controller: ObserverMapScreenController;
   chatDisplayRole: PlayerRole;
   moderationBusy: boolean;
-  moderationError: string | null;
-  onModerationAction: (action: "end" | "resetBoard" | "cleanupCode") => void;
+  onModerationAction: (action: ModerationAction) => void;
   mapViewport: MapViewportState | null;
   onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
   onLowPowerModeChange: (enabled: boolean) => void;
@@ -61,13 +64,13 @@ export function AdminMonitorRail({
   controller,
   chatDisplayRole,
   moderationBusy,
-  moderationError,
   onModerationAction,
   mapViewport,
   onLayerVisibilityChange,
   onLowPowerModeChange,
 }: AdminMonitorRailProps) {
   const events = useSessionActivityLog(session.id);
+  const liveNowMs = useLiveLocationNowMs();
   const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
   const activeLabel = TABS.find((tab) => tab.id === activeTab)?.label ?? "Overview";
@@ -75,7 +78,7 @@ export function AdminMonitorRail({
   return (
     <Group
       component="aside"
-      className="admin-map-shell__rail"
+      style={adminShellCell.rail}
       aria-label="Admin monitor rail"
       h="100%"
       gap={0}
@@ -149,8 +152,8 @@ export function AdminMonitorRail({
                     session={session}
                     syncStatusLabel={syncStatusLabel}
                     annotationCount={controller.annotations.length}
-                    seekerCount={controller.seekerLocations.length}
-                    hiderCount={controller.hiderLocations.length}
+                    seekerCount={countLiveLocations(controller.seekerLocations, liveNowMs)}
+                    hiderCount={countLiveLocations(controller.hiderLocations, liveNowMs)}
                     questionCount={controller.pendingQuestions.length}
                     messageCount={controller.chatMessages.length}
                     timerState={controller.timer.timerState}
@@ -225,11 +228,7 @@ export function AdminMonitorRail({
 
             <Tabs.Panel value="mod">
               <Box p="sm">
-                <ModPanel
-                  moderationBusy={moderationBusy}
-                  moderationError={moderationError}
-                  onModerationAction={onModerationAction}
-                />
+                <ModPanel moderationBusy={moderationBusy} onModerationAction={onModerationAction} />
               </Box>
             </Tabs.Panel>
           </Tabs>

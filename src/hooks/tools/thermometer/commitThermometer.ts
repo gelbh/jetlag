@@ -8,7 +8,7 @@ import {
   hasOpenPendingQuestion,
   isThermometerDistanceOptionUsed,
   type ThermometerAnswer,
-  type ThermometerDistanceOptionMiles,
+  type ThermometerDistanceOptionKey,
   thermometerHotterTowards,
   thermometerQuestionPrompt,
 } from "@/domain/questions";
@@ -32,7 +32,7 @@ export interface CommitThermometerManualInput {
   distanceUnit: DistanceUnit;
   cardDraw: number;
   cardKeep: number;
-  usedThermometerOptions?: ReadonlySet<ThermometerDistanceOptionMiles>;
+  usedThermometerOptions?: ReadonlySet<ThermometerDistanceOptionKey>;
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
@@ -71,7 +71,7 @@ export async function commitThermometerManual(input: CommitThermometerManualInpu
     return;
   }
 
-  if (isThermometerDistanceOptionUsed(usedThermometerOptions, distanceMeters)) {
+  if (isThermometerDistanceOptionUsed(usedThermometerOptions, distanceMeters, distanceUnit)) {
     setMapError("That thermometer distance was already used this session.");
     return;
   }

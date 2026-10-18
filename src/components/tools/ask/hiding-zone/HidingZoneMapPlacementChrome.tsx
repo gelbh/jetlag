@@ -47,6 +47,12 @@ function placementSummary(zoneTool: HidingZoneToolPanelState): {
   detail?: string;
 } {
   if (zoneTool.manualMode) {
+    if (zoneTool.snapping) {
+      return { label: "Finding nearest station…" };
+    }
+    if (zoneTool.selectedStation) {
+      return { label: zoneTool.selectedStation.name, detail: "Snapped to the nearest station" };
+    }
     if (zoneTool.manualCenter) {
       return {
         label: "Dropped on the map",
@@ -176,7 +182,7 @@ export function HidingZoneMapPlacementChrome({
         onClick={() => {
           void zoneTool.confirmZone();
         }}
-        disabled={!writesEnabled || !zoneTool.hasPlacement || zoneTool.saving}
+        disabled={!writesEnabled || !zoneTool.hasPlacement || zoneTool.saving || zoneTool.snapping}
         aria-busy={zoneTool.saving || undefined}
         leftSection={
           zoneTool.saving ? undefined : <CheckIcon size={16} weight="bold" aria-hidden />

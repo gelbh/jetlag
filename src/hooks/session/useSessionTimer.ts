@@ -47,7 +47,7 @@ export function useSessionTimer(
   const onControlRef = useRef(onControl);
   const lastSessionIdRef = useRef<string | undefined>(undefined);
   const lastSessionResetAtRef = useRef<string | undefined>(undefined);
-  // React can defer start updaters, so timerStateRef alone misses same-frame double starts.
+  // Keeps game_started to once per session or reset; remote state can rewind to unstarted.
   const gameStartedTrackedRef = useRef(false);
 
   useEffect(() => {
@@ -55,18 +55,13 @@ export function useSessionTimer(
     onControlRef.current = onControl;
   }, [onControl, timerState]);
 
-  const setTimerState = useCallback(
-    (next: TimerState | ((current: TimerState) => TimerState)) => {
-      setTimerStateInternal((current) => {
-        const resolved = typeof next === "function" ? next(current) : next;
-        timerStateRef.current = resolved;
-
-        if (sessionId) {
-          setStoredTimer(sessionId, resolved);
-        }
-
-        return resolved;
-      });
+  const commitTimerState = useCallback(
+    (next: TimerState) => {
+      timerStateRef.current = next;
+      setTimerStateInternal(next);
+      if (sessionId) {
+        setStoredTimer(sessionId, next);
+      }
     },
     [sessionId, setStoredTimer],
   );
@@ -144,21 +139,21 @@ export function useSessionTimer(
       return;
     }
 
-    const isFirstStart = !hasTimerStarted(timerStateRef.current);
-    setTimerState((current) => {
-      const wasStarted = hasTimerStarted(current);
-      const next = startTimer(current, serverNow());
-      onControlRef.current?.(next);
-      if (sessionId && !wasStarted && hasTimerStarted(next)) {
-        emitHidingTimerStartedActivity(sessionId);
-      }
-      return next;
-    });
-    if (sessionId && isFirstStart && !gameStartedTrackedRef.current) {
-      gameStartedTrackedRef.current = true;
-      trackLazy(ANALYTICS_EVENTS.game_started);
+    const current = timerStateRef.current;
+    const next = startTimer(current, serverNow());
+    if (next === current) {
+      return;
     }
-  }, [canControl, sessionId, setTimerState]);
+    commitTimerState(next);
+    onControlRef.current?.(next);
+    if (sessionId && !hasTimerStarted(current) && hasTimerStarted(next)) {
+      emitHidingTimerStartedActivity(sessionId);
+      if (!gameStartedTrackedRef.current) {
+        gameStartedTrackedRef.current = true;
+        trackLazy(ANALYTICS_EVENTS.game_started);
+      }
+    }
+  }, [canControl, commitTimerState, sessionId]);
 
   const pause = useCallback(() => {
     if (!canControl) {
@@ -166,12 +161,10 @@ export function useSessionTimer(
     }
 
     const remote = remoteSnapshot ?? (remoteState === null ? undefined : remoteState);
-    setTimerState((current) => {
-      const next = pausePreferringRemote(current, remote, serverNow());
-      onControlRef.current?.(next);
-      return next;
-    });
-  }, [canControl, remoteSnapshot, remoteState, setTimerState]);
+    const next = pausePreferringRemote(timerStateRef.current, remote, serverNow());
+    commitTimerState(next);
+    onControlRef.current?.(next);
+  }, [canControl, commitTimerState, remoteSnapshot, remoteState]);
 
   const reset = useCallback(() => {
     if (!canControl) {
@@ -180,19 +173,19 @@ export function useSessionTimer(
 
     const next = resetTimer();
     gameStartedTrackedRef.current = false;
-    setTimerState(next);
+    commitTimerState(next);
     onControlRef.current?.(next);
 
     if (sessionId) {
       clearStoredTimer(sessionId);
     }
-  }, [canControl, clearStoredTimer, sessionId, setTimerState]);
+  }, [canControl, clearStoredTimer, commitTimerState, sessionId]);
 
   const applyRemoteState = useCallback(
     (state: TimerState) => {
-      setTimerState(state);
+      commitTimerState(state);
     },
-    [setTimerState],
+    [commitTimerState],
   );
 
   return {

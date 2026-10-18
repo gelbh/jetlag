@@ -1,4 +1,4 @@
-import { Alert, Button, Group, NativeSelect, Stack, Text, TextInput } from "@mantine/core";
+import { Alert, Button, Group, NativeSelect, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useState } from "react";
 import { APP_VERSION } from "../../../domain/device/changelog";
 import type {
@@ -16,6 +16,8 @@ import {
   publishIncidentHotfix,
   updateIncidentStatus,
 } from "../../../services/incident/incidentApi";
+import { toneColor } from "../../../theme/adminTone";
+import { AdminConfirm } from "../shared/AdminConfirm";
 import { AdminIncidentCursorLaunch } from "./AdminIncidentCursorLaunch";
 
 const CLOSEABLE = new Set<IncidentStatus>(["open", "chatting", "mitigating", "hotfix_pending"]);
@@ -25,6 +27,7 @@ const REOPENABLE = new Set<IncidentStatus>(["resolved", "dismissed"]);
 export interface AdminIncidentActionsProps {
   incidentId: string | null;
   status?: IncidentStatus | null;
+  sessionCode?: string | null;
   agent?: IncidentCodingAgentState | null;
   disabled?: boolean;
   applyMitigationFn?: typeof applyIncidentMitigation;
@@ -37,6 +40,7 @@ export interface AdminIncidentActionsProps {
 export function AdminIncidentActions({
   incidentId,
   status = null,
+  sessionCode = null,
   agent = null,
   disabled = false,
   applyMitigationFn = applyIncidentMitigation,
@@ -45,14 +49,13 @@ export function AdminIncidentActions({
   launchCursorAgentFn = launchIncidentCursorAgent,
   openExternalUrlFn,
 }: AdminIncidentActionsProps) {
+  const [pending, setPending] = useState<"dismiss" | "mitigation" | "hotfix" | null>(null);
+
   const [mitigationType, setMitigationType] = useState<IncidentMitigationType>("soft_reload");
-  const [mitigationBusy, setMitigationBusy] = useState(false);
-  const [mitigationError, setMitigationError] = useState<string | null>(null);
   const [mitigationOk, setMitigationOk] = useState<string | null>(null);
 
   const [toVersion, setToVersion] = useState("");
   const [graceSeconds, setGraceSeconds] = useState(String(DEFAULT_HOTFIX_GRACE_SECONDS));
-  const [hotfixBusy, setHotfixBusy] = useState(false);
   const [hotfixError, setHotfixError] = useState<string | null>(null);
   const [hotfixOk, setHotfixOk] = useState<string | null>(null);
 
@@ -64,53 +67,55 @@ export function AdminIncidentActions({
   const canClose = status != null && CLOSEABLE.has(status);
   const canReopen = status != null && REOPENABLE.has(status);
 
-  const onApplyMitigation = async () => {
-    if (!incidentId) {
-      return;
-    }
-    setMitigationBusy(true);
-    setMitigationError(null);
-    setMitigationOk(null);
-    try {
-      const result = await applyMitigationFn(incidentId, mitigationType);
-      setMitigationOk(`Applied ${result.type}.`);
-    } catch (error) {
-      setMitigationError(
-        error instanceof Error ? error.message : "Could not apply the mitigation.",
-      );
-    }
-    setMitigationBusy(false);
+  if (pending === "dismiss" && !canClose) {
+    setPending(null);
+  }
+
+  const target = sessionCode ?? "this session";
+  const mitigationLabel =
+    INCIDENT_MITIGATION_OPTIONS.find((option) => option.type === mitigationType)?.label ??
+    mitigationType;
+  const mitigationConsequence: Record<IncidentMitigationType, string> = {
+    soft_reload: `Ask every player's app in ${target} to reload?`,
+    reset_board: `Clear the board for ${target}? Active annotations are removed, open questions are cancelled and the timer goes back to zero.`,
+    clear_pending_questions: `Cancel the open questions in ${target}?`,
+    end_session: `Start the end game for ${target} now?`,
   };
 
-  const onPublishHotfix = async () => {
-    if (!incidentId) {
-      return;
-    }
-    const version = toVersion.trim();
+  const runDismiss = async () => {
+    if (!incidentId) return;
+    const result = await updateStatusFn(incidentId, "dismissed");
+    setStatusOk(`Status set to ${result.status}.`);
+  };
+
+  const runMitigation = async () => {
+    if (!incidentId) return;
+    const result = await applyMitigationFn(incidentId, mitigationType);
+    setMitigationOk(`Applied ${result.type}.`);
+  };
+
+  const parsedGrace = Number.parseInt(graceSeconds, 10);
+  const grace = Number.isFinite(parsedGrace) ? parsedGrace : DEFAULT_HOTFIX_GRACE_SECONDS;
+  const version = toVersion.trim();
+
+  const requestHotfix = () => {
     if (!version) {
       setHotfixError("Enter a target version.");
       return;
     }
-    const parsedGrace = Number.parseInt(graceSeconds, 10);
-    const grace = Number.isFinite(parsedGrace) ? parsedGrace : DEFAULT_HOTFIX_GRACE_SECONDS;
-
-    setHotfixBusy(true);
     setHotfixError(null);
-    setHotfixOk(null);
-    try {
-      const result = await publishHotfixFn(incidentId, version, grace);
-      setHotfixOk(
-        `Published ${result.toVersion} (${result.graceSeconds}s grace) to ${result.fannedOutSessionCount} session(s).`,
-      );
-    } catch (error) {
-      setHotfixError(error instanceof Error ? error.message : "Could not publish the hotfix.");
-    }
-    setHotfixBusy(false);
+    setPending("hotfix");
   };
 
-  const onUpdateStatus = async (
-    next: Extract<IncidentStatus, "resolved" | "dismissed" | "chatting">,
-  ) => {
+  const runHotfix = async () => {
+    if (!incidentId) return;
+    const result = await publishHotfixFn(incidentId, version, grace);
+    setHotfixOk(
+      `Published ${result.toVersion} (${result.graceSeconds}s grace) to ${result.fannedOutSessionCount} session(s).`,
+    );
+  };
+
+  const onUpdateStatus = async (next: Extract<IncidentStatus, "resolved" | "chatting">) => {
     if (!incidentId) {
       return;
     }
@@ -129,15 +134,17 @@ export function AdminIncidentActions({
   };
 
   return (
-    <aside className="jl-scroll jl-incident-actions" aria-label="Incident actions">
-      <div className="jl-incident-pane-header">
-        <h2 className="jl-incident-pane-title">Actions</h2>
-      </div>
+    <Stack component="aside" gap="md" aria-label="Incident actions">
+      <Title order={2} size="h5">
+        Actions
+      </Title>
 
-      <Stack className="jl-incident-module" gap="sm">
-        <h3 className="jl-incident-module-title">0 · Queue</h3>
+      <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
+        <Title order={3} size="h6">
+          0 · Queue
+        </Title>
         {statusError ? (
-          <Alert color="red" role="alert">
+          <Alert data-tone="mispunch" role="alert">
             {statusError}
           </Alert>
         ) : null}
@@ -159,9 +166,10 @@ export function AdminIncidentActions({
             <Button
               type="button"
               variant="default"
+              c={toneColor.mispunch}
               tt="uppercase"
               disabled={actionsDisabled || statusBusy}
-              onClick={() => void onUpdateStatus("dismissed")}
+              onClick={() => setPending("dismiss")}
             >
               Dismiss
             </Button>
@@ -170,6 +178,7 @@ export function AdminIncidentActions({
         {canReopen ? (
           <Button
             type="button"
+            variant="default"
             tt="uppercase"
             disabled={actionsDisabled || statusBusy}
             onClick={() => void onUpdateStatus("chatting")}
@@ -178,19 +187,21 @@ export function AdminIncidentActions({
           </Button>
         ) : null}
         {!canClose && !canReopen ? (
-          <p className="jl-incident-module-hint">
+          <Text size="xs" c="dimmed">
             Select an incident to resolve, dismiss, or reopen.
-          </p>
+          </Text>
         ) : null}
       </Stack>
 
-      <Stack className="jl-incident-module" gap="sm">
-        <h3 className="jl-incident-module-title">1 · Apply mitigation</h3>
+      <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
+        <Title order={3} size="h6">
+          1 · Apply mitigation
+        </Title>
         <NativeSelect
           label="Mitigation"
           aria-label="Mitigation type"
           value={mitigationType}
-          disabled={actionsDisabled || mitigationBusy}
+          disabled={actionsDisabled}
           onChange={(event) =>
             setMitigationType(event.currentTarget.value as IncidentMitigationType)
           }
@@ -199,11 +210,6 @@ export function AdminIncidentActions({
             label: option.label,
           }))}
         />
-        {mitigationError ? (
-          <Alert color="red" role="alert">
-            {mitigationError}
-          </Alert>
-        ) : null}
         {mitigationOk ? (
           <Text size="sm" c="green">
             {mitigationOk}
@@ -211,11 +217,13 @@ export function AdminIncidentActions({
         ) : null}
         <Button
           type="button"
+          variant="default"
+          c={mitigationType === "end_session" ? toneColor.mispunch : undefined}
           tt="uppercase"
-          disabled={actionsDisabled || mitigationBusy}
-          onClick={() => void onApplyMitigation()}
+          disabled={actionsDisabled}
+          onClick={() => setPending("mitigation")}
         >
-          {mitigationBusy ? "Applying…" : "Apply mitigation"}
+          Apply mitigation
         </Button>
       </Stack>
 
@@ -228,12 +236,14 @@ export function AdminIncidentActions({
         openExternalUrlFn={openExternalUrlFn}
       />
 
-      <Stack className="jl-incident-module" gap="sm">
-        <h3 className="jl-incident-module-title">3 · Publish hotfix</h3>
+      <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
+        <Title order={3} size="h6">
+          3 · Publish hotfix
+        </Title>
         <TextInput
           label="Hotfix target version"
           value={toVersion}
-          disabled={actionsDisabled || hotfixBusy}
+          disabled={actionsDisabled}
           onChange={(event) => setToVersion(event.currentTarget.value)}
           placeholder={`e.g. ${APP_VERSION}.1`}
           autoComplete="off"
@@ -244,11 +254,11 @@ export function AdminIncidentActions({
           min={5}
           max={300}
           value={graceSeconds}
-          disabled={actionsDisabled || hotfixBusy}
+          disabled={actionsDisabled}
           onChange={(event) => setGraceSeconds(event.currentTarget.value)}
         />
         {hotfixError ? (
-          <Alert color="red" role="alert">
+          <Alert data-tone="mispunch" role="alert">
             {hotfixError}
           </Alert>
         ) : null}
@@ -259,13 +269,46 @@ export function AdminIncidentActions({
         ) : null}
         <Button
           type="button"
+          variant="default"
+          c={toneColor.mispunch}
           tt="uppercase"
-          disabled={actionsDisabled || hotfixBusy}
-          onClick={() => void onPublishHotfix()}
+          disabled={actionsDisabled}
+          onClick={requestHotfix}
         >
-          {hotfixBusy ? "Publishing…" : "Publish hotfix"}
+          Publish hotfix
         </Button>
       </Stack>
-    </aside>
+
+      <AdminConfirm
+        opened={pending === "dismiss"}
+        title="Dismiss this incident?"
+        consequence={`Dismiss the report for ${target}? It leaves the queue; you can reopen it later.`}
+        confirmLabel="Dismiss incident"
+        busyLabel="Dismissing…"
+        destructive
+        onConfirm={runDismiss}
+        onClose={() => setPending(null)}
+      />
+      <AdminConfirm
+        opened={pending === "mitigation"}
+        title={`${mitigationLabel}?`}
+        consequence={mitigationConsequence[mitigationType]}
+        confirmLabel={`Apply ${mitigationLabel}`}
+        busyLabel="Applying…"
+        destructive={mitigationType === "end_session" || mitigationType === "reset_board"}
+        onConfirm={runMitigation}
+        onClose={() => setPending(null)}
+      />
+      <AdminConfirm
+        opened={pending === "hotfix"}
+        title="Publish hotfix?"
+        consequence={`Require version ${version} in every session with an active join code? The requirement takes effect after a ${grace}s grace period.`}
+        confirmLabel={`Publish ${version}`}
+        busyLabel="Publishing…"
+        destructive
+        onConfirm={runHotfix}
+        onClose={() => setPending(null)}
+      />
+    </Stack>
   );
 }

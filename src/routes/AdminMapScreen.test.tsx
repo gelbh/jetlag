@@ -1,8 +1,13 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { adminModerateSession } from "../services/admin/adminModeration";
 import { createTestSession } from "../test/fixtures/sessions";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { AdminMapScreen } from "./AdminMapScreen";
+
+vi.mock("../services/admin/adminModeration", () => ({
+  adminModerateSession: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("../hooks/admin/useAdminMapWideLayout", () => ({
   useAdminMapWideLayout: vi.fn(() => false),
@@ -126,6 +131,7 @@ describe("AdminMapScreen", () => {
   beforeEach(() => {
     mockedUseObserverMapScreen.mockReturnValue(mockController());
     mockedUseAdminMapWideLayout.mockReturnValue(false);
+    vi.mocked(adminModerateSession).mockClear();
   });
 
   it("keeps phone sheets and moderation overlay in compact layout", () => {
@@ -135,6 +141,30 @@ describe("AdminMapScreen", () => {
     expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Force end" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Admin monitor rail")).not.toBeInTheDocument();
+  });
+
+  it("asks before force ending from the compact overlay", async () => {
+    const session = createTestSession({ id: "session-1" });
+    mockedUseObserverMapScreen.mockReturnValue({
+      ...mockController(),
+      session,
+      sessionRules: session,
+    });
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+    fireEvent.click(screen.getByRole("button", { name: "Force end" }));
+    expect(adminModerateSession).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByRole("button", { name: "Start end game" }));
+    await waitFor(() =>
+      expect(adminModerateSession).toHaveBeenCalledWith(expect.any(String), "end"),
+    );
+  });
+
+  it("reports moderation as failed when the session is local", async () => {
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+    fireEvent.click(screen.getByRole("button", { name: "Force end" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Start end game" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Moderation needs a live session.");
+    expect(adminModerateSession).not.toHaveBeenCalled();
   });
 
   it("renders the side rail in wide layout", () => {
@@ -190,6 +220,25 @@ describe("AdminMapScreen", () => {
     expect(screen.getByTestId("admin-map-view").closest("[data-player-map]")).not.toBeNull();
   });
 
+  it.each([
+    { embedded: true, position: "absolute" },
+    { embedded: false, position: "" },
+  ])("wide shell is a two-column grid (embedded=$embedded)", ({ embedded, position }) => {
+    mockedUseAdminMapWideLayout.mockReturnValue(true);
+
+    renderWithRouter(<AdminMapScreen embeddedMonitor={embedded} />, {
+      route: embedded ? "/admin" : "/map",
+    });
+
+    const shell = screen.getByTestId("admin-map-view").closest(".map-screen-shell") as HTMLElement;
+    expect(shell.style.display).toBe("grid");
+    expect(shell.style.gridTemplateColumns).toMatch(/^minmax\(0, 1fr\) minmax\(0, /);
+    // Embedded sits in the course region; standalone keeps the player shell's fixed frame.
+    expect(shell.style.position).toBe(position);
+    const mapCell = screen.getByTestId("admin-map-view").closest("[data-map-dock-frame]");
+    expect((mapCell as HTMLElement).style.contain).toBe("layout");
+  });
+
   it("standalone map has no player map token scope", () => {
     renderWithRouter(<AdminMapScreen />, { route: "/map" });
 
@@ -212,7 +261,7 @@ describe("AdminMapScreen", () => {
       });
 
       const error = screen.getByText("Write rejected by rules");
-      expect(error.closest(".admin-map-shell__top") !== null).toBe(inHeader);
+      expect(error.closest('[data-shell-cell="top"]') !== null).toBe(inHeader);
     },
   );
 

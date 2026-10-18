@@ -1,6 +1,9 @@
-import { Alert, Badge, Button, Divider, Drawer, Select } from "@mantine/core";
-import { screen } from "@testing-library/react";
+import { Alert, Badge, Button, Divider, Drawer, Modal, Select } from "@mantine/core";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { AdminConfirm } from "@/components/admin/shared/AdminConfirm";
+import { AdminDiagRow } from "@/components/admin/shared/AdminDiagRow";
 import { AdminRegion } from "@/components/admin/shared/AdminRegion";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
 import { PunchTime } from "@/components/admin/shared/PunchTime";
@@ -18,6 +21,20 @@ vi.mock("@mantine/hooks", async (importActual) => ({
 }));
 
 describe("admin shared primitives", () => {
+  it("renders a selectable diagnostics term/value pair outside the admin world", () => {
+    // Standalone /map renders the monitor panels under the player theme.
+    renderWithAppUi(
+      <dl>
+        <AdminDiagRow label="Bounds">51.5, -0.12</AdminDiagRow>
+      </dl>,
+    );
+    const term = screen.getByText("Bounds");
+    const value = screen.getByText("51.5, -0.12");
+    expect(term.tagName).toBe("DT");
+    expect(value.tagName).toBe("DD");
+    expect(term.parentElement).toHaveStyle({ userSelect: "text" });
+  });
+
   it("renders the session code in one form at every size", () => {
     renderWithAppUi(
       <AdminWorld>
@@ -120,7 +137,7 @@ describe("admin shared primitives", () => {
     }
   });
 
-  it("follows a light OS inside admin", () => {
+  it("stays dark inside admin when the OS prefers light", () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: false,
       media: query,
@@ -137,7 +154,7 @@ describe("admin shared primitives", () => {
           <span>x</span>
         </AdminWorld>,
       );
-      expect(document.documentElement).toHaveAttribute("data-mantine-color-scheme", "light");
+      expect(document.documentElement).toHaveAttribute("data-mantine-color-scheme", "dark");
     } finally {
       vi.unstubAllGlobals();
     }
@@ -177,6 +194,21 @@ describe("admin shared primitives", () => {
       "var(--adm-paper)",
     );
     expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
+  });
+
+  it("portals a Modal into the admin world on admin paper", async () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Modal opened onClose={() => {}} title="Confirm">
+          modal body
+        </Modal>
+      </AdminWorld>,
+    );
+    const body = await screen.findByText("modal body");
+    expect(body.closest("[data-admin-world]")).not.toBeNull();
+    expect(body.closest(".mantine-Modal-content")?.getAttribute("style")).toContain(
+      "var(--adm-paper-raised)",
+    );
   });
 
   it("names a region by its title and shows the count", () => {
@@ -313,5 +345,75 @@ describe("admin shared primitives", () => {
     );
     const option = await screen.findByRole("option", { name: "Created" });
     expect(option.closest("[data-admin-world]")).not.toBeNull();
+  });
+});
+
+describe("AdminConfirm", () => {
+  function renderConfirm(overrides: Partial<ComponentProps<typeof AdminConfirm>> = {}) {
+    const props = {
+      opened: true,
+      title: "Start the end game?",
+      consequence: "Start the end game for ABCD now?",
+      confirmLabel: "Start end game",
+      destructive: true,
+      onConfirm: vi.fn().mockResolvedValue(undefined),
+      onClose: vi.fn(),
+      ...overrides,
+    };
+    renderWithAppUi(
+      <AdminWorld>
+        <AdminConfirm {...props} />
+      </AdminWorld>,
+    );
+    return props;
+  }
+
+  it("calls onConfirm then onClose when confirmed", async () => {
+    const props = renderConfirm();
+    expect(screen.getByText(props.consequence)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Start end game" }));
+    await waitFor(() => expect(props.onClose).toHaveBeenCalledTimes(1));
+    expect(props.onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it("Cancel closes without confirming", () => {
+    const props = renderConfirm();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(props.onClose).toHaveBeenCalledTimes(1);
+    expect(props.onConfirm).not.toHaveBeenCalled();
+  });
+
+  it("keeps the modal open and shows the error when onConfirm throws", async () => {
+    const props = renderConfirm({
+      onConfirm: vi.fn().mockRejectedValue(new Error("Session already ended.")),
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Start end game" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Session already ended.");
+    expect(props.onClose).not.toHaveBeenCalled();
+  });
+
+  it("fills destructive admin buttons with the mispunch token", () => {
+    renderWithAppUi(
+      <AdminWorld>
+        <Button color="red">Stop</Button>
+      </AdminWorld>,
+    );
+    const button = screen.getByRole("button", { name: "Stop" });
+    expect(button.style.getPropertyValue("--button-bg")).toBe("var(--adm-mispunch)");
+    expect(button.style.getPropertyValue("--button-color")).toBe("var(--adm-paper)");
+  });
+
+  it("renders outside the admin world without admin tokens", () => {
+    renderWithAppUi(
+      <AdminConfirm
+        opened
+        title="Reset board?"
+        consequence="Clear the board for ABCD?"
+        confirmLabel="Reset board"
+        onConfirm={vi.fn().mockResolvedValue(undefined)}
+        onClose={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Reset board" })).toBeInTheDocument();
   });
 });

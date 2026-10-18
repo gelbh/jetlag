@@ -3,6 +3,7 @@ import { StatCell } from "@/components/admin/shared/StatCell";
 import { APP_VERSION } from "@/domain/device/changelog";
 import type { SessionRecord } from "@/domain/map/annotations";
 import type { TimerState } from "@/domain/session/timer/timer";
+import { AdminDiagRow } from "../../../components/admin/shared/AdminDiagRow";
 
 function formatTimestamp(value: string | undefined): string {
   if (!value) {
@@ -85,10 +86,9 @@ export function OverviewPanel({
         </Title>
         <Stack component="dl" gap="xs" m={0}>
           {diagnosticRows.map((row) => (
-            <div key={row.label} className="admin-diag-row">
-              <dt>{row.label}</dt>
-              <dd>{row.value}</dd>
-            </div>
+            <AdminDiagRow key={row.label} label={row.label}>
+              {row.value}
+            </AdminDiagRow>
           ))}
         </Stack>
       </Stack>

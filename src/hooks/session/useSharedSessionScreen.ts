@@ -163,7 +163,7 @@ export function useSharedSessionScreen({
   });
 
   const pendingQuestions = usePendingQuestionsSync(sessionId);
-  const hidingZones = useHidingZonesSync(sessionId);
+  const { zones: hidingZones, loaded: hidingZonesLoaded } = useHidingZonesSync(sessionId);
   const seekerLocations = useSeekerLocationsSync(sessionId, authReady);
   const showHiderLocations =
     notificationRole === "hider" || notificationRole === "observer" || notificationRole === "admin";
@@ -193,6 +193,7 @@ export function useSharedSessionScreen({
     timer,
     pendingQuestions,
     hidingZones,
+    hidingZonesLoaded,
     seekerLocations,
     hiderLocations,
     chatMessages,
