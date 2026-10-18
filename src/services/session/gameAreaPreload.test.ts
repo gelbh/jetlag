@@ -179,6 +179,7 @@ describe("gameAreaPreload", () => {
         category,
         [],
         "dublin",
+        { priority: "background" },
       );
     }
   });

@@ -35,6 +35,9 @@ export function preloadMeasuringCategoriesForTests(): readonly MeasuringLocation
   return PRELOAD_MEASURING_CATEGORIES;
 }
 
+/** Preload shares the Overpass pool with user questions but never holds more than one slot. */
+const BACKGROUND_LANE = { priority: "background" } as const;
+
 export function gameAreaPreloadKey(gameArea: GameArea): string {
   return JSON.stringify(gameArea.coordinates);
 }
@@ -45,14 +48,16 @@ function buildPreloadJobs(
   regionPackId?: RegionPackId,
   options?: { includeAdminProbe?: boolean },
 ): Array<() => Promise<unknown>> {
-  const jobs: Array<() => Promise<unknown>> = [() => fetchStaticTransit(gameArea)];
+  const jobs: Array<() => Promise<unknown>> = [() => fetchStaticTransit(gameArea, BACKGROUND_LANE)];
 
   if (options?.includeAdminProbe !== false) {
     jobs.push(() =>
-      probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId).then((counts) => {
-        usePreloadStore.getState().setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
-        return counts;
-      }),
+      probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId, BACKGROUND_LANE).then(
+        (counts) => {
+          usePreloadStore.getState().setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
+          return counts;
+        },
+      ),
     );
   }
 
@@ -62,12 +67,15 @@ function buildPreloadJobs(
         gameArea,
         adminLevel,
         customMatchingAreas?.[adminLevel as MatchingAdminLevel],
+        BACKGROUND_LANE,
       ),
     );
   }
 
   for (const category of PRELOAD_MEASURING_CATEGORIES) {
-    jobs.push(() => fetchMeasuringPlacesInArea(gameArea, category, [], regionPackId));
+    jobs.push(() =>
+      fetchMeasuringPlacesInArea(gameArea, category, [], regionPackId, BACKGROUND_LANE),
+    );
   }
 
   return jobs;
@@ -166,7 +174,12 @@ export async function preloadGameAreaCachesAsync(
 
   let counts = emptyAdminDivisionCounts();
   try {
-    counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId);
+    counts = await probeAdminDivisionCounts(
+      gameArea,
+      customMatchingAreas,
+      regionPackId,
+      BACKGROUND_LANE,
+    );
   } catch {
     // probe failure is non-fatal; background preload continues with empty counts
   }
@@ -183,7 +196,12 @@ export async function preloadCriticalGameAreaCaches(
 ): Promise<void> {
   let counts = emptyAdminDivisionCounts();
   try {
-    counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId);
+    counts = await probeAdminDivisionCounts(
+      gameArea,
+      customMatchingAreas,
+      regionPackId,
+      BACKGROUND_LANE,
+    );
   } catch {
     // probe failure is non-fatal; preload continues with empty counts
   }
@@ -195,6 +213,7 @@ export async function preloadCriticalGameAreaCaches(
         gameArea,
         adminLevel,
         customMatchingAreas?.[adminLevel as MatchingAdminLevel],
+        BACKGROUND_LANE,
       ),
     ),
   );

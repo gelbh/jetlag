@@ -9,6 +9,7 @@ import type {
 } from "@/domain/session/catalog/sessionCustomContent";
 import { regionPackHasBundledBoundaries } from "../matching/regionPackBoundaries";
 import { fetchAdminDivisionFeaturesInArea } from "./adminDivisionBoundaries";
+import type { OverpassLoad } from "./overpassLoad";
 
 export const MIN_ADMIN_DIVISIONS_FOR_AVAILABILITY = 2;
 
@@ -79,6 +80,7 @@ export async function probeAdminDivisionCounts(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
+  load?: Pick<OverpassLoad, "priority" | "signal">,
 ): Promise<AdminDivisionCounts> {
   const counts = emptyAdminDivisionCounts();
 
@@ -98,6 +100,7 @@ export async function probeAdminDivisionCounts(
           gameArea,
           level,
           customMatchingAreas?.[level],
+          load,
         );
 
         counts[category] = features.length;

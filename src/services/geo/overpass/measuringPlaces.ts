@@ -5,6 +5,7 @@ import {
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
+import type { LoadPriority } from "@/domain/progress/progressTree";
 import { type MeasuringLocationCategory, measuringLocationLabel } from "@/domain/questions";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import { measuringOverpassSelectorsForKind } from "@/domain/session/catalog/sessionCustomCatalog";
@@ -80,6 +81,8 @@ type OverpassElement = {
 
 export type FetchMeasuringPlacesOptions = {
   onEnrich?: (places: MeasuringPlace[]) => void;
+  /** Pool lane when no task drives the load, e.g. "background" for preload. */
+  priority?: LoadPriority;
 } & PackThenOverpassProgress;
 
 export function buildMeasuringPlacesQuery(
@@ -241,7 +244,9 @@ export async function fetchMeasuringPlacesInArea(
     return bundledPlaces;
   }
 
-  return mergeWithOverpass(overpassLoadFromTask(task, searchSpec));
+  return mergeWithOverpass(
+    task ? overpassLoadFromTask(task, searchSpec) : { priority: options?.priority },
+  );
 }
 
 export async function findNearestMeasuringPlace(
