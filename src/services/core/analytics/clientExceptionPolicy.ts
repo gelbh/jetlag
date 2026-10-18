@@ -52,6 +52,8 @@ export const EXPECTED_JOIN_UX_MESSAGES = [
   "Invalid join request.",
   "Not allowed for this join request.",
   "Session uses legacy join.",
+  "Session not found.",
+  "Session already ended.",
 ] as const;
 
 const EXPECTED_JOIN_UX_MESSAGE_SET = new Set<string>(EXPECTED_JOIN_UX_MESSAGES);

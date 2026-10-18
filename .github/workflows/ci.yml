@@ -199,8 +199,13 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            functions/package-lock.json
       - if: ${{ needs.changes.outputs.release_pr != 'true' }}
         run: npm ci
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm ci --prefix functions
       - name: Cache Firebase emulators
         if: ${{ needs.changes.outputs.release_pr != 'true' }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4

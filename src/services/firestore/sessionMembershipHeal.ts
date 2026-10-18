@@ -73,15 +73,16 @@ export async function withSessionWriteAccess({
   write,
 }: SessionWriteAccessInput): Promise<void> {
   const options = { returningMemberUid: myUid, persistedMyUid: myUid };
+  // A heal keeps the old member's role; once the old uid is gone, uid holds it.
+  const healRole = (current: SessionRecord): PlayerRole =>
+    resolvePlayerRole(
+      current.memberRoles,
+      myUid && current.memberUids.includes(myUid) ? myUid : uid,
+    );
   let activeSession = session;
 
   if (!session.memberUids.includes(uid)) {
-    activeSession = await ensureRemoteSessionWriteAccess(
-      session,
-      uid,
-      resolvePlayerRole(session.memberRoles, uid),
-      options,
-    );
+    activeSession = await ensureRemoteSessionWriteAccess(session, uid, healRole(session), options);
 
     if (sessionMembershipChanged(session, activeSession, uid, myUid)) {
       onSessionChange(activeSession);
@@ -98,7 +99,7 @@ export async function withSessionWriteAccess({
     const healedSession = await healSessionMembership(
       activeSession,
       uid,
-      resolvePlayerRole(activeSession.memberRoles, uid),
+      healRole(activeSession),
       options,
     );
 
