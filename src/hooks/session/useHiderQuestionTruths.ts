@@ -4,6 +4,7 @@ import {
   getNamedLoadTask,
   setNamedLoadTask,
 } from "@/services/core/progress/loadTask";
+import { HIDER_TRUTHS_TASK } from "@/services/core/progress/namedTasks";
 import type { GameArea } from "../../domain/map/annotations";
 import { buildHiderTruthFetchKey } from "../../domain/questions/hiderTruth/hiderTruthFetchKey";
 import { reuseHiderTruthMapIfEqual } from "../../domain/questions/hiderTruth/hiderTruthMapReuse";
@@ -152,9 +153,6 @@ export function useHiderQuestionTruths(
     truthReferenceModes: openQuestions.length === 0 ? EMPTY_MODES : truthReferenceModes,
   };
 }
-
-/** Name of the published truth-check task, read by the answer picker. */
-export const HIDER_TRUTHS_TASK = "hider-truths";
 
 function truthHistoryKey(question: { toolType?: string }): string {
   switch (question.toolType) {

@@ -1,5 +1,5 @@
-import { ELIMINATION_MASK_TASK } from "@/hooks/map/useCombinedEliminationMask";
 import { useLoadTask, useNamedLoadTask } from "@/hooks/progress/useLoadTask";
+import { ELIMINATION_MASK_TASK } from "@/services/core/progress/namedTasks";
 import { HotfixGraceChip } from "../../../components/incident/HotfixGraceChip";
 import { FirestorePersistenceBanner } from "../../../components/session/banners/FirestorePersistenceBanner";
 import { MeasuringRefineMapChip } from "../../../components/ui/banners/MeasuringRefineMapChip";

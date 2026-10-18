@@ -1,6 +1,10 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
+import { isAbortError } from "@/services/core/network/anySignal";
+import { createLoadTask, setNamedLoadTask } from "@/services/core/progress/loadTask";
+import { HIDER_STATIONS_TASK } from "@/services/core/progress/namedTasks";
 import { commitWrite } from "@/services/firestore/commitWrite";
+import { overpassLoadFromTask } from "@/services/geo/overpass/overpassLoad";
 import { enqueueMoveTimerIntent } from "@/services/session/sessionIntents";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
@@ -93,7 +97,7 @@ export function useHiderZoneTool({
     setStationsError(null);
   }, []);
 
-  const { beginRequest, isLatestRequest } = useLatestRequest();
+  const { beginRequest, isLatestRequest, requestSignal } = useLatestRequest();
 
   const searchStationsInArea = useCallback(
     async (viewport: MapViewportBounds) => {
@@ -101,8 +105,19 @@ export function useHiderZoneTool({
       setStationsLoading(true);
       setStationsError(null);
 
+      const task = createLoadTask({ label: "Loading stations", signal: requestSignal() });
+      setNamedLoadTask(HIDER_STATIONS_TASK, task);
       try {
-        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea);
+        const loaded = await fetchTransitStationsForHidingZoneViewport(
+          viewport,
+          gameArea,
+          overpassLoadFromTask(task, {
+            kind: "fetch",
+            label: "Searching map data",
+            historyKey: "overpass:stations",
+          }),
+        );
+        task.complete();
         if (!isLatestRequest(requestId)) {
           return;
         }
@@ -111,7 +126,15 @@ export function useHiderZoneTool({
         setSelectedStation((current) =>
           current && loaded.some((station) => station.id === current.id) ? current : null,
         );
-      } catch {
+      } catch (error) {
+        if (isAbortError(error)) {
+          task.cancel();
+          if (isLatestRequest(requestId)) {
+            setStationsLoading(false);
+          }
+          return;
+        }
+        task.fail(error);
         if (!isLatestRequest(requestId)) {
           return;
         }
@@ -123,7 +146,7 @@ export function useHiderZoneTool({
         setStationsLoading(false);
       }
     },
-    [beginRequest, gameArea, isLatestRequest],
+    [beginRequest, gameArea, isLatestRequest, requestSignal],
   );
 
   const filteredStations = useMemo(() => searchStations(query, stations), [query, stations]);

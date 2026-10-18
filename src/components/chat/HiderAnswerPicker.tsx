@@ -1,6 +1,6 @@
 import { Button, SimpleGrid, Stack, Text } from "@mantine/core";
 import { useNamedLoadTask } from "@/hooks/progress/useLoadTask";
-import { HIDER_TRUTHS_TASK } from "@/hooks/session/useHiderQuestionTruths";
+import { HIDER_TRUTHS_TASK } from "@/services/core/progress/namedTasks";
 import { jetlagBrand } from "@/theme/theme";
 import {
   hiderTruthReferenceLabel,

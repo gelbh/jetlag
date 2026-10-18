@@ -1,4 +1,6 @@
 import { useId } from "react";
+import { useNamedLoadTask } from "@/hooks/progress/useLoadTask";
+import { HIDER_STATIONS_TASK } from "@/services/core/progress/namedTasks";
 import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 import { LoadingReadout } from "../tools/shared/readout/LoadingReadout";
 
@@ -37,6 +39,7 @@ export function TransitStationPicker({
   rowMinHeight = "10",
   layout = "compact",
 }: TransitStationPickerProps) {
+  const stationsTask = useNamedLoadTask(HIDER_STATIONS_TASK);
   const searchId = useId();
   const rowClass = rowMinHeight === "11" ? "min-h-11" : "min-h-10";
   const searchButtonClass =
@@ -84,7 +87,9 @@ export function TransitStationPicker({
       >
         Search stations in this area
       </button>
-      {stationsLoading ? <LoadingReadout>Loading stations…</LoadingReadout> : null}
+      {stationsLoading ? (
+        <LoadingReadout task={stationsTask}>Loading stations…</LoadingReadout>
+      ) : null}
       {stationsError ? <p className="text-sm text-status-error">{stationsError}</p> : null}
       {selectedStation ? (
         <div className="flex shrink-0 items-center justify-between gap-2 rounded-[var(--radius-hud-md)] border border-highlight/40 bg-highlight-soft px-3 py-2">

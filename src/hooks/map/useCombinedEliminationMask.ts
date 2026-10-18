@@ -1,5 +1,6 @@
 import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ELIMINATION_MASK_TASK } from "@/services/core/progress/namedTasks";
 import type { PolygonFeature } from "../../domain/geometry/kernel/types";
 import { requestCombinedEliminationMask } from "../../domain/geometry/masks/eliminationMaskWorkerClient";
 import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/masks/emptyFeatures";
@@ -22,8 +23,6 @@ interface UseCombinedEliminationMaskOptions {
   hidden?: boolean;
 }
 
-/** Name of the published mask-rebuild task, read by the map refine chip. */
-export const ELIMINATION_MASK_TASK = "elimination-mask";
 const MASK_PROGRESS_DELAY_MS = 400;
 const MASK_PREPARE_STAGE = {
   kind: "compute",
