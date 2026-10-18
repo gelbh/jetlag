@@ -24,6 +24,7 @@ export const STAGE_PRIORS_MS: Readonly<Record<string, number>> = {
   "compute:shade": 500,
   "refine:lod-pass": 300,
   "elevation:seeker": 1_500,
+  "elevation:sampling": 15_000,
   "elevation:refine": 3_000,
   "truth:matching": 1_000,
   "truth:measuring": 3_000,

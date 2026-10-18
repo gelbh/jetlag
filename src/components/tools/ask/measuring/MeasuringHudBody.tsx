@@ -44,6 +44,7 @@ import {
   measuringTargetKind,
   measuringTargetLabel,
 } from "@/domain/questions";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { type GeocodedPlace, GeocodedPlaceLeading } from "@/services/geo/geocoding";
 import { measuringCategoryIcon } from "./measuringCategoryIcons";
 
@@ -93,6 +94,7 @@ export type MeasuringHudBodyModel = {
   targetPlaceName: string | null;
   distanceMeters: number | null;
   loading: boolean;
+  loadTask?: LoadTask | null;
   gpsLoading: boolean;
   searchQuery: string;
   searchResults: GeocodedPlace[];
@@ -143,6 +145,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
     targetPlaceName,
     distanceMeters,
     loading,
+    loadTask = null,
     gpsLoading,
     searchQuery,
     searchResults,
@@ -336,6 +339,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
             distanceMeters={distanceMeters}
             anchorAltitudeMeters={anchorAltitudeMeters}
             loading={loading}
+            loadTask={loadTask}
             searchQuery={searchQuery}
             searchLoading={searchLoading}
             distanceUnit={distanceUnit}

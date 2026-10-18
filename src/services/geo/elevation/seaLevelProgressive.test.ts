@@ -3,12 +3,14 @@ import {
   resolveFineSeaLevelDivisions,
   sampleGameAreaCells,
 } from "@/domain/geometry/measuring/seaLevel";
+import { createProgressRoot } from "@/domain/progress/progressTree";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import { clearGeographicFeatureCacheForTests, writeSeaLevelSamplingCache } from "../cache";
 import { clearBundledSeaLevelSeedCacheForTests } from "./regionPackSeaLevelSeed";
 import {
   clearSeaLevelProgressiveStateForTests,
   ensureSeaLevelSamplingComplete,
+  followSeaLevelCrawl,
   getSeaLevelSamplingProgress,
   startSeaLevelBackgroundSampling,
 } from "./seaLevelProgressive";
@@ -295,5 +297,56 @@ describe("seaLevelProgressive", () => {
     });
 
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("seaLevelProgressive foreground follow", () => {
+  beforeEach(async () => {
+    await clearGeographicFeatureCacheForTests();
+    clearSeaLevelProgressiveStateForTests();
+    clearBundledSeaLevelSeedCacheForTests();
+    const { fetchElevations } = await import("./index");
+    vi.mocked(fetchElevations).mockImplementation(async (points) =>
+      points.map((_, index) => 10 + index),
+    );
+  });
+
+  afterEach(() => {
+    clearSeaLevelProgressiveStateForTests();
+  });
+
+  it("reports the running crawl's cell count and skips its background gaps", async () => {
+    const root = createProgressRoot("Task", { now: () => Date.now(), expectedMs: () => 1_000 });
+    const node = root.stage({ kind: "fetch", label: "Sampling", historyKey: "x" });
+    const setCount = vi.spyOn(node, "setCount");
+
+    startSeaLevelBackgroundSampling(DUBLIN_CITY_GAME_AREA);
+    const startedAt = Date.now();
+    await ensureSeaLevelSamplingComplete(DUBLIN_CITY_GAME_AREA, { node });
+    const elapsed = Date.now() - startedAt;
+
+    expect(setCount.mock.calls.length).toBeGreaterThan(1);
+    const [done, total] = setCount.mock.calls.at(-1) ?? [];
+    expect(done).toBe(total);
+    // Unpromoted, the crawl sleeps 400 ms between batches and 800 ms between phases.
+    expect(elapsed).toBeLessThan(1_500);
+  });
+
+  it("tolerates a double detach", () => {
+    const detach = followSeaLevelCrawl(DUBLIN_CITY_GAME_AREA);
+    detach();
+    expect(() => detach()).not.toThrow();
+  });
+
+  it("rejects the foreground wait on cancel without stopping the crawl", async () => {
+    startSeaLevelBackgroundSampling(DUBLIN_CITY_GAME_AREA);
+    const controller = new AbortController();
+    const wait = ensureSeaLevelSamplingComplete(DUBLIN_CITY_GAME_AREA, {
+      signal: controller.signal,
+    });
+    controller.abort(new DOMException("Cancelled.", "AbortError"));
+    await expect(wait).rejects.toMatchObject({ name: "AbortError" });
+    await ensureSeaLevelSamplingComplete(DUBLIN_CITY_GAME_AREA);
+    expect(getSeaLevelSamplingProgress(DUBLIN_CITY_GAME_AREA).phase).toBe("complete");
   });
 });

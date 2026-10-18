@@ -14,15 +14,21 @@ import type {
   SessionCustomCategory,
   SessionCustomLocationPin,
 } from "@/domain/session/catalog/sessionCustomContent";
-import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached, tentaclePoisCacheKey } from "../cache";
 import { parseWikidataId } from "../parseWikidataId";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
+import { mergeOverpassElementPayloads, type OverpassBbox } from "./overpassBboxSplit";
 import {
-  mergeOverpassElementPayloads,
-  type OverpassBbox,
-  queryOverpassWithBboxSplit,
-} from "./overpassBboxSplit";
+  cachedFetchOptions,
+  enrichInBackground,
+  type OverpassLoad,
+  overpassLoadFromFetch,
+  overpassLoadFromTask,
+  overpassSearchStage,
+  type PackThenOverpassProgress,
+  queryOverpassSplitLoaded,
+  withBundleStage,
+} from "./overpassLoad";
 import { formatOverpassBbox, overpassQueryTemplate } from "./query";
 import { fetchBundledTentaclePois, mergeTentaclePois } from "./regionPackPoi";
 
@@ -224,12 +230,14 @@ export type FetchTentaclePoisOptions = {
   customLocationPins?: readonly SessionCustomLocationPin[];
   regionPackId?: RegionPackId;
   onEnrich?: (pois: TentaclePoi[]) => void;
-};
+} & PackThenOverpassProgress;
 
 function withManualPins(mergedOverpass: TentaclePoi[], pinPois: TentaclePoi[]): TentaclePoi[] {
   const seen = new Set(mergedOverpass.map((poi) => poi.id));
   return [...mergedOverpass, ...pinPois.filter((poi) => !seen.has(poi.id))];
 }
+
+const TENTACLE_HISTORY_KEY = "overpass:tentacle";
 
 async function fetchOverpassTentaclePois(
   center: LatLngTuple,
@@ -237,21 +245,27 @@ async function fetchOverpassTentaclePois(
   categoryId: TentacleExtendedCategoryId,
   customCategories: readonly SessionCustomCategory[],
   cacheScope: string,
+  load?: OverpassLoad,
 ): Promise<TentaclePoi[]> {
-  return getOrFetchCached(tentaclePoisCacheKey(center, radiusMeters, cacheScope), async () => {
-    const payload = await queryOverpassWithBboxSplit(
-      (bbox) => buildTentacleOverpassQueryForBbox(bbox, categoryId, customCategories),
-      tentacleSearchBoundingBox(center, radiusMeters),
-      (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
-      mergeOverpassElementPayloads,
-    );
+  const bbox = tentacleSearchBoundingBox(center, radiusMeters);
+  return getOrFetchCached(
+    tentaclePoisCacheKey(center, radiusMeters, cacheScope),
+    async (context) => {
+      const payload = await queryOverpassSplitLoaded<{ elements: OverpassElement[] }>(
+        (child) => buildTentacleOverpassQueryForBbox(child, categoryId, customCategories),
+        bbox,
+        mergeOverpassElementPayloads,
+        overpassLoadFromFetch(context),
+      );
 
-    return filterTentaclePoisByRadius(
-      parseTentaclePois(payload.elements, categoryId),
-      center,
-      radiusMeters,
-    );
-  });
+      return filterTentaclePoisByRadius(
+        parseTentaclePois(payload.elements, categoryId),
+        center,
+        radiusMeters,
+      );
+    },
+    cachedFetchOptions(load, overpassSearchStage(TENTACLE_HISTORY_KEY, bbox)),
+  );
 }
 
 export async function fetchTentaclePois(
@@ -270,20 +284,23 @@ export async function fetchTentaclePois(
     categoryId,
   );
 
-  const bundledPois = await fetchBundledTentaclePois(
-    center,
-    radiusMeters,
-    categoryId,
-    options?.regionPackId,
+  const task = options?.task;
+  const searchSpec = overpassSearchStage(
+    TENTACLE_HISTORY_KEY,
+    tentacleSearchBoundingBox(center, radiusMeters),
+  );
+  const bundledPois = await withBundleStage(task, () =>
+    fetchBundledTentaclePois(center, radiusMeters, categoryId, options?.regionPackId),
   );
 
-  const mergeWithOverpass = async (): Promise<TentaclePoi[]> => {
+  const mergeWithOverpass = async (load?: OverpassLoad): Promise<TentaclePoi[]> => {
     const overpassPois = await fetchOverpassTentaclePois(
       center,
       radiusMeters,
       categoryId,
       customCategories,
       cacheScope,
+      load,
     );
 
     const mergedOverpass = mergeTentaclePois(
@@ -299,13 +316,11 @@ export async function fetchTentaclePois(
   };
 
   if (bundledPois.length > 0 && options?.onEnrich) {
-    void mergeWithOverpass()
-      .then((merged) => {
-        options.onEnrich?.(merged);
-      })
-      .catch(() => {});
+    enrichInBackground(options.createEnrichTask, searchSpec, mergeWithOverpass, (merged) => {
+      options.onEnrich?.(merged);
+    });
     return withManualPins(bundledPois, pinPois);
   }
 
-  return mergeWithOverpass();
+  return mergeWithOverpass(overpassLoadFromTask(task, searchSpec));
 }

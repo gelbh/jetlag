@@ -38,7 +38,9 @@ import type { PendingQuestionRecord } from "../../domain/session/activity/sessio
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { sessionGameSize } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
+import { isAbortError } from "../../services/core/network/anySignal";
 import { overpassErrorMessage } from "../../services/core/overpass/overpassClient";
+import { createLoadTask, type LoadTask } from "../../services/core/progress/loadTask";
 import { fetchTentaclePois } from "../../services/geo/overpass/tentacleOverpass";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { useLatestRequest } from "../forms/useLatestRequest";
@@ -177,7 +179,8 @@ export function useTentacleTool({
     }, []),
   });
 
-  const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
+  const { beginRequest, cancelRequests, isLatestRequest, requestSignal } = useLatestRequest();
+  const [tentacleLoadTask, setTentacleLoadTask] = useState<LoadTask | null>(null);
 
   const tentacleApplyPhaseRef = useRef(new Map<number, number>());
 
@@ -232,6 +235,12 @@ export function useTentacleTool({
         setTentaclePois([]);
       }
 
+      const signal = requestSignal();
+      const task = createLoadTask({
+        label: `Finding locations within ${formatDistance(searchRadiusMeters, distanceUnit)}`,
+        signal,
+      });
+      setTentacleLoadTask(task);
       try {
         const pois = await fetchTentaclePois(center, searchRadiusMeters, categoryId, {
           customCategories: sessionRules.customCategories,
@@ -240,22 +249,40 @@ export function useTentacleTool({
             ...poiPinsForCategory(activeAnnotationsRef.current, categoryId),
           ],
           regionPackId: sessionRules.regionPackId,
+          task,
+          createEnrichTask: () =>
+            createLoadTask({ label: "Confirming locations", signal, global: true }),
           onEnrich: (enrichedPois) => {
             applyTentaclePoisResult(requestId, enrichedPois, 1);
           },
         });
 
+        task.complete();
         applyTentaclePoisResult(requestId, pois, 0);
       } catch (error) {
-        if (isLatestRequest(requestId)) {
-          setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
+        if (isAbortError(error)) {
+          // Cancelled or superseded: no error text.
+          task.cancel();
+        } else {
+          task.fail(error);
+          if (isLatestRequest(requestId)) {
+            setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
+          }
         }
       }
       if (isLatestRequest(requestId)) {
         setTentacleLoading(false);
       }
     },
-    [applyTentaclePoisResult, beginRequest, isLatestRequest, searchRadiusMeters, sessionRules],
+    [
+      applyTentaclePoisResult,
+      beginRequest,
+      distanceUnit,
+      isLatestRequest,
+      requestSignal,
+      searchRadiusMeters,
+      sessionRules,
+    ],
   );
 
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);
@@ -477,6 +504,7 @@ export function useTentacleTool({
         selectedPoiId,
         outOfReach: tentacleOutOfReach,
         loading: tentacleLoading,
+        loadTask: tentacleLoadTask,
         awaitingPlacement,
         hasCenter: tentacleCenter !== null,
         gpsLoading,
@@ -654,6 +682,7 @@ export function useTentacleTool({
         selectedPoiId={selectedPoiId}
         outOfReach={tentacleOutOfReach}
         loading={tentacleLoading}
+        loadTask={tentacleLoadTask}
         awaitingPlacement={awaitingPlacement}
         hasCenter={tentacleCenter !== null}
         gpsLoading={gpsLoading}

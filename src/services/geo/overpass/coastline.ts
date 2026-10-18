@@ -7,23 +7,31 @@ import {
   prepareMeasuringLineSegments,
 } from "@/domain/geometry/measuring/geometryMeasuring";
 import type { GameArea } from "@/domain/map/annotations";
+import type { ProgressNode } from "@/domain/progress/progressTree";
 import type { RegionPackId } from "@/domain/regions/regionPack";
-import { queryOverpass } from "../../core/overpass/overpassClient";
+import { yieldToMain } from "../../core/progress/yieldToMain";
 import {
   coastlineSegmentsCacheKey,
   getOrFetchCached,
   readCachedMemoryEntry,
   writeCoastlineSegmentsCache,
 } from "../cache";
+import { mergeOverpassElementPayloads, type OverpassBbox } from "./overpassBboxSplit";
 import {
-  mergeOverpassElementPayloads,
-  type OverpassBbox,
-  queryOverpassWithBboxSplit,
-} from "./overpassBboxSplit";
+  cachedFetchOptions,
+  enrichInBackground,
+  type OverpassLoad,
+  overpassLoadFromFetch,
+  overpassLoadFromTask,
+  overpassSearchStage,
+  type PackThenOverpassProgress,
+  queryOverpassSplitLoaded,
+  withBundleStage,
+} from "./overpassLoad";
 import { formatOverpassBbox, overpassQueryTemplate } from "./query";
 import { loadBundledCoastlinePack, mergeCoastlineSegments } from "./regionPackCoastline";
 
-export interface FetchCoastlineOptions {
+export interface FetchCoastlineOptions extends PackThenOverpassProgress {
   regionPackId?: RegionPackId;
   onEnrich?: (prepared: PreparedLinearSegments) => void;
 }
@@ -55,21 +63,29 @@ function wayToLineString(nodes: Array<{ lat: number; lon: number }>): Feature<Li
   };
 }
 
+const COASTLINE_HISTORY_KEY = "overpass:coastline";
+
+const COASTLINE_SEGMENTS_STAGE = {
+  kind: "compute",
+  label: "Preparing coastline",
+  historyKey: "compute:segments",
+} as const;
+
 async function fetchCoastlineSegmentsFromOverpass(
   gameArea: GameArea,
+  load: OverpassLoad = {},
 ): Promise<Feature<LineString>[]> {
-  const payload = await queryOverpassWithBboxSplit(
+  const payload = await queryOverpassSplitLoaded<{
+    elements: Array<{
+      type: string;
+      id: number;
+      geometry?: Array<{ lat: number; lon: number }>;
+    }>;
+  }>(
     buildCoastlineQueryForBbox,
     gameAreaToBoundingBox(gameArea),
-    (ql) =>
-      queryOverpass<{
-        elements: Array<{
-          type: string;
-          id: number;
-          geometry?: Array<{ lat: number; lon: number }>;
-        }>;
-      }>(ql),
     mergeOverpassElementPayloads,
+    load,
   );
 
   return payload.elements
@@ -81,10 +97,18 @@ async function fetchCoastlineSegmentsFromOverpass(
 async function prepareMergedCoastlineSegments(
   gameArea: GameArea,
   bundledSegments: Feature<LineString>[],
+  load: OverpassLoad = {},
+  prepareNode?: ProgressNode,
 ): Promise<PreparedLinearSegments> {
-  const overpassSegments = await fetchCoastlineSegmentsFromOverpass(gameArea);
+  const overpassSegments = await fetchCoastlineSegmentsFromOverpass(gameArea, load);
   const segments = mergeCoastlineSegments(overpassSegments, bundledSegments);
-  return prepareMeasuringLineSegments(segments, gameArea);
+  prepareNode?.start();
+  if (prepareNode) {
+    await yieldToMain();
+  }
+  const prepared = prepareMeasuringLineSegments(segments, gameArea);
+  prepareNode?.finish();
+  return prepared;
 }
 
 export async function fetchCoastlineSegments(
@@ -99,7 +123,15 @@ export async function fetchPreparedCoastlineSegments(
   gameArea: GameArea,
   options?: FetchCoastlineOptions,
 ): Promise<PreparedLinearSegments> {
-  const pack = options?.regionPackId ? await loadBundledCoastlinePack(options.regionPackId) : null;
+  const task = options?.task;
+  const searchSpec = overpassSearchStage(COASTLINE_HISTORY_KEY, gameAreaToBoundingBox(gameArea));
+  const pack = options?.regionPackId
+    ? await withBundleStage(
+        task,
+        () => loadBundledCoastlinePack(options.regionPackId as RegionPackId),
+        { kind: "fetch", label: "Loading bundled coastline", historyKey: "bundle:coastline" },
+      )
+    : null;
 
   if (pack?.source === "none") {
     const empty = prepareMeasuringLineSegments([], gameArea);
@@ -113,19 +145,31 @@ export async function fetchPreparedCoastlineSegments(
   // shared coastline cache (same dual-phase shape as measuringPlaces).
   if (bundledSegments.length > 0 && options?.onEnrich) {
     const prepared = prepareMeasuringLineSegments(bundledSegments, gameArea);
-    void prepareMergedCoastlineSegments(gameArea, bundledSegments)
-      .then(async (merged) => {
+    enrichInBackground(
+      options.createEnrichTask,
+      searchSpec,
+      async (load) => {
+        const merged = await prepareMergedCoastlineSegments(gameArea, bundledSegments, load);
         await writeCoastlineSegmentsCache(gameArea, merged);
-        options.onEnrich?.(merged);
-      })
-      .catch(() => {
-        // Soft-fail Overpass enrich; keep the pack result in the caller.
-      });
+        return merged;
+      },
+      (merged) => options.onEnrich?.(merged),
+    );
     return prepared;
   }
 
-  return getOrFetchCached(coastlineSegmentsCacheKey(gameArea), () =>
-    prepareMergedCoastlineSegments(gameArea, bundledSegments),
+  const prepareNode = task?.stage(COASTLINE_SEGMENTS_STAGE);
+  const load = overpassLoadFromTask(task, searchSpec);
+  return getOrFetchCached(
+    coastlineSegmentsCacheKey(gameArea),
+    (context) =>
+      prepareMergedCoastlineSegments(
+        gameArea,
+        bundledSegments,
+        overpassLoadFromFetch(context),
+        prepareNode,
+      ),
+    cachedFetchOptions(load, searchSpec),
   );
 }
 

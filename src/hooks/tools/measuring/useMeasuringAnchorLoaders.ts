@@ -11,10 +11,13 @@ import {
   type MeasuringLocationCategory,
   type MeasuringTargetMode,
   measuringFromKind,
+  measuringLocationLabel,
   measuringUsesAllPlacesInArea,
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import { isAbortError } from "@/services/core/network/anySignal";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
+import { createLoadTask, type LoadTask } from "@/services/core/progress/loadTask";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
 import { measuringLinearNotFoundMessage } from "@/services/geo/overpass/measuringLinearFeatures";
@@ -70,6 +73,7 @@ export function useMeasuringAnchorLoaders({
     usedMeasuringFromKindsSet,
     unavailableMeasuringFromKinds,
     setMeasuringLoading,
+    setMeasuringLoadTask,
     setMeasuringError,
     setMeasuringPlaces,
     setMeasuringDistanceMeters,
@@ -100,6 +104,25 @@ export function useMeasuringAnchorLoaders({
   }, [measuringAnswer]);
 
   const placesApplyPhaseRef = useRef(new Map<number, number>());
+
+  // One measuring resolve runs at a time; a new one cancels the old so its fetch frees its slot.
+  const loadTaskRef = useRef<LoadTask | null>(null);
+  const beginLoadTask = useCallback(
+    (label: string) => {
+      loadTaskRef.current?.cancel();
+      const task = createLoadTask({ label });
+      loadTaskRef.current = task;
+      setMeasuringLoadTask(task);
+      return task;
+    },
+    [setMeasuringLoadTask],
+  );
+  useEffect(
+    () => () => {
+      loadTaskRef.current?.cancel();
+    },
+    [],
+  );
 
   const applyAllPlacesResult = useCallback(
     (
@@ -193,6 +216,7 @@ export function useMeasuringAnchorLoaders({
         applyAllPlacesResult(requestId, seekerPoint, category, tilePreview, 0);
       }
 
+      const task = beginLoadTask("Loading places in the play area");
       try {
         const customCategories = sessionRules?.customCategories ?? [];
         const places = await fetchMeasuringPlacesInArea(
@@ -201,15 +225,22 @@ export function useMeasuringAnchorLoaders({
           customCategories,
           sessionRules?.regionPackId,
           {
+            task,
+            createEnrichTask: () =>
+              createLoadTask({ label: "Confirming places", signal: task.signal, global: true }),
             onEnrich: (enrichedPlaces) => {
               applyAllPlacesResult(requestId, seekerPoint, category, enrichedPlaces, 1);
             },
           },
         );
 
+        task.complete();
         applyAllPlacesResult(requestId, seekerPoint, category, places, 0);
       } catch (error) {
-        if (requestId === placesRequestIdRef.current) {
+        if (isAbortError(error)) {
+          task.cancel();
+        } else if (requestId === placesRequestIdRef.current) {
+          task.fail(error);
           setMeasuringPlaces([]);
           setMeasuringDistanceMeters(null);
           setMeasuringTargetPlaceName(null);
@@ -222,6 +253,7 @@ export function useMeasuringAnchorLoaders({
     },
     [
       applyAllPlacesResult,
+      beginLoadTask,
       gameArea,
       measuringLocationCategory,
       placesRequestIdRef,
@@ -239,6 +271,7 @@ export function useMeasuringAnchorLoaders({
       const requestId = ++seaLevelRequestIdRef.current;
       setMeasuringLoading(true);
       setMeasuringError(null);
+      const task = beginLoadTask("Reading elevation and shading the play area");
 
       try {
         const applySeaLevelResult = (
@@ -267,15 +300,20 @@ export function useMeasuringAnchorLoaders({
         };
 
         const result = await fetchMeasuringSeaLevelContext(seekerPoint, gameArea, {
+          task,
           regionPackId: sessionRules?.regionPackId,
           onEnrich: (enriched) => {
             applySeaLevelResult(enriched);
           },
         });
 
+        task.complete();
         applySeaLevelResult(result);
       } catch (error) {
-        if (requestId === seaLevelRequestIdRef.current) {
+        if (isAbortError(error)) {
+          task.cancel();
+        } else if (requestId === seaLevelRequestIdRef.current) {
+          task.fail(error);
           setMeasuringSeaLevelNearRegion(null);
           setMeasuringAnchorElevationMeters(null);
           setMeasuringDistanceMeters(null);
@@ -289,6 +327,7 @@ export function useMeasuringAnchorLoaders({
       }
     },
     [
+      beginLoadTask,
       gameArea,
       seaLevelRequestIdRef,
       sessionRules,
@@ -326,6 +365,7 @@ export function useMeasuringAnchorLoaders({
         return;
       }
 
+      const task = beginLoadTask("Finding coastline in the play area");
       try {
         const applyCoastlineOk = (result: {
           coastPoint: LatLngTuple;
@@ -345,12 +385,16 @@ export function useMeasuringAnchorLoaders({
         };
 
         const result = await fetchMeasuringCoastlineContext(seekerPoint, gameArea, {
+          task,
+          createEnrichTask: () =>
+            createLoadTask({ label: "Confirming coastline", signal: task.signal, global: true }),
           regionPackId: sessionRules?.regionPackId,
           onEnrich: (enriched) => {
             applyCoastlineOk(enriched);
           },
         });
 
+        task.complete();
         if (result.ok) {
           applyCoastlineOk(result);
         } else if (requestId === coastlineRequestIdRef.current) {
@@ -360,7 +404,10 @@ export function useMeasuringAnchorLoaders({
           setMeasuringError(result.message);
         }
       } catch (error) {
-        if (requestId === coastlineRequestIdRef.current) {
+        if (isAbortError(error)) {
+          task.cancel();
+        } else if (requestId === coastlineRequestIdRef.current) {
+          task.fail(error);
           setMeasuringTargetPoint(null);
           setMeasuringDistanceMeters(null);
           setMeasuringCoastSegments([]);
@@ -372,6 +419,7 @@ export function useMeasuringAnchorLoaders({
       }
     },
     [
+      beginLoadTask,
       coastlineRequestIdRef,
       gameArea,
       sessionRules,
@@ -394,6 +442,9 @@ export function useMeasuringAnchorLoaders({
       const requestId = ++linearRequestIdRef.current;
       setMeasuringLoading(true);
       setMeasuringError(null);
+      const task = beginLoadTask(
+        `Finding ${measuringLocationLabel(kind).toLowerCase()} in the play area`,
+      );
 
       try {
         const result = await fetchMeasuringLinearContext(
@@ -404,8 +455,10 @@ export function useMeasuringAnchorLoaders({
           customMeasureGeometries,
           customMatchingAreas,
           sessionRules?.regionPackId,
+          task,
         );
 
+        task.complete();
         if (requestId === linearRequestIdRef.current) {
           if (result.ok) {
             setMeasuringTargetPoint(result.point);
@@ -421,7 +474,10 @@ export function useMeasuringAnchorLoaders({
           }
         }
       } catch (error) {
-        if (requestId === linearRequestIdRef.current) {
+        if (isAbortError(error)) {
+          task.cancel();
+        } else if (requestId === linearRequestIdRef.current) {
+          task.fail(error);
           setMeasuringTargetPoint(null);
           setMeasuringTargetPlaceName(null);
           setMeasuringDistanceMeters(null);
@@ -434,6 +490,7 @@ export function useMeasuringAnchorLoaders({
       }
     },
     [
+      beginLoadTask,
       customMatchingAreas,
       customMeasureGeometries,
       gameArea,

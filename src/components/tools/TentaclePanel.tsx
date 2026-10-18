@@ -1,4 +1,5 @@
 import { type RefObject } from "react";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { filterConfirmedTentaclePois } from "../../domain/geo/poiCandidateAdapters";
 import type { TentaclePoi } from "../../domain/map/annotations";
 import { type DistanceUnit, formatPresetDistance } from "../../domain/map/distance";
@@ -38,6 +39,8 @@ export type TentaclePanelModel = {
   selectedPoiId: string | null;
   outOfReach: boolean;
   loading: boolean;
+  /** Live progress for the location search; replaces the spinner while running. */
+  loadTask?: LoadTask | null;
   awaitingPlacement: boolean;
   hasCenter: boolean;
   gpsLoading?: boolean;
@@ -70,6 +73,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
     selectedPoiId,
     outOfReach,
     loading,
+    loadTask = null,
     awaitingPlacement,
     hasCenter,
     gpsLoading = false,
@@ -186,7 +190,9 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
             gpsLoadingLabel="Locating…"
           />
           {loading && hasCenter && categoryChosen ? (
-            <LoadingReadout>Loading locations within {searchRadiusLabel}…</LoadingReadout>
+            <LoadingReadout task={loadTask}>
+              Loading locations within {searchRadiusLabel}…
+            </LoadingReadout>
           ) : null}
         </ToolSection>
       ) : null}
@@ -194,7 +200,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
       {phaseId === "configure" && stepId === "locations" ? (
         <ToolSection first compact status="active">
           {loading ? (
-            <LoadingReadout>
+            <LoadingReadout task={loadTask}>
               {poiOptions.length > 0
                 ? `Confirming ${poiOptions.length} map preview${
                     poiOptions.length === 1 ? "" : "s"

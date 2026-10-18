@@ -12,6 +12,9 @@ import {
   subdivideElevationSampleCell,
 } from "@/domain/geometry/measuring/seaLevel";
 import type { GameArea } from "@/domain/map/annotations";
+import type { ProgressNode, StageSpec } from "@/domain/progress/progressTree";
+import type { LoadTask } from "@/services/core/progress/loadTask";
+import { yieldToMain } from "@/services/core/progress/yieldToMain";
 import type { CachedSeaLevelSampling } from "../cache";
 import { fetchElevations } from "./index";
 import {
@@ -37,6 +40,34 @@ export interface SeaLevelContextFailure {
 export interface LoadSeaLevelContextOptions {
   regionPackId?: SeaLevelSamplingOptions["regionPackId"];
   onEnrich?: (result: SeaLevelContext | SeaLevelContextFailure) => void;
+  task?: LoadTask;
+}
+
+const SEEKER_ELEVATION_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Reading your elevation",
+  historyKey: "elevation:seeker",
+};
+const SAMPLING_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Sampling elevation across the play area",
+  historyKey: "elevation:sampling",
+};
+const REFINE_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Refining near your position",
+  historyKey: "elevation:refine",
+};
+const SHADE_STAGE: StageSpec = {
+  kind: "compute",
+  label: "Shading the play area",
+  historyKey: "compute:shade",
+};
+
+interface SeaLevelStages {
+  signal?: AbortSignal;
+  refine?: ProgressNode;
+  shade?: ProgressNode;
 }
 
 export function buildSeaLevelContextFromSampling(
@@ -67,10 +98,22 @@ export function buildSeaLevelContextFromSampling(
   };
 }
 
+async function shadeStage<T>(stages: SeaLevelStages, build: () => T): Promise<T> {
+  stages.refine?.finish();
+  stages.shade?.start();
+  if (stages.shade) {
+    await yieldToMain();
+  }
+  const result = build();
+  stages.shade?.finish();
+  return result;
+}
+
 async function refineSeaLevelContextLocally(
   seekerElevationMeters: number,
   sampling: CachedSeaLevelSampling,
   gameArea: GameArea,
+  stages: SeaLevelStages = {},
 ): Promise<SeaLevelContext | SeaLevelContextFailure> {
   const distanceFromSeaLevel = distanceFromSeaLevelMeters(seekerElevationMeters);
   const ambiguous = selectAmbiguousSeaLevelCells(
@@ -80,7 +123,9 @@ async function refineSeaLevelContextLocally(
   );
 
   if (ambiguous.length === 0) {
-    return buildSeaLevelContextFromSampling(seekerElevationMeters, sampling, gameArea);
+    return shadeStage(stages, () =>
+      buildSeaLevelContextFromSampling(seekerElevationMeters, sampling, gameArea),
+    );
   }
 
   const refineEntries = ambiguous.flatMap((parent) => {
@@ -94,20 +139,23 @@ async function refineSeaLevelContextLocally(
   const refineCells = capped.map((entry) => entry.cell);
   const refineParentKeys = capped.map((entry) => entry.parentKey);
 
+  stages.refine?.start();
   const refineElevations = await fetchElevations(
     refineCells.map((cell) => cell.point),
-    { profile: "foreground" },
+    { profile: "foreground", signal: stages.signal },
   );
 
-  const { region: nearRegion, edgeCase } = buildSeaLevelNearRegionWithLocalRefine({
-    cells: sampling.cells,
-    elevations: sampling.cellElevations,
-    seekerDistanceFromSeaLevelMeters: distanceFromSeaLevel,
-    gameArea,
-    refineCells,
-    refineParentKeys,
-    refineElevations,
-  });
+  const { region: nearRegion, edgeCase } = await shadeStage(stages, () =>
+    buildSeaLevelNearRegionWithLocalRefine({
+      cells: sampling.cells,
+      elevations: sampling.cellElevations,
+      seekerDistanceFromSeaLevelMeters: distanceFromSeaLevel,
+      gameArea,
+      refineCells,
+      refineParentKeys,
+      refineElevations,
+    }),
+  );
 
   if (edgeCase === "lowest" || !nearRegion) {
     return { reason: "lowest" };
@@ -128,14 +176,29 @@ export async function loadSeaLevelContext(
   gameArea: GameArea,
   options?: LoadSeaLevelContextOptions,
 ): Promise<SeaLevelContext | SeaLevelContextFailure | null> {
-  const elevations = await fetchElevations([seeker], { profile: "foreground" });
+  const task = options?.task;
+  const signal = task?.signal;
+  const seekerStage = task?.stage(SEEKER_ELEVATION_STAGE);
+  const samplingStage = task?.stage(SAMPLING_STAGE);
+  const stages: SeaLevelStages = {
+    signal,
+    refine: task?.stage(REFINE_STAGE),
+    shade: task?.stage(SHADE_STAGE),
+  };
+
+  seekerStage?.start();
+  const elevations = await fetchElevations([seeker], { profile: "foreground", signal });
+  seekerStage?.finish();
   const seekerElevationMeters = elevations[0];
 
   if (!Number.isFinite(seekerElevationMeters)) {
     return null;
   }
 
+  samplingStage?.start();
   const sampling = await ensureSeaLevelSamplingComplete(gameArea, {
+    node: samplingStage,
+    signal,
     regionPackId: options?.regionPackId,
     onEnrich: options?.onEnrich
       ? (enriched) => {
@@ -146,12 +209,16 @@ export async function loadSeaLevelContext(
       : undefined,
   });
 
+  samplingStage?.finish();
+
   // Dense complete pack seed: trust the grid. Freehand / incomplete: local refine.
   if (sampling.complete === true && options?.regionPackId) {
-    return buildSeaLevelContextFromSampling(seekerElevationMeters, sampling, gameArea);
+    return shadeStage(stages, () =>
+      buildSeaLevelContextFromSampling(seekerElevationMeters, sampling, gameArea),
+    );
   }
 
-  return refineSeaLevelContextLocally(seekerElevationMeters, sampling, gameArea);
+  return refineSeaLevelContextLocally(seekerElevationMeters, sampling, gameArea, stages);
 }
 
 export type { CachedSeaLevelSampling };

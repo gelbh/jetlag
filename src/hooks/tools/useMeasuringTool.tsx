@@ -322,6 +322,7 @@ export function useMeasuringTool({
           distanceMeters={draft.measuringDistanceMeters}
           anchorAltitudeMeters={draft.measuringAnchorElevationMeters}
           loading={draft.measuringLoading}
+          loadTask={draft.measuringLoadTask}
           searchQuery={draft.measuringSearchQuery}
           searchLoading={draft.measuringSearchLoading}
           distanceUnit={distanceUnit}
@@ -418,6 +419,7 @@ export function useMeasuringTool({
           targetPlaceName: draft.measuringTargetPlaceName,
           distanceMeters: draft.measuringDistanceMeters,
           loading: draft.measuringLoading,
+          loadTask: draft.measuringLoadTask,
           gpsLoading,
           searchQuery: draft.measuringSearchQuery,
           searchResults: draft.measuringSearchResults,

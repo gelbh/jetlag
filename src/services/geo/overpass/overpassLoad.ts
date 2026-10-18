@@ -103,8 +103,9 @@ export function enrichInBackground<T>(
 export async function withBundleStage<T>(
   task: LoadTask | undefined,
   read: () => Promise<T>,
+  spec: StageSpec = BUNDLE_PLACES_STAGE,
 ): Promise<T> {
-  const node = task?.stage(BUNDLE_PLACES_STAGE);
+  const node = task?.stage(spec);
   node?.start();
   try {
     return await read();
