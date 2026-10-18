@@ -137,7 +137,7 @@ describe("admin shared primitives", () => {
     }
   });
 
-  it("follows a light OS inside admin", () => {
+  it("stays dark inside admin when the OS prefers light", () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: false,
       media: query,
@@ -154,7 +154,7 @@ describe("admin shared primitives", () => {
           <span>x</span>
         </AdminWorld>,
       );
-      expect(document.documentElement).toHaveAttribute("data-mantine-color-scheme", "light");
+      expect(document.documentElement).toHaveAttribute("data-mantine-color-scheme", "dark");
     } finally {
       vi.unstubAllGlobals();
     }

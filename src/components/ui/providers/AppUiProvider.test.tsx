@@ -63,4 +63,28 @@ describe("AppUiProvider", () => {
       "shell",
     );
   });
+
+  it("keeps player routes dark when the OS prefers light", () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    // A returning user may still hold the old admin's "auto" value; the forced dark scheme must win.
+    localStorage.setItem("mantine-color-scheme-value", "auto");
+
+    render(
+      <AppUiProvider>
+        <span>child</span>
+      </AppUiProvider>,
+    );
+
+    expect(document.documentElement.getAttribute("data-mantine-color-scheme")).toBe("dark");
+    localStorage.removeItem("mantine-color-scheme-value");
+  });
 });

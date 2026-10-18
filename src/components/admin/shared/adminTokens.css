@@ -1,20 +1,18 @@
-@import "@fontsource-variable/archivo/wdth.css";
-
 [data-admin-world] {
-  color-scheme: light dark;
-  --adm-font: "Archivo Variable", system-ui, sans-serif;
-  --adm-paper: light-dark(oklch(0.975 0.008 95), oklch(0.19 0.025 260));
-  --adm-paper-raised: light-dark(oklch(0.995 0.004 95), oklch(0.23 0.025 260));
-  --adm-ink: light-dark(oklch(0.22 0.01 60), oklch(0.94 0.01 90));
-  --adm-ink-muted: light-dark(oklch(0.45 0.015 60), oklch(0.74 0.015 90));
-  --adm-rule: light-dark(oklch(0.62 0.07 60), oklch(0.48 0.05 60));
-  --adm-overprint: light-dark(oklch(0.52 0.22 350), oklch(0.72 0.19 350));
-  --adm-overprint-ink: light-dark(oklch(0.98 0.01 350), oklch(0.18 0.03 350));
-  --adm-overprint-soft: light-dark(oklch(0.52 0.22 350 / 0.12), oklch(0.72 0.19 350 / 0.18));
-  --adm-live: light-dark(oklch(0.9 0.13 95), oklch(0.42 0.09 95));
-  --adm-ok: light-dark(oklch(0.5 0.13 145), oklch(0.74 0.14 145));
-  --adm-info: light-dark(oklch(0.51 0.13 240), oklch(0.74 0.11 240));
-  --adm-mispunch: light-dark(oklch(0.52 0.19 25), oklch(0.72 0.16 25));
+  color-scheme: dark;
+  --adm-font: var(--font-body);
+  --adm-paper: var(--color-surface-deep);
+  --adm-paper-raised: var(--color-canvas);
+  --adm-ink: var(--color-ink);
+  --adm-ink-muted: var(--color-ink-muted);
+  --adm-rule: var(--color-rule);
+  --adm-overprint: var(--color-flag);
+  --adm-overprint-ink: var(--color-flag-ink);
+  --adm-overprint-soft: var(--color-flag-soft);
+  --adm-live: var(--color-signal-soft);
+  --adm-ok: var(--color-trail);
+  --adm-info: var(--color-brand-blue);
+  --adm-mispunch: var(--color-status-error);
   --adm-cell: 2.75rem;
   /* Mantine bridge: components inside admin read admin roles */
   --mantine-color-body: var(--adm-paper);
@@ -28,37 +26,6 @@
   --mantine-primary-color-contrast: var(--adm-overprint-ink);
   --mantine-font-family: var(--adm-font);
   --mantine-font-family-headings: var(--adm-font);
-  /* Player bridge: player chrome still inside admin (sign-in gate, incident detail) reads admin roles */
-  --color-surface-deep: var(--adm-paper);
-  --color-surface-base: var(--adm-paper);
-  --color-surface-panel: var(--adm-paper);
-  --color-surface-raised: var(--adm-paper-raised);
-  --color-canvas: var(--adm-paper-raised);
-  --color-ink: var(--adm-ink);
-  --color-ink-secondary: var(--adm-ink);
-  --color-field-ink: var(--adm-ink);
-  --color-ink-muted: var(--adm-ink-muted);
-  --color-ink-dim: var(--adm-ink-muted);
-  --color-field-ink-muted: var(--adm-ink-muted);
-  --color-rule: var(--adm-rule);
-  --color-border: var(--adm-rule);
-  --color-scrollbar-track: var(--adm-paper);
-  --color-scrollbar-thumb: var(--adm-rule);
-  --color-scrollbar-thumb-hover: var(--adm-ink-muted);
-  --color-action: var(--adm-overprint);
-  --color-action-ink: var(--adm-overprint-ink);
-  --color-flag: var(--adm-overprint);
-  --color-flag-ink: var(--adm-overprint-ink);
-  --color-flag-soft: var(--adm-overprint-soft);
-  --color-highlight: var(--adm-overprint);
-  --color-highlight-soft: var(--adm-overprint-soft);
-  --color-signal: var(--adm-info);
-  --color-brand-blue: var(--adm-info);
-  --color-trail: var(--adm-ok);
-  --color-status-success: var(--adm-ok);
-  --color-halt: var(--adm-mispunch);
-  --color-status-error: var(--adm-mispunch);
-  --color-status-warning: var(--adm-ink);
 
   /* Desk roots fill their parent (height: 100% / flex: 1) and scroll inside. */
   display: flex;
@@ -72,9 +39,7 @@
 }
 
 /*
- * Monitor map keeps the player map look (spec non-goal: no restyling player map layers).
- * :root captures the player values before [data-admin-world] shadows them; the player
- * tokens are literal (no light-dark()), so the captured value is the player value.
+ * Monitor map keeps the player map look. The admin world no longer overrides player tokens, so these blocks only restate them; P2b deletes this file.
  */
 :root {
   --adm-player-canvas: var(--color-canvas);

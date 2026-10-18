@@ -11,6 +11,8 @@ export const HTTPS_MSG_JOIN_NOT_ALLOWED = "Not allowed for this join request.";
 export const HTTPS_MSG_LEGACY_JOIN = "Session uses legacy join.";
 /** Not in the allowlist below: a heal into another role can be a seat takeover attempt. */
 export const HTTPS_MSG_HEAL_ROLE_MISMATCH = "Rejoin in your previous role.";
+/** Not in the allowlist below: a heal without the seat's secret can be a seat takeover attempt. */
+export const HTTPS_MSG_HEAL_PROOF_INVALID = "Heal proof invalid.";
 export const HTTPS_MSG_SESSION_NOT_FOUND = "Session not found.";
 export const HTTPS_MSG_SESSION_ENDED = "Session already ended.";
 

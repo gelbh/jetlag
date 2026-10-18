@@ -21,6 +21,10 @@ function mockDb() {
         }
         incidents.set(id, { ...data });
       },
+      get: async () => ({
+        exists: incidents.has(id),
+        data: () => incidents.get(id),
+      }),
       update: async (data) => {
         incidents.set(id, { ...(incidents.get(id) ?? {}), ...data });
       },
@@ -247,6 +251,69 @@ test("rejects payloads without a safe issue id or a name", async () => {
       new RegExp(POSTHOG_ALERT_INVALID_PAYLOAD),
     );
   }
+});
+
+test("reopened alert on a dismissed incident reopens it, writes one message and emails", async () => {
+  const db = mockDb();
+  const d = deps();
+  await ingestPosthogAlert(db, payload(), d);
+  const id = `posthog-${ISSUE_ID}`;
+  db._incidents.set(id, { ...db._incidents.get(id), status: "dismissed" });
+  const messagesBefore = db._messages.length;
+
+  const result = await ingestPosthogAlert(db, payload({ trigger: "reopened" }), d);
+
+  assert.deepEqual(result, { status: "reopened", incidentId: id });
+  assert.equal(db._incidents.get(id).status, "open");
+  assert.equal(db._incidents.get(id).updatedAt, "2026-10-11T12:00:00.000Z");
+  assert.equal(db._messages.length, messagesBefore + 1);
+  assert.deepEqual(
+    {
+      sender: db._messages.at(-1).sender,
+      kind: db._messages.at(-1).kind,
+      text: db._messages.at(-1).text,
+    },
+    { sender: "system", kind: "chat", text: "PostHog issue reopened" },
+  );
+  assert.equal(d._emails.length, 2);
+  assert.equal(d._emails[1].subject, "Jet Lag PostHog issue reopened: TypeError");
+});
+
+test("reopened alert on an open incident is a duplicate with no writes", async () => {
+  const db = mockDb();
+  const d = deps();
+  await ingestPosthogAlert(db, payload(), d);
+  const messagesBefore = db._messages.length;
+
+  const result = await ingestPosthogAlert(db, payload({ trigger: "reopened" }), d);
+
+  assert.deepEqual(result, { status: "duplicate", incidentId: `posthog-${ISSUE_ID}` });
+  assert.equal(db._messages.length, messagesBefore);
+  assert.equal(d._emails.length, 1);
+});
+
+test("reopened alert with no incident creates one labelled as reopened", async () => {
+  const db = mockDb();
+  const result = await ingestPosthogAlert(db, payload({ trigger: "reopened" }), deps());
+
+  assert.equal(result.status, "created");
+  assert.equal(
+    db._incidents.get(result.incidentId).playerNote,
+    "PostHog alert (reopened): TypeError",
+  );
+});
+
+test("unknown trigger values behave as created", async () => {
+  const db = mockDb();
+  const d = deps();
+  await ingestPosthogAlert(db, payload(), d);
+  const id = `posthog-${ISSUE_ID}`;
+  db._incidents.set(id, { ...db._incidents.get(id), status: "dismissed" });
+
+  const result = await ingestPosthogAlert(db, payload({ trigger: "spiking" }), d);
+
+  assert.deepEqual(result, { status: "duplicate", incidentId: id });
+  assert.equal(db._incidents.get(id).status, "dismissed");
 });
 
 const KEY = Buffer.from("0123456789abcdef0123456789abcdef");

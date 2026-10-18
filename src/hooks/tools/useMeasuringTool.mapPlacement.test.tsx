@@ -4,6 +4,7 @@ import * as previewBasemapPoisModule from "@/services/geo/maplibre/previewBasema
 import { useMapStore } from "../../state/mapStore";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { fetchMeasuringCoastlineContext } from "./measuringToolResolvers";
 import { useMeasuringTool } from "./useMeasuringTool";
 
 vi.mock("../../services/core/location/geolocation", async (importOriginal) => {
@@ -58,6 +59,36 @@ vi.mock("./measuringToolResolvers", () => ({
     message: "unused",
   })),
 }));
+
+function renderMeasuringCoastline() {
+  vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([]);
+  const mocks = createToolHookMocks();
+  const rendered = renderHook(() =>
+    useMeasuringTool({
+      active: true,
+      annotations: mocks.annotations,
+      gameArea: DUBLIN_CITY_GAME_AREA,
+      sessionRules: { gameSize: "medium" },
+      createAnnotation: mocks.createAnnotation,
+      distanceUnit: mocks.distanceUnit,
+      finishPlacement: mocks.finishPlacement,
+      setMapError: mocks.setMapError,
+      mapError: mocks.mapError,
+      gpsLoading: mocks.gpsLoading,
+      refreshGps: mocks.refreshGps,
+      ensurePointInGameArea: mocks.ensurePointInGameArea,
+      awaitHiderAnswer: false,
+    }),
+  );
+  act(() => {
+    (
+      rendered.result.current.hud.modeBody as {
+        props: { model: { onMeasureFromChange: (kind: string) => void } };
+      }
+    ).props.model.onMeasureFromChange("coastline");
+  });
+  return rendered;
+}
 
 describe("useMeasuringTool map-first", () => {
   beforeEach(() => {
@@ -187,5 +218,76 @@ describe("useMeasuringTool map-first", () => {
     // Seeker re-pin path clears target for re-resolve; must not treat ask tap as target-only.
     expect(result.current.draft.measuringTargetPoint).toBeNull();
     expect(targetBeforeRepin).toEqual([53.34, -6.27]);
+  });
+  it("moves the anchor on map tap after the target fails to resolve", async () => {
+    vi.mocked(fetchMeasuringCoastlineContext).mockResolvedValueOnce({
+      ok: false,
+      message: "Coastline lookup failed.",
+    });
+    const { result } = renderMeasuringCoastline();
+
+    await waitFor(() => {
+      expect(result.current.hud.suppressSheet).toBe(true);
+    });
+
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.draft.seekerResolving).toBe(false);
+    });
+    expect(result.current.draft.measuringTargetPoint).toBeNull();
+
+    let accepted = false;
+    act(() => {
+      accepted = result.current.handleMapClick([53.36, -6.25]);
+    });
+
+    expect(accepted).toBe(true);
+    expect(result.current.draft.measuringSeekerPoint).toEqual([53.36, -6.25]);
+  });
+
+  it("moves the anchor on map tap while the target is still resolving", async () => {
+    type CoastlineResult = Awaited<ReturnType<typeof fetchMeasuringCoastlineContext>>;
+    let settleFirst: (value: CoastlineResult) => void = () => undefined;
+    vi.mocked(fetchMeasuringCoastlineContext).mockImplementationOnce(
+      () =>
+        new Promise<CoastlineResult>((resolve) => {
+          settleFirst = resolve;
+        }),
+    );
+    const { result } = renderMeasuringCoastline();
+
+    await waitFor(() => {
+      expect(result.current.hud.suppressSheet).toBe(true);
+    });
+
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.draft.seekerResolving).toBe(true);
+    });
+
+    let accepted = false;
+    act(() => {
+      accepted = result.current.handleMapClick([53.36, -6.25]);
+    });
+
+    expect(accepted).toBe(true);
+    expect(result.current.draft.measuringSeekerPoint).toEqual([53.36, -6.25]);
+
+    await waitFor(() => {
+      expect(result.current.draft.measuringTargetPoint).toEqual([53.34, -6.27]);
+    });
+
+    // The first tap's stale response must not overwrite the second tap's target.
+    await act(async () => {
+      settleFirst({ ok: false, message: "stale" });
+    });
+    expect(result.current.draft.measuringSeekerPoint).toEqual([53.36, -6.25]);
+    expect(result.current.draft.measuringTargetPoint).toEqual([53.34, -6.27]);
   });
 });

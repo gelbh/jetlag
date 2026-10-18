@@ -4,6 +4,8 @@
  * No LLM — rules only (session-ops follow-up design).
  */
 
+import { isKnownNoiseError } from "./incidentNoise.mjs";
+
 export const TRIAGE_OUTCOME_AGENT = "agent";
 export const TRIAGE_OUTCOME_HUMAN = "human";
 
@@ -27,7 +29,9 @@ const CODE_ERROR_MESSAGE_RE =
  * }}
  */
 export function triageIncidentDiagnostics(diagnostics) {
-  const errors = Array.isArray(diagnostics?.lastClientErrors) ? diagnostics.lastClientErrors : [];
+  const errors = (
+    Array.isArray(diagnostics?.lastClientErrors) ? diagnostics.lastClientErrors : []
+  ).filter((error) => !isKnownNoiseError(error));
 
   for (const error of errors) {
     const exceptionId =
