@@ -160,6 +160,7 @@ export type HiderMapScreenController = {
   onResetBoard?: () => void;
   onResetSession?: () => void;
   onEndSession?: () => void;
+  endSessionInFlight?: boolean;
   onLeaveSession?: () => void;
   mapSettings: {
     showCurrentLocation: boolean;
@@ -195,6 +196,7 @@ export type HiderMapScreenController = {
       deadlineExpired?: boolean,
     ) => Promise<void>;
     questionCards?: HiderQuestionCards;
+    onSetHidingZone?: () => void;
   };
   /** HUD root for pan-hide (`data-map-interacting`): same as seeker. */
   chromeHudRef?: RefObject<HTMLDivElement | null>;
@@ -263,6 +265,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     onResetBoard,
     onResetSession,
     onEndSession,
+    endSessionInFlight,
     onLeaveSession,
     mapSettings,
     chat,
@@ -435,6 +438,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
         answeredPendingIds={chat.answeredPendingIds}
         onAnswerQuestion={chat.onAnswerQuestion}
         questionCards={chat.questionCards}
+        onSetHidingZone={chat.onSetHidingZone}
       />
 
       {zoneHudPresence.showMapFirst ? (
@@ -500,6 +504,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           answeredPendingIds: chat.answeredPendingIds,
           onAnswerQuestion: chat.onAnswerQuestion,
           questionCards: chat.questionCards,
+          onSetHidingZone: chat.onSetHidingZone,
         }}
       />
 
@@ -560,6 +565,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           onResetBoard,
           onResetSession: onResetSession ? () => void onResetSession() : undefined,
           onEndSession: onEndSession ? () => void onEndSession() : undefined,
+          endSessionInFlight,
           onLeaveSession: onLeaveSession ? () => void onLeaveSession() : undefined,
           expansionPackEnabled,
           onOpenCurseReference: () => {

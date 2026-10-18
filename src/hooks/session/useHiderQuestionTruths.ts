@@ -3,10 +3,11 @@ import type { GameArea } from "../../domain/map/annotations";
 import { buildHiderTruthFetchKey } from "../../domain/questions/hiderTruth/hiderTruthFetchKey";
 import { reuseHiderTruthMapIfEqual } from "../../domain/questions/hiderTruth/hiderTruthMapReuse";
 import {
-  type HiderQuestionTruthContextInput,
   type HiderTruthReferenceMode,
-  resolvePendingQuestionTruthReference,
+  type ResolveHiderTruthReferenceInput,
+  resolveHiderTruthReference,
 } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
+import { truthUnavailable, UNAVAILABLE_NO_ANCHOR } from "../../domain/questions/hiderTruth/shared";
 import { computeHiderTruthReplyAsync, type HiderTruthResult } from "../../domain/questions/ui";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useLatestRequest } from "../forms/useLatestRequest";
@@ -20,11 +21,9 @@ function openPendingQuestions(
   return pendingQuestions.filter((question) => question.status === "pending");
 }
 
-export type HiderQuestionTruthContext = HiderQuestionTruthContextInput;
-
 export function useHiderQuestionTruths(
   pendingQuestions: readonly PendingQuestionRecord[],
-  truthContext: HiderQuestionTruthContext | null,
+  truthContext: ResolveHiderTruthReferenceInput | null,
   gameArea?: GameArea,
   options?: {
     truthReferenceReady?: boolean;
@@ -58,17 +57,18 @@ export function useHiderQuestionTruths(
       ? buildHiderTruthFetchKey(openQuestions, truthContext)
       : "none";
 
+  const truthReferenceReady = options?.truthReferenceReady ?? true;
   const truthReferenceModes = useMemo(() => {
-    if (!truthContext || openQuestions.length === 0) {
+    if (!truthReferenceReady || !truthContext || openQuestions.length === 0) {
       return EMPTY_MODES;
     }
+    const { mode } = resolveHiderTruthReference(truthContext);
     const modes = new Map<string, HiderTruthReferenceMode>();
     for (const question of openQuestions) {
-      modes.set(question.id, resolvePendingQuestionTruthReference(question, truthContext).mode);
+      modes.set(question.id, mode);
     }
     return modes;
-  }, [openQuestions, truthContext]);
-  const truthReferenceReady = options?.truthReferenceReady ?? true;
+  }, [openQuestions, truthContext, truthReferenceReady]);
   const loading =
     openQuestions.length > 0 && (!truthReferenceReady || resolvedFetchKey !== fetchKey);
 
@@ -81,12 +81,17 @@ export function useHiderQuestionTruths(
     }
 
     const requestId = beginRequest();
+    const reference = resolveHiderTruthReference(context);
 
     void (async () => {
       const entries = await Promise.all(
         open.map(async (question) => {
-          const reference = resolvePendingQuestionTruthReference(question, context);
-          const truth = await computeHiderTruthReplyAsync(question, reference.point, gameArea);
+          const truth =
+            reference.mode === "noHidingZone"
+              ? null
+              : reference.mode === "unavailable"
+                ? truthUnavailable(UNAVAILABLE_NO_ANCHOR)
+                : await computeHiderTruthReplyAsync(question, reference.point, gameArea);
           return [question.id, truth] as const;
         }),
       );

@@ -1,7 +1,11 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, render, renderHook, waitFor } from "@testing-library/react";
+import { createElement, StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { useFirestoreCollectionSync } from "./useFirestoreCollectionSync";
+import {
+  useFirestoreCollectionSync,
+  useFirestoreCollectionSyncWithStatus,
+} from "./useFirestoreCollectionSync";
 
 vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: vi.fn(() => true),
@@ -117,5 +121,58 @@ describe("useFirestoreCollectionSync", () => {
     const { result } = renderHook(() => useFirestoreCollectionSync("remote-session", subscribe));
 
     expect(result.current).toEqual([]);
+  });
+
+  it("reports loaded only after the first snapshot", async () => {
+    let emit: ((items: string[]) => void) | undefined;
+    const subscribe = vi.fn((_sessionId: string, onData: (items: string[]) => void) => {
+      emit = onData;
+      return vi.fn();
+    });
+
+    const { result } = renderHook(() =>
+      useFirestoreCollectionSyncWithStatus("remote-session", subscribe),
+    );
+
+    expect(result.current).toEqual({ items: [], loaded: false });
+
+    act(() => {
+      emit?.(["alpha"]);
+    });
+
+    expect(result.current).toEqual({ items: ["alpha"], loaded: true });
+  });
+
+  it("reports loaded when the subscription errors", () => {
+    const subscribe = vi.fn(
+      (_sessionId: string, _onData: (items: string[]) => void, onError: () => void) => {
+        onError();
+        return vi.fn();
+      },
+    );
+
+    const { result } = renderHook(() =>
+      useFirestoreCollectionSyncWithStatus("remote-session", subscribe),
+    );
+
+    expect(result.current.loaded).toBe(true);
+  });
+
+  it("keeps loaded after a synchronous re-subscribe under StrictMode", async () => {
+    const subscribe = vi.fn((_sessionId: string, onData: (items: string[]) => void) => {
+      onData(["alpha"]);
+      return vi.fn();
+    });
+    let latest: { items: string[]; loaded: boolean } | undefined;
+    function Probe() {
+      latest = useFirestoreCollectionSyncWithStatus("remote-session", subscribe);
+      return null;
+    }
+
+    render(createElement(StrictMode, null, createElement(Probe)));
+    await act(async () => {});
+
+    expect(subscribe.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(latest?.loaded).toBe(true);
   });
 });

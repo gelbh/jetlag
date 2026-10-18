@@ -2,7 +2,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { JOIN_PREVIEW_DEBOUNCE_MS } from "../../services/session/joinSessionPreviewCache";
+import {
+  JOIN_PREVIEW_DEBOUNCE_MS,
+  JOIN_PREVIEW_TIMEOUT_MS,
+} from "../../services/session/joinSessionPreviewCache";
 import { createTestRemoteSession } from "../../test/fixtures/sessions";
 import { useJoinSessionPreview } from "./useJoinSessionPreview";
 
@@ -94,5 +97,46 @@ describe("useJoinSessionPreview", () => {
     rerender({ code: "EFGH" });
     expect(result.current.previewSession).toBeNull();
     expect(result.current.lookupLoading).toBe(true);
+  });
+
+  it("retries a transient network failure from anonymous auth", async () => {
+    mockEnsureAnonymousUser
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue({ uid: "user-1" });
+
+    const { result } = renderHook(() => useJoinSessionPreview("ABCD"), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(JOIN_PREVIEW_DEBOUNCE_MS + 2_000);
+    });
+
+    await waitFor(() => {
+      expect(result.current.previewSession?.code).toBe("ABCD");
+    });
+    expect(mockEnsureAnonymousUser).toHaveBeenCalledTimes(2);
+  });
+
+  it("ends loading with no preview when the lookup hangs", async () => {
+    mockLookupRemoteSessionByCode.mockImplementation(() => new Promise(() => undefined));
+
+    const { result } = renderHook(() => useJoinSessionPreview("ABCD"), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(JOIN_PREVIEW_DEBOUNCE_MS + 50);
+    });
+    expect(result.current.lookupLoading).toBe(true);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(JOIN_PREVIEW_TIMEOUT_MS + 50);
+    });
+
+    await waitFor(() => {
+      expect(result.current.lookupLoading).toBe(false);
+    });
+    expect(result.current.previewSession).toBeNull();
   });
 });

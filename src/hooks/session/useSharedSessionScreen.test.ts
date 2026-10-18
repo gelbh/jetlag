@@ -57,7 +57,7 @@ vi.mock("./useChatUnread", () => ({
 }));
 vi.mock("./useSessionExtrasSync", () => ({
   usePendingQuestionsSync: vi.fn(() => []),
-  useHidingZonesSync: vi.fn(() => []),
+  useHidingZonesSync: vi.fn(() => ({ zones: [], loaded: true })),
   useSeekerLocationsSync: vi.fn(() => []),
   useHiderLocationsSync: vi.fn(() => []),
   useSessionMessagesSync: vi.fn(() => []),

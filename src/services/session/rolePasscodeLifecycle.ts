@@ -1,4 +1,5 @@
 import { APP_VERSION } from "../../domain/device/changelog";
+import { JOIN_ERROR_MARKERS } from "../../domain/session/join/joinErrorMarkers";
 import type { JoinRequestRole } from "../../domain/session/players/joinRequest";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { callWithResilience, isCallableError } from "../core/firebase/callWithResilience";
@@ -255,8 +256,10 @@ export async function resolveRoleJoinRequest(
 
 const CLIENT_UPDATE_REQUIRED_COPY = "Update the app to continue. Refresh to load the latest build.";
 
+export const ROLE_CODE_REQUIRED_COPY = "Enter the role code for that side.";
+
 function isClientUpdateRequiredMessage(message: string): boolean {
-  return message.includes("Client update required.");
+  return message.includes(JOIN_ERROR_MARKERS.clientUpdateRequired);
 }
 
 /**
@@ -281,22 +284,22 @@ export function mapRolePasscodeJoinError(error: unknown): string {
     return JOIN_ERROR_SESSION_NOT_FOUND;
   }
   const message = error.message;
-  if (message.includes("Session already ended")) {
+  if (message.includes(JOIN_ERROR_MARKERS.sessionEnded)) {
     return JOIN_ERROR_SESSION_ENDED;
   }
-  if (message.includes("legacy join")) {
+  if (message.includes(JOIN_ERROR_MARKERS.legacyJoin)) {
     return JOIN_ERROR_LEGACY_JOIN;
   }
-  if (message.includes("Rejoin in your previous role")) {
+  if (message.includes(JOIN_ERROR_MARKERS.healRoleMismatch)) {
     return JOIN_ERROR_HEAL_ROLE_MISMATCH;
   }
-  if (message.includes("Wrong role code")) {
+  if (message.includes(JOIN_ERROR_MARKERS.wrongRoleCode)) {
     return "Wrong role code. Ask your team for the current code.";
   }
-  if (message.includes("Role code is required")) {
-    return "Enter the role code for that side.";
+  if (message.includes(JOIN_ERROR_MARKERS.roleCodeRequired)) {
+    return ROLE_CODE_REQUIRED_COPY;
   }
-  if (message.includes("App version incompatible")) {
+  if (message.includes(JOIN_ERROR_MARKERS.versionIncompatible)) {
     return JOIN_ERROR_APP_VERSION_INCOMPATIBLE;
   }
   if (isClientUpdateRequiredMessage(message)) {
