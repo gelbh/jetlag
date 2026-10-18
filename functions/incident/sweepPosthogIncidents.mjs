@@ -54,6 +54,7 @@ export async function sweepPosthogIncidents(db, deps) {
 
   const counts = { checked: 0, resolved: 0, dismissed: 0, skipped: 0 };
   let authFailed = false;
+  // Sequential on purpose: one PostHog API call at a time, and 50 lookups × 2s timeout fit the 120s run.
   for (const doc of candidates) {
     counts.checked += 1;
     const lookup = await readPosthogStatus(
