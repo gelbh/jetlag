@@ -1,12 +1,15 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import type { HidingZoneRecord, TransitStation } from "../../domain/session/hiding/hidingZone";
 import { createTestGameArea } from "../../test/fixtures/sessions";
 import { useHiderZoneTool } from "./useHiderZoneTool";
 
 const writeHidingZone = vi.hoisted(() => vi.fn());
 const enqueueMoveTimerIntent = vi.hoisted(() => vi.fn());
 const isEffectivelyOfflineNow = vi.hoisted(() => vi.fn(() => false));
+const fetchTransitStationsForHidingZoneViewport = vi.hoisted(() =>
+  vi.fn(async (): Promise<TransitStation[]> => []),
+);
 const commitWrite = vi.hoisted(() =>
   vi.fn((_label: string, run: () => Promise<void>) => {
     const acknowledged = run();
@@ -20,7 +23,7 @@ vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
 }));
 
 vi.mock("../../services/geo/matching", () => ({
-  fetchTransitStationsForHidingZoneViewport: vi.fn(async () => []),
+  fetchTransitStationsForHidingZoneViewport,
 }));
 
 vi.mock("@/services/session/sessionIntents", () => ({
@@ -78,6 +81,8 @@ describe("useHiderZoneTool", () => {
     commitWrite.mockClear();
     isEffectivelyOfflineNow.mockReset();
     isEffectivelyOfflineNow.mockReturnValue(false);
+    fetchTransitStationsForHidingZoneViewport.mockReset();
+    fetchTransitStationsForHidingZoneViewport.mockResolvedValue([]);
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
@@ -300,5 +305,56 @@ describe("useHiderZoneTool", () => {
     expect(enqueueMoveTimerIntent).not.toHaveBeenCalled();
     expect(result.current.error).toMatch(/No access/);
     expect(result.current.saving).toBe(false);
+  });
+
+  it("tap-map placement snaps to the nearest station within 200 m", async () => {
+    fetchTransitStationsForHidingZoneViewport.mockResolvedValue([
+      { id: "far", name: "Far", lat: 53.36, lng: -6.26 },
+      { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 },
+    ]);
+    const { result } = renderZoneTool({ existingZone: null, mapPickEnabled: true });
+
+    act(() => {
+      result.current.openWizard();
+      result.current.choosePlacementMethod(true);
+    });
+    await act(async () => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    expect(result.current.snapping).toBe(false);
+    expect(result.current.manualCenter).toEqual([53.3503, -6.2603]);
+    await act(async () => {
+      await result.current.confirmZone();
+    });
+
+    expect(writeHidingZone).toHaveBeenCalledWith(
+      "session-1",
+      expect.objectContaining({
+        stationId: "near",
+        stationName: "Near",
+        center: { lat: 53.3503, lng: -6.2603 },
+      }),
+    );
+  });
+
+  it("tap-map placement keeps the tapped point when no station is nearby", async () => {
+    const { result } = renderZoneTool({ existingZone: null, mapPickEnabled: true });
+
+    act(() => {
+      result.current.openWizard();
+      result.current.choosePlacementMethod(true);
+    });
+    await act(async () => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+    await act(async () => {
+      await result.current.confirmZone();
+    });
+
+    expect(writeHidingZone).toHaveBeenCalledWith(
+      "session-1",
+      expect.objectContaining({ stationId: "manual", center: { lat: 53.35, lng: -6.26 } }),
+    );
   });
 });

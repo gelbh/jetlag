@@ -710,6 +710,7 @@ export function HiderMapScreen() {
       methodChosen: zoneTool.methodChosen,
       choosePlacementMethod: zoneTool.choosePlacementMethod,
       manualCenter: zoneTool.manualCenter,
+      snapping: zoneTool.snapping,
       hasPlacement: zoneTool.hasPlacement,
       confirmZone: zoneTool.confirmZone,
       saving: zoneTool.saving,
