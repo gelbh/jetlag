@@ -63,4 +63,25 @@ describe("AppUiProvider", () => {
       "shell",
     );
   });
+
+  it("keeps player routes dark when the OS prefers light", () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+
+    render(
+      <AppUiProvider>
+        <span>child</span>
+      </AppUiProvider>,
+    );
+
+    expect(document.documentElement.getAttribute("data-mantine-color-scheme")).toBe("dark");
+  });
 });
