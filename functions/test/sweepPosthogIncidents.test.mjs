@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  POSTHOG_SWEEP_AUTH_FAILED,
   POSTHOG_SWEEP_MAX_PER_RUN,
   POSTHOG_SWEEP_UID,
   sweepPosthogIncidents,
@@ -71,6 +72,9 @@ function fakeFetch(statusByIssue) {
     }
     if (entry instanceof Error) {
       throw entry;
+    }
+    if (typeof entry === "number") {
+      return { ok: false, status: entry, json: async () => ({}) };
     }
     return { ok: true, status: 200, json: async () => ({ status: entry }) };
   };
@@ -144,4 +148,29 @@ test("sweep checks at most POSTHOG_SWEEP_MAX_PER_RUN incidents", async () => {
 
   assert.equal(result.checked, POSTHOG_SWEEP_MAX_PER_RUN);
   assert.equal(fetch.calls.length, POSTHOG_SWEEP_MAX_PER_RUN);
+});
+
+test("sweep finishes the loop then fails loudly when PostHog returns 401", async () => {
+  const db = mockDb({
+    "posthog-a": alertIncident("a"),
+    "posthog-b": alertIncident("b"),
+  });
+  const fetch = fakeFetch({ a: 401, b: "resolved" });
+
+  await assert.rejects(
+    sweepPosthogIncidents(db, { apiKey: "k", fetch, now }),
+    new Error(POSTHOG_SWEEP_AUTH_FAILED),
+  );
+  assert.equal(db._incidents.get("posthog-b").status, "resolved");
+  assert.equal(db._incidents.get("posthog-a").status, "open");
+});
+
+test("sweep fails loudly on a 403-only run", async () => {
+  const db = mockDb({ "posthog-a": alertIncident("a") });
+  const fetch = fakeFetch({ a: 403 });
+
+  await assert.rejects(
+    sweepPosthogIncidents(db, { apiKey: "k", fetch, now }),
+    new Error(POSTHOG_SWEEP_AUTH_FAILED),
+  );
 });

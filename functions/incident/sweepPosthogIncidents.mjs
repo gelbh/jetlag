@@ -3,9 +3,10 @@ import { updateIncidentStatusHandler } from "./updateIncidentStatus.mjs";
 
 export const POSTHOG_SWEEP_UID = "system:posthog-sweep";
 export const POSTHOG_SWEEP_MAX_PER_RUN = 50;
+export const POSTHOG_SWEEP_AUTH_FAILED = "POSTHOG_SWEEP_AUTH_FAILED";
 
 const POSTHOG_ISSUES_API = "https://eu.posthog.com/api/projects/232295/error_tracking/issues";
-const FETCH_TIMEOUT_MS = 10_000;
+const FETCH_TIMEOUT_MS = 2_000;
 
 /** PostHog issue status → incident status. Anything unmapped leaves the incident open. */
 const TARGET_STATUS = {
@@ -23,14 +24,14 @@ async function readPosthogStatus(fetchImpl, apiKey, incidentId, issueId) {
     );
     if (!response.ok) {
       console.warn("[sweepPosthogIncidents] PostHog lookup failed:", incidentId, response.status);
-      return null;
+      return { status: null, authFailed: response.status === 401 || response.status === 403 };
     }
     const body = await response.json();
-    return typeof body?.status === "string" ? body.status : null;
+    return { status: typeof body?.status === "string" ? body.status : null, authFailed: false };
   } catch (error) {
     const name = error instanceof Error ? error.name : "unknown";
     console.warn("[sweepPosthogIncidents] PostHog lookup threw:", incidentId, name);
-    return null;
+    return { status: null, authFailed: false };
   }
 }
 
@@ -52,14 +53,17 @@ export async function sweepPosthogIncidents(db, deps) {
     .slice(0, POSTHOG_SWEEP_MAX_PER_RUN);
 
   const counts = { checked: 0, resolved: 0, dismissed: 0, skipped: 0 };
+  let authFailed = false;
   for (const doc of candidates) {
     counts.checked += 1;
-    const posthogStatus = await readPosthogStatus(
+    const lookup = await readPosthogStatus(
       fetchImpl,
       deps.apiKey,
       doc.id,
       doc.data().posthogIssue.id,
     );
+    authFailed ||= lookup.authFailed;
+    const posthogStatus = lookup.status;
     const target = posthogStatus ? TARGET_STATUS[posthogStatus] : undefined;
     if (!target) {
       counts.skipped += 1;
@@ -80,5 +84,8 @@ export async function sweepPosthogIncidents(db, deps) {
   }
 
   console.log("[sweepPosthogIncidents]", JSON.stringify(counts));
+  if (authFailed) {
+    throw new Error(POSTHOG_SWEEP_AUTH_FAILED);
+  }
   return counts;
 }
