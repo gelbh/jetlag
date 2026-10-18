@@ -27,7 +27,6 @@ interface AdminStatusStripProps {
   refreshing: boolean;
   onRefresh: () => void;
   onOpenSettings: () => void;
-  onOpenNeedsYou?: () => void;
   dataFetchedAt: Date | null;
   syncFailed: boolean;
 }
@@ -139,17 +138,12 @@ export function AdminStatusStrip({
   refreshing,
   onRefresh,
   onOpenSettings,
-  onOpenNeedsYou,
   dataFetchedAt,
   syncFailed,
 }: AdminStatusStripProps) {
   const needsYouLabel = `Needs you: ${needsYouCount} open`;
   const needsYouCell = <BarStat label="Needs you" value={needsYouCount} alert />;
-  const needsYouControl: ReactNode = onOpenNeedsYou ? (
-    <UnstyledButton onClick={onOpenNeedsYou} aria-label={needsYouLabel} aria-haspopup="dialog">
-      {needsYouCell}
-    </UnstyledButton>
-  ) : (
+  const needsYouControl: ReactNode = (
     <UnstyledButton component={AppLink} to="/admin/incidents" aria-label={needsYouLabel}>
       {needsYouCell}
     </UnstyledButton>
@@ -221,7 +215,6 @@ export function AdminStatusStrip({
           <ActionIcon
             component={AppLink}
             to="/admin/preload-requests"
-            onClick={onOpenNeedsYou}
             variant="subtle"
             aria-label="Preload requests"
             styles={iconButtonStyles}

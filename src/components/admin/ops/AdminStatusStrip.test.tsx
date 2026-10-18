@@ -11,7 +11,6 @@ function strip(
     incidentsLoading?: boolean;
     onRefresh?: () => void;
     onOpenSettings?: () => void;
-    onOpenNeedsYou?: () => void;
     dataFetchedAt?: Date | null;
     syncFailed?: boolean;
   } = {},
@@ -25,7 +24,6 @@ function strip(
       refreshing={false}
       onRefresh={overrides.onRefresh ?? vi.fn()}
       onOpenSettings={overrides.onOpenSettings ?? vi.fn()}
-      onOpenNeedsYou={overrides.onOpenNeedsYou}
       dataFetchedAt={overrides.dataFetchedAt ?? null}
       syncFailed={overrides.syncFailed ?? false}
     />
@@ -119,15 +117,12 @@ describe("AdminStatusStrip", () => {
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
-  it("turns Needs you into a dialog button when the desk asks for the drawer", () => {
-    const onOpenNeedsYou = vi.fn();
-    renderStrip({ onOpenNeedsYou });
-
-    expect(screen.queryByRole("link", { name: "Needs you: 2 open" })).toBeNull();
-    const needsYou = screen.getByRole("button", { name: "Needs you: 2 open" });
-    expect(needsYou).toHaveAttribute("aria-haspopup", "dialog");
-    fireEvent.click(needsYou);
-    expect(onOpenNeedsYou).toHaveBeenCalledTimes(1);
+  it("links Needs you to the incidents route", () => {
+    renderStrip();
+    expect(screen.getByRole("link", { name: "Needs you: 2 open" })).toHaveAttribute(
+      "href",
+      "/admin/incidents",
+    );
   });
 
   it("shows how long ago the list synced and ages it with the clock", () => {
