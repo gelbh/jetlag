@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { createElement, StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { INITIAL_TIMER_STATE, startTimer } from "../../domain/session/timer/timer";
 import { useTimerStore } from "../../state/timerStore";
@@ -72,11 +73,10 @@ describe("useSessionTimer", () => {
     expect(trackLazy).not.toHaveBeenCalled();
   });
 
-  it("tracks game_started once when two same-frame starts run as deferred state updaters, and again after reset", () => {
+  it("tracks game_started once for two same-frame starts, and again after reset", () => {
     const { result } = renderHook(() => useSessionTimer("session-1"));
 
     act(() => {
-      // A queued update makes React defer the start updaters, so the ref stays stale.
       result.current.applyRemoteState({ ...INITIAL_TIMER_STATE });
       result.current.start();
       result.current.start();
@@ -92,6 +92,24 @@ describe("useSessionTimer", () => {
     });
 
     expect(trackLazy).toHaveBeenCalledTimes(2);
+  });
+
+  it("runs start side effects once under StrictMode", () => {
+    const onControl = vi.fn();
+    const setTimerSpy = vi.spyOn(useTimerStore.getState(), "setTimer");
+    const { result } = renderHook(() => useSessionTimer("session-strict", { onControl }), {
+      wrapper: ({ children }) => createElement(StrictMode, null, children),
+    });
+    onControl.mockClear();
+    setTimerSpy.mockClear();
+
+    act(() => {
+      result.current.start();
+    });
+
+    expect(onControl).toHaveBeenCalledTimes(1);
+    expect(setTimerSpy).toHaveBeenCalledTimes(1);
+    setTimerSpy.mockRestore();
   });
 
   it("does not track game_started when the client cannot control the timer", () => {

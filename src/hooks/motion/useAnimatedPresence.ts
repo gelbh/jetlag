@@ -37,6 +37,11 @@ export function useAnimatedPresence({
   );
   const animNodeRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
+  const phaseRef = useRef(phase);
+
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -76,13 +81,19 @@ export function useAnimatedPresence({
       return;
     }
 
+    if (!decorativeAnimate) {
+      const current = phaseRef.current;
+      if (current === "closed" || current === "exiting") {
+        return;
+      }
+      setPhase("closed");
+      queueMicrotask(() => finishClose());
+      return;
+    }
+
     setPhase((current) => {
       if (current === "closed" || current === "exiting") {
         return current;
-      }
-      if (!decorativeAnimate) {
-        queueMicrotask(() => finishClose());
-        return "closed";
       }
       return "exiting";
     });
