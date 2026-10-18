@@ -2,6 +2,7 @@ import { HttpsError } from "firebase-functions/v2/https";
 import { isAdminAuth } from "../admin/adminAccess.mjs";
 import { assertClientMeetsConfiguredMin } from "./clientMinVersion.mjs";
 import { HTTPS_MSG_SESSION_NOT_FOUND } from "./expectedSessionUxHttpsErrors.mjs";
+import { memberProofRef, sanitizeProofHash } from "./memberProofs.mjs";
 import {
   buildMembershipHealState,
   countMembersWithRole,
@@ -143,6 +144,27 @@ function assertRolePasscodeForJoin(
   };
 }
 
+function proofSetWrite(sessionRef, uid, data) {
+  return { op: "set", ref: memberProofRef(sessionRef, uid), data };
+}
+
+/** Proof writes for this join. Resolved before any transaction write. */
+async function resolveMemberProofWrites(_tx, { sessionRef, uid, proofHash }) {
+  return proofHash
+    ? [proofSetWrite(sessionRef, uid, { hash: proofHash, createdAt: new Date().toISOString() })]
+    : [];
+}
+
+function applyMemberProofWrites(tx, writes) {
+  for (const write of writes) {
+    if (write.op === "delete") {
+      tx.delete(write.ref);
+    } else {
+      tx.set(write.ref, write.data);
+    }
+  }
+}
+
 export async function joinSessionWithRoleHandler(db, auth, rawInput) {
   if (!auth?.uid) {
     throw new HttpsError("unauthenticated", "Sign in required.");
@@ -157,6 +179,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
     rawInput?.persistedMyUid,
     rawInput?.returningMemberUid,
   );
+  const proofHash = sanitizeProofHash(rawInput?.proofHash);
 
   if (code.length !== 4) {
     throw new HttpsError("invalid-argument", "A 4-letter session code is required.");
@@ -225,6 +248,15 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       throw new Error(JOIN_INCOMPATIBLE_VERSION);
     }
 
+    // All transaction reads must happen before the first write.
+    const proofWrites = await resolveMemberProofWrites(tx, {
+      sessionRef,
+      sessionData: data,
+      uid,
+      healFromUid: healing ? healFromUid : undefined,
+      proofHash,
+    });
+
     if (!gated) {
       const ungatedHeal = buildMembershipHealState({
         existingMemberUids: memberUids,
@@ -242,6 +274,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
         memberAppVersions: ungatedHeal.memberAppVersions,
         ...hostPatch,
       });
+      applyMemberProofWrites(tx, proofWrites);
       result = { sessionId, rolePasscode: undefined, becameLeader: false };
       return;
     }
@@ -324,6 +357,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
     };
 
     tx.update(sessionRef, sessionUpdate);
+    applyMemberProofWrites(tx, proofWrites);
     // Full replace so vacated role keys are deleted (merge:true would leave them).
     if (secretsChanged || Object.keys(secrets).length > 0) {
       tx.set(secretsRef, secrets);

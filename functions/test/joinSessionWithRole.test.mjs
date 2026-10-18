@@ -16,6 +16,7 @@ import {
   JOIN_WRONG_PASSCODE,
   joinSessionWithRoleHandler,
 } from "../session/joinSessionWithRole.mjs";
+import { hashHealSecret } from "../session/memberProofs.mjs";
 import { newRoleSecret } from "../session/rolePasscodes.mjs";
 
 test.beforeEach(() => {
@@ -28,8 +29,24 @@ function buildMockDb({
   writes,
   codeSessionId = "sess-1",
   clientMinVersion,
+  proofs = {},
 }) {
-  const sessionRef = { id: codeSessionId };
+  const proofRefs = new Map();
+  const proofRef = (uid) => {
+    if (!proofRefs.has(uid)) {
+      proofRefs.set(uid, { kind: "proof", uid });
+    }
+    return proofRefs.get(uid);
+  };
+  const sessionRef = {
+    id: codeSessionId,
+    collection: (name) => {
+      if (name !== "memberProofs") {
+        throw new Error(`unexpected subcollection ${name}`);
+      }
+      return { doc: proofRef };
+    },
+  };
   const secretsRef = { id: codeSessionId };
 
   return {
@@ -74,6 +91,10 @@ function buildMockDb({
     runTransaction: async (fn) => {
       const tx = {
         get: async (ref) => {
+          if (ref?.kind === "proof") {
+            const proof = proofs[ref.uid];
+            return { exists: proof !== undefined, data: () => proof };
+          }
           if (ref === secretsRef) {
             return {
               exists: Object.keys(secrets).length > 0,
@@ -89,11 +110,21 @@ function buildMockDb({
           writes.push(payload);
           Object.assign(sessionData, payload);
         },
-        set: async (_ref, payload) => {
+        set: async (ref, payload) => {
+          if (ref?.kind === "proof") {
+            proofs[ref.uid] = { ...payload };
+            return;
+          }
           for (const key of Object.keys(secrets)) {
             delete secrets[key];
           }
           Object.assign(secrets, payload);
+        },
+        delete: async (ref) => {
+          if (ref?.kind !== "proof") {
+            throw new Error("unexpected delete");
+          }
+          delete proofs[ref.uid];
         },
       };
       await fn(tx);
@@ -658,4 +689,49 @@ test("heal proof rejection maps to a failed-precondition HttpsError", () => {
       error.code === "failed-precondition" &&
       error.message === "Heal proof invalid.",
   );
+});
+
+const DEVICE_PROOF_HASH = hashHealSecret("device-secret");
+
+function openSeekerSideSession() {
+  return {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host"],
+    memberRoles: { host: "hider" },
+    roleGates: { version: 1, leaders: { hider: "host" } },
+  };
+}
+
+test("gated join with a proof hash writes the caller's proof", async () => {
+  const writes = [];
+  const proofs = {};
+  const db = buildMockDb({ sessionData: openSeekerSideSession(), writes, proofs });
+
+  await joinSessionWithRoleHandler(
+    db,
+    { uid: "seeker-1" },
+    { code: "ABCD", role: "seeker", clientVersion: "0.2.0", proofHash: DEVICE_PROOF_HASH },
+  );
+
+  assert.deepEqual(Object.keys(proofs), ["seeker-1"]);
+  assert.deepEqual(Object.keys(proofs["seeker-1"]).sort(), ["createdAt", "hash"]);
+  assert.equal(proofs["seeker-1"].hash, DEVICE_PROOF_HASH);
+  assert.equal(typeof proofs["seeker-1"].createdAt, "string");
+});
+
+test("gated join without a valid proof hash writes no proof", async () => {
+  for (const proofHash of [undefined, DEVICE_PROOF_HASH.toUpperCase(), "short"]) {
+    const proofs = {};
+    const db = buildMockDb({ sessionData: openSeekerSideSession(), writes: [], proofs });
+
+    await joinSessionWithRoleHandler(
+      db,
+      { uid: "seeker-1" },
+      { code: "ABCD", role: "seeker", clientVersion: "0.2.0", proofHash },
+    );
+
+    assert.deepEqual(proofs, {});
+  }
 });
