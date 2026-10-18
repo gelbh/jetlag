@@ -16,7 +16,7 @@ import {
   JOIN_WRONG_PASSCODE,
   joinSessionWithRoleHandler,
 } from "../session/joinSessionWithRole.mjs";
-import { hashHealSecret } from "../session/memberProofs.mjs";
+import { HEAL_PROOF_REQUIRED_SINCE, hashHealSecret } from "../session/memberProofs.mjs";
 import { newRoleSecret } from "../session/rolePasscodes.mjs";
 
 test.beforeEach(() => {
@@ -89,8 +89,12 @@ function buildMockDb({
       throw new Error(`unexpected collection ${name}`);
     },
     runTransaction: async (fn) => {
+      let wrote = false;
       const tx = {
         get: async (ref) => {
+          if (wrote) {
+            throw new Error("transaction read after write");
+          }
           if (ref?.kind === "proof") {
             const proof = proofs[ref.uid];
             return { exists: proof !== undefined, data: () => proof };
@@ -107,10 +111,12 @@ function buildMockDb({
           };
         },
         update: async (_ref, payload) => {
+          wrote = true;
           writes.push(payload);
           Object.assign(sessionData, payload);
         },
         set: async (ref, payload) => {
+          wrote = true;
           if (ref?.kind === "proof") {
             proofs[ref.uid] = { ...payload };
             return;
@@ -121,6 +127,7 @@ function buildMockDb({
           Object.assign(secrets, payload);
         },
         delete: async (ref) => {
+          wrote = true;
           if (ref?.kind !== "proof") {
             throw new Error("unexpected delete");
           }
@@ -734,4 +741,168 @@ test("gated join without a valid proof hash writes no proof", async () => {
 
     assert.deepEqual(proofs, {});
   }
+});
+
+const HEAL_SECRET = "device-secret";
+const STORED_PROOF = {
+  hash: hashHealSecret(HEAL_SECRET),
+  createdAt: "2026-10-18T00:00:00.000Z",
+};
+const SUNSET_OPTIONS = { healProofRequiredSince: "2026-10-25T00:00:00.000Z" };
+
+function gatedSeekerSeatSession(overrides = {}) {
+  return {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host", "old-seeker"],
+    memberRoles: { host: "hider", "old-seeker": "seeker" },
+    roleGates: { version: 1, leaders: { hider: "host", seeker: "old-seeker" } },
+    ...overrides,
+  };
+}
+
+function proofHealInput(role, returningMemberUid, healSecret) {
+  return { ...healInput(role, returningMemberUid), healSecret, proofHash: STORED_PROOF.hash };
+}
+
+test("gated heal with the matching secret moves the proof to the new uid", async () => {
+  const writes = [];
+  const proofs = { "old-seeker": { ...STORED_PROOF } };
+  const sessionData = gatedSeekerSeatSession();
+  const db = buildMockDb({ sessionData, secrets: { seeker: newRoleSecret() }, writes, proofs });
+
+  await joinSessionWithRoleHandler(
+    db,
+    { uid: "new-seeker" },
+    proofHealInput("seeker", "old-seeker", HEAL_SECRET),
+  );
+
+  assert.deepEqual(proofs, { "new-seeker": STORED_PROOF });
+  assert.ok(sessionData.memberUids.includes("new-seeker"));
+  assert.ok(!sessionData.memberUids.includes("old-seeker"));
+});
+
+test("ungated heal with the matching secret moves the proof to the new uid", async () => {
+  const proofs = { "old-hider": { ...STORED_PROOF } };
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host", "old-hider"],
+    memberRoles: { host: "seeker", "old-hider": "hider" },
+  };
+  const db = buildMockDb({ sessionData, writes: [], proofs });
+
+  await joinSessionWithRoleHandler(
+    db,
+    { uid: "new-hider" },
+    proofHealInput("hider", "old-hider", HEAL_SECRET),
+  );
+
+  assert.deepEqual(proofs, { "new-hider": STORED_PROOF });
+  assert.equal(sessionData.memberRoles["new-hider"], "hider");
+});
+
+test("heal with a wrong or missing secret is rejected and writes nothing", async () => {
+  for (const healSecret of ["wrong-secret", undefined]) {
+    const writes = [];
+    const proofs = { "old-seeker": { ...STORED_PROOF } };
+    const secrets = { seeker: newRoleSecret() };
+    const secretsBefore = { ...secrets };
+    const sessionData = gatedSeekerSeatSession();
+    const db = buildMockDb({ sessionData, secrets, writes, proofs });
+
+    await assert.rejects(
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "forger" },
+        proofHealInput("seeker", "old-seeker", healSecret),
+      ),
+      (error) => error.message === JOIN_HEAL_PROOF_INVALID,
+    );
+    assert.equal(writes.length, 0);
+    assert.deepEqual(proofs, { "old-seeker": STORED_PROOF });
+    assert.deepEqual(sessionData.memberUids, ["host", "old-seeker"]);
+    assert.deepEqual(secrets, secretsBefore);
+  }
+});
+
+test("heal with no proof on a session created before the cutoff uses the bounded fallback", async () => {
+  const proofs = {};
+  const sessionData = gatedSeekerSeatSession({ createdAt: "2020-01-01T00:00:00.000Z" });
+  const db = buildMockDb({ sessionData, secrets: { seeker: newRoleSecret() }, writes: [], proofs });
+
+  await joinSessionWithRoleHandler(
+    db,
+    { uid: "new-seeker" },
+    { ...healInput("seeker", "old-seeker"), proofHash: STORED_PROOF.hash },
+    SUNSET_OPTIONS,
+  );
+
+  assert.equal(sessionData.memberRoles["new-seeker"], "seeker");
+  assert.deepEqual(Object.keys(proofs), ["new-seeker"]);
+  assert.equal(proofs["new-seeker"].hash, STORED_PROOF.hash);
+});
+
+test("heal with no proof on a session created on or after the cutoff is rejected", async () => {
+  for (const createdAt of [SUNSET_OPTIONS.healProofRequiredSince, "2099-01-01T00:00:00.000Z"]) {
+    const writes = [];
+    const proofs = {};
+    const secrets = { seeker: newRoleSecret() };
+    const secretsBefore = { ...secrets };
+    const sessionData = gatedSeekerSeatSession({ createdAt });
+    const db = buildMockDb({ sessionData, secrets, writes, proofs });
+
+    await assert.rejects(
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "new-seeker" },
+        proofHealInput("seeker", "old-seeker", HEAL_SECRET),
+        SUNSET_OPTIONS,
+      ),
+      (error) => error.message === JOIN_HEAL_PROOF_INVALID,
+    );
+    assert.equal(writes.length, 0);
+    assert.deepEqual(proofs, {});
+    assert.deepEqual(secrets, secretsBefore);
+  }
+});
+
+test("heal with no proof uses the bounded fallback by default because the sunset is off", async () => {
+  assert.equal(HEAL_PROOF_REQUIRED_SINCE, null);
+  const proofs = {};
+  const sessionData = gatedSeekerSeatSession({ createdAt: "2099-01-01T00:00:00.000Z" });
+  const db = buildMockDb({ sessionData, secrets: { seeker: newRoleSecret() }, writes: [], proofs });
+
+  await joinSessionWithRoleHandler(
+    db,
+    { uid: "new-seeker" },
+    proofHealInput("seeker", "old-seeker", HEAL_SECRET),
+  );
+
+  assert.equal(sessionData.memberRoles["new-seeker"], "seeker");
+  assert.ok(!sessionData.memberUids.includes("old-seeker"));
+  assert.deepEqual(Object.keys(proofs), ["new-seeker"]);
+  assert.equal(proofs["new-seeker"].hash, STORED_PROOF.hash);
+});
+
+test("heal role mismatch is reported before the proof check", async () => {
+  const proofs = { "old-seeker": { ...STORED_PROOF } };
+  const db = buildMockDb({
+    sessionData: gatedSeekerSeatSession(),
+    secrets: { seeker: newRoleSecret() },
+    writes: [],
+    proofs,
+  });
+
+  await assert.rejects(
+    joinSessionWithRoleHandler(
+      db,
+      { uid: "forger" },
+      proofHealInput("hider", "old-seeker", "wrong-secret"),
+    ),
+    (error) => error.message === JOIN_HEAL_ROLE_MISMATCH,
+  );
+  assert.deepEqual(proofs, { "old-seeker": STORED_PROOF });
 });

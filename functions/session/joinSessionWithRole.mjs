@@ -2,7 +2,13 @@ import { HttpsError } from "firebase-functions/v2/https";
 import { isAdminAuth } from "../admin/adminAccess.mjs";
 import { assertClientMeetsConfiguredMin } from "./clientMinVersion.mjs";
 import { HTTPS_MSG_SESSION_NOT_FOUND } from "./expectedSessionUxHttpsErrors.mjs";
-import { memberProofRef, sanitizeProofHash } from "./memberProofs.mjs";
+import {
+  HEAL_PROOF_REQUIRED_SINCE,
+  healSecretMatchesProof,
+  memberProofRef,
+  sanitizeProofHash,
+  sessionRequiresHealProof,
+} from "./memberProofs.mjs";
 import {
   buildMembershipHealState,
   countMembersWithRole,
@@ -148,11 +154,40 @@ function proofSetWrite(sessionRef, uid, data) {
   return { op: "set", ref: memberProofRef(sessionRef, uid), data };
 }
 
-/** Proof writes for this join. Resolved before any transaction write. */
-async function resolveMemberProofWrites(_tx, { sessionRef, uid, proofHash }) {
-  return proofHash
+/**
+ * Proof writes for this join, resolved before any transaction write. A heal
+ * must show the secret behind the old seat's proof; sessions created before
+ * the heal proof cutoff may still heal a seat that has no proof.
+ */
+async function resolveMemberProofWrites(
+  tx,
+  { sessionRef, sessionData, uid, healFromUid, healSecret, proofHash, healProofRequiredSince },
+) {
+  const ownProof = proofHash
     ? [proofSetWrite(sessionRef, uid, { hash: proofHash, createdAt: new Date().toISOString() })]
     : [];
+  if (healFromUid == null) {
+    return ownProof;
+  }
+
+  const oldProofRef = memberProofRef(sessionRef, healFromUid);
+  const oldProofSnap = await tx.get(oldProofRef);
+  if (!oldProofSnap.exists) {
+    if (sessionRequiresHealProof(sessionData, healProofRequiredSince)) {
+      throw new Error(JOIN_HEAL_PROOF_INVALID);
+    }
+    return ownProof;
+  }
+
+  const oldProof = oldProofSnap.data() ?? {};
+  if (!healSecretMatchesProof(healSecret, oldProof.hash)) {
+    throw new Error(JOIN_HEAL_PROOF_INVALID);
+  }
+
+  return [
+    proofSetWrite(sessionRef, uid, { hash: oldProof.hash, createdAt: oldProof.createdAt }),
+    { op: "delete", ref: oldProofRef },
+  ];
 }
 
 function applyMemberProofWrites(tx, writes) {
@@ -165,7 +200,7 @@ function applyMemberProofWrites(tx, writes) {
   }
 }
 
-export async function joinSessionWithRoleHandler(db, auth, rawInput) {
+export async function joinSessionWithRoleHandler(db, auth, rawInput, options = {}) {
   if (!auth?.uid) {
     throw new HttpsError("unauthenticated", "Sign in required.");
   }
@@ -180,6 +215,8 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
     rawInput?.returningMemberUid,
   );
   const proofHash = sanitizeProofHash(rawInput?.proofHash);
+  const healSecret = typeof rawInput?.healSecret === "string" ? rawInput.healSecret : undefined;
+  const healProofRequiredSince = options.healProofRequiredSince ?? HEAL_PROOF_REQUIRED_SINCE;
 
   if (code.length !== 4) {
     throw new HttpsError("invalid-argument", "A 4-letter session code is required.");
@@ -254,7 +291,9 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       sessionData: data,
       uid,
       healFromUid: healing ? healFromUid : undefined,
+      healSecret,
       proofHash,
+      healProofRequiredSince,
     });
 
     if (!gated) {
