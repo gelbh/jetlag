@@ -14,6 +14,7 @@ export const posthogAlertWebhookSecret = defineSecret("POSTHOG_ALERT_WEBHOOK_SEC
 /**
  * PostHog Error Tracking "issue created" alert → admin desk incident + email.
  * No App Check: PostHog calls this server-to-server, authenticated by signature.
+ * One warm instance: a cold start (~4s) outlasts PostHog's ~3s fetch timeout.
  */
 export const posthogErrorAlert = onRequest(
   {
@@ -21,6 +22,7 @@ export const posthogErrorAlert = onRequest(
     enforceAppCheck: false,
     cors: false,
     timeoutSeconds: 30,
+    minInstances: 1,
   },
   withFunctionsExceptionHandler(async (req, res) => {
     const db = getFirestore();
