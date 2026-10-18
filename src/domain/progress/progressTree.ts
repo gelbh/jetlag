@@ -9,6 +9,8 @@ import {
   updateRate,
 } from "./estimator";
 
+export type LoadPriority = "foreground" | "background";
+
 export type StageKind = "queue" | "fetch" | "download" | "parse" | "compute" | "refine" | "group";
 
 export interface StageSpec {
@@ -35,7 +37,7 @@ export interface ProgressTreeOptions {
   onStageFinish?: (spec: StageSpec, durationMs: number) => void;
 }
 
-type NodeStatus = "pending" | "running" | "done" | "cancelled";
+type NodeStatus = "pending" | "queued" | "running" | "done" | "cancelled";
 
 export class ProgressNode {
   readonly spec: StageSpec;
@@ -52,6 +54,8 @@ export class ProgressNode {
   private splitCount = 0;
   private mirrorSource: ProgressNode | null = null;
   private labelOverride: string | null = null;
+  private queueLabel: string | null = null;
+  private queueWaitMs = 0;
 
   constructor(spec: StageSpec, tree: ProgressTreeOptions, parent: ProgressNode | null) {
     this.spec = spec;
@@ -68,11 +72,19 @@ export class ProgressNode {
     return this.status === "done" || this.status === "cancelled";
   }
 
+  /** Running or waiting for a slot; either way it is the stage the user is waiting on. */
   get isRunning(): boolean {
-    return this.status === "running";
+    return this.status === "running" || this.status === "queued";
+  }
+
+  get parentNode(): ProgressNode | null {
+    return this.parent;
   }
 
   get label(): string {
+    if (this.status === "queued" && this.queueLabel !== null) {
+      return this.queueLabel;
+    }
     return this.labelOverride ?? this.spec.label;
   }
 
@@ -84,8 +96,23 @@ export class ProgressNode {
     return child;
   }
 
+  /**
+   * Marks the stage as waiting for a concurrency slot. Its own timer does not
+   * start until {@link start}, so queue time never pollutes duration history.
+   */
+  queue(label: string, expectedWaitMs: number): void {
+    if (this.status !== "pending" && this.status !== "queued") {
+      return;
+    }
+    this.status = "queued";
+    this.queueLabel = label;
+    this.queueWaitMs = Math.max(0, expectedWaitMs);
+    this.parent?.start();
+    this.notify();
+  }
+
   start(): this {
-    if (this.status === "pending") {
+    if (this.status === "pending" || this.status === "queued") {
       this.status = "running";
       this.startedAt = this.tree.now();
       this.parent?.start();
@@ -241,6 +268,9 @@ export class ProgressNode {
     }
     if (this.status === "running" && this.startedAt !== null) {
       return timedRemainingMs(this.tree.now() - this.startedAt, this.expected);
+    }
+    if (this.status === "queued") {
+      return this.queueWaitMs + this.expected;
     }
     return this.expected;
   }

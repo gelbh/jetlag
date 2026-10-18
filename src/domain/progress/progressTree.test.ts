@@ -175,3 +175,21 @@ describe("ProgressNode notifications", () => {
     expect(onChange).toHaveBeenCalled();
   });
 });
+
+describe("ProgressNode queue", () => {
+  it("shows the queue label without starting the stage timer", () => {
+    const clock = fakeTree();
+    const root = createProgressRoot("Task", clock.options);
+    const fetch = root.stage(fetchSpec);
+    fetch.queue("Waiting for map server", 4_000);
+    clock.advance(3_000);
+    expect(root.activeLeaf().label).toBe("Waiting for map server");
+    expect(fetch.fraction()).toBe(0);
+    expect(fetch.remainingMs()).toBe(5_000);
+    fetch.start();
+    clock.advance(500);
+    expect(fetch.label).toBe("Searching map data");
+    fetch.finish();
+    expect(clock.finished).toContainEqual({ key: "fetch", bucket: undefined, durationMs: 500 });
+  });
+});

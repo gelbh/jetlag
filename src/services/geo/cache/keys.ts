@@ -13,12 +13,16 @@ export function elevationPointCacheKey(lat: number, lng: number): string {
   return `elevation:${lat.toFixed(5)},${lng.toFixed(5)}`;
 }
 
+/** Single blob holding per-stage duration history for progress estimates. */
+export const PROGRESS_HISTORY_CACHE_KEY = "progress-history";
+
 export function isStableCacheKey(key: string): boolean {
   return (
     key.startsWith("admin:") ||
     key.startsWith("landmass:") ||
     key.startsWith("coastline:") ||
-    key.startsWith("sea_level:sampling:")
+    key.startsWith("sea_level:sampling:") ||
+    key === PROGRESS_HISTORY_CACHE_KEY
   );
 }
 
