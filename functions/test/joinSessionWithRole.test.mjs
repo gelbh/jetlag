@@ -8,6 +8,7 @@ import {
   clearClientMinVersionCache,
 } from "../session/clientMinVersion.mjs";
 import {
+  JOIN_HEAL_PROOF_INVALID,
   JOIN_HEAL_ROLE_MISMATCH,
   JOIN_NOT_GATED,
   JOIN_PASSCODE_REQUIRED,
@@ -646,5 +647,15 @@ test("heal role mismatch maps to a failed-precondition HttpsError", () => {
       error instanceof HttpsError &&
       error.code === "failed-precondition" &&
       error.message === "Rejoin in your previous role.",
+  );
+});
+
+test("heal proof rejection maps to a failed-precondition HttpsError", () => {
+  assert.throws(
+    () => mapJoinSessionWithRoleError(new Error(JOIN_HEAL_PROOF_INVALID)),
+    (error) =>
+      error instanceof HttpsError &&
+      error.code === "failed-precondition" &&
+      error.message === "Heal proof invalid.",
   );
 });
