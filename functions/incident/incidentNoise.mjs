@@ -1,6 +1,7 @@
 /**
  * Client errors from code we do not ship (wallet injection, browser extensions,
- * benign browser warnings). Kept as a literal list; PostHog suppression rules
+ * benign browser warnings) or that the app recovers from on its own (stale
+ * chunks after a deploy). Kept as a literal list; PostHog suppression rules
  * cover the alert path, this list covers player-report triage.
  */
 export const KNOWN_NOISE_PATTERNS = Object.freeze([
@@ -9,6 +10,7 @@ export const KNOWN_NOISE_PATTERNS = Object.freeze([
   "chrome-extension://",
   "moz-extension://",
   "safari-web-extension://",
+  "Importing a module script failed",
 ]);
 
 /**
