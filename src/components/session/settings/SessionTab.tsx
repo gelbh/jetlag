@@ -30,6 +30,9 @@ const haltSolidRoot = {
   "&:hover": {
     backgroundColor: "oklch(from var(--color-halt) calc(l + 0.03) c h)",
   },
+  "&:disabled": {
+    opacity: 0.45,
+  },
 } as const;
 
 export interface MapSettingsSessionTabProps {
@@ -44,6 +47,8 @@ export interface MapSettingsSessionTabProps {
   onResetBoard?: () => void;
   onResetSession?: () => void;
   onEndSession?: () => void;
+  /** True while an end call is running; blocks a second tap. */
+  endSessionInFlight?: boolean;
   onLeaveSession?: () => void;
   endGameBlocked?: boolean;
   expansionPackEnabled?: boolean;
@@ -64,6 +69,7 @@ export function MapSettingsSessionTab({
   onResetBoard,
   onResetSession,
   onEndSession,
+  endSessionInFlight = false,
   onLeaveSession,
   endGameBlocked = false,
   expansionPackEnabled = false,
@@ -219,7 +225,12 @@ export function MapSettingsSessionTab({
                   </div>
                 </InsetGroup>
               ) : null}
-              <Button fullWidth styles={{ root: haltSolidRoot }} onClick={onEndSession}>
+              <Button
+                fullWidth
+                styles={{ root: haltSolidRoot }}
+                disabled={endSessionInFlight}
+                onClick={onEndSession}
+              >
                 End session for everyone
               </Button>
             </>

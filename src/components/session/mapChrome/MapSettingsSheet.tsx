@@ -76,6 +76,7 @@ export interface MapSettingsSessionProps {
   onResetBoard?: () => void;
   onResetSession?: () => void;
   onEndSession?: () => void;
+  endSessionInFlight?: boolean;
   onLeaveSession?: () => void;
   endGameBlocked?: boolean;
   expansionPackEnabled?: boolean;
@@ -196,6 +197,7 @@ export function MapSettingsSheet({
             onResetBoard={session.onResetBoard}
             onResetSession={session.onResetSession}
             onEndSession={session.onEndSession}
+            endSessionInFlight={session.endSessionInFlight}
             onLeaveSession={session.onLeaveSession}
             endGameBlocked={session.endGameBlocked}
             expansionPackEnabled={session.expansionPackEnabled}

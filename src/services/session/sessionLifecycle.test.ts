@@ -76,6 +76,14 @@ describe("sessionLifecycle", () => {
     expect(trackSessionEnded).toHaveBeenCalledWith("host_end");
   });
 
+  it("tracks expected_already_ended when the server reports alreadyEnded", async () => {
+    callable.mockResolvedValueOnce({ data: { ok: true, alreadyEnded: true } } as never);
+    await endSession("session-42");
+
+    expect(trackSessionEnded).toHaveBeenCalledOnce();
+    expect(trackSessionEnded).toHaveBeenCalledWith("expected_already_ended");
+  });
+
   it("does not track when endSession callable fails", async () => {
     callable.mockRejectedValueOnce(new Error("network"));
     await expect(endSession("session-42")).rejects.toThrow("network");

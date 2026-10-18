@@ -45,7 +45,7 @@ import {
 } from "../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
-import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
+import { resolveHiderTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
 import {
   pickRandomizeOption,
   randomizedQuestionNotice,
@@ -153,6 +153,7 @@ export function HiderMapScreen() {
     canControlTimer,
     pendingQuestions,
     hidingZones,
+    hidingZonesLoaded,
     seekerLocations,
     hiderLocations,
     chatMessages: messages,
@@ -206,6 +207,7 @@ export function HiderMapScreen() {
     handleResetBoard,
     handleResetSession,
     handleEndSession,
+    endInFlight,
     handleLeaveSession,
   } = useMapSessionChrome({
     session,
@@ -249,9 +251,8 @@ export function HiderMapScreen() {
   );
   const stationCenter = useMemo(() => hiderStationCenter(myZone), [myZone]);
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
-  const needsTruthLocation = pendingQuestions.some((question) => question.status === "pending");
   const { reading: liveLocationReading, error: liveLocationWatchError } = useLiveLocation(
-    showCurrentLocation || needsTruthLocation,
+    showCurrentLocation,
     {
       highAccuracy: liveLocationProfile.highAccuracy,
       minIntervalMs: liveLocationProfile.minIntervalMs,
@@ -259,36 +260,14 @@ export function HiderMapScreen() {
     },
   );
   const locationError = liveLocationWatchError ?? hiderLocationSyncError;
-  const hidingPlace = useMemo((): LatLngTuple | null => {
-    if (!liveLocationReading) {
-      return null;
-    }
-    return [liveLocationReading.lat, liveLocationReading.lng];
-  }, [liveLocationReading]);
-  const seekerPlacesByUid = useMemo(() => {
-    const places: Record<string, LatLngTuple> = {};
-    for (const location of seekerLocations) {
-      if (Number.isFinite(location.lat) && Number.isFinite(location.lng)) {
-        places[location.uid] = [location.lat, location.lng];
-      }
-    }
-    return places;
-  }, [seekerLocations]);
   const truthContext = useMemo(() => {
     if (!uid) {
       return null;
     }
-    return {
-      hiderUid: uid,
-      zoneCenter: stationCenter,
-      hidingPlace,
-      zoneRadiusMeters: myZone?.radiusMeters ?? null,
-      seekerPlacesByUid,
-      session,
-    };
-  }, [hidingPlace, myZone?.radiusMeters, seekerPlacesByUid, session, stationCenter, uid]);
+    return { hiderUid: uid, zoneCenter: stationCenter, session };
+  }, [session, stationCenter, uid]);
   useHidingZoneUidHeal(sessionId, uid, hidingZones, persistedMyUid);
-  const truthReferenceReady = authReady && uid !== null;
+  const truthReferenceReady = authReady && uid !== null && hidingZonesLoaded;
   const {
     questionTruths,
     loading: truthsLoading,
@@ -438,7 +417,7 @@ export function HiderMapScreen() {
 
         try {
           const answerTruthReference = truthContext
-            ? resolvePendingQuestionTruthReference(pending, truthContext)
+            ? resolveHiderTruthReference(truthContext)
             : { point: null as LatLngTuple | null };
           const truth = await computeHiderTruthReplyAsync(
             pending,
@@ -1083,6 +1062,7 @@ export function HiderMapScreen() {
             onResetBoard: isHost ? handleResetBoard : undefined,
             onResetSession: isHost ? handleResetSession : undefined,
             onEndSession: isHost ? handleEndSession : undefined,
+            endSessionInFlight: endInFlight,
             onLeaveSession: handleLeaveSession,
             mapSettings: {
               showCurrentLocation,
@@ -1112,6 +1092,7 @@ export function HiderMapScreen() {
               answeredPendingIds,
               onAnswerQuestion: submitHiderAnswer,
               questionCards,
+              onSetHidingZone: openWizardExclusive,
             },
           }}
         />

@@ -250,6 +250,7 @@ export function useMapScreenController() {
     handleResetBoard,
     handleResetSession,
     handleEndSession,
+    endInFlight,
     handleLeaveSession,
     exportMap,
   } = useMapSessionChrome({
@@ -617,6 +618,7 @@ export function useMapScreenController() {
     handleResetBoard,
     handleResetSession,
     handleEndSession,
+    endInFlight,
     handleLeaveSession,
     handleSaveGameRules: sessionActions.handleSaveGameRules,
     handleDistanceUnitChange: sessionActions.handleDistanceUnitChange,

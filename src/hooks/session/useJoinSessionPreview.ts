@@ -5,9 +5,11 @@ import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { retryAsync } from "../../services/core/network/retryAsync";
+import { withTimeout } from "../../services/core/withTimeout";
 import { lookupRemoteSessionByCode } from "../../services/firestore/firestoreAnnotations";
 import {
   JOIN_PREVIEW_DEBOUNCE_MS,
+  JOIN_PREVIEW_TIMEOUT_MS,
   JOIN_PREVIEW_TTL_MS,
 } from "../../services/session/joinSessionPreviewCache";
 import { isValidSessionCode, normalizeSessionCode } from "../../services/session/sessionCodes";
@@ -27,9 +29,15 @@ async function fetchJoinPreview(normalized: string): Promise<{
   result: JoinPreviewResult;
   uid: string;
 }> {
-  const user = await ensureAnonymousUser();
-  const result = await retryAsync(() => lookupRemoteSessionByCode(normalized));
-  return { result, uid: user.uid };
+  return withTimeout(
+    (async () => {
+      const user = await retryAsync(() => ensureAnonymousUser());
+      const result = await retryAsync(() => lookupRemoteSessionByCode(normalized));
+      return { result, uid: user.uid };
+    })(),
+    JOIN_PREVIEW_TIMEOUT_MS,
+    "Join preview timed out.",
+  );
 }
 
 /**
@@ -52,6 +60,8 @@ export function useJoinSessionPreview(code: string): JoinSessionPreviewState {
     enabled,
     staleTime: JOIN_PREVIEW_TTL_MS,
     gcTime: JOIN_PREVIEW_TTL_MS,
+    // retryAsync already retries auth and lookup; a query retry would stack on that.
+    retry: false,
   });
 
   if (!enabled) {

@@ -1,4 +1,5 @@
 import type { SessionRecord } from "../../map/annotations";
+import { isPlaceholderGameArea } from "../join/joinPreviewGameArea";
 import type { JoinRequestRole } from "./joinRequest";
 import type { PlayerRole } from "./playerRole";
 
@@ -114,4 +115,28 @@ export function buildRoleGatesForHost(hostUid: string, hostRole: PlayerRole): Ro
   }
 
   return { version: 1, leaders };
+}
+
+/**
+ * Submit gate for a blank role code. Unlike field visibility, unknown occupancy
+ * returns false so the first player on a side can still join without a code.
+ */
+export function isRolePasscodeRequired(
+  previewSession: Pick<SessionRecord, "memberRoles" | "gameArea"> | null | undefined,
+  role: PlayerRole,
+  uid: string | undefined,
+): boolean {
+  if (!previewSession) {
+    return false;
+  }
+
+  if (role === "observer") {
+    return true;
+  }
+
+  if (isPlaceholderGameArea(previewSession.gameArea)) {
+    return false;
+  }
+
+  return joinRequiresRolePasscode(previewSession.memberRoles, role, uid, true);
 }

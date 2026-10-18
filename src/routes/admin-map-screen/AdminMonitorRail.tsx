@@ -17,6 +17,7 @@ import { MapPanel } from "./panels/MapPanel";
 import { ModPanel } from "./panels/ModPanel";
 import { OverviewPanel } from "./panels/OverviewPanel";
 import { SyncPanel } from "./panels/SyncPanel";
+import type { ModerationAction } from "./useModerationConfirm";
 
 export type AdminMonitorRailTab = "overview" | "log" | "chat" | "sync" | "map" | "mod";
 
@@ -46,8 +47,7 @@ interface AdminMonitorRailProps {
   controller: ObserverMapScreenController;
   chatDisplayRole: PlayerRole;
   moderationBusy: boolean;
-  moderationError: string | null;
-  onModerationAction: (action: "end" | "resetBoard" | "cleanupCode") => void;
+  onModerationAction: (action: ModerationAction) => void;
   mapViewport: MapViewportState | null;
   onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
   onLowPowerModeChange: (enabled: boolean) => void;
@@ -64,7 +64,6 @@ export function AdminMonitorRail({
   controller,
   chatDisplayRole,
   moderationBusy,
-  moderationError,
   onModerationAction,
   mapViewport,
   onLayerVisibilityChange,
@@ -229,11 +228,7 @@ export function AdminMonitorRail({
 
             <Tabs.Panel value="mod">
               <Box p="sm">
-                <ModPanel
-                  moderationBusy={moderationBusy}
-                  moderationError={moderationError}
-                  onModerationAction={onModerationAction}
-                />
+                <ModPanel moderationBusy={moderationBusy} onModerationAction={onModerationAction} />
               </Box>
             </Tabs.Panel>
           </Tabs>

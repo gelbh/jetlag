@@ -52,10 +52,9 @@ export async function endSession(sessionId: string): Promise<void> {
     throw new Error("Firebase is not configured.");
   }
 
-  await callWithResilience<{ sessionId: string }, { ok: boolean }>(
-    "endSession",
-    { sessionId },
-    { idempotent: true },
-  );
-  trackSessionEnded("host_end");
+  const result = await callWithResilience<
+    { sessionId: string },
+    { ok: boolean; alreadyEnded?: boolean }
+  >("endSession", { sessionId }, { idempotent: true });
+  trackSessionEnded(result?.alreadyEnded === true ? "expected_already_ended" : "host_end");
 }
