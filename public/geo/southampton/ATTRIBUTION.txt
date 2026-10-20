@@ -1,0 +1,14 @@
+Southampton electoral wards (Dec 2023): Office for National Statistics
+Wards_December_2023_Boundaries_UK_BFC (WD_DEC_2023_UK_BFC), filtered to Southampton UA
+(WD23CD E05015490–E05015506). Contains OS data © Crown copyright and database right 2023.
+Licensed under the Open Government Licence v3.0.
+Downloaded 2026-10-20 via ONS Open Geography / ArcGIS FeatureServer.
+
+Southampton city outline: unary union of the ward polygons above (same OGL attribution).
+
+Coastline segments: OpenStreetMap contributors (ODbL 1.0), natural=coastline ways
+within the Southampton pack reference bbox (Overpass extract, 2026-10-20).
+
+POI bundles: Wikidata (CC0), clipped to the Southampton pack reference bbox.
+
+Sea-level seed elevations: Open-Meteo Elevation API.

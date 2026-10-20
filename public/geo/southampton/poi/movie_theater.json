@@ -1,0 +1,216 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.86,
+    "west": -1.4973,
+    "north": 50.9761,
+    "east": -1.302
+  },
+  "places": [
+    {
+      "id": "Q39417275",
+      "name": "Abbey Cinema",
+      "lat": 50.873543,
+      "lng": -1.353607
+    },
+    {
+      "id": "Q39417451",
+      "name": "ABC Southampton",
+      "lat": 50.907279,
+      "lng": -1.404615
+    },
+    {
+      "id": "Q39417381",
+      "name": "Atherley Cinema",
+      "lat": 50.917345,
+      "lng": -1.427011
+    },
+    {
+      "id": "Q39417220",
+      "name": "Bitterne Cinema",
+      "lat": 50.917336,
+      "lng": -1.355325
+    },
+    {
+      "id": "Q39417334",
+      "name": "Broadway Cinema",
+      "lat": 50.924682,
+      "lng": -1.393574
+    },
+    {
+      "id": "Q39417471",
+      "name": "Carlton Cinema",
+      "lat": 50.91199,
+      "lng": -1.403829
+    },
+    {
+      "id": "Q39417497",
+      "name": "Cineworld Cinema Southampton",
+      "lat": 50.89563,
+      "lng": -1.395147
+    },
+    {
+      "id": "Q39417525",
+      "name": "Classic Southampton",
+      "lat": 50.906105,
+      "lng": -1.404457
+    },
+    {
+      "id": "Q39417550",
+      "name": "Clock Tower Cinema",
+      "lat": 50.906468,
+      "lng": -1.404519
+    },
+    {
+      "id": "Q39417405",
+      "name": "Electric Theatre",
+      "lat": 50.92134,
+      "lng": -1.432189
+    },
+    {
+      "id": "Q39417571",
+      "name": "Gaiety Picture House",
+      "lat": 50.901673,
+      "lng": -1.404106
+    },
+    {
+      "id": "Q39417595",
+      "name": "Gantry Arts Centre",
+      "lat": 50.907942,
+      "lng": -1.411886
+    },
+    {
+      "id": "Q31675255",
+      "name": "Grand Theatre",
+      "lat": 50.907607,
+      "lng": -1.405514
+    },
+    {
+      "id": "Q39417691",
+      "name": "Harbour Lights Picturehouse",
+      "lat": 50.896496,
+      "lng": -1.389922
+    },
+    {
+      "id": "Q39417715",
+      "name": "Imperial Cinema",
+      "lat": 50.900246,
+      "lng": -1.399953
+    },
+    {
+      "id": "Q39417914",
+      "name": "Lyric Cinema",
+      "lat": 50.924745,
+      "lng": -1.381579
+    },
+    {
+      "id": "Q6797243",
+      "name": "Mayflower Theatre",
+      "lat": 50.9086,
+      "lng": -1.41024
+    },
+    {
+      "id": "Q39417753",
+      "name": "Odeon Southampton",
+      "lat": 50.902615,
+      "lng": -1.413102
+    },
+    {
+      "id": "Q39417775",
+      "name": "Palace of Varieties",
+      "lat": 50.904683,
+      "lng": -1.404102
+    },
+    {
+      "id": "Q39417359",
+      "name": "Palladium Cinema",
+      "lat": 50.926665,
+      "lng": -1.391478
+    },
+    {
+      "id": "Q39417797",
+      "name": "Picture House",
+      "lat": 50.906396,
+      "lng": -1.404484
+    },
+    {
+      "id": "Q39417817",
+      "name": "Picture Palace",
+      "lat": 50.901748,
+      "lng": -1.403382
+    },
+    {
+      "id": "Q39417293",
+      "name": "Picturedrome",
+      "lat": 50.911746,
+      "lng": -1.388069
+    },
+    {
+      "id": "Q39417836",
+      "name": "Plaza Cinema",
+      "lat": 50.934108,
+      "lng": -1.382274
+    },
+    {
+      "id": "Q41562041",
+      "name": "Regal Cinema",
+      "lat": 50.965729,
+      "lng": -1.352586
+    },
+    {
+      "id": "Q39417860",
+      "name": "Regent Cinema",
+      "lat": 50.922308,
+      "lng": -1.434881
+    },
+    {
+      "id": "Q39417426",
+      "name": "Rialto Cinema",
+      "lat": 50.917824,
+      "lng": -1.427632
+    },
+    {
+      "id": "Q39417238",
+      "name": "Ritz Cinema",
+      "lat": 50.914541,
+      "lng": -1.361167
+    },
+    {
+      "id": "Q39417931",
+      "name": "Savoy Cinema",
+      "lat": 50.939962,
+      "lng": -1.379282
+    },
+    {
+      "id": "Q39417874",
+      "name": "Showcase Cinema de Lux",
+      "lat": 50.904632,
+      "lng": -1.411021
+    },
+    {
+      "id": "Q39417897",
+      "name": "Standard Cinema",
+      "lat": 50.901781,
+      "lng": -1.401113
+    },
+    {
+      "id": "Q7757589",
+      "name": "The Point, Eastleigh",
+      "lat": 50.969837,
+      "lng": -1.355588
+    },
+    {
+      "id": "Q41562045",
+      "name": "Vue Eastleigh",
+      "lat": 50.967404,
+      "lng": -1.352975
+    },
+    {
+      "id": "Q39417945",
+      "name": "Woolston Picture Theatre",
+      "lat": 50.898114,
+      "lng": -1.380497
+    }
+  ]
+}

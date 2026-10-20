@@ -1,0 +1,126 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.86,
+    "west": -1.4973,
+    "north": 50.9761,
+    "east": -1.302
+  },
+  "places": [
+    {
+      "id": "Q55114714",
+      "name": "Bitterne Library",
+      "lat": 50.91488,
+      "lng": -1.355355
+    },
+    {
+      "id": "Q55114715",
+      "name": "Burgess Road Library",
+      "lat": 50.938391,
+      "lng": -1.395549
+    },
+    {
+      "id": "Q55114716",
+      "name": "Cobbett Road Library",
+      "lat": 50.917867,
+      "lng": -1.373377
+    },
+    {
+      "id": "Q55121753",
+      "name": "Eastleigh Library",
+      "lat": 50.966785,
+      "lng": -1.353881
+    },
+    {
+      "id": "Q127784249",
+      "name": "Hartley Library",
+      "lat": 50.935154,
+      "lng": -1.395799
+    },
+    {
+      "id": "Q55121765",
+      "name": "Hedge End Library",
+      "lat": 50.913263,
+      "lng": -1.305634
+    },
+    {
+      "id": "Q55121767",
+      "name": "Hythe Library",
+      "lat": 50.868927,
+      "lng": -1.40005
+    },
+    {
+      "id": "Q55114717",
+      "name": "Lordshill Library",
+      "lat": 50.94009,
+      "lng": -1.44949
+    },
+    {
+      "id": "Q55121774",
+      "name": "Lowford Community Library",
+      "lat": 50.889875,
+      "lng": -1.317194
+    },
+    {
+      "id": "Q55114718",
+      "name": "Millbrook Community Library",
+      "lat": 50.928088,
+      "lng": -1.455993
+    },
+    {
+      "id": "Q55121778",
+      "name": "Netley Library",
+      "lat": 50.872641,
+      "lng": -1.352236
+    },
+    {
+      "id": "Q55114720",
+      "name": "Portswood Library",
+      "lat": 50.926823,
+      "lng": -1.391953
+    },
+    {
+      "id": "Q55114721",
+      "name": "Shirley Library",
+      "lat": 50.9239,
+      "lng": -1.434255
+    },
+    {
+      "id": "Q53545714",
+      "name": "Southampton Central Library",
+      "lat": 50.908467,
+      "lng": -1.406181
+    },
+    {
+      "id": "Q55114722",
+      "name": "Thornhill Community Library",
+      "lat": 50.908875,
+      "lng": -1.335087
+    },
+    {
+      "id": "Q55121789",
+      "name": "Totton Library",
+      "lat": 50.919532,
+      "lng": -1.489173
+    },
+    {
+      "id": "Q130548613",
+      "name": "University of Southampton Library",
+      "lat": 50.935,
+      "lng": -1.396
+    },
+    {
+      "id": "Q55121792",
+      "name": "West End Library",
+      "lat": 50.928838,
+      "lng": -1.337226
+    },
+    {
+      "id": "Q55114724",
+      "name": "Weston Library",
+      "lat": 50.889462,
+      "lng": -1.367391
+    }
+  ]
+}

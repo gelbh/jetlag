@@ -1,0 +1,66 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.86,
+    "west": -1.4973,
+    "north": 50.9761,
+    "east": -1.302
+  },
+  "places": [
+    {
+      "id": "Q18160275",
+      "name": "God's House Hospital",
+      "lat": 50.897,
+      "lng": -1.403
+    },
+    {
+      "id": "Q17528555",
+      "name": "Grove Place House Northcliffe School",
+      "lat": 50.9491,
+      "lng": -1.47922
+    },
+    {
+      "id": "Q6908386",
+      "name": "Moorgreen Hospital",
+      "lat": 50.928,
+      "lng": -1.323
+    },
+    {
+      "id": "Q3145353",
+      "name": "Netley Hospital",
+      "lat": 50.8666,
+      "lng": -1.34175
+    },
+    {
+      "id": "Q7244546",
+      "name": "Princess Anne Hospital",
+      "lat": 50.9353,
+      "lng": -1.4349
+    },
+    {
+      "id": "Q7374854",
+      "name": "Royal South Hants Hospital",
+      "lat": 50.9126,
+      "lng": -1.3968
+    },
+    {
+      "id": "Q30261302",
+      "name": "Southampton Children's Hospital",
+      "lat": 50.931109,
+      "lng": -1.433652
+    },
+    {
+      "id": "Q7569131",
+      "name": "Southampton General Hospital",
+      "lat": 50.933,
+      "lng": -1.434
+    },
+    {
+      "id": "Q30293085",
+      "name": "Western Community Hospital",
+      "lat": 50.9251,
+      "lng": -1.4463
+    }
+  ]
+}

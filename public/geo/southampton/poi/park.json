@@ -1,0 +1,90 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.86,
+    "west": -1.4973,
+    "north": 50.9761,
+    "east": -1.302
+  },
+  "places": [
+    {
+      "id": "Q60776338",
+      "name": "Blechynden Terrace Park",
+      "lat": 50.90771,
+      "lng": -1.41167
+    },
+    {
+      "id": "Q117351290",
+      "name": "East Park",
+      "lat": 50.9091,
+      "lng": -1.4028
+    },
+    {
+      "id": "Q124868017",
+      "name": "Houndwell Park",
+      "lat": 50.90395,
+      "lng": -1.4021
+    },
+    {
+      "id": "Q6094281",
+      "name": "Itchen Valley Country Park",
+      "lat": 50.943,
+      "lng": -1.345
+    },
+    {
+      "id": "Q6479080",
+      "name": "Lakeside Country Park",
+      "lat": 50.957,
+      "lng": -1.364
+    },
+    {
+      "id": "Q6797189",
+      "name": "Mayfield Park",
+      "lat": 50.8917,
+      "lng": -1.36419
+    },
+    {
+      "id": "Q126951413",
+      "name": "Riverside Park",
+      "lat": 50.93436,
+      "lng": -1.37518
+    },
+    {
+      "id": "Q60773109",
+      "name": "Rockstone Place Park",
+      "lat": 50.91452,
+      "lng": -1.40383
+    },
+    {
+      "id": "Q15273542",
+      "name": "Royal Victoria Country Park",
+      "lat": 50.87,
+      "lng": -1.34
+    },
+    {
+      "id": "Q7569113",
+      "name": "Southampton Common",
+      "lat": 50.9262,
+      "lng": -1.4109
+    },
+    {
+      "id": "Q18162444",
+      "name": "St James' Park",
+      "lat": 50.927,
+      "lng": -1.43
+    },
+    {
+      "id": "Q65085475",
+      "name": "Watts Park",
+      "lat": 50.909444,
+      "lng": -1.406389
+    },
+    {
+      "id": "Q96414605",
+      "name": "Westwood Woodland Park",
+      "lat": 50.883,
+      "lng": -1.356
+    }
+  ]
+}
