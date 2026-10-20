@@ -29,6 +29,8 @@ const MOVE_MIN_DISTANCE_METERS = 50;
 const TAP_SNAP_SEARCH_METERS = STATION_SNAP_METERS + 50;
 /** Overpass retries can take minutes; past this the tap keeps its own point so Confirm stays usable. */
 const TAP_SNAP_TIMEOUT_MS = 4000;
+/** Same bound for Search this area so a stalled Overpass does not leave the list spinner stuck. */
+const SEARCH_STATIONS_TIMEOUT_MS = 4000;
 const MOVE_PLAYED_MESSAGE =
   "Move card played. Timer paused. Seekers must stay put. Hider is relocating.";
 
@@ -120,7 +122,10 @@ export function useHiderZoneTool({
       setStationsError(null);
 
       try {
-        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea);
+        const loaded = await withTimeout(
+          fetchTransitStationsForHidingZoneViewport(viewport, gameArea),
+          SEARCH_STATIONS_TIMEOUT_MS,
+        );
         if (!isLatestRequest(requestId)) {
           return;
         }

@@ -358,6 +358,74 @@ describe("useHiderZoneTool", () => {
     );
   });
 
+  describe("Search this area", () => {
+    const viewport = { south: 53.34, west: -6.27, north: 53.36, east: -6.25 };
+    const priorStation = { id: "prior", name: "Prior", lat: 53.35, lng: -6.26 };
+
+    it("clears loading and keeps prior stations when the search times out", async () => {
+      vi.useFakeTimers();
+      try {
+        fetchTransitStationsForHidingZoneViewport.mockResolvedValueOnce([priorStation]);
+        const { result } = renderZoneTool({ existingZone: null });
+
+        await act(async () => {
+          await result.current.searchStationsInArea(viewport);
+        });
+        expect(result.current.stations).toEqual([priorStation]);
+
+        fetchTransitStationsForHidingZoneViewport.mockReturnValue(new Promise(() => {}));
+        act(() => {
+          void result.current.searchStationsInArea(viewport);
+        });
+        expect(result.current.stationsLoading).toBe(true);
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(4000);
+        });
+
+        expect(result.current.stationsLoading).toBe(false);
+        expect(result.current.stationsError).toMatch(/Couldn't load transit stations/i);
+        expect(result.current.stations).toEqual([priorStation]);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("ignores a late result from a timed-out search after a newer search started", async () => {
+      vi.useFakeTimers();
+      try {
+        let resolveStale!: (value: TransitStation[]) => void;
+        const stale = new Promise<TransitStation[]>((resolve) => {
+          resolveStale = resolve;
+        });
+        const newer = { id: "newer", name: "Newer", lat: 53.351, lng: -6.261 };
+
+        fetchTransitStationsForHidingZoneViewport.mockReturnValueOnce(stale);
+        const { result } = renderZoneTool({ existingZone: null });
+
+        act(() => {
+          void result.current.searchStationsInArea(viewport);
+        });
+
+        fetchTransitStationsForHidingZoneViewport.mockResolvedValueOnce([newer]);
+        await act(async () => {
+          await result.current.searchStationsInArea(viewport);
+        });
+        expect(result.current.stations).toEqual([newer]);
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(4000);
+          resolveStale([priorStation]);
+        });
+
+        expect(result.current.stations).toEqual([newer]);
+        expect(result.current.stationsLoading).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
   describe("tap-map snap lookup", () => {
     const tap: [number, number] = [53.35, -6.26];
     const nearTap = { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 };
