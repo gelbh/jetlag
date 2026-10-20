@@ -256,7 +256,7 @@ export const BUNDLED_PRESET_FLAG_ASSETS = {
     src: "/region-flags/canton-neuchatel.png",
     alt: "Canton of Neuchâtel",
     source: "wikidata:Q12738:P41",
-    identity: "commons:flag of canton of neuchâtel.svg",
+    identity: "commons:che canton de neuchâtel flag.svg",
     presentation: "flag",
   },
   "canton-geneva": {
