@@ -27,7 +27,8 @@ jobs:
           persist-credentials: false
       # Superseded (cancelled while pending) or failed runs never deploy, so diff
       # deploy filters from the last successful run instead of the push's `before`.
-      # Empty falls back to paths-filter's push default.
+      # light/code filters below prefer that SHA; if unresolved, fall back to
+      # github.event.before (never pass base as an empty string alone).
       - name: Resolve last successful deploy commit
         id: deploy_base
         env:
@@ -42,6 +43,7 @@ jobs:
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v3
         id: light
         with:
+          base: ${{ steps.deploy_base.outputs.sha != '' && steps.deploy_base.outputs.sha || github.event.before }}
           filters: |
             light:
               - '.changeset/**'
@@ -53,6 +55,7 @@ jobs:
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v3
         id: code
         with:
+          base: ${{ steps.deploy_base.outputs.sha != '' && steps.deploy_base.outputs.sha || github.event.before }}
           # every: ** plus negations — README-only must not set code=true
           predicate-quantifier: every
           filters: |
