@@ -5,8 +5,8 @@ import { DEFAULT_CASTLE_SIEGE_DIALS } from "@/domain/session/castleSiege/dials";
 import { renderWithAppUi } from "@/test/renderWithAppUi";
 import { CastleSiegeSetupChrome } from "./CastleSiegeSetupChrome";
 
-const updateCastleSiegeSetup = vi.fn(async () => undefined);
-const writeTeamSealHash = vi.fn(async () => undefined);
+const updateCastleSiegeSetup = vi.fn(async (..._args: unknown[]) => undefined);
+const writeTeamSealHash = vi.fn(async (..._args: unknown[]) => undefined);
 
 vi.mock("@/services/firestore/firestoreSessions", () => ({
   updateCastleSiegeSetup: (...args: unknown[]) => updateCastleSiegeSetup(...args),
