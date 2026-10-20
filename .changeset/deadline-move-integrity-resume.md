@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-fix: Ignore orphan hiding-zone moveInProgress when resuming the timer after a deadline answer
+fix: Harden deadline and move integrity (host-only expiry, create forbids moveInProgress, orphan resume ignore)
