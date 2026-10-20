@@ -17,12 +17,11 @@ import {
   type MatchingCategoryId,
   type MeasuringLocationCategory,
 } from "@/domain/questions";
-import type { MeasuringFromKind } from "@/domain/questions/measuringQuestions";
+import { isPackGeoPointCategory } from "@/domain/regions/packGeoManifest";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   matchingOverpassSelectorsForCategory,
   resolveMatchingCategory,
-  resolveMeasuringCatalogOption,
 } from "@/domain/session/catalog/sessionCustomCatalog";
 import type {
   CustomMatchingAreasByLevel,
@@ -40,11 +39,12 @@ import {
   fetchLandmassFeaturesInArea,
   landmassToMatchingFeature,
 } from "../overpass/landmassFeatures";
-import { fetchMeasuringPlacesInArea, type MeasuringPlace } from "../overpass/measuringPlaces";
+import type { MeasuringPlace } from "../overpass/measuringPlaces";
 import {
   mergeOverpassElementPayloads,
   queryOverpassWithBboxSplit,
 } from "../overpass/overpassBboxSplit";
+import { fetchBundledMeasuringPlaces, mergeMeasuringPlaces } from "../overpass/regionPackPoi";
 import { parseMatchingFeatures } from "./parse";
 import { buildMatchingFeaturesQueryForBbox, matchingFeaturesCacheKey } from "./query";
 import {
@@ -81,15 +81,31 @@ function measuringPlacesToMatchingFeatures(
   }));
 }
 
+function matchingFeaturesToMeasuringPlaces(features: MatchingFeature[]): MeasuringPlace[] {
+  return features.map((feature) => ({
+    id: feature.id,
+    name: feature.name,
+    point: feature.point,
+    ...(feature.wikidataId ? { wikidataId: feature.wikidataId } : {}),
+  }));
+}
+
+function asPackMeasuringCategory(categoryId: MatchingCategoryId): MeasuringLocationCategory | null {
+  if (!isPackGeoPointCategory(categoryId)) {
+    return null;
+  }
+  return categoryId;
+}
+
 function filterHygieneMatchingFeatures(
   features: MatchingFeature[],
   categoryId: MatchingCategoryId,
 ): MatchingFeature[] {
-  if (!HYGIENE_MATCHING_CATEGORIES.has(categoryId as MeasuringLocationCategory)) {
+  const measuringCategory = asPackMeasuringCategory(categoryId);
+  if (measuringCategory === null || !HYGIENE_MATCHING_CATEGORIES.has(measuringCategory)) {
     return features;
   }
 
-  const measuringCategory = categoryId as MeasuringLocationCategory;
   return features.filter((feature) =>
     isEligibleBundledPoi(
       {
@@ -136,40 +152,48 @@ async function fetchOverpassPointMatchingFeaturesInArea(
   customCategories: readonly SessionCustomCategory[],
   options?: MatchingFetchOptions,
 ): Promise<MatchingFeature[]> {
+  const measuringCategory = asPackMeasuringCategory(categoryId);
+  const bundledPlaces =
+    measuringCategory === null
+      ? []
+      : await fetchBundledMeasuringPlaces(gameArea, measuringCategory, options?.regionPackId);
+  const bundledFeatures = measuringPlacesToMatchingFeatures(bundledPlaces, gameArea);
   const pinFeatures = measuringPlacesToMatchingFeatures([...(options?.poiPins ?? [])], gameArea);
   const withPins = (features: MatchingFeature[]): MatchingFeature[] => {
     const seen = new Set(features.map((feature) => feature.id));
     return [...features, ...pinFeatures.filter((feature) => !seen.has(feature.id))];
   };
 
-  const measuringOption = resolveMeasuringCatalogOption(
-    categoryId as MeasuringFromKind,
-    customCategories,
-  );
-  if (measuringOption) {
-    const places = await fetchMeasuringPlacesInArea(
-      gameArea,
-      categoryId as MeasuringLocationCategory,
-      customCategories,
-      options?.regionPackId,
-      options?.onEnrich
-        ? {
-            onEnrich: (mergedPlaces) => {
-              options.onEnrich?.(
-                withPins(measuringPlacesToMatchingFeatures(mergedPlaces, gameArea)),
-              );
-            },
-          }
-        : undefined,
+  const mergeWithOverpass = async (): Promise<MatchingFeature[]> => {
+    const overpassFeatures = filterHygieneMatchingFeatures(
+      await fetchOverpassMatchingFeaturesCached(gameArea, categoryId, customCategories, options),
+      categoryId,
     );
-    return withPins(measuringPlacesToMatchingFeatures(places, gameArea));
+
+    if (bundledFeatures.length === 0) {
+      return withPins(overpassFeatures);
+    }
+
+    return withPins(
+      measuringPlacesToMatchingFeatures(
+        mergeMeasuringPlaces(matchingFeaturesToMeasuringPlaces(overpassFeatures), bundledPlaces),
+        gameArea,
+      ),
+    );
+  };
+
+  if (bundledFeatures.length > 0 && options?.onEnrich) {
+    void mergeWithOverpass()
+      .then((merged) => {
+        options.onEnrich?.(merged);
+      })
+      .catch(() => {
+        // Soft-fail Overpass enrich; keep the bundle result.
+      });
+    return withPins(bundledFeatures);
   }
 
-  const overpassFeatures = filterHygieneMatchingFeatures(
-    await fetchOverpassMatchingFeaturesCached(gameArea, categoryId, customCategories, options),
-    categoryId,
-  );
-  return withPins(overpassFeatures);
+  return mergeWithOverpass();
 }
 
 async function fetchAdminMatchingFeaturesInArea(

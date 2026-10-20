@@ -808,6 +808,65 @@ describe("matching features", () => {
     ]);
   });
 
+  it("fetchMatchingFeaturesInArea drops honorary consulates via Matching Overpass parse", async () => {
+    vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          id: 2,
+          tags: {
+            name: "Honorary Consulate",
+            office: "diplomatic",
+            diplomatic: "consulate",
+          },
+          lat: 51.45,
+          lon: -0.17,
+        },
+        {
+          id: 3,
+          tags: {
+            name: "US Consulate",
+            office: "diplomatic",
+            diplomatic: "consulate",
+          },
+          lat: 51.45,
+          lon: -0.18,
+        },
+      ],
+    });
+
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "foreign_consulate");
+    expect(features.map((feature) => feature.name)).toEqual(["US Consulate"]);
+  });
+
+  it("fetchMatchingFeaturesInArea drops miniature golf via Matching Overpass parse", async () => {
+    vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          id: 1,
+          tags: {
+            name: "Mini Putt",
+            leisure: "golf_course",
+            miniature: "yes",
+          },
+          lat: 51.45,
+          lon: -0.16,
+        },
+        {
+          id: 2,
+          tags: {
+            name: "City Links",
+            leisure: "golf_course",
+          },
+          lat: 51.45,
+          lon: -0.17,
+        },
+      ],
+    });
+
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "golf_course");
+    expect(features.map((feature) => feature.name)).toEqual(["City Links"]);
+  });
+
   it("breaks nearest-feature ties by feature id", () => {
     const nearest = pickNearestMatchingFeature(
       [51.45, -0.16],
