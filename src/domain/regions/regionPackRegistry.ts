@@ -44,6 +44,12 @@ import {
 } from "./princeRupertRegionPack";
 import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 import {
+  SOUTHAMPTON_GEO_ASSETS,
+  SOUTHAMPTON_MATCHING_LABEL_OVERRIDES,
+  SOUTHAMPTON_MEASURING_LABEL_OVERRIDES,
+  SOUTHAMPTON_REGION_PACK_ID,
+} from "./southamptonRegionPack";
+import {
   SWITZERLAND_GEO_ASSETS,
   SWITZERLAND_MATCHING_LABEL_OVERRIDES,
   SWITZERLAND_MEASURING_LABEL_OVERRIDES,
@@ -64,7 +70,8 @@ import {
 
 export interface RegionPackGeoAssets {
   primary: string;
-  secondary: string;
+  /** Omitted for single-depth packs (no admin4 / leaf layer). */
+  secondary?: string;
   secondaryBySubregion?: (subregionId: string) => string;
   playArea?: string;
 }
@@ -228,6 +235,15 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "neighbourhoodId",
     matchingLabelOverrides: PRINCE_RUPERT_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: PRINCE_RUPERT_MEASURING_LABEL_OVERRIDES,
+  }),
+  [SOUTHAMPTON_REGION_PACK_ID]: metroRegionPack({
+    id: SOUTHAMPTON_REGION_PACK_ID,
+    geoAssets: {
+      primary: SOUTHAMPTON_GEO_ASSETS.wards,
+    },
+    subregionPropertyKey: "wardId",
+    matchingLabelOverrides: SOUTHAMPTON_MATCHING_LABEL_OVERRIDES,
+    measuringLabelOverrides: SOUTHAMPTON_MEASURING_LABEL_OVERRIDES,
   }),
 };
 

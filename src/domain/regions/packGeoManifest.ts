@@ -41,6 +41,8 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
     north: 54.4,
     east: -130.2,
   },
+  // Placeholder UA AABB until Task 2 measures ward union.
+  southampton: { south: 50.87, west: -1.48, north: 50.96, east: -1.31 },
 };
 
 /**
