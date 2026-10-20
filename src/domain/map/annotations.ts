@@ -18,6 +18,8 @@ import type {
 } from "../questions/thermometerQuestions";
 import { thermometerQuestionPrompt } from "../questions/thermometerQuestions";
 import type { RegionPackId } from "../regions/regionPack";
+import type { SessionMode } from "../session/castleSiege/mode";
+import type { CastleSiegeRoles } from "../session/castleSiege/teamRole";
 import type { SessionCustomMeasureGeometry } from "../session/catalog/customMeasureGeometry";
 import type {
   CustomMatchingAreasByLevel,
@@ -33,6 +35,8 @@ import { DEFAULT_RADIUS_METERS } from "./distance";
 import type { MapTool } from "./mapToolTypes";
 import type { PoiPinCategoryId } from "./poiPinCategories";
 
+export type { SessionMode } from "../session/castleSiege/mode";
+export type { CastleSiegeRoles, CastleSiegeTeamRole } from "../session/castleSiege/teamRole";
 export type { EndGameTruthAnchor } from "../session/hiding/endGameTruthAnchors";
 export type { MemberRoles, PlayerRole } from "../session/players/playerRole";
 export type { GameSize } from "../session/size/gameSize";
@@ -210,6 +214,11 @@ export interface SessionRecord {
   requiredMinAppVersion?: string;
   requiredMinAppVersionSetAt?: string;
   requiredMinAppVersionGraceSeconds?: number;
+  /** Absent or `"classic"` plays classic Jet Lag. `"castleSiege"` uses team roles. */
+  mode?: SessionMode;
+  castleSiegeRoles?: CastleSiegeRoles;
+  seriesLength?: 1 | 3;
+  setupMode?: "pregame" | "fairSplit";
 }
 
 /** Bounded session override written by `applyIncidentMitigation` (server-only). */

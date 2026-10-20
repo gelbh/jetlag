@@ -1,6 +1,8 @@
 import type { TimeTrapRecord } from "@/domain/expansion/timeTraps";
 import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
 import { parseRegionPackId } from "@/domain/regions/regionPack";
+import type { SessionMode } from "@/domain/session/castleSiege/mode";
+import type { CastleSiegeRoles, CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { parseCustomMeasureGeometries } from "@/domain/session/catalog/customMeasureGeometry";
 import {
   parseCustomCategories,
@@ -41,6 +43,47 @@ import {
 
 function parseSessionTier(value: unknown): SessionTier {
   return value === "premium" ? "premium" : "free";
+}
+
+const CASTLE_SIEGE_TEAM_ROLES = new Set<CastleSiegeTeamRole>([
+  "teamA",
+  "teamB",
+  "referee",
+  "observer",
+]);
+
+export type BuildSessionDocumentOptions = {
+  mode?: SessionMode;
+  castleSiegeRoles?: CastleSiegeRoles;
+  seriesLength?: 1 | 3;
+  setupMode?: "pregame" | "fairSplit";
+};
+
+function parseSessionMode(value: unknown): SessionMode | undefined {
+  return value === "castleSiege" || value === "classic" ? value : undefined;
+}
+
+function parseCastleSiegeRoles(value: unknown): CastleSiegeRoles | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const roles: CastleSiegeRoles = {};
+  for (const [uid, role] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof role === "string" && CASTLE_SIEGE_TEAM_ROLES.has(role as CastleSiegeTeamRole)) {
+      roles[uid] = role as CastleSiegeTeamRole;
+    }
+  }
+
+  return Object.keys(roles).length > 0 ? roles : undefined;
+}
+
+function parseSeriesLength(value: unknown): 1 | 3 | undefined {
+  return value === 1 || value === 3 ? value : undefined;
+}
+
+function parseSetupMode(value: unknown): "pregame" | "fairSplit" | undefined {
+  return value === "pregame" || value === "fairSplit" ? value : undefined;
 }
 
 function parseMemberRoles(value: unknown): MemberRoles | undefined {
@@ -231,6 +274,7 @@ export function buildSessionDocument(
   rulesPatch: SessionRulesPatch = {},
   distanceUnit?: SessionRecord["distanceUnit"],
   hostAppVersion?: string,
+  options?: BuildSessionDocumentOptions,
 ): Record<string, unknown> {
   const unit = distanceUnit ?? "imperial";
   const radiusMeters =
@@ -260,6 +304,19 @@ export function buildSessionDocument(
 
   if (hostAppVersion) {
     payload.hostAppVersion = hostAppVersion;
+  }
+
+  if (options?.mode === "castleSiege") {
+    payload.mode = "castleSiege";
+    if (options.castleSiegeRoles) {
+      payload.castleSiegeRoles = options.castleSiegeRoles;
+    }
+    if (options.seriesLength === 1 || options.seriesLength === 3) {
+      payload.seriesLength = options.seriesLength;
+    }
+    if (options.setupMode === "pregame" || options.setupMode === "fairSplit") {
+      payload.setupMode = options.setupMode;
+    }
   }
 
   assertNoNestedArrays(payload);
@@ -415,6 +472,10 @@ export function deserializeSessionFromFirestore(
       Number.isFinite(document.requiredMinAppVersionGraceSeconds)
         ? document.requiredMinAppVersionGraceSeconds
         : undefined,
+    mode: parseSessionMode(document.mode),
+    castleSiegeRoles: parseCastleSiegeRoles(document.castleSiegeRoles),
+    seriesLength: parseSeriesLength(document.seriesLength),
+    setupMode: parseSetupMode(document.setupMode),
   };
 }
 

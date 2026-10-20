@@ -3,6 +3,8 @@ import { clientEnvUsesFirebaseEmulator } from "@/config/env";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { isEffectivelyOffline } from "@/domain/device/sync/sync";
 import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
+import type { SessionMode } from "@/domain/session/castleSiege/mode";
+import type { CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { type PlayerRole, resolvePlayerRole } from "@/domain/session/players/playerRole";
 import { buildRoleGatesForHost } from "@/domain/session/players/roleGates";
 import { type GameSize, hidingZoneRadiusMeters } from "@/domain/session/size/gameSize";
@@ -24,6 +26,13 @@ import {
 export type EnsureRemoteSessionMembershipOptions = {
   returningMemberUid?: string | null;
   persistedMyUid?: string | null;
+};
+
+export type CreateRemoteSessionOptions = {
+  mode?: SessionMode;
+  hostCastleSiegeRole?: CastleSiegeTeamRole;
+  seriesLength?: 1 | 3;
+  setupMode?: "pregame" | "fairSplit";
 };
 
 /**
@@ -128,6 +137,7 @@ export async function createRemoteSession(
   rulesPatch: SessionRulesPatch = {},
   distanceUnit: SessionRecord["distanceUnit"] = "imperial",
   hostAppVersion: string = APP_VERSION,
+  options?: CreateRemoteSessionOptions,
 ): Promise<SessionRecord> {
   let code = generateSessionCode();
   let attempts = 0;
@@ -153,6 +163,11 @@ export async function createRemoteSession(
     typeof rulesPatch.hidingZoneRadiusMeters === "number"
       ? rulesPatch.hidingZoneRadiusMeters
       : hidingZoneRadiusMeters(gameSize, unit);
+  const isCastleSiege = options?.mode === "castleSiege";
+  const effectiveHostRole: PlayerRole = isCastleSiege ? "observer" : hostRole;
+  const castleSiegeRoles = isCastleSiege
+    ? { [hostUid]: options?.hostCastleSiegeRole ?? ("teamA" as const) }
+    : undefined;
 
   // New session id per attempt so a denied retry never updates an orphaned doc.
   const session = await withPermissionDeniedAuthRetry(async () => {
@@ -165,7 +180,7 @@ export async function createRemoteSession(
       hostUid,
       createdAt,
       memberUids: [hostUid],
-      memberRoles: { [hostUid]: hostRole },
+      memberRoles: { [hostUid]: effectiveHostRole },
       gameSize,
       distanceUnit: unit,
       hidingZoneRadiusMeters: radiusMeters,
@@ -173,6 +188,14 @@ export async function createRemoteSession(
       transitMetroId,
       hostAppVersion,
       ...rulesPatch,
+      ...(isCastleSiege
+        ? {
+            mode: "castleSiege" as const,
+            castleSiegeRoles,
+            ...(options?.seriesLength !== undefined ? { seriesLength: options.seriesLength } : {}),
+            ...(options?.setupMode !== undefined ? { setupMode: options.setupMode } : {}),
+          }
+        : {}),
     };
 
     const batch = writeBatch(getFirestoreDb());
@@ -184,11 +207,19 @@ export async function createRemoteSession(
         createdAt,
         tier,
         transitMetroId,
-        hostRole,
+        effectiveHostRole,
         gameSize,
         rulesPatch,
         unit,
         hostAppVersion,
+        isCastleSiege
+          ? {
+              mode: "castleSiege",
+              castleSiegeRoles,
+              seriesLength: options?.seriesLength,
+              setupMode: options?.setupMode,
+            }
+          : undefined,
       ),
       createdAtServer: serverTimestamp(),
     });
@@ -219,7 +250,7 @@ export async function createRemoteSession(
       cause: error,
     });
   }
-  session.roleGates = buildRoleGatesForHost(hostUid, hostRole);
+  session.roleGates = buildRoleGatesForHost(hostUid, effectiveHostRole);
 
   return session;
 }
