@@ -3,11 +3,13 @@ import { intersectBoundingBoxes } from "@/domain/geometry/gameArea/gameAreaBound
 import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
 import type { MapViewportBounds } from "@/domain/map/transitViewport";
-import type { TransitStation } from "@/domain/session/hiding/hidingZone";
+import { dedupeTransitStations, type TransitStation } from "@/domain/session/hiding/hidingZone";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
+  filterGtfsStopsForBoundingBox,
   filterGtfsStopsForGameArea,
   gtfsStopsToMatchingFeatures,
+  gtfsStopsToTransitStations,
   loadGtfsBundle,
 } from "../../transit/gtfsRouteGraph";
 import { inferTransitMetroId } from "../../transit/transitCatalog";
@@ -66,6 +68,18 @@ export async function fetchTransitLineMatchingFeaturesInArea(
 export async function fetchTransitStationsForHidingZone(
   gameArea: GameArea,
 ): Promise<TransitStation[]> {
+  const metroId = inferTransitMetroId(gameArea);
+  if (metroId) {
+    const bundle = await loadGtfsBundle(metroId);
+    if (bundle) {
+      const stops = filterGtfsStopsForGameArea(bundle, gameArea);
+      const stations = gtfsStopsToTransitStations(stops, gameArea);
+      if (stations.length > 0) {
+        return dedupeTransitStations(stations);
+      }
+    }
+  }
+
   const payload = await queryOverpass<{ elements: OverpassTransitStopElement[] }>(
     buildHidingZoneTransitStopOverpassQuery(matchingSearchBoundingBox(gameArea)),
   );
@@ -82,6 +96,18 @@ export async function fetchTransitStationsForHidingZoneViewport(
 
   if (!clipped) {
     return [];
+  }
+
+  const metroId = inferTransitMetroId(gameArea);
+  if (metroId) {
+    const bundle = await loadGtfsBundle(metroId);
+    if (bundle) {
+      const stops = filterGtfsStopsForBoundingBox(bundle, clipped);
+      const stations = gtfsStopsToTransitStations(stops, gameArea);
+      if (stations.length > 0) {
+        return dedupeTransitStations(stations);
+      }
+    }
   }
 
   const payload = await queryOverpass<{ elements: OverpassTransitStopElement[] }>(
