@@ -137,6 +137,9 @@ export function Home() {
   const [changelogOpen, setChangelogOpen] = useState(false);
   const sessionPlayArea = session ? homeSessionPlayAreaLabel(session) : null;
   const sessionRoleLabel = myRole ? playerRoleLabel(myRole) : null;
+  // Persist can finish before hydrateRoot; keep Continue + leave-confirm off the
+  // hydration paint so the prerendered empty shell stays recoverable-error-free.
+  const showContinueSession = hydrated && session != null;
 
   return (
     <>
@@ -189,7 +192,7 @@ export function Home() {
                 >
                   {LEGAL_APP_NAME}
                 </Title>
-                {session ? null : (
+                {showContinueSession ? null : (
                   <Text
                     c="var(--color-field-ink-muted)"
                     size="sm"
@@ -206,7 +209,7 @@ export function Home() {
             </Group>
 
             <Stack gap={12}>
-              {session ? (
+              {showContinueSession && session ? (
                 <Stack gap={8}>
                   <Stack gap={0} align="stretch">
                     {needsRefresh ? (
@@ -454,15 +457,17 @@ export function Home() {
         </Container>
       </EntryScreenLayout>
       <VersionChangelogSheet open={changelogOpen} onClose={() => setChangelogOpen(false)} />
-      <EntryConfirm
-        opened={leaveUpdatePrompt !== null}
-        title={leaveUpdatePrompt?.title ?? appUpdateCopy.leaveAndUpdateConfirmTitle}
-        consequence={leaveUpdatePrompt?.body ?? ""}
-        confirmLabel={appUpdateCopy.leaveAndUpdateAction}
-        busyLabel={appUpdateCopy.leaveAndUpdateBusy}
-        onConfirm={confirmLeaveAndUpdate}
-        onClose={dismissLeaveAndUpdatePrompt}
-      />
+      {hydrated ? (
+        <EntryConfirm
+          opened={leaveUpdatePrompt !== null}
+          title={leaveUpdatePrompt?.title ?? appUpdateCopy.leaveAndUpdateConfirmTitle}
+          consequence={leaveUpdatePrompt?.body ?? ""}
+          confirmLabel={appUpdateCopy.leaveAndUpdateAction}
+          busyLabel={appUpdateCopy.leaveAndUpdateBusy}
+          onConfirm={confirmLeaveAndUpdate}
+          onClose={dismissLeaveAndUpdatePrompt}
+        />
+      ) : null}
     </>
   );
 }
