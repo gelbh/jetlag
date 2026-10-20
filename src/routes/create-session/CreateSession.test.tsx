@@ -7,6 +7,7 @@ import { createMapBounds } from "@/domain/map/mapBounds";
 import { mergeBundledPresets } from "@/domain/regions/bundledGamePresets";
 import { GAME_PRESET_SCHEMA_VERSION } from "@/domain/session/presets/gamePreset";
 import { defaultAdvancedSessionSettings } from "@/domain/session/tools/advancedSessionSettings";
+import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
 import { useGamePresetStore } from "@/state/gamePresetStore";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
@@ -151,9 +152,25 @@ vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
   }),
 }));
 
+const premiumEntitlementsMock = vi.hoisted(() => ({
+  current: null as null | {
+    premiumSessionCredits: number;
+    lifetimePremium: boolean;
+    subscription: {
+      status: string | null;
+      plan: "monthly" | "yearly" | null;
+      currentPeriodEnd: number | null;
+    } | null;
+    trialUsedAt: number | null;
+    trialEndsAt: number | null;
+    canCreatePremium: boolean;
+    hasUnlimitedPremium: boolean;
+  },
+}));
+
 vi.mock("@/hooks/billing/usePremiumEntitlements", () => ({
   usePremiumEntitlements: () => ({
-    entitlements: null,
+    entitlements: premiumEntitlementsMock.current,
     refresh: vi.fn(),
     loading: false,
   }),
@@ -236,6 +253,7 @@ beforeEach(() => {
   suggestPlacesAtPoint.mockResolvedValue([]);
   isFirebaseConfigured.mockReturnValue(false);
   isCastleSiegeModeEnabled.mockReturnValue(false);
+  premiumEntitlementsMock.current = null;
   hasAccessClaim.mockReset();
   hasAccessClaim.mockResolvedValue(false);
   createRemoteSession.mockClear();
@@ -275,7 +293,9 @@ function renderCreateSession(route = "/create") {
   return render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MemoryRouter initialEntries={[route]}>
-        <CreateSession />
+        <RouteTransitionProvider>
+          <CreateSession />
+        </RouteTransitionProvider>
       </MemoryRouter>
     </MantineProvider>,
   );
@@ -1040,5 +1060,65 @@ describe("CreateSession", () => {
     expect(createPremiumRemoteSession).not.toHaveBeenCalled();
     expect(createRemoteSession.mock.calls[0]?.[2]).toBe("free");
     expect(createRemoteSession.mock.calls[0]?.[9]).toMatchObject({ mode: "castleSiege" });
+  });
+
+  it("creates Castle Siege as free for paidPremiumHost without permanent sign-in", async () => {
+    isCastleSiegeModeEnabled.mockReturnValue(true);
+    isFirebaseConfigured.mockReturnValue(true);
+    // Anonymous host (usePermanentAuthUser mock: isPermanent false) with paid premium entitlement.
+    premiumEntitlementsMock.current = {
+      premiumSessionCredits: 0,
+      lifetimePremium: false,
+      subscription: {
+        status: "active",
+        plan: "monthly",
+        currentPeriodEnd: null,
+      },
+      trialUsedAt: null,
+      trialEndsAt: null,
+      canCreatePremium: true,
+      hasUnlimitedPremium: true,
+    };
+    parseBoundaryFile.mockResolvedValue(IMPORTED_AREA);
+    createRemoteSession.mockResolvedValue({
+      id: "session-cs-paid-host",
+      code: "SIE2",
+      gameArea: IMPORTED_AREA,
+      createdAt: new Date().toISOString(),
+      memberUids: ["host-1"],
+      memberRoles: { "host-1": "observer" },
+      gameSize: "medium",
+      distanceUnit: "imperial",
+      tier: "free",
+      mode: "castleSiege",
+    });
+
+    renderCreateSession();
+    const file = importBoundaryFile();
+    await waitFor(() => {
+      expect(parseBoundaryFile).toHaveBeenCalledWith(file);
+    });
+    goToRules();
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /^premium/i })).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+
+    fireEvent.click(screen.getByRole("radio", { name: /castle siege/i }));
+    const createButton = screen.getByRole("button", { name: "Create game" });
+    expect(createButton).not.toBeDisabled();
+    expect(screen.queryByText(/sign in with email/i)).toBeNull();
+    fireEvent.click(createButton);
+
+    await waitFor(() => {
+      expect(createRemoteSession).toHaveBeenCalled();
+    });
+    expect(createPremiumRemoteSession).not.toHaveBeenCalled();
+    expect(createRemoteSession.mock.calls[0]?.[2]).toBe("free");
+    expect(createRemoteSession.mock.calls[0]?.[9]).toMatchObject({ mode: "castleSiege" });
+    expect(screen.queryByText(/sign in with email, google, or apple/i)).toBeNull();
   });
 });

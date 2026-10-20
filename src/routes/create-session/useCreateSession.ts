@@ -532,7 +532,11 @@ export function useCreateSession() {
     premiumEntitlements,
     hostHasAccessClaim,
   });
-  const showAccessCodeField = showPremiumUnlockPanel && accessCodeExpanded;
+  // Castle Siege create is free-path only: hide premium sign-in / access-code UI gates.
+  const castleSiegeCreateIntent = castleSiegeFlagEnabled && sessionMode === "castleSiege";
+  const createRequiresPremiumSignIn = castleSiegeCreateIntent ? false : requiresPremiumSignIn;
+  const createShowPremiumUnlockPanel = castleSiegeCreateIntent ? false : showPremiumUnlockPanel;
+  const showAccessCodeField = createShowPremiumUnlockPanel && accessCodeExpanded;
 
   const previewGameArea = useMemo(() => {
     if (importedGameArea) {
@@ -748,9 +752,22 @@ export function useCreateSession() {
 
       const metroId = transitMetroId || undefined;
       const tier = resolveSubmitTier();
+      // Phase 1: Castle Siege stays on free createRemoteSession (premium callable has no mode bag).
+      // Derive before access-code unlock / premium host validation so those gates see free tier.
+      const castleSiegeCreate =
+        castleSiegeFlagEnabled && sessionMode === "castleSiege"
+          ? ({
+              mode: "castleSiege",
+              hostCastleSiegeRole,
+              seriesLength,
+              setupMode,
+            } satisfies CreateRemoteSessionOptions)
+          : undefined;
+      // Do not invent premium CS billing: coerce free even if the UI tier is premium.
+      const createTier = castleSiegeCreate !== undefined ? ("free" as const) : tier;
       let useAccessClaimForPremium = hostHasAccessClaim;
 
-      if (tier === "premium" && !useAccessClaimForPremium && !paidPremiumHost) {
+      if (createTier === "premium" && !useAccessClaimForPremium && !paidPremiumHost) {
         const trimmedCode = accessCode.trim();
         if (!trimmedCode) {
           setAccessCodeError("Unlock premium or enter a host access code.");
@@ -795,24 +812,16 @@ export function useCreateSession() {
 
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
-        const premiumSubmitError = validatePremiumHostSubmit(user, tier, useAccessClaimForPremium);
+        const premiumSubmitError = validatePremiumHostSubmit(
+          user,
+          createTier,
+          useAccessClaimForPremium,
+        );
         if (premiumSubmitError) {
           setError(premiumSubmitError);
           return;
         }
 
-        // Phase 1: Castle Siege stays on free createRemoteSession (premium callable has no mode bag).
-        const castleSiegeCreate =
-          castleSiegeFlagEnabled && sessionMode === "castleSiege"
-            ? ({
-                mode: "castleSiege",
-                hostCastleSiegeRole,
-                seriesLength,
-                setupMode,
-              } satisfies CreateRemoteSessionOptions)
-            : undefined;
-        // Do not invent premium CS billing: coerce free even if the UI tier is premium.
-        const createTier = castleSiegeCreate !== undefined ? ("free" as const) : tier;
         const usePremiumCallable =
           createTier === "premium" &&
           !useAccessClaimForPremium &&
@@ -1054,8 +1063,8 @@ export function useCreateSession() {
     visibleTierOptions,
     packCreditsLabel,
     packPremiumFlow,
-    requiresPremiumSignIn,
-    showPremiumUnlockPanel,
+    requiresPremiumSignIn: createRequiresPremiumSignIn,
+    showPremiumUnlockPanel: createShowPremiumUnlockPanel,
     showAccessCodeField,
     handleGameSizeChange,
     handleGameSizeUserOverride,
