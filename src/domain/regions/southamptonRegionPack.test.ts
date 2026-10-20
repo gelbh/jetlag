@@ -39,6 +39,7 @@ describe("southampton region pack wiring", () => {
     expect(config?.subregionPropertyKey).toBe("wardId");
     expect(config?.matchingLabelOverrides.admin_division_3?.label).toBe("Ward");
     expect(config?.geoAssets.primary).toBe("/geo/southampton/wards.geojson");
+    expect(config?.geoAssets.playArea).toBe("/geo/southampton/city.geojson");
     expect(config?.geoAssets.secondary).toBeUndefined();
   });
 
@@ -74,5 +75,11 @@ describe("southampton geo assets", () => {
     for (const category of PACK_GEO_POINT_CATEGORIES) {
       expect(existsSync(resolve(root, `poi/${category}.json`)), category).toBe(true);
     }
+  });
+
+  it("excludes closed Southampton West End railway station from rail POI", () => {
+    const payload = JSON.parse(readFileSync(resolve(root, "poi/rail_station.json"), "utf8"));
+    const ids = (payload.places as Array<{ id: string }>).map((place) => place.id);
+    expect(ids).not.toContain("Q28970339");
   });
 });

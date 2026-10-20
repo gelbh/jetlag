@@ -251,6 +251,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
       id: SOUTHAMPTON_REGION_PACK_ID,
       geoAssets: {
         primary: SOUTHAMPTON_GEO_ASSETS.wards,
+        playArea: SOUTHAMPTON_GEO_ASSETS.city,
       },
       subregionPropertyKey: "wardId",
       matchingLabelOverrides: SOUTHAMPTON_MATCHING_LABEL_OVERRIDES,
