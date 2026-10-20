@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { TransitStation } from "@/domain/session/hiding/hidingZone";
 import * as overpassClient from "../../core/overpass/overpassClient";
 import type { GtfsStaticBundle } from "../../transit/gtfsBundle";
 import { loadGtfsBundle } from "../../transit/gtfsRouteGraph";
 import {
   fetchTransitStationsForHidingZone,
   fetchTransitStationsForHidingZoneViewport,
+  HIDING_ZONE_OVERPASS_TIMEOUT_MS,
 } from "./transit";
 
 vi.mock("../../transit/gtfsRouteGraph", async (importOriginal) => {
@@ -165,5 +167,69 @@ describe("hiding-zone transit station fetchers", () => {
 
     expect(overpassClient.queryOverpass).toHaveBeenCalledTimes(1);
     expect(stations[0]?.id).toBe("9001");
+  });
+
+  it("waits out a slow GTFS load and still skips Overpass when stops arrive", async () => {
+    vi.useFakeTimers();
+    try {
+      let resolveBundle!: (value: GtfsStaticBundle) => void;
+      vi.mocked(loadGtfsBundle).mockReturnValue(
+        new Promise<GtfsStaticBundle>((resolve) => {
+          resolveBundle = resolve;
+        }),
+      );
+      vi.mocked(overpassClient.queryOverpass).mockResolvedValue({
+        elements: [OVERPASS_STATION],
+      });
+
+      const pending = fetchTransitStationsForHidingZoneViewport(
+        { south: 40.748, west: -73.996, north: 40.753, east: -73.99 },
+        MIDTOWN_GAME_AREA,
+      );
+
+      await vi.advanceTimersByTimeAsync(HIDING_ZONE_OVERPASS_TIMEOUT_MS + 1000);
+      resolveBundle(NYC_BUNDLE);
+      const stations = await pending;
+
+      expect(stations.map((station) => station.id)).toEqual(["nyc:penn"]);
+      expect(overpassClient.queryOverpass).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("times out only the Overpass leg and still delivers late results via onStations", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.mocked(loadGtfsBundle).mockResolvedValue(null);
+      let resolveOverpass!: (value: { elements: (typeof OVERPASS_STATION)[] }) => void;
+      vi.mocked(overpassClient.queryOverpass).mockReturnValue(
+        new Promise((resolve) => {
+          resolveOverpass = resolve;
+        }),
+      );
+
+      const late: TransitStation[] = [];
+      const pending = fetchTransitStationsForHidingZoneViewport(
+        { south: 40.748, west: -73.996, north: 40.753, east: -73.99 },
+        MIDTOWN_GAME_AREA,
+        {
+          onStations: (stations) => {
+            late.push(...stations);
+          },
+        },
+      );
+
+      const rejection = expect(pending).rejects.toThrow(/Couldn't load transit stations/i);
+      await vi.advanceTimersByTimeAsync(HIDING_ZONE_OVERPASS_TIMEOUT_MS);
+      await rejection;
+
+      resolveOverpass({ elements: [OVERPASS_STATION] });
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(late.map((station) => station.id)).toEqual(["9001"]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

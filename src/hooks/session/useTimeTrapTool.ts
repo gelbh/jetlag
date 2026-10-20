@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { withTimeout } from "@/services/core/withTimeout";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import { buildTimeTrapRecord, type TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import type { GameArea } from "../../domain/map/annotations";
@@ -12,9 +11,6 @@ import {
 import { writeTimeTrap } from "../../services/firestore/firestoreSessionExtras";
 import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { useLatestRequest } from "../forms/useLatestRequest";
-
-/** Match hiding-zone Search this area so a stalled Overpass does not leave the spinner stuck. */
-const SEARCH_STATIONS_TIMEOUT_MS = 4000;
 
 interface UseTimeTrapToolParams {
   sessionId: string;
@@ -55,11 +51,22 @@ export function useTimeTrapTool({
       setStationsLoading(true);
       setStationsError(null);
 
+      const applyStations = (loaded: TransitStation[]) => {
+        if (!isLatestRequest(requestId) || loaded.length === 0) {
+          return;
+        }
+        const valid = loaded.filter((station) => isValidHidingStation(station, gameArea));
+        if (valid.length === 0) {
+          return;
+        }
+        setStations(valid);
+        setStationsError(null);
+      };
+
       try {
-        const loaded = await withTimeout(
-          fetchTransitStationsForHidingZoneViewport(viewport, gameArea),
-          SEARCH_STATIONS_TIMEOUT_MS,
-        );
+        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
+          onStations: applyStations,
+        });
         if (!isLatestRequest(requestId)) {
           return;
         }
