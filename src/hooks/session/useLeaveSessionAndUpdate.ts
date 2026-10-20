@@ -70,18 +70,19 @@ export function useLeaveSessionAndUpdate(): {
     const isLocalSession = session.id === LOCAL_SESSION_ID;
     setLeaving(true);
     let leaveError: Error | null = null;
-    try {
-      if (!isLocalSession) {
-        const { ensureAnonymousUser } = await loadFirebase();
-        let user: { uid: string };
-        try {
-          user = await ensureAnonymousUser();
-        } catch (error) {
-          const { captureException } = await loadClientErrors();
-          captureException(error);
-          throw new Error(LEAVE_FAILED_MESSAGE);
-        }
 
+    if (!isLocalSession && leaveError == null) {
+      const { ensureAnonymousUser } = await loadFirebase();
+      let user: { uid: string } | null = null;
+      try {
+        user = await ensureAnonymousUser();
+      } catch (error) {
+        const { captureException } = await loadClientErrors();
+        captureException(error);
+        leaveError = new Error(LEAVE_FAILED_MESSAGE);
+      }
+
+      if (leaveError == null && user != null) {
         let pendingQuestions: PendingQuestionRecord[] = [];
         try {
           const { listPendingQuestions } = await loadPendingQuestions();
@@ -98,10 +99,12 @@ export function useLeaveSessionAndUpdate(): {
           pendingQuestions,
         });
         if (leaveResult === "failed") {
-          throw new Error(LEAVE_FAILED_MESSAGE);
+          leaveError = new Error(LEAVE_FAILED_MESSAGE);
         }
       }
+    }
 
+    if (leaveError == null) {
       try {
         await exitSession({
           reason: "leave",
@@ -112,14 +115,16 @@ export function useLeaveSessionAndUpdate(): {
       } catch (error) {
         const { captureException } = await loadClientErrors();
         captureException(error);
-        throw new Error(LEAVE_FAILED_MESSAGE);
+        leaveError = new Error(LEAVE_FAILED_MESSAGE);
       }
-      applyUpdate();
-    } catch (error) {
-      leaveError = error instanceof Error ? error : new Error(LEAVE_FAILED_MESSAGE);
     }
+
+    if (leaveError == null) {
+      applyUpdate();
+    }
+
     setLeaving(false);
-    if (leaveError) {
+    if (leaveError != null) {
       throw leaveError;
     }
   };
