@@ -41,6 +41,8 @@ export function destinationTitleForPath(path: string): string {
       return "Edit preset";
     case "/premium":
       return "Premium";
+    case "/account":
+      return "Account";
     case "/admin":
       return "Admin";
     default:

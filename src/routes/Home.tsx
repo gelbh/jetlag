@@ -1,11 +1,11 @@
 import { Alert, Anchor, Badge, Container, Group, Stack, Text, Title } from "@mantine/core";
 import {
   ChartBarIcon,
-  CrownIcon,
   PlusCircleIcon,
   SignInIcon,
   SquaresFourIcon,
   TrophyIcon,
+  UserCircleIcon,
   UsersThreeIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
@@ -20,16 +20,82 @@ import { VersionChangelogSheet } from "@/components/ui/sheets/VersionChangelogSh
 import { APP_VERSION } from "@/domain/device/changelog";
 import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { useHydrated } from "@/hooks/app/useHydrated";
+import { usePermanentAuthUser } from "@/hooks/billing/usePermanentAuthUser";
 import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSession";
+import { expectsPermanentSignIn } from "@/services/core/auth/persistedAuthHint";
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
 // Footer links: 44px tap height without adding visual weight next to the Play actions.
 const footerLinkStyle = { display: "inline-flex", alignItems: "center", minHeight: 44 } as const;
 
+type HomeMoreChromeProps = {
+  firebaseOn: boolean;
+  showGuestAuthEntry: boolean;
+  showAccountFeatures: boolean;
+};
+
+function HomeMoreChrome({
+  firebaseOn,
+  showGuestAuthEntry,
+  showAccountFeatures,
+}: HomeMoreChromeProps) {
+  return (
+    <Stack gap={8}>
+      <SectionLabel>More</SectionLabel>
+      <InsetGroup>
+        {showGuestAuthEntry ? (
+          <InsetRow
+            to="/account"
+            label="Log in"
+            icon={<UserCircleIcon size={22} weight="regular" />}
+          />
+        ) : showAccountFeatures ? (
+          <>
+            <InsetRow
+              to="/friends"
+              label="Friends"
+              icon={<UsersThreeIcon size={22} weight="regular" />}
+            />
+            <InsetRow
+              showSeparator
+              to="/leaderboard"
+              label="Leaderboard"
+              icon={<TrophyIcon size={22} weight="regular" />}
+            />
+            <InsetRow
+              showSeparator
+              to="/stats"
+              label="Stats"
+              icon={<ChartBarIcon size={22} weight="regular" />}
+            />
+            {firebaseOn ? (
+              <InsetRow
+                showSeparator
+                to="/account"
+                label="Account"
+                icon={<UserCircleIcon size={22} weight="regular" />}
+              />
+            ) : null}
+          </>
+        ) : null}
+      </InsetGroup>
+    </Stack>
+  );
+}
+
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } = useContinueActiveSession();
-  const showPremium = isFirebaseConfigured();
+  const { isPermanent, authReady } = usePermanentAuthUser();
+  const hydrated = useHydrated();
+  const [permanentHint] = useState(expectsPermanentSignIn);
+  const firebaseOn = isFirebaseConfigured();
+  // Same family as AccountSignInGate: ignore storage hint until hydrated so prerender matches
+  // first client paint. Until authReady: hint → signed-in chrome; else guest (no Friends flash).
+  const treatAsPermanent = firebaseOn && (isPermanent || (hydrated && !authReady && permanentHint));
+  const showGuestAuthEntry = firebaseOn && !treatAsPermanent;
+  const showAccountFeatures = !firebaseOn || treatAsPermanent;
   const [changelogOpen, setChangelogOpen] = useState(false);
 
   return (
@@ -163,36 +229,11 @@ export function Home() {
                 </InsetGroup>
               </Stack>
 
-              <Stack gap={8}>
-                <SectionLabel>More</SectionLabel>
-                <InsetGroup>
-                  <InsetRow
-                    to="/friends"
-                    label="Friends"
-                    icon={<UsersThreeIcon size={22} weight="regular" />}
-                  />
-                  <InsetRow
-                    showSeparator
-                    to="/leaderboard"
-                    label="Leaderboard"
-                    icon={<TrophyIcon size={22} weight="regular" />}
-                  />
-                  <InsetRow
-                    showSeparator
-                    to="/stats"
-                    label="Stats"
-                    icon={<ChartBarIcon size={22} weight="regular" />}
-                  />
-                  {showPremium ? (
-                    <InsetRow
-                      showSeparator
-                      to="/premium"
-                      label="Premium"
-                      icon={<CrownIcon size={22} weight="regular" />}
-                    />
-                  ) : null}
-                </InsetGroup>
-              </Stack>
+              <HomeMoreChrome
+                firebaseOn={firebaseOn}
+                showGuestAuthEntry={showGuestAuthEntry}
+                showAccountFeatures={showAccountFeatures}
+              />
 
               <Stack gap={0} align="center">
                 <Group gap="xs" justify="center" component="nav" aria-label="Learn how to play">

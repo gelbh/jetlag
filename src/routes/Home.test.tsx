@@ -15,6 +15,13 @@ const mockIsFirebaseConfigured = vi.fn(() => false);
 const mockEnsureAnonymousUser = vi.fn();
 const mockGetRemoteSessionById = vi.fn();
 const mockEnsureRemoteSessionMembership = vi.fn();
+const mockUsePermanentAuthUser = vi.fn(() => ({
+  user: null as { uid: string; isAnonymous: boolean; email?: string } | null,
+  isPermanent: false,
+  authReady: true,
+}));
+const mockExpectsPermanentSignIn = vi.fn(() => false);
+const mockUseHydrated = vi.fn(() => true);
 
 function renderHome(options?: { resetStores?: boolean }) {
   return renderWithRouter(
@@ -41,6 +48,18 @@ vi.mock("@/services/core/firebase/authBootstrapState", () => ({
 
 vi.mock("@/services/core/firebase/firebaseAuthReady", () => ({
   waitForPermanentAuthReady: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
+  usePermanentAuthUser: () => mockUsePermanentAuthUser(),
+}));
+
+vi.mock("@/services/core/auth/persistedAuthHint", () => ({
+  expectsPermanentSignIn: () => mockExpectsPermanentSignIn(),
+}));
+
+vi.mock("@/hooks/app/useHydrated", () => ({
+  useHydrated: () => mockUseHydrated(),
 }));
 
 vi.mock("@/hooks/billing/usePremiumEntitlements", () => ({
@@ -75,6 +94,13 @@ describe("Home", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockIsFirebaseConfigured.mockReturnValue(false);
+    mockUsePermanentAuthUser.mockReturnValue({
+      user: null,
+      isPermanent: false,
+      authReady: true,
+    });
+    mockExpectsPermanentSignIn.mockReturnValue(false);
+    mockUseHydrated.mockReturnValue(true);
     mockEnsureAnonymousUser.mockResolvedValue({ uid: "user-new" });
     useSessionStore.getState().setSession(null);
     vi.stubGlobal("matchMedia", (query: string) => ({
@@ -104,7 +130,7 @@ describe("Home", () => {
     );
   });
 
-  it("links to friends and leaderboard in the header", () => {
+  it("shows Friends, Leaderboard, and Stats in More when Firebase is off", () => {
     renderHome();
 
     expect(screen.getByRole("link", { name: "Friends" })).toHaveAttribute("href", "/friends");
@@ -112,6 +138,90 @@ describe("Home", () => {
       "href",
       "/leaderboard",
     );
+    expect(screen.getByRole("link", { name: "Stats" })).toHaveAttribute("href", "/stats");
+    expect(screen.queryByRole("link", { name: "Premium" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Account" })).not.toBeInTheDocument();
+  });
+
+  it("shows only Log in in More when Firebase is on and the user is not permanent", () => {
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    mockUsePermanentAuthUser.mockReturnValue({
+      user: { uid: "anon", isAnonymous: true },
+      isPermanent: false,
+      authReady: true,
+    });
+    renderHome();
+    expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: "Friends" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Leaderboard" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Stats" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Premium" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Account" })).not.toBeInTheDocument();
+  });
+
+  it("shows Friends, Leaderboard, Stats, and Account when permanent; hides Log in and Premium", () => {
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    mockUsePermanentAuthUser.mockReturnValue({
+      user: { uid: "u1", isAnonymous: false, email: "a@b.co" },
+      isPermanent: true,
+      authReady: true,
+    });
+    renderHome();
+    expect(screen.getByRole("link", { name: "Friends" })).toHaveAttribute("href", "/friends");
+    expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute(
+      "href",
+      "/leaderboard",
+    );
+    expect(screen.getByRole("link", { name: "Stats" })).toHaveAttribute("href", "/stats");
+    expect(screen.getByRole("link", { name: "Account" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Premium" })).not.toBeInTheDocument();
+  });
+
+  it("shows features + Account while auth is not ready when hydrated and permanent hint is set", () => {
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    mockUseHydrated.mockReturnValue(true);
+    mockExpectsPermanentSignIn.mockReturnValue(true);
+    mockUsePermanentAuthUser.mockReturnValue({
+      user: null,
+      isPermanent: false,
+      authReady: false,
+    });
+    renderHome();
+    expect(screen.getByRole("link", { name: "Friends" })).toHaveAttribute("href", "/friends");
+    expect(screen.getByRole("link", { name: "Account" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument();
+  });
+
+  it("shows only Log in while auth is not ready when hydrated and permanent hint is clear", () => {
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    mockUseHydrated.mockReturnValue(true);
+    mockExpectsPermanentSignIn.mockReturnValue(false);
+    mockUsePermanentAuthUser.mockReturnValue({
+      user: null,
+      isPermanent: false,
+      authReady: false,
+    });
+    renderHome();
+    expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: "Friends" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Account" })).not.toBeInTheDocument();
+  });
+
+  it("ignores permanent hint before hydrate so More matches the prerender guest set", () => {
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    mockUseHydrated.mockReturnValue(false);
+    mockExpectsPermanentSignIn.mockReturnValue(true);
+    mockUsePermanentAuthUser.mockReturnValue({
+      user: null,
+      isPermanent: false,
+      authReady: false,
+    });
+    renderHome();
+    expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: "Friends" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Account" })).not.toBeInTheDocument();
   });
 
   it("continues a local session without remote verification", () => {
