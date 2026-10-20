@@ -51,6 +51,9 @@ export const importPrivacy = () =>
 export const importPremium = () =>
   import("../routes/Premium").then((m) => ({ default: m.Premium }));
 
+export const importAccount = () =>
+  import("../routes/Account").then((m) => ({ default: m.Account }));
+
 export const importTerms = () => import("../routes/Terms").then((m) => ({ default: m.Terms }));
 
 export const importLearnPage = () =>
@@ -77,6 +80,7 @@ export const routeImporter = {
   importFeedback,
   importPrivacy,
   importPremium,
+  importAccount,
   importTerms,
   importLearnPage,
   importNotFound,
@@ -94,6 +98,7 @@ export const AdminOpsDeskLazy = lazyWithChunkRetry(importAdminOpsDesk);
 export const FeedbackLazy = lazyWithChunkRetry(importFeedback);
 export const PrivacyLazy = lazyWithChunkRetry(importPrivacy);
 export const PremiumLazy = lazyWithChunkRetry(importPremium);
+export const AccountLazy = lazyWithChunkRetry(importAccount);
 export const TermsLazy = lazyWithChunkRetry(importTerms);
 export const LearnPageLazy = lazyWithChunkRetry(importLearnPage);
 export const NotFoundLazy = lazyWithChunkRetry(importNotFound);
@@ -111,6 +116,7 @@ const lazyRouteByLoaderKey: Record<LazyRouteLoaderKey, LazyRouteComponent> = {
   importFeedback: FeedbackLazy,
   importPrivacy: PrivacyLazy,
   importPremium: PremiumLazy,
+  importAccount: AccountLazy,
   importTerms: TermsLazy,
   importStats: StatsLazy,
   importFriends: FriendsLazy,

@@ -12,6 +12,7 @@ export const APP_ROUTE_PATHS = [
   "/privacy",
   "/terms",
   "/premium",
+  "/account",
   ...LEARN_ROUTE_PATHS,
   "/create",
   "/join",

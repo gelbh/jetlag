@@ -43,6 +43,7 @@ import { RouteProgressChrome } from "./navigation/RouteProgressChrome";
 import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
 import {
+  AccountLazy,
   AdminOpsDeskLazy,
   AppResumeWatchdogLazy,
   CreateSessionLazy,
@@ -298,6 +299,14 @@ export default function App() {
                             element={
                               <LazyRoute>
                                 <PremiumLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/account"
+                            element={
+                              <LazyRoute>
+                                <AccountLazy />
                               </LazyRoute>
                             }
                           />

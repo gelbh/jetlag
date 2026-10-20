@@ -141,6 +141,12 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
     jsonLd: webPageJsonLd("/premium", PREMIUM_TITLE, PREMIUM_DESCRIPTION),
   },
+  "/account": {
+    title: titleFor("Account"),
+    description: `Sign in or manage your account in ${LEGAL_APP_NAME}.`,
+    canonicalPath: "/account",
+    ogImagePath: DEFAULT_OG_IMAGE_PATH,
+  },
   "/privacy": {
     title: PRIVACY_TITLE,
     description: PRIVACY_DESCRIPTION,

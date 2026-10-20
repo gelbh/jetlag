@@ -16,6 +16,7 @@ const LAZY_ROUTE_PATHS = new Set([
   "/privacy",
   "/terms",
   "/premium",
+  "/account",
   "/stats",
   "/friends",
   "/leaderboard",
@@ -60,6 +61,7 @@ export type LazyRouteLoaderKey =
   | "importFeedback"
   | "importPrivacy"
   | "importPremium"
+  | "importAccount"
   | "importTerms"
   | "importStats"
   | "importFriends"
@@ -92,6 +94,8 @@ export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined
       return "importPrivacy";
     case "/premium":
       return "importPremium";
+    case "/account":
+      return "importAccount";
     case "/terms":
       return "importTerms";
     case "/stats":

@@ -5,9 +5,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { Home } from "./Home";
 
-const { isFirebaseConfigured, isAuthBootstrapReady } = vi.hoisted(() => ({
+const { isFirebaseConfigured, isAuthBootstrapReady, usePermanentAuthUser } = vi.hoisted(() => ({
   isFirebaseConfigured: vi.fn(() => false),
   isAuthBootstrapReady: vi.fn(() => true),
+  usePermanentAuthUser: vi.fn(() => ({
+    user: null,
+    isPermanent: false,
+    authReady: true,
+  })),
 }));
 
 vi.mock("@/hooks/session/useContinueActiveSession", () => ({
@@ -34,9 +39,26 @@ vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured,
 }));
 
+vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
+  usePermanentAuthUser,
+}));
+
+vi.mock("@/hooks/app/useHydrated", () => ({
+  useHydrated: () => true,
+}));
+
+vi.mock("@/services/core/auth/persistedAuthHint", () => ({
+  expectsPermanentSignIn: () => false,
+}));
+
 beforeEach(() => {
   isFirebaseConfigured.mockReturnValue(false);
   isAuthBootstrapReady.mockReturnValue(true);
+  usePermanentAuthUser.mockReturnValue({
+    user: null,
+    isPermanent: false,
+    authReady: true,
+  });
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -96,7 +118,7 @@ describe("Home", () => {
     expect(screen.queryByRole("link", { name: /^premium$/i })).toBeNull();
   });
 
-  it("links to premium when Firebase is configured", () => {
+  it("shows Log in (not Premium) when Firebase is configured for a guest", () => {
     isFirebaseConfigured.mockReturnValue(true);
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
@@ -105,7 +127,9 @@ describe("Home", () => {
         </MemoryRouter>
       </MantineProvider>,
     );
-    expect(screen.getByRole("link", { name: /premium/i })).toHaveAttribute("href", "/premium");
+    expect(screen.getByRole("link", { name: /^Log in$/i })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: /^premium$/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /^friends$/i })).toBeNull();
   });
 
   it("renders entries before Firebase auth bootstrap settles", () => {
