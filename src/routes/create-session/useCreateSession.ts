@@ -34,6 +34,7 @@ import {
   BUNDLED_REGION_PACK_GEO_REVISION,
   type RegionPackId,
 } from "../../domain/regions/regionPack";
+import type { SessionMode } from "../../domain/session/castleSiege/mode";
 import { generateLocalCode } from "../../domain/session/meta/sessionCode";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
@@ -56,12 +57,14 @@ import { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
 import { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
 import { createPremiumRemoteSession } from "../../services/billing/premiumBilling";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
+import { isCastleSiegeModeEnabled } from "../../services/core/analytics/castleSiegeFlag";
 import { grantAccess, hasAccessClaim } from "../../services/core/auth/accessControl";
 import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { requestLocationAccess } from "../../services/core/location/geolocation";
 import { retryAsync } from "../../services/core/network/retryAsync";
 import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
+import type { CreateRemoteSessionOptions } from "../../services/firestore/firestoreSessions";
 import {
   type GeocodedPlace,
   searchPlacesSettled,
@@ -129,6 +132,11 @@ export function useCreateSession() {
   const [sessionTier, setSessionTier] = useState<SessionTier>("free");
   const [tierManuallySet, setTierManuallySet] = useState(false);
   const [playerRole, setPlayerRole] = useState<PlayerRole>("seeker");
+  const castleSiegeFlagEnabled = isCastleSiegeModeEnabled();
+  const [sessionMode, setSessionMode] = useState<SessionMode>("classic");
+  const [seriesLength, setSeriesLength] = useState<1 | 3>(1);
+  const [setupMode, setSetupMode] = useState<"pregame" | "fairSplit">("pregame");
+  const [hostCastleSiegeRole, setHostCastleSiegeRole] = useState<"teamA" | "teamB">("teamA");
   const [gameSize, setGameSize] = useState<GameSize>("medium");
   const [gameSizeUserOverrode, setGameSizeUserOverrode] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>("imperial");
@@ -793,8 +801,21 @@ export function useCreateSession() {
           return;
         }
 
+        // Phase 1: Castle Siege stays on free createRemoteSession (premium callable has no mode bag).
+        const castleSiegeCreate =
+          castleSiegeFlagEnabled && sessionMode === "castleSiege"
+            ? ({
+                mode: "castleSiege",
+                hostCastleSiegeRole,
+                seriesLength,
+                setupMode,
+              } satisfies CreateRemoteSessionOptions)
+            : undefined;
         const usePremiumCallable =
-          tier === "premium" && !useAccessClaimForPremium && paidPremiumHost;
+          tier === "premium" &&
+          !useAccessClaimForPremium &&
+          paidPremiumHost &&
+          castleSiegeCreate === undefined;
         const session = usePremiumCallable
           ? await retryAsync(() =>
               createPremiumRemoteSession({
@@ -819,6 +840,8 @@ export function useCreateSession() {
                 gameSize,
                 rulesPatch,
                 distanceUnit,
+                APP_VERSION,
+                castleSiegeCreate,
               ),
             );
         setSession(session, user.uid);
@@ -917,6 +940,30 @@ export function useCreateSession() {
     });
   }, []);
 
+  const handleSessionModeChange = useCallback((mode: SessionMode) => {
+    startTransition(() => {
+      setSessionMode(mode);
+    });
+  }, []);
+
+  const handleSeriesLengthChange = useCallback((value: 1 | 3) => {
+    startTransition(() => {
+      setSeriesLength(value);
+    });
+  }, []);
+
+  const handleSetupModeChange = useCallback((value: "pregame" | "fairSplit") => {
+    startTransition(() => {
+      setSetupMode(value);
+    });
+  }, []);
+
+  const handleHostCastleSiegeRoleChange = useCallback((value: "teamA" | "teamB") => {
+    startTransition(() => {
+      setHostCastleSiegeRole(value);
+    });
+  }, []);
+
   const handleSessionTierChange = (tier: SessionTier) => {
     startTransition(() => {
       setTierManuallySet(true);
@@ -976,6 +1023,15 @@ export function useCreateSession() {
     setTransitMetroOverride,
     playerRole,
     handlePlayerRoleChange,
+    castleSiegeFlagEnabled,
+    sessionMode,
+    handleSessionModeChange,
+    seriesLength,
+    handleSeriesLengthChange,
+    setupMode,
+    handleSetupModeChange,
+    hostCastleSiegeRole,
+    handleHostCastleSiegeRoleChange,
     gameSize,
     gameSizeUserOverrode,
     distanceUnit,

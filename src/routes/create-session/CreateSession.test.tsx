@@ -14,9 +14,38 @@ import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const ensureAnonymousUser = vi.hoisted(() => vi.fn(async () => ({ uid: "host-1" })));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => false));
+const isCastleSiegeModeEnabled = vi.hoisted(() => vi.fn(() => false));
+const createRemoteSession = vi.hoisted(() =>
+  vi.fn(async () => ({
+    id: "session-1",
+    code: "ABCD",
+    gameArea: null,
+    createdAt: new Date().toISOString(),
+    memberUids: ["host-1"],
+    memberRoles: { "host-1": "observer" },
+    gameSize: "medium",
+    distanceUnit: "imperial",
+    tier: "free",
+  })),
+);
+const createPremiumRemoteSession = vi.hoisted(() => vi.fn());
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => vi.fn(),
+}));
+
+vi.mock("@/services/core/analytics/castleSiegeFlag", () => ({
+  isCastleSiegeModeEnabled: () => isCastleSiegeModeEnabled(),
+}));
+
+vi.mock("@/services/firestore/firestoreAnnotations", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/services/firestore/firestoreAnnotations")>()),
+  createRemoteSession: (...args: unknown[]) => createRemoteSession(...args),
+}));
+
+vi.mock("@/services/billing/premiumBilling", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/services/billing/premiumBilling")>()),
+  createPremiumRemoteSession: (...args: unknown[]) => createPremiumRemoteSession(...args),
 }));
 
 const mapView = vi.hoisted(() => ({ model: null as MapViewModel | null }));
@@ -205,6 +234,9 @@ beforeEach(() => {
   suggestPlacesAtPoint.mockReset();
   suggestPlacesAtPoint.mockResolvedValue([]);
   isFirebaseConfigured.mockReturnValue(false);
+  isCastleSiegeModeEnabled.mockReturnValue(false);
+  createRemoteSession.mockClear();
+  createPremiumRemoteSession.mockClear();
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
   loadRegionPackSessionBoundaries.mockClear();
   useGamePresetStore.setState({
@@ -895,5 +927,70 @@ describe("CreateSession", () => {
     expect(
       screen.queryByText(/search for a place, load a preset, or open draw to set the play area/i),
     ).toBeNull();
+  });
+
+  it("hides Castle Siege controls when flag off", () => {
+    isCastleSiegeModeEnabled.mockReturnValue(false);
+    renderCreateSession();
+    goToPlay();
+
+    expect(screen.queryByRole("radiogroup", { name: /game mode/i })).toBeNull();
+    expect(screen.queryByText("Castle Siege")).toBeNull();
+    expect(screen.getByRole("radiogroup", { name: "Player side" })).toBeInTheDocument();
+  });
+
+  it("shows Castle Siege controls when flag on", () => {
+    isCastleSiegeModeEnabled.mockReturnValue(true);
+    renderCreateSession();
+    goToPlay();
+
+    expect(screen.getByRole("radiogroup", { name: /game mode/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /castle siege/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^classic/i })).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: "Player side" })).toBeInTheDocument();
+  });
+
+  it("creates a Castle Siege session with selected options via createRemoteSession", async () => {
+    isCastleSiegeModeEnabled.mockReturnValue(true);
+    isFirebaseConfigured.mockReturnValue(true);
+    parseBoundaryFile.mockResolvedValue(IMPORTED_AREA);
+    createRemoteSession.mockResolvedValue({
+      id: "session-cs",
+      code: "SIEG",
+      gameArea: IMPORTED_AREA,
+      createdAt: new Date().toISOString(),
+      memberUids: ["host-1"],
+      memberRoles: { "host-1": "observer" },
+      gameSize: "medium",
+      distanceUnit: "imperial",
+      tier: "free",
+      mode: "castleSiege",
+    });
+
+    renderCreateSession();
+    const file = importBoundaryFile();
+    await waitFor(() => {
+      expect(parseBoundaryFile).toHaveBeenCalledWith(file);
+    });
+    goToPlay();
+
+    fireEvent.click(screen.getByRole("radio", { name: /castle siege/i }));
+    expect(screen.queryByRole("radiogroup", { name: "Player side" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^best of 3$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /fair.?split/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^team b$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+
+    await waitFor(() => {
+      expect(createRemoteSession).toHaveBeenCalled();
+    });
+    expect(createPremiumRemoteSession).not.toHaveBeenCalled();
+    const options = createRemoteSession.mock.calls[0]?.[9];
+    expect(options).toEqual({
+      mode: "castleSiege",
+      hostCastleSiegeRole: "teamB",
+      seriesLength: 3,
+      setupMode: "fairSplit",
+    });
   });
 });
