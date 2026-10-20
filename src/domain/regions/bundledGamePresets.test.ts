@@ -6,8 +6,21 @@ import {
   buildBundledGamePresets,
   mergeBundledPresets,
 } from "./bundledGamePresets";
+import { SOUTHAMPTON_WARDS } from "./bundledPresets/southampton";
 
 describe("bundledGamePresets", () => {
+  it("includes southampton city and ward presets on the southampton pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "southampton");
+    expect(presets.some((p) => p.id === "bundled:southampton")).toBe(true);
+    for (const ward of SOUTHAMPTON_WARDS) {
+      const preset = presets.find((p) => p.id === `bundled:southampton-${ward.id}`);
+      expect(preset, ward.id).toBeDefined();
+      expect(preset?.subregionId).toBe(ward.id);
+      expect(preset?.transitMetroId).toBe("southampton");
+    }
+    expect(presets).toHaveLength(18);
+  });
+
   it("defines Dublin and Hide+Seek show metro presets", () => {
     expect(BUNDLED_GAME_PRESET_DEFINITIONS.length).toBeGreaterThan(90);
     expect(BUNDLED_GAME_PRESET_DEFINITIONS.map((preset) => preset.id)).toEqual(

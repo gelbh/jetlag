@@ -55,6 +55,14 @@
       "builtAt": "2026-07-11T15:15:51.600Z",
       "stopCount": 3238,
       "routeCount": 69
+    },
+    {
+      "id": "southampton",
+      "bundlePath": "/geo/gtfs/southampton.json",
+      "feedOnestopId": "f-bus~dft~gov~uk",
+      "builtAt": "2026-10-20T19:18:20.297Z",
+      "stopCount": 1571,
+      "routeCount": 103
     }
   ]
 }

@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../domain/map/annotations";
+import { BUNDLED_REGION_PACK_GEO_REVISION } from "../../domain/regions/regionPack";
 import * as regionPackBoundaries from "../../services/geo/matching/regionPackBoundaries";
 import {
   clearResolvedMatchingAreasCacheForTests,
@@ -109,5 +110,19 @@ describe("useResolvedSessionRules play area readiness", () => {
       expect(result.current.playAreaReady).toBe(true);
     });
     expect(result.current.gameArea).toEqual(session.gameArea);
+  });
+
+  it("skips async matching reload for single-depth Southampton with level 8 only", () => {
+    const session = createTestSession({
+      regionPackId: "southampton",
+      customMatchingAreas: { 8: "southampton-wards" },
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+    });
+
+    const { result } = renderHook(() => useResolvedSessionRules(session));
+
+    expect(result.current.matchingAreasReady).toBe(true);
+    expect(result.current.matchingAreasError).toBeNull();
+    expect(regionPackBoundaries.loadRegionPackMatchingAreas).not.toHaveBeenCalled();
   });
 });

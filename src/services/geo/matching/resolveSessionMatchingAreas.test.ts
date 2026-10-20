@@ -49,6 +49,38 @@ describe("resolveSessionMatchingAreas", () => {
     expect(regionPackBoundaries.loadRegionPackMatchingAreas).not.toHaveBeenCalled();
   });
 
+  it("treats single-depth Southampton sessions with only level 8 as complete", async () => {
+    const sessionAreas = {
+      8: "southampton-wards",
+    };
+
+    const areas = await resolveSessionMatchingAreas({
+      regionPackId: "southampton",
+      customMatchingAreas: sessionAreas,
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+    });
+
+    expect(areas).toEqual(sessionAreas);
+    expect(regionPackBoundaries.loadRegionPackMatchingAreas).not.toHaveBeenCalled();
+  });
+
+  it("still reloads dual-depth packs when only level 8 is present", async () => {
+    vi.spyOn(regionPackBoundaries, "loadRegionPackMatchingAreas").mockResolvedValue(bundledAreas);
+
+    const areas = await resolveSessionMatchingAreas({
+      regionPackId: "dublin",
+      regionPackSubregionId: "south-dublin",
+      customMatchingAreas: { 8: "primary-only" },
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+    });
+
+    expect(areas).toEqual(bundledAreas);
+    expect(regionPackBoundaries.loadRegionPackMatchingAreas).toHaveBeenCalledWith(
+      "dublin",
+      "south-dublin",
+    );
+  });
+
   it("reloads bundled matching areas when session revision is stale", async () => {
     vi.spyOn(regionPackBoundaries, "loadRegionPackMatchingAreas").mockResolvedValue(bundledAreas);
 

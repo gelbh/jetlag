@@ -168,4 +168,19 @@ describe("production GTFS bundles", () => {
     const civicCentre = stops.find((stop) => stop.name === "Civic Centre Complex");
     expect(civicCentre).toBeDefined();
   });
+
+  it("lists southampton in the production GTFS manifest and bundle loads", async () => {
+    const manifest = JSON.parse(
+      readFileSync(resolve(ROOT, "public/geo/gtfs/manifest.json"), "utf8"),
+    );
+    const entry = manifest.metros.find((m: { id: string }) => m.id === "southampton");
+    expect(entry).toBeDefined();
+    expect(entry.bundlePath).toBe("/geo/gtfs/southampton.json");
+    const bundle = JSON.parse(
+      readFileSync(resolve(ROOT, "public/geo/gtfs/southampton.json"), "utf8"),
+    );
+    expect(bundle.metroId).toBe("southampton");
+    expect(bundle.stops.length).toBeGreaterThan(0);
+    expect(bundle.routes.length).toBeGreaterThan(0);
+  });
 });

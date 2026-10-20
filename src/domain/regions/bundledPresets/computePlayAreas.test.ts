@@ -24,4 +24,11 @@ describe("bundled preset play areas", () => {
     expect(recorded).toBeDefined();
     expect(recorded).toBeCloseTo(computed, 1);
   });
+
+  it("matches Southampton city boundary square mileage", () => {
+    const computed = squareMilesFromCityGeoJson("southampton/city.geojson");
+    const recorded = BUNDLED_PRESET_PLAY_AREA_SQ_MI["bundled:southampton"];
+    expect(recorded).toBeDefined();
+    expect(recorded).toBeCloseTo(computed, 1);
+  });
 });

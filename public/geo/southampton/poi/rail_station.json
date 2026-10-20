@@ -1,0 +1,132 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.86,
+    "west": -1.4973,
+    "north": 50.9761,
+    "east": -1.302
+  },
+  "places": [
+    {
+      "id": "Q4919061",
+      "name": "Bitterne railway station",
+      "lat": 50.918,
+      "lng": -1.377
+    },
+    {
+      "id": "Q2219439",
+      "name": "Bursledon railway station",
+      "lat": 50.884,
+      "lng": -1.305
+    },
+    {
+      "id": "Q2285305",
+      "name": "Eastleigh railway station",
+      "lat": 50.969444,
+      "lng": -1.349444
+    },
+    {
+      "id": "Q927502",
+      "name": "Hamble railway station",
+      "lat": 50.871,
+      "lng": -1.329
+    },
+    {
+      "id": "Q15227369",
+      "name": "Hythe railway station",
+      "lat": 50.8661,
+      "lng": -1.3955
+    },
+    {
+      "id": "Q6757050",
+      "name": "Marchwood railway station",
+      "lat": 50.8888,
+      "lng": -1.455
+    },
+    {
+      "id": "Q6858611",
+      "name": "Millbrook railway station",
+      "lat": 50.9116,
+      "lng": -1.4343
+    },
+    {
+      "id": "Q2555327",
+      "name": "Netley railway station",
+      "lat": 50.875,
+      "lng": -1.342
+    },
+    {
+      "id": "Q7057570",
+      "name": "Northam railway station",
+      "lat": 50.9068,
+      "lng": -1.3923
+    },
+    {
+      "id": "Q15263046",
+      "name": "Nursling railway station",
+      "lat": 50.9428,
+      "lng": -1.484
+    },
+    {
+      "id": "Q28970342",
+      "name": "Portswood railway station",
+      "lat": 50.92483,
+      "lng": -1.38644
+    },
+    {
+      "id": "Q7305512",
+      "name": "Redbridge railway station",
+      "lat": 50.9198,
+      "lng": -1.4702
+    },
+    {
+      "id": "Q7500232",
+      "name": "Sholing railway station",
+      "lat": 50.897,
+      "lng": -1.364
+    },
+    {
+      "id": "Q4047567",
+      "name": "Southampton Airport Parkway railway station",
+      "lat": 50.9503,
+      "lng": -1.3634
+    },
+    {
+      "id": "Q2396008",
+      "name": "Southampton Central railway station",
+      "lat": 50.9075,
+      "lng": -1.4141
+    },
+    {
+      "id": "Q7569159",
+      "name": "Southampton Terminus railway station",
+      "lat": 50.8978,
+      "lng": -1.39639
+    },
+    {
+      "id": "Q3372457",
+      "name": "St Denys railway station",
+      "lat": 50.922,
+      "lng": -1.388
+    },
+    {
+      "id": "Q12070392",
+      "name": "Swaythling railway station",
+      "lat": 50.9411,
+      "lng": -1.3765
+    },
+    {
+      "id": "Q2008136",
+      "name": "Totton railway station",
+      "lat": 50.9178,
+      "lng": -1.4826
+    },
+    {
+      "id": "Q2632304",
+      "name": "Woolston railway station",
+      "lat": 50.898929,
+      "lng": -1.376987
+    }
+  ]
+}

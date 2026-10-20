@@ -4,6 +4,7 @@ import { BUNDLED_REGION_PACK_GEO_REVISION } from "../../domain/regions/regionPac
 import { isKnownRegionPack } from "../../domain/regions/regionPackRegistry";
 import { type SessionRulesInput, sessionRulesSnapshot } from "../../domain/session/rules";
 import {
+  hasBundledMatchingLevels,
   isPlayAreaReadySync,
   matchingAreasCacheKey,
   peekResolvedPlayArea,
@@ -13,22 +14,13 @@ import {
   sessionUsesPackPlayArea,
 } from "../../services/geo/matching/resolveSessionMatchingAreas";
 
-function sessionHasBundledMatchingLevels(session: SessionRecord | null | undefined): boolean {
-  const areas = session?.customMatchingAreas;
-  if (!areas) {
-    return false;
-  }
-
-  return Boolean(areas[8] && areas[9]);
-}
-
 function sessionNeedsAsyncMatchingAreas(session: SessionRecord | null | undefined): boolean {
   if (!session) {
     return false;
   }
 
   if (
-    sessionHasBundledMatchingLevels(session) &&
+    hasBundledMatchingLevels(session.customMatchingAreas, session.regionPackId) &&
     session.bundledGeoRevision === BUNDLED_REGION_PACK_GEO_REVISION
   ) {
     return false;
@@ -56,17 +48,18 @@ export function useResolvedSessionRules(
 
   const regionPackId = session?.regionPackId;
   const regionPackSubregionId = session?.regionPackSubregionId;
-  const customMatchingArea8 = session?.customMatchingAreas?.[8];
-  const customMatchingArea9 = session?.customMatchingAreas?.[9];
-  const hasCustomMatchingPair = Boolean(customMatchingArea8 && customMatchingArea9);
+  const hasCompleteSessionMatching = hasBundledMatchingLevels(
+    session?.customMatchingAreas,
+    regionPackId,
+  );
   const hasSession = session != null;
 
   const areasCacheKey = useMemo(
     () =>
       hasSession
-        ? matchingAreasCacheKey(regionPackId, regionPackSubregionId, hasCustomMatchingPair)
+        ? matchingAreasCacheKey(regionPackId, regionPackSubregionId, hasCompleteSessionMatching)
         : "",
-    [hasSession, regionPackId, regionPackSubregionId, hasCustomMatchingPair],
+    [hasSession, regionPackId, regionPackSubregionId, hasCompleteSessionMatching],
   );
 
   const playAreaCacheKeyValue = useMemo(
@@ -107,7 +100,7 @@ export function useResolvedSessionRules(
           matchingAreasCacheKey(
             snapshot.regionPackId,
             snapshot.regionPackSubregionId,
-            Boolean(snapshot.customMatchingAreas?.[8] && snapshot.customMatchingAreas?.[9]),
+            hasBundledMatchingLevels(snapshot.customMatchingAreas, snapshot.regionPackId),
           ) === expectedKey
         ) {
           setResolvedAreas(areas);
