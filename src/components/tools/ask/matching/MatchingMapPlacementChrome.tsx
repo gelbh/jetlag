@@ -2,7 +2,7 @@
  * Map-first Matching chrome: GPS-first anchor, then on-map answer / send.
  * Thin adapter over AskMapPlacementChrome.
  */
-import { Button, UnstyledButton } from "@mantine/core";
+import { UnstyledButton } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudMatchingIcon } from "@/components/map/icons/ToolIcons";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { binaryAnswerIcon } from "@/components/tools/shared/answers/binaryAnswerIcons";
 import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import {
   askInsetSurfaceStyle,
   choiceChipStyles,
@@ -200,37 +201,29 @@ export function MatchingMapPlacementChrome({
           ) : null}
 
           {awaitHiderAnswer ? (
-            <Button
+            <EntryAsyncButton
               type="button"
               fullWidth
-              onClick={onCommit}
-              disabled={!canCommit || isSubmitting}
-              aria-busy={isSubmitting || undefined}
-              leftSection={
-                isSubmitting ? undefined : (
-                  <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
-                )
-              }
+              busy={isSubmitting}
+              unavailable={!canCommit}
+              idleLabel="Send to hiders"
+              busyLabel="Sending…"
+              leftSection={<PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />}
               styles={askMapPlacementSendStyles}
-            >
-              {isSubmitting ? "Sending…" : "Send to hiders"}
-            </Button>
+              onClick={onCommit}
+            />
           ) : answer ? (
-            <Button
+            <EntryAsyncButton
               type="button"
               fullWidth
-              onClick={onCommit}
-              disabled={!canCommit || isSubmitting}
-              aria-busy={isSubmitting || undefined}
-              leftSection={
-                isSubmitting ? undefined : (
-                  <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
-                )
-              }
+              busy={isSubmitting}
+              unavailable={!canCommit}
+              idleLabel="Send"
+              busyLabel="…"
+              leftSection={<PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />}
               styles={askMapPlacementSendStyles}
-            >
-              {isSubmitting ? "…" : "Send"}
-            </Button>
+              onClick={onCommit}
+            />
           ) : null}
         </div>
       </div>

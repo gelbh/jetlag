@@ -107,6 +107,7 @@ import {
   hiderBoardEconomyDockProps,
   hiderBoardEconomyZoneOpts,
 } from "./hider-map-screen/hiderBoardEconomyChrome";
+import { resolveHiderZonePlacementChromeVisibility } from "./hider-map-screen/hiderZonePlacementChrome";
 import { AdminBoundariesLayer } from "./map-screen/lazyImports";
 
 export function HiderMapScreen() {
@@ -823,6 +824,7 @@ export function HiderMapScreen() {
     overlay.isCodesOpen ||
     timeTrapSheetOpen ||
     pinSheetOpen;
+  const { showMapControls } = resolveHiderZonePlacementChromeVisibility(zoneTool.wizardOpen);
 
   const mapLayers = (
     <div className="absolute inset-0">
@@ -834,13 +836,15 @@ export function HiderMapScreen() {
           mapKey: session.id,
           mapStyle: effectiveBasemapStyle,
           streetBasemap,
-          onMapStyleChange: handleMapStyleChange,
+          onMapStyleChange: showMapControls ? handleMapStyleChange : undefined,
+          showMapStyleToggle: showMapControls,
+          showZoomControl: showMapControls,
           center,
           zoom: 12,
           focusBounds: mapFocusBounds,
           fitBoundsMode: "once",
           recenterToken,
-          showCompassControl: true,
+          showCompassControl: showMapControls,
           onRecenter: () => setRecenterToken((value) => value + 1),
           onMapClick: handleMapClick,
           className: "h-full w-full",
@@ -1017,6 +1021,7 @@ export function HiderMapScreen() {
               writesEnabled: zoneTool.writesEnabled,
               openWizard: zoneTool.openWizard,
               closeWizard: zoneTool.closeWizard,
+              closeWizardFromUser: zoneTool.closeWizardFromUser,
               startMove: zoneTool.startMove,
             },
             hidingZonePanelTool,

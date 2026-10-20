@@ -12,6 +12,7 @@ import {
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { binaryAnswerIcon } from "@/components/tools/shared/answers/binaryAnswerIcons";
 import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import {
   askInsetSurfaceStyle,
   choiceChipStyles,
@@ -274,25 +275,17 @@ export function ThermometerMapPlacementChrome({
         ) : null}
 
         {pinsReady && (awaitHiderAnswer || answer) ? (
-          <Button
+          <EntryAsyncButton
             type="button"
             fullWidth
-            onClick={onCommit}
-            disabled={!canCommit || isSubmitting}
-            aria-busy={isSubmitting || undefined}
-            leftSection={
-              isSubmitting ? undefined : <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
-            }
+            busy={isSubmitting}
+            unavailable={!canCommit}
+            idleLabel={awaitHiderAnswer ? "Send to hiders" : "Send"}
+            busyLabel={awaitHiderAnswer ? "Sending…" : "…"}
+            leftSection={<PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />}
             styles={askMapPlacementSendStyles}
-          >
-            {isSubmitting
-              ? awaitHiderAnswer
-                ? "Sending…"
-                : "…"
-              : awaitHiderAnswer
-                ? "Send to hiders"
-                : "Send"}
-          </Button>
+            onClick={onCommit}
+          />
         ) : null}
       </div>
     </div>
