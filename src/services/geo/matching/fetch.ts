@@ -17,6 +17,7 @@ import {
   type MatchingCategoryId,
   type MeasuringLocationCategory,
 } from "@/domain/questions";
+import { isPackGeoPointCategory } from "@/domain/regions/packGeoManifest";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   matchingOverpassSelectorsForCategory,
@@ -67,23 +68,6 @@ const HYGIENE_MATCHING_CATEGORIES = new Set<MeasuringLocationCategory>([
   "hospital",
 ]);
 
-const BUNDLED_MATCHING_CATEGORIES = new Set<MatchingCategoryId>([
-  "commercial_airport",
-  "mountain",
-  "park",
-  "museum",
-  "hospital",
-]);
-
-function asBundledMeasuringCategory(
-  categoryId: MatchingCategoryId,
-): MeasuringLocationCategory | null {
-  if (!BUNDLED_MATCHING_CATEGORIES.has(categoryId)) {
-    return null;
-  }
-  return categoryId as MeasuringLocationCategory;
-}
-
 function measuringPlacesToMatchingFeatures(
   places: MeasuringPlace[],
   gameArea: GameArea,
@@ -106,11 +90,18 @@ function matchingFeaturesToMeasuringPlaces(features: MatchingFeature[]): Measuri
   }));
 }
 
+function asPackMeasuringCategory(categoryId: MatchingCategoryId): MeasuringLocationCategory | null {
+  if (!isPackGeoPointCategory(categoryId)) {
+    return null;
+  }
+  return categoryId;
+}
+
 function filterHygieneMatchingFeatures(
   features: MatchingFeature[],
   categoryId: MatchingCategoryId,
 ): MatchingFeature[] {
-  const measuringCategory = asBundledMeasuringCategory(categoryId);
+  const measuringCategory = asPackMeasuringCategory(categoryId);
   if (measuringCategory === null || !HYGIENE_MATCHING_CATEGORIES.has(measuringCategory)) {
     return features;
   }
@@ -161,7 +152,7 @@ async function fetchOverpassPointMatchingFeaturesInArea(
   customCategories: readonly SessionCustomCategory[],
   options?: MatchingFetchOptions,
 ): Promise<MatchingFeature[]> {
-  const measuringCategory = asBundledMeasuringCategory(categoryId);
+  const measuringCategory = asPackMeasuringCategory(categoryId);
   const bundledPlaces =
     measuringCategory === null
       ? []
