@@ -17,19 +17,23 @@ const ensureAnonymousUser = vi.hoisted(() => vi.fn(async () => ({ uid: "host-1" 
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => false));
 const isCastleSiegeModeEnabled = vi.hoisted(() => vi.fn(() => false));
 const createRemoteSession = vi.hoisted(() =>
-  vi.fn(async () => ({
-    id: "session-1",
-    code: "ABCD",
-    gameArea: null,
-    createdAt: new Date().toISOString(),
-    memberUids: ["host-1"],
-    memberRoles: { "host-1": "observer" },
-    gameSize: "medium",
-    distanceUnit: "imperial",
-    tier: "free",
-  })),
+  vi.fn(
+    async (..._args: unknown[]): Promise<Record<string, unknown>> => ({
+      id: "session-1",
+      code: "ABCD",
+      gameArea: null,
+      createdAt: new Date().toISOString(),
+      memberUids: ["host-1"],
+      memberRoles: { "host-1": "observer" },
+      gameSize: "medium",
+      distanceUnit: "imperial",
+      tier: "free",
+    }),
+  ),
 );
-const createPremiumRemoteSession = vi.hoisted(() => vi.fn());
+const createPremiumRemoteSession = vi.hoisted(() =>
+  vi.fn(async (..._args: unknown[]) => undefined),
+);
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => vi.fn(),
@@ -138,7 +142,7 @@ vi.mock("@/services/core/firebase/firebase", () => ({
   subscribeAuthBootstrapReady: () => () => {},
 }));
 
-const hasAccessClaim = vi.hoisted(() => vi.fn(async () => false));
+const hasAccessClaim = vi.hoisted(() => vi.fn(async (..._args: unknown[]) => false));
 vi.mock("@/services/core/auth/accessControl", () => ({
   hasAccessClaim: (...args: unknown[]) => hasAccessClaim(...args),
   grantAccess: vi.fn(),
