@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { LOCAL_SESSION_ID } from "@/domain/map/annotations";
-import { isSessionRoleGated } from "@/domain/session/players/roleGates";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
 import { useAppNavigate } from "@/hooks/navigation/useAppNavigate";
 import type { ExitSessionParams } from "@/services/session/sessionExit";
@@ -10,11 +10,9 @@ import { useSessionStore } from "@/state/sessionStore";
 // Dynamic: Home is prerendered on the App chunk; keep firestore off it.
 const loadSessionExit = () => import("@/services/session/sessionExit");
 const loadFirebase = () => import("@/services/core/firebase/firebase");
-const loadRolePasscodeLifecycle = () => import("@/services/session/rolePasscodeLifecycle");
-const loadClearLiveLocation = () => import("@/services/session/clearLiveLocationOnLeave");
 const loadClientErrors = () => import("@/services/core/analytics/clientErrors");
-const loadAnalytics = () => import("@/services/core/analytics/analytics");
-const loadSessionLeaveErrors = () => import("@/services/session/sessionLeaveErrors");
+const loadLeaveRemote = () => import("@/services/session/leaveRemoteSessionOnDevice");
+const loadPendingQuestions = () => import("@/services/firestore/firestoreSessionExtras");
 
 export function useLeaveSessionAndUpdate(): {
   leaving: boolean;
@@ -35,14 +33,10 @@ export function useLeaveSessionAndUpdate(): {
       return;
     }
 
-    if (!window.confirm(appUpdateCopy.leaveAndUpdateConfirm)) {
-      return;
-    }
+    const isLocalSession = session.id === LOCAL_SESSION_ID;
 
     setLeaving(true);
     try {
-      const isLocalSession = session.id === LOCAL_SESSION_ID;
-
       if (!isLocalSession) {
         const { ensureAnonymousUser } = await loadFirebase();
         let user: { uid: string };
@@ -55,45 +49,55 @@ export function useLeaveSessionAndUpdate(): {
           return;
         }
 
+        const { isAloneHost, leaveRemoteSessionOnDevice } = await loadLeaveRemote();
         const isRemoteHost = session.hostUid === user.uid;
-        if (isSessionRoleGated(session) && !isRemoteHost) {
-          try {
-            const { leaveSessionMembership } = await loadRolePasscodeLifecycle();
-            if ((await leaveSessionMembership(session.id)) === "already_left") {
-              const { trackSessionLeaveAlreadyLeft } = await loadAnalytics();
-              trackSessionLeaveAlreadyLeft();
-            }
-          } catch (error) {
-            const { isExpectedSessionLeaveError } = await loadSessionLeaveErrors();
-            if (!isExpectedSessionLeaveError(error)) {
-              const { captureException } = await loadClientErrors();
-              captureException(error);
-              window.alert("Couldn't leave the session. Try again.");
-              return;
-            }
+
+        if (isRemoteHost) {
+          const alone = isAloneHost(session);
+          const confirmMessage = alone
+            ? "You're the only player. Leaving will end this session, then install the update."
+            : "Another player will become host so others can keep playing. Leave and update anyway?";
+          if (!window.confirm(confirmMessage)) {
+            return;
           }
+        } else if (!window.confirm(appUpdateCopy.leaveAndUpdateConfirm)) {
+          return;
         }
 
+        let pendingQuestions: PendingQuestionRecord[] = [];
         try {
-          const { clearLiveLocationOnLeave } = await loadClearLiveLocation();
-          await clearLiveLocationOnLeave({
-            sessionId: session.id,
-            uid: user.uid,
-            role: session.memberRoles?.[user.uid] ?? "seeker",
-            pendingQuestions: [],
-          });
+          const { listPendingQuestions } = await loadPendingQuestions();
+          pendingQuestions = await listPendingQuestions(session.id);
         } catch (error) {
           const { captureException } = await loadClientErrors();
           captureException(error);
         }
+
+        const leaveResult = await leaveRemoteSessionOnDevice({
+          session,
+          uid: user.uid,
+          pendingQuestions,
+        });
+        if (leaveResult === "failed") {
+          return;
+        }
+      } else if (!window.confirm(appUpdateCopy.leaveAndUpdateConfirm)) {
+        return;
       }
 
-      await exitSession({
-        reason: "leave",
-        sessionId: session.id,
-        animate: false,
-        replace: true,
-      });
+      try {
+        await exitSession({
+          reason: "leave",
+          sessionId: session.id,
+          animate: false,
+          replace: true,
+        });
+      } catch (error) {
+        const { captureException } = await loadClientErrors();
+        captureException(error);
+        window.alert("Couldn't leave the session. Try again.");
+        return;
+      }
       applyUpdate();
     } finally {
       setLeaving(false);
