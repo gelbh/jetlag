@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../domain/map/annotations";
 import {
+  buildHidingZoneTransitStopOverpassQuery,
   buildTransitStopOverpassQuery,
+  HIDING_ZONE_BUS_STOP_OVERPASS_CAP,
+  HIDING_ZONE_RAIL_STOP_OVERPASS_CAP,
   parseOverpassTransitStops,
   transitStopDisplayName,
 } from "./transitStops";
@@ -30,7 +33,27 @@ describe("transitStops", () => {
 
     expect(query).toContain('highway"="bus_stop"');
     expect(query).toContain('public_transport"="platform"');
+    expect(query).toContain('public_transport"="stop_position"');
     expect(query).not.toContain('["name"]');
+  });
+
+  it("builds a hiding-zone overpass query with bus and rail buckets", () => {
+    const query = buildHidingZoneTransitStopOverpassQuery({
+      south: 54.28,
+      west: -130.35,
+      north: 54.32,
+      east: -130.3,
+    });
+
+    expect(query).toMatch(/->\.bus|\.bus out/);
+    expect(query).toMatch(/->\.rail|\.rail out/);
+    expect(query).toContain(`out center ${HIDING_ZONE_BUS_STOP_OVERPASS_CAP}`);
+    expect(query).toContain(`out center ${HIDING_ZONE_RAIL_STOP_OVERPASS_CAP}`);
+    expect(HIDING_ZONE_BUS_STOP_OVERPASS_CAP).toBe(150);
+    expect(HIDING_ZONE_RAIL_STOP_OVERPASS_CAP).toBe(100);
+    expect(query).toContain('highway"="bus_stop"');
+    expect(query).toContain('railway"="station"');
+    expect(query).not.toContain('public_transport"="stop_position"');
   });
 
   it("prefers ref over name for display labels", () => {
