@@ -11,10 +11,10 @@
     {
       "id": "dublin",
       "bundlePath": "/geo/gtfs/dublin.json",
-      "feedOnestopId": "f-small~operators~ie",
-      "builtAt": "2026-07-11T15:15:34.235Z",
-      "stopCount": 207,
-      "routeCount": 28
+      "feedOnestopId": "tfi-dublin-merged",
+      "builtAt": "2026-10-20T22:24:00.096Z",
+      "stopCount": 5309,
+      "routeCount": 184
     },
     {
       "id": "london",

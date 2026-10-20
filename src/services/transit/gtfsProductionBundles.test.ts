@@ -169,6 +169,20 @@ describe("production GTFS bundles", () => {
     expect(civicCentre).toBeDefined();
   });
 
+  it("Dublin production bundle covers TFI bus + Luas + rail density", () => {
+    const bundle = loadProductionBundle("dublin");
+    expect(bundle).not.toBeNull();
+    // Rebuilt from TFI Dublin Bus + Go-Ahead + Luas + Irish Rail (was ~207).
+    expect(bundle!.stops.length).toBeGreaterThan(2000);
+    expect(bundle!.routes.length).toBeGreaterThan(50);
+    expect(bundle!.feedOnestopId).toBe("tfi-dublin-merged");
+
+    const oconnell = bundle!.stops.find((stop) => /O'?Connell/i.test(stop.name));
+    expect(oconnell).toBeDefined();
+    const luasStop = bundle!.stops.find((stop) => /luas/i.test(stop.name));
+    expect(luasStop).toBeDefined();
+  });
+
   it("lists southampton in the production GTFS manifest and bundle loads", async () => {
     const manifest = JSON.parse(
       readFileSync(resolve(ROOT, "public/geo/gtfs/manifest.json"), "utf8"),
