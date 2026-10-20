@@ -1,3 +1,10 @@
+import {
+  answerCompassOracle,
+  answerMatchingOracle,
+  answerMeasuringOracle,
+  answerPhotoMirrorOracle,
+  answerTentacleOracle,
+} from "./oracleKinds.mjs";
 import { answerRadarOracle } from "./oracleRadar.mjs";
 import {
   decryptSealPayload,
@@ -26,6 +33,16 @@ export function dispatchOracleAsk(seal, ask) {
   switch (ask.kind) {
     case "radar":
       return answerRadarOracle(seal, ask);
+    case "matching":
+      return answerMatchingOracle(seal, ask);
+    case "measuring":
+      return answerMeasuringOracle(seal, ask);
+    case "tentacle":
+      return answerTentacleOracle(seal, ask);
+    case "photo":
+      return answerPhotoMirrorOracle(ask);
+    case "compass":
+      return answerCompassOracle(seal, ask);
     default:
       throw new Error(`Unsupported oracle ask kind: ${ask.kind}`);
   }

@@ -75,7 +75,11 @@ export const answerCastleSiegeOracleAsk = onCall(
         if (/Unsupported oracle ask kind/i.test(error.message)) {
           throw new HttpsError("invalid-argument", error.message);
         }
-        if (/Invalid radar ask|Oracle ask kind/i.test(error.message)) {
+        if (
+          /Invalid (radar|matching|measuring|tentacle|photo|compass) ask|Oracle ask kind/i.test(
+            error.message,
+          )
+        ) {
           throw new HttpsError("invalid-argument", error.message);
         }
         if (/Seal decrypt failed|Invalid seal/i.test(error.message)) {
