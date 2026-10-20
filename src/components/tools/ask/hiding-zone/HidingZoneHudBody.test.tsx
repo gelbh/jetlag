@@ -124,4 +124,29 @@ describe("HidingZoneHudBody", () => {
     );
     expect(onStepChange).toHaveBeenCalledWith("method");
   });
+
+  it("shows station vs map method chips in move mode (create parity)", () => {
+    const choosePlacementMethod = vi.fn();
+    const onStepChange = vi.fn();
+
+    renderHud(
+      <HidingZoneHudBody
+        moveMode
+        zoneTool={baseZoneTool({ choosePlacementMethod })}
+        onStepChange={onStepChange}
+      />,
+    );
+
+    expect(screen.getByTestId("ask-chip-island")).toBeInTheDocument();
+    expect(screen.getByText(/Snap to a stop, or tap any point/i)).toBeInTheDocument();
+
+    onStepChange.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: /^Tap map$/i }));
+    expect(onStepChange).toHaveBeenCalledWith("location");
+    expect(choosePlacementMethod).toHaveBeenCalledWith(true);
+
+    choosePlacementMethod.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: /^Transit stop$/i }));
+    expect(choosePlacementMethod).toHaveBeenCalledWith(false);
+  });
 });

@@ -379,7 +379,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
   const hidingZoneCue = activeModeCue({
     surface: hidingZoneSurface,
     placementReady: hidingZonePanelTool.hasPlacement,
-    configureReady: zoneTool.moveMode || hidingZonePanelTool.methodChosen,
+    configureReady: hidingZonePanelTool.methodChosen,
     resolveReady: true,
   });
 
@@ -454,13 +454,10 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           onSearchThisArea={onSearchThisArea}
           writesEnabled={zoneTool.writesEnabled}
           onDismiss={zoneTool.closeWizardFromUser}
-          onBackToMethod={
-            zoneTool.moveMode
-              ? undefined
-              : () => {
-                  zoneTool.openWizard();
-                }
-          }
+          onBackToMethod={() => {
+            // Reset draft to method chips; preserves moveMode when relocating.
+            zoneTool.openWizard();
+          }}
         />
       ) : null}
       {zoneHudPresence.showAsk ? (

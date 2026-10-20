@@ -528,6 +528,63 @@ describe("useHiderZoneTool", () => {
     });
   });
 
+  describe("move mode method picker (create parity)", () => {
+    it("startMove leaves method unchosen so the sheet can show station vs map", async () => {
+      const { result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+
+      expect(result.current.moveMode).toBe(true);
+      expect(result.current.wizardOpen).toBe(true);
+      expect(result.current.methodChosen).toBe(false);
+      expect(result.current.manualMode).toBe(false);
+    });
+
+    it("choosePlacementMethod(true) during move enables tap-map placement", async () => {
+      const { result } = renderZoneTool({ mapPickEnabled: true });
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      act(() => {
+        result.current.choosePlacementMethod(true);
+      });
+      await act(async () => {
+        result.current.handleMapClick([53.35, -6.26]);
+      });
+
+      expect(result.current.methodChosen).toBe(true);
+      expect(result.current.manualMode).toBe(true);
+      expect(result.current.manualCenter).not.toBeNull();
+      expect(result.current.hasPlacement).toBe(true);
+    });
+
+    it("openWizard during move resets method without exiting move", async () => {
+      const { result } = renderZoneTool({ mapPickEnabled: true });
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      act(() => {
+        result.current.choosePlacementMethod(true);
+      });
+      await act(async () => {
+        result.current.handleMapClick([53.35, -6.26]);
+      });
+      act(() => {
+        result.current.openWizard();
+      });
+
+      expect(result.current.moveMode).toBe(true);
+      expect(result.current.wizardOpen).toBe(true);
+      expect(result.current.methodChosen).toBe(false);
+      expect(result.current.manualMode).toBe(false);
+      expect(result.current.manualCenter).toBeNull();
+    });
+  });
+
   describe("history Back and user dismiss", () => {
     it("openWizard pushes a zone-wizard history marker", () => {
       const { result } = renderZoneTool({ existingZone: null });

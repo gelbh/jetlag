@@ -22,7 +22,7 @@ export type HidingZoneMapPlacementChromeProps = {
   onSearchThisArea: () => void;
   onStepChange?: (stepId: HidingZoneStepId) => void;
   onDismiss?: () => void;
-  /** Re-open method chips (create flow only). */
+  /** Re-open method chips (create and move). */
   onBackToMethod?: () => void;
   /** Mirror sheet viewOnly: false disables Confirm. */
   writesEnabled?: boolean;
@@ -224,7 +224,7 @@ export function HidingZoneMapPlacementChrome({
       statusBody=""
       toolIcon={<HudZoneIcon width={20} height={20} />}
       questionAriaLabel={`${toolTitle} placement`}
-      onChangeConfigure={!moveMode && onBackToMethod ? onBackToMethod : undefined}
+      onChangeConfigure={onBackToMethod}
       changeConfigureAriaLabel="Change placement method"
       midSlot={midSlot}
       answerSlot={answerSlot}

@@ -250,6 +250,25 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(onBackToMethod).toHaveBeenCalledTimes(1);
   });
 
+  it("backs to method via change-configure in moveMode", () => {
+    const onBackToMethod = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          hasPlacement: false,
+        })}
+        onBackToMethod={onBackToMethod}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Change placement method/i }));
+    expect(onBackToMethod).toHaveBeenCalledTimes(1);
+  });
+
   it("shows station picker in map-first chrome when station method chosen", () => {
     const onSearchThisArea = vi.fn();
     renderHud(
