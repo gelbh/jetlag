@@ -309,12 +309,13 @@ describe("Home", () => {
     ).toHaveAttribute("href", "/feedback");
   });
 
-  it("centers the home entry stack in the viewport layout", () => {
+  it("centers the home entry stack with breathing room under the safe area", () => {
     renderHome();
 
     const main = screen.getByRole("main");
     expect(main.className).toContain("justify-center");
     expect(main.className).toContain("overflow-y-auto");
+    expect(main.className).toContain("safe-area-top)+1.25rem");
   });
 
   it("renders the brand mark and LEGAL_APP_NAME heading", () => {

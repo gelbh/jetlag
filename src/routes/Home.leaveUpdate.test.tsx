@@ -14,7 +14,11 @@ const leaveUpdateState = vi.hoisted(() => ({
   prompt: null as { title: string; body: string } | null,
 }));
 const continueSession = vi.hoisted(() => ({
-  session: { id: "sess-1", code: "ABCD" } as { id: string; code: string } | null,
+  session: {
+    id: "sess-1",
+    code: "ABCD",
+    gameAreaLabel: "Dublin City",
+  } as { id: string; code: string; gameAreaLabel?: string } | null,
 }));
 const updateState = vi.hoisted(() => ({
   needsRefresh: true,
@@ -69,7 +73,7 @@ beforeEach(() => {
   confirmLeaveAndUpdate.mockClear();
   leaveUpdateState.leaving = false;
   leaveUpdateState.prompt = null;
-  continueSession.session = { id: "sess-1", code: "ABCD" };
+  continueSession.session = { id: "sess-1", code: "ABCD", gameAreaLabel: "Dublin City" };
   updateState.needsRefresh = true;
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
@@ -94,16 +98,20 @@ function renderHome() {
 }
 
 describe("Home leave session & update", () => {
-  it("shows an update-ready card with Leave & refresh when session and needsRefresh", () => {
+  it("shows a compact Update ready callout with Leave & refresh when session and needsRefresh", () => {
     renderHome();
     expect(screen.getByText(appUpdateCopy.readyTitle)).toBeInTheDocument();
-    expect(screen.getByText(appUpdateCopy.leaveAndUpdateBody)).toBeInTheDocument();
+    expect(screen.queryByText(appUpdateCopy.leaveAndUpdateBody)).toBeNull();
     expect(
       screen.getByRole("button", { name: appUpdateCopy.leaveAndUpdateAction }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Return to map for session ABCD in Dublin City/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Dublin City/)).toBeInTheDocument();
   });
 
-  it("hides the update card when needsRefresh is false", () => {
+  it("hides the update callout when needsRefresh is false", () => {
     updateState.needsRefresh = false;
     renderHome();
     expect(screen.queryByText(appUpdateCopy.readyTitle)).toBeNull();

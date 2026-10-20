@@ -1,6 +1,18 @@
-import { Alert, Anchor, Badge, Container, Group, Stack, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  Anchor,
+  Badge,
+  Box,
+  Button,
+  Container,
+  Group,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import {
   ChartBarIcon,
+  MapTrifoldIcon,
   PlusCircleIcon,
   SignInIcon,
   SquaresFourIcon,
@@ -14,13 +26,15 @@ import { AppLogo } from "@/components/ui/brand/AppLogo";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { EntryConfirm } from "@/components/ui/entry/EntryConfirm";
 import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
-import { filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
+import { filledStyles, homeCardBtnHintOnPrimaryStyle } from "@/components/ui/entry/entryStyles";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import { VersionChangelogSheet } from "@/components/ui/sheets/VersionChangelogSheet";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";
+import type { SessionRecord } from "@/domain/map/annotations";
+import { regionPackDisplayLabel } from "@/domain/regions/regionPackDisplayLabel";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
 import { useHydrated } from "@/hooks/app/useHydrated";
@@ -33,6 +47,18 @@ import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
 // Footer links: 44px tap height without adding visual weight next to the Play actions.
 const footerLinkStyle = { display: "inline-flex", alignItems: "center", minHeight: 44 } as const;
+
+/** Home-safe play-area label: stored name first, then light pack display (no preset catalog). */
+function homeSessionPlayAreaLabel(session: SessionRecord): string | null {
+  const labeled = session.gameAreaLabel?.trim();
+  if (labeled) {
+    return labeled;
+  }
+  if (session.regionPackId) {
+    return regionPackDisplayLabel(session.regionPackId);
+  }
+  return null;
+}
 
 type HomeMoreChromeProps = {
   firebaseOn: boolean;
@@ -109,14 +135,16 @@ export function Home() {
   const showGuestAuthEntry = firebaseOn && !treatAsPermanent;
   const showAccountFeatures = !firebaseOn || treatAsPermanent;
   const [changelogOpen, setChangelogOpen] = useState(false);
+  const sessionPlayArea = session ? homeSessionPlayAreaLabel(session) : null;
+  const sessionRoleLabel = myRole ? playerRoleLabel(myRole) : null;
 
   return (
     <>
-      <EntryScreenLayout viewport viewportLayout="center" skin="plain">
+      <EntryScreenLayout viewport viewportLayout="center" topBreathing skin="plain">
         <Container size="xs" w="100%" px={0} maw={PHONE_SHELL_MAX_WIDTH_PX}>
-          <Stack gap={28}>
+          <Stack gap={16}>
             <Group gap="sm" align="flex-start" wrap="nowrap">
-              <Stack gap={8} align="center" className="shrink-0">
+              <Stack gap={6} align="center" className="shrink-0">
                 <AppLogo variant="mark" size="md" />
                 <Badge
                   component="button"
@@ -147,12 +175,12 @@ export function Home() {
                   v{APP_VERSION}
                 </Badge>
               </Stack>
-              <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
+              <Stack gap={4} style={{ minWidth: 0, flex: 1 }}>
                 <Title
                   order={1}
                   c="var(--color-field-ink)"
                   fw={700}
-                  fz="1.875rem"
+                  fz="1.75rem"
                   style={{
                     lineHeight: 1.15,
                     letterSpacing: "-0.03em",
@@ -161,126 +189,175 @@ export function Home() {
                 >
                   {LEGAL_APP_NAME}
                 </Title>
-                <Text
-                  c="var(--color-field-ink-muted)"
-                  size="sm"
-                  style={{
-                    lineHeight: 1.35,
-                    textWrap: "pretty",
-                    maxWidth: "22rem",
-                  }}
-                >
-                  Unofficial fan companion for Jet Lag: The Game.
-                </Text>
+                {session ? null : (
+                  <Text
+                    c="var(--color-field-ink-muted)"
+                    size="sm"
+                    style={{
+                      lineHeight: 1.3,
+                      textWrap: "pretty",
+                      maxWidth: "22rem",
+                    }}
+                  >
+                    Unofficial fan companion for Jet Lag: The Game.
+                  </Text>
+                )}
               </Stack>
             </Group>
 
-            <Stack gap={22}>
+            <Stack gap={12}>
               {session ? (
                 <Stack gap={8}>
-                  {needsRefresh ? (
-                    <Stack
-                      gap={10}
-                      p="0.85rem"
-                      style={{
-                        borderRadius: 12,
-                        backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
-                        border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
-                        backdropFilter: "blur(20px) saturate(1.4)",
-                        WebkitBackdropFilter: "blur(20px) saturate(1.4)",
-                      }}
-                    >
-                      <Stack gap={4}>
-                        <Text
-                          size="xs"
-                          fw={700}
-                          tt="uppercase"
+                  <Stack gap={0} align="stretch">
+                    {needsRefresh ? (
+                      <Box
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          position: "relative",
+                          zIndex: 1,
+                          marginBottom: -1,
+                        }}
+                      >
+                        <Group
+                          justify="space-between"
+                          align="center"
+                          gap="xs"
+                          wrap="nowrap"
+                          px="0.7rem"
+                          py={5}
                           style={{
-                            letterSpacing: "0.08em",
-                            color: "var(--color-highlight)",
-                            fontFamily: "var(--mantine-font-family-headings)",
+                            position: "relative",
+                            width: "fit-content",
+                            maxWidth: "min(100%, 17.5rem)",
+                            borderRadius: 999,
+                            backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.1)",
+                            border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
+                            boxShadow: "0 6px 16px oklch(from var(--color-canvas) l c h / 0.35)",
                           }}
                         >
-                          {appUpdateCopy.readyTitle}
-                        </Text>
-                        <Text
-                          size="sm"
-                          c="var(--color-field-ink-muted)"
-                          style={{ textWrap: "pretty", lineHeight: 1.4 }}
-                        >
-                          {appUpdateCopy.leaveAndUpdateBody}
-                        </Text>
-                        <Text
-                          size="xs"
-                          c="var(--color-field-ink-muted)"
-                          fw={590}
-                          style={{ letterSpacing: "-0.01em" }}
-                        >
-                          Active session
-                          {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
-                        </Text>
-                      </Stack>
-                      <EntryAsyncButton
-                        fullWidth
-                        busy={continuing}
-                        idleLabel="Continue"
-                        busyLabel="Verifying…"
-                        statusMessage={`Verifying session ${session.code}`}
-                        aria-label={
-                          continuing
-                            ? `Verifying session ${session.code}`
-                            : `Return to map for session ${session.code}`
-                        }
-                        styles={filledStyles}
-                        onClick={() => void handleContinue()}
-                      />
-                      <EntryAsyncButton
-                        fullWidth
-                        busy={leaving}
-                        idleLabel={appUpdateCopy.leaveAndUpdateAction}
-                        busyLabel={appUpdateCopy.leaveAndUpdateBusy}
-                        statusMessage="Leaving session to apply update"
-                        aria-label={appUpdateCopy.leaveAndUpdateAction}
-                        styles={grayStyles}
-                        onClick={requestLeaveAndUpdate}
-                      />
-                    </Stack>
-                  ) : (
-                    <>
-                      <Text
-                        size="xs"
-                        c="var(--color-field-ink-muted)"
-                        fw={590}
-                        style={{ letterSpacing: "-0.01em", paddingInline: 4 }}
-                      >
-                        Active session
-                        {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
-                      </Text>
-                      <EntryAsyncButton
-                        fullWidth
-                        busy={continuing}
-                        idleLabel="Continue"
-                        busyLabel="Verifying…"
-                        statusMessage={`Verifying session ${session.code}`}
-                        aria-label={
-                          continuing
-                            ? `Verifying session ${session.code}`
-                            : `Return to map for session ${session.code}`
-                        }
-                        styles={filledStyles}
-                        onClick={() => void handleContinue()}
-                      />
-                    </>
-                  )}
-                  <Text
-                    ta="center"
-                    size="sm"
-                    c="var(--color-field-ink-muted)"
-                    ff="monospace"
-                    style={{ letterSpacing: "0.16em" }}
-                  >
-                    {session.code}
-                  </Text>
+                          <Text
+                            size="xs"
+                            fw={600}
+                            style={{
+                              color: "var(--color-highlight)",
+                              letterSpacing: "-0.01em",
+                              minWidth: 0,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {appUpdateCopy.readyTitle}
+                          </Text>
+                          <Button
+                            type="button"
+                            variant="subtle"
+                            size="compact-sm"
+                            disabled={leaving}
+                            onClick={requestLeaveAndUpdate}
+                            aria-label={appUpdateCopy.leaveAndUpdateAction}
+                            styles={{
+                              root: {
+                                flexShrink: 0,
+                                minHeight: 36,
+                                paddingInline: "0.55rem",
+                                color: "var(--color-field-ink)",
+                                fontWeight: 600,
+                              },
+                            }}
+                          >
+                            {leaving
+                              ? appUpdateCopy.leaveAndUpdateBusy
+                              : appUpdateCopy.leaveAndUpdateAction}
+                          </Button>
+                          <Box
+                            aria-hidden
+                            style={{
+                              position: "absolute",
+                              left: "50%",
+                              bottom: -5,
+                              width: 10,
+                              height: 10,
+                              transform: "translateX(-50%) rotate(45deg)",
+                              backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.1)",
+                              borderRight:
+                                "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
+                              borderBottom:
+                                "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
+                            }}
+                          />
+                        </Group>
+                      </Box>
+                    ) : null}
+                    <EntryAsyncButton
+                      fullWidth
+                      busy={continuing}
+                      leftSection={<MapTrifoldIcon size={22} weight="duotone" aria-hidden="true" />}
+                      idleLabel={
+                        <Stack gap={2} align="flex-start" justify="center" style={{ minWidth: 0 }}>
+                          <Text component="span" fw={600} style={{ lineHeight: 1.15 }}>
+                            Continue
+                          </Text>
+                          <Text
+                            component="span"
+                            style={{
+                              ...homeCardBtnHintOnPrimaryStyle,
+                              lineHeight: 1.2,
+                              letterSpacing: "0.02em",
+                              maxWidth: "100%",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {sessionPlayArea ? `${sessionPlayArea} · ` : null}
+                            {sessionRoleLabel ? `${sessionRoleLabel} · ` : null}
+                            <Text
+                              component="span"
+                              ff="monospace"
+                              fw={700}
+                              style={{ letterSpacing: "0.14em" }}
+                            >
+                              {session.code}
+                            </Text>
+                          </Text>
+                        </Stack>
+                      }
+                      busyLabel="Verifying…"
+                      statusMessage={`Verifying session ${session.code}`}
+                      aria-label={
+                        continuing
+                          ? `Verifying session ${session.code}`
+                          : `Return to map for session ${session.code}${
+                              sessionPlayArea ? ` in ${sessionPlayArea}` : ""
+                            }`
+                      }
+                      styles={{
+                        root: {
+                          ...filledStyles.root,
+                          minHeight: "3.5rem",
+                          height: "auto",
+                          paddingBlock: "0.55rem",
+                          justifyContent: "flex-start",
+                          paddingInline: "1rem",
+                          ...(needsRefresh
+                            ? {
+                                borderTopLeftRadius: 16,
+                                borderTopRightRadius: 16,
+                              }
+                            : {}),
+                        },
+                        section: {
+                          marginInlineEnd: "0.65rem",
+                        },
+                        label: {
+                          flex: 1,
+                          minWidth: 0,
+                          justifyContent: "flex-start",
+                        },
+                      }}
+                      onClick={() => void handleContinue()}
+                    />
+                  </Stack>
                   {continueError ? (
                     <Alert color="red" title="Could not continue" radius={14}>
                       {continueError}

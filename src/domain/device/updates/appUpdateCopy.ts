@@ -7,7 +7,7 @@ export const appUpdateCopy = {
   mapErrorTitle: "Map failed to load",
   mapErrorReload: "Refresh now",
   mapErrorBackHome: "Back home",
-  /** Active-session Home card body under readyTitle. */
+  /** Detail for confirm sheet / docs; Home shows readyTitle + leave action only. */
   leaveAndUpdateBody:
     "Leave this device's session, then install the new build. Others keep playing.",
   leaveAndUpdateAction: "Leave & refresh",
