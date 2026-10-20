@@ -106,6 +106,16 @@ const SWITZERLAND_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>([
   "admin2_border",
 ]);
 
+/** Single-depth metro packs: no secondary/admin4 layer (Overpass must not surface it). */
+const SOUTHAMPTON_UNSUPPORTED_MATCHING = new Set<
+  "admin_division_1" | "admin_division_2" | "admin_division_3" | "admin_division_4"
+>([...HIDE_COUNTRY_PROVINCE_MATCHING, "admin_division_4"]);
+
+const SOUTHAMPTON_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>([
+  ...HIDE_COUNTRY_PROVINCE_BORDERS,
+  "admin4_border",
+]);
+
 type MetroRegionPackConfig = Omit<RegionPackConfig, "unsupportedMatching" | "unsupportedBorders">;
 
 function metroRegionPack(config: MetroRegionPackConfig): RegionPackConfig {
@@ -236,15 +246,19 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     matchingLabelOverrides: PRINCE_RUPERT_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: PRINCE_RUPERT_MEASURING_LABEL_OVERRIDES,
   }),
-  [SOUTHAMPTON_REGION_PACK_ID]: metroRegionPack({
-    id: SOUTHAMPTON_REGION_PACK_ID,
-    geoAssets: {
-      primary: SOUTHAMPTON_GEO_ASSETS.wards,
-    },
-    subregionPropertyKey: "wardId",
-    matchingLabelOverrides: SOUTHAMPTON_MATCHING_LABEL_OVERRIDES,
-    measuringLabelOverrides: SOUTHAMPTON_MEASURING_LABEL_OVERRIDES,
-  }),
+  [SOUTHAMPTON_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: SOUTHAMPTON_REGION_PACK_ID,
+      geoAssets: {
+        primary: SOUTHAMPTON_GEO_ASSETS.wards,
+      },
+      subregionPropertyKey: "wardId",
+      matchingLabelOverrides: SOUTHAMPTON_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: SOUTHAMPTON_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: SOUTHAMPTON_UNSUPPORTED_MATCHING,
+    unsupportedBorders: SOUTHAMPTON_UNSUPPORTED_BORDERS,
+  },
 };
 
 export function getRegionPackConfig(packId: RegionPackId): RegionPackConfig | undefined {

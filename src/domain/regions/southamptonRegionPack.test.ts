@@ -41,6 +41,14 @@ describe("southampton region pack wiring", () => {
     expect(config?.geoAssets.primary).toBe("/geo/southampton/wards.geojson");
     expect(config?.geoAssets.secondary).toBeUndefined();
   });
+
+  it("hard-hides admin4 matching and borders for the single-depth pack", () => {
+    const config = getRegionPackConfig("southampton");
+    expect(config?.unsupportedMatching.has("admin_division_4")).toBe(true);
+    expect(config?.unsupportedBorders.has("admin4_border")).toBe(true);
+    expect(config?.unsupportedMatching.has("admin_division_3")).toBe(false);
+    expect(config?.unsupportedBorders.has("admin3_border")).toBe(false);
+  });
 });
 
 describe("southampton geo assets", () => {
