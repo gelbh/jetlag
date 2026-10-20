@@ -114,6 +114,9 @@ export function useLeaveSessionAndUpdate(): {
         throw new Error(LEAVE_FAILED_MESSAGE);
       }
       applyUpdate();
+    } catch (error) {
+      // Re-throw after finally clears leaving (React Compiler needs catch with finally).
+      throw error;
     } finally {
       setLeaving(false);
     }
