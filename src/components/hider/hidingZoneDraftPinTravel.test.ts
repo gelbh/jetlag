@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { MOTION_MAP_CAMERA_SNAP_MS } from "@/domain/device/motion/motionTokens";
+import { buildHidingZoneCircle } from "@/domain/session/hiding/hidingZone";
 import {
   HIDING_ZONE_PIN_CHOSEN_RADIUS_BUMP,
   HIDING_ZONE_PIN_SNAPPING_RADIUS_BUMP,
   HIDING_ZONE_PIN_TRAVEL_MS,
+  resolveHidingZoneDisplayPreviewCircle,
   resolvePinCircleRadius,
   resolvePinTravelDisplay,
 } from "./hidingZoneDraftPinTravel";
 
 const TAP: [number, number] = [53.35, -6.26];
 const STATION: [number, number] = [53.3503, -6.2603];
+const RADIUS_M = 400;
 
 describe("resolvePinTravelDisplay", () => {
   it("jumps to the target when animate is false (reduced motion)", () => {
@@ -95,5 +98,39 @@ describe("resolvePinCircleRadius", () => {
     expect(resolvePinCircleRadius({ snapping: true, chosenActive: true })).toBe(
       8 + HIDING_ZONE_PIN_CHOSEN_RADIUS_BUMP,
     );
+  });
+});
+
+describe("resolveHidingZoneDisplayPreviewCircle", () => {
+  it("rebuilds the preview ring on the traveling display center, not tool-state station", () => {
+    const toolPreview = buildHidingZoneCircle(STATION, RADIUS_M);
+    const midTravel = resolvePinTravelDisplay({
+      from: TAP,
+      to: STATION,
+      elapsedMs: HIDING_ZONE_PIN_TRAVEL_MS / 2,
+      durationMs: HIDING_ZONE_PIN_TRAVEL_MS,
+      animate: true,
+    }).displayCenter;
+
+    const displayPreview = resolveHidingZoneDisplayPreviewCircle({
+      displayCenter: midTravel,
+      radiusMeters: RADIUS_M,
+      toolPreviewCircle: toolPreview,
+    });
+
+    expect(displayPreview).toEqual(buildHidingZoneCircle(midTravel, RADIUS_M));
+    expect(displayPreview).not.toEqual(toolPreview);
+  });
+
+  it("falls back to tool preview when the draft pin is inactive", () => {
+    const toolPreview = buildHidingZoneCircle(STATION, RADIUS_M);
+
+    expect(
+      resolveHidingZoneDisplayPreviewCircle({
+        displayCenter: null,
+        radiusMeters: RADIUS_M,
+        toolPreviewCircle: toolPreview,
+      }),
+    ).toBe(toolPreview);
   });
 });

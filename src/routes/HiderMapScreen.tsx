@@ -3,7 +3,9 @@ import { commitWrite } from "@/services/firestore/commitWrite";
 import type { HiderQuestionCards } from "../components/chat/HiderPendingQuestionAnswer";
 import { HidingZoneDraftCenterPin } from "../components/hider/HidingZoneDraftCenterPin";
 import { HidingZoneStationFocus } from "../components/hider/HidingZoneStationFocus";
+import { resolveHidingZoneDisplayPreviewCircle } from "../components/hider/hidingZoneDraftPinTravel";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
+import { useHidingZoneDraftDisplayCenter } from "../components/hider/useHidingZoneDraftDisplayCenter";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import {
   type MapViewportState,
@@ -811,13 +813,6 @@ export function HiderMapScreen() {
 
   const chromeHudRef = useRef<HTMLDivElement>(null);
 
-  if (!session || !gameArea) {
-    return <AppNavigate to="/" replace />;
-  }
-
-  const mapFocusBounds = gameAreaToBoundsExpression(gameArea);
-  const center = gameAreaCenter(gameArea);
-  const previewRing = hidingZonePreviewPositions(zoneTool.previewCircle);
   const draftCenterPinActive =
     zoneTool.wizardOpen && (hidingZoneStepId === "location" || hidingZoneStepId === "confirm");
   const draftCenterPin: LatLngTuple | null = draftCenterPinActive
@@ -827,6 +822,22 @@ export function HiderMapScreen() {
         ? [zoneTool.selectedStation.lat, zoneTool.selectedStation.lng]
         : null
     : null;
+  // Display-only; Confirm keeps tool-state center / previewCircle.
+  const draftDisplayCenter = useHidingZoneDraftDisplayCenter(draftCenterPin);
+
+  if (!session || !gameArea) {
+    return <AppNavigate to="/" replace />;
+  }
+
+  const mapFocusBounds = gameAreaToBoundsExpression(gameArea);
+  const center = gameAreaCenter(gameArea);
+  const previewRing = hidingZonePreviewPositions(
+    resolveHidingZoneDisplayPreviewCircle({
+      displayCenter: draftDisplayCenter,
+      radiusMeters: hidingZoneRadius,
+      toolPreviewCircle: zoneTool.previewCircle,
+    }),
+  );
   const sheetBlocksWizard =
     overlay.isChatOpen ||
     overlay.isSettingsOpen ||
@@ -923,7 +934,7 @@ export function HiderMapScreen() {
           />
         ) : null}
         <HidingZoneDraftCenterPin
-          center={draftCenterPin}
+          displayCenter={draftDisplayCenter}
           snapping={zoneTool.snapping}
           chosenKey={zoneTool.selectedStation?.id ?? null}
         />

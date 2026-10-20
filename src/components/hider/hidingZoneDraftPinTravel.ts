@@ -1,5 +1,7 @@
+import type { Feature, Polygon } from "geojson";
 import { MOTION_MAP_CAMERA_SNAP_MS } from "@/domain/device/motion/motionTokens";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { buildHidingZoneCircle } from "@/domain/session/hiding/hidingZone";
 
 /** Shared with `HidingZoneStationFocus` camera ease so pin and camera land together. */
 export const HIDING_ZONE_PIN_TRAVEL_MS = MOTION_MAP_CAMERA_SNAP_MS;
@@ -44,7 +46,7 @@ function sameCenter(a: LatLngTuple, b: LatLngTuple): boolean {
 
 /**
  * Pure travel frame for the draft-center pin.
- * Tool state / Confirm keep `to`; only the marker should use `displayCenter`.
+ * Tool state / Confirm keep `to`; pin marker and preview ring both use `displayCenter`.
  */
 export function resolvePinTravelDisplay(input: {
   from: LatLngTuple;
@@ -68,6 +70,22 @@ export function resolvePinTravelDisplay(input: {
     displayCenter: lerpLatLng(from, to, easeOutCubic(t)),
     traveling: true,
   };
+}
+
+/**
+ * Display preview ring geometry. When the draft pin is traveling, rebuild at
+ * `displayCenter` so the ring stays centered on the pin (S1/AC1). Confirm keeps
+ * `toolPreviewCircle` / tool-state center.
+ */
+export function resolveHidingZoneDisplayPreviewCircle(input: {
+  displayCenter: LatLngTuple | null;
+  radiusMeters: number;
+  toolPreviewCircle: Feature<Polygon> | null;
+}): Feature<Polygon> | null {
+  if (input.displayCenter) {
+    return buildHidingZoneCircle(input.displayCenter, input.radiusMeters);
+  }
+  return input.toolPreviewCircle;
 }
 
 export function resolvePinCircleRadius(input: {
