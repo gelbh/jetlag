@@ -21,6 +21,7 @@ const SOURCES = [
   { packId: "tokyo", file: "wards.geojson", idProperty: "wardId" },
   { packId: "osaka", file: "wards.geojson", idProperty: "wardId" },
   { packId: "portland-maine", file: "districts.geojson", idProperty: "districtId" },
+  { packId: "southampton", file: "wards.geojson", idProperty: "wardId" },
   { packId: "switzerland", file: "cantons.geojson", idProperty: "cantonId" },
   { packId: "zurich", file: "districts.geojson", idProperty: "districtId" },
   { packId: "lucerne", file: "districts.geojson", idProperty: "districtId" },

@@ -113,6 +113,11 @@ export async function loadRegionPackPlayArea(
   }
 
   if (!subregionId && config.playAreaLevel === "secondary") {
+    if (!config.geoAssets.secondary) {
+      throw new Error(
+        `Region pack ${packId} playAreaLevel is secondary but has no secondary asset.`,
+      );
+    }
     const secondaryJson = await fetchGeoJsonText(config.geoAssets.secondary);
     const collection = parseFeatureCollection(secondaryJson);
     return combineRegionGameAreas(polygonFeatures(collection));
@@ -155,7 +160,7 @@ export async function loadRegionPackSessionBoundaries(
     subregionId && config.geoAssets.secondaryBySubregion
       ? config.geoAssets.secondaryBySubregion(subregionId)
       : config.geoAssets.secondary;
-  const secondaryJson = await fetchGeoJsonText(secondaryPath);
+  const secondaryJson = secondaryPath ? await fetchGeoJsonText(secondaryPath) : undefined;
   const playArea = await loadRegionPackPlayArea(packId, subregionId);
 
   return {
@@ -163,7 +168,7 @@ export async function loadRegionPackSessionBoundaries(
     focusBounds: gameAreaToBoundingBox(playArea),
     customMatchingAreas: {
       8: primaryJson,
-      9: secondaryJson,
+      ...(secondaryJson !== undefined ? { 9: secondaryJson } : {}),
     },
   };
 }
