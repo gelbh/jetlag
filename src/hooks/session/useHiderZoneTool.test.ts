@@ -105,6 +105,9 @@ describe("useHiderZoneTool", () => {
       await result.current.startMove();
     });
 
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringMatching(/place a new zone \(station or map\)/i),
+    );
     expect(props.pauseTimer).toHaveBeenCalledTimes(1);
     expect(enqueueMoveTimerIntent).not.toHaveBeenCalled();
     expect(labels()).toEqual(["system.message", "zone.write"]);
@@ -161,7 +164,7 @@ describe("useHiderZoneTool", () => {
     ]);
   });
 
-  it("discards the Move card only after the zone write is acknowledged", async () => {
+  it("discards the Move card only after confirm, not after move start ack", async () => {
     let ackZone: () => void = () => {};
     writeHidingZone.mockReturnValueOnce(
       new Promise<void>((resolve) => {
@@ -179,9 +182,42 @@ describe("useHiderZoneTool", () => {
     await act(async () => {
       ackZone();
     });
+    expect(consumeMoveCard).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.setSelectedStation({ id: "station-2", name: "Other", lat: 53.4, lng: -6.3 });
+    });
+    await act(async () => {
+      await result.current.confirmZone();
+    });
 
     expect(consumeMoveCard).toHaveBeenCalledTimes(1);
     expect(labels()).toContain("economy.update");
+  });
+
+  it("does not discard the Move card when Cancel closes a started move", async () => {
+    let ackZone: () => void = () => {};
+    writeHidingZone.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        ackZone = resolve;
+      }),
+    );
+    const consumeMoveCard = vi.fn(async () => undefined);
+    const { result } = renderZoneTool({ consumeMoveCard, hasMoveCard: () => true });
+
+    await act(async () => {
+      await result.current.startMove();
+    });
+    await act(async () => {
+      ackZone();
+    });
+
+    act(() => {
+      result.current.closeWizardFromUser();
+    });
+
+    expect(consumeMoveCard).not.toHaveBeenCalled();
+    expect(labels()).not.toContain("economy.update");
   });
 
   it("ignores a late Move rejection after the new zone was confirmed", async () => {
@@ -611,6 +647,179 @@ describe("useHiderZoneTool", () => {
       expect(result.current.snapping).toBe(false);
       expect(result.current.selectedStation).toBeNull();
       expect(result.current.manualCenter).toBeNull();
+    });
+  });
+
+  describe("move mode method picker (create parity)", () => {
+    it("startMove leaves method unchosen so the sheet can show station vs map", async () => {
+      const { result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+
+      expect(result.current.moveMode).toBe(true);
+      expect(result.current.wizardOpen).toBe(true);
+      expect(result.current.methodChosen).toBe(false);
+      expect(result.current.manualMode).toBe(false);
+    });
+
+    it("choosePlacementMethod(true) during move enables tap-map placement", async () => {
+      const { result } = renderZoneTool({ mapPickEnabled: true });
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      act(() => {
+        result.current.choosePlacementMethod(true);
+      });
+      await act(async () => {
+        result.current.handleMapClick([53.35, -6.26]);
+      });
+
+      expect(result.current.methodChosen).toBe(true);
+      expect(result.current.manualMode).toBe(true);
+      expect(result.current.manualCenter).not.toBeNull();
+      expect(result.current.hasPlacement).toBe(true);
+    });
+
+    it("openWizard during move resets method without exiting move", async () => {
+      const { result } = renderZoneTool({ mapPickEnabled: true });
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      act(() => {
+        result.current.choosePlacementMethod(true);
+      });
+      await act(async () => {
+        result.current.handleMapClick([53.35, -6.26]);
+      });
+      act(() => {
+        result.current.openWizard();
+      });
+
+      expect(result.current.moveMode).toBe(true);
+      expect(result.current.wizardOpen).toBe(true);
+      expect(result.current.methodChosen).toBe(false);
+      expect(result.current.manualMode).toBe(false);
+      expect(result.current.manualCenter).toBeNull();
+    });
+  });
+
+  describe("history Back and user dismiss", () => {
+    it("openWizard pushes a zone-wizard history marker with a new router idx", () => {
+      window.history.replaceState({ idx: 3, key: "rrr", usr: null }, "");
+      const { result } = renderZoneTool({ existingZone: null });
+
+      act(() => {
+        result.current.openWizard();
+      });
+
+      expect(window.history.state).toEqual(
+        expect.objectContaining({
+          jlZoneWizard: true,
+          idx: 4,
+          usr: null,
+        }),
+      );
+      expect(window.history.state).toEqual(
+        expect.objectContaining({
+          key: expect.stringMatching(/^jlz-/),
+        }),
+      );
+      expect(result.current.wizardOpen).toBe(true);
+    });
+
+    it("startMove pushes a zone-wizard history marker", async () => {
+      const { result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+
+      expect(window.history.state).toEqual(expect.objectContaining({ jlZoneWizard: true }));
+      expect(result.current.moveMode).toBe(true);
+    });
+
+    it("popstate closes an open create wizard", () => {
+      const { result } = renderZoneTool({ existingZone: null });
+
+      act(() => {
+        result.current.openWizard();
+      });
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+    });
+
+    it("popstate during move closes the wizard and resumes the timer", async () => {
+      const { props, result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      expect(props.pauseTimer).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+      expect(result.current.moveMode).toBe(false);
+      expect(props.resumeTimer).toHaveBeenCalledTimes(1);
+    });
+
+    it("closeWizardFromUser during move resumes the timer", async () => {
+      const { props, result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+
+      act(() => {
+        result.current.closeWizardFromUser();
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+      expect(result.current.moveMode).toBe(false);
+      expect(props.resumeTimer).toHaveBeenCalledTimes(1);
+    });
+
+    it("closeWizardFromUser during move clears moveInProgress", async () => {
+      const { result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      expect(writeHidingZone).toHaveBeenCalledWith(
+        "session-1",
+        expect.objectContaining({ moveInProgress: true }),
+      );
+
+      act(() => {
+        result.current.closeWizardFromUser();
+      });
+
+      expect(result.current.moveMode).toBe(false);
+      expect(writeHidingZone).toHaveBeenLastCalledWith(
+        "session-1",
+        expect.objectContaining({ moveInProgress: false }),
+      );
+    });
+
+    it("closeWizardFromUser on create closes without resuming the timer", () => {
+      const { props, result } = renderZoneTool({ existingZone: null });
+
+      act(() => {
+        result.current.openWizard();
+        result.current.closeWizardFromUser();
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+      expect(props.resumeTimer).not.toHaveBeenCalled();
     });
   });
 });

@@ -50,6 +50,7 @@ import { useAnnotationStore } from "../../state/annotationStore";
 import type { LayerVisibility } from "../../state/sessionStore";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
+import { resolveHiderZonePlacementChromeVisibility } from "./hiderZonePlacementChrome";
 import { resolveHidingZoneHudPresence } from "./hidingZoneAskChrome";
 // ponytail yagni waiver: keep named helper + matrix tests (1 call site, readiness-reviewed).
 import { isHidingZoneMapFirstEligible } from "./hidingZoneMapFirst";
@@ -113,6 +114,7 @@ export type HiderMapScreenController = {
     | "writesEnabled"
     | "openWizard"
     | "closeWizard"
+    | "closeWizardFromUser"
     | "startMove"
   >;
   hidingZonePanelTool: HidingZonePanelTool;
@@ -377,7 +379,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
   const hidingZoneCue = activeModeCue({
     surface: hidingZoneSurface,
     placementReady: hidingZonePanelTool.hasPlacement,
-    configureReady: zoneTool.moveMode || hidingZonePanelTool.methodChosen,
+    configureReady: hidingZonePanelTool.methodChosen,
     resolveReady: true,
   });
 
@@ -394,7 +396,8 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     askExitMounted: zoneAskExit.mounted,
   });
 
-  const toolDock = (
+  const { showToolDock } = resolveHiderZonePlacementChromeVisibility(zoneTool.wizardOpen);
+  const toolDock = showToolDock ? (
     <HiderToolDock
       zoneLabel={zoneLabel}
       onZoneAction={onZoneAction}
@@ -415,7 +418,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
       hasUnreadChat={hasUnreadChat}
       unreadCount={unreadCount}
     />
-  );
+  ) : null;
 
   return (
     <MapScreenChromeSlots chromeHudRef={chromeHudRef} header={statusRail} toolbar={toolDock}>
@@ -450,14 +453,11 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           onStepChange={onHidingZoneStepChange}
           onSearchThisArea={onSearchThisArea}
           writesEnabled={zoneTool.writesEnabled}
-          onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
-          onBackToMethod={
-            zoneTool.moveMode
-              ? undefined
-              : () => {
-                  zoneTool.openWizard();
-                }
-          }
+          onDismiss={zoneTool.closeWizardFromUser}
+          onBackToMethod={() => {
+            // Reset draft to method chips; preserves moveMode when relocating.
+            zoneTool.openWizard();
+          }}
         />
       ) : null}
       {zoneHudPresence.showAsk ? (
@@ -470,7 +470,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           canCommit={false}
           commitLabel="CONFIRM"
           onCommit={() => undefined}
-          onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+          onDismiss={zoneTool.closeWizardFromUser}
           isSubmitting={false}
           error={hidingZonePanelTool.error}
           modeBody={
@@ -478,7 +478,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
               moveMode={zoneTool.moveMode}
               zoneTool={hidingZonePanelTool}
               onStepChange={onHidingZoneStepChange}
-              onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+              onDismiss={zoneTool.closeWizardFromUser}
             />
           }
           onExitTransitionEnd={zoneAskExit.onExitTransitionEnd}

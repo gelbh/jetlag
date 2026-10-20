@@ -251,6 +251,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     });
 
     return {
+      needsRefresh,
       safeToReload,
       showGlobalBanner,
       applyUpdate: () => {

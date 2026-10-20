@@ -17,11 +17,33 @@ const { isFirebaseConfigured, isAuthBootstrapReady, usePermanentAuthUser } = vi.
 
 vi.mock("@/hooks/session/useContinueActiveSession", () => ({
   useContinueActiveSession: () => ({
-    session: { id: "local", code: "ABCD" },
+    session: { id: "local", code: "ABCD", gameAreaLabel: "Dublin City" },
     myRole: "seeker",
     continueError: null,
     continuing: false,
     handleContinue: vi.fn(),
+  }),
+}));
+
+vi.mock("@/hooks/session/useLeaveSessionAndUpdate", () => ({
+  useLeaveSessionAndUpdate: () => ({
+    leaving: false,
+    prompt: null,
+    requestLeaveAndUpdate: vi.fn(),
+    dismissLeaveAndUpdatePrompt: vi.fn(),
+    confirmLeaveAndUpdate: vi.fn(),
+  }),
+}));
+
+vi.mock("@/hooks/app/useAppUpdateState", () => ({
+  useAppUpdateState: () => ({
+    needsRefresh: false,
+    safeToReload: true,
+    showGlobalBanner: false,
+    applyUpdate: vi.fn(),
+    hotfixGraceActive: false,
+    hotfixGraceSecondsRemaining: null,
+    hotfixRequiredMinAppVersion: null,
   }),
 }));
 
@@ -94,9 +116,10 @@ describe("Home", () => {
       </MantineProvider>,
     );
     expect(
-      screen.getByRole("button", { name: /Return to map for session ABCD/i }),
+      screen.getByRole("button", { name: /Return to map for session ABCD in Dublin City/i }),
     ).toBeInTheDocument();
     expect(screen.getByText("ABCD")).toBeInTheDocument();
+    expect(screen.getByText(/Dublin City/)).toBeInTheDocument();
     expect(screen.getByText(/^Continue$/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
   });

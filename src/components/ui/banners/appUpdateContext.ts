@@ -1,6 +1,7 @@
 import { createContext } from "react";
 
 export interface AppUpdateContextValue {
+  needsRefresh: boolean;
   safeToReload: boolean;
   showGlobalBanner: boolean;
   applyUpdate: () => void;

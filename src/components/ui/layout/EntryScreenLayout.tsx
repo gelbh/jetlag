@@ -17,6 +17,11 @@ interface EntryScreenLayoutProps {
    * Drop page padding so a full-bleed chrome (e.g. EntryHeader) owns safe-area.
    */
   flush?: boolean;
+  /**
+   * Extra air under the status bar / notch. Home uses this with viewport start packing
+   * so the brand lockup is not hard against the top edge.
+   */
+  topBreathing?: boolean;
 }
 
 export function EntryScreenLayout({
@@ -26,6 +31,7 @@ export function EntryScreenLayout({
   viewportLayout = "start",
   skin: _skin = "plain",
   flush = false,
+  topBreathing = false,
 }: EntryScreenLayoutProps) {
   void _skin;
   const justifyClass =
@@ -43,14 +49,18 @@ export function EntryScreenLayout({
       ? "home-poster-viewport min-h-0 overflow-hidden justify-between gap-2"
       : viewportLayout === "center"
         ? "home-poster-viewport jl-scroll min-h-0 overflow-y-auto overscroll-y-contain justify-center gap-6"
-        : "home-poster-viewport min-h-0 overflow-hidden justify-start gap-2"
+        : "home-poster-viewport jl-scroll min-h-0 overflow-y-auto overscroll-y-contain justify-start gap-4"
     : "";
 
   const minHeightClass = viewport ? "min-h-0" : "entry-screen-layout-flow";
 
+  const topPad = topBreathing
+    ? "pt-[max(1.75rem,calc(var(--safe-area-top)+1.25rem))]"
+    : "pt-[max(1.25rem,calc(var(--safe-area-top)+0.75rem))]";
+
   const insetClass = flush
     ? "px-0 pt-0 pb-[max(1rem,var(--safe-area-bottom))]"
-    : `px-5 ${paddingClass} pb-[max(1rem,var(--safe-area-bottom))] pt-[max(1.25rem,calc(var(--safe-area-top)+0.75rem))]`;
+    : `px-5 ${paddingClass} pb-[max(1rem,var(--safe-area-bottom))] ${topPad}`;
 
   return (
     <main
