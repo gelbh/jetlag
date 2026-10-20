@@ -3,42 +3,42 @@
     {
       "id": "chicago",
       "bundlePath": "/geo/gtfs/chicago.json",
-      "feedOnestopId": "f-dp3-cta",
-      "builtAt": "2026-07-11T15:16:56.751Z",
-      "stopCount": 10980,
-      "routeCount": 133
+      "feedOnestopId": "cta-google-transit",
+      "builtAt": "2026-10-20T22:35:02.821Z",
+      "stopCount": 10993,
+      "routeCount": 132
     },
     {
       "id": "dublin",
       "bundlePath": "/geo/gtfs/dublin.json",
       "feedOnestopId": "tfi-dublin-merged",
-      "builtAt": "2026-10-20T22:24:00.096Z",
+      "builtAt": "2026-10-20T22:35:08.960Z",
       "stopCount": 5309,
       "routeCount": 184
     },
     {
       "id": "london",
       "bundlePath": "/geo/gtfs/london.json",
-      "feedOnestopId": "f-transport~for~london",
-      "builtAt": "2026-07-11T15:15:23.805Z",
-      "stopCount": 780,
-      "routeCount": 14
+      "feedOnestopId": "mdb-tfl-995",
+      "builtAt": "2026-10-20T22:35:13.922Z",
+      "stopCount": 1038,
+      "routeCount": 21
     },
     {
       "id": "nyc",
       "bundlePath": "/geo/gtfs/nyc.json",
-      "feedOnestopId": "f-dr5r-nyctsubway",
-      "builtAt": "2026-07-11T15:15:40.795Z",
-      "stopCount": 1033,
-      "routeCount": 36
+      "feedOnestopId": "mta-nyc-subway-bus-merged",
+      "builtAt": "2026-10-20T22:35:26.552Z",
+      "stopCount": 12667,
+      "routeCount": 282
     },
     {
       "id": "portland-maine",
       "bundlePath": "/geo/gtfs/portland-maine.json",
-      "feedOnestopId": "f-dry0-maine~greaterportlandmetrobus",
-      "builtAt": "2026-07-11T21:09:57.097Z",
-      "stopCount": 637,
-      "routeCount": 14
+      "feedOnestopId": "mdb-gpmetro-south-portland",
+      "builtAt": "2026-10-20T22:35:28.419Z",
+      "stopCount": 833,
+      "routeCount": 17
     },
     {
       "id": "prince-rupert",
@@ -51,10 +51,10 @@
     {
       "id": "sf",
       "bundlePath": "/geo/gtfs/sf.json",
-      "feedOnestopId": "f-9q8y-sfmta",
-      "builtAt": "2026-07-11T15:15:51.600Z",
-      "stopCount": 3238,
-      "routeCount": 69
+      "feedOnestopId": "mdb-sfmta-2886",
+      "builtAt": "2026-10-20T22:35:30.505Z",
+      "stopCount": 3246,
+      "routeCount": 70
     },
     {
       "id": "southampton",

@@ -34,3 +34,6 @@ target/
 crates/*/pkg
 
 .lighthouseci
+
+# Local GTFS rebuild downloads
+.cache/

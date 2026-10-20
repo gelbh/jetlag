@@ -111,7 +111,9 @@ describe("production GTFS bundles", () => {
   it("NYC midtown play area uses full subway stop inventory", async () => {
     const bundle = loadProductionBundle("nyc");
     expect(bundle).not.toBeNull();
-    expect(bundle!.stops.length).toBeGreaterThan(100);
+    // Subway + five borough bus feeds (was subway-only ~1k).
+    expect(bundle!.stops.length).toBeGreaterThan(5000);
+    expect(bundle!.feedOnestopId).toBe("mta-nyc-subway-bus-merged");
 
     const stops = filterGtfsStopsForGameArea(bundle!, MIDTOWN_NYC);
     expect(stops.length).toBeGreaterThan(20);
