@@ -460,10 +460,17 @@ export function useHiderZoneTool({
     let stationId = "";
     let stationName = "";
 
-    if (manualMode && manualCenter && !selectedStation) {
+    // Manual placement: draft center is the single source for ring + Confirm.
+    // Snap success keeps manualCenter on the station; timeout/offline leave the tap.
+    if (manualMode && manualCenter) {
       center = manualCenter;
-      stationId = MANUAL_STATION_ID;
-      stationName = "";
+      if (selectedStation) {
+        stationId = selectedStation.id;
+        stationName = selectedStation.name;
+      } else {
+        stationId = MANUAL_STATION_ID;
+        stationName = "";
+      }
     } else if (selectedStation) {
       center = [selectedStation.lat, selectedStation.lng];
       stationId = selectedStation.id;
