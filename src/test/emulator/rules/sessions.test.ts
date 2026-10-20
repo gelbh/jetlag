@@ -13,6 +13,40 @@ describe("firestore.rules — sessions", () => {
     );
   });
 
+  it("allows castleSiege create with observer host and team roles", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-castle")
+        .set(
+          sessionPayload("host-1", {
+            mode: "castleSiege",
+            memberRoles: { "host-1": "observer" },
+            castleSiegeRoles: { "host-1": "teamA" },
+            seriesLength: 3,
+            setupMode: "fairSplit",
+          }),
+        ),
+    );
+  });
+
+  it("denies classic create when host memberRoles is observer", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await assertFails(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-observer-classic")
+        .set(
+          sessionPayload("host-1", {
+            memberRoles: { "host-1": "observer" },
+          }),
+        ),
+    );
+  });
+
   it("denies client-supplied server-only ops fields on session create", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await assertFails(

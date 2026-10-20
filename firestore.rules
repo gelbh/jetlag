@@ -52,6 +52,42 @@ service cloud.firestore {
       return role in ['seeker', 'hider'];
     }
 
+    function validCastleSiegeTeamRole(role) {
+      return role in ['teamA', 'teamB', 'referee', 'observer'];
+    }
+
+    // Classic create: host seeker|hider only. Castle Siege: host observer in memberRoles.
+    function validCreateHostPlayerRole(data) {
+      return ('mode' in data && data.mode == 'castleSiege')
+        ? data.memberRoles[request.auth.uid] == 'observer'
+        : validHostPlayerRole(data.memberRoles[request.auth.uid]);
+    }
+
+    function validOptionalCastleSiegeCreateFields(data) {
+      return (!('mode' in data) || data.mode in ['classic', 'castleSiege'])
+        && (!('seriesLength' in data) || data.seriesLength == 1 || data.seriesLength == 3)
+        && (!('setupMode' in data) || data.setupMode in ['pregame', 'fairSplit'])
+        && (
+          !('castleSiegeRoles' in data)
+          || (
+            data.castleSiegeRoles is map
+            && data.castleSiegeRoles.size() >= 1
+            && data.castleSiegeRoles.size() <= 32
+            && request.auth.uid in data.castleSiegeRoles
+            && validCastleSiegeTeamRole(data.castleSiegeRoles[request.auth.uid])
+          )
+        )
+        && (
+          !('mode' in data)
+          || data.mode != 'castleSiege'
+          || (
+            'castleSiegeRoles' in data
+            && data.castleSiegeRoles is map
+            && validCastleSiegeTeamRole(data.castleSiegeRoles[request.auth.uid])
+          )
+        );
+    }
+
     function validDisabledTools(tools) {
       return tools is list
         && tools.size() <= 8
@@ -683,7 +719,8 @@ service cloud.firestore {
         && request.resource.data.hidingZoneRadiusMeters is number
         && request.resource.data.memberRoles is map
         && request.resource.data.memberRoles[request.auth.uid] is string
-        && validHostPlayerRole(request.resource.data.memberRoles[request.auth.uid])
+        && validCreateHostPlayerRole(request.resource.data)
+        && validOptionalCastleSiegeCreateFields(request.resource.data)
         && (
           !('hostAppVersion' in request.resource.data)
           || request.resource.data.hostAppVersion is string
