@@ -377,6 +377,7 @@ describe("HidingZoneMapPlacementChrome", () => {
     const onDismiss = vi.fn();
     renderHud(
       <HidingZoneMapPlacementChrome
+        moveMode={false}
         radiusLabel="200 m"
         zoneTool={baseZoneTool({
           methodChosen: true,

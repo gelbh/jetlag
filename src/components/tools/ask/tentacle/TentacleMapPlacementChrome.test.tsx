@@ -18,8 +18,10 @@ beforeEach(() => {
   }));
 });
 
-function renderChrome(overrides: Partial<Parameters<typeof TentacleMapPlacementChrome>[0]> = {}) {
-  const onCommit = overrides.onCommit ?? vi.fn();
+function renderChrome(
+  overrides: Partial<Omit<Parameters<typeof TentacleMapPlacementChrome>[0], "onCommit">> = {},
+) {
+  const onCommit = vi.fn();
   render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <TentacleMapPlacementChrome
@@ -38,8 +40,8 @@ function renderChrome(overrides: Partial<Parameters<typeof TentacleMapPlacementC
         statusTitle="Ready"
         statusBody="Place set"
         canCommit={false}
-        onCommit={onCommit}
         {...overrides}
+        onCommit={onCommit}
       />
     </MantineProvider>,
   );

@@ -19,11 +19,18 @@ beforeEach(() => {
   }));
 });
 
-function renderChrome(props: Partial<ComponentProps<typeof MatchingMapPlacementChrome>> = {}) {
-  const onUseGps = props.onUseGps ?? vi.fn();
-  const onCommit = props.onCommit ?? vi.fn();
-  const onAnswerChange = props.onAnswerChange ?? vi.fn();
-  const onChangeCategory = props.onChangeCategory ?? vi.fn();
+function renderChrome(
+  props: Partial<
+    Omit<
+      ComponentProps<typeof MatchingMapPlacementChrome>,
+      "onCommit" | "onUseGps" | "onAnswerChange" | "onChangeCategory"
+    >
+  > = {},
+) {
+  const onUseGps = vi.fn();
+  const onCommit = vi.fn();
+  const onAnswerChange = vi.fn();
+  const onChangeCategory = vi.fn();
   render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MatchingMapPlacementChrome
@@ -31,11 +38,11 @@ function renderChrome(props: Partial<ComponentProps<typeof MatchingMapPlacementC
         questionPrompt="Is your nearest commercial airport the same as my nearest commercial airport?"
         costLabel="D3P1"
         phase="locating"
+        {...props}
         onUseGps={onUseGps}
         onCommit={onCommit}
         onAnswerChange={onAnswerChange}
         onChangeCategory={onChangeCategory}
-        {...props}
       />
     </MantineProvider>,
   );

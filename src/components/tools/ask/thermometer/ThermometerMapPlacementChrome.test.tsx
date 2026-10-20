@@ -19,9 +19,9 @@ beforeEach(() => {
 });
 
 function renderChrome(
-  overrides: Partial<Parameters<typeof ThermometerMapPlacementChrome>[0]> = {},
+  overrides: Partial<Omit<Parameters<typeof ThermometerMapPlacementChrome>[0], "onCommit">> = {},
 ) {
-  const onCommit = overrides.onCommit ?? vi.fn();
+  const onCommit = vi.fn();
   render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <ThermometerMapPlacementChrome
@@ -33,8 +33,8 @@ function renderChrome(
         onStartWalk={vi.fn()}
         awaitHiderAnswer
         canCommit={false}
-        onCommit={onCommit}
         {...overrides}
+        onCommit={onCommit}
       />
     </MantineProvider>,
   );

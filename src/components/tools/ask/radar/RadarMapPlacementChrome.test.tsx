@@ -18,8 +18,10 @@ beforeEach(() => {
   }));
 });
 
-function renderChrome(overrides: Partial<Parameters<typeof RadarMapPlacementChrome>[0]> = {}) {
-  const onCommit = overrides.onCommit ?? vi.fn();
+function renderChrome(
+  overrides: Partial<Omit<Parameters<typeof RadarMapPlacementChrome>[0], "onCommit">> = {},
+) {
+  const onCommit = vi.fn();
   render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <RadarMapPlacementChrome
@@ -38,8 +40,8 @@ function renderChrome(overrides: Partial<Parameters<typeof RadarMapPlacementChro
         onChooseSelect={vi.fn()}
         onCustomRadiusChange={vi.fn()}
         canCommit={false}
-        onCommit={onCommit}
         {...overrides}
+        onCommit={onCommit}
       />
     </MantineProvider>,
   );

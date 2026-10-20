@@ -18,8 +18,10 @@ beforeEach(() => {
   }));
 });
 
-function renderChrome(overrides: Partial<Parameters<typeof MeasuringMapPlacementChrome>[0]> = {}) {
-  const onCommit = overrides.onCommit ?? vi.fn();
+function renderChrome(
+  overrides: Partial<Omit<Parameters<typeof MeasuringMapPlacementChrome>[0], "onCommit">> = {},
+) {
+  const onCommit = vi.fn();
   render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MeasuringMapPlacementChrome
@@ -32,8 +34,8 @@ function renderChrome(overrides: Partial<Parameters<typeof MeasuringMapPlacement
         statusTitle="Ready"
         statusBody="Place set"
         canCommit={false}
-        onCommit={onCommit}
         {...overrides}
+        onCommit={onCommit}
       />
     </MantineProvider>,
   );

@@ -6,12 +6,12 @@ import { LOCAL_SESSION_ID } from "@/domain/map/annotations";
 const applyUpdate = vi.fn();
 const navigate = vi.fn();
 const exitSession = vi.fn(async () => undefined);
-const leaveRemoteSessionOnDevice = vi.fn(async () => "ok" as const);
+const leaveRemoteSessionOnDevice = vi.fn(async (): Promise<"ok" | "failed"> => "ok");
 const isAloneHost = vi.fn((session: { hostUid?: string; memberUids?: string[] }) => {
   const hostUid = session.hostUid ?? "";
   return !(session.memberUids ?? []).some((uid) => uid !== hostUid);
 });
-const listPendingQuestions = vi.fn(async () => [] as const);
+const listPendingQuestions = vi.fn(async (): Promise<unknown[]> => []);
 const ensureAnonymousUser = vi.fn(async () => ({ uid: "uid-1" }));
 const captureException = vi.fn();
 
