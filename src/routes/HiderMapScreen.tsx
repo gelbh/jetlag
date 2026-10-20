@@ -1,17 +1,14 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import type { HiderQuestionCards } from "../components/chat/HiderPendingQuestionAnswer";
-import { HidingZoneDraftCenterPin } from "../components/hider/HidingZoneDraftCenterPin";
+import { HidingZoneDraftPlacementOverlays } from "../components/hider/HidingZoneDraftPlacementOverlays";
 import { HidingZoneStationFocus } from "../components/hider/HidingZoneStationFocus";
-import { resolveHidingZoneDisplayPreviewCircle } from "../components/hider/hidingZoneDraftPinTravel";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
-import { useHidingZoneDraftDisplayCenter } from "../components/hider/useHidingZoneDraftDisplayCenter";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import {
   type MapViewportState,
   MapViewportTracker,
 } from "../components/map/chrome/MapViewportTracker";
-import { cssPxDashToMapLibre } from "../components/map/helpers/cssPxDashToMapLibre";
 import { MapLibreGeoJsonOverlay } from "../components/map/helpers/MapLibreGeoJsonOverlay";
 import { ActiveThermometerWalkLayer } from "../components/map/layers/ActiveThermometerWalkLayer";
 import { AnnotationLayer } from "../components/map/layers/AnnotationLayer";
@@ -58,7 +55,6 @@ import {
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import {
   hiderStationCenter,
-  hidingZonePreviewPositions,
   nearestStation,
   resolveMyHidingZone,
 } from "../domain/session/hiding/hidingZone";
@@ -813,36 +809,14 @@ export function HiderMapScreen() {
 
   const chromeHudRef = useRef<HTMLDivElement>(null);
 
-  const draftCenterPinActive =
-    zoneTool.wizardOpen && (hidingZoneStepId === "location" || hidingZoneStepId === "confirm");
-  const selectedStationCenter = useMemo((): LatLngTuple | null => {
-    const station = zoneTool.selectedStation;
-    if (!station) {
-      return null;
-    }
-    return [station.lat, station.lng];
-  }, [zoneTool.selectedStation]);
-  const draftCenterPin: LatLngTuple | null = draftCenterPinActive
-    ? zoneTool.manualMode
-      ? zoneTool.manualCenter
-      : selectedStationCenter
-    : null;
-  // Display-only; Confirm keeps tool-state center / previewCircle.
-  const draftDisplayCenter = useHidingZoneDraftDisplayCenter(draftCenterPin);
-
   if (!session || !gameArea) {
     return <AppNavigate to="/" replace />;
   }
 
   const mapFocusBounds = gameAreaToBoundsExpression(gameArea);
   const center = gameAreaCenter(gameArea);
-  const previewRing = hidingZonePreviewPositions(
-    resolveHidingZoneDisplayPreviewCircle({
-      displayCenter: draftDisplayCenter,
-      radiusMeters: hidingZoneRadius,
-      toolPreviewCircle: zoneTool.previewCircle,
-    }),
-  );
+  const draftPlacementActive =
+    zoneTool.wizardOpen && (hidingZoneStepId === "location" || hidingZoneStepId === "confirm");
   const sheetBlocksWizard =
     overlay.isChatOpen ||
     overlay.isSettingsOpen ||
@@ -911,35 +885,14 @@ export function HiderMapScreen() {
             onSelectStation={timeTrapTool.setSelectedStation}
           />
         ) : null}
-        {previewRing.length > 0 ? (
-          <MapLibreGeoJsonOverlay
-            id="hider-zone-preview"
-            data={{
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Polygon",
-                coordinates: [
-                  [
-                    ...previewRing.map(([lat, lng]) => [lng, lat] as [number, number]),
-                    [previewRing[0]![1], previewRing[0]![0]],
-                  ],
-                ],
-              },
-            }}
-            fill={{
-              fillColor: MAP_ANNOTATION_COLORS.hidingZoneOwn,
-              fillOpacity: 0.12,
-            }}
-            line={{
-              color: MAP_ANNOTATION_COLORS.hidingZoneOwn,
-              width: 2,
-              dashArray: cssPxDashToMapLibre("6 6", 2),
-            }}
-          />
-        ) : null}
-        <HidingZoneDraftCenterPin
-          displayCenter={draftDisplayCenter}
+        <HidingZoneDraftPlacementOverlays
+          active={draftPlacementActive}
+          manualMode={zoneTool.manualMode}
+          manualCenter={zoneTool.manualCenter}
+          selectedStationLat={zoneTool.selectedStation?.lat ?? null}
+          selectedStationLng={zoneTool.selectedStation?.lng ?? null}
+          radiusMeters={hidingZoneRadius}
+          toolPreviewCircle={zoneTool.previewCircle}
           snapping={zoneTool.snapping}
           chosenKey={zoneTool.selectedStation?.id ?? null}
         />
