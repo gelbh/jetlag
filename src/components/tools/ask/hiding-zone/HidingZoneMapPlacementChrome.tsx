@@ -13,6 +13,7 @@ import {
   AskMapPlacementChrome,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 
 export type HidingZoneMapPlacementChromeProps = {
@@ -176,21 +177,19 @@ export function HidingZoneMapPlacementChrome({
           {zoneTool.error}
         </p>
       ) : null}
-      <Button
+      <EntryAsyncButton
         type="button"
         fullWidth
+        busy={zoneTool.saving}
+        unavailable={!writesEnabled || !zoneTool.hasPlacement || zoneTool.snapping}
+        idleLabel="Confirm"
+        busyLabel="Saving…"
+        leftSection={<CheckIcon size={16} weight="bold" aria-hidden />}
+        styles={askMapPlacementSendStyles}
         onClick={() => {
           void zoneTool.confirmZone();
         }}
-        disabled={!writesEnabled || !zoneTool.hasPlacement || zoneTool.saving || zoneTool.snapping}
-        aria-busy={zoneTool.saving || undefined}
-        leftSection={
-          zoneTool.saving ? undefined : <CheckIcon size={16} weight="bold" aria-hidden />
-        }
-        styles={askMapPlacementSendStyles}
-      >
-        {zoneTool.saving ? "Saving…" : "Confirm"}
-      </Button>
+      />
       {onDismiss ? (
         <Button
           type="button"

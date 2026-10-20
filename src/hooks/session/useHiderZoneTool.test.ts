@@ -96,6 +96,9 @@ describe("useHiderZoneTool", () => {
       await result.current.startMove();
     });
 
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringMatching(/place a new zone \(station or map\)/i),
+    );
     expect(props.pauseTimer).toHaveBeenCalledTimes(1);
     expect(enqueueMoveTimerIntent).not.toHaveBeenCalled();
     expect(labels()).toEqual(["system.message", "zone.write"]);

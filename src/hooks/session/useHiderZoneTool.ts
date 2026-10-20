@@ -273,7 +273,9 @@ export function useHiderZoneTool({
       return;
     }
 
-    const confirmed = window.confirm("Play Move? Timer pauses and you must pick a new station.");
+    const confirmed = window.confirm(
+      "Play Move? Timer pauses and you must place a new zone (station or map).",
+    );
     if (!confirmed) {
       return;
     }

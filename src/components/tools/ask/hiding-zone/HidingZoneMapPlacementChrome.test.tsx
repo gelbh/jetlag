@@ -172,6 +172,57 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(confirmZone).not.toHaveBeenCalled();
   });
 
+  it("marks Confirm unavailable (natively disabled) without placement", () => {
+    const confirmZone = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          hasPlacement: false,
+          confirmZone,
+        })}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    const confirm = screen.getByRole("button", { name: /^Confirm$/i });
+    expect(confirm).toBeDisabled();
+    fireEvent.click(confirm);
+    expect(confirmZone).not.toHaveBeenCalled();
+  });
+
+  it("keeps Confirm busy (spinner + aria-busy) without native disable while saving", () => {
+    const confirmZone = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          manualCenter: [53.35, -6.26],
+          hasPlacement: true,
+          saving: true,
+          confirmZone,
+        })}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    const confirm = screen.getByRole("button", { name: /^Saving/i });
+    expect(confirm).toHaveAttribute("aria-busy", "true");
+    expect(confirm).toHaveAttribute("aria-disabled", "true");
+    expect(confirm).not.toBeDisabled();
+    const statusId = confirm.getAttribute("aria-describedby");
+    expect(statusId).toBeTruthy();
+    expect(document.getElementById(statusId!)).toHaveTextContent(/Saving/i);
+    fireEvent.click(confirm);
+    expect(confirmZone).not.toHaveBeenCalled();
+  });
+
   it("shows the station lookup and disables Confirm while snapping", () => {
     renderHud(
       <HidingZoneMapPlacementChrome
