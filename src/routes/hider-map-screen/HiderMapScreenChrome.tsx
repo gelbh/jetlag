@@ -50,6 +50,7 @@ import { useAnnotationStore } from "../../state/annotationStore";
 import type { LayerVisibility } from "../../state/sessionStore";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
+import { resolveHiderZonePlacementChromeVisibility } from "./hiderZonePlacementChrome";
 import { resolveHidingZoneHudPresence } from "./hidingZoneAskChrome";
 // ponytail yagni waiver: keep named helper + matrix tests (1 call site, readiness-reviewed).
 import { isHidingZoneMapFirstEligible } from "./hidingZoneMapFirst";
@@ -394,7 +395,8 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     askExitMounted: zoneAskExit.mounted,
   });
 
-  const toolDock = (
+  const { showToolDock } = resolveHiderZonePlacementChromeVisibility(zoneTool.wizardOpen);
+  const toolDock = showToolDock ? (
     <HiderToolDock
       zoneLabel={zoneLabel}
       onZoneAction={onZoneAction}
@@ -415,7 +417,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
       hasUnreadChat={hasUnreadChat}
       unreadCount={unreadCount}
     />
-  );
+  ) : null;
 
   return (
     <MapScreenChromeSlots chromeHudRef={chromeHudRef} header={statusRail} toolbar={toolDock}>
