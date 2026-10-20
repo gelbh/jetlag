@@ -215,9 +215,21 @@ export function useHiderZoneTool({
       resetWizardDraft();
       if (options.resumeIfMove && wasMove) {
         resumeTimerForMove();
+        // Best-effort: Confirm clears this flag; Cancel/Back must too or the
+        // session stays stuck in “Moving” for seekers.
+        if (existingZone && hiderUid) {
+          moveAttemptRef.current = 0;
+          commitWrite("zone.write", () =>
+            writeHidingZone(sessionId, {
+              ...existingZone,
+              hiderUid,
+              moveInProgress: false,
+            }),
+          );
+        }
       }
     },
-    [resetWizardDraft, resumeTimerForMove],
+    [existingZone, hiderUid, resetWizardDraft, resumeTimerForMove, sessionId],
   );
 
   const openWizard = useCallback(() => {
@@ -515,7 +527,12 @@ export function useHiderZoneTool({
       moveAttemptRef.current = 0;
 
       const wasMove = moveMode;
-      applyWizardClosed({ resumeIfMove: wasMove });
+      // Confirm already wrote moveInProgress: false; do not re-enter the
+      // cancel path (which would republish the pre-move zone).
+      applyWizardClosed({ resumeIfMove: false });
+      if (wasMove) {
+        resumeTimerForMove();
+      }
       abandonZoneWizardHistory();
     } catch (nextError) {
       setError(zoneWriteErrorMessage(nextError));
@@ -531,6 +548,7 @@ export function useHiderZoneTool({
     manualMode,
     moveMode,
     radiusMeters,
+    resumeTimerForMove,
     selectedStation,
     sessionId,
     snapping,

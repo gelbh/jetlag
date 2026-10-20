@@ -657,6 +657,28 @@ describe("useHiderZoneTool", () => {
       expect(props.resumeTimer).toHaveBeenCalledTimes(1);
     });
 
+    it("closeWizardFromUser during move clears moveInProgress", async () => {
+      const { result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      expect(writeHidingZone).toHaveBeenCalledWith(
+        "session-1",
+        expect.objectContaining({ moveInProgress: true }),
+      );
+
+      act(() => {
+        result.current.closeWizardFromUser();
+      });
+
+      expect(result.current.moveMode).toBe(false);
+      expect(writeHidingZone).toHaveBeenLastCalledWith(
+        "session-1",
+        expect.objectContaining({ moveInProgress: false }),
+      );
+    });
+
     it("closeWizardFromUser on create closes without resuming the timer", () => {
       const { props, result } = renderZoneTool({ existingZone: null });
 
