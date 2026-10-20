@@ -1,6 +1,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import type { HiderQuestionCards } from "../components/chat/HiderPendingQuestionAnswer";
+import { HidingZoneDraftCenterPin } from "../components/hider/HidingZoneDraftCenterPin";
 import { HidingZoneStationFocus } from "../components/hider/HidingZoneStationFocus";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
@@ -817,6 +818,15 @@ export function HiderMapScreen() {
   const mapFocusBounds = gameAreaToBoundsExpression(gameArea);
   const center = gameAreaCenter(gameArea);
   const previewRing = hidingZonePreviewPositions(zoneTool.previewCircle);
+  const draftCenterPinActive =
+    zoneTool.wizardOpen && (hidingZoneStepId === "location" || hidingZoneStepId === "confirm");
+  const draftCenterPin: LatLngTuple | null = draftCenterPinActive
+    ? zoneTool.manualMode
+      ? zoneTool.manualCenter
+      : zoneTool.selectedStation
+        ? [zoneTool.selectedStation.lat, zoneTool.selectedStation.lng]
+        : null
+    : null;
   const sheetBlocksWizard =
     overlay.isChatOpen ||
     overlay.isSettingsOpen ||
@@ -912,6 +922,11 @@ export function HiderMapScreen() {
             }}
           />
         ) : null}
+        <HidingZoneDraftCenterPin
+          center={draftCenterPin}
+          snapping={zoneTool.snapping}
+          chosenKey={zoneTool.selectedStation?.id ?? null}
+        />
         {pinSheetOpen && pinTool.draft.pinPoint ? (
           <MapLibreGeoJsonOverlay
             id="hider-pin-draft"
