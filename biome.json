@@ -12,6 +12,7 @@
       "!crates/*/pkg",
       "!src/styles/tokens.css",
       "!public/geo/gtfs/chicago.json",
+      "!public/geo/gtfs/dublin.json",
       "!.worktrees",
       "!worker-configuration.d.ts"
     ]
@@ -72,6 +73,7 @@
       "!**/node_modules",
       "!src/styles/tokens.css",
       "!public/geo/gtfs/chicago.json",
+      "!public/geo/gtfs/dublin.json",
       "!**/yqrd-*.test.ts",
       "!.worktrees/**"
     ]
