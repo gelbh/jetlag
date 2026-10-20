@@ -41,7 +41,7 @@ export const MOTION_MAP_CAMERA_FLY_MS = 450;
 /** Large placement reframe duration in seconds. */
 export const MOTION_MAP_CAMERA_FLY_S = MOTION_MAP_CAMERA_FLY_MS / 1000;
 
-/** Unhurried pan to the station a hiding-zone tap snapped to, so the hider sees where it went. */
+/** Unhurried pan to the station picked for a hiding zone, so the hider sees where it went. */
 export const MOTION_MAP_CAMERA_SNAP_MS = 1200;
 
 /** Minimum zoom-level change that classifies a reframe as a large jump (fly). */

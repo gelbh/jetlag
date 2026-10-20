@@ -37,6 +37,16 @@ describe("HidingZoneStationFocus", () => {
     expect(map.easeTo).toHaveBeenCalledTimes(1);
   });
 
+  it("eases again when a different station is picked", () => {
+    const { rerender } = render(<HidingZoneStationFocus station={station} />);
+    rerender(
+      <HidingZoneStationFocus station={{ ...station, id: "t1", lat: 35.54916, lng: 139.78455 }} />,
+    );
+
+    expect(map.easeTo).toHaveBeenCalledTimes(2);
+    expect(map.easeTo.mock.calls[1]?.[0]).toMatchObject({ center: [139.78455, 35.54916] });
+  });
+
   it("jumps instead of animating under reduced motion", () => {
     motion.animate = false;
     render(<HidingZoneStationFocus station={station} />);

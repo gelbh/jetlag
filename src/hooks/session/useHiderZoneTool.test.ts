@@ -357,4 +357,174 @@ describe("useHiderZoneTool", () => {
       expect.objectContaining({ stationId: "manual", center: { lat: 53.35, lng: -6.26 } }),
     );
   });
+
+  describe("tap-map snap lookup", () => {
+    const tap: [number, number] = [53.35, -6.26];
+    const nearTap = { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 };
+
+    function deferred<T>() {
+      let resolve!: (value: T) => void;
+      let reject!: (reason: unknown) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    }
+
+    function renderTapMap() {
+      const rendered = renderZoneTool({ existingZone: null, mapPickEnabled: true });
+      act(() => {
+        rendered.result.current.openWizard();
+        rendered.result.current.choosePlacementMethod(true);
+      });
+      return rendered;
+    }
+
+    it("reports snapping while the lookup runs and ignores Confirm until it settles", async () => {
+      const lookup = deferred<TransitStation[]>();
+      fetchTransitStationsForHidingZoneViewport.mockReturnValue(lookup.promise);
+      const { result } = renderTapMap();
+
+      act(() => {
+        result.current.handleMapClick(tap);
+      });
+      expect(result.current.snapping).toBe(true);
+      await act(async () => {
+        await result.current.confirmZone();
+      });
+      expect(writeHidingZone).not.toHaveBeenCalled();
+
+      await act(async () => {
+        lookup.resolve([nearTap]);
+      });
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.selectedStation).toEqual(nearTap);
+    });
+
+    it("searches a box around the tap that covers the snap radius", async () => {
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+
+      const [bounds] = fetchTransitStationsForHidingZoneViewport.mock.calls[0] as unknown as [
+        { south: number; north: number; west: number; east: number },
+      ];
+      expect(bounds.south).toBeLessThan(tap[0]);
+      expect(bounds.north).toBeGreaterThan(tap[0]);
+      // 200 m of latitude is about 0.0018 degrees.
+      expect(bounds.north - tap[0]).toBeGreaterThan(0.0018);
+    });
+
+    it("lets a newer tap win over a slower, older lookup", async () => {
+      const first = deferred<TransitStation[]>();
+      const second = deferred<TransitStation[]>();
+      fetchTransitStationsForHidingZoneViewport
+        .mockReturnValueOnce(first.promise)
+        .mockReturnValueOnce(second.promise);
+      const { result } = renderTapMap();
+      const secondTap: [number, number] = [53.34, -6.27];
+      const nearSecond = { id: "second", name: "Second", lat: 53.3402, lng: -6.2702 };
+
+      act(() => {
+        result.current.handleMapClick(tap);
+      });
+      act(() => {
+        result.current.handleMapClick(secondTap);
+      });
+      await act(async () => {
+        second.resolve([nearSecond]);
+      });
+      await act(async () => {
+        first.resolve([nearTap]);
+      });
+
+      expect(result.current.selectedStation).toEqual(nearSecond);
+      expect(result.current.manualCenter).toEqual([53.3402, -6.2702]);
+    });
+
+    it("keeps the tapped point when the lookup fails", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockRejectedValue(new Error("Overpass down"));
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.selectedStation).toBeNull();
+      expect(result.current.manualCenter).toEqual(tap);
+    });
+
+    it("gives up after the timeout so Confirm saves the tapped point", async () => {
+      vi.useFakeTimers();
+      try {
+        fetchTransitStationsForHidingZoneViewport.mockReturnValue(new Promise(() => {}));
+        const { result } = renderTapMap();
+
+        act(() => {
+          result.current.handleMapClick(tap);
+        });
+        expect(result.current.snapping).toBe(true);
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(4000);
+        });
+
+        expect(result.current.snapping).toBe(false);
+        expect(result.current.manualCenter).toEqual(tap);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("skips the lookup while offline", async () => {
+      isEffectivelyOfflineNow.mockReturnValue(true);
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+
+      expect(fetchTransitStationsForHidingZoneViewport).not.toHaveBeenCalled();
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.manualCenter).toEqual(tap);
+    });
+
+    it("reuses stations from an earlier lookup for a nearby tap", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockResolvedValue([nearTap]);
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+      await act(async () => {
+        result.current.handleMapClick([53.3501, -6.2601]);
+      });
+
+      expect(fetchTransitStationsForHidingZoneViewport).toHaveBeenCalledTimes(1);
+      expect(result.current.selectedStation).toEqual(nearTap);
+    });
+
+    it("drops an in-flight snap when the placement method changes", async () => {
+      const lookup = deferred<TransitStation[]>();
+      fetchTransitStationsForHidingZoneViewport.mockReturnValue(lookup.promise);
+      const { result } = renderTapMap();
+
+      act(() => {
+        result.current.handleMapClick(tap);
+      });
+      act(() => {
+        result.current.choosePlacementMethod(true);
+      });
+      await act(async () => {
+        lookup.resolve([nearTap]);
+      });
+
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.selectedStation).toBeNull();
+      expect(result.current.manualCenter).toBeNull();
+    });
+  });
 });
