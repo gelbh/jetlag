@@ -263,6 +263,45 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(screen.getByRole("button", { name: /^Confirm$/i })).toBeEnabled();
   });
 
+  it("marks the mid slot chosen briefly after a successful snap", () => {
+    const { rerender } = renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          manualCenter: [53.35, -6.26],
+          hasPlacement: true,
+          snapping: true,
+        })}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <HidingZoneMapPlacementChrome
+          moveMode={false}
+          radiusLabel="200 m"
+          zoneTool={baseZoneTool({
+            methodChosen: true,
+            manualMode: true,
+            manualCenter: [53.3503, -6.2603],
+            selectedStation: { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 },
+            hasPlacement: true,
+            snapping: false,
+          })}
+          onSearchThisArea={vi.fn()}
+        />
+      </MantineProvider>,
+    );
+
+    const mid = screen.getByTestId("hiding-zone-map-placement-mid");
+    expect(mid).toHaveAttribute("data-chosen", "true");
+    expect(mid.className).toMatch(/annotation-pulse/);
+  });
+
   it("reports confirm step when placement already exists (move/handoff)", () => {
     const onStepChange = vi.fn();
     renderHud(
