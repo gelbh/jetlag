@@ -10,8 +10,8 @@ export const HIDING_ZONE_PIN_BASE_RADIUS = 8;
 export const HIDING_ZONE_PIN_SNAPPING_RADIUS_BUMP = 2;
 export const HIDING_ZONE_PIN_CHOSEN_RADIUS_BUMP = 4;
 
-/** One-shot chrome / pin chosen emphasis after snap success. */
-export const HIDING_ZONE_PIN_CHOSEN_MS = 600;
+/** One-shot chrome / pin chosen emphasis; matches `.annotation-pulse` (1.2s). */
+export const HIDING_ZONE_PIN_CHOSEN_MS = MOTION_MAP_CAMERA_SNAP_MS;
 
 export type PinTravelFrame = {
   /** Display-only; Confirm always uses tool state center, not this. */

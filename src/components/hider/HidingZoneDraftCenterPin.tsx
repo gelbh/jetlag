@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapLibreGeoJsonOverlay } from "@/components/map/helpers/MapLibreGeoJsonOverlay";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
@@ -26,18 +26,13 @@ export function HidingZoneDraftCenterPin({
   chosenKey = null,
 }: HidingZoneDraftCenterPinProps) {
   const [chosenActive, setChosenActive] = useState(false);
-  const previousChosenKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!chosenKey || chosenKey === previousChosenKeyRef.current) {
-      if (!chosenKey) {
-        previousChosenKeyRef.current = null;
-        setChosenActive(false);
-      }
+    if (!chosenKey) {
+      setChosenActive(false);
       return;
     }
 
-    previousChosenKeyRef.current = chosenKey;
     setChosenActive(true);
     const timeoutId = window.setTimeout(() => {
       setChosenActive(false);

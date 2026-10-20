@@ -264,20 +264,37 @@ describe("HidingZoneMapPlacementChrome", () => {
   });
 
   it("marks the mid slot chosen briefly after a successful snap", () => {
-    renderHud(
+    const { rerender } = renderHud(
       <HidingZoneMapPlacementChrome
         moveMode={false}
         radiusLabel="200 m"
         zoneTool={baseZoneTool({
           methodChosen: true,
           manualMode: true,
-          manualCenter: [53.3503, -6.2603],
-          selectedStation: { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 },
+          manualCenter: [53.35, -6.26],
           hasPlacement: true,
-          snapping: false,
+          snapping: true,
         })}
         onSearchThisArea={vi.fn()}
       />,
+    );
+
+    rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <HidingZoneMapPlacementChrome
+          moveMode={false}
+          radiusLabel="200 m"
+          zoneTool={baseZoneTool({
+            methodChosen: true,
+            manualMode: true,
+            manualCenter: [53.3503, -6.2603],
+            selectedStation: { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 },
+            hasPlacement: true,
+            snapping: false,
+          })}
+          onSearchThisArea={vi.fn()}
+        />
+      </MantineProvider>,
     );
 
     const mid = screen.getByTestId("hiding-zone-map-placement-mid");

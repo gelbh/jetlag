@@ -58,4 +58,20 @@ describe("useHidingZoneDraftDisplayCenter", () => {
 
     expect(result.current).toEqual([53.3503, -6.2603]);
   });
+
+  it("does not restart travel when a new array has the same coordinates", () => {
+    const { result, rerender } = renderHook(
+      ({ center }) => useHidingZoneDraftDisplayCenter(center),
+      { initialProps: { center: [53.35, -6.26] as [number, number] } },
+    );
+
+    const settled = result.current;
+    rerender({ center: [53.35, -6.26] });
+
+    act(() => {
+      vi.advanceTimersByTime(0);
+    });
+
+    expect(result.current).toBe(settled);
+  });
 });

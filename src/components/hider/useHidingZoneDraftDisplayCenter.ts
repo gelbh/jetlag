@@ -18,9 +18,14 @@ function centersEqual(a: LatLngTuple | null, b: LatLngTuple | null): boolean {
 export function useHidingZoneDraftDisplayCenter(center: LatLngTuple | null): LatLngTuple | null {
   const { animate } = useMotionProfile();
   const [displayCenter, setDisplayCenter] = useState<LatLngTuple | null>(center);
+  const centerRef = useRef<LatLngTuple | null>(center);
   const committedRef = useRef<LatLngTuple | null>(center);
   const displayRef = useRef<LatLngTuple | null>(center);
   const travelRafRef = useRef<number | null>(null);
+
+  const centerLat = center?.[0] ?? null;
+  const centerLng = center?.[1] ?? null;
+  centerRef.current = center;
 
   useEffect(() => {
     displayRef.current = displayCenter;
@@ -32,7 +37,9 @@ export function useHidingZoneDraftDisplayCenter(center: LatLngTuple | null): Lat
       travelRafRef.current = null;
     }
 
-    if (!center) {
+    const next = centerRef.current;
+
+    if (centerLat == null || centerLng == null || !next) {
       committedRef.current = null;
       displayRef.current = null;
       setDisplayCenter(null);
@@ -40,16 +47,18 @@ export function useHidingZoneDraftDisplayCenter(center: LatLngTuple | null): Lat
     }
 
     const previous = displayRef.current ?? committedRef.current;
-    committedRef.current = center;
+    committedRef.current = next;
 
-    if (!previous || centersEqual(previous, center) || !animate) {
-      displayRef.current = center;
-      setDisplayCenter(center);
+    if (!previous || centersEqual(previous, next) || !animate) {
+      if (!centersEqual(displayRef.current, next)) {
+        displayRef.current = next;
+        setDisplayCenter(next);
+      }
       return;
     }
 
     const from = previous;
-    const to = center;
+    const to = next;
     const startedAt = performance.now();
 
     const tick = (now: number) => {
@@ -77,7 +86,7 @@ export function useHidingZoneDraftDisplayCenter(center: LatLngTuple | null): Lat
         travelRafRef.current = null;
       }
     };
-  }, [animate, center]);
+  }, [animate, centerLat, centerLng]);
 
   return displayCenter;
 }

@@ -4,7 +4,7 @@
 
 import { Button } from "@mantine/core";
 import { CheckIcon } from "@phosphor-icons/react";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { HIDING_ZONE_PIN_CHOSEN_MS } from "@/components/hider/hidingZoneDraftPinTravel";
 import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
 import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
@@ -85,6 +85,8 @@ export function HidingZoneMapPlacementChrome({
       ? zoneTool.selectedStation.id
       : null;
   const [chosenFlash, setChosenFlash] = useState(false);
+  const previousSnappedIdRef = useRef<string | null>(null);
+  const wasSnappingRef = useRef(zoneTool.snapping);
 
   // Layout: sync step before paint so mapPickEnabled / stations layer match overlay.
   useLayoutEffect(() => {
@@ -92,10 +94,24 @@ export function HidingZoneMapPlacementChrome({
   }, [onStepChange, step]);
 
   useEffect(() => {
+    const wasSnapping = wasSnappingRef.current;
+    wasSnappingRef.current = zoneTool.snapping;
+
     if (!snappedStationId) {
+      previousSnappedIdRef.current = null;
       setChosenFlash(false);
       return;
     }
+
+    const isSnapEdge =
+      wasSnapping && !zoneTool.snapping && previousSnappedIdRef.current !== snappedStationId;
+
+    previousSnappedIdRef.current = snappedStationId;
+
+    if (!isSnapEdge) {
+      return;
+    }
+
     setChosenFlash(true);
     const timeoutId = window.setTimeout(() => {
       setChosenFlash(false);
@@ -103,7 +119,7 @@ export function HidingZoneMapPlacementChrome({
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [snappedStationId]);
+  }, [snappedStationId, zoneTool.snapping]);
 
   const toolTitle = moveMode ? "Move zone" : "Set zone";
   const questionPrompt = zoneTool.manualMode

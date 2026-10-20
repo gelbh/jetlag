@@ -815,12 +815,17 @@ export function HiderMapScreen() {
 
   const draftCenterPinActive =
     zoneTool.wizardOpen && (hidingZoneStepId === "location" || hidingZoneStepId === "confirm");
+  const selectedStationCenter = useMemo((): LatLngTuple | null => {
+    const station = zoneTool.selectedStation;
+    if (!station) {
+      return null;
+    }
+    return [station.lat, station.lng];
+  }, [zoneTool.selectedStation]);
   const draftCenterPin: LatLngTuple | null = draftCenterPinActive
     ? zoneTool.manualMode
       ? zoneTool.manualCenter
-      : zoneTool.selectedStation
-        ? [zoneTool.selectedStation.lat, zoneTool.selectedStation.lng]
-        : null
+      : selectedStationCenter
     : null;
   // Display-only; Confirm keeps tool-state center / previewCircle.
   const draftDisplayCenter = useHidingZoneDraftDisplayCenter(draftCenterPin);
