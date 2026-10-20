@@ -4,7 +4,8 @@
 
 import { Button } from "@mantine/core";
 import { CheckIcon } from "@phosphor-icons/react";
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { HIDING_ZONE_PIN_CHOSEN_MS } from "@/components/hider/hidingZoneDraftPinTravel";
 import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
 import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 import { TransitStationPicker } from "@/components/hider/TransitStationPicker";
@@ -79,11 +80,30 @@ export function HidingZoneMapPlacementChrome({
 }: HidingZoneMapPlacementChromeProps) {
   const step = resolveStep(moveMode, zoneTool.methodChosen, zoneTool.hasPlacement);
   const showStationPicker = !zoneTool.manualMode && (step === "location" || step === "confirm");
+  const snappedStationId =
+    zoneTool.manualMode && zoneTool.selectedStation && !zoneTool.snapping
+      ? zoneTool.selectedStation.id
+      : null;
+  const [chosenFlash, setChosenFlash] = useState(false);
 
   // Layout: sync step before paint so mapPickEnabled / stations layer match overlay.
   useLayoutEffect(() => {
     onStepChange?.(step);
   }, [onStepChange, step]);
+
+  useEffect(() => {
+    if (!snappedStationId) {
+      setChosenFlash(false);
+      return;
+    }
+    setChosenFlash(true);
+    const timeoutId = window.setTimeout(() => {
+      setChosenFlash(false);
+    }, HIDING_ZONE_PIN_CHOSEN_MS);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [snappedStationId]);
 
   const toolTitle = moveMode ? "Move zone" : "Set zone";
   const questionPrompt = zoneTool.manualMode
@@ -103,7 +123,8 @@ export function HidingZoneMapPlacementChrome({
   const midSlot = showMid ? (
     <div
       data-testid="hiding-zone-map-placement-mid"
-      className="mx-auto w-full max-w-[22rem]"
+      data-chosen={chosenFlash ? "true" : undefined}
+      className={`mx-auto w-full max-w-[22rem]${chosenFlash ? " annotation-pulse" : ""}`}
       style={{
         ...mapChromeSurfaceStyles,
         borderRadius: 16,
