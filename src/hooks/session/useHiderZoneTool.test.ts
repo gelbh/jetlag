@@ -1,6 +1,9 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { GameArea } from "../../domain/map/annotations";
+import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import type { HidingZoneRecord, TransitStation } from "../../domain/session/hiding/hidingZone";
+import type { HidingZoneStationsOptions } from "../../services/geo/matching/transit";
 import { createTestGameArea } from "../../test/fixtures/sessions";
 import { useHiderZoneTool } from "./useHiderZoneTool";
 
@@ -8,7 +11,13 @@ const writeHidingZone = vi.hoisted(() => vi.fn());
 const enqueueMoveTimerIntent = vi.hoisted(() => vi.fn());
 const isEffectivelyOfflineNow = vi.hoisted(() => vi.fn(() => false));
 const fetchTransitStationsForHidingZoneViewport = vi.hoisted(() =>
-  vi.fn(async (): Promise<TransitStation[]> => []),
+  vi.fn(
+    async (
+      _viewport: MapViewportBounds,
+      _gameArea: GameArea,
+      _options?: HidingZoneStationsOptions,
+    ): Promise<TransitStation[]> => [],
+  ),
 );
 const commitWrite = vi.hoisted(() =>
   vi.fn((_label: string, run: () => Promise<void>) => {
@@ -358,6 +367,90 @@ describe("useHiderZoneTool", () => {
     );
   });
 
+  describe("Search this area", () => {
+    const viewport = { south: 53.34, west: -6.27, north: 53.36, east: -6.25 };
+    const priorStation = { id: "prior", name: "Prior", lat: 53.35, lng: -6.26 };
+
+    it("clears loading and keeps prior stations when Overpass search times out", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockResolvedValueOnce([priorStation]);
+      const { result } = renderZoneTool({ existingZone: null });
+
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+      expect(result.current.stations).toEqual([priorStation]);
+
+      fetchTransitStationsForHidingZoneViewport.mockRejectedValueOnce(
+        new Error("Couldn't load transit stations for this area."),
+      );
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+
+      expect(result.current.stationsLoading).toBe(false);
+      expect(result.current.stationsError).toMatch(/Couldn't load transit stations/i);
+      expect(result.current.stations).toEqual([priorStation]);
+    });
+
+    it("applies late onStations results after a timed-out search", async () => {
+      const lateStation = { id: "late", name: "Late", lat: 53.352, lng: -6.262 };
+      fetchTransitStationsForHidingZoneViewport.mockImplementationOnce(
+        async (_viewport, _gameArea, options) => {
+          window.setTimeout(() => {
+            options?.onStations?.([lateStation]);
+          }, 50);
+          return Promise.reject(new Error("Couldn't load transit stations for this area."));
+        },
+      );
+      const { result } = renderZoneTool({ existingZone: null });
+
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+      expect(result.current.stationsError).toMatch(/Couldn't load transit stations/i);
+      expect(result.current.stations).toEqual([]);
+
+      await act(async () => {
+        await new Promise((resolve) => {
+          window.setTimeout(resolve, 60);
+        });
+      });
+
+      expect(result.current.stations).toEqual([lateStation]);
+      expect(result.current.stationsError).toBeNull();
+    });
+
+    it("ignores a late onStations result after a newer search started", async () => {
+      const newer = { id: "newer", name: "Newer", lat: 53.351, lng: -6.261 };
+      let staleOnStations: ((stations: TransitStation[]) => void) | undefined;
+
+      fetchTransitStationsForHidingZoneViewport.mockImplementationOnce(
+        async (_viewport, _gameArea, options) => {
+          staleOnStations = options?.onStations;
+          return Promise.reject(new Error("Couldn't load transit stations for this area."));
+        },
+      );
+      const { result } = renderZoneTool({ existingZone: null });
+
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+
+      fetchTransitStationsForHidingZoneViewport.mockResolvedValueOnce([newer]);
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+      expect(result.current.stations).toEqual([newer]);
+
+      await act(async () => {
+        staleOnStations?.([priorStation]);
+      });
+
+      expect(result.current.stations).toEqual([newer]);
+      expect(result.current.stationsLoading).toBe(false);
+    });
+  });
+
   describe("tap-map snap lookup", () => {
     const tap: [number, number] = [53.35, -6.26];
     const nearTap = { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 };
@@ -458,25 +551,18 @@ describe("useHiderZoneTool", () => {
       expect(result.current.manualCenter).toEqual(tap);
     });
 
-    it("gives up after the timeout so Confirm saves the tapped point", async () => {
-      vi.useFakeTimers();
-      try {
-        fetchTransitStationsForHidingZoneViewport.mockReturnValue(new Promise(() => {}));
-        const { result } = renderTapMap();
+    it("gives up when Overpass times out so Confirm saves the tapped point", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockRejectedValueOnce(
+        new Error("Couldn't load transit stations for this area."),
+      );
+      const { result } = renderTapMap();
 
-        act(() => {
-          result.current.handleMapClick(tap);
-        });
-        expect(result.current.snapping).toBe(true);
-        await act(async () => {
-          await vi.advanceTimersByTimeAsync(4000);
-        });
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
 
-        expect(result.current.snapping).toBe(false);
-        expect(result.current.manualCenter).toEqual(tap);
-      } finally {
-        vi.useRealTimers();
-      }
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.manualCenter).toEqual(tap);
     });
 
     it("skips the lookup while offline", async () => {
