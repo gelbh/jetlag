@@ -195,6 +195,7 @@ export function HidingZoneMapPlacementChrome({
           type="button"
           fullWidth
           variant="default"
+          disabled={zoneTool.saving}
           onClick={onDismiss}
           styles={{
             root: {

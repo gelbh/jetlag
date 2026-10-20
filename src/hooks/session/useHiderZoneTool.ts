@@ -58,7 +58,7 @@ interface UseHiderZoneToolParams {
   mapPickEnabled?: boolean;
   /** Board economy: require a Move card in hand before starting relocate. */
   hasMoveCard?: () => boolean;
-  /** Board economy: discard Move (and hand) when the relocate is queued. */
+  /** Board economy: discard Move (and hand) when the new zone is confirmed. */
   consumeMoveCard?: () => Promise<void>;
 }
 
@@ -124,9 +124,15 @@ export function useHiderZoneTool({
       return;
     }
     const prev = window.history.state;
+    const prevObj =
+      prev && typeof prev === "object" ? (prev as Record<string, unknown>) : ({} as const);
+    const prevIdx = typeof prevObj.idx === "number" ? prevObj.idx : 0;
+    // Mint a new idx/key so React Router POP accounting does not see delta 0.
     window.history.pushState(
       {
-        ...(prev && typeof prev === "object" ? prev : null),
+        ...prevObj,
+        idx: prevIdx + 1,
+        key: `jlz-${Date.now().toString(36)}`,
         [ZONE_WIZARD_HISTORY_KEY]: true,
       },
       "",
@@ -327,29 +333,20 @@ export function useHiderZoneTool({
         moveInProgress: true,
       }),
     );
-    zoneAcked.then(
-      () => {
-        // Discard the Move card only once the relocate is accepted (as before).
-        if (consumeMoveCard) {
-          commitWrite("economy.update", consumeMoveCard);
-        }
-      },
-      (nextError: unknown) => {
-        if (moveAttemptRef.current !== attempt) {
-          return;
-        }
-        // Compensate the pause so a rejected Move cannot leave the timer stopped.
-        moveAttemptRef.current = 0;
-        resumeTimerForMove();
-        applyWizardClosed({ resumeIfMove: false });
-        abandonZoneWizardHistory();
-        setError(zoneWriteErrorMessage(nextError));
-      },
-    );
+    zoneAcked.then(undefined, (nextError: unknown) => {
+      if (moveAttemptRef.current !== attempt) {
+        return;
+      }
+      // Compensate the pause so a rejected Move cannot leave the timer stopped.
+      moveAttemptRef.current = 0;
+      resumeTimerForMove();
+      applyWizardClosed({ resumeIfMove: false });
+      abandonZoneWizardHistory();
+      setError(zoneWriteErrorMessage(nextError));
+    });
   }, [
     abandonZoneWizardHistory,
     applyWizardClosed,
-    consumeMoveCard,
     ensureWriteAccessIfOnline,
     existingZone,
     hasMoveCard,
@@ -532,6 +529,10 @@ export function useHiderZoneTool({
       applyWizardClosed({ resumeIfMove: false });
       if (wasMove) {
         resumeTimerForMove();
+        // Discard Move only after a successful relocate so Cancel/Back cannot burn it.
+        if (consumeMoveCard) {
+          commitWrite("economy.update", consumeMoveCard);
+        }
       }
       abandonZoneWizardHistory();
     } catch (nextError) {
@@ -541,6 +542,7 @@ export function useHiderZoneTool({
   }, [
     abandonZoneWizardHistory,
     applyWizardClosed,
+    consumeMoveCard,
     ensureWriteAccessIfOnline,
     existingZone,
     hiderUid,

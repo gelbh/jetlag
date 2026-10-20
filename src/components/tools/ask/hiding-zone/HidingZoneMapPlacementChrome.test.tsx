@@ -372,4 +372,24 @@ describe("HidingZoneMapPlacementChrome", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Cancel$/i }));
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
+
+  it("disables Cancel while saving", () => {
+    const onDismiss = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: false,
+          selectedStation: { id: "s1", name: "Station", lat: 53.3, lng: -6.2 },
+          hasPlacement: true,
+          saving: true,
+        })}
+        onSearchThisArea={vi.fn()}
+        onDismiss={onDismiss}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /^Cancel$/i })).toBeDisabled();
+  });
 });

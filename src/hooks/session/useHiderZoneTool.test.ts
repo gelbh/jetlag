@@ -155,7 +155,7 @@ describe("useHiderZoneTool", () => {
     ]);
   });
 
-  it("discards the Move card only after the zone write is acknowledged", async () => {
+  it("discards the Move card only after confirm, not after move start ack", async () => {
     let ackZone: () => void = () => {};
     writeHidingZone.mockReturnValueOnce(
       new Promise<void>((resolve) => {
@@ -173,9 +173,42 @@ describe("useHiderZoneTool", () => {
     await act(async () => {
       ackZone();
     });
+    expect(consumeMoveCard).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.setSelectedStation({ id: "station-2", name: "Other", lat: 53.4, lng: -6.3 });
+    });
+    await act(async () => {
+      await result.current.confirmZone();
+    });
 
     expect(consumeMoveCard).toHaveBeenCalledTimes(1);
     expect(labels()).toContain("economy.update");
+  });
+
+  it("does not discard the Move card when Cancel closes a started move", async () => {
+    let ackZone: () => void = () => {};
+    writeHidingZone.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        ackZone = resolve;
+      }),
+    );
+    const consumeMoveCard = vi.fn(async () => undefined);
+    const { result } = renderZoneTool({ consumeMoveCard, hasMoveCard: () => true });
+
+    await act(async () => {
+      await result.current.startMove();
+    });
+    await act(async () => {
+      ackZone();
+    });
+
+    act(() => {
+      result.current.closeWizardFromUser();
+    });
+
+    expect(consumeMoveCard).not.toHaveBeenCalled();
+    expect(labels()).not.toContain("economy.update");
   });
 
   it("ignores a late Move rejection after the new zone was confirmed", async () => {
@@ -589,14 +622,26 @@ describe("useHiderZoneTool", () => {
   });
 
   describe("history Back and user dismiss", () => {
-    it("openWizard pushes a zone-wizard history marker", () => {
+    it("openWizard pushes a zone-wizard history marker with a new router idx", () => {
+      window.history.replaceState({ idx: 3, key: "rrr", usr: null }, "");
       const { result } = renderZoneTool({ existingZone: null });
 
       act(() => {
         result.current.openWizard();
       });
 
-      expect(window.history.state).toEqual(expect.objectContaining({ jlZoneWizard: true }));
+      expect(window.history.state).toEqual(
+        expect.objectContaining({
+          jlZoneWizard: true,
+          idx: 4,
+          usr: null,
+        }),
+      );
+      expect(window.history.state).toEqual(
+        expect.objectContaining({
+          key: expect.stringMatching(/^jlz-/),
+        }),
+      );
       expect(result.current.wizardOpen).toBe(true);
     });
 
