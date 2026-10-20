@@ -971,17 +971,18 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
           && request.resource.data.status == 'cancelled'
         ) || (
-          isSessionMember(sessionId)
+          isSessionHost(sessionId)
           && resource.data.status == 'pending'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deadlineExpiredAt'])
           && request.resource.data.deadlineExpiredAt is string
+          && request.resource.data.deadlineExpiredAt.size() > 0
         );
         allow delete: if false;
       }
 
       match /hidingZones/{hiderUid} {
         allow read: if isSessionMember(sessionId);
-        allow create, update: if isHiderMember(sessionId)
+        allow create: if isHiderMember(sessionId)
           && request.auth.uid == hiderUid
           && request.resource.data.stationId is string
           && request.resource.data.stationName is string
@@ -991,7 +992,26 @@ service cloud.firestore {
           && request.resource.data.radiusMeters is number
           && request.resource.data.geometryJson is string
           && request.resource.data.status == 'confirmed'
-          && request.resource.data.confirmedAt is string;
+          && request.resource.data.confirmedAt is string
+          && (!('moveInProgress' in request.resource.data) || request.resource.data.moveInProgress == false);
+        allow update: if (
+          isHiderMember(sessionId)
+          && request.auth.uid == hiderUid
+          && request.resource.data.stationId is string
+          && request.resource.data.stationName is string
+          && request.resource.data.center is map
+          && request.resource.data.center.lat is number
+          && request.resource.data.center.lng is number
+          && request.resource.data.radiusMeters is number
+          && request.resource.data.geometryJson is string
+          && request.resource.data.status == 'confirmed'
+          && request.resource.data.confirmedAt is string
+          && (!('moveInProgress' in request.resource.data) || request.resource.data.moveInProgress is bool)
+        ) || (
+          isSessionHost(sessionId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['moveInProgress'])
+          && request.resource.data.moveInProgress == false
+        );
         allow delete: if false;
       }
 

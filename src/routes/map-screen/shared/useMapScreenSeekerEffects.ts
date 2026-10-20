@@ -86,6 +86,7 @@ export function useMapScreenSeekerEffects({
     sessionRules,
     pendingQuestions,
     hidingZones,
+    memberUids: session?.memberUids ?? [],
     hidingTimerRunning: isHidingTimerEffectivelyRunning(
       timer.running,
       Boolean(session?.timerRunningSince),
