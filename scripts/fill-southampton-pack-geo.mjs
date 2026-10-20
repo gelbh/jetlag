@@ -116,12 +116,19 @@ function inBbox(lat, lng, bbox) {
 }
 
 function buildCategoryQuery(typeQid, extra = "") {
-  // UK + coords first; inverted type path; labels via rdfs.
+  // UK + coords first; inverted type path; skip dissolved/closed; labels via rdfs.
+  // P5817 closed states: permanently closed, abandoned, out of service, demolished.
   return `
 SELECT DISTINCT ?item ?coord ?label WHERE {
   ?item wdt:P17 wd:Q145 ;
         wdt:P625 ?coord .
   wd:${typeQid} ^wdt:P279*/^wdt:P31 ?item .
+  FILTER NOT EXISTS { ?item wdt:P576 ?_dissolved }
+  FILTER NOT EXISTS { ?item wdt:P3999 ?_dateClosed }
+  FILTER NOT EXISTS {
+    VALUES ?closedState { wd:Q56556915 wd:Q811701 wd:Q109551065 wd:Q19860854 }
+    ?item wdt:P5817 ?closedState .
+  }
   ${extra}
   OPTIONAL {
     ?item rdfs:label ?label .
