@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
-import { withTimeout } from "@/services/core/withTimeout";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import { enqueueMoveTimerIntent } from "@/services/session/sessionIntents";
 import { expandBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
@@ -27,8 +26,6 @@ import { useLatestRequest } from "../forms/useLatestRequest";
 const MOVE_MIN_DISTANCE_METERS = 50;
 /** Half-width of the Overpass box searched around a map tap; the margin keeps the snap radius inside it. */
 const TAP_SNAP_SEARCH_METERS = STATION_SNAP_METERS + 50;
-/** Overpass retries can take minutes; past this the tap keeps its own point so Confirm stays usable. */
-const TAP_SNAP_TIMEOUT_MS = 4000;
 const MOVE_PLAYED_MESSAGE =
   "Move card played. Timer paused. Seekers must stay put. Hider is relocating.";
 
@@ -119,8 +116,23 @@ export function useHiderZoneTool({
       setStationsLoading(true);
       setStationsError(null);
 
+      const applyStations = (loaded: TransitStation[]) => {
+        if (!isLatestRequest(requestId) || loaded.length === 0) {
+          return;
+        }
+        setStations(loaded);
+        setStationsError(null);
+        setSelectedStation((current) =>
+          current && loaded.some((station) => station.id === current.id) ? current : null,
+        );
+      };
+
       try {
-        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea);
+        // GTFS load is uncapped; Overpass is bounded inside the fetcher. onStations
+        // still applies late Overpass hits after that Overpass timeout.
+        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
+          onStations: applyStations,
+        });
         if (!isLatestRequest(requestId)) {
           return;
         }
@@ -282,25 +294,20 @@ export function useHiderZoneTool({
       let station = nearestStation(point, stations);
       if (!station && !isEffectivelyOfflineNow()) {
         setSnapping(true);
-        const lookup = fetchTransitStationsForHidingZoneViewport(
+        const cacheNearby = (loaded: TransitStation[]) => {
+          if (loaded.length > 0 && isLatestRequest(stationsEpoch)) {
+            setStations((current) => dedupeTransitStations([...current, ...loaded]));
+          }
+        };
+        const nearby = await fetchTransitStationsForHidingZoneViewport(
           expandBoundingBox(
             { south: point[0], north: point[0], west: point[1], east: point[1] },
             TAP_SNAP_SEARCH_METERS,
           ),
           gameArea,
-        ).then(
-          (nearby) => {
-            // Cache even late results so the next nearby tap resolves without Overpass.
-            if (nearby.length > 0 && isLatestRequest(stationsEpoch)) {
-              setStations((current) => dedupeTransitStations([...current, ...nearby]));
-            }
-            return nearby;
-          },
-          (): TransitStation[] => [],
-        );
-        const nearby = await withTimeout(lookup, TAP_SNAP_TIMEOUT_MS).catch(
-          (): TransitStation[] => [],
-        );
+          { onStations: cacheNearby },
+        ).catch((): TransitStation[] => []);
+        cacheNearby(nearby);
         station = nearestStation(point, nearby);
       }
 

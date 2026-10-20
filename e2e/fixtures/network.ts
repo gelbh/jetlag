@@ -101,6 +101,33 @@ export async function blockExternalAssets(page: Page, options: BlockExternalAsse
       return;
     }
 
+    // Hiding-zone Search is GTFS-first. Stub local bundles so smoke stays on the
+    // deterministic "Dublin Central" names used by Overpass fixtures / specs.
+    if (isLocalAppRequest(url) && parsed.pathname.startsWith("/geo/gtfs/")) {
+      if (parsed.pathname.endsWith("/manifest.json")) {
+        await route.continue();
+        return;
+      }
+      const metroId = parsed.pathname.replace(/^\/geo\/gtfs\//, "").replace(/\.json$/, "");
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          metroId,
+          feedOnestopId: "e2e-stub",
+          builtAt: "2026-01-01T00:00:00.000Z",
+          stops: [
+            { id: "e2e-dublin-central", name: "Dublin Central", lat: 53.35, lng: -6.26 },
+            { id: "e2e-north", name: "North Station", lat: 53.38, lng: -6.3 },
+            { id: "e2e-south", name: "South Halt", lat: 53.32, lng: -6.22 },
+          ],
+          routes: [],
+          stopRouteIds: {},
+        }),
+      });
+      return;
+    }
+
     if (isLocalAppRequest(url)) {
       await route.continue();
       return;

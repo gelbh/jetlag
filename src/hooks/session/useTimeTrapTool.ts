@@ -51,8 +51,22 @@ export function useTimeTrapTool({
       setStationsLoading(true);
       setStationsError(null);
 
+      const applyStations = (loaded: TransitStation[]) => {
+        if (!isLatestRequest(requestId) || loaded.length === 0) {
+          return;
+        }
+        const valid = loaded.filter((station) => isValidHidingStation(station, gameArea));
+        if (valid.length === 0) {
+          return;
+        }
+        setStations(valid);
+        setStationsError(null);
+      };
+
       try {
-        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea);
+        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
+          onStations: applyStations,
+        });
         if (!isLatestRequest(requestId)) {
           return;
         }

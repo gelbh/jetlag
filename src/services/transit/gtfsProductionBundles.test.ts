@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { GtfsStaticBundle } from "./gtfsBundle";
+import type { GtfsBundleManifest, GtfsStaticBundle } from "./gtfsBundle";
 import {
   filterGtfsStopsForGameArea,
   gtfsStopsShareStationOrRoute,
@@ -9,14 +9,26 @@ import {
 } from "./gtfsRouteGraph";
 
 const ROOT = resolve(import.meta.dirname, "../../..");
+const GTFS_DIR = resolve(ROOT, "public/geo/gtfs");
 
 function loadProductionBundle(metroId: string): GtfsStaticBundle | null {
-  const path = resolve(ROOT, `public/geo/gtfs/${metroId}.json`);
+  const path = resolve(GTFS_DIR, `${metroId}.json`);
   try {
     return JSON.parse(readFileSync(path, "utf8")) as GtfsStaticBundle;
   } catch {
     return null;
   }
+}
+
+function shippedGtfsMetroIds(): string[] {
+  return readdirSync(GTFS_DIR)
+    .filter((name) => name.endsWith(".json") && name !== "manifest.json")
+    .map((name) => name.replace(/\.json$/, ""))
+    .sort();
+}
+
+function loadManifest(): GtfsBundleManifest {
+  return JSON.parse(readFileSync(resolve(GTFS_DIR, "manifest.json"), "utf8")) as GtfsBundleManifest;
 }
 
 const MIDTOWN_NYC = {
@@ -72,6 +84,30 @@ const CENTRAL_PRINCE_RUPERT = {
 };
 
 describe("production GTFS bundles", () => {
+  it("manifest lists every shipped metro with a resolvable bundlePath", () => {
+    const manifest = loadManifest();
+    const byId = new Map(manifest.metros.map((entry) => [entry.id, entry]));
+
+    for (const metroId of shippedGtfsMetroIds()) {
+      const entry = byId.get(metroId);
+      expect(entry, `manifest missing metro ${metroId}`).toBeDefined();
+      expect(entry!.bundlePath).toMatch(/^\/geo\/gtfs\/.+\.json$/);
+
+      const onDisk = resolve(ROOT, `public${entry!.bundlePath}`);
+      expect(existsSync(onDisk), `bundlePath missing on disk: ${entry!.bundlePath}`).toBe(true);
+
+      const bundle = JSON.parse(readFileSync(onDisk, "utf8")) as GtfsStaticBundle;
+      expect(bundle.metroId).toBe(metroId);
+      expect(entry!.feedOnestopId).toBe(bundle.feedOnestopId);
+      expect(entry!.builtAt).toBe(bundle.builtAt);
+      expect(entry!.stopCount).toBe(bundle.stops.length);
+      expect(entry!.routeCount).toBe(bundle.routes.length);
+    }
+
+    // Cheap loadGtfsBundle-resolution smoke: dublin must be findable like the runtime loader.
+    expect(byId.get("dublin")?.bundlePath).toBe("/geo/gtfs/dublin.json");
+  });
+
   it("NYC midtown play area uses full subway stop inventory", async () => {
     const bundle = loadProductionBundle("nyc");
     expect(bundle).not.toBeNull();
