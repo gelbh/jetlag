@@ -4,10 +4,6 @@ import { MOTION_MAP_CAMERA_SNAP_MS } from "@/domain/device/motion/motionTokens";
 import type { TransitStation } from "@/domain/session/hiding/hidingZone";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 
-function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
-}
-
 /** Pans (zoom unchanged) to the station picked for the hiding zone. Map drags interrupt it. */
 export function HidingZoneStationFocus({ station }: { station: TransitStation | null }) {
   const map = useMapLibreMap();
@@ -25,7 +21,7 @@ export function HidingZoneStationFocus({ station }: { station: TransitStation | 
       return;
     }
 
-    map.easeTo({ center: [lng, lat], duration: MOTION_MAP_CAMERA_SNAP_MS, easing: easeInOutCubic });
+    map.easeTo({ center: [lng, lat], duration: MOTION_MAP_CAMERA_SNAP_MS });
   }, [animate, lat, lng, map]);
 
   return null;
