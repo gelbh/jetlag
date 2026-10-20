@@ -811,8 +811,10 @@ export function useCreateSession() {
                 setupMode,
               } satisfies CreateRemoteSessionOptions)
             : undefined;
+        // Do not invent premium CS billing: coerce free even if the UI tier is premium.
+        const createTier = castleSiegeCreate !== undefined ? ("free" as const) : tier;
         const usePremiumCallable =
-          tier === "premium" &&
+          createTier === "premium" &&
           !useAccessClaimForPremium &&
           paidPremiumHost &&
           castleSiegeCreate === undefined;
@@ -821,7 +823,7 @@ export function useCreateSession() {
               createPremiumRemoteSession({
                 gameArea,
                 hostUid: user.uid,
-                tier,
+                tier: createTier,
                 transitMetroId: metroId,
                 hostRole: playerRole,
                 gameSize,
@@ -834,7 +836,7 @@ export function useCreateSession() {
               createRemoteSession(
                 gameArea,
                 user.uid,
-                tier,
+                createTier,
                 metroId,
                 playerRole,
                 gameSize,

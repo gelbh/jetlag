@@ -137,8 +137,9 @@ vi.mock("@/services/core/firebase/firebase", () => ({
   subscribeAuthBootstrapReady: () => () => {},
 }));
 
+const hasAccessClaim = vi.hoisted(() => vi.fn(async () => false));
 vi.mock("@/services/core/auth/accessControl", () => ({
-  hasAccessClaim: vi.fn(async () => false),
+  hasAccessClaim: (...args: unknown[]) => hasAccessClaim(...args),
   grantAccess: vi.fn(),
 }));
 
@@ -235,6 +236,8 @@ beforeEach(() => {
   suggestPlacesAtPoint.mockResolvedValue([]);
   isFirebaseConfigured.mockReturnValue(false);
   isCastleSiegeModeEnabled.mockReturnValue(false);
+  hasAccessClaim.mockReset();
+  hasAccessClaim.mockResolvedValue(false);
   createRemoteSession.mockClear();
   createPremiumRemoteSession.mockClear();
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
@@ -985,6 +988,7 @@ describe("CreateSession", () => {
       expect(createRemoteSession).toHaveBeenCalled();
     });
     expect(createPremiumRemoteSession).not.toHaveBeenCalled();
+    expect(createRemoteSession.mock.calls[0]?.[2]).toBe("free");
     const options = createRemoteSession.mock.calls[0]?.[9];
     expect(options).toEqual({
       mode: "castleSiege",
@@ -992,5 +996,49 @@ describe("CreateSession", () => {
       seriesLength: 3,
       setupMode: "fairSplit",
     });
+  });
+
+  it("coerces Castle Siege create tier to free when premium would otherwise be selected", async () => {
+    isCastleSiegeModeEnabled.mockReturnValue(true);
+    isFirebaseConfigured.mockReturnValue(true);
+    hasAccessClaim.mockResolvedValue(true);
+    parseBoundaryFile.mockResolvedValue(IMPORTED_AREA);
+    createRemoteSession.mockResolvedValue({
+      id: "session-cs-premium-ui",
+      code: "FREE",
+      gameArea: IMPORTED_AREA,
+      createdAt: new Date().toISOString(),
+      memberUids: ["host-1"],
+      memberRoles: { "host-1": "observer" },
+      gameSize: "medium",
+      distanceUnit: "imperial",
+      tier: "free",
+      mode: "castleSiege",
+    });
+
+    renderCreateSession();
+    const file = importBoundaryFile();
+    await waitFor(() => {
+      expect(parseBoundaryFile).toHaveBeenCalledWith(file);
+    });
+    goToRules();
+    // Session tier lives on the rules step; access claim defaults to premium.
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /^premium/i })).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+
+    fireEvent.click(screen.getByRole("radio", { name: /castle siege/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+
+    await waitFor(() => {
+      expect(createRemoteSession).toHaveBeenCalled();
+    });
+    expect(createPremiumRemoteSession).not.toHaveBeenCalled();
+    expect(createRemoteSession.mock.calls[0]?.[2]).toBe("free");
+    expect(createRemoteSession.mock.calls[0]?.[9]).toMatchObject({ mode: "castleSiege" });
   });
 });
