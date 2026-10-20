@@ -1,6 +1,6 @@
 import type { GameArea, SessionRecord } from "@/domain/map/annotations";
 import { BUNDLED_REGION_PACK_GEO_REVISION, type RegionPackId } from "@/domain/regions/regionPack";
-import { isKnownRegionPack } from "@/domain/regions/regionPackRegistry";
+import { getRegionPackConfig, isKnownRegionPack } from "@/domain/regions/regionPackRegistry";
 import type { CustomMatchingAreasByLevel } from "@/domain/session/catalog/sessionCustomContent";
 import {
   failedPlayAreaKeys,
@@ -14,14 +14,25 @@ import { loadRegionPackMatchingAreas, loadRegionPackPlayArea } from "./regionPac
 
 export { isPlayAreaReadySync, playAreaCacheKey, sessionUsesPackPlayArea };
 
-const MATCHING_ADMIN_LEVELS = [8, 9] as const;
-
-function hasBundledMatchingLevels(areas: CustomMatchingAreasByLevel | undefined): boolean {
-  if (!areas) {
+/**
+ * Session bundled matching is complete when level 8 is present, and level 9
+ * when the pack ships a secondary asset (dual-depth metros). Single-depth packs
+ * (no secondary) are complete with level 8 only.
+ */
+export function hasBundledMatchingLevels(
+  areas: CustomMatchingAreasByLevel | undefined,
+  regionPackId?: RegionPackId,
+): boolean {
+  if (!areas?.[8]) {
     return false;
   }
 
-  return MATCHING_ADMIN_LEVELS.every((level) => Boolean(areas[level]));
+  const config = regionPackId ? getRegionPackConfig(regionPackId) : undefined;
+  if (config && !config.geoAssets.secondary) {
+    return true;
+  }
+
+  return Boolean(areas[9]);
 }
 
 function bundledGeoRevisionIsCurrent(revision: number | undefined): boolean {
@@ -62,7 +73,7 @@ export async function resolveSessionMatchingAreas(
   session: SessionMatchingAreasInput,
 ): Promise<CustomMatchingAreasByLevel | undefined> {
   if (
-    hasBundledMatchingLevels(session.customMatchingAreas) &&
+    hasBundledMatchingLevels(session.customMatchingAreas, session.regionPackId) &&
     bundledGeoRevisionIsCurrent(session.bundledGeoRevision)
   ) {
     return session.customMatchingAreas;
