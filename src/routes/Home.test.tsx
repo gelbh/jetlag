@@ -16,7 +16,7 @@ const mockEnsureAnonymousUser = vi.fn();
 const mockGetRemoteSessionById = vi.fn();
 const mockEnsureRemoteSessionMembership = vi.fn();
 const mockUsePermanentAuthUser = vi.fn(() => ({
-  user: null,
+  user: null as { uid: string; isAnonymous: boolean; email?: string } | null,
   isPermanent: false,
   authReady: true,
 }));
