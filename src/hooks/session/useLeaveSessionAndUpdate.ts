@@ -69,6 +69,7 @@ export function useLeaveSessionAndUpdate(): {
 
     const isLocalSession = session.id === LOCAL_SESSION_ID;
     setLeaving(true);
+    let leaveError: Error | null = null;
     try {
       if (!isLocalSession) {
         const { ensureAnonymousUser } = await loadFirebase();
@@ -115,10 +116,11 @@ export function useLeaveSessionAndUpdate(): {
       }
       applyUpdate();
     } catch (error) {
-      // Re-throw after finally clears leaving (React Compiler needs catch with finally).
-      throw error;
-    } finally {
-      setLeaving(false);
+      leaveError = error instanceof Error ? error : new Error(LEAVE_FAILED_MESSAGE);
+    }
+    setLeaving(false);
+    if (leaveError) {
+      throw leaveError;
     }
   };
 
