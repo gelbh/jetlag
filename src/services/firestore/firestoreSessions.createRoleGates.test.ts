@@ -147,6 +147,15 @@ describe("createRemoteSession role-gate bootstrap", () => {
   it("persists castleSiege mode fields and observer host on create", async () => {
     clientEnvUsesFirebaseEmulator.mockReturnValue(true);
 
+    const dials = {
+      zoneRadiusMeters: 500,
+      turnLengthSeconds: 300,
+      maxRounds: 12,
+      beltWidthMeters: 200,
+      breachToleranceMeters: 50,
+      siegeLimitSeconds: 1800,
+    };
+
     const session = await createRemoteSession(
       AREA,
       "host-1",
@@ -162,6 +171,7 @@ describe("createRemoteSession role-gate bootstrap", () => {
         hostCastleSiegeRole: "teamB",
         seriesLength: 3,
         setupMode: "fairSplit",
+        dials,
       },
     );
 
@@ -171,6 +181,7 @@ describe("createRemoteSession role-gate bootstrap", () => {
       castleSiegeRoles: { "host-1": "teamB" },
       seriesLength: 3,
       setupMode: "fairSplit",
+      dials,
     });
 
     expect(batchSet).toHaveBeenCalledWith(
@@ -181,6 +192,7 @@ describe("createRemoteSession role-gate bootstrap", () => {
         castleSiegeRoles: { "host-1": "teamB" },
         seriesLength: 3,
         setupMode: "fairSplit",
+        dials,
       }),
     );
   });
