@@ -114,6 +114,7 @@ export type HiderMapScreenController = {
     | "writesEnabled"
     | "openWizard"
     | "closeWizard"
+    | "closeWizardFromUser"
     | "startMove"
   >;
   hidingZonePanelTool: HidingZonePanelTool;
@@ -452,7 +453,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           onStepChange={onHidingZoneStepChange}
           onSearchThisArea={onSearchThisArea}
           writesEnabled={zoneTool.writesEnabled}
-          onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+          onDismiss={zoneTool.closeWizardFromUser}
           onBackToMethod={
             zoneTool.moveMode
               ? undefined
@@ -472,7 +473,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           canCommit={false}
           commitLabel="CONFIRM"
           onCommit={() => undefined}
-          onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+          onDismiss={zoneTool.closeWizardFromUser}
           isSubmitting={false}
           error={hidingZonePanelTool.error}
           modeBody={
@@ -480,7 +481,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
               moveMode={zoneTool.moveMode}
               zoneTool={hidingZonePanelTool}
               onStepChange={onHidingZoneStepChange}
-              onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+              onDismiss={zoneTool.closeWizardFromUser}
             />
           }
           onExitTransitionEnd={zoneAskExit.onExitTransitionEnd}

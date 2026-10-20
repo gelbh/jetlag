@@ -61,7 +61,7 @@ export function HidingZoneHudBody({
 
       {zoneTool.error ? <InlineError>{zoneTool.error}</InlineError> : null}
 
-      {onDismiss && !moveMode ? (
+      {onDismiss ? (
         <button
           type="button"
           className="btn-secondary pointer-events-auto w-full"

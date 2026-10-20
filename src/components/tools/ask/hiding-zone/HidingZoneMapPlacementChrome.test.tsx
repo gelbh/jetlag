@@ -276,7 +276,8 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(screen.getByRole("button", { name: /^Confirm$/i })).toBeDisabled();
   });
 
-  it("keeps move-mode copy, 50 m warning, and gated confirm without Cancel", () => {
+  it("keeps move-mode copy, 50 m warning, gated confirm, and Cancel when onDismiss is set", () => {
+    const onDismiss = vi.fn();
     renderHud(
       <HidingZoneMapPlacementChrome
         moveMode
@@ -288,7 +289,7 @@ describe("HidingZoneMapPlacementChrome", () => {
           hasPlacement: false,
         })}
         onSearchThisArea={vi.fn()}
-        onDismiss={vi.fn()}
+        onDismiss={onDismiss}
       />,
     );
 
@@ -298,6 +299,7 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(screen.getByText(/at least 50 m from your previous zone/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/search stations/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Confirm$/i })).toBeDisabled();
-    expect(screen.queryByRole("button", { name: /^Cancel$/i })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^Cancel$/i }));
+    expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 });

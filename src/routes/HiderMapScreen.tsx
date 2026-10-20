@@ -1021,6 +1021,7 @@ export function HiderMapScreen() {
               writesEnabled: zoneTool.writesEnabled,
               openWizard: zoneTool.openWizard,
               closeWizard: zoneTool.closeWizard,
+              closeWizardFromUser: zoneTool.closeWizardFromUser,
               startMove: zoneTool.startMove,
             },
             hidingZonePanelTool,

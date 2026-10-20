@@ -191,7 +191,7 @@ export function HidingZoneMapPlacementChrome({
       >
         {zoneTool.saving ? "Saving…" : "Confirm"}
       </Button>
-      {onDismiss && !moveMode ? (
+      {onDismiss ? (
         <Button
           type="button"
           fullWidth

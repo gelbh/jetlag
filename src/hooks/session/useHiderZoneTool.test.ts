@@ -527,4 +527,86 @@ describe("useHiderZoneTool", () => {
       expect(result.current.manualCenter).toBeNull();
     });
   });
+
+  describe("history Back and user dismiss", () => {
+    it("openWizard pushes a zone-wizard history marker", () => {
+      const { result } = renderZoneTool({ existingZone: null });
+
+      act(() => {
+        result.current.openWizard();
+      });
+
+      expect(window.history.state).toEqual(expect.objectContaining({ jlZoneWizard: true }));
+      expect(result.current.wizardOpen).toBe(true);
+    });
+
+    it("startMove pushes a zone-wizard history marker", async () => {
+      const { result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+
+      expect(window.history.state).toEqual(expect.objectContaining({ jlZoneWizard: true }));
+      expect(result.current.moveMode).toBe(true);
+    });
+
+    it("popstate closes an open create wizard", () => {
+      const { result } = renderZoneTool({ existingZone: null });
+
+      act(() => {
+        result.current.openWizard();
+      });
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+    });
+
+    it("popstate during move closes the wizard and resumes the timer", async () => {
+      const { props, result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      expect(props.pauseTimer).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+      expect(result.current.moveMode).toBe(false);
+      expect(props.resumeTimer).toHaveBeenCalledTimes(1);
+    });
+
+    it("closeWizardFromUser during move resumes the timer", async () => {
+      const { props, result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+
+      act(() => {
+        result.current.closeWizardFromUser();
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+      expect(result.current.moveMode).toBe(false);
+      expect(props.resumeTimer).toHaveBeenCalledTimes(1);
+    });
+
+    it("closeWizardFromUser on create closes without resuming the timer", () => {
+      const { props, result } = renderZoneTool({ existingZone: null });
+
+      act(() => {
+        result.current.openWizard();
+        result.current.closeWizardFromUser();
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+      expect(props.resumeTimer).not.toHaveBeenCalled();
+    });
+  });
 });
