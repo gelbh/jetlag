@@ -20,6 +20,7 @@ import { VersionChangelogSheet } from "@/components/ui/sheets/VersionChangelogSh
 import { APP_VERSION } from "@/domain/device/changelog";
 import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { useHydrated } from "@/hooks/app/useHydrated";
 import { usePermanentAuthUser } from "@/hooks/billing/usePermanentAuthUser";
 import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSession";
 import { expectsPermanentSignIn } from "@/services/core/auth/persistedAuthHint";
@@ -32,10 +33,12 @@ const footerLinkStyle = { display: "inline-flex", alignItems: "center", minHeigh
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } = useContinueActiveSession();
   const { isPermanent, authReady } = usePermanentAuthUser();
+  const hydrated = useHydrated();
   const [permanentHint] = useState(expectsPermanentSignIn);
   const firebaseOn = isFirebaseConfigured();
-  // Until ready: hint → treat as signed-in chrome; else guest chrome (no Friends flash for returning users).
-  const treatAsPermanent = firebaseOn && (isPermanent || (!authReady && permanentHint));
+  // Same family as AccountSignInGate: ignore storage hint until hydrated so prerender matches
+  // first client paint. Until authReady: hint → signed-in chrome; else guest (no Friends flash).
+  const treatAsPermanent = firebaseOn && (isPermanent || (hydrated && !authReady && permanentHint));
   const showGuestAuthEntry = firebaseOn && !treatAsPermanent;
   const showAccountFeatures = !firebaseOn || treatAsPermanent;
   const [changelogOpen, setChangelogOpen] = useState(false);

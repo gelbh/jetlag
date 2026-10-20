@@ -21,6 +21,7 @@ const mockUsePermanentAuthUser = vi.fn(() => ({
   authReady: true,
 }));
 const mockExpectsPermanentSignIn = vi.fn(() => false);
+const mockUseHydrated = vi.fn(() => true);
 
 function renderHome(options?: { resetStores?: boolean }) {
   return renderWithRouter(
@@ -55,6 +56,10 @@ vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
 
 vi.mock("@/services/core/auth/persistedAuthHint", () => ({
   expectsPermanentSignIn: () => mockExpectsPermanentSignIn(),
+}));
+
+vi.mock("@/hooks/app/useHydrated", () => ({
+  useHydrated: () => mockUseHydrated(),
 }));
 
 vi.mock("@/hooks/billing/usePremiumEntitlements", () => ({
@@ -95,6 +100,7 @@ describe("Home", () => {
       authReady: true,
     });
     mockExpectsPermanentSignIn.mockReturnValue(false);
+    mockUseHydrated.mockReturnValue(true);
     mockEnsureAnonymousUser.mockResolvedValue({ uid: "user-new" });
     useSessionStore.getState().setSession(null);
     vi.stubGlobal("matchMedia", (query: string) => ({
@@ -171,6 +177,51 @@ describe("Home", () => {
     expect(screen.getByRole("link", { name: "Account" })).toHaveAttribute("href", "/account");
     expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Premium" })).not.toBeInTheDocument();
+  });
+
+  it("shows features + Account while auth is not ready when hydrated and permanent hint is set", () => {
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    mockUseHydrated.mockReturnValue(true);
+    mockExpectsPermanentSignIn.mockReturnValue(true);
+    mockUsePermanentAuthUser.mockReturnValue({
+      user: null,
+      isPermanent: false,
+      authReady: false,
+    });
+    renderHome();
+    expect(screen.getByRole("link", { name: "Friends" })).toHaveAttribute("href", "/friends");
+    expect(screen.getByRole("link", { name: "Account" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument();
+  });
+
+  it("shows only Log in while auth is not ready when hydrated and permanent hint is clear", () => {
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    mockUseHydrated.mockReturnValue(true);
+    mockExpectsPermanentSignIn.mockReturnValue(false);
+    mockUsePermanentAuthUser.mockReturnValue({
+      user: null,
+      isPermanent: false,
+      authReady: false,
+    });
+    renderHome();
+    expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: "Friends" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Account" })).not.toBeInTheDocument();
+  });
+
+  it("ignores permanent hint before hydrate so More matches the prerender guest set", () => {
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    mockUseHydrated.mockReturnValue(false);
+    mockExpectsPermanentSignIn.mockReturnValue(true);
+    mockUsePermanentAuthUser.mockReturnValue({
+      user: null,
+      isPermanent: false,
+      authReady: false,
+    });
+    renderHome();
+    expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: "Friends" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Account" })).not.toBeInTheDocument();
   });
 
   it("continues a local session without remote verification", () => {
