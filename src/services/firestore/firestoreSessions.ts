@@ -23,6 +23,7 @@ export {
 } from "./sessions/lifecycle";
 export { handleFirestoreListenError } from "./sessions/listenError";
 export {
+  type CreateRemoteSessionOptions,
   createRemoteSession,
   type EnsureRemoteSessionMembershipOptions,
   ensureRemoteSessionMembership,

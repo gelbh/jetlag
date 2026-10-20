@@ -259,4 +259,64 @@ describe("serializeSession", () => {
     expect(restored.gameResultId).toBe("result-1");
     expect(restored.roundNumber).toBe(2);
   });
+
+  it("round-trips castleSiege session fields", () => {
+    const payload = buildSessionDocument(
+      "CS01",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "observer",
+      "medium",
+      {},
+      "imperial",
+      undefined,
+      {
+        mode: "castleSiege",
+        castleSiegeRoles: { "host-uid": "teamA" },
+        seriesLength: 3,
+        setupMode: "pregame",
+      },
+    );
+
+    expect(payload).toMatchObject({
+      mode: "castleSiege",
+      memberRoles: { "host-uid": "observer" },
+      castleSiegeRoles: { "host-uid": "teamA" },
+      seriesLength: 3,
+      setupMode: "pregame",
+    });
+
+    const restored = deserializeSessionFromFirestore("session-cs", {
+      ...payload,
+      gameArea: {
+        south: 53.3,
+        west: -6.3,
+        north: 53.4,
+        east: -6.2,
+      },
+    });
+
+    expect(restored.mode).toBe("castleSiege");
+    expect(restored.castleSiegeRoles).toEqual({ "host-uid": "teamA" });
+    expect(restored.seriesLength).toBe(3);
+    expect(restored.setupMode).toBe("pregame");
+    expect(restored.memberRoles).toEqual({ "host-uid": "observer" });
+  });
+
+  it("omits castleSiege fields from classic session documents", () => {
+    const payload = buildSessionDocument(
+      "ABCD",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+    );
+
+    expect(payload).not.toHaveProperty("mode");
+    expect(payload).not.toHaveProperty("castleSiegeRoles");
+    expect(payload).not.toHaveProperty("seriesLength");
+    expect(payload).not.toHaveProperty("setupMode");
+  });
 });

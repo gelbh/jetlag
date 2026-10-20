@@ -14,6 +14,7 @@ import {
 } from "../../domain/session/presets/gamePreset";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import { useGamePresetStore } from "../../state/gamePresetStore";
+import { CastleSiegeCreateControls } from "./CastleSiegeCreateControls";
 import { type CreateSheetStep, GameAreaSection } from "./GameAreaSection";
 import { NestedSplitLayout } from "./NestedSplitLayout";
 import { PremiumGateSection } from "./PremiumGateSection";
@@ -235,16 +236,33 @@ export function CreateSession() {
               />
             }
             playSlot={
-              <RolePicker
-                value={session.playerRole}
-                onChange={(role) => {
-                  session.handlePlayerRoleChange(role);
-                  queueMicrotask(() => {
-                    track(ANALYTICS_EVENTS.role_selected, { role, surface: "create" });
-                  });
-                }}
-                disabled={session.loading || session.verifyingAccess}
-              />
+              <>
+                {session.castleSiegeFlagEnabled ? (
+                  <CastleSiegeCreateControls
+                    mode={session.sessionMode}
+                    onModeChange={session.handleSessionModeChange}
+                    seriesLength={session.seriesLength}
+                    onSeriesLengthChange={session.handleSeriesLengthChange}
+                    setupMode={session.setupMode}
+                    onSetupModeChange={session.handleSetupModeChange}
+                    hostCastleSiegeRole={session.hostCastleSiegeRole}
+                    onHostCastleSiegeRoleChange={session.handleHostCastleSiegeRoleChange}
+                    disabled={session.loading || session.verifyingAccess}
+                  />
+                ) : null}
+                {session.sessionMode === "classic" ? (
+                  <RolePicker
+                    value={session.playerRole}
+                    onChange={(role) => {
+                      session.handlePlayerRoleChange(role);
+                      queueMicrotask(() => {
+                        track(ANALYTICS_EVENTS.role_selected, { role, surface: "create" });
+                      });
+                    }}
+                    disabled={session.loading || session.verifyingAccess}
+                  />
+                ) : null}
+              </>
             }
           />
 
