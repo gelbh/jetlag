@@ -1,18 +1,37 @@
 import { useState } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
+import { gameAreaToBoundingBoxRaw } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { gameAreaCenter } from "@/domain/geometry/gameArea/geometry";
-import type { SessionRecord } from "@/domain/map/annotations";
+import type { GameArea, SessionRecord } from "@/domain/map/annotations";
 import { arenaFromGameArea } from "@/domain/session/castleSiege/arena";
 import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
+import type { FairSplitLockPatch } from "@/domain/session/castleSiege/fairSplitLock";
 import { isCastleSiegeSession } from "@/domain/session/castleSiege/mode";
+import type { CastleSiegeSealPoint } from "@/domain/session/castleSiege/pregame";
 import {
   isCastleSiegePlayingRole,
   resolveCastleSiegeRole,
 } from "@/domain/session/castleSiege/teamRole";
 import { updateCastleSiegeSetup } from "@/services/firestore/firestoreSessions";
 import { ArenaLedger } from "./ArenaLedger";
+import { FairSplitProposal } from "./FairSplitProposal";
 import { MusterDials } from "./MusterDials";
 import { SealVault } from "./SealVault";
+
+/** Temporary opposite stubs until map seal pins land (Phase 2 residual). */
+function stubFairSplitSeals(arena: GameArea): {
+  sealA: CastleSiegeSealPoint;
+  sealB: CastleSiegeSealPoint;
+} {
+  const bounds = gameAreaToBoundingBoxRaw(arena);
+  const midLat = (bounds.south + bounds.north) / 2;
+  const midLng = (bounds.west + bounds.east) / 2;
+  const span = ((bounds.east - bounds.west) / 2) * 0.6;
+  return {
+    sealA: { lat: midLat, lng: midLng - span },
+    sealB: { lat: midLat, lng: midLng + span },
+  };
+}
 
 export type CastleSiegeSetupChromeProps = {
   session: SessionRecord | null | undefined;
@@ -21,7 +40,7 @@ export type CastleSiegeSetupChromeProps = {
 };
 
 /**
- * Skin-S3 Pregame setup chrome. Renders only for Castle Siege sessions (V14).
+ * Skin-S3 setup chrome (Pregame + Fair-split). Castle Siege only (V14).
  * Classic HUD callers stay unchanged when this returns null.
  */
 export function CastleSiegeSetupChrome({
@@ -57,6 +76,15 @@ export function CastleSiegeSetupChrome({
   const saveDials = async (dials: CastleSiegeDials) => {
     await updateCastleSiegeSetup(session.id, { dials });
   };
+
+  const lockFairSplit = async (patch: FairSplitLockPatch) => {
+    await updateCastleSiegeSetup(session.id, patch);
+  };
+
+  const fairSplitActive = session.setupMode === "fairSplit";
+  const fairSplitArena = session.arena?.polygon ?? session.gameArea;
+  const fairSplitSeals = stubFairSplitSeals(fairSplitArena);
+  const beltWidthMeters = session.dials?.beltWidthMeters ?? 200;
 
   return (
     <aside
@@ -100,6 +128,18 @@ export function CastleSiegeSetupChrome({
           teamId={role}
           sealedByUid={uid}
           sealPosition={sealPosition}
+        />
+      ) : null}
+
+      {fairSplitActive ? (
+        <FairSplitProposal
+          arena={fairSplitArena}
+          sealA={fairSplitSeals.sealA}
+          sealB={fairSplitSeals.sealB}
+          beltWidthMeters={beltWidthMeters}
+          isHost={isHost}
+          alreadyLocked={Boolean(session.border && session.neutralBelt)}
+          onLock={lockFairSplit}
         />
       ) : null}
     </aside>

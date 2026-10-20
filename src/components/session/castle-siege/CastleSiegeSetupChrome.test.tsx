@@ -75,6 +75,27 @@ describe("CastleSiegeSetupChrome", () => {
     expect(screen.getByTestId("castle-siege-muster-dials")).toBeInTheDocument();
     expect(screen.getByTestId("castle-siege-seal-vault")).toBeInTheDocument();
     expect(screen.getByText("Pregame")).toBeInTheDocument();
+    expect(screen.queryByTestId("castle-siege-fair-split-proposal")).not.toBeInTheDocument();
+  });
+
+  it("mounts Fair-split proposal chrome when setupMode is fairSplit", () => {
+    renderWithAppUi(
+      <CastleSiegeSetupChrome
+        session={baseSession({
+          mode: "castleSiege",
+          setupMode: "fairSplit",
+          dials: DEFAULT_CASTLE_SIEGE_DIALS,
+          castleSiegeRoles: { "host-1": "teamA" },
+        })}
+        uid="host-1"
+        isHost
+      />,
+    );
+
+    expect(screen.getByTestId("castle-siege-fair-split-proposal")).toBeInTheDocument();
+    expect(screen.getByText("Fair-split")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Propose fair split" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Nudge west" })).not.toBeInTheDocument();
   });
 
   it("imports arena from gameArea for the host", async () => {
