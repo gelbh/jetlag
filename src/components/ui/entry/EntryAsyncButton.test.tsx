@@ -81,4 +81,39 @@ describe("EntryAsyncButton", () => {
     expect(screen.getByRole("button", { name: "Confirm game area" })).toBeDisabled();
     expect(screen.queryByRole("status")).toBeNull();
   });
+
+  it("keeps caller aria-describedby when idle and merges it while busy", () => {
+    const { rerender } = renderEntryButton(
+      <EntryAsyncButton
+        busy={false}
+        idleLabel="SEND"
+        busyLabel="Sending…"
+        aria-describedby="ask-error"
+        styles={filledStyles}
+        onClick={() => {}}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "SEND" })).toHaveAttribute(
+      "aria-describedby",
+      "ask-error",
+    );
+
+    rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <EntryAsyncButton
+          busy
+          idleLabel="SEND"
+          busyLabel="Sending…"
+          aria-describedby="ask-error"
+          styles={filledStyles}
+          onClick={() => {}}
+        />
+      </MantineProvider>,
+    );
+    const button = screen.getByRole("button", { name: "Sending…" });
+    const describedBy = button.getAttribute("aria-describedby") ?? "";
+    expect(describedBy.split(" ")).toEqual(
+      expect.arrayContaining([screen.getByRole("status").id, "ask-error"]),
+    );
+  });
 });

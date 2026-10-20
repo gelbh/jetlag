@@ -1,7 +1,7 @@
 /**
  * Map-first Radar chrome: shared placement shell + Yes/No + distance mid-strip.
  */
-import { Button, UnstyledButton } from "@mantine/core";
+import { UnstyledButton } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudRadarIcon } from "@/components/map/icons/ToolIcons";
 import {
@@ -12,6 +12,7 @@ import {
 import { RadarDistancePicker } from "@/components/tools/RadarDistancePicker";
 import { binaryAnswerIcon } from "@/components/tools/shared/answers/binaryAnswerIcons";
 import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import {
   askInsetSurfaceStyle,
   choiceChipStyles,
@@ -200,27 +201,17 @@ export function RadarMapPlacementChrome({
               color: "var(--color-field-ink)",
             }}
           >
-            <Button
+            <EntryAsyncButton
               type="button"
               fullWidth
-              onClick={onCommit}
-              disabled={!canCommit || isSubmitting}
-              aria-busy={isSubmitting || undefined}
-              leftSection={
-                isSubmitting ? undefined : (
-                  <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
-                )
-              }
+              busy={isSubmitting}
+              unavailable={!canCommit}
+              idleLabel={awaitHiderAnswer ? "Send to hiders" : "Send"}
+              busyLabel={awaitHiderAnswer ? "Sending…" : "…"}
+              leftSection={<PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />}
               styles={askMapPlacementSendStyles}
-            >
-              {isSubmitting
-                ? awaitHiderAnswer
-                  ? "Sending…"
-                  : "…"
-                : awaitHiderAnswer
-                  ? "Send to hiders"
-                  : "Send"}
-            </Button>
+              onClick={onCommit}
+            />
           </div>
         ) : null}
       </div>

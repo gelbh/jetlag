@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
+import { expectBusyPrimary, expectUnavailablePrimary } from "../primaryActionContract.testAssert";
 import { MatchingMapPlacementChrome } from "./MatchingMapPlacementChrome";
 
 beforeEach(() => {
@@ -151,5 +152,28 @@ describe("MatchingMapPlacementChrome", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^Send to hiders$/i }));
     expect(onCommit).toHaveBeenCalled();
+  });
+
+  it("marks Send unavailable (natively disabled) when !canCommit", () => {
+    const { onCommit } = renderChrome({
+      phase: "answer",
+      awaitHiderAnswer: true,
+      nearestPlaceName: "Dublin Airport",
+      canCommit: false,
+    });
+
+    expectUnavailablePrimary(screen.getByRole("button", { name: /^Send to hiders$/i }), onCommit);
+  });
+
+  it("keeps Send busy without native disable while submitting", () => {
+    const { onCommit } = renderChrome({
+      phase: "answer",
+      awaitHiderAnswer: true,
+      nearestPlaceName: "Dublin Airport",
+      canCommit: true,
+      isSubmitting: true,
+    });
+
+    expectBusyPrimary(screen.getByRole("button", { name: "Sending…" }), onCommit);
   });
 });

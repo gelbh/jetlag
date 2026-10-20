@@ -32,6 +32,7 @@ export function EntryAsyncButton({
   statusMessage,
   leftSection,
   onClick,
+  "aria-describedby": ariaDescribedBy,
   ...rest
 }: EntryAsyncButtonProps): React.JSX.Element {
   const statusId = useId();
@@ -42,6 +43,8 @@ export function EntryAsyncButton({
     : "";
   const gated = unavailable && !busy;
   const blockActivation = busy || unavailable;
+  const describedBy =
+    [busy ? statusId : null, ariaDescribedBy].filter(Boolean).join(" ") || undefined;
 
   const handleClick: MouseEventHandler<HTMLButtonElement> = (event) => {
     if (blockActivation) {
@@ -86,7 +89,7 @@ export function EntryAsyncButton({
         disabled={gated}
         aria-disabled={blockActivation ? true : undefined}
         aria-busy={busy || undefined}
-        aria-describedby={busy ? statusId : undefined}
+        aria-describedby={describedBy}
         leftSection={
           busy && showSpinner ? (
             <LoadingSpinnerRing size="sm" className="text-current" />
