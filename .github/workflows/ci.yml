@@ -83,21 +83,22 @@ jobs:
         with:
           persist-credentials: false
       - if: ${{ needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false' }}
-        run: echo "Skipping full suite on light-only PR."
+        run: echo "Skipping full suite on light-only PR; running lint gates."
+      # Release PRs bump package.json (code=true). Light-only PRs skip the full
+      # suite but still need required lint + release gates (ci-light is not a
+      # ruleset check).
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        if: ${{ needs.changes.outputs.release_pr == 'true' }}
+        if: ${{ needs.changes.outputs.release_pr == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
         with:
           node-version: 24
           cache: npm
-      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+      - if: ${{ needs.changes.outputs.release_pr == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
         run: npm ci
-      # Release PRs bump package.json, so path filters mark code=true. Keep the
-      # required `unit` check green with lint + release gates only.
-      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+      - if: ${{ needs.changes.outputs.release_pr == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
         run: npm run lint
-      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+      - if: ${{ needs.changes.outputs.release_pr == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
         run: npm run release:check
-      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+      - if: ${{ needs.changes.outputs.release_pr == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
         run: npm run test:changeset-map
       - uses: ./.github/actions/setup-rust-wasm
         if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
