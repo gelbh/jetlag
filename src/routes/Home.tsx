@@ -12,8 +12,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
+import { EntryConfirm } from "@/components/ui/entry/EntryConfirm";
 import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
-import { filledStyles, plainStyles } from "@/components/ui/entry/entryStyles";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import { VersionChangelogSheet } from "@/components/ui/sheets/VersionChangelogSheet";
@@ -91,7 +92,13 @@ function HomeMoreChrome({
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } = useContinueActiveSession();
   const { needsRefresh } = useAppUpdateState();
-  const { leaving, handleLeaveAndUpdate } = useLeaveSessionAndUpdate();
+  const {
+    leaving,
+    prompt: leaveUpdatePrompt,
+    requestLeaveAndUpdate,
+    dismissLeaveAndUpdatePrompt,
+    confirmLeaveAndUpdate,
+  } = useLeaveSessionAndUpdate();
   const { isPermanent, authReady } = usePermanentAuthUser();
   const hydrated = useHydrated();
   const [permanentHint] = useState(expectsPermanentSignIn);
@@ -171,41 +178,100 @@ export function Home() {
             <Stack gap={22}>
               {session ? (
                 <Stack gap={8}>
-                  <Text
-                    size="xs"
-                    c="var(--color-field-ink-muted)"
-                    fw={590}
-                    style={{ letterSpacing: "-0.01em", paddingInline: 4 }}
-                  >
-                    Active session
-                    {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
-                  </Text>
-                  <EntryAsyncButton
-                    fullWidth
-                    busy={continuing}
-                    idleLabel="Continue"
-                    busyLabel="Verifying…"
-                    statusMessage={`Verifying session ${session.code}`}
-                    aria-label={
-                      continuing
-                        ? `Verifying session ${session.code}`
-                        : `Return to map for session ${session.code}`
-                    }
-                    styles={filledStyles}
-                    onClick={() => void handleContinue()}
-                  />
                   {needsRefresh ? (
-                    <EntryAsyncButton
-                      fullWidth
-                      busy={leaving}
-                      idleLabel={appUpdateCopy.leaveAndUpdateAction}
-                      busyLabel="Leaving…"
-                      statusMessage="Leaving session to apply update"
-                      aria-label={appUpdateCopy.leaveAndUpdateAction}
-                      styles={plainStyles}
-                      onClick={() => void handleLeaveAndUpdate()}
-                    />
-                  ) : null}
+                    <Stack
+                      gap={10}
+                      p="0.85rem"
+                      style={{
+                        borderRadius: 12,
+                        backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+                        border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                        backdropFilter: "blur(20px) saturate(1.4)",
+                        WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+                      }}
+                    >
+                      <Stack gap={4}>
+                        <Text
+                          size="xs"
+                          fw={700}
+                          tt="uppercase"
+                          style={{
+                            letterSpacing: "0.08em",
+                            color: "var(--color-highlight)",
+                            fontFamily: "var(--mantine-font-family-headings)",
+                          }}
+                        >
+                          {appUpdateCopy.readyTitle}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c="var(--color-field-ink-muted)"
+                          style={{ textWrap: "pretty", lineHeight: 1.4 }}
+                        >
+                          {appUpdateCopy.leaveAndUpdateBody}
+                        </Text>
+                        <Text
+                          size="xs"
+                          c="var(--color-field-ink-muted)"
+                          fw={590}
+                          style={{ letterSpacing: "-0.01em" }}
+                        >
+                          Active session
+                          {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
+                        </Text>
+                      </Stack>
+                      <EntryAsyncButton
+                        fullWidth
+                        busy={continuing}
+                        idleLabel="Continue"
+                        busyLabel="Verifying…"
+                        statusMessage={`Verifying session ${session.code}`}
+                        aria-label={
+                          continuing
+                            ? `Verifying session ${session.code}`
+                            : `Return to map for session ${session.code}`
+                        }
+                        styles={filledStyles}
+                        onClick={() => void handleContinue()}
+                      />
+                      <EntryAsyncButton
+                        fullWidth
+                        busy={leaving}
+                        idleLabel={appUpdateCopy.leaveAndUpdateAction}
+                        busyLabel={appUpdateCopy.leaveAndUpdateBusy}
+                        statusMessage="Leaving session to apply update"
+                        aria-label={appUpdateCopy.leaveAndUpdateAction}
+                        styles={grayStyles}
+                        onClick={requestLeaveAndUpdate}
+                      />
+                    </Stack>
+                  ) : (
+                    <>
+                      <Text
+                        size="xs"
+                        c="var(--color-field-ink-muted)"
+                        fw={590}
+                        style={{ letterSpacing: "-0.01em", paddingInline: 4 }}
+                      >
+                        Active session
+                        {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
+                      </Text>
+                      <EntryAsyncButton
+                        fullWidth
+                        busy={continuing}
+                        idleLabel="Continue"
+                        busyLabel="Verifying…"
+                        statusMessage={`Verifying session ${session.code}`}
+                        aria-label={
+                          continuing
+                            ? `Verifying session ${session.code}`
+                            : `Return to map for session ${session.code}`
+                        }
+                        styles={filledStyles}
+                        onClick={() => void handleContinue()}
+                      />
+                    </>
+                  )}
                   <Text
                     ta="center"
                     size="sm"
@@ -311,6 +377,15 @@ export function Home() {
         </Container>
       </EntryScreenLayout>
       <VersionChangelogSheet open={changelogOpen} onClose={() => setChangelogOpen(false)} />
+      <EntryConfirm
+        opened={leaveUpdatePrompt !== null}
+        title={leaveUpdatePrompt?.title ?? appUpdateCopy.leaveAndUpdateConfirmTitle}
+        consequence={leaveUpdatePrompt?.body ?? ""}
+        confirmLabel={appUpdateCopy.leaveAndUpdateAction}
+        busyLabel={appUpdateCopy.leaveAndUpdateBusy}
+        onConfirm={confirmLeaveAndUpdate}
+        onClose={dismissLeaveAndUpdatePrompt}
+      />
     </>
   );
 }

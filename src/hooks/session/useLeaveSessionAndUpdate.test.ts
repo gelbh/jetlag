@@ -31,6 +31,7 @@ const store = vi.hoisted(() => ({
     memberRoles?: Record<string, "seeker" | "hider">;
     roleGates?: { version: 1; leaders: Record<string, string> };
   } | null,
+  myUid: "uid-1" as string | null,
 }));
 
 vi.mock("@/hooks/app/useAppUpdateState", () => ({
@@ -50,7 +51,8 @@ vi.mock("@/hooks/navigation/useAppNavigate", () => ({
 }));
 
 vi.mock("@/state/sessionStore", () => ({
-  useSessionStore: (sel: (s: unknown) => unknown) => sel({ session: store.session }),
+  useSessionStore: (sel: (s: unknown) => unknown) =>
+    sel({ session: store.session, myUid: store.myUid }),
 }));
 
 vi.mock("@/services/session/sessionExit", () => ({
@@ -93,6 +95,7 @@ describe("useLeaveSessionAndUpdate", () => {
     ensureAnonymousUser.mockClear();
     ensureAnonymousUser.mockResolvedValue({ uid: "uid-1" });
     captureException.mockClear();
+    store.myUid = "uid-1";
     store.session = {
       id: "sess-remote",
       code: "ABCD",
@@ -101,7 +104,55 @@ describe("useLeaveSessionAndUpdate", () => {
       memberRoles: { "uid-1": "seeker" },
       roleGates: { version: 1, leaders: { seeker: "other-host" } },
     };
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+  });
+
+  it("opens a member prompt without leaving until confirm", () => {
+    const { result } = renderHook(() => useLeaveSessionAndUpdate());
+
+    act(() => {
+      result.current.requestLeaveAndUpdate();
+    });
+
+    expect(result.current.prompt).toEqual({
+      title: appUpdateCopy.leaveAndUpdateConfirmTitle,
+      body: appUpdateCopy.leaveAndUpdateConfirmMember,
+    });
+    expect(leaveRemoteSessionOnDevice).not.toHaveBeenCalled();
+    expect(exitSession).not.toHaveBeenCalled();
+  });
+
+  it("opens a host-alone prompt when the current uid is the only member", () => {
+    store.session = {
+      id: "sess-host",
+      code: "HOST",
+      hostUid: "uid-1",
+      memberUids: ["uid-1"],
+      memberRoles: { "uid-1": "hider" },
+    };
+    const { result } = renderHook(() => useLeaveSessionAndUpdate());
+
+    act(() => {
+      result.current.requestLeaveAndUpdate();
+    });
+
+    expect(result.current.prompt?.body).toBe(appUpdateCopy.leaveAndUpdateConfirmHostAlone);
+  });
+
+  it("opens a host-promote prompt when other members remain", () => {
+    store.session = {
+      id: "sess-host",
+      code: "HOST",
+      hostUid: "uid-1",
+      memberUids: ["uid-1", "uid-2"],
+      memberRoles: { "uid-1": "seeker", "uid-2": "hider" },
+    };
+    const { result } = renderHook(() => useLeaveSessionAndUpdate());
+
+    act(() => {
+      result.current.requestLeaveAndUpdate();
+    });
+
+    expect(result.current.prompt?.body).toBe(appUpdateCopy.leaveAndUpdateConfirmHostPromote);
   });
 
   it("confirms, leaves remote session, exits, then applies update", async () => {
@@ -121,12 +172,14 @@ describe("useLeaveSessionAndUpdate", () => {
     listPendingQuestions.mockResolvedValueOnce(pending);
 
     const { result } = renderHook(() => useLeaveSessionAndUpdate());
-
-    await act(async () => {
-      await result.current.handleLeaveAndUpdate();
+    act(() => {
+      result.current.requestLeaveAndUpdate();
     });
 
-    expect(window.confirm).toHaveBeenCalledWith(appUpdateCopy.leaveAndUpdateConfirm);
+    await act(async () => {
+      await result.current.confirmLeaveAndUpdate();
+    });
+
     expect(listPendingQuestions).toHaveBeenCalledWith("sess-remote");
     expect(leaveRemoteSessionOnDevice).toHaveBeenCalledWith({
       session: store.session,
@@ -146,95 +199,64 @@ describe("useLeaveSessionAndUpdate", () => {
     );
   });
 
-  it("alone host confirms end-and-update, leaves via host path, then applies update", async () => {
-    store.session = {
-      id: "sess-host",
-      code: "HOST",
-      hostUid: "uid-1",
-      memberUids: ["uid-1"],
-      memberRoles: { "uid-1": "hider" },
-    };
-    const { result } = renderHook(() => useLeaveSessionAndUpdate());
-
-    await act(async () => {
-      await result.current.handleLeaveAndUpdate();
-    });
-
-    expect(window.confirm).toHaveBeenCalledWith(
-      expect.stringMatching(/only player.*end this session.*update/i),
-    );
-    expect(leaveRemoteSessionOnDevice).toHaveBeenCalledWith(
-      expect.objectContaining({ uid: "uid-1", session: store.session }),
-    );
-    expect(exitSession).toHaveBeenCalled();
-    expect(applyUpdate).toHaveBeenCalledTimes(1);
-  });
-
-  it("host with others confirms promote-and-update before leave", async () => {
-    store.session = {
-      id: "sess-host",
-      code: "HOST",
-      hostUid: "uid-1",
-      memberUids: ["uid-1", "uid-2"],
-      memberRoles: { "uid-1": "seeker", "uid-2": "hider" },
-    };
-    const { result } = renderHook(() => useLeaveSessionAndUpdate());
-
-    await act(async () => {
-      await result.current.handleLeaveAndUpdate();
-    });
-
-    expect(window.confirm).toHaveBeenCalledWith(
-      expect.stringMatching(/become host.*Leave and update/i),
-    );
-    expect(leaveRemoteSessionOnDevice).toHaveBeenCalled();
-    expect(applyUpdate).toHaveBeenCalledTimes(1);
-  });
-
-  it("does not apply update when remote leave fails", async () => {
+  it("throws when remote leave fails so the sheet can stay open", async () => {
     leaveRemoteSessionOnDevice.mockResolvedValueOnce("failed");
     const { result } = renderHook(() => useLeaveSessionAndUpdate());
-
-    await act(async () => {
-      await result.current.handleLeaveAndUpdate();
+    act(() => {
+      result.current.requestLeaveAndUpdate();
     });
+
+    await expect(
+      act(async () => {
+        await result.current.confirmLeaveAndUpdate();
+      }),
+    ).rejects.toThrow(/couldn't leave/i);
 
     expect(exitSession).not.toHaveBeenCalled();
     expect(applyUpdate).not.toHaveBeenCalled();
   });
 
-  it("does not apply update when exitSession rejects", async () => {
+  it("throws when exitSession rejects", async () => {
     exitSession.mockRejectedValueOnce(new Error("exit failed"));
-    vi.spyOn(window, "alert").mockImplementation(() => undefined);
     const { result } = renderHook(() => useLeaveSessionAndUpdate());
-
-    await act(async () => {
-      await result.current.handleLeaveAndUpdate();
+    act(() => {
+      result.current.requestLeaveAndUpdate();
     });
+
+    await expect(
+      act(async () => {
+        await result.current.confirmLeaveAndUpdate();
+      }),
+    ).rejects.toThrow(/couldn't leave/i);
 
     expect(captureException).toHaveBeenCalled();
     expect(applyUpdate).not.toHaveBeenCalled();
   });
 
-  it("does nothing when confirm is cancelled", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(false);
+  it("dismisses the prompt without leaving", () => {
     const { result } = renderHook(() => useLeaveSessionAndUpdate());
-
-    await act(async () => {
-      await result.current.handleLeaveAndUpdate();
+    act(() => {
+      result.current.requestLeaveAndUpdate();
+    });
+    act(() => {
+      result.current.dismissLeaveAndUpdatePrompt();
     });
 
+    expect(result.current.prompt).toBeNull();
     expect(leaveRemoteSessionOnDevice).not.toHaveBeenCalled();
-    expect(exitSession).not.toHaveBeenCalled();
     expect(applyUpdate).not.toHaveBeenCalled();
   });
 
   it("skips remote leave for local sessions but still exits and applies update", async () => {
     store.session = { id: LOCAL_SESSION_ID, code: "LOCAL" };
     const { result } = renderHook(() => useLeaveSessionAndUpdate());
+    act(() => {
+      result.current.requestLeaveAndUpdate();
+    });
+    expect(result.current.prompt?.body).toBe(appUpdateCopy.leaveAndUpdateConfirmMember);
 
     await act(async () => {
-      await result.current.handleLeaveAndUpdate();
+      await result.current.confirmLeaveAndUpdate();
     });
 
     expect(leaveRemoteSessionOnDevice).not.toHaveBeenCalled();

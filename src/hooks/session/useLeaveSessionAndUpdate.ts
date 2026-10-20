@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
+import {
+  type LeaveAndUpdatePrompt,
+  resolveLeaveAndUpdatePrompt,
+} from "@/domain/device/updates/appUpdateCopy";
 import { LOCAL_SESSION_ID } from "@/domain/map/annotations";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
@@ -14,27 +17,57 @@ const loadClientErrors = () => import("@/services/core/analytics/clientErrors");
 const loadLeaveRemote = () => import("@/services/session/leaveRemoteSessionOnDevice");
 const loadPendingQuestions = () => import("@/services/firestore/firestoreSessionExtras");
 
+const LEAVE_FAILED_MESSAGE = "Couldn't leave the session. Try again.";
+
 export function useLeaveSessionAndUpdate(): {
   leaving: boolean;
-  handleLeaveAndUpdate: () => Promise<void>;
+  prompt: LeaveAndUpdatePrompt | null;
+  requestLeaveAndUpdate: () => void;
+  dismissLeaveAndUpdatePrompt: () => void;
+  confirmLeaveAndUpdate: () => Promise<void>;
 } {
   const navigate = useAppNavigate();
   const { applyUpdate } = useAppUpdateState();
   const session = useSessionStore((state) => state.session);
+  const myUid = useSessionStore((state) => state.myUid);
   const [leaving, setLeaving] = useState(false);
+  const [prompt, setPrompt] = useState<LeaveAndUpdatePrompt | null>(null);
 
   const exitSession = async (params: Omit<ExitSessionParams, "navigate">) => {
     const { exitSession: runExit } = await loadSessionExit();
     await runExit({ ...params, navigate });
   };
 
-  const handleLeaveAndUpdate = async () => {
+  const requestLeaveAndUpdate = () => {
+    if (!session || leaving) {
+      return;
+    }
+    const isLocalSession = session.id === LOCAL_SESSION_ID;
+    const isRemoteHost = !isLocalSession && myUid != null && session.hostUid === myUid;
+    const aloneHost =
+      isRemoteHost && !(session.memberUids ?? []).some((uid) => uid !== (session.hostUid ?? ""));
+    setPrompt(
+      resolveLeaveAndUpdatePrompt({
+        isLocalSession,
+        isRemoteHost,
+        aloneHost,
+      }),
+    );
+  };
+
+  const dismissLeaveAndUpdatePrompt = () => {
+    if (leaving) {
+      return;
+    }
+    setPrompt(null);
+  };
+
+  const confirmLeaveAndUpdate = async () => {
     if (!session || leaving) {
       return;
     }
 
     const isLocalSession = session.id === LOCAL_SESSION_ID;
-
     setLeaving(true);
     try {
       if (!isLocalSession) {
@@ -45,23 +78,7 @@ export function useLeaveSessionAndUpdate(): {
         } catch (error) {
           const { captureException } = await loadClientErrors();
           captureException(error);
-          window.alert("Couldn't leave the session. Try again.");
-          return;
-        }
-
-        const { isAloneHost, leaveRemoteSessionOnDevice } = await loadLeaveRemote();
-        const isRemoteHost = session.hostUid === user.uid;
-
-        if (isRemoteHost) {
-          const alone = isAloneHost(session);
-          const confirmMessage = alone
-            ? "You're the only player. Leaving will end this session, then install the update."
-            : "Another player will become host so others can keep playing. Leave and update anyway?";
-          if (!window.confirm(confirmMessage)) {
-            return;
-          }
-        } else if (!window.confirm(appUpdateCopy.leaveAndUpdateConfirm)) {
-          return;
+          throw new Error(LEAVE_FAILED_MESSAGE);
         }
 
         let pendingQuestions: PendingQuestionRecord[] = [];
@@ -73,16 +90,15 @@ export function useLeaveSessionAndUpdate(): {
           captureException(error);
         }
 
+        const { leaveRemoteSessionOnDevice } = await loadLeaveRemote();
         const leaveResult = await leaveRemoteSessionOnDevice({
           session,
           uid: user.uid,
           pendingQuestions,
         });
         if (leaveResult === "failed") {
-          return;
+          throw new Error(LEAVE_FAILED_MESSAGE);
         }
-      } else if (!window.confirm(appUpdateCopy.leaveAndUpdateConfirm)) {
-        return;
       }
 
       try {
@@ -95,8 +111,7 @@ export function useLeaveSessionAndUpdate(): {
       } catch (error) {
         const { captureException } = await loadClientErrors();
         captureException(error);
-        window.alert("Couldn't leave the session. Try again.");
-        return;
+        throw new Error(LEAVE_FAILED_MESSAGE);
       }
       applyUpdate();
     } finally {
@@ -104,5 +119,11 @@ export function useLeaveSessionAndUpdate(): {
     }
   };
 
-  return { leaving, handleLeaveAndUpdate };
+  return {
+    leaving,
+    prompt,
+    requestLeaveAndUpdate,
+    dismissLeaveAndUpdatePrompt,
+    confirmLeaveAndUpdate,
+  };
 }

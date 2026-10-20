@@ -1,12 +1,18 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { jetlagTheme } from "@/theme/theme";
 import { Home } from "./Home";
 
-const handleLeaveAndUpdate = vi.fn();
+const requestLeaveAndUpdate = vi.fn();
+const dismissLeaveAndUpdatePrompt = vi.fn();
+const confirmLeaveAndUpdate = vi.fn(async () => undefined);
+const leaveUpdateState = vi.hoisted(() => ({
+  leaving: false,
+  prompt: null as { title: string; body: string } | null,
+}));
 const continueSession = vi.hoisted(() => ({
   session: { id: "sess-1", code: "ABCD" } as { id: string; code: string } | null,
 }));
@@ -27,8 +33,11 @@ vi.mock("@/hooks/session/useContinueActiveSession", () => ({
 
 vi.mock("@/hooks/session/useLeaveSessionAndUpdate", () => ({
   useLeaveSessionAndUpdate: () => ({
-    leaving: false,
-    handleLeaveAndUpdate,
+    leaving: leaveUpdateState.leaving,
+    prompt: leaveUpdateState.prompt,
+    requestLeaveAndUpdate,
+    dismissLeaveAndUpdatePrompt,
+    confirmLeaveAndUpdate,
   }),
 }));
 
@@ -55,7 +64,11 @@ vi.mock("@/services/core/firebase/authBootstrapState", () => ({
 }));
 
 beforeEach(() => {
-  handleLeaveAndUpdate.mockClear();
+  requestLeaveAndUpdate.mockClear();
+  dismissLeaveAndUpdatePrompt.mockClear();
+  confirmLeaveAndUpdate.mockClear();
+  leaveUpdateState.leaving = false;
+  leaveUpdateState.prompt = null;
   continueSession.session = { id: "sess-1", code: "ABCD" };
   updateState.needsRefresh = true;
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -81,28 +94,44 @@ function renderHome() {
 }
 
 describe("Home leave session & update", () => {
-  it("shows Leave session & update when session and needsRefresh", () => {
+  it("shows an update-ready card with Leave & refresh when session and needsRefresh", () => {
     renderHome();
+    expect(screen.getByText(appUpdateCopy.readyTitle)).toBeInTheDocument();
+    expect(screen.getByText(appUpdateCopy.leaveAndUpdateBody)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: appUpdateCopy.leaveAndUpdateAction }),
     ).toBeInTheDocument();
   });
 
-  it("hides Leave session & update when needsRefresh is false", () => {
+  it("hides the update card when needsRefresh is false", () => {
     updateState.needsRefresh = false;
     renderHome();
+    expect(screen.queryByText(appUpdateCopy.readyTitle)).toBeNull();
     expect(screen.queryByRole("button", { name: appUpdateCopy.leaveAndUpdateAction })).toBeNull();
+    expect(screen.getByRole("button", { name: /Return to map/i })).toBeInTheDocument();
   });
 
-  it("hides Leave session & update when there is no session", () => {
+  it("hides Leave & refresh when there is no session", () => {
     continueSession.session = null;
     renderHome();
     expect(screen.queryByRole("button", { name: appUpdateCopy.leaveAndUpdateAction })).toBeNull();
   });
 
-  it("calls handleLeaveAndUpdate when the leave CTA is clicked", () => {
+  it("requests leave-and-update when the leave CTA is clicked", () => {
     renderHome();
     fireEvent.click(screen.getByRole("button", { name: appUpdateCopy.leaveAndUpdateAction }));
-    expect(handleLeaveAndUpdate).toHaveBeenCalledTimes(1);
+    expect(requestLeaveAndUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the in-app confirm sheet when a prompt is open", () => {
+    leaveUpdateState.prompt = {
+      title: appUpdateCopy.leaveAndUpdateConfirmTitle,
+      body: appUpdateCopy.leaveAndUpdateConfirmMember,
+    };
+    renderHome();
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText(appUpdateCopy.leaveAndUpdateConfirmMember)).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: /^Leave & refresh$/i }));
+    expect(confirmLeaveAndUpdate).toHaveBeenCalled();
   });
 });

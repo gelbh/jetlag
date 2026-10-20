@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AppUpdateContextValue } from "@/components/ui/banners/appUpdateContext";
-import { appUpdateCopy } from "./appUpdateCopy";
+import { appUpdateCopy, resolveLeaveAndUpdatePrompt } from "./appUpdateCopy";
 
 describe("appUpdateCopy", () => {
   it("uses player-safe deferred wording for map chunk deferral", () => {
@@ -13,11 +13,34 @@ describe("appUpdateCopy", () => {
     expect(appUpdateCopy.readyTitle).toBe("Update ready");
   });
 
-  it("locks leave-and-update Home CTA copy", () => {
-    expect(appUpdateCopy.leaveAndUpdateAction).toBe("Leave session & update");
-    expect(appUpdateCopy.leaveAndUpdateConfirm).toBe(
-      "Leave this session on this device? Other players can keep playing.",
-    );
+  it("locks leave-and-refresh Home card copy", () => {
+    expect(appUpdateCopy.leaveAndUpdateAction).toBe("Leave & refresh");
+    expect(appUpdateCopy.leaveAndUpdateBody).toMatch(/install the new build/i);
+    expect(appUpdateCopy.leaveAndUpdateConfirmMember).toMatch(/other players can keep playing/i);
+  });
+});
+
+describe("resolveLeaveAndUpdatePrompt", () => {
+  it("uses member copy for local and non-host remotes", () => {
+    expect(
+      resolveLeaveAndUpdatePrompt({ isLocalSession: true, isRemoteHost: false, aloneHost: false })
+        .body,
+    ).toBe(appUpdateCopy.leaveAndUpdateConfirmMember);
+    expect(
+      resolveLeaveAndUpdatePrompt({ isLocalSession: false, isRemoteHost: false, aloneHost: false })
+        .body,
+    ).toBe(appUpdateCopy.leaveAndUpdateConfirmMember);
+  });
+
+  it("uses alone vs promote copy for hosts", () => {
+    expect(
+      resolveLeaveAndUpdatePrompt({ isLocalSession: false, isRemoteHost: true, aloneHost: true })
+        .body,
+    ).toBe(appUpdateCopy.leaveAndUpdateConfirmHostAlone);
+    expect(
+      resolveLeaveAndUpdatePrompt({ isLocalSession: false, isRemoteHost: true, aloneHost: false })
+        .body,
+    ).toBe(appUpdateCopy.leaveAndUpdateConfirmHostPromote);
   });
 });
 
