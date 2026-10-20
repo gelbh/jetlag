@@ -10,10 +10,24 @@
  * Run: node scripts/build-gtfs-static-graph.mjs
  *      node scripts/build-gtfs-static-graph.mjs --metro nyc
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, dirname, resolve } from "node:path";
+import { execFileSync, spawn } from "node:child_process";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { basename, dirname, join, resolve } from "node:path";
+import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 import JSZip from "jszip";
+
+/** V8 string limit is ~512MiB; BODS regional zips exceed that for stop_times. */
+const LARGE_ZIP_BYTES = 40 * 1024 * 1024;
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = resolve(ROOT, "public/geo/gtfs");
@@ -25,8 +39,8 @@ function stripUtf8Bom(text) {
 const METROS = [
   {
     id: "london",
-    feedOnestopId: "f-transport~for~london",
-    feedOnestopIds: ["f-transport~for~london"],
+    feedOnestopId: "mdb-tfl-995",
+    feedOnestopIds: ["mdb-tfl-995"],
     bbox: { south: 51.28, west: -0.51, north: 51.69, east: 0.33 },
   },
   {
@@ -39,26 +53,26 @@ const METROS = [
   },
   {
     id: "nyc",
-    feedOnestopId: "f-dr5r-nyctsubway",
-    feedOnestopIds: ["f-dr5r-nyctsubway", "f-dr5r-path~nj~us"],
+    feedOnestopId: "mta-nyc-subway-bus-merged",
+    feedOnestopIds: ["mta-nyc-subway-bus-merged"],
     bbox: { south: 40.49, west: -74.26, north: 40.92, east: -73.7 },
   },
   {
     id: "sf",
-    feedOnestopId: "f-9q8y-sfmta",
-    feedOnestopIds: ["f-9q8y-sfmta"],
+    feedOnestopId: "mdb-sfmta-2886",
+    feedOnestopIds: ["mdb-sfmta-2886"],
     bbox: { south: 37.45, west: -122.52, north: 38.05, east: -122.05 },
   },
   {
     id: "chicago",
-    feedOnestopId: "f-dp3-cta",
-    feedOnestopIds: ["f-dp3-cta"],
+    feedOnestopId: "cta-google-transit",
+    feedOnestopIds: ["cta-google-transit"],
     bbox: { south: 41.64, west: -87.94, north: 42.07, east: -87.52 },
   },
   {
     id: "portland-maine",
-    feedOnestopId: "f-dry0-maine~greaterportlandmetrobus",
-    feedOnestopIds: ["f-dry0-maine~greaterportlandmetrobus"],
+    feedOnestopId: "mdb-gpmetro-south-portland",
+    feedOnestopIds: ["mdb-gpmetro-south-portland"],
     bbox: { south: 43.55, west: -70.45, north: 43.75, east: -70.1 },
   },
   {
@@ -66,6 +80,13 @@ const METROS = [
     feedOnestopId: "f-bctransit~prince~rupert",
     feedOnestopIds: ["f-bctransit~prince~rupert"],
     bbox: { south: 54.25, west: -130.45, north: 54.4, east: -130.2 },
+  },
+  {
+    id: "southampton",
+    feedOnestopId: "f-bus~dft~gov~uk",
+    feedOnestopIds: ["f-bus~dft~gov~uk"],
+    // City pack bbox (+margin). BODS ITM South East is not a usable source today.
+    bbox: { south: 50.84, west: -1.52, north: 51.0, east: -1.28 },
   },
 ];
 
@@ -254,38 +275,7 @@ function forEachCsvDataRow(text, onRow) {
   }
 }
 
-function buildStopRouteIdsFromText(stopTimesText, stopIds, tripRoute) {
-  let tripIndex;
-  let stopIndex;
-  const routeSets = new Map();
-
-  forEachCsvDataRow(stopTimesText, (values, columns) => {
-    if (tripIndex === undefined) {
-      tripIndex = columns.trip_id;
-      stopIndex = columns.stop_id;
-      if (tripIndex === undefined || stopIndex === undefined) {
-        throw new Error("GTFS stop_times.txt is missing trip_id or stop_id columns.");
-      }
-    }
-
-    const stopId = values[stopIndex];
-    if (!stopIds.has(stopId)) {
-      return;
-    }
-
-    const routeId = tripRoute.get(values[tripIndex]);
-    if (!routeId) {
-      return;
-    }
-
-    let routeSet = routeSets.get(stopId);
-    if (!routeSet) {
-      routeSet = new Set();
-      routeSets.set(stopId, routeSet);
-    }
-    routeSet.add(routeId);
-  });
-
+function finalizeStopRouteIds(routeSets) {
   const stopRouteIds = {};
   for (const [stopId, routeSet] of routeSets) {
     stopRouteIds[stopId] = [...routeSet];
@@ -293,12 +283,162 @@ function buildStopRouteIdsFromText(stopTimesText, stopIds, tripRoute) {
   return stopRouteIds;
 }
 
-function buildBundleFromGtfsZip(zipBuffer, metro) {
-  const zip = new JSZip();
-  return zip.loadAsync(zipBuffer).then(async (archive) => {
-    const stopsText = stripUtf8Bom((await archive.file("stops.txt")?.async("string")) ?? "");
-    const routesText = stripUtf8Bom((await archive.file("routes.txt")?.async("string")) ?? "");
-    const tripsText = stripUtf8Bom((await archive.file("trips.txt")?.async("string")) ?? "");
+function accumulateStopRouteRow(values, columns, state, stopIds, tripRoute) {
+  if (state.tripIndex === undefined) {
+    state.tripIndex = columns.trip_id;
+    state.stopIndex = columns.stop_id;
+    if (state.tripIndex === undefined || state.stopIndex === undefined) {
+      throw new Error("GTFS stop_times.txt is missing trip_id or stop_id columns.");
+    }
+  }
+
+  const stopId = values[state.stopIndex];
+  if (!stopIds.has(stopId)) {
+    return;
+  }
+
+  const routeId = tripRoute.get(values[state.tripIndex]);
+  if (!routeId) {
+    return;
+  }
+
+  let routeSet = state.routeSets.get(stopId);
+  if (!routeSet) {
+    routeSet = new Set();
+    state.routeSets.set(stopId, routeSet);
+  }
+  routeSet.add(routeId);
+}
+
+function buildStopRouteIdsFromText(stopTimesText, stopIds, tripRoute) {
+  const state = { routeSets: new Map() };
+  forEachCsvDataRow(stopTimesText, (values, columns) => {
+    accumulateStopRouteRow(values, columns, state, stopIds, tripRoute);
+  });
+  return finalizeStopRouteIds(state.routeSets);
+}
+
+async function buildStopRouteIdsFromUnzipStream(zipPath, stopIds, tripRoute) {
+  const child = spawn("unzip", ["-p", zipPath, "stop_times.txt"], {
+    stdio: ["ignore", "pipe", "inherit"],
+  });
+  const lines = createInterface({ input: child.stdout, crlfDelay: Infinity });
+  const state = { routeSets: new Map() };
+  let columns = null;
+
+  for await (const rawLine of lines) {
+    const line = columns ? rawLine : stripUtf8Bom(rawLine);
+    if (!line) {
+      continue;
+    }
+    if (!columns) {
+      columns = csvColumnIndexes(splitCsvLine(line));
+      continue;
+    }
+    accumulateStopRouteRow(splitCsvLine(line), columns, state, stopIds, tripRoute);
+  }
+
+  const exitCode = await new Promise((resolveExit, rejectExit) => {
+    child.on("error", rejectExit);
+    child.on("close", resolveExit);
+  });
+  if (exitCode !== 0) {
+    throw new Error(`unzip -p stop_times.txt failed (exit ${exitCode})`);
+  }
+  return finalizeStopRouteIds(state.routeSets);
+}
+
+function unzipEntryTextSync(zipPath, entryName, { maxBuffer = 200 * 1024 * 1024 } = {}) {
+  return stripUtf8Bom(
+    execFileSync("unzip", ["-p", zipPath, entryName], {
+      encoding: "utf8",
+      maxBuffer,
+    }),
+  );
+}
+
+function materializeZipPath(zipBuffer, zipPath) {
+  if (zipPath) {
+    return { path: zipPath, cleanup: null };
+  }
+  const dir = mkdtempSync(join(tmpdir(), "gtfs-build-"));
+  const path = join(dir, "feed.zip");
+  writeFileSync(path, Buffer.from(zipBuffer));
+  return {
+    path,
+    cleanup: () => {
+      rmSync(dir, { recursive: true, force: true });
+    },
+  };
+}
+
+async function buildBundleFromGtfsZip(zipBuffer, metro, { zipPath = null } = {}) {
+  const byteLength = zipPath
+    ? statSync(zipPath).size
+    : (zipBuffer?.byteLength ?? zipBuffer?.length ?? 0);
+  const useUnzip = Boolean(zipPath) || byteLength >= LARGE_ZIP_BYTES;
+  const materialized = useUnzip ? materializeZipPath(zipBuffer, zipPath) : null;
+
+  try {
+    let stopsText;
+    let routesText;
+    let tripsText;
+    let stopRouteIds;
+
+    if (materialized) {
+      stopsText = unzipEntryTextSync(materialized.path, "stops.txt");
+      routesText = unzipEntryTextSync(materialized.path, "routes.txt");
+      tripsText = unzipEntryTextSync(materialized.path, "trips.txt", {
+        maxBuffer: 400 * 1024 * 1024,
+      });
+      if (!stopsText || !routesText || !tripsText) {
+        throw new Error(`GTFS zip for ${metro.id} is missing required tables.`);
+      }
+
+      const stopsRows = parseCsv(stopsText).filter((row) => stopInBbox(row, metro.bbox));
+      const referencedParentIds = new Set(
+        stopsRows.map((row) => row.parent_station).filter((value) => value && value.length > 0),
+      );
+      const tripsRows = parseCsv(tripsText);
+      const stopIds = new Set(
+        stopsRows.filter((row) => !referencedParentIds.has(row.stop_id)).map((row) => row.stop_id),
+      );
+      const tripRoute = new Map(tripsRows.map((row) => [row.trip_id, row.route_id]));
+      stopRouteIds = await buildStopRouteIdsFromUnzipStream(materialized.path, stopIds, tripRoute);
+
+      const usedRouteIds = new Set(Object.values(stopRouteIds).flatMap((routeIds) => routeIds));
+      const routesRows = parseCsv(routesText).filter((row) => usedRouteIds.has(row.route_id));
+      const routes = routesRows.map((row) => ({
+        id: row.route_id,
+        shortName: row.route_short_name || row.route_id,
+        longName: row.route_long_name || row.route_short_name || row.route_id,
+        mode: routeMode(row.route_type),
+      }));
+      const stops = stopsRows
+        .filter((row) => !referencedParentIds.has(row.stop_id))
+        .map((row) => ({
+          id: row.stop_id,
+          name: row.stop_name,
+          lat: Number(row.stop_lat),
+          lng: Number(row.stop_lon),
+          ...(row.parent_station ? { parentStationId: row.parent_station } : {}),
+        }));
+
+      return {
+        metroId: metro.id,
+        feedOnestopId: metro.feedOnestopId,
+        builtAt: new Date().toISOString(),
+        stops,
+        routes,
+        stopRouteIds,
+      };
+    }
+
+    const zip = new JSZip();
+    const archive = await zip.loadAsync(zipBuffer);
+    stopsText = stripUtf8Bom((await archive.file("stops.txt")?.async("string")) ?? "");
+    routesText = stripUtf8Bom((await archive.file("routes.txt")?.async("string")) ?? "");
+    tripsText = stripUtf8Bom((await archive.file("trips.txt")?.async("string")) ?? "");
     const stopTimesText = stripUtf8Bom(
       (await archive.file("stop_times.txt")?.async("string")) ?? "",
     );
@@ -317,7 +457,7 @@ function buildBundleFromGtfsZip(zipBuffer, metro) {
       stopsRows.filter((row) => !referencedParentIds.has(row.stop_id)).map((row) => row.stop_id),
     );
     const tripRoute = new Map(tripsRows.map((row) => [row.trip_id, row.route_id]));
-    const stopRouteIds = buildStopRouteIdsFromText(stopTimesText, stopIds, tripRoute);
+    stopRouteIds = buildStopRouteIdsFromText(stopTimesText, stopIds, tripRoute);
 
     const usedRouteIds = new Set(Object.values(stopRouteIds).flatMap((routeIds) => routeIds));
     const routesRows = parseCsv(routesText).filter((row) => usedRouteIds.has(row.route_id));
@@ -347,7 +487,9 @@ function buildBundleFromGtfsZip(zipBuffer, metro) {
       routes,
       stopRouteIds,
     };
-  });
+  } finally {
+    materialized?.cleanup?.();
+  }
 }
 
 function feedSlug(feedId) {
@@ -487,8 +629,9 @@ function upsertManifestEntries(entries, { replaceAll }) {
 async function buildBundleFromLocalZips(metro, localZipPaths) {
   const parts = [];
   for (const zipPath of localZipPaths) {
-    const zipBuffer = readFileSync(zipPath);
-    const part = await buildBundleFromGtfsZip(zipBuffer, metro);
+    // Prefer path-based unzip for large BODS/agency zips (avoid V8 string limit).
+    const zipBuffer = statSync(zipPath).size >= LARGE_ZIP_BYTES ? null : readFileSync(zipPath);
+    const part = await buildBundleFromGtfsZip(zipBuffer, metro, { zipPath });
     const slug = basename(zipPath, ".zip");
     parts.push(localZipPaths.length > 1 ? namespaceBundlePart(part, slug) : part);
     console.log(`  ${slug}: ${part.stops.length} stops, ${part.routes.length} routes.`);
