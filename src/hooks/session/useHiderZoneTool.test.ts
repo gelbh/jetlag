@@ -2,7 +2,11 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapViewportBounds } from "../../domain/map/transitViewport";
-import type { HidingZoneRecord, TransitStation } from "../../domain/session/hiding/hidingZone";
+import {
+  buildHidingZoneCircle,
+  type HidingZoneRecord,
+  type TransitStation,
+} from "../../domain/session/hiding/hidingZone";
 import type { HidingZoneStationsOptions } from "../../services/geo/matching/transit";
 import { createTestGameArea } from "../../test/fixtures/sessions";
 import { useHiderZoneTool } from "./useHiderZoneTool";
@@ -490,6 +494,7 @@ describe("useHiderZoneTool", () => {
   describe("tap-map snap lookup", () => {
     const tap: [number, number] = [53.35, -6.26];
     const nearTap = { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 };
+    const nearCenter: [number, number] = [nearTap.lat, nearTap.lng];
 
     function deferred<T>() {
       let resolve!: (value: T) => void;
@@ -510,6 +515,28 @@ describe("useHiderZoneTool", () => {
       return rendered;
     }
 
+    function expectDraftCenter(
+      result: { current: ReturnType<typeof useHiderZoneTool> },
+      center: [number, number],
+    ) {
+      expect(result.current.manualCenter).toEqual(center);
+      expect(result.current.previewCircle).toEqual(buildHidingZoneCircle(center, 200));
+    }
+
+    it("sets draft center to the tap immediately and keeps the ring on that center", () => {
+      const lookup = deferred<TransitStation[]>();
+      fetchTransitStationsForHidingZoneViewport.mockReturnValue(lookup.promise);
+      const { result } = renderTapMap();
+
+      act(() => {
+        result.current.handleMapClick(tap);
+      });
+
+      expect(result.current.snapping).toBe(true);
+      expect(result.current.selectedStation).toBeNull();
+      expectDraftCenter(result, tap);
+    });
+
     it("reports snapping while the lookup runs and ignores Confirm until it settles", async () => {
       const lookup = deferred<TransitStation[]>();
       fetchTransitStationsForHidingZoneViewport.mockReturnValue(lookup.promise);
@@ -529,6 +556,7 @@ describe("useHiderZoneTool", () => {
       });
       expect(result.current.snapping).toBe(false);
       expect(result.current.selectedStation).toEqual(nearTap);
+      expectDraftCenter(result, nearCenter);
     });
 
     it("searches a box around the tap that covers the snap radius", async () => {
@@ -584,7 +612,7 @@ describe("useHiderZoneTool", () => {
 
       expect(result.current.snapping).toBe(false);
       expect(result.current.selectedStation).toBeNull();
-      expect(result.current.manualCenter).toEqual(tap);
+      expectDraftCenter(result, tap);
     });
 
     it("gives up when Overpass times out so Confirm saves the tapped point", async () => {
@@ -598,7 +626,16 @@ describe("useHiderZoneTool", () => {
       });
 
       expect(result.current.snapping).toBe(false);
-      expect(result.current.manualCenter).toEqual(tap);
+      expect(result.current.selectedStation).toBeNull();
+      expectDraftCenter(result, tap);
+
+      await act(async () => {
+        await result.current.confirmZone();
+      });
+      expect(writeHidingZone).toHaveBeenCalledWith(
+        "session-1",
+        expect.objectContaining({ stationId: "manual", center: { lat: tap[0], lng: tap[1] } }),
+      );
     });
 
     it("skips the lookup while offline", async () => {
@@ -611,7 +648,31 @@ describe("useHiderZoneTool", () => {
 
       expect(fetchTransitStationsForHidingZoneViewport).not.toHaveBeenCalled();
       expect(result.current.snapping).toBe(false);
-      expect(result.current.manualCenter).toEqual(tap);
+      expect(result.current.selectedStation).toBeNull();
+      expectDraftCenter(result, tap);
+    });
+
+    it("Confirm writes the draft center after snap, not a lagging tap", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockResolvedValue([nearTap]);
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+      expectDraftCenter(result, nearCenter);
+      expect(result.current.selectedStation).toEqual(nearTap);
+
+      await act(async () => {
+        await result.current.confirmZone();
+      });
+      expect(writeHidingZone).toHaveBeenCalledWith(
+        "session-1",
+        expect.objectContaining({
+          stationId: "near",
+          stationName: "Near",
+          center: { lat: nearTap.lat, lng: nearTap.lng },
+        }),
+      );
     });
 
     it("reuses stations from an earlier lookup for a nearby tap", async () => {

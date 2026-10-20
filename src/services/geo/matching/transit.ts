@@ -124,18 +124,43 @@ export async function fetchTransitLineMatchingFeaturesInArea(
   return fetchStationFeaturesInArea(gameArea);
 }
 
+/**
+ * GTFS ∪ Overpass for hiding-zone / Time Trap lists.
+ * GTFS-first matching is unchanged. Prefer GTFS rows when dedupe collapses near-duplicates.
+ */
+async function fetchHidingZoneStationsUnion(
+  bbox: BoundingBox,
+  gameArea: GameArea,
+  options?: HidingZoneStationsOptions,
+): Promise<TransitStation[]> {
+  const gtfsPromise = tryHidingZoneGtfsStations(gameArea, bbox).then((stations) => stations ?? []);
+  const overpassPromise = fetchOverpassHidingZoneStations(bbox, gameArea, options);
+
+  const [gtfsResult, overpassResult] = await Promise.allSettled([gtfsPromise, overpassPromise]);
+
+  const gtfs = gtfsResult.status === "fulfilled" ? gtfsResult.value : [];
+  const overpass = overpassResult.status === "fulfilled" ? overpassResult.value : [];
+
+  if (gtfs.length === 0 && overpass.length === 0) {
+    if (overpassResult.status === "rejected") {
+      throw overpassResult.reason;
+    }
+    return [];
+  }
+
+  // GTFS first so name/proximity dedupe keeps agency ids over OSM ids.
+  const merged = dedupeTransitStations([...gtfs, ...overpass]);
+  if (merged.length > 0) {
+    options?.onStations?.(merged);
+  }
+  return merged;
+}
+
 export async function fetchTransitStationsForHidingZone(
   gameArea: GameArea,
   options?: HidingZoneStationsOptions,
 ): Promise<TransitStation[]> {
-  const bbox = matchingSearchBoundingBox(gameArea);
-  const gtfs = await tryHidingZoneGtfsStations(gameArea, bbox);
-  if (gtfs) {
-    options?.onStations?.(gtfs);
-    return gtfs;
-  }
-
-  return fetchOverpassHidingZoneStations(bbox, gameArea, options);
+  return fetchHidingZoneStationsUnion(matchingSearchBoundingBox(gameArea), gameArea, options);
 }
 
 export async function fetchTransitStationsForHidingZoneViewport(
@@ -150,13 +175,7 @@ export async function fetchTransitStationsForHidingZoneViewport(
     return [];
   }
 
-  const gtfs = await tryHidingZoneGtfsStations(gameArea, clipped);
-  if (gtfs) {
-    options?.onStations?.(gtfs);
-    return gtfs;
-  }
-
-  return fetchOverpassHidingZoneStations(clipped, gameArea, options);
+  return fetchHidingZoneStationsUnion(clipped, gameArea, options);
 }
 
 export async function fetchStreetPathFeaturesInArea(

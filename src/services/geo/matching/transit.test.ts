@@ -81,7 +81,7 @@ describe("hiding-zone transit station fetchers", () => {
     vi.mocked(overpassClient.queryOverpass).mockReset();
   });
 
-  it("returns GTFS stations and skips Overpass when the bundle has stops in area", async () => {
+  it("unions GTFS and Overpass when the bundle has stops in area", async () => {
     vi.mocked(loadGtfsBundle).mockResolvedValue(NYC_BUNDLE);
     vi.mocked(overpassClient.queryOverpass).mockResolvedValue({
       elements: [OVERPASS_STATION],
@@ -90,10 +90,9 @@ describe("hiding-zone transit station fetchers", () => {
     const stations = await fetchTransitStationsForHidingZone(MIDTOWN_GAME_AREA);
 
     expect(stations.map((station) => station.id)).toEqual(
-      expect.arrayContaining(["nyc:penn", "nyc:times"]),
+      expect.arrayContaining(["nyc:penn", "nyc:times", "9001"]),
     );
-    expect(stations.map((station) => station.id)).not.toContain("9001");
-    expect(overpassClient.queryOverpass).not.toHaveBeenCalled();
+    expect(overpassClient.queryOverpass).toHaveBeenCalledTimes(1);
   });
 
   it("falls back to Overpass when GTFS filter yields no stations", async () => {
@@ -139,7 +138,7 @@ describe("hiding-zone transit station fetchers", () => {
     expect(stations[0]?.id).toBe("9001");
   });
 
-  it("viewport: returns GTFS stations in the clipped bbox and skips Overpass", async () => {
+  it("viewport: unions GTFS stations in the clipped bbox with Overpass", async () => {
     vi.mocked(loadGtfsBundle).mockResolvedValue(NYC_BUNDLE);
     vi.mocked(overpassClient.queryOverpass).mockResolvedValue({
       elements: [OVERPASS_STATION],
@@ -150,8 +149,10 @@ describe("hiding-zone transit station fetchers", () => {
       MIDTOWN_GAME_AREA,
     );
 
-    expect(stations.map((station) => station.id)).toEqual(["nyc:penn"]);
-    expect(overpassClient.queryOverpass).not.toHaveBeenCalled();
+    expect(stations.map((station) => station.id)).toEqual(
+      expect.arrayContaining(["nyc:penn", "9001"]),
+    );
+    expect(overpassClient.queryOverpass).toHaveBeenCalledTimes(1);
   });
 
   it("viewport: falls back to Overpass when GTFS hits nothing in the clipped viewport", async () => {
@@ -169,7 +170,7 @@ describe("hiding-zone transit station fetchers", () => {
     expect(stations[0]?.id).toBe("9001");
   });
 
-  it("waits out a slow GTFS load and still skips Overpass when stops arrive", async () => {
+  it("waits out a slow GTFS load and still unions Overpass when both arrive", async () => {
     vi.useFakeTimers();
     try {
       let resolveBundle!: (value: GtfsStaticBundle) => void;
@@ -191,8 +192,10 @@ describe("hiding-zone transit station fetchers", () => {
       resolveBundle(NYC_BUNDLE);
       const stations = await pending;
 
-      expect(stations.map((station) => station.id)).toEqual(["nyc:penn"]);
-      expect(overpassClient.queryOverpass).not.toHaveBeenCalled();
+      expect(stations.map((station) => station.id)).toEqual(
+        expect.arrayContaining(["nyc:penn", "9001"]),
+      );
+      expect(overpassClient.queryOverpass).toHaveBeenCalledTimes(1);
     } finally {
       vi.useRealTimers();
     }

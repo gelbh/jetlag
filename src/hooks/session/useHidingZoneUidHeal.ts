@@ -4,6 +4,18 @@ import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras";
 
+/** Payload for UID heal create. Always clear moveInProgress (rules forbid create with true). */
+export function buildHidingZoneUidHealWrite(
+  staleZone: HidingZoneRecord,
+  uid: string,
+): HidingZoneRecord {
+  return {
+    ...staleZone,
+    hiderUid: uid,
+    moveInProgress: false,
+  };
+}
+
 export function useHidingZoneUidHeal(
   sessionId: string | undefined,
   uid: string | null,
@@ -41,9 +53,6 @@ export function useHidingZoneUidHeal(
     healedKeysRef.current.add(healKey);
     // Best-effort heal: never an unhandled rejection, and the heal key stays
     // set so the effect does not loop.
-    writeHidingZone(sessionId, {
-      ...staleZone,
-      hiderUid: uid,
-    }).catch(() => {});
+    writeHidingZone(sessionId, buildHidingZoneUidHealWrite(staleZone, uid)).catch(() => {});
   }, [hidingZones, persistedUid, sessionId, uid]);
 }
