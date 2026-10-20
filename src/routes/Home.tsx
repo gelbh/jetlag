@@ -30,6 +30,61 @@ import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 // Footer links: 44px tap height without adding visual weight next to the Play actions.
 const footerLinkStyle = { display: "inline-flex", alignItems: "center", minHeight: 44 } as const;
 
+type HomeMoreChromeProps = {
+  firebaseOn: boolean;
+  showGuestAuthEntry: boolean;
+  showAccountFeatures: boolean;
+};
+
+function HomeMoreChrome({
+  firebaseOn,
+  showGuestAuthEntry,
+  showAccountFeatures,
+}: HomeMoreChromeProps) {
+  return (
+    <Stack gap={8}>
+      <SectionLabel>More</SectionLabel>
+      <InsetGroup>
+        {showGuestAuthEntry ? (
+          <InsetRow
+            to="/account"
+            label="Log in"
+            icon={<UserCircleIcon size={22} weight="regular" />}
+          />
+        ) : showAccountFeatures ? (
+          <>
+            <InsetRow
+              to="/friends"
+              label="Friends"
+              icon={<UsersThreeIcon size={22} weight="regular" />}
+            />
+            <InsetRow
+              showSeparator
+              to="/leaderboard"
+              label="Leaderboard"
+              icon={<TrophyIcon size={22} weight="regular" />}
+            />
+            <InsetRow
+              showSeparator
+              to="/stats"
+              label="Stats"
+              icon={<ChartBarIcon size={22} weight="regular" />}
+            />
+            {firebaseOn ? (
+              <InsetRow
+                showSeparator
+                to="/account"
+                label="Account"
+                icon={<UserCircleIcon size={22} weight="regular" />}
+              />
+            ) : null}
+          </>
+        ) : null}
+      </InsetGroup>
+    </Stack>
+  );
+}
+
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } = useContinueActiveSession();
   const { isPermanent, authReady } = usePermanentAuthUser();
@@ -174,46 +229,11 @@ export function Home() {
                 </InsetGroup>
               </Stack>
 
-              <Stack gap={8}>
-                <SectionLabel>More</SectionLabel>
-                <InsetGroup>
-                  {showGuestAuthEntry ? (
-                    <InsetRow
-                      to="/account"
-                      label="Log in"
-                      icon={<UserCircleIcon size={22} weight="regular" />}
-                    />
-                  ) : showAccountFeatures ? (
-                    <>
-                      <InsetRow
-                        to="/friends"
-                        label="Friends"
-                        icon={<UsersThreeIcon size={22} weight="regular" />}
-                      />
-                      <InsetRow
-                        showSeparator
-                        to="/leaderboard"
-                        label="Leaderboard"
-                        icon={<TrophyIcon size={22} weight="regular" />}
-                      />
-                      <InsetRow
-                        showSeparator
-                        to="/stats"
-                        label="Stats"
-                        icon={<ChartBarIcon size={22} weight="regular" />}
-                      />
-                      {firebaseOn ? (
-                        <InsetRow
-                          showSeparator
-                          to="/account"
-                          label="Account"
-                          icon={<UserCircleIcon size={22} weight="regular" />}
-                        />
-                      ) : null}
-                    </>
-                  ) : null}
-                </InsetGroup>
-              </Stack>
+              <HomeMoreChrome
+                firebaseOn={firebaseOn}
+                showGuestAuthEntry={showGuestAuthEntry}
+                showAccountFeatures={showAccountFeatures}
+              />
 
               <Stack gap={0} align="center">
                 <Group gap="xs" justify="center" component="nav" aria-label="Learn how to play">
