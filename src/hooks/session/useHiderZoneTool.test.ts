@@ -1,6 +1,9 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { GameArea } from "../../domain/map/annotations";
+import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import type { HidingZoneRecord, TransitStation } from "../../domain/session/hiding/hidingZone";
+import type { HidingZoneStationsOptions } from "../../services/geo/matching/transit";
 import { createTestGameArea } from "../../test/fixtures/sessions";
 import { useHiderZoneTool } from "./useHiderZoneTool";
 
@@ -8,7 +11,13 @@ const writeHidingZone = vi.hoisted(() => vi.fn());
 const enqueueMoveTimerIntent = vi.hoisted(() => vi.fn());
 const isEffectivelyOfflineNow = vi.hoisted(() => vi.fn(() => false));
 const fetchTransitStationsForHidingZoneViewport = vi.hoisted(() =>
-  vi.fn(async (): Promise<TransitStation[]> => []),
+  vi.fn(
+    async (
+      _viewport: MapViewportBounds,
+      _gameArea: GameArea,
+      _options?: HidingZoneStationsOptions,
+    ): Promise<TransitStation[]> => [],
+  ),
 );
 const commitWrite = vi.hoisted(() =>
   vi.fn((_label: string, run: () => Promise<void>) => {
@@ -386,7 +395,7 @@ describe("useHiderZoneTool", () => {
     it("applies late onStations results after a timed-out search", async () => {
       const lateStation = { id: "late", name: "Late", lat: 53.352, lng: -6.262 };
       fetchTransitStationsForHidingZoneViewport.mockImplementationOnce(
-        (_viewport, _gameArea, options) => {
+        async (_viewport, _gameArea, options) => {
           window.setTimeout(() => {
             options?.onStations?.([lateStation]);
           }, 50);
@@ -416,7 +425,7 @@ describe("useHiderZoneTool", () => {
       let staleOnStations: ((stations: TransitStation[]) => void) | undefined;
 
       fetchTransitStationsForHidingZoneViewport.mockImplementationOnce(
-        (_viewport, _gameArea, options) => {
+        async (_viewport, _gameArea, options) => {
           staleOnStations = options?.onStations;
           return Promise.reject(new Error("Couldn't load transit stations for this area."));
         },
