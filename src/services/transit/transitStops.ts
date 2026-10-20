@@ -4,6 +4,8 @@ import type { GameArea } from "../../domain/map/annotations";
 import { dedupeTransitStations, type TransitStation } from "../../domain/session/hiding/hidingZone";
 
 export const TRANSIT_STOP_OVERPASS_LIMIT = 250;
+export const HIDING_ZONE_BUS_STOP_OVERPASS_CAP = 150;
+export const HIDING_ZONE_RAIL_STOP_OVERPASS_CAP = 100;
 
 export type OverpassTransitStopElement = {
   id: number;
@@ -38,6 +40,34 @@ export function buildTransitStopOverpassQuery(
     node["station"="light_rail"](${formatted});
   );
   out ${output} ${limit};
+  `;
+}
+
+export function buildHidingZoneTransitStopOverpassQuery(
+  bbox: BoundingBox,
+  caps?: { bus?: number; rail?: number },
+  output: "center" | "body" = "center",
+): string {
+  const formatted = formatOverpassBbox(bbox);
+  const busCap = caps?.bus ?? HIDING_ZONE_BUS_STOP_OVERPASS_CAP;
+  const railCap = caps?.rail ?? HIDING_ZONE_RAIL_STOP_OVERPASS_CAP;
+
+  return `
+    [out:json][timeout:25];
+  (
+    node["highway"="bus_stop"](${formatted});
+    node["public_transport"="platform"]["bus"="yes"](${formatted});
+  )->.bus;
+  (
+    node["railway"="station"](${formatted});
+    node["railway"="halt"](${formatted});
+    node["railway"="stop"](${formatted});
+    node["railway"="tram_stop"](${formatted});
+    node["station"="subway"](${formatted});
+    node["station"="light_rail"](${formatted});
+  )->.rail;
+  .bus out ${output} ${busCap};
+  .rail out ${output} ${railCap};
   `;
 }
 

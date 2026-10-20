@@ -12,6 +12,7 @@ import {
 } from "../../transit/gtfsRouteGraph";
 import { inferTransitMetroId } from "../../transit/transitCatalog";
 import {
+  buildHidingZoneTransitStopOverpassQuery,
   buildTransitStopOverpassQuery,
   type OverpassTransitStopElement,
   overpassTransitStopsToMatchingFeatures,
@@ -66,7 +67,7 @@ export async function fetchTransitStationsForHidingZone(
   gameArea: GameArea,
 ): Promise<TransitStation[]> {
   const payload = await queryOverpass<{ elements: OverpassTransitStopElement[] }>(
-    buildStationQuery(gameArea),
+    buildHidingZoneTransitStopOverpassQuery(matchingSearchBoundingBox(gameArea)),
   );
 
   return parseOverpassTransitStops(payload.elements, gameArea);
@@ -84,7 +85,7 @@ export async function fetchTransitStationsForHidingZoneViewport(
   }
 
   const payload = await queryOverpass<{ elements: OverpassTransitStopElement[] }>(
-    buildTransitStopOverpassQuery(clipped),
+    buildHidingZoneTransitStopOverpassQuery(clipped),
   );
 
   return parseOverpassTransitStops(payload.elements, gameArea);
