@@ -25,6 +25,25 @@ vi.mock("@/hooks/session/useContinueActiveSession", () => ({
   }),
 }));
 
+vi.mock("@/hooks/session/useLeaveSessionAndUpdate", () => ({
+  useLeaveSessionAndUpdate: () => ({
+    leaving: false,
+    handleLeaveAndUpdate: vi.fn(),
+  }),
+}));
+
+vi.mock("@/hooks/app/useAppUpdateState", () => ({
+  useAppUpdateState: () => ({
+    needsRefresh: false,
+    safeToReload: true,
+    showGlobalBanner: false,
+    applyUpdate: vi.fn(),
+    hotfixGraceActive: false,
+    hotfixGraceSecondsRemaining: null,
+    hotfixRequiredMinAppVersion: null,
+  }),
+}));
+
 vi.mock("@/navigation/useRouteTransition", () => ({
   useRouteTransition: () => ({ phase: "idle" }),
 }));

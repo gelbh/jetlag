@@ -13,16 +13,19 @@ import { Link } from "react-router-dom";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
-import { filledStyles } from "@/components/ui/entry/entryStyles";
+import { filledStyles, plainStyles } from "@/components/ui/entry/entryStyles";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import { VersionChangelogSheet } from "@/components/ui/sheets/VersionChangelogSheet";
 import { APP_VERSION } from "@/domain/device/changelog";
+import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
 import { useHydrated } from "@/hooks/app/useHydrated";
 import { usePermanentAuthUser } from "@/hooks/billing/usePermanentAuthUser";
 import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSession";
+import { useLeaveSessionAndUpdate } from "@/hooks/session/useLeaveSessionAndUpdate";
 import { expectsPermanentSignIn } from "@/services/core/auth/persistedAuthHint";
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
@@ -87,6 +90,8 @@ function HomeMoreChrome({
 
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } = useContinueActiveSession();
+  const { needsRefresh } = useAppUpdateState();
+  const { leaving, handleLeaveAndUpdate } = useLeaveSessionAndUpdate();
   const { isPermanent, authReady } = usePermanentAuthUser();
   const hydrated = useHydrated();
   const [permanentHint] = useState(expectsPermanentSignIn);
@@ -189,6 +194,18 @@ export function Home() {
                     styles={filledStyles}
                     onClick={() => void handleContinue()}
                   />
+                  {needsRefresh ? (
+                    <EntryAsyncButton
+                      fullWidth
+                      busy={leaving}
+                      idleLabel={appUpdateCopy.leaveAndUpdateAction}
+                      busyLabel="Leaving…"
+                      statusMessage="Leaving session to apply update"
+                      aria-label={appUpdateCopy.leaveAndUpdateAction}
+                      styles={plainStyles}
+                      onClick={() => void handleLeaveAndUpdate()}
+                    />
+                  ) : null}
                   <Text
                     ta="center"
                     size="sm"
