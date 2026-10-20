@@ -17,10 +17,12 @@ import {
   type MatchingCategoryId,
   type MeasuringLocationCategory,
 } from "@/domain/questions";
+import type { MeasuringFromKind } from "@/domain/questions/measuringQuestions";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   matchingOverpassSelectorsForCategory,
   resolveMatchingCategory,
+  resolveMeasuringCatalogOption,
 } from "@/domain/session/catalog/sessionCustomCatalog";
 import type {
   CustomMatchingAreasByLevel,
@@ -38,12 +40,11 @@ import {
   fetchLandmassFeaturesInArea,
   landmassToMatchingFeature,
 } from "../overpass/landmassFeatures";
-import type { MeasuringPlace } from "../overpass/measuringPlaces";
+import { fetchMeasuringPlacesInArea, type MeasuringPlace } from "../overpass/measuringPlaces";
 import {
   mergeOverpassElementPayloads,
   queryOverpassWithBboxSplit,
 } from "../overpass/overpassBboxSplit";
-import { fetchBundledMeasuringPlaces, mergeMeasuringPlaces } from "../overpass/regionPackPoi";
 import { parseMatchingFeatures } from "./parse";
 import { buildMatchingFeaturesQueryForBbox, matchingFeaturesCacheKey } from "./query";
 import {
@@ -67,23 +68,6 @@ const HYGIENE_MATCHING_CATEGORIES = new Set<MeasuringLocationCategory>([
   "hospital",
 ]);
 
-const BUNDLED_MATCHING_CATEGORIES = new Set<MatchingCategoryId>([
-  "commercial_airport",
-  "mountain",
-  "park",
-  "museum",
-  "hospital",
-]);
-
-function asBundledMeasuringCategory(
-  categoryId: MatchingCategoryId,
-): MeasuringLocationCategory | null {
-  if (!BUNDLED_MATCHING_CATEGORIES.has(categoryId)) {
-    return null;
-  }
-  return categoryId as MeasuringLocationCategory;
-}
-
 function measuringPlacesToMatchingFeatures(
   places: MeasuringPlace[],
   gameArea: GameArea,
@@ -97,24 +81,15 @@ function measuringPlacesToMatchingFeatures(
   }));
 }
 
-function matchingFeaturesToMeasuringPlaces(features: MatchingFeature[]): MeasuringPlace[] {
-  return features.map((feature) => ({
-    id: feature.id,
-    name: feature.name,
-    point: feature.point,
-    ...(feature.wikidataId ? { wikidataId: feature.wikidataId } : {}),
-  }));
-}
-
 function filterHygieneMatchingFeatures(
   features: MatchingFeature[],
   categoryId: MatchingCategoryId,
 ): MatchingFeature[] {
-  const measuringCategory = asBundledMeasuringCategory(categoryId);
-  if (measuringCategory === null || !HYGIENE_MATCHING_CATEGORIES.has(measuringCategory)) {
+  if (!HYGIENE_MATCHING_CATEGORIES.has(categoryId as MeasuringLocationCategory)) {
     return features;
   }
 
+  const measuringCategory = categoryId as MeasuringLocationCategory;
   return features.filter((feature) =>
     isEligibleBundledPoi(
       {
@@ -161,48 +136,40 @@ async function fetchOverpassPointMatchingFeaturesInArea(
   customCategories: readonly SessionCustomCategory[],
   options?: MatchingFetchOptions,
 ): Promise<MatchingFeature[]> {
-  const measuringCategory = asBundledMeasuringCategory(categoryId);
-  const bundledPlaces =
-    measuringCategory === null
-      ? []
-      : await fetchBundledMeasuringPlaces(gameArea, measuringCategory, options?.regionPackId);
-  const bundledFeatures = measuringPlacesToMatchingFeatures(bundledPlaces, gameArea);
   const pinFeatures = measuringPlacesToMatchingFeatures([...(options?.poiPins ?? [])], gameArea);
   const withPins = (features: MatchingFeature[]): MatchingFeature[] => {
     const seen = new Set(features.map((feature) => feature.id));
     return [...features, ...pinFeatures.filter((feature) => !seen.has(feature.id))];
   };
 
-  const mergeWithOverpass = async (): Promise<MatchingFeature[]> => {
-    const overpassFeatures = filterHygieneMatchingFeatures(
-      await fetchOverpassMatchingFeaturesCached(gameArea, categoryId, customCategories, options),
-      categoryId,
+  const measuringOption = resolveMeasuringCatalogOption(
+    categoryId as MeasuringFromKind,
+    customCategories,
+  );
+  if (measuringOption) {
+    const places = await fetchMeasuringPlacesInArea(
+      gameArea,
+      categoryId as MeasuringLocationCategory,
+      customCategories,
+      options?.regionPackId,
+      options?.onEnrich
+        ? {
+            onEnrich: (mergedPlaces) => {
+              options.onEnrich?.(
+                withPins(measuringPlacesToMatchingFeatures(mergedPlaces, gameArea)),
+              );
+            },
+          }
+        : undefined,
     );
-
-    if (bundledFeatures.length === 0) {
-      return withPins(overpassFeatures);
-    }
-
-    return withPins(
-      measuringPlacesToMatchingFeatures(
-        mergeMeasuringPlaces(matchingFeaturesToMeasuringPlaces(overpassFeatures), bundledPlaces),
-        gameArea,
-      ),
-    );
-  };
-
-  if (bundledFeatures.length > 0 && options?.onEnrich) {
-    void mergeWithOverpass()
-      .then((merged) => {
-        options.onEnrich?.(merged);
-      })
-      .catch(() => {
-        // Soft-fail Overpass enrich; keep the bundle result.
-      });
-    return withPins(bundledFeatures);
+    return withPins(measuringPlacesToMatchingFeatures(places, gameArea));
   }
 
-  return mergeWithOverpass();
+  const overpassFeatures = filterHygieneMatchingFeatures(
+    await fetchOverpassMatchingFeaturesCached(gameArea, categoryId, customCategories, options),
+    categoryId,
+  );
+  return withPins(overpassFeatures);
 }
 
 async function fetchAdminMatchingFeaturesInArea(
