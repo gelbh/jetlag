@@ -268,6 +268,107 @@ describe("firestore.rules — game chat & questions", () => {
     );
   });
 
+  it("denies non-host member from stamping deadlineExpiredAt on pending", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1", "seeker-2"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider", "seeker-2": "seeker" },
+        }),
+      );
+
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-deadline")
+        .set({
+          toolType: "radar",
+          createdByUid: "host-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "Feature",
+              properties: {},
+              geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+            }),
+            metadata: {},
+          },
+          replyOptions: [],
+          promptText: "Are you within 1 mile?",
+        });
+    });
+
+    const stamp = { deadlineExpiredAt: "2026-01-01T00:05:00.000Z" };
+    const questionRef = (uid: string) =>
+      rules.testEnv
+        .authenticatedContext(uid)
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-deadline");
+
+    await assertFails(questionRef("hider-1").update(stamp));
+    await assertFails(questionRef("seeker-2").update(stamp));
+  });
+
+  it("allows host to stamp deadlineExpiredAt on pending", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1", "seeker-2"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider", "seeker-2": "seeker" },
+        }),
+      );
+
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-deadline-host")
+        .set({
+          toolType: "radar",
+          createdByUid: "host-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "Feature",
+              properties: {},
+              geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+            }),
+            metadata: {},
+          },
+          replyOptions: [],
+          promptText: "Are you within 1 mile?",
+        });
+    });
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-deadline-host")
+        .update({ deadlineExpiredAt: "2026-01-01T00:05:00.000Z" }),
+    );
+  });
+
   it("allows seeker to cancel expired game question message", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host
