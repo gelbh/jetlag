@@ -256,7 +256,7 @@ export const BUNDLED_PRESET_FLAG_ASSETS = {
     src: "/region-flags/canton-neuchatel.png",
     alt: "Canton of Neuchâtel",
     source: "wikidata:Q12738:P41",
-    identity: "commons:che canton de neuchâtel flag.svg",
+    identity: "commons:flag of canton of neuchâtel.svg",
     presentation: "flag",
   },
   "canton-geneva": {
@@ -278,6 +278,13 @@ export const BUNDLED_PRESET_FLAG_ASSETS = {
     alt: "County Dublin",
     source: "wikidata:Q173500:P41",
     identity: "commons:colours of dublin.svg",
+    presentation: "flag",
+  },
+  "county-hampshire": {
+    src: "/region-flags/county-hampshire.png",
+    alt: "Hampshire",
+    source: "wikidata:Q23204:P41",
+    identity: "commons:county flag of hampshire.svg",
     presentation: "flag",
   },
   "metro-london": {
@@ -307,6 +314,13 @@ export const BUNDLED_PRESET_FLAG_ASSETS = {
     source: "wikidata:Q35765:P41",
     identity: "commons:flag of osaka, osaka.svg",
     presentation: "flag",
+  },
+  "metro-southampton": {
+    src: "/region-flags/metro-southampton.png",
+    alt: "Southampton",
+    source: "wikidata:Q79848:P94",
+    identity: "commons:arms of southampton.svg",
+    presentation: "cutout",
   },
   "lucerne-metro": {
     src: "/region-flags/lucerne-metro.png",
