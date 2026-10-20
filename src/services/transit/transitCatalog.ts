@@ -75,6 +75,13 @@ export const TRANSIT_METROS: TransitMetro[] = [
     transitlandFeed: "f-bctransit~prince~rupert",
     transitlandRtFeed: "f-bctransit~prince~rupert~rt",
   },
+  {
+    id: "southampton",
+    label: "Southampton",
+    center: [50.9097, -1.4044],
+    radiusKm: 25,
+    transitlandFeed: "f-bus~dft~gov~uk",
+  },
 ];
 
 export function getTransitMetro(metroId: string | undefined): TransitMetro | null {

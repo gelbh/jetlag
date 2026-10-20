@@ -29,4 +29,11 @@ describe("transitCatalog", () => {
     expect(dublin?.transitlandRtFeed).toBe("f-national~transport~authority~ie~rt");
     expect(sf?.transitlandRtFeed).toBe("f-sf~bay~area~rg~rt");
   });
+
+  it("registers southampton as static-only (no RT)", () => {
+    const southampton = TRANSIT_METROS.find((m) => m.id === "southampton");
+    expect(southampton?.transitlandFeed).toBeTruthy();
+    expect(southampton?.transitlandRtFeed).toBeUndefined();
+    expect(metroSupportsLiveVehicles(southampton ?? null)).toBe(false);
+  });
 });

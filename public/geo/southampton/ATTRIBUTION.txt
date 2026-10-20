@@ -12,3 +12,12 @@ within the Southampton pack reference bbox (Overpass extract, 2026-10-20).
 POI bundles: Wikidata (CC0), clipped to the Southampton pack reference bbox.
 
 Sea-level seed elevations: Open-Meteo Elevation API.
+
+GTFS static bundle (public/geo/gtfs/southampton.json): built 2026-10-20 from
+Bluestar / Go South Coast Passenger open-data GTFS (agencies BLUS + UNIL Unilink,
+plus WDBC/SWWD rows present in the same zip). Filtered to
+REGION_PACK_REFERENCE_BBOXES.southampton padded +0.02°. Transitland onestop id
+f-bus~dft~gov~uk (UK DfT BODS nationwide bus feed that indexes this operator set).
+Source URL: https://data.discoverpassenger.com/operator/bluestar/dataset/current/download/gtfs
+Licensed under the Open Government Licence v3.0. First Bus Southampton city
+services are not included in this Bluestar/Unilink zip.
