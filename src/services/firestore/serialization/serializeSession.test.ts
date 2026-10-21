@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_CASTLE_SIEGE_DIALS } from "@/domain/session/castleSiege/dials";
 import {
   buildHidingZoneDocument,
   buildSessionDocument,
@@ -278,6 +279,7 @@ describe("serializeSession", () => {
         castleSiegeRoles: { "host-uid": "teamA" },
         seriesLength: 3,
         setupMode: "pregame",
+        dials: DEFAULT_CASTLE_SIEGE_DIALS,
       },
     );
 
@@ -287,6 +289,7 @@ describe("serializeSession", () => {
       castleSiegeRoles: { "host-uid": "teamA" },
       seriesLength: 3,
       setupMode: "pregame",
+      dials: DEFAULT_CASTLE_SIEGE_DIALS,
     });
 
     const restored = deserializeSessionFromFirestore("session-cs", {
@@ -297,12 +300,25 @@ describe("serializeSession", () => {
         north: 53.4,
         east: -6.2,
       },
+      border: {
+        geometryJson: JSON.stringify({
+          type: "LineString",
+          coordinates: [
+            [-6.3, 53.3],
+            [-6.2, 53.4],
+          ],
+        }),
+      },
+      coinAssignment: { teamA: "left", teamB: "right" },
     });
 
     expect(restored.mode).toBe("castleSiege");
     expect(restored.castleSiegeRoles).toEqual({ "host-uid": "teamA" });
     expect(restored.seriesLength).toBe(3);
     expect(restored.setupMode).toBe("pregame");
+    expect(restored.dials).toEqual(DEFAULT_CASTLE_SIEGE_DIALS);
+    expect(restored.border?.type).toBe("LineString");
+    expect(restored.coinAssignment).toEqual({ teamA: "left", teamB: "right" });
     expect(restored.memberRoles).toEqual({ "host-uid": "observer" });
   });
 
@@ -318,5 +334,7 @@ describe("serializeSession", () => {
     expect(payload).not.toHaveProperty("castleSiegeRoles");
     expect(payload).not.toHaveProperty("seriesLength");
     expect(payload).not.toHaveProperty("setupMode");
+    expect(payload).not.toHaveProperty("dials");
+    expect(payload).not.toHaveProperty("arena");
   });
 });

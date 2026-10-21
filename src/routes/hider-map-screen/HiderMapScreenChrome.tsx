@@ -13,6 +13,7 @@ import { FirestorePersistenceBanner } from "../../components/session/banners/Fir
 import type { HiderTruthRevealState } from "../../components/session/banners/HiderTruthRevealBanner";
 import { HiderTruthRevealBanner } from "../../components/session/banners/HiderTruthRevealBanner";
 import { QuestionAlertBanner } from "../../components/session/banners/QuestionAlertBanner";
+import { CastleSiegeSetupChrome } from "../../components/session/castle-siege";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { SessionLog } from "../../components/session/log/SessionLog";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
@@ -422,6 +423,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
 
   return (
     <MapScreenChromeSlots chromeHudRef={chromeHudRef} header={statusRail} toolbar={toolDock}>
+      <CastleSiegeSetupChrome session={session} uid={uid} isHost={isHost} />
       <GameOverChrome
         sessionId={session.id}
         playerRole={roleConfig.statusPlayerRole}

@@ -3,6 +3,7 @@ import { clientEnvUsesFirebaseEmulator } from "@/config/env";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { isEffectivelyOffline } from "@/domain/device/sync/sync";
 import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
+import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
 import type { SessionMode } from "@/domain/session/castleSiege/mode";
 import type { CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { type PlayerRole, resolvePlayerRole } from "@/domain/session/players/playerRole";
@@ -33,6 +34,7 @@ export type CreateRemoteSessionOptions = {
   hostCastleSiegeRole?: CastleSiegeTeamRole;
   seriesLength?: 1 | 3;
   setupMode?: "pregame" | "fairSplit";
+  dials?: CastleSiegeDials;
 };
 
 /**
@@ -194,6 +196,7 @@ export async function createRemoteSession(
             castleSiegeRoles,
             ...(options?.seriesLength !== undefined ? { seriesLength: options.seriesLength } : {}),
             ...(options?.setupMode !== undefined ? { setupMode: options.setupMode } : {}),
+            ...(options?.dials !== undefined ? { dials: options.dials } : {}),
           }
         : {}),
     };
@@ -218,6 +221,7 @@ export async function createRemoteSession(
               castleSiegeRoles,
               seriesLength: options?.seriesLength,
               setupMode: options?.setupMode,
+              dials: options?.dials,
             }
           : undefined,
       ),

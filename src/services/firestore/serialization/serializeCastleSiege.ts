@@ -1,0 +1,249 @@
+import type { MultiPolygon, Polygon } from "geojson";
+import { parseRegionPackId } from "@/domain/regions/regionPack";
+import type { CastleSiegeArena, CastleSiegeArenaSource } from "@/domain/session/castleSiege/arena";
+import {
+  type CastleSiegeDials,
+  normalizeCastleSiegeDials,
+  parseCastleSiegeDials,
+} from "@/domain/session/castleSiege/dials";
+import type {
+  CastleSiegeBorderLine,
+  CastleSiegeCoinAssignment,
+  CastleSiegeHalfSide,
+  CastleSiegePlayingTeam,
+} from "@/domain/session/castleSiege/pregame";
+import {
+  assertNoNestedArrays,
+  deserializeGameAreaFromFirestore,
+  serializeGameAreaForFirestore,
+  stripUndefinedValues,
+} from "./shared";
+
+const ARENA_SOURCES = new Set<CastleSiegeArenaSource>(["gameArea", "regionPack", "drawn"]);
+const HALF_SIDES = new Set<CastleSiegeHalfSide>(["left", "right"]);
+const PLAYING_TEAMS = new Set<CastleSiegePlayingTeam>(["teamA", "teamB"]);
+
+export type CastleSiegeSetupPatch = {
+  arena?: CastleSiegeArena;
+  border?: CastleSiegeBorderLine;
+  neutralBelt?: Polygon | MultiPolygon;
+  dials?: CastleSiegeDials;
+  coinAssignment?: CastleSiegeCoinAssignment;
+};
+
+export type TeamSealHashRecord = {
+  teamId: CastleSiegePlayingTeam;
+  hash: string;
+  sealedByUid: string;
+  sealedAt: string;
+};
+
+const SEAL_HASH_HEX = /^[0-9a-f]{64}$/;
+
+/** Plaintext / oracle fields that must never be enemy-readable (V3). */
+export const TEAM_SEAL_PLAINTEXT_KEYS = [
+  "anchorName",
+  "lat",
+  "lng",
+  "secretPhrase",
+  "revealedAnchor",
+  "ciphertext",
+] as const;
+
+export function isValidSealHash(hash: string): boolean {
+  return SEAL_HASH_HEX.test(hash);
+}
+
+export function serializeCastleSiegeArenaForFirestore(
+  arena: CastleSiegeArena,
+): Record<string, unknown> {
+  const payload = stripUndefinedValues({
+    polygon: serializeGameAreaForFirestore(arena.polygon),
+    source: arena.source,
+    regionPackId: arena.regionPackId,
+    subregionId: arena.subregionId,
+  }) as Record<string, unknown>;
+  assertNoNestedArrays(payload, "arena");
+  return payload;
+}
+
+export function deserializeCastleSiegeArenaFromFirestore(
+  value: unknown,
+): CastleSiegeArena | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  if (!ARENA_SOURCES.has(record.source as CastleSiegeArenaSource)) {
+    return undefined;
+  }
+  try {
+    const polygon = deserializeGameAreaFromFirestore(record.polygon);
+    const regionPackId = parseRegionPackId(record.regionPackId);
+    return {
+      polygon,
+      source: record.source as CastleSiegeArenaSource,
+      ...(regionPackId !== undefined ? { regionPackId } : {}),
+      ...(typeof record.subregionId === "string" ? { subregionId: record.subregionId } : {}),
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+export function serializeGeometryJsonForFirestore(geometry: object): { geometryJson: string } {
+  const payload = { geometryJson: JSON.stringify(geometry) };
+  assertNoNestedArrays(payload, "geometry");
+  return payload;
+}
+
+export function deserializeBorderFromFirestore(value: unknown): CastleSiegeBorderLine | undefined {
+  const geometry = parseGeometryJson(value);
+  if (!geometry || geometry.type !== "LineString" || !Array.isArray(geometry.coordinates)) {
+    return undefined;
+  }
+  return geometry as CastleSiegeBorderLine;
+}
+
+export function deserializeNeutralBeltFromFirestore(
+  value: unknown,
+): Polygon | MultiPolygon | undefined {
+  const geometry = parseGeometryJson(value);
+  if (
+    !geometry ||
+    (geometry.type !== "Polygon" && geometry.type !== "MultiPolygon") ||
+    !Array.isArray(geometry.coordinates)
+  ) {
+    return undefined;
+  }
+  return geometry as Polygon | MultiPolygon;
+}
+
+export function parseCastleSiegeCoinAssignment(
+  value: unknown,
+): CastleSiegeCoinAssignment | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  if (!HALF_SIDES.has(record.teamA as CastleSiegeHalfSide)) {
+    return undefined;
+  }
+  if (!HALF_SIDES.has(record.teamB as CastleSiegeHalfSide)) {
+    return undefined;
+  }
+  if (record.teamA === record.teamB) {
+    return undefined;
+  }
+  return {
+    teamA: record.teamA as CastleSiegeHalfSide,
+    teamB: record.teamB as CastleSiegeHalfSide,
+  };
+}
+
+/** Serialize arena / border / belt / dials / coin for session create or host update. */
+export function castleSiegeSetupPatchToFirestore(
+  patch: CastleSiegeSetupPatch,
+): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+
+  if (patch.arena) {
+    payload.arena = serializeCastleSiegeArenaForFirestore(patch.arena);
+  }
+  if (patch.border) {
+    payload.border = serializeGeometryJsonForFirestore(patch.border);
+  }
+  if (patch.neutralBelt) {
+    payload.neutralBelt = serializeGeometryJsonForFirestore(patch.neutralBelt);
+  }
+  if (patch.dials) {
+    payload.dials = normalizeCastleSiegeDials(patch.dials);
+  }
+  if (patch.coinAssignment) {
+    const coin = parseCastleSiegeCoinAssignment(patch.coinAssignment);
+    if (!coin) {
+      throw new Error("Invalid Castle Siege coin assignment.");
+    }
+    payload.coinAssignment = coin;
+  }
+
+  assertNoNestedArrays(payload, "castleSiegeSetup");
+  return payload;
+}
+
+export function parseCastleSiegeSetupFromDocument(document: Record<string, unknown>): {
+  arena?: CastleSiegeArena;
+  border?: CastleSiegeBorderLine;
+  neutralBelt?: Polygon | MultiPolygon;
+  dials?: CastleSiegeDials;
+  coinAssignment?: CastleSiegeCoinAssignment;
+} {
+  const arena = deserializeCastleSiegeArenaFromFirestore(document.arena);
+  const border = deserializeBorderFromFirestore(document.border);
+  const neutralBelt = deserializeNeutralBeltFromFirestore(document.neutralBelt);
+  const dials = parseCastleSiegeDials(document.dials);
+  const coinAssignment = parseCastleSiegeCoinAssignment(document.coinAssignment);
+  return {
+    ...(arena !== undefined ? { arena } : {}),
+    ...(border !== undefined ? { border } : {}),
+    ...(neutralBelt !== undefined ? { neutralBelt } : {}),
+    ...(dials !== undefined ? { dials } : {}),
+    ...(coinAssignment !== undefined ? { coinAssignment } : {}),
+  };
+}
+
+/** Hash-only team seal doc (plaintext / ciphertext deferred to Phase 4). */
+export function buildTeamSealHashDocument(
+  seal: Omit<TeamSealHashRecord, "teamId">,
+): Record<string, unknown> {
+  if (!isValidSealHash(seal.hash)) {
+    throw new Error("Seal hash must be a lowercase SHA-256 hex string.");
+  }
+  if (!seal.sealedByUid || !seal.sealedAt) {
+    throw new Error("Seal hash doc requires sealedByUid and sealedAt.");
+  }
+
+  const payload = {
+    hash: seal.hash,
+    sealedByUid: seal.sealedByUid,
+    sealedAt: seal.sealedAt,
+  };
+  assertNoNestedArrays(payload, "teamSeal");
+  return payload;
+}
+
+export function deserializeTeamSealHashFromFirestore(
+  teamId: string,
+  data: Record<string, unknown>,
+): TeamSealHashRecord | null {
+  if (!PLAYING_TEAMS.has(teamId as CastleSiegePlayingTeam)) {
+    return null;
+  }
+  if (typeof data.hash !== "string" || !isValidSealHash(data.hash)) {
+    return null;
+  }
+  if (typeof data.sealedByUid !== "string" || typeof data.sealedAt !== "string") {
+    return null;
+  }
+  return {
+    teamId: teamId as CastleSiegePlayingTeam,
+    hash: data.hash,
+    sealedByUid: data.sealedByUid,
+    sealedAt: data.sealedAt,
+  };
+}
+
+function parseGeometryJson(value: unknown): { type?: string; coordinates?: unknown } | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+  const record = value as Record<string, unknown>;
+  if (typeof record.geometryJson !== "string") {
+    return null;
+  }
+  try {
+    return JSON.parse(record.geometryJson) as { type?: string; coordinates?: unknown };
+  } catch {
+    return null;
+  }
+}

@@ -1,5 +1,6 @@
 /** Public session Firestore API — split by concern under ./sessions/. */
 
+export { updateCastleSiegeSetup, writeTeamSealHash } from "./sessions/castleSiege";
 export {
   ensureHiderPhotoUploadAccess,
   getRemoteSessionById,

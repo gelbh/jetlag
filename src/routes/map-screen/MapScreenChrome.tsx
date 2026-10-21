@@ -1,5 +1,6 @@
 import { ChatPanel } from "../../components/chat/ChatPanel";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
+import { CastleSiegeSetupChrome } from "../../components/session/castle-siege";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { SessionLog } from "../../components/session/log/SessionLog";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
@@ -288,6 +289,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
 
   return (
     <MapScreenChromeSlots chromeHudRef={chromeHudRef} header={header} toolbar={toolDock}>
+      <CastleSiegeSetupChrome session={session} uid={uid} isHost={isHost} />
       <SeekerChromeOverlays
         timer={timer}
         activeTool={activeTool}
