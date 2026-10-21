@@ -68,6 +68,20 @@ service cloud.firestore {
         && (!('seriesLength' in data) || data.seriesLength == 1 || data.seriesLength == 3)
         && (!('setupMode' in data) || data.setupMode in ['pregame', 'fairSplit'])
         && (
+          !('dials' in data)
+          || (
+            data.dials is map
+            && data.dials.keys().hasOnly([
+              'zoneRadiusMeters',
+              'turnLengthSeconds',
+              'maxRounds',
+              'beltWidthMeters',
+              'breachToleranceMeters',
+              'siegeLimitSeconds'
+            ])
+          )
+        )
+        && (
           !('castleSiegeRoles' in data)
           || (
             data.castleSiegeRoles is map
@@ -86,6 +100,108 @@ service cloud.firestore {
             && validCastleSiegeTeamRole(data.castleSiegeRoles[request.auth.uid])
           )
         );
+    }
+
+    function validCastleSiegeSealHash(hash) {
+      return hash is string
+        && hash.size() == 64
+        && hash.matches('^[0-9a-f]+$');
+    }
+
+    function teamSealHasPlaintext(data) {
+      return 'anchorName' in data
+        || 'lat' in data
+        || 'lng' in data
+        || 'secretPhrase' in data
+        || 'revealedAnchor' in data
+        || 'ciphertext' in data;
+    }
+
+    function castleSiegeRoleOnSession(sessionId) {
+      return sessionData(sessionId).castleSiegeRoles[request.auth.uid];
+    }
+
+    function isCastleSiegePlayingTeamMember(sessionId, teamId) {
+      return isSessionMember(sessionId)
+        && sessionData(sessionId).mode == 'castleSiege'
+        && 'castleSiegeRoles' in sessionData(sessionId)
+        && sessionData(sessionId).castleSiegeRoles is map
+        && castleSiegeRoleOnSession(sessionId) == teamId
+        && teamId in ['teamA', 'teamB'];
+    }
+
+    function canReadTeamSeal(sessionId, teamId) {
+      return isSessionMember(sessionId)
+        && (
+          !teamSealHasPlaintext(resource.data)
+          || isCastleSiegePlayingTeamMember(sessionId, teamId)
+          || (
+            'castleSiegeRoles' in sessionData(sessionId)
+            && sessionData(sessionId).castleSiegeRoles is map
+            && castleSiegeRoleOnSession(sessionId) in ['referee', 'observer']
+          )
+          || isSessionHost(sessionId)
+        );
+    }
+
+    // Host-only Pregame setup fields. Prefer resource.data (no sessionData get)
+    // to stay under the session-update expression budget.
+    function isCastleSiegeSetupUpdate() {
+      return isSignedIn()
+        && resource.data.hostUid is string
+        && request.auth.uid == resource.data.hostUid
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && resource.data.mode == 'castleSiege'
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['arena', 'border', 'neutralBelt', 'dials', 'coinAssignment'])
+        && (
+          !('arena' in request.resource.data)
+          || (
+            request.resource.data.arena is map
+            && request.resource.data.arena.polygon is map
+            && request.resource.data.arena.source in ['gameArea', 'regionPack', 'drawn']
+          )
+        )
+        && (
+          !('border' in request.resource.data)
+          || (
+            request.resource.data.border is map
+            && request.resource.data.border.geometryJson is string
+          )
+        )
+        && (
+          !('neutralBelt' in request.resource.data)
+          || (
+            request.resource.data.neutralBelt is map
+            && request.resource.data.neutralBelt.geometryJson is string
+          )
+        )
+        && (
+          !('dials' in request.resource.data)
+          || (
+            request.resource.data.dials is map
+            && request.resource.data.dials.keys().hasOnly([
+              'zoneRadiusMeters',
+              'turnLengthSeconds',
+              'maxRounds',
+              'beltWidthMeters',
+              'breachToleranceMeters',
+              'siegeLimitSeconds'
+            ])
+          )
+        )
+        && (
+          !('coinAssignment' in request.resource.data)
+          || (
+            request.resource.data.coinAssignment is map
+            && request.resource.data.coinAssignment.teamA in ['left', 'right']
+            && request.resource.data.coinAssignment.teamB in ['left', 'right']
+            && request.resource.data.coinAssignment.teamA
+              != request.resource.data.coinAssignment.teamB
+          )
+        )
+        && sessionIdentityUnchanged();
     }
 
     function validDisabledTools(tools) {
@@ -743,6 +859,7 @@ service cloud.firestore {
       // High-frequency + Found key discriminators before End Game start (exists/get).
       // Board-economy flag early: host+large gameArea otherwise burns budget on prior diffs.
       allow update: if isBoardEconomyFlagUpdate(sessionId)
+        || isCastleSiegeSetupUpdate()
         || isTimerHostUpdate()
         || isLastActiveAtUpdate()
         || isFoundHiderRequestUpdate()
@@ -1014,6 +1131,22 @@ service cloud.firestore {
           && request.resource.data.deadlineExpiredAt is string
           && request.resource.data.deadlineExpiredAt.size() > 0
         );
+        allow delete: if false;
+      }
+
+      // Castle Siege team seals: hash is a public commitment; plaintext/ciphertext
+      // (when present later) are readable only by own team / referee / observer / host.
+      match /teamSeals/{teamId} {
+        allow read: if teamId in ['teamA', 'teamB']
+          && canReadTeamSeal(sessionId, teamId);
+        allow create, update: if teamId in ['teamA', 'teamB']
+          && isCastleSiegePlayingTeamMember(sessionId, teamId)
+          && request.resource.data.keys().hasOnly(['hash', 'sealedByUid', 'sealedAt'])
+          && validCastleSiegeSealHash(request.resource.data.hash)
+          && request.resource.data.sealedByUid == request.auth.uid
+          && request.resource.data.sealedAt is string
+          && request.resource.data.sealedAt.size() > 0
+          && !teamSealHasPlaintext(request.resource.data);
         allow delete: if false;
       }
 

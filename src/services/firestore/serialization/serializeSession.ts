@@ -1,6 +1,7 @@
 import type { TimeTrapRecord } from "@/domain/expansion/timeTraps";
 import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
 import { parseRegionPackId } from "@/domain/regions/regionPack";
+import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
 import type { SessionMode } from "@/domain/session/castleSiege/mode";
 import type { CastleSiegeRoles, CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { parseCustomMeasureGeometries } from "@/domain/session/catalog/customMeasureGeometry";
@@ -35,6 +36,10 @@ import { parseSessionOpsMitigation } from "../firestoreSessionOps";
 import { sessionDocumentSchema } from "../schemas/firestoreDocuments";
 import { parseFirestoreDocument } from "../zodConverter";
 import {
+  castleSiegeSetupPatchToFirestore,
+  parseCastleSiegeSetupFromDocument,
+} from "./serializeCastleSiege";
+import {
   assertNoNestedArrays,
   deserializeGameAreaFromFirestore,
   serializeGameAreaForFirestore,
@@ -57,6 +62,7 @@ export type BuildSessionDocumentOptions = {
   castleSiegeRoles?: CastleSiegeRoles;
   seriesLength?: 1 | 3;
   setupMode?: "pregame" | "fairSplit";
+  dials?: CastleSiegeDials;
 };
 
 function parseSessionMode(value: unknown): SessionMode | undefined {
@@ -317,6 +323,9 @@ export function buildSessionDocument(
     if (options.setupMode === "pregame" || options.setupMode === "fairSplit") {
       payload.setupMode = options.setupMode;
     }
+    if (options.dials) {
+      Object.assign(payload, castleSiegeSetupPatchToFirestore({ dials: options.dials }));
+    }
   }
 
   assertNoNestedArrays(payload);
@@ -476,6 +485,7 @@ export function deserializeSessionFromFirestore(
     castleSiegeRoles: parseCastleSiegeRoles(document.castleSiegeRoles),
     seriesLength: parseSeriesLength(document.seriesLength),
     setupMode: parseSetupMode(document.setupMode),
+    ...parseCastleSiegeSetupFromDocument(document as Record<string, unknown>),
   };
 }
 

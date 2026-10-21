@@ -18,7 +18,13 @@ import type {
 } from "../questions/thermometerQuestions";
 import { thermometerQuestionPrompt } from "../questions/thermometerQuestions";
 import type { RegionPackId } from "../regions/regionPack";
+import type { CastleSiegeArena } from "../session/castleSiege/arena";
+import type { CastleSiegeDials } from "../session/castleSiege/dials";
 import type { SessionMode } from "../session/castleSiege/mode";
+import type {
+  CastleSiegeBorderLine,
+  CastleSiegeCoinAssignment,
+} from "../session/castleSiege/pregame";
 import type { CastleSiegeRoles } from "../session/castleSiege/teamRole";
 import type { SessionCustomMeasureGeometry } from "../session/catalog/customMeasureGeometry";
 import type {
@@ -219,6 +225,16 @@ export interface SessionRecord {
   castleSiegeRoles?: CastleSiegeRoles;
   seriesLength?: 1 | 3;
   setupMode?: "pregame" | "fairSplit";
+  /** Outer arena (draw|import). Castle Siege only. */
+  arena?: CastleSiegeArena;
+  /** Pregame border cut. Castle Siege only. */
+  border?: CastleSiegeBorderLine;
+  /** Neutral Belt polygon buffered from the border. Castle Siege only. */
+  neutralBelt?: Polygon | MultiPolygon;
+  /** Muster dials. Castle Siege only. */
+  dials?: CastleSiegeDials;
+  /** Coin half assignment after Pregame flip. Castle Siege only. */
+  coinAssignment?: CastleSiegeCoinAssignment;
 }
 
 /** Bounded session override written by `applyIncidentMitigation` (server-only). */

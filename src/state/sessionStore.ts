@@ -36,6 +36,11 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "opsMitigation",
   "endGameTruthAnchors",
   "castleSiegeRoles",
+  "arena",
+  "border",
+  "neutralBelt",
+  "dials",
+  "coinAssignment",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordStructuredKey = (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
