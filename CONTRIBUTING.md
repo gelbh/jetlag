@@ -39,6 +39,8 @@ just env-pull
 | Functions secrets (`defineSecret`) | Google Secret Manager | `STRIPE_SECRET_KEY`, `CURSOR_API_KEY`, `CASTLE_SIEGE_SEAL_WRAP_KEY` (base64 of 32 AES wrap-key bytes; Castle Siege oracle) |
 | App / Worker / CI | Doppler | `VITE_*`, Worker bindings, `GCP_*`, Cloudflare deploy |
 
+Castle Siege seal ciphertext: Functions decrypt with GSM `CASTLE_SIEGE_SEAL_WRAP_KEY`. Clients that seal need the same 32-byte key as base64 in Doppler / local env as `VITE_CASTLE_SIEGE_SEAL_WRAP_KEY_B64` (passed into SealVault; never commit real values). Unit tests inject wrap bytes via SealVault props.
+
 New Functions param: update the project dotenv (and a code `default` only when the prod value is stable and safe to commit). Do not mirror Functions-only params into Doppler unless another runtime needs them.
 
 ## React memoization

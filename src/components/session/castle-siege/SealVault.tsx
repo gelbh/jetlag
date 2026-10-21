@@ -17,8 +17,9 @@ export type SealVaultProps = {
   sealPosition: { lat: number; lng: number };
   onCommitted?: (hash: string) => void;
   /**
-   * Test / Task 5 inject: when set, commit hash + ciphertext via writeTeamSealCipher.
-   * Production wrap key comes from a non-secret client config + Functions GSM twin later.
+   * When set, commit hash + ciphertext via writeTeamSealCipher.
+   * Production: Doppler `VITE_CASTLE_SIEGE_SEAL_WRAP_KEY_B64` twin of Functions GSM wrap key.
+   * Tests inject bytes / encryptSeal directly.
    */
   wrappingKey?: Uint8Array;
   wrapKeyId?: string;

@@ -3,10 +3,12 @@ import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { gameAreaCenter } from "@/domain/geometry/gameArea/geometry";
 import type { SessionRecord } from "@/domain/map/annotations";
 import { arenaFromGameArea } from "@/domain/session/castleSiege/arena";
+import { readClientSealWrapKey } from "@/domain/session/castleSiege/clientSealWrapKey";
 import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
 import type { FairSplitLockPatch } from "@/domain/session/castleSiege/fairSplitLock";
 import { isCastleSiegeSession } from "@/domain/session/castleSiege/mode";
 import type { CastleSiegeSealPoint } from "@/domain/session/castleSiege/pregame";
+import { SEAL_WRAP_KEY_ID_V1 } from "@/domain/session/castleSiege/sealCipher";
 import {
   isCastleSiegePlayingRole,
   resolveCastleSiegeRole,
@@ -120,6 +122,8 @@ export function CastleSiegeSetupChrome({
           teamId={role}
           sealedByUid={uid}
           sealPosition={sealPosition}
+          wrappingKey={readClientSealWrapKey()}
+          wrapKeyId={SEAL_WRAP_KEY_ID_V1}
         />
       ) : null}
 

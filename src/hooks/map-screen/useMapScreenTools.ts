@@ -14,6 +14,11 @@ import type {
   PendingQuestionRecord,
   PendingQuestionToolType,
 } from "../../domain/session/activity/sessionChat";
+import { isCastleSiegeSession } from "../../domain/session/castleSiege/mode";
+import {
+  opposingCastleSiegePlayingTeam,
+  resolveCastleSiegeRole,
+} from "../../domain/session/castleSiege/teamRole";
 import { sessionHasHiders } from "../../domain/session/players/playerRole";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { MapTool } from "../../state/sessionStore";
@@ -61,7 +66,14 @@ export function useMapScreenTools({
   const { refresh, loading: gpsLoading, error: gpsError } = useGeolocation();
   const [mapError, setMapError] = useState<string | null>(null);
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
-  const awaitHiderAnswer = sessionHasHiders(session?.memberRoles);
+  const castleSiege = isCastleSiegeSession(session);
+  // Castle Siege answers come from the Functions oracle (confirm-send), not honor typing.
+  const awaitHiderAnswer = !castleSiege && sessionHasHiders(session?.memberRoles);
+  const myCastleRole = resolveCastleSiegeRole(session?.castleSiegeRoles, uid ?? undefined);
+  const defenderTeamId =
+    castleSiege && (myCastleRole === "teamA" || myCastleRole === "teamB")
+      ? opposingCastleSiegePlayingTeam(myCastleRole)
+      : null;
   const {
     submitPendingQuestion,
     answerPendingQuestion,
@@ -193,6 +205,8 @@ export function useMapScreenTools({
     ensurePointInGameArea,
     armPlacement,
     canSubmitQuestion,
+    sessionMode: session?.mode,
+    defenderTeamId,
   });
   const photoTool = usePhotoTool({
     active: activeTool === "photo",
