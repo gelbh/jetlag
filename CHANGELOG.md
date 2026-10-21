@@ -6,6 +6,36 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.5.0 - 2026-10-21
+
+### Fixes
+
+- Harden deadline and move integrity (host-only expiry, create forbids moveInProgress, orphan resume ignore)
+- Tap-map hiding zone keeps the tapped point when offline or when station lookup times out
+- Search stations no longer spins forever when map data is slow
+
+### Improvements
+
+- feat: Full Southampton location pack with city and ward presets
+- Castle Siege Pregame setup chrome (arena ledger, seal vault, muster dials)
+- Dublin offline station catalog covers Dublin Bus, Go-Ahead, Luas, and rail stops for zone Search and tap-snap
+- Offline station catalogs rebuilt for NYC bus coverage plus refreshed Chicago, London, SF, Portland, and Dublin packs
+- Nearby stations from a tap lookup are reused for later taps in the same area
+- Set zone / Search stations use local transit stops first in cities with a transit pack
+- Hiding-zone and Time Trap station search now merge GTFS stops with Overpass results so thin city bundles no longer hide nearby bus stops
+- Denser cities keep bus stops in hiding-zone search and map snap when Overpass returns many rail and bus results
+- Hiding-zone map taps show a center pin that animates to the nearest station when one is found
+- Home: Friends, Leaderboard, and Stats show after you sign in; Log in and Account open an account page with Premium and sign out
+- Home shows a compact Update ready callout to leave this device and refresh when a build is waiting
+- Zone placement hides the dock, supports Back/dismiss on play move, and lets you place on the map after choosing custom
+- Confirm and Send stay visibly disabled until the action is ready, then show busy feedback while saving
+- Matching point categories on region packs load bundled places first, same progressive path as Measuring
+
+### Technical
+
+- Castle Siege create entry behind PostHog flag `castle-siege-mode`.
+- Add one-shot scripts/rebuild-all-gtfs-metros.mjs for multi-metro GTFS rebuilds without Transitland
+
 ## 1.4.2 - 2026-10-18
 
 ### Fixes
