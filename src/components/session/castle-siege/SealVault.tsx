@@ -52,9 +52,8 @@ export function SealVault({
       onCommitted?.(hash);
     } catch {
       setError("Couldn't seal. Try again.");
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   };
 
   const teamAccent = teamId === "teamA" ? "var(--color-flag)" : "var(--color-signal)";

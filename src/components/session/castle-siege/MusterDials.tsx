@@ -44,9 +44,8 @@ export function MusterDials({ dials, disabled = false, onSave }: MusterDialsProp
       setDraft(next);
     } catch {
       setError("Couldn't save dials. Try again.");
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   };
 
   return (

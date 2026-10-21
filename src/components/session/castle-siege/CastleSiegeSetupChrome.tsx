@@ -50,9 +50,8 @@ export function CastleSiegeSetupChrome({
       await updateCastleSiegeSetup(session.id, { arena });
     } catch {
       setImportError("Couldn't import arena. Try again.");
-    } finally {
-      setImportBusy(false);
     }
+    setImportBusy(false);
   };
 
   const saveDials = async (dials: CastleSiegeDials) => {
