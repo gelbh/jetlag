@@ -102,15 +102,14 @@ export function FairSplitProposal({
             ? "Nudged border is illegal. Propose again or draw manually."
             : "Only the host can lock the border.",
         );
-        return;
+      } else {
+        await onLock(lock.patch);
+        setState({ status: "locked" });
       }
-      await onLock(lock.patch);
-      setState({ status: "locked" });
     } catch {
       setError("Couldn't lock border. Try again.");
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   };
 
   const statusLabel =
