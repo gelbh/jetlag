@@ -45,6 +45,10 @@ export async function joinSessionWithRole(input: {
   clientVersion: string;
   returningMemberUid?: string;
   persistedMyUid?: string;
+  /** Hex SHA-256 of this device's heal secret; the callable stores it as the member proof. */
+  proofHash?: string;
+  /** The stored heal secret. Sent only on a heal, so the callable can check the old seat's proof. */
+  healSecret?: string;
 }): Promise<JoinSessionWithRoleResult> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
