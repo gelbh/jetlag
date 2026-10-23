@@ -1,3 +1,4 @@
+import type { Feature, Point } from "geojson";
 import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/gameArea/geometry";
 import { pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
 import { isActive } from "../../map/annotationActive";
@@ -21,7 +22,7 @@ export function isNearRadarEliminationEdge(
       continue;
     }
 
-    const radarCenter = pointFromGeometryFeature(annotation.geometry);
+    const radarCenter = pointFromGeometryFeature(annotation.geometry as Feature<Point>);
     if (!radarCenter) {
       continue;
     }
