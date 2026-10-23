@@ -30,6 +30,11 @@ describe("australia region pack wiring", () => {
     expect(config?.geoAssets.primary).toBe("/geo/australia/states.geojson");
     expect(config?.geoAssets.secondary).toBe("/geo/australia/lgas.geojson");
     expect(config?.geoAssets.secondaryBySubregion?.("nsw")).toBe("/geo/australia/lgas/nsw.geojson");
+    expect(config?.geoAssets.matchingLevel4).toBe("/geo/australia/ced.geojson");
+    expect(config?.geoAssets.matchingLevel6).toBe("/geo/australia/sed.geojson");
+    expect(config?.geoAssets.matchingLevel6BySubregion?.("nsw")).toBe(
+      "/geo/australia/sed/nsw.geojson",
+    );
   });
 
   it("keeps all four admin matching categories available", () => {
