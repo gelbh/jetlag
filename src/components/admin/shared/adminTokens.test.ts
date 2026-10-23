@@ -36,4 +36,9 @@ describe("admin tokens", () => {
   it("no longer overrides player tokens inside the admin world", () => {
     expect(worldBlock).not.toMatch(/^\s*--color-[a-z-]+:/m);
   });
+
+  it("keeps a focus-visible ring on unstyled desk controls", () => {
+    expect(css).toContain(".admin-unstyled-control:focus-visible");
+    expect(css).toContain("outline: 2px solid var(--color-flag)");
+  });
 });

@@ -47,8 +47,13 @@ describe("AdminLegStrip", () => {
 
   it("runs from the start chip through questions in asked order", () => {
     renderWithAppUi(strip([question("b", T(5)), question("a", T(1)), question("c", T(9))]));
-    expect(chips().map((chip) => chip.textContent)).toEqual(["S", "1", "2", "3"]);
+    expect(chips().map((chip) => chip.textContent)).toEqual([
+      "RadarPrompt a · Answered",
+      "RadarPrompt b · Answered",
+      "RadarPrompt c · Answered",
+    ]);
     expect(screen.getByLabelText("Question 1, radar, answered: Prompt a")).toBeInTheDocument();
+    expect(screen.getByText("Questions")).toBeInTheDocument();
   });
 
   it.each([
@@ -74,7 +79,7 @@ describe("AdminLegStrip", () => {
     rerender(strip([...first, question("c", T(3), "pending")]));
     const stamped = document.querySelectorAll("[data-stamp]");
     expect(stamped).toHaveLength(1);
-    expect(stamped[0]).toHaveTextContent("3");
+    expect(stamped[0]).toHaveTextContent("Prompt c");
   });
 
   it("treats a late first snapshot as history, not punches", () => {
@@ -99,7 +104,7 @@ describe("AdminLegStrip", () => {
       ),
     );
     expect(document.querySelectorAll("[data-stamp]")).toHaveLength(0);
-    expect(chips()).toHaveLength(3);
+    expect(chips()).toHaveLength(2);
   });
 
   it("stamps the first question of a fresh game once the strip has settled", () => {
@@ -121,18 +126,24 @@ describe("AdminLegStrip", () => {
   it("moves the latest marker to the newest question", () => {
     const first = [question("a", T(1))];
     const { rerender } = renderWithAppUi(strip(first));
-    expect(document.querySelector("[data-latest]")).toHaveTextContent("1");
+    expect(document.querySelector("[data-latest]")).toHaveTextContent("Prompt a");
 
     rerender(strip([...first, question("b", T(2))]));
     const latest = document.querySelectorAll("[data-latest]");
     expect(latest).toHaveLength(1);
-    expect(latest[0]).toHaveTextContent("2");
-    expect(latest[0].getAttribute("style")).toContain("2px solid var(--adm-overprint)");
+    expect(latest[0]).toHaveTextContent("Prompt b");
   });
 
-  it("shows only the start chip and a hint before any question", () => {
+  it("tints answered pills trail-soft and waiting ones signal-soft", () => {
+    renderWithAppUi(strip([question("a", T(1)), question("b", T(2), "pending")]));
+    const [answered, waiting] = chips();
+    expect(answered.getAttribute("style")).toContain("var(--color-trail-soft)");
+    expect(waiting.getAttribute("style")).toContain("var(--color-signal-soft)");
+  });
+
+  it("shows only a hint before any question", () => {
     renderWithAppUi(strip([]));
-    expect(chips()).toHaveLength(1);
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
     expect(screen.getByText("No questions yet")).toBeInTheDocument();
   });
 });

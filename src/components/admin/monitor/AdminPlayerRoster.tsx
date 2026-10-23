@@ -1,11 +1,10 @@
-import { ScrollArea, Table, Text, UnstyledButton } from "@mantine/core";
+import { Box, ScrollArea, Text, UnstyledButton, VisuallyHidden } from "@mantine/core";
 import { useAdminMonitorFocus } from "../../../domain/admin/adminMonitorFocus";
 import { formatFreshnessAge } from "../../../domain/admin/formatAdminFreshness";
 import type { SessionRecord } from "../../../domain/map/annotations";
 import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
 import { playerRoleLabel, resolvePlayerRole } from "../../../domain/session/players/playerRole";
 import { useFreshnessClock } from "../../../hooks/time/useFreshnessClock";
-import { reversedInk } from "../../../theme/adminTone";
 
 interface AdminPlayerRosterProps {
   session: SessionRecord | null;
@@ -34,57 +33,79 @@ export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps
 
   if (uids.length === 0) {
     return (
-      <Text size="sm" c="dimmed" px="sm" pb="sm">
-        No runners yet. They appear here when players join the session.
+      <Text size="sm" c="var(--color-ink-muted)" px={16} pb="sm">
+        No players yet. They appear here when players join the session.
       </Text>
     );
   }
 
+  const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
+
   return (
-    <ScrollArea.Autosize mah="16rem">
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Runner</Table.Th>
-            <Table.Th>Role</Table.Th>
-            <Table.Th ta="end">Last fix</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
+    <ScrollArea.Autosize mah="14rem">
+      <Box
+        component="table"
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          fontSize: 14,
+          color: "var(--color-ink-muted)",
+        }}
+      >
+        <VisuallyHidden component="thead">
+          <tr>
+            <th scope="col">Player</th>
+            <th scope="col">Role</th>
+            <th scope="col">Last fix</th>
+          </tr>
+        </VisuallyHidden>
+        <tbody>
           {uids.map((uid) => {
             const shortUid = uid.length > 10 ? `${uid.slice(0, 8)}…` : uid;
             const role = playerRoleLabel(resolvePlayerRole(session.memberRoles, uid));
             const selected = focusedPlayerUid === uid;
-            const cellStyle = selected ? reversedInk : undefined;
+            const cell = {
+              padding: "0 16px",
+              borderTop: hairline,
+              background: selected ? "var(--color-flag-soft)" : undefined,
+            } as const;
             return (
-              // The runner button is the keyboard stop; the row widens the pointer target.
-              <Table.Tr
+              // The player button is the keyboard stop; the row widens the pointer target.
+              <Box
+                component="tr"
                 key={uid}
-                bg={selected ? "var(--adm-ink)" : undefined}
                 style={{ cursor: "pointer" }}
                 onClick={() => setFocusedPlayerUid(uid)}
               >
-                <Table.Td style={cellStyle}>
+                <Box
+                  component="td"
+                  style={{
+                    ...cell,
+                    boxShadow: selected ? "inset 3px 0 0 var(--color-flag)" : undefined,
+                  }}
+                >
                   <UnstyledButton
-                    w="100%"
-                    h="var(--adm-cell)"
-                    fw={700}
+                    h={38}
+                    fw={600}
+                    c="var(--color-ink)"
                     title={uid}
                     aria-label={`Follow ${shortUid}`}
                     aria-pressed={selected}
                   >
                     {shortUid}
                   </UnstyledButton>
-                </Table.Td>
-                <Table.Td style={cellStyle}>{role}</Table.Td>
-                <Table.Td ta="end" style={cellStyle}>
+                </Box>
+                <Box component="td" style={cell}>
+                  {role}
+                </Box>
+                <Box component="td" style={{ ...cell, textAlign: "right" }}>
                   {formatFreshnessAge(locationByUid.get(uid)?.updatedAt ?? null, nowMs)}
-                </Table.Td>
-              </Table.Tr>
+                </Box>
+              </Box>
             );
           })}
-        </Table.Tbody>
-      </Table>
+        </tbody>
+      </Box>
     </ScrollArea.Autosize>
   );
 }

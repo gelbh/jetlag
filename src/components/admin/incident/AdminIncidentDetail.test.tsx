@@ -230,20 +230,17 @@ describe("AdminIncidentDetail", () => {
       />,
     );
 
-    expect(screen.getByText("inc-abc12345")).toBeInTheDocument();
-    // Same tone as the incident's row in Needs you (new = mispunch).
-    expect(screen.getByText("OPEN").closest("[data-tone]")).toHaveAttribute(
-      "data-tone",
-      "mispunch",
-    );
-    expect(screen.getByText("7G2LJH")).toBeInTheDocument();
     expect(screen.getByText(/Pinned prompt for admins/i)).toBeInTheDocument();
     expect(screen.getByText("Still stuck on the map")).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Chat" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("radio", { name: "Chat" })).toBeChecked();
+    expect(screen.getByLabelText("Incident message")).toHaveAttribute(
+      "placeholder",
+      "Message the reporter…",
+    );
     expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument();
   });
 
-  it("switches to support, hotfix, diagnostics, and timeline tabs", () => {
+  it("switches to hotfix and details, which holds support, diagnostics and timeline", () => {
     renderAdmin(
       <AdminIncidentDetail
         incidentId="inc-abc12345"
@@ -261,18 +258,16 @@ describe("AdminIncidentDetail", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "Support" }));
-    expect(screen.getByTestId("support-agent-chat")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("tab", { name: "Hotfix" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Hotfix" }));
     expect(screen.getByTestId("admin-hotfix-thread")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Diagnostics" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Details" }));
+    // The incident id lives in Details, not in the heading.
+    expect(screen.getByText("inc-abc12345")).toBeInTheDocument();
+    expect(screen.getByTestId("support-agent-chat")).toBeInTheDocument();
     expect(screen.getByText("App version")).toBeInTheDocument();
     expect(screen.getByText("0.9.5")).toBeInTheDocument();
     expect(screen.getByText("/map")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("tab", { name: "Timeline" }));
     expect(screen.getByText(/Mitigation applied: soft_reload/i)).toBeInTheDocument();
   });
 
@@ -289,7 +284,7 @@ describe("AdminIncidentDetail", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "Diagnostics" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Details" }));
     expect(screen.getByRole("link", { name: "TypeError" })).toHaveAttribute("href", url);
   });
 });
@@ -325,15 +320,17 @@ describe("AdminIncidentActions", () => {
     expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
     expect(await screen.findByRole("button", { name: "Open agent" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Apply mitigation" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mitigate…" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Apply mitigation" }));
     expect(applyMitigationFn).not.toHaveBeenCalled();
     fireEvent.click(await screen.findByRole("button", { name: "Apply Soft reload" }));
     await waitFor(() => expect(applyMitigationFn).toHaveBeenCalledWith("inc-1", "soft_reload"));
 
-    fireEvent.change(screen.getByLabelText("Hotfix target version"), {
+    fireEvent.click(screen.getByRole("button", { name: "Hotfix…" }));
+    fireEvent.change(await screen.findByLabelText("Hotfix target version"), {
       target: { value: "0.9.5.1" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Publish hotfix" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Publish hotfix" }));
     expect(publishHotfixFn).not.toHaveBeenCalled();
     fireEvent.click(await screen.findByRole("button", { name: "Publish 0.9.5.1" }));
     await waitFor(() => expect(publishHotfixFn).toHaveBeenCalledWith("inc-1", "0.9.5.1", 30));
@@ -344,11 +341,11 @@ describe("AdminIncidentActions", () => {
     renderAdmin(
       <AdminIncidentActions incidentId="inc-1" status="open" updateStatusFn={updateStatusFn} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss…" }));
     fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
     expect(updateStatusFn).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss…" }));
     fireEvent.click(await screen.findByRole("button", { name: "Dismiss incident" }));
     await waitFor(() => expect(updateStatusFn).toHaveBeenCalledWith("inc-1", "dismissed"));
   });
@@ -362,10 +359,11 @@ describe("AdminIncidentActions", () => {
         applyMitigationFn={vi.fn().mockResolvedValue({ mitigationId: "m", type: "end_session" })}
       />,
     );
-    fireEvent.change(screen.getByLabelText("Mitigation type"), {
+    fireEvent.click(screen.getByRole("button", { name: "Mitigate…" }));
+    fireEvent.change(await screen.findByLabelText("Mitigation type"), {
       target: { value: "end_session" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Apply mitigation" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Apply mitigation" }));
     expect(await screen.findByText("Start the end game for ABCD now?")).toBeInTheDocument();
   });
 
@@ -374,18 +372,20 @@ describe("AdminIncidentActions", () => {
     renderAdmin(
       <AdminIncidentActions incidentId="inc-1" status="open" updateStatusFn={updateStatusFn} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Resolve" }));
+    const resolve = screen.getByRole("button", { name: "Resolve" });
+    fireEvent.click(resolve);
     expect(updateStatusFn).toHaveBeenCalledWith("inc-1", "resolved");
-    for (const name of ["Dismiss", "Apply mitigation", "Publish hotfix"]) {
+    for (const name of ["Dismiss…", "Mitigate…", "Hotfix…", "Launch agent"]) {
       expect(screen.getByRole("button", { name })).toHaveAttribute("data-variant", "default");
     }
+    expect(resolve).not.toHaveAttribute("data-variant", "default");
   });
 
   it("closes the dismiss confirm when the incident is resolved elsewhere", async () => {
     const { rerender } = renderAdmin(
       <AdminIncidentActions incidentId="inc-1" status="open" updateStatusFn={vi.fn()} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss…" }));
     expect(await screen.findByRole("button", { name: "Dismiss incident" })).toBeInTheDocument();
     rerender(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
@@ -497,7 +497,7 @@ describe("AdminOpsDesk gate + mobile stack", () => {
 
     renderDesk("/admin/incidents");
 
-    expect(screen.getByText("No incidents")).toBeInTheDocument();
+    expect(screen.getByText("Nothing needs you")).toBeInTheDocument();
     expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
   });
 
@@ -510,7 +510,7 @@ describe("AdminOpsDesk gate + mobile stack", () => {
 
     renderDesk("/admin/incidents");
 
-    expect(screen.getByText("Queue error")).toBeInTheDocument();
+    expect(screen.getByText("Couldn't load the queue")).toBeInTheDocument();
     expect(screen.getByText("Firestore unavailable")).toBeInTheDocument();
   });
 
@@ -524,8 +524,9 @@ describe("AdminOpsDesk gate + mobile stack", () => {
     renderDesk("/admin/incidents/inc-abc12345");
 
     expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "mobile");
-    expect(screen.getByRole("radio", { name: "Needs you" })).toBeChecked();
+    expect(screen.getByRole("heading", { name: /map froze/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
+    expect(screen.getByTestId("admin-case-file")).toBeInTheDocument();
+    expect(screen.queryByRole("radio", { name: /Needs you/ })).not.toBeInTheDocument();
   });
 });

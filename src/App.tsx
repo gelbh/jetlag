@@ -433,6 +433,22 @@ export default function App() {
                             </LazyRoute>
                           }
                         />
+                        <Route
+                          path="/admin/sessions/:sessionId"
+                          element={
+                            <LazyRoute>
+                              <AdminOpsDeskLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/preload-requests/:requestId"
+                          element={
+                            <LazyRoute>
+                              <AdminOpsDeskLazy />
+                            </LazyRoute>
+                          }
+                        />
                       </Routes>
                     </div>
                   </ClientMinVersionGate>

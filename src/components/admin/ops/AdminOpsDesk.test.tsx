@@ -1,7 +1,7 @@
 import { MantineProvider } from "@mantine/core";
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
 import type { PreloadRequest } from "../../../domain/preloadRequest/preloadRequestTypes";
@@ -35,16 +35,6 @@ function mockViewport(widthPx: number) {
       dispatchEvent: vi.fn(),
     })),
   });
-}
-
-function expectStaticAppShell(layout: "desktop" | "mobile") {
-  const desk = screen.getByTestId("admin-ops-desk");
-  expect(desk).toHaveAttribute("data-layout", layout);
-  expect(desk).toHaveAttribute("data-admin-shell", "mantine-static");
-  expect(
-    desk.classList.contains("mantine-AppShell-root") ||
-      desk.querySelector(".mantine-AppShell-root"),
-  ).toBeTruthy();
 }
 
 function makeLiveSession(overrides: Partial<AdminSessionSummary> = {}): AdminSessionSummary {
@@ -199,7 +189,13 @@ function makeRequest(overrides: Partial<PreloadRequest> = {}): PreloadRequest {
     updatedAt: "2026-10-01T12:05:00Z",
     status: "open",
     reporterUid: "uid-1",
-    presetSnapshot: { name: "Dublin core", gameSize: "medium", distanceUnit: "metric" },
+    presetSnapshot: {
+      name: "Dublin core",
+      placeLabel: "Dublin, Ireland",
+      gameSize: "medium",
+      distanceUnit: "metric",
+      gameAreaBytes: 412_000,
+    },
     ...overrides,
   } as PreloadRequest;
 }
@@ -229,19 +225,6 @@ vi.mock("../../../services/core/firebase/firebase", () => ({
   ensureAnonymousUser: vi.fn(async () => ({ uid: "anon-test" })),
 }));
 
-const sessionRowRenderCount = vi.hoisted(() => ({ value: 0 }));
-const sessionRowRenders = () => sessionRowRenderCount.value;
-
-vi.mock("./AdminSessionRow", async () => {
-  const actual = await vi.importActual<typeof import("./AdminSessionRow")>("./AdminSessionRow");
-  return {
-    AdminSessionRow: (props: Parameters<typeof actual.AdminSessionRow>[0]) => {
-      sessionRowRenderCount.value += 1;
-      return <actual.AdminSessionRow {...props} />;
-    },
-  };
-});
-
 vi.mock("../../../hooks/admin/useAdminJoinSession", () => ({
   useAdminJoinSession: () => ({
     joinSession: incidentState.joinSession,
@@ -252,8 +235,22 @@ vi.mock("../../../hooks/admin/useAdminJoinSession", () => ({
 }));
 
 vi.mock("../monitor/AdminMonitorPane", () => ({
-  AdminMonitorPane: ({ active }: { active: boolean }) => (
-    <div data-testid="admin-monitor-pane" data-active={active ? "true" : "false"} />
+  AdminMonitorPane: ({
+    active,
+    errorMessage,
+    joining,
+  }: {
+    active: boolean;
+    errorMessage?: string | null;
+    joining?: boolean;
+  }) => (
+    <div
+      data-testid="admin-monitor-pane"
+      data-active={active ? "true" : "false"}
+      data-joining={joining ? "true" : "false"}
+    >
+      {errorMessage}
+    </div>
   ),
 }));
 
@@ -280,6 +277,7 @@ describe("AdminOpsDesk", () => {
     incidentState.subscribeIncident.mockReset();
     incidentState.joinSession.mockReset();
     useSessionStore.getState().setSession(null, null);
+    localStorage.clear();
   });
 
   it("shows skeleton rows while auth is loading", () => {
@@ -413,945 +411,690 @@ describe("AdminOpsDesk", () => {
     expect(screen.queryByText(/^Synced/)).not.toBeInTheDocument();
   });
 
-  it("has no Settings option in the mobile bottom bar", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [];
-    mockViewport(375);
+  describe("desk layout and routes", () => {
+    function setAdmin() {
+      authState.state = "admin";
+      authState.authReady = true;
+      authState.user = { email: "admin@example.com", emailVerified: true };
+    }
 
-    renderOpsDesk();
+    function PathProbe() {
+      return <div data-testid="path">{useLocation().pathname}</div>;
+    }
 
-    expect(screen.getByRole("radio", { name: "Start list" })).toBeInTheDocument();
-    expect(screen.queryByRole("radio", { name: "Settings" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^settings$/i })).toBeInTheDocument();
-  });
+    function renderDesk(route: string, width = 1440) {
+      setAdmin();
+      mockViewport(width);
+      return renderOpsDesk(
+        <>
+          <Routes>
+            <Route path="/admin" element={<AdminOpsDesk />} />
+            <Route path="/admin/sessions/:sessionId" element={<AdminOpsDesk />} />
+            <Route path="/admin/incidents" element={<AdminOpsDesk />} />
+            <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
+            <Route path="/admin/preload-requests" element={<AdminOpsDesk />} />
+            <Route path="/admin/preload-requests/:requestId" element={<AdminOpsDesk />} />
+          </Routes>
+          <PathProbe />
+        </>,
+        route,
+      );
+    }
 
-  it("defaults Live on and shows no-live empty title when the list is empty", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.loading = false;
-    sessionListState.error = null;
-    sessionListState.sessions = [];
-
-    renderOpsDesk();
-
-    expect(screen.getByRole("checkbox", { name: "Live" })).toBeChecked();
-    expect(screen.getByText("No live sessions")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "More filters" })).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
-    expect(screen.queryByRole("checkbox", { name: "Singleplayer" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("checkbox", { name: "Hiding" })).not.toBeInTheDocument();
-  });
-
-  it("shows No sessions when Live is off and the list is empty", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.loading = false;
-    sessionListState.error = null;
-    sessionListState.sessions = [];
-
-    renderOpsDesk();
-
-    fireEvent.click(screen.getByRole("checkbox", { name: "Live" }));
-
-    expect(screen.getByRole("checkbox", { name: "Live" })).not.toBeChecked();
-    expect(screen.getByText("No sessions")).toBeInTheDocument();
-    expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
-  });
-
-  it("shows actionable sessions failure without the calm empty state", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.loading = false;
-    sessionListState.sessions = [];
-    sessionListState.error = "Couldn't load live sessions.";
-
-    renderOpsDesk();
-
-    expect(screen.getByText("Couldn't load live sessions.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
-    expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
-    expect(screen.queryByRole("checkbox", { name: "Live" })).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Search")).not.toBeInTheDocument();
-  });
-
-  it("retries the session list from the sessions failure UI", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.loading = false;
-    sessionListState.sessions = [];
-    sessionListState.error = "Couldn't load live sessions.";
-    sessionListState.refresh.mockClear();
-
-    renderOpsDesk();
-
-    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
-    expect(sessionListState.refresh).toHaveBeenCalledTimes(1);
-  });
-
-  it("keeps retained sessions visible when refresh fails with an error", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.loading = false;
-    sessionListState.error = "Couldn't load live sessions.";
-    sessionListState.sessions = [
-      {
-        sessionId: "session-1",
-        code: "ABCD",
-        phase: "seek",
-        tier: "free",
-        gameSize: "medium",
-        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
-        hostUid: "host-1",
-        createdAt: "2026-01-01T00:00:00.000Z",
-        memberCount: 2,
-        timerAccumulatedMs: 0,
-        timerRunningSince: "2026-01-01T00:00:00.000Z",
-        endGameStartedAt: null,
-        endGameRequestedAt: null,
-        hostAppVersion: null,
-        hidingPeriodMinutes: null,
-        regionPackId: null,
-        regionPackSubregionId: null,
-        transitMetroId: null,
-        gameAreaLabel: "Dublin",
-        lastActivityAt: "2026-01-02T00:00:00.000Z",
-        lastLocationAt: "2026-01-02T00:00:00.000Z",
-        lastAnnotationAt: null,
-        activeAnnotationCount: 0,
-        mode: "multiplayer",
-        isLive: true,
-        liveMultiplayer: true,
-      },
+    const path = () => screen.getByTestId("path").textContent;
+    const twoSessions = () => [
+      makeLiveSession(),
+      makeLiveSession({ sessionId: "session-2", code: "EFGH", gameAreaLabel: "Tokyo" }),
     ];
 
-    renderOpsDesk();
+    it("shows the expanded table on /admin with Sessions and Needs you tabs", () => {
+      sessionListState.sessions = twoSessions();
+      incidentState.list = [makeIncident({ id: "inc-a", sessionId: "session-1" })];
 
-    expect(screen.getByText("Couldn't load live sessions.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
-    expect(screen.getByText("ABCD")).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "Live" })).toBeInTheDocument();
-    expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "More filters" })).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
-    expect(screen.queryByRole("checkbox", { name: "Singleplayer" })).not.toBeInTheDocument();
-  });
+      renderDesk("/admin");
 
-  it("renders session phase labels for admin users", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [
-      {
-        sessionId: "session-1",
-        code: "ABCD",
-        phase: "seek",
-        tier: "free",
-        gameSize: "medium",
-        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
-        hostUid: "host-1",
-        createdAt: "2026-01-01T00:00:00.000Z",
-        memberCount: 2,
-        timerAccumulatedMs: 0,
-        timerRunningSince: "2026-01-01T00:00:00.000Z",
-        endGameStartedAt: null,
-        endGameRequestedAt: null,
-        hostAppVersion: null,
-        hidingPeriodMinutes: null,
-        regionPackId: null,
-        regionPackSubregionId: null,
-        transitMetroId: null,
-        gameAreaLabel: "Dublin",
-        lastActivityAt: "2026-01-02T00:00:00.000Z",
-        lastLocationAt: "2026-01-02T00:00:00.000Z",
-        lastAnnotationAt: null,
-        activeAnnotationCount: 0,
-        mode: "multiplayer",
-        isLive: true,
-        liveMultiplayer: true,
-      },
-    ];
-
-    renderOpsDesk();
-
-    expect(screen.getByText("ABCD")).toBeInTheDocument();
-    expect(screen.getByText("Dublin")).toBeInTheDocument();
-    expect(screen.getAllByText("Seek").length).toBeGreaterThan(0);
-    const row = screen
-      .getByRole("button", { name: "Monitor ABCD, Dublin" })
-      .closest("tr") as HTMLElement;
-    expect(within(row).getAllByRole("cell")[2]).toHaveTextContent("2");
-  });
-
-  it("uses a scrollable session list column on desktop", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [
-      {
-        sessionId: "session-1",
-        code: "ABCD",
-        phase: "seek",
-        tier: "free",
-        gameSize: "medium",
-        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
-        hostUid: "host-1",
-        createdAt: "2026-01-01T00:00:00.000Z",
-        memberCount: 2,
-        timerAccumulatedMs: 0,
-        timerRunningSince: "2026-01-01T00:00:00.000Z",
-        endGameStartedAt: null,
-        endGameRequestedAt: null,
-        hostAppVersion: null,
-        hidingPeriodMinutes: null,
-        regionPackId: null,
-        regionPackSubregionId: null,
-        transitMetroId: null,
-        gameAreaLabel: "Dublin",
-        lastActivityAt: "2026-01-02T00:00:00.000Z",
-        lastLocationAt: null,
-        lastAnnotationAt: null,
-        activeAnnotationCount: 0,
-        mode: "multiplayer",
-        isLive: true,
-        liveMultiplayer: true,
-      },
-    ];
-    mockViewport(1440);
-
-    renderOpsDesk();
-
-    const startList = screen.getByTestId("admin-ops-sessions");
-    expect(startList.closest(".mantine-AppShell-navbar")).not.toBeNull();
-    expect(within(startList).getByRole("table").closest(".mantine-ScrollArea-root")).not.toBeNull();
-    expectStaticAppShell("desktop");
-    expect(screen.queryByRole("radiogroup", { name: "Desk sections" })).toBeNull();
-    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
-    expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
-    expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
-  });
-
-  it("keeps topbar Home on mobile without a ScreenHeader Back", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [];
-
-    mockViewport(375);
-
-    renderOpsDesk();
-
-    expectStaticAppShell("mobile");
-    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
-    expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
-    expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
-  });
-
-  function renderDeskRoutes(route: string) {
-    renderOpsDesk(
-      <Routes>
-        <Route path="/admin" element={<AdminOpsDesk />} />
-        <Route path="/admin/incidents" element={<AdminOpsDesk />} />
-        <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
-        <Route path="/admin/preload-requests" element={<AdminOpsDesk />} />
-      </Routes>,
-      route,
-    );
-  }
-
-  function setAdmin() {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-  }
-
-  describe("preload requests", () => {
-    it("opens only the Preload group in the three-region desk at 1440", () => {
-      setAdmin();
-      preloadState.list = [makeRequest()];
-      mockViewport(1440);
-
-      renderDeskRoutes("/admin/preload-requests");
-
-      expect(screen.getByRole("region", { name: "Start list" })).toBeInTheDocument();
-      expect(screen.getByRole("region", { name: "Course" })).toBeInTheDocument();
-      const needsYou = screen.getByRole("region", { name: "Needs you" });
-      expect(within(needsYou).getByRole("button", { name: "Preload requests" })).toHaveAttribute(
-        "aria-expanded",
-        "true",
-      );
-      expect(within(needsYou).getByRole("button", { name: "Incidents" })).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
+      expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "desktop");
+      expect(screen.getByRole("radio", { name: "Sessions 2" })).toBeChecked();
+      expect(screen.getByRole("radio", { name: /Needs you\s*1/ })).not.toBeChecked();
+      const table = screen.getByRole("table");
+      expect(within(table).getAllByRole("row")).toHaveLength(3);
+      expect(within(table).getByText("ABCD")).toBeInTheDocument();
+      expect(screen.queryByTestId("admin-session-view")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Expand to table" })).not.toBeInTheDocument();
     });
 
-    it("drills into a request and shows its status actions", async () => {
-      setAdmin();
-      preloadState.list = [makeRequest()];
-      mockViewport(1440);
-
-      renderDeskRoutes("/admin/preload-requests");
-      const panel = screen.getByRole("region", { name: "Preload requests" });
-      fireEvent.click(within(panel).getByRole("button", { name: /Dublin core/ }));
-
-      expect(await screen.findByRole("button", { name: "Back" })).toHaveFocus();
-      expect(screen.getByRole("heading", { name: "Dublin core" })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Mark accepted" })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Mark shipped" })).toBeInTheDocument();
-    });
-
-    it("leaves the drill-in when its request disappears and does not re-drill later", async () => {
-      setAdmin();
-      const request = makeRequest();
-      preloadState.list = [request];
-      mockViewport(1440);
-
-      renderDeskRoutes("/admin/preload-requests");
-      fireEvent.click(
-        within(screen.getByRole("region", { name: "Preload requests" })).getByRole("button", {
-          name: /Dublin core/,
-        }),
-      );
-      expect(await screen.findByRole("button", { name: "Back" })).toHaveFocus();
-
-      act(() => preloadState.emit([]));
-      expect(screen.getByRole("button", { name: "Preload requests" })).toHaveFocus();
-
-      act(() => preloadState.emit([request]));
-      expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
-      expect(screen.getByRole("region", { name: "Preload requests" })).toBeInTheDocument();
-    });
-
-    it("opens the Needs you drawer on the Preload item from the strip at 1280", async () => {
-      setAdmin();
-      preloadState.list = [makeRequest()];
-      mockViewport(1280);
-
-      renderDeskRoutes("/admin");
-      expect(screen.queryByRole("dialog", { name: "Needs you" })).not.toBeInTheDocument();
-      fireEvent.click(screen.getByRole("link", { name: "Preload requests" }));
-
-      const dialog = await screen.findByRole("dialog", { name: "Needs you" });
-      expect(within(dialog).getByRole("button", { name: "Preload requests" })).toHaveAttribute(
-        "aria-expanded",
-        "true",
-      );
-    });
-
-    it("reopens the Needs you drawer from the strip's Preload item on the preload route at 1280", async () => {
-      setAdmin();
-      preloadState.list = [makeRequest()];
-      mockViewport(1280);
-
-      renderDeskRoutes("/admin/preload-requests");
-      fireEvent.keyDown(await screen.findByRole("dialog", { name: "Needs you" }), {
-        key: "Escape",
-      });
-      await waitFor(() =>
-        expect(screen.queryByRole("dialog", { name: "Needs you" })).not.toBeInTheDocument(),
-      );
-
-      fireEvent.click(screen.getByRole("link", { name: "Preload requests" }));
-
-      expect(await screen.findByRole("dialog", { name: "Needs you" })).toBeInTheDocument();
-    });
-
-    it("counts open incidents plus open preload requests in the strip", () => {
-      setAdmin();
-      incidentState.list = [makeIncident({ id: "inc-listed01" })];
-      preloadState.list = [
-        makeRequest({ id: "req-open1" }),
-        makeRequest({ id: "req-open2", status: "accepted" }),
-        makeRequest({ id: "req-done", status: "shipped" }),
+    it("counts open incidents in the Open incidents column", () => {
+      sessionListState.sessions = [makeLiveSession({ sessionId: "sess-1" })];
+      incidentState.list = [
+        makeIncident({ id: "inc-a", status: "open" }),
+        makeIncident({ id: "inc-b", status: "chatting" }),
+        makeIncident({ id: "inc-c", status: "resolved" }),
       ];
-      mockViewport(1280);
 
-      renderDeskRoutes("/admin");
+      renderDesk("/admin");
 
-      expect(screen.getByRole("button", { name: "Needs you: 2 open" })).toBeInTheDocument();
+      expect(screen.getByText("2 open")).toBeInTheDocument();
     });
 
-    it("leaves a preload drill-in on Escape before closing the drawer", async () => {
-      setAdmin();
-      preloadState.list = [makeRequest()];
-      mockViewport(1280);
+    it("feeds live games, players and Needs you into the status strip", () => {
+      sessionListState.sessions = [
+        makeLiveSession({ sessionId: "s1", memberCount: 3 }),
+        makeLiveSession({ sessionId: "s2", memberCount: 4 }),
+        makeLiveSession({ sessionId: "s3", memberCount: 9, isLive: false }),
+      ];
+      incidentState.list = [
+        makeIncident({ id: "inc-open", status: "open" }),
+        makeIncident({ id: "inc-done", status: "resolved" }),
+      ];
 
-      renderDeskRoutes("/admin/preload-requests");
-      const dialog = await screen.findByRole("dialog", { name: "Needs you" });
-      fireEvent.click(within(dialog).getByRole("button", { name: /Dublin core/ }));
-      expect(await within(dialog).findByRole("button", { name: "Mark accepted" })).toBeVisible();
+      renderDesk("/admin");
 
-      fireEvent.keyDown(screen.getByRole("dialog", { name: "Needs you" }), { key: "Escape" });
-
-      expect(
-        await within(screen.getByRole("dialog", { name: "Needs you" })).findByRole("region", {
-          name: "Preload requests",
-        }),
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText("Live games")).toHaveTextContent("2");
+      expect(screen.getByLabelText("Players")).toHaveTextContent("7");
+      expect(screen.getByRole("group", { name: "Needs you" })).toHaveTextContent("1");
     });
 
-    it("continues sign-in back to /admin/preload-requests", () => {
-      authState.state = "unsigned";
-      authState.authReady = true;
-      authState.user = null;
+    it("opens a session row on its own route, folding the table into the sidebar", async () => {
+      sessionListState.sessions = twoSessions();
 
-      renderDeskRoutes("/admin/preload-requests");
+      renderDesk("/admin");
+      fireEvent.click(within(screen.getByRole("table")).getByText("ABCD"));
 
-      expect(screen.getByTestId("premium-sign-in-gate")).toHaveTextContent(
-        "/admin/preload-requests",
+      await waitFor(() => expect(path()).toBe("/admin/sessions/session-1"));
+      expect(screen.queryByRole("table")).not.toBeInTheDocument();
+      const open = screen.getByRole("button", { name: "Open session ABCD" });
+      expect(open).toHaveAttribute("aria-current", "true");
+      expect(screen.getByRole("button", { name: "Open session EFGH" })).toBeInTheDocument();
+      const header = screen.getByRole("region", { name: "Session" });
+      expect(within(header).getByText("ABCD")).toBeInTheDocument();
+      expect(within(header).getByText("Dublin")).toBeInTheDocument();
+      expect(within(header).getByText(/1 seeker · 1 hider/)).toBeInTheDocument();
+      expect(within(header).getByRole("button", { name: "Moderate…" })).toBeInTheDocument();
+      expect(screen.getByTestId("admin-monitor-pane")).toBeInTheDocument();
+    });
+
+    it("expands back to the table with the row selected", async () => {
+      sessionListState.sessions = twoSessions();
+
+      renderDesk("/admin/sessions/session-2");
+      fireEvent.click(screen.getByRole("button", { name: "Expand to table" }));
+
+      await waitFor(() => expect(path()).toBe("/admin"));
+      const selected = screen
+        .getAllByRole("row")
+        .filter((row) => row.getAttribute("aria-current") === "true");
+      expect(selected).toHaveLength(1);
+      expect(selected[0]).toHaveTextContent("EFGH");
+    });
+
+    it("returns to the table on Escape, but not while a dialog is open or in a field", async () => {
+      sessionListState.sessions = twoSessions();
+
+      const { unmount } = renderDesk("/admin/sessions/session-1");
+      const dialog = document.createElement("div");
+      dialog.setAttribute("role", "dialog");
+      document.body.appendChild(dialog);
+      fireEvent.keyDown(document.body, { key: "Escape" });
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(path()).toBe("/admin/sessions/session-1");
+      dialog.remove();
+
+      fireEvent.keyDown(document.body, { key: "Escape" });
+      await waitFor(() => expect(path()).toBe("/admin"));
+      unmount();
+
+      renderDesk("/admin/sessions/session-1");
+      const input = document.createElement("input");
+      document.body.appendChild(input);
+      input.focus();
+      fireEvent.keyDown(input, { key: "Escape" });
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(path()).toBe("/admin/sessions/session-1");
+      input.remove();
+    });
+
+    it("reopens the last opened item from the collapse control", async () => {
+      sessionListState.sessions = twoSessions();
+
+      renderDesk("/admin");
+      expect(screen.queryByRole("button", { name: "Collapse to sidebar" })).toBeNull();
+      fireEvent.click(within(screen.getByRole("table")).getByText("EFGH"));
+      await waitFor(() => expect(path()).toBe("/admin/sessions/session-2"));
+      fireEvent.click(screen.getByRole("button", { name: "Expand to table" }));
+      await waitFor(() => expect(path()).toBe("/admin"));
+
+      fireEvent.click(screen.getByRole("button", { name: "Collapse to sidebar" }));
+      await waitFor(() => expect(path()).toBe("/admin/sessions/session-2"));
+    });
+
+    it("joins the monitor on the session route, once, for the route's session", async () => {
+      sessionListState.sessions = twoSessions();
+
+      const { rerender } = renderDesk("/admin/sessions/session-2");
+
+      await waitFor(() =>
+        expect(incidentState.joinSession).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: "session-2", code: "EFGH" }),
+          { navigate: false },
+        ),
+      );
+      sessionListState.sessions = twoSessions();
+      rerender(<div />);
+      expect(incidentState.joinSession).toHaveBeenCalledTimes(1);
+    });
+
+    it("rejoins the monitor after leaving and reopening the same session", async () => {
+      sessionListState.sessions = twoSessions();
+
+      renderDesk("/admin/sessions/session-1");
+
+      await waitFor(() =>
+        expect(incidentState.joinSession).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: "session-1", code: "ABCD" }),
+          { navigate: false },
+        ),
+      );
+      expect(incidentState.joinSession).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(screen.getByRole("button", { name: "Expand to table" }));
+      await waitFor(() => expect(path()).toBe("/admin"));
+
+      fireEvent.click(within(screen.getByRole("table")).getByText("ABCD"));
+      await waitFor(() => expect(path()).toBe("/admin/sessions/session-1"));
+
+      await waitFor(() => expect(incidentState.joinSession).toHaveBeenCalledTimes(2));
+      expect(incidentState.joinSession).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sessionId: "session-1", code: "ABCD" }),
+        { navigate: false },
       );
     });
-  });
 
-  it.each(["/admin", "/admin/incidents", "/admin/incidents/inc-listed01"])(
-    "lays out Start list, Course, and Needs you on %s at 1440",
-    (route) => {
-      authState.state = "admin";
-      authState.authReady = true;
-      authState.user = { email: "admin@example.com", emailVerified: true };
-      incidentState.list = [makeIncident({ id: "inc-listed01" })];
-      mockViewport(1440);
-
-      renderDeskRoutes(route);
-
-      expect(screen.getByRole("region", { name: "Start list" })).toBeInTheDocument();
-      expect(screen.getByRole("region", { name: "Course" })).toBeInTheDocument();
-      expect(screen.getByRole("region", { name: "Needs you" })).toBeInTheDocument();
-      expect(document.querySelector("[data-desk-mode]")).toBeNull();
-      expect(document.querySelector(".mantine-AppShell-navbar")?.getAttribute("style")).toContain(
-        "border-inline-end",
+    it("activates the monitor once the join lands an admin session", async () => {
+      sessionListState.sessions = twoSessions();
+      incidentState.joinSession.mockImplementation(
+        async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
+          useSessionStore.getState().setSession(
+            createTestRemoteSession({
+              id: summary.sessionId,
+              code: summary.code,
+              memberUids: ["admin-1"],
+              memberRoles: { "admin-1": "admin" },
+            }),
+            "admin-1",
+          );
+          return true;
+        },
       );
-      expect(document.querySelector(".mantine-AppShell-aside")?.getAttribute("style")).toContain(
-        "border-inline-start",
+
+      renderDesk("/admin/sessions/session-1");
+
+      await waitFor(() =>
+        expect(screen.getByTestId("admin-monitor-pane")).toHaveAttribute("data-active", "true"),
       );
-      expect(screen.queryByRole("button", { name: /^Needs you/ })).not.toBeInTheDocument();
-    },
-  );
+      expect(incidentState.joinSession).toHaveBeenCalledTimes(1);
+    });
 
-  it("shows the selected incident's detail and actions inside Needs you", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    incidentState.list = [makeIncident({ id: "inc-listed01" })];
-    mockViewport(1440);
+    it("keeps the monitor inactive and offers the error when the join fails", async () => {
+      sessionListState.sessions = twoSessions();
+      incidentState.joinSession.mockResolvedValue(false);
 
-    renderDeskRoutes("/admin/incidents/inc-listed01");
+      renderDesk("/admin/sessions/session-1");
 
-    const needsYou = screen.getByRole("region", { name: "Needs you" });
-    expect(within(needsYou).getByTestId("admin-incident-detail")).toBeInTheDocument();
-    expect(
-      within(needsYou).getByRole("complementary", { name: "Incident actions" }),
-    ).toBeInTheDocument();
-    expect(within(needsYou).queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
-  });
+      await waitFor(() => expect(incidentState.joinSession).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(screen.getByTestId("admin-monitor-pane")).toHaveTextContent(/Couldn't open the map/),
+      );
+      expect(screen.getByTestId("admin-monitor-pane")).toHaveAttribute("data-active", "false");
+    });
 
-  it("opens the Incidents group on /admin/incidents and resets toggles on route change", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    incidentState.list = [makeIncident({ id: "inc-listed01" })];
-    mockViewport(1440);
+    it("says the session is not in the loaded list when missing, with refresh", async () => {
+      sessionListState.sessions = twoSessions();
+      sessionListState.hasMore = true;
 
-    renderDeskRoutes("/admin/incidents");
+      renderDesk("/admin/sessions/session-gone");
 
-    const control = screen.getByRole("button", { name: "Incidents" });
-    expect(control).toHaveAttribute("aria-expanded", "true");
-    fireEvent.click(control);
-    expect(screen.getByRole("button", { name: "Incidents" })).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
+      const missing = screen.getByTestId("admin-session-missing");
+      expect(within(missing).getByText("Session not in the loaded list")).toBeInTheDocument();
+      expect(screen.queryByText("This session has ended")).not.toBeInTheDocument();
+      expect(incidentState.joinSession).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("link", { name: /event centre/i }));
+      fireEvent.click(within(missing).getByRole("button", { name: "Refresh live sessions" }));
+      expect(sessionListState.refresh).toHaveBeenCalledTimes(1);
 
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Incidents" })).toHaveAttribute(
-        "aria-expanded",
-        "true",
-      ),
-    );
-  });
+      fireEvent.click(within(missing).getByRole("button", { name: "Load more sessions" }));
+      expect(sessionListState.loadMore).toHaveBeenCalledTimes(1);
 
-  it("closes Settings on Escape without leaving a drilled-in incident", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    incidentState.list = [makeIncident({ id: "inc-listed01" })];
-    mockViewport(1440);
+      fireEvent.click(within(missing).getByRole("button", { name: "Back to table" }));
+      await waitFor(() => expect(path()).toBe("/admin"));
+    });
 
-    renderDeskRoutes("/admin/incidents/inc-listed01");
-    fireEvent.click(screen.getByRole("button", { name: /^settings$/i }));
-    const settings = await screen.findByRole("dialog", { name: "Desk settings" });
-
-    fireEvent.keyDown(settings, { key: "Escape" });
-
-    await waitFor(() =>
-      expect(screen.queryByRole("dialog", { name: "Desk settings" })).not.toBeInTheDocument(),
-    );
-    expect(screen.getByTestId("admin-incident-detail")).toBeInTheDocument();
-  });
-
-  it("returns from the drill-in to /admin/incidents with Back", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    incidentState.list = [makeIncident({ id: "inc-listed01" })];
-    mockViewport(1440);
-
-    renderDeskRoutes("/admin/incidents/inc-listed01");
-
-    fireEvent.click(screen.getByRole("button", { name: "Back" }));
-
-    expect(await screen.findByRole("region", { name: "Incidents" })).toBeInTheDocument();
-    expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
-  });
-
-  it("opens Needs you in a drawer from the strip between 1024 and 1439", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    incidentState.list = [makeIncident({ id: "inc-listed01" })];
-    mockViewport(1280);
-
-    renderDeskRoutes("/admin");
-
-    expect(screen.getByRole("region", { name: "Start list" })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Course" })).toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Needs you" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
-
-    const trigger = screen.getByRole("button", { name: "Needs you: 1 open" });
-    expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
-    trigger.focus();
-    fireEvent.click(trigger);
-
-    const dialog = await screen.findByRole("dialog", { name: "Needs you" });
-    expect(dialog).toHaveClass("mantine-Drawer-content");
-    const inbox = within(dialog).getByRole("region", { name: "Incidents" });
-
-    fireEvent.click(
-      within(inbox)
-        .getByText(/7G2LJH/)
-        .closest("button") as HTMLElement,
-    );
-    expect(
-      await within(screen.getByRole("dialog", { name: "Needs you" })).findByTestId(
-        "admin-incident-detail",
-      ),
-    ).toBeInTheDocument();
-
-    fireEvent.keyDown(screen.getByRole("dialog", { name: "Needs you" }), { key: "Escape" });
-    expect(
-      await within(screen.getByRole("dialog", { name: "Needs you" })).findByRole("region", {
-        name: "Incidents",
-      }),
-    ).toBeInTheDocument();
-
-    fireEvent.keyDown(screen.getByRole("dialog", { name: "Needs you" }), { key: "Escape" });
-    await waitFor(() =>
-      expect(screen.queryByRole("dialog", { name: "Needs you" })).not.toBeInTheDocument(),
-    );
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Needs you: 1 open" })).toHaveFocus(),
-    );
-  });
-
-  it("opens the Needs you drawer on an incident deep link between 1024 and 1439", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    incidentState.list = [makeIncident({ id: "inc-listed01" })];
-    mockViewport(1280);
-
-    renderDeskRoutes("/admin/incidents/inc-listed01");
-
-    const dialog = await screen.findByRole("dialog", { name: "Needs you" });
-    expect(within(dialog).getByTestId("admin-incident-detail")).toBeInTheDocument();
-  });
-
-  it("opens the Needs you drawer on /admin/incidents between 1024 and 1439", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    incidentState.list = [makeIncident({ id: "inc-listed01" })];
-    mockViewport(1280);
-
-    renderDeskRoutes("/admin/incidents");
-
-    expect(await screen.findByRole("dialog", { name: "Needs you" })).toBeInTheDocument();
-  });
-
-  describe("incident deep link", () => {
-    function setDesktopAdmin() {
-      authState.state = "admin";
-      authState.authReady = true;
-      authState.user = { email: "admin@example.com", emailVerified: true };
+    it("does not claim a missing session while the list is still loading", () => {
       sessionListState.sessions = [];
-      mockViewport(1440);
-    }
+      sessionListState.loading = true;
 
-    function renderIncidentRoute(incidentId: string) {
-      renderOpsDesk(
-        <Routes>
-          <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
-        </Routes>,
-        `/admin/incidents/${incidentId}`,
-      );
-    }
+      renderDesk("/admin/sessions/session-1");
 
-    it("selects an incident from the list without a by-id subscription", () => {
-      setDesktopAdmin();
-      incidentState.list = [makeIncident({ id: "inc-listed01" })];
+      expect(screen.queryByText("Session not in the loaded list")).not.toBeInTheDocument();
+      expect(screen.queryByText("This session has ended")).not.toBeInTheDocument();
+    });
 
-      renderIncidentRoute("inc-listed01");
+    it("opens the case file on an incident route and never joins the monitor", () => {
+      sessionListState.sessions = twoSessions();
+      incidentState.list = [
+        makeIncident({
+          id: "inc-listed01",
+          sessionId: "session-1",
+          sessionCode: "ABCD",
+          playerNote: "Radar circle vanished",
+        }),
+      ];
 
-      expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
-      expect(
-        within(screen.getByTestId("admin-incident-detail")).getByText("inc-listed01"),
-      ).toBeInTheDocument();
+      renderDesk("/admin/incidents/inc-listed01");
+
+      expect(screen.getByTestId("admin-case-file")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: /Radar circle vanished/ })).toBeInTheDocument();
+      expect(screen.getByText(/Reported by a seeker/)).toBeInTheDocument();
+      expect(screen.getByRole("group", { name: "Session" })).toHaveTextContent("ABCD");
       const actions = screen.getByRole("complementary", { name: "Incident actions" });
       expect(within(actions).getByRole("button", { name: "Resolve" })).toBeInTheDocument();
+      expect(within(actions).getByRole("button", { name: "Mitigate…" })).toBeInTheDocument();
+      expect(within(actions).getByRole("button", { name: "Hotfix…" })).toBeInTheDocument();
+      expect(within(actions).getByRole("button", { name: "Dismiss…" })).toBeInTheDocument();
+      expect(screen.getByRole("radio", { name: "Chat" })).toBeChecked();
+      expect(screen.queryByTestId("admin-monitor-pane")).not.toBeInTheDocument();
       expect(incidentState.subscribeIncident).not.toHaveBeenCalled();
+      expect(incidentState.joinSession).not.toHaveBeenCalled();
     });
 
-    const outside = makeIncident({
-      id: "inc-outside1",
-      sessionId: "sess-outside",
-      sessionCode: "ZZ99QQ",
+    it("watches the game from the case file when its session is listed", async () => {
+      sessionListState.sessions = twoSessions();
+      incidentState.list = [
+        makeIncident({ id: "inc-listed01", sessionId: "session-1", sessionCode: "ABCD" }),
+      ];
+
+      renderDesk("/admin/incidents/inc-listed01");
+      fireEvent.click(screen.getByRole("button", { name: "Watch game" }));
+
+      await waitFor(() => expect(path()).toBe("/admin/sessions/session-1"));
     });
 
-    function serveById(incident: IncidentRecord | null) {
-      incidentState.byId = incident;
+    it("says the session is no longer live when the case's session is gone", () => {
+      sessionListState.sessions = [];
+      incidentState.list = [makeIncident({ id: "inc-listed01", sessionCode: "7G2LJH" })];
+
+      renderDesk("/admin/incidents/inc-listed01");
+
+      expect(screen.getByText("7G2LJH is no longer live")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Watch game" })).not.toBeInTheDocument();
+    });
+
+    it("fetches an incident outside the list by id, still without joining", async () => {
+      const outside = makeIncident({
+        id: "inc-outside1",
+        sessionId: "s-out",
+        sessionCode: "ZZ99QQ",
+      });
+      incidentState.byId = outside;
       incidentState.subscribeIncident.mockImplementation(
         (_id: string, onChange: (next: IncidentRecord | null) => void) => {
-          onChange(incident);
+          onChange(outside);
           return () => undefined;
         },
       );
-    }
+      sessionListState.sessions = [makeLiveSession({ sessionId: "s-out", code: "ZZ99QQ" })];
 
-    it("fetches an incident outside the list by id and monitors its live session", async () => {
-      setDesktopAdmin();
-      sessionListState.sessions = [
-        {
-          sessionId: "sess-outside",
-          code: "ZZ99QQ",
-          phase: "seek",
-          tier: "free",
-          gameSize: "medium",
-          roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
-          hostUid: "host-1",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          memberCount: 2,
-          timerAccumulatedMs: 0,
-          timerRunningSince: "2026-01-01T00:00:00.000Z",
-          endGameStartedAt: null,
-          endGameRequestedAt: null,
-          hostAppVersion: null,
-          hidingPeriodMinutes: null,
-          regionPackId: null,
-          regionPackSubregionId: null,
-          transitMetroId: null,
-          gameAreaLabel: null,
-          lastActivityAt: null,
-          lastLocationAt: null,
-          lastAnnotationAt: null,
-          activeAnnotationCount: 0,
-          mode: "multiplayer",
-          isLive: true,
-          liveMultiplayer: true,
-        },
-      ];
-      serveById(outside);
-
-      renderIncidentRoute("inc-outside1");
+      renderDesk("/admin/incidents/inc-outside1");
 
       expect(incidentState.subscribeIncident).toHaveBeenCalledWith(
         "inc-outside1",
         expect.any(Function),
         expect.any(Function),
       );
-      expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
-      const actions = screen.getByRole("complementary", { name: "Incident actions" });
-      expect(await within(actions).findByRole("button", { name: "Resolve" })).toBeInTheDocument();
-      await waitFor(() =>
-        expect(incidentState.joinSession).toHaveBeenCalledWith(
-          expect.objectContaining({ sessionId: "sess-outside", code: "ZZ99QQ" }),
-          { navigate: false },
-        ),
-      );
-    });
-
-    it("does not auto-join a fetched incident whose session is not live", async () => {
-      setDesktopAdmin();
-      serveById(outside);
-
-      renderIncidentRoute("inc-outside1");
-
       const actions = screen.getByRole("complementary", { name: "Incident actions" });
       expect(await within(actions).findByRole("button", { name: "Resolve" })).toBeInTheDocument();
       expect(incidentState.joinSession).not.toHaveBeenCalled();
     });
 
-    it("offers no actions when the deep-linked incident does not exist", () => {
-      setDesktopAdmin();
-      serveById(null);
-
-      renderIncidentRoute("inc-missing1");
-
-      const actions = screen.getByRole("complementary", { name: "Incident actions" });
-      expect(within(actions).queryByRole("button", { name: "Resolve" })).toBeNull();
-      expect(incidentState.joinSession).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("mobile desk", () => {
-    function renderMobile(route: string) {
-      authState.state = "admin";
-      authState.authReady = true;
-      authState.user = { email: "admin@example.com", emailVerified: true };
-      sessionListState.sessions = [];
-      mockViewport(375);
-      renderOpsDesk(
-        <Routes>
-          <Route path="/admin" element={<AdminOpsDesk />} />
-          <Route path="/admin/incidents" element={<AdminOpsDesk />} />
-          <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
-          <Route path="/admin/preload-requests" element={<AdminOpsDesk />} />
-        </Routes>,
-        route,
+    it("says the incident was not found when it does not exist", () => {
+      incidentState.subscribeIncident.mockImplementation(
+        (_id: string, onChange: (next: IncidentRecord | null) => void) => {
+          onChange(null);
+          return () => undefined;
+        },
       );
-    }
 
-    it("shows preload requests under Needs you on /admin/preload-requests", () => {
+      renderDesk("/admin/incidents/inc-missing1");
+
+      expect(screen.getByText("Incident not found")).toBeInTheDocument();
+      expect(screen.queryByRole("complementary", { name: "Incident actions" })).toBeNull();
+    });
+
+    it("opens the open incident from the session header", async () => {
+      sessionListState.sessions = [makeLiveSession({ sessionId: "sess-1" })];
+      incidentState.list = [makeIncident({ id: "inc-a", sessionId: "sess-1" })];
+
+      renderDesk("/admin/sessions/sess-1");
+      expect(screen.getByText("1 open incident")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Open incident" }));
+
+      await waitFor(() => expect(path()).toBe("/admin/incidents/inc-a"));
+    });
+
+    it("shows the Needs you tab count equal to the strip count", async () => {
+      incidentState.list = [
+        makeIncident({ id: "inc-a", status: "open" }),
+        makeIncident({ id: "inc-b", status: "chatting" }),
+        makeIncident({ id: "inc-c", status: "resolved" }),
+      ];
+      preloadState.list = [
+        makeRequest({ id: "req-open" }),
+        makeRequest({ id: "req-done", status: "shipped" }),
+      ];
+
+      renderDesk("/admin");
+
+      const strip = screen.getByRole("group", { name: "Needs you" });
+      expect(strip).toHaveTextContent("3");
+      expect(screen.getByRole("radio", { name: /Needs you\s*3/ })).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("radio", { name: /Needs you/ }));
+      await waitFor(() => expect(path()).toBe("/admin/incidents"));
+      // Open rows only: two incidents and one preload request.
+      expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(4);
+      expect(screen.getByText("Open")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "Show closed" }));
+      expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(6);
+    });
+
+    it("keeps the Kind chip when returning from an incident detail", async () => {
+      incidentState.list = [makeIncident({ id: "inc-a", status: "open", playerNote: "map froze" })];
       preloadState.list = [makeRequest()];
-      renderMobile("/admin/preload-requests");
 
-      expect(screen.getByRole("radio", { name: "Needs you" })).toBeChecked();
-      expect(
-        within(screen.getByRole("region", { name: "Preload requests" })).getByText("Dublin core"),
-      ).toBeInTheDocument();
+      renderDesk("/admin/incidents");
+
+      fireEvent.click(screen.getByRole("button", { name: /Kind:/ }));
+      fireEvent.click(await screen.findByRole("menuitem", { name: "Incidents" }));
+      expect(screen.getByRole("button", { name: /Kind: Incidents/ })).toBeInTheDocument();
+      expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(2);
+
+      fireEvent.click(within(screen.getByRole("table")).getByText("map froze"));
+      await waitFor(() => expect(path()).toBe("/admin/incidents/inc-a"));
+      expect(screen.getByTestId("admin-case-file")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "Expand to table" }));
+      await waitFor(() => expect(path()).toBe("/admin/incidents"));
+
+      expect(screen.getByRole("button", { name: /Kind: Incidents/ })).toBeInTheDocument();
+      expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(2);
     });
 
-    it("has a bottom bar with exactly Start list and Needs you", () => {
-      renderMobile("/admin");
+    it("lists only preload requests on /admin/preload-requests and opens the request file", async () => {
+      incidentState.list = [makeIncident({ id: "inc-a" })];
+      preloadState.list = [makeRequest()];
 
-      const bar = screen.getByRole("radiogroup", { name: "Desk sections" });
-      expect(bar.closest("footer")).not.toBeNull();
-      const labels = within(bar)
-        .getAllByRole<HTMLInputElement>("radio")
-        .map((option) => option.labels?.[0]);
-      expect(labels.map((label) => label?.textContent)).toEqual(["Start list", "Needs you"]);
-      // Spec #9: 44px touch targets.
-      for (const label of labels) {
-        expect(label?.style.minHeight).toBe("2.75rem");
-      }
+      renderDesk("/admin/preload-requests");
+
+      expect(screen.getByRole("radio", { name: /Needs you/ })).toBeChecked();
+      const table = screen.getByRole("table");
+      expect(within(table).getAllByRole("row")).toHaveLength(2);
+      expect(within(table).getByText(/Dublin, Ireland/)).toBeInTheDocument();
+      fireEvent.click(within(table).getByText(/Dublin, Ireland/));
+
+      await waitFor(() => expect(path()).toBe("/admin/preload-requests/req-abc12345"));
+      expect(screen.getByTestId("admin-request-file")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Dublin core" })).toBeInTheDocument();
+      expect(screen.getByText("Game area size")).toBeInTheDocument();
+      expect(screen.getByText("412 kB")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Accept" })).toHaveAttribute(
+        "data-variant",
+        "filled",
+      );
+      expect(screen.getByRole("button", { name: "Decline" })).toHaveAttribute(
+        "data-variant",
+        "default",
+      );
+      expect(incidentState.joinSession).not.toHaveBeenCalled();
     });
 
-    it("shows the session list on /admin", () => {
-      renderMobile("/admin");
+    it("shows a titled alert when a request status update fails", async () => {
+      const { updatePreloadRequestStatus } = await import(
+        "../../../services/preloadRequest/preloadRequestApi"
+      );
+      vi.mocked(updatePreloadRequestStatus).mockRejectedValueOnce(new Error("network down"));
+      preloadState.list = [makeRequest()];
 
-      expect(screen.getByRole("radio", { name: "Start list" })).toBeChecked();
-      expect(screen.getByTestId("admin-ops-sessions")).toBeInTheDocument();
-      expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
+      renderDesk("/admin/preload-requests/req-abc12345");
+      fireEvent.click(screen.getByRole("button", { name: "Accept" }));
+
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveAttribute("data-tone", "mispunch");
+      expect(within(alert).getByText("Couldn't update request")).toBeInTheDocument();
+      expect(within(alert).getByText("network down")).toBeInTheDocument();
     });
 
-    it("shows the inbox alone on /admin/incidents", () => {
-      renderMobile("/admin/incidents");
+    it("says the request was not found when it is not in the list", () => {
+      preloadState.list = [];
 
-      expect(screen.getByRole("radio", { name: "Needs you" })).toBeChecked();
-      expect(screen.getByRole("region", { name: "Incidents" })).toBeInTheDocument();
-      expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
-      expect(screen.queryByTestId("admin-ops-sessions")).not.toBeInTheDocument();
+      renderDesk("/admin/preload-requests/req-gone");
+
+      expect(screen.getByText("Preload request not found")).toBeInTheDocument();
     });
 
-    it("drills into detail and actions for a selected incident, with Back to the queue", async () => {
-      incidentState.list = [makeIncident({ id: "inc-listed01" })];
-      renderMobile("/admin/incidents/inc-listed01");
+    it("switches the sidebar to Needs you without leaving the open session", async () => {
+      sessionListState.sessions = twoSessions();
+      incidentState.list = [makeIncident({ id: "inc-a", playerNote: "map froze" })];
 
-      expect(screen.queryByRole("region", { name: "Incidents" })).not.toBeInTheDocument();
-      expect(
-        within(screen.getByTestId("admin-incident-detail")).getByText("inc-listed01"),
-      ).toBeInTheDocument();
-      const actions = screen.getByRole("complementary", { name: "Incident actions" });
-      expect(within(actions).getByRole("button", { name: "Resolve" })).toBeInTheDocument();
+      renderDesk("/admin/sessions/session-1");
+      fireEvent.click(screen.getByRole("radio", { name: /Needs you/ }));
 
-      fireEvent.click(screen.getByRole("button", { name: "Back" }));
-
-      expect(await screen.findByRole("region", { name: "Incidents" })).toBeInTheDocument();
-      expect(screen.queryByTestId("admin-incident-detail")).not.toBeInTheDocument();
+      expect(path()).toBe("/admin/sessions/session-1");
+      fireEvent.click(await screen.findByRole("button", { name: /Open incident: map froze/ }));
+      await waitFor(() => expect(path()).toBe("/admin/incidents/inc-a"));
     });
 
-    it("opens an incident from the inbox", async () => {
-      incidentState.list = [makeIncident({ id: "inc-listed01" })];
-      renderMobile("/admin/incidents");
+    describe("table states", () => {
+      it("defaults Live on and offers Show all sessions when nothing is live", () => {
+        sessionListState.sessions = [makeLiveSession({ isLive: false })];
 
-      const inbox = screen.getByRole("region", { name: "Incidents" });
-      const row = within(inbox)
-        .getByText(/7G2LJH/)
-        .closest("button");
-      expect(row).not.toBeNull();
-      fireEvent.click(row as HTMLElement);
+        renderDesk("/admin");
 
-      expect(await screen.findByTestId("admin-incident-detail")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
-    });
-
-    it("switches sections by route", async () => {
-      renderMobile("/admin");
-
-      fireEvent.click(screen.getByRole("radio", { name: "Needs you" }));
-      expect(await screen.findByRole("region", { name: "Incidents" })).toBeInTheDocument();
-
-      fireEvent.click(screen.getByRole("radio", { name: "Start list" }));
-      expect(await screen.findByTestId("admin-ops-sessions")).toBeInTheDocument();
-    });
-  });
-
-  it("does not re-render session rows on clock ticks", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [makeLiveSession()];
-    mockViewport(1440);
-    vi.useFakeTimers();
-    try {
-      renderOpsDesk(<AdminOpsDesk />, "/admin");
-      const before = sessionRowRenders();
-      const deskBefore = deskRenderCount.value;
-      expect(before).toBeGreaterThan(0);
-      await act(() => vi.advanceTimersByTimeAsync(3000));
-      expect(sessionRowRenders()).toBe(before);
-      expect(deskRenderCount.value).toBe(deskBefore);
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it("feeds live games and runners from live sessions into the status strip", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [
-      makeLiveSession({ sessionId: "s1", memberCount: 3 }),
-      makeLiveSession({ sessionId: "s2", memberCount: 4 }),
-      makeLiveSession({ sessionId: "s3", memberCount: 9, isLive: false }),
-    ];
-    incidentState.list = [
-      makeIncident({ id: "inc-open", status: "open" }),
-      makeIncident({ id: "inc-done", status: "resolved" }),
-    ];
-    mockViewport(1440);
-
-    renderOpsDesk();
-
-    expect(screen.getByLabelText("Live games")).toHaveTextContent("2");
-    expect(screen.getByLabelText("Runners")).toHaveTextContent("7");
-    expect(screen.getByRole("group", { name: "Needs you" })).toHaveTextContent("1");
-  });
-
-  it("counts open incidents per session in the start list MP column", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [makeLiveSession({ sessionId: "sess-1" })];
-    incidentState.list = [
-      makeIncident({ id: "inc-a", status: "open" }),
-      makeIncident({ id: "inc-b", status: "chatting" }),
-      makeIncident({ id: "inc-c", status: "resolved" }),
-    ];
-    mockViewport(1440);
-
-    renderOpsDesk();
-
-    const row = screen
-      .getByRole("button", { name: "Monitor ABCD, Dublin" })
-      .closest("tr") as HTMLElement;
-    expect(within(row).getAllByRole("cell")[4]).toHaveTextContent("2");
-  });
-
-  it("keeps the monitor pane inactive when the Monitor join fails", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [makeLiveSession()];
-    mockViewport(1440);
-    incidentState.joinSession.mockResolvedValue(false);
-
-    renderOpsDesk();
-
-    fireEvent.click(screen.getByRole("button", { name: "Monitor ABCD, Dublin" }));
-    await waitFor(() => expect(incidentState.joinSession).toHaveBeenCalledTimes(1));
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    expect(screen.getByTestId("admin-monitor-pane")).toHaveAttribute("data-active", "false");
-  });
-
-  it("does not rejoin when Monitor is activated on the monitored session", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [makeLiveSession()];
-    mockViewport(1440);
-    incidentState.joinSession.mockImplementation(
-      async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
-        useSessionStore.getState().setSession(
-          createTestRemoteSession({
-            id: summary.sessionId,
-            code: summary.code,
-            memberUids: ["admin-1"],
-            memberRoles: { "admin-1": "admin" },
-          }),
-          "admin-1",
+        expect(screen.getByRole("button", { name: "Live only" })).toHaveAttribute(
+          "aria-pressed",
+          "true",
         );
-        return true;
-      },
-    );
+        expect(screen.getByText("No live games right now")).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Show all sessions" }));
+        expect(screen.getByText("ABCD")).toBeInTheDocument();
+        expect(screen.getByText("Idle")).toBeInTheDocument();
+      });
 
-    renderOpsDesk();
+      it("shows No sessions when Live is off and the list is empty", () => {
+        sessionListState.sessions = [];
 
-    fireEvent.click(screen.getByRole("button", { name: "Monitor ABCD, Dublin" }));
-    await waitFor(() =>
-      expect(screen.getByTestId("admin-monitor-pane")).toHaveAttribute("data-active", "true"),
-    );
+        renderDesk("/admin");
+        fireEvent.click(screen.getByRole("button", { name: "Live only" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Monitor ABCD, Dublin" }));
-    await act(async () => {
-      await Promise.resolve();
+        expect(screen.getByText("No sessions")).toBeInTheDocument();
+      });
+
+      it("says No sessions match for a search and clears it", () => {
+        sessionListState.sessions = twoSessions();
+
+        renderDesk("/admin");
+        fireEvent.change(screen.getByRole("textbox", { name: "Search sessions" }), {
+          target: { value: "zzzz" },
+        });
+
+        expect(screen.getByText("No sessions match")).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+        expect(screen.getByText("ABCD")).toBeInTheDocument();
+        expect(screen.getByText("EFGH")).toBeInTheDocument();
+      });
+
+      it("shows a retryable failure without the calm empty state", () => {
+        sessionListState.sessions = [];
+        sessionListState.error = "Couldn't load live sessions.";
+
+        renderDesk("/admin");
+
+        expect(screen.getByRole("alert")).toHaveTextContent("Couldn't load live sessions.");
+        expect(screen.queryByText("No live games right now")).not.toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+        expect(sessionListState.refresh).toHaveBeenCalled();
+      });
+
+      it("keeps retained sessions visible when a refresh fails", () => {
+        sessionListState.sessions = twoSessions();
+        sessionListState.error = "Couldn't load live sessions.";
+
+        renderDesk("/admin");
+
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+        expect(screen.getByText("ABCD")).toBeInTheDocument();
+      });
+
+      it("loads more sessions from the table footer, also when filters hide every row", () => {
+        sessionListState.hasMore = true;
+        sessionListState.sessions = [makeLiveSession({ isLive: false })];
+
+        renderDesk("/admin");
+
+        expect(screen.getByText("No live games right now")).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Load more sessions" }));
+        expect(sessionListState.loadMore).toHaveBeenCalledTimes(1);
+      });
+
+      it("keeps column preferences per browser", () => {
+        sessionListState.sessions = twoSessions();
+        localStorage.setItem(
+          "jl-admin-table:v1:sessions",
+          JSON.stringify({ visible: ["code", "tier"], sort: null, density: "compact" }),
+        );
+
+        renderDesk("/admin");
+
+        const headers = within(screen.getByRole("table"))
+          .getAllByRole("columnheader")
+          .map((cell) => cell.textContent);
+        expect(headers).toEqual(["Code", "Tier"]);
+        expect(screen.getByRole("button", { name: "Columns · 2 of 19" })).toBeInTheDocument();
+      });
     });
 
-    expect(incidentState.joinSession).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("admin-monitor-pane")).toHaveAttribute("data-active", "true");
-  });
+    describe("keyboard", () => {
+      it("drives search and row focus from the keyboard", () => {
+        sessionListState.sessions = twoSessions();
 
-  it("leaves the incident drill-in from the strip event centre link on desktop", async () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [];
-    incidentState.list = [makeIncident({ id: "inc-listed01" })];
-    mockViewport(1440);
+        renderDesk("/admin");
+        const search = screen.getByRole("textbox", { name: "Search sessions" });
 
-    renderDeskRoutes("/admin/incidents/inc-listed01");
+        expect(fireEvent.keyDown(document.body, { key: "/" })).toBe(false);
+        expect(search).toHaveFocus();
+        expect(fireEvent.keyDown(search, { key: "/" })).toBe(true);
+        fireEvent.keyDown(search, { key: "j" });
+        expect(search).toHaveFocus();
 
-    expect(screen.getByTestId("admin-incident-detail")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("link", { name: /event centre/i }));
+        search.blur();
+        const rows = () => within(screen.getByRole("table")).getAllByRole("row").slice(1);
+        fireEvent.keyDown(document.body, { key: "j" });
+        expect(rows()[0]).toHaveFocus();
+        fireEvent.keyDown(document.activeElement ?? document.body, { key: "j" });
+        expect(rows()[1]).toHaveFocus();
+        fireEvent.keyDown(document.activeElement ?? document.body, { key: "k" });
+        expect(rows()[0]).toHaveFocus();
+      });
 
-    await waitFor(() => expect(screen.queryByTestId("admin-incident-detail")).toBeNull());
-    expect(screen.getByRole("region", { name: "Needs you" })).toBeInTheDocument();
+      it("opens the focused row with Enter", async () => {
+        sessionListState.sessions = twoSessions();
+
+        renderDesk("/admin");
+        fireEvent.keyDown(document.body, { key: "j" });
+        fireEvent.keyDown(document.activeElement ?? document.body, { key: "Enter" });
+
+        await waitFor(() => expect(path()).toBe("/admin/sessions/session-1"));
+      });
+
+      it("leaves the keyboard alone while a dialog is open", () => {
+        sessionListState.sessions = twoSessions();
+
+        renderDesk("/admin");
+        const dialog = document.createElement("div");
+        dialog.setAttribute("role", "dialog");
+        dialog.setAttribute("aria-modal", "true");
+        document.body.appendChild(dialog);
+
+        fireEvent.keyDown(document.body, { key: "j" });
+        expect(
+          within(screen.getByRole("table"))
+            .getAllByRole("row")
+            .some((row) => row === document.activeElement),
+        ).toBe(false);
+        dialog.remove();
+      });
+    });
+
+    describe("phone", () => {
+      it("shows cards with the chosen columns as label and value pairs", () => {
+        sessionListState.sessions = twoSessions();
+
+        renderDesk("/admin", 390);
+
+        expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "mobile");
+        expect(screen.queryByRole("table")).not.toBeInTheDocument();
+        const card = screen.getByRole("button", { name: "Open session ABCD" });
+        expect(within(card).getByText("Players (S / H)")).toBeInTheDocument();
+        expect(within(card).getByText("Last activity")).toBeInTheDocument();
+        expect(screen.getByRole("radio", { name: "Sessions 2" })).toBeChecked();
+        expect(screen.getByRole("button", { name: /^Columns/ })).toBeInTheDocument();
+      });
+
+      it("opens an item full screen with Back, and Watch game opens /map", async () => {
+        sessionListState.sessions = twoSessions();
+
+        renderDesk("/admin", 390);
+        fireEvent.click(screen.getByRole("button", { name: "Open session ABCD" }));
+
+        await waitFor(() => expect(path()).toBe("/admin/sessions/session-1"));
+        expect(screen.getByTestId("admin-phone-session")).toBeInTheDocument();
+        expect(screen.queryByTestId("admin-monitor-pane")).not.toBeInTheDocument();
+        expect(incidentState.joinSession).not.toHaveBeenCalled();
+
+        fireEvent.click(screen.getByRole("button", { name: "Watch game" }));
+        expect(incidentState.joinSession).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: "session-1" }),
+          { navigate: true },
+        );
+
+        fireEvent.click(screen.getByRole("button", { name: "Back" }));
+        await waitFor(() => expect(path()).toBe("/admin"));
+      });
+
+      it("opens a Needs you card as a full-screen case file", async () => {
+        incidentState.list = [makeIncident({ id: "inc-a", playerNote: "map froze" })];
+
+        renderDesk("/admin/incidents", 390);
+        fireEvent.click(screen.getByRole("button", { name: /Open incident: map froze/ }));
+
+        await waitFor(() => expect(path()).toBe("/admin/incidents/inc-a"));
+        expect(screen.getByTestId("admin-case-file")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
+      });
+
+      it("offers 44px touch targets for the search field and the tabs' sibling controls", () => {
+        sessionListState.sessions = twoSessions();
+
+        renderDesk("/admin", 390);
+
+        expect(screen.getByRole("textbox", { name: "Search sessions" })).toHaveStyle({
+          height: "44px",
+        });
+      });
+    });
   });
 
   it("clears retired desk layout storage on mount", () => {
@@ -1368,93 +1111,20 @@ describe("AdminOpsDesk", () => {
     expect(localStorage.getItem("jetlag.adminOpsDesk.v1:uid-admin")).toBeNull();
   });
 
-  it("loads more sessions from the list footer", () => {
-    authState.state = "admin";
+  it("continues sign-in back to the opened route", () => {
+    authState.state = "unsigned";
     authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.loading = false;
-    sessionListState.hasMore = true;
-    sessionListState.loadingMore = false;
-    sessionListState.loadMore.mockClear();
-    sessionListState.sessions = [
-      {
-        sessionId: "session-1",
-        code: "ABCD",
-        phase: "seek",
-        tier: "free",
-        gameSize: "medium",
-        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
-        hostUid: "host-1",
-        createdAt: "2026-01-01T00:00:00.000Z",
-        memberCount: 2,
-        timerAccumulatedMs: 0,
-        timerRunningSince: "2026-01-01T00:00:00.000Z",
-        endGameStartedAt: null,
-        endGameRequestedAt: null,
-        hostAppVersion: null,
-        hidingPeriodMinutes: null,
-        regionPackId: null,
-        regionPackSubregionId: null,
-        transitMetroId: null,
-        gameAreaLabel: "Dublin",
-        lastActivityAt: "2026-01-02T00:00:00.000Z",
-        lastLocationAt: "2026-01-02T00:00:00.000Z",
-        lastAnnotationAt: null,
-        activeAnnotationCount: 0,
-        mode: "multiplayer",
-        isLive: true,
-        liveMultiplayer: true,
-      },
-    ];
+    authState.user = null;
 
-    renderOpsDesk();
+    renderOpsDesk(
+      <Routes>
+        <Route path="/admin/sessions/:sessionId" element={<AdminOpsDesk />} />
+      </Routes>,
+      "/admin/sessions/session-1",
+    );
 
-    fireEvent.click(screen.getByRole("button", { name: "Load more sessions" }));
-    expect(sessionListState.loadMore).toHaveBeenCalledTimes(1);
-  });
-
-  it("shows load more when filters hide every loaded session", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.loading = false;
-    sessionListState.hasMore = true;
-    sessionListState.sessions = [
-      {
-        sessionId: "session-1",
-        code: "ABCD",
-        phase: "seek",
-        tier: "free",
-        gameSize: "medium",
-        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
-        hostUid: "host-1",
-        createdAt: "2026-01-01T00:00:00.000Z",
-        memberCount: 2,
-        timerAccumulatedMs: 0,
-        timerRunningSince: "2026-01-01T00:00:00.000Z",
-        endGameStartedAt: null,
-        endGameRequestedAt: null,
-        hostAppVersion: null,
-        hidingPeriodMinutes: null,
-        regionPackId: null,
-        regionPackSubregionId: null,
-        transitMetroId: null,
-        gameAreaLabel: "Dublin",
-        lastActivityAt: "2026-01-02T00:00:00.000Z",
-        lastLocationAt: "2026-01-02T00:00:00.000Z",
-        lastAnnotationAt: null,
-        activeAnnotationCount: 0,
-        mode: "multiplayer",
-        isLive: false,
-        liveMultiplayer: false,
-      },
-    ];
-
-    renderOpsDesk();
-
-    // Default Live filter hides the non-live row; keep Load more for the filter miss.
-    expect(screen.getByRole("checkbox", { name: "Live" })).toBeChecked();
-    expect(screen.getByText("No matching sessions")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Load more sessions" })).toBeInTheDocument();
+    expect(screen.getByTestId("premium-sign-in-gate")).toHaveTextContent(
+      "/admin/sessions/session-1",
+    );
   });
 });
