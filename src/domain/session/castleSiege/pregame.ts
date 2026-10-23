@@ -158,19 +158,38 @@ export function validateSealPlacement(
 }
 
 function isNearArenaBoundary(coord: Position, arena: GameArea): boolean {
-  const ring = exteriorRing(arena);
-  if (!ring || ring.length < 2) {
+  const rings = exteriorRings(arena);
+  if (rings.length === 0) {
     return false;
   }
 
-  const nearest = nearestPointOnLine(lineString(ring), turfPoint(coord), { units: "meters" });
-  const distMeters = nearest.properties.dist ?? Number.POSITIVE_INFINITY;
-  return distMeters <= BORDER_ENDPOINT_BOUNDARY_TOLERANCE_METERS;
+  const probe = turfPoint(coord);
+  let best = Number.POSITIVE_INFINITY;
+  for (const ring of rings) {
+    if (ring.length < 2) {
+      continue;
+    }
+    const nearest = nearestPointOnLine(lineString(ring), probe, { units: "meters" });
+    const distMeters = nearest.properties.dist ?? Number.POSITIVE_INFINITY;
+    if (distMeters < best) {
+      best = distMeters;
+    }
+  }
+  return best <= BORDER_ENDPOINT_BOUNDARY_TOLERANCE_METERS;
 }
 
-function exteriorRing(arena: GameArea): Position[] | null {
+/** Exterior ring(s) only (no holes); all MultiPolygon parts. */
+function exteriorRings(arena: GameArea): Position[][] {
   if (arena.type === "Polygon") {
-    return arena.coordinates[0] ?? null;
+    const ring = arena.coordinates[0];
+    return ring && ring.length >= 2 ? [ring] : [];
   }
-  return arena.coordinates[0]?.[0] ?? null;
+  const out: Position[][] = [];
+  for (const polygon of arena.coordinates) {
+    const ring = polygon[0];
+    if (ring && ring.length >= 2) {
+      out.push(ring);
+    }
+  }
+  return out;
 }
