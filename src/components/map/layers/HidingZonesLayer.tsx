@@ -2,7 +2,7 @@ import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { Fragment, useMemo } from "react";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import type { AnnotationRecord, SessionRecord } from "@/domain/map/annotations";
+import type { AnnotationRecord, GameArea, SessionRecord } from "@/domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { isNearMeasuringEliminationEdge } from "@/domain/questions/hiderTruth/measuring";
 import {
@@ -21,8 +21,10 @@ interface HidingZonesLayerProps {
   myUid?: string | null;
   memberUids?: readonly string[];
   session?: Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors"> | null;
-  /** Active map annotations; used for near-radar-edge truth-pin styling only. */
+  /** Active map annotations; used for near-edge truth-pin caution styling. */
   annotations?: readonly AnnotationRecord[];
+  /** Session play area; required for coastline/linear measuring pin gap. */
+  gameArea?: GameArea;
 }
 
 function polygonFeature(ring: LatLngTuple[]): Feature<GeoPolygon> {
@@ -58,6 +60,7 @@ export function HidingZonesLayer({
   memberUids,
   session,
   annotations = [],
+  gameArea,
 }: HidingZonesLayerProps) {
   const memberSet = memberUids ? new Set(memberUids) : null;
   const visibleZones = memberSet ? zones.filter((zone) => memberSet.has(zone.hiderUid)) : zones;
@@ -81,7 +84,7 @@ export function HidingZonesLayer({
         const nearEdge =
           isNearRadarEliminationEdge(referencePoint, annotations) ||
           isNearThermometerEliminationEdge(referencePoint, annotations) ||
-          isNearMeasuringEliminationEdge(referencePoint, annotations);
+          isNearMeasuringEliminationEdge(referencePoint, annotations, undefined, gameArea);
         markers.push({
           id: `hiding-truth-${zone.hiderUid}`,
           lat: referencePoint[0],
@@ -95,7 +98,7 @@ export function HidingZonesLayer({
       }
     }
     return markers;
-  }, [annotations, session, visibleZones]);
+  }, [annotations, gameArea, session, visibleZones]);
 
   return (
     <>

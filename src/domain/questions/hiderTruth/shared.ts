@@ -53,17 +53,21 @@ export function parseMatchingAnchor(metadata: Record<string, unknown>): LatLngTu
   return [lat, lng];
 }
 
-export function seekerAnchorFromMetadata(metadata: Record<string, unknown>): LatLngTuple | null {
+/** Accepts annotation metadata or loose pending-placement metadata. */
+export function seekerAnchorFromMetadata(
+  metadata: { measuringAnchor?: unknown } | Record<string, unknown>,
+): LatLngTuple | null {
   const anchor = metadata.measuringAnchor;
   if (
     anchor &&
     typeof anchor === "object" &&
     "lat" in anchor &&
     "lng" in anchor &&
-    typeof anchor.lat === "number" &&
-    typeof anchor.lng === "number"
+    typeof (anchor as { lat: unknown }).lat === "number" &&
+    typeof (anchor as { lng: unknown }).lng === "number"
   ) {
-    return [anchor.lat, anchor.lng];
+    const { lat, lng } = anchor as { lat: number; lng: number };
+    return [lat, lng];
   }
 
   return null;

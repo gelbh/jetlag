@@ -6,14 +6,11 @@ import {
 } from "../../geometry/measuring/geometryMeasuring";
 import type { MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
 import { isActive } from "../../map/annotationActive";
-import type { AnnotationRecord, GameArea } from "../../map/annotations";
+import type { AnnotationMetadata, AnnotationRecord, GameArea } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
 import { isMeasuringLinearLocation } from "../measuringQuestions";
-import {
-  NEAR_ELIMINATION_EDGE_METERS,
-  radarCircumferenceGapMeters,
-} from "./nearRadarEliminationEdge";
+import { NEAR_ELIMINATION_EDGE_METERS } from "./nearRadarEliminationEdge";
 import {
   type HiderTruthResult,
   minDistanceToPlaces,
@@ -30,6 +27,15 @@ export function measuringDistanceFlipGapMeters(
 ): number {
   return Math.abs(stationDistanceMeters - seekerDistanceMeters);
 }
+
+type MeasuringDistances = {
+  stationDistanceMeters: number;
+  seekerDistanceMeters: number;
+};
+
+type ParsedMeasuringRegion = Omit<MeasuringRegionInput, "measuringAnswer" | "gameArea"> & {
+  gameArea?: MeasuringRegionInput["gameArea"];
+};
 
 function closerFurtherOrUnavailable(
   pending: PendingQuestionRecord,
@@ -59,16 +65,78 @@ function resolvedMeasuringGameArea(
   return undefined;
 }
 
-type ParsedMeasuringRegion = Omit<MeasuringRegionInput, "measuringAnswer" | "gameArea"> & {
-  gameArea?: MeasuringRegionInput["gameArea"];
-};
-
 function parseMeasuringRegionInput(regionInputJson: string): ParsedMeasuringRegion | null {
   try {
     return JSON.parse(regionInputJson) as ParsedMeasuringRegion;
   } catch {
     return null;
   }
+}
+
+/**
+ * Station vs seeker scalar distances for in-scope measuring subjects.
+ * Returns null for sea_level, incomplete metadata, or unresolvable geometry.
+ */
+export function measuringStationSeekerDistances(
+  point: LatLngTuple,
+  regionInput: ParsedMeasuringRegion,
+  metadata: AnnotationMetadata | Record<string, unknown>,
+  sessionGameArea?: GameArea,
+): MeasuringDistances | null {
+  const seekerAnchor = seekerAnchorFromMetadata(metadata);
+  if (!seekerAnchor) {
+    return null;
+  }
+
+  const { measuringSubject, measuringLocationCategory } = regionInput;
+  if (measuringSubject === "sea_level") {
+    return null;
+  }
+
+  if (
+    measuringSubject === "coastline" ||
+    isMeasuringLinearLocation(measuringSubject, measuringLocationCategory ?? undefined)
+  ) {
+    const effectiveGameArea = resolvedMeasuringGameArea(sessionGameArea, regionInput.gameArea);
+    if (!effectiveGameArea) {
+      return null;
+    }
+    const prepared = prepareMeasuringLineSegments(
+      regionInput.measuringCoastSegments,
+      effectiveGameArea,
+    );
+    const coastNearestStation = nearestPointToCoastlines(point, prepared.segments, prepared);
+    const coastNearestSeeker = nearestPointToCoastlines(seekerAnchor, prepared.segments, prepared);
+    if (!coastNearestStation || !coastNearestSeeker) {
+      return null;
+    }
+    return {
+      stationDistanceMeters: coastNearestStation.distanceMeters,
+      seekerDistanceMeters: coastNearestSeeker.distanceMeters,
+    };
+  }
+
+  if (regionInput.usesAllPlacesInArea) {
+    const measuringPlaces = measuringPlacesFromMetadata(metadata, regionInput.measuringPlaces);
+    const stationDistance = minDistanceToPlaces(point, measuringPlaces);
+    const seekerDistance = minDistanceToPlaces(seekerAnchor, measuringPlaces);
+    if (stationDistance === null || seekerDistance === null) {
+      return null;
+    }
+    return {
+      stationDistanceMeters: stationDistance,
+      seekerDistanceMeters: seekerDistance,
+    };
+  }
+
+  const targetPoint = regionInput.measuringTargetPoint;
+  if (!targetPoint) {
+    return null;
+  }
+  return {
+    stationDistanceMeters: distanceBetweenPoints(point, targetPoint),
+    seekerDistanceMeters: distanceBetweenPoints(seekerAnchor, targetPoint),
+  };
 }
 
 /**
@@ -97,56 +165,19 @@ export function measuringFlipGapMetersAtPoint(
     return null;
   }
 
-  const metadata = annotation.metadata as unknown as Record<string, unknown>;
-  const seekerAnchor = seekerAnchorFromMetadata(metadata);
-  if (!seekerAnchor) {
+  const distances = measuringStationSeekerDistances(
+    point,
+    regionInput,
+    annotation.metadata,
+    sessionGameArea,
+  );
+  if (!distances) {
     return null;
   }
-
-  const { measuringSubject, measuringLocationCategory } = regionInput;
-  if (measuringSubject === "sea_level") {
-    return null;
-  }
-
-  if (
-    measuringSubject === "coastline" ||
-    isMeasuringLinearLocation(measuringSubject, measuringLocationCategory ?? undefined)
-  ) {
-    const effectiveGameArea = resolvedMeasuringGameArea(sessionGameArea, regionInput.gameArea);
-    if (!effectiveGameArea) {
-      return null;
-    }
-    const prepared = prepareMeasuringLineSegments(
-      regionInput.measuringCoastSegments,
-      effectiveGameArea,
-    );
-    const coastNearestStation = nearestPointToCoastlines(point, prepared.segments, prepared);
-    const coastNearestSeeker = nearestPointToCoastlines(seekerAnchor, prepared.segments, prepared);
-    if (!coastNearestStation || !coastNearestSeeker) {
-      return null;
-    }
-    return measuringDistanceFlipGapMeters(
-      coastNearestStation.distanceMeters,
-      coastNearestSeeker.distanceMeters,
-    );
-  }
-
-  if (regionInput.usesAllPlacesInArea) {
-    const measuringPlaces = measuringPlacesFromMetadata(metadata, regionInput.measuringPlaces);
-    const stationDistance = minDistanceToPlaces(point, measuringPlaces);
-    const seekerDistance = minDistanceToPlaces(seekerAnchor, measuringPlaces);
-    if (stationDistance === null || seekerDistance === null) {
-      return null;
-    }
-    return measuringDistanceFlipGapMeters(stationDistance, seekerDistance);
-  }
-
-  const targetPoint = regionInput.measuringTargetPoint;
-  if (!targetPoint) {
-    return null;
-  }
-  const seekerDistance = distanceBetweenPoints(seekerAnchor, targetPoint);
-  return radarCircumferenceGapMeters(point, targetPoint, seekerDistance);
+  return measuringDistanceFlipGapMeters(
+    distances.stationDistanceMeters,
+    distances.seekerDistanceMeters,
+  );
 }
 
 export function isNearMeasuringEliminationEdge(
@@ -180,68 +211,20 @@ export function truthMeasuringSync(
     return truthUnavailable();
   }
 
-  const seekerAnchor = seekerAnchorFromMetadata(metadata);
-  if (!seekerAnchor) {
-    return truthUnavailable();
-  }
-
-  const { measuringSubject, measuringLocationCategory } = regionInput;
-
-  if (measuringSubject === "sea_level") {
+  if (regionInput.measuringSubject === "sea_level") {
     return null;
   }
 
-  if (
-    measuringSubject === "coastline" ||
-    isMeasuringLinearLocation(measuringSubject, measuringLocationCategory ?? undefined)
-  ) {
-    const effectiveGameArea = resolvedMeasuringGameArea(gameArea, regionInput.gameArea);
-    if (!effectiveGameArea) {
-      return truthUnavailable();
-    }
-
-    const prepared = prepareMeasuringLineSegments(
-      regionInput.measuringCoastSegments,
-      effectiveGameArea,
-    );
-    const coastNearestStation = nearestPointToCoastlines(
-      stationCenter,
-      prepared.segments,
-      prepared,
-    );
-    const coastNearestSeeker = nearestPointToCoastlines(seekerAnchor, prepared.segments, prepared);
-
-    if (!coastNearestStation || !coastNearestSeeker) {
-      return truthUnavailable();
-    }
-
-    return closerFurtherOrUnavailable(
-      pending,
-      coastNearestStation.distanceMeters,
-      coastNearestSeeker.distanceMeters,
-    );
-  }
-
-  if (regionInput.usesAllPlacesInArea) {
-    const measuringPlaces = measuringPlacesFromMetadata(metadata, regionInput.measuringPlaces);
-    const stationDistance = minDistanceToPlaces(stationCenter, measuringPlaces);
-    const seekerDistance = minDistanceToPlaces(seekerAnchor, measuringPlaces);
-
-    if (stationDistance === null || seekerDistance === null) {
-      return truthUnavailable();
-    }
-
-    return closerFurtherOrUnavailable(pending, stationDistance, seekerDistance);
-  }
-
-  const targetPoint = regionInput.measuringTargetPoint;
-  if (!targetPoint) {
+  const distances = measuringStationSeekerDistances(stationCenter, regionInput, metadata, gameArea);
+  if (!distances) {
     return truthUnavailable();
   }
 
-  const stationDistance = distanceBetweenPoints(stationCenter, targetPoint);
-  const seekerDistance = distanceBetweenPoints(seekerAnchor, targetPoint);
-  return closerFurtherOrUnavailable(pending, stationDistance, seekerDistance);
+  return closerFurtherOrUnavailable(
+    pending,
+    distances.stationDistanceMeters,
+    distances.seekerDistanceMeters,
+  );
 }
 
 export async function truthMeasuringSeaLevel(

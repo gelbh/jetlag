@@ -7,7 +7,11 @@ import {
 import { isActive } from "../../map/annotationActive";
 import { type AnnotationRecord, pointToolRadiusFromMetadata } from "../../map/annotations";
 
-/** Shared pin highlight + tool truth: within this gap of an answer boundary. */
+/**
+ * Shared pin highlight + tool truth band next to an answer boundary.
+ * Radar/measuring: absolute metres to circumference or |station−seeker| distance delta.
+ * Thermometer: |d(start)−d(end)| / 2 (flip-locus approximation).
+ */
 export const NEAR_ELIMINATION_EDGE_METERS = 50;
 
 /** Alias kept for radar call sites; same threshold as NEAR_ELIMINATION_EDGE_METERS. */
@@ -121,16 +125,4 @@ export function isNearThermometerEliminationEdge(
     }
   }
   return false;
-}
-
-/** Caution pin: near any answered radar circumference or thermometer flip edge. */
-export function isNearEliminationEdge(
-  point: LatLngTuple,
-  annotations: readonly AnnotationRecord[],
-  thresholdMeters: number = NEAR_ELIMINATION_EDGE_METERS,
-): boolean {
-  return (
-    isNearRadarEliminationEdge(point, annotations, thresholdMeters) ||
-    isNearThermometerEliminationEdge(point, annotations, thresholdMeters)
-  );
 }

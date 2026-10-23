@@ -629,6 +629,41 @@ describe("computeHiderTruthReply", () => {
     expect(result?.label).toBe(UNAVAILABLE_MEASURING_EDGE_GAP);
   });
 
+  it("measuring withholds auto-answer within 50 m for all-places flip", () => {
+    const placePoint: [number, number] = [51.45, -0.15];
+    const seeker = destinationPoint(placePoint, 2000, 0);
+    const nearFlip = destinationPoint(placePoint, 2000 - (NEAR_ELIMINATION_EDGE_METERS - 1), 0);
+    const pending = basePending({
+      toolType: "measuring",
+      replyOptions: [
+        { id: "closer", label: "Closer" },
+        { id: "further", label: "Further" },
+      ],
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [seeker[1], seeker[0]] },
+        }),
+        metadata: {
+          measuringAnchor: { lat: seeker[0], lng: seeker[1] },
+          measuringRegionInputJson: JSON.stringify({
+            measuringSubject: "location",
+            measuringLocationCategory: "museum",
+            measuringDistanceMeters: 2000,
+            measuringTargetPoint: null,
+            measuringPlaces: [{ id: "p1", name: "Place", point: placePoint }],
+            measuringCoastSegments: [],
+            measuringSeaLevelNearRegion: null,
+            usesAllPlacesInArea: true,
+          }),
+        },
+      },
+    });
+
+    expect(computeHiderTruthReply(pending, nearFlip)?.unavailable).toBe(true);
+  });
+
   it("tentacle picks nearest poi when station is within reach", () => {
     const pending = basePending({
       toolType: "tentacle",
