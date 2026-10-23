@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { resolveDocumentPath } from "./lhci-document-route.mjs";
+import { resolveDocumentPath } from "./document-route.mjs";
 
 const dist = new Set([
   "/index.html",

@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ensureDatedVersionHeaders } from "./normalize-changelog-sections.mjs";
 
-const projectRoot = resolve(import.meta.dirname, "..");
+const projectRoot = resolve(import.meta.dirname, "../..");
 const changelogMdPath = resolve(projectRoot, "CHANGELOG.md");
 const changelogTsPath = resolve(projectRoot, "src/domain/device/changelog.ts");
 const biomeBinPath = resolve(projectRoot, "node_modules/@biomejs/biome/bin/biome");

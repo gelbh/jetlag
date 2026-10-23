@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // LHCI server: `vite preview` of built `dist/` with prod's document routing in front
-// (scripts/lhci-document-route.mjs), so `/`, `/join`, `/premium`, … audit the same HTML file
+// (scripts/lighthouse/document-route.mjs), so `/`, `/join`, `/premium`, … audit the same HTML file
 // the Worker serves. Auditing `/prerender/home/` directly hydrates the router's NotFound route.
 // `wrangler dev` is not used: local workerd rejects the non-handler named exports on
 // worker/index.ts.
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { preview } from "vite";
-import { resolveDocumentPath } from "./lhci-document-route.mjs";
+import { resolveDocumentPath } from "./document-route.mjs";
 
-const distDir = resolve(import.meta.dirname, "..", "dist");
+const distDir = resolve(import.meta.dirname, "../..", "dist");
 
 /** @type {import("vite").Plugin} */
 const prodDocumentRouting = {

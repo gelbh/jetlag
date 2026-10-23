@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const projectRoot = resolve(import.meta.dirname, "..");
+const projectRoot = resolve(import.meta.dirname, "../..");
 const packageVersion = JSON.parse(
   readFileSync(resolve(projectRoot, "package.json"), "utf8"),
 ).version;

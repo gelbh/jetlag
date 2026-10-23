@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { summarizeRunner } from "./lighthouse-runner-summary.mjs";
+import { summarizeRunner } from "./runner-summary.mjs";
 
 const lhr = (path, score, bi) => ({
   finalUrl: `http://127.0.0.1:4173${path}`,

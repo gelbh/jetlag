@@ -11,7 +11,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { extractChangelogReleaseBody } from "./changelog-release-body.mjs";
 
-const projectRoot = resolve(import.meta.dirname, "..");
+const projectRoot = resolve(import.meta.dirname, "../..");
 
 function isCliMain() {
   const entry = process.argv[1];

@@ -4,10 +4,10 @@ import { appendFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { cpus } from "node:os";
 import { delimiter, resolve } from "node:path";
-import { readLhrs, summarizeRunner } from "./lighthouse-runner-summary.mjs";
+import { readLhrs, summarizeRunner } from "./runner-summary.mjs";
 
 const require = createRequire(import.meta.url);
-const root = resolve(import.meta.dirname, "..");
+const root = resolve(import.meta.dirname, "../..");
 const bin = resolve(root, "node_modules", ".bin");
 const env = {
   ...process.env,

@@ -5,9 +5,9 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { parsePrefixedBullet, SECTION_ORDER } from "../.changeset/section-map.mjs";
+import { parsePrefixedBullet, SECTION_ORDER } from "../../.changeset/section-map.mjs";
 
-const projectRoot = resolve(import.meta.dirname, "..");
+const projectRoot = resolve(import.meta.dirname, "../..");
 const changelogPath = resolve(projectRoot, "CHANGELOG.md");
 
 const BUMP_HEADING_TO_TYPE = {
