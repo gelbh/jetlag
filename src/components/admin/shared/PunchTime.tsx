@@ -7,8 +7,8 @@ export function PunchTime({ at, flashing }: { at: string | null; flashing: boole
   const nowMs = useFreshnessClock();
   const reduceMotion = useReducedMotion();
   const flashStyle = reduceMotion
-    ? { background: "var(--adm-overprint-soft)" }
-    : { animation: "adm-punch 30s linear forwards" };
+    ? { background: "var(--color-flag-soft)" }
+    : { animation: "admin-punch 30s linear forwards" };
 
   return (
     <Text

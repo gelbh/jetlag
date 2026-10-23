@@ -186,7 +186,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         controller.syncStatus.lastSyncError ? (
           <Box data-shell-cell="top" bg="var(--color-canvas)" style={adminShellCell.top}>
             {/* In flow, not an overlay: it pushes the map down instead of covering the strip. */}
-            <Alert data-tone="mispunch" title="Sync issue" m="xs" py={6}>
+            <Alert color="halt" title="Sync issue" m="xs" py={6}>
               {controller.syncStatus.lastSyncError}
             </Alert>
           </Box>

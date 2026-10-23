@@ -69,7 +69,7 @@ export function LoadMore({ list }: { list: AdminSessionListState }) {
   return (
     <Stack gap="xs" p={12}>
       {list.loadMoreError ? (
-        <Alert role="alert" data-tone="mispunch" title="Couldn't load more sessions">
+        <Alert role="alert" color="halt" title="Couldn't load more sessions">
           <Group gap="xs" wrap="nowrap">
             <Text size="sm">{list.loadMoreError}</Text>
             <Button
@@ -141,7 +141,7 @@ export function SessionsEmpty({
   if (list.error && list.sessions.length === 0) {
     return (
       <Box p={16}>
-        <Alert role="alert" data-tone="mispunch" title="Couldn't load sessions">
+        <Alert role="alert" color="halt" title="Couldn't load sessions">
           <Stack gap="xs" align="flex-start">
             <Text size="sm">{list.error}</Text>
             <Button type="button" variant="default" size="compact-sm" onClick={list.onRetry}>
@@ -217,7 +217,7 @@ export function NeedsYouEmpty({
   if (error) {
     return (
       <Box p={16}>
-        <Alert role="alert" data-tone="mispunch" title="Couldn't load the queue">
+        <Alert role="alert" color="halt" title="Couldn't load the queue">
           {error}
         </Alert>
       </Box>
@@ -363,7 +363,7 @@ export function AdminDeskTable({
         )}
         {list.error && list.sessions.length > 0 && onSessions ? (
           <Box p={12}>
-            <Alert role="alert" data-tone="mispunch" title="Couldn't load sessions">
+            <Alert role="alert" color="halt" title="Couldn't load sessions">
               <Group gap="xs" wrap="nowrap">
                 <Text size="sm">{list.error}</Text>
                 <Button type="button" variant="default" size="compact-sm" onClick={list.onRetry}>

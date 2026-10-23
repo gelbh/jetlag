@@ -59,7 +59,7 @@ export function AdminConfirm({
       <Stack gap="md">
         <Text size="sm">{consequence}</Text>
         {error ? (
-          <Text size="sm" c="red" role="alert">
+          <Text size="sm" c="halt" role="alert">
             {error}
           </Text>
         ) : null}
@@ -68,7 +68,7 @@ export function AdminConfirm({
             Cancel
           </Button>
           <Button
-            color={destructive ? "red" : undefined}
+            color={destructive ? "halt" : undefined}
             disabled={busy}
             onClick={() => void confirm()}
           >

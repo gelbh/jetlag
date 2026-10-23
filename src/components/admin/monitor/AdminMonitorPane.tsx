@@ -29,7 +29,7 @@ export function AdminMonitorPane({
   if (errorMessage) {
     return (
       <Center h="100%" mih={0} p="xl">
-        <Alert role="alert" title="Monitor unavailable" data-tone="mispunch" maw={384}>
+        <Alert role="alert" title="Monitor unavailable" color="halt" maw={384}>
           <Stack gap="xs" align="flex-start">
             {errorMessage}
             {onRetry ? (

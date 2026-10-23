@@ -108,7 +108,7 @@ export function AdminPreloadRequestDetail({ request }: { request: PreloadRequest
       </Box>
 
       {actionError ? (
-        <Alert role="alert" title="Couldn't update request" data-tone="mispunch">
+        <Alert role="alert" title="Couldn't update request" color="halt">
           {actionError}
         </Alert>
       ) : null}
