@@ -23,7 +23,8 @@ export async function searchStationsInArea(page: Page) {
   await expect(searchButton).toBeVisible({ timeout: 15_000 });
   await expect(searchButton).toBeEnabled();
   await searchButton.click();
-  await expect(page.getByText(/Loading stations/i)).toBeHidden({
+  // The progress readout repeats the label for screen readers, so count rather than toBeHidden.
+  await expect(page.getByText(/Loading stations/i)).toHaveCount(0, {
     timeout: 30_000,
   });
 }

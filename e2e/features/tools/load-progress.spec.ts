@@ -55,11 +55,18 @@ test.describe("load progress", () => {
     await askMatchingMuseum(page);
 
     await expect(progressBar(page)).toBeVisible({ timeout: 10_000 });
+    // Cancel must abort the network request itself, which frees its Overpass slot.
+    const aborted = page.waitForEvent("requestfailed", {
+      predicate: (request) => OVERPASS_URL.test(request.url()),
+      timeout: 5_000,
+    });
     await page.getByRole("button", { name: "Cancel" }).click();
+    await aborted;
 
     await expect(page.getByTestId("load-progress")).toHaveCount(0, { timeout: 5_000 });
     await expect(page.getByText(/didn't load|Couldn't resolve/i)).toHaveCount(0);
-    await expect(page.getByText(/Museum/i).first()).toBeVisible();
+    // Back on the category step: catalog rows are buttons again.
+    await expect(page.getByRole("button", { name: /Museum/i }).first()).toBeVisible();
   });
 
   test("a split query never moves the bar backwards", async ({ localMap: page }) => {
