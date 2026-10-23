@@ -1,5 +1,6 @@
 import type { Feature, LineString } from "geojson";
 import { describe, expect, it, vi } from "vitest";
+import { destinationPoint } from "../../geometry/core/geodesicPrimitives";
 import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
@@ -8,6 +9,8 @@ import type { GameArea } from "../../map/annotations";
 import { milesToMeters } from "../../map/distance";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { computeHiderTruthReply, computeHiderTruthReplyAsync } from "./index";
+import { NEAR_RADAR_EDGE_METERS } from "./nearRadarEliminationEdge";
+import { UNAVAILABLE_RADAR_EDGE_GAP } from "./shared";
 
 vi.mock("@/services/geo/elevation", () => ({
   fetchElevations: vi.fn(async (points: [number, number][]) => points.map(() => 10)),
@@ -81,8 +84,10 @@ describe("computeHiderTruthReply", () => {
     expect(fromGps?.replyId).toBe("no");
   });
 
-  it("radar treats radius boundary as inside (inclusive)", () => {
+  it("radar treats clear inside of the circle as yes (inclusive of deep interior)", () => {
     const seeker: [number, number] = [51.45, -0.15];
+    const radiusMeters = 2000;
+    const station = destinationPoint(seeker, radiusMeters - (NEAR_RADAR_EDGE_METERS + 1), 0);
     const pending = basePending({
       placement: {
         geometryJson: JSON.stringify({
@@ -93,15 +98,62 @@ describe("computeHiderTruthReply", () => {
             coordinates: [seeker[1], seeker[0]],
           },
         }),
-        metadata: { radiusMeters: 0 },
+        metadata: { radiusMeters },
       },
     });
 
-    const result = computeHiderTruthReply(pending, seeker);
+    const result = computeHiderTruthReply(pending, station);
     expect(result?.replyId).toBe("yes");
+    expect(result?.unavailable).toBeUndefined();
   });
 
-  it("radar answers no when station is outside the circle", () => {
+  it("radar withholds auto-answer when the centre sits on the circumference", () => {
+    const seeker: [number, number] = [51.45, -0.15];
+    const radiusMeters = 2000;
+    const station = destinationPoint(seeker, radiusMeters, 0);
+    const pending = basePending({
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: [seeker[1], seeker[0]],
+          },
+        }),
+        metadata: { radiusMeters },
+      },
+    });
+
+    const result = computeHiderTruthReply(pending, station);
+    expect(result?.unavailable).toBe(true);
+    expect(result?.label).toBe(UNAVAILABLE_RADAR_EDGE_GAP);
+  });
+
+  it("radar withholds auto-answer within 50 m inside or outside the circumference", () => {
+    const seeker: [number, number] = [51.45, -0.15];
+    const radiusMeters = 2000;
+    const pending = basePending({
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: [seeker[1], seeker[0]],
+          },
+        }),
+        metadata: { radiusMeters },
+      },
+    });
+
+    const inside = destinationPoint(seeker, radiusMeters - NEAR_RADAR_EDGE_METERS, 0);
+    const outside = destinationPoint(seeker, radiusMeters + (NEAR_RADAR_EDGE_METERS - 1), 0);
+    expect(computeHiderTruthReply(pending, inside)?.unavailable).toBe(true);
+    expect(computeHiderTruthReply(pending, outside)?.unavailable).toBe(true);
+  });
+
+  it("radar answers no when station is clearly outside the circle", () => {
     const pending = basePending({
       placement: {
         geometryJson: JSON.stringify({

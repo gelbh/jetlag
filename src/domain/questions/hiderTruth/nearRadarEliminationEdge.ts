@@ -4,8 +4,17 @@ import { pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsin
 import { isActive } from "../../map/annotationActive";
 import { type AnnotationRecord, pointToolRadiusFromMetadata } from "../../map/annotations";
 
-/** Display-only: truth pin caution when within this gap of a radar circumference. */
+/** Shared pin highlight + radar truth: within this gap of a radar circumference. */
 export const NEAR_RADAR_EDGE_METERS = 50;
+
+/** Absolute metres between `point` and the circle of `radiusMeters` around `center`. */
+export function radarCircumferenceGapMeters(
+  point: LatLngTuple,
+  center: LatLngTuple,
+  radiusMeters: number,
+): number {
+  return Math.abs(distanceBetweenPoints(point, center) - radiusMeters);
+}
 
 export function isNearRadarEliminationEdge(
   point: LatLngTuple,
@@ -28,8 +37,7 @@ export function isNearRadarEliminationEdge(
     }
 
     const radiusMeters = pointToolRadiusFromMetadata(annotation.metadata);
-    const gapMeters = Math.abs(distanceBetweenPoints(point, radarCenter) - radiusMeters);
-    if (gapMeters <= thresholdMeters) {
+    if (radarCircumferenceGapMeters(point, radarCenter, radiusMeters) <= thresholdMeters) {
       return true;
     }
   }
