@@ -5,4 +5,5 @@ export {
 } from "./CastleSiegeSetupChrome";
 export { FairSplitProposal, type FairSplitProposalProps } from "./FairSplitProposal";
 export { MusterDials, type MusterDialsProps } from "./MusterDials";
+export { OracleAskReceipt, type OracleAskReceiptProps } from "./OracleAskReceipt";
 export { SealVault, type SealVaultProps } from "./SealVault";

@@ -108,13 +108,35 @@ service cloud.firestore {
         && hash.matches('^[0-9a-f]+$');
     }
 
-    function teamSealHasPlaintext(data) {
+    // True plaintext coords/phrase — never client-writable.
+    function teamSealHasPlaintextCoords(data) {
       return 'anchorName' in data
         || 'lat' in data
         || 'lng' in data
         || 'secretPhrase' in data
-        || 'revealedAnchor' in data
-        || 'ciphertext' in data;
+        || 'revealedAnchor' in data;
+    }
+
+    // Enemy-restricted: plaintext coords OR ciphertext blob (V3).
+    function teamSealHasEnemyRestrictedFields(data) {
+      return teamSealHasPlaintextCoords(data) || 'ciphertext' in data;
+    }
+
+    function validCastleSiegeSealCiphertext(value) {
+      return value is map
+        && value.keys().hasOnly(['v', 'alg', 'keyId', 'iv', 'ciphertext', 'wrappedKey', 'wrapIv'])
+        && value.v == 1
+        && value.alg == 'A256GCM'
+        && value.keyId is string
+        && value.keyId.size() > 0
+        && value.iv is string
+        && value.iv.size() > 0
+        && value.ciphertext is string
+        && value.ciphertext.size() > 0
+        && value.wrappedKey is string
+        && value.wrappedKey.size() > 0
+        && value.wrapIv is string
+        && value.wrapIv.size() > 0;
     }
 
     function castleSiegeRoleOnSession(sessionId) {
@@ -130,15 +152,17 @@ service cloud.firestore {
         && teamId in ['teamA', 'teamB'];
     }
 
+    // Ciphertext is enemy-restricted. Observers must not read envelopes while the
+    // client ships a shared wrap key (offline decrypt). Referee + host may still read.
     function canReadTeamSeal(sessionId, teamId) {
       return isSessionMember(sessionId)
         && (
-          !teamSealHasPlaintext(resource.data)
+          !teamSealHasEnemyRestrictedFields(resource.data)
           || isCastleSiegePlayingTeamMember(sessionId, teamId)
           || (
             'castleSiegeRoles' in sessionData(sessionId)
             && sessionData(sessionId).castleSiegeRoles is map
-            && castleSiegeRoleOnSession(sessionId) in ['referee', 'observer']
+            && castleSiegeRoleOnSession(sessionId) == 'referee'
           )
           || isSessionHost(sessionId)
         );
@@ -1134,19 +1158,24 @@ service cloud.firestore {
         allow delete: if false;
       }
 
-      // Castle Siege team seals: hash is a public commitment; plaintext/ciphertext
-      // (when present later) are readable only by own team / referee / observer / host.
+      // Castle Siege team seals: hash-only docs are member-readable; plaintext coords
+      // and ciphertext blobs are readable only by own team / referee / host.
+      // Clients may write hash (+ optional ciphertext envelope); never plaintext coords.
       match /teamSeals/{teamId} {
         allow read: if teamId in ['teamA', 'teamB']
           && canReadTeamSeal(sessionId, teamId);
         allow create, update: if teamId in ['teamA', 'teamB']
           && isCastleSiegePlayingTeamMember(sessionId, teamId)
-          && request.resource.data.keys().hasOnly(['hash', 'sealedByUid', 'sealedAt'])
+          && request.resource.data.keys().hasOnly(['hash', 'sealedByUid', 'sealedAt', 'ciphertext'])
           && validCastleSiegeSealHash(request.resource.data.hash)
           && request.resource.data.sealedByUid == request.auth.uid
           && request.resource.data.sealedAt is string
           && request.resource.data.sealedAt.size() > 0
-          && !teamSealHasPlaintext(request.resource.data);
+          && !teamSealHasPlaintextCoords(request.resource.data)
+          && (
+            !('ciphertext' in request.resource.data)
+            || validCastleSiegeSealCiphertext(request.resource.data.ciphertext)
+          );
         allow delete: if false;
       }
 

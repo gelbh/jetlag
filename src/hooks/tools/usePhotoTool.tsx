@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { OracleAskReceipt } from "../../components/session/castle-siege/OracleAskReceipt";
 import { PhotoHudBody } from "../../components/tools/ask/photo/PhotoHudBody";
 import { PhotoMapPlacementChrome } from "../../components/tools/ask/photo/PhotoMapPlacementChrome";
 import { PhotoPanel } from "../../components/tools/PhotoPanel";
@@ -8,7 +9,6 @@ import {
   firstAvailablePhotoCategoryId,
   hasOpenPendingQuestion,
   isPhotoCategoryAvailableForGameSize,
-  PHOTO_REPLY_OPTIONS,
   type PhotoCategoryId,
   photoCategoryLabelForUnit,
   photoCategoryUseCount,
@@ -17,11 +17,17 @@ import {
   usedPhotoCategoryIds,
 } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import type { SessionMode } from "../../domain/session/castleSiege/mode";
+import type { CastleSiegeOracleReceipt } from "../../domain/session/castleSiege/oracleAskReceipt";
+import type { CastleSiegePlayingTeam } from "../../domain/session/castleSiege/pregame";
+import { resolveAskPath } from "../../domain/session/castleSiege/resolveAskPath";
 import type { GameSize } from "../../domain/session/size/gameSize";
+import type { AnswerCastleSiegeOracleAskFn } from "../../services/session/castleSiegeOracleAsk";
 import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
 import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
 import { useToolPreset } from "./framework/useToolPreset";
 import { useToolSession } from "./framework/useToolSession";
+import { commitPhoto } from "./photo/commitPhoto";
 
 interface PhotoSessionConfig {
   ready: true;
@@ -42,6 +48,9 @@ interface UsePhotoToolParams {
   setMapError: (message: string | null) => void;
   mapError: string | null;
   canSubmitQuestion?: boolean;
+  sessionMode?: SessionMode | null;
+  defenderTeamId?: CastleSiegePlayingTeam | null;
+  callOracleAsk?: AnswerCastleSiegeOracleAskFn;
 }
 
 export function usePhotoTool({
@@ -57,11 +66,28 @@ export function usePhotoTool({
   setMapError,
   mapError,
   canSubmitQuestion = true,
+  sessionMode = null,
+  defenderTeamId = null,
+  callOracleAsk,
 }: UsePhotoToolParams) {
   const finishPlacementRef = useRef(finishPlacement);
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
+
+  const [oracleReceipt, setOracleReceipt] = useState<Extract<
+    CastleSiegeOracleReceipt,
+    { kind: "photo" }
+  > | null>(null);
+  const oraclePath = resolveAskPath(sessionMode) === "oracle";
+  const effectiveAwaitHider = oraclePath ? false : awaitHiderAnswer;
+  const photoAskActive = oraclePath || effectiveAwaitHider;
+
+  useEffect(() => {
+    if (!active) {
+      setOracleReceipt(null);
+    }
+  }, [active]);
 
   const usedCategories = useMemo(() => usedPhotoCategoryIds(pendingQuestions), [pendingQuestions]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<PhotoCategoryId>("tree");
@@ -95,44 +121,30 @@ export function usePhotoTool({
     toolId: "photo",
     createInitialConfig: () => ({ ready: true }),
     onSubmit: async () => {
-      setMapError(null);
-
-      if (!canSubmitQuestion) {
-        if (hasOpenQuestion) {
-          setMapError("Finish the open question before starting another.");
-        }
-        return;
-      }
-
-      if (!awaitHiderAnswer || !submitPendingQuestion || !sessionId || !senderUid) {
-        setMapError("Photo questions require a hider in the session.");
-        return;
-      }
-
-      if (usedCategories.has(categoryId)) {
-        setMapError("That photo question was already used this session.");
-        return;
-      }
-
-      await submitPendingQuestion({
-        promptText: photoQuestionPrompt(categoryId, distanceUnit),
-        replyOptions: [...PHOTO_REPLY_OPTIONS],
-        placement: {
-          geometryJson: JSON.stringify({
-            type: "FeatureCollection",
-            features: [],
-          }),
-          metadata: {
-            photoCategoryId: categoryId,
-          },
-        },
+      await commitPhoto({
+        canSubmitQuestion,
+        hasOpenQuestion,
+        categoryId,
+        usedCategories,
+        awaitHiderAnswer: effectiveAwaitHider,
+        submitPendingQuestion: oraclePath ? undefined : submitPendingQuestion,
+        sessionId,
+        senderUid,
+        distanceUnit,
         cardDraw,
         cardKeep,
+        setMapError,
+        onSuccess: () => {
+          setOracleReceipt(null);
+          setCategoryChosen(false);
+          finishPlacementRef.current();
+        },
+        sessionMode,
+        defenderTeamId: defenderTeamId ?? undefined,
+        callOracleAsk,
+        oracleReceipt,
+        onOracleReceipt: setOracleReceipt,
       });
-
-      setMapError(null);
-      setCategoryChosen(false);
-      finishPlacementRef.current();
     },
   });
 
@@ -141,19 +153,20 @@ export function usePhotoTool({
   const categoryReady =
     !usedCategories.has(categoryId) && isPhotoCategoryAvailableForGameSize(gameSize, categoryId);
 
-  const mapFirstEligible = categoryChosen && categoryReady && awaitHiderAnswer;
+  const mapFirstEligible = categoryChosen && categoryReady && photoAskActive;
 
   const handleCategoryChange = (id: PhotoCategoryId) => {
     setSelectedCategoryId(id);
     setCategoryChosen(true);
   };
 
-  useToolPreset("photo", active && awaitHiderAnswer, (key) => {
+  useToolPreset("photo", active && photoAskActive, (key) => {
     if (typeof key === "string") handleCategoryChange(key as PhotoCategoryId);
   });
 
   const reopenCategoryPicker = () => {
     setCategoryChosen(false);
+    setOracleReceipt(null);
   };
 
   const readiness: AskHudReadiness = {
@@ -162,18 +175,32 @@ export function usePhotoTool({
     configureReady: categoryReady,
     resolveReady: true,
     answerReady: true,
-    awaitHiderAnswer,
+    awaitHiderAnswer: effectiveAwaitHider,
     isSubmitting: session.isBusy,
     viewOnly: !canSubmitQuestion,
   };
 
   const canCommitPhoto =
-    categoryReady && categoryChosen && canSubmitQuestion && !session.isBusy && !hasOpenQuestion;
+    categoryReady &&
+    categoryChosen &&
+    canSubmitQuestion &&
+    !session.isBusy &&
+    !hasOpenQuestion &&
+    !(oraclePath && oracleReceipt);
 
-  const mapPlacementActive = Boolean(mapFirstEligible);
+  const mapPlacementActive = Boolean(mapFirstEligible) && !oracleReceipt;
+
+  const oracleReceiptBody = oracleReceipt ? (
+    <OracleAskReceipt
+      receipt={oracleReceipt}
+      busy={session.isBusy}
+      onConfirmSend={() => void commit()}
+      onCancel={() => setOracleReceipt(null)}
+    />
+  ) : null;
 
   const hud: AskToolHudBundle | null =
-    active && awaitHiderAnswer
+    active && photoAskActive
       ? {
           readiness,
           costLabel,
@@ -192,26 +219,28 @@ export function usePhotoTool({
               onChangeCategory={reopenCategoryPicker}
             />
           ) : null,
-          modeBody: mapPlacementActive ? null : (
-            <PhotoHudBody
-              gameSize={gameSize}
-              distanceUnit={distanceUnit}
-              categoryId={categoryId}
-              categoryChosen={categoryChosen}
-              usedCategoryIds={usedCategories}
-              onCategoryChange={handleCategoryChange}
-              hasOpenQuestion={hasOpenQuestion}
-              awaitHiderAnswer={awaitHiderAnswer}
-              costLabel={costLabel}
-              toolLabel="Photo"
-            />
-          ),
+          modeBody:
+            oracleReceiptBody ??
+            (mapPlacementActive ? null : (
+              <PhotoHudBody
+                gameSize={gameSize}
+                distanceUnit={distanceUnit}
+                categoryId={categoryId}
+                categoryChosen={categoryChosen}
+                usedCategoryIds={usedCategories}
+                onCategoryChange={handleCategoryChange}
+                hasOpenQuestion={hasOpenQuestion}
+                awaitHiderAnswer={effectiveAwaitHider}
+                costLabel={costLabel}
+                toolLabel="Photo"
+              />
+            )),
           sheets: null as ReactNode,
         }
       : null;
 
   const panel =
-    active && awaitHiderAnswer ? (
+    active && photoAskActive ? (
       <PhotoPanel
         gameSize={gameSize}
         distanceUnit={distanceUnit}

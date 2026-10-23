@@ -1,9 +1,11 @@
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
 import {
+  buildTeamSealCipherDocument,
   buildTeamSealHashDocument,
   type CastleSiegeSetupPatch,
   castleSiegeSetupPatchToFirestore,
+  type TeamSealCipherRecord,
   type TeamSealHashRecord,
 } from "../serialization/serializeCastleSiege";
 import { sessionsCollection } from "./shared";
@@ -35,6 +37,22 @@ export async function writeTeamSealHash(
       hash: seal.hash,
       sealedByUid: seal.sealedByUid,
       sealedAt: seal.sealedAt,
+    }),
+  );
+}
+
+/** Team member commits hash + AES-GCM ciphertext envelope (no plaintext coords). */
+export async function writeTeamSealCipher(
+  sessionId: string,
+  seal: TeamSealCipherRecord,
+): Promise<void> {
+  await setDoc(
+    teamSealDoc(sessionId, seal.teamId),
+    buildTeamSealCipherDocument({
+      hash: seal.hash,
+      sealedByUid: seal.sealedByUid,
+      sealedAt: seal.sealedAt,
+      ciphertext: seal.ciphertext,
     }),
   );
 }

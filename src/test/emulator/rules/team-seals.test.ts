@@ -218,4 +218,141 @@ describe("firestore.rules — castle siege team seals + setup", () => {
         }),
     );
   });
+
+  const SAMPLE_CIPHERTEXT = {
+    v: 1,
+    alg: "A256GCM",
+    keyId: "castle-siege-seal-wrap-test",
+    iv: "dGVzdGl2MTIzNDU2",
+    ciphertext: "Y2lwaGVydGV4dC1ibG9iLW5vdC1wbGFpbnRleHQ=",
+    wrappedKey: "d3JhcHBlZC1rZXktYmxvYg==",
+    wrapIv: "d3JhcEl2MTIzNDU2",
+  };
+
+  it("allows a team member to write hash + ciphertext envelope", async () => {
+    await seedCastleSiegeSession();
+    const teamA = rules.testEnv.authenticatedContext("team-a-1");
+
+    await assertSucceeds(
+      teamA
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .collection("teamSeals")
+        .doc("teamA")
+        .set({
+          hash: HASH_A,
+          sealedByUid: "team-a-1",
+          sealedAt: "2026-10-20T12:00:00.000Z",
+          ciphertext: SAMPLE_CIPHERTEXT,
+        }),
+    );
+  });
+
+  it("denies opposing team reading seal docs that include ciphertext (V3)", async () => {
+    await seedCastleSiegeSession();
+
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .collection("teamSeals")
+        .doc("teamA")
+        .set({
+          hash: HASH_A,
+          sealedByUid: "team-a-1",
+          sealedAt: "2026-10-20T12:00:00.000Z",
+          ciphertext: SAMPLE_CIPHERTEXT,
+        });
+    });
+
+    const teamB = rules.testEnv.authenticatedContext("team-b-1");
+    const teamA = rules.testEnv.authenticatedContext("team-a-1");
+
+    await assertFails(
+      teamB
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .collection("teamSeals")
+        .doc("teamA")
+        .get(),
+    );
+    await assertSucceeds(
+      teamA
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .collection("teamSeals")
+        .doc("teamA")
+        .get(),
+    );
+  });
+
+  it("denies classic observers reading ciphertext envelopes", async () => {
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .set({
+          ...castleSiegeSessionPayload("host-1"),
+          memberUids: ["host-1", "team-a-1", "observer-1"],
+          memberRoles: {
+            "host-1": "observer",
+            "team-a-1": "observer",
+            "observer-1": "observer",
+          },
+          castleSiegeRoles: {
+            "host-1": "teamA",
+            "team-a-1": "teamA",
+            "observer-1": "observer",
+          },
+        });
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .collection("teamSeals")
+        .doc("teamA")
+        .set({
+          hash: HASH_A,
+          sealedByUid: "team-a-1",
+          sealedAt: "2026-10-20T12:00:00.000Z",
+          ciphertext: SAMPLE_CIPHERTEXT,
+        });
+    });
+
+    const spectator = rules.testEnv.authenticatedContext("observer-1");
+    await assertFails(
+      spectator
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .collection("teamSeals")
+        .doc("teamA")
+        .get(),
+    );
+  });
+
+  it("denies client writes with malformed ciphertext envelopes", async () => {
+    await seedCastleSiegeSession();
+    const teamA = rules.testEnv.authenticatedContext("team-a-1");
+
+    await assertFails(
+      teamA
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .collection("teamSeals")
+        .doc("teamA")
+        .set({
+          hash: HASH_A,
+          sealedByUid: "team-a-1",
+          sealedAt: "2026-10-20T12:00:00.000Z",
+          ciphertext: { v: 1, alg: "A256GCM" },
+        }),
+    );
+  });
 });
