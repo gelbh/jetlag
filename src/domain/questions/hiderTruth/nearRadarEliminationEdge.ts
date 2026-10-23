@@ -1,10 +1,17 @@
-import type { Feature, Point } from "geojson";
+import type { Feature, LineString, Point } from "geojson";
 import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/gameArea/geometry";
-import { pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
+import {
+  lineEndpointsFromFeature,
+  pointFromGeometryFeature,
+} from "../../geometry/gameArea/geometryParsing";
 import { isActive } from "../../map/annotationActive";
 import { type AnnotationRecord, pointToolRadiusFromMetadata } from "../../map/annotations";
 
-/** Shared pin highlight + tool truth: within this gap of an answer boundary. */
+/**
+ * Shared pin highlight + tool truth band next to an answer boundary.
+ * Radar/measuring: absolute metres to circumference or |station−seeker| distance delta.
+ * Thermometer: |d(start)−d(end)| / 2 (flip-locus approximation).
+ */
 export const NEAR_ELIMINATION_EDGE_METERS = 50;
 
 /** Alias kept for radar call sites; same threshold as NEAR_ELIMINATION_EDGE_METERS. */
@@ -67,5 +74,55 @@ export function isNearRadarEliminationEdge(
     }
   }
 
+  return false;
+}
+
+export type AnsweredThermometerSegment = {
+  start: LatLngTuple;
+  end: LatLngTuple;
+};
+
+/** Active answered thermometer with LineString endpoints. */
+export function answeredThermometerSegment(
+  annotation: AnnotationRecord,
+): AnsweredThermometerSegment | null {
+  if (!isActive(annotation) || annotation.type !== "thermometer") {
+    return null;
+  }
+  if (!annotation.metadata.thermometerAnswer) {
+    return null;
+  }
+  if (annotation.geometry.geometry.type !== "LineString") {
+    return null;
+  }
+  return lineEndpointsFromFeature(annotation.geometry as Feature<LineString>);
+}
+
+/**
+ * Half the absolute difference of distances to the walk endpoints.
+ * Zero on the hotter/colder flip locus; matches truthThermometer distances.
+ */
+export function thermometerFlipGapMeters(
+  point: LatLngTuple,
+  start: LatLngTuple,
+  end: LatLngTuple,
+): number {
+  return Math.abs(distanceBetweenPoints(point, start) - distanceBetweenPoints(point, end)) / 2;
+}
+
+export function isNearThermometerEliminationEdge(
+  point: LatLngTuple,
+  annotations: readonly AnnotationRecord[],
+  thresholdMeters: number = NEAR_ELIMINATION_EDGE_METERS,
+): boolean {
+  for (const annotation of annotations) {
+    const segment = answeredThermometerSegment(annotation);
+    if (!segment) {
+      continue;
+    }
+    if (thermometerFlipGapMeters(point, segment.start, segment.end) <= thresholdMeters) {
+      return true;
+    }
+  }
   return false;
 }
