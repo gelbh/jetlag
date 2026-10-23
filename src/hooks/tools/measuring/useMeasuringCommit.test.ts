@@ -143,3 +143,164 @@ describe("useMeasuringCommit solo persist-or-defer", () => {
     slimSpy.mockRestore();
   });
 });
+
+describe("useMeasuringCommit castleSiege oracle", () => {
+  const callOracle = vi.fn();
+  const onOracleReceipt = vi.fn();
+  const submitPendingQuestion = vi.fn();
+  const createAnnotation = vi.fn();
+  const finishPlacement = vi.fn();
+
+  function measuringPreviews(): MeasuringPreviews {
+    return {
+      resolvedCoastSegments: [],
+      measuringRegionInput: {
+        measuringSubject: "location",
+        measuringLocationCategory: "museum",
+        measuringDistanceMeters: 1000,
+        measuringTargetPoint: [51.44, -0.14],
+        measuringPlaces: [],
+        measuringCoastSegments: [],
+        measuringSeaLevelNearRegion: null,
+        usesAllPlacesInArea: false,
+        measuringAnswer: null,
+        gameArea: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [-1, 50],
+              [1, 50],
+              [1, 52],
+              [-1, 52],
+              [-1, 50],
+            ],
+          ],
+        },
+      },
+    } as unknown as MeasuringPreviews;
+  }
+
+  beforeEach(() => {
+    callOracle.mockReset();
+    onOracleReceipt.mockReset();
+    submitPendingQuestion.mockReset();
+    createAnnotation.mockReset();
+    finishPlacement.mockReset();
+    createAnnotation.mockResolvedValue({ id: "ann-1", sessionId: "s1", status: "active" });
+    buildMeasuringRegions.mockResolvedValue({
+      near: samplePolygon(),
+      elimination: samplePolygon(),
+    });
+  });
+
+  it("classic honor pending path does not call oracle", async () => {
+    const draft = draftStub({ measuringAnswer: null });
+    const { result } = renderHook(() =>
+      useMeasuringCommit({
+        annotations: [],
+        pendingQuestions: [],
+        createAnnotation,
+        awaitHiderAnswer: true,
+        submitPendingQuestion,
+        sessionId: "s1",
+        senderUid: "u1",
+        finishPlacement,
+        canSubmitQuestion: true,
+        draft,
+        previews: measuringPreviews(),
+        sessionMode: "classic",
+        defenderTeamId: "teamB",
+        callOracleAsk: callOracle,
+        onOracleReceipt,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.performCommit();
+    });
+
+    expect(callOracle).not.toHaveBeenCalled();
+    expect(onOracleReceipt).not.toHaveBeenCalled();
+    expect(submitPendingQuestion).toHaveBeenCalledTimes(1);
+    expect(createAnnotation).not.toHaveBeenCalled();
+  });
+
+  it("castleSiege first pass routes to oracle and stashes receipt", async () => {
+    callOracle.mockResolvedValue({ kind: "measuring", answer: "closer" });
+    const draft = draftStub({ measuringAnswer: null });
+    const { result } = renderHook(() =>
+      useMeasuringCommit({
+        annotations: [],
+        pendingQuestions: [],
+        createAnnotation,
+        awaitHiderAnswer: true,
+        submitPendingQuestion,
+        sessionId: "s1",
+        senderUid: "u1",
+        finishPlacement,
+        canSubmitQuestion: true,
+        draft,
+        previews: measuringPreviews(),
+        sessionMode: "castleSiege",
+        defenderTeamId: "teamA",
+        callOracleAsk: callOracle,
+        onOracleReceipt,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.performCommit();
+    });
+
+    expect(callOracle).toHaveBeenCalledWith({
+      sessionId: "s1",
+      defenderTeamId: "teamA",
+      ask: {
+        kind: "measuring",
+        seekerPoint: { lat: 51.45, lng: -0.15 },
+        targetPoint: { lat: 51.44, lng: -0.14 },
+      },
+    });
+    expect(onOracleReceipt).toHaveBeenCalledWith({ kind: "measuring", answer: "closer" });
+    expect(submitPendingQuestion).not.toHaveBeenCalled();
+    expect(createAnnotation).not.toHaveBeenCalled();
+  });
+
+  it("castleSiege confirm-send uses oracle receipt without honor typing", async () => {
+    const draft = draftStub({ measuringAnswer: null });
+    const { result } = renderHook(() =>
+      useMeasuringCommit({
+        annotations: [],
+        pendingQuestions: [],
+        createAnnotation,
+        awaitHiderAnswer: true,
+        submitPendingQuestion,
+        sessionId: "s1",
+        senderUid: "u1",
+        finishPlacement,
+        canSubmitQuestion: true,
+        draft,
+        previews: measuringPreviews(),
+        sessionMode: "castleSiege",
+        defenderTeamId: "teamA",
+        callOracleAsk: callOracle,
+        oracleReceipt: { kind: "measuring", answer: "further" },
+        onOracleReceipt,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.performCommit();
+    });
+
+    expect(callOracle).not.toHaveBeenCalled();
+    expect(submitPendingQuestion).not.toHaveBeenCalled();
+    expect(createAnnotation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "measuring",
+        metadata: expect.objectContaining({ measuringAnswer: "further" }),
+      }),
+    );
+    expect(finishPlacement).toHaveBeenCalled();
+  });
+});

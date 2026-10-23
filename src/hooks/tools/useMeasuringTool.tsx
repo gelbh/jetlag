@@ -1,4 +1,5 @@
-import { startTransition, useEffect, useMemo, useRef } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { OracleAskReceipt } from "@/components/session/castle-siege/OracleAskReceipt";
 import { MeasuringHudBody } from "@/components/tools/ask/measuring/MeasuringHudBody";
 import {
   MeasuringMapPlacementChrome,
@@ -21,6 +22,8 @@ import {
   measuringTargetLabel,
   questionCostBreakdown,
 } from "../../domain/questions";
+import type { CastleSiegeOracleReceipt } from "../../domain/session/castleSiege/oracleAskReceipt";
+import { resolveAskPath } from "../../domain/session/castleSiege/resolveAskPath";
 import { firstUnusedCatalogOption } from "../../domain/session/tools/toolSessionOptions";
 import { GeocodedPlaceLeading } from "../../services/geo/geocoding";
 import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
@@ -68,11 +71,31 @@ export function useMeasuringTool({
   refreshGps,
   ensurePointInGameArea,
   canSubmitQuestion = true,
+  sessionMode = null,
+  defenderTeamId = null,
+  callOracleAsk,
 }: UseMeasuringToolParams) {
   const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
   const draft = useMeasuringDraftState(annotations, pendingQuestions, sessionRules);
   const previews = useMeasuringPreviews(gameArea, draft);
   const submittingRef = useRef(false);
+  const [oracleReceipt, setOracleReceipt] = useState<Extract<
+    CastleSiegeOracleReceipt,
+    { kind: "measuring" }
+  > | null>(null);
+  const oraclePath = resolveAskPath(sessionMode) === "oracle";
+  const effectiveAwaitHider = oraclePath ? false : awaitHiderAnswer;
+
+  useEffect(() => {
+    if (!active) {
+      setOracleReceipt(null);
+    }
+  }, [active]);
+
+  const finishPlacementAndClearOracle = useCallback(() => {
+    setOracleReceipt(null);
+    finishPlacement();
+  }, [finishPlacement]);
 
   const loaders = useMeasuringAnchorLoaders({
     active,
@@ -97,14 +120,19 @@ export function useMeasuringTool({
     annotations,
     pendingQuestions,
     createAnnotation,
-    awaitHiderAnswer,
-    submitPendingQuestion,
+    awaitHiderAnswer: effectiveAwaitHider,
+    submitPendingQuestion: oraclePath ? undefined : submitPendingQuestion,
     sessionId,
     senderUid,
-    finishPlacement,
+    finishPlacement: finishPlacementAndClearOracle,
     canSubmitQuestion,
     draft,
     previews,
+    sessionMode,
+    defenderTeamId,
+    callOracleAsk,
+    oracleReceipt,
+    onOracleReceipt: setOracleReceipt,
   });
 
   const commitRef = useRef(commitMeasuring);
@@ -182,7 +210,7 @@ export function useMeasuringTool({
   const panel = (
     <MeasuringToolPanel
       distanceUnit={distanceUnit}
-      awaitHiderAnswer={awaitHiderAnswer}
+      awaitHiderAnswer={effectiveAwaitHider}
       gpsLoading={gpsLoading}
       gpsError={gpsError}
       mapError={mapError}
@@ -209,8 +237,8 @@ export function useMeasuringTool({
     placementReady: draft.measuringSeekerPoint !== null,
     configureReady: draft.measuringOptionChosen,
     resolveReady: hasMeasuringTarget,
-    answerReady: awaitHiderAnswer || draft.measuringAnswer !== null,
-    awaitHiderAnswer,
+    answerReady: oraclePath || effectiveAwaitHider || draft.measuringAnswer !== null,
+    awaitHiderAnswer: effectiveAwaitHider,
     isSubmitting: session.isBusy,
     viewOnly: !canSubmitQuestion,
     resolving: draft.measuringLoading && draft.measuringSeekerPoint !== null,
@@ -270,14 +298,24 @@ export function useMeasuringTool({
     draft.measuringSeekerPoint !== null &&
     hasMeasuringTarget &&
     draft.measuringOptionChosen &&
-    (awaitHiderAnswer || draft.measuringAnswer !== null) &&
+    (oraclePath || effectiveAwaitHider || draft.measuringAnswer !== null) &&
     canSubmitQuestion &&
     !session.isBusy &&
+    !(oraclePath && oracleReceipt) &&
     measuringCommitReady({
       measuringSubject: draft.measuringSubject,
       measuringLoading: draft.measuringLoading,
       resolvedCoastSegmentsLength: previews.resolvedCoastSegments.length,
     });
+
+  const oracleReceiptBody = oracleReceipt ? (
+    <OracleAskReceipt
+      receipt={oracleReceipt}
+      busy={session.isBusy}
+      onConfirmSend={() => void commit()}
+      onCancel={() => setOracleReceipt(null)}
+    />
+  ) : null;
 
   const locationCategory =
     draft.measuringSubject === "location" ? draft.measuringLocationCategory : undefined;
@@ -368,96 +406,99 @@ export function useMeasuringTool({
     costLabel: questionCost.label,
     error: mapPlacementActive ? null : (draft.measuringError ?? gpsError ?? mapError ?? null),
     onCommit: () => void commit(),
-    suppressSheet: mapPlacementActive,
-    mapOverlay: mapPlacementActive ? (
-      <MeasuringMapPlacementChrome
-        configureLabel={configureLabel}
-        questionPrompt={question.prompt}
-        costLabel={questionCost.label}
-        phase={placementPhase}
-        onUseGps={() => void interactions.handleGps()}
-        gpsLoading={gpsLoading}
-        error={placementError}
-        awaitHiderAnswer={awaitHiderAnswer}
-        answer={draft.measuringAnswer}
-        onAnswerChange={(answer) => {
-          startTransition(() => draft.setMeasuringAnswer(answer));
-        }}
-        canCommit={canCommitMeasuring}
-        isSubmitting={session.isBusy}
-        onCommit={() => void commit()}
-        onChangeConfigure={reopenCatalog}
-        seekerPlaceName={draft.measuringSeekerPlaceName}
-        targetPlaceName={draft.measuringTargetPlaceName}
-        distanceMeters={draft.measuringDistanceMeters}
-        distanceUnit={distanceUnit}
-        statusTitle={statusTitle}
-        statusBody={statusBody ?? ""}
-        midSlot={midSlot}
-      />
-    ) : null,
-    modeBody: mapPlacementActive ? null : (
-      <MeasuringHudBody
-        model={{
-          distanceUnit,
-          optionChosen: draft.measuringOptionChosen,
-          usedMeasuringFromKinds: draft.usedMeasuringFromKindsSet,
-          unavailableMeasuringFromKinds: new Set(draft.unavailableMeasuringFromKinds.keys()),
-          catalogNotice: draft.catalogNotice,
-          catalogOptions: draft.measuringCatalog,
-          anchorLat: draft.measuringSeekerPoint?.[0] ?? null,
-          anchorLng: draft.measuringSeekerPoint?.[1] ?? null,
-          measureFrom: measureFromKey,
-          subject: draft.measuringSubject,
-          targetMode: draft.measuringTargetMode,
-          usesAllPlacesInArea: draft.usesAllPlacesInArea,
-          hasSeekerPoint: draft.measuringSeekerPoint !== null,
-          hasTargetPoint: hasMeasuringTarget,
-          anchorAltitudeMeters: draft.measuringAnchorElevationMeters,
-          seekerPlaceName: draft.measuringSeekerPlaceName,
-          targetPlaceName: draft.measuringTargetPlaceName,
-          distanceMeters: draft.measuringDistanceMeters,
-          loading: draft.measuringLoading,
-          gpsLoading,
-          searchQuery: draft.measuringSearchQuery,
-          searchResults: draft.measuringSearchResults,
-          searchLoading: draft.measuringSearchLoading,
-          searchRole: draft.measuringSearchRole,
-          answer: draft.measuringAnswer,
-          seaLevelEdgeCase: draft.measuringSeaLevelEdgeCase,
-          error: draft.measuringError ?? gpsError ?? mapError,
-          onMeasureFromChange: loaders.handleMeasureFromChange,
-          onTargetModeChange: loaders.handleTargetModeChange,
-          onSearchQueryChange: draft.setMeasuringSearchQuery,
-          onSearchSubmit: (role) => void interactions.handleSearch(role),
-          onSearchResultSelect: interactions.applySearchResult,
-          onUseGps: () => void interactions.handleGps(),
-          onFindCoastline: () => {
-            if (draft.measuringSeekerPoint) {
-              void loaders.loadMeasuringCoastlineAt(draft.measuringSeekerPoint);
-            }
-          },
-          onRetrySeaLevel: () => {
-            if (draft.measuringSeekerPoint) {
-              void loaders.loadSeaLevelContextAt(draft.measuringSeekerPoint);
-            }
-          },
-          onFindLinearFeature: () => {
-            if (draft.measuringSeekerPoint) {
-              void loaders.loadMeasuringLinearAt(draft.measuringSeekerPoint);
-            }
-          },
-          onFindNearest: () => void interactions.loadNearest(),
-          onAnswerChange: (answer) => {
+    suppressSheet: mapPlacementActive && !oracleReceipt,
+    mapOverlay:
+      mapPlacementActive && !oracleReceipt ? (
+        <MeasuringMapPlacementChrome
+          configureLabel={configureLabel}
+          questionPrompt={question.prompt}
+          costLabel={questionCost.label}
+          phase={placementPhase}
+          onUseGps={() => void interactions.handleGps()}
+          gpsLoading={gpsLoading}
+          error={placementError}
+          awaitHiderAnswer={effectiveAwaitHider}
+          answer={draft.measuringAnswer}
+          onAnswerChange={(answer) => {
             startTransition(() => draft.setMeasuringAnswer(answer));
-          },
-          awaitHiderAnswer,
-          costLabel: questionCost.label,
-          isSubmitting: session.isBusy,
-          toolLabel: "Measuring",
-        }}
-      />
-    ),
+          }}
+          canCommit={canCommitMeasuring}
+          isSubmitting={session.isBusy}
+          onCommit={() => void commit()}
+          onChangeConfigure={reopenCatalog}
+          seekerPlaceName={draft.measuringSeekerPlaceName}
+          targetPlaceName={draft.measuringTargetPlaceName}
+          distanceMeters={draft.measuringDistanceMeters}
+          distanceUnit={distanceUnit}
+          statusTitle={statusTitle}
+          statusBody={statusBody ?? ""}
+          midSlot={midSlot}
+        />
+      ) : null,
+    modeBody:
+      oracleReceiptBody ??
+      (mapPlacementActive ? null : (
+        <MeasuringHudBody
+          model={{
+            distanceUnit,
+            optionChosen: draft.measuringOptionChosen,
+            usedMeasuringFromKinds: draft.usedMeasuringFromKindsSet,
+            unavailableMeasuringFromKinds: new Set(draft.unavailableMeasuringFromKinds.keys()),
+            catalogNotice: draft.catalogNotice,
+            catalogOptions: draft.measuringCatalog,
+            anchorLat: draft.measuringSeekerPoint?.[0] ?? null,
+            anchorLng: draft.measuringSeekerPoint?.[1] ?? null,
+            measureFrom: measureFromKey,
+            subject: draft.measuringSubject,
+            targetMode: draft.measuringTargetMode,
+            usesAllPlacesInArea: draft.usesAllPlacesInArea,
+            hasSeekerPoint: draft.measuringSeekerPoint !== null,
+            hasTargetPoint: hasMeasuringTarget,
+            anchorAltitudeMeters: draft.measuringAnchorElevationMeters,
+            seekerPlaceName: draft.measuringSeekerPlaceName,
+            targetPlaceName: draft.measuringTargetPlaceName,
+            distanceMeters: draft.measuringDistanceMeters,
+            loading: draft.measuringLoading,
+            gpsLoading,
+            searchQuery: draft.measuringSearchQuery,
+            searchResults: draft.measuringSearchResults,
+            searchLoading: draft.measuringSearchLoading,
+            searchRole: draft.measuringSearchRole,
+            answer: draft.measuringAnswer,
+            seaLevelEdgeCase: draft.measuringSeaLevelEdgeCase,
+            error: draft.measuringError ?? gpsError ?? mapError,
+            onMeasureFromChange: loaders.handleMeasureFromChange,
+            onTargetModeChange: loaders.handleTargetModeChange,
+            onSearchQueryChange: draft.setMeasuringSearchQuery,
+            onSearchSubmit: (role) => void interactions.handleSearch(role),
+            onSearchResultSelect: interactions.applySearchResult,
+            onUseGps: () => void interactions.handleGps(),
+            onFindCoastline: () => {
+              if (draft.measuringSeekerPoint) {
+                void loaders.loadMeasuringCoastlineAt(draft.measuringSeekerPoint);
+              }
+            },
+            onRetrySeaLevel: () => {
+              if (draft.measuringSeekerPoint) {
+                void loaders.loadSeaLevelContextAt(draft.measuringSeekerPoint);
+              }
+            },
+            onFindLinearFeature: () => {
+              if (draft.measuringSeekerPoint) {
+                void loaders.loadMeasuringLinearAt(draft.measuringSeekerPoint);
+              }
+            },
+            onFindNearest: () => void interactions.loadNearest(),
+            onAnswerChange: (answer) => {
+              startTransition(() => draft.setMeasuringAnswer(answer));
+            },
+            awaitHiderAnswer: effectiveAwaitHider,
+            costLabel: questionCost.label,
+            isSubmitting: session.isBusy,
+            toolLabel: "Measuring",
+          }}
+        />
+      )),
     sheets: (
       <QuestionPreviewSheet
         open={draft.previewOpen}

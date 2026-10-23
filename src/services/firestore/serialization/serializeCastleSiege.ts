@@ -13,6 +13,10 @@ import type {
   CastleSiegePlayingTeam,
 } from "@/domain/session/castleSiege/pregame";
 import {
+  isSealCipherEnvelopeV1,
+  type SealCipherEnvelopeV1,
+} from "@/domain/session/castleSiege/sealCipher";
+import {
   assertNoNestedArrays,
   deserializeGameAreaFromFirestore,
   serializeGameAreaForFirestore,
@@ -38,15 +42,27 @@ export type TeamSealHashRecord = {
   sealedAt: string;
 };
 
+export type TeamSealCipherRecord = TeamSealHashRecord & {
+  ciphertext: SealCipherEnvelopeV1;
+};
+
 const SEAL_HASH_HEX = /^[0-9a-f]{64}$/;
 
-/** Plaintext / oracle fields that must never be enemy-readable (V3). */
-export const TEAM_SEAL_PLAINTEXT_KEYS = [
+/** True plaintext coords/phrase — never written by clients (V3). */
+export const TEAM_SEAL_CLIENT_FORBIDDEN_PLAINTEXT_KEYS = [
   "anchorName",
   "lat",
   "lng",
   "secretPhrase",
   "revealedAnchor",
+] as const;
+
+/**
+ * Fields that must never be enemy-readable (V3).
+ * Includes ciphertext (own team / referee / host / Functions only).
+ */
+export const TEAM_SEAL_PLAINTEXT_KEYS = [
+  ...TEAM_SEAL_CLIENT_FORBIDDEN_PLAINTEXT_KEYS,
   "ciphertext",
 ] as const;
 
@@ -192,7 +208,30 @@ export function parseCastleSiegeSetupFromDocument(document: Record<string, unkno
   };
 }
 
-/** Hash-only team seal doc (plaintext / ciphertext deferred to Phase 4). */
+function assertNoClientPlaintextSealKeys(data: Record<string, unknown>): void {
+  for (const key of TEAM_SEAL_CLIENT_FORBIDDEN_PLAINTEXT_KEYS) {
+    if (key in data) {
+      throw new Error(`Team seal docs must not include plaintext field "${key}".`);
+    }
+  }
+}
+
+function serializeSealCipherEnvelope(envelope: SealCipherEnvelopeV1): SealCipherEnvelopeV1 {
+  if (!isSealCipherEnvelopeV1(envelope)) {
+    throw new Error("Seal ciphertext must be a V1 AES-GCM envelope.");
+  }
+  return {
+    v: 1,
+    alg: envelope.alg,
+    keyId: envelope.keyId,
+    iv: envelope.iv,
+    ciphertext: envelope.ciphertext,
+    wrappedKey: envelope.wrappedKey,
+    wrapIv: envelope.wrapIv,
+  };
+}
+
+/** Hash-only team seal doc (commitment without oracle blob). */
 export function buildTeamSealHashDocument(
   seal: Omit<TeamSealHashRecord, "teamId">,
 ): Record<string, unknown> {
@@ -208,6 +247,19 @@ export function buildTeamSealHashDocument(
     sealedByUid: seal.sealedByUid,
     sealedAt: seal.sealedAt,
   };
+  assertNoNestedArrays(payload, "teamSeal");
+  return payload;
+}
+
+/** Hash + ciphertext envelope for Functions oracle (no plaintext coords). */
+export function buildTeamSealCipherDocument(
+  seal: Omit<TeamSealCipherRecord, "teamId">,
+): Record<string, unknown> {
+  const payload = {
+    ...buildTeamSealHashDocument(seal),
+    ciphertext: serializeSealCipherEnvelope(seal.ciphertext),
+  };
+  assertNoClientPlaintextSealKeys(payload);
   assertNoNestedArrays(payload, "teamSeal");
   return payload;
 }
@@ -230,6 +282,26 @@ export function deserializeTeamSealHashFromFirestore(
     hash: data.hash,
     sealedByUid: data.sealedByUid,
     sealedAt: data.sealedAt,
+  };
+}
+
+/** Parse hash + optional ciphertext; drops docs that still carry plaintext coords. */
+export function deserializeTeamSealCipherFromFirestore(
+  teamId: string,
+  data: Record<string, unknown>,
+): TeamSealCipherRecord | null {
+  for (const key of TEAM_SEAL_CLIENT_FORBIDDEN_PLAINTEXT_KEYS) {
+    if (key in data) {
+      return null;
+    }
+  }
+  const base = deserializeTeamSealHashFromFirestore(teamId, data);
+  if (!base || !isSealCipherEnvelopeV1(data.ciphertext)) {
+    return null;
+  }
+  return {
+    ...base,
+    ciphertext: serializeSealCipherEnvelope(data.ciphertext),
   };
 }
 

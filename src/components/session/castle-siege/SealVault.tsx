@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import type { CastleSiegePlayingTeam } from "@/domain/session/castleSiege/pregame";
+import {
+  encryptSealPayload,
+  SEAL_WRAP_KEY_ID_V1,
+  type SealCipherEnvelopeV1,
+} from "@/domain/session/castleSiege/sealCipher";
 import { canonicalSealPayload, hashSealPayload } from "@/domain/session/castleSiege/sealHash";
-import { writeTeamSealHash } from "@/services/firestore/firestoreSessions";
+import { writeTeamSealCipher, writeTeamSealHash } from "@/services/firestore/firestoreSessions";
 
 export type SealVaultProps = {
   sessionId: string;
@@ -11,15 +16,30 @@ export type SealVaultProps = {
   /** Seal placement; map draw stubbed in Phase 2. */
   sealPosition: { lat: number; lng: number };
   onCommitted?: (hash: string) => void;
+  /**
+   * When set, commit hash + ciphertext via writeTeamSealCipher.
+   * Production: Doppler `VITE_CASTLE_SIEGE_SEAL_WRAP_KEY_B64` twin of Functions GSM wrap key.
+   * Tests inject bytes / encryptSeal directly.
+   */
+  wrappingKey?: Uint8Array;
+  wrapKeyId?: string;
+  /** Test inject for encrypt (defaults to encryptSealPayload). */
+  encryptSeal?: (
+    plaintext: string,
+    options: { wrappingKey: Uint8Array; keyId: string },
+  ) => Promise<SealCipherEnvelopeV1>;
 };
 
-/** Skin-S3 seal vault: name + secret → client hash → teamSeals doc. */
+/** Skin-S3 seal vault: name + secret → client hash (+ optional ciphertext) → teamSeals doc. */
 export function SealVault({
   sessionId,
   teamId,
   sealedByUid,
   sealPosition,
   onCommitted,
+  wrappingKey,
+  wrapKeyId = SEAL_WRAP_KEY_ID_V1,
+  encryptSeal = encryptSealPayload,
 }: SealVaultProps) {
   const [anchorName, setAnchorName] = useState("");
   const [secretPhrase, setSecretPhrase] = useState("");
@@ -41,12 +61,28 @@ export function SealVault({
         secretPhrase.trim(),
       );
       const hash = await hashSealPayload(payload);
-      await writeTeamSealHash(sessionId, {
-        teamId,
-        hash,
-        sealedByUid,
-        sealedAt: new Date().toISOString(),
-      });
+      const sealedAt = new Date().toISOString();
+
+      if (wrappingKey) {
+        const ciphertext = await encryptSeal(payload, {
+          wrappingKey,
+          keyId: wrapKeyId,
+        });
+        await writeTeamSealCipher(sessionId, {
+          teamId,
+          hash,
+          sealedByUid,
+          sealedAt,
+          ciphertext,
+        });
+      } else {
+        await writeTeamSealHash(sessionId, {
+          teamId,
+          hash,
+          sealedByUid,
+          sealedAt,
+        });
+      }
       setCommittedHash(hash);
       setSecretPhrase("");
       onCommitted?.(hash);

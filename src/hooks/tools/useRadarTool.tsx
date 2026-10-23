@@ -1,4 +1,5 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { OracleAskReceipt } from "../../components/session/castle-siege/OracleAskReceipt";
 import { RadarHudBody } from "../../components/tools/ask/radar/RadarHudBody";
 import {
   RadarMapPlacementChrome,
@@ -24,8 +25,13 @@ import {
   usedRadarDistanceOptionsForSession,
 } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import type { SessionMode } from "../../domain/session/castleSiege/mode";
+import type { CastleSiegeOracleReceipt } from "../../domain/session/castleSiege/oracleAskReceipt";
+import type { CastleSiegePlayingTeam } from "../../domain/session/castleSiege/pregame";
+import { resolveAskPath } from "../../domain/session/castleSiege/resolveAskPath";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
+import type { AnswerCastleSiegeOracleAskFn } from "../../services/session/castleSiegeOracleAsk";
 import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
 import { useToolPreset } from "./framework/useToolPreset";
 import { useToolSession } from "./framework/useToolSession";
@@ -63,6 +69,9 @@ interface UseRadarToolParams {
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   armPlacement: () => void;
   canSubmitQuestion?: boolean;
+  sessionMode?: SessionMode | null;
+  defenderTeamId?: CastleSiegePlayingTeam | null;
+  callOracleAsk?: AnswerCastleSiegeOracleAskFn;
 }
 
 export function useRadarTool({
@@ -87,13 +96,26 @@ export function useRadarTool({
   ensurePointInGameArea,
   armPlacement,
   canSubmitQuestion = true,
+  sessionMode = null,
+  defenderTeamId = null,
+  callOracleAsk,
 }: UseRadarToolParams) {
   const wizardStepRef = useRef("place");
   const submittingRef = useRef(false);
   const finishPlacementRef = useRef(finishPlacement);
+  const [oracleReceipt, setOracleReceipt] = useState<Extract<
+    CastleSiegeOracleReceipt,
+    { kind: "radar" }
+  > | null>(null);
+  const oraclePath = resolveAskPath(sessionMode) === "oracle";
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
+  useEffect(() => {
+    if (!active) {
+      setOracleReceipt(null);
+    }
+  }, [active]);
 
   const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
   const usedRadarOptions = useMemo(
@@ -137,6 +159,7 @@ export function useRadarTool({
     setRadarAnswer(null);
     setRadarCenter(null);
     setEditingDistance(false);
+    setOracleReceipt(null);
   }, []);
 
   const handleMapClick = useCallback(
@@ -151,6 +174,7 @@ export function useRadarTool({
       }
 
       setRadarAnswer(null);
+      setOracleReceipt(null);
       setRadarCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
@@ -190,6 +214,7 @@ export function useRadarTool({
     setRadarAnswer(null);
     setRadarChooseCustom(false);
     setRadarCustomRadius("");
+    setOracleReceipt(null);
     setMapError(null);
     finishPlacementRef.current();
   }, [setMapError]);
@@ -209,8 +234,8 @@ export function useRadarTool({
         gameSize,
         distanceUnit,
         usedRadarOptions,
-        awaitHiderAnswer,
-        submitPendingQuestion,
+        awaitHiderAnswer: oraclePath ? false : awaitHiderAnswer,
+        submitPendingQuestion: oraclePath ? undefined : submitPendingQuestion,
         sessionId,
         senderUid,
         cardDraw,
@@ -218,6 +243,11 @@ export function useRadarTool({
         createAnnotation,
         setMapError,
         onSuccess: clearAfterCommit,
+        sessionMode,
+        defenderTeamId: defenderTeamId ?? undefined,
+        callOracleAsk,
+        oracleReceipt,
+        onOracleReceipt: setOracleReceipt,
       });
     },
   });
@@ -347,13 +377,16 @@ export function useRadarTool({
     />
   );
 
+  const effectiveAwaitHider = oraclePath ? false : awaitHiderAnswer;
+  const answerReady = oraclePath || effectiveAwaitHider || radarAnswer !== null;
+
   const readiness: AskHudReadiness = {
     surface: "radar",
     placementReady: hasCenter,
     configureReady: distanceSelectionAvailable,
     resolveReady: true,
-    answerReady: awaitHiderAnswer || radarAnswer !== null,
-    awaitHiderAnswer,
+    answerReady,
+    awaitHiderAnswer: effectiveAwaitHider,
     isSubmitting: session.isBusy,
     viewOnly: !canSubmitQuestion,
   };
@@ -361,72 +394,89 @@ export function useRadarTool({
   const canCommitRadar =
     hasCenter &&
     distanceSelectionAvailable &&
-    (awaitHiderAnswer || radarAnswer !== null) &&
+    answerReady &&
     canSubmitQuestion &&
-    !session.isBusy;
+    !session.isBusy &&
+    // Confirm-send uses OracleAskReceipt button once receipt is ready.
+    !(oraclePath && oracleReceipt);
+
+  const oracleReceiptBody = oracleReceipt ? (
+    <OracleAskReceipt
+      receipt={oracleReceipt}
+      busy={session.isBusy}
+      onConfirmSend={() => void commit()}
+      onCancel={() => setOracleReceipt(null)}
+    />
+  ) : null;
 
   const hud = {
     readiness,
     costLabel,
     error: null,
     onCommit: () => void commit(),
-    suppressSheet: mapPlacementActive,
-    mapOverlay: mapPlacementActive ? (
-      <RadarMapPlacementChrome
-        distanceLabel={distanceLabel}
-        questionPrompt={radarQuestionPrompt(resolvedForReady ?? resolvedRadarRadius, distanceUnit)}
-        costLabel={costLabel}
-        phase={placementPhase}
-        onUseGps={() => void handleUseGps()}
-        gpsLoading={gpsLoading}
-        error={placementError}
-        awaitHiderAnswer={awaitHiderAnswer}
-        answer={radarAnswer}
-        onAnswerChange={setRadarAnswer}
-        canCommit={canCommitRadar}
-        isSubmitting={session.isBusy}
-        onCommit={() => void commit()}
-        onChangeDistance={reopenDistancePicker}
-        radiusMeters={radarRadius}
-        chooseCustom={radarChooseCustom}
-        customRadius={radarCustomRadius}
-        distanceUnit={distanceUnit}
-        gameSize={gameSize}
-        usedDistanceOptions={usedRadarOptions}
-        onPresetSelect={onPresetSelect}
-        onChooseSelect={() => {
-          // Stay map-first; keep last preset as fallback until custom parses.
-          setRadarChooseCustom(true);
-        }}
-        onCustomRadiusChange={setRadarCustomRadius}
-      />
-    ) : null,
-    modeBody: mapPlacementActive ? null : (
-      <RadarHudBody
-        radiusMeters={radarRadius}
-        chooseCustom={radarChooseCustom}
-        customRadius={radarCustomRadius}
-        distanceUnit={distanceUnit}
-        gameSize={gameSize}
-        usedDistanceOptions={usedRadarOptions}
-        answer={radarAnswer}
-        onPresetSelect={onPresetSelectArmed}
-        onChooseSelect={onChooseSelect}
-        onCustomRadiusChange={setRadarCustomRadius}
-        onCustomDistanceCommit={onCustomDistanceCommit}
-        onAnswerChange={setRadarAnswer}
-        onUseGps={() => void handleUseGps()}
-        onPlaceAtMapTap={armPlacement}
-        awaitingPlacement={awaitingPlacement}
-        hasCenter={hasCenter}
-        gpsLoading={gpsLoading}
-        awaitHiderAnswer={awaitHiderAnswer}
-        viewOnly={!canSubmitQuestion}
-        costLabel={costLabel}
-        toolLabel="Radar"
-        editingDistance={editingDistance}
-      />
-    ),
+    suppressSheet: mapPlacementActive && !oracleReceipt,
+    mapOverlay:
+      mapPlacementActive && !oracleReceipt ? (
+        <RadarMapPlacementChrome
+          distanceLabel={distanceLabel}
+          questionPrompt={radarQuestionPrompt(
+            resolvedForReady ?? resolvedRadarRadius,
+            distanceUnit,
+          )}
+          costLabel={costLabel}
+          phase={placementPhase}
+          onUseGps={() => void handleUseGps()}
+          gpsLoading={gpsLoading}
+          error={placementError}
+          awaitHiderAnswer={effectiveAwaitHider}
+          answer={radarAnswer}
+          onAnswerChange={setRadarAnswer}
+          canCommit={canCommitRadar}
+          isSubmitting={session.isBusy}
+          onCommit={() => void commit()}
+          onChangeDistance={reopenDistancePicker}
+          radiusMeters={radarRadius}
+          chooseCustom={radarChooseCustom}
+          customRadius={radarCustomRadius}
+          distanceUnit={distanceUnit}
+          gameSize={gameSize}
+          usedDistanceOptions={usedRadarOptions}
+          onPresetSelect={onPresetSelect}
+          onChooseSelect={() => {
+            // Stay map-first; keep last preset as fallback until custom parses.
+            setRadarChooseCustom(true);
+          }}
+          onCustomRadiusChange={setRadarCustomRadius}
+        />
+      ) : null,
+    modeBody:
+      oracleReceiptBody ??
+      (mapPlacementActive ? null : (
+        <RadarHudBody
+          radiusMeters={radarRadius}
+          chooseCustom={radarChooseCustom}
+          customRadius={radarCustomRadius}
+          distanceUnit={distanceUnit}
+          gameSize={gameSize}
+          usedDistanceOptions={usedRadarOptions}
+          answer={radarAnswer}
+          onPresetSelect={onPresetSelectArmed}
+          onChooseSelect={onChooseSelect}
+          onCustomRadiusChange={setRadarCustomRadius}
+          onCustomDistanceCommit={onCustomDistanceCommit}
+          onAnswerChange={setRadarAnswer}
+          onUseGps={() => void handleUseGps()}
+          onPlaceAtMapTap={armPlacement}
+          awaitingPlacement={awaitingPlacement}
+          hasCenter={hasCenter}
+          gpsLoading={gpsLoading}
+          awaitHiderAnswer={effectiveAwaitHider}
+          viewOnly={!canSubmitQuestion}
+          costLabel={costLabel}
+          toolLabel="Radar"
+          editingDistance={editingDistance}
+        />
+      )),
     sheets: null as ReactNode,
   };
 

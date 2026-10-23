@@ -2,7 +2,10 @@ import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import type { SessionMode } from "@/domain/session/castleSiege/mode";
+import type { CastleSiegePlayingTeam } from "@/domain/session/castleSiege/pregame";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import type { AnswerCastleSiegeOracleAskFn } from "@/services/session/castleSiegeOracleAsk";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 
 export interface UseMatchingToolParams {
@@ -28,6 +31,9 @@ export interface UseMatchingToolParams {
   refreshGps: () => Promise<{ lat: number; lng: number }>;
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   canSubmitQuestion?: boolean;
+  sessionMode?: SessionMode | null;
+  defenderTeamId?: CastleSiegePlayingTeam | null;
+  callOracleAsk?: AnswerCastleSiegeOracleAskFn;
 }
 
 export interface MatchingSessionConfig {
