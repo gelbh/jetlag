@@ -177,7 +177,7 @@ function stubFetchForAustraliaAssets() {
 }
 
 describe("loadRegionPackSessionBoundaries australia levels 4 and 6", () => {
-  // National states/LGA fixtures are multi-MB; union + parse can exceed the default 5s under load.
+  // National states/LGA fixtures are multi-MB; union + parse can exceed 15s under pre-push load.
   it("returns matching areas 4, 6, 8, and 9 for whole-country australia", async () => {
     clearRegionPackGeoCacheForTests();
     const fetchMock = stubFetchForAustraliaAssets();
@@ -196,7 +196,7 @@ describe("loadRegionPackSessionBoundaries australia levels 4 and 6", () => {
     expect(customMatchingAreas[9]).toContain("lgaId");
 
     fetchMock.mockRestore();
-  }, 15_000);
+  }, 60_000);
 
   it("scopes CED to the state and loads SED by subregion for nsw", async () => {
     clearRegionPackGeoCacheForTests();
