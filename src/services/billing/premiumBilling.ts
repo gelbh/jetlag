@@ -155,7 +155,11 @@ export async function createPremiumRemoteSession(
     billingUnavailable();
   }
 
-  const serializedArea = serializeGameAreaForFirestore(input.gameArea);
+  const omitPackPlayAreaGeometry =
+    Boolean(input.rulesPatch.regionPackId) && input.rulesPatch.playAreaFromPack !== false;
+  const serializedArea = serializeGameAreaForFirestore(input.gameArea, {
+    omitGeometryJson: omitPackPlayAreaGeometry,
+  });
   const functions = await getFirebaseFunctions();
   const callable = httpsCallable<
     {

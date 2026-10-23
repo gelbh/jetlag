@@ -157,11 +157,35 @@ function stubFetchForAustraliaAssets() {
     ],
   });
 
+  const nswCedOnly = JSON.stringify({
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: { stateId: "nsw", name: "CED NSW" },
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [151, -34],
+              [152, -34],
+              [152, -33],
+              [151, -33],
+              [151, -34],
+            ],
+          ],
+        },
+      },
+    ],
+  });
+
   const paths: Record<string, string> = {
     "/geo/australia/states.geojson": read("states.geojson"),
+    "/geo/australia/states/nsw.geojson": read("states/nsw.geojson"),
     "/geo/australia/lgas.geojson": read("lgas.geojson"),
     "/geo/australia/lgas/nsw.geojson": read("lgas/nsw.geojson"),
     "/geo/australia/ced.geojson": cedWithStates,
+    "/geo/australia/ced/nsw.geojson": nswCedOnly,
     "/geo/australia/sed.geojson": EMPTY_FC,
     "/geo/australia/sed/nsw.geojson": EMPTY_FC,
   };
@@ -217,7 +241,23 @@ describe("loadRegionPackSessionBoundaries australia levels 4 and 6", () => {
     };
     expect(level8.features.map((f) => f.properties?.stateId)).toEqual(["nsw"]);
     expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringMatching(/\/geo\/australia\/states\/nsw\.geojson$/),
+      expect.anything(),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringMatching(/\/geo\/australia\/ced\/nsw\.geojson$/),
+      expect.anything(),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
       expect.stringMatching(/\/geo\/australia\/sed\/nsw\.geojson$/),
+      expect.anything(),
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      expect.stringMatching(/\/geo\/australia\/states\.geojson$/),
+      expect.anything(),
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      expect.stringMatching(/\/geo\/australia\/ced\.geojson$/),
       expect.anything(),
     );
 

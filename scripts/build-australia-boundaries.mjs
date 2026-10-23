@@ -214,8 +214,23 @@ function loadSeds(rawDir) {
 
 function writeCedSed(rawDir) {
   mkdirSync(join(outDir, "sed"), { recursive: true });
+  mkdirSync(join(outDir, "ced"), { recursive: true });
   const ceds = loadCeds(rawDir);
   writeJson(join(outDir, "ced.geojson"), ceds);
+  /** @type {Record<string, import('@turf/helpers').Feature[]>} */
+  const cedsByState = Object.fromEntries(Object.values(STATE_BY_CODE).map((s) => [s.id, []]));
+  for (const feature of ceds.features) {
+    const stateId = feature.properties?.stateId;
+    if (typeof stateId === "string" && cedsByState[stateId]) {
+      cedsByState[stateId].push(feature);
+    }
+  }
+  for (const stateId of Object.keys(cedsByState).sort()) {
+    if (cedsByState[stateId].length === 0) {
+      throw new Error(`no CEDs for ${stateId}`);
+    }
+    writeJson(join(outDir, "ced", `${stateId}.geojson`), featureCollection(cedsByState[stateId]));
+  }
 
   const byState = loadSeds(rawDir);
   const allSeds = [];
@@ -228,6 +243,9 @@ function writeCedSed(rawDir) {
   return {
     ceds: ceds.features.length,
     seds: allSeds.length,
+    cedByState: Object.fromEntries(
+      Object.entries(cedsByState).map(([id, features]) => [id, features.length]),
+    ),
     sedByState: Object.fromEntries(
       Object.entries(byState).map(([id, features]) => [id, features.length]),
     ),
@@ -424,9 +442,17 @@ function main() {
   }
 
   mkdirSync(join(outDir, "lgas"), { recursive: true });
+  mkdirSync(join(outDir, "states"), { recursive: true });
 
   const states = loadSte(rawDir);
   writeJson(join(outDir, "states.geojson"), states);
+  for (const feature of states.features) {
+    const stateId = feature.properties?.stateId;
+    if (typeof stateId !== "string" || !stateId) {
+      throw new Error("state feature missing stateId");
+    }
+    writeJson(join(outDir, "states", `${stateId}.geojson`), featureCollection([feature]));
+  }
 
   const byState = loadLgas(rawDir);
   const allLgas = [];
