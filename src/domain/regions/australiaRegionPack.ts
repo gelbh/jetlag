@@ -11,9 +11,11 @@ export type AustraliaStateId = (typeof AUSTRALIA_STATES)[number];
 
 export const AUSTRALIA_GEO_ASSETS = {
   states: "/geo/australia/states.geojson",
+  statesByState: (stateId: string) => `/geo/australia/states/${stateId}.geojson`,
   lgas: "/geo/australia/lgas.geojson",
   lgasByState: (stateId: string) => `/geo/australia/lgas/${stateId}.geojson`,
   ced: "/geo/australia/ced.geojson",
+  cedByState: (stateId: string) => `/geo/australia/ced/${stateId}.geojson`,
   sed: "/geo/australia/sed.geojson",
   sedByState: (stateId: string) => `/geo/australia/sed/${stateId}.geojson`,
 } as const;

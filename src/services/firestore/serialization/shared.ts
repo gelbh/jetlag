@@ -32,8 +32,17 @@ function isFirestoreGameArea(value: unknown): value is FirestoreGameArea {
   );
 }
 
-export function serializeGameAreaForFirestore(gameArea: GameArea): FirestoreGameArea {
+export function serializeGameAreaForFirestore(
+  gameArea: GameArea,
+  options?: { omitGeometryJson?: boolean },
+): FirestoreGameArea {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+
+  if (options?.omitGeometryJson) {
+    // Pack play areas reload via resolveSessionPlayArea (regionPackId + revision).
+    // Australia national STE union alone exceeds Firestore's 1MiB document limit.
+    return { south, west, north, east };
+  }
 
   return {
     south,
