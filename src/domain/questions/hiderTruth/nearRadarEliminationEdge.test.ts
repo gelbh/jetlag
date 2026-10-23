@@ -5,7 +5,6 @@ import type { AnnotationRecord } from "../../map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import {
   answeredRadarCircle,
-  isNearEliminationEdge,
   isNearRadarEliminationEdge,
   isNearThermometerEliminationEdge,
   NEAR_ELIMINATION_EDGE_METERS,
@@ -173,15 +172,5 @@ describe("isNearThermometerEliminationEdge", () => {
 
   it("skips unanswered thermometers", () => {
     expect(isNearThermometerEliminationEdge(THERMO_MID, [thermometerAnnotation({})])).toBe(false);
-  });
-});
-
-describe("isNearEliminationEdge", () => {
-  it("is true for near radar or near thermometer", () => {
-    const onRadar = pointAlongRadius(RADIUS_METERS);
-    expect(isNearEliminationEdge(onRadar, [radarAnnotation({ inside: true })])).toBe(true);
-    expect(isNearEliminationEdge(THERMO_MID, [thermometerAnnotation({ answer: "hotter" })])).toBe(
-      true,
-    );
   });
 });
