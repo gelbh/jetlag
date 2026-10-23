@@ -174,6 +174,7 @@ export function useRadarTool({
       }
 
       setRadarAnswer(null);
+      setOracleReceipt(null);
       setRadarCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);

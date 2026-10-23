@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   answerCompassOracle,
   answerMatchingOracle,
@@ -13,6 +14,9 @@ import {
   TEST_SEAL_WRAP_KEY_ID,
 } from "./sealDecrypt.mjs";
 import { parseCanonicalSealPayload } from "./sealParse.mjs";
+
+const SEAL_HASH_HEX = /^[0-9a-f]{64}$/;
+const MAX_ORACLE_LIST_ITEMS = 64;
 
 export {
   encryptSealPayload as encryptSealPayloadForTests,
@@ -63,8 +67,30 @@ export async function answerOracleAsk(input) {
     wrappingKey: input.wrappingKey,
     wrapKeyEnv: input.wrapKeyEnv,
   });
+  if (typeof input.committedHash === "string") {
+    if (!SEAL_HASH_HEX.test(input.committedHash)) {
+      throw new Error("ORACLE_HASH_MISMATCH");
+    }
+    const digest = createHash("sha256").update(plaintext, "utf8").digest("hex");
+    if (digest !== input.committedHash) {
+      throw new Error("ORACLE_HASH_MISMATCH");
+    }
+  }
   const seal = parseCanonicalSealPayload(plaintext);
   return dispatchOracleAsk(seal, input.ask);
+}
+
+/** Fail closed when ask payloads are oversized (Functions DoS guard). */
+export function assertOracleAskBounded(ask) {
+  if (!ask || typeof ask !== "object") {
+    return;
+  }
+  for (const key of ["features", "pois"]) {
+    const list = ask[key];
+    if (Array.isArray(list) && list.length > MAX_ORACLE_LIST_ITEMS) {
+      throw new Error(`Oracle ask ${key} exceeds ${MAX_ORACLE_LIST_ITEMS} items.`);
+    }
+  }
 }
 
 /**
@@ -96,15 +122,19 @@ export async function answerOracleAskFromSession(input) {
     throw new Error("ORACLE_SEAL_NOT_FOUND");
   }
 
-  const ciphertext = snap.data()?.ciphertext;
+  const data = snap.data() ?? {};
+  const ciphertext = data.ciphertext;
   if (!ciphertext) {
     throw new Error("ORACLE_CIPHERTEXT_MISSING");
   }
+
+  assertOracleAskBounded(ask);
 
   return answerOracleAsk({
     envelope: ciphertext,
     wrappingKey: input.wrappingKey,
     wrapKeyEnv: input.wrapKeyEnv,
     ask,
+    committedHash: typeof data.hash === "string" ? data.hash : undefined,
   });
 }

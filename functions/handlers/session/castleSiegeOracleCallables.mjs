@@ -48,6 +48,19 @@ export const answerCastleSiegeOracleAsk = onCall(
       throw new HttpsError("permission-denied", "Session membership required.");
     }
 
+    // Only the opposing playing team may probe a defender seal (not observers / own team).
+    const castleRoles =
+      session.castleSiegeRoles && typeof session.castleSiegeRoles === "object"
+        ? session.castleSiegeRoles
+        : {};
+    const callerRole = typeof castleRoles[uid] === "string" ? castleRoles[uid] : "";
+    if (!PLAYING_TEAMS.has(callerRole)) {
+      throw new HttpsError("permission-denied", "Only playing teams can ask the oracle.");
+    }
+    if (callerRole === defenderTeamId) {
+      throw new HttpsError("permission-denied", "Cannot ask the oracle about your own seal.");
+    }
+
     let wrappingKey;
     try {
       wrappingKey = decodeSealWrapKeyFromEnv(castleSiegeSealWrapKey.value());
@@ -71,6 +84,15 @@ export const answerCastleSiegeOracleAsk = onCall(
         }
         if (error.message === "ORACLE_CIPHERTEXT_MISSING") {
           throw new HttpsError("failed-precondition", "Defender seal ciphertext missing.");
+        }
+        if (error.message === "ORACLE_HASH_MISMATCH") {
+          throw new HttpsError(
+            "failed-precondition",
+            "Defender seal hash does not match ciphertext.",
+          );
+        }
+        if (/exceeds \d+ items/i.test(error.message)) {
+          throw new HttpsError("invalid-argument", error.message);
         }
         if (/Unsupported oracle ask kind/i.test(error.message)) {
           throw new HttpsError("invalid-argument", error.message);

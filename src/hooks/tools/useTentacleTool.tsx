@@ -346,6 +346,7 @@ export function useTentacleTool({
       setTentaclePois([]);
       setTentacleOutOfReach(false);
       setSelectedPoiId(null);
+      setOracleReceipt(null);
       setTentacleCenter(nextCenter);
       setAwaitingPlacement(false);
       setMapError(null);

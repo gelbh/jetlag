@@ -290,6 +290,52 @@ describe("firestore.rules — castle siege team seals + setup", () => {
     );
   });
 
+  it("denies classic observers reading ciphertext envelopes", async () => {
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .set({
+          ...castleSiegeSessionPayload("host-1"),
+          memberUids: ["host-1", "team-a-1", "observer-1"],
+          memberRoles: {
+            "host-1": "observer",
+            "team-a-1": "observer",
+            "observer-1": "observer",
+          },
+          castleSiegeRoles: {
+            "host-1": "teamA",
+            "team-a-1": "teamA",
+            "observer-1": "observer",
+          },
+        });
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .collection("teamSeals")
+        .doc("teamA")
+        .set({
+          hash: HASH_A,
+          sealedByUid: "team-a-1",
+          sealedAt: "2026-10-20T12:00:00.000Z",
+          ciphertext: SAMPLE_CIPHERTEXT,
+        });
+    });
+
+    const spectator = rules.testEnv.authenticatedContext("observer-1");
+    await assertFails(
+      spectator
+        .firestore()
+        .collection("sessions")
+        .doc("session-cs")
+        .collection("teamSeals")
+        .doc("teamA")
+        .get(),
+    );
+  });
+
   it("denies client writes with malformed ciphertext envelopes", async () => {
     await seedCastleSiegeSession();
     const teamA = rules.testEnv.authenticatedContext("team-a-1");

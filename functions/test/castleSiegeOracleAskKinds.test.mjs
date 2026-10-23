@@ -152,3 +152,28 @@ test("Compass: cardinal from ask point toward sealed anchor", async () => {
   assert.equal(receipt.answer, "N");
   assertNoCoordLeak(receipt);
 });
+
+test("rejects when committed hash does not match decrypted plaintext", async () => {
+  const base = await sealed();
+  await assert.rejects(
+    () =>
+      answerOracleAsk({
+        ...base,
+        committedHash: "a".repeat(64),
+        ask: { kind: "photo" },
+      }),
+    /ORACLE_HASH_MISMATCH/,
+  );
+});
+
+test("rejects oversized matching feature lists", async () => {
+  const { assertOracleAskBounded } = await import("../session/castleSiege/answerOracleAsk.mjs");
+  assert.throws(
+    () =>
+      assertOracleAskBounded({
+        kind: "matching",
+        features: Array.from({ length: 65 }, (_, i) => ({ id: String(i), lat: 0, lng: 0 })),
+      }),
+    /exceeds 64 items/,
+  );
+});

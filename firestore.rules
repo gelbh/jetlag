@@ -152,6 +152,8 @@ service cloud.firestore {
         && teamId in ['teamA', 'teamB'];
     }
 
+    // Ciphertext is enemy-restricted. Observers must not read envelopes while the
+    // client ships a shared wrap key (offline decrypt). Referee + host may still read.
     function canReadTeamSeal(sessionId, teamId) {
       return isSessionMember(sessionId)
         && (
@@ -160,7 +162,7 @@ service cloud.firestore {
           || (
             'castleSiegeRoles' in sessionData(sessionId)
             && sessionData(sessionId).castleSiegeRoles is map
-            && castleSiegeRoleOnSession(sessionId) in ['referee', 'observer']
+            && castleSiegeRoleOnSession(sessionId) == 'referee'
           )
           || isSessionHost(sessionId)
         );
@@ -1157,7 +1159,7 @@ service cloud.firestore {
       }
 
       // Castle Siege team seals: hash-only docs are member-readable; plaintext coords
-      // and ciphertext blobs are readable only by own team / referee / observer / host.
+      // and ciphertext blobs are readable only by own team / referee / host.
       // Clients may write hash (+ optional ciphertext envelope); never plaintext coords.
       match /teamSeals/{teamId} {
         allow read: if teamId in ['teamA', 'teamB']

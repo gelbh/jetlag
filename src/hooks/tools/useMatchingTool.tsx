@@ -418,6 +418,7 @@ export function useMatchingTool({
           : null;
 
       setMatchingAnswerSynced(null);
+      setOracleReceipt(null);
       setMatchingSeekerAnchor(tapHit?.point ?? point);
       return true;
     },
