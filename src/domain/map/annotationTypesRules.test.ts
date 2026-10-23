@@ -17,7 +17,6 @@ function rulesAnnotationTypes(): string[] {
 }
 
 describe("annotation types vs firestore.rules", () => {
-  // A client type missing here is denied on every remote write (JETLAG-49: freehand "draw").
   it("allowlists exactly the client annotation types", () => {
     expect([...rulesAnnotationTypes()].sort()).toEqual([...ANNOTATION_TYPES].sort());
   });

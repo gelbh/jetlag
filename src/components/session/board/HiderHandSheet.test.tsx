@@ -31,7 +31,6 @@ describe("HiderHandSheet", () => {
         {...noopHandlers}
       />,
     );
-    // Closed: no dialog role / body (Drawer keepMounted=false). Host stays in React tree.
     expect(screen.queryByRole("dialog", { name: "Hider hand" })).not.toBeInTheDocument();
     expect(screen.queryByText(/2 \/ 6 cards/)).not.toBeInTheDocument();
 
@@ -46,7 +45,6 @@ describe("HiderHandSheet", () => {
         {...noopHandlers}
       />,
     );
-    // Present latch: first paint opened=false, then effect opens.
     await waitFor(() => {
       expect(screen.getByRole("dialog", { name: "Hider hand" })).toBeTruthy();
     });

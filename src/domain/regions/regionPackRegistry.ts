@@ -82,15 +82,11 @@ import {
 
 export interface RegionPackGeoAssets {
   primary: string;
-  /** Per-subregion primary slice (avoids downloading the national primary). */
   primaryBySubregion?: (subregionId: string) => string;
-  /** Omitted for single-depth packs (no admin4 / leaf layer). */
   secondary?: string;
   secondaryBySubregion?: (subregionId: string) => string;
-  /** Optional admin level 4 matching areas (e.g. Australia CED). */
   matchingLevel4?: string;
   matchingLevel4BySubregion?: (subregionId: string) => string;
-  /** Optional admin level 6 matching areas (e.g. Australia SED national). */
   matchingLevel6?: string;
   matchingLevel6BySubregion?: (subregionId: string) => string;
   playArea?: string;
@@ -100,7 +96,6 @@ export interface RegionPackConfig {
   id: RegionPackId;
   geoAssets: RegionPackGeoAssets;
   subregionPropertyKey: string;
-  /** When "secondary", full-pack play area unions level-9 features instead of level-8. */
   playAreaLevel?: "primary" | "secondary";
   matchingLabelOverrides: Partial<Record<MatchingCategoryId, RegionPackLabelOverride>>;
   measuringLabelOverrides: Partial<Record<MeasuringFromKind, RegionPackLabelOverride>>;

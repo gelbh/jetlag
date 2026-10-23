@@ -19,11 +19,8 @@ import { useTimerStore } from "../../state/timerStore";
 interface UseSessionTimerOptions {
   canControl?: boolean;
   onControl?: (state: TimerState) => void;
-  /** undefined = waiting for remote snapshot; null = local/host mode */
   remoteState?: TimerState | null | undefined;
-  /** Firestore snapshot for host remount reconcile */
   remoteSnapshot?: TimerState | undefined;
-  /** When this changes, clear local timer cache before reconciling remote */
   sessionResetAt?: string;
 }
 

@@ -35,18 +35,15 @@ export function seaLevelSamplingCacheKey(gameArea: GameArea): string {
 }
 
 export function adminDivisionCacheKey(gameArea: GameArea, adminLevel: number): string {
-  // v2: query no longer uses empty `area.searchArea` (zero-result bug).
   return geographicCacheKey(gameArea, `admin:v2:${adminLevel}`);
 }
 
 export function landmassCacheKey(gameArea: GameArea, regionPackId?: RegionPackId): string {
-  // v3: skip Overpass for bundled metro packs; bbox + out geom from v2.
   const packSuffix = regionPackId ? `:${regionPackId}` : "";
   return geographicCacheKey(gameArea, `landmass:v3${packSuffix}`);
 }
 
 export function measuringPlacesCacheKey(gameArea: GameArea, category: string): string {
-  // v3: Overpass parse attaches optional wikidataId for pack QID merge.
   return geographicCacheKey(gameArea, `measuring:v3:${category}`);
 }
 
@@ -55,7 +52,6 @@ export function tentaclePoisCacheKey(
   radiusMeters: number,
   categoryId: string,
 ): string {
-  // v2: Overpass parse attaches optional wikidataId for pack QID merge.
   return `tentacle:v2:${categoryId}:${center[0]},${center[1]}:${radiusMeters}`;
 }
 

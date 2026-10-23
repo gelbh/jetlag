@@ -57,7 +57,6 @@ describe("shouldEmitSeekingStarted", () => {
 });
 
 describe("useSeekingStartedActivity", () => {
-  // Clamped minimum hiding period is 5 minutes.
   const sessionRules = { hidingPeriodMinutes: 5 };
   const hidingMs = 5 * 60 * 1000;
 
@@ -92,7 +91,6 @@ describe("useSeekingStartedActivity", () => {
 
     expect(emitSeekingStartedActivity).not.toHaveBeenCalled();
 
-    // Still inside the hiding period after the first tick.
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1_000);
     });
@@ -105,7 +103,6 @@ describe("useSeekingStartedActivity", () => {
     expect(emitSeekingStartedActivity).toHaveBeenCalledTimes(1);
     expect(emitSeekingStartedActivity).toHaveBeenCalledWith("session-1");
 
-    // Interval stops after emit — further ticks do not re-fire.
     await act(async () => {
       await vi.advanceTimersByTimeAsync(5_000);
     });

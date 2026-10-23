@@ -2,11 +2,6 @@ export type ToolWizardPhaseId = "place" | "configure" | "ask";
 
 export type ToolWizardAskMode = "ask" | "send" | "confirm";
 
-/**
- * Frozen phase spine for tool wizards. Configure continua here are the
- * migration target; legacy per-tool step arrays in shared wizard utils stay
- * until panel migration re-exports from these defs.
- */
 export type ToolWizardDefinition = {
   toolId: string;
   phases: readonly ToolWizardPhaseId[];
@@ -51,7 +46,6 @@ export const MEASURING_WIZARD = seekerWizard("measuring", [
   { id: "target", label: "Target" },
 ]);
 
-/** Create: Method → Place → Confirm (starts on Configure). */
 export const HIDING_ZONE_CREATE_WIZARD: ToolWizardDefinition = {
   toolId: "hiding-zone-create",
   phases: ["configure", "place", "ask"],
@@ -60,7 +54,6 @@ export const HIDING_ZONE_CREATE_WIZARD: ToolWizardDefinition = {
   startsOn: "configure",
 };
 
-/** Move: Place → Confirm only. */
 export const HIDING_ZONE_MOVE_WIZARD: ToolWizardDefinition = {
   toolId: "hiding-zone-move",
   phases: ["place", "ask"],

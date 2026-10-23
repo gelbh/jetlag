@@ -37,7 +37,6 @@ export interface GamePreset {
   customCategories?: readonly SessionCustomCategory[];
   customLocationPins?: readonly SessionCustomLocationPin[];
   regionPackId?: RegionPackId;
-  /** Preset-only subregion filter (e.g. borough, council). Not stored on session. */
   subregionId?: string;
   /** @deprecated Use subregionId. Migrated from stored presets. */
   councilFilter?: DublinCouncilFilter;

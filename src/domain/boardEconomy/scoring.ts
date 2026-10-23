@@ -2,10 +2,6 @@ import type { GameSize } from "../session/size/gameSize";
 import type { BoardCardInstance } from "./types";
 import { timeBonusMinutesForGameSize } from "./types";
 
-/**
- * Sum fixed time-bonus minutes in hand. Percentage bonuses (expansion) are
- * applied separately against base hiding time excluding other bonuses.
- */
 export function sumTimeBonusMinutesInHand(
   hand: readonly BoardCardInstance[],
   gameSize: GameSize,
@@ -24,7 +20,6 @@ export function scoreHidingTimeWithBonuses(params: {
   baseHidingMinutes: number;
   hand: readonly BoardCardInstance[];
   gameSize: GameSize;
-  /** Expansion percentage bonuses as fractions (e.g. 0.1 = 10%). */
   percentageBonuses?: readonly number[];
 }): number {
   const fixed = sumTimeBonusMinutesInHand(params.hand, params.gameSize);

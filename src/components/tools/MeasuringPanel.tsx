@@ -36,14 +36,12 @@ import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./shared/wizard/
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 
-/** Flat measuring wizard fields bag for MeasuringPanel (W4-B peel). */
 export type MeasuringPanelModel = {
   distanceUnit: DistanceUnit;
   optionChosen: boolean;
   measureFrom: MeasuringFromKind;
   usesAllPlacesInArea: boolean;
   usedMeasuringFromKinds: ReadonlySet<MeasuringFromKind>;
-  /** Empty play-area bounce; greys like used (Matching twin). */
   unavailableMeasuringFromKinds?: ReadonlySet<MeasuringFromKind>;
   catalogNotice?: string | null;
   catalogOptions?: readonly MeasuringCatalogOption[];

@@ -21,7 +21,6 @@ export interface GtfsStaticBundle {
   builtAt: string;
   stops: GtfsBundleStop[];
   routes: GtfsBundleRoute[];
-  /** stop id -> route ids serving that stop */
   stopRouteIds: Record<string, string[]>;
 }
 

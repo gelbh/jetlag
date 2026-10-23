@@ -96,7 +96,6 @@ async function rotateAnonymousAuth(): Promise<string> {
   return credential.user.uid;
 }
 
-/** Signed-in uid right now; resilience e2e asserts it survives offline / resume. */
 function currentUid(): string | null {
   return getFirebaseAuth().currentUser?.uid ?? null;
 }

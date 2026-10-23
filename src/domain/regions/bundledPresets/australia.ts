@@ -2,7 +2,6 @@ import { AUSTRALIA_REGION_PACK_ID } from "../australiaRegionPack";
 import { attachPlayArea } from "./attachPlayArea";
 import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
-/** State/Territory slug + display name; ids match `stateId` / `AUSTRALIA_STATES`. */
 export const AUSTRALIA_STATE_PRESETS = [
   { id: "nsw", name: "New South Wales" },
   { id: "vic", name: "Victoria" },

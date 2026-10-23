@@ -17,7 +17,6 @@ export {
   subscribeIncidentMessages,
 };
 
-/** Compact uppercase label for queue / detail status chips. */
 export function incidentStatusChipLabel(status: IncidentStatus): string {
   switch (status) {
     case "open":
@@ -61,7 +60,6 @@ export function incidentStatusChipTone(status: IncidentStatus): IncidentStatusCh
   }
 }
 
-/** Short mono id for dense queue rows (full id remains in detail header). */
 export function formatIncidentQueueId(id: string): string {
   const trimmed = id.trim();
   if (trimmed.length <= 12) {

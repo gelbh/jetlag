@@ -1,4 +1,3 @@
-/// <reference lib="webworker" />
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
 import {
@@ -81,7 +80,6 @@ function registerSplitTileRoute(matches: (href: string) => boolean, cacheName: s
   );
 }
 
-// Every host in src/domain/map/mapTileHosts.ts routes through the split.
 registerSplitTileRoute(isEsriTileUrl, "esri-satellite-tiles");
 registerSplitTileRoute(isOpenFreeMapUrl, "openfreemap-tiles");
 

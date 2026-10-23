@@ -70,7 +70,6 @@ function saveHandled(storageKey: string, handled: ReadonlySet<string>): void {
   }
 }
 
-/** Exported for tests: the cancelled randomize this seeker still owes, or null. */
 export function nextRandomizedQuestion(
   pendingQuestions: readonly PendingQuestionRecord[],
   uid: string,
@@ -89,7 +88,6 @@ export function nextRandomizedQuestion(
   return randomizedTo ? { ...newest, randomizedTo } : null;
 }
 
-/** On the asking seeker's device, sends the question the hider's Randomize rolled, once per original. */
 export function useRandomizeAutoAsk({
   sessionId,
   uid,

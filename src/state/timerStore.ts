@@ -4,10 +4,6 @@ import { INITIAL_TIMER_STATE, type TimerState } from "../domain/session/timer/ti
 
 const STORAGE_KEY = "jetlag-timer";
 
-/**
- * One-time move from sessionStorage (pre-server-clock builds) so a running
- * hiding timer survives the upgrade. Must run before `persist` hydrates.
- */
 function migrateTimerStorageFromSession(): void {
   try {
     const legacy = sessionStorage.getItem(STORAGE_KEY);
@@ -16,9 +12,7 @@ function migrateTimerStorageFromSession(): void {
       localStorage.setItem(STORAGE_KEY, legacy);
     }
     sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // Storage blocked (private mode / SSR): nothing to migrate.
-  }
+  } catch {}
 }
 
 migrateTimerStorageFromSession();

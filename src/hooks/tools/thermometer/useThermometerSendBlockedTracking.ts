@@ -4,13 +4,8 @@ import { ANALYTICS_EVENTS } from "@/services/core/analytics/analyticsEvents";
 import { trackLazy } from "@/services/core/analytics/lazyTelemetry";
 import type { ThermometerPlacementMode } from "./types";
 
-/** A walk normally gets its first GPS sample within seconds; only a stall counts as blocked. */
 export const THERMOMETER_GPS_WAIT_BLOCK_MS = 15_000;
 
-/**
- * Emits `thermometer_send_blocked` once per reason while the tool stays open,
- * so silent disabled states show up next to `question_asked`.
- */
 export function useThermometerSendBlockedTracking({
   active,
   reason,

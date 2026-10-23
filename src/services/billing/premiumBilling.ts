@@ -190,7 +190,6 @@ export async function createPremiumRemoteSession(
     const raw = result.data.session;
     return deserializeSessionFromFirestore(raw.id, raw);
   } catch (error) {
-    // After auth-retry exhaustion, preserve callable denials (e.g. entitlement).
     if (error instanceof Error && error.message === AUTH_FAILURE_MESSAGE && error.cause != null) {
       throw mapCallableError(error.cause, "Could not create premium session.");
     }

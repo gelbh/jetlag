@@ -25,7 +25,6 @@ import { ensureAnonymousUser, getFirebaseAuth } from "../firebase/firebase";
 import { OAUTH_REDIRECT_PENDING_KEY } from "./persistedAuthHint";
 
 export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
-/** Set before linkWithRedirect / signInWithRedirect; cleared on redirect recovery. */
 export { OAUTH_REDIRECT_PENDING_KEY };
 
 export const OAUTH_REDIRECT_FAILED_MESSAGE =
@@ -48,7 +47,6 @@ export async function signOutToAnonymous(): Promise<void> {
   await ensureAnonymousUser();
 }
 
-/** Flip when Apple Sign-In is configured in Firebase + Apple Developer. */
 export const APPLE_SIGN_IN_ENABLED = false;
 
 export function isAnonymousUser(user?: User | null): boolean {
@@ -188,9 +186,7 @@ async function linkWithPopupOrSignInExisting(provider: AuthProvider): Promise<Us
 function markOAuthRedirectPending(): void {
   try {
     window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, String(Date.now()));
-  } catch {
-    // Private mode / blocked storage — recovery still runs; UI may miss the hint.
-  }
+  } catch {}
 }
 
 const OAUTH_REDIRECT_PENDING_MAX_AGE_MS = 10 * 60 * 1000;
@@ -203,7 +199,6 @@ function consumeOAuthRedirectPending(): boolean {
     }
     window.sessionStorage.removeItem(OAUTH_REDIRECT_PENDING_KEY);
     if (raw === "1") {
-      // Legacy boolean flag from older clients.
       return true;
     }
     const startedAt = Number(raw);
@@ -284,7 +279,6 @@ function notePendingRedirectFailure(): void {
   pendingRedirectFailureMessage = OAUTH_REDIRECT_FAILED_MESSAGE;
 }
 
-/** Player-visible message after a redirect returned no user; cleared on read. */
 export function consumeOAuthRedirectFailureMessage(): string | null {
   const message = pendingRedirectFailureMessage;
   pendingRedirectFailureMessage = null;

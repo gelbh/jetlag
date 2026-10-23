@@ -12,23 +12,12 @@ import {
   polygonGeometryJsonChars,
 } from "../progressive/polygonMetrics";
 
-/** Max places when measuring every site in the play area (HADK parks = 107). */
 export const MEASURING_MULTI_PLACE_MAX = 128;
 
-/** Max vertices across prepared linear segments (coast / LEA / borders). */
 export const MEASURING_LINEAR_MAX_VERTICES = 12_000;
 
-/**
- * Max vertices on any elim GeoJSON write after persist-slim (Firestore ceiling).
- * Locked between museum-scale (~1.3k OK) and RLBT golf closer (~8k fatal).
- */
 export const MEASURING_OUTPUT_MAX_VERTICES = POLYGON_PERSIST_MAX_VERTICES;
 
-/**
- * Max UTF-16 length of JSON.stringify(geometry) after persist-slim.
- * Locked between museum-scale (~50 KB OK) and RLBT golf closer (~320 KB fatal).
- * Applies to any elim GeoJSON write, not measuring-only.
- */
 export const MEASURING_OUTPUT_MAX_JSON_CHARS = POLYGON_PERSIST_MAX_JSON_CHARS;
 
 export const MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE =
@@ -41,7 +30,6 @@ export const MEASURING_LINEAR_OVER_BUDGET_MESSAGE =
 export const MEASURING_OUTPUT_OVER_BUDGET_MESSAGE =
   "This measure is too complex for this play area. Try a shorter distance or a smaller area.";
 
-/** Persist soft-fail: storage ceiling, not play-area complexity. */
 export const MEASURING_PERSIST_OVER_BUDGET_MESSAGE =
   "Couldn't save this measure — geometry is too large to store. Try a shorter distance.";
 
@@ -112,7 +100,6 @@ export function assertMeasuringOutputComplexityBudget(
   return { ok: true };
 }
 
-/** Slim toward Firestore ceiling; fail copy is storage-oriented only. */
 export function persistSlimMeasuringGeometry(
   feature: Feature<Polygon | MultiPolygon>,
 ): MeasuringOutputSoftenResult {
@@ -123,9 +110,6 @@ export function persistSlimMeasuringGeometry(
   return result;
 }
 
-/**
- * Persist-slim wrapper (legacy name). Prefer `persistSlimMeasuringGeometry`.
- */
 export function softenMeasuringOutputToBudget(
   feature: Feature<Polygon | MultiPolygon>,
 ): MeasuringOutputSoftenResult {

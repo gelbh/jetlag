@@ -29,7 +29,6 @@ const sampleGameArea: GameAreaGeometry = {
   ],
 };
 
-/** Enough segments that the former TS path would cooperative-yield. */
 function coastSegments(count: number): Feature<LineString>[] {
   return Array.from({ length: count }, (_, index) => {
     const offset = index * 0.008;

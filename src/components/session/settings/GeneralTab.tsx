@@ -10,13 +10,11 @@ import { SegmentControl } from "../../ui/forms/SegmentControl";
 import { LayerVisibilityGrid } from "../mapChrome/LayerVisibilityGrid";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
-/** Flat general/layers fields bag for MapSettingsGeneralTab (W4-C peel). */
 export type MapSettingsGeneralTabModel = {
   showCurrentLocation: boolean;
   onShowCurrentLocationChange: (enabled: boolean) => void;
   showAdminBoundaries: boolean;
   onShowAdminBoundariesChange: (enabled: boolean) => void;
-  /** Read-only: satellite option and effective style respect low power from Session tab. */
   lowPowerMode: boolean;
   distanceUnit: DistanceUnit;
   onDistanceUnitChange: (unit: DistanceUnit) => void;

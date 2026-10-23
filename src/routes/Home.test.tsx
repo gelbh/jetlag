@@ -273,7 +273,6 @@ describe("Home", () => {
     renderHome({ resetStores: false });
     fireEvent.click(screen.getByRole("button", { name: /Return to map for session ABCD/i }));
 
-    // Under a full parallel run the async resume path can outlast waitFor's 1s default.
     await waitFor(
       () => {
         expect(mockEnsureRemoteSessionMembership).toHaveBeenCalledWith(
@@ -359,7 +358,6 @@ describe("Home", () => {
       name: `Version ${APP_VERSION}. Open changelog`,
     });
     expect(versionControl).toHaveTextContent(`v${APP_VERSION}`);
-    // Mantine maps mih={24} → calc(1.5rem * var(--mantine-scale))
     expect(versionControl.style.minHeight).toContain(`${24 / 16}rem`);
     expect(screen.queryByRole("dialog", { name: "Changelog" })).not.toBeInTheDocument();
 

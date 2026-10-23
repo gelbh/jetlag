@@ -46,7 +46,6 @@ export type GeometryEditModel =
   | {
       kind: "zone";
       polygonFeature: Feature<GeoPolygon>;
-      /** Closed ring as [lat, lng] tuples (Leaflet order). */
       ringLatLng: LatLngTuple[];
       color: string;
     }

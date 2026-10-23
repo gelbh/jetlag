@@ -1,7 +1,6 @@
 import { loadKernelWasm, parseWasmFeature, resetKernelWasmForTests } from "./kernelWasmPkg";
 import type { DiskSpec, EliminationUnionInput, GameAreaGeometry, PolygonFeature } from "./types";
 
-/** Reset lazy WASM module (tests). */
 export const resetMaskWasmForTests = resetKernelWasmForTests;
 
 export async function wasmBuildMaskFromUnionInput(

@@ -1,5 +1,3 @@
-// Parallel implementation: functions/fetchWithTimeout.mjs (Cloud Functions runtime).
-/** Upper bound for raw geo asset / public geo API requests so flaky networks fail fast. */
 export const GEO_FETCH_TIMEOUT_MS = 15_000;
 
 export class FetchTimeoutError extends Error {
@@ -17,11 +15,6 @@ export function isTransientFetchError(error: unknown): boolean {
   return error instanceof FetchTimeoutError || error instanceof TypeError;
 }
 
-/**
- * Like {@link fetchWithTimeout}, but the deadline also covers `read`, so a
- * body that stalls mid-download is aborted too (headers-only timeouts let
- * large geo bundles hang forever on flaky networks).
- */
 export async function fetchAndReadWithTimeout<T>(
   input: RequestInfo | URL,
   init: RequestInit | undefined,

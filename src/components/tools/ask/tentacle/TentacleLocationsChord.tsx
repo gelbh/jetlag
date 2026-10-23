@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 import { cn } from "@/lib/cn";
 
-/** Shared Ask HUD / panel shell for tentacle locations (rail max-height). */
 export function TentacleLocationsChord({
   header,
   children,

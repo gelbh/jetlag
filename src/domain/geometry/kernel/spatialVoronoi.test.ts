@@ -6,7 +6,6 @@ import { describe, expect, it } from "vitest";
 import { resolveVoronoiCellSiteId, voronoiCellSiteId } from "./voronoiCellSiteId";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 
-/** Finite clip cells can reach ~1e10–1e11 m²; planet-scale was ≫1e14. */
 const MAX_PLAUSIBLE_CELL_AREA_M2 = 1e12;
 
 const DUBLIN_GRID_SPACING_DEGREES = 0.003;

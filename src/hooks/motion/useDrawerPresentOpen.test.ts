@@ -4,7 +4,6 @@ import { useDrawerPresentOpen } from "./useDrawerPresentOpen";
 
 describe("useDrawerPresentOpen", () => {
   it("stays false on first paint when open is true, then becomes true", () => {
-    // RTL flushes useEffect before renderHook returns; capture first paint via history.
     const paints: boolean[] = [];
     const { result } = renderHook(() => {
       const presented = useDrawerPresentOpen(true);
@@ -41,7 +40,6 @@ describe("useDrawerPresentOpen", () => {
     act(() => {
       rerender({ open: true });
     });
-    // First paint of the new open cycle stays closed; effect then latches open.
     expect(paints[0]).toBe(false);
     expect(result.current).toBe(true);
   });

@@ -4,9 +4,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       await navigator.clipboard.writeText(text);
       return true;
     }
-  } catch {
-    // fall through to execCommand fallback
-  }
+  } catch {}
 
   try {
     const textarea = document.createElement("textarea");

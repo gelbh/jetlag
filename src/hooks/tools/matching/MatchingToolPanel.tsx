@@ -10,7 +10,6 @@ import type {
   MatchingQuestionDefinition,
 } from "@/domain/questions";
 
-/** Flat matching tool panel fields bag for MatchingToolPanel (W4-D peel). */
 export type MatchingToolPanelModel = {
   distanceUnit: DistanceUnit;
   categoryId: MatchingCategoryId | null;

@@ -12,7 +12,6 @@ interface WizardSwipeSurfaceProps {
   children: ReactNode;
   footer?: ReactNode;
   className?: string;
-  /** When false, children stay clickable without horizontal swipe handling. */
   swipeEnabled?: boolean;
 }
 

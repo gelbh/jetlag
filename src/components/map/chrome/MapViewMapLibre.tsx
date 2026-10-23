@@ -110,8 +110,6 @@ function MapFocus({
   const focusPaddingTopBiasRef = useRef(focusPaddingTopBias);
   const focusMinZoomRef = useRef(focusMinZoom);
   const focusMaxZoomRef = useRef(focusMaxZoom);
-  // Placement reframes are functional (keep the pin in view), not decorative —
-  // do not gate on lowPowerMode (that only kills ornament motion).
   const animate = !prefersReducedMotion;
   const padY = fitBoundsPaddingProp?.[0] ?? 32;
   const padX = fitBoundsPaddingProp?.[1] ?? 32;
@@ -194,7 +192,6 @@ function MapFocus({
       lastRecenterToken: lastRecenterRef.current,
     });
     if (!willApply) {
-      // Placement auto-reframe skipped, but compass may still need leveling.
       return orientationRequested ? levelOrientationOnly() : undefined;
     }
 
@@ -435,7 +432,6 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
             if (map) {
               registerMapLibreMap(map);
             }
-            // Pinch zoom always; two-finger rotate only with play-map compass.
             if (interactive) {
               map?.touchZoomRotate.enable();
               if (touchRotateEnabled) {

@@ -46,7 +46,6 @@ async function waitForExitTransition(animate: boolean): Promise<void> {
 
 let exitInFlight = false;
 
-/** Single front door for leaving, ending, or clearing a session with nav-first teardown. */
 export async function exitSession({
   reason,
   sessionId,

@@ -33,11 +33,9 @@ const gameArea: GameArea = {
   ],
 };
 
-/** Thermo A/B across London (half-plane perf fixture). */
 const thermoA: LatLngTuple = [51.45, -0.18];
 const thermoB: LatLngTuple = [51.46, -0.12];
 
-/** ~10-vertex line for geodesic perf. */
 function tenVertexLine(): Feature<LineString> {
   const coordinates: [number, number][] = [];
   for (let index = 0; index < 10; index += 1) {

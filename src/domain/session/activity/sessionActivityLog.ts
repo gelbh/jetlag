@@ -99,7 +99,6 @@ export function sortActivityEventsDesc(
   return [...events].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 }
 
-/** Ask + resolve plate for the session log (oldest-first / messaging order). */
 export type SessionActivityLogEntry =
   | { kind: "single"; event: SessionActivityEvent }
   | {
@@ -178,10 +177,6 @@ function askMatchesResolve(asked: SessionActivityEvent, resolved: SessionActivit
   return false;
 }
 
-/**
- * Oldest-first log entries (messaging order): pair ask→resolve when they share
- * a pending id (or matching prompt/tool), so the UI can show one plate.
- */
 export function groupSessionActivityEntries(
   events: readonly SessionActivityEvent[],
 ): SessionActivityLogEntry[] {
@@ -216,7 +211,6 @@ export function groupSessionActivityEntries(
   return entries;
 }
 
-/** Annotation id for map focus / edit when the event links to a live answer. */
 export function activityAnnotationId(event: SessionActivityEvent): string | undefined {
   switch (event.type) {
     case "question_asked":
@@ -240,7 +234,6 @@ export function activityAnnotationId(event: SessionActivityEvent): string | unde
   }
 }
 
-/** Short Barlow label for timeline rows. */
 export function sessionActivityTypeLabel(type: SessionActivityType): string {
   switch (type) {
     case "session_started":

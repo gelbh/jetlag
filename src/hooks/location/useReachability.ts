@@ -20,7 +20,6 @@ export function useReachability(
 ): {
   reachable: boolean | null;
   lastProbeAt: number | null;
-  /** Probe now (no-op while disabled or while a probe is in flight). Stable identity. */
   probeNow: () => void;
 } {
   const [reachable, setReachable] = useState<boolean | null>(null);

@@ -3,7 +3,6 @@ import { type BoundingBox, normalizeBoundingBox } from "../geometry/gameArea/gam
 export type MapLatLngTuple = [lat: number, lng: number];
 export type MapLatLng = MapLatLngTuple | { lat: number; lng: number };
 
-/** SW/NE corners as `[lat, lng]` pairs. */
 export type MapBoundsExpression = [MapLatLngTuple, MapLatLngTuple];
 
 export interface MapBounds {

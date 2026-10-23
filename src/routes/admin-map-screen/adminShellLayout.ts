@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 
-/** Wide admin map: course header and map in column 1, rail spanning column 2. */
 export function adminShellStyle({
   isWide,
   railCollapsed,
@@ -10,7 +9,6 @@ export function adminShellStyle({
   railCollapsed: boolean;
   embedded: boolean;
 }): CSSProperties {
-  // cqi, not %: resolves against the monitor pane (its container), not the grid.
   const railWidth = railCollapsed
     ? "var(--ops-rail-collapsed-width)"
     : embedded
@@ -31,7 +29,6 @@ export function adminShellStyle({
 
 export const adminShellCell = {
   top: { gridColumn: 1, gridRow: 1, minWidth: 0, zIndex: "var(--z-dock)" },
-  // contain: layout makes the map cell the fixed containing block for map chrome docks.
   map: {
     gridColumn: 1,
     gridRow: 2,

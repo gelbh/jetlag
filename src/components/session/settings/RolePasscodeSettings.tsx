@@ -27,7 +27,6 @@ export interface RolePasscodeSettingsProps {
   session: SessionRecord;
   myUid: string;
   isHost: boolean;
-  /** When true, omit section chrome (used inside RoleCodesSheet). */
   embedded?: boolean;
 }
 

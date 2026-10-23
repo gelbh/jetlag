@@ -652,7 +652,6 @@ export function useMatchingTool({
     requestGps: handleGps,
   });
 
-  // Stay map-first for the whole post-category flow (locate → resolve → answer/send).
   const mapPlacementActive = Boolean(mapFirstEligible);
 
   // Drop stale GPS errors once an anchor exists (map tap or later successful fix).

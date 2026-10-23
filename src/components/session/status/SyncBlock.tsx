@@ -17,13 +17,7 @@ interface SyncBlockProps {
   onMenuOpenChange?: (open: boolean) => void;
   /** @deprecated Detail modal removed; ignored. */
   onSyncErrorAction?: () => void;
-  /**
-   * overlay: absolute under status bar
-   * inline: floating sibling Paper
-   * segment: control only inside the single status island
-   */
   placement?: "overlay" | "inline" | "segment";
-  /** Hide segment text (beacon only); also used by narrow gallery frames. */
   compact?: boolean;
 }
 
@@ -31,7 +25,6 @@ function surveyShortLabelTone(status: SyncStatus): SyncTone | null {
   return status === "synced" ? null : syncToneForStatus(status);
 }
 
-/** Live sync beacon in the status rail (display only; no detail modal). */
 export function SyncBlock({
   syncStatus,
   queuedWrites,

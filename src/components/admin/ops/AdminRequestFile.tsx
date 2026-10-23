@@ -22,7 +22,6 @@ function titleCase(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
 
-/** Spec section 5: preset name heading, place / size / age meta, fields, then actions. */
 export function AdminRequestFile({
   request,
   loading,

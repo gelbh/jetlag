@@ -97,8 +97,6 @@ export function prepareMeasuringLineSegments(
   return {
     segments: preparedSegments,
     boundingBoxes,
-    // Flatbush rejects a zero-item index; no-segment play areas (e.g. blocked
-    // admin borders for a metro region pack) legitimately have none to index.
     spatialIndex: boundingBoxes.length > 0 ? buildSegmentSpatialIndex(boundingBoxes) : null,
   };
 }
@@ -174,7 +172,6 @@ export function nearestPointToCoastlines(
 const COASTLINE_NEAR_REGION_CACHE_MAX = 32;
 const coastlineNearRegionCache = new Map<string, Feature<Polygon | MultiPolygon>>();
 
-/** Content fingerprint so same-count different polylines cannot collide in cache. */
 export function coastlineSegmentsFingerprint(segments: readonly Feature<LineString>[]): string {
   let hash = segments.length >>> 0;
   for (const segment of segments) {
@@ -328,9 +325,7 @@ function clipNearCoastToGameArea(
     ) {
       return clipped as Feature<Polygon | MultiPolygon>;
     }
-  } catch {
-    // Fall back to per-buffer clipping below.
-  }
+  } catch {}
 
   return null;
 }
@@ -355,15 +350,12 @@ function clipBufferedSegmentsToGameArea(
       ) {
         clippedParts.push(clipped as Feature<Polygon | MultiPolygon>);
       }
-    } catch {
-      // Skip buffers that fail to clip cleanly.
-    }
+    } catch {}
   }
 
   return combinePolygonFeatures(clippedParts);
 }
 
-/** Oracle negative control: legacy per-segment buffer union (not production coastline). */
 export async function buildCoastlineNearRegionUnionBufferForTests(
   segments: Feature<LineString>[],
   distanceMeters: number,
@@ -457,7 +449,6 @@ export async function buildCoastlineNearRegion(
       return null;
     }
 
-    // Fail closed via dispatchKernel (not-ready + wasm throw): no TS distance-threshold path.
     const result = await dispatchNearRegionBatch({
       segments: prepared.segments,
       distanceMeters,
@@ -479,7 +470,6 @@ export async function buildCoastlineNearRegion(
 
 export { distanceBetweenPoints } from "../gameArea/distance";
 
-/** Match radar / elimination / hiding-zone disks; coarse steps undersize near chords. */
 const NEAR_REGION_DISK_STEPS = 64;
 
 export function buildLocationNearRegion(

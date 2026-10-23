@@ -7,10 +7,6 @@ type MapSideDockStackProps = {
   className?: string;
 };
 
-/**
- * Viewport-fixed phone side stack: free-drag, edge snap, continuous Y with
- * peer stack/push when sharing a side with map nav.
- */
 export function MapSideDockStack({ children, className }: MapSideDockStackProps) {
   const { placement, setPlacement } = useMapSideDockSide();
 

@@ -101,7 +101,6 @@ function unionPair(
   return unionPairMartinez(left, right);
 }
 
-/** Keep both polygons when clip engines fail so confirmed shade is not dropped. */
 function concatPolygonFeatures(left: PolygonFeature, right: PolygonFeature): PolygonFeature {
   const leftParts =
     left.geometry.type === "Polygon" ? [left.geometry.coordinates] : left.geometry.coordinates;

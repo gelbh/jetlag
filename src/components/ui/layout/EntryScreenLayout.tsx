@@ -4,23 +4,10 @@ import { homePosterStyle, homeTerminalAccentBarStyle } from "@/components/ui/ent
 interface EntryScreenLayoutProps {
   children: ReactNode;
   justify?: "between" | "center" | "start";
-  /** Locks content to one viewport with no page scroll. */
   viewport?: boolean;
-  /** Viewport layout: start packs from the top; home uses between or center. */
   viewportLayout?: "start" | "between" | "center";
-  /**
-   * `plain` (preferred): transparent shell so `AppEntryBackdrop` shows through.
-   * `survey`: legacy alias kept for call sites; skin classes are no-ops post W3-B.
-   */
   skin?: "survey" | "plain";
-  /**
-   * Drop page padding so a full-bleed chrome (e.g. EntryHeader) owns safe-area.
-   */
   flush?: boolean;
-  /**
-   * Extra air under the status bar / notch. Home uses this with viewport start packing
-   * so the brand lockup is not hard against the top edge.
-   */
   topBreathing?: boolean;
 }
 

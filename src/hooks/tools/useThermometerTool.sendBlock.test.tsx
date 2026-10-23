@@ -75,7 +75,6 @@ describe("useThermometerTool send blocks", () => {
         annotations: mocks.annotations,
         sessionRules: { gameSize: "large" },
         pendingQuestions: [walkingQuestion],
-        // The map screen counts our own walking question as open.
         canSubmitQuestion: false,
         createAnnotation: mocks.createAnnotation,
         distanceUnit: mocks.distanceUnit,

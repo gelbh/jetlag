@@ -7,7 +7,6 @@ export interface AdminSegmentedOption {
   badge?: number;
 }
 
-/** Comp `.segc`: ground track, 3px padding, 12px radius, selected `--color-flag-soft`. */
 export function AdminSegmented({
   value,
   onChange,

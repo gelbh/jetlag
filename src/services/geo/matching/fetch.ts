@@ -192,9 +192,7 @@ async function fetchOverpassPointMatchingFeaturesInArea(
       .then((merged) => {
         options.onEnrich?.(merged);
       })
-      .catch(() => {
-        // Soft-fail Overpass enrich; keep the bundle result.
-      });
+      .catch(() => {});
     return withPins(bundledFeatures);
   }
 

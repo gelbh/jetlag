@@ -13,9 +13,7 @@ export function readAnalyticsConsent(): AnalyticsConsent {
     if (raw && READ_VALUES.has(raw as AnalyticsConsent)) {
       return raw as AnalyticsConsent;
     }
-  } catch {
-    // localStorage unavailable
-  }
+  } catch {}
   return "unset";
 }
 
@@ -25,9 +23,7 @@ export function writeAnalyticsConsent(value: WritableAnalyticsConsent): void {
   }
   try {
     localStorage.setItem(ANALYTICS_CONSENT_KEY, value);
-  } catch {
-    // localStorage unavailable
-  }
+  } catch {}
 }
 
 /** Sticky per device: set on admin sign-in, never cleared by sign-out (clearing site data resets it). */
@@ -44,7 +40,5 @@ export function readInternalDevice(): boolean {
 export function markInternalDevice(): void {
   try {
     localStorage.setItem(ANALYTICS_INTERNAL_DEVICE_KEY, "1");
-  } catch {
-    // localStorage unavailable
-  }
+  } catch {}
 }

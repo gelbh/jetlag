@@ -26,14 +26,12 @@ const gameArea: GameAreaGeometry = {
 };
 
 const topologyBbox = {
-  // Inset from game-area edges: turf vs geo disagree on exact boundary PIP.
   west: -0.199,
   east: -0.101,
   south: 51.401,
   north: 51.499,
 };
 
-/** Thermo A/B across London gameArea (plan fixture). */
 const thermoA: LatLngTuple = [51.45, -0.18];
 const thermoB: LatLngTuple = [51.46, -0.12];
 

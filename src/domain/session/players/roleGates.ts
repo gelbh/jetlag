@@ -39,7 +39,6 @@ export function ledJoinRequestRoles(input: {
   return roles;
 }
 
-/** Roles whose passcode stamps the viewer may open (Codes sheet / Settings). */
 export function visibleRoleCodeRoles(input: {
   roleGates?: RoleGates | null;
   memberRoles?: Record<string, PlayerRole | string>;
@@ -81,10 +80,6 @@ export function joinRequiresRolePasscode(
   memberRoles: Record<string, PlayerRole | string> | undefined,
   role: PlayerRole,
   uid: string | undefined,
-  /**
-   * False for permission-denied join previews (empty stub roles).
-   * When unknown, keep collecting seeker/hider codes.
-   */
   occupancyKnown = true,
 ): boolean {
   if (role === "observer") {
@@ -117,10 +112,6 @@ export function buildRoleGatesForHost(hostUid: string, hostRole: PlayerRole): Ro
   return { version: 1, leaders };
 }
 
-/**
- * Submit gate for a blank role code. Unlike field visibility, unknown occupancy
- * returns false so the first player on a side can still join without a code.
- */
 export function isRolePasscodeRequired(
   previewSession: Pick<SessionRecord, "memberRoles" | "gameArea"> | null | undefined,
   role: PlayerRole,

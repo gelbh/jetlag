@@ -15,7 +15,6 @@ export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
       if (!(target instanceof Node)) {
         return;
       }
-      // Clicks on the dock itself (including the Draw toggle) stay local.
       if (dockRef.current?.contains(target)) {
         return;
       }

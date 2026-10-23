@@ -18,10 +18,6 @@ export const toneAlertColor: Record<MapFloatTone, string> = {
   info: "teal",
 };
 
-/**
- * Frosted canvas body + accent border/title for map floats and halt alerts.
- * Avoid accent-at-0.12 fills over live map (outdoor body copy fails contrast).
- */
 export function floatToneStyles(tone: MapFloatTone) {
   const accent = toneAccent[tone];
   return {

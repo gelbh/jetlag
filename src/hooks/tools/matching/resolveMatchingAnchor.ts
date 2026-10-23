@@ -29,15 +29,10 @@ export interface ResolveMatchingAnchorResult {
   error: string | null;
 }
 
-/** Dual-phase apply guard: ignore a late phase-0 after phase-1 enrich for the same request. */
 export function shouldApplyMatchingAnchorPhase(lastAppliedPhase: number, phase: 0 | 1): boolean {
   return phase >= lastAppliedPhase;
 }
 
-/**
- * After Overpass enrich, pack Wikidata ids may be replaced by OSM ids for the
- * same venue name. Keep commit/Voronoi keyed to a live feature id.
- */
 export function reconcileLockedMatchingNearest(
   features: MatchingFeature[],
   lockedId: string | null,

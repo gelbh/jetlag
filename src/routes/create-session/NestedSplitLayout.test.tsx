@@ -18,7 +18,6 @@ describe("NestedSplitLayout", () => {
     const scroller = body.parentElement;
     expect(scroller?.className).toMatch(/overflow-y-auto/);
     expect(scroller?.contains(footer)).toBe(false);
-    // Wrapper (shrink-0 bg-canvas) is the scroller sibling; footer lives inside it.
     expect(footer.parentElement).toBe(scroller?.nextElementSibling);
     expect(footer.parentElement?.className).toMatch(/shrink-0/);
   });

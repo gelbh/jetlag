@@ -1,9 +1,6 @@
 import { pickHostPromotee } from "./pickHostPromotee";
 import type { PlayerRole } from "./playerRole";
 
-/**
- * Only honor a returning-member heal when the client persisted the prior UID locally.
- */
 export function sanitizeReturningMemberUid(
   persistedMyUid: string | null | undefined,
   candidate: string | null | undefined,
@@ -70,15 +67,10 @@ export type MembershipHealState = {
   memberUids: string[];
   memberRoles: Record<string, PlayerRole>;
   memberAppVersions: Record<string, string>;
-  /** Host after heal (promotee or unchanged). */
   hostUid: string;
-  /** Non-null when the write must include hostUid. */
   nextHostUid: string | null;
 };
 
-/**
- * Build membership maps + optional host transfer for an auth-drift heal / join.
- */
 export function buildMembershipHealState(input: {
   existingMemberUids: readonly string[];
   existingRoles: Record<string, PlayerRole>;

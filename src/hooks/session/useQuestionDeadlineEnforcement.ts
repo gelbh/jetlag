@@ -21,7 +21,6 @@ interface UseQuestionDeadlineEnforcementParams {
   pendingQuestions: readonly PendingQuestionRecord[];
   hidingZones: readonly HidingZoneRecord[];
   memberUids: readonly string[];
-  /** Local or remote hiding timer is running (see isHidingTimerEffectivelyRunning). */
   hidingTimerRunning: boolean;
   pauseTimer: () => void;
   resumeTimer: () => void;
@@ -70,7 +69,6 @@ export function useQuestionDeadlineEnforcement({
 
     const checkDeadlines = () => {
       const nowMs = serverNow();
-      // A still-queued ask has not reached the hider: its window has not opened.
       const openQuestions = pendingQuestions.filter(
         (question) => question.status === "pending" && activeDeadlineAnchor(question) !== undefined,
       );

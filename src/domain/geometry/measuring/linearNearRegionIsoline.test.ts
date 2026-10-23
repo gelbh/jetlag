@@ -88,13 +88,11 @@ describe("linear near-region isoline", () => {
       divisions: 24,
     });
     expect(region).not.toBeNull();
-    // Cap leaves some boundary cells unstamped; they stay in via coarse dual / MS, not full merge-rects.
     expect(booleanPointInPolygon(turfPoint([0, 50.15]), region!)).toBe(true);
     expect(booleanPointInPolygon(turfPoint([0, 50.15 + 9 * 0.18]), region!)).toBe(true);
     expect(featureHasNonAxisEdge(region!)).toBe(true);
   });
 
-  // Dense 48-division isoline can exceed the default 5s under CI coverage load.
   it("persist-slims isoline shade under the vertex ceiling", async () => {
     setCoastlineNearRegionYieldHookForTests(async () => {});
     const denseShore: Feature<LineString> = {

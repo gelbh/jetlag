@@ -511,7 +511,6 @@ describe("resolveTentaclePendingQuestion", () => {
   });
 
   it("EXYS hospital tentacle resolves annotation with elim shade (not stuck answered)", async () => {
-    // Live: EXYS / a4ad8efe-90d3-46cb-a803-b37ef2e307e2 answered Q7989290, no annotation.
     const dublinGameArea: GameArea = {
       type: "Polygon",
       coordinates: [

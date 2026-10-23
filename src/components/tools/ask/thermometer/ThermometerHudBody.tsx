@@ -1,7 +1,3 @@
-/**
- * Thermometer Ask HUD — Matching twin: question header + distance catalog, then map-first.
- * Spec: ask-surface-kit-design rev 2026-08-05b.
- */
 import { CrosshairIcon } from "@phosphor-icons/react";
 import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
@@ -36,7 +32,6 @@ export type ThermometerHudBodyProps = {
   step: "a" | "b" | "ready";
   placementMode: PlacementMode;
   walkingActive: boolean;
-  /** Live walk has no GPS sample yet, so END WALK is still disarmed. */
   waitingForGps?: boolean;
   presetUseCount: number;
   usedDistanceOptions?: ReadonlySet<ThermometerDistanceOptionKey>;

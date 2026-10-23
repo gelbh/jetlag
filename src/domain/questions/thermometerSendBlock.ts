@@ -1,7 +1,3 @@
-/**
- * Why the Thermometer Send / End walk control is disabled, so the map overlay
- * and walk banner can say so instead of leaving a dead button.
- */
 export type ThermometerSendBlockReason =
   | "open_question"
   | "distance_unavailable"
@@ -31,7 +27,6 @@ export function thermometerSendBlockReason(
   input: ThermometerSendBlockInput,
 ): ThermometerSendBlockReason | null {
   if (input.walkingActive) {
-    // The live walk is itself the open question; only GPS can block End walk.
     return input.liveTravelMeters === null ? "gps_waiting" : null;
   }
   if (!input.canSubmitQuestion) {

@@ -1,4 +1,3 @@
-/** sessionStorage flag accountAuth sets before an OAuth redirect sign-in leaves the page. */
 export const OAUTH_REDIRECT_PENDING_KEY = "jl.oauthRedirectPending";
 
 type HintStorage = Pick<Storage, "getItem" | "key" | "length">;
@@ -6,7 +5,6 @@ type HintStorage = Pick<Storage, "getItem" | "key" | "length">;
 const AUTH_USER_PREFIX = "firebase:authUser:";
 const DEFAULT_APP_SUFFIX = ":[DEFAULT]";
 
-/** A missing or non-boolean `isAnonymous` counts as no hint: fail toward the sign-in prompt. */
 function holdsPermanentUser(storage: HintStorage): boolean {
   try {
     for (let index = 0; index < storage.length; index += 1) {
@@ -19,13 +17,9 @@ function holdsPermanentUser(storage: HintStorage): boolean {
         if (raw != null && (JSON.parse(raw) as { isAnonymous?: unknown }).isAnonymous === false) {
           return true;
         }
-      } catch {
-        // Malformed entry: keep looking.
-      }
+      } catch {}
     }
-  } catch {
-    // Blocked storage: no hint.
-  }
+  } catch {}
   return false;
 }
 

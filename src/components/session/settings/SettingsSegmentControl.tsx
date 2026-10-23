@@ -13,7 +13,6 @@ interface SettingsSegmentControlProps {
   onChange: (segment: SettingsSegment) => void;
 }
 
-/** Equal-width Survey segment track for settings (tablist ↔ tabpanel). */
 export function SettingsSegmentControl({ value, onChange }: SettingsSegmentControlProps) {
   return (
     <Box

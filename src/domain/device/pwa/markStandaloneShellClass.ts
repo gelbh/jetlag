@@ -1,6 +1,5 @@
 import { isStandalonePwa } from "./isStandalonePwa";
 
-/** Class paired with css-standalone height lock when matchMedia alone misses iOS. */
 export const STANDALONE_SHELL_CLASS = "jl-standalone-shell";
 
 /**

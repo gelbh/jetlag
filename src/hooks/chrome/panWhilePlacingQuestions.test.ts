@@ -8,11 +8,6 @@ import { useRadarTool } from "../tools/useRadarTool";
 import { useThermometerTool } from "../tools/useThermometerTool";
 import { useToolPanelChrome } from "./useToolPanelChrome";
 
-/**
- * Matrix: pan mid-placement must keep the tool selected, clear mapPanning, and
- * accept the next place tap. Thermometer is multi-point; radar/matching are
- * single-tap place tools sharing the same chrome path.
- */
 describe("pan while placing questions", () => {
   it("thermometer: A → pan start/end → B keeps draft and place step", () => {
     const mocks = createToolHookMocks();
@@ -61,7 +56,6 @@ describe("pan while placing questions", () => {
     expect(thermo.result.current.draft.thermoA).toEqual([53.35, -6.26]);
     expect(thermo.result.current.draft.thermoB).toEqual([53.36, -6.25]);
     expect(mocks.finishPlacement).not.toHaveBeenCalled();
-    // HUD: both pins → ask chord (map taps no longer place).
     expect(thermo.result.current.panel.props.wizardStepRef.current).toBe("ask");
   });
 
@@ -96,7 +90,7 @@ describe("pan while placing questions", () => {
 
     act(() => {
       handlers.onDragStart();
-      handlers.onMoveEnd(); // dragend missed — moveend safety
+      handlers.onMoveEnd();
     });
     expect(chrome.result.current.mapPanning).toBe(false);
 

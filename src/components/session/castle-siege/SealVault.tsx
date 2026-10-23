@@ -13,17 +13,10 @@ export type SealVaultProps = {
   sessionId: string;
   teamId: CastleSiegePlayingTeam;
   sealedByUid: string;
-  /** Seal placement; map draw stubbed in Phase 2. */
   sealPosition: { lat: number; lng: number };
   onCommitted?: (hash: string) => void;
-  /**
-   * When set, commit hash + ciphertext via writeTeamSealCipher.
-   * Production: Doppler `VITE_CASTLE_SIEGE_SEAL_WRAP_KEY_B64` twin of Functions GSM wrap key.
-   * Tests inject bytes / encryptSeal directly.
-   */
   wrappingKey?: Uint8Array;
   wrapKeyId?: string;
-  /** Test inject for encrypt (defaults to encryptSealPayload). */
   encryptSeal?: (
     plaintext: string,
     options: { wrappingKey: Uint8Array; keyId: string },

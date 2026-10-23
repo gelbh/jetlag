@@ -1,4 +1,3 @@
-/** Vector overlay stroke/fill options (formerly Leaflet PathOptions). */
 export interface MapPathOptions {
   color?: string;
   weight?: number;

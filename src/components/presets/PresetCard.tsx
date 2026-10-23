@@ -81,7 +81,6 @@ export function PresetDangerButton({
   );
 }
 
-/** Frosted preset card for Mantine / iOS browse surfaces. */
 export function PresetCard({
   name,
   meta,

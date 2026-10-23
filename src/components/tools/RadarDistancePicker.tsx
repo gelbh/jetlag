@@ -32,10 +32,8 @@ interface RadarDistancePickerProps {
   onPresetSelect: (radiusMeters: number) => void;
   onChooseSelect: () => void;
   onCustomRadiusChange: (value: string) => void;
-  /** Finish custom distance (sheet catalog). Mid-map may omit. */
   onCustomDistanceCommit?: () => void;
   showPrompt?: boolean;
-  /** Compact chip strip for map-first mid chrome (Mantine). */
   compact?: boolean;
 }
 

@@ -262,10 +262,6 @@ export interface PostSupportAgentTurnResult {
   toolOutcomes: unknown[];
 }
 
-/**
- * Player/host/admin turn against the session-ops support agent.
- * First call without an active summon consumes a summon cap.
- */
 export async function postSupportAgentTurn(
   incidentId: string,
   text: string,

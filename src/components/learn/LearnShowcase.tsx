@@ -27,7 +27,6 @@ function ShowcaseBody({ showcase }: { showcase: LearnShowcaseId }) {
   }
 }
 
-/** Mounts a live Ask HUD (or tools hub rail) inside a learn article. */
 export function LearnShowcase({
   showcase,
   caption,

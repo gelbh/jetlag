@@ -25,13 +25,6 @@ import {
   sessionsCollection,
 } from "./shared";
 
-/**
- * Client end write (fallback when the end callable is unavailable). The session
- * read is cache-capable and the code delete is issued without waiting for the
- * end's ack, so both apply locally and replay on reconnect instead of hanging
- * offline. The code delete stays a separate best-effort commit: batching it
- * would let a missing code doc (rules deny deleting it) block the end itself.
- */
 export async function endRemoteSession(sessionId: string): Promise<void> {
   const session = await getRemoteSessionById(sessionId);
   const ended = updateDoc(doc(sessionsCollection(), sessionId), {
@@ -65,16 +58,12 @@ export async function updateSessionRules(
   await updateDoc(doc(sessionsCollection(), sessionId), sessionRulesPatchToFirestore(patch));
 }
 
-/** Seeker/host direct End Game start (no hider Accept). Clears legacy request fields. */
 export async function startEndGameSession(
   sessionId: string,
   startedByUid: string,
   anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
   endGameStartedAt: string = new Date().toISOString(),
 ): Promise<void> {
-  // Sequential create-then-update: session start rules require the freeze doc to
-  // already exist. Same-batch exists()+get() against large session docs has denied
-  // the write in e2e (optimistic local banner, then permission error).
   const anchorsRef = endGameTruthAnchorsDoc(sessionId);
   let anchorsWritten = false;
   try {
@@ -83,13 +72,11 @@ export async function startEndGameSession(
     await updateDoc(doc(sessionsCollection(), sessionId), {
       endGameStartedAt,
       endGameStartedByUid: startedByUid,
-      // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
       endGameTruthAnchors: deleteField(),
       endGameRequestedAt: deleteField(),
       endGameRequestedByUid: deleteField(),
     });
   } catch (error) {
-    // Only roll back an anchors doc this call created — do not delete a prior freeze.
     if (anchorsWritten) {
       await clearEndGameTruthAnchorsDoc(sessionId);
     }
@@ -97,7 +84,6 @@ export async function startEndGameSession(
   }
 }
 
-/** Clear a pending end-game request only (hider decline / seeker cancel). */
 export async function clearEndGameRequestSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameRequestedAt: deleteField(),
@@ -105,7 +91,6 @@ export async function clearEndGameRequestSession(sessionId: string): Promise<voi
   });
 }
 
-/** Clear active or pending end game, including frozen truth anchors. */
 export async function resetEndGameSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameStartedAt: deleteField(),
@@ -146,9 +131,7 @@ export async function confirmFoundHiderSession(
   // Session outcome already persisted — cleanup must not surface as confirm failure.
   try {
     await clearEndGameTruthAnchorsDoc(sessionId);
-  } catch {
-    // Best-effort; anchors may already be absent or rules-denied after end.
-  }
+  } catch {}
   emitGameEndedActivity(sessionId, { outcome: "found", summary: "Hider found" }, confirmedByUid);
 }
 

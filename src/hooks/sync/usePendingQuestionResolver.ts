@@ -29,10 +29,6 @@ interface UsePendingQuestionResolverParams {
   deleteAnnotation?: (id: string) => Promise<void>;
   gameArea: GameArea;
   sessionResetAt?: string;
-  /**
-   * Session annotation ids (incl. soft-deleted). Content-stable key for effect
-   * deps — join sorted ids; do not pass a fresh Set identity each render.
-   */
   knownAnnotationIdsKey?: string;
   /** Latest known ids; read via ref after awaits so reload hydration is visible. */
   knownAnnotationIds?: ReadonlySet<string>;
@@ -207,12 +203,9 @@ export function usePendingQuestionResolver({
           });
 
           if (outcome === "already-cancelled") {
-            // Host/other tab cancelled while we created — drop orphan shade.
             try {
               await deleteAnnotation?.(created.id);
-            } catch {
-              // Best-effort cleanup; keep in-flight guard.
-            }
+            } catch {}
             return;
           }
 
@@ -243,17 +236,13 @@ export function usePendingQuestionResolver({
                 status: "resolved",
                 resolvedAnnotationId: pending.id,
               });
-            } catch {
-              // Best-effort complete failed — keep guard for this mount.
-            }
+            } catch {}
           } else {
             try {
               await writePendingTerminalStatus(sessionId, pending.id, {
                 status: "cancelled",
               });
-            } catch {
-              // Cancel write failed — still keep the guard for this session mount.
-            }
+            } catch {}
           }
           capturePendingResolveFailure(error, {
             toolType: pending.toolType,

@@ -225,5 +225,4 @@ export function formatOverpassAuditReport(summaries: OverpassAuditSummary[]): st
   return [header, ...rows].join("\n");
 }
 
-// Re-export for callers that need bbox without pulling leaflet.
 export { gameAreaToBoundingBox };

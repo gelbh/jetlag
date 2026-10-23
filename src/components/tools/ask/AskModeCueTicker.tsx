@@ -1,7 +1,3 @@
-/**
- * GlanceVerb ticker — one imperative, verb-only. Not a button; never DnPm/cost.
- * Spec: ask-surface-kit-design rev 2026-08-05b.
- */
 import { Paper } from "@mantine/core";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { cn } from "@/lib/cn";

@@ -1,5 +1,3 @@
-// @vitest-environment node
-
 import { describe, expect, it } from "vitest";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import { formatOverpassAuditReport, runOverpassAudit } from "./overpassAudit";

@@ -27,7 +27,6 @@ function worldScaleAtZoom(zoom: number): number {
   return WORLD_TILE_SIZE * 2 ** zoom;
 }
 
-/** Project lng/lat into world pixels at `zoom` (Leaflet `map.project(_, zoom)`). */
 export function projectLngLatAtZoom(
   lngLat: { lng: number; lat: number },
   zoom: number,
@@ -37,7 +36,6 @@ export function projectLngLatAtZoom(
   return { x: mc.x * scale, y: mc.y * scale };
 }
 
-/** Unproject world pixels at `zoom` (Leaflet `map.unproject(_, zoom)`). */
 export function unprojectPointAtZoom(
   point: { x: number; y: number },
   zoom: number,
@@ -47,10 +45,6 @@ export function unprojectPointAtZoom(
   return { lng: lngLat.lng, lat: lngLat.lat };
 }
 
-/**
- * Midpoint of SW/NE at `zoom`, shifted by asymmetric padding — same math as
- * Leaflet {@link computeFramedCenterZoom} after a min/max zoom clamp.
- */
 export function computePaddedCenterAtZoom(
   sw: { lng: number; lat: number },
   ne: { lng: number; lat: number },

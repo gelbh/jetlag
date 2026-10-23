@@ -29,7 +29,6 @@ function confirmCopy(action: ModerationAction, target: string) {
   }
 }
 
-/** One confirm step shared by the rail Mod tab and the compact moderation overlay. */
 export function useModerationConfirm({
   sessionCode,
   run,

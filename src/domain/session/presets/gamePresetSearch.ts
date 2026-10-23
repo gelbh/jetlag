@@ -47,7 +47,6 @@ function placeMatchesPreset(placeName: string, preset: GamePreset): boolean {
   return foldPlaceLabel(placeName).includes(region);
 }
 
-/** Official play-area preset for a geocoded place, when the names line up uniquely. */
 export function matchGamePresetForPlace(
   presets: readonly GamePreset[],
   place: { displayName: string },

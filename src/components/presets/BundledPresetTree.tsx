@@ -131,7 +131,6 @@ function CategoryGlyph({ id }: { id: HierarchyCategoryGlyphId }) {
   } as const;
 
   if (id === "local-authorities") {
-    // Civic building
     return (
       <Box component="svg" {...common}>
         <path
@@ -146,7 +145,6 @@ function CategoryGlyph({ id }: { id: HierarchyCategoryGlyphId }) {
   }
 
   if (id === "wards") {
-    // 2×2 parcel grid
     return (
       <Box component="svg" {...common}>
         <rect
@@ -190,7 +188,6 @@ function CategoryGlyph({ id }: { id: HierarchyCategoryGlyphId }) {
   }
 
   if (id === "boroughs") {
-    // Three vertical borough strips
     return (
       <Box component="svg" {...common}>
         <rect
@@ -224,7 +221,6 @@ function CategoryGlyph({ id }: { id: HierarchyCategoryGlyphId }) {
     );
   }
 
-  // Districts: nested parcels
   return (
     <Box component="svg" {...common}>
       <rect
@@ -309,7 +305,6 @@ function RowLeading({
   return <Box aria-hidden style={leadingSlotStyle} />;
 }
 
-/** Continent = flush; each nested level steps in more clearly. */
 function rowPad(depth: number): number {
   if (depth <= 0) {
     return 14;
@@ -551,7 +546,6 @@ function collectAllGroupIds(nodes: readonly BundledPresetTreeNode[], out: string
   return out;
 }
 
-/** One frosted card per continent; nested rows sit in a deeper well. */
 export function BundledPresetTree({ presets }: { presets: readonly MigratedPreset[] }) {
   const tree = useMemo(() => buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS), []);
   const presetsById = useMemo(

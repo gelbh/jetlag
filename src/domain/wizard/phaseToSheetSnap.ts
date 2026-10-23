@@ -2,13 +2,7 @@ import type { ToolWizardPhaseId } from "./toolWizardPhases";
 
 export type WizardSheetSnap = "peek" | "mid" | "expand";
 
-const PLACEMENT_STEP_IDS = new Set([
-  "place",
-  "anchor",
-  "placement",
-  // Measuring "target" is configure (category/POI), not map placement.
-  "location",
-]);
+const PLACEMENT_STEP_IDS = new Set(["place", "anchor", "placement", "location"]);
 
 const ASK_STEP_IDS = new Set(["answer", "confirm"]);
 

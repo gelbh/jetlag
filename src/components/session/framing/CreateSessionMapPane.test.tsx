@@ -276,7 +276,6 @@ describe("CreateSessionMapPane", () => {
 
     requestThenLoad(props, rerender);
 
-    // Same element survives the request (focus not dropped to <body>).
     expect(screen.getByTestId("create-session-map-facade")).toBe(facade);
     expect(fakeCanvas.focus).toHaveBeenCalledTimes(1);
   });

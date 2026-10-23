@@ -80,10 +80,6 @@ function ScenarioRow({ scenario }: { scenario: StatusDockScenario }) {
   );
 }
 
-/**
- * Dev-only gallery of status-island states.
- * Open `/dev/status-dock` with Vite.
- */
 export function StatusDockGallery() {
   return (
     <Box

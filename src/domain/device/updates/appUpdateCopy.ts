@@ -7,7 +7,6 @@ export const appUpdateCopy = {
   mapErrorTitle: "Map failed to load",
   mapErrorReload: "Refresh now",
   mapErrorBackHome: "Back home",
-  /** Detail for confirm sheet / docs; Home shows readyTitle + leave action only. */
   leaveAndUpdateBody:
     "Leave this device's session, then install the new build. Others keep playing.",
   leaveAndUpdateAction: "Leave & refresh",
@@ -25,7 +24,6 @@ export type LeaveAndUpdatePrompt = {
   body: string;
 };
 
-/** Copy for the in-app leave-and-refresh confirm sheet. */
 export function resolveLeaveAndUpdatePrompt(options: {
   isLocalSession: boolean;
   isRemoteHost: boolean;

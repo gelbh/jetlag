@@ -1,4 +1,3 @@
-/** Turf-free so session rules (boot path) avoid `gameSize`'s area math. */
 import type { DistanceUnit } from "../../map/distance";
 import { hidingZoneDefaultRadiusMeters, resolveDistanceUnit } from "../../map/distancePresets";
 import type { GameSize } from "./gameSize";

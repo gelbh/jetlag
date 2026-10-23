@@ -13,10 +13,6 @@ import {
   overpassTaggedBboxClauses,
 } from "./query";
 
-// Keep landmass/admin QL in sync with buildLandmassQuery / buildAdminDivisionQuery.
-// Do not import those modules here — they pull leaflet via geometry and break
-// @vitest-environment node audit harnesses.
-
 export function auditAdminDivisionQuery(gameArea: GameArea, adminLevel: number): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const bbox = `${south},${west},${north},${east}`;

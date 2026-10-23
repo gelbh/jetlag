@@ -1,5 +1,3 @@
-/** Pinned placement-camera constants — keep in sync with design spec. */
-
 export const PADDING_FRACTION = 0.12;
 export const PADDING_MIN_METERS = 80;
 export const PADDING_MAX_METERS = 800;

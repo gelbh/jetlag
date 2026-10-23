@@ -112,7 +112,6 @@ describe("useReachability", () => {
     rerender();
     expect(result.current.probeNow).toBe(first);
 
-    // Initial probe in flight: probeNow is a no-op.
     act(() => result.current.probeNow());
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
@@ -160,7 +159,6 @@ describe("useReachability", () => {
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
-    // Stale pre-resume probe fails: ignored, then the resume probe runs.
     await act(async () => {
       rejecters[0]?.(new TypeError("Failed to fetch"));
       await vi.advanceTimersByTimeAsync(0);

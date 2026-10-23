@@ -348,7 +348,6 @@ export const BASE_MEASURING_CATALOG = [
   },
 ] as const satisfies ReadonlyArray<MeasuringCatalogOption>;
 
-/** Book-adjacent measuring extras; available only with custom question pack. */
 export const CUSTOM_PACK_GATED_MEASURING = [
   {
     id: "admin3_border",
@@ -411,7 +410,6 @@ export function isCustomPackGatedMeasuringId(id: string): id is CustomPackGatedM
   return (CUSTOM_PACK_GATED_MEASURING_IDS as readonly string[]).includes(id);
 }
 
-/** Printed rulebook coastline width (2 km) for both editions — not mile/km dual copy. */
 export const COASTLINE_DEFINITION =
   "A coastline is where land meets the ocean, a great lake, or a body of water that flows into the ocean or a great lake. That waterway must stay at least 2 km wide along its whole route.";
 

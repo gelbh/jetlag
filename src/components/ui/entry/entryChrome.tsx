@@ -58,7 +58,6 @@ import {
 import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
 
 export type { ChoiceTone, HomeCardBtnVariant, MapToolSlotTone, SyncBeaconStatus };
-/** Re-export button/drawer styles so map chrome callers keep one import path. */
 export {
   askHudPanelStyle,
   askInsetSurfaceStyle,
@@ -109,7 +108,6 @@ export {
   toggleRowStyle,
 };
 
-/** Frosted inset grouped list / form surface. */
 export function InsetGroup({ children, error = false }: { children: ReactNode; error?: boolean }) {
   return (
     <Box
@@ -133,7 +131,6 @@ export function InsetGroup({ children, error = false }: { children: ReactNode; e
   );
 }
 
-/** Caption under an inset field (field-level validation). */
 export function FieldError({ children, id }: { children: ReactNode; id?: string }) {
   if (children == null || children === false || children === "") {
     return null;
@@ -157,7 +154,6 @@ export function FieldError({ children, id }: { children: ReactNode; id?: string 
   );
 }
 
-/** Soft banner for join/submit failures (not a heavy Alert title block). */
 export function ErrorCallout({ children }: { children: ReactNode }) {
   if (children == null || children === false || children === "") {
     return null;
@@ -189,7 +185,6 @@ export function ErrorCallout({ children }: { children: ReactNode }) {
   );
 }
 
-/** Transient success banner (no @mantine/notifications). */
 export function SuccessCallout({ children }: { children: ReactNode }) {
   if (children == null || children === false || children === "") {
     return null;
@@ -240,10 +235,6 @@ export function SectionLabel({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Shared frosted map chrome (status island, dock, chip, ask).
- * Quiet elevation so the map stays the hero.
- */
 export const mapChromeSurfaceStyles = {
   backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
   border: "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
@@ -252,18 +243,15 @@ export const mapChromeSurfaceStyles = {
   boxShadow: "0 4px 14px 0 oklch(0.1 0.04 265 / 0.28)",
 } as const;
 
-/** Status instrument: shared chrome + Survey ink. */
 export const mapStatusIslandStyles = {
   ...mapChromeSurfaceStyles,
   color: "var(--color-field-ink)",
 } as const;
 
-/** Hunt deck: frosted island without Survey flag top bar (Approach B). */
 export const mapHuntSurfaceStyles = {
   ...mapChromeSurfaceStyles,
 } as const;
 
-/** Ask-first: hunt deck reads secondary under the Ask instrument cluster. */
 export const mapHuntAskFirstSurfaceStyles = {
   ...mapHuntSurfaceStyles,
   backgroundColor: "oklch(from var(--color-canvas) l c h / 0.58)",
@@ -271,7 +259,6 @@ export const mapHuntAskFirstSurfaceStyles = {
   border: "0.33px solid oklch(from var(--color-rule) l c h / 0.4)",
 } as const;
 
-/** Inset strip wrapping question tools inside the hunt deck. */
 export const mapHuntQuestionStripStyles = {
   display: "flex",
   flex: 1,
@@ -284,7 +271,6 @@ export const mapHuntQuestionStripStyles = {
   border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
 } as const;
 
-/** Ask-first instrument switcher strip (denser, quieter than idle tip B). */
 export const mapHuntAskFirstQuestionStripStyles = {
   ...mapHuntQuestionStripStyles,
   gap: 0,
@@ -318,7 +304,6 @@ export function DrawerGrabber({ handleProps }: { handleProps?: SheetHandleProps 
       type="button"
       tabIndex={-1}
       aria-label="Drag sheet down to dismiss"
-      // Full-width finger hit strip; pill visual stays 36×5 inside.
       className="jl-sheet-drag-handle flex min-h-11 w-full items-center justify-center"
       {...handleProps}
     >

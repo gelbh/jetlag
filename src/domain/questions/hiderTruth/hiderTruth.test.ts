@@ -227,7 +227,6 @@ describe("computeHiderTruthReply", () => {
       },
     });
 
-    // Far enough past the midpoint that the flip gap exceeds 50 m.
     const result = computeHiderTruthReply(pending, [51.45, -0.141]);
     expect(result?.unavailable).toBeUndefined();
     expect(result?.replyId).toBe("hotter");
@@ -237,7 +236,6 @@ describe("computeHiderTruthReply", () => {
     const start: [number, number] = [51.45, -0.18];
     const end: [number, number] = [51.45, -0.14];
     const midpoint: [number, number] = [51.45, -0.16];
-    // Move slightly toward end; stay inside the 50 m flip band.
     const nearFlip = destinationPoint(midpoint, NEAR_ELIMINATION_EDGE_METERS - 1, 90);
     const pending = basePending({
       toolType: "thermometer",

@@ -78,9 +78,7 @@ export async function queryGeolocationPermission(): Promise<GeolocationPermissio
       if (status.state === "granted" || status.state === "denied" || status.state === "prompt") {
         return status.state;
       }
-    } catch {
-      // Permissions API missing/unsupported for geolocation — infer carefully below.
-    }
+    } catch {}
   }
 
   // Without Permissions API, unknown is not denied. Treat as prompt so callers
@@ -90,7 +88,6 @@ export async function queryGeolocationPermission(): Promise<GeolocationPermissio
 
 export function getCurrentPosition(options?: {
   highAccuracy?: boolean;
-  /** Cached reading age; `0` forces a fresh sample (walk / e2e). */
   maximumAge?: number;
 }): Promise<GeolocationReading> {
   const highAccuracy = options?.highAccuracy ?? true;

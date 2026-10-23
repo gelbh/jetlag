@@ -1,6 +1,3 @@
-/**
- * Map-first Photo chrome: prompt + Send (no GPS; Photo has no placement).
- */
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudPhotoIcon } from "@/components/map/icons/ToolIcons";
 import {

@@ -4,7 +4,6 @@ import { createMapBounds, type MapBounds } from "../../map/mapBounds";
 import { haversineMeters } from "./haversine";
 import type { LatLngTuple } from "./types";
 
-/** Geodesic distance from center to the nearest viewport edge. */
 export function centerToViewportEdgeRadiusMeters(center: LatLngTuple, bounds: MapBounds): number {
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();
@@ -61,7 +60,6 @@ export function destinationPoint(
   return [(lat2 * 180) / Math.PI, (lng2 * 180) / Math.PI];
 }
 
-/** Inscribe an equal-meter square in `bounds` (center stays put). */
 export function squareizeMapBounds(bounds: MapBounds): MapBounds {
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();

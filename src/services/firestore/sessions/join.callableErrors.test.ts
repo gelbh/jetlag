@@ -41,8 +41,6 @@ describe("joinRemoteSessionByCode heal with raw callable errors", () => {
     });
   });
 
-  // Codes and messages mirror functions/handlers/session/shared.mjs
-  // mapJoinSessionWithRoleError, as the Functions SDK surfaces them.
   it.each([
     ["not-found", "Session not found.", { status: "missing" }],
     ["failed-precondition", "Session already ended.", { status: "ended" }],

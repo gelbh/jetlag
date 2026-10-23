@@ -57,7 +57,6 @@ interface ToolDockHistorySlotProps {
   inactive?: boolean;
 }
 
-/** Undo/redo chip for the bottom-middle hunt group (equal size with question tools). */
 export function ToolDockHistorySlot({
   kind,
   canAct,
@@ -85,7 +84,6 @@ interface ToolDockDrawControlProps {
   inactive?: boolean;
 }
 
-/** Draw / markup control for the RIGHT session dock. */
 export function ToolDockDrawControl({
   drawMenuOpen,
   markupActive,

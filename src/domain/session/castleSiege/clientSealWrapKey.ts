@@ -24,7 +24,6 @@ function decodeBase64ToBytes(value: string): Uint8Array | undefined {
   }
 }
 
-/** Resolve optional client wrap key from Vite env (or an explicit inject for tests). */
 export function readClientSealWrapKey(
   envB64: string | undefined = import.meta.env.VITE_CASTLE_SIEGE_SEAL_WRAP_KEY_B64,
 ): Uint8Array | undefined {

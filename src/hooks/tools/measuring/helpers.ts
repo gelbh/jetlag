@@ -37,7 +37,6 @@ export function usesDebouncedSeekerResolve(
   );
 }
 
-/** Firestore region JSON: session supplies gameArea; placesJson is SoT for all-places. */
 export function buildStoredMeasuringRegionInput(input: {
   measuringSubject: MeasuringSubject;
   measuringLocationCategory: MeasuringLocationCategory | null;

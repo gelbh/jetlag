@@ -8,7 +8,6 @@ import {
 } from "./packAttach";
 import { REGION_PACK_REFERENCE_BBOXES } from "./packGeoManifest";
 
-/** Axis-aligned polygon from south/west/north/east (lng, lat rings). */
 function boxPolygon(south: number, west: number, north: number, east: number): GameArea {
   return {
     type: "Polygon",
@@ -26,7 +25,6 @@ function boxPolygon(south: number, west: number, north: number, east: number): G
 
 describe("suggestRegionPackForGameArea", () => {
   it("suggests nyc for a NY-state-sized polygon covering the NYC pack", () => {
-    // Rough NY state box that fully covers the NYC pack bbox.
     const nyState = boxPolygon(40.4, -79.8, 45.0, -71.8);
     const suggestion = suggestRegionPackForGameArea(nyState);
     expect(suggestion).not.toBeNull();
@@ -48,7 +46,6 @@ describe("suggestRegionPackForGameArea", () => {
   it("picks the higher-scoring pack when zurich and lucerne both overlap", () => {
     const overlap = REGION_PACK_REFERENCE_BBOXES.zurich;
     const lucerne = REGION_PACK_REFERENCE_BBOXES.lucerne;
-    // Game area = zurich∩lucerne overlap rectangle.
     const south = Math.max(overlap.south, lucerne.south);
     const west = Math.max(overlap.west, lucerne.west);
     const north = Math.min(overlap.north, lucerne.north);
@@ -59,7 +56,6 @@ describe("suggestRegionPackForGameArea", () => {
     const suggestion = suggestRegionPackForGameArea(boxPolygon(south, west, north, east));
     expect(suggestion).not.toBeNull();
 
-    // Score = intersection / pack area; same intersection ⇒ smaller pack wins.
     const zurichArea =
       (REGION_PACK_REFERENCE_BBOXES.zurich.north - REGION_PACK_REFERENCE_BBOXES.zurich.south) *
       (REGION_PACK_REFERENCE_BBOXES.zurich.east - REGION_PACK_REFERENCE_BBOXES.zurich.west);

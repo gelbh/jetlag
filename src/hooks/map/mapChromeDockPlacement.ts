@@ -1,14 +1,8 @@
-/**
- * Continuous side-dock placement: snap to left/right edge, free vertical
- * position, stack/push when two docks share a side.
- */
-
 export type MapChromeDockId = "side" | "nav";
 export type MapChromeDockSide = "left" | "right";
 
 export type MapChromeDockPlacement = {
   side: MapChromeDockSide;
-  /** 0 = top of usable band, 1 = bottom (top edge of the stack). */
   topRatio: number;
 };
 
@@ -20,18 +14,13 @@ export type MapChromeDocksState = {
 export const MAP_CHROME_DOCKS_STORAGE_KEY = "jl.mapChrome.docks";
 export const MAP_CHROME_DOCKS_CHANGE_EVENT = "jl:map-chrome-docks";
 
-/** Legacy keys (6-slot anchors). */
 export const MAP_SIDE_DOCK_STORAGE_KEY = "jl.mapChrome.sideDock";
 export const MAP_NAV_DOCK_STORAGE_KEY = "jl.mapChrome.navDock";
 
 const PEER_GAP_PX = 14;
-/** Matches --dock-float-gap (0.75rem). */
 const FLOAT_GAP_PX = 12;
-/** ToolStatusBlock island (~2.75rem min-height). */
 const STATUS_ISLAND_PX = 44;
-/** --dock-island-height (3.25rem). */
 const HUNT_DOCK_PX = 52;
-/** Air between side stack and top/bottom docks. */
 export const SIDE_DOCK_CLEARANCE_PX = 16;
 
 export const DEFAULT_SIDE_PLACEMENT: MapChromeDockPlacement = {
@@ -77,7 +66,6 @@ export function placementFromLegacyAnchor(
   return { side, topRatio };
 }
 
-/** Coarse label for dataset / a11y (still left|right + band). */
 export function legacyAnchorFromPlacement(placement: MapChromeDockPlacement): MapSideDockAnchor {
   const band = placement.topRatio < 0.33 ? "top" : placement.topRatio > 0.66 ? "bottom" : "mid";
   return `${band}-${placement.side}` as MapSideDockAnchor;
@@ -90,10 +78,8 @@ export function usableVerticalBand(
   minTop: number;
   maxBottom: number;
 } {
-  // Status island: safe-area + float gap + island height, then clearance.
   const minTop =
     Math.max(0, safeAreaTopPx) + FLOAT_GAP_PX + STATUS_ISLAND_PX + SIDE_DOCK_CLEARANCE_PX;
-  // Hunt dock: float gap + island height from physical bottom, then clearance.
   const maxBottom = viewportHeight - (FLOAT_GAP_PX + HUNT_DOCK_PX + SIDE_DOCK_CLEARANCE_PX);
   return { minTop, maxBottom: Math.max(minTop + 48, maxBottom) };
 }
@@ -104,7 +90,6 @@ export function resolveSafeAreaTopPx(): number {
     return 0;
   }
   const probe = document.createElement("div");
-  // Measure computed length of --safe-area-top (resolves env() on device; e2e can override the var).
   probe.style.cssText =
     "position:fixed;visibility:hidden;pointer-events:none;top:0;left:0;height:0;padding-top:var(--safe-area-top,0px)";
   document.documentElement.appendChild(probe);
@@ -155,10 +140,6 @@ export function topPxFromTopRatio(
   return clampTopPx(minTop + ratio * span, height, viewportHeight, safeAreaTopPx);
 }
 
-/**
- * Stack mover above/below peer on the same side; push peer when the preferred
- * park would leave the viewport.
- */
 export function resolveStackedTops(input: {
   moverTop: number;
   moverHeight: number;
@@ -251,9 +232,7 @@ export function readMapChromeDocksState(): MapChromeDocksState {
         nav: parsePlacement(parsed.nav, DEFAULT_NAV_PLACEMENT),
       };
     }
-  } catch {
-    // migrate below
-  }
+  } catch {}
 
   let side = DEFAULT_SIDE_PLACEMENT;
   let nav = DEFAULT_NAV_PLACEMENT;
@@ -266,21 +245,16 @@ export function readMapChromeDocksState(): MapChromeDocksState {
       localStorage.getItem(MAP_NAV_DOCK_STORAGE_KEY),
       DEFAULT_NAV_PLACEMENT,
     );
-  } catch {
-    // defaults
-  }
+  } catch {}
   return { side, nav };
 }
 
 export function writeMapChromeDocksState(state: MapChromeDocksState): void {
   try {
     localStorage.setItem(MAP_CHROME_DOCKS_STORAGE_KEY, JSON.stringify(state));
-    // Keep legacy keys in sync for older CSS / readers.
     localStorage.setItem(MAP_SIDE_DOCK_STORAGE_KEY, legacyAnchorFromPlacement(state.side));
     localStorage.setItem(MAP_NAV_DOCK_STORAGE_KEY, legacyAnchorFromPlacement(state.nav));
-  } catch {
-    // ignore
-  }
+  } catch {}
   if (typeof document !== "undefined") {
     document.documentElement.dataset.mapSideDock = legacyAnchorFromPlacement(state.side);
     document.documentElement.dataset.mapNavDock = legacyAnchorFromPlacement(state.nav);

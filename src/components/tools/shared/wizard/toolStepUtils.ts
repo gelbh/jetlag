@@ -78,7 +78,6 @@ const stepsWithoutAnswer = new WeakMap<
   readonly ToolStepDefinition[]
 >();
 
-/** Multiplayer drops the Answer step; hiders respond in game chat. */
 export function stepsForMode<T extends readonly ToolStepDefinition[]>(
   allSteps: T,
   awaitHiderAnswer: boolean,

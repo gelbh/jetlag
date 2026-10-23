@@ -16,7 +16,6 @@ export function InsetHairline({ insetStart = "3.25rem" }: { insetStart?: string 
   );
 }
 
-/** Home-style inset navigation row (icon · label · chevron). */
 export function InsetRow({
   to,
   href,
@@ -30,7 +29,6 @@ export function InsetRow({
   "aria-label": ariaLabel,
 }: {
   to?: string;
-  /** External URL (opens in a new tab). */
   href?: string;
   label: string;
   icon: ReactNode;

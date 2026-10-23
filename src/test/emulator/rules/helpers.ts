@@ -90,11 +90,9 @@ export function timeTrapPayload() {
 }
 
 export type RulesTestEnvBox = {
-  /** Populated by beforeAll; safe to read from it()/beforeEach. */
   testEnv: RulesTestEnvironment;
 };
 
-/** Call inside a describe() to bind RulesTestEnvironment lifecycle hooks. */
 export function bindRulesTestEnv(): RulesTestEnvBox {
   const box = {} as RulesTestEnvBox;
 

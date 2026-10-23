@@ -9,7 +9,6 @@ const DISTANCE_UNIT: DistanceUnit = "metric";
 const EMPTY_USED = new Set<PhotoCategoryId>();
 const DEFAULT_CATEGORY = photoCategoriesForGameSize(GAME_SIZE)[0]!.id;
 
-/** Live Photo Ask catalog. */
 export function PhotoLearnDemo() {
   const [categoryId, setCategoryId] = useState<PhotoCategoryId>(DEFAULT_CATEGORY);
   const [categoryChosen, setCategoryChosen] = useState(false);

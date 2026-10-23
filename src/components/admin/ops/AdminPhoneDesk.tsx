@@ -151,7 +151,6 @@ function visibleColumns<Row>(columns: AdminColumn<Row>[], visible: string[]): Ad
   return visible.flatMap((id) => byId.get(id) ?? []);
 }
 
-/** Comp `phone()`: segmented tabs and Columns, then one card per row. */
 export function AdminPhoneList({
   tables,
   tab,
@@ -285,7 +284,6 @@ export function AdminPhoneList({
   );
 }
 
-/** A session opened full screen on a phone: the chosen facts, Watch game, Open incident. */
 export function AdminPhoneSession({
   summary,
   columns,

@@ -1,8 +1,3 @@
-// Copy checked against: src/hooks/billing/usePremiumHostEligibility.ts and
-// src/components/billing/PremiumFeatureList.tsx (Premium), src/sw.ts and
-// src/services/core/network/offlineQueue.ts (offline), src/domain/regions/bundledPresets/index.ts
-// (built-in areas), src/components/ui/banners/PwaInstallTipBanner.tsx (install) and
-// src/domain/legal/privacyPolicyContent.ts (privacy). Re-check them when those change.
 import type { LearnPageContent } from "./learnContentTypes";
 
 export const FAQ_CONTENT: LearnPageContent = {

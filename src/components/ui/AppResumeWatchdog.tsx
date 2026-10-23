@@ -47,9 +47,7 @@ function writeResumeWatchdogLatch(): boolean {
 function clearResumeWatchdogLatch(): void {
   try {
     sessionStorage.removeItem(RESUME_WATCHDOG_RELOAD_KEY);
-  } catch {
-    // sessionStorage may be unavailable in private browsing.
-  }
+  } catch {}
 }
 
 function hasConflictingReloadLatch(): boolean {
@@ -189,7 +187,6 @@ export function AppResumeWatchdog() {
     };
 
     const onPageShow = (event: PageTransitionEvent) => {
-      // Only bfcache restores — skip initial load and normal navigations.
       if (!event.persisted) {
         return;
       }

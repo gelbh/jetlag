@@ -15,10 +15,6 @@ export interface UseIncidentThreadResult {
   sendMessage: (text: string) => Promise<void>;
 }
 
-/**
- * Live incident doc + messages for the player/admin chat thread.
- * Mutations go through callables; Firestore is read-only for clients.
- */
 export function useIncidentThread(incidentId: string | null | undefined): UseIncidentThreadResult {
   const [incident, setIncident] = useState<IncidentRecord | null>(null);
   const [messages, setMessages] = useState<IncidentMessageRecord[]>([]);

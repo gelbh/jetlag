@@ -10,7 +10,6 @@ export type MapScreenRoleCodesSheetProps = {
   canOpenCodes: boolean;
 };
 
-/** Shared Codes sheet gate for seeker / hider / observer map chrome. */
 export function MapScreenRoleCodesSheet({
   session,
   uid,

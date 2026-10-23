@@ -1,16 +1,3 @@
-/**
- * Free vs premium caps for the session-ops agent.
- * Server mirror: `functions/incident/sessionOpsCaps.mjs` — keep numbers in sync.
- *
- * Counters (server):
- * - `incidents/{id}.sessionOpsSummonCount`
- * - `incidents/{id}/summons/{summonId}.agentTurnCount`
- * - `incidents/{id}/summons/{summonId}.toolExecutionCount`
- * - global tool attempts: `_rateLimits` route `sessionOpsTool` (uid / hour)
- *
- * Destructive host confirms do not reset these counters.
- */
-
 export type SessionOpsCapTier = "free" | "premium";
 
 export interface SessionOpsCaps {
@@ -35,7 +22,6 @@ export const SESSION_OPS_CAPS = {
   },
 } as const satisfies Record<SessionOpsCapTier, SessionOpsCaps>;
 
-/** Sliding / fixed window length for global tool attempts. */
 export const SESSION_OPS_GLOBAL_TOOL_WINDOW_MS = 60 * 60 * 1000;
 
 export const SESSION_OPS_SUMMON_CAP = "SESSION_OPS_SUMMON_CAP";
@@ -60,10 +46,6 @@ export interface SessionOpsSummonUsage {
 
 export type CapConsumeResult<T> = { ok: true; usage: T } | { ok: false; code: SessionOpsCapCode };
 
-/**
- * Premium when the reporter has unlimited premium entitlement, or the
- * incident session is a premium-tier session.
- */
 export function isSessionOpsPremiumTier(input: {
   hasUnlimitedPremium?: boolean;
   sessionTier?: string | null;

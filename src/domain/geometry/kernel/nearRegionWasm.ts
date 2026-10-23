@@ -3,7 +3,6 @@ import type { NearRegionBatchInput, PolygonFeature } from "./types";
 
 export type { NearRegionBatchInput } from "./types";
 
-/** Reset lazy WASM module (tests). */
 export const resetNearRegionWasmForTests = resetKernelWasmForTests;
 
 export async function wasmBuildNearRegion(

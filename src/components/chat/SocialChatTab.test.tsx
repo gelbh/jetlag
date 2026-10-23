@@ -41,7 +41,6 @@ describe("SocialChatTab", () => {
   beforeEach(() => {
     useWriteLedgerStore.setState({ entries: {} });
     postSocialMessageMock.mockReset();
-    // Offline: the server ack never arrives.
     postSocialMessageMock.mockReturnValue(new Promise<void>(() => {}));
   });
 

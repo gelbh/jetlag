@@ -89,7 +89,6 @@ export function useResolvedSessionRules(
 
     void (async () => {
       try {
-        // Read session at start; discard if pack key churned away.
         const snapshot = session;
         if (!snapshot) {
           return;

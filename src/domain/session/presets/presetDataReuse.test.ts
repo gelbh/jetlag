@@ -113,7 +113,6 @@ describe("suggestPresetDataReuseForGameArea", () => {
     const framed = boxPolygon(53.32, -6.35, 53.38, -6.2);
     const suggestion = suggestPresetDataReuseForGameArea(framed, [a, b]);
     expect(suggestion.customLocationPins?.map((pin) => pin.id).sort()).toEqual(["a1", "b1"]);
-    // tighter bbox → higher score → b wins pack fields
     expect(suggestion.subregionId).toBe("dcc");
     expect(suggestion.sourcePresetIds.sort()).toEqual(["a", "b"]);
   });
@@ -140,7 +139,6 @@ describe("suggestPresetDataReuseForGameArea", () => {
     });
     expect(suggestion.customLocationPins?.map((pin) => pin.id)).toEqual(["other-pin"]);
     expect(suggestion.sourcePresetIds).toEqual(["other"]);
-    // other is tighter → score > loaded → pack fields from other
     expect(suggestion.subregionId).toBe("fingal");
   });
 

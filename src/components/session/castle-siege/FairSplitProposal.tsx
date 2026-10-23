@@ -25,7 +25,6 @@ export type FairSplitProposalProps = {
   sealB: CastleSiegeSealPoint;
   beltWidthMeters: number;
   isHost: boolean;
-  /** Injected candidates (tests / host override); omits geometric search when set. */
   candidates?: readonly CastleSiegeBorderLine[];
   alreadyLocked?: boolean;
   onLock: (patch: FairSplitLockPatch) => Promise<void>;
@@ -72,10 +71,6 @@ function evaluateNudgedDraft(args: {
   }
 }
 
-/**
- * Skin-S3 Fair-split proposal strip: propose → score/status → host nudge stub → lock.
- * Fail-closed surfaces a manual-path flag when no legal cut exists.
- */
 export function FairSplitProposal({
   arena,
   sealA,

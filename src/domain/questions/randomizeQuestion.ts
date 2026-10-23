@@ -47,7 +47,6 @@ import {
   usedThermometerDistanceOptionsForSession,
 } from "./thermometerQuestions";
 
-/** Questions the seekers could ask with this tool in this session, keyed by tool-native id. */
 export function questionOptionsForTool(
   toolType: PendingQuestionToolType,
   session: SessionRulesInput,
@@ -89,7 +88,6 @@ export function questionOptionsForTool(
   }
 }
 
-/** Catalog label for one pending question option, or null when unknown. */
 export function questionOptionLabelForPending(
   pending: PendingQuestionRecord,
   session: SessionRulesInput,
@@ -134,7 +132,6 @@ export function questionOptionLabelForPending(
   }
 }
 
-/** Session-used option labels for a tool (annotations + sticky/open pending). */
 export function usedQuestionOptionLabelsForTool(
   toolType: PendingQuestionToolType,
   session: SessionRulesInput,

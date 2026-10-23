@@ -8,7 +8,6 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 
-/** Phosphor icons for binary Ask answers (map chrome + BinaryAnswerPicker). */
 export function binaryAnswerIcon(value: string): Icon | null {
   switch (value) {
     case "yes":

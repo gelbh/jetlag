@@ -18,9 +18,7 @@ const FIREFOX_NS_ERROR_FAILURE = /NS_ERROR_FAILURE:\s*No error message/i;
 const RECAPTCHA_TIMEOUT = /^reCAPTCHA Timeout\s*\(/i;
 const BROWSER_EXTENSION_NOISE =
   /Invalid call to runtime\.sendMessage\(\)|Object Not Found Matching Id:/i;
-/** Soft App Check backoff codes (initial-throttle after 403, later throttled). */
 const APP_CHECK_SOFT_THROTTLE = /appCheck\/(?:initial-throttle|throttled)/i;
-/** Transient network disconnect while contacting App Check (not content-blocker). */
 const APP_CHECK_FETCH_NETWORK = /appCheck\/fetch-network-error/i;
 const APP_CHECK_PROBE_TIMED_OUT = /App Check probe timed out/i;
 const APP_CHECK_BLOCKED_FETCH =
@@ -59,17 +57,14 @@ export function isFirefoxNsErrorFailureNoiseMessage(message: string): boolean {
   return FIREFOX_NS_ERROR_FAILURE.test(message);
 }
 
-/** Google reCAPTCHA script timeout string. */
 export function isRecaptchaTimeoutMessage(message: string): boolean {
   return RECAPTCHA_TIMEOUT.test(message.trim());
 }
 
-/** Browser extension / injector noise leaking into the page. */
 export function isBrowserExtensionNoiseMessage(message: string): boolean {
   return BROWSER_EXTENSION_NOISE.test(message);
 }
 
-/** Firebase App Check soft throttle error codes in the message. */
 export function isAppCheckInitialThrottleMessage(message: string): boolean {
   return APP_CHECK_SOFT_THROTTLE.test(message);
 }
@@ -91,7 +86,6 @@ export function isAppCheckSoftFailureMessage(message: string): boolean {
   );
 }
 
-/** Content-blocker load/fetch failures that should hard-block the app. */
 export function isAppCheckBlockedFetchMessage(message: string): boolean {
   return APP_CHECK_BLOCKED_FETCH.test(message);
 }
@@ -100,7 +94,6 @@ export type AppCheckProbeFailureClass =
   | { soft: true; reason: "timeout" | "offline" | "error"; allowApp: true }
   | { soft: false; reason: "blocked"; allowApp: false };
 
-/** Single classifier for App Check probe soft vs hard outcomes. */
 export function classifyAppCheckProbeFailure(
   outcome: "timeout" | "offline" | "empty" | { message: string },
 ): AppCheckProbeFailureClass {

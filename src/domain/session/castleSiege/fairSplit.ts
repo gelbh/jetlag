@@ -19,11 +19,8 @@ import {
   validateBorderCutsArena,
 } from "./pregame";
 
-/** Default angle samples over [0, π). */
 const DEFAULT_ANGLE_STEPS = 18;
-/** Default offsets as fractions of the arena half-diagonal. */
 const DEFAULT_OFFSET_STEPS = 11;
-/** Grid resolution for area / landmark-free side balance. */
 const AREA_SAMPLE_GRID = 8;
 
 export type FairSplitHalves = CastleSiegeCoinAssignment;
@@ -33,12 +30,7 @@ export type ProposeFairSplitArgs = {
   sealA: CastleSiegeSealPoint;
   sealB: CastleSiegeSealPoint;
   beltWidthMeters: number;
-  /**
-   * Optional stations / landmarks for side-balance scoring.
-   * When empty, halves are scored by sampled arena area on each side of the cut.
-   */
   landmarks?: readonly CastleSiegeSealPoint[];
-  /** Injected borders (tests / host override); skips geometric search when set. */
   candidates?: readonly CastleSiegeBorderLine[];
   search?: {
     angleSteps?: number;
@@ -81,10 +73,6 @@ export function assignHalvesByCastleSide(
   return { teamA, teamB };
 }
 
-/**
- * V7 legality: border cuts the arena, castles on opposite sides, neither inside
- * the Neutral Belt after buffering `beltWidthMeters`.
- */
 export function isLegalFairSplitCut(args: FairSplitLegalityArgs): boolean {
   const { arena, border, sealA, sealB, beltWidthMeters } = args;
   if (!(beltWidthMeters > 0) || !Number.isFinite(beltWidthMeters)) {
@@ -123,10 +111,6 @@ export type ScoreFairSplitArgs = FairSplitLegalityArgs & {
   landmarks?: readonly CastleSiegeSealPoint[];
 };
 
-/**
- * Lower is better. Combines side balance (landmarks or sampled area), compact
- * cut length, and cheap travel proxy (half-centroid distance-to-border gap).
- */
 export function scoreFairSplitCandidate(args: ScoreFairSplitArgs): number {
   const { arena, border, sealA, sealB, landmarks } = args;
   const balance = sideBalanceImbalance(arena, border, landmarks);
@@ -142,9 +126,6 @@ export function scoreFairSplitCandidate(args: ScoreFairSplitArgs): number {
   return balance + 0.15 * lengthNorm + travelNorm;
 }
 
-/**
- * Propose the best legal Fair-split cut, or fail closed to manual (`noLegalCut`).
- */
 export function proposeFairSplit(args: ProposeFairSplitArgs): ProposeFairSplitResult {
   const { arena, sealA, sealB, beltWidthMeters, landmarks, candidates, search } = args;
 
@@ -187,7 +168,6 @@ export function proposeFairSplit(args: ProposeFairSplitArgs): ProposeFairSplitRe
   return best ?? { ok: false, reason: "noLegalCut" };
 }
 
-/** Angle/offset chord sweep; endpoints snapped to arena ring intersections. */
 export function generateFairSplitCandidates(
   arena: GameArea,
   angleSteps: number = DEFAULT_ANGLE_STEPS,
@@ -219,7 +199,7 @@ export function generateFairSplitCandidates(
     const perpLat = Math.cos(angle);
 
     for (let oi = 0; oi < stepsO; oi += 1) {
-      const t = stepsO === 1 ? 0 : (oi / (stepsO - 1)) * 2 - 1; // [-1, 1]
+      const t = stepsO === 1 ? 0 : (oi / (stepsO - 1)) * 2 - 1;
       const offsetFrac = t * 0.45;
       const offsetMeters = offsetFrac * halfDiag;
       const midLatRad = (cy * Math.PI) / 180;
@@ -260,7 +240,6 @@ export function generateFairSplitCandidates(
   return out;
 }
 
-/** Exterior rings only (no holes) for Polygon and every MultiPolygon part. */
 function arenaExteriorLines(arena: GameArea): Feature<LineString>[] {
   const rings: Position[][] =
     arena.type === "Polygon"
@@ -293,7 +272,6 @@ function clipBorderToArenaRings(
     return null;
   }
 
-  // Order along the probe direction; take extremes as the cut endpoints.
   const [aLng, aLat] = probe.coordinates[0]!;
   const [bLng, bLat] = probe.coordinates[probe.coordinates.length - 1]!;
   const dx = bLng! - aLng!;

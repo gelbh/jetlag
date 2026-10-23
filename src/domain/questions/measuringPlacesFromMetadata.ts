@@ -8,10 +8,6 @@ type StoredMeasuringPlace = {
   lng: number;
 };
 
-/**
- * Prefer places embedded in region input (legacy). Otherwise hydrate from
- * `measuringPlacesJson` (current SoT when all-places measuring is used).
- */
 export function measuringPlacesFromMetadata(
   metadata: { measuringPlacesJson?: unknown } | Record<string, unknown>,
   regionPlaces: MeasuringPlace[] | undefined,

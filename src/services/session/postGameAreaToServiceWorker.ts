@@ -78,7 +78,6 @@ export function retainGameAreaForServiceWorker(bbox: BoundingBox | null): () => 
   };
 }
 
-/** Test hook — drop module state between cases. */
 export function resetGameAreaServiceWorkerPostForTests(): void {
   if (controllerChangeBound && hasServiceWorker()) {
     navigator.serviceWorker.removeEventListener("controllerchange", resendToNewController);

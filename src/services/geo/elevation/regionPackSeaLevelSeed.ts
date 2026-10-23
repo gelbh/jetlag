@@ -14,7 +14,6 @@ import {
 } from "@/services/core/network/fetchWithTimeout";
 import type { CachedSeaLevelSampling } from "../cache";
 
-/** Require most session cells to resolve from the pack seed before dual-phase. */
 const MIN_SEED_COVERAGE_RATIO = 0.5;
 
 export interface BundledSeaLevelSeed {
@@ -138,8 +137,6 @@ export async function loadBundledSeaLevelSeed(
 }
 
 function lookupSeedElevation(seed: BundledSeaLevelSeed, point: LatLngTuple): number {
-  // Containment only — nearest-fill would invent pack elevations outside the
-  // seed footprint and green-wash sparse/stub seeds.
   for (let index = 0; index < seed.cells.length; index += 1) {
     const cell = seed.cells[index];
     if (

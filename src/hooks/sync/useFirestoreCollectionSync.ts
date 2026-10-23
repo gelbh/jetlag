@@ -17,14 +17,6 @@ interface LoadedFor<T> {
   subscribe: CollectionSubscriber<T>;
 }
 
-/**
- * Subscribes to a Firestore collection for the session. `subscribe` is an
- * effect dependency: pass a module-level (or memoized) subscriber, or the
- * subscription is torn down and recreated on every render.
- *
- * `loaded` is false until the first snapshot (or error) of an enabled remote
- * subscription; it is true when there is nothing to wait for.
- */
 export function useFirestoreCollectionSyncWithStatus<T>(
   sessionId: string | undefined,
   subscribe: CollectionSubscriber<T>,

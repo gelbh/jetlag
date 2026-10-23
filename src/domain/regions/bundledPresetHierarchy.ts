@@ -3,7 +3,6 @@ import { bundledPresetDefinition } from "./bundledGamePresets";
 
 export interface PresetHierarchySegment {
   id: string;
-  /** Geographic or organizational level, e.g. Continent, Country, County. */
   category: string;
   name: string;
 }
@@ -88,12 +87,6 @@ function findSolePreset(
   return null;
 }
 
-/**
- * If a group wraps only one leaf preset (possibly through unary parents),
- * promote that preset so the UI does not show empty nested dropdowns
- * (e.g. Canada → BC → Prince Rupert becomes Canada → Prince Rupert).
- * Keep Continent / Country / Constituent country rows even when unary.
- */
 const KEEP_UNARY_GROUP_CATEGORIES = new Set(["Continent", "Country", "Constituent country"]);
 
 function collapseUnaryPresetChains(nodes: BundledPresetTreeNode[]): BundledPresetTreeNode[] {

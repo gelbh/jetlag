@@ -5,21 +5,11 @@ import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { HIDING_ZONE_PIN_CHOSEN_MS, resolvePinCircleRadius } from "./hidingZoneDraftPinTravel";
 
 export type HidingZoneDraftCenterPinProps = {
-  /**
-   * Display-only center from `useHidingZoneDraftDisplayCenter`.
-   * Confirm must keep reading tool-state center, not this.
-   */
   displayCenter: LatLngTuple | null;
-  /** While true, pin idles/pulses at the current display (usually the tap). */
   snapping?: boolean;
-  /** Station id after a successful snap; triggers a brief chosen radius bump. */
   chosenKey?: string | null;
 };
 
-/**
- * Draft-center marker while placing a hiding zone.
- * Position is display-only (may lag tool state during snap travel).
- */
 export function HidingZoneDraftCenterPin({
   displayCenter,
   snapping = false,

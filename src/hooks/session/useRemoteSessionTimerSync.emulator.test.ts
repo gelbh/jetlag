@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
@@ -71,7 +70,6 @@ describe("useRemoteSessionTimerSync emulator", () => {
   it("writes the host start in server time when the host clock is fast", async () => {
     const hostSkewMs = 300_000;
     const t = Date.now();
-    // Device clock 5 min ahead of the server: server reads t - skew at our midpoint t + 20.
     recordClockSample({ sentAtMs: t, receivedAtMs: t + 40, serverMs: t + 20 - hostSkewMs });
 
     const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, testUid);

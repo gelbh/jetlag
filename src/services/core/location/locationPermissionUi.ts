@@ -32,7 +32,6 @@ export function subscribeLocationPermissionUi(onStoreChange: () => void): () => 
   };
 }
 
-/** Register that a live feature wants GPS. Banner watches aggregate demand. */
 export function retainLocationPermissionDemand(): () => void {
   locationPermissionDemand += 1;
   emitLocationPermissionUi();
@@ -42,7 +41,6 @@ export function retainLocationPermissionDemand(): () => void {
   };
 }
 
-/** Call only after a successful user-gesture grant for live map GPS. */
 export function markLocationAccessConfirmed(): void {
   locationAccessConfirmEpoch += 1;
   emitLocationPermissionUi();
@@ -61,20 +59,15 @@ export function hasPersistedLocationAccessConfirmed(): boolean {
 export function persistLocationAccessConfirmed(): void {
   try {
     localStorage.setItem(LOCATION_ACCESS_CONFIRMED_STORAGE_KEY, "1");
-  } catch {
-    // private mode / blocked storage
-  }
+  } catch {}
 }
 
 export function clearPersistedLocationAccessConfirmed(): void {
   try {
     localStorage.removeItem(LOCATION_ACCESS_CONFIRMED_STORAGE_KEY);
-  } catch {
-    // private mode / blocked storage
-  }
+  } catch {}
 }
 
-/** Test-only reset for demand / confirm epoch. */
 export function resetLocationPermissionUiForTests(): void {
   locationPermissionDemand = 0;
   locationAccessConfirmEpoch = 0;

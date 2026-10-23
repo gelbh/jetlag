@@ -33,7 +33,6 @@ export function commitWrite(
   return { acknowledged };
 }
 
-/** Only show the restored entry if the SDK queue has not drained by then (avoids a boot "Saving…" flash). */
 export const RESTORED_WRITES_GRACE_MS = 250;
 
 const trackedDbs = new WeakSet<Firestore>();

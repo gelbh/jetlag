@@ -261,9 +261,7 @@ async function joinRemoteSessionWithoutRead(
         ),
       };
     }
-  } catch {
-    // Fall through to preview only as last resort.
-  }
+  } catch {}
 
   const memberUids = returningMemberUid
     ? buildMemberUidsAfterHeal([returningMemberUid], uid, returningMemberUid)
@@ -307,10 +305,6 @@ function isLegacyJoinError(error: unknown): boolean {
   return error instanceof Error && error.message === JOIN_ERROR_LEGACY_JOIN;
 }
 
-/**
- * The callable throws mapped copy for ended, missing, and incompatible
- * sessions; heal callers expect the status shape the client join returned.
- */
 function healFailureFromCallableError(
   error: unknown,
   codeRecord: SessionCodeRecord,
@@ -392,7 +386,6 @@ async function joinRemoteSessionByCodeOnce(
     if (healed) {
       return healed;
     }
-    // Ungated session and the old uid already left: join as a new member.
     return joinRemoteSessionByCodeOnce(code, codeRecord, uid, role, clientVersion, undefined, {
       ...options,
       returningMemberUid: undefined,
@@ -432,8 +425,6 @@ async function joinRemoteSessionByCodeOnce(
         throw legacyJoinError;
       }
 
-      // Gated sessions deny client membership writes. Probe the callable;
-      // if the session is not gated, keep the permission-denied for auth retry.
       try {
         return await callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
           ...options,

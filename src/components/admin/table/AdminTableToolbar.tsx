@@ -13,7 +13,6 @@ export interface AdminTableToolbarProps {
   onQueryChange(query: string): void;
   searchPlaceholder?: string;
   searchRef?: Ref<HTMLInputElement>;
-  /** Replaces the Sessions chips (Needs you brings its own). */
   chips?: ReactNode;
   liveOnly?: boolean;
   onLiveOnlyChange?(on: boolean): void;
@@ -25,7 +24,6 @@ export interface AdminTableToolbarProps {
   onTierChange?(tier: string | null): void;
   hasIncident?: boolean;
   onHasIncidentChange?(on: boolean): void;
-  /** The `AdminColumnPicker`, which renders the "Columns · N of M" button. */
   picker: ReactNode;
   density: "comfortable" | "compact";
   onDensityChange(density: "comfortable" | "compact"): void;
@@ -105,7 +103,6 @@ export function MenuChip({
 
 function noop() {}
 
-/** Comp `.tool`: 10px/14px padding, 32px controls, 28px chips. */
 export function AdminTableToolbar({
   tabs,
   query,

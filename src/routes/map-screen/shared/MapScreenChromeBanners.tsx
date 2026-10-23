@@ -9,7 +9,6 @@ const MEASURING_REFINE: MapRefineChip = {
   body: "Adding detail to the shaded area…",
 };
 
-/** Shared status-stack chips under MapStatusRail (seeker / hider). */
 export function MapScreenChromeBanners({
   measuringLodRefining = false,
   refineChip,

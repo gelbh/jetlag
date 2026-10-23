@@ -29,7 +29,6 @@ export function AppCheckProbeGate({ children }: { children: ReactNode }) {
           setProbe(result);
         }
       })
-      // Probe chunk failed to load: fail open, same as an inconclusive probe.
       .catch(() => {});
 
     return () => {

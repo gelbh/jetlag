@@ -6,20 +6,16 @@ type ScreenHeaderPlacement = "fixed" | "sticky" | "inline";
 export const screenBackLinkClassName =
   "screen-back-control inline-flex min-h-11 items-center gap-1 px-1 font-display text-xs font-semibold uppercase tracking-[0.14em] text-field-ink-muted no-underline transition-colors hover:text-flag";
 
-/** Clears the OS status bar on header shells (safe area + gap, with a 44px floor). */
 export const screenHeaderInsetTopClassName =
   "pt-[max(2.75rem,calc(var(--safe-area-top)+0.625rem))]";
 
-/** Shared chrome for inline header wrappers (border, bg, bottom padding). */
 export const screenHeaderShellClassName = `shrink-0 border-b-2 border-rule bg-canvas pb-2 ${screenHeaderInsetTopClassName}`;
 
-/** Top padding for page content below a fixed ScreenHeader. */
 export const screenHeaderOffsetClassName = "pt-[max(6rem,calc(var(--safe-area-top)+3.875rem))]";
 
 interface ScreenHeaderProps {
   backTo?: string;
   backLabel?: string;
-  /** In-screen back (e.g. nested sub-views) instead of routing away. */
   onBack?: () => void;
   placement?: ScreenHeaderPlacement;
   className?: string;

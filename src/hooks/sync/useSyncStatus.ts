@@ -57,7 +57,6 @@ export function useSyncStatus(): {
       fromCache,
       lastSyncError,
     }),
-    // "Offline · N queued" counts every un-acked action, not just annotations.
     queuedWrites: pendingWrites + ledgerPending,
     lastSyncError,
     remoteUpdateNotice,

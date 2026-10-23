@@ -1,6 +1,5 @@
 export type CancelIdleAfterLoad = () => void;
 
-/** The slice of `window` the scheduler needs; injectable for tests. */
 export type IdleAfterLoadHost = {
   document: { readyState: string };
   addEventListener(type: "load", listener: () => void, options: { once: true }): void;
@@ -12,7 +11,6 @@ export type IdleAfterLoadHost = {
 };
 
 export type ScheduleWhenIdleAfterLoadOptions = {
-  /** Max wait for idle once `load` has fired (requestIdleCallback timeout). */
   timeoutMs?: number;
   host?: IdleAfterLoadHost;
 };
@@ -26,12 +24,6 @@ function defaultHost(): IdleAfterLoadHost | undefined {
   return window as unknown as IdleAfterLoadHost;
 }
 
-/**
- * Runs `callback` once, after the window `load` event and the next idle
- * period (bounded by `timeoutMs`). Unlike `scheduleIdleBootWork`, this waits
- * for `load`, so the work stays off the LCP / first-load network path.
- * Returns a cancel function; runs immediately when there is no window (SSR).
- */
 export function scheduleWhenIdleAfterLoad(
   callback: () => void,
   options: ScheduleWhenIdleAfterLoadOptions = {},

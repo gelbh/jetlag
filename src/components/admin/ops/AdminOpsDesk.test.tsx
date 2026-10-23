@@ -802,7 +802,6 @@ describe("AdminOpsDesk", () => {
 
       fireEvent.click(screen.getByRole("radio", { name: /Needs you/ }));
       await waitFor(() => expect(path()).toBe("/admin/incidents"));
-      // Open rows only: two incidents and one preload request.
       expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(4);
       expect(screen.getByText("Open")).toBeInTheDocument();
 

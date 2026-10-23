@@ -29,10 +29,6 @@ export type CastleSiegeSetupChromeProps = {
   session: SessionRecord | null | undefined;
   uid: string | null | undefined;
   isHost?: boolean;
-  /**
-   * Real Fair-split seal coordinates (map pins). When either is missing, Fair-split
-   * propose/lock is gated so stub halves are never persisted.
-   */
   sealA?: CastleSiegeSealPoint;
   sealB?: CastleSiegeSealPoint;
 };

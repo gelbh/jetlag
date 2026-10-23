@@ -118,13 +118,11 @@ describe("serverClock", () => {
 
   it("drops older samples after a device clock jump", () => {
     const t = Date.now();
-    // Fast sample: offset 10_000, rtt 20.
     recordClockSample({
       sentAtMs: t,
       receivedAtMs: t + 20,
       serverMs: t + 10_010,
     });
-    // Device clock corrected by +10s: slower sample now implies offset ~0.
     recordClockSample({
       sentAtMs: t + 10_000,
       receivedAtMs: t + 10_400,
@@ -158,7 +156,6 @@ describe("serverClock", () => {
       vi.useRealTimers();
     });
 
-    /** Puts the test on a device whose clock is `skewMs` off, synced by one probe. */
     function becomeDevice(skewMs: number, trueNowMs: number): void {
       localStorage.clear();
       resetServerClockForTests();
@@ -189,7 +186,6 @@ describe("serverClock", () => {
       expect(Math.abs(fastView - slowView)).toBeLessThan(1_000);
       expect(Math.abs(fastView - 7 * 60_000)).toBeLessThan(1_000);
 
-      // Same reads on raw device clocks drift by the full 7 min skew gap.
       const rawFast = computeElapsedMs(started, trueReadMs + FAST_DEVICE_MS);
       const rawSlow = computeElapsedMs(started, trueReadMs + SLOW_DEVICE_MS);
       expect(Math.abs(rawFast - rawSlow)).toBe(FAST_DEVICE_MS - SLOW_DEVICE_MS);

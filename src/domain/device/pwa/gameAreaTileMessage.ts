@@ -2,7 +2,6 @@ import { type BoundingBox, isValidBoundingBox } from "../../geometry/gameArea/ga
 
 // Relative imports: this module is bundled into the service worker (src/sw.ts).
 
-/** Client → SW: current session game-area bbox (`null` clears it on session end). */
 export const GAME_AREA_SW_MESSAGE_TYPE = "jetlag:game-area";
 
 export interface GameAreaSwMessage {
@@ -14,10 +13,6 @@ export function createGameAreaSwMessage(bbox: BoundingBox | null): GameAreaSwMes
   return { type: GAME_AREA_SW_MESSAGE_TYPE, bbox };
 }
 
-/**
- * Validate an untrusted `postMessage` payload. Returns the message when it is a
- * well-formed game-area message, else `null` (wrong type or malformed bbox).
- */
 export function parseGameAreaSwMessage(data: unknown): GameAreaSwMessage | null {
   if (typeof data !== "object" || data === null) {
     return null;

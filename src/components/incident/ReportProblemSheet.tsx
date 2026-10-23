@@ -31,11 +31,8 @@ type PostReportTab = "agent" | "chat";
 export interface ReportProblemSheetProps {
   open: boolean;
   onClose: () => void;
-  /** Injectable online flag for tests; defaults to `navigator.onLine`. */
   online?: boolean;
-  /** Injectable create call for tests. */
   createIncidentFn?: (input: CreateIncidentInput) => Promise<CreateIncidentResult>;
-  /** Optional pre-seeded client errors (otherwise empty until a ring buffer lands). */
   lastClientErrors?: readonly IncidentClientError[];
 }
 

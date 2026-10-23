@@ -30,7 +30,6 @@ const TABS: Array<{ id: AdminMonitorRailTab; label: string; short: string }> = [
   { id: "mod", label: "Mod", short: "Mod" },
 ];
 
-// The rail is a fixed-height column: the list stays put and the active panel scrolls.
 const TAB_LAYOUT = {
   root: { display: "flex", flexDirection: "column", flex: 1, minHeight: 0 },
   panel: { flex: 1, minHeight: 0 },

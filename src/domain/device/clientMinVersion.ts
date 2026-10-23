@@ -1,6 +1,5 @@
 import { compareAppVersions } from "../session/meta/sessionVersion";
 
-/** Firestore path: `ops/clientMinVersion` — global client floor (not peer session version). */
 export const CLIENT_MIN_VERSION_COLLECTION = "ops";
 export const CLIENT_MIN_VERSION_DOC_ID = "clientMinVersion";
 
@@ -8,10 +7,6 @@ export function meetsClientMinVersion(clientVersion: string, minVersion: string)
   return compareAppVersions(clientVersion, minVersion) >= 0;
 }
 
-/**
- * True when the client is strictly below a configured min.
- * Empty / missing min means the gate is disabled (fail-open).
- */
 export function isBelowClientMinVersion(
   clientVersion: string,
   minVersion: string | null | undefined,

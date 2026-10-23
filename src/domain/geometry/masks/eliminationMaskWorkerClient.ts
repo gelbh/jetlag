@@ -11,7 +11,6 @@ import { gameAreaFingerprint } from "../core/gameAreaConvert";
 import type { DiskSpec, EliminationUnionInput, PolygonFeature } from "../kernel/types";
 import { eliminationAnnotationsContentKey, isAddOnly } from "./eliminationAnnotationKey";
 
-/** Full draft geometry identity for mask cache (preview fingerprints are lossy). */
 function draftFeaturesContentKey(features: readonly Feature<GeoPolygon | MultiPolygon>[]): string {
   return features
     .map((feature) => {

@@ -1,7 +1,3 @@
-/**
- * PostHog `before_send` for `$exception` events.
- * Reuses the client exception drop / keep / meter matrix so exception capture shares one noise definition.
- */
 import type { CaptureResult } from "posthog-js";
 import {
   applyClientExceptionDisposition,
@@ -43,7 +39,6 @@ export function filterPosthogException(
     return null;
   }
 
-  // meter_quota: mirror grouping + level via PostHog's custom exception properties.
   if (next.fingerprint) {
     capture.properties.$exception_fingerprint = next.fingerprint.join(":");
   }

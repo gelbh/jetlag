@@ -8,10 +8,8 @@ type EntryRouteShellProps = {
   title: string;
   backTo?: string;
   backLabel?: string;
-  /** See `EntryHeader` `titleIsHeading`. */
   titleIsHeading?: boolean;
   children: ReactNode;
-  /** Join centers the form column in the remaining viewport. */
   centerBody?: boolean;
 };
 

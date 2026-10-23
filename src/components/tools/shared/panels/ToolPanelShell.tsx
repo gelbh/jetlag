@@ -8,7 +8,6 @@ interface ToolPanelShellProps {
   helper?: ReactNode;
   stepper?: ReactNode;
   children?: ReactNode;
-  /** Live map wizards: fill the floating panel height for internal scroll. */
   fillHeight?: boolean;
 }
 
