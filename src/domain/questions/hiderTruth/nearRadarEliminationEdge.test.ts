@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { destinationPoint } from "../../geometry/core/geodesicPrimitives";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import type { AnnotationRecord } from "../../map/annotations";
-import { isNearRadarEliminationEdge, NEAR_RADAR_EDGE_METERS } from "./nearRadarEliminationEdge";
+import { DEFAULT_RADIUS_METERS } from "../../map/distance";
+import {
+  answeredRadarCircle,
+  isNearRadarEliminationEdge,
+  NEAR_RADAR_EDGE_METERS,
+} from "./nearRadarEliminationEdge";
 
 const RADAR_CENTER: LatLngTuple = [51.45, -0.15];
 const RADIUS_METERS = 2000;
@@ -39,6 +44,28 @@ function radarAnnotation(options: {
 function pointAlongRadius(distanceMeters: number): LatLngTuple {
   return destinationPoint(RADAR_CENTER, distanceMeters, 0);
 }
+
+describe("answeredRadarCircle", () => {
+  it("returns centre, radius, and inside for an answered radar", () => {
+    const circle = answeredRadarCircle(radarAnnotation({ inside: true, radiusMeters: 1500 }));
+    expect(circle).toEqual({
+      center: RADAR_CENTER,
+      radiusMeters: 1500,
+      inside: true,
+    });
+  });
+
+  it("uses pointToolRadiusFromMetadata default when radiusMeters is missing", () => {
+    const annotation = radarAnnotation({ inside: false });
+    delete annotation.metadata.radiusMeters;
+    const circle = answeredRadarCircle(annotation);
+    expect(circle?.radiusMeters).toBe(DEFAULT_RADIUS_METERS);
+  });
+
+  it("returns null when inside is unanswered", () => {
+    expect(answeredRadarCircle(radarAnnotation({}))).toBeNull();
+  });
+});
 
 describe("isNearRadarEliminationEdge", () => {
   it("is true when the point sits exactly on the radar edge", () => {
