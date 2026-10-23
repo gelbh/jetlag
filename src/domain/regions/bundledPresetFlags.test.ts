@@ -6,6 +6,7 @@ import {
   flagMarkForHierarchySegmentId,
   flagMarkForSegmentRow,
 } from "./bundledPresetFlags";
+import { AUSTRALIA_STATE_PRESETS } from "./bundledPresets/australia";
 import { SWISS_CANTON_IDS } from "./bundledPresets/swiss";
 
 describe("bundledPresetFlags", () => {
@@ -146,6 +147,21 @@ describe("bundledPresetFlags", () => {
   it("resolves flags for all Swiss canton segments", () => {
     for (const cantonId of SWISS_CANTON_IDS) {
       expect(flagMarkForSegmentRow(`canton-${cantonId}`, [])).not.toBeNull();
+    }
+  });
+
+  it("resolves flags for Australia country and state/territory segments", () => {
+    expect(flagMarkForHierarchySegmentId("country-au")?.src).toBe("/region-flags/country-au.png");
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-au"].source).toMatch(/^flagcdn:au$/);
+    expect(flagMarkForBundledPresetId("bundled:australia")?.src).toBe(
+      "/region-flags/country-au.png",
+    );
+    for (const state of AUSTRALIA_STATE_PRESETS) {
+      const segmentId = `state-${state.id}`;
+      expect(flagMarkForSegmentRow(segmentId, ["continent-oceania", "country-au"])).not.toBeNull();
+      expect(flagMarkForBundledPresetId(`bundled:australia-${state.id}`)?.src).toBe(
+        `/region-flags/${segmentId}.png`,
+      );
     }
   });
 });
