@@ -146,6 +146,8 @@ interface SessionState {
   networkReachable: boolean | null;
   /** True while the latest session doc snapshot came from the local cache (not persisted). */
   sessionFromCache: boolean;
+  /** Heal secret keyed by session id: one entry, the latest session. Persisted with myUid. */
+  healSecrets: Record<string, string>;
   setSession: (session: SessionRecord | null, myUid?: string | null) => void;
   setMyUid: (uid: string | null) => void;
   setGameArea: (gameArea: GameArea) => void;
@@ -158,6 +160,7 @@ interface SessionState {
   setRemoteUpdateNotice: (message: string | null) => void;
   setNetworkReachable: (reachable: boolean | null) => void;
   setSessionFromCache: (fromCache: boolean) => void;
+  setHealSecret: (sessionId: string, secret: string) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -172,6 +175,7 @@ export const useSessionStore = create<SessionState>()(
       remoteUpdateNotice: null,
       networkReachable: null,
       sessionFromCache: false,
+      healSecrets: {},
       setSession: (session, myUid) =>
         set((state) => {
           const uid = myUid === undefined ? state.myUid : myUid;
@@ -205,6 +209,7 @@ export const useSessionStore = create<SessionState>()(
             myUid: uid,
             myRole: nextSession && uid ? resolvePlayerRole(nextSession.memberRoles, uid) : null,
             ...(sessionChanged ? { remoteUpdateNotice: null, lastSyncError: null } : {}),
+            ...(uid === null ? { healSecrets: {} } : {}),
           };
         }),
       setMyUid: (myUid) =>
@@ -214,6 +219,7 @@ export const useSessionStore = create<SessionState>()(
             state.session && myUid
               ? resolvePlayerRole(state.session.memberRoles, myUid)
               : state.myRole,
+          ...(myUid === null ? { healSecrets: {} } : {}),
         })),
       setGameArea: (gameArea) =>
         set((state) =>
@@ -244,6 +250,7 @@ export const useSessionStore = create<SessionState>()(
         set((state) =>
           state.sessionFromCache === sessionFromCache ? state : { sessionFromCache },
         ),
+      setHealSecret: (sessionId, secret) => set({ healSecrets: { [sessionId]: secret } }),
     }),
     {
       name: "jetlag-session",
@@ -251,6 +258,7 @@ export const useSessionStore = create<SessionState>()(
         session: state.session,
         myUid: state.myUid,
         myRole: state.myRole,
+        healSecrets: state.healSecrets,
       }),
     },
   ),

@@ -10,6 +10,7 @@ export function resetAllStores(): void {
     syncInFlight: 0,
     lastSyncError: null,
     remoteUpdateNotice: null,
+    healSecrets: {},
   });
   useAnnotationStore.setState({
     annotations: [],
