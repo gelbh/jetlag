@@ -5,6 +5,7 @@ import { isActive } from "../../map/annotationActive";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
+import { answeredRadarCircle } from "../../questions/hiderTruth/nearRadarEliminationEdge";
 import { measuringPlacesFromMetadata } from "../../questions/measuringPlacesFromMetadata";
 import { thermometerShadedSide } from "../../questions/thermometerQuestions";
 import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
@@ -41,22 +42,14 @@ export function eliminationDiskForAnnotation(annotation: AnnotationRecord): Disk
     return null;
   }
 
-  if (annotation.type === "radar") {
-    const geometry = annotation.geometry.geometry;
-    if (geometry.type !== "Point") {
-      return null;
-    }
-
+  const radar = answeredRadarCircle(annotation);
+  if (radar) {
     // metadata.inside = hider within circle (yes). Eliminate where they are not:
     // no → disk; yes → exterior (kernel path below).
-    if (annotation.metadata.inside !== false) {
+    if (radar.inside) {
       return null;
     }
-
-    const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
-    const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-
-    return { center, radiusMeters };
+    return { center: radar.center, radiusMeters: radar.radiusMeters };
   }
 
   return null;
@@ -232,25 +225,13 @@ export async function eliminationFeatureForAnnotation(
     );
   }
 
-  if (annotation.type === "radar") {
-    const geometry = annotation.geometry.geometry;
-    if (geometry.type !== "Point") {
-      return null;
-    }
-
-    if (typeof annotation.metadata.inside !== "boolean") {
-      return null;
-    }
-
-    const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
-    const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-
+  const radar = answeredRadarCircle(annotation);
+  if (radar) {
     // yes (inside): eliminate exterior. no: disk path in eliminationDiskForAnnotation.
-    if (!annotation.metadata.inside) {
+    if (!radar.inside) {
       return null;
     }
-
-    return dispatchRadarShadedRegion(center, radiusMeters, gameArea, false);
+    return dispatchRadarShadedRegion(radar.center, radar.radiusMeters, gameArea, false);
   }
 
   return null;
@@ -360,11 +341,7 @@ function annotationLikelyHasEliminationFeature(annotation: AnnotationRecord): bo
     return true;
   }
 
-  if (
-    annotation.type === "radar" &&
-    annotation.geometry.geometry.type === "Point" &&
-    typeof annotation.metadata.inside === "boolean"
-  ) {
+  if (answeredRadarCircle(annotation) !== null) {
     return true;
   }
 

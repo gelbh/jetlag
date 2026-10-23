@@ -13,7 +13,7 @@ type StoredMeasuringPlace = {
  * `measuringPlacesJson` (current SoT when all-places measuring is used).
  */
 export function measuringPlacesFromMetadata(
-  metadata: Record<string, unknown>,
+  metadata: { measuringPlacesJson?: unknown } | Record<string, unknown>,
   regionPlaces: MeasuringPlace[] | undefined,
 ): MeasuringPlace[] {
   if (regionPlaces && regionPlaces.length > 0) {
