@@ -1,6 +1,7 @@
 import { Box, Button, Checkbox, Popover, TextInput } from "@mantine/core";
 import { type KeyboardEvent, useState } from "react";
 import type { AdminTablePrefs } from "@/domain/admin/adminTablePrefs";
+import { RAISED_BG } from "../shared/adminSurface";
 import type { AdminColumn } from "./AdminDataTable";
 
 const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
@@ -10,6 +11,8 @@ export interface AdminColumnPickerProps<Row> {
   prefs: AdminTablePrefs;
   defaults: AdminTablePrefs;
   onPrefsChange(prefs: AdminTablePrefs): void;
+  /** Trigger height: 32 in the toolbar, 44 for touch. */
+  height?: number;
 }
 
 /** Comp `.picker`: 300px floating panel; the toolbar button is its target. */
@@ -18,6 +21,7 @@ export function AdminColumnPicker<Row>({
   prefs,
   defaults,
   onPrefsChange,
+  height = 32,
 }: AdminColumnPickerProps<Row>) {
   const [opened, setOpened] = useState(false);
   const [find, setFind] = useState("");
@@ -77,13 +81,13 @@ export function AdminColumnPicker<Row>({
         <Button
           variant="default"
           size="compact-sm"
-          h={32}
+          h={height}
           fz={13}
           radius={12}
           aria-expanded={opened}
           onClick={() => setOpened((value) => !value)}
           style={{
-            background: opened ? "var(--color-flag-soft)" : "var(--color-surface-raised)",
+            background: opened ? "var(--color-flag-soft)" : RAISED_BG,
             borderColor: opened ? "var(--color-flag)" : undefined,
             color: "var(--color-ink)",
           }}
@@ -94,8 +98,9 @@ export function AdminColumnPicker<Row>({
       <Popover.Dropdown
         p={0}
         style={{
-          background: "var(--color-surface-raised)",
+          background: "var(--color-canvas)",
           border: hairline,
+          boxShadow: "0 8px 24px 0 oklch(0.1 0.04 265 / 0.45)",
           overflow: "hidden",
         }}
       >

@@ -5,6 +5,7 @@ import type { AdminTableTab } from "@/domain/admin/adminTablePrefs";
 import { formatFreshnessAge } from "@/domain/admin/formatAdminFreshness";
 import type { AdminSessionSummary } from "@/services/admin/adminSessions";
 import { AdminRegion } from "../shared/AdminRegion";
+import { RAISED_BG } from "../shared/adminSurface";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { sortAdminRows } from "../table/AdminDataTable";
@@ -236,7 +237,6 @@ export function AdminSidebarList({
   const bodyRef = useRef<HTMLDivElement>(null);
 
   // The open row stays in view when the sidebar mounts or the selection moves.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-run on selection or tab change
   useEffect(() => {
     bodyRef.current
       ?.querySelector<HTMLElement>('[aria-current="true"]')
@@ -260,7 +260,7 @@ export function AdminSidebarList({
             size="compact-sm"
             aria-label="Expand to table"
             title="Expand to table"
-            style={{ background: "var(--color-surface-raised)", color: "var(--color-ink)" }}
+            style={{ background: RAISED_BG, color: "var(--color-ink)" }}
             onClick={onExpand}
           >
             Expand ⟩

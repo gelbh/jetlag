@@ -6,6 +6,7 @@ import type {
 } from "@/domain/session/activity/sessionChat";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import type { StatusTone } from "@/theme/adminTone";
+import { RAISED_BG } from "../shared/adminSurface";
 
 const STATUS: Record<PendingQuestionStatus, { tone: StatusTone; word: string; label: string }> = {
   answered: { tone: "ok", word: "answered", label: "Answered" },
@@ -21,7 +22,7 @@ const PILL_BACKGROUND: Record<StatusTone, string> = {
   live: "var(--color-signal-soft)",
   info: "var(--color-brand-blue-soft)",
   mispunch: "var(--color-halt-soft)",
-  neutral: "var(--color-surface-raised)",
+  neutral: RAISED_BG,
 };
 
 const STAMP = { animation: "adm-stamp 220ms cubic-bezier(0.16, 1, 0.3, 1)" };

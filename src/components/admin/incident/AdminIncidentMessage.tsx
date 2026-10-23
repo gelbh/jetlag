@@ -1,4 +1,5 @@
 import { Box } from "@mantine/core";
+import { RAISED_BG } from "../shared/adminSurface";
 
 export function formatIncidentClock(iso: string): string {
   const date = new Date(iso);
@@ -55,7 +56,7 @@ export function AdminIncidentMessage({
               ? "var(--color-flag-soft)"
               : tone === "system"
                 ? "transparent"
-                : "var(--color-surface-raised)",
+                : RAISED_BG,
           border:
             tone === "system"
               ? "0.5px dashed color-mix(in oklch, var(--color-rule) 65%, transparent)"

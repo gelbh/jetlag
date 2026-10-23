@@ -65,6 +65,7 @@ function BarStat({ label, value, alert }: { label: string; value: number; alert?
           fontWeight: 600,
           letterSpacing: "0.06em",
           textTransform: "uppercase",
+          whiteSpace: "nowrap",
           color: "var(--color-ink-muted)",
         }}
       >
@@ -87,7 +88,7 @@ function BarStat({ label, value, alert }: { label: string; value: number; alert?
 
 function Logo() {
   return (
-    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" style={{ flex: "none" }}>
       <circle cx="14" cy="14" r="11" fill="none" stroke="var(--color-flag)" strokeWidth="3" />
       <circle cx="14" cy="14" r="5" fill="none" stroke="var(--color-signal)" strokeWidth="2" />
       <path d="M14 2v24M2 14h24" stroke="var(--color-flag)" strokeWidth="1.5" />
@@ -184,12 +185,14 @@ export function AdminStatusStrip({
         >
           <Group gap={10} wrap="nowrap">
             <Logo />
-            <Text
-              component="span"
-              style={{ fontSize: 16, fontWeight: 700, color: "var(--color-ink)" }}
-            >
-              Admin
-            </Text>
+            <Box visibleFrom="xs">
+              <Text
+                component="span"
+                style={{ fontSize: 16, fontWeight: 700, color: "var(--color-ink)" }}
+              >
+                Admin
+              </Text>
+            </Box>
           </Group>
         </UnstyledButton>
         <Box visibleFrom="sm">

@@ -18,7 +18,7 @@
   --mantine-color-body: var(--adm-paper);
   --mantine-color-text: var(--adm-ink);
   --mantine-color-dimmed: var(--adm-ink-muted);
-  --mantine-color-default: var(--adm-paper-raised);
+  --mantine-color-default: color-mix(in oklch, var(--color-canvas) 94%, var(--color-ink));
   --mantine-color-default-color: var(--adm-ink);
   --mantine-color-default-border: var(--adm-rule);
   --mantine-color-default-hover: var(--adm-overprint-soft);

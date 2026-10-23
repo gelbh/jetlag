@@ -77,7 +77,7 @@ function controlColors(variant: string | undefined) {
 export const adminTheme: MantineThemeOverride = {
   fontFamily: "var(--adm-font)",
   headings: { fontFamily: "var(--adm-font)", fontWeight: "700" },
-  defaultRadius: 0,
+  defaultRadius: 12,
   components: {
     // One AdminWorld per page: Portal resolves the first matching host.
     Portal: Portal.extend({ defaultProps: { target: "[data-admin-portal]" } }),
@@ -112,7 +112,7 @@ export const adminTheme: MantineThemeOverride = {
       },
     }),
     Button: Button.extend({
-      defaultProps: { radius: 0 },
+      defaultProps: { radius: 12 },
       vars: (_theme, props) => {
         if (props.color === "red" && (props.variant ?? "filled") === "filled") {
           return {
@@ -147,7 +147,7 @@ export const adminTheme: MantineThemeOverride = {
       },
     }),
     ActionIcon: ActionIcon.extend({
-      defaultProps: { radius: 0, color: undefined },
+      defaultProps: { radius: 12, color: undefined },
       styles: { root: { fontFamily: "var(--adm-font)" } },
       vars: (_theme, props) => {
         const colors = props.color ? null : controlColors(props.variant);
@@ -164,11 +164,11 @@ export const adminTheme: MantineThemeOverride = {
       },
     }),
     TextInput: TextInput.extend({
-      defaultProps: { radius: 0 },
+      defaultProps: { radius: 12 },
       styles: { input: inputStyles },
     }),
     Select: Select.extend({
-      defaultProps: { radius: 0 },
+      defaultProps: { radius: 12 },
       styles: {
         input: inputStyles,
         dropdown: {
@@ -199,7 +199,7 @@ export const adminTheme: MantineThemeOverride = {
       }),
     }),
     Popover: Popover.extend({
-      defaultProps: { radius: 0, shadow: "none" },
+      defaultProps: { radius: 12, shadow: "none" },
       styles: {
         dropdown: {
           background: "var(--adm-paper-raised)",
@@ -210,7 +210,7 @@ export const adminTheme: MantineThemeOverride = {
       },
     }),
     Tooltip: Tooltip.extend({
-      defaultProps: { radius: 0 },
+      defaultProps: { radius: 12 },
       styles: {
         tooltip: {
           fontFamily: "var(--adm-font)",
@@ -236,7 +236,7 @@ export const adminTheme: MantineThemeOverride = {
       },
     }),
     Alert: Alert.extend({
-      defaultProps: { radius: 0 },
+      defaultProps: { radius: 12 },
       // The app theme's default `color: "halt"` always merges in, so `color` alone can't mean "caller chose".
       vars: (_theme, props) => {
         const tone =
@@ -267,7 +267,7 @@ export const adminTheme: MantineThemeOverride = {
     }),
     Drawer: Drawer.extend({
       defaultProps: {
-        radius: 0,
+        radius: 12,
         overlayProps: { backgroundOpacity: 0.4, blur: 0 },
         closeButtonProps: { "aria-label": "Close" },
       },
@@ -286,7 +286,7 @@ export const adminTheme: MantineThemeOverride = {
     }),
     Modal: Modal.extend({
       defaultProps: {
-        radius: 0,
+        radius: 12,
         overlayProps: { backgroundOpacity: 0.4, blur: 0 },
         closeButtonProps: { "aria-label": "Close" },
       },
@@ -317,7 +317,7 @@ export const adminTheme: MantineThemeOverride = {
       }),
     }),
     Accordion: Accordion.extend({
-      defaultProps: { radius: 0 },
+      defaultProps: { radius: 12 },
       // Inline borders: the app's `@layer base` border reset outranks Mantine's class rule.
       styles: {
         item: { borderBottom: rule },
@@ -326,7 +326,7 @@ export const adminTheme: MantineThemeOverride = {
       },
     }),
     SegmentedControl: SegmentedControl.extend({
-      defaultProps: { radius: 0 },
+      defaultProps: { radius: 12 },
       styles: {
         root: { backgroundColor: "var(--adm-paper)", border: rule, padding: 2 },
         // 44px touch target (spec #9); the selected plate is reversed in overprint.
@@ -351,7 +351,7 @@ export const adminTheme: MantineThemeOverride = {
       }),
     }),
     Paper: Paper.extend({
-      defaultProps: { radius: 0, shadow: "none", withBorder: true },
+      defaultProps: { radius: 12, shadow: "none", withBorder: true },
       styles: {
         root: {
           backgroundColor: "var(--adm-paper-raised)",

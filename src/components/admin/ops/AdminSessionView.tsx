@@ -11,13 +11,14 @@ import {
   useModerationConfirm,
 } from "../../../routes/admin-map-screen/useModerationConfirm";
 import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
+import { RAISED_BG } from "../shared/adminSurface";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { sessionElapsedMs, sessionPhaseMark } from "../table/sessionColumns";
 
 const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
 
-const raisedButton = { background: "var(--color-surface-raised)", color: "var(--color-ink)" };
+const raisedButton = { background: RAISED_BG, color: "var(--color-ink)" };
 
 function plural(count: number, one: string, many: string) {
   return `${count} ${count === 1 ? one : many}`;

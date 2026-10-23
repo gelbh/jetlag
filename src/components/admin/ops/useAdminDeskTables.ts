@@ -24,8 +24,15 @@ export type NeedsYouKind = "all" | "incident" | "preload";
 
 const STATIC_SESSION_COLUMNS = buildSessionColumns(new Map());
 const STATIC_NEEDS_COLUMNS = buildNeedsYouColumns();
-const SESSION_DEFAULTS = defaultPrefs(STATIC_SESSION_COLUMNS, SESSION_DEFAULT_SORT);
-const NEEDS_DEFAULTS = defaultPrefs(STATIC_NEEDS_COLUMNS, NEEDS_YOU_DEFAULT_SORT);
+// The comp draws 40px rows.
+const SESSION_DEFAULTS: AdminTablePrefs = {
+  ...defaultPrefs(STATIC_SESSION_COLUMNS, SESSION_DEFAULT_SORT),
+  density: "compact",
+};
+const NEEDS_DEFAULTS: AdminTablePrefs = {
+  ...defaultPrefs(STATIC_NEEDS_COLUMNS, NEEDS_YOU_DEFAULT_SORT),
+  density: "compact",
+};
 
 interface Inputs {
   sessions: readonly AdminSessionSummary[];

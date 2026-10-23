@@ -10,6 +10,7 @@ import { incidentProgressTone } from "@/theme/adminTone";
 import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
 import { AdminRegion } from "../shared/AdminRegion";
+import { RAISED_BG } from "../shared/adminSurface";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { incidentSummary } from "../table/needsYouRows";
@@ -36,6 +37,10 @@ function Fact({ name, value }: { name: string; value: string }) {
       </Box>
     </Box>
   );
+}
+
+function titleCase(label: string): string {
+  return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
 }
 
 function reporterLine(incident: IncidentRecord): string {
@@ -83,7 +88,7 @@ function SessionCard({
             variant="default"
             h={36}
             radius={12}
-            style={{ background: "var(--color-surface-raised)", color: "var(--color-ink)" }}
+            style={{ background: RAISED_BG, color: "var(--color-ink)" }}
             onClick={() => onWatch(session)}
           >
             Watch game
@@ -165,7 +170,7 @@ export function AdminCaseFile({
           </Box>
           <StatusMark
             tone={incidentProgressTone[progress]}
-            label={incidentStatusChipLabel(incident.status)}
+            label={titleCase(incidentStatusChipLabel(incident.status))}
           />
           <Box component="span" style={{ color: "var(--color-ink-muted)" }}>
             {reporterLine(incident)} · {formatFreshnessAge(incident.createdAt)}

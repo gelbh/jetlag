@@ -47,7 +47,10 @@ function Pairs<Row>({ columns, row }: { columns: AdminColumn<Row>[]; row: Row })
           <Box component="span" style={lbl}>
             {column.label}
           </Box>
-          <Box component="span" style={{ color: "var(--color-ink)", fontWeight: 600 }}>
+          <Box
+            component="span"
+            style={{ color: "var(--color-ink)", fontWeight: 600, fontSize: 14 }}
+          >
             {column.render(row)}
           </Box>
         </Box>
@@ -208,6 +211,7 @@ export function AdminPhoneList({
             prefs={tables.sessionPrefs}
             defaults={tables.sessionDefaults}
             onPrefsChange={tables.setSessionPrefs}
+            height={TOUCH}
           />
         ) : (
           <AdminColumnPicker
@@ -215,6 +219,7 @@ export function AdminPhoneList({
             prefs={tables.needsPrefs}
             defaults={tables.needsDefaults}
             onPrefsChange={tables.setNeedsPrefs}
+            height={TOUCH}
           />
         )}
       </Box>

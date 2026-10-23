@@ -1,5 +1,6 @@
 import { ActionIcon, Box, Button, Menu, TextInput } from "@mantine/core";
 import type { ReactNode, Ref } from "react";
+import { RAISED_BG } from "../shared/adminSurface";
 
 export interface AdminChipOption {
   value: string;
@@ -170,7 +171,7 @@ export function AdminTableToolbar({
         fz={13}
         radius={12}
         size="compact-sm"
-        style={{ background: "var(--color-surface-raised)", color: "var(--color-ink)" }}
+        style={{ background: RAISED_BG, color: "var(--color-ink)" }}
         onClick={() => onDensityChange(density === "compact" ? "comfortable" : "compact")}
       >
         Density: {density === "compact" ? "Compact" : "Comfortable"}
@@ -183,7 +184,7 @@ export function AdminTableToolbar({
           aria-label="Collapse to sidebar"
           title="Collapse to sidebar"
           onClick={onCollapse}
-          style={{ background: "var(--color-surface-raised)", color: "var(--color-ink)" }}
+          style={{ background: RAISED_BG, color: "var(--color-ink)" }}
         >
           ⟨
         </ActionIcon>
