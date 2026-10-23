@@ -223,6 +223,8 @@ export function useMapScreenTools({
     setMapError,
     mapError,
     canSubmitQuestion,
+    sessionMode: session?.mode,
+    defenderTeamId,
   });
   const thermometerTool = useThermometerTool({
     active: activeTool === "thermometer",
@@ -332,6 +334,8 @@ export function useMapScreenTools({
     sessionId: session?.id,
     senderUid: uid,
     canSubmitQuestion,
+    sessionMode: session?.mode,
+    defenderTeamId,
     onToolsChange: handleHeavyToolsChange,
   };
 
