@@ -79,3 +79,23 @@
     opacity: 1;
   }
 }
+
+/* Desk row / sort header: reset native button chrome without wiping :focus-visible. */
+[data-admin-world] .admin-unstyled-control {
+  appearance: none;
+  background: transparent;
+  border: none;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+}
+
+[data-admin-world] .admin-unstyled-control:focus {
+  outline: none;
+}
+
+[data-admin-world] .admin-unstyled-control:focus-visible {
+  outline: 2px solid var(--color-flag);
+  outline-offset: 2px;
+}

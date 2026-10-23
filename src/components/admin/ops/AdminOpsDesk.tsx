@@ -214,11 +214,12 @@ function AdminOpsDeskContent() {
     initialKind: location.pathname === PRELOAD_ROUTE ? "preload" : "all",
   });
 
-  // The Kind chip follows the table route it was opened from.
+  // Kind follows preload table entry/exit only; incident detail must not reset it.
   if (location.pathname !== kindPath) {
+    const previousPath = kindPath;
     setKindPath(location.pathname);
     if (location.pathname === PRELOAD_ROUTE) tables.setKind("preload");
-    else if (location.pathname === INCIDENTS_ROUTE) tables.setKind("all");
+    else if (previousPath === PRELOAD_ROUTE) tables.setKind("all");
   }
 
   const listIncident =
@@ -299,7 +300,10 @@ function AdminOpsDeskContent() {
 
   // Only the session route monitors; incident and request routes never join.
   useEffect(() => {
-    if (!enabled || !isDesktop || !routeSessionId) return;
+    if (!enabled || !isDesktop || !routeSessionId) {
+      joinKeyRef.current = null;
+      return;
+    }
     if (monitorSessionId === routeSessionId && activeSession?.id === routeSessionId) {
       joinKeyRef.current = routeSessionId;
       return;
@@ -487,6 +491,11 @@ function AdminOpsDeskContent() {
             incident && void navigate(`/admin/incidents/${encodeURIComponent(incident.id)}`)
           }
           onBack={goToTable}
+          onRefresh={() => void refresh()}
+          onLoadMore={() => void loadMore()}
+          hasMore={hasMore}
+          refreshing={refreshing}
+          loadingMore={loadingMore}
           sessionsUnavailable={sessionsFailedEmpty}
           monitor={{
             active: monitorActive,
@@ -555,7 +564,14 @@ function AdminOpsDeskContent() {
       ) : sessionsLoading ? (
         <Skeleton height={160} radius={16} aria-hidden="true" />
       ) : (
-        <EndedSession onBack={goToTable} />
+        <EndedSession
+          onBack={goToTable}
+          onRefresh={() => void refresh()}
+          onLoadMore={() => void loadMore()}
+          hasMore={hasMore}
+          refreshing={refreshing}
+          loadingMore={loadingMore}
+        />
       );
     }
     body = (

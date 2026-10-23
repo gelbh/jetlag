@@ -139,9 +139,9 @@ export function AdminDataTable<Row>({
                     <Box
                       component="button"
                       type="button"
+                      className="admin-unstyled-control"
                       onClick={() => cycleSort(column.id)}
                       style={{
-                        all: "unset",
                         boxSizing: "border-box",
                         display: "block",
                         width: "100%",

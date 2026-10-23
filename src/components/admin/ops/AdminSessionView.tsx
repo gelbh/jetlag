@@ -24,12 +24,27 @@ function plural(count: number, one: string, many: string) {
   return `${count} ${count === 1 ? one : many}`;
 }
 
-export function EndedSession({ onBack }: { onBack(): void }) {
+export function EndedSession({
+  onBack,
+  onRefresh,
+  onLoadMore,
+  hasMore = false,
+  refreshing = false,
+  loadingMore = false,
+}: {
+  onBack(): void;
+  onRefresh?(): void;
+  onLoadMore?(): void;
+  hasMore?: boolean;
+  refreshing?: boolean;
+  loadingMore?: boolean;
+}) {
   return (
     <Stack
       gap={8}
       align="flex-start"
       p={20}
+      data-testid="admin-session-missing"
       style={{
         flex: 1,
         background: "var(--color-canvas)",
@@ -38,11 +53,33 @@ export function EndedSession({ onBack }: { onBack(): void }) {
       }}
     >
       <Text fw={700} size="lg" c="var(--color-ink)">
-        This session has ended
+        Session not in the loaded list
       </Text>
       <Text size="sm" c="var(--color-ink-muted)">
-        It is no longer in the loaded list of sessions.
+        It may still be live on a later page. Refresh or load more, or go back to the table.
       </Text>
+      {onRefresh ? (
+        <Button
+          type="button"
+          variant="default"
+          loading={refreshing}
+          onClick={onRefresh}
+          aria-label="Refresh live sessions"
+        >
+          Refresh live sessions
+        </Button>
+      ) : null}
+      {hasMore && onLoadMore ? (
+        <Button
+          type="button"
+          variant="default"
+          loading={loadingMore}
+          onClick={onLoadMore}
+          aria-label="Load more sessions"
+        >
+          {loadingMore ? "Loading…" : "Load more sessions"}
+        </Button>
+      ) : null}
       <Button type="button" variant="default" onClick={onBack}>
         Back to table
       </Button>
@@ -65,6 +102,11 @@ export function AdminSessionView({
   openIncidentCount,
   onOpenIncident,
   onBack,
+  onRefresh,
+  onLoadMore,
+  hasMore = false,
+  refreshing = false,
+  loadingMore = false,
   monitor,
   sessionsUnavailable,
 }: {
@@ -73,6 +115,11 @@ export function AdminSessionView({
   openIncidentCount: number;
   onOpenIncident(): void;
   onBack(): void;
+  onRefresh?(): void;
+  onLoadMore?(): void;
+  hasMore?: boolean;
+  refreshing?: boolean;
+  loadingMore?: boolean;
   monitor: AdminSessionMonitorState;
   sessionsUnavailable: boolean;
 }) {
@@ -101,7 +148,14 @@ export function AdminSessionView({
         <Skeleton flex={1} radius={16} />
       </Stack>
     ) : (
-      <EndedSession onBack={onBack} />
+      <EndedSession
+        onBack={onBack}
+        onRefresh={onRefresh}
+        onLoadMore={onLoadMore}
+        hasMore={hasMore}
+        refreshing={refreshing}
+        loadingMore={loadingMore}
+      />
     );
   }
 

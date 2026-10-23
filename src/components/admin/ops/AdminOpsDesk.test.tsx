@@ -587,6 +587,32 @@ describe("AdminOpsDesk", () => {
       expect(incidentState.joinSession).toHaveBeenCalledTimes(1);
     });
 
+    it("rejoins the monitor after leaving and reopening the same session", async () => {
+      sessionListState.sessions = twoSessions();
+
+      renderDesk("/admin/sessions/session-1");
+
+      await waitFor(() =>
+        expect(incidentState.joinSession).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: "session-1", code: "ABCD" }),
+          { navigate: false },
+        ),
+      );
+      expect(incidentState.joinSession).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(screen.getByRole("button", { name: "Expand to table" }));
+      await waitFor(() => expect(path()).toBe("/admin"));
+
+      fireEvent.click(within(screen.getByRole("table")).getByText("ABCD"));
+      await waitFor(() => expect(path()).toBe("/admin/sessions/session-1"));
+
+      await waitFor(() => expect(incidentState.joinSession).toHaveBeenCalledTimes(2));
+      expect(incidentState.joinSession).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sessionId: "session-1", code: "ABCD" }),
+        { navigate: false },
+      );
+    });
+
     it("activates the monitor once the join lands an admin session", async () => {
       sessionListState.sessions = twoSessions();
       incidentState.joinSession.mockImplementation(
@@ -625,23 +651,34 @@ describe("AdminOpsDesk", () => {
       expect(screen.getByTestId("admin-monitor-pane")).toHaveAttribute("data-active", "false");
     });
 
-    it("says the session has ended when it is not in the loaded list", async () => {
+    it("says the session is not in the loaded list when missing, with refresh", async () => {
       sessionListState.sessions = twoSessions();
+      sessionListState.hasMore = true;
 
       renderDesk("/admin/sessions/session-gone");
 
-      expect(screen.getByText("This session has ended")).toBeInTheDocument();
+      const missing = screen.getByTestId("admin-session-missing");
+      expect(within(missing).getByText("Session not in the loaded list")).toBeInTheDocument();
+      expect(screen.queryByText("This session has ended")).not.toBeInTheDocument();
       expect(incidentState.joinSession).not.toHaveBeenCalled();
-      fireEvent.click(screen.getByRole("button", { name: "Back to table" }));
+
+      fireEvent.click(within(missing).getByRole("button", { name: "Refresh live sessions" }));
+      expect(sessionListState.refresh).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(within(missing).getByRole("button", { name: "Load more sessions" }));
+      expect(sessionListState.loadMore).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(within(missing).getByRole("button", { name: "Back to table" }));
       await waitFor(() => expect(path()).toBe("/admin"));
     });
 
-    it("does not call a session ended while the list is still loading", () => {
+    it("does not claim a missing session while the list is still loading", () => {
       sessionListState.sessions = [];
       sessionListState.loading = true;
 
       renderDesk("/admin/sessions/session-1");
 
+      expect(screen.queryByText("Session not in the loaded list")).not.toBeInTheDocument();
       expect(screen.queryByText("This session has ended")).not.toBeInTheDocument();
     });
 
@@ -772,6 +809,28 @@ describe("AdminOpsDesk", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Show closed" }));
       expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(6);
+    });
+
+    it("keeps the Kind chip when returning from an incident detail", async () => {
+      incidentState.list = [makeIncident({ id: "inc-a", status: "open", playerNote: "map froze" })];
+      preloadState.list = [makeRequest()];
+
+      renderDesk("/admin/incidents");
+
+      fireEvent.click(screen.getByRole("button", { name: /Kind:/ }));
+      fireEvent.click(await screen.findByRole("menuitem", { name: "Incidents" }));
+      expect(screen.getByRole("button", { name: /Kind: Incidents/ })).toBeInTheDocument();
+      expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(2);
+
+      fireEvent.click(within(screen.getByRole("table")).getByText("map froze"));
+      await waitFor(() => expect(path()).toBe("/admin/incidents/inc-a"));
+      expect(screen.getByTestId("admin-case-file")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "Expand to table" }));
+      await waitFor(() => expect(path()).toBe("/admin/incidents"));
+
+      expect(screen.getByRole("button", { name: /Kind: Incidents/ })).toBeInTheDocument();
+      expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(2);
     });
 
     it("lists only preload requests on /admin/preload-requests and opens the request file", async () => {

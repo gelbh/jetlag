@@ -104,6 +104,7 @@ describe("AdminDataTable sorting", () => {
     // default: lastActivity desc -> 5s ago, 3m ago, 2h ago, null last
     expect(codesInOrder()).toEqual(["BBBB", "AAAA", "DDDD", "CCCC"]);
     const header = () => screen.getByRole("button", { name: /Last activity/ });
+    expect(header()).toHaveClass("admin-unstyled-control");
     fireEvent.click(header());
     expect(codesInOrder()).toEqual(["DDDD", "AAAA", "BBBB", "CCCC"]);
     expect(screen.getByRole("columnheader", { name: /Last activity/ })).toHaveAttribute(

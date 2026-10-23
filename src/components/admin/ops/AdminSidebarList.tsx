@@ -38,12 +38,12 @@ function ItemShell({
     <Box
       component="button"
       type="button"
+      className="admin-unstyled-control"
       data-desk-row=""
       aria-current={selected ? "true" : undefined}
       aria-label={label}
       onClick={onOpen}
       style={{
-        all: "unset",
         boxSizing: "border-box",
         display: "grid",
         gridTemplateColumns: "auto 1fr auto",
