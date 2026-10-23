@@ -7,3 +7,4 @@ export { FairSplitProposal, type FairSplitProposalProps } from "./FairSplitPropo
 export { MusterDials, type MusterDialsProps } from "./MusterDials";
 export { OracleAskReceipt, type OracleAskReceiptProps } from "./OracleAskReceipt";
 export { SealVault, type SealVaultProps } from "./SealVault";
+export { StandoffChrome, type StandoffChromeProps } from "./StandoffChrome";

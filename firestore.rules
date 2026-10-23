@@ -22,12 +22,11 @@ service cloud.firestore {
       return role in ['seeker', 'hider', 'observer', 'admin'];
     }
 
-    // Keep in sync with src/domain/admin/adminAccess.ts and Functions ADMIN_EMAIL param.
+    // Firebase Auth custom claim `admin` (set via Admin SDK / functions/scripts/set-admin-claim.mjs).
     function isAdmin() {
       return isSignedIn()
         && request.auth.token.email_verified == true
-        && request.auth.token.email is string
-        && request.auth.token.email.lower() == 'gelbharttomer@gmail.com';
+        && request.auth.token.admin == true;
     }
 
     function validJoinRole(role) {
@@ -224,8 +223,69 @@ service cloud.firestore {
             && request.resource.data.coinAssignment.teamA
               != request.resource.data.coinAssignment.teamB
           )
+
         )
         && sessionIdentityUnchanged();
+    }
+
+    // Host starts / advances Standoff public fields (turn + deck count only).
+    function isCastleSiegeStandoffUpdate() {
+      return isSignedIn()
+        && resource.data.hostUid is string
+        && request.auth.uid == resource.data.hostUid
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && resource.data.mode == 'castleSiege'
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['phase', 'standoffTurn', 'standoffDeckRemainingCount'])
+        && (
+          !('phase' in request.resource.data)
+          || request.resource.data.phase in ['setup', 'standoff', 'siege', 'betweenGames']
+        )
+        && (
+          !('standoffDeckRemainingCount' in request.resource.data)
+          || (
+            request.resource.data.standoffDeckRemainingCount is number
+            && request.resource.data.standoffDeckRemainingCount >= 0
+          )
+        )
+        && (
+          !('standoffTurn' in request.resource.data)
+          || request.resource.data.standoffTurn is map
+        )
+        && sessionIdentityUnchanged();
+    }
+
+    function canReadTeamHands(sessionId, teamId) {
+      return isSessionMember(sessionId)
+        && (
+          isCastleSiegePlayingTeamMember(sessionId, teamId)
+          || (
+            'castleSiegeRoles' in sessionData(sessionId)
+            && sessionData(sessionId).castleSiegeRoles is map
+            && castleSiegeRoleOnSession(sessionId) == 'referee'
+          )
+        );
+    }
+
+    function isCastleSiegeHostMember(sessionId) {
+      return isSignedIn()
+        && isSessionMember(sessionId)
+        && isSessionHost(sessionId)
+        && sessionData(sessionId).mode == 'castleSiege';
+    }
+
+    // Own team + referee only. Playing hosts must not read enemy shade (V12).
+    function canReadTeamMarks(sessionId, teamId) {
+      return isSessionMember(sessionId)
+        && (
+          isCastleSiegePlayingTeamMember(sessionId, teamId)
+          || (
+            'castleSiegeRoles' in sessionData(sessionId)
+            && sessionData(sessionId).castleSiegeRoles is map
+            && castleSiegeRoleOnSession(sessionId) == 'referee'
+          )
+        );
     }
 
     function validDisabledTools(tools) {
@@ -884,6 +944,7 @@ service cloud.firestore {
       // Board-economy flag early: host+large gameArea otherwise burns budget on prior diffs.
       allow update: if isBoardEconomyFlagUpdate(sessionId)
         || isCastleSiegeSetupUpdate()
+        || isCastleSiegeStandoffUpdate()
         || isTimerHostUpdate()
         || isLastActiveAtUpdate()
         || isFoundHiderRequestUpdate()
@@ -1176,6 +1237,46 @@ service cloud.firestore {
             !('ciphertext' in request.resource.data)
             || validCastleSiegeSealCiphertext(request.resource.data.ciphertext)
           );
+        allow delete: if false;
+      }
+
+      // Standoff shade marks: own team write; enemy clients never read polygons (V12).
+      match /teamMarks/{teamId} {
+        allow read: if teamId in ['teamA', 'teamB']
+          && canReadTeamMarks(sessionId, teamId);
+        allow create, update: if teamId in ['teamA', 'teamB']
+          && isCastleSiegePlayingTeamMember(sessionId, teamId)
+          && request.resource.data.keys().hasOnly(['geometryJson', 'updatedByUid', 'updatedAt'])
+          && request.resource.data.geometryJson is string
+          && request.resource.data.geometryJson.size() > 0
+          && request.resource.data.geometryJson.size() <= 200000
+          && request.resource.data.updatedByUid == request.auth.uid
+          && request.resource.data.updatedAt is string
+          && request.resource.data.updatedAt.size() > 0;
+        allow delete: if false;
+      }
+
+      // Hand card ids: own team + referee read; host writes on deal.
+      match /teamHands/{teamId} {
+        allow read: if teamId in ['teamA', 'teamB']
+          && canReadTeamHands(sessionId, teamId);
+        allow create, update: if teamId in ['teamA', 'teamB']
+          && isCastleSiegeHostMember(sessionId)
+          && request.resource.data.keys().hasOnly(['cardIds', 'updatedAt'])
+          && request.resource.data.cardIds is list
+          && request.resource.data.updatedAt is string
+          && request.resource.data.updatedAt.size() > 0;
+        allow delete: if false;
+      }
+
+      // Shuffled deck order: host write only; clients never read (Functions Admin SDK may).
+      match /standoffPrivate/{docId} {
+        allow read: if false;
+        allow create, update: if docId == 'deck'
+          && isCastleSiegeHostMember(sessionId)
+          && request.resource.data.keys().hasOnly(['remainingIds', 'discardIds'])
+          && request.resource.data.remainingIds is list
+          && request.resource.data.discardIds is list;
         allow delete: if false;
       }
 
