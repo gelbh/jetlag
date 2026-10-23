@@ -1,6 +1,2670 @@
 {
   "category": "museum",
-  "source": "none",
-  "bbox": { "south": -43.7604, "west": 112.9011, "north": -9.1225, "east": 159.1292 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -43.7604,
+    "west": 112.9011,
+    "north": -9.1225,
+    "east": 159.1292
+  },
+  "places": [
+    {
+      "id": "Q108663292",
+      "name": "4A Centre for Contemporary Asian Art",
+      "lat": -33.88,
+      "lng": 151.2058
+    },
+    {
+      "id": "Q17000681",
+      "name": "Abbey Museum of Art and Archaeology",
+      "lat": -27.0709,
+      "lng": 153.023
+    },
+    {
+      "id": "Q4823962",
+      "name": "ACMI",
+      "lat": -37.8176,
+      "lng": 144.969
+    },
+    {
+      "id": "Q104589885",
+      "name": "Adelaide Holocaust Museum and Andrew Steiner Education Centre",
+      "lat": -34.928752,
+      "lng": 138.601978
+    },
+    {
+      "id": "Q64980212",
+      "name": "Adelaide House",
+      "lat": -23.6996,
+      "lng": 133.8825
+    },
+    {
+      "id": "Q23073335",
+      "name": "Albany Convict Gaol",
+      "lat": -35.028281,
+      "lng": 117.880111
+    },
+    {
+      "id": "Q53694674",
+      "name": "Alexandra Timber Tramway and Museum",
+      "lat": -37.183584,
+      "lng": 145.713326
+    },
+    {
+      "id": "Q53692330",
+      "name": "Allansford Cheese World Museum",
+      "lat": -38.39511,
+      "lng": 142.62862
+    },
+    {
+      "id": "Q61099760",
+      "name": "Allport Library and Museum of Fine Arts",
+      "lat": -42.88193,
+      "lng": 147.324626
+    },
+    {
+      "id": "Q53695886",
+      "name": "ANZ Banking Museum",
+      "lat": -37.81664,
+      "lng": 144.96179
+    },
+    {
+      "id": "Q22910688",
+      "name": "Anzac Cottage",
+      "lat": -31.923499,
+      "lng": 115.834745
+    },
+    {
+      "id": "Q844556",
+      "name": "Anzac Memorial",
+      "lat": -33.875722,
+      "lng": 151.210944
+    },
+    {
+      "id": "Q4783902",
+      "name": "Araluen Cultural Precinct",
+      "lat": -23.70155,
+      "lng": 133.862571
+    },
+    {
+      "id": "Q28035284",
+      "name": "Aramac Tramway Museum",
+      "lat": -22.9752,
+      "lng": 145.2462
+    },
+    {
+      "id": "Q4785958",
+      "name": "Archer Park Rail Museum",
+      "lat": -23.3756,
+      "lng": 150.507
+    },
+    {
+      "id": "Q132337462",
+      "name": "Ardrossan Museum",
+      "lat": -34.423363,
+      "lng": 137.91781
+    },
+    {
+      "id": "Q4794191",
+      "name": "Army Museum of Western Australia",
+      "lat": -32.045206,
+      "lng": 115.7544
+    },
+    {
+      "id": "Q132337936",
+      "name": "Auburn Old Police Station and Courthouse Museum",
+      "lat": -34.025374,
+      "lng": 138.684329
+    },
+    {
+      "id": "Q64411897",
+      "name": "Australasian Golf Museum",
+      "lat": -42.3834,
+      "lng": 147.00824
+    },
+    {
+      "id": "Q16826292",
+      "name": "Australian Age of Dinosaurs",
+      "lat": -22.476356,
+      "lng": 143.184299
+    },
+    {
+      "id": "Q19870908",
+      "name": "Australian Armour and Artillery Museum",
+      "lat": -16.8503,
+      "lng": 145.695
+    },
+    {
+      "id": "Q7373733",
+      "name": "Australian Army Museum Puckapunyal",
+      "lat": -36.99603,
+      "lng": 145.04046
+    },
+    {
+      "id": "Q4823870",
+      "name": "Australian Aviation Museum",
+      "lat": -33.9265,
+      "lng": 150.981
+    },
+    {
+      "id": "Q55604505",
+      "name": "Australian Centre for Photography",
+      "lat": -33.8788,
+      "lng": 151.215
+    },
+    {
+      "id": "Q130755218",
+      "name": "Australian Cinémathèque",
+      "lat": -27.4726,
+      "lng": 153.01828
+    },
+    {
+      "id": "Q4824027",
+      "name": "Australian Computer Museum Society",
+      "lat": -33.874714,
+      "lng": 151.1235
+    },
+    {
+      "id": "Q4056101",
+      "name": "Australian Fossil and Mineral Museum",
+      "lat": -33.416986,
+      "lng": 149.580669
+    },
+    {
+      "id": "Q17030662",
+      "name": "Australian Jazz Museum",
+      "lat": -37.8583,
+      "lng": 145.208
+    },
+    {
+      "id": "Q769416",
+      "name": "Australian Museum",
+      "lat": -33.8743,
+      "lng": 151.213
+    },
+    {
+      "id": "Q110050755",
+      "name": "Australian Music Vault",
+      "lat": -37.82178,
+      "lng": 144.96856
+    },
+    {
+      "id": "Q4824444",
+      "name": "Australian National Aviation Museum",
+      "lat": -37.97619,
+      "lng": 145.090808
+    },
+    {
+      "id": "Q844329",
+      "name": "Australian National Maritime Museum",
+      "lat": -33.8692,
+      "lng": 151.199
+    },
+    {
+      "id": "Q6528667",
+      "name": "Australian National Surfing Museum",
+      "lat": -38.32651,
+      "lng": 144.316011
+    },
+    {
+      "id": "Q4824479",
+      "name": "Australian National University Classics Museum",
+      "lat": -35.2783,
+      "lng": 149.122
+    },
+    {
+      "id": "Q781603",
+      "name": "Australian Opal Centre",
+      "lat": -29.428841,
+      "lng": 147.975675
+    },
+    {
+      "id": "Q7168281",
+      "name": "Australian Performing Arts Collection",
+      "lat": -37.8203,
+      "lng": 144.968
+    },
+    {
+      "id": "Q136497501",
+      "name": "Australian Pinball Museum",
+      "lat": -36.334405,
+      "lng": 141.668181
+    },
+    {
+      "id": "Q4824592",
+      "name": "Australian Racing Museum",
+      "lat": -37.8189,
+      "lng": 144.984
+    },
+    {
+      "id": "Q4824634",
+      "name": "Australian Sailing Museum",
+      "lat": -32.5275,
+      "lng": 115.718
+    },
+    {
+      "id": "Q61912115",
+      "name": "Australian Sikh Heritage Trail",
+      "lat": -32.034194,
+      "lng": 115.910661
+    },
+    {
+      "id": "Q782783",
+      "name": "Australian War Memorial",
+      "lat": -35.280472,
+      "lng": 149.149056
+    },
+    {
+      "id": "Q30102902",
+      "name": "Australiana Pioneer Village",
+      "lat": -33.567552,
+      "lng": 150.840382
+    },
+    {
+      "id": "Q4828636",
+      "name": "Aviation Heritage Museum",
+      "lat": -32.0493,
+      "lng": 115.859
+    },
+    {
+      "id": "Q66766892",
+      "name": "Ballam Park",
+      "lat": -38.1523,
+      "lng": 145.16
+    },
+    {
+      "id": "Q27628385",
+      "name": "Ballarat Aviation Museum",
+      "lat": -37.514722,
+      "lng": 143.788375
+    },
+    {
+      "id": "Q4851483",
+      "name": "Ballarat Tramway Museum",
+      "lat": -37.5515,
+      "lng": 143.82
+    },
+    {
+      "id": "Q38251119",
+      "name": "Ballina Naval and Maritime Museum",
+      "lat": -28.873314,
+      "lng": 153.56448
+    },
+    {
+      "id": "Q4852179",
+      "name": "Ballyhooley Steam Railway",
+      "lat": -16.4964,
+      "lng": 145.457
+    },
+    {
+      "id": "Q860852",
+      "name": "Barossa International Sculpture Symposium",
+      "lat": -34.5369,
+      "lng": 138.99932
+    },
+    {
+      "id": "Q106407682",
+      "name": "Bathurst Rail Museum",
+      "lat": -33.42615,
+      "lng": 149.58191
+    },
+    {
+      "id": "Q136555839",
+      "name": "Battery Hill Gold Mining and Heritage Centre",
+      "lat": -19.64792,
+      "lng": 134.20795
+    },
+    {
+      "id": "Q4876028",
+      "name": "Beaconsfield Mine and Heritage Centre",
+      "lat": -41.2017,
+      "lng": 146.816
+    },
+    {
+      "id": "Q65069976",
+      "name": "Belconnen Arts Centre",
+      "lat": -35.235924,
+      "lng": 149.068006
+    },
+    {
+      "id": "Q55605184",
+      "name": "Ben Chifley's House",
+      "lat": -33.433,
+      "lng": 149.578
+    },
+    {
+      "id": "Q4889670",
+      "name": "Bennett Brook Railway",
+      "lat": -31.8452,
+      "lng": 115.944
+    },
+    {
+      "id": "Q4894087",
+      "name": "Berndt Museum of Anthropology",
+      "lat": -31.976944,
+      "lng": 115.816111
+    },
+    {
+      "id": "Q55885788",
+      "name": "Berry Museum",
+      "lat": -34.775,
+      "lng": 150.699
+    },
+    {
+      "id": "Q64779085",
+      "name": "Black Rock House",
+      "lat": -37.97841,
+      "lng": 145.01828
+    },
+    {
+      "id": "Q4930754",
+      "name": "Blundells Cottage",
+      "lat": -35.293,
+      "lng": 149.142
+    },
+    {
+      "id": "Q124628149",
+      "name": "Boorowa Historical Museum",
+      "lat": -34.43818,
+      "lng": 148.7166
+    },
+    {
+      "id": "Q137009696",
+      "name": "Borroloola Police Station Museum",
+      "lat": -16.06794,
+      "lng": 136.30521
+    },
+    {
+      "id": "Q63253116",
+      "name": "Bradman’s Birthplace Museum",
+      "lat": -34.630983,
+      "lng": 148.021424
+    },
+    {
+      "id": "Q55886660",
+      "name": "Braidwood District Historical Society Museum",
+      "lat": -35.4404,
+      "lng": 149.7995
+    },
+    {
+      "id": "Q4959700",
+      "name": "Breakwater Battery",
+      "lat": -34.4757,
+      "lng": 150.914
+    },
+    {
+      "id": "Q102188173",
+      "name": "Brett Whiteley Studio",
+      "lat": -33.888716,
+      "lng": 151.21456
+    },
+    {
+      "id": "Q4965829",
+      "name": "Bribie Island Seaside Museum",
+      "lat": -27.0859,
+      "lng": 153.159
+    },
+    {
+      "id": "Q4968620",
+      "name": "Brisbane Tramway Museum",
+      "lat": -27.4073,
+      "lng": 152.938
+    },
+    {
+      "id": "Q56279721",
+      "name": "Brislington, Parramatta",
+      "lat": -33.813,
+      "lng": 151.0021
+    },
+    {
+      "id": "Q117004010",
+      "name": "Bublacowie Military Museum",
+      "lat": -34.922,
+      "lng": 137.6106
+    },
+    {
+      "id": "Q4997504",
+      "name": "Bundanon",
+      "lat": -34.889,
+      "lng": 150.5
+    },
+    {
+      "id": "Q66766064",
+      "name": "Bundoora Park Homestead",
+      "lat": -37.7049,
+      "lng": 145.051
+    },
+    {
+      "id": "Q55130301",
+      "name": "Burke Museum",
+      "lat": -36.35809,
+      "lng": 146.68727
+    },
+    {
+      "id": "Q25848374",
+      "name": "Burnett House",
+      "lat": -12.45074,
+      "lng": 130.8297
+    },
+    {
+      "id": "Q42954977",
+      "name": "Byron Bay Railroad Company",
+      "lat": -28.629444,
+      "lng": 153.585
+    },
+    {
+      "id": "Q138649647",
+      "name": "Cairns Botanic Gardens Visitor Centre",
+      "lat": -16.89957,
+      "lng": 145.74902
+    },
+    {
+      "id": "Q132291282",
+      "name": "Cambrai Agricultural Museum",
+      "lat": -34.657715,
+      "lng": 139.280301
+    },
+    {
+      "id": "Q18172917",
+      "name": "Camden Museum of Aviation",
+      "lat": -34.0372,
+      "lng": 150.7387
+    },
+    {
+      "id": "Q5031255",
+      "name": "Canberra Glassworks",
+      "lat": -35.311597,
+      "lng": 149.143695
+    },
+    {
+      "id": "Q495518",
+      "name": "Canberra Museum and Gallery",
+      "lat": -35.2807,
+      "lng": 149.131
+    },
+    {
+      "id": "Q5043781",
+      "name": "Carnamah Historical Society",
+      "lat": -29.688546,
+      "lng": 115.886407
+    },
+    {
+      "id": "Q138818820",
+      "name": "Carnamah Museum",
+      "lat": -29.688577,
+      "lng": 115.886506
+    },
+    {
+      "id": "Q5046143",
+      "name": "Carrick Hill",
+      "lat": -34.9792,
+      "lng": 138.632
+    },
+    {
+      "id": "Q55779618",
+      "name": "Castlemaine Art Museum",
+      "lat": -37.064707,
+      "lng": 144.213797
+    },
+    {
+      "id": "Q21575026",
+      "name": "Central Australian Aviation Museum",
+      "lat": -23.702611,
+      "lng": 133.864306
+    },
+    {
+      "id": "Q5062389",
+      "name": "Centre for Contemporary Photography",
+      "lat": -37.7972,
+      "lng": 144.982
+    },
+    {
+      "id": "Q124607797",
+      "name": "Channel Heritage Museum",
+      "lat": -43.029847,
+      "lng": 147.264377
+    },
+    {
+      "id": "Q30315172",
+      "name": "Charles Darwin University Nursing Museum",
+      "lat": -12.372234,
+      "lng": 130.868523
+    },
+    {
+      "id": "Q113059363",
+      "name": "Chau Chak Wing Museum",
+      "lat": -33.885278,
+      "lng": 151.190278
+    },
+    {
+      "id": "Q56747066",
+      "name": "Chelsea Court House",
+      "lat": -38.052861,
+      "lng": 145.115028
+    },
+    {
+      "id": "Q23641166",
+      "name": "Childers Pharmaceutical Museum",
+      "lat": -25.237,
+      "lng": 152.2781
+    },
+    {
+      "id": "Q66974882",
+      "name": "Chiverton House Complex",
+      "lat": -28.355665,
+      "lng": 114.630224
+    },
+    {
+      "id": "Q5123616",
+      "name": "City of Canada Bay Museum",
+      "lat": -33.8555,
+      "lng": 151.104
+    },
+    {
+      "id": "Q66974898",
+      "name": "Claremont Museum",
+      "lat": -31.990593,
+      "lng": 115.786954
+    },
+    {
+      "id": "Q5130217",
+      "name": "Clayton Farm Heritage Museum",
+      "lat": -36.3316,
+      "lng": 140.759
+    },
+    {
+      "id": "Q137794147",
+      "name": "Cleve Agricultural and Folk Museum",
+      "lat": -33.700726,
+      "lng": 136.495782
+    },
+    {
+      "id": "Q5137717",
+      "name": "Coal Creek Heritage Village",
+      "lat": -38.4406,
+      "lng": 145.831
+    },
+    {
+      "id": "Q5138747",
+      "name": "Cobb & Co Museum",
+      "lat": -27.5554,
+      "lng": 151.965
+    },
+    {
+      "id": "Q66486028",
+      "name": "Cobdogla Steam and Irrigation Museum",
+      "lat": -34.241944,
+      "lng": 140.406111
+    },
+    {
+      "id": "Q55400190",
+      "name": "Colonial Cottage Museum",
+      "lat": -32.1389,
+      "lng": 150.3537
+    },
+    {
+      "id": "Q5152612",
+      "name": "Commissariat Store, Brisbane",
+      "lat": -27.47327,
+      "lng": 153.02425
+    },
+    {
+      "id": "Q1129647",
+      "name": "Cooks' Cottage",
+      "lat": -37.8145,
+      "lng": 144.979
+    },
+    {
+      "id": "Q10458963",
+      "name": "Cooma Monaro Railway",
+      "lat": -36.236474,
+      "lng": 149.135284
+    },
+    {
+      "id": "Q64584641",
+      "name": "Cossack Museum",
+      "lat": -20.677964,
+      "lng": 117.188357
+    },
+    {
+      "id": "Q66975025",
+      "name": "Court House & Registrar's Office",
+      "lat": -31.23158,
+      "lng": 119.327688
+    },
+    {
+      "id": "Q55816187",
+      "name": "Creswick Town Hall",
+      "lat": -37.424072,
+      "lng": 143.894949
+    },
+    {
+      "id": "Q71888724",
+      "name": "Cricket Captains' Walk",
+      "lat": -34.637149,
+      "lng": 148.020569
+    },
+    {
+      "id": "Q28184285",
+      "name": "Customs House Museum",
+      "lat": -28.5489,
+      "lng": 150.3068
+    },
+    {
+      "id": "Q5211770",
+      "name": "Dalwood House",
+      "lat": -32.645,
+      "lng": 151.421
+    },
+    {
+      "id": "Q113643673",
+      "name": "Dardanup Heritage Park",
+      "lat": -33.399033,
+      "lng": 115.709672
+    },
+    {
+      "id": "Q23753999",
+      "name": "Darwin Aviation Museum",
+      "lat": -12.425394,
+      "lng": 130.895711
+    },
+    {
+      "id": "Q5226003",
+      "name": "Darwin Military Museum",
+      "lat": -12.407517,
+      "lng": 130.819769
+    },
+    {
+      "id": "Q111535557",
+      "name": "Das Neumann Haus Museum",
+      "lat": -27.631659,
+      "lng": 152.39408
+    },
+    {
+      "id": "Q131418704",
+      "name": "Daylesford School of Mines",
+      "lat": -37.344222,
+      "lng": 144.14175
+    },
+    {
+      "id": "Q122973015",
+      "name": "Dolphin Discovery Centre",
+      "lat": -33.320767,
+      "lng": 115.649933
+    },
+    {
+      "id": "Q30103055",
+      "name": "Don Bank",
+      "lat": -33.837686,
+      "lng": 151.205233
+    },
+    {
+      "id": "Q5293392",
+      "name": "Don Rhodes Mining and Transport Museum",
+      "lat": -20.3115,
+      "lng": 118.606
+    },
+    {
+      "id": "Q5293410",
+      "name": "Don River Railway",
+      "lat": -41.181,
+      "lng": 146.318
+    },
+    {
+      "id": "Q5298751",
+      "name": "Dorrigo Steam Railway and Museum",
+      "lat": -30.3337,
+      "lng": 152.707
+    },
+    {
+      "id": "Q22032074",
+      "name": "DownsSteam Tourist Railway & Museum",
+      "lat": -27.59302,
+      "lng": 151.917039
+    },
+    {
+      "id": "Q5306807",
+      "name": "Dreamworld Railway",
+      "lat": -27.863,
+      "lng": 153.317
+    },
+    {
+      "id": "Q55610018",
+      "name": "Dromana Historical Museum",
+      "lat": -38.3363,
+      "lng": 144.9578
+    },
+    {
+      "id": "Q131463982",
+      "name": "Dwellingup Trails and Visitor Centre",
+      "lat": -32.712444,
+      "lng": 116.062433
+    },
+    {
+      "id": "Q5330187",
+      "name": "Eastern Hill Fire Station",
+      "lat": -37.8086,
+      "lng": 144.975
+    },
+    {
+      "id": "Q58268462",
+      "name": "Echuca Historical Society Museum",
+      "lat": -36.119534,
+      "lng": 144.745173
+    },
+    {
+      "id": "Q5336879",
+      "name": "Eden Killer Whale Museum",
+      "lat": -37.0686,
+      "lng": 149.9085
+    },
+    {
+      "id": "Q656521",
+      "name": "Elizabeth Bay House",
+      "lat": -33.8701,
+      "lng": 151.226
+    },
+    {
+      "id": "Q124530778",
+      "name": "Esperance Museum and Historical Village",
+      "lat": -33.85817,
+      "lng": 121.894923
+    },
+    {
+      "id": "Q85294488",
+      "name": "Eyre Pensinsula Railway Preservation Society",
+      "lat": -34.7242,
+      "lng": 135.8671
+    },
+    {
+      "id": "Q27628331",
+      "name": "Fighter World",
+      "lat": -32.803208,
+      "lng": 151.850389
+    },
+    {
+      "id": "Q5457025",
+      "name": "Flagstaff Hill Maritime Village",
+      "lat": -38.38947,
+      "lng": 142.48499
+    },
+    {
+      "id": "Q5458379",
+      "name": "Fleet Air Arm Museum",
+      "lat": -34.936,
+      "lng": 150.555
+    },
+    {
+      "id": "Q18164839",
+      "name": "Flinders University Art Museum",
+      "lat": -34.920871,
+      "lng": 138.602153
+    },
+    {
+      "id": "Q3748475",
+      "name": "Fort Denison",
+      "lat": -33.854781,
+      "lng": 151.225628
+    },
+    {
+      "id": "Q5471231",
+      "name": "Fort Glanville Conservation Park",
+      "lat": -34.850981,
+      "lng": 138.477187
+    },
+    {
+      "id": "Q48642",
+      "name": "Fort Lytton National Park",
+      "lat": -27.412222,
+      "lng": 153.15
+    },
+    {
+      "id": "Q3077989",
+      "name": "Fort Queenscliff",
+      "lat": -38.272256,
+      "lng": 144.660284
+    },
+    {
+      "id": "Q5472006",
+      "name": "Fort Scratchley",
+      "lat": -32.9277,
+      "lng": 151.79
+    },
+    {
+      "id": "Q117866337",
+      "name": "Fox Classic Car Collection",
+      "lat": -37.821252,
+      "lng": 144.948508
+    },
+    {
+      "id": "Q132291236",
+      "name": "Franklin Harbour Historical Museum",
+      "lat": -33.684062,
+      "lng": 136.926518
+    },
+    {
+      "id": "Q5492248",
+      "name": "Frankston Arts Centre",
+      "lat": -38.146125,
+      "lng": 145.123494
+    },
+    {
+      "id": "Q141718907",
+      "name": "Fremantle Hospital Museum",
+      "lat": -32.057462,
+      "lng": 115.752894
+    },
+    {
+      "id": "Q111605066",
+      "name": "Frog's Hollow, Lowden",
+      "lat": -33.535697,
+      "lng": 115.972163
+    },
+    {
+      "id": "Q114702366",
+      "name": "Gab Titui Cultural Centre",
+      "lat": -10.584836,
+      "lng": 142.218351
+    },
+    {
+      "id": "Q5519031",
+      "name": "Galley Museum",
+      "lat": -42.07835,
+      "lng": 145.55671
+    },
+    {
+      "id": "Q18165574",
+      "name": "Geelong Maritime Museum",
+      "lat": -38.1187,
+      "lng": 144.358
+    },
+    {
+      "id": "Q24190455",
+      "name": "Gippsland Armed Forces Museum",
+      "lat": -38.09672,
+      "lng": 146.964566
+    },
+    {
+      "id": "Q24090272",
+      "name": "Gladstone Regional Art Gallery and Museum",
+      "lat": -23.8451,
+      "lng": 151.2575
+    },
+    {
+      "id": "Q114120150",
+      "name": "Glenorchy Art and Sculpture Park",
+      "lat": -42.819842,
+      "lng": 147.285114
+    },
+    {
+      "id": "Q5569276",
+      "name": "Glenreagh Mountain Railway",
+      "lat": -30.0525,
+      "lng": 152.972
+    },
+    {
+      "id": "Q122980212",
+      "name": "Gnomesville",
+      "lat": -33.464578,
+      "lng": 115.910282
+    },
+    {
+      "id": "Q5579334",
+      "name": "Golden Dragon Museum",
+      "lat": -36.7549,
+      "lng": 144.282
+    },
+    {
+      "id": "Q55612849",
+      "name": "Goulburn Pumping Station",
+      "lat": -34.7369,
+      "lng": 149.704
+    },
+    {
+      "id": "Q15961636",
+      "name": "Goulburn Rail Heritage Centre",
+      "lat": -34.7739,
+      "lng": 149.712
+    },
+    {
+      "id": "Q5593518",
+      "name": "Grainger Museum",
+      "lat": -37.7975,
+      "lng": 144.958
+    },
+    {
+      "id": "Q5598047",
+      "name": "Gravity Discovery Centre",
+      "lat": -31.3562,
+      "lng": 115.713
+    },
+    {
+      "id": "Q127190336",
+      "name": "Great Cobar Heritage Centre",
+      "lat": -31.497847,
+      "lng": 145.842479
+    },
+    {
+      "id": "Q112920181",
+      "name": "Griffith University Art Museum",
+      "lat": -27.481802,
+      "lng": 153.024165
+    },
+    {
+      "id": "Q5617604",
+      "name": "Gulflander",
+      "lat": -17.857,
+      "lng": 141.138
+    },
+    {
+      "id": "Q63342581",
+      "name": "Gundagai Historical Museum",
+      "lat": -35.066324,
+      "lng": 148.107429
+    },
+    {
+      "id": "Q66975315",
+      "name": "Gwalia Museum Group",
+      "lat": -28.914675,
+      "lng": 121.334288
+    },
+    {
+      "id": "Q5685529",
+      "name": "Hawthorn tram depot",
+      "lat": -37.8274,
+      "lng": 145.025
+    },
+    {
+      "id": "Q954298",
+      "name": "Heide Museum of Modern Art",
+      "lat": -37.75863,
+      "lng": 145.08421
+    },
+    {
+      "id": "Q55639871",
+      "name": "Heidelberg Historical Society",
+      "lat": -37.757106,
+      "lng": 145.070433
+    },
+    {
+      "id": "Q15961629",
+      "name": "Hellenic Museum",
+      "lat": -37.8122,
+      "lng": 144.957
+    },
+    {
+      "id": "Q106806979",
+      "name": "Henry Lawson Centre Gulgong",
+      "lat": -32.363019,
+      "lng": 149.531409
+    },
+    {
+      "id": "Q66975346",
+      "name": "Highgate Hill  Police Station, Lockup & Quarters",
+      "lat": -31.942836,
+      "lng": 115.870636
+    },
+    {
+      "id": "Q60748208",
+      "name": "Hindmarsh Fire and Folk Museum",
+      "lat": -34.90768,
+      "lng": 138.5698
+    },
+    {
+      "id": "Q57201120",
+      "name": "Hindmarsh Historical Society Museum",
+      "lat": -34.9077,
+      "lng": 138.5698
+    },
+    {
+      "id": "Q104864480",
+      "name": "Hinkler Hall of Aviation",
+      "lat": -24.851354,
+      "lng": 152.336196
+    },
+    {
+      "id": "Q24090049",
+      "name": "Historic Village Herberton",
+      "lat": -17.373931,
+      "lng": 145.384898
+    },
+    {
+      "id": "Q56021454",
+      "name": "Historical Aircraft Restoration Society",
+      "lat": -34.561238,
+      "lng": 150.790451
+    },
+    {
+      "id": "Q106407659",
+      "name": "History Hill Museum",
+      "lat": -33.022,
+      "lng": 149.4331
+    },
+    {
+      "id": "Q5630230",
+      "name": "HMAS Advance",
+      "lat": -33.869167,
+      "lng": 151.199917
+    },
+    {
+      "id": "Q1293949",
+      "name": "HMAS Castlemaine",
+      "lat": -37.8611,
+      "lng": 144.9056
+    },
+    {
+      "id": "Q3061684",
+      "name": "HMAS Diamantina",
+      "lat": -27.4819,
+      "lng": 153.027
+    },
+    {
+      "id": "Q5630352",
+      "name": "HMAS Gladstone",
+      "lat": -23.833173,
+      "lng": 151.252769
+    },
+    {
+      "id": "Q5630499",
+      "name": "HMAS Onslow",
+      "lat": -33.86925,
+      "lng": 151.19995
+    },
+    {
+      "id": "Q9284699",
+      "name": "HMAS Ovens",
+      "lat": -32.05526,
+      "lng": 115.73868
+    },
+    {
+      "id": "Q5630626",
+      "name": "HMAS Townsville",
+      "lat": -19.256489,
+      "lng": 146.826516
+    },
+    {
+      "id": "Q721087",
+      "name": "HMAS Vampire",
+      "lat": -33.8692,
+      "lng": 151.2
+    },
+    {
+      "id": "Q5630666",
+      "name": "HMAS Whyalla",
+      "lat": -33.019307,
+      "lng": 137.574888
+    },
+    {
+      "id": "Q7714606",
+      "name": "HOTA - Home of the Arts",
+      "lat": -28.0015,
+      "lng": 153.416
+    },
+    {
+      "id": "Q5912332",
+      "name": "Hotham Valley Railway",
+      "lat": -32.63,
+      "lng": 115.871
+    },
+    {
+      "id": "Q2640189",
+      "name": "Hou Wang Temple",
+      "lat": -17.278839,
+      "lng": 145.471842
+    },
+    {
+      "id": "Q5944593",
+      "name": "Hunter Valley Railway Trust",
+      "lat": -32.6815,
+      "lng": 151.344
+    },
+    {
+      "id": "Q116004776",
+      "name": "Hunters Hill Historical Society Museum",
+      "lat": -33.83441,
+      "lng": 151.15282
+    },
+    {
+      "id": "Q56643562",
+      "name": "Huntly Shire Council Chambers",
+      "lat": -36.666,
+      "lng": 144.332556
+    },
+    {
+      "id": "Q56729125",
+      "name": "Huyghue House",
+      "lat": -37.560528,
+      "lng": 143.858944
+    },
+    {
+      "id": "Q1577600",
+      "name": "Hyde Park Barracks",
+      "lat": -33.869611,
+      "lng": 151.212806
+    },
+    {
+      "id": "Q4350417",
+      "name": "Ian Potter Centre",
+      "lat": -37.8178,
+      "lng": 144.969
+    },
+    {
+      "id": "Q5982619",
+      "name": "Ian Potter Museum of Art",
+      "lat": -37.7975,
+      "lng": 144.964
+    },
+    {
+      "id": "Q1656485",
+      "name": "Ida Bay Railway",
+      "lat": -43.443589,
+      "lng": 146.903525
+    },
+    {
+      "id": "Q14934840",
+      "name": "Illawarra Light Railway Museum",
+      "lat": -34.568528,
+      "lng": 150.792049
+    },
+    {
+      "id": "Q60228235",
+      "name": "Illawarra Museum",
+      "lat": -34.4247,
+      "lng": 150.901
+    },
+    {
+      "id": "Q2694295",
+      "name": "Immigration Museum",
+      "lat": -37.819245,
+      "lng": 144.960455
+    },
+    {
+      "id": "Q98556985",
+      "name": "Inside Industry",
+      "lat": -34.444088,
+      "lng": 150.880643
+    },
+    {
+      "id": "Q6049975",
+      "name": "International Cricket Hall of Fame",
+      "lat": -34.48294,
+      "lng": 150.42438
+    },
+    {
+      "id": "Q16251084",
+      "name": "Islamic Museum of Australia",
+      "lat": -37.75451,
+      "lng": 144.98079
+    },
+    {
+      "id": "Q24998041",
+      "name": "James Cook Historical Museum",
+      "lat": -15.4689,
+      "lng": 145.2506
+    },
+    {
+      "id": "Q833945",
+      "name": "Jewish Holocaust Museum and Research Centre",
+      "lat": -37.8833,
+      "lng": 145.001
+    },
+    {
+      "id": "Q1688730",
+      "name": "Jewish Museum of Australia",
+      "lat": -37.8603,
+      "lng": 144.986
+    },
+    {
+      "id": "Q6312503",
+      "name": "Junee Locomotive Depot",
+      "lat": -34.8835,
+      "lng": 147.579
+    },
+    {
+      "id": "Q42915912",
+      "name": "Justice and Police Museum",
+      "lat": -33.862236,
+      "lng": 151.212323
+    },
+    {
+      "id": "Q136749265",
+      "name": "Katherine Historical Museum",
+      "lat": -14.44343,
+      "lng": 132.27288
+    },
+    {
+      "id": "Q55862890",
+      "name": "Kilmore Court House",
+      "lat": -37.296556,
+      "lng": 144.952333
+    },
+    {
+      "id": "Q56053233",
+      "name": "King Cottage",
+      "lat": -33.341282,
+      "lng": 115.649002
+    },
+    {
+      "id": "Q53700558",
+      "name": "Koorie Heritage Trust",
+      "lat": -37.8183,
+      "lng": 144.9691
+    },
+    {
+      "id": "Q132324521",
+      "name": "Koppio Smithy Museum",
+      "lat": -34.420349,
+      "lng": 135.847418
+    },
+    {
+      "id": "Q3048580",
+      "name": "Kuranda Scenic Railway",
+      "lat": -16.8849,
+      "lng": 145.702
+    },
+    {
+      "id": "Q1584808",
+      "name": "La Trobe University Sculpture Park",
+      "lat": -37.72179,
+      "lng": 145.047909
+    },
+    {
+      "id": "Q6468478",
+      "name": "Lachlan Valley Railway",
+      "lat": -33.840756,
+      "lng": 148.69745
+    },
+    {
+      "id": "Q111951015",
+      "name": "Laidley Pioneer Village and Museum",
+      "lat": -27.65,
+      "lng": 152.391389
+    },
+    {
+      "id": "Q6475013",
+      "name": "Lake Boga Flying Boat Base",
+      "lat": -35.4511,
+      "lng": 143.627692
+    },
+    {
+      "id": "Q28183735",
+      "name": "Landsborough Shire Museum",
+      "lat": -26.8094,
+      "lng": 152.9648
+    },
+    {
+      "id": "Q27628378",
+      "name": "Latrobe Flying Museum",
+      "lat": -38.207222,
+      "lng": 146.470278
+    },
+    {
+      "id": "Q24190891",
+      "name": "Lawrence Museum",
+      "lat": -29.821667,
+      "lng": 153.194389
+    },
+    {
+      "id": "Q130483790",
+      "name": "Leschenault Estuary Eco Museum",
+      "lat": -33.297085,
+      "lng": 115.705912
+    },
+    {
+      "id": "Q6534610",
+      "name": "Leuralla",
+      "lat": -33.7246,
+      "lng": 150.33
+    },
+    {
+      "id": "Q27628417",
+      "name": "Light Horse & Field Artillery Museum",
+      "lat": -38.052028,
+      "lng": 145.569792
+    },
+    {
+      "id": "Q6552443",
+      "name": "Lindesay, Darling Point",
+      "lat": -33.8676,
+      "lng": 151.24
+    },
+    {
+      "id": "Q118896692",
+      "name": "Lithgow Small Arms Factory Museum",
+      "lat": -33.48757,
+      "lng": 150.14192
+    },
+    {
+      "id": "Q6647856",
+      "name": "Lithgow State Mine Heritage Park & Railway",
+      "lat": -33.460556,
+      "lng": 150.168889
+    },
+    {
+      "id": "Q116258122",
+      "name": "Liverpool Regional Museum and Family History Centre",
+      "lat": -33.93374,
+      "lng": 150.91683
+    },
+    {
+      "id": "Q65071204",
+      "name": "Lobethal Archives and Historical Museum",
+      "lat": -34.904327,
+      "lng": 138.872637
+    },
+    {
+      "id": "Q57964920",
+      "name": "Lomas' Cottage",
+      "lat": -31.994941,
+      "lng": 115.539728
+    },
+    {
+      "id": "Q28184223",
+      "name": "Longreach Powerhouse",
+      "lat": -23.4404,
+      "lng": 144.2455
+    },
+    {
+      "id": "Q6705197",
+      "name": "Luskintyre Airfield",
+      "lat": -32.6667,
+      "lng": 151.417
+    },
+    {
+      "id": "Q6709635",
+      "name": "Lyon Housemuseum",
+      "lat": -37.808752,
+      "lng": 145.048782
+    },
+    {
+      "id": "Q24887019",
+      "name": "Lyons Cottage",
+      "lat": -12.464568,
+      "lng": 130.839736
+    },
+    {
+      "id": "Q87734889",
+      "name": "MAAP",
+      "lat": -27.455,
+      "lng": 153.03525
+    },
+    {
+      "id": "Q22271907",
+      "name": "Madame Tussauds Sydney",
+      "lat": -33.869756,
+      "lng": 151.201539
+    },
+    {
+      "id": "Q110679810",
+      "name": "Manjimup Heritage Park",
+      "lat": -34.235888,
+      "lng": 116.147599
+    },
+    {
+      "id": "Q6750607",
+      "name": "Manly Art Gallery and Museum",
+      "lat": -33.7985,
+      "lng": 151.281
+    },
+    {
+      "id": "Q6765823",
+      "name": "Maritime Museum of Tasmania",
+      "lat": -42.88262,
+      "lng": 147.3316
+    },
+    {
+      "id": "Q56381833",
+      "name": "Market Hall and Royal Oaks",
+      "lat": -36.996611,
+      "lng": 144.067389
+    },
+    {
+      "id": "Q30315197",
+      "name": "Marks-Hirschfeld Museum of Medical History",
+      "lat": -27.4482,
+      "lng": 153.0238
+    },
+    {
+      "id": "Q6780210",
+      "name": "Mary MacKillop Interpretive Centre",
+      "lat": -37.379236,
+      "lng": 140.839559
+    },
+    {
+      "id": "Q6780880",
+      "name": "Mary Valley Heritage Railway",
+      "lat": -26.4605,
+      "lng": 152.676
+    },
+    {
+      "id": "Q16894696",
+      "name": "Maryborough Military and Colonial Museum",
+      "lat": -25.53884,
+      "lng": 152.70545
+    },
+    {
+      "id": "Q111818871",
+      "name": "Medical History Museum",
+      "lat": -37.799049,
+      "lng": 144.959394
+    },
+    {
+      "id": "Q6811829",
+      "name": "Melbourne Maritime Museum",
+      "lat": -37.8244,
+      "lng": 144.953
+    },
+    {
+      "id": "Q1353869",
+      "name": "Melbourne Museum",
+      "lat": -37.803337,
+      "lng": 144.971445
+    },
+    {
+      "id": "Q14935212",
+      "name": "Melbourne's Living Museum of the West",
+      "lat": -37.775438,
+      "lng": 144.894927
+    },
+    {
+      "id": "Q55886696",
+      "name": "Meroogal",
+      "lat": -34.8754,
+      "lng": 150.5927
+    },
+    {
+      "id": "Q114002035",
+      "name": "Merredin Military Museum",
+      "lat": -31.483231,
+      "lng": 118.280545
+    },
+    {
+      "id": "Q114002096",
+      "name": "Merredin Railway Museum",
+      "lat": -31.482931,
+      "lng": 118.278701
+    },
+    {
+      "id": "Q71353186",
+      "name": "Methodist Church and Hall (former)",
+      "lat": -33.688613,
+      "lng": 117.553835
+    },
+    {
+      "id": "Q6844330",
+      "name": "Migration Museum",
+      "lat": -34.9198,
+      "lng": 138.602
+    },
+    {
+      "id": "Q18632323",
+      "name": "Mildura Arts Centre",
+      "lat": -34.177442,
+      "lng": 142.158408
+    },
+    {
+      "id": "Q14935494",
+      "name": "Miles Historical Village and Museum",
+      "lat": -26.659,
+      "lng": 150.197
+    },
+    {
+      "id": "Q4348847",
+      "name": "Military Museum of Tasmania",
+      "lat": -42.888744,
+      "lng": 147.325497
+    },
+    {
+      "id": "Q55623422",
+      "name": "Miss Porter's House",
+      "lat": -32.928,
+      "lng": 151.765
+    },
+    {
+      "id": "Q12061966",
+      "name": "Monash University Museum of Art",
+      "lat": -37.8772,
+      "lng": 145.0462
+    },
+    {
+      "id": "Q56273655",
+      "name": "Moonee Ponds Court House",
+      "lat": -37.764472,
+      "lng": 144.924056
+    },
+    {
+      "id": "Q38252032",
+      "name": "Mulberry Hill",
+      "lat": -38.18677,
+      "lng": 145.1668
+    },
+    {
+      "id": "Q97591117",
+      "name": "Murchison Museum, Western Australia",
+      "lat": -26.893278,
+      "lng": 115.957221
+    },
+    {
+      "id": "Q24185504",
+      "name": "Murray Art Museum Albury",
+      "lat": -36.08059,
+      "lng": 146.916753
+    },
+    {
+      "id": "Q56088299",
+      "name": "Murtoa Railway Water Tower",
+      "lat": -36.615111,
+      "lng": 142.471417
+    },
+    {
+      "id": "Q1954532",
+      "name": "Museum & Art Gallery of the Northern Territory",
+      "lat": -12.4375,
+      "lng": 130.833611
+    },
+    {
+      "id": "Q30267357",
+      "name": "Museum of Applied Arts & Sciences",
+      "lat": -33.878517,
+      "lng": 151.199539
+    },
+    {
+      "id": "Q2107035",
+      "name": "Museum of Applied Arts and Science",
+      "lat": -33.878611,
+      "lng": 151.199444
+    },
+    {
+      "id": "Q116985621",
+      "name": "Museum of Art and Culture Lake Macquarie",
+      "lat": -32.974277,
+      "lng": 151.615697
+    },
+    {
+      "id": "Q56857361",
+      "name": "Museum of Australian Democracy at Old Parliament House",
+      "lat": -35.30234,
+      "lng": 149.129605
+    },
+    {
+      "id": "Q140517749",
+      "name": "Museum of Australian Photography",
+      "lat": -37.9077,
+      "lng": 145.1902
+    },
+    {
+      "id": "Q1389172",
+      "name": "Museum of Brisbane",
+      "lat": -27.4688,
+      "lng": 153.023
+    },
+    {
+      "id": "Q137382192",
+      "name": "Museum of Central Australia",
+      "lat": -23.70131,
+      "lng": 133.86443
+    },
+    {
+      "id": "Q5100547",
+      "name": "Museum of Chinese Australian History",
+      "lat": -37.8106,
+      "lng": 144.969
+    },
+    {
+      "id": "Q140995100",
+      "name": "Museum of Chinese in Australia",
+      "lat": -33.879909,
+      "lng": 151.205511
+    },
+    {
+      "id": "Q690242",
+      "name": "Museum of Contemporary Art Australia",
+      "lat": -33.86,
+      "lng": 151.208889
+    },
+    {
+      "id": "Q122171157",
+      "name": "Museum of Discovery (MOD)",
+      "lat": -34.9215,
+      "lng": 138.5928
+    },
+    {
+      "id": "Q60746927",
+      "name": "Museum of Lands, Mapping and Surveying",
+      "lat": -27.4651,
+      "lng": 153.025
+    },
+    {
+      "id": "Q85787153",
+      "name": "Museum of Modern Art Australia",
+      "lat": -37.818909,
+      "lng": 144.961888
+    },
+    {
+      "id": "Q2353030",
+      "name": "Museum of Old and New Art",
+      "lat": -42.8128,
+      "lng": 147.261
+    },
+    {
+      "id": "Q23808595",
+      "name": "Museum of Perth",
+      "lat": -31.950848,
+      "lng": 115.853676
+    },
+    {
+      "id": "Q910232",
+      "name": "Museum of Sydney",
+      "lat": -33.8636,
+      "lng": 151.211
+    },
+    {
+      "id": "Q6941115",
+      "name": "Museum of the Riverina",
+      "lat": -35.1284,
+      "lng": 147.368
+    },
+    {
+      "id": "Q500890",
+      "name": "Museums Victoria",
+      "lat": -37.803333,
+      "lng": 144.971667
+    },
+    {
+      "id": "Q62868012",
+      "name": "Narryna Heritage Museum",
+      "lat": -42.889193,
+      "lng": 147.331585
+    },
+    {
+      "id": "Q6970324",
+      "name": "National Alpine Museum of Australia",
+      "lat": -37.1452,
+      "lng": 146.449
+    },
+    {
+      "id": "Q60578839",
+      "name": "National Anzac Centre",
+      "lat": -35.031451,
+      "lng": 117.913
+    },
+    {
+      "id": "Q6970476",
+      "name": "National Art Glass Collection",
+      "lat": -35.1095,
+      "lng": 147.372
+    },
+    {
+      "id": "Q136649082",
+      "name": "National Capital Exhibition",
+      "lat": -35.290464,
+      "lng": 149.131293
+    },
+    {
+      "id": "Q131749517",
+      "name": "National Communication Museum",
+      "lat": -37.822497,
+      "lng": 145.036436
+    },
+    {
+      "id": "Q494881",
+      "name": "National Dinosaur Museum",
+      "lat": -35.1943,
+      "lng": 149.088
+    },
+    {
+      "id": "Q623578",
+      "name": "National Library of Australia",
+      "lat": -35.296389,
+      "lng": 149.129444
+    },
+    {
+      "id": "Q17435190",
+      "name": "National Military Vehicle Museum",
+      "lat": -34.7261,
+      "lng": 138.629
+    },
+    {
+      "id": "Q15261134",
+      "name": "National Motor Museum",
+      "lat": -34.819722,
+      "lng": 138.954444
+    },
+    {
+      "id": "Q6974397",
+      "name": "National Motor Racing Museum",
+      "lat": -33.44,
+      "lng": 149.561944
+    },
+    {
+      "id": "Q1967496",
+      "name": "National Museum of Australia",
+      "lat": -35.2931,
+      "lng": 149.121
+    },
+    {
+      "id": "Q16895683",
+      "name": "National Museum of Australian Pottery",
+      "lat": -35.7264,
+      "lng": 147.312
+    },
+    {
+      "id": "Q6975187",
+      "name": "National Railway Museum",
+      "lat": -34.8455,
+      "lng": 138.508
+    },
+    {
+      "id": "Q6978131",
+      "name": "National Road Transport Museum",
+      "lat": -23.777111,
+      "lng": 133.867528
+    },
+    {
+      "id": "Q27628411",
+      "name": "National Vietnam Veterans Museum",
+      "lat": -38.520754,
+      "lng": 145.324518
+    },
+    {
+      "id": "Q25182739",
+      "name": "National Wool Museum",
+      "lat": -38.145374,
+      "lng": 144.361221
+    },
+    {
+      "id": "Q29025064",
+      "name": "New England Regional Art Museum",
+      "lat": -30.5252,
+      "lng": 151.6648
+    },
+    {
+      "id": "Q56279777",
+      "name": "New South Wales Lancers Memorial Museum",
+      "lat": -33.8168,
+      "lng": 151.0068
+    },
+    {
+      "id": "Q14934949",
+      "name": "Newcastle Museum",
+      "lat": -32.925278,
+      "lng": 151.758056
+    },
+    {
+      "id": "Q16926902",
+      "name": "Newport Railway Museum",
+      "lat": -37.856111,
+      "lng": 144.886667
+    },
+    {
+      "id": "Q7026623",
+      "name": "Nicholson Museum",
+      "lat": -33.8864,
+      "lng": 151.189
+    },
+    {
+      "id": "Q7052498",
+      "name": "Norman Lindsay Gallery and Museum",
+      "lat": -33.680556,
+      "lng": 150.561389
+    },
+    {
+      "id": "Q14935534",
+      "name": "North Stradbroke Island Historical Museum",
+      "lat": -27.4977,
+      "lng": 153.404
+    },
+    {
+      "id": "Q7011771",
+      "name": "NSW Rail Museum",
+      "lat": -34.2064,
+      "lng": 150.57
+    },
+    {
+      "id": "Q109419728",
+      "name": "NSW Schoolhouse Museum",
+      "lat": -33.794633,
+      "lng": 151.121475
+    },
+    {
+      "id": "Q30401891",
+      "name": "Nungarin Heritage Machinery and Army Museum",
+      "lat": -31.185744,
+      "lng": 118.097278
+    },
+    {
+      "id": "Q136511136",
+      "name": "Nyinkka Nyunyu",
+      "lat": -19.65191,
+      "lng": 134.18807
+    },
+    {
+      "id": "Q7074801",
+      "name": "Oberon Tarana Heritage Railway",
+      "lat": -33.7001,
+      "lng": 149.854
+    },
+    {
+      "id": "Q55865478",
+      "name": "Old Bank of New South Wales building, Kyneton",
+      "lat": -37.244333,
+      "lng": 144.448778
+    },
+    {
+      "id": "Q7084723",
+      "name": "Old Central Fire Station",
+      "lat": -31.954828,
+      "lng": 115.864288
+    },
+    {
+      "id": "Q100152068",
+      "name": "Old Court House, Pingelly",
+      "lat": -32.534657,
+      "lng": 117.083861
+    },
+    {
+      "id": "Q7083876",
+      "name": "Old Dubbo Gaol",
+      "lat": -32.2459,
+      "lng": 148.6022
+    },
+    {
+      "id": "Q56053647",
+      "name": "Old Gaol & Police Quarters, Bridgetown",
+      "lat": -33.957362,
+      "lng": 116.137751
+    },
+    {
+      "id": "Q7084076",
+      "name": "Old Gaol Museum",
+      "lat": -31.5535,
+      "lng": 116.467
+    },
+    {
+      "id": "Q2018366",
+      "name": "Old Ghan Heritage Railway and Museum",
+      "lat": -23.7777,
+      "lng": 133.868
+    },
+    {
+      "id": "Q7084093",
+      "name": "Old Gippstown",
+      "lat": -38.18486,
+      "lng": 146.23625
+    },
+    {
+      "id": "Q104604483",
+      "name": "Old Petrie Town",
+      "lat": -27.261195,
+      "lng": 152.953629
+    },
+    {
+      "id": "Q111601489",
+      "name": "Old Roads Board Office, Collie",
+      "lat": -33.358708,
+      "lng": 116.148139
+    },
+    {
+      "id": "Q137660459",
+      "name": "Old Timers Traeger Museum",
+      "lat": -23.74207,
+      "lng": 133.86953
+    },
+    {
+      "id": "Q7085326",
+      "name": "Old Treasury Building",
+      "lat": -37.8132,
+      "lng": 144.974
+    },
+    {
+      "id": "Q7105792",
+      "name": "Osborne House",
+      "lat": -38.1194,
+      "lng": 144.358
+    },
+    {
+      "id": "Q7073081",
+      "name": "OTC Satellite Earth Station Carnarvon",
+      "lat": -24.868961,
+      "lng": 113.703928
+    },
+    {
+      "id": "Q1858105",
+      "name": "Parliament House",
+      "lat": -35.308056,
+      "lng": 149.124444
+    },
+    {
+      "id": "Q24190625",
+      "name": "Patrick Taylor Cottage",
+      "lat": -35.026999,
+      "lng": 117.881087
+    },
+    {
+      "id": "Q85792562",
+      "name": "Paynesville Maritime Museum",
+      "lat": -37.916667,
+      "lng": 147.716667
+    },
+    {
+      "id": "Q7161899",
+      "name": "Pemberton Tramway Company",
+      "lat": -34.4429,
+      "lng": 116.033
+    },
+    {
+      "id": "Q58204626",
+      "name": "Penrith Museum of Fire",
+      "lat": -33.7477,
+      "lng": 150.6936
+    },
+    {
+      "id": "Q99438812",
+      "name": "Penrith Museum of Printing",
+      "lat": -33.757,
+      "lng": 150.688
+    },
+    {
+      "id": "Q140914533",
+      "name": "Perth Electric Tramway",
+      "lat": -31.840228,
+      "lng": 115.952939
+    },
+    {
+      "id": "Q2072568",
+      "name": "Perth Institute of Contemporary Arts",
+      "lat": -31.949811,
+      "lng": 115.860213
+    },
+    {
+      "id": "Q56053797",
+      "name": "Pioneer Museum, Greenough",
+      "lat": -28.914945,
+      "lng": 114.710487
+    },
+    {
+      "id": "Q53889787",
+      "name": "Pioneer Settlement",
+      "lat": -35.3475,
+      "lng": 143.5644
+    },
+    {
+      "id": "Q24997949",
+      "name": "Port Douglas Court House Museum",
+      "lat": -16.4796,
+      "lng": 145.4628
+    },
+    {
+      "id": "Q7231012",
+      "name": "Port Victoria Maritime Museum",
+      "lat": -34.496,
+      "lng": 137.482
+    },
+    {
+      "id": "Q116859499",
+      "name": "Portland Maritime Discovery Centre",
+      "lat": -38.346,
+      "lng": 141.608
+    },
+    {
+      "id": "Q24185471",
+      "name": "Princess Royal Fortress",
+      "lat": -35.030722,
+      "lng": 117.91125
+    },
+    {
+      "id": "Q24090094",
+      "name": "Pringle Cottage Museum",
+      "lat": -28.2202,
+      "lng": 152.0269
+    },
+    {
+      "id": "Q19917343",
+      "name": "QAGOMA",
+      "lat": -27.4726,
+      "lng": 153.01828
+    },
+    {
+      "id": "Q1326506",
+      "name": "Qantas Founders Outback Museum",
+      "lat": -23.4399,
+      "lng": 144.271
+    },
+    {
+      "id": "Q124652092",
+      "name": "Qtopia",
+      "lat": -33.8797,
+      "lng": 151.2172
+    },
+    {
+      "id": "Q7270538",
+      "name": "Queen Victoria Museum and Art Gallery",
+      "lat": -41.4378,
+      "lng": 147.134
+    },
+    {
+      "id": "Q60740601",
+      "name": "Queenscliffe Historical Museum",
+      "lat": -38.26766,
+      "lng": 144.6615
+    },
+    {
+      "id": "Q7270869",
+      "name": "Queenscliffe Maritime Museum",
+      "lat": -38.264722,
+      "lng": 144.667222
+    },
+    {
+      "id": "Q14935546",
+      "name": "Queensland Air Museum",
+      "lat": -26.798,
+      "lng": 153.1096
+    },
+    {
+      "id": "Q7270964",
+      "name": "Queensland Maritime Museum",
+      "lat": -27.4819,
+      "lng": 153.026
+    },
+    {
+      "id": "Q1537684",
+      "name": "Queensland Museum",
+      "lat": -27.473173,
+      "lng": 153.017423
+    },
+    {
+      "id": "Q6941039",
+      "name": "Queensland Museum Tropics",
+      "lat": -19.2574,
+      "lng": 146.822
+    },
+    {
+      "id": "Q60740586",
+      "name": "Queensland Police Museum",
+      "lat": -27.4666,
+      "lng": 153.018
+    },
+    {
+      "id": "Q497181",
+      "name": "Questacon",
+      "lat": -35.298056,
+      "lng": 149.131389
+    },
+    {
+      "id": "Q4306366",
+      "name": "RAAF Museum",
+      "lat": -37.9305,
+      "lng": 144.749
+    },
+    {
+      "id": "Q7274989",
+      "name": "RAAF Wagga Heritage Centre",
+      "lat": -35.1492,
+      "lng": 147.468
+    },
+    {
+      "id": "Q7283899",
+      "name": "Rail Motor Society",
+      "lat": -32.602,
+      "lng": 151.615
+    },
+    {
+      "id": "Q1138895",
+      "name": "Reconciliation Place",
+      "lat": -35.3,
+      "lng": 149.133
+    },
+    {
+      "id": "Q23073813",
+      "name": "Redland Museum",
+      "lat": -27.534242,
+      "lng": 153.259663
+    },
+    {
+      "id": "Q105612423",
+      "name": "Reserve Bank of Australia Museum",
+      "lat": -33.868003,
+      "lng": 151.211964
+    },
+    {
+      "id": "Q24190771",
+      "name": "Residency Museum",
+      "lat": -35.028642,
+      "lng": 117.880828
+    },
+    {
+      "id": "Q15272521",
+      "name": "Richmond Vale Railway Museum",
+      "lat": -32.857293,
+      "lng": 151.47582
+    },
+    {
+      "id": "Q113667482",
+      "name": "Robert Steele Steam Machinery Exhibition",
+      "lat": -32.054926,
+      "lng": 115.73974
+    },
+    {
+      "id": "Q66480991",
+      "name": "Rockingham Museum",
+      "lat": -32.275354,
+      "lng": 115.732858
+    },
+    {
+      "id": "Q7367931",
+      "name": "Rose Seidler House",
+      "lat": -33.70977,
+      "lng": 151.14209
+    },
+    {
+      "id": "Q107132392",
+      "name": "Rosewood Railway Museum",
+      "lat": -27.61042,
+      "lng": 152.56214
+    },
+    {
+      "id": "Q7373759",
+      "name": "Royal Australian Navy Heritage Centre",
+      "lat": -33.8595,
+      "lng": 151.23
+    },
+    {
+      "id": "Q15628009",
+      "name": "Samson House",
+      "lat": -32.050978,
+      "lng": 115.75525
+    },
+    {
+      "id": "Q15274714",
+      "name": "Samstag Museum",
+      "lat": -34.9222,
+      "lng": 138.5913
+    },
+    {
+      "id": "Q65071201",
+      "name": "Santos Museum of Economic Botany",
+      "lat": -34.918041,
+      "lng": 138.61127
+    },
+    {
+      "id": "Q98556963",
+      "name": "Science Space",
+      "lat": -34.40116,
+      "lng": 150.900044
+    },
+    {
+      "id": "Q7433721",
+      "name": "Scienceworks",
+      "lat": -37.8316,
+      "lng": 144.894
+    },
+    {
+      "id": "Q7434103",
+      "name": "Scitech",
+      "lat": -31.9443,
+      "lng": 115.847
+    },
+    {
+      "id": "Q76056681",
+      "name": "Serpentine Vintage Tractor Museum",
+      "lat": -32.36353,
+      "lng": 115.981661
+    },
+    {
+      "id": "Q7459214",
+      "name": "Seymour Railway Heritage Centre",
+      "lat": -37.0228,
+      "lng": 145.143
+    },
+    {
+      "id": "Q96405527",
+      "name": "Shepparton Art Museum",
+      "lat": -36.3912,
+      "lng": 145.396583
+    },
+    {
+      "id": "Q68521258",
+      "name": "Sir Edgeworth David Memorial Museum",
+      "lat": -32.810516,
+      "lng": 151.487585
+    },
+    {
+      "id": "Q7527050",
+      "name": "Sir Harry Gibbs Legal Heritage Centre",
+      "lat": -27.4676,
+      "lng": 153.021
+    },
+    {
+      "id": "Q7548760",
+      "name": "Snowy Scheme Museum",
+      "lat": -35.9983,
+      "lng": 148.775
+    },
+    {
+      "id": "Q65078335",
+      "name": "South Australia Police Historical Society",
+      "lat": -34.919582,
+      "lng": 138.582222
+    },
+    {
+      "id": "Q7566100",
+      "name": "South Australian Aviation Museum",
+      "lat": -34.8482,
+      "lng": 138.512
+    },
+    {
+      "id": "Q18165679",
+      "name": "South Australian Maritime Museum",
+      "lat": -34.8431,
+      "lng": 138.506
+    },
+    {
+      "id": "Q2546445",
+      "name": "South Australian Museum",
+      "lat": -34.92049,
+      "lng": 138.60319
+    },
+    {
+      "id": "Q24190349",
+      "name": "South Sea Islands Museum",
+      "lat": -33.074093,
+      "lng": 151.462751
+    },
+    {
+      "id": "Q116057559",
+      "name": "South West Rail & Heritage Centre",
+      "lat": -33.479428,
+      "lng": 115.731341
+    },
+    {
+      "id": "Q18754899",
+      "name": "Southern Downs Steam Railway",
+      "lat": -28.216,
+      "lng": 152.042
+    },
+    {
+      "id": "Q7571604",
+      "name": "Sovereign Hill",
+      "lat": -37.5751,
+      "lng": 143.866
+    },
+    {
+      "id": "Q28183812",
+      "name": "Springsure Hospital Museum",
+      "lat": -24.1194,
+      "lng": 148.0844
+    },
+    {
+      "id": "Q6133813",
+      "name": "State Library of New South Wales",
+      "lat": -33.866389,
+      "lng": 151.213333
+    },
+    {
+      "id": "Q7605482",
+      "name": "Steamrail Victoria",
+      "lat": -37.8508,
+      "lng": 144.88
+    },
+    {
+      "id": "Q7605329",
+      "name": "SteamRanger Heritage Railway",
+      "lat": -35.066064,
+      "lng": 138.865665
+    },
+    {
+      "id": "Q7605492",
+      "name": "Steamtown Heritage Rail Centre",
+      "lat": -32.9751,
+      "lng": 138.826
+    },
+    {
+      "id": "Q138797019",
+      "name": "Sugar Valley Library Museum",
+      "lat": -32.92,
+      "lng": 151.6
+    },
+    {
+      "id": "Q7648734",
+      "name": "Susannah Place Museum",
+      "lat": -33.86009,
+      "lng": 151.205244
+    },
+    {
+      "id": "Q7659846",
+      "name": "Sydney Bus Museum",
+      "lat": -33.8765,
+      "lng": 151.158
+    },
+    {
+      "id": "Q1722305",
+      "name": "Sydney Jewish Museum",
+      "lat": -33.87903,
+      "lng": 151.22015
+    },
+    {
+      "id": "Q7660031",
+      "name": "Sydney Maritime Museum",
+      "lat": -33.8699,
+      "lng": 151.199
+    },
+    {
+      "id": "Q1641346",
+      "name": "Sydney Mint",
+      "lat": -33.868889,
+      "lng": 151.2125
+    },
+    {
+      "id": "Q7660067",
+      "name": "Sydney Observatory",
+      "lat": -33.859559,
+      "lng": 151.204583
+    },
+    {
+      "id": "Q1109301",
+      "name": "Sydney Tramway Museum",
+      "lat": -34.0446,
+      "lng": 151.052
+    },
+    {
+      "id": "Q7682408",
+      "name": "Tandanya National Aboriginal Cultural Institute",
+      "lat": -34.9241,
+      "lng": 138.6105
+    },
+    {
+      "id": "Q53706297",
+      "name": "TarraWarra Museum of Art",
+      "lat": -37.65963,
+      "lng": 145.46919
+    },
+    {
+      "id": "Q7687474",
+      "name": "Tasmanian Museum and Art Gallery",
+      "lat": -42.8819,
+      "lng": 147.332
+    },
+    {
+      "id": "Q7687490",
+      "name": "Tasmanian Transport Museum",
+      "lat": -42.8312,
+      "lng": 147.275
+    },
+    {
+      "id": "Q107548188",
+      "name": "Tea Tree Gully Heritage Museum",
+      "lat": -34.822141,
+      "lng": 138.730816
+    },
+    {
+      "id": "Q7698212",
+      "name": "Temora Aviation Museum",
+      "lat": -34.4273,
+      "lng": 147.515
+    },
+    {
+      "id": "Q7712847",
+      "name": "The Age of Fishes Museum",
+      "lat": -33.56215,
+      "lng": 148.66013
+    },
+    {
+      "id": "Q28220489",
+      "name": "The Army Museum Bandiana",
+      "lat": -36.1463,
+      "lng": 146.9168
+    },
+    {
+      "id": "Q53857982",
+      "name": "The Dax Centre",
+      "lat": -37.7983,
+      "lng": 144.9585
+    },
+    {
+      "id": "Q7743419",
+      "name": "The Johnston Collection",
+      "lat": -37.8139,
+      "lng": 144.985
+    },
+    {
+      "id": "Q85807904",
+      "name": "The Milang Railway Museum",
+      "lat": -35.408742,
+      "lng": 138.971721
+    },
+    {
+      "id": "Q28402951",
+      "name": "The Nostalgia Box",
+      "lat": -31.944185,
+      "lng": 115.846412
+    },
+    {
+      "id": "Q135263995",
+      "name": "The Rocks Discovery Museum",
+      "lat": -33.8589,
+      "lng": 151.208651
+    },
+    {
+      "id": "Q137438921",
+      "name": "Timber Creek Police Station Museum",
+      "lat": -15.64394,
+      "lng": 130.47731
+    },
+    {
+      "id": "Q56057162",
+      "name": "Tintaldra General Store",
+      "lat": -36.047083,
+      "lng": 147.931583
+    },
+    {
+      "id": "Q107639496",
+      "name": "Tocumwal Aviation Museum",
+      "lat": -35.811833,
+      "lng": 145.593472
+    },
+    {
+      "id": "Q7833252",
+      "name": "Tramway Museum Society of Victoria",
+      "lat": -37.3535,
+      "lng": 144.966
+    },
+    {
+      "id": "Q38251131",
+      "name": "Tramway Museum, St Kilda",
+      "lat": -34.736,
+      "lng": 138.548
+    },
+    {
+      "id": "Q100271920",
+      "name": "Tressie's Museum & Caravan Park",
+      "lat": -32.493977,
+      "lng": 118.711305
+    },
+    {
+      "id": "Q28219922",
+      "name": "Tuxworth Fullwood House",
+      "lat": -19.64673,
+      "lng": 134.18788
+    },
+    {
+      "id": "Q138841598",
+      "name": "Tweed Regional Museum, Murwillumbah",
+      "lat": -28.325628,
+      "lng": 153.395233
+    },
+    {
+      "id": "Q18166789",
+      "name": "University of Queensland Anthropology Museum",
+      "lat": -27.4973,
+      "lng": 153.012
+    },
+    {
+      "id": "Q7896183",
+      "name": "University of Queensland Art Museum",
+      "lat": -27.4965,
+      "lng": 153.012
+    },
+    {
+      "id": "Q60748124",
+      "name": "Unley Museum",
+      "lat": -34.951395,
+      "lng": 138.608823
+    },
+    {
+      "id": "Q55327366",
+      "name": "Up-To-Date Store",
+      "lat": -34.813,
+      "lng": 147.2
+    },
+    {
+      "id": "Q7912084",
+      "name": "Valley Heights Locomotive Depot Heritage Museum",
+      "lat": -33.7026,
+      "lng": 150.58
+    },
+    {
+      "id": "Q52807706",
+      "name": "Victoria Police Museum",
+      "lat": -37.8225,
+      "lng": 144.9541
+    },
+    {
+      "id": "Q7927333",
+      "name": "Victorian Telecommunications Museum",
+      "lat": -37.8226,
+      "lng": 145.036
+    },
+    {
+      "id": "Q137637263",
+      "name": "Wagga Steam and Vintage Engine Museum",
+      "lat": -35.12947,
+      "lng": 147.36895
+    },
+    {
+      "id": "Q66976582",
+      "name": "Walkaway Railway Station Museum",
+      "lat": -28.938626,
+      "lng": 114.801736
+    },
+    {
+      "id": "Q30102881",
+      "name": "Walter Sully Emporium",
+      "lat": -31.95624,
+      "lng": 141.468175
+    },
+    {
+      "id": "Q7979282",
+      "name": "Wee Georgie Wood Railway",
+      "lat": -41.72987,
+      "lng": 145.62417
+    },
+    {
+      "id": "Q24191242",
+      "name": "West Coast Heritage Centre",
+      "lat": -41.882722,
+      "lng": 145.335686
+    },
+    {
+      "id": "Q7984846",
+      "name": "West Coast Wilderness Railway",
+      "lat": -42.153,
+      "lng": 145.496
+    },
+    {
+      "id": "Q66379418",
+      "name": "Western Australian Maritime Museum",
+      "lat": -32.054722,
+      "lng": 115.739188
+    },
+    {
+      "id": "Q3567483",
+      "name": "Western Australian Museum",
+      "lat": -31.949629,
+      "lng": 115.862402
+    },
+    {
+      "id": "Q7987539",
+      "name": "Western Australian Rail Transport Museum",
+      "lat": -31.9097,
+      "lng": 115.939
+    },
+    {
+      "id": "Q138329714",
+      "name": "Wheatbelt Heritage Rail Discovery Centre",
+      "lat": -31.1373,
+      "lng": 117.18321
+    },
+    {
+      "id": "Q66976651",
+      "name": "Wilkinson Homestead",
+      "lat": -32.063869,
+      "lng": 115.981905
+    },
+    {
+      "id": "Q76529991",
+      "name": "Wireless Hill Museum",
+      "lat": -32.030388,
+      "lng": 115.828011
+    },
+    {
+      "id": "Q14935683",
+      "name": "Women's Museum of Australia",
+      "lat": -23.7041,
+      "lng": 133.8769
+    },
+    {
+      "id": "Q58203041",
+      "name": "Woodford Academy",
+      "lat": -33.733,
+      "lng": 150.4736
+    },
+    {
+      "id": "Q22032353",
+      "name": "Workshops Rail Museum",
+      "lat": -27.6023,
+      "lng": 152.7572
+    },
+    {
+      "id": "Q66976685",
+      "name": "Wubin Wheatbin",
+      "lat": -30.106684,
+      "lng": 116.630672
+    },
+    {
+      "id": "Q8048303",
+      "name": "Yanco Powerhouse Museum",
+      "lat": -34.6035,
+      "lng": 146.407
+    },
+    {
+      "id": "Q14935328",
+      "name": "Yarra Valley Railway",
+      "lat": -37.6597,
+      "lng": 145.489
+    },
+    {
+      "id": "Q8052939",
+      "name": "Yester Grange",
+      "lat": -33.7263,
+      "lng": 150.3781
+    },
+    {
+      "id": "Q141539547",
+      "name": "Yitpi Yartapuultiku",
+      "lat": -34.851317,
+      "lng": 138.501589
+    },
+    {
+      "id": "Q77967180",
+      "name": "York Motor Museum",
+      "lat": -31.889058,
+      "lng": 116.768648
+    },
+    {
+      "id": "Q199312",
+      "name": "Zig Zag Railway",
+      "lat": -33.471758,
+      "lng": 150.194222
+    }
+  ]
 }
