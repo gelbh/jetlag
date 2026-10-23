@@ -146,6 +146,22 @@ export interface RegionPackSessionBoundaries {
   customMatchingAreas: CustomMatchingAreasByLevel;
 }
 
+function filterGeoJsonTextBySubregion(
+  text: string,
+  propertyKey: string,
+  subregionId: string,
+): string {
+  const collection = parseFeatureCollection(text);
+  const filtered: FeatureCollection = {
+    type: "FeatureCollection",
+    features: collection.features.filter((feature) => {
+      const value = feature.properties?.[propertyKey];
+      return typeof value === "string" && value === subregionId;
+    }),
+  };
+  return JSON.stringify(filtered);
+}
+
 export async function loadRegionPackSessionBoundaries(
   packId: RegionPackId,
   subregionId?: string,
@@ -155,18 +171,42 @@ export async function loadRegionPackSessionBoundaries(
     throw new Error(`Unknown region pack: ${packId}`);
   }
 
-  const primaryJson = await fetchGeoJsonText(config.geoAssets.primary);
+  const primaryRaw = await fetchGeoJsonText(config.geoAssets.primary);
+  // Australia STE is ~1.6MB national; subregion sessions only need the one state feature.
+  // Other packs keep full primary at level 8 (e.g. Dublin councils while playing one LEA).
+  const primaryJson =
+    packId === "australia" && subregionId !== undefined
+      ? filterGeoJsonTextBySubregion(primaryRaw, config.subregionPropertyKey, subregionId)
+      : primaryRaw;
   const secondaryPath =
     subregionId && config.geoAssets.secondaryBySubregion
       ? config.geoAssets.secondaryBySubregion(subregionId)
       : config.geoAssets.secondary;
   const secondaryJson = secondaryPath ? await fetchGeoJsonText(secondaryPath) : undefined;
+
+  let level4Json: string | undefined;
+  if (config.geoAssets.matchingLevel4) {
+    const raw = await fetchGeoJsonText(config.geoAssets.matchingLevel4);
+    level4Json =
+      subregionId !== undefined
+        ? filterGeoJsonTextBySubregion(raw, config.subregionPropertyKey, subregionId)
+        : raw;
+  }
+
+  const level6Path =
+    subregionId && config.geoAssets.matchingLevel6BySubregion
+      ? config.geoAssets.matchingLevel6BySubregion(subregionId)
+      : config.geoAssets.matchingLevel6;
+  const level6Json = level6Path ? await fetchGeoJsonText(level6Path) : undefined;
+
   const playArea = await loadRegionPackPlayArea(packId, subregionId);
 
   return {
     playArea,
     focusBounds: gameAreaToBoundingBox(playArea),
     customMatchingAreas: {
+      ...(level4Json !== undefined ? { 4: level4Json } : {}),
+      ...(level6Json !== undefined ? { 6: level6Json } : {}),
       8: primaryJson,
       ...(secondaryJson !== undefined ? { 9: secondaryJson } : {}),
     },
@@ -184,7 +224,7 @@ export async function loadRegionPackMatchingAreas(
 export function adminLevelForRegionPackAsset(
   level: keyof CustomMatchingAreasByLevel,
 ): MatchingAdminLevel | null {
-  if (level === 8 || level === 9) {
+  if (level === 4 || level === 6 || level === 8 || level === 9) {
     return level;
   }
   return null;

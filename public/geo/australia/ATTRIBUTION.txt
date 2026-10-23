@@ -9,6 +9,18 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
 Server-generalized with maxAllowableOffset≈0.0014°, then @turf/simplify
 tolerance 0.002°; coordinates rounded to 4 decimal places.
 
+Commonwealth Electoral Divisions (CED) and State Electoral Divisions (SED):
+Australian Bureau of Statistics (ABS), Australian Statistical Geography Standard
+(ASGS) Edition 3.
+CED: ASGS 2025 Commonwealth Electoral Divisions (ArcGIS REST ASGS2025/CED,
+downloaded 2026-10-23, WGS84 / EPSG:4326).
+SED: ASGS 2025 State Electoral Divisions (ArcGIS REST ASGS2025/SED,
+downloaded 2026-10-23, WGS84 / EPSG:4326).
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+Server-generalized with maxAllowableOffset≈0.0014°, then @turf/simplify
+tolerance 0.002°; coordinates rounded to 4 decimal places.
+Other Territories / outside-Australia codes omitted (locked eight S/T only).
+
 Coastline segments: unary union of simplified STE polygons, exterior rings
 only (same ABS ASGS CC BY 4.0 attribution). Further simplified at 0.01°.
 

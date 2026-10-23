@@ -1,14 +1,15 @@
 /**
- * Convert ABS ASGS STE + LGA GeoJSON (tmp) into public/geo/australia pack assets.
+ * Convert ABS ASGS STE + LGA + CED + SED GeoJSON (tmp) into public/geo/australia pack assets.
  *
  * Source downloads (not committed): ArcGIS REST GeoJSON with maxAllowableOffset=0.0014
- *   STE: ASGS2021/STE  LGA: ASGS2025/LGA
+ *   STE: ASGS2021/STE  LGA: ASGS2025/LGA  CED/SED: ASGS2025/CED + ASGS2025/SED
  * Further client simplify via @turf/simplify to Switzerland-band file weight.
  *
  * Usage:
  *   node scripts/build-australia-boundaries.mjs --raw-dir /tmp/abs-asgs/raw
+ *   node scripts/build-australia-boundaries.mjs --raw-dir /tmp/abs-asgs/raw --only ced-sed
  */
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import bbox from "@turf/bbox";
@@ -53,10 +54,13 @@ const SIMPLIFY_TOLERANCE = 0.002;
 const ROUND_DECIMALS = 4;
 
 function parseArgs(argv) {
-  const args = { rawDir: "/tmp/abs-asgs/raw" };
+  const args = { rawDir: "/tmp/abs-asgs/raw", only: null };
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === "--raw-dir" && argv[i + 1]) {
       args.rawDir = argv[++i];
+    }
+    if (argv[i] === "--only" && argv[i + 1]) {
+      args.only = argv[++i];
     }
   }
   return args;
@@ -153,6 +157,107 @@ function loadLgas(rawDir) {
     features.sort((a, b) => a.properties.lgaId.localeCompare(b.properties.lgaId));
   }
   return byState;
+}
+
+function loadCeds(rawDir) {
+  const collection = JSON.parse(readFileSync(join(rawDir, "ced.geojson"), "utf8"));
+  const features = [];
+  for (const feature of collection.features ?? []) {
+    if (!feature.geometry) continue;
+    const code = String(feature.properties?.state_code_2021 ?? "").trim();
+    const meta = STATE_BY_CODE[code];
+    if (!meta) continue;
+    const cedId = String(feature.properties?.ced_code_2025 ?? "").trim();
+    const name = String(feature.properties?.ced_name_2025 ?? "").trim();
+    if (!cedId || !name) continue;
+    const next = simplifyFeature({
+      type: "Feature",
+      properties: { cedId, name, stateId: meta.id },
+      geometry: feature.geometry,
+    });
+    if (next) features.push(next);
+  }
+  features.sort((a, b) => a.properties.cedId.localeCompare(b.properties.cedId));
+  if (features.length === 0) {
+    throw new Error("no CED features for locked states");
+  }
+  return featureCollection(features);
+}
+
+function loadSeds(rawDir) {
+  /** @type {Record<string, import('@turf/helpers').Feature[]>} */
+  const byState = Object.fromEntries(Object.values(STATE_BY_CODE).map((s) => [s.id, []]));
+  const collection = JSON.parse(readFileSync(join(rawDir, "sed.geojson"), "utf8"));
+  for (const feature of collection.features ?? []) {
+    if (!feature.geometry) continue;
+    const code = String(feature.properties?.state_code_2021 ?? "").trim();
+    const meta = STATE_BY_CODE[code];
+    if (!meta) continue;
+    const sedId = String(feature.properties?.sed_code_2025 ?? "").trim();
+    const name = String(feature.properties?.sed_name_2025 ?? "").trim();
+    if (!sedId || !name) continue;
+    const next = simplifyFeature({
+      type: "Feature",
+      properties: { sedId, name, stateId: meta.id },
+      geometry: feature.geometry,
+    });
+    if (next) byState[meta.id].push(next);
+  }
+  for (const [stateId, features] of Object.entries(byState)) {
+    if (features.length === 0) {
+      throw new Error(`no SEDs for ${stateId}`);
+    }
+    features.sort((a, b) => a.properties.sedId.localeCompare(b.properties.sedId));
+  }
+  return byState;
+}
+
+function writeCedSed(rawDir) {
+  mkdirSync(join(outDir, "sed"), { recursive: true });
+  const ceds = loadCeds(rawDir);
+  writeJson(join(outDir, "ced.geojson"), ceds);
+
+  const byState = loadSeds(rawDir);
+  const allSeds = [];
+  for (const stateId of Object.keys(byState).sort()) {
+    const collection = featureCollection(byState[stateId]);
+    writeJson(join(outDir, "sed", `${stateId}.geojson`), collection);
+    allSeds.push(...byState[stateId]);
+  }
+  writeJson(join(outDir, "sed.geojson"), featureCollection(allSeds));
+  return {
+    ceds: ceds.features.length,
+    seds: allSeds.length,
+    sedByState: Object.fromEntries(
+      Object.entries(byState).map(([id, features]) => [id, features.length]),
+    ),
+  };
+}
+
+function attributionWithCedSed(existing) {
+  const cedSedBlock = [
+    "Commonwealth Electoral Divisions (CED) and State Electoral Divisions (SED):",
+    "Australian Bureau of Statistics (ABS), Australian Statistical Geography Standard",
+    "(ASGS) Edition 3.",
+    "CED: ASGS 2025 Commonwealth Electoral Divisions (ArcGIS REST ASGS2025/CED,",
+    "downloaded 2026-10-23, WGS84 / EPSG:4326).",
+    "SED: ASGS 2025 State Electoral Divisions (ArcGIS REST ASGS2025/SED,",
+    "downloaded 2026-10-23, WGS84 / EPSG:4326).",
+    "Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).",
+    "Server-generalized with maxAllowableOffset≈0.0014°, then @turf/simplify",
+    "tolerance 0.002°; coordinates rounded to 4 decimal places.",
+    "Other Territories / outside-Australia codes omitted (locked eight S/T only).",
+    "",
+  ].join("\n");
+  if (existing.includes("Commonwealth Electoral Divisions (CED)")) {
+    return existing;
+  }
+  // Insert CED/SED after the LGA simplify paragraph, before coastline.
+  const marker = "Coastline segments:";
+  if (existing.includes(marker)) {
+    return existing.replace(marker, `${cedSedBlock}\n${marker}`);
+  }
+  return `${existing.trimEnd()}\n\n${cedSedBlock}`;
 }
 
 function nationalAabb(states) {
@@ -266,29 +371,27 @@ function writePackStubs(box) {
     bbox: box,
     segments: [],
   });
-  writeFileSync(
-    join(outDir, "ATTRIBUTION.txt"),
-    [
-      "Australian States and Territories (STE) and Local Government Areas (LGA):",
-      "Australian Bureau of Statistics (ABS), Australian Statistical Geography Standard",
-      "(ASGS) Edition 3.",
-      "STE: ASGS 2021 State and Territory boundaries (ArcGIS REST ASGS2021/STE,",
-      "downloaded 2026-10-23, WGS84 / EPSG:4326).",
-      "LGA: ASGS 2025 Local Government Areas (ArcGIS REST ASGS2025/LGA,",
-      "downloaded 2026-10-23, WGS84 / EPSG:4326).",
-      "Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).",
-      "Server-generalized with maxAllowableOffset≈0.0014°, then @turf/simplify",
-      "tolerance 0.002°; coordinates rounded to 4 decimal places.",
-      "",
-      "Coastline segments: unary union of simplified STE polygons, exterior rings",
-      "only (same ABS ASGS CC BY 4.0 attribution). Further simplified at 0.01°.",
-      "",
-      "POI bundles: empty source:none stubs pending Wikidata fill.",
-      "Sea-level seed: empty source:none stub pending Open-Meteo fill.",
-      "International border: empty (island continent; pack marks unsupported).",
-      "",
-    ].join("\n"),
-  );
+  const body = [
+    "Australian States and Territories (STE) and Local Government Areas (LGA):",
+    "Australian Bureau of Statistics (ABS), Australian Statistical Geography Standard",
+    "(ASGS) Edition 3.",
+    "STE: ASGS 2021 State and Territory boundaries (ArcGIS REST ASGS2021/STE,",
+    "downloaded 2026-10-23, WGS84 / EPSG:4326).",
+    "LGA: ASGS 2025 Local Government Areas (ArcGIS REST ASGS2025/LGA,",
+    "downloaded 2026-10-23, WGS84 / EPSG:4326).",
+    "Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).",
+    "Server-generalized with maxAllowableOffset≈0.0014°, then @turf/simplify",
+    "tolerance 0.002°; coordinates rounded to 4 decimal places.",
+    "",
+    "Coastline segments: unary union of simplified STE polygons, exterior rings",
+    "only (same ABS ASGS CC BY 4.0 attribution). Further simplified at 0.01°.",
+    "",
+    "POI bundles: empty source:none stubs pending Wikidata fill.",
+    "Sea-level seed: empty source:none stub pending Open-Meteo fill.",
+    "International border: empty (island continent; pack marks unsupported).",
+    "",
+  ].join("\n");
+  writeFileSync(join(outDir, "ATTRIBUTION.txt"), attributionWithCedSed(body));
 }
 
 function patchPackGeoManifest(box) {
@@ -306,7 +409,20 @@ function patchPackGeoManifest(box) {
 }
 
 function main() {
-  const { rawDir } = parseArgs(process.argv.slice(2));
+  const { rawDir, only } = parseArgs(process.argv.slice(2));
+
+  if (only === "ced-sed") {
+    if (!existsSync(join(rawDir, "ced.geojson")) || !existsSync(join(rawDir, "sed.geojson"))) {
+      throw new Error(`missing ced.geojson or sed.geojson under ${rawDir}`);
+    }
+    const stats = writeCedSed(rawDir);
+    const attributionPath = join(outDir, "ATTRIBUTION.txt");
+    const existing = existsSync(attributionPath) ? readFileSync(attributionPath, "utf8") : "";
+    writeFileSync(attributionPath, attributionWithCedSed(existing));
+    console.log(JSON.stringify({ only: "ced-sed", ...stats }, null, 2));
+    return;
+  }
+
   mkdirSync(join(outDir, "lgas"), { recursive: true });
 
   const states = loadSte(rawDir);
@@ -326,6 +442,15 @@ function main() {
   writePackStubs(box);
   patchPackGeoManifest(box);
 
+  let cedSed = null;
+  if (existsSync(join(rawDir, "ced.geojson")) && existsSync(join(rawDir, "sed.geojson"))) {
+    cedSed = writeCedSed(rawDir);
+    writeFileSync(
+      join(outDir, "ATTRIBUTION.txt"),
+      attributionWithCedSed(readFileSync(join(outDir, "ATTRIBUTION.txt"), "utf8")),
+    );
+  }
+
   console.log(
     JSON.stringify(
       {
@@ -336,6 +461,7 @@ function main() {
         ),
         bbox: box,
         statesBytes: Buffer.byteLength(JSON.stringify(states)),
+        ...(cedSed ? { cedSed } : {}),
       },
       null,
       2,

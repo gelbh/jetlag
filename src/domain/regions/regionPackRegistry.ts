@@ -79,6 +79,11 @@ export interface RegionPackGeoAssets {
   /** Omitted for single-depth packs (no admin4 / leaf layer). */
   secondary?: string;
   secondaryBySubregion?: (subregionId: string) => string;
+  /** Optional admin level 4 matching areas (e.g. Australia CED). */
+  matchingLevel4?: string;
+  /** Optional admin level 6 matching areas (e.g. Australia SED national). */
+  matchingLevel6?: string;
+  matchingLevel6BySubregion?: (subregionId: string) => string;
   playArea?: string;
 }
 
@@ -279,6 +284,9 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
       primary: AUSTRALIA_GEO_ASSETS.states,
       secondary: AUSTRALIA_GEO_ASSETS.lgas,
       secondaryBySubregion: (subregionId) => AUSTRALIA_GEO_ASSETS.lgasByState(subregionId),
+      matchingLevel4: AUSTRALIA_GEO_ASSETS.ced,
+      matchingLevel6: AUSTRALIA_GEO_ASSETS.sed,
+      matchingLevel6BySubregion: (subregionId) => AUSTRALIA_GEO_ASSETS.sedByState(subregionId),
     },
     subregionPropertyKey: "stateId",
     matchingLabelOverrides: AUSTRALIA_MATCHING_LABEL_OVERRIDES,

@@ -13,6 +13,9 @@ export const AUSTRALIA_GEO_ASSETS = {
   states: "/geo/australia/states.geojson",
   lgas: "/geo/australia/lgas.geojson",
   lgasByState: (stateId: string) => `/geo/australia/lgas/${stateId}.geojson`,
+  ced: "/geo/australia/ced.geojson",
+  sed: "/geo/australia/sed.geojson",
+  sedByState: (stateId: string) => `/geo/australia/sed/${stateId}.geojson`,
 } as const;
 
 export const AUSTRALIA_MATCHING_LABEL_OVERRIDES: Partial<
