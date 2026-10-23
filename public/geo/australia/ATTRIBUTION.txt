@@ -24,6 +24,10 @@ Other Territories / outside-Australia codes omitted (locked eight S/T only).
 Coastline segments: unary union of simplified STE polygons, exterior rings
 only (same ABS ASGS CC BY 4.0 attribution). Further simplified at 0.01°.
 
-POI bundles: empty source:none stubs pending Wikidata fill.
-Sea-level seed: empty source:none stub pending Open-Meteo fill.
+POI bundles: Wikidata (CC0), Australia (P17=Q408) clipped to the
+Australia pack reference bbox (WDQS fill 2026-10-23).
+
+Sea-level seed elevations: Open-Meteo Elevation API
+(dense complete seed over the Australia pack reference bbox).
+
 International border: empty (island continent; pack marks unsupported).

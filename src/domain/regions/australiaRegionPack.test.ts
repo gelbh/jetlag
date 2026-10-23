@@ -1,7 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { PACK_SEA_LEVEL_SEED_DIVISIONS } from "@/domain/geometry/measuring/seaLevel";
 import { AUSTRALIA_STATES } from "./australiaRegionPack";
+import { PACK_GEO_POINT_CATEGORIES } from "./packGeoManifest";
 import { isRegionPackId, REGION_PACK_IDS } from "./regionPack";
 import { regionPackDisplayLabel } from "./regionPackDisplayLabel";
 import { getRegionPackConfig } from "./regionPackRegistry";
@@ -145,5 +147,43 @@ describe("australia geo assets", () => {
     for (const stateId of AUSTRALIA_STATES) {
       expect(seen.has(stateId), stateId).toBe(true);
     }
+  });
+
+  it("ships Wikidata-filled POI bundles for every pack point category", () => {
+    // National AU WDQS fill (P17=Q408 + pack bbox). Empty after sanitize would be
+    // allowed only when WDQS returns none; current fill has data in every category.
+    for (const category of PACK_GEO_POINT_CATEGORIES) {
+      const path = resolve(root, `poi/${category}.json`);
+      expect(existsSync(path), path).toBe(true);
+      const payload = JSON.parse(readFileSync(path, "utf8")) as {
+        source: string;
+        places: Array<{ id: string; name: string; lat: number; lng: number }>;
+      };
+      expect(payload.source, category).toBe("wikidata");
+      expect(payload.places.length, category).toBeGreaterThan(0);
+      expect(payload.places.every((place) => /^Q\d+$/.test(place.id))).toBe(true);
+      expect(payload.places.every((place) => place.name.trim().length > 0)).toBe(true);
+    }
+  });
+
+  it("ships dense complete Open-Meteo sea_level_seed", () => {
+    const seaLevel = JSON.parse(readFileSync(resolve(root, "sea_level_seed.json"), "utf8")) as {
+      source: string;
+      divisions: number;
+      cells: unknown[];
+      cellElevations: unknown[];
+      complete?: boolean;
+    };
+    expect(seaLevel.source).toBe("open-meteo");
+    expect(seaLevel.divisions).toBeGreaterThanOrEqual(PACK_SEA_LEVEL_SEED_DIVISIONS);
+    expect(seaLevel.complete).toBe(true);
+    expect(seaLevel.cells.length).toBeGreaterThan(0);
+    expect(seaLevel.cellElevations.length).toBe(seaLevel.cells.length);
+  });
+
+  it("records Wikidata and Open-Meteo in ATTRIBUTION", () => {
+    const text = readFileSync(resolve(root, "ATTRIBUTION.txt"), "utf8");
+    expect(text).toMatch(/Wikidata/i);
+    expect(text).toMatch(/Open-Meteo/i);
   });
 });

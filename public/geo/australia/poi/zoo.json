@@ -1,6 +1,504 @@
 {
   "category": "zoo",
-  "source": "none",
-  "bbox": { "south": -43.7604, "west": 112.9011, "north": -9.1225, "east": 159.1292 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -43.7604,
+    "west": 112.9011,
+    "north": -9.1225,
+    "east": 159.1292
+  },
+  "places": [
+    {
+      "id": "Q3244627",
+      "name": "Adelaide Zoo",
+      "lat": -34.914089,
+      "lng": 138.605794
+    },
+    {
+      "id": "Q4689846",
+      "name": "African Lion Safari",
+      "lat": -33.899487,
+      "lng": 150.602646
+    },
+    {
+      "id": "Q4689907",
+      "name": "African Safari World",
+      "lat": -37.9229,
+      "lng": 144.667
+    },
+    {
+      "id": "Q110239814",
+      "name": "Alexandra Park Zoo",
+      "lat": -24.865833,
+      "lng": 152.343056
+    },
+    {
+      "id": "Q2572243",
+      "name": "Alice Springs Desert Park",
+      "lat": -23.7065,
+      "lng": 133.833
+    },
+    {
+      "id": "Q2836667",
+      "name": "Alice Springs Reptile Centre",
+      "lat": -23.7,
+      "lng": 133.87
+    },
+    {
+      "id": "Q4733588",
+      "name": "Alma Park Zoo",
+      "lat": -27.2267,
+      "lng": 152.983
+    },
+    {
+      "id": "Q85741058",
+      "name": "Altina Wildlife Park",
+      "lat": -34.618643,
+      "lng": 146.058739
+    },
+    {
+      "id": "Q296366",
+      "name": "Aquarium of Western Australia",
+      "lat": -31.82668,
+      "lng": 115.738118
+    },
+    {
+      "id": "Q4792522",
+      "name": "Armadale Reptile Centre",
+      "lat": -32.1766,
+      "lng": 116.015
+    },
+    {
+      "id": "Q781321",
+      "name": "Australia Zoo",
+      "lat": -26.8366,
+      "lng": 152.9595
+    },
+    {
+      "id": "Q4823915",
+      "name": "Australian Butterfly Sanctuary",
+      "lat": -16.8205,
+      "lng": 145.633
+    },
+    {
+      "id": "Q4273332",
+      "name": "Australian Reptile Park",
+      "lat": -33.4182,
+      "lng": 151.277
+    },
+    {
+      "id": "Q111821178",
+      "name": "Australian Wildlife Park, Albany",
+      "lat": -35.096754,
+      "lng": 117.959444
+    },
+    {
+      "id": "Q4851486",
+      "name": "Ballarat Wildlife Park",
+      "lat": -37.5698,
+      "lng": 143.893
+    },
+    {
+      "id": "Q4911530",
+      "name": "Billabong Koala and Wildlife Park",
+      "lat": -31.459,
+      "lng": 152.82
+    },
+    {
+      "id": "Q4911532",
+      "name": "Billabong Sanctuary",
+      "lat": -19.3747,
+      "lng": 146.906
+    },
+    {
+      "id": "Q109229025",
+      "name": "Birdland Animal Park",
+      "lat": -35.723583,
+      "lng": 150.194222
+    },
+    {
+      "id": "Q51228751",
+      "name": "Birdworld Kuranda",
+      "lat": -16.819303,
+      "lng": 145.6324
+    },
+    {
+      "id": "Q119475135",
+      "name": "Bonorong Wildlife Sanctuary",
+      "lat": -42.708664,
+      "lng": 147.271154
+    },
+    {
+      "id": "Q141606010",
+      "name": "Bribie Island Butterfly House",
+      "lat": -27.079869,
+      "lng": 153.178972
+    },
+    {
+      "id": "Q50822227",
+      "name": "Cairns Aquarium",
+      "lat": -16.918592,
+      "lng": 145.773639
+    },
+    {
+      "id": "Q5017723",
+      "name": "Cairns Tropical Zoo",
+      "lat": -16.7581,
+      "lng": 145.663
+    },
+    {
+      "id": "Q60324601",
+      "name": "Cairns Zoom and Wildlife Dome",
+      "lat": -16.923056,
+      "lng": 145.779167
+    },
+    {
+      "id": "Q55606786",
+      "name": "Caversham Wildlife Park",
+      "lat": -31.83364,
+      "lng": 115.951031
+    },
+    {
+      "id": "Q108913257",
+      "name": "Central Coast Zoo",
+      "lat": -33.271667,
+      "lng": 151.389722
+    },
+    {
+      "id": "Q21929398",
+      "name": "Cleland Wildlife Park",
+      "lat": -34.967222,
+      "lng": 138.696667
+    },
+    {
+      "id": "Q4236423",
+      "name": "Cohunu Koala Park",
+      "lat": -32.230305,
+      "lng": 116.014151
+    },
+    {
+      "id": "Q85754626",
+      "name": "Crocodylus Park",
+      "lat": -12.412132,
+      "lng": 130.928075
+    },
+    {
+      "id": "Q5195193",
+      "name": "Currumbin Wildlife Sanctuary",
+      "lat": -28.1359,
+      "lng": 153.488
+    },
+    {
+      "id": "Q85755743",
+      "name": "Darling Downs Zoo",
+      "lat": -27.892277,
+      "lng": 152.020035
+    },
+    {
+      "id": "Q5439615",
+      "name": "Featherdale Sydney Wildlife Park",
+      "lat": -33.766111,
+      "lng": 150.884167
+    },
+    {
+      "id": "Q5463448",
+      "name": "Flying High Bird Sanctuary",
+      "lat": -25.2186,
+      "lng": 152.239
+    },
+    {
+      "id": "Q2386465",
+      "name": "Gorge Wildlife Park",
+      "lat": -34.841936,
+      "lng": 138.814331
+    },
+    {
+      "id": "Q5643148",
+      "name": "Halls Gap Zoo",
+      "lat": -37.1478,
+      "lng": 142.564
+    },
+    {
+      "id": "Q48814233",
+      "name": "Hartley’s Crocodile Adventures",
+      "lat": -16.663056,
+      "lng": 145.564444
+    },
+    {
+      "id": "Q3047381",
+      "name": "Healesville Sanctuary",
+      "lat": -37.6822,
+      "lng": 145.5316
+    },
+    {
+      "id": "Q80508323",
+      "name": "Hunter Valley Wildlife Park",
+      "lat": -32.796056,
+      "lng": 151.363611
+    },
+    {
+      "id": "Q110641395",
+      "name": "Ipswich Nature Centre",
+      "lat": -27.61891,
+      "lng": 152.76717
+    },
+    {
+      "id": "Q6424208",
+      "name": "Koala Park Sanctuary",
+      "lat": -33.7419,
+      "lng": 151.045
+    },
+    {
+      "id": "Q11297466",
+      "name": "Kuranda Koala Gardens",
+      "lat": -16.819233,
+      "lng": 145.632858
+    },
+    {
+      "id": "Q6450637",
+      "name": "Kyabram Fauna Park",
+      "lat": -36.3242,
+      "lng": 145.049
+    },
+    {
+      "id": "Q641873",
+      "name": "Lone Pine Koala Sanctuary",
+      "lat": -27.5329,
+      "lng": 152.969
+    },
+    {
+      "id": "Q6750618",
+      "name": "Manly Sea Life Sanctuary",
+      "lat": -33.7991,
+      "lng": 151.281
+    },
+    {
+      "id": "Q85783684",
+      "name": "Mansfield Zoo",
+      "lat": -37.127308,
+      "lng": 146.132187
+    },
+    {
+      "id": "Q1321392",
+      "name": "Melbourne Aquarium",
+      "lat": -37.82083,
+      "lng": 144.95778
+    },
+    {
+      "id": "Q578027",
+      "name": "Melbourne Zoo",
+      "lat": -37.784762,
+      "lng": 144.952095
+    },
+    {
+      "id": "Q116214252",
+      "name": "Mogo Wildlife Park",
+      "lat": -35.7954,
+      "lng": 150.1592
+    },
+    {
+      "id": "Q6890658",
+      "name": "Mogo Zoo",
+      "lat": -35.7954,
+      "lng": 150.159
+    },
+    {
+      "id": "Q6898210",
+      "name": "Monarto Zoo",
+      "lat": -35.1021,
+      "lng": 139.142
+    },
+    {
+      "id": "Q6907907",
+      "name": "Moonlit Sanctuary Wildlife Conservation Park",
+      "lat": -38.21255,
+      "lng": 145.25038
+    },
+    {
+      "id": "Q495039",
+      "name": "National Zoo & Aquarium",
+      "lat": -35.3006,
+      "lng": 149.069
+    },
+    {
+      "id": "Q7066894",
+      "name": "Nowra Wildlife Park",
+      "lat": -34.8704,
+      "lng": 150.568
+    },
+    {
+      "id": "Q109849799",
+      "name": "Oakvale Wildlife Park",
+      "lat": -32.793889,
+      "lng": 151.910278
+    },
+    {
+      "id": "Q109236782",
+      "name": "Ocean Park Aquarium",
+      "lat": -25.980457,
+      "lng": 113.55957
+    },
+    {
+      "id": "Q3082583",
+      "name": "Perth Zoo",
+      "lat": -31.975561,
+      "lng": 115.852216
+    },
+    {
+      "id": "Q21973147",
+      "name": "Phillip Island Wildlife Park",
+      "lat": -38.47313,
+      "lng": 145.2349
+    },
+    {
+      "id": "Q70049729",
+      "name": "Ranger Red’s Zoo & Conservation Park",
+      "lat": -32.609472,
+      "lng": 115.866417
+    },
+    {
+      "id": "Q7306796",
+      "name": "Reef HQ",
+      "lat": -19.2577,
+      "lng": 146.824
+    },
+    {
+      "id": "Q55631889",
+      "name": "Rockhampton Zoo",
+      "lat": -23.397878,
+      "lng": 150.490753
+    },
+    {
+      "id": "Q7883058",
+      "name": "Sea Life Sunshine Coast",
+      "lat": -26.6828,
+      "lng": 153.121
+    },
+    {
+      "id": "Q2591764",
+      "name": "Sea Life Sydney Aquarium",
+      "lat": -33.8694,
+      "lng": 151.202
+    },
+    {
+      "id": "Q505518",
+      "name": "Sea World",
+      "lat": -27.9559,
+      "lng": 153.4257
+    },
+    {
+      "id": "Q7487446",
+      "name": "Shambala Animal Kingdom",
+      "lat": -16.9009,
+      "lng": 145.571
+    },
+    {
+      "id": "Q123339719",
+      "name": "Something Wild Wildlife Sanctuary",
+      "lat": -42.680116,
+      "lng": 146.746752
+    },
+    {
+      "id": "Q55634508",
+      "name": "Sydney Zoo",
+      "lat": -33.791111,
+      "lng": 150.866944
+    },
+    {
+      "id": "Q7661113",
+      "name": "Symbio Wildlife Park",
+      "lat": -34.2048,
+      "lng": 150.968
+    },
+    {
+      "id": "Q12070638",
+      "name": "Taronga Western Plains Zoo",
+      "lat": -32.271889,
+      "lng": 148.587222
+    },
+    {
+      "id": "Q1064813",
+      "name": "Taronga Zoo",
+      "lat": -33.843333,
+      "lng": 151.241111
+    },
+    {
+      "id": "Q7687422",
+      "name": "Tasmania Zoo",
+      "lat": -41.43095,
+      "lng": 146.978461
+    },
+    {
+      "id": "Q2132053",
+      "name": "Territory Wildlife Park",
+      "lat": -12.7102,
+      "lng": 130.99
+    },
+    {
+      "id": "Q7745231",
+      "name": "The Lair",
+      "lat": -27.8648,
+      "lng": 153.317
+    },
+    {
+      "id": "Q21924192",
+      "name": "Trowunna Wildlife Park",
+      "lat": -41.55577,
+      "lng": 146.45228
+    },
+    {
+      "id": "Q60227907",
+      "name": "Waratah Park",
+      "lat": -33.6762,
+      "lng": 151.177
+    },
+    {
+      "id": "Q60716876",
+      "name": "Waterways Wildlife Park",
+      "lat": -30.98184,
+      "lng": 150.18976
+    },
+    {
+      "id": "Q14935316",
+      "name": "Werribee Open Range Zoo",
+      "lat": -37.9229,
+      "lng": 144.667
+    },
+    {
+      "id": "Q8000710",
+      "name": "Wild Life Sydney",
+      "lat": -33.8698,
+      "lng": 151.202
+    },
+    {
+      "id": "Q123336268",
+      "name": "Wildlife Habitat Port Douglas",
+      "lat": -16.5259,
+      "lng": 145.463691
+    },
+    {
+      "id": "Q24090077",
+      "name": "Wildlife HQ Zoo",
+      "lat": -26.672672,
+      "lng": 152.990781
+    },
+    {
+      "id": "Q127386415",
+      "name": "Wing's Wildlife Park",
+      "lat": -41.262894,
+      "lng": 146.045641
+    },
+    {
+      "id": "Q135004110",
+      "name": "Zambi Wildlife Retreat",
+      "lat": -33.869722,
+      "lng": 150.67
+    },
+    {
+      "id": "Q8074096",
+      "name": "Zoodoo Wildlife Park",
+      "lat": -42.7057,
+      "lng": 147.376
+    }
+  ]
 }
