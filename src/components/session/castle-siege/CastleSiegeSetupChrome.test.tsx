@@ -78,7 +78,7 @@ describe("CastleSiegeSetupChrome", () => {
     expect(screen.queryByTestId("castle-siege-fair-split-proposal")).not.toBeInTheDocument();
   });
 
-  it("mounts Fair-split proposal chrome when setupMode is fairSplit", () => {
+  it("gates Fair-split propose until both seal coordinates exist", () => {
     renderWithAppUi(
       <CastleSiegeSetupChrome
         session={baseSession({
@@ -92,10 +92,31 @@ describe("CastleSiegeSetupChrome", () => {
       />,
     );
 
-    expect(screen.getByTestId("castle-siege-fair-split-proposal")).toBeInTheDocument();
+    expect(screen.getByTestId("castle-siege-fair-split-awaiting-seals")).toBeInTheDocument();
     expect(screen.getByText("Fair-split")).toBeInTheDocument();
+    expect(screen.queryByTestId("castle-siege-fair-split-proposal")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Propose fair split" })).not.toBeInTheDocument();
+  });
+
+  it("mounts Fair-split proposal chrome when both seals are provided", () => {
+    renderWithAppUi(
+      <CastleSiegeSetupChrome
+        session={baseSession({
+          mode: "castleSiege",
+          setupMode: "fairSplit",
+          dials: DEFAULT_CASTLE_SIEGE_DIALS,
+          castleSiegeRoles: { "host-1": "teamA" },
+        })}
+        uid="host-1"
+        isHost
+        sealA={{ lat: 0.05, lng: 0.05 }}
+        sealB={{ lat: 0.15, lng: 0.15 }}
+      />,
+    );
+
+    expect(screen.getByTestId("castle-siege-fair-split-proposal")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Propose fair split" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Nudge west" })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("castle-siege-fair-split-awaiting-seals")).not.toBeInTheDocument();
   });
 
   it("imports arena from gameArea for the host", async () => {

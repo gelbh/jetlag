@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
-import { gameAreaToBoundingBoxRaw } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { gameAreaCenter } from "@/domain/geometry/gameArea/geometry";
-import type { GameArea, SessionRecord } from "@/domain/map/annotations";
+import type { SessionRecord } from "@/domain/map/annotations";
 import { arenaFromGameArea } from "@/domain/session/castleSiege/arena";
 import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
 import type { FairSplitLockPatch } from "@/domain/session/castleSiege/fairSplitLock";
@@ -18,25 +17,16 @@ import { FairSplitProposal } from "./FairSplitProposal";
 import { MusterDials } from "./MusterDials";
 import { SealVault } from "./SealVault";
 
-/** Temporary opposite stubs until map seal pins land (Phase 2 residual). */
-function stubFairSplitSeals(arena: GameArea): {
-  sealA: CastleSiegeSealPoint;
-  sealB: CastleSiegeSealPoint;
-} {
-  const bounds = gameAreaToBoundingBoxRaw(arena);
-  const midLat = (bounds.south + bounds.north) / 2;
-  const midLng = (bounds.west + bounds.east) / 2;
-  const span = ((bounds.east - bounds.west) / 2) * 0.6;
-  return {
-    sealA: { lat: midLat, lng: midLng - span },
-    sealB: { lat: midLat, lng: midLng + span },
-  };
-}
-
 export type CastleSiegeSetupChromeProps = {
   session: SessionRecord | null | undefined;
   uid: string | null | undefined;
   isHost?: boolean;
+  /**
+   * Real Fair-split seal coordinates (map pins). When either is missing, Fair-split
+   * propose/lock is gated so stub halves are never persisted.
+   */
+  sealA?: CastleSiegeSealPoint;
+  sealB?: CastleSiegeSealPoint;
 };
 
 /**
@@ -47,6 +37,8 @@ export function CastleSiegeSetupChrome({
   session,
   uid,
   isHost = false,
+  sealA,
+  sealB,
 }: CastleSiegeSetupChromeProps) {
   const [importBusy, setImportBusy] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -83,7 +75,7 @@ export function CastleSiegeSetupChrome({
 
   const fairSplitActive = session.setupMode === "fairSplit";
   const fairSplitArena = session.arena?.polygon ?? session.gameArea;
-  const fairSplitSeals = stubFairSplitSeals(fairSplitArena);
+  const fairSplitSealsReady = Boolean(sealA && sealB);
   const beltWidthMeters = session.dials?.beltWidthMeters ?? 200;
 
   return (
@@ -131,16 +123,31 @@ export function CastleSiegeSetupChrome({
         />
       ) : null}
 
-      {fairSplitActive ? (
+      {fairSplitActive && fairSplitSealsReady && sealA && sealB ? (
         <FairSplitProposal
           arena={fairSplitArena}
-          sealA={fairSplitSeals.sealA}
-          sealB={fairSplitSeals.sealB}
+          sealA={sealA}
+          sealB={sealB}
           beltWidthMeters={beltWidthMeters}
           isHost={isHost}
           alreadyLocked={Boolean(session.border && session.neutralBelt)}
           onLock={lockFairSplit}
         />
+      ) : null}
+
+      {fairSplitActive && !fairSplitSealsReady ? (
+        <p
+          className="m-0 rounded-md border px-3 py-2 text-sm"
+          role="status"
+          data-testid="castle-siege-fair-split-awaiting-seals"
+          style={{
+            borderColor: "var(--color-rule)",
+            background: "oklch(from var(--color-canvas) l c h / 92%)",
+            color: "var(--color-field-ink-muted)",
+          }}
+        >
+          Fair-split waits for both castle seals on the map before propose or lock.
+        </p>
       ) : null}
     </aside>
   );

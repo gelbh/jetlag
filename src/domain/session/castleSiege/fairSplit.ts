@@ -204,8 +204,8 @@ export function generateFairSplitCandidates(
     return [];
   }
 
-  const ringLine = arenaExteriorLine(arena);
-  if (!ringLine) {
+  const ringLines = arenaExteriorLines(arena);
+  if (ringLines.length === 0) {
     return [];
   }
 
@@ -241,7 +241,7 @@ export function generateFairSplitCandidates(
         ],
       };
 
-      const clipped = clipBorderToArenaRing(probe, ringLine);
+      const clipped = clipBorderToArenaRings(probe, ringLines);
       if (!clipped) {
         continue;
       }
@@ -261,40 +261,56 @@ export function generateFairSplitCandidates(
   return out;
 }
 
-function arenaExteriorLine(arena: GameArea): Feature<LineString> | null {
+/** Exterior rings for Polygon and MultiPolygon arenas (all parts, not just the first). */
+function arenaExteriorLines(arena: GameArea): Feature<LineString>[] {
   const poly = gameAreaToPolygon(arena);
   const asLine = polygonToLine(poly);
+  const out: Feature<LineString>[] = [];
+
+  const pushGeom = (
+    geometry: LineString | { type: "MultiLineString"; coordinates: Position[][] },
+  ) => {
+    if (geometry.type === "LineString") {
+      out.push(lineString(geometry.coordinates));
+      return;
+    }
+    for (const coords of geometry.coordinates) {
+      if (coords.length >= 2) {
+        out.push(lineString(coords));
+      }
+    }
+  };
+
   if (asLine.type === "Feature") {
-    if (asLine.geometry.type === "LineString") {
-      return asLine as Feature<LineString>;
+    if (asLine.geometry.type === "LineString" || asLine.geometry.type === "MultiLineString") {
+      pushGeom(asLine.geometry);
     }
-    if (asLine.geometry.type === "MultiLineString" && asLine.geometry.coordinates[0]) {
-      return lineString(asLine.geometry.coordinates[0]);
+    return out;
+  }
+
+  for (const feature of asLine.features) {
+    if (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString") {
+      pushGeom(feature.geometry);
     }
-    return null;
   }
-  // FeatureCollection: take first LineString-ish feature.
-  const first = asLine.features[0];
-  if (!first) {
-    return null;
-  }
-  if (first.geometry.type === "LineString") {
-    return first as Feature<LineString>;
-  }
-  if (first.geometry.type === "MultiLineString" && first.geometry.coordinates[0]) {
-    return lineString(first.geometry.coordinates[0]);
-  }
-  return null;
+  return out;
 }
 
-function clipBorderToArenaRing(
+function clipBorderToArenaRings(
   probe: CastleSiegeBorderLine,
-  ringLine: Feature<LineString>,
+  ringLines: readonly Feature<LineString>[],
 ): CastleSiegeBorderLine | null {
-  const hits = lineIntersect(lineString(probe.coordinates), ringLine);
-  const points = hits.features
-    .map((f) => f.geometry.coordinates as Position)
-    .filter((c) => Number.isFinite(c[0]) && Number.isFinite(c[1]));
+  const probeLine = lineString(probe.coordinates);
+  const points: Position[] = [];
+  for (const ringLine of ringLines) {
+    const hits = lineIntersect(probeLine, ringLine);
+    for (const f of hits.features) {
+      const c = f.geometry.coordinates as Position;
+      if (Number.isFinite(c[0]) && Number.isFinite(c[1])) {
+        points.push(c);
+      }
+    }
+  }
   if (points.length < 2) {
     return null;
   }

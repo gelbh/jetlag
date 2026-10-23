@@ -82,7 +82,7 @@ describe("FairSplitProposal", () => {
     expect(screen.getByRole("button", { name: "Lock border" })).toBeInTheDocument();
   });
 
-  it("forces manual path when no legal cut exists", async () => {
+  it("forces manual path when no legal cut exists and keeps retry propose", async () => {
     renderWithAppUi(
       <FairSplitProposal
         arena={ARENA}
@@ -102,6 +102,42 @@ describe("FairSplitProposal", () => {
     });
     expect(screen.getByTestId("castle-siege-fair-split-status")).toHaveTextContent(/No legal cut/i);
     expect(screen.queryByRole("button", { name: "Lock border" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry propose" })).toBeInTheDocument();
+  });
+
+  it("syncs locked status when alreadyLocked becomes true after mount", async () => {
+    const { rerender } = renderWithAppUi(
+      <FairSplitProposal
+        arena={ARENA}
+        sealA={SEAL_WEST}
+        sealB={SEAL_EAST}
+        beltWidthMeters={100}
+        isHost
+        alreadyLocked={false}
+        onLock={onLock}
+      />,
+    );
+
+    expect(screen.getByText(/Awaiting proposal/i)).toBeInTheDocument();
+
+    rerender(
+      <FairSplitProposal
+        arena={ARENA}
+        sealA={SEAL_WEST}
+        sealB={SEAL_EAST}
+        beltWidthMeters={100}
+        isHost
+        alreadyLocked
+        onLock={onLock}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("castle-siege-fair-split-status")).toHaveTextContent(
+        /Border locked/i,
+      );
+    });
+    expect(screen.queryByRole("button", { name: "Propose fair split" })).not.toBeInTheDocument();
   });
 
   it("locks a legal proposal via onLock", async () => {

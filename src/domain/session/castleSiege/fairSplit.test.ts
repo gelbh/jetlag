@@ -164,6 +164,38 @@ describe("proposeFairSplit candidate search + scoring", () => {
     expect(a).toEqual(b);
   });
 
+  it("searches candidates across MultiPolygon arena exterior rings", () => {
+    const multiArena: GameArea = {
+      type: "MultiPolygon",
+      coordinates: [
+        [
+          [
+            [-0.2, 51.4],
+            [-0.15, 51.4],
+            [-0.15, 51.5],
+            [-0.2, 51.5],
+            [-0.2, 51.4],
+          ],
+        ],
+        [
+          [
+            [-0.15, 51.4],
+            [-0.1, 51.4],
+            [-0.1, 51.5],
+            [-0.15, 51.5],
+            [-0.15, 51.4],
+          ],
+        ],
+      ],
+    };
+    const fromMulti = generateFairSplitCandidates(multiArena, 12, 7);
+    const fromSingle = generateFairSplitCandidates(ARENA, 12, 7);
+    // Multi-part rings must not fail-closed to an empty candidate set.
+    expect(fromMulti.length).toBeGreaterThan(0);
+    // Covering the same bbox as the square should still yield cuts.
+    expect(fromSingle.length).toBeGreaterThan(0);
+  });
+
   it("prefers a balanced legal candidate over an illegal near-perfect balance cut", () => {
     const legalBalanced = MIDLINE;
     // Same-side horizontal cut would score well on area if it were legal, but is not.

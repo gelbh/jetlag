@@ -1,16 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import type { GameArea } from "@/domain/map/annotations";
-import type { ProposeFairSplitOk } from "@/domain/session/castleSiege/fairSplit";
+import {
+  assignHalvesByCastleSide,
+  isLegalFairSplitCut,
+  type ProposeFairSplitOk,
+  scoreFairSplitCandidate,
+} from "@/domain/session/castleSiege/fairSplit";
 import {
   buildFairSplitLockPatch,
   type FairSplitLockPatch,
   nudgeFairSplitBorder,
   resolveFairSplitSetupPath,
 } from "@/domain/session/castleSiege/fairSplitLock";
-import type {
-  CastleSiegeBorderLine,
-  CastleSiegeSealPoint,
+import {
+  buildNeutralBelt,
+  type CastleSiegeBorderLine,
+  type CastleSiegeSealPoint,
 } from "@/domain/session/castleSiege/pregame";
 
 export type FairSplitProposalProps = {
@@ -52,6 +58,12 @@ export function FairSplitProposal({
   const [error, setError] = useState<string | null>(null);
   const [nudgeNote, setNudgeNote] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (alreadyLocked) {
+      setState({ status: "locked" });
+    }
+  }, [alreadyLocked]);
+
   const runPropose = () => {
     setError(null);
     setNudgeNote(null);
@@ -77,19 +89,55 @@ export function FairSplitProposal({
     if (state.status !== "ready" || !isHost) return;
     setNudgeNote(label);
     setError(null);
+    const draftBorder = nudgeFairSplitBorder(state.draftBorder, nudge);
+    const legality = { arena, border: draftBorder, sealA, sealB, beltWidthMeters };
+    if (!isLegalFairSplitCut(legality)) {
+      setState({
+        status: "ready",
+        proposal: { ...state.proposal, border: draftBorder, score: Number.NaN },
+        draftBorder,
+      });
+      setError("Nudged border is illegal. Propose again or draw manually.");
+      return;
+    }
+    const halves = assignHalvesByCastleSide(sealA, sealB, draftBorder);
+    if (!halves) {
+      setState({
+        status: "ready",
+        proposal: { ...state.proposal, border: draftBorder, score: Number.NaN },
+        draftBorder,
+      });
+      setError("Nudged border is illegal. Propose again or draw manually.");
+      return;
+    }
+    let neutralBelt: ProposeFairSplitOk["neutralBelt"];
+    try {
+      neutralBelt = buildNeutralBelt(draftBorder, beltWidthMeters);
+    } catch {
+      setState({
+        status: "ready",
+        proposal: { ...state.proposal, border: draftBorder, score: Number.NaN },
+        draftBorder,
+      });
+      setError("Nudged border is illegal. Propose again or draw manually.");
+      return;
+    }
+    const score = scoreFairSplitCandidate(legality);
     setState({
-      ...state,
-      draftBorder: nudgeFairSplitBorder(state.draftBorder, nudge),
+      status: "ready",
+      proposal: { ok: true, border: draftBorder, halves, neutralBelt, score },
+      draftBorder,
     });
   };
 
   const lockBorder = async () => {
     if (state.status !== "ready" || !isHost || busy) return;
+    if (!Number.isFinite(state.proposal.score)) return;
     setBusy(true);
     setError(null);
     try {
       const lock = buildFairSplitLockPatch({
-        isHost: true,
+        isHost,
         arena,
         border: state.draftBorder,
         sealA,
@@ -121,6 +169,13 @@ export function FairSplitProposal({
           ? "Border locked"
           : "Proposal ready";
 
+  const scoreLabel =
+    state.status === "ready" && Number.isFinite(state.proposal.score)
+      ? `Score ${state.proposal.score.toFixed(3)}`
+      : state.status === "ready"
+        ? "Score unavailable (illegal nudge)"
+        : null;
+
   return (
     <section
       aria-label="Fair-split proposal"
@@ -144,9 +199,9 @@ export function FairSplitProposal({
         {statusLabel}
       </p>
 
-      {state.status === "ready" ? (
+      {scoreLabel ? (
         <p className="m-0 mt-1 text-xs" style={{ color: "var(--color-field-ink-muted)" }}>
-          Score {state.proposal.score.toFixed(3)}
+          {scoreLabel}
           {nudgeNote ? ` · ${nudgeNote}` : ""}
         </p>
       ) : null}
@@ -158,16 +213,16 @@ export function FairSplitProposal({
           data-testid="castle-siege-fair-split-manual-path"
           style={{ color: "var(--color-halt)" }}
         >
-          No legal cut found. Host must draw the border manually (Pregame path).
+          No legal cut found. Retry propose, or draw the border manually (Pregame path).
         </p>
       ) : null}
 
-      {state.status !== "locked" && state.status !== "manualPath" ? (
+      {state.status !== "locked" ? (
         <div className="mt-2">
           <EntryAsyncButton
             type="button"
             busy={false}
-            idleLabel="Propose fair split"
+            idleLabel={state.status === "manualPath" ? "Retry propose" : "Propose fair split"}
             busyLabel="Proposing…"
             fullWidth
             onClick={runPropose}
@@ -204,7 +259,7 @@ export function FairSplitProposal({
         </div>
       ) : null}
 
-      {isHost && state.status === "ready" ? (
+      {isHost && state.status === "ready" && Number.isFinite(state.proposal.score) ? (
         <div className="mt-2">
           <EntryAsyncButton
             type="button"
