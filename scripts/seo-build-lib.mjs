@@ -208,6 +208,60 @@ export function metaDescriptionContent(html) {
   return undefined;
 }
 
+/** `content` of `<meta property="…">`, or undefined. */
+export function metaPropertyContent(html, property) {
+  const want = property.toLowerCase();
+  const masked = maskInert(html);
+  for (const match of masked.matchAll(META_TAG_RE)) {
+    if (attr(match[0], "property")?.toLowerCase() === want) {
+      return attr(match[0], "content");
+    }
+  }
+  return undefined;
+}
+
+const LD_JSON_SCRIPT_RE =
+  /<script(?=[\s/>])[^>]*\btype\s*=\s*(?:"application\/ld\+json"|'application\/ld\+json')[^>]*>([\s\S]*?)<\/script(?=[\s/>])[^>]*>/gi;
+
+/** Raw text bodies of `application/ld+json` scripts (trimmed; empty bodies dropped). */
+export function seoJsonLdBodies(html) {
+  const bodies = [];
+  for (const match of html.matchAll(LD_JSON_SCRIPT_RE)) {
+    const body = match[1]?.trim() ?? "";
+    if (body) bodies.push(body);
+  }
+  return bodies;
+}
+
+/** True when a node's `@type` is `type` (string form only; emitters use strings). */
+function nodeHasType(node, type) {
+  return Boolean(node && typeof node === "object" && node["@type"] === type);
+}
+
+/** True when parsed JSON-LD has `@type` (top-level or any `@graph` node) equal to `type`. */
+export function jsonLdIncludesType(data, type) {
+  if (!data || typeof data !== "object") return false;
+  if (nodeHasType(data, type)) return true;
+  const graph = data["@graph"];
+  if (!Array.isArray(graph)) return false;
+  return graph.some((node) => nodeHasType(node, type));
+}
+
+/**
+ * `name` of the first top-level or `@graph` node with `@type` === `type`, or undefined.
+ * String `@type` only (matches current SEO emitters).
+ */
+export function jsonLdTypeName(data, type) {
+  if (!data || typeof data !== "object") return undefined;
+  if (nodeHasType(data, type) && typeof data.name === "string") return data.name;
+  const graph = data["@graph"];
+  if (!Array.isArray(graph)) return undefined;
+  for (const node of graph) {
+    if (nodeHasType(node, type) && typeof node.name === "string") return node.name;
+  }
+  return undefined;
+}
+
 // Forgiving end tags (</script >, </script foo=…>) without matching script-*.
 const SCRIPT_SPAN_RE = /<script(?=[\s/>])[^>]*>[\s\S]*?<\/script(?=[\s/>])[^>]*>/gi;
 

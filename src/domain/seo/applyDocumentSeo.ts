@@ -1,3 +1,4 @@
+import { LEGAL_APP_NAME } from "../legal/legalContact";
 import { absoluteUrl, getRouteSeo } from "./routeSeo";
 
 const JSON_LD_ATTR = "data-seo-jsonld";
@@ -60,6 +61,7 @@ export function applyDocumentSeo(pathname: string): void {
   upsertMeta({ property: "og:url", content: canonicalUrl });
   upsertMeta({ property: "og:image", content: ogImageUrl });
   upsertMeta({ property: "og:type", content: "website" });
+  upsertMeta({ property: "og:site_name", content: LEGAL_APP_NAME });
 
   upsertMeta({ name: "twitter:card", content: "summary_large_image" });
   upsertMeta({ name: "twitter:title", content: seo.title });
