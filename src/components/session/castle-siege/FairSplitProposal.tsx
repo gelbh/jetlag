@@ -33,9 +33,44 @@ export type FairSplitProposalProps = {
 
 type ProposalState =
   | { status: "idle" }
-  | { status: "ready"; proposal: ProposeFairSplitOk; draftBorder: CastleSiegeBorderLine }
+  | {
+      status: "ready";
+      proposal: ProposeFairSplitOk;
+      draftBorder: CastleSiegeBorderLine;
+      draftLegal: boolean;
+    }
   | { status: "manualPath" }
   | { status: "locked" };
+
+function evaluateNudgedDraft(args: {
+  arena: GameArea;
+  draftBorder: CastleSiegeBorderLine;
+  sealA: CastleSiegeSealPoint;
+  sealB: CastleSiegeSealPoint;
+  beltWidthMeters: number;
+}): ProposeFairSplitOk | null {
+  const { arena, draftBorder, sealA, sealB, beltWidthMeters } = args;
+  const legality = { arena, border: draftBorder, sealA, sealB, beltWidthMeters };
+  if (!isLegalFairSplitCut(legality)) {
+    return null;
+  }
+  const halves = assignHalvesByCastleSide(sealA, sealB, draftBorder);
+  if (!halves) {
+    return null;
+  }
+  try {
+    const neutralBelt = buildNeutralBelt(draftBorder, beltWidthMeters);
+    return {
+      ok: true,
+      border: draftBorder,
+      halves,
+      neutralBelt,
+      score: scoreFairSplitCandidate(legality),
+    };
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Skin-S3 Fair-split proposal strip: propose → score/status → host nudge stub → lock.
@@ -82,6 +117,7 @@ export function FairSplitProposal({
       status: "ready",
       proposal: path.result,
       draftBorder: path.result.border,
+      draftLegal: true,
     });
   };
 
@@ -90,49 +126,33 @@ export function FairSplitProposal({
     setNudgeNote(label);
     setError(null);
     const draftBorder = nudgeFairSplitBorder(state.draftBorder, nudge);
-    const legality = { arena, border: draftBorder, sealA, sealB, beltWidthMeters };
-    if (!isLegalFairSplitCut(legality)) {
+    const evaluated = evaluateNudgedDraft({
+      arena,
+      draftBorder,
+      sealA,
+      sealB,
+      beltWidthMeters,
+    });
+    if (!evaluated) {
       setState({
         status: "ready",
-        proposal: { ...state.proposal, border: draftBorder, score: Number.NaN },
+        proposal: state.proposal,
         draftBorder,
+        draftLegal: false,
       });
       setError("Nudged border is illegal. Propose again or draw manually.");
       return;
     }
-    const halves = assignHalvesByCastleSide(sealA, sealB, draftBorder);
-    if (!halves) {
-      setState({
-        status: "ready",
-        proposal: { ...state.proposal, border: draftBorder, score: Number.NaN },
-        draftBorder,
-      });
-      setError("Nudged border is illegal. Propose again or draw manually.");
-      return;
-    }
-    let neutralBelt: ProposeFairSplitOk["neutralBelt"];
-    try {
-      neutralBelt = buildNeutralBelt(draftBorder, beltWidthMeters);
-    } catch {
-      setState({
-        status: "ready",
-        proposal: { ...state.proposal, border: draftBorder, score: Number.NaN },
-        draftBorder,
-      });
-      setError("Nudged border is illegal. Propose again or draw manually.");
-      return;
-    }
-    const score = scoreFairSplitCandidate(legality);
     setState({
       status: "ready",
-      proposal: { ok: true, border: draftBorder, halves, neutralBelt, score },
+      proposal: evaluated,
       draftBorder,
+      draftLegal: true,
     });
   };
 
   const lockBorder = async () => {
-    if (state.status !== "ready" || !isHost || busy) return;
-    if (!Number.isFinite(state.proposal.score)) return;
+    if (state.status !== "ready" || !isHost || busy || !state.draftLegal) return;
     setBusy(true);
     setError(null);
     try {
@@ -167,10 +187,12 @@ export function FairSplitProposal({
         ? "No legal cut: draw border manually"
         : state.status === "locked"
           ? "Border locked"
-          : "Proposal ready";
+          : state.draftLegal
+            ? "Proposal ready"
+            : "Nudged border illegal";
 
   const scoreLabel =
-    state.status === "ready" && Number.isFinite(state.proposal.score)
+    state.status === "ready" && state.draftLegal
       ? `Score ${state.proposal.score.toFixed(3)}`
       : state.status === "ready"
         ? "Score unavailable (illegal nudge)"
@@ -259,7 +281,7 @@ export function FairSplitProposal({
         </div>
       ) : null}
 
-      {isHost && state.status === "ready" && Number.isFinite(state.proposal.score) ? (
+      {isHost && state.status === "ready" && state.draftLegal ? (
         <div className="mt-2">
           <EntryAsyncButton
             type="button"

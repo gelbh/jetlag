@@ -14,6 +14,7 @@ import {
   type CastleSiegeBorderLine,
   halfSideOfPoint,
   pointInNeutralBelt,
+  validateBorderCutsArena,
 } from "./pregame";
 
 /** Square arena spanning ~0.02° (~2 km) near London. */
@@ -188,12 +189,17 @@ describe("proposeFairSplit candidate search + scoring", () => {
         ],
       ],
     };
-    const fromMulti = generateFairSplitCandidates(multiArena, 12, 7);
-    const fromSingle = generateFairSplitCandidates(ARENA, 12, 7);
-    // Multi-part rings must not fail-closed to an empty candidate set.
+    const fromMulti = generateFairSplitCandidates(multiArena, 18, 11);
     expect(fromMulti.length).toBeGreaterThan(0);
-    // Covering the same bbox as the square should still yield cuts.
-    expect(fromSingle.length).toBeGreaterThan(0);
+    const validated = fromMulti.filter((border) => validateBorderCutsArena(multiArena, border));
+    expect(validated.length).toBeGreaterThan(0);
+    // At least one validated cut must touch the eastern part (lng > -0.14).
+    const touchesEastPart = validated.some((border) => {
+      const a = border.coordinates[0]![0]!;
+      const b = border.coordinates[border.coordinates.length - 1]![0]!;
+      return a > -0.14 || b > -0.14;
+    });
+    expect(touchesEastPart).toBe(true);
   });
 
   it("prefers a balanced legal candidate over an illegal near-perfect balance cut", () => {

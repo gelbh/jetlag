@@ -4,7 +4,6 @@ import { lineString, point as turfPoint } from "@turf/helpers";
 import turfLength from "@turf/length";
 import lineIntersect from "@turf/line-intersect";
 import nearestPointOnLine from "@turf/nearest-point-on-line";
-import polygonToLine from "@turf/polygon-to-line";
 import type { Feature, LineString, MultiPolygon, Polygon, Position } from "geojson";
 import { gameAreaToBoundingBoxRaw } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { gameAreaToPolygon } from "@/domain/geometry/gameArea/geometry";
@@ -261,39 +260,18 @@ export function generateFairSplitCandidates(
   return out;
 }
 
-/** Exterior rings for Polygon and MultiPolygon arenas (all parts, not just the first). */
+/** Exterior rings only (no holes) for Polygon and every MultiPolygon part. */
 function arenaExteriorLines(arena: GameArea): Feature<LineString>[] {
-  const poly = gameAreaToPolygon(arena);
-  const asLine = polygonToLine(poly);
-  const out: Feature<LineString>[] = [];
+  const rings: Position[][] =
+    arena.type === "Polygon"
+      ? arena.coordinates[0]
+        ? [arena.coordinates[0]]
+        : []
+      : arena.coordinates
+          .map((polygon) => polygon[0])
+          .filter((ring): ring is Position[] => Boolean(ring && ring.length >= 2));
 
-  const pushGeom = (
-    geometry: LineString | { type: "MultiLineString"; coordinates: Position[][] },
-  ) => {
-    if (geometry.type === "LineString") {
-      out.push(lineString(geometry.coordinates));
-      return;
-    }
-    for (const coords of geometry.coordinates) {
-      if (coords.length >= 2) {
-        out.push(lineString(coords));
-      }
-    }
-  };
-
-  if (asLine.type === "Feature") {
-    if (asLine.geometry.type === "LineString" || asLine.geometry.type === "MultiLineString") {
-      pushGeom(asLine.geometry);
-    }
-    return out;
-  }
-
-  for (const feature of asLine.features) {
-    if (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString") {
-      pushGeom(feature.geometry);
-    }
-  }
-  return out;
+  return rings.filter((ring) => ring.length >= 2).map((ring) => lineString(ring));
 }
 
 function clipBorderToArenaRings(
