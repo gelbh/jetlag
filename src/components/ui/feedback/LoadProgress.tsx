@@ -75,15 +75,12 @@ export function LoadProgress({
           {snapshot.percent}%
         </span>
       </div>
-      <div
-        className="flex items-center justify-between gap-2 text-xs text-field-ink-muted"
-        aria-hidden={compact}
-      >
-        <span className="min-w-0 truncate">
+      <div className="flex items-center justify-between gap-2 text-xs text-field-ink-muted">
+        <span className="min-w-0 truncate" aria-hidden={compact}>
           {compact ? snapshot.label : snapshot.stageLabel}
           {time ? ` · ${time}` : ""}
         </span>
-        {snapshot.cancellable && !compact ? (
+        {snapshot.cancellable ? (
           <UnstyledButton
             type="button"
             onClick={() => task.cancel()}

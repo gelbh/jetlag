@@ -642,6 +642,7 @@ export function useTentacleTool({
     mapOverlay:
       mapPlacementActive && tentacleCategoryId ? (
         <TentacleMapPlacementChrome
+          loadTask={tentacleLoadTask}
           categoryLabel={categoryLabel}
           questionPrompt={questionPrompt}
           costLabel={costLabel}

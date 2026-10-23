@@ -13,6 +13,7 @@ import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { TentacleExtendedCategoryId } from "@/domain/questions";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { TentacleMapAnswerStrip } from "./TentacleMapAnswerStrip";
 
 export type TentacleMapPlacementPhase = AskMapPlacementPhase;
@@ -25,6 +26,8 @@ export type TentacleMapPlacementChromeProps = {
   onUseGps: () => void;
   gpsLoading?: boolean;
   error?: string | null;
+  /** Live progress for the resolve shown in the status card. */
+  loadTask?: LoadTask | null;
   awaitHiderAnswer?: boolean;
   categoryId: TentacleExtendedCategoryId;
   distanceUnit: DistanceUnit;
@@ -49,6 +52,7 @@ export function TentacleMapPlacementChrome({
   onUseGps,
   gpsLoading = false,
   error = null,
+  loadTask = null,
   awaitHiderAnswer = false,
   categoryId,
   distanceUnit,
@@ -134,6 +138,7 @@ export function TentacleMapPlacementChrome({
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}
+      statusTask={loadTask}
       toolIcon={<HudTentacleIcon width={20} height={20} />}
       questionAriaLabel="Tentacle question"
       onChangeConfigure={onChangeCategory}

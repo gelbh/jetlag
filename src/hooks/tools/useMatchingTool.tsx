@@ -200,6 +200,9 @@ export function useMatchingTool({
         matchingLoading,
         matchingError,
         matchingFeatureCount,
+        // The published HUD holds the tasks, so a new task must republish it.
+        matchingLoadTask?.id,
+        matchingEnrichTask?.id,
         catalog.matchingBoundaryPreview ? "b" : "",
         catalog.matchingEliminationPreview ? "e" : "",
       ].join("|"),
@@ -208,7 +211,9 @@ export function useMatchingTool({
       catalog.matchingEliminationPreview,
       matchingAnswer,
       matchingError,
+      matchingEnrichTask,
       matchingFeatureCount,
+      matchingLoadTask,
       matchingLoading,
       matchingNearestFeatureId,
       matchingNearestFeatureName,
@@ -742,6 +747,7 @@ export function useMatchingTool({
     suppressSheet: mapPlacementActive,
     mapOverlay: mapPlacementActive ? (
       <MatchingMapPlacementChrome
+        loadTask={matchingLoadTask}
         categoryLabel={placementCategoryLabel}
         questionPrompt={placementQuestionPrompt}
         costLabel={catalog.costLabel}

@@ -372,6 +372,7 @@ export function useMeasuringTool({
     suppressSheet: mapPlacementActive,
     mapOverlay: mapPlacementActive ? (
       <MeasuringMapPlacementChrome
+        loadTask={draft.measuringLoadTask}
         configureLabel={configureLabel}
         questionPrompt={question.prompt}
         costLabel={questionCost.label}

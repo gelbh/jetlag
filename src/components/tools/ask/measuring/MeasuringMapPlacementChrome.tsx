@@ -1,3 +1,4 @@
+import type { LoadTask } from "@/services/core/progress/loadTask";
 /**
  * Map-first Measuring chrome: GPS → resolve → closer/further + Send (Matching twin).
  */
@@ -31,6 +32,8 @@ export type MeasuringMapPlacementChromeProps = {
   onUseGps: () => void;
   gpsLoading?: boolean;
   error?: string | null;
+  /** Live progress for the resolve shown in the status card. */
+  loadTask?: LoadTask | null;
   awaitHiderAnswer?: boolean;
   answer?: MeasuringAnswer | null;
   onAnswerChange?: (answer: MeasuringAnswer) => void;
@@ -112,6 +115,7 @@ export function MeasuringMapPlacementChrome({
   onUseGps,
   gpsLoading = false,
   error = null,
+  loadTask = null,
   awaitHiderAnswer = false,
   answer = null,
   onAnswerChange,
@@ -245,6 +249,7 @@ export function MeasuringMapPlacementChrome({
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}
+      statusTask={loadTask}
       toolIcon={<HudMeasuringIcon width={20} height={20} />}
       questionAriaLabel="Measuring question"
       onChangeConfigure={onChangeConfigure}
