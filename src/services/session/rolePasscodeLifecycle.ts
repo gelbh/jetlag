@@ -272,6 +272,8 @@ export const JOIN_ERROR_APP_VERSION_INCOMPATIBLE = "Update the app to join this 
 export const JOIN_ERROR_LEGACY_JOIN = "Session uses legacy join.";
 export const JOIN_ERROR_HEAL_ROLE_MISMATCH =
   "Rejoin with the role you had before, or ask the host for help.";
+export const JOIN_ERROR_HEAL_PROOF_INVALID =
+  "Couldn't confirm this device held your seat. Join again with the session code.";
 
 export function mapRolePasscodeJoinError(error: unknown): string {
   if (!(error instanceof Error)) {
@@ -292,6 +294,9 @@ export function mapRolePasscodeJoinError(error: unknown): string {
   }
   if (message.includes(JOIN_ERROR_MARKERS.healRoleMismatch)) {
     return JOIN_ERROR_HEAL_ROLE_MISMATCH;
+  }
+  if (message.includes(JOIN_ERROR_MARKERS.healProofInvalid)) {
+    return JOIN_ERROR_HEAL_PROOF_INVALID;
   }
   if (message.includes(JOIN_ERROR_MARKERS.wrongRoleCode)) {
     return "Wrong role code. Ask your team for the current code.";
