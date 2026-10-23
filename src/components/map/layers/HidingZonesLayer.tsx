@@ -2,8 +2,9 @@ import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { Fragment, useMemo } from "react";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import type { SessionRecord } from "@/domain/map/annotations";
+import type { AnnotationRecord, SessionRecord } from "@/domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import { isNearRadarEliminationEdge } from "@/domain/questions/hiderTruth/nearRadarEliminationEdge";
 import { resolveHiderTruthReference } from "@/domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
@@ -16,6 +17,8 @@ interface HidingZonesLayerProps {
   myUid?: string | null;
   memberUids?: readonly string[];
   session?: Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors"> | null;
+  /** Active map annotations; used for near-radar-edge truth-pin styling only. */
+  annotations?: readonly AnnotationRecord[];
 }
 
 function polygonFeature(ring: LatLngTuple[]): Feature<GeoPolygon> {
@@ -45,7 +48,13 @@ function polygonPositions(geometryJson: string): LatLngTuple[] | null {
   }
 }
 
-export function HidingZonesLayer({ zones, myUid, memberUids, session }: HidingZonesLayerProps) {
+export function HidingZonesLayer({
+  zones,
+  myUid,
+  memberUids,
+  session,
+  annotations = [],
+}: HidingZonesLayerProps) {
   const memberSet = memberUids ? new Set(memberUids) : null;
   const visibleZones = memberSet ? zones.filter((zone) => memberSet.has(zone.hiderUid)) : zones;
 
@@ -65,20 +74,21 @@ export function HidingZonesLayer({ zones, myUid, memberUids, session }: HidingZo
         truthReference.mode !== "unavailable";
 
       if (showReferencePin) {
+        const nearEdge = isNearRadarEliminationEdge(referencePoint, annotations);
         markers.push({
           id: `hiding-truth-${zone.hiderUid}`,
           lat: referencePoint[0],
           lng: referencePoint[1],
-          radiusPx: 7,
+          radiusPx: nearEdge ? 9 : 7,
           borderColor: MAP_ANNOTATION_COLORS.strokeLight,
-          fillColor: MAP_ANNOTATION_COLORS.highlight,
+          fillColor: nearEdge ? MAP_ANNOTATION_COLORS.caution : MAP_ANNOTATION_COLORS.highlight,
           hitKind: "hiding-truth",
           hitId: zone.hiderUid,
         });
       }
     }
     return markers;
-  }, [session, visibleZones]);
+  }, [annotations, session, visibleZones]);
 
   return (
     <>

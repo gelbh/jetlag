@@ -867,6 +867,7 @@ export function HiderMapScreen() {
           myUid={uid}
           memberUids={session?.memberUids}
           session={session}
+          annotations={annotations}
         />
         {zoneTool.wizardOpen &&
         (hidingZoneStepId === "location" || hidingZoneStepId === "confirm") &&
