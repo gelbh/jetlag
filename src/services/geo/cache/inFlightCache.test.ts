@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createProgressRoot } from "@/domain/progress/progressTree";
-import { clearGeographicFeatureCacheForTests, type FetchContext, getOrFetchCached } from "./index";
+import {
+  ABANDON_GRACE_MS,
+  clearGeographicFeatureCacheForTests,
+  type FetchContext,
+  getOrFetchCached,
+} from "./index";
 import { DB_NAME, DB_VERSION, readPersistedEntryIgnoringExpiry, STORE_NAME } from "./indexedDb";
 
 function controllableFetch<T>() {
@@ -82,9 +87,30 @@ describe("getOrFetchCached shared in-flight fetches", () => {
     second.abort(cancelError());
     await expect(a).rejects.toMatchObject({ name: "AbortError" });
     await expect(b).rejects.toMatchObject({ name: "AbortError" });
-    expect(fetch.context().signal.aborted).toBe(true);
+    // Aborted after the grace period, not at once.
+    expect(fetch.context().signal.aborted).toBe(false);
+    await vi.waitFor(() => expect(fetch.context().signal.aborted).toBe(true), {
+      timeout: ABANDON_GRACE_MS + 1_000,
+    });
     await flush();
     expect(await readPersistedEntryIgnoringExpiry("k:abort")).toBeUndefined();
+  });
+
+  it("lets a superseding request rejoin the fetch within the grace period", async () => {
+    const fetch = controllableFetch<string[]>();
+    const old = new AbortController();
+    const stale = getOrFetchCached("k:rejoin", fetch.fetcher, { signal: old.signal });
+    await fetch.started();
+    old.abort(cancelError());
+    await expect(stale).rejects.toMatchObject({ name: "AbortError" });
+    const next = getOrFetchCached("k:rejoin", fetch.fetcher, {
+      signal: new AbortController().signal,
+    });
+    await new Promise((resolve) => setTimeout(resolve, ABANDON_GRACE_MS + 200));
+    expect(fetch.context().signal.aborted).toBe(false);
+    fetch.resolve(["kept"]);
+    await expect(next).resolves.toEqual(["kept"]);
+    expect(fetch.calls()).toBe(1);
   });
 
   it("does not serve stale data for a cancelled fetch", async () => {

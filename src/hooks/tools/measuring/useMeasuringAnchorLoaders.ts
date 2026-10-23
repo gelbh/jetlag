@@ -227,7 +227,12 @@ export function useMeasuringAnchorLoaders({
           {
             task,
             createEnrichTask: () =>
-              createLoadTask({ label: "Confirming places", signal: task.signal, global: true }),
+              createLoadTask({
+                label: "Confirming places",
+                signal: task.signal,
+                global: true,
+                cancellable: false,
+              }),
             onEnrich: (enrichedPlaces) => {
               applyAllPlacesResult(requestId, seekerPoint, category, enrichedPlaces, 1);
             },
@@ -387,7 +392,12 @@ export function useMeasuringAnchorLoaders({
         const result = await fetchMeasuringCoastlineContext(seekerPoint, gameArea, {
           task,
           createEnrichTask: () =>
-            createLoadTask({ label: "Confirming coastline", signal: task.signal, global: true }),
+            createLoadTask({
+              label: "Confirming coastline",
+              signal: task.signal,
+              global: true,
+              cancellable: false,
+            }),
           regionPackId: sessionRules?.regionPackId,
           onEnrich: (enriched) => {
             applyCoastlineOk(enriched);

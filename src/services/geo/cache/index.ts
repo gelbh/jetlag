@@ -78,6 +78,9 @@ async function writeCachedValue<T>(
   await writePersistedEntry(key, value);
 }
 
+/** How long a fetch with no remaining subscribers keeps running before it is aborted. */
+export const ABANDON_GRACE_MS = 1_500;
+
 const DEFAULT_FETCH_STAGE: StageSpec = {
   kind: "fetch",
   label: "Loading map data",
@@ -104,6 +107,7 @@ function startInFlight<T>(
     pinned: false,
     foreground: 0,
     settled: false,
+    abandonTimer: null,
   };
 
   entry.promise = (async () => {
@@ -141,6 +145,10 @@ function startInFlight<T>(
     }
   })().finally(() => {
     entry.settled = true;
+    if (entry.abandonTimer !== null) {
+      clearTimeout(entry.abandonTimer);
+      entry.abandonTimer = null;
+    }
     if (inFlight.get(key) === entry) {
       inFlight.delete(key);
     }
@@ -160,6 +168,10 @@ function subscribe<T>(key: string, entry: InFlightEntry, options: CachedFetchOpt
   } else {
     entry.pinned = true;
   }
+  if (entry.abandonTimer !== null) {
+    clearTimeout(entry.abandonTimer);
+    entry.abandonTimer = null;
+  }
   options.node?.mirror(entry.node);
   notifyOverpassPriorityChanged();
 
@@ -175,16 +187,26 @@ function subscribe<T>(key: string, entry: InFlightEntry, options: CachedFetchOpt
     if (signal) {
       entry.cancellable -= 1;
     }
-    if (
+    const abandoned = () =>
       entry.cancellable === 0 &&
       !entry.pinned &&
       !entry.settled &&
-      !entry.controller.signal.aborted
-    ) {
-      if (inFlight.get(key) === entry) {
-        inFlight.delete(key);
-      }
-      entry.controller.abort(signal ? abortReason(signal) : undefined);
+      !entry.controller.signal.aborted;
+    // A superseded request is usually followed at once by a new one for the same
+    // key (same play area, new anchor). Waiting briefly lets it rejoin instead of
+    // restarting the fetch, which could otherwise never finish under GPS jitter.
+    if (abandoned() && entry.abandonTimer === null) {
+      const reason = signal ? abortReason(signal) : undefined;
+      entry.abandonTimer = setTimeout(() => {
+        entry.abandonTimer = null;
+        if (!abandoned()) {
+          return;
+        }
+        if (inFlight.get(key) === entry) {
+          inFlight.delete(key);
+        }
+        entry.controller.abort(reason);
+      }, ABANDON_GRACE_MS);
     }
     notifyOverpassPriorityChanged();
   };

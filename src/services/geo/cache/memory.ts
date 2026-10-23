@@ -23,6 +23,8 @@ export interface InFlightEntry {
   /** Live foreground subscribers; any one promotes the fetch to the foreground lane. */
   foreground: number;
   settled: boolean;
+  /** Pending abort after the last subscriber left; a new subscriber cancels it. */
+  abandonTimer: ReturnType<typeof setTimeout> | null;
 }
 
 export const inFlight = new Map<string, InFlightEntry>();

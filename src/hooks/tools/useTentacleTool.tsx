@@ -251,7 +251,12 @@ export function useTentacleTool({
           regionPackId: sessionRules.regionPackId,
           task,
           createEnrichTask: () =>
-            createLoadTask({ label: "Confirming locations", signal, global: true }),
+            createLoadTask({
+              label: "Confirming locations",
+              signal,
+              global: true,
+              cancellable: false,
+            }),
           onEnrich: (enrichedPois) => {
             applyTentaclePoisResult(requestId, enrichedPois, 1);
           },
