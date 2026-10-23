@@ -14,6 +14,7 @@ export function sydneyPresets(): BundledGamePresetDefinition[] {
       hierarchy: [
         { id: "continent-oceania", category: "Continent", name: "Oceania" },
         { id: "country-au", category: "Country", name: "Australia" },
+        { id: "state-nsw", category: "State/Territory", name: "New South Wales" },
         { id: "sydney-metro", category: "City", name: "Sydney" },
       ],
       distanceUnit: "metric",

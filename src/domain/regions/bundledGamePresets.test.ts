@@ -54,6 +54,7 @@ describe("bundledGamePresets", () => {
     expect(sydney[0]?.hierarchy).toEqual([
       { id: "continent-oceania", category: "Continent", name: "Oceania" },
       { id: "country-au", category: "Country", name: "Australia" },
+      { id: "state-nsw", category: "State/Territory", name: "New South Wales" },
       { id: "sydney-metro", category: "City", name: "Sydney" },
     ]);
     expect(sydney.some((p) => /ced|sed|lga|sal/i.test(p.id))).toBe(false);
