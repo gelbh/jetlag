@@ -64,7 +64,7 @@ function listedCssImports(file: string): string[] {
 
 /** Sources that only render under an admin root, which imports `mantineAdminStyles`. */
 const isAdminSource = (path: string) =>
-  /[\\/]src[\\/](components[\\/]admin[\\/]|routes[\\/]admin-map-screen[\\/]|routes[\\/]AdminMapScreen\.tsx$|theme[\\/]adminTheme\.ts$)/.test(
+  /[\\/]src[\\/](components[\\/]admin[\\/]|routes[\\/]admin-map-screen[\\/]|routes[\\/]AdminMapScreen\.tsx$)/.test(
     path,
   );
 

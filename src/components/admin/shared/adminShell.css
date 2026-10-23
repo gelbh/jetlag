@@ -1,0 +1,71 @@
+/**
+ * Admin desk shell under jetlagTheme (no nested MantineThemeProvider).
+ * Layout, punch/stamp keyframes, unstyled-control focus, and an intentional
+ * Mantine CSS-var bridge so desk paper stays surface-deep (player dark body is canvas).
+ */
+[data-admin-world] {
+  color-scheme: dark;
+  --mantine-color-body: var(--color-surface-deep);
+  --mantine-color-text: var(--color-ink);
+  --mantine-color-dimmed: var(--color-ink-muted);
+  --mantine-color-default: color-mix(in oklch, var(--color-canvas) 94%, var(--color-ink));
+  --mantine-color-default-color: var(--color-ink);
+  --mantine-color-default-border: var(--color-rule);
+  --mantine-color-default-hover: var(--color-flag-soft);
+  --mantine-primary-color-filled: var(--color-flag);
+  --mantine-primary-color-contrast: var(--color-flag-ink);
+  --mantine-font-family: var(--font-body);
+  --mantine-font-family-headings: var(--font-body);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100dvh;
+  background: var(--color-surface-deep);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes admin-punch {
+  from {
+    background-color: var(--color-flag-soft);
+  }
+
+  to {
+    background-color: transparent;
+  }
+}
+
+/* Leg strip: a new control chip punches in. */
+@keyframes admin-stamp {
+  from {
+    transform: scale(1.5);
+    opacity: 0.3;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Desk row / sort header: reset native button chrome without wiping :focus-visible. */
+[data-admin-world] .admin-unstyled-control {
+  appearance: none;
+  background: transparent;
+  border: none;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+}
+
+[data-admin-world] .admin-unstyled-control:focus {
+  outline: none;
+}
+
+[data-admin-world] .admin-unstyled-control:focus-visible {
+  outline: 2px solid var(--color-flag);
+  outline-offset: 2px;
+}

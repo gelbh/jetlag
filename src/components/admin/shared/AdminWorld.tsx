@@ -1,14 +1,12 @@
-import { MantineThemeProvider } from "@mantine/core";
 import type { ReactNode } from "react";
-import { adminTheme } from "@/theme/adminTheme";
 import "@/theme/mantineAdminStyles";
-import "./adminTokens.css";
+import "./adminShell.css";
 
+/**
+ * Admin desk shell: layout host + lazy Mantine admin CSS. Theme is AppUiProvider
+ * (jetlagTheme, dark-only). Desk paper (`surface-deep`) and Mantine CSS vars are
+ * set by adminShell.css on this host, not a nested MantineThemeProvider.
+ */
 export function AdminWorld({ children }: { children: ReactNode }) {
-  return (
-    <div data-admin-world>
-      <MantineThemeProvider theme={adminTheme}>{children}</MantineThemeProvider>
-      <div data-admin-portal />
-    </div>
-  );
+  return <div data-admin-world>{children}</div>;
 }

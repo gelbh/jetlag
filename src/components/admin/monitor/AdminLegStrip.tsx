@@ -25,7 +25,7 @@ const PILL_BACKGROUND: Record<StatusTone, string> = {
   neutral: RAISED_BG,
 };
 
-const STAMP = { animation: "adm-stamp 220ms cubic-bezier(0.16, 1, 0.3, 1)" };
+const STAMP = { animation: "admin-stamp 220ms cubic-bezier(0.16, 1, 0.3, 1)" };
 
 /** An empty list this long after mount is a fresh game, not a listener still loading. */
 export const LEG_STRIP_SETTLE_MS = 1500;
