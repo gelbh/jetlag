@@ -3,15 +3,12 @@ import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
 import type { PreloadRequest } from "../../../domain/preloadRequest/preloadRequestTypes";
 import { subscribeIncident } from "../../../services/admin/adminIncidents";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
-import type { NeedsYouKind } from "./useAdminDeskTables";
 
 type RouteKind = "table" | "session" | "incident" | "request";
 
 interface Inputs {
   enabled: boolean;
   pathname: string;
-  preloadRoute: string;
-  setKind: (kind: NeedsYouKind) => void;
   routeKind: RouteKind;
   routeSessionId: string | null;
   routeIncidentId: string | null;
@@ -22,12 +19,10 @@ interface Inputs {
   sessions: readonly AdminSessionSummary[];
 }
 
-/** Route selection, Kind chip path sync, and incident deep-link fetch. */
+/** Route selection, last-item memory, and incident deep-link fetch. */
 export function useAdminDeskSelection({
   enabled,
   pathname,
-  preloadRoute,
-  setKind,
   routeKind,
   routeSessionId,
   routeIncidentId,
@@ -40,16 +35,6 @@ export function useAdminDeskSelection({
   const [fetchedIncident, setFetchedIncident] = useState<IncidentRecord | null>(null);
   const [fetchedFor, setFetchedFor] = useState<string | null>(null);
   const [lastItem, setLastItem] = useState<{ key: string; path: string } | null>(null);
-  const [kindPath, setKindPath] = useState(pathname);
-
-  // Kind follows preload table entry/exit only; incident detail must not reset it.
-  // Adjust during render — avoids setState-in-effect (same pattern as map landscape chrome).
-  if (pathname !== kindPath) {
-    const previousPath = kindPath;
-    setKindPath(pathname);
-    if (pathname === preloadRoute) setKind("preload");
-    else if (previousPath === preloadRoute) setKind("all");
-  }
 
   const listIncident =
     routeIncidentId == null

@@ -150,6 +150,7 @@ function AdminOpsDeskContent() {
     incidents: visibleIncidents,
     preloadRequests: visiblePreloadRequests,
     openIncidentsBySession,
+    pathname: location.pathname,
     initialKind: location.pathname === PRELOAD_ROUTE ? "preload" : "all",
   });
 
@@ -164,8 +165,6 @@ function AdminOpsDeskContent() {
   } = useAdminDeskSelection({
     enabled,
     pathname: location.pathname,
-    preloadRoute: PRELOAD_ROUTE,
-    setKind: tables.setKind,
     routeKind,
     routeSessionId,
     routeIncidentId,
