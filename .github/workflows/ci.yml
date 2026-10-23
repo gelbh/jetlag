@@ -196,7 +196,7 @@ jobs:
         run: echo "Skipping full suite on light-only PR."
       - if: ${{ needs.changes.outputs.release_pr == 'true' }}
         run: echo "Skipping emulator suite on changeset-release PR."
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v4
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v4
         if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
         with:
           distribution: temurin
@@ -240,7 +240,7 @@ jobs:
         run: echo "Skipping e2e on changeset-release PR."
       - uses: ./.github/actions/setup-rust-wasm
         if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v4
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v4
         if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
         with:
           distribution: temurin
