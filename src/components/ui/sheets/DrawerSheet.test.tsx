@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ComponentProps, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
@@ -45,7 +45,31 @@ function stubMatchMedia(prefersReducedMotion: boolean) {
   }));
 }
 
-function dragGrabberDown(handle: HTMLElement, deltaY: number) {
+/**
+ * Schedule rAF on the microtask queue.
+ * Sync invoke TDZ-breaks Mantine Transition (const frame = requestAnimationFrame(...)).
+ */
+function stubSyncRaf() {
+  let nextId = 1;
+  vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+    const id = nextId++;
+    queueMicrotask(() => {
+      cb(0);
+    });
+    return id;
+  });
+  vi.stubGlobal("cancelAnimationFrame", () => {});
+}
+
+async function flushRaf(frames = 2) {
+  for (let i = 0; i < frames; i++) {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  }
+}
+
+async function dragGrabberDown(handle: HTMLElement, deltaY: number) {
   fireEvent.pointerDown(handle, {
     pointerId: 1,
     button: 0,
@@ -55,19 +79,12 @@ function dragGrabberDown(handle: HTMLElement, deltaY: number) {
     pointerId: 1,
     clientY: 100 + deltaY,
   });
+  await flushRaf(1);
   fireEvent.pointerUp(handle, {
     pointerId: 1,
     clientY: 100 + deltaY,
   });
-}
-
-/** Flush drag offset updates that schedule via rAF. */
-function stubSyncRaf() {
-  vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
-    cb(0);
-    return 1;
-  });
-  vi.stubGlobal("cancelAnimationFrame", () => {});
+  await flushRaf(1);
 }
 
 describe("DrawerSheet", () => {
@@ -134,7 +151,7 @@ describe("DrawerSheet", () => {
     expect(root).not.toHaveAttribute("aria-label");
   });
 
-  it("applies translateY on the chrome wrapper while dragging (Verify #1 live follow)", () => {
+  it("applies translateY on the chrome wrapper while dragging (Verify #1 live follow)", async () => {
     const onClose = vi.fn();
     render(
       withAppUi(
@@ -156,6 +173,7 @@ describe("DrawerSheet", () => {
       pointerId: 1,
       clientY: 160,
     });
+    await flushRaf(1);
 
     const sheet = screen.getByTestId("mantine-drawer-sheet");
     expect(sheet.style.transform).toContain("translateY(60px)");
@@ -164,7 +182,7 @@ describe("DrawerSheet", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("dismisses when grabber is dragged past the sheet fraction (Verify #1)", () => {
+  it("dismisses when grabber is dragged past the sheet fraction (Verify #1)", async () => {
     const onClose = vi.fn();
     render(
       withAppUi(
@@ -178,12 +196,12 @@ describe("DrawerSheet", () => {
       name: "Drag sheet down to dismiss",
     });
     // Default sheetHeight in useSheetGesture is 320; 0.28 * 320 ≈ 90.
-    dragGrabberDown(handle, 120);
+    await dragGrabberDown(handle, 120);
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("clears stale drag translateY when reopening after grabber dismiss", () => {
+  it("clears stale drag translateY when reopening after grabber dismiss", async () => {
     const onClose = vi.fn();
     const { rerender } = render(
       withAppUi(
@@ -196,7 +214,7 @@ describe("DrawerSheet", () => {
     const handle = screen.getByRole("button", {
       name: "Drag sheet down to dismiss",
     });
-    dragGrabberDown(handle, 120);
+    await dragGrabberDown(handle, 120);
     expect(onClose).toHaveBeenCalledTimes(1);
 
     rerender(
@@ -206,6 +224,7 @@ describe("DrawerSheet", () => {
         </DrawerSheet>,
       ),
     );
+    await flushRaf();
     rerender(
       withAppUi(
         <DrawerSheet open onClose={onClose} ariaLabel="Changelog">
@@ -213,12 +232,13 @@ describe("DrawerSheet", () => {
         </DrawerSheet>,
       ),
     );
+    await flushRaf();
 
     const sheet = screen.getByTestId("mantine-drawer-sheet");
     expect(sheet.style.transform).not.toContain("translateY");
   });
 
-  it("dismisses from grabber even when the host body is scrolled", () => {
+  it("dismisses from grabber even when the host body is scrolled", async () => {
     const onClose = vi.fn();
     render(
       withAppUi(
@@ -239,7 +259,7 @@ describe("DrawerSheet", () => {
     const handle = screen.getByRole("button", {
       name: "Drag sheet down to dismiss",
     });
-    dragGrabberDown(handle, 120);
+    await dragGrabberDown(handle, 120);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -277,7 +297,7 @@ describe("DrawerSheet", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("keeps mapInteractive overlay pointer-events none and still dismisses via grabber (Verify #3)", () => {
+  it("keeps mapInteractive overlay pointer-events none and still dismisses via grabber (Verify #3)", async () => {
     const onClose = vi.fn();
     render(
       withAppUi(
@@ -294,7 +314,7 @@ describe("DrawerSheet", () => {
     const handle = screen.getByRole("button", {
       name: "Drag sheet down to dismiss",
     });
-    dragGrabberDown(handle, 120);
+    await dragGrabberDown(handle, 120);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
