@@ -16,7 +16,8 @@ export type RegionPackId =
   | "portland-maine"
   | "prince-rupert"
   | "southampton"
-  | "australia";
+  | "australia"
+  | "sydney";
 
 export const REGION_PACK_IDS: readonly RegionPackId[] = [
   "dublin",
@@ -31,6 +32,7 @@ export const REGION_PACK_IDS: readonly RegionPackId[] = [
   "prince-rupert",
   "southampton",
   "australia",
+  "sydney",
 ] as const;
 
 /** Bump when bundled boundary or POI assets change to bust in-memory and Firestore session caches. */
