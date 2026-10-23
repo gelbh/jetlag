@@ -1,0 +1,126 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": { "south": -35.1916, "west": 112.9211, "north": -13.6887, "east": 129.0019 },
+  "places": [
+    { "id": "Q4709301", "name": "Albany Cottage Hospital", "lat": -35.026389, "lng": 117.874722 },
+    {
+      "id": "Q4792520",
+      "name": "Armadale Kelmscott District Memorial Hospital",
+      "lat": -32.133164,
+      "lng": 116.019717
+    },
+    { "id": "Q81122594", "name": "Broome Hospital", "lat": -17.9606, "lng": 122.2365 },
+    { "id": "Q63378093", "name": "Busselton Health Campus", "lat": -33.654771, "lng": 115.320344 },
+    { "id": "Q81122053", "name": "Derby Hospital", "lat": -17.3056, "lng": 123.6324 },
+    { "id": "Q5451115", "name": "Fiona Stanley Hospital", "lat": -32.07094, "lng": 115.846916 },
+    { "id": "Q81096630", "name": "Fitzroy Crossing Hospital", "lat": -18.1912, "lng": 125.5628 },
+    { "id": "Q5501490", "name": "Fremantle Hospital", "lat": -32.058593, "lng": 115.751639 },
+    { "id": "Q5598317", "name": "Graylands Hospital", "lat": -31.962062, "lng": 115.791129 },
+    { "id": "Q66975337", "name": "Heathcote Hospital", "lat": -32.003877, "lng": 115.843254 },
+    {
+      "id": "Q5882887",
+      "name": "Hollywood Private Hospital",
+      "lat": -31.970126,
+      "lng": 115.808865
+    },
+    { "id": "Q6276049", "name": "Joondalup Health Campus", "lat": -31.739379, "lng": 115.772521 },
+    {
+      "id": "Q6411472",
+      "name": "King Edward Memorial Hospital",
+      "lat": -31.950189,
+      "lng": 115.818631
+    },
+    {
+      "id": "Q139501083",
+      "name": "Kingstown Barracks Sergeant's Mess",
+      "lat": -32.004861,
+      "lng": 115.554779
+    },
+    { "id": "Q81096644", "name": "Kununurra Hospital", "lat": -15.7746, "lng": 128.7336 },
+    { "id": "Q66975484", "name": "Lake Grace Hospital", "lat": -33.10238, "lng": 118.452705 },
+    {
+      "id": "Q64226311",
+      "name": "Lock Hospital and Burial Ground",
+      "lat": -20.309197,
+      "lng": 118.600916
+    },
+    { "id": "Q81123938", "name": "Meekatharra Hospital", "lat": -26.5911, "lng": 118.4918 },
+    { "id": "Q17016499", "name": "Newcastle Hospital", "lat": -31.554816, "lng": 116.47049 },
+    { "id": "Q81123830", "name": "Newman Hospital", "lat": -23.3548, "lng": 119.7362 },
+    { "id": "Q124519080", "name": "Old Hospital, Esperance", "lat": -33.858024, "lng": 121.894828 },
+    { "id": "Q81123298", "name": "Onslow Hospital", "lat": -21.6435, "lng": 115.1149 },
+    { "id": "Q81123607", "name": "Paraburdoo Hospital", "lat": -23.2031, "lng": 117.6708 },
+    {
+      "id": "Q48769668",
+      "name": "Perth Children's Hospital",
+      "lat": -31.969619,
+      "lng": 115.816644
+    },
+    {
+      "id": "Q7244698",
+      "name": "Princess Margaret Hospital for Children",
+      "lat": -31.9462,
+      "lng": 115.837
+    },
+    {
+      "id": "Q17025694",
+      "name": "Rockingham General Hospital",
+      "lat": -32.291167,
+      "lng": 115.770156
+    },
+    { "id": "Q81122920", "name": "Roebourne Hospital", "lat": -20.7765, "lng": 117.1436 },
+    { "id": "Q7374710", "name": "Royal Perth Hospital", "lat": -31.954903, "lng": 115.86694 },
+    { "id": "Q30686999", "name": "Shalom House", "lat": -31.813722, "lng": 115.984278 },
+    {
+      "id": "Q7526207",
+      "name": "Sir Charles Gairdner Hospital",
+      "lat": -31.967635,
+      "lng": 115.81539
+    },
+    {
+      "id": "Q7593685",
+      "name": "St John of God Bunbury Hospital",
+      "lat": -33.368256,
+      "lng": 115.648144
+    },
+    {
+      "id": "Q7593688",
+      "name": "St John of God Geraldton Hospital",
+      "lat": -28.78427,
+      "lng": 114.615907
+    },
+    {
+      "id": "Q141235120",
+      "name": "St John of God Midland Private Hospital",
+      "lat": -31.896814,
+      "lng": 116.004969
+    },
+    {
+      "id": "Q6842346",
+      "name": "St John of God Midland Public Hospital",
+      "lat": -31.8948,
+      "lng": 116.0092
+    },
+    {
+      "id": "Q6818755",
+      "name": "St John of God Mt Lawley Hospital",
+      "lat": -31.9364,
+      "lng": 115.884
+    },
+    {
+      "id": "Q7593698",
+      "name": "St John of God Murdoch Hospital",
+      "lat": -32.068028,
+      "lng": 115.844645
+    },
+    {
+      "id": "Q7593701",
+      "name": "St John of God Subiaco Hospital",
+      "lat": -31.94143,
+      "lng": 115.825437
+    },
+    { "id": "Q7641292", "name": "Sunset Hospital", "lat": -32.001505, "lng": 115.803719 },
+    { "id": "Q81123387", "name": "Tom Price Hospital", "lat": -22.6956, "lng": 117.7903 }
+  ]
+}

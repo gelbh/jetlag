@@ -1,0 +1,9 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": { "south": -38.0626, "west": 129.0018, "north": -25.9964, "east": 141.003 },
+  "places": [
+    { "id": "Q139963494", "name": "Crystal Brook Golf Course", "lat": -33.34537, "lng": 138.20902 },
+    { "id": "Q116741282", "name": "The Grange Golf Club", "lat": -34.886675, "lng": 138.498758 }
+  ]
+}

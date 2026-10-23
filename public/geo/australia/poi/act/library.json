@@ -1,0 +1,50 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [
+    { "id": "Q4650884", "name": "ACT Heritage Library", "lat": -35.3444, "lng": 149.084 },
+    {
+      "id": "Q85682271",
+      "name": "Alejandro Malaspina Resource Center in Canberra",
+      "lat": -35.323983,
+      "lng": 149.132879
+    },
+    {
+      "id": "Q4824478",
+      "name": "Australian National University Library",
+      "lat": -35.278,
+      "lng": 149.12
+    },
+    { "id": "Q4868068", "name": "Basser Library", "lat": -35.2837, "lng": 149.123 },
+    { "id": "Q4882081", "name": "Belconnen Library", "lat": -35.2386, "lng": 149.069 },
+    { "id": "Q67012725", "name": "Dickson Library", "lat": -35.2496, "lng": 149.139 },
+    {
+      "id": "Q2565882",
+      "name": "National Film and Sound Archive of Australia",
+      "lat": -35.283,
+      "lng": 149.121
+    },
+    {
+      "id": "Q6972828",
+      "name": "National Gallery of Australia Research Library",
+      "lat": -35.3004,
+      "lng": 149.137
+    },
+    {
+      "id": "Q623578",
+      "name": "National Library of Australia",
+      "lat": -35.296389,
+      "lng": 149.129444
+    },
+    {
+      "id": "Q14935660",
+      "name": "National Sport Information Centre",
+      "lat": -35.246381,
+      "lng": 149.101997
+    },
+    { "id": "Q84623268", "name": "Queanbeyan City Library", "lat": -35.355443, "lng": 149.234204 },
+    { "id": "Q7895221", "name": "University of Canberra Library", "lat": -35.2381, "lng": 149.083 },
+    { "id": "Q67062859", "name": "Woden Library", "lat": -35.344607, "lng": 149.084206 }
+  ]
+}

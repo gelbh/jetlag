@@ -1,0 +1,1508 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": { "south": -38.0626, "west": 129.0018, "north": -25.9964, "east": 141.003 },
+  "places": [
+    {
+      "id": "Q21925596",
+      "name": "A A Bailey Recreation Ground",
+      "lat": -34.973333,
+      "lng": 138.578056
+    },
+    {
+      "id": "Q21926168",
+      "name": "A James Bailey Playground",
+      "lat": -34.858889,
+      "lng": 138.503889
+    },
+    { "id": "Q21926172", "name": "Aaron Creek Picnic Area", "lat": -35.63202, "lng": 138.19298 },
+    { "id": "Q21928657", "name": "Abbotsford Plantation", "lat": -34.776944, "lng": 138.6975 },
+    { "id": "Q21928658", "name": "Aberdour Conservation Park", "lat": -36.32523, "lng": 140.42767 },
+    { "id": "Q21970391", "name": "Acacia Park Paddock", "lat": -30.55473, "lng": 139.63061 },
+    { "id": "Q21926343", "name": "Adams Oval", "lat": -34.748056, "lng": 138.628611 },
+    { "id": "Q21970409", "name": "Adare Caravan Park", "lat": -35.54152, "lng": 138.62861 },
+    {
+      "id": "Q21970407",
+      "name": "Adelaide Beachfront Tourst Park",
+      "lat": -34.85242,
+      "lng": 138.47803
+    },
+    { "id": "Q4681683", "name": "Adelaide Botanic Garden", "lat": -34.9175, "lng": 138.6125 },
+    { "id": "Q21970408", "name": "Adelaide Caravan Park", "lat": -34.909, "lng": 138.61488 },
+    {
+      "id": "Q21970406",
+      "name": "Adelaide Shores Caravan Park",
+      "lat": -34.94946,
+      "lng": 138.50438
+    },
+    { "id": "Q21926350", "name": "Adelaide Swimming Centre", "lat": -34.900833, "lng": 138.591111 },
+    { "id": "Q3244627", "name": "Adelaide Zoo", "lat": -34.914089, "lng": 138.605794 },
+    { "id": "Q21926484", "name": "Aiston Screen", "lat": -34.785556, "lng": 138.715 },
+    { "id": "Q21970448", "name": "Alan Bell Park", "lat": -35.06547, "lng": 138.89 },
+    { "id": "Q21926511", "name": "Aldgate Hall", "lat": -35.016667, "lng": 138.728889 },
+    { "id": "Q21926513", "name": "Aldgate Oval", "lat": -35.01653, "lng": 138.7289 },
+    { "id": "Q21970429", "name": "Aldinga Holiday Park", "lat": -35.29795, "lng": 138.46059 },
+    { "id": "Q21970412", "name": "Alec Johnston Park", "lat": -35.0297, "lng": 138.81117 },
+    {
+      "id": "Q21926525",
+      "name": "Alexander Cameron Memorial Park",
+      "lat": -37.383611,
+      "lng": 140.840556
+    },
+    { "id": "Q21926531", "name": "Alexander Plantation", "lat": -34.823889, "lng": 138.668611 },
+    {
+      "id": "Q21926532",
+      "name": "Alexandra Avenue Plantation",
+      "lat": -34.931944,
+      "lng": 138.630833
+    },
+    { "id": "Q21926548", "name": "Alfred Street Park", "lat": -34.925556, "lng": 138.631667 },
+    {
+      "id": "Q21925160",
+      "name": "Alligator Gorge National Park",
+      "lat": -32.787881,
+      "lng": 138.069461
+    },
+    { "id": "Q21926568", "name": "Allinga Park", "lat": -33.13692, "lng": 136.41507 },
+    { "id": "Q21926626", "name": "Alsbra Park", "lat": -33.668889, "lng": 136.152222 },
+    { "id": "Q21926646", "name": "Amadeus Plantation", "lat": -34.764444, "lng": 138.717778 },
+    { "id": "Q21926671", "name": "Ambulance Ground", "lat": -35.00332, "lng": 138.77714 },
+    { "id": "Q21925611", "name": "Amisfield Plantation", "lat": -34.769722, "lng": 138.708333 },
+    { "id": "Q21926723", "name": "Anare Plantation", "lat": -34.771944, "lng": 138.717778 },
+    { "id": "Q21970415", "name": "Anembo Park", "lat": -35.05541, "lng": 138.85535 },
+    { "id": "Q4770774", "name": "Anstey Hill Recreation Park", "lat": -34.8307, "lng": 138.738 },
+    { "id": "Q21925607", "name": "Apex Rotary Park", "lat": -35.328333, "lng": 140.512778 },
+    { "id": "Q21926851", "name": "Apex Taperoo Playground", "lat": -34.802222, "lng": 138.502778 },
+    { "id": "Q21926889", "name": "Aqueduct Plantation", "lat": -34.857778, "lng": 138.7175 },
+    { "id": "Q21970426", "name": "Archibald Park", "lat": -35.02641, "lng": 138.63652 },
+    { "id": "Q21926902", "name": "Arcola Plantation", "lat": -34.768056, "lng": 138.706389 },
+    { "id": "Q21926907", "name": "Argana Park", "lat": -34.7025, "lng": 138.683889 },
+    {
+      "id": "Q21926909",
+      "name": "Arid Flora Research Station",
+      "lat": -32.116111,
+      "lng": 139.339444
+    },
+    { "id": "Q21926920", "name": "Arnold Park", "lat": -34.915, "lng": 139.309444 },
+    { "id": "Q21925617", "name": "Arthur Reusch Park", "lat": -34.464722, "lng": 138.99 },
+    { "id": "Q21926945", "name": "Asgard Plantation", "lat": -34.784722, "lng": 138.703056 },
+    { "id": "Q21925614", "name": "Ashton Plantation", "lat": -34.797222, "lng": 138.701667 },
+    { "id": "Q4813354", "name": "Athelstone Recreation Reserve", "lat": -34.8623, "lng": 138.704 },
+    { "id": "Q21925609", "name": "Atlantis Plantation", "lat": -34.78001, "lng": 138.70744 },
+    { "id": "Q21926983", "name": "Augustus Screen", "lat": -34.812778, "lng": 138.680833 },
+    { "id": "Q21926991", "name": "Aurora Plantation", "lat": -34.76685, "lng": 138.7122 },
+    { "id": "Q21926995", "name": "Austral Park", "lat": -34.941667, "lng": 138.645833 },
+    {
+      "id": "Q4823826",
+      "name": "Australian Arid Lands Botanic Garden",
+      "lat": -32.4616,
+      "lng": 137.743
+    },
+    { "id": "Q21927013", "name": "Avenues Picnic Area", "lat": -35.208056, "lng": 138.708889 },
+    {
+      "id": "Q21927017",
+      "name": "Avoca Dell Picnic Grounds",
+      "lat": -35.088611,
+      "lng": 139.307778
+    },
+    { "id": "Q21927028", "name": "Ayles Plantation", "lat": -34.773889, "lng": 138.704444 },
+    { "id": "Q21925608", "name": "Bakkabakkandi", "lat": -34.933056, "lng": 138.620556 },
+    { "id": "Q21925623", "name": "Balaklava Racing Club", "lat": -34.151944, "lng": 138.407778 },
+    { "id": "Q21927078", "name": "Balcarres Plantation", "lat": -34.776111, "lng": 138.697778 },
+    {
+      "id": "Q139757496",
+      "name": "Ballaparudda Creek Recreation Park",
+      "lat": -35.617,
+      "lng": 138.396
+    },
+    { "id": "Q21970401", "name": "Banksia Park Sports Area", "lat": -34.81042, "lng": 138.72829 },
+    {
+      "id": "Q21970399",
+      "name": "Barkers Rocks Conservation Park",
+      "lat": -34.69856,
+      "lng": 137.49251
+    },
+    { "id": "Q21927133", "name": "Barnguttilla", "lat": -34.9051, "lng": 138.61204 },
+    { "id": "Q68654764", "name": "Barossa Bushgardens", "lat": -34.468988, "lng": 139.00886 },
+    {
+      "id": "Q860852",
+      "name": "Barossa International Sculpture Symposium",
+      "lat": -34.5369,
+      "lng": 138.99932
+    },
+    { "id": "Q21927137", "name": "Barrett Plantation", "lat": -34.7935, "lng": 138.70335 },
+    { "id": "Q21970414", "name": "Battunga Park", "lat": -35.18173, "lng": 138.75724 },
+    { "id": "Q21927163", "name": "Baynes Plantation", "lat": -34.76938, "lng": 138.72186 },
+    { "id": "Q21927169", "name": "Beaufort Wildlife Park", "lat": -34.086667, "lng": 138.196667 },
+    { "id": "Q21925613", "name": "Beaumont Common", "lat": -34.947778, "lng": 138.656389 },
+    { "id": "Q21927176", "name": "Beefacres Park", "lat": -34.865278, "lng": 138.662222 },
+    { "id": "Q643818", "name": "Belair National Park", "lat": -35.013056, "lng": 138.655833 },
+    { "id": "Q21925156", "name": "Belair Recreation Park", "lat": -35.0095, "lng": 138.65578 },
+    {
+      "id": "Q21927192",
+      "name": "Belt Hill Conservation Park",
+      "lat": -37.46671,
+      "lng": 140.24165
+    },
+    { "id": "Q21925163", "name": "Beulah Park", "lat": -34.915556, "lng": 138.643889 },
+    { "id": "Q21927219", "name": "Bicentennial Screen", "lat": -34.78453, "lng": 138.71227 },
+    { "id": "Q21925185", "name": "Big Heath National Park", "lat": -37.108019, "lng": 140.5732 },
+    {
+      "id": "Q21927242",
+      "name": "Bimbowrie Conservation Park",
+      "lat": -32.026389,
+      "lng": 140.240833
+    },
+    { "id": "Q21925615", "name": "Bindana Park", "lat": -33.141944, "lng": 136.413333 },
+    { "id": "Q21927266", "name": "Birchmore Bowling Club", "lat": -35.736667, "lng": 137.5175 },
+    {
+      "id": "Q17049439",
+      "name": "Bird Islands Conservation Park",
+      "lat": -33.99755,
+      "lng": 137.53258
+    },
+    {
+      "id": "Q21927289",
+      "name": "Black Rock Conservation Park",
+      "lat": -32.69007,
+      "lng": 138.80942
+    },
+    {
+      "id": "Q19871398",
+      "name": "Blackwood Forest Recreation Park",
+      "lat": -35.0285,
+      "lng": 138.629
+    },
+    { "id": "Q21927296", "name": "Blackwood Hill Oval", "lat": -35.033056, "lng": 138.608333 },
+    { "id": "Q21925612", "name": "Bloomfield Plantation", "lat": -34.766111, "lng": 138.725833 },
+    {
+      "id": "Q21927325",
+      "name": "Bockelberg Conservation Park",
+      "lat": -32.549444,
+      "lng": 135.019444
+    },
+    { "id": "Q4942702", "name": "Bonython Park", "lat": -34.916, "lng": 138.581 },
+    {
+      "id": "Q21927370",
+      "name": "Boris Coulls Bushland Preservation Area",
+      "lat": -35.00338,
+      "lng": 138.73953
+    },
+    { "id": "Q21927372", "name": "Borodino Plantation", "lat": -34.769167, "lng": 138.704167 },
+    { "id": "Q21927384", "name": "Borthwick Park", "lat": -34.92472, "lng": 138.64334 },
+    { "id": "Q4948429", "name": "Botanic Park", "lat": -34.9146, "lng": 138.611 },
+    { "id": "Q21927398", "name": "Botany Plantation", "lat": -34.786111, "lng": 138.7075 },
+    { "id": "Q21927420", "name": "Boundary Park", "lat": -34.752778, "lng": 138.666944 },
+    { "id": "Q21927476", "name": "Braddock Park", "lat": -32.491667, "lng": 137.769444 },
+    { "id": "Q21927484", "name": "Bradwood Park", "lat": -35.055833, "lng": 138.723611 },
+    { "id": "Q21927490", "name": "Brahma Lodge Oval", "lat": -34.77827, "lng": 138.65578 },
+    { "id": "Q21925158", "name": "Bridgewater Park", "lat": -34.99433, "lng": 138.75295 },
+    { "id": "Q21927578", "name": "Brighton Recreation Area", "lat": -35.014444, "lng": 138.525278 },
+    { "id": "Q21927619", "name": "Bronhill Plantation", "lat": -34.79035, "lng": 138.69975 },
+    {
+      "id": "Q21927620",
+      "name": "Brookfield Conservation Park",
+      "lat": -34.35661,
+      "lng": 139.48987
+    },
+    {
+      "id": "Q21927622",
+      "name": "Brooklyn Chase Plantation",
+      "lat": -34.769444,
+      "lng": 138.724167
+    },
+    { "id": "Q21927623", "name": "Brooklyn Chase Screens", "lat": -34.76871, "lng": 138.72485 },
+    {
+      "id": "Q19871680",
+      "name": "Brownhill Creek Recreation Park",
+      "lat": -34.9896,
+      "lng": 138.637
+    },
+    { "id": "Q21925597", "name": "Browning Courts", "lat": -34.818889, "lng": 138.721111 },
+    { "id": "Q21927656", "name": "Brunskill Park", "lat": -34.92894, "lng": 138.64438 },
+    { "id": "Q21927665", "name": "Bryant Plantation", "lat": -34.791389, "lng": 138.703056 },
+    {
+      "id": "Q21927757",
+      "name": "Bullock Hill Conservation Park",
+      "lat": -35.309722,
+      "lng": 138.794722
+    },
+    { "id": "Q21927775", "name": "Bundara Park", "lat": -33.060556, "lng": 138.299444 },
+    { "id": "Q21972995", "name": "Bungala Park", "lat": -35.44865, "lng": 138.32012 },
+    { "id": "Q21927790", "name": "Bunyip Park", "lat": -33.588889, "lng": 138.334167 },
+    { "id": "Q21927825", "name": "Bush Park", "lat": -34.82824, "lng": 138.62917 },
+    { "id": "Q21970397", "name": "Byethorne Park", "lat": -35.0339, "lng": 138.90352 },
+    { "id": "Q21970435", "name": "C C Hood Park", "lat": -35.00034, "lng": 138.59692 },
+    {
+      "id": "Q21929338",
+      "name": "Calectasia Conservation Park",
+      "lat": -37.35759,
+      "lng": 140.55058
+    },
+    { "id": "Q21929653", "name": "Calectasia National Park", "lat": -37.357589, "lng": 140.550581 },
+    { "id": "Q21929428", "name": "Camden Oval", "lat": -34.974444, "lng": 138.535556 },
+    { "id": "Q1033936", "name": "Canunda National Park", "lat": -37.7156, "lng": 140.283 },
+    {
+      "id": "Q21929656",
+      "name": "Cape Gantheaume National Park",
+      "lat": -35.988931,
+      "lng": 137.455581
+    },
+    { "id": "Q21929657", "name": "Cape Hart National Park", "lat": -35.861811, "lng": 138.080769 },
+    { "id": "Q19871956", "name": "Caratoola Recreation Park", "lat": -32.4965, "lng": 134.214 },
+    { "id": "Q21929362", "name": "Carcuma Conservation Park", "lat": -35.62068, "lng": 140.08254 },
+    {
+      "id": "Q21970425",
+      "name": "Carl Nitschke Memorial Park",
+      "lat": -35.02504,
+      "lng": 138.80739
+    },
+    {
+      "id": "Q21929324",
+      "name": "Caroona Creek Conservation Park",
+      "lat": -33.41988,
+      "lng": 139.10806
+    },
+    { "id": "Q21929429", "name": "Carrignane Park Reserve", "lat": -35.020833, "lng": 138.545 },
+    { "id": "Q21929329", "name": "Casadio Park Oval", "lat": -37.84958, "lng": 140.76282 },
+    { "id": "Q28220446", "name": "Cave Garden / Thugi", "lat": -37.829, "lng": 140.781 },
+    { "id": "Q21971707", "name": "Ceentennial Park", "lat": -37.48267, "lng": 140.00898 },
+    { "id": "Q21929339", "name": "Centenary Oval", "lat": -34.72118, "lng": 135.85533 },
+    { "id": "Q21929407", "name": "Centennial Park Oval", "lat": -34.468611, "lng": 139.003333 },
+    { "id": "Q21929418", "name": "Central Oval", "lat": -32.493056, "lng": 137.770833 },
+    { "id": "Q21929437", "name": "Chaffery Oval", "lat": -34.10545, "lng": 140.71735 },
+    {
+      "id": "Q21929386",
+      "name": "Charleston Conservation Park",
+      "lat": -34.91868,
+      "lng": 138.95131
+    },
+    { "id": "Q21929436", "name": "Chimney Park", "lat": -34.91666, "lng": 138.62885 },
+    { "id": "Q21929353", "name": "Chinnery Park Oval", "lat": -32.479722, "lng": 137.761944 },
+    {
+      "id": "Q21929396",
+      "name": "Clarke Park Picnic Reserve",
+      "lat": -38.052778,
+      "lng": 140.679167
+    },
+    { "id": "Q112581932", "name": "Cleland National Park", "lat": -34.9675, "lng": 138.695833 },
+    { "id": "Q21929398", "name": "Cleland Wildlife Park", "lat": -34.967222, "lng": 138.696667 },
+    { "id": "Q21929433", "name": "Clem McCauley Park", "lat": -34.06192, "lng": 137.58593 },
+    { "id": "Q21973051", "name": "Clem McCaulley Park", "lat": -34.06192, "lng": 137.58588 },
+    {
+      "id": "Q21929351",
+      "name": "Clements Gap Conservation Park",
+      "lat": -33.49232,
+      "lng": 138.0761
+    },
+    { "id": "Q21929431", "name": "Clonlea Park", "lat": -34.58967, "lng": 138.75063 },
+    { "id": "Q21929395", "name": "Clovelly Park Reserve", "lat": -34.998611, "lng": 138.573333 },
+    { "id": "Q5138806", "name": "Cobbler Creek Recreation Park", "lat": -34.775, "lng": 138.69 },
+    { "id": "Q21929658", "name": "Cockburn Street Park", "lat": -35.036389, "lng": 138.9125 },
+    { "id": "Q1106855", "name": "Coffin Bay National Park", "lat": -34.5822, "lng": 135.322 },
+    { "id": "Q21929371", "name": "Collier Park", "lat": -34.85485, "lng": 139.16319 },
+    { "id": "Q21929421", "name": "Colonel Waite Oval", "lat": -34.923333, "lng": 138.663333 },
+    { "id": "Q1129899", "name": "Coorong National Park", "lat": -36.049167, "lng": 139.553611 },
+    {
+      "id": "Q21929358",
+      "name": "Coultyard Recreation Park",
+      "lat": -34.470556,
+      "lng": 139.001667
+    },
+    { "id": "Q21970424", "name": "Craigmore Park", "lat": -34.70075, "lng": 138.71347 },
+    { "id": "Q21929427", "name": "Creaser Park", "lat": -34.781389, "lng": 138.619167 },
+    { "id": "Q21929326", "name": "Creswell Park", "lat": -34.899722, "lng": 138.616667 },
+    { "id": "Q21929416", "name": "Cromer Conservation Park", "lat": -34.77442, "lng": 138.98175 },
+    { "id": "Q21929370", "name": "Croser Oval", "lat": -34.89646, "lng": 138.54051 },
+    { "id": "Q21929425", "name": "Croydon Park Reserve", "lat": -34.879722, "lng": 138.572222 },
+    {
+      "id": "Q21929397",
+      "name": "Cudlee Creek Conservation Park",
+      "lat": -34.83827,
+      "lng": 138.84219
+    },
+    { "id": "Q5194997", "name": "Currency Creek Arboretum", "lat": -35.428856, "lng": 138.761498 },
+    { "id": "Q21929422", "name": "Da Costa Park Reserve", "lat": -34.98372, "lng": 138.52731 },
+    { "id": "Q21929432", "name": "Dakalanta Park", "lat": -33.04073, "lng": 137.58003 },
+    { "id": "Q21929330", "name": "Daly Oval", "lat": -34.90088, "lng": 138.66962 },
+    {
+      "id": "Q21929435",
+      "name": "Dan and Nan Manning Playground and Walkway",
+      "lat": -34.92,
+      "lng": 138.625278
+    },
+    { "id": "Q112582163", "name": "Deep Creek National Park", "lat": -35.6328, "lng": 138.2518 },
+    { "id": "Q21970421", "name": "Denis Morrissey Park", "lat": -34.8896, "lng": 138.67296 },
+    {
+      "id": "Q21929652",
+      "name": "Desert Camp National Parks Reserve",
+      "lat": -36.48,
+      "lng": 140.3675
+    },
+    {
+      "id": "Q1234100",
+      "name": "Dhilba Guuranda-Innes National Park",
+      "lat": -35.2278,
+      "lng": 136.895
+    },
+    { "id": "Q21954201", "name": "Discovery Holiday Robe", "lat": -37.16343, "lng": 139.78347 },
+    {
+      "id": "Q21929379",
+      "name": "Don Watkinson Adventure Park",
+      "lat": -34.78751,
+      "lng": 139.5571
+    },
+    { "id": "Q21970437", "name": "Dry Creek Linear Park", "lat": -34.80965, "lng": 138.61333 },
+    { "id": "Q21970420", "name": "Dulcie Perry Park", "lat": -35.0077, "lng": 138.52701 },
+    { "id": "Q21929430", "name": "Dunn Park Oval", "lat": -35.06054, "lng": 138.8604 },
+    { "id": "Q21929346", "name": "Dunstan Adventure Playground", "lat": -34.9, "lng": 138.618889 },
+    { "id": "Q21929420", "name": "Dunstone Grove Playground", "lat": -34.91173, "lng": 138.62826 },
+    {
+      "id": "Q21929334",
+      "name": "Dutton Park Recreation Area",
+      "lat": -34.336944,
+      "lng": 138.903611
+    },
+    { "id": "Q21970395", "name": "Eagle Mountain Bike Park", "lat": -34.98153, "lng": 138.67791 },
+    { "id": "Q21970392", "name": "East Mulga Park Paddock", "lat": -30.36806, "lng": 139.75931 },
+    {
+      "id": "Q21929357",
+      "name": "Eastern Spencer Gulf Marine Park",
+      "lat": -34.340556,
+      "lng": 137.396944
+    },
+    { "id": "Q21929356", "name": "Edithburgh Caravan Park", "lat": -35.08986, "lng": 137.74731 },
+    { "id": "Q5353950", "name": "Elder Park", "lat": -34.9184, "lng": 138.598 },
+    { "id": "Q21929359", "name": "Elder Smith Oval", "lat": -34.820556, "lng": 138.611111 },
+    {
+      "id": "Q21929377",
+      "name": "Elliott Goodger Memorial Park",
+      "lat": -34.59052,
+      "lng": 138.73402
+    },
+    { "id": "Q21929391", "name": "Encounter Marine Park", "lat": -35.696111, "lng": 138.140833 },
+    {
+      "id": "Q21928701",
+      "name": "Eric Bonython National Park",
+      "lat": -35.600919,
+      "lng": 138.329711
+    },
+    { "id": "Q21929369", "name": "Eric Sutton Oval", "lat": -34.85424, "lng": 138.52026 },
+    { "id": "Q21970418", "name": "Ern Sconce Rotary Park", "lat": -34.87917, "lng": 138.5908 },
+    { "id": "Q21929404", "name": "Essex Park", "lat": -34.59324, "lng": 138.74329 },
+    { "id": "Q21929354", "name": "Eurilla Conservation Park", "lat": -34.98263, "lng": 138.71208 },
+    { "id": "Q21929424", "name": "Evergreen Oval", "lat": -35.095556, "lng": 138.791389 },
+    {
+      "id": "Q5430805",
+      "name": "Fairview Conservation Park",
+      "lat": -36.828839,
+      "lng": 140.418719
+    },
+    { "id": "Q21929394", "name": "Fairview Park Reserve", "lat": -34.796389, "lng": 138.731389 },
+    { "id": "Q21929419", "name": "Fairytale Park", "lat": -37.624444, "lng": 140.798333 },
+    { "id": "Q21929341", "name": "Far West Coast Marine Park", "lat": -31.62125, "lng": 130.85577 },
+    { "id": "Q21928731", "name": "Ferguson Park", "lat": -34.930833, "lng": 138.6725 },
+    { "id": "Q21929335", "name": "Ferryden Park Reserve", "lat": -34.865556, "lng": 138.561111 },
+    { "id": "Q1428780", "name": "Flinders Chase National Park", "lat": -35.9772, "lng": 136.673 },
+    { "id": "Q21929393", "name": "Folland Park", "lat": -34.859444, "lng": 138.605833 },
+    { "id": "Q21929350", "name": "Ford Oval", "lat": -34.920833, "lng": 138.663889 },
+    { "id": "Q21929384", "name": "Foxfield Recreation Oval", "lat": -34.88384, "lng": 138.70411 },
+    { "id": "Q21929325", "name": "Frank Smith Park", "lat": -35.032222, "lng": 138.63 },
+    {
+      "id": "Q21929374",
+      "name": "Franklin Harbor Marine Park",
+      "lat": -33.66922,
+      "lng": 137.22276
+    },
+    {
+      "id": "Q21929349",
+      "name": "Freeling Oval and Recreation Grounds",
+      "lat": -34.45644,
+      "lng": 138.8143
+    },
+    { "id": "Q16899940", "name": "Fremont Park", "lat": -34.7175, "lng": 138.676 },
+    { "id": "Q21929342", "name": "Frew Park Oval", "lat": -37.82414, "lng": 140.78394 },
+    { "id": "Q21929378", "name": "Fullarton Park", "lat": -34.95765, "lng": 138.62489 },
+    { "id": "Q21929344", "name": "Furner Conservation Park", "lat": -37.3757, "lng": 140.26566 },
+    { "id": "Q21930451", "name": "Gall Park", "lat": -36.83798, "lng": 139.85745 },
+    {
+      "id": "Q21930429",
+      "name": "Gambier Islands Group Marine Park",
+      "lat": -35.16537,
+      "lng": 136.46516
+    },
+    { "id": "Q21930409", "name": "Garnett Kelly Park", "lat": -35.470556, "lng": 138.303889 },
+    { "id": "Q1496499", "name": "Gawler Ranges National Park", "lat": -32.5539, "lng": 135.464 },
+    { "id": "Q21930431", "name": "Geegeela Conservation Park", "lat": -36.6325, "lng": 140.847778 },
+    { "id": "Q21930467", "name": "Glen Forest Animal Park", "lat": -34.6225, "lng": 135.783333 },
+    { "id": "Q21930537", "name": "Glen Roy Conservation Park", "lat": -37.18828, "lng": 140.86614 },
+    {
+      "id": "Q106249372",
+      "name": "Glenthorne National Park-Ityamaiitpinna Yarta",
+      "lat": -35.053056,
+      "lng": 138.545
+    },
+    { "id": "Q21930465", "name": "Globe Oval", "lat": -33.18741, "lng": 138.02449 },
+    { "id": "Q21930494", "name": "Glossop Recreation Park", "lat": -34.27197, "lng": 140.53384 },
+    { "id": "Q21930442", "name": "Golding Oval", "lat": -34.8325, "lng": 138.655278 },
+    { "id": "Q21930522", "name": "Goodwood Oval", "lat": -34.956111, "lng": 138.583611 },
+    { "id": "Q2386465", "name": "Gorge Wildlife Park", "lat": -34.841936, "lng": 138.814331 },
+    { "id": "Q21930492", "name": "Gower Conservation Park", "lat": -37.71337, "lng": 140.51637 },
+    { "id": "Q18165627", "name": "Granite Island Recreation Park", "lat": -35.5642, "lng": 138.63 },
+    { "id": "Q21930515", "name": "Grant Park Playground", "lat": -34.235278, "lng": 140.558889 },
+    {
+      "id": "Q139742870",
+      "name": "Great Australian Bight Australian Marine Park",
+      "lat": -32.041,
+      "lng": 130.811
+    },
+    {
+      "id": "Q21930528",
+      "name": "Great Australian Bight Marine National Park",
+      "lat": -31.914867,
+      "lng": 131.440431
+    },
+    { "id": "Q21930502", "name": "Greenhill Recreation Park", "lat": -34.94503, "lng": 138.67349 },
+    { "id": "Q21930570", "name": "Greenock Centenary Park", "lat": -34.459722, "lng": 138.929167 },
+    { "id": "Q21970390", "name": "Greenwith Sports Park", "lat": -34.77225, "lng": 138.71877 },
+    { "id": "Q21930576", "name": "Gum Park", "lat": -33.515833, "lng": 138.226389 },
+    {
+      "id": "Q21930592",
+      "name": "Gum Tree Gully Conservation Park",
+      "lat": -35.423056,
+      "lng": 138.517222
+    },
+    { "id": "Q21930513", "name": "Haines Memorial Park", "lat": -34.82178, "lng": 138.73051 },
+    { "id": "Q21930530", "name": "Hambidge National Park", "lat": -33.3857, "lng": 135.92299 },
+    { "id": "Q21930602", "name": "Hamilton Park Reserve", "lat": -34.997778, "lng": 138.535278 },
+    { "id": "Q21930425", "name": "Hamra Homes Oval", "lat": -34.722222, "lng": 138.663611 },
+    { "id": "Q21970442", "name": "Hams Park", "lat": -34.59633, "lng": 138.59962 },
+    {
+      "id": "Q21930490",
+      "name": "Hanson Scrub Conservation Park",
+      "lat": -36.564444,
+      "lng": 140.174444
+    },
+    { "id": "Q21930604", "name": "Haslam Oval", "lat": -34.918611, "lng": 138.650278 },
+    { "id": "Q21930556", "name": "Hawthorn Oval", "lat": -34.973056, "lng": 138.601389 },
+    { "id": "Q21930455", "name": "Haynes Park", "lat": -33.02946, "lng": 137.56043 },
+    { "id": "Q21930471", "name": "Haywood Park", "lat": -34.96132, "lng": 138.60104 },
+    { "id": "Q5688189", "name": "Hazelwood Park, Adelaide", "lat": -34.9362, "lng": 138.657 },
+    {
+      "id": "Q21930596",
+      "name": "Heathfield Conservation Park",
+      "lat": -35.03488,
+      "lng": 138.70363
+    },
+    { "id": "Q21930539", "name": "Heathfield Oval", "lat": -35.023056, "lng": 138.715278 },
+    { "id": "Q21930411", "name": "Heinemann Park", "lat": -34.529722, "lng": 138.948889 },
+    { "id": "Q21970430", "name": "Heini Becker Park", "lat": -34.83587, "lng": 138.53632 },
+    {
+      "id": "Q21930413",
+      "name": "Hesperilla Conservation Park",
+      "lat": -35.370556,
+      "lng": 138.625
+    },
+    { "id": "Q19874278", "name": "Heywood Park", "lat": -34.9583, "lng": 138.601 },
+    { "id": "Q21970411", "name": "Hilltop Linear Park", "lat": -35.08786, "lng": 138.86863 },
+    {
+      "id": "Q139757386",
+      "name": "Hindmarsh Valley National Park",
+      "lat": -35.456,
+      "lng": 138.576
+    },
+    {
+      "id": "Q21970396",
+      "name": "Hogwash Bend Conservation Park",
+      "lat": -34.07227,
+      "lng": 139.84831
+    },
+    { "id": "Q21930436", "name": "Homburg Park", "lat": -35.13885, "lng": 139.27963 },
+    { "id": "Q21930606", "name": "Hope Valley Oval", "lat": -34.847222, "lng": 138.700278 },
+    {
+      "id": "Q21930407",
+      "name": "Hopkins Creek Conservation Park",
+      "lat": -33.84953,
+      "lng": 139.01791
+    },
+    { "id": "Q21930545", "name": "How Park", "lat": -35.315278, "lng": 139.986944 },
+    { "id": "Q21930475", "name": "Howell Park", "lat": -34.183611, "lng": 139.985833 },
+    { "id": "Q21930517", "name": "Hutchinson Park", "lat": -34.92341, "lng": 138.62907 },
+    { "id": "Q21930608", "name": "Hyde Park Reserve", "lat": -34.799167, "lng": 138.684722 },
+    { "id": "Q21930521", "name": "I S A S Oval", "lat": -35.013056, "lng": 138.577222 },
+    { "id": "Q21930578", "name": "Ifould Park", "lat": -34.184722, "lng": 139.988611 },
+    {
+      "id": "Q426073",
+      "name": "Ikara-Flinders Ranges National Park",
+      "lat": -31.4222,
+      "lng": 138.705
+    },
+    {
+      "id": "Q21970436",
+      "name": "International Sports Shooting Park",
+      "lat": -34.66603,
+      "lng": 138.54289
+    },
+    { "id": "Q21930665", "name": "Investigator Marine Park", "lat": -33.728, "lng": 134.64687 },
+    { "id": "Q21930554", "name": "Irene Hughes Park", "lat": -35.042222, "lng": 139.355556 },
+    {
+      "id": "Q21973052",
+      "name": "Ivan Polgreen Memorial Park",
+      "lat": -34.06407,
+      "lng": 137.58388
+    },
+    { "id": "Q21930473", "name": "Jack Roberts Park", "lat": -35.332778, "lng": 140.519167 },
+    { "id": "Q48802208", "name": "Jack Watkins Reserve", "lat": -34.861361, "lng": 138.581528 },
+    { "id": "Q21930499", "name": "James Coke Park", "lat": -34.922778, "lng": 138.635278 },
+    { "id": "Q21970400", "name": "James Hammer Memorial Park", "lat": -35.00299, "lng": 138.94354 },
+    { "id": "Q21930543", "name": "Jeffery Street Park", "lat": -35.036389, "lng": 138.9125 },
+    { "id": "Q21983483", "name": "Jimmy Melrose Park", "lat": -34.98074, "lng": 138.51075 },
+    {
+      "id": "Q21930505",
+      "name": "Jip Jip Conservation Park",
+      "lat": -36.483056,
+      "lng": 140.184722
+    },
+    { "id": "Q21930594", "name": "Jip Jip National Park", "lat": -36.48299, "lng": 140.18468 },
+    { "id": "Q21930497", "name": "John Knox Oval", "lat": -37.36706, "lng": 140.83687 },
+    { "id": "Q21930469", "name": "John P Jennings Park", "lat": -34.182778, "lng": 139.977778 },
+    {
+      "id": "Q21927132",
+      "name": "Johnnie Baynes Memorial Park",
+      "lat": -34.253889,
+      "lng": 140.469167
+    },
+    { "id": "Q21930541", "name": "Johnson Oval", "lat": -32.139444, "lng": 133.670833 },
+    { "id": "Q21930558", "name": "Johnston Memorial Park", "lat": -34.98891, "lng": 138.83006 },
+    { "id": "Q21930453", "name": "Jubilee Park Showgrounds", "lat": -33.039167, "lng": 137.512778 },
+    { "id": "Q21930588", "name": "K M Bennett Oval", "lat": -33.01961, "lng": 137.53316 },
+    { "id": "Q21930459", "name": "Karinya Rotary Park", "lat": -35.0275, "lng": 138.60191 },
+    { "id": "Q21930440", "name": "Karka Oval", "lat": -35.019722, "lng": 138.663611 },
+    { "id": "Q21930507", "name": "Karte Conservation Park", "lat": -35.10607, "lng": 140.70506 },
+    { "id": "Q21930562", "name": "Karunda Park", "lat": -33.13835, "lng": 136.41234 },
+    {
+      "id": "Q927997",
+      "name": "Kati Thanda-Lake Eyre National Park",
+      "lat": -28.29954,
+      "lng": 137.60651
+    },
+    { "id": "Q21970444", "name": "Keith Stephenson Park", "lat": -35.07148, "lng": 138.85626 },
+    {
+      "id": "Q21930449",
+      "name": "Kellidie Bay National Park",
+      "lat": -34.608889,
+      "lng": 135.532222
+    },
+    {
+      "id": "Q23209576",
+      "name": "Kensington Gardens Reserve",
+      "lat": -34.921667,
+      "lng": 138.663611
+    },
+    { "id": "Q21930547", "name": "Kensington Pioneer Park", "lat": -34.925278, "lng": 138.646389 },
+    { "id": "Q21970440", "name": "Kidman Park Playing Fields", "lat": -34.91583, "lng": 138.52979 },
+    {
+      "id": "Q21930564",
+      "name": "Kingston Park Recreation Park",
+      "lat": -35.03755,
+      "lng": 138.51723
+    },
+    { "id": "Q21930610", "name": "Kingswood Oval", "lat": -34.968611, "lng": 138.61 },
+    { "id": "Q21930614", "name": "Kirton Oval", "lat": -34.732778, "lng": 135.87 },
+    { "id": "Q21930519", "name": "Kirton Point Caravan Park", "lat": -34.72746, "lng": 135.88434 },
+    { "id": "Q21930417", "name": "Knobbies Park", "lat": -32.733056, "lng": 137.150278 },
+    {
+      "id": "Q21930482",
+      "name": "Koolgera Conservation Park",
+      "lat": -32.217778,
+      "lng": 134.708333
+    },
+    { "id": "Q21930565", "name": "Koster Park", "lat": -34.911111, "lng": 138.645556 },
+    { "id": "Q21930438", "name": "Kuchel Park Reserve", "lat": -35.138889, "lng": 139.284444 },
+    { "id": "Q21970398", "name": "Kungari Conservation Park", "lat": -37.02121, "lng": 139.98631 },
+    {
+      "id": "Q21930660",
+      "name": "Kurdlibidni Conservation Park",
+      "lat": -34.79364,
+      "lng": 135.72382
+    },
+    { "id": "Q21930600", "name": "Kurralta Park Reserve", "lat": -34.950556, "lng": 138.560278 },
+    { "id": "Q21930419", "name": "Kyeema Conservation Park", "lat": -35.26634, "lng": 138.6824 },
+    { "id": "Q21932640", "name": "L. J. Lewis Reserve", "lat": -34.84607, "lng": 138.62331 },
+    { "id": "Q21932616", "name": "Lake Eyre National Park", "lat": -28.37022, "lng": 137.38091 },
+    {
+      "id": "Q21932628",
+      "name": "Lake Frome Conservation Park",
+      "lat": -37.570556,
+      "lng": 140.179444
+    },
+    {
+      "id": "Q112582824",
+      "name": "Lake Frome National Park",
+      "lat": -30.731069,
+      "lng": 139.810961
+    },
+    { "id": "Q570270", "name": "Lake Gairdner National Park", "lat": -31.6972, "lng": 135.854 },
+    {
+      "id": "Q21970417",
+      "name": "Lake Gilles Conservation Park",
+      "lat": -32.93525,
+      "lng": 136.75008
+    },
+    {
+      "id": "Q21932613",
+      "name": "Lake Gilles National Park",
+      "lat": -33.014444,
+      "lng": 136.726389
+    },
+    {
+      "id": "Q21932637",
+      "name": "Lake Hawdon South Conservation Park",
+      "lat": -37.21775,
+      "lng": 139.94704
+    },
+    {
+      "id": "Q21932621",
+      "name": "Lake Roberts Recreation Park",
+      "lat": -35.327222,
+      "lng": 140.520278
+    },
+    {
+      "id": "Q21932601",
+      "name": "Lake St Clair Conservation Park",
+      "lat": -37.29713,
+      "lng": 139.90711
+    },
+    {
+      "id": "Q1631337",
+      "name": "Lake Torrens National Park",
+      "lat": -31.044444,
+      "lng": 137.859722
+    },
+    {
+      "id": "Q21932587",
+      "name": "Lands End Conservation Park",
+      "lat": -35.92909,
+      "lng": 135.74707
+    },
+    { "id": "Q6486344", "name": "Langman Reserve", "lat": -34.938, "lng": 138.643 },
+    { "id": "Q21932584", "name": "Lawrie Park", "lat": -33.130278, "lng": 138.109444 },
+    { "id": "Q21932617", "name": "Le Messurier Oval", "lat": -35.12182, "lng": 139.26448 },
+    { "id": "Q21932562", "name": "Lenswood Memorial Park", "lat": -34.9325, "lng": 138.823611 },
+    { "id": "Q21932598", "name": "Lenswood Recreation Park", "lat": -34.9175, "lng": 138.826111 },
+    { "id": "Q21932542", "name": "Leonard Oval", "lat": -33.20356, "lng": 138.00581 },
+    {
+      "id": "Q21932578",
+      "name": "Lesueur Conservation Park",
+      "lat": -35.862778,
+      "lng": 138.063056
+    },
+    { "id": "Q21932530", "name": "Lewiston Park", "lat": -34.583611, "lng": 138.576944 },
+    { "id": "Q920056", "name": "Lincoln National Park", "lat": -34.8678, "lng": 135.87 },
+    { "id": "Q21932641", "name": "Lindblom Park", "lat": -34.82778, "lng": 138.62302 },
+    {
+      "id": "Q21932586",
+      "name": "Lindsay Evans Memorial Recreation Park",
+      "lat": -34.56875,
+      "lng": 139.12669
+    },
+    { "id": "Q21932673", "name": "Linear Park-Gilberton", "lat": -34.90496, "lng": 138.61505 },
+    { "id": "Q21932650", "name": "Lions Club Park", "lat": -35.25665, "lng": 138.89078 },
+    { "id": "Q21932594", "name": "Lions Park Picnic Area", "lat": -38.056389, "lng": 140.685556 },
+    { "id": "Q21932599", "name": "Lions Pioneer Park", "lat": -36.828333, "lng": 139.850833 },
+    { "id": "Q21932675", "name": "Lions River Front Park", "lat": -34.175278, "lng": 139.983333 },
+    {
+      "id": "Q21932593",
+      "name": "Lochiel Park Social Welfare Reserve",
+      "lat": -34.876667,
+      "lng": 138.651111
+    },
+    { "id": "Q21932532", "name": "Loftia Recreation Park", "lat": -35.026111, "lng": 138.699722 },
+    { "id": "Q21932592", "name": "Long Gully Oval", "lat": -35.018333, "lng": 138.658333 },
+    {
+      "id": "Q21932545",
+      "name": "Long Island Recreation Park",
+      "lat": -35.13013,
+      "lng": 139.29997
+    },
+    { "id": "Q21932605", "name": "Loveday Park", "lat": -34.244444, "lng": 140.401389 },
+    { "id": "Q21932551", "name": "Lowan Conservation Park", "lat": -34.97785, "lng": 139.68875 },
+    { "id": "Q21932543", "name": "Lower Broughton Oval", "lat": -33.290556, "lng": 137.961389 },
+    {
+      "id": "Q21932603",
+      "name": "Lower Glenelg River Conservation Park",
+      "lat": -38.00663,
+      "lng": 140.96339
+    },
+    {
+      "id": "Q21932549",
+      "name": "Lower South East Marine Park",
+      "lat": -37.893026,
+      "lng": 140.334974
+    },
+    {
+      "id": "Q106961227",
+      "name": "Lower Yorke Peninsula Marine Park",
+      "lat": -35.02,
+      "lng": 137.826
+    },
+    { "id": "Q19875325", "name": "Luna Park Glenelg", "lat": -34.9792, "lng": 138.511 },
+    { "id": "Q21932585", "name": "Luther Park", "lat": -34.464722, "lng": 138.980278 },
+    { "id": "Q21932642", "name": "Madison Park", "lat": -34.77773, "lng": 138.66269 },
+    { "id": "Q14935735", "name": "Magic Mountain, Glenelg", "lat": -34.9792, "lng": 138.511 },
+    { "id": "Q21932588", "name": "Magill Park", "lat": -33.033611, "lng": 137.554444 },
+    {
+      "id": "Q19589768",
+      "name": "Malkumba-Coongie Lakes National Park",
+      "lat": -27.2613,
+      "lng": 140.157039
+    },
+    { "id": "Q21932651", "name": "Mallee Park", "lat": -34.73535, "lng": 135.86304 },
+    { "id": "Q21932558", "name": "Malseed Park Oval", "lat": -37.8275, "lng": 140.751944 },
+    { "id": "Q21932575", "name": "Mambray Creek National Park", "lat": -32.825, "lng": 138.063889 },
+    { "id": "Q21983926", "name": "Mankivell Park", "lat": -34.068056, "lng": 137.596389 },
+    { "id": "Q21932567", "name": "Manor Farm Oval", "lat": -34.79144, "lng": 138.65466 },
+    {
+      "id": "Q21932568",
+      "name": "Margaret Medhurst Memorial Park",
+      "lat": -37.627222,
+      "lng": 140.797222
+    },
+    {
+      "id": "Q21932556",
+      "name": "Mark Oliphant Conservation Park",
+      "lat": -35.032222,
+      "lng": 138.703056
+    },
+    {
+      "id": "Q21932618",
+      "name": "Marne Valley Conservation Park",
+      "lat": -34.645,
+      "lng": 139.370833
+    },
+    {
+      "id": "Q21932612",
+      "name": "Martin Washpool Conservation Park",
+      "lat": -36.148889,
+      "lng": 139.702222
+    },
+    { "id": "Q21932668", "name": "Mary Seymour National Park", "lat": -37.16899, "lng": 140.6244 },
+    { "id": "Q21932590", "name": "McCallum Oval", "lat": -31.201944, "lng": 136.833611 },
+    { "id": "Q21983927", "name": "McCorquindale Park", "lat": -37.373333, "lng": 140.841667 },
+    { "id": "Q21932622", "name": "McDonald Park Oval", "lat": -37.829444, "lng": 140.794444 },
+    { "id": "Q21932536", "name": "McGilp Recreation Park", "lat": -34.712222, "lng": 138.765556 },
+    { "id": "Q21932638", "name": "McLaughlin Park", "lat": -37.595556, "lng": 140.339167 },
+    { "id": "Q21932559", "name": "McLaughlin Park Oval", "lat": -37.595556, "lng": 140.341111 },
+    { "id": "Q21932596", "name": "McNamara Park", "lat": -35.115556, "lng": 139.264167 },
+    {
+      "id": "Q21932554",
+      "name": "Melville Soldiers Memorial Park",
+      "lat": -35.01918,
+      "lng": 137.61177
+    },
+    {
+      "id": "Q21932582",
+      "name": "Messent Conservation Park",
+      "lat": -36.062778,
+      "lng": 139.773333
+    },
+    { "id": "Q21932636", "name": "Messent National Park", "lat": -36.06275, "lng": 139.77335 },
+    { "id": "Q21932600", "name": "Meyer Oval", "lat": -34.812778, "lng": 138.503889 },
+    { "id": "Q21932553", "name": "Mick Murphy Park", "lat": -35.03638, "lng": 138.91251 },
+    { "id": "Q21970423", "name": "Miels Park", "lat": -35.04793, "lng": 138.86552 },
+    { "id": "Q6845758", "name": "Mikawomma Reserve", "lat": -34.8646, "lng": 138.556 },
+    { "id": "Q21932674", "name": "Minalton Wildlife Park", "lat": -34.76625, "lng": 137.59895 },
+    { "id": "Q21932580", "name": "Minkarra Park", "lat": -35.0575, "lng": 138.579444 },
+    { "id": "Q21932552", "name": "Mitchell Park Reserve", "lat": -35.00195, "lng": 138.56438 },
+    {
+      "id": "Q21970432",
+      "name": "Moculta Distrist Recreation Park",
+      "lat": -34.47233,
+      "lng": 139.11818
+    },
+    { "id": "Q21932589", "name": "Mokota Conservation Park", "lat": -33.55782, "lng": 138.95451 },
+    { "id": "Q21932597", "name": "Monarto Conservation Park", "lat": -35.16971, "lng": 139.10957 },
+    { "id": "Q6898210", "name": "Monarto Zoo", "lat": -35.099444, "lng": 139.152778 },
+    { "id": "Q21932639", "name": "Moorook Oval", "lat": -34.277778, "lng": 140.364167 },
+    { "id": "Q21932540", "name": "Moorundie Wildlife Park", "lat": -34.44738, "lng": 139.5099 },
+    { "id": "Q21932624", "name": "Morgan Conservation Park", "lat": -34.033333, "lng": 139.687222 },
+    { "id": "Q21961268", "name": "Morialta Park", "lat": -34.897222, "lng": 138.6925 },
+    { "id": "Q21932611", "name": "Mortlock Park Reserve", "lat": -34.98838, "lng": 138.59567 },
+    { "id": "Q21932644", "name": "Mosoor Park", "lat": -29.645556, "lng": 138.063056 },
+    {
+      "id": "Q21932577",
+      "name": "Mother Mary McKillop Memorial Park",
+      "lat": -37.3775,
+      "lng": 140.835556
+    },
+    { "id": "Q21970449", "name": "Mount Barker Tourist Park", "lat": -35.06196, "lng": 138.86108 },
+    {
+      "id": "Q21932626",
+      "name": "Mount Billy Conservation Park",
+      "lat": -35.456667,
+      "lng": 138.601111
+    },
+    {
+      "id": "Q21932630",
+      "name": "Mount Boothby Conservation Park",
+      "lat": -35.83911,
+      "lng": 139.77596
+    },
+    {
+      "id": "Q21932544",
+      "name": "Mount Boothby National Park",
+      "lat": -35.83911,
+      "lng": 139.77596
+    },
+    {
+      "id": "Q21932574",
+      "name": "Mount George Conservation Park",
+      "lat": -34.996389,
+      "lng": 138.7525
+    },
+    {
+      "id": "Q6921866",
+      "name": "Mount Lofty Botanic Garden",
+      "lat": -34.989116,
+      "lng": 138.713765
+    },
+    {
+      "id": "Q21932629",
+      "name": "Mount Monster Conservation Park",
+      "lat": -36.202222,
+      "lng": 140.323333
+    },
+    {
+      "id": "Q1141385",
+      "name": "Mount Remarkable National Park",
+      "lat": -32.781389,
+      "lng": 138.062778
+    },
+    {
+      "id": "Q21932531",
+      "name": "Mount Shaugh Conservation Park",
+      "lat": -35.82971,
+      "lng": 140.92825
+    },
+    {
+      "id": "Q21932634",
+      "name": "Mowantjie Willauwar Conservation Park",
+      "lat": -35.309167,
+      "lng": 139.419722
+    },
+    { "id": "Q21932604", "name": "Mulbura Park", "lat": -34.72249, "lng": 137.83527 },
+    {
+      "id": "Q21932669",
+      "name": "Mundoora Conservation Park",
+      "lat": -33.492222,
+      "lng": 138.076111
+    },
+    {
+      "id": "Q112582248",
+      "name": "Munga-Thirri—Simpson Desert National Park",
+      "lat": -26.246149,
+      "lng": 137.872968
+    },
+    { "id": "Q139742899", "name": "Murat Australian Marine Park", "lat": -32.517, "lng": 132.65 },
+    { "id": "Q139742890", "name": "Murray Australian Marine Park", "lat": -36.422, "lng": 138.361 },
+    { "id": "Q21932566", "name": "Murray Park", "lat": -34.914167, "lng": 139.296111 },
+    {
+      "id": "Q21932548",
+      "name": "Murray Park Flora and Fauna Reserve",
+      "lat": -35.120556,
+      "lng": 139.256111
+    },
+    { "id": "Q1953824", "name": "Murray River National Park", "lat": -34.3869, "lng": 140.54 },
+    {
+      "id": "Q21932610",
+      "name": "Mutton Cove Conservation Park",
+      "lat": -34.773,
+      "lng": 138.51082
+    },
+    { "id": "Q21932647", "name": "Myer Oval", "lat": -27.266944, "lng": 139.967778 },
+    { "id": "Q21971498", "name": "Mylor Parklands", "lat": -35.04034, "lng": 138.75743 },
+    { "id": "Q69294377", "name": "Nangawooka Flora Park", "lat": -35.518175, "lng": 138.634294 },
+    {
+      "id": "Q1135796",
+      "name": "Naracoorte Caves National Park",
+      "lat": -37.036111,
+      "lng": 140.796667
+    },
+    {
+      "id": "Q21935395",
+      "name": "Nene Valley Memorial Park",
+      "lat": -37.988611,
+      "lng": 140.519444
+    },
+    { "id": "Q21934694", "name": "Nepean Bay Caravan Park", "lat": -35.67121, "lng": 137.61249 },
+    {
+      "id": "Q21935381",
+      "name": "Neptune Islands Group Marine Park",
+      "lat": -35.258056,
+      "lng": 136.077778
+    },
+    { "id": "Q21934736", "name": "Newland Park", "lat": -33.964722, "lng": 137.695278 },
+    {
+      "id": "Q21935389",
+      "name": "Ngaut Ngaut Conservation Park",
+      "lat": -34.688333,
+      "lng": 139.6075
+    },
+    {
+      "id": "Q21935332",
+      "name": "Ngautngaut Conservation Park",
+      "lat": -34.688333,
+      "lng": 139.6075
+    },
+    {
+      "id": "Q112581488",
+      "name": "Nilpena Ediacara National Park",
+      "lat": -30.8057,
+      "lng": 138.1348
+    },
+    {
+      "id": "Q21935339",
+      "name": "Nixon-Skinner Conservation Park",
+      "lat": -35.41141,
+      "lng": 138.43339
+    },
+    { "id": "Q21935348", "name": "Norton Park", "lat": -33.020278, "lng": 137.521944 },
+    {
+      "id": "Q21935304",
+      "name": "Norwood Pioneers Memorial Park",
+      "lat": -34.925278,
+      "lng": 138.646389
+    },
+    { "id": "Q181891", "name": "Nullarbor National Park", "lat": -31.398611, "lng": 130.137778 },
+    { "id": "Q21935327", "name": "Nuriootpa Centennial Park", "lat": -34.46858, "lng": 139.00339 },
+    {
+      "id": "Q21972027",
+      "name": "Nuyts Archepelago Conservation Park",
+      "lat": -32.27721,
+      "lng": 133.58952
+    },
+    {
+      "id": "Q2005778",
+      "name": "Nuyts Archipelago Conservation Park",
+      "lat": -32.277222,
+      "lng": 133.589444
+    },
+    {
+      "id": "Q21934703",
+      "name": "Nuyts Archipelago Marine Park",
+      "lat": -32.372778,
+      "lng": 133.513889
+    },
+    { "id": "Q21935370", "name": "O'Bahn Linear Park North", "lat": -34.838333, "lng": 138.681111 },
+    { "id": "Q21935367", "name": "O'Bahn Linear Park South", "lat": -34.85685, "lng": 138.67438 },
+    { "id": "Q21935333", "name": "Ohlmeyer Park", "lat": -33.858056, "lng": 138.605 },
+    { "id": "Q21970402", "name": "Olympic Park Sports Field", "lat": -37.83283, "lng": 140.77456 },
+    {
+      "id": "Q21935397",
+      "name": "Onkaparinga Gorge Conservation Park",
+      "lat": -35.15802,
+      "lng": 138.56062
+    },
+    {
+      "id": "Q1140071",
+      "name": "Onkaparinga River National Park",
+      "lat": -35.1606,
+      "lng": 138.554
+    },
+    {
+      "id": "Q16896174",
+      "name": "Onkaparinga River Recreation Park",
+      "lat": -35.1644,
+      "lng": 138.491
+    },
+    { "id": "Q21935324", "name": "Oraparinna National Park", "lat": -31.33174, "lng": 138.64795 },
+    { "id": "Q21934695", "name": "Otto Park", "lat": -34.91, "lng": 138.624444 },
+    { "id": "Q21935347", "name": "Oval Park", "lat": -35.556667, "lng": 138.613889 },
+    {
+      "id": "Q21935366",
+      "name": "Padthaway Conservation Park",
+      "lat": -36.590556,
+      "lng": 140.526944
+    },
+    { "id": "Q21935326", "name": "Pandappa Conservation Park", "lat": -33.17614, "lng": 139.13274 },
+    { "id": "Q21935363", "name": "Panther Park", "lat": -35.0075, "lng": 138.579444 },
+    { "id": "Q21934718", "name": "Para Hills Oval", "lat": -34.80915, "lng": 138.66309 },
+    { "id": "Q21935377", "name": "Para Wirra National Park", "lat": -34.68349, "lng": 138.82806 },
+    { "id": "Q21934710", "name": "Parafield Gardens Oval", "lat": -34.793333, "lng": 138.62 },
+    { "id": "Q21970404", "name": "Park Bore Paddock", "lat": -29.92173, "lng": 134.87288 },
+    { "id": "Q21935349", "name": "Park One", "lat": -34.913333, "lng": 138.588611 },
+    { "id": "Q21935387", "name": "Park Terrace Reserve", "lat": -35.044444, "lng": 138.521944 },
+    { "id": "Q21935361", "name": "Park Twelve", "lat": -34.91757, "lng": 138.6029 },
+    { "id": "Q21934711", "name": "Park Twenty-Four", "lat": -34.92715, "lng": 138.58389 },
+    { "id": "Q21935314", "name": "Park Twenty-Three", "lat": -34.93547, "lng": 138.58485 },
+    { "id": "Q21970447", "name": "Parkers Paddock", "lat": -33.14404, "lng": 140.15835 },
+    { "id": "Q21970413", "name": "Parkes Paddock", "lat": -27.36806, "lng": 134.45526 },
+    { "id": "Q21934717", "name": "Parkinson Oval", "lat": -34.92212, "lng": 138.66423 },
+    { "id": "Q21934709", "name": "Parkinson Reserve", "lat": -34.975278, "lng": 138.521667 },
+    { "id": "Q21934699", "name": "Parndana National Park", "lat": -35.756389, "lng": 137.326944 },
+    { "id": "Q21935385", "name": "Payne Car Park", "lat": -34.848056, "lng": 138.708889 },
+    { "id": "Q21935343", "name": "Payneham Oval", "lat": -34.899444, "lng": 138.643889 },
+    { "id": "Q21934714", "name": "Pedare Park", "lat": -34.93657, "lng": 138.84868 },
+    { "id": "Q21935372", "name": "Pedare Village Park", "lat": -34.798333, "lng": 138.689444 },
+    { "id": "Q21935330", "name": "Pedlar Reserve Oval", "lat": -34.880556, "lng": 138.506667 },
+    { "id": "Q21935396", "name": "Penfold Park", "lat": -34.917778, "lng": 138.6825 },
+    { "id": "Q21934706", "name": "Penneshaw Caravan Park", "lat": -35.719444, "lng": 137.94 },
+    { "id": "Q21934712", "name": "Pennington Oval", "lat": -34.857778, "lng": 138.530833 },
+    { "id": "Q21935360", "name": "Penola Caravan Park", "lat": -37.38593, "lng": 140.83272 },
+    { "id": "Q21935309", "name": "Penola Conservation Park", "lat": -37.35563, "lng": 140.69769 },
+    {
+      "id": "Q21935337",
+      "name": "Piccaninnie Ponds National Park",
+      "lat": -38.050278,
+      "lng": 140.938611
+    },
+    {
+      "id": "Q21934698",
+      "name": "Pike River Conservation Park",
+      "lat": -34.20155,
+      "lng": 140.79385
+    },
+    { "id": "Q21934715", "name": "Pine Park", "lat": -34.821667, "lng": 138.733333 },
+    { "id": "Q21935351", "name": "Pine-Camp Park", "lat": -35.256667, "lng": 139.460278 },
+    { "id": "Q21935378", "name": "Pirie East Cricket Oval", "lat": -33.26337, "lng": 138.02988 },
+    { "id": "Q21935393", "name": "Pirie East Tennis Courts", "lat": -33.2625, "lng": 138.029444 },
+    { "id": "Q21935329", "name": "Pitman Park", "lat": -34.758611, "lng": 138.646111 },
+    { "id": "Q21935318", "name": "Plenty Park", "lat": -33.2053, "lng": 137.99251 },
+    {
+      "id": "Q21935328",
+      "name": "Plympton Park Memorial Recreation Ground",
+      "lat": -34.97291,
+      "lng": 138.54785
+    },
+    { "id": "Q18389106", "name": "Point Bell Conservation Park", "lat": -32.1928, "lng": 133.14 },
+    {
+      "id": "Q21934734",
+      "name": "Pooginook Conservation Park",
+      "lat": -34.096667,
+      "lng": 140.105278
+    },
+    { "id": "Q21935323", "name": "Poole Oval", "lat": -34.730556, "lng": 135.864167 },
+    {
+      "id": "Q21935303",
+      "name": "Poonthie Ruwe Conservation Park",
+      "lat": -35.294167,
+      "lng": 139.483333
+    },
+    {
+      "id": "Q21935388",
+      "name": "Poonthie Ruwi-Riverdale Conservation Park",
+      "lat": -35.294167,
+      "lng": 139.483333
+    },
+    { "id": "Q21935373", "name": "Pooraka Unity Park", "lat": -34.83628, "lng": 138.61633 },
+    {
+      "id": "Q21934689",
+      "name": "Port Broughton Caravan Park",
+      "lat": -33.606667,
+      "lng": 137.928333
+    },
+    { "id": "Q21934716", "name": "Port Elliot Oval", "lat": -35.52991, "lng": 138.67548 },
+    { "id": "Q21935306", "name": "Port Oval", "lat": -33.1925, "lng": 138.009167 },
+    {
+      "id": "Q21935331",
+      "name": "Porter Scrub Conservation Park",
+      "lat": -34.865,
+      "lng": 138.907778
+    },
+    { "id": "Q21934735", "name": "Prince's Park", "lat": -33.188889, "lng": 138.018056 },
+    {
+      "id": "Q21935350",
+      "name": "Princess Elizabeth Playground",
+      "lat": -34.936667,
+      "lng": 138.591667
+    },
+    {
+      "id": "Q21935319",
+      "name": "Princess Margaret Playground",
+      "lat": -34.9627,
+      "lng": 138.57828
+    },
+    { "id": "Q21934720", "name": "Puckridge Park", "lat": -34.7093, "lng": 135.85143 },
+    {
+      "id": "Q21934707",
+      "name": "Queen Elizabeth Caravan Park",
+      "lat": -37.845278,
+      "lng": 140.768333
+    },
+    {
+      "id": "Q21935383",
+      "name": "Queen Victoria Jubilee Park",
+      "lat": -34.673056,
+      "lng": 138.9025
+    },
+    {
+      "id": "Q21983911",
+      "name": "Ramco Point Conservation Park",
+      "lat": -34.15299,
+      "lng": 139.91306
+    },
+    { "id": "Q21935336", "name": "Ramsay Park", "lat": -34.703611, "lng": 138.667778 },
+    {
+      "id": "Q21934693",
+      "name": "Ramsay Park Fauna Reserve",
+      "lat": -34.761111,
+      "lng": 137.762222
+    },
+    { "id": "Q21926900", "name": "Raywood, Aldgate", "lat": -34.995556, "lng": 138.758889 },
+    { "id": "Q21934719", "name": "Reade Park Reserve", "lat": -34.98017, "lng": 138.59724 },
+    { "id": "Q21935365", "name": "Red Banks Conservation Park", "lat": -33.6756, "lng": 139.09203 },
+    { "id": "Q21935359", "name": "Reddecliffe Pioneer Park", "lat": -33.990833, "lng": 138.878333 },
+    {
+      "id": "Q21935341",
+      "name": "Reedy Creek Conservation Park",
+      "lat": -37.29914,
+      "lng": 140.22935
+    },
+    { "id": "Q21935394", "name": "Rehder Centenary Park", "lat": -34.13854, "lng": 138.87898 },
+    { "id": "Q21935305", "name": "Reidy Park", "lat": -37.824444, "lng": 140.773333 },
+    { "id": "Q21935362", "name": "Richardson Oval", "lat": -34.803056, "lng": 138.686111 },
+    { "id": "Q21935340", "name": "Ridley Conservation Park", "lat": -34.644167, "lng": 139.570833 },
+    {
+      "id": "Q21934738",
+      "name": "River Torrens Linear Park Section Number Eight",
+      "lat": -34.891944,
+      "lng": 138.627778
+    },
+    {
+      "id": "Q21935352",
+      "name": "River Torrens Linear Park Section Number Four",
+      "lat": -34.900278,
+      "lng": 138.614722
+    },
+    {
+      "id": "Q21935356",
+      "name": "River Torrens Linear Park Section Number Nine",
+      "lat": -34.888611,
+      "lng": 138.633611
+    },
+    {
+      "id": "Q21935399",
+      "name": "River Torrens Linear Park Section Number Seven",
+      "lat": -34.893889,
+      "lng": 138.622778
+    },
+    {
+      "id": "Q21935390",
+      "name": "River Torrens Linear Park Section Number Six",
+      "lat": -34.896944,
+      "lng": 138.618611
+    },
+    {
+      "id": "Q21934737",
+      "name": "River Torrens Linear Park Section Number Two",
+      "lat": -34.908333,
+      "lng": 138.614444
+    },
+    { "id": "Q21935380", "name": "Robbies Park", "lat": -34.711667, "lng": 135.848611 },
+    {
+      "id": "Q18390896",
+      "name": "Rocky Island (South) Conservation Park",
+      "lat": -34.810278,
+      "lng": 134.716944
+    },
+    { "id": "Q21934713", "name": "Rowe Park", "lat": -34.828056, "lng": 138.639722 },
+    { "id": "Q69388626", "name": "Roxby Downs Arboretum", "lat": -30.565099, "lng": 136.898185 },
+    { "id": "Q21935371", "name": "Roy Marten Park", "lat": -34.80859, "lng": 138.49458 },
+    { "id": "Q7379786", "name": "Rundle Park", "lat": -34.921, "lng": 138.613 },
+    { "id": "Q7385199", "name": "Rymill Park", "lat": -34.9236, "lng": 138.614 },
+    { "id": "Q21937604", "name": "S A S M E E Park", "lat": -34.95588, "lng": 138.58687 },
+    { "id": "Q21937558", "name": "Salisbury North Oval", "lat": -34.75208, "lng": 138.63258 },
+    {
+      "id": "Q21937538",
+      "name": "Salisbury Recreation Park Oval",
+      "lat": -34.768056,
+      "lng": 138.643056
+    },
+    {
+      "id": "Q21937590",
+      "name": "Sandy Creek Conservation Park",
+      "lat": -34.608333,
+      "lng": 138.8575
+    },
+    {
+      "id": "Q21935833",
+      "name": "Scorpion Well National Park",
+      "lat": -35.464167,
+      "lng": 140.887222
+    },
+    { "id": "Q21937518", "name": "Scott Conservation Park", "lat": -35.413889, "lng": 138.736667 },
+    { "id": "Q21937609", "name": "Scott Creek Oval", "lat": -35.04983, "lng": 138.70927 },
+    { "id": "Q21937600", "name": "Sedunary Park", "lat": -34.250278, "lng": 140.459722 },
+    { "id": "Q21973057", "name": "Semaphore Greek Festival", "lat": -34.83903, "lng": 138.47953 },
+    {
+      "id": "Q21937578",
+      "name": "Shannon Landing Conservation Park",
+      "lat": -34.625833,
+      "lng": 139.651944
+    },
+    {
+      "id": "Q19878909",
+      "name": "Shepherds Hill Recreation Park",
+      "lat": -35.0156,
+      "lng": 138.587
+    },
+    { "id": "Q21971497", "name": "Sherry Park", "lat": -35.04395, "lng": 138.76167 },
+    { "id": "Q21937608", "name": "Sherwood Park Reserve", "lat": -34.813333, "lng": 138.7125 },
+    {
+      "id": "Q21937616",
+      "name": "Sir Joseph Banks Group Marine Park",
+      "lat": -34.541111,
+      "lng": 136.310278
+    },
+    {
+      "id": "Q21935816",
+      "name": "Sleaford Mere National Park",
+      "lat": -34.83879,
+      "lng": 135.74074
+    },
+    { "id": "Q21935819", "name": "Soldier Memorial Park", "lat": -36.309722, "lng": 140.776111 },
+    { "id": "Q21937565", "name": "Soliders Memorial Park", "lat": -37.559167, "lng": 140.698889 },
+    { "id": "Q21937601", "name": "Souter Park", "lat": -34.950556, "lng": 138.593611 },
+    { "id": "Q21937524", "name": "South Park Holme Reserve", "lat": -34.99335, "lng": 138.55383 },
+    {
+      "id": "Q56276231",
+      "name": "Southern Kangaroo Island Marine Park",
+      "lat": -36.142795,
+      "lng": 137.502661
+    },
+    {
+      "id": "Q21937619",
+      "name": "Southern Spencer Gulf Marine Park",
+      "lat": -35.217222,
+      "lng": 136.817222
+    },
+    { "id": "Q21937525", "name": "Spruance Oval", "lat": -34.73, "lng": 138.676667 },
+    {
+      "id": "Q21935827",
+      "name": "Square Waterhole Conservation Park",
+      "lat": -35.370556,
+      "lng": 138.625
+    },
+    { "id": "Q21937606", "name": "St Clair Oval", "lat": -34.875278, "lng": 138.537778 },
+    { "id": "Q21937607", "name": "St Helens Park", "lat": -34.892778, "lng": 138.595556 },
+    { "id": "Q21937605", "name": "St James Park", "lat": -34.993056, "lng": 138.600833 },
+    { "id": "Q21937574", "name": "St Marys Park", "lat": -35.0075, "lng": 138.579444 },
+    { "id": "Q21937517", "name": "St Peters River Park", "lat": -34.905, "lng": 138.616389 },
+    { "id": "Q21937497", "name": "Stacey Park", "lat": -33.056667, "lng": 138.425833 },
+    { "id": "Q21937506", "name": "Stamford Oval", "lat": -34.733889, "lng": 135.813889 },
+    { "id": "Q21935813", "name": "Stanley Park Cricket Pitch", "lat": -33.315833, "lng": 138.0325 },
+    { "id": "Q21970445", "name": "State Shooting Park", "lat": -34.66639, "lng": 138.53828 },
+    { "id": "Q21937545", "name": "Stipiturus Conservation Park", "lat": -35.369444, "lng": 138.55 },
+    { "id": "Q21937523", "name": "Stirling Oval", "lat": -35.007778, "lng": 138.718333 },
+    { "id": "Q65042130", "name": "Stockade Botanic Park", "lat": -34.8415, "lng": 138.6286 },
+    { "id": "Q21970433", "name": "Stockwell Recreation Park", "lat": -34.43248, "lng": 139.04984 },
+    { "id": "Q21937614", "name": "Stonewall Park", "lat": -35.331667, "lng": 139.383333 },
+    {
+      "id": "Q21971691",
+      "name": "Streaky Bay Foreshore Tourist Park",
+      "lat": -32.79729,
+      "lng": 134.19828
+    },
+    { "id": "Q21937514", "name": "Stuart Oval", "lat": -36.948333, "lng": 140.727222 },
+    { "id": "Q7629144", "name": "Sturt Gorge Recreation Park", "lat": -35.0378, "lng": 138.585 },
+    { "id": "Q21937507", "name": "Sutherland Park", "lat": -34.990556, "lng": 138.519722 },
+    {
+      "id": "Q21937583",
+      "name": "Swan Reach Conservation Park",
+      "lat": -34.601389,
+      "lng": 139.498056
+    },
+    { "id": "Q21970394", "name": "Swandel Park", "lat": -33.03995, "lng": 137.56414 },
+    {
+      "id": "Q21935831",
+      "name": "Talisker Regional Recreation Park",
+      "lat": -35.623333,
+      "lng": 138.156111
+    },
+    { "id": "Q21970434", "name": "Talunga Park", "lat": -34.77669, "lng": 139.04241 },
+    { "id": "Q21970431", "name": "Tangari Park", "lat": -35.0939, "lng": 138.57102 },
+    { "id": "Q21937572", "name": "Tanunda Recreation Park", "lat": -34.521389, "lng": 138.956944 },
+    { "id": "Q21937579", "name": "Tarpeena Caravan Park", "lat": -37.625, "lng": 140.7975 },
+    { "id": "Q21935824", "name": "Tatiara Memorial Park", "lat": -36.307778, "lng": 140.766667 },
+    {
+      "id": "Q69481419",
+      "name": "Terowie Arid Lands Botanic Garden",
+      "lat": -33.150745,
+      "lng": 138.9196
+    },
+    { "id": "Q7715977", "name": "The Beachouse", "lat": -34.9793, "lng": 138.511 },
+    {
+      "id": "Q21935835",
+      "name": "The Elbow Recreation Park",
+      "lat": -34.968333,
+      "lng": 138.666667
+    },
+    { "id": "Q21937587", "name": "The Knoll Conservation Park", "lat": -35.00743, "lng": 138.6994 },
+    { "id": "Q21937595", "name": "Thidna Conservation Park", "lat": -34.99193, "lng": 136.99521 },
+    { "id": "Q21937515", "name": "Thorndon Park Reserve", "lat": -34.874444, "lng": 138.688333 },
+    {
+      "id": "Q21937563",
+      "name": "Thorny Passage Marine Park",
+      "lat": -34.736111,
+      "lng": 135.295556
+    },
+    { "id": "Q21937552", "name": "Tilley Recreation Park", "lat": -34.793333, "lng": 138.715 },
+    {
+      "id": "Q21937499",
+      "name": "Tilley Swamp Conservation Park",
+      "lat": -36.385833,
+      "lng": 139.839722
+    },
+    { "id": "Q21937611", "name": "Tonkin Oval", "lat": -32.138056, "lng": 133.671944 },
+    { "id": "Q3364393", "name": "Torrens Linear Park", "lat": -34.865556, "lng": 138.686944 },
+    { "id": "Q21935830", "name": "Totness National Park", "lat": -35.058333, "lng": 138.8375 },
+    { "id": "Q7828359", "name": "Totness Recreation Park", "lat": -35.0581, "lng": 138.837 },
+    { "id": "Q21937564", "name": "Tregalana Park", "lat": -32.945278, "lng": 137.575556 },
+    { "id": "Q21937543", "name": "Tregenza Oval", "lat": -34.942778, "lng": 138.649722 },
+    { "id": "Q21937623", "name": "Trenorden Park", "lat": -34.921111, "lng": 138.649444 },
+    { "id": "Q21937626", "name": "Tresylva Memorial Park", "lat": -33.267778, "lng": 138.350556 },
+    { "id": "Q21937508", "name": "Tusmore Park", "lat": -34.933889, "lng": 138.648611 },
+    {
+      "id": "Q127784592",
+      "name": "Umpherston Sinkhole/Balumbul",
+      "lat": -37.8388,
+      "lng": 140.808354
+    },
+    {
+      "id": "Q21935822",
+      "name": "Unnamed Conservation Park",
+      "lat": -28.494167,
+      "lng": 129.291389
+    },
+    {
+      "id": "Q21937622",
+      "name": "Upper Gulf St Vincent Marine Park",
+      "lat": -34.411667,
+      "lng": 138.108889
+    },
+    {
+      "id": "Q21937591",
+      "name": "Upper South East Marine Park",
+      "lat": -36.765,
+      "lng": 139.770556
+    },
+    {
+      "id": "Q21937512",
+      "name": "Upper Spencer Gulf Marine Park",
+      "lat": -32.938056,
+      "lng": 137.864167
+    },
+    { "id": "Q21937513", "name": "Urimbirra Fauna Park", "lat": -35.5175, "lng": 138.630278 },
+    { "id": "Q21937603", "name": "Vansittart Park", "lat": -37.824444, "lng": 140.773333 },
+    { "id": "Q7926901", "name": "Victoria Park", "lat": -34.933, "lng": 138.62 },
+    { "id": "Q21942203", "name": "Victoria Way Park", "lat": -34.852134, "lng": 138.555343 },
+    { "id": "Q21935837", "name": "Virgo Park", "lat": -36.316111, "lng": 140.769167 },
+    {
+      "id": "Q21937618",
+      "name": "Vivigani Ardune Conservation Park",
+      "lat": -36.93432,
+      "lng": 140.29614
+    },
+    { "id": "Q21937561", "name": "Volunteer Park", "lat": -38.053056, "lng": 140.699167 },
+    {
+      "id": "Q2535413",
+      "name": "Vulkathunha-Gammon Ranges National Park",
+      "lat": -30.4472,
+      "lng": 139.277
+    },
+    { "id": "Q21937534", "name": "Wadmore Park", "lat": -34.87863, "lng": 138.70283 },
+    { "id": "Q21937510", "name": "Waikerie Fauna Park", "lat": -34.175556, "lng": 139.980833 },
+    { "id": "Q69523862", "name": "Waite Arboretum", "lat": -34.967412, "lng": 138.62997 },
+    { "id": "Q21935821", "name": "Waitpinga National Park", "lat": -35.590556, "lng": 138.323889 },
+    { "id": "Q21935817", "name": "Wallaroo Fauna Park", "lat": -33.928889, "lng": 137.637778 },
+    {
+      "id": "Q110232271",
+      "name": "Wapma Thura–Southern Flinders Ranges National Park",
+      "lat": -33.039,
+      "lng": 138.124797
+    },
+    { "id": "Q21937535", "name": "Warradale Park Reserve", "lat": -35.016389, "lng": 138.536389 },
+    { "id": "Q21935905", "name": "Warrenben National Park", "lat": -35.120556, "lng": 137.045833 },
+    {
+      "id": "Q21935818",
+      "name": "Waterfall Gully Recreation Park",
+      "lat": -34.970278,
+      "lng": 138.681111
+    },
+    { "id": "Q21937504", "name": "Wattle Park Reserve", "lat": -34.923333, "lng": 138.68 },
+    { "id": "Q21935825", "name": "Websters Cricket Oval", "lat": -33.321389, "lng": 137.996667 },
+    { "id": "Q21937576", "name": "Weigal Oval", "lat": -34.955556, "lng": 138.559722 },
+    { "id": "Q21937495", "name": "Weigall Park", "lat": -35.133333, "lng": 139.278889 },
+    {
+      "id": "Q21937620",
+      "name": "West Coast Bays Marine Park",
+      "lat": -33.196111,
+      "lng": 134.295556
+    },
+    {
+      "id": "Q139742875",
+      "name": "Western Eyre Australian Marine Park",
+      "lat": -34.643,
+      "lng": 134.015
+    },
+    {
+      "id": "Q56276742",
+      "name": "Western Kangaroo Island Marine Park",
+      "lat": -35.954565,
+      "lng": 136.552714
+    },
+    { "id": "Q21937588", "name": "Whicker Park", "lat": -35.026944, "lng": 138.584444 },
+    {
+      "id": "Q21935820",
+      "name": "White Dam Conservation Park",
+      "lat": -33.95462,
+      "lng": 139.54953
+    },
+    { "id": "Q21935828", "name": "Whitedam Conservation Park", "lat": -33.95462, "lng": 139.54953 },
+    {
+      "id": "Q21937541",
+      "name": "Whyalla Fauna and Reptile Park",
+      "lat": -33.045,
+      "lng": 137.522778
+    },
+    { "id": "Q21935815", "name": "Whyalla National Park", "lat": -32.9525, "lng": 137.543889 },
+    { "id": "Q21937573", "name": "Willows Oval", "lat": -35.018889, "lng": 138.659722 },
+    { "id": "Q21937516", "name": "Willunga Recreation Park", "lat": -35.270556, "lng": 138.552222 },
+    { "id": "Q21937568", "name": "Wilmington Recreation Park", "lat": -32.655556, "lng": 138.085 },
+    {
+      "id": "Q21935826",
+      "name": "Windy Point Recreation Park",
+      "lat": -35.000278,
+      "lng": 138.607222
+    },
+    { "id": "Q21937624", "name": "Winkler Park", "lat": -34.098333, "lng": 138.774722 },
+    {
+      "id": "Q21937613",
+      "name": "Winston Park SA Equestrian Centre",
+      "lat": -34.717222,
+      "lng": 138.561111
+    },
+    { "id": "Q918256", "name": "Witjira National Park", "lat": -26.3717, "lng": 135.63 },
+    { "id": "Q21935814", "name": "Wittelbee National Park", "lat": -32.200278, "lng": 133.742778 },
+    { "id": "Q8028642", "name": "Wittunga Botanic Garden", "lat": -35.0235, "lng": 138.61 },
+    {
+      "id": "Q21937502",
+      "name": "Wolseley Common Conservation Park",
+      "lat": -36.36889,
+      "lng": 140.90114
+    },
+    { "id": "Q21937610", "name": "Womma Park", "lat": -34.702778, "lng": 138.665278 },
+    { "id": "Q21937536", "name": "Wonga Park Reserve", "lat": -34.83609, "lng": 138.48028 },
+    { "id": "Q21937559", "name": "Woolwash Caravan Park", "lat": -38.050556, "lng": 140.716389 },
+    { "id": "Q21937549", "name": "Wortley Oval", "lat": -36.951667, "lng": 140.740556 },
+    {
+      "id": "Q21937585",
+      "name": "Wudinna Bicentennial Park",
+      "lat": -33.050278,
+      "lng": 135.461944
+    },
+    { "id": "Q21937493", "name": "Yalpara Conservation Park", "lat": -32.55814, "lng": 138.84981 },
+    { "id": "Q21937617", "name": "Yulte Conservation Park", "lat": -35.4139, "lng": 138.47845 },
+    { "id": "Q21937612", "name": "Yumburra Park", "lat": -32.9475, "lng": 135.365556 }
+  ]
+}

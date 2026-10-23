@@ -1,0 +1,188 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": { "south": -39.159, "west": 140.9619, "north": -33.9806, "east": 149.9762 },
+  "places": [
+    { "id": "Q4823962", "name": "ACMI", "lat": -37.8176, "lng": 144.969 },
+    { "id": "Q4650884", "name": "ACT Heritage Library", "lat": -35.3444, "lng": 149.084 },
+    { "id": "Q84963170", "name": "Adelong Library", "lat": -35.308642, "lng": 148.065615 },
+    { "id": "Q16868900", "name": "Albury Library Museum", "lat": -36.0789, "lng": 146.916 },
+    {
+      "id": "Q85682271",
+      "name": "Alejandro Malaspina Resource Center in Canberra",
+      "lat": -35.323983,
+      "lng": 149.132879
+    },
+    {
+      "id": "Q4824478",
+      "name": "Australian National University Library",
+      "lat": -35.278,
+      "lng": 149.12
+    },
+    { "id": "Q17022254", "name": "Australian Policy Online", "lat": -37.826039, "lng": 145.034532 },
+    { "id": "Q4848465", "name": "Baillieu Library", "lat": -37.7985, "lng": 144.96 },
+    {
+      "id": "Q56610110",
+      "name": "Bairnsdale Mechanics Institute",
+      "lat": -37.825333,
+      "lng": 147.628722
+    },
+    { "id": "Q64584840", "name": "Balranald Library", "lat": -34.637263, "lng": 143.561906 },
+    {
+      "id": "Q56611194",
+      "name": "Bargoonga Nganjin, North Fitzroy Library",
+      "lat": -37.78476,
+      "lng": 144.98283
+    },
+    { "id": "Q77981701", "name": "Barham Library", "lat": -35.630125, "lng": 144.127192 },
+    { "id": "Q64841073", "name": "Barooga Library", "lat": -35.901174, "lng": 145.684778 },
+    { "id": "Q4868068", "name": "Basser Library", "lat": -35.2837, "lng": 149.123 },
+    { "id": "Q84961408", "name": "Batlow Library", "lat": -35.521568, "lng": 148.14741 },
+    { "id": "Q64708000", "name": "Bega Library", "lat": -36.675478, "lng": 149.842061 },
+    { "id": "Q4882081", "name": "Belconnen Library", "lat": -35.2386, "lng": 149.069 },
+    { "id": "Q64841086", "name": "Berrigan Library", "lat": -35.657317, "lng": 145.810492 },
+    { "id": "Q84962704", "name": "Bombala Library", "lat": -36.914853, "lng": 149.23433 },
+    { "id": "Q67343997", "name": "Boorowa Library", "lat": -34.43723, "lng": 148.722806 },
+    { "id": "Q83675914", "name": "Braidwood Library", "lat": -35.442869, "lng": 149.799746 },
+    { "id": "Q107404208", "name": "Braybrook Library", "lat": -37.785922, "lng": 144.854233 },
+    { "id": "Q84622564", "name": "Bungendore library", "lat": -35.254318, "lng": 149.442199 },
+    { "id": "Q55768522", "name": "Buninyong Public Library", "lat": -37.648639, "lng": 143.884167 },
+    { "id": "Q83927369", "name": "Buronga Library", "lat": -34.174033, "lng": 142.198789 },
+    { "id": "Q78960381", "name": "Carlton Library", "lat": -37.789457, "lng": 144.971604 },
+    { "id": "Q122973891", "name": "Carmelite Library", "lat": -37.848717, "lng": 144.959664 },
+    { "id": "Q124004600", "name": "Carnegie Toy Library", "lat": -37.89435, "lng": 145.05349 },
+    { "id": "Q56611161", "name": "Coburg library", "lat": -37.74318, "lng": 144.96519 },
+    { "id": "Q78044138", "name": "Collingwood Library", "lat": -37.80456, "lng": 144.993 },
+    { "id": "Q66446736", "name": "Coolamon Library", "lat": -34.813007, "lng": 147.199887 },
+    { "id": "Q84962953", "name": "Cooma Library", "lat": -36.236531, "lng": 149.124963 },
+    { "id": "Q66446740", "name": "Cootamundra Library", "lat": -34.639847, "lng": 148.025786 },
+    { "id": "Q66816193", "name": "Corowa Library", "lat": -35.996704, "lng": 146.39128 },
+    { "id": "Q70800850", "name": "Craigieburn Library", "lat": -37.59045, "lng": 144.90985 },
+    { "id": "Q84800661", "name": "Crookwell Library", "lat": -34.458791, "lng": 149.468613 },
+    { "id": "Q67341412", "name": "Culcairn Library", "lat": -35.668602, "lng": 147.03203 },
+    { "id": "Q100920032", "name": "Cunningham Library", "lat": -37.82812, "lng": 145.05876 },
+    { "id": "Q83927987", "name": "Dareton Library", "lat": -34.096081, "lng": 142.041978 },
+    { "id": "Q66672663", "name": "Deniliquin Library", "lat": -35.528669, "lng": 144.960839 },
+    { "id": "Q67012725", "name": "Dickson Library", "lat": -35.2496, "lng": 149.139 },
+    { "id": "Q64841001", "name": "Eden Library", "lat": -37.063771, "lng": 149.902087 },
+    { "id": "Q65018449", "name": "Finley Library", "lat": -35.644022, "lng": 145.575817 },
+    { "id": "Q77931556", "name": "Fitzroy Library", "lat": -37.801907, "lng": 144.979723 },
+    {
+      "id": "Q134972904",
+      "name": "Glenroy Australia Family History Center",
+      "lat": -37.70576,
+      "lng": 144.92554
+    },
+    {
+      "id": "Q67341081",
+      "name": "Goulburn Mulwaree Library",
+      "lat": -34.754835,
+      "lng": 149.718649
+    },
+    { "id": "Q66041179", "name": "Griffith City Library", "lat": -34.287929, "lng": 146.047867 },
+    { "id": "Q66446754", "name": "Gundagai Library", "lat": -35.063198, "lng": 148.10187 },
+    { "id": "Q84800242", "name": "Gunning Library", "lat": -34.782844, "lng": 149.266187 },
+    { "id": "Q67345848", "name": "Harden Library", "lat": -34.5629, "lng": 148.363906 },
+    { "id": "Q56611198", "name": "Hawthorn Library", "lat": -37.824984, "lng": 145.035103 },
+    { "id": "Q67343758", "name": "Hay Library", "lat": -34.505831, "lng": 144.843519 },
+    { "id": "Q67341759", "name": "Henty Library", "lat": -35.51834, "lng": 147.039059 },
+    { "id": "Q67342111", "name": "Holbrook Library", "lat": -35.722771, "lng": 147.314613 },
+    { "id": "Q66816198", "name": "Howlong Library", "lat": -35.979497, "lng": 146.627552 },
+    { "id": "Q106221833", "name": "Ivanhoe Library", "lat": -37.765571, "lng": 145.043285 },
+    { "id": "Q78402623", "name": "Jerilderie Library", "lat": -35.357166, "lng": 145.73256 },
+    { "id": "Q86473571", "name": "Jindera Library", "lat": -35.953025, "lng": 146.888278 },
+    { "id": "Q68623889", "name": "Junee Library", "lat": -34.871473, "lng": 147.584614 },
+    {
+      "id": "Q66766171",
+      "name": "Kathleen Syme Library and Community Centre",
+      "lat": -37.7988,
+      "lng": 144.965
+    },
+    { "id": "Q64438179", "name": "Lavington Library", "lat": -36.045506, "lng": 146.940803 },
+    { "id": "Q69525199", "name": "Leeton Library", "lat": -34.550355, "lng": 146.405546 },
+    { "id": "Q21481291", "name": "Library at the Dock", "lat": -37.820171, "lng": 144.94058 },
+    { "id": "Q109774502", "name": "Maldon Athenaeum Library", "lat": -36.99577, "lng": 144.06764 },
+    { "id": "Q113207171", "name": "Malvern Library", "lat": -37.856663, "lng": 145.031762 },
+    { "id": "Q104089599", "name": "Mannix Library", "lat": -37.809239, "lng": 144.980545 },
+    { "id": "Q78401366", "name": "Mathoura library", "lat": -35.811715, "lng": 144.9013 },
+    { "id": "Q137232162", "name": "Melbourne Art Library", "lat": -37.74242, "lng": 144.963563 },
+    { "id": "Q78400514", "name": "Moulamein Library", "lat": -35.091385, "lng": 144.036265 },
+    { "id": "Q66816160", "name": "Mulwala Library", "lat": -35.98795, "lng": 146.006154 },
+    { "id": "Q82881587", "name": "Narrandera Library", "lat": -34.743673, "lng": 146.554131 },
+    {
+      "id": "Q2565882",
+      "name": "National Film and Sound Archive of Australia",
+      "lat": -35.283,
+      "lng": 149.121
+    },
+    {
+      "id": "Q6972828",
+      "name": "National Gallery of Australia Research Library",
+      "lat": -35.3004,
+      "lng": 149.137
+    },
+    {
+      "id": "Q623578",
+      "name": "National Library of Australia",
+      "lat": -35.296389,
+      "lng": 149.129444
+    },
+    {
+      "id": "Q14935660",
+      "name": "National Sport Information Centre",
+      "lat": -35.246381,
+      "lng": 149.101997
+    },
+    { "id": "Q113206710", "name": "Phoenix Park Library", "lat": -37.879837, "lng": 145.081495 },
+    { "id": "Q113207168", "name": "Prahran Square Library", "lat": -37.847742, "lng": 144.992659 },
+    { "id": "Q84623268", "name": "Queanbeyan City Library", "lat": -35.355443, "lng": 149.234204 },
+    { "id": "Q115685199", "name": "Realm", "lat": -37.81487, "lng": 145.22912 },
+    { "id": "Q61883442", "name": "Richmond Library", "lat": -37.825283, "lng": 144.998299 },
+    { "id": "Q6542466", "name": "RMIT University Library", "lat": -37.8086, "lng": 144.964 },
+    {
+      "id": "Q134972846",
+      "name": "Royal Park Campus Library",
+      "lat": -37.781284,
+      "lng": 144.94135
+    },
+    {
+      "id": "Q85682274",
+      "name": "Spanish Resource Centre of Melbourne",
+      "lat": -37.808807,
+      "lng": 144.960604
+    },
+    { "id": "Q7593909", "name": "St Kilda Library", "lat": -37.8678, "lng": 144.9889 },
+    { "id": "Q1200052", "name": "State Library Victoria", "lat": -37.8098, "lng": 144.965 },
+    {
+      "id": "Q83512018",
+      "name": "Swan Hill Regional Library",
+      "lat": -35.335571,
+      "lng": 143.558995
+    },
+    {
+      "id": "Q73786272",
+      "name": "Swinburne University of Technology Library",
+      "lat": -37.821488,
+      "lng": 145.03946
+    },
+    { "id": "Q84963383", "name": "Talbingo Library", "lat": -35.58103, "lng": 148.299606 },
+    { "id": "Q85737928", "name": "Temora Library", "lat": -34.451168, "lng": 147.535079 },
+    { "id": "Q65018472", "name": "Tocumwal Library", "lat": -35.811683, "lng": 145.573698 },
+    {
+      "id": "Q113207109",
+      "name": "Toorak/South Yarra Library",
+      "lat": -37.840089,
+      "lng": 144.999451
+    },
+    { "id": "Q84963588", "name": "Tumbarumba Library", "lat": -35.778192, "lng": 148.009081 },
+    { "id": "Q84963731", "name": "Tumut Library", "lat": -35.302401, "lng": 148.219729 },
+    { "id": "Q7895221", "name": "University of Canberra Library", "lat": -35.2381, "lng": 149.083 },
+    { "id": "Q84799492", "name": "Wagga Wagga City Library", "lat": -35.109393, "lng": 147.371384 },
+    { "id": "Q84773146", "name": "Wentworth Library", "lat": -34.109114, "lng": 141.917179 },
+    { "id": "Q67062859", "name": "Woden Library", "lat": -35.344607, "lng": 149.084206 },
+    { "id": "Q61629678", "name": "Wodonga Library", "lat": -36.1243, "lng": 146.88878 },
+    { "id": "Q61883318", "name": "Women's Art Register", "lat": -37.825283, "lng": 144.998299 },
+    { "id": "Q78015864", "name": "Yass Valley Library", "lat": -34.841171, "lng": 148.911255 },
+    { "id": "Q67346099", "name": "Young Library", "lat": -34.312214, "lng": 148.298289 }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "category": "mountain",
+  "source": "wikidata",
+  "bbox": { "south": -37.5051, "west": 140.9993, "north": -28.1569, "east": 159.1092 },
+  "places": [
+    { "id": "Q241762", "name": "Bimberi Peak", "lat": -35.660833, "lng": 148.789167 },
+    { "id": "Q804222", "name": "Black Mountain", "lat": -35.273836, "lng": 149.0978 },
+    { "id": "Q3120844", "name": "Gungartan", "lat": -36.2667, "lng": 148.383 },
+    { "id": "Q492279", "name": "Mount Ainslie", "lat": -35.27, "lng": 149.158333 },
+    { "id": "Q1757719", "name": "Mount Alexander", "lat": -36.996944, "lng": 144.305 },
+    { "id": "Q130217", "name": "Mount Bogong", "lat": -36.7325, "lng": 147.305833 },
+    { "id": "Q16895397", "name": "Mount Buffalo", "lat": -36.777, "lng": 146.767 },
+    { "id": "Q994378", "name": "Mount Feathertop", "lat": -36.9, "lng": 147.133333 },
+    { "id": "Q8536515", "name": "Mount Franklin (Victoria)", "lat": -37.2651, "lng": 144.15 },
+    { "id": "Q6920912", "name": "Mount Gingera", "lat": -35.583333, "lng": 148.783333 },
+    { "id": "Q6920913", "name": "Mount Ginini", "lat": -35.529444, "lng": 148.772222 },
+    { "id": "Q3321857", "name": "Mount Gower", "lat": -31.5903, "lng": 159.072 },
+    { "id": "Q3321882", "name": "Mount Jagungal", "lat": -36.131667, "lng": 148.384444 },
+    { "id": "Q6921623", "name": "Mount Kelly", "lat": -35.715, "lng": 148.867778 },
+    { "id": "Q178167", "name": "Mount Kosciuszko", "lat": -36.45583, "lng": 148.26351 },
+    { "id": "Q1950602", "name": "Mount McKay", "lat": -36.875095, "lng": 147.24313 },
+    { "id": "Q1041646", "name": "Mount Stromlo", "lat": -35.316667, "lng": 149.016667 },
+    { "id": "Q6924052", "name": "Mount Tate", "lat": -36.35, "lng": 148.35 },
+    { "id": "Q542041", "name": "Mount Townsend", "lat": -36.416667, "lng": 148.266667 },
+    { "id": "Q6924231", "name": "Mount Twynam", "lat": -36.393333, "lng": 148.314722 },
+    { "id": "Q97334616", "name": "The Rock Hill", "lat": -35.274736, "lng": 147.074236 }
+  ]
+}

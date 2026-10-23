@@ -1,0 +1,14 @@
+{
+  "category": "mountain",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [
+    { "id": "Q241762", "name": "Bimberi Peak", "lat": -35.660833, "lng": 148.789167 },
+    { "id": "Q804222", "name": "Black Mountain", "lat": -35.273836, "lng": 149.0978 },
+    { "id": "Q492279", "name": "Mount Ainslie", "lat": -35.27, "lng": 149.158333 },
+    { "id": "Q6920912", "name": "Mount Gingera", "lat": -35.583333, "lng": 148.783333 },
+    { "id": "Q6920913", "name": "Mount Ginini", "lat": -35.529444, "lng": 148.772222 },
+    { "id": "Q6921623", "name": "Mount Kelly", "lat": -35.715, "lng": 148.867778 },
+    { "id": "Q1041646", "name": "Mount Stromlo", "lat": -35.316667, "lng": 149.016667 }
+  ]
+}

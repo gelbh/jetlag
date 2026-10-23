@@ -1,0 +1,8 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [
+    { "id": "Q495039", "name": "National Zoo & Aquarium", "lat": -35.3006, "lng": 149.069 }
+  ]
+}

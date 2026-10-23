@@ -1,0 +1,30 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": { "south": -39.159, "west": 140.9619, "north": -33.9806, "east": 149.9762 },
+  "places": [
+    { "id": "Q4689907", "name": "African Safari World", "lat": -37.9229, "lng": 144.667 },
+    { "id": "Q85741058", "name": "Altina Wildlife Park", "lat": -34.618643, "lng": 146.058739 },
+    { "id": "Q4851486", "name": "Ballarat Wildlife Park", "lat": -37.5698, "lng": 143.893 },
+    { "id": "Q5643148", "name": "Halls Gap Zoo", "lat": -37.1478, "lng": 142.564 },
+    { "id": "Q3047381", "name": "Healesville Sanctuary", "lat": -37.6822, "lng": 145.5316 },
+    { "id": "Q6450637", "name": "Kyabram Fauna Park", "lat": -36.3242, "lng": 145.049 },
+    { "id": "Q85783684", "name": "Mansfield Zoo", "lat": -37.127308, "lng": 146.132187 },
+    { "id": "Q1321392", "name": "Melbourne Aquarium", "lat": -37.82083, "lng": 144.95778 },
+    { "id": "Q578027", "name": "Melbourne Zoo", "lat": -37.784762, "lng": 144.952095 },
+    {
+      "id": "Q6907907",
+      "name": "Moonlit Sanctuary Wildlife Conservation Park",
+      "lat": -38.21255,
+      "lng": 145.25038
+    },
+    { "id": "Q495039", "name": "National Zoo & Aquarium", "lat": -35.3006, "lng": 149.069 },
+    {
+      "id": "Q21973147",
+      "name": "Phillip Island Wildlife Park",
+      "lat": -38.47313,
+      "lng": 145.2349
+    },
+    { "id": "Q14935316", "name": "Werribee Open Range Zoo", "lat": -37.9229, "lng": 144.667 }
+  ]
+}

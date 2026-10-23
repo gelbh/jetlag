@@ -1,0 +1,61 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": { "south": -37.5051, "west": 140.9993, "north": -28.1569, "east": 159.1092 },
+  "places": [
+    {
+      "id": "Q131388141",
+      "name": "Consulate General of Germany, Sydney",
+      "lat": -33.874136,
+      "lng": 151.217
+    },
+    {
+      "id": "Q109456914",
+      "name": "Consulate General of South Korea, Sydney",
+      "lat": -33.870498,
+      "lng": 151.205868
+    },
+    {
+      "id": "Q48842841",
+      "name": "Consulate General of the Republic of Poland in Sydney",
+      "lat": -33.883972,
+      "lng": 151.240278
+    },
+    {
+      "id": "Q136452355",
+      "name": "Consulate General of the United States in Sydney",
+      "lat": -33.839883,
+      "lng": 151.206373
+    },
+    {
+      "id": "Q131447795",
+      "name": "Consulate General of Turkey, Sydney",
+      "lat": -33.885275,
+      "lng": 151.239083
+    },
+    {
+      "id": "Q116214434",
+      "name": "Consulate-General of China, Sydney",
+      "lat": -33.888611,
+      "lng": 151.179167
+    },
+    {
+      "id": "Q16507587",
+      "name": "Consulate-General of France in  Sydney",
+      "lat": -33.8561,
+      "lng": 151.193
+    },
+    {
+      "id": "Q62124367",
+      "name": "Consulate-General of Japan, Sydney",
+      "lat": -33.864556,
+      "lng": 151.209944
+    },
+    {
+      "id": "Q106463586",
+      "name": "embassy of Hungary in Australia",
+      "lat": -35.32498,
+      "lng": 149.09076
+    }
+  ]
+}

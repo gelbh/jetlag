@@ -1,0 +1,54 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": { "south": -37.5051, "west": 140.9993, "north": -28.1569, "east": 159.1092 },
+  "places": [
+    { "id": "Q4689846", "name": "African Lion Safari", "lat": -33.899487, "lng": 150.602646 },
+    { "id": "Q85741058", "name": "Altina Wildlife Park", "lat": -34.618643, "lng": 146.058739 },
+    { "id": "Q4273332", "name": "Australian Reptile Park", "lat": -33.4182, "lng": 151.277 },
+    {
+      "id": "Q4911530",
+      "name": "Billabong Koala and Wildlife Park",
+      "lat": -31.459,
+      "lng": 152.82
+    },
+    { "id": "Q109229025", "name": "Birdland Animal Park", "lat": -35.723583, "lng": 150.194222 },
+    { "id": "Q108913257", "name": "Central Coast Zoo", "lat": -33.271667, "lng": 151.389722 },
+    {
+      "id": "Q5439615",
+      "name": "Featherdale Sydney Wildlife Park",
+      "lat": -33.766111,
+      "lng": 150.884167
+    },
+    { "id": "Q5643148", "name": "Halls Gap Zoo", "lat": -37.1478, "lng": 142.564 },
+    {
+      "id": "Q80508323",
+      "name": "Hunter Valley Wildlife Park",
+      "lat": -32.796056,
+      "lng": 151.363611
+    },
+    { "id": "Q6424208", "name": "Koala Park Sanctuary", "lat": -33.7419, "lng": 151.045 },
+    { "id": "Q6450637", "name": "Kyabram Fauna Park", "lat": -36.3242, "lng": 145.049 },
+    { "id": "Q6750618", "name": "Manly Sea Life Sanctuary", "lat": -33.7991, "lng": 151.281 },
+    { "id": "Q85783684", "name": "Mansfield Zoo", "lat": -37.127308, "lng": 146.132187 },
+    { "id": "Q116214252", "name": "Mogo Wildlife Park", "lat": -35.7954, "lng": 150.1592 },
+    { "id": "Q6890658", "name": "Mogo Zoo", "lat": -35.7954, "lng": 150.159 },
+    { "id": "Q495039", "name": "National Zoo & Aquarium", "lat": -35.3006, "lng": 149.069 },
+    { "id": "Q7066894", "name": "Nowra Wildlife Park", "lat": -34.8704, "lng": 150.568 },
+    { "id": "Q109849799", "name": "Oakvale Wildlife Park", "lat": -32.793889, "lng": 151.910278 },
+    { "id": "Q2591764", "name": "Sea Life Sydney Aquarium", "lat": -33.8694, "lng": 151.202 },
+    { "id": "Q55634508", "name": "Sydney Zoo", "lat": -33.791111, "lng": 150.866944 },
+    { "id": "Q7661113", "name": "Symbio Wildlife Park", "lat": -34.2048, "lng": 150.968 },
+    {
+      "id": "Q12070638",
+      "name": "Taronga Western Plains Zoo",
+      "lat": -32.271889,
+      "lng": 148.587222
+    },
+    { "id": "Q1064813", "name": "Taronga Zoo", "lat": -33.843333, "lng": 151.241111 },
+    { "id": "Q60227907", "name": "Waratah Park", "lat": -33.6762, "lng": 151.177 },
+    { "id": "Q60716876", "name": "Waterways Wildlife Park", "lat": -30.98184, "lng": 150.18976 },
+    { "id": "Q8000710", "name": "Wild Life Sydney", "lat": -33.8698, "lng": 151.202 },
+    { "id": "Q135004110", "name": "Zambi Wildlife Retreat", "lat": -33.869722, "lng": 150.67 }
+  ]
+}

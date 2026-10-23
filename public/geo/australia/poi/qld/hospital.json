@@ -1,0 +1,193 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": { "south": -29.1793, "west": 137.9946, "north": -9.1425, "east": 153.5522 },
+  "places": [
+    { "id": "Q122268880", "name": "Atherton Hospital", "lat": -17.266557, "lng": 145.483449 },
+    { "id": "Q4997483", "name": "Bundaberg Base Hospital", "lat": -24.8694, "lng": 152.336 },
+    { "id": "Q85142306", "name": "Caboolture Hospital", "lat": -27.0802, "lng": 152.9637 },
+    { "id": "Q1025960", "name": "Cairns Base Hospital", "lat": -16.912229, "lng": 145.767653 },
+    {
+      "id": "Q23641120",
+      "name": "Cape Pallarenda Quarantine Station",
+      "lat": -19.1917,
+      "lng": 146.7703
+    },
+    { "id": "Q5036256", "name": "Capricorn Coast Hospital", "lat": -23.1443, "lng": 150.734 },
+    { "id": "Q81046190", "name": "Cloncurry Hospital", "lat": -20.7045, "lng": 140.5272 },
+    { "id": "Q85138643", "name": "Collinsville Hospital", "lat": -20.546, "lng": 147.8384 },
+    { "id": "Q81044498", "name": "Cooktown Hospital", "lat": -15.4775, "lng": 145.2504 },
+    { "id": "Q25231213", "name": "Croydon Hospital Ward", "lat": -18.2027, "lng": 142.2424 },
+    { "id": "Q81096052", "name": "Dirranbandi Hospital", "lat": -28.579, "lng": 148.2283 },
+    { "id": "Q81046717", "name": "Doomadgee Hospital", "lat": -17.9425, "lng": 138.8284 },
+    { "id": "Q85138301", "name": "Dysart Hospital", "lat": -22.5829, "lng": 148.3531 },
+    {
+      "id": "Q28183571",
+      "name": "Fantome Island Lock Hospital and Lazaret Sites",
+      "lat": -18.687,
+      "lng": 146.5159
+    },
+    {
+      "id": "Q24089789",
+      "name": "Fortitude Valley Child Health Centre",
+      "lat": -27.4562,
+      "lng": 153.0331
+    },
+    { "id": "Q85139603", "name": "Gayndah Hospital", "lat": -25.6308, "lng": 151.6048 },
+    { "id": "Q85139120", "name": "Gin Gin Hospital", "lat": -24.9862, "lng": 151.9535 },
+    {
+      "id": "Q23057984",
+      "name": "Gold Coast Private Hospital",
+      "lat": -27.962361,
+      "lng": 153.385196
+    },
+    { "id": "Q5578668", "name": "Gold Coast University Hospital", "lat": -27.9598, "lng": 153.382 },
+    { "id": "Q24190311", "name": "Herries Private Hospital", "lat": -16.9149, "lng": 145.7651 },
+    {
+      "id": "Q24185634",
+      "name": "History of Rockhampton Base Hospital",
+      "lat": -23.379,
+      "lng": 150.4952
+    },
+    {
+      "id": "Q30279988",
+      "name": "Holy Spirit Northside Private Hospital",
+      "lat": -27.39081,
+      "lng": 153.023948
+    },
+    { "id": "Q137042899", "name": "Injune General Hospital", "lat": -25.84654, "lng": 148.563198 },
+    { "id": "Q6065590", "name": "Ipswich Hospital", "lat": -27.619267, "lng": 152.758842 },
+    { "id": "Q24089904", "name": "Ipswich Mental Hospital", "lat": -27.6284, "lng": 152.7555 },
+    {
+      "id": "Q24185303",
+      "name": "John Flynn Private Hospital",
+      "lat": -28.153879,
+      "lng": 153.48851
+    },
+    { "id": "Q85141968", "name": "Kilcoy Hospital", "lat": -26.941, "lng": 152.5615 },
+    {
+      "id": "Q16893884",
+      "name": "Lady Bowen Hospital, Spring Hill",
+      "lat": -27.461,
+      "lng": 153.02
+    },
+    { "id": "Q6559025", "name": "Lismore Base Hospital", "lat": -28.8092, "lng": 153.2913 },
+    { "id": "Q6667071", "name": "Logan Hospital", "lat": -27.6668, "lng": 153.149 },
+    { "id": "Q6724277", "name": "Mackay Base Hospital", "lat": -21.145833, "lng": 149.155278 },
+    { "id": "Q24090206", "name": "Maryborough Base Hospital", "lat": -25.5223, "lng": 152.6902 },
+    { "id": "Q30280909", "name": "Mater Adult Hospital", "lat": -27.484905, "lng": 153.026868 },
+    { "id": "Q30280910", "name": "Mater Children's Hospital", "lat": -27.48362, "lng": 153.026496 },
+    { "id": "Q14935489", "name": "Mater Hospital Pimlico", "lat": -19.289, "lng": 146.7872 },
+    {
+      "id": "Q48785405",
+      "name": "Mater Misericordiae Hospital, Mackay",
+      "lat": -21.1309,
+      "lng": 149.1662
+    },
+    { "id": "Q30280918", "name": "Mater Mothers' Hospital", "lat": -27.485572, "lng": 153.0276 },
+    { "id": "Q30280917", "name": "Mater Private Hospital", "lat": -27.484069, "lng": 153.0286 },
+    {
+      "id": "Q6786525",
+      "name": "Mater Women's and Children's Hospital",
+      "lat": -19.2726,
+      "lng": 146.803
+    },
+    { "id": "Q85139320", "name": "Monto Hospital", "lat": -24.8663, "lng": 151.1126 },
+    { "id": "Q85138452", "name": "Moranbah Hospital", "lat": -22.0021, "lng": 148.0552 },
+    { "id": "Q24997951", "name": "Mossman District Hospital", "lat": -16.4643, "lng": 145.3684 },
+    { "id": "Q81045878", "name": "Mount Isa Base Hospital", "lat": -20.7306, "lng": 139.4936 },
+    { "id": "Q30280885", "name": "Nambour General Hospital", "lat": -26.620781, "lng": 152.951585 },
+    { "id": "Q24952508", "name": "Old Cooktown Hospital", "lat": -15.48, "lng": 145.2517 },
+    { "id": "Q48804645", "name": "Old Isisford District Hospital", "lat": -24.261, "lng": 144.439 },
+    { "id": "Q24185311", "name": "Pindara Private Hospital", "lat": -28.006658, "lng": 153.393652 },
+    {
+      "id": "Q7244522",
+      "name": "Princess Alexandra Hospital, Brisbane",
+      "lat": -27.4993,
+      "lng": 153.0332
+    },
+    { "id": "Q24189446", "name": "Proserpine Hospital", "lat": -20.4004, "lng": 148.5848 },
+    {
+      "id": "Q7270363",
+      "name": "Queen Elizabeth II Jubilee Hospital",
+      "lat": -27.5594,
+      "lng": 153.0489
+    },
+    {
+      "id": "Q7270916",
+      "name": "Queensland Children's Hospital",
+      "lat": -27.483972,
+      "lng": 153.027972
+    },
+    { "id": "Q81096581", "name": "Quilpie Hospital", "lat": -26.616, "lng": 144.274 },
+    { "id": "Q50036976", "name": "Redcliffe Hospital", "lat": -27.228336, "lng": 153.104851 },
+    { "id": "Q7306019", "name": "Redland Hospital", "lat": -27.540311, "lng": 153.251833 },
+    { "id": "Q81095592", "name": "Richmond Hospital", "lat": -20.7388, "lng": 143.1506 },
+    { "id": "Q7352917", "name": "Robina Hospital", "lat": -28.071036, "lng": 153.375939 },
+    {
+      "id": "Q24887441",
+      "name": "Rocky Creek World War Two Hospital Complex",
+      "lat": -17.1886,
+      "lng": 145.4594
+    },
+    {
+      "id": "Q7373845",
+      "name": "Royal Brisbane and Women's Hospital",
+      "lat": -27.4469,
+      "lng": 153.0283
+    },
+    {
+      "id": "Q42850202",
+      "name": "Royal Children's Hospital, Brisbane",
+      "lat": -27.4495,
+      "lng": 153.0251
+    },
+    { "id": "Q85138824", "name": "Sarina Hospital", "lat": -21.4213, "lng": 149.2098 },
+    {
+      "id": "Q29324826",
+      "name": "Second Townsville General Hospital",
+      "lat": -19.2523,
+      "lng": 146.8131
+    },
+    { "id": "Q28183812", "name": "Springsure Hospital Museum", "lat": -24.1194, "lng": 148.0844 },
+    { "id": "Q3460059", "name": "SS Maheno", "lat": -25.267097, "lng": 153.238542 },
+    { "id": "Q16932711", "name": "St Martin's House", "lat": -27.4642, "lng": 153.0297 },
+    { "id": "Q30280913", "name": "St Mary's Hospital", "lat": -25.300326, "lng": 152.82533 },
+    {
+      "id": "Q7595608",
+      "name": "St Vincent's Private Hospital Brisbane",
+      "lat": -27.4734,
+      "lng": 153.035
+    },
+    {
+      "id": "Q109729188",
+      "name": "St Vincent's Private Hospital, Northside",
+      "lat": -27.390658,
+      "lng": 153.023735
+    },
+    {
+      "id": "Q30590661",
+      "name": "Sunshine Coast University Hospital",
+      "lat": -26.7441,
+      "lng": 153.1146
+    },
+    {
+      "id": "Q7756132",
+      "name": "The Park Centre for Mental Health",
+      "lat": -27.5999,
+      "lng": 152.91
+    },
+    { "id": "Q7758249", "name": "The Prince Charles Hospital", "lat": -27.3899, "lng": 153.023 },
+    { "id": "Q18353324", "name": "Toowoomba Hospital", "lat": -27.5697, "lng": 151.943 },
+    { "id": "Q7830280", "name": "Townsville Hospital", "lat": -19.3208, "lng": 146.7623 },
+    {
+      "id": "Q28183480",
+      "name": "Underground Hospital, Mount Isa",
+      "lat": -20.7316,
+      "lng": 139.4947
+    },
+    { "id": "Q81044058", "name": "Weipa Hospital", "lat": -12.6412, "lng": 141.867 },
+    { "id": "Q7983933", "name": "Wesley Hospital", "lat": -27.477583, "lng": 152.9975 },
+    { "id": "Q18395204", "name": "Wislet", "lat": -27.5579, "lng": 151.948 }
+  ]
+}

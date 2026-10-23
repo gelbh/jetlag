@@ -1,0 +1,23 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": { "south": -43.7404, "west": 143.8192, "north": -39.2038, "east": 148.4986 },
+  "places": [
+    {
+      "id": "Q119475135",
+      "name": "Bonorong Wildlife Sanctuary",
+      "lat": -42.708664,
+      "lng": 147.271154
+    },
+    {
+      "id": "Q123339719",
+      "name": "Something Wild Wildlife Sanctuary",
+      "lat": -42.680116,
+      "lng": 146.746752
+    },
+    { "id": "Q7687422", "name": "Tasmania Zoo", "lat": -41.43095, "lng": 146.978461 },
+    { "id": "Q21924192", "name": "Trowunna Wildlife Park", "lat": -41.55577, "lng": 146.45228 },
+    { "id": "Q127386415", "name": "Wing's Wildlife Park", "lat": -41.262894, "lng": 146.045641 },
+    { "id": "Q8074096", "name": "Zoodoo Wildlife Park", "lat": -42.7057, "lng": 147.376 }
+  ]
+}

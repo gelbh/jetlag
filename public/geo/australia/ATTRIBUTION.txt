@@ -26,6 +26,8 @@ only (same ABS ASGS CC BY 4.0 attribution). Further simplified at 0.01°.
 
 POI bundles: Wikidata (CC0), Australia (P17=Q408) clipped to the
 Australia pack reference bbox (WDQS fill 2026-10-23).
+Per-state slices under poi/<stateId>/: AABB filter via
+scripts/slice-australia-poi-by-state.mjs (subregion reference bboxes).
 
 Sea-level seed elevations: Open-Meteo Elevation API
 (dense complete seed over the Australia pack reference bbox).

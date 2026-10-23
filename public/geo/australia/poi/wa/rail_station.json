@@ -1,0 +1,457 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": { "south": -35.1916, "west": 112.9211, "north": -13.6887, "east": 129.0019 },
+  "places": [
+    {
+      "id": "Q19818501",
+      "name": "Airport Central railway station",
+      "lat": -31.944028,
+      "lng": 115.974833
+    },
+    { "id": "Q24191032", "name": "Albany railway station", "lat": -35.027974, "lng": 117.885978 },
+    { "id": "Q56063049", "name": "Alkimos railway station", "lat": -31.615398, "lng": 115.692632 },
+    { "id": "Q4792531", "name": "Armadale railway station", "lat": -32.1534, "lng": 116.013 },
+    { "id": "Q4804977", "name": "Ashfield railway station", "lat": -31.913, "lng": 115.936 },
+    {
+      "id": "Q20313207",
+      "name": "Aubin Grove railway station",
+      "lat": -32.155278,
+      "lng": 115.857778
+    },
+    { "id": "Q99884336", "name": "Ballajura railway station", "lat": -31.849, "lng": 115.921 },
+    { "id": "Q4868064", "name": "Bassendean railway station", "lat": -31.903, "lng": 115.947 },
+    { "id": "Q4874863", "name": "Bayswater railway station", "lat": -31.9184, "lng": 115.9125 },
+    { "id": "Q4878652", "name": "Beckenham railway station", "lat": -32.0228, "lng": 115.954 },
+    { "id": "Q4883972", "name": "Bellevue railway station", "lat": -31.8988, "lng": 116.028 },
+    { "id": "Q66974744", "name": "Beverley Railway Station", "lat": -32.107664, "lng": 116.92556 },
+    {
+      "id": "Q135423072",
+      "name": "Bodallin railway station, Western Australia",
+      "lat": -31.373471,
+      "lng": 118.872394
+    },
+    {
+      "id": "Q135426545",
+      "name": "Bonnie Vale railway station, Western Australia",
+      "lat": -30.842421,
+      "lng": 121.150401
+    },
+    { "id": "Q29026439", "name": "Boulder railway station", "lat": -30.7827, "lng": 121.4923 },
+    { "id": "Q4950798", "name": "Bowelling", "lat": -33.4218, "lng": 116.488 },
+    {
+      "id": "Q111607601",
+      "name": "Boyup Brook railway station",
+      "lat": -33.831331,
+      "lng": 116.389447
+    },
+    { "id": "Q56052480", "name": "Bridgetown railway station", "lat": -33.9598, "lng": 116.137725 },
+    {
+      "id": "Q30329364",
+      "name": "Brunswick Junction Railway Station",
+      "lat": -33.25803,
+      "lng": 115.838311
+    },
+    { "id": "Q4996557", "name": "Bull Creek railway station", "lat": -32.0469, "lng": 115.854 },
+    { "id": "Q22329533", "name": "Bunbury railway station", "lat": -33.344366, "lng": 115.657213 },
+    {
+      "id": "Q135420899",
+      "name": "Burracoppin railway station, Western Australia",
+      "lat": -31.386662,
+      "lng": 118.483984
+    },
+    { "id": "Q5000667", "name": "Burswood railway station", "lat": -31.96, "lng": 115.9 },
+    { "id": "Q5002684", "name": "Butler railway station", "lat": -31.635547, "lng": 115.700269 },
+    { "id": "Q20717300", "name": "Byford railway station", "lat": -32.2173, "lng": 116.0075 },
+    { "id": "Q5032676", "name": "Canning Bridge railway station", "lat": -32.0096, "lng": 115.856 },
+    { "id": "Q5032717", "name": "Cannington railway station", "lat": -32.0137, "lng": 115.945 },
+    { "id": "Q5041415", "name": "Carlisle railway station", "lat": -31.98092, "lng": 115.91119 },
+    {
+      "id": "Q135420939",
+      "name": "Carrabin railway station, Western Australia",
+      "lat": -31.393432,
+      "lng": 118.674835
+    },
+    { "id": "Q5068990", "name": "Challis railway station", "lat": -32.1266, "lng": 116.013 },
+    { "id": "Q5096623", "name": "Chidlow railway station", "lat": -31.8629, "lng": 116.267 },
+    { "id": "Q5123512", "name": "City West railway station", "lat": -31.9448, "lng": 115.845 },
+    { "id": "Q5125409", "name": "Claisebrook railway station", "lat": -31.9495, "lng": 115.873 },
+    { "id": "Q5126341", "name": "Claremont railway station", "lat": -31.980617, "lng": 115.781481 },
+    { "id": "Q5127652", "name": "Clarkson railway station", "lat": -31.6908, "lng": 115.738 },
+    { "id": "Q5139549", "name": "Cockburn Central Station", "lat": -32.125279, "lng": 115.858355 },
+    { "id": "Q111601873", "name": "Collie railway station", "lat": -33.360043, "lng": 116.154793 },
+    {
+      "id": "Q30329330",
+      "name": "Cookernup Railway Station",
+      "lat": -32.994799,
+      "lng": 115.893469
+    },
+    { "id": "Q5175605", "name": "Cottesloe railway station", "lat": -31.9969, "lng": 115.761 },
+    {
+      "id": "Q106495124",
+      "name": "Cranbrook railway station, Western Australia",
+      "lat": -34.295445,
+      "lng": 117.555411
+    },
+    { "id": "Q66975032", "name": "Cue Railway Station", "lat": -27.425345, "lng": 117.900459 },
+    {
+      "id": "Q135415295",
+      "name": "Cunderdin railway station, Western Australia",
+      "lat": -31.646005,
+      "lng": 117.243144
+    },
+    { "id": "Q5194947", "name": "Currambine railway station", "lat": -31.725, "lng": 115.750556 },
+    { "id": "Q5208573", "name": "Daglish railway station", "lat": -31.952, "lng": 115.813 },
+    {
+      "id": "Q108738259",
+      "name": "Dalwallinu railway station",
+      "lat": -30.27711,
+      "lng": 116.663194
+    },
+    { "id": "Q106514465", "name": "Darkan Railway Station", "lat": -33.336037, "lng": 116.743564 },
+    {
+      "id": "Q56052807",
+      "name": "Donnybrook Railway Precinct",
+      "lat": -33.573385,
+      "lng": 115.823629
+    },
+    {
+      "id": "Q135415650",
+      "name": "Doodlakine railway station, Western Australia",
+      "lat": -31.608242,
+      "lng": 117.881781
+    },
+    {
+      "id": "Q97441461",
+      "name": "Dwelllingup Railway Station",
+      "lat": -32.711696,
+      "lng": 116.062882
+    },
+    { "id": "Q5328511", "name": "East Guildford railway station", "lat": -31.8965, "lng": 115.98 },
+    { "id": "Q5329143", "name": "East Perth railway station", "lat": -31.9439, "lng": 115.877 },
+    { "id": "Q5337853", "name": "Edgewater railway station", "lat": -31.7719, "lng": 115.779 },
+    { "id": "Q56063050", "name": "Eglinton railway station", "lat": -31.58364, "lng": 115.672575 },
+    {
+      "id": "Q5399042",
+      "name": "Elizabeth Quay railway station",
+      "lat": -31.956918,
+      "lng": 115.855304
+    },
+    {
+      "id": "Q99884280",
+      "name": "Ellenbrook railway station",
+      "lat": -31.780975,
+      "lng": 115.963288
+    },
+    { "id": "Q5501510", "name": "Fremantle Station", "lat": -32.052085, "lng": 115.745293 },
+    { "id": "Q20717401", "name": "Geraldton railway station", "lat": -28.766909, "lng": 114.6151 },
+    {
+      "id": "Q56053001",
+      "name": "Gingin Railway Station and Quarters",
+      "lat": -31.350884,
+      "lng": 115.904844
+    },
+    { "id": "Q5568399", "name": "Glendalough railway station", "lat": -31.9146, "lng": 115.823 },
+    { "id": "Q5587356", "name": "Gosnells railway station", "lat": -32.07118, "lng": 115.99954 },
+    { "id": "Q5596468", "name": "Grant Street railway station", "lat": -31.9867, "lng": 115.765 },
+    {
+      "id": "Q121596941",
+      "name": "Greenbushes railway station",
+      "lat": -33.825262,
+      "lng": 116.051818
+    },
+    { "id": "Q5605108", "name": "Greenwood railway station", "lat": -31.8175, "lng": 115.784 },
+    { "id": "Q5615858", "name": "Guildford railway station", "lat": -31.8989, "lng": 115.966 },
+    {
+      "id": "Q20717439",
+      "name": "Harvey railway station, Western Australia",
+      "lat": -33.079013,
+      "lng": 115.897727
+    },
+    {
+      "id": "Q19818500",
+      "name": "High Wycombe railway station",
+      "lat": -31.954628,
+      "lng": 115.992199
+    },
+    {
+      "id": "Q135415809",
+      "name": "Hines Hill railway station, Western Australia",
+      "lat": -31.529522,
+      "lng": 118.081158
+    },
+    { "id": "Q97441460", "name": "Isandra", "lat": -32.696708, "lng": 115.949949 },
+    { "id": "Q6276052", "name": "Joondalup railway station", "lat": -31.7452, "lng": 115.767 },
+    {
+      "id": "Q14935833",
+      "name": "Kalgoorlie railway station",
+      "lat": -30.746111,
+      "lng": 121.466667
+    },
+    { "id": "Q6373345", "name": "Karrakatta railway station", "lat": -31.9685, "lng": 115.796 },
+    {
+      "id": "Q98839067",
+      "name": "Katanning railway station",
+      "lat": -33.692163,
+      "lng": 117.557089
+    },
+    {
+      "id": "Q135415584",
+      "name": "Kellerberrin railway station, Western Australia",
+      "lat": -31.633328,
+      "lng": 117.720106
+    },
+    { "id": "Q6386404", "name": "Kelmscott railway station", "lat": -32.1132, "lng": 116.013 },
+    { "id": "Q6392492", "name": "Kenwick railway station", "lat": -32.0365, "lng": 115.97 },
+    {
+      "id": "Q53087305",
+      "name": "Kingstown Railway Station",
+      "lat": -32.004475,
+      "lng": 115.552722
+    },
+    {
+      "id": "Q66975474",
+      "name": "Kojonup Railway Station Group",
+      "lat": -33.83676,
+      "lng": 117.157593
+    },
+    { "id": "Q99373238", "name": "Kondinin railway station", "lat": -32.495042, "lng": 118.268669 },
+    {
+      "id": "Q135424394",
+      "name": "Koolyanobbing railway station, Western Australia",
+      "lat": -30.827923,
+      "lng": 119.514221
+    },
+    { "id": "Q100332221", "name": "Kulin Railway Station", "lat": -32.669774, "lng": 118.156985 },
+    { "id": "Q6450457", "name": "Kwinana railway station", "lat": -32.235, "lng": 115.843 },
+    {
+      "id": "Q124420977",
+      "name": "Lake Grace Railway Station",
+      "lat": -33.100459,
+      "lng": 118.4622
+    },
+    { "id": "Q107028936", "name": "Lakelands railway station", "lat": -32.474, "lng": 115.77 },
+    { "id": "Q6515790", "name": "Leederville railway station", "lat": -31.9389, "lng": 115.84 },
+    { "id": "Q6665015", "name": "Loch Street railway station", "lat": -31.9718, "lng": 115.792 },
+    { "id": "Q6675747", "name": "Loongana railway station", "lat": -30.946, "lng": 127.038 },
+    { "id": "Q6726633", "name": "Maddington railway station", "lat": -32.0496, "lng": 115.983 },
+    { "id": "Q14935859", "name": "Mandurah railway station", "lat": -32.527148, "lng": 115.746621 },
+    {
+      "id": "Q110663029",
+      "name": "Manjimup railway station",
+      "lat": -34.241291,
+      "lng": 116.147155
+    },
+    { "id": "Q6797333", "name": "Maylands railway station", "lat": -31.9283, "lng": 115.892 },
+    { "id": "Q6801665", "name": "McIver railway station", "lat": -31.951743, "lng": 115.866542 },
+    {
+      "id": "Q129979409",
+      "name": "Meckering railway station, Western Australia",
+      "lat": -31.62418,
+      "lng": 117.01359
+    },
+    { "id": "Q6813755", "name": "Meltham railway station", "lat": -31.9225, "lng": 115.9 },
+    { "id": "Q20718060", "name": "Merredin railway station", "lat": -31.482504, "lng": 118.2765 },
+    {
+      "id": "Q6842365",
+      "name": "Midland Junction railway station",
+      "lat": -31.8932,
+      "lng": 116.006
+    },
+    { "id": "Q6842475", "name": "Midland railway station", "lat": -31.8916, "lng": 116.001 },
+    {
+      "id": "Q113541567",
+      "name": "Mingenew railway station",
+      "lat": -29.189715,
+      "lng": 115.444246
+    },
+    {
+      "id": "Q135423258",
+      "name": "Moorine Rock railway station, Western Australia",
+      "lat": -31.318925,
+      "lng": 119.073695
+    },
+    { "id": "Q6908721", "name": "Mooterdine", "lat": -32.749, "lng": 116.802 },
+    { "id": "Q99884400", "name": "Morley railway station", "lat": -31.896066, "lng": 115.919951 },
+    { "id": "Q6916394", "name": "Mosman Park railway station", "lat": -32.0069, "lng": 115.757 },
+    {
+      "id": "Q66975680",
+      "name": "Mount Barker Railway Station",
+      "lat": -34.627924,
+      "lng": 117.663806
+    },
+    {
+      "id": "Q14935870",
+      "name": "Mount Lawley railway station",
+      "lat": -31.934744,
+      "lng": 115.88089
+    },
+    {
+      "id": "Q98839825",
+      "name": "Mukinbudin railway station",
+      "lat": -30.914239,
+      "lng": 118.207615
+    },
+    {
+      "id": "Q30327687",
+      "name": "Mundijong Railway Station",
+      "lat": -32.294722,
+      "lng": 115.986692
+    },
+    { "id": "Q6938239", "name": "Murdoch Station", "lat": -32.066208, "lng": 115.850571 },
+    { "id": "Q98837894", "name": "Narrogin railway station", "lat": -32.935692, "lng": 117.18021 },
+    { "id": "Q48772458", "name": "Nicholson Road Station", "lat": -32.061239, "lng": 115.934844 },
+    { "id": "Q99884380", "name": "Noranda railway station", "lat": -31.874, "lng": 115.918 },
+    {
+      "id": "Q30328688",
+      "name": "North Dandalup Railway Station",
+      "lat": -32.517872,
+      "lng": 115.968678
+    },
+    {
+      "id": "Q7055455",
+      "name": "North Fremantle railway station",
+      "lat": -32.0301,
+      "lng": 115.752
+    },
+    {
+      "id": "Q20718083",
+      "name": "Northam railway station, Western Australia",
+      "lat": -31.648992,
+      "lng": 116.676039
+    },
+    { "id": "Q7074508", "name": "Oats Street railway station", "lat": -31.987, "lng": 115.916 },
+    {
+      "id": "Q53085534",
+      "name": "Oliver Hill Railway Station",
+      "lat": -32.00745,
+      "lng": 115.516933
+    },
+    {
+      "id": "Q56053763",
+      "name": "Pemberton-Northcliffe Railway & Railway Station",
+      "lat": -34.53752,
+      "lng": 116.025139
+    },
+    { "id": "Q7170917", "name": "Perth railway station", "lat": -31.951389, "lng": 115.860278 },
+    {
+      "id": "Q18165698",
+      "name": "Perth Stadium railway station",
+      "lat": -31.95028,
+      "lng": 115.8929
+    },
+    {
+      "id": "Q52835310",
+      "name": "Perth Underground railway station",
+      "lat": -31.951939,
+      "lng": 115.858005
+    },
+    {
+      "id": "Q100151682",
+      "name": "Pingelly railway station",
+      "lat": -32.531684,
+      "lng": 117.084262
+    },
+    { "id": "Q20718104", "name": "Pinjarra railway station", "lat": -32.62818, "lng": 115.88027 },
+    { "id": "Q7270804", "name": "Queens Park railway station", "lat": -32.0075, "lng": 115.939 },
+    { "id": "Q48772461", "name": "Ranford Road Station", "lat": -32.075491, "lng": 115.895717 },
+    {
+      "id": "Q124427992",
+      "name": "Ravensthorpe railway station, Western Australia",
+      "lat": -33.57883,
+      "lng": 120.055892
+    },
+    { "id": "Q52776430", "name": "Redcliffe railway station", "lat": -31.93359, "lng": 115.949709 },
+    { "id": "Q14935903", "name": "Robbs Jetty railway station", "lat": -32.08739, "lng": 115.7559 },
+    { "id": "Q7355408", "name": "Rockingham railway station", "lat": -32.2898, "lng": 115.761 },
+    { "id": "Q7440420", "name": "Seaforth railway station", "lat": -32.0849, "lng": 116.011 },
+    {
+      "id": "Q30327732",
+      "name": "Serpentine railway station",
+      "lat": -32.363768,
+      "lng": 115.976186
+    },
+    {
+      "id": "Q53085473",
+      "name": "Settlement Railway Station",
+      "lat": -31.999644,
+      "lng": 115.541522
+    },
+    { "id": "Q7494329", "name": "Shenton Park railway station", "lat": -31.9596, "lng": 115.805 },
+    { "id": "Q7495570", "name": "Sherwood railway station", "lat": -32.1378, "lng": 116.011 },
+    { "id": "Q7503255", "name": "Showgrounds railway station", "lat": -31.9766, "lng": 115.787 },
+    {
+      "id": "Q20718140",
+      "name": "Southern Cross railway station, Western Australia",
+      "lat": -31.214903,
+      "lng": 119.310483
+    },
+    { "id": "Q7617598", "name": "Stirling railway station", "lat": -31.8941, "lng": 115.804 },
+    { "id": "Q137785299", "name": "Stokely railway station", "lat": -32.056639, "lng": 115.991139 },
+    { "id": "Q7631315", "name": "Subiaco railway station", "lat": -31.9447, "lng": 115.824 },
+    {
+      "id": "Q14935915",
+      "name": "Success Hill railway station",
+      "lat": -31.900174,
+      "lng": 115.955965
+    },
+    { "id": "Q7653536", "name": "Swan View railway station", "lat": -31.8872, "lng": 116.06 },
+    { "id": "Q7653564", "name": "Swanbourne railway station", "lat": -31.9828, "lng": 115.771 },
+    {
+      "id": "Q135415289",
+      "name": "Tammin railway station, Western Australia",
+      "lat": -31.642056,
+      "lng": 117.487006
+    },
+    { "id": "Q7796468", "name": "Thornlie Station", "lat": -32.047222, "lng": 115.952293 },
+    {
+      "id": "Q113540218",
+      "name": "Three Springs railway station",
+      "lat": -29.534228,
+      "lng": 115.763478
+    },
+    { "id": "Q20718166", "name": "Toodyay railway station", "lat": -31.5516, "lng": 116.4653 },
+    {
+      "id": "Q7926948",
+      "name": "Victoria Park railway station",
+      "lat": -31.97175,
+      "lng": 115.90232
+    },
+    { "id": "Q7927067", "name": "Victoria Street railway station", "lat": -32.012, "lng": 115.755 },
+    { "id": "Q106458861", "name": "Wagin railway station", "lat": -33.309954, "lng": 117.345954 },
+    { "id": "Q7969673", "name": "Warnbro railway station", "lat": -32.3264, "lng": 115.768 },
+    { "id": "Q30329231", "name": "Waroona Railway Station", "lat": -32.845476, "lng": 115.920447 },
+    { "id": "Q7971216", "name": "Warwick railway station", "lat": -31.8446, "lng": 115.797 },
+    { "id": "Q7981175", "name": "Wellard railway station", "lat": -32.2639, "lng": 115.817 },
+    {
+      "id": "Q7985731",
+      "name": "West Leederville railway station",
+      "lat": -31.9427,
+      "lng": 115.833
+    },
+    {
+      "id": "Q85815421",
+      "name": "Whiteman Park railway station",
+      "lat": -31.835466,
+      "lng": 115.963807
+    },
+    { "id": "Q7996482", "name": "Whitfords railway station", "lat": -31.7993, "lng": 115.782 },
+    { "id": "Q97664661", "name": "Whitlock Island Station", "lat": -24.885131, "lng": 113.649238 },
+    { "id": "Q98838059", "name": "Wickepin railway station", "lat": -32.780739, "lng": 117.499663 },
+    {
+      "id": "Q111770743",
+      "name": "Woodanilling railway station",
+      "lat": -33.5631,
+      "lng": 117.431316
+    },
+    { "id": "Q8032429", "name": "Woodbridge railway station", "lat": -31.8915, "lng": 115.993 },
+    {
+      "id": "Q66976691",
+      "name": "Wyalkatchem Railway Station",
+      "lat": -31.180987,
+      "lng": 117.380628
+    },
+    { "id": "Q55863576", "name": "Yanchep railway station", "lat": -31.531949, "lng": 115.643871 },
+    { "id": "Q30329292", "name": "Yarloop Railway Station", "lat": -32.955535, "lng": 115.89966 }
+  ]
+}
