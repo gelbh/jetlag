@@ -212,6 +212,10 @@ describe("loadRegionPackSessionBoundaries australia levels 4 and 6", () => {
     expect(customMatchingAreas[4]).toContain("CED NSW");
     expect(customMatchingAreas[4]).not.toContain("CED VIC");
     expect(customMatchingAreas[6]).toBe(EMPTY_FC);
+    const level8 = JSON.parse(customMatchingAreas[8]!) as {
+      features: Array<{ properties?: { stateId?: string } }>;
+    };
+    expect(level8.features.map((f) => f.properties?.stateId)).toEqual(["nsw"]);
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringMatching(/\/geo\/australia\/sed\/nsw\.geojson$/),
       expect.anything(),

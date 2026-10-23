@@ -171,7 +171,13 @@ export async function loadRegionPackSessionBoundaries(
     throw new Error(`Unknown region pack: ${packId}`);
   }
 
-  const primaryJson = await fetchGeoJsonText(config.geoAssets.primary);
+  const primaryRaw = await fetchGeoJsonText(config.geoAssets.primary);
+  // Australia STE is ~1.6MB national; subregion sessions only need the one state feature.
+  // Other packs keep full primary at level 8 (e.g. Dublin councils while playing one LEA).
+  const primaryJson =
+    packId === "australia" && subregionId !== undefined
+      ? filterGeoJsonTextBySubregion(primaryRaw, config.subregionPropertyKey, subregionId)
+      : primaryRaw;
   const secondaryPath =
     subregionId && config.geoAssets.secondaryBySubregion
       ? config.geoAssets.secondaryBySubregion(subregionId)

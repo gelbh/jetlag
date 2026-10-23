@@ -70,6 +70,13 @@ export function buildPremiumSessionFirestoreDocument(input, code, hostUid, creat
     gameAreaPayload.geometryJson = input.gameArea.geometryJson;
   }
 
+  // Pack matching GeoJSON is reloaded client-side; never embed it (AU STE >1MiB).
+  const { customMatchingAreas: _omitPackMatching, ...rulesPatch } = input.rulesPatch;
+  const remoteRulesPatch =
+    typeof rulesPatch.regionPackId === "string" && rulesPatch.regionPackId.length > 0
+      ? rulesPatch
+      : input.rulesPatch;
+
   const payload = {
     code,
     gameArea: gameAreaPayload,
@@ -89,7 +96,7 @@ export function buildPremiumSessionFirestoreDocument(input, code, hostUid, creat
     timerAccumulatedMs: 0,
     timerRunningSince: null,
     hostAppVersion: input.hostAppVersion,
-    ...input.rulesPatch,
+    ...remoteRulesPatch,
   };
 
   if (input.transitMetroId) {

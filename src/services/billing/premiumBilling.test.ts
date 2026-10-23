@@ -242,4 +242,48 @@ describe("premiumBilling", () => {
     expect(created.id).toBe("session-premium");
     expect(created.code).toBe("PREM");
   });
+
+  it("strips pack customMatchingAreas from premium create rulesPatch", async () => {
+    const session = createTestSession({ id: "session-au", code: "AUS1" });
+    callable.mockResolvedValueOnce({
+      data: {
+        session: {
+          id: session.id,
+          code: session.code,
+          gameArea: session.gameArea,
+          createdAt: session.createdAt,
+          memberUids: session.memberUids,
+          status: session.status,
+          tier: "premium",
+          regionPackId: "australia",
+        },
+      },
+    });
+
+    await createPremiumRemoteSession({
+      gameArea: session.gameArea,
+      hostUid: "host-uid",
+      tier: "premium",
+      hostRole: "seeker",
+      gameSize: "large",
+      rulesPatch: {
+        regionPackId: "australia",
+        bundledGeoRevision: 11,
+        customMatchingAreas: { 8: '{"type":"FeatureCollection","features":[]}' },
+      },
+      distanceUnit: "metric",
+      hostAppVersion: "0.4.0",
+    });
+
+    expect(callable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rulesPatch: expect.objectContaining({
+          regionPackId: "australia",
+          bundledGeoRevision: 11,
+        }),
+      }),
+    );
+    const sent = callable.mock.calls[0]?.[0] as { rulesPatch: Record<string, unknown> };
+    expect(sent.rulesPatch).not.toHaveProperty("customMatchingAreas");
+  });
 });
