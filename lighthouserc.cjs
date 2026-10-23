@@ -12,6 +12,9 @@ const { createLhciConfig } = require("./lighthouserc.shared.cjs");
 // 7763 (17 runs, benchmarkIndex ~2450) scored / 0.91-0.93, /premium 0.92-0.94. Unlisted models
 // (new SKUs, local Macs) get the slow floors. LHCI_CPU_MODEL overrides the detected model.
 // 5 runs absorb single-run CPU-contention dips (per-run benchmarkIndex < 2000, / down to 0.73).
+// Slow /premium was 0.9 (only ~0.02 under the 0.92 low median), so median noise at the
+// assert boundary failed CI (run 39964270235: median 0.89, values 0.86-0.90). Apply the
+// same median-0.05 rule as / → 0.87. Do not "rerun failed" for this class of miss.
 const FAST_CPU_MODELS = [
   "AMD EPYC 9V74 80-Core Processor",
   "AMD EPYC 9V45 96-Core Processor",
@@ -23,7 +26,7 @@ const fast = FAST_CPU_MODELS.includes(model);
 const runnerClass = fast ? "fast" : "slow";
 
 module.exports = createLhciConfig({
-  perf: { home: fast ? 0.91 : 0.88, join: 0.92, premium: fast ? 0.92 : 0.9, create: 0.53 },
+  perf: { home: fast ? 0.91 : 0.88, join: 0.92, premium: fast ? 0.92 : 0.87, create: 0.53 },
   numberOfRuns: 5,
   createMaxTbtMs: 700,
   outputDir: ".lighthouseci/mobile",
