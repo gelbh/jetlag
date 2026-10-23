@@ -109,21 +109,10 @@ function mergePlacesByIdentity<T extends { id: string; name: string; wikidataId?
   return merged;
 }
 
-async function loadBundledPoiCategory(
-  regionPackId: RegionPackId,
+async function fetchPoiCategoryUrl(
+  url: string,
   category: MeasuringLocationCategory,
 ): Promise<BundledPoiCategory | null> {
-  if (!BUNDLED_POI_PACKS.has(regionPackId)) {
-    return null;
-  }
-
-  const cacheKey = `${regionPackId}:${category}`;
-  if (bundleCache.has(cacheKey)) {
-    return bundleCache.get(cacheKey) ?? null;
-  }
-
-  const url = packGeoPoiUrl(regionPackId, category);
-
   try {
     const payload = await fetchAndReadWithTimeout(
       url,
@@ -132,17 +121,49 @@ async function loadBundledPoiCategory(
       async (response) => (response.ok ? ((await response.json()) as BundledPoiCategory) : null),
     );
     if (!payload || !Array.isArray(payload.places)) {
-      bundleCache.set(cacheKey, null);
       return null;
     }
-
-    const sanitized: BundledPoiCategory = {
+    return {
       ...payload,
       places: sanitizeBundledPoiPlaces(payload.places, category),
     };
+  } catch (error) {
+    if (isTransientFetchError(error)) {
+      throw error;
+    }
+    return null;
+  }
+}
 
-    bundleCache.set(cacheKey, sanitized);
-    return sanitized;
+async function loadBundledPoiCategory(
+  regionPackId: RegionPackId,
+  category: MeasuringLocationCategory,
+  subregionId?: string,
+): Promise<BundledPoiCategory | null> {
+  if (!BUNDLED_POI_PACKS.has(regionPackId)) {
+    return null;
+  }
+
+  const cacheKey = `${regionPackId}:${subregionId ?? ""}:${category}`;
+  if (bundleCache.has(cacheKey)) {
+    return bundleCache.get(cacheKey) ?? null;
+  }
+
+  try {
+    if (regionPackId === "australia" && subregionId) {
+      const sliced = await fetchPoiCategoryUrl(
+        packGeoPoiUrl(regionPackId, category, subregionId),
+        category,
+      );
+      if (sliced) {
+        bundleCache.set(cacheKey, sliced);
+        return sliced;
+      }
+    }
+
+    const national = await fetchPoiCategoryUrl(packGeoPoiUrl(regionPackId, category), category);
+    bundleCache.set(cacheKey, national);
+    return national;
   } catch (error) {
     // Timeouts / offline say nothing about the asset; leave uncached so the next call retries.
     if (!isTransientFetchError(error)) {
@@ -164,6 +185,7 @@ export async function fetchBundledTentaclePois(
   radiusMeters: number,
   categoryId: TentacleExtendedCategoryId,
   regionPackId?: RegionPackId,
+  subregionId?: string,
 ): Promise<TentaclePoi[]> {
   if (
     !regionPackId ||
@@ -176,6 +198,7 @@ export async function fetchBundledTentaclePois(
   const bundle = await loadBundledPoiCategory(
     regionPackId,
     categoryId as MeasuringLocationCategory,
+    subregionId,
   );
   if (!bundle) {
     return [];
@@ -211,12 +234,13 @@ export async function fetchBundledMeasuringPlaces(
   gameArea: GameArea,
   category: MeasuringLocationCategory,
   regionPackId?: RegionPackId,
+  subregionId?: string,
 ): Promise<MeasuringPlace[]> {
   if (!regionPackId || !isPackGeoPointCategory(category)) {
     return [];
   }
 
-  const bundle = await loadBundledPoiCategory(regionPackId, category);
+  const bundle = await loadBundledPoiCategory(regionPackId, category, subregionId);
   if (!bundle) {
     return [];
   }

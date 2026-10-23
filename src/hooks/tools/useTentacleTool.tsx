@@ -263,6 +263,7 @@ export function useTentacleTool({
             ...poiPinsForCategory(activeAnnotationsRef.current, categoryId),
           ],
           regionPackId: sessionRules.regionPackId,
+          subregionId: sessionRules.regionPackSubregionId,
           onEnrich: (enrichedPois) => {
             applyTentaclePoisResult(requestId, enrichedPois, 1);
           },

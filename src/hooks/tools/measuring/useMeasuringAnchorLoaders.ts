@@ -201,6 +201,7 @@ export function useMeasuringAnchorLoaders({
           customCategories,
           sessionRules?.regionPackId,
           {
+            subregionId: sessionRules?.regionPackSubregionId,
             onEnrich: (enrichedPlaces) => {
               applyAllPlacesResult(requestId, seekerPoint, category, enrichedPlaces, 1);
             },

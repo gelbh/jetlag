@@ -10,6 +10,8 @@ export interface MatchingFetchOptions {
   customMatchingAreas?: CustomMatchingAreasByLevel;
   customCategories?: readonly SessionCustomCategory[];
   regionPackId?: RegionPackId;
+  /** Pack subregion (e.g. Australia `stateId`) for bandwidth-scoped POI slices. */
+  subregionId?: string;
   /** Map pins tagged with this point category; appended after Overpass / pack features. */
   poiPins?: readonly { id: string; name: string; point: LatLngTuple }[];
   /** When pack POI hits, return immediately and deliver Overpass-merged features here. */
