@@ -9,8 +9,8 @@ import type { GameArea } from "../../map/annotations";
 import { milesToMeters } from "../../map/distance";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { computeHiderTruthReply, computeHiderTruthReplyAsync } from "./index";
-import { NEAR_RADAR_EDGE_METERS } from "./nearRadarEliminationEdge";
-import { UNAVAILABLE_RADAR_EDGE_GAP } from "./shared";
+import { NEAR_ELIMINATION_EDGE_METERS, NEAR_RADAR_EDGE_METERS } from "./nearRadarEliminationEdge";
+import { UNAVAILABLE_RADAR_EDGE_GAP, UNAVAILABLE_THERMOMETER_EDGE_GAP } from "./shared";
 
 vi.mock("@/services/geo/elevation", () => ({
   fetchElevations: vi.fn(async (points: [number, number][]) => points.map(() => 10)),
@@ -172,7 +172,7 @@ describe("computeHiderTruthReply", () => {
     expect(result?.replyId).toBe("no");
   });
 
-  it("thermometer picks colder on equidistant tie", () => {
+  it("thermometer withholds auto-answer on the equidistant flip", () => {
     const pending = basePending({
       toolType: "thermometer",
       replyOptions: [
@@ -196,10 +196,11 @@ describe("computeHiderTruthReply", () => {
     });
 
     const result = computeHiderTruthReply(pending, [51.45, -0.15]);
-    expect(result?.replyId).toBe("colder");
+    expect(result?.unavailable).toBe(true);
+    expect(result?.label).toBe(UNAVAILABLE_THERMOMETER_EDGE_GAP);
   });
 
-  it("thermometer picks hotter when station is closer to walk end", () => {
+  it("thermometer picks hotter when clearly closer to walk end", () => {
     const pending = basePending({
       toolType: "thermometer",
       replyOptions: [
@@ -222,8 +223,41 @@ describe("computeHiderTruthReply", () => {
       },
     });
 
-    const result = computeHiderTruthReply(pending, [51.45, -0.145]);
+    // Far enough past the midpoint that the flip gap exceeds 50 m.
+    const result = computeHiderTruthReply(pending, [51.45, -0.141]);
+    expect(result?.unavailable).toBeUndefined();
     expect(result?.replyId).toBe("hotter");
+  });
+
+  it("thermometer withholds auto-answer within 50 m of the flip", () => {
+    const start: [number, number] = [51.45, -0.18];
+    const end: [number, number] = [51.45, -0.14];
+    const midpoint: [number, number] = [51.45, -0.16];
+    // Move slightly toward end; stay inside the 50 m flip band.
+    const nearFlip = destinationPoint(midpoint, NEAR_ELIMINATION_EDGE_METERS - 1, 90);
+    const pending = basePending({
+      toolType: "thermometer",
+      replyOptions: [
+        { id: "hotter", label: "Hotter" },
+        { id: "colder", label: "Colder" },
+      ],
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates: [
+              [start[1], start[0]],
+              [end[1], end[0]],
+            ],
+          },
+        }),
+        metadata: {},
+      },
+    });
+
+    expect(computeHiderTruthReply(pending, nearFlip)?.unavailable).toBe(true);
   });
 
   it("matching returns null when station has no nearest feature and null is allowed", () => {

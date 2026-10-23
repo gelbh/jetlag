@@ -4,7 +4,7 @@ import { Fragment, useMemo } from "react";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { AnnotationRecord, SessionRecord } from "@/domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
-import { isNearRadarEliminationEdge } from "@/domain/questions/hiderTruth/nearRadarEliminationEdge";
+import { isNearEliminationEdge } from "@/domain/questions/hiderTruth/nearRadarEliminationEdge";
 import { resolveHiderTruthReference } from "@/domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
@@ -74,7 +74,7 @@ export function HidingZonesLayer({
         truthReference.mode !== "unavailable";
 
       if (showReferencePin) {
-        const nearEdge = isNearRadarEliminationEdge(referencePoint, annotations);
+        const nearEdge = isNearEliminationEdge(referencePoint, annotations);
         markers.push({
           id: `hiding-truth-${zone.hiderUid}`,
           lat: referencePoint[0],

@@ -14,6 +14,10 @@ export const UNAVAILABLE_NO_ANCHOR = "Truth unavailable. No end-game location wa
 export const UNAVAILABLE_GENERIC = "Truth unavailable. Cannot compute.";
 export const UNAVAILABLE_RADAR_EDGE_GAP =
   "Too close to the radar edge to auto-answer. Pick Yes or No.";
+export const UNAVAILABLE_THERMOMETER_EDGE_GAP =
+  "Too close to the thermometer flip to auto-answer. Pick Hotter or Colder.";
+export const UNAVAILABLE_MEASURING_EDGE_GAP =
+  "Too close to the measuring flip to auto-answer. Pick Closer or Further.";
 
 export function truthUnavailable(reason = UNAVAILABLE_GENERIC): HiderTruthResult {
   return {
