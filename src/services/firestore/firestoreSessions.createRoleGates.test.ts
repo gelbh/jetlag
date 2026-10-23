@@ -220,6 +220,30 @@ describe("createRemoteSession role-gate bootstrap", () => {
     expect(session.setupMode).toBeUndefined();
   });
 
+  it("calls initSessionRoleGates for castleSiege outside emulator and stamps empty leaders", async () => {
+    clientEnvUsesFirebaseEmulator.mockReturnValue(false);
+
+    const session = await createRemoteSession(
+      AREA,
+      "host-1",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      {},
+      "imperial",
+      undefined,
+      { mode: "castleSiege", hostCastleSiegeRole: "teamA" },
+    );
+
+    expect(initSessionRoleGates).toHaveBeenCalledOnce();
+    expect(initSessionRoleGates).toHaveBeenCalledWith(session.id);
+    expect(session.memberRoles).toEqual({ "host-1": "observer" });
+    expect(session.roleGates).toEqual({ version: 1, leaders: {} });
+    expect(updateDoc).not.toHaveBeenCalled();
+    expect(deleteDoc).not.toHaveBeenCalled();
+  });
+
   it("keeps classic create free of castleSiege fields", async () => {
     clientEnvUsesFirebaseEmulator.mockReturnValue(true);
 
