@@ -26,7 +26,7 @@ import {
   spaShellPath,
 } from "./seo-build-lib.mjs";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const policy = loadCrawlPolicy(root);
 const targets = prerenderTargets(policy);
 
@@ -202,7 +202,7 @@ for (const { path: urlPath, indexable } of targets) {
         `${urlPath}: <head> asset tags differ from dist/index.html ` +
           `(${keys.length} vs ${shellAssetKeys.length}; extra: ${list(extra)}; missing: ${list(missing)}).` +
           (extra.length
-            ? " Runtime-injected tags leaked into the prerender snapshot; see restoreTemplateHeadAssets in scripts/prerender-marketing.mjs."
+            ? " Runtime-injected tags leaked into the prerender snapshot; see restoreTemplateHeadAssets in scripts/build/prerender-marketing.mjs."
             : " Order or duplicates differ from the shell."),
       );
       failed = true;

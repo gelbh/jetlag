@@ -16,7 +16,7 @@ import {
   spaShellPath,
 } from "./seo-build-lib.mjs";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const targets = prerenderTargets(loadCrawlPolicy(root));
 const shellHtml = readFileSync(spaShellPath(root), "utf8");
 

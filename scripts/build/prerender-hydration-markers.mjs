@@ -1,4 +1,4 @@
-// Browser-side half of scripts/prerender-marketing.mjs; see finalizePrerenderDom.
+// Browser-side half of scripts/build/prerender-marketing.mjs; see finalizePrerenderDom.
 
 /**
  * Runs inside the prerender page (serialized by Playwright, so it must stay self-contained).
