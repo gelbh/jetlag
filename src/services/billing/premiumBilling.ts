@@ -5,7 +5,10 @@ import type { PremiumEntitlements, PremiumProductKey } from "../../domain/billin
 import type { GameArea, SessionRecord, SessionTier } from "../../domain/map/annotations";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import type { SessionRulesPatch } from "../../domain/session/tools/advancedSessionSettings";
+import {
+  omitPackCustomMatchingAreasForRemoteWrite,
+  type SessionRulesPatch,
+} from "../../domain/session/tools/advancedSessionSettings";
 import { ANALYTICS_EVENTS, track } from "../core/analytics/analytics";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 import { deserializeSessionFromFirestore } from "../firestore/serialization/serializeSession";
@@ -176,7 +179,7 @@ export async function createPremiumRemoteSession(
         gameSize: input.gameSize,
         distanceUnit: input.distanceUnit ?? "imperial",
         hostAppVersion: input.hostAppVersion,
-        rulesPatch: input.rulesPatch,
+        rulesPatch: omitPackCustomMatchingAreasForRemoteWrite(input.rulesPatch),
       });
     });
 

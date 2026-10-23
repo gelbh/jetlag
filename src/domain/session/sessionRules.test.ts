@@ -13,6 +13,7 @@ import { sessionRulesFromRecord, timerNeverStarted } from "./rules/core";
 import {
   advancedSettingsFromSession,
   defaultAdvancedSessionSettings,
+  omitPackCustomMatchingAreasForRemoteWrite,
   sessionRulesPatchFromAdvancedSettings,
 } from "./tools/advancedSessionSettings";
 
@@ -87,6 +88,18 @@ describe("sessionRules", () => {
     expect(restored.customHidingPeriodEnabled).toBe(true);
     expect(restored.hidingPeriodMinutes).toBe(90);
     expect(restored.disabledTools).toEqual(["photo"]);
+  });
+
+  it("omits customMatchingAreas from remote write patches when regionPackId is set", () => {
+    const remote = omitPackCustomMatchingAreasForRemoteWrite({
+      regionPackId: "australia",
+      bundledGeoRevision: 11,
+      customMatchingAreas: { 8: '{"type":"FeatureCollection","features":[]}' },
+    });
+
+    expect(remote.regionPackId).toBe("australia");
+    expect(remote.bundledGeoRevision).toBe(11);
+    expect(remote).not.toHaveProperty("customMatchingAreas");
   });
 
   it("maps session records into rules input and detects unstarted timers", () => {

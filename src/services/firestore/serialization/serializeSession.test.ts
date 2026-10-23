@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { BUNDLED_REGION_PACK_GEO_REVISION } from "@/domain/regions/regionPack";
 import { DEFAULT_CASTLE_SIEGE_DIALS } from "@/domain/session/castleSiege/dials";
 import {
   buildHidingZoneDocument,
   buildSessionDocument,
   deserializeSessionFromFirestore,
+  sessionRulesPatchToFirestore,
 } from "./serializeSession";
 import {
   assertNoNestedArrays,
@@ -91,6 +93,62 @@ describe("serializeSession", () => {
     );
 
     expect(payload.tier).toBe("premium");
+  });
+
+  it("omits pack customMatchingAreas from Firestore create payload when regionPackId is set", () => {
+    const payload = buildSessionDocument(
+      "AUS1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "seeker",
+      "large",
+      {
+        regionPackId: "australia",
+        regionPackSubregionId: "nsw",
+        bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+        customMatchingAreas: {
+          8: '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"stateId":"nsw"},"geometry":null}]}',
+          9: '{"type":"FeatureCollection","features":[]}',
+        },
+      },
+    );
+
+    expect(payload.regionPackId).toBe("australia");
+    expect(payload.regionPackSubregionId).toBe("nsw");
+    expect(payload.bundledGeoRevision).toBe(BUNDLED_REGION_PACK_GEO_REVISION);
+    expect(payload).not.toHaveProperty("customMatchingAreas");
+  });
+
+  it("keeps customMatchingAreas on Firestore payload when regionPackId is absent", () => {
+    const areas = { 8: '{"type":"FeatureCollection","features":[]}' };
+    const payload = buildSessionDocument(
+      "CUST",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      { customMatchingAreas: areas },
+    );
+
+    expect(payload.customMatchingAreas).toEqual(areas);
+  });
+
+  it("omits pack customMatchingAreas from rules update payloads", () => {
+    const firestore = sessionRulesPatchToFirestore({
+      regionPackId: "australia",
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+      customMatchingAreas: { 8: '{"type":"FeatureCollection","features":[]}' },
+    });
+
+    expect(firestore.regionPackId).toBe("australia");
+    expect(firestore.bundledGeoRevision).toBe(BUNDLED_REGION_PACK_GEO_REVISION);
+    expect(firestore).not.toHaveProperty("customMatchingAreas");
   });
 
   it("deserializes session tier with free default", () => {

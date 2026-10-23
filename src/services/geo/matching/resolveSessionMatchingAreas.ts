@@ -17,7 +17,8 @@ export { isPlayAreaReadySync, playAreaCacheKey, sessionUsesPackPlayArea };
 /**
  * Session bundled matching is complete when level 8 is present, and level 9
  * when the pack ships a secondary asset (dual-depth metros). Single-depth packs
- * (no secondary) are complete with level 8 only.
+ * (no secondary) are complete with level 8 only. Packs that declare level 4/6
+ * assets (e.g. Australia CED/SED) also require those keys.
  */
 export function hasBundledMatchingLevels(
   areas: CustomMatchingAreasByLevel | undefined,
@@ -28,6 +29,15 @@ export function hasBundledMatchingLevels(
   }
 
   const config = regionPackId ? getRegionPackConfig(regionPackId) : undefined;
+  if (config?.geoAssets.matchingLevel4 && !areas[4]) {
+    return false;
+  }
+  if (
+    (config?.geoAssets.matchingLevel6 || config?.geoAssets.matchingLevel6BySubregion) &&
+    !areas[6]
+  ) {
+    return false;
+  }
   if (config && !config.geoAssets.secondary) {
     return true;
   }

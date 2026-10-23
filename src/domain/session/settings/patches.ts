@@ -13,6 +13,20 @@ import { hidingZoneRadiusMeters } from "../size/gameSize";
 import { thermometerPresetsMetersForGameSize } from "../size/gameSizeRules";
 import type { AdvancedSessionSettingsValue, SessionRulesPatch } from "./types";
 
+/**
+ * Pack matching GeoJSON is reloaded client-side via resolveSessionMatchingAreas.
+ * Never persist it on remote session writes (Australia STE alone exceeds Firestore's 1MiB doc limit).
+ */
+export function omitPackCustomMatchingAreasForRemoteWrite(
+  patch: SessionRulesPatch,
+): SessionRulesPatch {
+  if (!patch.regionPackId || patch.customMatchingAreas === undefined) {
+    return patch;
+  }
+  const { customMatchingAreas: _omit, ...rest } = patch;
+  return rest;
+}
+
 export function sessionRulesPatchFromAdvancedSettings(
   gameSize: GameSize,
   settings: AdvancedSessionSettingsValue,

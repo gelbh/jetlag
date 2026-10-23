@@ -30,6 +30,11 @@ describe("australia region pack wiring", () => {
     expect(config?.geoAssets.primary).toBe("/geo/australia/states.geojson");
     expect(config?.geoAssets.secondary).toBe("/geo/australia/lgas.geojson");
     expect(config?.geoAssets.secondaryBySubregion?.("nsw")).toBe("/geo/australia/lgas/nsw.geojson");
+    expect(config?.geoAssets.matchingLevel4).toBe("/geo/australia/ced.geojson");
+    expect(config?.geoAssets.matchingLevel6).toBe("/geo/australia/sed.geojson");
+    expect(config?.geoAssets.matchingLevel6BySubregion?.("nsw")).toBe(
+      "/geo/australia/sed/nsw.geojson",
+    );
   });
 
   it("keeps all four admin matching categories available", () => {
@@ -91,6 +96,54 @@ describe("australia geo assets", () => {
         true,
       );
       expect(typeof feature.properties.lgaId).toBe("string");
+    }
+  });
+
+  it("ships national CED with cedId, name, and stateId", () => {
+    const path = resolve(root, "ced.geojson");
+    expect(existsSync(path), path).toBe(true);
+    const collection = JSON.parse(readFileSync(path, "utf8")) as {
+      features: Array<{ properties: { cedId: string; name: string; stateId: string } }>;
+    };
+    expect(collection.features.length).toBeGreaterThan(0);
+    const locked = new Set(AUSTRALIA_STATES);
+    for (const feature of collection.features) {
+      expect(typeof feature.properties.cedId).toBe("string");
+      expect(feature.properties.cedId.length).toBeGreaterThan(0);
+      expect(typeof feature.properties.name).toBe("string");
+      expect(feature.properties.name.length).toBeGreaterThan(0);
+      expect(locked.has(feature.properties.stateId as (typeof AUSTRALIA_STATES)[number])).toBe(
+        true,
+      );
+    }
+  });
+
+  it("ships SED slices for every stateId including non-empty NSW", () => {
+    for (const stateId of AUSTRALIA_STATES) {
+      const path = resolve(root, `sed/${stateId}.geojson`);
+      expect(existsSync(path), path).toBe(true);
+      const collection = JSON.parse(readFileSync(path, "utf8")) as {
+        features: Array<{ properties: { sedId: string; name: string; stateId: string } }>;
+      };
+      expect(collection.features.length, stateId).toBeGreaterThan(0);
+      for (const feature of collection.features) {
+        expect(feature.properties.stateId).toBe(stateId);
+        expect(typeof feature.properties.sedId).toBe("string");
+        expect(feature.properties.sedId.length).toBeGreaterThan(0);
+        expect(typeof feature.properties.name).toBe("string");
+        expect(feature.properties.name.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("ships national sed.geojson covering every locked stateId", () => {
+    const collection = JSON.parse(readFileSync(resolve(root, "sed.geojson"), "utf8")) as {
+      features: Array<{ properties: { sedId: string; stateId: string } }>;
+    };
+    expect(collection.features.length).toBeGreaterThan(0);
+    const seen = new Set(collection.features.map((f) => f.properties.stateId));
+    for (const stateId of AUSTRALIA_STATES) {
+      expect(seen.has(stateId), stateId).toBe(true);
     }
   });
 });
