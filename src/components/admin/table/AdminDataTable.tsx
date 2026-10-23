@@ -1,6 +1,7 @@
 import { Box } from "@mantine/core";
 import type { KeyboardEvent, ReactNode } from "react";
 import type { AdminTablePrefs } from "@/domain/admin/adminTablePrefs";
+import { DESK_HAIRLINE } from "../shared/adminSurface";
 
 export interface AdminColumn<Row> {
   id: string;
@@ -26,7 +27,6 @@ export interface AdminDataTableProps<Row> {
   footer?: ReactNode;
 }
 
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
 const cellSeparator = "0.5px solid color-mix(in oklch, var(--color-rule) 30%, transparent)";
 
 /** Raw-value sort; nulls always last whatever the direction. */
@@ -124,7 +124,7 @@ export function AdminDataTable<Row>({
                     background: "var(--color-surface-panel)",
                     height: 34,
                     padding: 0,
-                    borderBottom: hairline,
+                    borderBottom: DESK_HAIRLINE,
                     borderLeft: index > 0 ? cellSeparator : undefined,
                     textAlign: column.numeric ? "right" : "left",
                     fontSize: 11,
@@ -195,7 +195,7 @@ export function AdminDataTable<Row>({
                     style={{
                       height: rowHeight,
                       padding: "0 10px",
-                      borderBottom: hairline,
+                      borderBottom: DESK_HAIRLINE,
                       borderLeft: index > 0 ? cellSeparator : undefined,
                       whiteSpace: "nowrap",
                       textAlign: column.numeric ? "right" : "left",

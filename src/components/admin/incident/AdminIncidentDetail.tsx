@@ -7,6 +7,7 @@ import { SupportAgentChat } from "../../incident/SupportAgentChat";
 import { AdminDiagRow } from "../shared/AdminDiagRow";
 import { AdminEmptyState } from "../shared/AdminEmptyState";
 import { AdminSegmented } from "../shared/AdminSegmented";
+import { DESK_HAIRLINE } from "../shared/adminSurface";
 import { AdminHotfixThread } from "./AdminHotfixThread";
 import { AdminIncidentMessage, formatIncidentClock } from "./AdminIncidentMessage";
 
@@ -312,7 +313,7 @@ function AdminIncidentDetailBody({
               pb={16}
               style={{
                 flex: "none",
-                borderTop: "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+                borderTop: DESK_HAIRLINE,
               }}
             >
               <TextInput
