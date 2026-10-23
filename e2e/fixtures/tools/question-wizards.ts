@@ -163,6 +163,11 @@ export async function waitForGeoLoadingIdle(page: Page) {
   if (await loading.count()) {
     await expect(loading).toHaveCount(0, { timeout: 60_000 });
   }
+  // Task-driven readouts render a progress bar instead of the spinner text.
+  const progress = page.getByTestId("load-progress");
+  if (await progress.count()) {
+    await expect(progress).toHaveCount(0, { timeout: 60_000 });
+  }
 }
 
 /** Tip send cost suffix (`D2P1`). Shared source for primed / multiplayer / in-flight. */
@@ -287,7 +292,7 @@ export async function sendRadarToHiders(page: Page) {
   });
 }
 
-async function pickCatalogRow(page: Page, label: RegExp | string) {
+export async function pickCatalogRow(page: Page, label: RegExp | string) {
   const row = page.getByRole("button", { name: label }).first();
   await expect(row).toBeVisible({ timeout: 15_000 });
   await row.click();
