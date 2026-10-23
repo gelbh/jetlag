@@ -97,7 +97,8 @@ export function measuringFlipGapMetersAtPoint(
     return null;
   }
 
-  const seekerAnchor = seekerAnchorFromMetadata(annotation.metadata);
+  const metadata = annotation.metadata as Record<string, unknown>;
+  const seekerAnchor = seekerAnchorFromMetadata(metadata);
   if (!seekerAnchor) {
     return null;
   }
@@ -131,10 +132,7 @@ export function measuringFlipGapMetersAtPoint(
   }
 
   if (regionInput.usesAllPlacesInArea) {
-    const measuringPlaces = measuringPlacesFromMetadata(
-      annotation.metadata,
-      regionInput.measuringPlaces,
-    );
+    const measuringPlaces = measuringPlacesFromMetadata(metadata, regionInput.measuringPlaces);
     const stationDistance = minDistanceToPlaces(point, measuringPlaces);
     const seekerDistance = minDistanceToPlaces(seekerAnchor, measuringPlaces);
     if (stationDistance === null || seekerDistance === null) {
