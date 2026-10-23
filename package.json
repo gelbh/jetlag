@@ -42,13 +42,13 @@
   },
   "dependencies": {
     "@fontsource/barlow-semi-condensed": "^5.2.7",
-    "@fontsource/source-sans-3": "^5.2.9",
-    "@mantine/core": "^9.7.1",
-    "@mantine/form": "^9.7.1",
-    "@mantine/hooks": "^9.7.1",
-    "@mantine/notifications": "^9.7.1",
+    "@fontsource/source-sans-3": "^5.3.1",
+    "@mantine/core": "^9.7.3",
+    "@mantine/form": "^9.7.3",
+    "@mantine/hooks": "^9.7.3",
+    "@mantine/notifications": "^9.7.3",
     "@phosphor-icons/react": "^2.1.10",
-    "@tanstack/react-query": "^5.104.1",
+    "@tanstack/react-query": "^5.104.5",
     "@tmcw/togeojson": "^7.1.3",
     "@turf/area": "^7.4.0",
     "@turf/bbox": "^7.4.0",
@@ -80,18 +80,18 @@
     "jszip": "^3.10.2",
     "kdbush": "^4.1.0",
     "lru-cache": "^11.5.2",
-    "maplibre-gl": "^6.13.0",
+    "maplibre-gl": "^6.15.0",
     "martinez-polygon-clipping": "^0.9.0",
-    "posthog-js": "^1.438.5",
-    "posthog-node": "^5.55.2",
+    "posthog-js": "^1.438.12",
+    "posthog-node": "^5.56.2",
     "rbush": "^4.0.1",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "react-map-gl": "^8.1.3",
     "react-router-dom": "^7.18.4",
     "tailwind-merge": "^3.7.0",
     "use-debounce": "^10.1.1",
-    "zod": "^4.6.5",
+    "zod": "^4.6.7",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
@@ -133,9 +133,9 @@
     "wrangler": "^4.151.0"
   },
   "optionalDependencies": {
-    "@rolldown/binding-darwin-arm64": "1.2.13",
-    "@rolldown/binding-darwin-x64": "1.2.13",
-    "@rolldown/binding-linux-x64-gnu": "1.2.13"
+    "@rolldown/binding-darwin-arm64": "1.2.14",
+    "@rolldown/binding-darwin-x64": "1.2.14",
+    "@rolldown/binding-linux-x64-gnu": "1.2.14"
   },
   "overrides": {
     "node-fetch": {
