@@ -43,6 +43,8 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
   },
   // Union AABB of public/geo/southampton/wards.geojson (+0.02° pad).
   southampton: { south: 50.86, west: -1.4973, north: 50.9761, east: -1.302 },
+  // AABB from public/geo/australia/states.geojson (+0.02° pad).
+  australia: { south: -43.7604, west: 112.9011, north: -9.1225, east: 159.1292 },
 };
 
 /**

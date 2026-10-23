@@ -15,7 +15,8 @@ export type RegionPackId =
   | "switzerland"
   | "portland-maine"
   | "prince-rupert"
-  | "southampton";
+  | "southampton"
+  | "australia";
 
 export const REGION_PACK_IDS: readonly RegionPackId[] = [
   "dublin",
@@ -29,10 +30,11 @@ export const REGION_PACK_IDS: readonly RegionPackId[] = [
   "portland-maine",
   "prince-rupert",
   "southampton",
+  "australia",
 ] as const;
 
 /** Bump when bundled boundary or POI assets change to bust in-memory and Firestore session caches. */
-export const BUNDLED_REGION_PACK_GEO_REVISION = 10;
+export const BUNDLED_REGION_PACK_GEO_REVISION = 11;
 
 /** @deprecated Use subregionId on presets. Dublin council ids remain valid subregion values. */
 export type DublinCouncilFilter = "dcc" | "fingal" | "sdcc" | "dlr";
