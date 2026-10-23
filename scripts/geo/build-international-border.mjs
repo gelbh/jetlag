@@ -9,7 +9,7 @@ import { featureCollection } from "@turf/helpers";
 import union from "@turf/union";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, "..");
+const root = join(__dirname, "../..");
 const publicGeo = join(root, "public", "geo");
 
 const PACK_IDS = [

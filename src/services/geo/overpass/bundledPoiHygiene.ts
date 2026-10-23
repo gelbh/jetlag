@@ -1,4 +1,4 @@
-// Build-time fill scripts import this module via jiti (e.g. fill-switzerland-pack-geo.mjs).
+// Build-time fill scripts import this module via jiti (e.g. scripts/geo/fill-pack.mjs).
 import { haversineMeters } from "@/domain/geometry/gameArea/distance";
 import { isWikidataQid } from "../parseWikidataId";
 

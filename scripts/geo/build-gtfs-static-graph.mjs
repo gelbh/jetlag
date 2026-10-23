@@ -4,11 +4,11 @@
  * Requires TRANSITLAND_API_KEY for live downloads; --fixtures-only skips network.
  *
  * Optional (no API key): repeatable --local-zip with --metro <id>.
- *   node scripts/build-gtfs-static-graph.mjs --metro dublin \
+ *   node scripts/geo/build-gtfs-static-graph.mjs --metro dublin \
  *     --local-zip /tmp/GTFS_Dublin_Bus.zip --local-zip /tmp/GTFS_GoAhead.zip
  *
- * Run: node scripts/build-gtfs-static-graph.mjs
- *      node scripts/build-gtfs-static-graph.mjs --metro nyc
+ * Run: node scripts/geo/build-gtfs-static-graph.mjs
+ *      node scripts/geo/build-gtfs-static-graph.mjs --metro nyc
  */
 import { execFileSync, spawn } from "node:child_process";
 import {
@@ -29,7 +29,7 @@ import JSZip from "jszip";
 /** V8 string limit is ~512MiB; BODS regional zips exceed that for stop_times. */
 const LARGE_ZIP_BYTES = 40 * 1024 * 1024;
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const OUT_DIR = resolve(ROOT, "public/geo/gtfs");
 
 function stripUtf8Bom(text) {

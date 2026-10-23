@@ -6,8 +6,8 @@
  * Further client simplify via @turf/simplify to Switzerland-band file weight.
  *
  * Usage:
- *   node scripts/build-australia-boundaries.mjs --raw-dir /tmp/abs-asgs/raw
- *   node scripts/build-australia-boundaries.mjs --raw-dir /tmp/abs-asgs/raw --only ced-sed
+ *   node scripts/geo/build-australia-boundaries.mjs --raw-dir /tmp/abs-asgs/raw
+ *   node scripts/geo/build-australia-boundaries.mjs --raw-dir /tmp/abs-asgs/raw --only ced-sed
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -19,7 +19,7 @@ import simplify from "@turf/simplify";
 import union from "@turf/union";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, "..");
+const root = join(__dirname, "../..");
 const outDir = join(root, "public", "geo", "australia");
 
 const STATE_BY_CODE = {

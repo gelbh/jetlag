@@ -3,15 +3,15 @@
  * One-shot multi-metro GTFS rebuild (no Transitland API key required).
  *
  * Downloads public agency / Mobility Database / BODS zips into `.cache/gtfs-rebuild/`,
- * then invokes `scripts/build-gtfs-static-graph.mjs --metro <id> --local-zip …` for each
+ * then invokes `scripts/geo/build-gtfs-static-graph.mjs --metro <id> --local-zip …` for each
  * shipped GTFS metro. Presets without a GTFS metro (tokyo / osaka / swiss) are listed
  * as skipped.
  *
  * Usage:
- *   node scripts/rebuild-all-gtfs-metros.mjs
- *   node scripts/rebuild-all-gtfs-metros.mjs --metro nyc,london
- *   node scripts/rebuild-all-gtfs-metros.mjs --skip-download   # reuse cached zips
- *   node scripts/rebuild-all-gtfs-metros.mjs --dry-run
+ *   node scripts/geo/rebuild-gtfs-metros.mjs
+ *   node scripts/geo/rebuild-gtfs-metros.mjs --metro nyc,london
+ *   node scripts/geo/rebuild-gtfs-metros.mjs --skip-download   # reuse cached zips
+ *   node scripts/geo/rebuild-gtfs-metros.mjs --dry-run
  *
  * Env:
  *   GTFS_REBUILD_CACHE   override cache dir (default: <repo>/.cache/gtfs-rebuild)
@@ -32,8 +32,8 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const BUILD_SCRIPT = resolve(ROOT, "scripts/build-gtfs-static-graph.mjs");
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const BUILD_SCRIPT = resolve(ROOT, "scripts/geo/build-gtfs-static-graph.mjs");
 const MANIFEST_PATH = resolve(ROOT, "public/geo/gtfs/manifest.json");
 const BIOME_PATH = resolve(ROOT, "biome.json");
 const CACHE_DIR = process.env.GTFS_REBUILD_CACHE?.trim() || resolve(ROOT, ".cache/gtfs-rebuild");
@@ -173,7 +173,7 @@ function parseArgs(argv) {
       i += 1;
     } else if (arg === "--help" || arg === "-h") {
       console.log(
-        `Usage: node scripts/rebuild-all-gtfs-metros.mjs [--metro a,b] [--skip-download] [--dry-run]`,
+        `Usage: node scripts/geo/rebuild-gtfs-metros.mjs [--metro a,b] [--skip-download] [--dry-run]`,
       );
       process.exit(0);
     } else {

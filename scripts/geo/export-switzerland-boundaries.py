@@ -8,7 +8,7 @@ Deps (maintainer venv): pyshp, pyproj
   python3 -m venv .tmp-swiss-venv && .tmp-swiss-venv/bin/pip install pyshp pyproj
 
 Example:
-  .tmp-swiss-venv/bin/python scripts/export-switzerland-boundaries.py \\
+  .tmp-swiss-venv/bin/python scripts/geo/export-switzerland-boundaries.py \\
     --source-dir /path/to/extracted-shp \\
     --out-dir public/geo/switzerland
 """
