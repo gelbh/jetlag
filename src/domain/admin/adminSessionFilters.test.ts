@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { AdminSessionSummary } from "@/services/admin/adminSessions";
-import { filterAdminSessions, summarizeAdminSessions } from "./adminSessionFilters";
+import {
+  applyAdminSessionChipFilters,
+  filterAdminSessions,
+  summarizeAdminSessions,
+} from "./adminSessionFilters";
 
 function summary(overrides: Partial<AdminSessionSummary> = {}): AdminSessionSummary {
   return {
@@ -189,5 +193,27 @@ describe("adminSessionFilters", () => {
     expect(stats.multiplayer).toBe(1);
     expect(stats.byPhase.seek).toBe(1);
     expect(stats.byPhase["end-game-active"]).toBe(1);
+  });
+});
+
+describe("applyAdminSessionChipFilters", () => {
+  it("filters by phase, tier and open incidents", () => {
+    const sessions = [
+      summary({ sessionId: "a", phase: "seek", tier: "premium" }),
+      summary({ sessionId: "b", phase: "hiding", tier: "free" }),
+    ];
+    const incidents = new Map([["b", 2]]);
+    const off = { phase: null, tier: null, hasIncident: false } as const;
+    expect(applyAdminSessionChipFilters(sessions, off, incidents)).toHaveLength(2);
+    expect(
+      applyAdminSessionChipFilters(sessions, { ...off, phase: "seek" }, incidents)[0]?.sessionId,
+    ).toBe("a");
+    expect(
+      applyAdminSessionChipFilters(sessions, { ...off, tier: "free" }, incidents)[0]?.sessionId,
+    ).toBe("b");
+    expect(
+      applyAdminSessionChipFilters(sessions, { ...off, hasIncident: true }, incidents)[0]
+        ?.sessionId,
+    ).toBe("b");
   });
 });

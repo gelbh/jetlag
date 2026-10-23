@@ -14,7 +14,7 @@ describe("AdminSplitBoard", () => {
       </AdminWorld>,
     );
     const region = screen.getByRole("region", { name: "Player roster" });
-    const toggle = within(region).getByRole("button", { name: /Runners\s*4/ });
+    const toggle = within(region).getByRole("button", { name: /Players\s*4/ });
     expect(toggle).toHaveAttribute("aria-expanded", "true");
 
     fireEvent.click(toggle);
@@ -29,7 +29,7 @@ describe("AdminSplitBoard", () => {
         </AdminSplitBoard>
       </AdminWorld>,
     );
-    expect(screen.getByRole("button", { name: /Runners\s*2/ })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: /Players\s*2/ })).toHaveAttribute(
       "aria-expanded",
       "false",
     );

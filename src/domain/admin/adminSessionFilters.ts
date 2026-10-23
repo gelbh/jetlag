@@ -116,6 +116,7 @@ export function filterAdminSessions(
     const hostVersion = summary.hostAppVersion?.toLowerCase() ?? "";
     return (
       summary.code.toLowerCase().includes(normalizedQuery) ||
+      (summary.hostUid ?? "").toLowerCase().includes(normalizedQuery) ||
       areaLabel.includes(normalizedQuery) ||
       hostVersion.includes(normalizedQuery)
     );
@@ -151,4 +152,24 @@ export function summarizeAdminSessions(sessions: readonly AdminSessionSummary[])
     multiplayer,
     byPhase,
   };
+}
+
+export interface AdminSessionChipFilters {
+  phase: AdminSessionPhase | null;
+  tier: AdminSessionSummary["tier"] | null;
+  hasIncident: boolean;
+}
+
+/** Toolbar chips beyond Live only: Phase, Tier and Has incident (needs the open-incident map). */
+export function applyAdminSessionChipFilters(
+  sessions: readonly AdminSessionSummary[],
+  chips: AdminSessionChipFilters,
+  openIncidentsBySession: ReadonlyMap<string, number>,
+): AdminSessionSummary[] {
+  return sessions.filter(
+    (summary) =>
+      (chips.phase == null || summary.phase === chips.phase) &&
+      (chips.tier == null || summary.tier === chips.tier) &&
+      (!chips.hasIncident || (openIncidentsBySession.get(summary.sessionId) ?? 0) > 0),
+  );
 }

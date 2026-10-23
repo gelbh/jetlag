@@ -20,6 +20,8 @@ export const APP_ROUTE_PATHS = [
   "/admin/incidents",
   "/admin/incidents/:incidentId",
   "/admin/preload-requests",
+  "/admin/sessions/:sessionId",
+  "/admin/preload-requests/:requestId",
   "/presets",
   "/presets/new",
   "/presets/:id/edit",

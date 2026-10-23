@@ -11,7 +11,6 @@ function strip(
     incidentsLoading?: boolean;
     onRefresh?: () => void;
     onOpenSettings?: () => void;
-    onOpenNeedsYou?: () => void;
     dataFetchedAt?: Date | null;
     syncFailed?: boolean;
   } = {},
@@ -21,12 +20,10 @@ function strip(
       liveCount={3}
       runnerCount={11}
       needsYouCount={overrides.needsYouCount ?? 2}
-      inQueueCount={7}
       incidentsLoading={overrides.incidentsLoading ?? false}
       refreshing={false}
       onRefresh={overrides.onRefresh ?? vi.fn()}
       onOpenSettings={overrides.onOpenSettings ?? vi.fn()}
-      onOpenNeedsYou={overrides.onOpenNeedsYou}
       dataFetchedAt={overrides.dataFetchedAt ?? null}
       syncFailed={overrides.syncFailed ?? false}
     />
@@ -46,11 +43,12 @@ describe("AdminStatusStrip", () => {
 
   it("labels the desk as the event centre without Broadcast or Survey copy", () => {
     renderStrip();
-    expect(screen.getByText("Event centre")).toBeInTheDocument();
+    expect(screen.getByText("Admin")).toBeInTheDocument();
     expect(screen.getByLabelText("Live games")).toHaveTextContent("3");
-    expect(screen.getByLabelText("Runners")).toHaveTextContent("11");
+    expect(screen.getByLabelText("Players")).toHaveTextContent("11");
     expect(screen.getByLabelText("Needs you")).toHaveTextContent("2");
-    expect(screen.getByLabelText("In queue")).toHaveTextContent("7");
+    expect(screen.queryByLabelText("In queue")).toBeNull();
+    expect(screen.getByText("2", { selector: "span" }).style.color).toBe("var(--color-flag)");
     expect(screen.queryByText(/broadcast/i)).toBeNull();
   });
 
@@ -84,10 +82,8 @@ describe("AdminStatusStrip", () => {
       expect(control.closest(HIDDEN_ON_MOBILE)).toBeNull();
     }
     for (const detail of [
-      screen.getByText("Event centre"),
       screen.getByLabelText("Live games"),
-      screen.getByLabelText("Runners"),
-      screen.getByLabelText("In queue"),
+      screen.getByLabelText("Players"),
       document.querySelector("time"),
     ]) {
       expect(detail?.closest(HIDDEN_ON_MOBILE)).not.toBeNull();
@@ -121,15 +117,12 @@ describe("AdminStatusStrip", () => {
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
-  it("turns Needs you into a dialog button when the desk asks for the drawer", () => {
-    const onOpenNeedsYou = vi.fn();
-    renderStrip({ onOpenNeedsYou });
-
-    expect(screen.queryByRole("link", { name: "Needs you: 2 open" })).toBeNull();
-    const needsYou = screen.getByRole("button", { name: "Needs you: 2 open" });
-    expect(needsYou).toHaveAttribute("aria-haspopup", "dialog");
-    fireEvent.click(needsYou);
-    expect(onOpenNeedsYou).toHaveBeenCalledTimes(1);
+  it("links Needs you to the incidents route", () => {
+    renderStrip();
+    expect(screen.getByRole("link", { name: "Needs you: 2 open" })).toHaveAttribute(
+      "href",
+      "/admin/incidents",
+    );
   });
 
   it("shows how long ago the list synced and ages it with the clock", () => {

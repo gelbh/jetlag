@@ -228,6 +228,7 @@ export function summarizeSession(sessionId, code, session, nowMs = Date.now()) {
     mode: deriveSessionMode(memberUids.length, roleCounts),
     isLive: false,
     liveMultiplayer: false,
+    questionCount: 0,
   };
 }
 
@@ -250,14 +251,21 @@ export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
     return null;
   }
 
-  const [annotationsSnap, annotationCountSnap, messagesSnap, questionsSnap, locationsSnap] =
-    await Promise.all([
-      sessionRef.collection("annotations").orderBy("updatedAt", "desc").limit(1).get(),
-      sessionRef.collection("annotations").where("status", "==", "active").count().get(),
-      sessionRef.collection("messages").orderBy("createdAt", "desc").limit(1).get(),
-      sessionRef.collection("pendingQuestions").orderBy("createdAt", "desc").limit(1).get(),
-      sessionRef.collection("playerLocations").orderBy("updatedAt", "desc").limit(1).get(),
-    ]);
+  const [
+    annotationsSnap,
+    annotationCountSnap,
+    messagesSnap,
+    questionsSnap,
+    questionCountSnap,
+    locationsSnap,
+  ] = await Promise.all([
+    sessionRef.collection("annotations").orderBy("updatedAt", "desc").limit(1).get(),
+    sessionRef.collection("annotations").where("status", "==", "active").count().get(),
+    sessionRef.collection("messages").orderBy("createdAt", "desc").limit(1).get(),
+    sessionRef.collection("pendingQuestions").orderBy("createdAt", "desc").limit(1).get(),
+    sessionRef.collection("pendingQuestions").count().get(),
+    sessionRef.collection("playerLocations").orderBy("updatedAt", "desc").limit(1).get(),
+  ]);
 
   const lastActivityMs = resolveSessionLastActivityMs(session, {
     annotationDoc: annotationsSnap.docs[0]?.data() ?? null,
@@ -273,6 +281,7 @@ export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
   summary.lastAnnotationAt =
     lastAnnotationMs == null ? null : new Date(lastAnnotationMs).toISOString();
   summary.activeAnnotationCount = annotationCountSnap.data().count ?? 0;
+  summary.questionCount = questionCountSnap.data().count ?? 0;
   summary.isLive = computeIsLive(lastActivityMs, lastLocationMs, nowMs);
   summary.liveMultiplayer =
     summary.isLive && summary.roleCounts.seeker >= 1 && summary.roleCounts.hider >= 1;
