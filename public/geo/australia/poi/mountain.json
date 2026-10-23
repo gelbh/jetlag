@@ -1,6 +1,498 @@
 {
   "category": "mountain",
-  "source": "none",
-  "bbox": { "south": -43.7604, "west": 112.9011, "north": -9.1225, "east": 159.1292 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -43.7604,
+    "west": 112.9011,
+    "north": -9.1225,
+    "east": 159.1292
+  },
+  "places": [
+    {
+      "id": "Q124928",
+      "name": "Adamsons Peak",
+      "lat": -43.350711,
+      "lng": 146.824031
+    },
+    {
+      "id": "Q808400",
+      "name": "Barn Bluff",
+      "lat": -41.724061,
+      "lng": 145.923042
+    },
+    {
+      "id": "Q241762",
+      "name": "Bimberi Peak",
+      "lat": -35.660833,
+      "lng": 148.789167
+    },
+    {
+      "id": "Q804222",
+      "name": "Black Mountain",
+      "lat": -35.273836,
+      "lng": 149.0978
+    },
+    {
+      "id": "Q2496852",
+      "name": "Bluff Knoll",
+      "lat": -34.375556,
+      "lng": 118.256111
+    },
+    {
+      "id": "Q21895278",
+      "name": "Castle Hill",
+      "lat": -35.7158,
+      "lng": 136.9058
+    },
+    {
+      "id": "Q1099671",
+      "name": "Cleft Peak",
+      "lat": -42.9625,
+      "lng": 146.091667
+    },
+    {
+      "id": "Q1138451",
+      "name": "Cradle Mountain",
+      "lat": -41.684644,
+      "lng": 145.951275
+    },
+    {
+      "id": "Q185611",
+      "name": "Federation Peak",
+      "lat": -43.271389,
+      "lng": 146.475556
+    },
+    {
+      "id": "Q1445118",
+      "name": "Frankland Peak",
+      "lat": -42.985833,
+      "lng": 146.144167
+    },
+    {
+      "id": "Q1345637",
+      "name": "Greycap",
+      "lat": -42.971111,
+      "lng": 146.106944
+    },
+    {
+      "id": "Q3120844",
+      "name": "Gungartan",
+      "lat": -36.2667,
+      "lng": 148.383
+    },
+    {
+      "id": "Q1673147",
+      "name": "Ironstone Mountain",
+      "lat": -41.716667,
+      "lng": 146.5
+    },
+    {
+      "id": "Q279980",
+      "name": "Kata Tjuta",
+      "lat": -25.3,
+      "lng": 130.7593
+    },
+    {
+      "id": "Q1742014",
+      "name": "King Davids Peak",
+      "lat": -41.868889,
+      "lng": 146.258611
+    },
+    {
+      "id": "Q204552",
+      "name": "Kunanyi / Mount Wellington",
+      "lat": -42.899167,
+      "lng": 147.2325
+    },
+    {
+      "id": "Q1632512",
+      "name": "Legges Tor",
+      "lat": -41.533159,
+      "lng": 147.658844
+    },
+    {
+      "id": "Q1582484",
+      "name": "Mother Cummings Peak",
+      "lat": -41.67741,
+      "lng": 146.543736
+    },
+    {
+      "id": "Q520864",
+      "name": "Mount Achilles",
+      "lat": -41.8583,
+      "lng": 145.978
+    },
+    {
+      "id": "Q492279",
+      "name": "Mount Ainslie",
+      "lat": -35.27,
+      "lng": 149.158333
+    },
+    {
+      "id": "Q1757719",
+      "name": "Mount Alexander",
+      "lat": -36.996944,
+      "lng": 144.305
+    },
+    {
+      "id": "Q1336808",
+      "name": "Mount Anne",
+      "lat": -42.942,
+      "lng": 146.424
+    },
+    {
+      "id": "Q531825",
+      "name": "Mount Arthur",
+      "lat": -41.3,
+      "lng": 147.3
+    },
+    {
+      "id": "Q1950378",
+      "name": "Mount Barrow",
+      "lat": -41.377222,
+      "lng": 147.4175
+    },
+    {
+      "id": "Q1330376",
+      "name": "Mount Bartle Frere",
+      "lat": -17.383333,
+      "lng": 145.816667
+    },
+    {
+      "id": "Q1950396",
+      "name": "Mount Beerwah",
+      "lat": -26.9,
+      "lng": 152.883333
+    },
+    {
+      "id": "Q1645747",
+      "name": "Mount Bellenden Ker",
+      "lat": -17.264167,
+      "lng": 145.853889
+    },
+    {
+      "id": "Q130217",
+      "name": "Mount Bogong",
+      "lat": -36.7325,
+      "lng": 147.305833
+    },
+    {
+      "id": "Q6919798",
+      "name": "Mount Bowen",
+      "lat": -27.4331,
+      "lng": 145.183
+    },
+    {
+      "id": "Q16895397",
+      "name": "Mount Buffalo",
+      "lat": -36.777,
+      "lng": 146.767
+    },
+    {
+      "id": "Q6920235",
+      "name": "Mount Cooke",
+      "lat": -32.4239,
+      "lng": 116.312
+    },
+    {
+      "id": "Q16895478",
+      "name": "Mount Dandenong",
+      "lat": -37.827158,
+      "lng": 145.352823
+    },
+    {
+      "id": "Q6920465",
+      "name": "Mount Donna Buang",
+      "lat": -37.706389,
+      "lng": 145.681111
+    },
+    {
+      "id": "Q994378",
+      "name": "Mount Feathertop",
+      "lat": -36.9,
+      "lng": 147.133333
+    },
+    {
+      "id": "Q2780831",
+      "name": "Mount Field West",
+      "lat": -42.65632,
+      "lng": 146.51492
+    },
+    {
+      "id": "Q8536515",
+      "name": "Mount Franklin (Victoria)",
+      "lat": -37.2651,
+      "lng": 144.15
+    },
+    {
+      "id": "Q1659706",
+      "name": "Mount Geryon",
+      "lat": -41.927889,
+      "lng": 146.054667
+    },
+    {
+      "id": "Q6920912",
+      "name": "Mount Gingera",
+      "lat": -35.583333,
+      "lng": 148.783333
+    },
+    {
+      "id": "Q6920913",
+      "name": "Mount Ginini",
+      "lat": -35.529444,
+      "lng": 148.772222
+    },
+    {
+      "id": "Q1950498",
+      "name": "Mount Gould",
+      "lat": -41.9667,
+      "lng": 146.083
+    },
+    {
+      "id": "Q3321857",
+      "name": "Mount Gower",
+      "lat": -31.5903,
+      "lng": 159.072
+    },
+    {
+      "id": "Q107619880",
+      "name": "Mount Hobbs",
+      "lat": -42.503889,
+      "lng": 147.591111
+    },
+    {
+      "id": "Q3321882",
+      "name": "Mount Jagungal",
+      "lat": -36.131667,
+      "lng": 148.384444
+    },
+    {
+      "id": "Q1300783",
+      "name": "Mount Jukes",
+      "lat": -42.1667,
+      "lng": 145.567
+    },
+    {
+      "id": "Q6921623",
+      "name": "Mount Kelly",
+      "lat": -35.715,
+      "lng": 148.867778
+    },
+    {
+      "id": "Q178167",
+      "name": "Mount Kosciuszko",
+      "lat": -36.45583,
+      "lng": 148.26351
+    },
+    {
+      "id": "Q1950581",
+      "name": "Mount Lloyd Jones",
+      "lat": -42.98,
+      "lng": 146.170556
+    },
+    {
+      "id": "Q3321938",
+      "name": "Mount Manypeaks",
+      "lat": -34.896111,
+      "lng": 118.261944
+    },
+    {
+      "id": "Q1950602",
+      "name": "Mount McKay",
+      "lat": -36.875095,
+      "lng": 147.24313
+    },
+    {
+      "id": "Q1788401",
+      "name": "Mount Meharry",
+      "lat": -22.966667,
+      "lng": 118.583333
+    },
+    {
+      "id": "Q548030",
+      "name": "Mount Munro",
+      "lat": -40.3698,
+      "lng": 148.1173
+    },
+    {
+      "id": "Q1950615",
+      "name": "Mount Murchison",
+      "lat": -42.083333,
+      "lng": 145.6
+    },
+    {
+      "id": "Q21905711",
+      "name": "Mount Oakleigh",
+      "lat": -41.7992,
+      "lng": 146.0375
+    },
+    {
+      "id": "Q21905854",
+      "name": "Mount Olympus",
+      "lat": -42.04,
+      "lng": 146.11
+    },
+    {
+      "id": "Q747182",
+      "name": "Mount Ossa",
+      "lat": -41.871025,
+      "lng": 146.033344
+    },
+    {
+      "id": "Q1950622",
+      "name": "Mount Owen",
+      "lat": -42.09,
+      "lng": 145.60001
+    },
+    {
+      "id": "Q1336504",
+      "name": "Mount Pelion East",
+      "lat": -41.857239,
+      "lng": 146.067683
+    },
+    {
+      "id": "Q1335779",
+      "name": "Mount Pelion West",
+      "lat": -41.831678,
+      "lng": 145.977625
+    },
+    {
+      "id": "Q1314313",
+      "name": "Mount Sorell",
+      "lat": -42.266667,
+      "lng": 145.533333
+    },
+    {
+      "id": "Q1041646",
+      "name": "Mount Stromlo",
+      "lat": -35.316667,
+      "lng": 149.016667
+    },
+    {
+      "id": "Q6924052",
+      "name": "Mount Tate",
+      "lat": -36.35,
+      "lng": 148.35
+    },
+    {
+      "id": "Q1950755",
+      "name": "Mount Thetis",
+      "lat": -41.863056,
+      "lng": 145.998056
+    },
+    {
+      "id": "Q542041",
+      "name": "Mount Townsend",
+      "lat": -36.416667,
+      "lng": 148.266667
+    },
+    {
+      "id": "Q6924231",
+      "name": "Mount Twynam",
+      "lat": -36.393333,
+      "lng": 148.314722
+    },
+    {
+      "id": "Q950412",
+      "name": "Mount Victoria",
+      "lat": -41.3308,
+      "lng": 147.837
+    },
+    {
+      "id": "Q1687370",
+      "name": "Murpheys Bluff",
+      "lat": -42.954444,
+      "lng": 146.08
+    },
+    {
+      "id": "Q21887620",
+      "name": "Oulnina Hill",
+      "lat": -32.588,
+      "lng": 139.8374
+    },
+    {
+      "id": "Q21940832",
+      "name": "Precipitous Bluff",
+      "lat": -43.4613,
+      "lng": 146.6029
+    },
+    {
+      "id": "Q2122141",
+      "name": "Quamby Bluff",
+      "lat": -41.6539,
+      "lng": 146.697
+    },
+    {
+      "id": "Q1410043",
+      "name": "Redtop Peak",
+      "lat": -42.936111,
+      "lng": 146.038889
+    },
+    {
+      "id": "Q2152792",
+      "name": "Right Angle Peak",
+      "lat": -42.994444,
+      "lng": 146.141944
+    },
+    {
+      "id": "Q1719537",
+      "name": "Secheron Peak",
+      "lat": -42.987222,
+      "lng": 146.155833
+    },
+    {
+      "id": "Q2325795",
+      "name": "Stacks Bluff",
+      "lat": -41.626119,
+      "lng": 147.688419
+    },
+    {
+      "id": "Q2404831",
+      "name": "Terminal Peak",
+      "lat": -42.982222,
+      "lng": 146.199722
+    },
+    {
+      "id": "Q2409367",
+      "name": "The Acropolis",
+      "lat": -41.9353,
+      "lng": 146.061
+    },
+    {
+      "id": "Q2410266",
+      "name": "The Citadel",
+      "lat": -42.9556,
+      "lng": 146.067
+    },
+    {
+      "id": "Q1642139",
+      "name": "The Cupola",
+      "lat": -42.9378,
+      "lng": 146.051
+    },
+    {
+      "id": "Q123375474",
+      "name": "The Dutchman Peak",
+      "lat": -32.319722,
+      "lng": 137.965278
+    },
+    {
+      "id": "Q2412510",
+      "name": "The Lion",
+      "lat": -42.9478,
+      "lng": 146.053
+    },
+    {
+      "id": "Q97334616",
+      "name": "The Rock Hill",
+      "lat": -35.274736,
+      "lng": 147.074236
+    },
+    {
+      "id": "Q33910",
+      "name": "Uluru",
+      "lat": -25.345,
+      "lng": 131.036111
+    }
+  ]
 }

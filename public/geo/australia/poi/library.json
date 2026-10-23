@@ -1,6 +1,6288 @@
 {
   "category": "library",
-  "source": "none",
-  "bbox": { "south": -43.7604, "west": 112.9011, "north": -9.1225, "east": 159.1292 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -43.7604,
+    "west": 112.9011,
+    "north": -9.1225,
+    "east": 159.1292
+  },
+  "places": [
+    {
+      "id": "Q43377054",
+      "name": "A. H. Bracks Public Library",
+      "lat": -32.03446,
+      "lng": 115.79552
+    },
+    {
+      "id": "Q63917299",
+      "name": "Aberdeen Library",
+      "lat": -32.161917,
+      "lng": 150.889667
+    },
+    {
+      "id": "Q4823962",
+      "name": "ACMI",
+      "lat": -37.8176,
+      "lng": 144.969
+    },
+    {
+      "id": "Q4650884",
+      "name": "ACT Heritage Library",
+      "lat": -35.3444,
+      "lng": 149.084
+    },
+    {
+      "id": "Q83090182",
+      "name": "Adamstown Library",
+      "lat": -32.935294,
+      "lng": 151.725648
+    },
+    {
+      "id": "Q56867964",
+      "name": "Adelaide River School",
+      "lat": -13.237157,
+      "lng": 131.109119
+    },
+    {
+      "id": "Q84963170",
+      "name": "Adelong Library",
+      "lat": -35.308642,
+      "lng": 148.065615
+    },
+    {
+      "id": "Q85461460",
+      "name": "Agnes Water Library",
+      "lat": -24.212068,
+      "lng": 151.910282
+    },
+    {
+      "id": "Q85461679",
+      "name": "Albany Creek Library",
+      "lat": -27.344783,
+      "lng": 152.968287
+    },
+    {
+      "id": "Q43377226",
+      "name": "Albany Public Library",
+      "lat": -35.023089,
+      "lng": 117.883149
+    },
+    {
+      "id": "Q66045336",
+      "name": "Albion Park Library",
+      "lat": -34.572921,
+      "lng": 150.773615
+    },
+    {
+      "id": "Q16868900",
+      "name": "Albury Library Museum",
+      "lat": -36.0789,
+      "lng": 146.916
+    },
+    {
+      "id": "Q85682271",
+      "name": "Alejandro Malaspina Resource Center in Canberra",
+      "lat": -35.323983,
+      "lng": 149.132879
+    },
+    {
+      "id": "Q4726098",
+      "name": "Alice Springs Public Library",
+      "lat": -23.701611,
+      "lng": 133.882944
+    },
+    {
+      "id": "Q85461683",
+      "name": "Allora Library",
+      "lat": -28.033484,
+      "lng": 151.982891
+    },
+    {
+      "id": "Q61099760",
+      "name": "Allport Library and Museum of Fine Arts",
+      "lat": -42.88193,
+      "lng": 147.324626
+    },
+    {
+      "id": "Q85461687",
+      "name": "Alpha Library",
+      "lat": -23.650854,
+      "lng": 146.641039
+    },
+    {
+      "id": "Q64481949",
+      "name": "Alstonville Library",
+      "lat": -28.841452,
+      "lng": 153.439163
+    },
+    {
+      "id": "Q43377071",
+      "name": "Altone Park Public Library",
+      "lat": -31.87487,
+      "lng": 115.93994
+    },
+    {
+      "id": "Q126106550",
+      "name": "Alyangula Area School",
+      "lat": -13.84964,
+      "lng": 136.42011
+    },
+    {
+      "id": "Q43377241",
+      "name": "Amherst Village Library",
+      "lat": -32.08966,
+      "lng": 115.94393
+    },
+    {
+      "id": "Q85461690",
+      "name": "Amity Point Library",
+      "lat": -27.395949,
+      "lng": 153.440373
+    },
+    {
+      "id": "Q80879145",
+      "name": "Andamooka School Community Library",
+      "lat": -30.448903,
+      "lng": 137.167614
+    },
+    {
+      "id": "Q85461693",
+      "name": "Annerley Library",
+      "lat": -27.509441,
+      "lng": 153.033381
+    },
+    {
+      "id": "Q85461696",
+      "name": "Aramac Library",
+      "lat": -22.97123,
+      "lng": 145.241581
+    },
+    {
+      "id": "Q85461700",
+      "name": "Arana Hills Library",
+      "lat": -27.394612,
+      "lng": 152.948974
+    },
+    {
+      "id": "Q80886777",
+      "name": "Ardrossan School Community Library",
+      "lat": -34.422962,
+      "lng": 137.913842
+    },
+    {
+      "id": "Q64481925",
+      "name": "Armidale War Memorial Library",
+      "lat": -30.51333,
+      "lng": 151.660298
+    },
+    {
+      "id": "Q64707853",
+      "name": "Arncliffe Library",
+      "lat": -33.936029,
+      "lng": 151.14708
+    },
+    {
+      "id": "Q84772780",
+      "name": "Artarmon Library",
+      "lat": -33.806977,
+      "lng": 151.185913
+    },
+    {
+      "id": "Q63919117",
+      "name": "Ashfield Library",
+      "lat": -33.88857,
+      "lng": 151.124198
+    },
+    {
+      "id": "Q56564119",
+      "name": "Ashgrove Library",
+      "lat": -27.444395,
+      "lng": 152.987098
+    },
+    {
+      "id": "Q85461703",
+      "name": "Atherton Library",
+      "lat": -17.268905,
+      "lng": 145.478854
+    },
+    {
+      "id": "Q66671313",
+      "name": "Auburn Library",
+      "lat": -33.854877,
+      "lng": 151.033374
+    },
+    {
+      "id": "Q85461706",
+      "name": "Augathella Library",
+      "lat": -25.794675,
+      "lng": 146.586585
+    },
+    {
+      "id": "Q43432867",
+      "name": "Augusta Public Library",
+      "lat": -34.314084,
+      "lng": 115.155323
+    },
+    {
+      "id": "Q4824478",
+      "name": "Australian National University Library",
+      "lat": -35.278,
+      "lng": 149.12
+    },
+    {
+      "id": "Q17022254",
+      "name": "Australian Policy Online",
+      "lat": -37.826039,
+      "lng": 145.034532
+    },
+    {
+      "id": "Q43433896",
+      "name": "Australind Public Library",
+      "lat": -33.281379,
+      "lng": 115.71639
+    },
+    {
+      "id": "Q85461714",
+      "name": "Babinda Library",
+      "lat": -17.344195,
+      "lng": 145.923834
+    },
+    {
+      "id": "Q43435075",
+      "name": "Badgingarra Public Library",
+      "lat": -30.387233,
+      "lng": 115.498838
+    },
+    {
+      "id": "Q85461717",
+      "name": "Badu Island Indigenous Knowledge Centre",
+      "lat": -10.159918,
+      "lng": 142.166344
+    },
+    {
+      "id": "Q4848465",
+      "name": "Baillieu Library",
+      "lat": -37.7985,
+      "lng": 144.96
+    },
+    {
+      "id": "Q56610110",
+      "name": "Bairnsdale Mechanics Institute",
+      "lat": -37.825333,
+      "lng": 147.628722
+    },
+    {
+      "id": "Q80913874",
+      "name": "Balaklava Community Library",
+      "lat": -34.154389,
+      "lng": 138.417306
+    },
+    {
+      "id": "Q43386029",
+      "name": "Baldivis Library and Community Centre",
+      "lat": -32.33236,
+      "lng": 115.81375
+    },
+    {
+      "id": "Q43435245",
+      "name": "Balingup Library",
+      "lat": -33.7838,
+      "lng": 115.985417
+    },
+    {
+      "id": "Q43386051",
+      "name": "Ballajura Public Library",
+      "lat": -31.83941,
+      "lng": 115.89483
+    },
+    {
+      "id": "Q64537671",
+      "name": "Ballina Library",
+      "lat": -28.868964,
+      "lng": 153.556594
+    },
+    {
+      "id": "Q63919175",
+      "name": "Balmain Library",
+      "lat": -33.856217,
+      "lng": 151.176828
+    },
+    {
+      "id": "Q64584840",
+      "name": "Balranald Library",
+      "lat": -34.637263,
+      "lng": 143.561906
+    },
+    {
+      "id": "Q85461720",
+      "name": "Bamaga Indigenous Knowledge Centre",
+      "lat": -10.887686,
+      "lng": 142.388488
+    },
+    {
+      "id": "Q85465319",
+      "name": "Banana Shire Mobile Library",
+      "lat": -24.390567,
+      "lng": 150.513382
+    },
+    {
+      "id": "Q65930789",
+      "name": "Bankstown Library and Knowledge Centre",
+      "lat": -33.914627,
+      "lng": 151.034917
+    },
+    {
+      "id": "Q85461723",
+      "name": "Banyo Library",
+      "lat": -27.374268,
+      "lng": 153.075954
+    },
+    {
+      "id": "Q85461726",
+      "name": "Barcaldine Library",
+      "lat": -23.553803,
+      "lng": 145.289168
+    },
+    {
+      "id": "Q56611194",
+      "name": "Bargoonga Nganjin, North Fitzroy Library",
+      "lat": -37.78476,
+      "lng": 144.98283
+    },
+    {
+      "id": "Q77981701",
+      "name": "Barham Library",
+      "lat": -35.630125,
+      "lng": 144.127192
+    },
+    {
+      "id": "Q64841073",
+      "name": "Barooga Library",
+      "lat": -35.901174,
+      "lng": 145.684778
+    },
+    {
+      "id": "Q4863112",
+      "name": "Barr Smith Library",
+      "lat": -34.9188,
+      "lng": 138.605
+    },
+    {
+      "id": "Q85732453",
+      "name": "Barraba Library",
+      "lat": -30.379215,
+      "lng": 150.610986
+    },
+    {
+      "id": "Q43435507",
+      "name": "Bassendean Public Library",
+      "lat": -31.904062,
+      "lng": 115.949284
+    },
+    {
+      "id": "Q4868068",
+      "name": "Basser Library",
+      "lat": -35.2837,
+      "lng": 149.123
+    },
+    {
+      "id": "Q136889307",
+      "name": "Batchelor Community Library",
+      "lat": -13.046836,
+      "lng": 131.033684
+    },
+    {
+      "id": "Q65930899",
+      "name": "Bateau Bay Library",
+      "lat": -33.378781,
+      "lng": 151.485141
+    },
+    {
+      "id": "Q66673671",
+      "name": "Batemans Bay Library",
+      "lat": -35.721559,
+      "lng": 150.195475
+    },
+    {
+      "id": "Q64584856",
+      "name": "Bathurst Library",
+      "lat": -33.422293,
+      "lng": 149.579881
+    },
+    {
+      "id": "Q84961408",
+      "name": "Batlow Library",
+      "lat": -35.521568,
+      "lng": 148.14741
+    },
+    {
+      "id": "Q85461728",
+      "name": "Bauhinia Library Honorarium",
+      "lat": -24.572003,
+      "lng": 149.286475
+    },
+    {
+      "id": "Q85471661",
+      "name": "Baulkham Hills Library",
+      "lat": -33.76185,
+      "lng": 150.99406
+    },
+    {
+      "id": "Q43435850",
+      "name": "Bayswater Library",
+      "lat": -31.91997,
+      "lng": 115.913731
+    },
+    {
+      "id": "Q43436010",
+      "name": "Beacon Public Library",
+      "lat": -30.449684,
+      "lng": 117.865497
+    },
+    {
+      "id": "Q85461733",
+      "name": "Beaudesert Library",
+      "lat": -27.989827,
+      "lng": 152.995702
+    },
+    {
+      "id": "Q85461736",
+      "name": "Bedourie Library",
+      "lat": -24.361125,
+      "lng": 139.470514
+    },
+    {
+      "id": "Q85461738",
+      "name": "Beenleigh Library",
+      "lat": -27.718001,
+      "lng": 153.200725
+    },
+    {
+      "id": "Q85461741",
+      "name": "Beerwah Library",
+      "lat": -26.858055,
+      "lng": 152.955254
+    },
+    {
+      "id": "Q64708000",
+      "name": "Bega Library",
+      "lat": -36.675478,
+      "lng": 149.842061
+    },
+    {
+      "id": "Q4882081",
+      "name": "Belconnen Library",
+      "lat": -35.2386,
+      "lng": 149.069
+    },
+    {
+      "id": "Q85461745",
+      "name": "Bell Library",
+      "lat": -26.929516,
+      "lng": 151.447817
+    },
+    {
+      "id": "Q64841004",
+      "name": "Bellingen Library",
+      "lat": -30.451833,
+      "lng": 152.898377
+    },
+    {
+      "id": "Q69524718",
+      "name": "Belmont Library",
+      "lat": -33.036829,
+      "lng": 151.661112
+    },
+    {
+      "id": "Q43436373",
+      "name": "Belmont Public Library",
+      "lat": -31.96187,
+      "lng": 115.933927
+    },
+    {
+      "id": "Q43436519",
+      "name": "Bencubbin Public Library",
+      "lat": -30.810061,
+      "lng": 117.860269
+    },
+    {
+      "id": "Q43377390",
+      "name": "Bentley Public Library",
+      "lat": -32.01249,
+      "lng": 115.90934
+    },
+    {
+      "id": "Q83091608",
+      "name": "Beresfield Library",
+      "lat": -32.802165,
+      "lng": 151.656473
+    },
+    {
+      "id": "Q64840987",
+      "name": "Bermagui Library",
+      "lat": -36.429254,
+      "lng": 150.076035
+    },
+    {
+      "id": "Q67346361",
+      "name": "Berowra Library",
+      "lat": -33.621981,
+      "lng": 151.150088
+    },
+    {
+      "id": "Q64841086",
+      "name": "Berrigan Library",
+      "lat": -35.657317,
+      "lng": 145.810492
+    },
+    {
+      "id": "Q43437840",
+      "name": "Beverley Public Library",
+      "lat": -32.109089,
+      "lng": 116.924226
+    },
+    {
+      "id": "Q64584896",
+      "name": "Bexley North Library",
+      "lat": -33.938013,
+      "lng": 151.112968
+    },
+    {
+      "id": "Q58477478",
+      "name": "Bidyadanga Community Library",
+      "lat": -18.684758,
+      "lng": 121.777017
+    },
+    {
+      "id": "Q85461748",
+      "name": "Biggenden Library",
+      "lat": -25.510587,
+      "lng": 152.04396
+    },
+    {
+      "id": "Q85461752",
+      "name": "Biloela Library",
+      "lat": -24.399752,
+      "lng": 150.512465
+    },
+    {
+      "id": "Q85464643",
+      "name": "Binal Mungka Bayan",
+      "lat": -15.945075,
+      "lng": 145.319567
+    },
+    {
+      "id": "Q58477480",
+      "name": "Bindoon Public Library",
+      "lat": -31.386176,
+      "lng": 116.096116
+    },
+    {
+      "id": "Q67342749",
+      "name": "Bingara Library",
+      "lat": -29.866446,
+      "lng": 150.5705
+    },
+    {
+      "id": "Q85461757",
+      "name": "Birdsville Library",
+      "lat": -25.901047,
+      "lng": 139.351934
+    },
+    {
+      "id": "Q85461763",
+      "name": "Blackall Library",
+      "lat": -24.424607,
+      "lng": 145.464894
+    },
+    {
+      "id": "Q85461768",
+      "name": "Blackbutt Library",
+      "lat": -26.884383,
+      "lng": 152.101593
+    },
+    {
+      "id": "Q65020995",
+      "name": "Blackheath Library",
+      "lat": -33.635667,
+      "lng": 150.285337
+    },
+    {
+      "id": "Q85461773",
+      "name": "Blackwater Library",
+      "lat": -23.582936,
+      "lng": 148.878066
+    },
+    {
+      "id": "Q84959037",
+      "name": "Bland Library",
+      "lat": -33.923503,
+      "lng": 147.205284
+    },
+    {
+      "id": "Q65021546",
+      "name": "Blaxland Library",
+      "lat": -33.745923,
+      "lng": 150.612369
+    },
+    {
+      "id": "Q65020519",
+      "name": "Blayney Library",
+      "lat": -33.532468,
+      "lng": 149.255253
+    },
+    {
+      "id": "Q85461777",
+      "name": "Bloomfield Library",
+      "lat": -15.92221,
+      "lng": 145.352361
+    },
+    {
+      "id": "Q28219999",
+      "name": "Blue Mountains Library",
+      "lat": -33.713381,
+      "lng": 150.310149
+    },
+    {
+      "id": "Q85462414",
+      "name": "Bob McDonald Library",
+      "lat": -20.705489,
+      "lng": 140.507012
+    },
+    {
+      "id": "Q58477484",
+      "name": "Boddington Public Library",
+      "lat": -32.800283,
+      "lng": 116.475251
+    },
+    {
+      "id": "Q65022655",
+      "name": "Bogan Library",
+      "lat": -31.56345,
+      "lng": 147.193352
+    },
+    {
+      "id": "Q82876954",
+      "name": "Boggabri Library",
+      "lat": -30.704089,
+      "lng": 150.042128
+    },
+    {
+      "id": "Q85461782",
+      "name": "Boigu Island Indigenous Knowledge Centre",
+      "lat": -9.231144,
+      "lng": 142.220819
+    },
+    {
+      "id": "Q58477487",
+      "name": "Bolgart Public Library",
+      "lat": -31.273986,
+      "lng": 116.50867
+    },
+    {
+      "id": "Q85461787",
+      "name": "Bollon Library",
+      "lat": -28.031465,
+      "lng": 147.477829
+    },
+    {
+      "id": "Q84962704",
+      "name": "Bombala Library",
+      "lat": -36.914853,
+      "lng": 149.23433
+    },
+    {
+      "id": "Q66815326",
+      "name": "Bonnyrigg Library",
+      "lat": -33.888246,
+      "lng": 150.887093
+    },
+    {
+      "id": "Q85461793",
+      "name": "Boonah Library",
+      "lat": -27.998589,
+      "lng": 152.681819
+    },
+    {
+      "id": "Q67343997",
+      "name": "Boorowa Library",
+      "lat": -34.43723,
+      "lng": 148.722806
+    },
+    {
+      "id": "Q85461795",
+      "name": "Boulia Library",
+      "lat": -22.910561,
+      "lng": 139.911844
+    },
+    {
+      "id": "Q65022978",
+      "name": "Bourke Public Library",
+      "lat": -30.08976,
+      "lng": 145.940602
+    },
+    {
+      "id": "Q81658102",
+      "name": "Bowen Library",
+      "lat": -20.011875,
+      "lng": 148.245594
+    },
+    {
+      "id": "Q83913376",
+      "name": "Bowral Library",
+      "lat": -34.479598,
+      "lng": 150.420888
+    },
+    {
+      "id": "Q58477492",
+      "name": "Boyanup Public Library",
+      "lat": -33.487545,
+      "lng": 115.7303
+    },
+    {
+      "id": "Q85461859",
+      "name": "Boyne Island Library",
+      "lat": -23.94581,
+      "lng": 151.353704
+    },
+    {
+      "id": "Q58477494",
+      "name": "Boyup Brook Public Library",
+      "lat": -33.831918,
+      "lng": 116.386038
+    },
+    {
+      "id": "Q85461862",
+      "name": "Bracken Ridge Library",
+      "lat": -27.317972,
+      "lng": 153.037873
+    },
+    {
+      "id": "Q83675914",
+      "name": "Braidwood Library",
+      "lat": -35.442869,
+      "lng": 149.799746
+    },
+    {
+      "id": "Q107404208",
+      "name": "Braybrook Library",
+      "lat": -37.785922,
+      "lng": 144.854233
+    },
+    {
+      "id": "Q58477497",
+      "name": "Bremer Bay Public Library",
+      "lat": -34.392474,
+      "lng": 119.379024
+    },
+    {
+      "id": "Q65023443",
+      "name": "Brewarrina Library",
+      "lat": -29.961417,
+      "lng": 146.858806
+    },
+    {
+      "id": "Q85461865",
+      "name": "Bribie Island Library",
+      "lat": -27.083525,
+      "lng": 153.159231
+    },
+    {
+      "id": "Q58477498",
+      "name": "Bridgetown Public Library",
+      "lat": -33.958211,
+      "lng": 116.145464
+    },
+    {
+      "id": "Q139505456",
+      "name": "Bridgewater Library",
+      "lat": -42.73969,
+      "lng": 147.24353
+    },
+    {
+      "id": "Q139505457",
+      "name": "Bridport Library",
+      "lat": -41.00277,
+      "lng": 147.39477
+    },
+    {
+      "id": "Q64584906",
+      "name": "Brighton Le Sands Library",
+      "lat": -33.958954,
+      "lng": 151.155208
+    },
+    {
+      "id": "Q85465322",
+      "name": "Brisbane mobile library services",
+      "lat": -27.470842,
+      "lng": 153.022721
+    },
+    {
+      "id": "Q85461870",
+      "name": "Brisbane Square Library",
+      "lat": -27.470837,
+      "lng": 153.022455
+    },
+    {
+      "id": "Q85461876",
+      "name": "Broadbeach Library",
+      "lat": -28.035935,
+      "lng": 153.424051
+    },
+    {
+      "id": "Q16255569",
+      "name": "Broken Hill City Library",
+      "lat": -31.954749,
+      "lng": 141.468888
+    },
+    {
+      "id": "Q58477500",
+      "name": "Brookton Public Library",
+      "lat": -32.368761,
+      "lng": 117.007219
+    },
+    {
+      "id": "Q58477502",
+      "name": "Broome Public Library",
+      "lat": -17.960247,
+      "lng": 122.239889
+    },
+    {
+      "id": "Q58477508",
+      "name": "Broomehill Public Library",
+      "lat": -33.844052,
+      "lng": 117.638461
+    },
+    {
+      "id": "Q58477513",
+      "name": "Bruce Rock Public Library",
+      "lat": -31.879063,
+      "lng": 118.148422
+    },
+    {
+      "id": "Q65483536",
+      "name": "Brunswick Heads Library",
+      "lat": -28.539569,
+      "lng": 153.543556
+    },
+    {
+      "id": "Q85461879",
+      "name": "Bulimba Library",
+      "lat": -27.452083,
+      "lng": 153.06286
+    },
+    {
+      "id": "Q43377119",
+      "name": "Bull Creek Public Library",
+      "lat": -32.06373,
+      "lng": 115.85558
+    },
+    {
+      "id": "Q58477519",
+      "name": "Bullsbrook Community Library",
+      "lat": -31.667311,
+      "lng": 116.031575
+    },
+    {
+      "id": "Q58477525",
+      "name": "Bunbury Public Library",
+      "lat": -33.327406,
+      "lng": 115.637219
+    },
+    {
+      "id": "Q85461882",
+      "name": "Bundaberg Library",
+      "lat": -24.868659,
+      "lng": 152.348329
+    },
+    {
+      "id": "Q85724642",
+      "name": "Bundeena Library",
+      "lat": -34.08662,
+      "lng": 151.152518
+    },
+    {
+      "id": "Q84622564",
+      "name": "Bungendore library",
+      "lat": -35.254318,
+      "lng": 149.442199
+    },
+    {
+      "id": "Q55768522",
+      "name": "Buninyong Public Library",
+      "lat": -37.648639,
+      "lng": 143.884167
+    },
+    {
+      "id": "Q81659533",
+      "name": "Burdekin Library",
+      "lat": -19.5761,
+      "lng": 147.404
+    },
+    {
+      "id": "Q85461947",
+      "name": "Burke Shire Library",
+      "lat": -17.740674,
+      "lng": 139.546762
+    },
+    {
+      "id": "Q85461952",
+      "name": "Burleigh Heads Library",
+      "lat": -28.090704,
+      "lng": 153.452418
+    },
+    {
+      "id": "Q85461958",
+      "name": "Burleigh Waters Library",
+      "lat": -28.081617,
+      "lng": 153.43191
+    },
+    {
+      "id": "Q139505459",
+      "name": "Burnie Library",
+      "lat": -41.05102,
+      "lng": 145.90345
+    },
+    {
+      "id": "Q5000155",
+      "name": "Burnside library",
+      "lat": -34.938324,
+      "lng": 138.643342
+    },
+    {
+      "id": "Q83927369",
+      "name": "Buronga Library",
+      "lat": -34.174033,
+      "lng": 142.198789
+    },
+    {
+      "id": "Q85461964",
+      "name": "Burpengary Library",
+      "lat": -27.155202,
+      "lng": 152.967303
+    },
+    {
+      "id": "Q85461967",
+      "name": "Burrum Heads Library",
+      "lat": -25.185641,
+      "lng": 152.612736
+    },
+    {
+      "id": "Q65484037",
+      "name": "Burwood Library",
+      "lat": -33.877666,
+      "lng": 151.100378
+    },
+    {
+      "id": "Q58477531",
+      "name": "Busselton Public Library",
+      "lat": -33.651047,
+      "lng": 115.347747
+    },
+    {
+      "id": "Q85463789",
+      "name": "Bwgcolman Indigenous Knowledge Center",
+      "lat": -18.733938,
+      "lng": 146.577464
+    },
+    {
+      "id": "Q85461972",
+      "name": "Byfield Library",
+      "lat": -22.848125,
+      "lng": 150.651293
+    },
+    {
+      "id": "Q65484353",
+      "name": "Byron Bay Library",
+      "lat": -28.643314,
+      "lng": 153.615685
+    },
+    {
+      "id": "Q85461977",
+      "name": "Caboolture Library",
+      "lat": -27.083668,
+      "lng": 152.951261
+    },
+    {
+      "id": "Q66815558",
+      "name": "Cabramatta Library",
+      "lat": -33.892694,
+      "lng": 150.938925
+    },
+    {
+      "id": "Q85461981",
+      "name": "Cairns City Library",
+      "lat": -16.920195,
+      "lng": 145.775372
+    },
+    {
+      "id": "Q58477538",
+      "name": "Calingiri Public Library",
+      "lat": -31.088958,
+      "lng": 116.448183
+    },
+    {
+      "id": "Q85461986",
+      "name": "Calliope Library",
+      "lat": -23.999604,
+      "lng": 151.211367
+    },
+    {
+      "id": "Q85461992",
+      "name": "Caloundra Library",
+      "lat": -26.80391,
+      "lng": 153.131186
+    },
+    {
+      "id": "Q58477545",
+      "name": "Cambridge Public Library",
+      "lat": -31.936492,
+      "lng": 115.793419
+    },
+    {
+      "id": "Q65486202",
+      "name": "Camden Library",
+      "lat": -34.05362,
+      "lng": 150.695634
+    },
+    {
+      "id": "Q65486237",
+      "name": "Campbelltown Library",
+      "lat": -34.067774,
+      "lng": 150.813192
+    },
+    {
+      "id": "Q65931185",
+      "name": "Campsie Library",
+      "lat": -33.912554,
+      "lng": 151.102618
+    },
+    {
+      "id": "Q58477551",
+      "name": "Canning Bridge Express Library",
+      "lat": -32.010731,
+      "lng": 115.850586
+    },
+    {
+      "id": "Q58477557",
+      "name": "Cannington Public Library",
+      "lat": -32.010375,
+      "lng": 115.940686
+    },
+    {
+      "id": "Q81658370",
+      "name": "Cannonvale Library",
+      "lat": -20.2899,
+      "lng": 148.6762
+    },
+    {
+      "id": "Q65484976",
+      "name": "Canowindra Library",
+      "lat": -33.562246,
+      "lng": 148.660443
+    },
+    {
+      "id": "Q85462066",
+      "name": "Canungra Library",
+      "lat": -28.017967,
+      "lng": 153.164445
+    },
+    {
+      "id": "Q5034504",
+      "name": "Capalaba Library",
+      "lat": -27.523,
+      "lng": 153.193
+    },
+    {
+      "id": "Q58477563",
+      "name": "Capel Public Library",
+      "lat": -33.553672,
+      "lng": 115.563072
+    },
+    {
+      "id": "Q85462151",
+      "name": "Capella Library",
+      "lat": -23.086473,
+      "lng": 148.023434
+    },
+    {
+      "id": "Q69524754",
+      "name": "Cardiff Library",
+      "lat": -32.94044,
+      "lng": 151.660787
+    },
+    {
+      "id": "Q85462154",
+      "name": "Cardwell Library",
+      "lat": -18.267564,
+      "lng": 146.028734
+    },
+    {
+      "id": "Q85462157",
+      "name": "Carina Library",
+      "lat": -27.493334,
+      "lng": 153.090068
+    },
+    {
+      "id": "Q85462161",
+      "name": "Carindale Library",
+      "lat": -27.501353,
+      "lng": 153.100562
+    },
+    {
+      "id": "Q85725908",
+      "name": "Caringbah Library",
+      "lat": -34.044981,
+      "lng": 151.123432
+    },
+    {
+      "id": "Q66041219",
+      "name": "Carlingford Library",
+      "lat": -33.782412,
+      "lng": 151.048534
+    },
+    {
+      "id": "Q78960381",
+      "name": "Carlton Library",
+      "lat": -37.789457,
+      "lng": 144.971604
+    },
+    {
+      "id": "Q122973891",
+      "name": "Carmelite Library",
+      "lat": -37.848717,
+      "lng": 144.959664
+    },
+    {
+      "id": "Q81662047",
+      "name": "Carmila Library",
+      "lat": -21.9089,
+      "lng": 149.4114
+    },
+    {
+      "id": "Q58477571",
+      "name": "Carnamah Public Library",
+      "lat": -29.687197,
+      "lng": 115.889289
+    },
+    {
+      "id": "Q58477578",
+      "name": "Carnarvon Public Library",
+      "lat": -24.884244,
+      "lng": 113.658869
+    },
+    {
+      "id": "Q124004600",
+      "name": "Carnegie Toy Library",
+      "lat": -37.89435,
+      "lng": 145.05349
+    },
+    {
+      "id": "Q65931604",
+      "name": "Carrathool Shire Library",
+      "lat": -33.485068,
+      "lng": 145.531457
+    },
+    {
+      "id": "Q73947115",
+      "name": "Casino Library",
+      "lat": -28.866112,
+      "lng": 153.046201
+    },
+    {
+      "id": "Q85730562",
+      "name": "Cassilis Library",
+      "lat": -32.006394,
+      "lng": 149.978836
+    },
+    {
+      "id": "Q84772417",
+      "name": "Castle Cove Library",
+      "lat": -33.782434,
+      "lng": 151.198791
+    },
+    {
+      "id": "Q85471118",
+      "name": "Castle Hill Library",
+      "lat": -33.731376,
+      "lng": 151.003641
+    },
+    {
+      "id": "Q136850026",
+      "name": "Casuarina Public Library",
+      "lat": -12.374154,
+      "lng": 130.880059
+    },
+    {
+      "id": "Q69525351",
+      "name": "Casula Library",
+      "lat": -33.948712,
+      "lng": 150.897285
+    },
+    {
+      "id": "Q85462227",
+      "name": "Cecil Plains Library",
+      "lat": -27.532211,
+      "lng": 151.191798
+    },
+    {
+      "id": "Q58477587",
+      "name": "Cervantes Public Library",
+      "lat": -30.500392,
+      "lng": 115.071781
+    },
+    {
+      "id": "Q66041139",
+      "name": "Cessnock Library",
+      "lat": -32.833858,
+      "lng": 151.356089
+    },
+    {
+      "id": "Q69524779",
+      "name": "Charlestown Library",
+      "lat": -32.962438,
+      "lng": 151.697419
+    },
+    {
+      "id": "Q85462233",
+      "name": "Charleville Library",
+      "lat": -26.40118,
+      "lng": 146.239486
+    },
+    {
+      "id": "Q5086889",
+      "name": "Charters Towers Excelsior Library",
+      "lat": -20.076807,
+      "lng": 146.261319
+    },
+    {
+      "id": "Q84531949",
+      "name": "Chatswood Library",
+      "lat": -33.795669,
+      "lng": 151.183368
+    },
+    {
+      "id": "Q85462327",
+      "name": "Chermside Library",
+      "lat": -27.38621,
+      "lng": 153.032693
+    },
+    {
+      "id": "Q65931413",
+      "name": "Chester Hill Library",
+      "lat": -33.885328,
+      "lng": 150.999956
+    },
+    {
+      "id": "Q85462330",
+      "name": "Childers Library",
+      "lat": -25.235768,
+      "lng": 152.27978
+    },
+    {
+      "id": "Q85462336",
+      "name": "Chillagoe Library",
+      "lat": -17.15396,
+      "lng": 144.523378
+    },
+    {
+      "id": "Q85462341",
+      "name": "Chinchilla Library",
+      "lat": -26.740794,
+      "lng": 150.625173
+    },
+    {
+      "id": "Q66045841",
+      "name": "City Library & Museum",
+      "lat": -34.566165,
+      "lng": 150.835905
+    },
+    {
+      "id": "Q66041225",
+      "name": "City of Parramatta Library",
+      "lat": -33.818254,
+      "lng": 151.004684
+    },
+    {
+      "id": "Q18347770",
+      "name": "City of Perth Library",
+      "lat": -31.9551,
+      "lng": 115.861
+    },
+    {
+      "id": "Q5123868",
+      "name": "City of Playford Library Service",
+      "lat": -34.717921,
+      "lng": 138.671591
+    },
+    {
+      "id": "Q87415351",
+      "name": "City of Sydney Library Service",
+      "lat": -33.86219,
+      "lng": 151.21072
+    },
+    {
+      "id": "Q81659728",
+      "name": "CityLibraries Aitkenvale",
+      "lat": -19.295081,
+      "lng": 146.771859
+    },
+    {
+      "id": "Q81659894",
+      "name": "CityLibraries Flinders Street",
+      "lat": -19.258722,
+      "lng": 146.817931
+    },
+    {
+      "id": "Q85465350",
+      "name": "CityLibraries Home Service",
+      "lat": -19.258704,
+      "lng": 146.817816
+    },
+    {
+      "id": "Q85465352",
+      "name": "CityLibraries Mobile Library",
+      "lat": -19.258638,
+      "lng": 146.817738
+    },
+    {
+      "id": "Q81660098",
+      "name": "CityLibraries Thuringowa Central",
+      "lat": -19.308754,
+      "lng": 146.73144
+    },
+    {
+      "id": "Q58477606",
+      "name": "Claremont Public Library",
+      "lat": -31.983197,
+      "lng": 115.779922
+    },
+    {
+      "id": "Q43377140",
+      "name": "Clarkson Public Library",
+      "lat": -31.68937,
+      "lng": 115.71749
+    },
+    {
+      "id": "Q81662663",
+      "name": "Clermont Library",
+      "lat": -22.825812,
+      "lng": 147.642152
+    },
+    {
+      "id": "Q85462404",
+      "name": "Cleveland Library",
+      "lat": -27.525767,
+      "lng": 153.266946
+    },
+    {
+      "id": "Q85462409",
+      "name": "Clifton Library",
+      "lat": -27.928768,
+      "lng": 151.905416
+    },
+    {
+      "id": "Q66446714",
+      "name": "Cobar Library",
+      "lat": -31.497557,
+      "lng": 145.837742
+    },
+    {
+      "id": "Q56611161",
+      "name": "Coburg library",
+      "lat": -37.74318,
+      "lng": 144.96519
+    },
+    {
+      "id": "Q66446717",
+      "name": "Coffs Harbour City Library",
+      "lat": -30.296312,
+      "lng": 153.115672
+    },
+    {
+      "id": "Q58477629",
+      "name": "Collie Public Library",
+      "lat": -33.361531,
+      "lng": 116.154458
+    },
+    {
+      "id": "Q78044138",
+      "name": "Collingwood Library",
+      "lat": -37.80456,
+      "lng": 144.993
+    },
+    {
+      "id": "Q81658566",
+      "name": "Collinsville Library",
+      "lat": -20.5528,
+      "lng": 147.8452
+    },
+    {
+      "id": "Q66041158",
+      "name": "Concord Library",
+      "lat": -33.857923,
+      "lng": 151.099077
+    },
+    {
+      "id": "Q69436433",
+      "name": "Condobolin Library",
+      "lat": -33.088696,
+      "lng": 147.146238
+    },
+    {
+      "id": "Q66041229",
+      "name": "Constitution Hill Library",
+      "lat": -33.792134,
+      "lng": 150.974343
+    },
+    {
+      "id": "Q85462469",
+      "name": "Cooktown Library",
+      "lat": -15.471042,
+      "lng": 145.249262
+    },
+    {
+      "id": "Q84794367",
+      "name": "Coolah Library",
+      "lat": -31.823709,
+      "lng": 149.719637
+    },
+    {
+      "id": "Q66446736",
+      "name": "Coolamon Library",
+      "lat": -34.813007,
+      "lng": 147.199887
+    },
+    {
+      "id": "Q85462475",
+      "name": "Coolangatta Library",
+      "lat": -28.16736,
+      "lng": 153.537115
+    },
+    {
+      "id": "Q58477635",
+      "name": "Coolbellup Public Library",
+      "lat": -32.083207,
+      "lng": 115.809089
+    },
+    {
+      "id": "Q58477638",
+      "name": "Coolgardie Public Library",
+      "lat": -30.953735,
+      "lng": 121.164338
+    },
+    {
+      "id": "Q85462480",
+      "name": "Coolum Beach Library",
+      "lat": -26.530552,
+      "lng": 153.091138
+    },
+    {
+      "id": "Q84962953",
+      "name": "Cooma Library",
+      "lat": -36.236531,
+      "lng": 149.124963
+    },
+    {
+      "id": "Q84792960",
+      "name": "Coonabarabran Library",
+      "lat": -31.274221,
+      "lng": 149.277335
+    },
+    {
+      "id": "Q66446738",
+      "name": "Coonamble Library",
+      "lat": -30.954337,
+      "lng": 148.38838
+    },
+    {
+      "id": "Q85462486",
+      "name": "Coopers Plains Library",
+      "lat": -27.565053,
+      "lng": 153.096605
+    },
+    {
+      "id": "Q58477641",
+      "name": "Coorow Public Library",
+      "lat": -29.880883,
+      "lng": 116.023939
+    },
+    {
+      "id": "Q85462491",
+      "name": "Cooroy Library",
+      "lat": -26.415519,
+      "lng": 152.910751
+    },
+    {
+      "id": "Q66446740",
+      "name": "Cootamundra Library",
+      "lat": -34.639847,
+      "lng": 148.025786
+    },
+    {
+      "id": "Q85462493",
+      "name": "Corinda Library",
+      "lat": -27.538885,
+      "lng": 152.981475
+    },
+    {
+      "id": "Q66816193",
+      "name": "Corowa Library",
+      "lat": -35.996704,
+      "lng": 146.39128
+    },
+    {
+      "id": "Q58477643",
+      "name": "Corrigin Public Library",
+      "lat": -32.329374,
+      "lng": 117.873756
+    },
+    {
+      "id": "Q73957759",
+      "name": "Corrimal Library",
+      "lat": -34.37552,
+      "lng": 150.89817
+    },
+    {
+      "id": "Q66671065",
+      "name": "Cowra Library",
+      "lat": -33.836989,
+      "lng": 148.693266
+    },
+    {
+      "id": "Q70800850",
+      "name": "Craigieburn Library",
+      "lat": -37.59045,
+      "lng": 144.90985
+    },
+    {
+      "id": "Q58477649",
+      "name": "Cranbrook Public Library",
+      "lat": -34.292919,
+      "lng": 117.556483
+    },
+    {
+      "id": "Q85725933",
+      "name": "Cronulla Library",
+      "lat": -34.055376,
+      "lng": 151.151591
+    },
+    {
+      "id": "Q84800661",
+      "name": "Crookwell Library",
+      "lat": -34.458791,
+      "lng": 149.468613
+    },
+    {
+      "id": "Q85463239",
+      "name": "Crows Nest John French V.C. Memorial Library",
+      "lat": -27.261163,
+      "lng": 152.054381
+    },
+    {
+      "id": "Q85462497",
+      "name": "Croydon Library",
+      "lat": -18.204104,
+      "lng": 142.244202
+    },
+    {
+      "id": "Q58477652",
+      "name": "Cue Public Library",
+      "lat": -27.423119,
+      "lng": 117.899217
+    },
+    {
+      "id": "Q67341412",
+      "name": "Culcairn Library",
+      "lat": -35.668602,
+      "lng": 147.03203
+    },
+    {
+      "id": "Q58477655",
+      "name": "Cunderdin Public Library",
+      "lat": -31.650592,
+      "lng": 117.239656
+    },
+    {
+      "id": "Q85462502",
+      "name": "Cunnamulla Library",
+      "lat": -28.068726,
+      "lng": 145.684454
+    },
+    {
+      "id": "Q100920032",
+      "name": "Cunningham Library",
+      "lat": -37.82812,
+      "lng": 145.05876
+    },
+    {
+      "id": "Q139505461",
+      "name": "Currie Library",
+      "lat": -39.92952,
+      "lng": 143.85201
+    },
+    {
+      "id": "Q66407487",
+      "name": "Customs House Library",
+      "lat": -33.862199,
+      "lng": 151.210859
+    },
+    {
+      "id": "Q139505462",
+      "name": "Cygnet Library",
+      "lat": -43.16178,
+      "lng": 147.07638
+    },
+    {
+      "id": "Q85462507",
+      "name": "Dalby Library",
+      "lat": -27.188644,
+      "lng": 151.26941
+    },
+    {
+      "id": "Q58477657",
+      "name": "Dalwallinu Public Library",
+      "lat": -30.275769,
+      "lng": 116.662344
+    },
+    {
+      "id": "Q58477660",
+      "name": "Dalyellup Public Library",
+      "lat": -33.39807,
+      "lng": 115.634683
+    },
+    {
+      "id": "Q56762057",
+      "name": "Dampier Public Library",
+      "lat": -20.663056,
+      "lng": 116.707194
+    },
+    {
+      "id": "Q58477668",
+      "name": "Dandaragan Public Library",
+      "lat": -30.676353,
+      "lng": 115.703328
+    },
+    {
+      "id": "Q73961088",
+      "name": "Dapto Library",
+      "lat": -34.49652,
+      "lng": 150.79314
+    },
+    {
+      "id": "Q58477671",
+      "name": "Dardanup Public Library",
+      "lat": -33.398822,
+      "lng": 115.756697
+    },
+    {
+      "id": "Q83927987",
+      "name": "Dareton Library",
+      "lat": -34.096081,
+      "lng": 142.041978
+    },
+    {
+      "id": "Q87415680",
+      "name": "Darling Square Library",
+      "lat": -33.877552,
+      "lng": 151.202718
+    },
+    {
+      "id": "Q137279525",
+      "name": "Darwin Public Library",
+      "lat": -12.464757,
+      "lng": 130.845615
+    },
+    {
+      "id": "Q85462512",
+      "name": "Dauan Island Indigenous Knowledge Centre",
+      "lat": -9.412457,
+      "lng": 142.539399
+    },
+    {
+      "id": "Q85463113",
+      "name": "Dawita Cultural Centre",
+      "lat": -9.899398,
+      "lng": 142.767747
+    },
+    {
+      "id": "Q85462516",
+      "name": "Deception Bay Library",
+      "lat": -27.185159,
+      "lng": 153.029546
+    },
+    {
+      "id": "Q83207383",
+      "name": "Dee Why Library",
+      "lat": -33.751304,
+      "lng": 151.286799
+    },
+    {
+      "id": "Q139505463",
+      "name": "Deloraine Library",
+      "lat": -41.52499,
+      "lng": 146.65664
+    },
+    {
+      "id": "Q66672663",
+      "name": "Deniliquin Library",
+      "lat": -35.528669,
+      "lng": 144.960839
+    },
+    {
+      "id": "Q78403692",
+      "name": "Denman Library",
+      "lat": -32.389986,
+      "lng": 150.688454
+    },
+    {
+      "id": "Q58477677",
+      "name": "Denmark Public Library",
+      "lat": -34.960825,
+      "lng": 117.355149
+    },
+    {
+      "id": "Q58477679",
+      "name": "Derby Public Library",
+      "lat": -17.302772,
+      "lng": 123.628531
+    },
+    {
+      "id": "Q58477682",
+      "name": "Dianella Public Library",
+      "lat": -31.896128,
+      "lng": 115.873169
+    },
+    {
+      "id": "Q67012725",
+      "name": "Dickson Library",
+      "lat": -35.2496,
+      "lng": 149.139
+    },
+    {
+      "id": "Q85462520",
+      "name": "Dimbulah Library",
+      "lat": -17.148292,
+      "lng": 145.112231
+    },
+    {
+      "id": "Q85462525",
+      "name": "Dingo Library",
+      "lat": -23.646215,
+      "lng": 149.33012
+    },
+    {
+      "id": "Q85462531",
+      "name": "Dirranbandi Library",
+      "lat": -28.586039,
+      "lng": 148.226949
+    },
+    {
+      "id": "Q58477685",
+      "name": "Dongara Public Library",
+      "lat": -29.251936,
+      "lng": 114.930628
+    },
+    {
+      "id": "Q58477688",
+      "name": "Donnybrook Public Library",
+      "lat": -33.574969,
+      "lng": 115.821267
+    },
+    {
+      "id": "Q85462536",
+      "name": "Dorothy Jones Library",
+      "lat": -17.935228,
+      "lng": 145.92346
+    },
+    {
+      "id": "Q64841050",
+      "name": "Dorrigo Library",
+      "lat": -30.338125,
+      "lng": 152.712423
+    },
+    {
+      "id": "Q58477691",
+      "name": "Dowerin Public Library",
+      "lat": -31.195047,
+      "lng": 117.031092
+    },
+    {
+      "id": "Q85462541",
+      "name": "Duaringa Library",
+      "lat": -23.717392,
+      "lng": 149.672509
+    },
+    {
+      "id": "Q66672286",
+      "name": "Dubbo Library",
+      "lat": -32.244535,
+      "lng": 148.601422
+    },
+    {
+      "id": "Q81661612",
+      "name": "Dudley Denny City Library",
+      "lat": -21.140655,
+      "lng": 149.185153
+    },
+    {
+      "id": "Q63919199",
+      "name": "Dulwich Hill Library",
+      "lat": -33.902569,
+      "lng": 151.144382
+    },
+    {
+      "id": "Q58477694",
+      "name": "Dumbleyung Public Library",
+      "lat": -33.31435,
+      "lng": 117.740181
+    },
+    {
+      "id": "Q58477698",
+      "name": "Duncraig Public Library",
+      "lat": -31.835161,
+      "lng": 115.765094
+    },
+    {
+      "id": "Q66041237",
+      "name": "Dundas Valley Library",
+      "lat": -33.796301,
+      "lng": 151.043646
+    },
+    {
+      "id": "Q84774825",
+      "name": "Dunedoo Library",
+      "lat": -32.016314,
+      "lng": 149.39719
+    },
+    {
+      "id": "Q66672653",
+      "name": "Dungog Library",
+      "lat": -32.403495,
+      "lng": 151.754746
+    },
+    {
+      "id": "Q58477704",
+      "name": "Dunsborough Public Library",
+      "lat": -33.620892,
+      "lng": 115.104833
+    },
+    {
+      "id": "Q85462618",
+      "name": "Dunwich Library",
+      "lat": -27.501486,
+      "lng": 153.404095
+    },
+    {
+      "id": "Q85469764",
+      "name": "Dural Library",
+      "lat": -33.69023,
+      "lng": 151.0179
+    },
+    {
+      "id": "Q85462621",
+      "name": "Durong Community Library",
+      "lat": -26.395637,
+      "lng": 151.245217
+    },
+    {
+      "id": "Q81663319",
+      "name": "Dysart Library",
+      "lat": -22.587905,
+      "lng": 148.351452
+    },
+    {
+      "id": "Q65486241",
+      "name": "Eagle Vale Library",
+      "lat": -34.033656,
+      "lng": 150.815188
+    },
+    {
+      "id": "Q85462699",
+      "name": "Earlville Library",
+      "lat": -16.944545,
+      "lng": 145.740037
+    },
+    {
+      "id": "Q65931441",
+      "name": "Earlwood Library",
+      "lat": -33.927384,
+      "lng": 151.124507
+    },
+    {
+      "id": "Q71193313",
+      "name": "East Maitland Library",
+      "lat": -32.759887,
+      "lng": 151.589306
+    },
+    {
+      "id": "Q64584914",
+      "name": "Eastgardens Library",
+      "lat": -33.900285,
+      "lng": 151.252843
+    },
+    {
+      "id": "Q84959518",
+      "name": "Eastwood Library",
+      "lat": -33.790147,
+      "lng": 151.081452
+    },
+    {
+      "id": "Q58477707",
+      "name": "Eaton Public Library",
+      "lat": -33.318731,
+      "lng": 115.720959
+    },
+    {
+      "id": "Q64841001",
+      "name": "Eden Library",
+      "lat": -37.063771,
+      "lng": 149.902087
+    },
+    {
+      "id": "Q59130405",
+      "name": "EDFAA Library",
+      "lat": -31.976625,
+      "lng": 115.813293
+    },
+    {
+      "id": "Q69524818",
+      "name": "Edgeworth Library",
+      "lat": -32.917718,
+      "lng": 151.623346
+    },
+    {
+      "id": "Q85462702",
+      "name": "Edmonton Library",
+      "lat": -17.01743,
+      "lng": 145.74354
+    },
+    {
+      "id": "Q85462706",
+      "name": "Eidsvold Library",
+      "lat": -25.370251,
+      "lng": 151.121959
+    },
+    {
+      "id": "Q85462710",
+      "name": "Elanora Library",
+      "lat": -28.135469,
+      "lng": 153.469208
+    },
+    {
+      "id": "Q58477709",
+      "name": "Ellenbrook Public Library",
+      "lat": -31.783703,
+      "lng": 115.964653
+    },
+    {
+      "id": "Q85462715",
+      "name": "Emerald Library",
+      "lat": -23.525333,
+      "lng": 148.162377
+    },
+    {
+      "id": "Q85462720",
+      "name": "Emu Park Library and Customer Service Centre",
+      "lat": -23.256404,
+      "lng": 150.82698
+    },
+    {
+      "id": "Q58477713",
+      "name": "Eneabba Public Library",
+      "lat": -29.822572,
+      "lng": 115.264594
+    },
+    {
+      "id": "Q85726153",
+      "name": "Engadine Library",
+      "lat": -34.06538,
+      "lng": 151.015158
+    },
+    {
+      "id": "Q66044252",
+      "name": "Epping Library",
+      "lat": -33.771535,
+      "lng": 151.087863
+    },
+    {
+      "id": "Q65930938",
+      "name": "Erina Library",
+      "lat": -33.437641,
+      "lng": 151.392996
+    },
+    {
+      "id": "Q66044875",
+      "name": "Ermington Library",
+      "lat": -33.817548,
+      "lng": 151.053374
+    },
+    {
+      "id": "Q85462723",
+      "name": "Erub Island Indigenous Knowledge Centre",
+      "lat": -9.597055,
+      "lng": 143.761337
+    },
+    {
+      "id": "Q85462728",
+      "name": "Esk Library",
+      "lat": -27.241225,
+      "lng": 152.421436
+    },
+    {
+      "id": "Q58477717",
+      "name": "Esperance Public Library",
+      "lat": -33.859353,
+      "lng": 121.890742
+    },
+    {
+      "id": "Q73951328",
+      "name": "Evans Head Library",
+      "lat": -29.11869,
+      "lng": 153.4311
+    },
+    {
+      "id": "Q85462731",
+      "name": "Everton Park Library",
+      "lat": -27.405307,
+      "lng": 152.990503
+    },
+    {
+      "id": "Q139505465",
+      "name": "Exeter Library",
+      "lat": -41.30021,
+      "lng": 146.95303
+    },
+    {
+      "id": "Q58477723",
+      "name": "Exmouth Public Library",
+      "lat": -21.936556,
+      "lng": 114.130408
+    },
+    {
+      "id": "Q85462735",
+      "name": "Fairfield Libary",
+      "lat": -27.509219,
+      "lng": 153.026714
+    },
+    {
+      "id": "Q66815889",
+      "name": "Fairfield Library",
+      "lat": -33.870993,
+      "lng": 150.95337
+    },
+    {
+      "id": "Q58477726",
+      "name": "Falcon Public Library",
+      "lat": -32.584833,
+      "lng": 115.658342
+    },
+    {
+      "id": "Q65018449",
+      "name": "Finley Library",
+      "lat": -35.644022,
+      "lng": 145.575817
+    },
+    {
+      "id": "Q58477731",
+      "name": "Fitzroy Crossing Public Library",
+      "lat": -18.194492,
+      "lng": 125.56515
+    },
+    {
+      "id": "Q77931556",
+      "name": "Fitzroy Library",
+      "lat": -37.801907,
+      "lng": 144.979723
+    },
+    {
+      "id": "Q66041160",
+      "name": "Five Dock Library",
+      "lat": -33.868288,
+      "lng": 151.128608
+    },
+    {
+      "id": "Q85462741",
+      "name": "Flinders Shire Public Library",
+      "lat": -20.843157,
+      "lng": 144.200747
+    },
+    {
+      "id": "Q66816156",
+      "name": "Forbes Library",
+      "lat": -33.386952,
+      "lng": 148.008944
+    },
+    {
+      "id": "Q83207963",
+      "name": "Forestville Library",
+      "lat": -33.761471,
+      "lng": 151.214722
+    },
+    {
+      "id": "Q58477734",
+      "name": "Forrestfield Public Library",
+      "lat": -31.985375,
+      "lng": 116.009269
+    },
+    {
+      "id": "Q71195857",
+      "name": "Forster Library",
+      "lat": -32.200294,
+      "lng": 152.522463
+    },
+    {
+      "id": "Q58477737",
+      "name": "Frankland Public Library",
+      "lat": -34.362456,
+      "lng": 117.081756
+    },
+    {
+      "id": "Q43377094",
+      "name": "Fremantle Library",
+      "lat": -32.054064,
+      "lng": 115.748406
+    },
+    {
+      "id": "Q67346644",
+      "name": "Galston Library",
+      "lat": -33.653107,
+      "lng": 151.044272
+    },
+    {
+      "id": "Q85462745",
+      "name": "Garden City Library",
+      "lat": -27.562695,
+      "lng": 153.079847
+    },
+    {
+      "id": "Q58477739",
+      "name": "Gascoyne Junction Community Resource Centre",
+      "lat": -25.054364,
+      "lng": 115.208756
+    },
+    {
+      "id": "Q85462751",
+      "name": "Gatton Library",
+      "lat": -27.569489,
+      "lng": 152.270057
+    },
+    {
+      "id": "Q85462754",
+      "name": "Gayndah Library",
+      "lat": -25.625279,
+      "lng": 151.608633
+    },
+    {
+      "id": "Q139505466",
+      "name": "Geeveston Library",
+      "lat": -43.16407,
+      "lng": 146.92681
+    },
+    {
+      "id": "Q85462760",
+      "name": "Gemfields Library",
+      "lat": -23.419146,
+      "lng": 147.697822
+    },
+    {
+      "id": "Q85462768",
+      "name": "Georgetown Library",
+      "lat": -18.290788,
+      "lng": 143.548648
+    },
+    {
+      "id": "Q58477745",
+      "name": "Geraldton Regional Library",
+      "lat": -28.771819,
+      "lng": 114.611267
+    },
+    {
+      "id": "Q68633782",
+      "name": "Gerringong Library",
+      "lat": -34.743199,
+      "lng": 150.827249
+    },
+    {
+      "id": "Q63987088",
+      "name": "Gilgandra Library",
+      "lat": -31.709083,
+      "lng": 148.641604
+    },
+    {
+      "id": "Q85462775",
+      "name": "Gin Gin Library",
+      "lat": -24.989775,
+      "lng": 151.953425
+    },
+    {
+      "id": "Q58477747",
+      "name": "Gingin Public Library",
+      "lat": -31.346133,
+      "lng": 115.903878
+    },
+    {
+      "id": "Q58477750",
+      "name": "Girrawheen Public Library",
+      "lat": -31.839706,
+      "lng": 115.838732
+    },
+    {
+      "id": "Q84959744",
+      "name": "Gladesville Library",
+      "lat": -33.829267,
+      "lng": 151.127658
+    },
+    {
+      "id": "Q85462781",
+      "name": "Gladstone City Library",
+      "lat": -23.842973,
+      "lng": 151.255427
+    },
+    {
+      "id": "Q66408440",
+      "name": "Glebe Library",
+      "lat": -33.878038,
+      "lng": 151.185016
+    },
+    {
+      "id": "Q67340802",
+      "name": "Glen Innes Severn Public & TAFE Library",
+      "lat": -29.745655,
+      "lng": 151.734878
+    },
+    {
+      "id": "Q83208479",
+      "name": "Glen Street Library",
+      "lat": -33.739671,
+      "lng": 151.209136
+    },
+    {
+      "id": "Q81663488",
+      "name": "Glenden Library",
+      "lat": -21.357266,
+      "lng": 148.115916
+    },
+    {
+      "id": "Q139505467",
+      "name": "Glenorchy Library",
+      "lat": -42.83452,
+      "lng": 147.27525
+    },
+    {
+      "id": "Q65486246",
+      "name": "Glenquarie Library",
+      "lat": -33.986123,
+      "lng": 150.891275
+    },
+    {
+      "id": "Q134972904",
+      "name": "Glenroy Australia Family History Center",
+      "lat": -37.70576,
+      "lng": 144.92554
+    },
+    {
+      "id": "Q71196532",
+      "name": "Gloucester Library",
+      "lat": -32.007248,
+      "lng": 151.959815
+    },
+    {
+      "id": "Q58477754",
+      "name": "Gnowangerup Public Library",
+      "lat": -33.936667,
+      "lng": 118.007025
+    },
+    {
+      "id": "Q56564369",
+      "name": "Gold Coast Local Studies Library",
+      "lat": -27.970725,
+      "lng": 153.412174
+    },
+    {
+      "id": "Q85465324",
+      "name": "Gold Coast Mobile Library",
+      "lat": -28.077641,
+      "lng": 153.385599
+    },
+    {
+      "id": "Q58477757",
+      "name": "Goomalling Public Library",
+      "lat": -31.299044,
+      "lng": 116.826647
+    },
+    {
+      "id": "Q85462858",
+      "name": "Goombungee Library",
+      "lat": -27.303814,
+      "lng": 151.851686
+    },
+    {
+      "id": "Q85462863",
+      "name": "Goomeri Library",
+      "lat": -26.181603,
+      "lng": 152.065189
+    },
+    {
+      "id": "Q85462866",
+      "name": "Goondiwindi Library",
+      "lat": -28.5471,
+      "lng": 150.3067
+    },
+    {
+      "id": "Q69525274",
+      "name": "Goonellabah Library",
+      "lat": -28.822058,
+      "lng": 153.338198
+    },
+    {
+      "id": "Q68634612",
+      "name": "Gordon Library",
+      "lat": -33.753908,
+      "lng": 151.152299
+    },
+    {
+      "id": "Q81660844",
+      "name": "Gordon White Library",
+      "lat": -21.1171,
+      "lng": 149.1602
+    },
+    {
+      "id": "Q85462953",
+      "name": "Gordonvale Library",
+      "lat": -17.093179,
+      "lng": 145.786004
+    },
+    {
+      "id": "Q65930966",
+      "name": "Gosford Library",
+      "lat": -33.427175,
+      "lng": 151.343302
+    },
+    {
+      "id": "Q58477759",
+      "name": "Gosnells Public Library",
+      "lat": -32.0707,
+      "lng": 116.001894
+    },
+    {
+      "id": "Q67341081",
+      "name": "Goulburn Mulwaree Library",
+      "lat": -34.754835,
+      "lng": 149.718649
+    },
+    {
+      "id": "Q66446684",
+      "name": "Grafton Library",
+      "lat": -29.703154,
+      "lng": 152.933049
+    },
+    {
+      "id": "Q85462959",
+      "name": "Grange Library",
+      "lat": -27.425142,
+      "lng": 153.017606
+    },
+    {
+      "id": "Q66671604",
+      "name": "Granville Library",
+      "lat": -33.832578,
+      "lng": 151.009407
+    },
+    {
+      "id": "Q58477762",
+      "name": "Grass Patch Public Library",
+      "lat": -33.227975,
+      "lng": 121.712675
+    },
+    {
+      "id": "Q58477767",
+      "name": "Green Head Public Library",
+      "lat": -30.069467,
+      "lng": 114.966486
+    },
+    {
+      "id": "Q66409275",
+      "name": "Green Square Library",
+      "lat": -33.906376,
+      "lng": 151.203431
+    },
+    {
+      "id": "Q69525372",
+      "name": "Green Valley Library",
+      "lat": -33.908411,
+      "lng": 150.86595
+    },
+    {
+      "id": "Q65931467",
+      "name": "Greenacre Library",
+      "lat": -33.907663,
+      "lng": 151.05658
+    },
+    {
+      "id": "Q85462962",
+      "name": "Greenbank Library",
+      "lat": -27.730177,
+      "lng": 152.984178
+    },
+    {
+      "id": "Q58477771",
+      "name": "Greenmount Public Library",
+      "lat": -31.917919,
+      "lng": 116.048294
+    },
+    {
+      "id": "Q69525089",
+      "name": "Greenwich Library",
+      "lat": -33.829062,
+      "lng": 151.188145
+    },
+    {
+      "id": "Q65486248",
+      "name": "Greg Percival Library",
+      "lat": -33.999997,
+      "lng": 150.868009
+    },
+    {
+      "id": "Q84773441",
+      "name": "Grenfell Library",
+      "lat": -33.893361,
+      "lng": 148.160657
+    },
+    {
+      "id": "Q66671903",
+      "name": "Greystanes Library",
+      "lat": -33.829609,
+      "lng": 150.946824
+    },
+    {
+      "id": "Q66041179",
+      "name": "Griffith City Library",
+      "lat": -34.287929,
+      "lng": 146.047867
+    },
+    {
+      "id": "Q66671978",
+      "name": "Guildford Library",
+      "lat": -33.852408,
+      "lng": 150.986131
+    },
+    {
+      "id": "Q58477777",
+      "name": "Guildford Public Library",
+      "lat": -31.899478,
+      "lng": 115.972069
+    },
+    {
+      "id": "Q71190749",
+      "name": "Gulgong Library",
+      "lat": -32.362352,
+      "lng": 149.533606
+    },
+    {
+      "id": "Q66446754",
+      "name": "Gundagai Library",
+      "lat": -35.063198,
+      "lng": 148.10187
+    },
+    {
+      "id": "Q67342453",
+      "name": "Gunnedah Shire Library",
+      "lat": -30.979321,
+      "lng": 150.256394
+    },
+    {
+      "id": "Q84800242",
+      "name": "Gunning Library",
+      "lat": -34.782844,
+      "lng": 149.266187
+    },
+    {
+      "id": "Q64481935",
+      "name": "Guyra Library",
+      "lat": -30.221397,
+      "lng": 151.671076
+    },
+    {
+      "id": "Q85462966",
+      "name": "Gympie Library",
+      "lat": -26.189647,
+      "lng": 152.665471
+    },
+    {
+      "id": "Q63940481",
+      "name": "Haberfield Library",
+      "lat": -33.879404,
+      "lng": 151.139124
+    },
+    {
+      "id": "Q81660549",
+      "name": "Halifax Library",
+      "lat": -18.580047,
+      "lng": 146.284472
+    },
+    {
+      "id": "Q71197234",
+      "name": "Hallidays Point Library",
+      "lat": -32.069687,
+      "lng": 152.488161
+    },
+    {
+      "id": "Q58477781",
+      "name": "Halls Creek Public Library",
+      "lat": -18.225103,
+      "lng": 127.667306
+    },
+    {
+      "id": "Q83093030",
+      "name": "Hamilton Library",
+      "lat": -32.923105,
+      "lng": 151.747741
+    },
+    {
+      "id": "Q85463014",
+      "name": "Hammond Island Indigenous Knowledge Centre",
+      "lat": -10.553984,
+      "lng": 142.217633
+    },
+    {
+      "id": "Q67345848",
+      "name": "Harden Library",
+      "lat": -34.5629,
+      "lng": 148.363906
+    },
+    {
+      "id": "Q71197804",
+      "name": "Harrington Library",
+      "lat": -31.8814,
+      "lng": 152.6638
+    },
+    {
+      "id": "Q58477787",
+      "name": "Harvey Public Library",
+      "lat": -33.079244,
+      "lng": 115.893167
+    },
+    {
+      "id": "Q67343221",
+      "name": "Hawkesbury Central Library",
+      "lat": -33.607531,
+      "lng": 150.819451
+    },
+    {
+      "id": "Q56611198",
+      "name": "Hawthorn Library",
+      "lat": -37.824984,
+      "lng": 145.035103
+    },
+    {
+      "id": "Q67343758",
+      "name": "Hay Library",
+      "lat": -34.505831,
+      "lng": 144.843519
+    },
+    {
+      "id": "Q85463020",
+      "name": "Hebel Library",
+      "lat": -28.972718,
+      "lng": 147.795532
+    },
+    {
+      "id": "Q83901584",
+      "name": "Helensburgh Library",
+      "lat": -34.193177,
+      "lng": 150.981857
+    },
+    {
+      "id": "Q85463022",
+      "name": "Helensvale Library",
+      "lat": -27.922237,
+      "lng": 153.334733
+    },
+    {
+      "id": "Q67341759",
+      "name": "Henty Library",
+      "lat": -35.51834,
+      "lng": 147.039059
+    },
+    {
+      "id": "Q85463026",
+      "name": "Herberton Library & Customer Service Centre",
+      "lat": -17.384152,
+      "lng": 145.385812
+    },
+    {
+      "id": "Q85463029",
+      "name": "Hervey Bay Library",
+      "lat": -25.28503,
+      "lng": 152.836872
+    },
+    {
+      "id": "Q85463032",
+      "name": "Hibberd Library",
+      "lat": -12.621981,
+      "lng": 141.877932
+    },
+    {
+      "id": "Q84963925",
+      "name": "High Street Community Library",
+      "lat": -33.889794,
+      "lng": 151.082223
+    },
+    {
+      "id": "Q58477792",
+      "name": "High Wycombe Public Library",
+      "lat": -31.940194,
+      "lng": 116.004111
+    },
+    {
+      "id": "Q85463035",
+      "name": "Highfields Library",
+      "lat": -27.450033,
+      "lng": 151.946765
+    },
+    {
+      "id": "Q5765713",
+      "name": "Hinchinbrook Shire Library",
+      "lat": -18.6518,
+      "lng": 146.154
+    },
+    {
+      "id": "Q7603407",
+      "name": "Hobart Library",
+      "lat": -42.8817,
+      "lng": 147.325
+    },
+    {
+      "id": "Q67342111",
+      "name": "Holbrook Library",
+      "lat": -35.722771,
+      "lng": 147.314613
+    },
+    {
+      "id": "Q85463089",
+      "name": "Holland Park Library",
+      "lat": -27.523092,
+      "lng": 153.072059
+    },
+    {
+      "id": "Q85463095",
+      "name": "Home Hill Branch Library",
+      "lat": -19.662302,
+      "lng": 147.415031
+    },
+    {
+      "id": "Q58477796",
+      "name": "Hopetoun Public Library",
+      "lat": -33.947928,
+      "lng": 120.126867
+    },
+    {
+      "id": "Q67346898",
+      "name": "Hornsby Central Library",
+      "lat": -33.703035,
+      "lng": 151.09921
+    },
+    {
+      "id": "Q85463110",
+      "name": "Howard Library",
+      "lat": -25.318076,
+      "lng": 152.56281
+    },
+    {
+      "id": "Q66816198",
+      "name": "Howlong Library",
+      "lat": -35.979497,
+      "lng": 146.627552
+    },
+    {
+      "id": "Q139505468",
+      "name": "Huonville Library",
+      "lat": -43.03115,
+      "lng": 147.04968
+    },
+    {
+      "id": "Q66816223",
+      "name": "Hurstville Library",
+      "lat": -33.964045,
+      "lng": 151.101027
+    },
+    {
+      "id": "Q58477804",
+      "name": "Hyden Public Library",
+      "lat": -32.448694,
+      "lng": 118.862717
+    },
+    {
+      "id": "Q85463116",
+      "name": "Ilfracombe Library",
+      "lat": -23.489799,
+      "lng": 144.507568
+    },
+    {
+      "id": "Q66446706",
+      "name": "Iluka Library",
+      "lat": -29.401873,
+      "lng": 153.350526
+    },
+    {
+      "id": "Q85463119",
+      "name": "Imbil Library",
+      "lat": -26.459252,
+      "lng": 152.677301
+    },
+    {
+      "id": "Q85463125",
+      "name": "Inala Library",
+      "lat": -27.600167,
+      "lng": 152.973768
+    },
+    {
+      "id": "Q56564177",
+      "name": "Indooroopilly Library",
+      "lat": -27.499611,
+      "lng": 152.972644
+    },
+    {
+      "id": "Q85463193",
+      "name": "Inglewood Library",
+      "lat": -28.41421,
+      "lng": 151.081941
+    },
+    {
+      "id": "Q58477811",
+      "name": "Inglewood Public Library",
+      "lat": -31.920925,
+      "lng": 115.885994
+    },
+    {
+      "id": "Q85463198",
+      "name": "Injune Library",
+      "lat": -25.84481,
+      "lng": 148.565497
+    },
+    {
+      "id": "Q85463204",
+      "name": "Innisfail Library",
+      "lat": -17.522594,
+      "lng": 146.030731
+    },
+    {
+      "id": "Q68624840",
+      "name": "Inverell Shire Public Library",
+      "lat": -29.776592,
+      "lng": 151.111506
+    },
+    {
+      "id": "Q85463208",
+      "name": "Ipswich Central Library",
+      "lat": -27.616609,
+      "lng": 152.759952
+    },
+    {
+      "id": "Q85465326",
+      "name": "Ipswich Mobile Library Service",
+      "lat": -27.61696,
+      "lng": 152.760038
+    },
+    {
+      "id": "Q85463214",
+      "name": "Isisford Library",
+      "lat": -24.260136,
+      "lng": 144.439216
+    },
+    {
+      "id": "Q106221833",
+      "name": "Ivanhoe Library",
+      "lat": -37.765571,
+      "lng": 145.043285
+    },
+    {
+      "id": "Q6109426",
+      "name": "J S Battye Library",
+      "lat": -31.9489,
+      "lng": 115.861
+    },
+    {
+      "id": "Q85463100",
+      "name": "Jack Bambie Memorial Centre",
+      "lat": -15.294597,
+      "lng": 145.1099
+    },
+    {
+      "id": "Q85463219",
+      "name": "Jackson Library",
+      "lat": -26.6446,
+      "lng": 149.624785
+    },
+    {
+      "id": "Q85463224",
+      "name": "Jandowae Library",
+      "lat": -26.78142,
+      "lng": 151.110621
+    },
+    {
+      "id": "Q85463231",
+      "name": "Jericho Library",
+      "lat": -23.602647,
+      "lng": 146.129645
+    },
+    {
+      "id": "Q78402623",
+      "name": "Jerilderie Library",
+      "lat": -35.357166,
+      "lng": 145.73256
+    },
+    {
+      "id": "Q58477816",
+      "name": "Jerramungup Public Library",
+      "lat": -33.9403,
+      "lng": 118.918483
+    },
+    {
+      "id": "Q17004409",
+      "name": "Jessie Street National Women's Library",
+      "lat": -33.8778,
+      "lng": 151.198
+    },
+    {
+      "id": "Q85463236",
+      "name": "Jimboomba Library",
+      "lat": -27.829465,
+      "lng": 153.026373
+    },
+    {
+      "id": "Q86473571",
+      "name": "Jindera Library",
+      "lat": -35.953025,
+      "lng": 146.888278
+    },
+    {
+      "id": "Q127950372",
+      "name": "John Curtin Prime Ministerial Library",
+      "lat": -32.006161,
+      "lng": 115.89196
+    },
+    {
+      "id": "Q58477819",
+      "name": "Joondalup Public Library",
+      "lat": -31.743483,
+      "lng": 115.773625
+    },
+    {
+      "id": "Q85463244",
+      "name": "Julia Creek library",
+      "lat": -20.657447,
+      "lng": 141.743988
+    },
+    {
+      "id": "Q85463248",
+      "name": "Jundah Library",
+      "lat": -24.831276,
+      "lng": 143.058999
+    },
+    {
+      "id": "Q68623889",
+      "name": "Junee Library",
+      "lat": -34.871473,
+      "lng": 147.584614
+    },
+    {
+      "id": "Q58477822",
+      "name": "Jurien Public Library",
+      "lat": -30.306617,
+      "lng": 115.038106
+    },
+    {
+      "id": "Q58477827",
+      "name": "Kalamunda Public Library",
+      "lat": -31.971036,
+      "lng": 116.059878
+    },
+    {
+      "id": "Q58477831",
+      "name": "Kalbarri Public Library",
+      "lat": -27.709217,
+      "lng": 114.166286
+    },
+    {
+      "id": "Q58477833",
+      "name": "Kalgoorlie-Boulder Public Library",
+      "lat": -30.753253,
+      "lng": 121.478811
+    },
+    {
+      "id": "Q58477836",
+      "name": "Kambalda Public Library",
+      "lat": -31.2082,
+      "lng": 121.621914
+    },
+    {
+      "id": "Q71191427",
+      "name": "Kandos Library",
+      "lat": -32.858336,
+      "lng": 149.969389
+    },
+    {
+      "id": "Q138188204",
+      "name": "Karama Public Library",
+      "lat": -12.400974,
+      "lng": 130.915342
+    },
+    {
+      "id": "Q65930995",
+      "name": "Kariong Library",
+      "lat": -33.434014,
+      "lng": 151.296327
+    },
+    {
+      "id": "Q56761932",
+      "name": "Karratha Public Library",
+      "lat": -20.73725,
+      "lng": 116.845194
+    },
+    {
+      "id": "Q58477844",
+      "name": "Karrinyup Public Library",
+      "lat": -31.875842,
+      "lng": 115.778519
+    },
+    {
+      "id": "Q85463253",
+      "name": "Karumba Library",
+      "lat": -17.48527,
+      "lng": 140.842185
+    },
+    {
+      "id": "Q58477848",
+      "name": "Katanning Public Library",
+      "lat": -33.690147,
+      "lng": 117.553631
+    },
+    {
+      "id": "Q66766171",
+      "name": "Kathleen Syme Library and Community Centre",
+      "lat": -37.7988,
+      "lng": 144.965
+    },
+    {
+      "id": "Q65021850",
+      "name": "Katoomba Library",
+      "lat": -33.714955,
+      "lng": 150.311407
+    },
+    {
+      "id": "Q85463258",
+      "name": "Kawana Library",
+      "lat": -26.699095,
+      "lng": 153.132613
+    },
+    {
+      "id": "Q58477854",
+      "name": "Kellerberrin Public Library",
+      "lat": -31.633858,
+      "lng": 117.721936
+    },
+    {
+      "id": "Q58477859",
+      "name": "Kelmscott Public Library",
+      "lat": -32.113153,
+      "lng": 116.015133
+    },
+    {
+      "id": "Q68625267",
+      "name": "Kempsey Shire Library",
+      "lat": -31.078346,
+      "lng": 152.825317
+    },
+    {
+      "id": "Q85463262",
+      "name": "Kenilworth Library",
+      "lat": -26.593775,
+      "lng": 152.727669
+    },
+    {
+      "id": "Q56564129",
+      "name": "Kenmore Library",
+      "lat": -27.506052,
+      "lng": 152.938584
+    },
+    {
+      "id": "Q58477862",
+      "name": "Kenwick Public Library",
+      "lat": -32.034025,
+      "lng": 115.978292
+    },
+    {
+      "id": "Q68634204",
+      "name": "Kiama Municipal Library",
+      "lat": -34.671358,
+      "lng": 150.855149
+    },
+    {
+      "id": "Q85463274",
+      "name": "Kilcoy Library",
+      "lat": -26.94121,
+      "lng": 152.563933
+    },
+    {
+      "id": "Q85463280",
+      "name": "Kilkivan Library",
+      "lat": -26.086272,
+      "lng": 152.239995
+    },
+    {
+      "id": "Q65931024",
+      "name": "Kincumber Library",
+      "lat": -33.465981,
+      "lng": 151.383976
+    },
+    {
+      "id": "Q85463284",
+      "name": "Kingaroy Library",
+      "lat": -26.54022,
+      "lng": 151.837626
+    },
+    {
+      "id": "Q66410281",
+      "name": "Kings Cross Library",
+      "lat": -33.874122,
+      "lng": 151.223613
+    },
+    {
+      "id": "Q85467777",
+      "name": "Kingscliff Library",
+      "lat": -28.259592,
+      "lng": 153.571271
+    },
+    {
+      "id": "Q139505469",
+      "name": "Kingston Library",
+      "lat": -42.9765,
+      "lng": 147.31086
+    },
+    {
+      "id": "Q139505470",
+      "name": "Kinimathatakinta/George Town Library",
+      "lat": -41.10725,
+      "lng": 146.82099
+    },
+    {
+      "id": "Q66816225",
+      "name": "Kogarah Library",
+      "lat": -33.965291,
+      "lng": 151.133006
+    },
+    {
+      "id": "Q58477867",
+      "name": "Kojonup Public Library",
+      "lat": -33.8321,
+      "lng": 117.159339
+    },
+    {
+      "id": "Q58477871",
+      "name": "Kondinin Public Library",
+      "lat": -32.495467,
+      "lng": 118.266964
+    },
+    {
+      "id": "Q58477877",
+      "name": "Koorda Public Library",
+      "lat": -30.824022,
+      "lng": 117.483311
+    },
+    {
+      "id": "Q85733582",
+      "name": "Kootingal Library",
+      "lat": -31.052021,
+      "lng": 151.055084
+    },
+    {
+      "id": "Q85463286",
+      "name": "Kubin Indigenous Knowledge Centre",
+      "lat": -10.234978,
+      "lng": 142.216998
+    },
+    {
+      "id": "Q58477882",
+      "name": "Kukerin Public Library",
+      "lat": -33.187914,
+      "lng": 118.083556
+    },
+    {
+      "id": "Q58477887",
+      "name": "Kulin Public Library",
+      "lat": -32.668883,
+      "lng": 118.155922
+    },
+    {
+      "id": "Q58477890",
+      "name": "Kununurra Public Library",
+      "lat": -15.770286,
+      "lng": 128.737489
+    },
+    {
+      "id": "Q85463289",
+      "name": "Kuranda Library",
+      "lat": -16.819502,
+      "lng": 145.635879
+    },
+    {
+      "id": "Q66041151",
+      "name": "Kurri Kurri Library",
+      "lat": -32.819573,
+      "lng": 151.479089
+    },
+    {
+      "id": "Q58477893",
+      "name": "Kwinana Public Library",
+      "lat": -32.242744,
+      "lng": 115.813989
+    },
+    {
+      "id": "Q69436022",
+      "name": "Kyogle Library",
+      "lat": -28.621541,
+      "lng": 153.00611
+    },
+    {
+      "id": "Q85463295",
+      "name": "Laidley Library",
+      "lat": -27.630138,
+      "lng": 152.395396
+    },
+    {
+      "id": "Q69437877",
+      "name": "Lake Cargelligo Library",
+      "lat": -33.298359,
+      "lng": 146.373972
+    },
+    {
+      "id": "Q58477897",
+      "name": "Lake Grace Public Library",
+      "lat": -33.103575,
+      "lng": 118.458436
+    },
+    {
+      "id": "Q124420613",
+      "name": "Lake Grace War Memorial Library",
+      "lat": -33.101078,
+      "lng": 118.461118
+    },
+    {
+      "id": "Q65931048",
+      "name": "Lake Haven Library and Council Services",
+      "lat": -33.24,
+      "lng": 151.501
+    },
+    {
+      "id": "Q58477899",
+      "name": "Lake King Public Library",
+      "lat": -33.088719,
+      "lng": 119.675303
+    },
+    {
+      "id": "Q65931494",
+      "name": "Lakemba Library",
+      "lat": -33.920444,
+      "lng": 151.075993
+    },
+    {
+      "id": "Q65018724",
+      "name": "Lalor Park Library",
+      "lat": -33.76437,
+      "lng": 150.930778
+    },
+    {
+      "id": "Q83093830",
+      "name": "Lambton Library",
+      "lat": -32.911693,
+      "lng": 151.70915
+    },
+    {
+      "id": "Q58477904",
+      "name": "Lancelin Public Library",
+      "lat": -31.019094,
+      "lng": 115.332925
+    },
+    {
+      "id": "Q69525115",
+      "name": "Lane Cove Library",
+      "lat": -33.814556,
+      "lng": 151.169895
+    },
+    {
+      "id": "Q58477907",
+      "name": "Latham Public Library",
+      "lat": -29.757169,
+      "lng": 116.444014
+    },
+    {
+      "id": "Q139505471",
+      "name": "Latrobe Library",
+      "lat": -41.2352,
+      "lng": 146.41147
+    },
+    {
+      "id": "Q139505472",
+      "name": "Launceston Library",
+      "lat": -41.43616,
+      "lng": 147.13726
+    },
+    {
+      "id": "Q83669555",
+      "name": "Laurieton Library",
+      "lat": -31.651994,
+      "lng": 152.795787
+    },
+    {
+      "id": "Q58477914",
+      "name": "Laverton Public Library",
+      "lat": -28.626261,
+      "lng": 122.403911
+    },
+    {
+      "id": "Q64438179",
+      "name": "Lavington Library",
+      "lat": -36.045506,
+      "lng": 146.940803
+    },
+    {
+      "id": "Q65022143",
+      "name": "Lawson Library",
+      "lat": -33.717888,
+      "lng": 150.430685
+    },
+    {
+      "id": "Q58477919",
+      "name": "Leeman Public Library",
+      "lat": -29.947097,
+      "lng": 114.977389
+    },
+    {
+      "id": "Q69525199",
+      "name": "Leeton Library",
+      "lat": -34.550355,
+      "lng": 146.405546
+    },
+    {
+      "id": "Q63919212",
+      "name": "Leichhardt Library",
+      "lat": -33.886886,
+      "lng": 151.157582
+    },
+    {
+      "id": "Q64538596",
+      "name": "Lennox Head library",
+      "lat": -28.793962,
+      "lng": 153.591448
+    },
+    {
+      "id": "Q58477922",
+      "name": "Leonora Public Library",
+      "lat": -28.888106,
+      "lng": 121.330894
+    },
+    {
+      "id": "Q58477927",
+      "name": "Lesmurdie School Community Library",
+      "lat": -32.012431,
+      "lng": 116.050883
+    },
+    {
+      "id": "Q6458744",
+      "name": "Libraries Tasmania",
+      "lat": -42.88184,
+      "lng": 147.32466
+    },
+    {
+      "id": "Q7059036",
+      "name": "Library & Archives NT",
+      "lat": -12.4666,
+      "lng": 130.8428
+    },
+    {
+      "id": "Q21481291",
+      "name": "Library at the Dock",
+      "lat": -37.820171,
+      "lng": 144.94058
+    },
+    {
+      "id": "Q85682275",
+      "name": "Library of the Instituto Cervantes in Sydney",
+      "lat": -33.874641,
+      "lng": 151.204095
+    },
+    {
+      "id": "Q66671825",
+      "name": "Lidcombe Library",
+      "lat": -33.862301,
+      "lng": 151.042139
+    },
+    {
+      "id": "Q84797014",
+      "name": "Lightning Ridge Library",
+      "lat": -29.42913,
+      "lng": 147.984285
+    },
+    {
+      "id": "Q68634989",
+      "name": "Lindfield Library",
+      "lat": -33.777311,
+      "lng": 151.169327
+    },
+    {
+      "id": "Q69525301",
+      "name": "Lismore City Library",
+      "lat": -28.812371,
+      "lng": 153.282651
+    },
+    {
+      "id": "Q64974038",
+      "name": "Lithgow Library Learning Centre",
+      "lat": -33.48221,
+      "lng": 150.155247
+    },
+    {
+      "id": "Q69525397",
+      "name": "Liverpool City Library",
+      "lat": -33.921849,
+      "lng": 150.925788
+    },
+    {
+      "id": "Q85463384",
+      "name": "Lockhart River Indigenous Knowledge Centre",
+      "lat": -12.785393,
+      "lng": 143.343311
+    },
+    {
+      "id": "Q85463390",
+      "name": "Logan Central Library",
+      "lat": -27.642929,
+      "lng": 153.111659
+    },
+    {
+      "id": "Q85463395",
+      "name": "Logan Hyperdome Library",
+      "lat": -27.655759,
+      "lng": 153.171349
+    },
+    {
+      "id": "Q85463400",
+      "name": "Logan North Library",
+      "lat": -27.610966,
+      "lng": 153.118982
+    },
+    {
+      "id": "Q85463403",
+      "name": "Logan Village Library",
+      "lat": -27.767584,
+      "lng": 153.105136
+    },
+    {
+      "id": "Q85463409",
+      "name": "Logan West Library",
+      "lat": -27.665295,
+      "lng": 153.042673
+    },
+    {
+      "id": "Q139505474",
+      "name": "Longford Library",
+      "lat": -41.59365,
+      "lng": 147.12208
+    },
+    {
+      "id": "Q85463415",
+      "name": "Longreach Library",
+      "lat": -23.443432,
+      "lng": 144.248244
+    },
+    {
+      "id": "Q85463421",
+      "name": "Lowood Library",
+      "lat": -27.46339,
+      "lng": 152.580249
+    },
+    {
+      "id": "Q138341374",
+      "name": "Ltyentye Apurte Community Library",
+      "lat": -24.129524,
+      "lng": 134.374912
+    },
+    {
+      "id": "Q85465328",
+      "name": "Mackay Mobile Library",
+      "lat": -21.117771,
+      "lng": 149.15993
+    },
+    {
+      "id": "Q82872811",
+      "name": "Macksville Library",
+      "lat": -30.709996,
+      "lng": 152.918812
+    },
+    {
+      "id": "Q66446710",
+      "name": "Maclean Library",
+      "lat": -29.459043,
+      "lng": 153.201262
+    },
+    {
+      "id": "Q11175397",
+      "name": "Macquarie University Library",
+      "lat": -33.7742,
+      "lng": 151.112
+    },
+    {
+      "id": "Q85463432",
+      "name": "Maidenwell Library",
+      "lat": -26.846903,
+      "lng": 151.799726
+    },
+    {
+      "id": "Q71193709",
+      "name": "Maitland Library",
+      "lat": -32.729981,
+      "lng": 151.55296
+    },
+    {
+      "id": "Q84624129",
+      "name": "Malabar Community Library",
+      "lat": -33.962293,
+      "lng": 151.245961
+    },
+    {
+      "id": "Q85463438",
+      "name": "Malanda Library & Customer Service Centre",
+      "lat": -17.352768,
+      "lng": 145.59435
+    },
+    {
+      "id": "Q109774502",
+      "name": "Maldon Athenaeum Library",
+      "lat": -36.99577,
+      "lng": 144.06764
+    },
+    {
+      "id": "Q85463443",
+      "name": "Maleny Library",
+      "lat": -26.759195,
+      "lng": 152.85318
+    },
+    {
+      "id": "Q113207171",
+      "name": "Malvern Library",
+      "lat": -37.856663,
+      "lng": 145.031762
+    },
+    {
+      "id": "Q58477930",
+      "name": "Mandurah Public Library",
+      "lat": -32.537583,
+      "lng": 115.7415
+    },
+    {
+      "id": "Q65486078",
+      "name": "Manildra Library",
+      "lat": -33.18542,
+      "lng": 148.69393
+    },
+    {
+      "id": "Q85734350",
+      "name": "Manilla Library",
+      "lat": -30.746491,
+      "lng": 150.719235
+    },
+    {
+      "id": "Q58477932",
+      "name": "Manjimup Public Library",
+      "lat": -34.238739,
+      "lng": 116.146222
+    },
+    {
+      "id": "Q83210584",
+      "name": "Manly Library",
+      "lat": -33.797413,
+      "lng": 151.285878
+    },
+    {
+      "id": "Q58477933",
+      "name": "Manning Public Library",
+      "lat": -32.0153,
+      "lng": 115.867358
+    },
+    {
+      "id": "Q104089599",
+      "name": "Mannix Library",
+      "lat": -37.809239,
+      "lng": 144.980545
+    },
+    {
+      "id": "Q85463449",
+      "name": "Manunda Library",
+      "lat": -16.926743,
+      "lng": 145.74096
+    },
+    {
+      "id": "Q58477937",
+      "name": "Marble Bar Public Library",
+      "lat": -21.172647,
+      "lng": 119.745442
+    },
+    {
+      "id": "Q85463455",
+      "name": "Mareeba Library",
+      "lat": -16.996439,
+      "lng": 145.423177
+    },
+    {
+      "id": "Q58477939",
+      "name": "Margaret River Public Library",
+      "lat": -33.951208,
+      "lng": 115.072294
+    },
+    {
+      "id": "Q85463460",
+      "name": "Marlborough Library",
+      "lat": -22.812767,
+      "lng": 149.891606
+    },
+    {
+      "id": "Q85463465",
+      "name": "Maroochydore Library",
+      "lat": -26.656002,
+      "lng": 153.101515
+    },
+    {
+      "id": "Q84624659",
+      "name": "Maroubra Library",
+      "lat": -33.938281,
+      "lng": 151.238144
+    },
+    {
+      "id": "Q63940484",
+      "name": "Marrickville Library",
+      "lat": -33.908913,
+      "lng": 151.154094
+    },
+    {
+      "id": "Q85463471",
+      "name": "Marsden Library",
+      "lat": -27.678721,
+      "lng": 153.117539
+    },
+    {
+      "id": "Q85463729",
+      "name": "Mary Ann Coconut Library",
+      "lat": -12.685013,
+      "lng": 141.886902
+    },
+    {
+      "id": "Q85463477",
+      "name": "Maryborough Library",
+      "lat": -25.539837,
+      "lng": 152.702419
+    },
+    {
+      "id": "Q64584926",
+      "name": "Mascot Library",
+      "lat": -33.930124,
+      "lng": 151.193454
+    },
+    {
+      "id": "Q136532128",
+      "name": "Mataranka Community Library",
+      "lat": -14.921957,
+      "lng": 133.065055
+    },
+    {
+      "id": "Q78401366",
+      "name": "Mathoura library",
+      "lat": -35.811715,
+      "lng": 144.9013
+    },
+    {
+      "id": "Q63874397",
+      "name": "Max Webber Library",
+      "lat": -33.771258,
+      "lng": 150.908228
+    },
+    {
+      "id": "Q83096184",
+      "name": "Mayfield Library",
+      "lat": -32.898079,
+      "lng": 151.73566
+    },
+    {
+      "id": "Q58477943",
+      "name": "Maylands Public Library",
+      "lat": -31.930828,
+      "lng": 115.895442
+    },
+    {
+      "id": "Q85463483",
+      "name": "McKinlay Library",
+      "lat": -21.271629,
+      "lng": 141.289308
+    },
+    {
+      "id": "Q85463484",
+      "name": "Meandarra Library",
+      "lat": -27.325079,
+      "lng": 149.881717
+    },
+    {
+      "id": "Q58477946",
+      "name": "Meekatharra Public Library",
+      "lat": -26.593022,
+      "lng": 118.49565
+    },
+    {
+      "id": "Q137232162",
+      "name": "Melbourne Art Library",
+      "lat": -37.74242,
+      "lng": 144.963563
+    },
+    {
+      "id": "Q58477948",
+      "name": "Melville Civic Square Public Library",
+      "lat": -32.032979,
+      "lng": 115.832881
+    },
+    {
+      "id": "Q85729184",
+      "name": "Menai Library",
+      "lat": -34.013877,
+      "lng": 151.017628
+    },
+    {
+      "id": "Q58477950",
+      "name": "Menzies Public Library",
+      "lat": -29.693719,
+      "lng": 121.028544
+    },
+    {
+      "id": "Q58477953",
+      "name": "Merredin Public Library",
+      "lat": -31.479514,
+      "lng": 118.277408
+    },
+    {
+      "id": "Q84803405",
+      "name": "Merriwa Library",
+      "lat": -32.139662,
+      "lng": 150.355398
+    },
+    {
+      "id": "Q66672042",
+      "name": "Merrylands Library",
+      "lat": -33.838516,
+      "lng": 150.989898
+    },
+    {
+      "id": "Q85463488",
+      "name": "Middlemount Library",
+      "lat": -22.809682,
+      "lng": 148.699619
+    },
+    {
+      "id": "Q58477956",
+      "name": "Midland Public Library",
+      "lat": -31.889381,
+      "lng": 116.002687
+    },
+    {
+      "id": "Q85463491",
+      "name": "Miles Library",
+      "lat": -26.659179,
+      "lng": 150.186346
+    },
+    {
+      "id": "Q137382197",
+      "name": "Milikapiti Community Library",
+      "lat": -11.419418,
+      "lng": 130.672747
+    },
+    {
+      "id": "Q137382212",
+      "name": "Milingimbi Community Library",
+      "lat": -12.102946,
+      "lng": 134.920153
+    },
+    {
+      "id": "Q85463496",
+      "name": "Millaa Millaa Library",
+      "lat": -17.511937,
+      "lng": 145.613716
+    },
+    {
+      "id": "Q69525418",
+      "name": "Miller Library",
+      "lat": -33.92012,
+      "lng": 150.883261
+    },
+    {
+      "id": "Q85463501",
+      "name": "Millmerran Library",
+      "lat": -27.875837,
+      "lng": 151.270489
+    },
+    {
+      "id": "Q122974213",
+      "name": "Mills Park Library",
+      "lat": -32.023805,
+      "lng": 115.967353
+    },
+    {
+      "id": "Q66404579",
+      "name": "Milton Library",
+      "lat": -35.315782,
+      "lng": 150.435335
+    },
+    {
+      "id": "Q58477959",
+      "name": "Mingenew Public Library",
+      "lat": -29.189844,
+      "lng": 115.442492
+    },
+    {
+      "id": "Q85730152",
+      "name": "Miranda Library",
+      "lat": -34.03435,
+      "lng": 151.097288
+    },
+    {
+      "id": "Q81661262",
+      "name": "Mirani Library",
+      "lat": -21.15982,
+      "lng": 148.862922
+    },
+    {
+      "id": "Q85463556",
+      "name": "Miriam Vale Library",
+      "lat": -24.32801,
+      "lng": 151.559991
+    },
+    {
+      "id": "Q58477963",
+      "name": "Mirrabooka Public Library",
+      "lat": -31.869028,
+      "lng": 115.859464
+    },
+    {
+      "id": "Q85463561",
+      "name": "Mitchell Library",
+      "lat": -26.487009,
+      "lng": 147.976323
+    },
+    {
+      "id": "Q85463568",
+      "name": "Mitchelton Library",
+      "lat": -27.417154,
+      "lng": 152.978381
+    },
+    {
+      "id": "Q83914256",
+      "name": "Mittagong Library",
+      "lat": -34.44981,
+      "lng": 150.44623
+    },
+    {
+      "id": "Q58477967",
+      "name": "Mogumber Public Library",
+      "lat": -31.036228,
+      "lng": 116.048844
+    },
+    {
+      "id": "Q65485356",
+      "name": "Molong Library",
+      "lat": -33.091331,
+      "lng": 148.863952
+    },
+    {
+      "id": "Q83209809",
+      "name": "Mona Vale Library",
+      "lat": -33.676676,
+      "lng": 151.304054
+    },
+    {
+      "id": "Q85463570",
+      "name": "Monto Library",
+      "lat": -24.864229,
+      "lng": 151.122568
+    },
+    {
+      "id": "Q85463574",
+      "name": "Moonie Library",
+      "lat": -27.717105,
+      "lng": 150.371128
+    },
+    {
+      "id": "Q58477970",
+      "name": "Moora Public Library",
+      "lat": -30.641564,
+      "lng": 116.007678
+    },
+    {
+      "id": "Q71187397",
+      "name": "Moorebank Library",
+      "lat": -33.933809,
+      "lng": 150.953613
+    },
+    {
+      "id": "Q85463578",
+      "name": "Moranbah Library",
+      "lat": -22.00052,
+      "lng": 148.046968
+    },
+    {
+      "id": "Q58477972",
+      "name": "Morawa Public Library",
+      "lat": -29.209858,
+      "lng": 116.008997
+    },
+    {
+      "id": "Q71190151",
+      "name": "Moree Library",
+      "lat": -29.462538,
+      "lng": 149.841776
+    },
+    {
+      "id": "Q85465332",
+      "name": "Moreton Bay Region Mobile Library",
+      "lat": -27.178626,
+      "lng": 152.983804
+    },
+    {
+      "id": "Q69524840",
+      "name": "Morisset Library",
+      "lat": -33.107339,
+      "lng": 151.487347
+    },
+    {
+      "id": "Q58477976",
+      "name": "Morley Public Library",
+      "lat": -31.895747,
+      "lng": 115.896081
+    },
+    {
+      "id": "Q66673874",
+      "name": "Moruya Library",
+      "lat": -35.909319,
+      "lng": 150.082377
+    },
+    {
+      "id": "Q85463584",
+      "name": "Morven Library",
+      "lat": -26.415336,
+      "lng": 147.112513
+    },
+    {
+      "id": "Q6916393",
+      "name": "Mosman Library",
+      "lat": -33.8258,
+      "lng": 151.242
+    },
+    {
+      "id": "Q83911895",
+      "name": "Moss Vale Library",
+      "lat": -34.55081,
+      "lng": 150.373337
+    },
+    {
+      "id": "Q85463588",
+      "name": "Mossman Library",
+      "lat": -16.458913,
+      "lng": 145.375106
+    },
+    {
+      "id": "Q78400514",
+      "name": "Moulamein Library",
+      "lat": -35.091385,
+      "lng": 144.036265
+    },
+    {
+      "id": "Q58477978",
+      "name": "Mount Barker Public Library",
+      "lat": -34.622714,
+      "lng": 117.660614
+    },
+    {
+      "id": "Q58477981",
+      "name": "Mount Claremont Public Library",
+      "lat": -31.961989,
+      "lng": 115.776397
+    },
+    {
+      "id": "Q85463591",
+      "name": "Mount Coot-tha Library",
+      "lat": -27.475615,
+      "lng": 152.976016
+    },
+    {
+      "id": "Q65019177",
+      "name": "Mount Druitt Library",
+      "lat": -33.766847,
+      "lng": 150.823872
+    },
+    {
+      "id": "Q85463611",
+      "name": "Mount Garnet Library",
+      "lat": -17.678601,
+      "lng": 145.120798
+    },
+    {
+      "id": "Q85463596",
+      "name": "Mount Gravatt Library",
+      "lat": -27.53868,
+      "lng": 153.080299
+    },
+    {
+      "id": "Q85463601",
+      "name": "Mount Isa City Library",
+      "lat": -20.725502,
+      "lng": 139.490674
+    },
+    {
+      "id": "Q85463617",
+      "name": "Mount Larcom Library",
+      "lat": -23.810221,
+      "lng": 150.978386
+    },
+    {
+      "id": "Q58477986",
+      "name": "Mount Magnet Public Library",
+      "lat": -28.062239,
+      "lng": 117.848092
+    },
+    {
+      "id": "Q85463622",
+      "name": "Mount Morgan Library",
+      "lat": -23.645124,
+      "lng": 150.386567
+    },
+    {
+      "id": "Q85463604",
+      "name": "Mount Ommaney Library",
+      "lat": -27.548034,
+      "lng": 152.939348
+    },
+    {
+      "id": "Q85463607",
+      "name": "Moura Library",
+      "lat": -24.571938,
+      "lng": 149.974902
+    },
+    {
+      "id": "Q71192028",
+      "name": "Mudgee Library",
+      "lat": -32.590519,
+      "lng": 149.587244
+    },
+    {
+      "id": "Q58477990",
+      "name": "Mukinbudin Public Library",
+      "lat": -30.915956,
+      "lng": 118.207464
+    },
+    {
+      "id": "Q58477996",
+      "name": "Mullewa Public Library",
+      "lat": -28.539864,
+      "lng": 115.511183
+    },
+    {
+      "id": "Q65484618",
+      "name": "Mullumbimby Library",
+      "lat": -28.555578,
+      "lng": 153.511578
+    },
+    {
+      "id": "Q66816160",
+      "name": "Mulwala Library",
+      "lat": -35.98795,
+      "lng": 146.006154
+    },
+    {
+      "id": "Q58478004",
+      "name": "Mundaring Public Library",
+      "lat": -31.903072,
+      "lng": 116.165519
+    },
+    {
+      "id": "Q58478009",
+      "name": "Mundijong Public Library",
+      "lat": -32.297419,
+      "lng": 115.984611
+    },
+    {
+      "id": "Q85463627",
+      "name": "Mundubbera Library",
+      "lat": -25.59153,
+      "lng": 151.299731
+    },
+    {
+      "id": "Q85463632",
+      "name": "Mungallala Library",
+      "lat": -26.446791,
+      "lng": 147.543812
+    },
+    {
+      "id": "Q71189442",
+      "name": "Mungindi Library",
+      "lat": -28.977417,
+      "lng": 148.994748
+    },
+    {
+      "id": "Q58478011",
+      "name": "Munglinup Public Library",
+      "lat": -33.704033,
+      "lng": 120.857664
+    },
+    {
+      "id": "Q58478014",
+      "name": "Murchison Public Library",
+      "lat": -26.892831,
+      "lng": 115.955828
+    },
+    {
+      "id": "Q56564147",
+      "name": "Murgon Library",
+      "lat": -26.24067,
+      "lng": 151.94216
+    },
+    {
+      "id": "Q58478015",
+      "name": "Murray Public Library",
+      "lat": -32.627344,
+      "lng": 115.871719
+    },
+    {
+      "id": "Q84802704",
+      "name": "Murrurundi Library",
+      "lat": -31.765263,
+      "lng": 150.839212
+    },
+    {
+      "id": "Q85467167",
+      "name": "Murwillumbah Library",
+      "lat": -28.326942,
+      "lng": 153.401373
+    },
+    {
+      "id": "Q78404343",
+      "name": "Muswellbrook Library",
+      "lat": -32.261754,
+      "lng": 150.888412
+    },
+    {
+      "id": "Q85463718",
+      "name": "Muttaburra Library",
+      "lat": -22.592618,
+      "lng": 144.546823
+    },
+    {
+      "id": "Q58478017",
+      "name": "Nabawa Public Library",
+      "lat": -28.501283,
+      "lng": 114.789581
+    },
+    {
+      "id": "Q85463723",
+      "name": "Nambour Library",
+      "lat": -26.628283,
+      "lng": 152.959125
+    },
+    {
+      "id": "Q82875660",
+      "name": "Nambucca Heads Library",
+      "lat": -30.642549,
+      "lng": 153.001259
+    },
+    {
+      "id": "Q85463726",
+      "name": "Nanango Library",
+      "lat": -26.670682,
+      "lng": 152.002265
+    },
+    {
+      "id": "Q58478019",
+      "name": "Nannup Public Library",
+      "lat": -33.979664,
+      "lng": 115.765056
+    },
+    {
+      "id": "Q65485719",
+      "name": "Narellan Library",
+      "lat": -34.043456,
+      "lng": 150.736074
+    },
+    {
+      "id": "Q58478024",
+      "name": "Narembeen Public Library",
+      "lat": -32.065408,
+      "lng": 118.394367
+    },
+    {
+      "id": "Q84532498",
+      "name": "Naremburn Library",
+      "lat": -33.815927,
+      "lng": 151.201862
+    },
+    {
+      "id": "Q66815062",
+      "name": "Narooma Library",
+      "lat": -36.216372,
+      "lng": 150.123737
+    },
+    {
+      "id": "Q82878510",
+      "name": "Narrabri Library",
+      "lat": -30.324321,
+      "lng": 149.784604
+    },
+    {
+      "id": "Q82881587",
+      "name": "Narrandera Library",
+      "lat": -34.743673,
+      "lng": 146.554131
+    },
+    {
+      "id": "Q58478026",
+      "name": "Narrogin Regional Library",
+      "lat": -32.934869,
+      "lng": 117.176619
+    },
+    {
+      "id": "Q82882870",
+      "name": "Narromine Library",
+      "lat": -32.236148,
+      "lng": 148.238866
+    },
+    {
+      "id": "Q2565882",
+      "name": "National Film and Sound Archive of Australia",
+      "lat": -35.283,
+      "lng": 149.121
+    },
+    {
+      "id": "Q6972828",
+      "name": "National Gallery of Australia Research Library",
+      "lat": -35.3004,
+      "lng": 149.137
+    },
+    {
+      "id": "Q623578",
+      "name": "National Library of Australia",
+      "lat": -35.296389,
+      "lng": 149.129444
+    },
+    {
+      "id": "Q14935660",
+      "name": "National Sport Information Centre",
+      "lat": -35.246381,
+      "lng": 149.101997
+    },
+    {
+      "id": "Q85463734",
+      "name": "Nebo Library",
+      "lat": -21.688984,
+      "lng": 148.689027
+    },
+    {
+      "id": "Q58478030",
+      "name": "Nedlands Public Library",
+      "lat": -31.978839,
+      "lng": 115.806764
+    },
+    {
+      "id": "Q85463738",
+      "name": "Nerang Library",
+      "lat": -27.991318,
+      "lng": 153.335629
+    },
+    {
+      "id": "Q85463743",
+      "name": "New Farm Library",
+      "lat": -27.467293,
+      "lng": 153.049626
+    },
+    {
+      "id": "Q83097416",
+      "name": "New Lambton Library",
+      "lat": -32.923944,
+      "lng": 151.713192
+    },
+    {
+      "id": "Q85463749",
+      "name": "New Mapoon Indigenous Knowledge Centre",
+      "lat": -10.869337,
+      "lng": 142.384311
+    },
+    {
+      "id": "Q139505475",
+      "name": "New Norfolk Library",
+      "lat": -42.7814,
+      "lng": 147.06407
+    },
+    {
+      "id": "Q63917327",
+      "name": "Newcastle City Library",
+      "lat": -32.929194,
+      "lng": 151.77225
+    },
+    {
+      "id": "Q63919046",
+      "name": "Newcastle Libraries",
+      "lat": -32.929191,
+      "lng": 151.772262
+    },
+    {
+      "id": "Q58478032",
+      "name": "Newdegate Public Library",
+      "lat": -33.093647,
+      "lng": 119.02195
+    },
+    {
+      "id": "Q58478036",
+      "name": "Newman Community Library",
+      "lat": -23.357903,
+      "lng": 119.739128
+    },
+    {
+      "id": "Q66410726",
+      "name": "Newtown Library",
+      "lat": -33.895364,
+      "lng": 151.182669
+    },
+    {
+      "id": "Q85463818",
+      "name": "Ngalpun Ngulaygaw Lag",
+      "lat": -10.050057,
+      "lng": 143.063986
+    },
+    {
+      "id": "Q85463425",
+      "name": "Ngalpun Ngulaygaw Lag Resource Centre",
+      "lat": -9.952895,
+      "lng": 142.192801
+    },
+    {
+      "id": "Q85464240",
+      "name": "Ngulaig Meta Municipal Library",
+      "lat": -10.584312,
+      "lng": 142.215656
+    },
+    {
+      "id": "Q136526222",
+      "name": "Nhulunbuy Community Library",
+      "lat": -12.186368,
+      "lng": 136.783072
+    },
+    {
+      "id": "Q136532181",
+      "name": "Nightcliff Public Library",
+      "lat": -12.387009,
+      "lng": 130.850337
+    },
+    {
+      "id": "Q85465333",
+      "name": "Noosa Mobile Library",
+      "lat": -26.387074,
+      "lng": 153.091403
+    },
+    {
+      "id": "Q85463755",
+      "name": "Noosaville Library",
+      "lat": -26.401172,
+      "lng": 153.049942
+    },
+    {
+      "id": "Q85463757",
+      "name": "Normanton Library",
+      "lat": -17.667763,
+      "lng": 141.08119
+    },
+    {
+      "id": "Q58478038",
+      "name": "Norseman Public Library",
+      "lat": -32.197967,
+      "lng": 121.780078
+    },
+    {
+      "id": "Q85463765",
+      "name": "North Lakes Library",
+      "lat": -27.239184,
+      "lng": 153.017566
+    },
+    {
+      "id": "Q85463771",
+      "name": "North Rockhampton Library",
+      "lat": -23.364701,
+      "lng": 150.529701
+    },
+    {
+      "id": "Q84960320",
+      "name": "North Ryde Library",
+      "lat": -33.794625,
+      "lng": 151.122332
+    },
+    {
+      "id": "Q83206748",
+      "name": "North Sydney Library",
+      "lat": -33.833061,
+      "lng": 151.207302
+    },
+    {
+      "id": "Q58478040",
+      "name": "Northam Public Library",
+      "lat": -31.655869,
+      "lng": 116.66835
+    },
+    {
+      "id": "Q58478043",
+      "name": "Northampton Public Library",
+      "lat": -28.351697,
+      "lng": 114.630047
+    },
+    {
+      "id": "Q84533527",
+      "name": "Northbridge Library",
+      "lat": -33.811933,
+      "lng": 151.21653
+    },
+    {
+      "id": "Q58478045",
+      "name": "Northcliffe Public Library",
+      "lat": -34.632297,
+      "lng": 116.124789
+    },
+    {
+      "id": "Q66405131",
+      "name": "Nowra Library",
+      "lat": -34.873081,
+      "lng": 150.601251
+    },
+    {
+      "id": "Q58478049",
+      "name": "Nullagine Public Library",
+      "lat": -21.890103,
+      "lng": 120.105378
+    },
+    {
+      "id": "Q85463777",
+      "name": "Nundah Library",
+      "lat": -27.400712,
+      "lng": 153.058333
+    },
+    {
+      "id": "Q85735500",
+      "name": "Nundle Library",
+      "lat": -31.46083,
+      "lng": 151.127959
+    },
+    {
+      "id": "Q58478052",
+      "name": "Nungarin Public Library",
+      "lat": -31.183869,
+      "lng": 118.100908
+    },
+    {
+      "id": "Q58478057",
+      "name": "Nyabing Public Library",
+      "lat": -33.541558,
+      "lng": 118.149944
+    },
+    {
+      "id": "Q66046346",
+      "name": "Oak Flats Library",
+      "lat": -34.563399,
+      "lng": 150.819065
+    },
+    {
+      "id": "Q85463781",
+      "name": "Oakey Library",
+      "lat": -27.435432,
+      "lng": 151.721787
+    },
+    {
+      "id": "Q66816231",
+      "name": "Oatley Library",
+      "lat": -33.982034,
+      "lng": 151.081854
+    },
+    {
+      "id": "Q83390254",
+      "name": "Oberon Library",
+      "lat": -33.702713,
+      "lng": 149.856067
+    },
+    {
+      "id": "Q58478059",
+      "name": "Ongerup Public Library",
+      "lat": -33.963392,
+      "lng": 118.478808
+    },
+    {
+      "id": "Q58478063",
+      "name": "Onslow Public Library",
+      "lat": -21.636756,
+      "lng": 115.112671
+    },
+    {
+      "id": "Q65486233",
+      "name": "Oran Park Library",
+      "lat": -33.999163,
+      "lng": 150.743997
+    },
+    {
+      "id": "Q64841068",
+      "name": "Orange City Library",
+      "lat": -33.283577,
+      "lng": 149.10127
+    },
+    {
+      "id": "Q139505477",
+      "name": "Orford Library",
+      "lat": -42.56283,
+      "lng": 147.87231
+    },
+    {
+      "id": "Q58478067",
+      "name": "Osborne Park Public Library",
+      "lat": -31.896422,
+      "lng": 115.829269
+    },
+    {
+      "id": "Q78023712",
+      "name": "Paddington Library",
+      "lat": -33.885264,
+      "lng": 151.22581
+    },
+    {
+      "id": "Q65931524",
+      "name": "Padstow Library",
+      "lat": -33.950926,
+      "lng": 151.030986
+    },
+    {
+      "id": "Q85463784",
+      "name": "Palm Beach Library",
+      "lat": -28.117183,
+      "lng": 153.467653
+    },
+    {
+      "id": "Q136531088",
+      "name": "Palmerston City Library",
+      "lat": -12.479494,
+      "lng": 130.984939
+    },
+    {
+      "id": "Q65931551",
+      "name": "Panania Library",
+      "lat": -33.956139,
+      "lng": 150.998125
+    },
+    {
+      "id": "Q58478069",
+      "name": "Pannawonica Public Library",
+      "lat": -21.639447,
+      "lng": 116.323256
+    },
+    {
+      "id": "Q58478074",
+      "name": "Paraburdoo Public Library",
+      "lat": -23.198817,
+      "lng": 117.671588
+    },
+    {
+      "id": "Q83390666",
+      "name": "Parkes Library",
+      "lat": -33.136635,
+      "lng": 148.173132
+    },
+    {
+      "id": "Q83390919",
+      "name": "Peak Hill Library",
+      "lat": -32.724867,
+      "lng": 148.191683
+    },
+    {
+      "id": "Q58478078",
+      "name": "Pemberton Public Library",
+      "lat": -34.444703,
+      "lng": 116.034189
+    },
+    {
+      "id": "Q139505478",
+      "name": "Penguin Library",
+      "lat": -41.11356,
+      "lng": 146.0729
+    },
+    {
+      "id": "Q67347172",
+      "name": "Pennant Hills Library",
+      "lat": -33.737843,
+      "lng": 151.072227
+    },
+    {
+      "id": "Q83445791",
+      "name": "Penrith City Library",
+      "lat": -33.749621,
+      "lng": 150.689562
+    },
+    {
+      "id": "Q66816232",
+      "name": "Penshurst Library",
+      "lat": -33.961,
+      "lng": 151.077243
+    },
+    {
+      "id": "Q58478083",
+      "name": "Perenjori Public Library",
+      "lat": -29.439614,
+      "lng": 116.284778
+    },
+    {
+      "id": "Q85463794",
+      "name": "Perry Library",
+      "lat": -25.180224,
+      "lng": 151.645446
+    },
+    {
+      "id": "Q113206710",
+      "name": "Phoenix Park Library",
+      "lat": -37.879837,
+      "lng": 145.081495
+    },
+    {
+      "id": "Q58478091",
+      "name": "Pingelly Public Library",
+      "lat": -32.534458,
+      "lng": 117.084236
+    },
+    {
+      "id": "Q58478095",
+      "name": "Pingrup Public Library",
+      "lat": -33.534058,
+      "lng": 118.511911
+    },
+    {
+      "id": "Q85463797",
+      "name": "Pittsworth Library",
+      "lat": -27.715925,
+      "lng": 151.633022
+    },
+    {
+      "id": "Q85463801",
+      "name": "Point Lookout Library",
+      "lat": -27.426033,
+      "lng": 153.521029
+    },
+    {
+      "id": "Q85463814",
+      "name": "Port Douglas Library",
+      "lat": -16.485202,
+      "lng": 145.464226
+    },
+    {
+      "id": "Q58478098",
+      "name": "Port Hedland Public Library",
+      "lat": -20.301952,
+      "lng": 118.632908
+    },
+    {
+      "id": "Q83670590",
+      "name": "Port Macquarie Library",
+      "lat": -31.433076,
+      "lng": 152.91494
+    },
+    {
+      "id": "Q66041200",
+      "name": "Portland Library",
+      "lat": -33.353418,
+      "lng": 149.981904
+    },
+    {
+      "id": "Q113207168",
+      "name": "Prahran Square Library",
+      "lat": -37.847742,
+      "lng": 144.992659
+    },
+    {
+      "id": "Q81658997",
+      "name": "Proserpine Library",
+      "lat": -20.401719,
+      "lng": 148.580217
+    },
+    {
+      "id": "Q85463864",
+      "name": "Proston Library",
+      "lat": -26.16352,
+      "lng": 151.601307
+    },
+    {
+      "id": "Q58478102",
+      "name": "Quairading Public Library",
+      "lat": -32.010106,
+      "lng": 117.401689
+    },
+    {
+      "id": "Q84623268",
+      "name": "Queanbeyan City Library",
+      "lat": -35.355443,
+      "lng": 149.234204
+    },
+    {
+      "id": "Q134972840",
+      "name": "Queensland Council of Carers",
+      "lat": -27.50041,
+      "lng": 153.07697
+    },
+    {
+      "id": "Q115489106",
+      "name": "Queenstown Library",
+      "lat": -42.07875,
+      "lng": 145.55622
+    },
+    {
+      "id": "Q85463869",
+      "name": "Quilpie Shire Library",
+      "lat": -26.613829,
+      "lng": 144.266255
+    },
+    {
+      "id": "Q85463871",
+      "name": "Quinalow Library",
+      "lat": -27.111768,
+      "lng": 151.62446
+    },
+    {
+      "id": "Q71188185",
+      "name": "Quirindi Library",
+      "lat": -31.507285,
+      "lng": 150.680498
+    },
+    {
+      "id": "Q85463877",
+      "name": "Rainbow Beach Library",
+      "lat": -25.905662,
+      "lng": 153.090044
+    },
+    {
+      "id": "Q84629103",
+      "name": "Randwick Library",
+      "lat": -33.914437,
+      "lng": 151.241642
+    },
+    {
+      "id": "Q85463882",
+      "name": "Ravenshoe Library & Customer Service Centre",
+      "lat": -17.61088,
+      "lng": 145.488263
+    },
+    {
+      "id": "Q58478106",
+      "name": "Ravensthorpe Public Library",
+      "lat": -33.580756,
+      "lng": 120.045822
+    },
+    {
+      "id": "Q139505479",
+      "name": "Ravenswood Library",
+      "lat": -41.41851,
+      "lng": 147.17519
+    },
+    {
+      "id": "Q83672568",
+      "name": "Raymond Terrace Library",
+      "lat": -32.76172,
+      "lng": 151.745002
+    },
+    {
+      "id": "Q115685199",
+      "name": "Realm",
+      "lat": -37.81487,
+      "lng": 145.22912
+    },
+    {
+      "id": "Q85463887",
+      "name": "Redbank Plains Library",
+      "lat": -27.648284,
+      "lng": 152.863941
+    },
+    {
+      "id": "Q85463892",
+      "name": "Redbank Plaza Branch Library",
+      "lat": -27.605875,
+      "lng": 152.869477
+    },
+    {
+      "id": "Q85463897",
+      "name": "Redcliffe Library",
+      "lat": -27.225116,
+      "lng": 153.110994
+    },
+    {
+      "id": "Q85465338",
+      "name": "Redland Mobile Library",
+      "lat": -27.525603,
+      "lng": 153.266828
+    },
+    {
+      "id": "Q66672116",
+      "name": "Regents Park Library",
+      "lat": -33.88466,
+      "lng": 151.031933
+    },
+    {
+      "id": "Q61883442",
+      "name": "Richmond Library",
+      "lat": -37.825283,
+      "lng": 144.998299
+    },
+    {
+      "id": "Q139505480",
+      "name": "Ringarooma Library",
+      "lat": -41.24153,
+      "lng": 147.73509
+    },
+    {
+      "id": "Q65019543",
+      "name": "Riverstone Library",
+      "lat": -33.679549,
+      "lng": 150.860782
+    },
+    {
+      "id": "Q56563984",
+      "name": "Riverton Public Library",
+      "lat": -32.037571,
+      "lng": 115.903047
+    },
+    {
+      "id": "Q65931578",
+      "name": "Riverwood Library",
+      "lat": -33.947338,
+      "lng": 151.052994
+    },
+    {
+      "id": "Q6542466",
+      "name": "RMIT University Library",
+      "lat": -37.8086,
+      "lng": 144.964
+    },
+    {
+      "id": "Q85463908",
+      "name": "Robina Library",
+      "lat": -28.077594,
+      "lng": 153.385207
+    },
+    {
+      "id": "Q64707993",
+      "name": "Rockdale Library",
+      "lat": -33.950568,
+      "lng": 151.139132
+    },
+    {
+      "id": "Q85463918",
+      "name": "Rockhampton History Centre",
+      "lat": -23.381284,
+      "lng": 150.512365
+    },
+    {
+      "id": "Q85463913",
+      "name": "Rockhampton Regional Library",
+      "lat": -23.381549,
+      "lng": 150.51346
+    },
+    {
+      "id": "Q58478110",
+      "name": "Rockingham Central Library",
+      "lat": -32.277583,
+      "lng": 115.751983
+    },
+    {
+      "id": "Q56762060",
+      "name": "Roebourne Public Library",
+      "lat": -20.773778,
+      "lng": 117.14525
+    },
+    {
+      "id": "Q85463923",
+      "name": "Rolleston Library",
+      "lat": -24.462502,
+      "lng": 148.623315
+    },
+    {
+      "id": "Q85463927",
+      "name": "Roma Library",
+      "lat": -26.572964,
+      "lng": 148.788341
+    },
+    {
+      "id": "Q139505482",
+      "name": "Rosny Library",
+      "lat": -42.86346,
+      "lng": 147.36993
+    },
+    {
+      "id": "Q134972846",
+      "name": "Royal Park Campus Library",
+      "lat": -37.781284,
+      "lng": 144.94135
+    },
+    {
+      "id": "Q85463932",
+      "name": "Runaway Bay Library",
+      "lat": -27.91224,
+      "lng": 153.39854
+    },
+    {
+      "id": "Q85463937",
+      "name": "Russell Island Library",
+      "lat": -27.647617,
+      "lng": 153.382141
+    },
+    {
+      "id": "Q71194307",
+      "name": "Rutherford Library",
+      "lat": -32.716247,
+      "lng": 151.526907
+    },
+    {
+      "id": "Q84960657",
+      "name": "Ryde Library",
+      "lat": -33.811445,
+      "lng": 151.107253
+    },
+    {
+      "id": "Q89307547",
+      "name": "Rylstone Library",
+      "lat": -32.7979,
+      "lng": 149.970265
+    },
+    {
+      "id": "Q58478116",
+      "name": "Safety Bay Public Library",
+      "lat": -32.300536,
+      "lng": 115.710431
+    },
+    {
+      "id": "Q66405571",
+      "name": "Sanctuary Point Library",
+      "lat": -35.104172,
+      "lng": 150.626923
+    },
+    {
+      "id": "Q85463942",
+      "name": "Sandgate Library",
+      "lat": -27.320605,
+      "lng": 153.070492
+    },
+    {
+      "id": "Q58478119",
+      "name": "Sandstone Public Library",
+      "lat": -27.987083,
+      "lng": 119.296908
+    },
+    {
+      "id": "Q64707747",
+      "name": "Sans Souci Library",
+      "lat": -33.993552,
+      "lng": 151.139964
+    },
+    {
+      "id": "Q81661060",
+      "name": "Sarina Library",
+      "lat": -21.421461,
+      "lng": 149.216765
+    },
+    {
+      "id": "Q58478123",
+      "name": "Scarborough Public Library",
+      "lat": -31.894647,
+      "lng": 115.774911
+    },
+    {
+      "id": "Q85465339",
+      "name": "Scenic Rim Regional Council Mobile Library",
+      "lat": -27.989954,
+      "lng": 152.9956
+    },
+    {
+      "id": "Q84802245",
+      "name": "Scone Library",
+      "lat": -32.050458,
+      "lng": 150.868574
+    },
+    {
+      "id": "Q139505483",
+      "name": "Scottsdale Library",
+      "lat": -41.16207,
+      "lng": 147.5153
+    },
+    {
+      "id": "Q115301635",
+      "name": "Seaford Library",
+      "lat": -35.17856,
+      "lng": 138.48183
+    },
+    {
+      "id": "Q85464023",
+      "name": "Seisia Indigenous Knowledge Centre",
+      "lat": -10.852803,
+      "lng": 142.367368
+    },
+    {
+      "id": "Q24090250",
+      "name": "Semaphore Library",
+      "lat": -34.838679,
+      "lng": 138.481337
+    },
+    {
+      "id": "Q58478126",
+      "name": "Seville Grove Public Library",
+      "lat": -32.133192,
+      "lng": 116.002922
+    },
+    {
+      "id": "Q58478128",
+      "name": "Shark Bay Public Library",
+      "lat": -25.928217,
+      "lng": 113.535519
+    },
+    {
+      "id": "Q66046910",
+      "name": "Shellharbour Village Library",
+      "lat": -34.577795,
+      "lng": 150.868039
+    },
+    {
+      "id": "Q58477674",
+      "name": "Shire of West Arthur Health and Resource Centre",
+      "lat": -33.336895,
+      "lng": 116.74093
+    },
+    {
+      "id": "Q84962426",
+      "name": "Singleton Library",
+      "lat": -32.558562,
+      "lng": 151.175017
+    },
+    {
+      "id": "Q66816140",
+      "name": "Smithfield Library",
+      "lat": -33.85654,
+      "lng": 150.938737
+    },
+    {
+      "id": "Q139505485",
+      "name": "Smithton Library",
+      "lat": -40.84185,
+      "lng": 145.12282
+    },
+    {
+      "id": "Q139505486",
+      "name": "Sorell Library",
+      "lat": -42.78146,
+      "lng": 147.56403
+    },
+    {
+      "id": "Q58478136",
+      "name": "South Hedland Public Library",
+      "lat": -20.411876,
+      "lng": 118.60224
+    },
+    {
+      "id": "Q66816258",
+      "name": "South Hurstville Library",
+      "lat": -33.977623,
+      "lng": 151.106426
+    },
+    {
+      "id": "Q58478138",
+      "name": "South Perth Public Library",
+      "lat": -31.984156,
+      "lng": 115.865975
+    },
+    {
+      "id": "Q85736449",
+      "name": "South Tamworth Library",
+      "lat": -31.10879,
+      "lng": 150.90901
+    },
+    {
+      "id": "Q68631939",
+      "name": "South West Rocks Library",
+      "lat": -30.886269,
+      "lng": 153.040737
+    },
+    {
+      "id": "Q58478141",
+      "name": "Southern Cross Public Library",
+      "lat": -31.230725,
+      "lng": 119.326228
+    },
+    {
+      "id": "Q56564127",
+      "name": "Southport Library",
+      "lat": -27.970687,
+      "lng": 153.41241
+    },
+    {
+      "id": "Q85682274",
+      "name": "Spanish Resource Centre of Melbourne",
+      "lat": -37.808807,
+      "lng": 144.960604
+    },
+    {
+      "id": "Q58478143",
+      "name": "Spearwood Public Library",
+      "lat": -32.100227,
+      "lng": 115.783779
+    },
+    {
+      "id": "Q69524931",
+      "name": "Speers Point Library",
+      "lat": -32.959858,
+      "lng": 151.622571
+    },
+    {
+      "id": "Q85464117",
+      "name": "Springfield Central Library",
+      "lat": -27.677105,
+      "lng": 152.900679
+    },
+    {
+      "id": "Q85464123",
+      "name": "Springsure Library",
+      "lat": -24.113775,
+      "lng": 148.088736
+    },
+    {
+      "id": "Q65022295",
+      "name": "Springwood Library",
+      "lat": -33.69921,
+      "lng": 150.56861
+    },
+    {
+      "id": "Q83445885",
+      "name": "St Clair Library",
+      "lat": -33.794214,
+      "lng": 150.789561
+    },
+    {
+      "id": "Q85464126",
+      "name": "St George Library",
+      "lat": -28.036467,
+      "lng": 148.581022
+    },
+    {
+      "id": "Q139505487",
+      "name": "St Helens Library",
+      "lat": -41.32078,
+      "lng": 148.24909
+    },
+    {
+      "id": "Q69433812",
+      "name": "St Ives Library",
+      "lat": -33.729895,
+      "lng": 151.160964
+    },
+    {
+      "id": "Q7593909",
+      "name": "St Kilda Library",
+      "lat": -37.8678,
+      "lng": 144.9889
+    },
+    {
+      "id": "Q85464132",
+      "name": "St Lawrence Library",
+      "lat": -22.35097,
+      "lng": 149.523221
+    },
+    {
+      "id": "Q83445977",
+      "name": "St Marys Library",
+      "lat": -33.768865,
+      "lng": 150.773661
+    },
+    {
+      "id": "Q63940495",
+      "name": "St Peters/Sydenham Library",
+      "lat": -33.915293,
+      "lng": 151.167341
+    },
+    {
+      "id": "Q65020050",
+      "name": "Stanhope Gardens Library",
+      "lat": -33.716699,
+      "lng": 150.926611
+    },
+    {
+      "id": "Q63940489",
+      "name": "Stanmore Library",
+      "lat": -33.89386,
+      "lng": 151.165114
+    },
+    {
+      "id": "Q85464136",
+      "name": "Stanthorpe Library",
+      "lat": -28.654121,
+      "lng": 151.932488
+    },
+    {
+      "id": "Q6133813",
+      "name": "State Library of New South Wales",
+      "lat": -33.866389,
+      "lng": 151.213333
+    },
+    {
+      "id": "Q2050653",
+      "name": "State Library of Queensland",
+      "lat": -27.471191,
+      "lng": 153.018104
+    },
+    {
+      "id": "Q7603406",
+      "name": "State Library of South Australia",
+      "lat": -34.9209,
+      "lng": 138.602
+    },
+    {
+      "id": "Q7603408",
+      "name": "State Library of Western Australia",
+      "lat": -31.949057,
+      "lng": 115.860534
+    },
+    {
+      "id": "Q1200052",
+      "name": "State Library Victoria",
+      "lat": -37.8098,
+      "lng": 144.965
+    },
+    {
+      "id": "Q83099069",
+      "name": "Stockton Library",
+      "lat": -32.91488,
+      "lng": 151.784997
+    },
+    {
+      "id": "Q85464142",
+      "name": "Stonehenge Library",
+      "lat": -24.353773,
+      "lng": 143.286331
+    },
+    {
+      "id": "Q85464147",
+      "name": "Stones Corner Library",
+      "lat": -27.497925,
+      "lng": 153.043663
+    },
+    {
+      "id": "Q85464150",
+      "name": "Stratford Library",
+      "lat": -16.875354,
+      "lng": 145.732457
+    },
+    {
+      "id": "Q85723493",
+      "name": "Strathfield Library",
+      "lat": -33.869157,
+      "lng": 151.083547
+    },
+    {
+      "id": "Q85464155",
+      "name": "Strathpine Library",
+      "lat": -27.311858,
+      "lng": 152.990598
+    },
+    {
+      "id": "Q71198398",
+      "name": "Stroud Library",
+      "lat": -32.404517,
+      "lng": 151.966901
+    },
+    {
+      "id": "Q68633064",
+      "name": "Stuarts Point Library",
+      "lat": -30.820781,
+      "lng": 152.993787
+    },
+    {
+      "id": "Q58478146",
+      "name": "Subiaco Public Library",
+      "lat": -31.950642,
+      "lng": 115.823697
+    },
+    {
+      "id": "Q58478149",
+      "name": "Success Public Library",
+      "lat": -32.129606,
+      "lng": 115.852981
+    },
+    {
+      "id": "Q138797019",
+      "name": "Sugar Valley Library Museum",
+      "lat": -32.92,
+      "lng": 151.6
+    },
+    {
+      "id": "Q85464160",
+      "name": "Sunnybank Hills Library",
+      "lat": -27.610537,
+      "lng": 153.0549
+    },
+    {
+      "id": "Q85465343",
+      "name": "Sunshine Coast Central Mobile Library",
+      "lat": -26.652215,
+      "lng": 153.082895
+    },
+    {
+      "id": "Q85465344",
+      "name": "Sunshine Coast Southern Mobile Library",
+      "lat": -26.804547,
+      "lng": 153.129233
+    },
+    {
+      "id": "Q85464168",
+      "name": "Surat Library",
+      "lat": -27.151885,
+      "lng": 149.067889
+    },
+    {
+      "id": "Q66446671",
+      "name": "Surry Hills Library",
+      "lat": -33.885961,
+      "lng": 151.213642
+    },
+    {
+      "id": "Q85730537",
+      "name": "Sutherland Library",
+      "lat": -34.030875,
+      "lng": 151.062171
+    },
+    {
+      "id": "Q83512018",
+      "name": "Swan Hill Regional Library",
+      "lat": -35.335571,
+      "lng": 143.558995
+    },
+    {
+      "id": "Q69525006",
+      "name": "Swansea Library",
+      "lat": -33.091765,
+      "lng": 151.637419
+    },
+    {
+      "id": "Q73786272",
+      "name": "Swinburne University of Technology Library",
+      "lat": -37.821488,
+      "lng": 145.03946
+    },
+    {
+      "id": "Q85731715",
+      "name": "Sylvania Library",
+      "lat": -34.010672,
+      "lng": 151.104834
+    },
+    {
+      "id": "Q84963383",
+      "name": "Talbingo Library",
+      "lat": -35.58103,
+      "lng": 148.299606
+    },
+    {
+      "id": "Q58478151",
+      "name": "Tambellup Public Library",
+      "lat": -34.04505,
+      "lng": 117.641878
+    },
+    {
+      "id": "Q85464175",
+      "name": "Tambo Library",
+      "lat": -24.885278,
+      "lng": 146.253975
+    },
+    {
+      "id": "Q85464178",
+      "name": "Tamborine Mountain Library",
+      "lat": -27.924886,
+      "lng": 153.185372
+    },
+    {
+      "id": "Q136449249",
+      "name": "Taminmin Community Library",
+      "lat": -12.57955,
+      "lng": 131.10023
+    },
+    {
+      "id": "Q58478153",
+      "name": "Tammin Public Library",
+      "lat": -31.641351,
+      "lng": 117.484396
+    },
+    {
+      "id": "Q85737216",
+      "name": "Tamworth Library",
+      "lat": -31.093772,
+      "lng": 150.933564
+    },
+    {
+      "id": "Q85464184",
+      "name": "Tara Library",
+      "lat": -27.276845,
+      "lng": 150.459073
+    },
+    {
+      "id": "Q71199050",
+      "name": "Taree Library",
+      "lat": -31.914726,
+      "lng": 152.459581
+    },
+    {
+      "id": "Q85464187",
+      "name": "Taroom Library",
+      "lat": -25.641398,
+      "lng": 149.796047
+    },
+    {
+      "id": "Q71199627",
+      "name": "Tea Gardens Library",
+      "lat": -32.665736,
+      "lng": 152.160024
+    },
+    {
+      "id": "Q85737928",
+      "name": "Temora Library",
+      "lat": -34.451168,
+      "lng": 147.535079
+    },
+    {
+      "id": "Q136849888",
+      "name": "Tennant Creek Public Library",
+      "lat": -19.64639,
+      "lng": 134.19598
+    },
+    {
+      "id": "Q85731044",
+      "name": "Tenterfield Library",
+      "lat": -29.055658,
+      "lng": 152.020152
+    },
+    {
+      "id": "Q85464193",
+      "name": "Texas Library",
+      "lat": -28.854785,
+      "lng": 151.167326
+    },
+    {
+      "id": "Q85463806",
+      "name": "Thaayorre-Munkan Library",
+      "lat": -14.899197,
+      "lng": 141.620116
+    },
+    {
+      "id": "Q85464198",
+      "name": "Thallon Library",
+      "lat": -28.634357,
+      "lng": 148.86731
+    },
+    {
+      "id": "Q85464204",
+      "name": "Thargomindah Library",
+      "lat": -27.99632,
+      "lng": 143.824063
+    },
+    {
+      "id": "Q65931079",
+      "name": "The Entrance Library and Council Services",
+      "lat": -33.3443,
+      "lng": 151.496295
+    },
+    {
+      "id": "Q58477645",
+      "name": "The Grove Library",
+      "lat": -31.997325,
+      "lng": 115.763811
+    },
+    {
+      "id": "Q66041172",
+      "name": "The Learning Space",
+      "lat": -33.828148,
+      "lng": 151.083623
+    },
+    {
+      "id": "Q55635640",
+      "name": "The Women's Library, Sydney",
+      "lat": -33.895375,
+      "lng": 151.180711
+    },
+    {
+      "id": "Q85464208",
+      "name": "Theodore Library",
+      "lat": -24.947309,
+      "lng": 150.075603
+    },
+    {
+      "id": "Q83900733",
+      "name": "Thirroul Library",
+      "lat": -34.31684,
+      "lng": 150.9183
+    },
+    {
+      "id": "Q58478156",
+      "name": "Thornlie Public Library",
+      "lat": -32.055275,
+      "lng": 115.965247
+    },
+    {
+      "id": "Q71195073",
+      "name": "Thornton Library",
+      "lat": -32.200294,
+      "lng": 152.522463
+    },
+    {
+      "id": "Q58478159",
+      "name": "Three Springs Public Library",
+      "lat": -29.536075,
+      "lng": 115.764878
+    },
+    {
+      "id": "Q85464213",
+      "name": "Tiaro Library",
+      "lat": -25.728076,
+      "lng": 152.580998
+    },
+    {
+      "id": "Q85464219",
+      "name": "Tieri Library",
+      "lat": -23.034578,
+      "lng": 148.34569
+    },
+    {
+      "id": "Q85464222",
+      "name": "Tin Can Bay Library",
+      "lat": -25.917183,
+      "lng": 153.003261
+    },
+    {
+      "id": "Q65018472",
+      "name": "Tocumwal Library",
+      "lat": -35.811683,
+      "lng": 145.573698
+    },
+    {
+      "id": "Q58478161",
+      "name": "Tom Price Public Library",
+      "lat": -22.694035,
+      "lng": 117.794712
+    },
+    {
+      "id": "Q83674465",
+      "name": "Tomaree Library & Community Centre",
+      "lat": -32.737036,
+      "lng": 152.107369
+    },
+    {
+      "id": "Q16901863",
+      "name": "Toodyay Public Library",
+      "lat": -31.55022,
+      "lng": 116.46968
+    },
+    {
+      "id": "Q85464226",
+      "name": "Toogoolawah Library",
+      "lat": -27.089619,
+      "lng": 152.376847
+    },
+    {
+      "id": "Q113207109",
+      "name": "Toorak/South Yarra Library",
+      "lat": -37.840089,
+      "lng": 144.999451
+    },
+    {
+      "id": "Q66446721",
+      "name": "Toormina Library",
+      "lat": -30.354922,
+      "lng": 153.093913
+    },
+    {
+      "id": "Q85464230",
+      "name": "Toowong Library",
+      "lat": -27.485812,
+      "lng": 152.99302
+    },
+    {
+      "id": "Q85464235",
+      "name": "Toowoomba City Library",
+      "lat": -27.56444,
+      "lng": 151.949814
+    },
+    {
+      "id": "Q85464237",
+      "name": "Toowoomba Local History Library",
+      "lat": -27.561945,
+      "lng": 151.953417
+    },
+    {
+      "id": "Q85465347",
+      "name": "Toowoomba Region Mobile Library",
+      "lat": -27.56155,
+      "lng": 151.95096
+    },
+    {
+      "id": "Q69525073",
+      "name": "Toronto Library",
+      "lat": -33.014625,
+      "lng": 151.596574
+    },
+    {
+      "id": "Q65931127",
+      "name": "Toukley Library",
+      "lat": -33.266598,
+      "lng": 151.5417
+    },
+    {
+      "id": "Q82884148",
+      "name": "Trangie Library",
+      "lat": -32.035928,
+      "lng": 147.977817
+    },
+    {
+      "id": "Q58478164",
+      "name": "Trayning Public Library",
+      "lat": -31.114239,
+      "lng": 117.791714
+    },
+    {
+      "id": "Q83441858",
+      "name": "Trundle Library",
+      "lat": -32.923834,
+      "lng": 147.71083
+    },
+    {
+      "id": "Q65931151",
+      "name": "Tuggerah Library and Council Services",
+      "lat": -33.299,
+      "lng": 151.435
+    },
+    {
+      "id": "Q83445344",
+      "name": "Tullamore Library",
+      "lat": -32.632655,
+      "lng": 147.574525
+    },
+    {
+      "id": "Q84963588",
+      "name": "Tumbarumba Library",
+      "lat": -35.778192,
+      "lng": 148.009081
+    },
+    {
+      "id": "Q84963731",
+      "name": "Tumut Library",
+      "lat": -35.302401,
+      "lng": 148.219729
+    },
+    {
+      "id": "Q69435528",
+      "name": "Turramurra Library",
+      "lat": -33.731715,
+      "lng": 151.127128
+    },
+    {
+      "id": "Q84807272",
+      "name": "Tweed Heads Library",
+      "lat": -28.177119,
+      "lng": 153.54191
+    },
+    {
+      "id": "Q66405975",
+      "name": "Ulladulla Library",
+      "lat": -35.356977,
+      "lng": 150.47399
+    },
+    {
+      "id": "Q66446675",
+      "name": "Ultimo Library",
+      "lat": -33.883733,
+      "lng": 151.202034
+    },
+    {
+      "id": "Q139505492",
+      "name": "Ulverstone Library",
+      "lat": -41.15563,
+      "lng": 146.17238
+    },
+    {
+      "id": "Q85464419",
+      "name": "Umagico Indigenous Knowledge Centre",
+      "lat": -10.892,
+      "lng": 142.351549
+    },
+    {
+      "id": "Q65930858",
+      "name": "Umina Beach Library",
+      "lat": -33.521901,
+      "lng": 151.322539
+    },
+    {
+      "id": "Q83896474",
+      "name": "Unanderra Library",
+      "lat": -34.457212,
+      "lng": 150.842239
+    },
+    {
+      "id": "Q7895221",
+      "name": "University of Canberra Library",
+      "lat": -35.2381,
+      "lng": 149.083
+    },
+    {
+      "id": "Q109450293",
+      "name": "University of New South Wales Library",
+      "lat": -33.917382,
+      "lng": 151.233461
+    },
+    {
+      "id": "Q7896192",
+      "name": "University of Queensland Library",
+      "lat": -27.496031,
+      "lng": 153.014753
+    },
+    {
+      "id": "Q367840",
+      "name": "University of Sydney Library",
+      "lat": -33.886667,
+      "lng": 151.190278
+    },
+    {
+      "id": "Q7896608",
+      "name": "University of Western Australia Library",
+      "lat": -31.979,
+      "lng": 115.818
+    },
+    {
+      "id": "Q85464424",
+      "name": "Upper Coomera Library",
+      "lat": -27.869458,
+      "lng": 153.304354
+    },
+    {
+      "id": "Q84798816",
+      "name": "Uralla Library",
+      "lat": -30.643151,
+      "lng": 151.498768
+    },
+    {
+      "id": "Q64841058",
+      "name": "Urunga Library",
+      "lat": -30.496805,
+      "lng": 153.020746
+    },
+    {
+      "id": "Q58478168",
+      "name": "Useless Loop Public Library",
+      "lat": -26.129731,
+      "lng": 113.417903
+    },
+    {
+      "id": "Q7876038",
+      "name": "UTS Library",
+      "lat": -33.88065,
+      "lng": 151.2025
+    },
+    {
+      "id": "Q58477456",
+      "name": "Victoria Park Public Library",
+      "lat": -31.984314,
+      "lng": 115.900082
+    },
+    {
+      "id": "Q85464430",
+      "name": "Victoria Point Library",
+      "lat": -27.584981,
+      "lng": 153.280402
+    },
+    {
+      "id": "Q58477410",
+      "name": "Vincent Public Library",
+      "lat": -31.934572,
+      "lng": 115.845319
+    },
+    {
+      "id": "Q85468296",
+      "name": "Vinegar Hill Memorial Library",
+      "lat": -33.690605,
+      "lng": 150.92628
+    },
+    {
+      "id": "Q58477415",
+      "name": "VisAbility Library",
+      "lat": -31.971002,
+      "lng": 115.900911
+    },
+    {
+      "id": "Q137213295",
+      "name": "Wadeye Community Library",
+      "lat": -14.243228,
+      "lng": 129.522821
+    },
+    {
+      "id": "Q84799492",
+      "name": "Wagga Wagga City Library",
+      "lat": -35.109393,
+      "lng": 147.371384
+    },
+    {
+      "id": "Q58477418",
+      "name": "Wagin Public Library",
+      "lat": -33.308902,
+      "lng": 117.342203
+    },
+    {
+      "id": "Q84798161",
+      "name": "Walcha Library",
+      "lat": -30.983654,
+      "lng": 151.593939
+    },
+    {
+      "id": "Q84794373",
+      "name": "Walgett Library",
+      "lat": -30.023181,
+      "lng": 148.116083
+    },
+    {
+      "id": "Q81660965",
+      "name": "Walkerston Library",
+      "lat": -21.1605,
+      "lng": 149.0662
+    },
+    {
+      "id": "Q66041215",
+      "name": "Wallerawang Library",
+      "lat": -33.411283,
+      "lng": 150.064937
+    },
+    {
+      "id": "Q83095011",
+      "name": "Wallsend Library",
+      "lat": -32.901342,
+      "lng": 151.666796
+    },
+    {
+      "id": "Q85464513",
+      "name": "Wallumbilla Library",
+      "lat": -26.585444,
+      "lng": 149.186015
+    },
+    {
+      "id": "Q47982779",
+      "name": "Walpole Public Library",
+      "lat": -34.977377,
+      "lng": 116.73273
+    },
+    {
+      "id": "Q52046021",
+      "name": "Wandering Public Library",
+      "lat": -32.681416,
+      "lng": 116.675481
+    },
+    {
+      "id": "Q85464519",
+      "name": "Wandoan Library",
+      "lat": -26.121038,
+      "lng": 149.958758
+    },
+    {
+      "id": "Q69525054",
+      "name": "Wangi Wangi Library",
+      "lat": -33.069818,
+      "lng": 151.588114
+    },
+    {
+      "id": "Q52046025",
+      "name": "Wanneroo Public Library",
+      "lat": -31.750568,
+      "lng": 115.805295
+    },
+    {
+      "id": "Q67342979",
+      "name": "Warialda Library",
+      "lat": -29.540883,
+      "lng": 150.574374
+    },
+    {
+      "id": "Q66047408",
+      "name": "Warilla Library",
+      "lat": -34.55238,
+      "lng": 150.859881
+    },
+    {
+      "id": "Q52046027",
+      "name": "Warnbro Community Library",
+      "lat": -32.345405,
+      "lng": 115.758723
+    },
+    {
+      "id": "Q56768680",
+      "name": "Waroona Public Library",
+      "lat": -32.842694,
+      "lng": 115.923363
+    },
+    {
+      "id": "Q85464523",
+      "name": "Warraber Indigenous Knowledge Centre",
+      "lat": -10.205248,
+      "lng": 142.826876
+    },
+    {
+      "id": "Q83895343",
+      "name": "Warrawong Library",
+      "lat": -34.489722,
+      "lng": 150.889151
+    },
+    {
+      "id": "Q83917928",
+      "name": "Warren Shire Library",
+      "lat": -31.698583,
+      "lng": 147.834313
+    },
+    {
+      "id": "Q83209198",
+      "name": "Warringah Mall Library",
+      "lat": -33.768637,
+      "lng": 151.265641
+    },
+    {
+      "id": "Q85464528",
+      "name": "Warwick Library",
+      "lat": -28.215215,
+      "lng": 152.03468
+    },
+    {
+      "id": "Q66446682",
+      "name": "Waterloo Library",
+      "lat": -33.899372,
+      "lng": 151.20676
+    },
+    {
+      "id": "Q73956735",
+      "name": "Watsons Bay Library",
+      "lat": -33.84524,
+      "lng": 151.28174
+    },
+    {
+      "id": "Q83671548",
+      "name": "Wauchope Library",
+      "lat": -31.46312,
+      "lng": 152.722787
+    },
+    {
+      "id": "Q63873691",
+      "name": "Waverley Library",
+      "lat": -33.89274,
+      "lng": 151.244997
+    },
+    {
+      "id": "Q82879947",
+      "name": "Wee Waa Library",
+      "lat": -30.22451,
+      "lng": 149.445202
+    },
+    {
+      "id": "Q66672511",
+      "name": "Wellington Library",
+      "lat": -32.55583,
+      "lng": 148.944408
+    },
+    {
+      "id": "Q56768700",
+      "name": "Wellstead Public Library",
+      "lat": -34.493853,
+      "lng": 118.604314
+    },
+    {
+      "id": "Q65022496",
+      "name": "Wentworth Falls Library",
+      "lat": -33.709345,
+      "lng": 150.375865
+    },
+    {
+      "id": "Q84773146",
+      "name": "Wentworth Library",
+      "lat": -34.109114,
+      "lng": 141.917179
+    },
+    {
+      "id": "Q86408622",
+      "name": "Wentworth Point Community Centre and Library",
+      "lat": -33.825409,
+      "lng": 151.078108
+    },
+    {
+      "id": "Q66671736",
+      "name": "Wentworthville Library",
+      "lat": -33.808085,
+      "lng": 150.973735
+    },
+    {
+      "id": "Q71188689",
+      "name": "Werris Creek Library",
+      "lat": -31.35135,
+      "lng": 150.649388
+    },
+    {
+      "id": "Q84534347",
+      "name": "West Chatswood Library",
+      "lat": -33.805501,
+      "lng": 151.163535
+    },
+    {
+      "id": "Q85464537",
+      "name": "West End Library",
+      "lat": -27.482444,
+      "lng": 153.01186
+    },
+    {
+      "id": "Q84961079",
+      "name": "West Ryde Library",
+      "lat": -33.806914,
+      "lng": 151.088058
+    },
+    {
+      "id": "Q139505493",
+      "name": "Westbury Library",
+      "lat": -41.52676,
+      "lng": 146.83313
+    },
+    {
+      "id": "Q56768716",
+      "name": "Westonia Public Library",
+      "lat": -31.302304,
+      "lng": 118.696812
+    },
+    {
+      "id": "Q66816189",
+      "name": "Wetherill Park Library",
+      "lat": -33.850439,
+      "lng": 150.910015
+    },
+    {
+      "id": "Q139505494",
+      "name": "Whitemark Library",
+      "lat": -40.12205,
+      "lng": 148.01662
+    },
+    {
+      "id": "Q56768733",
+      "name": "Whitford Public Library",
+      "lat": -31.797426,
+      "lng": 115.753337
+    },
+    {
+      "id": "Q56768454",
+      "name": "Wickepin Public Library",
+      "lat": -32.781667,
+      "lng": 117.498964
+    },
+    {
+      "id": "Q56247797",
+      "name": "Wickham Public Library",
+      "lat": -20.680861,
+      "lng": 117.144193
+    },
+    {
+      "id": "Q85461709",
+      "name": "Wik Mungkan Indigenous Knowledge Centre",
+      "lat": -13.355047,
+      "lng": 141.727925
+    },
+    {
+      "id": "Q56247786",
+      "name": "Willagee Public Library",
+      "lat": -32.052575,
+      "lng": 115.805844
+    },
+    {
+      "id": "Q56247779",
+      "name": "Willetton Public Library",
+      "lat": -32.055755,
+      "lng": 115.879059
+    },
+    {
+      "id": "Q56247776",
+      "name": "Williams Public Library",
+      "lat": -33.025753,
+      "lng": 116.880977
+    },
+    {
+      "id": "Q56242186",
+      "name": "Wiluna Public Library",
+      "lat": -26.59063,
+      "lng": 120.224805
+    },
+    {
+      "id": "Q69525030",
+      "name": "Windale Library",
+      "lat": -32.993441,
+      "lng": 151.681699
+    },
+    {
+      "id": "Q85464542",
+      "name": "Windorah Library",
+      "lat": -25.420696,
+      "lng": 142.655869
+    },
+    {
+      "id": "Q71200095",
+      "name": "Wingham Library",
+      "lat": -31.869293,
+      "lng": 152.375935
+    },
+    {
+      "id": "Q85462323",
+      "name": "Winifred Fisher Knowledge Centre",
+      "lat": -26.293205,
+      "lng": 151.955198
+    },
+    {
+      "id": "Q56564131",
+      "name": "Winton Library",
+      "lat": -22.390169,
+      "lng": 143.037354
+    },
+    {
+      "id": "Q56242179",
+      "name": "Withers Public Library",
+      "lat": -33.364176,
+      "lng": 115.63002
+    },
+    {
+      "id": "Q67062859",
+      "name": "Woden Library",
+      "lat": -35.344607,
+      "lng": 149.084206
+    },
+    {
+      "id": "Q61629678",
+      "name": "Wodonga Library",
+      "lat": -36.1243,
+      "lng": 146.88878
+    },
+    {
+      "id": "Q83909738",
+      "name": "Wollondilly Library & Information Service",
+      "lat": -34.16968,
+      "lng": 150.61235
+    },
+    {
+      "id": "Q83895220",
+      "name": "Wollongong Library",
+      "lat": -34.427064,
+      "lng": 150.898741
+    },
+    {
+      "id": "Q61883318",
+      "name": "Women's Art Register",
+      "lat": -37.825283,
+      "lng": 144.998299
+    },
+    {
+      "id": "Q85464623",
+      "name": "Wondai Library",
+      "lat": -26.319027,
+      "lng": 151.873257
+    },
+    {
+      "id": "Q85464625",
+      "name": "Wongaling Beach Library",
+      "lat": -17.89585,
+      "lng": 146.091217
+    },
+    {
+      "id": "Q56242176",
+      "name": "Wongan Hills Public Library",
+      "lat": -30.893066,
+      "lng": 116.718179
+    },
+    {
+      "id": "Q56242172",
+      "name": "Woodanilling Public Library",
+      "lat": -33.563076,
+      "lng": 117.436321
+    },
+    {
+      "id": "Q85464630",
+      "name": "Woodford Library",
+      "lat": -26.954499,
+      "lng": 152.778438
+    },
+    {
+      "id": "Q85464634",
+      "name": "Woodgate Beach Library",
+      "lat": -25.108373,
+      "lng": 152.565406
+    },
+    {
+      "id": "Q56242168",
+      "name": "Woodvale Public Library",
+      "lat": -31.797994,
+      "lng": 115.795315
+    },
+    {
+      "id": "Q66446733",
+      "name": "Woolgoolga Library",
+      "lat": -30.109729,
+      "lng": 153.198963
+    },
+    {
+      "id": "Q73952414",
+      "name": "Woollahra Library at Double Bay",
+      "lat": -33.877549,
+      "lng": 151.24377
+    },
+    {
+      "id": "Q85464640",
+      "name": "Woorabinda Knowledge Centre",
+      "lat": -24.13366,
+      "lng": 149.457266
+    },
+    {
+      "id": "Q65930830",
+      "name": "Woy Woy Library",
+      "lat": -33.492962,
+      "lng": 151.327521
+    },
+    {
+      "id": "Q56242164",
+      "name": "Wundowie Public Library",
+      "lat": -31.759451,
+      "lng": 116.384077
+    },
+    {
+      "id": "Q56242159",
+      "name": "Wyalkatchem Public Library",
+      "lat": -31.179651,
+      "lng": 117.379431
+    },
+    {
+      "id": "Q85464646",
+      "name": "Wyandra Library",
+      "lat": -27.246379,
+      "lng": 145.978475
+    },
+    {
+      "id": "Q54911858",
+      "name": "Wyndham Public Library",
+      "lat": -15.485797,
+      "lng": 128.122825
+    },
+    {
+      "id": "Q85464650",
+      "name": "Wynnum Library",
+      "lat": -27.445,
+      "lng": 153.17168
+    },
+    {
+      "id": "Q139505495",
+      "name": "Wynyard Library",
+      "lat": -40.99058,
+      "lng": 145.7267
+    },
+    {
+      "id": "Q54911829",
+      "name": "Yalgoo Public Library",
+      "lat": -28.341781,
+      "lng": 116.682415
+    },
+    {
+      "id": "Q66446711",
+      "name": "Yamba Library",
+      "lat": -29.436773,
+      "lng": 153.358194
+    },
+    {
+      "id": "Q52882863",
+      "name": "Yanchep and Two Rocks Public Library",
+      "lat": -31.496153,
+      "lng": 115.588639
+    },
+    {
+      "id": "Q85464653",
+      "name": "Yarrabah Knowledge Centre",
+      "lat": -16.907672,
+      "lng": 145.866809
+    },
+    {
+      "id": "Q85464657",
+      "name": "Yarraman Library",
+      "lat": -26.840695,
+      "lng": 151.98062
+    },
+    {
+      "id": "Q78015864",
+      "name": "Yass Valley Library",
+      "lat": -34.841171,
+      "lng": 148.911255
+    },
+    {
+      "id": "Q85464660",
+      "name": "Yeppoon Library",
+      "lat": -23.131303,
+      "lng": 150.741348
+    },
+    {
+      "id": "Q52046031",
+      "name": "York Public Library",
+      "lat": -31.891667,
+      "lng": 116.767828
+    },
+    {
+      "id": "Q67346099",
+      "name": "Young Library",
+      "lat": -34.312214,
+      "lng": 148.298289
+    },
+    {
+      "id": "Q85464663",
+      "name": "Yowah Library",
+      "lat": -27.968979,
+      "lng": 144.633781
+    },
+    {
+      "id": "Q85464665",
+      "name": "Yuleba Library",
+      "lat": -26.613201,
+      "lng": 149.382648
+    },
+    {
+      "id": "Q52046028",
+      "name": "Yuna Public Library",
+      "lat": -28.327464,
+      "lng": 115.002642
+    },
+    {
+      "id": "Q85464667",
+      "name": "Yungaburra Library",
+      "lat": -17.2707,
+      "lng": 145.583342
+    },
+    {
+      "id": "Q139505496",
+      "name": "Zeehan Library",
+      "lat": -41.88728,
+      "lng": 145.33815
+    },
+    {
+      "id": "Q85464671",
+      "name": "Zillmere Library",
+      "lat": -27.359812,
+      "lng": 153.040649
+    }
+  ]
 }
