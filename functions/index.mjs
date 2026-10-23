@@ -57,6 +57,7 @@ export {
   pollSessionOpsAgentRuns,
   processSessionIntent,
   purgeStaleSessions,
+  sendPosthogIncidentEmail,
   sweepPosthogIncidents,
   warmPremiumOverpassPreload,
 } from "./handlers/triggers.mjs";
