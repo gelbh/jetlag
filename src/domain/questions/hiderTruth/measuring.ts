@@ -5,29 +5,45 @@ import {
   prepareMeasuringLineSegments,
 } from "../../geometry/measuring/geometryMeasuring";
 import type { MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
-import type { GameArea } from "../../map/annotations";
+import { isActive } from "../../map/annotationActive";
+import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
 import { isMeasuringLinearLocation } from "../measuringQuestions";
+import {
+  NEAR_ELIMINATION_EDGE_METERS,
+  radarCircumferenceGapMeters,
+} from "./nearRadarEliminationEdge";
 import {
   type HiderTruthResult,
   minDistanceToPlaces,
   resultFromReplyId,
   seekerAnchorFromMetadata,
   truthUnavailable,
+  UNAVAILABLE_MEASURING_EDGE_GAP,
 } from "./shared";
 
-/** Equal nearest-coast distances within this band resolve to Closer. */
-export const COASTLINE_TRUTH_DISTANCE_TIE_EPSILON_METERS = 1;
-
-function closerFurtherFromCoastDistances(
+/** Absolute difference of two scalar distances to the same target/locus. */
+export function measuringDistanceFlipGapMeters(
   stationDistanceMeters: number,
   seekerDistanceMeters: number,
-): "closer" | "further" {
-  if (stationDistanceMeters <= seekerDistanceMeters + COASTLINE_TRUTH_DISTANCE_TIE_EPSILON_METERS) {
-    return "closer";
+): number {
+  return Math.abs(stationDistanceMeters - seekerDistanceMeters);
+}
+
+function closerFurtherOrUnavailable(
+  pending: PendingQuestionRecord,
+  stationDistanceMeters: number,
+  seekerDistanceMeters: number,
+): HiderTruthResult {
+  if (
+    measuringDistanceFlipGapMeters(stationDistanceMeters, seekerDistanceMeters) <=
+    NEAR_ELIMINATION_EDGE_METERS
+  ) {
+    return truthUnavailable(UNAVAILABLE_MEASURING_EDGE_GAP);
   }
-  return "further";
+  const replyId = stationDistanceMeters < seekerDistanceMeters ? "closer" : "further";
+  return resultFromReplyId(pending, replyId);
 }
 
 function resolvedMeasuringGameArea(
@@ -43,6 +59,113 @@ function resolvedMeasuringGameArea(
   return undefined;
 }
 
+type ParsedMeasuringRegion = Omit<MeasuringRegionInput, "measuringAnswer" | "gameArea"> & {
+  gameArea?: MeasuringRegionInput["gameArea"];
+};
+
+function parseMeasuringRegionInput(regionInputJson: string): ParsedMeasuringRegion | null {
+  try {
+    return JSON.parse(regionInputJson) as ParsedMeasuringRegion;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Flip gap (metres) for an answered measuring annotation at `point`, or null when
+ * the annotation is not an in-scope answered measuring edge (or metadata is incomplete).
+ */
+export function measuringFlipGapMetersAtPoint(
+  point: LatLngTuple,
+  annotation: AnnotationRecord,
+  sessionGameArea?: GameArea,
+): number | null {
+  if (!isActive(annotation) || annotation.type !== "measuring") {
+    return null;
+  }
+  if (!annotation.metadata.measuringAnswer) {
+    return null;
+  }
+
+  const regionInputJson = annotation.metadata.measuringRegionInputJson;
+  if (typeof regionInputJson !== "string") {
+    return null;
+  }
+
+  const regionInput = parseMeasuringRegionInput(regionInputJson);
+  if (!regionInput) {
+    return null;
+  }
+
+  const seekerAnchor = seekerAnchorFromMetadata(annotation.metadata);
+  if (!seekerAnchor) {
+    return null;
+  }
+
+  const { measuringSubject, measuringLocationCategory } = regionInput;
+  if (measuringSubject === "sea_level") {
+    return null;
+  }
+
+  if (
+    measuringSubject === "coastline" ||
+    isMeasuringLinearLocation(measuringSubject, measuringLocationCategory ?? undefined)
+  ) {
+    const effectiveGameArea = resolvedMeasuringGameArea(sessionGameArea, regionInput.gameArea);
+    if (!effectiveGameArea) {
+      return null;
+    }
+    const prepared = prepareMeasuringLineSegments(
+      regionInput.measuringCoastSegments,
+      effectiveGameArea,
+    );
+    const coastNearestStation = nearestPointToCoastlines(point, prepared.segments, prepared);
+    const coastNearestSeeker = nearestPointToCoastlines(seekerAnchor, prepared.segments, prepared);
+    if (!coastNearestStation || !coastNearestSeeker) {
+      return null;
+    }
+    return measuringDistanceFlipGapMeters(
+      coastNearestStation.distanceMeters,
+      coastNearestSeeker.distanceMeters,
+    );
+  }
+
+  if (regionInput.usesAllPlacesInArea) {
+    const measuringPlaces = measuringPlacesFromMetadata(
+      annotation.metadata,
+      regionInput.measuringPlaces,
+    );
+    const stationDistance = minDistanceToPlaces(point, measuringPlaces);
+    const seekerDistance = minDistanceToPlaces(seekerAnchor, measuringPlaces);
+    if (stationDistance === null || seekerDistance === null) {
+      return null;
+    }
+    return measuringDistanceFlipGapMeters(stationDistance, seekerDistance);
+  }
+
+  const targetPoint = regionInput.measuringTargetPoint;
+  if (!targetPoint) {
+    return null;
+  }
+  const seekerDistance = distanceBetweenPoints(seekerAnchor, targetPoint);
+  return radarCircumferenceGapMeters(point, targetPoint, seekerDistance);
+}
+
+export function isNearMeasuringEliminationEdge(
+  point: LatLngTuple,
+  annotations: readonly AnnotationRecord[],
+  thresholdMeters: number = NEAR_ELIMINATION_EDGE_METERS,
+  sessionGameArea?: GameArea,
+): boolean {
+  for (const annotation of annotations) {
+    const gap = measuringFlipGapMetersAtPoint(point, annotation, sessionGameArea);
+    if (gap !== null && gap <= thresholdMeters) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function truthMeasuringSync(
   pending: PendingQuestionRecord,
   stationCenter: LatLngTuple,
@@ -54,12 +177,8 @@ export function truthMeasuringSync(
     return truthUnavailable();
   }
 
-  let regionInput: Omit<MeasuringRegionInput, "measuringAnswer" | "gameArea"> & {
-    gameArea?: MeasuringRegionInput["gameArea"];
-  };
-  try {
-    regionInput = JSON.parse(regionInputJson) as typeof regionInput;
-  } catch {
+  const regionInput = parseMeasuringRegionInput(regionInputJson);
+  if (!regionInput) {
     return truthUnavailable();
   }
 
@@ -98,11 +217,11 @@ export function truthMeasuringSync(
       return truthUnavailable();
     }
 
-    const replyId = closerFurtherFromCoastDistances(
+    return closerFurtherOrUnavailable(
+      pending,
       coastNearestStation.distanceMeters,
       coastNearestSeeker.distanceMeters,
     );
-    return resultFromReplyId(pending, replyId);
   }
 
   if (regionInput.usesAllPlacesInArea) {
@@ -114,8 +233,7 @@ export function truthMeasuringSync(
       return truthUnavailable();
     }
 
-    const replyId = stationDistance < seekerDistance ? "closer" : "further";
-    return resultFromReplyId(pending, replyId);
+    return closerFurtherOrUnavailable(pending, stationDistance, seekerDistance);
   }
 
   const targetPoint = regionInput.measuringTargetPoint;
@@ -125,8 +243,7 @@ export function truthMeasuringSync(
 
   const stationDistance = distanceBetweenPoints(stationCenter, targetPoint);
   const seekerDistance = distanceBetweenPoints(seekerAnchor, targetPoint);
-  const replyId = stationDistance < seekerDistance ? "closer" : "further";
-  return resultFromReplyId(pending, replyId);
+  return closerFurtherOrUnavailable(pending, stationDistance, seekerDistance);
 }
 
 export async function truthMeasuringSeaLevel(
