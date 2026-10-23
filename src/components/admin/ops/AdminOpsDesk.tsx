@@ -5,19 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import type { AdminTableTab } from "../../../domain/admin/adminTablePrefs";
 import { clearLegacyOpsDeskStorage } from "../../../domain/admin/clearLegacyOpsDeskStorage";
-import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
-import type { PreloadRequest } from "../../../domain/preloadRequest/preloadRequestTypes";
 import { useAdminAccessState } from "../../../hooks/admin/useAdminAccessState";
 import { useAdminJoinSession } from "../../../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../../../hooks/admin/useAdminSessionList";
 import { useMinWidth } from "../../../hooks/layout/useMinWidth";
 import { useAppNavigate } from "../../../hooks/navigation/useAppNavigate";
-import {
-  isOpenIncident,
-  subscribeIncident,
-  subscribeIncidentList,
-} from "../../../services/admin/adminIncidents";
-import { subscribePreloadRequestList } from "../../../services/admin/adminPreloadRequests";
+import { isOpenIncident } from "../../../services/admin/adminIncidents";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
 import { getFirebaseAuth } from "../../../services/core/firebase/firebase";
 import { useSessionStore } from "../../../state/sessionStore";
@@ -41,10 +34,9 @@ import {
   PASSIVE_HOTKEY,
   unlessDialog,
 } from "./adminDeskKeys";
+import { useAdminDeskSelection } from "./useAdminDeskSelection";
 import { useAdminDeskTables } from "./useAdminDeskTables";
-
-const EMPTY_INCIDENTS: IncidentRecord[] = [];
-const EMPTY_PRELOAD_REQUESTS: PreloadRequest[] = [];
+import { useAdminOpsDeskFeeds } from "./useAdminOpsDeskFeeds";
 
 const SESSIONS_ROUTE = "/admin";
 const INCIDENTS_ROUTE = "/admin/incidents";
@@ -110,15 +102,16 @@ function AdminOpsDeskContent() {
           : location.pathname;
   const collapsed = routeKind !== "table";
 
-  const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
-  const [incidentsLoading, setIncidentsLoading] = useState(enabled);
-  const [incidentsError, setIncidentsError] = useState<string | null>(null);
-  const [preloadRequests, setPreloadRequests] = useState<PreloadRequest[]>([]);
-  const [preloadLoading, setPreloadLoading] = useState(enabled);
-  const [preloadError, setPreloadError] = useState<string | null>(null);
-  const [enabledState, setEnabledState] = useState(enabled);
-  const [fetchedIncident, setFetchedIncident] = useState<IncidentRecord | null>(null);
-  const [fetchedFor, setFetchedFor] = useState<string | null>(null);
+  const {
+    visibleIncidents,
+    visiblePreloadRequests,
+    openIncidentsBySession,
+    incidentsLoading,
+    incidentsError,
+    preloadLoading,
+    preloadError,
+  } = useAdminOpsDeskFeeds(enabled);
+
   const activeSession = useSessionStore((state) => state.session);
   const activeRole = useSessionStore((state) => state.myRole);
   const {
@@ -145,66 +138,12 @@ function AdminOpsDeskContent() {
   const joinKeyRef = useRef<string | null>(null);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [lastItem, setLastItem] = useState<{ key: string; path: string } | null>(null);
   const [sidebarTab, setSidebarTab] = useState<{ path: string; tab: AdminTableTab } | null>(null);
-  const [kindPath, setKindPath] = useState(location.pathname);
   const deskRef = useRef<HTMLDivElement>(null);
-
-  if (enabled !== enabledState) {
-    setEnabledState(enabled);
-    if (enabled) {
-      setIncidentsLoading(true);
-      setIncidentsError(null);
-      setPreloadLoading(true);
-      setPreloadError(null);
-    }
-  }
 
   useEffect(() => {
     clearLegacyOpsDeskStorage();
   }, []);
-
-  useEffect(() => {
-    if (!enabled) return;
-    const unsubscribe = subscribeIncidentList(
-      (next) => {
-        setIncidents(next);
-        setIncidentsLoading(false);
-      },
-      (error) => {
-        setIncidentsError(error.message);
-        setIncidentsLoading(false);
-      },
-      { limitCount: 50 },
-    );
-    return unsubscribe;
-  }, [enabled]);
-
-  useEffect(() => {
-    if (!enabled) return;
-    return subscribePreloadRequestList(
-      (next) => {
-        setPreloadRequests(next);
-        setPreloadLoading(false);
-      },
-      (error) => {
-        setPreloadError(error.message);
-        setPreloadLoading(false);
-      },
-    );
-  }, [enabled]);
-
-  const visibleIncidents = enabled ? incidents : EMPTY_INCIDENTS;
-  const visiblePreloadRequests = enabled ? preloadRequests : EMPTY_PRELOAD_REQUESTS;
-  const openIncidentsBySession = new Map<string, number>();
-  for (const incident of visibleIncidents) {
-    if (incident.sessionId && isOpenIncident(incident)) {
-      openIncidentsBySession.set(
-        incident.sessionId,
-        (openIncidentsBySession.get(incident.sessionId) ?? 0) + 1,
-      );
-    }
-  }
 
   const tables = useAdminDeskTables({
     sessions,
@@ -214,61 +153,28 @@ function AdminOpsDeskContent() {
     initialKind: location.pathname === PRELOAD_ROUTE ? "preload" : "all",
   });
 
-  // Kind follows preload table entry/exit only; incident detail must not reset it.
-  if (location.pathname !== kindPath) {
-    const previousPath = kindPath;
-    setKindPath(location.pathname);
-    if (location.pathname === PRELOAD_ROUTE) tables.setKind("preload");
-    else if (previousPath === PRELOAD_ROUTE) tables.setKind("all");
-  }
-
-  const listIncident =
-    routeIncidentId == null
-      ? null
-      : (visibleIncidents.find((row) => row.id === routeIncidentId) ?? null);
-  const listHasSelected = listIncident != null;
-
-  useEffect(() => {
-    if (!enabled || incidentsLoading || !routeIncidentId || listHasSelected) return;
-    return subscribeIncident(
-      routeIncidentId,
-      (next) => {
-        setFetchedIncident(next);
-        setFetchedFor(routeIncidentId);
-      },
-      () => {
-        setFetchedIncident(null);
-        setFetchedFor(routeIncidentId);
-      },
-    );
-  }, [enabled, incidentsLoading, listHasSelected, routeIncidentId]);
-
-  const selectedIncident =
-    listIncident ?? (enabled && fetchedIncident?.id === routeIncidentId ? fetchedIncident : null);
-  const incidentLoading =
-    incidentsLoading ||
-    (!listHasSelected && routeIncidentId != null && fetchedFor !== routeIncidentId);
-  const selectedRequest =
-    routeRequestId == null
-      ? null
-      : (visiblePreloadRequests.find((request) => request.id === routeRequestId) ?? null);
-
-  const sessionById = (id: string | null | undefined) =>
-    id ? (sessions.find((row) => row.sessionId === id) ?? null) : null;
-  const routeSession = sessionById(routeSessionId);
-
-  const routeKey =
-    routeKind === "session"
-      ? routeSessionId
-      : routeKind === "incident"
-        ? `incident:${routeIncidentId}`
-        : routeKind === "request"
-          ? `preload:${routeRequestId}`
-          : null;
-  if (routeKey && (lastItem?.key !== routeKey || lastItem.path !== location.pathname)) {
-    setLastItem({ key: routeKey, path: location.pathname });
-  }
-  const selectedKey = routeKey ?? lastItem?.key ?? null;
+  const {
+    lastItem,
+    selectedKey,
+    selectedIncident,
+    incidentLoading,
+    selectedRequest,
+    sessionById,
+    routeSession,
+  } = useAdminDeskSelection({
+    enabled,
+    pathname: location.pathname,
+    preloadRoute: PRELOAD_ROUTE,
+    setKind: tables.setKind,
+    routeKind,
+    routeSessionId,
+    routeIncidentId,
+    routeRequestId,
+    visibleIncidents,
+    visiblePreloadRequests,
+    incidentsLoading,
+    sessions,
+  });
 
   const monitorRoleError =
     routeSessionId != null &&
