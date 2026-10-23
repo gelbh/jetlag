@@ -29,6 +29,11 @@ describe("jetlagTheme", () => {
     expect(jetlagTheme.components?.Modal).toBeDefined();
     expect(jetlagTheme.components?.Notification).toBeDefined();
     expect(jetlagTheme.components?.Alert).toBeDefined();
+    const alertRoot = jetlagTheme.components?.Alert?.styles?.root as
+      | { border?: string }
+      | undefined;
+    expect(alertRoot?.border).toContain("var(--alert-color)");
+    expect(alertRoot?.border).not.toContain(jetlagBrand.halt);
     expect(jetlagTheme.colors?.halt).toBeDefined();
     expect(jetlagBrand.halt).toMatch(/^oklch/);
   });

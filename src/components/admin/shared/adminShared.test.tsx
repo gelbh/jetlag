@@ -81,6 +81,11 @@ describe("admin shared primitives", () => {
     const blue = screen.getByText("Blue").closest<HTMLElement>(".mantine-Alert-root");
     expect(halt?.style.getPropertyValue("--alert-color")).toContain("halt");
     expect(blue?.style.getPropertyValue("--alert-color")).toContain("blue");
+    expect(halt?.style.border).toContain("var(--alert-color)");
+    expect(blue?.style.border).toContain("var(--alert-color)");
+    expect(halt?.style.getPropertyValue("--alert-color")).not.toBe(
+      blue?.style.getPropertyValue("--alert-color"),
+    );
   });
 
   it("labels stat cells for assistive tech", () => {

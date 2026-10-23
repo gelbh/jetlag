@@ -239,7 +239,8 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
         root: {
           fontFamily: appleSystemSans,
           backgroundColor: `oklch(from ${jetlagBrand.canvas} l c h / 0.92)`,
-          border: `${jetlagBrand.hairline} solid oklch(from ${jetlagBrand.halt} l c h / 0.45)`,
+          // Track Mantine --alert-color (set from `color` prop); do not hardcode halt.
+          border: `${jetlagBrand.hairline} solid color-mix(in oklch, var(--alert-color) 45%, transparent)`,
           backdropFilter: jetlagBrand.frostBlur,
           WebkitBackdropFilter: jetlagBrand.frostBlur,
           boxShadow: jetlagBrand.floatShadow,
