@@ -31,4 +31,23 @@ describe("bundled preset play areas", () => {
     expect(recorded).toBeDefined();
     expect(recorded).toBeCloseTo(computed, 1);
   });
+
+  it("matches Australia states.geojson square mileage", () => {
+    const collection = JSON.parse(
+      readFileSync(
+        resolve(import.meta.dirname, "../../../../public/geo/australia/states.geojson"),
+        "utf8",
+      ),
+    );
+    let total = 0;
+    for (const feature of collection.features ?? []) {
+      const stateId = feature.properties?.stateId as string;
+      const computed = area(feature) / SQ_METERS_PER_SQ_MILE;
+      total += computed;
+      const recorded = BUNDLED_PRESET_PLAY_AREA_SQ_MI[`bundled:australia-${stateId}`];
+      expect(recorded, stateId).toBeDefined();
+      expect(recorded).toBeCloseTo(computed, 1);
+    }
+    expect(BUNDLED_PRESET_PLAY_AREA_SQ_MI["bundled:australia"]).toBeCloseTo(total, 1);
+  });
 });
