@@ -23,7 +23,7 @@ const ROW_SELECTOR = "tbody tr, [data-desk-row]";
 export function moveRowFocus(root: RefObject<HTMLElement | null>, delta: 1 | -1) {
   const rows = [...(root.current?.querySelectorAll<HTMLElement>(ROW_SELECTOR) ?? [])];
   if (rows.length === 0) return;
-  const current = rows.findIndex((row) => row === document.activeElement);
+  const current = rows.indexOf(document.activeElement as HTMLElement);
   const next =
     current === -1
       ? delta > 0

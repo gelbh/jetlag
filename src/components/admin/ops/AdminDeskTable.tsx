@@ -281,7 +281,6 @@ export function AdminDeskTable({
   const onSessions = tab === "sessions";
 
   // Coming back from an open item: keep its row in view.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-run when the selection or tab changes
   useEffect(() => {
     rootRef.current
       ?.querySelector<HTMLElement>('tr[aria-current="true"]')
