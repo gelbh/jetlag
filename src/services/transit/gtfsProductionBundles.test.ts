@@ -199,4 +199,17 @@ describe("production GTFS bundles", () => {
     expect(bundle.stops.length).toBeGreaterThan(0);
     expect(bundle.routes.length).toBeGreaterThan(0);
   });
+
+  it("lists sydney in the production GTFS manifest and bundle loads", async () => {
+    const manifest = JSON.parse(
+      readFileSync(resolve(ROOT, "public/geo/gtfs/manifest.json"), "utf8"),
+    );
+    const entry = manifest.metros.find((m: { id: string }) => m.id === "sydney");
+    expect(entry).toBeDefined();
+    expect(entry.bundlePath).toBe("/geo/gtfs/sydney.json");
+    const bundle = JSON.parse(readFileSync(resolve(ROOT, "public/geo/gtfs/sydney.json"), "utf8"));
+    expect(bundle.metroId).toBe("sydney");
+    expect(bundle.stops.length).toBeGreaterThan(0);
+    expect(bundle.routes.length).toBeGreaterThan(0);
+  });
 });

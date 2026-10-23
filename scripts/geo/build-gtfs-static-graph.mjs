@@ -88,6 +88,14 @@ const METROS = [
     // City pack bbox (+margin). BODS ITM South East is not a usable source today.
     bbox: { south: 50.84, west: -1.52, north: 51.0, east: -1.28 },
   },
+  {
+    id: "sydney",
+    // Mobility Database mdb-2449 (TfNSW Greater Sydney complete static).
+    feedOnestopId: "mdb-2449",
+    feedOnestopIds: ["mdb-2449"],
+    // Greater Sydney specialty pack AABB (+margin).
+    bbox: { south: -34.38, west: 149.97, north: -32.95, east: 151.39 },
+  },
 ];
 
 const FIXTURES = {

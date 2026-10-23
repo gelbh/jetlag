@@ -82,6 +82,13 @@ export const TRANSIT_METROS: TransitMetro[] = [
     radiusKm: 25,
     transitlandFeed: "f-bus~dft~gov~uk",
   },
+  {
+    id: "sydney",
+    label: "Sydney",
+    center: [-33.8688, 151.2093],
+    radiusKm: 70,
+    transitlandFeed: "f-r6-nswtrainlink~sydneytrains~buswayswesternsydney~interlinebus",
+  },
 ];
 
 export function getTransitMetro(metroId: string | undefined): TransitMetro | null {
