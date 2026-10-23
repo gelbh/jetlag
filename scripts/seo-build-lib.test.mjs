@@ -9,12 +9,16 @@ import {
   hasBootSplashElement,
   hasPrerenderedRootMarker,
   inlineStyleText,
+  jsonLdIncludesType,
+  jsonLdTypeName,
   metaDescriptionContent,
+  metaPropertyContent,
   PERF_PRERENDER_PATHS,
   prerenderTargets,
   restoreTemplateHeadAssets,
   rewritePrerenderPreviewUrls,
   robotsMetaContent,
+  seoJsonLdBodies,
 } from "./seo-build-lib.mjs";
 
 test("rewritePrerenderPreviewUrls strips the preview origin", () => {
@@ -252,4 +256,32 @@ test("inlineStyleText collects live style attributes only", () => {
 
 test("decodeBasicEntities counts visible characters", () => {
   assert.equal(decodeBasicEntities("Hide &amp; Seek &quot;FAQ&quot;"), 'Hide & Seek "FAQ"');
+});
+
+test("metaPropertyContent reads Open Graph properties", () => {
+  assert.equal(
+    metaPropertyContent(
+      '<meta property="og:site_name" content="Jet Lag Map Companion">',
+      "og:site_name",
+    ),
+    "Jet Lag Map Companion",
+  );
+  assert.equal(
+    metaPropertyContent('<meta name="description" content="x">', "og:site_name"),
+    undefined,
+  );
+});
+
+test("seoJsonLdBodies and jsonLdIncludesType cover graph and top-level types", () => {
+  const html = `<script type="application/ld+json">
+    {"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"X"},{"@type":"WebApplication"}]}
+  </script><script type="application/ld+json">   </script>`;
+  const bodies = seoJsonLdBodies(html);
+  assert.equal(bodies.length, 1);
+  const parsed = JSON.parse(bodies[0]);
+  assert.equal(jsonLdIncludesType(parsed, "WebSite"), true);
+  assert.equal(jsonLdIncludesType(parsed, "WebApplication"), true);
+  assert.equal(jsonLdIncludesType({ "@type": "WebPage" }, "WebSite"), false);
+  assert.equal(jsonLdTypeName(parsed, "WebSite"), "X");
+  assert.equal(jsonLdTypeName({ "@type": "WebPage" }, "WebSite"), undefined);
 });

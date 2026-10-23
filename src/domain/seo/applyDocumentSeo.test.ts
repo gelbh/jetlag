@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { LEGAL_APP_NAME } from "../legal/legalContact";
 import { applyDocumentSeo } from "./applyDocumentSeo";
 
 function metaContent(selector: string): string | null {
@@ -24,6 +25,7 @@ describe("applyDocumentSeo", () => {
     expect(metaContent('meta[property="og:image"]')).toBe(
       "https://jetlag.gelbhart.dev/og-default.png",
     );
+    expect(metaContent('meta[property="og:site_name"]')).toBe(LEGAL_APP_NAME);
     expect(metaContent('meta[name="twitter:card"]')).toBe("summary_large_image");
   });
 
