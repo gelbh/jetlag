@@ -231,6 +231,7 @@ const WIKIDATA = {
   "state-ny": { qid: "Q1384", alt: "New York" },
   "state-me": { qid: "Q724", alt: "Maine" },
   "state-nsw": { qid: "Q3224", alt: "New South Wales" },
+  "sydney-metro": { qid: "Q3130", alt: "Sydney" },
   "state-vic": { qid: "Q36687", alt: "Victoria" },
   "state-qld": { qid: "Q36074", alt: "Queensland" },
   "state-sa": { qid: "Q35715", alt: "South Australia" },
