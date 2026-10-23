@@ -12,3 +12,8 @@ simplification tolerances.
 
 Coastline / sea_level_seed / international_border / POI: stubs
 (source "none") until metro fill; bbox matches Greater Sydney reference AABB.
+
+GTFS static bundle (public/geo/gtfs/sydney.json): Mobility Database mdb-2449
+(Transport for NSW Greater Sydney complete static), clipped to the Sydney
+specialty pack AABB. Attribution: Transport for NSW (CC BY 4.0). Rebuild:
+node scripts/rebuild-all-gtfs-metros.mjs --metro sydney

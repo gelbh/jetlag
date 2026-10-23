@@ -36,4 +36,11 @@ describe("transitCatalog", () => {
     expect(southampton?.transitlandRtFeed).toBeUndefined();
     expect(metroSupportsLiveVehicles(southampton ?? null)).toBe(false);
   });
+
+  it("registers sydney as static-only (no RT)", () => {
+    const sydney = TRANSIT_METROS.find((m) => m.id === "sydney");
+    expect(sydney?.transitlandFeed).toBeTruthy();
+    expect(sydney?.transitlandRtFeed).toBeUndefined();
+    expect(metroSupportsLiveVehicles(sydney ?? null)).toBe(false);
+  });
 });

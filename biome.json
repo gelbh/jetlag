@@ -19,7 +19,8 @@
       "!public/geo/gtfs/dublin.json",
       "!.worktrees",
       "!worker-configuration.d.ts",
-      "!public/geo/gtfs/nyc.json"
+      "!public/geo/gtfs/nyc.json",
+      "!public/geo/gtfs/sydney.json"
     ]
   },
   "formatter": {
@@ -81,7 +82,8 @@
       "!public/geo/gtfs/dublin.json",
       "!**/yqrd-*.test.ts",
       "!.worktrees/**",
-      "!public/geo/gtfs/nyc.json"
+      "!public/geo/gtfs/nyc.json",
+      "!public/geo/gtfs/sydney.json"
     ]
   },
   "css": {
