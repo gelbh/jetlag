@@ -66,7 +66,7 @@ export function SpectatorMapLayers({
         hidingZones={hidingZones}
       />
       {spectatorLayers.showHidingZones ? (
-        <HidingZonesLayer zones={hidingZones} session={session} />
+        <HidingZonesLayer zones={hidingZones} session={session} annotations={annotations} />
       ) : null}
       {spectatorLayers.showSeekerLocations ? (
         <LiveSeekerLocationsLayer locations={seekerLocations} myUid={uid} />
