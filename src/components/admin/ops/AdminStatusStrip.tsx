@@ -32,8 +32,6 @@ interface AdminStatusStripProps {
   syncFailed: boolean;
 }
 
-const hairline = DESK_HAIRLINE;
-
 const iconButtonStyles = {
   root: {
     width: 36,
@@ -55,7 +53,7 @@ function BarStat({ label, value, alert }: { label: string; value: number; alert?
         flexDirection: "column",
         justifyContent: "center",
         padding: "0 14px",
-        borderLeft: hairline,
+        borderLeft: DESK_HAIRLINE,
         height: 32,
       }}
     >
@@ -162,7 +160,7 @@ export function AdminStatusStrip({
       style={{
         flex: "none",
         background: "var(--color-canvas)",
-        border: hairline,
+        border: DESK_HAIRLINE,
         borderRadius: 16,
       }}
     >

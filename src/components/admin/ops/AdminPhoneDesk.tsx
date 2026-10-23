@@ -21,7 +21,6 @@ import {
 } from "./AdminDeskTable";
 import type { AdminDeskTables } from "./useAdminDeskTables";
 
-const hairline = DESK_HAIRLINE;
 const MAX_CARD_COLUMNS = 8;
 const TOUCH = 44;
 
@@ -86,7 +85,7 @@ function Card<Row>({
       style={{
         listStyle: "none",
         background: "var(--color-canvas)",
-        border: hairline,
+        border: DESK_HAIRLINE,
         borderRadius: 16,
         overflow: "hidden",
         boxShadow: selected ? "inset 3px 0 0 var(--color-flag)" : undefined,
@@ -314,7 +313,7 @@ export function AdminPhoneSession({
       data-testid="admin-phone-session"
       style={{
         background: "var(--color-canvas)",
-        border: hairline,
+        border: DESK_HAIRLINE,
         borderRadius: 16,
         overflow: "hidden",
       }}

@@ -16,8 +16,6 @@ import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { sessionElapsedMs, sessionPhaseMark } from "../table/sessionColumns";
 
-const hairline = DESK_HAIRLINE;
-
 const raisedButton = { background: RAISED_BG, color: "var(--color-ink)" };
 
 function plural(count: number, one: string, many: string) {
@@ -48,7 +46,7 @@ export function EndedSession({
       style={{
         flex: 1,
         background: "var(--color-canvas)",
-        border: hairline,
+        border: DESK_HAIRLINE,
         borderRadius: 16,
       }}
     >
@@ -177,7 +175,7 @@ export function AdminSessionView({
           gap: 10,
           padding: "0 16px",
           background: "var(--color-canvas)",
-          border: hairline,
+          border: DESK_HAIRLINE,
           borderRadius: 16,
           overflow: "hidden",
         }}
@@ -247,7 +245,7 @@ export function AdminSessionView({
           minHeight: 0,
           position: "relative",
           overflow: "hidden",
-          border: hairline,
+          border: DESK_HAIRLINE,
           borderRadius: 16,
           background: "var(--color-surface-deep)",
         }}

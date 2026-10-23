@@ -21,7 +21,6 @@ import {
 import type { AdminDeskTables } from "./useAdminDeskTables";
 
 const FRESH_MS = 60_000;
-const hairline = DESK_HAIRLINE;
 
 function ItemShell({
   selected,
@@ -52,7 +51,7 @@ function ItemShell({
         width: "100%",
         minHeight: 56,
         padding: "10px 14px",
-        borderTop: hairline,
+        borderTop: DESK_HAIRLINE,
         cursor: "pointer",
         background: selected ? "var(--color-flag-soft)" : undefined,
         boxShadow: selected ? "inset 3px 0 0 var(--color-flag)" : undefined,

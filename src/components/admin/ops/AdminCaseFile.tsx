@@ -16,8 +16,6 @@ import { StatusMark } from "../shared/StatusMark";
 import { incidentSummary } from "../table/needsYouRows";
 import { sessionPhaseMark } from "../table/sessionColumns";
 
-const hairline = DESK_HAIRLINE;
-
 const label = {
   fontSize: 11,
   fontWeight: 600,
@@ -71,7 +69,7 @@ function SessionCard({
         padding: "10px 12px",
         borderRadius: 12,
         background: "var(--color-surface-deep)",
-        border: hairline,
+        border: DESK_HAIRLINE,
       }}
     >
       <SessionCode code={code} size="md" />
