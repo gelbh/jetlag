@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { RadarDistanceOptionKey } from "../../../domain/questions";
 import { commitRadar } from "./commitRadar";
 
 const createAnnotation = vi.fn();
@@ -22,7 +23,7 @@ function baseInput(overrides: Partial<Parameters<typeof commitRadar>[0]> = {}) {
     radarAnswer: "yes" as const,
     gameSize: "medium" as const,
     distanceUnit: "metric" as const,
-    usedRadarOptions: new Set(),
+    usedRadarOptions: new Set<RadarDistanceOptionKey>(),
     awaitHiderAnswer: true,
     submitPendingQuestion,
     sessionId: "s1",

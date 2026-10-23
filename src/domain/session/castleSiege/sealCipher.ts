@@ -66,9 +66,20 @@ function requireAes256KeyBytes(bytes: Uint8Array, label: string): void {
   }
 }
 
+/** TS DOM libs type Uint8Array.buffer as ArrayBufferLike; SubtleCrypto wants BufferSource. */
+function asBufferSource(bytes: Uint8Array): BufferSource {
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+}
+
 async function importAesGcmKey(raw: Uint8Array, usages: KeyUsage[]): Promise<CryptoKey> {
   requireAes256KeyBytes(raw, "AES key");
-  return crypto.subtle.importKey("raw", raw, { name: "AES-GCM", length: 256 }, false, usages);
+  return crypto.subtle.importKey(
+    "raw",
+    asBufferSource(raw),
+    { name: "AES-GCM", length: 256 },
+    false,
+    usages,
+  );
 }
 
 function isSealCipherEnvelopeRecord(value: unknown): value is Record<string, unknown> {
@@ -116,7 +127,7 @@ export async function encryptSealPayload(
 
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const ciphertextBuf = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-GCM", iv: asBufferSource(iv) },
     contentKey,
     new TextEncoder().encode(plaintext),
   );
@@ -124,9 +135,9 @@ export async function encryptSealPayload(
   const rawContent = new Uint8Array(await crypto.subtle.exportKey("raw", contentKey));
   const wrapIv = crypto.getRandomValues(new Uint8Array(12));
   const wrappedKeyBuf = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: wrapIv },
+    { name: "AES-GCM", iv: asBufferSource(wrapIv) },
     wrapKey,
-    rawContent,
+    asBufferSource(rawContent),
   );
 
   return {
@@ -152,16 +163,16 @@ export async function decryptSealPayload(
   const wrapKey = await importAesGcmKey(options.wrappingKey, ["decrypt"]);
   const rawContent = new Uint8Array(
     await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: base64ToBytes(envelope.wrapIv) },
+      { name: "AES-GCM", iv: asBufferSource(base64ToBytes(envelope.wrapIv)) },
       wrapKey,
-      base64ToBytes(envelope.wrappedKey),
+      asBufferSource(base64ToBytes(envelope.wrappedKey)),
     ),
   );
   const contentKey = await importAesGcmKey(rawContent, ["decrypt"]);
   const plaintextBuf = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: base64ToBytes(envelope.iv) },
+    { name: "AES-GCM", iv: asBufferSource(base64ToBytes(envelope.iv)) },
     contentKey,
-    base64ToBytes(envelope.ciphertext),
+    asBufferSource(base64ToBytes(envelope.ciphertext)),
   );
   return new TextDecoder().decode(plaintextBuf);
 }

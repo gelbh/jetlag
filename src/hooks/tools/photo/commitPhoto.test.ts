@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { commitPhoto } from "./commitPhoto";
 
-const emitQuestionAnsweredActivity = vi.hoisted(() => vi.fn());
+const emitPhotoAnsweredActivity = vi.hoisted(() => vi.fn());
 
 vi.mock("@/services/session/emitSessionActivity", () => ({
-  emitQuestionAnsweredActivity: (...args: unknown[]) => emitQuestionAnsweredActivity(...args),
+  emitPhotoAnsweredActivity: (...args: unknown[]) => emitPhotoAnsweredActivity(...args),
 }));
 
 const callOracle = vi.fn();
@@ -39,7 +39,7 @@ describe("commitPhoto castleSiege oracle", () => {
     submitPendingQuestion.mockReset();
     setMapError.mockReset();
     onSuccess.mockReset();
-    emitQuestionAnsweredActivity.mockReset();
+    emitPhotoAnsweredActivity.mockReset();
     submitPendingQuestion.mockResolvedValue(undefined);
   });
 
@@ -110,9 +110,8 @@ describe("commitPhoto castleSiege oracle", () => {
 
     expect(callOracle).not.toHaveBeenCalled();
     expect(submitPendingQuestion).not.toHaveBeenCalled();
-    expect(emitQuestionAnsweredActivity).toHaveBeenCalledWith(
+    expect(emitPhotoAnsweredActivity).toHaveBeenCalledWith(
       expect.objectContaining({
-        toolType: "photo",
         answerSummary: "Mirror · tree",
       }),
     );

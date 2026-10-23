@@ -13,7 +13,7 @@ import type {
   CastleSiegeOracleAskPayload,
 } from "../../../services/session/castleSiegeOracleAsk";
 import { resolveAskAnswer } from "../../../services/session/castleSiegeOracleAsk";
-import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
+import { emitPhotoAnsweredActivity } from "../../../services/session/emitSessionActivity";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 
 export interface CommitPhotoInput {
@@ -124,13 +124,11 @@ export async function commitPhoto(input: CommitPhotoInput): Promise<void> {
     }
 
     if (sessionId) {
-      emitQuestionAnsweredActivity({
+      emitPhotoAnsweredActivity({
         sessionId,
-        toolType: "photo",
         promptText: photoQuestionPrompt(categoryId, distanceUnit),
         answerSummary: `Mirror · ${photoReceipt.mirror.categoryId}`,
         createdByUid: senderUid ?? undefined,
-        analyticsMode: "self_recorded",
       });
     }
 
