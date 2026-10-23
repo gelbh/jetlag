@@ -504,3 +504,14 @@ Modified: `requestQueue.ts`, `overpassClient.ts`, `overpassBboxSplit.ts`, `fetch
 - progressbar2 SmoothingETA (EMA-based ETA): https://progressbar-2.readthedocs.io/en/latest/widgets/smoothing-eta.html
 - OSM dev list, Overpass client vs server timeouts: https://lists.openstreetmap.org/pipermail/dev/2017-May/029870.html
 - Mantine Progress (ARIA, fixed 0 to 100 range): https://mantine.dev/core/progress
+
+## Implementation Notes
+
+The first implementation differs from this spec in these places:
+
+- **Named tasks.** The hider truth check, hider station search and mask rebuild publish their task through `setNamedLoadTask` (`src/services/core/progress/namedTasks.ts`) instead of threading a prop through every layer. The readouts that show them (`HiderAnswerPicker`, `TransitStationPicker`, `MapScreenChromeBanners`) read it with `useNamedLoadTask`.
+- **Enrich tasks.** Matching shows the background Overpass enrich inline. Tentacle, measuring places and coastline show it in the global activity chip.
+- **Matching compute.** The matching task ends when features are resolved. Voronoi and LOD refinement keep using the existing map refine chip.
+- **Queue stage.** Waiting for an Overpass slot is a `queued` state on the fetch stage (label "Waiting for map server") rather than a separate stage, so queue time never enters duration history.
+- **Route entry.** `RouteProgressChrome` shows "Step i of n" with a stepped bar. Boundary GeoJSON downloads are not yet byte-counted.
+- **Deferred.** Geocoding search, photo upload byte progress (`uploadBytesResumable`), preset boundary loading and tracking `preloadCriticalGameAreaCaches` in `preloadStore` are left for a follow-up.
