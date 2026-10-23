@@ -11,6 +11,7 @@ export function sydneyPresets(): BundledGamePresetDefinition[] {
         "Greater Sydney LGAs (Strathfield, City of Sydney, and metro cluster). Boundary data © ABS (ASGS).",
       placeLabel: "Sydney, Australia",
       regionPackId: SYDNEY_REGION_PACK_ID,
+      transitMetroId: "sydney",
       hierarchy: [
         { id: "continent-oceania", category: "Continent", name: "Oceania" },
         { id: "country-au", category: "Country", name: "Australia" },

@@ -48,7 +48,7 @@ describe("bundledGamePresets", () => {
     expect(sydney).toHaveLength(1);
     expect(sydney[0]?.id).toBe("bundled:sydney");
     expect(sydney[0]?.subregionId).toBeUndefined();
-    expect(sydney[0]?.transitMetroId).toBeUndefined();
+    expect(sydney[0]?.transitMetroId).toBe("sydney");
     expect(sydney[0]?.distanceUnit).toBe("metric");
     expect(sydney[0]?.advancedSettingsPatch?.expansionPackEnabled).toBe(false);
     expect(sydney[0]?.hierarchy).toEqual([
