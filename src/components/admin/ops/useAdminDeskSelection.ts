@@ -3,8 +3,7 @@ import type { IncidentRecord } from "../../../domain/incident/incidentTypes";
 import type { PreloadRequest } from "../../../domain/preloadRequest/preloadRequestTypes";
 import { subscribeIncident } from "../../../services/admin/adminIncidents";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
-
-type RouteKind = "table" | "session" | "incident" | "request";
+import type { RouteKind } from "./adminDeskRoute";
 
 interface Inputs {
   enabled: boolean;

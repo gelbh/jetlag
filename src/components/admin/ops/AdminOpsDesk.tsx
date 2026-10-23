@@ -27,6 +27,7 @@ import {
   PASSIVE_HOTKEY,
   unlessDialog,
 } from "./adminDeskKeys";
+import type { RouteKind } from "./adminDeskRoute";
 import { useAdminDeskMonitor } from "./useAdminDeskMonitor";
 import { useAdminDeskSelection } from "./useAdminDeskSelection";
 import { useAdminDeskTables } from "./useAdminDeskTables";
@@ -49,8 +50,6 @@ function AdminSessionSkeletonRows() {
 function continuePathForRoute(pathname: string): string {
   return pathname.startsWith("/admin") ? pathname : SESSIONS_ROUTE;
 }
-
-type RouteKind = "table" | "session" | "incident" | "request";
 
 export function AdminOpsDesk() {
   return (

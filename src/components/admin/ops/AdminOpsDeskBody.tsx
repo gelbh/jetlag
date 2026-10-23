@@ -12,9 +12,8 @@ import { AdminPhoneList, AdminPhoneSession } from "./AdminPhoneDesk";
 import { AdminRequestFile } from "./AdminRequestFile";
 import { type AdminSessionMonitorState, AdminSessionView, EndedSession } from "./AdminSessionView";
 import { AdminSidebarList } from "./AdminSidebarList";
+import type { RouteKind } from "./adminDeskRoute";
 import type { AdminDeskTables } from "./useAdminDeskTables";
-
-type RouteKind = "table" | "session" | "incident" | "request";
 
 export function AdminOpsDeskBody({
   isDesktop,
