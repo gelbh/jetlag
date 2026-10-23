@@ -97,7 +97,7 @@ export function measuringFlipGapMetersAtPoint(
     return null;
   }
 
-  const metadata = annotation.metadata as Record<string, unknown>;
+  const metadata = annotation.metadata as unknown as Record<string, unknown>;
   const seekerAnchor = seekerAnchorFromMetadata(metadata);
   if (!seekerAnchor) {
     return null;
