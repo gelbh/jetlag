@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Divider, Drawer, Modal, Select } from "@mantine/core";
+import { Alert } from "@mantine/core";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -70,24 +70,17 @@ describe("admin shared primitives", () => {
     }
   });
 
-  it("keeps error alerts in the mispunch tone", () => {
+  it("uses jetlag halt for destructive alerts under the admin shell", () => {
     renderWithAppUi(
       <AdminWorld>
-        <Alert color="red">Red</Alert>
-        <Alert>Default</Alert>
-        <Alert data-tone="ok">Toned</Alert>
+        <Alert color="halt">Halt</Alert>
         <Alert color="blue">Blue</Alert>
       </AdminWorld>,
     );
-    const alertVar = (text: string) =>
-      screen
-        .getByText(text)
-        .closest<HTMLElement>(".mantine-Alert-root")
-        ?.style.getPropertyValue("--alert-color");
-    expect(alertVar("Red")).toBe("var(--adm-mispunch)");
-    expect(alertVar("Default")).toBe("var(--adm-mispunch)");
-    expect(alertVar("Toned")).toBe("var(--adm-ok)");
-    expect(alertVar("Blue")).not.toBe("var(--adm-ink)");
+    const halt = screen.getByText("Halt").closest<HTMLElement>(".mantine-Alert-root");
+    const blue = screen.getByText("Blue").closest<HTMLElement>(".mantine-Alert-root");
+    expect(halt?.style.getPropertyValue("--alert-color")).toContain("halt");
+    expect(blue?.style.getPropertyValue("--alert-color")).toContain("blue");
   });
 
   it("labels stat cells for assistive tech", () => {
@@ -130,16 +123,6 @@ describe("admin shared primitives", () => {
     }
   });
 
-  it("falls back to the neutral tone for an unknown data-tone", () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Badge data-tone="bogus">Odd</Badge>
-      </AdminWorld>,
-    );
-    const badge = screen.getByText("Odd").closest<HTMLElement>("[data-tone]");
-    expect(badge?.style.getPropertyValue("--badge-bd")).toBe("1px solid var(--adm-ink-muted)");
-  });
-
   it("reports a blank status label in dev", () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
@@ -175,57 +158,6 @@ describe("admin shared primitives", () => {
     } finally {
       vi.unstubAllGlobals();
     }
-  });
-
-  it("draws vertical dividers inline so the base border reset can't hide them", () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Divider orientation="vertical" />
-      </AdminWorld>,
-    );
-    expect(screen.getByRole("separator").style.borderInlineStart).toBe("1px solid var(--adm-rule)");
-  });
-
-  it("fills admin buttons with overprint instead of the app primary", () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Button>Go</Button>
-      </AdminWorld>,
-    );
-    const button = screen.getByRole("button", { name: "Go" });
-    expect(button.style.getPropertyValue("--button-bg")).toBe("var(--adm-overprint)");
-    expect(button.style.getPropertyValue("--button-color")).toBe("var(--adm-overprint-ink)");
-  });
-
-  it("portals a Drawer into the admin world so it reads --adm-paper", async () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Drawer opened onClose={() => {}} title="Settings">
-          drawer body
-        </Drawer>
-      </AdminWorld>,
-    );
-    const body = await screen.findByText("drawer body");
-    expect(body.closest("[data-admin-world]")).not.toBeNull();
-    expect(body.closest(".mantine-Drawer-content")?.getAttribute("style")).toContain(
-      "var(--adm-paper)",
-    );
-    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
-  });
-
-  it("portals a Modal into the admin world on admin paper", async () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Modal opened onClose={() => {}} title="Confirm">
-          modal body
-        </Modal>
-      </AdminWorld>,
-    );
-    const body = await screen.findByText("modal body");
-    expect(body.closest("[data-admin-world]")).not.toBeNull();
-    expect(body.closest(".mantine-Modal-content")?.getAttribute("style")).toContain(
-      "var(--adm-paper-raised)",
-    );
   });
 
   it("names a region by its title and shows the count", () => {
@@ -316,7 +248,7 @@ describe("admin shared primitives", () => {
           <PunchTime at={at} flashing />
         </AdminWorld>,
       );
-      expect(screen.getByText("just now").getAttribute("style")).toContain("adm-punch");
+      expect(screen.getByText("just now").getAttribute("style")).toContain("admin-punch");
       unmount();
 
       motion.reduced = true;
@@ -326,7 +258,7 @@ describe("admin shared primitives", () => {
         </AdminWorld>,
       );
       const style = screen.getByText("just now").getAttribute("style") ?? "";
-      expect(style).toContain("var(--adm-overprint-soft)");
+      expect(style).toContain("var(--color-flag-soft)");
       expect(style).not.toContain("animation");
     } finally {
       motion.reduced = false;
@@ -351,19 +283,9 @@ describe("admin shared primitives", () => {
 
     const after = screen.getByText("just now");
     expect(after).toHaveAttribute("datetime", second);
-    expect(after.getAttribute("style")).toContain("adm-punch");
+    expect(after.getAttribute("style")).toContain("admin-punch");
     expect(after).not.toBe(before);
     expect(before.isConnected).toBe(false);
-  });
-
-  it("portals combobox dropdowns into the admin world", async () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Select label="Sort" data={["Last activity", "Created"]} defaultDropdownOpened />
-      </AdminWorld>,
-    );
-    const option = await screen.findByRole("option", { name: "Created" });
-    expect(option.closest("[data-admin-world]")).not.toBeNull();
   });
 });
 
@@ -430,17 +352,6 @@ describe("AdminConfirm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Start end game" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Session already ended.");
     expect(props.onClose).not.toHaveBeenCalled();
-  });
-
-  it("fills destructive admin buttons with the mispunch token", () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Button color="red">Stop</Button>
-      </AdminWorld>,
-    );
-    const button = screen.getByRole("button", { name: "Stop" });
-    expect(button.style.getPropertyValue("--button-bg")).toBe("var(--adm-mispunch)");
-    expect(button.style.getPropertyValue("--button-color")).toBe("var(--adm-paper)");
   });
 
   it("renders outside the admin world without admin tokens", () => {

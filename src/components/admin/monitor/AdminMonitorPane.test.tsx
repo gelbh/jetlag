@@ -31,7 +31,7 @@ describe("AdminMonitorPane", () => {
     renderWithAppUi(<AdminMonitorPane active errorMessage="Session load failed." />);
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveAttribute("data-tone", "mispunch");
+    expect(alert.style.getPropertyValue("--alert-color")).toContain("halt");
     expect(alert).toHaveTextContent("Monitor unavailable");
     expect(alert).toHaveTextContent("Session load failed.");
   });

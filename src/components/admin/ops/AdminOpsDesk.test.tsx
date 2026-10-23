@@ -345,12 +345,11 @@ describe("AdminOpsDesk", () => {
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
 
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveAttribute("data-tone", "mispunch");
     expect(alert).toHaveClass("mantine-Alert-root");
+    expect(alert.style.getPropertyValue("--alert-color")).toContain("halt");
     expect(within(alert).getByText("Sign-out failed")).toBeInTheDocument();
     expect(within(alert).getByText("Sign-out network error")).toBeInTheDocument();
     expect(alert.closest("[data-admin-world]")).not.toBeNull();
-    expect(alert.style.getPropertyValue("--alert-color")).toBe("var(--adm-mispunch)");
   });
 
   it("renders the signed-in desk inside the admin world", () => {
@@ -872,7 +871,7 @@ describe("AdminOpsDesk", () => {
       fireEvent.click(screen.getByRole("button", { name: "Accept" }));
 
       const alert = await screen.findByRole("alert");
-      expect(alert).toHaveAttribute("data-tone", "mispunch");
+      expect(alert.style.getPropertyValue("--alert-color")).toContain("halt");
       expect(within(alert).getByText("Couldn't update request")).toBeInTheDocument();
       expect(within(alert).getByText("network down")).toBeInTheDocument();
     });

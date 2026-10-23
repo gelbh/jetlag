@@ -168,7 +168,7 @@ function AdminIncidentDetailBody({
   if (error && !incident) {
     return (
       <Stack {...detailFrame} data-testid="admin-incident-detail">
-        <Alert data-tone="mispunch" title="Incident error" role="alert">
+        <Alert color="halt" title="Incident error" role="alert">
           {error.message}
         </Alert>
       </Stack>
@@ -275,7 +275,7 @@ function AdminIncidentDetailBody({
                 ) : null}
 
                 {error ? (
-                  <Alert data-tone="mispunch" role="alert">
+                  <Alert color="halt" role="alert">
                     {error.message}
                   </Alert>
                 ) : null}
@@ -299,7 +299,7 @@ function AdminIncidentDetailBody({
             </ScrollArea>
 
             {sendError ? (
-              <Alert data-tone="mispunch" role="alert" mx={20}>
+              <Alert color="halt" role="alert" mx={20}>
                 {sendError}
               </Alert>
             ) : null}

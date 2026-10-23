@@ -415,7 +415,7 @@ function AdminOpsDeskContent() {
           }
         />
         {signOutError ? (
-          <Alert role="alert" title="Sign-out failed" data-tone="mispunch">
+          <Alert role="alert" title="Sign-out failed" color="halt">
             {signOutError}
           </Alert>
         ) : null}
@@ -580,7 +580,7 @@ function AdminOpsDeskContent() {
           Back
         </Button>
         {observeError && routeKind === "session" ? (
-          <Alert role="alert" data-tone="mispunch" title="Couldn't monitor">
+          <Alert role="alert" color="halt" title="Couldn't monitor">
             {observeError}
           </Alert>
         ) : null}

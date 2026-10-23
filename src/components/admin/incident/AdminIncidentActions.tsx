@@ -278,7 +278,7 @@ export function AdminIncidentActions({
                 onChange={(event) => setGraceSeconds(event.currentTarget.value)}
               />
               {hotfixError ? (
-                <Alert data-tone="mispunch" role="alert">
+                <Alert color="halt" role="alert">
                   {hotfixError}
                 </Alert>
               ) : null}
@@ -315,7 +315,7 @@ export function AdminIncidentActions({
       ) : null}
       {messages.map((message) =>
         message.tone === "error" ? (
-          <Alert key={message.text} data-tone="mispunch" role="alert" py={6}>
+          <Alert key={message.text} color="halt" role="alert" py={6}>
             {message.text}
           </Alert>
         ) : (
