@@ -1,8 +1,13 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { AUSTRALIA_STATES } from "./australiaRegionPack";
 import { isRegionPackId, REGION_PACK_IDS } from "./regionPack";
 import { regionPackDisplayLabel } from "./regionPackDisplayLabel";
 import { getRegionPackConfig } from "./regionPackRegistry";
+
+const root = resolve(import.meta.dirname, "../../../public/geo/australia");
+const lockedStateIds = [...AUSTRALIA_STATES].sort();
 
 describe("australia region pack wiring", () => {
   it("registers australia in the pack id union", () => {
@@ -39,8 +44,53 @@ describe("australia region pack wiring", () => {
   });
 
   it("exports the locked eight state/territory ids", () => {
-    expect([...AUSTRALIA_STATES].sort()).toEqual(
-      ["act", "nsw", "nt", "qld", "sa", "tas", "vic", "wa"].sort(),
-    );
+    expect(lockedStateIds).toEqual(["act", "nsw", "nt", "qld", "sa", "tas", "vic", "wa"]);
+  });
+});
+
+describe("australia geo assets", () => {
+  it("ships exactly eight states with locked stateId and name", () => {
+    const collection = JSON.parse(readFileSync(resolve(root, "states.geojson"), "utf8")) as {
+      features: Array<{ properties: { stateId: string; name: string } }>;
+    };
+    expect(collection.features).toHaveLength(8);
+    const ids = collection.features.map((f) => f.properties.stateId).sort();
+    expect(ids).toEqual(lockedStateIds);
+    for (const feature of collection.features) {
+      expect(typeof feature.properties.name).toBe("string");
+      expect(feature.properties.name.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("ships LGA slices for every stateId with stateId and lgaId", () => {
+    for (const stateId of AUSTRALIA_STATES) {
+      const path = resolve(root, `lgas/${stateId}.geojson`);
+      expect(existsSync(path), path).toBe(true);
+      const collection = JSON.parse(readFileSync(path, "utf8")) as {
+        features: Array<{ properties: { stateId: string; lgaId: string; name: string } }>;
+      };
+      expect(collection.features.length).toBeGreaterThan(0);
+      for (const feature of collection.features) {
+        expect(feature.properties.stateId).toBe(stateId);
+        expect(typeof feature.properties.lgaId).toBe("string");
+        expect(feature.properties.lgaId.length).toBeGreaterThan(0);
+        expect(typeof feature.properties.name).toBe("string");
+        expect(feature.properties.name.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("ships national lgas.geojson with stateIds in the locked set", () => {
+    const collection = JSON.parse(readFileSync(resolve(root, "lgas.geojson"), "utf8")) as {
+      features: Array<{ properties: { stateId: string; lgaId: string } }>;
+    };
+    expect(collection.features.length).toBeGreaterThan(0);
+    const locked = new Set(AUSTRALIA_STATES);
+    for (const feature of collection.features) {
+      expect(locked.has(feature.properties.stateId as (typeof AUSTRALIA_STATES)[number])).toBe(
+        true,
+      );
+      expect(typeof feature.properties.lgaId).toBe("string");
+    }
   });
 });

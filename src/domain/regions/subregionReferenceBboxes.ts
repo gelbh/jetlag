@@ -161,6 +161,16 @@ export const REGION_PACK_SUBREGION_REFERENCE_BBOXES: Partial<
     zug: { south: 47.0811, west: 8.3949, north: 47.2484, east: 8.7012 },
     zurich: { south: 47.1594, west: 8.3583, north: 47.6944, east: 8.985 },
   },
+  australia: {
+    act: { south: -35.9205, west: 148.7628, north: -35.1244, east: 149.3993 },
+    nsw: { south: -37.5051, west: 140.9993, north: -28.1569, east: 159.1092 },
+    nt: { south: -25.9986, west: 129.0006, north: -10.9068, east: 137.9991 },
+    qld: { south: -29.1793, west: 137.9946, north: -9.1425, east: 153.5522 },
+    sa: { south: -38.0626, west: 129.0018, north: -25.9964, east: 141.003 },
+    tas: { south: -43.7404, west: 143.8192, north: -39.2038, east: 148.4986 },
+    vic: { south: -39.159, west: 140.9619, north: -33.9806, east: 149.9762 },
+    wa: { south: -35.1916, west: 112.9211, north: -13.6887, east: 129.0019 },
+  },
   zurich: {
     affoltern: { south: 47.2123, west: 8.3925, north: 47.3584, east: 8.5818 },
     andelfingen: { south: 47.5322, west: 8.5686, north: 47.699, east: 8.8289 },
