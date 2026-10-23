@@ -173,7 +173,7 @@ jobs:
               - 'firestore.indexes.json'
               - 'storage.rules'
               - 'firebase.json'
-              - 'scripts/deploy-production.mjs'
+              - 'scripts/deploy/production.mjs'
               - '.firebaserc'
               - 'src/services/billing/**'
               - 'src/routes/Premium.tsx'

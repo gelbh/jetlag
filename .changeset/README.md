@@ -45,7 +45,7 @@ tech: Tighten release:check version alignment
 1. Feature PRs merge to `main` with pending `.changeset/*.md` files.
 2. The release workflow opens/updates a Version Packages PR titled `chore(release): version packages` (`changeset version` → normalize sections → sync and biome-format `changelog.ts`).
 3. Humans review `CHANGELOG.md` + version bump, then merge.
-4. Merge tags `vX.Y.Z` and opens a GitHub Release. `npm run release` runs `changeset publish` (private package tags only; no npm registry) then `scripts/create-github-release.mjs`, which extracts the dated `## X.Y.Z - YYYY-MM-DD` section from `CHANGELOG.md` (the Changesets Action built-in Release body matcher only accepts undated headings). Do not run a real version bump just to experiment on a feature branch without discarding it.
+4. Merge tags `vX.Y.Z` and opens a GitHub Release. `npm run release` runs `changeset publish` (private package tags only; no npm registry) then `scripts/release/create-github-release.mjs`, which extracts the dated `## X.Y.Z - YYYY-MM-DD` section from `CHANGELOG.md` (the Changesets Action built-in Release body matcher only accepts undated headings). Do not run a real version bump just to experiment on a feature branch without discarding it.
 
 Version Packages PRs opened with the default `GITHUB_TOKEN` usually skip CI. Prefer a GitHub App or PAT for the Release workflow when you want checks on that PR. Enable **Allow GitHub Actions to create and approve pull requests** in repo Actions settings.
 

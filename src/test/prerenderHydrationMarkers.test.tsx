@@ -2,9 +2,9 @@ import { act, lazy, type ReactNode, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
-import { finalizePrerenderDom } from "../../scripts/prerender-hydration-markers.mjs";
+import { finalizePrerenderDom } from "../../scripts/build/prerender-hydration-markers.mjs";
 
-// Pins scripts/prerender-hydration-markers.mjs (React fiber internals) to the installed React:
+// Pins scripts/build/prerender-hydration-markers.mjs (React fiber internals) to the installed React:
 // a client-rendered DOM plus the markers must hydrate with zero recoverable errors.
 
 function Route() {
