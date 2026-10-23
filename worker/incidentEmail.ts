@@ -12,7 +12,8 @@
 export const INCIDENT_EMAIL_PATH = "/api/incident-email";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
-const DEFAULT_INCIDENT_ADMIN_EMAIL = "gelbharttomer@gmail.com";
+/** Require Worker binding / Doppler; do not commit personal addresses. */
+const DEFAULT_INCIDENT_ADMIN_EMAIL = "";
 const DEFAULT_INCIDENT_EMAIL_FROM = "Jet Lag Incidents <incidents@gelbhart.dev>";
 
 export type IncidentEmailAudience = "admin" | "reporter";

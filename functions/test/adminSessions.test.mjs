@@ -16,11 +16,11 @@ import {
 } from "../admin/listActiveSessions.mjs";
 
 describe("adminAccess", () => {
-  it("accepts verified admin email", () => {
+  it("accepts verified admin claim", () => {
     assert.equal(
       isAdminAuth({
         token: {
-          email: "gelbharttomer@gmail.com",
+          admin: true,
           email_verified: true,
         },
       }),
@@ -28,11 +28,11 @@ describe("adminAccess", () => {
     );
   });
 
-  it("rejects unverified or wrong email", () => {
+  it("rejects missing claim or unverified email", () => {
     assert.equal(
       isAdminAuth({
         token: {
-          email: "gelbharttomer@gmail.com",
+          admin: true,
           email_verified: false,
         },
       }),
@@ -41,7 +41,6 @@ describe("adminAccess", () => {
     assert.equal(
       isAdminAuth({
         token: {
-          email: "other@example.com",
           email_verified: true,
         },
       }),
@@ -54,7 +53,6 @@ describe("adminAccess", () => {
       () =>
         requireAdminAuth({
           token: {
-            email: "other@example.com",
             email_verified: true,
           },
         }),

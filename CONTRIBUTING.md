@@ -38,6 +38,7 @@ just env-pull
 | Functions non-secret params (`defineString`) | `functions/.env.jet-lag-map-companion` | Stripe price IDs, `SESSION_OPS_MCP_URL`, `CF_*` |
 | Functions secrets (`defineSecret`) | Google Secret Manager | `STRIPE_SECRET_KEY`, `CURSOR_API_KEY`, `CASTLE_SIEGE_SEAL_WRAP_KEY` (base64 of 32 AES wrap-key bytes; Castle Siege oracle) |
 | App / Worker / CI | Doppler | `VITE_*`, Worker bindings, `GCP_*`, Cloudflare deploy |
+| Admin auth | Firebase custom claim `admin: true` | Grant via `doppler run -- node functions/scripts/set-admin-claim.mjs` with `ADMIN_CLAIM_EMAILS` / `ADMIN_CLAIM_UIDS` (never commit personal emails). Rules/Functions/client gate on the claim. Notification mail still uses Functions param `ADMIN_EMAIL` (Doppler/GSM), not git. |
 
 Castle Siege seal ciphertext: Functions decrypt with GSM `CASTLE_SIEGE_SEAL_WRAP_KEY`. Clients that seal need the same 32-byte key as base64 in Doppler / local env as `VITE_CASTLE_SIEGE_SEAL_WRAP_KEY_B64` (passed into SealVault; never commit real values). Unit tests inject wrap bytes via SealVault props.
 
