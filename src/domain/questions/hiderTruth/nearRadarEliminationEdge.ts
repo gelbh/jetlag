@@ -1,15 +1,11 @@
 import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/gameArea/geometry";
+import { pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
 import { isActive } from "../../map/annotationActive";
-import type { AnnotationRecord } from "../../map/annotations";
-import { DEFAULT_RADIUS_METERS } from "../../map/distance";
+import { type AnnotationRecord, pointToolRadiusFromMetadata } from "../../map/annotations";
 
 /** Display-only: truth pin caution when within this gap of a radar circumference. */
 export const NEAR_RADAR_EDGE_METERS = 50;
 
-/**
- * True when `point` sits within `thresholdMeters` of any active answered radar's
- * elimination edge (disk-no and exterior-yes share the same circumference).
- */
 export function isNearRadarEliminationEdge(
   point: LatLngTuple,
   annotations: readonly AnnotationRecord[],
@@ -19,17 +15,18 @@ export function isNearRadarEliminationEdge(
     if (!isActive(annotation) || annotation.type !== "radar") {
       continue;
     }
-    if (typeof annotation.metadata.inside !== "boolean") {
+    // Answered radar: disk-no and exterior-yes share the same circumference.
+    const answered = typeof annotation.metadata.inside === "boolean";
+    if (!answered || annotation.geometry.geometry.type !== "Point") {
       continue;
     }
 
-    const geometry = annotation.geometry.geometry;
-    if (geometry.type !== "Point") {
+    const radarCenter = pointFromGeometryFeature(annotation.geometry);
+    if (!radarCenter) {
       continue;
     }
 
-    const radarCenter: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
-    const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
+    const radiusMeters = pointToolRadiusFromMetadata(annotation.metadata);
     const gapMeters = Math.abs(distanceBetweenPoints(point, radarCenter) - radiusMeters);
     if (gapMeters <= thresholdMeters) {
       return true;
