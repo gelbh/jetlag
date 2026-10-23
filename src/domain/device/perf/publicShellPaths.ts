@@ -1,11 +1,19 @@
 import { LEARN_ROUTE_PATHS } from "../../seo/learnRoutePaths";
 
-const PUBLIC_SHELL_PATHS = new Set<string>(["/", "/privacy", "/terms", ...LEARN_ROUTE_PATHS]);
+const PUBLIC_SHELL_PATHS = new Set<string>([
+  "/",
+  "/privacy",
+  "/terms",
+  "/premium",
+  ...LEARN_ROUTE_PATHS,
+]);
 
 /**
- * Public, auth-free entry screens (landing, legal, how-to-play pages). Boot defers Firebase Auth
- * / App Check on these until the page is idle so third parties stay off the
- * LCP path. Exact match; a trailing slash is tolerated.
+ * Entry screens where boot defers *eager* Firebase Auth / App Check until idle so third
+ * parties stay off the first paint path (landing, legal, Premium, how-to-play). Exact match;
+ * a trailing slash is tolerated. Deferral does not mean “no Firebase”: `/premium` still
+ * hydrates entitlements via Premium readiness after React mounts. `/account` is excluded
+ * because its sign-in gate needs Auth on the critical path.
  */
 export function isPublicShellPath(pathname: string): boolean {
   const normalized =

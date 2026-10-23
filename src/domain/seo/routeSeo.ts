@@ -123,15 +123,25 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
     description: HOME_DESCRIPTION,
     canonicalPath: "/",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
+    // WebSite is Google's preferred site-name signal; WebApplication keeps the app type.
     jsonLd: {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      name: LEGAL_APP_NAME,
-      url: absoluteUrl("/"),
-      applicationCategory: "GameApplication",
-      description: HOME_DESCRIPTION,
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      disclaimer: UNOFFICIAL_DISCLAIMER,
+      "@graph": [
+        {
+          "@type": "WebSite",
+          name: LEGAL_APP_NAME,
+          url: absoluteUrl("/"),
+        },
+        {
+          "@type": "WebApplication",
+          name: LEGAL_APP_NAME,
+          url: absoluteUrl("/"),
+          applicationCategory: "GameApplication",
+          description: HOME_DESCRIPTION,
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          disclaimer: UNOFFICIAL_DISCLAIMER,
+        },
+      ],
     },
   },
   "/premium": {
