@@ -5,7 +5,7 @@ import type { AdminTableTab } from "@/domain/admin/adminTablePrefs";
 import { formatFreshnessAge } from "@/domain/admin/formatAdminFreshness";
 import type { AdminSessionSummary } from "@/services/admin/adminSessions";
 import { AdminRegion } from "../shared/AdminRegion";
-import { RAISED_BG } from "../shared/adminSurface";
+import { DESK_HAIRLINE, RAISED_BG } from "../shared/adminSurface";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { sortAdminRows } from "../table/AdminDataTable";
@@ -21,7 +21,7 @@ import {
 import type { AdminDeskTables } from "./useAdminDeskTables";
 
 const FRESH_MS = 60_000;
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
+const hairline = DESK_HAIRLINE;
 
 function ItemShell({
   selected,

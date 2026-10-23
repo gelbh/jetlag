@@ -10,13 +10,13 @@ import { incidentProgressTone } from "@/theme/adminTone";
 import { AdminIncidentActions } from "../incident/AdminIncidentActions";
 import { AdminIncidentDetail } from "../incident/AdminIncidentDetail";
 import { AdminRegion } from "../shared/AdminRegion";
-import { RAISED_BG } from "../shared/adminSurface";
+import { DESK_HAIRLINE, RAISED_BG } from "../shared/adminSurface";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { incidentSummary } from "../table/needsYouRows";
 import { sessionPhaseMark } from "../table/sessionColumns";
 
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
+const hairline = DESK_HAIRLINE;
 
 const label = {
   fontSize: 11,

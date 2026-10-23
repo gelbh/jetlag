@@ -17,6 +17,7 @@ import {
   HudRefreshIcon,
   HudSettingsIcon,
 } from "../../ui/brand/HudIcons";
+import { DESK_HAIRLINE } from "../shared/adminSurface";
 import { AdminUtcClock } from "./AdminUtcClock";
 
 interface AdminStatusStripProps {
@@ -31,7 +32,7 @@ interface AdminStatusStripProps {
   syncFailed: boolean;
 }
 
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
+const hairline = DESK_HAIRLINE;
 
 const iconButtonStyles = {
   root: {

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { resolveAdminSessionAreaLabel } from "@/domain/admin/adminSessionAreaLabel";
 import type { AdminTableTab } from "@/domain/admin/adminTablePrefs";
 import type { AdminSessionSummary } from "@/services/admin/adminSessions";
+import { DESK_HAIRLINE } from "../shared/adminSurface";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { AdminColumnPicker } from "../table/AdminColumnPicker";
@@ -20,7 +21,7 @@ import {
 } from "./AdminDeskTable";
 import type { AdminDeskTables } from "./useAdminDeskTables";
 
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
+const hairline = DESK_HAIRLINE;
 const MAX_CARD_COLUMNS = 8;
 const TOUCH = 44;
 
