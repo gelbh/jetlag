@@ -40,6 +40,61 @@ describe("serializeSession", () => {
     expect(serialized).not.toHaveProperty("coordinates");
   });
 
+  it("omits geometryJson when serializeGameAreaForFirestore requests pack play-area mode", () => {
+    const serialized = serializeGameAreaForFirestore(sampleGameArea, { omitGeometryJson: true });
+
+    expect(serialized).toEqual({
+      south: 53.3,
+      west: -6.3,
+      north: 53.4,
+      east: -6.2,
+    });
+    expect(serialized).not.toHaveProperty("geometryJson");
+  });
+
+  it("omits gameArea.geometryJson on Firestore create when regionPackId is set", () => {
+    const payload = buildSessionDocument(
+      "AUS1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "seeker",
+      "large",
+      {
+        regionPackId: "australia",
+        playAreaFromPack: true,
+        bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+      },
+    );
+
+    const gameArea = payload.gameArea as { geometryJson?: string; south: number };
+    expect(gameArea.south).toBe(53.3);
+    expect(gameArea).not.toHaveProperty("geometryJson");
+    expect(payload.playAreaFromPack).toBe(true);
+  });
+
+  it("keeps gameArea.geometryJson when playAreaFromPack is false", () => {
+    const payload = buildSessionDocument(
+      "FREE",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      {
+        regionPackId: "australia",
+        playAreaFromPack: false,
+      },
+    );
+
+    const gameArea = payload.gameArea as { geometryJson?: string };
+    expect(gameArea.geometryJson).toBe(JSON.stringify(sampleGameArea));
+  });
+
   it("reconstructs game areas from stored geometry json", () => {
     const restored = deserializeGameAreaFromFirestore({
       south: 53.3,

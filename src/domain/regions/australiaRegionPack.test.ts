@@ -32,7 +32,11 @@ describe("australia region pack wiring", () => {
     expect(config?.geoAssets.primary).toBe("/geo/australia/states.geojson");
     expect(config?.geoAssets.secondary).toBe("/geo/australia/lgas.geojson");
     expect(config?.geoAssets.secondaryBySubregion?.("nsw")).toBe("/geo/australia/lgas/nsw.geojson");
+    expect(config?.geoAssets.primaryBySubregion?.("nsw")).toBe("/geo/australia/states/nsw.geojson");
     expect(config?.geoAssets.matchingLevel4).toBe("/geo/australia/ced.geojson");
+    expect(config?.geoAssets.matchingLevel4BySubregion?.("nsw")).toBe(
+      "/geo/australia/ced/nsw.geojson",
+    );
     expect(config?.geoAssets.matchingLevel6).toBe("/geo/australia/sed.geojson");
     expect(config?.geoAssets.matchingLevel6BySubregion?.("nsw")).toBe(
       "/geo/australia/sed/nsw.geojson",
@@ -66,6 +70,28 @@ describe("australia geo assets", () => {
     for (const feature of collection.features) {
       expect(typeof feature.properties.name).toBe("string");
       expect(feature.properties.name.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("ships STE and CED slices for every stateId", () => {
+    for (const stateId of AUSTRALIA_STATES) {
+      const stePath = resolve(root, `states/${stateId}.geojson`);
+      const cedPath = resolve(root, `ced/${stateId}.geojson`);
+      expect(existsSync(stePath), stePath).toBe(true);
+      expect(existsSync(cedPath), cedPath).toBe(true);
+      const ste = JSON.parse(readFileSync(stePath, "utf8")) as {
+        features: Array<{ properties: { stateId: string } }>;
+      };
+      const ced = JSON.parse(readFileSync(cedPath, "utf8")) as {
+        features: Array<{ properties: { stateId: string; cedId: string } }>;
+      };
+      expect(ste.features).toHaveLength(1);
+      expect(ste.features[0]?.properties.stateId).toBe(stateId);
+      expect(ced.features.length).toBeGreaterThan(0);
+      for (const feature of ced.features) {
+        expect(feature.properties.stateId).toBe(stateId);
+        expect(feature.properties.cedId.length).toBeGreaterThan(0);
+      }
     }
   });
 

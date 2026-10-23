@@ -294,9 +294,13 @@ export function buildSessionDocument(
     typeof rulesPatch.hidingZoneRadiusMeters === "number"
       ? rulesPatch.hidingZoneRadiusMeters
       : hidingZoneRadiusMeters(gameSize, unit);
+  const omitPackPlayAreaGeometry =
+    Boolean(rulesPatch.regionPackId) && rulesPatch.playAreaFromPack !== false;
   const payload: Record<string, unknown> = {
     code,
-    gameArea: serializeGameAreaForFirestore(gameArea),
+    gameArea: serializeGameAreaForFirestore(gameArea, {
+      omitGeometryJson: omitPackPlayAreaGeometry,
+    }),
     hostUid,
     createdAt,
     memberUids: [hostUid],

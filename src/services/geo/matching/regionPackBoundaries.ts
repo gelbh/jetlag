@@ -123,7 +123,11 @@ export async function loadRegionPackPlayArea(
     return combineRegionGameAreas(polygonFeatures(collection));
   }
 
-  const primaryJson = await fetchGeoJsonText(config.geoAssets.primary);
+  const primaryPath =
+    subregionId && config.geoAssets.primaryBySubregion
+      ? config.geoAssets.primaryBySubregion(subregionId)
+      : config.geoAssets.primary;
+  const primaryJson = await fetchGeoJsonText(primaryPath);
   const collection = parseFeatureCollection(primaryJson);
   const primaryFeatures = polygonFeatures(collection);
 
@@ -171,13 +175,19 @@ export async function loadRegionPackSessionBoundaries(
     throw new Error(`Unknown region pack: ${packId}`);
   }
 
-  const primaryRaw = await fetchGeoJsonText(config.geoAssets.primary);
-  // Australia STE is ~1.6MB national; subregion sessions only need the one state feature.
-  // Other packs keep full primary at level 8 (e.g. Dublin councils while playing one LEA).
-  const primaryJson =
-    packId === "australia" && subregionId !== undefined
-      ? filterGeoJsonTextBySubregion(primaryRaw, config.subregionPropertyKey, subregionId)
-      : primaryRaw;
+  const primaryPath =
+    subregionId && config.geoAssets.primaryBySubregion
+      ? config.geoAssets.primaryBySubregion(subregionId)
+      : config.geoAssets.primary;
+  let primaryJson = await fetchGeoJsonText(primaryPath);
+  // Fallback when primaryBySubregion is absent: Australia STE is ~1.6MB national.
+  if (!config.geoAssets.primaryBySubregion && packId === "australia" && subregionId !== undefined) {
+    primaryJson = filterGeoJsonTextBySubregion(
+      primaryJson,
+      config.subregionPropertyKey,
+      subregionId,
+    );
+  }
   const secondaryPath =
     subregionId && config.geoAssets.secondaryBySubregion
       ? config.geoAssets.secondaryBySubregion(subregionId)
@@ -185,10 +195,14 @@ export async function loadRegionPackSessionBoundaries(
   const secondaryJson = secondaryPath ? await fetchGeoJsonText(secondaryPath) : undefined;
 
   let level4Json: string | undefined;
-  if (config.geoAssets.matchingLevel4) {
-    const raw = await fetchGeoJsonText(config.geoAssets.matchingLevel4);
+  const level4Path =
+    subregionId && config.geoAssets.matchingLevel4BySubregion
+      ? config.geoAssets.matchingLevel4BySubregion(subregionId)
+      : config.geoAssets.matchingLevel4;
+  if (level4Path) {
+    const raw = await fetchGeoJsonText(level4Path);
     level4Json =
-      subregionId !== undefined
+      !config.geoAssets.matchingLevel4BySubregion && subregionId !== undefined
         ? filterGeoJsonTextBySubregion(raw, config.subregionPropertyKey, subregionId)
         : raw;
   }
