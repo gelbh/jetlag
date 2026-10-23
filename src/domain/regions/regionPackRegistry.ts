@@ -313,6 +313,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
       id: SYDNEY_REGION_PACK_ID,
       geoAssets: {
         primary: SYDNEY_GEO_ASSETS.lgas,
+        playArea: SYDNEY_GEO_ASSETS.playArea,
       },
       subregionPropertyKey: "lgaId",
       matchingLabelOverrides: SYDNEY_MATCHING_LABEL_OVERRIDES,

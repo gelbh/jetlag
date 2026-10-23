@@ -45,8 +45,8 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
   southampton: { south: 50.86, west: -1.4973, north: 50.9761, east: -1.302 },
   // AABB from public/geo/australia/states.geojson (+0.02° pad).
   australia: { south: -43.7604, west: 112.9011, north: -9.1225, east: 159.1292 },
-  // Placeholder Greater Sydney AABB until Task 2 measures real extents.
-  sydney: { south: -34.2, west: 150.5, north: -33.3, east: 151.35 },
+  // AABB from public/geo/sydney/lgas.geojson (+0.02° pad).
+  sydney: { south: -34.3574, west: 149.9948, north: -32.9761, east: 151.363 },
 };
 
 /**

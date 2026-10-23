@@ -6,6 +6,7 @@ export const SYDNEY_REGION_PACK_ID = "sydney" satisfies RegionPackId;
 
 export const SYDNEY_GEO_ASSETS = {
   lgas: "/geo/sydney/lgas.geojson",
+  playArea: "/geo/sydney/playArea.geojson",
 } as const;
 
 export const SYDNEY_MATCHING_LABEL_OVERRIDES: Partial<
