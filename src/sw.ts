@@ -1,3 +1,4 @@
+/// <reference lib="webworker" />
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
 import {

@@ -1,5 +1,10 @@
 import type { SessionOpsMitigation } from "../../map/annotations";
 
+/**
+ * Durable one-shot flags for forced full-page reloads (soft_reload / hotfix).
+ * Same sessionStorage `"1"` pattern as chunkLoadRecovery.
+ */
+
 const SOFT_RELOAD_PREFIX = "jetlag:soft-reload:";
 const HOTFIX_RELOAD_PREFIX = "jetlag:hotfix-reload:";
 
@@ -11,6 +16,7 @@ function hotfixReloadKey(requiredMinAppVersion: string): string {
   return `${HOTFIX_RELOAD_PREFIX}${requiredMinAppVersion}`;
 }
 
+/** `null` means storage is unavailable (fail closed for forced reloads). */
 function readSessionFlag(key: string): boolean | null {
   try {
     return sessionStorage.getItem(key) === "1";
@@ -19,6 +25,7 @@ function readSessionFlag(key: string): boolean | null {
   }
 }
 
+/** @returns whether the flag is readable after write (false if storage unavailable). */
 function writeSessionFlag(key: string): boolean {
   try {
     sessionStorage.setItem(key, "1");
@@ -65,6 +72,7 @@ export function shouldHonorSoftReload(options: {
   if (lastHonoredId === mitigation.id) {
     return false;
   }
+  // Absent flag → honor; already set or storage unreadable → skip (fail closed).
   const acknowledgement = readSessionFlag(softReloadKey(mitigation.id));
   if (acknowledgement !== false) {
     return false;

@@ -50,7 +50,9 @@ function saveAcknowledgedFingerprints(storageKey: string, acknowledged: Readonly
   try {
     // react-doctor-disable-next-line react-doctor/no-side-effect-in-state-updater-function -- idempotent sessionStorage write with no subscribers; a re-invoked updater writes the same value
     sessionStorage.setItem(storageKey, JSON.stringify([...acknowledged]));
-  } catch {}
+  } catch {
+    // Quota / security errors: unread still works in-memory for this tab.
+  }
 }
 
 export function useChatUnread({

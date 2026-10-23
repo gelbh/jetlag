@@ -523,6 +523,8 @@ export function useHiderZoneTool({
       moveAttemptRef.current = 0;
 
       const wasMove = moveMode;
+      // Confirm already wrote moveInProgress: false; do not re-enter the
+      // cancel path (which would republish the pre-move zone).
       applyWizardClosed({ resumeIfMove: false });
       if (wasMove) {
         resumeTimerForMove();
