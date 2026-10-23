@@ -2,7 +2,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const projectRoot = resolve(import.meta.dirname, "..");
+const projectRoot = resolve(import.meta.dirname, "../..");
 
 /** @type {Record<string, string>} Maps route id to Vite env var name. */
 const PROXY_SECRET_NAMES = {

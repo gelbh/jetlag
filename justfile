@@ -17,7 +17,7 @@ dev-emulator:
 
 # Failproof emulator stack (deps/WASM/ports + emulators + Vite). Optional worktree slug.
 dev-local slug="":
-  ./scripts/dev-local.sh {{slug}}
+  ./scripts/dev/local.sh {{slug}}
 
 build-secrets:
   doppler run --config prd -- npm run build
@@ -34,7 +34,7 @@ e2e-ui:
   playwright test --ui
 
 geometry-gates:
-  node scripts/run-geometry-gates.mjs
+  node scripts/dev/geometry-gates.mjs
 
 audit-overpass:
   RUN_OVERPASS_AUDIT=1 vitest run --project unit src/services/core/overpassAudit.integration.test.ts

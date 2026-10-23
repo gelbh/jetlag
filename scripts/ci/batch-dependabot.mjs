@@ -7,8 +7,8 @@
  * - Exclude: failing CI, majors, drafts
  *
  * Usage:
- *   node scripts/batch-dependabot.mjs --dry-run
- *   node scripts/batch-dependabot.mjs --create-pr
+ *   node scripts/ci/batch-dependabot.mjs --dry-run
+ *   node scripts/ci/batch-dependabot.mjs --create-pr
  */
 import { execFileSync, spawnSync } from "node:child_process";
 import { writeFileSync } from "node:fs";

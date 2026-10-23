@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # One-command local emulator stack: bootstrap + Firebase emulators + Vite (dev_emulator).
-# Usage: scripts/dev-local.sh [worktree-slug]
+# Usage: scripts/dev/local.sh [worktree-slug]
 #   slug → $HOME/Projects/worktrees/jetlag/<slug>
 #   no arg → current jetlag checkout (git toplevel)
 set -euo pipefail
@@ -331,7 +331,7 @@ main() {
     "$auth_port" "$firestore_port" "$storage_port" "$functions_port" >&2
   printf 'dev-local: starting emulators + vite (Ctrl+C stops both)\n' >&2
 
-  # Export only remap vars for run-dev-emulator.sh (captured before doppler; no --preserve-env).
+  # Export only remap vars for emulator.sh (captured before doppler; no --preserve-env).
   export VITE_DEV_PORT="$vite_port"
   export VITE_FIREBASE_AUTH_EMULATOR_PORT="$auth_port"
   export VITE_FIRESTORE_EMULATOR_PORT="$firestore_port"

@@ -1,30 +1,9 @@
 #!/usr/bin/env node
 /**
  * Geometry WASM parity + perf gates.
- * Invoked by `just geometry-gates` (or `node scripts/run-geometry-gates.mjs`).
+ * Invoked by `just geometry-gates` (or `node scripts/dev/geometry-gates.mjs`).
  */
-import { spawnSync } from "node:child_process";
-import { delimiter, resolve } from "node:path";
-
-const root = resolve(import.meta.dirname, "..");
-const bin = resolve(root, "node_modules", ".bin");
-const env = {
-  ...process.env,
-  PATH: `${bin}${delimiter}${process.env.PATH ?? ""}`,
-};
-
-/** @param {string} command @param {string[]} args */
-function run(command, args) {
-  const result = spawnSync(command, args, {
-    cwd: root,
-    stdio: "inherit",
-    env,
-    shell: process.platform === "win32",
-  });
-  if (result.error) throw result.error;
-  // status is null when the child exits via signal — treat as failure
-  if (result.status !== 0) process.exit(result.status ?? 1);
-}
+import { run } from "../lib/run-command.mjs";
 
 const parityTests = [
   "src/domain/geometry/kernel/geodesicWasmParity.test.ts",
