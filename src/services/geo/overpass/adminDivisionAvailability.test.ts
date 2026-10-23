@@ -111,4 +111,23 @@ describe("adminDivisionAvailability", () => {
     expect(adminBorderKindAvailability("admin3_border", counts, "southampton")).toBe(true);
     expect(adminBorderKindAvailability("admin4_border", counts, "southampton")).toBe(false);
   });
+
+  it("does not hide admin 1/2 for australia when counts pass (contrast dublin)", () => {
+    const counts = {
+      ...emptyAdminDivisionCounts(),
+      admin_division_1: 4,
+      admin_division_2: 4,
+      admin_division_3: 8,
+      admin_division_4: 11,
+    };
+
+    expect(isAdminDivisionCategoryAvailable("admin_division_1", counts, "australia")).toBe(true);
+    expect(isAdminDivisionCategoryAvailable("admin_division_2", counts, "australia")).toBe(true);
+    expect(isAdminDivisionCategoryAvailable("admin_division_3", counts, "australia")).toBe(true);
+    expect(isAdminDivisionCategoryAvailable("admin_division_4", counts, "australia")).toBe(true);
+    expect(adminBorderKindAvailability("admin1_border", counts, "australia")).toBe(true);
+    expect(adminBorderKindAvailability("admin2_border", counts, "australia")).toBe(true);
+    expect(adminBorderKindAvailability("admin3_border", counts, "australia")).toBe(true);
+    expect(adminBorderKindAvailability("admin4_border", counts, "australia")).toBe(true);
+  });
 });
