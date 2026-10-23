@@ -56,8 +56,7 @@ function hidingMinutes(row: Row): number {
 }
 
 function questionCount(row: Row): number | null {
-  const count = (row as { questionCount?: number }).questionCount;
-  return typeof count === "number" ? count : null;
+  return typeof row.questionCount === "number" ? row.questionCount : null;
 }
 
 function ageCell(iso: string | null) {

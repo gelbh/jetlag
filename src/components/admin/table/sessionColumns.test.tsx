@@ -53,7 +53,7 @@ describe("buildSessionColumns", () => {
   it("renders a dash for questions when absent and the count when present", () => {
     renderWithAppUi(<>{cell("questions")}</>);
     expect(screen.getByText("–")).toBeInTheDocument();
-    renderWithAppUi(<>{cell("questions", { ...makeSession(), questionCount: 7 } as never)}</>);
+    renderWithAppUi(<>{cell("questions", makeSession({ questionCount: 7 }))}</>);
     expect(screen.getByText("7")).toBeInTheDocument();
   });
 

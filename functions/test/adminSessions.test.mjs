@@ -8,6 +8,7 @@ import {
   computeIsLive,
   deriveSessionMode,
   deriveSessionPhase,
+  mapActiveCodeToSummary,
   mapWithConcurrency,
   parseFirestoreTimestampMs,
   resolveSessionLastActivityMs,
@@ -141,6 +142,96 @@ describe("listActiveSessions helpers", () => {
     assert.equal(summary.lastActivityAt, null);
     assert.equal(summary.mode, "multiplayer");
     assert.equal(summary.isLive, false);
+    assert.equal(summary.questionCount, 0);
+  });
+
+  it("counts every pendingQuestions doc for questionCount", async () => {
+    const emptySnap = { docs: [] };
+    const countSnap = (count) => ({ data: () => ({ count }) });
+    const ordered = {
+      orderBy() {
+        return this;
+      },
+      limit() {
+        return this;
+      },
+      async get() {
+        return emptySnap;
+      },
+    };
+    const sessionRef = {
+      async get() {
+        return {
+          exists: true,
+          data: () => ({
+            status: "active",
+            hostUid: "host-1",
+            memberUids: ["host-1"],
+            memberRoles: { "host-1": "seeker" },
+            timerAccumulatedMs: 0,
+            timerRunningSince: null,
+          }),
+        };
+      },
+      collection(name) {
+        if (name === "pendingQuestions") {
+          return {
+            ...ordered,
+            where() {
+              return this;
+            },
+            count() {
+              return {
+                async get() {
+                  return countSnap(4);
+                },
+              };
+            },
+          };
+        }
+        return {
+          ...ordered,
+          where() {
+            return {
+              count() {
+                return {
+                  async get() {
+                    return countSnap(0);
+                  },
+                };
+              },
+            };
+          },
+          count() {
+            return {
+              async get() {
+                return countSnap(0);
+              },
+            };
+          },
+        };
+      },
+    };
+    const db = {
+      collection() {
+        return {
+          doc() {
+            return sessionRef;
+          },
+        };
+      },
+    };
+    const codeDoc = {
+      id: "ABCD",
+      data: () => ({ sessionId: "session-1", hostUid: "host-1" }),
+    };
+
+    const summary = await mapActiveCodeToSummary(
+      codeDoc,
+      db,
+      Date.parse("2026-01-01T00:00:00.000Z"),
+    );
+    assert.equal(summary.questionCount, 4);
   });
 
   it("derives live semantics from activity and location timestamps", () => {
