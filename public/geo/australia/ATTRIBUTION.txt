@@ -1,0 +1,17 @@
+Australian States and Territories (STE) and Local Government Areas (LGA):
+Australian Bureau of Statistics (ABS), Australian Statistical Geography Standard
+(ASGS) Edition 3.
+STE: ASGS 2021 State and Territory boundaries (ArcGIS REST ASGS2021/STE,
+downloaded 2026-10-23, WGS84 / EPSG:4326).
+LGA: ASGS 2025 Local Government Areas (ArcGIS REST ASGS2025/LGA,
+downloaded 2026-10-23, WGS84 / EPSG:4326).
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+Server-generalized with maxAllowableOffset≈0.0014°, then @turf/simplify
+tolerance 0.002°; coordinates rounded to 4 decimal places.
+
+Coastline segments: unary union of simplified STE polygons, exterior rings
+only (same ABS ASGS CC BY 4.0 attribution). Further simplified at 0.01°.
+
+POI bundles: empty source:none stubs pending Wikidata fill.
+Sea-level seed: empty source:none stub pending Open-Meteo fill.
+International border: empty (island continent; pack marks unsupported).

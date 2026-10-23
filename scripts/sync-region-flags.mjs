@@ -36,6 +36,7 @@ const FLAGCDN = {
   "country-usa": { code: "us", alt: "United States" },
   "country-canada": { code: "ca", alt: "Canada" },
   "country-japan": { code: "jp", alt: "Japan" },
+  "country-au": { code: "au", alt: "Australia" },
 };
 
 /**
@@ -229,6 +230,14 @@ const OSAKA_WARD_FLOWERS = {
 const WIKIDATA = {
   "state-ny": { qid: "Q1384", alt: "New York" },
   "state-me": { qid: "Q724", alt: "Maine" },
+  "state-nsw": { qid: "Q3224", alt: "New South Wales" },
+  "state-vic": { qid: "Q36687", alt: "Victoria" },
+  "state-qld": { qid: "Q36074", alt: "Queensland" },
+  "state-sa": { qid: "Q35715", alt: "South Australia" },
+  "state-wa": { qid: "Q3206", alt: "Western Australia" },
+  "state-tas": { qid: "Q34366", alt: "Tasmania" },
+  "state-nt": { qid: "Q3235", alt: "Northern Territory" },
+  "state-act": { qid: "Q3258", alt: "Australian Capital Territory" },
   "province-bc": { qid: "Q1973", alt: "British Columbia" },
   "canton-zurich": { qid: "Q11943", alt: "Canton of Zürich" },
   "canton-bern": { qid: "Q11911", alt: "Canton of Bern" },

@@ -23,6 +23,7 @@ const SOURCES = [
   { packId: "portland-maine", file: "districts.geojson", idProperty: "districtId" },
   { packId: "southampton", file: "wards.geojson", idProperty: "wardId" },
   { packId: "switzerland", file: "cantons.geojson", idProperty: "cantonId" },
+  { packId: "australia", file: "states.geojson", idProperty: "stateId" },
   { packId: "zurich", file: "districts.geojson", idProperty: "districtId" },
   { packId: "lucerne", file: "districts.geojson", idProperty: "districtId" },
 ];

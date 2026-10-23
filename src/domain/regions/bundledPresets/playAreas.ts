@@ -150,4 +150,13 @@ export const BUNDLED_PRESET_PLAY_AREA_SQ_MI: Record<string, number> = {
   "bundled:southampton-swaythling": 1.16,
   "bundled:southampton-thornhill": 1.04,
   "bundled:southampton-woolston": 1.06,
+  "bundled:australia": 2974093.24,
+  "bundled:australia-nsw": 309408.11,
+  "bundled:australia-vic": 87832.44,
+  "bundled:australia-qld": 669690.65,
+  "bundled:australia-sa": 380500.01,
+  "bundled:australia-wa": 977505.98,
+  "bundled:australia-tas": 26230.53,
+  "bundled:australia-nt": 522016.02,
+  "bundled:australia-act": 909.5,
 };

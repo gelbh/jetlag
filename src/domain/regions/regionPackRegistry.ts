@@ -1,6 +1,12 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
 import {
+  AUSTRALIA_GEO_ASSETS,
+  AUSTRALIA_MATCHING_LABEL_OVERRIDES,
+  AUSTRALIA_MEASURING_LABEL_OVERRIDES,
+  AUSTRALIA_REGION_PACK_ID,
+} from "./australiaRegionPack";
+import {
   DUBLIN_GEO_ASSETS,
   DUBLIN_MATCHING_LABEL_OVERRIDES,
   DUBLIN_MEASURING_LABEL_OVERRIDES,
@@ -115,6 +121,13 @@ const SOUTHAMPTON_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>([
   ...HIDE_COUNTRY_PROVINCE_BORDERS,
   "admin4_border",
 ]);
+
+/** Australia: show admin 1–4 (CED/SED/S/T/LGA); hide empty land international border. */
+const AUSTRALIA_UNSUPPORTED_MATCHING = new Set<
+  "admin_division_1" | "admin_division_2" | "admin_division_3" | "admin_division_4"
+>();
+
+const AUSTRALIA_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>(["international_border"]);
 
 type MetroRegionPackConfig = Omit<RegionPackConfig, "unsupportedMatching" | "unsupportedBorders">;
 
@@ -259,6 +272,19 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     }),
     unsupportedMatching: SOUTHAMPTON_UNSUPPORTED_MATCHING,
     unsupportedBorders: SOUTHAMPTON_UNSUPPORTED_BORDERS,
+  },
+  [AUSTRALIA_REGION_PACK_ID]: {
+    id: AUSTRALIA_REGION_PACK_ID,
+    geoAssets: {
+      primary: AUSTRALIA_GEO_ASSETS.states,
+      secondary: AUSTRALIA_GEO_ASSETS.lgas,
+      secondaryBySubregion: (subregionId) => AUSTRALIA_GEO_ASSETS.lgasByState(subregionId),
+    },
+    subregionPropertyKey: "stateId",
+    matchingLabelOverrides: AUSTRALIA_MATCHING_LABEL_OVERRIDES,
+    measuringLabelOverrides: AUSTRALIA_MEASURING_LABEL_OVERRIDES,
+    unsupportedMatching: AUSTRALIA_UNSUPPORTED_MATCHING,
+    unsupportedBorders: AUSTRALIA_UNSUPPORTED_BORDERS,
   },
 };
 

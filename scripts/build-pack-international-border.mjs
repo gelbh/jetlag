@@ -24,6 +24,7 @@ const PACK_IDS = [
   "portland-maine",
   "prince-rupert",
   "southampton",
+  "australia",
 ];
 
 /** Mirrors REGION_PACK_REFERENCE_BBOXES (optional on stubs). */
@@ -53,6 +54,12 @@ const PACK_BBOXES = {
     west: -1.4973,
     north: 50.9761,
     east: -1.302,
+  },
+  australia: {
+    south: -43.7604,
+    west: 112.9011,
+    north: -9.1225,
+    east: 159.1292,
   },
 };
 
