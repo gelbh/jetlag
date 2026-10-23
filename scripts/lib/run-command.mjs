@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { delimiter, resolve } from "node:path";
 
-// scripts/lib → repo root (plan snippet used ".." which would land on scripts/)
 const root = resolve(import.meta.dirname, "../..");
 const bin = resolve(root, "node_modules", ".bin");
 

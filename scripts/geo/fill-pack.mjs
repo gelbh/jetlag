@@ -82,10 +82,6 @@ async function main() {
     printHelp();
     process.exit(1);
   }
-  if (!KNOWN_PACK_IDS.includes(args.pack)) {
-    console.error(`Unknown pack: ${args.pack}. Known: ${KNOWN_PACK_IDS.join(", ")}`);
-    process.exit(1);
-  }
 
   await fillPack({
     packId: args.pack,

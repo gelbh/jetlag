@@ -173,11 +173,8 @@ SELECT DISTINCT ?item ?coord ?label WHERE {
  * }} opts
  */
 export async function fillPack({ packId, root, args }) {
-  const def = PACK_DEFS[packId];
-  if (!def) {
-    throw new Error(`Unknown pack: ${packId}. Known: ${KNOWN_PACK_IDS.join(", ")}`);
-  }
   const mapping = resolvePackMapping(packId, root);
+  const def = PACK_DEFS[packId];
   const { poiDir, seaLevelPath, ua } = mapping;
 
   const jiti = createJiti(import.meta.url, {
