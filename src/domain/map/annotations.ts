@@ -213,6 +213,14 @@ export interface SessionRecord {
   mode?: SessionMode;
   castleSiegeRoles?: CastleSiegeRoles;
   seriesLength?: 1 | 3;
+  /** 1-based BO1/BO3 game index. Castle Siege only. */
+  gameIndex?: number;
+  /** Series scoreboard. Castle Siege only. */
+  score?: { teamA: number; teamB: number };
+  /** Terminal series result. Castle Siege only. */
+  seriesOutcome?: "complete" | "abandoned";
+  /** Which team opens Standoff next game. Castle Siege only. */
+  seriesStandoffOpener?: "teamA" | "teamB";
   setupMode?: "pregame" | "fairSplit";
   arena?: CastleSiegeArena;
   border?: CastleSiegeBorderLine;
