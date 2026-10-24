@@ -1,38 +1,23 @@
 import type { User } from "firebase/auth";
 
-export const ADMIN_EMAIL = "gelbharttomer@gmail.com";
+/** Firebase Auth custom claim granting admin. Set via Admin SDK / `functions/scripts/set-admin-claim.mjs`. */
+export const ADMIN_CLAIM = "admin" as const;
 
-/** Must stay in sync with `firestore.rules` isAdmin() and Functions ADMIN_EMAIL param. */
-
-export function normalizeAdminEmail(email: string): string {
-  return email.trim().toLowerCase();
+export function claimsLookAdmin(
+  claims: Record<string, unknown> | { admin?: unknown; email_verified?: unknown },
+): boolean {
+  return claims.admin === true && claims.email_verified === true;
 }
 
-export function isAdminEmail(email: string | null | undefined): boolean {
-  if (!email) {
-    return false;
-  }
-
-  return normalizeAdminEmail(email) === normalizeAdminEmail(ADMIN_EMAIL);
-}
-
-export function isAdminUser(user: User | null | undefined): boolean {
-  if (!user || user.isAnonymous) {
-    return false;
-  }
-
-  return user.emailVerified === true && isAdminEmail(user.email);
+/**
+ * Sync path cannot see custom claims without a token refresh.
+ * Always false; use `resolveAdminAccess` / `claimsLookAdmin` for real gates.
+ */
+export function isAdminUser(_user: User | null | undefined): boolean {
+  return false;
 }
 
 export type AdminAccessResolution = "unsigned" | "denied" | "admin";
-
-export function claimsLookAdmin(
-  claims: Record<string, unknown> | { email?: unknown; email_verified?: unknown },
-): boolean {
-  return (
-    claims.email_verified === true && typeof claims.email === "string" && isAdminEmail(claims.email)
-  );
-}
 
 export async function resolveAdminAccess(
   user: User | null | undefined,
@@ -40,23 +25,20 @@ export async function resolveAdminAccess(
   if (!user || user.isAnonymous) {
     return "unsigned";
   }
-  if (!isAdminEmail(user.email)) {
-    return "denied";
-  }
-  if (!isAdminUser(user)) {
+
+  if (user.emailVerified !== true) {
     try {
       await user.reload();
     } catch {
       // fall through to forced token / deny
     }
   }
+
   try {
     const token = await user.getIdTokenResult(true);
     if (claimsLookAdmin(token.claims)) {
       return "admin";
     }
-  } catch {
-    // deny
-  }
+  } catch {}
   return "denied";
 }

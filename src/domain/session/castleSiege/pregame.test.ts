@@ -12,7 +12,6 @@ import {
   validateSealPlacement,
 } from "./pregame";
 
-/** Square arena spanning ~0.02° (~2 km) near London. */
 const ARENA: GameArea = {
   type: "Polygon",
   coordinates: [
@@ -26,7 +25,6 @@ const ARENA: GameArea = {
   ],
 };
 
-/** Northbound vertical cut through the arena midline. */
 const BORDER: CastleSiegeBorderLine = {
   type: "LineString",
   coordinates: [

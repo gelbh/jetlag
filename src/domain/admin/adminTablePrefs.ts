@@ -74,7 +74,5 @@ export function readPrefs(
 export function writePrefs(tab: AdminTableTab, prefs: AdminTablePrefs): void {
   try {
     localStorage.setItem(prefsStorageKey(tab), JSON.stringify(prefs));
-  } catch {
-    // Storage blocked (private mode); preferences stay for this page only.
-  }
+  } catch {}
 }

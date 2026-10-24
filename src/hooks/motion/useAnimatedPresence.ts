@@ -8,7 +8,6 @@ export interface UseAnimatedPresenceOptions {
   onClose: () => void;
   enterClass?: string;
   exitClass?: string;
-  /** Enter animation duration; exit uses 75% of this. */
   durationMs?: number;
 }
 

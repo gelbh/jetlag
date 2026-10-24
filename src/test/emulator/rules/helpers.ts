@@ -9,11 +9,10 @@ import { DUBLIN_CITY_GAME_AREA } from "../../fixtures/dublinGameArea";
 export { milesToMeters };
 
 export const PROJECT_ID = "demo-jetlag-rules";
-export const ADMIN_EMAIL = "gelbharttomer@gmail.com";
 
 export function adminContext(testEnv: RulesTestEnvironment, uid = "admin-1") {
   return testEnv.authenticatedContext(uid, {
-    email: ADMIN_EMAIL,
+    admin: true,
     email_verified: true,
   });
 }
@@ -91,11 +90,9 @@ export function timeTrapPayload() {
 }
 
 export type RulesTestEnvBox = {
-  /** Populated by beforeAll; safe to read from it()/beforeEach. */
   testEnv: RulesTestEnvironment;
 };
 
-/** Call inside a describe() to bind RulesTestEnvironment lifecycle hooks. */
 export function bindRulesTestEnv(): RulesTestEnvBox {
   const box = {} as RulesTestEnvBox;
 

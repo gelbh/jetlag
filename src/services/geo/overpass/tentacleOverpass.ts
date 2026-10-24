@@ -229,6 +229,8 @@ export type FetchTentaclePoisOptions = {
   customCategories?: readonly SessionCustomCategory[];
   customLocationPins?: readonly SessionCustomLocationPin[];
   regionPackId?: RegionPackId;
+  /** Pack subregion (e.g. Australia `stateId`) for bandwidth-scoped POI slices. */
+  subregionId?: string;
   onEnrich?: (pois: TentaclePoi[]) => void;
 } & PackThenOverpassProgress;
 
@@ -290,7 +292,13 @@ export async function fetchTentaclePois(
     tentacleSearchBoundingBox(center, radiusMeters),
   );
   const bundledPois = await withBundleStage(task, () =>
-    fetchBundledTentaclePois(center, radiusMeters, categoryId, options?.regionPackId),
+    fetchBundledTentaclePois(
+      center,
+      radiusMeters,
+      categoryId,
+      options?.regionPackId,
+      options?.subregionId,
+    ),
   );
 
   const mergeWithOverpass = async (load?: OverpassLoad): Promise<TentaclePoi[]> => {

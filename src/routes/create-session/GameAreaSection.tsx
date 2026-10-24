@@ -8,7 +8,6 @@ import type { GeocodedPlace } from "../../services/geo/geocoding";
 import { GameAreaRulesStep } from "./GameAreaRulesStep";
 import { GameAreaWhereStep } from "./GameAreaWhereStep";
 
-/** Flat create-session framing fields bag for GameAreaSection (W4-E peel). */
 export type GameAreaSectionModel = {
   bundledPresetSelectGroups: BundledPresetSelectGroup[];
   favouritePresetSelectOptions: { presetId: string; name: string }[];

@@ -18,10 +18,8 @@ export type PersistSlimPolygonResult =
   | { ok: true; feature: Feature<Polygon | MultiPolygon> }
   | { ok: false; message: string };
 
-/** Escalating Turf simplify tolerances: slim toward the persist cap, then gate. */
 const PERSIST_SIMPLIFY_TOLERANCES = [0.000012, 0.00005, 0.0002, 0.001] as const;
 
-/** Slim toward Firestore ceiling; storage-oriented fail copy only. */
 export function persistSlimPolygonFeature(
   feature: Feature<Polygon | MultiPolygon>,
 ): PersistSlimPolygonResult {
@@ -30,8 +28,6 @@ export function persistSlimPolygonFeature(
     return { ok: true, feature: current };
   }
 
-  // Turf simplify thrash/stack-overflows on multi-k dense rings (CI 5s timeout);
-  // skip straight to stride decimate above 1.25× the vertex cap.
   const initialVerts = countPolygonVertices(current);
   if (initialVerts <= POLYGON_PERSIST_MAX_VERTICES * 1.25) {
     for (const tolerance of PERSIST_SIMPLIFY_TOLERANCES) {

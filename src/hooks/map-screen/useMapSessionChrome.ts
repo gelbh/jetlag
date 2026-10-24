@@ -33,7 +33,6 @@ import { useSessionStore } from "../../state/sessionStore";
 import { useSubmitLock } from "../forms/useSubmitLock";
 import { useSessionExit } from "../session/useSessionExit";
 
-/** Offline fail-fast: tell the player instead of reporting or falling back to a client write. */
 function alertIfNeedsConnection(error: unknown): boolean {
   if (!isNeedsConnectionError(error)) {
     return false;
@@ -44,7 +43,6 @@ function alertIfNeedsConnection(error: unknown): boolean {
 
 const MAP_EXPORT_BACKGROUND = "#0f172a";
 
-/** Bounds auth so a hung sign-in cannot leave the End button disabled forever. */
 const END_SESSION_AUTH_TIMEOUT_MS = 10_000;
 const END_SESSION_ERROR_MESSAGE = "Couldn't end the session. Try again.";
 
@@ -243,14 +241,10 @@ export function useMapSessionChrome({
           trackSessionEnded("expected_already_ended");
         } else {
           captureException(error);
-          // Emulator / no Functions: fall back to the client end write. Not awaited —
-          // it applies locally and replays on reconnect; rejections reach WriteFailureNotifier.
           commitWrite("session.end", () => endRemoteSession(sessionId));
-          // Counts the local end; a later rules rejection surfaces via the notifier.
           trackSessionEnded("fallback_client_end");
         }
       }
-      // Activity only — session_ended already tracked via endSession / paths above.
       emitGameEndedActivity(sessionId, {
         outcome: "ended_early",
         summary: "Session ended",

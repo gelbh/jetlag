@@ -1,6 +1,5 @@
 const UNITS = ["B", "kB", "MB", "GB"] as const;
 
-/** Decimal byte units for admin fields, e.g. 412_000 becomes "412 kB". */
 export function formatBytes(bytes: number | null | undefined): string {
   if (bytes == null || !Number.isFinite(bytes) || bytes < 0) return "–";
   let value = bytes;

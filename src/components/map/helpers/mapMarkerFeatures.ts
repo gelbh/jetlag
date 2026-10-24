@@ -1,6 +1,5 @@
 import type { Feature, FeatureCollection, Point } from "geojson";
 
-/** Standard circle-marker feature properties for data-driven GL paint. */
 export interface CircleMarkerProps {
   id: string;
   lat: number;
@@ -10,7 +9,6 @@ export interface CircleMarkerProps {
   borderColor: string;
   borderWidth?: number;
   opacity?: number;
-  /** Hit-test dispatch key (e.g. stop id, overlay id). */
   hitId?: string;
   hitKind?: string;
 }
@@ -44,7 +42,6 @@ export function circleMarkerCollection(
   };
 }
 
-/** Symbol-marker feature properties (icon + optional text). */
 export interface SymbolMarkerProps {
   id: string;
   lat: number;

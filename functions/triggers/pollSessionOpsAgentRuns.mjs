@@ -4,9 +4,6 @@ import { cursorApiKey, posthogProjectApiKey } from "../handlers/incident/shared.
 import { pollSessionOpsRuns } from "../incident/sessionOpsRunPoller.mjs";
 import { withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 
-/**
- * Poll Cursor session-ops runs every minute and persist terminal results.
- */
 export const pollSessionOpsAgentRuns = onSchedule(
   {
     schedule: "every 1 minutes",

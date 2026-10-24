@@ -7,7 +7,6 @@ import type {
 import type { GameSize } from "../../domain/session/size/gameSize";
 
 export const LEADERBOARD_MOCK_STORAGE_KEY = "jl.leaderboard.mock";
-/** Stable viewer uid when browsing under leaderboard mock. */
 export const LEADERBOARD_MOCK_SELF_UID = "mock-lb-self";
 
 const MOCK_LATENCY_MS = 240;
@@ -15,7 +14,6 @@ const MOCK_LATENCY_MS = 240;
 type SeedPlayer = {
   uid: string;
   displayName: string;
-  /** Base score; metric/role/size nudge this for variety. */
   base: number;
   friends: boolean;
 };
@@ -92,9 +90,7 @@ export function setLeaderboardMockEnabled(enabled: boolean): void {
     } else {
       localStorage.removeItem(LEADERBOARD_MOCK_STORAGE_KEY);
     }
-  } catch {
-    // ignore quota / private mode
-  }
+  } catch {}
 }
 
 export function getLeaderboardPlayerSheetProfile(uid: string): LeaderboardPlayerSheetProfile {
@@ -168,7 +164,6 @@ export async function mockListLeaderboardBoard(args: {
       };
     })
     .sort((a, b) => {
-      // Lower is better for time metrics.
       if (
         args.metric === "avg_answer_time" ||
         args.metric === "phase_time" ||

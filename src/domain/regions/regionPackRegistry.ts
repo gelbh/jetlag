@@ -62,6 +62,12 @@ import {
   SWITZERLAND_REGION_PACK_ID,
 } from "./switzerlandRegionPack";
 import {
+  SYDNEY_GEO_ASSETS,
+  SYDNEY_MATCHING_LABEL_OVERRIDES,
+  SYDNEY_MEASURING_LABEL_OVERRIDES,
+  SYDNEY_REGION_PACK_ID,
+} from "./sydneyRegionPack";
+import {
   TOKYO_GEO_ASSETS,
   TOKYO_MATCHING_LABEL_OVERRIDES,
   TOKYO_MEASURING_LABEL_OVERRIDES,
@@ -76,15 +82,11 @@ import {
 
 export interface RegionPackGeoAssets {
   primary: string;
-  /** Per-subregion primary slice (avoids downloading the national primary). */
   primaryBySubregion?: (subregionId: string) => string;
-  /** Omitted for single-depth packs (no admin4 / leaf layer). */
   secondary?: string;
   secondaryBySubregion?: (subregionId: string) => string;
-  /** Optional admin level 4 matching areas (e.g. Australia CED). */
   matchingLevel4?: string;
   matchingLevel4BySubregion?: (subregionId: string) => string;
-  /** Optional admin level 6 matching areas (e.g. Australia SED national). */
   matchingLevel6?: string;
   matchingLevel6BySubregion?: (subregionId: string) => string;
   playArea?: string;
@@ -94,7 +96,6 @@ export interface RegionPackConfig {
   id: RegionPackId;
   geoAssets: RegionPackGeoAssets;
   subregionPropertyKey: string;
-  /** When "secondary", full-pack play area unions level-9 features instead of level-8. */
   playAreaLevel?: "primary" | "secondary";
   matchingLabelOverrides: Partial<Record<MatchingCategoryId, RegionPackLabelOverride>>;
   measuringLabelOverrides: Partial<Record<MeasuringFromKind, RegionPackLabelOverride>>;
@@ -121,14 +122,17 @@ const SWITZERLAND_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>([
 ]);
 
 /** Single-depth metro packs: no secondary/admin4 layer (Overpass must not surface it). */
-const SOUTHAMPTON_UNSUPPORTED_MATCHING = new Set<
+const SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING = new Set<
   "admin_division_1" | "admin_division_2" | "admin_division_3" | "admin_division_4"
 >([...HIDE_COUNTRY_PROVINCE_MATCHING, "admin_division_4"]);
 
-const SOUTHAMPTON_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>([
+const SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>([
   ...HIDE_COUNTRY_PROVINCE_BORDERS,
   "admin4_border",
 ]);
+
+const SOUTHAMPTON_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const SOUTHAMPTON_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
 
 /** Australia: show admin 1–4 (CED/SED/S/T/LGA); hide empty land international border. */
 const AUSTRALIA_UNSUPPORTED_MATCHING = new Set<
@@ -298,6 +302,20 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     measuringLabelOverrides: AUSTRALIA_MEASURING_LABEL_OVERRIDES,
     unsupportedMatching: AUSTRALIA_UNSUPPORTED_MATCHING,
     unsupportedBorders: AUSTRALIA_UNSUPPORTED_BORDERS,
+  },
+  [SYDNEY_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: SYDNEY_REGION_PACK_ID,
+      geoAssets: {
+        primary: SYDNEY_GEO_ASSETS.lgas,
+        playArea: SYDNEY_GEO_ASSETS.playArea,
+      },
+      subregionPropertyKey: "lgaId",
+      matchingLabelOverrides: SYDNEY_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: SYDNEY_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING,
+    unsupportedBorders: SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS,
   },
 };
 

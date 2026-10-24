@@ -1,0 +1,276 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": { "south": -29.1793, "west": 137.9946, "north": -9.1425, "east": 153.5522 },
+  "places": [
+    { "id": "Q28035295", "name": "Astor Theatre, Surat", "lat": -27.15224, "lng": 149.07007 },
+    { "id": "Q47001376", "name": "Australia Fair Cinemas", "lat": -27.969082, "lng": 153.415665 },
+    {
+      "id": "Q47001256",
+      "name": "Babinda Munro Picture Theatre",
+      "lat": -17.344174,
+      "lng": 145.922805
+    },
+    { "id": "Q47001585", "name": "Balmoral Cineplex", "lat": -27.451347, "lng": 153.059456 },
+    {
+      "id": "Q47001383",
+      "name": "BCC Cinema Townsville Central",
+      "lat": -19.267108,
+      "lng": 146.811454
+    },
+    { "id": "Q47002063", "name": "BCC Cinemas Lismore", "lat": -28.805972, "lng": 153.28059 },
+    {
+      "id": "Q47001363",
+      "name": "BCC Cinemas Mackay Mount Pleasant",
+      "lat": -21.121882,
+      "lng": 149.157997
+    },
+    {
+      "id": "Q47001364",
+      "name": "BCC Cinemas North Rockhampton",
+      "lat": -23.378908,
+      "lng": 150.504313
+    },
+    { "id": "Q47001378", "name": "BCC Cinemas Strathpine", "lat": -27.307133, "lng": 152.990899 },
+    { "id": "Q47001382", "name": "BCC Cinemas Toombul", "lat": -27.409015, "lng": 153.061338 },
+    {
+      "id": "Q45300373",
+      "name": "BCC Cinemas Toowoomba Grand Central",
+      "lat": -27.560684,
+      "lng": 151.950405
+    },
+    { "id": "Q47001359", "name": "BCC Noosa Cinemas", "lat": -26.397336, "lng": 153.090832 },
+    {
+      "id": "Q45308261",
+      "name": "Ben & Jerry's Openair Cinema Brisbane",
+      "lat": -27.393787,
+      "lng": 152.982469
+    },
+    {
+      "id": "Q47001267",
+      "name": "Ben & Jerry's Openair Cinema Gold Coast",
+      "lat": -28.026763,
+      "lng": 153.433553
+    },
+    {
+      "id": "Q47001277",
+      "name": "Bigscreen Cinemas Caloundra",
+      "lat": -26.804927,
+      "lng": 153.135081
+    },
+    {
+      "id": "Q47001328",
+      "name": "Bigscreen Hervey Bay Cinema",
+      "lat": -25.286609,
+      "lng": 152.832356
+    },
+    {
+      "id": "Q47001293",
+      "name": "Bio Cafe and Cinema and Open Air",
+      "lat": -20.70576,
+      "lng": 140.508954
+    },
+    {
+      "id": "Q47001335",
+      "name": "Birch Carroll and Coyle Cinemas Ipswich",
+      "lat": -27.613944,
+      "lng": 152.757873
+    },
+    { "id": "Q47001396", "name": "Blackwater Drive-In", "lat": -23.57561, "lng": 148.878198 },
+    { "id": "Q45308256", "name": "Boomerang Theatre", "lat": -27.503798, "lng": 153.034375 },
+    { "id": "Q47001263", "name": "Bribie Twin Theatre", "lat": -27.078003, "lng": 153.18139 },
+    { "id": "Q45308268", "name": "Brisbane City Cinemas", "lat": -27.470474, "lng": 153.026083 },
+    { "id": "Q47001978", "name": "Brunswick Picture House", "lat": -28.540513, "lng": 153.548864 },
+    { "id": "Q47001255", "name": "Burdekin Delta Cinemas", "lat": -19.575453, "lng": 147.405147 },
+    { "id": "Q47001405", "name": "Capalaba Drive-In", "lat": -27.534744, "lng": 153.204609 },
+    { "id": "Q45308272", "name": "Carlton Theatre", "lat": -27.470132, "lng": 153.024565 },
+    {
+      "id": "Q47001412",
+      "name": "Central Highlands Drive-In",
+      "lat": -23.525826,
+      "lng": 148.158256
+    },
+    {
+      "id": "Q47001408",
+      "name": "Chinchilla-Miles Drive-In",
+      "lat": -26.748908,
+      "lng": 150.644124
+    },
+    { "id": "Q47001354", "name": "Cinema Mount Isa", "lat": -20.726433, "lng": 139.493796 },
+    { "id": "Q47001308", "name": "Croydon Town Hall", "lat": -18.20456, "lng": 142.247025 },
+    {
+      "id": "Q45300271",
+      "name": "Crystal Palace Picture Gardens",
+      "lat": -27.561033,
+      "lng": 151.955865
+    },
+    { "id": "Q5306806", "name": "Dreamworld Cinema", "lat": -27.863, "lng": 153.316 },
+    {
+      "id": "Q47001269",
+      "name": "Event Cinemas Browns Plain",
+      "lat": -27.662739,
+      "lng": 153.040202
+    },
+    {
+      "id": "Q47001275",
+      "name": "Event Cinemas Cairns Central",
+      "lat": -16.925673,
+      "lng": 145.771288
+    },
+    { "id": "Q47001276", "name": "Event Cinemas Cairns City", "lat": -16.9218, "lng": 145.774358 },
+    {
+      "id": "Q47001316",
+      "name": "Event Cinemas Cairns Earlville",
+      "lat": -16.944205,
+      "lng": 145.739841
+    },
+    { "id": "Q47001279", "name": "Event Cinemas Capalaba", "lat": -27.523226, "lng": 153.195239 },
+    { "id": "Q47001282", "name": "Event Cinemas Carindale", "lat": -27.503158, "lng": 153.101651 },
+    { "id": "Q47001586", "name": "Event Cinemas Chermside", "lat": -27.385965, "lng": 153.030822 },
+    {
+      "id": "Q47001302",
+      "name": "Event Cinemas Coolangatta",
+      "lat": -28.168551,
+      "lng": 153.539025
+    },
+    {
+      "id": "Q47001387",
+      "name": "Event Cinemas Garden City Mt Gravatt",
+      "lat": -27.559992,
+      "lng": 153.081135
+    },
+    {
+      "id": "Q47001592",
+      "name": "Event Cinemas Indooroopilly",
+      "lat": -27.499167,
+      "lng": 152.972694
+    },
+    { "id": "Q47001338", "name": "Event Cinemas Loganholme", "lat": -27.658748, "lng": 153.169309 },
+    {
+      "id": "Q47001347",
+      "name": "Event Cinemas Maroochydore Sunshine Plaza",
+      "lat": -26.655097,
+      "lng": 153.087312
+    },
+    { "id": "Q47001351", "name": "Event Cinemas Morayfield", "lat": -27.104494, "lng": 152.947287 },
+    {
+      "id": "Q47001362",
+      "name": "Event Cinemas North Lakes",
+      "lat": -27.242586,
+      "lng": 153.020684
+    },
+    { "id": "Q47001374", "name": "Event Cinemas Robina", "lat": -28.075343, "lng": 153.386139 },
+    {
+      "id": "Q47001377",
+      "name": "Event Cinemas Springfield",
+      "lat": -27.677649,
+      "lng": 152.902356
+    },
+    {
+      "id": "Q47001384",
+      "name": "Event Cinemas Townsville City",
+      "lat": -19.262201,
+      "lng": 146.813694
+    },
+    {
+      "id": "Q47001266",
+      "name": "Event Pacific Fair Cinemas",
+      "lat": -28.035825,
+      "lng": 153.419126
+    },
+    { "id": "Q45112718", "name": "Gees Hall", "lat": -25.236085, "lng": 152.276737 },
+    { "id": "Q47001322", "name": "Gladstone Cinemas", "lat": -23.855535, "lng": 151.248609 },
+    { "id": "Q47001417", "name": "Glen Drive-In", "lat": -23.859329, "lng": 151.252541 },
+    { "id": "Q47001587", "name": "Globe Theatre", "lat": -27.456509, "lng": 153.032679 },
+    { "id": "Q47001429", "name": "Grove Drive-In", "lat": -21.101829, "lng": 149.187214 },
+    { "id": "Q47001591", "name": "Hawthorne Cinema", "lat": -27.462369, "lng": 153.060492 },
+    { "id": "Q7714606", "name": "HOTA - Home of the Arts", "lat": -28.0015, "lng": 153.416 },
+    { "id": "Q47001337", "name": "Hoyts Redcliffe", "lat": -27.225887, "lng": 153.087748 },
+    { "id": "Q47001600", "name": "Hoyts Stafford", "lat": -27.409979, "lng": 153.012617 },
+    { "id": "Q47001601", "name": "Hoyts Sunnybank", "lat": -27.571975, "lng": 153.064175 },
+    { "id": "Q47001257", "name": "Imperial Cinema", "lat": -27.975247, "lng": 152.994299 },
+    { "id": "Q47001423", "name": "Jericho Drive-In", "lat": -23.601855, "lng": 146.123095 },
+    { "id": "Q47001424", "name": "Keperra Drive-In", "lat": -27.414548, "lng": 152.94888 },
+    { "id": "Q47001341", "name": "Mackay City Cinemas", "lat": -21.142972, "lng": 149.185822 },
+    { "id": "Q24887243", "name": "Majestic Picture Theatre", "lat": -17.35351, "lng": 145.59287 },
+    { "id": "Q24090148", "name": "Majestic Theatre, Pomona", "lat": -26.3655, "lng": 152.8576 },
+    { "id": "Q47001350", "name": "Mermaid Cinema Centre", "lat": -28.048147, "lng": 153.435649 },
+    { "id": "Q47001594", "name": "Moonlight Cinema Brisbane", "lat": -27.46653, "lng": 153.051633 },
+    {
+      "id": "Q47001368",
+      "name": "Moonlight Cinema Port Douglas",
+      "lat": -16.509752,
+      "lng": 145.462682
+    },
+    { "id": "Q45308282", "name": "Myer Centre 8", "lat": -27.470647, "lng": 153.02489 },
+    { "id": "Q47001358", "name": "Nerang Cinemas", "lat": -27.992246, "lng": 153.335998 },
+    { "id": "Q47001596", "name": "New Farm Six Cinemas", "lat": -27.464783, "lng": 153.042642 },
+    { "id": "Q47001454", "name": "Norline Drive-In", "lat": -19.261943, "lng": 146.749245 },
+    { "id": "Q28183917", "name": "Nostalgic Queen's Theatre", "lat": -26.5869, "lng": 149.1865 },
+    { "id": "Q47001332", "name": "Olympia Cinema", "lat": -20.843179, "lng": 144.201605 },
+    { "id": "Q47001588", "name": "Palace Centro Cinemas", "lat": -27.457245, "lng": 153.039666 },
+    { "id": "Q45112732", "name": "Palace Theatre", "lat": -25.236479, "lng": 152.276941 },
+    { "id": "Q45308297", "name": "Pavilion Theatre", "lat": -27.467565, "lng": 153.027927 },
+    { "id": "Q47001455", "name": "Range Drive-In", "lat": -19.320169, "lng": 146.705914 },
+    {
+      "id": "Q47001259",
+      "name": "Reading Biggera Waters Cinemas",
+      "lat": -27.934434,
+      "lng": 153.390498
+    },
+    {
+      "id": "Q47001271",
+      "name": "Reading Cinemas Bundaberg",
+      "lat": -24.888752,
+      "lng": 152.321636
+    },
+    {
+      "id": "Q47001380",
+      "name": "Reading Cinemas Thuringowa",
+      "lat": -19.318801,
+      "lng": 146.724776
+    },
+    { "id": "Q47001445", "name": "Redcliffe Drive-In", "lat": -27.242798, "lng": 153.08575 },
+    { "id": "Q47001371", "name": "Redcliffe Picture Palace", "lat": -27.228031, "lng": 153.113922 },
+    { "id": "Q47001589", "name": "Regal Twin Cinemas", "lat": -27.522222, "lng": 152.97595 },
+    { "id": "Q47001386", "name": "Regent Picture Theatre", "lat": -19.276104, "lng": 146.800329 },
+    { "id": "Q47001446", "name": "Richlands Drive-In", "lat": -27.587853, "lng": 152.958822 },
+    { "id": "Q47001433", "name": "Rodeo Drive-In", "lat": -17.04857, "lng": 145.433109 },
+    { "id": "Q47001389", "name": "Royal Outdoor Theatre", "lat": -22.390141, "lng": 143.038266 },
+    { "id": "Q7432113", "name": "Schonell Theatre", "lat": -27.4971, "lng": 153.015 },
+    { "id": "Q47001288", "name": "School of Arts", "lat": -20.077674, "lng": 146.256331 },
+    { "id": "Q47001419", "name": "Scottish Drive-In", "lat": -26.211449, "lng": 152.691686 },
+    { "id": "Q96405822", "name": "Sky Voyager", "lat": -27.863, "lng": 153.315836 },
+    { "id": "Q47001400", "name": "Skyway Drive-In", "lat": -24.89342, "lng": 152.342623 },
+    { "id": "Q47001599", "name": "Southbank 5 Cinemas", "lat": -27.478842, "lng": 153.021545 },
+    { "id": "Q45300418", "name": "Spring Bluff Drive-In", "lat": -27.466414, "lng": 151.984713 },
+    { "id": "Q47001289", "name": "Stadium Theatre", "lat": -20.076928, "lng": 146.2638 },
+    { "id": "Q47001394", "name": "Stardust Drive-In", "lat": -19.594479, "lng": 147.39949 },
+    { "id": "Q47001457", "name": "Stuart Drive-In", "lat": -19.216919, "lng": 146.60362 },
+    { "id": "Q47001379", "name": "Surfers Paradise Cinema", "lat": -28.00551, "lng": 153.428115 },
+    { "id": "Q47001409", "name": "Tivoli Drive-In", "lat": -27.57037, "lng": 152.784031 },
+    {
+      "id": "Q45308303",
+      "name": "Tivoli Theatre and Roof Garden",
+      "lat": -27.468462,
+      "lng": 153.023961
+    },
+    { "id": "Q45308308", "name": "Tribal Theatre", "lat": -27.469148, "lng": 153.021737 },
+    { "id": "Q19880075", "name": "Triumph Cinema", "lat": -27.4884, "lng": 153.047 },
+    { "id": "Q47001438", "name": "Tropicaire Drive-In", "lat": -20.724354, "lng": 139.493748 },
+    { "id": "Q47002120", "name": "Tweed City 6", "lat": -28.200557, "lng": 153.543987 },
+    { "id": "Q47002187", "name": "Tweed Heads Drive-In", "lat": -28.183017, "lng": 153.521387 },
+    { "id": "Q47001593", "name": "United Cinemas El Dorado", "lat": -27.50305, "lng": 152.974953 },
+    { "id": "Q47001313", "name": "Warrina Cineplex Cinemas", "lat": -19.274853, "lng": 146.770215 },
+    { "id": "Q47001444", "name": "Western Drive-In", "lat": -27.549886, "lng": 152.958311 },
+    { "id": "Q47001431", "name": "Westline Drive-In", "lat": -21.153817, "lng": 149.139572 },
+    { "id": "Q47001399", "name": "Whitsunday Bowen Drive-In", "lat": -20.05062, "lng": 148.230426 },
+    { "id": "Q45308313", "name": "Winter Garden Theatre", "lat": -27.468911, "lng": 153.027164 },
+    { "id": "Q47001427", "name": "Wonga Drive-In", "lat": -26.127778, "lng": 152.447406 },
+    { "id": "Q47001459", "name": "Woodridge Drive-In", "lat": -27.709872, "lng": 153.116404 },
+    { "id": "Q47001460", "name": "Woree Drive-In", "lat": -16.966928, "lng": 145.746727 },
+    { "id": "Q47001290", "name": "World Theatre", "lat": -20.07641, "lng": 146.256479 },
+    { "id": "Q47001452", "name": "Yalata Drive-In", "lat": -27.730491, "lng": 153.237313 },
+    { "id": "Q47001391", "name": "Yeppoon Film Theatres", "lat": -23.12863, "lng": 150.747979 }
+  ]
+}

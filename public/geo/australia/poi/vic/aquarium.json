@@ -1,0 +1,9 @@
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": { "south": -39.159, "west": 140.9619, "north": -33.9806, "east": 149.9762 },
+  "places": [
+    { "id": "Q1321392", "name": "Melbourne Aquarium", "lat": -37.82083, "lng": 144.95778 },
+    { "id": "Q495039", "name": "National Zoo & Aquarium", "lat": -35.3006, "lng": 149.069 }
+  ]
+}

@@ -1,4 +1,3 @@
-/** Defaults match `firebase.json` `emulators.*.port` (UI/hub/logging omitted). */
 export const FIREBASE_EMULATOR_DEFAULTS = {
   host: "127.0.0.1",
   auth: 9199,

@@ -19,29 +19,22 @@ export interface UsePoiCandidatesOptions {
   map: MapLibreMap | null;
   mapStyle: MapStyle;
   categoryId?: string | null;
-  /** Authoritative confirm fetch (bundle and/or Overpass). */
   confirm: () => Promise<PoiCandidate[]>;
   enabled?: boolean;
   /** Test seam — defaults to live MapLibre adapter. */
   queryPois?: QueryBasemapPoisFn;
-  /** Test seam — defaults to mapStyle !== "satellite". */
   isTileQueryAvailable?: (mapStyle: MapStyle) => boolean;
 }
 
 export interface UsePoiCandidatesResult {
   provisional: PoiCandidate[];
   confirmed: PoiCandidate[];
-  /** Merged list for UI (provisional upgraded by confirm). */
   candidates: PoiCandidate[];
   status: PoiCandidatesStatus;
   error: string | null;
   refresh: () => void;
 }
 
-/**
- * Tile provisional preview then Overpass/bundle confirm.
- * Satellite disables the tile path. Stale confirms are ignored via request id.
- */
 export function usePoiCandidates({
   map,
   mapStyle,

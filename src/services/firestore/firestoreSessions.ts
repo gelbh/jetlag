@@ -1,7 +1,7 @@
-/** Public session Firestore API — split by concern under ./sessions/. */
-
 export {
+  startCastleSiegeStandoff,
   updateCastleSiegeSetup,
+  writeTeamMarks,
   writeTeamSealCipher,
   writeTeamSealHash,
 } from "./sessions/castleSiege";

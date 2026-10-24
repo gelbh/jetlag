@@ -1,4 +1,3 @@
-/** Tailwind text color for podium ranks (1–3) and everyone else. */
 export function leaderboardRankColorClass(rank: number): string {
   switch (rank) {
     case 1:

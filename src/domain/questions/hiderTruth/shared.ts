@@ -53,7 +53,6 @@ export function parseMatchingAnchor(metadata: Record<string, unknown>): LatLngTu
   return [lat, lng];
 }
 
-/** Accepts annotation metadata or loose pending-placement metadata. */
 export function seekerAnchorFromMetadata(
   metadata: { measuringAnchor?: unknown } | Record<string, unknown>,
 ): LatLngTuple | null {

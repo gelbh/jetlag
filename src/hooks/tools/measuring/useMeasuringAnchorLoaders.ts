@@ -41,7 +41,6 @@ interface UseMeasuringAnchorLoadersParams {
   active: boolean;
   gameArea: GameArea;
   sessionRules?: SessionRulesInput;
-  /** Active annotations; tagged POI pins join the places list for their category. */
   annotations?: readonly AnnotationRecord[];
   setMapError: (message: string | null) => void;
   draft: MeasuringDraftState;
@@ -225,6 +224,7 @@ export function useMeasuringAnchorLoaders({
           customCategories,
           sessionRules?.regionPackId,
           {
+            subregionId: sessionRules?.regionPackSubregionId,
             task,
             createEnrichTask: () =>
               createLoadTask({

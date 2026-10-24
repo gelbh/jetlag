@@ -43,7 +43,6 @@ interface GameAreaFramingModalProps {
   mapStyle: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
   framing: GameAreaFramingController;
-  /** Place search or saved area shown until the user draws on the map. */
   referenceGameArea?: GameArea | null;
   referenceFocusBounds?: MapBoundsExpression | null;
   onClose: () => void;

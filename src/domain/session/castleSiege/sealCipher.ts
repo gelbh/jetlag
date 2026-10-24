@@ -16,7 +16,6 @@
 
 export const SEAL_CIPHER_ALG = "A256GCM" as const;
 export const SEAL_WRAP_KEY_ID_V1 = "castle-siege-seal-wrap-v1";
-/** Test-only key id; pair with {@link TEST_SEAL_WRAP_KEY_BYTES}. */
 export const SEAL_WRAP_KEY_ID_TEST = "castle-siege-seal-wrap-test";
 
 /**
@@ -66,7 +65,6 @@ function requireAes256KeyBytes(bytes: Uint8Array, label: string): void {
   }
 }
 
-/** TS DOM libs type Uint8Array.buffer as ArrayBufferLike; SubtleCrypto wants BufferSource. */
 function asBufferSource(bytes: Uint8Array): BufferSource {
   return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
 }
@@ -86,7 +84,6 @@ function isSealCipherEnvelopeRecord(value: unknown): value is Record<string, unk
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-/** Type guard for the Firestore `ciphertext` map (V1 envelope). */
 export function isSealCipherEnvelopeV1(value: unknown): value is SealCipherEnvelopeV1 {
   if (!isSealCipherEnvelopeRecord(value)) {
     return false;
@@ -107,7 +104,6 @@ export function isSealCipherEnvelopeV1(value: unknown): value is SealCipherEnvel
   );
 }
 
-/** Encrypt canonical seal plaintext into a Functions-unwrapable envelope. */
 export async function encryptSealPayload(
   plaintext: string,
   options: EncryptSealOptions,
@@ -151,7 +147,6 @@ export async function encryptSealPayload(
   };
 }
 
-/** Decrypt a V1 envelope (unit tests + future Functions port). */
 export async function decryptSealPayload(
   envelope: SealCipherEnvelopeV1,
   options: { wrappingKey: Uint8Array },

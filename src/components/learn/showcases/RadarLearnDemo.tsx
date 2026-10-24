@@ -9,7 +9,6 @@ const EMPTY_USED = new Set<RadarDistanceOptionKey>();
 const GAME_SIZE: GameSize = "medium";
 const DISTANCE_UNIT: DistanceUnit = "metric";
 
-/** Live Radar Ask HUD with local state (no session / map). */
 export function RadarLearnDemo() {
   const [radiusMeters, setRadiusMeters] = useState<number | null>(null);
   const [chooseCustom, setChooseCustom] = useState(false);

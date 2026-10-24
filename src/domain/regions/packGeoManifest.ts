@@ -7,26 +7,16 @@ import {
 } from "@/domain/questions";
 import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 
-/** Static asset kinds under `/geo/{packId}/`. */
 export type PackGeoAssetKind = "poi" | "coastline" | "sea_level_seed" | "international_border";
 
-/**
- * Per-pack reference bounding boxes for attach scoring (v1 embed).
- * Primary extents from `public/geo/{packId}/` GeoJSON; expanded slightly where
- * POI `bbox` fields (2-decimal / airport padding) extend outside the primary
- * boundary so attach validation stays consistent with on-disk POI metadata.
- */
 export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
   dublin: { south: 53.1782, west: -6.5469, north: 53.6347, east: -5.9945 },
-  // Union with POI file bboxes (2-decimal rounding of borough extent).
   nyc: { south: 40.49, west: -74.26, north: 40.92, east: -73.7 },
-  // Union with POI file bboxes (2-decimal rounding of borough extent).
   london: { south: 51.28, west: -0.51, north: 51.7, east: 0.3357 },
   tokyo: { south: 35.5282, west: 139.5628, north: 35.8175, east: 139.9189 },
   osaka: { south: 34.5865, west: 135.3435, north: 34.7688, east: 135.5993 },
   zurich: { south: 47.1637, west: 8.3589, north: 47.699, east: 8.986 },
   lucerne: { south: 46.775, west: 7.839, north: 47.2903, east: 8.5213 },
-  // AABB from public/geo/switzerland/cantons.geojson (+0.02° pad).
   switzerland: { south: 45.798, west: 5.9359, north: 47.8285, east: 10.5121 },
   "portland-maine": {
     south: 43.4669,
@@ -34,31 +24,24 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
     north: 43.8488,
     east: -69.9759,
   },
-  // Union with POI bboxes (airport west of city.geojson extent).
   "prince-rupert": {
     south: 54.2016,
     west: -130.45,
     north: 54.4,
     east: -130.2,
   },
-  // Union AABB of public/geo/southampton/wards.geojson (+0.02° pad).
   southampton: { south: 50.86, west: -1.4973, north: 50.9761, east: -1.302 },
-  // AABB from public/geo/australia/states.geojson (+0.02° pad).
   australia: { south: -43.7604, west: 112.9011, north: -9.1225, east: 159.1292 },
+  // AABB from public/geo/sydney/lgas.geojson (+0.02° pad).
+  sydney: { south: -34.3574, west: 149.9948, north: -32.9761, east: 151.363 },
 };
 
-/**
- * Measuring point categories with Overpass selectors (excludes custom_place and
- * non-point kinds). Every listed id should have a pack POI JSON path.
- * Runtime may fetch empty `source:"none"` stubs until Wikidata fills them.
- */
 export const PACK_GEO_POINT_CATEGORIES = BASE_MEASURING_CATALOG.filter(
   (option) => option.targetKind === "point" && option.overpassSelectors.length > 0,
 ).map((option) => option.id) as readonly MeasuringLocationCategory[];
 
 const PACK_GEO_POINT_CATEGORY_SET = new Set<string>(PACK_GEO_POINT_CATEGORIES);
 
-/** Tentacle categories that reuse measuring point POI bundles. */
 export const PACK_GEO_TENTACLE_CATEGORIES = [
   ...TENTACLE_LOCATION_CATEGORY_IDS,
   "zoo",
@@ -68,7 +51,6 @@ export const PACK_GEO_TENTACLE_CATEGORIES = [
 
 const PACK_GEO_TENTACLE_CATEGORY_SET = new Set<string>(PACK_GEO_TENTACLE_CATEGORIES);
 
-/** All recommended region packs participate in the pack geo matrix. */
 export const PACK_GEO_PACK_IDS: readonly RegionPackId[] = REGION_PACK_IDS;
 
 const PACK_GEO_PACK_ID_SET = new Set<string>(PACK_GEO_PACK_IDS);
@@ -83,10 +65,6 @@ export function isPackGeoTentacleCategory(
   return PACK_GEO_TENTACLE_CATEGORY_SET.has(category);
 }
 
-/**
- * Whether a pack/kind(/category) is in the supported matrix.
- * Coastline and sea-level seeds are pack-scoped (no category).
- */
 export function isPackGeoSupported(
   packId: RegionPackId,
   kind: PackGeoAssetKind,
@@ -110,10 +88,19 @@ export function isPackGeoSupported(
   }
 }
 
+/**
+ * Bundled POI JSON URL. For `australia` with a State/Territory `subregionId`,
+ * prefers `/geo/australia/poi/<stateId>/<category>.json` (bandwidth slice).
+ * Callers should fall back to the national path when that asset is missing.
+ */
 export function packGeoPoiUrl(
   packId: RegionPackId,
   category: MeasuringLocationCategory | string,
+  subregionId?: string,
 ): string {
+  if (packId === "australia" && subregionId) {
+    return `/geo/${packId}/poi/${subregionId}/${category}.json`;
+  }
   return `/geo/${packId}/poi/${category}.json`;
 }
 
@@ -129,11 +116,14 @@ export function packGeoSeaLevelSeedUrl(packId: RegionPackId): string {
   return `/geo/${packId}/sea_level_seed.json`;
 }
 
-/** Relative path under `public/` for on-disk matrix checks. */
 export function packGeoPoiPublicPath(
   packId: RegionPackId,
   category: MeasuringLocationCategory | string,
+  subregionId?: string,
 ): string {
+  if (packId === "australia" && subregionId) {
+    return `geo/${packId}/poi/${subregionId}/${category}.json`;
+  }
   return `geo/${packId}/poi/${category}.json`;
 }
 

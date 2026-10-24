@@ -21,7 +21,6 @@ describe("phone-shell L/R safe-area compose", () => {
     expect(css).toMatch(
       /--jl-shell-safe-right:\s*max\(\s*0px,\s*env\(safe-area-inset-right,\s*0px\)\s*-\s*var\(--jl-shell-letterbox-x\)\s*\)/s,
     );
-    // Sync beacon under shell uses composed L/R (not raw viewport env alone).
     expect(css).toMatch(
       /\[data-player-phone-shell\]\s*\{[^}]*--jl-sync-beacon-inset:\s*max\(0\.625rem,\s*var\(--jl-shell-safe-right\)\)/s,
     );

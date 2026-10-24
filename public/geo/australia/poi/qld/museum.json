@@ -1,0 +1,183 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": { "south": -29.1793, "west": 137.9946, "north": -9.1425, "east": 153.5522 },
+  "places": [
+    {
+      "id": "Q17000681",
+      "name": "Abbey Museum of Art and Archaeology",
+      "lat": -27.0709,
+      "lng": 153.023
+    },
+    { "id": "Q28035284", "name": "Aramac Tramway Museum", "lat": -22.9752, "lng": 145.2462 },
+    { "id": "Q4785958", "name": "Archer Park Rail Museum", "lat": -23.3756, "lng": 150.507 },
+    {
+      "id": "Q16826292",
+      "name": "Australian Age of Dinosaurs",
+      "lat": -22.476356,
+      "lng": 143.184299
+    },
+    {
+      "id": "Q19870908",
+      "name": "Australian Armour and Artillery Museum",
+      "lat": -16.8503,
+      "lng": 145.695
+    },
+    { "id": "Q130755218", "name": "Australian Cinémathèque", "lat": -27.4726, "lng": 153.01828 },
+    { "id": "Q4852179", "name": "Ballyhooley Steam Railway", "lat": -16.4964, "lng": 145.457 },
+    { "id": "Q4965829", "name": "Bribie Island Seaside Museum", "lat": -27.0859, "lng": 153.159 },
+    { "id": "Q4968620", "name": "Brisbane Tramway Museum", "lat": -27.4073, "lng": 152.938 },
+    {
+      "id": "Q138649647",
+      "name": "Cairns Botanic Gardens Visitor Centre",
+      "lat": -16.89957,
+      "lng": 145.74902
+    },
+    {
+      "id": "Q23641166",
+      "name": "Childers Pharmaceutical Museum",
+      "lat": -25.237,
+      "lng": 152.2781
+    },
+    { "id": "Q5138747", "name": "Cobb & Co Museum", "lat": -27.5554, "lng": 151.965 },
+    {
+      "id": "Q5152612",
+      "name": "Commissariat Store, Brisbane",
+      "lat": -27.47327,
+      "lng": 153.02425
+    },
+    { "id": "Q28184285", "name": "Customs House Museum", "lat": -28.5489, "lng": 150.3068 },
+    { "id": "Q111535557", "name": "Das Neumann Haus Museum", "lat": -27.631659, "lng": 152.39408 },
+    {
+      "id": "Q22032074",
+      "name": "DownsSteam Tourist Railway & Museum",
+      "lat": -27.59302,
+      "lng": 151.917039
+    },
+    { "id": "Q5306807", "name": "Dreamworld Railway", "lat": -27.863, "lng": 153.317 },
+    { "id": "Q48642", "name": "Fort Lytton National Park", "lat": -27.412222, "lng": 153.15 },
+    {
+      "id": "Q114702366",
+      "name": "Gab Titui Cultural Centre",
+      "lat": -10.584836,
+      "lng": 142.218351
+    },
+    {
+      "id": "Q24090272",
+      "name": "Gladstone Regional Art Gallery and Museum",
+      "lat": -23.8451,
+      "lng": 151.2575
+    },
+    {
+      "id": "Q112920181",
+      "name": "Griffith University Art Museum",
+      "lat": -27.481802,
+      "lng": 153.024165
+    },
+    { "id": "Q5617604", "name": "Gulflander", "lat": -17.857, "lng": 141.138 },
+    {
+      "id": "Q104864480",
+      "name": "Hinkler Hall of Aviation",
+      "lat": -24.851354,
+      "lng": 152.336196
+    },
+    {
+      "id": "Q24090049",
+      "name": "Historic Village Herberton",
+      "lat": -17.373931,
+      "lng": 145.384898
+    },
+    { "id": "Q3061684", "name": "HMAS Diamantina", "lat": -27.4819, "lng": 153.027 },
+    { "id": "Q5630352", "name": "HMAS Gladstone", "lat": -23.833173, "lng": 151.252769 },
+    { "id": "Q5630626", "name": "HMAS Townsville", "lat": -19.256489, "lng": 146.826516 },
+    { "id": "Q7714606", "name": "HOTA - Home of the Arts", "lat": -28.0015, "lng": 153.416 },
+    { "id": "Q2640189", "name": "Hou Wang Temple", "lat": -17.278839, "lng": 145.471842 },
+    { "id": "Q24998041", "name": "James Cook Historical Museum", "lat": -15.4689, "lng": 145.2506 },
+    { "id": "Q3048580", "name": "Kuranda Scenic Railway", "lat": -16.8849, "lng": 145.702 },
+    {
+      "id": "Q111951015",
+      "name": "Laidley Pioneer Village and Museum",
+      "lat": -27.65,
+      "lng": 152.391389
+    },
+    { "id": "Q28183735", "name": "Landsborough Shire Museum", "lat": -26.8094, "lng": 152.9648 },
+    { "id": "Q28184223", "name": "Longreach Powerhouse", "lat": -23.4404, "lng": 144.2455 },
+    { "id": "Q87734889", "name": "MAAP", "lat": -27.455, "lng": 153.03525 },
+    {
+      "id": "Q30315197",
+      "name": "Marks-Hirschfeld Museum of Medical History",
+      "lat": -27.4482,
+      "lng": 153.0238
+    },
+    { "id": "Q6780880", "name": "Mary Valley Heritage Railway", "lat": -26.4605, "lng": 152.676 },
+    {
+      "id": "Q16894696",
+      "name": "Maryborough Military and Colonial Museum",
+      "lat": -25.53884,
+      "lng": 152.70545
+    },
+    {
+      "id": "Q14935494",
+      "name": "Miles Historical Village and Museum",
+      "lat": -26.659,
+      "lng": 150.197
+    },
+    { "id": "Q1389172", "name": "Museum of Brisbane", "lat": -27.4688, "lng": 153.023 },
+    {
+      "id": "Q60746927",
+      "name": "Museum of Lands, Mapping and Surveying",
+      "lat": -27.4651,
+      "lng": 153.025
+    },
+    {
+      "id": "Q14935534",
+      "name": "North Stradbroke Island Historical Museum",
+      "lat": -27.4977,
+      "lng": 153.404
+    },
+    { "id": "Q104604483", "name": "Old Petrie Town", "lat": -27.261195, "lng": 152.953629 },
+    {
+      "id": "Q24997949",
+      "name": "Port Douglas Court House Museum",
+      "lat": -16.4796,
+      "lng": 145.4628
+    },
+    { "id": "Q24090094", "name": "Pringle Cottage Museum", "lat": -28.2202, "lng": 152.0269 },
+    { "id": "Q19917343", "name": "QAGOMA", "lat": -27.4726, "lng": 153.01828 },
+    { "id": "Q1326506", "name": "Qantas Founders Outback Museum", "lat": -23.4399, "lng": 144.271 },
+    { "id": "Q14935546", "name": "Queensland Air Museum", "lat": -26.798, "lng": 153.1096 },
+    { "id": "Q7270964", "name": "Queensland Maritime Museum", "lat": -27.4819, "lng": 153.026 },
+    { "id": "Q1537684", "name": "Queensland Museum", "lat": -27.473173, "lng": 153.017423 },
+    { "id": "Q6941039", "name": "Queensland Museum Tropics", "lat": -19.2574, "lng": 146.822 },
+    { "id": "Q60740586", "name": "Queensland Police Museum", "lat": -27.4666, "lng": 153.018 },
+    { "id": "Q23073813", "name": "Redland Museum", "lat": -27.534242, "lng": 153.259663 },
+    { "id": "Q107132392", "name": "Rosewood Railway Museum", "lat": -27.61042, "lng": 152.56214 },
+    {
+      "id": "Q7527050",
+      "name": "Sir Harry Gibbs Legal Heritage Centre",
+      "lat": -27.4676,
+      "lng": 153.021
+    },
+    { "id": "Q18754899", "name": "Southern Downs Steam Railway", "lat": -28.216, "lng": 152.042 },
+    { "id": "Q28183812", "name": "Springsure Hospital Museum", "lat": -24.1194, "lng": 148.0844 },
+    {
+      "id": "Q138841598",
+      "name": "Tweed Regional Museum, Murwillumbah",
+      "lat": -28.325628,
+      "lng": 153.395233
+    },
+    {
+      "id": "Q18166789",
+      "name": "University of Queensland Anthropology Museum",
+      "lat": -27.4973,
+      "lng": 153.012
+    },
+    {
+      "id": "Q7896183",
+      "name": "University of Queensland Art Museum",
+      "lat": -27.4965,
+      "lng": 153.012
+    },
+    { "id": "Q22032353", "name": "Workshops Rail Museum", "lat": -27.6023, "lng": 152.7572 }
+  ]
+}

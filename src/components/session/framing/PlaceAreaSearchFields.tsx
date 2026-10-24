@@ -35,7 +35,6 @@ export function PlaceAreaSearchInsetResults({
   searchResults: GeocodedPlace[];
   selectedPlaceId: string | null;
   onSelectPlace: (place: GeocodedPlace) => void;
-  /** Omit the first row's prefix rule inside a grouped list. */
   skipLeadingHairline?: boolean;
 }) {
   return (
@@ -167,7 +166,6 @@ export function PlaceAreaSearchFields({
             ...insetTextInputStyles,
             input: {
               ...insetTextInputStyles.input,
-              // inset paddingInline cancels Mantine's right-section gutter.
               paddingInlineEnd: "2.75rem",
             },
           }}

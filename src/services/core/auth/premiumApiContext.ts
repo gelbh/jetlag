@@ -13,7 +13,6 @@ interface PremiumApiContext {
 
 const EMPTY_CONTEXT: PremiumApiContext = { sessionId: null, tier: "free", memberUids: [] };
 
-/** Covers the rejoin heal window (~7 s observed) without hanging map data. */
 const PROXY_MEMBERSHIP_WAIT_MS = 10_000;
 
 let context: PremiumApiContext = EMPTY_CONTEXT;

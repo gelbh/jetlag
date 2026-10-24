@@ -4,9 +4,7 @@ import { clampTopPx, SIDE_DOCK_CLEARANCE_PX, usableVerticalBand } from "./mapChr
 describe("usableVerticalBand", () => {
   it("keeps side docks clear of status and hunt chrome", () => {
     const { minTop, maxBottom } = usableVerticalBand(844, 59);
-    // safe(59) + float(12) + status(44) + clearance(16)
     expect(minTop).toBe(59 + 12 + 44 + SIDE_DOCK_CLEARANCE_PX);
-    // viewport - (float + hunt + clearance)
     expect(maxBottom).toBe(844 - (12 + 52 + SIDE_DOCK_CLEARANCE_PX));
     expect(maxBottom - minTop).toBeGreaterThan(48);
   });

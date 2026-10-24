@@ -1,0 +1,18 @@
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [
+    { "id": "Q21913142", "name": "Cotter Storage Reservoir", "lat": -35.3126, "lng": 148.92105 },
+    { "id": "Q21961920", "name": "Googong Reservoir", "lat": -35.441944, "lng": 149.266667 },
+    { "id": "Q21957237", "name": "Isabella Pond", "lat": -35.422222, "lng": 149.081111 },
+    { "id": "Q1642390", "name": "Lake Burley Griffin", "lat": -35.293333, "lng": 149.113889 },
+    { "id": "Q1800934", "name": "Lake Ginninderra", "lat": -35.233333, "lng": 149.066667 },
+    { "id": "Q21954896", "name": "Lake Jerrabomberra", "lat": -35.390278, "lng": 149.192778 },
+    { "id": "Q137788", "name": "Lake Tuggeranong", "lat": -35.408333, "lng": 149.066667 },
+    { "id": "Q7347854", "name": "Stranger Pond", "lat": -35.429722, "lng": 149.069722 },
+    { "id": "Q21957235", "name": "West Basin", "lat": -35.289444, "lng": 149.122222 },
+    { "id": "Q21957234", "name": "West Lake", "lat": -35.28917, "lng": 149.1064 },
+    { "id": "Q21957233", "name": "Yerrabi Pond", "lat": -35.176389, "lng": 149.129722 }
+  ]
+}

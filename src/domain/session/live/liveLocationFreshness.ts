@@ -1,9 +1,7 @@
 import { formatFreshnessAge } from "../../admin/formatAdminFreshness";
 
-/** Age at which a shared live pin is removed from the map. */
 export const LIVE_LOCATION_GONE_MS = 60 * 60 * 1000;
 
-/** Shared UI tick for opacity / last-seen refresh. */
 export const LIVE_LOCATION_FRESHNESS_TICK_MS = 15_000;
 
 export function liveLocationAgeMs(updatedAt: string, nowMs: number): number | null {
@@ -22,7 +20,6 @@ export function isLiveLocationGone(updatedAt: string, nowMs: number): boolean {
   return ageMs >= LIVE_LOCATION_GONE_MS;
 }
 
-/** Locations still drawn on the map (not yet gone). */
 export function countLiveLocations(
   locations: readonly { updatedAt: string }[],
   nowMs: number,
@@ -30,7 +27,6 @@ export function countLiveLocations(
   return locations.filter((location) => !isLiveLocationGone(location.updatedAt, nowMs)).length;
 }
 
-/** Linear fade from 1 (fresh) to 0 (gone). Gone ages return 0. */
 export function liveLocationFillOpacity(updatedAt: string, nowMs: number): number {
   const ageMs = liveLocationAgeMs(updatedAt, nowMs);
   if (ageMs === null || ageMs >= LIVE_LOCATION_GONE_MS) {
@@ -47,7 +43,6 @@ export function formatLiveLocationLastSeen(updatedAt: string, nowMs: number): st
   return `Last seen ${age}`;
 }
 
-/** Oldest (stalest) updatedAt among members, or null if empty. */
 export function oldestLiveLocationUpdatedAt(updatedAts: readonly string[]): string | null {
   let oldest: string | null = null;
   let oldestMs = Number.POSITIVE_INFINITY;

@@ -108,9 +108,7 @@ export function AccountSignInGate({
         }
         try {
           await ensureAnonymousUser();
-        } catch {
-          // Keep the original sign-in error visible.
-        }
+        } catch {}
       }
       if (!cancelled) {
         setCompletingEmailLink(false);

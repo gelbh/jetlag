@@ -178,9 +178,6 @@ function resolveWash(event: SessionActivityEvent): string {
   return "var(--color-trail-soft)";
 }
 
-/**
- * Distilled field-log stake: icon + ask (left) → answer stake box (right).
- */
 export function SessionLogBody({
   events,
   annotations,

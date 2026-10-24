@@ -31,7 +31,6 @@ export function mapStylePreviewAssetUrl(
   return MAP_STYLE_PREVIEW_ASSETS.standard[streetBasemap];
 }
 
-/** Four identical static preview tiles for the style-toggle 2×2 grid. */
 export function mapStylePreviewTileUrls(
   style: MapStyle,
   streetBasemap: StreetBasemap = "light",

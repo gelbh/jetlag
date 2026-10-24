@@ -93,7 +93,6 @@ function emailDeps(overrides = {}) {
   };
 }
 
-/** Simulate the trigger firing with the doc's current state. */
 function fire(db, d) {
   return sendPosthogIncidentEmail(db, ID, structuredClone(db._incidents.get(ID)), d);
 }

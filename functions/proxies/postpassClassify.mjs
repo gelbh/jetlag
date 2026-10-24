@@ -12,7 +12,6 @@
  * @returns {{ south: number, west: number, north: number, east: number } | null}
  */
 export function extractOverpassBbox(ql) {
-  // Overpass bbox filters: (south,west,north,east)
   const match = String(ql).match(
     /\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)/,
   );
@@ -84,7 +83,6 @@ const OVERPASS_STATEMENT_RE =
   /\b(?:node|way|rel|relation|nwr)\b(?:\s*\(\s*around\s*:[^)]*\))?\s*((?:\[[^\]]*\]\s*)+)/g;
 const OVERPASS_KEYWORD_RE = /\b(?:node|way|rel|relation|nwr|nw|nr|wr)\b/g;
 
-// Quoted ("…", no escapes) or bare Overpass identifier.
 const FILTER_TOKEN = String.raw`(?:"([^"\\]*)"|([A-Za-z0-9_]+))`;
 const FILTER_EXISTS_RE = new RegExp(String.raw`^\[\s*${FILTER_TOKEN}\s*\]$`);
 const FILTER_COMPARE_RE = new RegExp(

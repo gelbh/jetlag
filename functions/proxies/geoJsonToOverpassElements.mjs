@@ -1,8 +1,4 @@
 /**
- * Normalize Postpass GeoJSON FeatureCollection → Overpass-shaped `{ elements }`.
- */
-
-/**
  * @param {unknown} tags
  * @returns {Record<string, string>}
  */

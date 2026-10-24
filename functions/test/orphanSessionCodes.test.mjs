@@ -37,9 +37,7 @@ function makeCodeDoc(id, sessionId) {
     id,
     data: () => ({ sessionId }),
     ref: {
-      delete: async () => {
-        /* set by caller */
-      },
+      delete: async () => {},
     },
   };
 }

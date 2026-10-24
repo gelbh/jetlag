@@ -53,7 +53,6 @@ import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots"
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
 import { resolveHiderZonePlacementChromeVisibility } from "./hiderZonePlacementChrome";
 import { resolveHidingZoneHudPresence } from "./hidingZoneAskChrome";
-// ponytail yagni waiver: keep named helper + matrix tests (1 call site, readiness-reviewed).
 import { isHidingZoneMapFirstEligible } from "./hidingZoneMapFirst";
 
 type MapOverlayState = ReturnType<typeof useMapOverlayState>;
@@ -82,7 +81,6 @@ type HidingZonePanelTool = {
   error: string | null;
 };
 
-/** Chrome bag for hider map. Full `useHiderMapScreenController` deferred: extract ~800 LOC would blow jumbo soft-gate. */
 export type HiderMapScreenController = {
   session: SessionRecord;
   hasMyZone: boolean;
@@ -127,10 +125,8 @@ export type HiderMapScreenController = {
   onOpenChat: () => void;
   onOpenSettings: () => void;
   onOpenCodes: () => void;
-  /** Board economy: Hand control next to Set zone. */
   handLabel?: string;
   onOpenHand?: () => void;
-  /** When economy is on, Move only if a Move card is in hand. */
   boardEconomyEnabled?: boolean;
   hasMoveCard?: boolean;
   expansionPackEnabled: boolean;
@@ -202,7 +198,6 @@ export type HiderMapScreenController = {
     questionCards?: HiderQuestionCards;
     onSetHidingZone?: () => void;
   };
-  /** HUD root for pan-hide (`data-map-interacting`): same as seeker. */
   chromeHudRef?: RefObject<HTMLDivElement | null>;
 };
 
@@ -457,7 +452,6 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           writesEnabled={zoneTool.writesEnabled}
           onDismiss={zoneTool.closeWizardFromUser}
           onBackToMethod={() => {
-            // Reset draft to method chips; preserves moveMode when relocating.
             zoneTool.openWizard();
           }}
         />

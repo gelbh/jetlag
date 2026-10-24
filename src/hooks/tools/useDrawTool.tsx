@@ -6,7 +6,6 @@ import type { AnnotationRecord } from "../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 const MIN_STROKE_POINTS = 2;
-/** Skip samples closer than this (degrees ~ few meters). */
 const MIN_SAMPLE_DELTA = 0.00004;
 
 export function shouldAppendStrokePoint(

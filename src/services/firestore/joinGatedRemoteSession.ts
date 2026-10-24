@@ -40,10 +40,6 @@ async function getRemoteSessionByIdFromServer(sessionId: string): Promise<Sessio
   );
 }
 
-/**
- * Join a role-gated session via the server callable.
- * Extracted from firestoreSessions to keep the join ladder readable.
- */
 export async function joinGatedRemoteSessionByCode(input: {
   code: string;
   codeRecord: SessionCodeRecord;
@@ -68,9 +64,7 @@ export async function joinGatedRemoteSessionByCode(input: {
     let session: SessionRecord | null = null;
     try {
       session = await getRemoteSessionByIdFromServer(callableResult.sessionId);
-    } catch {
-      // Fall through to code lookup.
-    }
+    } catch {}
 
     if (!session) {
       const lookup = await input.lookupRemoteSessionByCode(input.code);

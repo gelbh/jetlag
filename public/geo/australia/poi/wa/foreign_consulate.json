@@ -1,0 +1,37 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": { "south": -35.1916, "west": 112.9211, "north": -13.6887, "east": 129.0019 },
+  "places": [
+    {
+      "id": "Q111047776",
+      "name": "consulate general of Indonesia, Perth",
+      "lat": -31.959938,
+      "lng": 115.872888
+    },
+    {
+      "id": "Q66152352",
+      "name": "Consulate-General of Japan, Perth",
+      "lat": -31.946,
+      "lng": 115.843028
+    },
+    {
+      "id": "Q115966656",
+      "name": "Consulate-General of the People's Republic of China in Perth",
+      "lat": -31.951134,
+      "lng": 115.877173
+    },
+    {
+      "id": "Q117742314",
+      "name": "German Honorary Consulate, Perth",
+      "lat": -31.97796,
+      "lng": 115.811495
+    },
+    {
+      "id": "Q73003105",
+      "name": "Honorary Consulate of Portugal in Perth",
+      "lat": -32.060344,
+      "lng": 115.751607
+    }
+  ]
+}

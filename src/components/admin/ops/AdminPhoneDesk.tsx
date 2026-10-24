@@ -3,6 +3,7 @@ import { useState } from "react";
 import { resolveAdminSessionAreaLabel } from "@/domain/admin/adminSessionAreaLabel";
 import type { AdminTableTab } from "@/domain/admin/adminTablePrefs";
 import type { AdminSessionSummary } from "@/services/admin/adminSessions";
+import { DESK_HAIRLINE } from "../shared/adminSurface";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { AdminColumnPicker } from "../table/AdminColumnPicker";
@@ -20,7 +21,6 @@ import {
 } from "./AdminDeskTable";
 import type { AdminDeskTables } from "./useAdminDeskTables";
 
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
 const MAX_CARD_COLUMNS = 8;
 const TOUCH = 44;
 
@@ -85,7 +85,7 @@ function Card<Row>({
       style={{
         listStyle: "none",
         background: "var(--color-canvas)",
-        border: hairline,
+        border: DESK_HAIRLINE,
         borderRadius: 16,
         overflow: "hidden",
         boxShadow: selected ? "inset 3px 0 0 var(--color-flag)" : undefined,
@@ -151,7 +151,6 @@ function visibleColumns<Row>(columns: AdminColumn<Row>[], visible: string[]): Ad
   return visible.flatMap((id) => byId.get(id) ?? []);
 }
 
-/** Comp `phone()`: segmented tabs and Columns, then one card per row. */
 export function AdminPhoneList({
   tables,
   tab,
@@ -285,7 +284,6 @@ export function AdminPhoneList({
   );
 }
 
-/** A session opened full screen on a phone: the chosen facts, Watch game, Open incident. */
 export function AdminPhoneSession({
   summary,
   columns,
@@ -313,7 +311,7 @@ export function AdminPhoneSession({
       data-testid="admin-phone-session"
       style={{
         background: "var(--color-canvas)",
-        border: hairline,
+        border: DESK_HAIRLINE,
         borderRadius: 16,
         overflow: "hidden",
       }}

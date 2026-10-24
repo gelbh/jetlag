@@ -1,0 +1,37 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": { "south": -39.159, "west": 140.9619, "north": -33.9806, "east": 149.9762 },
+  "places": [
+    {
+      "id": "Q81986729",
+      "name": "Consulate General of the United Arab Emirates, Melbourne",
+      "lat": -37.817591,
+      "lng": 144.958394
+    },
+    {
+      "id": "Q130349582",
+      "name": "Consulate General of the United States, Melbourne",
+      "lat": -37.846944,
+      "lng": 144.979952
+    },
+    {
+      "id": "Q63970199",
+      "name": "Consulate-General of Japan, Melbourne",
+      "lat": -37.815611,
+      "lng": 144.956639
+    },
+    {
+      "id": "Q106463586",
+      "name": "embassy of Hungary in Australia",
+      "lat": -35.32498,
+      "lng": 149.09076
+    },
+    {
+      "id": "Q80803692",
+      "name": "Honorary Consulate of South Africa, Melbourne",
+      "lat": -37.838623,
+      "lng": 144.995948
+    }
+  ]
+}

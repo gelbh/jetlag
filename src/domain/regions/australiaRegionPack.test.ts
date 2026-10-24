@@ -192,6 +192,29 @@ describe("australia geo assets", () => {
     }
   });
 
+  it("ships per-state POI slices for every locked stateId (NSW museum/park non-empty)", () => {
+    for (const stateId of AUSTRALIA_STATES) {
+      for (const category of PACK_GEO_POINT_CATEGORIES) {
+        const path = resolve(root, `poi/${stateId}/${category}.json`);
+        expect(existsSync(path), path).toBe(true);
+        const payload = JSON.parse(readFileSync(path, "utf8")) as {
+          source: string;
+          places: unknown[];
+        };
+        expect(typeof payload.source).toBe("string");
+        expect(Array.isArray(payload.places)).toBe(true);
+      }
+    }
+    const nswMuseum = JSON.parse(readFileSync(resolve(root, "poi/nsw/museum.json"), "utf8")) as {
+      places: unknown[];
+    };
+    const nswPark = JSON.parse(readFileSync(resolve(root, "poi/nsw/park.json"), "utf8")) as {
+      places: unknown[];
+    };
+    expect(nswMuseum.places.length).toBeGreaterThan(0);
+    expect(nswPark.places.length).toBeGreaterThan(0);
+  });
+
   it("ships dense complete Open-Meteo sea_level_seed", () => {
     const seaLevel = JSON.parse(readFileSync(resolve(root, "sea_level_seed.json"), "utf8")) as {
       source: string;

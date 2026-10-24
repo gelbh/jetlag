@@ -44,7 +44,6 @@ export async function resolveTentaclePendingQuestion(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    // Persist ceiling only: keep Point; other failures cancel resolve.
     if (
       message === MEASURING_PERSIST_OVER_BUDGET_MESSAGE ||
       message === POLYGON_PERSIST_OVER_BUDGET_MESSAGE

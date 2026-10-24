@@ -138,7 +138,6 @@ const EMPTY_MATCHING_ELIMINATION: Feature<MultiPolygon> = {
   geometry: { type: "MultiPolygon", coordinates: [] },
 };
 
-/** Yes/no elim is a complement of the same-nearest cell - derive without re-Voronoi. */
 export function matchingEliminationFromSameNearestRegion(
   sameNearestRegion: Feature<Polygon | MultiPolygon>,
   gameArea: GameArea,

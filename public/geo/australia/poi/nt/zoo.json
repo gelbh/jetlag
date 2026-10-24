@@ -1,0 +1,11 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": { "south": -25.9986, "west": 129.0006, "north": -10.9068, "east": 137.9991 },
+  "places": [
+    { "id": "Q2572243", "name": "Alice Springs Desert Park", "lat": -23.7065, "lng": 133.833 },
+    { "id": "Q2836667", "name": "Alice Springs Reptile Centre", "lat": -23.7, "lng": 133.87 },
+    { "id": "Q85754626", "name": "Crocodylus Park", "lat": -12.412132, "lng": 130.928075 },
+    { "id": "Q2132053", "name": "Territory Wildlife Park", "lat": -12.7102, "lng": 130.99 }
+  ]
+}

@@ -6,7 +6,6 @@ fn buffers_short_london_line() {
     let line = vec![[-0.12, 51.5], [-0.119, 51.501]];
     let buffered = geodesic_line_buffer(&line, 200.0, None).expect("buffer");
 
-    // Midpoint of the segment should be inside the buffer.
     assert!(feature_contains_lng_lat(
         &buffered,
         (-0.12 + -0.119) / 2.0,
@@ -14,7 +13,6 @@ fn buffers_short_london_line() {
     ));
     assert!(feature_contains_lng_lat(&buffered, -0.12, 51.5));
     assert!(feature_contains_lng_lat(&buffered, -0.119, 51.501));
-    // Far away point should be outside.
     assert!(!feature_contains_lng_lat(&buffered, -0.2, 51.4));
 }
 

@@ -20,7 +20,6 @@ const ADMIN_LEVEL_STROKE_OPACITY: Record<number, number> = {
   9: 0.42,
 };
 
-/** Reference zoom for admin stroke base weights (matches useZoomAdaptiveWeight). */
 const ADMIN_STROKE_REF_ZOOM = 12;
 
 const ADMIN_LINE_WIDTH_ZOOM_STOPS = [4, 8, 10, 12, 14, 16, 18, 20] as const;

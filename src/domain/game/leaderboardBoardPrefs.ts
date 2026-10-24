@@ -67,7 +67,5 @@ export function loadLeaderboardBoardPrefs(): LeaderboardBoardSelection {
 export function saveLeaderboardBoardPrefs(selection: LeaderboardBoardSelection): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(selection));
-  } catch {
-    // private browsing / quota — ignore
-  }
+  } catch {}
 }

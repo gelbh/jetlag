@@ -56,9 +56,7 @@ export interface UsePlacementMapFocusOptions {
   defaultFocusBounds: MapBoundsExpression | null;
   enabled: boolean;
   panelMinimized: boolean;
-  /** When set (Ask HUD), overrides floating-panel peek height for padding. */
   hudBottomPaddingPx?: number | null;
-  /** Top chrome height for asymmetric fitBounds (map-first Matching banner). */
   hudTopPaddingPx?: number | null;
   selectedPoiId?: string | null;
   walkActive?: boolean;
@@ -72,8 +70,6 @@ export interface UsePlacementMapFocusResult {
   placementRecenterToken: number;
   focusPaddingBias?: number;
   focusPaddingTopBias?: number;
-  /** True on forced reframes (phase transitions, Recenter) — tells `MapView`
-   * to prefer the cinematic `flyTo` path even if the geometry delta is modest. */
   focusPreferFly: boolean;
   requestPlacementRecenter: () => void;
 }
@@ -148,7 +144,6 @@ export function usePlacementMapFocus({
       panelTopPaddingPx,
       selectedPoiId,
       walkActive,
-      // viewportFrame intentionally omitted — hysteresis only
     }),
     [
       activeTool,

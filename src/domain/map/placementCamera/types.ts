@@ -24,7 +24,6 @@ export interface CameraTarget {
   /** Extra top inset so map chrome (banners) does not cover the framed region. */
   paddingTopBiasPx?: number;
   animate?: boolean;
-  /** When true, skip hysteresis (phase transitions, Recenter). */
   forceReframe?: boolean;
 }
 
@@ -81,14 +80,9 @@ export interface PlacementCameraContext {
   overlays: readonly MapDraftOverlay[];
   eliminationFeatures: Feature<Polygon | MultiPolygon>[];
   panelPeekHeightPx: number;
-  /** Top chrome height (question banner) for asymmetric fitBounds padding. */
   panelTopPaddingPx?: number;
   selectedPoiId?: string | null;
   walkActive?: boolean;
-  /**
-   * Viewport hysteresis input for `shouldReframeWithHysteresis` only.
-   * Not read by `computePlacementCameraTarget`.
-   */
   viewportFrame?: PlacementViewportFrame | null;
   forceReframe?: boolean;
 }

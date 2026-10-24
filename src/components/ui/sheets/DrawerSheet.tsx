@@ -25,28 +25,12 @@ export interface DrawerSheetProps {
    * off the sheet edge (use named denser tokens for tighter chrome).
    */
   padding?: "xs" | "sm" | "md" | "lg" | "xl" | number;
-  /**
-   * `host` (default): one scroll region for children (session log).
-   * `child`: host locks height; child owns scroll (chat tabs + list).
-   */
   scrollMode?: "host" | "child";
-  /**
-   * Extra styles on the gesture wrapper, except `paddingBottom`: that key is
-   * the keyboard (or custom) bottom inset applied on the scroll/body and
-   * replaces safe-area there so insets do not stack. Omit or set 0 to use
-   * safe-area bottom on the scroll/body instead.
-   */
   contentStyle?: CSSProperties;
-  /**
-   * Ask placement: keep the dim scrim but let map taps pass through.
-   * Also disables outside-click dismiss so pin taps do not close the tool.
-   */
   mapInteractive?: boolean;
-  /** After Drawer exit transition finishes (clear data / drop held hosts). */
   onExitTransitionEnd?: () => void;
 }
 
-/** Chrome lives on the gesture wrapper so translateY moves radius/bg with the finger. */
 const sheetChromeStyle: CSSProperties = {
   backgroundColor: "var(--color-canvas)",
   borderTopLeftRadius: 24,
@@ -54,7 +38,6 @@ const sheetChromeStyle: CSSProperties = {
   borderTop: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
 };
 
-/** Bottom safe-area on scroll/content so body can span to the phone bottom. */
 const SHEET_BODY_SAFE_BOTTOM = "max(1.25rem, var(--safe-area-bottom))";
 
 const DRAWER_PADDING_INLINE: Record<
@@ -76,12 +59,6 @@ function resolveDrawerBodyInlinePadding(padding: NonNullable<DrawerSheetProps["p
   return DRAWER_PADDING_INLINE[padding];
 }
 
-/**
- * One bottom inset for scroll/body: keyboard/custom pad replaces safe-area.
- * ChatPanel passes contentStyle.paddingBottom when the soft keyboard is up.
- * Accepts numbers, px strings, and CSS expressions (calc/env) that parseFloat
- * cannot treat as a positive length.
- */
 function resolveDrawerBodyBottomPadding(contentStyle: CSSProperties | undefined): string | number {
   const raw = contentStyle?.paddingBottom;
   if (typeof raw === "number") {
@@ -97,7 +74,6 @@ function resolveDrawerBodyBottomPadding(contentStyle: CSSProperties | undefined)
   return SHEET_BODY_SAFE_BOTTOM;
 }
 
-/** Drop paddingBottom so keyboard inset is not applied on the gesture wrapper too. */
 function stripPaddingBottom(style: CSSProperties | undefined): CSSProperties | undefined {
   if (style == null || style.paddingBottom === undefined) return style;
   const rest = { ...style };
@@ -139,7 +115,6 @@ export function DrawerSheet({
     enabled: gestureEnabled,
     onDismiss: onClose,
     scrollRef,
-    // Grabber sits outside the scroll body; do not block after scroll.
     gateStartOnScrollTop: false,
   });
   // Drag-dismiss keeps offsetY for exit animation; host stays mounted while
@@ -163,7 +138,6 @@ export function DrawerSheet({
       onClose={onClose}
       position="bottom"
       size="auto"
-      // Body inset is owned by scroll/content, not Drawer chrome.
       padding={0}
       radius={0}
       withCloseButton={false}
@@ -180,7 +154,6 @@ export function DrawerSheet({
       overlayProps={{
         backgroundOpacity: 0.4,
         blur: 3,
-        // Overlay Transition owns opacity; drag drives sheet translate + dismiss only.
         style: mapInteractive ? { pointerEvents: "none" as const } : undefined,
       }}
       classNames={{
@@ -200,7 +173,6 @@ export function DrawerSheet({
         },
         content: {
           ...baseStyles.content,
-          // Neutralize theme/Drawer chrome; gesture wrapper owns radius + fill.
           backgroundColor: "transparent",
           border: "none",
           borderRadius: 0,
@@ -228,7 +200,6 @@ export function DrawerSheet({
         className="flex min-h-0 flex-1 flex-col gap-2"
         style={{
           ...sheetChromeStyle,
-          // No chrome-only bottom bar; safe-area / keyboard live on scroll.
           paddingTop: "0.5rem",
           ...gestureContentStyle,
           ...sheetStyle,

@@ -6,7 +6,7 @@ import type {
 } from "@/domain/session/activity/sessionChat";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import type { StatusTone } from "@/theme/adminTone";
-import { RAISED_BG } from "../shared/adminSurface";
+import { DESK_HAIRLINE, RAISED_BG } from "../shared/adminSurface";
 
 const STATUS: Record<PendingQuestionStatus, { tone: StatusTone; word: string; label: string }> = {
   answered: { tone: "ok", word: "answered", label: "Answered" },
@@ -16,7 +16,6 @@ const STATUS: Record<PendingQuestionStatus, { tone: StatusTone; word: string; la
   cancelled: { tone: "neutral", word: "cancelled", label: "Cancelled" },
 };
 
-/** Comp `.q`: answered reads as trail-soft, waiting as signal-soft. */
 const PILL_BACKGROUND: Record<StatusTone, string> = {
   ok: "var(--color-trail-soft)",
   live: "var(--color-signal-soft)",
@@ -45,7 +44,6 @@ function shortPrompt(text: string): string {
   return text.length > PROMPT_LIMIT ? `${text.slice(0, PROMPT_LIMIT - 1)}…` : text;
 }
 
-/** Comp `.qstrip`: a frosted rounded bar over the top of the map, one tinted pill per question. */
 export function AdminLegStrip({
   sessionId,
   questions,
@@ -93,7 +91,7 @@ export function AdminLegStrip({
         pointerEvents: "auto",
         background: "color-mix(in oklch, var(--color-canvas) 90%, transparent)",
         backdropFilter: "blur(20px) saturate(1.4)",
-        border: "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+        border: DESK_HAIRLINE,
         borderRadius: 16,
       }}
     >

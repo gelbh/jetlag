@@ -24,7 +24,6 @@ export function hasOpenQuestionCountdown(
   );
 }
 
-/** Pass `nowMs` from the server clock: anchors are server-stamped. */
 export function selectPrimaryQuestionTimer(
   pendingQuestions: readonly PendingQuestionRecord[],
   sessionRules: SessionRulesInput,

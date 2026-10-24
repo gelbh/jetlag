@@ -234,7 +234,6 @@ describe("MatchingHudBody", () => {
     );
 
     expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent("RESOLVE ON MAP");
-    // Sheet path hides muted SEND footer; cue carries the next-step hint.
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
   });
 

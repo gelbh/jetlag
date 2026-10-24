@@ -202,7 +202,6 @@ function stubFetchForAustraliaAssets() {
 }
 
 describe("loadRegionPackSessionBoundaries australia levels 4 and 6", () => {
-  // National states/LGA fixtures are multi-MB; union + parse can exceed 15s under pre-push load.
   it("returns matching areas 4, 6, 8, and 9 for whole-country australia", async () => {
     clearRegionPackGeoCacheForTests();
     const fetchMock = stubFetchForAustraliaAssets();

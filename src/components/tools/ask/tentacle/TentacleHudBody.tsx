@@ -1,9 +1,4 @@
 import { HudTentacleIcon } from "@/components/map/icons/ToolIcons";
-/**
- * Tentacle Ask HUD mode body — CatalogRail → map radius (+ locations / solo answer).
- * Matching-style question header + catalog; map-first overlays after category.
- * SingleBottomChord: row tap advances; no PhaseRail / CONTINUE.
- */
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";

@@ -160,7 +160,6 @@ export interface AdminSessionChipFilters {
   hasIncident: boolean;
 }
 
-/** Toolbar chips beyond Live only: Phase, Tier and Has incident (needs the open-incident map). */
 export function applyAdminSessionChipFilters(
   sessions: readonly AdminSessionSummary[],
   chips: AdminSessionChipFilters,

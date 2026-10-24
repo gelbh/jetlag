@@ -176,7 +176,12 @@ async function fetchOverpassPointMatchingFeaturesInArea(
     measuringCategory === null
       ? []
       : await withBundleStage(task, () =>
-          fetchBundledMeasuringPlaces(gameArea, measuringCategory, options?.regionPackId),
+          fetchBundledMeasuringPlaces(
+            gameArea,
+            measuringCategory,
+            options?.regionPackId,
+            options?.subregionId,
+          ),
         );
   const bundledFeatures = measuringPlacesToMatchingFeatures(bundledPlaces, gameArea);
   const pinFeatures = measuringPlacesToMatchingFeatures([...(options?.poiPins ?? [])], gameArea);

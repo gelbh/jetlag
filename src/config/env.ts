@@ -64,7 +64,6 @@ export type FirebaseClientConfig = {
   appId: string;
 };
 
-/** Demo project used by Playwright + local `just emulators`. */
 const DEMO_FIREBASE_EMULATOR_ENV = {
   VITE_USE_FIREBASE_EMULATOR: "true",
   VITE_FIREBASE_API_KEY: "demo-api-key",

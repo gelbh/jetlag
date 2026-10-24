@@ -86,9 +86,7 @@ export interface AnnotationMetadata {
   tentacleNearestByCategory?: Partial<
     Record<TentacleExtendedCategoryId, { poiId: string; distanceMeters: number }>
   >;
-  /** Post-answer display radius (search radius + hiding zone); POI answers only. */
   tentacleAnswerRadiusMeters?: number;
-  /** GeoJSON Polygon/MultiPolygon: inside the tentacle radius, cells closer to another POI than the answer. */
   tentacleEliminationJson?: string;
   measuringPlacesJson?: string;
   measuringSubject?: MeasuringSubject;
@@ -100,7 +98,6 @@ export interface AnnotationMetadata {
   measuringTargetName?: string;
   measuringDistanceMeters?: number;
   measuringBoundaryJson?: string;
-  /** Region input JSON so clients can rebuild shade when persist-slim cannot store the polygon. */
   measuringRegionInputJson?: string;
   matchingCategory?: MatchingCategoryId;
   matchingAnswer?: MatchingAnswer;
@@ -113,11 +110,8 @@ export interface AnnotationMetadata {
   matchingNullAnswer?: boolean;
   matchingBoundaryJson?: string;
   matchingFeaturesJson?: string;
-  /** Metro used for GTFS-backed transit_line matching truth. */
   transitMetroId?: string;
-  /** Pin annotations only: the POI category this pin counts as. */
   poiCategory?: PoiPinCategoryId;
-  /** Pin annotations only: author uid. Firestore rules require it for hider pins. */
   createdByUid?: string;
 }
 
@@ -128,7 +122,6 @@ export interface TentaclePoi {
   lng: number;
   category: TentacleExtendedCategoryId;
   source?: PoiCandidateSource;
-  /** Absent = confirmed (legacy Overpass/bundle). */
   confirmStatus?: PoiConfirmStatus;
   osmId?: string;
   wikidataId?: string;
@@ -184,10 +177,8 @@ export interface SessionRecord {
   regionPackId?: RegionPackId;
   regionPackSubregionId?: string;
   bundledGeoRevision?: number;
-  /** True: play the pack/subregion boundary. False: play the host-framed gameArea. Absent (legacy): pack boundary. */
   playAreaFromPack?: boolean;
   expansionPackEnabled?: boolean;
-  /** Ops-admin-only hider deck simulation. Default false. */
   boardEconomyEnabled?: boolean;
   customQuestionPackEnabled?: boolean;
   previewQuestionBeforeSend?: boolean;
@@ -214,30 +205,28 @@ export interface SessionRecord {
   hostAppVersion?: string;
   memberAppVersions?: Record<string, string>;
   gameAreaLabel?: string;
-  /** Server-written ops mitigation the client may honor (soft reload, etc.). */
   opsMitigation?: SessionOpsMitigation;
   /** Hotfix gate: clients below this version start a grace countdown then refresh. */
   requiredMinAppVersion?: string;
   requiredMinAppVersionSetAt?: string;
   requiredMinAppVersionGraceSeconds?: number;
-  /** Absent or `"classic"` plays classic Jet Lag. `"castleSiege"` uses team roles. */
   mode?: SessionMode;
   castleSiegeRoles?: CastleSiegeRoles;
   seriesLength?: 1 | 3;
   setupMode?: "pregame" | "fairSplit";
-  /** Outer arena (draw|import). Castle Siege only. */
   arena?: CastleSiegeArena;
-  /** Pregame border cut. Castle Siege only. */
   border?: CastleSiegeBorderLine;
-  /** Neutral Belt polygon buffered from the border. Castle Siege only. */
   neutralBelt?: Polygon | MultiPolygon;
-  /** Muster dials. Castle Siege only. */
   dials?: CastleSiegeDials;
-  /** Coin half assignment after Pregame flip. Castle Siege only. */
   coinAssignment?: CastleSiegeCoinAssignment;
+  /** Match phase. Castle Siege only (`setup` implied when absent). */
+  phase?: "setup" | "standoff" | "siege" | "betweenGames";
+  /** Standoff turn clocks (serialized). Castle Siege only. */
+  standoffTurn?: Record<string, unknown>;
+  /** Public deck remaining count only (ids live under standoffPrivate). Castle Siege only. */
+  standoffDeckRemainingCount?: number;
 }
 
-/** Bounded session override written by `applyIncidentMitigation` (server-only). */
 export interface SessionOpsMitigation {
   id: string;
   type: "soft_reload" | "reset_board" | "clear_pending_questions" | "end_session";

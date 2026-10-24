@@ -48,15 +48,12 @@ export async function buildMeasuringOverlays(
         await buildMeasuringBoundaryPreview({
           ...regionInput,
           measuringPlaces: measuringPlacesFromMetadata(metadata, regionInput.measuringPlaces),
-          // Session play area wins over any legacy embedded gameArea.
           gameArea,
         }),
         mapStyle,
         streetBasemap,
       );
-    } catch {
-      // Corrupt region JSON: keep markers, skip boundary.
-    }
+    } catch {}
   }
 
   const targetPoint = metadata.measuringCoastPoint as { lat: number; lng: number } | undefined;

@@ -122,7 +122,6 @@ export function AdminPreloadRequestDetail({ request }: { request: PreloadRequest
             type="button"
             h={36}
             radius={12}
-            // Accept is the one filled action; the rest stay neutral.
             variant={status === "accepted" ? "filled" : "default"}
             disabled={busy}
             onClick={() => void onStatus(status)}

@@ -29,16 +29,8 @@ export interface CreateSessionMapMount {
   mapRequested: boolean;
   /** True once MapLibre has loaded and reported its first viewport. */
   mapMounted: boolean;
-  /** Construct the map on first intent without waiting for it. */
   requestMap: () => void;
-  /**
-   * Single seam for code that reads the live viewport (rectangle framing,
-   * Confirm without an explicit area). Requests the map if needed and resolves
-   * after the commit that carries the map's first `onBoundsChange`, so callers
-   * reading state through a latest-ref see the framed viewport.
-   */
   ensureMapMounted: () => Promise<MapLibreMap>;
-  /** Wire to the pane: called with the map after `load`, and `null` on unmount. */
   handleMapMounted: (map: MapLibreMap | null) => void;
 }
 

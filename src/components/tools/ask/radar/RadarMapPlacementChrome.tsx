@@ -1,6 +1,3 @@
-/**
- * Map-first Radar chrome: shared placement shell + Yes/No + distance mid-strip.
- */
 import { UnstyledButton } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudRadarIcon } from "@/components/map/icons/ToolIcons";
@@ -39,7 +36,6 @@ export type RadarMapPlacementChromeProps = {
   isSubmitting?: boolean;
   onCommit?: () => void;
   onChangeDistance?: () => void;
-  /** Compact distance strip while map-first. */
   radiusMeters: number | null;
   chooseCustom: boolean;
   customRadius: string;

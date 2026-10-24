@@ -1,0 +1,1195 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": { "south": -35.1916, "west": 112.9211, "north": -13.6887, "east": 129.0019 },
+  "places": [
+    { "id": "Q45918481", "name": "12d Extreme Cinema", "lat": -33.652089, "lng": 115.346387 },
+    { "id": "Q45922364", "name": "Ace Cinemas Rockingham", "lat": -32.288672, "lng": 115.748309 },
+    { "id": "Q45920943", "name": "Ace Midland Cineplex", "lat": -31.885084, "lng": 116.025637 },
+    { "id": "Q45920856", "name": "Ace Midland Gate Cinema", "lat": -31.891617, "lng": 116.011914 },
+    { "id": "Q45113101", "name": "Ace Subiaco", "lat": -31.94662, "lng": 115.82243 },
+    { "id": "Q45917284", "name": "Aceway Drive-in", "lat": -31.875589, "lng": 115.924916 },
+    { "id": "Q45923077", "name": "Acme Gardens", "lat": -31.901229, "lng": 115.792098 },
+    { "id": "Q45918555", "name": "Agricultural Hall", "lat": -31.089238, "lng": 116.447853 },
+    {
+      "id": "Q45917692",
+      "name": "Albany Entertainment Centre",
+      "lat": -35.029259,
+      "lng": 117.885942
+    },
+    { "id": "Q23640734", "name": "Albany Town Hall", "lat": -35.023417, "lng": 117.883167 },
+    {
+      "id": "Q45919269",
+      "name": "Albion Theatre and Gardens",
+      "lat": -31.953092,
+      "lng": 115.869702
+    },
+    { "id": "Q28219793", "name": "Ambassadors Theatre", "lat": -31.954862, "lng": 115.859892 },
+    {
+      "id": "Q45920486",
+      "name": "Ambassadors Theatre and Gardens",
+      "lat": -32.533282,
+      "lng": 115.719141
+    },
+    {
+      "id": "Q45922730",
+      "name": "Amusu Theatre and Gardens",
+      "lat": -31.976046,
+      "lng": 115.897465
+    },
+    { "id": "Q45917948", "name": "Arcadia and Gardens", "lat": -31.904983, "lng": 115.951283 },
+    {
+      "id": "Q45918608",
+      "name": "Archer Theatre and Gardens",
+      "lat": -31.97186,
+      "lng": 115.918947
+    },
+    { "id": "Q45917779", "name": "Ardath Memorial Hall", "lat": -32.02775, "lng": 118.096799 },
+    {
+      "id": "Q45921933",
+      "name": "Army Amenities Building & Open Air Theatre",
+      "lat": -31.187,
+      "lng": 118.101
+    },
+    { "id": "Q45917851", "name": "Arthur River Hall", "lat": -33.33997, "lng": 117.035397 },
+    {
+      "id": "Q45922316",
+      "name": "Ascot Theatre and Gardens",
+      "lat": -31.956215,
+      "lng": 115.906344
+    },
+    { "id": "Q4811049", "name": "Astor Theatre", "lat": -31.934062, "lng": 115.87211 },
+    { "id": "Q45917858", "name": "Augusta Centennial Hall", "lat": -34.319142, "lng": 115.158571 },
+    { "id": "Q45917870", "name": "Augusta Community Centre", "lat": -34.319147, "lng": 115.158553 },
+    { "id": "Q45917379", "name": "Avonway Drive-In", "lat": -31.662236, "lng": 116.649053 },
+    { "id": "Q45917901", "name": "Bakers Hill Oval", "lat": -31.748756, "lng": 116.460133 },
+    { "id": "Q45917891", "name": "Bakers Hill Town Hall", "lat": -31.746613, "lng": 116.460885 },
+    { "id": "Q45917930", "name": "Ballidu Hall", "lat": -30.595587, "lng": 116.770781 },
+    { "id": "Q45919715", "name": "Bamboo Outdoor Cinema", "lat": -31.940954, "lng": 115.868159 },
+    { "id": "Q45918487", "name": "Barnards Hall", "lat": -33.65222, "lng": 115.344448 },
+    { "id": "Q45922432", "name": "Bay View Theatre", "lat": -32.303443, "lng": 115.711314 },
+    {
+      "id": "Q45917993",
+      "name": "Bayswater Hall and Gardens",
+      "lat": -31.919168,
+      "lng": 115.916215
+    },
+    { "id": "Q45918006", "name": "Beacon Theatre", "lat": -32.061975, "lng": 115.756691 },
+    { "id": "Q45918378", "name": "Bedford Hall", "lat": -33.326257, "lng": 115.639116 },
+    { "id": "Q45918017", "name": "Bedford Park Gardens", "lat": -31.90644, "lng": 115.882527 },
+    { "id": "Q45916655", "name": "Beechline Drive-In", "lat": -31.855578, "lng": 115.924873 },
+    { "id": "Q45918167", "name": "Bellevue Gardens", "lat": -30.78151, "lng": 121.489682 },
+    { "id": "Q45918029", "name": "Bellevue Hall", "lat": -31.899605, "lng": 116.030463 },
+    { "id": "Q45918040", "name": "Belvedere Gardens", "lat": -31.946161, "lng": 115.9404 },
+    {
+      "id": "Q45919279",
+      "name": "Ben & Jerry's Openair Cinemas",
+      "lat": -31.96185,
+      "lng": 115.87593
+    },
+    { "id": "Q45916688", "name": "Bencubbin Drive-In", "lat": -30.80989, "lng": 117.859823 },
+    { "id": "Q45921698", "name": "Bernard Park", "lat": -31.653094, "lng": 116.670936 },
+    { "id": "Q45916713", "name": "Beverley Drive-In", "lat": -32.115544, "lng": 116.926551 },
+    { "id": "Q45918087", "name": "Beverley Town Hall", "lat": -32.109127, "lng": 116.923911 },
+    {
+      "id": "Q45918614",
+      "name": "Bickford Memorial Hall and Gardens",
+      "lat": -31.981249,
+      "lng": 115.912496
+    },
+    { "id": "Q45308146", "name": "Bijou Theatre", "lat": -32.054616, "lng": 115.747739 },
+    { "id": "Q45918115", "name": "Bindoon Town Hall", "lat": -31.386188, "lng": 116.097448 },
+    { "id": "Q45917542", "name": "Bluff Point Drive-In", "lat": -28.74025, "lng": 114.625991 },
+    {
+      "id": "Q45918124",
+      "name": "Boddington Town Hall and Gardens",
+      "lat": -32.800443,
+      "lng": 116.474528
+    },
+    { "id": "Q137206006", "name": "Bohemia Outdoor Cinema", "lat": -32.051176, "lng": 115.749056 },
+    { "id": "Q45918133", "name": "Bolgart Memorial Hall", "lat": -31.272579, "lng": 116.508887 },
+    { "id": "Q45921491", "name": "Boomerang Oval", "lat": -23.354225, "lng": 119.734087 },
+    { "id": "Q45918633", "name": "Boor's Theatre", "lat": -24.883064, "lng": 113.657626 },
+    { "id": "Q45916795", "name": "Borania Drive-In", "lat": -35.003216, "lng": 117.918496 },
+    { "id": "Q45918154", "name": "Borden Hall", "lat": -34.087703, "lng": 118.237662 },
+    { "id": "Q45918174", "name": "Boulder Town Hall", "lat": -30.78224, "lng": 121.48668 },
+    { "id": "Q45918779", "name": "Bow Cinema", "lat": -33.361024, "lng": 116.156102 },
+    { "id": "Q45918220", "name": "Boyanup Hall", "lat": -33.48498, "lng": 115.72736 },
+    {
+      "id": "Q45918230",
+      "name": "Boyup Brook Visitor Centre",
+      "lat": -33.833444,
+      "lng": 116.388712
+    },
+    { "id": "Q45916725", "name": "Bridgetown Drive-In", "lat": -33.941799, "lng": 116.157351 },
+    { "id": "Q45918253", "name": "Bridgetown Town Hall", "lat": -33.958056, "lng": 116.137125 },
+    { "id": "Q45916781", "name": "Broadlands Drive-In", "lat": -29.686988, "lng": 115.89139 },
+    {
+      "id": "Q45921445",
+      "name": "Broadway Theatre and Gardens",
+      "lat": -31.984596,
+      "lng": 115.8146
+    },
+    {
+      "id": "Q45918261",
+      "name": "Brookton District Memorial Hall",
+      "lat": -32.368875,
+      "lng": 117.007726
+    },
+    { "id": "Q45918300", "name": "Broomehill Museum", "lat": -33.844916, "lng": 117.639589 },
+    { "id": "Q45918314", "name": "Broomehill Town Hall", "lat": -33.844344, "lng": 117.638815 },
+    { "id": "Q45918335", "name": "Brunswick Memorial Hall", "lat": -33.253509, "lng": 115.838989 },
+    {
+      "id": "Q45918355",
+      "name": "Bullsbrook Open Air Pictures",
+      "lat": -31.666677,
+      "lng": 115.998165
+    },
+    {
+      "id": "Q45918392",
+      "name": "Bunbury Regional Entertainment Centre",
+      "lat": -33.322,
+      "lng": 115.638
+    },
+    { "id": "Q45918463", "name": "Buntine Hall", "lat": -29.983857, "lng": 116.568597 },
+    { "id": "Q45916732", "name": "Busselton Drive-In", "lat": -33.660172, "lng": 115.284788 },
+    { "id": "Q45918537", "name": "Byford Hall", "lat": -32.22077, "lng": 116.00989 },
+    { "id": "Q45918644", "name": "Camel Lane Theatre", "lat": -24.883662, "lng": 113.656798 },
+    { "id": "Q45922843", "name": "Cameo Gardens", "lat": -31.940096, "lng": 115.812474 },
+    { "id": "Q47000602", "name": "Canning Town Hall", "lat": -32.016325, "lng": 115.929903 },
+    { "id": "Q45918591", "name": "Capel Hall", "lat": -33.553996, "lng": 115.563245 },
+    { "id": "Q45922997", "name": "Capitol Hall", "lat": -26.591416, "lng": 120.225909 },
+    {
+      "id": "Q45921729",
+      "name": "Capitol Theatre and Gardens",
+      "lat": -31.655687,
+      "lng": 116.671266
+    },
+    { "id": "Q45915045", "name": "Capri Theatrette", "lat": -31.953794, "lng": 115.857572 },
+    { "id": "Q45918601", "name": "Cardiff Hall", "lat": -33.429431, "lng": 116.207511 },
+    {
+      "id": "Q45918652",
+      "name": "Carnival Open Air Theatre",
+      "lat": -24.883323,
+      "lng": 113.657658
+    },
+    { "id": "Q45918570", "name": "Carousel Megaplex", "lat": -32.018147, "lng": 115.934851 },
+    { "id": "Q45921606", "name": "Castle Gardens", "lat": -31.854513, "lng": 115.754082 },
+    {
+      "id": "Q45923201",
+      "name": "Caves House Outdoor Cinema",
+      "lat": -33.645862,
+      "lng": 115.03201
+    },
+    { "id": "Q45920472", "name": "Centenary Hall", "lat": -32.051039, "lng": 115.98397 },
+    {
+      "id": "Q45922800",
+      "name": "Centenary Hall and Gardens",
+      "lat": -31.752263,
+      "lng": 115.803462
+    },
+    { "id": "Q45916581", "name": "Central 70 Drive-In", "lat": -35.013816, "lng": 117.876528 },
+    { "id": "Q45919387", "name": "Central Hall Pictures", "lat": -28.778682, "lng": 114.595562 },
+    { "id": "Q45922949", "name": "Centre Gardens and Hall", "lat": -32.053257, "lng": 115.805548 },
+    { "id": "Q45922329", "name": "Century and Gardens", "lat": -32.27653, "lng": 115.729897 },
+    { "id": "Q45918696", "name": "Chidlow Hall", "lat": -31.86194, "lng": 116.26978 },
+    { "id": "Q45919293", "name": "Chinatown Cinema", "lat": -31.950774, "lng": 115.867385 },
+    { "id": "Q45918703", "name": "Chittering Hall", "lat": -31.570721, "lng": 116.101888 },
+    { "id": "Q45308150", "name": "Cine 2", "lat": -32.052806, "lng": 115.746113 },
+    { "id": "Q45915056", "name": "Cinecentre", "lat": -31.953806, "lng": 115.860959 },
+    { "id": "Q45921798", "name": "Cinema Aberdeen", "lat": -31.947179, "lng": 115.859814 },
+    { "id": "Q45919321", "name": "Civic Centre", "lat": -33.860244, "lng": 121.889302 },
+    {
+      "id": "Q45918713",
+      "name": "Claremont Picture Gardens",
+      "lat": -31.982758,
+      "lng": 115.782886
+    },
+    { "id": "Q45917349", "name": "Clayton Drive-In", "lat": -32.93082, "lng": 117.161927 },
+    { "id": "Q45915077", "name": "Club X", "lat": -31.953316, "lng": 115.86116 },
+    { "id": "Q45918788", "name": "Coliseum Theatre", "lat": -33.36161, "lng": 116.154064 },
+    { "id": "Q45916788", "name": "Collie Drive-In", "lat": -33.341854, "lng": 116.162863 },
+    { "id": "Q45920591", "name": "Comet Mine Theatre", "lat": -21.172615, "lng": 119.735064 },
+    { "id": "Q45922067", "name": "Community Arts Centre", "lat": -34.446308, "lng": 116.032053 },
+    {
+      "id": "Q45921505",
+      "name": "Community Centre and Cinema",
+      "lat": -23.357524,
+      "lng": 119.731128
+    },
+    {
+      "id": "Q45918474",
+      "name": "Community Cinemas Burswood",
+      "lat": -31.962195,
+      "lng": 115.894777
+    },
+    { "id": "Q45918069", "name": "Community Cinemas Curtin", "lat": -32.002049, "lng": 115.887556 },
+    {
+      "id": "Q45920690",
+      "name": "Community Cinemas Mandurah",
+      "lat": -32.536679,
+      "lng": 115.742628
+    },
+    {
+      "id": "Q45921329",
+      "name": "Community Cinemas Murdoch",
+      "lat": -32.064433,
+      "lng": 115.838374
+    },
+    { "id": "Q45919234", "name": "Community Hall", "lat": -32.714277, "lng": 116.062963 },
+    { "id": "Q5199190", "name": "Como Theatre", "lat": -31.993553, "lng": 115.85834 },
+    { "id": "Q45918267", "name": "Continental Gardens", "lat": -17.95953, "lng": 122.23901 },
+    {
+      "id": "Q45918833",
+      "name": "Coolgardie Town Hall and Gardens",
+      "lat": -30.954373,
+      "lng": 121.16294
+    },
+    {
+      "id": "Q45918871",
+      "name": "Coorow Hall and Gardens, Main Street",
+      "lat": -29.881185,
+      "lng": 116.02383
+    },
+    {
+      "id": "Q45918881",
+      "name": "Coorow Hall and Gardens, South Street",
+      "lat": -29.88376,
+      "lng": 116.02506
+    },
+    { "id": "Q45916802", "name": "Corrigin Drive-in", "lat": -32.332151, "lng": 117.88235 },
+    { "id": "Q45918896", "name": "Corrigin Town Hall", "lat": -32.330246, "lng": 117.875265 },
+    {
+      "id": "Q45918902",
+      "name": "Cottesloe Theatre and Gardens",
+      "lat": -31.998475,
+      "lng": 115.763517
+    },
+    { "id": "Q45918495", "name": "Courtyard Cinema", "lat": -33.6472, "lng": 115.34338 },
+    {
+      "id": "Q45918939",
+      "name": "Cowaramup Brewing Company Movies",
+      "lat": -33.835497,
+      "lng": 115.135834
+    },
+    {
+      "id": "Q45918943",
+      "name": "Cowaramup Sports Ground Pavilion",
+      "lat": -33.851598,
+      "lng": 115.103937
+    },
+    { "id": "Q45918955", "name": "Cowaramup Town Hall", "lat": -33.851598, "lng": 115.103937 },
+    { "id": "Q45918964", "name": "Cranbrook Memorial Hall", "lat": -34.29602, "lng": 117.553655 },
+    { "id": "Q45917710", "name": "Cremorne Gardens", "lat": -35.027111, "lng": 117.883814 },
+    {
+      "id": "Q45918845",
+      "name": "Cremorne Theatre and Gardens",
+      "lat": -30.954654,
+      "lng": 121.164896
+    },
+    {
+      "id": "Q45915084",
+      "name": "Cremorne Theatre and Palace Gardens",
+      "lat": -31.954244,
+      "lng": 115.861859
+    },
+    { "id": "Q45921564", "name": "Criterion Theatre", "lat": -32.199221, "lng": 121.77875 },
+    { "id": "Q45308156", "name": "Crown Theatre", "lat": -32.054378, "lng": 115.753608 },
+    { "id": "Q45918986", "name": "Cue Hall and Gardens", "lat": -27.422954, "lng": 117.895367 },
+    { "id": "Q45920812", "name": "Cummins Theatre", "lat": -31.480088, "lng": 118.279412 },
+    { "id": "Q45916814", "name": "Cunderdin Drive-In", "lat": -31.650964, "lng": 117.222948 },
+    { "id": "Q45916591", "name": "Daleline Drive-In", "lat": -32.155198, "lng": 116.005034 },
+    { "id": "Q45919019", "name": "Dalkeith Picture Gardens", "lat": -31.994206, "lng": 115.798347 },
+    { "id": "Q45916824", "name": "Dalwallinu Drive-In", "lat": -30.281822, "lng": 116.655802 },
+    { "id": "Q45919072", "name": "Dangin Agricultural Hall", "lat": -32.040567, "lng": 117.330459 },
+    { "id": "Q45919084", "name": "Darkan Pioneer Hall", "lat": -33.33779, "lng": 116.741474 },
+    { "id": "Q45916833", "name": "Darlington Drive-In", "lat": -31.919003, "lng": 116.079247 },
+    { "id": "Q45919095", "name": "Darlington Pictures", "lat": -31.918492, "lng": 116.074278 },
+    { "id": "Q45922520", "name": "Datatine Hall", "lat": -33.498775, "lng": 117.874769 },
+    { "id": "Q45919105", "name": "Deanmill Hall", "lat": -34.250218, "lng": 116.084041 },
+    {
+      "id": "Q45919117",
+      "name": "Denmark Community Resource Centre",
+      "lat": -34.95926,
+      "lng": 117.354197
+    },
+    { "id": "Q45916849", "name": "Denmark Drive-In", "lat": -34.966753, "lng": 117.358108 },
+    { "id": "Q45920541", "name": "Dixvale Hall", "lat": -34.245537, "lng": 116.144278 },
+    { "id": "Q45917459", "name": "Dongara Drive-In", "lat": -29.265975, "lng": 114.925253 },
+    { "id": "Q45919156", "name": "Dongara Town Hall", "lat": -29.249422, "lng": 114.931298 },
+    { "id": "Q45916860", "name": "Dowerin Drive-In", "lat": -31.194542, "lng": 117.03385 },
+    {
+      "id": "Q45919189",
+      "name": "Dowerin Town Hall and Gardens",
+      "lat": -31.193946,
+      "lng": 117.032264
+    },
+    { "id": "Q45917720", "name": "Downtown Cinema", "lat": -35.026599, "lng": 117.885456 },
+    { "id": "Q45919196", "name": "Dumbleyung Hall", "lat": -33.312156, "lng": 117.739826 },
+    { "id": "Q45918325", "name": "Durham Theatre", "lat": -31.87555, "lng": 118.148888 },
+    { "id": "Q28947885", "name": "East Fremantle Town Hall", "lat": -32.041168, "lng": 115.763052 },
+    { "id": "Q45916678", "name": "Eastway Drive-In", "lat": -31.936149, "lng": 115.91643 },
+    { "id": "Q45920869", "name": "Empire Hall", "lat": -31.891256, "lng": 116.002775 },
+    { "id": "Q45918403", "name": "Empire Picture Gardens", "lat": -33.324393, "lng": 115.634642 },
+    {
+      "id": "Q45922871",
+      "name": "Empire Theatre and Gardens",
+      "lat": -31.940956,
+      "lng": 115.833573
+    },
+    { "id": "Q45916880", "name": "Esperance Drive-In", "lat": -33.831622, "lng": 121.897398 },
+    { "id": "Q45918507", "name": "Esplanade Hotel", "lat": -33.647081, "lng": 115.342298 },
+    { "id": "Q45915098", "name": "Esplande Picture Gardens", "lat": -31.956053, "lng": 115.85591 },
+    {
+      "id": "Q45922026",
+      "name": "Esquire Theatre and Gardens",
+      "lat": -31.913908,
+      "lng": 115.828633
+    },
+    { "id": "Q45919758", "name": "Event Cinemas Innaloo", "lat": -31.90433, "lng": 115.79702 },
+    { "id": "Q45916898", "name": "Exmouth Drive-In", "lat": -21.943942, "lng": 114.132495 },
+    { "id": "Q45923014", "name": "Fearns' Store", "lat": -34.026168, "lng": 115.099552 },
+    { "id": "Q45920461", "name": "Federal and Gardens", "lat": -28.879822, "lng": 121.330847 },
+    { "id": "Q45919334", "name": "Fenwick 3", "lat": -33.863169, "lng": 121.890267 },
+    {
+      "id": "Q45922469",
+      "name": "Fiesta Theatre and Gardens",
+      "lat": -31.893951,
+      "lng": 115.763221
+    },
+    {
+      "id": "Q45916914",
+      "name": "Finucane Gardens Island Drive-In",
+      "lat": -20.303333,
+      "lng": 118.552778
+    },
+    { "id": "Q45921827", "name": "Flight Deck Adult Cinema", "lat": -31.947793, "lng": 115.856466 },
+    {
+      "id": "Q110903170",
+      "name": "Former Bayswater Roads Board office",
+      "lat": -31.919142,
+      "lng": 115.916156
+    },
+    { "id": "Q45918417", "name": "Forrest Cinema", "lat": -33.360205, "lng": 115.642856 },
+    { "id": "Q45916754", "name": "Forrest Drive-In", "lat": -33.360205, "lng": 115.642856 },
+    {
+      "id": "Q45918427",
+      "name": "Forrest Theatre and Gardens",
+      "lat": -33.327068,
+      "lng": 115.639176
+    },
+    {
+      "id": "Q22271767",
+      "name": "Fremantle School building",
+      "lat": -32.050683,
+      "lng": 115.749061
+    },
+    { "id": "Q5501504", "name": "Fremantle Town Hall", "lat": -32.054293, "lng": 115.7479 },
+    { "id": "Q45919378", "name": "Gabbin Hall", "lat": -30.800717, "lng": 117.680009 },
+    { "id": "Q45918796", "name": "Gaiety Gardens", "lat": -33.357992, "lng": 116.151188 },
+    { "id": "Q45922541", "name": "Gaiety Theatre", "lat": -31.980988, "lng": 115.863861 },
+    { "id": "Q45917053", "name": "Galaxy Drive-In", "lat": -31.805178, "lng": 115.808054 },
+    { "id": "Q45919400", "name": "Geraldton Town Hall", "lat": -28.773415, "lng": 114.611328 },
+    { "id": "Q45919488", "name": "Gingin Agricultural Hall", "lat": -31.346055, "lng": 115.905771 },
+    { "id": "Q45919369", "name": "Glenroy Air Beef Camp", "lat": -18.194451, "lng": 125.568458 },
+    { "id": "Q45916600", "name": "Glenway Drive-In", "lat": -31.863573, "lng": 115.82771 },
+    {
+      "id": "Q45919497",
+      "name": "Gnowangerup Agricultural Hall",
+      "lat": -33.937979,
+      "lng": 118.00618
+    },
+    { "id": "Q45916937", "name": "Gnowangerup Drive-In", "lat": -33.924551, "lng": 117.993529 },
+    {
+      "id": "Q45919507",
+      "name": "Gnowangerup Memorial Hall",
+      "lat": -33.934488,
+      "lng": 118.005476
+    },
+    {
+      "id": "Q45922570",
+      "name": "Goodin's Hall and Open Air Theatre",
+      "lat": -31.23192,
+      "lng": 119.32909
+    },
+    {
+      "id": "Q45919518",
+      "name": "Goomalling War Memorial Hall",
+      "lat": -31.300213,
+      "lng": 116.826833
+    },
+    {
+      "id": "Q45919542",
+      "name": "Gosnells Hall and Gardens",
+      "lat": -32.072999,
+      "lng": 116.001152
+    },
+    { "id": "Q45919009", "name": "Grand Cinema Complex", "lat": -31.741192, "lng": 115.737948 },
+    { "id": "Q45918438", "name": "Grand Cinemas", "lat": -33.3215, "lng": 115.6374 },
+    { "id": "Q45922827", "name": "Grand Cinemas Warwick", "lat": -31.845133, "lng": 115.808996 },
+    { "id": "Q45922905", "name": "Grand Cinemas Whitfords", "lat": -31.796725, "lng": 115.751936 },
+    {
+      "id": "Q45920124",
+      "name": "Great Southern Residential College Recreation Centre Theatre",
+      "lat": -33.683863,
+      "lng": 117.571499
+    },
+    { "id": "Q45921105", "name": "Greater Union Morley", "lat": -31.895199, "lng": 115.897941 },
+    {
+      "id": "Q45915110",
+      "name": "Green Lawn Picture Gardens",
+      "lat": -31.955727,
+      "lng": 115.863605
+    },
+    {
+      "id": "Q45919594",
+      "name": "Guildford Town Hall & Library",
+      "lat": -31.899632,
+      "lng": 115.972071
+    },
+    { "id": "Q45919658", "name": "Hamel Hall", "lat": -32.873646, "lng": 115.919731 },
+    {
+      "id": "Q45919671",
+      "name": "Hamilton Hill Hall and Gardens",
+      "lat": -32.085988,
+      "lng": 115.776516
+    },
+    { "id": "Q45919345", "name": "Hancock's Hall", "lat": -33.861301, "lng": 121.890714 },
+    { "id": "Q45922239", "name": "Happs Winery Movies", "lat": -33.666946, "lng": 115.097407 },
+    { "id": "Q45916964", "name": "Harvey Drive-In", "lat": -33.084886, "lng": 115.891321 },
+    { "id": "Q45919695", "name": "Harvey Town Hall", "lat": -33.079932, "lng": 115.892798 },
+    {
+      "id": "Q45919862",
+      "name": "Heath Road Picture Gardens",
+      "lat": -31.971739,
+      "lng": 116.04717
+    },
+    { "id": "Q45919929", "name": "Her Majesty's Theatre", "lat": -30.745912, "lng": 121.46999 },
+    { "id": "Q45916701", "name": "Highway Drive-In", "lat": -32.01149, "lng": 115.921076 },
+    { "id": "Q45917149", "name": "Hillcrest Drive-In", "lat": -33.10089, "lng": 118.461305 },
+    { "id": "Q45917044", "name": "Hillview Drive-In", "lat": -31.633821, "lng": 117.718612 },
+    { "id": "Q45919726", "name": "Hilton Park Gardens", "lat": -32.062945, "lng": 115.781655 },
+    { "id": "Q5772098", "name": "His Majesty's Theatre", "lat": -31.953078, "lng": 115.854439 },
+    { "id": "Q45920494", "name": "Hotham Valley Hall", "lat": -32.534807, "lng": 115.720106 },
+    { "id": "Q45918582", "name": "Hoyts 8", "lat": -32.015389, "lng": 115.939247 },
+    { "id": "Q45915120", "name": "Hoyts Centre", "lat": -31.948102, "lng": 115.811891 },
+    { "id": "Q45915128", "name": "Hoyts Cinema 1", "lat": -31.956409, "lng": 115.865582 },
+    { "id": "Q45918144", "name": "Hoyts Garden City", "lat": -32.032924, "lng": 115.838275 },
+    { "id": "Q45308168", "name": "Hoyts Millenium Cinemas", "lat": -32.05617, "lng": 115.74743 },
+    { "id": "Q45922965", "name": "Hoyts Southlands", "lat": -32.057442, "lng": 115.87988 },
+    {
+      "id": "Q45922735",
+      "name": "Hurlingham Theatre and Gardens",
+      "lat": -31.977844,
+      "lng": 115.879165
+    },
+    { "id": "Q45916981", "name": "Hyden Drive-In", "lat": -32.449041, "lng": 118.86568 },
+    {
+      "id": "Q45921183",
+      "name": "Inglewood Picture Gardens",
+      "lat": -31.927554,
+      "lng": 115.878494
+    },
+    { "id": "Q45919771", "name": "Innaloo Gardens", "lat": -31.888682, "lng": 115.792191 },
+    {
+      "id": "Q45919783",
+      "name": "Innaloo Hall and Waldorf Gardens",
+      "lat": -31.898684,
+      "lng": 115.792372
+    },
+    { "id": "Q45919797", "name": "Jardee Hall", "lat": -34.281793, "lng": 116.098273 },
+    { "id": "Q45919825", "name": "Jerramungup Town Hall", "lat": -33.942285, "lng": 118.919108 },
+    {
+      "id": "Q45919853",
+      "name": "Joondalup Pines Picture Gardens",
+      "lat": -31.739108,
+      "lng": 115.763741
+    },
+    { "id": "Q45917002", "name": "Kalgoorlie Drive-In", "lat": -30.731572, "lng": 121.458853 },
+    { "id": "Q45919937", "name": "Kalgoorlie Town Hall", "lat": -30.748696, "lng": 121.470515 },
+    { "id": "Q45917016", "name": "Kambalda Drive-In", "lat": -31.201051, "lng": 121.630112 },
+    { "id": "Q45920028", "name": "Kambalda Town Hall", "lat": -31.208078, "lng": 121.621645 },
+    { "id": "Q45919906", "name": "Karlgarin Town Hall", "lat": -32.498759, "lng": 118.710953 },
+    { "id": "Q45920042", "name": "Karloning Hall", "lat": -30.640468, "lng": 118.167051 },
+    { "id": "Q45920053", "name": "Karratha Cinemas", "lat": -20.735462, "lng": 116.8447 },
+    { "id": "Q45917025", "name": "Karratha Drive-In", "lat": -20.752251, "lng": 116.848399 },
+    {
+      "id": "Q45920114",
+      "name": "Karrinyup Community Centre",
+      "lat": -31.875533,
+      "lng": 115.778012
+    },
+    {
+      "id": "Q45920168",
+      "name": "Kellerberrin Agricultural Hall",
+      "lat": -31.632435,
+      "lng": 117.721245
+    },
+    { "id": "Q45920201", "name": "Kelmscott Hall", "lat": -32.121771, "lng": 116.0202 },
+    {
+      "id": "Q45920212",
+      "name": "Kelmscott Open Air Pictures",
+      "lat": -32.116944,
+      "lng": 116.015805
+    },
+    { "id": "Q45920224", "name": "Kendenup Hall", "lat": -34.491656, "lng": 117.628083 },
+    { "id": "Q45920146", "name": "King's Hall", "lat": -33.688819, "lng": 117.551802 },
+    { "id": "Q45919411", "name": "King's Pictures", "lat": -28.776521, "lng": 114.606888 },
+    { "id": "Q45113116", "name": "Kings Hall", "lat": -31.949, "lng": 115.824297 },
+    {
+      "id": "Q45920251",
+      "name": "Kojonup Agricultural Hall",
+      "lat": -33.833189,
+      "lng": 117.159563
+    },
+    { "id": "Q45917067", "name": "Kojonup Drive-In", "lat": -33.828089, "lng": 117.165844 },
+    {
+      "id": "Q45920262",
+      "name": "Kojonup Memorial Hall and Gardens",
+      "lat": -33.832632,
+      "lng": 117.159289
+    },
+    { "id": "Q45917077", "name": "Kondinin Drive-In", "lat": -32.499207, "lng": 118.264757 },
+    { "id": "Q45920270", "name": "Kondinin Hall", "lat": -32.493589, "lng": 118.267729 },
+    {
+      "id": "Q45921280",
+      "name": "Kookaburra Outdoor Cinema",
+      "lat": -31.958311,
+      "lng": 116.187581
+    },
+    { "id": "Q45920286", "name": "Kookynie Hall", "lat": -29.341151, "lng": 121.494085 },
+    { "id": "Q45920316", "name": "Koorda Agricultural Hall", "lat": -30.826549, "lng": 117.481043 },
+    { "id": "Q45917102", "name": "Koorda Drive-In", "lat": -30.8318, "lng": 117.48154 },
+    { "id": "Q45920367", "name": "Koorliny Arts Centre", "lat": -32.240037, "lng": 115.812753 },
+    { "id": "Q45917605", "name": "KTY Drive-In", "lat": -31.113038, "lng": 117.792127 },
+    { "id": "Q45917115", "name": "Kulin Drive-In", "lat": -32.670576, "lng": 118.154866 },
+    { "id": "Q45917125", "name": "Kununoppin Drive-In", "lat": -31.112904, "lng": 117.923969 },
+    {
+      "id": "Q45920349",
+      "name": "Kununurra Picture Gardens",
+      "lat": -15.770776,
+      "lng": 128.734709
+    },
+    {
+      "id": "Q45920378",
+      "name": "Lake Grace Football Pavilion",
+      "lat": -33.10089,
+      "lng": 118.461305
+    },
+    { "id": "Q45920394", "name": "Lake Grace Town Hall", "lat": -33.10207, "lng": 118.464192 },
+    { "id": "Q45920408", "name": "Lake King Hall", "lat": -33.089742, "lng": 119.555714 },
+    { "id": "Q45920417", "name": "Lancelin Hall", "lat": -31.014303, "lng": 115.329681 },
+    { "id": "Q45921918", "name": "Larsson's Hall", "lat": -34.633084, "lng": 116.12143 },
+    { "id": "Q45920430", "name": "Laverton Town Hall and Gardens", "lat": -28.628, "lng": 122.403 },
+    {
+      "id": "Q45917156",
+      "name": "Leinster Drive-In and Open Air Theatre",
+      "lat": -27.918428,
+      "lng": 120.700931
+    },
+    { "id": "Q45918913", "name": "Lido Gardens", "lat": -31.996075, "lng": 115.751981 },
+    { "id": "Q45922761", "name": "Little Gem Theatre", "lat": -33.308319, "lng": 117.342678 },
+    { "id": "Q45919138", "name": "Londesborough Theatre", "lat": -34.960007, "lng": 117.354705 },
+    { "id": "Q45915156", "name": "Lumiere Cinema", "lat": -31.949348, "lng": 115.852683 },
+    { "id": "Q14935853", "name": "Luna Leederville", "lat": -31.936231, "lng": 115.840985 },
+    { "id": "Q45915170", "name": "Luna on SX", "lat": -32.057376, "lng": 115.748018 },
+    { "id": "Q45920452", "name": "Luna Outdoor Cinema", "lat": -31.9361, "lng": 115.8408 },
+    { "id": "Q45918180", "name": "Lyric Gardens", "lat": -30.781866, "lng": 121.479011 },
+    {
+      "id": "Q45918187",
+      "name": "Lyric Paramount Picture Gardens",
+      "lat": -30.780668,
+      "lng": 121.488666
+    },
+    { "id": "Q45918444", "name": "Lyric Theatre", "lat": -33.3234, "lng": 115.6367 },
+    { "id": "Q45919956", "name": "Majestic Gardens", "lat": -30.749, "lng": 121.466 },
+    {
+      "id": "Q45920502",
+      "name": "Mandurah Agricultural Hall",
+      "lat": -32.534833,
+      "lng": 115.718853
+    },
+    { "id": "Q45917182", "name": "Mandurah Drive-In", "lat": -32.536375, "lng": 115.738495 },
+    { "id": "Q45917195", "name": "Manjimup Drive-In", "lat": -34.242677, "lng": 116.144212 },
+    { "id": "Q45920551", "name": "Manjimup Town Hall", "lat": -34.240766, "lng": 116.145191 },
+    {
+      "id": "Q45920600",
+      "name": "Marble Bar Primary School",
+      "lat": -21.168956,
+      "lng": 119.746332
+    },
+    { "id": "Q45920618", "name": "Margaret River Cinema", "lat": -33.954447, "lng": 115.067953 },
+    { "id": "Q45917204", "name": "Margaret River Drive-In", "lat": -33.957663, "lng": 115.078935 },
+    { "id": "Q45920625", "name": "Margaret River Hall", "lat": -33.951587, "lng": 115.085975 },
+    { "id": "Q45922221", "name": "Mariana Hall", "lat": -31.997509, "lng": 115.950673 },
+    { "id": "Q45917515", "name": "Marmion Drive-In", "lat": -31.822135, "lng": 115.760979 },
+    {
+      "id": "Q45920640",
+      "name": "Marradong Agricultural Hall",
+      "lat": -32.868285,
+      "lng": 116.418631
+    },
+    { "id": "Q45920648", "name": "Marvel Loch Hall", "lat": -31.466254, "lng": 119.487333 },
+    { "id": "Q45918661", "name": "Masonic Hall", "lat": -31.231983, "lng": 119.330023 },
+    {
+      "id": "Q45922531",
+      "name": "Matt Dann Cultural Centre",
+      "lat": -20.407718,
+      "lng": 118.596239
+    },
+    { "id": "Q45919644", "name": "Mavern Star Cinema", "lat": -18.224492, "lng": 127.669707 },
+    {
+      "id": "Q45922059",
+      "name": "Mayfair Cinema and Gardens",
+      "lat": -32.037663,
+      "lng": 115.777149
+    },
+    { "id": "Q45916766", "name": "Mayfair Drive-In", "lat": -33.32707, "lng": 115.639175 },
+    { "id": "Q45920662", "name": "Maylands Town Hall", "lat": -31.930312, "lng": 115.89379 },
+    {
+      "id": "Q45917963",
+      "name": "McDonald's Community Cinemas",
+      "lat": -31.902869,
+      "lng": 115.948931
+    },
+    { "id": "Q45921580", "name": "Mcpherson's Rock", "lat": -32.249808, "lng": 121.798123 },
+    {
+      "id": "Q45923177",
+      "name": "Meatworks Picture Gardens",
+      "lat": -15.455196,
+      "lng": 128.104211
+    },
+    { "id": "Q45922164", "name": "Mechanics Hall", "lat": -32.628673, "lng": 115.873422 },
+    { "id": "Q45918193", "name": "Mechanics Institute", "lat": -30.781866, "lng": 121.479011 },
+    { "id": "Q45922263", "name": "Mechanics Institute Hall", "lat": -33.583056, "lng": 120.048889 },
+    {
+      "id": "Q45922000",
+      "name": "Mechanics Institute Hall and Picture Gardens",
+      "lat": -21.644686,
+      "lng": 115.113379
+    },
+    {
+      "id": "Q45920134",
+      "name": "Mechanics' Institute, Katanning",
+      "lat": -33.690604,
+      "lng": 117.554103
+    },
+    { "id": "Q45920702", "name": "Meckering Public Hall", "lat": -31.626862, "lng": 117.010432 },
+    { "id": "Q45920714", "name": "Medina Gardens", "lat": -32.235824, "lng": 115.805352 },
+    { "id": "Q45920725", "name": "Medina Theatre", "lat": -32.236217, "lng": 115.808947 },
+    {
+      "id": "Q45920751",
+      "name": "Meekatharra Picture Gardens",
+      "lat": -26.589445,
+      "lng": 118.49712
+    },
+    { "id": "Q45915190", "name": "Melba Picture Hall", "lat": -31.952881, "lng": 115.858651 },
+    { "id": "Q45917213", "name": "Mellway Drive-In", "lat": -32.038624, "lng": 115.809202 },
+    { "id": "Q45917135", "name": "Melody Drive-In", "lat": -32.249986, "lng": 115.770451 },
+    { "id": "Q45918078", "name": "Melody Gardens", "lat": -32.006427, "lng": 115.915262 },
+    { "id": "Q45922339", "name": "Melody Hall and Gardens", "lat": -32.282273, "lng": 115.769353 },
+    { "id": "Q45922448", "name": "Melville Army Camp Hall", "lat": -32.06818, "lng": 115.799293 },
+    {
+      "id": "Q45920789",
+      "name": "Menora Theatre and Gardens",
+      "lat": -31.917956,
+      "lng": 115.853315
+    },
+    { "id": "Q45920801", "name": "Menzies Town Hall", "lat": -29.6945, "lng": 121.0292 },
+    { "id": "Q114067435", "name": "Merredin Cinema", "lat": -31.48193, "lng": 118.275313 },
+    { "id": "Q45917224", "name": "Merredin Drive-In", "lat": -31.494557, "lng": 118.275442 },
+    { "id": "Q45916993", "name": "Metro Drive-In", "lat": -31.909147, "lng": 115.798652 },
+    { "id": "Q45915200", "name": "Metro Theatre", "lat": -31.95267, "lng": 115.857103 },
+    { "id": "Q14935836", "name": "Metropolis Fremantle", "lat": -32.055813, "lng": 115.748493 },
+    {
+      "id": "Q45920844",
+      "name": "Middleton Beach Tea Rooms",
+      "lat": -35.025448,
+      "lng": 117.914004
+    },
+    {
+      "id": "Q45917236",
+      "name": "Midland Military Markets Drive-In",
+      "lat": -31.896419,
+      "lng": 116.011954
+    },
+    { "id": "Q45920883", "name": "Midland Outdoor Cinema", "lat": -31.890717, "lng": 116.00733 },
+    { "id": "Q45920957", "name": "Midvale Hall and Gardens", "lat": -31.889111, "lng": 116.021229 },
+    { "id": "Q45920970", "name": "Miling Hall", "lat": -30.492545, "lng": 116.361765 },
+    { "id": "Q45922081", "name": "Mill Hall", "lat": -34.448139, "lng": 116.031285 },
+    { "id": "Q45919982", "name": "Miners Institute", "lat": -30.746214, "lng": 121.473404 },
+    { "id": "Q45919564", "name": "Miners Institute Hall", "lat": -33.844429, "lng": 116.054592 },
+    { "id": "Q45917254", "name": "Mingenew Drive-In", "lat": -29.197915, "lng": 115.44197 },
+    { "id": "Q45920992", "name": "Mingenew Hall", "lat": -29.192614, "lng": 115.441703 },
+    { "id": "Q45921039", "name": "Moodiarrup Hall", "lat": -33.5715, "lng": 116.856366 },
+    { "id": "Q45921592", "name": "Moonlight Cinema", "lat": -32.198973, "lng": 121.779586 },
+    { "id": "Q45915210", "name": "Moonlight Cinema Perth", "lat": -31.970373, "lng": 115.817796 },
+    { "id": "Q45923004", "name": "Moonlight Hall", "lat": -26.592325, "lng": 120.224533 },
+    { "id": "Q45917430", "name": "Moonline Drive-In", "lat": -31.780888, "lng": 115.81367 },
+    { "id": "Q45920061", "name": "Moonrise Cinema", "lat": -20.749485, "lng": 116.886449 },
+    { "id": "Q45917263", "name": "Moora Drive-In", "lat": -30.638852, "lng": 115.996555 },
+    {
+      "id": "Q45921051",
+      "name": "Moora Performing Arts Centre",
+      "lat": -30.64177,
+      "lng": 116.00765
+    },
+    { "id": "Q45917273", "name": "Morawa Drive-In", "lat": -29.21219, "lng": 116.012129 },
+    {
+      "id": "Q45921066",
+      "name": "Morawa Town Hall and Gardens",
+      "lat": -29.210537,
+      "lng": 116.00796
+    },
+    {
+      "id": "Q45921079",
+      "name": "Morawa Town Hall and Gardens, Winfield Street and Prater Street",
+      "lat": -29.21053,
+      "lng": 116.009247
+    },
+    { "id": "Q45917635", "name": "Morcady Drive-In", "lat": -30.88931, "lng": 116.712834 },
+    { "id": "Q45923037", "name": "Mornington Mill Hall", "lat": -33.156055, "lng": 115.937159 },
+    { "id": "Q45917307", "name": "Mount Barker Drive-In", "lat": -34.623659, "lng": 117.667716 },
+    { "id": "Q45921193", "name": "Mount Magnet Cinema", "lat": -28.062742, "lng": 117.849185 },
+    { "id": "Q45920632", "name": "Movies at Cape Mentelle", "lat": -33.962189, "lng": 115.041374 },
+    { "id": "Q45921219", "name": "Muchea Hall", "lat": -31.583787, "lng": 115.96565 },
+    { "id": "Q45917317", "name": "Mukinbudin Drive-In", "lat": -30.910587, "lng": 118.209552 },
+    { "id": "Q45921230", "name": "Mukinbudin Memorial Hall", "lat": -30.914585, "lng": 118.204573 },
+    {
+      "id": "Q45921241",
+      "name": "Mukinbudin Recreation Ground",
+      "lat": -30.91999,
+      "lng": 118.20377
+    },
+    { "id": "Q45917328", "name": "Mullewa Drive-in", "lat": -28.533133, "lng": 115.513626 },
+    { "id": "Q45921271", "name": "Mullewa Town Hall", "lat": -28.539453, "lng": 115.512019 },
+    { "id": "Q45921290", "name": "Mundaring Gardens", "lat": -31.90332, "lng": 116.16662 },
+    { "id": "Q45921302", "name": "Mundaring Hall", "lat": -31.903373, "lng": 116.159117 },
+    { "id": "Q45921341", "name": "Nabawa Hall", "lat": -28.498813, "lng": 114.798998 },
+    { "id": "Q45921354", "name": "Nannup Town Hall", "lat": -33.97698, "lng": 115.765311 },
+    { "id": "Q45917339", "name": "Narembeen Drive-In", "lat": -32.059232, "lng": 118.395853 },
+    { "id": "Q45921374", "name": "Narembeen Municipal Hall", "lat": -32.066875, "lng": 118.394311 },
+    { "id": "Q45921412", "name": "Narrogin Town Hall", "lat": -32.934684, "lng": 117.176312 },
+    { "id": "Q45921423", "name": "National Hall", "lat": -32.93551, "lng": 117.17835 },
+    {
+      "id": "Q45922744",
+      "name": "New Broadway Theatre and Gardens",
+      "lat": -31.973114,
+      "lng": 115.89639
+    },
+    {
+      "id": "Q45921481",
+      "name": "Newdegate Hall, Francis Street",
+      "lat": -33.092823,
+      "lng": 119.021133
+    },
+    {
+      "id": "Q45921470",
+      "name": "Newdegate Hall, Maley Street",
+      "lat": -33.091913,
+      "lng": 119.022136
+    },
+    { "id": "Q45917362", "name": "Newman Drive-in", "lat": -23.358429, "lng": 119.727755 },
+    { "id": "Q45921539", "name": "Nollamara Gardens", "lat": -31.880506, "lng": 115.839458 },
+    { "id": "Q45917369", "name": "Norseman Drive-In", "lat": -32.196475, "lng": 121.780398 },
+    { "id": "Q45921639", "name": "North Dandalup Hall", "lat": -32.518893, "lng": 115.972858 },
+    { "id": "Q45921650", "name": "North Fremantle Town Hall", "lat": -32.035001, "lng": 115.7537 },
+    {
+      "id": "Q45915220",
+      "name": "North Perth Picture Theatre",
+      "lat": -31.944793,
+      "lng": 115.862928
+    },
+    { "id": "Q45921741", "name": "Northam Cinemas", "lat": -31.6542, "lng": 116.672273 },
+    { "id": "Q45921759", "name": "Northam Town Hall", "lat": -31.656213, "lng": 116.671634 },
+    { "id": "Q45917391", "name": "Northampton Drive-In", "lat": -28.345016, "lng": 114.63355 },
+    { "id": "Q45921950", "name": "Nungarin Town Hall", "lat": -31.182578, "lng": 118.099256 },
+    { "id": "Q45921960", "name": "Nyabing Hall", "lat": -33.541146, "lng": 118.150535 },
+    { "id": "Q45917644", "name": "Oasis Drive-In", "lat": -28.761071, "lng": 114.624792 },
+    { "id": "Q45917559", "name": "Oceanview Drive-In", "lat": -31.972241, "lng": 115.771699 },
+    { "id": "Q45917552", "name": "Odin Drive-In", "lat": -31.876524, "lng": 115.803362 },
+    { "id": "Q45920189", "name": "Old Regent Theatre", "lat": -31.635674, "lng": 117.716511 },
+    { "id": "Q45923266", "name": "Old Scout Hall", "lat": -31.890827, "lng": 116.763598 },
+    { "id": "Q45915231", "name": "Olympia Gardens", "lat": -31.952753, "lng": 115.855616 },
+    { "id": "Q45919420", "name": "Olympia Pictures", "lat": -28.781669, "lng": 114.607441 },
+    { "id": "Q45308191", "name": "Olympia Theatre", "lat": -32.054236, "lng": 115.745476 },
+    { "id": "Q45921984", "name": "Ongerup Public Hall", "lat": -33.964597, "lng": 118.48842 },
+    { "id": "Q45919554", "name": "Open Air Cinema", "lat": -32.079881, "lng": 116.009767 },
+    { "id": "Q45920511", "name": "Open Air Picture Gardens", "lat": -32.533961, "lng": 115.719267 },
+    { "id": "Q45919061", "name": "Open Air Pictures", "lat": -20.656416, "lng": 116.710859 },
+    { "id": "Q45919037", "name": "Open Air Theatre", "lat": -30.278111, "lng": 116.661059 },
+    {
+      "id": "Q45921003",
+      "name": "Open Air Theatre, Railway Parade",
+      "lat": -29.311285,
+      "lng": 115.565167
+    },
+    {
+      "id": "Q45921015",
+      "name": "Open Air Theatre, Victoria Road",
+      "lat": -29.197089,
+      "lng": 115.441975
+    },
+    { "id": "Q45918519", "name": "Orana Cinemas", "lat": -33.651814, "lng": 115.344373 },
+    { "id": "Q45917397", "name": "Orana Drive-In", "lat": -34.994266, "lng": 117.857274 },
+    { "id": "Q45922035", "name": "Orion and Gardens", "lat": -31.897689, "lng": 115.828342 },
+    { "id": "Q45922598", "name": "Outdoor Cinema", "lat": -31.232826, "lng": 119.328949 },
+    { "id": "Q45918888", "name": "Outdoor Picture Gardens", "lat": -29.88234, "lng": 116.02244 },
+    { "id": "Q45917613", "name": "Ozone Drive-In", "lat": -28.773226, "lng": 114.609661 },
+    { "id": "Q45918102", "name": "Palais Hall and Gardens", "lat": -27.319799, "lng": 117.644203 },
+    { "id": "Q45920001", "name": "Palais Picture Gardens", "lat": -30.747392, "lng": 121.472651 },
+    { "id": "Q45308201", "name": "Palladium Theatre", "lat": -32.055014, "lng": 115.746334 },
+    { "id": "Q45917408", "name": "Pannawonica Drive-In", "lat": -21.641004, "lng": 116.323059 },
+    { "id": "Q45917505", "name": "Panorama Drive-in", "lat": -32.125755, "lng": 116.061252 },
+    {
+      "id": "Q45917420",
+      "name": "Paraburdoo Open Air Gardens and Drive-In",
+      "lat": -23.204776,
+      "lng": 117.669136
+    },
+    { "id": "Q45916925", "name": "Parkline Drive-In", "lat": -31.989795, "lng": 116.004428 },
+    { "id": "Q45918724", "name": "Parrish Hall", "lat": -31.984323, "lng": 115.778057 },
+    {
+      "id": "Q45919894",
+      "name": "Parrotiso's Outdoor Cinema",
+      "lat": -27.724374,
+      "lng": 114.155742
+    },
+    { "id": "Q45918368", "name": "Pearce R.A.A.F Base Hall", "lat": -31.66187, "lng": 116.023155 },
+    {
+      "id": "Q45922092",
+      "name": "Pemberton Picture Theatre",
+      "lat": -34.445598,
+      "lng": 116.035693
+    },
+    { "id": "Q45917439", "name": "Perenjori Drive-In", "lat": -29.443821, "lng": 116.28726 },
+    {
+      "id": "Q45921849",
+      "name": "Perth Cultural Centre Screen",
+      "lat": -31.946985,
+      "lng": 115.854774
+    },
+    { "id": "Q978904", "name": "Perth Rectangular Stadium", "lat": -31.945751, "lng": 115.869924 },
+    {
+      "id": "Q45922552",
+      "name": "Perth Zoo Twilight Outdoor Cinema",
+      "lat": -31.974262,
+      "lng": 115.854061
+    },
+    {
+      "id": "Q7190567",
+      "name": "Piccadilly Theatre and Arcade",
+      "lat": -31.953352,
+      "lng": 115.858261
+    },
+    { "id": "Q45919146", "name": "Picture Gardens", "lat": -17.303678, "lng": 123.630105 },
+    { "id": "Q45918929", "name": "Picture Stadium", "lat": -32.002039, "lng": 115.751987 },
+    {
+      "id": "Q45308214",
+      "name": "Pier Hotel Outdoor Cinema",
+      "lat": -32.056939,
+      "lng": 115.742959
+    },
+    { "id": "Q45921860", "name": "Pierrot Pavilion", "lat": -31.949086, "lng": 115.859322 },
+    { "id": "Q45917450", "name": "Pingelly Drive-In", "lat": -32.532812, "lng": 117.078585 },
+    { "id": "Q45922124", "name": "Pingelly Town Hall", "lat": -32.534727, "lng": 117.084345 },
+    {
+      "id": "Q45922146",
+      "name": "Pingrup Hall, Altham Street and Sanderson Street",
+      "lat": -33.534509,
+      "lng": 118.509774
+    },
+    { "id": "Q45916890", "name": "Pink Lake Drive-In", "lat": -33.863599, "lng": 121.872656 },
+    { "id": "Q45922169", "name": "Pithara Hall", "lat": -30.388391, "lng": 116.668482 },
+    { "id": "Q45921115", "name": "Plantagenet Hall", "lat": -34.624823, "lng": 117.663331 },
+    {
+      "id": "Q45918801",
+      "name": "Police and Citizens Youth Club",
+      "lat": -33.358631,
+      "lng": 116.152096
+    },
+    { "id": "Q45922177", "name": "Porongurup Hall", "lat": -34.646372, "lng": 117.78761 },
+    { "id": "Q45917471", "name": "Port Hedland Drive-In", "lat": -20.312638, "lng": 118.609369 },
+    {
+      "id": "Q45922197",
+      "name": "Port Hedland Picture Gardens",
+      "lat": -20.312285,
+      "lng": 118.575396
+    },
+    { "id": "Q45917739", "name": "Port Theatre", "lat": -35.028349, "lng": 117.885342 },
+    {
+      "id": "Q45919303",
+      "name": "Premier Theatre and Summer Gardens",
+      "lat": -31.942837,
+      "lng": 115.868452
+    },
+    { "id": "Q45915259", "name": "Prince of Wales Theatre", "lat": -31.952479, "lng": 115.857512 },
+    { "id": "Q45917484", "name": "Quairading Drive-In", "lat": -32.006769, "lng": 117.406288 },
+    { "id": "Q45919447", "name": "Queen's Hall", "lat": -28.773713, "lng": 114.608811 },
+    {
+      "id": "Q45919454",
+      "name": "Queen's Park Theatre, Geraldton",
+      "lat": -28.780681,
+      "lng": 114.614684
+    },
+    { "id": "Q45921873", "name": "R Max", "lat": -31.946953, "lng": 115.857399 },
+    { "id": "Q45919466", "name": "Radio Theatre", "lat": -28.775479, "lng": 114.607027 },
+    { "id": "Q45922641", "name": "Railway Goods Shed", "lat": -34.043129, "lng": 117.640848 },
+    { "id": "Q45922273", "name": "Ravensthorpe Hall", "lat": -33.580458, "lng": 120.046922 },
+    { "id": "Q45920523", "name": "Reading Boardwalk 6", "lat": -32.527157, "lng": 115.725748 },
+    { "id": "Q45918049", "name": "Reading Cinemas Belmont", "lat": -31.943375, "lng": 115.925754 },
+    { "id": "Q45922287", "name": "Redcliffe Gardens", "lat": -31.942124, "lng": 115.939313 },
+    { "id": "Q45113131", "name": "Regal Picture Gardens", "lat": -31.947041, "lng": 115.823989 },
+    { "id": "Q7307927", "name": "Regal Theatre", "lat": -31.946782, "lng": 115.823755 },
+    { "id": "Q45918528", "name": "Regal Theatre and Gardens", "lat": -33.65181, "lng": 115.34439 },
+    { "id": "Q45919605", "name": "Regent Open Air Pictures", "lat": -31.899398, "lng": 115.972158 },
+    {
+      "id": "Q45920015",
+      "name": "Regent Theatre and Gardens",
+      "lat": -30.749475,
+      "lng": 121.470361
+    },
+    { "id": "Q45920916", "name": "Renown Gardens", "lat": -31.888123, "lng": 116.001924 },
+    { "id": "Q45920932", "name": "Renown Theatre", "lat": -31.888226, "lng": 116.002929 },
+    { "id": "Q45919029", "name": "Revue Twin", "lat": -31.994278, "lng": 115.796964 },
+    { "id": "Q45915280", "name": "Rialto Cinema Gardens", "lat": -31.949129, "lng": 115.866915 },
+    {
+      "id": "Q45919250",
+      "name": "Richmond Theatre and Gardens",
+      "lat": -32.041035,
+      "lng": 115.764354
+    },
+    { "id": "Q45922137", "name": "Rink Theatre", "lat": -32.534083, "lng": 117.082748 },
+    { "id": "Q45921149", "name": "Ritz Gardens", "lat": -31.92245, "lng": 115.841232 },
+    { "id": "Q45921160", "name": "Ritz Theatre", "lat": -31.92245, "lng": 115.841268 },
+    { "id": "Q45917492", "name": "Riverline Drive-In", "lat": -32.038672, "lng": 115.897521 },
+    { "id": "Q45916870", "name": "Riverside Drive-In", "lat": -24.869334, "lng": 113.678175 },
+    { "id": "Q45915290", "name": "Riverside Theatre", "lat": -31.956412, "lng": 115.852802 },
+    { "id": "Q45917825", "name": "Rmax Cinema", "lat": -32.149743, "lng": 116.021391 },
+    { "id": "Q45921387", "name": "Road Board Offices", "lat": -32.065639, "lng": 118.394353 },
+    { "id": "Q45921026", "name": "Roads Board Hall", "lat": -29.192965, "lng": 115.443313 },
+    {
+      "id": "Q45919000",
+      "name": "Roads Board Hall and Gardens",
+      "lat": -31.650938,
+      "lng": 117.240161
+    },
+    { "id": "Q45919048", "name": "Roads Boards Hall", "lat": -30.275857, "lng": 116.662048 },
+    { "id": "Q45920562", "name": "Robbies Hall", "lat": -34.241406, "lng": 116.132542 },
+    { "id": "Q45922352", "name": "Rockingham and Gardens", "lat": -32.27653, "lng": 115.729897 },
+    { "id": "Q45916739", "name": "Rockview Drive-In", "lat": -31.885818, "lng": 118.148495 },
+    {
+      "id": "Q45922387",
+      "name": "Roebourne Open Air Pictures",
+      "lat": -20.77413,
+      "lng": 117.14555
+    },
+    { "id": "Q45918272", "name": "Roebuck Pictures", "lat": -17.956665, "lng": 122.242784 },
+    {
+      "id": "Q45922410",
+      "name": "Roleystone Hall and Gardens",
+      "lat": -32.12561,
+      "lng": 116.070948
+    },
+    { "id": "Q45921890", "name": "Rooftop Movies", "lat": -31.948616, "lng": 115.856997 },
+    { "id": "Q45921668", "name": "Rosemount Gardens", "lat": -31.930211, "lng": 115.85916 },
+    { "id": "Q45921681", "name": "Rosemount Theatre", "lat": -31.930766, "lng": 115.859854 },
+    {
+      "id": "Q45922420",
+      "name": "Rottnest Island Picture Hall",
+      "lat": -31.997387,
+      "lng": 115.539673
+    },
+    { "id": "Q45920680", "name": "Roxy Gardens", "lat": -31.929979, "lng": 115.8951 },
+    { "id": "Q45920762", "name": "Royal Hall and Gardens", "lat": -26.591413, "lng": 118.496262 },
+    { "id": "Q45918805", "name": "Royal Theatre", "lat": -33.358542, "lng": 116.153735 },
+    { "id": "Q45921785", "name": "RSL Hall", "lat": -28.348075, "lng": 114.631461 },
+    { "id": "Q45915299", "name": "Salvation Army Fortress", "lat": -31.954788, "lng": 115.862721 },
+    {
+      "id": "Q45922458",
+      "name": "Sandstone Hall and Gardens",
+      "lat": -27.986193,
+      "lng": 119.296665
+    },
+    { "id": "Q45917161", "name": "Satellite Drive-In", "lat": -28.894464, "lng": 121.330359 },
+    { "id": "Q24997560", "name": "Savoy Hotel", "lat": -31.95416, "lng": 115.85955 },
+    {
+      "id": "Q45919309",
+      "name": "Savoy Theatre and Gardens",
+      "lat": -31.984333,
+      "lng": 115.902978
+    },
+    {
+      "id": "Q45922882",
+      "name": "Scitech Planetarium Cinema",
+      "lat": -31.945411,
+      "lng": 115.847444
+    },
+    {
+      "id": "Q45921622",
+      "name": "Sea View Hall and Gardens",
+      "lat": -31.861671,
+      "lng": 115.755954
+    },
+    { "id": "Q45922486", "name": "Shackleton Memorial Hall", "lat": -31.932434, "lng": 117.837536 },
+    {
+      "id": "Q45922509",
+      "name": "Shenton Theatre and Gardens",
+      "lat": -31.956059,
+      "lng": 115.815492
+    },
+    { "id": "Q45918623", "name": "Shire Hall and Gardens", "lat": -29.688467, "lng": 115.886107 },
+    { "id": "Q45915309", "name": "Skyline Drive-In", "lat": -31.937254, "lng": 115.779073 },
+    { "id": "Q45919181", "name": "Soldiers Memorial Hall", "lat": -33.575671, "lng": 115.820608 },
+    { "id": "Q45918973", "name": "Somerville Auditorium", "lat": -31.977149, "lng": 115.819913 },
+    { "id": "Q45917525", "name": "South Hedland Drive-In", "lat": -20.399062, "lng": 118.610405 },
+    { "id": "Q45922608", "name": "Southern Cross Town Hall", "lat": -31.230459, "lng": 119.328038 },
+    { "id": "Q45919582", "name": "St Catherine's Hall", "lat": -28.940546, "lng": 114.740686 },
+    { "id": "Q18166605", "name": "St Georges Hall", "lat": -31.9552, "lng": 115.863 },
+    { "id": "Q45919214", "name": "Starlight Cinema", "lat": -33.625895, "lng": 115.118632 },
+    { "id": "Q45916973", "name": "Starline Drive-In", "lat": -32.072759, "lng": 115.779881 },
+    { "id": "Q45917534", "name": "Starview Drive-In", "lat": -31.22576, "lng": 119.322826 },
+    { "id": "Q45921904", "name": "State Library Theatre", "lat": -31.94887, "lng": 115.860588 },
+    { "id": "Q45918745", "name": "Station Bar/Cafe", "lat": -31.98737, "lng": 115.76998 },
+    { "id": "Q45922631", "name": "Stirling", "lat": -31.883855, "lng": 115.809854 },
+    { "id": "Q45917037", "name": "Strathfield Drive-In", "lat": -33.682507, "lng": 117.549861 },
+    { "id": "Q45113148", "name": "Subiaco Oval", "lat": -31.943607, "lng": 115.834596 },
+    { "id": "Q45918281", "name": "Sun Cinemas", "lat": -17.95615, "lng": 122.239716 },
+    { "id": "Q7638432", "name": "Sun Picture Gardens", "lat": -17.953456, "lng": 122.243071 },
+    { "id": "Q45922565", "name": "Swan Street Hall", "lat": -31.978515, "lng": 115.864523 },
+    { "id": "Q45917246", "name": "Swanway Drive-In", "lat": -31.879668, "lng": 116.005708 },
+    { "id": "Q45917568", "name": "Tammin Drive-In", "lat": -31.640617, "lng": 117.49356 },
+    { "id": "Q45922662", "name": "Tammin Hall", "lat": -31.641069, "lng": 117.484751 },
+    { "id": "Q45921208", "name": "Teneriffe Gardens", "lat": -32.020295, "lng": 115.834039 },
+    { "id": "Q45918210", "name": "Theatre Royal", "lat": -30.778817, "lng": 121.488668 },
+    { "id": "Q45917583", "name": "Three Springs Drive-In", "lat": -29.537351, "lng": 115.762911 },
+    {
+      "id": "Q45922677",
+      "name": "Three Springs Hall and Gardens",
+      "lat": -29.535733,
+      "lng": 115.764724
+    },
+    { "id": "Q45915347", "name": "Times Theatrette", "lat": -31.95479, "lng": 115.859096 },
+    { "id": "Q45918862", "name": "Tivoli Theatre", "lat": -30.954656, "lng": 121.168434 },
+    {
+      "id": "Q45918810",
+      "name": "Tivoli Theatre and Gardens",
+      "lat": -33.357262,
+      "lng": 116.148935
+    },
+    {
+      "id": "Q45915367",
+      "name": "Tivoli Theatre, Hay Street",
+      "lat": -31.950592,
+      "lng": 115.847756
+    },
+    {
+      "id": "Q45915356",
+      "name": "Tivoli Theatre, Stirling Street",
+      "lat": -31.950797,
+      "lng": 115.863285
+    },
+    {
+      "id": "Q45917594",
+      "name": "Tom Price Hall and Drive-In",
+      "lat": -22.694225,
+      "lng": 117.797546
+    },
+    { "id": "Q45922688", "name": "Toodyay Garage", "lat": -31.550467, "lng": 116.468769 },
+    { "id": "Q17026445", "name": "Toodyay Memorial Hall", "lat": -31.550444, "lng": 116.466833 },
+    { "id": "Q45915378", "name": "Town Cinema", "lat": -31.952724, "lng": 115.856115 },
+    { "id": "Q45917973", "name": "Town Hall and Gardens", "lat": -31.904163, "lng": 115.949521 },
+    { "id": "Q45922704", "name": "Trayning Town Hall", "lat": -31.114054, "lng": 117.792205 },
+    { "id": "Q45917171", "name": "Twilight Drive-In", "lat": -32.04624, "lng": 116.007231 },
+    { "id": "Q45918818", "name": "Union Hall", "lat": -33.3608, "lng": 116.15413 },
+    { "id": "Q45922377", "name": "United Cinemas", "lat": -32.285915, "lng": 115.741346 },
+    { "id": "Q45915390", "name": "Unity Theatre", "lat": -31.949603, "lng": 115.862631 },
+    { "id": "Q45919624", "name": "Vaudeville Theatre", "lat": -31.899647, "lng": 115.968263 },
+    { "id": "Q7926747", "name": "Victoria Hall", "lat": -32.0536, "lng": 115.75 },
+    { "id": "Q45917009", "name": "Viewway Drive-In", "lat": -30.761432, "lng": 121.481767 },
+    {
+      "id": "Q45922769",
+      "name": "Wagin Agricultural Hall & Picture Gardens",
+      "lat": -33.310676,
+      "lng": 117.342578
+    },
+    { "id": "Q45917626", "name": "Wagin Drive-In", "lat": -33.303881, "lng": 117.335823 },
+    { "id": "Q45920083", "name": "Walkington Theatre", "lat": -20.737757, "lng": 116.849578 },
+    { "id": "Q45922783", "name": "Walpole Hall", "lat": -34.979027, "lng": 116.730786 },
+    { "id": "Q45922790", "name": "Wandering Shire Hall", "lat": -32.680175, "lng": 116.675137 },
+    {
+      "id": "Q45922809",
+      "name": "Wanneroo Agricultural Hall",
+      "lat": -31.755277,
+      "lng": 115.803838
+    },
+    { "id": "Q45916666", "name": "Waverley Drive-In", "lat": -32.024379, "lng": 115.952594 },
+    { "id": "Q45920583", "name": "Welwyn Gardens", "lat": -32.015516, "lng": 115.868497 },
+    { "id": "Q45922853", "name": "Wembley Homebase", "lat": -31.942112, "lng": 115.820882 },
+    {
+      "id": "Q45922862",
+      "name": "Wembley Theatre and Gardens",
+      "lat": -31.94045,
+      "lng": 115.822948
+    },
+    { "id": "Q45922892", "name": "Westonia Hall", "lat": -31.302491, "lng": 118.697041 },
+    { "id": "Q45917920", "name": "Wests Hall", "lat": -33.784799, "lng": 115.982572 },
+    { "id": "Q45915401", "name": "White City", "lat": -31.955469, "lng": 115.84963 },
+    {
+      "id": "Q45922918",
+      "name": "Wickepin Arts and Crafts Organisation",
+      "lat": -32.779727,
+      "lng": 117.498484
+    },
+    { "id": "Q45922930", "name": "Wickepin Hall", "lat": -32.783163, "lng": 117.500288 },
+    { "id": "Q45922939", "name": "Wickham Picture Gardens", "lat": -20.677777, "lng": 117.132102 },
+    { "id": "Q45922959", "name": "Willagee Outdoor Cinema", "lat": -32.054299, "lng": 115.803809 },
+    {
+      "id": "Q45922976",
+      "name": "Williams Agricultural Hall",
+      "lat": -33.025473,
+      "lng": 116.878966
+    },
+    { "id": "Q45922981", "name": "Williams Shire Hall", "lat": -33.025429, "lng": 116.884462 },
+    { "id": "Q8024583", "name": "Windsor Cinema", "lat": -31.9797, "lng": 115.802 },
+    { "id": "Q45917296", "name": "Wirrina Drive-In", "lat": -31.894706, "lng": 115.902486 },
+    { "id": "Q45923026", "name": "Wittenoom Theatre Gardens", "lat": -22.241086, "lng": 118.33461 },
+    { "id": "Q45917983", "name": "Wonderview Pictures", "lat": -31.904008, "lng": 115.947992 },
+    {
+      "id": "Q45923045",
+      "name": "Wongan Hills Community Telecentre",
+      "lat": -30.89755,
+      "lng": 116.72026
+    },
+    { "id": "Q45923054", "name": "Wongan Hills Town Hall", "lat": -30.894754, "lng": 116.718324 },
+    {
+      "id": "Q45923064",
+      "name": "Wongan-Ballidu Shire Hall",
+      "lat": -30.892097,
+      "lng": 116.720481
+    },
+    { "id": "Q45923070", "name": "Woodanilling Hall", "lat": -33.563381, "lng": 117.4474 },
+    { "id": "Q45915410", "name": "World's Touring Car", "lat": -31.948438, "lng": 115.806264 },
+    { "id": "Q45923116", "name": "Worsley Mine Cinema", "lat": -33.260923, "lng": 116.03044 },
+    { "id": "Q45923124", "name": "Wubin Hall", "lat": -30.106029, "lng": 116.632644 },
+    { "id": "Q45923133", "name": "Wundowie Hall and Gardens", "lat": -31.75916, "lng": 116.38471 },
+    { "id": "Q45923144", "name": "Wundowie Oval", "lat": -31.759668, "lng": 116.384343 },
+    { "id": "Q45917653", "name": "Wyalkatchem Drive-In", "lat": -31.183807, "lng": 117.381696 },
+    {
+      "id": "Q45923155",
+      "name": "Wyalkatchem Recreation Ground",
+      "lat": -31.1832,
+      "lng": 117.380458
+    },
+    { "id": "Q45923166", "name": "Wyalkatchem Town Hall", "lat": -31.176021, "lng": 117.38556 },
+    { "id": "Q45923186", "name": "Wyndham Picture Gardens", "lat": -15.484051, "lng": 128.121993 },
+    { "id": "Q45923211", "name": "Yanchep Hall", "lat": -31.55081, "lng": 115.636873 },
+    { "id": "Q45923221", "name": "Yanchep Holiday Village", "lat": -31.542974, "lng": 115.65193 },
+    { "id": "Q45922400", "name": "Yandina Flat Pictures", "lat": -20.77545, "lng": 117.143412 },
+    { "id": "Q45923229", "name": "Yarloop Hall", "lat": -32.955, "lng": 115.9 },
+    { "id": "Q45923241", "name": "Yealering Hall", "lat": -32.59245, "lng": 117.631966 },
+    { "id": "Q45923258", "name": "Yerecoin Hall", "lat": -30.947632, "lng": 116.39519 },
+    { "id": "Q45917663", "name": "York Drive-In", "lat": -31.896238, "lng": 116.769888 },
+    { "id": "Q28225082", "name": "York Town Hall", "lat": -31.8916, "lng": 116.76818 }
+  ]
+}

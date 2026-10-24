@@ -97,7 +97,6 @@ describe("firestoreSessionExtras emulator", () => {
     await viWaitFor(() => {
       const asked = received.find((item) => item.id === question.id);
       expect(asked?.status).toBe("pending");
-      // Server-stamped receipt round-trips through rules + deserialization.
       expect(asked?.receivedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     });
 
@@ -144,8 +143,6 @@ describe("firestoreSessionExtras emulator", () => {
     });
     expect((await getDocs(pointsRef)).size).toBe(1);
 
-    // A deterministic-id set replayed onto an existing point is an update,
-    // which rules deny; this is why trail appends keep auto ids (addDoc).
     const fixed = doc(pointsRef, "replay-probe");
     const data = { lat: 53.35, lng: -6.26, recordedAt: "2026-01-01T00:01:00.000Z" };
     await setDoc(fixed, data);

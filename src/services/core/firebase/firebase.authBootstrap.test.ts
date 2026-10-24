@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ADMIN_EMAIL } from "@/domain/admin/adminAccess";
 
 const authMocks = vi.hoisted(() => {
   const auth = {
@@ -83,7 +82,6 @@ vi.mock("../../../config/env", () => ({
 
 describe("auth bootstrap start", () => {
   beforeEach(() => {
-    // Fresh module state per test: the analytics subscription is module-level.
     vi.resetModules();
     vi.clearAllMocks();
     authMocks.auth.currentUser = null;
@@ -137,25 +135,34 @@ describe("auth bootstrap start", () => {
       user: {
         uid: string;
         isAnonymous: boolean;
-        email?: string;
-        emailVerified?: boolean;
+        getIdTokenResult?: () => Promise<{ claims: Record<string, unknown> }>;
       } | null,
     ) => void;
 
-    authCallback({ uid: "user-1", isAnonymous: false });
-    authCallback(null);
-    authCallback({ uid: "admin-1", isAnonymous: false, email: ADMIN_EMAIL, emailVerified: true });
-
-    expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenNthCalledWith(1, {
+    authCallback({
       uid: "user-1",
       isAnonymous: false,
-      isInternal: false,
+      getIdTokenResult: async () => ({ claims: { email_verified: true } }),
     });
-    expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenNthCalledWith(2, null);
-    expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenNthCalledWith(3, {
+    authCallback(null);
+    authCallback({
       uid: "admin-1",
       isAnonymous: false,
-      isInternal: true,
+      getIdTokenResult: async () => ({ claims: { admin: true, email_verified: true } }),
+    });
+
+    await vi.waitFor(() => {
+      expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith({
+        uid: "user-1",
+        isAnonymous: false,
+        isInternal: false,
+      });
+      expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith(null);
+      expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith({
+        uid: "admin-1",
+        isAnonymous: false,
+        isInternal: true,
+      });
     });
   });
 });

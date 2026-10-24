@@ -142,8 +142,6 @@ describe("useSharedSessionScreen", () => {
       }),
     );
 
-    // Membership heal remints and updates store myUid before the first
-    // ensureAnonymousUser promise settles.
     mockMyUid = "new-uid";
     rerender();
 

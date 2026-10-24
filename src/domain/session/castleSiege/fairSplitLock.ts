@@ -13,7 +13,6 @@ import { buildNeutralBelt, type CastleSiegeBorderLine, type CastleSiegeSealPoint
 export type FairSplitManualPath = {
   kind: "manualPath";
   reason: "noLegalCut";
-  /** UI must force the Pregame-style manual border path. */
   requiresManualPath: true;
 };
 
@@ -30,7 +29,6 @@ export type FairSplitLockArgs = {
   beltWidthMeters: number;
 };
 
-/** Setup fields written via `updateCastleSiegeSetup` on Fair-split lock. */
 export type FairSplitLockPatch = {
   border: CastleSiegeBorderLine;
   neutralBelt: Polygon | MultiPolygon;
@@ -44,13 +42,9 @@ export type FairSplitLockResult =
 export type FairSplitNudge = {
   translateLng?: number;
   translateLat?: number;
-  /** Counter-clockwise degrees around the border midpoint. */
   rotateDegrees?: number;
 };
 
-/**
- * Run Fair-split search; fail closed to a manual-path flag when no legal cut.
- */
 export function resolveFairSplitSetupPath(args: ProposeFairSplitArgs): FairSplitProposalPath {
   const result = proposeFairSplit(args);
   if (!result.ok) {
@@ -59,10 +53,6 @@ export function resolveFairSplitSetupPath(args: ProposeFairSplitArgs): FairSplit
   return { kind: "proposal", result };
 }
 
-/**
- * Host-only lock: re-validate with V7, then build the setup patch
- * (`border` + `neutralBelt` + halves as `coinAssignment`).
- */
 export function buildFairSplitLockPatch(args: FairSplitLockArgs): FairSplitLockResult {
   if (!args.isHost) {
     return { ok: false, reason: "notHost" };
@@ -95,7 +85,6 @@ export function buildFairSplitLockPatch(args: FairSplitLockArgs): FairSplitLockR
   };
 }
 
-/** Small translate / rotate for host nudge before re-validation + lock. */
 export function nudgeFairSplitBorder(
   border: CastleSiegeBorderLine,
   nudge: FairSplitNudge,

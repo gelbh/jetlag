@@ -1,5 +1,6 @@
 import { Box, Group, ScrollArea, Stack, VisuallyHidden } from "@mantine/core";
 import { type ReactNode, useId } from "react";
+import { DESK_HAIRLINE } from "./adminSurface";
 
 export function AdminRegion({
   title,
@@ -20,7 +21,6 @@ export function AdminRegion({
   empty?: ReactNode;
   error?: ReactNode;
   scroll?: boolean;
-  /** No 48px header row (the toolbar leads); the title stays as the accessible name. */
   headerless?: boolean;
   children?: ReactNode;
   "data-testid"?: string;
@@ -39,7 +39,7 @@ export function AdminRegion({
       data-testid={testId}
       style={{
         background: "var(--color-canvas)",
-        border: "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+        border: DESK_HAIRLINE,
         borderRadius: 16,
         overflow: "hidden",
       }}

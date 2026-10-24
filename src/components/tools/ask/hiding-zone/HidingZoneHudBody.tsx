@@ -1,8 +1,3 @@
-/**
- * Hider MethodChipIsland — station/map chips only (place/confirm live on map-first overlay).
- * Spec: ask-surface-kit-design rev 2026-08-05b; map-first stream 2026-09-27.
- */
-
 import { useEffect } from "react";
 import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
 import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
@@ -17,8 +12,6 @@ export type HidingZoneHudBodyProps = {
 };
 
 export function HidingZoneHudBody({ zoneTool, onStepChange, onDismiss }: HidingZoneHudBodyProps) {
-  // Method sheet only: always report "method" while mounted.
-  // moveMode stays on the props type for call-site parity; method UI is identical create/move.
   useEffect(() => {
     onStepChange("method");
   }, [onStepChange]);

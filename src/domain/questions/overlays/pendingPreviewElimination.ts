@@ -87,9 +87,7 @@ export async function buildPendingPreviewEliminationFeatures(
       if (feature) {
         features.push(feature);
       }
-    } catch {
-      // Measuring/matching WASM budget refuse or other soft-fail: skip shade only.
-    }
+    } catch {}
   }
 
   return features;

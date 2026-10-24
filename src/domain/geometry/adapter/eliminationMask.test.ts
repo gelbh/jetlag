@@ -90,7 +90,6 @@ describe("adapter/eliminationMask", () => {
     const shade = input.polygons[0]!;
     // Center of radar must remain possible (not eliminated).
     expect(booleanPointInPolygon(turfPoint([-0.15, 51.45]), shade)).toBe(false);
-    // Far corner of the play area is eliminated.
     expect(booleanPointInPolygon(turfPoint([-0.19, 51.49]), shade)).toBe(true);
   });
 

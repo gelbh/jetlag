@@ -12,5 +12,4 @@ export const OVERPASS_L2_ENV_KEYS = Object.freeze({
   R2_ENDPOINT: "CF_R2_ENDPOINT",
 });
 
-/** Ordered list for `envConfigured()` completeness checks. */
 export const OVERPASS_L2_ENV_KEY_LIST = Object.freeze(Object.values(OVERPASS_L2_ENV_KEYS));

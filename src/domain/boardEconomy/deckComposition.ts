@@ -27,7 +27,6 @@ const POWER_ROWS: readonly { id: PowerUpCardDef["id"]; count: number }[] = [
   { id: "expandHand1", count: 2 },
 ];
 
-/** Base-game curse ids (24). Expansion curses are separate. */
 export const BASE_CURSE_IDS = [
   "zoologist",
   "unguided-tourist",
@@ -59,7 +58,6 @@ function expandCount<T>(count: number, make: () => T): T[] {
   return Array.from({ length: count }, make);
 }
 
-/** Exact base hider-deck multiset (100 cards). See hider-deck.md. */
 export const HIDER_DECK_TEMPLATE: readonly BoardCardDef[] = Object.freeze([
   ...TIME_ROWS.flatMap(({ id, count, durations }) =>
     expandCount(count, (): TimeBonusCardDef => ({ kind: "timeBonus", id, durations })),

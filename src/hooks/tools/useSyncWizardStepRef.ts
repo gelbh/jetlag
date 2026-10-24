@@ -18,7 +18,6 @@ function notifyWizardStepListeners(): void {
   }
 }
 
-/** Publish the active wizard step for sheet-snap / map-attention subscribers. */
 export function publishWizardStep(toolId: string | null, stepId: string): void {
   latestWizardStep = { toolId, stepId };
   notifyWizardStepListeners();
@@ -48,11 +47,6 @@ export function getLatestWizardStepIdForTool(toolId: string): string | null {
   return null;
 }
 
-/**
- * Keep a parent-owned ref + sheet-snap subscribers in sync with the active
- * wizard step. Publishes in useLayoutEffect so `useSyncExternalStore` readers
- * see the place-phase step in the same commit as tool open/switch.
- */
 export function useSyncWizardStepRef(
   wizardStepRef: RefObject<string | null> | undefined,
   stepId: string,

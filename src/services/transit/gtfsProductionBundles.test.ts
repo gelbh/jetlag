@@ -111,7 +111,6 @@ describe("production GTFS bundles", () => {
   it("NYC midtown play area uses full subway stop inventory", async () => {
     const bundle = loadProductionBundle("nyc");
     expect(bundle).not.toBeNull();
-    // Subway + five borough bus feeds (was subway-only ~1k).
     expect(bundle!.stops.length).toBeGreaterThan(5000);
     expect(bundle!.feedOnestopId).toBe("mta-nyc-subway-bus-merged");
 
@@ -174,7 +173,6 @@ describe("production GTFS bundles", () => {
   it("Dublin production bundle covers TFI bus + Luas + rail density", () => {
     const bundle = loadProductionBundle("dublin");
     expect(bundle).not.toBeNull();
-    // Rebuilt from TFI Dublin Bus + Go-Ahead + Luas + Irish Rail (was ~207).
     expect(bundle!.stops.length).toBeGreaterThan(2000);
     expect(bundle!.routes.length).toBeGreaterThan(50);
     expect(bundle!.feedOnestopId).toBe("tfi-dublin-merged");
@@ -196,6 +194,19 @@ describe("production GTFS bundles", () => {
       readFileSync(resolve(ROOT, "public/geo/gtfs/southampton.json"), "utf8"),
     );
     expect(bundle.metroId).toBe("southampton");
+    expect(bundle.stops.length).toBeGreaterThan(0);
+    expect(bundle.routes.length).toBeGreaterThan(0);
+  });
+
+  it("lists sydney in the production GTFS manifest and bundle loads", async () => {
+    const manifest = JSON.parse(
+      readFileSync(resolve(ROOT, "public/geo/gtfs/manifest.json"), "utf8"),
+    );
+    const entry = manifest.metros.find((m: { id: string }) => m.id === "sydney");
+    expect(entry).toBeDefined();
+    expect(entry.bundlePath).toBe("/geo/gtfs/sydney.json");
+    const bundle = JSON.parse(readFileSync(resolve(ROOT, "public/geo/gtfs/sydney.json"), "utf8"));
+    expect(bundle.metroId).toBe("sydney");
     expect(bundle.stops.length).toBeGreaterThan(0);
     expect(bundle.routes.length).toBeGreaterThan(0);
   });

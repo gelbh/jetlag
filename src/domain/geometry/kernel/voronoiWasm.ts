@@ -2,7 +2,6 @@ import type { Feature, FeatureCollection, Polygon } from "geojson";
 import { loadKernelWasm, resetKernelWasmForTests } from "./kernelWasmPkg";
 import type { SpatialVoronoiSite } from "./spatialVoronoiTypes";
 
-/** Reset lazy WASM module (tests). */
 export const resetVoronoiWasmForTests = resetKernelWasmForTests;
 
 function dedupeSpatialVoronoiSites<T extends Record<string, unknown> = Record<string, unknown>>(

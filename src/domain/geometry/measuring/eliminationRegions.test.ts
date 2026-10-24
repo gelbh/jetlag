@@ -47,11 +47,9 @@ describe("measuring elimination polarity", () => {
     const hiderPt = turfPoint([hiderInside[1], hiderInside[0]]);
     const farPt = turfPoint([seekerRingFar[1], seekerRingFar[0]]);
 
-    // closer → shade complement of near; hider in near stays possible
     expect(booleanPointInPolygon(hiderPt, closer!)).toBe(false);
     expect(booleanPointInPolygon(farPt, closer!)).toBe(true);
 
-    // further → shade near; hider in near is eliminated
     expect(booleanPointInPolygon(hiderPt, further!)).toBe(true);
     expect(booleanPointInPolygon(farPt, further!)).toBe(false);
   });
@@ -60,8 +58,6 @@ describe("measuring elimination polarity", () => {
     const cells = sampleGameAreaCells(sampleGameArea, 4);
     expect(cells.length).toBeGreaterThan(4);
 
-    // Seeker distance from sea level = 100m. Near cells ≤ 100m; far > 100m.
-    // Hider cell at the inclusive boundary (100m), not a loose interior near value.
     const elevations = cells.map((_, index) => (index === 0 ? 100 : 180));
     const { region: nearRegion } = buildSeaLevelNearRegionFromSamples(
       cells,

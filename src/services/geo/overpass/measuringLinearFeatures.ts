@@ -148,9 +148,7 @@ async function fetchMeasuringLinearSegmentsForKind(
         if (packSegments.length > 0) {
           return packSegments;
         }
-      } catch {
-        // Pack assets unavailable — fall through to Overpass gate.
-      }
+      } catch {}
     }
 
     if (!allowsOverpassAdminBorderFallthrough(regionPackId)) {

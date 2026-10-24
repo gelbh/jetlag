@@ -10,7 +10,6 @@ import {
   type LegalSection,
 } from "@/domain/legal/legalContact";
 
-/** Mantine / iOS legal article body (header chrome owned by the route). */
 export function LegalDocumentBody({
   title,
   sections,

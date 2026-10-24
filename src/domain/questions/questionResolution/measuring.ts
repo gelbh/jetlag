@@ -42,7 +42,6 @@ export async function resolveMeasuringPendingQuestion(
     ...regionInput,
     measuringPlaces,
     measuringAnswer: answer,
-    // Session play area wins; legacy embedded gameArea is ignored for size/safety.
     gameArea,
   });
 

@@ -1,15 +1,14 @@
 import { AccordionChevron, Box, Collapse, Group, Text, UnstyledButton } from "@mantine/core";
 import { type ReactNode, useId, useState } from "react";
+import { DESK_HAIRLINE } from "../shared/adminSurface";
 
 interface AdminSplitBoardProps {
   count: number;
   defaultOpen: boolean;
-  /** Narrow course: sit above the code plate at the bottom instead of the corner. */
   placement?: "top" | "bottom";
   children: ReactNode;
 }
 
-/** Comp `players`: a frosted floating panel bottom-left of the map, header then rows. */
 export function AdminSplitBoard({
   count,
   defaultOpen,
@@ -32,7 +31,7 @@ export function AdminSplitBoard({
         zIndex: "var(--z-panel)",
         background: "color-mix(in oklch, var(--color-canvas) 92%, transparent)",
         backdropFilter: "blur(20px) saturate(1.4)",
-        border: "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+        border: DESK_HAIRLINE,
         borderRadius: 16,
         boxShadow: "0 8px 24px 0 oklch(0.1 0.04 265 / 0.45)",
       }}

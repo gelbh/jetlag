@@ -124,7 +124,6 @@ function revealWarmKey(sessionId: string, role: RevealRole): string {
   return `${sessionId}:${role}`;
 }
 
-/** Drop in-flight warm slots (tests, leave, regenerate). */
 export function clearRolePasscodeRevealWarm(sessionId?: string): void {
   if (!sessionId) {
     revealInflight.clear();
@@ -143,9 +142,7 @@ export function clearRolePasscodeRevealWarm(sessionId?: string): void {
  * Coalesces with an in-flight reveal for the same session+role.
  */
 export function prefetchRolePasscode(sessionId: string, role: RevealRole): void {
-  void revealRolePasscode(sessionId, role).catch(() => {
-    // Prefetch is best-effort; tap Reveal surfaces the error.
-  });
+  void revealRolePasscode(sessionId, role).catch(() => {});
 }
 
 export async function revealRolePasscode(
@@ -309,7 +306,6 @@ export function mapRolePasscodeJoinError(error: unknown): string {
   return message || "Couldn't join the session.";
 }
 
-/** Leader-facing copy when accept/decline of a pending request fails. */
 export function mapLeaderJoinResolveError(error: unknown): string {
   if (error instanceof Error && isClientUpdateRequiredMessage(error.message)) {
     return "That player needs to update the app before they can join.";

@@ -123,7 +123,6 @@ describe("MapTimerCluster", () => {
       />,
     );
 
-    // Primary session clock plus seek-phase secondary (formatted elapsed).
     expect(screen.getAllByText(/\d+:\d{2}/).length).toBeGreaterThanOrEqual(1);
   });
 });

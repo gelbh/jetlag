@@ -10,7 +10,6 @@ import { AskCostChip } from "./AskCostChip";
 import { AskModeCueTicker } from "./AskModeCueTicker";
 
 export type AskHudHostProps = {
-  /** Sheet open signal; keep host mounted and flip false for exit animation. */
   open: boolean;
   cue: string;
   toolLabel: string;
@@ -18,15 +17,12 @@ export type AskHudHostProps = {
   canCommit: boolean;
   commitLabel: string;
   onCommit: () => void;
-  /** Sheet dismiss (clears active ask tool). */
   onDismiss?: () => void;
   isSubmitting?: boolean;
   error?: string | null;
-  /** ONE OF chips island | catalog rail | walk banner — or null scaffold. */
   modeBody?: ReactNode | null;
   showCommitStrip?: boolean;
   showCostChip?: boolean;
-  /** Hide GlanceVerb ticker (Matching embeds cost in the question box). */
   showCue?: boolean;
   onExitTransitionEnd?: () => void;
 };
@@ -57,7 +53,6 @@ export function AskHudHost({
       </div>
     ) : null;
 
-  // Sheet path: hide muted "SEND/ASK — …" footer; cue already states the next step.
   const sheetShowCommit = open && showCommitStrip && (canCommit || Boolean(error) || isSubmitting);
 
   const sheetCommit = sheetShowCommit ? (

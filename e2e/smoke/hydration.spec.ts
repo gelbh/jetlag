@@ -31,7 +31,6 @@ async function servePrerenderedDocuments(page: Page): Promise<void> {
   );
 }
 
-/** Probe state written by the init script below. */
 type HydrationProbeWindow = Window & {
   __cls: number;
   __prerenderedNodes: Element[];

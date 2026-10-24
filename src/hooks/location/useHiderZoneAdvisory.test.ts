@@ -24,7 +24,6 @@ const zone: HidingZoneRecord = {
   confirmedAt: "2026-10-11T00:00:00.000Z",
 };
 
-// ~2.2 km north of the zone centre, well outside radius + buffer.
 const outside = { lat: 53.37, lng: -6.26 };
 
 function renderAdvisory(timerState: TimerState) {

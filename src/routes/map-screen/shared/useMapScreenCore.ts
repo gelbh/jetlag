@@ -35,10 +35,6 @@ export type UseMapScreenCoreOptions = {
   role?: MapScreenRole;
 };
 
-/**
- * Role-agnostic map-screen foundation: session listeners, annotations,
- * timer/sync wiring, shell sizing, and shared map prefs.
- */
 export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   const roleConfig = getMapScreenRoleConfig(options.role ?? "seeker");
 
@@ -196,12 +192,18 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
 
     const customMatchingAreas = sessionRules.customMatchingAreas;
     const regionPackId = session.regionPackId;
+    const regionPackSubregionId = session.regionPackSubregionId;
     const tier = isPremiumSession(session) ? "premium" : "free";
     const area = gameArea;
 
-    // Keep map-usable chrome free of geo preload / elevation sampling work.
     return scheduleIdleBootWork(() => {
-      void preloadGameAreaCachesAsync(area, customMatchingAreas, regionPackId, tier);
+      void preloadGameAreaCachesAsync(
+        area,
+        customMatchingAreas,
+        regionPackId,
+        tier,
+        regionPackSubregionId,
+      );
       startSeaLevelBackgroundSampling(area, { regionPackId });
     });
   }, [

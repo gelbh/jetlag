@@ -1,37 +1,30 @@
 import { defineString } from "firebase-functions/params";
 import { HttpsError } from "firebase-functions/v2/https";
 
-export const ADMIN_EMAIL_DEFAULT = "gelbharttomer@gmail.com";
-
+/**
+ * Notification recipient for incident/preload mail (not auth).
+ * Set via Functions param / Doppler; never commit personal addresses.
+ */
 export const adminEmailParam = defineString("ADMIN_EMAIL", {
-  default: ADMIN_EMAIL_DEFAULT,
+  default: "",
 });
 
 export function resolveAdminEmail() {
   try {
     const configured = adminEmailParam.value();
-    return configured?.trim() ? configured.trim().toLowerCase() : ADMIN_EMAIL_DEFAULT;
+    return typeof configured === "string" ? configured.trim() : "";
   } catch {
-    return ADMIN_EMAIL_DEFAULT;
+    return "";
   }
 }
 
-export function normalizeAdminEmail(email) {
-  return typeof email === "string" ? email.trim().toLowerCase() : "";
-}
-
+/** Auth: Firebase custom claim `admin === true` (plus verified email). */
 export function isAdminAuth(auth) {
   if (!auth?.token) {
     return false;
   }
 
-  const email = auth.token.email;
-  const verified = auth.token.email_verified === true;
-  if (!verified || typeof email !== "string") {
-    return false;
-  }
-
-  return normalizeAdminEmail(email) === resolveAdminEmail();
+  return auth.token.admin === true && auth.token.email_verified === true;
 }
 
 export function requireAdminAuth(auth) {

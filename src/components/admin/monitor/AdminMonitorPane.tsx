@@ -13,7 +13,6 @@ export function AdminMonitorPane({
 }: {
   active: boolean;
   errorMessage?: string | null;
-  /** The join for this session is in flight: show progress instead of the idle hint. */
   joining?: boolean;
   onRetry?: () => void;
   sessionsUnavailable?: boolean;

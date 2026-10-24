@@ -21,10 +21,6 @@ function listFocusable(container: HTMLElement): HTMLElement[] {
   );
 }
 
-/**
- * When `active`, moves focus into `containerRef`, traps Tab inside it, and
- * restores the previously focused element on cleanup.
- */
 export function useDialogFocus(containerRef: RefObject<HTMLElement | null>, active: boolean) {
   useEffect(() => {
     if (!active) {

@@ -1,4 +1,3 @@
-/** Distinguishes tile preview candidates from Overpass/bundle-confirmed places. */
 export function ProvisionalBadge() {
   return (
     <span

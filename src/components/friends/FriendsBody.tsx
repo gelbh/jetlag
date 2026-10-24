@@ -73,7 +73,6 @@ const insetInputStyles = {
     fontSize: "1.0625rem",
     fontWeight: 400,
     letterSpacing: "-0.01em",
-    // Keep start padding for leftSection; only trim the trailing edge.
     paddingInlineEnd: "0.75rem",
   },
   section: {
@@ -306,7 +305,6 @@ function PullToRefresh({
       setPull(0);
       return;
     }
-    // Stronger rubber-band: need a longer pull before release fires.
     setPull(Math.min(112, dy * 0.32));
   };
 
@@ -555,7 +553,6 @@ function FriendDetailDrawer({
           if (error instanceof DOMException && error.name === "AbortError") {
             return;
           }
-          // Fall through to clipboard.
         }
       }
 
@@ -765,7 +762,6 @@ function FriendDetailDrawer({
   );
 }
 
-/** Join/Presets-style iOS body for the Mantine Friends route. */
 export function FriendsBody() {
   const model = useFriendsPanelModel();
   const sessionCode = useSessionStore((state) => state.session?.code ?? null);

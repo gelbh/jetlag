@@ -66,12 +66,9 @@ const FORBIDDEN_PROP_KEYS = new Set([
   "sessionid",
 ]);
 
-/** PostHog SDK ready for scrubbed `$exception` (consent-independent). */
 let coreInitialized = false;
-/** Product analytics (track / pageview / identify) enabled after Accept. */
 let initialized = false;
 let identifiedUid: string | null = null;
-/** Last auth identity seen — applied on init so Accept-after-sign-in still identifies. */
 let lastSeenIdentity: AnalyticsIdentity | null = null;
 let appInstalledHandler: (() => void) | null = null;
 
@@ -126,7 +123,6 @@ function runtimeEnabled(): boolean {
   );
 }
 
-/** `posthog.reset` clears persisted super properties, so call this after every reset. */
 function registerSuperProperties(): void {
   // IP is personal data; PostHog's `ip: false` is a no-op, so disable GeoIP enrichment.
   posthog.register({
@@ -136,10 +132,6 @@ function registerSuperProperties(): void {
   });
 }
 
-/**
- * Link signed-in uid for ungated scrubbed `$exception` once core is up.
- * Product capture stays Accept-gated via `initialized` + `before_send`.
- */
 function applyIdentity(user: AnalyticsIdentity | null): void {
   if (!coreInitialized) {
     return;
@@ -188,7 +180,6 @@ export function initPosthogCore(): void {
       capture_pageview: false,
       capture_pageleave: true,
       capture_performance: true,
-      // Uncaught errors bypass the facade; before_send still scrubs and filters them.
       capture_exceptions: {
         capture_unhandled_errors: true,
         capture_unhandled_rejections: true,
@@ -219,7 +210,6 @@ export function initPosthogCore(): void {
   }
 }
 
-/** Enables product analytics when consent is already granted (boot + Accept path). */
 export function initAnalytics(): void {
   initPosthogCore();
   if (!coreInitialized || initialized) {
@@ -230,7 +220,6 @@ export function initAnalytics(): void {
   }
 
   try {
-    // Sticky persistence can retain opt-out across deny → Accept; clear before product enable.
     posthog.opt_in_capturing();
     initialized = true;
     applyIdentity(lastSeenIdentity);
@@ -256,12 +245,9 @@ export function denyAnalyticsConsent(): void {
     posthog.stopSessionRecording();
     posthog.reset(true);
     registerSuperProperties();
-  } catch {
-    // Soft-fail: consent must still clear locally.
-  }
+  } catch {}
   identifiedUid = null;
   initialized = false;
-  // Re-link signed-in uid for ungated error reports after product reset.
   applyIdentity(lastSeenIdentity);
 }
 
@@ -272,9 +258,7 @@ export function syncAnalyticsIdentity(user: AnalyticsIdentity | null): void {
     if (coreInitialized) {
       try {
         registerSuperProperties();
-      } catch {
-        // Soft-fail: tagging must never break analytics.
-      }
+      } catch {}
     }
   }
   applyIdentity(user);
@@ -290,9 +274,7 @@ function pageViewProperties(pathWithSearch: string): Record<string, string | boo
     props.referrer = document.referrer;
     try {
       props.$referring_domain = new URL(document.referrer).hostname;
-    } catch {
-      // ignore invalid referrer
-    }
+    } catch {}
   }
   const queryIndex = pathWithSearch.indexOf("?");
   if (queryIndex >= 0) {
@@ -340,16 +322,10 @@ export function trackSessionEnded(reason: SessionEndedReason): void {
   track(ANALYTICS_EVENTS.session_ended, { reason });
 }
 
-/** Leave was a no-op server-side: the player had already been removed. */
 export function trackSessionLeaveAlreadyLeft(): void {
   track(ANALYTICS_EVENTS.session_leave_already_left);
 }
 
-/**
- * Exception capture props: keep product forbidden-key drops (geo / session codes / uids)
- * but remaps Firebase-style `code` → `firebase_code` so diagnostics survive, then scrub
- * session-code-like string leaves via `scrubPosthogExceptionProperties`.
- */
 export function scrubExceptionCaptureProperties(
   props: Record<string, unknown> | undefined,
 ): Record<string, unknown> | undefined {

@@ -38,8 +38,26 @@ describe("bundledGamePresets", () => {
         "bundled:zurich-city",
         "bundled:lucerne-metro",
         "bundled:prince-rupert",
+        "bundled:sydney",
       ]),
     );
+  });
+
+  it("ships sydney specialty preset on the sydney pack", () => {
+    const sydney = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "sydney");
+    expect(sydney).toHaveLength(1);
+    expect(sydney[0]?.id).toBe("bundled:sydney");
+    expect(sydney[0]?.subregionId).toBeUndefined();
+    expect(sydney[0]?.transitMetroId).toBe("sydney");
+    expect(sydney[0]?.distanceUnit).toBe("metric");
+    expect(sydney[0]?.advancedSettingsPatch?.expansionPackEnabled).toBe(false);
+    expect(sydney[0]?.hierarchy).toEqual([
+      { id: "continent-oceania", category: "Continent", name: "Oceania" },
+      { id: "country-au", category: "Country", name: "Australia" },
+      { id: "state-nsw", category: "State/Territory", name: "New South Wales" },
+      { id: "sydney-metro", category: "City", name: "Sydney" },
+    ]);
+    expect(sydney.some((p) => /ced|sed|lga|sal/i.test(p.id))).toBe(false);
   });
 
   it("ships switzerland country + 26 canton presets on the switzerland pack", () => {
@@ -52,9 +70,8 @@ describe("bundledGamePresets", () => {
       ]),
     );
     const ch = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "switzerland");
-    expect(ch).toHaveLength(27); // country + 26 cantons
+    expect(ch).toHaveLength(27);
     expect(ch.every((p) => p.distanceUnit === "metric")).toBe(true);
-    // specialty packs still present
     expect(ids).toEqual(
       expect.arrayContaining([
         "bundled:zurich-canton",

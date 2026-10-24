@@ -40,7 +40,6 @@ function getSnapshot(): number {
   return nowMs;
 }
 
-/** Shared 15s clock for all live location layers on a map. */
 export function useLiveLocationNowMs(): number {
   return useSyncExternalStore(subscribe, getSnapshot, () => 0);
 }

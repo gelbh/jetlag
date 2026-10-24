@@ -21,7 +21,6 @@ export function baseCostForQuestionTool(
   return TOOL_BASE_COST[toolType] ?? null;
 }
 
-/** useCount = prior uses of this option (0 = first). */
 export function rewardCyclesForTool(
   toolType: PendingQuestionToolType,
   useCount: number,
@@ -33,7 +32,6 @@ export function rewardCyclesForTool(
   return rewardForQuestion(base, useCount).cycles;
 }
 
-/** Derive sequential cycles from pending cardDraw/cardKeep when present. */
 export function rewardCyclesFromPendingCost(
   toolType: PendingQuestionToolType,
   cardDraw?: number,

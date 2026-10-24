@@ -1,4 +1,3 @@
-/** Map-first placement and exit-held Ask are independent (not exclusive). */
 export function resolveHidingZoneHudPresence(input: {
   mapFirstEligible: boolean;
   askExitMounted: boolean;

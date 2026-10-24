@@ -9,7 +9,6 @@ interface HiderToolDockProps {
   zoneLabel: string;
   onZoneAction: () => void;
   zoneDisabled?: boolean;
-  /** Board hand control placed next to Set zone when economy is on. */
   handLabel?: string;
   onOpenHand?: () => void;
   handDisabled?: boolean;

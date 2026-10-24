@@ -138,9 +138,7 @@ interface GameOverFooterProps {
 
 function GameOverFooter({ rematchPending, rematchError, onRematch, onHome }: GameOverFooterProps) {
   const handleRematch = useCallback(() => {
-    void Promise.resolve(onRematch()).catch(() => {
-      // Parent surfaces rematchError; swallow to avoid unhandled rejection.
-    });
+    void Promise.resolve(onRematch()).catch(() => {});
   }, [onRematch]);
 
   return (

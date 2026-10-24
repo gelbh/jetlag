@@ -275,7 +275,6 @@ describe("usePlacementMapFocus", () => {
       }),
     );
 
-    // 168 + PANEL_PADDING_EXTRA_PX(24) = 192 — below DEFAULT_PANEL_HEIGHT 320+24
     expect(result.current.focusPaddingBias).toBe(192);
   });
 

@@ -9,7 +9,6 @@ export type CanOpenMapScreenRoleCodesInput = {
   isHost: boolean;
 };
 
-/** Whether Codes is available on map chrome (dock / rail / observer island). */
 export function canOpenMapScreenRoleCodes(input: CanOpenMapScreenRoleCodesInput): boolean {
   return (
     Boolean(input.myUid) &&

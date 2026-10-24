@@ -12,7 +12,6 @@ const pkgEntry = path.resolve(
 );
 const wasmPkgReady = existsSync(pkgEntry);
 
-/** Short LineString + 200m buffer (plan fixture). */
 const shortLine: Feature<LineString> = {
   type: "Feature",
   properties: {},

@@ -1,4 +1,5 @@
 import { Box, SegmentedControl } from "@mantine/core";
+import { DESK_HAIRLINE } from "./adminSurface";
 
 export interface AdminSegmentedOption {
   value: string;
@@ -6,7 +7,6 @@ export interface AdminSegmentedOption {
   badge?: number;
 }
 
-/** Comp `.segc`: ground track, 3px padding, 12px radius, selected `--color-flag-soft`. */
 export function AdminSegmented({
   value,
   onChange,
@@ -57,7 +57,7 @@ export function AdminSegmented({
       styles={{
         root: {
           background: "var(--color-surface-deep)",
-          border: "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+          border: DESK_HAIRLINE,
           borderRadius: 12,
           padding: 3,
         },

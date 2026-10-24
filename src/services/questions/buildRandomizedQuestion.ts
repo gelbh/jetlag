@@ -48,7 +48,6 @@ export interface BuildRandomizedQuestionContext {
   task?: LoadTask;
 }
 
-/** Tools whose randomized roll needs the play area and the dynamically imported heavy resolvers. */
 export const HEAVY_RANDOMIZE_TOOLS: ReadonlySet<PendingQuestionToolType> = new Set([
   "matching",
   "tentacle",

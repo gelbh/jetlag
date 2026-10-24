@@ -152,7 +152,6 @@ function Section({ section }: { section: LearnSection }) {
   );
 }
 
-/** Long-form how-to-play article (guide, tool explainers, FAQ). Header bar owned by the route. */
 export function LearnArticle({ content }: { content: LearnPageContent }) {
   const meta = learnPageMeta(content.path);
 

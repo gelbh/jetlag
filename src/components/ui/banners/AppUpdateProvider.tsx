@@ -130,13 +130,11 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
         mitigation.type === "soft_reload" &&
         lastSoftReloadMitigationIdRef.current !== mitigation.id
       ) {
-        // Sync in-memory ref when sessionStorage already acknowledged this id.
         lastSoftReloadMitigationIdRef.current = mitigation.id;
       }
       return;
     }
     lastSoftReloadMitigationIdRef.current = mitigation.id;
-    // Prefer skipping reload over looping when durable ack cannot be stored.
     if (!acknowledgeSoftReload(mitigation.id)) {
       return;
     }
@@ -181,9 +179,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
             setNeedsRefresh(true);
           });
         },
-        onRegisterError() {
-          // Registration failures are handled by the browser.
-        },
+        onRegisterError() {},
       });
       if (!cancelled) {
         setUpdateSW(() => applyUpdateFn);

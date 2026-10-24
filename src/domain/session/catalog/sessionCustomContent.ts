@@ -15,7 +15,6 @@ export interface SessionCustomLocationPin {
   id: string;
   name: string;
   point: LatLngTuple;
-  /** Absent: offered for every Tentacle / Measuring category. */
   category?: PoiPinCategoryId;
 }
 

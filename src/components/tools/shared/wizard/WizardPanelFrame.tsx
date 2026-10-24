@@ -5,11 +5,9 @@ import { WizardToolPanelLayout } from "./WizardToolPanelLayout";
 interface WizardPanelFrameProps {
   children: ReactNode;
   readOnly?: boolean;
-  /** Live map wizards: fill panel height and scroll step content above the footer. */
   scrollable?: boolean;
   stickyFooter?: ReactNode;
   error?: string | null;
-  /** Extra readouts below the scroll region (e.g. retryable geo errors). */
   trailing?: ReactNode;
 }
 

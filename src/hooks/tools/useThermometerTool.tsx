@@ -55,11 +55,6 @@ function createThermometerConfig(
   };
 }
 
-/**
- * A synced walk keeps its own distance. Outside a walk, a picked preset that has
- * since been used falls through to the first unused one; during a walk it stays
- * put, because the walk's own question can count as used.
- */
 function effectiveThermometerDistanceMeters(
   config: ThermometerSessionConfig,
   syncedWalk: { distanceMeters: number | null } | null,
@@ -418,8 +413,6 @@ export function useThermometerTool({
   const distanceAvailable = distanceAvailableForSession && distanceUnused;
   const liveTravelMeters = walkTracker.distanceTraveledMeters ?? thermoTravelMeters;
   const travelTooShort = liveTravelMeters !== null && liveTravelMeters + 1 < activeDistanceMeters;
-  // While walking, END WALK arms only after a GPS sample (non-null travel).
-  // Before walk / after walk, keep distance + short-travel gates.
   const configureReady = walkingActive
     ? distanceAvailable && liveTravelMeters !== null
     : distanceAvailable && !travelTooShort;
@@ -465,11 +458,6 @@ export function useThermometerTool({
     void commit();
   };
 
-  /**
-   * Manual: leave the sheet after mode/distance so pins can be tapped on the map.
-   * GPS setup + live walk stay on the sheet; answer chrome only once pins exist.
-   */
-  /** After distance pick: map for GPS start or manual pins (Matching/Radar twin). */
   const mapFirstEligible = !walkingActive && !editingSetup;
   const mapPlacementActive = Boolean(mapFirstEligible);
 
@@ -486,7 +474,6 @@ export function useThermometerTool({
 
   const placementError = config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError;
 
-  // Count blocks only where a commit control is on screen: End walk, Start track, or Send.
   const commitControlVisible =
     walkingActive ||
     (mapPlacementActive &&

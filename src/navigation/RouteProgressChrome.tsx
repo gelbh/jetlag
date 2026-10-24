@@ -21,7 +21,6 @@ export function routeProgressPercent(
   return Math.round(((progress.currentStepIndex + stepCredit) / total) * 100);
 }
 
-/** In-shell settle progress (never a full-bleed cover). */
 export function RouteProgressChrome() {
   const { phase, loadingProgress } = useRouteTransition();
   const boundaryTask = useNamedLoadTask(PACK_PLAY_AREA_TASK);

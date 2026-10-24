@@ -13,7 +13,6 @@ import {
 
 export { MAP_NAV_DOCK_STORAGE_KEY };
 
-/** Phone map-nav dock placement (shared store with session tools). */
 export function useMapNavDockSide(): {
   placement: MapChromeDockPlacement;
   setPlacement: (placement: MapChromeDockPlacement) => void;

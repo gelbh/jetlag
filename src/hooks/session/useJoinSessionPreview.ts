@@ -21,7 +21,6 @@ export type JoinSessionPreviewState = {
   previewSession: SessionRecord | null;
   previewPremium: boolean;
   lookupLoading: boolean;
-  /** Suggested role when the uid already has a membership on the preview. */
   existingRole: PlayerRole | null;
 };
 
@@ -60,7 +59,6 @@ export function useJoinSessionPreview(code: string): JoinSessionPreviewState {
     enabled,
     staleTime: JOIN_PREVIEW_TTL_MS,
     gcTime: JOIN_PREVIEW_TTL_MS,
-    // retryAsync already retries auth and lookup; a query retry would stack on that.
     retry: false,
   });
 

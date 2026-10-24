@@ -16,14 +16,9 @@ export type MapFloatSurfaceProps = {
   "aria-describedby"?: string;
   "data-testid"?: string;
   className?: string;
-  /** Paper path: copy + actions side-by-side (MapFloatAlertPanel). */
   actionRow?: boolean;
 };
 
-/**
- * Shared Mantine float chrome for map / HudBanner surfaces.
- * Compact status uses Alert; unconstrained children (question card, action rows) use Paper.
- */
 export function MapFloatSurface({
   tone,
   title,
@@ -48,7 +43,6 @@ export function MapFloatSurface({
     "data-map-float-surface": "true",
   };
 
-  // Paper when callers need unconstrained children (no title → panel / card body).
   if (title == null) {
     return (
       <Paper

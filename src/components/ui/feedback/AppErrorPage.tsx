@@ -21,7 +21,6 @@ export type AppErrorPageProps = {
   detail?: ReactNode;
   primaryAction?: AppErrorPrimaryAction | null;
   secondaryAction?: AppErrorSecondaryAction | null;
-  /** Use for crash fallbacks; omit on navigational 404. */
   assertive?: boolean;
 };
 

@@ -28,7 +28,6 @@ function resolvePointerTarget(target: EventTarget | null): Element | null {
   return null;
 }
 
-/** Exported for unit tests. */
 export function isInteractiveWizardSwipeTarget(target: EventTarget | null): boolean {
   const element = resolvePointerTarget(target);
   if (!element) {
@@ -237,7 +236,6 @@ export function useWizardSwipe({
   };
 }
 
-/** Exported for unit tests. */
 export function shouldCommitWizardSwipe(
   offsetX: number,
   containerWidth: number,

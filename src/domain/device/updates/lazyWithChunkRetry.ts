@@ -29,10 +29,6 @@ export function getServiceWorkerChunkReloadContext(): Pick<
   return serviceWorkerChunkReloadContext;
 }
 
-/**
- * Reload once for a stale chunk, honoring the app's reload context (deferred
- * on the live map). Returns whether a reload is underway.
- */
 export function reloadForChunkLoadError(
   getReloadContext?: () => ChunkReloadContext,
   isOffline?: () => boolean,
@@ -46,7 +42,6 @@ export function reloadForChunkLoadError(
   });
 }
 
-// React.lazy needs a wide component type across named-export modules.
 type LazyModule = { default: ComponentType<any> };
 
 /**

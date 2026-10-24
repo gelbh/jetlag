@@ -1,6 +1,9 @@
 /** Session callable wiring — re-exports preserve `functions/index.mjs` names. */
 
-export { answerCastleSiegeOracleAsk } from "./session/castleSiegeOracleCallables.mjs";
+export {
+  answerCastleSiegeOracleAsk,
+  declareCastleSiege,
+} from "./session/castleSiegeOracleCallables.mjs";
 export {
   cancelRoleJoinRequest,
   requestRoleJoin,

@@ -7,7 +7,6 @@ function fillXyzTemplate(template: string, z: number, x: number, y: number): str
   return template.replace("{z}", String(z)).replace("{x}", String(x)).replace("{y}", String(y));
 }
 
-/** Real OpenFreeMap planet vector tile URL shape (from the liberty style tilejson). */
 const OPENFREEMAP_TILE_URL =
   "https://tiles.openfreemap.org/planet/20250430_001001_pt/14/8186/5448.pbf";
 

@@ -38,10 +38,6 @@ const roleSegmentStyles = {
   },
 } as const;
 
-/**
- * Dev-only gallery for Chat + Session log polish.
- * Open `/dev/chat-log`. Also flips on `jl.dev.mockSessionFeed` for in-map use.
- */
 export function ChatLogGallery() {
   const [view, setView] = useState<"seeker" | "hider">("hider");
   const [answerBusy, setAnswerBusy] = useState(false);

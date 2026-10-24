@@ -217,7 +217,6 @@ export function MapLibreGeoJsonOverlay({
   line?: MapLibreLinePaint | null;
   circle?: MapLibreCirclePaint | null;
   symbol?: MapLibreSymbolSpec | null;
-  /** Multiple fill/line/circle/symbol pairs on one Source (same geometry). */
   layers?: readonly MapLibreGeoJsonLayerSpec[];
   beforeId?: string;
   /** MapLibre fill/line opacity transition; omit for MapLibre defaults. */

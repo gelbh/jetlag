@@ -11,12 +11,10 @@ import {
   useModerationConfirm,
 } from "../../../routes/admin-map-screen/useModerationConfirm";
 import { AdminMonitorPane } from "../monitor/AdminMonitorPane";
-import { RAISED_BG } from "../shared/adminSurface";
+import { DESK_HAIRLINE, RAISED_BG } from "../shared/adminSurface";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { sessionElapsedMs, sessionPhaseMark } from "../table/sessionColumns";
-
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
 
 const raisedButton = { background: RAISED_BG, color: "var(--color-ink)" };
 
@@ -48,7 +46,7 @@ export function EndedSession({
       style={{
         flex: 1,
         background: "var(--color-canvas)",
-        border: hairline,
+        border: DESK_HAIRLINE,
         borderRadius: 16,
       }}
     >
@@ -95,7 +93,6 @@ export interface AdminSessionMonitorState {
   onRetry(): void;
 }
 
-/** Comp `desk2` main area: header panel, then the map frame. */
 export function AdminSessionView({
   summary,
   loading,
@@ -177,7 +174,7 @@ export function AdminSessionView({
           gap: 10,
           padding: "0 16px",
           background: "var(--color-canvas)",
-          border: hairline,
+          border: DESK_HAIRLINE,
           borderRadius: 16,
           overflow: "hidden",
         }}
@@ -247,7 +244,7 @@ export function AdminSessionView({
           minHeight: 0,
           position: "relative",
           overflow: "hidden",
-          border: hairline,
+          border: DESK_HAIRLINE,
           borderRadius: 16,
           background: "var(--color-surface-deep)",
         }}

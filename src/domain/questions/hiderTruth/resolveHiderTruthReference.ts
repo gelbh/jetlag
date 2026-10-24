@@ -33,7 +33,6 @@ function isUsablePoint(point: LatLngTuple | null | undefined): point is LatLngTu
   return point != null && isUsableLatLng(point[0], point[1]);
 }
 
-/** Zone center before end game (noHidingZone without one), frozen anchor during it. */
 export function resolveHiderTruthReference({
   hiderUid,
   zoneCenter,

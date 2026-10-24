@@ -5,7 +5,7 @@ import type { AdminTableTab } from "@/domain/admin/adminTablePrefs";
 import { formatFreshnessAge } from "@/domain/admin/formatAdminFreshness";
 import type { AdminSessionSummary } from "@/services/admin/adminSessions";
 import { AdminRegion } from "../shared/AdminRegion";
-import { RAISED_BG } from "../shared/adminSurface";
+import { DESK_HAIRLINE, RAISED_BG } from "../shared/adminSurface";
 import { SessionCode } from "../shared/SessionCode";
 import { StatusMark } from "../shared/StatusMark";
 import { sortAdminRows } from "../table/AdminDataTable";
@@ -21,7 +21,6 @@ import {
 import type { AdminDeskTables } from "./useAdminDeskTables";
 
 const FRESH_MS = 60_000;
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
 
 function ItemShell({
   selected,
@@ -52,7 +51,7 @@ function ItemShell({
         width: "100%",
         minHeight: 56,
         padding: "10px 14px",
-        borderTop: hairline,
+        borderTop: DESK_HAIRLINE,
         cursor: "pointer",
         background: selected ? "var(--color-flag-soft)" : undefined,
         boxShadow: selected ? "inset 3px 0 0 var(--color-flag)" : undefined,
@@ -194,7 +193,6 @@ function NeedsItem({
   );
 }
 
-/** Comp `desk2` left column: 320px sidebar of rows with an Expand control. */
 export function AdminSidebarList({
   tables,
   tab,
@@ -236,7 +234,6 @@ export function AdminSidebarList({
     : tables.needsRows;
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  // The open row stays in view when the sidebar mounts or the selection moves.
   useEffect(() => {
     bodyRef.current
       ?.querySelector<HTMLElement>('[aria-current="true"]')

@@ -61,7 +61,6 @@ export interface CommitMatchingInput {
   setMatchingError: (message: string | null) => void;
   setPreviewOpen: (open: boolean) => void;
   onSuccess: () => void;
-  /** When set, Castle Siege routes through oracle instead of honor typing. */
   sessionMode?: SessionMode | null;
   defenderTeamId?: CastleSiegePlayingTeam;
   callOracleAsk?: AnswerCastleSiegeOracleAskFn;
@@ -366,7 +365,6 @@ export async function performMatchingCommit(input: CommitMatchingInput): Promise
   let storedBoundary = boundaryRegion;
   if (storedBoundary) {
     const slimmedBoundary = persistSlimPolygonFeature(storedBoundary);
-    // Boundary is best-effort: omit JSON when over budget (same as MP resolve).
     storedBoundary = slimmedBoundary.ok ? slimmedBoundary.feature : null;
   }
 

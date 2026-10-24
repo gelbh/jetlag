@@ -10,9 +10,6 @@ export interface UseHotfixThreadResult {
   error: Error | null;
 }
 
-/**
- * Admin-only live hotfix thread (coding-agent status / agent_meta).
- */
 export function useHotfixThread(incidentId: string | null | undefined): UseHotfixThreadResult {
   const [messages, setMessages] = useState<IncidentThreadMessageRecord[]>([]);
   const [error, setError] = useState<Error | null>(null);

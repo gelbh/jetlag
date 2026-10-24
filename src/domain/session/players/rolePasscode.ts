@@ -5,7 +5,6 @@ export function normalizeRolePasscode(input: string): string {
   return input.replace(/\s+/g, "").toUpperCase();
 }
 
-/** CSPRNG role codes (matches functions/session/rolePasscodes.mjs). */
 export function generateRolePasscode(): string {
   let code = "";
   const limit = ROLE_PASSCODE_ALPHABET.length * Math.floor(256 / ROLE_PASSCODE_ALPHABET.length);

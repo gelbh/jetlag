@@ -25,7 +25,6 @@ const SOURCE_LABEL: Record<CastleSiegeArena["source"], string> = {
   drawn: "Drawn",
 };
 
-/** Skin-S3 arena ledger: source, setup mode, dials summary. */
 export function ArenaLedger({ arena, setupMode, dials }: ArenaLedgerProps) {
   const resolvedDials = dials ?? DEFAULT_CASTLE_SIEGE_DIALS;
   const sourceLabel = arena ? SOURCE_LABEL[arena.source] : "No arena yet";

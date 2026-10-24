@@ -37,7 +37,6 @@ function demoPois(category: TentacleExtendedCategoryId): TentaclePoi[] {
   ];
 }
 
-/** Live Tentacles catalog with canned nearby places for the answer picker. */
 export function TentacleLearnDemo() {
   const [categoryId, setCategoryId] = useState<TentacleExtendedCategoryId | null>(null);
   const [categoryChosen, setCategoryChosen] = useState(false);

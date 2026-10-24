@@ -10,7 +10,6 @@ export function distanceBetweenLatLngPoints(from: LatLngTuple, to: LatLngTuple):
   });
 }
 
-/** Turf geodesic meters; alias kept for call sites that say distanceBetweenPoints. */
 export function distanceBetweenPoints(from: LatLngTuple, to: LatLngTuple): number {
   return distanceBetweenLatLngPoints(from, to);
 }

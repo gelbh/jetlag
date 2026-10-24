@@ -6,10 +6,8 @@ import type { LineString, MultiPolygon, Polygon, Position } from "geojson";
 import { gameAreaToPolygon } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
 
-/** Border cut drawn across the arena (GeoJSON LineString, lng/lat positions). */
 export type CastleSiegeBorderLine = LineString;
 
-/** Side of the directed border polyline (left/right in the lng/lat plane). */
 export type CastleSiegeHalfSide = "left" | "right";
 
 export type CastleSiegeCoinFace = "heads" | "tails";
@@ -40,7 +38,6 @@ export class InvalidCastleSiegePregameError extends Error {
   }
 }
 
-/** Coin flip: heads → teamA left / teamB right; tails flips the halves. */
 export function assignHalvesByCoin(face: CastleSiegeCoinFace): CastleSiegeCoinAssignment {
   if (face === "heads") {
     return { teamA: "left", teamB: "right" };
@@ -48,10 +45,6 @@ export function assignHalvesByCoin(face: CastleSiegeCoinFace): CastleSiegeCoinAs
   return { teamA: "right", teamB: "left" };
 }
 
-/**
- * Buffer the border into the Neutral Belt polygon.
- * `beltWidthMeters` is the full belt width; each side of the cut gets half.
- */
 export function buildNeutralBelt(
   border: CastleSiegeBorderLine,
   beltWidthMeters: number,
@@ -81,7 +74,6 @@ export function pointInNeutralBelt(
   return booleanPointInPolygon(turfPoint([point.lng, point.lat]), belt);
 }
 
-/** Classify which directed-border half contains the point (left vs right). */
 export function halfSideOfPoint(
   point: CastleSiegeSealPoint,
   border: CastleSiegeBorderLine,
@@ -105,10 +97,6 @@ export function halfSideOfPoint(
   return cross >= 0 ? "left" : "right";
 }
 
-/**
- * True when the border spans the arena: ≥2 positions, both endpoints near the
- * exterior ring, and the chord midpoint inside the arena.
- */
 export function validateBorderCutsArena(arena: GameArea, border: CastleSiegeBorderLine): boolean {
   if (border.coordinates.length < 2) {
     return false;
@@ -133,7 +121,6 @@ export type ValidateSealPlacementArgs = {
   assignment: CastleSiegeCoinAssignment;
 };
 
-/** V6: reject seals outside the arena, inside the Neutral Belt, or outside own half. */
 export function validateSealPlacement(
   args: ValidateSealPlacementArgs,
 ): CastleSiegeSealPlacementResult {
@@ -178,7 +165,6 @@ function isNearArenaBoundary(coord: Position, arena: GameArea): boolean {
   return best <= BORDER_ENDPOINT_BOUNDARY_TOLERANCE_METERS;
 }
 
-/** Exterior ring(s) only (no holes); all MultiPolygon parts. */
 function exteriorRings(arena: GameArea): Position[][] {
   if (arena.type === "Polygon") {
     const ring = arena.coordinates[0];

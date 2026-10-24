@@ -1,0 +1,52 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": { "south": -29.1793, "west": 137.9946, "north": -9.1425, "east": 153.5522 },
+  "places": [
+    { "id": "Q110239814", "name": "Alexandra Park Zoo", "lat": -24.865833, "lng": 152.343056 },
+    { "id": "Q4733588", "name": "Alma Park Zoo", "lat": -27.2267, "lng": 152.983 },
+    { "id": "Q781321", "name": "Australia Zoo", "lat": -26.8366, "lng": 152.9595 },
+    { "id": "Q4823915", "name": "Australian Butterfly Sanctuary", "lat": -16.8205, "lng": 145.633 },
+    { "id": "Q4911532", "name": "Billabong Sanctuary", "lat": -19.3747, "lng": 146.906 },
+    { "id": "Q51228751", "name": "Birdworld Kuranda", "lat": -16.819303, "lng": 145.6324 },
+    {
+      "id": "Q141606010",
+      "name": "Bribie Island Butterfly House",
+      "lat": -27.079869,
+      "lng": 153.178972
+    },
+    { "id": "Q50822227", "name": "Cairns Aquarium", "lat": -16.918592, "lng": 145.773639 },
+    { "id": "Q5017723", "name": "Cairns Tropical Zoo", "lat": -16.7581, "lng": 145.663 },
+    {
+      "id": "Q60324601",
+      "name": "Cairns Zoom and Wildlife Dome",
+      "lat": -16.923056,
+      "lng": 145.779167
+    },
+    { "id": "Q5195193", "name": "Currumbin Wildlife Sanctuary", "lat": -28.1359, "lng": 153.488 },
+    { "id": "Q85755743", "name": "Darling Downs Zoo", "lat": -27.892277, "lng": 152.020035 },
+    { "id": "Q5463448", "name": "Flying High Bird Sanctuary", "lat": -25.2186, "lng": 152.239 },
+    {
+      "id": "Q48814233",
+      "name": "Hartley’s Crocodile Adventures",
+      "lat": -16.663056,
+      "lng": 145.564444
+    },
+    { "id": "Q110641395", "name": "Ipswich Nature Centre", "lat": -27.61891, "lng": 152.76717 },
+    { "id": "Q11297466", "name": "Kuranda Koala Gardens", "lat": -16.819233, "lng": 145.632858 },
+    { "id": "Q641873", "name": "Lone Pine Koala Sanctuary", "lat": -27.5329, "lng": 152.969 },
+    { "id": "Q7306796", "name": "Reef HQ", "lat": -19.2577, "lng": 146.824 },
+    { "id": "Q55631889", "name": "Rockhampton Zoo", "lat": -23.397878, "lng": 150.490753 },
+    { "id": "Q7883058", "name": "Sea Life Sunshine Coast", "lat": -26.6828, "lng": 153.121 },
+    { "id": "Q505518", "name": "Sea World", "lat": -27.9559, "lng": 153.4257 },
+    { "id": "Q7487446", "name": "Shambala Animal Kingdom", "lat": -16.9009, "lng": 145.571 },
+    { "id": "Q7745231", "name": "The Lair", "lat": -27.8648, "lng": 153.317 },
+    {
+      "id": "Q123336268",
+      "name": "Wildlife Habitat Port Douglas",
+      "lat": -16.5259,
+      "lng": 145.463691
+    },
+    { "id": "Q24090077", "name": "Wildlife HQ Zoo", "lat": -26.672672, "lng": 152.990781 }
+  ]
+}

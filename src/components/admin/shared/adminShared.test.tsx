@@ -23,7 +23,6 @@ vi.mock("@mantine/hooks", async (importActual) => ({
 
 describe("admin shared primitives", () => {
   it("renders a selectable diagnostics term/value pair outside the admin world", () => {
-    // Standalone /map renders the monitor panels under the player theme.
     renderWithAppUi(
       <dl>
         <AdminDiagRow label="Bounds">51.5, -0.12</AdminDiagRow>

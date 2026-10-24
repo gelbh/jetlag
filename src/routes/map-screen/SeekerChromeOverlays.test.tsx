@@ -179,7 +179,6 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
     expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
     expect(screen.getByTestId("matching-hud-body")).toBeInTheDocument();
-    // Matching embeds cue/cost in the question box; host cue + commit strip stay off.
     expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("tool-floating-panel")).toBeNull();
@@ -277,7 +276,6 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
     expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
     expect(screen.getByTestId("tentacle-hud-body")).toBeInTheDocument();
-    // Tentacle embeds cue/cost in the question box like Matching.
     expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("tentacle-float-panel")).toBeNull();
@@ -311,7 +309,6 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
     expect(screen.getByTestId("thermometer-hud-body")).toBeInTheDocument();
     expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
     expect(screen.queryByTestId("ask-cost-chip")).toBeNull();
-    // Setup uses map-first answer chrome; END WALK strip only while walking.
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("thermometer-float-panel")).toBeNull();
   });
@@ -381,7 +378,6 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
     expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
     expect(screen.getByTestId("photo-hud-body")).toBeInTheDocument();
-    // Photo embeds cue/cost in the question box like Matching.
     expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("photo-float-panel")).toBeNull();

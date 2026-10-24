@@ -24,7 +24,6 @@ import { HiderQuestionCardRow } from "./HiderQuestionCardRow";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 
 export interface HiderQuestionCards {
-  /** Veto / randomize cards the hider may play; empty hides the actions. */
   available: readonly QuestionPowerUpId[];
   onPlay: (pendingQuestionId: string, messageId: string, card: QuestionPowerUpId) => void;
 }

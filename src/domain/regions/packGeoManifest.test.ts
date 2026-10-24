@@ -60,6 +60,11 @@ describe("packGeoManifest", () => {
 
   it("builds poi urls and supports pack×category matrix", () => {
     expect(packGeoPoiUrl("nyc", "zoo")).toBe("/geo/nyc/poi/zoo.json");
+    expect(packGeoPoiUrl("australia", "museum")).toBe("/geo/australia/poi/museum.json");
+    expect(packGeoPoiUrl("australia", "museum", "nsw")).toBe("/geo/australia/poi/nsw/museum.json");
+    expect(packGeoPoiPublicPath("australia", "park", "vic")).toBe(
+      "geo/australia/poi/vic/park.json",
+    );
     expect(isPackGeoSupported("tokyo", "poi", "museum")).toBe(true);
     expect(isPackGeoSupported("tokyo", "poi", "custom_place")).toBe(false);
     expect(isPackGeoSupported("tokyo", "coastline")).toBe(true);
@@ -173,7 +178,6 @@ describe("packGeoManifest", () => {
         const payload = JSON.parse(readFileSync(resolve(poiDir, fileName), "utf8")) as {
           bbox?: unknown;
         };
-        // Skip files without bbox (tokyo/osaka/zurich/lucerne stubs).
         if (!isPoiBbox(payload.bbox)) {
           continue;
         }

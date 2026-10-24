@@ -29,7 +29,6 @@ function isDeniedTarget(target: EventTarget | null): boolean {
   return false;
 }
 
-/** Global left-edge swipe to navigate back when history allows. */
 export function useEdgeSwipeBack(): void {
   const { canGoBack, goBack } = useAppNavigationStack();
   const activeRef = useRef(false);

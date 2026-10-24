@@ -18,11 +18,6 @@ import { TentaclePoiPinMarker } from "./TentaclePoiPinMarker";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
-  /**
-   * Optional draft-marker activate. Return true when the hit is consumed
-   * (e.g. tentacle POI select). Popup toggle still runs when the overlay has
-   * a popup name.
-   */
   onMarkerActivate?: (overlayId: string) => boolean;
 }
 

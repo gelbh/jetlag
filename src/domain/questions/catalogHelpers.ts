@@ -10,9 +10,7 @@ export interface CatalogHelpersConfig<Option> {
   toolType: string;
   readOptionFromAnnotation: (annotation: AnnotationRecord) => Option | null | undefined;
   readOptionFromPending?: (question: PendingQuestionRecord) => Option | null | undefined;
-  /** Sticky used-set membership (pending ∪ cancelled-with-answer). */
   isPendingQuestionUsed?: (question: PendingQuestionRecord) => boolean;
-  /** Cost / useCount membership (open countable statuses only). */
   isPendingQuestionCountable?: (question: PendingQuestionRecord) => boolean;
 }
 

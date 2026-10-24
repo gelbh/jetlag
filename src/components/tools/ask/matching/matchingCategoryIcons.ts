@@ -51,7 +51,6 @@ const BUILTIN_ICONS: Record<
   foreign_consulate: FlagIcon,
 };
 
-/** Phosphor icon for a matching catalog category (custom/pack → TagIcon). */
 export function matchingCategoryIcon(categoryId: MatchingCategoryId): ComponentType<IconProps> {
   if (categoryId.startsWith("custom:") || categoryId.startsWith("pack:")) {
     return TagIcon;

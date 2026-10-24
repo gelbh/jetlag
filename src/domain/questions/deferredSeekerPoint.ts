@@ -15,7 +15,6 @@ export function seekerAnchorPointFeature(anchor: LatLngTuple): Feature<Point> {
   };
 }
 
-/** Point from pending placement geometryJson, else measuring/matching metadata anchor. */
 export function deferredPointFromPendingPlacement(
   pending: PendingQuestionRecord,
 ): Feature<Point> | null {

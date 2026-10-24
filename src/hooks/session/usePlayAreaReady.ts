@@ -9,11 +9,6 @@ import {
 const loadResolveSessionMatchingAreas = () =>
   import("@/services/geo/matching/resolveSessionMatchingAreas");
 
-/**
- * Play-area readiness only (route readiness on the App boot path). Unlike
- * `useResolvedSessionRules`, the turf-backed loader is dynamic-imported so the
- * App chunk stays free of geometry vendors.
- */
 export function usePlayAreaReady(session: SessionRecord | null | undefined): boolean {
   const readySync = isPlayAreaReadySync(session);
   const packKey = sessionUsesPackPlayArea(session)

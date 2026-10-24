@@ -1,0 +1,16 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": { "south": -29.1793, "west": 137.9946, "north": -9.1425, "east": 153.5522 },
+  "places": [
+    {
+      "id": "Q18359239",
+      "name": "Boyne Island Tannum Sands Golf Course",
+      "lat": -23.9657,
+      "lng": 151.343
+    },
+    { "id": "Q100500041", "name": "Brisbane Golf Club", "lat": -27.5277, "lng": 153.0086 },
+    { "id": "Q81663127", "name": "Clermont Golf Course", "lat": -22.8219, "lng": 147.6487 },
+    { "id": "Q18754828", "name": "St George Golf Club", "lat": -28.027948, "lng": 148.582372 }
+  ]
+}

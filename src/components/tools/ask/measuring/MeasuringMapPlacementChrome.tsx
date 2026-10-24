@@ -1,8 +1,3 @@
-import type { LoadTask } from "@/services/core/progress/loadTask";
-/**
- * Map-first Measuring chrome: GPS → resolve → closer/further + Send (Matching twin).
- */
-
 import { UnstyledButton } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
@@ -22,6 +17,7 @@ import {
 } from "@/components/ui/entry/entryChrome";
 import { type DistanceUnit, formatDistance } from "@/domain/map/distance";
 import type { MeasuringAnswer } from "@/domain/questions";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 
 export type MeasuringMapPlacementPhase = AskMapPlacementPhase;
 
@@ -48,7 +44,6 @@ export type MeasuringMapPlacementChromeProps = {
   distanceUnit: DistanceUnit;
   statusTitle: string;
   statusBody: string;
-  /** Target resolve / search controls while map-first. */
   midSlot?: ReactNode;
 };
 

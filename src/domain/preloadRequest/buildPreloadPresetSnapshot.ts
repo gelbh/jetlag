@@ -16,7 +16,6 @@ export interface BuildPreloadPresetSnapshotInput {
   presetId?: string;
 }
 
-/** Size-capped snapshot for createPreloadRequest (no full gameArea geometry). */
 export function buildPreloadPresetSnapshot(
   input: BuildPreloadPresetSnapshotInput,
 ): PreloadPresetSnapshot | null {

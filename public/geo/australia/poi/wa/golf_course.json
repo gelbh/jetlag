@@ -1,0 +1,12 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": { "south": -35.1916, "west": 112.9211, "north": -13.6887, "east": 129.0019 },
+  "places": [
+    { "id": "Q66974628", "name": "Albany Golf Course", "lat": -35.01272, "lng": 117.918799 },
+    { "id": "Q2357884", "name": "Lake Karrinyup Country Club", "lat": -31.8616, "lng": 115.785 },
+    { "id": "Q2379863", "name": "Port Hedland Golf Club", "lat": -20.399406, "lng": 118.578701 },
+    { "id": "Q2119976", "name": "Royal Perth Golf Club", "lat": -31.983677, "lng": 115.853288 },
+    { "id": "Q66976088", "name": "Sea View Golf Course Club", "lat": -31.998961, "lng": 115.75404 }
+  ]
+}

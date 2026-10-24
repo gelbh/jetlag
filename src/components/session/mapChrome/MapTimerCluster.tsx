@@ -54,11 +54,6 @@ const secondaryStyle = {
   fontVariantNumeric: "tabular-nums" as const,
 };
 
-/**
- * View-only timer cluster:
- * primary = session elapsed since Start
- * secondary = phase / question / walk cue
- */
 export function MapTimerCluster({
   sessionRules,
   timerState,

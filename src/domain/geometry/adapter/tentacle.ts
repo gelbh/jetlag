@@ -91,7 +91,6 @@ export function clearTentacleEliminationCacheForTests(): void {
   poiAnswerEliminationCache.clear();
 }
 
-/** Serialized GeoJSON for metadata, or `undefined` when no shaded region applies. */
 export async function tentacleEliminationJsonForAnswer(params: {
   anchor: LatLngTuple;
   radiusMeters: number;

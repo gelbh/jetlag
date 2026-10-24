@@ -3,7 +3,6 @@ import { LoadProgress } from "../components/ui/feedback/LoadProgress";
 import { useGlobalLoadTasks } from "../hooks/progress/useLoadTask";
 import { useSessionStore } from "../state/sessionStore";
 
-/** App-level non-blocking activity: the sync write queue and global load tasks. */
 export function AppGlobalActivity() {
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
   const tasks = useGlobalLoadTasks();

@@ -1,0 +1,10 @@
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": { "south": -37.5051, "west": 140.9993, "north": -28.1569, "east": 159.1092 },
+  "places": [
+    { "id": "Q6750618", "name": "Manly Sea Life Sanctuary", "lat": -33.7991, "lng": 151.281 },
+    { "id": "Q495039", "name": "National Zoo & Aquarium", "lat": -35.3006, "lng": 149.069 },
+    { "id": "Q2591764", "name": "Sea Life Sydney Aquarium", "lat": -33.8694, "lng": 151.202 }
+  ]
+}

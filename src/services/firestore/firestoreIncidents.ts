@@ -463,7 +463,6 @@ export function deserializeHostConfirmFromFirestore(
   return record;
 }
 
-/** Live host-confirm docs for an incident (host modal / agent status). */
 export function subscribeIncidentHostConfirms(
   incidentId: string,
   onChange: (confirms: HostConfirmRecord[]) => void,
@@ -489,7 +488,6 @@ export function subscribeIncidentHostConfirms(
   );
 }
 
-/** Admin inbox helper: live list ordered by most recently updated. */
 export function subscribeIncidentList(
   onChange: (incidents: IncidentRecord[]) => void,
   onError: (error: Error) => void,

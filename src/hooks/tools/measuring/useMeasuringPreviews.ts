@@ -121,7 +121,6 @@ export function useMeasuringPreviews(gameArea: GameArea, draft: MeasuringDraftSt
         return;
       }
 
-      // Clear stale elimination while the matching elim rebuild runs.
       setMeasuringEliminationPreview(null);
       setMeasuringError(null);
 

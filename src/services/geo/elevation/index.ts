@@ -86,6 +86,7 @@ export async function fetchElevations(
   for (let index = 0; index < pendingPoints.length; index += ELEVATION_BATCH_SIZE) {
     throwIfAborted(options.signal);
     const batch = pendingPoints.slice(index, index + ELEVATION_BATCH_SIZE);
+    // react-doctor-disable-next-line react-doctor/async-await-in-loop -- the elevation rate limiter allows one request at a time; cancel is checked between batches
     await runLimitedElevationRequest(() =>
       fetchElevationBatchAndWrite(batch, elevations, profile, options.signal),
     );

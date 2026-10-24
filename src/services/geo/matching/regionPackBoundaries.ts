@@ -66,7 +66,6 @@ function planDownloadStages(
 }
 
 function resolveGeoAssetUrl(path: string): string {
-  // Node/undici fetch (Vitest) rejects relative URLs; browsers resolve against the origin.
   if (/^https?:\/\//i.test(path)) {
     return path;
   }
@@ -266,7 +265,6 @@ export async function loadRegionPackSessionBoundaries(
   );
 
   let primaryJson = await fetchGeoJsonText(primaryPath, stages);
-  // Fallback when primaryBySubregion is absent: Australia STE is ~1.6MB national.
   if (!config.geoAssets.primaryBySubregion && packId === "australia" && subregionId !== undefined) {
     primaryJson = filterGeoJsonTextBySubregion(
       primaryJson,

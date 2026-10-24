@@ -5,13 +5,8 @@ import type { GameAreaGeometry } from "../kernel/types";
 export type { BoundingBox } from "../kernel/boundingBox";
 export { normalizeBoundingBox } from "../kernel/boundingBox";
 
-/** Meters per degree of latitude (equirectangular; same family as expand). */
 export const METERS_PER_DEGREE_LAT = 111_320;
 
-/**
- * Raw axis-aligned bbox intersection without {@link normalizeBoundingBox}.
- * Tiny intersections stay tiny (attach scoring, threshold tests).
- */
 export function intersectBoundingBoxesRaw(a: BoundingBox, b: BoundingBox): BoundingBox | null {
   const south = Math.max(a.south, b.south);
   const west = Math.max(a.west, b.west);
@@ -30,15 +25,10 @@ export function intersectBoundingBoxes(a: BoundingBox, b: BoundingBox): Bounding
   return intersection ? normalizeBoundingBox(intersection) : null;
 }
 
-/**
- * Inclusive overlap test: unlike {@link intersectBoundingBoxesRaw}, boxes that only
- * share an edge count as intersecting. No antimeridian wrap.
- */
 export function boundingBoxesIntersect(a: BoundingBox, b: BoundingBox): boolean {
   return a.west <= b.east && b.west <= a.east && a.south <= b.north && b.south <= a.north;
 }
 
-/** Finite, in-range, non-inverted lon/lat box. Guards untrusted input (SW messages, storage). */
 export function isValidBoundingBox(value: unknown): value is BoundingBox {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -61,10 +51,6 @@ export function isValidBoundingBox(value: unknown): value is BoundingBox {
   );
 }
 
-/**
- * Approximate bbox area in km² via mid-latitude equirectangular projection
- * using {@link METERS_PER_DEGREE_LAT}.
- */
 export function boundingBoxAreaKm2(box: BoundingBox): number {
   const midLat = (box.north + box.south) / 2;
   const latMeters = (box.north - box.south) * METERS_PER_DEGREE_LAT;
@@ -98,7 +84,6 @@ export function boundingBoxToGameArea(box: BoundingBox): GameAreaGeometry {
   };
 }
 
-/** Unexpanded AABB from game-area coordinates (no min-span inflate). */
 export function gameAreaToBoundingBoxRaw(gameArea: GameAreaGeometry): BoundingBox {
   const positions = collectPositions(gameArea);
   let south = Infinity;

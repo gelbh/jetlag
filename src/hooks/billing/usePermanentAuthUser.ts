@@ -28,14 +28,12 @@ function loadPermanentAuthDeps(): Promise<PermanentAuthDeps> {
       return loadedDeps;
     })
     .catch((error: unknown) => {
-      // Don't cache a transient chunk-load failure: the next mount retries.
       depsPromise = null;
       throw error;
     });
   return depsPromise;
 }
 
-// Local copy of accountAuth.isPermanentUser: that module statically imports firebase/auth.
 function isPermanentUser(user: User | null): boolean {
   return user != null && !user.isAnonymous;
 }

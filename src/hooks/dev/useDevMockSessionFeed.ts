@@ -11,10 +11,6 @@ import type {
 } from "@/domain/session/activity/sessionChat";
 import { useActivityLogStore } from "@/state/activityLogStore";
 
-/**
- * When `jl.dev.mockSessionFeed=1` (DEV only), seed activity log + return mock
- * chat/pending so Settings chrome can polish Chat/Log without Firestore.
- */
 export function useDevMockSessionFeed(
   sessionId: string | null | undefined,
   liveMessages: readonly SessionMessageRecord[],

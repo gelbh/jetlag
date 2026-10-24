@@ -1,8 +1,4 @@
 /**
- * Geo-routed regional Overpass peers (Functions only).
- */
-
-/**
  * @typedef {{ south: number, west: number, north: number, east: number }} OverpassBbox
  * @typedef {{ id: "ch" | "bi", host: string, interpreterUrl: string, bbox: OverpassBbox }} RegionCoverage
  */

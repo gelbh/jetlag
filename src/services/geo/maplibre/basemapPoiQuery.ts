@@ -12,7 +12,6 @@ import type { MapStyle } from "@/domain/map/mapBasemaps";
 export const OPENMAPTILES_SOURCE_ID = "openmaptiles";
 export const OPENMAPTILES_POI_SOURCE_LAYER = "poi";
 
-/** Liberty/dark rendered POI layers used when source query is empty. */
 export const OPENMAPTILES_POI_RENDERED_LAYER_PREFIXES = ["poi_r", "poi_transit"] as const;
 
 const DEFAULT_MAX_RESULTS = 48;
@@ -20,7 +19,6 @@ const POINT_QUERY_RADIUS_METERS = 80;
 
 export interface QueryBasemapPoisOptions {
   categoryIds?: readonly string[];
-  /** When set, keep features within ~80 m of this point (tap / nearest). */
   point?: LatLngTuple;
   maxResults?: number;
 }
@@ -177,7 +175,6 @@ function osmIdFromFeature(
   feature: MapGeoJSONFeature,
   props: OpenMapTilesPoiProperties,
 ): string | null {
-  // OpenMapTiles poi: key_field osm_id with key_field_as_attribute: no → feature.id
   const fromFeatureId = coerceOsmId(feature.id);
   if (fromFeatureId) {
     return fromFeatureId;

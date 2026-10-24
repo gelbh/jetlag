@@ -32,7 +32,6 @@ describe("EndGameAlert", () => {
     expect(container.innerHTML).not.toMatch(/btn-secondary/);
     const panel = screen.getByTestId("end-game-alert-panel");
     expect(panel.getAttribute("data-map-float-surface")).toBe("true");
-    // Non-halt kit chrome (MapFloatAlertPanel would force halt error surface).
     expect(panel.className).not.toMatch(/mantine-Alert-root/);
   });
 

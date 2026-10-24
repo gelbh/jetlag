@@ -1,7 +1,7 @@
 /**
  * Custom Changesets changelog: emit bullets (prefixes kept for normalize).
  * Section headings (Fixes / Improvements / Technical) are applied by
- * scripts/normalize-changelog-sections.mjs after `changeset version`.
+ * scripts/release/normalize-changelog-sections.mjs after `changeset version`.
  */
 const changelogFunctions = {
   getReleaseLine: async (changeset) => {

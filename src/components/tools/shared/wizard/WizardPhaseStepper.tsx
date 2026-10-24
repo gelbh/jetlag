@@ -10,7 +10,6 @@ export interface WizardPhaseStepperNav {
   canGoNext?: boolean;
   onBack: () => void;
   onNext: () => void;
-  /** Overrides the hook-default Continue / commit label. */
   primaryLabel?: string;
 }
 

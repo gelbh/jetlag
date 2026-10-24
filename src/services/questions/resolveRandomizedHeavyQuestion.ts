@@ -66,6 +66,7 @@ export async function resolveRandomizedMatching(
       customMatchingAreas,
       customCategories,
       regionPackId: session.regionPackId,
+      subregionId: session.regionPackSubregionId,
       poiPins: [
         ...taggedSetupPinsForCategory(session.customLocationPins ?? [], categoryId),
         ...poiPinsForCategory(annotations, categoryId),
@@ -117,6 +118,7 @@ export async function resolveRandomizedTentacle(
         ...poiPinsForCategory(annotations, categoryId),
       ],
       regionPackId: session.regionPackId,
+      subregionId: session.regionPackSubregionId,
       task: ctx.task,
     });
   } catch {
@@ -194,7 +196,7 @@ async function resolveMeasuringTarget(
       locationCategory,
       session.customCategories ?? [],
       session.regionPackId,
-      ctx.task ? { task: ctx.task } : undefined,
+      { subregionId: session.regionPackSubregionId, ...(ctx.task ? { task: ctx.task } : {}) },
     );
     const target = resolveAllPlacesTarget({
       seekerPoint: anchor,

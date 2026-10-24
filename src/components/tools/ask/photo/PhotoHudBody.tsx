@@ -1,8 +1,4 @@
 import { HudPhotoIcon } from "@/components/map/icons/ToolIcons";
-/**
- * Photo Ask HUD mode body — Matching twin: question header + catalog/chips.
- * Map-first overlay owns Send after category is chosen (Mantine flag).
- */
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskChipIsland } from "@/components/tools/ask/AskChipIsland";
 import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
@@ -20,7 +16,6 @@ import {
 } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
 
-/** Prefer chips when few options; short rail when the catalog is longer. */
 const CHIP_ISLAND_MAX = 6;
 
 const PHOTO_QUESTION_INTRO = {

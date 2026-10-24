@@ -194,7 +194,6 @@ export function useCreateSession() {
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [locationStatusTone, setLocationStatusTone] = useState<"ok" | "halt" | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
-  /** Mirrors appliedPresetRef after a successful Load-preset apply (reuse exclude + effect wake). */
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
   const presetApplyGenerationRef = useRef(0);
   const resetSilentReuseOverlayRef = useRef<() => void>(() => {});
@@ -561,7 +560,6 @@ export function useCreateSession() {
     premiumEntitlements,
     hostHasAccessClaim,
   });
-  // Castle Siege create is free-path only: hide premium sign-in / access-code UI gates.
   const castleSiegeCreateIntent = castleSiegeFlagEnabled && sessionMode === "castleSiege";
   const createRequiresPremiumSignIn = castleSiegeCreateIntent ? false : requiresPremiumSignIn;
   const createShowPremiumUnlockPanel = castleSiegeCreateIntent ? false : showPremiumUnlockPanel;
@@ -829,7 +827,6 @@ export function useCreateSession() {
               setupMode,
             } satisfies CreateRemoteSessionOptions)
           : undefined;
-      // Do not invent premium CS billing: coerce free even if the UI tier is premium.
       const createTier = castleSiegeCreate !== undefined ? ("free" as const) : tier;
       let useAccessClaimForPremium = hostHasAccessClaim;
 
@@ -968,7 +965,7 @@ export function useCreateSession() {
           regionPackSubregionId,
           customMatchingAreas: advancedSettings.customMatchingAreas,
         });
-        preloadGameAreaCaches(gameArea, matchingAreas, regionPackId, tier);
+        preloadGameAreaCaches(gameArea, matchingAreas, regionPackId, tier, regionPackSubregionId);
         void loadSeaLevelProgressive()
           .then(({ startSeaLevelBackgroundSampling }) => {
             startSeaLevelBackgroundSampling(gameArea, { regionPackId });

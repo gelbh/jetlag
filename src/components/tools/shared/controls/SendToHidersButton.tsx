@@ -8,7 +8,6 @@ interface SendToHidersButtonProps {
   instruction?: ReactNode;
   warning?: ReactNode;
   error?: string | null;
-  /** When false, render copy only — wizard rail owns the commit CTA. */
   showButton?: boolean;
 }
 

@@ -4,7 +4,6 @@ import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 
 export const AUSTRALIA_REGION_PACK_ID = "australia" satisfies RegionPackId;
 
-/** Locked State/Territory slugs for presets and geo properties (Task 2+). */
 export const AUSTRALIA_STATES = ["nsw", "vic", "qld", "sa", "wa", "tas", "nt", "act"] as const;
 
 export type AustraliaStateId = (typeof AUSTRALIA_STATES)[number];

@@ -9,16 +9,10 @@ export interface TileXYZ {
   y: number;
 }
 
-/** Deepest zoom we accept from a URL; well above any basemap max zoom. */
 const MAX_TILE_ZOOM = 24;
 
-/** Esri MapServer: `/tile/{z}/{y}/{x}` (row before column). */
 const ESRI_TILE_PATH = /\/tile\/(\d+)\/(\d+)\/(\d+)\/?$/;
 
-/**
- * OpenFreeMap vector + raster tiles: `/{z}/{x}/{y}.pbf|png|…`.
- * Fonts (`/fonts/…/0-255.pbf`), sprites, and style JSON do not match.
- */
 const OPENFREEMAP_TILE_PATH = /\/(\d+)\/(\d+)\/(\d+)\.(?:pbf|mvt|png|jpe?g|webp)$/i;
 
 function toTile(z: number, x: number, y: number): TileXYZ | null {
@@ -32,7 +26,6 @@ function toTile(z: number, x: number, y: number): TileXYZ | null {
   return { z, x, y };
 }
 
-/** Parse z/x/y from a basemap tile URL on a known tile host; `null` for anything else. */
 export function parseTileXYZ(url: string): TileXYZ | null {
   let pathname: string;
   try {
@@ -59,7 +52,6 @@ function tileYToLat(y: number, tilesPerAxis: number): number {
   return (Math.atan(Math.sinh(n)) * 180) / Math.PI;
 }
 
-/** Web Mercator (XYZ) tile → lon/lat bbox. */
 export function tileToBbox(z: number, x: number, y: number): BoundingBox {
   const tilesPerAxis = 2 ** z;
   return {
@@ -70,7 +62,6 @@ export function tileToBbox(z: number, x: number, y: number): BoundingBox {
   };
 }
 
-/** True when `url` is a basemap tile whose footprint overlaps `gameAreaBbox`. */
 export function isTileInGameArea(url: string, gameAreaBbox: BoundingBox | null): boolean {
   if (!gameAreaBbox) {
     return false;

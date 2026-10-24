@@ -62,8 +62,6 @@ export function clipMaskToGameArea(
   gameArea: GameAreaGeometry,
 ): PolygonFeature | null {
   const gameFeature = gameAreaGeometryToFeature(gameArea) as PolygonFeature;
-  // Union concat can emit overlapping/invalid MultiPolygons. One failed
-  // intersect used to null the whole committed shade.
   const clippedParts: PolygonFeature[] = [];
   for (const part of polygonParts(mask)) {
     const clipped = clipPolygonToGameArea(part, gameFeature);

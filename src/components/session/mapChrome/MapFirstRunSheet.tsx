@@ -9,7 +9,6 @@ const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
 interface MapFirstRunSheetProps {
   open: boolean;
   onDismiss: () => void;
-  /** Open from Settings even after first-run dismiss. */
   forceOpen?: boolean;
 }
 

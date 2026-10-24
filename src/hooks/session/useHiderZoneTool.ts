@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
 import { isAbortError } from "@/services/core/network/anySignal";
-import { createLoadTask, setNamedLoadTask } from "@/services/core/progress/loadTask";
+import { createLoadTask, type LoadTask, setNamedLoadTask } from "@/services/core/progress/loadTask";
 import { HIDER_STATIONS_TASK } from "@/services/core/progress/namedTasks";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import { overpassLoadFromTask } from "@/services/geo/overpass/overpassLoad";
@@ -27,11 +27,9 @@ import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras
 import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
-/** History.state marker so Back can exit zone placement without leaving `/map`. */
 export const ZONE_WIZARD_HISTORY_KEY = "jlZoneWizard";
 
 const MOVE_MIN_DISTANCE_METERS = 50;
-/** Half-width of the Overpass box searched around a map tap; the margin keeps the snap radius inside it. */
 const TAP_SNAP_SEARCH_METERS = STATION_SNAP_METERS + 50;
 const MOVE_PLAYED_MESSAGE =
   "Move card played. Timer paused. Seekers must stay put. Hider is relocating.";
@@ -52,15 +50,50 @@ interface UseHiderZoneToolParams {
   postSystemMessage: (text: string) => Promise<void>;
   pauseTimer: () => void;
   resumeTimer: () => void;
-  /** Host can write timer via client rules; non-host queues a server-applied intent. */
   canControlTimer?: boolean;
   ensureWriteAccess?: () => Promise<void>;
   writesEnabled?: boolean;
   mapPickEnabled?: boolean;
-  /** Board economy: require a Move card in hand before starting relocate. */
   hasMoveCard?: () => boolean;
-  /** Board economy: discard Move (and hand) when the new zone is confirmed. */
   consumeMoveCard?: () => Promise<void>;
+}
+
+type StationLoadOutcome =
+  | { status: "loaded"; stations: TransitStation[] }
+  | { status: "cancelled" }
+  | { status: "failed" };
+
+/**
+ * Runs the station search under `task` and never rejects. Kept outside the hook
+ * because React Compiler cannot compile try/finally inside a component or hook.
+ */
+async function loadStationsWithProgress(
+  viewport: MapViewportBounds,
+  gameArea: GameArea,
+  task: LoadTask,
+  callbacks: { onStations: (stations: TransitStation[]) => void; onSettled: () => void },
+): Promise<StationLoadOutcome> {
+  try {
+    const stations = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
+      onStations: callbacks.onStations,
+      load: overpassLoadFromTask(task, {
+        kind: "fetch",
+        label: "Searching map data",
+        historyKey: "overpass:stations",
+      }),
+    });
+    task.complete();
+    return { status: "loaded", stations };
+  } catch (error) {
+    if (isAbortError(error)) {
+      task.cancel();
+      return { status: "cancelled" };
+    }
+    task.fail(error);
+    return { status: "failed" };
+  } finally {
+    callbacks.onSettled();
+  }
 }
 
 export function useHiderZoneTool({
@@ -92,7 +125,6 @@ export function useHiderZoneTool({
   const [moveMode, setMoveMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  /** Bumped per Play Move and cleared on confirm, so a late rejection only rolls back the live attempt. */
   const moveAttemptRef = useRef(0);
   const wizardOpenRef = useRef(false);
   const moveModeRef = useRef(false);
@@ -169,45 +201,25 @@ export function useHiderZoneTool({
         );
       };
 
-      try {
-        // GTFS load is uncapped; Overpass is bounded inside the fetcher. onStations
-        // still applies late Overpass hits after that Overpass timeout.
-        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
-          onStations: applyStations,
-          load: overpassLoadFromTask(task, {
-            kind: "fetch",
-            label: "Searching map data",
-            historyKey: "overpass:stations",
-          }),
-        });
-        task.complete();
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
-        setStations(loaded);
-        setSelectedStation((current) =>
-          current && loaded.some((station) => station.id === current.id) ? current : null,
-        );
-      } catch (error) {
-        if (isAbortError(error)) {
-          task.cancel();
-          if (isLatestRequest(requestId)) {
-            setStationsLoading(false);
-          }
-          return;
-        }
-        task.fail(error);
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
+      const outcome = await loadStationsWithProgress(viewport, gameArea, task, {
+        onStations: applyStations,
+        // A superseded search must not clear the newer search's spinner.
+        onSettled: () =>
+          setStationsLoading((loading) => (isLatestRequest(requestId) ? false : loading)),
+      });
+      if (!isLatestRequest(requestId) || outcome.status === "cancelled") {
+        return;
+      }
+      if (outcome.status === "failed") {
         setStationsError("Couldn't load transit stations for this area.");
+        return;
       }
 
-      if (isLatestRequest(requestId)) {
-        setStationsLoading(false);
-      }
+      const loaded = outcome.stations;
+      setStations(loaded);
+      setSelectedStation((current) =>
+        current && loaded.some((station) => station.id === current.id) ? current : null,
+      );
     },
     [beginRequest, gameArea, isLatestRequest, requestSignal],
   );
@@ -286,7 +298,6 @@ export function useHiderZoneTool({
     abandonZoneWizardHistory();
   }, [abandonZoneWizardHistory, applyWizardClosed]);
 
-  /** Back / Cancel / dismiss: close placement and resume the timer when leaving a move. */
   const closeWizardFromUser = useCallback(() => {
     if (!wizardOpenRef.current) {
       return;
@@ -307,11 +318,6 @@ export function useHiderZoneTool({
     return () => window.removeEventListener("popstate", onPopState);
   }, [applyWizardClosed]);
 
-  /**
-   * Membership heal reads from the server, so it only runs when reachable.
-   * Offline, rules re-check access when Firestore replays the queued writes and
-   * any rejection surfaces through the write ledger.
-   */
   const ensureWriteAccessIfOnline = useCallback(async () => {
     if (!ensureWriteAccess || isEffectivelyOfflineNow()) {
       return;
@@ -392,7 +398,6 @@ export function useHiderZoneTool({
     sessionId,
     writesEnabled,
   ]);
-  /** Nothing loaded nearby is the common case in Tap map mode, so look stations up around the tap. */
   const snapTapToNearestStation = useCallback(
     async (point: LatLngTuple) => {
       const requestId = beginSnapRequest();

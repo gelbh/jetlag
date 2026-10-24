@@ -35,14 +35,12 @@ const SYNC_BANNER_TONE: Record<SyncTone, MapFloatTone> = {
   info: "info",
 };
 
-/** Spec: action / secondaryAction fields → sticky; only toast when action-free. */
 function errorHasActions(error: UserErrorDisplay): boolean {
   return Boolean(
     (error.action && error.actionLabel) || (error.secondaryAction && error.secondaryActionLabel),
   );
 }
 
-/** Channel 1 vs 2: actionful → sticky Alert; action-free → ephemeral toast. */
 function MapPlayerErrorChannel({
   error,
   onAction,
@@ -113,18 +111,15 @@ export type MapStatusRailModel = {
   onDeclineFoundHider?: () => void;
   hiderOutsideZone?: boolean;
   onSyncErrorAction?: () => void;
-  /** Dim chrome and block tool/timer interaction when the session is gone. */
   inactiveChrome?: boolean;
   terminalSessionError?: import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
   expanded?: boolean;
-  /** Synced hiding-zone Move card: drives PHASE=MOVE in status chrome. */
   moveInProgress?: boolean;
 };
 
 export type MapStatusRailProps = {
   model: MapStatusRailModel;
-  /** Replace default in-header home ScreenNav (e.g. observer leave control). */
   headerLeading?: ReactNode;
 };
 

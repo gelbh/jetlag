@@ -32,7 +32,6 @@ const PRELOAD_MEASURING_CATEGORIES = [
   "museum",
 ] as const satisfies readonly MeasuringLocationCategory[];
 
-/** Test hook — keep assertions aligned with background measuring preload jobs. */
 export function preloadMeasuringCategoriesForTests(): readonly MeasuringLocationCategory[] {
   return PRELOAD_MEASURING_CATEGORIES;
 }
@@ -48,9 +47,13 @@ function buildPreloadJobs(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
-  options?: { includeAdminProbe?: boolean },
+  options?: { includeAdminProbe?: boolean; subregionId?: string },
 ): Array<() => Promise<unknown>> {
   const jobs: Array<() => Promise<unknown>> = [() => fetchStaticTransit(gameArea, BACKGROUND_LANE)];
+  const measuringOptions = {
+    ...BACKGROUND_LANE,
+    ...(options?.subregionId ? { subregionId: options.subregionId } : {}),
+  };
 
   if (options?.includeAdminProbe !== false) {
     jobs.push(() =>
@@ -76,7 +79,7 @@ function buildPreloadJobs(
 
   for (const category of PRELOAD_MEASURING_CATEGORIES) {
     jobs.push(() =>
-      fetchMeasuringPlacesInArea(gameArea, category, [], regionPackId, BACKGROUND_LANE),
+      fetchMeasuringPlacesInArea(gameArea, category, [], regionPackId, measuringOptions),
     );
   }
 
@@ -149,8 +152,9 @@ export function preloadGameAreaCaches(
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
   tier: SessionTier = "free",
+  subregionId?: string,
 ): void {
-  void preloadGameAreaCachesAsync(gameArea, customMatchingAreas, regionPackId, tier);
+  void preloadGameAreaCachesAsync(gameArea, customMatchingAreas, regionPackId, tier, subregionId);
 }
 
 export async function preloadGameAreaCachesAsync(
@@ -158,10 +162,12 @@ export async function preloadGameAreaCachesAsync(
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
   tier: SessionTier = "free",
+  subregionId?: string,
 ): Promise<void> {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
   const jobs = buildPreloadJobs(gameArea, customMatchingAreas, regionPackId, {
     includeAdminProbe: false,
+    subregionId,
   });
   usePreloadStore.getState().reset(gameAreaKey, jobs.length + 1);
 
@@ -182,9 +188,7 @@ export async function preloadGameAreaCachesAsync(
       regionPackId,
       BACKGROUND_LANE,
     );
-  } catch {
-    // probe failure is non-fatal; background preload continues with empty counts
-  }
+  } catch {}
   usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
   usePreloadStore.getState().recordSuccess(gameAreaKey);
 
@@ -244,7 +248,6 @@ export async function preloadCriticalGameAreaCaches(
     probeStage.finish();
     store.recordCriticalJob(gameAreaKey, "success");
   } catch {
-    // probe failure is non-fatal; preload continues with empty counts
     probeStage.cancel();
     store.recordCriticalJob(gameAreaKey, "failure");
   }

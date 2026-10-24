@@ -8,6 +8,3 @@ vi.stubEnv("VITE_FIREBASE_PROJECT_ID", "demo-jetlag");
 vi.stubEnv("VITE_FIREBASE_STORAGE_BUCKET", "demo-jetlag.appspot.com");
 vi.stubEnv("VITE_FIREBASE_MESSAGING_SENDER_ID", "1234567890");
 vi.stubEnv("VITE_FIREBASE_APP_ID", "1:1234567890:web:demo");
-
-// The Functions emulator serves callables (join heals), but createRemoteSession
-// skips gate init when VITE_USE_FIREBASE_EMULATOR=true and leaves sessions ungated.

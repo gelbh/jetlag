@@ -1,7 +1,3 @@
-/**
- * Shared lazy dynamic-import cache for kernel WASM bridges.
- * Clears the cached promise on load failure so a later call can retry.
- */
 export function createLazyWasmImport<T>(loader: () => Promise<T>): {
   load: () => Promise<T>;
   resetForTests: () => void;

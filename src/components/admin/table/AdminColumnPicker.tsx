@@ -1,21 +1,17 @@
 import { Box, Button, Checkbox, Popover, TextInput } from "@mantine/core";
 import { type KeyboardEvent, useState } from "react";
 import type { AdminTablePrefs } from "@/domain/admin/adminTablePrefs";
-import { RAISED_BG } from "../shared/adminSurface";
+import { DESK_HAIRLINE, RAISED_BG } from "../shared/adminSurface";
 import type { AdminColumn } from "./AdminDataTable";
-
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
 
 export interface AdminColumnPickerProps<Row> {
   columns: AdminColumn<Row>[];
   prefs: AdminTablePrefs;
   defaults: AdminTablePrefs;
   onPrefsChange(prefs: AdminTablePrefs): void;
-  /** Trigger height: 32 in the toolbar, 44 for touch. */
   height?: number;
 }
 
-/** Comp `.picker`: 300px floating panel; the toolbar button is its target. */
 export function AdminColumnPicker<Row>({
   columns,
   prefs,
@@ -99,7 +95,7 @@ export function AdminColumnPicker<Row>({
         p={0}
         style={{
           background: "var(--color-canvas)",
-          border: hairline,
+          border: DESK_HAIRLINE,
           boxShadow: "0 8px 24px 0 oklch(0.1 0.04 265 / 0.45)",
           overflow: "hidden",
         }}
@@ -213,7 +209,7 @@ export function AdminColumnPicker<Row>({
         <Box
           style={{
             padding: "8px 14px 12px",
-            borderTop: hairline,
+            borderTop: DESK_HAIRLINE,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",

@@ -41,6 +41,7 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "neutralBelt",
   "dials",
   "coinAssignment",
+  "standoffTurn",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordStructuredKey = (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
@@ -94,6 +95,8 @@ const SESSION_RECORD_SCALAR_KEYS = [
   "mode",
   "seriesLength",
   "setupMode",
+  "phase",
+  "standoffDeckRemainingCount",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordScalarKey = (typeof SESSION_RECORD_SCALAR_KEYS)[number];
@@ -144,7 +147,6 @@ interface SessionState {
   lastSyncError: string | null;
   remoteUpdateNotice: string | null;
   networkReachable: boolean | null;
-  /** True while the latest session doc snapshot came from the local cache (not persisted). */
   sessionFromCache: boolean;
   setSession: (session: SessionRecord | null, myUid?: string | null) => void;
   setMyUid: (uid: string | null) => void;
