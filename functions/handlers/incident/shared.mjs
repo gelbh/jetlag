@@ -68,7 +68,6 @@ export const sessionOpsMcpAuthSecret = defineSecret("SESSION_OPS_MCP_AUTH_SECRET
 export const incidentWorkerBaseUrl = defineString("INCIDENT_WORKER_BASE_URL", {
   default: "https://jetlag.gelbhart.dev",
 });
-/** Public HTTPS URL of the sessionOpsMcp Cloud Function (Cursor mcpServers.url). */
 export const sessionOpsMcpUrl = defineString("SESSION_OPS_MCP_URL", {
   default: "https://us-central1-jet-lag-map-companion.cloudfunctions.net/sessionOpsMcp",
 });
@@ -188,7 +187,6 @@ export function mapIncidentError(error) {
   }
 }
 
-/** Shared session-ops execute deps wired to Firestore + admin moderate helpers. */
 export function buildSessionOpsExecuteDeps(db) {
   return {
     moderate: (sessionId, action, adminUid) => moderateSession(db, sessionId, action, adminUid),

@@ -17,10 +17,6 @@ export interface UseSupportThreadResult {
   sendTurn: (text: string) => Promise<void>;
 }
 
-/**
- * Live support thread (player ↔ session-ops agent ± admin) + incident doc.
- * Mutations go through `postSupportAgentTurn`; Firestore is read-only.
- */
 export function useSupportThread(incidentId: string | null | undefined): UseSupportThreadResult {
   const [incident, setIncident] = useState<IncidentRecord | null>(null);
   const [messages, setMessages] = useState<IncidentThreadMessageRecord[]>([]);

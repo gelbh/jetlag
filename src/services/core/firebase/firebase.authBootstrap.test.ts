@@ -82,7 +82,6 @@ vi.mock("../../../config/env", () => ({
 
 describe("auth bootstrap start", () => {
   beforeEach(() => {
-    // Fresh module state per test: the analytics subscription is module-level.
     vi.resetModules();
     vi.clearAllMocks();
     authMocks.auth.currentUser = null;

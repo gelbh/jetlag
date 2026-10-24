@@ -18,5 +18,4 @@ export async function dispatchSpatialVoronoi<
   });
 }
 
-/** Public alias; callers may import either name. */
 export const runSpatialVoronoi = dispatchSpatialVoronoi;

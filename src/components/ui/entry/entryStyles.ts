@@ -54,7 +54,6 @@ export const plainStyles: EntryButtonStyles = {
   },
 };
 
-/** Compact flag control for inset list rows (friends, presets). */
 export const compactFilledStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
@@ -91,7 +90,6 @@ export const mapIslandFilledStyles: EntryButtonStyles = {
 
 export type MapToolSlotTone = "tool" | "history";
 
-/** Caption under hunt/session slot icon (sentence case; not Survey display). */
 export const mapToolSlotLabelStyle = {
   display: "block",
   maxWidth: "100%",
@@ -106,7 +104,6 @@ export const mapToolSlotLabelStyle = {
   whiteSpace: "nowrap" as const,
 };
 
-/** Hunt / session dock chip (column icon+label). */
 export function mapToolSlotStyles(
   pressed: boolean,
   tone: MapToolSlotTone = "tool",
@@ -159,7 +156,6 @@ export function mapToolSlotStyles(
 
 export type ChoiceTone = "default" | "success" | "danger";
 
-/** Ask kit choice chip / catalog row / binary answer under Mantine flag. */
 export function choiceChipStyles(
   selected: boolean,
   tone: ChoiceTone = "default",
@@ -212,10 +208,6 @@ export const filterChipTrackStyle = {
   WebkitOverflowScrolling: "touch" as const,
 };
 
-/**
- * Compact filter pill (Photos / Music style) for category selectors.
- * Selected = elevated white segment on the frosted track.
- */
 export function filterChipStyles(selected: boolean): EntryButtonStyles {
   return {
     root: {
@@ -251,10 +243,6 @@ export function filterChipStyles(selected: boolean): EntryButtonStyles {
   };
 }
 
-/**
- * Quiet 2-col catalog tile (Matching categories). Soft inset, no drop shadow.
- * Selected uses a light flag wash + hairline, not a solid flag brick.
- */
 export function catalogTileStyles(selected: boolean): EntryButtonStyles {
   return {
     root: {
@@ -293,7 +281,6 @@ export function catalogTileStyles(selected: boolean): EntryButtonStyles {
   };
 }
 
-/** Flat question / callout surface inside Ask sheets (no elevation shadow). */
 export const askInsetSurfaceStyle = {
   borderRadius: 14,
   backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.06)",
@@ -301,7 +288,6 @@ export const askInsetSurfaceStyle = {
   boxShadow: "none",
 } as const;
 
-/** Island-height icon control (pause / resume beside the clock). */
 export const mapIslandIconStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
@@ -325,7 +311,6 @@ export const mapIslandIconStyles: EntryButtonStyles = {
   },
 };
 
-/** Compact gray / secondary control for inset list rows. */
 export const compactGrayStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
@@ -342,7 +327,6 @@ export const compactGrayStyles: EntryButtonStyles = {
   },
 };
 
-/** Compact halt-tinted control for destructive row actions. */
 export const compactDangerStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
@@ -359,7 +343,6 @@ export const compactDangerStyles: EntryButtonStyles = {
   },
 };
 
-/** Transparent TextInput sitting inside InsetGroup. */
 export const insetTextInputStyles = {
   root: { width: "100%" },
   label: {
@@ -382,7 +365,6 @@ export const insetTextInputStyles = {
   },
 } as const;
 
-/** Transparent Textarea sitting inside InsetGroup. */
 export const insetTextareaStyles = {
   root: { width: "100%" },
   label: {
@@ -404,7 +386,6 @@ export const insetTextareaStyles = {
   },
 } as const;
 
-/** Full-bleed bottom Drawer chassis (Friends / Leaderboard / report sheets). */
 export function bottomDrawerStyles(maxHeight: string | false = "min(70dvh, 34rem)") {
   return {
     inner: {
@@ -432,7 +413,6 @@ export function bottomDrawerStyles(maxHeight: string | false = "min(70dvh, 34rem
   };
 }
 
-/** Fixed entry-route backdrop (non-map routes). */
 export const entryBackdropStyle: CSSProperties = {
   position: "fixed",
   inset: 0,
@@ -445,14 +425,12 @@ export const entryBackdropStyle: CSSProperties = {
   ].join(", "),
 };
 
-/** Home / entry route poster shell. */
 export const homePosterStyle: CSSProperties = {
   position: "relative",
   isolation: "isolate",
   backgroundColor: "transparent",
 };
 
-/** Top signal→flag accent bar (replaces `.home-terminal-accent::after`). */
 export const homeTerminalAccentBarStyle: CSSProperties = {
   position: "fixed",
   top: "var(--safe-area-top)",
@@ -487,7 +465,6 @@ const homeCardBtnBase: CSSProperties = {
   boxSizing: "border-box",
 };
 
-/** Frosted home / play-hub row control (was `.home-card-btn*`). */
 export function homeCardBtnStyle(variant: HomeCardBtnVariant = "secondary"): CSSProperties {
   switch (variant) {
     case "primary":
@@ -624,12 +601,10 @@ export function segmentBtnStyle(selected: boolean): CSSProperties {
   };
 }
 
-/** Enter animation class hook kept for motion.css reduced-motion overrides. */
 export const homeEnterActionsStyle: CSSProperties = {
   animation: "home-enter 0.22s ease-out both",
 };
 
-/** Frosted map floating control (zoom / style / recenter). Was `.hud-chrome`. */
 export function hudChromeStyles(pressed = false): EntryButtonStyles {
   return {
     root: {
@@ -669,7 +644,6 @@ export function hudChromeStyles(pressed = false): EntryButtonStyles {
   };
 }
 
-/** Map floating panel / sheet surface (was `.hud-panel`). */
 export const hudPanelStyle: CSSProperties = {
   position: "relative",
   overflow: "hidden",
@@ -682,19 +656,16 @@ export const hudPanelStyle: CSSProperties = {
   color: "var(--color-field-ink)",
 };
 
-/** Bottom sheet skin (was `.hud-sheet`). */
 export const hudSheetStyle: CSSProperties = {
   borderTop: "3px solid var(--color-flag)",
   backgroundColor: "oklch(from var(--color-canvas) l c h / 0.96)",
   boxShadow: "0 -12px 40px oklch(0.08 0.04 265 / 0.55)",
 };
 
-/** Modal scrim (was `.hud-scrim`). */
 export const hudScrimStyle: CSSProperties = {
   backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
 };
 
-/** Ask path frosted panel (was `.ask-hud-panel`). */
 export const askHudPanelStyle: CSSProperties = {
   position: "relative",
   overflow: "hidden",
@@ -707,7 +678,6 @@ export const askHudPanelStyle: CSSProperties = {
   color: "var(--color-field-ink)",
 };
 
-/** Detail-panel icon close (was `.jl-sync-detail-panel__close`). */
 export const sheetIconCloseStyle: CSSProperties = {
   display: "inline-flex",
   height: "2rem",
@@ -764,7 +734,6 @@ const syncBeaconTone: Record<
   },
 };
 
-/** Sync status beacon (was `.jl-sync-beacon*`). */
 export function syncBeaconStyle(status: SyncBeaconStatus, size: "sm" | "md" = "md"): CSSProperties {
   const tone = syncBeaconTone[status];
   const dim = size === "sm" ? "1.25rem" : "1.625rem";
@@ -783,7 +752,6 @@ export function syncBeaconStyle(status: SyncBeaconStatus, size: "sm" | "md" = "m
   };
 }
 
-/** Preload leading beacon in detail panels. */
 export function preloadBeaconStyle(
   tone: "loading" | "failed",
   size: "sm" | "md" = "sm",
@@ -805,7 +773,6 @@ export function preloadBeaconStyle(
   };
 }
 
-/** Wizard place-phase attention ring overlay. */
 export const mapAttentionRingStyle: CSSProperties = {
   position: "fixed",
   inset: 0,
@@ -814,7 +781,6 @@ export const mapAttentionRingStyle: CSSProperties = {
   boxShadow: "inset 0 0 0 3px oklch(from var(--color-highlight) l c h / 0.5)",
 };
 
-/** Icon wrap inside hunt / session slot (was `.jl-tool-slot-icon`). */
 export const mapToolSlotIconStyle: CSSProperties = {
   display: "flex",
   height: "1.75rem",
@@ -823,7 +789,6 @@ export const mapToolSlotIconStyle: CSSProperties = {
   justifyContent: "center",
 };
 
-/** Expanded map status rail sits in-flow (clears absolute overlay inset). */
 export const statusRailExpandedFlowStyle: CSSProperties = {
   position: "relative",
   inset: "auto",
@@ -832,7 +797,6 @@ export const statusRailExpandedFlowStyle: CSSProperties = {
   left: "auto",
 };
 
-/** Chat unread pip on session dock slots (was `.jl-unread-badge`). */
 export const chatUnreadBadgeStyle: CSSProperties = {
   position: "absolute",
   top: "-0.375rem",

@@ -1,4 +1,3 @@
-/** Bare Wikidata Q-id (no URL, no semicolon lists). */
 export function isWikidataQid(value: string): boolean {
   return /^Q\d+$/.test(value);
 }

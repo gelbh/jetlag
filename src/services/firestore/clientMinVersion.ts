@@ -10,7 +10,6 @@ function clientMinVersionDoc() {
   return doc(getFirestoreDb(), CLIENT_MIN_VERSION_COLLECTION, CLIENT_MIN_VERSION_DOC_ID);
 }
 
-/** One-shot read for boot / before-join checks. */
 export async function fetchClientMinVersion(): Promise<string | null> {
   if (!isFirebaseConfigured()) {
     return null;

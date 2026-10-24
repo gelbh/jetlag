@@ -93,8 +93,6 @@ describe("matching geometry", () => {
 
     const ring = region?.geometry.type === "Polygon" ? region.geometry.coordinates[0] : null;
     expect(ring).not.toBeNull();
-    // A Voronoi cell clipped to a rectangle has a modest vertex count;
-    // the old grid produced a MultiPolygon of hundreds of axis-aligned rects.
     expect(ring!.length).toBeLessThan(20);
     expect(ring!.length).toBeGreaterThan(4);
   });

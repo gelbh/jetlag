@@ -30,7 +30,6 @@ export interface AdminIncidentCursorLaunchProps {
   disabled?: boolean;
   launchCursorAgentFn?: (incidentId: string) => Promise<LaunchIncidentCursorAgentResult>;
   openExternalUrlFn?: (url: string) => void;
-  /** Outcome line for the actions row to show (launch result or error). */
   onMessage?: (message: { tone: "ok" | "error"; text: string } | null) => void;
 }
 
@@ -38,10 +37,6 @@ function openInNewTab(url: string) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-/**
- * Launch / Open / Retry Cursor coding agent; one button in the actions row.
- * Parent should pass `key={incidentId}` so local state resets on selection change.
- */
 export function AdminIncidentCursorLaunch({
   incidentId,
   agent = null,

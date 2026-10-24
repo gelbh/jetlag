@@ -43,7 +43,6 @@ function parseBullets(body) {
 export function normalizeChangelogSections(content) {
   const dated = ensureDatedVersionHeaders(content);
   const split = dated.split(/^(## \d+\.\d+\.\d+ - \d{4}-\d{2}-\d{2})/m);
-  // [preamble, header1, body1, header2, body2, ...]
   if (split.length < 3) {
     return dated;
   }
@@ -54,7 +53,6 @@ export function normalizeChangelogSections(content) {
   const body = rest[0];
   const after = rest.slice(1).join("");
 
-  // Only rewrite if Changesets bump headings are present.
   const hasBumpHeadings = /### (?:Patch|Minor|Major) Changes/m.test(body);
   if (!hasBumpHeadings) {
     return dated;

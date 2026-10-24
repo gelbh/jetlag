@@ -34,7 +34,6 @@ pub fn destination_point(origin: LatLng, distance_m: f64, bearing_deg: f64) -> L
     (φ2.to_degrees(), λ2.to_degrees())
 }
 
-/// Haversine distance in meters between two lat/lng points.
 pub(crate) fn haversine_meters(a: LatLng, b: LatLng) -> f64 {
     let lat_delta = (b.0 - a.0).to_radians();
     let lng_delta = (b.1 - a.1).to_radians();

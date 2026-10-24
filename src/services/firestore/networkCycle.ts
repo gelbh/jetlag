@@ -17,9 +17,7 @@ async function enableWithRetry(db: ReturnType<typeof getFirestoreDb>): Promise<v
     try {
       await enableNetwork(db);
       return;
-    } catch {
-      // Retry below: leaving Firestore disabled would strand the session offline.
-    }
+    } catch {}
   }
 }
 

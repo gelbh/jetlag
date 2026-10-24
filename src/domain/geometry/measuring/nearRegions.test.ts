@@ -30,7 +30,6 @@ describe("buildLocationNearRegion disk steps", () => {
     const distanceMeters = 4_147;
     const center = turfPoint([-0.15, 51.45]);
 
-    // Midway between two vertices of a regular n-gon; chords cut inside the true circle.
     const bearingMidChordDegrees = 360 / 16 / 2;
     const coarseChordFraction = Math.cos(Math.PI / 16);
     const probeFraction = (coarseChordFraction + Math.cos(Math.PI / 64)) / 2;

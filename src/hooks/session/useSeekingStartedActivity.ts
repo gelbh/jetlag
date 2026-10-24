@@ -9,7 +9,6 @@ import {
 } from "../../domain/session/timer/timer";
 import { emitSeekingStartedActivity } from "../../services/session/emitSessionActivity";
 
-/** Poll while the timer is running so elapsed can cross the hiding boundary. */
 const SEEKING_STARTED_TICK_MS = 1_000;
 
 export interface ShouldEmitSeekingStartedInput {
@@ -19,7 +18,6 @@ export interface ShouldEmitSeekingStartedInput {
   elapsedMs: number;
 }
 
-/** Pure predicate for host/controller seeking_started emission. */
 export function shouldEmitSeekingStarted(input: ShouldEmitSeekingStartedInput): boolean {
   return (
     input.canEmit &&
@@ -35,13 +33,6 @@ interface UseSeekingStartedActivityParams {
   timerState: TimerState;
 }
 
-/**
- * Host/controller-only: append fixed `seeking_started` once when the hiding
- * period has elapsed. Non-controlling clients only read the log.
- *
- * While `runningSince` is set, elapsed grows without `timerState` identity
- * changes, so we tick every second to recompute and emit when due.
- */
 export function useSeekingStartedActivity({
   sessionId,
   canEmit,

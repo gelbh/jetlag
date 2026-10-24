@@ -4,7 +4,6 @@ import { dirname, join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const require = createRequire(import.meta.url);
-// `require.resolve("@mantine/core")` → <pkg>/cjs/index.cjs
 const coreRoot = resolve(dirname(require.resolve("@mantine/core")), "..");
 const notificationsRoot = resolve(dirname(require.resolve("@mantine/notifications")), "..");
 const componentsDir = join(coreRoot, "esm/components");
@@ -20,7 +19,6 @@ function walkFiles(dir: string, match: RegExp): string[] {
   });
 }
 
-/** Named imports from "@mantine/core" (multiline-safe; drops `type` / `as`). */
 function mantineCoreImports(source: string): string[] {
   const re = /import\s+(type\s+)?\{([^}]*)\}\s*from\s*["']@mantine\/core["']/g;
   return [...source.matchAll(re)].flatMap(([, typeOnly, body]) =>
@@ -34,7 +32,6 @@ function mantineCoreImports(source: string): string[] {
   );
 }
 
-/** Component plus the sibling component dirs it imports, recursively. */
 function withInternalDeps(roots: Iterable<string>): Set<string> {
   const seen = new Set<string>();
   const queue = [...roots];
@@ -42,7 +39,7 @@ function withInternalDeps(roots: Iterable<string>): Set<string> {
     const name = queue.pop()!;
     if (seen.has(name)) continue;
     const dir = [join(componentsDir, name), join(utilsDir, name)].find(existsSync);
-    if (!dir) continue; // hooks, providers
+    if (!dir) continue;
     seen.add(name);
     for (const file of walkFiles(dir, /\.mjs$/)) {
       const source = readFileSync(file, "utf8");
@@ -59,16 +56,14 @@ function listedCssImports(file: string): string[] {
   const source = readFileSync(resolve(__dirname, file), "utf8");
   return [...source.matchAll(/import\s+["']@mantine\/core\/styles\/([A-Za-z]+)\.layer\.css["']/g)]
     .map(([, name]) => name)
-    .filter((name) => /^[A-Z]/.test(name)); // skip baseline / global / variables
+    .filter((name) => /^[A-Z]/.test(name));
 }
 
-/** Sources that only render under an admin root, which imports `mantineAdminStyles`. */
 const isAdminSource = (path: string) =>
   /[\\/]src[\\/](components[\\/]admin[\\/]|routes[\\/]admin-map-screen[\\/]|routes[\\/]AdminMapScreen\.tsx$)/.test(
     path,
   );
 
-/** Styled Mantine components (with internal deps) that the given sources render. */
 function styledComponents(sources: string[]): string[] {
   const used = new Set(sources.flatMap((f) => mantineCoreImports(readFileSync(f, "utf8"))));
   return [...withInternalDeps(used)].filter((n) => existsSync(cssFor(n)));

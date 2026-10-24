@@ -14,7 +14,6 @@ export function formatIncidentClock(iso: string): string {
   });
 }
 
-/** Comp `.msg`: who line, then a bubble. Admin lines sit right in orange, system lines dashed. */
 export function AdminIncidentMessage({
   tone,
   meta,

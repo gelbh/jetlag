@@ -193,7 +193,6 @@ export function adminLevelForMatchingCategory(categoryId: MatchingCategoryId): n
   }
 }
 
-/** Matching is play-area-only; expanded near-search is retired. */
 export function matchingUsesExpandedFeatureSearch(_category?: MatchingCategoryDefinition): boolean {
   void _category;
   return false;

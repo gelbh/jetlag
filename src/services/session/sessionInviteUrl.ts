@@ -13,10 +13,6 @@ export function parseSessionInviteCode(raw: string | null | undefined): string |
   return isValidSessionCode(normalized) ? normalized : null;
 }
 
-/**
- * Prefer the current browser origin for shareable invites, but fall back to the
- * public site origin for non-http or loopback hosts.
- */
 export function resolveSessionInviteOrigin(currentOrigin: string, publicOrigin: string): string {
   try {
     const url = new URL(currentOrigin);

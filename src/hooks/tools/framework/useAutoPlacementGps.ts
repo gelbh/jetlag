@@ -5,7 +5,6 @@ import {
 } from "../../../services/core/location/geolocation";
 
 interface UseAutoPlacementGpsOptions<TKey> {
-  /** Map-first placement is showing for the current tool option. */
   eligible: boolean;
   /** Auto-GPS fires at most once per key (category, distance, measure-from). */
   entryKey: TKey;
@@ -15,10 +14,6 @@ interface UseAutoPlacementGpsOptions<TKey> {
   requestGps: (shouldApply: () => boolean) => Promise<unknown>;
 }
 
-/**
- * Checks location permission when map-first placement opens and, if granted,
- * requests GPS once per entry key unless a point is already placed.
- */
 export function useAutoPlacementGps<TKey>({
   eligible,
   entryKey,
@@ -48,8 +43,6 @@ export function useAutoPlacementGps<TKey>({
         return;
       }
       setPermission(next);
-      // Read the point after each await: a map tap during the permission check
-      // or the GPS fix wins.
       if (next === "granted" && !hasPointRef.current && firedForKeyRef.current !== entryKey) {
         firedForKeyRef.current = entryKey;
         void requestGpsRef.current(() => !hasPointRef.current);

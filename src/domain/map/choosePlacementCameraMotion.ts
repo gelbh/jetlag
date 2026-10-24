@@ -5,10 +5,6 @@ export type PlacementCameraMotion =
   | { kind: "fly"; durationMs: number }
   | { kind: "ease"; durationMs: number };
 
-/**
- * Placement reframe apply choice: durations come only from MOTION_MAP_CAMERA_*.
- * `animate` is already `!prefersReducedMotion` at the call site.
- */
 export function choosePlacementCameraMotion(args: {
   animate: boolean;
   isLargeJump: boolean;

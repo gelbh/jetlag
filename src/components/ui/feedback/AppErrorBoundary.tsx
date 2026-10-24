@@ -10,10 +10,6 @@ interface AppErrorBoundaryState {
   hasError: boolean;
 }
 
-/**
- * Root error boundary. Capture goes through the lazy PostHog-backed facade so
- * analytics stays off the App chunk's static graph.
- */
 export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
   state: AppErrorBoundaryState = { hasError: false };
 

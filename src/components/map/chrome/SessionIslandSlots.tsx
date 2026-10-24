@@ -13,7 +13,6 @@ import { JlIcon } from "../../ui/brand/JlIcon";
 import { MapChromeControl } from "./MapChromeControl";
 
 export interface SessionIslandSlotsProps {
-  /** Draw / markup control — lives on the RIGHT session dock, not bottom-middle. */
   drawSlot?: ReactNode;
   onOpenChat?: () => void;
   onOpenLog?: () => void;

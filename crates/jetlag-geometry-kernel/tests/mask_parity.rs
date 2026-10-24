@@ -29,20 +29,15 @@ fn square(west: f64) -> PolygonFeature {
 #[test]
 fn unions_polygons_and_clips_to_game_area() {
     let area = london_game_area();
-    // square(-0.22): west=-0.22..-0.19 crosses game-area west edge (-0.2)
     let input = UnionInput {
         polygons: vec![square(-0.22), square(-0.18)],
         disks: vec![],
     };
     let mask = build_mask_from_union_input(&input, &area).expect("mask");
-    // Inside clipped square / union and game area
     assert!(feature_contains_lng_lat(&mask, -0.195, 51.45));
     assert!(feature_contains_lng_lat(&mask, -0.165, 51.45));
-    // Gap between the two squares (not in either polygon)
     assert!(!feature_contains_lng_lat(&mask, -0.185, 51.45));
-    // In the polygon west of the game-area boundary → clipped out
     assert!(!feature_contains_lng_lat(&mask, -0.21, 51.45));
-    // Outside game area entirely
     assert!(!feature_contains_lng_lat(&mask, -0.25, 51.45));
 }
 
@@ -54,9 +49,7 @@ fn builds_end_game_mask_from_disks() {
         radius_meters: 400.0,
     }];
     let mask = build_end_game_mask_from_disks(&area, &disks).expect("mask");
-    // Disk center should be eliminated (outside remaining mask)
     assert!(!feature_contains_lng_lat(&mask, -0.15, 51.45));
-    // Far corner of game area remains
     assert!(feature_contains_lng_lat(&mask, -0.19, 51.49));
 }
 

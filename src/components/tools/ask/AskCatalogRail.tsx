@@ -1,9 +1,3 @@
-/**
- * Catalog rail — row select advances; no sibling CONTINUE strip/button.
- * Spec: ask-surface-kit-design rev 2026-08-05b.
- * Optional `groupLabel` on rows renders sticky section headers (Matching).
- * Optional `columns={2|3}` lays category tiles in a multi-column grid under each group.
- */
 import { Paper, Text, UnstyledButton } from "@mantine/core";
 import { type ReactNode } from "react";
 import { ListSelectRow } from "@/components/tools/shared/controls/ListSelectRow";
@@ -12,16 +6,9 @@ import { catalogTileStyles, mapChromeSurfaceStyles } from "@/components/ui/entry
 export type AskCatalogRailRow = {
   id: string;
   label: string;
-  /** Optional leading icon (e.g. Matching category glyph). */
   icon?: ReactNode;
-  /** When set, rows with the same label share a section heading above them. */
   groupLabel?: string;
-  /**
-   * Replaces the label node (e.g. inline distance field).
-   * Tile uses a non-button host so nested inputs stay valid HTML.
-   */
   content?: ReactNode;
-  /** Greyed / non-interactive (e.g. already used ask option). */
   disabled?: boolean;
 };
 
@@ -31,7 +18,6 @@ type AskCatalogRailProps = {
   onSelect: (id: string) => void;
   "aria-label"?: string;
   hint?: string;
-  /** 1 = stacked list (default); 2|3|4 = tile grid under each group heading. */
   columns?: 1 | 2 | 3 | 4;
 };
 

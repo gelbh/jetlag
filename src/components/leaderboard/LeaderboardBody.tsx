@@ -1061,7 +1061,6 @@ function RankRow({
 const EMPTY_BOARD_MESSAGE =
   "No ranked entries yet. Finish synced rounds with leaderboard opt-in to populate this board.";
 
-/** Join/Friends-style iOS body for the Mantine Leaderboard route. */
 export function LeaderboardBody() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();

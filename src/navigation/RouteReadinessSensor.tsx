@@ -33,14 +33,6 @@ function PremiumReadiness() {
   return <ScreenReadyReporter ready={usePremiumScreenReady()} />;
 }
 
-/**
- * Keeps the entitlements store hydrated for readers that do not mount
- * `usePremiumEntitlements` themselves (e.g. SupportAgentChat). Skipped on
- * public shells and /join so this global sync does not mint an anonymous user
- * or hit the App Check callable (reCAPTCHA) on those routes. `/premium` is a
- * public shell but still mounts `PremiumReadiness` / page entitlements itself;
- * only this background sync is skipped there.
- */
 function PremiumEntitlementsSync() {
   usePremiumEntitlements();
   return null;

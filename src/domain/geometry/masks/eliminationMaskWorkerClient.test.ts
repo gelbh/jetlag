@@ -242,7 +242,6 @@ describe("eliminationMaskWorkerClient", () => {
   });
 
   it("misses cache when draft geometry changes under a lossy preview fingerprint collision", async () => {
-    // Same bbox, vertex count, first, and last as previewGeometryFingerprint; middle differs.
     const draftA = {
       type: "Feature" as const,
       id: "draft",

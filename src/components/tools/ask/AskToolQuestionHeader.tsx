@@ -1,7 +1,3 @@
-/**
- * Shared Ask HUD question header (Matching / Measuring / Tentacle language).
- * Icon + optional cost under icon, tool label, prompt.
- */
 import type { ReactNode } from "react";
 import { QuestionPromptBlock } from "@/components/tools/shared/controls/QuestionPromptBlock";
 import { askHudPanelStyle, askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";

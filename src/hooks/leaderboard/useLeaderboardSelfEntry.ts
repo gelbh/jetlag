@@ -3,7 +3,6 @@ import type { LeaderboardEntry } from "../../domain/game/leaderboard";
 import type { LeaderboardBoardSelection } from "../../domain/game/leaderboardBoardPrefs";
 import { getLeaderboardSelfEntry } from "../../services/firestore/firestoreLeaderboard";
 
-/** When `skip` is true (e.g. viewer already in the board list), no self fetch runs. */
 export function useLeaderboardSelfEntry(
   selection: LeaderboardBoardSelection,
   uid: string | null | undefined,

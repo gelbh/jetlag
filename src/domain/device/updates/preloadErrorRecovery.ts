@@ -13,7 +13,6 @@ const nextTask = (run: () => void) => {
   window.setTimeout(run, 0);
 };
 
-/** Missing chunk or its CSS; module evaluation errors are bugs, not stale builds. */
 export function isPreloadLoadFailure(payload: unknown): boolean {
   return (
     isChunkLoadError(payload) ||
@@ -22,7 +21,6 @@ export function isPreloadLoadFailure(payload: unknown): boolean {
 }
 
 function recoverUnlessDeferred(isOffline?: () => boolean): void {
-  // On the live map (or offline) the reload is already parked; don't re-queue it.
   if (!wasChunkReloadDeferred()) {
     reloadForChunkLoadError(undefined, isOffline);
   }

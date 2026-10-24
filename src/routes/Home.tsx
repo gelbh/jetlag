@@ -48,7 +48,6 @@ import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 // Footer links: 44px tap height without adding visual weight next to the Play actions.
 const footerLinkStyle = { display: "inline-flex", alignItems: "center", minHeight: 44 } as const;
 
-/** Home-safe play-area label: stored name first, then light pack display (no preset catalog). */
 function homeSessionPlayAreaLabel(session: SessionRecord): string | null {
   const labeled = session.gameAreaLabel?.trim();
   if (labeled) {

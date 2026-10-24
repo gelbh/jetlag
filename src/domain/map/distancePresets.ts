@@ -2,21 +2,17 @@ import type { GameSize } from "../session/size/gameSize";
 import type { DistanceUnit } from "./distance";
 import { milesToMeters } from "./distance";
 
-/** Official metric edition hiding zone radii (m). */
 export const METRIC_HIDING_ZONE_RADIUS_METERS: Record<"smallMedium" | "large", number> = {
   smallMedium: 500,
   large: 1000,
 };
 
-/** Official metric edition radar presets (m). */
 export const METRIC_RADAR_PRESET_METERS = [
   500, 1000, 2000, 5000, 10_000, 15_000, 40_000, 80_000, 160_000,
 ] as const;
 
-/** Official metric edition thermometer presets (m). */
 export const METRIC_THERMOMETER_PRESET_METERS = [1000, 5000, 15_000, 75_000] as const;
 
-/** Official metric edition tentacle radii (m). */
 export const METRIC_TENTACLE_MEDIUM_RADIUS_METERS = 2000;
 export const METRIC_TENTACLE_LARGE_RADIUS_METERS = 25_000;
 
@@ -35,10 +31,8 @@ export const GAME_SIZE_THRESHOLDS_SQ_KM = {
   large: 2_500,
 } as const;
 
-/** Session availability and game-size preset checks. */
 export const PRESET_MATCH_TOLERANCE_METERS = 5;
 
-/** UI chip and annotation round-trip preset matching (tighter). */
 export const UI_PRESET_MATCH_TOLERANCE_METERS = 1;
 
 const RADAR_PRESET_COUNT_BY_GAME_SIZE: Record<GameSize, number> = {

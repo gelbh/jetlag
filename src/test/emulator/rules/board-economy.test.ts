@@ -208,9 +208,7 @@ describe("firestore.rules — boardEconomyEnabled host gate", () => {
   });
 
   it("denies boardEconomy state writes when flag is false", async () => {
-    const host = rules.testEnv.authenticatedContext("host-1", {
-      // hider host
-    });
+    const host = rules.testEnv.authenticatedContext("host-1", {});
     await host
       .firestore()
       .collection("sessions")

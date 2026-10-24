@@ -1,6 +1,3 @@
-/**
- * Category icon pin (Matching / Measuring): frosted disc + category glyph.
- */
 import { createElement } from "react";
 import { Marker } from "react-map-gl/maplibre";
 import { matchingCategoryIcon } from "@/components/tools/ask/matching/matchingCategoryIcons";

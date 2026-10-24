@@ -14,9 +14,6 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
-/**
- * Premium, billing, and proxy paths: wait for persisted sign-in without minting anonymous users.
- */
 export async function waitForRestoredFirebaseAuth(): Promise<boolean> {
   if (!isFirebaseConfigured()) {
     return true;
@@ -26,9 +23,6 @@ export async function waitForRestoredFirebaseAuth(): Promise<boolean> {
   return getFirebaseAuth().currentUser !== null;
 }
 
-/**
- * Game and map paths: wait for auth restore, then create anonymous only after restore settles.
- */
 export async function waitForFirebaseAuth(maxWaitMs = DEFAULT_GAME_AUTH_WAIT_MS): Promise<boolean> {
   if (!isFirebaseConfigured()) {
     return true;

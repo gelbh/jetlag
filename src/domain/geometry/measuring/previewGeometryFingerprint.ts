@@ -1,6 +1,5 @@
 import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 
-/** Cheap publish signature for measuring preview polygons (avoids JSON.stringify). */
 export function previewGeometryFingerprint(
   feature: Feature<Polygon | MultiPolygon> | null,
 ): string | null {

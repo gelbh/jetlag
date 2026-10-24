@@ -9,7 +9,6 @@ function PathProbe() {
 
 describe("App tutorial redirect", () => {
   it("replaces /tutorial with Home", () => {
-    // Mirrors src/App.tsx: <Route path="/tutorial" element={<Navigate to="/" replace />} />
     render(
       <MemoryRouter initialEntries={["/tutorial"]}>
         <Routes>

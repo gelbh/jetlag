@@ -15,7 +15,6 @@ export interface MatchingFetchOptions extends PackThenOverpassProgress {
   subregionId?: string;
   /** Map pins tagged with this point category; appended after Overpass / pack features. */
   poiPins?: readonly { id: string; name: string; point: LatLngTuple }[];
-  /** When pack POI hits, return immediately and deliver Overpass-merged features here. */
   onEnrich?: (features: MatchingFeature[]) => void;
 }
 

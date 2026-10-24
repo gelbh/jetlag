@@ -37,8 +37,6 @@ export async function dispatchRadarShadedRegion(
   });
 }
 
-/** Public alias; callers may import either name. */
 export const runHalfPlane = dispatchHalfPlane;
 
-/** Public alias; callers may import either name. */
 export const runRadarShadedRegion = dispatchRadarShadedRegion;

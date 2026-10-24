@@ -30,18 +30,15 @@ function isLocationPublishOffline(): boolean {
   });
 }
 
-// Permission-denied is expected after leaving/being removed from a session.
 function reportPublishError(error: unknown): void {
   if (!isFirestorePermissionDenied(error)) {
     captureException(error);
   }
 }
 
-/** Per publish target (session/uid); replaced on target change and unmount. */
 interface PublishState {
   /** Token of the newest issued location write still awaiting its ack. */
   inFlight: number | null;
-  /** Newest reading held back while offline with a write in flight. */
   pending: PlayerLocationRecord | null;
 }
 
@@ -130,7 +127,6 @@ export function usePlayerLocationPublish({
       writePlayerLocation(next.sessionId, next).then(
         () => settle(true),
         (error: unknown) => {
-          // A denied write means the held reading would be denied too.
           settle(!isFirestorePermissionDenied(error));
           reportPublishError(error);
         },

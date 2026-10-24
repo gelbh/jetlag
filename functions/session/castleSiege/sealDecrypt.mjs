@@ -87,7 +87,6 @@ export function resolveSealWrapKey(options = {}) {
   return decodeSealWrapKeyFromEnv(options.wrapKeyEnv ?? process.env.CASTLE_SIEGE_SEAL_WRAP_KEY);
 }
 
-/** Encrypt canonical seal plaintext (test fixtures + client parity). */
 export async function encryptSealPayload(plaintext, options) {
   if (!plaintext) {
     throw new Error("Seal plaintext must be non-empty.");

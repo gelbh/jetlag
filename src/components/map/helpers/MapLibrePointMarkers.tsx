@@ -19,14 +19,12 @@ const DATA_CIRCLE_PAINT = {
 };
 
 interface MapLibrePointMarkersProps {
-  /** Suffix after jl-marker- when interactive; bare id when not. */
   id: string;
   markers: readonly CircleMarkerProps[];
   interactive?: boolean;
   beforeId?: string;
 }
 
-/** Renders point features as a single circle GL layer. */
 export function MapLibrePointMarkers({
   id,
   markers,

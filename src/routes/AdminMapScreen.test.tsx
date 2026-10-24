@@ -320,7 +320,6 @@ describe("AdminMapScreen", () => {
 
     renderWithRouter(<AdminMapScreen />, { route: "/map" });
 
-    // Drawer overlay inert-hides the dock while a sheet is open.
     fireEvent.click(screen.getByRole("button", { name: "Open session log", hidden: true }));
     expect(controller.overlay.closeSheet).toHaveBeenCalled();
 

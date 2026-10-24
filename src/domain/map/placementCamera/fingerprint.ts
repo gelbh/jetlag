@@ -9,7 +9,6 @@ function isVolatileWalkOverlay(overlay: MapDraftOverlay): boolean {
   return overlay.id.startsWith("thermo-draft-walk-");
 }
 
-/** Marker / circle ids whose position is owned by `draftAnchor` in the fingerprint. */
 const DRAFT_ANCHORED_OVERLAY_IDS = new Set([
   "pin-draft",
   "radar-draft-center",
@@ -95,8 +94,6 @@ function eliminationQuickHash(
     return null;
   }
 
-  // Sample endpoints + vertex counts — do not walk every coordinate (yes-elim
-  // multipolygons can be tens of thousands of verts and block the click path).
   const parts: string[] = [];
   for (const feature of features) {
     const geometry = feature.geometry;
@@ -141,8 +138,6 @@ export interface PlacementCameraFingerprintInput {
 
 export function placementCameraFingerprint(input: PlacementCameraFingerprintInput): string {
   const structural = input.overlays.filter((overlay) => !isVolatileWalkOverlay(overlay));
-  // When draftAnchor is set, ignore async overlay catch-up of the same pin —
-  // a second fingerprint bump aborts the in-flight easeTo via effect cleanup.
   const omitDraftAnchorPoint = input.draftAnchor != null;
 
   // Matching yes/no are complements of the same cell — keep the camera fingerprint

@@ -11,10 +11,6 @@ export function haversineMeters(aLat, aLng, bLat, bLng) {
   return 2 * earthRadius * Math.asin(Math.sqrt(h));
 }
 
-/**
- * Initial bearing degrees [0, 360) from A → B.
- * @returns {number}
- */
 export function bearingDegrees(aLat, aLng, bLat, bLng) {
   const φ1 = (aLat * Math.PI) / 180;
   const φ2 = (bLat * Math.PI) / 180;

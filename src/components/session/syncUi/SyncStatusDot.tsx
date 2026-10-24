@@ -25,7 +25,6 @@ const SURVEY_ICON: Record<SyncStatus, PhosphorIcon> = {
   error: WarningCircleIcon,
 };
 
-/** Sync indicator for the map chrome status strip. */
 export function SyncStatusBeacon({ status, size = "md", className = "" }: SyncStatusBeaconProps) {
   const iconPx = size === "sm" ? 14 : 18;
 

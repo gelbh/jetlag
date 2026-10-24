@@ -51,7 +51,6 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   );
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [moderationBusy, setModerationBusy] = useState(false);
-  // Embedded in the desk the map is the page: the rail starts folded, one click away.
   const [railCollapsed, setRailCollapsed] = useState(embeddedMonitor);
   const [railTab, setRailTab] = useState<AdminMonitorRailTab>("overview");
 

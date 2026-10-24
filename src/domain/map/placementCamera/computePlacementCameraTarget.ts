@@ -58,7 +58,6 @@ function playAreaCameraTarget(
   ctx: PlacementCameraContext,
   options: {
     forceReframe?: boolean;
-    /** When set, caps minZoom so a smaller feature stays in play-area context. */
     contextBox?: ReturnType<typeof boundsForPinPoint>;
   } = {},
 ): CameraTarget {
@@ -95,7 +94,6 @@ function boundingBoxArea(box: BoundingBox): number {
   return Math.max(box.east - box.west, 0) * Math.max(box.north - box.south, 0);
 }
 
-/** Frame the shaded cell (no) or the kept pocket (yes) into the visible map band. */
 function matchingAnsweredFocusBox(ctx: PlacementCameraContext): BoundingBox | null {
   const eliminationBox = boundsForGeoJsonFeatures(ctx.eliminationFeatures);
   if (!eliminationBox) {
@@ -132,10 +130,8 @@ function matchingAnsweredTarget(ctx: PlacementCameraContext): CameraTarget | nul
 
   return {
     bounds: boundingBoxToBoundsExpression(focusBox),
-    // Fit the region into chrome-aware padding; do not floor to play-area zoom.
     paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
     paddingTopBiasPx: ctx.panelTopPaddingPx,
-    // First answered paint reframes via fingerprint; yes/no flips stay put.
     forceReframe: false,
   };
 }

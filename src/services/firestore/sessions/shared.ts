@@ -41,10 +41,6 @@ export function sessionCodeDoc(code: string) {
   return doc(getFirestoreDb(), "sessionCodes", code);
 }
 
-/**
- * Best-effort rollback when role-gate init fails after session docs land.
- * Host can end + delete the code; hard session delete is rules-denied.
- */
 export async function rollbackCreatedRemoteSession(sessionId: string, code: string): Promise<void> {
   try {
     await updateDoc(doc(sessionsCollection(), sessionId), {
@@ -62,7 +58,6 @@ export async function rollbackCreatedRemoteSession(sessionId: string, code: stri
   }
 }
 
-/** True when a sessionCodes doc may be deleted and the code reused. */
 export function isReclaimableSessionForCode(
   sessionData: Record<string, unknown> | null | undefined,
 ): boolean {

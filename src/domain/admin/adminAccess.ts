@@ -39,8 +39,6 @@ export async function resolveAdminAccess(
     if (claimsLookAdmin(token.claims)) {
       return "admin";
     }
-  } catch {
-    // deny
-  }
+  } catch {}
   return "denied";
 }

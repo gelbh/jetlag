@@ -1,7 +1,6 @@
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { SessionAuthMode } from "@/hooks/session/useSharedSessionScreen";
 
-/** Map screen roles that share chrome/controller primitives. */
 export type MapScreenRole = PlayerRole;
 
 export type MapScreenRoleConfig = {
@@ -9,9 +8,7 @@ export type MapScreenRoleConfig = {
   authMode: SessionAuthMode;
   notificationRole: PlayerRole;
   exitPath: string;
-  /** Status rail / game-over playerRole prop. */
   statusPlayerRole: PlayerRole;
-  /** Seeker question dock + tool placement. */
   showQuestionTools: boolean;
 };
 

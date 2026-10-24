@@ -14,18 +14,15 @@ export interface EliminationUnionInput {
   disks: DiskSpec[];
 }
 
-/** Structurally identical to map `GameArea`. */
 export type GameAreaGeometry =
   | { type: "Polygon"; coordinates: number[][][] }
   | { type: "MultiPolygon"; coordinates: number[][][][] };
 
-/** Near-region batch input for the kernel wasm / TS dispatch path. */
 export type NearRegionBatchInput = {
   segments: readonly Feature<LineString>[];
   distanceMeters: number;
   disks: readonly DiskSpec[];
   gameArea: GameAreaGeometry;
-  /** Coastline distance-threshold grid path (empty disks + segments). */
   mode?: "distanceThreshold" | "bufferUnion";
   divisions?: number;
 };

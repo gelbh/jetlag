@@ -41,7 +41,6 @@ export type AnswerCastleSiegeOracleAskFn = (
   input: AnswerCastleSiegeOracleAskInput,
 ) => Promise<CastleSiegeOracleReceipt>;
 
-/** Client callable: Functions decrypt seal and return obligation receipt (no coords). */
 export async function answerCastleSiegeOracleAsk(
   input: AnswerCastleSiegeOracleAskInput,
 ): Promise<CastleSiegeOracleReceipt> {
@@ -64,9 +63,6 @@ export type ResolveAskAnswerResult<THonor> =
   | { path: "honor"; value: THonor }
   | { path: "oracle"; receipt: CastleSiegeOracleReceipt };
 
-/**
- * Classic → run honor path (no callable). Castle Siege → oracle callable only.
- */
 export async function resolveAskAnswer<THonor>(input: {
   mode: SessionMode | null | undefined;
   honor: () => Promise<THonor> | THonor;

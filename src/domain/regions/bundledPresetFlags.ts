@@ -6,7 +6,6 @@ export type RegionFlagMark = {
   src: string;
   alt: string;
   identity: string;
-  /** "flag" keeps opaque field colours; "cutout" is arms/flower art on transparency. */
   presentation: "flag" | "cutout";
 };
 
@@ -32,10 +31,6 @@ export function flagMarkForHierarchySegmentId(segmentId: string): RegionFlagMark
   };
 }
 
-/**
- * Show a segment flag only if no ancestor already displays the same image identity.
- * Keeps the topmost occurrence (e.g. Lucerne canton, not Lucerne metro).
- */
 export function flagMarkForSegmentRow(
   segmentId: string,
   ancestorSegmentIds: readonly string[],
@@ -52,10 +47,6 @@ export function flagMarkForSegmentRow(
   return mark;
 }
 
-/**
- * Leaf rows: prefer subregion mark (ward / council) when present, else the
- * deepest hierarchy segment. Same-identity ancestors still suppress.
- */
 export function flagMarkForBundledPresetId(presetId: string): RegionFlagMark | null {
   const definition = bundledPresetDefinition(presetId);
   if (!definition || definition.hierarchy.length === 0) {

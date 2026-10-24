@@ -1,5 +1,3 @@
-/** Distance-scaled opacity for quiet radar and walk projection overlays. */
-
 const QUIET_RADAR_MIN_DISTANCE_M = 200;
 const QUIET_RADAR_MAX_DISTANCE_M = 5000;
 const FILL_OPACITY_FLOOR = 0.04;

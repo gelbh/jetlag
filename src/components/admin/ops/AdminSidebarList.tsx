@@ -193,7 +193,6 @@ function NeedsItem({
   );
 }
 
-/** Comp `desk2` left column: 320px sidebar of rows with an Expand control. */
 export function AdminSidebarList({
   tables,
   tab,
@@ -235,7 +234,6 @@ export function AdminSidebarList({
     : tables.needsRows;
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  // The open row stays in view when the sidebar mounts or the selection moves.
   useEffect(() => {
     bodyRef.current
       ?.querySelector<HTMLElement>('[aria-current="true"]')

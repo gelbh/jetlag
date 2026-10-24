@@ -41,7 +41,6 @@ const fixtureGameArea: GameArea = {
   ],
 };
 
-/** Primary shore + short stray segment (buffer-union inflation class). */
 const fixtureSegments: Feature<LineString>[] = [
   {
     type: "Feature",

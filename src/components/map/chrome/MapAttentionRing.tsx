@@ -1,6 +1,3 @@
-/**
- * Wizard place-phase attention ring (was map-wizard-attention.css ::after).
- */
 import { Box } from "@mantine/core";
 import { mapAttentionRingStyle } from "@/components/ui/entry/entryStyles";
 

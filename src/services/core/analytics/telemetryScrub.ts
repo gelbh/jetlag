@@ -1,7 +1,3 @@
-/**
- * Shared sensitive-string scrubbing for PostHog exception sinks.
- */
-
 export const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 
 export const SENSITIVE_EXTRA_KEYS = new Set(["sessionId", "authUid", "memberUids", "uid"]);
@@ -51,7 +47,6 @@ export function scrubTelemetryError(error: unknown): unknown {
   return scrubbed;
 }
 
-/** Scrub PostHog `$exception` capture properties before they leave the device. */
 export function scrubPosthogExceptionProperties(
   properties: Record<string, unknown> | undefined,
 ): Record<string, unknown> | undefined {

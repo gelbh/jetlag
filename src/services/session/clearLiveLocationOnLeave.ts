@@ -9,7 +9,6 @@ import {
 } from "../firestore/firestoreSessionExtras";
 import { blockPlayerLocationPublishes } from "./playerLocationPublishGate";
 
-/** Stop live GPS publishes, cancel open walks, and delete the live pin. */
 export async function clearLiveLocationOnLeave(params: {
   sessionId: string;
   uid: string;

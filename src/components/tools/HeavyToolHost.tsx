@@ -20,7 +20,6 @@ import { useTentacleTool } from "../../hooks/tools/useTentacleTool";
 import type { AnswerCastleSiegeOracleAskFn } from "../../services/session/castleSiegeOracleAsk";
 import type { MapTool } from "../../state/sessionStore";
 
-/** Flat heavy-tool host fields bag for HeavyToolHost (W4-F peel). */
 export type HeavyToolHostModel = {
   activeTool: MapTool;
   sessionRules: SessionRulesInput;
@@ -206,8 +205,6 @@ const HEAVY_TOOL_RUNNERS = {
   tentacle: TentacleToolRunner,
 } satisfies Record<HeavyToolName, (props: HeavyToolRunnerProps) => null>;
 
-/** Mounts one heavy seeker tool at a time and publishes its API to the map controller.
- * Tool hooks share the useToolSession open/submit/close machine; registry API is unchanged. */
 export function HeavyToolHost({ model }: HeavyToolHostProps) {
   const { activeTool, ...sharedProps } = model;
   if (activeTool !== "matching" && activeTool !== "measuring" && activeTool !== "tentacle") {

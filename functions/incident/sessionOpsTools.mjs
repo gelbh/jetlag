@@ -23,7 +23,6 @@ export const SESSION_OPS_TOOL_IDS = [
 
 const SESSION_OPS_TOOL_ID_SET = new Set(SESSION_OPS_TOOL_IDS);
 
-/** Tools that write via applyIncidentMitigationHandler. */
 export const SESSION_OPS_MITIGATION_TOOLS = new Set([
   "soft_reload",
   "reset_board",
@@ -64,7 +63,6 @@ export const SESSION_OPS_TOOLS = {
   },
 };
 
-/** JSON-schema-ish shapes for LLM tool registration. */
 export const SESSION_OPS_TOOL_JSON_SCHEMAS = {
   soft_reload: {
     type: "object",

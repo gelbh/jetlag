@@ -52,7 +52,6 @@ function square(west: number): PolygonFeature {
   };
 }
 
-/** Five overlapping end-game disks (CircleUnion vs Rust geodesic gons). */
 function overlappingEndGameDisks(): DiskSpec[] {
   const centerLat = 51.45;
   const centerLng = -0.15;

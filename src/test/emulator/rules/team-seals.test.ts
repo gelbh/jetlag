@@ -22,7 +22,6 @@ describe("firestore.rules — castle siege team seals + setup", () => {
   const rules = bindRulesTestEnv();
 
   async function seedCastleSiegeSession() {
-    // Membership join updates cannot touch castleSiegeRoles; seed the full doc.
     await rules.testEnv.withSecurityRulesDisabled(async (context) => {
       await context
         .firestore()

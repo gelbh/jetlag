@@ -369,7 +369,6 @@ export function HiderMapScreen() {
         });
 
         const user = await ensureAnonymousUser();
-        // Not awaited: the answer is queued locally; only a server rejection undoes it.
         const { acknowledged } = answerPendingQuestion(
           sessionId,
           pendingQuestionId,
@@ -398,9 +397,7 @@ export function HiderMapScreen() {
             if (reward && !reward.needsPick) {
               setHandSheetOpen(true);
             }
-          } catch {
-            // Best-effort: the answer itself is saved.
-          }
+          } catch {}
         }, rollBackOptimisticAnswer);
 
         acknowledgeFingerprints([
@@ -445,9 +442,7 @@ export function HiderMapScreen() {
               selectedReply;
             setTruthReveal({ truth, selectedReply, selectedLabel });
           }
-        } catch {
-          // Answer already queued; the truth reveal is best-effort.
-        }
+        } catch {}
       } catch (error) {
         rollBackOptimisticAnswer(error);
       }
@@ -499,7 +494,6 @@ export function HiderMapScreen() {
         : VETO_NOTICE,
       randomizedTo: randomizedTo ?? undefined,
     });
-    // A second tap before the local snapshot updates would send a cancel the rules reject.
     answerInFlightRef.current = true;
     // Same as answer rewards: the card leaves the hand only once the server accepts.
     acknowledged.then(
@@ -518,7 +512,6 @@ export function HiderMapScreen() {
     );
   };
 
-  // Physical deck: both cards on the honor system. Simulated: held cards, none mid-draw.
   const questionCards: HiderQuestionCards = {
     available: !boardEconomyEnabled
       ? QUESTION_POWER_UP_IDS

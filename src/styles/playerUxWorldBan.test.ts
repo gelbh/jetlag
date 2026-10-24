@@ -26,10 +26,6 @@ const MFA_HUD_PANEL_SCOPES = [
   "incident",
 ] as const;
 
-/**
- * Non-inventory holdouts still using `hud-panel` inside MFA scopes.
- * Do not migrate these in MFA-C (TimerBlock dropdown, etc.).
- */
 const HUD_PANEL_ALLOWLIST = new Set(["src/components/session/status/TimerBlock.tsx"]);
 
 function collectFiles(dir: string, out: string[]): void {
@@ -42,7 +38,6 @@ function collectFiles(dir: string, out: string[]): void {
     try {
       st = statSync(full);
     } catch {
-      // Broken symlink / unreadable (e.g. local .env) — skip.
       continue;
     }
     if (st.isDirectory()) {
@@ -69,7 +64,6 @@ describe("Verify #5 player UX world purge", () => {
     collectFiles(ROOT, files);
     const hits: string[] = [];
     for (const file of files) {
-      // This test file names the ban strings on purpose.
       if (file.endsWith("playerUxWorldBan.test.ts")) {
         continue;
       }

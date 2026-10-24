@@ -47,7 +47,6 @@ export interface MapSettingsSessionTabProps {
   onResetBoard?: () => void;
   onResetSession?: () => void;
   onEndSession?: () => void;
-  /** True while an end call is running; blocks a second tap. */
   endSessionInFlight?: boolean;
   onLeaveSession?: () => void;
   endGameBlocked?: boolean;

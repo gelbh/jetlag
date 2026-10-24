@@ -1,18 +1,13 @@
-import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
-import { useLoadTask } from "@/hooks/progress/useLoadTask";
-import type { LoadTask } from "@/services/core/progress/loadTask";
-/**
- * Shared map-first Ask placement chrome: GPS phases, frosted banner, Send slot.
- * Tool adapters supply answer/mid slots and labels.
- */
-
 import { Button } from "@mantine/core";
 import { CaretLeftIcon, CrosshairIcon } from "@phosphor-icons/react";
 import { type CSSProperties, type ReactNode, useEffect } from "react";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
 import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineError";
 import { compactFilledStyles, mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
+import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
+import { useLoadTask } from "@/hooks/progress/useLoadTask";
 import { cn } from "@/lib/cn";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 
 export type AskMapPlacementPhase =
   | "locating"
@@ -22,7 +17,6 @@ export type AskMapPlacementPhase =
   | "answer";
 
 export type AskMapPlacementChromeProps = {
-  /** Root test id, e.g. matching-map-placement */
   testId: string;
   toolTitle: string;
   configureLabel: string;
@@ -30,11 +24,8 @@ export type AskMapPlacementChromeProps = {
   costLabel?: string;
   phase: AskMapPlacementPhase;
   onUseGps: () => void;
-  /** Disables snap + shows spinner while GPS refresh is in flight. */
   gpsLoading?: boolean;
-  /** Answer-phase floating GPS snap; opt-in so Thermo/Photo/zone stay clean. */
   showSnapLocation?: boolean;
-  /** Disables snap while Send / commit is in flight. */
   isSubmitting?: boolean;
   error?: string | null;
   statusTitle: string;
@@ -45,13 +36,9 @@ export type AskMapPlacementChromeProps = {
   questionAriaLabel?: string;
   onChangeConfigure?: () => void;
   changeConfigureAriaLabel?: string;
-  /** Override back-control test id (Matching keeps matching-change-category). */
   changeConfigureTestId?: string;
-  /** Answer-phase body (choices, place card, Send). */
   answerSlot?: ReactNode;
-  /** Taller bottom clearance when answer chrome includes floating choices. */
   answerTall?: boolean;
-  /** Optional strip between status and location CTA. */
   midSlot?: ReactNode;
 };
 
@@ -61,7 +48,6 @@ const frostedStatusCardStyle = {
   color: "var(--color-field-ink)",
 };
 
-/** Soft flag CTA on frosted map chrome (tint + flag ink, not solid orange). */
 export const askMapPlacementLocationCtaStyles = {
   root: {
     minHeight: "3.25rem",
@@ -88,7 +74,6 @@ export const askMapPlacementSendStyles = {
   },
 } as const;
 
-/** Floating icon-only GPS snap (answer phase); not the tall soft-flag permission CTA. */
 const askMapPlacementSnapLocationStyles = (snapBusy: boolean): CSSProperties => ({
   width: "2.75rem",
   height: "2.75rem",
@@ -215,7 +200,6 @@ export function AskMapPlacementChrome({
   useEffect(() => {
     const root = document.documentElement;
     root.setAttribute("data-ask-map-placement", "1");
-    // Compat: Matching CSS/selectors during migrate.
     root.setAttribute("data-matching-map-placement", "1");
     root.style.setProperty("--ask-map-placement-bottom-clearance", bottomClearance);
     root.style.setProperty("--matching-map-bottom-clearance", bottomClearance);

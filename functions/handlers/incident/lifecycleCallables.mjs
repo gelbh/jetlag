@@ -201,7 +201,6 @@ export const publishIncidentHotfix = onCall(
   }),
 );
 
-/** Admin force-launch of Cursor coding agent (private hotfix thread). */
 export const launchIncidentCursorAgent = onCall(
   {
     secrets: [posthogProjectApiKey, cursorApiKey],

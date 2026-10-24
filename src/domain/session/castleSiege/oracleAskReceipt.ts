@@ -11,7 +11,6 @@ export type CastleSiegeOracleReceipt =
 
 const COORD_KEY = /(?:^|[^a-z])(?:lat|lng|longitude|latitude)(?:[^a-z]|$)/i;
 
-/** Player-facing summary for confirm-send (Survey Field Book copy). */
 export function formatOracleAskReceiptLabel(receipt: CastleSiegeOracleReceipt): string {
   switch (receipt.kind) {
     case "radar":

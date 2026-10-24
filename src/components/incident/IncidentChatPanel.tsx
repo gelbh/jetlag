@@ -4,7 +4,6 @@ import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
 
 export interface IncidentChatPanelProps {
   incidentId: string;
-  /** Optional close control when embedded in a sheet. */
   onClose?: () => void;
   className?: string;
 }

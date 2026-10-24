@@ -39,15 +39,12 @@ import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./shared/wizard/
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 
-/** Flat matching wizard fields bag for MatchingPanel (W4-D peel). */
 export type MatchingPanelModel = {
   distanceUnit: DistanceUnit;
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
-  /** Empty play-area bounce; greys like used. */
   unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
-  /** Session notice after empty play-area bounce. */
   catalogNotice?: string | null;
   catalogCategories?: readonly MatchingCategoryDefinition[];
   anchorLat?: number | null;
@@ -61,13 +58,9 @@ export type MatchingPanelModel = {
   nearestOutsidePlayArea: boolean;
   nullAnswer: boolean;
   loading: boolean;
-  /** Live progress for the current resolve; replaces the spinner while running. */
   loadTask?: LoadTask | null;
-  /** Background Overpass enrich after a bundled preview. */
   enrichTask?: LoadTask | null;
-  /** Tile preview nearest while Overpass/bundle confirm runs. */
   nearestProvisional?: boolean;
-  /** Street tile pick unavailable (satellite basemap). */
   satelliteBasemap?: boolean;
   gpsLoading: boolean;
   answer: MatchingAnswer | null;

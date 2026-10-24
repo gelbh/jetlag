@@ -1,21 +1,5 @@
 import { z } from "zod";
 
-/**
- * Closed allowlist of session-ops agent tools. Server mirrors live in
- * `functions/incident/sessionOpsTools.mjs` — keep ids, destructive flags, and
- * arg shapes in sync.
- *
- * Inventory (existing mutations → tools):
- * - `opsMitigation` soft_reload → `soft_reload`
- * - `moderateSession` resetBoard / end → `reset_board` / `end_session`
- * - `cancelOpenPendingQuestions` → `clear_pending_questions`
- * - cancel one pending question → `cancel_pending_question`
- * - annotation soft-delete (by id) → `soft_delete_annotation`
- * - `resetSessionForRematch` → intentionally not allowlisted (game-over flow)
- * - shading invert / elimination override → skipped (no session fields today;
- *   shading is derived from annotations)
- */
-
 export const SESSION_OPS_TOOL_IDS = [
   "soft_reload",
   "reset_board",
@@ -58,7 +42,6 @@ export type SessionOpsToolArgs = {
 
 export interface SessionOpsToolDefinition<Id extends SessionOpsToolId = SessionOpsToolId> {
   id: Id;
-  /** When true, executor requires `hostConfirmed` before mutating. */
   destructive: boolean;
   description: string;
   argsSchema: (typeof sessionOpsToolArgSchemas)[Id];
@@ -105,7 +88,6 @@ export const SESSION_OPS_TOOLS = {
   [K in SessionOpsToolId]: SessionOpsToolDefinition<K>;
 };
 
-/** JSON-schema-ish shapes for LLM tool registration (no Zod runtime). */
 export const SESSION_OPS_TOOL_JSON_SCHEMAS: Record<
   SessionOpsToolId,
   {

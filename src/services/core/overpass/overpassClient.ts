@@ -10,7 +10,6 @@ import { FetchTimeoutError, fetchWithTimeout } from "../network/fetchWithTimeout
 import { isOverpassHostCooled, recordOverpassHostCooldown } from "./overpassHostCooldown";
 
 const OVERPASS_MAX_RETRIES = 3;
-/** Proxy path only: one retry so attempts ≤ 2 (direct keeps OVERPASS_MAX_RETRIES). */
 export const OVERPASS_PROXY_MAX_RETRIES = 1;
 const OVERPASS_BASE_BACKOFF_MS = 750;
 const OVERPASS_DIRECT_FETCH_TIMEOUT_MS = 15_000;
@@ -95,12 +94,10 @@ function overpassEndpointHostname(endpoint: string): string {
   }
 }
 
-/** Upstream Overpass: short-backoff retry for transient gateway errors only (not 429/406). */
 function isRetryableUpstreamOverpassStatus(status: number): boolean {
   return status === 502 || status === 503;
 }
 
-/** Our Functions proxy: 429 is our rate limit and may carry Retry-After. */
 function isRetryableProxyStatus(status: number): boolean {
   return status === 429 || status === 502 || status === 503;
 }

@@ -1,6 +1,5 @@
 import type { ComponentProps, ComponentType } from "react";
 
-/** Phosphor icon component (per-icon import). */
 export type PhosphorIcon = ComponentType<
   ComponentProps<"svg"> & {
     size?: number | string;
@@ -13,7 +12,6 @@ export type PhosphorIcon = ComponentType<
 export type JlIconProps = {
   icon: PhosphorIcon;
   size?: number | string;
-  /** Idle chrome: `regular`; active/pressed: prefer `bold` or `fill`. */
   weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
   className?: string;
   color?: string;
@@ -22,10 +20,6 @@ export type JlIconProps = {
   "aria-label"?: string;
 };
 
-/**
- * Thin Jetlag wrapper around Phosphor icons.
- * Prefer per-icon imports at the call site; pass the component into `icon`.
- */
 export function JlIcon({
   icon: Icon,
   size = 20,

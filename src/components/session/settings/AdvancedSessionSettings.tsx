@@ -20,7 +20,6 @@ interface AdvancedSessionSettingsProps {
   value: AdvancedSessionSettingsValue;
   onChange: (value: AdvancedSessionSettingsValue) => void;
   disabled?: boolean;
-  /** When false, hides the collapsible chrome (e.g. embedded in settings sheet). */
   collapsible?: boolean;
 }
 

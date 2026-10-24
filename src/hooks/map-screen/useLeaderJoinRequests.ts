@@ -10,7 +10,6 @@ import {
   resolveRoleJoinRequest,
 } from "../../services/session/rolePasscodeLifecycle";
 
-/** Mirrors domain/map/annotations LOCAL_SESSION_ID without the annotations barrel. */
 const LOCAL_SESSION_ID = "local";
 
 interface UseLeaderJoinRequestsParams {

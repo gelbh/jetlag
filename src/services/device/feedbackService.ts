@@ -14,12 +14,9 @@ function vibrateFallback(event: FeedbackEvent): void {
 
   try {
     navigator.vibrate(duration);
-  } catch {
-    // Progressive enhancement only.
-  }
+  } catch {}
 }
 
-/** Unified tactile feedback using the Web Vibration API where available. */
 export async function feedback(event: FeedbackEvent): Promise<void> {
   vibrateFallback(event === "tap" ? "tap" : event);
 }
@@ -27,7 +24,6 @@ export async function feedback(event: FeedbackEvent): Promise<void> {
 const DELEGATED_FEEDBACK_SELECTOR =
   '[data-feedback="tap"], .hud-chrome, .btn-primary, .btn-secondary, .jl-tool-slot';
 
-/** One delegated listener for tap feedback on common HUD controls. */
 export function bindDelegatedTapFeedback(root: ParentNode = document): () => void {
   const handlePointerUp = (event: Event) => {
     const pointerEvent = event as PointerEvent;

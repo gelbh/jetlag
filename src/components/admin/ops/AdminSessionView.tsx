@@ -93,7 +93,6 @@ export interface AdminSessionMonitorState {
   onRetry(): void;
 }
 
-/** Comp `desk2` main area: header panel, then the map frame. */
 export function AdminSessionView({
   summary,
   loading,

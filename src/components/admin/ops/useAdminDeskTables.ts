@@ -26,7 +26,6 @@ const PRELOAD_ROUTE = "/admin/preload-requests";
 
 const STATIC_SESSION_COLUMNS = buildSessionColumns(new Map());
 const STATIC_NEEDS_COLUMNS = buildNeedsYouColumns();
-// The comp draws 40px rows.
 const SESSION_DEFAULTS: AdminTablePrefs = {
   ...defaultPrefs(STATIC_SESSION_COLUMNS, SESSION_DEFAULT_SORT),
   density: "compact",
@@ -46,7 +45,6 @@ interface Inputs {
   initialKind?: NeedsYouKind;
 }
 
-/** Filters, preferences and rows for the Sessions and Needs you tables. */
 export function useAdminDeskTables({
   sessions,
   incidents,

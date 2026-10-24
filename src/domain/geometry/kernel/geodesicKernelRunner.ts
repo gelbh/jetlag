@@ -20,5 +20,4 @@ export async function dispatchGeodesicLineBuffer(
   });
 }
 
-/** Public alias; callers may import either name. */
 export const runGeodesicLineBuffer = dispatchGeodesicLineBuffer;

@@ -44,9 +44,7 @@ export function setDevMockSessionFeedEnabled(enabled: boolean): void {
     } else {
       localStorage.removeItem(DEV_MOCK_SESSION_FEED_KEY);
     }
-  } catch {
-    // ignore quota / private mode
-  }
+  } catch {}
 }
 
 const HOST = "mock-host";
@@ -54,7 +52,6 @@ const SEEKER = "mock-seeker";
 const SEEKER_B = "mock-seeker-b";
 const HIDER = "mock-hider";
 
-/** Stable demo session id used by the chat/log gallery and in-map mock feed. */
 export const MOCK_SESSION_FEED_ID = "mock-session";
 
 const UNIT = "imperial" as const;
@@ -107,11 +104,6 @@ function yesNoLabel(id: "yes" | "no"): string {
   return YES_NO.find((option) => option.id === id)?.label ?? id;
 }
 
-/**
- * Dev mock feed shaped like production Jet Lag questions/answers.
- * Covers matching, measuring, radar, thermometer (walk + ask), tentacle,
- * photo, cancel, late, and expired-pending for Chat + Session log polish.
- */
 export function buildMockChatMessages(
   sessionId: string = MOCK_SESSION_FEED_ID,
 ): SessionMessageRecord[] {
@@ -153,7 +145,6 @@ export function buildMockChatMessages(
       text: "On my way.",
     },
 
-    // Matching · answered Yes
     {
       id: "mock-q-matching-museum",
       sessionId,
@@ -170,7 +161,6 @@ export function buildMockChatMessages(
       selectedReply: "yes",
     },
 
-    // Radar · answered No
     {
       id: "mock-q-radar-1mi",
       sessionId,
@@ -187,7 +177,6 @@ export function buildMockChatMessages(
       selectedReply: "no",
     },
 
-    // Measuring · body of water · answered Further
     {
       id: "mock-q-measuring-water",
       sessionId,
@@ -204,7 +193,6 @@ export function buildMockChatMessages(
       selectedReply: "further",
     },
 
-    // Matching · null option · answered Null
     {
       id: "mock-q-matching-airport",
       sessionId,
@@ -221,7 +209,6 @@ export function buildMockChatMessages(
       selectedReply: "null",
     },
 
-    // Measuring · cancelled
     {
       id: "mock-q-measuring-museum",
       sessionId,
@@ -237,7 +224,6 @@ export function buildMockChatMessages(
       status: "cancelled",
     },
 
-    // Thermometer walk start (system) + later ask answered Hotter
     {
       id: "mock-sys-thermo-walk",
       sessionId,
@@ -264,7 +250,6 @@ export function buildMockChatMessages(
       selectedReply: "hotter",
     },
 
-    // Tentacle · POI answer
     {
       id: "mock-q-tentacle-poi",
       sessionId,
@@ -281,7 +266,6 @@ export function buildMockChatMessages(
       selectedReply: "poi-tate-modern",
     },
 
-    // Tentacle · Not within reach
     {
       id: "mock-q-tentacle-oor",
       sessionId,
@@ -298,7 +282,6 @@ export function buildMockChatMessages(
       selectedReply: "out-of-reach",
     },
 
-    // Photo · answered uploaded
     {
       id: "mock-q-photo-tree",
       sessionId,
@@ -315,7 +298,6 @@ export function buildMockChatMessages(
       selectedReply: "photo",
     },
 
-    // Photo · cannot answer
     {
       id: "mock-q-photo-street",
       sessionId,
@@ -332,7 +314,6 @@ export function buildMockChatMessages(
       selectedReply: "cannot_answer",
     },
 
-    // Radar · answered late
     {
       id: "mock-q-radar-late",
       sessionId,
@@ -349,7 +330,6 @@ export function buildMockChatMessages(
       selectedReply: "yes",
     },
 
-    // Thermometer walk cancelled (system)
     {
       id: "mock-sys-thermo-cancel",
       sessionId,
@@ -361,7 +341,6 @@ export function buildMockChatMessages(
       text: THERMOMETER_WALK_CANCEL_TEXT.manual,
     },
 
-    // Radar · expired pending (seeker can dismiss)
     {
       id: "mock-q-radar-expired",
       sessionId,
@@ -377,7 +356,6 @@ export function buildMockChatMessages(
       status: "pending",
     },
 
-    // Photo · still pending (upload / mark sent / cannot answer)
     {
       id: "mock-q-photo-pending",
       sessionId,
@@ -393,7 +371,6 @@ export function buildMockChatMessages(
       status: "pending",
     },
 
-    // Matching · open for hider to answer (primary answer demo)
     {
       id: "mock-q-matching-answerable",
       sessionId,
@@ -409,7 +386,6 @@ export function buildMockChatMessages(
       status: "pending",
     },
 
-    // Radar · open for hider to answer
     {
       id: "mock-q-radar-answerable",
       sessionId,
@@ -719,7 +695,6 @@ export function buildMockPendingQuestions(
   ];
 }
 
-/** Recommended truth labels for open hider-answer demos. */
 export function buildMockHiderTruths(): ReadonlyMap<string, HiderTruthResult> {
   return new Map([
     ["mock-pq-matching-answerable", { replyId: "no", label: "No" }],

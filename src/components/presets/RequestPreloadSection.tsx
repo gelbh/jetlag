@@ -13,7 +13,6 @@ import {
 export interface RequestPreloadSectionProps {
   /** Built at submit time so the editor does not stringify gameArea on every render. */
   getSnapshot: () => PreloadPresetSnapshot | null;
-  /** Injected for tests; production uses {@link createPreloadRequest}. */
   createPreloadRequestFn?: (input: {
     presetSnapshot: PreloadPresetSnapshot;
     note?: string | null;

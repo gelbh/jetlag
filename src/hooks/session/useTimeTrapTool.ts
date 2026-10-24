@@ -36,7 +36,6 @@ export function useTimeTrapTool({
   const [selectedStation, setSelectedStation] = useState<TransitStation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { beginRequest, isLatestRequest } = useLatestRequest();
-  // Blocks a double tap before the listener's existingTrap re-renders the panel.
   const placingRef = useRef(false);
 
   const filteredStations = useMemo(() => searchStations(query, stations), [query, stations]);
@@ -89,7 +88,6 @@ export function useTimeTrapTool({
     [beginRequest, enabled, gameArea, isLatestRequest],
   );
 
-  /** Returns whether the trap was placed (the write is queued, not yet acked). */
   const confirmTrap = useCallback((): boolean => {
     if (!selectedStation || existingTrap || placingRef.current) {
       return false;

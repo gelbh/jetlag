@@ -27,13 +27,7 @@ interface UseLiveLocationOptions {
   highAccuracy?: boolean;
   minIntervalMs?: number;
   minDistanceMeters?: number;
-  /** Pass `0` for walk tracking so samples are not served from cache. */
   maximumAge?: number;
-  /**
-   * Optional getCurrentPosition poll while enabled. Helps when the browser
-   * geolocation override updates but `watchPosition` stays quiet (e2e / some
-   * mobile WebViews).
-   */
   pollIntervalMs?: number;
 }
 
@@ -67,8 +61,6 @@ export function useLiveLocation(enabled: boolean, options: UseLiveLocationOption
     };
   }, [enabled]);
 
-  // Reset state when location tracking is disabled. This is a necessary cleanup
-  // pattern — setState in effect is acceptable here since it only runs when enabled changes.
   useLayoutEffect(() => {
     if (enabled) {
       return;
@@ -140,9 +132,7 @@ export function useLiveLocation(enabled: boolean, options: UseLiveLocationOption
                 publishReading(next);
               }
             })
-            .catch(() => {
-              // Watch errors surface via watchPosition; poll is best-effort.
-            });
+            .catch(() => {});
         }, pollIntervalMs);
       }
     };

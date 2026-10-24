@@ -1,7 +1,3 @@
-// Copy checked against the session flow: src/routes/create-session/*, src/routes/JoinSession.tsx,
-// src/components/session/identity/RolePicker.tsx, src/domain/session/size/*,
-// src/domain/session/players/*, src/components/map/chrome/SessionIslandSlots.tsx and
-// src/components/session/GameOverSheet.tsx. Re-check them when the flow changes.
 import type { LearnPageContent } from "./learnContentTypes";
 
 export const GUIDE_CONTENT: LearnPageContent = {

@@ -45,7 +45,6 @@ export function HudPlayIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-/** Document/list glyph used for Report a problem in the secondary dock. */
 export function HudGuideIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <IconBase {...props}>
@@ -111,7 +110,6 @@ export function HudRefreshIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-/** Google Maps–style north/south needle; rotate via CSS transform. */
 export function HudCompassIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <IconBase {...props}>

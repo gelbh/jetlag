@@ -6,7 +6,6 @@ export function githubIssuesUrl(): string {
   return DEFAULT_GITHUB_ISSUES_URL;
 }
 
-/** Markdown issue templates — GitHub Mobile supports these; YAML forms and Discussions do not. */
 export function githubBugReportUrl(): string {
   return `${GITHUB_REPO}/issues/new?template=bug_report.md`;
 }

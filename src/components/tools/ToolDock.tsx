@@ -38,7 +38,6 @@ interface ToolDockProps {
   canRequestFoundHider?: boolean;
   onRequestFoundHider?: () => void;
   canSubmitQuestion?: boolean;
-  /** Block tool activation when the session is gone. */
   inactive?: boolean;
 }
 

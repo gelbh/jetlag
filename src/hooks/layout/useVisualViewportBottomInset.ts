@@ -3,12 +3,6 @@ import { useEffect, useState } from "react";
 /** Ignore small visual-viewport offsets (iOS home indicator); treat as keyboard. */
 const KEYBOARD_INSET_THRESHOLD_PX = 100;
 
-/**
- * Input types that typically open a soft keyboard.
- * Deliberately narrower than shortcut “typing target” checks (which also
- * treat `select` / any `input` as blocking hotkeys) — select pickers must
- * not lift map chrome.
- */
 const SOFT_KEYBOARD_INPUT_TYPES = new Set([
   "",
   "text",

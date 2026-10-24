@@ -88,8 +88,6 @@ function openDatabase(): Promise<IDBDatabase> {
       reject(request.error ?? new Error("IndexedDB open failed"));
     };
 
-    // Wait for onsuccess/onerror — rejecting onblocked abandons a promise that
-    // may still succeed, leaving a dangling open handle and a null cache.
     request.onblocked = () => {};
   });
 
@@ -118,7 +116,6 @@ export async function enqueueOfflineWrite(
   await enqueueOfflineWrites(sessionId, [annotation]);
 }
 
-/** Queues all annotations in one transaction, so either every write lands or none do. */
 export async function enqueueOfflineWrites(
   sessionId: string,
   annotations: readonly AnnotationRecord[],

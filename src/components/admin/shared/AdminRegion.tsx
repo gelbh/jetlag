@@ -21,7 +21,6 @@ export function AdminRegion({
   empty?: ReactNode;
   error?: ReactNode;
   scroll?: boolean;
-  /** No 48px header row (the toolbar leads); the title stays as the accessible name. */
   headerless?: boolean;
   children?: ReactNode;
   "data-testid"?: string;

@@ -25,7 +25,6 @@ export const THERMOMETER_DISTANCE_PRESETS_MILES = [0.5, 3, 10, 50] as const;
 
 export type ThermometerDistanceOptionMiles = (typeof THERMOMETER_DISTANCE_PRESETS_MILES)[number];
 
-/** Used-set keys: imperial mile ladders or metric meter ladders (radar twin). */
 export type ThermometerDistanceOptionKey =
   | ThermometerDistanceOptionMiles
   | (typeof METRIC_THERMOMETER_PRESET_METERS)[number];
@@ -151,7 +150,6 @@ export function isThermometerDistanceOptionUsed(
   return key !== null && usedOptions.has(key);
 }
 
-/** Full thermometer distance presets for game size (does not filter used). Radar twin. */
 export function thermometerDistancePresetsForGameSize(
   gameSize: GameSize,
   unit: DistanceUnit = "imperial",
@@ -159,7 +157,6 @@ export function thermometerDistancePresetsForGameSize(
   return thermometerPresetsMetersForGameSize(gameSize, unit);
 }
 
-/** Whether distanceMeters is a preset allowed for gameSize + unit. Twin of isRadarPresetMetersForGameSize. */
 export function isThermometerDistanceAllowedForGameSize(
   gameSize: GameSize,
   distanceMeters: number,

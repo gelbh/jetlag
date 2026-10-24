@@ -49,9 +49,7 @@ export function HiderBoardEconomySheets({
                 onHandSheetOpenChange(true);
               }
             })
-            .catch(() => {
-              // Persist failed; pendingPick remains in Firestore/subscription for retry.
-            });
+            .catch(() => {});
         }}
       />
     </>

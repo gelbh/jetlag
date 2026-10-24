@@ -2,9 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { resetSessionRoundExtras } from "../session/resetSessionRoundExtras.mjs";
 
-/**
- * Small fake Admin Firestore that records update/delete paths for rematch extras.
- */
 function mockExtrasDb({
   memberUids = ["u1"],
   annotations = [],

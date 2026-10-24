@@ -3,7 +3,6 @@ import type { DockableMapTool } from "../../../domain/map/mapTools";
 import type { MapTool } from "../../../domain/map/mapToolTypes";
 import { type ToolPreset, useMapStore } from "../../../state/mapStore";
 
-/** Applies this tool's pending preset once, when `enabled`. */
 export function useToolPreset(
   tool: DockableMapTool,
   enabled: boolean,
@@ -18,7 +17,6 @@ export function useToolPreset(
   }, [enabled, preset, tool, apply]);
 }
 
-/** Switches to the preset's tool once, from an idle map, through the normal tool selection path. */
 export function useOpenToolPreset({
   activeTool,
   canOpen,

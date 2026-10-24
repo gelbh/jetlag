@@ -1,7 +1,6 @@
 import { maskTopologyMatches } from "./maskTopology";
 import type { PolygonFeature } from "./types";
 
-/** Grid point-in-polygon agreement for dual-run / WASM parity tests. */
 export function assertPolygonTopologyParity(
   candidate: PolygonFeature | null,
   baseline: PolygonFeature | null,

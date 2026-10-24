@@ -1046,7 +1046,6 @@ describe("CreateSession", () => {
       expect(parseBoundaryFile).toHaveBeenCalledWith(file);
     });
     goToRules();
-    // Session tier lives on the rules step; access claim defaults to premium.
     await waitFor(() => {
       expect(screen.getByRole("radio", { name: /^premium/i })).toHaveAttribute(
         "aria-checked",
@@ -1069,7 +1068,6 @@ describe("CreateSession", () => {
   it("creates Castle Siege as free for paidPremiumHost without permanent sign-in", async () => {
     isCastleSiegeModeEnabled.mockReturnValue(true);
     isFirebaseConfigured.mockReturnValue(true);
-    // Anonymous host (usePermanentAuthUser mock: isPermanent false) with paid premium entitlement.
     premiumEntitlementsMock.current = {
       premiumSessionCredits: 0,
       lifetimePremium: false,

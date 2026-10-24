@@ -19,7 +19,6 @@ function subjectFor(kind: MeasuringFromKind): MeasuringSubject {
   return "location";
 }
 
-/** Live Measuring catalog; after a pick, shows a canned nearer/further resolve. */
 export function MeasuringLearnDemo() {
   const [measureFrom, setMeasureFrom] = useState<MeasuringFromKind>(BASE_MEASURING_CATALOG[0]!.id);
   const [optionChosen, setOptionChosen] = useState(false);

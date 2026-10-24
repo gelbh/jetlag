@@ -68,9 +68,7 @@ export function useGameOverActions(
             role: session.memberRoles?.[user.uid] ?? "seeker",
             pendingQuestions: [],
           });
-        } catch {
-          // Best-effort pin clear; still leave home.
-        }
+        } catch {}
       }
 
       try {

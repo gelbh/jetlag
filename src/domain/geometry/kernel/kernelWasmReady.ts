@@ -23,7 +23,6 @@ export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   unionPolygonFeatures: true,
 };
 
-/** True when the entrypoint registry marks it ready for wasm. */
 export function shouldUseWasm(entrypoint: KernelEntrypoint): boolean {
   return KERNEL_WASM_READY[entrypoint];
 }

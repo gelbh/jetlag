@@ -5,7 +5,6 @@ import { LEARN_DEMO_SESSION_RULES } from "./demoSessionRules";
 
 const DISTANCE_UNIT: DistanceUnit = "metric";
 
-/** Live Thermometer distance catalog (walk / answer live on the map in play). */
 export function ThermometerLearnDemo() {
   const [distanceMeters, setDistanceMeters] = useState(0);
 

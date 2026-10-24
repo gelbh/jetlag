@@ -249,7 +249,6 @@ describe("useTentacleTool", () => {
     });
 
     expect(result.current.draft.tentacleSelectedPoiId).toBeNull();
-    // Map-first placement nulls hud.error; panel model still surfaces tentacleError.
     expect(result.current.panel.props.model.error).toMatch(/Preview only/i);
   });
 

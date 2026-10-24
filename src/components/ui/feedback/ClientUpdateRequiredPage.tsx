@@ -11,7 +11,6 @@ export function ClientUpdateRequiredPage({ minVersion }: { minVersion: string })
       assertive
       primaryAction={{
         label: "Refresh",
-        // SKIP_WAITING + vite registerSW(true), with reload fallback — not soft reload alone.
         onClick: applyUpdate,
       }}
     />

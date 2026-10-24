@@ -4,7 +4,6 @@ import { useRouteTransition } from "./useRouteTransition";
 /** Share of the bar a step shows while it is still running, so the bar moves on entry. */
 const RUNNING_STEP_CREDIT = 0.35;
 
-/** In-shell settle progress (never a full-bleed cover). */
 export function RouteProgressChrome() {
   const { phase, loadingProgress } = useRouteTransition();
   if (phase !== "settling" || !loadingProgress) {

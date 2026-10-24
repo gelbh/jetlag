@@ -21,9 +21,7 @@ interface HidingZonesLayerProps {
   myUid?: string | null;
   memberUids?: readonly string[];
   session?: Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors"> | null;
-  /** Active map annotations; used for near-edge truth-pin caution styling. */
   annotations?: readonly AnnotationRecord[];
-  /** Session play area; required for coastline/linear measuring pin gap. */
   gameArea?: GameArea;
 }
 

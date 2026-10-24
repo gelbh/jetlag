@@ -140,7 +140,6 @@ test("Photo-mirror: obligation receipt without coords", async () => {
 
 test("Compass: cardinal from ask point toward sealed anchor", async () => {
   const base = await sealed();
-  // Ask south of anchor → bearing toward anchor is roughly N
   const receipt = await answerOracleAsk({
     ...base,
     ask: {

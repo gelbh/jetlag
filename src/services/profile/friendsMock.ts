@@ -1,12 +1,10 @@
 import type { FriendListEntry, FriendSearchResult, FriendsListResult } from "./profileFriends";
 
 export const FRIENDS_MOCK_STORAGE_KEY = "jl.friends.mock";
-/** Four-letter code used when inviting from the friends mock sheet. */
 export const FRIENDS_MOCK_SESSION_CODE = "PLAY";
 
 const MOCK_LATENCY_MS = 280;
 
-/** Presentation extras for the friend detail sheet (mock / offline polish). */
 export type FriendSheetProfile = {
   gamesTogether: number | null;
   winsTogether: number | null;
@@ -148,12 +146,10 @@ export function isFriendsMockEnabled(): boolean {
   }
 }
 
-/** Active session code for invite-to-game when friends mock is on. */
 export function getFriendsMockSessionCode(): string | null {
   return isFriendsMockEnabled() ? FRIENDS_MOCK_SESSION_CODE : null;
 }
 
-/** Sheet stats / captions. Empty when mock is off or uid unknown. */
 export function getFriendSheetProfile(uid: string): FriendSheetProfile {
   if (!isFriendsMockEnabled()) {
     return EMPTY_SHEET_PROFILE;
@@ -168,12 +164,9 @@ export function setFriendsMockEnabled(enabled: boolean): void {
     } else {
       localStorage.removeItem(FRIENDS_MOCK_STORAGE_KEY);
     }
-  } catch {
-    // ignore quota / private mode
-  }
+  } catch {}
 }
 
-/** Reset seed (tests + console). */
 export function resetFriendsMock(): void {
   state = createSeedState();
 }

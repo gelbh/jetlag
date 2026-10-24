@@ -1,5 +1,3 @@
-/** Muster dials for Castle Siege setup (§9 / Skin-S3). */
-
 export type CastleSiegeDials = {
   zoneRadiusMeters: number;
   turnLengthSeconds: number;
@@ -35,7 +33,6 @@ function clampDial(key: keyof CastleSiegeDials, value: number): number {
   return Math.min(max, Math.max(min, Math.round(value)));
 }
 
-/** Merge partial dials onto defaults and clamp into allowed ranges. */
 export function normalizeCastleSiegeDials(
   partial: Partial<CastleSiegeDials> = {},
 ): CastleSiegeDials {
@@ -64,7 +61,6 @@ export function normalizeCastleSiegeDials(
   };
 }
 
-/** Parse a Firestore dials map; returns undefined when shape is unusable. */
 export function parseCastleSiegeDials(value: unknown): CastleSiegeDials | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;

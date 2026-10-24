@@ -101,7 +101,6 @@ const headers = () =>
 describe("AdminDataTable sorting", () => {
   it("sorts Last activity by timestamp, nulls last, and cycles desc, asc, off", () => {
     renderWithAppUi(<Harness />);
-    // default: lastActivity desc -> 5s ago, 3m ago, 2h ago, null last
     expect(codesInOrder()).toEqual(["BBBB", "AAAA", "DDDD", "CCCC"]);
     const header = () => screen.getByRole("button", { name: /Last activity/ });
     expect(header()).toHaveClass("admin-unstyled-control");

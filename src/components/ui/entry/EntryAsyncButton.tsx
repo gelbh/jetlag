@@ -20,10 +20,8 @@ export type EntryAsyncButtonProps = Omit<
   busy: boolean;
   idleLabel: ReactNode;
   busyLabel: ReactNode;
-  /** Native disabled when the action cannot run (gate). Ignored as the sole busy mechanism. */
   unavailable?: boolean;
   showSpinner?: boolean;
-  /** Polite status text while busy; defaults to stringified busyLabel when string. */
   statusMessage?: string;
   /** While running, shows its stage as the busy label and a thin bar under the button. */
   task?: LoadTask | null;

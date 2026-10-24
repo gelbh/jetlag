@@ -49,9 +49,7 @@ function waitForServer(url, child, timeoutMs = 60_000) {
       try {
         const res = await fetch(url);
         if (res.ok || res.status === 404) return;
-      } catch {
-        // retry
-      }
+      } catch {}
       await new Promise((r) => setTimeout(r, 200));
     }
     throw new Error(`Preview server did not start: ${url}`);
@@ -81,9 +79,7 @@ function stopPreview(child) {
     const timer = setTimeout(() => {
       try {
         child.kill("SIGKILL");
-      } catch {
-        // ignore
-      }
+      } catch {}
       resolve();
     }, 3_000);
     child.once("exit", () => {
@@ -161,16 +157,12 @@ try {
   if (browser) {
     try {
       await browser.close();
-    } catch {
-      // ignore
-    }
+    } catch {}
   }
   if (preview.pid) {
     try {
       process.kill(-preview.pid, "SIGTERM");
-    } catch {
-      // fall through
-    }
+    } catch {}
   }
   await stopPreview(preview);
 }

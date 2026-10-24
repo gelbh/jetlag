@@ -1,7 +1,3 @@
-/**
- * Map-first Thermometer chrome: mode + place/start, then hotter/colder + Send.
- * Distance catalog stays on the sheet; live walk banner stays on the sheet.
- */
 import { Button, UnstyledButton } from "@mantine/core";
 import { GpsFixIcon, PaperPlaneTiltIcon, PathIcon } from "@phosphor-icons/react";
 import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
@@ -38,7 +34,6 @@ export type ThermometerMapPlacementChromeProps = {
   gpsLoading?: boolean;
   canStartWalk?: boolean;
   travelLabel?: string | null;
-  /** Why Start track / Send is disabled; shown instead of a silent dead button. */
   blockReason?: ThermometerSendBlockReason | null;
   error?: string | null;
   awaitHiderAnswer?: boolean;

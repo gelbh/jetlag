@@ -10,7 +10,6 @@ interface PinSessionConfig {
   ready: true;
 }
 
-/** Firestore rules cap hider pin labels at this length. */
 export const HIDER_PIN_LABEL_MAX_LENGTH = 60;
 
 interface UsePinToolParams {

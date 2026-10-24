@@ -29,10 +29,8 @@ export function isThermometerWalkActive(question: PendingQuestionRecord): boolea
   return question.toolType === "thermometer" && question.status === "walking";
 }
 
-/** Max in-tab GPS walk duration before the walk tracker auto-stops. */
 export const THERMOMETER_WALK_MAX_DURATION_MS = 30 * 60 * 1000;
 
-/** Walker location older than this (or missing) counts as stale for the host cue. */
 export const THERMOMETER_WALK_LOCATION_STALE_MS = 2 * 60 * 1000;
 
 export function listWalkingThermometerQuestionIds(
@@ -106,7 +104,6 @@ export function isStaleThermometerWalk(
   return nowMs - locationUpdatedAtMs >= locationStaleMs;
 }
 
-/** Client-only walk id when tracking a solo GPS walk without Firestore. */
 export const LOCAL_THERMOMETER_WALK_ID = "__local_thermometer_walk__";
 
 export function isLocalThermometerWalkId(questionId: string | null | undefined): boolean {

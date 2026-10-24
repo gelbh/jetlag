@@ -6,7 +6,6 @@ import type { MatchingAnswer, MatchingCategoryId } from "@/domain/questions";
 const EMPTY_USED = new Set<MatchingCategoryId>();
 const DISTANCE_UNIT: DistanceUnit = "metric";
 
-/** Live Matching category catalog with a canned nearest-feature resolve. */
 export function MatchingLearnDemo() {
   const [categoryId, setCategoryId] = useState<MatchingCategoryId | null>(null);
   const [categoryChosen, setCategoryChosen] = useState(false);

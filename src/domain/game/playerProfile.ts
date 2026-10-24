@@ -67,7 +67,6 @@ export function validateUsername(raw: string): ValidateUsernameResult {
   return { ok: true, username, normalized };
 }
 
-/** Prefix search for friends (server requires ≥2 chars). */
 export const FRIEND_SEARCH_MIN_LENGTH = 2;
 
 export function validateFriendSearchQuery(raw: string): ValidateUsernameResult {

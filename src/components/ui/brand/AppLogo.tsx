@@ -13,11 +13,9 @@ const MARK_SIZES = { sm: 32, md: 48, lg: 64 } as const;
 type MarkSize = keyof typeof MARK_SIZES;
 
 type RadarSweepMarkProps = SVGProps<SVGSVGElement> & {
-  /** Lighter geometry for favicon-scale rendering */
   compact?: boolean;
 };
 
-/** Radar sweep icon geometry, shared by AppLogo and static PWA assets */
 export function RadarSweepMark({ compact = false, ...props }: RadarSweepMarkProps) {
   return (
     <svg viewBox="0 0 64 64" fill="none" {...props}>

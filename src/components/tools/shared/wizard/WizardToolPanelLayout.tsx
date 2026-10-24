@@ -2,9 +2,7 @@ import type { ReactNode } from "react";
 
 interface WizardToolPanelLayoutProps {
   children: ReactNode;
-  /** Binary answer + commit controls pinned below the scroll region on live map. */
   stickyFooter?: ReactNode;
-  /** Live map: constrain height and scroll step content above an optional footer. */
   scrollable?: boolean;
 }
 

@@ -24,10 +24,6 @@ function mergeActivityEvents(
   return sortActivityEventsDesc([...byId.values()]);
 }
 
-/**
- * Subscribes to the session activity timeline (Firestore + local store merge),
- * sorted newest-first by `createdAt`.
- */
 export function useSessionActivityLog(sessionId: string | undefined): SessionActivityEvent[] {
   const localEvents = useActivityLogStore((state) =>
     sessionId ? (state.eventsBySessionId[sessionId] ?? EMPTY_EVENTS) : EMPTY_EVENTS,
@@ -40,9 +36,7 @@ export function useSessionActivityLog(sessionId: string | undefined): SessionAct
       return;
     }
 
-    return subscribeActivityLog(sessionId, setRemoteEvents, () => {
-      // Keep last good remote snapshot on permission/network errors.
-    });
+    return subscribeActivityLog(sessionId, setRemoteEvents, () => {});
   }, [sessionId]);
 
   return mergeActivityEvents(remoteEvents, localEvents);

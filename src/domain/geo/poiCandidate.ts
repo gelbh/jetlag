@@ -14,7 +14,6 @@ export interface PoiCandidate {
   osmId?: string;
 }
 
-/** ~50 m merge radius for name+point dedupe across tile / confirm sources. */
 export const POI_MERGE_DISTANCE_METERS = 50;
 
 const SOURCE_RANK: Record<PoiCandidateSource, number> = {
@@ -39,10 +38,6 @@ export function poiCandidatesMatch(
   return haversineMeters(a.point, b.point) <= maxDistanceMeters;
 }
 
-/**
- * Prefer confirmed over provisional; among equals prefer bundle > overpass > tile.
- * Incoming upgrades matching existing entries; unmatched existing are kept.
- */
 export function mergePoiCandidates(
   existing: readonly PoiCandidate[],
   incoming: readonly PoiCandidate[],
@@ -73,7 +68,6 @@ function preferPoiCandidate(a: PoiCandidate, b: PoiCandidate): PoiCandidate {
   return { ...b };
 }
 
-/** Returns true only when the candidate is safe for scored commit / shade / elim. */
 export function assertConfirmedForCommit(candidate: PoiCandidate): boolean {
   if (candidate.confirmStatus !== "confirmed") {
     return false;

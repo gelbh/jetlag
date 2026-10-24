@@ -1,6 +1,5 @@
 import { JOIN_ERROR_MARKERS } from "./joinErrorMarkers";
 
-/** Closed `join_failed` reason set. Enum values only: no code, uid, or message text. */
 export type JoinFailureReason =
   | "role_code_required"
   | "wrong_role_code"

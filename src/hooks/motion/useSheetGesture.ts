@@ -11,11 +11,6 @@ export interface UseSheetGestureOptions {
   enabled: boolean;
   onDismiss: () => void;
   scrollRef?: RefObject<HTMLElement | null>;
-  /**
-   * When true (default), pointer starts only if scrollRef.scrollTop <= 0.
-   * Set false when handleProps are only on a grabber outside the scroll body
-   * so a scrolled sheet still dismisses from the grabber.
-   */
   gateStartOnScrollTop?: boolean;
 }
 
@@ -32,7 +27,6 @@ export interface UseSheetGestureResult {
   scrimStyle: CSSProperties;
   handleProps: SheetHandleProps;
   isDragging: boolean;
-  /** Clear drag translate (call when the sheet reopens after a kept-mounted dismiss). */
   reset: () => void;
 }
 
@@ -108,7 +102,6 @@ export function useSheetGesture({
   };
 }
 
-/** Velocity helper exported for unit tests. */
 export function shouldDismissSheetDrag(
   offsetY: number,
   sheetHeight: number,

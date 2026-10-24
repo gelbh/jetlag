@@ -42,7 +42,6 @@ export function forceRgbCssColorsInClone(root: HTMLElement): void {
     }
   };
 
-  // html2canvas reads documentElement/body backgrounds; paint those two nodes only.
   const doc = root.ownerDocument;
   if (doc.documentElement instanceof HTMLElement) {
     paint(doc.documentElement);

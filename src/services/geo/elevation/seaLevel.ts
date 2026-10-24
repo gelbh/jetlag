@@ -211,7 +211,6 @@ export async function loadSeaLevelContext(
 
   samplingStage?.finish();
 
-  // Dense complete pack seed: trust the grid. Freehand / incomplete: local refine.
   if (sampling.complete === true && options?.regionPackId) {
     return shadeStage(stages, () =>
       buildSeaLevelContextFromSampling(seekerElevationMeters, sampling, gameArea),

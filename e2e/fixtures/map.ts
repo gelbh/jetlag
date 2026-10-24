@@ -1,7 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 import { DUBLIN_CITY_GAME_AREA } from "../../src/test/fixtures/dublinGameArea";
 
-/** Matches Playwright `use.geolocation` in playwright.config.ts */
 export const E2E_GEOLOCATION = { latitude: 53.35, longitude: -6.26 };
 
 export const LOCAL_GAME_AREA = DUBLIN_CITY_GAME_AREA;

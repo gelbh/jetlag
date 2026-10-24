@@ -29,7 +29,6 @@ function square(west: number): PolygonFeature {
   };
 }
 
-/** Same order as mask 8-poly gate (`-0.19 + index * 0.01`). */
 function eightSquares(): PolygonFeature[] {
   return Array.from({ length: 8 }, (_, index) => square(-0.19 + index * 0.01));
 }

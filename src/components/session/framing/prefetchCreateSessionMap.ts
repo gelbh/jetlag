@@ -33,7 +33,6 @@ export function prefetchCreateSessionMap(): Promise<void> {
   return shellPrefetch;
 }
 
-/** Test-only: forget memoized prefetch state. */
 export function resetCreateSessionMapPrefetchForTests() {
   shellPrefetch = null;
   workerPrefetched = false;

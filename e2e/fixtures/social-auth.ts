@@ -6,7 +6,6 @@ export const E2E_LAYOUT_USERNAME = "e2e_layout_user";
 
 export const SOCIAL_LAYOUT_ROUTES = {
   "/leaderboard": {
-    // Sticky Choose board chip (metric controls live in the board sheet).
     ready: (page: Page) => page.getByRole("button", { name: /Choose board/i }),
     viewportTarget: (page: Page) => page.getByRole("button", { name: /Choose board/i }),
   },

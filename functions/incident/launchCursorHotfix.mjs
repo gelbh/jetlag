@@ -438,13 +438,6 @@ async function executeCursorHotfixLaunch(db, ctx, deps = {}) {
   };
 }
 
-/**
- * Load incident and short-circuit if a Cursor agent id already exists.
- * @returns {Promise<
- *   | { ok: false, result: object }
- *   | { ok: true, incidentId: string, incidentRef: object, incident: object }
- * >}
- */
 async function loadIncidentForCursorLaunch(db, incidentId) {
   if (!incidentId) {
     return {

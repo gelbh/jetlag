@@ -37,5 +37,4 @@ export async function dispatchNearRegionBatch(
   });
 }
 
-/** Public alias; callers may import either name. */
 export const runNearRegionBatch = dispatchNearRegionBatch;

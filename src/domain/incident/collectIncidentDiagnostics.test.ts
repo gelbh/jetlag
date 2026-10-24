@@ -69,7 +69,6 @@ describe("collectIncidentDiagnostics", () => {
     });
 
     expect(diagnostics.lastClientErrors).toHaveLength(INCIDENT_MAX_CLIENT_ERRORS);
-    // Most-recent (tail) errors are retained.
     expect(diagnostics.lastClientErrors[0]?.name).toBe("Err5");
     expect(diagnostics.lastClientErrors[INCIDENT_MAX_CLIENT_ERRORS - 1]?.name).toBe(
       `Err${INCIDENT_MAX_CLIENT_ERRORS + 4}`,

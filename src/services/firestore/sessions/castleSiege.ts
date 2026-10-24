@@ -40,7 +40,6 @@ export async function updateCastleSiegeSetup(
   await updateDoc(doc(sessionsCollection(), sessionId), payload);
 }
 
-/** Team member commits a client seal hash (no plaintext on the server yet). */
 export async function writeTeamSealHash(
   sessionId: string,
   seal: TeamSealHashRecord,
@@ -55,7 +54,6 @@ export async function writeTeamSealHash(
   );
 }
 
-/** Team member commits hash + AES-GCM ciphertext envelope (no plaintext coords). */
 export async function writeTeamSealCipher(
   sessionId: string,
   seal: TeamSealCipherRecord,

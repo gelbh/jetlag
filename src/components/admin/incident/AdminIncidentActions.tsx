@@ -54,7 +54,6 @@ export function AdminIncidentActions({
   const [agentMessage, setAgentMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(
     null,
   );
-  // A confirm replaces the popover that asked for it.
   const setPending = (next: "dismiss" | "mitigation" | "hotfix" | null) => {
     if (next) setMenu(null);
     setPendingState(next);

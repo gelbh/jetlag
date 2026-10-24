@@ -69,7 +69,6 @@ export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps
               background: selected ? "var(--color-flag-soft)" : undefined,
             } as const;
             return (
-              // The player button is the keyboard stop; the row widens the pointer target.
               <Box
                 component="tr"
                 key={uid}

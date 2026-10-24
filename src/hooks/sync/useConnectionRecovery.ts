@@ -10,16 +10,6 @@ import { cycleFirestoreNetwork } from "@/services/firestore/networkCycle";
 import { useSessionStore } from "@/state/sessionStore";
 import { selectOldestPendingAgeMs, useWriteLedgerStore } from "@/state/writeLedgerStore";
 
-/**
- * Resume / lie-fi recovery for the live session.
- *
- * - Lie-fi: `navigator.onLine` says online but a tracked write has been unacked
- *   for longer than `LIE_FI_UNACKED_MS` → probe reachability now instead of
- *   waiting for the next interval tick.
- * - Stalled streams: the probe says the server is reachable but the session
- *   listener keeps serving cache → cycle Firestore's network, gated and
- *   throttled by `shouldCycleFirestoreNetwork`.
- */
 export function useConnectionRecovery(
   enabled: boolean,
   reachable: boolean | null,
@@ -38,8 +28,6 @@ export function useConnectionRecovery(
   useEffect(() => {
     if (!enabled) return;
     const id = window.setInterval(() => {
-      // Known-unreachable or OS-offline: the regular probe interval handles
-      // recovery; fast probes here would only burn battery.
       const online = typeof navigator === "undefined" ? true : navigator.onLine;
       if (isEffectivelyOffline({ online, reachable })) return;
       const age = selectOldestPendingAgeMs(useWriteLedgerStore.getState());

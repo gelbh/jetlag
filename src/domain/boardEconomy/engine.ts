@@ -10,7 +10,6 @@ import type {
 } from "./types";
 import { DEFAULT_HAND_LIMIT } from "./types";
 
-/** Deterministic mulberry32 from string seed. */
 export function hashSeed(seed: string): number {
   let h = 1779033703 ^ seed.length;
   for (let i = 0; i < seed.length; i++) {
@@ -78,7 +77,6 @@ export function createInitialBoardEconomyState(seed: string): BoardEconomyState 
   };
 }
 
-/** Draw `drawN` from deck top without committing keep/discard. */
 export function drawFromDeck(
   deck: readonly BoardCardInstance[],
   drawN: number,
@@ -133,10 +131,6 @@ export function resolveDrawKeep(
   };
 }
 
-/**
- * Draw `drawN` from deck top; keep first `keepM`.
- * Prefer {@link drawFromDeck} + {@link resolveDrawKeep} for interactive picks.
- */
 export function drawKeep(
   deck: readonly BoardCardInstance[],
   hand: readonly BoardCardInstance[],
@@ -160,7 +154,6 @@ export function drawKeep(
   };
 }
 
-/** Start interactive reward: draw the first cycle onto `pendingPick`. */
 export function beginSequentialRewardPick(
   state: BoardEconomyState,
   cycles: readonly DrawKeepCycle[],
@@ -184,10 +177,6 @@ export function beginSequentialRewardPick(
   };
 }
 
-/**
- * Apply keep/discard for the current pick; advance to the next cycle if any.
- * Returns the same state when the selection is invalid.
- */
 export function continueSequentialRewardPick(
   state: BoardEconomyState,
   keepInstanceIds: readonly string[],
@@ -219,7 +208,6 @@ export function continueSequentialRewardPick(
   return beginSequentialRewardPick(afterKeep, pending.cyclesRemaining);
 }
 
-/** Auto-advance cycles that need no choice (`keep === 0` or keep-all). */
 export function advanceUntilInteractivePick(state: BoardEconomyState): BoardEconomyState {
   let current = state;
   while (current.pendingPick) {
@@ -350,7 +338,6 @@ export function playExpandHand(
     ...next,
     handLimit: handLimitAfterExpand(next.handLimit, powerUpId),
   };
-  // Both expand cards draw/keep 1 (rulebook: "Draw 1, expand …").
   const result = drawKeep(next.deck, next.hand, 1, 1);
   return {
     ...next,

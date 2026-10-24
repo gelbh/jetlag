@@ -44,8 +44,6 @@ export function eliminationDiskForAnnotation(annotation: AnnotationRecord): Disk
 
   const radar = answeredRadarCircle(annotation);
   if (radar) {
-    // metadata.inside = hider within circle (yes). Eliminate where they are not:
-    // no → disk; yes → exterior (kernel path below).
     if (radar.inside) {
       return null;
     }
@@ -176,7 +174,6 @@ function eliminationFeatureFromNonKernel(annotation: AnnotationRecord): PolygonF
   return null;
 }
 
-/** Non-kernel sync feature only (tests / presence). Kernel paths are async. */
 export function eliminationFeatureForAnnotationTs(
   annotation: AnnotationRecord,
 ): PolygonFeature | null {
@@ -227,7 +224,6 @@ export async function eliminationFeatureForAnnotation(
 
   const radar = answeredRadarCircle(annotation);
   if (radar) {
-    // yes (inside): eliminate exterior. no: disk path in eliminationDiskForAnnotation.
     if (!radar.inside) {
       return null;
     }
@@ -237,7 +233,6 @@ export async function eliminationFeatureForAnnotation(
   return null;
 }
 
-/** Sync union input for tests/parity only (non-kernel polygons + disks). */
 export function computeEliminationUnionInputTs(
   annotations: readonly AnnotationRecord[],
   _gameArea: GameArea,

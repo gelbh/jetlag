@@ -18,7 +18,6 @@ describe("phaseToSheetSnap", () => {
     expect(wizardStepIdToPhase("location")).toBe("place");
     expect(wizardStepIdToPhase("method")).toBe("configure");
     expect(wizardStepIdToPhase("distance")).toBe("configure");
-    // Measuring Target is configure, not place/peek.
     expect(wizardStepIdToPhase("target")).toBe("configure");
     expect(wizardStepIdToPhase("source")).toBe("configure");
     expect(wizardStepIdToPhase("answer")).toBe("ask");

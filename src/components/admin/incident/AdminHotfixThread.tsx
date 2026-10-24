@@ -6,7 +6,6 @@ import { AdminIncidentMessage, formatIncidentClock } from "./AdminIncidentMessag
 
 export interface AdminHotfixThreadProps {
   incidentId: string;
-  /** Injectable for tests. */
   messagesOverride?: IncidentThreadMessageRecord[];
   errorOverride?: Error | null;
 }
@@ -35,9 +34,6 @@ function messageTone(sender: IncidentThreadMessageRecord["sender"]): "player" | 
   return "system";
 }
 
-/**
- * Private admin ↔ coding-agent hotfix thread (read-only client surface).
- */
 export function AdminHotfixThread({
   incidentId,
   messagesOverride,

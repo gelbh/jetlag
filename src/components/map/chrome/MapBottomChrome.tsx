@@ -6,24 +6,19 @@ import { cn } from "@/lib/cn";
 import { MapSideDockStack } from "./MapSideDockStack";
 import { OverlayHost } from "./OverlayHost";
 
-/** Seeker multi-tool Hunt (`tools`) vs hider 1–2 chip content-sized island (`sparse`). */
 export type MapBottomChromeHuntDensity = "tools" | "sparse";
 
 export type MapBottomChromeIslandName = "hunt" | "session" | "map-controls";
 
 export interface MapBottomChromeProps {
   inactive?: boolean;
-  /** Default `tools`: full-width hunt shrink for many question chips. */
   huntDensity?: MapBottomChromeHuntDensity;
-  /** Ask-owned tool: ToolDeck ask-first instrument cluster. */
   askFirst?: boolean;
   hunt?: ReactNode;
   session?: ReactNode;
   mapControls?: ReactNode;
-  /** Rendered inside the host (e.g. Draw menu). */
   overlay?: ReactNode;
   className?: string;
-  /** Applied to the fixed phone host (e.g. visualViewport bottom inset). */
   style?: CSSProperties;
 }
 
@@ -42,7 +37,6 @@ function SideIsland({
   const className = cn(
     "jl-map-island",
     `jl-map-island--${name}`,
-    // Match Island base hit target under OverlayHost pointer-events-none stack.
     "pointer-events-auto",
     "h-fit w-[var(--map-chrome-side-width,3.25rem)] flex-none flex-col p-1",
     "text-field-ink-muted",
@@ -69,7 +63,6 @@ function SideIsland({
   );
 }
 
-/** Side stack overlays the hunt trailing edge without permanently stealing hunt flex. */
 export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
   function MapBottomChrome(
     {

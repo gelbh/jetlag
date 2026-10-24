@@ -11,7 +11,6 @@ import type {
 } from "@/domain/questions";
 import type { LoadTask } from "@/services/core/progress/loadTask";
 
-/** Flat matching tool panel fields bag for MatchingToolPanel (W4-D peel). */
 export type MatchingToolPanelModel = {
   distanceUnit: DistanceUnit;
   categoryId: MatchingCategoryId | null;

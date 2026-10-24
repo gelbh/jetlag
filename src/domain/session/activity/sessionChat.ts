@@ -38,7 +38,6 @@ export interface PendingQuestionPlacement {
   metadata: Record<string, unknown>;
 }
 
-/** Hider's Randomize roll, written onto the cancelled question for the asking seeker. */
 export interface RandomizedTo {
   optionKey: string | number;
   label: string;
@@ -56,7 +55,6 @@ export interface PendingQuestionRecord {
   promptText: string;
   answer?: unknown;
   answerableAt?: string;
-  /** Server receipt time (ISO): stamped when the hider can first answer (ask, or walk completion). Absent on older docs. */
   receivedAt?: string;
   deadlineExpiredAt?: string;
   answeredLate?: boolean;

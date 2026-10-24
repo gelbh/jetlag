@@ -292,7 +292,6 @@ async function reverseSuggestCandidate(
   };
 }
 
-/** Nearby playable admin areas (city / county / state) for a GPS point. */
 export async function suggestPlacesAtPoint(point: LatLngTuple): Promise<GeocodedPlace[]> {
   const language = nominatimAcceptLanguage();
   const groups = await Promise.all(

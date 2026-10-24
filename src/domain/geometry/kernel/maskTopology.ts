@@ -66,7 +66,6 @@ export function bboxFromGameArea(gameArea: GameAreaGeometry): {
   return { west, east, south, north };
 }
 
-/** Raw AABB (no zero fallback) plus min-span normalize; matches `gameAreaToBoundingBox`. */
 export function normalizedBboxFromGameArea(gameArea: GameAreaGeometry): BoundingBox {
   let west = Infinity;
   let east = -Infinity;
@@ -92,7 +91,6 @@ export function normalizedBboxFromGameArea(gameArea: GameAreaGeometry): Bounding
   return normalizeBoundingBox({ south, west, north, east });
 }
 
-/** Non-throwing grid PIP topology compare for dual-run. */
 export function maskTopologyMatches(
   candidate: PolygonFeature | null,
   baseline: PolygonFeature | null,
