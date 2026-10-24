@@ -28,6 +28,8 @@ export type TentacleHudBodyProps = {
   categoryChosen: boolean;
   searchRadiusMeters: number;
   usedCategoryIds: ReadonlySet<TentacleExtendedCategoryId>;
+  unavailableCategoryIds?: ReadonlySet<TentacleExtendedCategoryId>;
+  catalogNotice?: string | null;
   distanceUnit: DistanceUnit;
   poiOptions: TentaclePoi[];
   selectedPoiId: string | null;
@@ -53,6 +55,8 @@ export function TentacleHudBody({
   categoryChosen,
   searchRadiusMeters,
   usedCategoryIds,
+  unavailableCategoryIds = new Set<TentacleExtendedCategoryId>(),
+  catalogNotice = null,
   distanceUnit,
   poiOptions,
   selectedPoiId,
@@ -76,7 +80,9 @@ export function TentacleHudBody({
     return {
       id: category.id,
       label: category.label,
-      disabled: usedCategoryIds.has(category.id) && !(categoryChosen && category.id === categoryId),
+      disabled:
+        (usedCategoryIds.has(category.id) || unavailableCategoryIds.has(category.id)) &&
+        !(categoryChosen && category.id === categoryId),
       icon: <Icon size={20} weight="duotone" color="currentColor" aria-hidden />,
     };
   });
@@ -115,6 +121,9 @@ export function TentacleHudBody({
       {chord === "types" ? (
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {catalogNotice ? (
+            <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
+          ) : null}
           <AskCatalogRail
             rows={catalogRows}
             selectedId={categoryChosen ? categoryId : null}

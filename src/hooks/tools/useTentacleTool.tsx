@@ -6,8 +6,11 @@ import {
   isConfirmedPoiLike,
   poiCandidateToTentaclePoi,
 } from "@/domain/geo/poiCandidateAdapters";
+import { resolveCategoryPresence } from "@/domain/session/catalog/playAreaCategoryPresence";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
+import { tentacleEmptyPlayAreaMessage } from "@/services/geo/overpass/tentacleMessages";
 import { useMapStore } from "@/state/mapStore";
+import { usePreloadStore } from "@/state/preloadStore";
 import { TentacleHudBody } from "../../components/tools/ask/tentacle/TentacleHudBody";
 import {
   TentacleMapPlacementChrome,
@@ -29,6 +32,7 @@ import {
   questionCostBreakdown,
   type TentacleExtendedCategoryId,
   tentacleCategoriesForGameSize,
+  tentacleCategoriesForSession,
   tentacleCategoryUseCount,
   tentacleCategoryUseCountFromPending,
   tentacleQuestionPrompt,
@@ -169,6 +173,58 @@ export function useTentacleTool({
   }, [selectedPoiId]);
   const [tentacleLoading, setTentacleLoading] = useState(false);
   const [tentacleError, setTentacleError] = useState<string | null>(null);
+  const [unavailableTentacleCategories, setUnavailableTentacleCategories] = useState<
+    Map<TentacleExtendedCategoryId, string>
+  >(() => new Map());
+  const [catalogNotice, setCatalogNotice] = useState<string | null>(null);
+
+  const categoryPresenceCounts = usePreloadStore((state) => state.categoryPresenceCounts);
+  const regionPackId = sessionRules.regionPackId;
+  const tentacleCatalog = useMemo(() => tentacleCategoriesForSession(sessionRules), [sessionRules]);
+
+  const seedUnavailableFromPresence = useCallback((): Map<TentacleExtendedCategoryId, string> => {
+    const next = new Map<TentacleExtendedCategoryId, string>();
+    if (!regionPackId) {
+      return next;
+    }
+
+    const probePending = categoryPresenceCounts === null;
+    for (const category of tentacleCatalog) {
+      const presence = resolveCategoryPresence({
+        categoryId: category.id,
+        regionPackId,
+        probeCount: categoryPresenceCounts?.[category.id],
+        probePending,
+      });
+      if (!presence.available) {
+        next.set(category.id, tentacleEmptyPlayAreaMessage(category.id));
+      }
+    }
+    return next;
+  }, [categoryPresenceCounts, regionPackId, tentacleCatalog]);
+
+  useEffect(() => {
+    setUnavailableTentacleCategories((prev) => {
+      const seeded = seedUnavailableFromPresence();
+      if (seeded.size === 0) {
+        return prev;
+      }
+      let changed = false;
+      const next = new Map(prev);
+      for (const [categoryId, notice] of seeded) {
+        if (!next.has(categoryId)) {
+          next.set(categoryId, notice);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [seedUnavailableFromPresence]);
+
+  const unavailableCategoryIds = useMemo(
+    () => new Set(unavailableTentacleCategories.keys()),
+    [unavailableTentacleCategories],
+  );
 
   const previewTentacleCategoryId =
     tentacleCategoryId ??
@@ -203,8 +259,25 @@ export function useTentacleTool({
 
   const tentacleApplyPhaseRef = useRef(new Map<number, number>());
 
+  const reopenCategoryPicker = useCallback(() => {
+    cancelRequests();
+    setTentacleLoading(false);
+    setTentacleCategoryChosen(false);
+    setTentacleCategoryId(null);
+    setTentaclePois([]);
+    setTentacleOutOfReach(false);
+    setSelectedPoiId(null);
+    setTentacleError(null);
+    setTentacleCenter(null);
+  }, [cancelRequests]);
+
   const applyTentaclePoisResult = useCallback(
-    (requestId: number, pois: Awaited<ReturnType<typeof fetchTentaclePois>>, phase: 0 | 1) => {
+    (
+      requestId: number,
+      pois: Awaited<ReturnType<typeof fetchTentaclePois>>,
+      phase: 0 | 1,
+      categoryId: TentacleExtendedCategoryId,
+    ) => {
       if (!isLatestRequest(requestId)) {
         return;
       }
@@ -215,21 +288,27 @@ export function useTentacleTool({
       }
       tentacleApplyPhaseRef.current.set(requestId, phase);
 
+      // Empty play-area / radius catalog: grey the option and reopen the sheet.
+      if (pois.length === 0) {
+        const notice = tentacleEmptyPlayAreaMessage(categoryId);
+        setUnavailableTentacleCategories((prev) => {
+          const next = new Map(prev);
+          next.set(categoryId, notice);
+          return next;
+        });
+        setCatalogNotice(notice);
+        reopenCategoryPicker();
+        return;
+      }
+
       setTentaclePois(pois);
       const selectedId = selectedPoiIdRef.current;
       if (selectedId && !pois.some((poi) => poi.id === selectedId)) {
         setSelectedPoiId(null);
       }
-      if (pois.length === 0) {
-        setTentacleError(
-          `No named locations were found within ${formatDistance(searchRadiusMeters, distanceUnit)}.`,
-        );
-        return;
-      }
-
       setTentacleError(null);
     },
-    [distanceUnit, isLatestRequest, searchRadiusMeters],
+    [isLatestRequest, reopenCategoryPicker],
   );
 
   const loadPoisForCenter = useCallback(
@@ -249,7 +328,7 @@ export function useTentacleTool({
         maxResults: 48,
       }).map((candidate) => poiCandidateToTentaclePoi(candidate, categoryId));
       if (tilePreview.length > 0) {
-        applyTentaclePoisResult(requestId, tilePreview, 0);
+        applyTentaclePoisResult(requestId, tilePreview, 0, categoryId);
       } else {
         setTentaclePois([]);
       }
@@ -264,11 +343,11 @@ export function useTentacleTool({
           regionPackId: sessionRules.regionPackId,
           subregionId: sessionRules.regionPackSubregionId,
           onEnrich: (enrichedPois) => {
-            applyTentaclePoisResult(requestId, enrichedPois, 1);
+            applyTentaclePoisResult(requestId, enrichedPois, 1, categoryId);
           },
         });
 
-        applyTentaclePoisResult(requestId, pois, 0);
+        applyTentaclePoisResult(requestId, pois, 0, categoryId);
       } catch (error) {
         if (isLatestRequest(requestId)) {
           setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
@@ -311,7 +390,9 @@ export function useTentacleTool({
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
     setTentacleError(null);
-  }, [cancelRequests]);
+    setUnavailableTentacleCategories(seedUnavailableFromPresence());
+    setCatalogNotice(null);
+  }, [cancelRequests, seedUnavailableFromPresence]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
@@ -467,6 +548,9 @@ export function useTentacleTool({
   const placementCrosshair = active && (awaitingPlacement || tentacleCenter === null);
 
   const handleCategoryChange = (nextCategory: TentacleExtendedCategoryId) => {
+    if (unavailableCategoryIds.has(nextCategory) || usedTentacleCategories.has(nextCategory)) {
+      return;
+    }
     cancelRequests();
     setTentacleLoading(false);
     setTentacleCategoryId(nextCategory);
@@ -475,6 +559,7 @@ export function useTentacleTool({
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
     setTentacleError(null);
+    setCatalogNotice(null);
   };
 
   useToolPreset("tentacle", active, (key) => {
@@ -503,6 +588,8 @@ export function useTentacleTool({
         categoryChosen: tentacleCategoryChosen,
         searchRadiusMeters,
         usedCategoryIds: usedTentacleCategories,
+        unavailableCategoryIds,
+        catalogNotice,
         distanceUnit,
         poiOptions: tentaclePois,
         selectedPoiId,
@@ -618,18 +705,6 @@ export function useTentacleTool({
       ? tentacleQuestionPrompt(tentacleCategoryId, distanceUnit, searchRadiusMeters)
       : "Pick a location type";
 
-  const reopenCategoryPicker = () => {
-    cancelRequests();
-    setTentacleLoading(false);
-    setTentacleCategoryChosen(false);
-    setTentacleCategoryId(null);
-    setTentaclePois([]);
-    setTentacleOutOfReach(false);
-    setSelectedPoiId(null);
-    setTentacleError(null);
-    setTentacleCenter(null);
-  };
-
   const statusTitle =
     placementPhase === "locating"
       ? "Getting your location"
@@ -693,6 +768,8 @@ export function useTentacleTool({
           categoryChosen={tentacleCategoryChosen}
           searchRadiusMeters={searchRadiusMeters}
           usedCategoryIds={usedTentacleCategories}
+          unavailableCategoryIds={unavailableCategoryIds}
+          catalogNotice={catalogNotice}
           distanceUnit={distanceUnit}
           poiOptions={tentaclePois}
           selectedPoiId={selectedPoiId}

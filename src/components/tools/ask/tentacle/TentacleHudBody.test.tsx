@@ -90,6 +90,18 @@ describe("TentacleHudBody", () => {
     expect(screen.getByRole("button", { name: /Museum/i })).toBeDisabled();
   });
 
+  it("greys unavailable categories and shows catalog notice", () => {
+    renderHud(
+      <TentacleHudBody
+        {...baseProps}
+        unavailableCategoryIds={new Set(["museum"])}
+        catalogNotice="No named museum found in this play area."
+      />,
+    );
+    expect(screen.getByText("No named museum found in this play area.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Museum/i })).toBeDisabled();
+  });
+
   it("after types, shows map-radius place chord without CONTINUE", () => {
     renderHud(
       <TentacleHudBody {...baseProps} categoryChosen categoryId="museum" awaitingPlacement />,
