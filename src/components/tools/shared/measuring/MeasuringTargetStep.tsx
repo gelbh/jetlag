@@ -13,7 +13,9 @@ import {
   measuringTargetKind,
   measuringTargetLabel,
 } from "@/domain/questions";
+import { useNamedLoadTask } from "@/hooks/progress/useLoadTask";
 import type { LoadTask } from "@/services/core/progress/loadTask";
+import { MEASURING_SEARCH_TASK } from "@/services/core/progress/namedTasks";
 import { BinaryAnswerPicker } from "../answers/BinaryAnswerPicker";
 import { closerFurtherAnswerOptions } from "../answers/binaryAnswerOptions";
 import { SegmentedControl } from "../controls/SegmentedControl";
@@ -51,6 +53,7 @@ interface MeasuringTargetSectionProps {
 }
 
 export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
+  const searchTask = useNamedLoadTask(MEASURING_SEARCH_TASK);
   const {
     subject,
     measureFrom,
@@ -223,6 +226,7 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
           onSubmit={onSearchSubmit}
           submitLabel="Find target"
           loading={searchLoading}
+          task={searchTask}
           placeholder="Address, business, or landmark"
           disabled={!hasSeekerPoint}
           submitClassName="btn-secondary w-full disabled:opacity-40"

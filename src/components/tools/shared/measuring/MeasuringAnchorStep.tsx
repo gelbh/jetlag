@@ -1,4 +1,6 @@
 import { SearchField } from "@/components/ui/forms/SearchField";
+import { useNamedLoadTask } from "@/hooks/progress/useLoadTask";
+import { MEASURING_SEARCH_TASK } from "@/services/core/progress/namedTasks";
 import { AnchorControls } from "../controls/AnchorControls";
 import { CoordinateCopyButton } from "../controls/CoordinateCopyButton";
 import { ToolSection } from "../panels/ToolSection";
@@ -35,6 +37,7 @@ export function MeasuringAnchorStep({
   onSearchQueryChange,
   onSearchSubmit,
 }: MeasuringAnchorStepProps) {
+  const searchTask = useNamedLoadTask(MEASURING_SEARCH_TASK);
   return (
     <ToolSection first compact status="active">
       <AnchorControls
@@ -57,6 +60,7 @@ export function MeasuringAnchorStep({
           onSubmit={onSearchSubmit}
           submitLabel="Find anchor"
           loading={searchLoading}
+          task={searchTask}
           placeholder="Address, business, or landmark"
           submitClassName="btn-secondary w-full disabled:opacity-40"
         />
