@@ -1,7 +1,6 @@
 /**
  * Map-first Photo chrome: prompt + Send (no GPS; Photo has no placement).
  */
-import { Button } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudPhotoIcon } from "@/components/map/icons/ToolIcons";
 import {
@@ -9,6 +8,7 @@ import {
   type AskMapPlacementPhase,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 
 export type PhotoMapPlacementChromeProps = {
@@ -49,19 +49,17 @@ export function PhotoMapPlacementChrome({
           {error}
         </p>
       ) : null}
-      <Button
+      <EntryAsyncButton
         type="button"
         fullWidth
-        onClick={onCommit}
-        disabled={!canCommit || isSubmitting}
-        aria-busy={isSubmitting || undefined}
-        leftSection={
-          isSubmitting ? undefined : <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
-        }
+        busy={isSubmitting}
+        unavailable={!canCommit}
+        idleLabel="Send to hiders"
+        busyLabel="Sending…"
+        leftSection={<PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />}
         styles={askMapPlacementSendStyles}
-      >
-        {isSubmitting ? "Sending…" : "Send to hiders"}
-      </Button>
+        onClick={onCommit}
+      />
     </div>
   );
 

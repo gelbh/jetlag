@@ -60,7 +60,7 @@ export function AdminHotfixThread({
       </div>
 
       {error ? (
-        <Alert role="alert" data-tone="mispunch">
+        <Alert role="alert" color="halt">
           {error.message}
         </Alert>
       ) : null}

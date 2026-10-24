@@ -100,6 +100,7 @@ describe("isLazyRoute", () => {
     expect(isLazyRoute("/privacy")).toBe(true);
     expect(isLazyRoute("/terms")).toBe(true);
     expect(isLazyRoute("/premium")).toBe(true);
+    expect(isLazyRoute("/account")).toBe(true);
     expect(isLazyRoute("/stats")).toBe(true);
     expect(isLazyRoute("/friends")).toBe(true);
     expect(isLazyRoute("/leaderboard")).toBe(true);

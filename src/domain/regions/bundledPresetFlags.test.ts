@@ -6,6 +6,7 @@ import {
   flagMarkForHierarchySegmentId,
   flagMarkForSegmentRow,
 } from "./bundledPresetFlags";
+import { AUSTRALIA_STATE_PRESETS } from "./bundledPresets/australia";
 import { SWISS_CANTON_IDS } from "./bundledPresets/swiss";
 
 describe("bundledPresetFlags", () => {
@@ -56,10 +57,21 @@ describe("bundledPresetFlags", () => {
 
   it("uses a city/metro's own mark on matching leaves", () => {
     expect(flagMarkForBundledPresetId("bundled:nyc")?.src).toBe("/region-flags/metro-nyc.png");
+    expect(flagMarkForBundledPresetId("bundled:southampton")?.src).toBe(
+      "/region-flags/metro-southampton.png",
+    );
   });
 
   it("does not reuse parent flags on leaves without their own mark", () => {
     expect(flagMarkForBundledPresetId("bundled:portland-maine-district-1")).toBeNull();
+    expect(flagMarkForBundledPresetId("bundled:southampton-bargate")).toBeNull();
+  });
+
+  it("uses Wikidata marks for Hampshire and Southampton hierarchy segments", () => {
+    expect(BUNDLED_PRESET_FLAG_ASSETS["county-hampshire"].source).toMatch(/^wikidata:Q23204:/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-southampton"].source).toMatch(/^wikidata:Q79848:/);
+    expect(flagMarkForHierarchySegmentId("county-hampshire")?.alt).toBe("Hampshire");
+    expect(flagMarkForHierarchySegmentId("metro-southampton")?.alt).toBe("Southampton");
   });
 
   it("uses Osaka ward flower marks on ward leaves", () => {
@@ -135,6 +147,21 @@ describe("bundledPresetFlags", () => {
   it("resolves flags for all Swiss canton segments", () => {
     for (const cantonId of SWISS_CANTON_IDS) {
       expect(flagMarkForSegmentRow(`canton-${cantonId}`, [])).not.toBeNull();
+    }
+  });
+
+  it("resolves flags for Australia country and state/territory segments", () => {
+    expect(flagMarkForHierarchySegmentId("country-au")?.src).toBe("/region-flags/country-au.png");
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-au"].source).toMatch(/^flagcdn:au$/);
+    expect(flagMarkForBundledPresetId("bundled:australia")?.src).toBe(
+      "/region-flags/country-au.png",
+    );
+    for (const state of AUSTRALIA_STATE_PRESETS) {
+      const segmentId = `state-${state.id}`;
+      expect(flagMarkForSegmentRow(segmentId, ["continent-oceania", "country-au"])).not.toBeNull();
+      expect(flagMarkForBundledPresetId(`bundled:australia-${state.id}`)?.src).toBe(
+        `/region-flags/${segmentId}.png`,
+      );
     }
   });
 });

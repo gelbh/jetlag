@@ -384,8 +384,32 @@ test("resolveDeployedFunctionName falls back to FUNCTION_TARGET", () => {
   }
 });
 
+test("isExpectedFunctionsError matches callable heal join outcomes but reports role mismatch", () => {
+  assert.equal(isExpectedFunctionsError(new HttpsError("not-found", "Session not found.")), true);
+  assert.equal(
+    isExpectedFunctionsError(new HttpsError("failed-precondition", "Session already ended.")),
+    true,
+  );
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError("failed-precondition", "Rejoin in your previous role."),
+    ),
+    false,
+  );
+  for (const key of [
+    "not-found:Session not found.",
+    "failed-precondition:Session already ended.",
+  ]) {
+    assert.ok(EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS.includes(key), `missing SoT key: ${key}`);
+  }
+  assert.ok(
+    !EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS.includes(
+      "failed-precondition:Rejoin in your previous role.",
+    ),
+  );
+});
+
 test("isExpectedFunctionsError ignores unrelated HttpsErrors and plain Errors", () => {
-  assert.equal(isExpectedFunctionsError(new HttpsError("not-found", "Session not found.")), false);
   assert.equal(
     isExpectedFunctionsError(new HttpsError("permission-denied", "Session membership required.")),
     false,
@@ -431,4 +455,14 @@ test("shouldSkipFunctionsException drops membership permission-denied only on le
   assert.equal(shouldSkipFunctionsException(error, "resetsessionforrematch"), false);
   assert.equal(shouldSkipFunctionsException(error, "repairghosthost"), false);
   assert.equal(shouldSkipFunctionsException(error), false);
+});
+
+test("isExpectedFunctionsError reports heal proof rejections as takeover signals", () => {
+  assert.equal(
+    isExpectedFunctionsError(new HttpsError("failed-precondition", "Heal proof invalid.")),
+    false,
+  );
+  assert.ok(
+    !EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS.includes("failed-precondition:Heal proof invalid."),
+  );
 });

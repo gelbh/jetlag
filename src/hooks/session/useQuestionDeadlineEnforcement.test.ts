@@ -46,6 +46,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "small" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
+        memberUids: [],
         hidingTimerRunning: true,
         pauseTimer,
         resumeTimer: vi.fn(),
@@ -88,6 +89,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "small" },
         pendingQuestions: [pendingQuestion(overrides)],
         hidingZones: [],
+        memberUids: [],
         hidingTimerRunning: true,
         pauseTimer: vi.fn(),
         resumeTimer: vi.fn(),
@@ -111,6 +113,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "small" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
+        memberUids: [],
         hidingTimerRunning: true,
         pauseTimer: vi.fn(),
         resumeTimer: vi.fn(),
@@ -138,6 +141,7 @@ describe("useQuestionDeadlineEnforcement", () => {
           sessionRules: { gameSize: "small" },
           pendingQuestions,
           hidingZones: [],
+          memberUids: [],
           hidingTimerRunning: timerRunning,
           pauseTimer,
           resumeTimer,
@@ -188,6 +192,7 @@ describe("useQuestionDeadlineEnforcement", () => {
           sessionRules: { gameSize: "small" },
           pendingQuestions,
           hidingZones: [],
+          memberUids: [],
           hidingTimerRunning: timerRunning,
           pauseTimer,
           resumeTimer,
@@ -249,6 +254,7 @@ describe("useQuestionDeadlineEnforcement", () => {
               moveInProgress: true,
             },
           ],
+          memberUids: ["hider-1"],
           hidingTimerRunning: timerRunning,
           pauseTimer: vi.fn(),
           resumeTimer,
@@ -284,6 +290,70 @@ describe("useQuestionDeadlineEnforcement", () => {
     expect(resumeTimer).not.toHaveBeenCalled();
   });
 
+  it("resumes after a late answer when moveInProgress is only on an orphan zone", async () => {
+    const pauseTimer = vi.fn();
+    const resumeTimer = vi.fn();
+    const expiredAt = new Date().toISOString();
+
+    const { rerender } = renderHook(
+      ({ pendingQuestions, timerRunning }) =>
+        useQuestionDeadlineEnforcement({
+          sessionId: "session-1",
+          enabled: true,
+          sessionRules: { gameSize: "small" },
+          pendingQuestions,
+          hidingZones: [
+            {
+              hiderUid: "old-uid",
+              sessionId: "session-1",
+              stationId: "station-1",
+              stationName: "Central",
+              center: { lat: 53.35, lng: -6.26 },
+              radiusMeters: 400,
+              geometryJson: "{}",
+              status: "confirmed",
+              confirmedAt: "2026-01-01T00:00:00.000Z",
+              moveInProgress: true,
+            },
+          ],
+          memberUids: ["hider-1", "seeker"],
+          hidingTimerRunning: timerRunning,
+          pauseTimer,
+          resumeTimer,
+          postSystemMessage: vi.fn(async () => undefined),
+        }),
+      {
+        initialProps: {
+          pendingQuestions: [pendingQuestion()],
+          timerRunning: true,
+        },
+      },
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+
+    expect(pauseTimer).toHaveBeenCalledTimes(1);
+
+    rerender({
+      pendingQuestions: [
+        pendingQuestion({
+          status: "answered",
+          deadlineExpiredAt: expiredAt,
+          answeredLate: true,
+        }),
+      ],
+      timerRunning: false,
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+
+    expect(resumeTimer).toHaveBeenCalledTimes(1);
+  });
+
   it("pauses when hidingTimerRunning is true (covers remote-only running)", async () => {
     const pauseTimer = vi.fn();
     renderHook(() =>
@@ -293,6 +363,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "medium" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
+        memberUids: [],
         hidingTimerRunning: true,
         pauseTimer,
         resumeTimer: vi.fn(),
@@ -314,6 +385,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "medium" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
+        memberUids: [],
         hidingTimerRunning: false,
         pauseTimer,
         resumeTimer: vi.fn(),

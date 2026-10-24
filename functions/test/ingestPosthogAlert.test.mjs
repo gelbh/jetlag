@@ -21,6 +21,10 @@ function mockDb() {
         }
         incidents.set(id, { ...data });
       },
+      get: async () => ({
+        exists: incidents.has(id),
+        data: () => incidents.get(id),
+      }),
       update: async (data) => {
         incidents.set(id, { ...(incidents.get(id) ?? {}), ...data });
       },
@@ -63,22 +67,15 @@ function payload(overrides = {}) {
 
 function deps(overrides = {}) {
   let counter = 0;
-  const emails = [];
   return {
     rateLimit: async () => ({ allowed: true }),
-    sendEmail: async (email) => {
-      emails.push(email);
-      return { messageId: "email-1" };
-    },
     now: () => new Date("2026-10-11T12:00:00.000Z"),
     generateId: () => `msg-${(counter += 1)}`,
-    incidentUrlBase: "https://jetlag.gelbhart.dev/",
-    _emails: emails,
     ...overrides,
   };
 }
 
-test("creates an admin-visible incident with a PostHog issue link and emails the admin", async () => {
+test("creates an admin-visible incident with a PostHog issue link and requests the admin email", async () => {
   const db = mockDb();
   const d = deps();
   const result = await ingestPosthogAlert(db, payload(), d);
@@ -108,15 +105,13 @@ test("creates an admin-visible incident with a PostHog issue link and emails the
     },
   ]);
   assert.match(doc.adminPrompt, /posthog-01999a2b/);
-  assert.deepEqual(doc.email, { sentAt: "2026-10-11T12:00:00.000Z", messageId: "email-1" });
+  assert.deepEqual(doc.email, {
+    requestedAt: "2026-10-11T12:00:00.000Z",
+    subject: "Jet Lag PostHog issue: TypeError",
+  });
 
   assert.equal(db._messages.length, 1);
   assert.equal(db._messages[0].kind, "prompt");
-
-  assert.equal(d._emails.length, 1);
-  assert.equal(d._emails[0].subject, "Jet Lag PostHog issue: TypeError");
-  assert.equal(d._emails[0].incidentUrl, `https://jetlag.gelbhart.dev/admin/incidents/${id}`);
-  assert.match(d._emails[0].text, /https:\/\/eu\.posthog\.com\/project\/232295/);
 });
 
 test("labels Worker exceptions with runtime and request path", async () => {
@@ -133,7 +128,7 @@ test("labels Worker exceptions with runtime and request path", async () => {
   assert.equal(doc.diagnostics.platform, "cloudflare-worker");
   assert.equal(doc.playerNote, "PostHog alert: Error (cloudflare-worker GET /join/****)");
   assert.equal(
-    d._emails[0].subject,
+    doc.email.subject,
     "Jet Lag PostHog issue: Error (cloudflare-worker GET /join/****)",
   );
 });
@@ -153,7 +148,7 @@ test("missing or junk exception context keeps the default labels", async () => {
     assert.equal(doc.diagnostics.route, "posthog");
     assert.equal(doc.diagnostics.platform, "web");
     assert.equal(doc.playerNote, "PostHog alert: TypeError");
-    assert.equal(d._emails[0].subject, "Jet Lag PostHog issue: TypeError");
+    assert.equal(doc.email.subject, "Jet Lag PostHog issue: TypeError");
   }
 });
 
@@ -175,7 +170,6 @@ test("a repeated alert for the same issue is a no-op", async () => {
 
   assert.deepEqual(second, { status: "duplicate", incidentId: `posthog-${ISSUE_ID}` });
   assert.equal(db._messages.length, 1);
-  assert.equal(d._emails.length, 1);
 });
 
 test("drops alerts over the rate limit without writing", async () => {
@@ -191,25 +185,8 @@ test("drops alerts over the rate limit without writing", async () => {
 
   assert.deepEqual(result, { status: "dropped", reason: "rate_limited" });
   assert.equal(db._incidents.size, 0);
-  assert.equal(d._emails.length, 0);
   assert.equal(calls[0].route, "posthogErrorAlert");
   assert.equal(calls[0].uid, "posthog");
-});
-
-test("still creates the incident when the email fails", async () => {
-  const db = mockDb();
-  const result = await ingestPosthogAlert(
-    db,
-    payload(),
-    deps({
-      sendEmail: async () => {
-        throw new Error("INCIDENT_EMAIL_FAILED:500");
-      },
-    }),
-  );
-
-  assert.equal(result.status, "created");
-  assert.deepEqual(db._incidents.get(result.incidentId).email, { error: "email_failed" });
 });
 
 test("clamps long text and drops non-PostHog issue URLs", async () => {
@@ -247,6 +224,76 @@ test("rejects payloads without a safe issue id or a name", async () => {
       new RegExp(POSTHOG_ALERT_INVALID_PAYLOAD),
     );
   }
+});
+
+test("reopened alert on a dismissed incident reopens it, writes one message and re-requests the email", async () => {
+  const db = mockDb();
+  const d = deps();
+  await ingestPosthogAlert(db, payload(), d);
+  const id = `posthog-${ISSUE_ID}`;
+  db._incidents.set(id, {
+    ...db._incidents.get(id),
+    status: "dismissed",
+    email: { sentAt: "2026-10-10T00:00:00.000Z", messageId: "email-0" },
+  });
+  const messagesBefore = db._messages.length;
+
+  const result = await ingestPosthogAlert(db, payload({ trigger: "reopened" }), d);
+
+  assert.deepEqual(result, { status: "reopened", incidentId: id });
+  assert.equal(db._incidents.get(id).status, "open");
+  assert.equal(db._incidents.get(id).updatedAt, "2026-10-11T12:00:00.000Z");
+  assert.equal(db._messages.length, messagesBefore + 1);
+  assert.deepEqual(
+    {
+      sender: db._messages.at(-1).sender,
+      kind: db._messages.at(-1).kind,
+      text: db._messages.at(-1).text,
+    },
+    { sender: "system", kind: "chat", text: "PostHog issue reopened" },
+  );
+  assert.deepEqual(db._incidents.get(id).email, {
+    requestedAt: "2026-10-11T12:00:00.000Z",
+    subject: "Jet Lag PostHog issue reopened: TypeError",
+  });
+});
+
+test("reopened alert on an open incident is a duplicate with no writes", async () => {
+  const db = mockDb();
+  const d = deps();
+  await ingestPosthogAlert(db, payload(), d);
+  const messagesBefore = db._messages.length;
+  const emailBefore = db._incidents.get(`posthog-${ISSUE_ID}`).email;
+
+  const result = await ingestPosthogAlert(db, payload({ trigger: "reopened" }), d);
+
+  assert.deepEqual(result, { status: "duplicate", incidentId: `posthog-${ISSUE_ID}` });
+  assert.equal(db._messages.length, messagesBefore);
+  assert.equal(db._incidents.get(`posthog-${ISSUE_ID}`).email, emailBefore);
+});
+
+test("reopened alert with no incident creates one labelled as reopened", async () => {
+  const db = mockDb();
+  const result = await ingestPosthogAlert(db, payload({ trigger: "reopened" }), deps());
+
+  assert.equal(result.status, "created");
+  assert.equal(
+    db._incidents.get(result.incidentId).playerNote,
+    "PostHog alert (reopened): TypeError",
+  );
+});
+
+test("unknown trigger values behave as created", async () => {
+  const db = mockDb();
+  const d = deps();
+  await ingestPosthogAlert(db, payload(), d);
+  const id = `posthog-${ISSUE_ID}`;
+  db._incidents.set(id, { ...db._incidents.get(id), status: "dismissed" });
+
+  const result = await ingestPosthogAlert(db, payload({ trigger: "spiking" }), d);
+
+  assert.deepEqual(result, { status: "duplicate", incidentId: id });
+  assert.equal(db._incidents.get(id).status, "dismissed");
 });
 
 const KEY = Buffer.from("0123456789abcdef0123456789abcdef");

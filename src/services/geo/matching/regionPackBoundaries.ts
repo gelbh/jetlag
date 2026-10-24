@@ -113,12 +113,21 @@ export async function loadRegionPackPlayArea(
   }
 
   if (!subregionId && config.playAreaLevel === "secondary") {
+    if (!config.geoAssets.secondary) {
+      throw new Error(
+        `Region pack ${packId} playAreaLevel is secondary but has no secondary asset.`,
+      );
+    }
     const secondaryJson = await fetchGeoJsonText(config.geoAssets.secondary);
     const collection = parseFeatureCollection(secondaryJson);
     return combineRegionGameAreas(polygonFeatures(collection));
   }
 
-  const primaryJson = await fetchGeoJsonText(config.geoAssets.primary);
+  const primaryPath =
+    subregionId && config.geoAssets.primaryBySubregion
+      ? config.geoAssets.primaryBySubregion(subregionId)
+      : config.geoAssets.primary;
+  const primaryJson = await fetchGeoJsonText(primaryPath);
   const collection = parseFeatureCollection(primaryJson);
   const primaryFeatures = polygonFeatures(collection);
 
@@ -141,6 +150,22 @@ export interface RegionPackSessionBoundaries {
   customMatchingAreas: CustomMatchingAreasByLevel;
 }
 
+function filterGeoJsonTextBySubregion(
+  text: string,
+  propertyKey: string,
+  subregionId: string,
+): string {
+  const collection = parseFeatureCollection(text);
+  const filtered: FeatureCollection = {
+    type: "FeatureCollection",
+    features: collection.features.filter((feature) => {
+      const value = feature.properties?.[propertyKey];
+      return typeof value === "string" && value === subregionId;
+    }),
+  };
+  return JSON.stringify(filtered);
+}
+
 export async function loadRegionPackSessionBoundaries(
   packId: RegionPackId,
   subregionId?: string,
@@ -150,20 +175,54 @@ export async function loadRegionPackSessionBoundaries(
     throw new Error(`Unknown region pack: ${packId}`);
   }
 
-  const primaryJson = await fetchGeoJsonText(config.geoAssets.primary);
+  const primaryPath =
+    subregionId && config.geoAssets.primaryBySubregion
+      ? config.geoAssets.primaryBySubregion(subregionId)
+      : config.geoAssets.primary;
+  let primaryJson = await fetchGeoJsonText(primaryPath);
+  // Fallback when primaryBySubregion is absent: Australia STE is ~1.6MB national.
+  if (!config.geoAssets.primaryBySubregion && packId === "australia" && subregionId !== undefined) {
+    primaryJson = filterGeoJsonTextBySubregion(
+      primaryJson,
+      config.subregionPropertyKey,
+      subregionId,
+    );
+  }
   const secondaryPath =
     subregionId && config.geoAssets.secondaryBySubregion
       ? config.geoAssets.secondaryBySubregion(subregionId)
       : config.geoAssets.secondary;
-  const secondaryJson = await fetchGeoJsonText(secondaryPath);
+  const secondaryJson = secondaryPath ? await fetchGeoJsonText(secondaryPath) : undefined;
+
+  let level4Json: string | undefined;
+  const level4Path =
+    subregionId && config.geoAssets.matchingLevel4BySubregion
+      ? config.geoAssets.matchingLevel4BySubregion(subregionId)
+      : config.geoAssets.matchingLevel4;
+  if (level4Path) {
+    const raw = await fetchGeoJsonText(level4Path);
+    level4Json =
+      !config.geoAssets.matchingLevel4BySubregion && subregionId !== undefined
+        ? filterGeoJsonTextBySubregion(raw, config.subregionPropertyKey, subregionId)
+        : raw;
+  }
+
+  const level6Path =
+    subregionId && config.geoAssets.matchingLevel6BySubregion
+      ? config.geoAssets.matchingLevel6BySubregion(subregionId)
+      : config.geoAssets.matchingLevel6;
+  const level6Json = level6Path ? await fetchGeoJsonText(level6Path) : undefined;
+
   const playArea = await loadRegionPackPlayArea(packId, subregionId);
 
   return {
     playArea,
     focusBounds: gameAreaToBoundingBox(playArea),
     customMatchingAreas: {
+      ...(level4Json !== undefined ? { 4: level4Json } : {}),
+      ...(level6Json !== undefined ? { 6: level6Json } : {}),
       8: primaryJson,
-      9: secondaryJson,
+      ...(secondaryJson !== undefined ? { 9: secondaryJson } : {}),
     },
   };
 }
@@ -179,7 +238,7 @@ export async function loadRegionPackMatchingAreas(
 export function adminLevelForRegionPackAsset(
   level: keyof CustomMatchingAreasByLevel,
 ): MatchingAdminLevel | null {
-  if (level === 8 || level === 9) {
+  if (level === 4 || level === 6 || level === 8 || level === 9) {
     return level;
   }
   return null;

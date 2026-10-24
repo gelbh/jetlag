@@ -2,7 +2,11 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { gameAreaSquareMiles } from "@/domain/session/size/gameSize";
-import { clearRegionPackGeoCacheForTests, loadRegionPackPlayArea } from "./regionPackBoundaries";
+import {
+  clearRegionPackGeoCacheForTests,
+  loadRegionPackPlayArea,
+  loadRegionPackSessionBoundaries,
+} from "./regionPackBoundaries";
 
 const ROOT = resolve(import.meta.dirname, "../../../..");
 
@@ -108,6 +112,158 @@ function isAxisAlignedRectangle(gameArea: { type: string; coordinates: unknown }
   const ring = (gameArea.coordinates as number[][][])[0] ?? [];
   return ring.length === 5;
 }
+
+const EMPTY_FC = '{"type":"FeatureCollection","features":[]}';
+
+function stubFetchForAustraliaAssets() {
+  const read = (relativePath: string) =>
+    readFileSync(resolve(ROOT, "public/geo/australia", relativePath), "utf8");
+
+  const cedWithStates = JSON.stringify({
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: { stateId: "nsw", name: "CED NSW" },
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [151, -34],
+              [152, -34],
+              [152, -33],
+              [151, -33],
+              [151, -34],
+            ],
+          ],
+        },
+      },
+      {
+        type: "Feature",
+        properties: { stateId: "vic", name: "CED VIC" },
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [144, -38],
+              [145, -38],
+              [145, -37],
+              [144, -37],
+              [144, -38],
+            ],
+          ],
+        },
+      },
+    ],
+  });
+
+  const nswCedOnly = JSON.stringify({
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: { stateId: "nsw", name: "CED NSW" },
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [151, -34],
+              [152, -34],
+              [152, -33],
+              [151, -33],
+              [151, -34],
+            ],
+          ],
+        },
+      },
+    ],
+  });
+
+  const paths: Record<string, string> = {
+    "/geo/australia/states.geojson": read("states.geojson"),
+    "/geo/australia/states/nsw.geojson": read("states/nsw.geojson"),
+    "/geo/australia/lgas.geojson": read("lgas.geojson"),
+    "/geo/australia/lgas/nsw.geojson": read("lgas/nsw.geojson"),
+    "/geo/australia/ced.geojson": cedWithStates,
+    "/geo/australia/ced/nsw.geojson": nswCedOnly,
+    "/geo/australia/sed.geojson": EMPTY_FC,
+    "/geo/australia/sed/nsw.geojson": EMPTY_FC,
+  };
+
+  return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = String(input);
+    const suffix = Object.keys(paths).find((path) => url.endsWith(path));
+    if (suffix) {
+      return new Response(paths[suffix], { status: 200 });
+    }
+    return new Response("missing", { status: 404 });
+  });
+}
+
+describe("loadRegionPackSessionBoundaries australia levels 4 and 6", () => {
+  // National states/LGA fixtures are multi-MB; union + parse can exceed 15s under pre-push load.
+  it("returns matching areas 4, 6, 8, and 9 for whole-country australia", async () => {
+    clearRegionPackGeoCacheForTests();
+    const fetchMock = stubFetchForAustraliaAssets();
+
+    const { customMatchingAreas } = await loadRegionPackSessionBoundaries("australia");
+
+    expect(
+      Object.keys(customMatchingAreas)
+        .map(Number)
+        .sort((a, b) => a - b),
+    ).toEqual([4, 6, 8, 9]);
+    expect(customMatchingAreas[4]).toContain("CED NSW");
+    expect(customMatchingAreas[4]).toContain("CED VIC");
+    expect(customMatchingAreas[6]).toBe(EMPTY_FC);
+    expect(customMatchingAreas[8]).toContain("nsw");
+    expect(customMatchingAreas[9]).toContain("lgaId");
+
+    fetchMock.mockRestore();
+  }, 60_000);
+
+  it("scopes CED to the state and loads SED by subregion for nsw", async () => {
+    clearRegionPackGeoCacheForTests();
+    const fetchMock = stubFetchForAustraliaAssets();
+
+    const { customMatchingAreas } = await loadRegionPackSessionBoundaries("australia", "nsw");
+
+    expect(
+      Object.keys(customMatchingAreas)
+        .map(Number)
+        .sort((a, b) => a - b),
+    ).toEqual([4, 6, 8, 9]);
+    expect(customMatchingAreas[4]).toContain("CED NSW");
+    expect(customMatchingAreas[4]).not.toContain("CED VIC");
+    expect(customMatchingAreas[6]).toBe(EMPTY_FC);
+    const level8 = JSON.parse(customMatchingAreas[8]!) as {
+      features: Array<{ properties?: { stateId?: string } }>;
+    };
+    expect(level8.features.map((f) => f.properties?.stateId)).toEqual(["nsw"]);
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringMatching(/\/geo\/australia\/states\/nsw\.geojson$/),
+      expect.anything(),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringMatching(/\/geo\/australia\/ced\/nsw\.geojson$/),
+      expect.anything(),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringMatching(/\/geo\/australia\/sed\/nsw\.geojson$/),
+      expect.anything(),
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      expect.stringMatching(/\/geo\/australia\/states\.geojson$/),
+      expect.anything(),
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      expect.stringMatching(/\/geo\/australia\/ced\.geojson$/),
+      expect.anything(),
+    );
+
+    fetchMock.mockRestore();
+  }, 15_000);
+});
 
 describe("loadRegionPackPlayArea", () => {
   it("returns exact Dublin council polygons instead of bounding boxes", async () => {

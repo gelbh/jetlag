@@ -7,6 +7,7 @@ import { createMapBounds } from "@/domain/map/mapBounds";
 import { mergeBundledPresets } from "@/domain/regions/bundledGamePresets";
 import { GAME_PRESET_SCHEMA_VERSION } from "@/domain/session/presets/gamePreset";
 import { defaultAdvancedSessionSettings } from "@/domain/session/tools/advancedSessionSettings";
+import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
 import { useGamePresetStore } from "@/state/gamePresetStore";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
@@ -14,9 +15,42 @@ import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const ensureAnonymousUser = vi.hoisted(() => vi.fn(async () => ({ uid: "host-1" })));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => false));
+const isCastleSiegeModeEnabled = vi.hoisted(() => vi.fn(() => false));
+const createRemoteSession = vi.hoisted(() =>
+  vi.fn(
+    async (..._args: unknown[]): Promise<Record<string, unknown>> => ({
+      id: "session-1",
+      code: "ABCD",
+      gameArea: null,
+      createdAt: new Date().toISOString(),
+      memberUids: ["host-1"],
+      memberRoles: { "host-1": "observer" },
+      gameSize: "medium",
+      distanceUnit: "imperial",
+      tier: "free",
+    }),
+  ),
+);
+const createPremiumRemoteSession = vi.hoisted(() =>
+  vi.fn(async (..._args: unknown[]) => undefined),
+);
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => vi.fn(),
+}));
+
+vi.mock("@/services/core/analytics/castleSiegeFlag", () => ({
+  isCastleSiegeModeEnabled: () => isCastleSiegeModeEnabled(),
+}));
+
+vi.mock("@/services/firestore/firestoreAnnotations", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/services/firestore/firestoreAnnotations")>()),
+  createRemoteSession: (...args: unknown[]) => createRemoteSession(...args),
+}));
+
+vi.mock("@/services/billing/premiumBilling", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/services/billing/premiumBilling")>()),
+  createPremiumRemoteSession: (...args: unknown[]) => createPremiumRemoteSession(...args),
 }));
 
 const mapView = vi.hoisted(() => ({ model: null as MapViewModel | null }));
@@ -108,8 +142,9 @@ vi.mock("@/services/core/firebase/firebase", () => ({
   subscribeAuthBootstrapReady: () => () => {},
 }));
 
+const hasAccessClaim = vi.hoisted(() => vi.fn(async (..._args: unknown[]) => false));
 vi.mock("@/services/core/auth/accessControl", () => ({
-  hasAccessClaim: vi.fn(async () => false),
+  hasAccessClaim: (...args: unknown[]) => hasAccessClaim(...args),
   grantAccess: vi.fn(),
 }));
 
@@ -121,9 +156,25 @@ vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
   }),
 }));
 
+const premiumEntitlementsMock = vi.hoisted(() => ({
+  current: null as null | {
+    premiumSessionCredits: number;
+    lifetimePremium: boolean;
+    subscription: {
+      status: string | null;
+      plan: "monthly" | "yearly" | null;
+      currentPeriodEnd: number | null;
+    } | null;
+    trialUsedAt: number | null;
+    trialEndsAt: number | null;
+    canCreatePremium: boolean;
+    hasUnlimitedPremium: boolean;
+  },
+}));
+
 vi.mock("@/hooks/billing/usePremiumEntitlements", () => ({
   usePremiumEntitlements: () => ({
-    entitlements: null,
+    entitlements: premiumEntitlementsMock.current,
     refresh: vi.fn(),
     loading: false,
   }),
@@ -205,6 +256,12 @@ beforeEach(() => {
   suggestPlacesAtPoint.mockReset();
   suggestPlacesAtPoint.mockResolvedValue([]);
   isFirebaseConfigured.mockReturnValue(false);
+  isCastleSiegeModeEnabled.mockReturnValue(false);
+  premiumEntitlementsMock.current = null;
+  hasAccessClaim.mockReset();
+  hasAccessClaim.mockResolvedValue(false);
+  createRemoteSession.mockClear();
+  createPremiumRemoteSession.mockClear();
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
   loadRegionPackSessionBoundaries.mockClear();
   useGamePresetStore.setState({
@@ -240,7 +297,9 @@ function renderCreateSession(route = "/create") {
   return render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MemoryRouter initialEntries={[route]}>
-        <CreateSession />
+        <RouteTransitionProvider>
+          <CreateSession />
+        </RouteTransitionProvider>
       </MemoryRouter>
     </MantineProvider>,
   );
@@ -895,5 +954,175 @@ describe("CreateSession", () => {
     expect(
       screen.queryByText(/search for a place, load a preset, or open draw to set the play area/i),
     ).toBeNull();
+  });
+
+  it("hides Castle Siege controls when flag off", () => {
+    isCastleSiegeModeEnabled.mockReturnValue(false);
+    renderCreateSession();
+    goToPlay();
+
+    expect(screen.queryByRole("radiogroup", { name: /game mode/i })).toBeNull();
+    expect(screen.queryByText("Castle Siege")).toBeNull();
+    expect(screen.getByRole("radiogroup", { name: "Player side" })).toBeInTheDocument();
+  });
+
+  it("shows Castle Siege controls when flag on", () => {
+    isCastleSiegeModeEnabled.mockReturnValue(true);
+    renderCreateSession();
+    goToPlay();
+
+    expect(screen.getByRole("radiogroup", { name: /game mode/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /castle siege/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^classic/i })).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: "Player side" })).toBeInTheDocument();
+  });
+
+  it("creates a Castle Siege session with selected options via createRemoteSession", async () => {
+    isCastleSiegeModeEnabled.mockReturnValue(true);
+    isFirebaseConfigured.mockReturnValue(true);
+    parseBoundaryFile.mockResolvedValue(IMPORTED_AREA);
+    createRemoteSession.mockResolvedValue({
+      id: "session-cs",
+      code: "SIEG",
+      gameArea: IMPORTED_AREA,
+      createdAt: new Date().toISOString(),
+      memberUids: ["host-1"],
+      memberRoles: { "host-1": "observer" },
+      gameSize: "medium",
+      distanceUnit: "imperial",
+      tier: "free",
+      mode: "castleSiege",
+    });
+
+    renderCreateSession();
+    const file = importBoundaryFile();
+    await waitFor(() => {
+      expect(parseBoundaryFile).toHaveBeenCalledWith(file);
+    });
+    goToPlay();
+
+    fireEvent.click(screen.getByRole("radio", { name: /castle siege/i }));
+    expect(screen.queryByRole("radiogroup", { name: "Player side" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^best of 3$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /fair.?split/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^team b$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+
+    await waitFor(() => {
+      expect(createRemoteSession).toHaveBeenCalled();
+    });
+    expect(createPremiumRemoteSession).not.toHaveBeenCalled();
+    expect(createRemoteSession.mock.calls[0]?.[2]).toBe("free");
+    const options = createRemoteSession.mock.calls[0]?.[9];
+    expect(options).toEqual({
+      mode: "castleSiege",
+      hostCastleSiegeRole: "teamB",
+      seriesLength: 3,
+      setupMode: "fairSplit",
+    });
+  });
+
+  it("coerces Castle Siege create tier to free when premium would otherwise be selected", async () => {
+    isCastleSiegeModeEnabled.mockReturnValue(true);
+    isFirebaseConfigured.mockReturnValue(true);
+    hasAccessClaim.mockResolvedValue(true);
+    parseBoundaryFile.mockResolvedValue(IMPORTED_AREA);
+    createRemoteSession.mockResolvedValue({
+      id: "session-cs-premium-ui",
+      code: "FREE",
+      gameArea: IMPORTED_AREA,
+      createdAt: new Date().toISOString(),
+      memberUids: ["host-1"],
+      memberRoles: { "host-1": "observer" },
+      gameSize: "medium",
+      distanceUnit: "imperial",
+      tier: "free",
+      mode: "castleSiege",
+    });
+
+    renderCreateSession();
+    const file = importBoundaryFile();
+    await waitFor(() => {
+      expect(parseBoundaryFile).toHaveBeenCalledWith(file);
+    });
+    goToRules();
+    // Session tier lives on the rules step; access claim defaults to premium.
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /^premium/i })).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+
+    fireEvent.click(screen.getByRole("radio", { name: /castle siege/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+
+    await waitFor(() => {
+      expect(createRemoteSession).toHaveBeenCalled();
+    });
+    expect(createPremiumRemoteSession).not.toHaveBeenCalled();
+    expect(createRemoteSession.mock.calls[0]?.[2]).toBe("free");
+    expect(createRemoteSession.mock.calls[0]?.[9]).toMatchObject({ mode: "castleSiege" });
+  });
+
+  it("creates Castle Siege as free for paidPremiumHost without permanent sign-in", async () => {
+    isCastleSiegeModeEnabled.mockReturnValue(true);
+    isFirebaseConfigured.mockReturnValue(true);
+    // Anonymous host (usePermanentAuthUser mock: isPermanent false) with paid premium entitlement.
+    premiumEntitlementsMock.current = {
+      premiumSessionCredits: 0,
+      lifetimePremium: false,
+      subscription: {
+        status: "active",
+        plan: "monthly",
+        currentPeriodEnd: null,
+      },
+      trialUsedAt: null,
+      trialEndsAt: null,
+      canCreatePremium: true,
+      hasUnlimitedPremium: true,
+    };
+    parseBoundaryFile.mockResolvedValue(IMPORTED_AREA);
+    createRemoteSession.mockResolvedValue({
+      id: "session-cs-paid-host",
+      code: "SIE2",
+      gameArea: IMPORTED_AREA,
+      createdAt: new Date().toISOString(),
+      memberUids: ["host-1"],
+      memberRoles: { "host-1": "observer" },
+      gameSize: "medium",
+      distanceUnit: "imperial",
+      tier: "free",
+      mode: "castleSiege",
+    });
+
+    renderCreateSession();
+    const file = importBoundaryFile();
+    await waitFor(() => {
+      expect(parseBoundaryFile).toHaveBeenCalledWith(file);
+    });
+    goToRules();
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /^premium/i })).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+
+    fireEvent.click(screen.getByRole("radio", { name: /castle siege/i }));
+    const createButton = screen.getByRole("button", { name: "Create game" });
+    expect(createButton).not.toBeDisabled();
+    expect(screen.queryByText(/sign in with email/i)).toBeNull();
+    fireEvent.click(createButton);
+
+    await waitFor(() => {
+      expect(createRemoteSession).toHaveBeenCalled();
+    });
+    expect(createPremiumRemoteSession).not.toHaveBeenCalled();
+    expect(createRemoteSession.mock.calls[0]?.[2]).toBe("free");
+    expect(createRemoteSession.mock.calls[0]?.[9]).toMatchObject({ mode: "castleSiege" });
+    expect(screen.queryByText(/sign in with email, google, or apple/i)).toBeNull();
   });
 });

@@ -1,13 +1,28 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { AUSTRALIA_STATES } from "./australiaRegionPack";
 import {
   BUNDLED_GAME_PRESET_DEFINITIONS,
   buildBundledGamePresets,
   mergeBundledPresets,
 } from "./bundledGamePresets";
+import { AUSTRALIA_STATE_PRESETS } from "./bundledPresets/australia";
+import { SOUTHAMPTON_WARDS } from "./bundledPresets/southampton";
 
 describe("bundledGamePresets", () => {
+  it("includes southampton city and ward presets on the southampton pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "southampton");
+    expect(presets.some((p) => p.id === "bundled:southampton")).toBe(true);
+    for (const ward of SOUTHAMPTON_WARDS) {
+      const preset = presets.find((p) => p.id === `bundled:southampton-${ward.id}`);
+      expect(preset, ward.id).toBeDefined();
+      expect(preset?.subregionId).toBe(ward.id);
+      expect(preset?.transitMetroId).toBe("southampton");
+    }
+    expect(presets).toHaveLength(18);
+  });
+
   it("defines Dublin and Hide+Seek show metro presets", () => {
     expect(BUNDLED_GAME_PRESET_DEFINITIONS.length).toBeGreaterThan(90);
     expect(BUNDLED_GAME_PRESET_DEFINITIONS.map((preset) => preset.id)).toEqual(
@@ -47,6 +62,45 @@ describe("bundledGamePresets", () => {
         "bundled:lucerne-metro",
       ]),
     );
+  });
+
+  it("ships australia country + 8 state/territory presets on the australia pack", () => {
+    expect(AUSTRALIA_STATE_PRESETS.map((s) => s.id)).toEqual([...AUSTRALIA_STATES]);
+
+    const au = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "australia");
+    expect(au).toHaveLength(9);
+    expect(au.every((p) => p.distanceUnit === "metric")).toBe(true);
+    expect(au.every((p) => p.transitMetroId === undefined)).toBe(true);
+    expect(au.every((p) => p.advancedSettingsPatch?.expansionPackEnabled === false)).toBe(true);
+
+    const country = au.find((p) => p.id === "bundled:australia");
+    expect(country).toBeDefined();
+    expect(country?.subregionId).toBeUndefined();
+    expect(country?.hierarchy).toEqual([
+      { id: "continent-oceania", category: "Continent", name: "Oceania" },
+      { id: "country-au", category: "Country", name: "Australia" },
+    ]);
+
+    for (const state of AUSTRALIA_STATE_PRESETS) {
+      const preset = au.find((p) => p.id === `bundled:australia-${state.id}`);
+      expect(preset, state.id).toBeDefined();
+      expect(preset?.subregionId).toBe(state.id);
+      expect(preset?.hierarchy).toEqual([
+        { id: "continent-oceania", category: "Continent", name: "Oceania" },
+        { id: "country-au", category: "Country", name: "Australia" },
+        { id: `state-${state.id}`, category: "State/Territory", name: state.name },
+      ]);
+    }
+
+    const auIds = au.map((p) => p.id);
+    const lockedStateIds = new Set(AUSTRALIA_STATES);
+    for (const id of auIds) {
+      if (/ced|sed|lga/i.test(id)) {
+        const slug = id.replace(/^bundled:australia-?/, "");
+        expect(lockedStateIds.has(slug as (typeof AUSTRALIA_STATES)[number])).toBe(true);
+      }
+    }
+    expect(auIds.some((id) => /ced|sed|lga/i.test(id))).toBe(false);
   });
 
   it("keeps bundled presets ahead of user presets", () => {

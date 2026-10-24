@@ -6,6 +6,69 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.5.0 - 2026-10-21
+
+### Fixes
+
+- Harden deadline and move integrity (host-only expiry, create forbids moveInProgress, orphan resume ignore)
+- Tap-map hiding zone keeps the tapped point when offline or when station lookup times out
+- Search stations no longer spins forever when map data is slow
+
+### Improvements
+
+- feat: Full Southampton location pack with city and ward presets
+- Castle Siege Pregame setup chrome (arena ledger, seal vault, muster dials)
+- Dublin offline station catalog covers Dublin Bus, Go-Ahead, Luas, and rail stops for zone Search and tap-snap
+- Offline station catalogs rebuilt for NYC bus coverage plus refreshed Chicago, London, SF, Portland, and Dublin packs
+- Nearby stations from a tap lookup are reused for later taps in the same area
+- Set zone / Search stations use local transit stops first in cities with a transit pack
+- Hiding-zone and Time Trap station search now merge GTFS stops with Overpass results so thin city bundles no longer hide nearby bus stops
+- Denser cities keep bus stops in hiding-zone search and map snap when Overpass returns many rail and bus results
+- Hiding-zone map taps show a center pin that animates to the nearest station when one is found
+- Home: Friends, Leaderboard, and Stats show after you sign in; Log in and Account open an account page with Premium and sign out
+- Home shows a compact Update ready callout to leave this device and refresh when a build is waiting
+- Zone placement hides the dock, supports Back/dismiss on play move, and lets you place on the map after choosing custom
+- Confirm and Send stay visibly disabled until the action is ready, then show busy feedback while saving
+- Matching point categories on region packs load bundled places first, same progressive path as Measuring
+
+### Technical
+
+- Castle Siege create entry behind PostHog flag `castle-siege-mode`.
+- Add one-shot scripts/rebuild-all-gtfs-metros.mjs for multi-metro GTFS rebuilds without Transitland
+
+## 1.4.2 - 2026-10-18
+
+### Fixes
+
+- Rejoining after your sign-in changed keeps your seat, your role and host status
+- Tapping the map now moves your Measuring anchor while the target is still loading or after it fails to load
+- Join waits for the session check and tells players to ask for the role code unless they know they are first on that side
+- Ending a session for everyone sends one request even on a double tap
+- Admin Monitor no longer rejoins a session that is already open in the course pane
+
+### Improvements
+
+- Admin desk on phones has a bottom bar for the start list and Needs you, and incident details use the admin look.
+- Admin asks for confirmation before dismissing an incident, applying a mitigation, publishing a hotfix or moderating a session.
+- The admin uses the app's Jet Lag colours and stays dark like the rest of the app.
+- Tapping the map to place a hiding zone now snaps to the nearest transit station within 200 m, keeps the tapped point when no station is that close, and the map pans smoothly to the chosen station.
+- Hiders without a hiding zone are asked to set one before answering a question, and the hider map no longer keeps GPS on just because a question is pending.
+- Admin incidents from PostHog alerts now close on their own once the PostHog issue is resolved, suppressed or archived, and reopen when the issue comes back.
+- Thermometer GameSize allow-check reuses the session size helper (same as radar).
+
+### Technical
+
+- Session membership heals check a per-member proof, with a no-proof fallback for older sessions
+- Player-report triage ignores errors from wallet browsers, browser extensions and ResizeObserver warnings, so they no longer launch an automatic hotfix.
+- Returning-member membership heals run through the join callable with seat and role checks
+- Emulator tests and CI run the Functions emulator
+- The PostHog error alert webhook keeps one warm instance, so alerts no longer time out while the function cold starts.
+- Production bundles no longer inline the whole client env or the App Check debug token
+- Hiding timer controls send one timer write and one activity event per start
+- React Doctor config and reasoned suppressions for verified false positives
+- Track join failures by reason in product analytics
+- Stale-chunk errors after a deploy ("Importing a module script failed") no longer open admin incidents or launch an automatic hotfix; the app already reloads itself when it hits one.
+
 ## 1.4.1 - 2026-10-14
 
 ### Fixes

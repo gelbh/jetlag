@@ -35,6 +35,12 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "memberAppVersions",
   "opsMitigation",
   "endGameTruthAnchors",
+  "castleSiegeRoles",
+  "arena",
+  "border",
+  "neutralBelt",
+  "dials",
+  "coinAssignment",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordStructuredKey = (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
@@ -85,6 +91,9 @@ const SESSION_RECORD_SCALAR_KEYS = [
   "requiredMinAppVersion",
   "requiredMinAppVersionSetAt",
   "requiredMinAppVersionGraceSeconds",
+  "mode",
+  "seriesLength",
+  "setupMode",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordScalarKey = (typeof SESSION_RECORD_SCALAR_KEYS)[number];

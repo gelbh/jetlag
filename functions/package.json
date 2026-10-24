@@ -2,7 +2,7 @@
   "name": "jetlag-functions",
   "description": "Jet Lag Cloud Functions",
   "private": true,
-  "version": "1.4.1",
+  "version": "1.5.0",
   "type": "module",
   "main": "index.mjs",
   "scripts": {
@@ -12,12 +12,12 @@
     "node": "24"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1148.0",
+    "@aws-sdk/client-s3": "^3.1152.0",
     "firebase-admin": "^14.5.0",
     "firebase-functions": "^7.4.0",
-    "posthog-node": "^5.55.1",
+    "posthog-node": "^5.56.1",
     "stripe": "^23.0.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "overrides": {
     "protobufjs": "^7.6.5",

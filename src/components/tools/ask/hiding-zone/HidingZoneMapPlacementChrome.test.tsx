@@ -41,6 +41,7 @@ function baseZoneTool(overrides: Partial<HidingZoneToolPanelState> = {}): Hiding
     methodChosen: false,
     choosePlacementMethod: vi.fn(),
     manualCenter: null,
+    snapping: false,
     hasPlacement: false,
     confirmZone: vi.fn(),
     saving: false,
@@ -171,6 +172,136 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(confirmZone).not.toHaveBeenCalled();
   });
 
+  it("marks Confirm unavailable (natively disabled) without placement", () => {
+    const confirmZone = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          hasPlacement: false,
+          confirmZone,
+        })}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    const confirm = screen.getByRole("button", { name: /^Confirm$/i });
+    expect(confirm).toBeDisabled();
+    fireEvent.click(confirm);
+    expect(confirmZone).not.toHaveBeenCalled();
+  });
+
+  it("keeps Confirm busy (spinner + aria-busy) without native disable while saving", () => {
+    const confirmZone = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          manualCenter: [53.35, -6.26],
+          hasPlacement: true,
+          saving: true,
+          confirmZone,
+        })}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    const confirm = screen.getByRole("button", { name: /^Saving/i });
+    expect(confirm).toHaveAttribute("aria-busy", "true");
+    expect(confirm).toHaveAttribute("aria-disabled", "true");
+    expect(confirm).not.toBeDisabled();
+    const statusId = confirm.getAttribute("aria-describedby");
+    expect(statusId).toBeTruthy();
+    expect(document.getElementById(statusId!)).toHaveTextContent(/Saving/i);
+    fireEvent.click(confirm);
+    expect(confirmZone).not.toHaveBeenCalled();
+  });
+
+  it("shows the station lookup and disables Confirm while snapping", () => {
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          manualCenter: [53.35, -6.26],
+          hasPlacement: true,
+          snapping: true,
+        })}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Finding nearest station…")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Confirm$/i })).toBeDisabled();
+  });
+
+  it("names the station a map tap snapped to", () => {
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          manualCenter: [53.3503, -6.2603],
+          selectedStation: { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 },
+          hasPlacement: true,
+        })}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Near")).toHaveAttribute("title", "Snapped to the nearest station");
+    expect(screen.getByRole("button", { name: /^Confirm$/i })).toBeEnabled();
+  });
+
+  it("marks the mid slot chosen briefly after a successful snap", () => {
+    const { rerender } = renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          manualCenter: [53.35, -6.26],
+          hasPlacement: true,
+          snapping: true,
+        })}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <HidingZoneMapPlacementChrome
+          moveMode={false}
+          radiusLabel="200 m"
+          zoneTool={baseZoneTool({
+            methodChosen: true,
+            manualMode: true,
+            manualCenter: [53.3503, -6.2603],
+            selectedStation: { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 },
+            hasPlacement: true,
+            snapping: false,
+          })}
+          onSearchThisArea={vi.fn()}
+        />
+      </MantineProvider>,
+    );
+
+    const mid = screen.getByTestId("hiding-zone-map-placement-mid");
+    expect(mid).toHaveAttribute("data-chosen", "true");
+    expect(mid.className).toMatch(/annotation-pulse/);
+  });
+
   it("reports confirm step when placement already exists (move/handoff)", () => {
     const onStepChange = vi.fn();
     renderHud(
@@ -195,6 +326,25 @@ describe("HidingZoneMapPlacementChrome", () => {
     renderHud(
       <HidingZoneMapPlacementChrome
         moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          hasPlacement: false,
+        })}
+        onBackToMethod={onBackToMethod}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Change placement method/i }));
+    expect(onBackToMethod).toHaveBeenCalledTimes(1);
+  });
+
+  it("backs to method via change-configure in moveMode", () => {
+    const onBackToMethod = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode
         radiusLabel="200 m"
         zoneTool={baseZoneTool({
           methodChosen: true,
@@ -235,7 +385,8 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(screen.getByRole("button", { name: /^Confirm$/i })).toBeDisabled();
   });
 
-  it("keeps move-mode copy, 50 m warning, and gated confirm without Cancel", () => {
+  it("keeps move-mode copy, 50 m warning, gated confirm, and Cancel when onDismiss is set", () => {
+    const onDismiss = vi.fn();
     renderHud(
       <HidingZoneMapPlacementChrome
         moveMode
@@ -247,7 +398,7 @@ describe("HidingZoneMapPlacementChrome", () => {
           hasPlacement: false,
         })}
         onSearchThisArea={vi.fn()}
-        onDismiss={vi.fn()}
+        onDismiss={onDismiss}
       />,
     );
 
@@ -257,6 +408,28 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(screen.getByText(/at least 50 m from your previous zone/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/search stations/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Confirm$/i })).toBeDisabled();
-    expect(screen.queryByRole("button", { name: /^Cancel$/i })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^Cancel$/i }));
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables Cancel while saving", () => {
+    const onDismiss = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: false,
+          selectedStation: { id: "s1", name: "Station", lat: 53.3, lng: -6.2 },
+          hasPlacement: true,
+          saving: true,
+        })}
+        onSearchThisArea={vi.fn()}
+        onDismiss={onDismiss}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /^Cancel$/i })).toBeDisabled();
   });
 });

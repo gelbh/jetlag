@@ -1,6 +1,14 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import { isAdminAuth } from "../admin/adminAccess.mjs";
 import { assertClientMeetsConfiguredMin } from "./clientMinVersion.mjs";
+import { HTTPS_MSG_SESSION_NOT_FOUND } from "./expectedSessionUxHttpsErrors.mjs";
+import {
+  HEAL_PROOF_REQUIRED_SINCE,
+  healSecretMatchesProof,
+  memberProofRef,
+  sanitizeProofHash,
+  sessionRequiresHealProof,
+} from "./memberProofs.mjs";
 import {
   buildMembershipHealState,
   countMembersWithRole,
@@ -17,11 +25,18 @@ export const JOIN_NOT_GATED = "JOIN_NOT_GATED";
 export const JOIN_WRONG_PASSCODE = "JOIN_WRONG_PASSCODE";
 export const JOIN_PASSCODE_REQUIRED = "JOIN_PASSCODE_REQUIRED";
 export const JOIN_INCOMPATIBLE_VERSION = "JOIN_INCOMPATIBLE_VERSION";
+export const JOIN_HEAL_ROLE_MISMATCH = "JOIN_HEAL_ROLE_MISMATCH";
+export const JOIN_HEAL_PROOF_INVALID = "JOIN_HEAL_PROOF_INVALID";
 
 const VALID_JOIN_ROLES = new Set(["seeker", "hider", "observer", "admin"]);
 
 function normalizeSessionCode(code) {
   return typeof code === "string" ? code.trim().toUpperCase() : "";
+}
+
+// A member without a stored role plays as seeker (the client resolvePlayerRole default).
+function storedMemberRole(memberRoles, memberUid) {
+  return memberRoles[memberUid] ?? "seeker";
 }
 
 function sanitizeReturningMemberUid(persistedMyUid, candidate) {
@@ -96,7 +111,8 @@ function assertRolePasscodeForJoin(
   // the prior uid (auth drift). Do not require a passcode to reclaim membership.
   const alreadyInRole =
     memberRoles[uid] === role ||
-    (typeof returningMemberUid === "string" && memberRoles[returningMemberUid] === role);
+    (typeof returningMemberUid === "string" &&
+      storedMemberRole(memberRoles, returningMemberUid) === role);
   if (alreadyInRole) {
     return {
       becameLeader: false,
@@ -134,7 +150,57 @@ function assertRolePasscodeForJoin(
   };
 }
 
-export async function joinSessionWithRoleHandler(db, auth, rawInput) {
+function proofSetWrite(sessionRef, uid, data) {
+  return { op: "set", ref: memberProofRef(sessionRef, uid), data };
+}
+
+/**
+ * Proof writes for this join, resolved before any transaction write. A heal
+ * must show the secret behind the old seat's proof; sessions created before
+ * the heal proof cutoff may still heal a seat that has no proof.
+ */
+async function resolveMemberProofWrites(
+  tx,
+  { sessionRef, sessionData, uid, healFromUid, healSecret, proofHash, healProofRequiredSince },
+) {
+  const ownProof = proofHash
+    ? [proofSetWrite(sessionRef, uid, { hash: proofHash, createdAt: new Date().toISOString() })]
+    : [];
+  if (healFromUid == null) {
+    return ownProof;
+  }
+
+  const oldProofRef = memberProofRef(sessionRef, healFromUid);
+  const oldProofSnap = await tx.get(oldProofRef);
+  if (!oldProofSnap.exists) {
+    if (sessionRequiresHealProof(sessionData, healProofRequiredSince)) {
+      throw new Error(JOIN_HEAL_PROOF_INVALID);
+    }
+    return ownProof;
+  }
+
+  const oldProof = oldProofSnap.data() ?? {};
+  if (!healSecretMatchesProof(healSecret, oldProof.hash)) {
+    throw new Error(JOIN_HEAL_PROOF_INVALID);
+  }
+
+  return [
+    proofSetWrite(sessionRef, uid, { hash: oldProof.hash, createdAt: oldProof.createdAt }),
+    { op: "delete", ref: oldProofRef },
+  ];
+}
+
+function applyMemberProofWrites(tx, writes) {
+  for (const write of writes) {
+    if (write.op === "delete") {
+      tx.delete(write.ref);
+    } else {
+      tx.set(write.ref, write.data);
+    }
+  }
+}
+
+export async function joinSessionWithRoleHandler(db, auth, rawInput, options = {}) {
   if (!auth?.uid) {
     throw new HttpsError("unauthenticated", "Sign in required.");
   }
@@ -148,6 +214,9 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
     rawInput?.persistedMyUid,
     rawInput?.returningMemberUid,
   );
+  const proofHash = sanitizeProofHash(rawInput?.proofHash);
+  const healSecret = typeof rawInput?.healSecret === "string" ? rawInput.healSecret : undefined;
+  const healProofRequiredSince = options.healProofRequiredSince ?? HEAL_PROOF_REQUIRED_SINCE;
 
   if (code.length !== 4) {
     throw new HttpsError("invalid-argument", "A 4-letter session code is required.");
@@ -165,13 +234,13 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
 
   const codeSnap = await db.collection("sessionCodes").doc(code).get();
   if (!codeSnap.exists) {
-    throw new HttpsError("not-found", "Session not found.");
+    throw new HttpsError("not-found", HTTPS_MSG_SESSION_NOT_FOUND);
   }
 
   const codeData = codeSnap.data() ?? {};
   const sessionId = typeof codeData.sessionId === "string" ? codeData.sessionId : "";
   if (!sessionId) {
-    throw new HttpsError("not-found", "Session not found.");
+    throw new HttpsError("not-found", HTTPS_MSG_SESSION_NOT_FOUND);
   }
 
   const sessionRef = db.collection("sessions").doc(sessionId);
@@ -189,19 +258,66 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       throw new Error(JOIN_SESSION_ENDED);
     }
 
-    if (!isRoleGatedSession(data)) {
+    const gated = isRoleGatedSession(data);
+    const membership = readMembershipFields(data);
+    const { memberUids, memberRoles, memberAppVersions, hostUid } = membership;
+
+    // returningMemberUid is client-supplied, so a heal may only take over a
+    // current member's seat in that member's role. A non-member uid is not a heal.
+    let healFromUid = returningMemberUid;
+    if (healFromUid != null && healFromUid !== uid && !memberUids.includes(healFromUid)) {
+      healFromUid = undefined;
+    }
+    const healing = healFromUid != null && healFromUid !== uid;
+    if (!gated && !healing) {
       throw new Error(JOIN_NOT_GATED);
     }
+    if (healing && storedMemberRole(memberRoles, healFromUid) !== role) {
+      throw new Error(JOIN_HEAL_ROLE_MISMATCH);
+    }
+    // The healed uid keeps the host seat; promoting another member would hand host away.
+    const hostPatch = healing && healFromUid === hostUid ? { hostUid: uid } : {};
 
     if (
       role !== "admin" &&
-      !sessionVersionCompatible(data, clientVersion, uid, returningMemberUid, role)
+      !sessionVersionCompatible(data, clientVersion, uid, healFromUid, role)
     ) {
       throw new Error(JOIN_INCOMPATIBLE_VERSION);
     }
 
-    const membership = readMembershipFields(data);
-    const { memberUids, memberRoles, memberAppVersions, hostUid } = membership;
+    // All transaction reads must happen before the first write.
+    const proofWrites = await resolveMemberProofWrites(tx, {
+      sessionRef,
+      sessionData: data,
+      uid,
+      healFromUid: healing ? healFromUid : undefined,
+      healSecret,
+      proofHash,
+      healProofRequiredSince,
+    });
+
+    if (!gated) {
+      const ungatedHeal = buildMembershipHealState({
+        existingMemberUids: memberUids,
+        existingRoles: memberRoles,
+        existingAppVersions: memberAppVersions,
+        uid,
+        role,
+        clientVersion,
+        returningMemberUid: healFromUid,
+        currentHostUid: hostUid,
+      });
+      tx.update(sessionRef, {
+        memberUids: ungatedHeal.memberUids,
+        memberRoles: ungatedHeal.memberRoles,
+        memberAppVersions: ungatedHeal.memberAppVersions,
+        ...hostPatch,
+      });
+      applyMemberProofWrites(tx, proofWrites);
+      result = { sessionId, rolePasscode: undefined, becameLeader: false };
+      return;
+    }
+
     let roleGates = {
       version: 1,
       leaders: { ...(data.roleGates?.leaders ?? {}) },
@@ -239,14 +355,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
             secretsPatch: null,
             roleGatesPatch: null,
           }
-        : assertRolePasscodeForJoin(
-            role,
-            memberRoles,
-            uid,
-            rolePasscode,
-            secrets,
-            returningMemberUid,
-          );
+        : assertRolePasscodeForJoin(role, memberRoles, uid, rolePasscode, secrets, healFromUid);
 
     if (passcodeResult.secretsPatch) {
       Object.assign(secrets, passcodeResult.secretsPatch);
@@ -265,7 +374,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       uid,
       role,
       clientVersion,
-      returningMemberUid,
+      returningMemberUid: healFromUid,
       currentHostUid: hostUid,
     });
 
@@ -283,12 +392,11 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       memberRoles: heal.memberRoles,
       memberAppVersions: heal.memberAppVersions,
       roleGates,
+      ...hostPatch,
     };
-    if (heal.nextHostUid != null) {
-      sessionUpdate.hostUid = heal.nextHostUid;
-    }
 
     tx.update(sessionRef, sessionUpdate);
+    applyMemberProofWrites(tx, proofWrites);
     // Full replace so vacated role keys are deleted (merge:true would leave them).
     if (secretsChanged || Object.keys(secrets).length > 0) {
       tx.set(secretsRef, secrets);

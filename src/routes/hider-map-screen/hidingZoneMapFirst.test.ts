@@ -24,13 +24,24 @@ describe("isHidingZoneMapFirstEligible", () => {
     ).toBe(true);
   });
 
-  it("is true in move mode without method chips", () => {
+  it("is false in move mode until a method is chosen (create parity)", () => {
     expect(
       isHidingZoneMapFirstEligible({
         wizardOpen: true,
         sheetBlocksWizard: false,
         moveMode: true,
         methodChosen: false,
+      }),
+    ).toBe(false);
+  });
+
+  it("is true in move mode after method is chosen", () => {
+    expect(
+      isHidingZoneMapFirstEligible({
+        wizardOpen: true,
+        sheetBlocksWizard: false,
+        moveMode: true,
+        methodChosen: true,
       }),
     ).toBe(true);
   });

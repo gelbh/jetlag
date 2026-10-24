@@ -4,6 +4,9 @@ import { PostHog } from "posthog-node";
 
 export const posthogProjectApiKey = defineSecret("POSTHOG_PROJECT_API_KEY");
 
+/** Read-only personal API key (`error_tracking:read`, project 232295) for the incident sweep. */
+export const posthogPersonalApiKey = defineSecret("POSTHOG_PERSONAL_API_KEY");
+
 /** Must match worker upstream host (eu.i.posthog.com). */
 export const POSTHOG_HOST = "https://eu.i.posthog.com";
 

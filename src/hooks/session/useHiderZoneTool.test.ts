@@ -1,12 +1,28 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import type { GameArea } from "../../domain/map/annotations";
+import type { MapViewportBounds } from "../../domain/map/transitViewport";
+import {
+  buildHidingZoneCircle,
+  type HidingZoneRecord,
+  type TransitStation,
+} from "../../domain/session/hiding/hidingZone";
+import type { HidingZoneStationsOptions } from "../../services/geo/matching/transit";
 import { createTestGameArea } from "../../test/fixtures/sessions";
 import { useHiderZoneTool } from "./useHiderZoneTool";
 
 const writeHidingZone = vi.hoisted(() => vi.fn());
 const enqueueMoveTimerIntent = vi.hoisted(() => vi.fn());
 const isEffectivelyOfflineNow = vi.hoisted(() => vi.fn(() => false));
+const fetchTransitStationsForHidingZoneViewport = vi.hoisted(() =>
+  vi.fn(
+    async (
+      _viewport: MapViewportBounds,
+      _gameArea: GameArea,
+      _options?: HidingZoneStationsOptions,
+    ): Promise<TransitStation[]> => [],
+  ),
+);
 const commitWrite = vi.hoisted(() =>
   vi.fn((_label: string, run: () => Promise<void>) => {
     const acknowledged = run();
@@ -20,7 +36,7 @@ vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
 }));
 
 vi.mock("../../services/geo/matching", () => ({
-  fetchTransitStationsForHidingZoneViewport: vi.fn(async () => []),
+  fetchTransitStationsForHidingZoneViewport,
 }));
 
 vi.mock("@/services/session/sessionIntents", () => ({
@@ -78,6 +94,8 @@ describe("useHiderZoneTool", () => {
     commitWrite.mockClear();
     isEffectivelyOfflineNow.mockReset();
     isEffectivelyOfflineNow.mockReturnValue(false);
+    fetchTransitStationsForHidingZoneViewport.mockReset();
+    fetchTransitStationsForHidingZoneViewport.mockResolvedValue([]);
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
@@ -91,6 +109,9 @@ describe("useHiderZoneTool", () => {
       await result.current.startMove();
     });
 
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringMatching(/place a new zone \(station or map\)/i),
+    );
     expect(props.pauseTimer).toHaveBeenCalledTimes(1);
     expect(enqueueMoveTimerIntent).not.toHaveBeenCalled();
     expect(labels()).toEqual(["system.message", "zone.write"]);
@@ -147,7 +168,7 @@ describe("useHiderZoneTool", () => {
     ]);
   });
 
-  it("discards the Move card only after the zone write is acknowledged", async () => {
+  it("discards the Move card only after confirm, not after move start ack", async () => {
     let ackZone: () => void = () => {};
     writeHidingZone.mockReturnValueOnce(
       new Promise<void>((resolve) => {
@@ -165,9 +186,42 @@ describe("useHiderZoneTool", () => {
     await act(async () => {
       ackZone();
     });
+    expect(consumeMoveCard).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.setSelectedStation({ id: "station-2", name: "Other", lat: 53.4, lng: -6.3 });
+    });
+    await act(async () => {
+      await result.current.confirmZone();
+    });
 
     expect(consumeMoveCard).toHaveBeenCalledTimes(1);
     expect(labels()).toContain("economy.update");
+  });
+
+  it("does not discard the Move card when Cancel closes a started move", async () => {
+    let ackZone: () => void = () => {};
+    writeHidingZone.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        ackZone = resolve;
+      }),
+    );
+    const consumeMoveCard = vi.fn(async () => undefined);
+    const { result } = renderZoneTool({ consumeMoveCard, hasMoveCard: () => true });
+
+    await act(async () => {
+      await result.current.startMove();
+    });
+    await act(async () => {
+      ackZone();
+    });
+
+    act(() => {
+      result.current.closeWizardFromUser();
+    });
+
+    expect(consumeMoveCard).not.toHaveBeenCalled();
+    expect(labels()).not.toContain("economy.update");
   });
 
   it("ignores a late Move rejection after the new zone was confirmed", async () => {
@@ -300,5 +354,533 @@ describe("useHiderZoneTool", () => {
     expect(enqueueMoveTimerIntent).not.toHaveBeenCalled();
     expect(result.current.error).toMatch(/No access/);
     expect(result.current.saving).toBe(false);
+  });
+
+  it("tap-map placement snaps to the nearest station within 200 m", async () => {
+    fetchTransitStationsForHidingZoneViewport.mockResolvedValue([
+      { id: "far", name: "Far", lat: 53.36, lng: -6.26 },
+      { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 },
+    ]);
+    const { result } = renderZoneTool({ existingZone: null, mapPickEnabled: true });
+
+    act(() => {
+      result.current.openWizard();
+      result.current.choosePlacementMethod(true);
+    });
+    await act(async () => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    expect(result.current.snapping).toBe(false);
+    expect(result.current.manualCenter).toEqual([53.3503, -6.2603]);
+    await act(async () => {
+      await result.current.confirmZone();
+    });
+
+    expect(writeHidingZone).toHaveBeenCalledWith(
+      "session-1",
+      expect.objectContaining({
+        stationId: "near",
+        stationName: "Near",
+        center: { lat: 53.3503, lng: -6.2603 },
+      }),
+    );
+  });
+
+  it("tap-map placement keeps the tapped point when no station is nearby", async () => {
+    const { result } = renderZoneTool({ existingZone: null, mapPickEnabled: true });
+
+    act(() => {
+      result.current.openWizard();
+      result.current.choosePlacementMethod(true);
+    });
+    await act(async () => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+    await act(async () => {
+      await result.current.confirmZone();
+    });
+
+    expect(writeHidingZone).toHaveBeenCalledWith(
+      "session-1",
+      expect.objectContaining({ stationId: "manual", center: { lat: 53.35, lng: -6.26 } }),
+    );
+  });
+
+  describe("Search this area", () => {
+    const viewport = { south: 53.34, west: -6.27, north: 53.36, east: -6.25 };
+    const priorStation = { id: "prior", name: "Prior", lat: 53.35, lng: -6.26 };
+
+    it("clears loading and keeps prior stations when Overpass search times out", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockResolvedValueOnce([priorStation]);
+      const { result } = renderZoneTool({ existingZone: null });
+
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+      expect(result.current.stations).toEqual([priorStation]);
+
+      fetchTransitStationsForHidingZoneViewport.mockRejectedValueOnce(
+        new Error("Couldn't load transit stations for this area."),
+      );
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+
+      expect(result.current.stationsLoading).toBe(false);
+      expect(result.current.stationsError).toMatch(/Couldn't load transit stations/i);
+      expect(result.current.stations).toEqual([priorStation]);
+    });
+
+    it("applies late onStations results after a timed-out search", async () => {
+      const lateStation = { id: "late", name: "Late", lat: 53.352, lng: -6.262 };
+      fetchTransitStationsForHidingZoneViewport.mockImplementationOnce(
+        async (_viewport, _gameArea, options) => {
+          window.setTimeout(() => {
+            options?.onStations?.([lateStation]);
+          }, 50);
+          return Promise.reject(new Error("Couldn't load transit stations for this area."));
+        },
+      );
+      const { result } = renderZoneTool({ existingZone: null });
+
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+      expect(result.current.stationsError).toMatch(/Couldn't load transit stations/i);
+      expect(result.current.stations).toEqual([]);
+
+      await act(async () => {
+        await new Promise((resolve) => {
+          window.setTimeout(resolve, 60);
+        });
+      });
+
+      expect(result.current.stations).toEqual([lateStation]);
+      expect(result.current.stationsError).toBeNull();
+    });
+
+    it("ignores a late onStations result after a newer search started", async () => {
+      const newer = { id: "newer", name: "Newer", lat: 53.351, lng: -6.261 };
+      let staleOnStations: ((stations: TransitStation[]) => void) | undefined;
+
+      fetchTransitStationsForHidingZoneViewport.mockImplementationOnce(
+        async (_viewport, _gameArea, options) => {
+          staleOnStations = options?.onStations;
+          return Promise.reject(new Error("Couldn't load transit stations for this area."));
+        },
+      );
+      const { result } = renderZoneTool({ existingZone: null });
+
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+
+      fetchTransitStationsForHidingZoneViewport.mockResolvedValueOnce([newer]);
+      await act(async () => {
+        await result.current.searchStationsInArea(viewport);
+      });
+      expect(result.current.stations).toEqual([newer]);
+
+      await act(async () => {
+        staleOnStations?.([priorStation]);
+      });
+
+      expect(result.current.stations).toEqual([newer]);
+      expect(result.current.stationsLoading).toBe(false);
+    });
+  });
+
+  describe("tap-map snap lookup", () => {
+    const tap: [number, number] = [53.35, -6.26];
+    const nearTap = { id: "near", name: "Near", lat: 53.3503, lng: -6.2603 };
+    const nearCenter: [number, number] = [nearTap.lat, nearTap.lng];
+
+    function deferred<T>() {
+      let resolve!: (value: T) => void;
+      let reject!: (reason: unknown) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    }
+
+    function renderTapMap() {
+      const rendered = renderZoneTool({ existingZone: null, mapPickEnabled: true });
+      act(() => {
+        rendered.result.current.openWizard();
+        rendered.result.current.choosePlacementMethod(true);
+      });
+      return rendered;
+    }
+
+    function expectDraftCenter(
+      result: { current: ReturnType<typeof useHiderZoneTool> },
+      center: [number, number],
+    ) {
+      expect(result.current.manualCenter).toEqual(center);
+      expect(result.current.previewCircle).toEqual(buildHidingZoneCircle(center, 200));
+    }
+
+    it("sets draft center to the tap immediately and keeps the ring on that center", () => {
+      const lookup = deferred<TransitStation[]>();
+      fetchTransitStationsForHidingZoneViewport.mockReturnValue(lookup.promise);
+      const { result } = renderTapMap();
+
+      act(() => {
+        result.current.handleMapClick(tap);
+      });
+
+      expect(result.current.snapping).toBe(true);
+      expect(result.current.selectedStation).toBeNull();
+      expectDraftCenter(result, tap);
+    });
+
+    it("reports snapping while the lookup runs and ignores Confirm until it settles", async () => {
+      const lookup = deferred<TransitStation[]>();
+      fetchTransitStationsForHidingZoneViewport.mockReturnValue(lookup.promise);
+      const { result } = renderTapMap();
+
+      act(() => {
+        result.current.handleMapClick(tap);
+      });
+      expect(result.current.snapping).toBe(true);
+      await act(async () => {
+        await result.current.confirmZone();
+      });
+      expect(writeHidingZone).not.toHaveBeenCalled();
+
+      await act(async () => {
+        lookup.resolve([nearTap]);
+      });
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.selectedStation).toEqual(nearTap);
+      expectDraftCenter(result, nearCenter);
+    });
+
+    it("searches a box around the tap that covers the snap radius", async () => {
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+
+      const [bounds] = fetchTransitStationsForHidingZoneViewport.mock.calls[0] as unknown as [
+        { south: number; north: number; west: number; east: number },
+      ];
+      expect(bounds.south).toBeLessThan(tap[0]);
+      expect(bounds.north).toBeGreaterThan(tap[0]);
+      // 200 m of latitude is about 0.0018 degrees.
+      expect(bounds.north - tap[0]).toBeGreaterThan(0.0018);
+    });
+
+    it("lets a newer tap win over a slower, older lookup", async () => {
+      const first = deferred<TransitStation[]>();
+      const second = deferred<TransitStation[]>();
+      fetchTransitStationsForHidingZoneViewport
+        .mockReturnValueOnce(first.promise)
+        .mockReturnValueOnce(second.promise);
+      const { result } = renderTapMap();
+      const secondTap: [number, number] = [53.34, -6.27];
+      const nearSecond = { id: "second", name: "Second", lat: 53.3402, lng: -6.2702 };
+
+      act(() => {
+        result.current.handleMapClick(tap);
+      });
+      act(() => {
+        result.current.handleMapClick(secondTap);
+      });
+      await act(async () => {
+        second.resolve([nearSecond]);
+      });
+      await act(async () => {
+        first.resolve([nearTap]);
+      });
+
+      expect(result.current.selectedStation).toEqual(nearSecond);
+      expect(result.current.manualCenter).toEqual([53.3402, -6.2702]);
+    });
+
+    it("keeps the tapped point when the lookup fails", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockRejectedValue(new Error("Overpass down"));
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.selectedStation).toBeNull();
+      expectDraftCenter(result, tap);
+    });
+
+    it("gives up when Overpass times out so Confirm saves the tapped point", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockRejectedValueOnce(
+        new Error("Couldn't load transit stations for this area."),
+      );
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.selectedStation).toBeNull();
+      expectDraftCenter(result, tap);
+
+      await act(async () => {
+        await result.current.confirmZone();
+      });
+      expect(writeHidingZone).toHaveBeenCalledWith(
+        "session-1",
+        expect.objectContaining({ stationId: "manual", center: { lat: tap[0], lng: tap[1] } }),
+      );
+    });
+
+    it("skips the lookup while offline", async () => {
+      isEffectivelyOfflineNow.mockReturnValue(true);
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+
+      expect(fetchTransitStationsForHidingZoneViewport).not.toHaveBeenCalled();
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.selectedStation).toBeNull();
+      expectDraftCenter(result, tap);
+    });
+
+    it("Confirm writes the draft center after snap, not a lagging tap", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockResolvedValue([nearTap]);
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+      expectDraftCenter(result, nearCenter);
+      expect(result.current.selectedStation).toEqual(nearTap);
+
+      await act(async () => {
+        await result.current.confirmZone();
+      });
+      expect(writeHidingZone).toHaveBeenCalledWith(
+        "session-1",
+        expect.objectContaining({
+          stationId: "near",
+          stationName: "Near",
+          center: { lat: nearTap.lat, lng: nearTap.lng },
+        }),
+      );
+    });
+
+    it("reuses stations from an earlier lookup for a nearby tap", async () => {
+      fetchTransitStationsForHidingZoneViewport.mockResolvedValue([nearTap]);
+      const { result } = renderTapMap();
+
+      await act(async () => {
+        result.current.handleMapClick(tap);
+      });
+      await act(async () => {
+        result.current.handleMapClick([53.3501, -6.2601]);
+      });
+
+      expect(fetchTransitStationsForHidingZoneViewport).toHaveBeenCalledTimes(1);
+      expect(result.current.selectedStation).toEqual(nearTap);
+    });
+
+    it("drops an in-flight snap when the placement method changes", async () => {
+      const lookup = deferred<TransitStation[]>();
+      fetchTransitStationsForHidingZoneViewport.mockReturnValue(lookup.promise);
+      const { result } = renderTapMap();
+
+      act(() => {
+        result.current.handleMapClick(tap);
+      });
+      act(() => {
+        result.current.choosePlacementMethod(true);
+      });
+      await act(async () => {
+        lookup.resolve([nearTap]);
+      });
+
+      expect(result.current.snapping).toBe(false);
+      expect(result.current.selectedStation).toBeNull();
+      expect(result.current.manualCenter).toBeNull();
+    });
+  });
+
+  describe("move mode method picker (create parity)", () => {
+    it("startMove leaves method unchosen so the sheet can show station vs map", async () => {
+      const { result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+
+      expect(result.current.moveMode).toBe(true);
+      expect(result.current.wizardOpen).toBe(true);
+      expect(result.current.methodChosen).toBe(false);
+      expect(result.current.manualMode).toBe(false);
+    });
+
+    it("choosePlacementMethod(true) during move enables tap-map placement", async () => {
+      const { result } = renderZoneTool({ mapPickEnabled: true });
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      act(() => {
+        result.current.choosePlacementMethod(true);
+      });
+      await act(async () => {
+        result.current.handleMapClick([53.35, -6.26]);
+      });
+
+      expect(result.current.methodChosen).toBe(true);
+      expect(result.current.manualMode).toBe(true);
+      expect(result.current.manualCenter).not.toBeNull();
+      expect(result.current.hasPlacement).toBe(true);
+    });
+
+    it("openWizard during move resets method without exiting move", async () => {
+      const { result } = renderZoneTool({ mapPickEnabled: true });
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      act(() => {
+        result.current.choosePlacementMethod(true);
+      });
+      await act(async () => {
+        result.current.handleMapClick([53.35, -6.26]);
+      });
+      act(() => {
+        result.current.openWizard();
+      });
+
+      expect(result.current.moveMode).toBe(true);
+      expect(result.current.wizardOpen).toBe(true);
+      expect(result.current.methodChosen).toBe(false);
+      expect(result.current.manualMode).toBe(false);
+      expect(result.current.manualCenter).toBeNull();
+    });
+  });
+
+  describe("history Back and user dismiss", () => {
+    it("openWizard pushes a zone-wizard history marker with a new router idx", () => {
+      window.history.replaceState({ idx: 3, key: "rrr", usr: null }, "");
+      const { result } = renderZoneTool({ existingZone: null });
+
+      act(() => {
+        result.current.openWizard();
+      });
+
+      expect(window.history.state).toEqual(
+        expect.objectContaining({
+          jlZoneWizard: true,
+          idx: 4,
+          usr: null,
+        }),
+      );
+      expect(window.history.state).toEqual(
+        expect.objectContaining({
+          key: expect.stringMatching(/^jlz-/),
+        }),
+      );
+      expect(result.current.wizardOpen).toBe(true);
+    });
+
+    it("startMove pushes a zone-wizard history marker", async () => {
+      const { result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+
+      expect(window.history.state).toEqual(expect.objectContaining({ jlZoneWizard: true }));
+      expect(result.current.moveMode).toBe(true);
+    });
+
+    it("popstate closes an open create wizard", () => {
+      const { result } = renderZoneTool({ existingZone: null });
+
+      act(() => {
+        result.current.openWizard();
+      });
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+    });
+
+    it("popstate during move closes the wizard and resumes the timer", async () => {
+      const { props, result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      expect(props.pauseTimer).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+      expect(result.current.moveMode).toBe(false);
+      expect(props.resumeTimer).toHaveBeenCalledTimes(1);
+    });
+
+    it("closeWizardFromUser during move resumes the timer", async () => {
+      const { props, result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+
+      act(() => {
+        result.current.closeWizardFromUser();
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+      expect(result.current.moveMode).toBe(false);
+      expect(props.resumeTimer).toHaveBeenCalledTimes(1);
+    });
+
+    it("closeWizardFromUser during move clears moveInProgress", async () => {
+      const { result } = renderZoneTool();
+
+      await act(async () => {
+        await result.current.startMove();
+      });
+      expect(writeHidingZone).toHaveBeenCalledWith(
+        "session-1",
+        expect.objectContaining({ moveInProgress: true }),
+      );
+
+      act(() => {
+        result.current.closeWizardFromUser();
+      });
+
+      expect(result.current.moveMode).toBe(false);
+      expect(writeHidingZone).toHaveBeenLastCalledWith(
+        "session-1",
+        expect.objectContaining({ moveInProgress: false }),
+      );
+    });
+
+    it("closeWizardFromUser on create closes without resuming the timer", () => {
+      const { props, result } = renderZoneTool({ existingZone: null });
+
+      act(() => {
+        result.current.openWizard();
+        result.current.closeWizardFromUser();
+      });
+
+      expect(result.current.wizardOpen).toBe(false);
+      expect(props.resumeTimer).not.toHaveBeenCalled();
+    });
   });
 });

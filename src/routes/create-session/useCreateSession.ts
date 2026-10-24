@@ -36,6 +36,7 @@ import {
   BUNDLED_REGION_PACK_GEO_REVISION,
   type RegionPackId,
 } from "../../domain/regions/regionPack";
+import type { SessionMode } from "../../domain/session/castleSiege/mode";
 import { generateLocalCode } from "../../domain/session/meta/sessionCode";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
@@ -58,12 +59,14 @@ import { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
 import { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
 import { createPremiumRemoteSession } from "../../services/billing/premiumBilling";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
+import { isCastleSiegeModeEnabled } from "../../services/core/analytics/castleSiegeFlag";
 import { grantAccess, hasAccessClaim } from "../../services/core/auth/accessControl";
 import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { requestLocationAccess } from "../../services/core/location/geolocation";
 import { retryAsync } from "../../services/core/network/retryAsync";
 import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
+import type { CreateRemoteSessionOptions } from "../../services/firestore/firestoreSessions";
 import {
   type GeocodedPlace,
   searchPlacesSettled,
@@ -144,6 +147,11 @@ export function useCreateSession() {
   const [sessionTier, setSessionTier] = useState<SessionTier>("free");
   const [tierManuallySet, setTierManuallySet] = useState(false);
   const [playerRole, setPlayerRole] = useState<PlayerRole>("seeker");
+  const castleSiegeFlagEnabled = isCastleSiegeModeEnabled();
+  const [sessionMode, setSessionMode] = useState<SessionMode>("classic");
+  const [seriesLength, setSeriesLength] = useState<1 | 3>(1);
+  const [setupMode, setSetupMode] = useState<"pregame" | "fairSplit">("pregame");
+  const [hostCastleSiegeRole, setHostCastleSiegeRole] = useState<"teamA" | "teamB">("teamA");
   const [gameSize, setGameSize] = useState<GameSize>("medium");
   const [gameSizeUserOverrode, setGameSizeUserOverrode] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>("imperial");
@@ -539,7 +547,11 @@ export function useCreateSession() {
     premiumEntitlements,
     hostHasAccessClaim,
   });
-  const showAccessCodeField = showPremiumUnlockPanel && accessCodeExpanded;
+  // Castle Siege create is free-path only: hide premium sign-in / access-code UI gates.
+  const castleSiegeCreateIntent = castleSiegeFlagEnabled && sessionMode === "castleSiege";
+  const createRequiresPremiumSignIn = castleSiegeCreateIntent ? false : requiresPremiumSignIn;
+  const createShowPremiumUnlockPanel = castleSiegeCreateIntent ? false : showPremiumUnlockPanel;
+  const showAccessCodeField = createShowPremiumUnlockPanel && accessCodeExpanded;
 
   const previewGameArea = useMemo(() => {
     if (importedGameArea) {
@@ -777,9 +789,22 @@ export function useCreateSession() {
 
       const metroId = transitMetroId || undefined;
       const tier = resolveSubmitTier();
+      // Phase 1: Castle Siege stays on free createRemoteSession (premium callable has no mode bag).
+      // Derive before access-code unlock / premium host validation so those gates see free tier.
+      const castleSiegeCreate =
+        castleSiegeFlagEnabled && sessionMode === "castleSiege"
+          ? ({
+              mode: "castleSiege",
+              hostCastleSiegeRole,
+              seriesLength,
+              setupMode,
+            } satisfies CreateRemoteSessionOptions)
+          : undefined;
+      // Do not invent premium CS billing: coerce free even if the UI tier is premium.
+      const createTier = castleSiegeCreate !== undefined ? ("free" as const) : tier;
       let useAccessClaimForPremium = hostHasAccessClaim;
 
-      if (tier === "premium" && !useAccessClaimForPremium && !paidPremiumHost) {
+      if (createTier === "premium" && !useAccessClaimForPremium && !paidPremiumHost) {
         const trimmedCode = accessCode.trim();
         if (!trimmedCode) {
           setAccessCodeError("Unlock premium or enter a host access code.");
@@ -832,20 +857,27 @@ export function useCreateSession() {
         const user = await retryAsync(() => ensureAnonymousUser());
         signInStage?.finish();
         createStage?.start();
-        const premiumSubmitError = validatePremiumHostSubmit(user, tier, useAccessClaimForPremium);
+        const premiumSubmitError = validatePremiumHostSubmit(
+          user,
+          createTier,
+          useAccessClaimForPremium,
+        );
         if (premiumSubmitError) {
           setError(premiumSubmitError);
           return;
         }
 
         const usePremiumCallable =
-          tier === "premium" && !useAccessClaimForPremium && paidPremiumHost;
+          createTier === "premium" &&
+          !useAccessClaimForPremium &&
+          paidPremiumHost &&
+          castleSiegeCreate === undefined;
         const session = usePremiumCallable
           ? await retryAsync(() =>
               createPremiumRemoteSession({
                 gameArea,
                 hostUid: user.uid,
-                tier,
+                tier: createTier,
                 transitMetroId: metroId,
                 hostRole: playerRole,
                 gameSize,
@@ -858,12 +890,14 @@ export function useCreateSession() {
               createRemoteSession(
                 gameArea,
                 user.uid,
-                tier,
+                createTier,
                 metroId,
                 playerRole,
                 gameSize,
                 rulesPatch,
                 distanceUnit,
+                APP_VERSION,
+                castleSiegeCreate,
               ),
             );
         createStage?.finish();
@@ -970,6 +1004,30 @@ export function useCreateSession() {
     });
   }, []);
 
+  const handleSessionModeChange = useCallback((mode: SessionMode) => {
+    startTransition(() => {
+      setSessionMode(mode);
+    });
+  }, []);
+
+  const handleSeriesLengthChange = useCallback((value: 1 | 3) => {
+    startTransition(() => {
+      setSeriesLength(value);
+    });
+  }, []);
+
+  const handleSetupModeChange = useCallback((value: "pregame" | "fairSplit") => {
+    startTransition(() => {
+      setSetupMode(value);
+    });
+  }, []);
+
+  const handleHostCastleSiegeRoleChange = useCallback((value: "teamA" | "teamB") => {
+    startTransition(() => {
+      setHostCastleSiegeRole(value);
+    });
+  }, []);
+
   const handleSessionTierChange = (tier: SessionTier) => {
     startTransition(() => {
       setTierManuallySet(true);
@@ -1030,6 +1088,15 @@ export function useCreateSession() {
     setTransitMetroOverride,
     playerRole,
     handlePlayerRoleChange,
+    castleSiegeFlagEnabled,
+    sessionMode,
+    handleSessionModeChange,
+    seriesLength,
+    handleSeriesLengthChange,
+    setupMode,
+    handleSetupModeChange,
+    hostCastleSiegeRole,
+    handleHostCastleSiegeRoleChange,
     gameSize,
     gameSizeUserOverrode,
     distanceUnit,
@@ -1050,8 +1117,8 @@ export function useCreateSession() {
     visibleTierOptions,
     packCreditsLabel,
     packPremiumFlow,
-    requiresPremiumSignIn,
-    showPremiumUnlockPanel,
+    requiresPremiumSignIn: createRequiresPremiumSignIn,
+    showPremiumUnlockPanel: createShowPremiumUnlockPanel,
     showAccessCodeField,
     handleGameSizeChange,
     handleGameSizeUserOverride,

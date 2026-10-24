@@ -1,10 +1,11 @@
-import { Alert, Badge, Button, Divider, Drawer, Modal, Select } from "@mantine/core";
+import { Alert } from "@mantine/core";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { AdminConfirm } from "@/components/admin/shared/AdminConfirm";
 import { AdminDiagRow } from "@/components/admin/shared/AdminDiagRow";
 import { AdminRegion } from "@/components/admin/shared/AdminRegion";
+import { AdminSegmented } from "@/components/admin/shared/AdminSegmented";
 import { AdminWorld } from "@/components/admin/shared/AdminWorld";
 import { PunchTime } from "@/components/admin/shared/PunchTime";
 import { SessionCode } from "@/components/admin/shared/SessionCode";
@@ -43,8 +44,13 @@ describe("admin shared primitives", () => {
         ))}
       </AdminWorld>,
     );
-    for (const size of ["sm", "md", "lg"]) {
-      expect(screen.getByText(`CODE-${size}`)).toHaveStyle({ fontStretch: "125%" });
+    const px = { sm: "14px", md: "16px", lg: "20px" };
+    for (const size of ["sm", "md", "lg"] as const) {
+      const { style } = screen.getByText(`CODE-${size}`);
+      expect(style.fontFamily).toBe("ui-monospace, SFMono-Regular, Menlo, monospace");
+      expect(style.fontWeight).toBe("700");
+      expect(style.letterSpacing).toBe("0.08em");
+      expect(style.fontSize).toBe(px[size]);
     }
   });
 
@@ -64,24 +70,22 @@ describe("admin shared primitives", () => {
     }
   });
 
-  it("keeps error alerts in the mispunch tone", () => {
+  it("uses jetlag halt for destructive alerts under the admin shell", () => {
     renderWithAppUi(
       <AdminWorld>
-        <Alert color="red">Red</Alert>
-        <Alert>Default</Alert>
-        <Alert data-tone="ok">Toned</Alert>
+        <Alert color="halt">Halt</Alert>
         <Alert color="blue">Blue</Alert>
       </AdminWorld>,
     );
-    const alertVar = (text: string) =>
-      screen
-        .getByText(text)
-        .closest<HTMLElement>(".mantine-Alert-root")
-        ?.style.getPropertyValue("--alert-color");
-    expect(alertVar("Red")).toBe("var(--adm-mispunch)");
-    expect(alertVar("Default")).toBe("var(--adm-mispunch)");
-    expect(alertVar("Toned")).toBe("var(--adm-ok)");
-    expect(alertVar("Blue")).not.toBe("var(--adm-ink)");
+    const halt = screen.getByText("Halt").closest<HTMLElement>(".mantine-Alert-root");
+    const blue = screen.getByText("Blue").closest<HTMLElement>(".mantine-Alert-root");
+    expect(halt?.style.getPropertyValue("--alert-color")).toContain("halt");
+    expect(blue?.style.getPropertyValue("--alert-color")).toContain("blue");
+    expect(halt?.style.border).toContain("var(--alert-color)");
+    expect(blue?.style.border).toContain("var(--alert-color)");
+    expect(halt?.style.getPropertyValue("--alert-color")).not.toBe(
+      blue?.style.getPropertyValue("--alert-color"),
+    );
   });
 
   it("labels stat cells for assistive tech", () => {
@@ -102,25 +106,26 @@ describe("admin shared primitives", () => {
     expect(container.querySelector("[data-admin-world]")).not.toBeNull();
   });
 
-  it("fills the live tone with ink text for contrast", () => {
+  it("draws each status tone as a dot plus word in its player token", () => {
+    const expected: Record<StatusTone, string> = {
+      live: "var(--color-signal)",
+      ok: "var(--color-trail)",
+      info: "var(--color-brand-blue)",
+      mispunch: "var(--color-status-error)",
+      neutral: "var(--color-ink-muted)",
+    };
     renderWithAppUi(
       <AdminWorld>
-        <StatusMark tone="live" label="Live" />
+        {(Object.keys(expected) as StatusTone[]).map((tone) => (
+          <StatusMark key={tone} tone={tone} label={`Mark ${tone}`} />
+        ))}
       </AdminWorld>,
     );
-    const mark = screen.getByText("Live").closest<HTMLElement>("[data-tone]");
-    expect(mark?.style.getPropertyValue("--badge-bg")).toBe("var(--adm-live)");
-    expect(mark?.style.getPropertyValue("--badge-color")).toBe("var(--adm-ink)");
-  });
-
-  it("falls back to the neutral tone for an unknown data-tone", () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Badge data-tone="bogus">Odd</Badge>
-      </AdminWorld>,
-    );
-    const badge = screen.getByText("Odd").closest<HTMLElement>("[data-tone]");
-    expect(badge?.style.getPropertyValue("--badge-bd")).toBe("1px solid var(--adm-ink-muted)");
+    for (const [tone, color] of Object.entries(expected)) {
+      const mark = screen.getByText(`Mark ${tone}`);
+      expect(mark.style.color).toBe(color);
+      expect(mark.querySelector('[aria-hidden="true"]')).not.toBeNull();
+    }
   });
 
   it("reports a blank status label in dev", () => {
@@ -137,7 +142,7 @@ describe("admin shared primitives", () => {
     }
   });
 
-  it("follows a light OS inside admin", () => {
+  it("stays dark inside admin when the OS prefers light", () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: false,
       media: query,
@@ -154,61 +159,10 @@ describe("admin shared primitives", () => {
           <span>x</span>
         </AdminWorld>,
       );
-      expect(document.documentElement).toHaveAttribute("data-mantine-color-scheme", "light");
+      expect(document.documentElement).toHaveAttribute("data-mantine-color-scheme", "dark");
     } finally {
       vi.unstubAllGlobals();
     }
-  });
-
-  it("draws vertical dividers inline so the base border reset can't hide them", () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Divider orientation="vertical" />
-      </AdminWorld>,
-    );
-    expect(screen.getByRole("separator").style.borderInlineStart).toBe("1px solid var(--adm-rule)");
-  });
-
-  it("fills admin buttons with overprint instead of the app primary", () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Button>Go</Button>
-      </AdminWorld>,
-    );
-    const button = screen.getByRole("button", { name: "Go" });
-    expect(button.style.getPropertyValue("--button-bg")).toBe("var(--adm-overprint)");
-    expect(button.style.getPropertyValue("--button-color")).toBe("var(--adm-overprint-ink)");
-  });
-
-  it("portals a Drawer into the admin world so it reads --adm-paper", async () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Drawer opened onClose={() => {}} title="Settings">
-          drawer body
-        </Drawer>
-      </AdminWorld>,
-    );
-    const body = await screen.findByText("drawer body");
-    expect(body.closest("[data-admin-world]")).not.toBeNull();
-    expect(body.closest(".mantine-Drawer-content")?.getAttribute("style")).toContain(
-      "var(--adm-paper)",
-    );
-    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
-  });
-
-  it("portals a Modal into the admin world on admin paper", async () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Modal opened onClose={() => {}} title="Confirm">
-          modal body
-        </Modal>
-      </AdminWorld>,
-    );
-    const body = await screen.findByText("modal body");
-    expect(body.closest("[data-admin-world]")).not.toBeNull();
-    expect(body.closest(".mantine-Modal-content")?.getAttribute("style")).toContain(
-      "var(--adm-paper-raised)",
-    );
   });
 
   it("names a region by its title and shows the count", () => {
@@ -223,6 +177,8 @@ describe("admin shared primitives", () => {
     expect(region).toHaveAttribute("data-testid", "start-list");
     expect(screen.getByRole("heading", { name: "Start list" })).toBeVisible();
     expect(region).toHaveTextContent("3");
+    expect(region.style.borderRadius).toBe("16px");
+    expect(region.style.background).toContain("var(--color-canvas)");
     expect(screen.getByText("rows")).toBeVisible();
   });
 
@@ -297,7 +253,7 @@ describe("admin shared primitives", () => {
           <PunchTime at={at} flashing />
         </AdminWorld>,
       );
-      expect(screen.getByText("just now").getAttribute("style")).toContain("adm-punch");
+      expect(screen.getByText("just now").getAttribute("style")).toContain("admin-punch");
       unmount();
 
       motion.reduced = true;
@@ -307,7 +263,7 @@ describe("admin shared primitives", () => {
         </AdminWorld>,
       );
       const style = screen.getByText("just now").getAttribute("style") ?? "";
-      expect(style).toContain("var(--adm-overprint-soft)");
+      expect(style).toContain("var(--color-flag-soft)");
       expect(style).not.toContain("animation");
     } finally {
       motion.reduced = false;
@@ -332,19 +288,30 @@ describe("admin shared primitives", () => {
 
     const after = screen.getByText("just now");
     expect(after).toHaveAttribute("datetime", second);
-    expect(after.getAttribute("style")).toContain("adm-punch");
+    expect(after.getAttribute("style")).toContain("admin-punch");
     expect(after).not.toBe(before);
     expect(before.isConnected).toBe(false);
   });
+});
 
-  it("portals combobox dropdowns into the admin world", async () => {
+describe("AdminSegmented", () => {
+  const data = [
+    { value: "live", label: "Live" },
+    { value: "triage", label: "Triage", badge: 3 },
+  ];
+
+  it("renders options with a count badge and reports a change", () => {
+    const onChange = vi.fn();
     renderWithAppUi(
       <AdminWorld>
-        <Select label="Sort" data={["Last activity", "Created"]} defaultDropdownOpened />
+        <AdminSegmented aria-label="Desk view" value="live" onChange={onChange} data={data} />
       </AdminWorld>,
     );
-    const option = await screen.findByRole("option", { name: "Created" });
-    expect(option.closest("[data-admin-world]")).not.toBeNull();
+    expect(screen.getByRole("radiogroup", { name: "Desk view" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Live" })).toBeChecked();
+    expect(screen.getByText("3")).toBeVisible();
+    fireEvent.click(screen.getByRole("radio", { name: /Triage/ }));
+    expect(onChange).toHaveBeenCalledWith("triage");
   });
 });
 
@@ -390,17 +357,6 @@ describe("AdminConfirm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Start end game" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Session already ended.");
     expect(props.onClose).not.toHaveBeenCalled();
-  });
-
-  it("fills destructive admin buttons with the mispunch token", () => {
-    renderWithAppUi(
-      <AdminWorld>
-        <Button color="red">Stop</Button>
-      </AdminWorld>,
-    );
-    const button = screen.getByRole("button", { name: "Stop" });
-    expect(button.style.getPropertyValue("--button-bg")).toBe("var(--adm-mispunch)");
-    expect(button.style.getPropertyValue("--button-color")).toBe("var(--adm-paper)");
   });
 
   it("renders outside the admin world without admin tokens", () => {

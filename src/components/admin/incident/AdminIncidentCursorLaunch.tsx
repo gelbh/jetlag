@@ -1,4 +1,4 @@
-import { Alert, Button, Group, Stack, Text, Title } from "@mantine/core";
+import { Button, Group } from "@mantine/core";
 import { useState } from "react";
 import type { IncidentCodingAgentState } from "../../../domain/incident/incidentTypes";
 import {
@@ -30,6 +30,8 @@ export interface AdminIncidentCursorLaunchProps {
   disabled?: boolean;
   launchCursorAgentFn?: (incidentId: string) => Promise<LaunchIncidentCursorAgentResult>;
   openExternalUrlFn?: (url: string) => void;
+  /** Outcome line for the actions row to show (launch result or error). */
+  onMessage?: (message: { tone: "ok" | "error"; text: string } | null) => void;
 }
 
 function openInNewTab(url: string) {
@@ -37,7 +39,7 @@ function openInNewTab(url: string) {
 }
 
 /**
- * Actions module 2 - Launch / Open / Retry Cursor coding agent.
+ * Launch / Open / Retry Cursor coding agent; one button in the actions row.
  * Parent should pass `key={incidentId}` so local state resets on selection change.
  */
 export function AdminIncidentCursorLaunch({
@@ -46,10 +48,9 @@ export function AdminIncidentCursorLaunch({
   disabled = false,
   launchCursorAgentFn = launchIncidentCursorAgent,
   openExternalUrlFn = openInNewTab,
+  onMessage,
 }: AdminIncidentCursorLaunchProps) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [ok, setOk] = useState<string | null>(null);
   const [localAgent, setLocalAgent] = useState<IncidentCodingAgentState | null>(null);
 
   const effectiveAgent = agent?.cursorAgentId ? agent : (localAgent ?? agent);
@@ -67,8 +68,7 @@ export function AdminIncidentCursorLaunch({
       return;
     }
     setBusy(true);
-    setError(null);
-    setOk(null);
+    onMessage?.(null);
     try {
       const result = await launchCursorAgentFn(incidentId);
       setLocalAgent({
@@ -78,73 +78,73 @@ export function AdminIncidentCursorLaunch({
         cursorRunId: result.runId ?? null,
         forced: true,
       });
-      setOk(
-        result.agentUrl ? "Cursor agent launched." : "Cursor agent launched (no URL returned).",
-      );
+      onMessage?.({
+        tone: "ok",
+        text: result.agentUrl
+          ? "Cursor agent launched."
+          : "Cursor agent launched (no URL returned).",
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not launch the Cursor agent.");
+      onMessage?.({
+        tone: "error",
+        text: err instanceof Error ? err.message : "Could not launch the Cursor agent.",
+      });
     }
     setBusy(false);
   };
 
-  return (
-    <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
-      <Title order={3} size="h6">
-        2 · Coding agent
-      </Title>
-      <Text size="xs" c="dimmed">
-        {codingAgentHint(effectiveAgent)}
-      </Text>
-      {error ? (
-        <Alert data-tone="mispunch" role="alert">
-          {error}
-        </Alert>
-      ) : null}
-      {ok ? (
-        <Text size="sm" c="green">
-          {ok}
-        </Text>
-      ) : null}
-      {hasOpenableAgent ? (
-        <Button
-          type="button"
-          variant="default"
-          tt="uppercase"
-          disabled={actionsDisabled}
-          onClick={() => {
-            if (agentUrl) {
-              openExternalUrlFn(agentUrl);
-            }
-          }}
-        >
-          Open agent
+  const hint = codingAgentHint(effectiveAgent);
+
+  if (hasOpenableAgent) {
+    return (
+      <Button
+        type="button"
+        variant="default"
+        h={36}
+        radius={12}
+        title={hint}
+        disabled={actionsDisabled}
+        onClick={() => {
+          if (agentUrl) {
+            openExternalUrlFn(agentUrl);
+          }
+        }}
+      >
+        Open agent
+      </Button>
+    );
+  }
+
+  if (waitingForLink) {
+    return (
+      <Group gap={4} wrap="nowrap">
+        <Button type="button" variant="default" h={36} radius={12} title={hint} disabled>
+          Agent launched, waiting for link
         </Button>
-      ) : waitingForLink ? (
-        <Group gap="xs" wrap="nowrap">
-          <Button type="button" variant="default" tt="uppercase" disabled>
-            Agent launched, waiting for link
-          </Button>
-          <Button
-            type="button"
-            variant="subtle"
-            size="compact-sm"
-            disabled={actionsDisabled || busy}
-            onClick={() => void onLaunch()}
-          >
-            {busy ? "Launching…" : "Retry"}
-          </Button>
-        </Group>
-      ) : (
         <Button
           type="button"
-          variant="default"
-          tt="uppercase"
+          variant="subtle"
+          size="compact-sm"
           disabled={actionsDisabled || busy}
           onClick={() => void onLaunch()}
         >
-          {busy ? "Launching…" : failed ? "Retry launch" : "Launch agent"}
+          {busy ? "Launching…" : "Retry"}
         </Button>
-      )}
-    </Stack>
+      </Group>
+    );
+  }
+
+  return (
+    <Button
+      type="button"
+      variant="default"
+      h={36}
+      radius={12}
+      title={hint}
+      disabled={actionsDisabled || busy}
+      onClick={() => void onLaunch()}
+    >
+      {busy ? "Launching…" : failed ? "Retry launch" : "Launch agent"}
+    </Button>
   );
 }

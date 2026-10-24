@@ -13,6 +13,25 @@ import { hidingZoneRadiusMeters } from "../size/gameSize";
 import { thermometerPresetsMetersForGameSize } from "../size/gameSizeRules";
 import type { AdvancedSessionSettingsValue, SessionRulesPatch } from "./types";
 
+/**
+ * Pack matching GeoJSON is reloaded client-side via resolveSessionMatchingAreas.
+ * Never persist it on remote session writes (Australia STE alone exceeds Firestore's 1MiB doc limit).
+ *
+ * Side effect (intentional for v1): when `regionPackId` is set, **all**
+ * `customMatchingAreas` levels are stripped, including any user-drawn / silent-reuse
+ * overlays merged into those levels. Joiners reload pack-only boundaries. Narrowing
+ * to pack feature ids only is a follow-up if hosts need custom overlays on pack sessions.
+ */
+export function omitPackCustomMatchingAreasForRemoteWrite(
+  patch: SessionRulesPatch,
+): SessionRulesPatch {
+  if (!patch.regionPackId || patch.customMatchingAreas === undefined) {
+    return patch;
+  }
+  const { customMatchingAreas: _omit, ...rest } = patch;
+  return rest;
+}
+
 export function sessionRulesPatchFromAdvancedSettings(
   gameSize: GameSize,
   settings: AdvancedSessionSettingsValue,

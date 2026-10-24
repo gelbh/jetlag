@@ -1,0 +1,18 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.86,
+    "west": -1.4973,
+    "north": 50.9761,
+    "east": -1.302
+  },
+  "places": [
+    {
+      "id": "Q17018779",
+      "name": "Southampton City Golf Course",
+      "lat": 50.9472,
+      "lng": -1.41806
+    }
+  ]
+}

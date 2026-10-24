@@ -25,6 +25,7 @@ const clientEnvSchema = firebaseEnvSchema
   .extend({
     VITE_USE_FIREBASE_EMULATOR: z.enum(["true", "false"]).optional(),
     VITE_FIREBASE_APP_CHECK_SITE_KEY: optionalNonEmptyString,
+    // react-doctor-disable-next-line react-doctor/public-env-secret-name -- App Check debug token, read only when import.meta.env.DEV
     VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN: optionalNonEmptyString,
     VITE_OVERPASS_PROXY_URL: optionalUrl,
     VITE_TRANSIT_PROXY_URL: optionalUrl,
@@ -104,7 +105,9 @@ function readRawClientEnv(): Record<string, unknown> {
     VITE_FIREBASE_MESSAGING_SENDER_ID: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     VITE_FIREBASE_APP_ID: import.meta.env.VITE_FIREBASE_APP_ID,
     VITE_FIREBASE_APP_CHECK_SITE_KEY: import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY,
-    VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN: import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN,
+    VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN: import.meta.env.DEV
+      ? import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN
+      : undefined,
     VITE_OVERPASS_PROXY_URL: import.meta.env.VITE_OVERPASS_PROXY_URL,
     VITE_TRANSIT_PROXY_URL: import.meta.env.VITE_TRANSIT_PROXY_URL,
     VITE_TRANSITLAND_PROXY_URL: import.meta.env.VITE_TRANSITLAND_PROXY_URL,

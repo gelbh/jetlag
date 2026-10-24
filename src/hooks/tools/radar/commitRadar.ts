@@ -12,7 +12,16 @@ import {
   radarInsideFromAnswer,
   radarQuestionPrompt,
 } from "../../../domain/questions";
+import type { SessionMode } from "../../../domain/session/castleSiege/mode";
+import type { CastleSiegeOracleReceipt } from "../../../domain/session/castleSiege/oracleAskReceipt";
+import type { CastleSiegePlayingTeam } from "../../../domain/session/castleSiege/pregame";
+import { resolveAskPath } from "../../../domain/session/castleSiege/resolveAskPath";
 import type { GameSize } from "../../../domain/session/size/gameSize";
+import type {
+  AnswerCastleSiegeOracleAskFn,
+  CastleSiegeOracleAskPayload,
+} from "../../../services/session/castleSiegeOracleAsk";
+import { resolveAskAnswer } from "../../../services/session/castleSiegeOracleAsk";
 import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 
@@ -39,6 +48,14 @@ export interface CommitRadarInput {
   ) => Promise<AnnotationRecord>;
   setMapError: (message: string | null) => void;
   onSuccess: () => void;
+  /** When set, Castle Siege routes through oracle instead of honor typing. */
+  sessionMode?: SessionMode | null;
+  defenderTeamId?: CastleSiegePlayingTeam;
+  callOracleAsk?: AnswerCastleSiegeOracleAskFn;
+  /** Confirm-send: receipt already fetched; skip callable and apply answer. */
+  oracleReceipt?: Extract<CastleSiegeOracleReceipt, { kind: "radar" }> | null;
+  /** First-phase CS: stash receipt for confirm-send UX. */
+  onOracleReceipt?: (receipt: Extract<CastleSiegeOracleReceipt, { kind: "radar" }>) => void;
 }
 
 export async function commitRadar(input: CommitRadarInput): Promise<void> {
@@ -61,6 +78,11 @@ export async function commitRadar(input: CommitRadarInput): Promise<void> {
     createAnnotation,
     setMapError,
     onSuccess,
+    sessionMode,
+    defenderTeamId,
+    callOracleAsk,
+    oracleReceipt,
+    onOracleReceipt,
   } = input;
 
   if (!canSubmitQuestion) {
@@ -107,6 +129,79 @@ export async function commitRadar(input: CommitRadarInput): Promise<void> {
   };
 
   try {
+    const askPath = resolveAskPath(sessionMode);
+
+    if (askPath === "oracle") {
+      const radarOracleAnswer: "yes" | "no" | null =
+        oracleReceipt?.kind === "radar" ? oracleReceipt.answer : null;
+
+      if (!radarOracleAnswer) {
+        if (!sessionId || !defenderTeamId) {
+          setMapError("Castle Siege ask needs a defender team seal.");
+          return;
+        }
+        if (!onOracleReceipt) {
+          setMapError("Confirm-send receipt handler missing.");
+          return;
+        }
+
+        const ask: CastleSiegeOracleAskPayload = {
+          kind: "radar",
+          point: { lat: radarCenter[0], lng: radarCenter[1] },
+          radiusMeters: resolvedRadarRadius,
+        };
+
+        const resolved = await resolveAskAnswer({
+          mode: sessionMode,
+          honor: async () => null,
+          oracle: {
+            sessionId,
+            defenderTeamId,
+            ask,
+            callOracle: callOracleAsk,
+          },
+        });
+
+        if (resolved.path !== "oracle" || resolved.receipt.kind !== "radar") {
+          setMapError("Could not get an oracle answer.");
+          return;
+        }
+
+        onOracleReceipt(resolved.receipt);
+        return;
+      }
+
+      const created = await createAnnotation({
+        type: "radar",
+        geometry,
+        metadata: {
+          createdAt: new Date().toISOString(),
+          radiusMeters: resolvedRadarRadius,
+          radarChooseCustom,
+          inside: radarInsideFromAnswer(radarOracleAnswer),
+          color: MAP_ANNOTATION_COLORS.radar,
+        },
+      });
+
+      if (sessionId) {
+        const answerOption = yesNoAnswerOptions.find(
+          (option) => option.value === radarOracleAnswer,
+        );
+        emitQuestionAnsweredActivity({
+          sessionId,
+          toolType: "radar",
+          promptText: radarQuestionPrompt(resolvedRadarRadius, distanceUnit),
+          annotationId: created.id,
+          answerSummary: answerOption?.label ?? String(radarOracleAnswer),
+          createdByUid: senderUid ?? undefined,
+          analyticsMode: "self_recorded",
+        });
+      }
+
+      onSuccess();
+      return;
+    }
+
     if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
       await submitPendingQuestion({
         promptText: radarQuestionPrompt(resolvedRadarRadius, distanceUnit),

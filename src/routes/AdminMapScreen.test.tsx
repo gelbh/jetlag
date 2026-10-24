@@ -196,7 +196,7 @@ describe("AdminMapScreen", () => {
     expect(screen.queryByTestId("admin-monitor-code") !== null).toBe(!wide);
   });
 
-  it("embedded wide monitor shows the course header instead of the status bar", () => {
+  it("embedded wide monitor shows the question strip and players panel, not a course header", () => {
     const controller = mockController();
     mockedUseObserverMapScreen.mockReturnValue(controller);
     mockedUseAdminMapWideLayout.mockReturnValue(true);
@@ -205,11 +205,23 @@ describe("AdminMapScreen", () => {
       route: "/admin",
     });
 
-    const header = screen.getByRole("region", { name: "Course header" });
-    expect(header).toHaveTextContent(controller.session?.code ?? "");
-    expect(within(header).getByRole("group", { name: "Questions" })).toBeInTheDocument();
-    expect(screen.getByRole("list", { name: "Leg strip" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Course header" })).not.toBeInTheDocument();
+    const strip = screen.getByTestId("admin-question-strip");
+    expect(strip.closest("[data-map-dock-frame]")).not.toBeNull();
+    expect(within(strip).getByRole("list", { name: "Leg strip" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Player roster" })).toBeInTheDocument();
     expect(screen.queryByRole("banner", { name: "Monitor status" })).not.toBeInTheDocument();
+  });
+
+  it("starts the embedded rail folded and the standalone rail open", () => {
+    mockedUseAdminMapWideLayout.mockReturnValue(true);
+
+    const embedded = renderWithRouter(<AdminMapScreen embeddedMonitor />, { route: "/admin" });
+    expect(screen.getByRole("button", { name: "Expand monitor rail" })).toBeInTheDocument();
+    embedded.unmount();
+
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+    expect(screen.getByRole("button", { name: "Collapse monitor rail" })).toBeInTheDocument();
   });
 
   it.each([true, false])("embedded map (wide=%s) keeps player map tokens", (wide) => {

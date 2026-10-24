@@ -1,6 +1,10 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
-  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "files": {
     "ignoreUnknown": false,
     "includes": [
@@ -12,8 +16,10 @@
       "!crates/*/pkg",
       "!src/styles/tokens.css",
       "!public/geo/gtfs/chicago.json",
+      "!public/geo/gtfs/dublin.json",
       "!.worktrees",
-      "!worker-configuration.d.ts"
+      "!worker-configuration.d.ts",
+      "!public/geo/gtfs/nyc.json"
     ]
   },
   "formatter": {
@@ -72,8 +78,10 @@
       "!**/node_modules",
       "!src/styles/tokens.css",
       "!public/geo/gtfs/chicago.json",
+      "!public/geo/gtfs/dublin.json",
       "!**/yqrd-*.test.ts",
-      "!.worktrees/**"
+      "!.worktrees/**",
+      "!public/geo/gtfs/nyc.json"
     ]
   },
   "css": {
@@ -81,27 +89,41 @@
       "tailwindDirectives": true
     }
   },
-  "javascript": { "formatter": { "quoteStyle": "double" } },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
   "overrides": [
     {
       "includes": ["**/*.css"],
       "linter": {
         "rules": {
-          "complexity": { "noImportantStyles": "off" },
-          "style": { "noDescendingSpecificity": "off" },
-          "suspicious": { "noDuplicateProperties": "off" }
+          "complexity": {
+            "noImportantStyles": "off"
+          },
+          "style": {
+            "noDescendingSpecificity": "off"
+          },
+          "suspicious": {
+            "noDuplicateProperties": "off"
+          }
         }
       }
     },
     {
       "includes": ["scripts/**/*.mjs"],
-      "javascript": { "globals": ["exports"] }
+      "javascript": {
+        "globals": ["exports"]
+      }
     },
     {
       "includes": ["src/test/**/*.{ts,tsx}"],
       "linter": {
         "rules": {
-          "style": { "useComponentExportOnlyModules": "off" }
+          "style": {
+            "useComponentExportOnlyModules": "off"
+          }
         }
       }
     },
@@ -109,17 +131,25 @@
       "includes": ["**/*.{test,spec}.{ts,tsx,js,mjs}"],
       "linter": {
         "rules": {
-          "suspicious": { "noAssignInExpressions": "off" }
+          "suspicious": {
+            "noAssignInExpressions": "off"
+          }
         }
       }
     },
     {
       "includes": ["e2e/**/*.{ts,tsx}"],
-      "javascript": { "globals": [] },
+      "javascript": {
+        "globals": []
+      },
       "linter": {
-        "domains": { "playwright": "recommended" },
+        "domains": {
+          "playwright": "recommended"
+        },
         "rules": {
-          "correctness": { "noEmptyPattern": "off" },
+          "correctness": {
+            "noEmptyPattern": "off"
+          },
           "nursery": {
             "useExpect": "off",
             "noPlaywrightWaitForTimeout": "error",
@@ -160,6 +190,10 @@
   ],
   "assist": {
     "enabled": true,
-    "actions": { "source": { "organizeImports": "on" } }
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   }
 }

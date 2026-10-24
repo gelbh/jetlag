@@ -1,4 +1,4 @@
-import { Alert, Button, Group, NativeSelect, Stack, Text, TextInput, Title } from "@mantine/core";
+import { Alert, Button, Group, NativeSelect, Popover, Stack, Text, TextInput } from "@mantine/core";
 import { useState } from "react";
 import { APP_VERSION } from "../../../domain/device/changelog";
 import type {
@@ -16,7 +16,6 @@ import {
   publishIncidentHotfix,
   updateIncidentStatus,
 } from "../../../services/incident/incidentApi";
-import { toneColor } from "../../../theme/adminTone";
 import { AdminConfirm } from "../shared/AdminConfirm";
 import { AdminIncidentCursorLaunch } from "./AdminIncidentCursorLaunch";
 
@@ -49,7 +48,16 @@ export function AdminIncidentActions({
   launchCursorAgentFn = launchIncidentCursorAgent,
   openExternalUrlFn,
 }: AdminIncidentActionsProps) {
-  const [pending, setPending] = useState<"dismiss" | "mitigation" | "hotfix" | null>(null);
+  const [pending, setPendingState] = useState<"dismiss" | "mitigation" | "hotfix" | null>(null);
+  const [menu, setMenu] = useState<"mitigate" | "hotfix" | null>(null);
+  const [agentMessage, setAgentMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(
+    null,
+  );
+  // A confirm replaces the popover that asked for it.
+  const setPending = (next: "dismiss" | "mitigation" | "hotfix" | null) => {
+    if (next) setMenu(null);
+    setPendingState(next);
+  };
 
   const [mitigationType, setMitigationType] = useState<IncidentMitigationType>("soft_reload");
   const [mitigationOk, setMitigationOk] = useState<string | null>(null);
@@ -133,151 +141,189 @@ export function AdminIncidentActions({
     setStatusBusy(false);
   };
 
-  return (
-    <Stack component="aside" gap="md" aria-label="Incident actions">
-      <Title order={2} size="h5">
-        Actions
-      </Title>
+  const popoverStyles = {
+    dropdown: {
+      background: "var(--color-canvas)",
+      border: "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+      borderRadius: 12,
+    },
+  };
+  const rowButton = { h: 36, radius: 12, variant: "default" } as const;
+  const messages = [
+    statusError ? { tone: "error", text: statusError } : null,
+    statusOk ? { tone: "ok", text: statusOk } : null,
+    mitigationOk ? { tone: "ok", text: mitigationOk } : null,
+    hotfixOk ? { tone: "ok", text: hotfixOk } : null,
+    agentMessage,
+  ].filter((message) => message != null);
 
-      <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
-        <Title order={3} size="h6">
-          0 · Queue
-        </Title>
-        {statusError ? (
-          <Alert data-tone="mispunch" role="alert">
-            {statusError}
-          </Alert>
-        ) : null}
-        {statusOk ? (
-          <Text size="sm" c="green">
-            {statusOk}
-          </Text>
-        ) : null}
+  return (
+    <Stack component="aside" gap={8} aria-label="Incident actions">
+      <Group gap={8} wrap="wrap">
         {canClose ? (
-          <Group gap="xs" wrap="wrap">
-            <Button
-              type="button"
-              tt="uppercase"
-              disabled={actionsDisabled || statusBusy}
-              onClick={() => void onUpdateStatus("resolved")}
-            >
-              {statusBusy ? "Updating…" : "Resolve"}
-            </Button>
-            <Button
-              type="button"
-              variant="default"
-              c={toneColor.mispunch}
-              tt="uppercase"
-              disabled={actionsDisabled || statusBusy}
-              onClick={() => setPending("dismiss")}
-            >
-              Dismiss
-            </Button>
-          </Group>
+          <Button
+            type="button"
+            h={36}
+            radius={12}
+            disabled={actionsDisabled || statusBusy}
+            onClick={() => void onUpdateStatus("resolved")}
+          >
+            {statusBusy ? "Updating…" : "Resolve"}
+          </Button>
         ) : null}
         {canReopen ? (
           <Button
             type="button"
-            variant="default"
-            tt="uppercase"
+            {...rowButton}
             disabled={actionsDisabled || statusBusy}
             onClick={() => void onUpdateStatus("chatting")}
           >
             {statusBusy ? "Updating…" : "Reopen"}
           </Button>
         ) : null}
-        {!canClose && !canReopen ? (
-          <Text size="xs" c="dimmed">
-            Select an incident to resolve, dismiss, or reopen.
-          </Text>
-        ) : null}
-      </Stack>
 
-      <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
-        <Title order={3} size="h6">
-          1 · Apply mitigation
-        </Title>
-        <NativeSelect
-          label="Mitigation"
-          aria-label="Mitigation type"
-          value={mitigationType}
-          disabled={actionsDisabled}
-          onChange={(event) =>
-            setMitigationType(event.currentTarget.value as IncidentMitigationType)
-          }
-          data={INCIDENT_MITIGATION_OPTIONS.map((option) => ({
-            value: option.type,
-            label: option.label,
-          }))}
-        />
-        {mitigationOk ? (
-          <Text size="sm" c="green">
-            {mitigationOk}
-          </Text>
-        ) : null}
-        <Button
-          type="button"
-          variant="default"
-          c={mitigationType === "end_session" ? toneColor.mispunch : undefined}
-          tt="uppercase"
-          disabled={actionsDisabled}
-          onClick={() => setPending("mitigation")}
+        <Popover
+          opened={menu === "mitigate"}
+          onChange={(opened) => setMenu(opened ? "mitigate" : null)}
+          position="bottom-start"
+          width={300}
+          trapFocus
+          hideDetached={false}
+          styles={popoverStyles}
         >
-          Apply mitigation
-        </Button>
-      </Stack>
+          <Popover.Target>
+            <Button
+              type="button"
+              {...rowButton}
+              disabled={actionsDisabled}
+              onClick={() => setMenu(menu === "mitigate" ? null : "mitigate")}
+            >
+              Mitigate…
+            </Button>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Stack gap="sm">
+              <NativeSelect
+                label="Mitigation"
+                aria-label="Mitigation type"
+                value={mitigationType}
+                disabled={actionsDisabled}
+                onChange={(event) =>
+                  setMitigationType(event.currentTarget.value as IncidentMitigationType)
+                }
+                data={INCIDENT_MITIGATION_OPTIONS.map((option) => ({
+                  value: option.type,
+                  label: option.label,
+                }))}
+              />
+              <Button
+                type="button"
+                variant="default"
+                c={mitigationType === "end_session" ? "var(--color-status-error)" : undefined}
+                disabled={actionsDisabled}
+                onClick={() => setPending("mitigation")}
+              >
+                Apply mitigation
+              </Button>
+            </Stack>
+          </Popover.Dropdown>
+        </Popover>
 
-      <AdminIncidentCursorLaunch
-        key={incidentId ?? "none"}
-        incidentId={incidentId}
-        agent={agent}
-        disabled={disabled}
-        launchCursorAgentFn={launchCursorAgentFn}
-        openExternalUrlFn={openExternalUrlFn}
-      />
+        <AdminIncidentCursorLaunch
+          key={incidentId ?? "none"}
+          incidentId={incidentId}
+          agent={agent}
+          disabled={disabled}
+          launchCursorAgentFn={launchCursorAgentFn}
+          openExternalUrlFn={openExternalUrlFn}
+          onMessage={setAgentMessage}
+        />
 
-      <Stack gap="sm" pt="sm" style={{ borderTop: "1px solid var(--adm-rule)" }}>
-        <Title order={3} size="h6">
-          3 · Publish hotfix
-        </Title>
-        <TextInput
-          label="Hotfix target version"
-          value={toVersion}
-          disabled={actionsDisabled}
-          onChange={(event) => setToVersion(event.currentTarget.value)}
-          placeholder={`e.g. ${APP_VERSION}.1`}
-          autoComplete="off"
-        />
-        <TextInput
-          label="Hotfix grace seconds"
-          type="number"
-          min={5}
-          max={300}
-          value={graceSeconds}
-          disabled={actionsDisabled}
-          onChange={(event) => setGraceSeconds(event.currentTarget.value)}
-        />
-        {hotfixError ? (
-          <Alert data-tone="mispunch" role="alert">
-            {hotfixError}
+        <Popover
+          opened={menu === "hotfix"}
+          onChange={(opened) => setMenu(opened ? "hotfix" : null)}
+          position="bottom-start"
+          width={300}
+          trapFocus
+          hideDetached={false}
+          styles={popoverStyles}
+        >
+          <Popover.Target>
+            <Button
+              type="button"
+              {...rowButton}
+              disabled={actionsDisabled}
+              onClick={() => setMenu(menu === "hotfix" ? null : "hotfix")}
+            >
+              Hotfix…
+            </Button>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Stack gap="sm">
+              <TextInput
+                label="Hotfix target version"
+                value={toVersion}
+                disabled={actionsDisabled}
+                onChange={(event) => setToVersion(event.currentTarget.value)}
+                placeholder={`e.g. ${APP_VERSION}.1`}
+                autoComplete="off"
+              />
+              <TextInput
+                label="Hotfix grace seconds"
+                type="number"
+                min={5}
+                max={300}
+                value={graceSeconds}
+                disabled={actionsDisabled}
+                onChange={(event) => setGraceSeconds(event.currentTarget.value)}
+              />
+              {hotfixError ? (
+                <Alert color="halt" role="alert">
+                  {hotfixError}
+                </Alert>
+              ) : null}
+              <Button
+                type="button"
+                variant="default"
+                c="var(--color-status-error)"
+                disabled={actionsDisabled}
+                onClick={requestHotfix}
+              >
+                Publish hotfix
+              </Button>
+            </Stack>
+          </Popover.Dropdown>
+        </Popover>
+
+        {canClose ? (
+          <Button
+            type="button"
+            {...rowButton}
+            c="var(--color-status-error)"
+            disabled={actionsDisabled || statusBusy}
+            onClick={() => setPending("dismiss")}
+          >
+            Dismiss…
+          </Button>
+        ) : null}
+      </Group>
+
+      {!canClose && !canReopen ? (
+        <Text size="xs" c="var(--color-ink-muted)">
+          Select an incident to resolve, dismiss, or reopen.
+        </Text>
+      ) : null}
+      {messages.map((message) =>
+        message.tone === "error" ? (
+          <Alert key={message.text} color="halt" role="alert" py={6}>
+            {message.text}
           </Alert>
-        ) : null}
-        {hotfixOk ? (
-          <Text size="sm" c="green">
-            {hotfixOk}
+        ) : (
+          <Text key={message.text} size="sm" c="var(--color-trail)">
+            {message.text}
           </Text>
-        ) : null}
-        <Button
-          type="button"
-          variant="default"
-          c={toneColor.mispunch}
-          tt="uppercase"
-          disabled={actionsDisabled}
-          onClick={requestHotfix}
-        >
-          Publish hotfix
-        </Button>
-      </Stack>
+        ),
+      )}
 
       <AdminConfirm
         opened={pending === "dismiss"}

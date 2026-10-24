@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { AdminMonitorPane } from "./AdminMonitorPane";
@@ -13,7 +13,7 @@ describe("AdminMonitorPane", () => {
 
     expect(screen.getByText("No course open")).toBeInTheDocument();
     expect(
-      screen.getByText("Pick a live game in the start list to watch its map here."),
+      screen.getByText("Open a live game from the table to watch its map here."),
     ).toBeInTheDocument();
     expect(screen.queryByText(/on desktop/i)).not.toBeInTheDocument();
   });
@@ -21,7 +21,7 @@ describe("AdminMonitorPane", () => {
   it("points at Refresh when the start list failed to load", () => {
     renderWithAppUi(<AdminMonitorPane active={false} sessionsUnavailable />);
 
-    expect(screen.getByText("Start list unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Sessions unavailable")).toBeInTheDocument();
     expect(
       screen.getByText("Games could not be loaded. Use Refresh in the status strip to try again."),
     ).toBeInTheDocument();
@@ -31,9 +31,20 @@ describe("AdminMonitorPane", () => {
     renderWithAppUi(<AdminMonitorPane active errorMessage="Session load failed." />);
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveAttribute("data-tone", "mispunch");
+    expect(alert.style.getPropertyValue("--alert-color")).toContain("halt");
     expect(alert).toHaveTextContent("Monitor unavailable");
     expect(alert).toHaveTextContent("Session load failed.");
+  });
+
+  it("shows progress while the join is in flight and Retry after an error", () => {
+    const onRetry = vi.fn();
+    const { rerender } = renderWithAppUi(<AdminMonitorPane active={false} joining />);
+    expect(screen.getByRole("status", { name: "Opening the map" })).toBeInTheDocument();
+    expect(screen.queryByText("No course open")).not.toBeInTheDocument();
+
+    rerender(<AdminMonitorPane active={false} errorMessage="Nope" onRetry={onRetry} />);
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
   it("renders the embedded map when active", () => {

@@ -399,6 +399,18 @@ export async function updatePendingQuestion(
 
 const OPEN_PENDING_QUESTION_STATUSES = new Set(["pending", "walking", "answered"]);
 
+/** One-shot read for leave paths that are not already subscribed (e.g. Home). */
+export async function listPendingQuestions(sessionId: string): Promise<PendingQuestionRecord[]> {
+  const snapshot = await getDocs(pendingQuestionsCollection(sessionId));
+  return snapshot.docs.map((questionDoc) =>
+    deserializePendingQuestionFromFirestore(
+      questionDoc.id,
+      sessionId,
+      questionDoc.data() as Record<string, unknown>,
+    ),
+  );
+}
+
 export async function cancelOpenPendingQuestions(sessionId: string): Promise<void> {
   const snapshot = await getDocs(pendingQuestionsCollection(sessionId));
   const toCancel = snapshot.docs.filter((questionDoc) => {

@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { buildAdminPrompt } from "./adminPrompt.mjs";
-import { INCIDENT_EMAIL_FAILED_CODE } from "./createIncident.mjs";
 import { verifyStandardWebhook } from "./verifyStandardWebhook.mjs";
 
 export const POSTHOG_ALERT_ROUTE = "posthogErrorAlert";
@@ -8,6 +7,10 @@ export const POSTHOG_ALERT_MAX_BODY_BYTES = 16 * 1024;
 export const POSTHOG_ALERT_RATE_LIMIT = 20;
 export const POSTHOG_ALERT_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 export const POSTHOG_ALERT_INVALID_PAYLOAD = "POSTHOG_ALERT_INVALID_PAYLOAD";
+export const POSTHOG_ALERT_TRIGGER_CREATED = "created";
+export const POSTHOG_ALERT_TRIGGER_REOPENED = "reopened";
+/** Incident statuses a reopened PostHog issue moves back to `open`. */
+const REOPENABLE_STATUSES = new Set(["resolved", "dismissed"]);
 
 const ISSUE_ID_PATTERN = /^[A-Za-z0-9-]{1,64}$/;
 const POSTHOG_ISSUE_URL_PREFIX = "https://eu.posthog.com/";
@@ -54,22 +57,27 @@ function parsePayload(payload) {
     runtime: runtime && RUNTIME_PATTERN.test(runtime) ? runtime : null,
     method: method && METHOD_PATTERN.test(method) ? method : null,
     path: path?.startsWith("/") ? path : null,
+    trigger:
+      payload.trigger === POSTHOG_ALERT_TRIGGER_REOPENED
+        ? POSTHOG_ALERT_TRIGGER_REOPENED
+        : POSTHOG_ALERT_TRIGGER_CREATED,
   };
 }
 
 /**
- * Turn a PostHog "issue created" alert into an admin desk incident + admin email.
+ * Turn a PostHog "issue created" or "issue reopened" alert into an admin desk incident.
  * Idempotent per issue (`posthog-<issueId>` + `create()`); never launches a Cursor hotfix.
+ * The admin email is only requested here (`email.requestedAt`); the `sendPosthogIncidentEmail`
+ * trigger sends it so the webhook response does not wait on the email hop.
  *
  * @param db Firestore instance (admin SDK or a compatible mock).
  * @param payload Webhook JSON body configured on the PostHog alert.
- * @param deps { rateLimit, sendEmail?, now?, generateId?, incidentUrlBase? }
+ * @param deps { rateLimit, now?, generateId? }
  */
 export async function ingestPosthogAlert(db, payload, deps) {
   const alert = parsePayload(payload);
   const now = deps.now ?? (() => new Date());
   const generateId = deps.generateId ?? (() => randomUUID());
-  const incidentUrlBase = (deps.incidentUrlBase ?? "").replace(/\/+$/, "");
 
   const rl = await deps.rateLimit({
     route: POSTHOG_ALERT_ROUTE,
@@ -109,10 +117,31 @@ export async function ingestPosthogAlert(db, payload, deps) {
     recentOps: [],
     reportedAt: nowIso,
   };
-  const playerNote = `PostHog alert: ${label}`;
+  const reopened = alert.trigger === POSTHOG_ALERT_TRIGGER_REOPENED;
+  const playerNote = `${reopened ? "PostHog alert (reopened)" : "PostHog alert"}: ${label}`;
   const adminPrompt = buildAdminPrompt({ incidentId, status, playerNote, diagnostics });
 
   const incidentRef = db.collection("incidents").doc(incidentId);
+  if (reopened) {
+    const existing = await incidentRef.get();
+    if (existing.exists) {
+      if (!REOPENABLE_STATUSES.has(existing.data()?.status)) {
+        return { status: "duplicate", incidentId };
+      }
+      await incidentRef.collection("messages").doc(generateId()).set({
+        sender: "system",
+        kind: "chat",
+        text: "PostHog issue reopened",
+        createdAt: nowIso,
+      });
+      await incidentRef.update({
+        status,
+        updatedAt: nowIso,
+        email: { requestedAt: nowIso, subject: `Jet Lag PostHog issue reopened: ${label}` },
+      });
+      return { status: "reopened", incidentId };
+    }
+  }
   try {
     await incidentRef.create({
       status,
@@ -128,7 +157,7 @@ export async function ingestPosthogAlert(db, payload, deps) {
       adminPrompt,
       posthogIssue: { id: alert.issueId, name: alert.name, url: alert.issueUrl },
       triage: { outcome: "admin", reason: "posthog_alert" },
-      email: {},
+      email: { requestedAt: nowIso, subject: `Jet Lag PostHog issue: ${label}` },
     });
   } catch (error) {
     if (error?.code === ALREADY_EXISTS_CODE) {
@@ -143,30 +172,6 @@ export async function ingestPosthogAlert(db, payload, deps) {
     text: adminPrompt,
     createdAt: nowIso,
   });
-
-  if (typeof deps.sendEmail === "function") {
-    const incidentUrl = `${incidentUrlBase}/admin/incidents/${incidentId}`;
-    let email;
-    try {
-      const result = await deps.sendEmail({
-        subject: `Jet Lag PostHog issue: ${label}`,
-        text: [
-          adminPrompt,
-          alert.issueUrl ? `PostHog issue: ${alert.issueUrl}` : null,
-          `Open incident: ${incidentUrl}`,
-        ]
-          .filter(Boolean)
-          .join("\n\n"),
-        incidentUrl,
-      });
-      email = { sentAt: now().toISOString(), messageId: result?.messageId ?? null };
-    } catch (error) {
-      const detail = error instanceof Error ? error.message : String(error);
-      console.warn("[ingestPosthogAlert] email failed:", detail);
-      email = { error: INCIDENT_EMAIL_FAILED_CODE };
-    }
-    await incidentRef.update({ email, updatedAt: now().toISOString() });
-  }
 
   return { status: "created", incidentId };
 }

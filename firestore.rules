@@ -52,6 +52,182 @@ service cloud.firestore {
       return role in ['seeker', 'hider'];
     }
 
+    function validCastleSiegeTeamRole(role) {
+      return role in ['teamA', 'teamB', 'referee', 'observer'];
+    }
+
+    // Classic create: host seeker|hider only. Castle Siege: host observer in memberRoles.
+    function validCreateHostPlayerRole(data) {
+      return ('mode' in data && data.mode == 'castleSiege')
+        ? data.memberRoles[request.auth.uid] == 'observer'
+        : validHostPlayerRole(data.memberRoles[request.auth.uid]);
+    }
+
+    function validOptionalCastleSiegeCreateFields(data) {
+      return (!('mode' in data) || data.mode in ['classic', 'castleSiege'])
+        && (!('seriesLength' in data) || data.seriesLength == 1 || data.seriesLength == 3)
+        && (!('setupMode' in data) || data.setupMode in ['pregame', 'fairSplit'])
+        && (
+          !('dials' in data)
+          || (
+            data.dials is map
+            && data.dials.keys().hasOnly([
+              'zoneRadiusMeters',
+              'turnLengthSeconds',
+              'maxRounds',
+              'beltWidthMeters',
+              'breachToleranceMeters',
+              'siegeLimitSeconds'
+            ])
+          )
+        )
+        && (
+          !('castleSiegeRoles' in data)
+          || (
+            data.castleSiegeRoles is map
+            && data.castleSiegeRoles.size() >= 1
+            && data.castleSiegeRoles.size() <= 32
+            && request.auth.uid in data.castleSiegeRoles
+            && validCastleSiegeTeamRole(data.castleSiegeRoles[request.auth.uid])
+          )
+        )
+        && (
+          !('mode' in data)
+          || data.mode != 'castleSiege'
+          || (
+            'castleSiegeRoles' in data
+            && data.castleSiegeRoles is map
+            && validCastleSiegeTeamRole(data.castleSiegeRoles[request.auth.uid])
+          )
+        );
+    }
+
+    function validCastleSiegeSealHash(hash) {
+      return hash is string
+        && hash.size() == 64
+        && hash.matches('^[0-9a-f]+$');
+    }
+
+    // True plaintext coords/phrase — never client-writable.
+    function teamSealHasPlaintextCoords(data) {
+      return 'anchorName' in data
+        || 'lat' in data
+        || 'lng' in data
+        || 'secretPhrase' in data
+        || 'revealedAnchor' in data;
+    }
+
+    // Enemy-restricted: plaintext coords OR ciphertext blob (V3).
+    function teamSealHasEnemyRestrictedFields(data) {
+      return teamSealHasPlaintextCoords(data) || 'ciphertext' in data;
+    }
+
+    function validCastleSiegeSealCiphertext(value) {
+      return value is map
+        && value.keys().hasOnly(['v', 'alg', 'keyId', 'iv', 'ciphertext', 'wrappedKey', 'wrapIv'])
+        && value.v == 1
+        && value.alg == 'A256GCM'
+        && value.keyId is string
+        && value.keyId.size() > 0
+        && value.iv is string
+        && value.iv.size() > 0
+        && value.ciphertext is string
+        && value.ciphertext.size() > 0
+        && value.wrappedKey is string
+        && value.wrappedKey.size() > 0
+        && value.wrapIv is string
+        && value.wrapIv.size() > 0;
+    }
+
+    function castleSiegeRoleOnSession(sessionId) {
+      return sessionData(sessionId).castleSiegeRoles[request.auth.uid];
+    }
+
+    function isCastleSiegePlayingTeamMember(sessionId, teamId) {
+      return isSessionMember(sessionId)
+        && sessionData(sessionId).mode == 'castleSiege'
+        && 'castleSiegeRoles' in sessionData(sessionId)
+        && sessionData(sessionId).castleSiegeRoles is map
+        && castleSiegeRoleOnSession(sessionId) == teamId
+        && teamId in ['teamA', 'teamB'];
+    }
+
+    // Ciphertext is enemy-restricted. Observers must not read envelopes while the
+    // client ships a shared wrap key (offline decrypt). Referee + host may still read.
+    function canReadTeamSeal(sessionId, teamId) {
+      return isSessionMember(sessionId)
+        && (
+          !teamSealHasEnemyRestrictedFields(resource.data)
+          || isCastleSiegePlayingTeamMember(sessionId, teamId)
+          || (
+            'castleSiegeRoles' in sessionData(sessionId)
+            && sessionData(sessionId).castleSiegeRoles is map
+            && castleSiegeRoleOnSession(sessionId) == 'referee'
+          )
+          || isSessionHost(sessionId)
+        );
+    }
+
+    // Host-only Pregame setup fields. Prefer resource.data (no sessionData get)
+    // to stay under the session-update expression budget.
+    function isCastleSiegeSetupUpdate() {
+      return isSignedIn()
+        && resource.data.hostUid is string
+        && request.auth.uid == resource.data.hostUid
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && resource.data.mode == 'castleSiege'
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['arena', 'border', 'neutralBelt', 'dials', 'coinAssignment'])
+        && (
+          !('arena' in request.resource.data)
+          || (
+            request.resource.data.arena is map
+            && request.resource.data.arena.polygon is map
+            && request.resource.data.arena.source in ['gameArea', 'regionPack', 'drawn']
+          )
+        )
+        && (
+          !('border' in request.resource.data)
+          || (
+            request.resource.data.border is map
+            && request.resource.data.border.geometryJson is string
+          )
+        )
+        && (
+          !('neutralBelt' in request.resource.data)
+          || (
+            request.resource.data.neutralBelt is map
+            && request.resource.data.neutralBelt.geometryJson is string
+          )
+        )
+        && (
+          !('dials' in request.resource.data)
+          || (
+            request.resource.data.dials is map
+            && request.resource.data.dials.keys().hasOnly([
+              'zoneRadiusMeters',
+              'turnLengthSeconds',
+              'maxRounds',
+              'beltWidthMeters',
+              'breachToleranceMeters',
+              'siegeLimitSeconds'
+            ])
+          )
+        )
+        && (
+          !('coinAssignment' in request.resource.data)
+          || (
+            request.resource.data.coinAssignment is map
+            && request.resource.data.coinAssignment.teamA in ['left', 'right']
+            && request.resource.data.coinAssignment.teamB in ['left', 'right']
+            && request.resource.data.coinAssignment.teamA
+              != request.resource.data.coinAssignment.teamB
+          )
+        )
+        && sessionIdentityUnchanged();
+    }
+
     function validDisabledTools(tools) {
       return tools is list
         && tools.size() <= 8
@@ -683,7 +859,8 @@ service cloud.firestore {
         && request.resource.data.hidingZoneRadiusMeters is number
         && request.resource.data.memberRoles is map
         && request.resource.data.memberRoles[request.auth.uid] is string
-        && validHostPlayerRole(request.resource.data.memberRoles[request.auth.uid])
+        && validCreateHostPlayerRole(request.resource.data)
+        && validOptionalCastleSiegeCreateFields(request.resource.data)
         && (
           !('hostAppVersion' in request.resource.data)
           || request.resource.data.hostAppVersion is string
@@ -706,6 +883,7 @@ service cloud.firestore {
       // High-frequency + Found key discriminators before End Game start (exists/get).
       // Board-economy flag early: host+large gameArea otherwise burns budget on prior diffs.
       allow update: if isBoardEconomyFlagUpdate(sessionId)
+        || isCastleSiegeSetupUpdate()
         || isTimerHostUpdate()
         || isLastActiveAtUpdate()
         || isFoundHiderRequestUpdate()
@@ -971,17 +1149,39 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
           && request.resource.data.status == 'cancelled'
         ) || (
-          isSessionMember(sessionId)
+          isSessionHost(sessionId)
           && resource.data.status == 'pending'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deadlineExpiredAt'])
           && request.resource.data.deadlineExpiredAt is string
+          && request.resource.data.deadlineExpiredAt.size() > 0
         );
+        allow delete: if false;
+      }
+
+      // Castle Siege team seals: hash-only docs are member-readable; plaintext coords
+      // and ciphertext blobs are readable only by own team / referee / host.
+      // Clients may write hash (+ optional ciphertext envelope); never plaintext coords.
+      match /teamSeals/{teamId} {
+        allow read: if teamId in ['teamA', 'teamB']
+          && canReadTeamSeal(sessionId, teamId);
+        allow create, update: if teamId in ['teamA', 'teamB']
+          && isCastleSiegePlayingTeamMember(sessionId, teamId)
+          && request.resource.data.keys().hasOnly(['hash', 'sealedByUid', 'sealedAt', 'ciphertext'])
+          && validCastleSiegeSealHash(request.resource.data.hash)
+          && request.resource.data.sealedByUid == request.auth.uid
+          && request.resource.data.sealedAt is string
+          && request.resource.data.sealedAt.size() > 0
+          && !teamSealHasPlaintextCoords(request.resource.data)
+          && (
+            !('ciphertext' in request.resource.data)
+            || validCastleSiegeSealCiphertext(request.resource.data.ciphertext)
+          );
         allow delete: if false;
       }
 
       match /hidingZones/{hiderUid} {
         allow read: if isSessionMember(sessionId);
-        allow create, update: if isHiderMember(sessionId)
+        allow create: if isHiderMember(sessionId)
           && request.auth.uid == hiderUid
           && request.resource.data.stationId is string
           && request.resource.data.stationName is string
@@ -991,7 +1191,26 @@ service cloud.firestore {
           && request.resource.data.radiusMeters is number
           && request.resource.data.geometryJson is string
           && request.resource.data.status == 'confirmed'
-          && request.resource.data.confirmedAt is string;
+          && request.resource.data.confirmedAt is string
+          && (!('moveInProgress' in request.resource.data) || request.resource.data.moveInProgress == false);
+        allow update: if (
+          isHiderMember(sessionId)
+          && request.auth.uid == hiderUid
+          && request.resource.data.stationId is string
+          && request.resource.data.stationName is string
+          && request.resource.data.center is map
+          && request.resource.data.center.lat is number
+          && request.resource.data.center.lng is number
+          && request.resource.data.radiusMeters is number
+          && request.resource.data.geometryJson is string
+          && request.resource.data.status == 'confirmed'
+          && request.resource.data.confirmedAt is string
+          && (!('moveInProgress' in request.resource.data) || request.resource.data.moveInProgress is bool)
+        ) || (
+          isSessionHost(sessionId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['moveInProgress'])
+          && request.resource.data.moveInProgress == false
+        );
         allow delete: if false;
       }
 
@@ -1063,6 +1282,22 @@ service cloud.firestore {
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.requestedAtMs is number
           && request.resource.data.createdAt == request.time;
+        allow update, delete: if false;
+      }
+
+      // Heal identity proof: SHA-256 of a device-held secret. The join callable
+      // verifies it and moves it to the healed uid; clients only create their
+      // own, once. `get` must not read resource.data so a missing-proof probe works.
+      match /memberProofs/{uid} {
+        allow get: if isSignedIn() && request.auth.uid == uid;
+        allow list: if false;
+        allow create: if isSessionMember(sessionId)
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['hash', 'createdAt'])
+          && request.resource.data.keys().hasAll(['hash', 'createdAt'])
+          && request.resource.data.hash is string
+          && request.resource.data.hash.matches('^[0-9a-f]{64}$')
+          && request.resource.data.createdAt is string;
         allow update, delete: if false;
       }
     }

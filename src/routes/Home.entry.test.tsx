@@ -5,18 +5,45 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { Home } from "./Home";
 
-const { isFirebaseConfigured, isAuthBootstrapReady } = vi.hoisted(() => ({
+const { isFirebaseConfigured, isAuthBootstrapReady, usePermanentAuthUser } = vi.hoisted(() => ({
   isFirebaseConfigured: vi.fn(() => false),
   isAuthBootstrapReady: vi.fn(() => true),
+  usePermanentAuthUser: vi.fn(() => ({
+    user: null,
+    isPermanent: false,
+    authReady: true,
+  })),
 }));
 
 vi.mock("@/hooks/session/useContinueActiveSession", () => ({
   useContinueActiveSession: () => ({
-    session: { id: "local", code: "ABCD" },
+    session: { id: "local", code: "ABCD", gameAreaLabel: "Dublin City" },
     myRole: "seeker",
     continueError: null,
     continuing: false,
     handleContinue: vi.fn(),
+  }),
+}));
+
+vi.mock("@/hooks/session/useLeaveSessionAndUpdate", () => ({
+  useLeaveSessionAndUpdate: () => ({
+    leaving: false,
+    prompt: null,
+    requestLeaveAndUpdate: vi.fn(),
+    dismissLeaveAndUpdatePrompt: vi.fn(),
+    confirmLeaveAndUpdate: vi.fn(),
+  }),
+}));
+
+vi.mock("@/hooks/app/useAppUpdateState", () => ({
+  useAppUpdateState: () => ({
+    needsRefresh: false,
+    safeToReload: true,
+    showGlobalBanner: false,
+    applyUpdate: vi.fn(),
+    hotfixGraceActive: false,
+    hotfixGraceSecondsRemaining: null,
+    hotfixRequiredMinAppVersion: null,
   }),
 }));
 
@@ -34,9 +61,26 @@ vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured,
 }));
 
+vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
+  usePermanentAuthUser,
+}));
+
+vi.mock("@/hooks/app/useHydrated", () => ({
+  useHydrated: () => true,
+}));
+
+vi.mock("@/services/core/auth/persistedAuthHint", () => ({
+  expectsPermanentSignIn: () => false,
+}));
+
 beforeEach(() => {
   isFirebaseConfigured.mockReturnValue(false);
   isAuthBootstrapReady.mockReturnValue(true);
+  usePermanentAuthUser.mockReturnValue({
+    user: null,
+    isPermanent: false,
+    authReady: true,
+  });
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -72,9 +116,10 @@ describe("Home", () => {
       </MantineProvider>,
     );
     expect(
-      screen.getByRole("button", { name: /Return to map for session ABCD/i }),
+      screen.getByRole("button", { name: /Return to map for session ABCD in Dublin City/i }),
     ).toBeInTheDocument();
     expect(screen.getByText("ABCD")).toBeInTheDocument();
+    expect(screen.getByText(/Dublin City/)).toBeInTheDocument();
     expect(screen.getByText(/^Continue$/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
   });
@@ -96,7 +141,7 @@ describe("Home", () => {
     expect(screen.queryByRole("link", { name: /^premium$/i })).toBeNull();
   });
 
-  it("links to premium when Firebase is configured", () => {
+  it("shows Log in (not Premium) when Firebase is configured for a guest", () => {
     isFirebaseConfigured.mockReturnValue(true);
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
@@ -105,7 +150,9 @@ describe("Home", () => {
         </MemoryRouter>
       </MantineProvider>,
     );
-    expect(screen.getByRole("link", { name: /premium/i })).toHaveAttribute("href", "/premium");
+    expect(screen.getByRole("link", { name: /^Log in$/i })).toHaveAttribute("href", "/account");
+    expect(screen.queryByRole("link", { name: /^premium$/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /^friends$/i })).toBeNull();
   });
 
   it("renders entries before Firebase auth bootstrap settles", () => {

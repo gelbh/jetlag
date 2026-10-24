@@ -1,0 +1,72 @@
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": {
+    "south": -43.7604,
+    "west": 112.9011,
+    "north": -9.1225,
+    "east": 159.1292
+  },
+  "places": [
+    {
+      "id": "Q296366",
+      "name": "Aquarium of Western Australia",
+      "lat": -31.82668,
+      "lng": 115.738118
+    },
+    {
+      "id": "Q50822227",
+      "name": "Cairns Aquarium",
+      "lat": -16.918592,
+      "lng": 145.773639
+    },
+    {
+      "id": "Q6750618",
+      "name": "Manly Sea Life Sanctuary",
+      "lat": -33.7991,
+      "lng": 151.281
+    },
+    {
+      "id": "Q1321392",
+      "name": "Melbourne Aquarium",
+      "lat": -37.82083,
+      "lng": 144.95778
+    },
+    {
+      "id": "Q495039",
+      "name": "National Zoo & Aquarium",
+      "lat": -35.3006,
+      "lng": 149.069
+    },
+    {
+      "id": "Q109236782",
+      "name": "Ocean Park Aquarium",
+      "lat": -25.980457,
+      "lng": 113.55957
+    },
+    {
+      "id": "Q7306796",
+      "name": "Reef HQ",
+      "lat": -19.2577,
+      "lng": 146.824
+    },
+    {
+      "id": "Q7883058",
+      "name": "Sea Life Sunshine Coast",
+      "lat": -26.6828,
+      "lng": 153.121
+    },
+    {
+      "id": "Q2591764",
+      "name": "Sea Life Sydney Aquarium",
+      "lat": -33.8694,
+      "lng": 151.202
+    },
+    {
+      "id": "Q505518",
+      "name": "Sea World",
+      "lat": -27.9559,
+      "lng": 153.4257
+    }
+  ]
+}

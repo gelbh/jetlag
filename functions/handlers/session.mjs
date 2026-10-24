@@ -1,5 +1,6 @@
 /** Session callable wiring — re-exports preserve `functions/index.mjs` names. */
 
+export { answerCastleSiegeOracleAsk } from "./session/castleSiegeOracleCallables.mjs";
 export {
   cancelRoleJoinRequest,
   requestRoleJoin,
@@ -18,5 +19,4 @@ export {
   regenerateRolePasscode,
   revealRolePasscode,
 } from "./session/rolePasscodeCallables.mjs";
-
 export { controlSessionTimerForMove } from "./session/timerCallables.mjs";

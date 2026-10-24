@@ -13,6 +13,7 @@ import {
   type LatLngTuple,
 } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
+import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 import type { GtfsBundleStop, GtfsStaticBundle } from "./gtfsBundle";
 import { GTFS_BUNDLE_MANIFEST_PATH } from "./gtfsBundle";
 
@@ -177,12 +178,38 @@ export function gtfsStopsToMatchingFeatures(
   }));
 }
 
+export function filterGtfsStopsForBoundingBox(
+  bundle: GtfsStaticBundle,
+  bbox: BoundingBox,
+): GtfsBundleStop[] {
+  return bundle.stops.filter((stop) => stopInBoundingBox(stop, bbox));
+}
+
 export function filterGtfsStopsForGameArea(
   bundle: GtfsStaticBundle,
   gameArea: GameArea,
 ): GtfsBundleStop[] {
-  const bbox = gameAreaToBoundingBox(gameArea);
-  return bundle.stops.filter((stop) => stopInBoundingBox(stop, bbox));
+  return filterGtfsStopsForBoundingBox(bundle, gameAreaToBoundingBox(gameArea));
+}
+
+export function gtfsStopsToTransitStations(
+  stops: readonly GtfsBundleStop[],
+  gameArea: GameArea,
+): TransitStation[] {
+  const inGameArea = stops.filter((stop) => isPointInGameArea([stop.lat, stop.lng], gameArea));
+  const idsInGameArea = new Set(inGameArea.map((stop) => stop.id));
+
+  return inGameArea
+    .filter((stop) => {
+      const parentId = stop.parentStationId;
+      return !parentId || !idsInGameArea.has(parentId);
+    })
+    .map((stop) => ({
+      id: stop.id,
+      name: stop.name,
+      lat: stop.lat,
+      lng: stop.lng,
+    }));
 }
 
 async function loadManifest(): Promise<Map<string, string>> {

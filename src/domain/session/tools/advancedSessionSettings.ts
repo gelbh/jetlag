@@ -5,6 +5,7 @@ export {
 } from "../settings/defaults";
 export {
   mergeSessionRulesPatch,
+  omitPackCustomMatchingAreasForRemoteWrite,
   sessionRecordFromAdvancedSettings,
   sessionRulesPatchFromAdvancedSettings,
 } from "../settings/patches";

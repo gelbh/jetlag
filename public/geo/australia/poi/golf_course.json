@@ -1,0 +1,348 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": -43.7604,
+    "west": 112.9011,
+    "north": -9.1225,
+    "east": 159.1292
+  },
+  "places": [
+    {
+      "id": "Q66974628",
+      "name": "Albany Golf Course",
+      "lat": -35.01272,
+      "lng": 117.918799
+    },
+    {
+      "id": "Q109974230",
+      "name": "Alice Springs Golf Course",
+      "lat": -23.71399,
+      "lng": 133.88242
+    },
+    {
+      "id": "Q97453633",
+      "name": "Avalon Golf Course",
+      "lat": -33.631667,
+      "lng": 151.317778
+    },
+    {
+      "id": "Q130297830",
+      "name": "Balgowlah Golf Club",
+      "lat": -33.792426,
+      "lng": 151.25606
+    },
+    {
+      "id": "Q97453634",
+      "name": "Bankstown Golf Course",
+      "lat": -33.931667,
+      "lng": 150.984444
+    },
+    {
+      "id": "Q104852982",
+      "name": "Barwon Heads Golf Club",
+      "lat": -38.27827,
+      "lng": 144.45692
+    },
+    {
+      "id": "Q97453635",
+      "name": "Bathurst Golf Course",
+      "lat": -33.415,
+      "lng": 149.551111
+    },
+    {
+      "id": "Q97453636",
+      "name": "Bayview Golf Course",
+      "lat": -33.665,
+      "lng": 151.284444
+    },
+    {
+      "id": "Q97453637",
+      "name": "Blaxland Golf Course",
+      "lat": -33.723333,
+      "lng": 150.626111
+    },
+    {
+      "id": "Q18359239",
+      "name": "Boyne Island Tannum Sands Golf Course",
+      "lat": -23.9657,
+      "lng": 151.343
+    },
+    {
+      "id": "Q100500041",
+      "name": "Brisbane Golf Club",
+      "lat": -27.5277,
+      "lng": 153.0086
+    },
+    {
+      "id": "Q130415311",
+      "name": "Byron Bay Golf Course",
+      "lat": -28.675802,
+      "lng": 153.60804
+    },
+    {
+      "id": "Q97453639",
+      "name": "Cabramatta Golf Course",
+      "lat": -33.904987,
+      "lng": 150.915144
+    },
+    {
+      "id": "Q97453640",
+      "name": "Chatswood Golf Course",
+      "lat": -33.798333,
+      "lng": 151.151111
+    },
+    {
+      "id": "Q81663127",
+      "name": "Clermont Golf Course",
+      "lat": -22.8219,
+      "lng": 147.6487
+    },
+    {
+      "id": "Q16258741",
+      "name": "Commonwealth Golf Club",
+      "lat": -37.93,
+      "lng": 145.088
+    },
+    {
+      "id": "Q97453641",
+      "name": "Concord Golf Course",
+      "lat": -33.848333,
+      "lng": 151.101111
+    },
+    {
+      "id": "Q97453642",
+      "name": "Cromer Golf Course",
+      "lat": -33.715,
+      "lng": 151.267778
+    },
+    {
+      "id": "Q139963494",
+      "name": "Crystal Brook Golf Course",
+      "lat": -33.34537,
+      "lng": 138.20902
+    },
+    {
+      "id": "Q97453643",
+      "name": "Dunedoo Golf Course",
+      "lat": -32.015,
+      "lng": 149.401111
+    },
+    {
+      "id": "Q97453644",
+      "name": "Eastlakes Golf Course",
+      "lat": -33.94,
+      "lng": 151.209444
+    },
+    {
+      "id": "Q97453645",
+      "name": "Gordon Golf Course",
+      "lat": -33.748333,
+      "lng": 151.134444
+    },
+    {
+      "id": "Q124290581",
+      "name": "Harrington Waters Golf Club",
+      "lat": -31.882141,
+      "lng": 152.65405
+    },
+    {
+      "id": "Q3067562",
+      "name": "Huntingdale Golf Club",
+      "lat": -37.92,
+      "lng": 145.1
+    },
+    {
+      "id": "Q97453646",
+      "name": "Kareela Golf Course",
+      "lat": -34.015,
+      "lng": 151.084444
+    },
+    {
+      "id": "Q2357884",
+      "name": "Lake Karrinyup Country Club",
+      "lat": -31.8616,
+      "lng": 115.785
+    },
+    {
+      "id": "Q97453648",
+      "name": "Maitland Golf Course",
+      "lat": -32.748333,
+      "lng": 151.601111
+    },
+    {
+      "id": "Q97453649",
+      "name": "Mona Vale Golf Course",
+      "lat": -33.6817,
+      "lng": 151.30487
+    },
+    {
+      "id": "Q16897529",
+      "name": "Moonah Links",
+      "lat": -38.4055,
+      "lng": 144.8528
+    },
+    {
+      "id": "Q97453650",
+      "name": "Moree Golf Course",
+      "lat": -29.448333,
+      "lng": 149.817778
+    },
+    {
+      "id": "Q97453664",
+      "name": "North Turramurra Golf Course",
+      "lat": -33.698333,
+      "lng": 151.151111
+    },
+    {
+      "id": "Q97453651",
+      "name": "Northbridge Golf Course",
+      "lat": -33.798333,
+      "lng": 151.217778
+    },
+    {
+      "id": "Q97453652",
+      "name": "Oberon Golf Course",
+      "lat": -33.698333,
+      "lng": 149.851111
+    },
+    {
+      "id": "Q97453653",
+      "name": "Palm Beach Golf Course",
+      "lat": -33.59051,
+      "lng": 151.32285
+    },
+    {
+      "id": "Q97453654",
+      "name": "Parramatta Golf Course",
+      "lat": -33.815,
+      "lng": 150.984444
+    },
+    {
+      "id": "Q64605444",
+      "name": "Pennant Hills Golf Club",
+      "lat": -33.753537,
+      "lng": 151.056394
+    },
+    {
+      "id": "Q2379863",
+      "name": "Port Hedland Golf Club",
+      "lat": -20.399406,
+      "lng": 118.578701
+    },
+    {
+      "id": "Q97453655",
+      "name": "Quirindi Golf Course",
+      "lat": -31.465,
+      "lng": 150.651111
+    },
+    {
+      "id": "Q115692027",
+      "name": "Ringwood Golf",
+      "lat": -37.835,
+      "lng": 145.222228
+    },
+    {
+      "id": "Q140399050",
+      "name": "Roseville Golf Club",
+      "lat": -33.776685,
+      "lng": 151.194618
+    },
+    {
+      "id": "Q607620",
+      "name": "Royal Melbourne Golf Club",
+      "lat": -37.9695,
+      "lng": 145.031
+    },
+    {
+      "id": "Q2119976",
+      "name": "Royal Perth Golf Club",
+      "lat": -31.983677,
+      "lng": 115.853288
+    },
+    {
+      "id": "Q97453656",
+      "name": "Ryde-Parramatta Golf Course",
+      "lat": -33.815,
+      "lng": 151.076111
+    },
+    {
+      "id": "Q7415712",
+      "name": "Sanctuary Lakes Resort",
+      "lat": -37.8961,
+      "lng": 144.763
+    },
+    {
+      "id": "Q97453658",
+      "name": "Sawtell Golf Course",
+      "lat": -30.365,
+      "lng": 153.084444
+    },
+    {
+      "id": "Q66976088",
+      "name": "Sea View Golf Course Club",
+      "lat": -31.998961,
+      "lng": 115.75404
+    },
+    {
+      "id": "Q18754828",
+      "name": "St George Golf Club",
+      "lat": -28.027948,
+      "lng": 148.582372
+    },
+    {
+      "id": "Q116741282",
+      "name": "The Grange Golf Club",
+      "lat": -34.886675,
+      "lng": 138.498758
+    },
+    {
+      "id": "Q7772725",
+      "name": "The Vintage Golf Course",
+      "lat": -32.7355,
+      "lng": 151.323
+    },
+    {
+      "id": "Q97453659",
+      "name": "Trundle Golf Course",
+      "lat": -32.930243,
+      "lng": 147.707902
+    },
+    {
+      "id": "Q97453660",
+      "name": "Tumbarumba Golf Course",
+      "lat": -35.748333,
+      "lng": 148.017778
+    },
+    {
+      "id": "Q119495491",
+      "name": "Twin Creeks Golf & Country Club",
+      "lat": -33.836097,
+      "lng": 150.76047
+    },
+    {
+      "id": "Q97453661",
+      "name": "Wakehurst Golf Course",
+      "lat": -33.765,
+      "lng": 151.234444
+    },
+    {
+      "id": "Q97453662",
+      "name": "Warringah Golf Course",
+      "lat": -33.765,
+      "lng": 151.267778
+    },
+    {
+      "id": "Q39892054",
+      "name": "Willaura Golf Club",
+      "lat": -37.576389,
+      "lng": 142.748333
+    },
+    {
+      "id": "Q97453663",
+      "name": "Woodville Golf Course",
+      "lat": -33.865,
+      "lng": 151.001111
+    }
+  ]
+}

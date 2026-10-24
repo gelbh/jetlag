@@ -1,9 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/geometry";
 import type { GtfsStaticBundle } from "./gtfsBundle";
 import {
   clearGtfsBundleCacheForTests,
+  filterGtfsStopsForBoundingBox,
   filterGtfsStopsForGameArea,
   gtfsStopsShareStationOrRoute,
+  gtfsStopsToTransitStations,
   loadGtfsBundle,
   nearestGtfsStopInGameArea,
   resolveTransitLineMatch,
@@ -109,6 +112,90 @@ describe("gtfsRouteGraph", () => {
     const stops = filterGtfsStopsForGameArea(NYC_BUNDLE, MIDTOWN_GAME_AREA);
     expect(stops.map((stop) => stop.id)).toContain("nyc:penn");
     expect(stops.map((stop) => stop.id)).not.toContain("nyc:union");
+  });
+
+  it("filters stops to an explicit bounding box", () => {
+    const bbox = gameAreaToBoundingBox(MIDTOWN_GAME_AREA);
+    const stops = filterGtfsStopsForBoundingBox(NYC_BUNDLE, bbox);
+    expect(stops.map((stop) => stop.id)).toContain("nyc:penn");
+    expect(stops.map((stop) => stop.id)).toContain("nyc:times");
+    expect(stops.map((stop) => stop.id)).not.toContain("nyc:union");
+  });
+
+  it("maps GTFS stops to hiding-zone transit stations inside the game area", () => {
+    const stations = gtfsStopsToTransitStations(NYC_BUNDLE.stops, MIDTOWN_GAME_AREA);
+    expect(stations).toEqual(
+      expect.arrayContaining([
+        {
+          id: "nyc:penn",
+          name: "34 St-Penn Station",
+          lat: 40.7506,
+          lng: -73.9935,
+        },
+        {
+          id: "nyc:times",
+          name: "Times Sq-42 St",
+          lat: 40.7559,
+          lng: -73.9872,
+        },
+      ]),
+    );
+    expect(stations.map((station) => station.id)).not.toContain("nyc:union");
+    expect(stations.map((station) => station.id)).not.toContain("nyc:union-n");
+  });
+
+  it("collapses child stops when the parent is present in the filtered set", () => {
+    const downtownGameArea = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [-74.01, 40.73],
+          [-73.97, 40.73],
+          [-73.97, 40.77],
+          [-74.01, 40.77],
+          [-74.01, 40.73],
+        ],
+      ],
+    };
+
+    const stations = gtfsStopsToTransitStations(NYC_BUNDLE.stops, downtownGameArea);
+    const ids = stations.map((station) => station.id);
+    expect(ids).toContain("nyc:union");
+    expect(ids).not.toContain("nyc:union-n");
+  });
+
+  it("keeps a child stop when its parent is absent from the filtered set", () => {
+    const childOnly = [
+      {
+        id: "nyc:union-n",
+        name: "14 St-Union Sq (North)",
+        lat: 40.7355,
+        lng: -73.9904,
+        parentStationId: "nyc:union",
+      },
+    ];
+    const downtownGameArea = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [-74.01, 40.73],
+          [-73.97, 40.73],
+          [-73.97, 40.74],
+          [-74.01, 40.74],
+          [-74.01, 40.73],
+        ],
+      ],
+    };
+
+    const stations = gtfsStopsToTransitStations(childOnly, downtownGameArea);
+    expect(stations).toEqual([
+      {
+        id: "nyc:union-n",
+        name: "14 St-Union Sq (North)",
+        lat: 40.7355,
+        lng: -73.9904,
+      },
+    ]);
   });
 
   it("resolves transit line truth from seeker and hider points", async () => {

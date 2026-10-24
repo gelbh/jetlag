@@ -36,6 +36,7 @@ export {
 export { claimUsername, profileFriends } from "./handlers/profile.mjs";
 export { grantAccess, proxy } from "./handlers/proxies.mjs";
 export {
+  answerCastleSiegeOracleAsk,
   cancelRoleJoinRequest,
   controlSessionTimerForMove,
   endSession,
@@ -56,5 +57,7 @@ export {
   pollSessionOpsAgentRuns,
   processSessionIntent,
   purgeStaleSessions,
+  sendPosthogIncidentEmail,
+  sweepPosthogIncidents,
   warmPremiumOverpassPreload,
 } from "./handlers/triggers.mjs";

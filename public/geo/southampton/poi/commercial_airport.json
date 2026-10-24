@@ -1,0 +1,18 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.86,
+    "west": -1.4973,
+    "north": 50.9761,
+    "east": -1.302
+  },
+  "places": [
+    {
+      "id": "Q8988",
+      "name": "Southampton Airport",
+      "lat": 50.950278,
+      "lng": -1.356667
+    }
+  ]
+}

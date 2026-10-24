@@ -1,6 +1,11 @@
 /** Public session Firestore API — split by concern under ./sessions/. */
 
 export {
+  updateCastleSiegeSetup,
+  writeTeamSealCipher,
+  writeTeamSealHash,
+} from "./sessions/castleSiege";
+export {
   ensureHiderPhotoUploadAccess,
   getRemoteSessionById,
   getRemoteSessionByIdFromServer,
@@ -23,6 +28,7 @@ export {
 } from "./sessions/lifecycle";
 export { handleFirestoreListenError } from "./sessions/listenError";
 export {
+  type CreateRemoteSessionOptions,
   createRemoteSession,
   type EnsureRemoteSessionMembershipOptions,
   ensureRemoteSessionMembership,

@@ -1,9 +1,6 @@
 import { Button, Stack, Text } from "@mantine/core";
 import type { ModerationAction } from "../useModerationConfirm";
 
-// Standalone /map renders this panel outside the admin world, where --adm-* is unset.
-const MISPUNCH = "var(--adm-mispunch, var(--color-halt))";
-
 interface ModPanelProps {
   moderationBusy: boolean;
   onModerationAction: (action: ModerationAction) => void;
@@ -32,7 +29,7 @@ export function ModPanel({ moderationBusy, onModerationAction }: ModPanelProps) 
         </Button>
         <Button
           variant="default"
-          c={MISPUNCH}
+          c="halt"
           disabled={moderationBusy}
           onClick={() => onModerationAction("cleanupCode")}
         >

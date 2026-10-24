@@ -37,6 +37,7 @@ export {
 } from "./regionPackBoundaries";
 export {
   clearResolvedMatchingAreasCacheForTests,
+  hasBundledMatchingLevels,
   isPlayAreaReadySync,
   matchingAreasCacheKey,
   peekResolvedPlayArea,

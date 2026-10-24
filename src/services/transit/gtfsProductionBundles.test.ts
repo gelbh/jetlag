@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { GtfsStaticBundle } from "./gtfsBundle";
+import type { GtfsBundleManifest, GtfsStaticBundle } from "./gtfsBundle";
 import {
   filterGtfsStopsForGameArea,
   gtfsStopsShareStationOrRoute,
@@ -9,14 +9,26 @@ import {
 } from "./gtfsRouteGraph";
 
 const ROOT = resolve(import.meta.dirname, "../../..");
+const GTFS_DIR = resolve(ROOT, "public/geo/gtfs");
 
 function loadProductionBundle(metroId: string): GtfsStaticBundle | null {
-  const path = resolve(ROOT, `public/geo/gtfs/${metroId}.json`);
+  const path = resolve(GTFS_DIR, `${metroId}.json`);
   try {
     return JSON.parse(readFileSync(path, "utf8")) as GtfsStaticBundle;
   } catch {
     return null;
   }
+}
+
+function shippedGtfsMetroIds(): string[] {
+  return readdirSync(GTFS_DIR)
+    .filter((name) => name.endsWith(".json") && name !== "manifest.json")
+    .map((name) => name.replace(/\.json$/, ""))
+    .sort();
+}
+
+function loadManifest(): GtfsBundleManifest {
+  return JSON.parse(readFileSync(resolve(GTFS_DIR, "manifest.json"), "utf8")) as GtfsBundleManifest;
 }
 
 const MIDTOWN_NYC = {
@@ -72,10 +84,36 @@ const CENTRAL_PRINCE_RUPERT = {
 };
 
 describe("production GTFS bundles", () => {
+  it("manifest lists every shipped metro with a resolvable bundlePath", () => {
+    const manifest = loadManifest();
+    const byId = new Map(manifest.metros.map((entry) => [entry.id, entry]));
+
+    for (const metroId of shippedGtfsMetroIds()) {
+      const entry = byId.get(metroId);
+      expect(entry, `manifest missing metro ${metroId}`).toBeDefined();
+      expect(entry!.bundlePath).toMatch(/^\/geo\/gtfs\/.+\.json$/);
+
+      const onDisk = resolve(ROOT, `public${entry!.bundlePath}`);
+      expect(existsSync(onDisk), `bundlePath missing on disk: ${entry!.bundlePath}`).toBe(true);
+
+      const bundle = JSON.parse(readFileSync(onDisk, "utf8")) as GtfsStaticBundle;
+      expect(bundle.metroId).toBe(metroId);
+      expect(entry!.feedOnestopId).toBe(bundle.feedOnestopId);
+      expect(entry!.builtAt).toBe(bundle.builtAt);
+      expect(entry!.stopCount).toBe(bundle.stops.length);
+      expect(entry!.routeCount).toBe(bundle.routes.length);
+    }
+
+    // Cheap loadGtfsBundle-resolution smoke: dublin must be findable like the runtime loader.
+    expect(byId.get("dublin")?.bundlePath).toBe("/geo/gtfs/dublin.json");
+  });
+
   it("NYC midtown play area uses full subway stop inventory", async () => {
     const bundle = loadProductionBundle("nyc");
     expect(bundle).not.toBeNull();
-    expect(bundle!.stops.length).toBeGreaterThan(100);
+    // Subway + five borough bus feeds (was subway-only ~1k).
+    expect(bundle!.stops.length).toBeGreaterThan(5000);
+    expect(bundle!.feedOnestopId).toBe("mta-nyc-subway-bus-merged");
 
     const stops = filterGtfsStopsForGameArea(bundle!, MIDTOWN_NYC);
     expect(stops.length).toBeGreaterThan(20);
@@ -131,5 +169,34 @@ describe("production GTFS bundles", () => {
 
     const civicCentre = stops.find((stop) => stop.name === "Civic Centre Complex");
     expect(civicCentre).toBeDefined();
+  });
+
+  it("Dublin production bundle covers TFI bus + Luas + rail density", () => {
+    const bundle = loadProductionBundle("dublin");
+    expect(bundle).not.toBeNull();
+    // Rebuilt from TFI Dublin Bus + Go-Ahead + Luas + Irish Rail (was ~207).
+    expect(bundle!.stops.length).toBeGreaterThan(2000);
+    expect(bundle!.routes.length).toBeGreaterThan(50);
+    expect(bundle!.feedOnestopId).toBe("tfi-dublin-merged");
+
+    const oconnell = bundle!.stops.find((stop) => /O'?Connell/i.test(stop.name));
+    expect(oconnell).toBeDefined();
+    const luasStop = bundle!.stops.find((stop) => /luas/i.test(stop.name));
+    expect(luasStop).toBeDefined();
+  });
+
+  it("lists southampton in the production GTFS manifest and bundle loads", async () => {
+    const manifest = JSON.parse(
+      readFileSync(resolve(ROOT, "public/geo/gtfs/manifest.json"), "utf8"),
+    );
+    const entry = manifest.metros.find((m: { id: string }) => m.id === "southampton");
+    expect(entry).toBeDefined();
+    expect(entry.bundlePath).toBe("/geo/gtfs/southampton.json");
+    const bundle = JSON.parse(
+      readFileSync(resolve(ROOT, "public/geo/gtfs/southampton.json"), "utf8"),
+    );
+    expect(bundle.metroId).toBe("southampton");
+    expect(bundle.stops.length).toBeGreaterThan(0);
+    expect(bundle.routes.length).toBeGreaterThan(0);
   });
 });

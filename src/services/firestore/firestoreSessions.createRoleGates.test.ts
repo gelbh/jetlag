@@ -143,4 +143,120 @@ describe("createRemoteSession role-gate bootstrap", () => {
     );
     expect(deleteDoc).toHaveBeenCalled();
   });
+
+  it("persists castleSiege mode fields and observer host on create", async () => {
+    clientEnvUsesFirebaseEmulator.mockReturnValue(true);
+
+    const dials = {
+      zoneRadiusMeters: 500,
+      turnLengthSeconds: 300,
+      maxRounds: 12,
+      beltWidthMeters: 200,
+      breachToleranceMeters: 50,
+      siegeLimitSeconds: 1800,
+    };
+
+    const session = await createRemoteSession(
+      AREA,
+      "host-1",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      {},
+      "imperial",
+      undefined,
+      {
+        mode: "castleSiege",
+        hostCastleSiegeRole: "teamB",
+        seriesLength: 3,
+        setupMode: "fairSplit",
+        dials,
+      },
+    );
+
+    expect(session).toMatchObject({
+      mode: "castleSiege",
+      memberRoles: { "host-1": "observer" },
+      castleSiegeRoles: { "host-1": "teamB" },
+      seriesLength: 3,
+      setupMode: "fairSplit",
+      dials,
+    });
+
+    expect(batchSet).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        mode: "castleSiege",
+        memberRoles: { "host-1": "observer" },
+        castleSiegeRoles: { "host-1": "teamB" },
+        seriesLength: 3,
+        setupMode: "fairSplit",
+        dials,
+      }),
+    );
+  });
+
+  it("defaults castleSiege host team to teamA and omits optional series fields", async () => {
+    clientEnvUsesFirebaseEmulator.mockReturnValue(true);
+
+    const session = await createRemoteSession(
+      AREA,
+      "host-1",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      {},
+      "imperial",
+      undefined,
+      { mode: "castleSiege" },
+    );
+
+    expect(session.mode).toBe("castleSiege");
+    expect(session.memberRoles).toEqual({ "host-1": "observer" });
+    expect(session.castleSiegeRoles).toEqual({ "host-1": "teamA" });
+    expect(session.seriesLength).toBeUndefined();
+    expect(session.setupMode).toBeUndefined();
+  });
+
+  it("calls initSessionRoleGates for castleSiege outside emulator and stamps empty leaders", async () => {
+    clientEnvUsesFirebaseEmulator.mockReturnValue(false);
+
+    const session = await createRemoteSession(
+      AREA,
+      "host-1",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      {},
+      "imperial",
+      undefined,
+      { mode: "castleSiege", hostCastleSiegeRole: "teamA" },
+    );
+
+    expect(initSessionRoleGates).toHaveBeenCalledOnce();
+    expect(initSessionRoleGates).toHaveBeenCalledWith(session.id);
+    expect(session.memberRoles).toEqual({ "host-1": "observer" });
+    expect(session.roleGates).toEqual({ version: 1, leaders: {} });
+    expect(updateDoc).not.toHaveBeenCalled();
+    expect(deleteDoc).not.toHaveBeenCalled();
+  });
+
+  it("keeps classic create free of castleSiege fields", async () => {
+    clientEnvUsesFirebaseEmulator.mockReturnValue(true);
+
+    const session = await createRemoteSession(AREA, "host-1");
+
+    expect(session.mode).toBeUndefined();
+    expect(session.castleSiegeRoles).toBeUndefined();
+    expect(session.memberRoles).toEqual({ "host-1": "seeker" });
+
+    const [, payload] = batchSet.mock.calls[0] ?? [];
+    expect(payload).not.toHaveProperty("mode");
+    expect(payload).not.toHaveProperty("castleSiegeRoles");
+    expect(payload).not.toHaveProperty("seriesLength");
+    expect(payload).not.toHaveProperty("setupMode");
+  });
 });

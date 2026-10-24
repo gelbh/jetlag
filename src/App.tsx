@@ -17,6 +17,7 @@ import { ClientMinVersionGate } from "./components/ui/feedback/ClientMinVersionG
 import { MapErrorBoundary } from "./components/ui/feedback/MapErrorBoundary";
 import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
 import { PlayerPhoneShell } from "./components/ui/layout/PlayerPhoneShell";
+import { PlayerRouteOnly } from "./components/ui/layout/PlayerRouteOnly";
 import { AppUiProvider } from "./components/ui/providers/AppUiProvider";
 import { removeBootSplash } from "./domain/device/chrome/bootSplash";
 import { markPlayDay, PWA_MARK_APP_READY } from "./domain/device/perf/playDayMarks";
@@ -42,6 +43,7 @@ import { RouteProgressChrome } from "./navigation/RouteProgressChrome";
 import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
 import {
+  AccountLazy,
   AdminOpsDeskLazy,
   AppResumeWatchdogLazy,
   CreateSessionLazy,
@@ -232,7 +234,9 @@ export default function App() {
                     <LazyRouteQuiet>
                       <AppResumeWatchdogLazy />
                     </LazyRouteQuiet>
-                    <PwaInstallTipBanner />
+                    <PlayerRouteOnly>
+                      <PwaInstallTipBanner />
+                    </PlayerRouteOnly>
                     <AnalyticsConsentBanner />
                     <AppEntryBackdrop />
                     <div className="jl-scroll app-scroll-root">
@@ -295,6 +299,14 @@ export default function App() {
                             element={
                               <LazyRoute>
                                 <PremiumLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/account"
+                            element={
+                              <LazyRoute>
+                                <AccountLazy />
                               </LazyRoute>
                             }
                           />
@@ -415,6 +427,22 @@ export default function App() {
                         />
                         <Route
                           path="/admin/preload-requests"
+                          element={
+                            <LazyRoute>
+                              <AdminOpsDeskLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/sessions/:sessionId"
+                          element={
+                            <LazyRoute>
+                              <AdminOpsDeskLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/preload-requests/:requestId"
                           element={
                             <LazyRoute>
                               <AdminOpsDeskLazy />

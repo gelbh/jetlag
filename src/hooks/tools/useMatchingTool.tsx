@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { OracleAskReceipt } from "@/components/session/castle-siege/OracleAskReceipt";
 import { MatchingHudBody } from "@/components/tools/ask/matching/MatchingHudBody";
 import {
   MatchingMapPlacementChrome,
@@ -8,6 +9,8 @@ import { QuestionPreviewSheet } from "@/components/tools/shared/controls/Questio
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { canCommit as askCanCommit } from "@/domain/ask/askHudModes";
 import { poiCandidateToMatchingFeature } from "@/domain/geo/poiCandidateAdapters";
+import type { CastleSiegeOracleReceipt } from "@/domain/session/castleSiege/oracleAskReceipt";
+import { resolveAskPath } from "@/domain/session/castleSiege/resolveAskPath";
 import { isAbortError } from "@/services/core/network/anySignal";
 import { createLoadTask, type LoadTask } from "@/services/core/progress/loadTask";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
@@ -75,14 +78,27 @@ export function useMatchingTool({
   refreshGps,
   ensurePointInGameArea,
   canSubmitQuestion = true,
+  sessionMode = null,
+  defenderTeamId = null,
+  callOracleAsk,
 }: UseMatchingToolParams) {
   const wizardStepRef = useRef("place");
   const submittingRef = useRef(false);
   const finishPlacementRef = useRef(finishPlacement);
   const mapStyle = useMapStore((state) => state.mapStyle);
+  const [oracleReceipt, setOracleReceipt] = useState<Extract<
+    CastleSiegeOracleReceipt,
+    { kind: "matching" }
+  > | null>(null);
+  const oraclePath = resolveAskPath(sessionMode) === "oracle";
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
+  useEffect(() => {
+    if (!active) {
+      setOracleReceipt(null);
+    }
+  }, [active]);
 
   const draft = useMatchingDraftState();
   const {
@@ -420,6 +436,7 @@ export function useMatchingTool({
 
   const resetDraft = useCallback(() => {
     cancelRequests();
+    setOracleReceipt(null);
     resetMatchingDraft();
   }, [cancelRequests, resetMatchingDraft]);
 
@@ -444,6 +461,7 @@ export function useMatchingTool({
           : null;
 
       setMatchingAnswerSynced(null);
+      setOracleReceipt(null);
       setMatchingSeekerAnchor(tapHit?.point ?? point);
       return true;
     },
@@ -503,11 +521,11 @@ export function useMatchingTool({
       matchingFeatures,
       matchingAnswer,
       matchingTransitMetroId: catalog.matchingTransitMetroId,
-      previewBeforeSend: catalog.previewBeforeSend,
+      previewBeforeSend: oraclePath ? false : catalog.previewBeforeSend,
       customCategories: catalog.customCategories,
       gameArea,
-      awaitHiderAnswer,
-      submitPendingQuestion,
+      awaitHiderAnswer: oraclePath ? false : awaitHiderAnswer,
+      submitPendingQuestion: oraclePath ? undefined : submitPendingQuestion,
       sessionId,
       senderUid,
       cardDraw: catalog.cardDraw,
@@ -516,12 +534,19 @@ export function useMatchingTool({
       setMatchingError,
       setPreviewOpen,
       onSuccess: () => {
+        setOracleReceipt(null);
         resetDraft();
         finishPlacementRef.current();
       },
+      sessionMode,
+      defenderTeamId: defenderTeamId ?? undefined,
+      callOracleAsk,
+      oracleReceipt,
+      onOracleReceipt: setOracleReceipt,
     };
   }, [
     awaitHiderAnswer,
+    callOracleAsk,
     canSubmitQuestion,
     catalog.cardDraw,
     catalog.cardKeep,
@@ -529,6 +554,7 @@ export function useMatchingTool({
     catalog.matchingTransitMetroId,
     catalog.previewBeforeSend,
     createAnnotation,
+    defenderTeamId,
     gameArea,
     matchingAnswer,
     matchingCategoryId,
@@ -540,9 +566,12 @@ export function useMatchingTool({
     matchingNearestFeaturePoint,
     matchingNullAnswer,
     matchingSeekerPoint,
+    oraclePath,
+    oracleReceipt,
     resetDraft,
     senderUid,
     sessionId,
+    sessionMode,
     setMatchingError,
     setPreviewOpen,
     submitPendingQuestion,
@@ -728,81 +757,96 @@ export function useMatchingTool({
       ? matchingQuestionFor(matchingCategoryId, catalog.customCategories).prompt
       : "";
 
+  const effectiveAwaitHider = oraclePath ? false : awaitHiderAnswer;
   const readiness: AskHudReadiness = {
     surface: "matching",
     placementReady: matchingSeekerPoint !== null,
     configureReady: matchingCategoryChosen && categoryAvailable,
     resolveReady: resolveComplete && !matchingLoading,
-    answerReady: awaitHiderAnswer || matchingAnswer !== null,
-    awaitHiderAnswer,
+    answerReady: oraclePath || effectiveAwaitHider || matchingAnswer !== null,
+    awaitHiderAnswer: effectiveAwaitHider,
     isSubmitting: session.isBusy,
     viewOnly: !canSubmitQuestion,
   };
+
+  const canCommitMatching = askCanCommit(readiness) && !(oraclePath && oracleReceipt);
+
+  const oracleReceiptBody = oracleReceipt ? (
+    <OracleAskReceipt
+      receipt={oracleReceipt}
+      busy={session.isBusy}
+      onConfirmSend={() => void commit()}
+      onCancel={() => setOracleReceipt(null)}
+    />
+  ) : null;
 
   const hud = {
     readiness,
     costLabel: catalog.costLabel,
     error: placementError,
     onCommit: () => void commit(),
-    suppressSheet: mapPlacementActive,
-    mapOverlay: mapPlacementActive ? (
-      <MatchingMapPlacementChrome
-        loadTask={matchingLoadTask}
-        categoryLabel={placementCategoryLabel}
-        questionPrompt={placementQuestionPrompt}
-        costLabel={catalog.costLabel}
-        phase={placementPhase}
-        onUseGps={() => void handleGps()}
-        gpsLoading={gpsLoading}
-        error={placementError}
-        nearestPlaceName={matchingNearestFeatureName}
-        awaitHiderAnswer={awaitHiderAnswer}
-        nearestSummary={answerNearestSummary}
-        nullAnswerMessage={
-          matchingNullAnswer && matchingCategoryId
-            ? matchingEmptyPlayAreaMessage(matchingCategoryId)
-            : null
-        }
-        answer={matchingAnswer}
-        onAnswerChange={setMatchingAnswerSynced}
-        canCommit={askCanCommit(readiness)}
-        isSubmitting={session.isBusy}
-        onCommit={() => void commit()}
-        onChangeCategory={reopenCategoryPicker}
-      />
-    ) : null,
-    modeBody: mapPlacementActive ? null : (
-      <MatchingHudBody
-        distanceUnit={distanceUnit}
-        categoryId={matchingCategoryId}
-        categoryChosen={matchingCategoryChosen}
-        usedCategoryIds={usedMatchingCategories}
-        unavailableCategoryIds={unavailableCategoryIds}
-        catalogNotice={catalogNotice}
-        catalogCategories={catalog.matchingCatalog}
-        hasSeekerPoint={matchingSeekerPoint !== null}
-        usesContainmentMatching={catalog.matchingUsesContainment}
-        nearestFeatureName={matchingNearestFeatureName}
-        distanceMeters={matchingDistanceMeters}
-        featureCount={matchingFeatureCount}
-        inPlayAreaFeatureCount={matchingInPlayAreaFeatureCount}
-        nearestOutsidePlayArea={matchingNearestOutsidePlayArea}
-        nullAnswer={matchingNullAnswer}
-        loading={matchingLoading}
-        loadTask={matchingLoadTask}
-        enrichTask={matchingEnrichTask}
-        nearestProvisional={nearestProvisional}
-        gpsLoading={gpsLoading}
-        answer={matchingAnswer}
-        error={matchingError ?? gpsError ?? mapError}
-        onCategoryChange={handleCategoryChange}
-        onUseGps={() => void handleGps()}
-        onAnswerChange={setMatchingAnswerSynced}
-        awaitHiderAnswer={awaitHiderAnswer}
-        costLabel={catalog.costLabel}
-        toolLabel="Matching"
-      />
-    ),
+    suppressSheet: mapPlacementActive && !oracleReceipt,
+    mapOverlay:
+      mapPlacementActive && !oracleReceipt ? (
+        <MatchingMapPlacementChrome
+          loadTask={matchingLoadTask}
+          categoryLabel={placementCategoryLabel}
+          questionPrompt={placementQuestionPrompt}
+          costLabel={catalog.costLabel}
+          phase={placementPhase}
+          onUseGps={() => void handleGps()}
+          gpsLoading={gpsLoading}
+          error={placementError}
+          nearestPlaceName={matchingNearestFeatureName}
+          awaitHiderAnswer={effectiveAwaitHider}
+          nearestSummary={answerNearestSummary}
+          nullAnswerMessage={
+            matchingNullAnswer && matchingCategoryId
+              ? matchingEmptyPlayAreaMessage(matchingCategoryId)
+              : null
+          }
+          answer={matchingAnswer}
+          onAnswerChange={setMatchingAnswerSynced}
+          canCommit={canCommitMatching}
+          isSubmitting={session.isBusy}
+          onCommit={() => void commit()}
+          onChangeCategory={reopenCategoryPicker}
+        />
+      ) : null,
+    modeBody:
+      oracleReceiptBody ??
+      (mapPlacementActive ? null : (
+        <MatchingHudBody
+          distanceUnit={distanceUnit}
+          categoryId={matchingCategoryId}
+          categoryChosen={matchingCategoryChosen}
+          usedCategoryIds={usedMatchingCategories}
+          unavailableCategoryIds={unavailableCategoryIds}
+          catalogNotice={catalogNotice}
+          catalogCategories={catalog.matchingCatalog}
+          hasSeekerPoint={matchingSeekerPoint !== null}
+          usesContainmentMatching={catalog.matchingUsesContainment}
+          nearestFeatureName={matchingNearestFeatureName}
+          distanceMeters={matchingDistanceMeters}
+          featureCount={matchingFeatureCount}
+          inPlayAreaFeatureCount={matchingInPlayAreaFeatureCount}
+          nearestOutsidePlayArea={matchingNearestOutsidePlayArea}
+          nullAnswer={matchingNullAnswer}
+          loading={matchingLoading}
+          loadTask={matchingLoadTask}
+          enrichTask={matchingEnrichTask}
+          nearestProvisional={nearestProvisional}
+          gpsLoading={gpsLoading}
+          answer={matchingAnswer}
+          error={matchingError ?? gpsError ?? mapError}
+          onCategoryChange={handleCategoryChange}
+          onUseGps={() => void handleGps()}
+          onAnswerChange={setMatchingAnswerSynced}
+          awaitHiderAnswer={effectiveAwaitHider}
+          costLabel={catalog.costLabel}
+          toolLabel="Matching"
+        />
+      )),
     sheets: (
       <QuestionPreviewSheet
         open={previewOpen}

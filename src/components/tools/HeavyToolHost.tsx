@@ -3,6 +3,8 @@ import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord, AnnotationType, GameArea } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import type { SessionMode } from "../../domain/session/castleSiege/mode";
+import type { CastleSiegePlayingTeam } from "../../domain/session/castleSiege/pregame";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import {
   createIdleHeavyMapTools,
@@ -15,6 +17,7 @@ import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQues
 import { useMatchingTool } from "../../hooks/tools/useMatchingTool";
 import { useMeasuringTool } from "../../hooks/tools/useMeasuringTool";
 import { useTentacleTool } from "../../hooks/tools/useTentacleTool";
+import type { AnswerCastleSiegeOracleAskFn } from "../../services/session/castleSiegeOracleAsk";
 import type { MapTool } from "../../state/sessionStore";
 
 /** Flat heavy-tool host fields bag for HeavyToolHost (W4-F peel). */
@@ -47,6 +50,9 @@ export type HeavyToolHostModel = {
   senderUid?: string | null;
   onToolsChange: (tools: HeavyMapToolsApi) => void;
   canSubmitQuestion?: boolean;
+  sessionMode?: SessionMode | null;
+  defenderTeamId?: CastleSiegePlayingTeam | null;
+  callOracleAsk?: AnswerCastleSiegeOracleAskFn;
 };
 
 export type HeavyToolHostProps = {
@@ -149,6 +155,9 @@ interface HeavyToolHookParams {
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   armPlacement: () => void;
   canSubmitQuestion?: boolean;
+  sessionMode?: SessionMode | null;
+  defenderTeamId?: CastleSiegePlayingTeam | null;
+  callOracleAsk?: AnswerCastleSiegeOracleAskFn;
 }
 
 type HeavyToolRunnerProps = Omit<HeavyToolHostModel, "activeTool">;

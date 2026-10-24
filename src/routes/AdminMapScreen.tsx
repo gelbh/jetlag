@@ -1,7 +1,6 @@
-import { Alert, Box, Divider, Paper } from "@mantine/core";
+import { Alert, Box, Paper } from "@mantine/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../theme/mantineAdminStyles";
-import { AdminCourseHeader } from "../components/admin/monitor/AdminCourseHeader";
 import { AdminLegStrip } from "../components/admin/monitor/AdminLegStrip";
 import { AdminMonitorPlayerFocus } from "../components/admin/monitor/AdminMonitorPlayerFocus";
 import { AdminPlayerRoster, rosterUids } from "../components/admin/monitor/AdminPlayerRoster";
@@ -15,9 +14,7 @@ import { SessionLog } from "../components/session/log/SessionLog";
 import { InlineError } from "../components/ui/banners/InlineError";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
-import { countLiveLocations } from "../domain/session/live/liveLocationFreshness";
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
-import { useLiveLocationNowMs } from "../hooks/map/useLiveLocationNowMs";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { usePlayerLocationsSync } from "../hooks/session/useSessionExtrasSync";
 import { AppNavigate } from "../navigation/AppNavigate";
@@ -52,10 +49,10 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const playerLocations = usePlayerLocationsSync(
     embeddedMonitor ? controller.session?.id : undefined,
   );
-  const liveNowMs = useLiveLocationNowMs();
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [moderationBusy, setModerationBusy] = useState(false);
-  const [railCollapsed, setRailCollapsed] = useState(false);
+  // Embedded in the desk the map is the page: the rail starts folded, one click away.
+  const [railCollapsed, setRailCollapsed] = useState(embeddedMonitor);
   const [railTab, setRailTab] = useState<AdminMonitorRailTab>("overview");
 
   const handleLeave = useCallback(async () => {
@@ -172,8 +169,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const splitBoard = embeddedMonitor ? (
     <AdminSplitBoard
       count={rosterUids(controller.session, playerLocations).length}
-      // Folded: beside the rail the course map is ~18rem at 1440, and an open board hides it.
-      defaultOpen={false}
+      defaultOpen
       placement={isWide ? "top" : "bottom"}
     >
       <AdminPlayerRoster session={controller.session} locations={playerLocations} />
@@ -187,30 +183,14 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
       style={adminShellStyle({ isWide, railCollapsed, embedded: embeddedMonitor })}
     >
       {embeddedMonitor && isWide ? (
-        <Box data-shell-cell="top" bg="var(--adm-paper)" style={adminShellCell.top}>
-          <AdminCourseHeader
-            code={controller.session.code}
-            timerState={controller.timer.timerState}
-            seekerCount={countLiveLocations(controller.seekerLocations, liveNowMs)}
-            hiderCount={countLiveLocations(controller.hiderLocations, liveNowMs)}
-            questionCount={controller.pendingQuestions.length}
-            syncStatus={controller.syncStatus.status}
-            onLeave={() => void handleLeave()}
-          />
-          <Divider />
-          <AdminLegStrip
-            key={controller.session.id}
-            sessionId={controller.session.id}
-            questions={controller.pendingQuestions}
-          />
-          <Divider />
-          {/* In flow, not an overlay: the header's height varies as its cells wrap. */}
-          {controller.syncStatus.lastSyncError ? (
-            <Alert data-tone="mispunch" title="Sync issue" m="xs" py={6}>
+        controller.syncStatus.lastSyncError ? (
+          <Box data-shell-cell="top" bg="var(--color-canvas)" style={adminShellCell.top}>
+            {/* In flow, not an overlay: it pushes the map down instead of covering the strip. */}
+            <Alert color="halt" title="Sync issue" m="xs" py={6}>
               {controller.syncStatus.lastSyncError}
             </Alert>
-          ) : null}
-        </Box>
+          </Box>
+        ) : null
       ) : (
         <AdminMapScreenChrome
           session={controller.session}
@@ -233,6 +213,21 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         data-player-map={embeddedMonitor ? "" : undefined}
       >
         {mapLayers}
+        {embeddedMonitor ? (
+          <Box
+            pos="absolute"
+            left={12}
+            right={12}
+            top={isWide ? 12 : 64}
+            style={{ zIndex: "var(--z-panel)", pointerEvents: "none" }}
+          >
+            <AdminLegStrip
+              key={controller.session.id}
+              sessionId={controller.session.id}
+              questions={controller.pendingQuestions}
+            />
+          </Box>
+        ) : null}
         {splitBoard}
       </div>
 

@@ -8,11 +8,7 @@ import { commitWrite } from "@/services/firestore/commitWrite";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { isActive, LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { isSessionRoleGated } from "../../domain/session/players/roleGates";
-import {
-  trackSessionEnded,
-  trackSessionLeaveAlreadyLeft,
-} from "../../services/core/analytics/analytics";
+import { trackSessionEnded } from "../../services/core/analytics/analytics";
 import { captureException } from "../../services/core/analytics/clientErrors";
 import { forceRgbCssColorsInClone } from "../../services/core/capture/html2canvasColors";
 import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/capture/html2canvasErrors";
@@ -22,19 +18,17 @@ import {
   endRemoteSession,
   resetRemoteSession,
 } from "../../services/firestore/firestoreAnnotations";
-import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
 import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
 import {
-  allowPlayerLocationPublishes,
-  blockPlayerLocationPublishes,
-} from "../../services/session/playerLocationPublishGate";
-import { leaveSessionMembership } from "../../services/session/rolePasscodeLifecycle";
+  isAloneHost,
+  leaveRemoteSessionOnDevice,
+} from "../../services/session/leaveRemoteSessionOnDevice";
 import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
 } from "../../services/session/sessionCleanup";
 import { isExpectedSessionLeaveError } from "../../services/session/sessionLeaveErrors";
-import { endSession, leaveHostSession } from "../../services/session/sessionLifecycle";
+import { endSession } from "../../services/session/sessionLifecycle";
 import { useSessionStore } from "../../state/sessionStore";
 import { useSubmitLock } from "../forms/useSubmitLock";
 import { useSessionExit } from "../session/useSessionExit";
@@ -291,49 +285,17 @@ export function useMapSessionChrome({
     // call the host-only leave callable after a transfer.
     const isRemoteHost = !isLocalSession && user !== null && session.hostUid === user.uid;
     if (isRemoteHost && user) {
-      const hostUid = session.hostUid ?? "";
-      const alone = !(session.memberUids ?? []).some((uid) => uid !== hostUid);
+      const alone = isAloneHost(session);
       const confirmMessage = alone
         ? "You're the only player. Leaving will end this session."
         : "Another player will become host so others can keep playing. Leave anyway?";
       if (!window.confirm(confirmMessage)) {
         return;
       }
-
-      blockPlayerLocationPublishes();
-
-      try {
-        const leaveResult = await leaveHostSession(session.id);
-        if (leaveResult.action === "ended") {
-          trackSessionEnded("host_leave_ended");
-        }
-        // promoted: session continues — do not emit session_ended
-      } catch (error) {
-        if (alertIfNeedsConnection(error)) {
-          allowPlayerLocationPublishes();
-          return;
-        }
-        if (isExpectedSessionLeaveError(error)) {
-          trackSessionEnded("expected_already_ended");
-        } else {
-          captureException(error);
-          if (alone) {
-            const sessionId = session.id;
-            commitWrite("session.end", () => endRemoteSession(sessionId));
-            trackSessionEnded("fallback_client_end");
-          } else {
-            allowPlayerLocationPublishes();
-            window.alert("Couldn't leave the session. Try again.");
-            return;
-          }
-        }
-      }
     } else if (
       !window.confirm("Leave this session on this device? Other players can keep playing.")
     ) {
       return;
-    } else if (!isLocalSession) {
-      blockPlayerLocationPublishes();
     }
 
     if (isLocalSession) {
@@ -341,33 +303,13 @@ export function useMapSessionChrome({
     }
 
     if (!isLocalSession && user) {
-      if (isSessionRoleGated(session) && !isRemoteHost) {
-        try {
-          if ((await leaveSessionMembership(session.id)) === "already_left") {
-            trackSessionLeaveAlreadyLeft();
-          }
-        } catch (error) {
-          if (alertIfNeedsConnection(error)) {
-            allowPlayerLocationPublishes();
-            return;
-          }
-          if (!isExpectedSessionLeaveError(error)) {
-            captureException(error);
-            window.alert("Couldn't leave the session. Try again.");
-            return;
-          }
-        }
-      }
-
-      try {
-        await clearLiveLocationOnLeave({
-          sessionId: session.id,
-          uid: user.uid,
-          role: session.memberRoles?.[user.uid] ?? "seeker",
-          pendingQuestions,
-        });
-      } catch (error) {
-        captureException(error);
+      const leaveResult = await leaveRemoteSessionOnDevice({
+        session,
+        uid: user.uid,
+        pendingQuestions,
+      });
+      if (leaveResult === "failed") {
+        return;
       }
     }
 

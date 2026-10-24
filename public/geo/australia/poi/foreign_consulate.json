@@ -1,0 +1,132 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": -43.7604,
+    "west": 112.9011,
+    "north": -9.1225,
+    "east": 159.1292
+  },
+  "places": [
+    {
+      "id": "Q66251211",
+      "name": "Consular Office of Japan, Cairns",
+      "lat": -16.925267,
+      "lng": 145.777778
+    },
+    {
+      "id": "Q131388141",
+      "name": "Consulate General of Germany, Sydney",
+      "lat": -33.874136,
+      "lng": 151.217
+    },
+    {
+      "id": "Q111047776",
+      "name": "consulate general of Indonesia, Perth",
+      "lat": -31.959938,
+      "lng": 115.872888
+    },
+    {
+      "id": "Q109456914",
+      "name": "Consulate General of South Korea, Sydney",
+      "lat": -33.870498,
+      "lng": 151.205868
+    },
+    {
+      "id": "Q48842841",
+      "name": "Consulate General of the Republic of Poland in Sydney",
+      "lat": -33.883972,
+      "lng": 151.240278
+    },
+    {
+      "id": "Q81986729",
+      "name": "Consulate General of the United Arab Emirates, Melbourne",
+      "lat": -37.817591,
+      "lng": 144.958394
+    },
+    {
+      "id": "Q136452355",
+      "name": "Consulate General of the United States in Sydney",
+      "lat": -33.839883,
+      "lng": 151.206373
+    },
+    {
+      "id": "Q130349582",
+      "name": "Consulate General of the United States, Melbourne",
+      "lat": -37.846944,
+      "lng": 144.979952
+    },
+    {
+      "id": "Q131447795",
+      "name": "Consulate General of Turkey, Sydney",
+      "lat": -33.885275,
+      "lng": 151.239083
+    },
+    {
+      "id": "Q116214434",
+      "name": "Consulate-General of China, Sydney",
+      "lat": -33.888611,
+      "lng": 151.179167
+    },
+    {
+      "id": "Q16507587",
+      "name": "Consulate-General of France in  Sydney",
+      "lat": -33.8561,
+      "lng": 151.193
+    },
+    {
+      "id": "Q66085161",
+      "name": "Consulate-General of Japan, Brisbane",
+      "lat": -27.468472,
+      "lng": 153.029583
+    },
+    {
+      "id": "Q63970199",
+      "name": "Consulate-General of Japan, Melbourne",
+      "lat": -37.815611,
+      "lng": 144.956639
+    },
+    {
+      "id": "Q66152352",
+      "name": "Consulate-General of Japan, Perth",
+      "lat": -31.946,
+      "lng": 115.843028
+    },
+    {
+      "id": "Q62124367",
+      "name": "Consulate-General of Japan, Sydney",
+      "lat": -33.864556,
+      "lng": 151.209944
+    },
+    {
+      "id": "Q115966656",
+      "name": "Consulate-General of the People's Republic of China in Perth",
+      "lat": -31.951134,
+      "lng": 115.877173
+    },
+    {
+      "id": "Q106463586",
+      "name": "embassy of Hungary in Australia",
+      "lat": -35.32498,
+      "lng": 149.09076
+    },
+    {
+      "id": "Q117742314",
+      "name": "German Honorary Consulate, Perth",
+      "lat": -31.97796,
+      "lng": 115.811495
+    },
+    {
+      "id": "Q73003105",
+      "name": "Honorary Consulate of Portugal in Perth",
+      "lat": -32.060344,
+      "lng": 115.751607
+    },
+    {
+      "id": "Q80803692",
+      "name": "Honorary Consulate of South Africa, Melbourne",
+      "lat": -37.838623,
+      "lng": 144.995948
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { createTestSession } from "@/test/fixtures/sessions";
 import * as regionPackBoundaries from "./regionPackBoundaries";
 import {
   clearResolvedMatchingAreasCacheForTests,
+  hasBundledMatchingLevels,
   isPlayAreaReadySync,
   matchingAreasCacheKey,
   peekResolvedPlayArea,
@@ -45,6 +46,82 @@ describe("resolveSessionMatchingAreas", () => {
       bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
     });
 
+    expect(areas).toEqual(sessionAreas);
+    expect(regionPackBoundaries.loadRegionPackMatchingAreas).not.toHaveBeenCalled();
+  });
+
+  it("treats single-depth Southampton sessions with only level 8 as complete", async () => {
+    const sessionAreas = {
+      8: "southampton-wards",
+    };
+
+    const areas = await resolveSessionMatchingAreas({
+      regionPackId: "southampton",
+      customMatchingAreas: sessionAreas,
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+    });
+
+    expect(areas).toEqual(sessionAreas);
+    expect(regionPackBoundaries.loadRegionPackMatchingAreas).not.toHaveBeenCalled();
+  });
+
+  it("still reloads dual-depth packs when only level 8 is present", async () => {
+    vi.spyOn(regionPackBoundaries, "loadRegionPackMatchingAreas").mockResolvedValue(bundledAreas);
+
+    const areas = await resolveSessionMatchingAreas({
+      regionPackId: "dublin",
+      regionPackSubregionId: "south-dublin",
+      customMatchingAreas: { 8: "primary-only" },
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+    });
+
+    expect(areas).toEqual(bundledAreas);
+    expect(regionPackBoundaries.loadRegionPackMatchingAreas).toHaveBeenCalledWith(
+      "dublin",
+      "south-dublin",
+    );
+  });
+
+  it("reloads australia when levels 8+9 are present but declared level 4 is missing", async () => {
+    const australiaAreas = {
+      4: "ced",
+      6: "sed",
+      8: "states",
+      9: "lgas",
+    };
+    vi.spyOn(regionPackBoundaries, "loadRegionPackMatchingAreas").mockResolvedValue(australiaAreas);
+
+    const areas = await resolveSessionMatchingAreas({
+      regionPackId: "australia",
+      regionPackSubregionId: "nsw",
+      customMatchingAreas: { 8: "states", 9: "lgas" },
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+    });
+
+    expect(hasBundledMatchingLevels({ 8: "states", 9: "lgas" }, "australia")).toBe(false);
+    expect(areas).toEqual(australiaAreas);
+    expect(regionPackBoundaries.loadRegionPackMatchingAreas).toHaveBeenCalledWith(
+      "australia",
+      "nsw",
+    );
+  });
+
+  it("treats australia sessions with levels 4, 6, 8, and 9 as complete", async () => {
+    const sessionAreas = {
+      4: "ced",
+      6: "sed",
+      8: "states",
+      9: "lgas",
+    };
+
+    const areas = await resolveSessionMatchingAreas({
+      regionPackId: "australia",
+      regionPackSubregionId: "nsw",
+      customMatchingAreas: sessionAreas,
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+    });
+
+    expect(hasBundledMatchingLevels(sessionAreas, "australia")).toBe(true);
     expect(areas).toEqual(sessionAreas);
     expect(regionPackBoundaries.loadRegionPackMatchingAreas).not.toHaveBeenCalled();
   });

@@ -20,6 +20,8 @@ export { APP_ROUTE_PATHS } from "./appRoutePaths";
 
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
 const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
+const ADMIN_SESSION_PATH_RE = /^\/admin\/sessions\/[^/]+$/;
+const ADMIN_REQUEST_PATH_RE = /^\/admin\/preload-requests\/[^/]+$/;
 const DEFAULT_OG_IMAGE_PATH = "/og-default.png";
 
 const INDEXABLE_PATHS = new Set(crawlPolicy.indexablePaths);
@@ -106,6 +108,12 @@ function normalizeSeoPath(pathname: string): string {
   if (ADMIN_INCIDENT_PATH_RE.test(base)) {
     return "/admin/incidents/:incidentId";
   }
+  if (ADMIN_SESSION_PATH_RE.test(base)) {
+    return "/admin/sessions/:sessionId";
+  }
+  if (ADMIN_REQUEST_PATH_RE.test(base)) {
+    return "/admin/preload-requests/:requestId";
+  }
   return base || "/";
 }
 
@@ -123,15 +131,25 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
     description: HOME_DESCRIPTION,
     canonicalPath: "/",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
+    // WebSite is Google's preferred site-name signal; WebApplication keeps the app type.
     jsonLd: {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      name: LEGAL_APP_NAME,
-      url: absoluteUrl("/"),
-      applicationCategory: "GameApplication",
-      description: HOME_DESCRIPTION,
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      disclaimer: UNOFFICIAL_DISCLAIMER,
+      "@graph": [
+        {
+          "@type": "WebSite",
+          name: LEGAL_APP_NAME,
+          url: absoluteUrl("/"),
+        },
+        {
+          "@type": "WebApplication",
+          name: LEGAL_APP_NAME,
+          url: absoluteUrl("/"),
+          applicationCategory: "GameApplication",
+          description: HOME_DESCRIPTION,
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          disclaimer: UNOFFICIAL_DISCLAIMER,
+        },
+      ],
     },
   },
   "/premium": {
@@ -140,6 +158,12 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
     canonicalPath: "/premium",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
     jsonLd: webPageJsonLd("/premium", PREMIUM_TITLE, PREMIUM_DESCRIPTION),
+  },
+  "/account": {
+    title: titleFor("Account"),
+    description: `Sign in or manage your account in ${LEGAL_APP_NAME}.`,
+    canonicalPath: "/account",
+    ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/privacy": {
     title: PRIVACY_TITLE,
@@ -213,6 +237,18 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
     title: titleFor("Preload requests"),
     description: `Custom preset preload request inbox for ${LEGAL_APP_NAME}.`,
     canonicalPath: "/admin/preload-requests",
+    ogImagePath: DEFAULT_OG_IMAGE_PATH,
+  },
+  "/admin/sessions/:sessionId": {
+    title: titleFor("Session"),
+    description: `Live session monitor for ${LEGAL_APP_NAME}.`,
+    canonicalPath: "/admin/sessions/:sessionId",
+    ogImagePath: DEFAULT_OG_IMAGE_PATH,
+  },
+  "/admin/preload-requests/:requestId": {
+    title: titleFor("Preload request"),
+    description: `Preload request detail for ${LEGAL_APP_NAME}.`,
+    canonicalPath: "/admin/preload-requests/:requestId",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/presets": {

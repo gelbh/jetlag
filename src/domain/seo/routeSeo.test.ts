@@ -87,8 +87,18 @@ describe("routeSeo", () => {
     expect(home.title).toBe(HOME_TITLE);
     expect(home.title).toBe("Jet Lag Map Companion · Live Hide + Seek Maps");
     expect(home.title.length).toBeLessThanOrEqual(60);
-    expect(home.jsonLd?.name).toBe("Jet Lag Map Companion");
+    const graph = home.jsonLd?.["@graph"] as Record<string, unknown>[];
+    expect(graph.map((node) => node["@type"])).toEqual(["WebSite", "WebApplication"]);
+    expect(graph[0]?.name).toBe("Jet Lag Map Companion");
+    expect(graph[0]?.url).toBe("https://jetlag.gelbhart.dev/");
+    expect(graph[1]?.name).toBe("Jet Lag Map Companion");
     expect(home.description).toMatch(/unofficial/i);
+  });
+
+  it("keeps /account noindex and off the crawl policy", () => {
+    expect(getRouteSeo("/account").robots).toBe("noindex,nofollow");
+    expect(getRouteSeo("/account").jsonLd).toBeUndefined();
+    expect(listIndexablePaths()).not.toContain("/account");
   });
 
   it("keeps the static index.html title and share titles in sync with home SEO", () => {

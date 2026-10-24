@@ -79,6 +79,22 @@ export const sessionDocumentSchema = z
     requiredMinAppVersion: z.string().optional(),
     requiredMinAppVersionSetAt: z.string().optional(),
     requiredMinAppVersionGraceSeconds: z.number().finite().optional(),
+    mode: z.enum(["classic", "castleSiege"]).optional(),
+    castleSiegeRoles: z
+      .record(z.string(), z.enum(["teamA", "teamB", "referee", "observer"]))
+      .optional(),
+    seriesLength: z.union([z.literal(1), z.literal(3)]).optional(),
+    setupMode: z.enum(["pregame", "fairSplit"]).optional(),
+    arena: z.record(z.string(), z.unknown()).optional(),
+    border: z.object({ geometryJson: z.string() }).passthrough().optional(),
+    neutralBelt: z.object({ geometryJson: z.string() }).passthrough().optional(),
+    dials: z.record(z.string(), z.unknown()).optional(),
+    coinAssignment: z
+      .object({
+        teamA: z.enum(["left", "right"]),
+        teamB: z.enum(["left", "right"]),
+      })
+      .optional(),
   })
   .passthrough()
   .refine((value) => value.gameArea !== undefined && value.gameArea !== null, {

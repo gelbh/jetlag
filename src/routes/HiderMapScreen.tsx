@@ -2,13 +2,14 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { createLoadTask } from "@/services/core/progress/loadTask";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import type { HiderQuestionCards } from "../components/chat/HiderPendingQuestionAnswer";
+import { HidingZoneDraftPlacementOverlays } from "../components/hider/HidingZoneDraftPlacementOverlays";
+import { HidingZoneStationFocus } from "../components/hider/HidingZoneStationFocus";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import {
   type MapViewportState,
   MapViewportTracker,
 } from "../components/map/chrome/MapViewportTracker";
-import { cssPxDashToMapLibre } from "../components/map/helpers/cssPxDashToMapLibre";
 import { MapLibreGeoJsonOverlay } from "../components/map/helpers/MapLibreGeoJsonOverlay";
 import { ActiveThermometerWalkLayer } from "../components/map/layers/ActiveThermometerWalkLayer";
 import { AnnotationLayer } from "../components/map/layers/AnnotationLayer";
@@ -55,7 +56,6 @@ import {
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import {
   hiderStationCenter,
-  hidingZonePreviewPositions,
   nearestStation,
   resolveMyHidingZone,
 } from "../domain/session/hiding/hidingZone";
@@ -107,6 +107,7 @@ import {
   hiderBoardEconomyDockProps,
   hiderBoardEconomyZoneOpts,
 } from "./hider-map-screen/hiderBoardEconomyChrome";
+import { resolveHiderZonePlacementChromeVisibility } from "./hider-map-screen/hiderZonePlacementChrome";
 import { AdminBoundariesLayer } from "./map-screen/lazyImports";
 
 export function HiderMapScreen() {
@@ -719,6 +720,7 @@ export function HiderMapScreen() {
       methodChosen: zoneTool.methodChosen,
       choosePlacementMethod: zoneTool.choosePlacementMethod,
       manualCenter: zoneTool.manualCenter,
+      snapping: zoneTool.snapping,
       hasPlacement: zoneTool.hasPlacement,
       confirmZone: zoneTool.confirmZone,
       saving: zoneTool.saving,
@@ -822,7 +824,8 @@ export function HiderMapScreen() {
 
   const mapFocusBounds = gameAreaToBoundsExpression(gameArea);
   const center = gameAreaCenter(gameArea);
-  const previewRing = hidingZonePreviewPositions(zoneTool.previewCircle);
+  const draftPlacementActive =
+    zoneTool.wizardOpen && (hidingZoneStepId === "location" || hidingZoneStepId === "confirm");
   const sheetBlocksWizard =
     overlay.isChatOpen ||
     overlay.isSettingsOpen ||
@@ -830,6 +833,7 @@ export function HiderMapScreen() {
     overlay.isCodesOpen ||
     timeTrapSheetOpen ||
     pinSheetOpen;
+  const { showMapControls } = resolveHiderZonePlacementChromeVisibility(zoneTool.wizardOpen);
 
   const mapLayers = (
     <div className="absolute inset-0">
@@ -841,19 +845,22 @@ export function HiderMapScreen() {
           mapKey: session.id,
           mapStyle: effectiveBasemapStyle,
           streetBasemap,
-          onMapStyleChange: handleMapStyleChange,
+          onMapStyleChange: showMapControls ? handleMapStyleChange : undefined,
+          showMapStyleToggle: showMapControls,
+          showZoomControl: showMapControls,
           center,
           zoom: 12,
           focusBounds: mapFocusBounds,
           fitBoundsMode: "once",
           recenterToken,
-          showCompassControl: true,
+          showCompassControl: showMapControls,
           onRecenter: () => setRecenterToken((value) => value + 1),
           onMapClick: handleMapClick,
           className: "h-full w-full",
         }}
       >
         <MapViewportTracker onViewportChange={handleMapViewportChange} />
+        {zoneTool.wizardOpen ? <HidingZoneStationFocus station={zoneTool.selectedStation} /> : null}
         <GameAreaMask gameArea={gameArea} />
         <AnnotationLayer
           annotations={annotations}
@@ -869,6 +876,8 @@ export function HiderMapScreen() {
           myUid={uid}
           memberUids={session?.memberUids}
           session={session}
+          annotations={annotations}
+          gameArea={gameArea}
         />
         {zoneTool.wizardOpen &&
         (hidingZoneStepId === "location" || hidingZoneStepId === "confirm") &&
@@ -887,33 +896,17 @@ export function HiderMapScreen() {
             onSelectStation={timeTrapTool.setSelectedStation}
           />
         ) : null}
-        {previewRing.length > 0 ? (
-          <MapLibreGeoJsonOverlay
-            id="hider-zone-preview"
-            data={{
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Polygon",
-                coordinates: [
-                  [
-                    ...previewRing.map(([lat, lng]) => [lng, lat] as [number, number]),
-                    [previewRing[0]![1], previewRing[0]![0]],
-                  ],
-                ],
-              },
-            }}
-            fill={{
-              fillColor: MAP_ANNOTATION_COLORS.hidingZoneOwn,
-              fillOpacity: 0.12,
-            }}
-            line={{
-              color: MAP_ANNOTATION_COLORS.hidingZoneOwn,
-              width: 2,
-              dashArray: cssPxDashToMapLibre("6 6", 2),
-            }}
-          />
-        ) : null}
+        <HidingZoneDraftPlacementOverlays
+          active={draftPlacementActive}
+          manualMode={zoneTool.manualMode}
+          manualCenter={zoneTool.manualCenter}
+          selectedStationLat={zoneTool.selectedStation?.lat ?? null}
+          selectedStationLng={zoneTool.selectedStation?.lng ?? null}
+          radiusMeters={hidingZoneRadius}
+          toolPreviewCircle={zoneTool.previewCircle}
+          snapping={zoneTool.snapping}
+          chosenKey={zoneTool.selectedStation?.id ?? null}
+        />
         {pinSheetOpen && pinTool.draft.pinPoint ? (
           <MapLibreGeoJsonOverlay
             id="hider-pin-draft"
@@ -1023,6 +1016,7 @@ export function HiderMapScreen() {
               writesEnabled: zoneTool.writesEnabled,
               openWizard: zoneTool.openWizard,
               closeWizard: zoneTool.closeWizard,
+              closeWizardFromUser: zoneTool.closeWizardFromUser,
               startMove: zoneTool.startMove,
             },
             hidingZonePanelTool,

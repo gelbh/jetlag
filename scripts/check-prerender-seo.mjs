@@ -12,13 +12,17 @@ import {
   hasBootSplashElement,
   hasPrerenderedRootMarker,
   inlineStyleText,
+  jsonLdIncludesType,
+  jsonLdTypeName,
   loadCrawlPolicy,
   MAX_DESCRIPTION_CHARS,
   MAX_TITLE_CHARS,
   MIN_ROOT_TEXT_CHARS,
   metaDescriptionContent,
+  metaPropertyContent,
   prerenderTargets,
   robotsMetaContent,
+  seoJsonLdBodies,
   spaShellPath,
 } from "./seo-build-lib.mjs";
 
@@ -109,6 +113,41 @@ for (const { path: urlPath, indexable } of targets) {
     if (h1Count !== 1) {
       console.error(`${urlPath}: expected exactly one <h1>, found ${h1Count}`);
       failed = true;
+    }
+
+    const siteName = metaPropertyContent(html, "og:site_name")?.trim() ?? "";
+    if (!siteName) {
+      console.error(`${urlPath}: missing non-empty og:site_name`);
+      failed = true;
+    }
+
+    const ldBodies = seoJsonLdBodies(html);
+    if (ldBodies.length === 0) {
+      console.error(`${urlPath}: missing non-empty application/ld+json`);
+      failed = true;
+    } else if (urlPath === "/") {
+      let webSiteName;
+      for (const body of ldBodies) {
+        try {
+          const parsed = JSON.parse(body);
+          if (jsonLdIncludesType(parsed, "WebSite")) {
+            webSiteName = jsonLdTypeName(parsed, "WebSite");
+            break;
+          }
+        } catch {
+          console.error(`${urlPath}: application/ld+json is not valid JSON`);
+          failed = true;
+        }
+      }
+      if (webSiteName === undefined) {
+        console.error(`${urlPath}: home JSON-LD must include @type WebSite`);
+        failed = true;
+      } else if (siteName && webSiteName !== siteName) {
+        console.error(
+          `${urlPath}: WebSite.name ${JSON.stringify(webSiteName)} must match og:site_name ${JSON.stringify(siteName)}`,
+        );
+        failed = true;
+      }
     }
   } else {
     // Perf-only prerender: real HTML first paint, still hidden from search.

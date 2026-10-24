@@ -1,0 +1,300 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": -43.7604,
+    "west": 112.9011,
+    "north": -9.1225,
+    "east": 159.1292
+  },
+  "places": [
+    {
+      "id": "Q7999618",
+      "name": "ABC Kids World",
+      "lat": -27.8638,
+      "lng": 153.318
+    },
+    {
+      "id": "Q4686519",
+      "name": "Adventure Park",
+      "lat": -38.2092,
+      "lng": 144.515
+    },
+    {
+      "id": "Q4686555",
+      "name": "Adventure World",
+      "lat": -32.095629,
+      "lng": 115.818099
+    },
+    {
+      "id": "Q4816717",
+      "name": "Atlantis Marine Park",
+      "lat": -31.4963,
+      "lng": 115.586
+    },
+    {
+      "id": "Q4822827",
+      "name": "Aussie World",
+      "lat": -26.7502,
+      "lng": 153.047
+    },
+    {
+      "id": "Q4824804",
+      "name": "Australian Wildlife Experience",
+      "lat": -27.8617,
+      "lng": 153.318
+    },
+    {
+      "id": "Q4875684",
+      "name": "Beach Break Bay",
+      "lat": -27.95765,
+      "lng": 153.425613
+    },
+    {
+      "id": "Q4904998",
+      "name": "Big Banana",
+      "lat": -30.274806,
+      "lng": 153.133917
+    },
+    {
+      "id": "Q4906404",
+      "name": "Big Splash",
+      "lat": -35.251,
+      "lng": 149.07
+    },
+    {
+      "id": "Q116229538",
+      "name": "Bigge Park Water Playground",
+      "lat": -33.92237,
+      "lng": 150.92839
+    },
+    {
+      "id": "Q5278660",
+      "name": "Dinosaur World",
+      "lat": -37.424,
+      "lng": 143.893
+    },
+    {
+      "id": "Q5306652",
+      "name": "Dreamland",
+      "lat": -37.868036,
+      "lng": 144.976369
+    },
+    {
+      "id": "Q5306257",
+      "name": "DreamWorks Experience",
+      "lat": -27.8641,
+      "lng": 153.317
+    },
+    {
+      "id": "Q1256280",
+      "name": "Dreamworld",
+      "lat": -27.864,
+      "lng": 153.316
+    },
+    {
+      "id": "Q5350849",
+      "name": "El Caballo Blanco",
+      "lat": -34.0097,
+      "lng": 150.775
+    },
+    {
+      "id": "Q5430977",
+      "name": "Fairy Park",
+      "lat": -37.8917,
+      "lng": 144.26
+    },
+    {
+      "id": "Q65047541",
+      "name": "Fairyland, Lane Cove River",
+      "lat": -33.798351,
+      "lng": 151.149661
+    },
+    {
+      "id": "Q5509137",
+      "name": "Funfields",
+      "lat": -37.5208,
+      "lng": 145.113
+    },
+    {
+      "id": "Q5618090",
+      "name": "Gumbuya World",
+      "lat": -38.0692,
+      "lng": 145.659
+    },
+    {
+      "id": "Q5750215",
+      "name": "Hi-Lite Park",
+      "lat": -38.146,
+      "lng": 144.367
+    },
+    {
+      "id": "Q6127793",
+      "name": "Jamberoo Action Park",
+      "lat": -34.6168,
+      "lng": 150.783
+    },
+    {
+      "id": "Q6391268",
+      "name": "Kennyland",
+      "lat": -27.8639,
+      "lng": 153.317
+    },
+    {
+      "id": "Q1568767",
+      "name": "Kryal Castle",
+      "lat": -37.5719,
+      "lng": 143.956
+    },
+    {
+      "id": "Q1165470",
+      "name": "Luna Park",
+      "lat": -33.847557,
+      "lng": 151.210066
+    },
+    {
+      "id": "Q19875325",
+      "name": "Luna Park Glenelg",
+      "lat": -34.9792,
+      "lng": 138.511
+    },
+    {
+      "id": "Q6730737",
+      "name": "Magic Kingdom",
+      "lat": -33.8991,
+      "lng": 150.97
+    },
+    {
+      "id": "Q14935735",
+      "name": "Magic Mountain, Glenelg",
+      "lat": -34.9792,
+      "lng": 138.511
+    },
+    {
+      "id": "Q6730780",
+      "name": "Magic Mountain, Merimbula",
+      "lat": -36.8755,
+      "lng": 149.902
+    },
+    {
+      "id": "Q6730781",
+      "name": "Magic Mountain, Nobby Beach",
+      "lat": -28.0617,
+      "lng": 153.44
+    },
+    {
+      "id": "Q6736073",
+      "name": "Main Street",
+      "lat": -27.8632,
+      "lng": 153.316
+    },
+    {
+      "id": "Q6750613",
+      "name": "Manly Fun Pier",
+      "lat": -33.799265,
+      "lng": 151.284751
+    },
+    {
+      "id": "Q6750622",
+      "name": "Manly Waterworks",
+      "lat": -33.7991,
+      "lng": 151.281
+    },
+    {
+      "id": "Q7076032",
+      "name": "Ocean Parade",
+      "lat": -27.8645,
+      "lng": 153.316
+    },
+    {
+      "id": "Q7338688",
+      "name": "Rivertown",
+      "lat": -27.8633,
+      "lng": 153.317
+    },
+    {
+      "id": "Q7355818",
+      "name": "Rocky Hollow",
+      "lat": -27.8617,
+      "lng": 153.316
+    },
+    {
+      "id": "Q7883058",
+      "name": "Sea Life Sunshine Coast",
+      "lat": -26.6828,
+      "lng": 153.121
+    },
+    {
+      "id": "Q505518",
+      "name": "Sea World",
+      "lat": -27.9559,
+      "lng": 153.4257
+    },
+    {
+      "id": "Q97455426",
+      "name": "Stante Reserve",
+      "lat": -33.919167,
+      "lng": 150.850556
+    },
+    {
+      "id": "Q7635060",
+      "name": "Sugarworld",
+      "lat": -17.0212,
+      "lng": 145.725
+    },
+    {
+      "id": "Q7989947",
+      "name": "Sydney Action Park",
+      "lat": -33.8088,
+      "lng": 150.911
+    },
+    {
+      "id": "Q7715977",
+      "name": "The Beachouse",
+      "lat": -34.9793,
+      "lng": 138.511
+    },
+    {
+      "id": "Q7804722",
+      "name": "Timbertown",
+      "lat": -31.470357,
+      "lng": 152.713107
+    },
+    {
+      "id": "Q1417567",
+      "name": "Warner Bros. Movie World",
+      "lat": -27.9075,
+      "lng": 153.3125
+    },
+    {
+      "id": "Q7989948",
+      "name": "Wet'n'Wild Water World",
+      "lat": -27.9151,
+      "lng": 153.318
+    },
+    {
+      "id": "Q7994548",
+      "name": "White City, Perth",
+      "lat": -31.956619,
+      "lng": 115.854926
+    },
+    {
+      "id": "Q7994409",
+      "name": "WhiteWater World",
+      "lat": -27.8644,
+      "lng": 153.315
+    },
+    {
+      "id": "Q8028953",
+      "name": "Wobbies World",
+      "lat": -37.8458,
+      "lng": 145.174
+    },
+    {
+      "id": "Q8031906",
+      "name": "Wonderland Sydney",
+      "lat": -33.8012,
+      "lng": 150.848
+    }
+  ]
+}

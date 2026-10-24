@@ -15,6 +15,8 @@ export interface HidingZoneToolPanelState {
   methodChosen: boolean;
   choosePlacementMethod: (manual: boolean) => void;
   manualCenter: LatLngTuple | null;
+  /** Tap-map placement is looking up the nearest station to snap to. */
+  snapping: boolean;
   hasPlacement: boolean;
   confirmZone: () => void | Promise<void>;
   saving: boolean;

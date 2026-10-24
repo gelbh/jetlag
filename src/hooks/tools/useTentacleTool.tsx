@@ -1,4 +1,5 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { OracleAskReceipt } from "@/components/session/castle-siege/OracleAskReceipt";
 import { type AskHudReadiness, canCommit as askCanCommit } from "@/domain/ask/askHudModes";
 import {
   filterConfirmedTentaclePois,
@@ -35,6 +36,10 @@ import {
   usedTentacleCategoryIdsForSession,
 } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import type { SessionMode } from "../../domain/session/castleSiege/mode";
+import type { CastleSiegeOracleReceipt } from "../../domain/session/castleSiege/oracleAskReceipt";
+import type { CastleSiegePlayingTeam } from "../../domain/session/castleSiege/pregame";
+import { resolveAskPath } from "../../domain/session/castleSiege/resolveAskPath";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { sessionGameSize } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
@@ -42,6 +47,7 @@ import { isAbortError } from "../../services/core/network/anySignal";
 import { overpassErrorMessage } from "../../services/core/overpass/overpassClient";
 import { createLoadTask, type LoadTask } from "../../services/core/progress/loadTask";
 import { fetchTentaclePois } from "../../services/geo/overpass/tentacleOverpass";
+import type { AnswerCastleSiegeOracleAskFn } from "../../services/session/castleSiegeOracleAsk";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { useLatestRequest } from "../forms/useLatestRequest";
 import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
@@ -82,6 +88,9 @@ interface UseTentacleToolParams {
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   armPlacement: () => void;
   canSubmitQuestion?: boolean;
+  sessionMode?: SessionMode | null;
+  defenderTeamId?: CastleSiegePlayingTeam | null;
+  callOracleAsk?: AnswerCastleSiegeOracleAskFn;
 }
 
 export function useTentacleTool({
@@ -107,13 +116,27 @@ export function useTentacleTool({
   ensurePointInGameArea,
   armPlacement,
   canSubmitQuestion = true,
+  sessionMode = null,
+  defenderTeamId = null,
+  callOracleAsk,
 }: UseTentacleToolParams) {
   const wizardStepRef = useRef("place");
   const submittingRef = useRef(false);
   const finishPlacementRef = useRef(finishPlacement);
+  const [oracleReceipt, setOracleReceipt] = useState<Extract<
+    CastleSiegeOracleReceipt,
+    { kind: "tentacle" }
+  > | null>(null);
+  const oraclePath = resolveAskPath(sessionMode) === "oracle";
+  const effectiveAwaitHider = oraclePath ? false : awaitHiderAnswer;
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
+  useEffect(() => {
+    if (!active) {
+      setOracleReceipt(null);
+    }
+  }, [active]);
   const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
   // Read at fetch time so live annotation sync does not refetch and clear the POI pick.
   const activeAnnotationsRef = useRef(activeAnnotations);
@@ -355,6 +378,7 @@ export function useTentacleTool({
       setTentaclePois([]);
       setTentacleOutOfReach(false);
       setSelectedPoiId(null);
+      setOracleReceipt(null);
       setTentacleCenter(nextCenter);
       setAwaitingPlacement(false);
       setMapError(null);
@@ -410,6 +434,7 @@ export function useTentacleTool({
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
     setTentacleError(null);
+    setOracleReceipt(null);
     setMapError(null);
     finishPlacementRef.current();
   }, [cancelRequests, setMapError]);
@@ -428,6 +453,7 @@ export function useTentacleTool({
         return;
       }
       if (
+        !oraclePath &&
         !tentacleOutOfReach &&
         selectedPoiId &&
         !confirmedPois.some((poi) => poi.id === selectedPoiId)
@@ -446,8 +472,8 @@ export function useTentacleTool({
         searchRadiusMeters,
         sessionRules,
         gameArea,
-        awaitHiderAnswer,
-        submitPendingQuestion,
+        awaitHiderAnswer: effectiveAwaitHider,
+        submitPendingQuestion: oraclePath ? undefined : submitPendingQuestion,
         sessionId,
         senderUid,
         distanceUnit,
@@ -456,6 +482,11 @@ export function useTentacleTool({
         createAnnotation,
         setMapError,
         onSuccess: clearAfterCommit,
+        sessionMode,
+        defenderTeamId: defenderTeamId ?? undefined,
+        callOracleAsk,
+        oracleReceipt,
+        onOracleReceipt: setOracleReceipt,
       });
     },
   });
@@ -525,7 +556,7 @@ export function useTentacleTool({
           }
         },
         onCommit: () => void commit(),
-        awaitHiderAnswer,
+        awaitHiderAnswer: effectiveAwaitHider,
         costLabel,
         isSubmitting: session.isBusy,
         onRetry:
@@ -562,12 +593,23 @@ export function useTentacleTool({
     placementReady: tentacleCenter !== null,
     configureReady: tentacleCategoryChosen && categorySelectionAvailable,
     resolveReady: confirmedTentaclePois.length > 0 && !tentacleLoading,
-    answerReady: awaitHiderAnswer || hasRecordedAnswer,
-    awaitHiderAnswer,
+    answerReady: oraclePath || effectiveAwaitHider || hasRecordedAnswer,
+    awaitHiderAnswer: effectiveAwaitHider,
     isSubmitting: session.isBusy,
     viewOnly: !canSubmitQuestion,
     resolving: tentacleLoading && tentacleCenter !== null,
   };
+
+  const canCommitTentacle = askCanCommit(readiness) && !(oraclePath && oracleReceipt);
+
+  const oracleReceiptBody = oracleReceipt ? (
+    <OracleAskReceipt
+      receipt={oracleReceipt}
+      busy={session.isBusy}
+      onConfirmSend={() => void commit()}
+      onCancel={() => setOracleReceipt(null)}
+    />
+  ) : null;
 
   const mapFirstEligible =
     tentacleCategoryChosen && tentacleCategoryId !== null && categorySelectionAvailable;
@@ -643,9 +685,9 @@ export function useTentacleTool({
     costLabel,
     error: mapPlacementActive ? null : (tentacleError ?? mapError ?? gpsError ?? null),
     onCommit: () => void commit(),
-    suppressSheet: mapPlacementActive,
+    suppressSheet: mapPlacementActive && !oracleReceipt,
     mapOverlay:
-      mapPlacementActive && tentacleCategoryId ? (
+      mapPlacementActive && tentacleCategoryId && !oracleReceipt ? (
         <TentacleMapPlacementChrome
           loadTask={tentacleLoadTask}
           categoryLabel={categoryLabel}
@@ -655,7 +697,7 @@ export function useTentacleTool({
           onUseGps={() => void handleUseGps()}
           gpsLoading={gpsLoading}
           error={placementError}
-          awaitHiderAnswer={awaitHiderAnswer}
+          awaitHiderAnswer={effectiveAwaitHider}
           categoryId={tentacleCategoryId}
           distanceUnit={distanceUnit}
           searchRadiusMeters={searchRadiusMeters}
@@ -668,7 +710,7 @@ export function useTentacleTool({
               setSelectedPoiId(null);
             }
           }}
-          canCommit={askCanCommit(readiness)}
+          canCommit={canCommitTentacle}
           isSubmitting={session.isBusy}
           onCommit={() => void commit()}
           onChangeCategory={reopenCategoryPicker}
@@ -676,38 +718,40 @@ export function useTentacleTool({
           statusBody={statusBody}
         />
       ) : null,
-    modeBody: mapPlacementActive ? null : (
-      <TentacleHudBody
-        gameSize={gameSize}
-        categoryId={tentacleCategoryId}
-        categoryChosen={tentacleCategoryChosen}
-        searchRadiusMeters={searchRadiusMeters}
-        usedCategoryIds={usedTentacleCategories}
-        distanceUnit={distanceUnit}
-        poiOptions={tentaclePois}
-        selectedPoiId={selectedPoiId}
-        outOfReach={tentacleOutOfReach}
-        loading={tentacleLoading}
-        loadTask={tentacleLoadTask}
-        awaitingPlacement={awaitingPlacement}
-        hasCenter={tentacleCenter !== null}
-        gpsLoading={gpsLoading}
-        error={tentacleError ?? mapError ?? gpsError}
-        onCategoryChange={handleCategoryChange}
-        onUseGps={() => void handleUseGps()}
-        onPlaceAtMapTap={armPlacement}
-        onSelectPoi={handleSelectPoi}
-        onOutOfReachChange={(nextOutOfReach) => {
-          setTentacleOutOfReach(nextOutOfReach);
-          if (nextOutOfReach) {
-            setSelectedPoiId(null);
-          }
-        }}
-        awaitHiderAnswer={awaitHiderAnswer}
-        costLabel={costLabel}
-        toolLabel="Tentacle"
-      />
-    ),
+    modeBody:
+      oracleReceiptBody ??
+      (mapPlacementActive ? null : (
+        <TentacleHudBody
+          gameSize={gameSize}
+          categoryId={tentacleCategoryId}
+          categoryChosen={tentacleCategoryChosen}
+          searchRadiusMeters={searchRadiusMeters}
+          usedCategoryIds={usedTentacleCategories}
+          distanceUnit={distanceUnit}
+          poiOptions={tentaclePois}
+          selectedPoiId={selectedPoiId}
+          outOfReach={tentacleOutOfReach}
+          loading={tentacleLoading}
+          loadTask={tentacleLoadTask}
+          awaitingPlacement={awaitingPlacement}
+          hasCenter={tentacleCenter !== null}
+          gpsLoading={gpsLoading}
+          error={tentacleError ?? mapError ?? gpsError}
+          onCategoryChange={handleCategoryChange}
+          onUseGps={() => void handleUseGps()}
+          onPlaceAtMapTap={armPlacement}
+          onSelectPoi={handleSelectPoi}
+          onOutOfReachChange={(nextOutOfReach) => {
+            setTentacleOutOfReach(nextOutOfReach);
+            if (nextOutOfReach) {
+              setSelectedPoiId(null);
+            }
+          }}
+          awaitHiderAnswer={effectiveAwaitHider}
+          costLabel={costLabel}
+          toolLabel="Tentacle"
+        />
+      )),
     sheets: null as ReactNode,
   };
 

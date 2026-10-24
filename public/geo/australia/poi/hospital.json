@@ -1,0 +1,1860 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": -43.7604,
+    "west": 112.9011,
+    "north": -9.1225,
+    "east": 159.1292
+  },
+  "places": [
+    {
+      "id": "Q59912696",
+      "name": "93-97 Macquarie Street, Sydney",
+      "lat": -33.8621,
+      "lng": 151.2128
+    },
+    {
+      "id": "Q686392",
+      "name": "AHS Centaur",
+      "lat": -27.283,
+      "lng": 153.987
+    },
+    {
+      "id": "Q4709301",
+      "name": "Albany Cottage Hospital",
+      "lat": -35.026389,
+      "lng": 117.874722
+    },
+    {
+      "id": "Q30254361",
+      "name": "Alice Springs Hospital",
+      "lat": -23.706479,
+      "lng": 133.878878
+    },
+    {
+      "id": "Q56277444",
+      "name": "Alma House",
+      "lat": -33.8276,
+      "lng": 151.2321
+    },
+    {
+      "id": "Q28220155",
+      "name": "Angliss Hospital",
+      "lat": -37.898618,
+      "lng": 145.314191
+    },
+    {
+      "id": "Q48680799",
+      "name": "Ararat Hospital",
+      "lat": -37.279,
+      "lng": 142.932
+    },
+    {
+      "id": "Q4792520",
+      "name": "Armadale Kelmscott District Memorial Hospital",
+      "lat": -32.133164,
+      "lng": 116.019717
+    },
+    {
+      "id": "Q4805000",
+      "name": "Ashford Hospital",
+      "lat": -34.9487,
+      "lng": 138.577
+    },
+    {
+      "id": "Q122268880",
+      "name": "Atherton Hospital",
+      "lat": -17.266557,
+      "lng": 145.483449
+    },
+    {
+      "id": "Q4819278",
+      "name": "Auburn Hospital",
+      "lat": -33.8605,
+      "lng": 151.0336
+    },
+    {
+      "id": "Q4823132",
+      "name": "Austin Hospital, Melbourne",
+      "lat": -37.7564,
+      "lng": 145.058
+    },
+    {
+      "id": "Q4851455",
+      "name": "Ballarat Base Hospital",
+      "lat": -37.5594,
+      "lng": 143.847
+    },
+    {
+      "id": "Q108582079",
+      "name": "Balmain Hospital",
+      "lat": -33.85967,
+      "lng": 151.183141
+    },
+    {
+      "id": "Q4856786",
+      "name": "Bankstown Lidcombe Hospital",
+      "lat": -33.9328,
+      "lng": 151.021
+    },
+    {
+      "id": "Q17001309",
+      "name": "Belmont Hospital",
+      "lat": -33.024722,
+      "lng": 151.648333
+    },
+    {
+      "id": "Q4887078",
+      "name": "Bendigo Base Hospital",
+      "lat": -36.7327,
+      "lng": 144.268
+    },
+    {
+      "id": "Q4923487",
+      "name": "Blacktown Hospital",
+      "lat": -33.7756,
+      "lng": 150.9175
+    },
+    {
+      "id": "Q30102945",
+      "name": "Bloomfield Hospital",
+      "lat": -33.3177,
+      "lng": 149.0951
+    },
+    {
+      "id": "Q137654030",
+      "name": "Blue Mountains District ANZAC Memorial Hospital",
+      "lat": -33.704886,
+      "lng": 150.32101
+    },
+    {
+      "id": "Q28933499",
+      "name": "Boort Hospital",
+      "lat": -36.114861,
+      "lng": 143.724306
+    },
+    {
+      "id": "Q17001648",
+      "name": "Bowral and District Hospital",
+      "lat": -34.485,
+      "lng": 150.423611
+    },
+    {
+      "id": "Q4951532",
+      "name": "Box Hill Hospital",
+      "lat": -37.8167,
+      "lng": 145.1333
+    },
+    {
+      "id": "Q56279721",
+      "name": "Brislington, Parramatta",
+      "lat": -33.813,
+      "lng": 151.0021
+    },
+    {
+      "id": "Q88513184",
+      "name": "Broadmeadows Hospital",
+      "lat": -37.68438,
+      "lng": 144.91299
+    },
+    {
+      "id": "Q16255574",
+      "name": "Broken Hill Hospital",
+      "lat": -31.948357,
+      "lng": 141.454579
+    },
+    {
+      "id": "Q81122594",
+      "name": "Broome Hospital",
+      "lat": -17.9606,
+      "lng": 122.2365
+    },
+    {
+      "id": "Q58203127",
+      "name": "Buckland Convalescent Home",
+      "lat": -33.694,
+      "lng": 150.577
+    },
+    {
+      "id": "Q4997483",
+      "name": "Bundaberg Base Hospital",
+      "lat": -24.8694,
+      "lng": 152.336
+    },
+    {
+      "id": "Q66766064",
+      "name": "Bundoora Park Homestead",
+      "lat": -37.7049,
+      "lng": 145.051
+    },
+    {
+      "id": "Q5000153",
+      "name": "Burnside War Memorial Hospital",
+      "lat": -34.9278,
+      "lng": 138.639
+    },
+    {
+      "id": "Q63378093",
+      "name": "Busselton Health Campus",
+      "lat": -33.654771,
+      "lng": 115.320344
+    },
+    {
+      "id": "Q85142306",
+      "name": "Caboolture Hospital",
+      "lat": -27.0802,
+      "lng": 152.9637
+    },
+    {
+      "id": "Q30293350",
+      "name": "Cabrini Hospital",
+      "lat": -37.861898,
+      "lng": 145.033129
+    },
+    {
+      "id": "Q1025960",
+      "name": "Cairns Base Hospital",
+      "lat": -16.912229,
+      "lng": 145.767653
+    },
+    {
+      "id": "Q5021753",
+      "name": "Callan Park Hospital for the Insane",
+      "lat": -33.8659,
+      "lng": 151.1623
+    },
+    {
+      "id": "Q65064526",
+      "name": "Calvary Adelaide Hospital",
+      "lat": -34.9294,
+      "lng": 138.6053
+    },
+    {
+      "id": "Q5024195",
+      "name": "Calvary Hospital, Hobart",
+      "lat": -42.8662,
+      "lng": 147.3039
+    },
+    {
+      "id": "Q30254214",
+      "name": "Calvary Mater Newcastle Hospital",
+      "lat": -32.898842,
+      "lng": 151.720748
+    },
+    {
+      "id": "Q5024193",
+      "name": "Calvary North Adelaide Hospital",
+      "lat": -34.91,
+      "lng": 138.589
+    },
+    {
+      "id": "Q14935650",
+      "name": "Calvary Public Hospital Bruce",
+      "lat": -35.253333,
+      "lng": 149.09
+    },
+    {
+      "id": "Q5024192",
+      "name": "Calvary Riverina Hospital",
+      "lat": -35.119342,
+      "lng": 147.352678
+    },
+    {
+      "id": "Q5024207",
+      "name": "Calvary Wakefield Hospital",
+      "lat": -34.9276,
+      "lng": 138.6113
+    },
+    {
+      "id": "Q14956869",
+      "name": "Campbelltown Hospital",
+      "lat": -34.062501,
+      "lng": 150.693882
+    },
+    {
+      "id": "Q131630356",
+      "name": "Camperdown Hospital",
+      "lat": -38.237114,
+      "lng": 143.135096
+    },
+    {
+      "id": "Q94982501",
+      "name": "Canberra Coronavirus Field Hospital",
+      "lat": -35.34305,
+      "lng": 149.101891
+    },
+    {
+      "id": "Q5031265",
+      "name": "Canberra Hospital",
+      "lat": -35.3454,
+      "lng": 149.1009
+    },
+    {
+      "id": "Q5033669",
+      "name": "Canterbury Hospital",
+      "lat": -33.9196,
+      "lng": 151.0984
+    },
+    {
+      "id": "Q23641120",
+      "name": "Cape Pallarenda Quarantine Station",
+      "lat": -19.1917,
+      "lng": 146.7703
+    },
+    {
+      "id": "Q5036256",
+      "name": "Capricorn Coast Hospital",
+      "lat": -23.1443,
+      "lng": 150.734
+    },
+    {
+      "id": "Q88488249",
+      "name": "Casey Hospital",
+      "lat": -38.04475,
+      "lng": 145.34756
+    },
+    {
+      "id": "Q109774646",
+      "name": "Castlemaine Hospital",
+      "lat": -37.05237,
+      "lng": 144.2125
+    },
+    {
+      "id": "Q30294629",
+      "name": "Caulfield Hospital",
+      "lat": -37.884,
+      "lng": 145.0159
+    },
+    {
+      "id": "Q56276078",
+      "name": "Cintra House, Maitland",
+      "lat": -32.730919,
+      "lng": 151.545648
+    },
+    {
+      "id": "Q58204751",
+      "name": "Cleveland House, Surry Hills",
+      "lat": -33.8878,
+      "lng": 151.207
+    },
+    {
+      "id": "Q81046190",
+      "name": "Cloncurry Hospital",
+      "lat": -20.7045,
+      "lng": 140.5272
+    },
+    {
+      "id": "Q85138643",
+      "name": "Collinsville Hospital",
+      "lat": -20.546,
+      "lng": 147.8384
+    },
+    {
+      "id": "Q5158851",
+      "name": "Concord Repatriation General Hospital",
+      "lat": -33.8374,
+      "lng": 151.093
+    },
+    {
+      "id": "Q81095735",
+      "name": "Coober Pedy Hospital",
+      "lat": -29.0045,
+      "lng": 134.7617
+    },
+    {
+      "id": "Q81044498",
+      "name": "Cooktown Hospital",
+      "lat": -15.4775,
+      "lng": 145.2504
+    },
+    {
+      "id": "Q55608503",
+      "name": "Coutt's Sailors Home",
+      "lat": -32.927,
+      "lng": 151.785
+    },
+    {
+      "id": "Q25231213",
+      "name": "Croydon Hospital Ward",
+      "lat": -18.2027,
+      "lng": 142.2424
+    },
+    {
+      "id": "Q5193905",
+      "name": "Cumberland Hospital",
+      "lat": -33.8019,
+      "lng": 150.995
+    },
+    {
+      "id": "Q30279798",
+      "name": "Dandenong Hospital",
+      "lat": -37.976302,
+      "lng": 145.217828
+    },
+    {
+      "id": "Q110605158",
+      "name": "Darwin Hospital",
+      "lat": -12.452778,
+      "lng": 130.829167
+    },
+    {
+      "id": "Q137279982",
+      "name": "Darwin Private Hospital",
+      "lat": -12.357468,
+      "lng": 130.882023
+    },
+    {
+      "id": "Q56051612",
+      "name": "David Berry Hospital",
+      "lat": -34.776,
+      "lng": 150.715
+    },
+    {
+      "id": "Q81122053",
+      "name": "Derby Hospital",
+      "lat": -17.3056,
+      "lng": 123.6324
+    },
+    {
+      "id": "Q81096052",
+      "name": "Dirranbandi Hospital",
+      "lat": -28.579,
+      "lng": 148.2283
+    },
+    {
+      "id": "Q81046717",
+      "name": "Doomadgee Hospital",
+      "lat": -17.9425,
+      "lng": 138.8284
+    },
+    {
+      "id": "Q59536421",
+      "name": "Dubbo Hospital",
+      "lat": -32.237881,
+      "lng": 148.621617
+    },
+    {
+      "id": "Q85138301",
+      "name": "Dysart Hospital",
+      "lat": -22.5829,
+      "lng": 148.3531
+    },
+    {
+      "id": "Q131373112",
+      "name": "Epworth Eastern",
+      "lat": -37.81482,
+      "lng": 145.11923
+    },
+    {
+      "id": "Q5501076",
+      "name": "Epworth Freemasons",
+      "lat": -37.8094,
+      "lng": 144.982
+    },
+    {
+      "id": "Q5430306",
+      "name": "Fairfield Hospital",
+      "lat": -33.8596,
+      "lng": 150.9043
+    },
+    {
+      "id": "Q28183571",
+      "name": "Fantome Island Lock Hospital and Lazaret Sites",
+      "lat": -18.687,
+      "lng": 146.5159
+    },
+    {
+      "id": "Q5451115",
+      "name": "Fiona Stanley Hospital",
+      "lat": -32.07094,
+      "lng": 115.846916
+    },
+    {
+      "id": "Q81096630",
+      "name": "Fitzroy Crossing Hospital",
+      "lat": -18.1912,
+      "lng": 125.5628
+    },
+    {
+      "id": "Q5459413",
+      "name": "Flinders Medical Centre",
+      "lat": -35.021426,
+      "lng": 138.568811
+    },
+    {
+      "id": "Q30260410",
+      "name": "Flinders Private Hospital",
+      "lat": -35.020363,
+      "lng": 138.569178
+    },
+    {
+      "id": "Q50036671",
+      "name": "Footscray Hospital",
+      "lat": -37.791995,
+      "lng": 144.886789
+    },
+    {
+      "id": "Q63241244",
+      "name": "Former Cootamundra District Hospital",
+      "lat": -34.642006,
+      "lng": 148.02393
+    },
+    {
+      "id": "Q24089789",
+      "name": "Fortitude Valley Child Health Centre",
+      "lat": -27.4562,
+      "lng": 153.0331
+    },
+    {
+      "id": "Q5478897",
+      "name": "Frances Perry Private Hospital",
+      "lat": -37.7987,
+      "lng": 144.955
+    },
+    {
+      "id": "Q5492258",
+      "name": "Frankston Hospital",
+      "lat": -38.150833,
+      "lng": 145.128611
+    },
+    {
+      "id": "Q5501490",
+      "name": "Fremantle Hospital",
+      "lat": -32.058593,
+      "lng": 115.751639
+    },
+    {
+      "id": "Q85139603",
+      "name": "Gayndah Hospital",
+      "lat": -25.6308,
+      "lng": 151.6048
+    },
+    {
+      "id": "Q5529844",
+      "name": "Geelong Hospital",
+      "lat": -38.1523,
+      "lng": 144.366
+    },
+    {
+      "id": "Q85139120",
+      "name": "Gin Gin Hospital",
+      "lat": -24.9862,
+      "lng": 151.9535
+    },
+    {
+      "id": "Q5566242",
+      "name": "Gladesville Mental Hospital",
+      "lat": -33.8379,
+      "lng": 151.1309
+    },
+    {
+      "id": "Q25184643",
+      "name": "Glenside Hospital",
+      "lat": -34.943,
+      "lng": 138.625
+    },
+    {
+      "id": "Q23057984",
+      "name": "Gold Coast Private Hospital",
+      "lat": -27.962361,
+      "lng": 153.385196
+    },
+    {
+      "id": "Q5578668",
+      "name": "Gold Coast University Hospital",
+      "lat": -27.9598,
+      "lng": 153.382
+    },
+    {
+      "id": "Q5587185",
+      "name": "Gosford Hospital",
+      "lat": -33.4197,
+      "lng": 151.3399
+    },
+    {
+      "id": "Q16891798",
+      "name": "Goulburn Base Hospital",
+      "lat": -34.7475,
+      "lng": 149.713
+    },
+    {
+      "id": "Q14935147",
+      "name": "Goulburn Valley Health",
+      "lat": -36.3631,
+      "lng": 145.4059
+    },
+    {
+      "id": "Q138314057",
+      "name": "Gove District Hospital",
+      "lat": -12.2353,
+      "lng": 136.681
+    },
+    {
+      "id": "Q5598317",
+      "name": "Graylands Hospital",
+      "lat": -31.962062,
+      "lng": 115.791129
+    },
+    {
+      "id": "Q58202313",
+      "name": "Graythwaite",
+      "lat": -33.8407,
+      "lng": 151.203
+    },
+    {
+      "id": "Q63344457",
+      "name": "Gundagai District Hospital",
+      "lat": -35.052207,
+      "lng": 148.102411
+    },
+    {
+      "id": "Q66975337",
+      "name": "Heathcote Hospital",
+      "lat": -32.003877,
+      "lng": 115.843254
+    },
+    {
+      "id": "Q30279835",
+      "name": "Heidelberg Repatriation Hospital",
+      "lat": -37.754771,
+      "lng": 145.047716
+    },
+    {
+      "id": "Q24190311",
+      "name": "Herries Private Hospital",
+      "lat": -16.9149,
+      "lng": 145.7651
+    },
+    {
+      "id": "Q24185634",
+      "name": "History of Rockhampton Base Hospital",
+      "lat": -23.379,
+      "lng": 150.4952
+    },
+    {
+      "id": "Q5874737",
+      "name": "Hobart Private Hospital",
+      "lat": -42.880777,
+      "lng": 147.329928
+    },
+    {
+      "id": "Q5882887",
+      "name": "Hollywood Private Hospital",
+      "lat": -31.970126,
+      "lng": 115.808865
+    },
+    {
+      "id": "Q30279988",
+      "name": "Holy Spirit Northside Private Hospital",
+      "lat": -27.39081,
+      "lng": 153.023948
+    },
+    {
+      "id": "Q14934835",
+      "name": "Hornsby Ku-ring-gai Hospital",
+      "lat": -33.7019,
+      "lng": 151.1129
+    },
+    {
+      "id": "Q116004966",
+      "name": "Hunters Hill Private Hospital",
+      "lat": -33.83513,
+      "lng": 151.15026
+    },
+    {
+      "id": "Q137042899",
+      "name": "Injune General Hospital",
+      "lat": -25.84654,
+      "lng": 148.563198
+    },
+    {
+      "id": "Q58204943",
+      "name": "Iona, Darlinghurst",
+      "lat": -33.8773,
+      "lng": 151.22
+    },
+    {
+      "id": "Q6065590",
+      "name": "Ipswich Hospital",
+      "lat": -27.619267,
+      "lng": 152.758842
+    },
+    {
+      "id": "Q24089904",
+      "name": "Ipswich Mental Hospital",
+      "lat": -27.6284,
+      "lng": 152.7555
+    },
+    {
+      "id": "Q14935171",
+      "name": "Jessie McPherson Private Hospital",
+      "lat": -37.9194,
+      "lng": 145.1214
+    },
+    {
+      "id": "Q24185303",
+      "name": "John Flynn Private Hospital",
+      "lat": -28.153879,
+      "lng": 153.48851
+    },
+    {
+      "id": "Q30283492",
+      "name": "John Hunter Children's Hospital",
+      "lat": -32.922545,
+      "lng": 151.692228
+    },
+    {
+      "id": "Q14934850",
+      "name": "John Hunter Hospital",
+      "lat": -32.92397,
+      "lng": 151.6918
+    },
+    {
+      "id": "Q6276049",
+      "name": "Joondalup Health Campus",
+      "lat": -31.739379,
+      "lng": 115.772521
+    },
+    {
+      "id": "Q10541345",
+      "name": "Junee District Hospital",
+      "lat": -34.8649,
+      "lng": 147.5794
+    },
+    {
+      "id": "Q16893192",
+      "name": "Katherine District Hospital",
+      "lat": -14.4389,
+      "lng": 132.272
+    },
+    {
+      "id": "Q28942995",
+      "name": "Kenmore Asylum",
+      "lat": -34.71876,
+      "lng": 149.755447
+    },
+    {
+      "id": "Q6397886",
+      "name": "Kew Cottages",
+      "lat": -37.7974,
+      "lng": 145.027
+    },
+    {
+      "id": "Q85141968",
+      "name": "Kilcoy Hospital",
+      "lat": -26.941,
+      "lng": 152.5615
+    },
+    {
+      "id": "Q6411472",
+      "name": "King Edward Memorial Hospital",
+      "lat": -31.950189,
+      "lng": 115.818631
+    },
+    {
+      "id": "Q139501083",
+      "name": "Kingstown Barracks Sergeant's Mess",
+      "lat": -32.004861,
+      "lng": 115.554779
+    },
+    {
+      "id": "Q81096644",
+      "name": "Kununurra Hospital",
+      "lat": -15.7746,
+      "lng": 128.7336
+    },
+    {
+      "id": "Q68514661",
+      "name": "Kurri Kurri Hospital",
+      "lat": -32.824475,
+      "lng": 151.462893
+    },
+    {
+      "id": "Q110552506",
+      "name": "Kyneton District Hospital",
+      "lat": -37.24969,
+      "lng": 144.44457
+    },
+    {
+      "id": "Q16893884",
+      "name": "Lady Bowen Hospital, Spring Hill",
+      "lat": -27.461,
+      "lng": 153.02
+    },
+    {
+      "id": "Q66975484",
+      "name": "Lake Grace Hospital",
+      "lat": -33.10238,
+      "lng": 118.452705
+    },
+    {
+      "id": "Q30280658",
+      "name": "Latrobe Regional Health",
+      "lat": -38.218378,
+      "lng": 146.471636
+    },
+    {
+      "id": "Q6498358",
+      "name": "Launceston General Hospital",
+      "lat": -41.4464,
+      "lng": 147.142
+    },
+    {
+      "id": "Q106910625",
+      "name": "Leeton District Hospital",
+      "lat": -34.54507,
+      "lng": 146.409074
+    },
+    {
+      "id": "Q55616838",
+      "name": "Lidcombe Hospital Precinct",
+      "lat": -33.884,
+      "lng": 151.045
+    },
+    {
+      "id": "Q6559025",
+      "name": "Lismore Base Hospital",
+      "lat": -28.8092,
+      "lng": 153.2913
+    },
+    {
+      "id": "Q6658472",
+      "name": "Liverpool Hospital",
+      "lat": -33.919722,
+      "lng": 150.930278
+    },
+    {
+      "id": "Q64226311",
+      "name": "Lock Hospital and Burial Ground",
+      "lat": -20.309197,
+      "lng": 118.600916
+    },
+    {
+      "id": "Q6667071",
+      "name": "Logan Hospital",
+      "lat": -27.6668,
+      "lng": 153.149
+    },
+    {
+      "id": "Q6707755",
+      "name": "Lyell McEwin Hospital",
+      "lat": -34.7478,
+      "lng": 138.6651
+    },
+    {
+      "id": "Q58205043",
+      "name": "Lyndhurst, Glebe",
+      "lat": -33.8774,
+      "lng": 151.1902
+    },
+    {
+      "id": "Q6724277",
+      "name": "Mackay Base Hospital",
+      "lat": -21.145833,
+      "lng": 149.155278
+    },
+    {
+      "id": "Q6725036",
+      "name": "Macquarie University Hospital",
+      "lat": -33.7735,
+      "lng": 151.118
+    },
+    {
+      "id": "Q139800923",
+      "name": "Maitland Private Hospital",
+      "lat": -32.765426,
+      "lng": 151.59796
+    },
+    {
+      "id": "Q66767601",
+      "name": "Maldon District Hospital",
+      "lat": -36.9932,
+      "lng": 144.064
+    },
+    {
+      "id": "Q115623672",
+      "name": "Maroondah Hospital",
+      "lat": -37.806793,
+      "lng": 145.255145
+    },
+    {
+      "id": "Q24090206",
+      "name": "Maryborough Base Hospital",
+      "lat": -25.5223,
+      "lng": 152.6902
+    },
+    {
+      "id": "Q30280909",
+      "name": "Mater Adult Hospital",
+      "lat": -27.484905,
+      "lng": 153.026868
+    },
+    {
+      "id": "Q30280910",
+      "name": "Mater Children's Hospital",
+      "lat": -27.48362,
+      "lng": 153.026496
+    },
+    {
+      "id": "Q14935489",
+      "name": "Mater Hospital Pimlico",
+      "lat": -19.289,
+      "lng": 146.7872
+    },
+    {
+      "id": "Q48785405",
+      "name": "Mater Misericordiae Hospital, Mackay",
+      "lat": -21.1309,
+      "lng": 149.1662
+    },
+    {
+      "id": "Q30280918",
+      "name": "Mater Mothers' Hospital",
+      "lat": -27.485572,
+      "lng": 153.0276
+    },
+    {
+      "id": "Q30280917",
+      "name": "Mater Private Hospital",
+      "lat": -27.484069,
+      "lng": 153.0286
+    },
+    {
+      "id": "Q6786525",
+      "name": "Mater Women's and Children's Hospital",
+      "lat": -19.2726,
+      "lng": 146.803
+    },
+    {
+      "id": "Q81123938",
+      "name": "Meekatharra Hospital",
+      "lat": -26.5911,
+      "lng": 118.4918
+    },
+    {
+      "id": "Q14935222",
+      "name": "Mercy Hospital for Women",
+      "lat": -37.7561,
+      "lng": 145.061
+    },
+    {
+      "id": "Q6820546",
+      "name": "Mersey Community Hospital",
+      "lat": -41.23,
+      "lng": 146.423
+    },
+    {
+      "id": "Q16895172",
+      "name": "Milton Ulladulla Hospital",
+      "lat": -35.3172,
+      "lng": 150.439
+    },
+    {
+      "id": "Q6888062",
+      "name": "Modbury Hospital",
+      "lat": -34.8344,
+      "lng": 138.6906
+    },
+    {
+      "id": "Q6897733",
+      "name": "Mona Vale Hospital",
+      "lat": -33.6855,
+      "lng": 151.3067
+    },
+    {
+      "id": "Q6898227",
+      "name": "Monash Children's Hospital",
+      "lat": -37.9195,
+      "lng": 145.124
+    },
+    {
+      "id": "Q6898232",
+      "name": "Monash Medical Centre",
+      "lat": -37.9194,
+      "lng": 145.121
+    },
+    {
+      "id": "Q6898222",
+      "name": "MonashHeart",
+      "lat": -37.9194,
+      "lng": 145.121
+    },
+    {
+      "id": "Q6903089",
+      "name": "Mont Park Asylum",
+      "lat": -37.7221,
+      "lng": 145.065
+    },
+    {
+      "id": "Q85139320",
+      "name": "Monto Hospital",
+      "lat": -24.8663,
+      "lng": 151.1126
+    },
+    {
+      "id": "Q50036981",
+      "name": "Moorabbin Hospital",
+      "lat": -37.920409,
+      "lng": 145.062908
+    },
+    {
+      "id": "Q85138452",
+      "name": "Moranbah Hospital",
+      "lat": -22.0021,
+      "lng": 148.0552
+    },
+    {
+      "id": "Q24997951",
+      "name": "Mossman District Hospital",
+      "lat": -16.4643,
+      "lng": 145.3684
+    },
+    {
+      "id": "Q6920502",
+      "name": "Mount Druitt Hospital",
+      "lat": -33.7658,
+      "lng": 150.8297
+    },
+    {
+      "id": "Q81045878",
+      "name": "Mount Isa Base Hospital",
+      "lat": -20.7306,
+      "lng": 139.4936
+    },
+    {
+      "id": "Q30280885",
+      "name": "Nambour General Hospital",
+      "lat": -26.620781,
+      "lng": 152.951585
+    },
+    {
+      "id": "Q6994600",
+      "name": "Nepean Hospital",
+      "lat": -33.7599,
+      "lng": 150.7131
+    },
+    {
+      "id": "Q17016499",
+      "name": "Newcastle Hospital",
+      "lat": -31.554816,
+      "lng": 116.47049
+    },
+    {
+      "id": "Q81123830",
+      "name": "Newman Hospital",
+      "lat": -23.3548,
+      "lng": 119.7362
+    },
+    {
+      "id": "Q2122289",
+      "name": "North Head Quarantine Station",
+      "lat": -33.8148,
+      "lng": 151.288
+    },
+    {
+      "id": "Q7057304",
+      "name": "North West Regional Hospital",
+      "lat": -41.0471,
+      "lng": 145.8818
+    },
+    {
+      "id": "Q28428518",
+      "name": "Northern Beaches Hospital",
+      "lat": -33.750751,
+      "lng": 151.23288
+    },
+    {
+      "id": "Q7754368",
+      "name": "Northern Hospital Epping",
+      "lat": -37.6533,
+      "lng": 145.014
+    },
+    {
+      "id": "Q24952508",
+      "name": "Old Cooktown Hospital",
+      "lat": -15.48,
+      "lng": 145.2517
+    },
+    {
+      "id": "Q59872349",
+      "name": "Old Coroner's Court, The Rocks",
+      "lat": -33.8585,
+      "lng": 151.2093
+    },
+    {
+      "id": "Q124519080",
+      "name": "Old Hospital, Esperance",
+      "lat": -33.858024,
+      "lng": 121.894828
+    },
+    {
+      "id": "Q48804645",
+      "name": "Old Isisford District Hospital",
+      "lat": -24.261,
+      "lng": 144.439
+    },
+    {
+      "id": "Q58202037",
+      "name": "Old Liverpool Hospital",
+      "lat": -33.9217,
+      "lng": 150.93
+    },
+    {
+      "id": "Q55627451",
+      "name": "Old Newcastle Club Building",
+      "lat": -32.929,
+      "lng": 151.785
+    },
+    {
+      "id": "Q81123298",
+      "name": "Onslow Hospital",
+      "lat": -21.6435,
+      "lng": 115.1149
+    },
+    {
+      "id": "Q16896201",
+      "name": "Orange Health Service",
+      "lat": -33.3167,
+      "lng": 149.094
+    },
+    {
+      "id": "Q30260636",
+      "name": "Paddington Cat Hospital",
+      "lat": -33.88477,
+      "lng": 151.225291
+    },
+    {
+      "id": "Q110654791",
+      "name": "Palmerston Regional Hospital",
+      "lat": -12.475833,
+      "lng": 131.004167
+    },
+    {
+      "id": "Q81123607",
+      "name": "Paraburdoo Hospital",
+      "lat": -23.2031,
+      "lng": 117.6708
+    },
+    {
+      "id": "Q48769668",
+      "name": "Perth Children's Hospital",
+      "lat": -31.969619,
+      "lng": 115.816644
+    },
+    {
+      "id": "Q7175569",
+      "name": "Peter MacCallum Cancer Centre",
+      "lat": -37.8115,
+      "lng": 144.977
+    },
+    {
+      "id": "Q24185311",
+      "name": "Pindara Private Hospital",
+      "lat": -28.006658,
+      "lng": 153.393652
+    },
+    {
+      "id": "Q50035589",
+      "name": "Port Macquarie Base Hospital",
+      "lat": -31.451911,
+      "lng": 152.878355
+    },
+    {
+      "id": "Q131630397",
+      "name": "Portland District Health",
+      "lat": -38.341203,
+      "lng": 141.60519
+    },
+    {
+      "id": "Q58201169",
+      "name": "Prince Henry Hospital, Sydney",
+      "lat": -33.9807,
+      "lng": 151.2505
+    },
+    {
+      "id": "Q7244388",
+      "name": "Prince of Wales Hospital, Sydney",
+      "lat": -33.9186,
+      "lng": 151.239
+    },
+    {
+      "id": "Q7244522",
+      "name": "Princess Alexandra Hospital, Brisbane",
+      "lat": -27.4993,
+      "lng": 153.0332
+    },
+    {
+      "id": "Q7244698",
+      "name": "Princess Margaret Hospital for Children",
+      "lat": -31.9462,
+      "lng": 115.837
+    },
+    {
+      "id": "Q24189446",
+      "name": "Proserpine Hospital",
+      "lat": -20.4004,
+      "lng": 148.5848
+    },
+    {
+      "id": "Q16899034",
+      "name": "Queanbeyan District Hospital",
+      "lat": -35.3475,
+      "lng": 149.232
+    },
+    {
+      "id": "Q7270313",
+      "name": "Queen Elizabeth Centre, Ballarat",
+      "lat": -37.5635,
+      "lng": 143.843
+    },
+    {
+      "id": "Q7270363",
+      "name": "Queen Elizabeth II Jubilee Hospital",
+      "lat": -27.5594,
+      "lng": 153.0489
+    },
+    {
+      "id": "Q7270916",
+      "name": "Queensland Children's Hospital",
+      "lat": -27.483972,
+      "lng": 153.027972
+    },
+    {
+      "id": "Q81096581",
+      "name": "Quilpie Hospital",
+      "lat": -26.616,
+      "lng": 144.274
+    },
+    {
+      "id": "Q18708309",
+      "name": "Rachel Forster Hospital",
+      "lat": -33.894906,
+      "lng": 151.20267
+    },
+    {
+      "id": "Q50036976",
+      "name": "Redcliffe Hospital",
+      "lat": -27.228336,
+      "lng": 153.104851
+    },
+    {
+      "id": "Q7306019",
+      "name": "Redland Hospital",
+      "lat": -27.540311,
+      "lng": 153.251833
+    },
+    {
+      "id": "Q81095592",
+      "name": "Richmond Hospital",
+      "lat": -20.7388,
+      "lng": 143.1506
+    },
+    {
+      "id": "Q126583174",
+      "name": "Ringwood Private Hospital",
+      "lat": -37.811356,
+      "lng": 145.243919
+    },
+    {
+      "id": "Q7337021",
+      "name": "Rivendell Child, Adolescent and Family Unit",
+      "lat": -33.832392,
+      "lng": 151.09787
+    },
+    {
+      "id": "Q7352917",
+      "name": "Robina Hospital",
+      "lat": -28.071036,
+      "lng": 153.375939
+    },
+    {
+      "id": "Q17025694",
+      "name": "Rockingham General Hospital",
+      "lat": -32.291167,
+      "lng": 115.770156
+    },
+    {
+      "id": "Q24887441",
+      "name": "Rocky Creek World War Two Hospital Complex",
+      "lat": -17.1886,
+      "lng": 145.4594
+    },
+    {
+      "id": "Q81122920",
+      "name": "Roebourne Hospital",
+      "lat": -20.7765,
+      "lng": 117.1436
+    },
+    {
+      "id": "Q7373582",
+      "name": "Royal Adelaide Hospital",
+      "lat": -34.920972,
+      "lng": 138.587333
+    },
+    {
+      "id": "Q7373845",
+      "name": "Royal Brisbane and Women's Hospital",
+      "lat": -27.4469,
+      "lng": 153.0283
+    },
+    {
+      "id": "Q7373942",
+      "name": "Royal Children's Hospital",
+      "lat": -37.795,
+      "lng": 144.949722
+    },
+    {
+      "id": "Q42850202",
+      "name": "Royal Children's Hospital, Brisbane",
+      "lat": -27.4495,
+      "lng": 153.0251
+    },
+    {
+      "id": "Q7374098",
+      "name": "Royal Darwin Hospital",
+      "lat": -12.355833,
+      "lng": 130.881944
+    },
+    {
+      "id": "Q2171042",
+      "name": "Royal Hobart Hospital",
+      "lat": -42.8799,
+      "lng": 147.33
+    },
+    {
+      "id": "Q7374307",
+      "name": "Royal Hospital for Women",
+      "lat": -33.918895,
+      "lng": 151.238215
+    },
+    {
+      "id": "Q7374471",
+      "name": "Royal Melbourne Hospital",
+      "lat": -37.7988,
+      "lng": 144.9561
+    },
+    {
+      "id": "Q7374599",
+      "name": "Royal North Shore Hospital",
+      "lat": -33.8222,
+      "lng": 151.1925
+    },
+    {
+      "id": "Q7374710",
+      "name": "Royal Perth Hospital",
+      "lat": -31.954903,
+      "lng": 115.86694
+    },
+    {
+      "id": "Q7374738",
+      "name": "Royal Prince Alfred Hospital",
+      "lat": -33.8892,
+      "lng": 151.183
+    },
+    {
+      "id": "Q3446037",
+      "name": "Royal South Sydney Hospital",
+      "lat": -33.909076,
+      "lng": 151.206404
+    },
+    {
+      "id": "Q110930484",
+      "name": "Royal Talbot Rehabilitation Centre",
+      "lat": -37.789441,
+      "lng": 145.02295
+    },
+    {
+      "id": "Q16899492",
+      "name": "Royal Victorian Eye and Ear Hospital",
+      "lat": -37.8091,
+      "lng": 144.976
+    },
+    {
+      "id": "Q7375028",
+      "name": "Royal Women's Hospital",
+      "lat": -37.7987,
+      "lng": 144.9551
+    },
+    {
+      "id": "Q56052837",
+      "name": "Rydalmere Hospital Precinct",
+      "lat": -33.812,
+      "lng": 151.026
+    },
+    {
+      "id": "Q58202748",
+      "name": "Sandgate, Randwick",
+      "lat": -33.916,
+      "lng": 151.2404
+    },
+    {
+      "id": "Q85138824",
+      "name": "Sarina Hospital",
+      "lat": -21.4213,
+      "lng": 149.2098
+    },
+    {
+      "id": "Q29324826",
+      "name": "Second Townsville General Hospital",
+      "lat": -19.2523,
+      "lng": 146.8131
+    },
+    {
+      "id": "Q30686999",
+      "name": "Shalom House",
+      "lat": -31.813722,
+      "lng": 115.984278
+    },
+    {
+      "id": "Q7493855",
+      "name": "Shellharbour Hospital",
+      "lat": -34.558333,
+      "lng": 150.841667
+    },
+    {
+      "id": "Q16900144",
+      "name": "Shoalhaven District Memorial Hospital",
+      "lat": -34.8694,
+      "lng": 150.596
+    },
+    {
+      "id": "Q58205152",
+      "name": "Singleton District Hospital",
+      "lat": -32.5673,
+      "lng": 151.1858
+    },
+    {
+      "id": "Q7526207",
+      "name": "Sir Charles Gairdner Hospital",
+      "lat": -31.967635,
+      "lng": 115.81539
+    },
+    {
+      "id": "Q26802977",
+      "name": "Sir John Monash Private Hospital",
+      "lat": -37.9186,
+      "lng": 145.1216
+    },
+    {
+      "id": "Q28183812",
+      "name": "Springsure Hospital Museum",
+      "lat": -24.1194,
+      "lng": 148.0844
+    },
+    {
+      "id": "Q137785589",
+      "name": "Springwood Hospital",
+      "lat": -33.690472,
+      "lng": 150.57121
+    },
+    {
+      "id": "Q3460059",
+      "name": "SS Maheno",
+      "lat": -25.267097,
+      "lng": 153.238542
+    },
+    {
+      "id": "Q30270448",
+      "name": "St Andrew’s Hospital",
+      "lat": -34.934409,
+      "lng": 138.614819
+    },
+    {
+      "id": "Q7593226",
+      "name": "St George Hospital",
+      "lat": -33.9672,
+      "lng": 151.1339
+    },
+    {
+      "id": "Q7593682",
+      "name": "St John of God Ballarat Hospital",
+      "lat": -37.5577,
+      "lng": 143.8476
+    },
+    {
+      "id": "Q7593684",
+      "name": "St John of God Berwick Hospital",
+      "lat": -38.0452,
+      "lng": 145.3448
+    },
+    {
+      "id": "Q7593685",
+      "name": "St John of God Bunbury Hospital",
+      "lat": -33.368256,
+      "lng": 115.648144
+    },
+    {
+      "id": "Q17055642",
+      "name": "St John of God Frankston Rehabilitation Hospital",
+      "lat": -38.1527,
+      "lng": 145.1556
+    },
+    {
+      "id": "Q7593689",
+      "name": "St John of God Geelong Hospital",
+      "lat": -38.1516,
+      "lng": 144.3577
+    },
+    {
+      "id": "Q7593688",
+      "name": "St John of God Geraldton Hospital",
+      "lat": -28.78427,
+      "lng": 114.615907
+    },
+    {
+      "id": "Q7593683",
+      "name": "St John of God Hospital",
+      "lat": -36.7622,
+      "lng": 144.2633
+    },
+    {
+      "id": "Q7593694",
+      "name": "St John of God Hospital Burwood",
+      "lat": -33.869937,
+      "lng": 151.100022
+    },
+    {
+      "id": "Q7593695",
+      "name": "St John of God Hospital Richmond",
+      "lat": -33.593876,
+      "lng": 150.70203
+    },
+    {
+      "id": "Q7593697",
+      "name": "St John of God Hospital Warrnambool",
+      "lat": -38.371,
+      "lng": 142.4788
+    },
+    {
+      "id": "Q141235120",
+      "name": "St John of God Midland Private Hospital",
+      "lat": -31.896814,
+      "lng": 116.004969
+    },
+    {
+      "id": "Q6842346",
+      "name": "St John of God Midland Public Hospital",
+      "lat": -31.8948,
+      "lng": 116.0092
+    },
+    {
+      "id": "Q6818755",
+      "name": "St John of God Mt Lawley Hospital",
+      "lat": -31.9364,
+      "lng": 115.884
+    },
+    {
+      "id": "Q7593698",
+      "name": "St John of God Murdoch Hospital",
+      "lat": -32.068028,
+      "lng": 115.844645
+    },
+    {
+      "id": "Q7593701",
+      "name": "St John of God Subiaco Hospital",
+      "lat": -31.94143,
+      "lng": 115.825437
+    },
+    {
+      "id": "Q7594073",
+      "name": "St Lukes Private Hospital",
+      "lat": -41.4339,
+      "lng": 147.1494
+    },
+    {
+      "id": "Q16932711",
+      "name": "St Martin's House",
+      "lat": -27.4642,
+      "lng": 153.0297
+    },
+    {
+      "id": "Q30280913",
+      "name": "St Mary's Hospital",
+      "lat": -25.300326,
+      "lng": 152.82533
+    },
+    {
+      "id": "Q7595607",
+      "name": "St Vincent's Hospital",
+      "lat": -33.8797,
+      "lng": 151.2211
+    },
+    {
+      "id": "Q7595606",
+      "name": "St Vincent's Hospital, Melbourne",
+      "lat": -37.806931,
+      "lng": 144.975561
+    },
+    {
+      "id": "Q7595608",
+      "name": "St Vincent's Private Hospital Brisbane",
+      "lat": -27.4734,
+      "lng": 153.035
+    },
+    {
+      "id": "Q7595619",
+      "name": "St Vincent's Private Hospital Melbourne",
+      "lat": -37.8085,
+      "lng": 144.9742
+    },
+    {
+      "id": "Q108737144",
+      "name": "St Vincent’s Private Hospital Sydney",
+      "lat": -33.880842,
+      "lng": 151.220164
+    },
+    {
+      "id": "Q109729188",
+      "name": "St Vincent's Private Hospital, Northside",
+      "lat": -27.390658,
+      "lng": 153.023735
+    },
+    {
+      "id": "Q7641292",
+      "name": "Sunset Hospital",
+      "lat": -32.001505,
+      "lng": 115.803719
+    },
+    {
+      "id": "Q30590661",
+      "name": "Sunshine Coast University Hospital",
+      "lat": -26.7441,
+      "lng": 153.1146
+    },
+    {
+      "id": "Q38250532",
+      "name": "Sunshine Hospital",
+      "lat": -37.76,
+      "lng": 144.815
+    },
+    {
+      "id": "Q7649972",
+      "name": "Sutherland Hospital",
+      "lat": -34.0372,
+      "lng": 151.1152
+    },
+    {
+      "id": "Q3145257",
+      "name": "Sydney Adventist Hospital",
+      "lat": -33.7335,
+      "lng": 151.0997
+    },
+    {
+      "id": "Q7659869",
+      "name": "Sydney Children's Hospital",
+      "lat": -33.9185,
+      "lng": 151.2387
+    },
+    {
+      "id": "Q30288783",
+      "name": "Sydney Children's Hospitals Network",
+      "lat": -33.915657,
+      "lng": 151.24088
+    },
+    {
+      "id": "Q2373707",
+      "name": "Sydney Hospital",
+      "lat": -33.86825,
+      "lng": 151.21284
+    },
+    {
+      "id": "Q7660101",
+      "name": "Sydney Private Hospital",
+      "lat": -33.894189,
+      "lng": 151.129622
+    },
+    {
+      "id": "Q116897898",
+      "name": "Sydney Southwest Private Hospital",
+      "lat": -33.917437,
+      "lng": 150.928369
+    },
+    {
+      "id": "Q30281064",
+      "name": "Tamworth Base Hospital",
+      "lat": -31.075138,
+      "lng": 150.922936
+    },
+    {
+      "id": "Q136849861",
+      "name": "Tennant Creek Hospital",
+      "lat": -19.64769,
+      "lng": 134.18699
+    },
+    {
+      "id": "Q7713086",
+      "name": "The Alfred Hospital",
+      "lat": -37.8461,
+      "lng": 144.9827
+    },
+    {
+      "id": "Q7373657",
+      "name": "The Children's Hospital at Westmead",
+      "lat": -33.8017,
+      "lng": 150.992
+    },
+    {
+      "id": "Q7756132",
+      "name": "The Park Centre for Mental Health",
+      "lat": -27.5999,
+      "lng": 152.91
+    },
+    {
+      "id": "Q7758249",
+      "name": "The Prince Charles Hospital",
+      "lat": -27.3899,
+      "lng": 153.023
+    },
+    {
+      "id": "Q7270336",
+      "name": "The Queen Elizabeth Hospital",
+      "lat": -34.8838,
+      "lng": 138.533
+    },
+    {
+      "id": "Q55635509",
+      "name": "The Ridge, Newcastle",
+      "lat": -32.9494,
+      "lng": 151.7504
+    },
+    {
+      "id": "Q7789350",
+      "name": "Thomas Embling Hospital",
+      "lat": -37.7892,
+      "lng": 145.012
+    },
+    {
+      "id": "Q55642367",
+      "name": "Thomas Walker Convalescent Hospital Buildings",
+      "lat": -33.833,
+      "lng": 151.097
+    },
+    {
+      "id": "Q81123387",
+      "name": "Tom Price Hospital",
+      "lat": -22.6956,
+      "lng": 117.7903
+    },
+    {
+      "id": "Q18353324",
+      "name": "Toowoomba Hospital",
+      "lat": -27.5697,
+      "lng": 151.943
+    },
+    {
+      "id": "Q7830280",
+      "name": "Townsville Hospital",
+      "lat": -19.3208,
+      "lng": 146.7623
+    },
+    {
+      "id": "Q85847860",
+      "name": "Tweed Valley Hospital",
+      "lat": -28.262712,
+      "lng": 153.569355
+    },
+    {
+      "id": "Q28183480",
+      "name": "Underground Hospital, Mount Isa",
+      "lat": -20.7316,
+      "lng": 139.4947
+    },
+    {
+      "id": "Q24185397",
+      "name": "Victorian Comprehensive Cancer Centre",
+      "lat": -37.800278,
+      "lng": 144.956667
+    },
+    {
+      "id": "Q7959526",
+      "name": "Wagga Wagga Base Hospital",
+      "lat": -35.118333,
+      "lng": 147.357778
+    },
+    {
+      "id": "Q115861541",
+      "name": "Warners Bay Private Hospital",
+      "lat": -32.965133,
+      "lng": 151.641293
+    },
+    {
+      "id": "Q81044058",
+      "name": "Weipa Hospital",
+      "lat": -12.6412,
+      "lng": 141.867
+    },
+    {
+      "id": "Q7983571",
+      "name": "Werribee Mercy Hospital",
+      "lat": -37.907,
+      "lng": 144.653
+    },
+    {
+      "id": "Q7983933",
+      "name": "Wesley Hospital",
+      "lat": -27.477583,
+      "lng": 152.9975
+    },
+    {
+      "id": "Q7985227",
+      "name": "West Gippsland Hospital",
+      "lat": -38.1733,
+      "lng": 145.928
+    },
+    {
+      "id": "Q30281151",
+      "name": "Western Hospital",
+      "lat": -37.759504,
+      "lng": 144.81624
+    },
+    {
+      "id": "Q7989074",
+      "name": "Westmead Hospital",
+      "lat": -33.8045,
+      "lng": 150.9886
+    },
+    {
+      "id": "Q39891307",
+      "name": "Willaura Hospital",
+      "lat": -37.544861,
+      "lng": 142.745694
+    },
+    {
+      "id": "Q18395204",
+      "name": "Wislet",
+      "lat": -27.5579,
+      "lng": 151.948
+    },
+    {
+      "id": "Q16903636",
+      "name": "Wollongong Hospital",
+      "lat": -34.253,
+      "lng": 150.526
+    },
+    {
+      "id": "Q50199806",
+      "name": "Wolper Jewish Hospital",
+      "lat": -33.884,
+      "lng": 151.241
+    },
+    {
+      "id": "Q8031120",
+      "name": "Women's and Children's Hospital",
+      "lat": -34.9114,
+      "lng": 138.5998
+    },
+    {
+      "id": "Q8049229",
+      "name": "Yaralla Estate",
+      "lat": -33.84,
+      "lng": 151.099
+    },
+    {
+      "id": "Q8049497",
+      "name": "Yarra Bend Asylum",
+      "lat": -37.7908,
+      "lng": 145.011
+    }
+  ]
+}

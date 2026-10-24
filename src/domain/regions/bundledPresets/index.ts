@@ -3,6 +3,7 @@ import { GAME_PRESET_SCHEMA_VERSION } from "../../session/presets/gamePreset";
 import { recommendGameSizeFromPlayAreaSquareMiles } from "../../session/size/gameSize";
 import { defaultAdvancedSessionSettings } from "../../session/tools/advancedSessionSettings";
 import { attachPlayArea } from "./attachPlayArea";
+import { australiaPresets } from "./australia";
 import { dublinPresets } from "./dublin";
 import { londonPresets } from "./london";
 import { nycPresets } from "./nyc";
@@ -10,6 +11,7 @@ import { osakaPresets } from "./osaka";
 import { portlandMainePresets } from "./portlandMaine";
 import { princeRupertPresets } from "./princeRupert";
 import type { BundledGamePresetDefinition } from "./shared";
+import { southamptonPresets } from "./southampton";
 import { swissPresets } from "./swiss";
 import { tokyoPresets } from "./tokyo";
 
@@ -25,6 +27,8 @@ export const BUNDLED_GAME_PRESET_DEFINITIONS: readonly BundledGamePresetDefiniti
   ...osakaPresets(),
   ...swissPresets(),
   ...princeRupertPresets(),
+  ...southamptonPresets(),
+  ...australiaPresets(),
 ];
 
 export function isBundledPresetId(id: string): boolean {

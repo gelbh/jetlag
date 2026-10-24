@@ -1,12 +1,68 @@
 {
   "metros": [
     {
+      "id": "chicago",
+      "bundlePath": "/geo/gtfs/chicago.json",
+      "feedOnestopId": "cta-google-transit",
+      "builtAt": "2026-10-20T22:35:02.821Z",
+      "stopCount": 10993,
+      "routeCount": 132
+    },
+    {
+      "id": "dublin",
+      "bundlePath": "/geo/gtfs/dublin.json",
+      "feedOnestopId": "tfi-dublin-merged",
+      "builtAt": "2026-10-20T22:35:08.960Z",
+      "stopCount": 5309,
+      "routeCount": 184
+    },
+    {
+      "id": "london",
+      "bundlePath": "/geo/gtfs/london.json",
+      "feedOnestopId": "mdb-tfl-995",
+      "builtAt": "2026-10-20T22:35:13.922Z",
+      "stopCount": 1038,
+      "routeCount": 21
+    },
+    {
+      "id": "nyc",
+      "bundlePath": "/geo/gtfs/nyc.json",
+      "feedOnestopId": "mta-nyc-subway-bus-merged",
+      "builtAt": "2026-10-20T22:35:26.552Z",
+      "stopCount": 12667,
+      "routeCount": 282
+    },
+    {
+      "id": "portland-maine",
+      "bundlePath": "/geo/gtfs/portland-maine.json",
+      "feedOnestopId": "mdb-gpmetro-south-portland",
+      "builtAt": "2026-10-20T22:35:28.419Z",
+      "stopCount": 833,
+      "routeCount": 17
+    },
+    {
       "id": "prince-rupert",
       "bundlePath": "/geo/gtfs/prince-rupert.json",
       "feedOnestopId": "f-bctransit~prince~rupert",
       "builtAt": "2026-07-11T23:32:54.113Z",
       "stopCount": 109,
       "routeCount": 8
+    },
+    {
+      "id": "sf",
+      "bundlePath": "/geo/gtfs/sf.json",
+      "feedOnestopId": "mdb-sfmta-2886",
+      "builtAt": "2026-10-20T22:35:30.505Z",
+      "stopCount": 3246,
+      "routeCount": 70
+    },
+    {
+      "id": "southampton",
+      "bundlePath": "/geo/gtfs/southampton.json",
+      "feedOnestopId": "f-bus~dft~gov~uk",
+      "builtAt": "2026-10-20T19:18:20.297Z",
+      "stopCount": 1571,
+      "routeCount": 103
     }
   ]
 }

@@ -1,7 +1,6 @@
 /**
  * Map-first Tentacle chrome: shared placement shell + map-primary answer strip.
  */
-import { Button } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudTentacleIcon } from "@/components/map/icons/ToolIcons";
 import {
@@ -9,6 +8,7 @@ import {
   type AskMapPlacementPhase,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
@@ -97,27 +97,17 @@ export function TentacleMapPlacementChrome({
               color: "var(--color-field-ink)",
             }}
           >
-            <Button
+            <EntryAsyncButton
               type="button"
               fullWidth
-              onClick={onCommit}
-              disabled={!canCommit || isSubmitting}
-              aria-busy={isSubmitting || undefined}
-              leftSection={
-                isSubmitting ? undefined : (
-                  <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
-                )
-              }
+              busy={isSubmitting}
+              unavailable={!canCommit}
+              idleLabel={awaitHiderAnswer ? "Send to hiders" : "Send"}
+              busyLabel={awaitHiderAnswer ? "Sending…" : "…"}
+              leftSection={<PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />}
               styles={askMapPlacementSendStyles}
-            >
-              {isSubmitting
-                ? awaitHiderAnswer
-                  ? "Sending…"
-                  : "…"
-                : awaitHiderAnswer
-                  ? "Send to hiders"
-                  : "Send"}
-            </Button>
+              onClick={onCommit}
+            />
           </div>
         ) : null}
       </div>

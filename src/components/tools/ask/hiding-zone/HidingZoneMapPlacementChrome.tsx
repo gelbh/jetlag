@@ -4,7 +4,8 @@
 
 import { Button } from "@mantine/core";
 import { CheckIcon } from "@phosphor-icons/react";
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { HIDING_ZONE_PIN_CHOSEN_MS } from "@/components/hider/hidingZoneDraftPinTravel";
 import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
 import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 import { TransitStationPicker } from "@/components/hider/TransitStationPicker";
@@ -13,6 +14,7 @@ import {
   AskMapPlacementChrome,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 
 export type HidingZoneMapPlacementChromeProps = {
@@ -22,7 +24,7 @@ export type HidingZoneMapPlacementChromeProps = {
   onSearchThisArea: () => void;
   onStepChange?: (stepId: HidingZoneStepId) => void;
   onDismiss?: () => void;
-  /** Re-open method chips (create flow only). */
+  /** Re-open method chips (create and move). */
   onBackToMethod?: () => void;
   /** Mirror sheet viewOnly: false disables Confirm. */
   writesEnabled?: boolean;
@@ -47,6 +49,12 @@ function placementSummary(zoneTool: HidingZoneToolPanelState): {
   detail?: string;
 } {
   if (zoneTool.manualMode) {
+    if (zoneTool.snapping) {
+      return { label: "Finding nearest station…" };
+    }
+    if (zoneTool.selectedStation) {
+      return { label: zoneTool.selectedStation.name, detail: "Snapped to the nearest station" };
+    }
     if (zoneTool.manualCenter) {
       return {
         label: "Dropped on the map",
@@ -72,11 +80,46 @@ export function HidingZoneMapPlacementChrome({
 }: HidingZoneMapPlacementChromeProps) {
   const step = resolveStep(moveMode, zoneTool.methodChosen, zoneTool.hasPlacement);
   const showStationPicker = !zoneTool.manualMode && (step === "location" || step === "confirm");
+  const snappedStationId =
+    zoneTool.manualMode && zoneTool.selectedStation && !zoneTool.snapping
+      ? zoneTool.selectedStation.id
+      : null;
+  const [chosenFlash, setChosenFlash] = useState(false);
+  const previousSnappedIdRef = useRef<string | null>(null);
+  const wasSnappingRef = useRef(zoneTool.snapping);
 
   // Layout: sync step before paint so mapPickEnabled / stations layer match overlay.
   useLayoutEffect(() => {
     onStepChange?.(step);
   }, [onStepChange, step]);
+
+  useEffect(() => {
+    const wasSnapping = wasSnappingRef.current;
+    wasSnappingRef.current = zoneTool.snapping;
+
+    if (!snappedStationId) {
+      previousSnappedIdRef.current = null;
+      setChosenFlash(false);
+      return;
+    }
+
+    const isSnapEdge =
+      wasSnapping && !zoneTool.snapping && previousSnappedIdRef.current !== snappedStationId;
+
+    previousSnappedIdRef.current = snappedStationId;
+
+    if (!isSnapEdge) {
+      return;
+    }
+
+    setChosenFlash(true);
+    const timeoutId = window.setTimeout(() => {
+      setChosenFlash(false);
+    }, HIDING_ZONE_PIN_CHOSEN_MS);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [snappedStationId, zoneTool.snapping]);
 
   const toolTitle = moveMode ? "Move zone" : "Set zone";
   const questionPrompt = zoneTool.manualMode
@@ -96,7 +139,8 @@ export function HidingZoneMapPlacementChrome({
   const midSlot = showMid ? (
     <div
       data-testid="hiding-zone-map-placement-mid"
-      className="mx-auto w-full max-w-[22rem]"
+      data-chosen={chosenFlash ? "true" : undefined}
+      className={`mx-auto w-full max-w-[22rem]${chosenFlash ? " annotation-pulse" : ""}`}
       style={{
         ...mapChromeSurfaceStyles,
         borderRadius: 16,
@@ -170,26 +214,25 @@ export function HidingZoneMapPlacementChrome({
           {zoneTool.error}
         </p>
       ) : null}
-      <Button
+      <EntryAsyncButton
         type="button"
         fullWidth
+        busy={zoneTool.saving}
+        unavailable={!writesEnabled || !zoneTool.hasPlacement || zoneTool.snapping}
+        idleLabel="Confirm"
+        busyLabel="Saving…"
+        leftSection={<CheckIcon size={16} weight="bold" aria-hidden />}
+        styles={askMapPlacementSendStyles}
         onClick={() => {
           void zoneTool.confirmZone();
         }}
-        disabled={!writesEnabled || !zoneTool.hasPlacement || zoneTool.saving}
-        aria-busy={zoneTool.saving || undefined}
-        leftSection={
-          zoneTool.saving ? undefined : <CheckIcon size={16} weight="bold" aria-hidden />
-        }
-        styles={askMapPlacementSendStyles}
-      >
-        {zoneTool.saving ? "Saving…" : "Confirm"}
-      </Button>
-      {onDismiss && !moveMode ? (
+      />
+      {onDismiss ? (
         <Button
           type="button"
           fullWidth
           variant="default"
+          disabled={zoneTool.saving}
           onClick={onDismiss}
           styles={{
             root: {
@@ -218,7 +261,7 @@ export function HidingZoneMapPlacementChrome({
       statusBody=""
       toolIcon={<HudZoneIcon width={20} height={20} />}
       questionAriaLabel={`${toolTitle} placement`}
-      onChangeConfigure={!moveMode && onBackToMethod ? onBackToMethod : undefined}
+      onChangeConfigure={onBackToMethod}
       changeConfigureAriaLabel="Change placement method"
       midSlot={midSlot}
       answerSlot={answerSlot}

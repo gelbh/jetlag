@@ -20,6 +20,7 @@ interface UseQuestionDeadlineEnforcementParams {
   sessionRules: SessionRulesInput;
   pendingQuestions: readonly PendingQuestionRecord[];
   hidingZones: readonly HidingZoneRecord[];
+  memberUids: readonly string[];
   /** Local or remote hiding timer is running (see isHidingTimerEffectivelyRunning). */
   hidingTimerRunning: boolean;
   pauseTimer: () => void;
@@ -27,8 +28,12 @@ interface UseQuestionDeadlineEnforcementParams {
   postSystemMessage: (text: string) => void;
 }
 
-function hasMoveInProgress(hidingZones: readonly HidingZoneRecord[]): boolean {
-  return hidingZones.some((zone) => zone.moveInProgress === true);
+function hasMoveInProgress(
+  hidingZones: readonly HidingZoneRecord[],
+  memberUids: readonly string[],
+): boolean {
+  const members = new Set(memberUids);
+  return hidingZones.some((zone) => zone.moveInProgress === true && members.has(zone.hiderUid));
 }
 
 export function useQuestionDeadlineEnforcement({
@@ -37,6 +42,7 @@ export function useQuestionDeadlineEnforcement({
   sessionRules,
   pendingQuestions,
   hidingZones,
+  memberUids,
   hidingTimerRunning,
   pauseTimer,
   resumeTimer,
@@ -116,7 +122,7 @@ export function useQuestionDeadlineEnforcement({
         // Wait until the host pause is visible (local+remote) and no move is
         // in progress before marking handled — otherwise a late answer would
         // skip resume forever while remote is still running.
-        if (hidingTimerRunningRef.current || hasMoveInProgress(hidingZones)) {
+        if (hidingTimerRunningRef.current || hasMoveInProgress(hidingZones, memberUids)) {
           continue;
         }
 
@@ -133,6 +139,7 @@ export function useQuestionDeadlineEnforcement({
     enabled,
     sessionRules,
     hidingZones,
+    memberUids,
     pauseTimer,
     pendingQuestions,
     postSystemMessage,

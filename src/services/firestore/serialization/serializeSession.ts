@@ -1,6 +1,9 @@
 import type { TimeTrapRecord } from "@/domain/expansion/timeTraps";
 import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
 import { parseRegionPackId } from "@/domain/regions/regionPack";
+import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
+import type { SessionMode } from "@/domain/session/castleSiege/mode";
+import type { CastleSiegeRoles, CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { parseCustomMeasureGeometries } from "@/domain/session/catalog/customMeasureGeometry";
 import {
   parseCustomCategories,
@@ -28,10 +31,17 @@ import {
 } from "@/domain/session/rules";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import { hidingZoneRadiusMeters } from "@/domain/session/size/gameSize";
-import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
+import {
+  omitPackCustomMatchingAreasForRemoteWrite,
+  type SessionRulesPatch,
+} from "@/domain/session/tools/advancedSessionSettings";
 import { parseSessionOpsMitigation } from "../firestoreSessionOps";
 import { sessionDocumentSchema } from "../schemas/firestoreDocuments";
 import { parseFirestoreDocument } from "../zodConverter";
+import {
+  castleSiegeSetupPatchToFirestore,
+  parseCastleSiegeSetupFromDocument,
+} from "./serializeCastleSiege";
 import {
   assertNoNestedArrays,
   deserializeGameAreaFromFirestore,
@@ -41,6 +51,48 @@ import {
 
 function parseSessionTier(value: unknown): SessionTier {
   return value === "premium" ? "premium" : "free";
+}
+
+const CASTLE_SIEGE_TEAM_ROLES = new Set<CastleSiegeTeamRole>([
+  "teamA",
+  "teamB",
+  "referee",
+  "observer",
+]);
+
+export type BuildSessionDocumentOptions = {
+  mode?: SessionMode;
+  castleSiegeRoles?: CastleSiegeRoles;
+  seriesLength?: 1 | 3;
+  setupMode?: "pregame" | "fairSplit";
+  dials?: CastleSiegeDials;
+};
+
+function parseSessionMode(value: unknown): SessionMode | undefined {
+  return value === "castleSiege" || value === "classic" ? value : undefined;
+}
+
+function parseCastleSiegeRoles(value: unknown): CastleSiegeRoles | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const roles: CastleSiegeRoles = {};
+  for (const [uid, role] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof role === "string" && CASTLE_SIEGE_TEAM_ROLES.has(role as CastleSiegeTeamRole)) {
+      roles[uid] = role as CastleSiegeTeamRole;
+    }
+  }
+
+  return Object.keys(roles).length > 0 ? roles : undefined;
+}
+
+function parseSeriesLength(value: unknown): 1 | 3 | undefined {
+  return value === 1 || value === 3 ? value : undefined;
+}
+
+function parseSetupMode(value: unknown): "pregame" | "fairSplit" | undefined {
+  return value === "pregame" || value === "fairSplit" ? value : undefined;
 }
 
 function parseMemberRoles(value: unknown): MemberRoles | undefined {
@@ -139,81 +191,85 @@ function parseOptionalMinutes(
 }
 
 export function sessionRulesPatchToFirestore(patch: SessionRulesPatch): Record<string, unknown> {
+  const remotePatch = omitPackCustomMatchingAreasForRemoteWrite(patch);
   const payload: Record<string, unknown> = {};
 
-  if (patch.distanceUnit !== undefined) {
-    payload.distanceUnit = patch.distanceUnit;
+  if (remotePatch.distanceUnit !== undefined) {
+    payload.distanceUnit = remotePatch.distanceUnit;
   }
-  if (typeof patch.hidingZoneRadiusMeters === "number") {
-    payload.hidingZoneRadiusMeters = patch.hidingZoneRadiusMeters;
+  if (typeof remotePatch.hidingZoneRadiusMeters === "number") {
+    payload.hidingZoneRadiusMeters = remotePatch.hidingZoneRadiusMeters;
   }
-  if (typeof patch.hidingPeriodMinutes === "number") {
-    payload.hidingPeriodMinutes = patch.hidingPeriodMinutes;
+  if (typeof remotePatch.hidingPeriodMinutes === "number") {
+    payload.hidingPeriodMinutes = remotePatch.hidingPeriodMinutes;
   }
-  if (typeof patch.photoAnswerDeadlineMinutes === "number") {
-    payload.photoAnswerDeadlineMinutes = patch.photoAnswerDeadlineMinutes;
+  if (typeof remotePatch.photoAnswerDeadlineMinutes === "number") {
+    payload.photoAnswerDeadlineMinutes = remotePatch.photoAnswerDeadlineMinutes;
   }
-  if (typeof patch.questionAnswerDeadlineMinutes === "number") {
-    payload.questionAnswerDeadlineMinutes = patch.questionAnswerDeadlineMinutes;
+  if (typeof remotePatch.questionAnswerDeadlineMinutes === "number") {
+    payload.questionAnswerDeadlineMinutes = remotePatch.questionAnswerDeadlineMinutes;
   }
-  if (patch.disabledTools !== undefined) {
-    payload.disabledTools = patch.disabledTools.length > 0 ? [...patch.disabledTools] : [];
+  if (remotePatch.disabledTools !== undefined) {
+    payload.disabledTools =
+      remotePatch.disabledTools.length > 0 ? [...remotePatch.disabledTools] : [];
   }
-  if (typeof patch.tentaclesEnabled === "boolean") {
-    payload.tentaclesEnabled = patch.tentaclesEnabled;
+  if (typeof remotePatch.tentaclesEnabled === "boolean") {
+    payload.tentaclesEnabled = remotePatch.tentaclesEnabled;
   }
-  if (patch.thermometerPresetMiles !== undefined) {
+  if (remotePatch.thermometerPresetMiles !== undefined) {
     payload.thermometerPresetMiles =
-      patch.thermometerPresetMiles.length > 0 ? [...patch.thermometerPresetMiles] : [];
+      remotePatch.thermometerPresetMiles.length > 0 ? [...remotePatch.thermometerPresetMiles] : [];
   }
-  if (patch.thermometerPresetMeters !== undefined) {
+  if (remotePatch.thermometerPresetMeters !== undefined) {
     payload.thermometerPresetMeters =
-      patch.thermometerPresetMeters.length > 0 ? [...patch.thermometerPresetMeters] : [];
+      remotePatch.thermometerPresetMeters.length > 0
+        ? [...remotePatch.thermometerPresetMeters]
+        : [];
   }
-  if (typeof patch.tentacleMediumRadiusMeters === "number") {
-    payload.tentacleMediumRadiusMeters = patch.tentacleMediumRadiusMeters;
+  if (typeof remotePatch.tentacleMediumRadiusMeters === "number") {
+    payload.tentacleMediumRadiusMeters = remotePatch.tentacleMediumRadiusMeters;
   }
-  if (typeof patch.tentacleLargeRadiusMeters === "number") {
-    payload.tentacleLargeRadiusMeters = patch.tentacleLargeRadiusMeters;
+  if (typeof remotePatch.tentacleLargeRadiusMeters === "number") {
+    payload.tentacleLargeRadiusMeters = remotePatch.tentacleLargeRadiusMeters;
   }
-  if (patch.customMatchingAreas !== undefined) {
-    payload.customMatchingAreas = { ...patch.customMatchingAreas };
+  if (remotePatch.customMatchingAreas !== undefined) {
+    payload.customMatchingAreas = { ...remotePatch.customMatchingAreas };
   }
-  if (patch.customCategories !== undefined) {
-    payload.customCategories = [...patch.customCategories];
+  if (remotePatch.customCategories !== undefined) {
+    payload.customCategories = [...remotePatch.customCategories];
   }
-  if (patch.customLocationPins !== undefined) {
-    payload.customLocationPins = [...patch.customLocationPins];
+  if (remotePatch.customLocationPins !== undefined) {
+    payload.customLocationPins = [...remotePatch.customLocationPins];
   }
-  if (patch.customMeasureGeometries !== undefined) {
-    payload.customMeasureGeometries = [...patch.customMeasureGeometries];
+  if (remotePatch.customMeasureGeometries !== undefined) {
+    payload.customMeasureGeometries = [...remotePatch.customMeasureGeometries];
   }
-  if (typeof patch.expansionPackEnabled === "boolean") {
-    payload.expansionPackEnabled = patch.expansionPackEnabled;
+  if (typeof remotePatch.expansionPackEnabled === "boolean") {
+    payload.expansionPackEnabled = remotePatch.expansionPackEnabled;
   }
-  if (typeof patch.boardEconomyEnabled === "boolean") {
-    payload.boardEconomyEnabled = patch.boardEconomyEnabled;
+  if (typeof remotePatch.boardEconomyEnabled === "boolean") {
+    payload.boardEconomyEnabled = remotePatch.boardEconomyEnabled;
   }
-  if (typeof patch.customQuestionPackEnabled === "boolean") {
-    payload.customQuestionPackEnabled = patch.customQuestionPackEnabled;
+  if (typeof remotePatch.customQuestionPackEnabled === "boolean") {
+    payload.customQuestionPackEnabled = remotePatch.customQuestionPackEnabled;
   }
-  if (typeof patch.previewQuestionBeforeSend === "boolean") {
-    payload.previewQuestionBeforeSend = patch.previewQuestionBeforeSend;
+  if (typeof remotePatch.previewQuestionBeforeSend === "boolean") {
+    payload.previewQuestionBeforeSend = remotePatch.previewQuestionBeforeSend;
   }
-  if (patch.regionPackId !== undefined) {
-    payload.regionPackId = patch.regionPackId;
+  if (remotePatch.regionPackId !== undefined) {
+    payload.regionPackId = remotePatch.regionPackId;
   }
-  if (patch.regionPackSubregionId !== undefined) {
-    payload.regionPackSubregionId = patch.regionPackSubregionId;
+  if (remotePatch.regionPackSubregionId !== undefined) {
+    payload.regionPackSubregionId = remotePatch.regionPackSubregionId;
   }
-  if (typeof patch.bundledGeoRevision === "number") {
-    payload.bundledGeoRevision = patch.bundledGeoRevision;
+  if (typeof remotePatch.bundledGeoRevision === "number") {
+    payload.bundledGeoRevision = remotePatch.bundledGeoRevision;
   }
-  if (typeof patch.playAreaFromPack === "boolean") {
-    payload.playAreaFromPack = patch.playAreaFromPack;
+  if (typeof remotePatch.playAreaFromPack === "boolean") {
+    payload.playAreaFromPack = remotePatch.playAreaFromPack;
   }
-  if (typeof patch.gameAreaLabel === "string" && patch.gameAreaLabel.trim()) {
-    payload.gameAreaLabel = patch.gameAreaLabel.trim();
+  if (typeof remotePatch.gameAreaLabel === "string" && remotePatch.gameAreaLabel.trim()) {
+    payload.gameAreaLabel = remotePatch.gameAreaLabel.trim();
   }
 
   return payload;
@@ -231,15 +287,20 @@ export function buildSessionDocument(
   rulesPatch: SessionRulesPatch = {},
   distanceUnit?: SessionRecord["distanceUnit"],
   hostAppVersion?: string,
+  options?: BuildSessionDocumentOptions,
 ): Record<string, unknown> {
   const unit = distanceUnit ?? "imperial";
   const radiusMeters =
     typeof rulesPatch.hidingZoneRadiusMeters === "number"
       ? rulesPatch.hidingZoneRadiusMeters
       : hidingZoneRadiusMeters(gameSize, unit);
+  const omitPackPlayAreaGeometry =
+    Boolean(rulesPatch.regionPackId) && rulesPatch.playAreaFromPack !== false;
   const payload: Record<string, unknown> = {
     code,
-    gameArea: serializeGameAreaForFirestore(gameArea),
+    gameArea: serializeGameAreaForFirestore(gameArea, {
+      omitGeometryJson: omitPackPlayAreaGeometry,
+    }),
     hostUid,
     createdAt,
     memberUids: [hostUid],
@@ -260,6 +321,22 @@ export function buildSessionDocument(
 
   if (hostAppVersion) {
     payload.hostAppVersion = hostAppVersion;
+  }
+
+  if (options?.mode === "castleSiege") {
+    payload.mode = "castleSiege";
+    if (options.castleSiegeRoles) {
+      payload.castleSiegeRoles = options.castleSiegeRoles;
+    }
+    if (options.seriesLength === 1 || options.seriesLength === 3) {
+      payload.seriesLength = options.seriesLength;
+    }
+    if (options.setupMode === "pregame" || options.setupMode === "fairSplit") {
+      payload.setupMode = options.setupMode;
+    }
+    if (options.dials) {
+      Object.assign(payload, castleSiegeSetupPatchToFirestore({ dials: options.dials }));
+    }
   }
 
   assertNoNestedArrays(payload);
@@ -415,6 +492,11 @@ export function deserializeSessionFromFirestore(
       Number.isFinite(document.requiredMinAppVersionGraceSeconds)
         ? document.requiredMinAppVersionGraceSeconds
         : undefined,
+    mode: parseSessionMode(document.mode),
+    castleSiegeRoles: parseCastleSiegeRoles(document.castleSiegeRoles),
+    seriesLength: parseSeriesLength(document.seriesLength),
+    setupMode: parseSetupMode(document.setupMode),
+    ...parseCastleSiegeSetupFromDocument(document as Record<string, unknown>),
   };
 }
 

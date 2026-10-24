@@ -79,4 +79,98 @@ describe("firestore.rules — hiding zones", () => {
         .set(hidingZonePayload()),
     );
   });
+
+  it("denies hider create with moveInProgress true", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
+
+    const hider = rules.testEnv.authenticatedContext("hider-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "hider-1"],
+        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+      });
+
+    await assertFails(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("hidingZones")
+        .doc("hider-1")
+        .set({ ...hidingZonePayload(), moveInProgress: true }),
+    );
+  });
+
+  it("allows host to clear another uid moveInProgress to false only", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("hidingZones")
+        .doc("hider-1")
+        .set({ ...hidingZonePayload(), moveInProgress: true });
+    });
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("hidingZones")
+        .doc("hider-1")
+        .update({ moveInProgress: false }),
+    );
+  });
+
+  it("denies non-host seeker from clearing hider moveInProgress", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-2", "hider-1"],
+          memberRoles: { "host-1": "seeker", "seeker-2": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("hidingZones")
+        .doc("hider-1")
+        .set({ ...hidingZonePayload(), moveInProgress: true });
+    });
+
+    const seeker = rules.testEnv.authenticatedContext("seeker-2");
+    await assertFails(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("hidingZones")
+        .doc("hider-1")
+        .update({ moveInProgress: false }),
+    );
+  });
 });

@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { BUNDLED_REGION_PACK_GEO_REVISION } from "@/domain/regions/regionPack";
+import { DEFAULT_CASTLE_SIEGE_DIALS } from "@/domain/session/castleSiege/dials";
 import {
   buildHidingZoneDocument,
   buildSessionDocument,
   deserializeSessionFromFirestore,
+  sessionRulesPatchToFirestore,
 } from "./serializeSession";
 import {
   assertNoNestedArrays,
@@ -35,6 +38,61 @@ describe("serializeSession", () => {
       geometryJson: JSON.stringify(sampleGameArea),
     });
     expect(serialized).not.toHaveProperty("coordinates");
+  });
+
+  it("omits geometryJson when serializeGameAreaForFirestore requests pack play-area mode", () => {
+    const serialized = serializeGameAreaForFirestore(sampleGameArea, { omitGeometryJson: true });
+
+    expect(serialized).toEqual({
+      south: 53.3,
+      west: -6.3,
+      north: 53.4,
+      east: -6.2,
+    });
+    expect(serialized).not.toHaveProperty("geometryJson");
+  });
+
+  it("omits gameArea.geometryJson on Firestore create when regionPackId is set", () => {
+    const payload = buildSessionDocument(
+      "AUS1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "seeker",
+      "large",
+      {
+        regionPackId: "australia",
+        playAreaFromPack: true,
+        bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+      },
+    );
+
+    const gameArea = payload.gameArea as { geometryJson?: string; south: number };
+    expect(gameArea.south).toBe(53.3);
+    expect(gameArea).not.toHaveProperty("geometryJson");
+    expect(payload.playAreaFromPack).toBe(true);
+  });
+
+  it("keeps gameArea.geometryJson when playAreaFromPack is false", () => {
+    const payload = buildSessionDocument(
+      "FREE",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      {
+        regionPackId: "australia",
+        playAreaFromPack: false,
+      },
+    );
+
+    const gameArea = payload.gameArea as { geometryJson?: string };
+    expect(gameArea.geometryJson).toBe(JSON.stringify(sampleGameArea));
   });
 
   it("reconstructs game areas from stored geometry json", () => {
@@ -90,6 +148,62 @@ describe("serializeSession", () => {
     );
 
     expect(payload.tier).toBe("premium");
+  });
+
+  it("omits pack customMatchingAreas from Firestore create payload when regionPackId is set", () => {
+    const payload = buildSessionDocument(
+      "AUS1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "seeker",
+      "large",
+      {
+        regionPackId: "australia",
+        regionPackSubregionId: "nsw",
+        bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+        customMatchingAreas: {
+          8: '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"stateId":"nsw"},"geometry":null}]}',
+          9: '{"type":"FeatureCollection","features":[]}',
+        },
+      },
+    );
+
+    expect(payload.regionPackId).toBe("australia");
+    expect(payload.regionPackSubregionId).toBe("nsw");
+    expect(payload.bundledGeoRevision).toBe(BUNDLED_REGION_PACK_GEO_REVISION);
+    expect(payload).not.toHaveProperty("customMatchingAreas");
+  });
+
+  it("keeps customMatchingAreas on Firestore payload when regionPackId is absent", () => {
+    const areas = { 8: '{"type":"FeatureCollection","features":[]}' };
+    const payload = buildSessionDocument(
+      "CUST",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      { customMatchingAreas: areas },
+    );
+
+    expect(payload.customMatchingAreas).toEqual(areas);
+  });
+
+  it("omits pack customMatchingAreas from rules update payloads", () => {
+    const firestore = sessionRulesPatchToFirestore({
+      regionPackId: "australia",
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
+      customMatchingAreas: { 8: '{"type":"FeatureCollection","features":[]}' },
+    });
+
+    expect(firestore.regionPackId).toBe("australia");
+    expect(firestore.bundledGeoRevision).toBe(BUNDLED_REGION_PACK_GEO_REVISION);
+    expect(firestore).not.toHaveProperty("customMatchingAreas");
   });
 
   it("deserializes session tier with free default", () => {
@@ -258,5 +372,82 @@ describe("serializeSession", () => {
     expect(restored.gameOutcome).toBe("found");
     expect(restored.gameResultId).toBe("result-1");
     expect(restored.roundNumber).toBe(2);
+  });
+
+  it("round-trips castleSiege session fields", () => {
+    const payload = buildSessionDocument(
+      "CS01",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      undefined,
+      "observer",
+      "medium",
+      {},
+      "imperial",
+      undefined,
+      {
+        mode: "castleSiege",
+        castleSiegeRoles: { "host-uid": "teamA" },
+        seriesLength: 3,
+        setupMode: "pregame",
+        dials: DEFAULT_CASTLE_SIEGE_DIALS,
+      },
+    );
+
+    expect(payload).toMatchObject({
+      mode: "castleSiege",
+      memberRoles: { "host-uid": "observer" },
+      castleSiegeRoles: { "host-uid": "teamA" },
+      seriesLength: 3,
+      setupMode: "pregame",
+      dials: DEFAULT_CASTLE_SIEGE_DIALS,
+    });
+
+    const restored = deserializeSessionFromFirestore("session-cs", {
+      ...payload,
+      gameArea: {
+        south: 53.3,
+        west: -6.3,
+        north: 53.4,
+        east: -6.2,
+      },
+      border: {
+        geometryJson: JSON.stringify({
+          type: "LineString",
+          coordinates: [
+            [-6.3, 53.3],
+            [-6.2, 53.4],
+          ],
+        }),
+      },
+      coinAssignment: { teamA: "left", teamB: "right" },
+    });
+
+    expect(restored.mode).toBe("castleSiege");
+    expect(restored.castleSiegeRoles).toEqual({ "host-uid": "teamA" });
+    expect(restored.seriesLength).toBe(3);
+    expect(restored.setupMode).toBe("pregame");
+    expect(restored.dials).toEqual(DEFAULT_CASTLE_SIEGE_DIALS);
+    expect(restored.border?.type).toBe("LineString");
+    expect(restored.coinAssignment).toEqual({ teamA: "left", teamB: "right" });
+    expect(restored.memberRoles).toEqual({ "host-uid": "observer" });
+  });
+
+  it("omits castleSiege fields from classic session documents", () => {
+    const payload = buildSessionDocument(
+      "ABCD",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+    );
+
+    expect(payload).not.toHaveProperty("mode");
+    expect(payload).not.toHaveProperty("castleSiegeRoles");
+    expect(payload).not.toHaveProperty("seriesLength");
+    expect(payload).not.toHaveProperty("setupMode");
+    expect(payload).not.toHaveProperty("dials");
+    expect(payload).not.toHaveProperty("arena");
   });
 });

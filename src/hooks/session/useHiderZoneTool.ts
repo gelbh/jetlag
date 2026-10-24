@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
 import { isAbortError } from "@/services/core/network/anySignal";
 import { createLoadTask, setNamedLoadTask } from "@/services/core/progress/loadTask";
@@ -6,16 +6,19 @@ import { HIDER_STATIONS_TASK } from "@/services/core/progress/namedTasks";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import { overpassLoadFromTask } from "@/services/geo/overpass/overpassLoad";
 import { enqueueMoveTimerIntent } from "@/services/session/sessionIntents";
+import { expandBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import {
   buildHidingZoneCircle,
+  dedupeTransitStations,
   type HidingZoneRecord,
   haversineMeters,
   MANUAL_STATION_ID,
   nearestStation,
+  STATION_SNAP_METERS,
   searchStations,
   type TransitStation,
 } from "../../domain/session/hiding/hidingZone";
@@ -24,7 +27,12 @@ import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras
 import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
+/** History.state marker so Back can exit zone placement without leaving `/map`. */
+export const ZONE_WIZARD_HISTORY_KEY = "jlZoneWizard";
+
 const MOVE_MIN_DISTANCE_METERS = 50;
+/** Half-width of the Overpass box searched around a map tap; the margin keeps the snap radius inside it. */
+const TAP_SNAP_SEARCH_METERS = STATION_SNAP_METERS + 50;
 const MOVE_PLAYED_MESSAGE =
   "Move card played. Timer paused. Seekers must stay put. Hider is relocating.";
 
@@ -51,7 +59,7 @@ interface UseHiderZoneToolParams {
   mapPickEnabled?: boolean;
   /** Board economy: require a Move card in hand before starting relocate. */
   hasMoveCard?: () => boolean;
-  /** Board economy: discard Move (and hand) when the relocate is queued. */
+  /** Board economy: discard Move (and hand) when the new zone is confirmed. */
   consumeMoveCard?: () => Promise<void>;
 }
 
@@ -79,14 +87,30 @@ export function useHiderZoneTool({
   const [manualMode, setManualMode] = useState(false);
   const [methodChosen, setMethodChosen] = useState(false);
   const [manualCenter, setManualCenter] = useState<LatLngTuple | null>(null);
+  const [snapping, setSnapping] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [moveMode, setMoveMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /** Bumped per Play Move and cleared on confirm, so a late rejection only rolls back the live attempt. */
   const moveAttemptRef = useRef(0);
+  const wizardOpenRef = useRef(false);
+  const moveModeRef = useRef(false);
+  const historyPushedRef = useRef(false);
+
+  const { beginRequest, cancelRequests, isLatestRequest, requestIdRef, requestSignal } =
+    useLatestRequest();
+  const {
+    beginRequest: beginSnapRequest,
+    cancelRequests: cancelSnapRequests,
+    isLatestRequest: isLatestSnapRequest,
+  } = useLatestRequest();
 
   const resetWizardDraft = useCallback(() => {
+    cancelRequests();
+    cancelSnapRequests();
+    setStationsLoading(false);
+    setSnapping(false);
     setSelectedStation(null);
     setManualCenter(null);
     setManualMode(false);
@@ -95,9 +119,36 @@ export function useHiderZoneTool({
     setError(null);
     setStations([]);
     setStationsError(null);
+  }, [cancelRequests, cancelSnapRequests]);
+
+  const pushZoneWizardHistory = useCallback(() => {
+    if (historyPushedRef.current) {
+      return;
+    }
+    const prev = window.history.state;
+    const prevObj =
+      prev && typeof prev === "object" ? (prev as Record<string, unknown>) : ({} as const);
+    const prevIdx = typeof prevObj.idx === "number" ? prevObj.idx : 0;
+    // Mint a new idx/key so React Router POP accounting does not see delta 0.
+    window.history.pushState(
+      {
+        ...prevObj,
+        idx: prevIdx + 1,
+        key: `jlz-${Date.now().toString(36)}`,
+        [ZONE_WIZARD_HISTORY_KEY]: true,
+      },
+      "",
+    );
+    historyPushedRef.current = true;
   }, []);
 
-  const { beginRequest, isLatestRequest, requestSignal } = useLatestRequest();
+  const abandonZoneWizardHistory = useCallback(() => {
+    if (!historyPushedRef.current) {
+      return;
+    }
+    historyPushedRef.current = false;
+    window.history.back();
+  }, []);
 
   const searchStationsInArea = useCallback(
     async (viewport: MapViewportBounds) => {
@@ -107,16 +158,28 @@ export function useHiderZoneTool({
 
       const task = createLoadTask({ label: "Loading stations", signal: requestSignal() });
       setNamedLoadTask(HIDER_STATIONS_TASK, task);
+      const applyStations = (loaded: TransitStation[]) => {
+        if (!isLatestRequest(requestId) || loaded.length === 0) {
+          return;
+        }
+        setStations(loaded);
+        setStationsError(null);
+        setSelectedStation((current) =>
+          current && loaded.some((station) => station.id === current.id) ? current : null,
+        );
+      };
+
       try {
-        const loaded = await fetchTransitStationsForHidingZoneViewport(
-          viewport,
-          gameArea,
-          overpassLoadFromTask(task, {
+        // GTFS load is uncapped; Overpass is bounded inside the fetcher. onStations
+        // still applies late Overpass hits after that Overpass timeout.
+        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
+          onStations: applyStations,
+          load: overpassLoadFromTask(task, {
             kind: "fetch",
             label: "Searching map data",
             historyKey: "overpass:stations",
           }),
-        );
+        });
         task.complete();
         if (!isLatestRequest(requestId)) {
           return;
@@ -165,28 +228,6 @@ export function useHiderZoneTool({
 
   const hasPlacement = manualMode ? manualCenter !== null : selectedStation !== null;
 
-  const openWizard = useCallback(() => {
-    setWizardOpen(true);
-    resetWizardDraft();
-  }, [resetWizardDraft]);
-
-  const closeWizard = useCallback(() => {
-    setWizardOpen(false);
-    resetWizardDraft();
-  }, [resetWizardDraft]);
-
-  /**
-   * Membership heal reads from the server, so it only runs when reachable.
-   * Offline, rules re-check access when Firestore replays the queued writes and
-   * any rejection surfaces through the write ledger.
-   */
-  const ensureWriteAccessIfOnline = useCallback(async () => {
-    if (!ensureWriteAccess || isEffectivelyOfflineNow()) {
-      return;
-    }
-    await ensureWriteAccess();
-  }, [ensureWriteAccess]);
-
   const pauseTimerForMove = useCallback(() => {
     if (canControlTimer) {
       pauseTimer();
@@ -203,12 +244,89 @@ export function useHiderZoneTool({
     enqueueMoveTimerIntent(sessionId, hiderUid, "resume");
   }, [canControlTimer, hiderUid, resumeTimer, sessionId]);
 
+  const applyWizardClosed = useCallback(
+    (options: { resumeIfMove: boolean }) => {
+      const wasMove = moveModeRef.current;
+      wizardOpenRef.current = false;
+      moveModeRef.current = false;
+      setWizardOpen(false);
+      setMoveMode(false);
+      resetWizardDraft();
+      if (options.resumeIfMove && wasMove) {
+        resumeTimerForMove();
+        // Best-effort: Confirm clears this flag; Cancel/Back must too or the
+        // session stays stuck in “Moving” for seekers.
+        if (existingZone && hiderUid) {
+          moveAttemptRef.current = 0;
+          commitWrite("zone.write", () =>
+            writeHidingZone(sessionId, {
+              ...existingZone,
+              hiderUid,
+              moveInProgress: false,
+            }),
+          );
+        }
+      }
+    },
+    [existingZone, hiderUid, resetWizardDraft, resumeTimerForMove, sessionId],
+  );
+
+  const openWizard = useCallback(() => {
+    wizardOpenRef.current = true;
+    setWizardOpen(true);
+    resetWizardDraft();
+    pushZoneWizardHistory();
+  }, [pushZoneWizardHistory, resetWizardDraft]);
+
+  const closeWizard = useCallback(() => {
+    if (!wizardOpenRef.current) {
+      return;
+    }
+    applyWizardClosed({ resumeIfMove: false });
+    abandonZoneWizardHistory();
+  }, [abandonZoneWizardHistory, applyWizardClosed]);
+
+  /** Back / Cancel / dismiss: close placement and resume the timer when leaving a move. */
+  const closeWizardFromUser = useCallback(() => {
+    if (!wizardOpenRef.current) {
+      return;
+    }
+    applyWizardClosed({ resumeIfMove: true });
+    abandonZoneWizardHistory();
+  }, [abandonZoneWizardHistory, applyWizardClosed]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      if (!wizardOpenRef.current) {
+        return;
+      }
+      historyPushedRef.current = false;
+      applyWizardClosed({ resumeIfMove: true });
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [applyWizardClosed]);
+
+  /**
+   * Membership heal reads from the server, so it only runs when reachable.
+   * Offline, rules re-check access when Firestore replays the queued writes and
+   * any rejection surfaces through the write ledger.
+   */
+  const ensureWriteAccessIfOnline = useCallback(async () => {
+    if (!ensureWriteAccess || isEffectivelyOfflineNow()) {
+      return;
+    }
+    await ensureWriteAccess();
+  }, [ensureWriteAccess]);
+
   const startMove = useCallback(async () => {
     if (!existingZone || !writesEnabled || !hiderUid) {
       return;
     }
 
-    const confirmed = window.confirm("Play Move? Timer pauses and you must pick a new station.");
+    const confirmed = window.confirm(
+      "Play Move? Timer pauses and you must place a new zone (station or map).",
+    );
     if (!confirmed) {
       return;
     }
@@ -218,15 +336,18 @@ export function useHiderZoneTool({
       return;
     }
 
+    moveModeRef.current = true;
+    wizardOpenRef.current = true;
     setMoveMode(true);
     setWizardOpen(true);
     resetWizardDraft();
+    pushZoneWizardHistory();
 
     try {
       await ensureWriteAccessIfOnline();
     } catch (nextError) {
-      setMoveMode(false);
-      setWizardOpen(false);
+      applyWizardClosed({ resumeIfMove: false });
+      abandonZoneWizardHistory();
       setError(zoneWriteErrorMessage(nextError));
       return;
     }
@@ -245,38 +366,69 @@ export function useHiderZoneTool({
         moveInProgress: true,
       }),
     );
-    zoneAcked.then(
-      () => {
-        // Discard the Move card only once the relocate is accepted (as before).
-        if (consumeMoveCard) {
-          commitWrite("economy.update", consumeMoveCard);
-        }
-      },
-      (nextError: unknown) => {
-        if (moveAttemptRef.current !== attempt) {
-          return;
-        }
-        // Compensate the pause so a rejected Move cannot leave the timer stopped.
-        moveAttemptRef.current = 0;
-        resumeTimerForMove();
-        setMoveMode(false);
-        setWizardOpen(false);
-        setError(zoneWriteErrorMessage(nextError));
-      },
-    );
+    zoneAcked.then(undefined, (nextError: unknown) => {
+      if (moveAttemptRef.current !== attempt) {
+        return;
+      }
+      // Compensate the pause so a rejected Move cannot leave the timer stopped.
+      moveAttemptRef.current = 0;
+      resumeTimerForMove();
+      applyWizardClosed({ resumeIfMove: false });
+      abandonZoneWizardHistory();
+      setError(zoneWriteErrorMessage(nextError));
+    });
   }, [
-    consumeMoveCard,
+    abandonZoneWizardHistory,
+    applyWizardClosed,
     ensureWriteAccessIfOnline,
     existingZone,
     hasMoveCard,
     hiderUid,
     pauseTimerForMove,
     postSystemMessage,
+    pushZoneWizardHistory,
     resetWizardDraft,
     resumeTimerForMove,
     sessionId,
     writesEnabled,
   ]);
+  /** Nothing loaded nearby is the common case in Tap map mode, so look stations up around the tap. */
+  const snapTapToNearestStation = useCallback(
+    async (point: LatLngTuple) => {
+      const requestId = beginSnapRequest();
+      const stationsEpoch = requestIdRef.current;
+
+      let station = nearestStation(point, stations);
+      if (!station && !isEffectivelyOfflineNow()) {
+        setSnapping(true);
+        const cacheNearby = (loaded: TransitStation[]) => {
+          if (loaded.length > 0 && isLatestRequest(stationsEpoch)) {
+            setStations((current) => dedupeTransitStations([...current, ...loaded]));
+          }
+        };
+        const nearby = await fetchTransitStationsForHidingZoneViewport(
+          expandBoundingBox(
+            { south: point[0], north: point[0], west: point[1], east: point[1] },
+            TAP_SNAP_SEARCH_METERS,
+          ),
+          gameArea,
+          { onStations: cacheNearby },
+        ).catch((): TransitStation[] => []);
+        cacheNearby(nearby);
+        station = nearestStation(point, nearby);
+      }
+
+      if (!isLatestSnapRequest(requestId)) {
+        return;
+      }
+      setSnapping(false);
+      if (station) {
+        setManualCenter([station.lat, station.lng]);
+        setSelectedStation(station);
+      }
+    },
+    [beginSnapRequest, gameArea, isLatestRequest, isLatestSnapRequest, requestIdRef, stations],
+  );
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
@@ -297,6 +449,7 @@ export function useHiderZoneTool({
         setManualCenter(point);
         setSelectedStation(null);
         setError(null);
+        void snapTapToNearestStation(point);
         return true;
       }
 
@@ -311,7 +464,7 @@ export function useHiderZoneTool({
       setError(null);
       return true;
     },
-    [gameArea, manualMode, mapPickEnabled, stations, wizardOpen],
+    [gameArea, manualMode, mapPickEnabled, snapTapToNearestStation, stations, wizardOpen],
   );
 
   const confirmZone = useCallback(async () => {
@@ -320,14 +473,25 @@ export function useHiderZoneTool({
       return;
     }
 
+    if (snapping) {
+      return;
+    }
+
     let center: LatLngTuple | null = null;
     let stationId = "";
     let stationName = "";
 
+    // Manual placement: draft center is the single source for ring + Confirm.
+    // Snap success keeps manualCenter on the station; timeout/offline leave the tap.
     if (manualMode && manualCenter) {
       center = manualCenter;
-      stationId = MANUAL_STATION_ID;
-      stationName = "";
+      if (selectedStation) {
+        stationId = selectedStation.id;
+        stationName = selectedStation.name;
+      } else {
+        stationId = MANUAL_STATION_ID;
+        stationName = "";
+      }
     } else if (selectedStation) {
       center = [selectedStation.lat, selectedStation.lng];
       stationId = selectedStation.id;
@@ -394,18 +558,26 @@ export function useHiderZoneTool({
       commitWrite("zone.write", () => writeHidingZone(sessionId, zone));
       moveAttemptRef.current = 0;
 
-      setMoveMode(false);
-      setWizardOpen(false);
-      resetWizardDraft();
-
-      if (moveMode) {
+      const wasMove = moveMode;
+      // Confirm already wrote moveInProgress: false; do not re-enter the
+      // cancel path (which would republish the pre-move zone).
+      applyWizardClosed({ resumeIfMove: false });
+      if (wasMove) {
         resumeTimerForMove();
+        // Discard Move only after a successful relocate so Cancel/Back cannot burn it.
+        if (consumeMoveCard) {
+          commitWrite("economy.update", consumeMoveCard);
+        }
       }
+      abandonZoneWizardHistory();
     } catch (nextError) {
       setError(zoneWriteErrorMessage(nextError));
     }
     setSaving(false);
   }, [
+    abandonZoneWizardHistory,
+    applyWizardClosed,
+    consumeMoveCard,
     ensureWriteAccessIfOnline,
     existingZone,
     hiderUid,
@@ -413,20 +585,27 @@ export function useHiderZoneTool({
     manualMode,
     moveMode,
     radiusMeters,
-    resetWizardDraft,
     resumeTimerForMove,
     selectedStation,
     sessionId,
+    snapping,
     writesEnabled,
   ]);
 
-  const choosePlacementMethod = useCallback((manual: boolean) => {
-    setManualMode(manual);
-    setMethodChosen(true);
-    setSelectedStation(null);
-    setManualCenter(null);
-    setError(null);
-  }, []);
+  const choosePlacementMethod = useCallback(
+    (manual: boolean) => {
+      cancelRequests();
+      cancelSnapRequests();
+      setStationsLoading(false);
+      setSnapping(false);
+      setManualMode(manual);
+      setMethodChosen(true);
+      setSelectedStation(null);
+      setManualCenter(null);
+      setError(null);
+    },
+    [cancelRequests, cancelSnapRequests],
+  );
 
   const clearStationSelection = useCallback(() => {
     setSelectedStation(null);
@@ -452,10 +631,12 @@ export function useHiderZoneTool({
     choosePlacementMethod,
     clearStationSelection,
     manualCenter,
+    snapping,
     previewCircle,
     wizardOpen,
     openWizard,
     closeWizard,
+    closeWizardFromUser,
     startMove,
     moveMode,
     confirmZone,

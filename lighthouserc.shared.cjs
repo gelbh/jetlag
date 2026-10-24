@@ -49,8 +49,11 @@ function createLhciConfig({ perf, numberOfRuns = 3, createMaxTbtMs, outputDir, c
       assert: {
         assertMatrix: [
           {
+            // SEO gate uses prerendered `/` (index,follow + WebSite JSON-LD).
             matchingUrlPattern: `${ORIGIN_PATTERN}${END}`,
-            assertions: routeAssertions(perf.home),
+            assertions: routeAssertions(perf.home, {
+              "categories:seo": ["error", { minScore: 0.9 }],
+            }),
           },
           {
             matchingUrlPattern: `${ORIGIN_PATTERN}/join${END}`,

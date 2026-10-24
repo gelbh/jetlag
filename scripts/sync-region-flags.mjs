@@ -36,6 +36,7 @@ const FLAGCDN = {
   "country-usa": { code: "us", alt: "United States" },
   "country-canada": { code: "ca", alt: "Canada" },
   "country-japan": { code: "jp", alt: "Japan" },
+  "country-au": { code: "au", alt: "Australia" },
 };
 
 /**
@@ -229,6 +230,14 @@ const OSAKA_WARD_FLOWERS = {
 const WIKIDATA = {
   "state-ny": { qid: "Q1384", alt: "New York" },
   "state-me": { qid: "Q724", alt: "Maine" },
+  "state-nsw": { qid: "Q3224", alt: "New South Wales" },
+  "state-vic": { qid: "Q36687", alt: "Victoria" },
+  "state-qld": { qid: "Q36074", alt: "Queensland" },
+  "state-sa": { qid: "Q35715", alt: "South Australia" },
+  "state-wa": { qid: "Q3206", alt: "Western Australia" },
+  "state-tas": { qid: "Q34366", alt: "Tasmania" },
+  "state-nt": { qid: "Q3235", alt: "Northern Territory" },
+  "state-act": { qid: "Q3258", alt: "Australian Capital Territory" },
   "province-bc": { qid: "Q1973", alt: "British Columbia" },
   "canton-zurich": { qid: "Q11943", alt: "Canton of Zürich" },
   "canton-bern": { qid: "Q11911", alt: "Canton of Bern" },
@@ -266,12 +275,14 @@ const WIKIDATA = {
   "canton-geneva": { qid: "Q11917", alt: "Canton of Geneva" },
   "canton-jura": { qid: "Q12755", alt: "Canton of Jura" },
   "county-dublin": { qid: "Q173500", alt: "County Dublin" },
+  "county-hampshire": { qid: "Q23204", alt: "Hampshire" },
   "metro-london": { qid: "Q23306", alt: "Greater London" },
   "metro-nyc": { qid: "Q60", alt: "New York City" },
   "metro-tokyo": { qid: "Q1490", alt: "Tokyo" },
   "metro-osaka": { qid: "Q35765", alt: "Osaka City" },
   "metro-portland-maine": { qid: "Q49201", alt: "Portland" },
   "metro-prince-rupert": { qid: "Q1015639", alt: "Prince Rupert" },
+  "metro-southampton": { qid: "Q79848", alt: "Southampton" },
   "lucerne-metro": { qid: "Q4191", alt: "Lucerne" },
   "zurich-city": { qid: "Q72", alt: "Zürich" },
   // Kantō / Kansai have no P41/P94 on Wikidata — local overrides.

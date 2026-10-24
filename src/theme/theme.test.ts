@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { adminTheme } from "./adminTheme";
 import {
   JETLAG_DOCK_Z_INDEX,
   JETLAG_MODAL_Z_INDEX,
@@ -30,6 +29,11 @@ describe("jetlagTheme", () => {
     expect(jetlagTheme.components?.Modal).toBeDefined();
     expect(jetlagTheme.components?.Notification).toBeDefined();
     expect(jetlagTheme.components?.Alert).toBeDefined();
+    const alertRoot = jetlagTheme.components?.Alert?.styles?.root as
+      | { border?: string }
+      | undefined;
+    expect(alertRoot?.border).toContain("var(--alert-color)");
+    expect(alertRoot?.border).not.toContain(jetlagBrand.halt);
     expect(jetlagTheme.colors?.halt).toBeDefined();
     expect(jetlagBrand.halt).toMatch(/^oklch/);
   });
@@ -49,24 +53,5 @@ describe("jetlagTheme", () => {
     expect(resolved.variables?.["--jl-z-dock"]).toBe("1000");
     expect(resolved.variables?.["--jl-z-modal"]).toBe("1100");
     expect(resolved.dark?.["--mantine-color-body"]).toBe(jetlagBrand.canvas);
-  });
-});
-
-describe("adminTheme", () => {
-  type VarsResolver = (
-    theme: never,
-    props: { variant: string },
-    ctx: never,
-  ) => { root: Record<string, string> };
-
-  it.each([
-    ["Button", "--button"],
-    ["ActionIcon", "--ai"],
-  ] as const)("gives %s filled and light controls a distinct hover", (component, prefix) => {
-    const vars = adminTheme.components?.[component]?.vars as unknown as VarsResolver;
-    for (const variant of ["filled", "light"]) {
-      const { root } = vars({} as never, { variant }, {} as never);
-      expect(root[`${prefix}-hover`]).not.toBe(root[`${prefix}-bg`]);
-    }
   });
 });

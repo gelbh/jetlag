@@ -31,8 +31,10 @@ export function optionalKernelWasmPkg(): Plugin {
       if (!isKernelWasmPkgSpecifier(id, importer)) {
         return null;
       }
+      // Return the absolute pkg path when built. Returning null lets Vite miss
+      // the gitignored pkg/ and leave the graph on the stub.
       if (existsSync(kernelWasmPkgJs)) {
-        return null;
+        return kernelWasmPkgJs;
       }
       return kernelWasmPkgStubId;
     },
