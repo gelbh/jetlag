@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
 import { isAbortError } from "@/services/core/network/anySignal";
-import { createLoadTask, setNamedLoadTask } from "@/services/core/progress/loadTask";
+import { createLoadTask, type LoadTask, setNamedLoadTask } from "@/services/core/progress/loadTask";
 import { HIDER_STATIONS_TASK } from "@/services/core/progress/namedTasks";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import { overpassLoadFromTask } from "@/services/geo/overpass/overpassLoad";
@@ -56,6 +56,44 @@ interface UseHiderZoneToolParams {
   mapPickEnabled?: boolean;
   hasMoveCard?: () => boolean;
   consumeMoveCard?: () => Promise<void>;
+}
+
+type StationLoadOutcome =
+  | { status: "loaded"; stations: TransitStation[] }
+  | { status: "cancelled" }
+  | { status: "failed" };
+
+/**
+ * Runs the station search under `task` and never rejects. Kept outside the hook
+ * because React Compiler cannot compile try/finally inside a component or hook.
+ */
+async function loadStationsWithProgress(
+  viewport: MapViewportBounds,
+  gameArea: GameArea,
+  task: LoadTask,
+  callbacks: { onStations: (stations: TransitStation[]) => void; onSettled: () => void },
+): Promise<StationLoadOutcome> {
+  try {
+    const stations = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
+      onStations: callbacks.onStations,
+      load: overpassLoadFromTask(task, {
+        kind: "fetch",
+        label: "Searching map data",
+        historyKey: "overpass:stations",
+      }),
+    });
+    task.complete();
+    return { status: "loaded", stations };
+  } catch (error) {
+    if (isAbortError(error)) {
+      task.cancel();
+      return { status: "cancelled" };
+    }
+    task.fail(error);
+    return { status: "failed" };
+  } finally {
+    callbacks.onSettled();
+  }
 }
 
 export function useHiderZoneTool({
@@ -163,37 +201,25 @@ export function useHiderZoneTool({
         );
       };
 
-      try {
-        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
-          onStations: applyStations,
-          load: overpassLoadFromTask(task, {
-            kind: "fetch",
-            label: "Searching map data",
-            historyKey: "overpass:stations",
-          }),
-        });
-        task.complete();
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
-        setStations(loaded);
-        setSelectedStation((current) =>
-          current && loaded.some((station) => station.id === current.id) ? current : null,
-        );
-      } catch (error) {
-        if (isAbortError(error)) {
-          task.cancel();
-          return;
-        }
-        task.fail(error);
-        if (isLatestRequest(requestId)) {
-          setStationsError("Couldn't load transit stations for this area.");
-        }
-      } finally {
+      const outcome = await loadStationsWithProgress(viewport, gameArea, task, {
+        onStations: applyStations,
         // A superseded search must not clear the newer search's spinner.
-        setStationsLoading((loading) => (isLatestRequest(requestId) ? false : loading));
+        onSettled: () =>
+          setStationsLoading((loading) => (isLatestRequest(requestId) ? false : loading)),
+      });
+      if (!isLatestRequest(requestId) || outcome.status === "cancelled") {
+        return;
       }
+      if (outcome.status === "failed") {
+        setStationsError("Couldn't load transit stations for this area.");
+        return;
+      }
+
+      const loaded = outcome.stations;
+      setStations(loaded);
+      setSelectedStation((current) =>
+        current && loaded.some((station) => station.id === current.id) ? current : null,
+      );
     },
     [beginRequest, gameArea, isLatestRequest, requestSignal],
   );
