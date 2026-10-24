@@ -5,6 +5,7 @@ import type {
   PendingQuestionToolType,
   RandomizedTo,
 } from "../session/activity/sessionChat";
+import { resolveCategoryPresence } from "../session/catalog/playAreaCategoryPresence";
 import {
   availableMatchingCategories,
   availableMeasuringCatalog,
@@ -47,45 +48,92 @@ import {
   usedThermometerDistanceOptionsForSession,
 } from "./thermometerQuestions";
 
+const PRESENCE_RANDOMIZE_TOOLS: ReadonlySet<PendingQuestionToolType> = new Set([
+  "matching",
+  "measuring",
+  "tentacle",
+]);
+
+/** Preload / admin signals for excluding empty Measuring / Matching / Tentacle ids. */
+export type RandomizePresenceSource = {
+  categoryPresenceCounts: Record<string, number> | null;
+  isAdminUnavailable?: (categoryId: string) => boolean;
+};
+
+function filterOptionsByPlayAreaPresence(
+  options: RandomizedTo[],
+  toolType: PendingQuestionToolType,
+  session: SessionRulesInput,
+  presence?: RandomizePresenceSource,
+): RandomizedTo[] {
+  if (!PRESENCE_RANDOMIZE_TOOLS.has(toolType)) {
+    return options;
+  }
+  const regionPackId = session.regionPackId;
+  if (!regionPackId) {
+    return options;
+  }
+  const probePending = presence?.categoryPresenceCounts === null;
+  return options.filter((option) => {
+    const categoryId = String(option.optionKey);
+    return resolveCategoryPresence({
+      categoryId,
+      regionPackId,
+      adminUnavailable: presence?.isAdminUnavailable?.(categoryId) ?? false,
+      probeCount: presence?.categoryPresenceCounts?.[categoryId],
+      probePending,
+    }).available;
+  });
+}
+
 export function questionOptionsForTool(
   toolType: PendingQuestionToolType,
   session: SessionRulesInput,
+  presence?: RandomizePresenceSource,
 ): RandomizedTo[] {
   const unit = sessionDistanceUnit(session);
+  let options: RandomizedTo[];
   switch (toolType) {
     case "matching":
-      return availableMatchingCategories(session).map((category) => ({
+      options = availableMatchingCategories(session).map((category) => ({
         optionKey: category.id,
         label: category.label,
       }));
+      break;
     case "measuring":
-      return availableMeasuringCatalog(session).map((option) => ({
+      options = availableMeasuringCatalog(session).map((option) => ({
         optionKey: option.id,
         label: option.label,
       }));
+      break;
     case "radar":
-      return resolveRadarPresetsMeters(session).map((meters) => ({
+      options = resolveRadarPresetsMeters(session).map((meters) => ({
         optionKey: meters,
         label: radarDistanceOptionLabel(meters / milesToMeters(1), unit),
       }));
+      break;
     case "thermometer":
-      return resolveThermometerPresetsMeters(session).map((meters) => ({
+      options = resolveThermometerPresetsMeters(session).map((meters) => ({
         optionKey: meters,
         label: thermometerDistanceLabel(meters, unit),
       }));
+      break;
     case "tentacle":
-      return tentacleCategoriesForSession(session).map((category) => ({
+      options = tentacleCategoriesForSession(session).map((category) => ({
         optionKey: category.id,
         label: category.label,
       }));
+      break;
     case "photo":
-      return photoCategoriesForGameSize(sessionGameSize(session)).map((category) => ({
+      options = photoCategoriesForGameSize(sessionGameSize(session)).map((category) => ({
         optionKey: category.id,
         label: photoCategoryLabelForUnit(category.id, unit),
       }));
+      break;
     default:
       return [];
   }
+  return filterOptionsByPlayAreaPresence(options, toolType, session, presence);
 }
 
 export function questionOptionLabelForPending(
@@ -231,9 +279,10 @@ export function pickRandomizeOption(
   annotations: readonly AnnotationRecord[],
   pendingQuestions: readonly PendingQuestionRecord[],
   random: () => number = Math.random,
+  presence?: RandomizePresenceSource,
 ): RandomizedTo | null {
   const exclude = randomizeExcludeLabelsForPending(pending, session, annotations, pendingQuestions);
-  const pool = questionOptionsForTool(pending.toolType, session).filter(
+  const pool = questionOptionsForTool(pending.toolType, session, presence).filter(
     (option) => !exclude.has(option.label),
   );
   return pool[Math.floor(random() * pool.length)] ?? null;
