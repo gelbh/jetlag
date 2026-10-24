@@ -25,7 +25,6 @@ fn single_segment_buffer_clips_to_game_area() {
         (-0.12 + -0.119) / 2.0,
         (51.5 + 51.501) / 2.0,
     ));
-    // Outside the play area box.
     assert!(!feature_contains_lng_lat(&near, -0.20, 51.40));
 }
 
@@ -70,7 +69,6 @@ fn segments_and_disks_combine() {
 #[test]
 fn no_intersection_with_game_area_returns_none() {
     let area = london_box();
-    // Far west of the box.
     let segment = vec![[-0.50, 51.5], [-0.49, 51.501]];
     assert!(build_near_region(&[segment], 50.0, &[], &area).is_none());
 }

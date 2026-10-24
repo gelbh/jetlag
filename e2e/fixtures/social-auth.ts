@@ -6,7 +6,6 @@ export const E2E_LAYOUT_USERNAME = "e2e_layout_user";
 
 export const SOCIAL_LAYOUT_ROUTES = {
   "/leaderboard": {
-    // Sticky Choose board chip (metric controls live in the board sheet).
     ready: (page: Page) => page.getByRole("button", { name: /Choose board/i }),
     viewportTarget: (page: Page) => page.getByRole("button", { name: /Choose board/i }),
   },
@@ -55,10 +54,6 @@ async function waitForSocialRouteChrome(page: Page, path: SocialLayoutPath): Pro
   });
 }
 
-/**
- * Settles a social route past RequireUsername.
- * Signs in + seeds on `/` first so the target route does not paint auth gates.
- */
 export async function openSocialRoute(
   page: Page,
   path: SocialLayoutPath,

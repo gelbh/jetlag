@@ -3,7 +3,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-/// GeoJSON Feature with Polygon or MultiPolygon geometry.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PolygonFeature {
     #[serde(rename = "type")]
@@ -58,7 +57,6 @@ pub struct NearRegionInputJson {
     pub divisions: Option<u32>,
 }
 
-/// Tentacle / Voronoi site on the JSON boundary (`id` + lat/lng degrees).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TentacleSiteJson {
     pub id: String,

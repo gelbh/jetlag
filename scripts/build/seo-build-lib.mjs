@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const MIN_ROOT_TEXT_CHARS = 40;
-/** Search-result truncation budgets for indexable pages. */
 export const MAX_TITLE_CHARS = 60;
 export const MAX_DESCRIPTION_CHARS = 160;
 
@@ -91,7 +90,6 @@ function attr(tag, name) {
   return match ? (match[1] ?? match[2] ?? match[3]) : undefined;
 }
 
-/** `modulepreload:/assets/x.js` style key, or null when the tag is not a loaded asset. */
 function headAssetKey(fullTag) {
   // Read attributes from the opening tag only, never from an inline script body.
   const tag = fullTag.match(new RegExp(String.raw`^<\w+${TAG_ATTRS}>`))[0];
@@ -166,7 +164,6 @@ export function restoreTemplateHeadAssets(snapshotHtml, templateHtml) {
   return out + snapshotHtml.slice(cursor);
 }
 
-/** Opening tag of the element whose `id` is exactly `id`. */
 function openTagWithIdRe(id) {
   return new RegExp(String.raw`<[a-z][\w-]*\b${TAG_ATTRS}\sid=["']${id}["']${TAG_ATTRS}>`, "i");
 }
@@ -186,7 +183,6 @@ export function hasBootSplashElement(html) {
   return BOOT_SPLASH_OPEN_TAG_RE.test(maskInert(html));
 }
 
-/** `content` of `<meta name="robots">`, or undefined. */
 export function robotsMetaContent(html) {
   const masked = maskInert(html);
   for (const match of masked.matchAll(META_TAG_RE)) {
@@ -197,7 +193,6 @@ export function robotsMetaContent(html) {
   return undefined;
 }
 
-/** `content` of `<meta name="description">`, or undefined. */
 export function metaDescriptionContent(html) {
   const masked = maskInert(html);
   for (const match of masked.matchAll(META_TAG_RE)) {
@@ -208,7 +203,6 @@ export function metaDescriptionContent(html) {
   return undefined;
 }
 
-/** `content` of `<meta property="…">`, or undefined. */
 export function metaPropertyContent(html, property) {
   const want = property.toLowerCase();
   const masked = maskInert(html);
@@ -223,7 +217,6 @@ export function metaPropertyContent(html, property) {
 const LD_JSON_SCRIPT_RE =
   /<script(?=[\s/>])[^>]*\btype\s*=\s*(?:"application\/ld\+json"|'application\/ld\+json')[^>]*>([\s\S]*?)<\/script(?=[\s/>])[^>]*>/gi;
 
-/** Raw text bodies of `application/ld+json` scripts (trimmed; empty bodies dropped). */
 export function seoJsonLdBodies(html) {
   const bodies = [];
   for (const match of html.matchAll(LD_JSON_SCRIPT_RE)) {
@@ -271,7 +264,6 @@ export function countLiveH1(html) {
   return (masked.match(/<h1\b/gi) ?? []).length;
 }
 
-/** Concatenated `style="…"` attribute values from live markup. */
 export function inlineStyleText(html) {
   return [...maskInert(html).matchAll(/\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)]
     .map((m) => m[1] ?? m[2])

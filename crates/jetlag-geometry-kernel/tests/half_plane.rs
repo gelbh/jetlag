@@ -10,7 +10,6 @@ fn london_game_area() -> GameArea {
 #[test]
 fn cold_half_plane_contains_colder_side_of_thermo() {
     let area = london_game_area();
-    // A west of B → bearing roughly east; cold = difference of hotter wedge.
     let point_a = (51.45, -0.18);
     let point_b = (51.46, -0.12);
     let cold = build_half_plane_polygon(
@@ -30,7 +29,6 @@ fn cold_half_plane_contains_colder_side_of_thermo() {
     )
     .expect("hot half-plane");
 
-    // A west of B → hotter wedge points east; cold owns west, hot owns east.
     let west_in_cold = feature_contains_lng_lat(&cold, -0.19, 51.45);
     let east_in_cold = feature_contains_lng_lat(&cold, -0.11, 51.45);
     let west_in_hot = feature_contains_lng_lat(&hot, -0.19, 51.45);

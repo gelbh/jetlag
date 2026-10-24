@@ -155,7 +155,6 @@ const METRO_SOURCES = {
   },
 };
 
-/** Presets that have no GTFS metro wiring today. */
 const PRESETS_WITHOUT_GTFS = ["tokyo", "osaka", "swiss"];
 
 function parseArgs(argv) {

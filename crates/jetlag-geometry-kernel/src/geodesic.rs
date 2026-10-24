@@ -5,7 +5,6 @@
 /// with `mask.rs` Turf `6_371_008.8`; naive unify breaks one parity surface.
 pub(crate) const EARTH_RADIUS_M: f64 = 6_371_000.0;
 
-/// Lat/lng tuple as in TS `LatLngTuple`.
 pub(crate) type LatLng = (f64, f64);
 
 pub(crate) fn midpoint(a: LatLng, b: LatLng) -> LatLng {
@@ -34,7 +33,6 @@ pub fn destination_point(origin: LatLng, distance_m: f64, bearing_deg: f64) -> L
     (φ2.to_degrees(), λ2.to_degrees())
 }
 
-/// Haversine distance in meters between two lat/lng points.
 pub(crate) fn haversine_meters(a: LatLng, b: LatLng) -> f64 {
     let lat_delta = (b.0 - a.0).to_radians();
     let lng_delta = (b.1 - a.1).to_radians();
