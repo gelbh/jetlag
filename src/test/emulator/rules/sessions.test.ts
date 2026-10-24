@@ -703,6 +703,15 @@ describe("firestore.rules — sessions", () => {
       );
     });
 
+    it("denies duplicating the caller's own uid in memberUids", async () => {
+      await seed();
+      await assertFails(
+        sessionAs("seeker-a").update({
+          memberUids: ["host-1", "seeker-a", "seeker-a"],
+        }),
+      );
+    });
+
     it("denies a join that also writes castleSiegeRoles", async () => {
       await seed({
         ...baseMembers,
