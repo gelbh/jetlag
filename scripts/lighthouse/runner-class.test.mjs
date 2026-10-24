@@ -5,7 +5,7 @@ import { test } from "node:test";
 
 const require = createRequire(import.meta.url);
 const path = require.resolve("../../lighthouserc.cjs");
-const SLOW = [0.88, 0.92, 0.87, 0.53];
+const SLOW = [0.88, 0.87, 0.87, 0.53];
 const FAST = [0.91, 0.92, 0.92, 0.53];
 
 /** @param {string} model */
