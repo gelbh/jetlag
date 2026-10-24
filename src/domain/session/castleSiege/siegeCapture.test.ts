@@ -135,6 +135,67 @@ describe("siegeCapture", () => {
     expect(isCaptureWin(disputed.capture)).toBe(false);
   });
 
+  it("rejects submit when team is not attacking", () => {
+    const clock = createSiegeClocks({
+      nowMs: 0,
+      limitSeconds: 600,
+      endgame: { kind: "standard", attackingTeam: "teamA" },
+    });
+    const result = submitSiegeCapture({
+      capture: createIdleSiegeCapture(),
+      clock,
+      guards: createInitialSiegeGuards(),
+      nowMs: 1_000,
+      attackingTeamId: "teamB",
+      submittedByUid: "uid-b",
+      photoStoragePath: "sessions/s1/siegeCaptures/b.jpg",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe("invalid");
+    }
+  });
+
+  it("rejects trailing-team submit during Dusk head-start", () => {
+    const clock = createSiegeClocks({
+      nowMs: 0,
+      limitSeconds: 600,
+      endgame: { kind: "headStart", teamId: "teamA", headStartSeconds: 900 },
+    });
+    expect(clock.roles.teamB).toBe("defend");
+    // Flip: trailing team is teamB while head-start active for teamA.
+    const midHeadStart = submitSiegeCapture({
+      capture: createIdleSiegeCapture(),
+      clock: {
+        ...clock,
+        roles: { teamA: "attack", teamB: "attack" },
+      },
+      guards: createInitialSiegeGuards(),
+      nowMs: 1_000,
+      attackingTeamId: "teamB",
+      submittedByUid: "uid-b",
+      photoStoragePath: "sessions/s1/siegeCaptures/b.jpg",
+    });
+    expect(midHeadStart.ok).toBe(false);
+    if (!midHeadStart.ok) {
+      expect(midHeadStart.reason).toBe("capture_blocked");
+    }
+
+    const afterHeadStart = submitSiegeCapture({
+      capture: createIdleSiegeCapture(),
+      clock: {
+        ...clock,
+        roles: { teamA: "attack", teamB: "attack" },
+      },
+      guards: createInitialSiegeGuards(),
+      nowMs: 900_000,
+      attackingTeamId: "teamB",
+      submittedByUid: "uid-b",
+      photoStoragePath: "sessions/s1/siegeCaptures/b.jpg",
+    });
+    expect(afterHeadStart.ok).toBe(true);
+  });
+
   it("rejects second submit while pending", () => {
     const clock = createSiegeClocks({
       nowMs: 0,

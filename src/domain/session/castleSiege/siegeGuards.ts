@@ -34,7 +34,6 @@ export type SiegeGuardState = {
   travelSoftActive: boolean;
   /** Latched until resolve; mirrors hard pauseReason when set. */
   hardKind: SiegeGuardKind | null;
-  captureBlocked: boolean;
 };
 
 export type GeofenceSample = {
@@ -58,7 +57,6 @@ export function createInitialSiegeGuards(): SiegeGuardState {
     geofenceSoftActive: false,
     travelSoftActive: false,
     hardKind: null,
-    captureBlocked: false,
   };
 }
 
@@ -75,8 +73,10 @@ export function isInsideDefenderZone(
   );
 }
 
-export function isCaptureAllowed(clock: SiegeClockState, guards: SiegeGuardState): boolean {
-  return !clock.paused && !clock.captureBlocked && !guards.captureBlocked;
+/** Capture blocked exactly when the Siege clock is paused (hard/soft pause). */
+export function isCaptureAllowed(clock: SiegeClockState, _guards?: SiegeGuardState): boolean {
+  void _guards;
+  return !clock.paused;
 }
 
 function latchHard(
@@ -91,7 +91,6 @@ function latchHard(
     guards: {
       ...guards,
       hardKind: kind,
-      captureBlocked: true,
       geofenceSoftActive: kind === "geofence" ? false : guards.geofenceSoftActive,
       travelSoftActive: kind === "travel" ? false : guards.travelSoftActive,
     },

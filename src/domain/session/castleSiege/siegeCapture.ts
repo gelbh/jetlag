@@ -49,6 +49,18 @@ export function submitSiegeCapture(opts: {
   if (!isCaptureAllowed(opts.clock, opts.guards)) {
     return { ok: false, reason: "capture_blocked" };
   }
+  if (opts.clock.roles[opts.attackingTeamId] !== "attack") {
+    return { ok: false, reason: "invalid" };
+  }
+  // Trailing team waits out Dusk head-start before they may submit a capture.
+  if (
+    opts.clock.headStartEndsAtMs != null &&
+    opts.clock.headStartTeamId != null &&
+    opts.attackingTeamId !== opts.clock.headStartTeamId &&
+    opts.nowMs < opts.clock.headStartEndsAtMs
+  ) {
+    return { ok: false, reason: "capture_blocked" };
+  }
   if (opts.capture.status === "pending") {
     return { ok: false, reason: "already_pending" };
   }
