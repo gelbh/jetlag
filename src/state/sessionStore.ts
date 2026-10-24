@@ -41,6 +41,7 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "neutralBelt",
   "dials",
   "coinAssignment",
+  "standoffTurn",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordStructuredKey = (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
@@ -94,6 +95,8 @@ const SESSION_RECORD_SCALAR_KEYS = [
   "mode",
   "seriesLength",
   "setupMode",
+  "phase",
+  "standoffDeckRemainingCount",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordScalarKey = (typeof SESSION_RECORD_SCALAR_KEYS)[number];

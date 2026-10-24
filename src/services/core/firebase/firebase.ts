@@ -27,7 +27,7 @@ import {
   readFirebaseConfigFromEnv,
 } from "@/config/env";
 import { firebaseEmulatorEndpoints } from "@/config/firebaseEmulatorEndpoints";
-import { isAdminUser } from "@/domain/admin/adminAccess";
+import { claimsLookAdmin } from "@/domain/admin/adminAccess";
 import {
   captureAuthBootstrapFailureLazy,
   captureAuthPersistenceFallbackLazy,
@@ -319,12 +319,26 @@ export function startAuthBootstrap(): void {
   }
 
   authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
-    const identity = user && {
-      uid: user.uid,
-      isAnonymous: user.isAnonymous,
-      isInternal: isAdminUser(user),
-    };
-    syncAnalyticsIdentityLazy(identity);
+    if (!user) {
+      syncAnalyticsIdentityLazy(null);
+      return;
+    }
+    void user
+      .getIdTokenResult()
+      .then((token) => {
+        syncAnalyticsIdentityLazy({
+          uid: user.uid,
+          isAnonymous: user.isAnonymous,
+          isInternal: claimsLookAdmin(token.claims),
+        });
+      })
+      .catch(() => {
+        syncAnalyticsIdentityLazy({
+          uid: user.uid,
+          isAnonymous: user.isAnonymous,
+          isInternal: false,
+        });
+      });
   });
 
   void getAuthBootstrapPromise();

@@ -4,20 +4,26 @@ import { gameAreaCenter } from "@/domain/geometry/gameArea/geometry";
 import type { SessionRecord } from "@/domain/map/annotations";
 import { arenaFromGameArea } from "@/domain/session/castleSiege/arena";
 import { readClientSealWrapKey } from "@/domain/session/castleSiege/clientSealWrapKey";
+import { CASTLE_SIEGE_HAND_LIMIT } from "@/domain/session/castleSiege/deck";
 import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
 import type { FairSplitLockPatch } from "@/domain/session/castleSiege/fairSplitLock";
 import { isCastleSiegeSession } from "@/domain/session/castleSiege/mode";
 import type { CastleSiegeSealPoint } from "@/domain/session/castleSiege/pregame";
 import { SEAL_WRAP_KEY_ID_V1 } from "@/domain/session/castleSiege/sealCipher";
+import { deserializeTurnState } from "@/domain/session/castleSiege/standoffPersist";
 import {
   isCastleSiegePlayingRole,
   resolveCastleSiegeRole,
 } from "@/domain/session/castleSiege/teamRole";
-import { updateCastleSiegeSetup } from "@/services/firestore/firestoreSessions";
+import {
+  startCastleSiegeStandoff,
+  updateCastleSiegeSetup,
+} from "@/services/firestore/firestoreSessions";
 import { ArenaLedger } from "./ArenaLedger";
 import { FairSplitProposal } from "./FairSplitProposal";
 import { MusterDials } from "./MusterDials";
 import { SealVault } from "./SealVault";
+import { StandoffChrome } from "./StandoffChrome";
 
 export type CastleSiegeSetupChromeProps = {
   session: SessionRecord | null | undefined;
@@ -79,6 +85,23 @@ export function CastleSiegeSetupChrome({
   const fairSplitArena = session.arena?.polygon ?? session.gameArea;
   const fairSplitSealsReady = Boolean(sealA && sealB);
   const beltWidthMeters = session.dials?.beltWidthMeters ?? 200;
+  const inStandoff = session.phase === "standoff";
+  const standoffTurn = deserializeTurnState(session.standoffTurn) ?? null;
+  const deckRemaining = session.standoffDeckRemainingCount ?? 0;
+  // Hand ids live in teamHands/{teamId}; chrome shows 0 until a listener wires (Phase 5.x).
+  const ownHandCount = 0;
+
+  const beginStandoff = async () => {
+    if (!isHost || importBusy) return;
+    setImportBusy(true);
+    setImportError(null);
+    try {
+      await startCastleSiegeStandoff(session.id);
+    } catch {
+      setImportError("Couldn't start Standoff. Try again.");
+    }
+    setImportBusy(false);
+  };
 
   return (
     <aside
@@ -87,9 +110,22 @@ export function CastleSiegeSetupChrome({
       className="pointer-events-auto absolute left-3 right-3 z-[var(--z-dock)] flex max-h-[min(52vh,28rem)] flex-col gap-2 overflow-y-auto"
       style={{ top: "max(4.5rem, calc(env(safe-area-inset-top, 0px) + 3.75rem))" }}
     >
-      <ArenaLedger arena={session.arena} setupMode={session.setupMode} dials={session.dials} />
+      <StandoffChrome
+        active={inStandoff}
+        turn={standoffTurn}
+        deckRemaining={deckRemaining}
+        handCount={ownHandCount}
+        handLimit={CASTLE_SIEGE_HAND_LIMIT}
+        endgameBanner={
+          standoffTurn?.lastWordPending ? "lastWord" : standoffTurn?.duskReady ? "dusk" : null
+        }
+      />
 
-      {isHost ? (
+      {inStandoff ? null : (
+        <ArenaLedger arena={session.arena} setupMode={session.setupMode} dials={session.dials} />
+      )}
+
+      {!inStandoff && isHost ? (
         <div
           className="rounded-md border px-3 py-2"
           style={{
@@ -106,6 +142,18 @@ export function CastleSiegeSetupChrome({
             fullWidth
             onClick={() => void importArenaFromGameArea()}
           />
+          {session.arena ? (
+            <div className="mt-2">
+              <EntryAsyncButton
+                type="button"
+                busy={importBusy}
+                idleLabel="Start Standoff"
+                busyLabel="Starting…"
+                fullWidth
+                onClick={() => void beginStandoff()}
+              />
+            </div>
+          ) : null}
           {importError ? (
             <p className="m-0 mt-2 text-xs" style={{ color: "var(--color-halt)" }} role="alert">
               {importError}
@@ -114,9 +162,9 @@ export function CastleSiegeSetupChrome({
         </div>
       ) : null}
 
-      {isHost ? <MusterDials dials={session.dials} onSave={saveDials} /> : null}
+      {!inStandoff && isHost ? <MusterDials dials={session.dials} onSave={saveDials} /> : null}
 
-      {playing && uid && (role === "teamA" || role === "teamB") ? (
+      {!inStandoff && playing && uid && (role === "teamA" || role === "teamB") ? (
         <SealVault
           sessionId={session.id}
           teamId={role}
@@ -127,7 +175,7 @@ export function CastleSiegeSetupChrome({
         />
       ) : null}
 
-      {fairSplitActive && fairSplitSealsReady && sealA && sealB ? (
+      {!inStandoff && fairSplitActive && fairSplitSealsReady && sealA && sealB ? (
         <FairSplitProposal
           arena={fairSplitArena}
           sealA={sealA}
@@ -139,7 +187,7 @@ export function CastleSiegeSetupChrome({
         />
       ) : null}
 
-      {fairSplitActive && !fairSplitSealsReady ? (
+      {!inStandoff && fairSplitActive && !fairSplitSealsReady ? (
         <p
           className="m-0 rounded-md border px-3 py-2 text-sm"
           role="status"
