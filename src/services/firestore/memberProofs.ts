@@ -14,10 +14,15 @@ async function createMissingMemberProof(sessionId: string, uid: string): Promise
     return;
   }
 
-  const secret = useSessionStore.getState().healSecrets[sessionId] ?? generateHealSecret();
+  const storedSecret = useSessionStore.getState().healSecrets[sessionId];
+  const secret = storedSecret ?? generateHealSecret();
   const hash = await hashHealSecret(secret);
+  if (!storedSecret) {
+    // Store first: a queued setDoc can land after a reload, and a proof no stored secret matches
+    // can never be replaced, while a secret without a proof is repaired on the next resume.
+    useSessionStore.getState().setHealSecret(sessionId, secret);
+  }
   await setDoc(ref, { hash, createdAt: new Date().toISOString() });
-  useSessionStore.getState().setHealSecret(sessionId, secret);
 }
 
 const confirmed = new Set<string>();

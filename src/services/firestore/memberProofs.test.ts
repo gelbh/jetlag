@@ -79,12 +79,26 @@ describe("ensureMemberProof", () => {
     expect(getDoc).toHaveBeenCalledTimes(2);
   });
 
-  it("swallows a denied create without storing the secret", async () => {
+  it("swallows a denied create and keeps the stored secret for the next resume", async () => {
     getDoc.mockResolvedValue({ exists: () => false });
     setDoc.mockRejectedValue(new Error("permission-denied"));
 
     await expect(ensureMemberProof("session-1", "uid-1")).resolves.toBeUndefined();
-    expect(useSessionStore.getState().healSecrets).toEqual({});
+    expect(useSessionStore.getState().healSecrets["session-1"]).toMatch(/^[A-Za-z0-9_-]{43}$/);
+  });
+
+  it("stores a new secret before writing its proof", async () => {
+    getDoc.mockResolvedValue({ exists: () => false });
+    let storedAtWrite: string | undefined;
+    setDoc.mockImplementation(async () => {
+      storedAtWrite = useSessionStore.getState().healSecrets["session-1"];
+    });
+
+    await ensureMemberProof("session-1", "uid-1");
+
+    expect(setDoc).toHaveBeenCalledTimes(1);
+    expect(storedAtWrite).toBe(useSessionStore.getState().healSecrets["session-1"]);
+    expect(storedAtWrite).toMatch(/^[A-Za-z0-9_-]{43}$/);
   });
 
   it("skips the proof when crypto.subtle is unavailable", async () => {
