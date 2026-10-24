@@ -58,7 +58,8 @@ for (const uid of targets) {
     nextClaims.admin = true;
   }
   await auth.setCustomUserClaims(uid, nextClaims);
-  console.log(`${revoke ? "revoked" : "granted"} admin claim for uid=${uid}`);
 }
 
-console.log("Done. Clients must refresh ID tokens (sign out/in or getIdToken(true)).");
+console.log(
+  `${revoke ? "Revoked" : "Granted"} admin claim for ${targets.size} user(s). Clients must refresh ID tokens (sign out/in or getIdToken(true)).`,
+);
