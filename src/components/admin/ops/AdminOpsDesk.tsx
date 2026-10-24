@@ -332,7 +332,7 @@ function AdminOpsDeskContent() {
             routeRequestId,
             routeSession,
           }}
-          selection={{
+          deskData={{
             tables,
             list,
             needsLoading,
