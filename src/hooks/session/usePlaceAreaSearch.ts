@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createLoadTask, type LoadTask } from "@/services/core/progress/loadTask";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   getCurrentPosition,
@@ -21,8 +22,9 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
   const [selectedPlace, setSelectedPlace] = useState<GeocodedPlace | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchTask, setSearchTask] = useState<LoadTask | null>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
-  const { beginRequest, isLatestRequest } = useLatestRequest();
+  const { beginRequest, isLatestRequest, requestSignal } = useLatestRequest();
 
   // Silent bias only when already granted — never trigger the system prompt on mount.
   useEffect(() => {
@@ -77,13 +79,29 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
     }
 
     const requestId = beginRequest();
+    // A newer search aborts this task's signal, so a stale search never records its duration.
+    const task = createLoadTask({ label: "Searching places", signal: requestSignal() });
+    setSearchTask(task);
     setSearchLoading(true);
     setSearchError(null);
 
-    const outcome = await searchPlacesSettled(
-      trimmed,
-      userLocationRef.current ? { near: userLocationRef.current } : undefined,
-    );
+    const outcome = await searchPlacesSettled(trimmed, {
+      near: userLocationRef.current ?? undefined,
+      signal: task.signal,
+      node: task.root,
+    });
+    if (task.signal.aborted) {
+      task.cancel();
+      if (isLatestRequest(requestId)) {
+        setSearchLoading(false);
+      }
+      return;
+    }
+    if (outcome.ok) {
+      task.complete();
+    } else {
+      task.fail();
+    }
     if (!isLatestRequest(requestId)) {
       return;
     }
@@ -100,7 +118,7 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
 
     setSearchResults(outcome.places.length > 1 ? outcome.places : []);
     applyPlace(outcome.places[0]!);
-  }, [applyPlace, beginRequest, isLatestRequest, locationQuery]);
+  }, [applyPlace, beginRequest, isLatestRequest, locationQuery, requestSignal]);
 
   const resetSearch = useCallback(() => {
     setLocationQueryState("");
@@ -118,6 +136,7 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
     selectedPlace,
     searchLoading,
     searchError,
+    searchTask,
     handleSearch,
     applyPlace,
     resetSearch,

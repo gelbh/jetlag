@@ -5,8 +5,13 @@ import { featureToGameArea } from "@/domain/geometry/gameArea/geometry";
 import { gameAreaWithoutInteriorRings } from "@/domain/geometry/gameArea/geometryCore";
 import { unionGameAreas } from "@/domain/geometry/masks/unionGameAreas";
 import type { GameArea } from "@/domain/map/annotations";
+import type { ProgressNode, StageSpec } from "@/domain/progress/progressTree";
 import type { RegionPackId } from "@/domain/regions/regionPack";
-import { getRegionPackConfig, isKnownRegionPack } from "@/domain/regions/regionPackRegistry";
+import {
+  getRegionPackConfig,
+  isKnownRegionPack,
+  type RegionPackConfig,
+} from "@/domain/regions/regionPackRegistry";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
@@ -14,9 +19,50 @@ import type {
 import {
   fetchAndReadWithTimeout,
   GEO_FETCH_TIMEOUT_MS,
+  readTextWithProgress,
 } from "@/services/core/network/fetchWithTimeout";
+import { withStage } from "@/services/core/progress/loadTask";
 
 const regionPackGeoCache = new Map<string, string>();
+
+const DOWNLOAD_STAGE: StageSpec = {
+  kind: "download",
+  label: "Downloading boundaries",
+  historyKey: "bundle:boundaries",
+};
+
+const PLAY_AREA_STAGE: StageSpec = {
+  kind: "compute",
+  label: "Building play area",
+  historyKey: "compute:pack-play-area",
+};
+
+type DownloadStages = ReadonlyMap<string, ProgressNode>;
+
+/**
+ * One download stage per asset not yet cached, all created before the first
+ * fetch so the bar's weights do not shift partway through.
+ */
+function planDownloadStages(
+  paths: readonly (string | undefined)[],
+  progress: ProgressNode | undefined,
+): DownloadStages {
+  const stages = new Map<string, ProgressNode>();
+  if (!progress) {
+    return stages;
+  }
+  const pending = [...new Set(paths.filter((path): path is string => Boolean(path)))].filter(
+    (path) => !regionPackGeoCache.has(path),
+  );
+  pending.forEach((path, index) => {
+    const label =
+      pending.length > 1
+        ? `${DOWNLOAD_STAGE.label} (${index + 1} of ${pending.length})`
+        : DOWNLOAD_STAGE.label;
+    stages.set(path, progress.stage({ ...DOWNLOAD_STAGE, label }));
+  });
+  return stages;
+}
 
 function resolveGeoAssetUrl(path: string): string {
   // Node/undici fetch (Vitest) rejects relative URLs; browsers resolve against the origin.
@@ -29,9 +75,11 @@ function resolveGeoAssetUrl(path: string): string {
   return path;
 }
 
-async function fetchGeoJsonText(path: string): Promise<string> {
+async function fetchGeoJsonText(path: string, stages?: DownloadStages): Promise<string> {
+  const node = stages?.get(path);
   const cached = regionPackGeoCache.get(path);
   if (cached) {
+    node?.finish();
     return cached;
   }
 
@@ -43,9 +91,10 @@ async function fetchGeoJsonText(path: string): Promise<string> {
       if (!response.ok) {
         throw new Error(`Couldn't load region boundary data (${response.status}).`);
       }
-      return response.text();
+      return readTextWithProgress(response, node);
     },
   );
+  node?.finish();
   regionPackGeoCache.set(path, text);
   return text;
 }
@@ -97,51 +146,68 @@ function combineRegionGameAreas(features: Feature<Polygon | MultiPolygon>[]): Ga
   return unionGameAreas(features.map((feature) => featureToRegionGameArea(feature)));
 }
 
-export async function loadRegionPackPlayArea(
+function primaryAssetPath(config: RegionPackConfig, subregionId?: string): string {
+  return subregionId && config.geoAssets.primaryBySubregion
+    ? config.geoAssets.primaryBySubregion(subregionId)
+    : config.geoAssets.primary;
+}
+
+function playAreaAssetPath(
   packId: RegionPackId,
+  config: RegionPackConfig,
   subregionId?: string,
-): Promise<GameArea> {
-  const config = getRegionPackConfig(packId);
-  if (!config) {
-    throw new Error(`Unknown region pack: ${packId}`);
-  }
-
+): string {
   if (!subregionId && config.geoAssets.playArea) {
-    const playAreaJson = await fetchGeoJsonText(config.geoAssets.playArea);
-    const collection = parseFeatureCollection(playAreaJson);
-    return combineRegionGameAreas(polygonFeatures(collection));
+    return config.geoAssets.playArea;
   }
-
   if (!subregionId && config.playAreaLevel === "secondary") {
     if (!config.geoAssets.secondary) {
       throw new Error(
         `Region pack ${packId} playAreaLevel is secondary but has no secondary asset.`,
       );
     }
-    const secondaryJson = await fetchGeoJsonText(config.geoAssets.secondary);
-    const collection = parseFeatureCollection(secondaryJson);
-    return combineRegionGameAreas(polygonFeatures(collection));
+    return config.geoAssets.secondary;
   }
+  return primaryAssetPath(config, subregionId);
+}
 
-  const primaryPath =
-    subregionId && config.geoAssets.primaryBySubregion
-      ? config.geoAssets.primaryBySubregion(subregionId)
-      : config.geoAssets.primary;
-  const primaryJson = await fetchGeoJsonText(primaryPath);
-  const collection = parseFeatureCollection(primaryJson);
-  const primaryFeatures = polygonFeatures(collection);
-
-  if (subregionId) {
-    const subregion = primaryFeatures.find(
+async function buildPlayArea(
+  path: string,
+  config: RegionPackConfig,
+  subregionId: string | undefined,
+  stages: DownloadStages,
+  progress: ProgressNode | undefined,
+): Promise<GameArea> {
+  const text = await fetchGeoJsonText(path, stages);
+  return withStage(progress, PLAY_AREA_STAGE, async () => {
+    const features = polygonFeatures(parseFeatureCollection(text));
+    if (!subregionId) {
+      return combineRegionGameAreas(features);
+    }
+    const subregion = features.find(
       (feature) => subregionIdFromFeature(feature, config.subregionPropertyKey) === subregionId,
     );
     if (!subregion) {
       throw new Error(`Couldn't find region boundary for ${subregionId}.`);
     }
     return featureToRegionGameArea(subregion);
+  });
+}
+
+/** `progress` gets a byte-counted download stage per uncached asset, then the build. */
+export async function loadRegionPackPlayArea(
+  packId: RegionPackId,
+  subregionId?: string,
+  progress?: ProgressNode,
+): Promise<GameArea> {
+  const config = getRegionPackConfig(packId);
+  if (!config) {
+    throw new Error(`Unknown region pack: ${packId}`);
   }
 
-  return combineRegionGameAreas(primaryFeatures);
+  const path = playAreaAssetPath(packId, config, subregionId);
+  const stages = planDownloadStages([path], progress);
+  return buildPlayArea(path, config, subregionId, stages, progress);
 }
 
 export interface RegionPackSessionBoundaries {
@@ -166,20 +232,37 @@ function filterGeoJsonTextBySubregion(
   return JSON.stringify(filtered);
 }
 
+/** `progress` gets a byte-counted download stage per uncached asset, then the play area build. */
 export async function loadRegionPackSessionBoundaries(
   packId: RegionPackId,
   subregionId?: string,
+  progress?: ProgressNode,
 ): Promise<RegionPackSessionBoundaries> {
   const config = getRegionPackConfig(packId);
   if (!config) {
     throw new Error(`Unknown region pack: ${packId}`);
   }
 
-  const primaryPath =
-    subregionId && config.geoAssets.primaryBySubregion
-      ? config.geoAssets.primaryBySubregion(subregionId)
-      : config.geoAssets.primary;
-  let primaryJson = await fetchGeoJsonText(primaryPath);
+  const primaryPath = primaryAssetPath(config, subregionId);
+  const secondaryPath =
+    subregionId && config.geoAssets.secondaryBySubregion
+      ? config.geoAssets.secondaryBySubregion(subregionId)
+      : config.geoAssets.secondary;
+  const level4Path =
+    subregionId && config.geoAssets.matchingLevel4BySubregion
+      ? config.geoAssets.matchingLevel4BySubregion(subregionId)
+      : config.geoAssets.matchingLevel4;
+  const level6Path =
+    subregionId && config.geoAssets.matchingLevel6BySubregion
+      ? config.geoAssets.matchingLevel6BySubregion(subregionId)
+      : config.geoAssets.matchingLevel6;
+  const playAreaPath = playAreaAssetPath(packId, config, subregionId);
+  const stages = planDownloadStages(
+    [primaryPath, secondaryPath, level4Path, level6Path, playAreaPath],
+    progress,
+  );
+
+  let primaryJson = await fetchGeoJsonText(primaryPath, stages);
   // Fallback when primaryBySubregion is absent: Australia STE is ~1.6MB national.
   if (!config.geoAssets.primaryBySubregion && packId === "australia" && subregionId !== undefined) {
     primaryJson = filterGeoJsonTextBySubregion(
@@ -188,32 +271,20 @@ export async function loadRegionPackSessionBoundaries(
       subregionId,
     );
   }
-  const secondaryPath =
-    subregionId && config.geoAssets.secondaryBySubregion
-      ? config.geoAssets.secondaryBySubregion(subregionId)
-      : config.geoAssets.secondary;
-  const secondaryJson = secondaryPath ? await fetchGeoJsonText(secondaryPath) : undefined;
+  const secondaryJson = secondaryPath ? await fetchGeoJsonText(secondaryPath, stages) : undefined;
 
   let level4Json: string | undefined;
-  const level4Path =
-    subregionId && config.geoAssets.matchingLevel4BySubregion
-      ? config.geoAssets.matchingLevel4BySubregion(subregionId)
-      : config.geoAssets.matchingLevel4;
   if (level4Path) {
-    const raw = await fetchGeoJsonText(level4Path);
+    const raw = await fetchGeoJsonText(level4Path, stages);
     level4Json =
       !config.geoAssets.matchingLevel4BySubregion && subregionId !== undefined
         ? filterGeoJsonTextBySubregion(raw, config.subregionPropertyKey, subregionId)
         : raw;
   }
 
-  const level6Path =
-    subregionId && config.geoAssets.matchingLevel6BySubregion
-      ? config.geoAssets.matchingLevel6BySubregion(subregionId)
-      : config.geoAssets.matchingLevel6;
-  const level6Json = level6Path ? await fetchGeoJsonText(level6Path) : undefined;
+  const level6Json = level6Path ? await fetchGeoJsonText(level6Path, stages) : undefined;
 
-  const playArea = await loadRegionPackPlayArea(packId, subregionId);
+  const playArea = await buildPlayArea(playAreaPath, config, subregionId, stages, progress);
 
   return {
     playArea,

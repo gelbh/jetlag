@@ -182,6 +182,7 @@ export function CreateSession() {
               loading: session.loading,
               verifyingAccess: session.verifyingAccess,
               searchLoading: session.searchLoading,
+              searchTask: session.searchTask,
               importLoading: session.importLoading,
               importFileInputRef: session.importFileInputRef,
               locationQuery: session.locationQuery,

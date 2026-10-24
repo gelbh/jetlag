@@ -13,7 +13,7 @@ vi.mock("firebase/storage", () => ({
   deleteObject: vi.fn(),
   getDownloadURL: vi.fn(),
   ref: vi.fn((_storage, path: string) => ({ path })),
-  uploadBytes: vi.fn(),
+  uploadBytesResumable: vi.fn(),
 }));
 
 vi.mock("../firebase/firebase", () => ({
@@ -34,7 +34,44 @@ vi.mock("../../firestore/firestoreAnnotations", () => ({
   ensureHiderPhotoUploadAccess: (...args: unknown[]) => ensureHiderPhotoUploadAccess(...args),
 }));
 
-import { deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
+import { deleteObject, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { createLoadTask } from "../progress/loadTask";
+
+type UploadSnapshot = { bytesTransferred: number; totalBytes: number };
+
+/** Thenable UploadTask stand-in that reports `steps` before settling with `outcome`. */
+function mockUploadTask(outcome: "ok" | Error, steps: UploadSnapshot[] = []) {
+  const listeners: Array<(snapshot: UploadSnapshot) => void> = [];
+  let rejectUpload: (error: unknown) => void = () => {};
+  const promise = new Promise<void>((resolve, reject) => {
+    rejectUpload = reject;
+    queueMicrotask(() => {
+      for (const step of steps) {
+        for (const listener of listeners) {
+          listener(step);
+        }
+      }
+      if (outcome === "ok") {
+        resolve();
+      } else {
+        reject(outcome);
+      }
+    });
+  });
+  return {
+    on: vi.fn((_event: string, next: (snapshot: UploadSnapshot) => void) => {
+      listeners.push(next);
+    }),
+    cancel: vi.fn(() => {
+      rejectUpload(new FirebaseError("storage/canceled", "User canceled the upload."));
+      return true;
+    }),
+    // biome-ignore lint/suspicious/noThenProperty: Firebase's UploadTask is thenable.
+    then: promise.then.bind(promise),
+  };
+}
+
+const photoFile = () => new File(["image"], "photo.jpg", { type: "image/jpeg" });
 
 const hiderSession = {
   id: "session-1",
@@ -114,7 +151,7 @@ describe("photoStorage", () => {
   });
 
   it("confirms hider access from the server before upload", async () => {
-    vi.mocked(uploadBytes).mockResolvedValue({} as never);
+    vi.mocked(uploadBytesResumable).mockImplementation(() => mockUploadTask("ok") as never);
     vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
 
     await withMockImage(800, 600, async () => {
@@ -128,13 +165,13 @@ describe("photoStorage", () => {
     });
 
     expect(ensureHiderPhotoUploadAccess).toHaveBeenCalledWith(hiderSession, "hider-1", "hider-1");
-    expect(uploadBytes).toHaveBeenCalledOnce();
+    expect(uploadBytesResumable).toHaveBeenCalledOnce();
 
     vi.mocked(Date.now).mockRestore();
   });
 
   it("uploads compressed photos and returns the storage path", async () => {
-    vi.mocked(uploadBytes).mockResolvedValue({} as never);
+    vi.mocked(uploadBytesResumable).mockImplementation(() => mockUploadTask("ok") as never);
     vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
 
     await withMockImage(800, 600, async () => {
@@ -147,7 +184,7 @@ describe("photoStorage", () => {
       );
 
       expect(path).toBe("sessions/session-1/photoAnswers/question-1/1700000000000.jpg");
-      expect(uploadBytes).toHaveBeenCalledOnce();
+      expect(uploadBytesResumable).toHaveBeenCalledOnce();
     });
 
     vi.mocked(Date.now).mockRestore();
@@ -158,9 +195,9 @@ describe("photoStorage", () => {
       "storage/unauthorized",
       "User does not have permission.",
     );
-    vi.mocked(uploadBytes)
-      .mockRejectedValueOnce(unauthorized)
-      .mockResolvedValueOnce({} as never);
+    vi.mocked(uploadBytesResumable)
+      .mockImplementationOnce(() => mockUploadTask(unauthorized) as never)
+      .mockImplementationOnce(() => mockUploadTask("ok") as never);
     vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
 
     await withMockImage(800, 600, async () => {
@@ -174,10 +211,80 @@ describe("photoStorage", () => {
 
       expect(path).toBe("sessions/session-1/photoAnswers/question-1/1700000000000.jpg");
       expect(ensureHiderPhotoUploadAccess).toHaveBeenCalledTimes(2);
-      expect(uploadBytes).toHaveBeenCalledTimes(2);
+      expect(uploadBytesResumable).toHaveBeenCalledTimes(2);
     });
 
     vi.mocked(Date.now).mockRestore();
+  });
+
+  it("counts uploaded bytes on the progress stage", async () => {
+    const steps = [
+      { bytesTransferred: 0, totalBytes: 400 },
+      { bytesTransferred: 100, totalBytes: 400 },
+    ];
+    vi.mocked(uploadBytesResumable).mockImplementation(() => mockUploadTask("ok", steps) as never);
+    const task = createLoadTask({ label: "Sending photo" });
+    const counts: Array<[number, number]> = [];
+    const stage = task.root.stage.bind(task.root);
+    vi.spyOn(task.root, "stage").mockImplementation((spec) => {
+      const node = stage(spec);
+      const setCount = node.setCount.bind(node);
+      node.setCount = (done, total) => {
+        counts.push([done, total]);
+        setCount(done, total);
+      };
+      return node;
+    });
+
+    await withMockImage(800, 600, async () => {
+      await uploadPhotoAnswer("session-1", "question-1", photoFile(), hiderSession, "hider-1", {
+        progress: task.root,
+      });
+    });
+
+    expect(task.root.children.map((child) => child.spec.historyKey)).toEqual([
+      "photo:compress",
+      "photo:upload",
+    ]);
+    expect(counts).toEqual([
+      [0, 400],
+      [100, 400],
+    ]);
+    expect(task.root.children.every((child) => child.isFinished)).toBe(true);
+  });
+
+  it("cancels the upload on abort without reporting a failure", async () => {
+    const pending = {
+      on: vi.fn(),
+      cancel: vi.fn(),
+      // biome-ignore lint/suspicious/noThenProperty: Firebase's UploadTask is thenable.
+      then: (_resolve: () => void, reject: (error: unknown) => void) => {
+        pending.cancel.mockImplementation(() => {
+          reject(new FirebaseError("storage/canceled", "User canceled the upload."));
+          return true;
+        });
+      },
+    };
+    vi.mocked(uploadBytesResumable).mockReturnValue(pending as never);
+    const controller = new AbortController();
+    const { capturePhotoUploadFailure } = await import("../analytics/clientErrors");
+
+    await withMockImage(800, 600, async () => {
+      const upload = uploadPhotoAnswer(
+        "session-1",
+        "question-1",
+        photoFile(),
+        hiderSession,
+        "hider-1",
+        { signal: controller.signal },
+      );
+      await vi.waitFor(() => expect(uploadBytesResumable).toHaveBeenCalled());
+      controller.abort(new DOMException("Cancelled.", "AbortError"));
+      await expect(upload).rejects.toMatchObject({ name: "AbortError" });
+    });
+
+    expect(pending.cancel).toHaveBeenCalledOnce();
+    expect(capturePhotoUploadFailure).not.toHaveBeenCalled();
   });
 
   it("deletes stored photo answers", async () => {

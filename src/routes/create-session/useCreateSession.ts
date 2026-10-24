@@ -107,7 +107,7 @@ const CREATE_STAGES = {
 export function useCreateSession() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { beginRequest, isLatestRequest } = useLatestRequest();
+  const { beginRequest, isLatestRequest, requestSignal } = useLatestRequest();
   const { beginRequest: beginLocationBias, isLatestRequest: isLatestLocationBias } =
     useLatestRequest();
   const { isSubmitting, runLocked } = useSubmitLock();
@@ -138,6 +138,7 @@ export function useCreateSession() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<GeocodedPlace | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [searchTask, setSearchTask] = useState<LoadTask | null>(null);
   const [mapFocusToken, setMapFocusToken] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
@@ -282,12 +283,23 @@ export function useCreateSession() {
       if (draft.regionPackId) {
         setRegionPackId(draft.regionPackId);
         setRegionPackSubregionId(subregionId);
+        const boundaryTask = createLoadTask({
+          label: "Loading region boundaries",
+          global: true,
+          cancellable: false,
+        });
         try {
-          const boundaries = await loadRegionPackSessionBoundaries(draft.regionPackId, subregionId);
+          const boundaries = await loadRegionPackSessionBoundaries(
+            draft.regionPackId,
+            subregionId,
+            boundaryTask.root,
+          );
           if (applyGeneration !== presetApplyGenerationRef.current) {
+            boundaryTask.cancel();
             abandonStaleApply();
             return;
           }
+          boundaryTask.complete();
           customMatchingAreas = boundaries.customMatchingAreas;
           if (!gameArea) {
             gameArea = boundaries.playArea;
@@ -299,9 +311,11 @@ export function useCreateSession() {
           }
         } catch (loadError) {
           if (applyGeneration !== presetApplyGenerationRef.current) {
+            boundaryTask.cancel();
             abandonStaleApply();
             return;
           }
+          boundaryTask.fail(loadError);
           setError(
             loadError instanceof Error ? loadError.message : "Couldn't load region boundary data.",
           );
@@ -714,13 +728,28 @@ export function useCreateSession() {
 
     requestMap();
     const requestId = beginRequest();
+    const task = createLoadTask({ label: "Searching places", signal: requestSignal() });
+    setSearchTask(task);
     setSearchLoading(true);
     setError(null);
 
-    const outcome = await searchPlacesSettled(
-      trimmed,
-      userLocationRef.current ? { near: userLocationRef.current } : undefined,
-    );
+    const outcome = await searchPlacesSettled(trimmed, {
+      near: userLocationRef.current ?? undefined,
+      signal: task.signal,
+      node: task.root,
+    });
+    if (task.signal.aborted) {
+      task.cancel();
+      if (isLatestRequest(requestId)) {
+        setSearchLoading(false);
+      }
+      return;
+    }
+    if (outcome.ok) {
+      task.complete();
+    } else {
+      task.fail();
+    }
     if (!isLatestRequest(requestId)) {
       return;
     }
@@ -1064,6 +1093,7 @@ export function useCreateSession() {
     createTask,
     verifyingAccess,
     searchLoading,
+    searchTask,
     importLoading,
     importFileInputRef,
     locationQuery,

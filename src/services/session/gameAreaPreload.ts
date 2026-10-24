@@ -1,4 +1,5 @@
 import type { GameArea, SessionTier } from "../../domain/map/annotations";
+import type { StageSpec } from "../../domain/progress/progressTree";
 import type { MeasuringLocationCategory } from "../../domain/questions";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import type {
@@ -6,6 +7,7 @@ import type {
   MatchingAdminLevel,
 } from "../../domain/session/catalog/sessionCustomContent";
 import { usePreloadStore } from "../../state/preloadStore";
+import { createLoadTask } from "../core/progress/loadTask";
 import {
   adminBoundaryLevelsForSession,
   emptyAdminDivisionCounts,
@@ -189,34 +191,72 @@ export async function preloadGameAreaCachesAsync(
   await runPreloadQueue(gameAreaKey, jobs, jobGapMs, signal);
 }
 
+const CRITICAL_PROBE_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Checking area divisions",
+  historyKey: "preload:admin-probe",
+};
+
+const CRITICAL_LEVEL_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Loading area boundaries",
+  historyKey: "preload:admin-level",
+};
+
+/**
+ * Admin boundaries the first questions need, started at create/join. Tracked in
+ * its own preload store slice and as a global background task for the ETA.
+ */
 export async function preloadCriticalGameAreaCaches(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
 ): Promise<void> {
+  const gameAreaKey = gameAreaPreloadKey(gameArea);
+  const adminLevels = adminBoundaryLevelsForSession(regionPackId, customMatchingAreas);
+  const store = usePreloadStore.getState();
+  store.resetCritical(gameAreaKey, adminLevels.length + 1);
+
+  const task = createLoadTask({
+    label: "Caching area boundaries",
+    priority: "background",
+    global: true,
+  });
+  const load = { priority: task.priority, signal: task.signal };
+  // Stages are created up front so the bar's weights stay put.
+  const probeStage = task.stage(CRITICAL_PROBE_STAGE);
+  const levelStages = adminLevels.map(() => task.stage(CRITICAL_LEVEL_STAGE));
+
   let counts = emptyAdminDivisionCounts();
   try {
-    counts = await probeAdminDivisionCounts(
-      gameArea,
-      customMatchingAreas,
-      regionPackId,
-      BACKGROUND_LANE,
-    );
+    probeStage.start();
+    counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId, load);
+    probeStage.finish();
+    store.recordCriticalJob(gameAreaKey, "success");
   } catch {
     // probe failure is non-fatal; preload continues with empty counts
+    probeStage.cancel();
+    store.recordCriticalJob(gameAreaKey, "failure");
   }
-  usePreloadStore.getState().setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
+  usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
 
   await Promise.allSettled(
-    adminBoundaryLevelsForSession(regionPackId, customMatchingAreas).map((adminLevel) =>
+    adminLevels.map((adminLevel, index) =>
       fetchAdminDivisionFeaturesInArea(
         gameArea,
         adminLevel,
         customMatchingAreas?.[adminLevel as MatchingAdminLevel],
-        BACKGROUND_LANE,
+        { ...load, node: levelStages[index] },
+      ).then(
+        () => store.recordCriticalJob(gameAreaKey, "success"),
+        () => {
+          levelStages[index]?.cancel();
+          store.recordCriticalJob(gameAreaKey, "failure");
+        },
       ),
     ),
   );
+  task.complete();
 }
 
 export function preloadJobGapMsForTests(): number {

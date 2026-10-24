@@ -3,6 +3,7 @@ import type { GameArea } from "../../domain/map/annotations";
 import type { TransitMetro } from "../../domain/map/transit";
 import type { BundledPresetSelectGroup } from "../../domain/regions/bundledPresetHierarchy";
 import type { GamePreset } from "../../domain/session/presets/gamePreset";
+import type { LoadTask } from "../../services/core/progress/loadTask";
 import type { GeocodedPlace } from "../../services/geo/geocoding";
 import { GameAreaRulesStep } from "./GameAreaRulesStep";
 import { GameAreaWhereStep } from "./GameAreaWhereStep";
@@ -16,6 +17,7 @@ export type GameAreaSectionModel = {
   loading: boolean;
   verifyingAccess: boolean;
   searchLoading: boolean;
+  searchTask?: LoadTask | null;
   importLoading: boolean;
   importFileInputRef: RefObject<HTMLInputElement | null>;
   locationQuery: string;

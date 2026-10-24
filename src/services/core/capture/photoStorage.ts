@@ -4,9 +4,10 @@ import {
   getDownloadURL,
   ref,
   type UploadMetadata,
-  uploadBytes,
+  uploadBytesResumable,
 } from "firebase/storage";
 import type { SessionRecord } from "@/domain/map/annotations";
+import type { ProgressNode, StageSpec } from "@/domain/progress/progressTree";
 import {
   formatPhotoStorageError,
   isStorageUnauthorized,
@@ -16,6 +17,7 @@ import {
 import { ensureHiderPhotoUploadAccess } from "../../firestore/firestoreAnnotations";
 import { capturePhotoUploadFailure } from "../analytics/clientErrors";
 import { ensureAnonymousUser, getFirebaseStorage } from "../firebase/firebase";
+import { throwIfAborted } from "../network/anySignal";
 
 const MAX_DIMENSION = 1920;
 const JPEG_QUALITY = 0.85;
@@ -31,6 +33,25 @@ const EXTENSION_MIME: Record<string, string> = {
   heif: "image/heif",
   gif: "image/gif",
 };
+
+const COMPRESS_STAGE: StageSpec = {
+  kind: "compute",
+  label: "Compressing photo",
+  historyKey: "photo:compress",
+};
+
+const UPLOAD_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Uploading photo",
+  historyKey: "photo:upload",
+};
+
+export interface UploadPhotoAnswerOptions {
+  /** Parent stage; gets a compress stage and a byte-counted upload stage. */
+  progress?: ProgressNode;
+  /** Cancels the running upload. */
+  signal?: AbortSignal;
+}
 
 const UNSUPPORTED_FORMAT_MESSAGE =
   "This photo format isn't supported. Try choosing a JPEG from your gallery.";
@@ -156,8 +177,20 @@ async function attemptUpload(
   storageRef: ReturnType<typeof ref>,
   blob: Blob,
   metadata: UploadMetadata,
+  node: ProgressNode | undefined,
+  signal: AbortSignal | undefined,
 ): Promise<void> {
-  await uploadBytes(storageRef, blob, metadata);
+  const upload = uploadBytesResumable(storageRef, blob, metadata);
+  const cancel = () => upload.cancel();
+  signal?.addEventListener("abort", cancel, { once: true });
+  upload.on("state_changed", (snapshot) => {
+    node?.setCount(snapshot.bytesTransferred, snapshot.totalBytes);
+  });
+  try {
+    await upload;
+  } finally {
+    signal?.removeEventListener("abort", cancel);
+  }
 }
 
 export async function deletePhotoAnswer(storagePath: string): Promise<void> {
@@ -171,7 +204,11 @@ export async function uploadPhotoAnswer(
   file: File,
   session?: Pick<SessionRecord, "id" | "code" | "memberUids" | "memberRoles"> | null,
   myUid?: string | null,
+  options: UploadPhotoAnswerOptions = {},
 ): Promise<string> {
+  const { progress, signal } = options;
+  const compressNode = progress?.stage(COMPRESS_STAGE);
+  const uploadNode = progress?.stage(UPLOAD_STAGE);
   const user = await ensureAnonymousUser();
   const authUid = user.uid;
   await user.getIdToken(true);
@@ -184,7 +221,9 @@ export async function uploadPhotoAnswer(
 
   let blob: Blob;
   try {
+    compressNode?.start();
     blob = await compressPhotoForUpload(file);
+    compressNode?.finish();
   } catch (error) {
     capturePhotoUploadFailure(error, "compress", {
       fileType: file.type || null,
@@ -206,9 +245,14 @@ export async function uploadPhotoAnswer(
   let lastError: unknown;
   for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
     try {
-      await attemptUpload(storageRef, blob, metadata);
+      throwIfAborted(signal);
+      uploadNode?.start();
+      await attemptUpload(storageRef, blob, metadata, uploadNode, signal);
+      uploadNode?.finish();
       return storagePath;
     } catch (error) {
+      // A cancelled upload is not a failure worth reporting.
+      throwIfAborted(signal);
       lastError = error;
 
       if (!isStorageUnauthorized(error) || attempt >= RETRY_DELAYS_MS.length) {

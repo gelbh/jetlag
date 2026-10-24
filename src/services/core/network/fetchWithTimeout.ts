@@ -1,4 +1,5 @@
 // Parallel implementation: functions/fetchWithTimeout.mjs (Cloud Functions runtime).
+import type { ProgressNode } from "@/domain/progress/progressTree";
 import { anySignal, throwIfAborted } from "./anySignal";
 
 /** Upper bound for raw geo asset / public geo API requests so flaky networks fail fast. */
@@ -61,4 +62,57 @@ export async function fetchWithTimeout(
   timeoutMs: number,
 ): Promise<Response> {
   return fetchAndReadWithTimeout(input, init, timeoutMs, async (response) => response);
+}
+
+/**
+ * Body size in bytes as the stream will yield them, or null when unknown.
+ * Under a content encoding, Content-Length is the compressed size while the
+ * stream yields decoded bytes, so it cannot be used as the total.
+ */
+function decodedContentLength(response: Response): number | null {
+  const encoding = response.headers.get("Content-Encoding")?.trim().toLowerCase();
+  if (encoding && encoding !== "identity") {
+    return null;
+  }
+  const length = Number(response.headers.get("Content-Length"));
+  return Number.isFinite(length) && length > 0 ? length : null;
+}
+
+/**
+ * Reads the body as text, counting bytes on `node` when the total is known.
+ * Without a usable Content-Length the stage stays timed. Call it inside the
+ * `read` callback of {@link fetchAndReadWithTimeout} so the deadline covers it.
+ */
+export async function readTextWithProgress(
+  response: Response,
+  node: ProgressNode | undefined,
+): Promise<string> {
+  if (!node || !response.body) {
+    return response.text();
+  }
+
+  node.start();
+  let total = decodedContentLength(response);
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const parts: string[] = [];
+  let loaded = 0;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    loaded += value.byteLength;
+    parts.push(decoder.decode(value, { stream: true }));
+    if (total !== null && loaded > total) {
+      // A proxy changed the body after all; stop trusting the header.
+      total = null;
+    }
+    if (total !== null) {
+      node.setCount(loaded, total);
+    }
+  }
+  parts.push(decoder.decode());
+  return parts.join("");
 }

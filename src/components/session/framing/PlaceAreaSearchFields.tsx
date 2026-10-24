@@ -3,6 +3,8 @@ import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { Fragment, useRef } from "react";
 import { insetTextInputStyles } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
+import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { type GeocodedPlace, GeocodedPlaceLeading } from "@/services/geo/geocoding";
 import { formatPlaceSearchSubtitle } from "@/services/geo/geocoding/geocodingRank";
 import { SearchResultsList } from "../../tools/shared/controls/SearchResultsList";
@@ -13,6 +15,8 @@ interface PlaceAreaSearchFieldsProps {
   onLocationQueryChange: (value: string) => void;
   onSearch: () => void;
   searchLoading: boolean;
+  /** Progress of the running search, shown under the field while it loads. */
+  searchTask?: LoadTask | null;
   searchResults: GeocodedPlace[];
   selectedPlaceId: string | null;
   selectedPlace: GeocodedPlace | null;
@@ -118,6 +122,7 @@ export function PlaceAreaSearchFields({
   onLocationQueryChange,
   onSearch,
   searchLoading,
+  searchTask = null,
   searchResults,
   selectedPlaceId,
   selectedPlace,
@@ -182,6 +187,9 @@ export function PlaceAreaSearchFields({
             </ActionIcon>
           }
         />
+        {searchLoading && searchTask ? (
+          <LoadProgress task={searchTask} variant="compact" className="px-4 pb-2" />
+        ) : null}
         {showResults !== false ? (
           <PlaceAreaSearchInsetResults
             searchResults={searchResults}
@@ -204,6 +212,7 @@ export function PlaceAreaSearchFields({
         onSubmit={onSearch}
         submitLabel="Find place"
         loading={searchLoading}
+        task={searchTask}
         placeholder="Dublin, Ireland"
         disabled={disabled}
       />

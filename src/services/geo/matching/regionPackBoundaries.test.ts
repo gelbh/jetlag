@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { gameAreaSquareMiles } from "@/domain/session/size/gameSize";
+import { createLoadTask } from "@/services/core/progress/loadTask";
 import {
   clearRegionPackGeoCacheForTests,
   loadRegionPackPlayArea,
@@ -322,6 +323,48 @@ describe("loadRegionPackPlayArea", () => {
     expect(gameAreaSquareMiles(city)).toBeGreaterThan(20);
     expect(gameAreaSquareMiles(city)).toBeLessThan(50);
 
+    fetchMock.mockRestore();
+  });
+});
+
+describe("region pack boundary progress", () => {
+  it("plans a download stage per uncached asset before the play area build", async () => {
+    clearRegionPackGeoCacheForTests();
+    const fetchMock = stubFetchForDublinAssets();
+    const task = createLoadTask({ label: "Loading region boundaries" });
+
+    await loadRegionPackSessionBoundaries("dublin", "fingal", task.root);
+
+    expect(task.root.children.map((child) => child.spec.label)).toEqual([
+      "Downloading boundaries (1 of 2)",
+      "Downloading boundaries (2 of 2)",
+      "Building play area",
+    ]);
+    expect(task.root.children.every((child) => child.isFinished)).toBe(true);
+
+    const cachedTask = createLoadTask({ label: "Loading region boundaries" });
+    await loadRegionPackSessionBoundaries("dublin", "fingal", cachedTask.root);
+    expect(cachedTask.root.children.map((child) => child.spec.kind)).toEqual(["compute"]);
+
+    fetchMock.mockRestore();
+  });
+
+  it("counts play area download bytes from Content-Length", async () => {
+    clearRegionPackGeoCacheForTests();
+    const body = readFileSync(resolve(ROOT, "public/geo/dublin/councils.geojson"));
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(
+        async () =>
+          new Response(body, { status: 200, headers: { "Content-Length": String(body.length) } }),
+      );
+    const task = createLoadTask({ label: "Loading game boundaries" });
+    const download = vi.spyOn(Object.getPrototypeOf(task.root), "setCount");
+
+    await loadRegionPackPlayArea("dublin", undefined, task.root);
+
+    expect(download).toHaveBeenLastCalledWith(body.length, body.length);
+    download.mockRestore();
     fetchMock.mockRestore();
   });
 });
