@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
 import { useSessionStore } from "../../../state/sessionStore";
 import type { AdminSessionMonitorState } from "./AdminSessionView";
@@ -32,9 +32,13 @@ export function useAdminDeskMonitor({
   const [failedSessionId, setFailedSessionId] = useState<string | null>(null);
   const monitorRequestRef = useRef(0);
   const joinKeyRef = useRef<string | null>(null);
+  const joinFnRef = useRef<
+    ((summary: Pick<AdminSessionSummary, "sessionId" | "code">) => Promise<void>) | null
+  >(null);
 
-  const joinForMonitor = useCallback(
-    async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
+  // Only the session route monitors; incident and request routes never join.
+  useEffect(() => {
+    const joinForMonitor = async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
       const requestId = ++monitorRequestRef.current;
       const joined = await joinSession(summary, { navigate: false });
       if (monitorRequestRef.current !== requestId) return;
@@ -45,12 +49,9 @@ export function useAdminDeskMonitor({
       }
       setFailedSessionId((current) => (current === summary.sessionId ? null : current));
       setMonitorSessionId(summary.sessionId);
-    },
-    [joinSession],
-  );
+    };
+    joinFnRef.current = joinForMonitor;
 
-  // Only the session route monitors; incident and request routes never join.
-  useEffect(() => {
     if (!enabled || !isDesktop || !routeSessionId) {
       joinKeyRef.current = null;
       return;
@@ -66,7 +67,7 @@ export function useAdminDeskMonitor({
     activeSession?.id,
     enabled,
     isDesktop,
-    joinForMonitor,
+    joinSession,
     monitorSessionId,
     routeSession,
     routeSessionId,
@@ -94,7 +95,7 @@ export function useAdminDeskMonitor({
         : null,
     joining: routeSession != null && observingCode === routeSession.code,
     onRetry: () => {
-      if (routeSession) void joinForMonitor(routeSession);
+      if (routeSession) void joinFnRef.current?.(routeSession);
     },
   };
 }

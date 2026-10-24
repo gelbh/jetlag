@@ -27,7 +27,7 @@ export interface AdminOpsDeskRouteBag {
   routeSession: AdminSessionSummary | null | undefined;
 }
 
-export interface AdminOpsDeskSelectionBag {
+export interface AdminOpsDeskDataBag {
   tables: AdminDeskTables;
   list: AdminSessionListState;
   needsLoading: boolean;
@@ -68,12 +68,12 @@ export interface AdminOpsDeskActionsBag {
 
 export function AdminOpsDeskBody({
   route,
-  selection,
+  deskData,
   monitor,
   actions,
 }: {
   route: AdminOpsDeskRouteBag;
-  selection: AdminOpsDeskSelectionBag;
+  deskData: AdminOpsDeskDataBag;
   monitor: AdminOpsDeskMonitorBag;
   actions: AdminOpsDeskActionsBag;
 }) {
@@ -108,7 +108,7 @@ export function AdminOpsDeskBody({
     loadingMore,
     sessionsFailedEmpty,
     visibleIncidents,
-  } = selection;
+  } = deskData;
   const { state: monitorState, observeError, observingCode } = monitor;
   const {
     onOpenSession,
