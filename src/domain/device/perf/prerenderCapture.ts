@@ -1,12 +1,12 @@
 declare global {
   interface Window {
-    /** Set by scripts/prerender-marketing.mjs before the app boots. */
+    /** Set by scripts/build/prerender-marketing.mjs before the app boots. */
     __JETLAG_PRERENDER__?: boolean;
   }
 }
 
 /**
- * True while scripts/prerender-marketing.mjs is snapshotting this page. The snapshot is what
+ * True while scripts/build/prerender-marketing.mjs is snapshotting this page. The snapshot is what
  * `hydrateRoot` later has to match, so it must show the hydration-time render (no device,
  * storage or consent-driven UI), not this headless browser's own state.
  */

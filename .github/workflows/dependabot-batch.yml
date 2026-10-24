@@ -38,4 +38,4 @@ jobs:
       - name: Create safe Dependabot batch PR
         env:
           GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN }}
-        run: node scripts/batch-dependabot.mjs --create-pr
+        run: node scripts/ci/batch-dependabot.mjs --create-pr

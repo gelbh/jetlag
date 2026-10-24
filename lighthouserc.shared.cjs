@@ -36,9 +36,9 @@ function createLhciConfig({ perf, numberOfRuns = 3, createMaxTbtMs, outputDir, c
     ci: {
       collect: {
         url: [`${ORIGIN}/`, `${ORIGIN}/premium`, `${ORIGIN}/join`, `${ORIGIN}/create`],
-        // Served like prod (Worker + Assets routing); see scripts/lhci-preview-server.mjs.
+        // Served like prod (Worker + Assets routing); see scripts/lighthouse/preview-server.mjs.
         startServerCommand: "npm run preview:lhci",
-        // Match plain console line from lhci-preview-server.mjs (Vite 8 ANSI breaks /Local:/i).
+        // Match plain console line from lighthouse/preview-server.mjs (Vite 8 ANSI breaks /Local:/i).
         startServerReadyPattern: "LHCI preview ready",
         numberOfRuns,
         settings: {

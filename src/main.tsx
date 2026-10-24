@@ -71,7 +71,7 @@ function appTree(App: ComponentType): ReactNode {
 function renderApp(): Promise<void> {
   markPlayDay(PWA_MARK_NAV);
   const rootEl = document.getElementById("root")!;
-  // scripts/prerender-marketing.mjs marks real-HTML shells; hydrating keeps that first paint
+  // scripts/build/prerender-marketing.mjs marks real-HTML shells; hydrating keeps that first paint
   // (and its LCP element) instead of replacing it. The SPA shell has no marker.
   if (rootEl.dataset.prerendered !== "true") {
     return import("./App.tsx").then(({ default: App }) => {
