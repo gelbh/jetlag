@@ -69,7 +69,6 @@ describe("PhotoAnswerUploader", () => {
     expect(screen.getByText(/In-app photo upload is temporarily unavailable/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mark sent" })).toBeInTheDocument();
     expect(document.querySelector('input[type="file"]')).toBeNull();
-    // Local anti-regression: do not revive pre-Mantine button classes.
     expect(document.querySelector(".btn-primary")).toBeNull();
     expect(document.querySelector(".btn-secondary")).toBeNull();
   });

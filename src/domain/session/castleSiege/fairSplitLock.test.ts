@@ -9,7 +9,6 @@ import {
 } from "./fairSplitLock";
 import type { CastleSiegeBorderLine } from "./pregame";
 
-/** Square arena spanning ~0.02° (~2 km) near London. */
 const ARENA: GameArea = {
   type: "Polygon",
   coordinates: [
@@ -164,10 +163,8 @@ describe("nudgeFairSplitBorder", () => {
     const nudged = nudgeFairSplitBorder(MIDLINE, { rotateDegrees: 90 });
     expect(nudged.coordinates).toHaveLength(2);
     const [start, end] = nudged.coordinates;
-    // Midpoint preserved.
     expect((start![0]! + end![0]!) / 2).toBeCloseTo(-0.15, 5);
     expect((start![1]! + end![1]!) / 2).toBeCloseTo(51.45, 5);
-    // Vertical → near-horizontal after 90°.
     expect(Math.abs(start![1]! - end![1]!)).toBeLessThan(0.001);
     expect(Math.abs(start![0]! - end![0]!)).toBeGreaterThan(0.05);
   });

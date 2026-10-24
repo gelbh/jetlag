@@ -17,10 +17,6 @@ function isAppCheckMessage(message: string): boolean {
   return /app check/i.test(message);
 }
 
-/**
- * Map rematch callable failures to short player-facing copy.
- * Unknown / internal messages stay behind the fallback (no TX leak).
- */
 export function mapRematchError(error: unknown): string {
   if (isNeedsConnectionError(error)) {
     return callableErrorMessage(error, FALLBACK);

@@ -15,7 +15,6 @@ export interface CoastlineNearRegionDistanceThresholdOptions {
   divisions?: number;
 }
 
-/** Grid discretization slack for membership oracle (half cell diagonal + 1 m). */
 export function coastlineNearRegionOracleEpsilonMeters(
   gameArea: GameArea,
   divisions: number,

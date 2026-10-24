@@ -27,11 +27,9 @@ import {
 } from "@/hooks/map/useMapSideDockSide";
 import { cn } from "@/lib/cn";
 
-/** Move distance before a press becomes a dock drag (keeps taps working). */
 const DRAG_THRESHOLD_PX = 12;
 const EDGE_PAD_PX = 12;
 const PEER_GAP_PX = 14;
-/** Smooth settle; longer than routine UI so the park reads continuous. */
 const SETTLE_MS = 640;
 const SETTLE_EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
 const DRAG_SCALE = 1.03;
@@ -59,10 +57,6 @@ function viewportFrame(): DockFrame {
   return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
 }
 
-/**
- * Nearest `[data-map-dock-frame]` ancestor while it has layout containment
- * (so it is the fixed containing block), else the viewport.
- */
 function dockFrame(node: HTMLElement | null): DockFrame {
   const frame = node?.closest<HTMLElement>("[data-map-dock-frame]");
   if (!frame || !/layout|content|strict/.test(getComputedStyle(frame).contain)) {
@@ -148,10 +142,6 @@ function rectsOverlap(
   );
 }
 
-/**
- * Live drag: keep gap padding above / below / beside the peer.
- * No park snap mid-drag; release settle still stacks via resolveStackedTops.
- */
 export function separateFromPeerRect(
   left: number,
   top: number,
@@ -198,7 +188,6 @@ export function separateFromPeerRect(
     return best;
   }
 
-  // Viewport squeeze: push on the shortest axis even if clamp still clips.
   const pushLeft = desired.left + width - exclLeft;
   const pushRight = exclRight - desired.left;
   const pushUp = desired.top + height - exclTop;
@@ -336,7 +325,6 @@ export function MapDraggableFixedStack({
       return;
     }
     let frameEl: HTMLElement | null = null;
-    // react-doctor-disable-next-line react-doctor/effect-observer-needs-disconnect -- cleanup returns observer.disconnect(); rule misses observe() inside the callback
     const observer = new ResizeObserver(() => {
       const nextFrameEl = node.closest<HTMLElement>("[data-map-dock-frame]");
       if (nextFrameEl && nextFrameEl !== frameEl) {
@@ -355,7 +343,6 @@ export function MapDraggableFixedStack({
   const safeTop = typeof window !== "undefined" ? resolveSafeAreaTopPx() : 0;
   const restTop = topPxFromTopRatio(placement.topRatio, stackHeight, frameHeight, safeTop);
 
-  /** Capture pre-update rect when shared store changes (peer push). */
   useEffect(() => {
     const capture = () => {
       const el = rootRef.current;
@@ -419,9 +406,7 @@ export function MapDraggableFixedStack({
       ) {
         try {
           node.releasePointerCapture(session.pointerId);
-        } catch {
-          // already released
-        }
+        } catch {}
       }
       if (snapped && session && node) {
         const from = node.getBoundingClientRect();
@@ -514,9 +499,7 @@ export function MapDraggableFixedStack({
           if (typeof rootRef.current?.setPointerCapture === "function") {
             rootRef.current.setPointerCapture(session.pointerId);
           }
-        } catch {
-          // window listeners still drive the drag
-        }
+        } catch {}
         requestAnimationFrame(() => {
           const live = sessionRef.current;
           const node = rootRef.current;

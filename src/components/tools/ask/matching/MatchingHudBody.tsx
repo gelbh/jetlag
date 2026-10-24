@@ -8,11 +8,6 @@ import {
   TreeIcon,
   WrenchIcon,
 } from "@phosphor-icons/react";
-/**
- * Matching Ask HUD mode body — CatalogRail → map resolve (+ solo answer).
- * SingleBottomChord: row tap advances; no PhaseRail / CONTINUE.
- * Spec: ask-surface-kit-design rev 2026-08-05b.
- */
 import { type ComponentType, createElement, useState } from "react";
 import { HudMatchingIcon } from "@/components/map/icons/ToolIcons";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
@@ -77,9 +72,7 @@ export type MatchingHudBodyProps = {
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
-  /** Session-local empty play-area categories; greys like used. */
   unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
-  /** Empty play-area reason shown above the catalog rail after bounce. */
   catalogNotice?: string | null;
   catalogCategories?: readonly MatchingCategoryDefinition[];
   hasSeekerPoint: boolean;
@@ -99,7 +92,6 @@ export type MatchingHudBodyProps = {
   onUseGps: () => void;
   onAnswerChange: (answer: MatchingAnswer) => void;
   awaitHiderAnswer?: boolean;
-  /** Shown inside the question box (Matching · D3P1). */
   costLabel?: string | null;
   toolLabel?: string;
 };

@@ -58,7 +58,6 @@ export interface SubmitPendingQuestionInput {
  */
 export const SUBMIT_DOUBLE_TAP_COOLDOWN_MS = 750;
 
-/** Cancel a pending question and its chat row, and post a notice in one batch. */
 function commitQuestionCancel(options: {
   sessionId: string;
   pendingQuestionId: string;
@@ -143,7 +142,6 @@ export function usePendingQuestionActions() {
             promptText,
             cardDraw,
             cardKeep,
-            // Walking asks open their answer window when the walk completes.
             ...(walking ? {} : { answerableAt: createdAt }),
           },
           walking
@@ -326,7 +324,6 @@ export function usePendingQuestionActions() {
     [],
   );
 
-  /** Hider veto / randomize: closes the question with no card draw; veto sticks answer. */
   const cancelPendingQuestionWithCard = useCallback(
     (options: {
       sessionId: string;

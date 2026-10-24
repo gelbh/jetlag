@@ -2,7 +2,6 @@ import type { Feature, LineString } from "geojson";
 import { loadKernelWasm, parseWasmFeature, resetKernelWasmForTests } from "./kernelWasmPkg";
 import type { PolygonFeature } from "./types";
 
-/** Reset lazy WASM module (tests). */
 export const resetGeodesicWasmForTests = resetKernelWasmForTests;
 
 export async function wasmGeodesicLineBuffer(
@@ -10,7 +9,6 @@ export async function wasmGeodesicLineBuffer(
   distanceMeters: number,
   sampleSpacingMeters?: number,
 ): Promise<PolygonFeature | null> {
-  // Match TS geodesicLineBuffer: invalid explicit spacing throws (Rust returns None).
   if (
     sampleSpacingMeters !== undefined &&
     (!Number.isFinite(sampleSpacingMeters) || sampleSpacingMeters <= 0)

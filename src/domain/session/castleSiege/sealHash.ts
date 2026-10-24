@@ -32,7 +32,6 @@ function bytesToHex(bytes: Uint8Array): string {
   return hex;
 }
 
-/** SHA-256 hex (lowercase) of a UTF-8 payload via Web Crypto SubtleCrypto. */
 export async function hashSealPayload(payload: string): Promise<string> {
   const data = new TextEncoder().encode(payload);
   const digest = await crypto.subtle.digest("SHA-256", data);

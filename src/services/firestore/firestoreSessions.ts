@@ -1,5 +1,3 @@
-/** Public session Firestore API — split by concern under ./sessions/. */
-
 export {
   startCastleSiegeStandoff,
   updateCastleSiegeSetup,

@@ -1,6 +1,5 @@
 const PRODUCTION_ORIGIN = "https://jetlag.gelbhart.dev";
 
-/** Vite default 5173 plus remapped local stacks (dev-local next-free ports). */
 const LOCAL_VITE_PORT_MIN = 5173;
 const LOCAL_VITE_PORT_MAX = 5200;
 

@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 
-/** Primary map chrome sheets + nested sheets opened from them. */
 export type MapSheetOverlay =
   | "chat"
   | "settings"
@@ -13,9 +12,7 @@ export type MapSheetOverlay =
 export type MapSheetOverlayOrNone = MapSheetOverlay | "none";
 
 export interface UseMapOverlayStateResult {
-  /** Top of the sheet stack, or `"none"` when empty. */
   sheet: MapSheetOverlayOrNone;
-  /** Full stack (bottom → top). Empty when nothing is open. */
   sheetStack: readonly MapSheetOverlay[];
   isChatOpen: boolean;
   isSettingsOpen: boolean;
@@ -24,17 +21,13 @@ export interface UseMapOverlayStateResult {
   isMapToolsGuideOpen: boolean;
   isReportProblemOpen: boolean;
   isCurseReferenceOpen: boolean;
-  /** Dock / peer open: replaces the whole stack. */
   openChat: () => void;
   openSettings: () => void;
   openLog: () => void;
   openCodes: () => void;
   openSheet: (sheet: MapSheetOverlay) => void;
-  /** Hierarchical open: keeps prior sheets so close returns to them. */
   pushSheet: (sheet: MapSheetOverlay) => void;
-  /** Pop one level; empty stack → none. */
   closeSheet: () => void;
-  /** Clear the stack (leave overlays entirely). */
   closeAllSheets: () => void;
 }
 

@@ -28,7 +28,6 @@ const LABEL_COPY: Record<WriteLabel, string> = {
   restored: "An earlier change",
 };
 
-/** Surfaces server rejections of queued writes so nothing drops silently. Mount once (App root). */
 export function WriteFailureNotifier() {
   const failed = useWriteLedgerStore(useShallow(selectFailedEntries));
   const remove = useWriteLedgerStore((state) => state.remove);

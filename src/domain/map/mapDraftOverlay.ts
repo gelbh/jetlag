@@ -10,11 +10,9 @@ export interface MapDraftOverlayStyle {
   opacity?: number;
   markerRadius?: number;
   pulsing?: boolean;
-  /** When set, draft marker renders as a category icon pin (Matching). */
   iconCategoryId?: string;
   /** Tentacle place candidate: frosted iOS pin (selected lifts). */
   tentaclePoiSelected?: boolean;
-  /** Tentacle category id for map pin glyph (museum, library, …). */
   tentacleCategoryId?: string;
 }
 

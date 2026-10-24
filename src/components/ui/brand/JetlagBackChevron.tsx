@@ -1,9 +1,5 @@
 import { type SVGProps, useId } from "react";
 
-/**
- * Curved reply/back arrow (product mark style).
- * Smooth flag → signal gradient; glyph centered on the viewBox midline.
- */
 export function JetlagBackChevron({
   size = 22,
   className,

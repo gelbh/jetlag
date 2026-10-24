@@ -1,8 +1,3 @@
-/**
- * Client exception drop / keep / meter policy.
- * Retuned or newly added denylist entries require a production message fixture in tests.
- */
-
 import { isExpectedSessionLeaveMessage } from "../../session/sessionLeaveErrors";
 import { isHtml2CanvasUnsupportedColorMessage } from "../capture/html2canvasErrors";
 import {
@@ -27,20 +22,11 @@ const LEAFLET_CLASSLIST_ERROR = /evaluating 'e\.classList'/i;
 const BATTERY_ADD_EVENT_LISTENER = /addEventListener is not a function/i;
 const IDB_DATABASE_DELETED = /Database deleted by request of the user/i;
 const RECAPTCHA_ALREADY_RENDERED = /reCAPTCHA has already been rendered/i;
-/**
- * Proven VT abort noise. Includes residual browser wording after revealRouteTransition
- * skips when `document.visibilityState === "hidden"`.
- */
 const VIEW_TRANSITION_ABORTED =
   /Transition was aborted because of invalid state|Transition was skipped|Skipping view transition because document visibility state has become hidden|Skipped ViewTransition due to document being hidden/i;
 const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 export const JOIN_PERMISSION_DENIED_MESSAGE = "Join permission denied";
 
-/**
- * Production fixtures — mirror `HTTPS_MSG_*` in
- * `functions/session/expectedSessionUxHttpsErrors.mjs`.
- * Client denylist belt for residual capture from old clients.
- */
 export const EXPECTED_JOIN_UX_MESSAGES = [
   "Wrong role code.",
   "Role code is required.",
@@ -116,9 +102,6 @@ export function classifyClientExceptionEvent(
     if (exception.type === "QuotaExceededError" && STORAGE_QUOTA_EXCEEDED.test(value)) {
       return "meter_quota";
     }
-
-    // Firestore permissions + storage/unauthorized: reopened (send) — not expected-only UX.
-    // Narrow expected join UX messages are dropped via isExpectedJoinUxMessage below.
 
     if (exception.type === "FirebaseError" && AUTH_NETWORK_FAILED.test(value)) {
       return "drop";

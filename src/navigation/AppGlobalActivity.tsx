@@ -1,7 +1,6 @@
 import { GlobalActivity } from "../components/ui/feedback/GlobalActivity";
 import { useSessionStore } from "../state/sessionStore";
 
-/** App-level non-blocking activity from the sync write queue. */
 export function AppGlobalActivity() {
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
 

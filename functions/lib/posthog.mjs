@@ -68,9 +68,7 @@ export async function captureAnalyticsEvent(input) {
     // Soft-fail: analytics must never break Stripe / idle jobs.
     try {
       await client?.shutdown?.();
-    } catch {
-      // ignore
-    }
+    } catch {}
   }
 }
 
@@ -79,9 +77,6 @@ let exceptionClient = null;
 /** @type {string | null} */
 let exceptionClientKey = null;
 
-/**
- * Test-only: drop the module-level exception client.
- */
 export function resetFunctionsExceptionClientForTests() {
   exceptionClient = null;
   exceptionClientKey = null;

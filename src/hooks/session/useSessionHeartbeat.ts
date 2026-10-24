@@ -32,9 +32,7 @@ export function useSessionHeartbeat(session: SessionRecord | null) {
       try {
         await touchSessionLastActive(sessionId);
         lastTouchAtRef.current = now;
-      } catch {
-        // Heartbeat failures are non-fatal; cron handles stale sessions server-side.
-      }
+      } catch {}
     };
 
     const forceInitial = initialTouchSessionIdRef.current !== sessionId;

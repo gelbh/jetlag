@@ -25,7 +25,6 @@ describe("OverlayHost", () => {
     expect(host?.className).toMatch(/--jl-shell-safe-right/);
     expect(host?.className).toMatch(/safe-area-inset-left/);
     expect(host?.className).toMatch(/safe-area-inset-right/);
-    // Bottom inset lives in map-bottom-chrome.css (real CSS), not Tailwind.
     expect(host?.className).not.toMatch(/safe-area-inset-bottom/);
     expect(host?.classList.contains("jl-map-bottom-chrome-host")).toBe(true);
   });

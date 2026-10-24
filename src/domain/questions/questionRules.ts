@@ -147,11 +147,6 @@ export function resolveDeadlineAnchor(q: {
   return Date.parse(q.receivedAt) > Date.parse(q.answerableAt) ? q.receivedAt : q.answerableAt;
 }
 
-/**
- * The ask is still queued on the seeker's device: the hider has not seen it,
- * so no answer clock runs yet. `receivedAt` only exists once the server has
- * stamped the create (local snapshots read the pending serverTimestamp as null).
- */
 export function isAwaitingServerReceipt(q: {
   pendingSync?: boolean;
   receivedAt?: string;
@@ -159,7 +154,6 @@ export function isAwaitingServerReceipt(q: {
   return q.pendingSync === true && !q.receivedAt;
 }
 
-/** Anchor for a running answer clock; undefined while the ask is still queued locally. */
 export function activeDeadlineAnchor(q: {
   answerableAt?: string;
   receivedAt?: string;

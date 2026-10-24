@@ -1,5 +1,3 @@
-// Browser-side half of scripts/build/prerender-marketing.mjs; see finalizePrerenderDom.
-
 /**
  * Runs inside the prerender page (serialized by Playwright, so it must stay self-contained).
  * A client-rendered DOM lacks the markers `hydrateRoot` needs, so this adds what React's server
@@ -61,7 +59,6 @@ export function finalizePrerenderDom() {
     return { ready: false };
   }
 
-  /** Top-level host nodes of a fiber subtree, in order (portals excluded). */
   const hostNodes = (fiber, out) => {
     for (let f = fiber; f; f = f.sibling) {
       if (f.tag === HOST_PORTAL) continue;

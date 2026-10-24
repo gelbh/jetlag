@@ -4,7 +4,6 @@ import type { MapTool } from "../../domain/map/mapToolTypes";
 import { publishWizardStep, useSyncWizardStepRef } from "../tools/useSyncWizardStepRef";
 import { useWizardSheetSnap } from "./useWizardSheetSnap";
 
-/** Mirrors panel (child) sync + map chrome (parent) sheet snap in one tree. */
 function usePanelAndSheetSnap(tool: MapTool, stepId: string) {
   useSyncWizardStepRef(undefined, stepId, tool === "none" ? undefined : tool);
   return useWizardSheetSnap(tool);

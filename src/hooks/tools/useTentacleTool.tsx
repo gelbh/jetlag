@@ -55,7 +55,6 @@ import { commitTentacle } from "./tentacle/commitTentacle";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 
 interface TentacleSessionConfig {
-  /** Marker config — draft state stays in local React state for this adapter. */
   ready: true;
 }
 

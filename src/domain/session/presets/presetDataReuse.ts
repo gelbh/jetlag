@@ -25,12 +25,10 @@ import type { GamePreset } from "./gamePreset";
 const MATCHING_ADMIN_LEVELS: readonly MatchingAdminLevel[] = [4, 6, 8, 9];
 /** A subregion scopes matching areas, so it attaches only when it covers most of the frame. */
 const SUBREGION_MIN_FRAME_COVERAGE = 0.8;
-/** Within this much of the top score, the smallest pack reference box wins (Zurich over Switzerland). */
 const PACK_NEAR_TIE_SCORE = 0.02;
 
 export type PresetDataReuseOptions = {
   excludePresetIds?: readonly string[];
-  /** When set, pack fields apply only if winner.score > basePackScore */
   basePackScore?: number;
   minIntersectionRatio?: number;
   minIntersectionKm2?: number;
@@ -185,7 +183,6 @@ function resolveBasePackScore(
   return base;
 }
 
-/** Stable id for matching features; geometry JSON when the feature has no id. */
 export function matchingFeatureKey(feature: Feature): string {
   if (typeof feature.id === "string" || typeof feature.id === "number") {
     return String(feature.id);
@@ -343,10 +340,6 @@ export type SilentReuseGeoApply = {
   appliedMatchingKeys: Set<string>;
 };
 
-/**
- * Drop the previous silent-reuse overlay, keep host/Load base, then layer pack
- * boundaries (optional) and the current suggestion.
- */
 export function applySilentReuseDraftGeo(input: {
   previousPins: readonly SessionCustomLocationPin[] | undefined;
   previousMatching: CustomMatchingAreasByLevel | undefined;

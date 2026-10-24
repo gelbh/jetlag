@@ -21,7 +21,6 @@ import { readOfflineQueueForSession } from "../../services/session/offlineQueue"
 import { bindOfflineQueueResumeFlush } from "../../services/session/sessionResumeFlush";
 import { useAnnotationStore, useMapStore, useSessionStore } from "../../state/sessionStore";
 
-/** How long a cache-served session doc may stand before the rail says "last known state". */
 export const SESSION_STALE_GRACE_MS = 1500;
 
 export interface UseSessionSyncOptions {

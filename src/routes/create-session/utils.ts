@@ -2,7 +2,6 @@ import type { MapBoundsExpression } from "../../domain/map/mapBounds";
 import type { GeocodedPlace } from "../../services/geo/geocoding";
 
 const GPS_FOCUS_PAD_DEG = 0.018;
-/** Tiny Nominatim bboxes fail cameraForBounds once strip padding is applied. */
 const PLACE_FOCUS_MIN_SPAN_DEG = 0.04;
 
 function expandFocusBox(box: { south: number; west: number; north: number; east: number }): {

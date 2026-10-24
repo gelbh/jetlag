@@ -9,7 +9,6 @@ import { loadPolygonGolden } from "./loadPolygonGolden";
 import { assertPolygonTopologyParity } from "./parity";
 import type { GameAreaGeometry } from "./types";
 
-/** Measuring APIs take annotations GameArea; kernel forbids that import. */
 type MeasuringGameArea = Parameters<typeof prepareMeasuringLineSegments>[1];
 
 const pkgEntry = path.resolve(
@@ -50,7 +49,6 @@ const topologyBbox = {
   north: 51.5,
 };
 
-/** Default cell divisions miss a 200 m band on this small fixture; keep parity explicit. */
 const coastlineParityDivisions = 32;
 
 describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {

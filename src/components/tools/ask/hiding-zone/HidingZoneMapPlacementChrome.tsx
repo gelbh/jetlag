@@ -1,7 +1,3 @@
-/**
- * Map-first hiding-zone chrome: shared placement shell + place/confirm slots (no GPS).
- */
-
 import { Button } from "@mantine/core";
 import { CheckIcon } from "@phosphor-icons/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -24,9 +20,7 @@ export type HidingZoneMapPlacementChromeProps = {
   onSearchThisArea: () => void;
   onStepChange?: (stepId: HidingZoneStepId) => void;
   onDismiss?: () => void;
-  /** Re-open method chips (create and move). */
   onBackToMethod?: () => void;
-  /** Mirror sheet viewOnly: false disables Confirm. */
   writesEnabled?: boolean;
 };
 
@@ -130,8 +124,6 @@ export function HidingZoneMapPlacementChrome({
       ? "Confirm your station, or pick another on the map."
       : "Tap a transit station on the map to place your zone.";
 
-  // Banner already owns questionPrompt + radius (configureLabel). Mid is
-  // placement artifact only: station picker, manual confirm summary, or move cues.
   const summary = step === "confirm" && !showStationPicker ? placementSummary(zoneTool) : null;
   const showMoveCues = moveMode;
   const showMid = showStationPicker || summary !== null || showMoveCues;

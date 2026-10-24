@@ -1,6 +1,3 @@
-// Imported by the Worker (via appRoutePaths.ts) and by the boot entry (publicShellPaths.ts):
-// keep this module dependency-free, DOM-free and tiny.
-
 /** Prerendered, indexable how-to-play pages (guide, question tool explainers, FAQ). */
 export const LEARN_ROUTE_PATHS = [
   "/guide",

@@ -10,7 +10,6 @@ interface EndGameAlertProps {
   onResetEndGame?: () => void;
 }
 
-/** Alert-only End Game banner. Seekers start via Found station (no Accept/Decline). */
 export function EndGameAlert({
   endGameActive,
   isHost,

@@ -70,9 +70,8 @@ describe("bundledGamePresets", () => {
       ]),
     );
     const ch = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "switzerland");
-    expect(ch).toHaveLength(27); // country + 26 cantons
+    expect(ch).toHaveLength(27);
     expect(ch.every((p) => p.distanceUnit === "metric")).toBe(true);
-    // specialty packs still present
     expect(ids).toEqual(
       expect.arrayContaining([
         "bundled:zurich-canton",

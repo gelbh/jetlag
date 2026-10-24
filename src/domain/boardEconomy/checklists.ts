@@ -1,5 +1,3 @@
-/** Rulebook honor-system checklist copy (no GPS enforce in v1). */
-
 export const FOUND_CHECKLIST_ITEMS = [
   "Seekers are within 2 m of the hider and have spotted them.",
 ] as const;

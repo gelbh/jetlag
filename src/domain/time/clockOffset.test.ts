@@ -10,8 +10,8 @@ describe("estimateOffset", () => {
   it("uses midpoint of lowest-RTT sample", () => {
     expect(
       estimateOffset([
-        { sentAtMs: 0, receivedAtMs: 1000, serverMs: 10_000 }, // rtt 1000
-        { sentAtMs: 2000, receivedAtMs: 2100, serverMs: 12_050 }, // rtt 100 → offset 10_000
+        { sentAtMs: 0, receivedAtMs: 1000, serverMs: 10_000 },
+        { sentAtMs: 2000, receivedAtMs: 2100, serverMs: 12_050 },
       ]),
     ).toBe(10_000);
   });
@@ -38,7 +38,7 @@ describe("estimateOffset plausibility", () => {
 });
 
 describe("indicatesClockJump", () => {
-  const sample = { sentAtMs: 1_000, receivedAtMs: 1_200, serverMs: 6_100 }; // offset 5_000, rtt 200
+  const sample = { sentAtMs: 1_000, receivedAtMs: 1_200, serverMs: 6_100 };
 
   it("accepts a sample within RTT/2 + tolerance of the estimate", () => {
     expect(indicatesClockJump(sample, 5_900)).toBe(false);

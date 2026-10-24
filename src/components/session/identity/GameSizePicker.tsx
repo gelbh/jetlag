@@ -24,7 +24,6 @@ interface GameSizePickerProps {
   disabled?: boolean;
   compact?: boolean;
   accessory?: ReactNode;
-  /** When set by a parent that survives remount, skips recommend overwrite. */
   userOverrode?: boolean;
   onUserOverride?: () => void;
 }

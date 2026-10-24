@@ -42,7 +42,6 @@ export function mapSideDockIsTop(anchor: MapSideDockAnchor): boolean {
   return anchor === "top-left" || anchor === "top-right";
 }
 
-/** Keyboard nudge: step down the band, then flip side. */
 export function cycleMapChromeDockPlacement(
   placement: MapChromeDockPlacement,
 ): MapChromeDockPlacement {
@@ -87,7 +86,6 @@ export function nearestMapSideDockAnchor(
   return "bottom-right";
 }
 
-/** Phone session tool dock placement (shared store with nav). */
 export function useMapSideDockSide(): {
   placement: MapChromeDockPlacement;
   setPlacement: (placement: MapChromeDockPlacement) => void;

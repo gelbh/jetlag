@@ -76,11 +76,6 @@ function pendingQuestionsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "pendingQuestions");
 }
 
-/**
- * Returns status string when the pending question exists; otherwise null.
- * Cache first: the pendingQuestions listener keeps it current, and a default
- * getDoc on lie-fi waits until the SDK decides it is offline (~10 s).
- */
 export async function getPendingQuestionStatus(
   sessionId: string,
   questionId: string,
@@ -142,7 +137,6 @@ export async function appendPlayerTrailPoint(
       recordedAt: point.recordedAt,
     });
   } catch (error) {
-    // Offline persistence can replay an already-committed create (JETLAG-1Z).
     if (isFirestoreAlreadyExistsError(error)) {
       return;
     }
@@ -245,11 +239,6 @@ export function subscribeToHiderPlayerLocations(
   );
 }
 
-/**
- * Listeners opened with `includeMetadataChanges` also fire on query-level
- * `fromCache` flips that change no document; skip those (after the first
- * emit, which must go out even for an empty collection) to avoid re-renders.
- */
 function createMetadataSnapshotGate(): (snapshot: Pick<QuerySnapshot, "docChanges">) => boolean {
   let emitted = false;
   return (snapshot) => {
@@ -308,12 +297,6 @@ export function subscribeToSessionMessages(
   );
 }
 
-/**
- * Question + its chat row in one atomic batch: queued offline as a unit, so
- * there is no half-asked state to compensate. Pending asks get `receivedAt`
- * stamped by the server so the hider's answer window starts on arrival;
- * walking asks get it when the walk completes (`stampReceivedAt`).
- */
 export async function writeAskedQuestionBatch(
   sessionId: string,
   question: PendingQuestionRecord,
@@ -346,18 +329,14 @@ export type PendingQuestionPatch = Partial<
   >
 >;
 
-/** A question transition plus the chat writes that announce it. */
 export interface PendingQuestionBatchWrites {
   questionId: string;
   questionPatch: PendingQuestionPatch;
-  /** Patch to the question's existing chat row. */
   gameMessage?: {
     id: string;
     patch: { status: "answered" | "cancelled"; selectedReply?: string };
   };
-  /** New chat row (system notice, or the question row when a walk completes). */
   newMessage?: SessionMessageRecord;
-  /** Stamp server receipt: the question becomes answerable for the hider with this write. */
   stampReceivedAt?: boolean;
 }
 
@@ -399,7 +378,6 @@ export async function updatePendingQuestion(
 
 const OPEN_PENDING_QUESTION_STATUSES = new Set(["pending", "walking", "answered"]);
 
-/** One-shot read for leave paths that are not already subscribed (e.g. Home). */
 export async function listPendingQuestions(sessionId: string): Promise<PendingQuestionRecord[]> {
   const snapshot = await getDocs(pendingQuestionsCollection(sessionId));
   return snapshot.docs.map((questionDoc) =>

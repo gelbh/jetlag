@@ -14,17 +14,13 @@ export function readLowBatteryPromptDismissed(): boolean {
 export function dismissLowBatteryPromptForSession(): void {
   try {
     sessionStorage.setItem(DISMISS_SESSION_KEY, "1");
-  } catch {
-    // sessionStorage unavailable
-  }
+  } catch {}
 }
 
 export function clearLowBatteryPromptDismissal(): void {
   try {
     sessionStorage.removeItem(DISMISS_SESSION_KEY);
-  } catch {
-    // sessionStorage unavailable
-  }
+  } catch {}
 }
 
 export function shouldOfferLowPowerMode(input: {

@@ -121,7 +121,6 @@ function EmptyBlock({
   );
 }
 
-/** What an empty Sessions tab says, by cause. Shared by the table and the phone cards. */
 export function SessionsEmpty({
   tables,
   list,
@@ -264,7 +263,6 @@ interface AdminDeskTableProps {
   onCollapse?(): void;
 }
 
-/** Comp "Sessions table", expanded: one full-width panel, toolbar then table. */
 export function AdminDeskTable({
   tables,
   tab,
@@ -280,7 +278,6 @@ export function AdminDeskTable({
   const rootRef = useRef<HTMLDivElement>(null);
   const onSessions = tab === "sessions";
 
-  // Coming back from an open item: keep its row in view.
   useEffect(() => {
     rootRef.current
       ?.querySelector<HTMLElement>('tr[aria-current="true"]')

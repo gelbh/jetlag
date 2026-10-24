@@ -35,7 +35,6 @@ export function useCancelOrphanThermometerWalks(args: {
     senderRole: PlayerRole;
     reason: Extract<ThermometerWalkCancelReason, "orphan" | "stale">;
   }) => Promise<void>;
-  /** Override clock (tests). Production uses the shared stale-walk tick. */
   nowMs?: () => number;
 }): void {
   const {

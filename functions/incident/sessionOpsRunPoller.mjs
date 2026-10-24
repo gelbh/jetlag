@@ -1,8 +1,3 @@
-/**
- * Poll Cursor Cloud Agent runs for in-flight session-ops turns and persist
- * terminal NL to the support thread.
- */
-
 import { randomUUID } from "node:crypto";
 import { getSessionOpsRun } from "./sessionOpsCursorAgent.mjs";
 import { appendSupportThreadMessage, SUPPORT_AGENT_WORKING_TEXT } from "./sessionOpsThread.mjs";

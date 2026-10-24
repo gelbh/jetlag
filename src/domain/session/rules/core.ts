@@ -92,5 +92,4 @@ export function timerNeverStarted(session: SessionRecord): boolean {
   );
 }
 
-/** Legacy helper for callers that only have gameSize */
 export { hidingPeriodMs };

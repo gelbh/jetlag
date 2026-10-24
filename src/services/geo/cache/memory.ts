@@ -14,7 +14,6 @@ export const inFlight = new Map<string, Promise<unknown>>();
 export const staleServedKeys = new Set<string>();
 
 export function cacheTtlMsForKey(key: string): number {
-  // Elevation samples are durable but shorter-lived than admin/coastline packs.
   if (key.startsWith("elevation:")) {
     return DEFAULT_CACHE_TTL_MS;
   }
@@ -47,7 +46,6 @@ export function writeMemoryEntry<T>(key: string, value: T, ttlMs?: number): void
   });
 }
 
-/** L1 memory adapter for {@link GeoCacheLayer}. */
 export const memoryGeoCache: GeoCacheLayer = {
   async get(key: string): Promise<unknown | null> {
     const value = readCachedMemoryEntry(key);

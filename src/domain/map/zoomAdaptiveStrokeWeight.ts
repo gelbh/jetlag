@@ -1,9 +1,5 @@
-/** Zoom-adaptive Leaflet stroke weights for map overlays. */
-
 export interface ZoomAdaptiveWeightOptions {
-  /** Zoom level where `baseWeight` is returned unchanged. Default 12. */
   refZoom?: number;
-  /** Exponent on (zoom / refZoom). Default 0.75. */
   scaleFactor?: number;
   minWeight?: number;
   maxWeight?: number;
@@ -24,9 +20,6 @@ export function resolveZoomAdaptiveWeightOptions(options: ZoomAdaptiveWeightOpti
   };
 }
 
-/**
- * `clamp(baseWeight * (zoom / refZoom) ^ scaleFactor, minWeight, maxWeight)`
- */
 export function computeZoomAdaptiveWeight(
   baseWeight: number,
   zoom: number,
@@ -39,7 +32,6 @@ export function computeZoomAdaptiveWeight(
   return Math.min(maxWeight, Math.max(minWeight, scaled));
 }
 
-/** Round weight to the nearest 0.5 so SVG path updates stay coarse. */
 export function quantizeWeight(weight: number, step = WEIGHT_STEP): number {
   if (!Number.isFinite(weight) || step <= 0) {
     return weight;
@@ -47,10 +39,6 @@ export function quantizeWeight(weight: number, step = WEIGHT_STEP): number {
   return Math.round(weight / step) * step;
 }
 
-/**
- * Scale a Leaflet `dashArray` string with stroke weight
- * (e.g. `"8 6"` at baseWeight 3 → larger/smaller dashes as weight changes).
- */
 export function scaleDashArray(dashArray: string, weight: number, baseWeight: number): string {
   if (!(baseWeight > 0) || !Number.isFinite(weight)) {
     return dashArray;

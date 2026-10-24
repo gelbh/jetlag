@@ -26,7 +26,6 @@ import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./shared/wizard/
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 
-/** Flat tentacle wizard fields bag for TentaclePanel (W4-F peel). */
 export type TentaclePanelModel = {
   gameSize: GameSize;
   categoryId: TentacleExtendedCategoryId | null;

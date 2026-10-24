@@ -47,7 +47,6 @@ export function QuestionAlertBanner({
   questionCards,
   onSetHidingZone,
 }: QuestionAlertBannerProps) {
-  // Server clock: deadline anchors are server-stamped, and expiry marks answers late.
   const [nowMs, setNowMs] = useState(() => serverNow());
 
   useEffect(() => {

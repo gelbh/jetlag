@@ -1,7 +1,3 @@
-/**
- * Segment/pill chip island in the thumb zone (radius, method, photo categories).
- * Spec: ask-surface-kit-design rev 2026-08-05b.
- */
 import { OptionChip, OptionChipRow } from "@/components/tools/shared/controls/OptionChip";
 
 export type AskChipIslandChip = {

@@ -43,8 +43,6 @@ export function SocialChatTab({
       return;
     }
     setDraft("");
-    // Not awaited: offline the ack only arrives after reconnect. On a rejection
-    // WriteFailureNotifier surfaces it; give the text back if the box is still empty.
     void sendSocialMessage(sessionId, senderUid, senderRole, text).acknowledged.catch(() => {
       setDraft((current) => (current === "" ? text : current));
     });

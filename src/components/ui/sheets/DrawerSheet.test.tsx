@@ -107,7 +107,6 @@ describe("DrawerSheet", () => {
       ),
     );
 
-    // RTL flushes useEffect before render returns; assert closed→open via prop history.
     expect(drawerOpenedHistory[0]).toBe(false);
 
     await waitFor(() => {
@@ -288,7 +287,6 @@ describe("DrawerSheet", () => {
       ),
     );
 
-    // Decorative-only grabber bar remains; interactive dismiss button stays off.
     expect(
       screen.queryByRole("button", {
         name: "Drag sheet down to dismiss",
@@ -341,7 +339,6 @@ describe("DrawerSheet", () => {
     const handle = screen.getByRole("button", {
       name: "Drag sheet down to dismiss",
     });
-    // Tailwind min-h-11 = 2.75rem = 44px finger target; pill stays 36×5.
     expect(handle.className).toMatch(/min-h-11/);
     expect(handle.className).toMatch(/\bw-full\b/);
     const pill = handle.querySelector("[aria-hidden]") as HTMLElement | null;

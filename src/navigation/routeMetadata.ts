@@ -35,10 +35,6 @@ export function normalizeRoutePath(path: string): string {
   return base || "/";
 }
 
-/**
- * Route pattern with dynamic ids collapsed, so ids don't explode cardinality. Unlike `normalizeRoutePath`, admin incident ids collapse too, and the
- * `/join/` asset alias folds into `/join`.
- */
 export function parameterizedRoutePath(path: string): string {
   const route = normalizeRoutePath(path);
   const trimmed = route.length > 1 ? route.replace(/\/$/, "") : route;

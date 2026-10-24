@@ -50,7 +50,6 @@ export interface CommitTentacleInput {
   ) => Promise<AnnotationRecord>;
   setMapError: (message: string | null) => void;
   onSuccess: () => void;
-  /** When set, Castle Siege routes through oracle instead of honor typing. */
   sessionMode?: SessionMode | null;
   defenderTeamId?: CastleSiegePlayingTeam;
   callOracleAsk?: AnswerCastleSiegeOracleAskFn;
@@ -276,7 +275,6 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    // Persist ceiling only: keep Point; other failures still surface.
     if (
       message === MEASURING_PERSIST_OVER_BUDGET_MESSAGE ||
       message === POLYGON_PERSIST_OVER_BUDGET_MESSAGE

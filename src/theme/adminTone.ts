@@ -10,7 +10,6 @@ export const toneColor: Record<StatusTone, string> = {
   neutral: "var(--color-ink-muted)",
 };
 
-/** One tone per incident progress group: queue rows and the drilled-in header agree. */
 export const incidentProgressTone: Record<IncidentProgress, StatusTone> = {
   new: "mispunch",
   diagnosed: "info",

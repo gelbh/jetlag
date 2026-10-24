@@ -32,7 +32,6 @@ export function subscribeToSession(
   );
 }
 
-/** Hider/observer/admin-only freeze points (not on the seeker-readable session doc). */
 export function subscribeToEndGameTruthAnchors(
   sessionId: string,
   onChange: (anchors: SessionRecord["endGameTruthAnchors"] | undefined) => void,

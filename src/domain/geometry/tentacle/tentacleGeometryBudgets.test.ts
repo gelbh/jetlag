@@ -8,7 +8,6 @@ import {
 
 describe("tentacleGeometryBudgets", () => {
   it("records EXYS-class 24-site hospital lists under the former cap", () => {
-    // Live: session EXYS / pending a4ad8efe-90d3-46cb-a803-b37ef2e307e2
     expect(exysHospitalTentacle.pois).toHaveLength(24);
     expect(exysHospitalTentacle.pois.length).toBeLessThan(TENTACLE_POI_MAX);
   });

@@ -66,11 +66,6 @@ async function writeSweepCursor(db, lastCodeId) {
     );
 }
 
-/**
- * Scan a page of sessionCodes and delete orphan / ended-session codes.
- * Advances a persisted cursor so repeated cron runs eventually cover the collection.
- * Returns number deleted.
- */
 export async function sweepOrphanSessionCodes(db, { limit = ORPHAN_CODE_SWEEP_LIMIT } = {}) {
   const startAfterId = await readSweepCursor(db);
   let codesSnap = await sessionCodesQuery(db, { limit, startAfterId }).get();

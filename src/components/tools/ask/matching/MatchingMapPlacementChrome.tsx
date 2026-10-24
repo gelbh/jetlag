@@ -1,7 +1,3 @@
-/**
- * Map-first Matching chrome: GPS-first anchor, then on-map answer / send.
- * Thin adapter over AskMapPlacementChrome.
- */
 import { UnstyledButton } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudMatchingIcon } from "@/components/map/icons/ToolIcons";
@@ -39,7 +35,6 @@ export type MatchingMapPlacementChromeProps = {
   canCommit?: boolean;
   isSubmitting?: boolean;
   onCommit?: () => void;
-  /** Reopen Matching catalog sheet to pick a different category. */
   onChangeCategory?: () => void;
 };
 

@@ -28,13 +28,11 @@ import { parseMatchingFeatures } from "./parse";
 import { buildStreetPathQuery, matchingSearchBoundingBox } from "./query";
 import type { OverpassElement } from "./types";
 
-/** UX bound for Overpass only; GTFS bundle load stays on GEO_FETCH_TIMEOUT_MS. */
 export const HIDING_ZONE_OVERPASS_TIMEOUT_MS = 4000;
 
 const OVERPASS_TIMEOUT_MESSAGE = "Couldn't load transit stations for this area.";
 
 export type HidingZoneStationsOptions = {
-  /** Fired for GTFS hits and for late Overpass results after a timed-out wait. */
   onStations?: (stations: TransitStation[]) => void;
 };
 
@@ -124,10 +122,6 @@ export async function fetchTransitLineMatchingFeaturesInArea(
   return fetchStationFeaturesInArea(gameArea);
 }
 
-/**
- * GTFS ∪ Overpass for hiding-zone / Time Trap lists.
- * GTFS-first matching is unchanged. Prefer GTFS rows when dedupe collapses near-duplicates.
- */
 async function fetchHidingZoneStationsUnion(
   bbox: BoundingBox,
   gameArea: GameArea,

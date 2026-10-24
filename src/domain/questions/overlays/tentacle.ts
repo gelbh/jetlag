@@ -60,9 +60,7 @@ export function buildTentacleOverlays(
           },
         });
       }
-    } catch {
-      // Corrupt POI JSON: keep range/center markers, skip POIs.
-    }
+    } catch {}
   }
 
   return { overlays, badgeAnchor: center };

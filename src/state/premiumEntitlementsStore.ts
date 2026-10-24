@@ -56,9 +56,7 @@ function writePersistedSnapshot(snapshot: PersistedEntitlements): void {
   }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
-  } catch {
-    // Ignore quota / private-mode failures.
-  }
+  } catch {}
 }
 
 export const usePremiumEntitlementsStore = create<PremiumEntitlementsState>((set, get) => ({

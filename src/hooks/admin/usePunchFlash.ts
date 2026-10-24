@@ -7,7 +7,6 @@ type PunchSession = Pick<AdminSessionSummary, "sessionId" | "lastActivityAt">;
 
 const NO_FLASH: ReadonlySet<string> = new Set();
 
-/** `undefined` marks an unparsable timestamp, which never flashes. */
 function parseActivity(value: string | null): number | null | undefined {
   if (value === null) return null;
   const ms = Date.parse(value);
@@ -27,7 +26,6 @@ export function usePunchFlash(sessions: readonly PunchSession[]): ReadonlySet<st
     };
   }, []);
 
-  // react-doctor-disable-next-line react-doctor/effect-needs-cleanup -- timers live in timersRef; the mount effect above clears them on unmount
   useEffect(() => {
     const seen = seenRef.current;
     if (!seen) {

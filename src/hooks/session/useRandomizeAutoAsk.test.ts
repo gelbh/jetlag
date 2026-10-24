@@ -105,7 +105,6 @@ function setup(overrides: Partial<UseRandomizeAutoAskParams> = {}) {
   return { props, submitToolQuestion, onManual };
 }
 
-/** Lets the async build/submit chain settle so "submits nothing" assertions are meaningful. */
 async function settle() {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }

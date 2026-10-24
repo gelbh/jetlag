@@ -1,9 +1,3 @@
-/**
- * Fire-and-forget facades over the PostHog-backed client error module and analytics.
- * Static imports would pull posthog into the entry critical path; dynamic
- * import of the facade module keeps analytics off that path.
- * Calls to one module resolve in call order (same import promise).
- */
 import { writeAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
 import type { syncAnalyticsIdentity, trackPageView } from "./analytics";
 import type { AnalyticsEventName, AnalyticsEventProps } from "./analyticsEvents";
@@ -19,7 +13,6 @@ let clientErrorsModule: Promise<typeof import("./clientErrors")> | undefined;
 
 function loadAnalytics(): Promise<typeof import("./analytics")> {
   analyticsModule ??= import("./analytics").catch((error: unknown) => {
-    // Let a later call retry after a transient chunk-load failure.
     analyticsModule = undefined;
     throw error;
   });
@@ -85,7 +78,6 @@ export function captureErrorBoundaryExceptionLazy(
     .catch(() => {});
 }
 
-/** Persists consent synchronously; product enable / identity reset follows once loaded. */
 export function grantAnalyticsConsentLazy(): void {
   writeAnalyticsConsent("granted");
   void loadAnalytics()

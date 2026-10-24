@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-/** Host STUCK? cue and host stale auto-cancel share this tick. */
 export const STALE_WALK_CLOCK_MS = 15_000;
 
 let staleWalkNowMs = 0;
@@ -46,7 +45,6 @@ export function useStaleWalkNowMs(): number {
   return useSyncExternalStore(subscribeStaleWalkClock, getStaleWalkNowMs, () => 0);
 }
 
-/** Test helper — reset module clock between suites if needed. */
 export function resetStaleWalkClockForTests(): void {
   if (intervalId !== null) {
     window.clearInterval(intervalId);

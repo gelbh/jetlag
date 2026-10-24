@@ -4,9 +4,6 @@ import { sweepPosthogIncidents as runSweep } from "../incident/sweepPosthogIncid
 import { withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 import { posthogPersonalApiKey, posthogProjectApiKey } from "../lib/posthog.mjs";
 
-/**
- * Daily: close PostHog-alert incidents whose PostHog issue is resolved, suppressed or archived.
- */
 export const sweepPosthogIncidents = onSchedule(
   {
     schedule: "0 6 * * *",

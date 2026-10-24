@@ -123,7 +123,6 @@ export function setupPinsForCategory(
   return pins.filter((pin) => !pin.category || pin.category === categoryId);
 }
 
-/** Matching has no "any category" fallback, so only explicitly tagged pins count there. */
 export function taggedSetupPinsForCategory(
   pins: readonly SessionCustomLocationPin[],
   categoryId: string,

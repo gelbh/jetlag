@@ -1,8 +1,3 @@
-/**
- * Firebase-SDK-free auth bootstrap flag. Lets boot-path UI (gates, route
- * readiness, Home) read readiness without pulling firebase/* into the App
- * chunk; `firebase.ts` flips the flag once auth bootstrap settles.
- */
 import { isFirebaseConfiguredFromEnv } from "@/config/env";
 
 let authBootstrapReady = false;

@@ -111,7 +111,6 @@ describe("production GTFS bundles", () => {
   it("NYC midtown play area uses full subway stop inventory", async () => {
     const bundle = loadProductionBundle("nyc");
     expect(bundle).not.toBeNull();
-    // Subway + five borough bus feeds (was subway-only ~1k).
     expect(bundle!.stops.length).toBeGreaterThan(5000);
     expect(bundle!.feedOnestopId).toBe("mta-nyc-subway-bus-merged");
 
@@ -174,7 +173,6 @@ describe("production GTFS bundles", () => {
   it("Dublin production bundle covers TFI bus + Luas + rail density", () => {
     const bundle = loadProductionBundle("dublin");
     expect(bundle).not.toBeNull();
-    // Rebuilt from TFI Dublin Bus + Go-Ahead + Luas + Irish Rail (was ~207).
     expect(bundle!.stops.length).toBeGreaterThan(2000);
     expect(bundle!.routes.length).toBeGreaterThan(50);
     expect(bundle!.feedOnestopId).toBe("tfi-dublin-merged");

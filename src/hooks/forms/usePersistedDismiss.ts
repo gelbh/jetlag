@@ -14,9 +14,7 @@ export function usePersistedDismiss(storageKey: string) {
   const dismiss = useCallback(() => {
     try {
       localStorage.setItem(storageKey, "1");
-    } catch {
-      // localStorage unavailable
-    }
+    } catch {}
     setDismissed(true);
   }, [storageKey]);
 

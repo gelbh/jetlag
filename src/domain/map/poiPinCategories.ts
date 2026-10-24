@@ -9,7 +9,6 @@ type PointMeasuringOption = Extract<
 
 export type PoiPinCategoryId = Exclude<PointMeasuringOption["id"], "body_of_water">;
 
-/** Point POIs a pin can stand in for; the Measuring catalog covers every Tentacle and Matching point id. */
 export const POI_PIN_CATEGORIES: readonly { id: PoiPinCategoryId; label: string }[] =
   BASE_MEASURING_CATALOG.filter(
     (option): option is Extract<PointMeasuringOption, { id: PoiPinCategoryId }> =>

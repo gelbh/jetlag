@@ -56,9 +56,7 @@ function segmentIntersectsViewport(
   );
 }
 
-/** Hide dense stop markers until close enough to be useful. */
 export const TRANSIT_STOP_MIN_ZOOM = 13;
-/** Cap markers per viewport publish to limit Leaflet remount cost. */
 export const TRANSIT_STOP_MARKER_CAP = 150;
 
 export function filterTransitStopsForViewport(

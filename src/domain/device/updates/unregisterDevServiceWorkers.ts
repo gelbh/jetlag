@@ -1,7 +1,3 @@
-/**
- * Preview/production builds on localhost can leave a Workbox SW registered on the
- * same origin as `npm run dev`. Unregister and clear caches so Vite HMR is served.
- */
 export async function unregisterDevServiceWorkers(): Promise<boolean> {
   if (!import.meta.env.DEV) {
     return false;

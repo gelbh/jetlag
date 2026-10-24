@@ -18,7 +18,6 @@ export function parseClockToSeconds(text: string): number {
   throw new Error(`Unexpected timer format: ${text}`);
 }
 
-/** Tip MapTimerCluster primary readout (view-only; not a button). */
 export function sessionElapsedLocator(page: Page) {
   return page.getByTitle("Session time since start");
 }
@@ -63,7 +62,6 @@ export async function returnToMapFromHome(page: Page) {
   await dismissMapOnboarding(page);
 }
 
-/** Tip status island exposes Pause/Resume inline (no timer-settings menu). */
 export async function pauseSessionTimer(page: Page) {
   await page.getByRole("button", { name: "Pause timer" }).click();
   await expect(page.getByRole("button", { name: "Resume timer" })).toBeVisible();

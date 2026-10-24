@@ -20,7 +20,6 @@ interface MapFloatingPanelProps {
   closeLabel?: string;
   maxHeightClassName?: string;
   bodyScrollable?: boolean;
-  /** Live question wizards: scroll lives inside the panel body, not the shell. */
   panelLayout?: "default" | "wizard";
   outerClassName?: string;
   outerRef?: Ref<HTMLDivElement>;

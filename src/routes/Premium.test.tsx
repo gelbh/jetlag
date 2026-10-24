@@ -91,7 +91,6 @@ vi.mock("../components/billing/AppleSignInButton", () => ({
   ),
 }));
 
-// Hook loads firebase/auth dynamically; drive `isPermanent` from the mock directly.
 vi.mock("../hooks/billing/usePermanentAuthUser", () => ({
   usePermanentAuthUser: () => ({
     user: null,

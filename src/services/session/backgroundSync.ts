@@ -17,7 +17,5 @@ export async function registerAnnotationBackgroundSync(): Promise<void> {
         sync: { register: (tag: string) => Promise<void> };
       }
     ).sync.register(ANNOTATION_SYNC_TAG);
-  } catch {
-    // Background Sync is optional; interval flush covers unsupported browsers.
-  }
+  } catch {}
 }

@@ -23,11 +23,9 @@ import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras
 import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
-/** History.state marker so Back can exit zone placement without leaving `/map`. */
 export const ZONE_WIZARD_HISTORY_KEY = "jlZoneWizard";
 
 const MOVE_MIN_DISTANCE_METERS = 50;
-/** Half-width of the Overpass box searched around a map tap; the margin keeps the snap radius inside it. */
 const TAP_SNAP_SEARCH_METERS = STATION_SNAP_METERS + 50;
 const MOVE_PLAYED_MESSAGE =
   "Move card played. Timer paused. Seekers must stay put. Hider is relocating.";
@@ -48,14 +46,11 @@ interface UseHiderZoneToolParams {
   postSystemMessage: (text: string) => Promise<void>;
   pauseTimer: () => void;
   resumeTimer: () => void;
-  /** Host can write timer via client rules; non-host queues a server-applied intent. */
   canControlTimer?: boolean;
   ensureWriteAccess?: () => Promise<void>;
   writesEnabled?: boolean;
   mapPickEnabled?: boolean;
-  /** Board economy: require a Move card in hand before starting relocate. */
   hasMoveCard?: () => boolean;
-  /** Board economy: discard Move (and hand) when the new zone is confirmed. */
   consumeMoveCard?: () => Promise<void>;
 }
 
@@ -88,7 +83,6 @@ export function useHiderZoneTool({
   const [moveMode, setMoveMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  /** Bumped per Play Move and cleared on confirm, so a late rejection only rolls back the live attempt. */
   const moveAttemptRef = useRef(0);
   const wizardOpenRef = useRef(false);
   const moveModeRef = useRef(false);
@@ -163,8 +157,6 @@ export function useHiderZoneTool({
       };
 
       try {
-        // GTFS load is uncapped; Overpass is bounded inside the fetcher. onStations
-        // still applies late Overpass hits after that Overpass timeout.
         const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
           onStations: applyStations,
         });
@@ -265,7 +257,6 @@ export function useHiderZoneTool({
     abandonZoneWizardHistory();
   }, [abandonZoneWizardHistory, applyWizardClosed]);
 
-  /** Back / Cancel / dismiss: close placement and resume the timer when leaving a move. */
   const closeWizardFromUser = useCallback(() => {
     if (!wizardOpenRef.current) {
       return;
@@ -286,11 +277,6 @@ export function useHiderZoneTool({
     return () => window.removeEventListener("popstate", onPopState);
   }, [applyWizardClosed]);
 
-  /**
-   * Membership heal reads from the server, so it only runs when reachable.
-   * Offline, rules re-check access when Firestore replays the queued writes and
-   * any rejection surfaces through the write ledger.
-   */
   const ensureWriteAccessIfOnline = useCallback(async () => {
     if (!ensureWriteAccess || isEffectivelyOfflineNow()) {
       return;
@@ -371,7 +357,6 @@ export function useHiderZoneTool({
     sessionId,
     writesEnabled,
   ]);
-  /** Nothing loaded nearby is the common case in Tap map mode, so look stations up around the tap. */
   const snapTapToNearestStation = useCallback(
     async (point: LatLngTuple) => {
       const requestId = beginSnapRequest();

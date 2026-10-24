@@ -124,9 +124,7 @@ export async function writePersistedEntry<T>(key: string, value: T): Promise<voi
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error ?? new Error("Cache write failed"));
     });
-  } catch {
-    // Ignore persistence failures; memory cache still helps this session.
-  }
+  } catch {}
 }
 
 export async function clearPersistedCacheForTests(): Promise<void> {
@@ -143,7 +141,5 @@ export async function clearPersistedCacheForTests(): Promise<void> {
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error ?? new Error("Cache clear failed"));
     });
-  } catch {
-    // Ignore persistence failures in tests.
-  }
+  } catch {}
 }

@@ -24,15 +24,12 @@ export interface ElevationSampleCell {
 
 const MAX_SEA_LEVEL_SAMPLE_CELLS = 600;
 export const COARSE_SEA_LEVEL_DIVISIONS = 8;
-/** Bundled pack seed density target (preload cost; not cold-path). */
 export const PACK_SEA_LEVEL_SEED_DIVISIONS = 20;
-/** Cap Open-Meteo samples for freehand local refine. */
 export const MAX_SEA_LEVEL_REFINE_SAMPLES = 48;
 export const SEA_LEVEL_REFINE_SUBDIVISIONS = 2;
 const DEFAULT_SEA_LEVEL_DIVISIONS = 10;
 const MAX_SMALL_AREA_DIVISIONS = 45;
 const MIN_GAME_AREA_DIVISIONS = 8;
-/** Elevations within this band of the seeker threshold are ambiguous. */
 const DEFAULT_SEA_LEVEL_AMBIGUITY_MARGIN_METERS = 15;
 
 type CellClass = "near" | "far" | "skip";
@@ -328,7 +325,6 @@ export function buildSeaLevelNearRegionWithLocalRefine(args: {
   seekerDistanceFromSeaLevelMeters: number;
   gameArea: GameArea;
   refineCells?: ElevationSampleCell[];
-  /** Parallel to refineCells: `${parent.row}:${parent.col}` from the subdivider. */
   refineParentKeys?: string[];
   refineElevations?: number[];
 }): SeaLevelNearRegionBuildResult {

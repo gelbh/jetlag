@@ -1,7 +1,3 @@
-/**
- * Map-first Tentacle answer chrome: selection lives on map pins;
- * this strip mirrors the choice, Not within reach, and solo copy-to-hider.
- */
 import { Button, Text } from "@mantine/core";
 import {
   choiceChipStyles,
@@ -25,7 +21,6 @@ export type TentacleMapAnswerStripProps = {
   selectedPoiId: string | null;
   outOfReach: boolean;
   onOutOfReachChange: (outOfReach: boolean) => void;
-  /** Solo / no in-app hider: show clipboard helper for offline hiders. */
   showCopyForHider?: boolean;
 };
 

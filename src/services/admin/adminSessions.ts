@@ -61,7 +61,6 @@ export interface AdminSessionSummary {
   mode: AdminSessionMode;
   isLive: boolean;
   liveMultiplayer: boolean;
-  /** Absent on older function deploys; column shows "–" until present. */
   questionCount?: number;
 }
 

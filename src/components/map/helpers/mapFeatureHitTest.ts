@@ -85,9 +85,6 @@ export function featureHitKind(feature: MapGeoJSONFeature): string | null {
   return typeof hitKind === "string" ? hitKind : null;
 }
 
-/**
- * Street-only basemap POI under a map tap. Satellite → null (no tile pick).
- */
 export function queryBasemapPoiAtPoint(
   map: MapLibreMap | null,
   mapStyle: MapStyle,

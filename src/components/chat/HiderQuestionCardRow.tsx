@@ -9,7 +9,6 @@ const DISARM_AFTER_MS = 4000;
 interface HiderQuestionCardRowProps {
   cards: readonly QuestionPowerUpId[];
   disabled?: boolean;
-  /** Changing this (e.g. a new pending question id) disarms any armed card. */
   resetKey: string;
   onPlay: (card: QuestionPowerUpId) => void;
 }

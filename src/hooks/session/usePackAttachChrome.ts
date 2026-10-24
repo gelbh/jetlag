@@ -13,7 +13,6 @@ export type { PackAttachSource };
 
 export interface UsePackAttachChromeOptions {
   gameArea: GameArea | null;
-  /** Seed from an existing preset (bundled or previously saved). */
   initialPackId?: RegionPackId;
 }
 
@@ -25,11 +24,6 @@ export interface PackAttachChrome {
   changePack: (packId: RegionPackId) => void;
 }
 
-/**
- * Quiet pack-attach chrome for preset editors.
- * Auto-suggests from play-area overlap; manual clear/change sticks until the
- * AABB fingerprint changes.
- */
 export function usePackAttachChrome({
   gameArea,
   initialPackId,

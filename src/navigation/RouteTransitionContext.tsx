@@ -134,9 +134,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
     ) => {
       try {
         await preloadRoute(targetPath);
-      } catch {
-        // Warm-up only; the rendered lazy route retries chunk failures itself.
-      }
+      } catch {}
 
       if (transitionGenerationRef.current !== myGeneration) {
         return;
@@ -146,9 +144,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         await revealRouteTransition(revealDirectionRef.current, decorativeAnimate, () =>
           navigate(to, navigateOptions),
         );
-      } catch {
-        // Navigation succeeded; a failed reveal should not block the route.
-      }
+      } catch {}
     },
     [decorativeAnimate, navigate],
   );
@@ -172,7 +168,6 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       const targetPath = resolveNavigatePath(to);
       const destinationKey = resolveNavigateDestinationKey(to);
       const warmFastPath = isWarmFastPathEligible(targetPath);
-      // Keep RR viewTransition off: revealRouteTransition owns VT after warm/settle.
       const navigateOptions: RouteNavigateOptions = {
         replace: options?.replace,
         state: options?.state,
@@ -192,9 +187,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         loadingTargetRef.current = destinationKey;
         try {
           await preloadRoute(targetPath);
-        } catch {
-          // Warm-up only; the rendered lazy route retries chunk failures itself.
-        }
+        } catch {}
 
         if (transitionGenerationRef.current !== myGeneration) {
           return;
@@ -231,9 +224,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       const settle = async () => {
         try {
           await preloadRoute(targetPath);
-        } catch {
-          // Warm-up only; the rendered lazy route retries chunk failures itself.
-        }
+        } catch {}
 
         if (transitionGenerationRef.current !== myGeneration) {
           return;
@@ -241,8 +232,6 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
 
         setLoadingProgress(computeLoadingProgress(targetPath, screenReadyRef.current));
 
-        // Navigate immediately - destination shell/skeleton mounts while
-        // readiness settles in-shell (no full-bleed load overlay).
         setNavDirection(revealDirectionRef.current);
         try {
           await revealRouteTransition(revealDirectionRef.current, decorativeAnimate, () =>

@@ -8,9 +8,7 @@ import { getFirebaseFunctions } from "./firebase";
 export { NeedsConnectionError };
 
 export const DEFAULT_CALLABLE_TIMEOUT_MS = 12_000;
-/** Wall-clock cap across all attempts and backoff sleeps. */
 export const DEFAULT_CALLABLE_BUDGET_MS = 25_000;
-/** Don't start an attempt that could not realistically finish. */
 const MIN_ATTEMPT_MS = 1_000;
 
 const RETRIABLE_CODES = new Set([
@@ -20,9 +18,7 @@ const RETRIABLE_CODES = new Set([
 ]);
 
 export type CallWithResilienceOptions<Res = unknown> = {
-  /** Per-attempt SDK timeout (the SDK default is 70 s). */
   timeoutMs?: number;
-  /** Total wall-clock budget across attempts. */
   budgetMs?: number;
   /**
    * Set only when a repeat call cannot double-apply: the handler is read-only
@@ -32,17 +28,10 @@ export type CallWithResilienceOptions<Res = unknown> = {
   idempotent?: boolean;
   /** Attempts for idempotent calls (ignored otherwise). */
   maxAttempts?: number;
-  /** Runs after the offline gate and Functions init, before the first attempt. */
   prepare?: () => Promise<void>;
-  /**
-   * Called only when a *retry* fails with a non-retriable error. A state-guarded
-   * handler answers a repeat of an already-committed call with a precondition
-   * error; return a result here to treat that as success, or undefined to throw.
-   */
   recoverAfterRetry?: (error: unknown) => Res | undefined | Promise<Res | undefined>;
 };
 
-/** Match a callable HttpsError by code (without `functions/`) and optional exact message. */
 export function isCallableError(
   error: unknown,
   code: string,

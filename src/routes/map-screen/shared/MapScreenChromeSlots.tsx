@@ -11,10 +11,6 @@ export type MapScreenChromeSlotsProps = {
   header: ReactNode;
   toolbar?: ReactNode;
   chromeHudRef?: Ref<HTMLDivElement>;
-  /**
-   * `hud`: fixed phone dock HUD.
-   * `fragments`: header/toolbar/children as-is (admin compact overlays).
-   */
   layout?: MapScreenChromeSlotsLayout;
   children?: ReactNode;
 };

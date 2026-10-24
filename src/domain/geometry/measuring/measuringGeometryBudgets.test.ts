@@ -18,7 +18,6 @@ import {
   softenMeasuringOutputToBudget,
 } from "./measuringGeometryBudgets";
 
-/** Dense zigzag ring — simplify can reduce verts under the output cap. */
 function denseZigzagPolygon(vertexCount: number): Feature<Polygon> {
   const ring: number[][] = [];
   const n = Math.max(4, vertexCount - 1);
@@ -34,10 +33,6 @@ function denseZigzagPolygon(vertexCount: number): Feature<Polygon> {
   };
 }
 
-/**
- * Many well-separated unit squares — Turf simplify cannot collapse under the
- * output cap (RLBT golf-closer class: ~8k verts that stay heavy).
- */
 function separateSquaresMultiPolygon(squareCount: number): Feature<MultiPolygon> {
   const polygons: number[][][][] = [];
   for (let i = 0; i < squareCount; i++) {
@@ -150,7 +145,6 @@ describe("measuringGeometryBudgets", () => {
 
 describe("measuring output complexity budget", () => {
   it("locks caps between museum-scale OK and RLBT golf-closer fatal sizes", () => {
-    // museum ~1.3k / ~50 KB OK; golf ~8k / ~320 KB fatal
     expect(MEASURING_OUTPUT_MAX_VERTICES).toBeGreaterThan(1_300);
     expect(MEASURING_OUTPUT_MAX_VERTICES).toBeLessThan(8_000);
     expect(MEASURING_OUTPUT_MAX_JSON_CHARS).toBeGreaterThan(50_000);
@@ -196,7 +190,6 @@ describe("measuring output complexity budget", () => {
   });
 
   it("persist-slim fails RLBT-class fixtures with storage copy only", () => {
-    // 1600 squares × 5 verts = 8000 — mirrors golf closer scale; squares resist slim.
     const golf = separateSquaresMultiPolygon(1_600);
     expect(countPolygonVertices(golf)).toBe(8_000);
     expect(measuringGeometryJsonChars(golf)).toBeGreaterThan(50_000);

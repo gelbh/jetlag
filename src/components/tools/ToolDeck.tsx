@@ -8,21 +8,15 @@ import {
 } from "@/components/ui/entry/entryChrome";
 import { cn } from "@/lib/cn";
 
-/** Seeker multi-tool Hunt (`tools`) vs hider 1–2 chip content-sized island (`sparse`). */
 export type ToolDeckDensity = "tools" | "sparse";
 
 export interface ToolDeckProps {
   density?: ToolDeckDensity;
-  /** Ask-owned tool: hunt re-roles under Ask instrument cluster. */
   askFirst?: boolean;
   className?: string;
   children?: ReactNode;
 }
 
-/**
- * Full-bleed hunt tool deck — equal-flex slots (≥44px hit areas).
- * Spans OverlayHost content width; side session stack overlays trailing edge (choice a).
- */
 export function ToolDeck({
   density = "tools",
   askFirst = false,
@@ -47,7 +41,6 @@ export function ToolDeck({
       aria-label="Hunt tools"
       radius={22}
       p={askFirstActive ? 3 : 4}
-      // OverlayHost / chrome are pointer-events-none; Island baked this in.
       className={cn(deckClassName, "pointer-events-auto flex min-h-11 items-center")}
       styles={{
         root: {
@@ -62,14 +55,12 @@ export function ToolDeck({
 }
 
 export interface ToolDeckGroupProps {
-  /** Match parent ToolDeck density — sparse chips stay content-sized. */
   density?: ToolDeckDensity;
   className?: string;
   "aria-label"?: string;
   children?: ReactNode;
 }
 
-/** Main hunt group — equal flex slots, even distribution, ≥44px min height. */
 export const ToolDeckGroup = forwardRef<HTMLDivElement, ToolDeckGroupProps>(function ToolDeckGroup(
   {
     density = "tools",
@@ -98,7 +89,6 @@ export const ToolDeckGroup = forwardRef<HTMLDivElement, ToolDeckGroupProps>(func
   );
 });
 
-/** Inset strip for question tools (history stays outside). */
 export function ToolDeckQuestionStrip({
   children,
   className,
@@ -132,7 +122,6 @@ export interface ToolDeckInnerProps {
   children?: ReactNode;
 }
 
-/** Relative wrap for active-tool highlight over the slot group. */
 export function ToolDeckInner({ className, children }: ToolDeckInnerProps) {
   return (
     <div

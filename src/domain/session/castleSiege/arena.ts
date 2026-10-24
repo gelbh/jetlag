@@ -4,7 +4,6 @@ import type { GameArea } from "@/domain/map/annotations";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import { loadRegionPackPlayArea } from "@/services/geo/matching/regionPackBoundaries";
 
-/** Outer Castle Siege arena polygon (same GeoJSON shape as session gameArea). */
 export type CastleSiegeArenaPolygon = GameArea;
 
 export type CastleSiegeArenaSource = "gameArea" | "regionPack" | "drawn";
@@ -54,7 +53,6 @@ function assertUsableArenaPolygon(gameArea: GameArea): void {
   }
 }
 
-/** Import the current session gameArea as the outer Castle Siege arena. */
 export function arenaFromGameArea(gameArea: GameArea): CastleSiegeArena {
   assertUsableArenaPolygon(gameArea);
   return {
@@ -65,11 +63,9 @@ export function arenaFromGameArea(gameArea: GameArea): CastleSiegeArena {
 
 export type ArenaFromRegionPackOptions = {
   subregionId?: string;
-  /** Defaults to {@link loadRegionPackPlayArea}; inject in tests. */
   loadPlayArea?: RegionPackPlayAreaLoader;
 };
 
-/** Import a bundled region pack play area as the outer Castle Siege arena. */
 export async function arenaFromRegionPack(
   packId: RegionPackId,
   options: ArenaFromRegionPackOptions = {},

@@ -1,6 +1,5 @@
 import { useRouteTransition } from "./useRouteTransition";
 
-/** In-shell settle progress (never a full-bleed cover). */
 export function RouteProgressChrome() {
   const { phase, loadingProgress } = useRouteTransition();
   if (phase !== "settling" || !loadingProgress) {

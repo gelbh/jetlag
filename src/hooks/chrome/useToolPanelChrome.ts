@@ -3,7 +3,6 @@ import type { DockableMapTool } from "../../domain/map/mapTools";
 import type { WizardSheetSnap } from "../../domain/wizard/phaseToSheetSnap";
 
 type ToolPanelChromeOptions = {
-  /** Phase-driven sheet height; peek keeps the map clear for placement taps. */
   sheetSnap?: WizardSheetSnap;
 };
 

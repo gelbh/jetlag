@@ -38,7 +38,6 @@ import { useToolSession } from "./framework/useToolSession";
 import { commitRadar } from "./radar/commitRadar";
 
 interface RadarSessionConfig {
-  /** Marker config — draft state stays in local React state for this adapter. */
   ready: true;
 }
 
@@ -129,7 +128,6 @@ export function useRadarTool({
   const [radarAnswer, setRadarAnswer] = useState<RadarAnswer | null>(null);
   const [radarCenter, setRadarCenter] = useState<LatLngTuple | null>(null);
   const [editingDistance, setEditingDistance] = useState(false);
-  /** Ignore catalog taps briefly after back — same-gesture click-through. */
   const [distanceCatalogArmed, setDistanceCatalogArmed] = useState(true);
   const distanceCatalogArmEpochRef = useRef(0);
 

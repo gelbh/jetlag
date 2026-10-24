@@ -29,10 +29,8 @@ export type IncidentMitigationType =
   | "clear_pending_questions"
   | "end_session";
 
-/** Optional short player-supplied note (probe counter caps at this length). */
 export const INCIDENT_NOTE_MAX_LENGTH = 140;
 
-/** Caps applied by {@link collectIncidentDiagnostics} to keep payloads bounded. */
 export const INCIDENT_MAX_CLIENT_ERRORS = 10;
 export const INCIDENT_MAX_RECENT_OPS = 20;
 export const INCIDENT_MAX_ERROR_MESSAGE_LENGTH = 300;
@@ -42,14 +40,8 @@ export const INCIDENT_MAX_USER_AGENT_LENGTH = 300;
 export interface IncidentClientError {
   name: string;
   message?: string;
-  /** ISO timestamp of when the error was captured. */
   at: string;
-  /** PostHog exception / issue id when the client attached one. */
   posthogExceptionId?: string;
-  /**
-   * Legacy client diagnostics field. Prefer {@link posthogExceptionId}.
-   * Dual-read in collect/triage until old docs age out.
-   */
   sentryEventId?: string;
 }
 
@@ -98,7 +90,6 @@ export interface IncidentHotfixState {
 
 export type IncidentCodingAgentStatus = "launched" | "failed" | "misconfigured";
 
-/** Private coding-agent / Cursor hotfix launch state on the incident doc. */
 export interface IncidentCodingAgentState {
   status: IncidentCodingAgentStatus;
   cursorAgentId?: string | null;
@@ -111,7 +102,6 @@ export interface IncidentCodingAgentState {
   updatedAt?: string;
 }
 
-/** PostHog Error Tracking issue that raised an alert-sourced incident. */
 export interface IncidentPosthogIssue {
   id: string;
   name: string;
@@ -133,18 +123,12 @@ export interface IncidentRecord {
   email?: IncidentEmailState;
   mitigations?: IncidentMitigationRecord[];
   hotfix?: IncidentHotfixState;
-  /** Set when the incident came from a PostHog error alert instead of a player. */
   posthogIssue?: IncidentPosthogIssue;
-  /** Cursor coding-agent launch state (admin hotfix thread). */
   agent?: IncidentCodingAgentState | null;
-  /** Active session-ops summon id when a fix agent is running. */
   activeSessionOpsSummonId?: string | null;
-  /** Summons consumed on this incident (free/premium capped). */
   sessionOpsSummonCount?: number;
-  /** Durable Cursor Cloud Agent id for session-ops (one per incident). */
   cursorAgentId?: string | null;
   cursorAgentUrl?: string | null;
-  /** In-flight or last session-ops Cloud Agent run metadata. */
   supportAgentRun?: {
     runId?: string | null;
     agentId?: string | null;
@@ -194,7 +178,6 @@ export function isIncidentStatus(value: unknown): value is IncidentStatus {
   return typeof value === "string" && (INCIDENT_STATUSES as readonly string[]).includes(value);
 }
 
-/** Trims a player note and clamps it to {@link INCIDENT_NOTE_MAX_LENGTH}. */
 export function clampIncidentNote(note: string | null | undefined): string {
   if (!note) {
     return "";

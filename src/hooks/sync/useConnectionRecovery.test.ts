@@ -105,7 +105,6 @@ describe("useConnectionRecovery — Firestore network cycle", () => {
     await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS));
     expect(cycleFirestoreNetwork).toHaveBeenCalledTimes(1);
 
-    // Flap reachability: new episode, but inside the throttle window.
     rerender({ ...props, reachable: false });
     rerender({ ...props, reachable: true });
     await act(() => vi.advanceTimersByTimeAsync(CYCLE_THROTTLE_MS - 1));

@@ -7,14 +7,8 @@ import {
 import { isActive } from "../../map/annotationActive";
 import { type AnnotationRecord, pointToolRadiusFromMetadata } from "../../map/annotations";
 
-/**
- * Shared pin highlight + tool truth band next to an answer boundary.
- * Radar/measuring: absolute metres to circumference or |station−seeker| distance delta.
- * Thermometer: |d(start)−d(end)| / 2 (flip-locus approximation).
- */
 export const NEAR_ELIMINATION_EDGE_METERS = 50;
 
-/** Alias kept for radar call sites; same threshold as NEAR_ELIMINATION_EDGE_METERS. */
 export const NEAR_RADAR_EDGE_METERS = NEAR_ELIMINATION_EDGE_METERS;
 
 export type AnsweredRadarCircle = {
@@ -23,10 +17,6 @@ export type AnsweredRadarCircle = {
   inside: boolean;
 };
 
-/**
- * Active answered radar with a Point centre. Shared by pin highlight, elimination
- * disk/exterior, and (via gap helpers) radar truth alignment on radius defaults.
- */
 export function answeredRadarCircle(annotation: AnnotationRecord): AnsweredRadarCircle | null {
   if (!isActive(annotation) || annotation.type !== "radar") {
     return null;
@@ -50,7 +40,6 @@ export function answeredRadarCircle(annotation: AnnotationRecord): AnsweredRadar
   };
 }
 
-/** Absolute metres between `point` and the circle of `radiusMeters` around `center`. */
 export function radarCircumferenceGapMeters(
   point: LatLngTuple,
   center: LatLngTuple,
@@ -82,7 +71,6 @@ export type AnsweredThermometerSegment = {
   end: LatLngTuple;
 };
 
-/** Active answered thermometer with LineString endpoints. */
 export function answeredThermometerSegment(
   annotation: AnnotationRecord,
 ): AnsweredThermometerSegment | null {
@@ -98,10 +86,6 @@ export function answeredThermometerSegment(
   return lineEndpointsFromFeature(annotation.geometry as Feature<LineString>);
 }
 
-/**
- * Half the absolute difference of distances to the walk endpoints.
- * Zero on the hotter/colder flip locus; matches truthThermometer distances.
- */
 export function thermometerFlipGapMeters(
   point: LatLngTuple,
   start: LatLngTuple,

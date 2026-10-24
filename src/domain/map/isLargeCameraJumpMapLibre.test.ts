@@ -39,7 +39,6 @@ function createStubMap(center: { lng: number; lat: number }, zoom: number) {
       if (hit) {
         return hit;
       }
-      // Approximate: 1° lng ≈ viewport width at this stub scale for delta tests
       const { lng, lat } = lngLatParts(lngLat);
       return {
         x: VIEWPORT_WIDTH_PX / 2 + (lng - center.lng) * VIEWPORT_WIDTH_PX,
@@ -74,7 +73,6 @@ describe("isLargeCameraJumpMapLibre", () => {
     const { map, center } = createStubMap({ lng: -6.26, lat: 53.34 }, 12);
     const viewportSpanPx = Math.max(VIEWPORT_WIDTH_PX, VIEWPORT_HEIGHT_PX);
     const thresholdPx = viewportSpanPx * MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION;
-    // project stub: deltaLng * VIEWPORT_WIDTH_PX = pixel delta
     const belowLng = center.lng + (thresholdPx - 30) / VIEWPORT_WIDTH_PX;
     const atLng = center.lng + (thresholdPx + 20) / VIEWPORT_WIDTH_PX;
 

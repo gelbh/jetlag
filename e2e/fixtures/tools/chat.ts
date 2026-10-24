@@ -11,7 +11,6 @@ export function gameChatScroll(page: Page): Locator {
   return page.locator(".jl-game-chat-scroll");
 }
 
-/** Social-tab message list (the composer sits below it). */
 export function socialChatScroll(page: Page): Locator {
   return page
     .getByLabel("Chat tabs")

@@ -12,7 +12,6 @@ export type { HiderTruthResult } from "./shared";
 
 export function computeHiderTruthReply(
   pending: PendingQuestionRecord,
-  /** Resolved truth reference: zone center until end-game freeze. */
   stationCenter: LatLngTuple | null,
   gameArea?: GameArea,
 ): HiderTruthResult | null {

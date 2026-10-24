@@ -8,7 +8,6 @@ interface HiderPinSheetProps {
   onDelete: (id: string) => void;
 }
 
-/** Firestore rules let a hider soft-delete only their own active pin, so nothing else shows here. */
 export function HiderPinSheet({ annotation, uid, onClose, onDelete }: HiderPinSheetProps) {
   if (
     !annotation ||

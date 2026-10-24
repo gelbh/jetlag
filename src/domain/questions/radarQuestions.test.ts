@@ -42,7 +42,6 @@ describe("radarQuestions", () => {
     expect(radarInsideFromAnswer("no")).toBe(false);
     expect(radarAnswerFromInside(true)).toBe("yes");
     expect(radarAnswerFromInside(false)).toBe("no");
-    // shadedInside = eliminate disk (no); exterior when yes
     expect(radarShadedInsideFromAnswer("yes")).toBe(false);
     expect(radarShadedInsideFromAnswer("no")).toBe(true);
   });

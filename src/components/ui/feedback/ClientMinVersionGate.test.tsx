@@ -63,7 +63,6 @@ describe("ClientMinVersionGate", () => {
     appCheckArmed.value = false;
 
     const view = renderGate(<div>app-content</div>);
-    // Let the gate's dynamic listener import settle before asserting.
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });

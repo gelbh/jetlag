@@ -1,20 +1,12 @@
-// Loaded by routeSeo (App chunk, critical path): titles and link labels only. Page bodies live
-// in learnContent.ts, which only the lazy LearnPage route imports.
 import { isLearnRoutePath, type LearnRoutePath } from "@/domain/seo/learnRoutePaths";
 import type { LearnLinkPath } from "./learnContentTypes";
 
 export type LearnPageMeta = {
-  /** Short sticky-bar title. */
   headerTitle: string;
-  /** Page heading (the only h1). */
   h1: string;
-  /** `<title>`, ≤ 60 chars. */
   seoTitle: string;
-  /** Meta description, ≤ 160 chars. */
   description: string;
-  /** Label for internal links and breadcrumbs. */
   linkLabel: string;
-  /** Breadcrumb parent; `null` sits directly under Home. */
   parent: LearnRoutePath | null;
 };
 
@@ -107,7 +99,6 @@ const OTHER_LINK_LABELS: Record<Exclude<LearnLinkPath, LearnRoutePath>, string> 
   "/privacy": "Privacy Policy",
 };
 
-/** Link label for a "Keep reading" target. */
 export function learnLinkLabel(path: LearnLinkPath): string {
   return isLearnRoutePath(path) ? LEARN_PAGE_META[path].linkLabel : OTHER_LINK_LABELS[path];
 }
@@ -118,7 +109,6 @@ export function learnPageMeta(path: LearnRoutePath): LearnPageMeta {
 
 export type LearnBreadcrumb = { name: string; path: string };
 
-/** Home → (parent) → page, for the breadcrumb nav and `BreadcrumbList` JSON-LD. */
 export function learnBreadcrumbs(path: LearnRoutePath): LearnBreadcrumb[] {
   const meta = learnPageMeta(path);
   const crumbs: LearnBreadcrumb[] = [{ name: "Home", path: "/" }];

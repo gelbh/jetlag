@@ -45,7 +45,6 @@ describe("computePaddedCenterAtZoom", () => {
       { top: 32, bottom: 32 + 120, left: 24, right: 24 },
       11,
     );
-    // Extra bottom padding → map center moves south → content sits higher.
     expect(biased.lat).toBeLessThan(symmetric.lat);
     expect(biased.lng).toBeCloseTo(symmetric.lng, 6);
   });

@@ -94,7 +94,6 @@ describe("measuringLod", () => {
     expect(countPolygonVertices(full)).toBeGreaterThan(MEASURING_LOD_TURF_VERTEX_CEILING);
     const coarse = buildMeasuringCoarseFeature(full);
     const fullVerts = countPolygonVertices(full);
-    // Stride coarse targets ~25% of verts — well under Turf-free ceiling path.
     expect(countPolygonVertices(coarse)).toBeLessThanOrEqual(Math.floor(fullVerts * 0.3));
     const step = refineMeasuringFeatureStep(full, coarse, 0);
     expect(countPolygonVertices(step.feature)).toBeGreaterThan(countPolygonVertices(coarse));

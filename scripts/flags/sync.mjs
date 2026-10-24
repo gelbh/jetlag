@@ -26,7 +26,6 @@ const outTs = path.join(root, "src", "domain", "regions", "bundledPresetFlagAsse
 
 const UA = "JetlagFlagSync/1.0 (https://github.com/gelbh/jetlag; flag sync)";
 
-/** Country / nation-level FlagCDN codes (not Wikidata). */
 const FLAGCDN = {
   "continent-europe": { code: "eu", alt: "European Union" },
   "country-ireland": { code: "ie", alt: "Ireland" },
@@ -398,7 +397,6 @@ SELECT ?item ?flag ?arms WHERE {
 }
 
 function commonsThumbUrl(specialFilePathUrl, width = 128) {
-  // Special:FilePath URLs accept width=
   const url = new URL(specialFilePathUrl.replace("http://", "https://"));
   url.searchParams.set("width", String(width));
   return url.toString();

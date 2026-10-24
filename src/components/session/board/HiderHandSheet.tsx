@@ -44,7 +44,6 @@ type HiderHandSheetProps = {
   onPlayMove: (instanceId: string) => void;
 };
 
-/** Stable host; content gate remounts selection draft each open. */
 export function HiderHandSheet(props: HiderHandSheetProps) {
   return (
     <SheetHost

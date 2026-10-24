@@ -101,7 +101,6 @@ function SessionCard({
   );
 }
 
-/** Comp `caseFile()`: meta line, note as heading, session card, one action row, then the thread. */
 export function AdminCaseFile({
   incidentId,
   incident,

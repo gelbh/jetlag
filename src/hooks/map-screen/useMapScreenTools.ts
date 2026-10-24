@@ -49,7 +49,6 @@ interface UseMapScreenToolsParams {
   ) => Promise<AnnotationRecord>;
 }
 
-/** Owns seeker tool state: GPS, placement, question submission, and the tool hooks. */
 export function useMapScreenTools({
   session,
   uid,
@@ -67,7 +66,6 @@ export function useMapScreenTools({
   const [mapError, setMapError] = useState<string | null>(null);
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
   const castleSiege = isCastleSiegeSession(session);
-  // Castle Siege answers come from the Functions oracle (confirm-send), not honor typing.
   const awaitHiderAnswer = !castleSiege && sessionHasHiders(session?.memberRoles);
   const myCastleRole = resolveCastleSiegeRole(session?.castleSiegeRoles, uid ?? undefined);
   const defenderTeamId =

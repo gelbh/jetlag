@@ -62,7 +62,6 @@ export function hasMeasuringCategoryIcon(kind: string): boolean {
   );
 }
 
-/** Phosphor icon for a Measuring catalog option (custom/pack → TagIcon). */
 export function measuringCategoryIcon(kind: MeasuringFromKind): ComponentType<IconProps> {
   if (kind.startsWith("custom:") || kind.startsWith("pack:") || kind.startsWith("custom_geo:")) {
     return TagIcon;

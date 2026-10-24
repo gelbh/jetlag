@@ -178,7 +178,6 @@ describe("packGeoManifest", () => {
         const payload = JSON.parse(readFileSync(resolve(poiDir, fileName), "utf8")) as {
           bbox?: unknown;
         };
-        // Skip files without bbox (tokyo/osaka/zurich/lucerne stubs).
         if (!isPoiBbox(payload.bbox)) {
           continue;
         }

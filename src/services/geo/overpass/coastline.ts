@@ -118,9 +118,7 @@ export async function fetchPreparedCoastlineSegments(
         await writeCoastlineSegmentsCache(gameArea, merged);
         options.onEnrich?.(merged);
       })
-      .catch(() => {
-        // Soft-fail Overpass enrich; keep the pack result in the caller.
-      });
+      .catch(() => {});
     return prepared;
   }
 

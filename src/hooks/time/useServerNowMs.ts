@@ -1,10 +1,6 @@
 import { useLayoutEffect, useState } from "react";
 import { serverNow } from "@/services/core/time/serverClock";
 
-/**
- * Server clock held in state so compiled renders recompute on each tick.
- * `null` freezes the value (no interval). Pauses while the page is hidden.
- */
 export function useServerNowMs(tickMs: number | null): number {
   const [nowMs, setNowMs] = useState(() => serverNow());
 

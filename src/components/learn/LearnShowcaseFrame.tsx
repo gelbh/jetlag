@@ -31,7 +31,6 @@ const captionStyle: CSSProperties = {
   textWrap: "pretty",
 };
 
-/** Stake-plate frame for live Ask HUD demos on learn pages. */
 export function LearnShowcaseFrame({
   showcase,
   caption,
@@ -43,7 +42,6 @@ export function LearnShowcaseFrame({
 }) {
   const trackedRef = useRef(false);
 
-  // Capture phase: demo handlers may stop propagation.
   const trackFirstInteraction = () => {
     if (trackedRef.current) return;
     trackedRef.current = true;

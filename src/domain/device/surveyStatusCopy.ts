@@ -5,13 +5,11 @@ import { isHidingPeriodActive } from "@/domain/session/hiding/hidingPeriod";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { computeElapsedMs, type TimerState } from "@/domain/session/timer/timer";
 
-/** Plain-language phase for the map status strip (jargon stays secondary). */
 export function surveyPhaseLabel(
   timerHasStarted: boolean,
   sessionRules: SessionRulesInput,
   timerState: TimerState,
   moveInProgress: boolean,
-  /** Server-frame now (`serverNow()`), the frame `runningSince` is written in. */
   nowMs: number,
 ): string {
   if (!timerHasStarted) {
@@ -24,10 +22,6 @@ export function surveyPhaseLabel(
   return isHidingPeriodActive(sessionRules, elapsed) ? "Hiding" : "Seeking";
 }
 
-/**
- * Session-level status for the Mantine map island (no player role).
- * Priority follows what is actually blocking attention in-game.
- */
 export function mapIslandSessionStatus(input: {
   timerHasStarted: boolean;
   timerSyncing: boolean;
@@ -36,7 +30,6 @@ export function mapIslandSessionStatus(input: {
   moveInProgress: boolean;
   sessionRules: SessionRulesInput;
   timerState: TimerState;
-  /** Server-frame now (`serverNow()`), the frame `runningSince` is written in. */
   nowMs: number;
   pendingQuestions?: readonly PendingQuestionRecord[];
 }): string {
@@ -129,10 +122,6 @@ export function surveySyncShortLabel(status: SyncStatus, queuedWrites: number): 
   }
 }
 
-/**
- * Compact sync copy for the status-island segment.
- * Synced is beacon-only; other states stay short enough for phones.
- */
 export function surveySyncSegmentLabel(status: SyncStatus, queuedWrites: number): string | null {
   switch (status) {
     case "synced":

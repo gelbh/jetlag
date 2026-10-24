@@ -12,7 +12,6 @@ describe("DrawPickSheet", () => {
     const { rerender } = renderWithAppUi(
       <DrawPickSheet pending={null} gameSize="medium" onConfirm={vi.fn()} />,
     );
-    // Closed: no dialog / draw body. Host stays in React tree with open=false.
     expect(screen.queryByRole("dialog", { name: "Choose cards to keep" })).not.toBeInTheDocument();
     expect(screen.queryByText(/Pick which drawn cards/i)).not.toBeInTheDocument();
 

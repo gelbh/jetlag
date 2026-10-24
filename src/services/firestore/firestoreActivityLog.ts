@@ -47,7 +47,6 @@ export async function createActivityLogEventIfAbsent(
     if (isFirestoreAlreadyExistsError(error)) {
       return { wrote: false };
     }
-    // Append-only rules treat a second write as update → permission-denied.
     if (isFirestorePermissionDenied(error)) {
       const existing = await getDoc(eventRef);
       if (existing.exists()) {

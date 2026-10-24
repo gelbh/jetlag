@@ -31,7 +31,6 @@ export function useHiderQuestionTruths(
 ): {
   questionTruths: ReadonlyMap<string, HiderTruthResult>;
   loading: boolean;
-  /** Per open question id → reference mode for picker labels. */
   truthReferenceModes: ReadonlyMap<string, HiderTruthReferenceMode>;
 } {
   const [questionTruths, setQuestionTruths] = useState<ReadonlyMap<string, HiderTruthResult>>(

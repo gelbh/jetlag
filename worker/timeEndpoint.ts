@@ -1,7 +1,6 @@
 // Pure Fetch API (no Cloudflare types): also served by vite.time-endpoint.ts in dev/preview.
 export const TIME_ENDPOINT_PATH = "/api/time";
 
-/** Reachability probe + server clock source (NTP-style midpoint on the client). */
 export function handleTimeRequest(request: Request, now: () => number = Date.now): Response {
   const serverMs = now();
   const headers = {

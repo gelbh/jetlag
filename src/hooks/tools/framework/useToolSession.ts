@@ -9,10 +9,6 @@ function mergeConfig<TConfig>(base: TConfig, initial?: Partial<TConfig>): TConfi
   return { ...base, ...initial };
 }
 
-/**
- * Shared open/close/submit state machine for seeker tool hooks.
- * Tools keep domain-specific draft logic; this owns phase + submit lock + error.
- */
 export function useToolSession<TConfig>({
   toolId,
   createInitialConfig,

@@ -223,7 +223,6 @@ export function photoCategoriesForGameSize(gameSize: GameSize): readonly PhotoCa
   return PHOTO_CATEGORIES.filter((category) => category.phase <= maxPhase);
 }
 
-/** Metric edition overrides; omit a field to keep the imperial catalog string. */
 const METRIC_PHOTO_COPY: Partial<
   Record<
     PhotoCategoryId,

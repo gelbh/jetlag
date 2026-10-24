@@ -26,7 +26,6 @@ const DEFAULT_OG_IMAGE_PATH = "/og-default.png";
 
 const INDEXABLE_PATHS = new Set(crawlPolicy.indexablePaths);
 
-/** Home tab/share title: brand plus what the app does (keep ≤ 60 chars; JSON-LD keeps the brand). */
 export const HOME_TITLE = `${LEGAL_APP_NAME} · Live Hide + Seek Maps`;
 
 const HOME_DESCRIPTION =
@@ -47,7 +46,6 @@ function webPageJsonLd(path: string, title: string, description: string): Record
   };
 }
 
-/** `WebPage` plus a `BreadcrumbList` for pages nested under a hub (e.g. `/tools/radar`). */
 function learnPageJsonLd(path: LearnRoutePath): Record<string, unknown> {
   const { seoTitle, description } = learnPageMeta(path);
   const crumbs = learnBreadcrumbs(path);

@@ -11,7 +11,6 @@ interface MapLibreFeaturePopupProps {
   children: ReactNode;
 }
 
-/** Shared popup shell for GL hit-test marker interactions. */
 export function MapLibreFeaturePopup({
   latitude,
   longitude,

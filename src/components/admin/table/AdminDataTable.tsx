@@ -29,7 +29,6 @@ export interface AdminDataTableProps<Row> {
 
 const cellSeparator = "0.5px solid color-mix(in oklch, var(--color-rule) 30%, transparent)";
 
-/** Raw-value sort; nulls always last whatever the direction. */
 export function sortAdminRows<Row>(
   rows: readonly Row[],
   column: AdminColumn<Row> | undefined,
@@ -53,7 +52,6 @@ export function sortAdminRows<Row>(
     .map((entry) => entry.row);
 }
 
-/** Comp `table.grid`: sticky 34px header, 40/48px rows, hairlines, orange sort arrow. */
 export function AdminDataTable<Row>({
   columns,
   rows,

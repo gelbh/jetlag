@@ -50,9 +50,7 @@ export type ToolStatusBlockProps = {
   timerControlsDisabled?: boolean;
   moveInProgress?: boolean;
   headerLeading?: ReactNode;
-  /** Trailing sync control (segment, not a sibling floater). */
   syncSlot?: ReactNode;
-  /** Dev gallery: force <380px copy/timer rules regardless of viewport. */
   forceNarrow?: boolean;
 };
 
@@ -72,11 +70,6 @@ function SegmentRule() {
   );
 }
 
-/**
- * One continuous status island (Home / Start / PauseIcon / Sync):
- * Home | CODE + session status | session+phase timers | sync (display only)
-
- */
 export function ToolStatusBlock({
   sessionCode,
   playerRole: _playerRole,

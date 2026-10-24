@@ -30,7 +30,6 @@ const PRELOAD_MEASURING_CATEGORIES = [
   "museum",
 ] as const satisfies readonly MeasuringLocationCategory[];
 
-/** Test hook — keep assertions aligned with background measuring preload jobs. */
 export function preloadMeasuringCategoriesForTests(): readonly MeasuringLocationCategory[] {
   return PRELOAD_MEASURING_CATEGORIES;
 }
@@ -173,9 +172,7 @@ export async function preloadGameAreaCachesAsync(
   let counts = emptyAdminDivisionCounts();
   try {
     counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId);
-  } catch {
-    // probe failure is non-fatal; background preload continues with empty counts
-  }
+  } catch {}
   usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
   usePreloadStore.getState().recordSuccess(gameAreaKey);
 
@@ -190,9 +187,7 @@ export async function preloadCriticalGameAreaCaches(
   let counts = emptyAdminDivisionCounts();
   try {
     counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId);
-  } catch {
-    // probe failure is non-fatal; preload continues with empty counts
-  }
+  } catch {}
   usePreloadStore.getState().setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
 
   await Promise.allSettled(

@@ -65,7 +65,6 @@ export async function updateSessionRules(
   await updateDoc(doc(sessionsCollection(), sessionId), sessionRulesPatchToFirestore(patch));
 }
 
-/** Seeker/host direct End Game start (no hider Accept). Clears legacy request fields. */
 export async function startEndGameSession(
   sessionId: string,
   startedByUid: string,
@@ -89,7 +88,7 @@ export async function startEndGameSession(
       endGameRequestedByUid: deleteField(),
     });
   } catch (error) {
-    // Only roll back an anchors doc this call created — do not delete a prior freeze.
+    // Only roll back an anchors doc this call created - do not delete a prior freeze.
     if (anchorsWritten) {
       await clearEndGameTruthAnchorsDoc(sessionId);
     }
@@ -97,7 +96,6 @@ export async function startEndGameSession(
   }
 }
 
-/** Clear a pending end-game request only (hider decline / seeker cancel). */
 export async function clearEndGameRequestSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameRequestedAt: deleteField(),
@@ -105,7 +103,6 @@ export async function clearEndGameRequestSession(sessionId: string): Promise<voi
   });
 }
 
-/** Clear active or pending end game, including frozen truth anchors. */
 export async function resetEndGameSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameStartedAt: deleteField(),

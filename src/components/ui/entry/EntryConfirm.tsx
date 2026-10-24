@@ -13,7 +13,6 @@ export interface EntryConfirmProps {
   onClose: () => void;
 }
 
-/** In-theme confirm for entry / Home flows (replaces window.confirm). */
 export function EntryConfirm({
   opened,
   title,

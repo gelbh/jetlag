@@ -38,7 +38,6 @@ export function voronoiCellSiteId(
   return undefined;
 }
 
-/** Nearest site id for a cell when site metadata lacks an id (coordinate fallback). */
 export function voronoiCellSiteIdByCoordinates(
   cell: Feature,
   sites: ReadonlyArray<VoronoiSiteRef>,

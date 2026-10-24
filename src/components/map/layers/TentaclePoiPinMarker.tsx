@@ -12,7 +12,6 @@ export type TentaclePoiPinMarkerProps = {
   longitude: number;
   categoryId: TentacleExtendedCategoryId;
   selected?: boolean;
-  /** Soften peers when another place is chosen. */
   dimmed?: boolean;
   label: string;
   onActivate: () => void;
@@ -29,7 +28,6 @@ export function TentaclePoiPinMarker({
 }: TentaclePoiPinMarkerProps) {
   const green = MAP_ANNOTATION_COLORS.tentacle;
   const greenSoft = MAP_ANNOTATION_COLORS.tentacleAccent;
-  // Selection reads via fill + stem, not bulk; keep disc near idle size.
   const size = selected ? 34 : 30;
 
   return (

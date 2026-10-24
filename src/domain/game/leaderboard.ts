@@ -28,7 +28,6 @@ export const LEADERBOARD_METRICS: readonly LeaderboardMetric[] = [
 
 export interface LeaderboardEntry {
   uid: string;
-  /** Public handle; may mirror legacy displayName from older writers. */
   displayName: string;
   value: number;
   rank: number;
@@ -39,7 +38,6 @@ export function leaderboardEntryLabel(entry: LeaderboardEntry): string {
   return label.length > 0 ? label : "Player";
 }
 
-/** Format a board value for the active metric (meters / ms / counts). */
 export function formatLeaderboardValue(metric: LeaderboardMetric, value: number): string {
   if (!Number.isFinite(value)) {
     return "—";

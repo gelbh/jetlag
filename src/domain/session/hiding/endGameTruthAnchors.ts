@@ -79,7 +79,6 @@ export function withLocalHiderLocationOverride(
   return locationsByUid;
 }
 
-/** Direct End Game start anchors from each hider's confirmed zone center. */
 export function assembleEndGameStartAnchors(input: {
   hiderUids: readonly string[];
   zoneCenters: readonly { uid: string; lat: number; lng: number }[];

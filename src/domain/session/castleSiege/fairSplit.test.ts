@@ -17,7 +17,6 @@ import {
   validateBorderCutsArena,
 } from "./pregame";
 
-/** Square arena spanning ~0.02° (~2 km) near London. */
 const ARENA: GameArea = {
   type: "Polygon",
   coordinates: [
@@ -31,7 +30,6 @@ const ARENA: GameArea = {
   ],
 };
 
-/** Northbound vertical midline cut. */
 const MIDLINE: CastleSiegeBorderLine = {
   type: "LineString",
   coordinates: [
@@ -123,7 +121,6 @@ describe("proposeFairSplit fail-closed", () => {
         [-0.1, 51.45],
       ],
     };
-    // Both seals are south of this eastbound cut → same side.
     const result = proposeFairSplit({
       arena: ARENA,
       sealA: { lat: 51.42, lng: -0.18 },
@@ -204,7 +201,6 @@ describe("proposeFairSplit candidate search + scoring", () => {
 
   it("prefers a balanced legal candidate over an illegal near-perfect balance cut", () => {
     const legalBalanced = MIDLINE;
-    // Same-side horizontal cut would score well on area if it were legal, but is not.
     const illegalHorizontal: CastleSiegeBorderLine = {
       type: "LineString",
       coordinates: [

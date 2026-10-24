@@ -13,7 +13,6 @@ import { getRegisteredMapLibreMap } from "@/services/geo/maplibre/mapLibreMapReg
 export interface PreviewBasemapPoisOptions extends QueryBasemapPoisOptions {
   mapStyle: MapStyle;
   map?: MapLibreMap | null;
-  /** When set with category preview, drop candidates farther than this from the point. */
   maxDistanceMeters?: number;
 }
 

@@ -11,7 +11,6 @@ import { getFirebaseAppCheck, isFirebaseConfigured } from "./firebase";
 
 export const APP_CHECK_PROBE_SKIP_KEY = "jl.appCheckProbe.skip";
 export const APP_CHECK_PROBE_TIMEOUT_MS = 15_000;
-/** Same-origin reachability check before blaming a content blocker. */
 export const APP_CHECK_REACHABILITY_TIMEOUT_MS = 2_000;
 
 export type AppCheckProbeResult = { ok: true } | { ok: false; reason: "blocked" };
@@ -121,7 +120,6 @@ async function runProbe(): Promise<AppCheckProbeResult> {
     ]);
 
     if (raced === "timeout") {
-      // Soft-fail: slow networks shouldn't hard-block the app as a "blocker".
       return reportProbeFailure(
         new Error("App Check probe timed out"),
         classifyAppCheckProbeFailure("timeout"),

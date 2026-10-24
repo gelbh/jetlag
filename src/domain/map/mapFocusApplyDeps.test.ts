@@ -34,7 +34,7 @@ describe("mapFocusApplyDependencyKeys", () => {
     });
 
     expect(a).toEqual(b);
-    expect(a).toContain(true); // bounds present
+    expect(a).toContain(true);
     expect(a).not.toContain(boxA);
     expect(a).not.toContain(boxB);
   });

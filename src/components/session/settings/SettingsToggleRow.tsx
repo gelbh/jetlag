@@ -9,13 +9,10 @@ interface SettingsToggleRowProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
-  /** Hairline above this row when stacked in an inset group. */
   showSeparator?: boolean;
-  /** Optional leading mark (e.g. layer color swatch). */
   leading?: ReactNode;
 }
 
-/** Inset toggle row: plain label + Mantine Switch (Survey flag when on). */
 export function SettingsToggleRow({
   label,
   description,

@@ -16,7 +16,6 @@ interface UseMeasuringInteractionsParams {
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   draft: MeasuringDraftState;
   loaders: MeasuringAnchorLoaders;
-  /** True while tool session phase is submitting (ignore relocate / GPS snap). */
   submittingRef: { current: boolean };
 }
 

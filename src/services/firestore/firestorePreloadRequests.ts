@@ -16,7 +16,6 @@ function preloadRequestsCollection() {
   return collection(getFirestoreDb(), "preloadRequests");
 }
 
-/** Admin inbox: live list ordered by most recently updated. */
 export function subscribePreloadRequestList(
   onChange: (requests: PreloadRequest[]) => void,
   onError: (error: Error) => void,
