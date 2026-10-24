@@ -1,4 +1,11 @@
 import { doc, setDoc, updateDoc, writeBatch } from "firebase/firestore";
+import type { SiegeCaptureState } from "@/domain/session/castleSiege/siegeCapture";
+import { serializeSiegeCapture } from "@/domain/session/castleSiege/siegeCapturePersist";
+import type { SiegeClockState, SiegeEndgameStart } from "@/domain/session/castleSiege/siegeClocks";
+import {
+  buildStartSiegePublicPatch,
+  serializeSiegeClock,
+} from "@/domain/session/castleSiege/siegePersist";
 import { buildStartStandoffPrivateState } from "@/domain/session/castleSiege/standoffPersist";
 import type { TeamMarksGeometry } from "@/domain/session/castleSiege/teamMarks";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
@@ -18,6 +25,10 @@ function teamSealDoc(sessionId: string, teamId: string) {
 
 function teamMarksDoc(sessionId: string, teamId: string) {
   return doc(getFirestoreDb(), "sessions", sessionId, "teamMarks", teamId);
+}
+
+function teamPressureDoc(sessionId: string, teamId: string) {
+  return doc(getFirestoreDb(), "sessions", sessionId, "teamPressure", teamId);
 }
 
 function standoffPrivateDeckDoc(sessionId: string) {
@@ -95,6 +106,45 @@ export async function startCastleSiegeStandoff(
     updatedAt: new Date(nowMs).toISOString(),
   });
   await batch.commit();
+}
+
+/**
+ * Host opens Siege: public phase + siegeClock (Dusk head-start already baked in).
+ */
+export async function startCastleSiegeSiege(
+  sessionId: string,
+  opts: {
+    nowMs?: number;
+    limitSeconds: number;
+    endgame: SiegeEndgameStart;
+  },
+): Promise<void> {
+  const patch = buildStartSiegePublicPatch({
+    nowMs: opts.nowMs ?? Date.now(),
+    limitSeconds: opts.limitSeconds,
+    endgame: opts.endgame,
+  });
+  await updateDoc(doc(sessionsCollection(), sessionId), patch);
+}
+
+/** Persist capture state; optionally update siegeClock (dispute pause). */
+export async function writeCastleSiegeCapture(
+  sessionId: string,
+  capture: SiegeCaptureState,
+  siegeClock?: SiegeClockState,
+): Promise<void> {
+  const patch: Record<string, unknown> = {
+    siegeCapture: serializeSiegeCapture(capture),
+  };
+  if (siegeClock) {
+    patch.siegeClock = serializeSiegeClock(siegeClock);
+  }
+  await updateDoc(doc(sessionsCollection(), sessionId), patch);
+}
+
+/** Defenders-only H5 pressure doc path (enemy cannot read — same gate as teamMarks). */
+export function castleSiegeTeamPressureRef(sessionId: string, teamId: "teamA" | "teamB") {
+  return teamPressureDoc(sessionId, teamId);
 }
 
 /** Own-team shade polygons (enemy clients cannot read — V12). */

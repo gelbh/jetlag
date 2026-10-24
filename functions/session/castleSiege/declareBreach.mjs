@@ -54,7 +54,8 @@ export async function evaluateDeclareBreach(input) {
     breachToleranceMeters: input.breachToleranceMeters,
   });
 
-  return { outcome };
+  // distanceMeters is for server-side H5 only; callables must not return it to clients.
+  return { outcome, distanceMeters };
 }
 
 /**

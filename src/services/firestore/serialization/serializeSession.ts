@@ -507,6 +507,18 @@ export function deserializeSessionFromFirestore(
     standoffDeckRemainingCount: parseStandoffDeckRemainingCount(
       document.standoffDeckRemainingCount,
     ),
+    siegeClock:
+      document.siegeClock &&
+      typeof document.siegeClock === "object" &&
+      !Array.isArray(document.siegeClock)
+        ? (document.siegeClock as Record<string, unknown>)
+        : undefined,
+    siegeCapture:
+      document.siegeCapture &&
+      typeof document.siegeCapture === "object" &&
+      !Array.isArray(document.siegeCapture)
+        ? (document.siegeCapture as Record<string, unknown>)
+        : undefined,
   };
 }
 

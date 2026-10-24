@@ -3,6 +3,7 @@
 export {
   answerCastleSiegeOracleAsk,
   declareCastleSiege,
+  recomputeCastleSiegePressure,
 } from "./session/castleSiegeOracleCallables.mjs";
 export {
   cancelRoleJoinRequest,

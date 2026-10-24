@@ -44,6 +44,7 @@ export {
   joinSessionWithRole,
   leaveHostSession,
   leaveSessionMembership,
+  recomputeCastleSiegePressure,
   regenerateRolePasscode,
   repairGhostHost,
   requestRoleJoin,

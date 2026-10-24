@@ -10,6 +10,8 @@ import type { FairSplitLockPatch } from "@/domain/session/castleSiege/fairSplitL
 import { isCastleSiegeSession } from "@/domain/session/castleSiege/mode";
 import type { CastleSiegeSealPoint } from "@/domain/session/castleSiege/pregame";
 import { SEAL_WRAP_KEY_ID_V1 } from "@/domain/session/castleSiege/sealCipher";
+import { deserializeSiegeCapture } from "@/domain/session/castleSiege/siegeCapturePersist";
+import { deserializeSiegeClock } from "@/domain/session/castleSiege/siegePersist";
 import { deserializeTurnState } from "@/domain/session/castleSiege/standoffPersist";
 import {
   isCastleSiegePlayingRole,
@@ -23,6 +25,7 @@ import { ArenaLedger } from "./ArenaLedger";
 import { FairSplitProposal } from "./FairSplitProposal";
 import { MusterDials } from "./MusterDials";
 import { SealVault } from "./SealVault";
+import { SiegeChrome } from "./SiegeChrome";
 import { StandoffChrome } from "./StandoffChrome";
 
 export type CastleSiegeSetupChromeProps = {
@@ -82,10 +85,14 @@ export function CastleSiegeSetupChrome({
   const fairSplitSealsReady = Boolean(sealA && sealB);
   const beltWidthMeters = session.dials?.beltWidthMeters ?? 200;
   const inStandoff = session.phase === "standoff";
+  const inSiege = session.phase === "siege";
   const standoffTurn = deserializeTurnState(session.standoffTurn) ?? null;
+  const siegeClock = deserializeSiegeClock(session.siegeClock) ?? null;
+  const siegeCapture = deserializeSiegeCapture(session.siegeCapture) ?? null;
   const deckRemaining = session.standoffDeckRemainingCount ?? 0;
   // Hand ids live in teamHands/{teamId}; chrome shows 0 until a listener wires (Phase 5.x).
   const ownHandCount = 0;
+  const setupPanelsHidden = inStandoff || inSiege;
 
   const beginStandoff = async () => {
     if (!isHost || importBusy) return;
@@ -117,11 +124,13 @@ export function CastleSiegeSetupChrome({
         }
       />
 
-      {inStandoff ? null : (
+      <SiegeChrome active={inSiege} clock={siegeClock} capture={siegeCapture} />
+
+      {setupPanelsHidden ? null : (
         <ArenaLedger arena={session.arena} setupMode={session.setupMode} dials={session.dials} />
       )}
 
-      {!inStandoff && isHost ? (
+      {!setupPanelsHidden && isHost ? (
         <div
           className="rounded-md border px-3 py-2"
           style={{
@@ -158,9 +167,11 @@ export function CastleSiegeSetupChrome({
         </div>
       ) : null}
 
-      {!inStandoff && isHost ? <MusterDials dials={session.dials} onSave={saveDials} /> : null}
+      {!setupPanelsHidden && isHost ? (
+        <MusterDials dials={session.dials} onSave={saveDials} />
+      ) : null}
 
-      {!inStandoff && playing && uid && (role === "teamA" || role === "teamB") ? (
+      {!setupPanelsHidden && playing && uid && (role === "teamA" || role === "teamB") ? (
         <SealVault
           sessionId={session.id}
           teamId={role}
@@ -171,7 +182,7 @@ export function CastleSiegeSetupChrome({
         />
       ) : null}
 
-      {!inStandoff && fairSplitActive && fairSplitSealsReady && sealA && sealB ? (
+      {!setupPanelsHidden && fairSplitActive && fairSplitSealsReady && sealA && sealB ? (
         <FairSplitProposal
           arena={fairSplitArena}
           sealA={sealA}
@@ -183,7 +194,7 @@ export function CastleSiegeSetupChrome({
         />
       ) : null}
 
-      {!inStandoff && fairSplitActive && !fairSplitSealsReady ? (
+      {!setupPanelsHidden && fairSplitActive && !fairSplitSealsReady ? (
         <p
           className="m-0 rounded-md border px-3 py-2 text-sm"
           role="status"

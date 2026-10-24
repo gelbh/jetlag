@@ -256,6 +256,26 @@ service cloud.firestore {
         && sessionIdentityUnchanged();
     }
 
+    // Host opens Siege: phase + siegeClock (Dusk head-start consumed into map).
+    function isCastleSiegeSiegeUpdate() {
+      return isSignedIn()
+        && resource.data.hostUid is string
+        && request.auth.uid == resource.data.hostUid
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && resource.data.mode == 'castleSiege'
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['phase', 'siegeClock'])
+        && request.resource.data.phase == 'siege'
+        && request.resource.data.siegeClock is map
+        && sessionIdentityUnchanged();
+    }
+
+    // Capture submit/confirm/timeout/dispute: client session writes denied.
+    // Domain helpers stay for a future Functions callable (expression budget:
+    // an inlined capture ACL on session update blew the 1000-expression cap
+    // and broke classic session updates).
+
     function canReadTeamHands(sessionId, teamId) {
       return isSessionMember(sessionId)
         && (
@@ -945,6 +965,7 @@ service cloud.firestore {
       allow update: if isBoardEconomyFlagUpdate(sessionId)
         || isCastleSiegeSetupUpdate()
         || isCastleSiegeStandoffUpdate()
+        || isCastleSiegeSiegeUpdate()
         || isTimerHostUpdate()
         || isLastActiveAtUpdate()
         || isFoundHiderRequestUpdate()
@@ -1254,6 +1275,18 @@ service cloud.firestore {
           && request.resource.data.updatedAt is string
           && request.resource.data.updatedAt.size() > 0;
         allow delete: if false;
+      }
+
+      // H5 pressure plate: defenders (+ referee) read own scalar/band only; Admin SDK writes.
+      match /teamPressure/{teamId} {
+        allow read: if teamId in ['teamA', 'teamB']
+          && canReadTeamMarks(sessionId, teamId);
+        allow create, update, delete: if false;
+      }
+
+      // Oracle ask receipts for H5 ask ratio; Admin SDK writes only.
+      match /oracleAskReceipts/{receiptId} {
+        allow read, create, update, delete: if false;
       }
 
       // Hand card ids: own team + referee read; host writes on deal.
