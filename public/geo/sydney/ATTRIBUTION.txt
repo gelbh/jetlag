@@ -1,0 +1,14 @@
+Sydney specialty pack (Greater Sydney LGA cluster)
+
+Local Government Areas clipped from the national Australia pack LGA slice
+(public/geo/australia/lgas/nsw.geojson), membership locked to ABS Greater
+Sydney GCCSA-equivalent LGAs for Jetlag (33 LGAs including Strathfield and
+City of Sydney).
+
+Upstream: Australian Bureau of Statistics (ABS), Australian Statistical
+Geography Standard (ASGS) Edition 3 / ASGS2025 LGA, CC BY 4.0.
+See public/geo/australia/ATTRIBUTION.txt for STE/LGA download pins and
+simplification tolerances.
+
+Coastline / sea_level_seed / international_border / POI: stubs
+(source "none") until metro fill; bbox matches Greater Sydney reference AABB.
