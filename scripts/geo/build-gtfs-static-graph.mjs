@@ -88,6 +88,14 @@ const METROS = [
     // City pack bbox (+margin). BODS ITM South East is not a usable source today.
     bbox: { south: 50.84, west: -1.52, north: 51.0, east: -1.28 },
   },
+  {
+    id: "sydney",
+    // Mobility Database mdb-2449 (TfNSW Greater Sydney complete static).
+    feedOnestopId: "mdb-2449",
+    feedOnestopIds: ["mdb-2449"],
+    // Greater Sydney specialty pack AABB (+margin).
+    bbox: { south: -34.38, west: 149.97, north: -32.95, east: 151.39 },
+  },
 ];
 
 const FIXTURES = {
@@ -238,6 +246,49 @@ function stopInBbox(stop, bbox) {
   const lat = Number(stop.stop_lat);
   const lng = Number(stop.stop_lon);
   return lat >= bbox.south && lat <= bbox.north && lng >= bbox.west && lng <= bbox.east;
+}
+
+/**
+ * Prefer parent stations when children reference them in-bbox.
+ * Platform/bay leaves with a present parent are dropped; orphan leaves stay.
+ */
+function stationStopRows(stopsRows) {
+  const byId = new Map(stopsRows.map((row) => [row.stop_id, row]));
+  const parentIds = new Set();
+  for (const row of stopsRows) {
+    if (row.parent_station) {
+      parentIds.add(row.parent_station);
+    }
+    if (row.location_type === "1") {
+      parentIds.add(row.stop_id);
+    }
+  }
+  return stopsRows.filter((row) => {
+    if (parentIds.has(row.stop_id)) {
+      return true;
+    }
+    if (row.parent_station && byId.has(row.parent_station)) {
+      return false;
+    }
+    return true;
+  });
+}
+
+/** Remap leaf stop_times routes onto parent station ids when the parent is in-bbox. */
+function collapseStopRouteIdsToParents(stopRouteIds, stopsRows) {
+  const byId = new Map(stopsRows.map((row) => [row.stop_id, row]));
+  const collapsed = {};
+  for (const [stopId, routeIds] of Object.entries(stopRouteIds)) {
+    const row = byId.get(stopId);
+    const targetId =
+      row?.parent_station && byId.has(row.parent_station) ? row.parent_station : stopId;
+    const merged = new Set(collapsed[targetId] ?? []);
+    for (const routeId of routeIds) {
+      merged.add(routeId);
+    }
+    collapsed[targetId] = [...merged];
+  }
+  return collapsed;
 }
 
 function csvColumnIndexes(headers) {
@@ -400,11 +451,15 @@ async function buildBundleFromGtfsZip(zipBuffer, metro, { zipPath = null } = {})
         stopsRows.map((row) => row.parent_station).filter((value) => value && value.length > 0),
       );
       const tripsRows = parseCsv(tripsText);
+      // stop_times usually cite platform leaves; scan those, then collapse onto parents.
       const stopIds = new Set(
         stopsRows.filter((row) => !referencedParentIds.has(row.stop_id)).map((row) => row.stop_id),
       );
       const tripRoute = new Map(tripsRows.map((row) => [row.trip_id, row.route_id]));
-      stopRouteIds = await buildStopRouteIdsFromUnzipStream(materialized.path, stopIds, tripRoute);
+      stopRouteIds = collapseStopRouteIdsToParents(
+        await buildStopRouteIdsFromUnzipStream(materialized.path, stopIds, tripRoute),
+        stopsRows,
+      );
 
       const usedRouteIds = new Set(Object.values(stopRouteIds).flatMap((routeIds) => routeIds));
       const routesRows = parseCsv(routesText).filter((row) => usedRouteIds.has(row.route_id));
@@ -414,15 +469,15 @@ async function buildBundleFromGtfsZip(zipBuffer, metro, { zipPath = null } = {})
         longName: row.route_long_name || row.route_short_name || row.route_id,
         mode: routeMode(row.route_type),
       }));
-      const stops = stopsRows
-        .filter((row) => !referencedParentIds.has(row.stop_id))
-        .map((row) => ({
-          id: row.stop_id,
-          name: row.stop_name,
-          lat: Number(row.stop_lat),
-          lng: Number(row.stop_lon),
-          ...(row.parent_station ? { parentStationId: row.parent_station } : {}),
-        }));
+      const stops = stationStopRows(stopsRows).map((row) => ({
+        id: row.stop_id,
+        name: row.stop_name,
+        lat: Number(row.stop_lat),
+        lng: Number(row.stop_lon),
+        ...(row.parent_station && !referencedParentIds.has(row.stop_id)
+          ? { parentStationId: row.parent_station }
+          : {}),
+      }));
 
       return {
         metroId: metro.id,
@@ -457,7 +512,10 @@ async function buildBundleFromGtfsZip(zipBuffer, metro, { zipPath = null } = {})
       stopsRows.filter((row) => !referencedParentIds.has(row.stop_id)).map((row) => row.stop_id),
     );
     const tripRoute = new Map(tripsRows.map((row) => [row.trip_id, row.route_id]));
-    stopRouteIds = buildStopRouteIdsFromText(stopTimesText, stopIds, tripRoute);
+    stopRouteIds = collapseStopRouteIdsToParents(
+      buildStopRouteIdsFromText(stopTimesText, stopIds, tripRoute),
+      stopsRows,
+    );
 
     const usedRouteIds = new Set(Object.values(stopRouteIds).flatMap((routeIds) => routeIds));
     const routesRows = parseCsv(routesText).filter((row) => usedRouteIds.has(row.route_id));
@@ -469,15 +527,15 @@ async function buildBundleFromGtfsZip(zipBuffer, metro, { zipPath = null } = {})
       mode: routeMode(row.route_type),
     }));
 
-    const stops = stopsRows
-      .filter((row) => !referencedParentIds.has(row.stop_id))
-      .map((row) => ({
-        id: row.stop_id,
-        name: row.stop_name,
-        lat: Number(row.stop_lat),
-        lng: Number(row.stop_lon),
-        ...(row.parent_station ? { parentStationId: row.parent_station } : {}),
-      }));
+    const stops = stationStopRows(stopsRows).map((row) => ({
+      id: row.stop_id,
+      name: row.stop_name,
+      lat: Number(row.stop_lat),
+      lng: Number(row.stop_lon),
+      ...(row.parent_station && !referencedParentIds.has(row.stop_id)
+        ? { parentStationId: row.parent_station }
+        : {}),
+    }));
 
     return {
       metroId: metro.id,
