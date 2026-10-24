@@ -322,6 +322,27 @@ export function captureFunctionsExceptionWithTags(error, options = {}) {
 }
 
 /**
+ * Callable request.data.sessionId when present (non-empty string).
+ * @param {unknown} arg
+ * @returns {string | null}
+ */
+function sessionIdFromCallableArg(arg) {
+  if (!arg || typeof arg !== "object") {
+    return null;
+  }
+  const data = "data" in arg ? arg.data : undefined;
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+  const sessionId = "sessionId" in data ? data.sessionId : undefined;
+  if (typeof sessionId !== "string") {
+    return null;
+  }
+  const trimmed = sessionId.trim();
+  return trimmed ? trimmed : null;
+}
+
+/**
  * @template {(...args: never[]) => unknown} T
  * @param {T} handler
  * @param {string | undefined} [explicitName]
@@ -331,10 +352,14 @@ export function withFunctionsExceptionHandler(handler, explicitName) {
   return async (...args) => {
     initFunctionsExceptionCapture();
     const name = resolveDeployedFunctionName(explicitName);
+    const sessionId = sessionIdFromCallableArg(args[0]);
     try {
       return await handler(...args);
     } catch (error) {
-      await captureFunctionsExceptionAsync(error, { name });
+      await captureFunctionsExceptionAsync(error, {
+        name,
+        extraTags: sessionId ? { session_id: sessionId } : undefined,
+      });
       throw error;
     }
   };
