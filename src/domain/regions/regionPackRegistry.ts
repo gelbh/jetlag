@@ -303,20 +303,17 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     unsupportedMatching: AUSTRALIA_UNSUPPORTED_MATCHING,
     unsupportedBorders: AUSTRALIA_UNSUPPORTED_BORDERS,
   },
-  [SYDNEY_REGION_PACK_ID]: {
-    ...metroRegionPack({
-      id: SYDNEY_REGION_PACK_ID,
-      geoAssets: {
-        primary: SYDNEY_GEO_ASSETS.lgas,
-        playArea: SYDNEY_GEO_ASSETS.playArea,
-      },
-      subregionPropertyKey: "lgaId",
-      matchingLabelOverrides: SYDNEY_MATCHING_LABEL_OVERRIDES,
-      measuringLabelOverrides: SYDNEY_MEASURING_LABEL_OVERRIDES,
-    }),
-    unsupportedMatching: SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING,
-    unsupportedBorders: SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS,
-  },
+  [SYDNEY_REGION_PACK_ID]: metroRegionPack({
+    id: SYDNEY_REGION_PACK_ID,
+    geoAssets: {
+      primary: SYDNEY_GEO_ASSETS.lgas,
+      playArea: SYDNEY_GEO_ASSETS.playArea,
+      secondary: SYDNEY_GEO_ASSETS.sals,
+    },
+    subregionPropertyKey: "lgaId",
+    matchingLabelOverrides: SYDNEY_MATCHING_LABEL_OVERRIDES,
+    measuringLabelOverrides: SYDNEY_MEASURING_LABEL_OVERRIDES,
+  }),
 };
 
 export function getRegionPackConfig(packId: RegionPackId): RegionPackConfig | undefined {
