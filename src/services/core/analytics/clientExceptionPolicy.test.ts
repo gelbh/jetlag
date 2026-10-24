@@ -42,6 +42,13 @@ describe("classifyClientExceptionEvent", () => {
     ).toBe("drop");
   });
 
+  it("drops Firebase callable internal [0] network noise", () => {
+    expect(classifyClientExceptionEvent(exc("FirebaseError", "internal [0]"))).toBe("drop");
+    expect(classifyClientExceptionEvent(exc("Error", "internal [0]"))).toBe("drop");
+    expect(classifyClientExceptionEvent(exc("FirebaseError", "internal"))).toBe("send");
+    expect(classifyClientExceptionEvent(exc("FirebaseError", "internal: something"))).toBe("send");
+  });
+
   it("drops soft App Check throttle, probe timeout, and fetch-network-error", () => {
     expect(
       classifyClientExceptionEvent(

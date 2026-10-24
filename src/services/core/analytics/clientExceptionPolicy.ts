@@ -22,6 +22,8 @@ export const QUOTA_SAMPLE_RATE = 0.05;
 /** Chrome: "…exceeded the quota."; Firefox/WebKit often "quota has been exceeded". */
 const STORAGE_QUOTA_EXCEEDED = /exceeded the quota|quota has been exceeded/i;
 const AUTH_NETWORK_FAILED = /auth\/network-request-failed/i;
+/** Firebase callable transport failure when the SDK has no HTTP status (PostHog 01a15a83). */
+const FIREBASE_CALLABLE_INTERNAL_ZERO = /internal \[0\]/;
 const LEAFLET_POS_ERROR = /_leaflet_pos/i;
 const LEAFLET_CLASSLIST_ERROR = /evaluating 'e\.classList'/i;
 const BATTERY_ADD_EVENT_LISTENER = /addEventListener is not a function/i;
@@ -96,7 +98,8 @@ function isGenericClientNoiseMessage(message: string): boolean {
     isExpectedSessionLeaveMessage(message) ||
     isExpectedJoinUxMessage(message) ||
     isBrowserExtensionNoiseMessage(message) ||
-    isAppCheckSoftFailureMessage(message)
+    isAppCheckSoftFailureMessage(message) ||
+    FIREBASE_CALLABLE_INTERNAL_ZERO.test(message)
   );
 }
 

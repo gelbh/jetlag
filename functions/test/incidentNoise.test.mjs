@@ -10,6 +10,7 @@ test("isKnownNoiseError matches injected wallet, ResizeObserver, extension and s
     "Error in moz-extension://abc/content.js",
     "safari-web-extension://abc/script.js threw",
     "Importing a module script failed.",
+    "internal [0]",
   ];
   for (const message of noise) {
     assert.equal(isKnownNoiseError({ name: "TypeError", message }), true, message);

@@ -11,6 +11,7 @@ export const KNOWN_NOISE_PATTERNS = Object.freeze([
   "moz-extension://",
   "safari-web-extension://",
   "Importing a module script failed",
+  "internal [0]",
 ]);
 
 /**
