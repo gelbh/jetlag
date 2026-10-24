@@ -143,10 +143,11 @@ describe("EntryAsyncButton with a load task", () => {
 
     // Task snapshots refresh on the next animation frame.
     const button = await screen.findByRole("button", { name: /Creating session…/ });
-    const fill = screen.getByRole("progressbar", { name: "Creating game" });
-    expect(button).toContainElement(fill);
-    expect(fill).toHaveAttribute("aria-valuemin", "0");
-    expect(fill).toHaveAttribute("aria-valuemax", "100");
+    // Native <progress> for assistive tech, outside the button so it stays out of its name.
+    const progress = screen.getByRole("progressbar", { name: "Creating game" });
+    expect(progress.tagName).toBe("PROGRESS");
+    expect(button).not.toContainElement(progress);
+    expect(progress).toHaveAttribute("max", "100");
     expect(screen.getByRole("status").textContent).toBe("Creating session");
   });
 

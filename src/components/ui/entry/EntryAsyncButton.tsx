@@ -10,7 +10,7 @@ import {
 } from "react";
 import { LoadingSpinnerRing } from "@/components/ui/feedback/LoadingSpinner";
 import { useLoadTask } from "@/hooks/progress/useLoadTask";
-import type { LoadTask } from "@/services/core/progress/loadTask";
+import type { LoadTask, LoadTaskSnapshot } from "@/services/core/progress/loadTask";
 
 export type EntryAsyncButtonProps = Omit<
   ButtonProps & ComponentPropsWithoutRef<"button">,
@@ -76,34 +76,74 @@ function busyCopy({ busy, idleLabel, busyLabel, statusMessage, stageLabel }: Bus
   };
 }
 
-/**
- * Progress drawn inside the button: the filled share sweeps left to right
- * behind the label, so the action bar needs no extra row.
- */
-function ButtonProgressFill({
-  percent,
-  label,
-  valueText,
-}: {
-  percent: number;
-  label: string;
-  valueText: string;
-}) {
+/** Decorative fill drawn inside the button: the done share sweeps left to right behind the label. */
+function ButtonProgressFill({ percent }: { percent: number }) {
   return (
     <span
-      role="progressbar"
-      aria-label={label}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={percent}
-      aria-valuetext={valueText}
+      aria-hidden
       className="pointer-events-none absolute inset-y-0 left-0 z-0 transition-[width] duration-300 ease-out motion-reduce:transition-none"
-      style={{
-        width: `${percent}%`,
-        backgroundColor: "oklch(1 0 0 / 0.22)",
-      }}
+      style={{ width: `${percent}%`, backgroundColor: "oklch(1 0 0 / 0.22)" }}
     />
   );
+}
+
+/**
+ * Screen-reader side of a running task, kept outside the button so the native
+ * progress value does not leak into the button's accessible name.
+ */
+function TaskAnnouncements({ snapshot }: { snapshot: LoadTaskSnapshot }) {
+  return (
+    <>
+      <progress
+        className="sr-only"
+        max={100}
+        value={snapshot.percent}
+        aria-label={snapshot.label}
+        aria-valuetext={snapshot.valueText}
+      />
+      <span role="status" aria-live="polite" className="sr-only">
+        {snapshot.stageLabel}
+      </span>
+    </>
+  );
+}
+
+interface BusyStateInput extends Omit<BusyCopyInput, "stageLabel"> {
+  task: LoadTask | null;
+  unavailable: boolean;
+  showSpinner: boolean;
+  statusId: string;
+  ariaDescribedBy: string | undefined;
+}
+
+/** All of the button's busy/gated branching, so the component only wires props. */
+function useBusyState({
+  busy,
+  task,
+  unavailable,
+  showSpinner,
+  statusId,
+  ariaDescribedBy,
+  ...copy
+}: BusyStateInput) {
+  const snapshot = useLoadTask(task);
+  const runningSnapshot = busy && snapshot?.status === "running" ? snapshot : null;
+  const { label, statusText } = busyCopy({
+    ...copy,
+    busy,
+    stageLabel: runningSnapshot?.stageLabel ?? null,
+  });
+  const describedBy =
+    [statusText ? statusId : null, ariaDescribedBy].filter(Boolean).join(" ") || undefined;
+  return {
+    label,
+    statusText,
+    describedBy,
+    runningSnapshot,
+    gated: unavailable && !busy,
+    blockActivation: busy || unavailable,
+    showBusySpinner: busy && showSpinner && runningSnapshot === null,
+  };
 }
 
 export function EntryAsyncButton({
@@ -121,23 +161,20 @@ export function EntryAsyncButton({
 }: EntryAsyncButtonProps): React.JSX.Element {
   const statusId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const taskSnapshot = useLoadTask(task);
-  const taskRunning = busy && taskSnapshot?.status === "running";
-  const { label, statusText } = busyCopy({
+  const state = useBusyState({
     busy,
+    task,
+    unavailable,
+    showSpinner,
+    statusId,
+    ariaDescribedBy,
     idleLabel,
     busyLabel,
     statusMessage,
-    stageLabel: taskRunning ? taskSnapshot.stageLabel : null,
   });
-  const gated = unavailable && !busy;
-  const blockActivation = busy || unavailable;
-  const describedBy =
-    [busy && !taskRunning ? statusId : null, ariaDescribedBy].filter(Boolean).join(" ") ||
-    undefined;
 
   const handleClick: MouseEventHandler<HTMLButtonElement> = (event) => {
-    if (blockActivation) {
+    if (state.blockActivation) {
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -145,19 +182,19 @@ export function EntryAsyncButton({
     onClick?.(event);
   };
 
-  useBlockImplicitSubmit(buttonRef, blockActivation);
+  useBlockImplicitSubmit(buttonRef, state.blockActivation);
 
   return (
     <>
       <Button
         {...rest}
         ref={buttonRef}
-        disabled={gated}
-        aria-disabled={blockActivation ? true : undefined}
+        disabled={state.gated}
+        aria-disabled={state.blockActivation ? true : undefined}
         aria-busy={busy || undefined}
-        aria-describedby={describedBy}
+        aria-describedby={state.describedBy}
         leftSection={
-          busy && showSpinner && !taskRunning ? (
+          state.showBusySpinner ? (
             <LoadingSpinnerRing size="sm" className="text-current" />
           ) : (
             leftSection
@@ -165,23 +202,15 @@ export function EntryAsyncButton({
         }
         onClick={handleClick}
       >
-        {taskRunning && taskSnapshot ? (
-          <ButtonProgressFill
-            percent={taskSnapshot.percent}
-            label={taskSnapshot.label}
-            valueText={taskSnapshot.valueText}
-          />
+        {state.runningSnapshot ? (
+          <ButtonProgressFill percent={state.runningSnapshot.percent} />
         ) : null}
-        <span className="relative z-[1]">{label}</span>
+        <span className="relative z-[1]">{state.label}</span>
       </Button>
-      {taskRunning && taskSnapshot ? (
-        <span role="status" aria-live="polite" className="sr-only">
-          {taskSnapshot.stageLabel}
-        </span>
-      ) : null}
-      {statusText ? (
+      {state.runningSnapshot ? <TaskAnnouncements snapshot={state.runningSnapshot} /> : null}
+      {state.statusText ? (
         <span id={statusId} role="status" aria-live="polite" className="sr-only">
-          {statusText}
+          {state.statusText}
         </span>
       ) : null}
     </>
