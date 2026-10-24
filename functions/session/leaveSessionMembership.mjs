@@ -1,3 +1,4 @@
+import { seriesPatchForPlayingMemberLeave } from "./castleSiege/seriesProgression.mjs";
 import { applyEndSessionInTx } from "./endSessionCanonical.mjs";
 import { LEAVE_ALREADY_ENDED, LEAVE_NOT_HOST, LEAVE_SESSION_NOT_FOUND } from "./hostLeave.mjs";
 import { pickHostPromotee } from "./pickHostPromotee.mjs";
@@ -110,7 +111,17 @@ export async function leaveSessionMembershipHandler(db, uid, sessionId) {
       throw new Error(LEAVE_NOT_HOST);
     }
 
-    tx.update(sessionRef, removal.sessionUpdate);
+    const seriesPatch = seriesPatchForPlayingMemberLeave(data, uid) ?? {};
+    const castleRoles =
+      data.castleSiegeRoles && typeof data.castleSiegeRoles === "object"
+        ? { ...data.castleSiegeRoles }
+        : null;
+    if (castleRoles && uid in castleRoles) {
+      delete castleRoles[uid];
+      seriesPatch.castleSiegeRoles = castleRoles;
+    }
+
+    tx.update(sessionRef, { ...removal.sessionUpdate, ...seriesPatch });
     if (removal.nextSecrets != null) {
       tx.set(secretsRef, removal.nextSecrets);
     }
@@ -144,13 +155,28 @@ export async function leaveGatedHostSessionHandler(db, uid, sessionId) {
     );
 
     if (promotee == null) {
+      // Solo host exit ends the session; mark series abandoned when Castle Siege.
+      if (data.mode === "castleSiege" && data.seriesOutcome == null) {
+        tx.update(sessionRef, { seriesOutcome: "abandoned" });
+      }
       applyEndSessionInTx(tx, db, sessionRef, data, "ended_early");
       outcome = { action: "ended" };
       return;
     }
 
+    const seriesPatch = seriesPatchForPlayingMemberLeave(data, uid) ?? {};
+    const castleRoles =
+      data.castleSiegeRoles && typeof data.castleSiegeRoles === "object"
+        ? { ...data.castleSiegeRoles }
+        : null;
+    if (castleRoles && uid in castleRoles) {
+      delete castleRoles[uid];
+      seriesPatch.castleSiegeRoles = castleRoles;
+    }
+
     tx.update(sessionRef, {
       ...removal.sessionUpdate,
+      ...seriesPatch,
       hostUid: promotee,
     });
     if (removal.nextSecrets != null) {

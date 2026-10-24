@@ -3,7 +3,9 @@ import { describe, it } from "node:test";
 import {
   captureWinnerTeam,
   countAsksByAttackerTeam,
+  resolveForfeitProgression,
   resolveGameProgression,
+  seriesPatchForPlayingMemberLeave,
   winnerFromFewerQuestions,
 } from "../session/castleSiege/seriesProgression.mjs";
 import {
@@ -76,5 +78,67 @@ describe("castleSiege series progression", () => {
     });
     assert.equal(tied.ok, false);
     assert.equal(tied.code, "QUESTIONS_TIE");
+  });
+
+  it("forfeit game vs series vs abandon", () => {
+    const mid = {
+      mode: "castleSiege",
+      seriesLength: 3,
+      gameIndex: 2,
+      score: { teamA: 1, teamB: 0 },
+      phase: "siege",
+      castleSiegeRoles: { u1: "teamA", u2: "teamB" },
+    };
+    const game = resolveForfeitProgression({
+      session: mid,
+      action: "forfeitGame",
+      forfeitingTeam: "teamA",
+    });
+    assert.equal(game.ok, true);
+    assert.equal(game.progression.kind, "betweenGames");
+    assert.deepEqual(game.progression.state.score, { teamA: 1, teamB: 1 });
+
+    const series = resolveForfeitProgression({
+      session: { ...mid, phase: "betweenGames" },
+      action: "forfeitSeries",
+      forfeitingTeam: "teamA",
+    });
+    assert.equal(series.ok, true);
+    assert.equal(series.progression.state.seriesOutcome, "complete");
+    assert.ok(series.progression.state.score.teamB >= 2);
+
+    const abandon = resolveForfeitProgression({ session: mid, action: "abandon" });
+    assert.equal(abandon.ok, true);
+    assert.equal(abandon.progression.state.seriesOutcome, "abandoned");
+    assert.deepEqual(abandon.progression.state.score, mid.score);
+  });
+
+  it("leave mid-series auto-forfeits the leaver's team", () => {
+    const leaveGame = seriesPatchForPlayingMemberLeave(
+      {
+        mode: "castleSiege",
+        seriesLength: 3,
+        gameIndex: 1,
+        score: { teamA: 0, teamB: 0 },
+        phase: "siege",
+        castleSiegeRoles: { leavers: "teamB" },
+      },
+      "leavers",
+    );
+    assert.equal(leaveGame.phase, "betweenGames");
+    assert.deepEqual(leaveGame.score, { teamA: 1, teamB: 0 });
+
+    const leaveSeries = seriesPatchForPlayingMemberLeave(
+      {
+        mode: "castleSiege",
+        seriesLength: 3,
+        gameIndex: 2,
+        score: { teamA: 1, teamB: 0 },
+        phase: "betweenGames",
+        castleSiegeRoles: { leavers: "teamA" },
+      },
+      "leavers",
+    );
+    assert.equal(leaveSeries.seriesOutcome, "complete");
   });
 });

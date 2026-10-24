@@ -41,6 +41,7 @@ export {
   controlSessionTimerForMove,
   declareCastleSiege,
   endSession,
+  forfeitCastleSiege,
   initSessionRoleGates,
   joinSessionWithRole,
   leaveHostSession,

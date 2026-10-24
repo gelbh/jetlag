@@ -197,3 +197,27 @@ export async function continueCastleSiegeSeries(
     { ok: true; phase: "setup"; seriesStandoffOpener: "teamA" | "teamB" }
   >("continueCastleSiegeSeries", { sessionId }, { idempotent: false });
 }
+
+export type ForfeitCastleSiegeAction = "forfeitGame" | "forfeitSeries" | "abandon";
+
+/** Forfeit game/series or host-abandon the match. */
+export async function forfeitCastleSiege(
+  sessionId: string,
+  action: ForfeitCastleSiegeAction,
+  forfeitingTeam?: "teamA" | "teamB",
+): Promise<{
+  ok: true;
+  action: ForfeitCastleSiegeAction;
+  kind: "betweenGames" | "matchEnd";
+  score: { teamA: number; teamB: number };
+  seriesOutcome: "complete" | "abandoned" | null;
+}> {
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured.");
+  }
+  return callWithResilience(
+    "forfeitCastleSiege",
+    { sessionId, action, ...(forfeitingTeam ? { forfeitingTeam } : {}) },
+    { idempotent: false },
+  );
+}

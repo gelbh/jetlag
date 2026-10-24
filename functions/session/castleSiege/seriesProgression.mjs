@@ -1,5 +1,8 @@
 import {
+  abandonMatch,
   awardGameWin,
+  forfeitGame,
+  forfeitSeries,
   seriesPatchFromProgression,
   seriesStateFromSession,
 } from "./seriesScore.mjs";
@@ -121,6 +124,60 @@ export function flipStandoffOpener(opener) {
  *   clearKeys: string[],
  * }}
  */
+/**
+ * Series patch when a playing member leaves mid-match (auto forfeit).
+ * betweenGames → forfeit series; otherwise forfeit current game.
+ *
+ * @param {object} session
+ * @param {string} uid
+ * @returns {Record<string, unknown> | null}
+ */
+export function seriesPatchForPlayingMemberLeave(session, uid) {
+  if (session?.mode !== "castleSiege") {
+    return null;
+  }
+  const state = seriesStateFromSession(session);
+  if (state.seriesOutcome != null) {
+    return null;
+  }
+  const roles =
+    session.castleSiegeRoles && typeof session.castleSiegeRoles === "object"
+      ? session.castleSiegeRoles
+      : {};
+  const role = typeof roles[uid] === "string" ? roles[uid] : "";
+  if (role !== "teamA" && role !== "teamB") {
+    return null;
+  }
+  const progression =
+    session.phase === "betweenGames" ? forfeitSeries(state, role) : forfeitGame(state, role);
+  return seriesPatchFromProgression(progression);
+}
+
+/**
+ * @param {{
+ *   session: object,
+ *   action: "forfeitGame" | "forfeitSeries" | "abandon",
+ *   forfeitingTeam?: "teamA" | "teamB",
+ * }} input
+ */
+export function resolveForfeitProgression(input) {
+  const state = seriesStateFromSession(input.session);
+  if (state.seriesOutcome != null && input.action !== "abandon") {
+    return { ok: false, code: "SERIES_ALREADY_ENDED" };
+  }
+  if (input.action === "abandon") {
+    const progression = abandonMatch(state);
+    return { ok: true, progression, patch: seriesPatchFromProgression(progression) };
+  }
+  const team = input.forfeitingTeam;
+  if (team !== "teamA" && team !== "teamB") {
+    return { ok: false, code: "INVALID_TEAM" };
+  }
+  const progression =
+    input.action === "forfeitSeries" ? forfeitSeries(state, team) : forfeitGame(state, team);
+  return { ok: true, progression, patch: seriesPatchFromProgression(progression) };
+}
+
 export function buildContinueSeriesPlan(session) {
   const opener =
     session.seriesStandoffOpener === "teamB" || session.seriesStandoffOpener === "teamA"

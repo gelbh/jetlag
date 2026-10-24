@@ -4,11 +4,13 @@ import { enforceAppCheck } from "../../lib/appCheck.mjs";
 import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import {
   buildContinueSeriesPlan,
+  resolveForfeitProgression,
   resolveGameProgression,
 } from "../../session/castleSiege/seriesProgression.mjs";
 import { posthogProjectApiKey, requireAuthSessionId } from "./shared.mjs";
 
 const PLAYING_TEAMS = ["teamA", "teamB"];
+const PLAYING_TEAM_SET = new Set(PLAYING_TEAMS);
 
 /**
  * @param {FirebaseFirestore.Firestore} db
@@ -142,6 +144,91 @@ export const continueCastleSiegeSeries = onCall(
       ok: true,
       phase: "setup",
       seriesStandoffOpener: plan.seriesStandoffOpener,
+    };
+  }),
+);
+
+/**
+ * Forfeit current game / series, or host abandon.
+ *
+ * data: {
+ *   sessionId,
+ *   action: "forfeitGame" | "forfeitSeries" | "abandon",
+ *   forfeitingTeam?: "teamA" | "teamB"  // required except abandon; host may pick; players only self
+ * }
+ */
+export const forfeitCastleSiege = onCall(
+  {
+    secrets: [posthogProjectApiKey],
+    enforceAppCheck,
+  },
+  withFunctionsExceptionHandler(async (request) => {
+    const { uid, sessionId } = requireAuthSessionId(request);
+    const action = typeof request.data?.action === "string" ? request.data.action : "";
+    if (action !== "forfeitGame" && action !== "forfeitSeries" && action !== "abandon") {
+      throw new HttpsError(
+        "invalid-argument",
+        "action must be forfeitGame, forfeitSeries, or abandon.",
+      );
+    }
+
+    const db = getFirestore();
+    const sessionRef = db.collection("sessions").doc(sessionId);
+    const sessionSnap = await sessionRef.get();
+    if (!sessionSnap.exists) {
+      throw new HttpsError("not-found", "Session not found.");
+    }
+    const session = sessionSnap.data() ?? {};
+    if (session.mode !== "castleSiege") {
+      throw new HttpsError("failed-precondition", "Session is not Castle Siege.");
+    }
+
+    const isHost = session.hostUid === uid;
+    const roles =
+      session.castleSiegeRoles && typeof session.castleSiegeRoles === "object"
+        ? session.castleSiegeRoles
+        : {};
+    const callerRole = typeof roles[uid] === "string" ? roles[uid] : "";
+
+    let forfeitingTeam =
+      typeof request.data?.forfeitingTeam === "string" ? request.data.forfeitingTeam : "";
+
+    if (action === "abandon") {
+      if (!isHost) {
+        throw new HttpsError("permission-denied", "Only the host can abandon the series.");
+      }
+    } else {
+      if (!PLAYING_TEAM_SET.has(forfeitingTeam)) {
+        if (PLAYING_TEAM_SET.has(callerRole)) {
+          forfeitingTeam = callerRole;
+        } else {
+          throw new HttpsError("invalid-argument", "forfeitingTeam must be teamA or teamB.");
+        }
+      }
+      if (!isHost && callerRole !== forfeitingTeam) {
+        throw new HttpsError("permission-denied", "Players may only forfeit their own team.");
+      }
+    }
+
+    const resolved = resolveForfeitProgression({
+      session,
+      action,
+      forfeitingTeam: action === "abandon" ? undefined : forfeitingTeam,
+    });
+    if (!resolved.ok) {
+      if (resolved.code === "SERIES_ALREADY_ENDED") {
+        throw new HttpsError("failed-precondition", "Series already ended.");
+      }
+      throw new HttpsError("invalid-argument", "Unable to apply forfeit.");
+    }
+
+    await sessionRef.update(resolved.patch);
+    return {
+      ok: true,
+      action,
+      kind: resolved.progression.kind,
+      score: resolved.progression.state.score,
+      seriesOutcome: resolved.progression.state.seriesOutcome,
     };
   }),
 );
