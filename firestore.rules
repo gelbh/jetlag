@@ -1295,6 +1295,13 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // H5 pressure plate: defenders (+ referee) read own scalar/band only; Admin SDK writes.
+      match /teamPressure/{teamId} {
+        allow read: if teamId in ['teamA', 'teamB']
+          && canReadTeamMarks(sessionId, teamId);
+        allow create, update, delete: if false;
+      }
+
       // Hand card ids: own team + referee read; host writes on deal.
       match /teamHands/{teamId} {
         allow read: if teamId in ['teamA', 'teamB']
