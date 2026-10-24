@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
 import { useSessionStore } from "../../../state/sessionStore";
 import type { AdminSessionMonitorState } from "./AdminSessionView";
@@ -33,18 +33,21 @@ export function useAdminDeskMonitor({
   const monitorRequestRef = useRef(0);
   const joinKeyRef = useRef<string | null>(null);
 
-  const joinForMonitor = async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
-    const requestId = ++monitorRequestRef.current;
-    const joined = await joinSession(summary, { navigate: false });
-    if (monitorRequestRef.current !== requestId) return;
-    if (!joined) {
-      setFailedSessionId(summary.sessionId);
-      setMonitorSessionId((current) => (current === summary.sessionId ? null : current));
-      return;
-    }
-    setFailedSessionId((current) => (current === summary.sessionId ? null : current));
-    setMonitorSessionId(summary.sessionId);
-  };
+  const joinForMonitor = useCallback(
+    async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
+      const requestId = ++monitorRequestRef.current;
+      const joined = await joinSession(summary, { navigate: false });
+      if (monitorRequestRef.current !== requestId) return;
+      if (!joined) {
+        setFailedSessionId(summary.sessionId);
+        setMonitorSessionId((current) => (current === summary.sessionId ? null : current));
+        return;
+      }
+      setFailedSessionId((current) => (current === summary.sessionId ? null : current));
+      setMonitorSessionId(summary.sessionId);
+    },
+    [joinSession],
+  );
 
   // Only the session route monitors; incident and request routes never join.
   useEffect(() => {
@@ -63,7 +66,6 @@ export function useAdminDeskMonitor({
     activeSession?.id,
     enabled,
     isDesktop,
-    // joinForMonitor closes over joinSession; intentional same as pre-extract.
     joinForMonitor,
     monitorSessionId,
     routeSession,

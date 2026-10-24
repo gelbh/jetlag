@@ -321,45 +321,53 @@ function AdminOpsDeskContent() {
         }}
       >
         <AdminOpsDeskBody
-          isDesktop={isDesktop}
-          pathname={location.pathname}
-          routeKind={routeKind}
-          routeTab={routeTab}
-          collapsed={collapsed}
-          routeSessionId={routeSessionId}
-          routeIncidentId={routeIncidentId}
-          routeRequestId={routeRequestId}
-          routeSession={routeSession}
-          tables={tables}
-          list={list}
-          needsLoading={needsLoading}
-          needsError={needsError}
-          openIncidentsBySession={openIncidentsBySession}
-          selectedKey={selectedKey}
-          lastItemPath={lastItem?.path ?? null}
-          selectedIncident={selectedIncident}
-          incidentLoading={incidentLoading}
-          selectedRequest={selectedRequest}
-          sessionById={sessionById}
-          sessionsLoading={sessionsLoading}
-          preloadLoading={preloadLoading}
-          enabled={enabled}
-          hasMore={hasMore}
-          refreshing={refreshing}
-          loadingMore={loadingMore}
-          sessionsFailedEmpty={sessionsFailedEmpty}
-          visibleIncidents={visibleIncidents}
-          monitor={monitor}
-          observeError={observeError}
-          observingCode={observingCode}
-          onOpenSession={openSession}
-          onOpenNeeds={openNeeds}
-          onChangeTab={changeTab}
-          onGoToTable={goToTable}
-          onWatchGame={watchGame}
-          onNavigate={(path) => void navigate(path)}
-          onRefresh={() => void refresh()}
-          onLoadMore={() => void loadMore()}
+          route={{
+            isDesktop,
+            pathname: location.pathname,
+            routeKind,
+            routeTab,
+            collapsed,
+            routeSessionId,
+            routeIncidentId,
+            routeRequestId,
+            routeSession,
+          }}
+          selection={{
+            tables,
+            list,
+            needsLoading,
+            needsError,
+            openIncidentsBySession,
+            selectedKey,
+            lastItemPath: lastItem?.path ?? null,
+            selectedIncident,
+            incidentLoading,
+            selectedRequest,
+            sessionById,
+            sessionsLoading,
+            preloadLoading,
+            enabled,
+            hasMore,
+            refreshing,
+            loadingMore,
+            sessionsFailedEmpty,
+            visibleIncidents,
+          }}
+          monitor={{
+            state: monitor,
+            observeError,
+            observingCode,
+          }}
+          actions={{
+            onOpenSession: openSession,
+            onOpenNeeds: openNeeds,
+            onChangeTab: changeTab,
+            onGoToTable: goToTable,
+            onWatchGame: watchGame,
+            onNavigate: (path) => void navigate(path),
+            onRefresh: () => void refresh(),
+            onLoadMore: () => void loadMore(),
+          }}
         />
       </Box>
       <Drawer
