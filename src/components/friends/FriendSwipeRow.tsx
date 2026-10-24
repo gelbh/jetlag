@@ -44,7 +44,6 @@ export function FriendSwipeRow({
   actions: ReactNode;
   children: ReactNode;
   onOpen?: () => void;
-  /** Fired when the user flings past the actions (primary / trailing action). */
   onFullSwipe?: () => void;
 }) {
   const rowId = useId();
@@ -229,7 +228,6 @@ export function FriendSwipeAction({
   tone: "flag" | "halt" | "muted";
   onClick: () => void;
   disabled?: boolean;
-  /** Trailing / full-swipe action; expands when the row is pulled past open. */
   primary?: boolean;
 }) {
   const background =

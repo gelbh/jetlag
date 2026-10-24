@@ -3,14 +3,9 @@ import type { ReactNode } from "react";
 export type EmptyStateProps = {
   children: ReactNode;
   className?: string;
-  /** Static placeholders default to note; pass status for live updating empties. */
   role?: "status" | "note";
 };
 
-/**
- * Shared empty copy for lists, boards, and recovery surfaces.
- * field-ink-muted on canvas; `.jl-empty-state` keeps a hairline under residual roots.
- */
 export function EmptyState({ children, className, role = "note" }: EmptyStateProps) {
   return (
     <p

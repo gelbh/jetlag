@@ -4,7 +4,6 @@ import type { GameArea } from "@/domain/map/annotations";
 import { isPlaceholderGameArea } from "@/domain/session/join/joinPreviewGameArea";
 import { retainGameAreaForServiceWorker } from "@/services/session/postGameAreaToServiceWorker";
 
-/** Wider than this (degrees) means an antimeridian-crossing area; skip rather than mis-route. */
 const MAX_GAME_AREA_LNG_SPAN = 180;
 
 /**
@@ -21,6 +20,5 @@ export function useGameAreaTileCacheSync(gameArea: GameArea | null): void {
     return box.east - box.west > MAX_GAME_AREA_LNG_SPAN ? null : box;
   }, [gameArea]);
 
-  // Repeats of an equal bbox (new snapshot objects) are deduped in the service.
   useEffect(() => retainGameAreaForServiceWorker(bbox), [bbox]);
 }

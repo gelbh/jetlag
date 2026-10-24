@@ -1,6 +1,3 @@
-/**
- * Map-first Tentacle chrome: shared placement shell + map-primary answer strip.
- */
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudTentacleIcon } from "@/components/map/icons/ToolIcons";
 import {

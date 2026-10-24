@@ -220,9 +220,7 @@ export async function fetchMeasuringPlacesInArea(
       .then((merged) => {
         options.onEnrich?.(merged);
       })
-      .catch(() => {
-        // Soft-fail Overpass enrich; keep the bundle result.
-      });
+      .catch(() => {});
     return bundledPlaces;
   }
 

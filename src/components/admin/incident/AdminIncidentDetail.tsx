@@ -40,7 +40,6 @@ function DetailSection({ label, children }: { label: string; children: React.Rea
 
 export interface AdminIncidentDetailProps {
   incidentId: string | null;
-  /** When provided, skips live subscribe (tests / parent-owned data). */
   incidentOverride?: IncidentRecord | null;
   messagesOverride?: IncidentMessageRecord[];
   errorOverride?: Error | null;

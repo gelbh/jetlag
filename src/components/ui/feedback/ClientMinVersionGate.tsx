@@ -41,7 +41,6 @@ export function ClientMinVersionGate({ children }: { children: ReactNode }) {
             }
           },
           () => {
-            // Fail-open on read errors when we cannot confirm a floor.
             if (!cancelled) {
               setMinVersion(null);
             }
@@ -49,7 +48,6 @@ export function ClientMinVersionGate({ children }: { children: ReactNode }) {
         );
       })
       .catch(() => {
-        // Fail-open when the listener chunk cannot load.
         if (!cancelled) {
           setMinVersion(null);
         }

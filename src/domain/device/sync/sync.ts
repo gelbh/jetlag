@@ -1,6 +1,5 @@
 export type SyncStatus = "synced" | "saving" | "offline" | "degraded" | "stale" | "error";
 
-/** `!== false`: Node/test globals may expose navigator without onLine. */
 export function isBrowserOnline(): boolean {
   return typeof navigator === "undefined" || navigator.onLine !== false;
 }
@@ -16,11 +15,6 @@ export function isEffectivelyOffline(input: {
   return input.reachable === false;
 }
 
-/**
- * `ledgerPending` counts un-acked Firestore writes (write ledger); `fromCache`
- * is true while the session doc snapshot came from the local cache, so the
- * rail can say "last known state" instead of claiming "Synced".
- */
 export function resolveSyncStatus(input: {
   online: boolean;
   reachable: boolean | null;

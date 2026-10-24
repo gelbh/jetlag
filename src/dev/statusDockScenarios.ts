@@ -27,7 +27,6 @@ export type StatusDockScenario = {
   syncStatus: SyncStatus;
   queuedWrites: number;
   syncMessage?: string | null;
-  /** Force island into a phone-narrow frame for layout QA. */
   narrowFrame?: boolean;
 };
 
@@ -59,7 +58,6 @@ function pendingBase(
   };
 }
 
-/** Visual QA fixtures for the Mantine map status island (top dock). */
 export const STATUS_DOCK_SCENARIOS: readonly StatusDockScenario[] = [
   {
     id: "prestart-waiting",

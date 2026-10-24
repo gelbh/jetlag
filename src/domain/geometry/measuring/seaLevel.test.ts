@@ -130,7 +130,6 @@ describe("sea level measuring", () => {
     const cells = sampleGameAreaCells(sampleGameArea, divisions);
     expect(cells.length).toBeGreaterThan(0);
 
-    // Coarse centers all "far" (> seeker 100m) — near region empty / lowest.
     const coarseElevations = cells.map(() => 180);
     const coarse = buildSeaLevelNearRegionFromSamples(
       cells,
@@ -141,7 +140,6 @@ describe("sea level measuring", () => {
     );
     expect(coarse.region).toBeNull();
 
-    // Pick a border cell and refine: three subcells near sea level, one far.
     const borderCell = cells[0]!;
     const refineCells = subdivideElevationSampleCell(borderCell, 2);
     const refineParentKeys = refineCells.map(() => `${borderCell.row}:${borderCell.col}`);
@@ -163,7 +161,6 @@ describe("sea level measuring", () => {
     expect(elimination).not.toBeNull();
 
     const hiderPt = turfPoint([hiderPoint[1], hiderPoint[0]]);
-    // closer → shade complement of near; truthful near hider stays unshaded
     expect(booleanPointInPolygon(hiderPt, elimination!)).toBe(false);
   });
 

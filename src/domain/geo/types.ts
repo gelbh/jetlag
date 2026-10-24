@@ -8,7 +8,6 @@ export interface MeasuringPlace {
   point: LatLngTuple;
   categoryId?: string;
   source?: PoiCandidateSource;
-  /** Absent = confirmed (legacy Overpass/bundle). */
   confirmStatus?: PoiConfirmStatus;
   osmId?: string;
   wikidataId?: string;
@@ -23,7 +22,6 @@ export interface MatchingFeature {
   boundary?: GameArea;
   categoryId?: string;
   source?: PoiCandidateSource;
-  /** Absent = confirmed (legacy Overpass/bundle). */
   confirmStatus?: PoiConfirmStatus;
   osmId?: string;
   wikidataId?: string;

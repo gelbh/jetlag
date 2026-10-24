@@ -10,18 +10,11 @@ import { applyServiceWorkerUpdate } from "../../domain/device/updates/serviceWor
 import { compareAppVersions } from "../../domain/session/meta/sessionVersion";
 
 export interface UseHotfixGraceReloadOptions {
-  /** Required minimum app version from session and/or `appConfig/runtime`. */
   requiredMinAppVersion?: string | null;
   /** Grace countdown length; defaults to 30s. */
   graceSeconds?: number | null;
-  /** Client version under test; defaults to `APP_VERSION`. */
   clientVersion?: string;
-  /** When false, never arm the countdown. */
   enabled?: boolean;
-  /**
-   * Injectable reload for tests. Defaults to SW update + hard reload fallback
-   * (via {@link applyServiceWorkerUpdate}).
-   */
   reload?: () => void | Promise<void>;
 }
 
@@ -42,10 +35,6 @@ function resolveGraceSeconds(value: number | null | undefined): number {
   return DEFAULT_HOTFIX_GRACE_SECONDS;
 }
 
-/**
- * When `requiredMinAppVersion` is greater than the running client version,
- * counts down then forces a refresh so the hotfix build is picked up.
- */
 export function useHotfixGraceReload(
   options: UseHotfixGraceReloadOptions,
 ): UseHotfixGraceReloadResult {
@@ -112,17 +101,12 @@ export function useHotfixGraceReload(
       }
       reloadedForVersionRef.current = requiredMinAppVersion;
       setAttemptedVersion(requiredMinAppVersion);
-      // Prefer skipping reload over looping when durable ack cannot be stored.
       if (!acknowledgeHotfixReload(requiredMinAppVersion)) {
         return;
       }
       try {
-        void Promise.resolve(reloadRef.current()).catch(() => {
-          // Ack already persisted — do not retry; avoid unhandled rejection.
-        });
-      } catch {
-        // Sync throw from injectable reload — same: do not retry.
-      }
+        void Promise.resolve(reloadRef.current()).catch(() => {});
+      } catch {}
     };
 
     const totalSeconds = resolveGraceSeconds(graceSeconds);

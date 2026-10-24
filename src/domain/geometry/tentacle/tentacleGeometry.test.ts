@@ -246,7 +246,6 @@ describe("tentacleGeometry", () => {
   });
 
   it("EXYS 24-hospital tentacle resolves elim shade with answered site clear", async () => {
-    // Live pending a4ad8efe-90d3-46cb-a803-b37ef2e307e2 / session EXYS (stuck answered, no shade).
     clearVoronoiCellCacheForTests();
     clearTentacleEliminationCacheForTests();
 

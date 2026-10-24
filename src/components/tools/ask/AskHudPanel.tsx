@@ -1,7 +1,3 @@
-/**
- * Ask path frosted panel — style object from entryStyles (was `.ask-hud-panel`).
- * Plain div keeps unit tests that omit MantineProvider working.
- */
 import type { CSSProperties, ReactNode } from "react";
 import { askHudPanelStyle } from "@/components/ui/entry/entryStyles";
 import { cn } from "@/lib/cn";

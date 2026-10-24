@@ -224,7 +224,6 @@ describe("useJoinSession", () => {
         await vi.advanceTimersByTimeAsync(0);
       });
 
-      // The late failure's specific copy replaces the timeout copy; tracking stays at one event.
       expect(mockTrack).toHaveBeenCalledTimes(1);
       expect(result.current.error).toBe("No session found for that code.");
       expect(navigate).not.toHaveBeenCalled();

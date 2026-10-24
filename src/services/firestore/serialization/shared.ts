@@ -39,8 +39,6 @@ export function serializeGameAreaForFirestore(
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
 
   if (options?.omitGeometryJson) {
-    // Pack play areas reload via resolveSessionPlayArea (regionPackId + revision).
-    // Australia national STE union alone exceeds Firestore's 1MiB document limit.
     return { south, west, north, east };
   }
 
@@ -120,7 +118,6 @@ export function assertNoNestedArrays(value: unknown, path = "document"): void {
   }
 }
 
-/** Firestore Timestamp (or its plain {seconds,nanoseconds} shape, or an ISO string) → ISO string. */
 export function deserializeFirestoreTimestamp(value: unknown): string | undefined {
   if (
     value &&

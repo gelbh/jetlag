@@ -69,10 +69,6 @@ export function JoinSession() {
   const code = form.values.code;
   const playerRole = form.values.playerRole;
   const rolePasscode = form.values.rolePasscode;
-  /**
-   * When invite query is absent, suppress preview until the user types
-   * (keeps typed code after leaving an invite URL without re-querying).
-   */
   const [previewEnabledByTyping, setPreviewEnabledByTyping] = useState(false);
   const inviteFromQuery = parseSessionInviteCode(codeFromQuery);
   const suppressPreview = codeFromQuery == null ? !previewEnabledByTyping : false;

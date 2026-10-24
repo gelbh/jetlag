@@ -16,7 +16,6 @@ export function isCastleSiegePlayingRole(role: CastleSiegeTeamRole | null): bool
   return role === "teamA" || role === "teamB";
 }
 
-/** Defender seal team for an attacking asker. */
 export function opposingCastleSiegePlayingTeam(
   team: CastleSiegePlayingTeam,
 ): CastleSiegePlayingTeam {

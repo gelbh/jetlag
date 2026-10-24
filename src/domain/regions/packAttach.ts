@@ -7,16 +7,8 @@ import type { GameArea } from "@/domain/map/annotations";
 import { REGION_PACK_REFERENCE_BBOXES } from "./packGeoManifest";
 import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 
-/**
- * Minimum intersection / pack-bbox ratio (α) for a pack attach suggestion.
- * Threshold is max(α × packArea, β km²).
- */
 export const PACK_ATTACH_MIN_INTERSECTION_RATIO = 0.05;
 
-/**
- * Minimum absolute intersection area in km² (β) for a pack attach suggestion.
- * Threshold is max(α × packArea, β km²).
- */
 export const PACK_ATTACH_MIN_INTERSECTION_KM2 = 25;
 
 export type PackAttachSuggestion = {
@@ -24,10 +16,8 @@ export type PackAttachSuggestion = {
   score: number;
 };
 
-/** How the current region pack was chosen for a draft play area. */
 export type PackAttachSource = "auto" | "manual" | "bundled";
 
-/** Sticky clear/change until the play-area AABB fingerprint changes. */
 export type PackAttachManualOverride = {
   fingerprint: string | null;
   packId: RegionPackId | undefined;
@@ -44,7 +34,6 @@ export type SuggestRegionPackOptions = {
   minIntersectionKm2?: number;
 };
 
-/** AABB fingerprint for sticky manual pack override (not full-geometry hash). */
 export function playAreaAttachFingerprint(gameArea: GameArea | null): string | null {
   if (!gameArea) {
     return null;
@@ -53,9 +42,6 @@ export function playAreaAttachFingerprint(gameArea: GameArea | null): string | n
   return `${box.south}:${box.west}:${box.north}:${box.east}`;
 }
 
-/**
- * Resolve quiet pack-attach chrome from suggestion + optional sticky manual override.
- */
 export function resolvePackAttachChrome(input: {
   gameArea: GameArea | null;
   fingerprint: string | null;
@@ -88,18 +74,6 @@ export function resolvePackAttachChrome(input: {
   };
 }
 
-/**
- * Suggest the best region pack for a game area by bbox overlap.
- *
- * Uses unexpanded game-area AABB (no min-span inflate) and raw rect intersect
- * so α/β thresholds are not coupled to play-area UX expand constants.
- *
- * Score = intersection area / pack reference bbox area (both km²).
- * A pack qualifies when intersection area ≥ max(α × packArea, β km²).
- * Among qualifying packs, the highest score wins. Equal scores break toward the
- * larger absolute intersection (country-scale play prefers the national pack
- * over nested specialty metros that also score 1.0).
- */
 export function suggestRegionPackForGameArea(
   gameArea: GameArea,
   options?: SuggestRegionPackOptions,

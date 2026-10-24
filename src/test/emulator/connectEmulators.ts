@@ -21,9 +21,7 @@ export async function teardownEmulatorsForTests(): Promise<void> {
     if (firebaseAuth.currentUser) {
       await signOut(firebaseAuth);
     }
-  } catch {
-    // Firebase app may already be torn down.
-  }
+  } catch {}
 
   await resetFirebaseForTests();
 }

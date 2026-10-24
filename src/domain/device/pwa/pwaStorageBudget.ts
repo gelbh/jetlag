@@ -1,4 +1,3 @@
-/** Tile caches: play-day cap — do not raise without Wave 0 storage evidence. */
 export const PWA_TILE_CACHE_MAX_ENTRIES = 500;
 export const PWA_TILE_CACHE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
@@ -10,7 +9,6 @@ export const PWA_TILE_CACHE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 export const PWA_GAME_AREA_TILE_CACHE_MAX_ENTRIES = 2000;
 export const PWA_GAME_AREA_TILE_CACHE_MAX_AGE_SECONDS = 14 * 24 * 60 * 60;
 
-/** Soft quota before logging storage pressure (~250 MB). */
 export const PWA_SOFT_STORAGE_BYTES = 250 * 1024 * 1024;
 
 export function isStorageOverSoftCap(usageBytes: number): boolean {

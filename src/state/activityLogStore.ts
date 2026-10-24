@@ -4,7 +4,6 @@ import type { SessionActivityEvent } from "../domain/session/activity/sessionAct
 
 interface ActivityLogState {
   eventsBySessionId: Record<string, SessionActivityEvent[]>;
-  /** Thin read helper for tests and non-selector callers. */
   getEvents: (sessionId: string) => SessionActivityEvent[];
   appendIfAbsent: (event: SessionActivityEvent) => boolean;
 }

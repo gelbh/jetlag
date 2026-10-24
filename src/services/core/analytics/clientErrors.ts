@@ -38,7 +38,6 @@ export function captureAppCheckTokenFailure(
   });
 }
 
-/** Same capture shape as the former ErrorBoundary helper (component stack on the exception). */
 export function captureErrorBoundaryException(
   error: unknown,
   componentStack: string | null | undefined,

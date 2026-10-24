@@ -214,9 +214,6 @@ async function runTool(db, { incidentId, sessionId, actorUid, toolId, args, deps
   throw new Error(SESSION_OPS_UNKNOWN_TOOL);
 }
 
-/**
- * Default DI helpers for single-doc mutations (admin SDK).
- */
 export async function cancelPendingQuestionInSession(db, sessionId, questionId) {
   const ref = db
     .collection("sessions")

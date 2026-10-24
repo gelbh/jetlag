@@ -57,7 +57,6 @@ function matchingEmptyCatalogBody(categoryId: MatchingCategoryId): string {
   return `No named ${label} found in this play area.`;
 }
 
-/** Empty play-area catalog reason shown on bounce (no null-match offer). */
 export function matchingEmptyPlayAreaMessage(categoryId: MatchingCategoryId): string {
   return matchingEmptyCatalogBody(categoryId);
 }

@@ -571,7 +571,6 @@ describe("useHiderZoneTool", () => {
       ];
       expect(bounds.south).toBeLessThan(tap[0]);
       expect(bounds.north).toBeGreaterThan(tap[0]);
-      // 200 m of latitude is about 0.0018 degrees.
       expect(bounds.north - tap[0]).toBeGreaterThan(0.0018);
     });
 

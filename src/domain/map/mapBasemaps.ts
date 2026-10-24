@@ -27,7 +27,6 @@ export const ESRI_WORLD_IMAGERY_TILE_URL =
 export const ESRI_REFERENCE_OVERLAY_TILE_URL =
   "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}";
 
-/** OpenFreeMap style URLs (no API key). Light locked to liberty after Slice 1 smoke. */
 export const OPENFREEMAP_STYLE_URLS = {
   light: "https://tiles.openfreemap.org/styles/liberty",
   dark: "https://tiles.openfreemap.org/styles/dark",
@@ -82,7 +81,6 @@ export function getBasemapSurface(
   return streetBasemap;
 }
 
-/** Plain-text basemap credits for settings / chrome. */
 export function getBasemapAttributionText(style: MapStyle): string {
   if (style === "satellite") {
     return ESRI_ATTRIBUTION_TEXT;

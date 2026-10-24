@@ -1,7 +1,3 @@
-// Copy checked against the tool code: src/domain/map/mapTools.ts (names, card costs),
-// src/domain/map/distancePresets.ts (distances), src/domain/session/size/gameSizeRules.ts
-// (size gating, deadlines), src/domain/questions/* (prompts, answers) and
-// src/domain/geometry/adapter/eliminationMask.ts (shading). Re-check them when tools change.
 import type { LearnPageContent } from "./learnContentTypes";
 
 const TOOL_RELATED = ["/tools", "/guide", "/faq"] as const satisfies LearnPageContent["related"];

@@ -155,7 +155,6 @@ describe("seaLevelProgressive", () => {
     expect(sampling.cells.length).toBeGreaterThan(1);
     expect(sampling.divisions).toBe(8);
     expect(sampling.cellElevations.every((value) => Number.isFinite(value))).toBe(true);
-    // Session-local cells (not pack-native extents).
     expect(sampling.cells[0]?.south).toBeGreaterThanOrEqual(53.27 - 1e-9);
   });
 

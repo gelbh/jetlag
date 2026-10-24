@@ -16,7 +16,6 @@ function isNetworkTimeoutMessage(lower: string): boolean {
   return lower.startsWith("request timed out after");
 }
 
-/** Friendlier titles for common GPS / ask failures shown in sheets. */
 export function askInlineErrorCopy(message: string): ErrorCopy {
   const lower = message.toLowerCase();
   if (isNetworkTimeoutMessage(lower)) {
@@ -54,7 +53,6 @@ export function askInlineErrorCopy(message: string): ErrorCopy {
   };
 }
 
-/** True when the message should get GPS-style title + detail treatment. */
 export function isLocationInlineError(message: string): boolean {
   const lower = message.toLowerCase();
   if (isNetworkTimeoutMessage(lower)) {
@@ -70,9 +68,6 @@ export function isLocationInlineError(message: string): boolean {
   );
 }
 
-/**
- * Soft inline error for Ask sheets and related HUD panels (channel 3).
- */
 export function AskInlineError({ message, id }: AskInlineErrorProps) {
   const { title, detail } = askInlineErrorCopy(message);
 

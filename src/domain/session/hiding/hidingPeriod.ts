@@ -22,7 +22,6 @@ export function isHidingPeriodActive(
   return hidingPeriodRemainingMs(sessionOrGameSize, elapsedMs) > 0;
 }
 
-/** Seek-phase clock: elapsed time since hiding period ended (display-only offset). */
 export function seekPhaseElapsedMs(
   sessionOrGameSize: SessionRulesInput | GameSize,
   elapsedMs: number,

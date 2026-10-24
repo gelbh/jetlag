@@ -35,7 +35,6 @@ import { isAdminDivisionCategoryAvailable } from "@/services/geo/overpass/adminD
 import { inferTransitMetroId } from "@/services/transit/transitCatalog";
 import { usePreloadStore } from "@/state/preloadStore";
 
-/** Temporary Voronoi/elim prefix — LOD step, not a catalog cap. */
 export const MATCHING_CATALOG_COARSE_PREFIX = 16;
 
 const yesElimWeakCache = new WeakMap<
@@ -58,7 +57,6 @@ function matchingFeatureArea(feature: MatchingFeature): number {
   }
 }
 
-/** Largest-first prefix; always includes the answered site. */
 export function matchingCoarseCatalogPrefix(
   features: readonly MatchingFeature[],
   nearestFeatureId: string,
@@ -226,7 +224,6 @@ export function useMatchingCatalog(input: {
     return () => window.clearTimeout(timer);
   }, [gameArea, matchingBoundaryPreview]);
 
-  // Prefer deriving elim from the same-nearest boundary (yes/no are complements).
   const derivedEliminationPreview = useMemo(() => {
     if (!eliminationEligible || matchingAnswer === null || !matchingBoundaryPreview) {
       return null;
@@ -237,7 +234,6 @@ export function useMatchingCatalog(input: {
     return yesElimFromBoundary(matchingBoundaryPreview, gameArea);
   }, [eliminationEligible, gameArea, matchingAnswer, matchingBoundaryPreview]);
 
-  // LOD only while the boundary is still building.
   useEffect(() => {
     if (
       !eliminationEligible ||

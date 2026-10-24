@@ -1,7 +1,6 @@
 import { collection, doc, onSnapshot, orderBy, query, type Unsubscribe } from "firebase/firestore";
 import { getFirestoreDb } from "../core/firebase/firebase";
 
-/** Thread ids under `incidents/{id}/threads/{threadId}`. */
 export type IncidentThreadId = "support" | "hotfix";
 
 export type IncidentThreadMessageSender =
@@ -43,7 +42,6 @@ export interface IncidentThreadMessageRecord {
   kind: IncidentThreadMessageKind;
   visibility?: IncidentThreadId;
   toolCall?: IncidentThreadToolCall | null;
-  /** True while a Cursor session-ops run is in flight for this placeholder. */
   working?: boolean;
 }
 
@@ -175,7 +173,6 @@ function subscribeIncidentThreadMessages(
   );
 }
 
-/** Player/host/member/admin live support thread (session-ops agent chat). */
 export function subscribeSupportThreadMessages(
   incidentId: string,
   onChange: (messages: IncidentThreadMessageRecord[]) => void,
@@ -184,7 +181,6 @@ export function subscribeSupportThreadMessages(
   return subscribeIncidentThreadMessages(incidentId, "support", onChange, onError);
 }
 
-/** Admin-only live hotfix thread (coding-agent status / agent_meta). */
 export function subscribeHotfixThreadMessages(
   incidentId: string,
   onChange: (messages: IncidentThreadMessageRecord[]) => void,
@@ -193,7 +189,6 @@ export function subscribeHotfixThreadMessages(
   return subscribeIncidentThreadMessages(incidentId, "hotfix", onChange, onError);
 }
 
-/** Convenience: thread doc path for admin deep-links / debugging. */
 export function incidentThreadDoc(incidentId: string, threadId: IncidentThreadId) {
   return doc(getFirestoreDb(), "incidents", incidentId, "threads", threadId);
 }

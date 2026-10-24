@@ -157,7 +157,6 @@ export function parseCastleSiegeCoinAssignment(
   };
 }
 
-/** Serialize arena / border / belt / dials / coin for session create or host update. */
 export function castleSiegeSetupPatchToFirestore(
   patch: CastleSiegeSetupPatch,
 ): Record<string, unknown> {
@@ -231,7 +230,6 @@ function serializeSealCipherEnvelope(envelope: SealCipherEnvelopeV1): SealCipher
   };
 }
 
-/** Hash-only team seal doc (commitment without oracle blob). */
 export function buildTeamSealHashDocument(
   seal: Omit<TeamSealHashRecord, "teamId">,
 ): Record<string, unknown> {
@@ -251,7 +249,6 @@ export function buildTeamSealHashDocument(
   return payload;
 }
 
-/** Hash + ciphertext envelope for Functions oracle (no plaintext coords). */
 export function buildTeamSealCipherDocument(
   seal: Omit<TeamSealCipherRecord, "teamId">,
 ): Record<string, unknown> {
@@ -285,7 +282,6 @@ export function deserializeTeamSealHashFromFirestore(
   };
 }
 
-/** Parse hash + optional ciphertext; drops docs that still carry plaintext coords. */
 export function deserializeTeamSealCipherFromFirestore(
   teamId: string,
   data: Record<string, unknown>,

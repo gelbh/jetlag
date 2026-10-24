@@ -74,7 +74,6 @@ export function useMatchingDraftState() {
     [clearResolvedFields],
   );
 
-  /** Back to catalog: keep tool open, clear placement/resolve, show category sheet. */
   const reopenCategoryPicker = useCallback(() => {
     setMatchingLoading(false);
     setMatchingSeekerPoint(null);

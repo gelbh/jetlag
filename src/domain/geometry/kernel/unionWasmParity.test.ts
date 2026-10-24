@@ -38,8 +38,6 @@ describe.skipIf(!wasmPkgReady)("union polygon wasm parity", () => {
     const { wasmUnionPolygonFeatures } = await import("./unionWasm");
     const wasm = await wasmUnionPolygonFeatures(features);
     const baseline = unionPolygonFeatures(features);
-    // steps=11: default 12 lands on east edge lng=-0.15 where geo boolean FP
-    // shrinks the ring inside Martinez's exact coordinate.
     assertPolygonTopologyParity(wasm, baseline, topologyBbox, 11);
   });
 });

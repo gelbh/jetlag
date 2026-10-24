@@ -11,9 +11,6 @@ export type OracleAskReceiptProps = {
   onCancel?: () => void;
 };
 
-/**
- * Skin-S3 confirm-send strip: shows oracle answer only (V4, no enemy coords).
- */
 export function OracleAskReceipt({
   receipt,
   busy = false,

@@ -49,7 +49,6 @@ describe("PhotoHudBody", () => {
     renderPhoto(<PhotoHudBody {...baseProps} />);
 
     expect(screen.getByTestId("photo-hud-body")).toBeInTheDocument();
-    // Medium catalogs exceed chip threshold → short CatalogRail.
     expect(screen.getByTestId("ask-catalog-rail")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /continue/i })).toBeNull();
   });

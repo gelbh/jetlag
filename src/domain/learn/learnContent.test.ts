@@ -35,12 +35,10 @@ function pageText(content: LearnPageContent): string {
   return JSON.stringify(content);
 }
 
-/** "500 m" / "15" style labels as the tables write them (km after the first metre value). */
 function metricLabel(meters: number): string {
   return meters < 1000 ? `${meters} m` : `${meters / 1000}`;
 }
 
-/** Distances first offered at `size` (the table lists additions per size). */
 function newPresets(presetsFor: (size: GameSize) => readonly number[], size: GameSize) {
   const index = SIZES.indexOf(size);
   const previous = index > 0 ? presetsFor(SIZES[index - 1]!) : [];

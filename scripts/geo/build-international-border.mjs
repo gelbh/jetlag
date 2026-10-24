@@ -27,7 +27,6 @@ const PACK_IDS = [
   "australia",
 ];
 
-/** Mirrors REGION_PACK_REFERENCE_BBOXES (optional on stubs). */
 const PACK_BBOXES = {
   dublin: { south: 53.1782, west: -6.5469, north: 53.6347, east: -5.9945 },
   nyc: { south: 40.49, west: -74.26, north: 40.92, east: -73.7 },

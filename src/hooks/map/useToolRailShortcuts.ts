@@ -17,7 +17,6 @@ export function useToolRailShortcuts(options: {
   enabled: boolean;
   activeTool: MapTool;
   onSelect: (tool: MapTool) => void;
-  /** Visible question tools in dock order */
   toolOrder: readonly MapTool[];
 }): void {
   const { enabled, activeTool, onSelect, toolOrder } = options;

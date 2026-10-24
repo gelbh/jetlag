@@ -40,7 +40,6 @@ export function useEnsureSessionMembership(options?: { enabled?: boolean }): voi
 
     void (async () => {
       try {
-        // Skip the forced refresh offline: it would only stall on the network.
         const user = await ensureFreshAnonymousUser({
           forceRefresh: !isEffectivelyOfflineNow(),
         });

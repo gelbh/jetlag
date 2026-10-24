@@ -12,7 +12,6 @@ export function isPreloadRequestStatus(value: unknown): value is PreloadRequestS
   return typeof value === "string" && STATUSES.has(value as PreloadRequestStatus);
 }
 
-/** Admin status edges for inbox actions (mirrors Cloud Function ALLOWED). */
 const ALLOWED: Record<PreloadRequestStatus, ReadonlySet<PreloadRequestStatus>> = {
   open: new Set(["accepted", "declined", "shipped"]),
   accepted: new Set(["shipped", "declined", "open"]),

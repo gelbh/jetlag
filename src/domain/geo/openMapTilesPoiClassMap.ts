@@ -1,8 +1,3 @@
-/**
- * Lossy OpenMapTiles `poi` layer class/subclass → Jetlag category ids.
- * Incomplete by design — missing classes yield [] and Overpass/bundle confirm fills gaps.
- */
-
 export interface OpenMapTilesPoiProperties {
   class?: unknown;
   subclass?: unknown;
@@ -10,11 +5,10 @@ export interface OpenMapTilesPoiProperties {
   [key: string]: unknown;
 }
 
-/** Stable allowlist samples used by tools that share measuring / matching point ids. */
 const CLASS_TO_CATEGORY_IDS: Readonly<Record<string, readonly string[]>> = {
   museum: ["museum"],
   hospital: ["hospital"],
-  clinic: [], // clinics are not hospitals in Jetlag catalogs
+  clinic: [],
   library: ["library"],
   cinema: ["movie_theater"],
   park: ["park"],
@@ -26,7 +20,6 @@ const CLASS_TO_CATEGORY_IDS: Readonly<Record<string, readonly string[]>> = {
   aerodrome: ["commercial_airport"],
   airport: ["commercial_airport"],
   embassy: ["foreign_consulate"],
-  // Transit stops / stations (OpenMapTiles class values)
   railway: ["rail_station"],
   bus: ["rail_station"],
   ferry_terminal: ["rail_station"],
@@ -40,10 +33,6 @@ const SUBCLASS_TO_CATEGORY_IDS: Readonly<Record<string, readonly string[]>> = {
   bus_stop: ["rail_station"],
 };
 
-/**
- * OpenMapTiles puts clinics/nursing homes under class=hospital with subclass.
- * Deny before the hospital class allowlist so provisional lists stay hospitals-only.
- */
 const DENIED_SUBCLASSES = new Set(["clinic", "nursing_home"]);
 
 function asTrimmedString(value: unknown): string | null {
@@ -64,10 +53,6 @@ function categoryIdsForKey(
   return [...map[key]];
 }
 
-/**
- * Map OpenMapTiles poi feature properties to zero or more Jetlag category ids.
- * Prefer subclass when it maps; otherwise class. Unknown → [].
- */
 export function mapOpenMapTilesPoiToCategoryIds(
   props: OpenMapTilesPoiProperties | null | undefined,
 ): string[] {

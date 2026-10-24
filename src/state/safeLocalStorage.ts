@@ -111,9 +111,7 @@ function trySetItem(storage: Storage, name: string, value: string): "ok" | "quot
 function clearStorageItem(storage: Storage, name: string): void {
   try {
     storage.removeItem(name);
-  } catch {
-    // In-memory state remains; persistence is best-effort under quota pressure.
-  }
+  } catch {}
 }
 
 export function safeSetItemForAnnotations(storage: Storage, name: string, value: string): void {

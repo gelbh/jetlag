@@ -12,24 +12,10 @@ export interface SheetHostProps {
   dismissible?: boolean;
   sheetClassName?: string;
   maxHeightClassName?: string;
-  /**
-   * Horizontal inset on DrawerSheet scroll/pinned body (see DrawerSheet.padding).
-   * Numeric values floor at 10px.
-   */
   padding?: "xs" | "sm" | "md" | "lg" | "xl" | number;
-  /**
-   * `host` (default): sheet scrolls children.
-   * `child`: sheet locks height; child owns scroll (chat).
-   */
   scrollMode?: "host" | "child";
-  /**
-   * Passed to DrawerSheet. `paddingBottom` is keyboard/custom bottom inset on
-   * the scroll body (replaces safe-area); other keys style the gesture wrapper.
-   */
   contentStyle?: CSSProperties;
-  /** Ask HUD: scrim stays visual; map taps pass through for placement. */
   mapInteractive?: boolean;
-  /** After Drawer exit transition finishes (clear data / drop held hosts). */
   onExitTransitionEnd?: () => void;
 }
 

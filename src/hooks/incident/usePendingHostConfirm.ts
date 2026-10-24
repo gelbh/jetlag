@@ -14,9 +14,6 @@ function isStillPending(confirm: HostConfirmRecord, nowMs: number): boolean {
   return nowMs < expiresMs;
 }
 
-/**
- * Newest non-expired pending host confirm for an incident (host modal source).
- */
 export function usePendingHostConfirm(incidentId: string | null | undefined): {
   pending: HostConfirmRecord | null;
   confirms: HostConfirmRecord[];

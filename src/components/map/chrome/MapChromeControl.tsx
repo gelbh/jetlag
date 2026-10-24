@@ -12,17 +12,12 @@ export type MapChromeControlVariant = "floating" | "slot";
 
 export interface MapChromeControlProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
-  /** `floating` = map portal square; `slot` = side-dock tool chip. */
   variant?: MapChromeControlVariant;
-  /** Toggle / selected state (`aria-pressed` + active chrome class). */
   pressed?: boolean;
-  /** Slot visual weight: question tools vs undo/redo. */
   tone?: MapToolSlotTone;
   icon?: ReactNode;
-  /** Extra classes on the icon wrapper (e.g. unread badge host). */
   iconClassName?: string;
   label?: ReactNode;
-  /** Custom body (e.g. satellite preview). Wins over icon/label slots. */
   children?: ReactNode;
 }
 
@@ -88,10 +83,6 @@ function ControlBody({
   );
 }
 
-/**
- * Shared map chrome control button (zoom / satellite / recenter / side-dock).
- * Layout wrappers stay with each control; this owns size, pressed, disabled, slots.
- */
 export function MapChromeControl({
   variant = "floating",
   pressed,

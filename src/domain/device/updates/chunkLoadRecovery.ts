@@ -21,17 +21,13 @@ function readSessionFlag(): boolean {
 function writeSessionFlag(): void {
   try {
     sessionStorage.setItem(CHUNK_RELOAD_KEY, "1");
-  } catch {
-    // sessionStorage may be unavailable in private browsing.
-  }
+  } catch {}
 }
 
 function removeSessionFlag(): void {
   try {
     sessionStorage.removeItem(CHUNK_RELOAD_KEY);
-  } catch {
-    // sessionStorage may be unavailable in private browsing.
-  }
+  } catch {}
 }
 
 export function isChunkLoadError(error: unknown): boolean {
@@ -64,17 +60,13 @@ function readDeferredFlag(): boolean {
 function writeDeferredFlag(): void {
   try {
     sessionStorage.setItem(CHUNK_DEFERRED_KEY, "1");
-  } catch {
-    // sessionStorage may be unavailable in private browsing.
-  }
+  } catch {}
 }
 
 function removeDeferredFlag(): void {
   try {
     sessionStorage.removeItem(CHUNK_DEFERRED_KEY);
-  } catch {
-    // sessionStorage may be unavailable in private browsing.
-  }
+  } catch {}
 }
 
 export function wasChunkReloadDeferred(): boolean {
@@ -87,12 +79,7 @@ export type ChunkReloadOptions = {
   onNeedRefresh?: () => void;
   registration?: ServiceWorkerRegistration;
   applyUpdate?: (reloadPage?: boolean) => Promise<void>;
-  /** Defaults to `navigator.onLine === false`; injectable for tests and richer reachability checks. */
   isOffline?: () => boolean;
-  /**
-   * Resolves the options at the moment an offline retry fires. The session can change while the
-   * device is offline, and reusing the snapshot from the failure could reload mid-game.
-   */
   resolveRetryOptions?: () => ChunkReloadOptions | undefined;
 };
 
@@ -189,7 +176,5 @@ export function clearChunkReloadFlag(): void {
 export function clearBootReloadFlag(): void {
   try {
     sessionStorage.removeItem(BOOT_RELOAD_KEY);
-  } catch {
-    // sessionStorage may be unavailable in private browsing.
-  }
+  } catch {}
 }

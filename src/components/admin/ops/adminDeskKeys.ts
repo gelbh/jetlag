@@ -19,7 +19,6 @@ export const PASSIVE_HOTKEY = { preventDefault: false } as const;
 
 const ROW_SELECTOR = "tbody tr, [data-desk-row]";
 
-/** Move focus to the next or previous row of the list inside `root`. */
 export function moveRowFocus(root: RefObject<HTMLElement | null>, delta: 1 | -1) {
   const rows = [...(root.current?.querySelectorAll<HTMLElement>(ROW_SELECTOR) ?? [])];
   if (rows.length === 0) return;

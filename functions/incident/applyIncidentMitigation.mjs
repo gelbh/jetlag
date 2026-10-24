@@ -20,7 +20,6 @@ const MITIGATION_LABELS = {
   end_session: "Ended the session",
 };
 
-/** Mitigations that delegate a board/session change to admin moderation. */
 const MODERATE_ACTIONS = {
   reset_board: "resetBoard",
   end_session: "end",

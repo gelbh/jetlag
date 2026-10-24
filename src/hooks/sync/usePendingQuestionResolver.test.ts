@@ -250,7 +250,6 @@ describe("usePendingQuestionResolver", () => {
   });
 
   it("cancels pending when resolve throws and does not retry", async () => {
-    // Soft-fail: answered forever + re-resolve thrash crashed EXYS seeker tabs.
     const radarPending: PendingQuestionRecord = {
       id: "pq-radar-fail",
       sessionId: "session-1",
@@ -534,7 +533,6 @@ describe("usePendingQuestionResolver", () => {
     expect(
       updatePendingQuestion.mock.calls.filter((call) => call[2]?.status === "cancelled"),
     ).toHaveLength(0);
-    // First call: happy-path resolve (rejected); second: catch complete-to-resolved
     expect(updatePendingQuestion).toHaveBeenCalledTimes(2);
   });
 

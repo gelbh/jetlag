@@ -37,12 +37,6 @@ export type CreateRemoteSessionOptions = {
   dials?: CastleSiegeDials;
 };
 
-/**
- * While effectively offline a server read cannot succeed (or stalls on weak
- * signal), so a write-access check trusts the caller's cached session when it
- * already lists `uid`. Firestore rules still enforce membership when any
- * queued write replays. Heals never take this path: they must hit the server.
- */
 function isTrustedCachedMemberWhileOffline(session: SessionRecord, uid: string): boolean {
   if (session.endedAt || !session.memberUids.includes(uid)) {
     return false;
@@ -151,7 +145,6 @@ export async function createRemoteSession(
     }
 
     try {
-      // Rules allow delete only for host, missing session, or ended session.
       await deleteDoc(sessionCodeDoc(code));
       break;
     } catch {

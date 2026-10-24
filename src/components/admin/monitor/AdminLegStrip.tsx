@@ -16,7 +16,6 @@ const STATUS: Record<PendingQuestionStatus, { tone: StatusTone; word: string; la
   cancelled: { tone: "neutral", word: "cancelled", label: "Cancelled" },
 };
 
-/** Comp `.q`: answered reads as trail-soft, waiting as signal-soft. */
 const PILL_BACKGROUND: Record<StatusTone, string> = {
   ok: "var(--color-trail-soft)",
   live: "var(--color-signal-soft)",
@@ -45,7 +44,6 @@ function shortPrompt(text: string): string {
   return text.length > PROMPT_LIMIT ? `${text.slice(0, PROMPT_LIMIT - 1)}…` : text;
 }
 
-/** Comp `.qstrip`: a frosted rounded bar over the top of the map, one tinted pill per question. */
 export function AdminLegStrip({
   sessionId,
   questions,

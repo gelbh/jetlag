@@ -262,7 +262,6 @@ describe("AdminIncidentDetail", () => {
     expect(screen.getByTestId("admin-hotfix-thread")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("radio", { name: "Details" }));
-    // The incident id lives in Details, not in the heading.
     expect(screen.getByText("inc-abc12345")).toBeInTheDocument();
     expect(screen.getByTestId("support-agent-chat")).toBeInTheDocument();
     expect(screen.getByText("App version")).toBeInTheDocument();

@@ -8,7 +8,6 @@ export type PlayerStickyErrorAlertProps = {
   onSecondaryAction?: () => void;
 };
 
-/** Thin channel-2 adapter: UserErrorDisplay + callbacks → Mantine Alert + Buttons. */
 export function PlayerStickyErrorAlert({
   error,
   onAction,

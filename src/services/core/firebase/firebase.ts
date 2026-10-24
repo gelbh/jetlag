@@ -186,18 +186,10 @@ export function getFirebaseAppCheck(): AppCheck | null {
   return appCheck;
 }
 
-/**
- * Arm App Check ahead of an App Check-enforced SDK (Firestore, Storage) without
- * making that SDK depend on reCAPTCHA init succeeding: on failure the SDK still
- * initializes, enforcement surfaces as a normal permission error, and the
- * content-blocker probe (which re-runs init) reports it.
- */
 export function armAppCheckForEnforcedService(): void {
   try {
     getFirebaseAppCheck();
-  } catch {
-    // Reported by appCheckProbe; see above.
-  }
+  } catch {}
 }
 
 export function getFirebaseAuth(): Auth {
@@ -211,7 +203,6 @@ export function getFirebaseAuth(): Auth {
 
 function createFirestoreDb(): Firestore {
   const firebaseApp = getFirebaseApp();
-  // Firestore is App Check-enforced: arm it before the first request leaves.
   armAppCheckForEnforcedService();
 
   if (firebaseUsesEmulator()) {
@@ -255,7 +246,6 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
-// persistedAuthHint.ts reads the browserLocal/browserSession entry this picks; keep them in step.
 async function configureAuthPersistence(
   firebaseAuth: Auth,
 ): Promise<"local" | "session" | "memory"> {

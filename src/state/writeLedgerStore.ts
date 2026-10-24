@@ -29,7 +29,6 @@ export type LedgerEntry =
 interface WriteLedgerState {
   entries: Record<string, LedgerEntry>;
   begin: (label: WriteLabel) => string;
-  /** Drop an entry: on server ack, or once a failure has been surfaced. */
   remove: (id: string) => void;
   fail: (id: string, message: string) => void;
 }
@@ -45,7 +44,6 @@ function withoutEntry(
   return next;
 }
 
-/** Firestore writes not yet acknowledged by the server (in-memory; the SDK owns durability). */
 export const useWriteLedgerStore = create<WriteLedgerState>()((set) => ({
   entries: {},
   begin: (label) => {
@@ -86,7 +84,6 @@ export function selectPendingCount(state: LedgerSnapshot): number {
   return count;
 }
 
-/** Consumed by the pending-age escalation (plan Task 5). */
 export function selectOldestPendingAgeMs(state: LedgerSnapshot, now = Date.now()): number | null {
   let oldest: number | null = null;
   for (const entry of Object.values(state.entries)) {

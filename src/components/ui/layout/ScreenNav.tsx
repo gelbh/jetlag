@@ -9,7 +9,6 @@ interface ScreenNavProps {
   backTo?: string;
   backLabel?: string;
   homeTo?: string;
-  /** fixed: viewport top bar; sticky: pins while parent scrolls; inline: in document flow */
   placement?: ScreenNavPlacement;
   className?: string;
 }

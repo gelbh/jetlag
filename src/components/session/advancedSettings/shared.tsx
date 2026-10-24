@@ -12,11 +12,9 @@ import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 interface AdvancedSettingsCategoryProps {
   title: string;
   children: ReactNode;
-  /** Defaults to open so existing long forms stay scannable. */
   defaultOpen?: boolean;
 }
 
-/** Collapsible category for Game advanced rules groups. */
 export function AdvancedSettingsCategory({
   title,
   children,
@@ -206,7 +204,6 @@ export function PresetButton({
   );
 }
 
-/** Wrap one or more toggle rows in the shared inset surface. */
 export function AdvancedSettingsInset({ children }: { children: ReactNode }) {
   return <InsetGroup>{children}</InsetGroup>;
 }

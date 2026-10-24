@@ -147,7 +147,6 @@ interface SessionState {
   lastSyncError: string | null;
   remoteUpdateNotice: string | null;
   networkReachable: boolean | null;
-  /** True while the latest session doc snapshot came from the local cache (not persisted). */
   sessionFromCache: boolean;
   setSession: (session: SessionRecord | null, myUid?: string | null) => void;
   setMyUid: (uid: string | null) => void;

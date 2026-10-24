@@ -5,12 +5,10 @@ import { DESK_HAIRLINE } from "../shared/adminSurface";
 interface AdminSplitBoardProps {
   count: number;
   defaultOpen: boolean;
-  /** Narrow course: sit above the code plate at the bottom instead of the corner. */
   placement?: "top" | "bottom";
   children: ReactNode;
 }
 
-/** Comp `players`: a frosted floating panel bottom-left of the map, header then rows. */
 export function AdminSplitBoard({
   count,
   defaultOpen,

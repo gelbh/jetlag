@@ -26,7 +26,6 @@ export interface CollectIncidentDiagnosticsInput {
   recentOps?: readonly string[];
   mapViewport?: IncidentMapViewport | null;
   reportedAt?: string;
-  /** Injectable clock for deterministic `reportedAt` defaults in tests. */
   now?: () => Date;
 }
 
@@ -59,11 +58,6 @@ function normalizeError(error: IncidentClientError): IncidentClientError {
   return normalized;
 }
 
-/**
- * Builds a bounded diagnostics snapshot for an incident report. Optional fields
- * are normalized to `null`/sensible defaults and array/string fields are capped
- * so the payload stays well under the server-side JSON size limit.
- */
 export function collectIncidentDiagnostics(
   input: CollectIncidentDiagnosticsInput,
 ): IncidentDiagnostics {

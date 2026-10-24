@@ -5,13 +5,10 @@ import { countPolygonVertices } from "./polygonMetrics";
 
 export type PolygonLodPhase = "coarse" | "refining" | "complete";
 
-/** Above this, skip Turf simplify for preview LOD (stride decimate only). */
 export const POLYGON_LOD_TURF_VERTEX_CEILING = 5_000;
 
-/** Coarse → fine Turf tolerances (first = preview coarse). */
 const LOD_TOLERANCES = [0.002, 0.0005, 0.0001, 0.00002] as const;
 
-/** Decimate targets as fractions of full verts (coarse → fine) when Turf is skipped. */
 const LOD_DECIMATE_FRACTIONS = [0.25, 0.4, 0.6, 0.85] as const;
 
 function simplifyAtTolerance(
@@ -54,10 +51,6 @@ export function buildCoarsePolygonFeature(
   return coarse;
 }
 
-/**
- * Idle-friendly refine step toward full geometry.
- * `stepIndex` 0 = first refine after coarse; returns `{ done: true }` with full.
- */
 export function refinePolygonFeatureStep(
   full: Feature<Polygon | MultiPolygon>,
   _current: Feature<Polygon | MultiPolygon>,

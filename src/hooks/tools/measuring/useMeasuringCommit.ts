@@ -319,7 +319,6 @@ export function useMeasuringCommit({
       return;
     }
 
-    // Rebuild near+elim together from current input (avoid stale deferred preview).
     const regions = await buildMeasuringRegions({
       ...measuringRegionInput,
     });

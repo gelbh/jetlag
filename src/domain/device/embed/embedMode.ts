@@ -17,7 +17,6 @@ function isFramed(): boolean {
   try {
     return window.self !== window.top;
   } catch {
-    // Cross-origin parent access throws — that is still a frame.
     return true;
   }
 }
@@ -28,7 +27,6 @@ function detectEmbedMode(): boolean {
   }
   const requested = new URLSearchParams(window.location.search).get(EMBED_PARAM) === "1";
   try {
-    // Remember for in-frame reloads that drop the query string.
     if (requested) {
       sessionStorage.setItem(EMBED_SESSION_KEY, "1");
       return true;

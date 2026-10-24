@@ -16,7 +16,6 @@ import { leaveSessionMembership } from "./rolePasscodeLifecycle";
 import { isExpectedSessionLeaveError } from "./sessionLeaveErrors";
 import { leaveHostSession } from "./sessionLifecycle";
 
-/** Offline fail-fast: tell the player instead of reporting or falling back to a client write. */
 function alertIfNeedsConnection(error: unknown): boolean {
   if (!isNeedsConnectionError(error)) {
     return false;

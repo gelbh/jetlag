@@ -12,7 +12,6 @@ const TOOL_ROWS: readonly { id: string; path: string; label: string; tool: Docka
   { id: "photo", path: "/tools/photo", label: "Photo", tool: "photo" },
 ];
 
-/** Real Ask catalog rail that routes into each tool explainer. */
 export function ToolsHubLearnDemo() {
   const navigate = useNavigate();
   return (

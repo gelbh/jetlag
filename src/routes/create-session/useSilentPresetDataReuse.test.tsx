@@ -176,7 +176,6 @@ function openCustomContent() {
   fireEvent.click(screen.getByRole("button", { name: /^Custom content$/i }));
 }
 
-/** Slightly nudged Dublin city polygon: same pack winner, different fingerprint. */
 const DUBLIN_CITY_NUDGED: GameArea = {
   type: "Polygon",
   coordinates: [
@@ -190,7 +189,6 @@ const DUBLIN_CITY_NUDGED: GameArea = {
   ],
 };
 
-/** Mid-Atlantic frame with no bundled/custom preset overlap (clears silent pack attach). */
 const OPEN_OCEAN_GAME_AREA: GameArea = {
   type: "Polygon",
   coordinates: [
@@ -427,7 +425,6 @@ describe("CreateSession silent preset data reuse", () => {
       expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
     });
 
-    // Allow reuse effect to re-run on the nudged fingerprint.
     await act(async () => {
       await Promise.resolve();
     });
@@ -457,7 +454,6 @@ describe("CreateSession silent preset data reuse", () => {
     openCustomContent();
     expect(await screen.findByText("Spire pin")).toBeInTheDocument();
 
-    // Back to game-area step and replace the frame (not Add another area).
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     parseBoundaryFile.mockResolvedValueOnce(OPEN_OCEAN_GAME_AREA);
     const input = document.querySelector<HTMLInputElement>('input[accept=".kml,.kmz"]');
@@ -517,7 +513,6 @@ describe("CreateSession silent preset data reuse", () => {
       expect(loadRegionPackSessionBoundaries).toHaveBeenCalledWith("dublin", undefined);
     });
 
-    // Reframe before the Dublin pack load resolves (no new pack qualifiers).
     parseBoundaryFile.mockResolvedValueOnce(OPEN_OCEAN_GAME_AREA);
     const input = document.querySelector<HTMLInputElement>('input[accept=".kml,.kmz"]');
     expect(input).toBeTruthy();
@@ -602,8 +597,6 @@ describe("CreateSession silent preset data reuse", () => {
   });
 
   it("keeps latest suggestion pins when same-pack nudge races an in-flight pack load", async () => {
-    // Corner pin sits in the city frame but outside the nudged frame. Stale
-    // .then re-apply of S1 would revive it after the nudge stripped it.
     seedCustomPresets(
       baseCustomPreset({
         id: "city-dublin",

@@ -8,9 +8,7 @@ import { useMapLibreMap } from "./useMapLibreMap";
 
 /** North-up cone sprite — rotate via MapLibre `icon-rotate`. */
 export const JL_ICON_USER_LOCATION = "jl-icon-user-location";
-/** Dot only (no heading). */
 export const JL_ICON_USER_LOCATION_PLAIN = "jl-icon-user-location-plain";
-/** Last-resort circle if SVG decode fails. */
 export const JL_ICON_USER_LOCATION_FALLBACK = "jl-icon-user-location-fallback";
 
 const TRANSIT_ICON_IDS: Record<TransitRouteMode, string> = {
@@ -24,7 +22,6 @@ const TRANSIT_ICON_IDS: Record<TransitRouteMode, string> = {
 
 const TRANSIT_MODES: TransitRouteMode[] = ["rail", "metro", "tram", "bus", "ferry", "other"];
 
-/** Serialize overlapping register() across mount + style.load per map. */
 const registerInFlight = new WeakMap<MapLibreMap, Promise<void>>();
 
 export function transitModeIconId(mode: TransitRouteMode): string {
@@ -53,7 +50,6 @@ function canMutateMapImages(map: MapLibreMap): boolean {
   }
 }
 
-/** hasImage → style.getImage; style can go null between canMutate and hasImage (JETLAG-3H). */
 function safeHasImage(map: MapLibreMap, imageId: string): boolean {
   if (!canMutateMapImages(map)) {
     return false;
@@ -162,10 +158,6 @@ async function registerMapLibreMarkerImagesOnce(map: MapLibreMap): Promise<void>
 
 const JL_ICON_PREFIX = "jl-icon-";
 
-/**
- * On-demand path for marker sprites when a symbol layer paints before
- * eager register finishes (or after setStyle cleared images).
- */
 export function attachMapLibreMissingMarkerImageResolver(map: MapLibreMap): () => void {
   map.setMissingStyleImageResolver(async (id) => {
     if (!id.startsWith(JL_ICON_PREFIX)) {
@@ -193,9 +185,6 @@ export async function registerMapLibreMarkerImages(map: MapLibreMap): Promise<vo
   await next;
 }
 
-/**
- * Keep marker sprites registered across `setStyle` (basemap toggles clear images).
- */
 export function useMapLibreMarkerImages(): void {
   const mapRef = useMapLibreMap();
 

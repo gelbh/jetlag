@@ -1,7 +1,6 @@
 import { MapTrifold } from "@phosphor-icons/react";
 import { type MouseEvent, type Ref, useId } from "react";
 
-/** Survey-sheet grid: ruled hairlines on the canvas plate, no tiles fetched. */
 const facadePlateStyle = {
   backgroundColor: "var(--color-canvas)",
   backgroundImage: [
@@ -12,7 +11,6 @@ const facadePlateStyle = {
   backgroundPosition: "center",
 } as const;
 
-/** Echoes the dashed play-boundary rectangle the live map draws. */
 const facadeBoundaryStyle = {
   border: "1.5px dashed oklch(from var(--color-flag) l c h / 0.55)",
 } as const;
@@ -26,7 +24,6 @@ interface CreateSessionMapFacadeProps {
    */
   loading: boolean;
   onActivate: (event: MouseEvent<HTMLButtonElement>) => void;
-  /** Hover / focus / press: warm the map chunk before the click lands. */
   onPrefetchIntent: () => void;
   ref?: Ref<HTMLButtonElement>;
 }
@@ -57,7 +54,6 @@ export function CreateSessionMapFacade({
       onPointerDown={onPrefetchIntent}
       onFocus={onPrefetchIntent}
       className={`group absolute inset-0 z-[1] flex w-full items-center justify-center border-0 p-0 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-[var(--color-flag)] ${
-        // Busy plate lets gestures through to the map that is loading under it.
         loading ? "pointer-events-none" : "cursor-pointer"
       }`}
       style={facadePlateStyle}

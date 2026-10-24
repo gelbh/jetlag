@@ -9,7 +9,6 @@ function roundCoord(value: number): string {
   return value.toFixed(6);
 }
 
-/** Full coordinate identity for mask cache / add-only (lossy preview fingerprints are not safe here). */
 function polygonFeatureIdentity(feature: Feature<Polygon | MultiPolygon>): string {
   return `${feature.geometry.type}:${JSON.stringify(feature.geometry.coordinates)}`;
 }
@@ -25,7 +24,6 @@ function polygonJsonFingerprint(json: string | undefined): string {
   return `json:${json}`;
 }
 
-/** Mask-shaping metadata that can change elimination without moving Feature geometry. */
 function maskShapingMetadataFingerprint(annotation: AnnotationRecord): string {
   const metadata = annotation.metadata;
   switch (annotation.type) {
@@ -99,11 +97,6 @@ function parseContentKey(key: string): Map<string, string> {
   return entries;
 }
 
-/**
- * Stable content key for committed annotations used by elimination mask delta.
- * Includes Feature geometry plus mask-shaping metadata (radar / tentacle / measuring / thermometer).
- * Pass the same active annotation set the mask path uses.
- */
 export function eliminationAnnotationsContentKey(annotations: readonly AnnotationRecord[]): string {
   return annotations
     .filter((annotation) => annotation.status === "active")

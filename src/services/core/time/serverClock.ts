@@ -7,7 +7,6 @@ import {
 } from "@/domain/time/clockOffset";
 import { fetchWithTimeout } from "@/services/core/network/fetchWithTimeout";
 
-/** Wire contract: worker/timeEndpoint.ts (path + x-server-time header). */
 const TIME_ENDPOINT_PATH = "/api/time";
 const SERVER_TIME_HEADER = "x-server-time";
 const STORAGE_KEY = "jetlag:server-clock-offset";
@@ -20,11 +19,6 @@ type PersistedOffset = { offsetMs: number; savedAtMs: number };
 const samples: ClockSample[] = [];
 let offsetMs = readPersistedOffset();
 
-/**
- * Cold-start seed only: each tab reads it once at import and then trusts its
- * own probes. Rejected when implausible, stale, or saved "in the future"
- * (device clock moved backwards since, so the offset no longer applies).
- */
 function readPersistedOffset(): number {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -46,12 +40,9 @@ function persistOffset(next: number): void {
   try {
     const value: PersistedOffset = { offsetMs: next, savedAtMs: Date.now() };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-  } catch {
-    // Private mode: in-memory offset still applies this session.
-  }
+  } catch {}
 }
 
-/** Drop samples taken in a different device-clock frame or too long ago. */
 function pruneSamplesFor(sample: ClockSample): void {
   const hasEstimate = samples.length > 0;
   if (hasEstimate && indicatesClockJump(sample, offsetMs)) {
@@ -75,10 +66,6 @@ export function recordClockSample(sample: ClockSample): void {
   persistOffset(next);
 }
 
-/**
- * Device time corrected to server time. Falls back to last persisted offset
- * offline. Not monotonic: a new estimate can step it back by RTT jitter.
- */
 export function serverNow(): number {
   return Date.now() + offsetMs;
 }
@@ -87,7 +74,6 @@ export function serverNowIso(): string {
   return new Date(serverNow()).toISOString();
 }
 
-/** One probe = reachability answer + a clock sample. */
 export async function probeServerTime(timeoutMs = 5_000): Promise<{ ok: boolean }> {
   const sentAtMs = Date.now();
   try {

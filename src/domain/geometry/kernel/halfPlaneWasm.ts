@@ -1,7 +1,6 @@
 import { loadKernelWasm, parseWasmFeature, resetKernelWasmForTests } from "./kernelWasmPkg";
 import type { GameAreaGeometry, LatLngTuple, PolygonFeature } from "./types";
 
-/** Reset lazy WASM module (tests). */
 export const resetHalfPlaneWasmForTests = resetKernelWasmForTests;
 
 export async function wasmBuildHalfPlanePolygon(

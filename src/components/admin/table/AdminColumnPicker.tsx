@@ -9,11 +9,9 @@ export interface AdminColumnPickerProps<Row> {
   prefs: AdminTablePrefs;
   defaults: AdminTablePrefs;
   onPrefsChange(prefs: AdminTablePrefs): void;
-  /** Trigger height: 32 in the toolbar, 44 for touch. */
   height?: number;
 }
 
-/** Comp `.picker`: 300px floating panel; the toolbar button is its target. */
 export function AdminColumnPicker<Row>({
   columns,
   prefs,

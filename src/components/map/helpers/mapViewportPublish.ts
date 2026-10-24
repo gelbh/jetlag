@@ -1,6 +1,5 @@
 export const VIEWPORT_PUBLISH_THROTTLE_MS = 200;
 
-/** Mid-gesture viewport policy keyed by Leaflet event phase. */
 export const VIEWPORT_PUBLISH_BY_PHASE = {
   move: "schedule",
   zoom: "schedule",

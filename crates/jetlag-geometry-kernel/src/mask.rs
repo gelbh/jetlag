@@ -23,7 +23,6 @@ pub struct UnionInput {
     pub disks: Vec<DiskSpec>,
 }
 
-/// Play area as MultiPolygon in lon/lat.
 #[derive(Debug, Clone)]
 pub struct GameArea {
     pub multipolygon: MultiPolygon<f64>,
@@ -279,7 +278,6 @@ fn coords_to_linestring(ring: &[Vec<f64>]) -> Option<LineString<f64>> {
             y: pair[1],
         });
     }
-    // Ensure closed
     if let (Some(first), Some(last)) = (coords.first().copied(), coords.last().copied()) {
         if first != last {
             coords.push(first);

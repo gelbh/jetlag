@@ -72,7 +72,6 @@ const MEASURING_QUESTION_INTRO = {
     "Pick what to measure below. Closer / further is relative to that place from your anchor.",
 };
 
-/** Flat measuring Ask HUD fields bag for MeasuringHudBody (W4-B peel). */
 export type MeasuringHudBodyModel = {
   distanceUnit: DistanceUnit;
   optionChosen: boolean;

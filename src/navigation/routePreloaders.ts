@@ -129,7 +129,6 @@ const lazyRouteByLoaderKey: Record<LazyRouteLoaderKey, LazyRouteComponent> = {
  * hydrates the route in the first pass instead of leaving it dehydrated.
  */
 export async function preloadLazyRouteComponent(path: string): Promise<void> {
-  // Assets also serve `/join/` from dist/join/index.html.
   const loaderKey = lazyRouteLoaderKey(path.length > 1 ? path.replace(/\/$/, "") : path);
   if (loaderKey) {
     await lazyRouteByLoaderKey[loaderKey].preload();

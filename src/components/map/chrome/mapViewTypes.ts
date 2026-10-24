@@ -10,7 +10,6 @@ export interface MapViewCoreProps {
   mapStyle?: MapStyle;
   streetBasemap?: StreetBasemap;
   onBoundsChange?: (bounds: MapBounds) => void;
-  /** Fired when the user pans or zooms the map (not programmatic fit/resize). */
   onUserViewportFramed?: () => void;
   onMapClick?: (lat: number, lng: number) => void;
   interactive?: boolean;
@@ -32,13 +31,11 @@ export interface MapViewMapLibreChromeProps {
   showZoomControl?: boolean;
   onMapStyleChange?: (style: MapStyle) => void;
   showMapStyleToggle?: boolean;
-  /** Left-stack compass — opt-in (`false` when omitted). Play maps pass true. */
   showCompassControl?: boolean;
   /** Bump recenterToken / play-area home after compass tap. */
   onRecenter?: () => void;
 }
 
-/** Flat map surface + chrome bag (children stay a React slot on the props type). */
 export type MapViewModel = Omit<MapViewCoreProps & MapViewMapLibreChromeProps, "children">;
 
 export type MapViewMapLibreProps = {

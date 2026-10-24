@@ -6,12 +6,10 @@ import { LEARN_ROUTE_PATHS } from "./learnRoutePaths";
 
 const ROOT = resolve(import.meta.dirname, "../../..");
 
-/** `<Route path="…">` values in App.tsx, minus the catch-all and DEV-only galleries. */
 function appTsxRoutePaths(): string[] {
   const source = readFileSync(resolve(ROOT, "src/App.tsx"), "utf8");
   const paths = [...source.matchAll(/<Route\b[^>]*?\bpath="([^"]+)"/g)].map((m) => m[1]);
   const filtered = paths.filter((path) => path !== "*" && !path.startsWith("/dev/"));
-  // Learn pages are mounted via LEARN_ROUTE_PATHS.map (no string path literals).
   if (source.includes("LEARN_ROUTE_PATHS.map")) {
     return [...new Set([...filtered, ...LEARN_ROUTE_PATHS])];
   }

@@ -1,6 +1,3 @@
-/**
- * Radar Ask HUD — Matching twin: question header + distance catalog, then map-first.
- */
 import { Text } from "@mantine/core";
 import { CheckIcon, CrosshairIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import { useEffect, useRef } from "react";
@@ -42,7 +39,6 @@ const RADAR_QUESTION_INTRO = {
 
 const CHOOSE_ROW_ID = "choose";
 
-/** Digits + one decimal; commas normalize to `.` for EU keyboards. */
 function sanitizeRadarCustomRadiusInput(raw: string): string {
   let out = "";
   let seenDot = false;
@@ -76,7 +72,6 @@ export type RadarHudBodyProps = {
   onPresetSelect: (radiusMeters: number) => void;
   onChooseSelect: () => void;
   onCustomRadiusChange: (value: string) => void;
-  /** Finish custom distance (Enter / blur) so map-first can continue. */
   onCustomDistanceCommit?: () => void;
   onAnswerChange: (answer: RadarAnswer) => void;
   onUseGps: () => void;
@@ -86,7 +81,6 @@ export type RadarHudBodyProps = {
   viewOnly?: boolean;
   costLabel?: string | null;
   toolLabel?: string;
-  /** Reopen distance catalog (map-first change-distance). */
   editingDistance?: boolean;
 };
 
@@ -283,7 +277,6 @@ export function RadarHudBody({
       ? String(radiusMeters)
       : null;
 
-  /** Catalog-first: sheet is distance only; map-first owns placement after pick. */
   const chord: "distance" | "place" =
     editingDistance || !distanceSelectionAvailable ? "distance" : "place";
 

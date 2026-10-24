@@ -125,7 +125,6 @@ export function mapToolPlacingLabel(id: DockableMapTool): string {
   return entry?.name ?? id;
 }
 
-/** Legacy thermometer rows with measuringSubject normalize via migrateAnnotations. */
 function isMeasuringAnnotation(annotation: AnnotationRecord): boolean {
   if (annotation.type === "measuring") {
     return true;

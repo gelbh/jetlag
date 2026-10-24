@@ -30,7 +30,6 @@ export type UseSilentPresetDataReuseArgs = {
   draftGameAreaFingerprint: string | null;
   presets: readonly GamePreset[];
   loadedPresetId: string | null;
-  /** Set after a successful `?preset=` apply finishes. */
   appliedPresetId: string | null;
   regionPackId: RegionPackId | undefined;
   regionPackSubregionId: string | undefined;
@@ -38,7 +37,6 @@ export type UseSilentPresetDataReuseArgs = {
   setRegionPackId: (id: RegionPackId | undefined) => void;
   setRegionPackSubregionId: (id: string | undefined) => void;
   setTransitMetroOverride: (id: string | null) => void;
-  /** Shared with Load-preset apply so reuse can cancel in-flight Load boundary loads. */
   presetApplyGenerationRef: MutableRefObject<number>;
 };
 
@@ -60,7 +58,6 @@ export function useSilentPresetDataReuse({
   setTransitMetroOverride,
   presetApplyGenerationRef,
 }: UseSilentPresetDataReuseArgs): {
-  /** Call after Load-preset apply so prior silent overlay tracking is dropped. */
   resetSilentReuseOverlay: () => void;
 } {
   const overlayRef = useRef<SilentReuseOverlay>({
@@ -191,9 +188,7 @@ export function useSilentPresetDataReuse({
           };
         });
       })
-      .catch(() => {
-        // Non-fatal: keep framed area; pack id may still help live fetches.
-      });
+      .catch(() => {});
   }, [
     appliedPresetId,
     draftGameArea,

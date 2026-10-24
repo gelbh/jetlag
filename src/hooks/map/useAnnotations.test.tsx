@@ -30,8 +30,6 @@ vi.mock("../../services/firestore/sessions/join", async (importOriginal) => ({
   getRemoteSessionByIdFromServer,
 }));
 
-// Stub writes only. Avoid importOriginal here: loading the real annotations
-// barrel while mocking ./sessions/join breaks membership's live join binding.
 vi.mock("../../services/firestore/firestoreAnnotations", () => ({
   writeRemoteAnnotation,
   writeRemoteAnnotationsBatch,
@@ -198,7 +196,6 @@ describe("useAnnotations", () => {
       const { result } = renderHook(() => useAnnotations());
 
       await act(async () => {
-        // Awaiting question commits rely on this rejection to keep their draft.
         await expect(result.current.createAnnotation(pin())).rejects.toThrow(
           ANNOTATION_PERMISSION_DENIED_MESSAGE,
         );

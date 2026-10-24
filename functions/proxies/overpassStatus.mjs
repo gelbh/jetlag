@@ -16,12 +16,6 @@ export function parseSlotAvailableAfter(statusText) {
   return Number.isFinite(value) ? value : null;
 }
 
-/**
- * Map `/api/interpreter` → `/api/status` for the same Overpass peer.
- *
- * @param {string} interpreterUrl
- * @returns {string | null}
- */
 export function overpassStatusUrl(interpreterUrl) {
   try {
     const url = new URL(interpreterUrl);

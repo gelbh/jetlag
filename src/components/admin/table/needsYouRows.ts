@@ -106,7 +106,6 @@ export function toNeedsYouRows(
   return showClosed ? rows : rows.filter((row) => row.open);
 }
 
-/** Open rows only: the strip's Needs you count equals the tab's. */
 export function countOpenNeedsYou(rows: readonly NeedsYouRow[]): number {
   return rows.filter((row) => row.open).length;
 }

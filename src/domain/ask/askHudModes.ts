@@ -1,9 +1,3 @@
-/**
- * Ask Map HUD mode registry — cues, mode bodies, and primed-commit readiness.
- * Spec: ask surface kit design (rev 2026-08-05b).
- * Visual: Figma MWCG8276A8eF2UwW79GSvT node 153:1186.
- */
-
 export type AskHudSurface =
   | "radar"
   | "matching"
@@ -27,7 +21,6 @@ export type AskHudCommitKind = "send" | "ask" | "confirm" | "endWalk";
 export type AskHudDefinition = {
   surface: AskHudSurface;
   modeBody: AskHudModeBody;
-  /** Default GlanceVerb when no step-specific cue applies. */
   defaultCue: string;
   commitKind: AskHudCommitKind;
 };
@@ -38,24 +31,13 @@ export type AskHudDefinition = {
  */
 export type AskHudReadiness = {
   surface: AskHudSurface;
-  /** Map center / seeker point / zone place set as required by the surface. */
   placementReady: boolean;
-  /** Distance, category, photo category, method, types, etc. */
   configureReady: boolean;
-  /**
-   * Matching/tentacle feature resolve, thermo walk complete, etc.
-   * Surfaces without a mid-step treat this as true when unused.
-   */
   resolveReady: boolean;
-  /**
-   * Solo play needs a recorded answer before ask commit; multiplayer send
-   * skips this. Hider confirm ignores it.
-   */
   answerReady: boolean;
   awaitHiderAnswer: boolean;
   isSubmitting: boolean;
   viewOnly?: boolean;
-  /** Tentacle (and similar): provisional confirm / load in flight. */
   resolving?: boolean;
 };
 
@@ -128,7 +110,6 @@ export function activeModeCue(
   const def = DEFINITIONS[input.surface];
   switch (input.surface) {
     case "radar":
-      // Distance catalog owns the job; keep the top cue quiet (Matching-style sheet).
       if (!input.configureReady) return "";
       if (!input.placementReady) return "TAP MAP TO SET CENTER";
       return "READY TO SEND";
@@ -137,7 +118,6 @@ export function activeModeCue(
       if (!input.resolveReady) return "RESOLVE ON MAP";
       return "READY TO SEND";
     case "measuring":
-      // Catalog-first (Matching twin): source before anchor.
       if (!input.configureReady) return "PICK A SOURCE";
       if (!input.placementReady) return "SET YOUR ANCHOR";
       if (!input.resolveReady) return "SET YOUR TARGET";
@@ -150,7 +130,6 @@ export function activeModeCue(
       if (!input.placementReady) return "SET CENTER ON MAP";
       if (input.resolving) return "CONFIRMING PLACES";
       if (!input.resolveReady) return "NO PLACES";
-      // Live chrome always passes these; omitted → ready path (legacy tests).
       if (input.awaitHiderAnswer === false && input.answerReady === false) {
         return "TAP A PLACE";
       }
@@ -175,13 +154,9 @@ export function commitKind(surface: AskHudSurface, awaitHiderAnswer: boolean): A
   if (def.commitKind === "confirm" || def.commitKind === "endWalk") {
     return def.commitKind;
   }
-  // Seeker tools: multiplayer → send; solo → ask (answer already recorded).
   return awaitHiderAnswer ? "send" : "ask";
 }
 
-/**
- * PrimedCommitStrip arming. Terracotta only when this returns true.
- */
 export function canCommit(readiness: AskHudReadiness): boolean {
   if (readiness.viewOnly || readiness.isSubmitting) {
     return false;
@@ -222,7 +197,6 @@ export function cueExcludesCostTokens(cue: string): boolean {
   return !/\bD\d+\s*[P·.]?\s*P?\d*\b/i.test(cue) && !/·\s*D\d/i.test(cue);
 }
 
-/** Short muted-strip hint derived from the current GlanceVerb. */
 export function notReadyCommitHint(cue: string): string {
   switch (cue) {
     case "TAP MAP TO SET CENTER":
@@ -261,7 +235,6 @@ export function notReadyCommitHint(cue: string): string {
     case "READY TO CONFIRM":
       return "NOT READY";
     case "":
-      // Quiet ticker (radar distance catalog, thermometer walk banner).
       return "NOT READY";
     default:
       return "NOT READY";
@@ -281,7 +254,6 @@ export function primedCommitLabel(input: {
     switch (input.kind) {
       case "send":
       case "ask":
-        // Solo used to say ASK; sheets read cleaner with one Send verb.
         return "SEND";
       case "confirm":
         return "CONFIRM";
@@ -301,7 +273,6 @@ export function primedCommitLabel(input: {
   return `${verb} — ${notReadyCommitHint(input.cue)}`;
 }
 
-/** Question tools that own AskHudHost (no ToolFloatingPanel). */
 export const ASK_HUD_OWNED_TOOLS = [
   "radar",
   "matching",
@@ -317,17 +288,10 @@ export function isAskHudOwnedTool(tool: string): tool is AskHudOwnedTool {
   return (ASK_HUD_OWNED_TOOLS as readonly string[]).includes(tool);
 }
 
-/**
- * Bottom camera padding when AskHudHost is open (cue + mode body + primed strip
- * above dock). Keeps placement geometry in the visible map band (Maps pattern).
- * Catalog-rail tools need extra room for ≤40dvh rail + strip.
- */
 export const ASK_HUD_CAMERA_PADDING_PX = 168;
 export const ASK_HUD_CAMERA_PADDING_RAIL_PX = 280;
 
-/** Map-first Ask placement: question banner under the status rail. */
 export const MAP_FIRST_CAMERA_TOP_PX = 120;
-/** Map-first Ask placement: answer chrome (+ Send) above safe area. */
 export const MAP_FIRST_CAMERA_BOTTOM_PX = 228;
 /** @deprecated Prefer MAP_FIRST_CAMERA_TOP_PX */
 export const MATCHING_MAP_FIRST_CAMERA_TOP_PX = MAP_FIRST_CAMERA_TOP_PX;

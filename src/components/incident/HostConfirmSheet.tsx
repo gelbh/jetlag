@@ -13,15 +13,10 @@ export interface HostConfirmSheetProps {
   open: boolean;
   confirm: HostConfirmRecord | null;
   onClose: () => void;
-  /** Injectable for tests. */
   approveFn?: (incidentId: string, confirmId: string) => Promise<unknown>;
   denyFn?: (incidentId: string, confirmId: string) => Promise<unknown>;
 }
 
-/**
- * Broadcast-HUD sheet asking the session host to approve a destructive
- * session-ops action. Approve runs the callable (execute once); dismiss denies.
- */
 export function HostConfirmSheet({
   open,
   confirm,

@@ -11,7 +11,6 @@ import {
 } from "../../domain/questions";
 import type { MeasuringPlace } from "../../services/geo/overpass/measuringPlaces";
 
-/** Ask Map HUD bundle returned by migrated question tools. */
 export type AskToolHudBundle = {
   readiness: AskHudReadiness;
   costLabel: string;
@@ -19,15 +18,9 @@ export type AskToolHudBundle = {
   onCommit: () => void;
   modeBody: ReactNode;
   sheets: ReactNode;
-  /** Override strip verb (e.g. thermometer END WALK while walking). */
   commitKind?: AskHudCommitKind;
-  /**
-   * Flag-on: hide Ask sheet and show map-first chrome.
-   * `mapOverlay` renders above the map instead.
-   */
   suppressSheet?: boolean;
   mapOverlay?: ReactNode;
-  /** Optional camera padding overrides while map-first. */
   mapFirstCameraTopPx?: number;
   mapFirstCameraBottomPx?: number;
 };
@@ -46,7 +39,6 @@ export interface MatchingToolApi {
   matchingLodPhase: PolygonLodPhase;
   matchingCatalogComplete: boolean;
   placementCrosshair: boolean;
-  /** Includes answer — draft JSON alone skips republish when Yes/No changes. */
   publishSignature: string;
   handleMapClick: (point: LatLngTuple) => void;
   resetDraft: () => void;
@@ -87,7 +79,6 @@ export interface TentacleToolApi {
   };
   placementCrosshair: boolean;
   handleMapClick: (point: LatLngTuple) => void;
-  /** Select a draft POI (map marker or list); provisional gate unchanged. */
   selectDraftPoi: (poiId: string) => void;
   resetDraft: () => void;
   tentacleLodPhase: PolygonLodPhase;

@@ -18,7 +18,6 @@ function ephemeralId(input: EphemeralInput): string {
   return "id" in input && input.id ? input.id : `ephemeral:${input.title}:${input.message}`;
 }
 
-/** Bridge from HUD ephemeral errors to Mantine notifications (channel 1). */
 export function showEphemeralPlayerNotification(input: EphemeralInput): void {
   notifications.show({
     id: ephemeralId(input),

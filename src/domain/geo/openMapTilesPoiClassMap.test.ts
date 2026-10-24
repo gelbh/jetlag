@@ -17,7 +17,6 @@ describe("openMapTilesPoiClassMap", () => {
         subclass: "hospital",
       }),
     ).toEqual(["hospital"]);
-    // OMT stores clinics under class=hospital + subclass=clinic
     expect(
       mapOpenMapTilesPoiToCategoryIds({
         class: "hospital",

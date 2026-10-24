@@ -88,7 +88,6 @@ export function useBoardEconomy(params: {
     [enabled, sessionId],
   );
 
-  /** Engine plays return the same state when the card is not playable. */
   const persistPlay = useCallback(
     (current: BoardEconomyState, next: BoardEconomyState, playedInstanceId: string) => {
       const played = current.hand.find((card) => card.instanceId === playedInstanceId);

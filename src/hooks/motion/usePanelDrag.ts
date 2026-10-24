@@ -46,17 +46,14 @@ export interface UsePanelDragResult {
   };
 }
 
-/** Collapsed rest offset in px from fully expanded (0). */
 export function collapsedRestOffsetPx(panelHeight: number, peekHeightPx: number): number {
   return Math.max(0, panelHeight - peekHeightPx);
 }
 
-/** Inline transform for a measured vertical offset. */
 export function panelTransformPx(offsetPx: number): string {
   return `translateY(${offsetPx}px)`;
 }
 
-/** Whether the panel should visually show peek UI after settle completes. */
 export function resolveDisplayMinimizedAfterSettle(targetMinimized: boolean): boolean {
   return targetMinimized;
 }
@@ -281,7 +278,6 @@ export function usePanelDrag({
   };
 }
 
-/** Exported for unit tests. */
 export function shouldMinimizePanelSnap(
   offsetY: number,
   panelHeight: number,
@@ -290,7 +286,6 @@ export function shouldMinimizePanelSnap(
   return offsetY >= panelHeight * PANEL_SNAP_FRACTION || velocityY > PANEL_MINIMIZE_VELOCITY_PX_MS;
 }
 
-/** Exported for unit tests. */
 export function shouldExpandPanelSnap(
   offsetY: number,
   panelHeight: number,

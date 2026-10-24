@@ -94,7 +94,6 @@ interface MapSettingsSheetProps {
   layers: MapSettingsLayersProps;
   rules?: MapSettingsRulesProps;
   session: MapSettingsSessionProps;
-  /** Chrome-owned Report sheet opener (session island / map chrome). */
   onReportProblem?: () => void;
 }
 

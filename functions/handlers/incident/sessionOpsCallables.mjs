@@ -33,7 +33,6 @@ function readSupportAgentCursorConfig() {
   }
 }
 
-/** Host approves a pending destructive session-ops confirm and executes once. */
 export const approveHostConfirm = onCall(
   { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {
@@ -61,7 +60,6 @@ export const approveHostConfirm = onCall(
   }),
 );
 
-/** Host denies a pending confirm without executing. */
 export const denyHostConfirm = onCall(
   { secrets: [posthogProjectApiKey], enforceAppCheck },
   withFunctionsExceptionHandler(async (request) => {

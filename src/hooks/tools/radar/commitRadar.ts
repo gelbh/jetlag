@@ -48,13 +48,10 @@ export interface CommitRadarInput {
   ) => Promise<AnnotationRecord>;
   setMapError: (message: string | null) => void;
   onSuccess: () => void;
-  /** When set, Castle Siege routes through oracle instead of honor typing. */
   sessionMode?: SessionMode | null;
   defenderTeamId?: CastleSiegePlayingTeam;
   callOracleAsk?: AnswerCastleSiegeOracleAskFn;
-  /** Confirm-send: receipt already fetched; skip callable and apply answer. */
   oracleReceipt?: Extract<CastleSiegeOracleReceipt, { kind: "radar" }> | null;
-  /** First-phase CS: stash receipt for confirm-send UX. */
   onOracleReceipt?: (receipt: Extract<CastleSiegeOracleReceipt, { kind: "radar" }>) => void;
 }
 

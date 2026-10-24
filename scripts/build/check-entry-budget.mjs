@@ -30,7 +30,6 @@ const kb = (bytes) => bytes / 1024;
 const isForbiddenChunk = (chunk) =>
   FORBIDDEN_SRC.test(chunk.src ?? "") || FORBIDDEN_NAME.test(chunk.name ?? "");
 
-/** Forbidden chunks statically reachable from `rootKey` (root included). */
 function findForbiddenStaticChunks(manifest, rootKey) {
   const seen = new Set();
   const found = [];

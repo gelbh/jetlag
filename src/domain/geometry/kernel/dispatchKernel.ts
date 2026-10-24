@@ -6,10 +6,6 @@ export type DispatchKernelOptions<T> = {
   runWasm: () => Promise<T>;
 };
 
-/**
- * Runs the wasm kernel for a ready entrypoint.
- * Not-ready entrypoints throw (no TS fallback).
- */
 export async function dispatchKernel<T>(options: DispatchKernelOptions<T>): Promise<T> {
   const { entrypoint, label, runWasm } = options;
   if (!shouldUseWasm(entrypoint)) {

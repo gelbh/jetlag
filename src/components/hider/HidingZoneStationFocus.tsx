@@ -4,7 +4,6 @@ import { MOTION_MAP_CAMERA_SNAP_MS } from "@/domain/device/motion/motionTokens";
 import type { TransitStation } from "@/domain/session/hiding/hidingZone";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 
-/** Pans (zoom unchanged) to the station picked for the hiding zone. Map drags interrupt it. */
 export function HidingZoneStationFocus({ station }: { station: TransitStation | null }) {
   const map = useMapLibreMap();
   const { animate } = useMotionProfile();

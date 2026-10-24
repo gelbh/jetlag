@@ -1,4 +1,3 @@
-/** Preload-request callables — preserve export names `createPreloadRequest` / `updatePreloadRequestStatus`. */
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { requireAdminAuth, resolveAdminEmail } from "../admin/adminAccess.mjs";

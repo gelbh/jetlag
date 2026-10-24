@@ -20,7 +20,6 @@ import {
   UNAVAILABLE_MEASURING_EDGE_GAP,
 } from "./shared";
 
-/** Absolute difference of two scalar distances to the same target/locus. */
 export function measuringDistanceFlipGapMeters(
   stationDistanceMeters: number,
   seekerDistanceMeters: number,
@@ -73,10 +72,6 @@ function parseMeasuringRegionInput(regionInputJson: string): ParsedMeasuringRegi
   }
 }
 
-/**
- * Station vs seeker scalar distances for in-scope measuring subjects.
- * Returns null for sea_level, incomplete metadata, or unresolvable geometry.
- */
 export function measuringStationSeekerDistances(
   point: LatLngTuple,
   regionInput: ParsedMeasuringRegion,

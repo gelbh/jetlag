@@ -12,7 +12,6 @@ interface InlineErrorProps {
   id?: string;
 }
 
-/** Channel-3 soft alert strip (GPS timeout gets title + detail). */
 export function InlineError({ children, className = "", id }: InlineErrorProps) {
   const copy =
     typeof children === "string" && isLocationInlineError(children)

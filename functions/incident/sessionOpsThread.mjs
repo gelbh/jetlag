@@ -1,7 +1,3 @@
-/**
- * Shared support-thread persistence for session-ops (turn enqueue + MCP + poller).
- */
-
 import { randomUUID } from "node:crypto";
 
 export const SUPPORT_AGENT_WORKING_TEXT =

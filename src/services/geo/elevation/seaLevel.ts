@@ -146,7 +146,6 @@ export async function loadSeaLevelContext(
       : undefined,
   });
 
-  // Dense complete pack seed: trust the grid. Freehand / incomplete: local refine.
   if (sampling.complete === true && options?.regionPackId) {
     return buildSeaLevelContextFromSampling(seekerElevationMeters, sampling, gameArea);
   }

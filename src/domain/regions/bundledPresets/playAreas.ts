@@ -1,5 +1,3 @@
-// Generated from bundledPresets/computePlayAreas.test.ts — do not edit by hand.
-
 export const BUNDLED_PRESET_PLAY_AREA_SQ_MI: Record<string, number> = {
   "bundled:dublin-county": 360.44,
   "bundled:dublin-city": 50.04,

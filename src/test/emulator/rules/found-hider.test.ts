@@ -125,7 +125,6 @@ describe("firestore.rules — found hider", () => {
       );
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
-    // Mirrors confirmFoundHiderSession: confirm + clear request + clear end-game keys.
     await assertSucceeds(
       hider.firestore().collection("sessions").doc("session-1").update({
         foundConfirmedAt: "2026-01-01T01:05:00.000Z",

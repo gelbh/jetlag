@@ -3,7 +3,6 @@ import { CloudArrowUp } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { JlIcon } from "../ui/brand/JlIcon";
 
-/** Online acks land in ~100–300 ms; only surface writes that are genuinely stuck. */
 export const PENDING_SYNC_BADGE_DELAY_MS = 1000;
 
 /**

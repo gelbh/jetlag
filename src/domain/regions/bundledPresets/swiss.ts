@@ -4,7 +4,6 @@ import { ZURICH_REGION_PACK_ID } from "../zurichRegionPack";
 import { attachPlayArea } from "./attachPlayArea";
 import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
-/** Canton slug + display name; ids match `cantonId` on switzerland pack geo. */
 export const SWISS_CANTONS = [
   { id: "zurich", name: "Zürich" },
   { id: "bern", name: "Bern" },
@@ -34,7 +33,6 @@ export const SWISS_CANTONS = [
   { id: "jura", name: "Jura" },
 ] as const;
 
-/** Stable cantonId list for presets/tests (same order as SWISS_CANTONS). */
 export const SWISS_CANTON_IDS = SWISS_CANTONS.map((canton) => canton.id);
 
 export function swissPresets(): BundledGamePresetDefinition[] {
@@ -96,7 +94,6 @@ export function swissPresets(): BundledGamePresetDefinition[] {
       advancedSettingsPatch: EXPANSION_OFF,
     }),
     ...SWISS_CANTONS.map((canton) => {
-      // Specialty Zürich/Lucerne presets keep "Canton of …" / metro names; disambiguate depth.
       const hasSpecialtyDepth = canton.id === "zurich" || canton.id === "lucerne";
       const name = hasSpecialtyDepth
         ? `Canton of ${canton.name} (municipalities)`

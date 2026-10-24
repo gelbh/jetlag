@@ -178,7 +178,7 @@ test("buildGameResultDocument builds basic round summary", () => {
 test("buildGameResultDocument splits hide and seek phases", () => {
   const result = buildGameResultDocument("session-1", {
     roundNumber: 1,
-    gameSize: "medium", // 60 min
+    gameSize: "medium",
     gameOutcome: "found",
     foundConfirmedAt: "2026-01-01T01:05:00.000Z",
     timerAccumulatedMs: 3_900_000,

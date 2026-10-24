@@ -11,8 +11,6 @@ export async function leaveHostSession(sessionId: string): Promise<LeaveHostSess
     throw new Error("Firebase is not configured.");
   }
 
-  // Not retried: a repeat after a lost "promoted" response fails "not host",
-  // which callers would misread as an already-ended session.
   return callWithResilience<{ sessionId: string }, LeaveHostSessionResult>(
     "leaveHostSession",
     { sessionId },

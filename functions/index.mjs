@@ -1,4 +1,3 @@
-/** Cloud Functions entry (Node.js 24). */
 import { getApps, initializeApp } from "firebase-admin/app";
 
 if (getApps().length === 0) {

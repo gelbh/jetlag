@@ -2,7 +2,6 @@ import type { GameSize } from "../session/size/gameSize";
 
 export type BoardCardKind = "timeBonus" | "powerUp" | "curse" | "move";
 
-/** Base + expansion power-up ids. Base deck omits discard3Draw4 / expandHand2. */
 export type PowerUpId =
   | "veto"
   | "randomize"
@@ -13,12 +12,10 @@ export type PowerUpId =
   | "expandHand1"
   | "expandHand2";
 
-/** Power-ups the hider plays on a pending question instead of answering it. */
 export type QuestionPowerUpId = Extract<PowerUpId, "veto" | "randomize">;
 
 export type TimeBonusId = "time-1" | "time-2" | "time-3" | "time-4" | "time-5";
 
-/** Minutes for [small, medium, large]. */
 export type TimeBonusDurations = readonly [number, number, number];
 
 export interface TimeBonusCardDef {
@@ -53,7 +50,6 @@ export interface ActiveCurseState {
   instanceId: string;
   curseId: string;
   playedAt: string;
-  /** Honor-system clear for IRL proofs. */
   cleared: boolean;
   clearedAt?: string;
 }
@@ -72,7 +68,6 @@ export interface BoardEconomyState {
   discard: BoardCardInstance[];
   handLimit: number;
   activeCurses: ActiveCurseState[];
-  /** In-flight answer reward pick; persisted so refresh keeps the draw. */
   pendingPick: PendingPickState | null;
 }
 

@@ -14,10 +14,6 @@ export const HOST_CONFIRM_NO_SESSION = "HOST_CONFIRM_NO_SESSION";
 export const HOST_CONFIRM_INVALID_TOOL = "HOST_CONFIRM_INVALID_TOOL";
 export const HOST_CONFIRM_SESSION_MISMATCH = "HOST_CONFIRM_SESSION_MISMATCH";
 
-/**
- * Stable hash of tool args for confirm docs / audit correlation.
- * @param {unknown} args
- */
 export function hashToolArgs(args) {
   return createHash("sha256")
     .update(JSON.stringify(args ?? null))
@@ -336,9 +332,6 @@ async function assertCallerIsHost(db, confirm, uid) {
   }
 }
 
-/**
- * Human-readable FCM body helper (kept for shared copy / tests).
- */
 export function hostConfirmNotificationBody(tool) {
   return `Approve ${toolLabel(tool)}? Open Jet Lag to confirm.`;
 }

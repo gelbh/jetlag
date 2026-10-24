@@ -1,4 +1,5 @@
 // Build-time fill scripts import this module via jiti (e.g. scripts/geo/fill-pack.mjs).
+
 import { haversineMeters } from "@/domain/geometry/gameArea/distance";
 import { isWikidataQid } from "../parseWikidataId";
 
@@ -13,10 +14,8 @@ const DEDUPE_PROXIMITY_METERS = 150;
 
 const TYPO_FIXES: readonly [RegExp, string][] = [[/\bsqaure\b/g, "square"]];
 
-/** Category noise suffixes stripped for park dedup only. */
 const PARK_NOISE_SUFFIX = /\s+(park|playground|square|plaza|playfield)$/;
 
-/** Street-like names that leak in from GIS parcel data. */
 const STREET_SUFFIX = /\b(st|rd|dr|ave|blvd|boulevard|road|street|avenue|drive)\.?$/;
 
 const PARK_EXCLUSIONS: readonly RegExp[] = [
@@ -57,7 +56,6 @@ const ZOO_EXCLUSIONS: readonly RegExp[] = [
   /\banimal\s+shelter\b/,
 ];
 
-/** Shared name collapse for hygiene dedupe and pack↔Overpass exact-name keys. */
 export function collapsePoiPlaceName(name: string): string {
   let collapsed = name.trim().toLowerCase().replace(/\s+/g, " ");
   collapsed = collapsed.replace(/&/g, " and ").replace(/\s+/g, " ");
@@ -124,7 +122,6 @@ function isEligibleMuseum(name: string): boolean {
   return true;
 }
 
-/** Category-specific exclusions for bundled POI hygiene. */
 export function isEligibleBundledPoi(place: BundledPoiPlaceLike, category: string): boolean {
   const name = collapsePoiPlaceName(place.name);
 
@@ -144,7 +141,6 @@ export function isEligibleBundledPoi(place: BundledPoiPlaceLike, category: strin
   }
 }
 
-/** Wikidata entries win over regional supplements (pme:openspace:*, etc.). */
 function preferenceRank(id: string): number {
   return isWikidataQid(id) ? 0 : 1;
 }
@@ -224,7 +220,6 @@ export function dedupeBundledPoiPlaces<T extends BundledPoiPlaceLike>(
     }
   }
 
-  // Restore input order for stable bundle output.
   const keptIds = new Set(fuzzyKept.map((place) => place.id));
   return exactDeduped.filter((place) => keptIds.has(place.id));
 }

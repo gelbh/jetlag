@@ -23,20 +23,13 @@ const mapHintPanelStyles = {
   WebkitBackdropFilter: "blur(20px) saturate(1.4)",
 } as const;
 
-/** Matches the ensureMapMounted() timeout in useCreateSessionMapMount. */
 const LOADING_PLATE_TIMEOUT_MS = 10_000;
 
-/** Shared outer shell so placeholder and live map keep identical layout (CLS). */
 export const CREATE_SESSION_MAP_SHELL_CLASS =
   "relative h-[33dvh] max-h-[36dvh] min-h-[28dvh] shrink-0 touch-none";
 
-/** Symmetric fitBounds inset. */
 export const CREATE_SESSION_FIT_PAD_PX = 48;
 
-/**
- * Extra bottom inset when the compact play-area stats chip is on the map.
- * Overlay `pb-3` (12) + Paper `py-xs` (~20) + compact stats line (~20) + slack.
- */
 export const CREATE_SESSION_STATS_OVERLAY_PAD_PX = 64;
 
 const LOCATE_BTN_SIZE = 44;
@@ -139,7 +132,6 @@ interface CreateSessionMapPaneProps {
   mapFocusToken?: number;
   previewGameArea: GameArea | null;
   selectedGameSize: GameSize;
-  /** Some intent asked for the live map; until then a static facade stands in. */
   mapRequested: boolean;
   /** MapLibre loaded and reported its first viewport. */
   mapMounted: boolean;
@@ -224,7 +216,6 @@ function CreateSessionMapPaneInner({
     if (!map || !boundsSeenRef.current) {
       return;
     }
-    // The facade unmounts on this signal; keep focus in the map, not <body>.
     const facadeHadFocus =
       facadeRef.current !== null && document.activeElement === facadeRef.current;
     onMapMounted(map);

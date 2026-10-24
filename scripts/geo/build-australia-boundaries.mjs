@@ -270,7 +270,6 @@ function attributionWithCedSed(existing) {
   if (existing.includes("Commonwealth Electoral Divisions (CED)")) {
     return existing;
   }
-  // Insert CED/SED after the LGA simplify paragraph, before coastline.
   const marker = "Coastline segments:";
   if (existing.includes(marker)) {
     return existing.replace(marker, `${cedSedBlock}\n${marker}`);

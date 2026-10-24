@@ -378,7 +378,6 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(screen.getByTestId("hiding-zone-map-placement")).toBeInTheDocument();
     expect(screen.queryByTestId("hiding-zone-hud-body")).toBeNull();
     expect(screen.queryByTestId("ask-hud-host")).toBeNull();
-    // Live TransitStationPicker uses a plain text input (placeholder), not role=searchbox.
     expect(screen.getByPlaceholderText(/search stations/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /search stations in this area/i }));
     expect(onSearchThisArea).toHaveBeenCalledTimes(1);

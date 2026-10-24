@@ -5,16 +5,10 @@ interface NestedSplitLayoutProps {
   children: ReactNode;
   className?: string;
   maxHeightClassName?: string;
-  /** Fixed header block rendered above the scroll body. */
   pinned?: ReactNode;
-  /**
-   * Fixed footer below the scroll body.
-   * Wrapper has no horizontal padding; callers must pad footer content.
-   */
   footer?: ReactNode;
 }
 
-/** In-flow nested split chassis for CreateSession (not a fixed bottom overlay). */
 export function NestedSplitLayout({
   children,
   className = "",

@@ -61,7 +61,6 @@ describe("PlayerPhoneShell", () => {
       configurable: true,
       value: 1280,
     });
-    // Absolute fill of the shell containing block matches shell width, not the document.
     Object.defineProperty(overlay!, "clientWidth", {
       configurable: true,
       get() {

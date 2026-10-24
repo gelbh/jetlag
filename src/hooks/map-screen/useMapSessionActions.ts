@@ -43,7 +43,6 @@ interface UseMapSessionActionsParams {
   hidingZones: readonly HidingZoneRecord[];
 }
 
-/** Host/session-level actions: end game, advanced rules, and distance unit. */
 export function useMapSessionActions({
   session,
   setSession,
@@ -282,8 +281,6 @@ export function useMapSessionActions({
     const prevBoardEconomy = session.boardEconomyEnabled === true;
 
     if (session.id !== LOCAL_SESSION_ID && isRemote) {
-      // Board economy is a single-key host update (rules budget path), not
-      // validSessionRulesUpdate's hasOnly list.
       const rulesPatch = { ...patch };
       delete rulesPatch.boardEconomyEnabled;
       await updateSessionRules(session.id, {

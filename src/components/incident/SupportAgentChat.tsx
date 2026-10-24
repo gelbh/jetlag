@@ -21,7 +21,6 @@ export interface SupportAgentChatProps {
   variant?: SupportAgentChatVariant;
   onClose?: () => void;
   className?: string;
-  /** Injectable for tests. */
   incidentOverride?: IncidentRecord | null;
   messagesOverride?: IncidentThreadMessageRecord[];
   errorOverride?: Error | null;

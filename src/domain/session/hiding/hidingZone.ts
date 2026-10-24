@@ -47,7 +47,6 @@ export function isValidHidingStation(station: TransitStation, gameArea: GameArea
   return isPointInGameArea([station.lat, station.lng], gameArea);
 }
 
-/** How far a map tap may be from a station and still snap to it. */
 export const STATION_SNAP_METERS = 200;
 
 export function nearestStation(

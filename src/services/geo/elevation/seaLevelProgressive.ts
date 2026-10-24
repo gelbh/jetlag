@@ -49,7 +49,6 @@ function countFiniteElevations(elevations: number[]): number {
   return elevations.filter((value) => Number.isFinite(value)).length;
 }
 
-/** Complete cache/seed is only skippable when density and coverage match fine sampling. */
 function isDenseCompleteSampling(sampling: CachedSeaLevelSampling, gameArea: GameArea): boolean {
   if (sampling.complete !== true) {
     return false;
@@ -237,7 +236,6 @@ export async function ensureSeaLevelSamplingComplete(
 ): Promise<CachedSeaLevelSampling> {
   const seeded = await hydratePackSeaLevelSeed(gameArea, options?.regionPackId);
 
-  // Sufficient dense pack seed: skip blocking fine fetch / background crawl.
   if (seeded && isDenseCompleteSampling(seeded, gameArea)) {
     setSamplerPhase(gameAreaPreloadKey(gameArea), "complete");
     return seeded;
@@ -262,9 +260,7 @@ export async function ensureSeaLevelSamplingComplete(
             options.onEnrich?.(fine);
           }
         })
-        .catch(() => {
-          // Soft-fail progressive enrich; keep the seed result.
-        });
+        .catch(() => {});
     }
     return seeded;
   }

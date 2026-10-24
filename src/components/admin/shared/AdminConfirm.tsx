@@ -4,17 +4,14 @@ import { useState } from "react";
 export interface AdminConfirmProps {
   opened: boolean;
   title: string;
-  /** One plain sentence naming the target (session code when there is one) and the effect. */
   consequence: string;
   confirmLabel: string;
   busyLabel?: string;
   destructive?: boolean;
-  /** Throw to report failure; the modal shows the message and stays open. */
   onConfirm: () => Promise<void>;
   onClose: () => void;
 }
 
-/** Confirm step for irreversible admin actions. Theme-neutral: standalone /map renders it too. */
 export function AdminConfirm({
   opened,
   title,

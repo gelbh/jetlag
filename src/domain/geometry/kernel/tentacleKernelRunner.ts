@@ -59,8 +59,6 @@ export async function dispatchTentaclePoiAnswerEliminationRegion(
   });
 }
 
-/** Public alias; callers may import either name. */
 export const runTentacleEliminationRegion = dispatchTentacleEliminationRegion;
 
-/** Public alias; callers may import either name. */
 export const runTentaclePoiAnswerEliminationRegion = dispatchTentaclePoiAnswerEliminationRegion;

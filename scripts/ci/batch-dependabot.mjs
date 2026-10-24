@@ -35,7 +35,6 @@ function ghJson(args) {
 }
 
 function isMajorTitle(title) {
-  // "from 1.2.3 to 2.0.0" or Actions-style "from 4 to 7"
   const m = title.match(/from (\d+)(?:\.[\d.]+)? to (\d+)(?:\.[\d.]+)?/i);
   if (!m) return false;
   return m[1] !== m[2];
@@ -51,7 +50,6 @@ function hasFailingChecks(prNumber) {
   });
   const out = `${r.stdout || ""}\n${r.stderr || ""}`;
   const ignore = new Set(["enable-automerge", "CodeRabbit"]);
-  // gh prints tab-separated: name\tfail\t...
   return out.split("\n").some((line) => {
     const [name, status] = line.split("\t");
     return status === "fail" && name && !ignore.has(name);
@@ -75,18 +73,15 @@ function classify(pr) {
 function packageNamesFromBody(body) {
   const names = new Set();
   if (!body) return names;
-  // Markdown links in tables: | [pkg](url) |
   for (const m of body.matchAll(/\|\s*\[(@?[\w./-]+)\]\([^)]+\)\s*\|/g)) {
     names.add(m[1]);
   }
-  // Plain / backtick table cells
   for (const m of body.matchAll(/\|\s*`?(@?[\w./-]+)`?\s*\|/g)) {
     const name = m[1];
     if (name === "Package" || name === "---") continue;
     if (/^(From|To)$/i.test(name)) continue;
     names.add(name);
   }
-  // "Bumps X from" / "Updates `X`"
   for (const m of body.matchAll(/(?:Bumps|Updates)\s+(?:the\s+)?`?(@?[\w./-]+)`?/g)) {
     if (m[1] === "the") continue;
     names.add(m[1]);
@@ -137,7 +132,6 @@ function selectBatch(classified) {
     if (pkg) covered.add(pkg);
   }
 
-  // Stable order: groups first, then by number ascending
   included.sort((a, b) => Number(b.group) - Number(a.group) || a.number - b.number);
   return { included, skipped };
 }
@@ -287,7 +281,6 @@ function main() {
   const bodyFile = join(tmpdir(), `deps-batch-${stamp}.md`);
   writeFileSync(bodyFile, body);
 
-  // Update existing batch PR for today if present
   const existing = ghJson([
     "pr",
     "list",

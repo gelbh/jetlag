@@ -14,9 +14,7 @@ import { appendSessionActivityEvent } from "./sessionActivityLog";
 
 /** Fire-and-forget append; lifecycle writers must not fail the primary action. */
 export function voidAppendSessionActivityEvent(event: SessionActivityEvent): void {
-  void appendSessionActivityEvent(event).catch(() => {
-    // Silent miss — timeline stays on last good snapshot.
-  });
+  void appendSessionActivityEvent(event).catch(() => {});
 }
 
 function isGameOverAnalyticsOutcome(outcome: GameOutcome | string | undefined): boolean {
