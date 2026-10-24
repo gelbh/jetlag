@@ -1,4 +1,6 @@
 import { doc, setDoc, updateDoc, writeBatch } from "firebase/firestore";
+import type { SiegeEndgameStart } from "@/domain/session/castleSiege/siegeClocks";
+import { buildStartSiegePublicPatch } from "@/domain/session/castleSiege/siegePersist";
 import { buildStartStandoffPrivateState } from "@/domain/session/castleSiege/standoffPersist";
 import type { TeamMarksGeometry } from "@/domain/session/castleSiege/teamMarks";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
@@ -97,6 +99,25 @@ export async function startCastleSiegeStandoff(
     updatedAt: new Date(nowMs).toISOString(),
   });
   await batch.commit();
+}
+
+/**
+ * Host opens Siege: public phase + siegeClock (Dusk head-start already baked in).
+ */
+export async function startCastleSiegeSiege(
+  sessionId: string,
+  opts: {
+    nowMs?: number;
+    limitSeconds: number;
+    endgame: SiegeEndgameStart;
+  },
+): Promise<void> {
+  const patch = buildStartSiegePublicPatch({
+    nowMs: opts.nowMs ?? Date.now(),
+    limitSeconds: opts.limitSeconds,
+    endgame: opts.endgame,
+  });
+  await updateDoc(doc(sessionsCollection(), sessionId), patch);
 }
 
 /** Own-team shade polygons (enemy clients cannot read — V12). */

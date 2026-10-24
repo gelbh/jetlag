@@ -42,6 +42,7 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "dials",
   "coinAssignment",
   "standoffTurn",
+  "siegeClock",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordStructuredKey = (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
