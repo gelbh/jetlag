@@ -329,6 +329,14 @@ describe("firestore.rules — player trail points", () => {
     await assertSucceeds(trailPoints("seeker-1").add(trailPoint("hider")));
   });
 
+  it("denies a point from a member whose own key is missing from memberRoles", async () => {
+    await seed({
+      memberUids: ["host-1", "seeker-1", "hider-1"],
+      memberRoles: { "host-1": "seeker", "seeker-1": "seeker" },
+    });
+    await assertFails(trailPoints("hider-1").add(trailPoint("hider")));
+  });
+
   it("denies trail points from a castle siege observer host", async () => {
     await seed({
       mode: "castleSiege",

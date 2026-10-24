@@ -586,6 +586,20 @@ describe("firestore.rules — sessions", () => {
       );
     });
 
+    it("allows the no-read join shape when memberAppVersions does not exist yet", async () => {
+      await seed({
+        memberUids: ["host-1", "seeker-a"],
+        memberRoles: { "host-1": "seeker", "seeker-a": "seeker" },
+      });
+      await assertSucceeds(
+        sessionAs("guest-1").update({
+          memberUids: arrayUnion("guest-1"),
+          "memberRoles.guest-1": "hider",
+          "memberAppVersions.guest-1": "1.7.0",
+        }),
+      );
+    });
+
     it("allows the read-path full-array join that adds only the caller", async () => {
       await seed();
       await assertSucceeds(
