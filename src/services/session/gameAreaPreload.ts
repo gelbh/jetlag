@@ -7,7 +7,7 @@ import type {
   MatchingAdminLevel,
 } from "../../domain/session/catalog/sessionCustomContent";
 import { usePreloadStore } from "../../state/preloadStore";
-import { createLoadTask } from "../core/progress/loadTask";
+import { createLoadTask, type LoadTask } from "../core/progress/loadTask";
 import {
   adminBoundaryLevelsForSession,
   emptyAdminDivisionCounts,
@@ -191,6 +191,14 @@ export async function preloadGameAreaCachesAsync(
   await runPreloadQueue(gameAreaKey, jobs, jobGapMs, signal);
 }
 
+let activeCriticalTask: LoadTask | null = null;
+
+/** Cancels the critical preload so its activity chip does not outlive the session. */
+export function abortCriticalGameAreaPreload(): void {
+  activeCriticalTask?.cancel();
+  activeCriticalTask = null;
+}
+
 const CRITICAL_PROBE_STAGE: StageSpec = {
   kind: "fetch",
   label: "Checking area divisions",
@@ -217,11 +225,13 @@ export async function preloadCriticalGameAreaCaches(
   const store = usePreloadStore.getState();
   store.resetCritical(gameAreaKey, adminLevels.length + 1);
 
+  activeCriticalTask?.cancel();
   const task = createLoadTask({
     label: "Caching area boundaries",
     priority: "background",
     global: true,
   });
+  activeCriticalTask = task;
   const load = { priority: task.priority, signal: task.signal };
   // Stages are created up front so the bar's weights stay put.
   const probeStage = task.stage(CRITICAL_PROBE_STAGE);
@@ -257,6 +267,9 @@ export async function preloadCriticalGameAreaCaches(
     ),
   );
   task.complete();
+  if (activeCriticalTask === task) {
+    activeCriticalTask = null;
+  }
 }
 
 export function preloadJobGapMsForTests(): number {

@@ -18,6 +18,7 @@ import {
   preloadJobGapPremiumMsForTests,
   preloadMeasuringCategoriesForTests,
 } from "./gameAreaPreload";
+import { teardownSessionUiState } from "./sessionCleanup";
 
 // Mock implementation modules (not barrels) so importOriginal of availability
 // and other overpass/matching importers see the stub.
@@ -125,6 +126,25 @@ describe("gameAreaPreload", () => {
       completedJobs: totalJobs,
     });
     expect(getGlobalLoadTasks().map((task) => task.label)).not.toContain("Caching area boundaries");
+  });
+
+  it("drops the critical preload chip on session teardown", async () => {
+    const pending = new Promise<never>(() => {});
+    vi.mocked(fetchAdminDivisionFeaturesInArea).mockReturnValue(pending);
+    vi.spyOn(adminDivisionAvailability, "probeAdminDivisionCounts").mockResolvedValue(
+      adminDivisionAvailability.emptyAdminDivisionCounts(),
+    );
+
+    void preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA);
+    await vi.waitFor(() => expect(fetchAdminDivisionFeaturesInArea).toHaveBeenCalled());
+    const chip = getGlobalLoadTasks().find((task) => task.label === "Caching area boundaries");
+    expect(chip).toBeDefined();
+
+    teardownSessionUiState();
+
+    expect(getGlobalLoadTasks()).not.toContain(chip);
+    expect(chip?.signal.aborted).toBe(true);
+    vi.mocked(fetchAdminDivisionFeaturesInArea).mockImplementation(async () => []);
   });
 
   it("continues critical preload when admin division probe fails", async () => {

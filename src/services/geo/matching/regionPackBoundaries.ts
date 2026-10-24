@@ -22,6 +22,7 @@ import {
   readTextWithProgress,
 } from "@/services/core/network/fetchWithTimeout";
 import { withStage } from "@/services/core/progress/loadTask";
+import { yieldToMain } from "@/services/core/progress/yieldToMain";
 
 const regionPackGeoCache = new Map<string, string>();
 
@@ -180,6 +181,8 @@ async function buildPlayArea(
 ): Promise<GameArea> {
   const text = await fetchGeoJsonText(path, stages);
   return withStage(progress, PLAY_AREA_STAGE, async () => {
+    // Let "Building play area" paint before the synchronous union.
+    await yieldToMain();
     const features = polygonFeatures(parseFeatureCollection(text));
     if (!subregionId) {
       return combineRegionGameAreas(features);

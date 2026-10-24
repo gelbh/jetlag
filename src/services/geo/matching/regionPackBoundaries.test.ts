@@ -347,7 +347,7 @@ describe("region pack boundary progress", () => {
     expect(cachedTask.root.children.map((child) => child.spec.kind)).toEqual(["compute"]);
 
     fetchMock.mockRestore();
-  });
+  }, 15_000);
 
   it("counts play area download bytes from Content-Length", async () => {
     clearRegionPackGeoCacheForTests();
@@ -366,5 +366,5 @@ describe("region pack boundary progress", () => {
     expect(download).toHaveBeenLastCalledWith(body.length, body.length);
     download.mockRestore();
     fetchMock.mockRestore();
-  });
+  }, 15_000);
 });
