@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
+import type { SessionCustomCategory } from "../session/catalog/sessionCustomContent";
 import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
-import { regionPackFlavorCategories } from "./regionPackFlavorCategories";
+import {
+  mergeRegionPackFlavorCategories,
+  regionPackFlavorCategories,
+} from "./regionPackFlavorCategories";
 
 const DUBLIN_FLAVOR_IDS = [
   "custom:dublin-luas-stop",
@@ -8,6 +12,13 @@ const DUBLIN_FLAVOR_IDS = [
   "custom:dublin-gaa-ground",
   "custom:dublin-castle-fort",
 ] as const;
+
+const HOST_CUSTOM: SessionCustomCategory = {
+  id: "custom:host-brewery",
+  label: "Brewery",
+  promptNoun: "a brewery",
+  overpassSelectors: ['["craft"="brewery"]'],
+};
 
 describe("regionPackFlavorCategories", () => {
   it("returns a readonly array for every region pack id", () => {
@@ -71,5 +82,44 @@ describe("regionPackFlavorCategories", () => {
         expect(selector.trim().length).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+describe("mergeRegionPackFlavorCategories", () => {
+  it("keeps host customs and appends Dublin flavor without wiping either", () => {
+    const merged = mergeRegionPackFlavorCategories([HOST_CUSTOM], "dublin");
+    const ids = merged.map((category) => category.id);
+
+    expect(ids).toEqual(["custom:host-brewery", ...DUBLIN_FLAVOR_IDS]);
+    expect(merged[0]).toEqual(HOST_CUSTOM);
+  });
+
+  it("dedupes by id when flavor is already present", () => {
+    const existing = [
+      HOST_CUSTOM,
+      {
+        id: "custom:dublin-luas-stop",
+        label: "Host Luas",
+        promptNoun: "a Luas stop",
+        overpassSelectors: ['["railway"="tram_stop"]'],
+      },
+    ] as const;
+    const merged = mergeRegionPackFlavorCategories(existing, "dublin");
+    const luasMatches = merged.filter((category) => category.id === "custom:dublin-luas-stop");
+
+    expect(luasMatches).toHaveLength(1);
+    expect(luasMatches[0]?.label).toBe("Host Luas");
+    expect(merged.map((category) => category.id)).toEqual([
+      "custom:host-brewery",
+      "custom:dublin-luas-stop",
+      "custom:dublin-canal-lock",
+      "custom:dublin-gaa-ground",
+      "custom:dublin-castle-fort",
+    ]);
+  });
+
+  it("does not invent flavor for non-Dublin packs", () => {
+    expect(mergeRegionPackFlavorCategories([HOST_CUSTOM], "nyc")).toEqual([HOST_CUSTOM]);
+    expect(mergeRegionPackFlavorCategories([], "nyc")).toEqual([]);
   });
 });

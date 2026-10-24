@@ -7,6 +7,7 @@ import {
 } from "react";
 import type { GameArea } from "@/domain/map/annotations";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import { mergeRegionPackFlavorCategories } from "@/domain/regions/regionPackFlavorCategories";
 import type { GamePreset } from "@/domain/session/presets/gamePreset";
 import {
   applySilentReuseDraftGeo,
@@ -140,6 +141,11 @@ export function useSilentPresetDataReuse({
         ...prev,
         customMatchingAreas: applied.customMatchingAreas ?? {},
         customLocationPins: applied.customLocationPins,
+        ...(packChanged && nextPack
+          ? {
+              customCategories: mergeRegionPackFlavorCategories(prev.customCategories, nextPack),
+            }
+          : {}),
       };
     });
 

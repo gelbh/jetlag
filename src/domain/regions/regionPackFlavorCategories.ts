@@ -52,3 +52,25 @@ const PACK_FLAVOR_CATEGORIES: Record<RegionPackId, readonly SessionCustomCategor
 export function regionPackFlavorCategories(packId: RegionPackId): readonly SessionCustomCategory[] {
   return PACK_FLAVOR_CATEGORIES[packId];
 }
+
+/** Append pack flavor into host customs; keep first id on conflict. */
+export function mergeRegionPackFlavorCategories(
+  existing: readonly SessionCustomCategory[],
+  packId: RegionPackId,
+): SessionCustomCategory[] {
+  const flavor = regionPackFlavorCategories(packId);
+  if (flavor.length === 0) {
+    return [...existing];
+  }
+
+  const seen = new Set(existing.map((category) => category.id));
+  const merged = [...existing];
+  for (const category of flavor) {
+    if (seen.has(category.id)) {
+      continue;
+    }
+    seen.add(category.id);
+    merged.push(category);
+  }
+  return merged;
+}
