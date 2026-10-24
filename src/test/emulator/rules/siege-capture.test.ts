@@ -74,15 +74,32 @@ describe("firestore.rules — castle siege capture ACL", () => {
     });
   }
 
-  it("allows attacker submit and denies observer forge confirm", async () => {
+  it("denies client siegeCapture writes (callable-only; keeps session update budget)", async () => {
     await seedSiegeSession();
     const attacker = rules.testEnv.authenticatedContext("team-a-1");
+    const defender = rules.testEnv.authenticatedContext("team-b-1");
     const observer = rules.testEnv.authenticatedContext("observer-1");
 
-    await assertSucceeds(
+    await assertFails(
       attacker.firestore().collection("sessions").doc(SESSION_ID).update({
         siegeCapture: pendingCapture(),
       }),
+    );
+
+    await seedSiegeSession({ siegeCapture: pendingCapture() });
+
+    await assertFails(
+      defender
+        .firestore()
+        .collection("sessions")
+        .doc(SESSION_ID)
+        .update({
+          siegeCapture: pendingCapture({
+            status: "confirmed",
+            resolvedAtMs: 2_000,
+            resolvedByUid: "team-b-1",
+          }),
+        }),
     );
 
     await assertFails(
@@ -95,42 +112,6 @@ describe("firestore.rules — castle siege capture ACL", () => {
             status: "confirmed",
             resolvedAtMs: 2_000,
             resolvedByUid: "observer-1",
-          }),
-        }),
-    );
-  });
-
-  it("denies attacker self-confirm; allows defender confirm", async () => {
-    await seedSiegeSession({
-      siegeCapture: pendingCapture(),
-    });
-    const attacker = rules.testEnv.authenticatedContext("team-a-1");
-    const defender = rules.testEnv.authenticatedContext("team-b-1");
-
-    await assertFails(
-      attacker
-        .firestore()
-        .collection("sessions")
-        .doc(SESSION_ID)
-        .update({
-          siegeCapture: pendingCapture({
-            status: "confirmed",
-            resolvedAtMs: 2_000,
-            resolvedByUid: "team-a-1",
-          }),
-        }),
-    );
-
-    await assertSucceeds(
-      defender
-        .firestore()
-        .collection("sessions")
-        .doc(SESSION_ID)
-        .update({
-          siegeCapture: pendingCapture({
-            status: "confirmed",
-            resolvedAtMs: 2_000,
-            resolvedByUid: "team-b-1",
           }),
         }),
     );
