@@ -60,17 +60,21 @@ describe("sydney region pack wiring", () => {
     expect(config?.measuringLabelOverrides.admin3_border?.label).toBe("LGA border");
     expect(config?.geoAssets.primary).toBe("/geo/sydney/lgas.geojson");
     expect(config?.geoAssets.playArea).toBe("/geo/sydney/playArea.geojson");
-    expect(config?.geoAssets.secondary).toBeUndefined();
+    expect(config?.geoAssets.secondary).toBe("/geo/sydney/sals.geojson");
+    // Per-LGA SAL slices deferred; full metro file only until Task 3 geo ships.
+    expect(config?.geoAssets.secondaryBySubregion).toBeUndefined();
+    expect(config?.matchingLabelOverrides.admin_division_4?.label).toBe("Suburb / Locality");
+    expect(config?.measuringLabelOverrides.admin4_border?.label).toBe("Suburb / Locality border");
     expect(config?.geoAssets.matchingLevel4).toBeUndefined();
     expect(config?.geoAssets.matchingLevel6).toBeUndefined();
   });
 
-  it("hides country/province matching and single-depth admin4", () => {
+  it("hides country/province matching and enables SAL secondary", () => {
     const config = getRegionPackConfig("sydney");
     expect(config?.unsupportedMatching.has("admin_division_1")).toBe(true);
     expect(config?.unsupportedMatching.has("admin_division_2")).toBe(true);
-    expect(config?.unsupportedMatching.has("admin_division_4")).toBe(true);
-    expect(config?.unsupportedBorders.has("admin4_border")).toBe(true);
+    expect(config?.unsupportedMatching.has("admin_division_4")).toBe(false);
+    expect(config?.unsupportedBorders.has("admin4_border")).toBe(false);
     expect(config?.unsupportedMatching.has("admin_division_3")).toBe(false);
     expect(config?.unsupportedBorders.has("admin3_border")).toBe(false);
   });
