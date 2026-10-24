@@ -1,7 +1,7 @@
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { deleteField } from "firebase/firestore";
 import { describe, expect, it } from "vitest";
-import { bindRulesTestEnv, milesToMeters, sessionPayload } from "./helpers";
+import { bindRulesTestEnv, milesToMeters, seedSessionMembers, sessionPayload } from "./helpers";
 
 describe("firestore.rules — sessions", () => {
   const rules = bindRulesTestEnv();
@@ -299,14 +299,7 @@ describe("firestore.rules — sessions", () => {
   it("allows a second guest to join as hider when one hider is already in the session", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "hider-1"],
-        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "hider-1": "hider" });
 
     const guest = rules.testEnv.authenticatedContext("guest-2");
     await assertSucceeds(
@@ -328,14 +321,7 @@ describe("firestore.rules — sessions", () => {
   it("allows a returning member to change role on join", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "guest-1"],
-        memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "guest-1": "seeker" });
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
     await assertSucceeds(

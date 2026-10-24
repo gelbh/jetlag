@@ -1,6 +1,6 @@
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import { bindRulesTestEnv, sessionPayload } from "./helpers";
+import { bindRulesTestEnv, seedSessionMembers, sessionPayload } from "./helpers";
 
 describe("firestore.rules", () => {
   const rules = bindRulesTestEnv();
@@ -18,14 +18,7 @@ describe("firestore.rules", () => {
     async function seedSessionWithMember(memberUid: string) {
       const host = rules.testEnv.authenticatedContext("host-1");
       await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
-      await host
-        .firestore()
-        .collection("sessions")
-        .doc("session-1")
-        .update({
-          memberUids: ["host-1", memberUid],
-          memberRoles: { "host-1": "seeker", [memberUid]: "hider" },
-        });
+      await seedSessionMembers(rules.testEnv, { "host-1": "seeker", [memberUid]: "hider" });
       return host;
     }
 
