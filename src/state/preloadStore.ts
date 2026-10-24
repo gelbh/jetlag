@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import type { AdminDivisionCounts } from "../services/geo/overpass/adminDivisionAvailability";
 
+export type CategoryPresenceCounts = Record<string, number>;
+
 interface PreloadStoreState {
   activeGameAreaKey: string | null;
   totalJobs: number;
@@ -8,11 +10,13 @@ interface PreloadStoreState {
   failedJobs: number;
   dismissed: boolean;
   adminDivisionCounts: AdminDivisionCounts | null;
+  categoryPresenceCounts: CategoryPresenceCounts | null;
   reset: (gameAreaKey: string, totalJobs: number) => void;
   recordSuccess: (gameAreaKey: string) => void;
   recordFailure: (gameAreaKey: string) => void;
   dismiss: () => void;
   setAdminDivisionCounts: (gameAreaKey: string, counts: AdminDivisionCounts) => void;
+  setCategoryPresenceCounts: (gameAreaKey: string, counts: CategoryPresenceCounts) => void;
 }
 
 export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
@@ -22,6 +26,7 @@ export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
   failedJobs: 0,
   dismissed: false,
   adminDivisionCounts: null,
+  categoryPresenceCounts: null,
   reset: (gameAreaKey, totalJobs) =>
     set({
       activeGameAreaKey: gameAreaKey,
@@ -30,6 +35,7 @@ export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
       failedJobs: 0,
       dismissed: false,
       adminDivisionCounts: null,
+      categoryPresenceCounts: null,
     }),
   recordSuccess: (gameAreaKey) => {
     if (get().activeGameAreaKey !== gameAreaKey) {
@@ -57,6 +63,13 @@ export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
     }
 
     set({ adminDivisionCounts: counts });
+  },
+  setCategoryPresenceCounts: (gameAreaKey, counts) => {
+    if (get().activeGameAreaKey !== gameAreaKey) {
+      return;
+    }
+
+    set({ categoryPresenceCounts: counts });
   },
 }));
 
