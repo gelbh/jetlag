@@ -256,6 +256,21 @@ service cloud.firestore {
         && sessionIdentityUnchanged();
     }
 
+    // Host opens Siege: phase + siegeClock (Dusk head-start consumed into map).
+    function isCastleSiegeSiegeUpdate() {
+      return isSignedIn()
+        && resource.data.hostUid is string
+        && request.auth.uid == resource.data.hostUid
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && resource.data.mode == 'castleSiege'
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['phase', 'siegeClock'])
+        && request.resource.data.phase == 'siege'
+        && request.resource.data.siegeClock is map
+        && sessionIdentityUnchanged();
+    }
+
     function canReadTeamHands(sessionId, teamId) {
       return isSessionMember(sessionId)
         && (
@@ -945,6 +960,7 @@ service cloud.firestore {
       allow update: if isBoardEconomyFlagUpdate(sessionId)
         || isCastleSiegeSetupUpdate()
         || isCastleSiegeStandoffUpdate()
+        || isCastleSiegeSiegeUpdate()
         || isTimerHostUpdate()
         || isLastActiveAtUpdate()
         || isFoundHiderRequestUpdate()
