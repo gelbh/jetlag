@@ -130,4 +130,22 @@ describe("mergeRegionPackFlavorCategories", () => {
       "custom:host-brewery",
     ]);
   });
+
+  it("keeps host customs whose ids look like custom:<packId>-*", () => {
+    const hostLondonBridge: SessionCustomCategory = {
+      id: "custom:london-bridge",
+      label: "London Bridge",
+      promptNoun: "a London Bridge",
+      overpassSelectors: ['["name"="London Bridge"]'],
+    };
+
+    const merged = mergeRegionPackFlavorCategories([hostLondonBridge], "dublin");
+    expect(merged.map((category) => category.id)).toEqual([
+      "custom:london-bridge",
+      ...DUBLIN_FLAVOR_IDS,
+    ]);
+    expect(stripKnownRegionPackFlavorCategories(merged).map((c) => c.id)).toEqual([
+      "custom:london-bridge",
+    ]);
+  });
 });

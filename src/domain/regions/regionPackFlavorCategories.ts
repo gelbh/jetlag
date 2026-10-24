@@ -59,17 +59,9 @@ export function regionPackFlavorCategories(packId: RegionPackId): readonly Sessi
   return PACK_FLAVOR_CATEGORIES[packId];
 }
 
-/** True for registered pack flavor ids or `custom:<packId>-*` for known packs. */
+/** True only for registered pack flavor ids (exact match; no pack-prefix guessing). */
 export function isKnownRegionPackFlavorCategoryId(id: string): boolean {
-  if (KNOWN_PACK_FLAVOR_IDS.has(id)) {
-    return true;
-  }
-  for (const packId of REGION_PACK_IDS) {
-    if (id.startsWith(`custom:${packId}-`)) {
-      return true;
-    }
-  }
-  return false;
+  return KNOWN_PACK_FLAVOR_IDS.has(id);
 }
 
 /** Drop prior pack flavor slots so a pack switch cannot leave stale flavor. */
