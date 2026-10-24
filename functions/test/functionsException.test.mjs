@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { HttpsError } from "firebase-functions/v2/https";
+import { POSTHOG_SWEEP_AUTH_FAILED } from "../incident/sweepPosthogIncidents.mjs";
 import {
   isAbortErrorNoise,
   isExpectedFunctionsError,
@@ -455,6 +456,24 @@ test("shouldSkipFunctionsException drops membership permission-denied only on le
   assert.equal(shouldSkipFunctionsException(error, "resetsessionforrematch"), false);
   assert.equal(shouldSkipFunctionsException(error, "repairghosthost"), false);
   assert.equal(shouldSkipFunctionsException(error), false);
+});
+
+test("shouldSkipFunctionsException skips sweep PostHog auth failure message", () => {
+  assert.equal(shouldSkipFunctionsException(new Error(POSTHOG_SWEEP_AUTH_FAILED)), true);
+  assert.equal(shouldSkipFunctionsException(new Error("other")), false);
+});
+
+test("captureFunctionsExceptionAsync skips sweep PostHog auth failure", async () => {
+  const { captureFunctionsExceptionAsync } = await import("../lib/functionsException.mjs");
+  const calls = [];
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async (...args) => {
+      calls.push(args);
+    },
+  });
+  await captureFunctionsExceptionAsync(new Error(POSTHOG_SWEEP_AUTH_FAILED));
+  assert.equal(calls.length, 0);
+  setFunctionsExceptionClientForTests(null);
 });
 
 test("isExpectedFunctionsError reports heal proof rejections as takeover signals", () => {
