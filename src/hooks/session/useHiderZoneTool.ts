@@ -192,21 +192,16 @@ export function useHiderZoneTool({
       } catch (error) {
         if (isAbortError(error)) {
           task.cancel();
-          if (isLatestRequest(requestId)) {
-            setStationsLoading(false);
-          }
           return;
         }
         task.fail(error);
-        if (!isLatestRequest(requestId)) {
-          return;
+        if (isLatestRequest(requestId)) {
+          setStationsError("Couldn't load transit stations for this area.");
         }
-
-        setStationsError("Couldn't load transit stations for this area.");
-      }
-
-      if (isLatestRequest(requestId)) {
-        setStationsLoading(false);
+      } finally {
+        if (isLatestRequest(requestId)) {
+          setStationsLoading(false);
+        }
       }
     },
     [beginRequest, gameArea, isLatestRequest, requestSignal],
