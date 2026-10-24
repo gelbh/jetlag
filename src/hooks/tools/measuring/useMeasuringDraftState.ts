@@ -1,5 +1,5 @@
 import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon } from "geojson";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MeasuringPlace } from "@/domain/geo/types";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
@@ -14,10 +14,12 @@ import {
   type MeasuringSubject,
   type MeasuringTargetMode,
   measuringFromKind,
+  measuringTargetKind,
   measuringUsesAllPlacesInArea,
   usedMeasuringFromKindsForSession,
 } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import { resolveCategoryPresence } from "@/domain/session/catalog/playAreaCategoryPresence";
 import {
   availableMeasuringCatalog,
   isPreviewQuestionBeforeSendEnabled,
@@ -25,6 +27,8 @@ import {
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
 import { adminBorderKindAvailability } from "@/services/geo/overpass/adminDivisionAvailability";
+import { measuringLinearNotFoundMessage } from "@/services/geo/overpass/measuringLinearFeatures";
+import { measuringPlaceNotFoundMessage } from "@/services/geo/overpass/measuringPlaces";
 import { usePreloadStore } from "@/state/preloadStore";
 
 export function useMeasuringDraftState(
@@ -84,6 +88,7 @@ export function useMeasuringDraftState(
   const customMeasureGeometries = sessionRules?.customMeasureGeometries ?? [];
   const customMatchingAreas = sessionRules?.customMatchingAreas;
   const adminDivisionCounts = usePreloadStore((state) => state.adminDivisionCounts);
+  const categoryPresenceCounts = usePreloadStore((state) => state.categoryPresenceCounts);
   const regionPackId = sessionRules?.regionPackId;
 
   const measuringCatalog = useMemo(() => {
@@ -94,6 +99,55 @@ export function useMeasuringDraftState(
       adminBorderKindAvailability(option.id, adminDivisionCounts, regionPackId),
     );
   }, [adminDivisionCounts, regionPackId, sessionRules]);
+
+  const seedUnavailableFromPresence = useCallback((): Map<MeasuringFromKind, string> => {
+    const next = new Map<MeasuringFromKind, string>();
+    if (!regionPackId) {
+      return next;
+    }
+
+    const probePending = categoryPresenceCounts === null;
+    for (const option of measuringCatalog) {
+      const adminUnavailable = !adminBorderKindAvailability(
+        option.id,
+        adminDivisionCounts,
+        regionPackId,
+      );
+      const presence = resolveCategoryPresence({
+        categoryId: option.id,
+        regionPackId,
+        adminUnavailable,
+        probeCount: categoryPresenceCounts?.[option.id],
+        probePending,
+      });
+      if (!presence.available) {
+        const notice =
+          measuringTargetKind(option.id) === "point"
+            ? measuringPlaceNotFoundMessage(option.id as MeasuringLocationCategory)
+            : measuringLinearNotFoundMessage(option.id);
+        next.set(option.id, notice);
+      }
+    }
+    return next;
+  }, [adminDivisionCounts, categoryPresenceCounts, measuringCatalog, regionPackId]);
+
+  useEffect(() => {
+    setUnavailableMeasuringFromKinds((prev) => {
+      const seeded = seedUnavailableFromPresence();
+      if (seeded.size === 0) {
+        return prev;
+      }
+      let changed = false;
+      const next = new Map(prev);
+      for (const [kind, notice] of seeded) {
+        if (!next.has(kind)) {
+          next.set(kind, notice);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [seedUnavailableFromPresence]);
 
   const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
     sessionRules ?? { gameSize: "medium" },
@@ -158,10 +212,10 @@ export function useMeasuringDraftState(
       setMeasuringError(null);
       setMeasuringPlaces([]);
       setMeasuringOptionChosen(false);
-      setUnavailableMeasuringFromKinds(new Map());
+      setUnavailableMeasuringFromKinds(seedUnavailableFromPresence());
       setCatalogNotice(null);
     },
-    [measuringCatalog, usedMeasuringFromKindsSet],
+    [measuringCatalog, seedUnavailableFromPresence, usedMeasuringFromKindsSet],
   );
 
   const reopenCatalog = useCallback(() => {
