@@ -1,6 +1,6 @@
 import { ActionIcon, Box, Button, Menu, TextInput } from "@mantine/core";
 import type { ReactNode, Ref } from "react";
-import { RAISED_BG } from "../shared/adminSurface";
+import { DESK_HAIRLINE, RAISED_BG } from "../shared/adminSurface";
 
 export interface AdminChipOption {
   value: string;
@@ -36,9 +36,7 @@ const chipStyle = (on: boolean, height = 28) => ({
   height,
   padding: "0 10px",
   borderRadius: 14,
-  border: on
-    ? "0.5px solid transparent"
-    : "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+  border: on ? "0.5px solid transparent" : DESK_HAIRLINE,
   display: "inline-flex",
   alignItems: "center",
   gap: 6,
@@ -141,7 +139,7 @@ export function AdminTableToolbar({
         padding: "10px 14px",
         flex: "none",
         flexWrap: "wrap",
-        borderBottom: "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+        borderBottom: DESK_HAIRLINE,
       }}
     >
       <Box style={{ flex: "none", width: 260 }}>{tabs}</Box>
