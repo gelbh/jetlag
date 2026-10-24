@@ -96,6 +96,22 @@ describe("sydney geo assets", () => {
     }
   });
 
+  it("ships metro SAL secondary geo with lgaId attribution", () => {
+    const salPath = resolve(root, "sals.geojson");
+    expect(existsSync(salPath)).toBe(true);
+    const collection = JSON.parse(readFileSync(salPath, "utf8")) as {
+      features: Array<{ properties: { salId: string; name: string; lgaId?: string } }>;
+    };
+    expect(collection.features.length).toBeGreaterThan(0);
+    for (const feature of collection.features) {
+      expect(feature.properties.salId.length).toBeGreaterThan(0);
+      expect(feature.properties.name.length).toBeGreaterThan(0);
+    }
+    const lgaIds = new Set(collection.features.map((f) => f.properties.lgaId).filter(Boolean));
+    expect(lgaIds.has("17100")).toBe(true);
+    expect(lgaIds.has("17200")).toBe(true);
+  });
+
   it("ships playArea, attribution, and pack matrix files", () => {
     expect(existsSync(resolve(root, "playArea.geojson"))).toBe(true);
     expect(existsSync(resolve(root, "coastline.json"))).toBe(true);
