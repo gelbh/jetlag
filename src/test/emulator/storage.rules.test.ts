@@ -182,4 +182,52 @@ describe("storage.rules", () => {
       seeker.storage().ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg").getMetadata(),
     );
   });
+
+  it("allows castle siege playing team create-only for siegeCaptures", async () => {
+    await seedSession(testEnv, "session-cs", {
+      ...sessionPayload("host-1"),
+      mode: "castleSiege",
+      memberUids: ["host-1", "team-a-1", "observer-1"],
+      memberRoles: {
+        "host-1": "observer",
+        "team-a-1": "observer",
+        "observer-1": "observer",
+      },
+      castleSiegeRoles: {
+        "host-1": "teamA",
+        "team-a-1": "teamA",
+        "observer-1": "observer",
+      },
+    });
+
+    const attacker = testEnv.authenticatedContext("team-a-1");
+    const path = "sessions/session-cs/siegeCaptures/shot.jpg";
+    await assertSucceeds(
+      attacker
+        .storage()
+        .ref(path)
+        .put(new Uint8Array([0xff, 0xd8, 0xff]), {
+          contentType: "image/jpeg",
+        }),
+    );
+
+    await assertFails(
+      attacker
+        .storage()
+        .ref(path)
+        .put(new Uint8Array([0xff, 0xd8, 0xff, 0x00]), {
+          contentType: "image/jpeg",
+        }),
+    );
+
+    const observer = testEnv.authenticatedContext("observer-1");
+    await assertFails(
+      observer
+        .storage()
+        .ref("sessions/session-cs/siegeCaptures/other.jpg")
+        .put(new Uint8Array([0xff, 0xd8, 0xff]), {
+          contentType: "image/jpeg",
+        }),
+    );
+  });
 });

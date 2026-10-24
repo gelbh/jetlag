@@ -144,6 +144,38 @@ describe("CastleSiegeSetupChrome", () => {
     });
   });
 
+  it("in siege phase shows SiegeChrome and hides setup panels (FR)", () => {
+    renderWithAppUi(
+      <CastleSiegeSetupChrome
+        session={baseSession({
+          mode: "castleSiege",
+          setupMode: "pregame",
+          phase: "siege",
+          dials: DEFAULT_CASTLE_SIEGE_DIALS,
+          castleSiegeRoles: { "host-1": "teamA" },
+          siegeClock: {
+            limitSeconds: 600,
+            deadlineMs: Date.now() + 600_000,
+            paused: false,
+            pauseReason: null,
+            remainingMsWhenPaused: null,
+            roles: { teamA: "attack", teamB: "defend" },
+            headStartTeamId: null,
+            headStartEndsAtMs: null,
+            headStartConsumed: true,
+          },
+        })}
+        uid="host-1"
+        isHost
+      />,
+    );
+
+    expect(screen.getByTestId("castle-siege-siege-chrome")).toBeInTheDocument();
+    expect(screen.getByTestId("castle-siege-siege-mast")).toBeInTheDocument();
+    expect(screen.queryByTestId("castle-siege-arena-ledger")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("castle-siege-muster-dials")).not.toBeInTheDocument();
+  });
+
   it("commits a seal hash from name and secret", async () => {
     renderWithAppUi(
       <CastleSiegeSetupChrome

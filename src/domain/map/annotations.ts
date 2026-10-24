@@ -225,6 +225,10 @@ export interface SessionRecord {
   standoffTurn?: Record<string, unknown>;
   /** Public deck remaining count only (ids live under standoffPrivate). Castle Siege only. */
   standoffDeckRemainingCount?: number;
+  /** Siege match clocks (serialized). Castle Siege only. */
+  siegeClock?: Record<string, unknown>;
+  /** Siege capture submission (serialized). Castle Siege only. */
+  siegeCapture?: Record<string, unknown>;
 }
 
 export interface SessionOpsMitigation {

@@ -41,5 +41,22 @@ service firebase.storage {
         && request.resource.size < 10 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }
+
+    // Castle Siege capture slate photos (7A); playing teams create-only (no overwrite).
+    function isCastleSiegePlayingUploader(sessionId) {
+      return isSessionMember(sessionId)
+        && sessionData(sessionId).mode == 'castleSiege'
+        && 'castleSiegeRoles' in sessionData(sessionId)
+        && sessionData(sessionId).castleSiegeRoles[request.auth.uid] in ['teamA', 'teamB'];
+    }
+
+    match /sessions/{sessionId}/siegeCaptures/{fileName} {
+      allow read: if isSessionMember(sessionId);
+      // resource == null → create only (overwrite / delete denied).
+      allow write: if resource == null
+        && isCastleSiegePlayingUploader(sessionId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
   }
 }
