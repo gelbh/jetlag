@@ -2,9 +2,9 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 import * as previewBasemapPoisModule from "@/services/geo/maplibre/previewBasemapPois";
-import { tentacleEmptyPlayAreaMessage } from "@/services/geo/overpass/tentacleMessages";
 import { useMapStore } from "@/state/mapStore";
 import { usePreloadStore } from "@/state/preloadStore";
+import { formatDistance } from "../../domain/map/distance";
 import { tentacleSearchRadiusMetersForSession } from "../../domain/questions";
 import * as tentacleOverpassModule from "../../services/geo/overpass/tentacleOverpass";
 import { createTestPinAnnotation } from "../../test/fixtures/sessions";
@@ -448,17 +448,19 @@ describe("useTentacleTool", () => {
     });
   });
 
-  it("marks category unavailable and reopens picker when POI resolve is empty", async () => {
+  it("keeps category available and shows radius error when POI resolve is empty", async () => {
     vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([]);
     vi.spyOn(tentacleOverpassModule, "fetchTentaclePois").mockResolvedValue([]);
 
     const mocks = createToolHookMocks();
+    const sessionRules = { gameSize: "medium" as const, regionPackId: "dublin" as const };
+    const radiusMeters = tentacleSearchRadiusMetersForSession(sessionRules, "museum");
     const { result } = renderHook(() =>
       useTentacleTool({
         active: true,
         annotations: mocks.annotations,
         gameArea: mocks.gameArea,
-        sessionRules: { gameSize: "medium", regionPackId: "dublin" },
+        sessionRules,
         createAnnotation: mocks.createAnnotation,
         distanceUnit: mocks.distanceUnit,
         finishPlacement: mocks.finishPlacement,
@@ -481,10 +483,10 @@ describe("useTentacleTool", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.panel.props.model.categoryChosen).toBe(false);
-      expect(result.current.panel.props.model.unavailableCategoryIds?.has("museum")).toBe(true);
-      expect(result.current.panel.props.model.catalogNotice).toBe(
-        tentacleEmptyPlayAreaMessage("museum"),
+      expect(result.current.panel.props.model.categoryChosen).toBe(true);
+      expect(result.current.panel.props.model.unavailableCategoryIds?.has("museum")).toBe(false);
+      expect(result.current.panel.props.model.error).toBe(
+        `No named locations were found within ${formatDistance(radiusMeters, mocks.distanceUnit)}.`,
       );
     });
   });

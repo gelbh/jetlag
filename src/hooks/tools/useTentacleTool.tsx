@@ -276,12 +276,7 @@ export function useTentacleTool({
   }, [cancelRequests]);
 
   const applyTentaclePoisResult = useCallback(
-    (
-      requestId: number,
-      pois: Awaited<ReturnType<typeof fetchTentaclePois>>,
-      phase: 0 | 1,
-      categoryId: TentacleExtendedCategoryId,
-    ) => {
+    (requestId: number, pois: Awaited<ReturnType<typeof fetchTentaclePois>>, phase: 0 | 1) => {
       if (!isLatestRequest(requestId)) {
         return;
       }
@@ -292,27 +287,23 @@ export function useTentacleTool({
       }
       tentacleApplyPhaseRef.current.set(requestId, phase);
 
-      // Empty play-area / radius catalog: grey the option and reopen the sheet.
-      if (pois.length === 0) {
-        const notice = tentacleEmptyPlayAreaMessage(categoryId);
-        setUnavailableTentacleCategories((prev) => {
-          const next = new Map(prev);
-          next.set(categoryId, notice);
-          return next;
-        });
-        setCatalogNotice(notice);
-        reopenCategoryPicker();
-        return;
-      }
-
       setTentaclePois(pois);
       const selectedId = selectedPoiIdRef.current;
       if (selectedId && !pois.some((poi) => poi.id === selectedId)) {
         setSelectedPoiId(null);
       }
+      // Radius-empty is a normal miss at the pin; keep the category available.
+      // Play-area greys come from presence seed, not this path.
+      if (pois.length === 0) {
+        setTentacleError(
+          `No named locations were found within ${formatDistance(searchRadiusMeters, distanceUnit)}.`,
+        );
+        return;
+      }
+
       setTentacleError(null);
     },
-    [isLatestRequest, reopenCategoryPicker],
+    [distanceUnit, isLatestRequest, searchRadiusMeters],
   );
 
   const loadPoisForCenter = useCallback(
@@ -332,7 +323,7 @@ export function useTentacleTool({
         maxResults: 48,
       }).map((candidate) => poiCandidateToTentaclePoi(candidate, categoryId));
       if (tilePreview.length > 0) {
-        applyTentaclePoisResult(requestId, tilePreview, 0, categoryId);
+        applyTentaclePoisResult(requestId, tilePreview, 0);
       } else {
         setTentaclePois([]);
       }
@@ -347,11 +338,11 @@ export function useTentacleTool({
           regionPackId: sessionRules.regionPackId,
           subregionId: sessionRules.regionPackSubregionId,
           onEnrich: (enrichedPois) => {
-            applyTentaclePoisResult(requestId, enrichedPois, 1, categoryId);
+            applyTentaclePoisResult(requestId, enrichedPois, 1);
           },
         });
 
-        applyTentaclePoisResult(requestId, pois, 0, categoryId);
+        applyTentaclePoisResult(requestId, pois, 0);
       } catch (error) {
         if (isLatestRequest(requestId)) {
           setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
