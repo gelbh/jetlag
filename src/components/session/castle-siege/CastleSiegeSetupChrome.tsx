@@ -18,6 +18,8 @@ import {
   resolveCastleSiegeRole,
 } from "@/domain/session/castleSiege/teamRole";
 import {
+  continueCastleSiegeSeries,
+  forfeitCastleSiege,
   startCastleSiegeStandoff,
   updateCastleSiegeSetup,
 } from "@/services/firestore/firestoreSessions";
@@ -25,6 +27,7 @@ import { ArenaLedger } from "./ArenaLedger";
 import { FairSplitProposal } from "./FairSplitProposal";
 import { MusterDials } from "./MusterDials";
 import { SealVault } from "./SealVault";
+import { SeriesChrome } from "./SeriesChrome";
 import { SiegeChrome } from "./SiegeChrome";
 import { StandoffChrome } from "./StandoffChrome";
 
@@ -86,13 +89,17 @@ export function CastleSiegeSetupChrome({
   const beltWidthMeters = session.dials?.beltWidthMeters ?? 200;
   const inStandoff = session.phase === "standoff";
   const inSiege = session.phase === "siege";
+  const inBetweenGames = session.phase === "betweenGames";
   const standoffTurn = deserializeTurnState(session.standoffTurn) ?? null;
   const siegeClock = deserializeSiegeClock(session.siegeClock) ?? null;
   const siegeCapture = deserializeSiegeCapture(session.siegeCapture) ?? null;
   const deckRemaining = session.standoffDeckRemainingCount ?? 0;
   // Hand ids live in teamHands/{teamId}; chrome shows 0 until a listener wires (Phase 5.x).
   const ownHandCount = 0;
-  const setupPanelsHidden = inStandoff || inSiege;
+  const setupPanelsHidden = inStandoff || inSiege || inBetweenGames;
+  const seriesLength = session.seriesLength === 3 ? 3 : 1;
+  const gameIndex = session.gameIndex && session.gameIndex >= 1 ? session.gameIndex : 1;
+  const score = session.score ?? { teamA: 0, teamB: 0 };
 
   const beginStandoff = async () => {
     if (!isHost || importBusy) return;
@@ -106,6 +113,42 @@ export function CastleSiegeSetupChrome({
     setImportBusy(false);
   };
 
+  const continueSeries = async () => {
+    if (!isHost || importBusy) return;
+    setImportBusy(true);
+    setImportError(null);
+    try {
+      await continueCastleSiegeSeries(session.id);
+    } catch {
+      setImportError("Couldn't continue the series. Try again.");
+    }
+    setImportBusy(false);
+  };
+
+  const forfeitOwnSeries = async () => {
+    if (importBusy || !playing) return;
+    setImportBusy(true);
+    setImportError(null);
+    try {
+      await forfeitCastleSiege(session.id, "forfeitSeries");
+    } catch {
+      setImportError("Couldn't forfeit. Try again.");
+    }
+    setImportBusy(false);
+  };
+
+  const abandonSeries = async () => {
+    if (!isHost || importBusy) return;
+    setImportBusy(true);
+    setImportError(null);
+    try {
+      await forfeitCastleSiege(session.id, "abandon");
+    } catch {
+      setImportError("Couldn't abandon. Try again.");
+    }
+    setImportBusy(false);
+  };
+
   return (
     <aside
       aria-label="Castle Siege setup"
@@ -113,6 +156,19 @@ export function CastleSiegeSetupChrome({
       className="pointer-events-auto absolute left-3 right-3 z-[var(--z-dock)] flex max-h-[min(52vh,28rem)] flex-col gap-2 overflow-y-auto"
       style={{ top: "max(4.5rem, calc(env(safe-area-inset-top, 0px) + 3.75rem))" }}
     >
+      <SeriesChrome
+        active
+        seriesLength={seriesLength}
+        gameIndex={gameIndex}
+        score={score}
+        phase={session.phase ?? "setup"}
+        seriesOutcome={session.seriesOutcome ?? null}
+        isHost={isHost}
+        onContinueSeries={isHost && inBetweenGames ? continueSeries : undefined}
+        onForfeitSeries={playing && inBetweenGames ? forfeitOwnSeries : undefined}
+        onAbandonSeries={isHost && inBetweenGames ? abandonSeries : undefined}
+      />
+
       <StandoffChrome
         active={inStandoff}
         turn={standoffTurn}

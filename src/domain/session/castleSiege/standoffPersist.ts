@@ -138,6 +138,7 @@ export function deserializeTurnState(value: unknown): StandoffTurnState | undefi
 export function buildStartStandoffPublicPatch(
   nowMs: number,
   deckRemainingCount: number,
+  opener: StandoffTeamId = "teamA",
 ): {
   phase: "standoff";
   standoffTurn: Record<string, unknown>;
@@ -145,7 +146,9 @@ export function buildStartStandoffPublicPatch(
 } {
   return {
     phase: "standoff",
-    standoffTurn: serializeTurnState(createInitialStandoffTurn(nowMs)),
+    standoffTurn: serializeTurnState(
+      createInitialStandoffTurn(nowMs, DEFAULT_STANDOFF_CLOCKS, opener),
+    ),
     standoffDeckRemainingCount: deckRemainingCount,
   };
 }
@@ -154,6 +157,7 @@ export function buildStartStandoffPublicPatch(
 export function buildStartStandoffPrivateState(
   nowMs: number,
   seed = 1,
+  opener: StandoffTeamId = "teamA",
 ): {
   deck: SerializedStandoffDeck;
   hands: SerializedStandoffHands;
@@ -164,7 +168,7 @@ export function buildStartStandoffPrivateState(
   return {
     deck,
     hands: { teamA: [], teamB: [] },
-    publicPatch: buildStartStandoffPublicPatch(nowMs, deck.remainingIds.length),
+    publicPatch: buildStartStandoffPublicPatch(nowMs, deck.remainingIds.length, opener),
   };
 }
 

@@ -5,8 +5,15 @@ const TERMINAL_OUTCOMES = new Set(["found", "ended_early", "abandoned"]);
 /**
  * Apply end writes inside an existing transaction (reads already done).
  * Returns the applied gameOutcome string, or false when no session update was applied.
+ *
+ * @param {FirebaseFirestore.Transaction} tx
+ * @param {FirebaseFirestore.Firestore} db
+ * @param {FirebaseFirestore.DocumentReference} sessionRef
+ * @param {object} data
+ * @param {string} gameOutcome
+ * @param {Record<string, unknown>} [extraFields] merged into the same session update
  */
-export function applyEndSessionInTx(tx, db, sessionRef, data, gameOutcome) {
+export function applyEndSessionInTx(tx, db, sessionRef, data, gameOutcome, extraFields) {
   if (data.status === "ended" || typeof data.endedAt === "string") {
     const existingCode = typeof data.code === "string" ? data.code : null;
     if (existingCode) {
@@ -19,6 +26,7 @@ export function applyEndSessionInTx(tx, db, sessionRef, data, gameOutcome) {
   const outcome = TERMINAL_OUTCOMES.has(data.gameOutcome) ? data.gameOutcome : gameOutcome;
 
   tx.update(sessionRef, {
+    ...(extraFields && typeof extraFields === "object" ? extraFields : {}),
     endedAt: new Date().toISOString(),
     status: "ended",
     gameOutcome: outcome,

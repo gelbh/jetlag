@@ -1,4 +1,7 @@
 export {
+  continueCastleSiegeSeries,
+  forfeitCastleSiege,
+  resolveCastleSiegeGame,
   startCastleSiegeStandoff,
   updateCastleSiegeSetup,
   writeTeamMarks,

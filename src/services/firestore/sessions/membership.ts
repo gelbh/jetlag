@@ -187,7 +187,9 @@ export async function createRemoteSession(
         ? {
             mode: "castleSiege" as const,
             castleSiegeRoles,
-            ...(options?.seriesLength !== undefined ? { seriesLength: options.seriesLength } : {}),
+            seriesLength: options?.seriesLength === 3 ? 3 : 1,
+            gameIndex: 1,
+            score: { teamA: 0, teamB: 0 },
             ...(options?.setupMode !== undefined ? { setupMode: options.setupMode } : {}),
             ...(options?.dials !== undefined ? { dials: options.dials } : {}),
           }

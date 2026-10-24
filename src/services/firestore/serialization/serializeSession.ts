@@ -3,6 +3,11 @@ import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotati
 import { parseRegionPackId } from "@/domain/regions/regionPack";
 import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
 import type { SessionMode } from "@/domain/session/castleSiege/mode";
+import {
+  deserializeSeriesFields,
+  serializeSeriesFields,
+} from "@/domain/session/castleSiege/seriesPersist";
+import { createInitialSeriesState } from "@/domain/session/castleSiege/seriesScore";
 import type { CastleSiegeRoles, CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { parseCustomMeasureGeometries } from "@/domain/session/catalog/customMeasureGeometry";
 import {
@@ -328,9 +333,9 @@ export function buildSessionDocument(
     if (options.castleSiegeRoles) {
       payload.castleSiegeRoles = options.castleSiegeRoles;
     }
-    if (options.seriesLength === 1 || options.seriesLength === 3) {
-      payload.seriesLength = options.seriesLength;
-    }
+    const seriesLength = options.seriesLength === 3 ? 3 : 1;
+    payload.seriesLength = seriesLength;
+    Object.assign(payload, serializeSeriesFields(createInitialSeriesState(seriesLength)));
     if (options.setupMode === "pregame" || options.setupMode === "fairSplit") {
       payload.setupMode = options.setupMode;
     }
@@ -495,6 +500,8 @@ export function deserializeSessionFromFirestore(
     mode: parseSessionMode(document.mode),
     castleSiegeRoles: parseCastleSiegeRoles(document.castleSiegeRoles),
     seriesLength: parseSeriesLength(document.seriesLength),
+    ...parseSeriesScoreboardFromDocument(document),
+    seriesStandoffOpener: parseSeriesStandoffOpener(document.seriesStandoffOpener),
     setupMode: parseSetupMode(document.setupMode),
     ...parseCastleSiegeSetupFromDocument(document as Record<string, unknown>),
     phase: parseCastleSiegePhase(document.phase),
@@ -520,6 +527,30 @@ export function deserializeSessionFromFirestore(
         ? (document.siegeCapture as Record<string, unknown>)
         : undefined,
   };
+}
+
+function parseSeriesScoreboardFromDocument(document: Record<string, unknown>): {
+  gameIndex?: number;
+  score?: { teamA: number; teamB: number };
+  seriesOutcome?: "complete" | "abandoned";
+} {
+  const parsed = deserializeSeriesFields({
+    gameIndex: document.gameIndex,
+    score: document.score,
+    seriesOutcome: document.seriesOutcome,
+  });
+  if (!parsed) {
+    return {};
+  }
+  return {
+    gameIndex: parsed.gameIndex,
+    score: parsed.score,
+    ...(parsed.seriesOutcome !== null ? { seriesOutcome: parsed.seriesOutcome } : {}),
+  };
+}
+
+function parseSeriesStandoffOpener(value: unknown): "teamA" | "teamB" | undefined {
+  return value === "teamA" || value === "teamB" ? value : undefined;
 }
 
 function parseCastleSiegePhase(

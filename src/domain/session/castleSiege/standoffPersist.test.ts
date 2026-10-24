@@ -27,4 +27,9 @@ describe("standoffPersist", () => {
     expect(deck?.deck).toHaveLength(CASTLE_SIEGE_DECK_SIZE);
     expect(serializeDeckState(deck!.deck, []).remainingIds).toEqual(state.deck.remainingIds);
   });
+
+  it("buildStartStandoffPrivateState wires opener into standoffTurn.activeTeam", () => {
+    const state = buildStartStandoffPrivateState(100, 1, "teamB");
+    expect(state.publicPatch.standoffTurn.activeTeam).toBe("teamB");
+  });
 });

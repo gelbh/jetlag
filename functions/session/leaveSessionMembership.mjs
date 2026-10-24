@@ -1,3 +1,4 @@
+import { seriesPatchForPlayingMemberLeave } from "./castleSiege/seriesProgression.mjs";
 import { applyEndSessionInTx } from "./endSessionCanonical.mjs";
 import { LEAVE_ALREADY_ENDED, LEAVE_NOT_HOST, LEAVE_SESSION_NOT_FOUND } from "./hostLeave.mjs";
 import { pickHostPromotee } from "./pickHostPromotee.mjs";
@@ -10,6 +11,24 @@ import {
 
 export const LEAVE_MEMBERSHIP_NOT_MEMBER = "LEAVE_MEMBERSHIP_NOT_MEMBER";
 export const LEAVE_NOT_GATED = "LEAVE_NOT_GATED";
+
+/**
+ * Scrub leaving uid from castleSiegeRoles into the series leave patch (mutates patch).
+ *
+ * @param {object} data
+ * @param {string} uid
+ * @param {Record<string, unknown>} patch
+ */
+function applyCastleSiegeRoleScrub(data, uid, patch) {
+  const castleRoles =
+    data.castleSiegeRoles && typeof data.castleSiegeRoles === "object"
+      ? { ...data.castleSiegeRoles }
+      : null;
+  if (castleRoles && uid in castleRoles) {
+    delete castleRoles[uid];
+    patch.castleSiegeRoles = castleRoles;
+  }
+}
 
 function assertActiveSession(sessionSnap) {
   if (!sessionSnap.exists) {
@@ -110,7 +129,10 @@ export async function leaveSessionMembershipHandler(db, uid, sessionId) {
       throw new Error(LEAVE_NOT_HOST);
     }
 
-    tx.update(sessionRef, removal.sessionUpdate);
+    const seriesPatch = seriesPatchForPlayingMemberLeave(data, uid) ?? {};
+    applyCastleSiegeRoleScrub(data, uid, seriesPatch);
+
+    tx.update(sessionRef, { ...removal.sessionUpdate, ...seriesPatch });
     if (removal.nextSecrets != null) {
       tx.set(secretsRef, removal.nextSecrets);
     }
@@ -144,13 +166,22 @@ export async function leaveGatedHostSessionHandler(db, uid, sessionId) {
     );
 
     if (promotee == null) {
-      applyEndSessionInTx(tx, db, sessionRef, data, "ended_early");
+      // Solo host exit ends the session; mark series abandoned when Castle Siege.
+      const abandonFields =
+        data.mode === "castleSiege" && data.seriesOutcome == null
+          ? { seriesOutcome: "abandoned" }
+          : undefined;
+      applyEndSessionInTx(tx, db, sessionRef, data, "ended_early", abandonFields);
       outcome = { action: "ended" };
       return;
     }
 
+    const seriesPatch = seriesPatchForPlayingMemberLeave(data, uid) ?? {};
+    applyCastleSiegeRoleScrub(data, uid, seriesPatch);
+
     tx.update(sessionRef, {
       ...removal.sessionUpdate,
+      ...seriesPatch,
       hostUid: promotee,
     });
     if (removal.nextSecrets != null) {
