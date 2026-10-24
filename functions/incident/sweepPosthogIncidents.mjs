@@ -8,6 +8,7 @@ export const POSTHOG_SWEEP_AUTH_FAILED = "POSTHOG_SWEEP_AUTH_FAILED";
 const POSTHOG_ISSUES_API = "https://eu.posthog.com/api/projects/232295/error_tracking/issues";
 const FETCH_TIMEOUT_MS = 2_000;
 
+/** PostHog issue status → incident status. Anything unmapped leaves the incident open. */
 const TARGET_STATUS = {
   resolved: "resolved",
   suppressed: "dismissed",

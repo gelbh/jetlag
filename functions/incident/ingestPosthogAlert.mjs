@@ -18,6 +18,7 @@ const DESCRIPTION_MAX_LENGTH = 300;
 const RUNTIME_PATTERN = /^[a-z0-9-]{1,40}$/;
 const METHOD_PATTERN = /^[A-Z]{1,10}$/;
 const PATH_MAX_LENGTH = 200;
+/** Firestore `ALREADY_EXISTS` from `DocumentReference.create`. */
 const ALREADY_EXISTS_CODE = 6;
 
 function clampString(value, max) {

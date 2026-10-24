@@ -13,6 +13,7 @@ export const INCIDENT_PAYLOAD_TOO_LARGE = "INCIDENT_PAYLOAD_TOO_LARGE";
 export const INCIDENT_RATE_LIMITED = "INCIDENT_RATE_LIMITED";
 export const INCIDENT_UNAUTHENTICATED = "INCIDENT_UNAUTHENTICATED";
 
+/** Client-visible email failure code (details stay server-side in logs). */
 export const INCIDENT_EMAIL_FAILED_CODE = "email_failed";
 
 const DIAGNOSTICS_ALLOWED_KEYS = [

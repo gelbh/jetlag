@@ -13,6 +13,7 @@ export const PRELOAD_RATE_LIMITED = "PRELOAD_RATE_LIMITED";
 export const PRELOAD_UNAUTHENTICATED = "PRELOAD_UNAUTHENTICATED";
 export const PRELOAD_PERMANENT_AUTH_REQUIRED = "PRELOAD_PERMANENT_AUTH_REQUIRED";
 
+/** Client-visible email failure code (details stay server-side in logs). */
 export const PRELOAD_EMAIL_FAILED_CODE = "email_failed";
 
 const GAME_SIZES = new Set(["small", "medium", "large"]);

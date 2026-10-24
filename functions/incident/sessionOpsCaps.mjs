@@ -97,6 +97,9 @@ export function canConsumeTool(usage, caps) {
   return usage.toolExecutionCount < caps.toolExecutionsPerSummon;
 }
 
+/**
+ * Pure consume-on-summon (in-memory). Prefer Firestore helpers for enforcement.
+ */
 export function consumeSummon(usage, caps) {
   if (!canSummon(usage, caps)) {
     return { ok: false, code: SESSION_OPS_SUMMON_CAP };
@@ -104,6 +107,9 @@ export function consumeSummon(usage, caps) {
   return { ok: true, usage: { summonCount: usage.summonCount + 1 } };
 }
 
+/**
+ * Pure consume-on-turn.
+ */
 export function consumeTurn(usage, caps) {
   if (!canConsumeTurn(usage, caps)) {
     return { ok: false, code: SESSION_OPS_TURN_CAP };
@@ -117,6 +123,9 @@ export function consumeTurn(usage, caps) {
   };
 }
 
+/**
+ * Pure consume-on-tool (per-summon only; global is separate).
+ */
 export function consumeTool(usage, caps) {
   if (!canConsumeTool(usage, caps)) {
     return { ok: false, code: SESSION_OPS_TOOL_CAP };

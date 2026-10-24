@@ -221,6 +221,10 @@ export async function approveHostConfirmHandler(db, input, deps = {}) {
   }
 }
 
+/**
+ * Mark a pending confirm denied (host dismissed). Callable optional; expire
+ * still applies if left pending.
+ */
 export async function denyHostConfirmHandler(db, input, deps = {}) {
   const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   const confirmId = typeof input?.confirmId === "string" ? input.confirmId : "";
