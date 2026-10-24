@@ -28,6 +28,31 @@ async function clearTeamSealsAndMarks(db, sessionId) {
 }
 
 /**
+ * @param {FirebaseFirestore.Firestore} db
+ * @param {FirebaseFirestore.DocumentReference} sessionRef
+ */
+async function clearOracleAskReceipts(db, sessionRef) {
+  const snap = await sessionRef.collection("oracleAskReceipts").get();
+  if (snap.empty) {
+    return;
+  }
+  let batch = db.batch();
+  let pending = 0;
+  for (const doc of snap.docs) {
+    batch.delete(doc.ref);
+    pending += 1;
+    if (pending >= 400) {
+      await batch.commit();
+      batch = db.batch();
+      pending = 0;
+    }
+  }
+  if (pending > 0) {
+    await batch.commit();
+  }
+}
+
+/**
  * Resolve a finished Siege game into series score / betweenGames / match end.
  *
  * data: { sessionId, reason: "capture" | "fewerQuestions" }
@@ -47,49 +72,62 @@ export const resolveCastleSiegeGame = onCall(
 
     const db = getFirestore();
     const sessionRef = db.collection("sessions").doc(sessionId);
-    const sessionSnap = await sessionRef.get();
-    if (!sessionSnap.exists) {
-      throw new HttpsError("not-found", "Session not found.");
-    }
-    const session = sessionSnap.data() ?? {};
-    if (session.mode !== "castleSiege") {
-      throw new HttpsError("failed-precondition", "Session is not Castle Siege.");
-    }
-    if (session.hostUid !== uid) {
-      throw new HttpsError("permission-denied", "Only the host can resolve series games.");
-    }
 
+    /** @type {FirebaseFirestore.QuerySnapshot | null} */
     let askSnap = null;
     if (reason === "fewerQuestions") {
       askSnap = await sessionRef.collection("oracleAskReceipts").get();
     }
 
-    const resolved = resolveGameProgression({ session, reason, askSnap });
-    if (!resolved.ok) {
-      if (resolved.code === "QUESTIONS_TIE") {
-        throw new HttpsError(
-          "failed-precondition",
-          "Ask counts are tied; host must forfeit or abandon.",
-        );
+    const result = await db.runTransaction(async (tx) => {
+      const sessionSnap = await tx.get(sessionRef);
+      if (!sessionSnap.exists) {
+        throw new HttpsError("not-found", "Session not found.");
       }
-      if (resolved.code === "CAPTURE_NOT_WON") {
-        throw new HttpsError("failed-precondition", "Capture is not a win yet.");
+      const session = sessionSnap.data() ?? {};
+      if (session.mode !== "castleSiege") {
+        throw new HttpsError("failed-precondition", "Session is not Castle Siege.");
       }
-      if (resolved.code === "SERIES_ALREADY_ENDED") {
-        throw new HttpsError("failed-precondition", "Series already ended.");
+      if (session.hostUid !== uid) {
+        throw new HttpsError("permission-denied", "Only the host can resolve series games.");
       }
-      throw new HttpsError("invalid-argument", "Unable to resolve game.");
-    }
 
-    await sessionRef.update(resolved.patch);
-    return {
-      ok: true,
-      kind: resolved.progression.kind,
-      winner: resolved.winner,
-      gameIndex: resolved.progression.state.gameIndex,
-      score: resolved.progression.state.score,
-      seriesOutcome: resolved.progression.state.seriesOutcome,
-    };
+      const resolved = resolveGameProgression({ session, reason, askSnap });
+      if (!resolved.ok) {
+        if (resolved.code === "QUESTIONS_TIE") {
+          throw new HttpsError(
+            "failed-precondition",
+            "Ask counts are tied; host must forfeit or abandon.",
+          );
+        }
+        if (resolved.code === "CAPTURE_NOT_WON") {
+          throw new HttpsError("failed-precondition", "Capture is not a win yet.");
+        }
+        if (resolved.code === "SERIES_ALREADY_ENDED") {
+          throw new HttpsError("failed-precondition", "Series already ended.");
+        }
+        if (resolved.code === "NOT_IN_SIEGE") {
+          throw new HttpsError("failed-precondition", "Resolve is only valid during Siege.");
+        }
+        throw new HttpsError("invalid-argument", "Unable to resolve game.");
+      }
+
+      tx.update(sessionRef, {
+        ...resolved.patch,
+        siegeCapture: FieldValue.delete(),
+      });
+
+      return {
+        ok: true,
+        kind: resolved.progression.kind,
+        winner: resolved.winner,
+        gameIndex: resolved.progression.state.gameIndex,
+        score: resolved.progression.state.score,
+        seriesOutcome: resolved.progression.state.seriesOutcome,
+      };
+    });
+
+    return result;
   }),
 );
 
@@ -139,6 +177,7 @@ export const continueCastleSiegeSeries = onCall(
     }
     await sessionRef.update(update);
     await clearTeamSealsAndMarks(db, sessionId);
+    await clearOracleAskReceipts(db, sessionRef);
 
     return {
       ok: true,
@@ -218,6 +257,12 @@ export const forfeitCastleSiege = onCall(
     if (!resolved.ok) {
       if (resolved.code === "SERIES_ALREADY_ENDED") {
         throw new HttpsError("failed-precondition", "Series already ended.");
+      }
+      if (resolved.code === "INVALID_PHASE") {
+        throw new HttpsError(
+          "failed-precondition",
+          "forfeitGame is not valid between games; use forfeitSeries.",
+        );
       }
       throw new HttpsError("invalid-argument", "Unable to apply forfeit.");
     }

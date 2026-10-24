@@ -71,6 +71,9 @@ export function resolveGameProgression(input) {
   if (state.seriesOutcome != null) {
     return { ok: false, code: "SERIES_ALREADY_ENDED" };
   }
+  if (input.session?.phase !== "siege") {
+    return { ok: false, code: "NOT_IN_SIEGE" };
+  }
 
   let winner = null;
   if (input.reason === "capture") {
@@ -116,17 +119,25 @@ export function flipStandoffOpener(opener) {
 }
 
 /**
- * @param {object} session
- * @returns {{
- *   phase: "setup",
- *   seriesStandoffOpener: "teamA" | "teamB",
- *   coinAssignment?: object,
- *   clearKeys: string[],
- * }}
+ * True when another uid still holds the same playing role (teammate remains).
+ *
+ * @param {Record<string, unknown>} roles
+ * @param {string} uid
+ * @param {"teamA" | "teamB"} role
  */
+export function hasTeammateOnPlayingRole(roles, uid, role) {
+  for (const [otherUid, otherRole] of Object.entries(roles)) {
+    if (otherUid !== uid && otherRole === role) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Series patch when a playing member leaves mid-match (auto forfeit).
- * betweenGames → forfeit series; otherwise forfeit current game.
+ * Setup: no score change. betweenGames → forfeit series.
+ * Otherwise forfeit current game only when this uid is the last on that role.
  *
  * @param {object} session
  * @param {string} uid
@@ -140,12 +151,18 @@ export function seriesPatchForPlayingMemberLeave(session, uid) {
   if (state.seriesOutcome != null) {
     return null;
   }
+  if (session.phase === "setup") {
+    return null;
+  }
   const roles =
     session.castleSiegeRoles && typeof session.castleSiegeRoles === "object"
       ? session.castleSiegeRoles
       : {};
   const role = typeof roles[uid] === "string" ? roles[uid] : "";
   if (role !== "teamA" && role !== "teamB") {
+    return null;
+  }
+  if (hasTeammateOnPlayingRole(roles, uid, role)) {
     return null;
   }
   const progression =
@@ -168,6 +185,9 @@ export function resolveForfeitProgression(input) {
   if (input.action === "abandon") {
     const progression = abandonMatch(state);
     return { ok: true, progression, patch: seriesPatchFromProgression(progression) };
+  }
+  if (input.action === "forfeitGame" && input.session?.phase === "betweenGames") {
+    return { ok: false, code: "INVALID_PHASE" };
   }
   const team = input.forfeitingTeam;
   if (team !== "teamA" && team !== "teamB") {

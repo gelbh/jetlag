@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  buildContinueSeriesPlan,
   captureWinnerTeam,
   countAsksByAttackerTeam,
   resolveForfeitProgression,
@@ -36,6 +37,7 @@ describe("castleSiege series progression", () => {
     const resolved = resolveGameProgression({
       reason: "capture",
       session: {
+        phase: "siege",
         seriesLength: 1,
         gameIndex: 1,
         score: { teamA: 0, teamB: 0 },
@@ -45,6 +47,40 @@ describe("castleSiege series progression", () => {
     assert.equal(resolved.ok, true);
     assert.equal(resolved.winner, "teamA");
     assert.equal(resolved.progression.kind, "matchEnd");
+  });
+
+  it("rejects resolve when phase is not siege (double-resolve / wrong phase)", () => {
+    const base = {
+      phase: "siege",
+      seriesLength: 3,
+      gameIndex: 1,
+      score: { teamA: 0, teamB: 0 },
+      siegeCapture: { status: "confirmed", attackingTeamId: "teamA" },
+    };
+    const first = resolveGameProgression({ reason: "capture", session: base });
+    assert.equal(first.ok, true);
+    assert.equal(first.progression.kind, "betweenGames");
+
+    const afterAward = {
+      ...base,
+      phase: "betweenGames",
+      gameIndex: 2,
+      score: { teamA: 1, teamB: 0 },
+    };
+    const second = resolveGameProgression({ reason: "capture", session: afterAward });
+    assert.equal(second.ok, false);
+    assert.equal(second.code, "NOT_IN_SIEGE");
+
+    const ended = resolveGameProgression({
+      reason: "capture",
+      session: {
+        ...base,
+        seriesOutcome: "complete",
+        score: { teamA: 1, teamB: 0 },
+      },
+    });
+    assert.equal(ended.ok, false);
+    assert.equal(ended.code, "SERIES_ALREADY_ENDED");
   });
 
   it("awards fewer Phase 1 questions; ties stay host-gated", () => {
@@ -64,6 +100,7 @@ describe("castleSiege series progression", () => {
     const tied = resolveGameProgression({
       reason: "fewerQuestions",
       session: {
+        phase: "siege",
         seriesLength: 3,
         gameIndex: 1,
         score: { teamA: 0, teamB: 0 },
@@ -111,9 +148,17 @@ describe("castleSiege series progression", () => {
     assert.equal(abandon.ok, true);
     assert.equal(abandon.progression.state.seriesOutcome, "abandoned");
     assert.deepEqual(abandon.progression.state.score, mid.score);
+
+    const forfeitInBetween = resolveForfeitProgression({
+      session: { ...mid, phase: "betweenGames" },
+      action: "forfeitGame",
+      forfeitingTeam: "teamA",
+    });
+    assert.equal(forfeitInBetween.ok, false);
+    assert.equal(forfeitInBetween.code, "INVALID_PHASE");
   });
 
-  it("leave mid-series auto-forfeits the leaver's team", () => {
+  it("leave mid-series auto-forfeits only the last member on a playing role", () => {
     const leaveGame = seriesPatchForPlayingMemberLeave(
       {
         mode: "castleSiege",
@@ -128,6 +173,32 @@ describe("castleSiege series progression", () => {
     assert.equal(leaveGame.phase, "betweenGames");
     assert.deepEqual(leaveGame.score, { teamA: 1, teamB: 0 });
 
+    const leaveWithTeammate = seriesPatchForPlayingMemberLeave(
+      {
+        mode: "castleSiege",
+        seriesLength: 3,
+        gameIndex: 1,
+        score: { teamA: 0, teamB: 0 },
+        phase: "siege",
+        castleSiegeRoles: { leavers: "teamA", mate: "teamA", opp: "teamB" },
+      },
+      "leavers",
+    );
+    assert.equal(leaveWithTeammate, null);
+
+    const leaveInSetup = seriesPatchForPlayingMemberLeave(
+      {
+        mode: "castleSiege",
+        seriesLength: 3,
+        gameIndex: 1,
+        score: { teamA: 0, teamB: 0 },
+        phase: "setup",
+        castleSiegeRoles: { leavers: "teamA", opp: "teamB" },
+      },
+      "leavers",
+    );
+    assert.equal(leaveInSetup, null);
+
     const leaveSeries = seriesPatchForPlayingMemberLeave(
       {
         mode: "castleSiege",
@@ -140,5 +211,16 @@ describe("castleSiege series progression", () => {
       "leavers",
     );
     assert.equal(leaveSeries.seriesOutcome, "complete");
+  });
+
+  it("continue flips standoff opener for the next game", () => {
+    const plan = buildContinueSeriesPlan({
+      seriesStandoffOpener: "teamA",
+      coinAssignment: { teamA: "left", teamB: "right" },
+    });
+    assert.equal(plan.phase, "setup");
+    assert.equal(plan.seriesStandoffOpener, "teamB");
+    assert.deepEqual(plan.coinAssignment, { teamA: "right", teamB: "left" });
+    assert.ok(plan.clearKeys.includes("siegeCapture"));
   });
 });
