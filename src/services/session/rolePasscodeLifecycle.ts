@@ -1,4 +1,5 @@
 import { APP_VERSION } from "../../domain/device/changelog";
+import { JOIN_ERROR_HEAL_PROOF_INVALID } from "../../domain/session/join/joinErrorCopy";
 import { JOIN_ERROR_MARKERS } from "../../domain/session/join/joinErrorMarkers";
 import type { JoinRequestRole } from "../../domain/session/players/joinRequest";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
@@ -276,8 +277,7 @@ export const JOIN_ERROR_APP_VERSION_INCOMPATIBLE = "Update the app to join this 
 export const JOIN_ERROR_LEGACY_JOIN = "Session uses legacy join.";
 export const JOIN_ERROR_HEAL_ROLE_MISMATCH =
   "Rejoin with the role you had before, or ask the host for help.";
-export const JOIN_ERROR_HEAL_PROOF_INVALID =
-  "Couldn't confirm this device held your seat. Join again with the session code.";
+export { JOIN_ERROR_HEAL_PROOF_INVALID };
 
 export function mapRolePasscodeJoinError(error: unknown): string {
   if (!(error instanceof Error)) {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { APP_VERSION } from "@/domain/device/changelog";
 import type { SessionRecord } from "@/domain/map/annotations";
+import { JOIN_ERROR_HEAL_PROOF_INVALID } from "@/domain/session/join/joinErrorCopy";
 import { type JoinFailureReason, joinFailureReason } from "@/domain/session/join/joinFailureReason";
 import { isPlaceholderGameArea } from "@/domain/session/join/joinPreviewGameArea";
 import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
@@ -366,23 +367,43 @@ export function useJoinSession({
           await withTimeout(
             (async () => {
               const user = await retryAsync(() => ensureFreshAnonymousUser());
-              const joinOptions =
-                session?.code === normalized && myUid
-                  ? {
-                      returningMemberUid: myUid,
-                      persistedMyUid: myUid,
-                      rolePasscode: values.rolePasscode || undefined,
-                    }
-                  : { rolePasscode: values.rolePasscode || undefined };
-              const result = await retryAsync(() =>
-                joinRemoteSessionByCode(
-                  normalized,
-                  user.uid,
-                  values.playerRole,
-                  APP_VERSION,
-                  joinOptions,
-                ),
-              );
+              const freshJoinOptions = { rolePasscode: values.rolePasscode || undefined };
+              const returningMemberUid = session?.code === normalized ? myUid : null;
+              const joinWith = (
+                options: typeof freshJoinOptions & {
+                  returningMemberUid?: string;
+                  persistedMyUid?: string;
+                },
+              ) =>
+                retryAsync(() =>
+                  joinRemoteSessionByCode(
+                    normalized,
+                    user.uid,
+                    values.playerRole,
+                    APP_VERSION,
+                    options,
+                  ),
+                );
+              let result: Awaited<ReturnType<typeof joinWith>>;
+              try {
+                result = await joinWith(
+                  returningMemberUid
+                    ? {
+                        ...freshJoinOptions,
+                        returningMemberUid,
+                        persistedMyUid: returningMemberUid,
+                      }
+                    : freshJoinOptions,
+                );
+              } catch (joinError) {
+                const proofRejected =
+                  joinError instanceof Error && joinError.message === JOIN_ERROR_HEAL_PROOF_INVALID;
+                if (!returningMemberUid || !proofRejected) {
+                  throw joinError;
+                }
+                // This device lost the secret for its seat; a fresh join takes a new seat instead.
+                result = await joinWith(freshJoinOptions);
+              }
               if (result.status === "missing") {
                 if (!isCurrent()) {
                   return;
