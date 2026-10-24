@@ -84,6 +84,20 @@ describe("suggestRegionPackForGameArea", () => {
     expect(suggestion?.packId).toBe("switzerland");
   });
 
+  it("prefers sydney specialty over australia on sydney overlap", () => {
+    const box = REGION_PACK_REFERENCE_BBOXES.sydney;
+    const gameArea = boxPolygon(box.south, box.west, box.north, box.east);
+    const suggestion = suggestRegionPackForGameArea(gameArea);
+    expect(suggestion?.packId).toBe("sydney");
+  });
+
+  it("prefers australia on country-scale overlap when sydney also scores 1.0", () => {
+    const box = REGION_PACK_REFERENCE_BBOXES.australia;
+    const gameArea = boxPolygon(box.south, box.west, box.north, box.east);
+    const suggestion = suggestRegionPackForGameArea(gameArea);
+    expect(suggestion?.packId).toBe("australia");
+  });
+
   it("returns null when intersection is below max(α×packArea, β km²)", () => {
     const nyc = REGION_PACK_REFERENCE_BBOXES.nyc;
     // Tiny sliver along the southern edge — well below default α and β.
