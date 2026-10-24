@@ -62,6 +62,23 @@ describe("ensureMemberProof", () => {
     expect(setDoc).not.toHaveBeenCalled();
   });
 
+  it("stores no secret when a proof exists and none was stored", async () => {
+    getDoc.mockResolvedValue({ exists: () => true });
+
+    await ensureMemberProof("session-1", "uid-1");
+
+    expect(useSessionStore.getState().healSecrets).toEqual({});
+  });
+
+  it("re-reads for a different uid in the same session", async () => {
+    getDoc.mockResolvedValue({ exists: () => true });
+
+    await ensureMemberProof("session-1", "uid-1");
+    await ensureMemberProof("session-1", "uid-2");
+
+    expect(getDoc).toHaveBeenCalledTimes(2);
+  });
+
   it("swallows a denied create without storing the secret", async () => {
     getDoc.mockResolvedValue({ exists: () => false });
     setDoc.mockRejectedValue(new Error("permission-denied"));
