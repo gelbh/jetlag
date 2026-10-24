@@ -4,6 +4,7 @@ import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 import {
   mergeRegionPackFlavorCategories,
   regionPackFlavorCategories,
+  stripKnownRegionPackFlavorCategories,
 } from "./regionPackFlavorCategories";
 
 const DUBLIN_FLAVOR_IDS = [
@@ -94,7 +95,7 @@ describe("mergeRegionPackFlavorCategories", () => {
     expect(merged[0]).toEqual(HOST_CUSTOM);
   });
 
-  it("dedupes by id when flavor is already present", () => {
+  it("replaces prior pack flavor ids with the locked pack list", () => {
     const existing = [
       HOST_CUSTOM,
       {
@@ -108,18 +109,25 @@ describe("mergeRegionPackFlavorCategories", () => {
     const luasMatches = merged.filter((category) => category.id === "custom:dublin-luas-stop");
 
     expect(luasMatches).toHaveLength(1);
-    expect(luasMatches[0]?.label).toBe("Host Luas");
+    expect(luasMatches[0]?.label).toBe("Luas stop");
     expect(merged.map((category) => category.id)).toEqual([
       "custom:host-brewery",
-      "custom:dublin-luas-stop",
-      "custom:dublin-canal-lock",
-      "custom:dublin-gaa-ground",
-      "custom:dublin-castle-fort",
+      ...DUBLIN_FLAVOR_IDS,
     ]);
   });
 
   it("does not invent flavor for non-Dublin packs", () => {
     expect(mergeRegionPackFlavorCategories([HOST_CUSTOM], "nyc")).toEqual([HOST_CUSTOM]);
     expect(mergeRegionPackFlavorCategories([], "nyc")).toEqual([]);
+  });
+
+  it("drops Dublin flavor when switching to NYC", () => {
+    const dublinMerged = mergeRegionPackFlavorCategories([HOST_CUSTOM], "dublin");
+    const nycMerged = mergeRegionPackFlavorCategories(dublinMerged, "nyc");
+
+    expect(nycMerged.map((category) => category.id)).toEqual(["custom:host-brewery"]);
+    expect(stripKnownRegionPackFlavorCategories(dublinMerged).map((c) => c.id)).toEqual([
+      "custom:host-brewery",
+    ]);
   });
 });

@@ -1,5 +1,5 @@
 import type { SessionCustomCategory } from "../session/catalog/sessionCustomContent";
-import type { RegionPackId } from "./regionPack";
+import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 
 const EMPTY: readonly SessionCustomCategory[] = [];
 
@@ -49,22 +49,49 @@ const PACK_FLAVOR_CATEGORIES: Record<RegionPackId, readonly SessionCustomCategor
   sydney: EMPTY,
 };
 
+const KNOWN_PACK_FLAVOR_IDS: ReadonlySet<string> = new Set(
+  REGION_PACK_IDS.flatMap((packId) =>
+    PACK_FLAVOR_CATEGORIES[packId].map((category) => category.id),
+  ),
+);
+
 export function regionPackFlavorCategories(packId: RegionPackId): readonly SessionCustomCategory[] {
   return PACK_FLAVOR_CATEGORIES[packId];
 }
 
-/** Append pack flavor into host customs; keep first id on conflict. */
+/** True for registered pack flavor ids or `custom:<packId>-*` for known packs. */
+export function isKnownRegionPackFlavorCategoryId(id: string): boolean {
+  if (KNOWN_PACK_FLAVOR_IDS.has(id)) {
+    return true;
+  }
+  for (const packId of REGION_PACK_IDS) {
+    if (id.startsWith(`custom:${packId}-`)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Drop prior pack flavor slots so a pack switch cannot leave stale flavor. */
+export function stripKnownRegionPackFlavorCategories(
+  existing: readonly SessionCustomCategory[],
+): SessionCustomCategory[] {
+  return existing.filter((category) => !isKnownRegionPackFlavorCategoryId(category.id));
+}
+
+/** Replace pack flavor slots with the given pack's list; keep host customs. */
 export function mergeRegionPackFlavorCategories(
   existing: readonly SessionCustomCategory[],
   packId: RegionPackId,
 ): SessionCustomCategory[] {
+  const withoutPackFlavor = stripKnownRegionPackFlavorCategories(existing);
   const flavor = regionPackFlavorCategories(packId);
   if (flavor.length === 0) {
-    return [...existing];
+    return withoutPackFlavor;
   }
 
-  const seen = new Set(existing.map((category) => category.id));
-  const merged = [...existing];
+  const seen = new Set(withoutPackFlavor.map((category) => category.id));
+  const merged = [...withoutPackFlavor];
   for (const category of flavor) {
     if (seen.has(category.id)) {
       continue;
