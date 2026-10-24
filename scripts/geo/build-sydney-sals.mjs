@@ -3,16 +3,18 @@
  *
  * Query: geo.abs.gov.au ASGS2021/SAL MapServer/0, envelope intersects Sydney AABB,
  * outSR=4326, maxAllowableOffset=0.0014, then @turf/simplify tolerance 0.002.
- * Parent lgaId: SAL feature centroid must lie inside a Greater Sydney LGA polygon;
- * SALs with no centroid hit are dropped (metro clip).
+ * Parent lgaId: largest-area outer-ring centroid must lie inside the SAL and
+ * inside a Greater Sydney LGA polygon; SALs with no hit are dropped (metro clip).
+ * Matching id: properties.id mirrors ABS salId (parser reads id, not salId).
  *
  * Usage: node scripts/geo/build-sydney-sals.mjs
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import area from "@turf/area";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
-import { featureCollection, point } from "@turf/helpers";
+import { featureCollection, point, polygon } from "@turf/helpers";
 import simplify from "@turf/simplify";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -130,25 +132,32 @@ function ringCentroid(ring) {
   return [cx * factor, cy * factor];
 }
 
-function featureCentroid(feature) {
+function outerRings(geometry) {
+  if (geometry.type === "Polygon") return [geometry.coordinates[0]];
+  if (geometry.type === "MultiPolygon") {
+    return geometry.coordinates.map((poly) => poly[0]);
+  }
+  return [];
+}
+
+/** Largest-area outer-ring centroid; null if the point falls outside the SAL. */
+function salParentPoint(feature) {
   const { geometry } = feature;
   if (!geometry) return null;
-  if (geometry.type === "Polygon") {
-    return point(ringCentroid(geometry.coordinates[0]));
-  }
-  if (geometry.type === "MultiPolygon") {
-    let best = null;
-    let bestLen = -1;
-    for (const poly of geometry.coordinates) {
-      const ring = poly[0];
-      if (ring.length > bestLen) {
-        bestLen = ring.length;
-        best = ringCentroid(ring);
-      }
+  let bestRing = null;
+  let bestArea = -1;
+  for (const ring of outerRings(geometry)) {
+    if (!ring || ring.length < 4) continue;
+    const ringArea = area(polygon([ring]));
+    if (ringArea > bestArea) {
+      bestArea = ringArea;
+      bestRing = ring;
     }
-    return best ? point(best) : null;
   }
-  return null;
+  if (!bestRing) return null;
+  const candidate = point(ringCentroid(bestRing));
+  if (!booleanPointInPolygon(candidate, feature)) return null;
+  return candidate;
 }
 
 function loadLgaIndex() {
@@ -160,7 +169,7 @@ function loadLgaIndex() {
 }
 
 function assignLgaId(salFeature, lgaIndex) {
-  const center = featureCentroid(salFeature);
+  const center = salParentPoint(salFeature);
   if (!center) return null;
   for (const lga of lgaIndex) {
     if (
@@ -193,7 +202,7 @@ async function main() {
 
     const next = simplifyFeature({
       type: "Feature",
-      properties: { salId, name, lgaId },
+      properties: { id: salId, salId, name, lgaId },
       geometry: feature.geometry,
     });
     if (next) features.push(next);

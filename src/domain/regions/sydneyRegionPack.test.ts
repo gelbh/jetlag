@@ -61,7 +61,7 @@ describe("sydney region pack wiring", () => {
     expect(config?.geoAssets.primary).toBe("/geo/sydney/lgas.geojson");
     expect(config?.geoAssets.playArea).toBe("/geo/sydney/playArea.geojson");
     expect(config?.geoAssets.secondary).toBe("/geo/sydney/sals.geojson");
-    // Per-LGA SAL slices deferred; full metro file only until Task 3 geo ships.
+    // Per-LGA SAL slices deferred; full metro sals.geojson only.
     expect(config?.geoAssets.secondaryBySubregion).toBeUndefined();
     expect(config?.matchingLabelOverrides.admin_division_4?.label).toBe("Suburb / Locality");
     expect(config?.measuringLabelOverrides.admin4_border?.label).toBe("Suburb / Locality border");
@@ -96,20 +96,33 @@ describe("sydney geo assets", () => {
     }
   });
 
-  it("ships metro SAL secondary geo with lgaId attribution", () => {
+  it("ships metro SAL secondary geo with matching id and lgaId attribution", () => {
     const salPath = resolve(root, "sals.geojson");
     expect(existsSync(salPath)).toBe(true);
+    const lgaCollection = JSON.parse(readFileSync(resolve(root, "lgas.geojson"), "utf8")) as {
+      features: Array<{ properties: { lgaId: string } }>;
+    };
+    const shippedLgaIds = new Set(lgaCollection.features.map((f) => f.properties.lgaId));
     const collection = JSON.parse(readFileSync(salPath, "utf8")) as {
-      features: Array<{ properties: { salId: string; name: string; lgaId?: string } }>;
+      features: Array<{
+        properties: { id: string; salId: string; name: string; lgaId: string };
+      }>;
     };
     expect(collection.features.length).toBeGreaterThan(0);
+    const seenSalIds = new Set<string>();
     for (const feature of collection.features) {
-      expect(feature.properties.salId.length).toBeGreaterThan(0);
-      expect(feature.properties.name.length).toBeGreaterThan(0);
+      const { id, salId, name, lgaId } = feature.properties;
+      expect(salId.length).toBeGreaterThan(0);
+      expect(name.length).toBeGreaterThan(0);
+      expect(id).toBe(salId);
+      expect(lgaId.length).toBeGreaterThan(0);
+      expect(shippedLgaIds.has(lgaId)).toBe(true);
+      expect(seenSalIds.has(salId)).toBe(false);
+      seenSalIds.add(salId);
     }
-    const lgaIds = new Set(collection.features.map((f) => f.properties.lgaId).filter(Boolean));
-    expect(lgaIds.has("17100")).toBe(true);
-    expect(lgaIds.has("17200")).toBe(true);
+    const parentLgaIds = new Set(collection.features.map((f) => f.properties.lgaId));
+    expect(parentLgaIds.has("17100")).toBe(true);
+    expect(parentLgaIds.has("17200")).toBe(true);
   });
 
   it("ships playArea, attribution, and pack matrix files", () => {
