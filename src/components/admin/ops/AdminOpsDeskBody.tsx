@@ -72,10 +72,10 @@ export function AdminOpsDeskBody({
   openIncidentsBySession: ReadonlyMap<string, number>;
   selectedKey: string | null;
   lastItemPath: string | null;
-  selectedIncident: IncidentRecord | null | undefined;
+  selectedIncident: IncidentRecord | null;
   incidentLoading: boolean;
   selectedRequest: PreloadRequest | null;
-  sessionById: (sessionId: string | null | undefined) => AdminSessionSummary | undefined;
+  sessionById: (sessionId: string | null | undefined) => AdminSessionSummary | null;
   sessionsLoading: boolean;
   preloadLoading: boolean;
   enabled: boolean;
