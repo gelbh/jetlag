@@ -78,6 +78,7 @@ describe("ensureMemberProof", () => {
     getDoc.mockResolvedValue({ exists: () => false });
 
     await expect(ensureMemberProof("session-1", "uid-1")).resolves.toBeUndefined();
+    expect(getDoc).not.toHaveBeenCalled();
     expect(setDoc).not.toHaveBeenCalled();
     expect(useSessionStore.getState().healSecrets).toEqual({});
   });

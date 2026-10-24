@@ -29,6 +29,11 @@ const inflight = new Map<string, Promise<void>>();
  * failed attempt is retried on the next resume.
  */
 export function ensureMemberProof(sessionId: string, uid: string): Promise<void> {
+  // Hashing needs crypto.subtle (secure origins only); skip the read that could never lead to a write.
+  if (!globalThis.crypto?.subtle) {
+    return Promise.resolve();
+  }
+
   const key = `${sessionId}:${uid}`;
   if (confirmed.has(key)) {
     return Promise.resolve();
