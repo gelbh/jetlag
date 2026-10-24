@@ -146,6 +146,10 @@ export async function appendPlayerTrailPoint(
     if (isFirestoreAlreadyExistsError(error)) {
       return;
     }
+    // Rules bind role to memberRoles; a point queued before an own-role switch is denied on replay.
+    if (error instanceof FirebaseError && error.code === "permission-denied") {
+      return;
+    }
     throw error;
   }
 }

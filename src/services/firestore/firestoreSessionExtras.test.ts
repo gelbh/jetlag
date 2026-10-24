@@ -197,23 +197,23 @@ describe("firestoreSessionExtras writes", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("rethrows unrelated trail-point write failures", async () => {
-    const permission = new FirebaseError(
-      "permission-denied",
-      "Missing or insufficient permissions.",
+  it("ignores permission-denied for trail points queued before a role switch", async () => {
+    firestoreMocks.addDoc.mockRejectedValueOnce(
+      new FirebaseError("permission-denied", "Missing or insufficient permissions."),
     );
-    firestoreMocks.addDoc.mockRejectedValueOnce(permission);
     await expect(
       appendPlayerTrailPoint("session-1", {
         uid: "seeker-1",
         sessionId: "session-1",
         lat: 1,
         lng: 2,
-        role: "seeker",
+        role: "hider",
         recordedAt: "2026-01-01T00:00:00.000Z",
       }),
-    ).rejects.toBe(permission);
+    ).resolves.toBeUndefined();
+  });
 
+  it("rethrows unrelated trail-point write failures", async () => {
     firestoreMocks.addDoc.mockRejectedValueOnce(new Error("network down"));
     await expect(
       appendPlayerTrailPoint("session-1", {
@@ -225,6 +225,19 @@ describe("firestoreSessionExtras writes", () => {
         recordedAt: "2026-01-01T00:00:00.000Z",
       }),
     ).rejects.toThrow("network down");
+
+    const unavailable = new FirebaseError("unavailable", "offline");
+    firestoreMocks.addDoc.mockRejectedValueOnce(unavailable);
+    await expect(
+      appendPlayerTrailPoint("session-1", {
+        uid: "seeker-1",
+        sessionId: "session-1",
+        lat: 1,
+        lng: 2,
+        role: "seeker",
+        recordedAt: "2026-01-01T00:00:00.000Z",
+      }),
+    ).rejects.toBe(unavailable);
   });
 
   it("round-trips pending question documents through serialization", () => {
