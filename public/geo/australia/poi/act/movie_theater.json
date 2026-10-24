@@ -1,0 +1,21 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [
+    { "id": "Q45111309", "name": "Arc Cinema", "lat": -35.28395, "lng": 149.121075 },
+    {
+      "id": "Q45111497",
+      "name": "Ben and Jerry's Openair Cinema",
+      "lat": -35.298327,
+      "lng": 149.130012
+    },
+    { "id": "Q45111524", "name": "Dendy Canberra Centre", "lat": -35.278767, "lng": 149.132893 },
+    { "id": "Q45111535", "name": "Greater Union Civic 3", "lat": -35.277843, "lng": 149.131138 },
+    { "id": "Q45111545", "name": "Greater Union Manuka", "lat": -35.319931, "lng": 149.133005 },
+    { "id": "Q45111481", "name": "Hoyts Belconnen", "lat": -35.238298, "lng": 149.065269 },
+    { "id": "Q45111577", "name": "Hoyts Woden", "lat": -35.347008, "lng": 149.087349 },
+    { "id": "Q45111588", "name": "Starlight Drive-In", "lat": -35.228694, "lng": 149.155865 },
+    { "id": "Q45111555", "name": "Sundown Drive-In", "lat": -35.347027, "lng": 149.155648 }
+  ]
+}

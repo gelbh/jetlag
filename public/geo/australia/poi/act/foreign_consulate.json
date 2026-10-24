@@ -1,0 +1,13 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [
+    {
+      "id": "Q106463586",
+      "name": "embassy of Hungary in Australia",
+      "lat": -35.32498,
+      "lng": 149.09076
+    }
+  ]
+}

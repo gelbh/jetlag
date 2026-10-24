@@ -1,0 +1,60 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": { "south": -43.7404, "west": 143.8192, "north": -39.2038, "east": 148.4986 },
+  "places": [
+    {
+      "id": "Q61099760",
+      "name": "Allport Library and Museum of Fine Arts",
+      "lat": -42.88193,
+      "lng": 147.324626
+    },
+    { "id": "Q64411897", "name": "Australasian Golf Museum", "lat": -42.3834, "lng": 147.00824 },
+    {
+      "id": "Q4876028",
+      "name": "Beaconsfield Mine and Heritage Centre",
+      "lat": -41.2017,
+      "lng": 146.816
+    },
+    { "id": "Q124607797", "name": "Channel Heritage Museum", "lat": -43.029847, "lng": 147.264377 },
+    { "id": "Q5293410", "name": "Don River Railway", "lat": -41.181, "lng": 146.318 },
+    { "id": "Q5519031", "name": "Galley Museum", "lat": -42.07835, "lng": 145.55671 },
+    {
+      "id": "Q114120150",
+      "name": "Glenorchy Art and Sculpture Park",
+      "lat": -42.819842,
+      "lng": 147.285114
+    },
+    { "id": "Q1656485", "name": "Ida Bay Railway", "lat": -43.443589, "lng": 146.903525 },
+    { "id": "Q6765823", "name": "Maritime Museum of Tasmania", "lat": -42.88262, "lng": 147.3316 },
+    {
+      "id": "Q4348847",
+      "name": "Military Museum of Tasmania",
+      "lat": -42.888744,
+      "lng": 147.325497
+    },
+    { "id": "Q2353030", "name": "Museum of Old and New Art", "lat": -42.8128, "lng": 147.261 },
+    { "id": "Q62868012", "name": "Narryna Heritage Museum", "lat": -42.889193, "lng": 147.331585 },
+    {
+      "id": "Q7270538",
+      "name": "Queen Victoria Museum and Art Gallery",
+      "lat": -41.4378,
+      "lng": 147.134
+    },
+    {
+      "id": "Q7687474",
+      "name": "Tasmanian Museum and Art Gallery",
+      "lat": -42.8819,
+      "lng": 147.332
+    },
+    { "id": "Q7687490", "name": "Tasmanian Transport Museum", "lat": -42.8312, "lng": 147.275 },
+    { "id": "Q7979282", "name": "Wee Georgie Wood Railway", "lat": -41.72987, "lng": 145.62417 },
+    {
+      "id": "Q24191242",
+      "name": "West Coast Heritage Centre",
+      "lat": -41.882722,
+      "lng": 145.335686
+    },
+    { "id": "Q7984846", "name": "West Coast Wilderness Railway", "lat": -42.153, "lng": 145.496 }
+  ]
+}

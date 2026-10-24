@@ -1,0 +1,51 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": { "south": -43.7404, "west": 143.8192, "north": -39.2038, "east": 148.4986 },
+  "places": [
+    {
+      "id": "Q61099760",
+      "name": "Allport Library and Museum of Fine Arts",
+      "lat": -42.88193,
+      "lng": 147.324626
+    },
+    { "id": "Q139505456", "name": "Bridgewater Library", "lat": -42.73969, "lng": 147.24353 },
+    { "id": "Q139505457", "name": "Bridport Library", "lat": -41.00277, "lng": 147.39477 },
+    { "id": "Q139505459", "name": "Burnie Library", "lat": -41.05102, "lng": 145.90345 },
+    { "id": "Q139505461", "name": "Currie Library", "lat": -39.92952, "lng": 143.85201 },
+    { "id": "Q139505462", "name": "Cygnet Library", "lat": -43.16178, "lng": 147.07638 },
+    { "id": "Q139505463", "name": "Deloraine Library", "lat": -41.52499, "lng": 146.65664 },
+    { "id": "Q139505465", "name": "Exeter Library", "lat": -41.30021, "lng": 146.95303 },
+    { "id": "Q139505466", "name": "Geeveston Library", "lat": -43.16407, "lng": 146.92681 },
+    { "id": "Q139505467", "name": "Glenorchy Library", "lat": -42.83452, "lng": 147.27525 },
+    { "id": "Q7603407", "name": "Hobart Library", "lat": -42.8817, "lng": 147.325 },
+    { "id": "Q139505468", "name": "Huonville Library", "lat": -43.03115, "lng": 147.04968 },
+    { "id": "Q139505469", "name": "Kingston Library", "lat": -42.9765, "lng": 147.31086 },
+    {
+      "id": "Q139505470",
+      "name": "Kinimathatakinta/George Town Library",
+      "lat": -41.10725,
+      "lng": 146.82099
+    },
+    { "id": "Q139505471", "name": "Latrobe Library", "lat": -41.2352, "lng": 146.41147 },
+    { "id": "Q139505472", "name": "Launceston Library", "lat": -41.43616, "lng": 147.13726 },
+    { "id": "Q6458744", "name": "Libraries Tasmania", "lat": -42.88184, "lng": 147.32466 },
+    { "id": "Q139505474", "name": "Longford Library", "lat": -41.59365, "lng": 147.12208 },
+    { "id": "Q139505475", "name": "New Norfolk Library", "lat": -42.7814, "lng": 147.06407 },
+    { "id": "Q139505477", "name": "Orford Library", "lat": -42.56283, "lng": 147.87231 },
+    { "id": "Q139505478", "name": "Penguin Library", "lat": -41.11356, "lng": 146.0729 },
+    { "id": "Q115489106", "name": "Queenstown Library", "lat": -42.07875, "lng": 145.55622 },
+    { "id": "Q139505479", "name": "Ravenswood Library", "lat": -41.41851, "lng": 147.17519 },
+    { "id": "Q139505480", "name": "Ringarooma Library", "lat": -41.24153, "lng": 147.73509 },
+    { "id": "Q139505482", "name": "Rosny Library", "lat": -42.86346, "lng": 147.36993 },
+    { "id": "Q139505483", "name": "Scottsdale Library", "lat": -41.16207, "lng": 147.5153 },
+    { "id": "Q139505485", "name": "Smithton Library", "lat": -40.84185, "lng": 145.12282 },
+    { "id": "Q139505486", "name": "Sorell Library", "lat": -42.78146, "lng": 147.56403 },
+    { "id": "Q139505487", "name": "St Helens Library", "lat": -41.32078, "lng": 148.24909 },
+    { "id": "Q139505492", "name": "Ulverstone Library", "lat": -41.15563, "lng": 146.17238 },
+    { "id": "Q139505493", "name": "Westbury Library", "lat": -41.52676, "lng": 146.83313 },
+    { "id": "Q139505494", "name": "Whitemark Library", "lat": -40.12205, "lng": 148.01662 },
+    { "id": "Q139505495", "name": "Wynyard Library", "lat": -40.99058, "lng": 145.7267 },
+    { "id": "Q139505496", "name": "Zeehan Library", "lat": -41.88728, "lng": 145.33815 }
+  ]
+}

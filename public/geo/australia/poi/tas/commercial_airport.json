@@ -1,0 +1,17 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": { "south": -43.7404, "west": 143.8192, "north": -39.2038, "east": 148.4986 },
+  "places": [
+    { "id": "Q117075120", "name": "Bruny Island Airport", "lat": -43.233333, "lng": 147.379167 },
+    { "id": "Q15540", "name": "Burnie Airport", "lat": -40.998889, "lng": 145.731111 },
+    { "id": "Q15496", "name": "Devonport Airport", "lat": -41.169722, "lng": 146.430278 },
+    { "id": "Q15497", "name": "Flinders Island Airport", "lat": -40.091389, "lng": 147.992778 },
+    { "id": "Q15498", "name": "Hobart Airport", "lat": -42.836112, "lng": 147.510278 },
+    { "id": "Q15514", "name": "King Island Airport", "lat": -39.8775, "lng": 143.878333 },
+    { "id": "Q15520", "name": "Launceston Airport", "lat": -41.545, "lng": 147.215 },
+    { "id": "Q15531", "name": "Smithton Airport", "lat": -40.835, "lng": 145.083333 },
+    { "id": "Q15528", "name": "St Helens Airport", "lat": -41.336667, "lng": 148.281667 },
+    { "id": "Q15533", "name": "Strahan Airport", "lat": -42.155556, "lng": 145.291389 }
+  ]
+}

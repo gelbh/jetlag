@@ -1,0 +1,25 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": { "south": -29.1793, "west": 137.9946, "north": -9.1425, "east": 153.5522 },
+  "places": [
+    { "id": "Q7999618", "name": "ABC Kids World", "lat": -27.8638, "lng": 153.318 },
+    { "id": "Q4822827", "name": "Aussie World", "lat": -26.7502, "lng": 153.047 },
+    { "id": "Q4824804", "name": "Australian Wildlife Experience", "lat": -27.8617, "lng": 153.318 },
+    { "id": "Q4875684", "name": "Beach Break Bay", "lat": -27.95765, "lng": 153.425613 },
+    { "id": "Q5306257", "name": "DreamWorks Experience", "lat": -27.8641, "lng": 153.317 },
+    { "id": "Q1256280", "name": "Dreamworld", "lat": -27.864, "lng": 153.316 },
+    { "id": "Q6391268", "name": "Kennyland", "lat": -27.8639, "lng": 153.317 },
+    { "id": "Q6730781", "name": "Magic Mountain, Nobby Beach", "lat": -28.0617, "lng": 153.44 },
+    { "id": "Q6736073", "name": "Main Street", "lat": -27.8632, "lng": 153.316 },
+    { "id": "Q7076032", "name": "Ocean Parade", "lat": -27.8645, "lng": 153.316 },
+    { "id": "Q7338688", "name": "Rivertown", "lat": -27.8633, "lng": 153.317 },
+    { "id": "Q7355818", "name": "Rocky Hollow", "lat": -27.8617, "lng": 153.316 },
+    { "id": "Q7883058", "name": "Sea Life Sunshine Coast", "lat": -26.6828, "lng": 153.121 },
+    { "id": "Q505518", "name": "Sea World", "lat": -27.9559, "lng": 153.4257 },
+    { "id": "Q7635060", "name": "Sugarworld", "lat": -17.0212, "lng": 145.725 },
+    { "id": "Q1417567", "name": "Warner Bros. Movie World", "lat": -27.9075, "lng": 153.3125 },
+    { "id": "Q7989948", "name": "Wet'n'Wild Water World", "lat": -27.9151, "lng": 153.318 },
+    { "id": "Q7994409", "name": "WhiteWater World", "lat": -27.8644, "lng": 153.315 }
+  ]
+}

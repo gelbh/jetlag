@@ -317,7 +317,24 @@ describe("resolveRandomizedMeasuring", () => {
       .calls[0]!;
     expect(category).toBe("museum");
     expect(regionPackId).toBe("london");
-    expect(options).toBeUndefined();
+    expect(options).toEqual({ subregionId: undefined });
+  });
+
+  it("passes regionPackSubregionId through to measuring place fetch", async () => {
+    vi.mocked(fetchMeasuringPlacesInArea).mockResolvedValue([
+      { id: "m1", name: "Museum A", point: [51.49, -0.1] },
+    ]);
+
+    await resolveRandomizedMeasuring(
+      anchor,
+      "museum",
+      cards,
+      ctx({ regionPackId: "australia", regionPackSubregionId: "nsw" }),
+    );
+
+    const [, , , regionPackId, options] = vi.mocked(fetchMeasuringPlacesInArea).mock.calls[0]!;
+    expect(regionPackId).toBe("australia");
+    expect(options).toEqual({ subregionId: "nsw" });
   });
 
   it("returns null when no places or pins exist", async () => {

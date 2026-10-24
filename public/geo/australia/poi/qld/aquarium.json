@@ -1,0 +1,11 @@
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": { "south": -29.1793, "west": 137.9946, "north": -9.1425, "east": 153.5522 },
+  "places": [
+    { "id": "Q50822227", "name": "Cairns Aquarium", "lat": -16.918592, "lng": 145.773639 },
+    { "id": "Q7306796", "name": "Reef HQ", "lat": -19.2577, "lng": 146.824 },
+    { "id": "Q7883058", "name": "Sea Life Sunshine Coast", "lat": -26.6828, "lng": 153.121 },
+    { "id": "Q505518", "name": "Sea World", "lat": -27.9559, "lng": 153.4257 }
+  ]
+}

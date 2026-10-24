@@ -70,6 +70,8 @@ type OverpassElement = {
 
 export type FetchMeasuringPlacesOptions = {
   onEnrich?: (places: MeasuringPlace[]) => void;
+  /** Pack subregion (e.g. Australia `stateId`) for bandwidth-scoped POI slices. */
+  subregionId?: string;
 };
 
 export function buildMeasuringPlacesQuery(
@@ -196,7 +198,12 @@ export async function fetchMeasuringPlacesInArea(
       ? `${category}:custom:${regionPackId ?? "global"}`
       : `${category}:${regionPackId ?? "global"}`;
 
-  const bundledPlaces = await fetchBundledMeasuringPlaces(gameArea, category, regionPackId);
+  const bundledPlaces = await fetchBundledMeasuringPlaces(
+    gameArea,
+    category,
+    regionPackId,
+    options?.subregionId,
+  );
 
   const mergeWithOverpass = async (): Promise<MeasuringPlace[]> => {
     const overpassPlaces = await fetchOverpassMeasuringPlaces(

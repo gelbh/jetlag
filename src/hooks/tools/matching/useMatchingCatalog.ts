@@ -130,6 +130,7 @@ export function useMatchingCatalog(input: {
       customMatchingAreas: content.customMatchingAreas,
       customCategories: content.customCategories,
       regionPackId: sessionRules?.regionPackId,
+      subregionId: sessionRules?.regionPackSubregionId,
     };
   }, [sessionRules]);
 

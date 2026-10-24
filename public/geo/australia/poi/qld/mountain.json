@@ -1,0 +1,11 @@
+{
+  "category": "mountain",
+  "source": "wikidata",
+  "bbox": { "south": -29.1793, "west": 137.9946, "north": -9.1425, "east": 153.5522 },
+  "places": [
+    { "id": "Q1330376", "name": "Mount Bartle Frere", "lat": -17.383333, "lng": 145.816667 },
+    { "id": "Q1950396", "name": "Mount Beerwah", "lat": -26.9, "lng": 152.883333 },
+    { "id": "Q1645747", "name": "Mount Bellenden Ker", "lat": -17.264167, "lng": 145.853889 },
+    { "id": "Q6919798", "name": "Mount Bowen", "lat": -27.4331, "lng": 145.183 }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": { "south": -25.9986, "west": 129.0006, "north": -10.9068, "east": 137.9991 },
+  "places": [
+    { "id": "Q4726107", "name": "Alice Springs railway station", "lat": -23.6967, "lng": 133.874 },
+    { "id": "Q137374757", "name": "Burrundie Station", "lat": -13.5373, "lng": 131.70158 },
+    { "id": "Q9202403", "name": "Darwin railway station", "lat": -12.4725, "lng": 130.904 },
+    { "id": "Q136531330", "name": "Engoordina Siding", "lat": -25.070353, "lng": 134.366506 },
+    { "id": "Q138187008", "name": "Kanyaka", "lat": -12.94755, "lng": 130.978581 },
+    { "id": "Q11737397", "name": "Katherine Railway Station", "lat": -14.5103, "lng": 132.248 },
+    { "id": "Q136481345", "name": "Larrimah Railway Station", "lat": -15.57403, "lng": 133.21395 },
+    { "id": "Q136532134", "name": "Mataranka Railway Station", "lat": -14.92254, "lng": 133.06831 },
+    { "id": "Q138004830", "name": "Spring Hill Station", "lat": -13.59815, "lng": 131.72821 },
+    {
+      "id": "Q9356715",
+      "name": "Tennant Creek Railway Station",
+      "lat": -19.693224,
+      "lng": 134.175532
+    }
+  ]
+}

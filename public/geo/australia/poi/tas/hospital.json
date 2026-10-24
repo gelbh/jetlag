@@ -1,0 +1,14 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": { "south": -43.7404, "west": 143.8192, "north": -39.2038, "east": 148.4986 },
+  "places": [
+    { "id": "Q5024195", "name": "Calvary Hospital, Hobart", "lat": -42.8662, "lng": 147.3039 },
+    { "id": "Q5874737", "name": "Hobart Private Hospital", "lat": -42.880777, "lng": 147.329928 },
+    { "id": "Q6498358", "name": "Launceston General Hospital", "lat": -41.4464, "lng": 147.142 },
+    { "id": "Q6820546", "name": "Mersey Community Hospital", "lat": -41.23, "lng": 146.423 },
+    { "id": "Q7057304", "name": "North West Regional Hospital", "lat": -41.0471, "lng": 145.8818 },
+    { "id": "Q2171042", "name": "Royal Hobart Hospital", "lat": -42.8799, "lng": 147.33 },
+    { "id": "Q7594073", "name": "St Lukes Private Hospital", "lat": -41.4339, "lng": 147.1494 }
+  ]
+}

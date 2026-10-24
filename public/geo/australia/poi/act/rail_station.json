@@ -1,0 +1,16 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [
+    { "id": "Q800608", "name": "Canberra railway station", "lat": -35.319187, "lng": 149.149232 },
+    {
+      "id": "Q108739451",
+      "name": "Letchworth railway station, New South Wales",
+      "lat": -35.3695,
+      "lng": 149.1905
+    },
+    { "id": "Q55623013", "name": "Michelago railway station", "lat": -35.711, "lng": 149.166 },
+    { "id": "Q14935664", "name": "Queanbeyan railway station", "lat": -35.3429, "lng": 149.2276 }
+  ]
+}

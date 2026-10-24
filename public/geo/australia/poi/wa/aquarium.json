@@ -1,0 +1,14 @@
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": { "south": -35.1916, "west": 112.9211, "north": -13.6887, "east": 129.0019 },
+  "places": [
+    {
+      "id": "Q296366",
+      "name": "Aquarium of Western Australia",
+      "lat": -31.82668,
+      "lng": 115.738118
+    },
+    { "id": "Q109236782", "name": "Ocean Park Aquarium", "lat": -25.980457, "lng": 113.55957 }
+  ]
+}
