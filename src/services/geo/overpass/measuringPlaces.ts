@@ -83,6 +83,8 @@ export type FetchMeasuringPlacesOptions = {
   onEnrich?: (places: MeasuringPlace[]) => void;
   /** Pool lane when no task drives the load, e.g. "background" for preload. */
   priority?: LoadPriority;
+  /** Pack subregion (e.g. Australia `stateId`) for bandwidth-scoped POI slices. */
+  subregionId?: string;
 } & PackThenOverpassProgress;
 
 export function buildMeasuringPlacesQuery(
@@ -223,7 +225,7 @@ export async function fetchMeasuringPlacesInArea(
     gameAreaToBoundingBox(gameArea),
   );
   const bundledPlaces = await withBundleStage(task, () =>
-    fetchBundledMeasuringPlaces(gameArea, category, regionPackId),
+    fetchBundledMeasuringPlaces(gameArea, category, regionPackId, options?.subregionId),
   );
 
   const mergeWithOverpass = async (load?: OverpassLoad): Promise<MeasuringPlace[]> => {

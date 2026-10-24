@@ -159,6 +159,129 @@ describe("regionPackPoi", () => {
     clearBundledPoiCacheForTests();
   });
 
+  it("loads australia state slice when present", async () => {
+    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } = await import(
+      "./regionPackPoi"
+    );
+    clearBundledPoiCacheForTests();
+
+    const sliceUrl = "/geo/australia/poi/nsw/museum.json";
+    const nationalUrl = "/geo/australia/poi/museum.json";
+    const nswGameArea = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [150.5, -34.0],
+          [151.3, -34.0],
+          [151.3, -33.5],
+          [150.5, -33.5],
+          [150.5, -34.0],
+        ],
+      ],
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === sliceUrl) {
+        return {
+          ok: true,
+          json: async () => ({
+            category: "museum",
+            source: "wikidata",
+            places: [{ id: "Q123", name: "NSW Museum", lat: -33.8, lng: 151.0 }],
+          }),
+        };
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const places = await fetchBundledMeasuringPlaces(nswGameArea, "museum", "australia", "nsw");
+    expect(places).toEqual([{ id: "Q123", name: "NSW Museum", point: [-33.8, 151.0] }]);
+    expect(fetchMock).toHaveBeenCalledWith(sliceUrl, expect.anything());
+    expect(fetchMock).not.toHaveBeenCalledWith(nationalUrl, expect.anything());
+
+    vi.unstubAllGlobals();
+    clearBundledPoiCacheForTests();
+  });
+
+  it("keeps empty australia slice without fetching national", async () => {
+    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } = await import(
+      "./regionPackPoi"
+    );
+    clearBundledPoiCacheForTests();
+
+    const sliceUrl = "/geo/australia/poi/tas/aquarium.json";
+    const nationalUrl = "/geo/australia/poi/aquarium.json";
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === sliceUrl) {
+        return {
+          ok: true,
+          json: async () => ({ category: "aquarium", source: "none", places: [] }),
+        };
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      fetchBundledMeasuringPlaces(sampleGameArea, "aquarium", "australia", "tas"),
+    ).resolves.toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(sliceUrl);
+    expect(fetchMock.mock.calls.some((call) => String(call[0]) === nationalUrl)).toBe(false);
+
+    vi.unstubAllGlobals();
+    clearBundledPoiCacheForTests();
+  });
+
+  it("falls back to national australia POI when state slice is missing", async () => {
+    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } = await import(
+      "./regionPackPoi"
+    );
+    clearBundledPoiCacheForTests();
+
+    const sliceUrl = "/geo/australia/poi/nsw/museum.json";
+    const nationalUrl = "/geo/australia/poi/museum.json";
+    const nswGameArea = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [150.5, -34.0],
+          [151.3, -34.0],
+          [151.3, -33.5],
+          [150.5, -33.5],
+          [150.5, -34.0],
+        ],
+      ],
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === sliceUrl) {
+        return { ok: false, json: async () => null };
+      }
+      if (url === nationalUrl) {
+        return {
+          ok: true,
+          json: async () => ({
+            category: "museum",
+            source: "wikidata",
+            places: [{ id: "Q999", name: "National Museum", lat: -33.8, lng: 151.0 }],
+          }),
+        };
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const places = await fetchBundledMeasuringPlaces(nswGameArea, "museum", "australia", "nsw");
+    expect(places).toEqual([{ id: "Q999", name: "National Museum", point: [-33.8, 151.0] }]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    vi.unstubAllGlobals();
+    clearBundledPoiCacheForTests();
+  });
+
   it("merges bundled tentacle pois without duplicating overpass names", () => {
     const overpass: TentaclePoi[] = [
       {

@@ -1,0 +1,9 @@
+{
+  "category": "mountain",
+  "source": "wikidata",
+  "bbox": { "south": -25.9986, "west": 129.0006, "north": -10.9068, "east": 137.9991 },
+  "places": [
+    { "id": "Q279980", "name": "Kata Tjuta", "lat": -25.3, "lng": 130.7593 },
+    { "id": "Q33910", "name": "Uluru", "lat": -25.345, "lng": 131.036111 }
+  ]
+}

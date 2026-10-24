@@ -225,6 +225,7 @@ export function useMeasuringAnchorLoaders({
           customCategories,
           sessionRules?.regionPackId,
           {
+            subregionId: sessionRules?.regionPackSubregionId,
             task,
             createEnrichTask: () =>
               createLoadTask({

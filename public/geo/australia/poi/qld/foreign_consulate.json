@@ -1,0 +1,19 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": { "south": -29.1793, "west": 137.9946, "north": -9.1425, "east": 153.5522 },
+  "places": [
+    {
+      "id": "Q66251211",
+      "name": "Consular Office of Japan, Cairns",
+      "lat": -16.925267,
+      "lng": 145.777778
+    },
+    {
+      "id": "Q66085161",
+      "name": "Consulate-General of Japan, Brisbane",
+      "lat": -27.468472,
+      "lng": 153.029583
+    }
+  ]
+}

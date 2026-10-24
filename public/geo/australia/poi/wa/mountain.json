@@ -1,0 +1,11 @@
+{
+  "category": "mountain",
+  "source": "wikidata",
+  "bbox": { "south": -35.1916, "west": 112.9211, "north": -13.6887, "east": 129.0019 },
+  "places": [
+    { "id": "Q2496852", "name": "Bluff Knoll", "lat": -34.375556, "lng": 118.256111 },
+    { "id": "Q6920235", "name": "Mount Cooke", "lat": -32.4239, "lng": 116.312 },
+    { "id": "Q3321938", "name": "Mount Manypeaks", "lat": -34.896111, "lng": 118.261944 },
+    { "id": "Q1788401", "name": "Mount Meharry", "lat": -22.966667, "lng": 118.583333 }
+  ]
+}

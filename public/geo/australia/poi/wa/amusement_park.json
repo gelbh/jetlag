@@ -1,0 +1,10 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": { "south": -35.1916, "west": 112.9211, "north": -13.6887, "east": 129.0019 },
+  "places": [
+    { "id": "Q4686555", "name": "Adventure World", "lat": -32.095629, "lng": 115.818099 },
+    { "id": "Q4816717", "name": "Atlantis Marine Park", "lat": -31.4963, "lng": 115.586 },
+    { "id": "Q7994548", "name": "White City, Perth", "lat": -31.956619, "lng": 115.854926 }
+  ]
+}

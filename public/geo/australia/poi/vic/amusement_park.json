@@ -1,0 +1,18 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": { "south": -39.159, "west": 140.9619, "north": -33.9806, "east": 149.9762 },
+  "places": [
+    { "id": "Q4686519", "name": "Adventure Park", "lat": -38.2092, "lng": 144.515 },
+    { "id": "Q4906404", "name": "Big Splash", "lat": -35.251, "lng": 149.07 },
+    { "id": "Q5278660", "name": "Dinosaur World", "lat": -37.424, "lng": 143.893 },
+    { "id": "Q5306652", "name": "Dreamland", "lat": -37.868036, "lng": 144.976369 },
+    { "id": "Q5430977", "name": "Fairy Park", "lat": -37.8917, "lng": 144.26 },
+    { "id": "Q5509137", "name": "Funfields", "lat": -37.5208, "lng": 145.113 },
+    { "id": "Q5618090", "name": "Gumbuya World", "lat": -38.0692, "lng": 145.659 },
+    { "id": "Q5750215", "name": "Hi-Lite Park", "lat": -38.146, "lng": 144.367 },
+    { "id": "Q1568767", "name": "Kryal Castle", "lat": -37.5719, "lng": 143.956 },
+    { "id": "Q6730780", "name": "Magic Mountain, Merimbula", "lat": -36.8755, "lng": 149.902 },
+    { "id": "Q8028953", "name": "Wobbies World", "lat": -37.8458, "lng": 145.174 }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": { "south": -25.9986, "west": 129.0006, "north": -10.9068, "east": 137.9991 },
+  "places": [
+    { "id": "Q17606", "name": "Alice Springs Airport", "lat": -23.806944, "lng": 133.902222 },
+    { "id": "Q17624", "name": "Ayers Rock Airport", "lat": -25.186111, "lng": 130.975556 },
+    { "id": "Q20459792", "name": "Bamyili Airstrip", "lat": -14.519722, "lng": 132.883333 },
+    { "id": "Q21924141", "name": "Cattle Creek Airport", "lat": -17.607, "lng": 131.549 },
+    { "id": "Q20450464", "name": "Cooinda Airport", "lat": -12.9033, "lng": 132.532 },
+    { "id": "Q17608", "name": "Croker Island Airport", "lat": -11.165, "lng": 132.483333 },
+    {
+      "id": "Q17609",
+      "name": "Darwin International Airport",
+      "lat": -12.414722,
+      "lng": 130.876667
+    },
+    { "id": "Q12692415", "name": "Delamere Airport", "lat": -15.746667, "lng": 131.92 },
+    { "id": "Q20449404", "name": "Delissaville Airport", "lat": -12.550278, "lng": 130.685278 },
+    { "id": "Q17610", "name": "Elcho Island Airport", "lat": -12.019338, "lng": 135.57065 },
+    { "id": "Q17611", "name": "Gapuwiyak Landing Ground", "lat": -12.498333, "lng": 135.805 },
+    { "id": "Q17620", "name": "Garden Point Airport", "lat": -11.3992, "lng": 130.425 },
+    { "id": "Q17618", "name": "Gove Airport", "lat": -12.27, "lng": 136.818333 },
+    { "id": "Q17612", "name": "Groote Eylandt Airport", "lat": -13.975, "lng": 136.46 },
+    { "id": "Q20456314", "name": "Jervois Airport", "lat": -22.915, "lng": 136.118333 },
+    { "id": "Q21924053", "name": "Marqua Airport", "lat": -22.8058, "lng": 137.25101 },
+    { "id": "Q4275516", "name": "McArthur River Mine Airport", "lat": -16.445, "lng": 136.075 },
+    { "id": "Q12693957", "name": "Minjilang Airport", "lat": -11.158333, "lng": 132.547222 },
+    { "id": "Q21957766", "name": "Moroak Landing Ground", "lat": -14.82, "lng": 133.7 },
+    { "id": "Q21957705", "name": "Mount Swan Airport", "lat": -22.666667, "lng": 134.916944 },
+    { "id": "Q17622", "name": "Ngukurr Airport", "lat": -14.7228, "lng": 134.747 },
+    { "id": "Q21924020", "name": "Rockhampton Downs Airport", "lat": -18.9533, "lng": 135.201 },
+    { "id": "Q13525565", "name": "Smith Point Airport", "lat": -11.1328, "lng": 132.158 },
+    { "id": "Q7567373", "name": "South Goulburn Island Airport", "lat": -11.65, "lng": 133.382 },
+    { "id": "Q17623", "name": "Tennant Creek Airport", "lat": -19.634444, "lng": 134.183333 },
+    { "id": "Q7737541", "name": "The Granites Airport", "lat": -20.5483, "lng": 130.35 }
+  ]
+}

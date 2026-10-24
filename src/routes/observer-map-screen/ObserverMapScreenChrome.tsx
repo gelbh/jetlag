@@ -7,6 +7,7 @@ import {
 import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
 import { MapChromeControl } from "../../components/map/chrome/MapChromeControl";
 import { AppLink } from "../../components/navigation/AppLink";
+import { CastleSiegeSetupChrome } from "../../components/session/castle-siege";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
 import { HudAdminIcon, HudHomeIcon, HudStarIcon } from "../../components/ui/brand/HudIcons";
@@ -152,7 +153,10 @@ export function ObserverMapScreenChrome({
 
   return (
     <>
-      <MapScreenChromeSlots layout="fragments" header={statusBar} toolbar={toolChrome} />
+      <MapScreenChromeSlots layout="fragments" header={statusBar} toolbar={toolChrome}>
+        {/* CS hosts are memberRole observer; seeker/hider chrome already mounts this. */}
+        <CastleSiegeSetupChrome session={session} uid={myUid} isHost={isHost} />
+      </MapScreenChromeSlots>
       {codesSheet}
     </>
   );

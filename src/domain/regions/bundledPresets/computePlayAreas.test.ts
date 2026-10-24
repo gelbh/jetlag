@@ -32,6 +32,13 @@ describe("bundled preset play areas", () => {
     expect(recorded).toBeCloseTo(computed, 1);
   });
 
+  it("matches Sydney playArea.geojson square mileage", () => {
+    const computed = squareMilesFromCityGeoJson("sydney/playArea.geojson");
+    const recorded = BUNDLED_PRESET_PLAY_AREA_SQ_MI["bundled:sydney"];
+    expect(recorded).toBeDefined();
+    expect(recorded).toBeCloseTo(computed, 1);
+  });
+
   it("matches Australia states.geojson square mileage", () => {
     const collection = JSON.parse(
       readFileSync(

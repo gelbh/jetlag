@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.5.0";
+export const APP_VERSION = "1.7.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,65 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.7.0",
+    date: "2026-10-24",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Castle Siege Standoff deck, turn clocks, Declare breach oracle, and Skin-S3 standoff chrome",
+          "Add a Greater Sydney specialty region pack and bundled preset for city-scale play with LGA matching.",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Admin auth uses Firebase custom claim `admin` (no personal emails in git); hands/deck ids move off the member-readable session doc",
+          "Load smaller per-state Australia POI bundles for State/Territory presets (national fill remains for whole-country play).",
+          "Wire the Sydney specialty preset to a Greater Sydney GTFS stop bundle so station tools prefer pack-backed stops with Overpass fallback.",
+        ],
+      },
+    ],
+  },
+  {
+    version: "1.6.0",
+    date: "2026-10-23",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "omit pack play-area geometryJson on Firestore writes and serve Australia STE/CED by state",
+          "Castle Siege create no longer fails when the host is an observer",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "feat: Australia location pack with States/Territories and LGA matching",
+          "The admin opens on a customisable sessions table that folds into a sidebar when you open a session or incident.",
+          "Alert borders follow the alert color instead of always using halt",
+          "Castle Siege Fair-split proposal chrome (propose, score, host nudge, lock)",
+          "Castle Siege Asks resolve via Functions oracle with confirm-send receipt (classic honor path unchanged)",
+          "Withhold measuring auto-answer when the hiding-zone centre is within 50 m of the closer/further flip (point, places, coastline); caution-highlight the truth pin; hider still picks Closer or Further",
+          "Caution-highlight the hiding-zone truth pin when it sits within 50 m of a radar elimination edge",
+          "Withhold radar auto-answer when the hiding-zone centre is within 50 m of the circle edge; hider still picks Yes or No",
+          "Search and share previews use a clearer site name; Premium landing stays fast for crawlers",
+          "Withhold thermometer auto-answer when the hiding-zone centre is within 50 m of the hotter/colder flip; caution-highlight the truth pin; hider still picks Hotter or Colder",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Admin desk runs on the player theme only; the nested admin theme and Archivo font are gone.",
+          "feat: Australia pack CED/SED matching areas and omit oversized pack matching from Firestore session writes",
+          "feat: fill Australia pack measuring/matching POIs and sea-level seed from Wikidata and Open-Meteo",
+          "PostHog alert webhook responds before the admin email; a Firestore trigger now sends it",
+          "Harden prerender SEO checks for JSON-LD and Open Graph site name",
+        ],
+      },
+    ],
+  },
   {
     version: "1.5.0",
     date: "2026-10-21",

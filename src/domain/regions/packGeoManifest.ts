@@ -45,6 +45,8 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
   southampton: { south: 50.86, west: -1.4973, north: 50.9761, east: -1.302 },
   // AABB from public/geo/australia/states.geojson (+0.02° pad).
   australia: { south: -43.7604, west: 112.9011, north: -9.1225, east: 159.1292 },
+  // AABB from public/geo/sydney/lgas.geojson (+0.02° pad).
+  sydney: { south: -34.3574, west: 149.9948, north: -32.9761, east: 151.363 },
 };
 
 /**
@@ -110,10 +112,19 @@ export function isPackGeoSupported(
   }
 }
 
+/**
+ * Bundled POI JSON URL. For `australia` with a State/Territory `subregionId`,
+ * prefers `/geo/australia/poi/<stateId>/<category>.json` (bandwidth slice).
+ * Callers should fall back to the national path when that asset is missing.
+ */
 export function packGeoPoiUrl(
   packId: RegionPackId,
   category: MeasuringLocationCategory | string,
+  subregionId?: string,
 ): string {
+  if (packId === "australia" && subregionId) {
+    return `/geo/${packId}/poi/${subregionId}/${category}.json`;
+  }
   return `/geo/${packId}/poi/${category}.json`;
 }
 
@@ -133,7 +144,11 @@ export function packGeoSeaLevelSeedUrl(packId: RegionPackId): string {
 export function packGeoPoiPublicPath(
   packId: RegionPackId,
   category: MeasuringLocationCategory | string,
+  subregionId?: string,
 ): string {
+  if (packId === "australia" && subregionId) {
+    return `geo/${packId}/poi/${subregionId}/${category}.json`;
+  }
   return `geo/${packId}/poi/${category}.json`;
 }
 

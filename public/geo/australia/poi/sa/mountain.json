@@ -1,0 +1,10 @@
+{
+  "category": "mountain",
+  "source": "wikidata",
+  "bbox": { "south": -38.0626, "west": 129.0018, "north": -25.9964, "east": 141.003 },
+  "places": [
+    { "id": "Q21895278", "name": "Castle Hill", "lat": -35.7158, "lng": 136.9058 },
+    { "id": "Q21887620", "name": "Oulnina Hill", "lat": -32.588, "lng": 139.8374 },
+    { "id": "Q123375474", "name": "The Dutchman Peak", "lat": -32.319722, "lng": 137.965278 }
+  ]
+}

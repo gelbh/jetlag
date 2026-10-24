@@ -1,0 +1,162 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": { "south": -38.0626, "west": 129.0018, "north": -25.9964, "east": 141.003 },
+  "places": [
+    {
+      "id": "Q104589885",
+      "name": "Adelaide Holocaust Museum and Andrew Steiner Education Centre",
+      "lat": -34.928752,
+      "lng": 138.601978
+    },
+    { "id": "Q132337462", "name": "Ardrossan Museum", "lat": -34.423363, "lng": 137.91781 },
+    {
+      "id": "Q132337936",
+      "name": "Auburn Old Police Station and Courthouse Museum",
+      "lat": -34.025374,
+      "lng": 138.684329
+    },
+    {
+      "id": "Q860852",
+      "name": "Barossa International Sculpture Symposium",
+      "lat": -34.5369,
+      "lng": 138.99932
+    },
+    { "id": "Q117004010", "name": "Bublacowie Military Museum", "lat": -34.922, "lng": 137.6106 },
+    {
+      "id": "Q132291282",
+      "name": "Cambrai Agricultural Museum",
+      "lat": -34.657715,
+      "lng": 139.280301
+    },
+    { "id": "Q5046143", "name": "Carrick Hill", "lat": -34.9792, "lng": 138.632 },
+    { "id": "Q5130217", "name": "Clayton Farm Heritage Museum", "lat": -36.3316, "lng": 140.759 },
+    {
+      "id": "Q137794147",
+      "name": "Cleve Agricultural and Folk Museum",
+      "lat": -33.700726,
+      "lng": 136.495782
+    },
+    {
+      "id": "Q66486028",
+      "name": "Cobdogla Steam and Irrigation Museum",
+      "lat": -34.241944,
+      "lng": 140.406111
+    },
+    {
+      "id": "Q85294488",
+      "name": "Eyre Pensinsula Railway Preservation Society",
+      "lat": -34.7242,
+      "lng": 135.8671
+    },
+    {
+      "id": "Q18164839",
+      "name": "Flinders University Art Museum",
+      "lat": -34.920871,
+      "lng": 138.602153
+    },
+    {
+      "id": "Q5471231",
+      "name": "Fort Glanville Conservation Park",
+      "lat": -34.850981,
+      "lng": 138.477187
+    },
+    {
+      "id": "Q132291236",
+      "name": "Franklin Harbour Historical Museum",
+      "lat": -33.684062,
+      "lng": 136.926518
+    },
+    {
+      "id": "Q60748208",
+      "name": "Hindmarsh Fire and Folk Museum",
+      "lat": -34.90768,
+      "lng": 138.5698
+    },
+    {
+      "id": "Q57201120",
+      "name": "Hindmarsh Historical Society Museum",
+      "lat": -34.9077,
+      "lng": 138.5698
+    },
+    { "id": "Q5630666", "name": "HMAS Whyalla", "lat": -33.019307, "lng": 137.574888 },
+    { "id": "Q132324521", "name": "Koppio Smithy Museum", "lat": -34.420349, "lng": 135.847418 },
+    {
+      "id": "Q65071204",
+      "name": "Lobethal Archives and Historical Museum",
+      "lat": -34.904327,
+      "lng": 138.872637
+    },
+    {
+      "id": "Q6780210",
+      "name": "Mary MacKillop Interpretive Centre",
+      "lat": -37.379236,
+      "lng": 140.839559
+    },
+    { "id": "Q6844330", "name": "Migration Museum", "lat": -34.9198, "lng": 138.602 },
+    { "id": "Q122171157", "name": "Museum of Discovery (MOD)", "lat": -34.9215, "lng": 138.5928 },
+    {
+      "id": "Q17435190",
+      "name": "National Military Vehicle Museum",
+      "lat": -34.7261,
+      "lng": 138.629
+    },
+    { "id": "Q15261134", "name": "National Motor Museum", "lat": -34.819722, "lng": 138.954444 },
+    { "id": "Q6975187", "name": "National Railway Museum", "lat": -34.8455, "lng": 138.508 },
+    { "id": "Q7231012", "name": "Port Victoria Maritime Museum", "lat": -34.496, "lng": 137.482 },
+    { "id": "Q15274714", "name": "Samstag Museum", "lat": -34.9222, "lng": 138.5913 },
+    {
+      "id": "Q65071201",
+      "name": "Santos Museum of Economic Botany",
+      "lat": -34.918041,
+      "lng": 138.61127
+    },
+    {
+      "id": "Q65078335",
+      "name": "South Australia Police Historical Society",
+      "lat": -34.919582,
+      "lng": 138.582222
+    },
+    {
+      "id": "Q7566100",
+      "name": "South Australian Aviation Museum",
+      "lat": -34.8482,
+      "lng": 138.512
+    },
+    {
+      "id": "Q18165679",
+      "name": "South Australian Maritime Museum",
+      "lat": -34.8431,
+      "lng": 138.506
+    },
+    { "id": "Q2546445", "name": "South Australian Museum", "lat": -34.92049, "lng": 138.60319 },
+    {
+      "id": "Q7605329",
+      "name": "SteamRanger Heritage Railway",
+      "lat": -35.066064,
+      "lng": 138.865665
+    },
+    { "id": "Q7605492", "name": "Steamtown Heritage Rail Centre", "lat": -32.9751, "lng": 138.826 },
+    {
+      "id": "Q7682408",
+      "name": "Tandanya National Aboriginal Cultural Institute",
+      "lat": -34.9241,
+      "lng": 138.6105
+    },
+    {
+      "id": "Q107548188",
+      "name": "Tea Tree Gully Heritage Museum",
+      "lat": -34.822141,
+      "lng": 138.730816
+    },
+    {
+      "id": "Q85807904",
+      "name": "The Milang Railway Museum",
+      "lat": -35.408742,
+      "lng": 138.971721
+    },
+    { "id": "Q38251131", "name": "Tramway Museum, St Kilda", "lat": -34.736, "lng": 138.548 },
+    { "id": "Q60748124", "name": "Unley Museum", "lat": -34.951395, "lng": 138.608823 },
+    { "id": "Q141539547", "name": "Yitpi Yartapuultiku", "lat": -34.851317, "lng": 138.501589 }
+  ]
+}

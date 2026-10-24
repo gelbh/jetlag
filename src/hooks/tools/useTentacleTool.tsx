@@ -272,6 +272,7 @@ export function useTentacleTool({
             ...poiPinsForCategory(activeAnnotationsRef.current, categoryId),
           ],
           regionPackId: sessionRules.regionPackId,
+          subregionId: sessionRules.regionPackSubregionId,
           task,
           createEnrichTask: () =>
             createLoadTask({

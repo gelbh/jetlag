@@ -1,0 +1,20 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": { "south": -25.9986, "west": 129.0006, "north": -10.9068, "east": 137.9991 },
+  "places": [
+    { "id": "Q30254361", "name": "Alice Springs Hospital", "lat": -23.706479, "lng": 133.878878 },
+    { "id": "Q110605158", "name": "Darwin Hospital", "lat": -12.452778, "lng": 130.829167 },
+    { "id": "Q137279982", "name": "Darwin Private Hospital", "lat": -12.357468, "lng": 130.882023 },
+    { "id": "Q138314057", "name": "Gove District Hospital", "lat": -12.2353, "lng": 136.681 },
+    { "id": "Q16893192", "name": "Katherine District Hospital", "lat": -14.4389, "lng": 132.272 },
+    {
+      "id": "Q110654791",
+      "name": "Palmerston Regional Hospital",
+      "lat": -12.475833,
+      "lng": 131.004167
+    },
+    { "id": "Q7374098", "name": "Royal Darwin Hospital", "lat": -12.355833, "lng": 130.881944 },
+    { "id": "Q136849861", "name": "Tennant Creek Hospital", "lat": -19.64769, "lng": 134.18699 }
+  ]
+}

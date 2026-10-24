@@ -17,6 +17,7 @@ import {
   HudRefreshIcon,
   HudSettingsIcon,
 } from "../../ui/brand/HudIcons";
+import { DESK_HAIRLINE } from "../shared/adminSurface";
 import { AdminUtcClock } from "./AdminUtcClock";
 
 interface AdminStatusStripProps {
@@ -30,8 +31,6 @@ interface AdminStatusStripProps {
   dataFetchedAt: Date | null;
   syncFailed: boolean;
 }
-
-const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
 
 const iconButtonStyles = {
   root: {
@@ -54,7 +53,7 @@ function BarStat({ label, value, alert }: { label: string; value: number; alert?
         flexDirection: "column",
         justifyContent: "center",
         padding: "0 14px",
-        borderLeft: hairline,
+        borderLeft: DESK_HAIRLINE,
         height: 32,
       }}
     >
@@ -161,7 +160,7 @@ export function AdminStatusStrip({
       style={{
         flex: "none",
         background: "var(--color-canvas)",
-        border: hairline,
+        border: DESK_HAIRLINE,
         borderRadius: 16,
       }}
     >

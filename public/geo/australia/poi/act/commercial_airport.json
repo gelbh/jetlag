@@ -1,0 +1,6 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [{ "id": "Q14300", "name": "Canberra Airport", "lat": -35.306944, "lng": 149.195 }]
+}

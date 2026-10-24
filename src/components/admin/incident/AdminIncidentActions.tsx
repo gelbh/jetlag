@@ -17,6 +17,7 @@ import {
   updateIncidentStatus,
 } from "../../../services/incident/incidentApi";
 import { AdminConfirm } from "../shared/AdminConfirm";
+import { DESK_HAIRLINE } from "../shared/adminSurface";
 import { AdminIncidentCursorLaunch } from "./AdminIncidentCursorLaunch";
 
 const CLOSEABLE = new Set<IncidentStatus>(["open", "chatting", "mitigating", "hotfix_pending"]);
@@ -144,7 +145,7 @@ export function AdminIncidentActions({
   const popoverStyles = {
     dropdown: {
       background: "var(--color-canvas)",
-      border: "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)",
+      border: DESK_HAIRLINE,
       borderRadius: 12,
     },
   };

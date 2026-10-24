@@ -63,6 +63,13 @@ export const BUNDLED_PRESET_FLAG_ASSETS = {
     identity: "flagcdn:au",
     presentation: "flag",
   },
+  "sydney-metro": {
+    src: "/region-flags/sydney-metro.png",
+    alt: "Sydney",
+    source: "wikidata:Q3130:P41",
+    identity: "wikidata:Q3130",
+    presentation: "flag",
+  },
   "continent-north-america": {
     src: "/region-flags/continent-north-america.png",
     alt: "Organization of American States",

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
-import { ADMIN_EMAIL_DEFAULT } from "../admin/adminAccess.mjs";
 import { mapJoinSessionWithRoleError } from "../handlers/session/shared.mjs";
 import {
   CLIENT_UPDATE_REQUIRED,
@@ -649,7 +648,7 @@ test("admin heal into a seeker seat with role admin is rejected without writes",
   const db = buildMockDb({ sessionData, secrets: { seeker: newRoleSecret() }, writes });
   const adminAuth = {
     uid: "new-admin",
-    token: { email: ADMIN_EMAIL_DEFAULT, email_verified: true },
+    token: { admin: true, email_verified: true },
   };
 
   await assert.rejects(

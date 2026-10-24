@@ -1,0 +1,35 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": { "south": -43.7404, "west": 143.8192, "north": -39.2038, "east": 148.4986 },
+  "places": [
+    { "id": "Q4967737", "name": "Brighton Transport Hub", "lat": -42.7145, "lng": 147.23 },
+    { "id": "Q24997999", "name": "Dubbil Barril, Tasmania", "lat": -42.1834, "lng": 145.4823 },
+    { "id": "Q28197594", "name": "Florentine Junction", "lat": -42.761, "lng": 146.599 },
+    { "id": "Q5615784", "name": "Guildford", "lat": -41.416667, "lng": 145.683333 },
+    {
+      "id": "Q115565373",
+      "name": "Halls Creek railway station",
+      "lat": -42.13533,
+      "lng": 145.50404
+    },
+    { "id": "Q127700317", "name": "Hobart railway station", "lat": -42.877606, "lng": 147.332589 },
+    {
+      "id": "Q115772313",
+      "name": "Lowana Railway Station railway station",
+      "lat": -42.191856,
+      "lng": 145.365421
+    },
+    { "id": "Q115565360", "name": "Lynchford railway station", "lat": -42.11685, "lng": 145.52777 },
+    { "id": "Q24998042", "name": "Lynchford, Tasmania", "lat": -42.1169, "lng": 145.5277 },
+    {
+      "id": "Q115772296",
+      "name": "Regatta Point Station railway station",
+      "lat": -42.160175,
+      "lng": 145.327583
+    },
+    { "id": "Q24560033", "name": "Rinadeena, Tasmania", "lat": -42.153029, "lng": 145.495529 },
+    { "id": "Q7687490", "name": "Tasmanian Transport Museum", "lat": -42.8312, "lng": 147.275 },
+    { "id": "Q7988599", "name": "Westerway railway station", "lat": -42.6824, "lng": 146.784 }
+  ]
+}
