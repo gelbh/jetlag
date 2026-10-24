@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HttpsError } from "firebase-functions/v2/https";
+import { POSTHOG_SWEEP_AUTH_FAILED } from "../incident/sweepPosthogIncidents.mjs";
 import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../session/expectedSessionUxHttpsErrors.mjs";
 import {
   capturePosthogException,
@@ -158,11 +159,16 @@ function isExpectedLeaveError(error, name) {
  * @param {string | null | undefined} [name] deployed function name, when known
  * @returns {boolean}
  */
+function isSweepAuthFailure(error) {
+  return error instanceof Error && error.message === POSTHOG_SWEEP_AUTH_FAILED;
+}
+
 export function shouldSkipFunctionsException(error, name = null) {
   return (
     isExpectedFunctionsError(error) ||
     isOverpassTransportNoise(error) ||
-    isExpectedLeaveError(error, name)
+    isExpectedLeaveError(error, name) ||
+    isSweepAuthFailure(error)
   );
 }
 
