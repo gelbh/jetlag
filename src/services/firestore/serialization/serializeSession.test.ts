@@ -401,6 +401,8 @@ describe("serializeSession", () => {
       memberRoles: { "host-uid": "observer" },
       castleSiegeRoles: { "host-uid": "teamA" },
       seriesLength: 3,
+      gameIndex: 1,
+      score: { teamA: 0, teamB: 0 },
       setupMode: "pregame",
       dials: DEFAULT_CASTLE_SIEGE_DIALS,
     });
@@ -428,6 +430,8 @@ describe("serializeSession", () => {
     expect(restored.mode).toBe("castleSiege");
     expect(restored.castleSiegeRoles).toEqual({ "host-uid": "teamA" });
     expect(restored.seriesLength).toBe(3);
+    expect(restored.gameIndex).toBe(1);
+    expect(restored.score).toEqual({ teamA: 0, teamB: 0 });
     expect(restored.setupMode).toBe("pregame");
     expect(restored.dials).toEqual(DEFAULT_CASTLE_SIEGE_DIALS);
     expect(restored.border?.type).toBe("LineString");
@@ -446,6 +450,9 @@ describe("serializeSession", () => {
     expect(payload).not.toHaveProperty("mode");
     expect(payload).not.toHaveProperty("castleSiegeRoles");
     expect(payload).not.toHaveProperty("seriesLength");
+    expect(payload).not.toHaveProperty("gameIndex");
+    expect(payload).not.toHaveProperty("score");
+    expect(payload).not.toHaveProperty("seriesOutcome");
     expect(payload).not.toHaveProperty("setupMode");
     expect(payload).not.toHaveProperty("dials");
     expect(payload).not.toHaveProperty("arena");

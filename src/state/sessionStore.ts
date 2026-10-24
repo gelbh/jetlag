@@ -44,6 +44,7 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "standoffTurn",
   "siegeClock",
   "siegeCapture",
+  "score",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordStructuredKey = (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
@@ -96,6 +97,8 @@ const SESSION_RECORD_SCALAR_KEYS = [
   "requiredMinAppVersionGraceSeconds",
   "mode",
   "seriesLength",
+  "gameIndex",
+  "seriesOutcome",
   "setupMode",
   "phase",
   "standoffDeckRemainingCount",
