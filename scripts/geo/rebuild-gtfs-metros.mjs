@@ -144,6 +144,15 @@ const METRO_SOURCES = {
     optional: true,
     note: "Keep existing bundle. BODS ITM South East has almost no Southampton local stops; prior DFT extract stays until a better source lands.",
   },
+  sydney: {
+    feedOnestopId: "mdb-2449",
+    sources: [
+      {
+        name: "au-new-south-wales-greater-sydney-gtfs-2449.zip",
+        url: `${MDB}/au-new-south-wales-greater-sydney-gtfs-2449.zip`,
+      },
+    ],
+  },
 };
 
 /** Presets that have no GTFS metro wiring today. */
@@ -237,6 +246,7 @@ function excludeLargeGtfsFromBiome() {
     "london.json",
     "sf.json",
     "southampton.json",
+    "sydney.json",
   ]) {
     const path = join(gtfsDir, name);
     if (existsSync(path) && statSync(path).size > maxBytes) {
