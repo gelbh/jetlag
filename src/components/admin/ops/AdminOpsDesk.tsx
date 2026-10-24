@@ -10,22 +10,15 @@ import { useAdminJoinSession } from "../../../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../../../hooks/admin/useAdminSessionList";
 import { useMinWidth } from "../../../hooks/layout/useMinWidth";
 import { useAppNavigate } from "../../../hooks/navigation/useAppNavigate";
-import { isOpenIncident } from "../../../services/admin/adminIncidents";
 import type { AdminSessionSummary } from "../../../services/admin/adminSessions";
 import { getFirebaseAuth } from "../../../services/core/firebase/firebase";
-import { useSessionStore } from "../../../state/sessionStore";
 import { PremiumSignInGate } from "../../billing/PremiumSignInGate";
 import { AppLink } from "../../navigation/AppLink";
 import { AdminEmptyState } from "../shared/AdminEmptyState";
 import { AdminWorld } from "../shared/AdminWorld";
 import type { NeedsYouRow } from "../table/needsYouRows";
-import { AdminCaseFile } from "./AdminCaseFile";
-import { AdminDeskTable } from "./AdminDeskTable";
-import { AdminPhoneList, AdminPhoneSession } from "./AdminPhoneDesk";
-import { AdminRequestFile } from "./AdminRequestFile";
-import { AdminSessionView, EndedSession } from "./AdminSessionView";
+import { AdminOpsDeskBody } from "./AdminOpsDeskBody";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
-import { AdminSidebarList } from "./AdminSidebarList";
 import { AdminStatusStrip } from "./AdminStatusStrip";
 import {
   dialogIsOpen,
@@ -34,6 +27,8 @@ import {
   PASSIVE_HOTKEY,
   unlessDialog,
 } from "./adminDeskKeys";
+import type { RouteKind } from "./adminDeskRoute";
+import { useAdminDeskMonitor } from "./useAdminDeskMonitor";
 import { useAdminDeskSelection } from "./useAdminDeskSelection";
 import { useAdminDeskTables } from "./useAdminDeskTables";
 import { useAdminOpsDeskFeeds } from "./useAdminOpsDeskFeeds";
@@ -55,8 +50,6 @@ function AdminSessionSkeletonRows() {
 function continuePathForRoute(pathname: string): string {
   return pathname.startsWith("/admin") ? pathname : SESSIONS_ROUTE;
 }
-
-type RouteKind = "table" | "session" | "incident" | "request";
 
 export function AdminOpsDesk() {
   return (
@@ -112,8 +105,6 @@ function AdminOpsDeskContent() {
     preloadError,
   } = useAdminOpsDeskFeeds(enabled);
 
-  const activeSession = useSessionStore((state) => state.session);
-  const activeRole = useSessionStore((state) => state.myRole);
   const {
     sessions,
     loading: sessionsLoading,
@@ -132,13 +123,8 @@ function AdminOpsDeskContent() {
     error: observeError,
   } = useAdminJoinSession({ onRefresh: refresh });
 
-  const [monitorSessionId, setMonitorSessionId] = useState<string | null>(null);
-  const [failedSessionId, setFailedSessionId] = useState<string | null>(null);
-  const monitorRequestRef = useRef(0);
-  const joinKeyRef = useRef<string | null>(null);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState<{ path: string; tab: AdminTableTab } | null>(null);
   const deskRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -175,60 +161,15 @@ function AdminOpsDeskContent() {
     sessions,
   });
 
-  const monitorRoleError =
-    routeSessionId != null &&
-    monitorSessionId === routeSessionId &&
-    activeSession?.id === routeSessionId &&
-    activeRole !== "admin"
-      ? (observeError ?? "Couldn't confirm admin monitor role after joining. Try again.")
-      : null;
-
-  const monitorActive =
-    isDesktop &&
-    routeSessionId != null &&
-    monitorSessionId === routeSessionId &&
-    activeSession?.id === routeSessionId &&
-    activeRole === "admin";
-
-  const joinForMonitor = async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
-    const requestId = ++monitorRequestRef.current;
-    const joined = await joinSession(summary, { navigate: false });
-    if (monitorRequestRef.current !== requestId) return;
-    if (!joined) {
-      setFailedSessionId(summary.sessionId);
-      setMonitorSessionId((current) => (current === summary.sessionId ? null : current));
-      return;
-    }
-    setFailedSessionId((current) => (current === summary.sessionId ? null : current));
-    setMonitorSessionId(summary.sessionId);
-  };
-
-  // Only the session route monitors; incident and request routes never join.
-  useEffect(() => {
-    if (!enabled || !isDesktop || !routeSessionId) {
-      joinKeyRef.current = null;
-      return;
-    }
-    if (monitorSessionId === routeSessionId && activeSession?.id === routeSessionId) {
-      joinKeyRef.current = routeSessionId;
-      return;
-    }
-    if (!routeSession || joinKeyRef.current === routeSessionId) return;
-    joinKeyRef.current = routeSessionId;
-    void joinForMonitor(routeSession);
-  }, [
-    activeSession?.id,
+  const monitor = useAdminDeskMonitor({
     enabled,
     isDesktop,
-    joinForMonitor,
-    monitorSessionId,
-    routeSession,
     routeSessionId,
-  ]);
-
-  const retryJoin = () => {
-    if (routeSession) void joinForMonitor(routeSession);
-  };
+    routeSession,
+    joinSession,
+    observingCode,
+    observeError,
+  });
 
   const handleSignOut = async () => {
     setSignOutError(null);
@@ -343,172 +284,6 @@ function AdminOpsDeskContent() {
   const needsError = enabled ? (incidentsError ?? preloadError) : null;
   const liveSessions = sessions.filter((row) => row.isLive);
   const sessionsFailedEmpty = Boolean(sessionsError) && sessions.length === 0;
-  const openIncidentForSession = (sessionId: string | null | undefined) =>
-    sessionId
-      ? visibleIncidents.find((row) => row.sessionId === sessionId && isOpenIncident(row))
-      : undefined;
-
-  const statusStrip = (
-    <AdminStatusStrip
-      liveCount={liveSessions.length}
-      runnerCount={liveSessions.reduce((sum, row) => sum + row.memberCount, 0)}
-      needsYouCount={tables.needsOpenCount}
-      incidentsLoading={enabled && incidentsLoading}
-      refreshing={refreshing}
-      onRefresh={() => void refresh({ background: true })}
-      onOpenSettings={() => setSettingsOpen(true)}
-      dataFetchedAt={lastFetchedAt}
-      syncFailed={Boolean(sessionsError)}
-    />
-  );
-
-  const caseFile = routeIncidentId ? (
-    <AdminCaseFile
-      incidentId={routeIncidentId}
-      incident={selectedIncident}
-      loading={incidentLoading}
-      session={sessionById(selectedIncident?.sessionId)}
-      sessionsLoading={sessionsLoading}
-      onWatch={watchGame}
-      onBack={goToTable}
-    />
-  ) : null;
-  const requestFile = routeRequestId ? (
-    <AdminRequestFile
-      request={selectedRequest}
-      loading={enabled && preloadLoading}
-      onBack={goToTable}
-    />
-  ) : null;
-
-  let body: React.ReactNode;
-  if (isDesktop) {
-    const sidebarRouteTab = sidebarTab?.path === location.pathname ? sidebarTab.tab : routeTab;
-    let main: React.ReactNode = null;
-    if (routeKind === "session") {
-      const incident = openIncidentForSession(routeSessionId);
-      main = (
-        <AdminSessionView
-          summary={routeSession}
-          loading={sessionsLoading}
-          openIncidentCount={routeSessionId ? (openIncidentsBySession.get(routeSessionId) ?? 0) : 0}
-          onOpenIncident={() =>
-            incident && void navigate(`/admin/incidents/${encodeURIComponent(incident.id)}`)
-          }
-          onBack={goToTable}
-          onRefresh={() => void refresh()}
-          onLoadMore={() => void loadMore()}
-          hasMore={hasMore}
-          refreshing={refreshing}
-          loadingMore={loadingMore}
-          sessionsUnavailable={sessionsFailedEmpty}
-          monitor={{
-            active: monitorActive,
-            roleError: monitorRoleError,
-            joinError:
-              failedSessionId === routeSessionId
-                ? (observeError ?? "Couldn't open the map for this session.")
-                : null,
-            joining: routeSession != null && observingCode === routeSession.code,
-            onRetry: retryJoin,
-          }}
-        />
-      );
-    } else if (routeKind === "incident") {
-      main = caseFile;
-    } else if (routeKind === "request") {
-      main = requestFile;
-    }
-    body = collapsed ? (
-      <>
-        <AdminSidebarList
-          tables={tables}
-          tab={sidebarRouteTab}
-          onTabChange={(tab) => setSidebarTab({ path: location.pathname, tab })}
-          list={list}
-          needsLoading={needsLoading}
-          needsError={needsError}
-          openIncidentsBySession={openIncidentsBySession}
-          selectedKey={selectedKey}
-          onOpenSession={openSession}
-          onOpenNeeds={openNeeds}
-          onExpand={goToTable}
-        />
-        <Box style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex" }}>{main}</Box>
-      </>
-    ) : (
-      <AdminDeskTable
-        tables={tables}
-        tab={routeTab}
-        onTabChange={changeTab}
-        list={list}
-        needsLoading={needsLoading}
-        needsError={needsError}
-        selectedKey={selectedKey}
-        onOpenSession={openSession}
-        onOpenNeeds={openNeeds}
-        onCollapse={lastItem ? () => void navigate(lastItem.path) : undefined}
-      />
-    );
-  } else if (collapsed) {
-    let item: React.ReactNode = caseFile ?? requestFile;
-    if (routeKind === "session") {
-      item = routeSession ? (
-        <AdminPhoneSession
-          summary={routeSession}
-          columns={tables.sessionColumns}
-          visible={tables.sessionPrefs.visible}
-          openIncidentCount={openIncidentsBySession.get(routeSession.sessionId) ?? 0}
-          watching={observingCode === routeSession.code}
-          onWatch={() => watchGame(routeSession)}
-          onOpenIncident={() => {
-            const incident = openIncidentForSession(routeSession.sessionId);
-            if (incident) void navigate(`/admin/incidents/${encodeURIComponent(incident.id)}`);
-          }}
-        />
-      ) : sessionsLoading ? (
-        <Skeleton height={160} radius={16} aria-hidden="true" />
-      ) : (
-        <EndedSession
-          onBack={goToTable}
-          onRefresh={() => void refresh()}
-          onLoadMore={() => void loadMore()}
-          hasMore={hasMore}
-          refreshing={refreshing}
-          loadingMore={loadingMore}
-        />
-      );
-    }
-    body = (
-      <Stack gap={10} p={10} flex={1} mih={0} style={{ overflow: "auto" }}>
-        <Button type="button" variant="subtle" w="fit-content" mih={44} onClick={goToTable}>
-          Back
-        </Button>
-        {observeError && routeKind === "session" ? (
-          <Alert role="alert" color="halt" title="Couldn't monitor">
-            {observeError}
-          </Alert>
-        ) : null}
-        <Box style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: "none" }}>
-          {item}
-        </Box>
-      </Stack>
-    );
-  } else {
-    body = (
-      <AdminPhoneList
-        tables={tables}
-        tab={routeTab}
-        onTabChange={changeTab}
-        list={list}
-        needsLoading={needsLoading}
-        needsError={needsError}
-        selectedKey={selectedKey}
-        onOpenSession={openSession}
-        onOpenNeeds={openNeeds}
-      />
-    );
-  }
 
   return (
     <Box
@@ -524,7 +299,17 @@ function AdminOpsDeskContent() {
         overflow: "hidden",
       }}
     >
-      {statusStrip}
+      <AdminStatusStrip
+        liveCount={liveSessions.length}
+        runnerCount={liveSessions.reduce((sum, row) => sum + row.memberCount, 0)}
+        needsYouCount={tables.needsOpenCount}
+        incidentsLoading={enabled && incidentsLoading}
+        refreshing={refreshing}
+        onRefresh={() => void refresh({ background: true })}
+        onOpenSettings={() => setSettingsOpen(true)}
+        dataFetchedAt={lastFetchedAt}
+        syncFailed={Boolean(sessionsError)}
+      />
       <Box
         style={{
           flex: 1,
@@ -535,7 +320,47 @@ function AdminOpsDeskContent() {
           padding: isDesktop ? 12 : 0,
         }}
       >
-        {body}
+        <AdminOpsDeskBody
+          isDesktop={isDesktop}
+          pathname={location.pathname}
+          routeKind={routeKind}
+          routeTab={routeTab}
+          collapsed={collapsed}
+          routeSessionId={routeSessionId}
+          routeIncidentId={routeIncidentId}
+          routeRequestId={routeRequestId}
+          routeSession={routeSession}
+          tables={tables}
+          list={list}
+          needsLoading={needsLoading}
+          needsError={needsError}
+          openIncidentsBySession={openIncidentsBySession}
+          selectedKey={selectedKey}
+          lastItemPath={lastItem?.path ?? null}
+          selectedIncident={selectedIncident}
+          incidentLoading={incidentLoading}
+          selectedRequest={selectedRequest}
+          sessionById={sessionById}
+          sessionsLoading={sessionsLoading}
+          preloadLoading={preloadLoading}
+          enabled={enabled}
+          hasMore={hasMore}
+          refreshing={refreshing}
+          loadingMore={loadingMore}
+          sessionsFailedEmpty={sessionsFailedEmpty}
+          visibleIncidents={visibleIncidents}
+          monitor={monitor}
+          observeError={observeError}
+          observingCode={observingCode}
+          onOpenSession={openSession}
+          onOpenNeeds={openNeeds}
+          onChangeTab={changeTab}
+          onGoToTable={goToTable}
+          onWatchGame={watchGame}
+          onNavigate={(path) => void navigate(path)}
+          onRefresh={() => void refresh()}
+          onLoadMore={() => void loadMore()}
+        />
       </Box>
       <Drawer
         opened={settingsOpen}

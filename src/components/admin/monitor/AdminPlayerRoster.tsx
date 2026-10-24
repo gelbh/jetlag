@@ -5,6 +5,7 @@ import type { SessionRecord } from "../../../domain/map/annotations";
 import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
 import { playerRoleLabel, resolvePlayerRole } from "../../../domain/session/players/playerRole";
 import { useFreshnessClock } from "../../../hooks/time/useFreshnessClock";
+import { DESK_HAIRLINE } from "../shared/adminSurface";
 
 interface AdminPlayerRosterProps {
   session: SessionRecord | null;
@@ -39,8 +40,6 @@ export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps
     );
   }
 
-  const hairline = "0.5px solid color-mix(in oklch, var(--color-rule) 65%, transparent)";
-
   return (
     <ScrollArea.Autosize mah="14rem">
       <Box
@@ -66,7 +65,7 @@ export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps
             const selected = focusedPlayerUid === uid;
             const cell = {
               padding: "0 16px",
-              borderTop: hairline,
+              borderTop: DESK_HAIRLINE,
               background: selected ? "var(--color-flag-soft)" : undefined,
             } as const;
             return (
