@@ -271,26 +271,71 @@ service cloud.firestore {
         && sessionIdentityUnchanged();
     }
 
-    // Capture submit / confirm / timeout / dispute (may also pause siegeClock).
+    // Capture submit / confirm / timeout / dispute. Lean checks to stay under
+    // the session-update expression budget (roles + status + uid bind).
     function isCastleSiegeCaptureUpdate() {
+      let role = resource.data.castleSiegeRoles is map
+        && request.auth.uid in resource.data.castleSiegeRoles
+        ? resource.data.castleSiegeRoles[request.auth.uid]
+        : '';
+      let next = request.resource.data.siegeCapture;
+      let prior = resource.data.siegeCapture;
+      let keys = request.resource.data.diff(resource.data).affectedKeys();
+      let priorStatus = prior is map && prior.status is string ? prior.status : 'idle';
       return isSignedIn()
         && resource.data.memberUids is list
         && request.auth.uid in resource.data.memberUids
         && resource.data.mode == 'castleSiege'
         && resource.data.phase == 'siege'
         && request.resource.data.phase == 'siege'
+        && role in ['teamA', 'teamB', 'referee']
+        && next is map
+        && sessionIdentityUnchanged()
         && (
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['siegeCapture'])
-          || request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['siegeCapture', 'siegeClock'])
-        )
-        && request.resource.data.siegeCapture is map
-        && (
-          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['siegeClock'])
-          || request.resource.data.siegeClock is map
-        )
-        && sessionIdentityUnchanged();
+          (
+            keys.hasOnly(['siegeCapture'])
+            && next.status == 'pending'
+            && priorStatus in ['idle', 'disputed']
+            && next.submittedByUid == request.auth.uid
+            && next.attackingTeamId in ['teamA', 'teamB']
+            && role == next.attackingTeamId
+            && next.resolvedByUid == null
+          )
+          || (
+            keys.hasOnly(['siegeCapture'])
+            && next.status == 'confirmed'
+            && prior is map
+            && prior.status == 'pending'
+            && next.resolvedByUid == request.auth.uid
+            && prior.attackingTeamId in ['teamA', 'teamB']
+            && (role == 'referee' || role != prior.attackingTeamId)
+            && next.attackingTeamId == prior.attackingTeamId
+            && next.submittedByUid == prior.submittedByUid
+          )
+          || (
+            keys.hasOnly(['siegeCapture'])
+            && next.status == 'timeout'
+            && prior is map
+            && prior.status == 'pending'
+            && next.resolvedByUid == null
+            && prior.confirmDeadlineMs is number
+            && request.time.toMillis() >= prior.confirmDeadlineMs
+            && next.attackingTeamId == prior.attackingTeamId
+          )
+          || (
+            keys.hasOnly(['siegeCapture', 'siegeClock'])
+            && next.status == 'disputed'
+            && prior is map
+            && prior.status == 'pending'
+            && next.resolvedByUid == request.auth.uid
+            && next.attackingTeamId == prior.attackingTeamId
+            && request.resource.data.siegeClock is map
+            && resource.data.siegeClock is map
+            && request.resource.data.siegeClock.paused == true
+            && request.resource.data.siegeClock.pauseReason == 'dispute'
+            && request.resource.data.siegeClock.roles == resource.data.siegeClock.roles
+          )
+        );
     }
 
     function canReadTeamHands(sessionId, teamId) {
@@ -1300,6 +1345,11 @@ service cloud.firestore {
         allow read: if teamId in ['teamA', 'teamB']
           && canReadTeamMarks(sessionId, teamId);
         allow create, update, delete: if false;
+      }
+
+      // Oracle ask receipts for H5 ask ratio; Admin SDK writes only.
+      match /oracleAskReceipts/{receiptId} {
+        allow read, create, update, delete: if false;
       }
 
       // Hand card ids: own team + referee read; host writes on deal.
