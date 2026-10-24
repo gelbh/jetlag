@@ -1,6 +1,6 @@
 import type { User } from "firebase/auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ADMIN_EMAIL, claimsLookAdmin, resolveAdminAccess } from "./adminAccess";
+import { claimsLookAdmin, isAdminUser, resolveAdminAccess } from "./adminAccess";
 
 function createUser(overrides: {
   email?: string | null;
@@ -20,10 +20,19 @@ function createUser(overrides: {
 }
 
 describe("claimsLookAdmin", () => {
-  it("requires email_verified true and admin email", () => {
-    expect(claimsLookAdmin({ email: ADMIN_EMAIL, email_verified: true })).toBe(true);
-    expect(claimsLookAdmin({ email: ADMIN_EMAIL, email_verified: false })).toBe(false);
-    expect(claimsLookAdmin({ email: "other@example.com", email_verified: true })).toBe(false);
+  it("requires admin claim and email_verified", () => {
+    expect(claimsLookAdmin({ admin: true, email_verified: true })).toBe(true);
+    expect(claimsLookAdmin({ admin: true, email_verified: false })).toBe(false);
+    expect(claimsLookAdmin({ admin: false, email_verified: true })).toBe(false);
+    expect(claimsLookAdmin({ email_verified: true })).toBe(false);
+  });
+});
+
+describe("isAdminUser", () => {
+  it("is always false without a token (sync path)", () => {
+    expect(isAdminUser(createUser({ email: "anyone@example.com", emailVerified: true }))).toBe(
+      false,
+    );
   });
 });
 
@@ -38,7 +47,7 @@ describe("resolveAdminAccess", () => {
 
   it("returns unsigned for anonymous users", async () => {
     const user = createUser({
-      email: ADMIN_EMAIL,
+      email: "player@example.com",
       emailVerified: true,
       isAnonymous: true,
     });
@@ -46,52 +55,37 @@ describe("resolveAdminAccess", () => {
     expect(user.reload).not.toHaveBeenCalled();
   });
 
-  it("returns denied for permanent non-admin without reload", async () => {
-    const reload = vi.fn(async () => undefined);
+  it("returns denied when token lacks admin claim", async () => {
+    const getIdTokenResult = vi.fn(async () => ({
+      claims: { email_verified: true },
+    }));
     const user = createUser({
       email: "player@example.com",
       emailVerified: true,
-      reload,
+      getIdTokenResult,
     });
 
     await expect(resolveAdminAccess(user)).resolves.toBe("denied");
-    expect(reload).not.toHaveBeenCalled();
+    expect(getIdTokenResult).toHaveBeenCalledWith(true);
   });
 
-  it("returns admin for verified admin after forced token claims", async () => {
-    const reload = vi.fn(async () => undefined);
+  it("returns admin when forced token has admin claim", async () => {
     const getIdTokenResult = vi.fn(async () => ({
-      claims: { email: ADMIN_EMAIL, email_verified: true },
+      claims: { admin: true, email_verified: true },
     }));
     const user = createUser({
-      email: ADMIN_EMAIL,
+      email: "player@example.com",
       emailVerified: true,
-      reload,
       getIdTokenResult,
     });
 
     await expect(resolveAdminAccess(user)).resolves.toBe("admin");
-    expect(reload).not.toHaveBeenCalled();
-    expect(getIdTokenResult).toHaveBeenCalledWith(true);
-  });
-
-  it("denies verified admin email when forced token claims are not admin", async () => {
-    const getIdTokenResult = vi.fn(async () => ({
-      claims: { email: ADMIN_EMAIL, email_verified: false },
-    }));
-    const user = createUser({
-      email: ADMIN_EMAIL,
-      emailVerified: true,
-      getIdTokenResult,
-    });
-
-    await expect(resolveAdminAccess(user)).resolves.toBe("denied");
     expect(getIdTokenResult).toHaveBeenCalledWith(true);
   });
 
   it("heals stale emailVerified via reload then forced token", async () => {
     const user = createUser({
-      email: ADMIN_EMAIL,
+      email: "player@example.com",
       emailVerified: false,
     });
     const reload = vi.fn(async () => {
@@ -101,7 +95,7 @@ describe("resolveAdminAccess", () => {
       });
     });
     const getIdTokenResult = vi.fn(async () => ({
-      claims: { email: ADMIN_EMAIL, email_verified: true },
+      claims: { admin: true, email_verified: true },
     }));
     (user as unknown as { reload: typeof reload }).reload = reload;
     (user as unknown as { getIdTokenResult: typeof getIdTokenResult }).getIdTokenResult =
@@ -112,30 +106,13 @@ describe("resolveAdminAccess", () => {
     expect(getIdTokenResult).toHaveBeenCalledWith(true);
   });
 
-  it("falls back to forced token claims after reload still stale", async () => {
+  it("returns denied when heal leaves claims without admin", async () => {
     const getIdTokenResult = vi.fn(async () => ({
-      claims: { email: ADMIN_EMAIL, email_verified: true },
+      claims: { email_verified: true },
     }));
     const reload = vi.fn(async () => undefined);
     const user = createUser({
-      email: ADMIN_EMAIL,
-      emailVerified: false,
-      reload,
-      getIdTokenResult,
-    });
-
-    await expect(resolveAdminAccess(user)).resolves.toBe("admin");
-    expect(reload).toHaveBeenCalledTimes(1);
-    expect(getIdTokenResult).toHaveBeenCalledWith(true);
-  });
-
-  it("returns denied when heal leaves claims unverified", async () => {
-    const getIdTokenResult = vi.fn(async () => ({
-      claims: { email: ADMIN_EMAIL, email_verified: false },
-    }));
-    const reload = vi.fn(async () => undefined);
-    const user = createUser({
-      email: ADMIN_EMAIL,
+      email: "player@example.com",
       emailVerified: false,
       reload,
       getIdTokenResult,

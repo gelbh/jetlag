@@ -497,7 +497,30 @@ export function deserializeSessionFromFirestore(
     seriesLength: parseSeriesLength(document.seriesLength),
     setupMode: parseSetupMode(document.setupMode),
     ...parseCastleSiegeSetupFromDocument(document as Record<string, unknown>),
+    phase: parseCastleSiegePhase(document.phase),
+    standoffTurn:
+      document.standoffTurn &&
+      typeof document.standoffTurn === "object" &&
+      !Array.isArray(document.standoffTurn)
+        ? (document.standoffTurn as Record<string, unknown>)
+        : undefined,
+    standoffDeckRemainingCount: parseStandoffDeckRemainingCount(
+      document.standoffDeckRemainingCount,
+    ),
   };
+}
+
+function parseCastleSiegePhase(
+  value: unknown,
+): "setup" | "standoff" | "siege" | "betweenGames" | undefined {
+  if (value === "setup" || value === "standoff" || value === "siege" || value === "betweenGames") {
+    return value;
+  }
+  return undefined;
+}
+
+function parseStandoffDeckRemainingCount(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
 }
 
 export function buildTimeTrapDocument(trap: TimeTrapRecord): Record<string, unknown> {

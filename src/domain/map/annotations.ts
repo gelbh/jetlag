@@ -235,6 +235,12 @@ export interface SessionRecord {
   dials?: CastleSiegeDials;
   /** Coin half assignment after Pregame flip. Castle Siege only. */
   coinAssignment?: CastleSiegeCoinAssignment;
+  /** Match phase. Castle Siege only (`setup` implied when absent). */
+  phase?: "setup" | "standoff" | "siege" | "betweenGames";
+  /** Standoff turn clocks (serialized). Castle Siege only. */
+  standoffTurn?: Record<string, unknown>;
+  /** Public deck remaining count only (ids live under standoffPrivate). Castle Siege only. */
+  standoffDeckRemainingCount?: number;
 }
 
 /** Bounded session override written by `applyIncidentMitigation` (server-only). */

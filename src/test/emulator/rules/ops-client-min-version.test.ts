@@ -20,7 +20,7 @@ describe("firestore.rules — ops/clientMinVersion", () => {
     );
 
     const admin = rules.testEnv.authenticatedContext("admin-1", {
-      email: "gelbharttomer@gmail.com",
+      admin: true,
       email_verified: true,
     });
     await assertSucceeds(
@@ -36,7 +36,7 @@ describe("firestore.rules — ops/clientMinVersion", () => {
 
   it("allows admin create/update/delete; denies player and unauth writes", async () => {
     const admin = rules.testEnv.authenticatedContext("admin-1", {
-      email: "gelbharttomer@gmail.com",
+      admin: true,
       email_verified: true,
     });
     const player = rules.testEnv.authenticatedContext("player-1");

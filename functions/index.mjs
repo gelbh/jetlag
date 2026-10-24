@@ -39,6 +39,7 @@ export {
   answerCastleSiegeOracleAsk,
   cancelRoleJoinRequest,
   controlSessionTimerForMove,
+  declareCastleSiege,
   endSession,
   initSessionRoleGates,
   joinSessionWithRole,

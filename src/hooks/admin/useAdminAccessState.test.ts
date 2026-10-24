@@ -37,7 +37,7 @@ describe("useAdminAccessState", () => {
   it("becomes admin after resolve settles for a stale admin user", async () => {
     const user = {
       uid: "admin-1",
-      email: "gelbharttomer@gmail.com",
+      email: "admin@example.com",
       emailVerified: false,
       isAnonymous: false,
     };
