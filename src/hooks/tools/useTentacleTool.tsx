@@ -204,8 +204,8 @@ export function useTentacleTool({
   }, [categoryPresenceCounts, regionPackId, tentacleCatalog]);
 
   useEffect(() => {
+    const seeded = seedUnavailableFromPresence();
     setUnavailableTentacleCategories((prev) => {
-      const seeded = seedUnavailableFromPresence();
       if (seeded.size === 0) {
         return prev;
       }
@@ -219,6 +219,10 @@ export function useTentacleTool({
       }
       return changed ? next : prev;
     });
+    if (seeded.size > 0) {
+      const firstNotice = seeded.values().next().value;
+      setCatalogNotice(firstNotice ?? "Some categories aren't available in this play area.");
+    }
   }, [seedUnavailableFromPresence]);
 
   const unavailableCategoryIds = useMemo(
@@ -390,8 +394,13 @@ export function useTentacleTool({
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
     setTentacleError(null);
-    setUnavailableTentacleCategories(seedUnavailableFromPresence());
-    setCatalogNotice(null);
+    const seeded = seedUnavailableFromPresence();
+    setUnavailableTentacleCategories(seeded);
+    setCatalogNotice(
+      seeded.size > 0
+        ? (seeded.values().next().value ?? "Some categories aren't available in this play area.")
+        : null,
+    );
   }, [cancelRequests, seedUnavailableFromPresence]);
 
   const handleMapClick = useCallback(

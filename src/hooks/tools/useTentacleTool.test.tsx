@@ -444,6 +444,7 @@ describe("useTentacleTool", () => {
 
     await waitFor(() => {
       expect(result.current.panel.props.model.unavailableCategoryIds?.has("museum")).toBe(true);
+      expect(result.current.panel.props.model.catalogNotice).not.toBeNull();
     });
   });
 

@@ -24,10 +24,12 @@ describe("useMatchingDraftState presence seed", () => {
 
     await waitFor(() => {
       expect(result.current.unavailableMatchingCategories.has("mountain")).toBe(true);
+      expect(result.current.catalogNotice).not.toBeNull();
     });
 
     expect(result.current.unavailableMatchingCategories.get("mountain")).toBe(
       matchingEmptyPlayAreaMessage("mountain"),
     );
+    expect(result.current.catalogNotice).toBe(matchingEmptyPlayAreaMessage("mountain"));
   });
 });

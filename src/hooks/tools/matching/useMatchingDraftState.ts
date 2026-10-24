@@ -75,8 +75,8 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
   }, [adminDivisionCounts, categoryPresenceCounts, matchingCatalog, regionPackId]);
 
   useEffect(() => {
+    const seeded = seedUnavailableFromPresence();
     setUnavailableMatchingCategories((prev) => {
-      const seeded = seedUnavailableFromPresence();
       if (seeded.size === 0) {
         return prev;
       }
@@ -90,6 +90,10 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
       }
       return changed ? next : prev;
     });
+    if (seeded.size > 0) {
+      const firstNotice = seeded.values().next().value;
+      setCatalogNotice(firstNotice ?? "Some categories aren't available in this play area.");
+    }
   }, [seedUnavailableFromPresence]);
 
   const clearResolvedFields = useCallback(() => {
@@ -124,8 +128,13 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
     setMatchingCategoryChosen(false);
     clearResolvedFields();
     setPreviewOpen(false);
-    setUnavailableMatchingCategories(seedUnavailableFromPresence());
-    setCatalogNotice(null);
+    const seeded = seedUnavailableFromPresence();
+    setUnavailableMatchingCategories(seeded);
+    setCatalogNotice(
+      seeded.size > 0
+        ? (seeded.values().next().value ?? "Some categories aren't available in this play area.")
+        : null,
+    );
   }, [clearResolvedFields, seedUnavailableFromPresence]);
 
   const selectCategory = useCallback(

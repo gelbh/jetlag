@@ -132,8 +132,8 @@ export function useMeasuringDraftState(
   }, [adminDivisionCounts, categoryPresenceCounts, measuringCatalog, regionPackId]);
 
   useEffect(() => {
+    const seeded = seedUnavailableFromPresence();
     setUnavailableMeasuringFromKinds((prev) => {
-      const seeded = seedUnavailableFromPresence();
       if (seeded.size === 0) {
         return prev;
       }
@@ -147,6 +147,10 @@ export function useMeasuringDraftState(
       }
       return changed ? next : prev;
     });
+    if (seeded.size > 0) {
+      const firstNotice = seeded.values().next().value;
+      setCatalogNotice(firstNotice ?? "Some categories aren't available in this play area.");
+    }
   }, [seedUnavailableFromPresence]);
 
   const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
@@ -212,8 +216,13 @@ export function useMeasuringDraftState(
       setMeasuringError(null);
       setMeasuringPlaces([]);
       setMeasuringOptionChosen(false);
-      setUnavailableMeasuringFromKinds(seedUnavailableFromPresence());
-      setCatalogNotice(null);
+      const seeded = seedUnavailableFromPresence();
+      setUnavailableMeasuringFromKinds(seeded);
+      setCatalogNotice(
+        seeded.size > 0
+          ? (seeded.values().next().value ?? "Some categories aren't available in this play area.")
+          : null,
+      );
     },
     [measuringCatalog, seedUnavailableFromPresence, usedMeasuringFromKindsSet],
   );

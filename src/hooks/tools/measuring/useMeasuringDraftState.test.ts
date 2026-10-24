@@ -20,9 +20,13 @@ describe("useMeasuringDraftState presence seed", () => {
 
     await waitFor(() => {
       expect(result.current.unavailableMeasuringFromKinds.has("high_speed_rail_line")).toBe(true);
+      expect(result.current.catalogNotice).not.toBeNull();
     });
 
     expect(result.current.unavailableMeasuringFromKinds.get("high_speed_rail_line")).toBe(
+      measuringLinearNotFoundMessage("high_speed_rail_line"),
+    );
+    expect(result.current.catalogNotice).toBe(
       measuringLinearNotFoundMessage("high_speed_rail_line"),
     );
   });
