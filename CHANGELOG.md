@@ -6,6 +6,19 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.7.0 - 2026-10-24
+
+### Improvements
+
+- Castle Siege Standoff deck, turn clocks, Declare breach oracle, and Skin-S3 standoff chrome
+- Add a Greater Sydney specialty region pack and bundled preset for city-scale play with LGA matching.
+
+### Technical
+
+- Admin auth uses Firebase custom claim `admin` (no personal emails in git); hands/deck ids move off the member-readable session doc
+- Load smaller per-state Australia POI bundles for State/Territory presets (national fill remains for whole-country play).
+- Wire the Sydney specialty preset to a Greater Sydney GTFS stop bundle so station tools prefer pack-backed stops with Overpass fallback.
+
 ## 1.6.0 - 2026-10-23
 
 ### Fixes
