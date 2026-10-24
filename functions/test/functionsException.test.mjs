@@ -476,6 +476,49 @@ test("captureFunctionsExceptionAsync skips sweep PostHog auth failure", async ()
   setFunctionsExceptionClientForTests(null);
 });
 
+test("withFunctionsExceptionHandler stamps session_id from callable request data", async () => {
+  const { withFunctionsExceptionHandler } = await import("../lib/functionsException.mjs");
+  const calls = [];
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async (error, distinctId, properties) => {
+      calls.push({ error, distinctId, properties });
+    },
+  });
+  const boom = new Error("callable boom");
+  const wrapped = withFunctionsExceptionHandler(async () => {
+    throw boom;
+  }, "initSessionRoleGates");
+  await assert.rejects(
+    () => wrapped({ data: { sessionId: "sess_abc123" } }),
+    (error) => error === boom,
+  );
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].properties.session_id, "sess_abc123");
+  assert.equal(calls[0].properties.function_name, "initSessionRoleGates");
+  setFunctionsExceptionClientForTests(null);
+});
+
+test("withFunctionsExceptionHandler omits session_id when request data has none", async () => {
+  const { withFunctionsExceptionHandler } = await import("../lib/functionsException.mjs");
+  const calls = [];
+  setFunctionsExceptionClientForTests({
+    captureExceptionImmediate: async (error, distinctId, properties) => {
+      calls.push({ error, distinctId, properties });
+    },
+  });
+  const boom = new Error("callable boom");
+  const wrapped = withFunctionsExceptionHandler(async () => {
+    throw boom;
+  }, "proxy");
+  await assert.rejects(
+    () => wrapped({ data: { sessionId: "   " } }),
+    (error) => error === boom,
+  );
+  assert.equal(calls.length, 1);
+  assert.equal("session_id" in calls[0].properties, false);
+  setFunctionsExceptionClientForTests(null);
+});
+
 test("isExpectedFunctionsError reports heal proof rejections as takeover signals", () => {
   assert.equal(
     isExpectedFunctionsError(new HttpsError("failed-precondition", "Heal proof invalid.")),
