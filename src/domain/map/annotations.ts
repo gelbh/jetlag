@@ -243,6 +243,8 @@ export interface SessionRecord {
   standoffDeckRemainingCount?: number;
   /** Siege match clocks (serialized). Castle Siege only. */
   siegeClock?: Record<string, unknown>;
+  /** Siege capture submission (serialized). Castle Siege only. */
+  siegeCapture?: Record<string, unknown>;
 }
 
 /** Bounded session override written by `applyIncidentMitigation` (server-only). */

@@ -41,5 +41,13 @@ service firebase.storage {
         && request.resource.size < 10 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }
+
+    // Castle Siege capture slate photos (7A); any session member may upload/read.
+    match /sessions/{sessionId}/siegeCaptures/{fileName} {
+      allow read: if isSessionMember(sessionId);
+      allow write: if isSessionMember(sessionId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
   }
 }

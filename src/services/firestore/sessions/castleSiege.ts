@@ -1,6 +1,11 @@
 import { doc, setDoc, updateDoc, writeBatch } from "firebase/firestore";
-import type { SiegeEndgameStart } from "@/domain/session/castleSiege/siegeClocks";
-import { buildStartSiegePublicPatch } from "@/domain/session/castleSiege/siegePersist";
+import type { SiegeCaptureState } from "@/domain/session/castleSiege/siegeCapture";
+import { serializeSiegeCapture } from "@/domain/session/castleSiege/siegeCapturePersist";
+import type { SiegeClockState, SiegeEndgameStart } from "@/domain/session/castleSiege/siegeClocks";
+import {
+  buildStartSiegePublicPatch,
+  serializeSiegeClock,
+} from "@/domain/session/castleSiege/siegePersist";
 import { buildStartStandoffPrivateState } from "@/domain/session/castleSiege/standoffPersist";
 import type { TeamMarksGeometry } from "@/domain/session/castleSiege/teamMarks";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
@@ -117,6 +122,21 @@ export async function startCastleSiegeSiege(
     limitSeconds: opts.limitSeconds,
     endgame: opts.endgame,
   });
+  await updateDoc(doc(sessionsCollection(), sessionId), patch);
+}
+
+/** Persist capture state; optionally update siegeClock (dispute pause). */
+export async function writeCastleSiegeCapture(
+  sessionId: string,
+  capture: SiegeCaptureState,
+  siegeClock?: SiegeClockState,
+): Promise<void> {
+  const patch: Record<string, unknown> = {
+    siegeCapture: serializeSiegeCapture(capture),
+  };
+  if (siegeClock) {
+    patch.siegeClock = serializeSiegeClock(siegeClock);
+  }
   await updateDoc(doc(sessionsCollection(), sessionId), patch);
 }
 
