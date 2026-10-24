@@ -82,6 +82,17 @@ export const answerCastleSiegeOracleAsk = onCall(
         ask,
         wrappingKey,
       });
+      await db
+        .collection("sessions")
+        .doc(sessionId)
+        .collection("oracleAskReceipts")
+        .add({
+          uid,
+          attackerTeamId: callerRole,
+          defenderTeamId,
+          askKind: typeof ask.kind === "string" ? ask.kind : "unknown",
+          createdAt: FieldValue.serverTimestamp(),
+        });
       try {
         await recomputeAndWritePressure({
           db,
@@ -89,8 +100,11 @@ export const answerCastleSiegeOracleAsk = onCall(
           defenderTeamId,
           attackerTeamId: callerRole,
         });
-      } catch {
-        // Best-effort H5 after ask.
+      } catch (err) {
+        console.warn("castleSiege pressure: recompute after ask failed", {
+          sessionId,
+          message: err instanceof Error ? err.message : String(err),
+        });
       }
       return { ok: true, receipt };
     } catch (error) {
@@ -231,8 +245,11 @@ export const declareCastleSiege = onCall(
           attackerTeamId: callerRole,
           declareDistanceMeters: result.distanceMeters,
         });
-      } catch {
-        // Best-effort H5; Declare outcome still stands.
+      } catch (err) {
+        console.warn("castleSiege pressure: recompute after declare failed", {
+          sessionId,
+          message: err instanceof Error ? err.message : String(err),
+        });
       }
 
       return { ok: true, outcome: result.outcome };
@@ -301,20 +318,16 @@ export const recomputeCastleSiegePressure = onCall(
       throw new HttpsError("permission-denied", "Attackers refresh defender pressure.");
     }
 
-    const nearest =
-      typeof request.data?.nearestAttackerDistanceMeters === "number"
-        ? request.data.nearestAttackerDistanceMeters
-        : null;
-
-    const reading = await recomputeAndWritePressure({
+    // Siege proximity is not client-trusted yet; omit nearest until server GPS exists.
+    await recomputeAndWritePressure({
       db,
       sessionId,
       defenderTeamId,
       attackerTeamId: callerRole,
-      nearestAttackerDistanceMeters: nearest,
+      nearestAttackerDistanceMeters: null,
     });
 
-    // Scalar+band only; never marks or coords.
-    return { ok: true, scalar: reading.scalar, band: reading.band };
+    // Attackers must not learn defender scalar/band; defenders read teamPressure.
+    return { ok: true };
   }),
 );

@@ -35,22 +35,23 @@ export async function recomputeAndWritePressure(input) {
   const zoneRadiusMeters =
     typeof dials.zoneRadiusMeters === "number" ? dials.zoneRadiusMeters : 500;
 
-  const [askSnap, marksSnap, priorPressureSnap] = await Promise.all([
+  const [askSnap, marksSnap] = await Promise.all([
     sessionRef
       .collection("oracleAskReceipts")
       .limit(50)
       .get()
-      .catch(() => null),
+      .catch((err) => {
+        console.warn("castleSiege pressure: oracleAskReceipts read failed", {
+          sessionId,
+          message: err instanceof Error ? err.message : String(err),
+        });
+        return null;
+      }),
     sessionRef.collection("teamMarks").doc(attackerTeamId).get(),
-    sessionRef.collection("teamPressure").doc(defenderTeamId).get(),
   ]);
 
-  // Prefer declareAttempts count when oracle receipts collection is absent.
-  let askCount = askSnap && !askSnap.empty ? askSnap.size : 0;
-  if (askCount === 0) {
-    const declareSnap = await sessionRef.collection("declareAttempts").limit(50).get();
-    askCount = declareSnap.size;
-  }
+  // Ask ratio from persisted receipts only — never substitute declareAttempts.
+  const askCount = askSnap && !askSnap.empty ? askSnap.size : 0;
   const askEliminationRatio = Math.min(1, askCount / 28);
 
   const geometryJson =
@@ -59,14 +60,10 @@ export async function recomputeAndWritePressure(input) {
       : "";
   const shadeCoverageRatio = shadeCoverageFromGeometryJson(geometryJson);
 
-  let declareDistance = input.declareDistanceMeters;
-  if (declareDistance === undefined || declareDistance === null) {
-    const prior = priorPressureSnap.exists ? priorPressureSnap.data() : null;
-    declareDistance =
-      prior && typeof prior.lastDeclareDistanceMeters === "number"
-        ? prior.lastDeclareDistanceMeters
-        : PRESSURE_DECLARE_FALLBACK_FAR;
-  }
+  const declareDistance =
+    typeof input.declareDistanceMeters === "number" && Number.isFinite(input.declareDistanceMeters)
+      ? input.declareDistanceMeters
+      : PRESSURE_DECLARE_FALLBACK_FAR;
 
   const phase = session.phase;
   const nearestAttackerProximity =
@@ -83,22 +80,16 @@ export async function recomputeAndWritePressure(input) {
     nearestAttackerProximity,
   });
 
-  // Never persist raw shade or attacker coords; optional lastDeclareDistance for next pass.
-  await sessionRef
-    .collection("teamPressure")
-    .doc(defenderTeamId)
-    .set(
-      {
-        scalar: reading.scalar,
-        band: reading.band,
-        updatedAt: FieldValue.serverTimestamp(),
-        lastDeclareDistanceMeters:
-          typeof declareDistance === "number" && Number.isFinite(declareDistance)
-            ? declareDistance
-            : FieldValue.delete(),
-      },
-      { merge: true },
-    );
+  // Scalar + band only; never persist declare distance, shade, or attacker coords.
+  await sessionRef.collection("teamPressure").doc(defenderTeamId).set(
+    {
+      scalar: reading.scalar,
+      band: reading.band,
+      updatedAt: FieldValue.serverTimestamp(),
+      lastDeclareDistanceMeters: FieldValue.delete(),
+    },
+    { merge: true },
+  );
 
   return reading;
 }
