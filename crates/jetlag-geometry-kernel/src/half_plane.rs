@@ -22,6 +22,7 @@ pub enum DivisionAnchor {
 
 fn bbox_polygon(game_area: &GameArea) -> Option<MultiPolygon<f64>> {
     let rect = game_area.multipolygon.bounding_rect()?;
+    // Rings are [lng, lat]
     let exterior = LineString(vec![
         Coord {
             x: rect.min().x,

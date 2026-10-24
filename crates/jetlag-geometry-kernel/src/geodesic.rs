@@ -5,6 +5,7 @@
 /// with `mask.rs` Turf `6_371_008.8`; naive unify breaks one parity surface.
 pub(crate) const EARTH_RADIUS_M: f64 = 6_371_000.0;
 
+/// Lat/lng tuple as in TS `LatLngTuple`.
 pub(crate) type LatLng = (f64, f64);
 
 pub(crate) fn midpoint(a: LatLng, b: LatLng) -> LatLng {
