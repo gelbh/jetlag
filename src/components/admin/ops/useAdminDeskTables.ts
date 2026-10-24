@@ -22,6 +22,8 @@ import { buildSessionColumns, SESSION_DEFAULT_SORT } from "../table/sessionColum
 
 export type NeedsYouKind = "all" | "incident" | "preload";
 
+const PRELOAD_ROUTE = "/admin/preload-requests";
+
 const STATIC_SESSION_COLUMNS = buildSessionColumns(new Map());
 const STATIC_NEEDS_COLUMNS = buildNeedsYouColumns();
 // The comp draws 40px rows.
@@ -39,6 +41,8 @@ interface Inputs {
   incidents: readonly IncidentRecord[];
   preloadRequests: readonly PreloadRequest[];
   openIncidentsBySession: ReadonlyMap<string, number>;
+  /** Current location; Kind follows preload table entry/exit only. */
+  pathname: string;
   initialKind?: NeedsYouKind;
 }
 
@@ -48,6 +52,7 @@ export function useAdminDeskTables({
   incidents,
   preloadRequests,
   openIncidentsBySession,
+  pathname,
   initialKind = "all",
 }: Inputs) {
   const nowMs = useFreshnessClock();
@@ -57,7 +62,17 @@ export function useAdminDeskTables({
   const [tier, setTier] = useState<AdminSessionSummary["tier"] | null>(null);
   const [hasIncident, setHasIncident] = useState(false);
   const [kind, setKind] = useState<NeedsYouKind>(initialKind);
+  const [kindPath, setKindPath] = useState(pathname);
   const [showClosed, setShowClosed] = useState(false);
+
+  // Kind follows preload table entry/exit only; incident detail must not reset it.
+  // Adjust during render — avoids setState-in-effect (same pattern as map landscape chrome).
+  if (pathname !== kindPath) {
+    const previousPath = kindPath;
+    setKindPath(pathname);
+    if (pathname === PRELOAD_ROUTE) setKind("preload");
+    else if (previousPath === PRELOAD_ROUTE) setKind("all");
+  }
   const [sessionPrefs, setSessionPrefsState] = useState<AdminTablePrefs>(() =>
     readPrefs("sessions", STATIC_SESSION_COLUMNS, SESSION_DEFAULTS),
   );
