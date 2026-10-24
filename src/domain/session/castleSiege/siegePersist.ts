@@ -18,7 +18,6 @@ export function serializeSiegeClock(clock: SiegeClockState): Record<string, unkn
     paused: clock.paused,
     pauseReason: clock.pauseReason,
     remainingMsWhenPaused: clock.remainingMsWhenPaused,
-    captureBlocked: clock.captureBlocked,
     roles: clock.roles,
     headStartTeamId: clock.headStartTeamId,
     headStartEndsAtMs: clock.headStartEndsAtMs,
@@ -90,7 +89,6 @@ export function deserializeSiegeClock(value: unknown): SiegeClockState | undefin
     paused: record.paused,
     pauseReason,
     remainingMsWhenPaused,
-    captureBlocked: record.captureBlocked === true || record.paused === true,
     roles: {
       teamA: rolesMap.teamA as SiegeRole,
       teamB: rolesMap.teamB as SiegeRole,

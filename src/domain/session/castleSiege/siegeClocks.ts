@@ -28,8 +28,6 @@ export type SiegeClockState = {
   paused: boolean;
   pauseReason: SiegePauseReason | null;
   remainingMsWhenPaused: number | null;
-  /** True while paused for geofence/travel/safety; cleared on resolve/resume. */
-  captureBlocked: boolean;
   roles: SiegeTeamRoles;
   headStartTeamId: StandoffTeamId | null;
   /** Wall time when trailing team may attack; null when no stagger. */
@@ -80,7 +78,6 @@ export function createSiegeClocks(opts: {
       paused: false,
       pauseReason: null,
       remainingMsWhenPaused: null,
-      captureBlocked: false,
       roles,
       headStartTeamId: opts.endgame.teamId,
       headStartEndsAtMs: opts.nowMs + headStartSeconds * 1000,
@@ -94,7 +91,6 @@ export function createSiegeClocks(opts: {
     paused: false,
     pauseReason: null,
     remainingMsWhenPaused: null,
-    captureBlocked: false,
     roles,
     headStartTeamId: null,
     headStartEndsAtMs: null,
@@ -122,7 +118,6 @@ export function pauseSiegeClock(
     paused: true,
     pauseReason: reason,
     remainingMsWhenPaused: remainingSiegeMs(clock, nowMs),
-    captureBlocked: true,
   };
 }
 
@@ -136,7 +131,6 @@ export function resumeSiegeClock(clock: SiegeClockState, nowMs: number): SiegeCl
     paused: false,
     pauseReason: null,
     remainingMsWhenPaused: null,
-    captureBlocked: false,
     deadlineMs: nowMs + remaining,
   };
 }

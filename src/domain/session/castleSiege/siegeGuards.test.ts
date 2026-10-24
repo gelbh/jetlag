@@ -53,7 +53,6 @@ describe("siegeGuards geofence", () => {
     expect(next.event).toEqual({ severity: "hard", kind: "geofence" });
     expect(next.clock.paused).toBe(true);
     expect(next.clock.pauseReason).toBe("geofence");
-    expect(next.guards.captureBlocked).toBe(true);
     expect(isCaptureAllowed(next.clock, next.guards)).toBe(false);
   });
 
@@ -156,7 +155,7 @@ describe("resolveSiegeGuards", () => {
     });
     const resolved = resolveSiegeGuards(hard.clock, hard.guards, GEOFENCE_HARD_AFTER_MS + 5_000);
     expect(resolved.clock.paused).toBe(false);
-    expect(resolved.guards.captureBlocked).toBe(false);
+    expect(resolved.guards.hardKind).toBeNull();
     expect(isCaptureAllowed(resolved.clock, resolved.guards)).toBe(true);
   });
 });
