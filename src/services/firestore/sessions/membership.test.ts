@@ -5,6 +5,9 @@ import { resetAllStores } from "@/test/helpers/storeReset";
 import { ensureRemoteSessionMembership, ensureRemoteSessionWriteAccess } from "./membership";
 
 const getRemoteSessionByIdFromServer = vi.hoisted(() => vi.fn());
+const ensureMemberProof = vi.hoisted(() => vi.fn(async () => undefined));
+
+vi.mock("../memberProofs", () => ({ ensureMemberProof }));
 
 vi.mock("@/services/core/firebase/firebase", () => ({
   getFirestoreDb: () => ({}),
@@ -25,6 +28,7 @@ describe("ensureRemoteSessionWriteAccess offline shortcut", () => {
     onLine = true;
     vi.spyOn(navigator, "onLine", "get").mockImplementation(() => onLine);
     getRemoteSessionByIdFromServer.mockReset();
+    ensureMemberProof.mockClear();
   });
 
   afterEach(() => {
@@ -91,5 +95,14 @@ describe("ensureRemoteSessionWriteAccess offline shortcut", () => {
     await ensureRemoteSessionMembership(session, "user-host", "seeker");
 
     expect(getRemoteSessionByIdFromServer).toHaveBeenCalledTimes(1);
+  });
+
+  it("repairs the member's heal proof when the uid is already a member", async () => {
+    const session = createTestRemoteSession({ memberUids: ["user-host"] });
+    getRemoteSessionByIdFromServer.mockResolvedValue(session);
+
+    await ensureRemoteSessionMembership(session, "user-host", "seeker");
+
+    expect(ensureMemberProof).toHaveBeenCalledWith(session.id, "user-host");
   });
 });

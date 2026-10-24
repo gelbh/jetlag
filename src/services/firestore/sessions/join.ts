@@ -30,6 +30,7 @@ import {
 } from "@/services/session/rolePasscodeLifecycle";
 import { cancelWalkingThermometersAfterIdentityHeal } from "../firestoreSessionExtras";
 import { joinGatedRemoteSessionByCode } from "../joinGatedRemoteSession";
+import { ensureMemberProof } from "../memberProofs";
 import { deserializeSessionFromFirestore } from "../serialization/serializeSession";
 import { ensureRemoteSessionMembership } from "./membership";
 import {
@@ -528,7 +529,7 @@ export async function joinRemoteSessionByCode(
   }
 
   const returningMemberUid = sanitizeJoinReturningMemberUid(options);
-  return withJoinPermissionRetry(() =>
+  const result = await withJoinPermissionRetry(() =>
     joinRemoteSessionByCodeOnce(
       code,
       codeRecord,
@@ -539,6 +540,15 @@ export async function joinRemoteSessionByCode(
       options,
     ),
   );
+
+  if (result.status === "joined") {
+    // Ungated joins write membership client-side, so the proof is created here.
+    // Gated joins and heals got theirs from the callable; this is then one read.
+    // Not awaited: setDoc resolves only on server ack and must not stall the join.
+    void ensureMemberProof(codeRecord.sessionId, uid);
+  }
+
+  return result;
 }
 
 export async function getRemoteSessionById(sessionId: string): Promise<SessionRecord | null> {

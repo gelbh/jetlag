@@ -36,6 +36,10 @@ vi.mock("../core/auth/forceRefreshIdToken", () => ({
   forceRefreshIdToken,
 }));
 
+const ensureMemberProof = vi.hoisted(() => vi.fn(async () => undefined));
+
+vi.mock("./memberProofs", () => ({ ensureMemberProof }));
+
 vi.mock("firebase/firestore", () => ({
   arrayUnion: vi.fn((value: unknown) => value),
   collection: vi.fn((_db: unknown, ...segments: string[]) => ({
@@ -258,5 +262,37 @@ describe("createRemoteSession role-gate bootstrap", () => {
     expect(payload).not.toHaveProperty("castleSiegeRoles");
     expect(payload).not.toHaveProperty("seriesLength");
     expect(payload).not.toHaveProperty("setupMode");
+  });
+
+  it("creates the host's heal proof after the session batch commits", async () => {
+    clientEnvUsesFirebaseEmulator.mockReturnValue(true);
+
+    const session = await createRemoteSession(AREA, "host-1");
+
+    expect(ensureMemberProof).toHaveBeenCalledWith(session.id, "host-1");
+    expect(batchCommit.mock.invocationCallOrder[0]).toBeLessThan(
+      ensureMemberProof.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("creates the castleSiege observer host's heal proof outside emulator", async () => {
+    const session = await createRemoteSession(
+      AREA,
+      "host-1",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      {},
+      "imperial",
+      undefined,
+      { mode: "castleSiege" },
+    );
+
+    expect(session.memberRoles).toEqual({ "host-1": "observer" });
+    expect(ensureMemberProof).toHaveBeenCalledWith(session.id, "host-1");
+    expect(batchCommit.mock.invocationCallOrder[0]).toBeLessThan(
+      ensureMemberProof.mock.invocationCallOrder[0],
+    );
   });
 });
