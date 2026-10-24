@@ -510,7 +510,10 @@ test("withFunctionsExceptionHandler omits session_id when request data has none"
   const wrapped = withFunctionsExceptionHandler(async () => {
     throw boom;
   }, "proxy");
-  await assert.rejects(() => wrapped({ data: { sessionId: "   " } }), (error) => error === boom);
+  await assert.rejects(
+    () => wrapped({ data: { sessionId: "   " } }),
+    (error) => error === boom,
+  );
   assert.equal(calls.length, 1);
   assert.equal("session_id" in calls[0].properties, false);
   setFunctionsExceptionClientForTests(null);
