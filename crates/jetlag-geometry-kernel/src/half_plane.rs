@@ -22,7 +22,6 @@ pub enum DivisionAnchor {
 
 fn bbox_polygon(game_area: &GameArea) -> Option<MultiPolygon<f64>> {
     let rect = game_area.multipolygon.bounding_rect()?;
-    // Rings are [lng, lat]
     let exterior = LineString(vec![
         Coord {
             x: rect.min().x,
@@ -52,6 +51,7 @@ fn hotter_side_polygon(anchor: LatLng, bearing: f64) -> MultiPolygon<f64> {
     let left = destination_point(anchor, DIAGONAL_METERS, bearing + 90.0);
     let right = destination_point(anchor, DIAGONAL_METERS, bearing - 90.0);
     let far = destination_point(anchor, DIAGONAL_METERS, bearing);
+    // Rings are [lng, lat]
     let exterior = LineString(vec![
         Coord {
             x: anchor.1,
