@@ -10,8 +10,8 @@ export type SiegeTeamRoles = {
   teamB: SiegeRole;
 };
 
-/** Pause reasons; geofence/travel hard-pause land in Task 2. */
-export type SiegePauseReason = "safetyStop" | "geofence" | "travel";
+/** Pause reasons; geofence/travel hard-pause; dispute from capture. */
+export type SiegePauseReason = "safetyStop" | "geofence" | "travel" | "dispute";
 
 /**
  * Endgame that opens Siege. `headStart` must already carry seconds from

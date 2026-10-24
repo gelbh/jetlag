@@ -513,6 +513,12 @@ export function deserializeSessionFromFirestore(
       !Array.isArray(document.siegeClock)
         ? (document.siegeClock as Record<string, unknown>)
         : undefined,
+    siegeCapture:
+      document.siegeCapture &&
+      typeof document.siegeCapture === "object" &&
+      !Array.isArray(document.siegeCapture)
+        ? (document.siegeCapture as Record<string, unknown>)
+        : undefined,
   };
 }
 

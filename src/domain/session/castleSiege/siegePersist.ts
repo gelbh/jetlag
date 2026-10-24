@@ -8,7 +8,7 @@ import {
 import type { StandoffTeamId } from "./standoffTurn";
 
 const ROLES = new Set<SiegeRole>(["attack", "defend"]);
-const PAUSE_REASONS = new Set<SiegePauseReason>(["safetyStop", "geofence", "travel"]);
+const PAUSE_REASONS = new Set<SiegePauseReason>(["safetyStop", "geofence", "travel", "dispute"]);
 const TEAMS = new Set<StandoffTeamId>(["teamA", "teamB"]);
 
 export function serializeSiegeClock(clock: SiegeClockState): Record<string, unknown> {

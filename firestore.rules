@@ -271,6 +271,28 @@ service cloud.firestore {
         && sessionIdentityUnchanged();
     }
 
+    // Capture submit / confirm / timeout / dispute (may also pause siegeClock).
+    function isCastleSiegeCaptureUpdate() {
+      return isSignedIn()
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && resource.data.mode == 'castleSiege'
+        && resource.data.phase == 'siege'
+        && request.resource.data.phase == 'siege'
+        && (
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['siegeCapture'])
+          || request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['siegeCapture', 'siegeClock'])
+        )
+        && request.resource.data.siegeCapture is map
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['siegeClock'])
+          || request.resource.data.siegeClock is map
+        )
+        && sessionIdentityUnchanged();
+    }
+
     function canReadTeamHands(sessionId, teamId) {
       return isSessionMember(sessionId)
         && (
@@ -961,6 +983,7 @@ service cloud.firestore {
         || isCastleSiegeSetupUpdate()
         || isCastleSiegeStandoffUpdate()
         || isCastleSiegeSiegeUpdate()
+        || isCastleSiegeCaptureUpdate()
         || isTimerHostUpdate()
         || isLastActiveAtUpdate()
         || isFoundHiderRequestUpdate()
