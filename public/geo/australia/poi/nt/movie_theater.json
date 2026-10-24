@@ -1,0 +1,20 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": { "south": -25.9986, "west": 129.0006, "north": -10.9068, "east": 137.9991 },
+  "places": [
+    { "id": "Q45308678", "name": "Alice Springs Cinema", "lat": -23.69755, "lng": 133.88389 },
+    { "id": "Q45308685", "name": "Alice Springs YHA Movies", "lat": -23.69928, "lng": 133.884022 },
+    { "id": "Q45308720", "name": "BCC Casuarina Cinemas", "lat": -12.37493, "lng": 130.881522 },
+    { "id": "Q45308727", "name": "BCC Darwin 5", "lat": -12.460987, "lng": 130.837982 },
+    { "id": "Q45308764", "name": "CMax Cinemas Palmerston", "lat": -12.480358, "lng": 130.988272 },
+    { "id": "Q45308734", "name": "Deckchair Cinema", "lat": -12.468547, "lng": 130.843275 },
+    { "id": "Q45308753", "name": "Katherine Cinema 3", "lat": -14.464194, "lng": 132.263381 },
+    { "id": "Q45308631", "name": "Moonlit Cinema", "lat": -14.495753, "lng": 132.393185 },
+    { "id": "Q45308699", "name": "Pioneer Drive-In", "lat": -23.697671, "lng": 133.878395 },
+    { "id": "Q45308772", "name": "Pioneer Theatre", "lat": -19.64306, "lng": 134.191864 },
+    { "id": "Q45308712", "name": "Recreation Hall", "lat": -13.044853, "lng": 131.028291 },
+    { "id": "Q45308706", "name": "Stuart Arms Hotel", "lat": -23.697854, "lng": 133.88367 },
+    { "id": "Q45308785", "name": "Winnellie Cinema", "lat": -12.425252, "lng": 130.885552 }
+  ]
+}

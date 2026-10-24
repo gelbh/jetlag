@@ -1,0 +1,77 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": { "south": -25.9986, "west": 129.0006, "north": -10.9068, "east": 137.9991 },
+  "places": [
+    { "id": "Q64980212", "name": "Adelaide House", "lat": -23.6996, "lng": 133.8825 },
+    { "id": "Q4783902", "name": "Araluen Cultural Precinct", "lat": -23.70155, "lng": 133.862571 },
+    {
+      "id": "Q136555839",
+      "name": "Battery Hill Gold Mining and Heritage Centre",
+      "lat": -19.64792,
+      "lng": 134.20795
+    },
+    {
+      "id": "Q137009696",
+      "name": "Borroloola Police Station Museum",
+      "lat": -16.06794,
+      "lng": 136.30521
+    },
+    { "id": "Q25848374", "name": "Burnett House", "lat": -12.45074, "lng": 130.8297 },
+    {
+      "id": "Q21575026",
+      "name": "Central Australian Aviation Museum",
+      "lat": -23.702611,
+      "lng": 133.864306
+    },
+    {
+      "id": "Q30315172",
+      "name": "Charles Darwin University Nursing Museum",
+      "lat": -12.372234,
+      "lng": 130.868523
+    },
+    { "id": "Q23753999", "name": "Darwin Aviation Museum", "lat": -12.425394, "lng": 130.895711 },
+    { "id": "Q5226003", "name": "Darwin Military Museum", "lat": -12.407517, "lng": 130.819769 },
+    {
+      "id": "Q136749265",
+      "name": "Katherine Historical Museum",
+      "lat": -14.44343,
+      "lng": 132.27288
+    },
+    { "id": "Q24887019", "name": "Lyons Cottage", "lat": -12.464568, "lng": 130.839736 },
+    {
+      "id": "Q1954532",
+      "name": "Museum & Art Gallery of the Northern Territory",
+      "lat": -12.4375,
+      "lng": 130.833611
+    },
+    {
+      "id": "Q137382192",
+      "name": "Museum of Central Australia",
+      "lat": -23.70131,
+      "lng": 133.86443
+    },
+    {
+      "id": "Q6978131",
+      "name": "National Road Transport Museum",
+      "lat": -23.777111,
+      "lng": 133.867528
+    },
+    { "id": "Q136511136", "name": "Nyinkka Nyunyu", "lat": -19.65191, "lng": 134.18807 },
+    {
+      "id": "Q2018366",
+      "name": "Old Ghan Heritage Railway and Museum",
+      "lat": -23.7777,
+      "lng": 133.868
+    },
+    { "id": "Q137660459", "name": "Old Timers Traeger Museum", "lat": -23.74207, "lng": 133.86953 },
+    {
+      "id": "Q137438921",
+      "name": "Timber Creek Police Station Museum",
+      "lat": -15.64394,
+      "lng": 130.47731
+    },
+    { "id": "Q28219922", "name": "Tuxworth Fullwood House", "lat": -19.64673, "lng": 134.18788 },
+    { "id": "Q14935683", "name": "Women's Museum of Australia", "lat": -23.7041, "lng": 133.8769 }
+  ]
+}

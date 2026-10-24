@@ -892,7 +892,7 @@ export function useCreateSession() {
           regionPackSubregionId,
           customMatchingAreas: advancedSettings.customMatchingAreas,
         });
-        preloadGameAreaCaches(gameArea, matchingAreas, regionPackId, tier);
+        preloadGameAreaCaches(gameArea, matchingAreas, regionPackId, tier, regionPackSubregionId);
         void loadSeaLevelProgressive()
           .then(({ startSeaLevelBackgroundSampling }) => {
             startSeaLevelBackgroundSampling(gameArea, { regionPackId });

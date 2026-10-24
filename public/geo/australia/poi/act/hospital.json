@@ -1,0 +1,21 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [
+    {
+      "id": "Q14935650",
+      "name": "Calvary Public Hospital Bruce",
+      "lat": -35.253333,
+      "lng": 149.09
+    },
+    {
+      "id": "Q94982501",
+      "name": "Canberra Coronavirus Field Hospital",
+      "lat": -35.34305,
+      "lng": 149.101891
+    },
+    { "id": "Q5031265", "name": "Canberra Hospital", "lat": -35.3454, "lng": 149.1009 },
+    { "id": "Q16899034", "name": "Queanbeyan District Hospital", "lat": -35.3475, "lng": 149.232 }
+  ]
+}

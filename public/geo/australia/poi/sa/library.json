@@ -1,0 +1,41 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": { "south": -38.0626, "west": 129.0018, "north": -25.9964, "east": 141.003 },
+  "places": [
+    {
+      "id": "Q80879145",
+      "name": "Andamooka School Community Library",
+      "lat": -30.448903,
+      "lng": 137.167614
+    },
+    {
+      "id": "Q80886777",
+      "name": "Ardrossan School Community Library",
+      "lat": -34.422962,
+      "lng": 137.913842
+    },
+    {
+      "id": "Q80913874",
+      "name": "Balaklava Community Library",
+      "lat": -34.154389,
+      "lng": 138.417306
+    },
+    { "id": "Q4863112", "name": "Barr Smith Library", "lat": -34.9188, "lng": 138.605 },
+    { "id": "Q5000155", "name": "Burnside library", "lat": -34.938324, "lng": 138.643342 },
+    {
+      "id": "Q5123868",
+      "name": "City of Playford Library Service",
+      "lat": -34.717921,
+      "lng": 138.671591
+    },
+    { "id": "Q115301635", "name": "Seaford Library", "lat": -35.17856, "lng": 138.48183 },
+    { "id": "Q24090250", "name": "Semaphore Library", "lat": -34.838679, "lng": 138.481337 },
+    {
+      "id": "Q7603406",
+      "name": "State Library of South Australia",
+      "lat": -34.9209,
+      "lng": 138.602
+    }
+  ]
+}

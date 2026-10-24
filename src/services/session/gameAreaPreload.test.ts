@@ -179,6 +179,33 @@ describe("gameAreaPreload", () => {
         category,
         [],
         "dublin",
+        undefined,
+      );
+    }
+  });
+
+  it("preloads measuring categories with australia state subregionId", async () => {
+    vi.useFakeTimers();
+
+    const preloadPromise = preloadGameAreaCachesAsync(
+      DUBLIN_CITY_GAME_AREA,
+      undefined,
+      "australia",
+      "free",
+      "nsw",
+    );
+    await vi.runAllTimersAsync();
+    await preloadPromise;
+
+    const expectedCategories = preloadMeasuringCategoriesForTests();
+    expect(fetchMeasuringPlacesInArea).toHaveBeenCalledTimes(expectedCategories.length);
+    for (const category of expectedCategories) {
+      expect(fetchMeasuringPlacesInArea).toHaveBeenCalledWith(
+        DUBLIN_CITY_GAME_AREA,
+        category,
+        [],
+        "australia",
+        { subregionId: "nsw" },
       );
     }
   });

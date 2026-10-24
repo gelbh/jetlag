@@ -1,0 +1,41 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": { "south": -35.9205, "west": 148.7628, "north": -35.1244, "east": 149.3993 },
+  "places": [
+    {
+      "id": "Q4824479",
+      "name": "Australian National University Classics Museum",
+      "lat": -35.2783,
+      "lng": 149.122
+    },
+    { "id": "Q782783", "name": "Australian War Memorial", "lat": -35.280472, "lng": 149.149056 },
+    { "id": "Q65069976", "name": "Belconnen Arts Centre", "lat": -35.235924, "lng": 149.068006 },
+    { "id": "Q4930754", "name": "Blundells Cottage", "lat": -35.293, "lng": 149.142 },
+    { "id": "Q5031255", "name": "Canberra Glassworks", "lat": -35.311597, "lng": 149.143695 },
+    { "id": "Q495518", "name": "Canberra Museum and Gallery", "lat": -35.2807, "lng": 149.131 },
+    {
+      "id": "Q56857361",
+      "name": "Museum of Australian Democracy at Old Parliament House",
+      "lat": -35.30234,
+      "lng": 149.129605
+    },
+    {
+      "id": "Q136649082",
+      "name": "National Capital Exhibition",
+      "lat": -35.290464,
+      "lng": 149.131293
+    },
+    { "id": "Q494881", "name": "National Dinosaur Museum", "lat": -35.1943, "lng": 149.088 },
+    {
+      "id": "Q623578",
+      "name": "National Library of Australia",
+      "lat": -35.296389,
+      "lng": 149.129444
+    },
+    { "id": "Q1967496", "name": "National Museum of Australia", "lat": -35.2931, "lng": 149.121 },
+    { "id": "Q1858105", "name": "Parliament House", "lat": -35.308056, "lng": 149.124444 },
+    { "id": "Q497181", "name": "Questacon", "lat": -35.298056, "lng": 149.131389 },
+    { "id": "Q1138895", "name": "Reconciliation Place", "lat": -35.3, "lng": 149.133 }
+  ]
+}

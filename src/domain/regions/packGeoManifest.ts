@@ -112,10 +112,19 @@ export function isPackGeoSupported(
   }
 }
 
+/**
+ * Bundled POI JSON URL. For `australia` with a State/Territory `subregionId`,
+ * prefers `/geo/australia/poi/<stateId>/<category>.json` (bandwidth slice).
+ * Callers should fall back to the national path when that asset is missing.
+ */
 export function packGeoPoiUrl(
   packId: RegionPackId,
   category: MeasuringLocationCategory | string,
+  subregionId?: string,
 ): string {
+  if (packId === "australia" && subregionId) {
+    return `/geo/${packId}/poi/${subregionId}/${category}.json`;
+  }
   return `/geo/${packId}/poi/${category}.json`;
 }
 
@@ -135,7 +144,11 @@ export function packGeoSeaLevelSeedUrl(packId: RegionPackId): string {
 export function packGeoPoiPublicPath(
   packId: RegionPackId,
   category: MeasuringLocationCategory | string,
+  subregionId?: string,
 ): string {
+  if (packId === "australia" && subregionId) {
+    return `geo/${packId}/poi/${subregionId}/${category}.json`;
+  }
   return `geo/${packId}/poi/${category}.json`;
 }
 

@@ -223,6 +223,8 @@ export type FetchTentaclePoisOptions = {
   customCategories?: readonly SessionCustomCategory[];
   customLocationPins?: readonly SessionCustomLocationPin[];
   regionPackId?: RegionPackId;
+  /** Pack subregion (e.g. Australia `stateId`) for bandwidth-scoped POI slices. */
+  subregionId?: string;
   onEnrich?: (pois: TentaclePoi[]) => void;
 };
 
@@ -275,6 +277,7 @@ export async function fetchTentaclePois(
     radiusMeters,
     categoryId,
     options?.regionPackId,
+    options?.subregionId,
   );
 
   const mergeWithOverpass = async (): Promise<TentaclePoi[]> => {

@@ -1,0 +1,11 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": { "south": -38.0626, "west": 129.0018, "north": -25.9964, "east": 141.003 },
+  "places": [
+    { "id": "Q3244627", "name": "Adelaide Zoo", "lat": -34.914089, "lng": 138.605794 },
+    { "id": "Q21929398", "name": "Cleland Wildlife Park", "lat": -34.967222, "lng": 138.696667 },
+    { "id": "Q2386465", "name": "Gorge Wildlife Park", "lat": -34.841936, "lng": 138.814331 },
+    { "id": "Q6898210", "name": "Monarto Zoo", "lat": -35.1021, "lng": 139.142 }
+  ]
+}

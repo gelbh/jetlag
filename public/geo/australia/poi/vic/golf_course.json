@@ -1,0 +1,16 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": { "south": -39.159, "west": 140.9619, "north": -33.9806, "east": 149.9762 },
+  "places": [
+    { "id": "Q104852982", "name": "Barwon Heads Golf Club", "lat": -38.27827, "lng": 144.45692 },
+    { "id": "Q16258741", "name": "Commonwealth Golf Club", "lat": -37.93, "lng": 145.088 },
+    { "id": "Q3067562", "name": "Huntingdale Golf Club", "lat": -37.92, "lng": 145.1 },
+    { "id": "Q16897529", "name": "Moonah Links", "lat": -38.4055, "lng": 144.8528 },
+    { "id": "Q115692027", "name": "Ringwood Golf", "lat": -37.835, "lng": 145.222228 },
+    { "id": "Q607620", "name": "Royal Melbourne Golf Club", "lat": -37.9695, "lng": 145.031 },
+    { "id": "Q7415712", "name": "Sanctuary Lakes Resort", "lat": -37.8961, "lng": 144.763 },
+    { "id": "Q97453660", "name": "Tumbarumba Golf Course", "lat": -35.748333, "lng": 148.017778 },
+    { "id": "Q39892054", "name": "Willaura Golf Club", "lat": -37.576389, "lng": 142.748333 }
+  ]
+}

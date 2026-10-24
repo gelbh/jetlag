@@ -1,0 +1,10 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": { "south": -38.0626, "west": 129.0018, "north": -25.9964, "east": 141.003 },
+  "places": [
+    { "id": "Q19875325", "name": "Luna Park Glenelg", "lat": -34.9792, "lng": 138.511 },
+    { "id": "Q14935735", "name": "Magic Mountain, Glenelg", "lat": -34.9792, "lng": 138.511 },
+    { "id": "Q7715977", "name": "The Beachouse", "lat": -34.9793, "lng": 138.511 }
+  ]
+}

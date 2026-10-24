@@ -1,0 +1,30 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": { "south": -35.1916, "west": 112.9211, "north": -13.6887, "east": 129.0019 },
+  "places": [
+    {
+      "id": "Q296366",
+      "name": "Aquarium of Western Australia",
+      "lat": -31.82668,
+      "lng": 115.738118
+    },
+    { "id": "Q4792522", "name": "Armadale Reptile Centre", "lat": -32.1766, "lng": 116.015 },
+    {
+      "id": "Q111821178",
+      "name": "Australian Wildlife Park, Albany",
+      "lat": -35.096754,
+      "lng": 117.959444
+    },
+    { "id": "Q55606786", "name": "Caversham Wildlife Park", "lat": -31.83364, "lng": 115.951031 },
+    { "id": "Q4236423", "name": "Cohunu Koala Park", "lat": -32.230305, "lng": 116.014151 },
+    { "id": "Q109236782", "name": "Ocean Park Aquarium", "lat": -25.980457, "lng": 113.55957 },
+    { "id": "Q3082583", "name": "Perth Zoo", "lat": -31.975561, "lng": 115.852216 },
+    {
+      "id": "Q70049729",
+      "name": "Ranger Red’s Zoo & Conservation Park",
+      "lat": -32.609472,
+      "lng": 115.866417
+    }
+  ]
+}

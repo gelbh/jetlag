@@ -1,0 +1,33 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": { "south": -43.7404, "west": 143.8192, "north": -39.2038, "east": 148.4986 },
+  "places": [
+    { "id": "Q45308471", "name": "Cinema 1", "lat": -41.437996, "lng": 147.138948 },
+    { "id": "Q45308382", "name": "Cinema One", "lat": -41.050101, "lng": 145.90524 },
+    { "id": "Q45308404", "name": "CMax Cinemas Devonport", "lat": -41.178865, "lng": 146.36246 },
+    {
+      "id": "Q45308477",
+      "name": "Country Club Tasmania Drive-In Cinema",
+      "lat": -41.482415,
+      "lng": 147.117706
+    },
+    { "id": "Q45308547", "name": "Eastside Drive-In", "lat": -42.86472, "lng": 147.376185 },
+    { "id": "Q45308417", "name": "Elwick Drive-In", "lat": -42.825524, "lng": 147.289832 },
+    {
+      "id": "Q45308423",
+      "name": "Hobart Showground Drive-In",
+      "lat": -42.830716,
+      "lng": 147.28684
+    },
+    { "id": "Q45308390", "name": "Metro Cinemas Burnie", "lat": -41.051308, "lng": 145.908692 },
+    { "id": "Q45308533", "name": "Paragon Theatre", "lat": -42.080147, "lng": 145.554883 },
+    { "id": "Q45308501", "name": "Princess Theatre", "lat": -41.436179, "lng": 147.141354 },
+    { "id": "Q45308540", "name": "Somerset Drive-In", "lat": -41.006432, "lng": 145.779187 },
+    { "id": "Q45308411", "name": "Starlite Drive-In", "lat": -41.183624, "lng": 146.372076 },
+    { "id": "Q45308446", "name": "State Cinema", "lat": -42.872221, "lng": 147.315021 },
+    { "id": "Q45308454", "name": "Village Cinema", "lat": -42.885991, "lng": 147.323983 },
+    { "id": "Q45308509", "name": "Village Cinemas", "lat": -41.438643, "lng": 147.136565 },
+    { "id": "Q45308518", "name": "Village Drive-In", "lat": -41.403982, "lng": 147.135154 }
+  ]
+}

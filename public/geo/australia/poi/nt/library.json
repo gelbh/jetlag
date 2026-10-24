@@ -1,0 +1,80 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": { "south": -25.9986, "west": 129.0006, "north": -10.9068, "east": 137.9991 },
+  "places": [
+    { "id": "Q56867964", "name": "Adelaide River School", "lat": -13.237157, "lng": 131.109119 },
+    {
+      "id": "Q4726098",
+      "name": "Alice Springs Public Library",
+      "lat": -23.701611,
+      "lng": 133.882944
+    },
+    { "id": "Q126106550", "name": "Alyangula Area School", "lat": -13.84964, "lng": 136.42011 },
+    {
+      "id": "Q136889307",
+      "name": "Batchelor Community Library",
+      "lat": -13.046836,
+      "lng": 131.033684
+    },
+    {
+      "id": "Q136850026",
+      "name": "Casuarina Public Library",
+      "lat": -12.374154,
+      "lng": 130.880059
+    },
+    { "id": "Q137279525", "name": "Darwin Public Library", "lat": -12.464757, "lng": 130.845615 },
+    { "id": "Q138188204", "name": "Karama Public Library", "lat": -12.400974, "lng": 130.915342 },
+    { "id": "Q7059036", "name": "Library & Archives NT", "lat": -12.4666, "lng": 130.8428 },
+    {
+      "id": "Q138341374",
+      "name": "Ltyentye Apurte Community Library",
+      "lat": -24.129524,
+      "lng": 134.374912
+    },
+    {
+      "id": "Q136532128",
+      "name": "Mataranka Community Library",
+      "lat": -14.921957,
+      "lng": 133.065055
+    },
+    {
+      "id": "Q137382197",
+      "name": "Milikapiti Community Library",
+      "lat": -11.419418,
+      "lng": 130.672747
+    },
+    {
+      "id": "Q137382212",
+      "name": "Milingimbi Community Library",
+      "lat": -12.102946,
+      "lng": 134.920153
+    },
+    {
+      "id": "Q136526222",
+      "name": "Nhulunbuy Community Library",
+      "lat": -12.186368,
+      "lng": 136.783072
+    },
+    {
+      "id": "Q136532181",
+      "name": "Nightcliff Public Library",
+      "lat": -12.387009,
+      "lng": 130.850337
+    },
+    { "id": "Q136531088", "name": "Palmerston City Library", "lat": -12.479494, "lng": 130.984939 },
+    {
+      "id": "Q136449249",
+      "name": "Taminmin Community Library",
+      "lat": -12.57955,
+      "lng": 131.10023
+    },
+    {
+      "id": "Q136849888",
+      "name": "Tennant Creek Public Library",
+      "lat": -19.64639,
+      "lng": 134.19598
+    },
+    { "id": "Q137213295", "name": "Wadeye Community Library", "lat": -14.243228, "lng": 129.522821 }
+  ]
+}

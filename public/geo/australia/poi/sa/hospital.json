@@ -1,0 +1,32 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": { "south": -38.0626, "west": 129.0018, "north": -25.9964, "east": 141.003 },
+  "places": [
+    { "id": "Q4805000", "name": "Ashford Hospital", "lat": -34.9487, "lng": 138.577 },
+    { "id": "Q5000153", "name": "Burnside War Memorial Hospital", "lat": -34.9278, "lng": 138.639 },
+    { "id": "Q65064526", "name": "Calvary Adelaide Hospital", "lat": -34.9294, "lng": 138.6053 },
+    { "id": "Q5024193", "name": "Calvary North Adelaide Hospital", "lat": -34.91, "lng": 138.589 },
+    { "id": "Q5024207", "name": "Calvary Wakefield Hospital", "lat": -34.9276, "lng": 138.6113 },
+    { "id": "Q81095735", "name": "Coober Pedy Hospital", "lat": -29.0045, "lng": 134.7617 },
+    { "id": "Q5459413", "name": "Flinders Medical Centre", "lat": -35.021426, "lng": 138.568811 },
+    {
+      "id": "Q30260410",
+      "name": "Flinders Private Hospital",
+      "lat": -35.020363,
+      "lng": 138.569178
+    },
+    { "id": "Q25184643", "name": "Glenside Hospital", "lat": -34.943, "lng": 138.625 },
+    { "id": "Q6707755", "name": "Lyell McEwin Hospital", "lat": -34.7478, "lng": 138.6651 },
+    { "id": "Q6888062", "name": "Modbury Hospital", "lat": -34.8344, "lng": 138.6906 },
+    { "id": "Q7373582", "name": "Royal Adelaide Hospital", "lat": -34.920972, "lng": 138.587333 },
+    { "id": "Q30270448", "name": "St Andrew’s Hospital", "lat": -34.934409, "lng": 138.614819 },
+    { "id": "Q7270336", "name": "The Queen Elizabeth Hospital", "lat": -34.8838, "lng": 138.533 },
+    {
+      "id": "Q8031120",
+      "name": "Women's and Children's Hospital",
+      "lat": -34.9114,
+      "lng": 138.5998
+    }
+  ]
+}
