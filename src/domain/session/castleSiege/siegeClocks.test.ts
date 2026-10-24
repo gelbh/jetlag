@@ -64,12 +64,14 @@ describe("siegeClocks", () => {
     clock = pauseSiegeClock(clock, 60_000, "safetyStop");
     expect(clock.paused).toBe(true);
     expect(clock.pauseReason).toBe("safetyStop");
+    expect(clock.captureBlocked).toBe(true);
     expect(clock.remainingMsWhenPaused).toBe(540_000);
     expect(remainingSiegeMs(clock, 120_000)).toBe(540_000);
 
     clock = resumeSiegeClock(clock, 200_000);
     expect(clock.paused).toBe(false);
     expect(clock.pauseReason).toBeNull();
+    expect(clock.captureBlocked).toBe(false);
     expect(clock.remainingMsWhenPaused).toBeNull();
     expect(clock.deadlineMs).toBe(200_000 + 540_000);
     expect(remainingSiegeMs(clock, 200_000)).toBe(540_000);
