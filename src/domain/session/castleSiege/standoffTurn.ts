@@ -38,10 +38,11 @@ function otherTeam(team: StandoffTeamId): StandoffTeamId {
 export function createInitialStandoffTurn(
   nowMs: number,
   clocks: StandoffClocks = DEFAULT_STANDOFF_CLOCKS,
+  opener: StandoffTeamId = "teamA",
 ): StandoffTurnState {
   return {
     round: 1,
-    activeTeam: "teamA",
+    activeTeam: opener,
     actsInRound: 0,
     phase: "turn",
     deadlineMs: nowMs + clocks.turnSeconds * 1000,

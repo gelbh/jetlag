@@ -1,4 +1,4 @@
-import { doc, setDoc, updateDoc, writeBatch } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, writeBatch } from "firebase/firestore";
 import type { SiegeCaptureState } from "@/domain/session/castleSiege/siegeCapture";
 import { serializeSiegeCapture } from "@/domain/session/castleSiege/siegeCapturePersist";
 import type { SiegeClockState, SiegeEndgameStart } from "@/domain/session/castleSiege/siegeClocks";
@@ -7,6 +7,7 @@ import {
   serializeSiegeClock,
 } from "@/domain/session/castleSiege/siegePersist";
 import { buildStartStandoffPrivateState } from "@/domain/session/castleSiege/standoffPersist";
+import type { StandoffTeamId } from "@/domain/session/castleSiege/standoffTurn";
 import type { TeamMarksGeometry } from "@/domain/session/castleSiege/teamMarks";
 import { callWithResilience } from "@/services/core/firebase/callWithResilience";
 import { getFirestoreDb, isFirebaseConfigured } from "@/services/core/firebase/firebase";
@@ -90,10 +91,14 @@ export async function startCastleSiegeStandoff(
   nowMs = Date.now(),
   seed = nowMs,
 ): Promise<void> {
-  const { deck, hands, publicPatch } = buildStartStandoffPrivateState(nowMs, seed);
+  const sessionRef = doc(sessionsCollection(), sessionId);
+  const sessionSnap = await getDoc(sessionRef);
+  const openerRaw = sessionSnap.data()?.seriesStandoffOpener;
+  const opener: StandoffTeamId = openerRaw === "teamB" ? "teamB" : "teamA";
+  const { deck, hands, publicPatch } = buildStartStandoffPrivateState(nowMs, seed, opener);
   const db = getFirestoreDb();
   const batch = writeBatch(db);
-  batch.update(doc(sessionsCollection(), sessionId), publicPatch);
+  batch.update(sessionRef, publicPatch);
   batch.set(standoffPrivateDeckDoc(sessionId), {
     remainingIds: deck.remainingIds,
     discardIds: deck.discardIds,
