@@ -20,7 +20,9 @@ function extractOverpassQuery(postData: string): string {
     if (data) {
       return decodeURIComponent(data);
     }
-  } catch {}
+  } catch {
+    /* malformed querystring; use raw body */
+  }
 
   return postData;
 }

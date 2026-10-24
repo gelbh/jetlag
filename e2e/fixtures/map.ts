@@ -84,7 +84,9 @@ export async function clickMapAtLatLng(page: Page, latitude: number, longitude: 
           ) {
             try {
               visit(rec[key], depth + 1);
-            } catch {}
+            } catch {
+              /* ignore cyclic / revoked */
+            }
           }
         }
       };

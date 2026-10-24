@@ -95,6 +95,7 @@ export async function injectSimulatedSafeAreaTop(page: Page, safeTopPx: number) 
 }
 
 export const SIMULATED_SAFE_AREA_BOTTOM_PX = 34;
+/** Matches --dock-float-gap (0.75rem) under OverlayHost. */
 export const DOCK_FLOAT_GAP_PX = 12;
 export const SIMULATED_SAFE_AREA_TOP_PX = 59;
 

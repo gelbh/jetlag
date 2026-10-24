@@ -54,6 +54,10 @@ async function waitForSocialRouteChrome(page: Page, path: SocialLayoutPath): Pro
   });
 }
 
+/**
+ * Settles a social route past RequireUsername.
+ * Signs in + seeds on `/` first so the target route does not paint auth gates.
+ */
 export async function openSocialRoute(
   page: Page,
   path: SocialLayoutPath,
