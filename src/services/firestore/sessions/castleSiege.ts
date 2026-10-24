@@ -27,6 +27,10 @@ function teamMarksDoc(sessionId: string, teamId: string) {
   return doc(getFirestoreDb(), "sessions", sessionId, "teamMarks", teamId);
 }
 
+function teamPressureDoc(sessionId: string, teamId: string) {
+  return doc(getFirestoreDb(), "sessions", sessionId, "teamPressure", teamId);
+}
+
 function standoffPrivateDeckDoc(sessionId: string) {
   return doc(getFirestoreDb(), "sessions", sessionId, "standoffPrivate", "deck");
 }
@@ -138,6 +142,11 @@ export async function writeCastleSiegeCapture(
     patch.siegeClock = serializeSiegeClock(siegeClock);
   }
   await updateDoc(doc(sessionsCollection(), sessionId), patch);
+}
+
+/** Defenders-only H5 pressure doc path (enemy cannot read — same gate as teamMarks). */
+export function castleSiegeTeamPressureRef(sessionId: string, teamId: "teamA" | "teamB") {
+  return teamPressureDoc(sessionId, teamId);
 }
 
 /** Own-team shade polygons (enemy clients cannot read — V12). */

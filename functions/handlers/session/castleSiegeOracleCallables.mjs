@@ -5,6 +5,7 @@ import { consumeRateLimit } from "../../lib/firestoreRateLimit.mjs";
 import { withFunctionsExceptionHandler } from "../../lib/functionsException.mjs";
 import { answerOracleAskFromSession } from "../../session/castleSiege/answerOracleAsk.mjs";
 import { evaluateDeclareBreachFromSession } from "../../session/castleSiege/declareBreach.mjs";
+import { recomputeAndWritePressure } from "../../session/castleSiege/recomputePressure.mjs";
 import { decodeSealWrapKeyFromEnv } from "../../session/castleSiege/sealDecrypt.mjs";
 import { castleSiegeSealWrapKey } from "../../session/castleSiege/sealWrapKey.mjs";
 import { posthogProjectApiKey, requireAuthSessionId } from "./shared.mjs";
@@ -81,6 +82,16 @@ export const answerCastleSiegeOracleAsk = onCall(
         ask,
         wrappingKey,
       });
+      try {
+        await recomputeAndWritePressure({
+          db,
+          sessionId,
+          defenderTeamId,
+          attackerTeamId: callerRole,
+        });
+      } catch {
+        // Best-effort H5 after ask.
+      }
       return { ok: true, receipt };
     } catch (error) {
       if (error instanceof Error) {
@@ -212,6 +223,18 @@ export const declareCastleSiege = onCall(
         createdAt: FieldValue.serverTimestamp(),
       });
 
+      try {
+        await recomputeAndWritePressure({
+          db,
+          sessionId,
+          defenderTeamId,
+          attackerTeamId: callerRole,
+          declareDistanceMeters: result.distanceMeters,
+        });
+      } catch {
+        // Best-effort H5; Declare outcome still stands.
+      }
+
       return { ok: true, outcome: result.outcome };
     } catch (error) {
       if (error instanceof Error) {
@@ -233,5 +256,65 @@ export const declareCastleSiege = onCall(
       }
       throw error;
     }
+  }),
+);
+
+/**
+ * Recompute H5 pressure after attacker shade sync (defenders-only write).
+ * data: { sessionId, defenderTeamId, nearestAttackerDistanceMeters? }
+ */
+export const recomputeCastleSiegePressure = onCall(
+  {
+    secrets: [posthogProjectApiKey],
+    enforceAppCheck,
+  },
+  withFunctionsExceptionHandler(async (request) => {
+    const { uid, sessionId } = requireAuthSessionId(request);
+    const defenderTeamId =
+      typeof request.data?.defenderTeamId === "string" ? request.data.defenderTeamId : "";
+    if (!PLAYING_TEAMS.has(defenderTeamId)) {
+      throw new HttpsError("invalid-argument", "defenderTeamId must be teamA or teamB.");
+    }
+
+    const db = getFirestore();
+    const sessionSnap = await db.collection("sessions").doc(sessionId).get();
+    if (!sessionSnap.exists) {
+      throw new HttpsError("not-found", "Session not found.");
+    }
+    const session = sessionSnap.data() ?? {};
+    if (session.mode !== "castleSiege") {
+      throw new HttpsError("failed-precondition", "Session is not Castle Siege.");
+    }
+    const members = session.memberUids;
+    if (!Array.isArray(members) || !members.includes(uid)) {
+      throw new HttpsError("permission-denied", "Session membership required.");
+    }
+    const castleRoles =
+      session.castleSiegeRoles && typeof session.castleSiegeRoles === "object"
+        ? session.castleSiegeRoles
+        : {};
+    const callerRole = typeof castleRoles[uid] === "string" ? castleRoles[uid] : "";
+    if (!PLAYING_TEAMS.has(callerRole)) {
+      throw new HttpsError("permission-denied", "Only playing teams can refresh pressure.");
+    }
+    if (callerRole === defenderTeamId) {
+      throw new HttpsError("permission-denied", "Attackers refresh defender pressure.");
+    }
+
+    const nearest =
+      typeof request.data?.nearestAttackerDistanceMeters === "number"
+        ? request.data.nearestAttackerDistanceMeters
+        : null;
+
+    const reading = await recomputeAndWritePressure({
+      db,
+      sessionId,
+      defenderTeamId,
+      attackerTeamId: callerRole,
+      nearestAttackerDistanceMeters: nearest,
+    });
+
+    // Scalar+band only; never marks or coords.
+    return { ok: true, scalar: reading.scalar, band: reading.band };
   }),
 );
