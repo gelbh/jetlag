@@ -2,7 +2,6 @@ import { createHash } from "node:crypto";
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { OVERPASS_L2_ENV_KEYS as K, OVERPASS_L2_ENV_KEY_LIST } from "./overpassL2Env.mjs";
 
-/** Match L1 TTL in overpassProxyCore.mjs */
 const OVERPASS_L2_TTL_MS = 60 * 60 * 1000;
 
 /** @typedef {{ kvGet: (key: string) => Promise<string | null>, kvPut: (key: string, value: string) => Promise<void>, r2Get: (key: string) => Promise<{ body: string, contentType: string } | null>, r2Put: (key: string, body: string, contentType: string) => Promise<void> }} OverpassL2Backend */

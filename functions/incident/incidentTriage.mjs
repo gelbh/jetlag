@@ -1,9 +1,3 @@
-/**
- * Deterministic clear-bug triage for incident create.
- * Outcomes drive whether we launch a private coding-agent hotfix thread.
- * No LLM — rules only (session-ops follow-up design).
- */
-
 import { isKnownNoiseError } from "./incidentNoise.mjs";
 
 export const TRIAGE_OUTCOME_AGENT = "agent";

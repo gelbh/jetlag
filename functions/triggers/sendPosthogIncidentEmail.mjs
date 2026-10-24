@@ -6,9 +6,6 @@ import { sendIncidentEmail } from "../incident/sendIncidentEmail.mjs";
 import { sendPosthogIncidentEmail as runSend } from "../incident/sendPosthogIncidentEmail.mjs";
 import { posthogProjectApiKey, withFunctionsExceptionHandler } from "../lib/functionsException.mjs";
 
-/**
- * Admin email for created / reopened PostHog-alert incidents, off the webhook's request path.
- */
 export const sendPosthogIncidentEmail = onDocumentWritten(
   {
     document: "incidents/{incidentId}",

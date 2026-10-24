@@ -158,9 +158,7 @@ export async function handleIncidentEmailRequest(
       if (detail) {
         providerDetail = detail;
       }
-    } catch {
-      // keep default
-    }
+    } catch {}
     console.warn("incident email Resend rejected", upstream.status, providerDetail);
     return jsonResponse(502, { error: "Email provider rejected the request" });
   }

@@ -72,7 +72,6 @@ export async function profileFriendsHandler(db, auth, data) {
   const action = typeof data?.action === "string" ? data.action : "";
 
   if (!RATE_LIMITS[action] && action) {
-    // unknown still falls through to switch for consistent error
   } else if (RATE_LIMITS[action]) {
     await enforceFriendsRateLimit(db, uid, action);
   }

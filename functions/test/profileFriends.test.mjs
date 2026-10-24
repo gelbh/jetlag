@@ -12,10 +12,6 @@ const auth = (uid) => ({
   token: { firebase: { sign_in_provider: "google.com" } },
 });
 
-/**
- * Minimal Firestore stand-in for friends graph + rate-limit docs.
- * Paths are `col/doc/col/doc…` with even segment counts for documents.
- */
 function createMemoryDb(seed = {}) {
   const store = new Map(Object.entries(seed));
 

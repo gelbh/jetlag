@@ -29,7 +29,6 @@ export const OVERPASS_FAILOVER_BUDGET_MS = 50_000;
  */
 export const PROXY_TIMEOUT_SECONDS_CEILING = 90;
 export const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
-/** Minimum remaining ms before attempting another Overpass peer. */
 const OVERPASS_MIN_ATTEMPT_MS = 1_500;
 
 export const overpassResponseCache = createMemoryCache(OVERPASS_CACHE_TTL_MS);

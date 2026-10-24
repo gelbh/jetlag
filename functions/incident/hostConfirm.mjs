@@ -14,10 +14,6 @@ export const HOST_CONFIRM_NO_SESSION = "HOST_CONFIRM_NO_SESSION";
 export const HOST_CONFIRM_INVALID_TOOL = "HOST_CONFIRM_INVALID_TOOL";
 export const HOST_CONFIRM_SESSION_MISMATCH = "HOST_CONFIRM_SESSION_MISMATCH";
 
-/**
- * Stable hash of tool args for confirm docs / audit correlation.
- * @param {unknown} args
- */
 export function hashToolArgs(args) {
   return createHash("sha256")
     .update(JSON.stringify(args ?? null))
@@ -225,10 +221,6 @@ export async function approveHostConfirmHandler(db, input, deps = {}) {
   }
 }
 
-/**
- * Mark a pending confirm denied (host dismissed). Callable optional; expire
- * still applies if left pending.
- */
 export async function denyHostConfirmHandler(db, input, deps = {}) {
   const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   const confirmId = typeof input?.confirmId === "string" ? input.confirmId : "";
@@ -336,9 +328,6 @@ async function assertCallerIsHost(db, confirm, uid) {
   }
 }
 
-/**
- * Human-readable FCM body helper (kept for shared copy / tests).
- */
 export function hostConfirmNotificationBody(tool) {
   return `Approve ${toolLabel(tool)}? Open Jet Lag to confirm.`;
 }

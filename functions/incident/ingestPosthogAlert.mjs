@@ -9,7 +9,6 @@ export const POSTHOG_ALERT_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 export const POSTHOG_ALERT_INVALID_PAYLOAD = "POSTHOG_ALERT_INVALID_PAYLOAD";
 export const POSTHOG_ALERT_TRIGGER_CREATED = "created";
 export const POSTHOG_ALERT_TRIGGER_REOPENED = "reopened";
-/** Incident statuses a reopened PostHog issue moves back to `open`. */
 const REOPENABLE_STATUSES = new Set(["resolved", "dismissed"]);
 
 const ISSUE_ID_PATTERN = /^[A-Za-z0-9-]{1,64}$/;
@@ -19,7 +18,6 @@ const DESCRIPTION_MAX_LENGTH = 300;
 const RUNTIME_PATTERN = /^[a-z0-9-]{1,40}$/;
 const METHOD_PATTERN = /^[A-Z]{1,10}$/;
 const PATH_MAX_LENGTH = 200;
-/** Firestore `ALREADY_EXISTS` from `DocumentReference.create`. */
 const ALREADY_EXISTS_CODE = 6;
 
 function clampString(value, max) {

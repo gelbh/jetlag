@@ -1,4 +1,3 @@
-/** Incident callable wiring — re-exports preserve `functions/index.mjs` names. */
 export {
   applyIncidentMitigation,
   createIncident,

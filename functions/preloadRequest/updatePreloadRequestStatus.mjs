@@ -6,7 +6,6 @@ export const PRELOAD_REQUEST_NOT_FOUND = "PRELOAD_REQUEST_NOT_FOUND";
 export const PRELOAD_INVALID_STATUS = "PRELOAD_INVALID_STATUS";
 export const PRELOAD_INVALID_TRANSITION = "PRELOAD_INVALID_TRANSITION";
 
-/** Allowed admin status edges for v1 inbox. */
 const ALLOWED = {
   open: new Set(["accepted", "declined", "shipped"]),
   accepted: new Set(["shipped", "declined", "open"]),
