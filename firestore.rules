@@ -1007,7 +1007,13 @@ service cloud.firestore {
           && request.resource.data.recordedAt is string
           && (
             !('role' in request.resource.data)
-            || validHostPlayerRole(request.resource.data.role)
+            || (
+              validHostPlayerRole(request.resource.data.role)
+              && (
+                isLegacySession(sessionId)
+                || request.resource.data.role == memberRole(sessionId)
+              )
+            )
           );
         allow update, delete: if false;
       }

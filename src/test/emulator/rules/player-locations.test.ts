@@ -262,3 +262,81 @@ describe("firestore.rules — player locations", () => {
     expect(hiderSnapshot.docs.map((doc) => doc.id).sort()).toEqual(["hider-1"]);
   });
 });
+
+describe("firestore.rules — player trail points", () => {
+  const rules = bindRulesTestEnv();
+
+  async function seed(overrides: Record<string, unknown>) {
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .set(sessionPayload("host-1", overrides));
+    });
+  }
+
+  function trailPoints(uid: string) {
+    return rules.testEnv
+      .authenticatedContext(uid)
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .collection("playerTrailPoints")
+      .doc(uid)
+      .collection("points");
+  }
+
+  function trailPoint(role?: string) {
+    return {
+      lat: 53.35,
+      lng: -6.26,
+      accuracyMeters: null,
+      recordedAt: "2026-01-01T00:00:00.000Z",
+      ...(role === undefined ? {} : { role }),
+    };
+  }
+
+  const classicMembers = {
+    memberUids: ["host-1", "seeker-1", "hider-1"],
+    memberRoles: { "host-1": "seeker", "seeker-1": "seeker", "hider-1": "hider" },
+  };
+
+  it("requires the trail point role to match the writer's session role", async () => {
+    await seed(classicMembers);
+    await assertSucceeds(trailPoints("seeker-1").add(trailPoint("seeker")));
+    await assertFails(trailPoints("seeker-1").add(trailPoint("hider")));
+    await assertSucceeds(trailPoints("hider-1").add(trailPoint("hider")));
+    await assertFails(trailPoints("hider-1").add(trailPoint("seeker")));
+  });
+
+  it("denies a point queued under a role the writer has switched away from", async () => {
+    await seed({
+      memberUids: ["host-1", "hider-1"],
+      memberRoles: { "host-1": "seeker", "hider-1": "seeker" },
+    });
+    await assertFails(trailPoints("hider-1").add(trailPoint("hider")));
+  });
+
+  it("still accepts trail points without a role", async () => {
+    await seed(classicMembers);
+    await assertSucceeds(trailPoints("seeker-1").add(trailPoint()));
+  });
+
+  it("keeps role-less legacy sessions writable with either player role", async () => {
+    await seed({ memberUids: ["host-1", "seeker-1"], memberRoles: null });
+    await assertSucceeds(trailPoints("seeker-1").add(trailPoint("seeker")));
+    await assertSucceeds(trailPoints("seeker-1").add(trailPoint("hider")));
+  });
+
+  it("denies trail points from a castle siege observer host", async () => {
+    await seed({
+      mode: "castleSiege",
+      memberUids: ["host-1", "seeker-1"],
+      memberRoles: { "host-1": "observer", "seeker-1": "seeker" },
+      castleSiegeRoles: { "host-1": "teamA" },
+    });
+    await assertFails(trailPoints("host-1").add(trailPoint("seeker")));
+    await assertSucceeds(trailPoints("seeker-1").add(trailPoint("seeker")));
+  });
+});
