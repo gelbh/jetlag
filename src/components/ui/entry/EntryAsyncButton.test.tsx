@@ -2,6 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { createLoadTask } from "@/services/core/progress/loadTask";
 import { jetlagTheme } from "@/theme/theme";
 import { EntryAsyncButton } from "./EntryAsyncButton";
 import { filledStyles } from "./entryStyles";
@@ -115,5 +116,54 @@ describe("EntryAsyncButton", () => {
     expect(describedBy.split(" ")).toEqual(
       expect.arrayContaining([screen.getByRole("status").id, "ask-error"]),
     );
+  });
+});
+
+describe("EntryAsyncButton with a load task", () => {
+  it("shows the stage as its label and draws progress inside the button", async () => {
+    const task = createLoadTask({ label: "Creating game", cancellable: false });
+    task
+      .stage({
+        kind: "fetch",
+        label: "Creating session",
+        historyKey: "test:create",
+        expectedMs: 4_000,
+      })
+      .start();
+    renderEntryButton(
+      <EntryAsyncButton
+        busy
+        task={task}
+        idleLabel="Create game"
+        busyLabel="Creating…"
+        styles={filledStyles}
+        onClick={() => {}}
+      />,
+    );
+
+    // Task snapshots refresh on the next animation frame.
+    const button = await screen.findByRole("button", { name: /Creating session…/ });
+    const fill = screen.getByRole("progressbar", { name: "Creating game" });
+    expect(button).toContainElement(fill);
+    expect(fill).toHaveAttribute("aria-valuemin", "0");
+    expect(fill).toHaveAttribute("aria-valuemax", "100");
+    expect(screen.getByRole("status").textContent).toBe("Creating session");
+  });
+
+  it("falls back to the busy label once the task has finished", () => {
+    const task = createLoadTask({ label: "Creating game", cancellable: false });
+    task.complete();
+    renderEntryButton(
+      <EntryAsyncButton
+        busy
+        task={task}
+        idleLabel="Create game"
+        busyLabel="Creating…"
+        styles={filledStyles}
+        onClick={() => {}}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Creating…" })).toBeTruthy();
+    expect(screen.queryByRole("progressbar")).toBeNull();
   });
 });

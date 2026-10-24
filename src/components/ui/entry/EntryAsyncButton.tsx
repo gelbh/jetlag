@@ -9,7 +9,6 @@ import {
   useRef,
 } from "react";
 import { LoadingSpinnerRing } from "@/components/ui/feedback/LoadingSpinner";
-import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
 import { useLoadTask } from "@/hooks/progress/useLoadTask";
 import type { LoadTask } from "@/services/core/progress/loadTask";
 
@@ -77,6 +76,36 @@ function busyCopy({ busy, idleLabel, busyLabel, statusMessage, stageLabel }: Bus
   };
 }
 
+/**
+ * Progress drawn inside the button: the filled share sweeps left to right
+ * behind the label, so the action bar needs no extra row.
+ */
+function ButtonProgressFill({
+  percent,
+  label,
+  valueText,
+}: {
+  percent: number;
+  label: string;
+  valueText: string;
+}) {
+  return (
+    <span
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent}
+      aria-valuetext={valueText}
+      className="pointer-events-none absolute inset-y-0 left-0 z-0 transition-[width] duration-300 ease-out motion-reduce:transition-none"
+      style={{
+        width: `${percent}%`,
+        backgroundColor: "oklch(1 0 0 / 0.22)",
+      }}
+    />
+  );
+}
+
 export function EntryAsyncButton({
   busy,
   idleLabel,
@@ -128,7 +157,7 @@ export function EntryAsyncButton({
         aria-busy={busy || undefined}
         aria-describedby={describedBy}
         leftSection={
-          busy && showSpinner ? (
+          busy && showSpinner && !taskRunning ? (
             <LoadingSpinnerRing size="sm" className="text-current" />
           ) : (
             leftSection
@@ -136,9 +165,20 @@ export function EntryAsyncButton({
         }
         onClick={handleClick}
       >
-        {label}
+        {taskRunning && taskSnapshot ? (
+          <ButtonProgressFill
+            percent={taskSnapshot.percent}
+            label={taskSnapshot.label}
+            valueText={taskSnapshot.valueText}
+          />
+        ) : null}
+        <span className="relative z-[1]">{label}</span>
       </Button>
-      {taskRunning && task ? <LoadProgress task={task} variant="compact" /> : null}
+      {taskRunning && taskSnapshot ? (
+        <span role="status" aria-live="polite" className="sr-only">
+          {taskSnapshot.stageLabel}
+        </span>
+      ) : null}
       {statusText ? (
         <span id={statusId} role="status" aria-live="polite" className="sr-only">
           {statusText}
