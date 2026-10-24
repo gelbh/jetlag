@@ -294,3 +294,76 @@ describe("useMeasuringAnchorLoaders POI pins", () => {
     expect(result.current.draft.measuringPlaces.map((place) => place.id)).not.toContain("pin-zoo");
   });
 });
+
+describe("useMeasuringAnchorLoaders cancel", () => {
+  beforeEach(() => {
+    fetchMock.mockReset();
+    // Hangs until the task's signal aborts, like a slow Overpass search.
+    fetchMock.mockImplementation(
+      (_area, _category, _custom, _pack, options) =>
+        new Promise((_resolve, reject) => {
+          options?.task?.signal.addEventListener("abort", () =>
+            reject(new DOMException("Cancelled.", "AbortError")),
+          );
+        }),
+    );
+  });
+
+  function renderLoaders() {
+    return renderHook(() => {
+      const draft = useMeasuringDraftState([]);
+      const loaders = useMeasuringAnchorLoaders({
+        active: true,
+        gameArea: dublinishArea as never,
+        setMapError: vi.fn(),
+        draft,
+      });
+      return { draft, loaders };
+    });
+  }
+
+  it("returns to the catalog with no error when the user cancels", async () => {
+    const { result } = renderLoaders();
+    act(() => {
+      result.current.draft.setMeasuringOptionChosen(true);
+      result.current.draft.setMeasuringSeekerPoint([53.34, -6.3]);
+    });
+    let load!: Promise<void>;
+    act(() => {
+      load = result.current.loaders.loadAllPlacesAt([53.34, -6.3], "commercial_airport");
+    });
+    await waitFor(() => expect(result.current.draft.measuringLoadTask).not.toBeNull());
+
+    await act(async () => {
+      result.current.draft.measuringLoadTask?.cancel();
+      await load;
+    });
+
+    expect(result.current.draft.measuringLoading).toBe(false);
+    expect(result.current.draft.measuringOptionChosen).toBe(false);
+    expect(result.current.draft.measuringSeekerPoint).toBeNull();
+    expect(result.current.draft.measuringError).toBeNull();
+  });
+
+  it("does not reopen the catalog when a newer search supersedes the old one", async () => {
+    const { result } = renderLoaders();
+    act(() => {
+      result.current.draft.setMeasuringOptionChosen(true);
+    });
+    let first!: Promise<void>;
+    act(() => {
+      first = result.current.loaders.loadAllPlacesAt([53.34, -6.3], "commercial_airport");
+    });
+    await waitFor(() => expect(result.current.draft.measuringLoadTask).not.toBeNull());
+    const firstTask = result.current.draft.measuringLoadTask;
+
+    await act(async () => {
+      void result.current.loaders.loadAllPlacesAt([53.35, -6.31], "commercial_airport");
+      await first;
+    });
+
+    expect(firstTask?.signal.aborted).toBe(true);
+    expect(result.current.draft.measuringOptionChosen).toBe(true);
+    expect(result.current.draft.measuringLoading).toBe(true);
+  });
+});

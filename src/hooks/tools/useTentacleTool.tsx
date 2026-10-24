@@ -203,6 +203,8 @@ export function useTentacleTool({
 
   const { beginRequest, cancelRequests, isLatestRequest, requestSignal } = useLatestRequest();
   const [tentacleLoadTask, setTentacleLoadTask] = useState<LoadTask | null>(null);
+  // Declared before the loader; assigned once reopenCategoryPicker exists below.
+  const reopenCategoryPickerRef = useRef<() => void>(() => {});
 
   const tentacleApplyPhaseRef = useRef(new Map<number, number>());
 
@@ -289,13 +291,17 @@ export function useTentacleTool({
         applyTentaclePoisResult(requestId, pois, 0);
       } catch (error) {
         if (isAbortError(error)) {
-          // Cancelled or superseded: no error text.
           task.cancel();
-        } else {
-          task.fail(error);
+          // A user Cancel (still the latest request) returns to the category step;
+          // a superseded request leaves the UI to its replacement.
           if (isLatestRequest(requestId)) {
-            setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
+            reopenCategoryPickerRef.current();
           }
+          return;
+        }
+        task.fail(error);
+        if (isLatestRequest(requestId)) {
+          setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
         }
       }
       if (isLatestRequest(requestId)) {
@@ -662,6 +668,9 @@ export function useTentacleTool({
     setTentacleError(null);
     setTentacleCenter(null);
   };
+  useEffect(() => {
+    reopenCategoryPickerRef.current = reopenCategoryPicker;
+  });
 
   const statusTitle =
     placementPhase === "locating"

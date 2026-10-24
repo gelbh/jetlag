@@ -123,6 +123,19 @@ export function useMeasuringAnchorLoaders({
     [],
   );
 
+  // A user Cancel (the task is still current) returns to the catalog; a superseded
+  // task was already replaced by beginLoadTask and must not touch the UI.
+  const handleCancelled = useCallback(
+    (task: LoadTask) => {
+      task.cancel();
+      if (loadTaskRef.current === task) {
+        loadTaskRef.current = null;
+        reopenCatalog();
+      }
+    },
+    [reopenCatalog],
+  );
+
   const applyAllPlacesResult = useCallback(
     (
       requestId: number,
@@ -243,7 +256,7 @@ export function useMeasuringAnchorLoaders({
         applyAllPlacesResult(requestId, seekerPoint, category, places, 0);
       } catch (error) {
         if (isAbortError(error)) {
-          task.cancel();
+          handleCancelled(task);
         } else if (requestId === placesRequestIdRef.current) {
           task.fail(error);
           setMeasuringPlaces([]);
@@ -259,6 +272,7 @@ export function useMeasuringAnchorLoaders({
     [
       applyAllPlacesResult,
       beginLoadTask,
+      handleCancelled,
       gameArea,
       measuringLocationCategory,
       placesRequestIdRef,
@@ -316,7 +330,7 @@ export function useMeasuringAnchorLoaders({
         applySeaLevelResult(result);
       } catch (error) {
         if (isAbortError(error)) {
-          task.cancel();
+          handleCancelled(task);
         } else if (requestId === seaLevelRequestIdRef.current) {
           task.fail(error);
           setMeasuringSeaLevelNearRegion(null);
@@ -333,6 +347,7 @@ export function useMeasuringAnchorLoaders({
     },
     [
       beginLoadTask,
+      handleCancelled,
       gameArea,
       seaLevelRequestIdRef,
       sessionRules,
@@ -415,7 +430,7 @@ export function useMeasuringAnchorLoaders({
         }
       } catch (error) {
         if (isAbortError(error)) {
-          task.cancel();
+          handleCancelled(task);
         } else if (requestId === coastlineRequestIdRef.current) {
           task.fail(error);
           setMeasuringTargetPoint(null);
@@ -430,6 +445,7 @@ export function useMeasuringAnchorLoaders({
     },
     [
       beginLoadTask,
+      handleCancelled,
       coastlineRequestIdRef,
       gameArea,
       sessionRules,
@@ -485,7 +501,7 @@ export function useMeasuringAnchorLoaders({
         }
       } catch (error) {
         if (isAbortError(error)) {
-          task.cancel();
+          handleCancelled(task);
         } else if (requestId === linearRequestIdRef.current) {
           task.fail(error);
           setMeasuringTargetPoint(null);
@@ -501,6 +517,7 @@ export function useMeasuringAnchorLoaders({
     },
     [
       beginLoadTask,
+      handleCancelled,
       customMatchingAreas,
       customMeasureGeometries,
       gameArea,
