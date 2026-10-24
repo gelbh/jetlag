@@ -291,8 +291,18 @@ describe("createRemoteSession role-gate bootstrap", () => {
 
     expect(session.memberRoles).toEqual({ "host-1": "observer" });
     expect(ensureMemberProof).toHaveBeenCalledWith(session.id, "host-1");
-    expect(batchCommit.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(initSessionRoleGates.mock.invocationCallOrder[0]).toBeLessThan(
       ensureMemberProof.mock.invocationCallOrder[0],
     );
+  });
+
+  it("creates no heal proof when role gate setup fails and the create rolls back", async () => {
+    initSessionRoleGates.mockRejectedValue(new Error("internal"));
+
+    await expect(createRemoteSession(AREA, "host-1")).rejects.toThrow(
+      "Couldn't set up role codes for this session. Try creating again.",
+    );
+
+    expect(ensureMemberProof).not.toHaveBeenCalled();
   });
 });

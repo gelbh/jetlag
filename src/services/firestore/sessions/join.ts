@@ -285,12 +285,14 @@ async function joinRemoteSessionWithoutRead(
 function callJoinGatedRemoteSession(
   code: string,
   codeRecord: SessionCodeRecord,
+  uid: string,
   role: PlayerRole,
   clientVersion: string,
   options: JoinRemoteSessionOptions,
 ): Promise<JoinRemoteSessionResult> {
   return joinGatedRemoteSessionByCode({
     code,
+    uid,
     codeRecord,
     role,
     clientVersion,
@@ -344,7 +346,7 @@ async function healReturningMemberViaCallable(
 ): Promise<JoinRemoteSessionResult | null> {
   let healed: JoinRemoteSessionResult;
   try {
-    healed = await callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
+    healed = await callJoinGatedRemoteSession(code, codeRecord, uid, role, clientVersion, {
       ...options,
       returningMemberUid,
       rolePasscode: options.rolePasscode,
@@ -436,7 +438,7 @@ async function joinRemoteSessionByCodeOnce(
       // Gated sessions deny client membership writes. Probe the callable;
       // if the session is not gated, keep the permission-denied for auth retry.
       try {
-        return await callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
+        return await callJoinGatedRemoteSession(code, codeRecord, uid, role, clientVersion, {
           ...options,
           returningMemberUid,
           rolePasscode: options.rolePasscode,
@@ -460,7 +462,7 @@ async function joinRemoteSessionByCodeOnce(
   }
 
   if (isSessionRoleGated(deserializeSessionFromFirestore(sessionDoc.id, data))) {
-    return callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
+    return callJoinGatedRemoteSession(code, codeRecord, uid, role, clientVersion, {
       ...options,
       returningMemberUid,
       rolePasscode: options.rolePasscode,

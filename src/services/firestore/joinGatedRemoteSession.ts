@@ -48,6 +48,8 @@ async function getRemoteSessionByIdFromServer(sessionId: string): Promise<Sessio
  */
 export async function joinGatedRemoteSessionByCode(input: {
   code: string;
+  /** The uid joining now; a heal is a join whose returningMemberUid differs from it. */
+  uid: string;
   codeRecord: SessionCodeRecord;
   role: PlayerRole;
   clientVersion: string;
@@ -73,7 +75,10 @@ export async function joinGatedRemoteSessionByCode(input: {
       returningMemberUid: input.returningMemberUid,
       persistedMyUid: input.persistedMyUid ?? undefined,
       proofHash,
-      healSecret: proofHash && input.returningMemberUid ? storedSecret : undefined,
+      healSecret:
+        proofHash && input.returningMemberUid && input.returningMemberUid !== input.uid
+          ? storedSecret
+          : undefined,
     });
     if (proofHash) {
       useSessionStore.getState().setHealSecret(sessionId, secret);

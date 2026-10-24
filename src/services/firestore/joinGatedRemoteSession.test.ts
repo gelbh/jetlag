@@ -29,6 +29,7 @@ import { joinGatedRemoteSessionByCode } from "./joinGatedRemoteSession";
 function joinInput(overrides: Partial<Parameters<typeof joinGatedRemoteSessionByCode>[0]> = {}) {
   return {
     code: "ABCD",
+    uid: "new-uid",
     codeRecord: { sessionId: "session-1", hostUid: "host-1" },
     role: "seeker" as const,
     clientVersion: "0.2.0",
@@ -74,6 +75,18 @@ describe("joinGatedRemoteSessionByCode heal proof", () => {
       }),
     );
     expect(useSessionStore.getState().healSecrets).toEqual({ "session-1": "stored-secret" });
+  });
+
+  it("does not send the secret when the returning uid is the joining uid", async () => {
+    useSessionStore.getState().setHealSecret("session-1", "stored-secret");
+
+    await joinGatedRemoteSessionByCode(
+      joinInput({ returningMemberUid: "new-uid", persistedMyUid: "new-uid" }),
+    );
+
+    const sent = joinSessionWithRole.mock.calls[0][0];
+    expect(sent.proofHash).toBe(await hashHealSecret("stored-secret"));
+    expect(sent.healSecret).toBeUndefined();
   });
 
   it("does not store a secret when the callable rejects", async () => {
