@@ -121,7 +121,10 @@ export function playAreaCategoryPresenceProbeSpecs(): PlayAreaCategoryPresencePr
     if (SKIP_PROBE_CATEGORY_IDS.has(category.id)) {
       continue;
     }
-    const selectors = category.overpassSelectors ?? [];
+    const selectors =
+      "overpassSelectors" in category && category.overpassSelectors
+        ? [...category.overpassSelectors]
+        : [];
     if (selectors.length === 0) {
       continue;
     }
