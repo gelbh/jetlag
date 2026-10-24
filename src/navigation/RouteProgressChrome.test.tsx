@@ -3,7 +3,8 @@ import { act, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createLoadTask, setNamedLoadTask } from "@/services/core/progress/loadTask";
 import { PACK_PLAY_AREA_TASK } from "@/services/core/progress/namedTasks";
-import { RouteProgressChrome, routeProgressPercent } from "./RouteProgressChrome";
+import { RouteProgressChrome } from "./RouteProgressChrome";
+import { routeProgressPercent } from "./routeLoadingSteps";
 
 const routeTransition = vi.hoisted(() => ({
   phase: "settling",

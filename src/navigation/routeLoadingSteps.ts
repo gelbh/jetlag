@@ -163,3 +163,19 @@ export function computeLoadingProgress(path: string, screenReady: boolean): Rout
     currentStepLabel: labelForStep(currentStepId, destinationTitle),
   };
 }
+
+/** Share of the bar a step shows while it is still running, so the bar moves on entry. */
+const RUNNING_STEP_CREDIT = 0.35;
+
+/**
+ * Overall percent: finished steps plus the current step's share. `stepPercent`
+ * is the current step's own load task, when it has one; otherwise a fixed credit.
+ */
+export function routeProgressPercent(
+  progress: Pick<RouteLoadingProgress, "steps" | "currentStepIndex">,
+  stepPercent: number | null,
+): number {
+  const total = Math.max(1, progress.steps.length);
+  const stepCredit = stepPercent === null ? RUNNING_STEP_CREDIT : stepPercent / 100;
+  return Math.round(((progress.currentStepIndex + stepCredit) / total) * 100);
+}
