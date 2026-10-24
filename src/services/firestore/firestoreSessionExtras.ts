@@ -134,6 +134,7 @@ export async function appendPlayerTrailPoint(
   try {
     // Auto ids on purpose: rules make points create-only, so a deterministic-id
     // set replayed onto an existing point is an update and is denied anyway.
+    // react-doctor-disable-next-line react-doctor/firebase-client-owned-authz-field -- playerTrailPoints create rule requires role == memberRole(sessionId) unless the session is role-less
     await addDoc(playerTrailPointsCollection(sessionId, point.uid), {
       lat: point.lat,
       lng: point.lng,
