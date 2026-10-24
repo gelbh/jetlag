@@ -51,6 +51,8 @@ export class ProgressNode {
   private count: { done: number; total: number } | null = null;
   private rate: RateState = emptyRateState();
   private frozenCredit = 0;
+  /** Time already spent when the node split; the parts' work comes on top of it. */
+  private splitElapsedMs = 0;
   private splitCount = 0;
   private mirrorSource: ProgressNode | null = null;
   private labelOverride: string | null = null;
@@ -162,6 +164,7 @@ export class ProgressNode {
     }
     this.start();
     this.frozenCredit = this.fraction();
+    this.splitElapsedMs = this.durationMs() ?? 0;
     this.splitCount += n;
     const created: ProgressNode[] = [];
     for (let index = 0; index < n; index += 1) {
@@ -213,6 +216,13 @@ export class ProgressNode {
     if (this.children.length > 0 && !this.isSplit) {
       const weights = this.children.map((child) => child.weight());
       return this.spec.parallel ? Math.max(...weights) : weights.reduce((a, b) => a + b, 0);
+    }
+    if (this.isSplit) {
+      // A split adds real work: the expected total grows so the ETA and overdue
+      // check track the remaining parts instead of the original single query.
+      const parts = this.children.slice(-this.splitCount);
+      const partsWeight = parts.reduce((sum, child) => sum + child.weight(), 0);
+      return Math.max(this.expected, this.splitElapsedMs + partsWeight);
     }
     return this.expected;
   }

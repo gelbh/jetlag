@@ -152,4 +152,28 @@ describe("queryOverpassWithBboxSplit cancellation and progress", () => {
     expect(node.isFinished).toBe(true);
     expect(node.label).toBe("Searching map data");
   });
+
+  it("labels each part on the running child stage, nesting part numbers", async () => {
+    const root = createProgressRoot("Task", { now: () => 0, expectedMs: () => 1_000 });
+    const node = root.stage({ kind: "fetch", label: "Searching map data", historyKey: "x" });
+    const labels: string[] = [];
+    let calls = 0;
+    const query = vi
+      .fn<(ql: string, child?: ProgressNode) => Promise<Payload>>()
+      .mockImplementation(async (_ql, child) => {
+        calls += 1;
+        // Top level and the first quadrant are too big; everything else succeeds.
+        if (calls <= 2) {
+          throw new OverpassQueryTooExpensiveError();
+        }
+        labels.push(child?.label ?? "");
+        child?.start().finish();
+        return { elements: [] };
+      });
+    await queryOverpassWithBboxSplit(() => "q", bbox, query, mergeOverpassElementPayloads, {
+      node,
+    });
+    expect(labels[0]).toBe("Searching map data (part 1 of 4, 1 of 4)");
+    expect(labels).toContain("Searching map data (part 2 of 4)");
+  });
 });

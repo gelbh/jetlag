@@ -347,7 +347,12 @@ export function AskMapPlacementChrome({
                 {statusTitle}
               </p>
               {statusTask ? (
-                <LoadProgress task={statusTask} variant="compact" className="mt-1" />
+                <LoadProgress
+                  task={statusTask}
+                  variant="compact"
+                  compactDetail="stage"
+                  className="mt-1"
+                />
               ) : null}
               {statusTaskRunning ? null : (
                 <p

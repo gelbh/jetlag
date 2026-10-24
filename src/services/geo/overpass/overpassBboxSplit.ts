@@ -77,6 +77,14 @@ export function overpassBboxSizeBucket(bbox: OverpassBbox): number {
   return sizeBucket(overpassBboxAreaKm2(bbox));
 }
 
+/** "Searching map data (part 2 of 4)", nesting as "(part 2 of 4, 1 of 4)". */
+function partLabel(parentLabel: string, part: number, total: number): string {
+  const nested = parentLabel.match(/^(.*) \((part .*)\)$/);
+  return nested
+    ? `${nested[1]} (${nested[2]}, ${part} of ${total})`
+    : `${parentLabel} (part ${part} of ${total})`;
+}
+
 export async function queryOverpassWithBboxSplit<T>(
   buildQuery: (bbox: OverpassBbox) => string,
   bbox: OverpassBbox,
@@ -106,7 +114,8 @@ export async function queryOverpassWithBboxSplit<T>(
     const parts: T[] = [];
     for (const [index, child] of children.entries()) {
       throwIfAborted(signal);
-      node?.setLabel(`${node.spec.label} (part ${index + 1} of ${children.length})`);
+      // The bar shows the deepest running stage, so the part count goes on the child.
+      childNodes[index]?.setLabel(partLabel(node?.label ?? "", index + 1, children.length));
       parts.push(
         await queryOverpassWithBboxSplit(buildQuery, child, query, merge, {
           signal,
