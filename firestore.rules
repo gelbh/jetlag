@@ -671,7 +671,10 @@ service cloud.firestore {
           .difference(resource.data.memberUids.toSet())
           .hasOnly([request.auth.uid])
         && request.resource.data.memberUids.size() <= resource.data.memberUids.size() + 1
-        && request.resource.data.memberUids.toSet().size() == request.resource.data.memberUids.size()
+        && (
+          !('memberUids' in request.resource.data.diff(resource.data).affectedKeys())
+          || request.resource.data.memberUids.toSet().size() == request.resource.data.memberUids.size()
+        )
         && memberMapTouchesOnlySelf('memberRoles')
         && memberMapTouchesOnlySelf('memberAppVersions');
     }

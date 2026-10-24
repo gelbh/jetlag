@@ -336,6 +336,30 @@ describe("firestore.rules — sessions", () => {
     );
   });
 
+  it("allows an own-role switch when memberUids already holds a duplicate uid", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          memberUids: ["host-1", "guest-1", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
+        });
+    });
+
+    const guest = rules.testEnv.authenticatedContext("guest-1");
+    await assertSucceeds(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({ memberRoles: { "host-1": "seeker", "guest-1": "hider" } }),
+    );
+  });
+
   it("denies premium session creation without host access claim", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await assertFails(
