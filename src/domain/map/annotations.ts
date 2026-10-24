@@ -219,6 +219,8 @@ export interface SessionRecord {
   score?: { teamA: number; teamB: number };
   /** Terminal series result. Castle Siege only. */
   seriesOutcome?: "complete" | "abandoned";
+  /** Which team opens Standoff next game. Castle Siege only. */
+  seriesStandoffOpener?: "teamA" | "teamB";
   setupMode?: "pregame" | "fairSplit";
   arena?: CastleSiegeArena;
   border?: CastleSiegeBorderLine;

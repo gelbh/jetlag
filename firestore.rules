@@ -275,6 +275,10 @@ service cloud.firestore {
     // Domain helpers stay for a future Functions callable (expression budget:
     // an inlined capture ACL on session update blew the 1000-expression cap
     // and broke classic session updates).
+    //
+    // Series scoreboard (gameIndex / score / seriesOutcome / seriesStandoffOpener):
+    // not in any client hasOnly allowlist; only Admin SDK callables may write
+    // (resolveCastleSiegeGame / continueCastleSiegeSeries / forfeit).
 
     function canReadTeamHands(sessionId, teamId) {
       return isSessionMember(sessionId)

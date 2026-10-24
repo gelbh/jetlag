@@ -37,6 +37,7 @@ export { grantAccess, proxy } from "./handlers/proxies.mjs";
 export {
   answerCastleSiegeOracleAsk,
   cancelRoleJoinRequest,
+  continueCastleSiegeSeries,
   controlSessionTimerForMove,
   declareCastleSiege,
   endSession,
@@ -49,6 +50,7 @@ export {
   repairGhostHost,
   requestRoleJoin,
   resetSessionForRematch,
+  resolveCastleSiegeGame,
   resolveRoleJoinRequest,
   revealRolePasscode,
 } from "./handlers/session.mjs";

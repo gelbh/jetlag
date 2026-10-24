@@ -6,6 +6,10 @@ export {
   recomputeCastleSiegePressure,
 } from "./session/castleSiegeOracleCallables.mjs";
 export {
+  continueCastleSiegeSeries,
+  resolveCastleSiegeGame,
+} from "./session/castleSiegeSeriesCallables.mjs";
+export {
   cancelRoleJoinRequest,
   requestRoleJoin,
   resolveRoleJoinRequest,

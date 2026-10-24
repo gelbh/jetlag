@@ -99,6 +99,7 @@ const SESSION_RECORD_SCALAR_KEYS = [
   "seriesLength",
   "gameIndex",
   "seriesOutcome",
+  "seriesStandoffOpener",
   "setupMode",
   "phase",
   "standoffDeckRemainingCount",

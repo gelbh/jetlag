@@ -501,6 +501,7 @@ export function deserializeSessionFromFirestore(
     castleSiegeRoles: parseCastleSiegeRoles(document.castleSiegeRoles),
     seriesLength: parseSeriesLength(document.seriesLength),
     ...parseSeriesScoreboardFromDocument(document),
+    seriesStandoffOpener: parseSeriesStandoffOpener(document.seriesStandoffOpener),
     setupMode: parseSetupMode(document.setupMode),
     ...parseCastleSiegeSetupFromDocument(document as Record<string, unknown>),
     phase: parseCastleSiegePhase(document.phase),
@@ -546,6 +547,10 @@ function parseSeriesScoreboardFromDocument(document: Record<string, unknown>): {
     score: parsed.score,
     ...(parsed.seriesOutcome !== null ? { seriesOutcome: parsed.seriesOutcome } : {}),
   };
+}
+
+function parseSeriesStandoffOpener(value: unknown): "teamA" | "teamB" | undefined {
+  return value === "teamA" || value === "teamB" ? value : undefined;
 }
 
 function parseCastleSiegePhase(

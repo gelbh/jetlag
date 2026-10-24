@@ -8,7 +8,8 @@ import {
 } from "@/domain/session/castleSiege/siegePersist";
 import { buildStartStandoffPrivateState } from "@/domain/session/castleSiege/standoffPersist";
 import type { TeamMarksGeometry } from "@/domain/session/castleSiege/teamMarks";
-import { getFirestoreDb } from "@/services/core/firebase/firebase";
+import { callWithResilience } from "@/services/core/firebase/callWithResilience";
+import { getFirestoreDb, isFirebaseConfigured } from "@/services/core/firebase/firebase";
 import {
   buildTeamSealCipherDocument,
   buildTeamSealHashDocument,
@@ -159,4 +160,40 @@ export async function writeTeamMarks(
     updatedByUid,
     updatedAt: new Date().toISOString(),
   });
+}
+
+export type ResolveCastleSiegeGameResult = {
+  ok: true;
+  kind: "betweenGames" | "matchEnd";
+  winner: "teamA" | "teamB";
+  gameIndex: number;
+  score: { teamA: number; teamB: number };
+  seriesOutcome: "complete" | "abandoned" | null;
+};
+
+/** Host resolves a finished Siege into series score (Functions Admin write). */
+export async function resolveCastleSiegeGame(
+  sessionId: string,
+  reason: "capture" | "fewerQuestions",
+): Promise<ResolveCastleSiegeGameResult> {
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured.");
+  }
+  return callWithResilience<
+    { sessionId: string; reason: "capture" | "fewerQuestions" },
+    ResolveCastleSiegeGameResult
+  >("resolveCastleSiegeGame", { sessionId, reason }, { idempotent: false });
+}
+
+/** Host continues from betweenGames into next-game setup. */
+export async function continueCastleSiegeSeries(
+  sessionId: string,
+): Promise<{ ok: true; phase: "setup"; seriesStandoffOpener: "teamA" | "teamB" }> {
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured.");
+  }
+  return callWithResilience<
+    { sessionId: string },
+    { ok: true; phase: "setup"; seriesStandoffOpener: "teamA" | "teamB" }
+  >("continueCastleSiegeSeries", { sessionId }, { idempotent: false });
 }
