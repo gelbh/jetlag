@@ -1,9 +1,15 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { MatchingAnswer, MatchingCategoryId } from "@/domain/questions";
+import { resolveCategoryPresence } from "@/domain/session/catalog/playAreaCategoryPresence";
+import { availableMatchingCategories } from "@/domain/session/catalog/sessionCatalogAvailability";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import type { MatchingFeature } from "@/services/geo/matching";
+import { matchingEmptyPlayAreaMessage } from "@/services/geo/matching";
+import { isAdminDivisionCategoryAvailable } from "@/services/geo/overpass/adminDivisionAvailability";
+import { usePreloadStore } from "@/state/preloadStore";
 
-export function useMatchingDraftState() {
+export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
   const [matchingSeekerPoint, setMatchingSeekerPoint] = useState<LatLngTuple | null>(null);
   const [matchingCategoryId, setMatchingCategoryId] = useState<MatchingCategoryId | null>(null);
   const [matchingCategoryChosen, setMatchingCategoryChosen] = useState(false);
@@ -27,6 +33,64 @@ export function useMatchingDraftState() {
     Map<MatchingCategoryId, string>
   >(() => new Map());
   const [catalogNotice, setCatalogNotice] = useState<string | null>(null);
+
+  const adminDivisionCounts = usePreloadStore((state) => state.adminDivisionCounts);
+  const categoryPresenceCounts = usePreloadStore((state) => state.categoryPresenceCounts);
+  const regionPackId = sessionRules?.regionPackId;
+
+  const matchingCatalog = useMemo(() => {
+    const categories = sessionRules
+      ? availableMatchingCategories(sessionRules)
+      : availableMatchingCategories({ gameSize: "medium" });
+    return categories.filter((category) =>
+      isAdminDivisionCategoryAvailable(category.id, adminDivisionCounts, regionPackId),
+    );
+  }, [adminDivisionCounts, regionPackId, sessionRules]);
+
+  const seedUnavailableFromPresence = useCallback((): Map<MatchingCategoryId, string> => {
+    const next = new Map<MatchingCategoryId, string>();
+    if (!regionPackId) {
+      return next;
+    }
+
+    const probePending = categoryPresenceCounts === null;
+    for (const category of matchingCatalog) {
+      const adminUnavailable = !isAdminDivisionCategoryAvailable(
+        category.id,
+        adminDivisionCounts,
+        regionPackId,
+      );
+      const presence = resolveCategoryPresence({
+        categoryId: category.id,
+        regionPackId,
+        adminUnavailable,
+        probeCount: categoryPresenceCounts?.[category.id],
+        probePending,
+      });
+      if (!presence.available) {
+        next.set(category.id, matchingEmptyPlayAreaMessage(category.id));
+      }
+    }
+    return next;
+  }, [adminDivisionCounts, categoryPresenceCounts, matchingCatalog, regionPackId]);
+
+  useEffect(() => {
+    setUnavailableMatchingCategories((prev) => {
+      const seeded = seedUnavailableFromPresence();
+      if (seeded.size === 0) {
+        return prev;
+      }
+      let changed = false;
+      const next = new Map(prev);
+      for (const [categoryId, notice] of seeded) {
+        if (!next.has(categoryId)) {
+          next.set(categoryId, notice);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [seedUnavailableFromPresence]);
 
   const clearResolvedFields = useCallback(() => {
     setMatchingFeatures([]);
@@ -60,9 +124,9 @@ export function useMatchingDraftState() {
     setMatchingCategoryChosen(false);
     clearResolvedFields();
     setPreviewOpen(false);
-    setUnavailableMatchingCategories(new Map());
+    setUnavailableMatchingCategories(seedUnavailableFromPresence());
     setCatalogNotice(null);
-  }, [clearResolvedFields]);
+  }, [clearResolvedFields, seedUnavailableFromPresence]);
 
   const selectCategory = useCallback(
     (categoryId: MatchingCategoryId) => {
