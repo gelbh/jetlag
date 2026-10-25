@@ -1,13 +1,14 @@
 import { Button, Group } from "@mantine/core";
 import { isAndroidDevice, isIosDevice } from "@/domain/device/pwa/detectMobilePlatform";
 import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
-import { PWA_INSTALL_TIP_DISMISS_KEY } from "@/domain/device/pwa/pwaInstallTipStorage";
 import { shouldOfferPwaInstallTip } from "@/domain/device/pwa/shouldOfferPwaInstallTip";
 import { useHydrated } from "@/hooks/app/useHydrated";
 import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
 import { usePwaDeferredInstallPrompt } from "@/hooks/pwa/usePwaDeferredInstallPrompt";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatSurface } from "./MapFloatSurface";
+
+const PWA_INSTALL_TIP_DISMISS_KEY = "jetlag:pwa-install-tip-dismissed";
 
 export function PwaInstallTipBanner() {
   const { dismissed, dismiss } = usePersistedDismiss(PWA_INSTALL_TIP_DISMISS_KEY);

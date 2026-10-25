@@ -1,21 +1,10 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { describe, expect, it } from "vitest";
 import {
-  assertMeasuringGeometryBudget,
-  assertMeasuringLinearVertexBudget,
-  assertMeasuringMultiPlaceBudget,
-  assertMeasuringOutputComplexityBudget,
-  countLineStringVertices,
-  countPolygonVertices,
-  MEASURING_LINEAR_MAX_VERTICES,
-  MEASURING_MULTI_PLACE_MAX,
   MEASURING_OUTPUT_MAX_JSON_CHARS,
   MEASURING_OUTPUT_MAX_VERTICES,
-  MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
   MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
-  measuringGeometryJsonChars,
   persistSlimMeasuringGeometry,
-  softenMeasuringOutputToBudget,
 } from "./measuringGeometryBudgets";
 
 function denseZigzagPolygon(vertexCount: number): Feature<Polygon> {
@@ -56,174 +45,25 @@ function separateSquaresMultiPolygon(squareCount: number): Feature<MultiPolygon>
 }
 
 describe("measuringGeometryBudgets", () => {
-  it("allows 107 and 128 multi-place counts", () => {
-    expect(assertMeasuringMultiPlaceBudget(107).ok).toBe(true);
-    expect(assertMeasuringMultiPlaceBudget(MEASURING_MULTI_PLACE_MAX).ok).toBe(true);
-  });
-
-  it("rejects 129 multi-place with the locked copy", () => {
-    const result = assertMeasuringMultiPlaceBudget(129);
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.message).toMatch(/Too many places/);
-    }
-  });
-
-  it("rejects linear vertex totals over the locked max", () => {
-    const result = assertMeasuringLinearVertexBudget(MEASURING_LINEAR_MAX_VERTICES + 1);
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.message).toMatch(/too detailed/);
-    }
-  });
-
-  it("counts LineString vertices across segments", () => {
-    expect(
-      countLineStringVertices([
-        {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "LineString",
-            coordinates: [
-              [0, 0],
-              [1, 1],
-              [2, 2],
-            ],
-          },
-        },
-        {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "LineString",
-            coordinates: [
-              [0, 0],
-              [1, 0],
-            ],
-          },
-        },
-      ]),
-    ).toBe(5);
-  });
-
-  it("gates multi-place via assertMeasuringGeometryBudget", () => {
-    expect(
-      assertMeasuringGeometryBudget({
-        measuringSubject: "location",
-        measuringLocationCategory: "park",
-        usesAllPlacesInArea: true,
-        placeCount: 129,
-        linearSegments: [],
-      }).ok,
-    ).toBe(false);
-  });
-
-  it("gates linear categories via prepared vertex count", () => {
-    const fatSegment = {
-      type: "Feature" as const,
-      properties: {},
-      geometry: {
-        type: "LineString" as const,
-        coordinates: Array.from({ length: MEASURING_LINEAR_MAX_VERTICES + 1 }, (_, i) => [
-          i * 0.0001,
-          0,
-        ]),
-      },
-    };
-    expect(
-      assertMeasuringGeometryBudget({
-        measuringSubject: "coastline",
-        measuringLocationCategory: null,
-        usesAllPlacesInArea: false,
-        placeCount: 0,
-        linearSegments: [fatSegment],
-      }).ok,
-    ).toBe(false);
-  });
-});
-
-describe("measuring output complexity budget", () => {
-  it("locks caps between museum-scale OK and RLBT golf-closer fatal sizes", () => {
+  it("locks persist caps to progressive polygon limits", () => {
     expect(MEASURING_OUTPUT_MAX_VERTICES).toBeGreaterThan(1_300);
     expect(MEASURING_OUTPUT_MAX_VERTICES).toBeLessThan(8_000);
     expect(MEASURING_OUTPUT_MAX_JSON_CHARS).toBeGreaterThan(50_000);
     expect(MEASURING_OUTPUT_MAX_JSON_CHARS).toBeLessThan(320_000);
   });
 
-  it("counts polygon vertices without spreading", () => {
-    const square: Feature<Polygon> = {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Polygon",
-        coordinates: [
-          [
-            [0, 0],
-            [1, 0],
-            [1, 1],
-            [0, 1],
-            [0, 0],
-          ],
-        ],
-      },
-    };
-    expect(countPolygonVertices(square)).toBe(5);
-  });
-
-  it("passes museum-scale fixtures (~1.3k verts)", () => {
-    const museum = denseZigzagPolygon(1_300);
-    expect(countPolygonVertices(museum)).toBeGreaterThanOrEqual(1_200);
-    expect(countPolygonVertices(museum)).toBeLessThan(MEASURING_OUTPUT_MAX_VERTICES);
-    expect(assertMeasuringOutputComplexityBudget(museum).ok).toBe(true);
-    expect(softenMeasuringOutputToBudget(museum).ok).toBe(true);
-  });
-
-  it("softens dense geometry under the cap (simplify or decimate)", () => {
+  it("persist-slim succeeds under the ceiling for soften-able density", () => {
     const dense = denseZigzagPolygon(6_000);
-    expect(countPolygonVertices(dense)).toBeGreaterThan(MEASURING_OUTPUT_MAX_VERTICES);
-    const softened = softenMeasuringOutputToBudget(dense);
-    expect(softened.ok).toBe(true);
-    if (softened.ok) {
-      expect(assertMeasuringOutputComplexityBudget(softened.feature).ok).toBe(true);
-    }
+    const slimmed = persistSlimMeasuringGeometry(dense);
+    expect(slimmed.ok).toBe(true);
   });
 
   it("persist-slim fails RLBT-class fixtures with storage copy only", () => {
     const golf = separateSquaresMultiPolygon(1_600);
-    expect(countPolygonVertices(golf)).toBe(8_000);
-    expect(measuringGeometryJsonChars(golf)).toBeGreaterThan(50_000);
-
-    const asserted = assertMeasuringOutputComplexityBudget(golf);
-    expect(asserted.ok).toBe(false);
-    if (!asserted.ok) {
-      expect(asserted.message).toBe(MEASURING_OUTPUT_OVER_BUDGET_MESSAGE);
-    }
-
     const slimmed = persistSlimMeasuringGeometry(golf);
     expect(slimmed.ok).toBe(false);
     if (!slimmed.ok) {
       expect(slimmed.message).toBe(MEASURING_PERSIST_OVER_BUDGET_MESSAGE);
-      expect(slimmed.message).not.toBe(MEASURING_OUTPUT_OVER_BUDGET_MESSAGE);
     }
-    expect(softenMeasuringOutputToBudget(golf).ok).toBe(false);
-  });
-
-  it("asserts by vertexCount / jsonChars without a Feature", () => {
-    expect(
-      assertMeasuringOutputComplexityBudget({
-        vertexCount: MEASURING_OUTPUT_MAX_VERTICES,
-      }).ok,
-    ).toBe(true);
-    expect(
-      assertMeasuringOutputComplexityBudget({
-        vertexCount: MEASURING_OUTPUT_MAX_VERTICES + 1,
-      }).ok,
-    ).toBe(false);
-    expect(
-      assertMeasuringOutputComplexityBudget({
-        jsonChars: MEASURING_OUTPUT_MAX_JSON_CHARS + 1,
-      }).ok,
-    ).toBe(false);
   });
 });

@@ -1,9 +1,8 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { describe, expect, it } from "vitest";
+import { countPolygonVertices } from "../progressive/polygonMetrics";
 import {
-  countPolygonVertices,
   MEASURING_OUTPUT_MAX_VERTICES,
-  MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
   MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
   persistSlimMeasuringGeometry,
 } from "./measuringGeometryBudgets";
@@ -85,7 +84,6 @@ describe("measuringLod", () => {
     expect(slimmed.ok).toBe(false);
     if (!slimmed.ok) {
       expect(slimmed.message).toBe(MEASURING_PERSIST_OVER_BUDGET_MESSAGE);
-      expect(slimmed.message).not.toBe(MEASURING_OUTPUT_OVER_BUDGET_MESSAGE);
     }
   });
 

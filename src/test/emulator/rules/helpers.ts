@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { initializeTestEnvironment, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { afterAll, beforeAll, beforeEach } from "vitest";
 import { milesToMeters } from "../../../domain/map/distance";
-import { serializeGameAreaForFirestore } from "../../../services/firestore/firestoreSerialization";
+import { serializeGameAreaForFirestore } from "../../../services/firestore/serialization";
 import { DUBLIN_CITY_GAME_AREA } from "../../fixtures/dublinGameArea";
 
 export { milesToMeters };

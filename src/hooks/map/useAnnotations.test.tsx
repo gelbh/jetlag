@@ -44,8 +44,8 @@ vi.mock("../../services/session/backgroundSync", () => ({
   registerAnnotationBackgroundSync: vi.fn(async () => undefined),
 }));
 
-vi.mock("./shouldQueueAnnotationOffline", () => ({
-  shouldQueueAnnotationOffline: () => queueOffline.value,
+vi.mock("@/hooks/sync/isEffectivelyOfflineNow", () => ({
+  isEffectivelyOfflineNow: () => queueOffline.value,
 }));
 
 function permissionDenied(): FirebaseError {
