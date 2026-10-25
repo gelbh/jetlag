@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { SessionIslandSlots } from "./SessionIslandSlots";
@@ -25,6 +25,23 @@ describe("SessionIslandSlots", () => {
     fireEvent.click(screen.getByRole("button", { name: "More session tools" }));
     fireEvent.click(await screen.findByRole("menuitem", { name: "Open role codes" }));
     expect(onOpenCodes).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes More when the session island becomes inactive", async () => {
+    const view = renderWithAppUi(
+      <SessionIslandSlots onOpenSettings={vi.fn()} onOpenCodes={vi.fn()} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "More session tools" }));
+    expect(await screen.findByRole("menu", { name: "More session tools" })).toBeInTheDocument();
+
+    view.rerender(<SessionIslandSlots inactive onOpenSettings={vi.fn()} onOpenCodes={vi.fn()} />);
+    await waitFor(() => {
+      expect(screen.queryByRole("menu", { name: "More session tools" })).not.toBeInTheDocument();
+    });
+
+    view.rerender(<SessionIslandSlots onOpenSettings={vi.fn()} onOpenCodes={vi.fn()} />);
+    expect(screen.queryByRole("menu", { name: "More session tools" })).not.toBeInTheDocument();
   });
 
   it("hides Codes and More when onOpenCodes is omitted", () => {

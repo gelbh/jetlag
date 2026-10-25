@@ -8,7 +8,7 @@ import {
   StarIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { ChatUnreadBadge } from "../../chat/ChatUnreadBadge";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { SheetHost } from "../../ui/sheets/SheetHost";
@@ -149,6 +149,12 @@ function SessionIslandMoreMenu({
         }
       : null,
   ].filter((action): action is NonNullable<typeof action> => action !== null);
+
+  useEffect(() => {
+    if (inactive) {
+      setOpen(false);
+    }
+  }, [inactive]);
 
   if (actions.length === 0) {
     return null;
