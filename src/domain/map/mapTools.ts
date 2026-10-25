@@ -88,9 +88,9 @@ export function isWizardDockTool(id: MapTool): id is (typeof WIZARD_DOCK_TOOL_ID
 const DOCK_SHORT_LABELS: Record<(typeof QUESTION_DOCK_TOOL_IDS)[number], string> = {
   matching: "Match",
   measuring: "Measure",
-  thermometer: "Thermo",
+  thermometer: "Thermometer",
   radar: "Radar",
-  tentacle: "Tent",
+  tentacle: "Tentacles",
   photo: "Photo",
 };
 

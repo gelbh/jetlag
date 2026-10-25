@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "./annotations";
-import { annotationMatchesMapTool, findAnnotationMapTool } from "./mapTools";
+import { annotationMatchesMapTool, findAnnotationMapTool, mapToolDockShortLabel } from "./mapTools";
 
 function annotation(
   overrides: Partial<AnnotationRecord> & Pick<AnnotationRecord, "type">,
@@ -24,6 +24,11 @@ describe("mapTools", () => {
     const measuring = annotation({ type: "measuring" });
     expect(annotationMatchesMapTool(measuring, "measuring")).toBe(true);
     expect(findAnnotationMapTool(measuring)).toBe("measuring");
+  });
+
+  it("uses full dock short labels for tentacle and thermometer", () => {
+    expect(mapToolDockShortLabel("tentacle")).toBe("Tentacles");
+    expect(mapToolDockShortLabel("thermometer")).toBe("Thermometer");
   });
 
   it("treats legacy thermometer measuring rows as measuring tool matches", () => {
