@@ -15,68 +15,57 @@ import { AdminSidebarList } from "./AdminSidebarList";
 import type { RouteKind } from "./adminDeskRoute";
 import type { AdminDeskTables } from "./useAdminDeskTables";
 
-export interface AdminOpsDeskRouteBag {
-  isDesktop: boolean;
-  pathname: string;
-  routeKind: RouteKind;
-  routeTab: AdminTableTab;
-  collapsed: boolean;
-  routeSessionId: string | null;
-  routeIncidentId: string | null;
-  routeRequestId: string | null;
-  routeSession: AdminSessionSummary | null | undefined;
-}
+export type AdminOpsDeskBodyProps = {
+  route: {
+    isDesktop: boolean;
+    pathname: string;
+    routeKind: RouteKind;
+    routeTab: AdminTableTab;
+    collapsed: boolean;
+    routeSessionId: string | null;
+    routeIncidentId: string | null;
+    routeRequestId: string | null;
+    routeSession: AdminSessionSummary | null | undefined;
+  };
+  deskData: {
+    tables: AdminDeskTables;
+    list: AdminSessionListState;
+    needsLoading: boolean;
+    needsError: string | null;
+    openIncidentsBySession: ReadonlyMap<string, number>;
+    selectedKey: string | null;
+    lastItemPath: string | null;
+    selectedIncident: IncidentRecord | null;
+    incidentLoading: boolean;
+    selectedRequest: PreloadRequest | null;
+    sessionById: (sessionId: string | null | undefined) => AdminSessionSummary | null;
+    sessionsLoading: boolean;
+    preloadLoading: boolean;
+    enabled: boolean;
+    hasMore: boolean;
+    refreshing: boolean;
+    loadingMore: boolean;
+    sessionsFailedEmpty: boolean;
+    visibleIncidents: readonly IncidentRecord[];
+  };
+  monitor: {
+    state: AdminSessionMonitorState;
+    observeError: string | null;
+    observingCode: string | null;
+  };
+  actions: {
+    onOpenSession: (summary: Pick<AdminSessionSummary, "sessionId">) => void;
+    onOpenNeeds: (row: NeedsYouRow) => void;
+    onChangeTab: (tab: AdminTableTab) => void;
+    onGoToTable: () => void;
+    onWatchGame: (summary: AdminSessionSummary) => void;
+    onNavigate: (path: string) => void;
+    onRefresh: () => void;
+    onLoadMore: () => void;
+  };
+};
 
-export interface AdminOpsDeskDataBag {
-  tables: AdminDeskTables;
-  list: AdminSessionListState;
-  needsLoading: boolean;
-  needsError: string | null;
-  openIncidentsBySession: ReadonlyMap<string, number>;
-  selectedKey: string | null;
-  lastItemPath: string | null;
-  selectedIncident: IncidentRecord | null;
-  incidentLoading: boolean;
-  selectedRequest: PreloadRequest | null;
-  sessionById: (sessionId: string | null | undefined) => AdminSessionSummary | null;
-  sessionsLoading: boolean;
-  preloadLoading: boolean;
-  enabled: boolean;
-  hasMore: boolean;
-  refreshing: boolean;
-  loadingMore: boolean;
-  sessionsFailedEmpty: boolean;
-  visibleIncidents: readonly IncidentRecord[];
-}
-
-export interface AdminOpsDeskMonitorBag {
-  state: AdminSessionMonitorState;
-  observeError: string | null;
-  observingCode: string | null;
-}
-
-export interface AdminOpsDeskActionsBag {
-  onOpenSession: (summary: Pick<AdminSessionSummary, "sessionId">) => void;
-  onOpenNeeds: (row: NeedsYouRow) => void;
-  onChangeTab: (tab: AdminTableTab) => void;
-  onGoToTable: () => void;
-  onWatchGame: (summary: AdminSessionSummary) => void;
-  onNavigate: (path: string) => void;
-  onRefresh: () => void;
-  onLoadMore: () => void;
-}
-
-export function AdminOpsDeskBody({
-  route,
-  deskData,
-  monitor,
-  actions,
-}: {
-  route: AdminOpsDeskRouteBag;
-  deskData: AdminOpsDeskDataBag;
-  monitor: AdminOpsDeskMonitorBag;
-  actions: AdminOpsDeskActionsBag;
-}) {
+export function AdminOpsDeskBody({ route, deskData, monitor, actions }: AdminOpsDeskBodyProps) {
   const {
     isDesktop,
     pathname,
