@@ -33,9 +33,39 @@ const DUBLIN_FLAVOR_CATEGORIES: readonly SessionCustomCategory[] = [
   },
 ];
 
+const NYC_FLAVOR_CATEGORIES: readonly SessionCustomCategory[] = [
+  {
+    id: "custom:nyc-subway-entrance",
+    label: "Subway entrance",
+    promptNoun: "a subway entrance",
+    overpassSelectors: ['["railway"="subway_entrance"]'],
+  },
+  {
+    id: "custom:nyc-fire-hydrant",
+    label: "Fire hydrant",
+    promptNoun: "a fire hydrant",
+    overpassSelectors: ['["emergency"="fire_hydrant"]'],
+  },
+  {
+    id: "custom:nyc-ferry-terminal",
+    label: "Ferry terminal",
+    promptNoun: "a ferry terminal",
+    overpassSelectors: ['["amenity"="ferry_terminal"]'],
+  },
+  {
+    id: "custom:nyc-pizza",
+    label: "Pizza place",
+    promptNoun: "a pizza place",
+    overpassSelectors: [
+      '["amenity"="fast_food"]["cuisine"="pizza"]',
+      '["amenity"="restaurant"]["cuisine"="pizza"]',
+    ],
+  },
+];
+
 const PACK_FLAVOR_CATEGORIES: Record<RegionPackId, readonly SessionCustomCategory[]> = {
   dublin: DUBLIN_FLAVOR_CATEGORIES,
-  nyc: EMPTY,
+  nyc: NYC_FLAVOR_CATEGORIES,
   london: EMPTY,
   tokyo: EMPTY,
   osaka: EMPTY,

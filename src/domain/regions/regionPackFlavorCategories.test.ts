@@ -14,6 +14,15 @@ const DUBLIN_FLAVOR_IDS = [
   "custom:dublin-castle-fort",
 ] as const;
 
+const NYC_FLAVOR_IDS = [
+  "custom:nyc-subway-entrance",
+  "custom:nyc-fire-hydrant",
+  "custom:nyc-ferry-terminal",
+  "custom:nyc-pizza",
+] as const;
+
+const APPROVED_FLAVOR_PACKS = new Set<RegionPackId>(["dublin", "nyc"]);
+
 const HOST_CUSTOM: SessionCustomCategory = {
   id: "custom:host-brewery",
   label: "Brewery",
@@ -29,9 +38,11 @@ describe("regionPackFlavorCategories", () => {
     }
   });
 
-  it("returns empty for every non-Dublin pack", () => {
-    const nonDublin = REGION_PACK_IDS.filter((id): id is RegionPackId => id !== "dublin");
-    for (const packId of nonDublin) {
+  it("returns empty for every unapproved pack", () => {
+    const unapproved = REGION_PACK_IDS.filter(
+      (id): id is RegionPackId => !APPROVED_FLAVOR_PACKS.has(id),
+    );
+    for (const packId of unapproved) {
       expect(regionPackFlavorCategories(packId)).toEqual([]);
     }
   });
@@ -84,6 +95,55 @@ describe("regionPackFlavorCategories", () => {
       }
     }
   });
+
+  it("returns the locked NYC flavor categories", () => {
+    const categories = regionPackFlavorCategories("nyc");
+
+    expect(categories).toEqual([
+      {
+        id: "custom:nyc-subway-entrance",
+        label: "Subway entrance",
+        promptNoun: "a subway entrance",
+        overpassSelectors: ['["railway"="subway_entrance"]'],
+      },
+      {
+        id: "custom:nyc-fire-hydrant",
+        label: "Fire hydrant",
+        promptNoun: "a fire hydrant",
+        overpassSelectors: ['["emergency"="fire_hydrant"]'],
+      },
+      {
+        id: "custom:nyc-ferry-terminal",
+        label: "Ferry terminal",
+        promptNoun: "a ferry terminal",
+        overpassSelectors: ['["amenity"="ferry_terminal"]'],
+      },
+      {
+        id: "custom:nyc-pizza",
+        label: "Pizza place",
+        promptNoun: "a pizza place",
+        overpassSelectors: [
+          '["amenity"="fast_food"]["cuisine"="pizza"]',
+          '["amenity"="restaurant"]["cuisine"="pizza"]',
+        ],
+      },
+    ]);
+  });
+
+  it("uses unique NYC flavor ids with non-empty selectors", () => {
+    const categories = regionPackFlavorCategories("nyc");
+    const ids = categories.map((category) => category.id);
+
+    expect(ids).toEqual([...NYC_FLAVOR_IDS]);
+    expect(new Set(ids).size).toBe(ids.length);
+
+    for (const category of categories) {
+      expect(category.overpassSelectors.length).toBeGreaterThan(0);
+      for (const selector of category.overpassSelectors) {
+        expect(selector.trim().length).toBeGreaterThan(0);
+      }
+    }
+  });
 });
 
 describe("mergeRegionPackFlavorCategories", () => {
@@ -92,6 +152,14 @@ describe("mergeRegionPackFlavorCategories", () => {
     const ids = merged.map((category) => category.id);
 
     expect(ids).toEqual(["custom:host-brewery", ...DUBLIN_FLAVOR_IDS]);
+    expect(merged[0]).toEqual(HOST_CUSTOM);
+  });
+
+  it("keeps host customs and appends NYC flavor without wiping either", () => {
+    const merged = mergeRegionPackFlavorCategories([HOST_CUSTOM], "nyc");
+    const ids = merged.map((category) => category.id);
+
+    expect(ids).toEqual(["custom:host-brewery", ...NYC_FLAVOR_IDS]);
     expect(merged[0]).toEqual(HOST_CUSTOM);
   });
 
@@ -116,16 +184,19 @@ describe("mergeRegionPackFlavorCategories", () => {
     ]);
   });
 
-  it("does not invent flavor for non-Dublin packs", () => {
-    expect(mergeRegionPackFlavorCategories([HOST_CUSTOM], "nyc")).toEqual([HOST_CUSTOM]);
-    expect(mergeRegionPackFlavorCategories([], "nyc")).toEqual([]);
+  it("does not invent flavor for unapproved packs", () => {
+    expect(mergeRegionPackFlavorCategories([HOST_CUSTOM], "london")).toEqual([HOST_CUSTOM]);
+    expect(mergeRegionPackFlavorCategories([], "london")).toEqual([]);
   });
 
-  it("drops Dublin flavor when switching to NYC", () => {
+  it("replaces Dublin flavor with NYC flavor when switching packs", () => {
     const dublinMerged = mergeRegionPackFlavorCategories([HOST_CUSTOM], "dublin");
     const nycMerged = mergeRegionPackFlavorCategories(dublinMerged, "nyc");
 
-    expect(nycMerged.map((category) => category.id)).toEqual(["custom:host-brewery"]);
+    expect(nycMerged.map((category) => category.id)).toEqual([
+      "custom:host-brewery",
+      ...NYC_FLAVOR_IDS,
+    ]);
     expect(stripKnownRegionPackFlavorCategories(dublinMerged).map((c) => c.id)).toEqual([
       "custom:host-brewery",
     ]);
