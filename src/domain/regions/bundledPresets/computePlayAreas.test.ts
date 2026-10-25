@@ -57,4 +57,24 @@ describe("bundled preset play areas", () => {
     }
     expect(BUNDLED_PRESET_PLAY_AREA_SQ_MI["bundled:australia"]).toBeCloseTo(total, 1);
   });
+
+  it("matches Sydney LGA feature square mileages", () => {
+    const collection = JSON.parse(
+      readFileSync(
+        resolve(import.meta.dirname, "../../../../public/geo/sydney/lgas.geojson"),
+        "utf8",
+      ),
+    ) as {
+      features: Array<{ properties: { lgaId: string }; geometry: unknown }>;
+    };
+
+    expect(collection.features).toHaveLength(33);
+    for (const feature of collection.features) {
+      const lgaId = feature.properties.lgaId;
+      const computed = area(feature as never) / SQ_METERS_PER_SQ_MILE;
+      const recorded = BUNDLED_PRESET_PLAY_AREA_SQ_MI[`bundled:sydney-lga-${lgaId}`];
+      expect(recorded, lgaId).toBeDefined();
+      expect(recorded).toBeCloseTo(computed, 1);
+    }
+  });
 });
