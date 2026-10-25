@@ -77,6 +77,12 @@ function advanceToPasscodeStep() {
   fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
 }
 
+function advanceToSeatStep() {
+  fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+  fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+  fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+}
+
 describe("JoinSession", () => {
   it("renders session code field and step continue control", () => {
     renderJoin();
@@ -142,5 +148,24 @@ describe("JoinSession", () => {
     expect(screen.getByText("Best of 3")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
     expect(screen.getByRole("radiogroup", { name: /Castle Siege seat/i })).toBeInTheDocument();
+  });
+
+  it("progressively discloses the classic observer role", () => {
+    previewState.value = {
+      ...previewState.value,
+      previewSession: createTestRemoteSession({ memberRoles: {} }),
+    };
+
+    renderJoin();
+    advanceToSeatStep();
+
+    expect(screen.queryByText("Observer")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /more roles/i }));
+    expect(screen.getByText("Observer")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Observer"));
+
+    expect(screen.getByRole("radio", { name: "Observer" })).toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+    expect(screen.getByText("Ask the host for the observer code.")).toBeInTheDocument();
   });
 });

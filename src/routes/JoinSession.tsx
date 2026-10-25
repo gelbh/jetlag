@@ -35,6 +35,7 @@ const JOIN_ROLE_OPTIONS: Array<{ value: PlayerRole; label: string }> = [
   { value: "hider", label: playerRoleLabel("hider") },
   { value: "observer", label: playerRoleLabel("observer") },
 ];
+const CLASSIC_JOIN_ROLE_OPTIONS = JOIN_ROLE_OPTIONS.filter(({ value }) => value !== "observer");
 
 type JoinStep = "code" | "preview" | "seat" | "passcode";
 
@@ -74,6 +75,7 @@ export function JoinSession() {
   const castleSiegeRole = form.values.castleSiegeRole ?? "teamA";
   const rolePasscode = form.values.rolePasscode;
   const [previewEnabledByTyping, setPreviewEnabledByTyping] = useState(false);
+  const [classicObserverRevealed, setClassicObserverRevealed] = useState(false);
   const inviteFromQuery = parseSessionInviteCode(codeFromQuery);
   const suppressPreview = codeFromQuery == null ? !previewEnabledByTyping : false;
   const [joinStep, setJoinStep] = useState<JoinStep>("code");
@@ -343,39 +345,57 @@ export function JoinSession() {
                       }}
                     />
                   ) : (
-                    <SegmentedControl
-                      fullWidth
-                      data={JOIN_ROLE_OPTIONS}
-                      value={playerRole}
-                      disabled={formBusy}
-                      onChange={(value) => {
-                        const role = value as PlayerRole;
-                        track(ANALYTICS_EVENTS.role_selected, {
-                          role,
-                          surface: "join",
-                        });
-                        form.setFieldValue("playerRole", role);
-                        form.setFieldValue("rolePasscode", "");
-                      }}
-                      aria-label="Player side"
-                      styles={{
-                        root: {
-                          backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
-                          border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
-                          borderRadius: 12,
-                          padding: 2,
-                        },
-                        label: {
-                          color: "var(--color-field-ink)",
-                          fontWeight: 510,
-                          fontSize: "0.9375rem",
-                        },
-                        indicator: {
-                          backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.16)",
-                          borderRadius: 10,
-                        },
-                      }}
-                    />
+                    <Stack gap={4}>
+                      <SegmentedControl
+                        fullWidth
+                        data={
+                          classicObserverRevealed || playerRole === "observer"
+                            ? JOIN_ROLE_OPTIONS
+                            : CLASSIC_JOIN_ROLE_OPTIONS
+                        }
+                        value={playerRole}
+                        disabled={formBusy}
+                        onChange={(value) => {
+                          const role = value as PlayerRole;
+                          track(ANALYTICS_EVENTS.role_selected, {
+                            role,
+                            surface: "join",
+                          });
+                          form.setFieldValue("playerRole", role);
+                          form.setFieldValue("rolePasscode", "");
+                        }}
+                        aria-label="Player side"
+                        styles={{
+                          root: {
+                            backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+                            border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                            borderRadius: 12,
+                            padding: 2,
+                          },
+                          label: {
+                            color: "var(--color-field-ink)",
+                            fontWeight: 510,
+                            fontSize: "0.9375rem",
+                          },
+                          indicator: {
+                            backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.16)",
+                            borderRadius: 10,
+                          },
+                        }}
+                      />
+                      {!classicObserverRevealed && playerRole !== "observer" ? (
+                        <Button
+                          type="button"
+                          variant="subtle"
+                          color="gray"
+                          size="compact-sm"
+                          disabled={formBusy}
+                          onClick={() => setClassicObserverRevealed(true)}
+                        >
+                          More roles
+                        </Button>
+                      ) : null}
+                    </Stack>
                   )}
                   <div className="flex gap-2 pt-2">
                     <Button
