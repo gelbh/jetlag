@@ -389,15 +389,14 @@ export function Home() {
 
               <Stack gap={8}>
                 <SectionLabel>Play</SectionLabel>
-                <EntryAsyncButton
+                <Button
                   component={Link}
                   to="/join"
-                  busy={false}
-                  idleLabel="Join session"
-                  busyLabel="Joining session…"
                   leftSection={<SignInIcon size={22} weight="regular" aria-hidden="true" />}
                   styles={filledStyles}
-                />
+                >
+                  Join session
+                </Button>
                 <Button
                   component={Link}
                   to="/create"
