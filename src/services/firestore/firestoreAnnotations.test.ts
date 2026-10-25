@@ -64,6 +64,8 @@ vi.mock("../core/analytics/clientErrors", () => ({
   captureException: vi.fn(),
 }));
 
+vi.mock("./memberProofs", () => ({ ensureMemberProof: vi.fn(async () => undefined) }));
+
 vi.mock("firebase/firestore", () => ({
   arrayRemove: vi.fn((value: unknown) => value),
   arrayUnion: vi.fn((value: unknown) => value),

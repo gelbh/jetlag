@@ -8,6 +8,9 @@ const mocks = vi.hoisted(() => ({
   sessionId: "",
   firebaseConfigured: false,
   ensureFreshAnonymousUser: vi.fn(),
+  exitSession: vi.fn(),
+  getRemoteSessionById: vi.fn(),
+  healSessionMembership: vi.fn(),
 }));
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
@@ -15,6 +18,9 @@ vi.mock("@/hooks/navigation/useAppNavigate", () => ({
 }));
 vi.mock("@/hooks/session/useSessionExit", () => ({
   useSessionExit: () => exitSession,
+}));
+vi.mock("@/services/session/sessionExit", () => ({
+  exitSession: mocks.exitSession,
 }));
 vi.mock("@/state/sessionStore", () => ({
   useSessionStore: (sel: (s: unknown) => unknown) =>
@@ -36,11 +42,12 @@ vi.mock("@/services/firestore/firestoreAnnotations", () => ({
   isFirestorePermissionDenied: () => false,
 }));
 vi.mock("@/services/firestore/sessionMembershipHeal", () => ({
-  getRemoteSessionById: vi.fn(),
-  healSessionMembership: vi.fn(),
+  getRemoteSessionById: mocks.getRemoteSessionById,
+  healSessionMembership: mocks.healSessionMembership,
   lookupRemoteSessionByCode: vi.fn(),
 }));
 
+import { JOIN_ERROR_HEAL_PROOF_INVALID } from "@/domain/session/join/joinErrorCopy";
 import { useContinueActiveSession } from "./useContinueActiveSession";
 
 describe("useContinueActiveSession", () => {
@@ -50,6 +57,9 @@ describe("useContinueActiveSession", () => {
     mocks.sessionId = LOCAL_SESSION_ID;
     mocks.firebaseConfigured = false;
     mocks.ensureFreshAnonymousUser.mockReset();
+    mocks.exitSession.mockReset();
+    mocks.getRemoteSessionById.mockReset();
+    mocks.healSessionMembership.mockReset();
   });
 
   it("navigates to map for local / unconfigured firebase session", async () => {
@@ -73,6 +83,30 @@ describe("useContinueActiveSession", () => {
 
     expect(result.current.continueError).toBe("Network down.");
     expect(result.current.continuing).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("exits the session and shows the copy when the heal proof is rejected", async () => {
+    mocks.sessionId = "remote-1";
+    mocks.firebaseConfigured = true;
+    mocks.ensureFreshAnonymousUser.mockResolvedValue({ uid: "u2" });
+    mocks.getRemoteSessionById.mockResolvedValue({
+      id: "remote-1",
+      code: "ABCD",
+      memberUids: ["u1"],
+      memberRoles: { u1: "seeker" },
+    });
+    mocks.healSessionMembership.mockRejectedValue(new Error(JOIN_ERROR_HEAL_PROOF_INVALID));
+
+    const { result } = renderHook(() => useContinueActiveSession());
+    await act(async () => {
+      await result.current.handleContinue();
+    });
+
+    expect(mocks.exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "reset", sessionId: "remote-1", animate: false }),
+    );
+    expect(result.current.continueError).toBe(JOIN_ERROR_HEAL_PROOF_INVALID);
     expect(navigate).not.toHaveBeenCalled();
   });
 });

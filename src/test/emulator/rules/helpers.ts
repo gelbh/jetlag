@@ -115,3 +115,21 @@ export function bindRulesTestEnv(): RulesTestEnvBox {
 
   return box;
 }
+
+/**
+ * Seeds membership the way the server would. Client membership updates may
+ * only add the caller, so fixtures that add other players bypass rules.
+ */
+export async function seedSessionMembers(
+  testEnv: RulesTestEnvironment,
+  memberRoles: Record<string, string>,
+  sessionId = "session-1",
+): Promise<void> {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await context
+      .firestore()
+      .collection("sessions")
+      .doc(sessionId)
+      .update({ memberUids: Object.keys(memberRoles), memberRoles });
+  });
+}

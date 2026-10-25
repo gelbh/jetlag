@@ -197,6 +197,20 @@ describe("captureException", () => {
     expect(passed.message).toBe("x");
   });
 
+  it("forwards firestore_op additional properties to PostHog", async () => {
+    resetAnalyticsForTests({ initialized: true });
+    const error = new Error("write failed");
+
+    captureException(error, { firestore_op: "write:playerLocation" });
+
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
+    expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
+      firestore_op: "write:playerLocation",
+    });
+  });
+
   it("soft-fails when PostHog core is not inited", async () => {
     resetAnalyticsForTests();
     expect(() => captureException(new Error("x"))).not.toThrow();

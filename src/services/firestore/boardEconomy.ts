@@ -141,6 +141,7 @@ export function subscribeBoardEconomyState(
       }
       onChange(deserializeBoardEconomyState(snap.data() as Record<string, unknown>));
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:boardEconomyState" }),
   );
 }

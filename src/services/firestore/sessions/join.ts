@@ -30,6 +30,7 @@ import {
 } from "@/services/session/rolePasscodeLifecycle";
 import { cancelWalkingThermometersAfterIdentityHeal } from "../firestoreSessionExtras";
 import { joinGatedRemoteSessionByCode } from "../joinGatedRemoteSession";
+import { ensureMemberProof } from "../memberProofs";
 import { deserializeSessionFromFirestore } from "../serialization/serializeSession";
 import { ensureRemoteSessionMembership } from "./membership";
 import {
@@ -244,6 +245,7 @@ async function joinRemoteSessionWithoutRead(
   }
 
   const sessionRef = doc(sessionsCollection(), sessionId);
+  // react-doctor-disable-next-line react-doctor/firebase-client-owned-authz-field -- firestore.rules membershipJoinTouchesOnlySelf limits this ungated join to the caller's own memberUids, memberRoles, and memberAppVersions entries
   await updateDoc(sessionRef, {
     memberUids: arrayUnion(uid),
     [`memberRoles.${uid}`]: role,
@@ -282,12 +284,14 @@ async function joinRemoteSessionWithoutRead(
 function callJoinGatedRemoteSession(
   code: string,
   codeRecord: SessionCodeRecord,
+  uid: string,
   role: PlayerRole,
   clientVersion: string,
   options: JoinRemoteSessionOptions,
 ): Promise<JoinRemoteSessionResult> {
   return joinGatedRemoteSessionByCode({
     code,
+    uid,
     codeRecord,
     role,
     clientVersion,
@@ -337,7 +341,7 @@ async function healReturningMemberViaCallable(
 ): Promise<JoinRemoteSessionResult | null> {
   let healed: JoinRemoteSessionResult;
   try {
-    healed = await callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
+    healed = await callJoinGatedRemoteSession(code, codeRecord, uid, role, clientVersion, {
       ...options,
       returningMemberUid,
       rolePasscode: options.rolePasscode,
@@ -426,7 +430,7 @@ async function joinRemoteSessionByCodeOnce(
       }
 
       try {
-        return await callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
+        return await callJoinGatedRemoteSession(code, codeRecord, uid, role, clientVersion, {
           ...options,
           returningMemberUid,
           rolePasscode: options.rolePasscode,
@@ -450,7 +454,7 @@ async function joinRemoteSessionByCodeOnce(
   }
 
   if (isSessionRoleGated(deserializeSessionFromFirestore(sessionDoc.id, data))) {
-    return callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
+    return callJoinGatedRemoteSession(code, codeRecord, uid, role, clientVersion, {
       ...options,
       returningMemberUid,
       rolePasscode: options.rolePasscode,
@@ -519,7 +523,7 @@ export async function joinRemoteSessionByCode(
   }
 
   const returningMemberUid = sanitizeJoinReturningMemberUid(options);
-  return withJoinPermissionRetry(() =>
+  const result = await withJoinPermissionRetry(() =>
     joinRemoteSessionByCodeOnce(
       code,
       codeRecord,
@@ -530,6 +534,15 @@ export async function joinRemoteSessionByCode(
       options,
     ),
   );
+
+  if (result.status === "joined") {
+    // Ungated joins write membership client-side, so the proof is created here.
+    // Gated joins and heals got theirs from the callable; this is then one read.
+    // Not awaited: setDoc resolves only on server ack and must not stall the join.
+    void ensureMemberProof(codeRecord.sessionId, uid);
+  }
+
+  return result;
 }
 
 export async function getRemoteSessionById(sessionId: string): Promise<SessionRecord | null> {

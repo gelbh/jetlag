@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LOCAL_SESSION_ID, type SessionRecord } from "@/domain/map/annotations";
+import { JOIN_ERROR_HEAL_PROOF_INVALID } from "@/domain/session/join/joinErrorCopy";
 import { type PlayerRole, resolvePlayerRole } from "@/domain/session/players/playerRole";
 import { useAppNavigate } from "@/hooks/navigation/useAppNavigate";
 import { setPremiumApiContext } from "@/services/core/auth/premiumApiContext";
@@ -137,7 +138,9 @@ export function useContinueActiveSession(): {
         const message = error instanceof Error ? error.message : "Couldn't continue that session.";
         if (
           message === "That session no longer exists." ||
-          message === "That session has ended. Join or create a new one."
+          message === "That session has ended. Join or create a new one." ||
+          // Resuming would re-send the same failing heal; drop the session so the player joins fresh.
+          message === JOIN_ERROR_HEAL_PROOF_INVALID
         ) {
           await exitSession({
             reason: "reset",

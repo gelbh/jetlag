@@ -368,13 +368,14 @@ export function useTentacleTool({
           // A user Cancel (still the latest request) returns to the category step;
           // a superseded request leaves the UI to its replacement.
           if (isLatestRequest(requestId)) {
+            // react-doctor-disable-next-line react-doctor/no-loading-flag-reset-outside-finally -- this is the catch path; the trailing reset below runs on every path
             reopenCategoryPicker();
           }
-          return;
-        }
-        task.fail(error);
-        if (isLatestRequest(requestId)) {
-          setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
+        } else {
+          task.fail(error);
+          if (isLatestRequest(requestId)) {
+            setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
+          }
         }
       }
       if (isLatestRequest(requestId)) {

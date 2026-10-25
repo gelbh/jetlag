@@ -6,4 +6,5 @@ export const JOIN_ERROR_MARKERS = {
   sessionEnded: "Session already ended",
   legacyJoin: "legacy join",
   healRoleMismatch: "Rejoin in your previous role",
+  healProofInvalid: "Heal proof invalid",
 } as const;

@@ -178,4 +178,56 @@ describe("sessionStore", () => {
 
     expect(read(useSessionStore.getState().session)).toBe(expected);
   });
+
+  it("persists heal secrets next to myUid and keeps them across uid drift", () => {
+    useSessionStore.getState().setMyUid("uid-1");
+    useSessionStore.getState().setHealSecret("session-a", "secret-a");
+    useSessionStore.getState().setSession(createTestRemoteSession({ id: "session-a" }), "uid-2");
+
+    expect(useSessionStore.getState().healSecrets).toEqual({ "session-a": "secret-a" });
+    const persisted = useSessionStore.persist.getOptions().partialize?.(useSessionStore.getState());
+    expect(persisted).toMatchObject({
+      myUid: "uid-2",
+      healSecrets: { "session-a": "secret-a" },
+    });
+  });
+
+  it("keeps only the latest session's heal secret", () => {
+    useSessionStore.getState().setHealSecret("session-a", "secret-a");
+    useSessionStore.getState().setHealSecret("session-b", "secret-b");
+
+    expect(useSessionStore.getState().healSecrets).toEqual({ "session-b": "secret-b" });
+  });
+
+  it("keeps heal secrets when the session is cleared", () => {
+    useSessionStore.getState().setMyUid("uid-1");
+    useSessionStore.getState().setHealSecret("session-a", "secret-a");
+    useSessionStore.getState().setSession(null);
+
+    expect(useSessionStore.getState().healSecrets).toEqual({ "session-a": "secret-a" });
+  });
+
+  it("clears heal secrets when myUid is cleared", () => {
+    useSessionStore.getState().setMyUid("uid-1");
+    useSessionStore.getState().setHealSecret("session-a", "secret-a");
+    useSessionStore.getState().setMyUid(null);
+    expect(useSessionStore.getState().healSecrets).toEqual({});
+
+    useSessionStore.getState().setMyUid("uid-1");
+    useSessionStore.getState().setHealSecret("session-a", "secret-a");
+    useSessionStore.getState().setSession(createTestSession(), null);
+    expect(useSessionStore.getState().healSecrets).toEqual({});
+  });
+
+  it("rehydrates persisted state saved before healSecrets existed", async () => {
+    localStorage.setItem(
+      "jetlag-session",
+      JSON.stringify({ state: { session: null, myUid: "uid-old", myRole: null }, version: 0 }),
+    );
+    await useSessionStore.persist.rehydrate();
+
+    expect(useSessionStore.getState().myUid).toBe("uid-old");
+    expect(useSessionStore.getState().healSecrets).toEqual({});
+    localStorage.removeItem("jetlag-session");
+  });
 });

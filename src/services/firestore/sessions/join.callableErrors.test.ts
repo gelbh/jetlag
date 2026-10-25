@@ -22,7 +22,10 @@ vi.mock("@/services/core/firebase/firebase", () => ({
   getFirebaseFunctions: async () => ({}),
 }));
 
-import { JOIN_ERROR_HEAL_ROLE_MISMATCH } from "@/services/session/rolePasscodeLifecycle";
+import {
+  JOIN_ERROR_HEAL_PROOF_INVALID,
+  JOIN_ERROR_HEAL_ROLE_MISMATCH,
+} from "@/services/session/rolePasscodeLifecycle";
 import { joinRemoteSessionByCode } from "./join";
 
 const healOptions = { returningMemberUid: "old-uid", persistedMyUid: "old-uid" };
@@ -67,5 +70,15 @@ describe("joinRemoteSessionByCode heal with raw callable errors", () => {
     await expect(
       joinRemoteSessionByCode("ABCD", "new-uid", "seeker", "0.2.0", healOptions),
     ).rejects.toThrow(JOIN_ERROR_HEAL_ROLE_MISMATCH);
+  });
+
+  it("surfaces a heal proof rejection as player copy", async () => {
+    httpsCallable.mockReturnValue(async () => {
+      throw new FirebaseError("functions/failed-precondition", "Heal proof invalid.");
+    });
+
+    await expect(
+      joinRemoteSessionByCode("ABCD", "new-uid", "seeker", "0.2.0", healOptions),
+    ).rejects.toMatchObject({ message: JOIN_ERROR_HEAL_PROOF_INVALID });
   });
 });

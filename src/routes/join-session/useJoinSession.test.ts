@@ -13,6 +13,10 @@ const mockRequestRoleJoin = vi.fn();
 const mockCancelRoleJoinRequest = vi.fn();
 const mockListenOwnJoinRequest = vi.fn(() => () => undefined);
 const mockTrack = vi.fn();
+const storeState: { session: { code: string } | null; myUid: string | null } = {
+  session: null,
+  myUid: null,
+};
 const mockUseJoinSessionPreview = vi.fn(() => ({
   previewSession: null,
   previewPremium: false,
@@ -27,8 +31,8 @@ vi.mock("@/hooks/navigation/useAppNavigate", () => ({
 vi.mock("@/state/sessionStore", () => ({
   useSessionStore: (sel: (s: unknown) => unknown) =>
     sel({
-      session: null,
-      myUid: null,
+      session: storeState.session,
+      myUid: storeState.myUid,
       setSession,
     }),
 }));
@@ -87,6 +91,7 @@ vi.mock("@/services/geo/matching/resolveSessionMatchingAreas", () => ({
   resolveSessionMatchingAreas: vi.fn(async () => []),
 }));
 
+import { JOIN_ERROR_HEAL_PROOF_INVALID } from "@/domain/session/join/joinErrorCopy";
 import { useJoinSession } from "./useJoinSession";
 
 const joinValues: JoinSessionFormValues = {
@@ -99,6 +104,8 @@ describe("useJoinSession", () => {
   beforeEach(() => {
     navigate.mockClear();
     setSession.mockClear();
+    storeState.session = null;
+    storeState.myUid = null;
     mockIsFirebaseConfigured.mockReturnValue(true);
     mockEnsureFreshAnonymousUser.mockResolvedValue({ uid: "u1" });
     mockJoinRemoteSessionByCode.mockReset();
@@ -652,5 +659,87 @@ describe("useJoinSession", () => {
     expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
       ["join_failed", { role: "seeker", reason: "version_mismatch" }],
     ]);
+  });
+
+  describe("rejected heal proof", () => {
+    const freshJoinOptions = { rolePasscode: undefined };
+
+    beforeEach(() => {
+      storeState.session = { code: "ABCD" };
+      storeState.myUid = "old-uid";
+    });
+
+    it("retries once as a fresh join without the returning member", async () => {
+      const session = createTestRemoteSession({ code: "ABCD" });
+      mockJoinRemoteSessionByCode
+        .mockRejectedValueOnce(new Error(JOIN_ERROR_HEAL_PROOF_INVALID))
+        .mockResolvedValueOnce({ status: "joined", session });
+
+      const { result } = renderHook(() =>
+        useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+      );
+
+      await act(async () => {
+        result.current.runJoin(joinValues);
+      });
+
+      await waitFor(() => {
+        expect(navigate).toHaveBeenCalledWith("/map");
+      });
+      expect(mockJoinRemoteSessionByCode).toHaveBeenCalledTimes(2);
+      expect(mockJoinRemoteSessionByCode.mock.calls[0]?.[4]).toEqual({
+        returningMemberUid: "old-uid",
+        persistedMyUid: "old-uid",
+        rolePasscode: undefined,
+      });
+      expect(mockJoinRemoteSessionByCode.mock.calls[1]?.[4]).toEqual(freshJoinOptions);
+      expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([]);
+    });
+
+    it("shows the fresh join error and tracks join_failed once when the retry fails", async () => {
+      mockJoinRemoteSessionByCode
+        .mockRejectedValueOnce(new Error(JOIN_ERROR_HEAL_PROOF_INVALID))
+        .mockRejectedValueOnce(
+          new Error("Enter the role code for that side.", {
+            cause: Object.assign(new Error("Role code is required."), {
+              code: "functions/invalid-argument",
+            }),
+          }),
+        );
+
+      const { result } = renderHook(() =>
+        useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+      );
+
+      await act(async () => {
+        result.current.runJoin(joinValues);
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBe("Enter the role code for that side.");
+      });
+      expect(mockJoinRemoteSessionByCode).toHaveBeenCalledTimes(2);
+      expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
+        ["join_failed", { role: "seeker", reason: "role_code_required" }],
+      ]);
+    });
+
+    it("does not retry a fresh join that is rejected for its proof", async () => {
+      storeState.session = null;
+      mockJoinRemoteSessionByCode.mockRejectedValue(new Error(JOIN_ERROR_HEAL_PROOF_INVALID));
+
+      const { result } = renderHook(() =>
+        useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+      );
+
+      await act(async () => {
+        result.current.runJoin(joinValues);
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(JOIN_ERROR_HEAL_PROOF_INVALID);
+      });
+      expect(mockJoinRemoteSessionByCode).toHaveBeenCalledTimes(1);
+    });
   });
 });
