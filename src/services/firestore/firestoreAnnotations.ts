@@ -103,6 +103,6 @@ export function subscribeToRemoteAnnotations(
 
       onChange(annotations);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) => handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:annotations" }),
   );
 }

@@ -177,7 +177,8 @@ export function subscribeToStartingLocations(
       });
       onChange(locations);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:startingLocations" }),
   );
 }
 
@@ -198,7 +199,8 @@ export function subscribeToPlayerLocations(
       );
       onChange(locations);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:playerLocations" }),
   );
 }
 
@@ -223,7 +225,10 @@ export function subscribeToSeekerPlayerLocations(
   return onSnapshot(
     query(playerLocationsCollection(sessionId), where("role", "==", "seeker")),
     (snapshot) => onChange(mapPlayerLocationSnapshot(sessionId, snapshot)),
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, {
+        firestoreOp: "subscribe:seekerPlayerLocations",
+      }),
   );
 }
 
@@ -235,7 +240,8 @@ export function subscribeToHiderPlayerLocations(
   return onSnapshot(
     query(playerLocationsCollection(sessionId), where("role", "==", "hider")),
     (snapshot) => onChange(mapPlayerLocationSnapshot(sessionId, snapshot)),
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:hiderPlayerLocations" }),
   );
 }
 
@@ -293,7 +299,8 @@ export function subscribeToSessionMessages(
       );
       onChange(messages);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:sessionMessages" }),
   );
 }
 
@@ -490,7 +497,7 @@ export async function cancelWalkingThermometersAfterIdentityHeal(
     const walkIds = listWalkingThermometerQuestionIds(questions, oldUid);
     await cancelWalkingThermometersAndAnnounce(sessionId, walkIds, senderUid, senderRole, "orphan");
   } catch (error) {
-    captureException(error);
+    captureException(error, { firestore_op: "write:cancelWalkingThermometersAfterIdentityHeal" });
   }
 }
 
@@ -519,7 +526,8 @@ export function subscribeToPendingQuestions(
       );
       onChange(questions);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:pendingQuestions" }),
   );
 }
 
@@ -544,7 +552,7 @@ export function subscribeToHidingZones(
       );
       onChange(zones);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) => handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:hidingZones" }),
   );
 }
 
@@ -569,7 +577,7 @@ export function subscribeToTimeTraps(
       );
       onChange(traps);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) => handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:timeTraps" }),
   );
 }
 

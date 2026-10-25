@@ -33,4 +33,26 @@ describe("handleFirestoreListenError", () => {
     expect(captureException).toHaveBeenCalledExactlyOnceWith(error);
     expect(onError).toHaveBeenCalledExactlyOnceWith(error);
   });
+
+  it("tags unexpected listen failures with firestore_op", () => {
+    const onError = vi.fn();
+    const error = new FirebaseError("unavailable", "Firestore is unavailable.");
+
+    handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:session" });
+
+    expect(captureException).toHaveBeenCalledExactlyOnceWith(error, {
+      firestore_op: "subscribe:session",
+    });
+    expect(onError).toHaveBeenCalledExactlyOnceWith(error);
+  });
+
+  it("still skips capture for permission-denied when firestore_op is provided", () => {
+    const onError = vi.fn();
+    const error = new FirebaseError("permission-denied", "Missing or insufficient permissions.");
+
+    handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:playerLocations" });
+
+    expect(captureException).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledExactlyOnceWith(error);
+  });
 });

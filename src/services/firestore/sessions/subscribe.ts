@@ -28,7 +28,7 @@ export function subscribeToSession(
         deserializeSessionFromFirestore(snapshot.id, snapshot.data() as Record<string, unknown>),
       );
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) => handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:session" }),
   );
 }
 
@@ -47,6 +47,7 @@ export function subscribeToEndGameTruthAnchors(
 
       onChange(parseEndGameTruthAnchors(snapshot.data()?.anchors));
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:endGameTruthAnchors" }),
   );
 }
