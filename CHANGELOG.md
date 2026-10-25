@@ -6,6 +6,22 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.9.0 - 2026-10-25
+
+### Fixes
+
+- Ask GPS waits for the map blue-dot before timing out when placing a question
+- Offline resume no longer loops a blank reload; shows a reconnect banner instead
+- Map recovers from a lost WebGL graphics context with Retry or Reload
+
+### Improvements
+
+- Join by code for Castle Siege sessions: pick Team A, Team B, referee, or observer and enter seat passcodes
+- NYC presets include local category options for Measuring, Matching, and Tentacle
+- Player map chrome marks itself resume-ready so PWA resume is less likely to false-fire
+- Sydney presets include each Greater Sydney LGA as a start option
+- Oceania continent mark shows in the preset hierarchy
+
 ## 1.8.0 - 2026-10-25
 
 ### Fixes
