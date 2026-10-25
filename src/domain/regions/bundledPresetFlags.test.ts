@@ -55,6 +55,17 @@ describe("bundledPresetFlags", () => {
     );
   });
 
+  it("uses a local override for the Oceania continent mark", () => {
+    expect(flagMarkForHierarchySegmentId("continent-oceania")?.alt).toBe("Oceania");
+    expect(flagMarkForHierarchySegmentId("continent-oceania")?.src).toBe(
+      "/region-flags/continent-oceania.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["continent-oceania"].source).toBe(
+      "local:continent-oceania.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["continent-oceania"].identity).toBe("local:oceania");
+  });
+
   it("uses a city/metro's own mark on matching leaves", () => {
     expect(flagMarkForBundledPresetId("bundled:nyc")?.src).toBe("/region-flags/metro-nyc.png");
     expect(flagMarkForBundledPresetId("bundled:southampton")?.src).toBe(

@@ -84,6 +84,13 @@ export const BUNDLED_PRESET_FLAG_ASSETS = {
     identity: "commons:asean flag (1994).svg",
     presentation: "flag",
   },
+  "continent-oceania": {
+    src: "/region-flags/continent-oceania.png",
+    alt: "Oceania",
+    source: "local:continent-oceania.png",
+    identity: "local:oceania",
+    presentation: "flag",
+  },
   "state-ny": {
     src: "/region-flags/state-ny.png",
     alt: "New York",
