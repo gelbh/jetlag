@@ -10,6 +10,7 @@ import {
 import { APP_VERSION } from "@/domain/device/changelog";
 import type { SessionRecord, SessionTier } from "@/domain/map/annotations";
 import { photoUploadAccessError } from "@/domain/questions";
+import type { CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { buildJoinPreviewSession } from "@/domain/session/join/joinPreviewSession";
 import {
   sessionVersionCompatible,
@@ -61,6 +62,7 @@ type JoinRemoteSessionOptions = {
   returningMemberUid?: string;
   persistedMyUid?: string | null;
   rolePasscode?: string;
+  castleSiegeRole?: CastleSiegeTeamRole;
 };
 
 type SessionCodeRecord = {
@@ -294,6 +296,7 @@ function callJoinGatedRemoteSession(
     uid,
     codeRecord,
     role,
+    castleSiegeRole: options.castleSiegeRole,
     clientVersion,
     rolePasscode: options.rolePasscode,
     returningMemberUid: options.returningMemberUid,

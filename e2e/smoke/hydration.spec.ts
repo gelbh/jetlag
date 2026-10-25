@@ -112,7 +112,7 @@ test("@smoke prerendered home hydrates without recoverable errors", async ({ pag
   });
   await page.getByRole("link", { name: "Join session" }).click();
   await expect(page).toHaveURL(/\/join$/);
-  await expect(page.getByRole("button", { name: "Join session" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
   expect(documents).toEqual([]);
 });
 
@@ -121,15 +121,11 @@ test("@smoke prerendered join hydrates without recoverable errors", async ({ pag
   await openPrerendered(page, "/join");
   await expectCleanHydration(page);
 
-  // Run after the App mount: clicks before the app boots are not replayed. Hider is the
-  // default; a native label click checks the radio even without React, but Mantine's
-  // `data-active` only moves once the route boundary has hydrated.
-  const seeker = page
-    .getByRole("radiogroup", { name: "Player side" })
-    .locator("label")
-    .filter({ hasText: /^Seeker$/ });
-  await seeker.click();
-  await expect(seeker).toHaveAttribute("data-active", "true");
+  // Run after the App mount: input before the app boots is not kept. Typing after
+  // hydration proves the route boundary attached controlled handlers.
+  const code = page.getByPlaceholder("ABCD");
+  await code.fill("WXYZ");
+  await expect(code).toHaveValue("WXYZ");
 });
 
 test("@smoke prerendered join fills the invite code after hydrating", async ({ page }) => {

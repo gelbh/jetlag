@@ -300,6 +300,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
         model={{
           sessionCode: session.code,
           sessionId: session.id,
+          mode: session.mode,
           roleGates: session.roleGates,
           sessionRules: session,
           playerRole: roleConfig.statusPlayerRole,
@@ -347,6 +348,8 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     visibleRoleCodeRoles({
       roleGates: session.roleGates,
       memberRoles: session.memberRoles,
+      castleSiegeRoles: session.castleSiegeRoles,
+      mode: session.mode,
       myUid: uid ?? undefined,
       isHost,
     }).length > 0;

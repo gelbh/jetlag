@@ -64,6 +64,25 @@ describe("useLeaderJoinRequests", () => {
     );
   });
 
+  it("listens for CS team leader roles when mode is castleSiege", () => {
+    renderHook(() =>
+      useLeaderJoinRequests({
+        sessionId: "sess-cs",
+        mode: "castleSiege",
+        roleGates: { version: 1, leaders: { teamA: "leader-a", teamB: "leader-b" } },
+        myUid: "leader-a",
+        isHost: false,
+      }),
+    );
+
+    expect(mockListenLeaderJoinRequests).toHaveBeenCalledWith(
+      "sess-cs",
+      ["teamA"],
+      expect.any(Function),
+      expect.any(Function),
+    );
+  });
+
   it("filters expired requests from pending", () => {
     let setRequests: ((reqs: RoleJoinRequest[]) => void) | null = null;
     mockListenLeaderJoinRequests.mockImplementation((_sessionId, _roles, onRequests) => {
