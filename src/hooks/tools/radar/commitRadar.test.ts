@@ -1,13 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { expect, vi } from "vitest";
 import type { RadarDistanceOptionKey } from "../../../domain/questions";
+import { describeCastleSiegeOracleCommit } from "../castleSiegeOracleCommit.testHarness";
 import { commitRadar } from "./commitRadar";
 
 const createAnnotation = vi.fn();
 const submitPendingQuestion = vi.fn();
 const setMapError = vi.fn();
 const onSuccess = vi.fn();
-const callOracle = vi.fn();
-const onOracleReceipt = vi.fn();
 
 vi.mock("@/services/session/emitSessionActivity", () => ({
   emitQuestionAnsweredActivity: vi.fn(),
@@ -37,48 +36,20 @@ function baseInput(overrides: Partial<Parameters<typeof commitRadar>[0]> = {}) {
   };
 }
 
-describe("commitRadar castleSiege oracle", () => {
-  beforeEach(() => {
-    createAnnotation.mockReset();
-    submitPendingQuestion.mockReset();
-    setMapError.mockReset();
-    onSuccess.mockReset();
-    callOracle.mockReset();
-    onOracleReceipt.mockReset();
-    createAnnotation.mockResolvedValue({ id: "ann-1" });
-    submitPendingQuestion.mockResolvedValue(undefined);
-  });
-
-  it("classic honor pending path does not call oracle", async () => {
-    await commitRadar(
-      baseInput({
-        sessionMode: "classic",
-        callOracleAsk: callOracle,
-        defenderTeamId: "teamB",
-        onOracleReceipt,
-      }),
-    );
-
-    expect(callOracle).not.toHaveBeenCalled();
-    expect(onOracleReceipt).not.toHaveBeenCalled();
-    expect(submitPendingQuestion).toHaveBeenCalledTimes(1);
-    expect(createAnnotation).not.toHaveBeenCalled();
-  });
-
-  it("castleSiege first pass routes to oracle and stashes receipt", async () => {
-    callOracle.mockResolvedValue({ kind: "radar", answer: "no" });
-
-    await commitRadar(
-      baseInput({
-        sessionMode: "castleSiege",
-        awaitHiderAnswer: true,
-        radarAnswer: null,
-        callOracleAsk: callOracle,
-        defenderTeamId: "teamA",
-        onOracleReceipt,
-      }),
-    );
-
+describeCastleSiegeOracleCommit({
+  name: "commitRadar",
+  oracleKind: "radar",
+  run: (input) => commitRadar(input as Parameters<typeof commitRadar>[0]),
+  baseInput: (overrides) =>
+    baseInput({
+      awaitHiderAnswer: true,
+      radarAnswer: null,
+      defenderTeamId: "teamA",
+      sessionId: "s1",
+      senderUid: "u1",
+      ...overrides,
+    }),
+  expectFirstPassAsk: (callOracle) => {
     expect(callOracle).toHaveBeenCalledWith({
       sessionId: "s1",
       defenderTeamId: "teamA",
@@ -88,33 +59,16 @@ describe("commitRadar castleSiege oracle", () => {
         radiusMeters: 500,
       },
     });
-    expect(onOracleReceipt).toHaveBeenCalledWith({ kind: "radar", answer: "no" });
-    expect(submitPendingQuestion).not.toHaveBeenCalled();
-    expect(createAnnotation).not.toHaveBeenCalled();
-    expect(onSuccess).not.toHaveBeenCalled();
-  });
-
-  it("castleSiege confirm-send uses oracle receipt without honor typing", async () => {
-    await commitRadar(
-      baseInput({
-        sessionMode: "castleSiege",
-        awaitHiderAnswer: true,
-        radarAnswer: null,
-        callOracleAsk: callOracle,
-        defenderTeamId: "teamA",
-        oracleReceipt: { kind: "radar", answer: "yes" },
-        onOracleReceipt,
-      }),
-    );
-
-    expect(callOracle).not.toHaveBeenCalled();
-    expect(submitPendingQuestion).not.toHaveBeenCalled();
+  },
+  expectConfirmAnnotation: (createAnnotation) => {
     expect(createAnnotation).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "radar",
         metadata: expect.objectContaining({ inside: true }),
       }),
     );
+  },
+  expectConfirmSuccess: (onSuccess) => {
     expect(onSuccess).toHaveBeenCalled();
-  });
+  },
 });

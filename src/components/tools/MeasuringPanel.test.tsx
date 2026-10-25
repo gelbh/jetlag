@@ -9,11 +9,7 @@ import {
   type MeasuringSubject,
   type MeasuringTargetMode,
 } from "@/domain/questions";
-import {
-  MeasuringPanel,
-  type MeasuringPanelModel,
-  type MeasuringPanelProps,
-} from "./MeasuringPanel";
+import { MeasuringPanel, type MeasuringPanelModel } from "./MeasuringPanel";
 
 vi.mock("../../hooks/wizard/useToolWizard", () => ({
   useToolWizard: () => ({
@@ -65,19 +61,6 @@ const baseModel: MeasuringPanelModel = {
 };
 
 describe("MeasuringPanel public props (AC #1)", () => {
-  it("accepts a single model options object", () => {
-    const props: MeasuringPanelProps = {
-      model: baseModel,
-    };
-    const keys = Object.keys(props) as Array<keyof MeasuringPanelProps>;
-    expect(keys).toEqual(["model"]);
-    expect(keys.length).toBeLessThanOrEqual(10);
-
-    render(<MeasuringPanel {...props} />);
-
-    expect(screen.getByText("Measuring from")).toBeInTheDocument();
-  });
-
   it("shows empty-area notice and greys unavailable options on the sheet", () => {
     render(
       <MeasuringPanel

@@ -2,11 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
-import {
-  MapSettingsGeneralTab,
-  type MapSettingsGeneralTabModel,
-  type MapSettingsGeneralTabProps,
-} from "./GeneralTab";
+import { MapSettingsGeneralTab, type MapSettingsGeneralTabModel } from "./GeneralTab";
 
 const baseModel: MapSettingsGeneralTabModel = {
   showCurrentLocation: true,
@@ -61,17 +57,10 @@ beforeEach(() => {
 });
 
 describe("MapSettingsGeneralTab public props (AC #1 / #4)", () => {
-  it("accepts a single model options object", () => {
-    const props: MapSettingsGeneralTabProps = {
-      model: baseModel,
-    };
-    const keys = Object.keys(props) as Array<keyof MapSettingsGeneralTabProps>;
-    expect(keys).toEqual(["model"]);
-    expect(keys.length).toBeLessThanOrEqual(10);
-
+  it("mounts with model options", () => {
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <MapSettingsGeneralTab {...props} />
+        <MapSettingsGeneralTab model={baseModel} />
       </MantineProvider>,
     );
 

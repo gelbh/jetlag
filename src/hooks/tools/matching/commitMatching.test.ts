@@ -1,9 +1,10 @@
 import type { Feature, Polygon } from "geojson";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { MatchingFeature } from "@/domain/geo/types";
 import * as persistSlim from "@/domain/geometry/progressive/persistSlim";
 import { POLYGON_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/progressive/persistSlim";
 import type { GameArea } from "@/domain/map/annotations";
+import { describeCastleSiegeOracleCommit } from "../castleSiegeOracleCommit.testHarness";
 import { type CommitMatchingInput, commitMatching, performMatchingCommit } from "./commitMatching";
 
 vi.mock("@/services/session/emitSessionActivity", () => ({
@@ -185,66 +186,23 @@ describe("performMatchingCommit persist-slim", () => {
   });
 });
 
-describe("performMatchingCommit castleSiege oracle", () => {
-  const callOracle = vi.fn();
-  const onOracleReceipt = vi.fn();
-  const submitPendingQuestion = vi.fn();
-  const createAnnotation = vi.fn();
-  const onSuccess = vi.fn();
-
-  beforeEach(() => {
-    callOracle.mockReset();
-    onOracleReceipt.mockReset();
-    submitPendingQuestion.mockReset();
-    createAnnotation.mockReset();
-    onSuccess.mockReset();
-    createAnnotation.mockResolvedValue({ id: "ann-1" });
+describeCastleSiegeOracleCommit({
+  name: "performMatchingCommit",
+  oracleKind: "matching",
+  run: (input) => performMatchingCommit(input as Parameters<typeof performMatchingCommit>[0]),
+  baseInput: (overrides) => {
     buildSameNearestRegion.mockResolvedValue(samplePolygon());
     buildMatchingEliminationRegion.mockResolvedValue(samplePolygon());
-  });
-
-  it("classic honor pending path does not call oracle", async () => {
-    await performMatchingCommit(
-      baseInput({
-        sessionMode: "classic",
-        awaitHiderAnswer: true,
-        matchingAnswer: null,
-        submitPendingQuestion,
-        sessionId: "s1",
-        senderUid: "u1",
-        callOracleAsk: callOracle,
-        defenderTeamId: "teamB",
-        onOracleReceipt,
-        createAnnotation,
-        onSuccess,
-      }),
-    );
-
-    expect(callOracle).not.toHaveBeenCalled();
-    expect(onOracleReceipt).not.toHaveBeenCalled();
-    expect(submitPendingQuestion).toHaveBeenCalledTimes(1);
-    expect(createAnnotation).not.toHaveBeenCalled();
-  });
-
-  it("castleSiege first pass routes to oracle and stashes receipt", async () => {
-    callOracle.mockResolvedValue({ kind: "matching", answer: "no" });
-
-    await performMatchingCommit(
-      baseInput({
-        sessionMode: "castleSiege",
-        awaitHiderAnswer: true,
-        matchingAnswer: null,
-        callOracleAsk: callOracle,
-        defenderTeamId: "teamA",
-        onOracleReceipt,
-        sessionId: "s1",
-        senderUid: "u1",
-        submitPendingQuestion,
-        createAnnotation,
-        onSuccess,
-      }),
-    );
-
+    return baseInput({
+      awaitHiderAnswer: true,
+      matchingAnswer: null,
+      defenderTeamId: "teamA",
+      sessionId: "s1",
+      senderUid: "u1",
+      ...overrides,
+    });
+  },
+  expectFirstPassAsk: (callOracle) => {
     expect(callOracle).toHaveBeenCalledWith({
       sessionId: "s1",
       defenderTeamId: "teamA",
@@ -254,38 +212,16 @@ describe("performMatchingCommit castleSiege oracle", () => {
         features: [{ id: "f-0", lat: 51.45, lng: -0.15 }],
       },
     });
-    expect(onOracleReceipt).toHaveBeenCalledWith({ kind: "matching", answer: "no" });
-    expect(submitPendingQuestion).not.toHaveBeenCalled();
-    expect(createAnnotation).not.toHaveBeenCalled();
-    expect(onSuccess).not.toHaveBeenCalled();
-  });
-
-  it("castleSiege confirm-send uses oracle receipt without honor typing", async () => {
-    await performMatchingCommit(
-      baseInput({
-        sessionMode: "castleSiege",
-        awaitHiderAnswer: true,
-        matchingAnswer: null,
-        callOracleAsk: callOracle,
-        defenderTeamId: "teamA",
-        oracleReceipt: { kind: "matching", answer: "yes" },
-        onOracleReceipt,
-        sessionId: "s1",
-        senderUid: "u1",
-        submitPendingQuestion,
-        createAnnotation,
-        onSuccess,
-      }),
-    );
-
-    expect(callOracle).not.toHaveBeenCalled();
-    expect(submitPendingQuestion).not.toHaveBeenCalled();
+  },
+  expectConfirmAnnotation: (createAnnotation) => {
     expect(createAnnotation).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "matching",
         metadata: expect.objectContaining({ matchingAnswer: "yes" }),
       }),
     );
+  },
+  expectConfirmSuccess: (onSuccess) => {
     expect(onSuccess).toHaveBeenCalled();
-  });
+  },
 });

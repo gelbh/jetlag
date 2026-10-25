@@ -14,11 +14,7 @@ import {
 } from "@/domain/questions";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "../AskHudHost";
-import {
-  MeasuringHudBody,
-  type MeasuringHudBodyModel,
-  type MeasuringHudBodyProps,
-} from "./MeasuringHudBody";
+import { MeasuringHudBody, type MeasuringHudBodyModel } from "./MeasuringHudBody";
 
 function renderHud(ui: ReactElement) {
   return render(
@@ -76,21 +72,6 @@ const baseModel: MeasuringHudBodyModel = {
   onAnswerChange: vi.fn(),
   awaitHiderAnswer: true,
 };
-
-describe("MeasuringHudBody public props (AC #1)", () => {
-  it("accepts a single model options object", () => {
-    const props: MeasuringHudBodyProps = {
-      model: baseModel,
-    };
-    const keys = Object.keys(props) as Array<keyof MeasuringHudBodyProps>;
-    expect(keys).toEqual(["model"]);
-    expect(keys.length).toBeLessThanOrEqual(10);
-
-    renderHud(<MeasuringHudBody {...props} />);
-
-    expect(screen.getByTestId("measuring-hud-body")).toBeInTheDocument();
-  });
-});
 
 describe("MeasuringHudBody", () => {
   it("shows catalog first with question text and cost in the body", () => {
