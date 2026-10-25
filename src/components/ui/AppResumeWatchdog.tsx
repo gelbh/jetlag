@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { isIosStandalonePwa } from "../../domain/device/pwa/isIosStandalonePwa";
 import { isStandalonePwa } from "../../domain/device/pwa/isStandalonePwa";
@@ -18,6 +18,8 @@ import { useRouteTransition } from "../../navigation/useRouteTransition";
 import { captureResumeShellUnresponsive } from "../../services/core/analytics/clientErrors";
 
 export const RESUME_WATCHDOG_RELOAD_KEY = "jetlag:resume-watchdog-reload";
+
+const RESUME_OFFLINE_BANNER_COPY = "You're offline. Reconnect to continue.";
 
 function isAdminPathname(pathname: string): boolean {
   return pathname === "/admin" || pathname.startsWith("/admin/");
@@ -70,10 +72,24 @@ export function AppResumeWatchdog() {
   const rafIdsRef = useRef<number[]>([]);
   const clearLatchTimerRef = useRef<number | null>(null);
   const pathnameRef = useRef(location.pathname);
+  const [offlineBannerVisible, setOfflineBannerVisible] = useState(false);
 
   useEffect(() => {
     pathnameRef.current = location.pathname;
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!offlineBannerVisible) {
+      return;
+    }
+    const onOnline = () => {
+      setOfflineBannerVisible(false);
+    };
+    window.addEventListener("online", onOnline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+    };
+  }, [offlineBannerVisible]);
 
   const cancelWatchdog = useCallback(() => {
     if (graceTimerRef.current !== null) {
@@ -128,6 +144,22 @@ export function AppResumeWatchdog() {
         settled = true;
         cancelWatchdog();
 
+        const pathname = pathnameRef.current;
+        const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+
+        if (offline) {
+          captureResumeShellUnresponsive({
+            pathname,
+            standalone: isStandalonePwa(),
+            iosStandalone: isIosStandalonePwa(),
+            backgroundMs,
+            resumeOffline: true,
+            ...(isAdminPathname(pathname) ? { adminRoute: true } : {}),
+          });
+          setOfflineBannerVisible(true);
+          return;
+        }
+
         if (
           readResumeWatchdogLatch() ||
           hasConflictingReloadLatch() ||
@@ -136,7 +168,6 @@ export function AppResumeWatchdog() {
           return;
         }
 
-        const pathname = pathnameRef.current;
         captureResumeShellUnresponsive({
           pathname,
           standalone: isStandalonePwa(),
@@ -206,5 +237,18 @@ export function AppResumeWatchdog() {
     };
   }, [cancelWatchdog, runResumeRecovery]);
 
-  return null;
+  if (!offlineBannerVisible) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-[var(--z-toast)] px-3 pt-[max(0.5rem,var(--safe-area-top))]">
+      <p
+        role="status"
+        className="pointer-events-auto mx-auto max-w-[min(calc(100%-1.5rem),24rem)] rounded-md border border-rule bg-canvas/95 px-3 py-2 font-display text-xs font-semibold uppercase tracking-[0.08em] text-highlight shadow-sm"
+      >
+        {RESUME_OFFLINE_BANNER_COPY}
+      </p>
+    </div>
+  );
 }

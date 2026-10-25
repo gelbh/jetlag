@@ -25,9 +25,12 @@ import {
   captureAuthPersistenceFallback,
   captureErrorBoundaryException,
   captureException,
+  captureMapWebGlContextLost,
+  captureMapWebGlContextLostOnce,
   capturePendingResolveFailure,
   capturePhotoUploadFailure,
   captureResumeShellUnresponsive,
+  resetMapWebGlContextLostCaptureForTests,
 } from "./clientErrors";
 
 describe("client facade module graph", () => {
@@ -46,6 +49,7 @@ describe("client facade module graph", () => {
 describe("tagged captures", () => {
   afterEach(() => {
     resetAnalyticsForTests();
+    resetMapWebGlContextLostCaptureForTests();
     posthogCaptureException.mockClear();
   });
 
@@ -173,6 +177,54 @@ describe("tagged captures", () => {
       standalone: true,
       ios_standalone: false,
       admin_route: true,
+    });
+  });
+
+  it("captureResumeShellUnresponsive stamps resume_offline when offline", async () => {
+    resetAnalyticsForTests({ initialized: true });
+
+    captureResumeShellUnresponsive({
+      pathname: "/map",
+      backgroundMs: 1200,
+      standalone: false,
+      iosStandalone: false,
+      resumeOffline: true,
+    });
+
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
+    expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
+      resume_watchdog: "unresponsive",
+      resume_offline: true,
+      pathname: "/map",
+    });
+  });
+
+  it("captureMapWebGlContextLost stamps map_webgl_context_lost", async () => {
+    resetAnalyticsForTests({ initialized: true });
+
+    captureMapWebGlContextLost();
+
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
+    expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
+      map_webgl_context_lost: true,
+    });
+  });
+
+  it("captureMapWebGlContextLostOnce rate-limits to one capture per page load", async () => {
+    resetAnalyticsForTests({ initialized: true });
+
+    expect(captureMapWebGlContextLostOnce()).toBe(true);
+    expect(captureMapWebGlContextLostOnce()).toBe(false);
+
+    await vi.waitFor(() => {
+      expect(posthogCaptureException).toHaveBeenCalledOnce();
+    });
+    expect(posthogCaptureException.mock.calls[0]?.[1]).toMatchObject({
+      map_webgl_context_lost: true,
     });
   });
 });
