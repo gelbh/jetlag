@@ -344,14 +344,22 @@ export function useCreateSession() {
         } | null = null;
 
         if (draft.regionPackId) {
+          const boundaryTask = createLoadTask({
+            label: "Loading region boundaries",
+            global: true,
+            cancellable: false,
+          });
           try {
             const boundaries = await loadRegionPackSessionBoundaries(
               draft.regionPackId,
               subregionId,
+              boundaryTask.root,
             );
             if (abandonIfStale()) {
+              boundaryTask.cancel();
               return;
             }
+            boundaryTask.complete();
             customMatchingAreas = boundaries.customMatchingAreas;
             if (!draft.gameArea) {
               nextPackPlayArea = {
@@ -362,8 +370,10 @@ export function useCreateSession() {
             }
           } catch (loadError) {
             if (abandonIfStale()) {
+              boundaryTask.cancel();
               return;
             }
+            boundaryTask.fail(loadError);
             setError(
               loadError instanceof Error
                 ? loadError.message
