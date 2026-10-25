@@ -169,6 +169,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
       model={{
         sessionCode: session!.code,
         sessionId: session!.id,
+        mode: session!.mode,
         roleGates: session!.roleGates,
         sessionRules: session!,
         playerRole: roleConfig.statusPlayerRole,
@@ -219,6 +220,8 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
   const canOpenCodes = canOpenMapScreenRoleCodes({
     roleGates: session!.roleGates,
     memberRoles: session!.memberRoles,
+    castleSiegeRoles: session!.castleSiegeRoles,
+    mode: session!.mode,
     myUid: uid,
     isHost,
   });

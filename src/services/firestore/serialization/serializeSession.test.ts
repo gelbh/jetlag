@@ -439,6 +439,33 @@ describe("serializeSession", () => {
     expect(restored.memberRoles).toEqual({ "host-uid": "observer" });
   });
 
+  it("deserializes castleSiege roleGates team leaders", () => {
+    const restored = deserializeSessionFromFirestore("session-cs-gates", {
+      code: "CS02",
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
+      memberUids: ["host-uid"],
+      memberRoles: { "host-uid": "observer" },
+      mode: "castleSiege",
+      roleGates: {
+        version: 1,
+        leaders: { teamB: "host-uid" },
+      },
+      gameArea: {
+        south: 53.3,
+        west: -6.3,
+        north: 53.4,
+        east: -6.2,
+        geometryJson: JSON.stringify(sampleGameArea),
+      },
+    });
+
+    expect(restored.roleGates).toEqual({
+      version: 1,
+      leaders: { teamB: "host-uid" },
+    });
+  });
+
   it("omits castleSiege fields from classic session documents", () => {
     const payload = buildSessionDocument(
       "ABCD",

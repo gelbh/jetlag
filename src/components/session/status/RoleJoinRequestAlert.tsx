@@ -1,6 +1,6 @@
 import { Button, Group } from "@mantine/core";
 import type { RoleJoinRequest } from "@/domain/session/players/joinRequest";
-import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { joinRequestRoleLabel } from "@/domain/session/players/joinRequest";
 import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 
 interface RoleJoinRequestAlertProps {
@@ -32,7 +32,7 @@ export function RoleJoinRequestAlert({
     >
       <div className="min-w-0">
         <p className="text-sm font-semibold text-ink">
-          {request.identityLabel} wants to join as {playerRoleLabel(request.role)}
+          {request.identityLabel} wants to join as {joinRequestRoleLabel(request.role)}
         </p>
         {error ? <p className="text-sm text-status-error">{error}</p> : null}
       </div>

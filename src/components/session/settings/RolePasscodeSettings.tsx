@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ErrorCallout, SectionLabel, SuccessCallout } from "@/components/ui/entry/entryChrome";
 import { callableErrorMessage } from "@/domain/device/feedback/userErrors";
 import type { SessionRecord } from "@/domain/map/annotations";
-import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { type JoinRequestRole, joinRequestRoleLabel } from "@/domain/session/players/joinRequest";
 import { isSessionRoleGated, visibleRoleCodeRoles } from "@/domain/session/players/roleGates";
 import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 import {
@@ -13,14 +13,15 @@ import {
 } from "@/services/session/rolePasscodeLifecycle";
 import { RoleCodeStamp } from "../identity/RoleCodeStamp";
 
-type RevealRole = "seeker" | "hider" | "observer";
-
-function rolePasscodeLabel(role: RevealRole): string {
+function rolePasscodeLabel(role: JoinRequestRole): string {
   if (role === "observer") {
     return "Observer code";
   }
+  if (role === "referee") {
+    return "Referee code";
+  }
 
-  return `${playerRoleLabel(role)} code`;
+  return `${joinRequestRoleLabel(role)} code`;
 }
 
 export interface RolePasscodeSettingsProps {
@@ -36,31 +37,28 @@ export function RolePasscodeSettings({
   isHost,
   embedded = false,
 }: RolePasscodeSettingsProps) {
-  const [busyRole, setBusyRole] = useState<RevealRole | null>(null);
-  const [revealedCodes, setRevealedCodes] = useState<Partial<Record<RevealRole, string>>>({});
+  const [busyRole, setBusyRole] = useState<JoinRequestRole | null>(null);
+  const [revealedCodes, setRevealedCodes] = useState<Partial<Record<JoinRequestRole, string>>>({});
   const [error, setError] = useState<string | null>(null);
   const { status: copyStatus, copy } = useCopyFeedback();
 
+  const roleCodeInput = {
+    roleGates: session.roleGates,
+    memberRoles: session.memberRoles,
+    castleSiegeRoles: session.castleSiegeRoles,
+    myUid,
+    isHost,
+    mode: session.mode,
+  };
+
   const gated = isSessionRoleGated(session);
-  const rows = gated
-    ? visibleRoleCodeRoles({
-        roleGates: session.roleGates,
-        memberRoles: session.memberRoles,
-        myUid,
-        isHost,
-      })
-    : [];
+  const rows = gated ? visibleRoleCodeRoles(roleCodeInput) : [];
 
   useEffect(() => {
     if (!isSessionRoleGated(session)) {
       return;
     }
-    const warmRoles = visibleRoleCodeRoles({
-      roleGates: session.roleGates,
-      memberRoles: session.memberRoles,
-      myUid,
-      isHost,
-    });
+    const warmRoles = visibleRoleCodeRoles(roleCodeInput);
     for (const role of warmRoles) {
       prefetchRolePasscode(session.id, role);
     }
@@ -70,7 +68,7 @@ export function RolePasscodeSettings({
     return null;
   }
 
-  const handleReveal = async (role: RevealRole) => {
+  const handleReveal = async (role: JoinRequestRole) => {
     setBusyRole(role);
     setError(null);
     try {
@@ -82,7 +80,7 @@ export function RolePasscodeSettings({
     setBusyRole(null);
   };
 
-  const handleCopy = async (role: RevealRole) => {
+  const handleCopy = async (role: JoinRequestRole) => {
     const code = revealedCodes[role];
     if (!code) {
       return;
@@ -96,7 +94,7 @@ export function RolePasscodeSettings({
     }
   };
 
-  const handleRegenerate = async (role: RevealRole) => {
+  const handleRegenerate = async (role: JoinRequestRole) => {
     if (
       !window.confirm(
         `Generate a new ${rolePasscodeLabel(role).toLowerCase()}? The old code stops working.`,

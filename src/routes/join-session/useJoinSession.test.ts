@@ -1,8 +1,19 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { SessionRecord } from "@/domain/map/annotations";
+import type { CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "@/domain/session/join/joinPreviewGameArea";
 import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
+
+type JoinSessionPreviewState = {
+  previewSession: SessionRecord | null;
+  previewPremium: boolean;
+  lookupLoading: boolean;
+  existingRole: PlayerRole | null;
+  existingCastleSiegeRole: CastleSiegeTeamRole | null;
+};
 
 const navigate = vi.fn();
 const setSession = vi.fn();
@@ -17,12 +28,15 @@ const storeState: { session: { code: string } | null; myUid: string | null } = {
   session: null,
   myUid: null,
 };
-const mockUseJoinSessionPreview = vi.fn(() => ({
-  previewSession: null,
-  previewPremium: false,
-  lookupLoading: false,
-  existingRole: null,
-}));
+const mockUseJoinSessionPreview = vi.fn(
+  (): JoinSessionPreviewState => ({
+    previewSession: null,
+    previewPremium: false,
+    lookupLoading: false,
+    existingRole: null,
+    existingCastleSiegeRole: null,
+  }),
+);
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => navigate,
@@ -119,6 +133,79 @@ describe("useJoinSession", () => {
       previewPremium: false,
       lookupLoading: false,
       existingRole: null,
+      existingCastleSiegeRole: null,
+    });
+  });
+
+  it("uses joinRequiresCastleSiegePasscode for CS needsRolePasscode", () => {
+    mockUseJoinSessionPreview.mockReturnValue({
+      previewSession: createTestRemoteSession({
+        mode: "castleSiege",
+        castleSiegeRoles: { host: "teamA" },
+      }),
+      previewPremium: false,
+      lookupLoading: false,
+      existingRole: null,
+      existingCastleSiegeRole: null,
+    });
+
+    const { result } = renderHook(() =>
+      useJoinSession({
+        code: "ABCD",
+        playerRole: "observer",
+        castleSiegeRole: "teamA",
+        rolePasscode: "",
+      }),
+    );
+
+    expect(result.current.castleSiegeJoin).toBe(true);
+    expect(result.current.needsRolePasscode).toBe(true);
+  });
+
+  it("joins a Castle Siege session with castleSiegeRole on the callable path", async () => {
+    const session = createTestRemoteSession({
+      code: "ABCD",
+      mode: "castleSiege",
+      castleSiegeRoles: { host: "teamA" },
+    });
+    mockUseJoinSessionPreview.mockReturnValue({
+      previewSession: session,
+      previewPremium: false,
+      lookupLoading: false,
+      existingRole: null,
+      existingCastleSiegeRole: null,
+    });
+    mockJoinRemoteSessionByCode.mockResolvedValue({
+      status: "joined",
+      session,
+    });
+
+    const { result } = renderHook(() =>
+      useJoinSession({
+        code: "ABCD",
+        playerRole: "hider",
+        castleSiegeRole: "teamB",
+        rolePasscode: "WXYZ",
+      }),
+    );
+
+    await act(async () => {
+      result.current.runJoin({
+        code: "ABCD",
+        playerRole: "hider",
+        castleSiegeRole: "teamB",
+        rolePasscode: "WXYZ",
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockJoinRemoteSessionByCode).toHaveBeenCalledWith(
+        "ABCD",
+        "u1",
+        "observer",
+        expect.any(String),
+        expect.objectContaining({ castleSiegeRole: "teamB", rolePasscode: "WXYZ" }),
+      );
     });
   });
 

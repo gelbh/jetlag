@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.8.0";
+export const APP_VERSION = "1.9.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,30 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.9.0",
+    date: "2026-10-25",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Ask GPS waits for the map blue-dot before timing out when placing a question",
+          "Offline resume no longer loops a blank reload; shows a reconnect banner instead",
+          "Map recovers from a lost WebGL graphics context with Retry or Reload",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Join by code for Castle Siege sessions: pick Team A, Team B, referee, or observer and enter seat passcodes",
+          "NYC presets include local category options for Measuring, Matching, and Tentacle",
+          "Player map chrome marks itself resume-ready so PWA resume is less likely to false-fire",
+          "Sydney presets include each Greater Sydney LGA as a start option",
+          "Oceania continent mark shows in the preset hierarchy",
+        ],
+      },
+    ],
+  },
   {
     version: "1.8.0",
     date: "2026-10-25",
