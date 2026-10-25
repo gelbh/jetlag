@@ -1,3 +1,5 @@
+import type { LoadTask } from "@/services/core/progress/loadTask";
+import { LoadProgress } from "../feedback/LoadProgress";
 import { TextField } from "./TextField";
 
 interface SearchFieldProps {
@@ -12,6 +14,8 @@ interface SearchFieldProps {
   disabled?: boolean;
   labelClassName?: string;
   submitClassName?: string;
+  /** While loading, shows the search's stage, percent and ETA under the button. */
+  task?: LoadTask | null;
 }
 
 export function SearchField({
@@ -26,6 +30,7 @@ export function SearchField({
   disabled = false,
   labelClassName = "field-label",
   submitClassName = "btn-secondary w-full disabled:opacity-50",
+  task = null,
 }: SearchFieldProps) {
   const busy = disabled || loading;
 
@@ -53,6 +58,7 @@ export function SearchField({
       <button type="button" onClick={onSubmit} disabled={busy} className={submitClassName}>
         {loading ? loadingLabel : submitLabel}
       </button>
+      {loading && task ? <LoadProgress task={task} variant="compact" /> : null}
     </>
   );
 }

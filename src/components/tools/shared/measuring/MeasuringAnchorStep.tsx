@@ -1,8 +1,8 @@
-import { SearchField } from "@/components/ui/forms/SearchField";
 import { AnchorControls } from "../controls/AnchorControls";
 import { CoordinateCopyButton } from "../controls/CoordinateCopyButton";
 import { ToolSection } from "../panels/ToolSection";
 import { LoadingReadout } from "../readout/LoadingReadout";
+import { MeasuringSearchField } from "./MeasuringSearchField";
 
 interface MeasuringAnchorStepProps {
   hasSeekerPoint: boolean;
@@ -50,15 +50,13 @@ export function MeasuringAnchorStep({
         <LoadingReadout>{anchorLoadingMessage}</LoadingReadout>
       ) : null}
       {allowsSearch ? (
-        <SearchField
+        <MeasuringSearchField
           label="Search anchor"
           value={searchQuery}
           onChange={onSearchQueryChange}
           onSubmit={onSearchSubmit}
           submitLabel="Find anchor"
           loading={searchLoading}
-          placeholder="Address, business, or landmark"
-          submitClassName="btn-secondary w-full disabled:opacity-40"
         />
       ) : null}
     </ToolSection>

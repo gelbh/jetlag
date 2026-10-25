@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { OverpassUnavailableError } from "../core/overpass/overpassClient";
+import { getGlobalLoadTasks } from "../core/progress/loadTask";
 import * as adminDivisionAvailability from "../geo/overpass/adminDivisionAvailability";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/overpass/adminDivisionBoundaries";
 import { fetchPreparedCoastlineSegments } from "../geo/overpass/coastline";
@@ -18,6 +19,7 @@ import {
   preloadJobGapPremiumMsForTests,
   preloadMeasuringCategoriesForTests,
 } from "./gameAreaPreload";
+import { teardownSessionUiState } from "./sessionCleanup";
 
 // Mock implementation modules (not barrels) so importOriginal of availability
 // and other overpass/matching importers see the stub.
@@ -77,6 +79,7 @@ describe("gameAreaPreload", () => {
       totalJobs: 0,
       completedJobs: 0,
       failedJobs: 0,
+      critical: null,
       dismissed: false,
       adminDivisionCounts: null,
       categoryPresenceCounts: null,
@@ -108,6 +111,53 @@ describe("gameAreaPreload", () => {
 
   it("warms critical caches without throwing", async () => {
     await expect(preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA)).resolves.toBeUndefined();
+  });
+
+  it("tracks critical preload in its own slice and as a global task", async () => {
+    vi.spyOn(adminDivisionAvailability, "probeAdminDivisionCounts").mockResolvedValue(
+      adminDivisionAvailability.emptyAdminDivisionCounts(),
+    );
+    const key = gameAreaPreloadKey(DUBLIN_CITY_GAME_AREA);
+
+    const critical = preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA);
+    const totalJobs = usePreloadStore.getState().critical?.totalJobs ?? 0;
+    expect(totalJobs).toBeGreaterThan(1);
+    expect(getGlobalLoadTasks().map((task) => task.label)).toContain("Caching area boundaries");
+
+    // The map screen's main preload must not wipe the critical counts.
+    usePreloadStore.getState().reset(key, 4);
+    await critical;
+
+    expect(usePreloadStore.getState().critical).toMatchObject({
+      gameAreaKey: key,
+      totalJobs,
+      completedJobs: totalJobs,
+      failedJobs: 0,
+    });
+    expect(selectPreloadBanner(usePreloadStore.getState())).toMatchObject({
+      totalJobs: totalJobs + 4,
+      completedJobs: totalJobs,
+    });
+    expect(getGlobalLoadTasks().map((task) => task.label)).not.toContain("Caching area boundaries");
+  });
+
+  it("drops the critical preload chip on session teardown", async () => {
+    const pending = new Promise<never>(() => {});
+    vi.mocked(fetchAdminDivisionFeaturesInArea).mockReturnValue(pending);
+    vi.spyOn(adminDivisionAvailability, "probeAdminDivisionCounts").mockResolvedValue(
+      adminDivisionAvailability.emptyAdminDivisionCounts(),
+    );
+
+    void preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA);
+    await vi.waitFor(() => expect(fetchAdminDivisionFeaturesInArea).toHaveBeenCalled());
+    const chip = getGlobalLoadTasks().find((task) => task.label === "Caching area boundaries");
+    expect(chip).toBeDefined();
+
+    teardownSessionUiState();
+
+    expect(getGlobalLoadTasks()).not.toContain(chip);
+    expect(chip?.signal.aborted).toBe(true);
+    vi.mocked(fetchAdminDivisionFeaturesInArea).mockImplementation(async () => []);
   });
 
   it("continues critical preload when admin division probe fails", async () => {

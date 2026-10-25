@@ -1,4 +1,5 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { ProgressNode, StageSpec } from "@/domain/progress/progressTree";
 import { FetchTimeoutError, fetchWithTimeout } from "../../core/network/fetchWithTimeout";
 import { retryAsync } from "../../core/network/retryAsync";
 import { geographicCacheKey, getOrFetchCached } from "../cache";
@@ -27,7 +28,19 @@ const SEARCH_RESULT_LIMIT = 8;
 
 export interface SearchPlacesOptions {
   near?: LatLngTuple;
+  signal?: AbortSignal;
+  /** Parent stage; the Nominatim requests are counted under it as they settle. */
+  node?: ProgressNode;
 }
+
+const SEARCH_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Searching places",
+  historyKey: "geocode:search",
+};
+
+/** Each search pass sends a default and a city-only request. */
+const REQUESTS_PER_PASS = 2;
 
 function nominatimAcceptLanguage(): string {
   if (typeof navigator === "undefined") {
@@ -90,12 +103,14 @@ function isRetryableGeocodingStatus(status: number): boolean {
 async function fetchNominatim(
   url: URL,
   failureMessage = "Place search failed.",
+  signal?: AbortSignal,
 ): Promise<NominatimResult[] | NominatimResult> {
   return retryAsync(
     async () => {
       const response = await fetchWithTimeout(
         url.toString(),
         {
+          signal,
           headers: {
             Accept: "application/json",
             "Accept-Language": nominatimAcceptLanguage(),
@@ -127,6 +142,7 @@ async function fetchNominatimSearch(
   options?: {
     featureType?: "city";
     viewbox?: { west: number; north: number; east: number; south: number };
+    signal?: AbortSignal;
   },
 ): Promise<NominatimResult[]> {
   const url = new URL(NOMINATIM_ENDPOINT);
@@ -146,7 +162,7 @@ async function fetchNominatimSearch(
     url.searchParams.set("viewbox", `${west},${north},${east},${south}`);
   }
 
-  return (await fetchNominatim(url)) as NominatimResult[];
+  return (await fetchNominatim(url, undefined, options?.signal)) as NominatimResult[];
 }
 
 async function candidatesFromResults(
@@ -178,13 +194,24 @@ function mergeSearchCandidates(
 
 async function fetchSearchCandidates(
   query: string,
-  options?: {
+  options: {
     viewbox?: { west: number; north: number; east: number; south: number };
-  },
+    signal?: AbortSignal;
+    node?: ProgressNode;
+  } = {},
 ): Promise<RankedGeocodedPlaceCandidate[]> {
+  const { viewbox, signal, node } = options;
+  let settled = 0;
+  node?.setCount(0, REQUESTS_PER_PASS);
+  const counted = <T>(request: Promise<T>): Promise<T> =>
+    request.then((value) => {
+      settled += 1;
+      node?.setCount(settled, REQUESTS_PER_PASS);
+      return value;
+    });
   const [defaultResults, cityResults] = await Promise.all([
-    fetchNominatimSearch(query, { viewbox: options?.viewbox }),
-    fetchNominatimSearch(query, { featureType: "city", viewbox: options?.viewbox }),
+    counted(fetchNominatimSearch(query, { viewbox, signal })),
+    counted(fetchNominatimSearch(query, { featureType: "city", viewbox, signal })),
   ]);
 
   return mergeSearchCandidates(
@@ -203,19 +230,40 @@ export async function searchPlaces(
   }
 
   const language = nominatimAcceptLanguage();
+  const signal = options?.signal;
 
   if (!options?.near) {
-    return getOrFetchCached(geocodeSearchCacheKey(trimmed, language), async () => {
-      const candidates = await fetchSearchCandidates(trimmed);
-      return rankGeocodedPlaceCandidates(candidates, trimmed).slice(0, SEARCH_RESULT_LIMIT);
-    });
+    return getOrFetchCached(
+      geocodeSearchCacheKey(trimmed, language),
+      async (context) => {
+        const candidates = await fetchSearchCandidates(trimmed, {
+          signal: context.signal,
+          node: context.node,
+        });
+        return rankGeocodedPlaceCandidates(candidates, trimmed).slice(0, SEARCH_RESULT_LIMIT);
+      },
+      { signal, node: options?.node?.stage(SEARCH_STAGE), stage: SEARCH_STAGE },
+    );
   }
 
   const near = options.near;
+  // Unbiased and biased passes run side by side, two requests each.
+  const passes = options.node?.stage({ ...SEARCH_STAGE, kind: "group", parallel: true });
+  const unbiasedNode = passes?.stage(SEARCH_STAGE).start();
   const [unbiasedCandidates, biasedCandidates] = await Promise.all([
-    fetchSearchCandidates(trimmed),
-    getOrFetchCached(geocodeSearchBiasCacheKey(trimmed, near, language), () =>
-      fetchSearchCandidates(trimmed, { viewbox: viewboxForPoint(near) }),
+    fetchSearchCandidates(trimmed, { signal, node: unbiasedNode }).then((candidates) => {
+      unbiasedNode?.finish();
+      return candidates;
+    }),
+    getOrFetchCached(
+      geocodeSearchBiasCacheKey(trimmed, near, language),
+      (context) =>
+        fetchSearchCandidates(trimmed, {
+          viewbox: viewboxForPoint(near),
+          signal: context.signal,
+          node: context.node,
+        }),
+      { signal, node: passes?.stage(SEARCH_STAGE), stage: SEARCH_STAGE },
     ),
   ]);
 

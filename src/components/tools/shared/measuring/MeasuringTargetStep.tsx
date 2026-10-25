@@ -1,4 +1,3 @@
-import { SearchField } from "@/components/ui/forms/SearchField";
 import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
 import { type DistanceUnit, formatAltitudeLabel, formatDistance } from "@/domain/map/distance";
 import {
@@ -21,6 +20,7 @@ import { SendToHidersButton } from "../controls/SendToHidersButton";
 import { ToolSection } from "../panels/ToolSection";
 import { LoadingReadout } from "../readout/LoadingReadout";
 import { ResolvedReadout } from "../readout/ResolvedReadout";
+import { MeasuringSearchField } from "./MeasuringSearchField";
 
 interface MeasuringTargetSectionProps {
   subject: MeasuringSubject;
@@ -216,16 +216,14 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
         </ResolvedReadout>
       ) : null}
       {allowsSearch && targetMode === "search" ? (
-        <SearchField
+        <MeasuringSearchField
           label="Search target"
           value={searchQuery}
           onChange={onSearchQueryChange}
           onSubmit={onSearchSubmit}
           submitLabel="Find target"
           loading={searchLoading}
-          placeholder="Address, business, or landmark"
           disabled={!hasSeekerPoint}
-          submitClassName="btn-secondary w-full disabled:opacity-40"
         />
       ) : null}
       {targetMode === "nearest" && canFindNearest ? (

@@ -3,6 +3,12 @@ import { BUNDLED_REGION_PACK_GEO_REVISION, type RegionPackId } from "@/domain/re
 import { getRegionPackConfig, isKnownRegionPack } from "@/domain/regions/regionPackRegistry";
 import type { CustomMatchingAreasByLevel } from "@/domain/session/catalog/sessionCustomContent";
 import {
+  createLoadTask,
+  getNamedLoadTask,
+  setNamedLoadTask,
+} from "@/services/core/progress/loadTask";
+import { PACK_PLAY_AREA_TASK } from "@/services/core/progress/namedTasks";
+import {
   failedPlayAreaKeys,
   isPlayAreaReadySync,
   playAreaCacheKey,
@@ -135,14 +141,19 @@ export async function resolveSessionPlayArea(session: SessionPlayAreaInput): Pro
   });
   inFlightPlayAreaLoads.set(cacheKey, loadPromise);
 
-  void loadRegionPackPlayArea(packId, session.regionPackSubregionId)
+  const task = createLoadTask({ label: "Loading game boundaries", cancellable: false });
+  setNamedLoadTask(PACK_PLAY_AREA_TASK, task);
+
+  void loadRegionPackPlayArea(packId, session.regionPackSubregionId, task.root)
     .then(
       (playArea) => {
+        task.complete();
         failedPlayAreaKeys.delete(cacheKey);
         resolvedPlayAreaCache.set(cacheKey, playArea);
         settle(playArea);
       },
-      () => {
+      (error: unknown) => {
+        task.fail(error);
         // Mark ready without caching session.gameArea under the pack key —
         // fallback geometry is session-specific and must not poison other sessions.
         failedPlayAreaKeys.add(cacheKey);
@@ -151,6 +162,9 @@ export async function resolveSessionPlayArea(session: SessionPlayAreaInput): Pro
     )
     .finally(() => {
       inFlightPlayAreaLoads.delete(cacheKey);
+      if (getNamedLoadTask(PACK_PLAY_AREA_TASK) === task) {
+        setNamedLoadTask(PACK_PLAY_AREA_TASK, null);
+      }
     });
 
   return loadPromise;

@@ -1,4 +1,5 @@
 import type { GameArea, SessionTier } from "../../domain/map/annotations";
+import type { StageSpec } from "../../domain/progress/progressTree";
 import type { MeasuringLocationCategory } from "../../domain/questions";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import { playAreaCategoryPresenceProbeSpecs } from "../../domain/session/catalog/playAreaCategoryPresence";
@@ -7,6 +8,7 @@ import type {
   MatchingAdminLevel,
 } from "../../domain/session/catalog/sessionCustomContent";
 import { usePreloadStore } from "../../state/preloadStore";
+import { createLoadTask, type LoadTask } from "../core/progress/loadTask";
 import {
   adminBoundaryLevelsForSession,
   emptyAdminDivisionCounts,
@@ -211,34 +213,95 @@ export async function preloadGameAreaCachesAsync(
   await runPreloadQueue(gameAreaKey, jobs, jobGapMs, signal);
 }
 
+let activeCriticalTask: LoadTask | null = null;
+
+/** Cancels the critical preload so its activity chip does not outlive the session. */
+export function abortCriticalGameAreaPreload(): void {
+  activeCriticalTask?.cancel();
+  activeCriticalTask = null;
+}
+
+const CRITICAL_PROBE_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Checking area divisions",
+  historyKey: "preload:admin-probe",
+};
+
+const CRITICAL_CATEGORY_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Checking places in the area",
+  historyKey: "preload:category-probe",
+};
+
+const CRITICAL_LEVEL_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Loading area boundaries",
+  historyKey: "preload:admin-level",
+};
+
+/**
+ * Admin boundaries the first questions need, started at create/join. Tracked in
+ * its own preload store slice and as a global background task for the ETA.
+ */
 export async function preloadCriticalGameAreaCaches(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
 ): Promise<void> {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
+  const adminLevels = adminBoundaryLevelsForSession(regionPackId, customMatchingAreas);
+  const store = usePreloadStore.getState();
+  store.resetCritical(gameAreaKey, adminLevels.length + 2);
+
+  activeCriticalTask?.cancel();
+  const task = createLoadTask({
+    label: "Caching area boundaries",
+    priority: "background",
+    global: true,
+  });
+  activeCriticalTask = task;
+  const load = { priority: task.priority, signal: task.signal };
+  // Stages are created up front so the bar's weights stay put.
+  const probeStage = task.stage(CRITICAL_PROBE_STAGE);
+  const categoryStage = task.stage(CRITICAL_CATEGORY_STAGE);
+  const levelStages = adminLevels.map(() => task.stage(CRITICAL_LEVEL_STAGE));
+
   let counts = emptyAdminDivisionCounts();
   try {
-    counts = await probeAdminDivisionCounts(
-      gameArea,
-      customMatchingAreas,
-      regionPackId,
-      BACKGROUND_LANE,
-    );
-  } catch {}
+    probeStage.start();
+    counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId, load);
+    probeStage.finish();
+    store.recordCriticalJob(gameAreaKey, "success");
+  } catch {
+    probeStage.cancel();
+    store.recordCriticalJob(gameAreaKey, "failure");
+  }
   usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
+  categoryStage.start();
   await warmCategoryPresenceCounts(gameArea, gameAreaKey);
+  categoryStage.finish();
+  store.recordCriticalJob(gameAreaKey, "success");
 
   await Promise.allSettled(
-    adminBoundaryLevelsForSession(regionPackId, customMatchingAreas).map((adminLevel) =>
+    adminLevels.map((adminLevel, index) =>
       fetchAdminDivisionFeaturesInArea(
         gameArea,
         adminLevel,
         customMatchingAreas?.[adminLevel as MatchingAdminLevel],
-        BACKGROUND_LANE,
+        { ...load, node: levelStages[index] },
+      ).then(
+        () => store.recordCriticalJob(gameAreaKey, "success"),
+        () => {
+          levelStages[index]?.cancel();
+          store.recordCriticalJob(gameAreaKey, "failure");
+        },
       ),
     ),
   );
+  task.complete();
+  if (activeCriticalTask === task) {
+    activeCriticalTask = null;
+  }
 }
 
 export function preloadJobGapMsForTests(): number {
