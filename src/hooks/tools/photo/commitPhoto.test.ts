@@ -53,6 +53,9 @@ describeCastleSiegeOracleCommit({
       ...rest,
     });
   },
+  expectClassicHonor: ({ onSuccess }) => {
+    expect(onSuccess).toHaveBeenCalled();
+  },
   expectFirstPassAsk: (callOracle) => {
     expect(callOracle).toHaveBeenCalledWith({
       sessionId: "s1",
