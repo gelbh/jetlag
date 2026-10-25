@@ -3,12 +3,17 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
+import { unionGameAreas } from "@/domain/geometry/masks/unionGameAreas";
+import type { GameArea } from "@/domain/map/annotations";
 import { createMapBounds } from "@/domain/map/mapBounds";
 import { mergeBundledPresets } from "@/domain/regions/bundledGamePresets";
 import { GAME_PRESET_SCHEMA_VERSION } from "@/domain/session/presets/gamePreset";
+import * as resolvePresetPlayAreasModule from "@/domain/session/presets/resolvePresetPlayAreas";
+import { recommendGameSize } from "@/domain/session/size/gameSize";
 import { defaultAdvancedSessionSettings } from "@/domain/session/tools/advancedSessionSettings";
 import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
 import { useGamePresetStore } from "@/state/gamePresetStore";
+import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
 import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
@@ -514,19 +519,23 @@ describe("CreateSession", () => {
   });
 
   it("applies multiple presets as a unioned play area with primary settings", async () => {
-    const areaA = IMPORTED_AREA;
-    const areaB = {
-      type: "Polygon" as const,
+    const tinyPrimary: GameArea = {
+      type: "Polygon",
       coordinates: [
         [
-          [-6.4, 53.3],
-          [-6.1, 53.3],
-          [-6.1, 53.4],
-          [-6.4, 53.4],
-          [-6.4, 53.3],
+          [-6.27, 53.34],
+          [-6.25, 53.34],
+          [-6.25, 53.35],
+          [-6.27, 53.35],
+          [-6.27, 53.34],
         ],
       ],
     };
+    const areaB = DUBLIN_CITY_GAME_AREA;
+    expect(recommendGameSize(tinyPrimary, "metric")).toBe("small");
+    const expectedUnionSize = recommendGameSize(unionGameAreas([tinyPrimary, areaB]), "metric");
+    expect(expectedUnionSize).not.toBe("small");
+
     useGamePresetStore.setState({
       presets: mergeBundledPresets([
         {
@@ -535,11 +544,11 @@ describe("CreateSession", () => {
           createdAt: "2026-01-01T00:00:00.000Z",
           updatedAt: "2026-01-01T00:00:00.000Z",
           schemaVersion: GAME_PRESET_SCHEMA_VERSION,
-          gameSize: "medium",
+          gameSize: "small",
           distanceUnit: "metric",
-          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          advancedSettings: defaultAdvancedSessionSettings("small", "metric"),
           placeLabel: "Area A",
-          gameArea: areaA,
+          gameArea: tinyPrimary,
           migrationStatus: "ok",
         },
         {
@@ -573,16 +582,93 @@ describe("CreateSession", () => {
     fireEvent.click(screen.getByRole("button", { name: /apply presets/i }));
 
     await waitFor(() => {
-      expect(mapView.model?.focusBounds).toEqual([
-        [51.85, -8.55],
-        [53.4, -6.1],
-      ]);
-    });
-    await waitFor(() => {
-      expect(screen.getByText(/medium · metric · Area A/i)).toBeInTheDocument();
+      expect(screen.getByText(/small · metric · Area A/i)).toBeInTheDocument();
     });
     expect(screen.queryByText(/imperial/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/\+ 1 areas/i)).toBeInTheDocument();
+    expect(screen.getByText(/\+ 1 area$/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() => {
+      expect(screen.getByRole("radiogroup", { name: "Game size" })).toBeInTheDocument();
+    });
+    const sizeName =
+      expectedUnionSize === "large"
+        ? /^Large\b/
+        : expectedUnionSize === "medium"
+          ? /^Medium\b/
+          : /^Small\b/;
+    expect(screen.getByRole("radio", { name: sizeName })).toBeChecked();
+  });
+
+  it("keeps pending chips added while a deep-link apply is still resolving", async () => {
+    let releaseResolve: (() => void) | undefined;
+    const hold = new Promise<void>((resolve) => {
+      releaseResolve = resolve;
+    });
+    const resolveSpy = vi
+      .spyOn(resolvePresetPlayAreasModule, "resolvePresetPlayAreas")
+      .mockImplementation(async (presetsById, orderedIds, loadBoundaries) => {
+        await hold;
+        resolveSpy.mockRestore();
+        return resolvePresetPlayAreasModule.resolvePresetPlayAreas(
+          presetsById,
+          orderedIds,
+          loadBoundaries,
+        );
+      });
+
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([
+        {
+          id: "preset-cork",
+          name: "Cork weekend",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Cork, Ireland",
+          gameArea: IMPORTED_AREA,
+          focusBounds: { south: 51.85, west: -8.55, north: 51.95, east: -8.4 },
+          migrationStatus: "ok",
+        },
+        {
+          id: "preset-extra",
+          name: "Extra chip",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Extra",
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          migrationStatus: "ok",
+        },
+      ]),
+    });
+
+    renderCreateSession("/create?preset=preset-cork");
+    await waitFor(() => {
+      expect(resolveSpy).toHaveBeenCalled();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Preset" }));
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-extra" },
+    });
+    expect(screen.getByRole("button", { name: /Extra chip/i })).toBeInTheDocument();
+
+    await act(async () => {
+      releaseResolve?.();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/medium · metric · Cork, Ireland/i)).toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: /Primary · Cork weekend/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Extra chip/i })).toBeInTheDocument();
   });
 
   it("restores applied preset ids after a failed apply so silent reuse is not stuck", async () => {

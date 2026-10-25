@@ -196,6 +196,7 @@ export function useCreateSession() {
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [locationStatusTone, setLocationStatusTone] = useState<"ok" | "halt" | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
+  const applyInFlightPrimaryRef = useRef<string | null>(null);
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
   const [appliedPresetIds, setAppliedPresetIds] = useState<string[]>([]);
   const [pendingPresetIds, setPendingPresetIds] = useState<string[]>([]);
@@ -237,17 +238,57 @@ export function useCreateSession() {
       const priorAppliedIds = appliedPresetStateRef.current.ids;
       const priorUrlPresetId = searchParamsRef.current.get("preset");
 
-      // Eager guard so URL effect / re-entry skip while async resolve runs.
+      // Eager guard + URL write so URL effect cannot re-apply a stale ?preset=
+      // while this primary is in flight (place-match / multi-apply races).
       appliedPresetRef.current = primaryId;
+      applyInFlightPrimaryRef.current = primaryId;
       const applyGeneration = ++presetApplyGenerationRef.current;
       const isStale = () => applyGeneration !== presetApplyGenerationRef.current;
+      const abandonIfStale = (): boolean => {
+        if (!isStale()) {
+          return false;
+        }
+        if (appliedPresetRef.current === primaryId) {
+          appliedPresetRef.current = priorAppliedId;
+        }
+        return true;
+      };
+      const clearInFlightIfCurrent = () => {
+        if (applyInFlightPrimaryRef.current === primaryId) {
+          applyInFlightPrimaryRef.current = null;
+        }
+      };
+
+      setSearchParams(
+        (current) => {
+          if (current.get("preset") === primaryId) {
+            return current;
+          }
+          const next = new URLSearchParams(current);
+          next.set("preset", primaryId);
+          return next;
+        },
+        { replace: true },
+      );
 
       const restoreAppliedAfterFailedApply = () => {
+        clearInFlightIfCurrent();
         if (priorAppliedId && priorUrlPresetId === priorAppliedId) {
           appliedPresetRef.current = priorAppliedId;
           setAppliedPresetId(priorAppliedId);
           setAppliedPresetIds(priorAppliedIds);
           setPendingPresetIds(priorAppliedIds);
+          setSearchParams(
+            (current) => {
+              if (current.get("preset") === priorAppliedId) {
+                return current;
+              }
+              const next = new URLSearchParams(current);
+              next.set("preset", priorAppliedId);
+              return next;
+            },
+            { replace: true },
+          );
           return;
         }
         // No prior successful apply matching URL: leave applied cleared and sync URL
@@ -256,25 +297,23 @@ export function useCreateSession() {
         setAppliedPresetId(null);
         setAppliedPresetIds([]);
         setPendingPresetIds([]);
-        if (priorUrlPresetId) {
-          setSearchParams(
-            (current) => {
-              if (!current.has("preset")) {
-                return current;
-              }
-              const next = new URLSearchParams(current);
-              next.delete("preset");
-              return next;
-            },
-            { replace: true },
-          );
-        }
+        setSearchParams(
+          (current) => {
+            if (!current.has("preset")) {
+              return current;
+            }
+            const next = new URLSearchParams(current);
+            next.delete("preset");
+            return next;
+          },
+          { replace: true },
+        );
       };
 
       const run = async () => {
         const presetsById = new Map(presets.map((entry) => [entry.id, entry]));
         const resolved = await resolvePresetPlayAreas(presetsById, orderedIds);
-        if (isStale()) {
+        if (abandonIfStale()) {
           return;
         }
         if (!resolved.ok) {
@@ -310,7 +349,7 @@ export function useCreateSession() {
               draft.regionPackId,
               subregionId,
             );
-            if (isStale()) {
+            if (abandonIfStale()) {
               return;
             }
             customMatchingAreas = boundaries.customMatchingAreas;
@@ -322,7 +361,7 @@ export function useCreateSession() {
               };
             }
           } catch (loadError) {
-            if (isStale()) {
+            if (abandonIfStale()) {
               return;
             }
             setError(
@@ -335,13 +374,13 @@ export function useCreateSession() {
           }
         }
 
-        if (isStale()) {
+        if (abandonIfStale()) {
           return;
         }
 
         const importedArea =
           resolved.areas.length === 1 ? primaryArea : unionGameAreas(resolved.areas);
-        const resolvedGameSize = recommendGameSize(primaryArea, unit);
+        const resolvedGameSize = recommendGameSize(importedArea, unit);
         const draftCustomCategories =
           draft.customCategories ?? draft.advancedSettings.customCategories ?? [];
         const resolvedAdvanced = {
@@ -390,10 +429,18 @@ export function useCreateSession() {
         }
         setAppliedPresetId(primaryId);
         setAppliedPresetIds([...orderedIds]);
-        setPendingPresetIds([...orderedIds]);
+        // Keep chips the user added during a slow apply; they remain an edit buffer.
+        setPendingPresetIds((current) => {
+          const extras = current.filter((id) => !orderedIds.includes(id));
+          return [...orderedIds, ...extras];
+        });
         setError(null);
+        clearInFlightIfCurrent();
         setSearchParams(
           (current) => {
+            if (current.get("preset") === primaryId) {
+              return current;
+            }
             const next = new URLSearchParams(current);
             next.set("preset", primaryId);
             return next;
@@ -439,6 +486,7 @@ export function useCreateSession() {
   const clearLoadedPreset = useCallback(() => {
     presetApplyGenerationRef.current += 1;
     appliedPresetRef.current = null;
+    applyInFlightPrimaryRef.current = null;
     setAppliedPresetId(null);
     setAppliedPresetIds([]);
     setPendingPresetIds([]);
@@ -466,6 +514,11 @@ export function useCreateSession() {
     }
 
     if (appliedPresetRef.current === presetId) {
+      return;
+    }
+
+    // In-flight apply owns a different primary; do not re-apply a lagging URL id.
+    if (applyInFlightPrimaryRef.current != null && applyInFlightPrimaryRef.current !== presetId) {
       return;
     }
 
