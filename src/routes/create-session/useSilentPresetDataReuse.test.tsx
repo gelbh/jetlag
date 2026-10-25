@@ -458,7 +458,7 @@ describe("CreateSession silent preset data reuse", () => {
       expect(screen.getByRole("button", { name: /Primary · Preset A/i })).toBeInTheDocument();
     });
     await waitFor(() => {
-      expect(screen.getByText(/\+ 1 areas/i)).toBeInTheDocument();
+      expect(screen.getByText(/\+ 1 area$/i)).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(suggestPresetDataReuseForGameArea).toHaveBeenCalledWith(

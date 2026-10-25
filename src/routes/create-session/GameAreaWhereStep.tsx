@@ -250,7 +250,7 @@ export function GameAreaWhereStep({
                   c="var(--color-field-ink-muted)"
                   style={{ margin: 0, marginTop: "0.25rem", fontSize: "0.8125rem" }}
                 >
-                  + {secondaryAreaCount} areas
+                  + {secondaryAreaCount} {secondaryAreaCount === 1 ? "area" : "areas"}
                 </Text>
               ) : null}
               {loadedPresetLocation ? (
