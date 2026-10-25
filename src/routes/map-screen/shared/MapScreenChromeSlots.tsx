@@ -27,6 +27,7 @@ export function MapScreenChromeSlots({
     return (
       <div
         className="map-chrome-hud map-chrome-hud--fragments group/map-chrome pointer-events-none absolute inset-0 z-[var(--z-dock)] overflow-visible"
+        data-resume-ready="true"
         data-landscape-chrome={landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode}
       >
         <div className={mapLandscapeChromeHeaderCollapseClass}>{header}</div>
@@ -43,6 +44,7 @@ export function MapScreenChromeSlots({
         ref={chromeHudRef}
         id="map-chrome-hud-controls"
         className="map-chrome-hud group/map-chrome pointer-events-none absolute inset-0 z-[var(--z-dock)] overflow-visible"
+        data-resume-ready="true"
         data-landscape-chrome={landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode}
       >
         <div className={mapLandscapeChromeHeaderCollapseClass}>{header}</div>

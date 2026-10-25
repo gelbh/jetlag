@@ -4,6 +4,7 @@
  *
  * - Countries / England / EU: FlagCDN
  * - North America / Asia continents: regional org flags (OAS, ASEAN)
+ * - Oceania continent: local override (PIF Commons art unavailable)
  * - States, provinces, cantons, cities, wards, boroughs: Wikidata P41/P94
  * - Osaka ward flowers from city.osaka.lg.jp 区の花一覧
  * - Local overrides in scripts/flags/flag-overrides/ (e.g. Kansai, Dublin councils)
@@ -40,7 +41,8 @@ const FLAGCDN = {
 
 /**
  * Continental stand-ins from regional orgs (no official continent flags).
- * OAS covers the Americas; ASEAN covers Southeast Asia (best available mark).
+ * OAS covers the Americas; ASEAN covers Southeast Asia (best available marks).
+ * Oceania uses LOCAL_OVERRIDES (`continent-oceania`) — PIF Commons SVG was deleted.
  */
 const REGION_ORG = {
   "continent-north-america": {
@@ -126,6 +128,12 @@ const LOCAL_OVERRIDES = {
     alt: "Redbridge",
     identity: "local:redbridge",
     presentation: "cutout",
+  },
+  "continent-oceania": {
+    file: "continent-oceania.png",
+    alt: "Oceania",
+    identity: "local:oceania",
+    presentation: "flag",
   },
 };
 

@@ -8,7 +8,7 @@ import {
 } from "@firebase/rules-unit-testing";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 import { milesToMeters } from "../../domain/map/distance";
-import { serializeGameAreaForFirestore } from "../../services/firestore/firestoreSerialization";
+import { serializeGameAreaForFirestore } from "../../services/firestore/serialization";
 import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
 
 const PROJECT_ID = "demo-jetlag";

@@ -4,9 +4,8 @@ import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import { persistSlimPolygonFeature } from "../progressive/persistSlim";
-import { POLYGON_PERSIST_MAX_VERTICES } from "../progressive/polygonMetrics";
+import { countPolygonVertices, POLYGON_PERSIST_MAX_VERTICES } from "../progressive/polygonMetrics";
 import { buildCoastlineNearRegionDistanceThreshold } from "./coastlineNearRegion";
-import { countPolygonVertices } from "./measuringGeometryBudgets";
 import { setCoastlineNearRegionYieldHookForTests } from "./nearRegions";
 import { LINEAR_NEAR_REGION_COARSE_MAX_DIVISIONS } from "./seaLevel";
 

@@ -3,10 +3,7 @@ import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import type { GameArea } from "../map/annotations";
 import { milesToMeters } from "../map/distance";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
-import {
-  buildPendingQuestionOverlay,
-  buildPendingQuestionOverlays,
-} from "./pendingQuestionOverlays";
+import { buildPendingQuestionOverlay, buildPendingQuestionOverlays } from "./overlays";
 
 const gameArea: GameArea = {
   type: "Polygon",
