@@ -65,12 +65,12 @@ describe("emitGameEndedActivity analytics", () => {
       summary: "Hider found",
     });
     expect(trackSessionEnded).toHaveBeenCalledOnce();
-    expect(trackSessionEnded).toHaveBeenCalledWith("game_over");
+    expect(trackSessionEnded).toHaveBeenCalledWith("game_over", { gameId: "session-1" });
   });
 
   it("tracks game_over for abandoned outcomes", () => {
     emitGameEndedActivity("session-1", { outcome: "abandoned" });
-    expect(trackSessionEnded).toHaveBeenCalledWith("game_over");
+    expect(trackSessionEnded).toHaveBeenCalledWith("game_over", { gameId: "session-1" });
   });
 
   it("does not track for ended_early (host end owns session_ended)", () => {
