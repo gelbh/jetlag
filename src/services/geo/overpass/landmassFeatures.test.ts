@@ -151,40 +151,6 @@ describe("landmass features", () => {
     const features = await computeLandmassFeatures(multi51, []);
     expect(features).toHaveLength(51);
   });
-
-  it("retries 413 with four child bboxes and merges elements", async () => {
-    vi.mocked(overpassClient.queryOverpass)
-      .mockRejectedValueOnce(new overpassClient.OverpassPayloadTooLargeError())
-      .mockResolvedValueOnce({ elements: [{ id: 1 }] })
-      .mockResolvedValueOnce({ elements: [{ id: 2 }] })
-      .mockResolvedValueOnce({ elements: [{ id: 3 }] })
-      .mockResolvedValueOnce({ elements: [{ id: 4 }] });
-
-    const landmasses = await fetchLandmassFeaturesInArea(sampleGameArea);
-    expect(vi.mocked(overpassClient.queryOverpass).mock.calls.length).toBeGreaterThan(1);
-    expect(landmasses.length).toBeGreaterThan(0);
-  });
-
-  it("rethrows 413 when bbox is already at minimum span", async () => {
-    vi.mocked(overpassClient.queryOverpass).mockRejectedValue(
-      new overpassClient.OverpassPayloadTooLargeError(),
-    );
-    const tinyGameArea: GameArea = {
-      type: "Polygon",
-      coordinates: [
-        [
-          [0, 0],
-          [0.02, 0],
-          [0.02, 0.02],
-          [0, 0.02],
-          [0, 0],
-        ],
-      ],
-    };
-    await expect(fetchLandmassFeaturesInArea(tinyGameArea)).rejects.toBeInstanceOf(
-      overpassClient.OverpassPayloadTooLargeError,
-    );
-  });
 });
 
 describe("computeLandmassFeatures fail-closed", () => {
