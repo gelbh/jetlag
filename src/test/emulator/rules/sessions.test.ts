@@ -1,7 +1,7 @@
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
-import { deleteField } from "firebase/firestore";
+import { arrayUnion, deleteField } from "firebase/firestore";
 import { describe, expect, it } from "vitest";
-import { bindRulesTestEnv, milesToMeters, sessionPayload } from "./helpers";
+import { bindRulesTestEnv, milesToMeters, seedSessionMembers, sessionPayload } from "./helpers";
 
 describe("firestore.rules — sessions", () => {
   const rules = bindRulesTestEnv();
@@ -160,7 +160,7 @@ describe("firestore.rules — sessions", () => {
     );
   });
 
-  it("allows membership heal without client hostUid writes", async () => {
+  it("denies a client membership heal that swaps out another member", async () => {
     const host = rules.testEnv.authenticatedContext("host-old");
     await host
       .firestore()
@@ -175,7 +175,7 @@ describe("firestore.rules — sessions", () => {
       );
 
     const returning = rules.testEnv.authenticatedContext("uid-new");
-    await assertSucceeds(
+    await assertFails(
       returning
         .firestore()
         .collection("sessions")
@@ -299,14 +299,7 @@ describe("firestore.rules — sessions", () => {
   it("allows a second guest to join as hider when one hider is already in the session", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "hider-1"],
-        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "hider-1": "hider" });
 
     const guest = rules.testEnv.authenticatedContext("guest-2");
     await assertSucceeds(
@@ -328,14 +321,7 @@ describe("firestore.rules — sessions", () => {
   it("allows a returning member to change role on join", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "guest-1"],
-        memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "guest-1": "seeker" });
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
     await assertSucceeds(
@@ -347,6 +333,30 @@ describe("firestore.rules — sessions", () => {
           memberUids: ["host-1", "guest-1"],
           memberRoles: { "host-1": "seeker", "guest-1": "hider" },
         }),
+    );
+  });
+
+  it("allows an own-role switch when memberUids already holds a duplicate uid", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
+    await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          memberUids: ["host-1", "guest-1", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
+        });
+    });
+
+    const guest = rules.testEnv.authenticatedContext("guest-1");
+    await assertSucceeds(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({ memberRoles: { "host-1": "seeker", "guest-1": "hider" } }),
     );
   });
 
@@ -562,5 +572,197 @@ describe("firestore.rules — sessions", () => {
           hidingZoneRadiusMeters: milesToMeters(0.25),
         }),
     );
+  });
+
+  describe("legacy membership join is self-only", () => {
+    const baseMembers = {
+      memberUids: ["host-1", "seeker-a"],
+      memberRoles: { "host-1": "seeker", "seeker-a": "seeker" },
+      memberAppVersions: { "host-1": "1.7.0", "seeker-a": "1.7.0" },
+    };
+
+    async function seed(overrides: Record<string, unknown> = baseMembers) {
+      await rules.testEnv.withSecurityRulesDisabled(async (context) => {
+        await context
+          .firestore()
+          .collection("sessions")
+          .doc("session-1")
+          .set(sessionPayload("host-1", overrides));
+      });
+    }
+
+    function sessionAs(uid: string) {
+      return rules.testEnv
+        .authenticatedContext(uid)
+        .firestore()
+        .collection("sessions")
+        .doc("session-1");
+    }
+
+    it("allows the no-read join shape (arrayUnion plus dotted own entries)", async () => {
+      await seed();
+      await assertSucceeds(
+        sessionAs("guest-1").update({
+          memberUids: arrayUnion("guest-1"),
+          "memberRoles.guest-1": "hider",
+          "memberAppVersions.guest-1": "1.7.0",
+        }),
+      );
+    });
+
+    it("allows the no-read join shape when memberAppVersions does not exist yet", async () => {
+      await seed({
+        memberUids: ["host-1", "seeker-a"],
+        memberRoles: { "host-1": "seeker", "seeker-a": "seeker" },
+      });
+      await assertSucceeds(
+        sessionAs("guest-1").update({
+          memberUids: arrayUnion("guest-1"),
+          "memberRoles.guest-1": "hider",
+          "memberAppVersions.guest-1": "1.7.0",
+        }),
+      );
+    });
+
+    it("allows the read-path full-array join that adds only the caller", async () => {
+      await seed();
+      await assertSucceeds(
+        sessionAs("guest-1").update({
+          memberUids: ["host-1", "seeker-a", "guest-1"],
+          memberRoles: { "host-1": "seeker", "seeker-a": "seeker", "guest-1": "hider" },
+          memberAppVersions: { "host-1": "1.7.0", "seeker-a": "1.7.0", "guest-1": "1.7.0" },
+        }),
+      );
+    });
+
+    it("allows a member to rewrite full arrays changing only their own entries", async () => {
+      // join.ts read path with returningMemberUid === uid moves the caller to the end.
+      await seed({
+        memberUids: ["host-1", "guest-1", "seeker-a"],
+        memberRoles: { "host-1": "seeker", "guest-1": "seeker", "seeker-a": "seeker" },
+        memberAppVersions: { "host-1": "1.7.0", "guest-1": "1.6.0", "seeker-a": "1.7.0" },
+      });
+      await assertSucceeds(
+        sessionAs("guest-1").update({
+          memberUids: ["host-1", "seeker-a", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "hider", "seeker-a": "seeker" },
+          memberAppVersions: { "host-1": "1.7.0", "guest-1": "1.7.0", "seeker-a": "1.7.0" },
+        }),
+      );
+    });
+
+    it("allows an own-role switch that writes only memberRoles and memberAppVersions", async () => {
+      await seed({
+        memberUids: ["host-1", "guest-1"],
+        memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
+        memberAppVersions: { "host-1": "1.7.0", "guest-1": "1.7.0" },
+      });
+      await assertSucceeds(
+        sessionAs("guest-1").update({
+          memberRoles: { "host-1": "seeker", "guest-1": "hider" },
+          memberAppVersions: { "host-1": "1.7.0", "guest-1": "1.7.0" },
+        }),
+      );
+    });
+
+    it("allows a join on a role-less session that creates only the caller's role", async () => {
+      await seed({ memberUids: ["host-1", "seeker-a"], memberRoles: null });
+      await assertSucceeds(
+        sessionAs("guest-1").update({
+          memberUids: ["host-1", "seeker-a", "guest-1"],
+          memberRoles: { "guest-1": "hider" },
+        }),
+      );
+    });
+
+    it("denies a join that rewrites another member's role", async () => {
+      await seed();
+      await assertFails(
+        sessionAs("guest-1").update({
+          memberUids: ["host-1", "seeker-a", "guest-1"],
+          memberRoles: { "host-1": "seeker", "seeker-a": "hider", "guest-1": "hider" },
+        }),
+      );
+    });
+
+    it("denies a stale full-array join that drops another member", async () => {
+      await seed();
+      await assertFails(
+        sessionAs("guest-1").update({
+          memberUids: ["host-1", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "hider" },
+          memberAppVersions: { "host-1": "1.7.0", "guest-1": "1.7.0" },
+        }),
+      );
+    });
+
+    it("denies a join that adds another uid alongside the caller", async () => {
+      await seed();
+      await assertFails(
+        sessionAs("guest-1").update({
+          memberUids: ["host-1", "seeker-a", "guest-1", "friend-1"],
+          memberRoles: { "host-1": "seeker", "seeker-a": "seeker", "guest-1": "hider" },
+        }),
+      );
+    });
+
+    it("denies a join that edits another member's app version", async () => {
+      await seed();
+      await assertFails(
+        sessionAs("guest-1").update({
+          memberUids: arrayUnion("guest-1"),
+          "memberRoles.guest-1": "hider",
+          "memberAppVersions.seeker-a": "0.0.1",
+        }),
+      );
+    });
+
+    it("denies other members' entries when memberAppVersions does not exist yet", async () => {
+      await seed({
+        memberUids: ["host-1", "seeker-a"],
+        memberRoles: { "host-1": "seeker", "seeker-a": "seeker" },
+      });
+      await assertFails(
+        sessionAs("guest-1").update({
+          memberUids: ["host-1", "seeker-a", "guest-1"],
+          memberRoles: { "host-1": "seeker", "seeker-a": "seeker", "guest-1": "hider" },
+          memberAppVersions: { "guest-1": "1.7.0", "seeker-a": "0.0.1" },
+        }),
+      );
+    });
+
+    it("denies a role-less session join that writes another member's role", async () => {
+      await seed({ memberUids: ["host-1", "seeker-a"], memberRoles: null });
+      await assertFails(
+        sessionAs("guest-1").update({
+          memberUids: ["host-1", "seeker-a", "guest-1"],
+          memberRoles: { "guest-1": "hider", "seeker-a": "hider" },
+        }),
+      );
+    });
+
+    it("denies duplicating the caller's own uid in memberUids", async () => {
+      await seed();
+      await assertFails(
+        sessionAs("seeker-a").update({
+          memberUids: ["host-1", "seeker-a", "seeker-a"],
+        }),
+      );
+    });
+
+    it("denies a join that also writes castleSiegeRoles", async () => {
+      await seed({
+        ...baseMembers,
+        mode: "castleSiege",
+        castleSiegeRoles: { "host-1": "teamA" },
+      });
+      await assertFails(
+        sessionAs("guest-1").update({
+          memberUids: arrayUnion("guest-1"),
+          "memberRoles.guest-1": "seeker",
+          "castleSiegeRoles.guest-1": "teamB",
+        }),
+      );
+    });
   });
 });

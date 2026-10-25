@@ -2,7 +2,7 @@ import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { serverTimestamp } from "firebase/firestore";
 import { describe, it } from "vitest";
 import { ANNOTATION_TYPES } from "@/domain/map/annotations";
-import { annotationPayload, bindRulesTestEnv, sessionPayload } from "./helpers";
+import { annotationPayload, bindRulesTestEnv, seedSessionMembers, sessionPayload } from "./helpers";
 
 describe("firestore.rules — annotations", () => {
   const rules = bindRulesTestEnv();
@@ -12,14 +12,7 @@ describe("firestore.rules — annotations", () => {
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "guest-1"],
-        memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "guest-1": "seeker" });
 
     await assertSucceeds(
       guest
@@ -37,14 +30,7 @@ describe("firestore.rules — annotations", () => {
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "hider-1"],
-        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "hider-1": "hider" });
 
     await assertFails(
       hider
@@ -95,14 +81,7 @@ describe("firestore.rules — annotations", () => {
     async function hiderSession() {
       const host = rules.testEnv.authenticatedContext("host-1");
       await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
-      await host
-        .firestore()
-        .collection("sessions")
-        .doc("session-1")
-        .update({
-          memberUids: ["host-1", "hider-1"],
-          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
-        });
+      await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "hider-1": "hider" });
       const annotations = (uid: string) =>
         rules.testEnv
           .authenticatedContext(uid)

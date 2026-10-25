@@ -673,7 +673,8 @@ service cloud.firestore {
 
     function isLegacyMembershipJoinUpdate() {
       return isMembershipJoinUpdate()
-        && !isRoleGatedSessionData(resource.data);
+        && !isRoleGatedSessionData(resource.data)
+        && membershipJoinTouchesOnlySelf();
     }
 
     function isMembershipJoinUpdate() {
@@ -681,6 +682,39 @@ service cloud.firestore {
         && membershipJoinFieldsStable()
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['memberUids', 'memberRoles', 'memberAppVersions']);
+    }
+
+    // Ungated client joins may add only the caller and change only the
+    // caller's own entries. Heals that remove another uid use the
+    // joinSessionWithRole callable. resource.data only: this branch is last
+    // in the session update chain and must stay under the expression budget.
+    function membershipJoinTouchesOnlySelf() {
+      return resource.data.memberUids is list
+        && request.resource.data.memberUids.toSet().hasAll(resource.data.memberUids)
+        && request.resource.data.memberUids.toSet()
+          .difference(resource.data.memberUids.toSet())
+          .hasOnly([request.auth.uid])
+        && request.resource.data.memberUids.size() <= resource.data.memberUids.size() + 1
+        && (
+          !('memberUids' in request.resource.data.diff(resource.data).affectedKeys())
+          || request.resource.data.memberUids.toSet().size() == request.resource.data.memberUids.size()
+        )
+        && memberMapTouchesOnlySelf('memberRoles')
+        && memberMapTouchesOnlySelf('memberAppVersions');
+    }
+
+    // A missing or null old map counts as empty, so every new key must be the caller's.
+    function memberMapTouchesOnlySelf(field) {
+      return !(field in request.resource.data.diff(resource.data).affectedKeys())
+        || (
+          request.resource.data.get(field, null) is map
+          && (
+            resource.data.get(field, null) is map
+              ? request.resource.data.get(field, {}).diff(resource.data.get(field, {}))
+                .affectedKeys().hasOnly([request.auth.uid])
+              : request.resource.data.get(field, {}).keys().hasOnly([request.auth.uid])
+          )
+        );
     }
 
     function sessionData(sessionId) {
@@ -1002,7 +1036,13 @@ service cloud.firestore {
           && request.resource.data.recordedAt is string
           && (
             !('role' in request.resource.data)
-            || validHostPlayerRole(request.resource.data.role)
+            || (
+              validHostPlayerRole(request.resource.data.role)
+              && (
+                isLegacySession(sessionId)
+                || request.resource.data.role == memberRole(sessionId)
+              )
+            )
           );
         allow update, delete: if false;
       }

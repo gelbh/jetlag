@@ -50,6 +50,7 @@ import {
 } from "./serialization/serializeSession";
 import { stripUndefinedValues } from "./serialization/shared";
 import { handleFirestoreListenError } from "./sessions/listenError";
+import { isFirestorePermissionDenied } from "./sessions/shared";
 
 export const THERMOMETER_WALK_CANCEL_TEXT = {
   left: "Thermometer walk cancelled — seeker left.",
@@ -129,6 +130,7 @@ export async function appendPlayerTrailPoint(
   try {
     // Auto ids on purpose: rules make points create-only, so a deterministic-id
     // set replayed onto an existing point is an update and is denied anyway.
+    // react-doctor-disable-next-line react-doctor/firebase-client-owned-authz-field -- playerTrailPoints create rule requires role == memberRole(sessionId) when role is present
     await addDoc(playerTrailPointsCollection(sessionId, point.uid), {
       lat: point.lat,
       lng: point.lng,
@@ -138,6 +140,10 @@ export async function appendPlayerTrailPoint(
     });
   } catch (error) {
     if (isFirestoreAlreadyExistsError(error)) {
+      return;
+    }
+    // Rules bind role to memberRoles; a point queued before an own-role switch is denied on replay.
+    if (isFirestorePermissionDenied(error)) {
       return;
     }
     throw error;
