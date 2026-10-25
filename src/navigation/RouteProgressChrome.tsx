@@ -55,7 +55,7 @@ export function RouteProgressChrome() {
           }}
         />
         {eta ? (
-          <p className="m-0 font-normal text-ink-muted" aria-hidden>
+          <p className="m-0 font-normal text-field-ink-muted" aria-hidden>
             {eta}
           </p>
         ) : null}
