@@ -36,6 +36,8 @@ vi.mock("firebase/auth", () => ({
   signInAnonymously: authMocks.signInAnonymously,
   signOut: vi.fn(),
   onAuthStateChanged: authMocks.onAuthStateChanged,
+  GoogleAuthProvider: { PROVIDER_ID: "google.com" },
+  EmailAuthProvider: { PROVIDER_ID: "password" },
 }));
 
 vi.mock("firebase/app-check", () => ({
@@ -135,34 +137,99 @@ describe("auth bootstrap start", () => {
       user: {
         uid: string;
         isAnonymous: boolean;
+        email?: string | null;
+        displayName?: string | null;
+        providerData?: Array<{ providerId: string }>;
         getIdTokenResult?: () => Promise<{ claims: Record<string, unknown> }>;
       } | null,
     ) => void;
 
-    authCallback({
+    const user1 = {
       uid: "user-1",
       isAnonymous: false,
+      email: "user@example.com",
+      displayName: "User One",
+      providerData: [{ providerId: "google.com" }],
       getIdTokenResult: async () => ({ claims: { email_verified: true } }),
-    });
-    authCallback(null);
-    authCallback({
-      uid: "admin-1",
-      isAnonymous: false,
-      getIdTokenResult: async () => ({ claims: { admin: true, email_verified: true } }),
-    });
-
+    };
+    authMocks.auth.currentUser = user1;
+    authCallback(user1);
     await vi.waitFor(() => {
       expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith({
         uid: "user-1",
         isAnonymous: false,
         isInternal: false,
+        email: "user@example.com",
+        name: "User One",
+        authProvider: "google",
       });
-      expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith(null);
+    });
+
+    authMocks.auth.currentUser = null;
+    authCallback(null);
+    expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith(null);
+
+    const admin1 = {
+      uid: "admin-1",
+      isAnonymous: false,
+      email: "admin@example.com",
+      displayName: "Admin One",
+      providerData: [{ providerId: "password" }],
+      getIdTokenResult: async () => ({ claims: { admin: true, email_verified: true } }),
+    };
+    authMocks.auth.currentUser = admin1;
+    authCallback(admin1);
+
+    await vi.waitFor(() => {
       expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith({
         uid: "admin-1",
         isAnonymous: false,
         isInternal: true,
+        email: "admin@example.com",
+        name: "Admin One",
+        authProvider: "email",
       });
     });
+  });
+
+  it("discards stale getIdTokenResult after sign-out", async () => {
+    const { startAuthBootstrap } = await import("./firebase");
+
+    startAuthBootstrap();
+
+    const authCallback = authMocks.onAuthStateChanged.mock.calls[0]?.[1] as (
+      user: {
+        uid: string;
+        isAnonymous: boolean;
+        email?: string | null;
+        displayName?: string | null;
+        providerData?: Array<{ providerId: string }>;
+        getIdTokenResult?: () => Promise<{ claims: Record<string, unknown> }>;
+      } | null,
+    ) => void;
+
+    let resolveToken!: (value: { claims: Record<string, unknown> }) => void;
+    const user = {
+      uid: "stale-1",
+      isAnonymous: false,
+      email: "stale@example.com",
+      displayName: "Stale",
+      providerData: [{ providerId: "google.com" }],
+      getIdTokenResult: () =>
+        new Promise<{ claims: Record<string, unknown> }>((resolve) => {
+          resolveToken = resolve;
+        }),
+    };
+    authMocks.auth.currentUser = user;
+    authCallback(user);
+    authMocks.auth.currentUser = null;
+    resolveToken({ claims: { email_verified: true } });
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ uid: "stale-1" }),
+    );
   });
 });

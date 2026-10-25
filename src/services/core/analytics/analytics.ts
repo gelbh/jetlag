@@ -11,6 +11,7 @@ import {
 } from "@/domain/device/consent/analyticsConsent";
 import { isEmbedMode } from "@/domain/device/embed/embedMode";
 import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
+import type { AnalyticsAuthProvider } from "@/services/core/auth/authProvider";
 import { shouldEnableAnalytics } from "./analyticsEnabled";
 import {
   ANALYTICS_EVENTS,
@@ -69,6 +70,7 @@ const FORBIDDEN_PROP_KEYS = new Set([
 let coreInitialized = false;
 let initialized = false;
 let identifiedUid: string | null = null;
+let lastTraitFingerprint: string | null = null;
 let lastSeenIdentity: AnalyticsIdentity | null = null;
 let appInstalledHandler: (() => void) | null = null;
 
@@ -76,7 +78,19 @@ export type AnalyticsIdentity = {
   uid: string;
   isAnonymous: boolean;
   isInternal: boolean;
+  email: string | null;
+  name: string | null;
+  authProvider: AnalyticsAuthProvider;
 };
+
+type PersonSetProps = {
+  auth_provider: AnalyticsAuthProvider;
+  is_internal: boolean;
+  email?: string;
+  name?: string;
+};
+
+const ACCEPT_GATED_PERSON_KEYS = ["email", "name", "auth_provider"] as const;
 
 export { shouldEnableAnalytics };
 
@@ -132,6 +146,41 @@ function registerSuperProperties(): void {
   });
 }
 
+function personSetProps(user: AnalyticsIdentity): PersonSetProps {
+  const props: PersonSetProps = {
+    auth_provider: user.authProvider,
+    is_internal: user.isInternal,
+  };
+  if (user.email) props.email = user.email;
+  if (user.name) props.name = user.name;
+  return props;
+}
+
+function personUnsetKeys(user: AnalyticsIdentity): string[] {
+  const keys: string[] = [];
+  if (!user.email) keys.push("email");
+  if (!user.name) keys.push("name");
+  return keys;
+}
+
+function traitFingerprint(props: PersonSetProps, unset: string[]): string {
+  return JSON.stringify({ props, unset });
+}
+
+function syncPersonTraits(user: AnalyticsIdentity): void {
+  const props = personSetProps(user);
+  const unset = personUnsetKeys(user);
+  const fp = traitFingerprint(props, unset);
+  if (fp === lastTraitFingerprint) {
+    return;
+  }
+  posthog.setPersonProperties(props);
+  if (unset.length > 0) {
+    posthog.unsetPersonProperties(unset);
+  }
+  lastTraitFingerprint = fp;
+}
+
 function applyIdentity(user: AnalyticsIdentity | null): void {
   if (!coreInitialized) {
     return;
@@ -141,6 +190,10 @@ function applyIdentity(user: AnalyticsIdentity | null): void {
       if (identifiedUid !== user.uid) {
         posthog.identify(user.uid);
         identifiedUid = user.uid;
+        lastTraitFingerprint = null;
+      }
+      if (initialized) {
+        syncPersonTraits(user);
       }
       return;
     }
@@ -148,6 +201,7 @@ function applyIdentity(user: AnalyticsIdentity | null): void {
       posthog.reset(true);
       registerSuperProperties();
       identifiedUid = null;
+      lastTraitFingerprint = null;
     }
   } catch {
     // Soft-fail: identity must never break app boot.
@@ -239,6 +293,12 @@ export function grantAnalyticsConsent(): void {
 }
 
 export function denyAnalyticsConsent(): void {
+  try {
+    // Unset while consent still granted so before_send does not drop $unset.
+    if (coreInitialized && initialized) {
+      posthog.unsetPersonProperties([...ACCEPT_GATED_PERSON_KEYS]);
+    }
+  } catch {}
   writeAnalyticsConsent("denied");
   try {
     // Keep capturing on so scrubbed `$exception` can still flow (gated by before_send).
@@ -247,6 +307,7 @@ export function denyAnalyticsConsent(): void {
     registerSuperProperties();
   } catch {}
   identifiedUid = null;
+  lastTraitFingerprint = null;
   initialized = false;
   applyIdentity(lastSeenIdentity);
 }
@@ -369,6 +430,7 @@ export function resetAnalyticsForTests(options?: { initialized?: boolean }): voi
   coreInitialized = options?.initialized ?? false;
   initialized = options?.initialized ?? false;
   identifiedUid = null;
+  lastTraitFingerprint = null;
   lastSeenIdentity = null;
   if (appInstalledHandler) {
     window.removeEventListener("appinstalled", appInstalledHandler);

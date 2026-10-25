@@ -22,6 +22,7 @@ import {
 import { ANALYTICS_EVENTS, type AnalyticsEventProps } from "../analytics/analyticsEvents";
 import { trackLazy } from "../analytics/lazyTelemetry";
 import { ensureAnonymousUser, getFirebaseAuth } from "../firebase/firebase";
+import { mapFirebaseAuthProvider } from "./authProvider";
 import { OAUTH_REDIRECT_PENDING_KEY } from "./persistedAuthHint";
 
 export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
@@ -97,12 +98,6 @@ function isFirebasePendingPromiseAssertion(error: unknown): boolean {
 
 type AccountLinkedProps = AnalyticsEventProps[typeof ANALYTICS_EVENTS.account_linked];
 
-const ACCOUNT_PROVIDER_BY_ID: Partial<Record<string, AccountLinkedProps["provider"]>> = {
-  [GoogleAuthProvider.PROVIDER_ID]: "google",
-  "apple.com": "apple",
-  [EmailAuthProvider.PROVIDER_ID]: "email",
-};
-
 const ACCOUNT_OUTCOME_BY_OPERATION: Partial<
   Record<UserCredential["operationType"], AccountLinkedProps["outcome"]>
 > = {
@@ -113,9 +108,9 @@ const ACCOUNT_OUTCOME_BY_OPERATION: Partial<
 /** Email-link UserCredentials carry providerId null, so callers pass the provider they used. */
 function trackAccountLinked(result: UserCredential, fallbackProviderId?: string): void {
   const providerId = result.providerId ?? fallbackProviderId;
-  const provider = providerId ? ACCOUNT_PROVIDER_BY_ID[providerId] : undefined;
+  const provider = mapFirebaseAuthProvider(providerId);
   const outcome = ACCOUNT_OUTCOME_BY_OPERATION[result.operationType];
-  if (!provider || !outcome) return;
+  if (provider === "unknown" || !outcome) return;
   trackLazy(ANALYTICS_EVENTS.account_linked, { provider, outcome });
 }
 
