@@ -179,6 +179,7 @@ export function CreateSession() {
               favouritePresetSelectOptions: session.favouritePresetSelectOptions,
               userPresets: session.userPresets,
               loadedPreset: session.loadedPreset,
+              appliedPresetIds: session.appliedPresetIds,
               loading: session.loading,
               verifyingAccess: session.verifyingAccess,
               searchLoading: session.searchLoading,
@@ -194,6 +195,7 @@ export function CreateSession() {
               transitMetroId: session.transitMetroId,
               metros: session.metros,
               onPresetSelect: session.selectPreset,
+              onApplyPresets: session.applyPresets,
               onSavePreset: handleSavePreset,
               onOpenFramingModal: () => {
                 session.requestMap();

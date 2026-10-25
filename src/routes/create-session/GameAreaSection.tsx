@@ -13,6 +13,7 @@ export type GameAreaSectionModel = {
   favouritePresetSelectOptions: { presetId: string; name: string }[];
   userPresets: GamePreset[];
   loadedPreset: GamePreset | null;
+  appliedPresetIds: string[];
   loading: boolean;
   verifyingAccess: boolean;
   searchLoading: boolean;
@@ -28,6 +29,7 @@ export type GameAreaSectionModel = {
   transitMetroId: string;
   metros: TransitMetro[];
   onPresetSelect: (presetId: string) => void;
+  onApplyPresets: (orderedIds: string[]) => void;
   onSavePreset: () => void;
   onOpenFramingModal: () => void;
   onRemoveSelectedArea: (index: number) => void;

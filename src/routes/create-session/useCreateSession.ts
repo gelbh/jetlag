@@ -43,6 +43,7 @@ import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { matchGamePresetForPlace } from "../../domain/session/presets/gamePresetSearch";
 import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/presetFavourites";
+import { resolvePresetPlayAreas } from "../../domain/session/presets/resolvePresetPlayAreas";
 import {
   type GameSize,
   hidingZoneRadiusMeters,
@@ -196,9 +197,9 @@ export function useCreateSession() {
   const [locationStatusTone, setLocationStatusTone] = useState<"ok" | "halt" | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
+  const [appliedPresetIds, setAppliedPresetIds] = useState<string[]>([]);
   const presetApplyGenerationRef = useRef(0);
   const resetSilentReuseOverlayRef = useRef<() => void>(() => {});
-  const [presetApplyNonce, setPresetApplyNonce] = useState(0);
   const packPlayAreaRef = useRef<{
     area: GameArea;
     packId: RegionPackId;
@@ -213,27 +214,171 @@ export function useCreateSession() {
     return presets.find((entry) => entry.id === loadedPresetId) ?? null;
   }, [loadedPresetId, presets]);
 
+  const applyPresets = useCallback(
+    (orderedIds: readonly string[]) => {
+      const primaryId = orderedIds[0];
+      if (!primaryId) {
+        setError("Select at least one preset.");
+        return;
+      }
+
+      // Eager guard so URL effect / re-entry skip while async resolve runs.
+      appliedPresetRef.current = primaryId;
+      const applyGeneration = ++presetApplyGenerationRef.current;
+      const isStale = () => applyGeneration !== presetApplyGenerationRef.current;
+
+      const run = async () => {
+        const presetsById = new Map(presets.map((entry) => [entry.id, entry]));
+        const resolved = await resolvePresetPlayAreas(presetsById, orderedIds);
+        if (isStale()) {
+          return;
+        }
+        if (!resolved.ok) {
+          // Keep appliedPresetRef so the URL effect does not retry; do not commit settings.
+          setError(resolved.message);
+          return;
+        }
+
+        const preset = presetsById.get(primaryId);
+        if (!preset) {
+          setError(`Unknown preset: ${primaryId}`);
+          return;
+        }
+
+        requestMap();
+        const draft = gamePresetToCreateSessionDraft(preset);
+        let customMatchingAreas =
+          draft.customMatchingAreas ?? draft.advancedSettings.customMatchingAreas;
+        const primaryArea = resolved.areas[0]!;
+        const subregionId = draft.subregionId ?? draft.councilFilter;
+        const unit = draft.distanceUnit;
+        let nextPackPlayArea: {
+          area: GameArea;
+          packId: RegionPackId;
+          subregionId: string | undefined;
+        } | null = null;
+
+        if (draft.regionPackId) {
+          try {
+            const boundaries = await loadRegionPackSessionBoundaries(
+              draft.regionPackId,
+              subregionId,
+            );
+            if (isStale()) {
+              return;
+            }
+            customMatchingAreas = boundaries.customMatchingAreas;
+            if (!draft.gameArea) {
+              nextPackPlayArea = {
+                area: primaryArea,
+                packId: draft.regionPackId,
+                subregionId,
+              };
+            }
+          } catch (loadError) {
+            if (isStale()) {
+              return;
+            }
+            setError(
+              loadError instanceof Error
+                ? loadError.message
+                : "Couldn't load region boundary data.",
+            );
+            return;
+          }
+        }
+
+        if (isStale()) {
+          return;
+        }
+
+        const importedArea =
+          resolved.areas.length === 1 ? primaryArea : unionGameAreas(resolved.areas);
+        const resolvedGameSize = recommendGameSize(primaryArea, unit);
+        const draftCustomCategories =
+          draft.customCategories ?? draft.advancedSettings.customCategories ?? [];
+        const resolvedAdvanced = {
+          ...defaultAdvancedSessionSettings(resolvedGameSize, unit),
+          ...draft.advancedSettings,
+          customMatchingAreas,
+          customCategories: draft.regionPackId
+            ? mergeRegionPackFlavorCategories(draftCustomCategories, draft.regionPackId)
+            : draftCustomCategories,
+          customLocationPins: draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
+          hidingZoneRadiusMeters: hidingZoneRadiusMeters(resolvedGameSize, unit),
+        };
+
+        if (draft.regionPackId) {
+          setRegionPackId(draft.regionPackId);
+          setRegionPackSubregionId(subregionId);
+          packPlayAreaRef.current = nextPackPlayArea;
+        } else {
+          setRegionPackId(undefined);
+          setRegionPackSubregionId(undefined);
+          packPlayAreaRef.current = null;
+        }
+
+        setGameSizeUserOverrode(false);
+        setGameSize(resolvedGameSize);
+        setDistanceUnit(unit);
+        resetSilentReuseOverlayRef.current();
+        setAdvancedSettings(resolvedAdvanced);
+        setSelectedPlaceId(null);
+        setSelectedPlace(null);
+        setSearchResults([]);
+        setSelectedAreas([]);
+        if (draft.transitMetroId) {
+          setTransitMetroOverride(draft.transitMetroId);
+        }
+        if (draft.sessionTier) {
+          setTierManuallySet(true);
+          setSessionTier(draft.sessionTier);
+        }
+        setImportedGameArea(importedArea);
+        framing.resetManualFraming();
+        framing.applyFocusToGameArea(importedArea);
+        setMapFocusToken((token) => token + 1);
+        if (draft.placeLabel) {
+          setLocationQuery(draft.placeLabel);
+        }
+        setAppliedPresetId(primaryId);
+        setAppliedPresetIds([...orderedIds]);
+        setError(null);
+        setSearchParams(
+          (current) => {
+            const next = new URLSearchParams(current);
+            next.set("preset", primaryId);
+            return next;
+          },
+          { replace: true },
+        );
+      };
+
+      void run();
+    },
+    [
+      framing.applyFocusToGameArea,
+      framing.resetManualFraming,
+      presets,
+      requestMap,
+      setSearchParams,
+    ],
+  );
+
   const selectPreset = useCallback(
     (presetId: string) => {
-      appliedPresetRef.current = null;
       setAppliedPresetId(null);
-      setPresetApplyNonce((nonce) => nonce + 1);
-      setSearchParams(
-        (current) => {
-          const next = new URLSearchParams(current);
-          next.set("preset", presetId);
-          return next;
-        },
-        { replace: true },
-      );
+      setAppliedPresetIds([]);
+      applyPresets([presetId]);
     },
-    [setSearchParams],
+    [applyPresets],
   );
 
   const clearLoadedPreset = useCallback(() => {
     presetApplyGenerationRef.current += 1;
     appliedPresetRef.current = null;
     setAppliedPresetId(null);
+    setAppliedPresetIds([]);
     setSearchParams(
       (current) => {
         if (!current.has("preset")) {
@@ -252,6 +397,7 @@ export function useCreateSession() {
     if (!presetId) {
       appliedPresetRef.current = null;
       setAppliedPresetId(null);
+      setAppliedPresetIds([]);
       return;
     }
 
@@ -259,130 +405,12 @@ export function useCreateSession() {
       return;
     }
 
-    const preset = presets.find((entry) => entry.id === presetId);
-    if (!preset) {
+    if (!presets.some((entry) => entry.id === presetId)) {
       return;
     }
 
-    appliedPresetRef.current = presetId;
-    const applyGeneration = ++presetApplyGenerationRef.current;
-    const draft = gamePresetToCreateSessionDraft(preset);
-    const abandonStaleApply = () => {
-      if (appliedPresetRef.current === presetId) {
-        appliedPresetRef.current = null;
-      }
-    };
-    const applyPreset = async () => {
-      requestMap();
-      let customMatchingAreas =
-        draft.customMatchingAreas ?? draft.advancedSettings.customMatchingAreas;
-      let gameArea = draft.gameArea ?? null;
-      const subregionId = draft.subregionId ?? draft.councilFilter;
-      const unit = draft.distanceUnit;
-
-      if (draft.regionPackId) {
-        setRegionPackId(draft.regionPackId);
-        setRegionPackSubregionId(subregionId);
-        const boundaryTask = createLoadTask({
-          label: "Loading region boundaries",
-          global: true,
-          cancellable: false,
-        });
-        try {
-          const boundaries = await loadRegionPackSessionBoundaries(
-            draft.regionPackId,
-            subregionId,
-            boundaryTask.root,
-          );
-          if (applyGeneration !== presetApplyGenerationRef.current) {
-            boundaryTask.cancel();
-            abandonStaleApply();
-            return;
-          }
-          boundaryTask.complete();
-          customMatchingAreas = boundaries.customMatchingAreas;
-          if (!gameArea) {
-            gameArea = boundaries.playArea;
-            packPlayAreaRef.current = {
-              area: boundaries.playArea,
-              packId: draft.regionPackId,
-              subregionId,
-            };
-          }
-        } catch (loadError) {
-          if (applyGeneration !== presetApplyGenerationRef.current) {
-            boundaryTask.cancel();
-            abandonStaleApply();
-            return;
-          }
-          boundaryTask.fail(loadError);
-          setError(
-            loadError instanceof Error ? loadError.message : "Couldn't load region boundary data.",
-          );
-        }
-      } else {
-        setRegionPackId(undefined);
-        setRegionPackSubregionId(undefined);
-      }
-
-      if (applyGeneration !== presetApplyGenerationRef.current) {
-        abandonStaleApply();
-        return;
-      }
-
-      const resolvedGameSize = gameArea ? recommendGameSize(gameArea, unit) : draft.gameSize;
-      const draftCustomCategories =
-        draft.customCategories ?? draft.advancedSettings.customCategories ?? [];
-      const resolvedAdvanced = {
-        ...defaultAdvancedSessionSettings(resolvedGameSize, unit),
-        ...draft.advancedSettings,
-        customMatchingAreas,
-        customCategories: draft.regionPackId
-          ? mergeRegionPackFlavorCategories(draftCustomCategories, draft.regionPackId)
-          : draftCustomCategories,
-        customLocationPins: draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
-        hidingZoneRadiusMeters: hidingZoneRadiusMeters(resolvedGameSize, unit),
-      };
-
-      setGameSizeUserOverrode(false);
-      setGameSize(resolvedGameSize);
-      setDistanceUnit(unit);
-      resetSilentReuseOverlayRef.current();
-      setAdvancedSettings(resolvedAdvanced);
-      setSelectedPlaceId(null);
-      setSelectedPlace(null);
-      setSearchResults([]);
-      setSelectedAreas([]);
-      if (draft.transitMetroId) {
-        setTransitMetroOverride(draft.transitMetroId);
-      }
-      if (draft.sessionTier) {
-        setTierManuallySet(true);
-        setSessionTier(draft.sessionTier);
-      }
-      if (gameArea) {
-        setImportedGameArea(gameArea);
-        framing.resetManualFraming();
-        framing.applyFocusToGameArea(gameArea);
-        setMapFocusToken((token) => token + 1);
-      } else {
-        setImportedGameArea(null);
-      }
-      if (draft.placeLabel) {
-        setLocationQuery(draft.placeLabel);
-      }
-      setAppliedPresetId(presetId);
-    };
-
-    void applyPreset();
-  }, [
-    framing.applyFocusToGameArea,
-    framing.resetManualFraming,
-    presetApplyNonce,
-    presets,
-    requestMap,
-    searchParams,
-  ]);
+    applyPresets([presetId]);
+  }, [applyPresets, presets, searchParams]);
 
   const applyPlace = useCallback(
     (place: GeocodedPlace, options?: { loadMatchingPreset?: boolean }) => {
@@ -1095,7 +1123,9 @@ export function useCreateSession() {
     userPresets,
     loadedPresetId,
     loadedPreset,
+    appliedPresetIds,
     selectPreset,
+    applyPresets,
     loading: confirmBusy,
     createTask,
     verifyingAccess,
