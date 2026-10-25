@@ -213,6 +213,12 @@ describe("classifyClientExceptionEvent", () => {
     expect(classifyClientExceptionEvent({ message })).toBe("send");
   });
 
+  it("keeps heal proof rejection reported as a seat takeover signal", () => {
+    const message = "Heal proof invalid.";
+    expect(classifyClientExceptionEvent(exc("FirebaseError", message))).toBe("send");
+    expect(classifyClientExceptionEvent({ message })).toBe("send");
+  });
+
   it("keeps module script import failure and WebKit Load failed", () => {
     expect(
       classifyClientExceptionEvent(exc("TypeError", "Importing a module script failed.")),

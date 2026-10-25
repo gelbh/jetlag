@@ -1,4 +1,5 @@
 import { APP_VERSION } from "../../domain/device/changelog";
+import { JOIN_ERROR_HEAL_PROOF_INVALID } from "../../domain/session/join/joinErrorCopy";
 import { JOIN_ERROR_MARKERS } from "../../domain/session/join/joinErrorMarkers";
 import type { JoinRequestRole } from "../../domain/session/players/joinRequest";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
@@ -45,6 +46,10 @@ export async function joinSessionWithRole(input: {
   clientVersion: string;
   returningMemberUid?: string;
   persistedMyUid?: string;
+  /** Hex SHA-256 of this device's heal secret; the callable stores it as the member proof. */
+  proofHash?: string;
+  /** The stored heal secret. Sent only when returningMemberUid differs from the caller, so the callable can check the old seat's proof. */
+  healSecret?: string;
 }): Promise<JoinSessionWithRoleResult> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
@@ -269,6 +274,7 @@ export const JOIN_ERROR_APP_VERSION_INCOMPATIBLE = "Update the app to join this 
 export const JOIN_ERROR_LEGACY_JOIN = "Session uses legacy join.";
 export const JOIN_ERROR_HEAL_ROLE_MISMATCH =
   "Rejoin with the role you had before, or ask the host for help.";
+export { JOIN_ERROR_HEAL_PROOF_INVALID };
 
 export function mapRolePasscodeJoinError(error: unknown): string {
   if (!(error instanceof Error)) {
@@ -289,6 +295,9 @@ export function mapRolePasscodeJoinError(error: unknown): string {
   }
   if (message.includes(JOIN_ERROR_MARKERS.healRoleMismatch)) {
     return JOIN_ERROR_HEAL_ROLE_MISMATCH;
+  }
+  if (message.includes(JOIN_ERROR_MARKERS.healProofInvalid)) {
+    return JOIN_ERROR_HEAL_PROOF_INVALID;
   }
   if (message.includes(JOIN_ERROR_MARKERS.wrongRoleCode)) {
     return "Wrong role code. Ask your team for the current code.";
