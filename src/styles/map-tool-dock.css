@@ -3,8 +3,9 @@
  * Dead (W5-E): jl-panel-hider-actions, thermometer-live-marker, chat-keyboard-inset,
  * home-card-btn press scale. */
 @layer components {
-  /* Hider sparse hunt: content-size slots so Set zone / Expansion fit. */
-  .jl-map-bottom-chrome--hunt-sparse .jl-tool-slot {
+  /* Hider sparse hunt: content-size slots so Set zone / Expansion fit.
+   * Scope to hunt island only: chrome --hunt-sparse also wraps side islands. */
+  .jl-map-island--hunt-sparse .jl-tool-slot {
     flex: 0 0 auto !important;
     min-width: 3.5rem;
     padding-inline: 0.35rem;
@@ -23,13 +24,13 @@
     }
 
     /* Hider sparse hunt: keep readable labels (Set zone / Expansion). */
-    .jl-map-bottom-chrome--hunt-sparse .jl-tool-slot {
+    .jl-map-island--hunt-sparse .jl-tool-slot {
       min-width: 3.5rem !important;
       padding-inline: 0.35rem !important;
       flex: 0 0 auto !important;
     }
 
-    .jl-map-bottom-chrome--hunt-sparse .jl-tool-slot-label {
+    .jl-map-island--hunt-sparse .jl-tool-slot-label {
       font-size: 0.625rem !important;
       letter-spacing: -0.01em !important;
     }
