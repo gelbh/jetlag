@@ -5,9 +5,28 @@ import {
   unknownGeolocationErrorMessage,
 } from "../../services/core/location/geolocation";
 import {
+  awaitFreshLiveLocationReading,
   getFreshLiveLocationReading,
+  hasLiveLocationRetainers,
   LIVE_LOCATION_FRESH_MS,
+  LIVE_WAIT_AFTER_TIMEOUT_MS,
+  LIVE_WAIT_BEFORE_ONESHOT_MS,
 } from "../../services/core/location/liveLocationReading";
+import {
+  getLocationPermissionUiSnapshot,
+  hasPersistedLocationAccessConfirmed,
+} from "../../services/core/location/locationPermissionUi";
+
+/** Wait only when retainers exist and access was confirmed (CTA epoch or persist). */
+function shouldAwaitLivePublish(): boolean {
+  if (!hasLiveLocationRetainers()) {
+    return false;
+  }
+  if (getLocationPermissionUiSnapshot().confirmEpoch > 0) {
+    return true;
+  }
+  return hasPersistedLocationAccessConfirmed();
+}
 
 export function useGeolocation() {
   const [reading, setReading] = useState<GeolocationReading | null>(null);
@@ -17,15 +36,23 @@ export function useGeolocation() {
   const refresh = useCallback(async () => {
     setError(null);
 
-    const live = getFreshLiveLocationReading();
-    if (live) {
-      setReading(live);
-      return live;
+    const liveHit = getFreshLiveLocationReading();
+    if (liveHit) {
+      setReading(liveHit);
+      return liveHit;
     }
 
     setLoading(true);
 
-    const read = async () => {
+    const run = async () => {
+      if (shouldAwaitLivePublish()) {
+        const waited = await awaitFreshLiveLocationReading(LIVE_WAIT_BEFORE_ONESHOT_MS);
+        if (waited) {
+          setReading(waited);
+          return waited;
+        }
+      }
+
       try {
         const next = await confirmAndRequestLocationAccess({
           highAccuracy: false,
@@ -35,12 +62,23 @@ export function useGeolocation() {
         return next;
       } catch (nextError) {
         const message = unknownGeolocationErrorMessage(nextError);
+        const isTimeout = message.toLowerCase().includes("timed out");
+        if (isTimeout && shouldAwaitLivePublish()) {
+          const recovered = await awaitFreshLiveLocationReading(LIVE_WAIT_AFTER_TIMEOUT_MS);
+          if (recovered) {
+            setError(null);
+            setReading(recovered);
+            return recovered;
+          }
+        }
         setError(message);
         throw nextError;
       }
     };
 
-    return read().finally(() => setLoading(false));
+    return run().finally(() => {
+      setLoading(false);
+    });
   }, []);
 
   return {
