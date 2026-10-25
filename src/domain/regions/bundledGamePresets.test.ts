@@ -85,6 +85,24 @@ describe("bundledGamePresets", () => {
     expect(sydney.some((p) => /ced|sed|sal/i.test(p.id))).toBe(false);
   });
 
+  it("keeps SYDNEY_LGAS 1:1 with public/geo/sydney/lgas.geojson id and name", () => {
+    const collection = JSON.parse(
+      readFileSync(resolve(import.meta.dirname, "../../../public/geo/sydney/lgas.geojson"), "utf8"),
+    ) as {
+      features: Array<{ properties: { lgaId: string; name: string } }>;
+    };
+    const fromGeo = collection.features
+      .map((feature) => ({
+        id: feature.properties.lgaId,
+        name: feature.properties.name,
+      }))
+      .sort((left, right) => left.id.localeCompare(right.id));
+    const fromCatalog = [...SYDNEY_LGAS]
+      .map((lga) => ({ id: lga.id, name: lga.name }))
+      .sort((left, right) => left.id.localeCompare(right.id));
+    expect(fromCatalog).toEqual(fromGeo);
+  });
+
   it("ships switzerland country + 26 canton presets on the switzerland pack", () => {
     const ids = BUNDLED_GAME_PRESET_DEFINITIONS.map((p) => p.id);
     expect(ids).toEqual(
