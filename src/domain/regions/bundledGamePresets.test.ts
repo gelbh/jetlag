@@ -234,13 +234,28 @@ describe("bundledGamePresets", () => {
     );
   });
 
-  it("does not invent pack flavor on NYC bundled presets", () => {
+  it("attaches NYC pack flavor categories to NYC bundled presets", () => {
     const presets = buildBundledGamePresets();
     const nyc = presets.find((preset) => preset.id === "bundled:nyc");
     const ids = (nyc?.advancedSettings.customCategories ?? []).map((category) => category.id);
 
-    expect(ids).toEqual([]);
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        "custom:nyc-ferry-terminal",
+        "custom:nyc-pizza",
+        "custom:nyc-basketball-court",
+        "custom:nyc-deli",
+      ]),
+    );
     expect(ids.some((id) => id.startsWith("custom:dublin-"))).toBe(false);
+  });
+
+  it("does not invent pack flavor on London bundled presets", () => {
+    const presets = buildBundledGamePresets();
+    const london = presets.find((preset) => preset.id === "bundled:london");
+    const ids = (london?.advancedSettings.customCategories ?? []).map((category) => category.id);
+
+    expect(ids).toEqual([]);
   });
 });
 
