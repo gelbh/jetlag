@@ -9,7 +9,11 @@ import {
   resetLiveLocationReadingForTests,
   retainLiveLocationReading,
 } from "../../services/core/location/liveLocationReading";
-import { resetLocationPermissionUiForTests } from "../../services/core/location/locationPermissionUi";
+import {
+  markLocationAccessConfirmed,
+  persistLocationAccessConfirmed,
+  resetLocationPermissionUiForTests,
+} from "../../services/core/location/locationPermissionUi";
 import { createMockGeolocationPosition, mockGeolocation } from "../../test/mocks/geolocation";
 import { useGeolocation } from "./useGeolocation";
 
@@ -111,8 +115,26 @@ describe("useGeolocation", () => {
     expect(result.current.error).toBeTruthy();
   });
 
+  it("does not wait when retainers exist but access is unconfirmed", async () => {
+    retainLiveLocationReading();
+    mockGeolocation(createMockGeolocationPosition(51.5, -0.12));
+    mockPermissions("granted");
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    const { result } = renderHook(() => useGeolocation());
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+    expect(result.current.reading).toMatchObject({ lat: 51.5, lng: -0.12 });
+    releaseLiveLocationReading();
+  });
+
   it("waits for live publish before one-shot when retainers exist", async () => {
     retainLiveLocationReading();
+    markLocationAccessConfirmed();
     mockGeolocation(createMockGeolocationPosition(51.5, -0.12));
     mockPermissions("granted");
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
@@ -140,9 +162,39 @@ describe("useGeolocation", () => {
     releaseLiveLocationReading();
   });
 
+  it("waits when retainers exist and access was persisted", async () => {
+    retainLiveLocationReading();
+    persistLocationAccessConfirmed();
+    mockGeolocation(createMockGeolocationPosition(51.5, -0.12));
+    mockPermissions("granted");
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    const { result } = renderHook(() => useGeolocation());
+
+    let refreshPromise: Promise<unknown>;
+    await act(async () => {
+      refreshPromise = result.current.refresh();
+    });
+
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+
+    await act(async () => {
+      publishLiveLocationReading(dublinReading, Date.now());
+    });
+
+    await act(async () => {
+      const reading = await refreshPromise;
+      expect(reading).toEqual(dublinReading);
+    });
+
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+    releaseLiveLocationReading();
+  });
+
   it("falls through to one-shot after LIVE_WAIT_BEFORE_ONESHOT_MS with retainers", async () => {
     vi.useFakeTimers();
     retainLiveLocationReading();
+    markLocationAccessConfirmed();
     mockGeolocation(createMockGeolocationPosition(51.5, -0.12));
     mockPermissions("granted");
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
@@ -186,6 +238,7 @@ describe("useGeolocation", () => {
   it("soft-recovers from TIMEOUT when live publishes after pre-wait", async () => {
     vi.useFakeTimers();
     retainLiveLocationReading();
+    markLocationAccessConfirmed();
     mockGeolocation(null, 3);
     mockPermissions("granted");
 
@@ -216,6 +269,7 @@ describe("useGeolocation", () => {
   it("surfaces timeout when soft-recover window also misses", async () => {
     vi.useFakeTimers();
     retainLiveLocationReading();
+    markLocationAccessConfirmed();
     mockGeolocation(null, 3);
     mockPermissions("granted");
 

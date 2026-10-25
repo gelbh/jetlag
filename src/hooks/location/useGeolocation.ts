@@ -12,6 +12,21 @@ import {
   LIVE_WAIT_AFTER_TIMEOUT_MS,
   LIVE_WAIT_BEFORE_ONESHOT_MS,
 } from "../../services/core/location/liveLocationReading";
+import {
+  getLocationPermissionUiSnapshot,
+  hasPersistedLocationAccessConfirmed,
+} from "../../services/core/location/locationPermissionUi";
+
+/** Wait only when retainers exist and access was confirmed (CTA epoch or persist). */
+function shouldAwaitLivePublish(): boolean {
+  if (!hasLiveLocationRetainers()) {
+    return false;
+  }
+  if (getLocationPermissionUiSnapshot().confirmEpoch > 0) {
+    return true;
+  }
+  return hasPersistedLocationAccessConfirmed();
+}
 
 export function useGeolocation() {
   const [reading, setReading] = useState<GeolocationReading | null>(null);
@@ -28,8 +43,9 @@ export function useGeolocation() {
     }
 
     setLoading(true);
-    try {
-      if (hasLiveLocationRetainers()) {
+
+    const run = async () => {
+      if (shouldAwaitLivePublish()) {
         const waited = await awaitFreshLiveLocationReading(LIVE_WAIT_BEFORE_ONESHOT_MS);
         if (waited) {
           setReading(waited);
@@ -47,7 +63,7 @@ export function useGeolocation() {
       } catch (nextError) {
         const message = unknownGeolocationErrorMessage(nextError);
         const isTimeout = message.toLowerCase().includes("timed out");
-        if (isTimeout && hasLiveLocationRetainers()) {
+        if (isTimeout && shouldAwaitLivePublish()) {
           const recovered = await awaitFreshLiveLocationReading(LIVE_WAIT_AFTER_TIMEOUT_MS);
           if (recovered) {
             setError(null);
@@ -58,9 +74,11 @@ export function useGeolocation() {
         setError(message);
         throw nextError;
       }
-    } finally {
+    };
+
+    return run().finally(() => {
       setLoading(false);
-    }
+    });
   }, []);
 
   return {
