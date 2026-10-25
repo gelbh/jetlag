@@ -185,9 +185,10 @@ describe("CreateSessionMapPane", () => {
 
     expect(screen.queryByTestId("create-session-map")).not.toBeInTheDocument();
     const facade = screen.getByRole("button", { name: "Open map" });
-    expect(facade).toHaveAccessibleDescription(
-      "Preview your play area here. Search, load a preset, or open Draw.",
-    );
+    expect(facade).toHaveAccessibleDescription("Search a place, load a preset, or open Draw.");
+    expect(facade.style.backgroundImage).toBe("");
+    expect(facade).not.toContainElement(screen.queryByTestId("create-session-map-facade-boundary"));
+    expect(facade.querySelector("[aria-hidden]")).toBeNull();
 
     fireEvent.click(facade);
 
