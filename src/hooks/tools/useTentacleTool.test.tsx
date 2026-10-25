@@ -411,6 +411,8 @@ describe("useTentacleTool", () => {
   });
 
   it("returns to the category step when the user cancels the location search", async () => {
+    // Stable rules: a fresh object each render would restart the search every render.
+    const sessionRules = { gameSize: "medium" as const };
     vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([]);
     vi.spyOn(tentacleOverpassModule, "fetchTentaclePois").mockImplementation(
       (_center, _radius, _category, options) =>
@@ -427,7 +429,7 @@ describe("useTentacleTool", () => {
         active: true,
         annotations: [],
         gameArea: mocks.gameArea,
-        sessionRules: { gameSize: "medium" },
+        sessionRules,
         createAnnotation: mocks.createAnnotation,
         distanceUnit: mocks.distanceUnit,
         finishPlacement: mocks.finishPlacement,

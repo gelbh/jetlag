@@ -43,7 +43,7 @@ test.describe("load progress", () => {
     await askMatchingMuseum(page);
 
     await expect(progressBar(page)).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId("load-progress").getByText(/Searching map data/)).toBeVisible();
+    await expect(page.getByTestId("load-progress").getByText(/^Searching map data/)).toBeVisible();
     const first = (await readPercent(page)) ?? 0;
     await expect.poll(async () => (await readPercent(page)) ?? 100).toBeGreaterThan(first);
 
