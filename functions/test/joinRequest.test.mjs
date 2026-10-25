@@ -7,6 +7,7 @@ import {
 import {
   cancelRoleJoinRequestHandler,
   JOIN_REQ_EXPIRED,
+  JOIN_REQ_INVALID_ROLE,
   JOIN_REQ_NOT_AUTHORIZED,
   JOIN_REQ_SIDE_EMPTY,
   JOIN_REQUEST_TTL_MS,
@@ -401,4 +402,129 @@ test("requestRoleJoin rejects clients below global min 0.11.0", async () => {
     clientVersion: "0.11.0",
   });
   assert.ok(ok.requestId);
+});
+
+function occupiedCastleSiegeTeamASession() {
+  return {
+    mode: "castleSiege",
+    status: "active",
+    hostUid: "host",
+    memberUids: ["host", "a1"],
+    memberRoles: { host: "observer", a1: "observer" },
+    memberAppVersions: { host: "0.1.0", a1: "0.1.0" },
+    castleSiegeRoles: { host: "teamB", a1: "teamA" },
+    roleGates: { version: 1, leaders: { teamA: "a1", teamB: "host" } },
+  };
+}
+
+test("requestRoleJoin CS teamA requires occupied seat", async () => {
+  const sessionData = occupiedCastleSiegeTeamASession();
+  const db = buildMockDb({ sessionData, profiles: { guest: { username: "ada" } } });
+
+  const result = await requestRoleJoinHandler(db, { uid: "guest" }, null, {
+    sessionId: "sess-1",
+    role: "teamA",
+    clientVersion: "0.2.0",
+  });
+
+  assert.equal(db._store[result.requestId].role, "teamA");
+
+  const emptyTeam = {
+    ...occupiedCastleSiegeTeamASession(),
+    memberUids: ["host"],
+    memberRoles: { host: "observer" },
+    castleSiegeRoles: { host: "teamB" },
+    roleGates: { version: 1, leaders: { teamB: "host" } },
+  };
+  const emptyDb = buildMockDb({ sessionData: emptyTeam });
+
+  await assert.rejects(
+    () =>
+      requestRoleJoinHandler(emptyDb, { uid: "guest" }, null, {
+        sessionId: "sess-1",
+        role: "teamA",
+      }),
+    (error) => error instanceof Error && error.message === JOIN_REQ_SIDE_EMPTY,
+  );
+});
+
+test("requestRoleJoin rejects classic role on CS session", async () => {
+  const sessionData = occupiedCastleSiegeTeamASession();
+  const db = buildMockDb({ sessionData });
+
+  await assert.rejects(
+    () =>
+      requestRoleJoinHandler(db, { uid: "guest" }, null, {
+        sessionId: "sess-1",
+        role: "seeker",
+      }),
+    (error) => error instanceof Error && error.message === JOIN_REQ_INVALID_ROLE,
+  );
+});
+
+test("resolveRoleJoinRequest accept CS teamA writes castleSiegeRoles", async () => {
+  const sessionData = occupiedCastleSiegeTeamASession();
+  const db = buildMockDb({
+    sessionData,
+    requests: {
+      "req-cs": {
+        requesterUid: "guest",
+        role: "teamA",
+        status: "pending",
+        identityLabel: "ada",
+        createdAt: "2026-08-03T12:00:00.000Z",
+        expiresAt: "2026-08-03T12:10:00.000Z",
+        clientVersion: "0.2.0",
+      },
+    },
+  });
+
+  await resolveRoleJoinRequestHandler(
+    db,
+    { uid: "a1" },
+    { sessionId: "sess-1", requestId: "req-cs", decision: "accept" },
+    Date.parse("2026-08-03T12:05:00.000Z"),
+  );
+
+  assert.equal(sessionData.memberRoles.guest, "observer");
+  assert.equal(sessionData.castleSiegeRoles.guest, "teamA");
+  assert.ok(sessionData.memberUids.includes("guest"));
+});
+
+test("resolveRoleJoinRequest CS referee accept requires host", async () => {
+  const sessionData = occupiedCastleSiegeTeamASession();
+  const db = buildMockDb({
+    sessionData,
+    requests: {
+      "req-ref": {
+        requesterUid: "guest",
+        role: "referee",
+        status: "pending",
+        identityLabel: "ada",
+        createdAt: "2026-08-03T12:00:00.000Z",
+        expiresAt: "2026-08-03T12:10:00.000Z",
+        clientVersion: "0.2.0",
+      },
+    },
+  });
+
+  await assert.rejects(
+    () =>
+      resolveRoleJoinRequestHandler(
+        db,
+        { uid: "a1" },
+        { sessionId: "sess-1", requestId: "req-ref", decision: "accept" },
+        Date.parse("2026-08-03T12:05:00.000Z"),
+      ),
+    (error) => error instanceof Error && error.message === JOIN_REQ_NOT_AUTHORIZED,
+  );
+
+  await resolveRoleJoinRequestHandler(
+    db,
+    { uid: "host" },
+    { sessionId: "sess-1", requestId: "req-ref", decision: "accept" },
+    Date.parse("2026-08-03T12:05:00.000Z"),
+  );
+
+  assert.equal(sessionData.castleSiegeRoles.guest, "referee");
 });

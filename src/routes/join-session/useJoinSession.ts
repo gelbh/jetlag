@@ -71,8 +71,15 @@ async function fetchAcceptedJoinSession(
   return confirmed;
 }
 
-function isJoinRequestRole(role: PlayerRole): role is JoinRequestRole {
-  return role === "seeker" || role === "hider" || role === "observer";
+function isJoinRequestRole(role: PlayerRole | string): role is JoinRequestRole {
+  return (
+    role === "seeker" ||
+    role === "hider" ||
+    role === "observer" ||
+    role === "teamA" ||
+    role === "teamB" ||
+    role === "referee"
+  );
 }
 
 export function waitingLeaderCopy(role: JoinRequestRole): string {
@@ -82,6 +89,12 @@ export function waitingLeaderCopy(role: JoinRequestRole): string {
     case "hider":
       return "Waiting for hider leader…";
     case "observer":
+      return "Waiting for host…";
+    case "teamA":
+      return "Waiting for Team A leader…";
+    case "teamB":
+      return "Waiting for Team B leader…";
+    case "referee":
       return "Waiting for host…";
     default: {
       const _exhaustive: never = role;

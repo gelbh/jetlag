@@ -28,12 +28,26 @@ export function ledJoinRequestRoles(input: {
   roleGates?: RoleGates | null;
   myUid: string | undefined;
   isHost: boolean;
+  mode?: SessionRecord["mode"];
 }): JoinRequestRole[] {
   if (!input.myUid || !isSessionRoleGated({ roleGates: input.roleGates ?? undefined })) {
     return [];
   }
 
   const roles: JoinRequestRole[] = [];
+  if (input.mode === "castleSiege") {
+    if (input.roleGates?.leaders?.teamA === input.myUid) {
+      roles.push("teamA");
+    }
+    if (input.roleGates?.leaders?.teamB === input.myUid) {
+      roles.push("teamB");
+    }
+    if (input.isHost) {
+      roles.push("observer", "referee");
+    }
+    return roles;
+  }
+
   if (input.roleGates?.leaders?.seeker === input.myUid) {
     roles.push("seeker");
   }
@@ -49,14 +63,32 @@ export function ledJoinRequestRoles(input: {
 export function visibleRoleCodeRoles(input: {
   roleGates?: RoleGates | null;
   memberRoles?: Record<string, PlayerRole | string>;
+  castleSiegeRoles?: CastleSiegeRoles;
   myUid: string | undefined;
   isHost: boolean;
+  mode?: SessionRecord["mode"];
 }): JoinRequestRole[] {
   if (!input.myUid || !isSessionRoleGated({ roleGates: input.roleGates ?? undefined })) {
     return [];
   }
 
   const roles: JoinRequestRole[] = [];
+  if (input.mode === "castleSiege") {
+    if (input.isHost) {
+      roles.push("observer", "referee");
+    }
+
+    const mySeat = input.castleSiegeRoles?.[input.myUid];
+    if (
+      (mySeat === "teamA" || mySeat === "teamB") &&
+      input.roleGates?.leaders?.[mySeat] === input.myUid
+    ) {
+      roles.push(mySeat);
+    }
+
+    return roles;
+  }
+
   if (input.isHost) {
     roles.push("observer");
   }
