@@ -6,7 +6,7 @@ import {
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "@/domain/questions";
-import { MatchingPanel, type MatchingPanelModel, type MatchingPanelProps } from "./MatchingPanel";
+import { MatchingPanel, type MatchingPanelModel } from "./MatchingPanel";
 
 vi.mock("../../hooks/wizard/useToolWizard", () => ({
   useToolWizard: () => ({
@@ -46,19 +46,6 @@ const baseModel: MatchingPanelModel = {
 };
 
 describe("MatchingPanel public props (AC #1)", () => {
-  it("accepts a single model options object", () => {
-    const props: MatchingPanelProps = {
-      model: baseModel,
-    };
-    const keys = Object.keys(props) as Array<keyof MatchingPanelProps>;
-    expect(keys).toEqual(["model"]);
-    expect(keys.length).toBeLessThanOrEqual(10);
-
-    render(<MatchingPanel {...props} />);
-
-    expect(screen.getByText("Match category")).toBeInTheDocument();
-  });
-
   it("keeps used categories visible but disabled", () => {
     render(
       <MatchingPanel

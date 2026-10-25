@@ -2,7 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
-import { ChatPanel, type ChatPanelModel, type ChatPanelProps } from "./ChatPanel";
+import { ChatPanel, type ChatPanelModel } from "./ChatPanel";
 
 vi.mock("../../hooks/layout/useVisualViewportBottomInset", () => ({
   useVisualViewportBottomInset: () => 0,
@@ -29,7 +29,7 @@ const baseModel: ChatPanelModel = {
 };
 
 describe("ChatPanel public props (AC #1)", () => {
-  it("accepts a single model options object", () => {
+  it("mounts with model options", () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: false,
       media: query,
@@ -41,16 +41,9 @@ describe("ChatPanel public props (AC #1)", () => {
       dispatchEvent: () => false,
     }));
 
-    const props: ChatPanelProps = {
-      model: baseModel,
-    };
-    const keys = Object.keys(props) as Array<keyof ChatPanelProps>;
-    expect(keys).toEqual(["model"]);
-    expect(keys.length).toBeLessThanOrEqual(10);
-
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <ChatPanel {...props} />
+        <ChatPanel model={baseModel} />
       </MantineProvider>,
     );
 

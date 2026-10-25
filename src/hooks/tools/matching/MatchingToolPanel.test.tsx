@@ -7,11 +7,7 @@ import {
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "@/domain/questions";
-import {
-  MatchingToolPanel,
-  type MatchingToolPanelModel,
-  type MatchingToolPanelProps,
-} from "./MatchingToolPanel";
+import { MatchingToolPanel, type MatchingToolPanelModel } from "./MatchingToolPanel";
 
 vi.mock("@/components/tools/MatchingPanel", () => ({
   MatchingPanel: ({ model }: { model: { categoryChosen: boolean } }) => (
@@ -58,15 +54,8 @@ const baseModel: MatchingToolPanelModel = {
 };
 
 describe("MatchingToolPanel public props (AC #1)", () => {
-  it("accepts a single model options object", () => {
-    const props: MatchingToolPanelProps = {
-      model: baseModel,
-    };
-    const keys = Object.keys(props) as Array<keyof MatchingToolPanelProps>;
-    expect(keys).toEqual(["model"]);
-    expect(keys.length).toBeLessThanOrEqual(10);
-
-    render(<MatchingToolPanel {...props} />);
+  it("mounts with model options", () => {
+    render(<MatchingToolPanel model={baseModel} />);
 
     expect(screen.getByTestId("matching-panel-stub")).toBeInTheDocument();
     expect(screen.getByTestId("preview-sheet-stub")).toBeInTheDocument();

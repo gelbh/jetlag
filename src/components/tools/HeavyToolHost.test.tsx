@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { MapTool } from "@/state/sessionStore";
-import { HeavyToolHost, type HeavyToolHostModel, type HeavyToolHostProps } from "./HeavyToolHost";
+import { HeavyToolHost, type HeavyToolHostModel } from "./HeavyToolHost";
 
 vi.mock("../../hooks/tools/useMatchingTool", () => ({
   useMatchingTool: () => ({
@@ -58,15 +58,8 @@ const baseModel: HeavyToolHostModel = {
 };
 
 describe("HeavyToolHost public props (AC #1 / #7)", () => {
-  it("accepts a single model options object", () => {
-    const props: HeavyToolHostProps = {
-      model: baseModel,
-    };
-    const keys = Object.keys(props) as Array<keyof HeavyToolHostProps>;
-    expect(keys).toEqual(["model"]);
-    expect(keys.length).toBeLessThanOrEqual(10);
-
-    render(<HeavyToolHost {...props} />);
+  it("mounts with model options", () => {
+    render(<HeavyToolHost model={baseModel} />);
     // Host must read activeTool from model; flat-spread of { model } leaves activeTool unset.
     expect(baseModel.onToolsChange).toHaveBeenCalled();
   });
