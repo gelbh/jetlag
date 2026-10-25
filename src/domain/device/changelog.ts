@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.7.0";
+export const APP_VERSION = "1.8.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,37 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.8.0",
+    date: "2026-10-25",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Wait for session membership before opening live map listeners so mid-join permission storms stop",
+          "Only the device that held a seat can reclaim it after its sign-in changes",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Castle Siege Siege phase clocks, travel/geofence guards, capture confirm, and pressure plate chrome",
+          "Castle Siege BO1/BO3 series scoreboard, between-games continue, and forfeit chrome",
+          "Measuring, Matching, and Tentacle grey categories with nothing in the play area, and Randomize skips them",
+          "Sydney specialty pack Matching includes Suburb / Locality (ABS SAL) under LGAs",
+          "Dublin presets include local category options for Measuring, Matching, and Tentacle",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Tag unexpected Firestore listen and write failures with firestore_op for Error Tracking",
+          "Clients keep a per-session heal secret and write its proof on join, create and resume",
+          "Joining an open session can only add yourself and change your own role; trail points must match your session role",
+        ],
+      },
+    ],
+  },
   {
     version: "1.7.0",
     date: "2026-10-24",
