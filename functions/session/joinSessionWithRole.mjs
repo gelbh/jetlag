@@ -194,12 +194,22 @@ function applyCsLeaderPromotionOnSeatSwitch({
   };
 }
 
-function assertCastleSiegeSeatCapacity(castleSiegeRoles, seat, uid) {
+function assertCastleSiegeSeatCapacity(castleSiegeRoles, seat, uid, excludeUid) {
   if (castleSiegeRoles[uid] === seat) {
     return;
   }
 
-  if (isCastleSiegeSeatFull(castleSiegeRoles, seat)) {
+  let rolesForCapacity = castleSiegeRoles;
+  if (
+    typeof excludeUid === "string" &&
+    excludeUid !== uid &&
+    castleSiegeRoles[excludeUid] === seat
+  ) {
+    rolesForCapacity = { ...castleSiegeRoles };
+    delete rolesForCapacity[excludeUid];
+  }
+
+  if (isCastleSiegeSeatFull(rolesForCapacity, seat)) {
     throw new Error(JOIN_SEAT_FULL);
   }
 }
@@ -508,7 +518,12 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput, options = {
         }
       }
 
-      assertCastleSiegeSeatCapacity(castleSiegeRoles, castleSiegeRole, uid);
+      assertCastleSiegeSeatCapacity(
+        castleSiegeRoles,
+        castleSiegeRole,
+        uid,
+        healing ? healFromUid : undefined,
+      );
 
       const passcodeResult =
         role === "admin"

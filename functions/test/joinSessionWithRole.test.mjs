@@ -1008,6 +1008,41 @@ test("castleSiege rejects fifth teammate", async () => {
   );
 });
 
+test("castleSiege heal onto a full team seat succeeds", async () => {
+  const writes = [];
+  const teamSecret = newRoleSecret();
+  const roles = { host: "teamA", u2: "teamA", u3: "teamA", u4: "teamA" };
+  const sessionData = openCastleSiegeSession({
+    memberUids: ["host", "u2", "u3", "u4"],
+    memberRoles: { host: "observer", u2: "observer", u3: "observer", u4: "observer" },
+    castleSiegeRoles: roles,
+    roleGates: { version: 1, leaders: { teamA: "host" } },
+  });
+  const db = buildMockDb({ sessionData, secrets: { teamA: teamSecret }, writes });
+
+  const result = await joinSessionWithRoleHandler(
+    db,
+    { uid: "new-u4" },
+    {
+      code: "ABCD",
+      role: "observer",
+      castleSiegeRole: "teamA",
+      clientVersion: "0.2.0",
+      returningMemberUid: "u4",
+      persistedMyUid: "u4",
+    },
+  );
+
+  assert.equal(result.sessionId, "sess-1");
+  assert.equal(result.becameLeader, false);
+  assert.equal(result.rolePasscode, undefined);
+  assert.equal(sessionData.castleSiegeRoles["new-u4"], "teamA");
+  assert.equal(sessionData.castleSiegeRoles.u4, undefined);
+  assert.ok(!sessionData.memberUids.includes("u4"));
+  assert.ok(sessionData.memberUids.includes("new-u4"));
+  assert.equal(Object.values(sessionData.castleSiegeRoles).filter((s) => s === "teamA").length, 4);
+});
+
 test("castleSiege rejects second referee", async () => {
   const sessionData = openCastleSiegeSession({
     memberUids: ["host", "ref-1"],
