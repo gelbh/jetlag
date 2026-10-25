@@ -60,6 +60,18 @@ export function mapToolDockMenuHint(entry: MapToolDockEntry): string | null {
   return OVERFLOW_TOOL_HINTS[entry.id] ?? MARKUP_TOOL_HINTS[entry.id] ?? null;
 }
 
+export const QUESTION_DOCK_PRIMARY_IDS = [
+  "matching",
+  "measuring",
+  "radar",
+  "tentacle",
+] as const satisfies readonly DockableMapTool[];
+
+export const QUESTION_DOCK_OVERFLOW_IDS = [
+  "thermometer",
+  "photo",
+] as const satisfies readonly DockableMapTool[];
+
 export const QUESTION_DOCK_TOOL_IDS = [
   "matching",
   "measuring",
