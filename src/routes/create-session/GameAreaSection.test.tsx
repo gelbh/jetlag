@@ -39,6 +39,7 @@ const baseModel: GameAreaSectionModel = {
   userPresets: [],
   loadedPreset: null,
   appliedPresetIds: [],
+  pendingPresetIds: [],
   loading: false,
   verifyingAccess: false,
   searchLoading: false,
@@ -54,6 +55,9 @@ const baseModel: GameAreaSectionModel = {
   metros: [],
   onPresetSelect: vi.fn(),
   onApplyPresets: vi.fn(),
+  onPendingPresetAdd: vi.fn(),
+  onPendingPresetRemove: vi.fn(),
+  onApplyPendingPresets: vi.fn(),
   onSavePreset: vi.fn(),
   onOpenFramingModal: vi.fn(),
   onRemoveSelectedArea: vi.fn(),
@@ -152,6 +156,8 @@ describe("GameAreaSection create wizard steps", () => {
     renderSection(
       {
         ...baseModel,
+        pendingPresetIds: ["preset-dublin"],
+        appliedPresetIds: ["preset-dublin"],
         loadedPreset: {
           id: "preset-dublin",
           name: "Dublin medium",
@@ -170,7 +176,8 @@ describe("GameAreaSection create wizard steps", () => {
     );
     expect(screen.getByRole("button", { name: "Preset" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText(/medium · metric · Dublin, Ireland/i)).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("preset-dublin");
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
+    expect(screen.getByRole("button", { name: /Primary · Dublin medium/i })).toBeInTheDocument();
     expect(screen.queryByRole("img")).toBeNull();
   });
 

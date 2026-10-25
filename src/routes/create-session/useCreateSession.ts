@@ -198,6 +198,7 @@ export function useCreateSession() {
   const appliedPresetRef = useRef<string | null>(null);
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
   const [appliedPresetIds, setAppliedPresetIds] = useState<string[]>([]);
+  const [pendingPresetIds, setPendingPresetIds] = useState<string[]>([]);
   const appliedPresetStateRef = useRef<{ id: string | null; ids: string[] }>({
     id: null,
     ids: [],
@@ -246,6 +247,7 @@ export function useCreateSession() {
           appliedPresetRef.current = priorAppliedId;
           setAppliedPresetId(priorAppliedId);
           setAppliedPresetIds(priorAppliedIds);
+          setPendingPresetIds(priorAppliedIds);
           return;
         }
         // No prior successful apply matching URL: leave applied cleared and sync URL
@@ -253,6 +255,7 @@ export function useCreateSession() {
         appliedPresetRef.current = null;
         setAppliedPresetId(null);
         setAppliedPresetIds([]);
+        setPendingPresetIds([]);
         if (priorUrlPresetId) {
           setSearchParams(
             (current) => {
@@ -387,6 +390,7 @@ export function useCreateSession() {
         }
         setAppliedPresetId(primaryId);
         setAppliedPresetIds([...orderedIds]);
+        setPendingPresetIds([...orderedIds]);
         setError(null);
         setSearchParams(
           (current) => {
@@ -418,11 +422,26 @@ export function useCreateSession() {
     [applyPresets],
   );
 
+  const onPendingPresetAdd = useCallback((presetId: string) => {
+    setPendingPresetIds((current) =>
+      current.includes(presetId) ? current : [...current, presetId],
+    );
+  }, []);
+
+  const onPendingPresetRemove = useCallback((presetId: string) => {
+    setPendingPresetIds((current) => current.filter((id) => id !== presetId));
+  }, []);
+
+  const onApplyPendingPresets = useCallback(() => {
+    applyPresets(pendingPresetIds);
+  }, [applyPresets, pendingPresetIds]);
+
   const clearLoadedPreset = useCallback(() => {
     presetApplyGenerationRef.current += 1;
     appliedPresetRef.current = null;
     setAppliedPresetId(null);
     setAppliedPresetIds([]);
+    setPendingPresetIds([]);
     setSearchParams(
       (current) => {
         if (!current.has("preset")) {
@@ -442,6 +461,7 @@ export function useCreateSession() {
       appliedPresetRef.current = null;
       setAppliedPresetId(null);
       setAppliedPresetIds([]);
+      // Leave pendingPresetIds: it is the Where edit buffer, not URL-backed.
       return;
     }
 
@@ -1168,8 +1188,12 @@ export function useCreateSession() {
     loadedPresetId,
     loadedPreset,
     appliedPresetIds,
+    pendingPresetIds,
     selectPreset,
     applyPresets,
+    onPendingPresetAdd,
+    onPendingPresetRemove,
+    onApplyPendingPresets,
     loading: confirmBusy,
     createTask,
     verifyingAccess,

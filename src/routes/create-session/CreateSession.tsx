@@ -180,6 +180,7 @@ export function CreateSession() {
               userPresets: session.userPresets,
               loadedPreset: session.loadedPreset,
               appliedPresetIds: session.appliedPresetIds,
+              pendingPresetIds: session.pendingPresetIds,
               loading: session.loading,
               verifyingAccess: session.verifyingAccess,
               searchLoading: session.searchLoading,
@@ -196,6 +197,9 @@ export function CreateSession() {
               metros: session.metros,
               onPresetSelect: session.selectPreset,
               onApplyPresets: session.applyPresets,
+              onPendingPresetAdd: session.onPendingPresetAdd,
+              onPendingPresetRemove: session.onPendingPresetRemove,
+              onApplyPendingPresets: session.onApplyPendingPresets,
               onSavePreset: handleSavePreset,
               onOpenFramingModal: () => {
                 session.requestMap();

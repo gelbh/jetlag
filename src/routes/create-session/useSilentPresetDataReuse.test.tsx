@@ -382,7 +382,7 @@ describe("CreateSession silent preset data reuse", () => {
 
     renderCreateSession("/create?preset=loaded");
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("loaded");
+      expect(screen.getByRole("button", { name: /Primary · Loaded/i })).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(screen.getByText(/medium · metric/i)).toBeInTheDocument();
@@ -583,7 +583,7 @@ describe("CreateSession silent preset data reuse", () => {
 
     renderCreateSession("/create?preset=loaded");
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("loaded");
+      expect(screen.getByRole("button", { name: /Primary · Loaded/i })).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(loadRegionPackSessionBoundaries).toHaveBeenCalledWith("dublin", undefined);
@@ -733,7 +733,7 @@ describe("CreateSession silent preset data reuse", () => {
 
     renderCreateSession("/create?preset=loaded");
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("loaded");
+      expect(screen.getByRole("button", { name: /Primary · Loaded/i })).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(loadRegionPackSessionBoundaries).toHaveBeenCalled();
@@ -742,7 +742,7 @@ describe("CreateSession silent preset data reuse", () => {
     parseBoundaryFile.mockResolvedValue(DUBLIN_CITY_GAME_AREA);
     importBoundaryFile();
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).not.toHaveValue("loaded");
+      expect(screen.queryByRole("button", { name: /Primary · Loaded/i })).toBeNull();
     });
   });
 

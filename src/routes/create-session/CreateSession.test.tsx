@@ -499,7 +499,8 @@ describe("CreateSession", () => {
       expect(screen.getByText(/medium · metric · Cork, Ireland/i)).toBeInTheDocument();
     });
     expect(screen.getByRole("button", { name: "Preset" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("preset-cork");
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
+    expect(screen.getByRole("button", { name: /Primary · Cork weekend/i })).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByTestId("create-map")).toBeInTheDocument();
     });
@@ -510,6 +511,78 @@ describe("CreateSession", () => {
       ]);
     });
     expect(mapView.model?.recenterToken).toBeGreaterThan(0);
+  });
+
+  it("applies multiple presets as a unioned play area with primary settings", async () => {
+    const areaA = IMPORTED_AREA;
+    const areaB = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [-6.4, 53.3],
+          [-6.1, 53.3],
+          [-6.1, 53.4],
+          [-6.4, 53.4],
+          [-6.4, 53.3],
+        ],
+      ],
+    };
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([
+        {
+          id: "preset-a",
+          name: "Preset A",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Area A",
+          gameArea: areaA,
+          migrationStatus: "ok",
+        },
+        {
+          id: "preset-b",
+          name: "Preset B",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "large",
+          distanceUnit: "imperial",
+          advancedSettings: defaultAdvancedSessionSettings("large", "imperial"),
+          placeLabel: "Area B",
+          gameArea: areaB,
+          migrationStatus: "ok",
+        },
+      ]),
+    });
+
+    renderCreateSession();
+    fireEvent.click(screen.getByRole("button", { name: "Preset" }));
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-a" },
+    });
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-b" },
+    });
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
+    expect(screen.getByRole("button", { name: /Primary · Preset A/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Preset B/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /apply presets/i }));
+
+    await waitFor(() => {
+      expect(mapView.model?.focusBounds).toEqual([
+        [51.85, -8.55],
+        [53.4, -6.1],
+      ]);
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/medium · metric · Area A/i)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/imperial/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/\+ 1 areas/i)).toBeInTheDocument();
   });
 
   it("restores applied preset ids after a failed apply so silent reuse is not stuck", async () => {
@@ -547,7 +620,7 @@ describe("CreateSession", () => {
     renderCreateSession("/create?preset=preset-cork");
 
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("preset-cork");
+      expect(screen.getByRole("button", { name: /Primary · Cork weekend/i })).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(silentReuseProbe.appliedPresetId).toBe("preset-cork");
@@ -557,9 +630,11 @@ describe("CreateSession", () => {
     fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
       target: { value: "preset-broken" },
     });
+    fireEvent.click(screen.getByRole("button", { name: /apply presets/i }));
 
     expect(await screen.findByText(/has no play area/i)).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("preset-cork");
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
+    expect(screen.getByRole("button", { name: /Primary · Cork weekend/i })).toBeInTheDocument();
     await waitFor(() => {
       expect(silentReuseProbe.loadedPresetId).toBe("preset-cork");
       expect(silentReuseProbe.appliedPresetId).toBe("preset-cork");
@@ -674,9 +749,8 @@ describe("CreateSession", () => {
         "true",
       );
     });
-    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue(
-      "bundled:dublin-county",
-    );
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
+    expect(screen.getByRole("button", { name: /Primary · County Dublin/i })).toBeInTheDocument();
   });
 
   it("Confirm with no area asks for Search, Preset, or Draw", async () => {
@@ -855,8 +929,9 @@ describe("CreateSession", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("bundled:london");
+      expect(screen.getByRole("button", { name: /Primary · Greater London/i })).toBeInTheDocument();
     });
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
     expect(screen.queryByDisplayValue("Dublin, Ireland")).toBeNull();
 
     await waitFor(() => {

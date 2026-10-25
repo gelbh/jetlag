@@ -1,5 +1,5 @@
 import { NativeSelect, Text } from "@mantine/core";
-import { BoundingBoxIcon } from "@phosphor-icons/react";
+import { BoundingBoxIcon, CheckIcon } from "@phosphor-icons/react";
 import {
   PlaceAreaSearchFields,
   PlaceAreaSearchInsetResults,
@@ -15,6 +15,26 @@ import { flagMarkForBundledPresetId } from "../../domain/regions/bundledPresetFl
 import { formatBundledPresetLocation } from "../../domain/regions/bundledPresetHierarchy";
 import type { GameAreaSectionModel, WhereSource } from "./GameAreaSection";
 
+function pendingPresetLabel(model: GameAreaSectionModel, presetId: string): string {
+  if (model.loadedPreset?.id === presetId) {
+    return model.loadedPreset.name;
+  }
+  const fromFavourites = model.favouritePresetSelectOptions.find(
+    (option) => option.presetId === presetId,
+  );
+  if (fromFavourites) {
+    return fromFavourites.name;
+  }
+  for (const group of model.bundledPresetSelectGroups) {
+    const option = group.options.find((entry) => entry.presetId === presetId);
+    if (option) {
+      return option.name;
+    }
+  }
+  const fromUser = model.userPresets.find((preset) => preset.id === presetId);
+  return fromUser?.name ?? presetId;
+}
+
 export function GameAreaWhereStep({
   model,
   whereSource,
@@ -29,6 +49,8 @@ export function GameAreaWhereStep({
     favouritePresetSelectOptions,
     userPresets,
     loadedPreset,
+    appliedPresetIds,
+    pendingPresetIds,
     loading,
     verifyingAccess,
     searchLoading,
@@ -39,7 +61,9 @@ export function GameAreaWhereStep({
     selectedPlaceId,
     selectedPlace,
     selectedAreas,
-    onPresetSelect,
+    onPendingPresetAdd,
+    onPendingPresetRemove,
+    onApplyPendingPresets,
     onOpenFramingModal,
     onRemoveSelectedArea,
     onLocationQueryChange,
@@ -55,6 +79,7 @@ export function GameAreaWhereStep({
     ? formatBundledPresetLocation(loadedBundledDefinition)
     : undefined;
   const loadedPresetFlag = loadedPreset ? flagMarkForBundledPresetId(loadedPreset.id) : null;
+  const secondaryAreaCount = Math.max(0, appliedPresetIds.length - 1);
 
   const presetIdsInSelect = new Set<string>([
     ...favouritePresetSelectOptions.map((option) => option.presetId),
@@ -111,13 +136,13 @@ export function GameAreaWhereStep({
             <NativeSelect
               aria-label="Game preset"
               data={presetSelectData}
-              value={loadedPreset?.id ?? ""}
+              value=""
               disabled={loading || verifyingAccess}
               onChange={(event) => {
                 const presetId = event.currentTarget.value;
                 if (presetId) {
                   onWhereSourceChange("preset");
-                  onPresetSelect(presetId);
+                  onPendingPresetAdd(presetId);
                 }
               }}
               styles={insetTextInputStyles}
@@ -146,6 +171,35 @@ export function GameAreaWhereStep({
             />
           )}
         </InsetGroup>
+        {whereSource === "preset" && pendingPresetIds.length > 0 ? (
+          <div className="flex flex-wrap gap-2 px-1">
+            {pendingPresetIds.map((presetId, index) => {
+              const name = pendingPresetLabel(model, presetId);
+              const label = index === 0 ? `Primary · ${name} · Remove` : `${name} · Remove`;
+              return (
+                <button
+                  key={presetId}
+                  type="button"
+                  onClick={() => onPendingPresetRemove(presetId)}
+                  className="rounded-full border border-rule bg-canvas px-3 py-1.5 text-xs font-semibold text-field-ink"
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+        {whereSource === "preset" ? (
+          <InsetGroup>
+            <InsetRow
+              label="Apply presets"
+              icon={<CheckIcon size={18} weight="bold" />}
+              onClick={onApplyPendingPresets}
+              disabled={pendingPresetIds.length < 1 || loading || verifyingAccess}
+              showChevron={false}
+            />
+          </InsetGroup>
+        ) : null}
       </div>
       {whereSource === "preset" && loadedPreset ? (
         <InsetGroup>
@@ -190,6 +244,15 @@ export function GameAreaWhereStep({
                 {loadedPreset.gameSize} · {loadedPreset.distanceUnit}
                 {loadedPreset.placeLabel ? ` · ${loadedPreset.placeLabel}` : ""}
               </Text>
+              {secondaryAreaCount > 0 ? (
+                <Text
+                  component="p"
+                  c="var(--color-field-ink-muted)"
+                  style={{ margin: 0, marginTop: "0.25rem", fontSize: "0.8125rem" }}
+                >
+                  + {secondaryAreaCount} areas
+                </Text>
+              ) : null}
               {loadedPresetLocation ? (
                 <Text
                   component="p"
