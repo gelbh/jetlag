@@ -132,6 +132,8 @@ export function useCreateSession() {
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const framing = useGameAreaFraming();
+  const applyFocusToGameArea = framing.applyFocusToGameArea;
+  const resetManualFraming = framing.resetManualFraming;
   const mapMount = useCreateSessionMapMount();
   const { requestMap } = mapMount;
   const [framingModalOpen, setFramingModalOpen] = useState(false);
@@ -204,9 +206,11 @@ export function useCreateSession() {
     id: null,
     ids: [],
   });
-  appliedPresetStateRef.current = { id: appliedPresetId, ids: appliedPresetIds };
   const searchParamsRef = useRef(searchParams);
-  searchParamsRef.current = searchParams;
+  useLayoutEffect(() => {
+    appliedPresetStateRef.current = { id: appliedPresetId, ids: appliedPresetIds };
+    searchParamsRef.current = searchParams;
+  }, [appliedPresetId, appliedPresetIds, searchParams]);
   const presetApplyGenerationRef = useRef(0);
   const resetSilentReuseOverlayRef = useRef<() => void>(() => {});
   const packPlayAreaRef = useRef<{
@@ -431,8 +435,8 @@ export function useCreateSession() {
           setSessionTier(draft.sessionTier);
         }
         setImportedGameArea(importedArea);
-        framing.resetManualFraming();
-        framing.applyFocusToGameArea(importedArea);
+        resetManualFraming();
+        applyFocusToGameArea(importedArea);
         setMapFocusToken((token) => token + 1);
         if (draft.placeLabel) {
           setLocationQuery(draft.placeLabel);
@@ -461,13 +465,7 @@ export function useCreateSession() {
 
       void run();
     },
-    [
-      framing.applyFocusToGameArea,
-      framing.resetManualFraming,
-      presets,
-      requestMap,
-      setSearchParams,
-    ],
+    [applyFocusToGameArea, presets, requestMap, resetManualFraming, setSearchParams],
   );
 
   const selectPreset = useCallback(
