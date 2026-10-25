@@ -370,11 +370,11 @@ export function useTentacleTool({
           if (isLatestRequest(requestId)) {
             reopenCategoryPicker();
           }
-          return;
-        }
-        task.fail(error);
-        if (isLatestRequest(requestId)) {
-          setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
+        } else {
+          task.fail(error);
+          if (isLatestRequest(requestId)) {
+            setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
+          }
         }
       }
       if (isLatestRequest(requestId)) {
