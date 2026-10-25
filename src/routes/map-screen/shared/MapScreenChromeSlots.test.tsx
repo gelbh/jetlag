@@ -29,6 +29,7 @@ describe("MapScreenChromeSlots", () => {
     expect(screen.getByText("Toolbar slot")).toBeInTheDocument();
     expect(screen.getByText("Sheet child")).toBeInTheDocument();
     expect(document.querySelector(".map-chrome-hud")).not.toBeNull();
+    expect(document.querySelector('[data-resume-ready="true"]')).not.toBeNull();
     expect(document.querySelector("[data-testid='desktop-ops-shell']")).toBeNull();
   });
 

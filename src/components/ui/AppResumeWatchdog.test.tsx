@@ -99,6 +99,10 @@ describe("AppResumeWatchdog", () => {
     vi.unstubAllGlobals();
     document.getElementById("root")?.remove();
     sessionStorage.clear();
+    Object.defineProperty(navigator, "onLine", {
+      configurable: true,
+      get: () => true,
+    });
   });
 
   it("does not reload when #root has interactive controls", async () => {
@@ -227,5 +231,41 @@ describe("AppResumeWatchdog", () => {
         adminRoute: true,
       }),
     );
+  });
+
+  it("when offline at watchdog fire, skips reload, captures resume_offline, shows banner", async () => {
+    const root = document.createElement("div");
+    root.id = "root";
+    document.body.appendChild(root);
+    Object.defineProperty(navigator, "onLine", {
+      configurable: true,
+      get: () => false,
+    });
+
+    const { getByRole, queryByRole } = renderWatchdog();
+    triggerVisibleResume();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(350);
+    });
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem(RESUME_WATCHDOG_RELOAD_KEY)).toBeNull();
+    expect(captureResumeShellUnresponsiveMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resumeOffline: true,
+      }),
+    );
+    expect(getByRole("status")).toHaveTextContent(/offline/i);
+
+    Object.defineProperty(navigator, "onLine", {
+      configurable: true,
+      get: () => true,
+    });
+    await act(async () => {
+      window.dispatchEvent(new Event("online"));
+    });
+
+    expect(queryByRole("status")).toBeNull();
   });
 });
