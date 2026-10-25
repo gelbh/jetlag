@@ -195,8 +195,6 @@ export function CreateSession() {
               previewGameArea: session.previewGameArea,
               transitMetroId: session.transitMetroId,
               metros: session.metros,
-              onPresetSelect: session.selectPreset,
-              onApplyPresets: session.applyPresets,
               onPendingPresetAdd: session.onPendingPresetAdd,
               onPendingPresetRemove: session.onPendingPresetRemove,
               onApplyPendingPresets: session.onApplyPendingPresets,

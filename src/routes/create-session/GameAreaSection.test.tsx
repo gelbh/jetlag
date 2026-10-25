@@ -53,8 +53,6 @@ const baseModel: GameAreaSectionModel = {
   previewGameArea: null,
   transitMetroId: "",
   metros: [],
-  onPresetSelect: vi.fn(),
-  onApplyPresets: vi.fn(),
   onPendingPresetAdd: vi.fn(),
   onPendingPresetRemove: vi.fn(),
   onApplyPendingPresets: vi.fn(),

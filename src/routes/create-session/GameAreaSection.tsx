@@ -29,8 +29,6 @@ export type GameAreaSectionModel = {
   previewGameArea: GameArea | null;
   transitMetroId: string;
   metros: TransitMetro[];
-  onPresetSelect: (presetId: string) => void;
-  onApplyPresets: (orderedIds: string[]) => void;
   onPendingPresetAdd: (presetId: string) => void;
   onPendingPresetRemove: (presetId: string) => void;
   onApplyPendingPresets: () => void;
