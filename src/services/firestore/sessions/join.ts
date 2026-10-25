@@ -245,6 +245,7 @@ async function joinRemoteSessionWithoutRead(
   }
 
   const sessionRef = doc(sessionsCollection(), sessionId);
+  // react-doctor-disable-next-line react-doctor/firebase-client-owned-authz-field -- firestore.rules membershipJoinTouchesOnlySelf limits this ungated join to the caller's own memberUids, memberRoles, and memberAppVersions entries
   await updateDoc(sessionRef, {
     memberUids: arrayUnion(uid),
     [`memberRoles.${uid}`]: role,

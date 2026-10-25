@@ -1,6 +1,6 @@
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import { bindRulesTestEnv, hidingZonePayload, sessionPayload } from "./helpers";
+import { bindRulesTestEnv, hidingZonePayload, seedSessionMembers, sessionPayload } from "./helpers";
 
 describe("firestore.rules — hiding zones", () => {
   const rules = bindRulesTestEnv();
@@ -10,14 +10,7 @@ describe("firestore.rules — hiding zones", () => {
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "hider-1"],
-        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "hider-1": "hider" });
 
     await assertSucceeds(
       hider
@@ -35,14 +28,7 @@ describe("firestore.rules — hiding zones", () => {
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const seeker = rules.testEnv.authenticatedContext("seeker-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "seeker-1"],
-        memberRoles: { "host-1": "seeker", "seeker-1": "seeker" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "seeker-1": "seeker" });
 
     await assertFails(
       seeker
@@ -60,14 +46,7 @@ describe("firestore.rules — hiding zones", () => {
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "hider-1"],
-        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "hider-1": "hider" });
 
     await assertFails(
       hider
@@ -85,14 +64,7 @@ describe("firestore.rules — hiding zones", () => {
     await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .update({
-        memberUids: ["host-1", "hider-1"],
-        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
-      });
+    await seedSessionMembers(rules.testEnv, { "host-1": "seeker", "hider-1": "hider" });
 
     await assertFails(
       hider
