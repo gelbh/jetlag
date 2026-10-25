@@ -6,6 +6,20 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.10.0 - 2026-10-25
+
+### Improvements
+
+- Place search shows a progress bar with a time estimate while it looks up matching cities and regions.
+- Loading a preset and opening the map show how far the boundary download has got.
+- The map preload indicator now also counts the area boundaries fetched when you create or join a game.
+- Matching, tentacle and measuring searches show a progress bar with the current step, a time estimate and a Cancel button instead of an endless spinner.
+- Your own questions no longer wait behind the background map preload, and cancelling a search frees its map-server slot right away.
+- Joining or creating a game, rebuilding the shaded area, random questions and hider answer checks now show what step they are on.
+- After you Accept analytics, signed-in accounts may show email, display name, and sign-in provider on the PostHog person profile (with matching privacy disclosure)
+- Tentacle answers use elim-only map shading without a leftover green disk or edit dot
+- Hider bottom dock slots are wider so Set zone and Expansion labels fit
+
 ## 1.9.0 - 2026-10-25
 
 ### Fixes
