@@ -195,6 +195,21 @@ vi.mock("@/services/core/capture/kmzImport", () => ({
   parseBoundaryFile,
 }));
 
+const silentReuseProbe = vi.hoisted(() => ({
+  appliedPresetId: null as string | null,
+  loadedPresetId: null as string | null,
+}));
+vi.mock("./useSilentPresetDataReuse", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./useSilentPresetDataReuse")>();
+  return {
+    useSilentPresetDataReuse: (args: Parameters<typeof actual.useSilentPresetDataReuse>[0]) => {
+      silentReuseProbe.appliedPresetId = args.appliedPresetId;
+      silentReuseProbe.loadedPresetId = args.loadedPresetId;
+      return actual.useSilentPresetDataReuse(args);
+    },
+  };
+});
+
 const IMPORTED_AREA = {
   type: "Polygon" as const,
   coordinates: [
@@ -264,6 +279,8 @@ beforeEach(() => {
   createPremiumRemoteSession.mockClear();
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
   loadRegionPackSessionBoundaries.mockClear();
+  silentReuseProbe.appliedPresetId = null;
+  silentReuseProbe.loadedPresetId = null;
   useGamePresetStore.setState({
     presets: mergeBundledPresets([]),
     favouritePresetIds: [],
@@ -493,6 +510,60 @@ describe("CreateSession", () => {
       ]);
     });
     expect(mapView.model?.recenterToken).toBeGreaterThan(0);
+  });
+
+  it("restores applied preset ids after a failed apply so silent reuse is not stuck", async () => {
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([
+        {
+          id: "preset-cork",
+          name: "Cork weekend",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Cork, Ireland",
+          gameArea: IMPORTED_AREA,
+          focusBounds: { south: 51.85, west: -8.55, north: 51.95, east: -8.4 },
+          migrationStatus: "ok",
+        },
+        {
+          id: "preset-broken",
+          name: "Broken empty",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Nowhere",
+          migrationStatus: "ok",
+        },
+      ]),
+    });
+
+    renderCreateSession("/create?preset=preset-cork");
+
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("preset-cork");
+    });
+    await waitFor(() => {
+      expect(silentReuseProbe.appliedPresetId).toBe("preset-cork");
+      expect(silentReuseProbe.loadedPresetId).toBe("preset-cork");
+    });
+
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-broken" },
+    });
+
+    expect(await screen.findByText(/has no play area/i)).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("preset-cork");
+    await waitFor(() => {
+      expect(silentReuseProbe.loadedPresetId).toBe("preset-cork");
+      expect(silentReuseProbe.appliedPresetId).toBe("preset-cork");
+    });
   });
 
   it("auto-selects the top ranked place and pans again when switching results", async () => {

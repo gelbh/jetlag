@@ -198,6 +198,13 @@ export function useCreateSession() {
   const appliedPresetRef = useRef<string | null>(null);
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
   const [appliedPresetIds, setAppliedPresetIds] = useState<string[]>([]);
+  const appliedPresetStateRef = useRef<{ id: string | null; ids: string[] }>({
+    id: null,
+    ids: [],
+  });
+  appliedPresetStateRef.current = { id: appliedPresetId, ids: appliedPresetIds };
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
   const presetApplyGenerationRef = useRef(0);
   const resetSilentReuseOverlayRef = useRef<() => void>(() => {});
   const packPlayAreaRef = useRef<{
@@ -222,10 +229,44 @@ export function useCreateSession() {
         return;
       }
 
+      // Snapshot prior successful apply so resolve/pack failure can restore ids
+      // (and silent-reuse gate) without clearing up front. Read via refs so
+      // applyPresets identity does not churn with every applied-id update.
+      const priorAppliedId = appliedPresetStateRef.current.id;
+      const priorAppliedIds = appliedPresetStateRef.current.ids;
+      const priorUrlPresetId = searchParamsRef.current.get("preset");
+
       // Eager guard so URL effect / re-entry skip while async resolve runs.
       appliedPresetRef.current = primaryId;
       const applyGeneration = ++presetApplyGenerationRef.current;
       const isStale = () => applyGeneration !== presetApplyGenerationRef.current;
+
+      const restoreAppliedAfterFailedApply = () => {
+        if (priorAppliedId && priorUrlPresetId === priorAppliedId) {
+          appliedPresetRef.current = priorAppliedId;
+          setAppliedPresetId(priorAppliedId);
+          setAppliedPresetIds(priorAppliedIds);
+          return;
+        }
+        // No prior successful apply matching URL: leave applied cleared and sync URL
+        // so silent reuse cannot stick on loadedPresetId !== appliedPresetId.
+        appliedPresetRef.current = null;
+        setAppliedPresetId(null);
+        setAppliedPresetIds([]);
+        if (priorUrlPresetId) {
+          setSearchParams(
+            (current) => {
+              if (!current.has("preset")) {
+                return current;
+              }
+              const next = new URLSearchParams(current);
+              next.delete("preset");
+              return next;
+            },
+            { replace: true },
+          );
+        }
+      };
 
       const run = async () => {
         const presetsById = new Map(presets.map((entry) => [entry.id, entry]));
@@ -234,14 +275,16 @@ export function useCreateSession() {
           return;
         }
         if (!resolved.ok) {
-          // Keep appliedPresetRef so the URL effect does not retry; do not commit settings.
+          // Do not commit settings; restore prior applied ids or clear URL mismatch.
           setError(resolved.message);
+          restoreAppliedAfterFailedApply();
           return;
         }
 
         const preset = presetsById.get(primaryId);
         if (!preset) {
           setError(`Unknown preset: ${primaryId}`);
+          restoreAppliedAfterFailedApply();
           return;
         }
 
@@ -284,6 +327,7 @@ export function useCreateSession() {
                 ? loadError.message
                 : "Couldn't load region boundary data.",
             );
+            restoreAppliedAfterFailedApply();
             return;
           }
         }
@@ -367,8 +411,8 @@ export function useCreateSession() {
 
   const selectPreset = useCallback(
     (presetId: string) => {
-      setAppliedPresetId(null);
-      setAppliedPresetIds([]);
+      // Do not clear applied ids here: that opened a window where URL still named
+      // the prior preset while appliedPresetId was null (silent-reuse stall).
       applyPresets([presetId]);
     },
     [applyPresets],
