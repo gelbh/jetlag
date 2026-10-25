@@ -126,7 +126,15 @@ function parseRoleGates(value: unknown) {
   }
 
   const leaders = gates.leaders as Record<string, unknown>;
-  const parsed: { version: 1; leaders: { seeker?: string; hider?: string } } = {
+  const parsed: {
+    version: 1;
+    leaders: {
+      seeker?: string;
+      hider?: string;
+      teamA?: string;
+      teamB?: string;
+    };
+  } = {
     version: 1,
     leaders: {},
   };
@@ -136,6 +144,12 @@ function parseRoleGates(value: unknown) {
   }
   if (typeof leaders.hider === "string") {
     parsed.leaders.hider = leaders.hider;
+  }
+  if (typeof leaders.teamA === "string") {
+    parsed.leaders.teamA = leaders.teamA;
+  }
+  if (typeof leaders.teamB === "string") {
+    parsed.leaders.teamB = leaders.teamB;
   }
 
   return parsed;

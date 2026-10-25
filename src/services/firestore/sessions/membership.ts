@@ -7,7 +7,10 @@ import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
 import type { SessionMode } from "@/domain/session/castleSiege/mode";
 import type { CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { type PlayerRole, resolvePlayerRole } from "@/domain/session/players/playerRole";
-import { buildRoleGatesForHost } from "@/domain/session/players/roleGates";
+import {
+  buildRoleGatesForCastleSiegeHost,
+  buildRoleGatesForHost,
+} from "@/domain/session/players/roleGates";
 import { type GameSize, hidingZoneRadiusMeters } from "@/domain/session/size/gameSize";
 import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
@@ -255,7 +258,9 @@ export async function createRemoteSession(
       cause: error,
     });
   }
-  session.roleGates = buildRoleGatesForHost(hostUid, effectiveHostRole);
+  session.roleGates = isCastleSiege
+    ? buildRoleGatesForCastleSiegeHost(hostUid, options?.hostCastleSiegeRole ?? "teamA")
+    : buildRoleGatesForHost(hostUid, effectiveHostRole);
   // Only once gates stick: a rolled-back create must not leave a proof or replace the stored secret.
   void ensureMemberProof(session.id, hostUid);
 
