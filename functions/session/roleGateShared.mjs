@@ -127,6 +127,34 @@ export function promoteOrClearRoleLeader(roleGates, memberUids, memberRoles, rol
   return { roleGates: { version: 1, leaders: nextLeaders }, clearSecret: false };
 }
 
+const CASTLE_SIEGE_PLAYING_TEAM_MAX = 4;
+const CASTLE_SIEGE_REFEREE_MAX = 1;
+
+export function countCastleSiegeSeat(roles, seat) {
+  if (!roles || typeof roles !== "object") {
+    return 0;
+  }
+
+  return Object.values(roles).filter((memberSeat) => memberSeat === seat).length;
+}
+
+export function isCastleSiegeSeatFull(roles, seat) {
+  if (seat === "observer") {
+    return false;
+  }
+
+  const count = countCastleSiegeSeat(roles, seat);
+  if (seat === "referee") {
+    return count >= CASTLE_SIEGE_REFEREE_MAX;
+  }
+
+  if (seat === "teamA" || seat === "teamB") {
+    return count >= CASTLE_SIEGE_PLAYING_TEAM_MAX;
+  }
+
+  return false;
+}
+
 export function buildInitialRoleSecrets(hostRole, options = {}) {
   if (options.mode === "castleSiege") {
     return {

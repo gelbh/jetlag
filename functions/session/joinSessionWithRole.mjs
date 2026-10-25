@@ -11,7 +11,9 @@ import {
 } from "./memberProofs.mjs";
 import {
   buildMembershipHealState,
+  countCastleSiegeSeat,
   countMembersWithRole,
+  isCastleSiegeSeatFull,
   isRoleGatedSession,
   promoteOrClearRoleLeader,
   readMembershipFields,
@@ -27,8 +29,12 @@ export const JOIN_PASSCODE_REQUIRED = "JOIN_PASSCODE_REQUIRED";
 export const JOIN_INCOMPATIBLE_VERSION = "JOIN_INCOMPATIBLE_VERSION";
 export const JOIN_HEAL_ROLE_MISMATCH = "JOIN_HEAL_ROLE_MISMATCH";
 export const JOIN_HEAL_PROOF_INVALID = "JOIN_HEAL_PROOF_INVALID";
+export const JOIN_CS_ROLE_REQUIRED = "JOIN_CS_ROLE_REQUIRED";
+export const JOIN_ROLE_MODE_MISMATCH = "JOIN_ROLE_MODE_MISMATCH";
+export const JOIN_SEAT_FULL = "JOIN_SEAT_FULL";
 
 const VALID_JOIN_ROLES = new Set(["seeker", "hider", "observer", "admin"]);
+const VALID_CASTLE_SIEGE_SEATS = new Set(["teamA", "teamB", "referee", "observer"]);
 
 function normalizeSessionCode(code) {
   return typeof code === "string" ? code.trim().toUpperCase() : "";
@@ -150,6 +156,128 @@ function assertRolePasscodeForJoin(
   };
 }
 
+function readCastleSiegeRoles(data) {
+  return data.castleSiegeRoles && typeof data.castleSiegeRoles === "object"
+    ? { ...data.castleSiegeRoles }
+    : {};
+}
+
+function storedCastleSiegeSeat(castleSiegeRoles, memberUid) {
+  return castleSiegeRoles[memberUid];
+}
+
+function applyCsLeaderPromotionOnSeatSwitch({
+  uid,
+  currentSeat,
+  roleGates,
+  memberUids,
+  castleSiegeRoles,
+}) {
+  if (currentSeat !== "teamA" && currentSeat !== "teamB") {
+    return { roleGates, clearSecret: false };
+  }
+
+  if (roleGates?.leaders?.[currentSeat] !== uid) {
+    return { roleGates, clearSecret: false };
+  }
+
+  const promoted = promoteOrClearRoleLeader(
+    roleGates,
+    memberUids,
+    castleSiegeRoles,
+    currentSeat,
+    uid,
+  );
+  return {
+    roleGates: promoted.roleGates,
+    clearSecret: promoted.clearSecret,
+  };
+}
+
+function assertCastleSiegeSeatCapacity(castleSiegeRoles, seat, uid) {
+  if (castleSiegeRoles[uid] === seat) {
+    return;
+  }
+
+  if (isCastleSiegeSeatFull(castleSiegeRoles, seat)) {
+    throw new Error(JOIN_SEAT_FULL);
+  }
+}
+
+function assertCastleSiegePasscodeForJoin(
+  seat,
+  castleSiegeRoles,
+  uid,
+  rolePasscode,
+  secrets,
+  returningMemberUid,
+) {
+  const alreadyInSeat =
+    castleSiegeRoles[uid] === seat ||
+    (typeof returningMemberUid === "string" &&
+      storedCastleSiegeSeat(castleSiegeRoles, returningMemberUid) === seat);
+  if (alreadyInSeat) {
+    return {
+      becameLeader: false,
+      returnedPasscode: undefined,
+      secretsPatch: null,
+      roleGatesPatch: null,
+    };
+  }
+
+  if (seat === "observer" || seat === "referee") {
+    const normalized = normalizeRolePasscode(rolePasscode ?? "");
+    if (!normalized) {
+      throw new Error(JOIN_PASSCODE_REQUIRED);
+    }
+    if (!verifyRolePasscode(secrets[seat], normalized)) {
+      throw new Error(JOIN_WRONG_PASSCODE);
+    }
+    return {
+      becameLeader: false,
+      returnedPasscode: undefined,
+      secretsPatch: null,
+      roleGatesPatch: null,
+    };
+  }
+
+  if (seat !== "teamA" && seat !== "teamB") {
+    return {
+      becameLeader: false,
+      returnedPasscode: undefined,
+      secretsPatch: null,
+      roleGatesPatch: null,
+    };
+  }
+
+  const occupied = countCastleSiegeSeat(castleSiegeRoles, seat) > 0;
+  if (!occupied) {
+    const secret = newRoleSecret();
+    return {
+      becameLeader: true,
+      returnedPasscode: secret.code,
+      secretsPatch: { [seat]: secret },
+      roleGatesPatch: { [seat]: uid },
+    };
+  }
+
+  const normalized = normalizeRolePasscode(rolePasscode ?? "");
+  if (!normalized) {
+    throw new Error(JOIN_PASSCODE_REQUIRED);
+  }
+
+  if (!verifyRolePasscode(secrets[seat], normalized)) {
+    throw new Error(JOIN_WRONG_PASSCODE);
+  }
+
+  return {
+    becameLeader: false,
+    returnedPasscode: undefined,
+    secretsPatch: null,
+    roleGatesPatch: null,
+  };
+}
+
 function proofSetWrite(sessionRef, uid, data) {
   return { op: "set", ref: memberProofRef(sessionRef, uid), data };
 }
@@ -209,6 +337,11 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput, options = {
   const code = normalizeSessionCode(rawInput?.code);
   const role = rawInput?.role;
   const rolePasscode = rawInput?.rolePasscode;
+  const castleSiegeRoleRaw = rawInput?.castleSiegeRole;
+  const castleSiegeRole =
+    typeof castleSiegeRoleRaw === "string" && VALID_CASTLE_SIEGE_SEATS.has(castleSiegeRoleRaw)
+      ? castleSiegeRoleRaw
+      : undefined;
   const clientVersion = typeof rawInput?.clientVersion === "string" ? rawInput.clientVersion : "";
   const returningMemberUid = sanitizeReturningMemberUid(
     rawInput?.persistedMyUid,
@@ -224,6 +357,10 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput, options = {
 
   if (!VALID_JOIN_ROLES.has(role)) {
     throw new HttpsError("invalid-argument", "Invalid join role.");
+  }
+
+  if (castleSiegeRoleRaw != null && castleSiegeRoleRaw !== "" && castleSiegeRole === undefined) {
+    throw new HttpsError("invalid-argument", "Invalid Castle Siege seat.");
   }
 
   if (role === "admin" && !isAdminAuth(auth)) {
@@ -259,8 +396,21 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput, options = {
     }
 
     const gated = isRoleGatedSession(data);
+    const isCastleSiege = data.mode === "castleSiege";
     const membership = readMembershipFields(data);
     const { memberUids, memberRoles, memberAppVersions, hostUid } = membership;
+    const castleSiegeRoles = readCastleSiegeRoles(data);
+
+    if (isCastleSiege) {
+      if (role === "seeker" || role === "hider") {
+        throw new Error(JOIN_ROLE_MODE_MISMATCH);
+      }
+      if (!castleSiegeRole) {
+        throw new Error(JOIN_CS_ROLE_REQUIRED);
+      }
+    } else if (castleSiegeRole) {
+      throw new Error(JOIN_ROLE_MODE_MISMATCH);
+    }
 
     // returningMemberUid is client-supplied, so a heal may only take over a
     // current member's seat in that member's role. A non-member uid is not a heal.
@@ -272,8 +422,14 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput, options = {
     if (!gated && !healing) {
       throw new Error(JOIN_NOT_GATED);
     }
-    if (healing && storedMemberRole(memberRoles, healFromUid) !== role) {
-      throw new Error(JOIN_HEAL_ROLE_MISMATCH);
+    if (healing) {
+      if (isCastleSiege) {
+        if (storedCastleSiegeSeat(castleSiegeRoles, healFromUid) !== castleSiegeRole) {
+          throw new Error(JOIN_HEAL_ROLE_MISMATCH);
+        }
+      } else if (storedMemberRole(memberRoles, healFromUid) !== role) {
+        throw new Error(JOIN_HEAL_ROLE_MISMATCH);
+      }
     }
     // The healed uid keeps the host seat; promoting another member would hand host away.
     const hostPatch = healing && healFromUid === hostUid ? { hostUid: uid } : {};
@@ -297,24 +453,134 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput, options = {
     });
 
     if (!gated) {
+      const membershipRole = isCastleSiege ? "observer" : role;
       const ungatedHeal = buildMembershipHealState({
         existingMemberUids: memberUids,
         existingRoles: memberRoles,
         existingAppVersions: memberAppVersions,
         uid,
-        role,
+        role: membershipRole,
         clientVersion,
         returningMemberUid: healFromUid,
         currentHostUid: hostUid,
       });
+      if (isCastleSiege && castleSiegeRole) {
+        castleSiegeRoles[uid] = castleSiegeRole;
+        if (ungatedHeal.removedUid != null) {
+          delete castleSiegeRoles[ungatedHeal.removedUid];
+        }
+      }
       tx.update(sessionRef, {
         memberUids: ungatedHeal.memberUids,
         memberRoles: ungatedHeal.memberRoles,
         memberAppVersions: ungatedHeal.memberAppVersions,
+        ...(isCastleSiege ? { castleSiegeRoles } : {}),
         ...hostPatch,
       });
       applyMemberProofWrites(tx, proofWrites);
       result = { sessionId, rolePasscode: undefined, becameLeader: false };
+      return;
+    }
+
+    if (isCastleSiege) {
+      let roleGates = {
+        version: 1,
+        leaders: { ...(data.roleGates?.leaders ?? {}) },
+      };
+
+      const secretsSnap = await tx.get(secretsRef);
+      const secrets = secretsSnap.exists ? { ...secretsSnap.data() } : {};
+      let secretsChanged = false;
+
+      const currentCsSeat = castleSiegeRoles[uid];
+      if (currentCsSeat && currentCsSeat !== castleSiegeRole) {
+        const switched = applyCsLeaderPromotionOnSeatSwitch({
+          uid,
+          currentSeat: currentCsSeat,
+          roleGates,
+          memberUids,
+          castleSiegeRoles,
+        });
+        roleGates = switched.roleGates;
+        if (switched.clearSecret) {
+          delete secrets[currentCsSeat];
+          secretsChanged = true;
+        }
+      }
+
+      assertCastleSiegeSeatCapacity(castleSiegeRoles, castleSiegeRole, uid);
+
+      const passcodeResult =
+        role === "admin"
+          ? {
+              becameLeader: false,
+              returnedPasscode: undefined,
+              secretsPatch: null,
+              roleGatesPatch: null,
+            }
+          : assertCastleSiegePasscodeForJoin(
+              castleSiegeRole,
+              castleSiegeRoles,
+              uid,
+              rolePasscode,
+              secrets,
+              healFromUid,
+            );
+
+      if (passcodeResult.secretsPatch) {
+        Object.assign(secrets, passcodeResult.secretsPatch);
+        secretsChanged = true;
+      }
+      if (passcodeResult.roleGatesPatch) {
+        for (const [gateSeat, leaderUid] of Object.entries(passcodeResult.roleGatesPatch)) {
+          roleGates.leaders[gateSeat] = leaderUid;
+        }
+      }
+
+      const heal = buildMembershipHealState({
+        existingMemberUids: memberUids,
+        existingRoles: memberRoles,
+        existingAppVersions: memberAppVersions,
+        uid,
+        role: "observer",
+        clientVersion,
+        returningMemberUid: healFromUid,
+        currentHostUid: hostUid,
+      });
+
+      castleSiegeRoles[uid] = castleSiegeRole;
+      if (heal.removedUid != null) {
+        delete castleSiegeRoles[heal.removedUid];
+      }
+
+      if (heal.removedUid != null) {
+        for (const gateSeat of ["teamA", "teamB"]) {
+          if (roleGates.leaders[gateSeat] === heal.removedUid) {
+            roleGates.leaders[gateSeat] = uid;
+          }
+        }
+      }
+
+      const sessionUpdate = {
+        memberUids: heal.memberUids,
+        memberRoles: heal.memberRoles,
+        memberAppVersions: heal.memberAppVersions,
+        castleSiegeRoles,
+        roleGates,
+        ...hostPatch,
+      };
+
+      tx.update(sessionRef, sessionUpdate);
+      applyMemberProofWrites(tx, proofWrites);
+      if (secretsChanged || Object.keys(secrets).length > 0) {
+        tx.set(secretsRef, secrets);
+      }
+
+      result = {
+        sessionId,
+        rolePasscode: passcodeResult.returnedPasscode,
+        becameLeader: passcodeResult.becameLeader,
+      };
       return;
     }
 

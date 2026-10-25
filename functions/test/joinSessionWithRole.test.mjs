@@ -7,10 +7,13 @@ import {
   clearClientMinVersionCache,
 } from "../session/clientMinVersion.mjs";
 import {
+  JOIN_CS_ROLE_REQUIRED,
   JOIN_HEAL_PROOF_INVALID,
   JOIN_HEAL_ROLE_MISMATCH,
   JOIN_NOT_GATED,
   JOIN_PASSCODE_REQUIRED,
+  JOIN_ROLE_MODE_MISMATCH,
+  JOIN_SEAT_FULL,
   JOIN_SESSION_ENDED,
   JOIN_WRONG_PASSCODE,
   joinSessionWithRoleHandler,
@@ -884,6 +887,204 @@ test("heal with no proof uses the bounded fallback by default because the sunset
   assert.ok(!sessionData.memberUids.includes("old-seeker"));
   assert.deepEqual(Object.keys(proofs), ["new-seeker"]);
   assert.equal(proofs["new-seeker"].hash, STORED_PROOF.hash);
+});
+
+function openCastleSiegeSession(overrides = {}) {
+  return {
+    status: "active",
+    mode: "castleSiege",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host"],
+    memberRoles: { host: "observer" },
+    castleSiegeRoles: { host: "teamA" },
+    roleGates: { version: 1, leaders: { teamA: "host" } },
+    ...overrides,
+  };
+}
+
+test("castleSiege first teamB join returns passcode and writes both maps", async () => {
+  const writes = [];
+  const observerSecret = newRoleSecret();
+  const sessionData = openCastleSiegeSession();
+  const db = buildMockDb({
+    sessionData,
+    secrets: { teamA: newRoleSecret(), observer: observerSecret },
+    writes,
+  });
+
+  const result = await joinSessionWithRoleHandler(
+    db,
+    { uid: "player-2" },
+    {
+      code: "ABCD",
+      role: "observer",
+      castleSiegeRole: "teamB",
+      clientVersion: "0.2.0",
+    },
+  );
+
+  assert.equal(result.becameLeader, true);
+  assert.match(result.rolePasscode, /^[A-Z]{4}$/);
+  assert.equal(sessionData.memberRoles["player-2"], "observer");
+  assert.equal(sessionData.castleSiegeRoles["player-2"], "teamB");
+  assert.equal(sessionData.roleGates.leaders.teamB, "player-2");
+});
+
+test("castleSiege second teamA join requires passcode", async () => {
+  const writes = [];
+  const teamSecret = newRoleSecret();
+  const sessionData = openCastleSiegeSession({
+    memberUids: ["host", "mate"],
+    memberRoles: { host: "observer", mate: "observer" },
+    castleSiegeRoles: { host: "teamA", mate: "teamA" },
+  });
+  const db = buildMockDb({ sessionData, secrets: { teamA: teamSecret }, writes });
+
+  await assert.rejects(
+    () =>
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "player-3" },
+        {
+          code: "ABCD",
+          role: "observer",
+          castleSiegeRole: "teamA",
+          clientVersion: "0.2.0",
+        },
+      ),
+    (error) => error instanceof Error && error.message === JOIN_PASSCODE_REQUIRED,
+  );
+});
+
+test("castleSiege wrong team passcode throws", async () => {
+  const teamSecret = newRoleSecret();
+  const sessionData = openCastleSiegeSession({
+    memberUids: ["host", "mate"],
+    castleSiegeRoles: { host: "teamA", mate: "teamA" },
+  });
+  const db = buildMockDb({ sessionData, secrets: { teamA: teamSecret }, writes: [] });
+
+  await assert.rejects(
+    () =>
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "player-3" },
+        {
+          code: "ABCD",
+          role: "observer",
+          castleSiegeRole: "teamA",
+          rolePasscode: "WRNG",
+          clientVersion: "0.2.0",
+        },
+      ),
+    (error) => error instanceof Error && error.message === JOIN_WRONG_PASSCODE,
+  );
+});
+
+test("castleSiege rejects fifth teammate", async () => {
+  const roles = { host: "teamA", u2: "teamA", u3: "teamA", u4: "teamA" };
+  const sessionData = openCastleSiegeSession({
+    memberUids: ["host", "u2", "u3", "u4"],
+    memberRoles: { host: "observer", u2: "observer", u3: "observer", u4: "observer" },
+    castleSiegeRoles: roles,
+  });
+  const db = buildMockDb({ sessionData, secrets: { teamA: newRoleSecret() }, writes: [] });
+
+  await assert.rejects(
+    () =>
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "u5" },
+        {
+          code: "ABCD",
+          role: "observer",
+          castleSiegeRole: "teamA",
+          rolePasscode: "ABCD",
+          clientVersion: "0.2.0",
+        },
+      ),
+    (error) => error instanceof Error && error.message === JOIN_SEAT_FULL,
+  );
+});
+
+test("castleSiege rejects second referee", async () => {
+  const sessionData = openCastleSiegeSession({
+    memberUids: ["host", "ref-1"],
+    memberRoles: { host: "observer", "ref-1": "observer" },
+    castleSiegeRoles: { host: "teamA", "ref-1": "referee" },
+  });
+  const db = buildMockDb({ sessionData, secrets: { referee: newRoleSecret() }, writes: [] });
+
+  await assert.rejects(
+    () =>
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "ref-2" },
+        {
+          code: "ABCD",
+          role: "observer",
+          castleSiegeRole: "referee",
+          rolePasscode: "ABCD",
+          clientVersion: "0.2.0",
+        },
+      ),
+    (error) => error instanceof Error && error.message === JOIN_SEAT_FULL,
+  );
+});
+
+test("castleSiege rejects seeker role and missing seat", async () => {
+  const sessionData = openCastleSiegeSession();
+  const db = buildMockDb({ sessionData, writes: [] });
+
+  await assert.rejects(
+    () =>
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "guest" },
+        { code: "ABCD", role: "seeker", clientVersion: "0.2.0" },
+      ),
+    (error) => error instanceof Error && error.message === JOIN_ROLE_MODE_MISMATCH,
+  );
+
+  await assert.rejects(
+    () =>
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "guest" },
+        { code: "ABCD", role: "observer", clientVersion: "0.2.0" },
+      ),
+    (error) => error instanceof Error && error.message === JOIN_CS_ROLE_REQUIRED,
+  );
+});
+
+test("classic session rejects castleSiegeRole", async () => {
+  const writes = [];
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host"],
+    memberRoles: { host: "hider" },
+    roleGates: { version: 1, leaders: { hider: "host" } },
+  };
+  const db = buildMockDb({ sessionData, writes });
+
+  await assert.rejects(
+    () =>
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "guest" },
+        {
+          code: "ABCD",
+          role: "observer",
+          castleSiegeRole: "teamA",
+          clientVersion: "0.2.0",
+        },
+      ),
+    (error) => error instanceof Error && error.message === JOIN_ROLE_MODE_MISMATCH,
+  );
+  assert.equal(writes.length, 0);
 });
 
 test("heal role mismatch is reported before the proof check", async () => {

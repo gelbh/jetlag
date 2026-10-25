@@ -64,6 +64,27 @@ describe("rolePasscodeLifecycle", () => {
     expect(result.sessionId).toBe("sess-1");
   });
 
+  it("forwards castleSiegeRole on joinSessionWithRole", async () => {
+    const callable = vi.fn(async () => ({
+      data: { sessionId: "sess-cs", becameLeader: false },
+    }));
+    httpsCallable.mockReturnValue(callable);
+
+    await joinSessionWithRole({
+      code: "WXYZ",
+      role: "observer",
+      castleSiegeRole: "teamB",
+      clientVersion: "0.2.0",
+    });
+
+    expect(callable).toHaveBeenCalledWith({
+      code: "WXYZ",
+      role: "observer",
+      castleSiegeRole: "teamB",
+      clientVersion: "0.2.0",
+    });
+  });
+
   it("calls leaveSessionMembership with session id", async () => {
     const callable = vi.fn(async () => ({ data: { ok: true } }));
     httpsCallable.mockReturnValue(callable);

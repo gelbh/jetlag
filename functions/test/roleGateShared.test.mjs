@@ -4,6 +4,8 @@ import {
   buildInitialRoleSecrets,
   buildRoleGatesForCastleSiegeHost,
   buildRoleGatesForHost,
+  countCastleSiegeSeat,
+  isCastleSiegeSeatFull,
 } from "../session/roleGateShared.mjs";
 
 test("buildInitialRoleSecrets classic seeker mints observer and seeker", () => {
@@ -43,6 +45,17 @@ test("buildRoleGatesForHost classic seeker stamps seeker leader", () => {
     version: 1,
     leaders: { seeker: "host-1" },
   });
+});
+
+test("countCastleSiegeSeat and isCastleSiegeSeatFull enforce capacity", () => {
+  const roles = { a: "teamA", b: "teamA", c: "teamB", d: "referee" };
+  assert.equal(countCastleSiegeSeat(roles, "teamA"), 2);
+  assert.equal(isCastleSiegeSeatFull(roles, "teamA"), false);
+  roles.e = "teamA";
+  roles.f = "teamA";
+  assert.equal(isCastleSiegeSeatFull(roles, "teamA"), true);
+  assert.equal(isCastleSiegeSeatFull(roles, "referee"), true);
+  assert.equal(isCastleSiegeSeatFull(roles, "observer"), false);
 });
 
 test("buildRoleGatesForCastleSiegeHost stamps host playing seat leader", () => {
