@@ -724,6 +724,7 @@ export function useCreateSession() {
     presets,
     loadedPresetId,
     appliedPresetId,
+    appliedPresetIds,
     regionPackId,
     regionPackSubregionId,
     setAdvancedSettings,

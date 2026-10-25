@@ -32,6 +32,7 @@ export type UseSilentPresetDataReuseArgs = {
   presets: readonly GamePreset[];
   loadedPresetId: string | null;
   appliedPresetId: string | null;
+  appliedPresetIds: readonly string[];
   regionPackId: RegionPackId | undefined;
   regionPackSubregionId: string | undefined;
   setAdvancedSettings: Dispatch<SetStateAction<AdvancedSessionSettingsValue>>;
@@ -51,6 +52,7 @@ export function useSilentPresetDataReuse({
   presets,
   loadedPresetId,
   appliedPresetId,
+  appliedPresetIds,
   regionPackId,
   regionPackSubregionId,
   setAdvancedSettings,
@@ -88,7 +90,7 @@ export function useSilentPresetDataReuse({
     }
 
     const suggestion = suggestPresetDataReuseForGameArea(draftGameArea, presets, {
-      excludePresetIds: loadedPresetId ? [loadedPresetId] : undefined,
+      excludePresetIds: appliedPresetIds.length > 0 ? [...appliedPresetIds] : undefined,
     });
 
     const overlay = overlayRef.current;
@@ -197,6 +199,7 @@ export function useSilentPresetDataReuse({
       .catch(() => {});
   }, [
     appliedPresetId,
+    appliedPresetIds,
     draftGameArea,
     draftGameAreaFingerprint,
     loadedPresetId,
