@@ -3,12 +3,17 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
+import { unionGameAreas } from "@/domain/geometry/masks/unionGameAreas";
+import type { GameArea } from "@/domain/map/annotations";
 import { createMapBounds } from "@/domain/map/mapBounds";
 import { mergeBundledPresets } from "@/domain/regions/bundledGamePresets";
 import { GAME_PRESET_SCHEMA_VERSION } from "@/domain/session/presets/gamePreset";
+import * as resolvePresetPlayAreasModule from "@/domain/session/presets/resolvePresetPlayAreas";
+import { recommendGameSize } from "@/domain/session/size/gameSize";
 import { defaultAdvancedSessionSettings } from "@/domain/session/tools/advancedSessionSettings";
 import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
 import { useGamePresetStore } from "@/state/gamePresetStore";
+import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
 import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
@@ -195,6 +200,21 @@ vi.mock("@/services/core/capture/kmzImport", () => ({
   parseBoundaryFile,
 }));
 
+const silentReuseProbe = vi.hoisted(() => ({
+  appliedPresetId: null as string | null,
+  loadedPresetId: null as string | null,
+}));
+vi.mock("./useSilentPresetDataReuse", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./useSilentPresetDataReuse")>();
+  return {
+    useSilentPresetDataReuse: (args: Parameters<typeof actual.useSilentPresetDataReuse>[0]) => {
+      silentReuseProbe.appliedPresetId = args.appliedPresetId;
+      silentReuseProbe.loadedPresetId = args.loadedPresetId;
+      return actual.useSilentPresetDataReuse(args);
+    },
+  };
+});
+
 const IMPORTED_AREA = {
   type: "Polygon" as const,
   coordinates: [
@@ -264,6 +284,8 @@ beforeEach(() => {
   createPremiumRemoteSession.mockClear();
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
   loadRegionPackSessionBoundaries.mockClear();
+  silentReuseProbe.appliedPresetId = null;
+  silentReuseProbe.loadedPresetId = null;
   useGamePresetStore.setState({
     presets: mergeBundledPresets([]),
     favouritePresetIds: [],
@@ -482,7 +504,8 @@ describe("CreateSession", () => {
       expect(screen.getByText(/medium · metric · Cork, Ireland/i)).toBeInTheDocument();
     });
     expect(screen.getByRole("button", { name: "Preset" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("preset-cork");
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
+    expect(screen.getByRole("button", { name: /Primary · Cork weekend/i })).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByTestId("create-map")).toBeInTheDocument();
     });
@@ -493,6 +516,215 @@ describe("CreateSession", () => {
       ]);
     });
     expect(mapView.model?.recenterToken).toBeGreaterThan(0);
+  });
+
+  it("applies multiple presets as a unioned play area with primary settings", async () => {
+    const tinyPrimary: GameArea = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-6.27, 53.34],
+          [-6.25, 53.34],
+          [-6.25, 53.35],
+          [-6.27, 53.35],
+          [-6.27, 53.34],
+        ],
+      ],
+    };
+    const areaB = DUBLIN_CITY_GAME_AREA;
+    expect(recommendGameSize(tinyPrimary, "metric")).toBe("small");
+    const expectedUnionSize = recommendGameSize(unionGameAreas([tinyPrimary, areaB]), "metric");
+    expect(expectedUnionSize).not.toBe("small");
+
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([
+        {
+          id: "preset-a",
+          name: "Preset A",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "small",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("small", "metric"),
+          placeLabel: "Area A",
+          gameArea: tinyPrimary,
+          migrationStatus: "ok",
+        },
+        {
+          id: "preset-b",
+          name: "Preset B",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "large",
+          distanceUnit: "imperial",
+          advancedSettings: defaultAdvancedSessionSettings("large", "imperial"),
+          placeLabel: "Area B",
+          gameArea: areaB,
+          migrationStatus: "ok",
+        },
+      ]),
+    });
+
+    renderCreateSession();
+    fireEvent.click(screen.getByRole("button", { name: "Preset" }));
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-a" },
+    });
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-b" },
+    });
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
+    expect(screen.getByRole("button", { name: /Primary · Preset A/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Preset B/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /apply presets/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/small · metric · Area A/i)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/imperial/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/\+ 1 area$/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() => {
+      expect(screen.getByRole("radiogroup", { name: "Game size" })).toBeInTheDocument();
+    });
+    const sizeName =
+      expectedUnionSize === "large"
+        ? /^Large\b/
+        : expectedUnionSize === "medium"
+          ? /^Medium\b/
+          : /^Small\b/;
+    expect(screen.getByRole("radio", { name: sizeName })).toBeChecked();
+  });
+
+  it("keeps pending chips added while a deep-link apply is still resolving", async () => {
+    let releaseResolve: (() => void) | undefined;
+    const hold = new Promise<void>((resolve) => {
+      releaseResolve = resolve;
+    });
+    const resolveSpy = vi
+      .spyOn(resolvePresetPlayAreasModule, "resolvePresetPlayAreas")
+      .mockImplementation(async (presetsById, orderedIds, loadBoundaries) => {
+        await hold;
+        resolveSpy.mockRestore();
+        return resolvePresetPlayAreasModule.resolvePresetPlayAreas(
+          presetsById,
+          orderedIds,
+          loadBoundaries,
+        );
+      });
+
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([
+        {
+          id: "preset-cork",
+          name: "Cork weekend",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Cork, Ireland",
+          gameArea: IMPORTED_AREA,
+          focusBounds: { south: 51.85, west: -8.55, north: 51.95, east: -8.4 },
+          migrationStatus: "ok",
+        },
+        {
+          id: "preset-extra",
+          name: "Extra chip",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Extra",
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          migrationStatus: "ok",
+        },
+      ]),
+    });
+
+    renderCreateSession("/create?preset=preset-cork");
+    await waitFor(() => {
+      expect(resolveSpy).toHaveBeenCalled();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Preset" }));
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-extra" },
+    });
+    expect(screen.getByRole("button", { name: /Extra chip/i })).toBeInTheDocument();
+
+    await act(async () => {
+      releaseResolve?.();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/medium · metric · Cork, Ireland/i)).toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: /Primary · Cork weekend/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Extra chip/i })).toBeInTheDocument();
+  });
+
+  it("restores applied preset ids after a failed apply so silent reuse is not stuck", async () => {
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([
+        {
+          id: "preset-cork",
+          name: "Cork weekend",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Cork, Ireland",
+          gameArea: IMPORTED_AREA,
+          focusBounds: { south: 51.85, west: -8.55, north: 51.95, east: -8.4 },
+          migrationStatus: "ok",
+        },
+        {
+          id: "preset-broken",
+          name: "Broken empty",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: GAME_PRESET_SCHEMA_VERSION,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          placeLabel: "Nowhere",
+          migrationStatus: "ok",
+        },
+      ]),
+    });
+
+    renderCreateSession("/create?preset=preset-cork");
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Primary · Cork weekend/i })).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(silentReuseProbe.appliedPresetId).toBe("preset-cork");
+      expect(silentReuseProbe.loadedPresetId).toBe("preset-cork");
+    });
+
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-broken" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /apply presets/i }));
+
+    expect(await screen.findByText(/has no play area/i)).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
+    expect(screen.getByRole("button", { name: /Primary · Cork weekend/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(silentReuseProbe.loadedPresetId).toBe("preset-cork");
+      expect(silentReuseProbe.appliedPresetId).toBe("preset-cork");
+    });
   });
 
   it("auto-selects the top ranked place and pans again when switching results", async () => {
@@ -603,9 +835,8 @@ describe("CreateSession", () => {
         "true",
       );
     });
-    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue(
-      "bundled:dublin-county",
-    );
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
+    expect(screen.getByRole("button", { name: /Primary · County Dublin/i })).toBeInTheDocument();
   });
 
   it("Confirm with no area asks for Search, Preset, or Draw", async () => {
@@ -784,8 +1015,9 @@ describe("CreateSession", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /use my location/i }));
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("bundled:london");
+      expect(screen.getByRole("button", { name: /Primary · Greater London/i })).toBeInTheDocument();
     });
+    expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
     expect(screen.queryByDisplayValue("Dublin, Ireland")).toBeNull();
 
     await waitFor(() => {

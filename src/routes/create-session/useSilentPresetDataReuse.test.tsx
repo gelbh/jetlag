@@ -98,6 +98,18 @@ vi.mock("@/services/geo/matching/regionPackBoundaries", () => ({
   loadRegionPackSessionBoundaries,
 }));
 
+const suggestPresetDataReuseForGameArea = vi.hoisted(() => vi.fn());
+vi.mock("@/domain/session/presets/presetDataReuse", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/domain/session/presets/presetDataReuse")>();
+  suggestPresetDataReuseForGameArea.mockImplementation(actual.suggestPresetDataReuseForGameArea);
+  return {
+    ...actual,
+    suggestPresetDataReuseForGameArea: (
+      ...args: Parameters<typeof actual.suggestPresetDataReuseForGameArea>
+    ) => suggestPresetDataReuseForGameArea(...args),
+  };
+});
+
 vi.mock("@/services/geo/matching/resolveSessionMatchingAreas", () => ({
   resolveSessionMatchingAreas: vi.fn(async () => []),
 }));
@@ -249,6 +261,7 @@ beforeEach(() => {
   suggestPlacesAtPoint.mockResolvedValue([]);
   isFirebaseConfigured.mockReturnValue(false);
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
+  suggestPresetDataReuseForGameArea.mockClear();
   loadRegionPackSessionBoundaries.mockClear();
   loadRegionPackSessionBoundaries.mockResolvedValue({
     playArea: {
@@ -382,7 +395,7 @@ describe("CreateSession silent preset data reuse", () => {
 
     renderCreateSession("/create?preset=loaded");
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("loaded");
+      expect(screen.getByRole("button", { name: /Primary · Loaded/i })).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(screen.getByText(/medium · metric/i)).toBeInTheDocument();
@@ -398,6 +411,64 @@ describe("CreateSession silent preset data reuse", () => {
     openCustomContent();
     expect(await screen.findByText("Other pin")).toBeInTheDocument();
     expect(screen.getByText("Loaded pin")).toBeInTheDocument();
+  });
+
+  it("excludes all applied presets from silent reuse after multi-apply", async () => {
+    seedCustomPresets(
+      baseCustomPreset({
+        id: "preset-a",
+        name: "Preset A",
+        gameArea: DUBLIN_CITY_GAME_AREA,
+        regionPackId: "dublin",
+        gameSize: "medium",
+        customLocationPins: [{ id: "a-pin", name: "A pin", point: [53.35, -6.26] }],
+      }),
+      baseCustomPreset({
+        id: "preset-b",
+        name: "Preset B",
+        gameArea: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [-6.4, 53.3],
+              [-6.1, 53.3],
+              [-6.1, 53.4],
+              [-6.4, 53.4],
+              [-6.4, 53.3],
+            ],
+          ],
+        },
+        regionPackId: "dublin",
+        gameSize: "large",
+        customLocationPins: [{ id: "b-pin", name: "B pin", point: [53.34, -6.25] }],
+      }),
+    );
+
+    renderCreateSession();
+    fireEvent.click(screen.getByRole("button", { name: "Preset" }));
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-a" },
+    });
+    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
+      target: { value: "preset-b" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /apply presets/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Primary · Preset A/i })).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/\+ 1 area$/i)).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(suggestPresetDataReuseForGameArea).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          excludePresetIds: expect.arrayContaining(["preset-a", "preset-b"]),
+        }),
+      );
+    });
   });
 
   it("does not reload pack boundaries when fingerprint changes but pack identity is stable", async () => {
@@ -583,7 +654,7 @@ describe("CreateSession silent preset data reuse", () => {
 
     renderCreateSession("/create?preset=loaded");
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("loaded");
+      expect(screen.getByRole("button", { name: /Primary · Loaded/i })).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(loadRegionPackSessionBoundaries).toHaveBeenCalledWith("dublin", undefined);
@@ -733,7 +804,7 @@ describe("CreateSession silent preset data reuse", () => {
 
     renderCreateSession("/create?preset=loaded");
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("loaded");
+      expect(screen.getByRole("button", { name: /Primary · Loaded/i })).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(loadRegionPackSessionBoundaries).toHaveBeenCalled();
@@ -742,7 +813,7 @@ describe("CreateSession silent preset data reuse", () => {
     parseBoundaryFile.mockResolvedValue(DUBLIN_CITY_GAME_AREA);
     importBoundaryFile();
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: /game preset/i })).not.toHaveValue("loaded");
+      expect(screen.queryByRole("button", { name: /Primary · Loaded/i })).toBeNull();
     });
   });
 
