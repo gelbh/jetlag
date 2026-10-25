@@ -103,12 +103,11 @@ export function CreateSession() {
           }
           footer={
             <Box
+              data-testid="create-session-footer"
               className="shrink-0 px-4 pt-3 pb-[max(0.25rem,var(--safe-area-bottom))]"
               style={{
-                backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
-                borderTop: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
-                backdropFilter: "blur(20px) saturate(1.4)",
-                WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+                backgroundColor: "var(--color-canvas)",
+                borderTop: "0.33px solid var(--color-rule)",
               }}
             >
               <div className="flex gap-2">
@@ -128,6 +127,7 @@ export function CreateSession() {
                     type="button"
                     variant="subtle"
                     color="gray"
+                    styles={filledStyles}
                     className="min-h-11 flex-1"
                     onClick={() => setCreateStep(createStep === "where" ? "rules" : "play")}
                   >

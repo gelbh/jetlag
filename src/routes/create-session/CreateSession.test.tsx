@@ -329,6 +329,28 @@ describe("CreateSession", () => {
     expect(screen.getByRole("link", { name: /^back$/i })).toBeInTheDocument();
   });
 
+  it("uses a flat footer and Survey primary treatment for Next", () => {
+    renderCreateSession();
+
+    const next = screen.getByRole("button", { name: "Next" });
+    const footer = screen.getByTestId("create-session-footer");
+
+    expect(footer).toBeInTheDocument();
+    expect(footer.style.backgroundColor).toBe("var(--color-canvas)");
+    expect(footer.style.borderTop).toBe("0.33px solid var(--color-rule)");
+    expect(footer?.style.backdropFilter).toBe("");
+    expect(footer.getAttribute("style")).not.toMatch(/backdrop-filter/i);
+    expect(next).toHaveStyle({
+      backgroundColor: "var(--color-flag)",
+      color: "var(--color-flag-ink)",
+    });
+
+    fireEvent.click(next);
+    expect(screen.getByRole("button", { name: "Back" })).not.toHaveStyle({
+      backgroundColor: "var(--color-flag)",
+    });
+  });
+
   it("Next reveals Rules then Play; Back reverses", () => {
     renderCreateSession();
     expect(screen.queryByRole("tab", { name: "Frame" })).toBeNull();
