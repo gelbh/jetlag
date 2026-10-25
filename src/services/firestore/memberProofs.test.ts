@@ -1,10 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getDoc, setDoc } = vi.hoisted(() => ({ getDoc: vi.fn(), setDoc: vi.fn() }));
+const { getDocFromServer, setDoc } = vi.hoisted(() => ({
+  getDocFromServer: vi.fn(),
+  setDoc: vi.fn(),
+}));
 
 vi.mock("firebase/firestore", () => ({
   doc: vi.fn((_db: unknown, ...segments: string[]) => ({ path: segments.join("/") })),
-  getDoc,
+  getDocFromServer,
   setDoc,
 }));
 
@@ -27,7 +30,7 @@ describe("ensureMemberProof", () => {
   });
 
   it("creates a proof and stores a new secret when none exists", async () => {
-    getDoc.mockResolvedValue({ exists: () => false });
+    getDocFromServer.mockResolvedValue({ exists: () => false });
 
     await ensureMemberProof("session-1", "uid-1");
 
@@ -41,7 +44,7 @@ describe("ensureMemberProof", () => {
 
   it("reuses the stored secret when the proof is missing", async () => {
     useSessionStore.getState().setHealSecret("session-1", "stored-secret");
-    getDoc.mockResolvedValue({ exists: () => false });
+    getDocFromServer.mockResolvedValue({ exists: () => false });
 
     await ensureMemberProof("session-1", "uid-1");
 
@@ -53,17 +56,17 @@ describe("ensureMemberProof", () => {
   });
 
   it("leaves an existing proof alone and reads it once per member", async () => {
-    getDoc.mockResolvedValue({ exists: () => true });
+    getDocFromServer.mockResolvedValue({ exists: () => true });
 
     await ensureMemberProof("session-1", "uid-1");
     await ensureMemberProof("session-1", "uid-1");
 
-    expect(getDoc).toHaveBeenCalledTimes(1);
+    expect(getDocFromServer).toHaveBeenCalledTimes(1);
     expect(setDoc).not.toHaveBeenCalled();
   });
 
   it("stores no secret when a proof exists and none was stored", async () => {
-    getDoc.mockResolvedValue({ exists: () => true });
+    getDocFromServer.mockResolvedValue({ exists: () => true });
 
     await ensureMemberProof("session-1", "uid-1");
 
@@ -71,16 +74,16 @@ describe("ensureMemberProof", () => {
   });
 
   it("re-reads for a different uid in the same session", async () => {
-    getDoc.mockResolvedValue({ exists: () => true });
+    getDocFromServer.mockResolvedValue({ exists: () => true });
 
     await ensureMemberProof("session-1", "uid-1");
     await ensureMemberProof("session-1", "uid-2");
 
-    expect(getDoc).toHaveBeenCalledTimes(2);
+    expect(getDocFromServer).toHaveBeenCalledTimes(2);
   });
 
   it("swallows a denied create and keeps the stored secret for the next resume", async () => {
-    getDoc.mockResolvedValue({ exists: () => false });
+    getDocFromServer.mockResolvedValue({ exists: () => false });
     setDoc.mockRejectedValue(new Error("permission-denied"));
 
     await expect(ensureMemberProof("session-1", "uid-1")).resolves.toBeUndefined();
@@ -88,7 +91,7 @@ describe("ensureMemberProof", () => {
   });
 
   it("stores a new secret before writing its proof", async () => {
-    getDoc.mockResolvedValue({ exists: () => false });
+    getDocFromServer.mockResolvedValue({ exists: () => false });
     let storedAtWrite: string | undefined;
     setDoc.mockImplementation(async () => {
       storedAtWrite = useSessionStore.getState().healSecrets["session-1"];
@@ -101,15 +104,27 @@ describe("ensureMemberProof", () => {
     expect(storedAtWrite).toMatch(/^[A-Za-z0-9_-]{43}$/);
   });
 
+  it("generates, stores and writes nothing when the server read fails", async () => {
+    getDocFromServer.mockRejectedValue(new Error("unavailable"));
+
+    await expect(ensureMemberProof("session-1", "uid-1")).resolves.toBeUndefined();
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(useSessionStore.getState().healSecrets).toEqual({});
+
+    getDocFromServer.mockResolvedValue({ exists: () => true });
+    await ensureMemberProof("session-1", "uid-1");
+    expect(getDocFromServer).toHaveBeenCalledTimes(2);
+  });
+
   it("skips the proof when crypto.subtle is unavailable", async () => {
     vi.stubGlobal("crypto", {
       getRandomValues: crypto.getRandomValues.bind(crypto),
       subtle: undefined,
     });
-    getDoc.mockResolvedValue({ exists: () => false });
+    getDocFromServer.mockResolvedValue({ exists: () => false });
 
     await expect(ensureMemberProof("session-1", "uid-1")).resolves.toBeUndefined();
-    expect(getDoc).not.toHaveBeenCalled();
+    expect(getDocFromServer).not.toHaveBeenCalled();
     expect(setDoc).not.toHaveBeenCalled();
     expect(useSessionStore.getState().healSecrets).toEqual({});
   });

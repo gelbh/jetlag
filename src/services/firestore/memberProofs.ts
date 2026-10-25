@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDocFromServer, setDoc } from "firebase/firestore";
 import { generateHealSecret, hashHealSecret } from "@/domain/session/join/healSecret";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
 import { useSessionStore } from "@/state/sessionStore";
@@ -9,7 +9,7 @@ export function memberProofDoc(sessionId: string, uid: string) {
 
 async function createMissingMemberProof(sessionId: string, uid: string): Promise<void> {
   const ref = memberProofDoc(sessionId, uid);
-  const snapshot = await getDoc(ref);
+  const snapshot = await getDocFromServer(ref);
   if (snapshot.exists()) {
     return;
   }
