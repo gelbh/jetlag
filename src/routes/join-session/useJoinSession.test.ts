@@ -1,8 +1,19 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { SessionRecord } from "@/domain/map/annotations";
+import type { CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "@/domain/session/join/joinPreviewGameArea";
 import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
+
+type JoinSessionPreviewState = {
+  previewSession: SessionRecord | null;
+  previewPremium: boolean;
+  lookupLoading: boolean;
+  existingRole: PlayerRole | null;
+  existingCastleSiegeRole: CastleSiegeTeamRole | null;
+};
 
 const navigate = vi.fn();
 const setSession = vi.fn();
@@ -17,13 +28,15 @@ const storeState: { session: { code: string } | null; myUid: string | null } = {
   session: null,
   myUid: null,
 };
-const mockUseJoinSessionPreview = vi.fn(() => ({
-  previewSession: null,
-  previewPremium: false,
-  lookupLoading: false,
-  existingRole: null,
-  existingCastleSiegeRole: null,
-}));
+const mockUseJoinSessionPreview = vi.fn(
+  (): JoinSessionPreviewState => ({
+    previewSession: null,
+    previewPremium: false,
+    lookupLoading: false,
+    existingRole: null,
+    existingCastleSiegeRole: null,
+  }),
+);
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => navigate,

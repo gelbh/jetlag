@@ -272,6 +272,7 @@ export function JoinSession() {
                   <EntryAsyncButton
                     type="button"
                     fullWidth
+                    busy={false}
                     unavailable={!codeStepReady}
                     idleLabel="Continue"
                     busyLabel="Continue"
@@ -313,6 +314,7 @@ export function JoinSession() {
                     <EntryAsyncButton
                       type="button"
                       fullWidth
+                      busy={false}
                       unavailable={lookupLoading}
                       idleLabel="Continue"
                       busyLabel="Continue"
@@ -387,6 +389,7 @@ export function JoinSession() {
                     <EntryAsyncButton
                       type="button"
                       fullWidth
+                      busy={joinBusy || requestBusy}
                       unavailable={joinBusy || requestBusy || lookupLoading}
                       idleLabel={needsRolePasscode ? "Continue" : "Join session"}
                       busyLabel={needsRolePasscode ? "Continue" : "Joining…"}

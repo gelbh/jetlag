@@ -1,8 +1,29 @@
+import { playerRoleLabel } from "./playerRole";
+
 export const JOIN_REQUEST_TTL_MS = 10 * 60 * 1000;
 
 export type JoinRequestStatus = "pending" | "accepted" | "declined" | "cancelled" | "expired";
 
 export type JoinRequestRole = "seeker" | "hider" | "observer" | "teamA" | "teamB" | "referee";
+
+export function joinRequestRoleLabel(role: JoinRequestRole): string {
+  switch (role) {
+    case "seeker":
+    case "hider":
+    case "observer":
+      return playerRoleLabel(role);
+    case "teamA":
+      return "Team A";
+    case "teamB":
+      return "Team B";
+    case "referee":
+      return "Referee";
+    default: {
+      const _exhaustive: never = role;
+      return _exhaustive;
+    }
+  }
+}
 
 export interface RoleJoinRequest {
   id: string;

@@ -7,7 +7,11 @@ import type { ThermometerSendBlockReason } from "@/domain/questions/thermometerS
 import type { LearnRoutePath } from "@/domain/seo/learnRoutePaths";
 import type { PendingQuestionToolType } from "@/domain/session/activity/sessionChat";
 import type { JoinFailureReason } from "@/domain/session/join/joinFailureReason";
+import type { JoinRequestRole } from "@/domain/session/players/joinRequest";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
+
+export type AnalyticsSessionRole = PlayerRole | JoinRequestRole;
+
 import type { GameSize } from "@/domain/session/size/gameSize";
 
 export const ANALYTICS_EVENTS = {
@@ -53,7 +57,7 @@ export type AnalyticsEventProps = {
     role: PlayerRole;
   };
   session_joined: {
-    role: PlayerRole;
+    role: AnalyticsSessionRole;
   };
   join_failed: {
     role: PlayerRole;
@@ -64,7 +68,7 @@ export type AnalyticsEventProps = {
   };
   session_leave_already_left: Record<string, never>;
   role_selected: {
-    role: PlayerRole;
+    role: AnalyticsSessionRole;
     surface: "create" | "join";
   };
   premium_checkout_started: {

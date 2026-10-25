@@ -258,8 +258,11 @@ export async function createRemoteSession(
       cause: error,
     });
   }
+  const hostCastleSeat = options?.hostCastleSiegeRole ?? "teamA";
+  const hostPlayingSeat: "teamA" | "teamB" =
+    hostCastleSeat === "teamA" || hostCastleSeat === "teamB" ? hostCastleSeat : "teamA";
   session.roleGates = isCastleSiege
-    ? buildRoleGatesForCastleSiegeHost(hostUid, options?.hostCastleSiegeRole ?? "teamA")
+    ? buildRoleGatesForCastleSiegeHost(hostUid, hostPlayingSeat)
     : buildRoleGatesForHost(hostUid, effectiveHostRole);
   // Only once gates stick: a rolled-back create must not leave a proof or replace the stored secret.
   void ensureMemberProof(session.id, hostUid);
