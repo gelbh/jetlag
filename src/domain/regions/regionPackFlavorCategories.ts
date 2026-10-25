@@ -35,18 +35,6 @@ const DUBLIN_FLAVOR_CATEGORIES: readonly SessionCustomCategory[] = [
 
 const NYC_FLAVOR_CATEGORIES: readonly SessionCustomCategory[] = [
   {
-    id: "custom:nyc-subway-entrance",
-    label: "Subway entrance",
-    promptNoun: "a subway entrance",
-    overpassSelectors: ['["railway"="subway_entrance"]'],
-  },
-  {
-    id: "custom:nyc-fire-hydrant",
-    label: "Fire hydrant",
-    promptNoun: "a fire hydrant",
-    overpassSelectors: ['["emergency"="fire_hydrant"]'],
-  },
-  {
     id: "custom:nyc-ferry-terminal",
     label: "Ferry terminal",
     promptNoun: "a ferry terminal",
@@ -60,6 +48,18 @@ const NYC_FLAVOR_CATEGORIES: readonly SessionCustomCategory[] = [
       '["amenity"="fast_food"]["cuisine"="pizza"]',
       '["amenity"="restaurant"]["cuisine"="pizza"]',
     ],
+  },
+  {
+    id: "custom:nyc-basketball-court",
+    label: "Basketball court",
+    promptNoun: "a basketball court",
+    overpassSelectors: ['["leisure"="pitch"]["sport"="basketball"]'],
+  },
+  {
+    id: "custom:nyc-deli",
+    label: "Deli",
+    promptNoun: "a deli",
+    overpassSelectors: ['["shop"="deli"]'],
   },
 ];
 

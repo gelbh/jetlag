@@ -15,10 +15,10 @@ const DUBLIN_FLAVOR_IDS = [
 ] as const;
 
 const NYC_FLAVOR_IDS = [
-  "custom:nyc-subway-entrance",
-  "custom:nyc-fire-hydrant",
   "custom:nyc-ferry-terminal",
   "custom:nyc-pizza",
+  "custom:nyc-basketball-court",
+  "custom:nyc-deli",
 ] as const;
 
 const APPROVED_FLAVOR_PACKS = new Set<RegionPackId>(["dublin", "nyc"]);
@@ -101,18 +101,6 @@ describe("regionPackFlavorCategories", () => {
 
     expect(categories).toEqual([
       {
-        id: "custom:nyc-subway-entrance",
-        label: "Subway entrance",
-        promptNoun: "a subway entrance",
-        overpassSelectors: ['["railway"="subway_entrance"]'],
-      },
-      {
-        id: "custom:nyc-fire-hydrant",
-        label: "Fire hydrant",
-        promptNoun: "a fire hydrant",
-        overpassSelectors: ['["emergency"="fire_hydrant"]'],
-      },
-      {
         id: "custom:nyc-ferry-terminal",
         label: "Ferry terminal",
         promptNoun: "a ferry terminal",
@@ -126,6 +114,18 @@ describe("regionPackFlavorCategories", () => {
           '["amenity"="fast_food"]["cuisine"="pizza"]',
           '["amenity"="restaurant"]["cuisine"="pizza"]',
         ],
+      },
+      {
+        id: "custom:nyc-basketball-court",
+        label: "Basketball court",
+        promptNoun: "a basketball court",
+        overpassSelectors: ['["leisure"="pitch"]["sport"="basketball"]'],
+      },
+      {
+        id: "custom:nyc-deli",
+        label: "Deli",
+        promptNoun: "a deli",
+        overpassSelectors: ['["shop"="deli"]'],
       },
     ]);
   });

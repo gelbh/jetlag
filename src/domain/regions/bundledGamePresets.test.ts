@@ -198,10 +198,10 @@ describe("bundledGamePresets", () => {
 
     expect(ids).toEqual(
       expect.arrayContaining([
-        "custom:nyc-subway-entrance",
-        "custom:nyc-fire-hydrant",
         "custom:nyc-ferry-terminal",
         "custom:nyc-pizza",
+        "custom:nyc-basketball-court",
+        "custom:nyc-deli",
       ]),
     );
     expect(ids.some((id) => id.startsWith("custom:dublin-"))).toBe(false);
