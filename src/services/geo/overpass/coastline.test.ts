@@ -162,6 +162,48 @@ describe("coastline lookup", () => {
     });
   });
 
+  it("filters dropped pack loops before merging Overpass coastline", async () => {
+    const harbourLoop: Feature<LineString> = {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [-6.3, 53.35],
+          [-6.295, 53.35],
+          [-6.295, 53.355],
+          [-6.3, 53.355],
+          [-6.3, 53.35],
+        ],
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          source: "overpass",
+          segments: [packSegment, harbourLoop],
+        }),
+      })),
+    );
+    vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          type: "way",
+          geometry: harbourLoop.geometry.coordinates.map(([lon, lat]) => ({ lat, lon })),
+        },
+      ],
+    });
+
+    const prepared = await fetchPreparedCoastlineSegments(sampleGameArea, {
+      regionPackId: "dublin",
+    });
+
+    expect(prepared.segments).toHaveLength(1);
+    expect(prepared.segments[0]?.geometry.coordinates).toEqual(packSegment.geometry.coordinates);
+  });
+
   it("skips Overpass for inland packs with source none", async () => {
     vi.stubGlobal(
       "fetch",
