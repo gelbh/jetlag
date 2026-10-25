@@ -13,6 +13,8 @@ export type GameAreaSectionModel = {
   favouritePresetSelectOptions: { presetId: string; name: string }[];
   userPresets: GamePreset[];
   loadedPreset: GamePreset | null;
+  appliedPresetIds: string[];
+  pendingPresetIds: string[];
   loading: boolean;
   verifyingAccess: boolean;
   searchLoading: boolean;
@@ -27,7 +29,9 @@ export type GameAreaSectionModel = {
   previewGameArea: GameArea | null;
   transitMetroId: string;
   metros: TransitMetro[];
-  onPresetSelect: (presetId: string) => void;
+  onPendingPresetAdd: (presetId: string) => void;
+  onPendingPresetRemove: (presetId: string) => void;
+  onApplyPendingPresets: () => void;
   onSavePreset: () => void;
   onOpenFramingModal: () => void;
   onRemoveSelectedArea: (index: number) => void;

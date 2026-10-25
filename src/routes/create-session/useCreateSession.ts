@@ -43,6 +43,7 @@ import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { matchGamePresetForPlace } from "../../domain/session/presets/gamePresetSearch";
 import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/presetFavourites";
+import { resolvePresetPlayAreas } from "../../domain/session/presets/resolvePresetPlayAreas";
 import {
   type GameSize,
   hidingZoneRadiusMeters,
@@ -131,6 +132,8 @@ export function useCreateSession() {
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const framing = useGameAreaFraming();
+  const applyFocusToGameArea = framing.applyFocusToGameArea;
+  const resetManualFraming = framing.resetManualFraming;
   const mapMount = useCreateSessionMapMount();
   const { requestMap } = mapMount;
   const [framingModalOpen, setFramingModalOpen] = useState(false);
@@ -195,10 +198,21 @@ export function useCreateSession() {
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [locationStatusTone, setLocationStatusTone] = useState<"ok" | "halt" | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
+  const applyInFlightPrimaryRef = useRef<string | null>(null);
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
+  const [appliedPresetIds, setAppliedPresetIds] = useState<string[]>([]);
+  const [pendingPresetIds, setPendingPresetIds] = useState<string[]>([]);
+  const appliedPresetStateRef = useRef<{ id: string | null; ids: string[] }>({
+    id: null,
+    ids: [],
+  });
+  const searchParamsRef = useRef(searchParams);
+  useLayoutEffect(() => {
+    appliedPresetStateRef.current = { id: appliedPresetId, ids: appliedPresetIds };
+    searchParamsRef.current = searchParams;
+  }, [appliedPresetId, appliedPresetIds, searchParams]);
   const presetApplyGenerationRef = useRef(0);
   const resetSilentReuseOverlayRef = useRef<() => void>(() => {});
-  const [presetApplyNonce, setPresetApplyNonce] = useState(0);
   const packPlayAreaRef = useRef<{
     area: GameArea;
     packId: RegionPackId;
@@ -213,27 +227,277 @@ export function useCreateSession() {
     return presets.find((entry) => entry.id === loadedPresetId) ?? null;
   }, [loadedPresetId, presets]);
 
-  const selectPreset = useCallback(
-    (presetId: string) => {
-      appliedPresetRef.current = null;
-      setAppliedPresetId(null);
-      setPresetApplyNonce((nonce) => nonce + 1);
+  const applyPresets = useCallback(
+    (orderedIds: readonly string[]) => {
+      const primaryId = orderedIds[0];
+      if (!primaryId) {
+        setError("Select at least one preset.");
+        return;
+      }
+
+      // Snapshot prior successful apply so resolve/pack failure can restore ids
+      // (and silent-reuse gate) without clearing up front. Read via refs so
+      // applyPresets identity does not churn with every applied-id update.
+      const priorAppliedId = appliedPresetStateRef.current.id;
+      const priorAppliedIds = appliedPresetStateRef.current.ids;
+      const priorUrlPresetId = searchParamsRef.current.get("preset");
+
+      // Eager guard + URL write so URL effect cannot re-apply a stale ?preset=
+      // while this primary is in flight (place-match / multi-apply races).
+      appliedPresetRef.current = primaryId;
+      applyInFlightPrimaryRef.current = primaryId;
+      const applyGeneration = ++presetApplyGenerationRef.current;
+      const isStale = () => applyGeneration !== presetApplyGenerationRef.current;
+      const abandonIfStale = (): boolean => {
+        if (!isStale()) {
+          return false;
+        }
+        if (appliedPresetRef.current === primaryId) {
+          appliedPresetRef.current = priorAppliedId;
+        }
+        return true;
+      };
+      const clearInFlightIfCurrent = () => {
+        if (applyInFlightPrimaryRef.current === primaryId) {
+          applyInFlightPrimaryRef.current = null;
+        }
+      };
+
       setSearchParams(
         (current) => {
+          if (current.get("preset") === primaryId) {
+            return current;
+          }
           const next = new URLSearchParams(current);
-          next.set("preset", presetId);
+          next.set("preset", primaryId);
           return next;
         },
         { replace: true },
       );
+
+      const restoreAppliedAfterFailedApply = () => {
+        clearInFlightIfCurrent();
+        if (priorAppliedId && priorUrlPresetId === priorAppliedId) {
+          appliedPresetRef.current = priorAppliedId;
+          setAppliedPresetId(priorAppliedId);
+          setAppliedPresetIds(priorAppliedIds);
+          setPendingPresetIds(priorAppliedIds);
+          setSearchParams(
+            (current) => {
+              if (current.get("preset") === priorAppliedId) {
+                return current;
+              }
+              const next = new URLSearchParams(current);
+              next.set("preset", priorAppliedId);
+              return next;
+            },
+            { replace: true },
+          );
+          return;
+        }
+        // No prior successful apply matching URL: leave applied cleared and sync URL
+        // so silent reuse cannot stick on loadedPresetId !== appliedPresetId.
+        appliedPresetRef.current = null;
+        setAppliedPresetId(null);
+        setAppliedPresetIds([]);
+        setPendingPresetIds([]);
+        setSearchParams(
+          (current) => {
+            if (!current.has("preset")) {
+              return current;
+            }
+            const next = new URLSearchParams(current);
+            next.delete("preset");
+            return next;
+          },
+          { replace: true },
+        );
+      };
+
+      const run = async () => {
+        const presetsById = new Map(presets.map((entry) => [entry.id, entry]));
+        const resolved = await resolvePresetPlayAreas(presetsById, orderedIds);
+        if (abandonIfStale()) {
+          return;
+        }
+        if (!resolved.ok) {
+          // Do not commit settings; restore prior applied ids or clear URL mismatch.
+          setError(resolved.message);
+          restoreAppliedAfterFailedApply();
+          return;
+        }
+
+        const preset = presetsById.get(primaryId);
+        if (!preset) {
+          setError(`Unknown preset: ${primaryId}`);
+          restoreAppliedAfterFailedApply();
+          return;
+        }
+
+        requestMap();
+        const draft = gamePresetToCreateSessionDraft(preset);
+        let customMatchingAreas =
+          draft.customMatchingAreas ?? draft.advancedSettings.customMatchingAreas;
+        const primaryArea = resolved.areas[0]!;
+        const subregionId = draft.subregionId ?? draft.councilFilter;
+        const unit = draft.distanceUnit;
+        let nextPackPlayArea: {
+          area: GameArea;
+          packId: RegionPackId;
+          subregionId: string | undefined;
+        } | null = null;
+
+        if (draft.regionPackId) {
+          const boundaryTask = createLoadTask({
+            label: "Loading region boundaries",
+            global: true,
+            cancellable: false,
+          });
+          try {
+            const boundaries = await loadRegionPackSessionBoundaries(
+              draft.regionPackId,
+              subregionId,
+              boundaryTask.root,
+            );
+            if (abandonIfStale()) {
+              boundaryTask.cancel();
+              return;
+            }
+            boundaryTask.complete();
+            customMatchingAreas = boundaries.customMatchingAreas;
+            if (!draft.gameArea) {
+              nextPackPlayArea = {
+                area: primaryArea,
+                packId: draft.regionPackId,
+                subregionId,
+              };
+            }
+          } catch (loadError) {
+            if (abandonIfStale()) {
+              boundaryTask.cancel();
+              return;
+            }
+            boundaryTask.fail(loadError);
+            setError(
+              loadError instanceof Error
+                ? loadError.message
+                : "Couldn't load region boundary data.",
+            );
+            restoreAppliedAfterFailedApply();
+            return;
+          }
+        }
+
+        if (abandonIfStale()) {
+          return;
+        }
+
+        const importedArea =
+          resolved.areas.length === 1 ? primaryArea : unionGameAreas(resolved.areas);
+        const resolvedGameSize = recommendGameSize(importedArea, unit);
+        const draftCustomCategories =
+          draft.customCategories ?? draft.advancedSettings.customCategories ?? [];
+        const resolvedAdvanced = {
+          ...defaultAdvancedSessionSettings(resolvedGameSize, unit),
+          ...draft.advancedSettings,
+          customMatchingAreas,
+          customCategories: draft.regionPackId
+            ? mergeRegionPackFlavorCategories(draftCustomCategories, draft.regionPackId)
+            : draftCustomCategories,
+          customLocationPins: draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
+          hidingZoneRadiusMeters: hidingZoneRadiusMeters(resolvedGameSize, unit),
+        };
+
+        if (draft.regionPackId) {
+          setRegionPackId(draft.regionPackId);
+          setRegionPackSubregionId(subregionId);
+          packPlayAreaRef.current = nextPackPlayArea;
+        } else {
+          setRegionPackId(undefined);
+          setRegionPackSubregionId(undefined);
+          packPlayAreaRef.current = null;
+        }
+
+        setGameSizeUserOverrode(false);
+        setGameSize(resolvedGameSize);
+        setDistanceUnit(unit);
+        resetSilentReuseOverlayRef.current();
+        setAdvancedSettings(resolvedAdvanced);
+        setSelectedPlaceId(null);
+        setSelectedPlace(null);
+        setSearchResults([]);
+        setSelectedAreas([]);
+        if (draft.transitMetroId) {
+          setTransitMetroOverride(draft.transitMetroId);
+        }
+        if (draft.sessionTier) {
+          setTierManuallySet(true);
+          setSessionTier(draft.sessionTier);
+        }
+        setImportedGameArea(importedArea);
+        resetManualFraming();
+        applyFocusToGameArea(importedArea);
+        setMapFocusToken((token) => token + 1);
+        if (draft.placeLabel) {
+          setLocationQuery(draft.placeLabel);
+        }
+        setAppliedPresetId(primaryId);
+        setAppliedPresetIds([...orderedIds]);
+        // Keep chips the user added during a slow apply; they remain an edit buffer.
+        setPendingPresetIds((current) => {
+          const extras = current.filter((id) => !orderedIds.includes(id));
+          return [...orderedIds, ...extras];
+        });
+        setError(null);
+        clearInFlightIfCurrent();
+        setSearchParams(
+          (current) => {
+            if (current.get("preset") === primaryId) {
+              return current;
+            }
+            const next = new URLSearchParams(current);
+            next.set("preset", primaryId);
+            return next;
+          },
+          { replace: true },
+        );
+      };
+
+      void run();
     },
-    [setSearchParams],
+    [applyFocusToGameArea, presets, requestMap, resetManualFraming, setSearchParams],
   );
+
+  const selectPreset = useCallback(
+    (presetId: string) => {
+      // Do not clear applied ids here: that opened a window where URL still named
+      // the prior preset while appliedPresetId was null (silent-reuse stall).
+      applyPresets([presetId]);
+    },
+    [applyPresets],
+  );
+
+  const onPendingPresetAdd = useCallback((presetId: string) => {
+    setPendingPresetIds((current) =>
+      current.includes(presetId) ? current : [...current, presetId],
+    );
+  }, []);
+
+  const onPendingPresetRemove = useCallback((presetId: string) => {
+    setPendingPresetIds((current) => current.filter((id) => id !== presetId));
+  }, []);
+
+  const onApplyPendingPresets = useCallback(() => {
+    applyPresets(pendingPresetIds);
+  }, [applyPresets, pendingPresetIds]);
 
   const clearLoadedPreset = useCallback(() => {
     presetApplyGenerationRef.current += 1;
     appliedPresetRef.current = null;
+    applyInFlightPrimaryRef.current = null;
     setAppliedPresetId(null);
+    setAppliedPresetIds([]);
+    setPendingPresetIds([]);
     setSearchParams(
       (current) => {
         if (!current.has("preset")) {
@@ -252,6 +516,8 @@ export function useCreateSession() {
     if (!presetId) {
       appliedPresetRef.current = null;
       setAppliedPresetId(null);
+      setAppliedPresetIds([]);
+      // Leave pendingPresetIds: it is the Where edit buffer, not URL-backed.
       return;
     }
 
@@ -259,130 +525,17 @@ export function useCreateSession() {
       return;
     }
 
-    const preset = presets.find((entry) => entry.id === presetId);
-    if (!preset) {
+    // In-flight apply owns a different primary; do not re-apply a lagging URL id.
+    if (applyInFlightPrimaryRef.current != null && applyInFlightPrimaryRef.current !== presetId) {
       return;
     }
 
-    appliedPresetRef.current = presetId;
-    const applyGeneration = ++presetApplyGenerationRef.current;
-    const draft = gamePresetToCreateSessionDraft(preset);
-    const abandonStaleApply = () => {
-      if (appliedPresetRef.current === presetId) {
-        appliedPresetRef.current = null;
-      }
-    };
-    const applyPreset = async () => {
-      requestMap();
-      let customMatchingAreas =
-        draft.customMatchingAreas ?? draft.advancedSettings.customMatchingAreas;
-      let gameArea = draft.gameArea ?? null;
-      const subregionId = draft.subregionId ?? draft.councilFilter;
-      const unit = draft.distanceUnit;
+    if (!presets.some((entry) => entry.id === presetId)) {
+      return;
+    }
 
-      if (draft.regionPackId) {
-        setRegionPackId(draft.regionPackId);
-        setRegionPackSubregionId(subregionId);
-        const boundaryTask = createLoadTask({
-          label: "Loading region boundaries",
-          global: true,
-          cancellable: false,
-        });
-        try {
-          const boundaries = await loadRegionPackSessionBoundaries(
-            draft.regionPackId,
-            subregionId,
-            boundaryTask.root,
-          );
-          if (applyGeneration !== presetApplyGenerationRef.current) {
-            boundaryTask.cancel();
-            abandonStaleApply();
-            return;
-          }
-          boundaryTask.complete();
-          customMatchingAreas = boundaries.customMatchingAreas;
-          if (!gameArea) {
-            gameArea = boundaries.playArea;
-            packPlayAreaRef.current = {
-              area: boundaries.playArea,
-              packId: draft.regionPackId,
-              subregionId,
-            };
-          }
-        } catch (loadError) {
-          if (applyGeneration !== presetApplyGenerationRef.current) {
-            boundaryTask.cancel();
-            abandonStaleApply();
-            return;
-          }
-          boundaryTask.fail(loadError);
-          setError(
-            loadError instanceof Error ? loadError.message : "Couldn't load region boundary data.",
-          );
-        }
-      } else {
-        setRegionPackId(undefined);
-        setRegionPackSubregionId(undefined);
-      }
-
-      if (applyGeneration !== presetApplyGenerationRef.current) {
-        abandonStaleApply();
-        return;
-      }
-
-      const resolvedGameSize = gameArea ? recommendGameSize(gameArea, unit) : draft.gameSize;
-      const draftCustomCategories =
-        draft.customCategories ?? draft.advancedSettings.customCategories ?? [];
-      const resolvedAdvanced = {
-        ...defaultAdvancedSessionSettings(resolvedGameSize, unit),
-        ...draft.advancedSettings,
-        customMatchingAreas,
-        customCategories: draft.regionPackId
-          ? mergeRegionPackFlavorCategories(draftCustomCategories, draft.regionPackId)
-          : draftCustomCategories,
-        customLocationPins: draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
-        hidingZoneRadiusMeters: hidingZoneRadiusMeters(resolvedGameSize, unit),
-      };
-
-      setGameSizeUserOverrode(false);
-      setGameSize(resolvedGameSize);
-      setDistanceUnit(unit);
-      resetSilentReuseOverlayRef.current();
-      setAdvancedSettings(resolvedAdvanced);
-      setSelectedPlaceId(null);
-      setSelectedPlace(null);
-      setSearchResults([]);
-      setSelectedAreas([]);
-      if (draft.transitMetroId) {
-        setTransitMetroOverride(draft.transitMetroId);
-      }
-      if (draft.sessionTier) {
-        setTierManuallySet(true);
-        setSessionTier(draft.sessionTier);
-      }
-      if (gameArea) {
-        setImportedGameArea(gameArea);
-        framing.resetManualFraming();
-        framing.applyFocusToGameArea(gameArea);
-        setMapFocusToken((token) => token + 1);
-      } else {
-        setImportedGameArea(null);
-      }
-      if (draft.placeLabel) {
-        setLocationQuery(draft.placeLabel);
-      }
-      setAppliedPresetId(presetId);
-    };
-
-    void applyPreset();
-  }, [
-    framing.applyFocusToGameArea,
-    framing.resetManualFraming,
-    presetApplyNonce,
-    presets,
-    requestMap,
-    searchParams,
-  ]);
+    applyPresets([presetId]);
+  }, [applyPresets, presets, searchParams]);
 
   const applyPlace = useCallback(
     (place: GeocodedPlace, options?: { loadMatchingPreset?: boolean }) => {
@@ -632,6 +785,7 @@ export function useCreateSession() {
     presets,
     loadedPresetId,
     appliedPresetId,
+    appliedPresetIds,
     regionPackId,
     regionPackSubregionId,
     setAdvancedSettings,
@@ -1095,7 +1249,13 @@ export function useCreateSession() {
     userPresets,
     loadedPresetId,
     loadedPreset,
+    appliedPresetIds,
+    pendingPresetIds,
     selectPreset,
+    applyPresets,
+    onPendingPresetAdd,
+    onPendingPresetRemove,
+    onApplyPendingPresets,
     loading: confirmBusy,
     createTask,
     verifyingAccess,
