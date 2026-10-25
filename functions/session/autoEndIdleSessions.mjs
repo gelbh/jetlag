@@ -69,12 +69,21 @@ export async function autoEndIdleSession(db, sessionDoc, options = {}) {
   if (!hostUid) {
     return;
   }
+  /** @type {Record<string, string>} */
+  const properties = {
+    reason: "abandoned",
+    // Opaque session doc id (not join code; client scrubbers strip `code` / `sessionId`).
+    gameId: sessionDoc.id,
+  };
+  if (typeof data?.createdAt === "string") {
+    properties.createdAt = data.createdAt;
+  }
   await captureAnalyticsEvent({
     apiKey: options.posthogApiKey ?? "",
     distinctId: hostUid,
     event: "session_ended",
     uuidSeed: `session_ended:abandoned:${sessionDoc.id}`,
-    properties: { reason: "abandoned" },
+    properties,
     captureImpl: options.captureImpl,
   });
 }

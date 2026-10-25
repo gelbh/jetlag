@@ -685,6 +685,7 @@ describe("useJoinSession", () => {
     expect(mockTrack).toHaveBeenCalledWith("join_failed", {
       role: "seeker",
       reason: "role_code_required",
+      gameId: "remote-session-1",
     });
   });
 

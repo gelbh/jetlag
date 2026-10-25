@@ -214,6 +214,84 @@ describe("buildMapDraftOverlays", () => {
     expect(pointInAnyElimination([pois[0]!.lng, pois[0]!.lat], westAnswer)).toBe(false);
     expect(pointInAnyElimination([pois[4]!.lng, pois[4]!.lat], westAnswer)).toBe(true);
   });
+
+  it("omits tentacle range circle and center when a POI answer is selected", async () => {
+    const result = await buildMapDraftOverlays({
+      ...emptySources,
+      activeTool: "tentacle",
+      tentacle: {
+        center: [53.35, -6.26],
+        searchRadiusMeters: 1609,
+        answerRadiusMeters: 1609,
+        pois: [
+          {
+            id: "east",
+            name: "East Museum",
+            lat: 53.351,
+            lng: -6.24,
+            category: "museum",
+          },
+        ],
+        selectedPoiId: "east",
+        outOfReach: false,
+        seekerResolving: false,
+      },
+    });
+
+    const ids = result.overlays.map((o) => o.id);
+    expect(ids).not.toContain("tentacle-draft-range");
+    expect(ids).not.toContain("tentacle-draft-center");
+    expect(result.eliminationFeatures.length).toBeGreaterThan(0);
+  });
+
+  it("omits tentacle range circle and center when out of reach", async () => {
+    const result = await buildMapDraftOverlays({
+      ...emptySources,
+      activeTool: "tentacle",
+      tentacle: {
+        center: [53.35, -6.26],
+        searchRadiusMeters: 1609,
+        answerRadiusMeters: 1609,
+        pois: [],
+        selectedPoiId: null,
+        outOfReach: true,
+        seekerResolving: false,
+      },
+    });
+
+    const ids = result.overlays.map((o) => o.id);
+    expect(ids).not.toContain("tentacle-draft-range");
+    expect(ids).not.toContain("tentacle-draft-center");
+    expect(ids).toContain("tentacle-draft-out-of-reach");
+  });
+
+  it("keeps tentacle range and center before an answer", async () => {
+    const result = await buildMapDraftOverlays({
+      ...emptySources,
+      activeTool: "tentacle",
+      tentacle: {
+        center: [53.35, -6.26],
+        searchRadiusMeters: 1609,
+        answerRadiusMeters: 1609,
+        pois: [
+          {
+            id: "east",
+            name: "East Museum",
+            lat: 53.351,
+            lng: -6.24,
+            category: "museum",
+          },
+        ],
+        selectedPoiId: null,
+        outOfReach: false,
+        seekerResolving: false,
+      },
+    });
+
+    const ids = result.overlays.map((o) => o.id);
+    expect(ids).toContain("tentacle-draft-range");
+    expect(ids).toContain("tentacle-draft-center");
+  });
 });
 
 describe("useMapDraftOverlays", () => {

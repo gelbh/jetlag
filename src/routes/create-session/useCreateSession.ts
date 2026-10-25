@@ -855,6 +855,7 @@ export function useCreateSession() {
       const signInStage = isFirebaseConfigured() ? task.stage(CREATE_STAGES.signIn) : undefined;
       const createStage = isFirebaseConfigured() ? task.stage(CREATE_STAGES.create) : undefined;
       const areasStage = lowPowerMode ? undefined : task.stage(CREATE_STAGES.matchingAreas);
+      let gameId = LOCAL_SESSION_ID;
       if (isFirebaseConfigured()) {
         signInStage?.start();
         const user = await retryAsync(() => ensureAnonymousUser());
@@ -904,6 +905,7 @@ export function useCreateSession() {
               ),
             );
         createStage?.finish();
+        gameId = session.id;
         setSession(session, user.uid);
         setPremiumApiContext(session);
         emitSessionStartedActivity(session.id, user.uid);
@@ -930,6 +932,7 @@ export function useCreateSession() {
       }
 
       track(ANALYTICS_EVENTS.session_created, {
+        gameId,
         tier: isFirebaseConfigured() ? tier : "free",
         gameSize,
         role: playerRole,

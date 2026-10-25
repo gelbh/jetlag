@@ -1,10 +1,12 @@
 import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon, Point } from "geojson";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { PolygonFeature } from "../../domain/geometry/kernel";
-import { tentacleEliminationJsonForAnswer } from "../../domain/geometry/tentacle/tentacleGeometry";
-import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
-import { DEFAULT_RADIUS_METERS } from "../../domain/map/distance";
+import {
+  type AnnotationRecord,
+  annotationSupportsGeometryEdit,
+  type GameArea,
+} from "../../domain/map/annotations";
 import { useAnnotationStore, useMapStore } from "../../state/sessionStore";
 import { clipZoneToGameArea, ZONE_OUTSIDE_PLAY_AREA_MESSAGE } from "../tools/useZoneTool";
 
@@ -29,20 +31,40 @@ export function useMapGeometryEdit({
   const setGeometryEditAnnotationId = useAnnotationStore(
     (state) => state.setGeometryEditAnnotationId,
   );
-  const [geometryDraft, setGeometryDraft] = useState<Feature<
+  const [geometryDraftState, setGeometryDraft] = useState<Feature<
     Point | LineString | GeoPolygon | MultiPolygon
   > | null>(null);
   const [thermoEditStep, setThermoEditStep] = useState<"a" | "b">("a");
 
-  const geometryEditAnnotation = useMemo(
+  const resolvedGeometryEditAnnotation = useMemo(
     () => annotations.find((annotation) => annotation.id === geometryEditAnnotationId) ?? null,
     [annotations, geometryEditAnnotationId],
   );
+  const geometryEditAnnotation =
+    resolvedGeometryEditAnnotation && annotationSupportsGeometryEdit(resolvedGeometryEditAnnotation)
+      ? resolvedGeometryEditAnnotation
+      : null;
+  const geometryDraft = geometryEditAnnotation ? geometryDraftState : null;
+
+  const cancelGeometryEdit = useCallback(() => {
+    setGeometryEditAnnotationId(null);
+    setGeometryDraft(null);
+    setThermoEditStep("a");
+  }, [setGeometryEditAnnotationId]);
+
+  useEffect(() => {
+    if (
+      resolvedGeometryEditAnnotation &&
+      !annotationSupportsGeometryEdit(resolvedGeometryEditAnnotation)
+    ) {
+      cancelGeometryEdit();
+    }
+  }, [cancelGeometryEdit, resolvedGeometryEditAnnotation]);
 
   const startGeometryEdit = useCallback(
     (annotationId: string) => {
       const annotation = annotations.find((item) => item.id === annotationId);
-      if (!annotation) {
+      if (!annotation || !annotationSupportsGeometryEdit(annotation)) {
         return;
       }
 
@@ -56,12 +78,6 @@ export function useMapGeometryEdit({
     [annotations, setActiveTool, setGeometryEditAnnotationId, setMapError, setSelectedAnnotationId],
   );
 
-  const cancelGeometryEdit = useCallback(() => {
-    setGeometryEditAnnotationId(null);
-    setGeometryDraft(null);
-    setThermoEditStep("a");
-  }, [setGeometryEditAnnotationId]);
-
   const saveGeometryEdit = useCallback(async () => {
     if (!geometryEditAnnotation || !geometryDraft) {
       return;
@@ -71,32 +87,6 @@ export function useMapGeometryEdit({
       ...geometryEditAnnotation,
       geometry: geometryDraft,
     };
-
-    if (geometryEditAnnotation.type === "tentacle") {
-      const meta = { ...record.metadata };
-      if (geometryDraft.geometry.type === "Point") {
-        const [lng, lat] = geometryDraft.geometry.coordinates;
-        const radiusMeters = meta.radiusMeters ?? DEFAULT_RADIUS_METERS;
-        const eliminationJson = await tentacleEliminationJsonForAnswer({
-          anchor: [lat, lng],
-          radiusMeters,
-          pois: meta.pois,
-          answeredPoiId: meta.highlightedPoiId,
-          outOfReach: Boolean(meta.tentacleOutOfReach),
-          gameArea,
-        });
-        if (!meta.tentacleOutOfReach && meta.highlightedPoiId) {
-          meta.tentacleAnswerRadiusMeters = radiusMeters;
-          meta.radiusMeters = radiusMeters;
-        }
-        if (eliminationJson !== undefined) {
-          meta.tentacleEliminationJson = eliminationJson;
-        } else {
-          delete meta.tentacleEliminationJson;
-        }
-      }
-      record = { ...record, metadata: meta };
-    }
 
     if (geometryEditAnnotation.type === "zone") {
       const clipped = clipZoneToGameArea(geometryDraft as PolygonFeature, gameArea);
@@ -128,11 +118,7 @@ export function useMapGeometryEdit({
         return true;
       }
 
-      if (
-        geometryEditAnnotation.type === "radar" ||
-        geometryEditAnnotation.type === "tentacle" ||
-        geometryEditAnnotation.type === "pin"
-      ) {
+      if (geometryEditAnnotation.type === "radar" || geometryEditAnnotation.type === "pin") {
         setGeometryDraft({
           ...geometryDraft,
           geometry: {

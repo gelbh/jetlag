@@ -238,11 +238,11 @@ export function useMapSessionChrome({
           return;
         }
         if (isExpectedSessionLeaveError(error)) {
-          trackSessionEnded("expected_already_ended");
+          trackSessionEnded("expected_already_ended", { gameId: sessionId });
         } else {
           captureException(error);
           commitWrite("session.end", () => endRemoteSession(sessionId));
-          trackSessionEnded("fallback_client_end");
+          trackSessionEnded("fallback_client_end", { gameId: sessionId });
         }
       }
       emitGameEndedActivity(sessionId, {
@@ -293,7 +293,7 @@ export function useMapSessionChrome({
     }
 
     if (isLocalSession) {
-      trackSessionEnded("local");
+      trackSessionEnded("local", { gameId: session.id });
     }
 
     if (!isLocalSession && user) {

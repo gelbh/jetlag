@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import type { Polygon as GeoPolygon, MultiPolygon } from "geojson";
+import { flushSync } from "react-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
@@ -98,6 +99,57 @@ describe("useMapGeometryEdit", () => {
       type: "Point",
       coordinates: [-6.27, 53.36],
     });
+  });
+
+  it("refuses save and click when geometry-edit ID resolves to a tentacle", async () => {
+    const sharedId = "ann-shared";
+    const pin: AnnotationRecord = { ...pinAnnotation, id: sharedId };
+    const tentacle: AnnotationRecord = {
+      ...pinAnnotation,
+      id: sharedId,
+      type: "tentacle",
+    };
+    const updateAnnotation = vi.fn(async (_annotation: AnnotationRecord) => {});
+    const ensurePointInGameArea = vi.fn(() => true);
+
+    const { result, rerender } = renderHook(
+      ({ annotations }: { annotations: AnnotationRecord[] }) =>
+        useMapGeometryEdit({
+          annotations,
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          ensurePointInGameArea,
+          setMapError: vi.fn(),
+          updateAnnotation,
+        }),
+      { initialProps: { annotations: [pin] } },
+    );
+
+    act(() => {
+      result.current.startGeometryEdit(sharedId);
+    });
+    act(() => {
+      result.current.handleGeometryEditClick([53.36, -6.27]);
+    });
+    expect(result.current.geometryDraft?.geometry).toEqual({
+      type: "Point",
+      coordinates: [-6.27, 53.36],
+    });
+
+    // Exposed draft nulls with the annotation at the API boundary; effect clears store.
+    await act(async () => {
+      flushSync(() => {
+        rerender({ annotations: [tentacle] });
+      });
+      expect(result.current.geometryEditAnnotation).toBeNull();
+      expect(result.current.geometryDraft).toBeNull();
+      expect(result.current.handleGeometryEditClick([53.37, -6.28])).toBe(false);
+      await result.current.saveGeometryEdit();
+    });
+
+    expect(updateAnnotation).not.toHaveBeenCalled();
+    expect(storeMocks.setGeometryEditAnnotationId).toHaveBeenCalledWith(null);
+    expect(storeMocks.geometryEditAnnotationId).toBeNull();
+    expect(result.current.geometryDraft).toBeNull();
   });
 
   describe("zone edits", () => {

@@ -389,6 +389,30 @@ describe("HiderToolDock", () => {
     expect(screen.getByRole("button", { name: "Expansion" })).toBeInTheDocument();
   });
 
+  it("gives sparse hider hunt slots a content-friendly min width", () => {
+    renderDock(
+      <HiderToolDock
+        zoneLabel="Set zone"
+        onZoneAction={vi.fn()}
+        showExpansion
+        onExpansion={vi.fn()}
+        onOpenChat={vi.fn()}
+        onOpenLog={vi.fn()}
+        onOpenSettings={vi.fn()}
+        onOpenReportProblem={vi.fn()}
+      />,
+    );
+
+    const setZone = screen.getByRole("button", { name: "Set zone" });
+    expect(setZone).toHaveClass("jl-tool-slot");
+    expect(document.querySelector(".jl-map-island--hunt-sparse")).not.toBeNull();
+
+    const group = document.querySelector(".jl-tool-dock-group-main");
+    expect(group?.className).toMatch(/min-w-\[3\.5rem\]/);
+    expect(group?.className).toMatch(/\[&_\.jl-tool-slot\]:px-1\.5/);
+    expect(group?.className).toMatch(/\[&_\.jl-tool-slot\]:flex-none/);
+  });
+
   it("places Hand next to Set zone when hand props are provided", () => {
     const onOpenHand = vi.fn();
     renderDock(

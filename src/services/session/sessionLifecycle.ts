@@ -54,5 +54,7 @@ export async function endSession(sessionId: string): Promise<void> {
     { sessionId: string },
     { ok: boolean; alreadyEnded?: boolean }
   >("endSession", { sessionId }, { idempotent: true });
-  trackSessionEnded(result?.alreadyEnded === true ? "expected_already_ended" : "host_end");
+  trackSessionEnded(result?.alreadyEnded === true ? "expected_already_ended" : "host_end", {
+    gameId: sessionId,
+  });
 }

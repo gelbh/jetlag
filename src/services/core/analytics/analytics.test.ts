@@ -153,7 +153,7 @@ describe("analytics facade", () => {
     initPosthogCore();
     initAnalytics();
     trackPageView("/home");
-    track(ANALYTICS_EVENTS.session_ended, { reason: "host_end" });
+    track(ANALYTICS_EVENTS.session_ended, { reason: "host_end", gameId: "sess-1" });
 
     expect(posthogInit).not.toHaveBeenCalled();
     expect(posthogCapture).not.toHaveBeenCalled();
@@ -270,6 +270,7 @@ describe("analytics facade", () => {
 
     initPosthogCore();
     track(ANALYTICS_EVENTS.session_created, {
+      gameId: "sess-1",
       tier: "free",
       gameSize: "medium",
       role: "seeker",
@@ -285,7 +286,7 @@ describe("analytics facade", () => {
 
     initAnalytics();
     trackPageView("/home");
-    track(ANALYTICS_EVENTS.session_ended, { reason: "host_end" });
+    track(ANALYTICS_EVENTS.session_ended, { reason: "host_end", gameId: "sess-1" });
 
     expect(posthogCapture).not.toHaveBeenCalled();
   });
@@ -536,7 +537,7 @@ describe("analytics facade", () => {
 
     denyAnalyticsConsent();
     trackPageView("/home");
-    track(ANALYTICS_EVENTS.session_ended, { reason: "host_end" });
+    track(ANALYTICS_EVENTS.session_ended, { reason: "host_end", gameId: "sess-1" });
 
     expect(posthogCapture).not.toHaveBeenCalled();
     expect(posthogOptOut).not.toHaveBeenCalled();
@@ -722,15 +723,27 @@ describe("analytics facade", () => {
     expect(JSON.stringify(props)).not.toMatch(/ABCD/);
   });
 
-  it("trackSessionEnded captures session_ended with reason", () => {
+  it("trackSessionEnded captures session_ended with reason and gameId", () => {
     writeAnalyticsConsent("granted");
     resetAnalyticsForTests({ initialized: true });
 
-    trackSessionEnded("host_end");
+    trackSessionEnded("host_end", { gameId: "sess-42" });
 
     expect(posthogCapture).toHaveBeenCalledWith("session_ended", {
       reason: "host_end",
+      gameId: "sess-42",
     });
+  });
+
+  it("keeps gameId through scrubAnalyticsProperties (sessionId keys stay forbidden)", () => {
+    expect(
+      scrubAnalyticsProperties({
+        gameId: "sess-42",
+        sessionId: "sess-42",
+        code: "ABCD",
+        reason: "abandoned",
+      }),
+    ).toEqual({ gameId: "sess-42", reason: "abandoned" });
   });
 
   it("trackSessionLeaveAlreadyLeft captures session_leave_already_left", () => {

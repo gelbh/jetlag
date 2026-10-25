@@ -94,6 +94,8 @@ describe("ToolDeck", () => {
     const group = screen.getByRole("group", {
       name: "History and question tools",
     });
-    expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:min-w-11/);
+    expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:min-w-\[3\.5rem\]/);
+    expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:px-1\.5/);
+    expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:flex-none/);
   });
 });
