@@ -55,7 +55,9 @@ export function useSharedSessionScreen({
     setPremiumApiContext(session);
   }, [session]);
 
-  useEnsureSessionMembership({ enabled: authMode !== "admin-permanent" });
+  const { membershipSettled } = useEnsureSessionMembership({
+    enabled: authMode !== "admin-permanent",
+  });
 
   useEffect(() => {
     if (authMode === "admin-permanent") {
@@ -162,13 +164,17 @@ export function useSharedSessionScreen({
     timerState: timer.timerState,
   });
 
-  const pendingQuestions = usePendingQuestionsSync(sessionId);
-  const { zones: hidingZones, loaded: hidingZonesLoaded } = useHidingZonesSync(sessionId);
-  const seekerLocations = useSeekerLocationsSync(sessionId, authReady);
+  const extrasEnabled = authReady && membershipSettled;
+  const pendingQuestions = usePendingQuestionsSync(sessionId, extrasEnabled);
+  const { zones: hidingZones, loaded: hidingZonesLoaded } = useHidingZonesSync(
+    sessionId,
+    extrasEnabled,
+  );
+  const seekerLocations = useSeekerLocationsSync(sessionId, extrasEnabled);
   const showHiderLocations =
     notificationRole === "hider" || notificationRole === "observer" || notificationRole === "admin";
-  const hiderLocations = useHiderLocationsSync(sessionId, showHiderLocations && authReady);
-  const chatMessages = useSessionMessagesSync(sessionId);
+  const hiderLocations = useHiderLocationsSync(sessionId, showHiderLocations && extrasEnabled);
+  const chatMessages = useSessionMessagesSync(sessionId, extrasEnabled);
   const syncStatus = useSyncStatus();
 
   const { hasUnreadChat, unreadCount, acknowledgeFingerprints } = useChatUnread({

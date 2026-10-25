@@ -41,6 +41,8 @@ describe("subscribeBoardEconomyState", () => {
     const boom = new FirebaseError("permission-denied", "Missing or insufficient permissions.");
     errorHandler?.(boom);
 
-    expect(handleFirestoreListenError).toHaveBeenCalledExactlyOnceWith(boom, onError);
+    expect(handleFirestoreListenError).toHaveBeenCalledExactlyOnceWith(boom, onError, {
+      firestoreOp: "subscribe:boardEconomyState",
+    });
   });
 });

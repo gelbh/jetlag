@@ -1,6 +1,8 @@
 import { doc, getDocFromServer } from "firebase/firestore";
 import type { SessionRecord, SessionTier } from "../../domain/map/annotations";
+import { generateHealSecret, hashHealSecret } from "../../domain/session/join/healSecret";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
+import { useSessionStore } from "../../state/sessionStore";
 import { getFirestoreDb } from "../core/firebase/firebase";
 import { joinSessionWithRole, mapRolePasscodeJoinError } from "../session/rolePasscodeLifecycle";
 import { deserializeSessionFromFirestore } from "./serialization/serializeSession";
@@ -42,6 +44,8 @@ async function getRemoteSessionByIdFromServer(sessionId: string): Promise<Sessio
 
 export async function joinGatedRemoteSessionByCode(input: {
   code: string;
+  /** The uid joining now; a heal is a join whose returningMemberUid differs from it. */
+  uid: string;
   codeRecord: SessionCodeRecord;
   role: PlayerRole;
   clientVersion: string;
@@ -52,6 +56,13 @@ export async function joinGatedRemoteSessionByCode(input: {
   touchSessionLastActive: TouchSessionLastActive;
 }): Promise<JoinGatedRemoteSessionResult> {
   try {
+    const sessionId = input.codeRecord.sessionId;
+    const storedSecret = useSessionStore.getState().healSecrets[sessionId];
+    // Reuse the stored secret: the callable may move or keep a proof made from it.
+    const secret = storedSecret ?? generateHealSecret();
+    // Without crypto.subtle (insecure context) join without a proof.
+    const proofHash = await hashHealSecret(secret).catch(() => undefined);
+
     const callableResult = await joinSessionWithRole({
       code: input.code,
       role: input.role,
@@ -59,7 +70,15 @@ export async function joinGatedRemoteSessionByCode(input: {
       clientVersion: input.clientVersion,
       returningMemberUid: input.returningMemberUid,
       persistedMyUid: input.persistedMyUid ?? undefined,
+      proofHash,
+      healSecret:
+        proofHash && input.returningMemberUid && input.returningMemberUid !== input.uid
+          ? storedSecret
+          : undefined,
     });
+    if (proofHash) {
+      useSessionStore.getState().setHealSecret(sessionId, secret);
+    }
 
     let session: SessionRecord | null = null;
     try {

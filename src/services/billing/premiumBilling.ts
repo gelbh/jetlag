@@ -11,6 +11,7 @@ import {
 } from "../../domain/session/tools/advancedSessionSettings";
 import { ANALYTICS_EVENTS, track } from "../core/analytics/analytics";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
+import { ensureMemberProof } from "../firestore/memberProofs";
 import { deserializeSessionFromFirestore } from "../firestore/serialization/serializeSession";
 import { serializeGameAreaForFirestore } from "../firestore/serialization/shared";
 import { AUTH_FAILURE_MESSAGE, withPermissionDeniedAuthRetry } from "../firestore/sessions/shared";
@@ -188,7 +189,9 @@ export async function createPremiumRemoteSession(
     });
 
     const raw = result.data.session;
-    return deserializeSessionFromFirestore(raw.id, raw);
+    const session = deserializeSessionFromFirestore(raw.id, raw);
+    void ensureMemberProof(session.id, input.hostUid);
+    return session;
   } catch (error) {
     if (error instanceof Error && error.message === AUTH_FAILURE_MESSAGE && error.cause != null) {
       throw mapCallableError(error.cause, "Could not create premium session.");

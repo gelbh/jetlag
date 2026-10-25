@@ -50,6 +50,7 @@ import {
 } from "./serialization/serializeSession";
 import { stripUndefinedValues } from "./serialization/shared";
 import { handleFirestoreListenError } from "./sessions/listenError";
+import { isFirestorePermissionDenied } from "./sessions/shared";
 
 export const THERMOMETER_WALK_CANCEL_TEXT = {
   left: "Thermometer walk cancelled — seeker left.",
@@ -129,6 +130,7 @@ export async function appendPlayerTrailPoint(
   try {
     // Auto ids on purpose: rules make points create-only, so a deterministic-id
     // set replayed onto an existing point is an update and is denied anyway.
+    // react-doctor-disable-next-line react-doctor/firebase-client-owned-authz-field -- playerTrailPoints create rule requires role == memberRole(sessionId) when role is present
     await addDoc(playerTrailPointsCollection(sessionId, point.uid), {
       lat: point.lat,
       lng: point.lng,
@@ -138,6 +140,10 @@ export async function appendPlayerTrailPoint(
     });
   } catch (error) {
     if (isFirestoreAlreadyExistsError(error)) {
+      return;
+    }
+    // Rules bind role to memberRoles; a point queued before an own-role switch is denied on replay.
+    if (isFirestorePermissionDenied(error)) {
       return;
     }
     throw error;
@@ -177,7 +183,8 @@ export function subscribeToStartingLocations(
       });
       onChange(locations);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:startingLocations" }),
   );
 }
 
@@ -198,7 +205,8 @@ export function subscribeToPlayerLocations(
       );
       onChange(locations);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:playerLocations" }),
   );
 }
 
@@ -223,7 +231,10 @@ export function subscribeToSeekerPlayerLocations(
   return onSnapshot(
     query(playerLocationsCollection(sessionId), where("role", "==", "seeker")),
     (snapshot) => onChange(mapPlayerLocationSnapshot(sessionId, snapshot)),
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, {
+        firestoreOp: "subscribe:seekerPlayerLocations",
+      }),
   );
 }
 
@@ -235,7 +246,8 @@ export function subscribeToHiderPlayerLocations(
   return onSnapshot(
     query(playerLocationsCollection(sessionId), where("role", "==", "hider")),
     (snapshot) => onChange(mapPlayerLocationSnapshot(sessionId, snapshot)),
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:hiderPlayerLocations" }),
   );
 }
 
@@ -293,7 +305,8 @@ export function subscribeToSessionMessages(
       );
       onChange(messages);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:sessionMessages" }),
   );
 }
 
@@ -490,7 +503,7 @@ export async function cancelWalkingThermometersAfterIdentityHeal(
     const walkIds = listWalkingThermometerQuestionIds(questions, oldUid);
     await cancelWalkingThermometersAndAnnounce(sessionId, walkIds, senderUid, senderRole, "orphan");
   } catch (error) {
-    captureException(error);
+    captureException(error, { firestore_op: "write:cancelWalkingThermometersAfterIdentityHeal" });
   }
 }
 
@@ -519,7 +532,8 @@ export function subscribeToPendingQuestions(
       );
       onChange(questions);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) =>
+      handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:pendingQuestions" }),
   );
 }
 
@@ -544,7 +558,7 @@ export function subscribeToHidingZones(
       );
       onChange(zones);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) => handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:hidingZones" }),
   );
 }
 
@@ -569,7 +583,7 @@ export function subscribeToTimeTraps(
       );
       onChange(traps);
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) => handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:timeTraps" }),
   );
 }
 
