@@ -2,8 +2,12 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   LIVE_LOCATION_FRESH_MS,
+  LIVE_WAIT_AFTER_TIMEOUT_MS,
+  LIVE_WAIT_BEFORE_ONESHOT_MS,
   publishLiveLocationReading,
+  releaseLiveLocationReading,
   resetLiveLocationReadingForTests,
+  retainLiveLocationReading,
 } from "../../services/core/location/liveLocationReading";
 import { resetLocationPermissionUiForTests } from "../../services/core/location/locationPermissionUi";
 import { createMockGeolocationPosition, mockGeolocation } from "../../test/mocks/geolocation";
@@ -23,7 +27,15 @@ describe("useGeolocation", () => {
     resetLiveLocationReadingForTests();
     resetLocationPermissionUiForTests();
     vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
+
+  const dublinReading = {
+    lat: 53.35,
+    lng: -6.26,
+    accuracy: 5,
+    heading: null,
+  };
 
   it("prefers a fresh live reading without calling geolocation", async () => {
     mockGeolocation(createMockGeolocationPosition(0, 0));
@@ -97,5 +109,138 @@ describe("useGeolocation", () => {
     });
 
     expect(result.current.error).toBeTruthy();
+  });
+
+  it("waits for live publish before one-shot when retainers exist", async () => {
+    retainLiveLocationReading();
+    mockGeolocation(createMockGeolocationPosition(51.5, -0.12));
+    mockPermissions("granted");
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    const { result } = renderHook(() => useGeolocation());
+
+    let refreshPromise: Promise<unknown>;
+    await act(async () => {
+      refreshPromise = result.current.refresh();
+    });
+
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+
+    await act(async () => {
+      publishLiveLocationReading(dublinReading, Date.now());
+    });
+
+    await act(async () => {
+      const reading = await refreshPromise;
+      expect(reading).toEqual(dublinReading);
+    });
+
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+    expect(result.current.reading).toEqual(dublinReading);
+    releaseLiveLocationReading();
+  });
+
+  it("falls through to one-shot after LIVE_WAIT_BEFORE_ONESHOT_MS with retainers", async () => {
+    vi.useFakeTimers();
+    retainLiveLocationReading();
+    mockGeolocation(createMockGeolocationPosition(51.5, -0.12));
+    mockPermissions("granted");
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    const { result } = renderHook(() => useGeolocation());
+
+    let refreshPromise: Promise<unknown>;
+    await act(async () => {
+      refreshPromise = result.current.refresh();
+    });
+
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(LIVE_WAIT_BEFORE_ONESHOT_MS);
+    });
+
+    await act(async () => {
+      await refreshPromise;
+    });
+
+    expect(getCurrentPosition).toHaveBeenCalled();
+    expect(result.current.reading).toMatchObject({ lat: 51.5, lng: -0.12 });
+    releaseLiveLocationReading();
+  });
+
+  it("does not wait when no retainers", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("granted");
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    const { result } = renderHook(() => useGeolocation());
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+  });
+
+  it("soft-recovers from TIMEOUT when live publishes after pre-wait", async () => {
+    vi.useFakeTimers();
+    retainLiveLocationReading();
+    mockGeolocation(null, 3);
+    mockPermissions("granted");
+
+    const { result } = renderHook(() => useGeolocation());
+
+    let refreshPromise: Promise<unknown>;
+    await act(async () => {
+      refreshPromise = result.current.refresh();
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(LIVE_WAIT_BEFORE_ONESHOT_MS);
+    });
+
+    await act(async () => {
+      publishLiveLocationReading(dublinReading, Date.now());
+    });
+
+    await act(async () => {
+      await refreshPromise;
+    });
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.reading).toEqual(dublinReading);
+    releaseLiveLocationReading();
+  });
+
+  it("surfaces timeout when soft-recover window also misses", async () => {
+    vi.useFakeTimers();
+    retainLiveLocationReading();
+    mockGeolocation(null, 3);
+    mockPermissions("granted");
+
+    const { result } = renderHook(() => useGeolocation());
+
+    let refreshPromise!: Promise<unknown>;
+    await act(async () => {
+      refreshPromise = result.current.refresh();
+    });
+
+    const rejection = expect(refreshPromise).rejects.toThrow(/timed out/i);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(LIVE_WAIT_BEFORE_ONESHOT_MS);
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(LIVE_WAIT_AFTER_TIMEOUT_MS);
+    });
+
+    await act(async () => {
+      await rejection;
+    });
+
+    expect(result.current.error).toMatch(/timed out/i);
+    releaseLiveLocationReading();
   });
 });

@@ -5,8 +5,12 @@ import {
   unknownGeolocationErrorMessage,
 } from "../../services/core/location/geolocation";
 import {
+  awaitFreshLiveLocationReading,
   getFreshLiveLocationReading,
+  hasLiveLocationRetainers,
   LIVE_LOCATION_FRESH_MS,
+  LIVE_WAIT_AFTER_TIMEOUT_MS,
+  LIVE_WAIT_BEFORE_ONESHOT_MS,
 } from "../../services/core/location/liveLocationReading";
 
 export function useGeolocation() {
@@ -17,15 +21,22 @@ export function useGeolocation() {
   const refresh = useCallback(async () => {
     setError(null);
 
-    const live = getFreshLiveLocationReading();
-    if (live) {
-      setReading(live);
-      return live;
+    const liveHit = getFreshLiveLocationReading();
+    if (liveHit) {
+      setReading(liveHit);
+      return liveHit;
     }
 
     setLoading(true);
+    try {
+      if (hasLiveLocationRetainers()) {
+        const waited = await awaitFreshLiveLocationReading(LIVE_WAIT_BEFORE_ONESHOT_MS);
+        if (waited) {
+          setReading(waited);
+          return waited;
+        }
+      }
 
-    const read = async () => {
       try {
         const next = await confirmAndRequestLocationAccess({
           highAccuracy: false,
@@ -35,12 +46,21 @@ export function useGeolocation() {
         return next;
       } catch (nextError) {
         const message = unknownGeolocationErrorMessage(nextError);
+        const isTimeout = message.toLowerCase().includes("timed out");
+        if (isTimeout && hasLiveLocationRetainers()) {
+          const recovered = await awaitFreshLiveLocationReading(LIVE_WAIT_AFTER_TIMEOUT_MS);
+          if (recovered) {
+            setError(null);
+            setReading(recovered);
+            return recovered;
+          }
+        }
         setError(message);
         throw nextError;
       }
-    };
-
-    return read().finally(() => setLoading(false));
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   return {
