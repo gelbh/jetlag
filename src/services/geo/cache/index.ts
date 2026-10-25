@@ -25,7 +25,6 @@ import {
   writeMemoryEntry,
 } from "./memory";
 
-export type { GeoCacheLayer } from "../shared/cacheInterface";
 export {
   adminDivisionCacheKey,
   coastlineSegmentsCacheKey,
@@ -37,6 +36,7 @@ export {
   staticTransitCacheKey,
   tentaclePoisCacheKey,
 } from "./keys";
+export type { GeoCacheLayer } from "./memory";
 export {
   clearStaleCacheNoticesForTests,
   memoryGeoCache,

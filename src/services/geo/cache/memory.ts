@@ -1,6 +1,10 @@
 import type { LoadPriority, ProgressNode } from "@/domain/progress/progressTree";
-import type { GeoCacheLayer } from "../shared/cacheInterface";
 import { isStableCacheKey } from "./keys";
+
+export interface GeoCacheLayer {
+  get(key: string): Promise<unknown | null>;
+  set(key: string, value: unknown, ttlMs?: number): Promise<void>;
+}
 
 export const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 export const STABLE_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;

@@ -36,9 +36,6 @@ e2e-ui:
 geometry-gates:
   node scripts/dev/geometry-gates.mjs
 
-audit-overpass:
-  RUN_OVERPASS_AUDIT=1 vitest run --project unit src/services/core/overpassAudit.integration.test.ts
-
 emulators:
   firebase emulators:start --project demo-jetlag --only auth,firestore,storage,functions
 

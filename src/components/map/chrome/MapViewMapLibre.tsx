@@ -21,9 +21,11 @@ import { getBasemapSurface, getMapLibreStyle } from "@/domain/map/mapBasemaps";
 import { MAP_CAMERA_HOME_ORIENTATION } from "@/domain/map/mapCameraHome";
 import { mapFocusApplyDependencyKeys } from "@/domain/map/mapFocusApplyDeps";
 import { shouldApplyMapFocus } from "@/domain/map/mapFocusPolicy";
+import { attachMapWebGlContextLostListener } from "@/domain/map/mapWebGlContextLoss";
 import { resolveMapPitchDegrees } from "@/domain/map/resolveMapPitchDegrees";
 import { stopMapCameraEase } from "@/domain/map/stopMapCameraEase";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
+import { captureMapWebGlContextLostOnce } from "@/services/core/analytics/clientErrors";
 import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 import {
   MapFeatureHitTestBridge,
@@ -33,6 +35,7 @@ import { useMapLibreMarkerImages } from "../helpers/mapLibreIconRegistry";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapNavControlStack } from "./MapNavControlStack";
+import { MapWebGlContextLostBanner } from "./MapWebGlContextLostBanner";
 import type { MapViewMapLibreProps } from "./mapViewTypes";
 
 setWorkerUrl(mapLibreWorkerUrl);
@@ -303,6 +306,8 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
   const compassControlEnabled = showCompassControl ?? false;
   const [fallbackRecenterToken, setFallbackRecenterToken] = useState(0);
   const [orientationResetToken, setOrientationResetToken] = useState(0);
+  const [webGlContextLost, setWebGlContextLost] = useState(false);
+  const [webGlRemountNonce, setWebGlRemountNonce] = useState(0);
   const focusRecenterToken = onRecenter ? recenterToken : fallbackRecenterToken;
   const handleCompassReset = useCallback(() => {
     // Orientation signal is compass-only; pan/zoom home uses recenter token.
@@ -313,6 +318,30 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
     }
     setFallbackRecenterToken((value) => value + 1);
   }, []);
+  const detachWebGlListenerRef = useRef<(() => void) | null>(null);
+  const handleWebGlContextLost = useCallback(() => {
+    captureMapWebGlContextLostOnce();
+    setWebGlContextLost(true);
+  }, []);
+  const handleWebGlRetry = useCallback(() => {
+    detachWebGlListenerRef.current?.();
+    detachWebGlListenerRef.current = null;
+    registerMapLibreMap(null);
+    setWebGlRemountNonce((value) => value + 1);
+  }, []);
+  const handleWebGlReload = useCallback(() => {
+    window.location.reload();
+  }, []);
+  const bindWebGlContextLost = useCallback(
+    (map: MapLibreMap) => {
+      detachWebGlListenerRef.current?.();
+      detachWebGlListenerRef.current = attachMapWebGlContextLostListener(
+        map.getCanvas(),
+        handleWebGlContextLost,
+      );
+    },
+    [handleWebGlContextLost],
+  );
   const mapStyleToggleEnabled =
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) && Boolean(onMapStyleChange);
   const { lowPowerMode } = useMotionProfile();
@@ -329,6 +358,8 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
 
   useEffect(() => {
     return () => {
+      detachWebGlListenerRef.current?.();
+      detachWebGlListenerRef.current = null;
       registerMapLibreMap(null);
     };
   }, []);
@@ -387,8 +418,11 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
     [emitBounds],
   );
 
+  const composedMapKey =
+    mapKey == null ? `webgl-${webGlRemountNonce}` : `${mapKey}::webgl-${webGlRemountNonce}`;
+
   return (
-    <div className={className ?? "h-full w-full"}>
+    <div className={`relative ${className ?? "h-full w-full"}`}>
       <div
         className={
           interactive
@@ -397,7 +431,7 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
         }
       >
         <Map
-          key={mapKey}
+          key={composedMapKey}
           ref={mapRef}
           initialViewState={{
             longitude,
@@ -431,6 +465,7 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
             const map = mapRef.current?.getMap();
             if (map) {
               registerMapLibreMap(map);
+              bindWebGlContextLost(map);
             }
             if (interactive) {
               map?.touchZoomRotate.enable();
@@ -444,6 +479,7 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
             if (maxPitchDegrees === 0) {
               map?.easeTo({ pitch: 0, duration: 0 });
             }
+            setWebGlContextLost(false);
             emitBounds();
           }}
           onMoveEnd={handleMoveEnd}
@@ -479,6 +515,11 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
           </MapFeatureHitTestProvider>
         </Map>
       </div>
+      <MapWebGlContextLostBanner
+        visible={webGlContextLost}
+        onRetry={handleWebGlRetry}
+        onReload={handleWebGlReload}
+      />
     </div>
   );
 }

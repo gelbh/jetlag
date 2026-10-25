@@ -87,6 +87,7 @@ export function captureResumeShellUnresponsive(
   context: Omit<AppResumeContext, "backgroundMs"> & {
     backgroundMs: number;
     adminRoute?: boolean;
+    resumeOffline?: boolean;
   },
 ): void {
   captureClientException(new Error("resume_shell_unresponsive"), {
@@ -96,5 +97,28 @@ export function captureResumeShellUnresponsive(
     standalone: context.standalone,
     ios_standalone: context.iosStandalone,
     ...(context.adminRoute ? { admin_route: true } : {}),
+    ...(context.resumeOffline ? { resume_offline: true } : {}),
   });
+}
+
+export function captureMapWebGlContextLost(): void {
+  captureClientException(new Error("map_webgl_context_lost"), {
+    map_webgl_context_lost: true,
+  });
+}
+
+let mapWebGlContextLostCapturedThisPageLoad = false;
+
+export function resetMapWebGlContextLostCaptureForTests(): void {
+  mapWebGlContextLostCapturedThisPageLoad = false;
+}
+
+/** Returns true when this call performed the capture. */
+export function captureMapWebGlContextLostOnce(): boolean {
+  if (mapWebGlContextLostCapturedThisPageLoad) {
+    return false;
+  }
+  mapWebGlContextLostCapturedThisPageLoad = true;
+  captureMapWebGlContextLost();
+  return true;
 }
