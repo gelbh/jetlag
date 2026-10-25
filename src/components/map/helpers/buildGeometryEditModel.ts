@@ -1,16 +1,8 @@
-import turfCircle from "@turf/circle";
-import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon, Point } from "geojson";
-import {
-  gameAreaToPolygon,
-  type LatLngTuple,
-  safeDifference,
-} from "@/domain/geometry/gameArea/geometry";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import { DEFAULT_RADIUS_METERS } from "@/domain/map/distance";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
-
-const TENTACLE_CIRCLE_STEPS = 64;
 
 export type GeometryEditModel =
   | {
@@ -18,15 +10,6 @@ export type GeometryEditModel =
       center: LatLngTuple;
       radiusMeters: number;
       color: string;
-    }
-  | {
-      kind: "tentacle";
-      center: LatLngTuple;
-      searchRadiusMeters: number;
-      color: string;
-      outOfReach: boolean;
-      noRadarDisk: Feature<GeoPolygon> | null;
-      yesRadarOutside: Feature<GeoPolygon | MultiPolygon> | null;
     }
   | {
       kind: "pin";
@@ -66,7 +49,7 @@ function asPolygon(geometry: Feature["geometry"]): GeoPolygon | null {
 export function buildGeometryEditModel(
   annotation: AnnotationRecord,
   draftGeometry: Feature<Point | LineString | GeoPolygon | MultiPolygon>,
-  gameArea: GameArea,
+  _gameArea: GameArea,
 ): GeometryEditModel {
   switch (annotation.type) {
     case "radar": {
@@ -79,42 +62,6 @@ export function buildGeometryEditModel(
         center: [point.coordinates[1], point.coordinates[0]],
         radiusMeters: annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS,
         color: MAP_ANNOTATION_COLORS.radar,
-      };
-    }
-    case "tentacle": {
-      const point = asPoint(draftGeometry.geometry);
-      if (!point) {
-        return { kind: "empty" };
-      }
-      const center: LatLngTuple = [point.coordinates[1], point.coordinates[0]];
-      const searchRadiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-      const color = annotation.metadata.color ?? MAP_ANNOTATION_COLORS.tentacle;
-      const outOfReach = Boolean(annotation.metadata.tentacleOutOfReach);
-      const searchCircle = turfCircle(turfPoint(point.coordinates), searchRadiusMeters / 1000, {
-        steps: TENTACLE_CIRCLE_STEPS,
-        units: "kilometers",
-      }) as Feature<GeoPolygon>;
-
-      if (outOfReach) {
-        return {
-          kind: "tentacle",
-          center,
-          searchRadiusMeters,
-          color,
-          outOfReach: true,
-          noRadarDisk: searchCircle,
-          yesRadarOutside: null,
-        };
-      }
-
-      return {
-        kind: "tentacle",
-        center,
-        searchRadiusMeters,
-        color,
-        outOfReach: false,
-        noRadarDisk: null,
-        yesRadarOutside: safeDifference(gameAreaToPolygon(gameArea), searchCircle),
       };
     }
     case "pin": {
@@ -168,6 +115,7 @@ export function buildGeometryEditModel(
         color: MAP_ANNOTATION_COLORS.zoneDraft,
       };
     }
+    case "tentacle":
     case "measuring":
     case "matching":
     case "draw":
