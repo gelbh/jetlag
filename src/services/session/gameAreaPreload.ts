@@ -2,6 +2,7 @@ import type { GameArea, SessionTier } from "../../domain/map/annotations";
 import type { StageSpec } from "../../domain/progress/progressTree";
 import type { MeasuringLocationCategory } from "../../domain/questions";
 import type { RegionPackId } from "../../domain/regions/regionPack";
+import { playAreaCategoryPresenceProbeSpecs } from "../../domain/session/catalog/playAreaCategoryPresence";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
@@ -15,7 +16,20 @@ import {
 } from "../geo/overpass/adminDivisionAvailability";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/overpass/adminDivisionBoundaries";
 import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
+import { probePlayAreaCategoryCounts } from "../geo/overpass/playAreaCategoryPresenceProbe";
 import { fetchStaticTransit } from "../transit/transitStatic";
+
+async function warmCategoryPresenceCounts(gameArea: GameArea, gameAreaKey: string): Promise<void> {
+  try {
+    const counts = await probePlayAreaCategoryCounts(
+      gameArea,
+      playAreaCategoryPresenceProbeSpecs(),
+    );
+    usePreloadStore.getState().setCategoryPresenceCounts(gameAreaKey, counts);
+  } catch {
+    // Soft-fail: leave categoryPresenceCounts unset so resolve stays available until reactive.
+  }
+}
 
 const PRELOAD_JOB_GAP_MS = 400;
 const PRELOAD_JOB_GAP_PREMIUM_MS = 100;
@@ -169,7 +183,8 @@ export async function preloadGameAreaCachesAsync(
     includeAdminProbe: false,
     subregionId,
   });
-  usePreloadStore.getState().reset(gameAreaKey, jobs.length + 1);
+  // +2: admin division probe + category presence probe (warmed before the queue).
+  usePreloadStore.getState().reset(gameAreaKey, jobs.length + 2);
 
   activePreloadAbort?.abort();
   activePreloadAbort = new AbortController();
@@ -192,6 +207,9 @@ export async function preloadGameAreaCachesAsync(
   usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
   usePreloadStore.getState().recordSuccess(gameAreaKey);
 
+  await warmCategoryPresenceCounts(gameArea, gameAreaKey);
+  usePreloadStore.getState().recordSuccess(gameAreaKey);
+
   await runPreloadQueue(gameAreaKey, jobs, jobGapMs, signal);
 }
 
@@ -207,6 +225,12 @@ const CRITICAL_PROBE_STAGE: StageSpec = {
   kind: "fetch",
   label: "Checking area divisions",
   historyKey: "preload:admin-probe",
+};
+
+const CRITICAL_CATEGORY_STAGE: StageSpec = {
+  kind: "fetch",
+  label: "Checking places in the area",
+  historyKey: "preload:category-probe",
 };
 
 const CRITICAL_LEVEL_STAGE: StageSpec = {
@@ -227,7 +251,7 @@ export async function preloadCriticalGameAreaCaches(
   const gameAreaKey = gameAreaPreloadKey(gameArea);
   const adminLevels = adminBoundaryLevelsForSession(regionPackId, customMatchingAreas);
   const store = usePreloadStore.getState();
-  store.resetCritical(gameAreaKey, adminLevels.length + 1);
+  store.resetCritical(gameAreaKey, adminLevels.length + 2);
 
   activeCriticalTask?.cancel();
   const task = createLoadTask({
@@ -239,6 +263,7 @@ export async function preloadCriticalGameAreaCaches(
   const load = { priority: task.priority, signal: task.signal };
   // Stages are created up front so the bar's weights stay put.
   const probeStage = task.stage(CRITICAL_PROBE_STAGE);
+  const categoryStage = task.stage(CRITICAL_CATEGORY_STAGE);
   const levelStages = adminLevels.map(() => task.stage(CRITICAL_LEVEL_STAGE));
 
   let counts = emptyAdminDivisionCounts();
@@ -252,6 +277,10 @@ export async function preloadCriticalGameAreaCaches(
     store.recordCriticalJob(gameAreaKey, "failure");
   }
   usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
+  categoryStage.start();
+  await warmCategoryPresenceCounts(gameArea, gameAreaKey);
+  categoryStage.finish();
+  store.recordCriticalJob(gameAreaKey, "success");
 
   await Promise.allSettled(
     adminLevels.map((adminLevel, index) =>

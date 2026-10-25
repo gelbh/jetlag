@@ -10,8 +10,8 @@ import { previewEliminationFeaturesFingerprint } from "../../domain/questions/ov
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import {
   createLoadTask,
-  getNamedLoadTask,
-  setNamedLoadTask,
+  publishNamedLoadTask,
+  runLoadTask,
 } from "../../services/core/progress/loadTask";
 import { createYieldBudget } from "../../services/core/progress/yieldToMain";
 
@@ -74,33 +74,34 @@ export function useCombinedEliminationMask({
     const union = task.stage({ ...MASK_UNION_STAGE, sizeBucket: bucket });
     const yieldBudget = createYieldBudget();
     // Most rebuilds are cache hits or instant; only surface ones the user would notice.
+    let clearPublished = () => {};
     const publishTimer = window.setTimeout(() => {
-      setNamedLoadTask(ELIMINATION_MASK_TASK, task);
+      clearPublished = publishNamedLoadTask(ELIMINATION_MASK_TASK, task);
     }, MASK_PROGRESS_DELAY_MS);
+    const settle = () => {
+      window.clearTimeout(publishTimer);
+      clearPublished();
+    };
 
-    void requestCombinedEliminationMask(
-      annotations,
-      gameArea,
-      draftFeaturesRef.current,
-      endGameHidingZones,
-      {
-        onPrepare: async (done, total) => {
-          prepare.setCount(done, total);
-          await yieldBudget();
+    void runLoadTask(task, () =>
+      requestCombinedEliminationMask(
+        annotations,
+        gameArea,
+        draftFeaturesRef.current,
+        endGameHidingZones,
+        {
+          onPrepare: async (done, total) => {
+            prepare.setCount(done, total);
+            await yieldBudget();
+          },
+          onUnion: () => {
+            prepare.finish();
+            union.start();
+          },
         },
-        onUnion: () => {
-          prepare.finish();
-          union.start();
-        },
-      },
+      ),
     )
-      .finally(() => {
-        window.clearTimeout(publishTimer);
-        task.complete();
-        if (getNamedLoadTask(ELIMINATION_MASK_TASK) === task) {
-          setNamedLoadTask(ELIMINATION_MASK_TASK, null);
-        }
-      })
+      .finally(settle)
       .then((result) => {
         if (generation === generationRef.current) {
           setMask(result);
@@ -111,6 +112,7 @@ export function useCombinedEliminationMask({
           setMask(null);
         }
       });
+    return settle;
   }, [annotations, draftFingerprint, endGameHidingZones, gameArea, hidden]);
 
   if (hidden) {

@@ -8,8 +8,11 @@ type LoadProgressVariant = "full" | "compact";
 interface LoadProgressProps {
   task: LoadTask;
   variant?: LoadProgressVariant;
-  /** Hides the task label when the surrounding UI already shows it. */
-  hideLabel?: boolean;
+  /**
+   * What the compact footer names: the task label, or the current step when the
+   * surrounding card already has a title.
+   */
+  compactDetail?: "label" | "stage";
   className?: string;
 }
 
@@ -26,7 +29,7 @@ function timeText(etaMs: number | null, overdue: boolean): string | null {
 export function LoadProgress({
   task,
   variant = "full",
-  hideLabel = false,
+  compactDetail = "label",
   className = "",
 }: LoadProgressProps) {
   const snapshot = useLoadTask(task);
@@ -43,7 +46,7 @@ export function LoadProgress({
       <div role="status" aria-live="polite" className="sr-only">
         {`${snapshot.label}. ${snapshot.stageLabel}.`}
       </div>
-      {!hideLabel && !compact ? (
+      {!compact ? (
         <p className="m-0 text-sm text-field-ink" aria-hidden>
           {snapshot.label}
         </p>
@@ -76,9 +79,12 @@ export function LoadProgress({
         </span>
       </div>
       <div className="flex items-center justify-between gap-2 text-xs text-field-ink-muted">
-        <span className="min-w-0 truncate" aria-hidden={compact}>
-          {compact ? snapshot.label : snapshot.stageLabel}
-          {time ? ` · ${time}` : ""}
+        <span className="flex min-w-0 flex-1 items-baseline gap-1" aria-hidden={compact}>
+          {/* The label may truncate; the time text must stay whole. */}
+          <span className="min-w-0 truncate">
+            {compact && compactDetail === "label" ? snapshot.label : snapshot.stageLabel}
+          </span>
+          {time ? <span className="shrink-0 whitespace-nowrap">· {time}</span> : null}
         </span>
         {snapshot.cancellable ? (
           <UnstyledButton

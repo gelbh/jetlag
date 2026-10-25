@@ -1,5 +1,6 @@
 import type { LoadPriority } from "@/domain/progress/progressTree";
 import { abortReason } from "../../core/network/anySignal";
+import { onSharedFetchPriorityChange } from "../cache";
 
 const MAX_CONCURRENT = 2;
 /** Background work never holds more than this many slots, so a user question waits for at most one request. */
@@ -81,6 +82,9 @@ function dispatch(): void {
 export function notifyOverpassPriorityChanged(): void {
   dispatch();
 }
+
+// Shared cache fetches change lanes as subscribers join or leave.
+onSharedFetchPriorityChange(dispatch);
 
 function acquireSlot(request: SlotRequest): Promise<Holder> {
   const priority = priorityGetter(request.priority);

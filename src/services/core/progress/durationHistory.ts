@@ -1,10 +1,5 @@
 import type { StageSpec } from "@/domain/progress/progressTree";
 import { stagePriorMs } from "@/domain/progress/stagePriors";
-import {
-  readPersistedEntryIgnoringExpiry,
-  writePersistedEntry,
-} from "@/services/geo/cache/indexedDb";
-import { PROGRESS_HISTORY_CACHE_KEY } from "@/services/geo/cache/keys";
 
 export interface DurationRecord {
   emaMs: number;
@@ -12,7 +7,21 @@ export interface DurationRecord {
   updatedAt: number;
 }
 
-type HistoryBlob = Record<string, DurationRecord>;
+export type HistoryBlob = Record<string, DurationRecord>;
+
+/** Where history persists; registered by the storage layer so this module stays I/O-free. */
+export interface DurationHistoryStore {
+  read(): Promise<HistoryBlob | undefined>;
+  write(blob: HistoryBlob): Promise<void>;
+}
+
+let store: DurationHistoryStore | null = null;
+
+export function configureDurationHistoryStore(next: DurationHistoryStore | null): void {
+  store = next;
+  hydratePromise = null;
+  hydrationFailed = false;
+}
 
 const HISTORY_ALPHA = 0.3;
 export const MAX_HISTORY_RECORDS = 64;
@@ -24,6 +33,7 @@ const MAX_BUCKET_SCALE = 4;
 
 let records: HistoryBlob = {};
 let hydratePromise: Promise<void> | null = null;
+let hydrationFailed = false;
 let writeTimer: ReturnType<typeof setTimeout> | null = null;
 
 function recordKey(historyKey: string, bucket: number | undefined): string {
@@ -32,7 +42,11 @@ function recordKey(historyKey: string, bucket: number | undefined): string {
 
 /** Loads the persisted blob once; estimates use priors until it resolves. */
 export function hydrateDurationHistory(): Promise<void> {
-  hydratePromise ??= readPersistedEntryIgnoringExpiry<HistoryBlob>(PROGRESS_HISTORY_CACHE_KEY)
+  if (!store) {
+    return Promise.resolve();
+  }
+  hydratePromise ??= store
+    .read()
     .then((stored) => {
       if (stored && typeof stored === "object") {
         records = { ...stored, ...records };
@@ -40,6 +54,7 @@ export function hydrateDurationHistory(): Promise<void> {
     })
     .catch(() => {
       // History is an optimisation; priors still work without it.
+      hydrationFailed = true;
     });
   return hydratePromise;
 }
@@ -50,7 +65,13 @@ function scheduleWrite(): void {
   }
   writeTimer = setTimeout(() => {
     writeTimer = null;
-    void writePersistedEntry(PROGRESS_HISTORY_CACHE_KEY, records);
+    // Writing before hydration merges would replace the stored history with this
+    // session's few records; after a failed read, leave the stored blob alone.
+    void hydrateDurationHistory().then(() => {
+      if (store && !hydrationFailed) {
+        void store.write(records);
+      }
+    });
   }, WRITE_DEBOUNCE_MS);
 }
 
@@ -120,6 +141,7 @@ export function readDurationRecordsForTests(): HistoryBlob {
 export function resetDurationHistoryForTests(): void {
   records = {};
   hydratePromise = null;
+  hydrationFailed = false;
   if (writeTimer !== null) {
     clearTimeout(writeTimer);
     writeTimer = null;

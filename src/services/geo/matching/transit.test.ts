@@ -235,4 +235,44 @@ describe("hiding-zone transit station fetchers", () => {
       vi.useRealTimers();
     }
   });
+
+  it("drops a timed-out Overpass lookup to the background lane instead of aborting it", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.mocked(loadGtfsBundle).mockResolvedValue(null);
+      vi.mocked(overpassClient.queryOverpass).mockReturnValue(new Promise(() => {}));
+
+      const pending = fetchTransitStationsForHidingZoneViewport(
+        { south: 40.748, west: -73.996, north: 40.753, east: -73.99 },
+        MIDTOWN_GAME_AREA,
+      );
+      const rejection = expect(pending).rejects.toThrow(/Couldn't load transit stations/i);
+      const options = vi.mocked(overpassClient.queryOverpass).mock.calls[0]?.[1];
+      const priority = options?.priority as () => string;
+      expect(priority()).toBe("foreground");
+
+      await vi.advanceTimersByTimeAsync(HIDING_ZONE_OVERPASS_TIMEOUT_MS);
+      await rejection;
+      expect(priority()).toBe("background");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("applies no stations, not even GTFS ones, after a Cancel", async () => {
+    vi.mocked(loadGtfsBundle).mockResolvedValue(NYC_BUNDLE);
+    const controller = new AbortController();
+    vi.mocked(overpassClient.queryOverpass).mockImplementation(async () => {
+      controller.abort(new DOMException("Cancelled.", "AbortError"));
+      throw new DOMException("Cancelled.", "AbortError");
+    });
+
+    await expect(
+      fetchTransitStationsForHidingZoneViewport(
+        { south: 40.748, west: -73.996, north: 40.753, east: -73.99 },
+        MIDTOWN_GAME_AREA,
+        { load: { signal: controller.signal } },
+      ),
+    ).rejects.toMatchObject({ name: "AbortError" });
+  });
 });

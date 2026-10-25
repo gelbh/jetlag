@@ -50,7 +50,7 @@ export function MeasuringRefineMapChip({
             {title}
           </p>
           {task ? (
-            <LoadProgress task={task} variant="compact" className="mt-1" />
+            <LoadProgress task={task} variant="compact" compactDetail="stage" className="mt-1" />
           ) : (
             <p
               className="m-0 mt-1 text-sm font-medium leading-snug"

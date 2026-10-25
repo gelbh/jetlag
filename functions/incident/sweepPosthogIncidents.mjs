@@ -55,7 +55,8 @@ export async function sweepPosthogIncidents(db, deps) {
   const counts = { checked: 0, resolved: 0, dismissed: 0, skipped: 0 };
   let authFailed = false;
   // Sequential on purpose: one PostHog API call at a time, and 50 lookups × 2s timeout fit the 120s run.
-  for (const doc of candidates) {
+  for (let i = 0; i < candidates.length; i += 1) {
+    const doc = candidates[i];
     counts.checked += 1;
     const lookup = await readPosthogStatus(
       fetchImpl,
@@ -64,6 +65,10 @@ export async function sweepPosthogIncidents(db, deps) {
       doc.data().posthogIssue.id,
     );
     authFailed ||= lookup.authFailed;
+    if (lookup.authFailed) {
+      counts.skipped += 1 + (candidates.length - i - 1);
+      break;
+    }
     const posthogStatus = lookup.status;
     const target = posthogStatus ? TARGET_STATUS[posthogStatus] : undefined;
     if (!target) {

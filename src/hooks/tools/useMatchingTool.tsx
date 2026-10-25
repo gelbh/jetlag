@@ -100,7 +100,7 @@ export function useMatchingTool({
     }
   }, [active]);
 
-  const draft = useMatchingDraftState();
+  const draft = useMatchingDraftState(sessionRules);
   const {
     matchingSeekerPoint,
     matchingCategoryId,
@@ -375,6 +375,7 @@ export function useMatchingTool({
               const enrichTask = createLoadTask({
                 label: "Confirming with map data",
                 signal,
+                priority: "background",
                 cancellable: false,
               });
               if (isLatestRequest(requestId)) {
@@ -390,6 +391,7 @@ export function useMatchingTool({
         task.complete();
       } catch (error) {
         if (!isAbortError(error)) {
+          task.fail(error);
           throw error;
         }
         task.cancel();

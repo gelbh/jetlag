@@ -2,6 +2,7 @@ import type { GamePreset } from "../../session/presets/gamePreset";
 import { GAME_PRESET_SCHEMA_VERSION } from "../../session/presets/gamePreset";
 import { recommendGameSizeFromPlayAreaSquareMiles } from "../../session/size/gameSize";
 import { defaultAdvancedSessionSettings } from "../../session/tools/advancedSessionSettings";
+import { mergeRegionPackFlavorCategories } from "../regionPackFlavorCategories";
 import { attachPlayArea } from "./attachPlayArea";
 import { australiaPresets } from "./australia";
 import { dublinPresets } from "./dublin";
@@ -49,6 +50,10 @@ export function buildBundledGamePresets(now = new Date().toISOString()): GamePre
       distanceUnit,
     );
     const defaults = defaultAdvancedSessionSettings(gameSize, distanceUnit);
+    const advancedSettings = {
+      ...defaults,
+      ...definition.advancedSettingsPatch,
+    };
     return {
       id: definition.id,
       name: definition.name,
@@ -58,8 +63,11 @@ export function buildBundledGamePresets(now = new Date().toISOString()): GamePre
       gameSize,
       distanceUnit,
       advancedSettings: {
-        ...defaults,
-        ...definition.advancedSettingsPatch,
+        ...advancedSettings,
+        customCategories: mergeRegionPackFlavorCategories(
+          advancedSettings.customCategories ?? [],
+          definition.regionPackId,
+        ),
       },
       placeLabel: definition.placeLabel,
       regionPackId: definition.regionPackId,

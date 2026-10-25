@@ -21,7 +21,6 @@ import {
   GEO_FETCH_TIMEOUT_MS,
   readTextWithProgress,
 } from "@/services/core/network/fetchWithTimeout";
-import { withStage } from "@/services/core/progress/loadTask";
 import { yieldToMain } from "@/services/core/progress/yieldToMain";
 
 const regionPackGeoCache = new Map<string, string>();
@@ -179,21 +178,24 @@ async function buildPlayArea(
   progress: ProgressNode | undefined,
 ): Promise<GameArea> {
   const text = await fetchGeoJsonText(path, stages);
-  return withStage(progress, PLAY_AREA_STAGE, async () => {
-    // Let "Building play area" paint before the synchronous union.
-    await yieldToMain();
-    const features = polygonFeatures(parseFeatureCollection(text));
-    if (!subregionId) {
-      return combineRegionGameAreas(features);
-    }
-    const subregion = features.find(
-      (feature) => subregionIdFromFeature(feature, config.subregionPropertyKey) === subregionId,
-    );
-    if (!subregion) {
-      throw new Error(`Couldn't find region boundary for ${subregionId}.`);
-    }
-    return featureToRegionGameArea(subregion);
-  });
+  const node = progress?.stage(PLAY_AREA_STAGE).start();
+  // Let "Building play area" paint before the synchronous union.
+  await yieldToMain();
+  const features = polygonFeatures(parseFeatureCollection(text));
+  if (!subregionId) {
+    const playArea = combineRegionGameAreas(features);
+    node?.finish();
+    return playArea;
+  }
+  const subregion = features.find(
+    (feature) => subregionIdFromFeature(feature, config.subregionPropertyKey) === subregionId,
+  );
+  if (!subregion) {
+    throw new Error(`Couldn't find region boundary for ${subregionId}.`);
+  }
+  const playArea = featureToRegionGameArea(subregion);
+  node?.finish();
+  return playArea;
 }
 
 /** `progress` gets a byte-counted download stage per uncached asset, then the build. */

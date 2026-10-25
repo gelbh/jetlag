@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { STAGE_PRIORS_MS } from "@/domain/progress/stagePriors";
-import { readPersistedEntryIgnoringExpiry } from "@/services/geo/cache/indexedDb";
+import {
+  readPersistedEntryIgnoringExpiry,
+  writePersistedEntry,
+} from "@/services/geo/cache/indexedDb";
 import { PROGRESS_HISTORY_CACHE_KEY } from "@/services/geo/cache/keys";
 import {
+  configureDurationHistoryStore,
   expectedStageMs,
   MAX_HISTORY_RECORDS,
   readDurationRecordsForTests,
@@ -15,6 +19,10 @@ const spec = { kind: "fetch" as const, label: "Search", historyKey: "overpass:te
 describe("durationHistory", () => {
   beforeEach(() => {
     resetDurationHistoryForTests();
+    configureDurationHistoryStore({
+      read: () => readPersistedEntryIgnoringExpiry(PROGRESS_HISTORY_CACHE_KEY),
+      write: (blob) => writePersistedEntry(PROGRESS_HISTORY_CACHE_KEY, blob),
+    });
   });
 
   afterEach(() => {
@@ -66,5 +74,24 @@ describe("durationHistory", () => {
       );
       expect(blob && Object.keys(blob)).toEqual(["overpass:tentacle#0"]);
     });
+  });
+
+  it("never overwrites stored history when the first read failed", async () => {
+    vi.useFakeTimers();
+    const write = vi.fn(async () => {});
+    configureDurationHistoryStore({
+      read: async () => {
+        throw new Error("IndexedDB unavailable");
+      },
+      write,
+    });
+    recordStageDuration(spec, 1_000);
+    await vi.advanceTimersByTimeAsync(2_500);
+    expect(write).not.toHaveBeenCalled();
+  });
+
+  it("estimates from priors with no store configured", () => {
+    configureDurationHistoryStore(null);
+    expect(expectedStageMs(spec)).toBe(STAGE_PRIORS_MS["overpass:tentacle"]);
   });
 });

@@ -107,6 +107,7 @@ export function createLoadTask(options: LoadTaskOptions): LoadTask {
   let snapshot: LoadTaskSnapshot;
   let framePending = false;
   let tickTimer: ReturnType<typeof setInterval> | null = null;
+  let detachParent = () => {};
 
   const root = createProgressRoot(options.label, {
     now: () => Date.now(),
@@ -179,6 +180,7 @@ export function createLoadTask(options: LoadTaskOptions): LoadTask {
       return;
     }
     status = next;
+    detachParent();
     syncTicker();
     if (options.global) {
       globalTasks.delete(task);
@@ -232,7 +234,10 @@ export function createLoadTask(options: LoadTaskOptions): LoadTask {
       status = "cancelled";
       snapshot = computeSnapshot();
     } else {
-      options.signal.addEventListener("abort", () => task.cancel(), { once: true });
+      const parent = options.signal;
+      const onParentAbort = () => task.cancel();
+      parent.addEventListener("abort", onParentAbort, { once: true });
+      detachParent = () => parent.removeEventListener("abort", onParentAbort);
     }
   }
 
@@ -261,19 +266,6 @@ export async function runLoadTask<T>(
     }
     throw error;
   }
-}
-
-/** Runs a stage around `work`, finishing it on success. */
-export async function withStage<T>(
-  parent: ProgressNode | undefined,
-  spec: StageSpec,
-  work: (node: ProgressNode | undefined) => Promise<T>,
-): Promise<T> {
-  const node = parent?.stage(spec);
-  node?.start();
-  const result = await work(node);
-  node?.finish();
-  return result;
 }
 
 /**
@@ -315,5 +307,18 @@ export function subscribeNamedLoadTasks(listener: () => void): () => void {
   namedListeners.add(listener);
   return () => {
     namedListeners.delete(listener);
+  };
+}
+
+/**
+ * Publishes `task` under `name` and returns a clear that only removes it while it
+ * is still the published one, so a stale clear never hides a newer task.
+ */
+export function publishNamedLoadTask(name: string, task: LoadTask): () => void {
+  setNamedLoadTask(name, task);
+  return () => {
+    if (getNamedLoadTask(name) === task) {
+      setNamedLoadTask(name, null);
+    }
   };
 }

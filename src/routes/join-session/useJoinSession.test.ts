@@ -139,6 +139,8 @@ describe("useJoinSession", () => {
       expect(navigate).toHaveBeenCalledWith("/map");
     });
     expect(result.current.error).toBeNull();
+    // A claimed join is the only outcome recorded as a successful, timed task.
+    await waitFor(() => expect(result.current.joinTask?.getSnapshot().status).toBe("done"));
   });
 
   it("sets error when firebase is not configured", async () => {
@@ -610,6 +612,8 @@ describe("useJoinSession", () => {
       role: "seeker",
       reason: "session_missing",
     });
+    // A failed join must not feed its stage timings into duration history as a success.
+    await waitFor(() => expect(result.current.joinTask?.getSnapshot().status).toBe("failed"));
   });
 
   it("tracks session_ended once when the join reports an ended session", async () => {

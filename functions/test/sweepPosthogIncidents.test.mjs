@@ -150,7 +150,7 @@ test("sweep checks at most POSTHOG_SWEEP_MAX_PER_RUN incidents", async () => {
   assert.equal(fetch.calls.length, POSTHOG_SWEEP_MAX_PER_RUN);
 });
 
-test("sweep finishes the loop then fails loudly when PostHog returns 401", async () => {
+test("sweep stops PostHog lookups after first auth failure but still throws", async () => {
   const db = mockDb({
     "posthog-a": alertIncident("a"),
     "posthog-b": alertIncident("b"),
@@ -161,8 +161,9 @@ test("sweep finishes the loop then fails loudly when PostHog returns 401", async
     sweepPosthogIncidents(db, { apiKey: "k", fetch, now }),
     new Error(POSTHOG_SWEEP_AUTH_FAILED),
   );
-  assert.equal(db._incidents.get("posthog-b").status, "resolved");
+  assert.equal(fetch.calls.length, 1);
   assert.equal(db._incidents.get("posthog-a").status, "open");
+  assert.equal(db._incidents.get("posthog-b").status, "open");
 });
 
 test("sweep fails loudly on a 403-only run", async () => {

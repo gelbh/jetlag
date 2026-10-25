@@ -23,6 +23,7 @@ export function teardownSessionUiState(): void {
     critical: null,
     dismissed: true,
     adminDivisionCounts: null,
+    categoryPresenceCounts: null,
   });
 }
 

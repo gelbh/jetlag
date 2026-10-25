@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createLoadTask,
-  getNamedLoadTask,
-  setNamedLoadTask,
+  publishNamedLoadTask,
+  runLoadTask,
 } from "@/services/core/progress/loadTask";
 import { HIDER_TRUTHS_TASK } from "@/services/core/progress/namedTasks";
 import type { GameArea } from "../../domain/map/annotations";
@@ -104,11 +104,12 @@ export function useHiderQuestionTruths(
         historyKey: truthHistoryKey(question),
       });
     }
-    setNamedLoadTask(HIDER_TRUTHS_TASK, task);
+    const clearPublished = publishNamedLoadTask(HIDER_TRUTHS_TASK, task);
 
-    void (async () => {
-      let resolved = 0;
-      const entries = await Promise.all(
+    let resolved = 0;
+    // runLoadTask ends the task even when a truth computation throws.
+    void runLoadTask(task, () =>
+      Promise.all(
         open.map(async (question, index) => {
           const stage = checks.children[index]?.start();
           const truth =
@@ -124,26 +125,25 @@ export function useHiderQuestionTruths(
           }
           return [question.id, truth] as const;
         }),
-      );
-
-      task.complete();
-      if (getNamedLoadTask(HIDER_TRUTHS_TASK) === task) {
-        setNamedLoadTask(HIDER_TRUTHS_TASK, null);
-      }
-      if (!isLatestRequest(requestId)) {
-        return;
-      }
-
-      const nextTruths = new Map<string, HiderTruthResult>();
-      for (const [questionId, truth] of entries) {
-        if (truth) {
-          nextTruths.set(questionId, truth);
+      ),
+    )
+      .finally(clearPublished)
+      .then((entries) => {
+        if (!isLatestRequest(requestId)) {
+          return;
         }
-      }
 
-      setQuestionTruths((previous) => reuseHiderTruthMapIfEqual(previous, nextTruths));
-      setResolvedFetchKey(fetchKey);
-    })();
+        const nextTruths = new Map<string, HiderTruthResult>();
+        for (const [questionId, truth] of entries) {
+          if (truth) {
+            nextTruths.set(questionId, truth);
+          }
+        }
+
+        setQuestionTruths((previous) => reuseHiderTruthMapIfEqual(previous, nextTruths));
+        setResolvedFetchKey(fetchKey);
+      });
+    return clearPublished;
   }, [fetchKey, beginRequest, isLatestRequest, gameArea, truthReferenceReady]);
 
   return {

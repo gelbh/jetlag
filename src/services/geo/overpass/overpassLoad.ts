@@ -1,4 +1,5 @@
 import type { ProgressNode, StageSpec } from "@/domain/progress/progressTree";
+import { throwIfAborted } from "../../core/network/anySignal";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { type LoadTask, runLoadTask } from "../../core/progress/loadTask";
 import type { CachedFetchOptions, FetchContext } from "../cache";
@@ -38,12 +39,7 @@ export function cachedFetchOptions(
   stage: StageSpec,
   base: Pick<CachedFetchOptions, "persistEmpty"> = {},
 ): CachedFetchOptions {
-  const priority = typeof load?.priority === "function" ? load.priority() : load?.priority;
-  return { ...base, signal: load?.signal, priority, node: load?.node, stage };
-}
-
-export function queryOverpassLoaded<T>(query: string, load: OverpassLoad = {}): Promise<T> {
-  return queryOverpass<T>(query, load);
+  return { ...base, signal: load?.signal, priority: load?.priority, node: load?.node, stage };
 }
 
 export function queryOverpassSplitLoaded<T>(
@@ -108,7 +104,11 @@ export async function withBundleStage<T>(
   const node = task?.stage(spec);
   node?.start();
   try {
-    return await read();
+    const result = await read();
+    // The pack read itself can't be aborted; a Cancel during it must still win,
+    // or the bundle-hit path would hand back results after the user cancelled.
+    throwIfAborted(task?.signal);
+    return result;
   } finally {
     node?.finish();
   }

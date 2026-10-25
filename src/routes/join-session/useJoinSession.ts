@@ -484,7 +484,12 @@ export function useJoinSession({
           );
         }
       }
-      task.complete();
+      // Only a claimed join is a timed success; every other exit failed.
+      if (claimed) {
+        task.complete();
+      } else {
+        task.fail();
+      }
       setLoading(false);
     });
 

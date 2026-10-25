@@ -58,6 +58,7 @@ async function flush() {
 
 describe("getOrFetchCached shared in-flight fetches", () => {
   afterEach(async () => {
+    vi.useRealTimers();
     await clearGeographicFeatureCacheForTests();
   });
 
@@ -83,15 +84,18 @@ describe("getOrFetchCached shared in-flight fetches", () => {
     const a = getOrFetchCached("k:abort", fetch.fetcher, { signal: first.signal });
     const b = getOrFetchCached("k:abort", fetch.fetcher, { signal: second.signal });
     await fetch.started();
+    // Fake only timers, after the IndexedDB read, so the grace period is instant and exact.
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     first.abort(cancelError());
     second.abort(cancelError());
     await expect(a).rejects.toMatchObject({ name: "AbortError" });
     await expect(b).rejects.toMatchObject({ name: "AbortError" });
     // Aborted after the grace period, not at once.
+    await vi.advanceTimersByTimeAsync(ABANDON_GRACE_MS - 1);
     expect(fetch.context().signal.aborted).toBe(false);
-    await vi.waitFor(() => expect(fetch.context().signal.aborted).toBe(true), {
-      timeout: ABANDON_GRACE_MS + 1_000,
-    });
+    await vi.advanceTimersByTimeAsync(1);
+    expect(fetch.context().signal.aborted).toBe(true);
+    vi.useRealTimers();
     await flush();
     expect(await readPersistedEntryIgnoringExpiry("k:abort")).toBeUndefined();
   });
@@ -101,13 +105,15 @@ describe("getOrFetchCached shared in-flight fetches", () => {
     const old = new AbortController();
     const stale = getOrFetchCached("k:rejoin", fetch.fetcher, { signal: old.signal });
     await fetch.started();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     old.abort(cancelError());
     await expect(stale).rejects.toMatchObject({ name: "AbortError" });
     const next = getOrFetchCached("k:rejoin", fetch.fetcher, {
       signal: new AbortController().signal,
     });
-    await new Promise((resolve) => setTimeout(resolve, ABANDON_GRACE_MS + 200));
+    await vi.advanceTimersByTimeAsync(ABANDON_GRACE_MS * 2);
     expect(fetch.context().signal.aborted).toBe(false);
+    vi.useRealTimers();
     fetch.resolve(["kept"]);
     await expect(next).resolves.toEqual(["kept"]);
     expect(fetch.calls()).toBe(1);
@@ -183,5 +189,56 @@ describe("getOrFetchCached shared in-flight fetches", () => {
     const node = root.stage({ kind: "fetch", label: "A", historyKey: "a" });
     await expect(getOrFetchCached("k:hit", async () => ["new"], { node })).resolves.toEqual(["v"]);
     expect(node.isFinished).toBe(true);
+  });
+});
+
+describe("getOrFetchCached nested priority", () => {
+  afterEach(async () => {
+    await clearGeographicFeatureCacheForTests();
+  });
+
+  it("promotes an inner shared fetch when a foreground caller joins the outer one", async () => {
+    const inner = controllableFetch<string[]>();
+    let outerContext!: FetchContext;
+    // Preload starts the outer fetch in the background lane; its fetcher starts the inner one.
+    const outerFetcher = async (context: FetchContext) => {
+      outerContext = context;
+      return getOrFetchCached("k:inner", inner.fetcher, {
+        signal: context.signal,
+        priority: context.priority,
+      });
+    };
+    const preload = getOrFetchCached("k:outer", outerFetcher, { priority: "background" });
+    await inner.started();
+    expect(inner.context().priority()).toBe("background");
+
+    const user = getOrFetchCached("k:outer", outerFetcher, {
+      signal: new AbortController().signal,
+    });
+    expect(outerContext.priority()).toBe("foreground");
+    expect(inner.context().priority()).toBe("foreground");
+
+    inner.resolve(["done"]);
+    await expect(Promise.all([preload, user])).resolves.toEqual([["done"], ["done"]]);
+  });
+
+  it("keeps a fetch foreground while either of two subscribers sharing a getter remains", async () => {
+    const fetch = controllableFetch<string[]>();
+    const shared = () => "foreground" as const;
+    const first = new AbortController();
+    const a = getOrFetchCached("k:shared-getter", fetch.fetcher, {
+      signal: first.signal,
+      priority: shared,
+    });
+    const b = getOrFetchCached("k:shared-getter", fetch.fetcher, {
+      signal: new AbortController().signal,
+      priority: shared,
+    });
+    await fetch.started();
+    first.abort(cancelError());
+    await expect(a).rejects.toMatchObject({ name: "AbortError" });
+    expect(fetch.context().priority()).toBe("foreground");
+    fetch.resolve([]);
+    await b;
   });
 });

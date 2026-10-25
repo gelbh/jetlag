@@ -84,6 +84,14 @@ export const sessionDocumentSchema = z
       .record(z.string(), z.enum(["teamA", "teamB", "referee", "observer"]))
       .optional(),
     seriesLength: z.union([z.literal(1), z.literal(3)]).optional(),
+    gameIndex: z.number().int().positive().optional(),
+    score: z
+      .object({
+        teamA: z.number().int().nonnegative(),
+        teamB: z.number().int().nonnegative(),
+      })
+      .optional(),
+    seriesOutcome: z.enum(["complete", "abandoned"]).optional(),
     setupMode: z.enum(["pregame", "fairSplit"]).optional(),
     arena: z.record(z.string(), z.unknown()).optional(),
     border: z.object({ geometryJson: z.string() }).passthrough().optional(),

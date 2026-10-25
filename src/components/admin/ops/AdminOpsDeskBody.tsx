@@ -15,47 +15,7 @@ import { AdminSidebarList } from "./AdminSidebarList";
 import type { RouteKind } from "./adminDeskRoute";
 import type { AdminDeskTables } from "./useAdminDeskTables";
 
-export function AdminOpsDeskBody({
-  isDesktop,
-  pathname,
-  routeKind,
-  routeTab,
-  collapsed,
-  routeSessionId,
-  routeIncidentId,
-  routeRequestId,
-  routeSession,
-  tables,
-  list,
-  needsLoading,
-  needsError,
-  openIncidentsBySession,
-  selectedKey,
-  lastItemPath,
-  selectedIncident,
-  incidentLoading,
-  selectedRequest,
-  sessionById,
-  sessionsLoading,
-  preloadLoading,
-  enabled,
-  hasMore,
-  refreshing,
-  loadingMore,
-  sessionsFailedEmpty,
-  visibleIncidents,
-  monitor,
-  observeError,
-  observingCode,
-  onOpenSession,
-  onOpenNeeds,
-  onChangeTab,
-  onGoToTable,
-  onWatchGame,
-  onNavigate,
-  onRefresh,
-  onLoadMore,
-}: {
+export interface AdminOpsDeskRouteBag {
   isDesktop: boolean;
   pathname: string;
   routeKind: RouteKind;
@@ -65,6 +25,9 @@ export function AdminOpsDeskBody({
   routeIncidentId: string | null;
   routeRequestId: string | null;
   routeSession: AdminSessionSummary | null | undefined;
+}
+
+export interface AdminOpsDeskDataBag {
   tables: AdminDeskTables;
   list: AdminSessionListState;
   needsLoading: boolean;
@@ -84,9 +47,15 @@ export function AdminOpsDeskBody({
   loadingMore: boolean;
   sessionsFailedEmpty: boolean;
   visibleIncidents: readonly IncidentRecord[];
-  monitor: AdminSessionMonitorState;
+}
+
+export interface AdminOpsDeskMonitorBag {
+  state: AdminSessionMonitorState;
   observeError: string | null;
   observingCode: string | null;
+}
+
+export interface AdminOpsDeskActionsBag {
   onOpenSession: (summary: Pick<AdminSessionSummary, "sessionId">) => void;
   onOpenNeeds: (row: NeedsYouRow) => void;
   onChangeTab: (tab: AdminTableTab) => void;
@@ -95,7 +64,63 @@ export function AdminOpsDeskBody({
   onNavigate: (path: string) => void;
   onRefresh: () => void;
   onLoadMore: () => void;
+}
+
+export function AdminOpsDeskBody({
+  route,
+  deskData,
+  monitor,
+  actions,
+}: {
+  route: AdminOpsDeskRouteBag;
+  deskData: AdminOpsDeskDataBag;
+  monitor: AdminOpsDeskMonitorBag;
+  actions: AdminOpsDeskActionsBag;
 }) {
+  const {
+    isDesktop,
+    pathname,
+    routeKind,
+    routeTab,
+    collapsed,
+    routeSessionId,
+    routeIncidentId,
+    routeRequestId,
+    routeSession,
+  } = route;
+  const {
+    tables,
+    list,
+    needsLoading,
+    needsError,
+    openIncidentsBySession,
+    selectedKey,
+    lastItemPath,
+    selectedIncident,
+    incidentLoading,
+    selectedRequest,
+    sessionById,
+    sessionsLoading,
+    preloadLoading,
+    enabled,
+    hasMore,
+    refreshing,
+    loadingMore,
+    sessionsFailedEmpty,
+    visibleIncidents,
+  } = deskData;
+  const { state: monitorState, observeError, observingCode } = monitor;
+  const {
+    onOpenSession,
+    onOpenNeeds,
+    onChangeTab,
+    onGoToTable,
+    onWatchGame,
+    onNavigate,
+    onRefresh,
+    onLoadMore,
+  } = actions;
+
   const [sidebarTab, setSidebarTab] = useState<{ path: string; tab: AdminTableTab } | null>(null);
 
   const openIncidentForSession = (sessionId: string | null | undefined) =>
@@ -142,7 +167,7 @@ export function AdminOpsDeskBody({
           refreshing={refreshing}
           loadingMore={loadingMore}
           sessionsUnavailable={sessionsFailedEmpty}
-          monitor={monitor}
+          monitor={monitorState}
         />
       );
     } else if (routeKind === "incident") {

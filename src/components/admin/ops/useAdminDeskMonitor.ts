@@ -32,22 +32,26 @@ export function useAdminDeskMonitor({
   const [failedSessionId, setFailedSessionId] = useState<string | null>(null);
   const monitorRequestRef = useRef(0);
   const joinKeyRef = useRef<string | null>(null);
-
-  const joinForMonitor = async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
-    const requestId = ++monitorRequestRef.current;
-    const joined = await joinSession(summary, { navigate: false });
-    if (monitorRequestRef.current !== requestId) return;
-    if (!joined) {
-      setFailedSessionId(summary.sessionId);
-      setMonitorSessionId((current) => (current === summary.sessionId ? null : current));
-      return;
-    }
-    setFailedSessionId((current) => (current === summary.sessionId ? null : current));
-    setMonitorSessionId(summary.sessionId);
-  };
+  const joinFnRef = useRef<
+    ((summary: Pick<AdminSessionSummary, "sessionId" | "code">) => Promise<void>) | null
+  >(null);
 
   // Only the session route monitors; incident and request routes never join.
   useEffect(() => {
+    const joinForMonitor = async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
+      const requestId = ++monitorRequestRef.current;
+      const joined = await joinSession(summary, { navigate: false });
+      if (monitorRequestRef.current !== requestId) return;
+      if (!joined) {
+        setFailedSessionId(summary.sessionId);
+        setMonitorSessionId((current) => (current === summary.sessionId ? null : current));
+        return;
+      }
+      setFailedSessionId((current) => (current === summary.sessionId ? null : current));
+      setMonitorSessionId(summary.sessionId);
+    };
+    joinFnRef.current = joinForMonitor;
+
     if (!enabled || !isDesktop || !routeSessionId) {
       joinKeyRef.current = null;
       return;
@@ -63,8 +67,7 @@ export function useAdminDeskMonitor({
     activeSession?.id,
     enabled,
     isDesktop,
-    // joinForMonitor closes over joinSession; intentional same as pre-extract.
-    joinForMonitor,
+    joinSession,
     monitorSessionId,
     routeSession,
     routeSessionId,
@@ -92,7 +95,7 @@ export function useAdminDeskMonitor({
         : null,
     joining: routeSession != null && observingCode === routeSession.code,
     onRetry: () => {
-      if (routeSession) void joinForMonitor(routeSession);
+      if (routeSession) void joinFnRef.current?.(routeSession);
     },
   };
 }

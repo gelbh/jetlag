@@ -50,17 +50,29 @@ describe("ProgressNode composite weights", () => {
 });
 
 describe("ProgressNode split", () => {
-  it("keeps the root fraction unchanged at the moment of split", () => {
+  it("keeps the split stage's own fraction at the moment of split", () => {
     const clock = fakeTree();
     const root = createProgressRoot("Task", clock.options);
     const fetch = root.stage(fetchSpec);
     root.stage(parseSpec);
     fetch.start();
     clock.advance(444);
-    const before = root.fraction();
-    expect(fetch.fraction()).toBeCloseTo(0.4, 1);
+    const before = fetch.fraction();
+    expect(before).toBeCloseTo(0.4, 1);
     fetch.split(4, { ...fetchSpec, sizeBucket: 3 });
-    expect(root.fraction()).toBeCloseTo(before);
+    expect(fetch.fraction()).toBeCloseTo(before);
+  });
+
+  it("grows the expected total by the parts so ETA and overdue track them", () => {
+    const clock = fakeTree();
+    const root = createProgressRoot("Task", clock.options);
+    const fetch = root.stage(fetchSpec);
+    fetch.start();
+    clock.advance(3_000);
+    fetch.split(4, fetchSpec);
+    // 3 s already spent plus four 1 s parts.
+    expect(fetch.weight()).toBe(7_000);
+    expect(fetch.remainingMs()).toBe(4_000);
   });
 
   it("sums correctly through a nested split", () => {

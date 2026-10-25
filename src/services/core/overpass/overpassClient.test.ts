@@ -14,6 +14,7 @@ import {
   OverpassUnavailableError,
   overpassErrorMessage,
   queryOverpass,
+  queueLabel,
 } from "./overpassClient";
 import { clearOverpassHostCooldownsForTests, isOverpassHostCooled } from "./overpassHostCooldown";
 
@@ -401,5 +402,51 @@ describe("overpassClient", () => {
     expect(overpassErrorMessage(new OverpassUnavailableError())).toBe(
       "Map data didn't load. Check your connection and try again.",
     );
+  });
+});
+
+describe("queryOverpass labels", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+    clearOverpassHostCooldownsForTests();
+  });
+
+  it("counts queue position as requests ahead", () => {
+    expect(queueLabel(0)).toBe("Waiting for map server (next)");
+    expect(queueLabel(1)).toBe("Waiting for map server (1 ahead)");
+    expect(queueLabel(3)).toBe("Waiting for map server (3 ahead)");
+  });
+
+  it("restores the stage label after a retry then failure, so a split never says retrying", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("VITE_OVERPASS_PROXY_URL", "");
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 502,
+          headers: new Headers(),
+          text: async () => "",
+        })
+        .mockResolvedValue({
+          ok: false,
+          status: 504,
+          headers: new Headers(),
+          text: async () => "",
+        }),
+    );
+    const root = createProgressRoot("Task", { now: () => 0, expectedMs: () => 1_000 });
+    const node = root.stage({ kind: "fetch", label: "Searching map data", historyKey: "x" });
+    node.setLabel("Searching map data (part 2 of 4)");
+
+    const result = queryOverpass("[out:json];", { node });
+    const settled = expect(result).rejects.toBeInstanceOf(OverpassQueryTooExpensiveError);
+    await vi.runAllTimersAsync();
+    await settled;
+    expect(node.label).toBe("Searching map data (part 2 of 4)");
+    vi.useRealTimers();
   });
 });

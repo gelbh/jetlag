@@ -7,6 +7,7 @@ import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
 import type { MapViewportBounds } from "@/domain/map/transitViewport";
 import { dedupeTransitStations, type TransitStation } from "@/domain/session/hiding/hidingZone";
+import { throwIfAborted } from "../../core/network/anySignal";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { withTimeout } from "../../core/withTimeout";
 import {
@@ -25,6 +26,7 @@ import {
   parseOverpassTransitStops,
 } from "../../transit/transitStops";
 import type { OverpassLoad } from "../overpass/overpassLoad";
+import { notifyOverpassPriorityChanged } from "../overpass/requestQueue";
 import { parseMatchingFeatures } from "./parse";
 import { buildStreetPathQuery, matchingSearchBoundingBox } from "./query";
 import type { OverpassElement } from "./types";
@@ -79,9 +81,21 @@ async function fetchOverpassHidingZoneStations(
   gameArea: GameArea,
   options?: HidingZoneStationsOptions,
 ): Promise<TransitStation[]> {
+  // After the timeout the lookup keeps running so late stations still arrive via
+  // onStations, but it drops to the background lane so it never blocks a new question.
+  let timedOut = false;
+  const basePriority = options?.load?.priority;
   const overpassLookup = queryOverpass<{ elements: OverpassTransitStopElement[] }>(
     buildHidingZoneTransitStopOverpassQuery(bbox),
-    options?.load,
+    {
+      ...options?.load,
+      priority: () =>
+        timedOut
+          ? "background"
+          : typeof basePriority === "function"
+            ? basePriority()
+            : (basePriority ?? "foreground"),
+    },
   ).then((payload) => parseOverpassTransitStops(payload.elements, gameArea));
 
   const tracked = overpassLookup.then((stations) => {
@@ -95,6 +109,8 @@ async function fetchOverpassHidingZoneStations(
     return await withTimeout(tracked, HIDING_ZONE_OVERPASS_TIMEOUT_MS, OVERPASS_TIMEOUT_MESSAGE);
   } catch (error) {
     if (error instanceof Error && error.message === OVERPASS_TIMEOUT_MESSAGE) {
+      timedOut = true;
+      notifyOverpassPriorityChanged();
       throw error;
     }
     throw error instanceof Error ? error : new Error(OVERPASS_TIMEOUT_MESSAGE);
@@ -140,6 +156,8 @@ async function fetchHidingZoneStationsUnion(
   const overpassPromise = fetchOverpassHidingZoneStations(bbox, gameArea, options);
 
   const [gtfsResult, overpassResult] = await Promise.allSettled([gtfsPromise, overpassPromise]);
+  // A Cancel rejects only the Overpass half; the GTFS half must not be applied either.
+  throwIfAborted(options?.load?.signal);
 
   const gtfs = gtfsResult.status === "fulfilled" ? gtfsResult.value : [];
   const overpass = overpassResult.status === "fulfilled" ? overpassResult.value : [];

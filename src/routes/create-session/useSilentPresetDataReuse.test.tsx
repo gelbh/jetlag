@@ -711,6 +711,14 @@ describe("CreateSession silent preset data reuse", () => {
     expect(session?.customMatchingAreas?.[6]).toEqual(
       level8MatchingJson("pack-feat", DUBLIN_CITY_GAME_AREA),
     );
+    expect((session?.customCategories ?? []).map((category) => category.id)).toEqual(
+      expect.arrayContaining([
+        "custom:dublin-luas-stop",
+        "custom:dublin-canal-lock",
+        "custom:dublin-gaa-ground",
+        "custom:dublin-castle-fort",
+      ]),
+    );
   });
 
   it("clears Load-preset exclude when importing a boundary file", async () => {

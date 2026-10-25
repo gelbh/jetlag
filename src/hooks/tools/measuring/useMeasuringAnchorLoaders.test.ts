@@ -6,7 +6,10 @@ import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastl
 import { fetchMeasuringPlacesInArea } from "@/services/geo/overpass/measuringPlaces";
 import { useMapStore } from "@/state/mapStore";
 import { createTestPinAnnotation } from "@/test/fixtures/sessions";
-import { fetchMeasuringCoastlineContext } from "../measuringToolResolvers";
+import {
+  fetchMeasuringCoastlineContext,
+  fetchMeasuringLinearContext,
+} from "../measuringToolResolvers";
 import { useMeasuringAnchorLoaders } from "./useMeasuringAnchorLoaders";
 import { useMeasuringDraftState } from "./useMeasuringDraftState";
 
@@ -28,12 +31,14 @@ vi.mock("../measuringToolResolvers", async (importOriginal) => {
   return {
     ...actual,
     fetchMeasuringCoastlineContext: vi.fn(),
+    fetchMeasuringLinearContext: vi.fn(),
   };
 });
 
 const fetchMock = vi.mocked(fetchMeasuringPlacesInArea);
 const resolveCoastlineCacheMock = vi.mocked(resolveCoastlineContextFromCache);
 const fetchCoastlineMock = vi.mocked(fetchMeasuringCoastlineContext);
+const fetchLinearMock = vi.mocked(fetchMeasuringLinearContext);
 
 const dublinishArea = {
   type: "Polygon",
@@ -247,6 +252,51 @@ describe("useMeasuringAnchorLoaders coastline pack seed", () => {
   });
 });
 
+describe("useMeasuringAnchorLoaders linear empty", () => {
+  beforeEach(() => {
+    fetchLinearMock.mockReset();
+  });
+
+  it("marks kind unavailable and reopens catalog when linear resolve is empty", async () => {
+    fetchLinearMock.mockResolvedValue({
+      ok: false,
+      message: "No high speed train line found in this play area.",
+    });
+
+    const { result } = renderHook(() => {
+      const draft = useMeasuringDraftState([]);
+      const loaders = useMeasuringAnchorLoaders({
+        active: true,
+        gameArea: dublinishArea as never,
+        setMapError: vi.fn(),
+        draft,
+      });
+      return { draft, loaders };
+    });
+
+    act(() => {
+      result.current.draft.setMeasuringSubject("location");
+      result.current.draft.setMeasuringLocationCategory("high_speed_rail_line");
+      result.current.draft.setMeasuringOptionChosen(true);
+      result.current.draft.setMeasuringSeekerPoint([53.35, -6.26]);
+    });
+
+    await act(async () => {
+      await result.current.loaders.loadMeasuringLinearAt([53.35, -6.26]);
+    });
+
+    expect(result.current.draft.unavailableMeasuringFromKinds.has("high_speed_rail_line")).toBe(
+      true,
+    );
+    expect(result.current.draft.catalogNotice).toBe(
+      "No high speed train line found in this play area.",
+    );
+    expect(result.current.draft.measuringOptionChosen).toBe(false);
+    expect(result.current.draft.measuringSeekerPoint).toBeNull();
+    expect(result.current.draft.measuringLoading).toBe(false);
+  });
+});
+
 describe("useMeasuringAnchorLoaders POI pins", () => {
   beforeEach(() => {
     useMapStore.setState({ mapStyle: "standard" });
@@ -292,5 +342,148 @@ describe("useMeasuringAnchorLoaders POI pins", () => {
       await result.current.loaders.loadAllPlacesAt([53.34, -6.3], "museum");
     });
     expect(result.current.draft.measuringPlaces.map((place) => place.id)).not.toContain("pin-zoo");
+  });
+});
+
+describe("useMeasuringAnchorLoaders cancel", () => {
+  beforeEach(() => {
+    fetchMock.mockReset();
+    // Hangs until the task's signal aborts, like a slow Overpass search.
+    fetchMock.mockImplementation(
+      (_area, _category, _custom, _pack, options) =>
+        new Promise((_resolve, reject) => {
+          options?.task?.signal.addEventListener("abort", () =>
+            reject(new DOMException("Cancelled.", "AbortError")),
+          );
+        }),
+    );
+  });
+
+  function renderLoaders() {
+    return renderHook(() => {
+      const draft = useMeasuringDraftState([]);
+      const loaders = useMeasuringAnchorLoaders({
+        active: true,
+        gameArea: dublinishArea as never,
+        setMapError: vi.fn(),
+        draft,
+      });
+      return { draft, loaders };
+    });
+  }
+
+  it("returns to the catalog with no error when the user cancels", async () => {
+    const { result } = renderLoaders();
+    act(() => {
+      result.current.draft.setMeasuringOptionChosen(true);
+      result.current.draft.setMeasuringSeekerPoint([53.34, -6.3]);
+    });
+    let load!: Promise<void>;
+    act(() => {
+      load = result.current.loaders.loadAllPlacesAt([53.34, -6.3], "commercial_airport");
+    });
+    await waitFor(() => expect(result.current.draft.measuringLoadTask).not.toBeNull());
+
+    await act(async () => {
+      result.current.draft.measuringLoadTask?.cancel();
+      await load;
+    });
+
+    expect(result.current.draft.measuringLoading).toBe(false);
+    expect(result.current.draft.measuringOptionChosen).toBe(false);
+    expect(result.current.draft.measuringSeekerPoint).toBeNull();
+    expect(result.current.draft.measuringError).toBeNull();
+  });
+
+  it("does not reopen the catalog when a newer search supersedes the old one", async () => {
+    const { result } = renderLoaders();
+    act(() => {
+      result.current.draft.setMeasuringOptionChosen(true);
+    });
+    let first!: Promise<void>;
+    act(() => {
+      first = result.current.loaders.loadAllPlacesAt([53.34, -6.3], "commercial_airport");
+    });
+    await waitFor(() => expect(result.current.draft.measuringLoadTask).not.toBeNull());
+    const firstTask = result.current.draft.measuringLoadTask;
+
+    await act(async () => {
+      void result.current.loaders.loadAllPlacesAt([53.35, -6.31], "commercial_airport");
+      await first;
+    });
+
+    expect(firstTask?.signal.aborted).toBe(true);
+    expect(result.current.draft.measuringOptionChosen).toBe(true);
+    expect(result.current.draft.measuringLoading).toBe(true);
+  });
+});
+
+describe("useMeasuringAnchorLoaders cancel scope", () => {
+  function renderLoaders() {
+    return renderHook(() => {
+      const draft = useMeasuringDraftState([]);
+      const loaders = useMeasuringAnchorLoaders({
+        active: true,
+        gameArea: dublinishArea as never,
+        setMapError: vi.fn(),
+        draft,
+      });
+      return { draft, loaders };
+    });
+  }
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    resolveCoastlineCacheMock.mockReset();
+    resolveCoastlineCacheMock.mockReturnValue(null);
+    fetchCoastlineMock.mockReset();
+  });
+
+  it("keeps the newer load's spinner when a different kind supersedes", async () => {
+    fetchMock.mockImplementation(
+      (_area, _category, _custom, _pack, options) =>
+        new Promise((_resolve, reject) => {
+          options?.task?.signal.addEventListener("abort", () =>
+            reject(new DOMException("Superseded.", "AbortError")),
+          );
+        }),
+    );
+    // The coastline load never settles, so loading must stay true for it.
+    fetchCoastlineMock.mockImplementation(() => new Promise(() => {}));
+    const { result } = renderLoaders();
+
+    let places!: Promise<void>;
+    act(() => {
+      places = result.current.loaders.loadAllPlacesAt([53.34, -6.3], "museum");
+    });
+    await waitFor(() => expect(result.current.draft.measuringLoadTask).not.toBeNull());
+
+    await act(async () => {
+      void result.current.loaders.loadMeasuringCoastlineAt([53.34, -6.3]);
+      await places;
+    });
+
+    expect(result.current.draft.measuringLoading).toBe(true);
+  });
+
+  it("stops a background enrich when a newer load starts", async () => {
+    let enrichSignal: AbortSignal | undefined;
+    fetchMock.mockImplementationOnce(async (_area, _category, _custom, _pack, options) => {
+      const enrich = options?.createEnrichTask?.();
+      enrichSignal = enrich?.signal;
+      return [{ id: "pack:1", name: "Bundled Museum", point: [53.34, -6.3] }];
+    });
+    fetchMock.mockImplementation(() => new Promise(() => {}));
+    const { result } = renderLoaders();
+
+    await act(async () => {
+      await result.current.loaders.loadAllPlacesAt([53.34, -6.3], "museum");
+    });
+    expect(enrichSignal?.aborted).toBe(false);
+
+    act(() => {
+      void result.current.loaders.loadAllPlacesAt([53.35, -6.31], "museum");
+    });
+    expect(enrichSignal?.aborted).toBe(true);
   });
 });

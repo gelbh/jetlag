@@ -9,6 +9,7 @@ import { fetchPreparedCoastlineSegments } from "../geo/overpass/coastline";
 import { fetchLandmassFeaturesInArea } from "../geo/overpass/landmassFeatures";
 import { fetchPreparedMeasuringLinearSegments } from "../geo/overpass/measuringLinearFeatures";
 import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
+import * as playAreaCategoryPresenceProbe from "../geo/overpass/playAreaCategoryPresenceProbe";
 import {
   gameAreaPreloadKey,
   preloadCriticalGameAreaCaches,
@@ -58,11 +59,21 @@ vi.mock("../geo/overpass/adminDivisionAvailability", async (importOriginal) => {
   };
 });
 
+vi.mock("../geo/overpass/playAreaCategoryPresenceProbe", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../geo/overpass/playAreaCategoryPresenceProbe")>();
+  return {
+    ...actual,
+    probePlayAreaCategoryCounts: vi.fn(actual.probePlayAreaCategoryCounts),
+  };
+});
+
 describe("gameAreaPreload", () => {
   beforeEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
     vi.clearAllMocks();
+    vi.mocked(playAreaCategoryPresenceProbe.probePlayAreaCategoryCounts).mockResolvedValue({});
     usePreloadStore.setState({
       activeGameAreaKey: null,
       totalJobs: 0,
@@ -70,6 +81,8 @@ describe("gameAreaPreload", () => {
       failedJobs: 0,
       critical: null,
       dismissed: false,
+      adminDivisionCounts: null,
+      categoryPresenceCounts: null,
     });
   });
 
@@ -156,6 +169,37 @@ describe("gameAreaPreload", () => {
 
     expect(fetchPreparedCoastlineSegments).not.toHaveBeenCalled();
     expect(fetchLandmassFeaturesInArea).not.toHaveBeenCalled();
+  });
+
+  it("stores category presence counts after a successful probe on background preload", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(playAreaCategoryPresenceProbe, "probePlayAreaCategoryCounts").mockResolvedValue({
+      zoo: 0,
+      museum: 4,
+    });
+
+    const key = gameAreaPreloadKey(DUBLIN_CITY_GAME_AREA);
+    const preloadPromise = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA);
+    await vi.runAllTimersAsync();
+    await preloadPromise;
+
+    expect(playAreaCategoryPresenceProbe.probePlayAreaCategoryCounts).toHaveBeenCalledTimes(1);
+    expect(usePreloadStore.getState().categoryPresenceCounts).toEqual({ zoo: 0, museum: 4 });
+    expect(usePreloadStore.getState().activeGameAreaKey).toBe(key);
+  });
+
+  it("leaves category presence unset when the probe soft-fails", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(playAreaCategoryPresenceProbe, "probePlayAreaCategoryCounts").mockRejectedValue(
+      new OverpassUnavailableError(),
+    );
+
+    const preloadPromise = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA);
+    await vi.runAllTimersAsync();
+    await preloadPromise;
+
+    expect(usePreloadStore.getState().categoryPresenceCounts).toBeNull();
+    expect(selectPreloadBanner(usePreloadStore.getState()).loading).toBe(false);
   });
 
   it("never preloads landmass Overpass on background or critical paths", async () => {
