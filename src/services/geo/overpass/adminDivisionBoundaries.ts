@@ -12,14 +12,16 @@ import {
   simplifyGameArea,
 } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
-import { queryOverpass } from "../../core/overpass/overpassClient";
 import { adminDivisionCacheKey, getOrFetchCached } from "../cache";
 import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
+import { mergeOverpassElementPayloads, type OverpassBbox } from "./overpassBboxSplit";
 import {
-  mergeOverpassElementPayloads,
-  type OverpassBbox,
-  queryOverpassWithBboxSplit,
-} from "./overpassBboxSplit";
+  cachedFetchOptions,
+  type OverpassLoad,
+  overpassLoadFromFetch,
+  overpassSearchStage,
+  queryOverpassSplitLoaded,
+} from "./overpassLoad";
 
 export type { AdminDivisionFeature } from "@/domain/geo/types";
 
@@ -271,21 +273,31 @@ export async function fetchAdminDivisionFeaturesInArea(
   gameArea: GameArea,
   adminLevel: number,
   customAreasJson?: string,
+  load?: OverpassLoad,
 ): Promise<AdminDivisionFeature[]> {
   if (customAreasJson) {
+    load?.node?.finish();
     return parseMatchingAreaGeoJson(customAreasJson, gameArea, adminLevel);
   }
 
-  return getOrFetchCached(adminDivisionCacheKey(gameArea, adminLevel), async () => {
-    const payload = await queryOverpassWithBboxSplit(
-      (bbox) => buildAdminDivisionQueryForBbox(bbox, adminLevel),
-      gameAreaToBoundingBox(gameArea),
-      (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
-      mergeOverpassElementPayloads,
-    );
+  const bbox = gameAreaToBoundingBox(gameArea);
+  return getOrFetchCached(
+    adminDivisionCacheKey(gameArea, adminLevel),
+    async (context) => {
+      const payload = await queryOverpassSplitLoaded<{ elements: OverpassElement[] }>(
+        (child) => buildAdminDivisionQueryForBbox(child, adminLevel),
+        bbox,
+        mergeOverpassElementPayloads,
+        overpassLoadFromFetch(context),
+      );
 
-    return parseAdminDivisionFeatures(payload.elements, gameArea, adminLevel);
-  });
+      return parseAdminDivisionFeatures(payload.elements, gameArea, adminLevel);
+    },
+    cachedFetchOptions(load, {
+      ...overpassSearchStage("overpass:admin-geom", bbox),
+      label: "Loading area boundaries",
+    }),
+  );
 }
 
 export function adminDivisionAreaSquareMeters(boundary: GameArea): number {

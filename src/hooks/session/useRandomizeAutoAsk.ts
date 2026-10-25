@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { captureException } from "@/services/core/analytics/clientErrors";
+import { createLoadTask } from "@/services/core/progress/loadTask";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type {
@@ -128,14 +129,19 @@ export function useRandomizeAutoAsk({
     saveHandled(storageKey, handled);
 
     const fallBackToManual = () => onManual(original.toolType, original.randomizedTo.label);
+    const task = HEAVY_RANDOMIZE_TOOLS.has(original.toolType)
+      ? createLoadTask({ label: "Picking a random question", global: true, cancellable: false })
+      : undefined;
     void buildRandomizedQuestion(original, original.randomizedTo, {
       session: sessionRules,
       annotations,
       pendingQuestions,
       gameArea,
       distanceUnit,
+      task,
     })
       .then(async (built) => {
+        task?.complete();
         if (built.kind === "manual") {
           onManual(original.toolType, built.label, built.presetKey);
           return;
@@ -149,6 +155,7 @@ export function useRandomizeAutoAsk({
         }
       })
       .catch((error: unknown) => {
+        task?.fail(error);
         captureException(error);
         fallBackToManual();
       });

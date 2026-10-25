@@ -1,4 +1,5 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { throwIfAborted } from "@/services/core/network/anySignal";
 import { ELEVATION_BATCH_SIZE, type FetchElevationsOptions } from "./constants";
 import { fetchElevationBatchAndWrite } from "./providers";
 import {
@@ -83,8 +84,12 @@ export async function fetchElevations(
   const pendingPoints = [...pendingByKey.values()];
 
   for (let index = 0; index < pendingPoints.length; index += ELEVATION_BATCH_SIZE) {
+    throwIfAborted(options.signal);
     const batch = pendingPoints.slice(index, index + ELEVATION_BATCH_SIZE);
-    await runLimitedElevationRequest(() => fetchElevationBatchAndWrite(batch, elevations, profile));
+    // react-doctor-disable-next-line react-doctor/async-await-in-loop -- the elevation rate limiter allows one request at a time; cancel is checked between batches
+    await runLimitedElevationRequest(() =>
+      fetchElevationBatchAndWrite(batch, elevations, profile, options.signal),
+    );
   }
 
   return elevations;

@@ -5,15 +5,26 @@ import {
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
+import type { LoadPriority } from "@/domain/progress/progressTree";
 import { type MeasuringLocationCategory, measuringLocationLabel } from "@/domain/questions";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import { measuringOverpassSelectorsForKind } from "@/domain/session/catalog/sessionCustomCatalog";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
-import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached, measuringPlacesCacheKey } from "../cache";
 import { parseWikidataId } from "../parseWikidataId";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
-import { mergeOverpassElementPayloads, queryOverpassWithBboxSplit } from "./overpassBboxSplit";
+import { mergeOverpassElementPayloads } from "./overpassBboxSplit";
+import {
+  cachedFetchOptions,
+  enrichInBackground,
+  type OverpassLoad,
+  overpassLoadFromFetch,
+  overpassLoadFromTask,
+  overpassSearchStage,
+  type PackThenOverpassProgress,
+  queryOverpassSplitLoaded,
+  withBundleStage,
+} from "./overpassLoad";
 import {
   buildTaggedBboxOverpassQuery,
   formatOverpassBbox,
@@ -70,9 +81,11 @@ type OverpassElement = {
 
 export type FetchMeasuringPlacesOptions = {
   onEnrich?: (places: MeasuringPlace[]) => void;
+  /** Pool lane when no task drives the load, e.g. "background" for preload. */
+  priority?: LoadPriority;
   /** Pack subregion (e.g. Australia `stateId`) for bandwidth-scoped POI slices. */
   subregionId?: string;
-};
+} & PackThenOverpassProgress;
 
 export function buildMeasuringPlacesQuery(
   gameArea: GameArea,
@@ -160,25 +173,33 @@ export function parseMeasuringPlaces(
     .filter((place): place is MeasuringPlace => place !== null);
 }
 
+const MEASURING_PLACES_HISTORY_KEY = "overpass:measuring-places";
+
 async function fetchOverpassMeasuringPlaces(
   gameArea: GameArea,
   category: MeasuringLocationCategory,
   selectors: readonly string[],
   cacheScope: string,
+  load?: OverpassLoad,
 ): Promise<MeasuringPlace[]> {
-  return getOrFetchCached(measuringPlacesCacheKey(gameArea, cacheScope), async () => {
-    const payload = await queryOverpassWithBboxSplit(
-      (bbox) => buildMeasuringPlacesQueryForBbox(bbox, selectors),
-      gameAreaToBoundingBox(gameArea),
-      (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
-      mergeOverpassElementPayloads,
-    );
+  const bbox = gameAreaToBoundingBox(gameArea);
+  return getOrFetchCached(
+    measuringPlacesCacheKey(gameArea, cacheScope),
+    async (context) => {
+      const payload = await queryOverpassSplitLoaded<{ elements: OverpassElement[] }>(
+        (child) => buildMeasuringPlacesQueryForBbox(child, selectors),
+        bbox,
+        mergeOverpassElementPayloads,
+        overpassLoadFromFetch(context),
+      );
 
-    return filterHygieneMeasuringPlaces(
-      parseMeasuringPlaces(payload.elements, gameArea, category),
-      category,
-    );
-  });
+      return filterHygieneMeasuringPlaces(
+        parseMeasuringPlaces(payload.elements, gameArea, category),
+        category,
+      );
+    },
+    cachedFetchOptions(load, overpassSearchStage(MEASURING_PLACES_HISTORY_KEY, bbox)),
+  );
 }
 
 export async function fetchMeasuringPlacesInArea(
@@ -198,33 +219,36 @@ export async function fetchMeasuringPlacesInArea(
       ? `${category}:custom:${regionPackId ?? "global"}`
       : `${category}:${regionPackId ?? "global"}`;
 
-  const bundledPlaces = await fetchBundledMeasuringPlaces(
-    gameArea,
-    category,
-    regionPackId,
-    options?.subregionId,
+  const task = options?.task;
+  const searchSpec = overpassSearchStage(
+    MEASURING_PLACES_HISTORY_KEY,
+    gameAreaToBoundingBox(gameArea),
+  );
+  const bundledPlaces = await withBundleStage(task, () =>
+    fetchBundledMeasuringPlaces(gameArea, category, regionPackId, options?.subregionId),
   );
 
-  const mergeWithOverpass = async (): Promise<MeasuringPlace[]> => {
+  const mergeWithOverpass = async (load?: OverpassLoad): Promise<MeasuringPlace[]> => {
     const overpassPlaces = await fetchOverpassMeasuringPlaces(
       gameArea,
       category,
       selectors,
       cacheScope,
+      load,
     );
     return mergeMeasuringPlaces(overpassPlaces, bundledPlaces);
   };
 
   if (bundledPlaces.length > 0 && options?.onEnrich) {
-    void mergeWithOverpass()
-      .then((merged) => {
-        options.onEnrich?.(merged);
-      })
-      .catch(() => {});
+    enrichInBackground(options.createEnrichTask, searchSpec, mergeWithOverpass, (merged) => {
+      options.onEnrich?.(merged);
+    });
     return bundledPlaces;
   }
 
-  return mergeWithOverpass();
+  return mergeWithOverpass(
+    task ? overpassLoadFromTask(task, searchSpec) : { priority: options?.priority },
+  );
 }
 
 export async function findNearestMeasuringPlace(

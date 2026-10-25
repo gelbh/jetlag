@@ -1,4 +1,5 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { throwIfAborted } from "@/services/core/network/anySignal";
 import {
   FetchTimeoutError,
   fetchWithTimeout,
@@ -51,6 +52,7 @@ export function isUsElevationPoint(point: LatLngTuple): boolean {
 async function fetchOpenMeteoElevationBatch(
   points: LatLngTuple[],
   profile: ElevationFetchProfile,
+  signal?: AbortSignal,
 ): Promise<number[]> {
   const maxRetries = maxRetriesForProfile(profile);
   const url = new URL(OPEN_METEO_ELEVATION_ENDPOINT);
@@ -64,10 +66,11 @@ async function fetchOpenMeteoElevationBatch(
     try {
       response = await fetchWithTimeout(
         url.toString(),
-        { headers: { Accept: "application/json" } },
+        { headers: { Accept: "application/json" }, signal },
         GEO_FETCH_TIMEOUT_MS,
       );
     } catch (error) {
+      throwIfAborted(signal);
       if (!(error instanceof FetchTimeoutError)) {
         throw error;
       }
@@ -75,7 +78,7 @@ async function fetchOpenMeteoElevationBatch(
       if (attempt >= maxRetries) {
         throw error;
       }
-      await sleep(retryDelayMs(attempt, null));
+      await sleep(retryDelayMs(attempt, null), signal);
       continue;
     }
 
@@ -100,6 +103,7 @@ async function fetchOpenMeteoElevationBatch(
           ELEVATION_MIN_429_BACKOFF_MS,
           retryDelayMs(attempt, response.headers.get("Retry-After")),
         ),
+        signal,
       );
       continue;
     }
@@ -113,6 +117,7 @@ async function fetchOpenMeteoElevationBatch(
 async function fetchUsgsElevation(
   point: LatLngTuple,
   profile: ElevationFetchProfile,
+  signal?: AbortSignal,
 ): Promise<number> {
   const maxRetries = maxRetriesForProfile(profile);
   const url = new URL(USGS_EPQS_ENDPOINT);
@@ -128,10 +133,11 @@ async function fetchUsgsElevation(
     try {
       response = await fetchWithTimeout(
         url.toString(),
-        { headers: { Accept: "application/json" } },
+        { headers: { Accept: "application/json" }, signal },
         GEO_FETCH_TIMEOUT_MS,
       );
     } catch (error) {
+      throwIfAborted(signal);
       if (!(error instanceof FetchTimeoutError)) {
         throw error;
       }
@@ -139,7 +145,7 @@ async function fetchUsgsElevation(
       if (attempt >= maxRetries) {
         throw error;
       }
-      await sleep(retryDelayMs(attempt, null));
+      await sleep(retryDelayMs(attempt, null), signal);
       continue;
     }
 
@@ -165,6 +171,7 @@ async function fetchUsgsElevation(
           ELEVATION_MIN_429_BACKOFF_MS,
           retryDelayMs(attempt, response.headers.get("Retry-After")),
         ),
+        signal,
       );
       continue;
     }
@@ -178,6 +185,7 @@ async function fetchUsgsElevation(
 async function fetchElevationBatch(
   points: LatLngTuple[],
   profile: ElevationFetchProfile,
+  signal?: AbortSignal,
 ): Promise<number[]> {
   const elevations: number[] = new Array(points.length);
   const openMeteoIndices: number[] = [];
@@ -192,11 +200,12 @@ async function fetchElevationBatch(
     }
 
     try {
-      elevations[index] = await fetchUsgsElevation(point, profile);
+      elevations[index] = await fetchUsgsElevation(point, profile, signal);
       if (index < points.length - 1) {
-        await sleep(USGS_MIN_REQUEST_GAP_MS);
+        await sleep(USGS_MIN_REQUEST_GAP_MS, signal);
       }
     } catch {
+      throwIfAborted(signal);
       openMeteoIndices.push(index);
       openMeteoPoints.push(point);
     }
@@ -206,7 +215,7 @@ async function fetchElevationBatch(
     return elevations;
   }
 
-  const openMeteoElevations = await fetchOpenMeteoElevationBatch(openMeteoPoints, profile);
+  const openMeteoElevations = await fetchOpenMeteoElevationBatch(openMeteoPoints, profile, signal);
 
   for (let fallbackIndex = 0; fallbackIndex < openMeteoIndices.length; fallbackIndex += 1) {
     elevations[openMeteoIndices[fallbackIndex]] = openMeteoElevations[fallbackIndex];
@@ -219,11 +228,13 @@ export async function fetchElevationBatchAndWrite(
   batch: Array<{ point: LatLngTuple; indices: number[] }>,
   elevations: number[],
   profile: ElevationFetchProfile,
+  signal?: AbortSignal,
 ): Promise<void> {
-  await waitForElevationBatchGap();
+  // Outside the try: a cancel during the gap sent nothing, so it must not reset the gap.
+  await waitForElevationBatchGap(signal);
   try {
     const batchPoints = batch.map((entry) => entry.point);
-    const batchElevations = await fetchElevationBatch(batchPoints, profile);
+    const batchElevations = await fetchElevationBatch(batchPoints, profile, signal);
 
     for (let batchIndex = 0; batchIndex < batch.length; batchIndex += 1) {
       const elevation = batchElevations[batchIndex];
@@ -234,6 +245,7 @@ export async function fetchElevationBatchAndWrite(
       }
     }
   } catch (error) {
+    throwIfAborted(signal);
     if (profile === "background") {
       for (const entry of batch) {
         for (const resultIndex of entry.indices) {

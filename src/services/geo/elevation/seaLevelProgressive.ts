@@ -5,7 +5,9 @@ import {
   sampleGameAreaCells,
 } from "@/domain/geometry/measuring/seaLevel";
 import type { GameArea } from "@/domain/map/annotations";
+import type { ProgressNode } from "@/domain/progress/progressTree";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import { abortReason, throwIfAborted } from "@/services/core/network/anySignal";
 import { gameAreaPreloadKey } from "../../session/gameAreaPreload";
 import {
   type CachedSeaLevelSampling,
@@ -14,6 +16,7 @@ import {
   writeSeaLevelSamplingCache,
 } from "../cache";
 import { type ElevationFetchProfile, fetchElevations } from "./index";
+import { requestGapMsForBatchSize } from "./rateLimit";
 import {
   loadBundledSeaLevelSeed,
   remapBundledSeaLevelSeedToGameArea,
@@ -22,6 +25,9 @@ import {
 export interface SeaLevelSamplingOptions {
   regionPackId?: RegionPackId;
   onEnrich?: (sampling: CachedSeaLevelSampling) => void;
+  /** Counted stage for the foreground wait (crawl follow or direct fine fetch). */
+  node?: ProgressNode;
+  signal?: AbortSignal;
 }
 
 const SAMPLING_BATCH_SIZE = 50;
@@ -39,10 +45,65 @@ export interface SeaLevelSamplingProgress {
 const activeSamplers = new Map<string, Promise<void>>();
 const samplerPhase = new Map<string, SeaLevelSamplingPhase>();
 
+interface CrawlProgress {
+  done: number;
+  total: number;
+}
+
+/** Cells fetched by the running crawl for a game area, across coarse and fine phases. */
+const crawlProgress = new Map<string, CrawlProgress>();
+const crawlListeners = new Map<string, Set<(progress: CrawlProgress) => void>>();
+/** Foreground waiters per game area; while any are attached the crawl skips its politeness gaps. */
+const crawlPromotions = new Map<string, number>();
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+function isCrawlPromoted(gameAreaKey: string): boolean {
+  return (crawlPromotions.get(gameAreaKey) ?? 0) > 0;
+}
+
+function emitCrawlProgress(gameAreaKey: string, progress: CrawlProgress): void {
+  crawlProgress.set(gameAreaKey, progress);
+  for (const listener of crawlListeners.get(gameAreaKey) ?? []) {
+    listener(progress);
+  }
+}
+
+/** Items per millisecond the elevation rate limit allows for sampling batches. */
+export function seaLevelSamplingRatePerMs(): number {
+  return SAMPLING_BATCH_SIZE / requestGapMsForBatchSize(SAMPLING_BATCH_SIZE);
+}
+
+/**
+ * Follows a running background crawl: reports its cell count to `node` and
+ * promotes it to foreground pacing until the returned detach is called.
+ * Detaching never aborts the crawl; it also fills the cache for later questions.
+ */
+export function followSeaLevelCrawl(gameArea: GameArea, node?: ProgressNode): () => void {
+  const gameAreaKey = gameAreaPreloadKey(gameArea);
+  crawlPromotions.set(gameAreaKey, (crawlPromotions.get(gameAreaKey) ?? 0) + 1);
+  const listener = (progress: CrawlProgress) => node?.setCount(progress.done, progress.total);
+  const listeners = crawlListeners.get(gameAreaKey) ?? new Set();
+  listeners.add(listener);
+  crawlListeners.set(gameAreaKey, listeners);
+  const current = crawlProgress.get(gameAreaKey);
+  if (current) {
+    listener(current);
+  }
+
+  let attached = true;
+  return () => {
+    if (!attached) {
+      return;
+    }
+    attached = false;
+    listeners.delete(listener);
+    crawlPromotions.set(gameAreaKey, Math.max(0, (crawlPromotions.get(gameAreaKey) ?? 1) - 1));
+  };
 }
 
 function countFiniteElevations(elevations: number[]): number {
@@ -83,21 +144,30 @@ async function fetchSamplingElevations(
   cells: ElevationSampleCell[],
   profile: ElevationFetchProfile,
   onBatchComplete: (elevations: number[]) => Promise<void>,
+  pacing: { gameAreaKey: string; signal?: AbortSignal; onCount?: (done: number) => void },
 ): Promise<number[]> {
   const cellElevations = new Array<number>(cells.length).fill(Number.NaN);
 
   for (let index = 0; index < cells.length; index += SAMPLING_BATCH_SIZE) {
     const batchEnd = Math.min(index + SAMPLING_BATCH_SIZE, cells.length);
     const batchPoints = cells.slice(index, batchEnd).map((cell) => cell.point);
-    const batchElevations = await fetchElevations(batchPoints, { profile });
+    const batchElevations = await fetchElevations(batchPoints, {
+      profile,
+      signal: pacing.signal,
+    });
 
     for (let batchIndex = 0; batchIndex < batchElevations.length; batchIndex += 1) {
       cellElevations[index + batchIndex] = batchElevations[batchIndex];
     }
 
     await onBatchComplete([...cellElevations]);
+    pacing.onCount?.(batchEnd);
 
-    if (profile === "background" && batchEnd < cells.length) {
+    if (
+      profile === "background" &&
+      batchEnd < cells.length &&
+      !isCrawlPromoted(pacing.gameAreaKey)
+    ) {
       await sleep(BACKGROUND_BATCH_GAP_MS);
     }
   }
@@ -125,6 +195,7 @@ async function fetchAndPersistSampling(
   divisions: number,
   profile: ElevationFetchProfile,
   completeWhenDone: boolean,
+  progress: { signal?: AbortSignal; onCount?: (done: number, total: number) => void } = {},
 ): Promise<CachedSeaLevelSampling> {
   const cells = sampleGameAreaCells(gameArea, divisions);
 
@@ -133,6 +204,11 @@ async function fetchAndPersistSampling(
     profile,
     async (partialElevations) => {
       await persistSampling(gameArea, cells, partialElevations, divisions, false);
+    },
+    {
+      gameAreaKey: gameAreaPreloadKey(gameArea),
+      signal: progress.signal,
+      onCount: (done) => progress.onCount?.(done, cells.length),
     },
   );
 
@@ -153,12 +229,19 @@ async function runProgressiveSampling(gameArea: GameArea): Promise<void> {
   const coarseDivisions = resolveCoarseSeaLevelDivisions();
   const fineDivisions = resolveFineSeaLevelDivisions(gameArea);
 
+  const coarseCells = sampleGameAreaCells(gameArea, coarseDivisions).length;
+  const fineCells =
+    fineDivisions > coarseDivisions ? sampleGameAreaCells(gameArea, fineDivisions).length : 0;
+  const total = coarseCells + fineCells;
+
   setSamplerPhase(gameAreaKey, "coarse");
+  emitCrawlProgress(gameAreaKey, { done: 0, total });
   await fetchAndPersistSampling(
     gameArea,
     coarseDivisions,
     "background",
     fineDivisions <= coarseDivisions,
+    { onCount: (done) => emitCrawlProgress(gameAreaKey, { done, total }) },
   );
 
   if (fineDivisions <= coarseDivisions) {
@@ -166,9 +249,13 @@ async function runProgressiveSampling(gameArea: GameArea): Promise<void> {
     return;
   }
 
-  await sleep(BACKGROUND_PHASE_GAP_MS);
+  if (!isCrawlPromoted(gameAreaKey)) {
+    await sleep(BACKGROUND_PHASE_GAP_MS);
+  }
   setSamplerPhase(gameAreaKey, "fine");
-  await fetchAndPersistSampling(gameArea, fineDivisions, "background", true);
+  await fetchAndPersistSampling(gameArea, fineDivisions, "background", true, {
+    onCount: (done) => emitCrawlProgress(gameAreaKey, { done: coarseCells + done, total }),
+  });
   setSamplerPhase(gameAreaKey, "complete");
 }
 
@@ -223,6 +310,7 @@ export function startSeaLevelBackgroundSampling(
     await runProgressiveSampling(gameArea);
   })().finally(() => {
     activeSamplers.delete(gameAreaKey);
+    crawlProgress.delete(gameAreaKey);
   });
   activeSamplers.set(gameAreaKey, job);
   void job.catch(() => {
@@ -267,8 +355,17 @@ export async function ensureSeaLevelSamplingComplete(
 
   const gameAreaKey = gameAreaPreloadKey(gameArea);
   const activeJob = activeSamplers.get(gameAreaKey);
+  options?.node?.seedRate(seaLevelSamplingRatePerMs());
   if (activeJob) {
-    await activeJob.catch(() => undefined);
+    const detach = followSeaLevelCrawl(gameArea, options?.node);
+    try {
+      await raceAbort(
+        activeJob.catch(() => undefined),
+        options?.signal,
+      );
+    } finally {
+      detach();
+    }
   }
 
   const fineDivisions = resolveFineSeaLevelDivisions(gameArea);
@@ -283,10 +380,38 @@ export async function ensureSeaLevelSamplingComplete(
     return cached;
   }
 
-  return fetchAndPersistSampling(gameArea, fineDivisions, "foreground", true);
+  return fetchAndPersistSampling(gameArea, fineDivisions, "foreground", true, {
+    signal: options?.signal,
+    onCount: (done, total) => options?.node?.setCount(done, total),
+  });
+}
+
+/** Resolves with `promise`, or rejects with the abort reason when `signal` aborts first. */
+function raceAbort<T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> {
+  if (!signal) {
+    return promise;
+  }
+  throwIfAborted(signal);
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(abortReason(signal));
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(
+      (value) => {
+        signal.removeEventListener("abort", onAbort);
+        resolve(value);
+      },
+      (error: unknown) => {
+        signal.removeEventListener("abort", onAbort);
+        reject(error);
+      },
+    );
+  });
 }
 
 export function clearSeaLevelProgressiveStateForTests(): void {
   activeSamplers.clear();
   samplerPhase.clear();
+  crawlProgress.clear();
+  crawlListeners.clear();
+  crawlPromotions.clear();
 }

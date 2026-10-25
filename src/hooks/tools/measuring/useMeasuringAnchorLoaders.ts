@@ -11,10 +11,13 @@ import {
   type MeasuringLocationCategory,
   type MeasuringTargetMode,
   measuringFromKind,
+  measuringLocationLabel,
   measuringUsesAllPlacesInArea,
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import { isAbortError } from "@/services/core/network/anySignal";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
+import { createLoadTask, type LoadTask } from "@/services/core/progress/loadTask";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
 import { measuringLinearNotFoundMessage } from "@/services/geo/overpass/measuringLinearFeatures";
@@ -69,6 +72,7 @@ export function useMeasuringAnchorLoaders({
     usedMeasuringFromKindsSet,
     unavailableMeasuringFromKinds,
     setMeasuringLoading,
+    setMeasuringLoadTask,
     setMeasuringError,
     setMeasuringPlaces,
     setMeasuringDistanceMeters,
@@ -99,6 +103,47 @@ export function useMeasuringAnchorLoaders({
   }, [measuringAnswer]);
 
   const placesApplyPhaseRef = useRef(new Map<number, number>());
+
+  // One measuring resolve runs at a time. Each gets a request signal that parents
+  // both its task and any background enrich, so starting a new one (or unmounting)
+  // stops the old fetches and frees their slots, even after the main task finished.
+  const loadTaskRef = useRef<LoadTask | null>(null);
+  const requestControllerRef = useRef<AbortController | null>(null);
+  const beginLoadTask = useCallback(
+    (label: string) => {
+      requestControllerRef.current?.abort(
+        new DOMException("Superseded by a newer request.", "AbortError"),
+      );
+      const controller = new AbortController();
+      requestControllerRef.current = controller;
+      const task = createLoadTask({ label, signal: controller.signal });
+      loadTaskRef.current = task;
+      setMeasuringLoadTask(task);
+      return { task, requestSignal: controller.signal };
+    },
+    [setMeasuringLoadTask],
+  );
+  useEffect(
+    () => () => {
+      requestControllerRef.current?.abort(
+        new DOMException("Measuring tool unmounted.", "AbortError"),
+      );
+    },
+    [],
+  );
+
+  // A user Cancel (the task is still current) returns to the catalog; a superseded
+  // task was already replaced by beginLoadTask and must not touch the UI.
+  const handleCancelled = useCallback(
+    (task: LoadTask) => {
+      task.cancel();
+      if (loadTaskRef.current === task) {
+        loadTaskRef.current = null;
+        reopenCatalog();
+      }
+    },
+    [reopenCatalog],
+  );
 
   const applyAllPlacesResult = useCallback(
     (
@@ -192,6 +237,7 @@ export function useMeasuringAnchorLoaders({
         applyAllPlacesResult(requestId, seekerPoint, category, tilePreview, 0);
       }
 
+      const { task, requestSignal } = beginLoadTask("Loading places in the play area");
       try {
         const customCategories = sessionRules?.customCategories ?? [];
         const places = await fetchMeasuringPlacesInArea(
@@ -201,14 +247,30 @@ export function useMeasuringAnchorLoaders({
           sessionRules?.regionPackId,
           {
             subregionId: sessionRules?.regionPackSubregionId,
+            task,
+            createEnrichTask: () =>
+              createLoadTask({
+                label: "Confirming places",
+                signal: requestSignal,
+                global: true,
+                priority: "background",
+                cancellable: false,
+              }),
             onEnrich: (enrichedPlaces) => {
               applyAllPlacesResult(requestId, seekerPoint, category, enrichedPlaces, 1);
             },
           },
         );
 
+        task.complete();
         applyAllPlacesResult(requestId, seekerPoint, category, places, 0);
       } catch (error) {
+        if (isAbortError(error)) {
+          // The newer load (or the reopened catalog) owns the loading flag now.
+          handleCancelled(task);
+          return;
+        }
+        task.fail(error);
         if (requestId === placesRequestIdRef.current) {
           setMeasuringPlaces([]);
           setMeasuringDistanceMeters(null);
@@ -222,6 +284,8 @@ export function useMeasuringAnchorLoaders({
     },
     [
       applyAllPlacesResult,
+      beginLoadTask,
+      handleCancelled,
       gameArea,
       measuringLocationCategory,
       placesRequestIdRef,
@@ -239,6 +303,7 @@ export function useMeasuringAnchorLoaders({
       const requestId = ++seaLevelRequestIdRef.current;
       setMeasuringLoading(true);
       setMeasuringError(null);
+      const { task } = beginLoadTask("Reading elevation and shading the play area");
 
       try {
         const applySeaLevelResult = (
@@ -267,14 +332,22 @@ export function useMeasuringAnchorLoaders({
         };
 
         const result = await fetchMeasuringSeaLevelContext(seekerPoint, gameArea, {
+          task,
           regionPackId: sessionRules?.regionPackId,
           onEnrich: (enriched) => {
             applySeaLevelResult(enriched);
           },
         });
 
+        task.complete();
         applySeaLevelResult(result);
       } catch (error) {
+        if (isAbortError(error)) {
+          // The newer load (or the reopened catalog) owns the loading flag now.
+          handleCancelled(task);
+          return;
+        }
+        task.fail(error);
         if (requestId === seaLevelRequestIdRef.current) {
           setMeasuringSeaLevelNearRegion(null);
           setMeasuringAnchorElevationMeters(null);
@@ -289,6 +362,8 @@ export function useMeasuringAnchorLoaders({
       }
     },
     [
+      beginLoadTask,
+      handleCancelled,
       gameArea,
       seaLevelRequestIdRef,
       sessionRules,
@@ -326,6 +401,7 @@ export function useMeasuringAnchorLoaders({
         return;
       }
 
+      const { task, requestSignal } = beginLoadTask("Finding coastline in the play area");
       try {
         const applyCoastlineOk = (result: {
           coastPoint: LatLngTuple;
@@ -345,12 +421,22 @@ export function useMeasuringAnchorLoaders({
         };
 
         const result = await fetchMeasuringCoastlineContext(seekerPoint, gameArea, {
+          task,
+          createEnrichTask: () =>
+            createLoadTask({
+              label: "Confirming coastline",
+              signal: requestSignal,
+              global: true,
+              priority: "background",
+              cancellable: false,
+            }),
           regionPackId: sessionRules?.regionPackId,
           onEnrich: (enriched) => {
             applyCoastlineOk(enriched);
           },
         });
 
+        task.complete();
         if (result.ok) {
           applyCoastlineOk(result);
         } else if (requestId === coastlineRequestIdRef.current) {
@@ -360,6 +446,12 @@ export function useMeasuringAnchorLoaders({
           setMeasuringError(result.message);
         }
       } catch (error) {
+        if (isAbortError(error)) {
+          // The newer load (or the reopened catalog) owns the loading flag now.
+          handleCancelled(task);
+          return;
+        }
+        task.fail(error);
         if (requestId === coastlineRequestIdRef.current) {
           setMeasuringTargetPoint(null);
           setMeasuringDistanceMeters(null);
@@ -372,6 +464,8 @@ export function useMeasuringAnchorLoaders({
       }
     },
     [
+      beginLoadTask,
+      handleCancelled,
       coastlineRequestIdRef,
       gameArea,
       sessionRules,
@@ -394,6 +488,9 @@ export function useMeasuringAnchorLoaders({
       const requestId = ++linearRequestIdRef.current;
       setMeasuringLoading(true);
       setMeasuringError(null);
+      const { task } = beginLoadTask(
+        `Finding ${measuringLocationLabel(kind).toLowerCase()} in the play area`,
+      );
 
       try {
         const result = await fetchMeasuringLinearContext(
@@ -404,8 +501,10 @@ export function useMeasuringAnchorLoaders({
           customMeasureGeometries,
           customMatchingAreas,
           sessionRules?.regionPackId,
+          task,
         );
 
+        task.complete();
         if (requestId === linearRequestIdRef.current) {
           if (result.ok && result.segments.length > 0) {
             setMeasuringTargetPoint(result.point);
@@ -425,6 +524,12 @@ export function useMeasuringAnchorLoaders({
           }
         }
       } catch (error) {
+        if (isAbortError(error)) {
+          // The newer load (or the reopened catalog) owns the loading flag now.
+          handleCancelled(task);
+          return;
+        }
+        task.fail(error);
         if (requestId === linearRequestIdRef.current) {
           setMeasuringTargetPoint(null);
           setMeasuringTargetPlaceName(null);
@@ -438,6 +543,8 @@ export function useMeasuringAnchorLoaders({
       }
     },
     [
+      beginLoadTask,
+      handleCancelled,
       customMatchingAreas,
       customMeasureGeometries,
       gameArea,

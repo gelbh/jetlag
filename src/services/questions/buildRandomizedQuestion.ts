@@ -27,6 +27,7 @@ import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGame
 import { sessionDistanceUnit } from "../../domain/session/meta/sessionDistanceUnit";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
+import type { LoadTask } from "../core/progress/loadTask";
 
 export type RandomizedQuestionInput = Omit<
   SubmitPendingQuestionInput,
@@ -43,6 +44,8 @@ export interface BuildRandomizedQuestionContext {
   pendingQuestions: readonly PendingQuestionRecord[];
   gameArea: GameArea;
   distanceUnit: DistanceUnit;
+  /** Progress for the heavy resolve (matching, tentacle, measuring). */
+  task?: LoadTask;
 }
 
 export const HEAVY_RANDOMIZE_TOOLS: ReadonlySet<PendingQuestionToolType> = new Set([

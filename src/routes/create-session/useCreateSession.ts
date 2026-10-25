@@ -8,6 +8,8 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "react-router-dom";
+import { sizeBucket } from "@/domain/progress/stagePriors";
+import { createLoadTask, type LoadTask } from "@/services/core/progress/loadTask";
 import { useTimerStore } from "@/state/timerStore";
 import {
   canSelectPremiumSessionTier,
@@ -91,6 +93,18 @@ const MISSING_GAME_AREA_ERROR =
 const loadKmzImport = () => import("../../services/core/capture/kmzImport");
 const loadSeaLevelProgressive = () => import("../../services/geo/elevation/seaLevelProgressive");
 
+const CREATE_STAGES = {
+  playArea: { kind: "compute", label: "Building play area", historyKey: "session:play-area" },
+  verifyAccess: { kind: "fetch", label: "Verifying access", historyKey: "session:verify-access" },
+  signIn: { kind: "fetch", label: "Signing in", historyKey: "session:sign-in" },
+  create: { kind: "fetch", label: "Creating session", historyKey: "session:create" },
+  matchingAreas: {
+    kind: "fetch",
+    label: "Loading matching areas",
+    historyKey: "session:matching-areas",
+  },
+} as const;
+
 export function useCreateSession() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -129,6 +143,7 @@ export function useCreateSession() {
   const [error, setError] = useState<string | null>(null);
   const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [createTask, setCreateTask] = useState<LoadTask | null>(null);
   const [verifyingAccess, setVerifyingAccess] = useState(false);
   const [sessionTier, setSessionTier] = useState<SessionTier>("free");
   const [tierManuallySet, setTierManuallySet] = useState(false);
@@ -660,11 +675,28 @@ export function useCreateSession() {
     setImportLoading(true);
     setError(null);
 
+    const task = createLoadTask({ label: "Importing boundary", global: true, cancellable: false });
+    const loaderStage = task.stage({
+      kind: "fetch",
+      label: "Loading importer",
+      historyKey: "import:loader",
+    });
+    const convertStage = task.stage({
+      kind: "compute",
+      label: "Converting boundary",
+      historyKey: "import:convert",
+      sizeBucket: sizeBucket(file.size / 1024),
+    });
     try {
+      loaderStage.start();
       const { parseBoundaryFile } = await loadKmzImport();
+      loaderStage.finish();
+      convertStage.start();
       const gameArea = await parseBoundaryFile(file);
+      task.complete();
       applyImportedBoundary(gameArea, file.name);
     } catch (nextError) {
+      task.fail(nextError);
       setError(
         isChunkLoadError(nextError)
           ? "Couldn't load the importer. Check your connection and try again."
@@ -723,8 +755,13 @@ export function useCreateSession() {
     setLoading(true);
     setError(null);
     setAccessCodeError(null);
+    const task = createLoadTask({ label: "Creating game", cancellable: false });
+    const playAreaStage = task.stage(CREATE_STAGES.playArea);
+    setCreateTask(task);
 
-    const submitSession = async () => {
+    /** Resolves true once the session exists; false when validation stopped it. */
+    const submitSession = async (): Promise<boolean> => {
+      playAreaStage.start();
       const manualArea =
         framing.userFramed &&
         framing.manualGameArea &&
@@ -750,8 +787,9 @@ export function useCreateSession() {
 
       if (!gameArea) {
         setError(MISSING_GAME_AREA_ERROR);
-        return;
+        return false;
       }
+      playAreaStage.finish();
 
       const metroId = transitMetroId || undefined;
       const tier = resolveSubmitTier();
@@ -773,13 +811,15 @@ export function useCreateSession() {
         const trimmedCode = accessCode.trim();
         if (!trimmedCode) {
           setAccessCodeError("Unlock premium or enter a host access code.");
-          return;
+          return false;
         }
 
         setVerifyingAccess(true);
+        const verifyStage = task.stage(CREATE_STAGES.verifyAccess).start();
         let grantError: string | null = null;
         try {
           await grantAccess(trimmedCode);
+          verifyStage.finish();
           setHostHasAccessClaim(true);
           useAccessClaimForPremium = true;
         } catch (nextError) {
@@ -788,7 +828,7 @@ export function useCreateSession() {
         setVerifyingAccess(false);
         if (grantError !== null) {
           setAccessCodeError(grantError);
-          return;
+          return false;
         }
       }
 
@@ -812,9 +852,15 @@ export function useCreateSession() {
           : {}),
       };
 
+      const signInStage = isFirebaseConfigured() ? task.stage(CREATE_STAGES.signIn) : undefined;
+      const createStage = isFirebaseConfigured() ? task.stage(CREATE_STAGES.create) : undefined;
+      const areasStage = lowPowerMode ? undefined : task.stage(CREATE_STAGES.matchingAreas);
       let gameId = LOCAL_SESSION_ID;
       if (isFirebaseConfigured()) {
+        signInStage?.start();
         const user = await retryAsync(() => ensureAnonymousUser());
+        signInStage?.finish();
+        createStage?.start();
         const premiumSubmitError = validatePremiumHostSubmit(
           user,
           createTier,
@@ -822,7 +868,7 @@ export function useCreateSession() {
         );
         if (premiumSubmitError) {
           setError(premiumSubmitError);
-          return;
+          return false;
         }
 
         const usePremiumCallable =
@@ -858,6 +904,7 @@ export function useCreateSession() {
                 castleSiegeCreate,
               ),
             );
+        createStage?.finish();
         gameId = session.id;
         setSession(session, user.uid);
         setPremiumApiContext(session);
@@ -892,6 +939,7 @@ export function useCreateSession() {
       });
 
       if (!lowPowerMode) {
+        areasStage?.start();
         const matchingAreas = await resolveSessionMatchingAreas({
           regionPackId,
           regionPackSubregionId,
@@ -906,11 +954,18 @@ export function useCreateSession() {
         void preloadCriticalGameAreaCaches(gameArea, matchingAreas, regionPackId);
       }
       navigate("/map");
+      return true;
     };
 
     try {
-      await submitSession();
+      // A validation stop is not a timed outcome, so it cancels rather than completes.
+      if (await submitSession()) {
+        task.complete();
+      } else {
+        task.cancel();
+      }
     } catch (nextError) {
+      task.fail(nextError);
       setError(nextError instanceof Error ? nextError.message : "Couldn't create session.");
     }
     setLoading(false);
@@ -1013,6 +1068,7 @@ export function useCreateSession() {
     loadedPreset,
     selectPreset,
     loading: confirmBusy,
+    createTask,
     verifyingAccess,
     searchLoading,
     importLoading,

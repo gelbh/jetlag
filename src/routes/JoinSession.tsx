@@ -101,6 +101,7 @@ export function JoinSession() {
     error,
     loading,
     joinBusy,
+    joinTask,
     requestBusy,
     formBusy,
     pendingRequest,
@@ -390,6 +391,7 @@ export function JoinSession() {
                       type="button"
                       fullWidth
                       busy={joinBusy || requestBusy}
+                      task={needsRolePasscode ? undefined : joinTask}
                       unavailable={joinBusy || requestBusy || lookupLoading}
                       idleLabel={needsRolePasscode ? "Continue" : "Join session"}
                       busyLabel={needsRolePasscode ? "Continue" : "Joining…"}
@@ -459,6 +461,7 @@ export function JoinSession() {
                         type="submit"
                         fullWidth
                         busy={joinBusy}
+                        task={joinTask}
                         unavailable={requestBusy || lookupLoading}
                         idleLabel="Join session"
                         busyLabel="Joining…"

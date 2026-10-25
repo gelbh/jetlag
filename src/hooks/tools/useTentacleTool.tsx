@@ -47,7 +47,9 @@ import { resolveAskPath } from "../../domain/session/castleSiege/resolveAskPath"
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { sessionGameSize } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
+import { isAbortError } from "../../services/core/network/anySignal";
 import { overpassErrorMessage } from "../../services/core/overpass/overpassClient";
+import { createLoadTask, type LoadTask } from "../../services/core/progress/loadTask";
 import { fetchTentaclePois } from "../../services/geo/overpass/tentacleOverpass";
 import type { AnswerCastleSiegeOracleAskFn } from "../../services/session/castleSiegeOracleAsk";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
@@ -259,7 +261,8 @@ export function useTentacleTool({
     }, []),
   });
 
-  const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
+  const { beginRequest, cancelRequests, isLatestRequest, requestSignal } = useLatestRequest();
+  const [tentacleLoadTask, setTentacleLoadTask] = useState<LoadTask | null>(null);
 
   const tentacleApplyPhaseRef = useRef(new Map<number, number>());
 
@@ -328,6 +331,12 @@ export function useTentacleTool({
         setTentaclePois([]);
       }
 
+      const signal = requestSignal();
+      const task = createLoadTask({
+        label: `Finding locations within ${formatDistance(searchRadiusMeters, distanceUnit)}`,
+        signal,
+      });
+      setTentacleLoadTask(task);
       try {
         const pois = await fetchTentaclePois(center, searchRadiusMeters, categoryId, {
           customCategories: sessionRules.customCategories,
@@ -337,22 +346,52 @@ export function useTentacleTool({
           ],
           regionPackId: sessionRules.regionPackId,
           subregionId: sessionRules.regionPackSubregionId,
+          task,
+          createEnrichTask: () =>
+            createLoadTask({
+              label: "Confirming locations",
+              signal,
+              global: true,
+              priority: "background",
+              cancellable: false,
+            }),
           onEnrich: (enrichedPois) => {
             applyTentaclePoisResult(requestId, enrichedPois, 1);
           },
         });
 
+        task.complete();
         applyTentaclePoisResult(requestId, pois, 0);
       } catch (error) {
-        if (isLatestRequest(requestId)) {
-          setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
+        if (isAbortError(error)) {
+          task.cancel();
+          // A user Cancel (still the latest request) returns to the category step;
+          // a superseded request leaves the UI to its replacement.
+          if (isLatestRequest(requestId)) {
+            // react-doctor-disable-next-line react-doctor/no-loading-flag-reset-outside-finally -- this is the catch path; the trailing reset below runs on every path
+            reopenCategoryPicker();
+          }
+        } else {
+          task.fail(error);
+          if (isLatestRequest(requestId)) {
+            setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
+          }
         }
       }
       if (isLatestRequest(requestId)) {
         setTentacleLoading(false);
       }
     },
-    [applyTentaclePoisResult, beginRequest, isLatestRequest, searchRadiusMeters, sessionRules],
+    [
+      applyTentaclePoisResult,
+      beginRequest,
+      distanceUnit,
+      isLatestRequest,
+      reopenCategoryPicker,
+      requestSignal,
+      searchRadiusMeters,
+      sessionRules,
+    ],
   );
 
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);
@@ -595,6 +634,7 @@ export function useTentacleTool({
         selectedPoiId,
         outOfReach: tentacleOutOfReach,
         loading: tentacleLoading,
+        loadTask: tentacleLoadTask,
         awaitingPlacement,
         hasCenter: tentacleCenter !== null,
         gpsLoading,
@@ -731,6 +771,7 @@ export function useTentacleTool({
     mapOverlay:
       mapPlacementActive && tentacleCategoryId && !oracleReceipt ? (
         <TentacleMapPlacementChrome
+          loadTask={tentacleLoadTask}
           categoryLabel={categoryLabel}
           questionPrompt={questionPrompt}
           costLabel={costLabel}
@@ -775,6 +816,7 @@ export function useTentacleTool({
           selectedPoiId={selectedPoiId}
           outOfReach={tentacleOutOfReach}
           loading={tentacleLoading}
+          loadTask={tentacleLoadTask}
           awaitingPlacement={awaitingPlacement}
           hasCenter={tentacleCenter !== null}
           gpsLoading={gpsLoading}

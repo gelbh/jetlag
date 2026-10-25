@@ -1,11 +1,16 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { LoadingSpinnerRing } from "@/components/ui/feedback/LoadingSpinner";
+import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
+import { useLoadTask } from "@/hooks/progress/useLoadTask";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 
 type LoadingReadoutVariant = "default" | "dim";
 
 interface LoadingReadoutProps {
   children: ReactNode;
   variant?: LoadingReadoutVariant;
+  /** When running, replaces the spinner with a progress bar, stage, ETA and Cancel. */
+  task?: LoadTask | null;
 }
 
 const VARIANT_COLOR: Record<LoadingReadoutVariant, string> = {
@@ -15,7 +20,15 @@ const VARIANT_COLOR: Record<LoadingReadoutVariant, string> = {
 
 const STALE_LOADING_MS = 10_000;
 
-export function LoadingReadout({ children, variant = "dim" }: LoadingReadoutProps) {
+export function LoadingReadout({ children, variant = "dim", task }: LoadingReadoutProps) {
+  const snapshot = useLoadTask(task);
+  if (task && snapshot?.status === "running") {
+    return <LoadProgress task={task} />;
+  }
+  return <SpinnerReadout variant={variant}>{children}</SpinnerReadout>;
+}
+
+function SpinnerReadout({ children, variant = "dim" }: LoadingReadoutProps) {
   const [stale, setStale] = useState(false);
 
   useEffect(() => {

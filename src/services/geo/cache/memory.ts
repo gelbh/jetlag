@@ -1,3 +1,4 @@
+import type { LoadPriority, ProgressNode } from "@/domain/progress/progressTree";
 import { isStableCacheKey } from "./keys";
 
 export interface GeoCacheLayer {
@@ -14,7 +15,23 @@ interface CacheEntry<T> {
 }
 
 export const memoryCache = new Map<string, CacheEntry<unknown>>();
-export const inFlight = new Map<string, Promise<unknown>>();
+/** In-flight fetch shared by every caller of the same key; see `getOrFetchCached`. */
+export interface InFlightEntry {
+  promise: Promise<unknown>;
+  controller: AbortController;
+  node: ProgressNode;
+  /** Live subscribers that can still cancel. */
+  cancellable: number;
+  /** A subscriber with no signal keeps the fetch alive until it settles. */
+  pinned: boolean;
+  /** Each live subscriber's lane, read live; any foreground one promotes the fetch. */
+  priorities: Set<() => LoadPriority>;
+  settled: boolean;
+  /** Pending abort after the last subscriber left; a new subscriber cancels it. */
+  abandonTimer: ReturnType<typeof setTimeout> | null;
+}
+
+export const inFlight = new Map<string, InFlightEntry>();
 export const staleServedKeys = new Set<string>();
 
 export function cacheTtlMsForKey(key: string): number {
