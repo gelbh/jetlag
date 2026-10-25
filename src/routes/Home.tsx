@@ -48,6 +48,25 @@ import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 // Footer links: 44px tap height without adding visual weight next to the Play actions.
 const footerLinkStyle = { display: "inline-flex", alignItems: "center", minHeight: 44 } as const;
 
+const homePlaySecondaryStyles = {
+  root: {
+    minHeight: "3.125rem",
+    borderRadius: 14,
+    border: "0.33px solid var(--color-rule)",
+    backgroundColor: "var(--color-canvas)",
+    color: "var(--color-field-ink)",
+    fontWeight: 590,
+    "&:hover": {
+      backgroundColor: "oklch(from var(--color-canvas) calc(l + 0.04) c h)",
+    },
+  },
+} as const;
+const homePlaySecondaryBaseStyle = {
+  border: "0.33px solid var(--color-rule)",
+  backgroundColor: "var(--color-canvas)",
+  color: "var(--color-field-ink)",
+} as const;
+
 function homeSessionPlayAreaLabel(session: SessionRecord): string | null {
   const labeled = session.gameAreaLabel?.trim();
   if (labeled) {
@@ -370,20 +389,26 @@ export function Home() {
 
               <Stack gap={8}>
                 <SectionLabel>Play</SectionLabel>
+                <EntryAsyncButton
+                  component={Link}
+                  to="/join"
+                  busy={false}
+                  idleLabel="Join session"
+                  busyLabel="Joining session…"
+                  leftSection={<SignInIcon size={22} weight="regular" aria-hidden="true" />}
+                  styles={filledStyles}
+                />
+                <Button
+                  component={Link}
+                  to="/create"
+                  leftSection={<PlusCircleIcon size={22} weight="regular" aria-hidden="true" />}
+                  style={homePlaySecondaryBaseStyle}
+                  styles={homePlaySecondaryStyles}
+                >
+                  Create session
+                </Button>
                 <InsetGroup>
                   <InsetRow
-                    to="/join"
-                    label="Join session"
-                    icon={<SignInIcon size={22} weight="regular" />}
-                  />
-                  <InsetRow
-                    showSeparator
-                    to="/create"
-                    label="Create session"
-                    icon={<PlusCircleIcon size={22} weight="regular" />}
-                  />
-                  <InsetRow
-                    showSeparator
                     to="/presets"
                     label="Browse presets"
                     icon={<SquaresFourIcon size={22} weight="regular" />}

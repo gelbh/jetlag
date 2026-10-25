@@ -149,6 +149,20 @@ describe("Home", () => {
     );
   });
 
+  it("gives Home play actions a clear primary, secondary, and muted hierarchy", () => {
+    renderHome();
+
+    expect(screen.getByRole("link", { name: "Join session" })).toHaveStyle({
+      backgroundColor: "var(--color-flag)",
+    });
+    const create = screen.getByRole("link", { name: "Create session" });
+    expect(create.style.backgroundColor).toBe("var(--color-canvas)");
+    expect(create.style.border).toBe("0.33px solid var(--color-rule)");
+    expect(screen.getByRole("link", { name: "Browse presets" }).style.backgroundColor).not.toBe(
+      "var(--color-flag)",
+    );
+  });
+
   it("shows Friends, Leaderboard, and Stats in More when Firebase is off", () => {
     renderHome();
 
