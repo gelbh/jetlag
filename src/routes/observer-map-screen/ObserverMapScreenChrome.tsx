@@ -59,6 +59,7 @@ export function ObserverMapScreenChrome({
         model={{
           sessionCode: session.code,
           sessionId: session.id,
+          mode: session.mode,
           roleGates: session.roleGates,
           sessionRules: session,
           playerRole: roleConfig.statusPlayerRole,
