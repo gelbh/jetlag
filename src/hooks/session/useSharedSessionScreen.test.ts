@@ -55,18 +55,33 @@ vi.mock("./useChatUnread", () => ({
     acknowledgeFingerprints: vi.fn(),
   })),
 }));
-const usePendingQuestionsSync = vi.fn(() => []);
-const useHidingZonesSync = vi.fn(() => ({ zones: [], loaded: true }));
-const useSeekerLocationsSync = vi.fn(() => []);
-const useHiderLocationsSync = vi.fn(() => []);
-const useSessionMessagesSync = vi.fn(() => []);
+const {
+  usePendingQuestionsSync,
+  useHidingZonesSync,
+  useSeekerLocationsSync,
+  useHiderLocationsSync,
+  useSessionMessagesSync,
+  ensureSessionMembershipMock,
+} = vi.hoisted(() => ({
+  usePendingQuestionsSync: vi.fn((_sessionId?: string, _enabled?: boolean) => []),
+  useHidingZonesSync: vi.fn((_sessionId?: string, _enabled?: boolean) => ({
+    zones: [],
+    loaded: true,
+  })),
+  useSeekerLocationsSync: vi.fn((_sessionId?: string, _enabled?: boolean) => []),
+  useHiderLocationsSync: vi.fn((_sessionId?: string, _enabled?: boolean) => []),
+  useSessionMessagesSync: vi.fn((_sessionId?: string, _enabled?: boolean) => []),
+  ensureSessionMembershipMock: vi.fn((_options?: { enabled?: boolean }) => ({
+    membershipSettled: true,
+  })),
+}));
 
 vi.mock("./useSessionExtrasSync", () => ({
-  usePendingQuestionsSync: (...args: unknown[]) => usePendingQuestionsSync(...args),
-  useHidingZonesSync: (...args: unknown[]) => useHidingZonesSync(...args),
-  useSeekerLocationsSync: (...args: unknown[]) => useSeekerLocationsSync(...args),
-  useHiderLocationsSync: (...args: unknown[]) => useHiderLocationsSync(...args),
-  useSessionMessagesSync: (...args: unknown[]) => useSessionMessagesSync(...args),
+  usePendingQuestionsSync,
+  useHidingZonesSync,
+  useSeekerLocationsSync,
+  useHiderLocationsSync,
+  useSessionMessagesSync,
 }));
 vi.mock("./useRemoteSessionTimerSync", () => ({
   useRemoteSessionTimerSync: vi.fn(() => ({
@@ -94,9 +109,8 @@ vi.mock("../sync/useFirebaseAuthReady", () => ({
   useFirebaseAuthReady: vi.fn(() => true),
 }));
 
-const ensureSessionMembershipMock = vi.fn(() => ({ membershipSettled: true }));
 vi.mock("./useEnsureSessionMembership", () => ({
-  useEnsureSessionMembership: (...args: unknown[]) => ensureSessionMembershipMock(...args),
+  useEnsureSessionMembership: ensureSessionMembershipMock,
 }));
 
 describe("useSharedSessionScreen", () => {
