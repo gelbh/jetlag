@@ -141,29 +141,9 @@ export function renderAnnotationLayerItem({
     );
   }
 
-  if (annotation.type === "tentacle" && annotation.geometry.geometry.type === "Point") {
-    const [lng, lat] = annotation.geometry.geometry.coordinates;
-    const radiusMeters = pointToolRadiusFromMetadata(annotation.metadata);
-    return (
-      <PointRadiusAnnotationLayer
-        key={annotation.id}
-        annotationId={annotation.id}
-        center={[lat, lng]}
-        radiusMeters={radiusMeters}
-        selected={selected}
-        selectionEnabled={selectionEnabled}
-        selectAnnotation={selectAnnotation}
-        markerFillColor={MAP_ANNOTATION_COLORS.tentacle}
-        strokeColor={MAP_ANNOTATION_COLORS.tentacleAccent}
-        fillColor={MAP_ANNOTATION_COLORS.tentacle}
-        fillOpacity={0.06}
-        dashArray="6 6"
-      />
-    );
-  }
-
   if (
     annotation.type === "matching" ||
+    annotation.type === "tentacle" ||
     (annotation.type === "measuring" &&
       (annotation.geometry.geometry.type === "Polygon" ||
         annotation.geometry.geometry.type === "MultiPolygon")) ||
