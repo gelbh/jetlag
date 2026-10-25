@@ -3,6 +3,7 @@ import type { Feature, Polygon } from "geojson";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as measuringGeometryBudgets from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import { describeCastleSiegeOracleCommit } from "../castleSiegeOracleCommit.testHarness";
 import { useMeasuringCommit } from "./useMeasuringCommit";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
@@ -144,114 +145,70 @@ describe("useMeasuringCommit solo persist-or-defer", () => {
   });
 });
 
-describe("useMeasuringCommit castleSiege oracle", () => {
-  const callOracle = vi.fn();
-  const onOracleReceipt = vi.fn();
-  const submitPendingQuestion = vi.fn();
-  const createAnnotation = vi.fn();
-  const finishPlacement = vi.fn();
-
-  function measuringPreviews(): MeasuringPreviews {
-    return {
-      resolvedCoastSegments: [],
-      measuringRegionInput: {
-        measuringSubject: "location",
-        measuringLocationCategory: "museum",
-        measuringDistanceMeters: 1000,
-        measuringTargetPoint: [51.44, -0.14],
-        measuringPlaces: [],
-        measuringCoastSegments: [],
-        measuringSeaLevelNearRegion: null,
-        usesAllPlacesInArea: false,
-        measuringAnswer: null,
-        gameArea: {
-          type: "Polygon",
-          coordinates: [
-            [
-              [-1, 50],
-              [1, 50],
-              [1, 52],
-              [-1, 52],
-              [-1, 50],
-            ],
+function measuringPreviews(): MeasuringPreviews {
+  return {
+    resolvedCoastSegments: [],
+    measuringRegionInput: {
+      measuringSubject: "location",
+      measuringLocationCategory: "museum",
+      measuringDistanceMeters: 1000,
+      measuringTargetPoint: [51.44, -0.14],
+      measuringPlaces: [],
+      measuringCoastSegments: [],
+      measuringSeaLevelNearRegion: null,
+      usesAllPlacesInArea: false,
+      measuringAnswer: null,
+      gameArea: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-1, 50],
+            [1, 50],
+            [1, 52],
+            [-1, 52],
+            [-1, 50],
           ],
-        },
+        ],
       },
-    } as unknown as MeasuringPreviews;
-  }
+    },
+  } as unknown as MeasuringPreviews;
+}
 
-  beforeEach(() => {
-    callOracle.mockReset();
-    onOracleReceipt.mockReset();
-    submitPendingQuestion.mockReset();
-    createAnnotation.mockReset();
-    finishPlacement.mockReset();
-    createAnnotation.mockResolvedValue({ id: "ann-1", sessionId: "s1", status: "active" });
+const finishPlacement = vi.fn();
+
+describeCastleSiegeOracleCommit({
+  name: "useMeasuringCommit",
+  oracleKind: "measuring",
+  run: async (input) => {
+    const { result } = renderHook(() =>
+      useMeasuringCommit(input as Parameters<typeof useMeasuringCommit>[0]),
+    );
+    await act(async () => {
+      await result.current.performCommit();
+    });
+    return result.current;
+  },
+  baseInput: (overrides) => {
     buildMeasuringRegions.mockResolvedValue({
       near: samplePolygon(),
       elimination: samplePolygon(),
     });
-  });
-
-  it("classic honor pending path does not call oracle", async () => {
-    const draft = draftStub({ measuringAnswer: null });
-    const { result } = renderHook(() =>
-      useMeasuringCommit({
-        annotations: [],
-        pendingQuestions: [],
-        createAnnotation,
-        awaitHiderAnswer: true,
-        submitPendingQuestion,
-        sessionId: "s1",
-        senderUid: "u1",
-        finishPlacement,
-        canSubmitQuestion: true,
-        draft,
-        previews: measuringPreviews(),
-        sessionMode: "classic",
-        defenderTeamId: "teamB",
-        callOracleAsk: callOracle,
-        onOracleReceipt,
-      }),
-    );
-
-    await act(async () => {
-      await result.current.performCommit();
-    });
-
-    expect(callOracle).not.toHaveBeenCalled();
-    expect(onOracleReceipt).not.toHaveBeenCalled();
-    expect(submitPendingQuestion).toHaveBeenCalledTimes(1);
-    expect(createAnnotation).not.toHaveBeenCalled();
-  });
-
-  it("castleSiege first pass routes to oracle and stashes receipt", async () => {
-    callOracle.mockResolvedValue({ kind: "measuring", answer: "closer" });
-    const draft = draftStub({ measuringAnswer: null });
-    const { result } = renderHook(() =>
-      useMeasuringCommit({
-        annotations: [],
-        pendingQuestions: [],
-        createAnnotation,
-        awaitHiderAnswer: true,
-        submitPendingQuestion,
-        sessionId: "s1",
-        senderUid: "u1",
-        finishPlacement,
-        canSubmitQuestion: true,
-        draft,
-        previews: measuringPreviews(),
-        sessionMode: "castleSiege",
-        defenderTeamId: "teamA",
-        callOracleAsk: callOracle,
-        onOracleReceipt,
-      }),
-    );
-
-    await act(async () => {
-      await result.current.performCommit();
-    });
-
+    finishPlacement.mockReset();
+    return {
+      annotations: [],
+      pendingQuestions: [],
+      awaitHiderAnswer: true,
+      finishPlacement,
+      canSubmitQuestion: true,
+      draft: draftStub({ measuringAnswer: null }),
+      previews: measuringPreviews(),
+      sessionId: "s1",
+      senderUid: "u1",
+      defenderTeamId: "teamA",
+      ...overrides,
+    };
+  },
+  expectFirstPassAsk: (callOracle) => {
     expect(callOracle).toHaveBeenCalledWith({
       sessionId: "s1",
       defenderTeamId: "teamA",
@@ -261,40 +218,8 @@ describe("useMeasuringCommit castleSiege oracle", () => {
         targetPoint: { lat: 51.44, lng: -0.14 },
       },
     });
-    expect(onOracleReceipt).toHaveBeenCalledWith({ kind: "measuring", answer: "closer" });
-    expect(submitPendingQuestion).not.toHaveBeenCalled();
-    expect(createAnnotation).not.toHaveBeenCalled();
-  });
-
-  it("castleSiege confirm-send uses oracle receipt without honor typing", async () => {
-    const draft = draftStub({ measuringAnswer: null });
-    const { result } = renderHook(() =>
-      useMeasuringCommit({
-        annotations: [],
-        pendingQuestions: [],
-        createAnnotation,
-        awaitHiderAnswer: true,
-        submitPendingQuestion,
-        sessionId: "s1",
-        senderUid: "u1",
-        finishPlacement,
-        canSubmitQuestion: true,
-        draft,
-        previews: measuringPreviews(),
-        sessionMode: "castleSiege",
-        defenderTeamId: "teamA",
-        callOracleAsk: callOracle,
-        oracleReceipt: { kind: "measuring", answer: "further" },
-        onOracleReceipt,
-      }),
-    );
-
-    await act(async () => {
-      await result.current.performCommit();
-    });
-
-    expect(callOracle).not.toHaveBeenCalled();
-    expect(submitPendingQuestion).not.toHaveBeenCalled();
+  },
+  expectConfirmAnnotation: (createAnnotation) => {
     expect(createAnnotation).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "measuring",
@@ -302,5 +227,5 @@ describe("useMeasuringCommit castleSiege oracle", () => {
       }),
     );
     expect(finishPlacement).toHaveBeenCalled();
-  });
+  },
 });
