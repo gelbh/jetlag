@@ -245,7 +245,11 @@ describe("resolveSessionPlayArea", () => {
 
     expect(isPlayAreaReadySync(session)).toBe(false);
     await expect(resolveSessionPlayArea(session)).resolves.toBe(packArea);
-    expect(regionPackBoundaries.loadRegionPackPlayArea).toHaveBeenCalledWith("dublin", "fingal");
+    expect(regionPackBoundaries.loadRegionPackPlayArea).toHaveBeenCalledWith(
+      "dublin",
+      "fingal",
+      expect.anything(),
+    );
   });
 
   it("keeps the host-framed gameArea when playAreaFromPack is false", async () => {

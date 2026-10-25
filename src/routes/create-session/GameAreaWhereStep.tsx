@@ -32,6 +32,7 @@ export function GameAreaWhereStep({
     loading,
     verifyingAccess,
     searchLoading,
+    searchTask,
     importLoading,
     locationQuery,
     searchResults,
@@ -134,6 +135,7 @@ export function GameAreaWhereStep({
               onLocationQueryChange={onLocationQueryChange}
               onSearch={onSearch}
               searchLoading={searchLoading}
+              searchTask={searchTask}
               searchResults={searchResults}
               selectedPlaceId={selectedPlaceId}
               selectedPlace={selectedPlace}

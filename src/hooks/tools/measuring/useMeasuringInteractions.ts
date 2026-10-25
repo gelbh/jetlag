@@ -1,7 +1,14 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
+import {
+  createLoadTask,
+  getNamedLoadTask,
+  type LoadTask,
+  setNamedLoadTask,
+} from "@/services/core/progress/loadTask";
+import { MEASURING_SEARCH_TASK } from "@/services/core/progress/namedTasks";
 import { type GeocodedPlace, searchPlaces } from "@/services/geo/geocoding";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import { useMapStore } from "@/state/mapStore";
@@ -51,6 +58,15 @@ export function useMeasuringInteractions({
 
   const { setMeasuringTargetAnchor, setMeasuringSeekerAnchorAndResolve } = loaders;
 
+  // A new search cancels the old one so its requests stop and it records no duration.
+  const searchTaskRef = useRef<LoadTask | null>(null);
+  useEffect(
+    () => () => {
+      searchTaskRef.current?.cancel();
+    },
+    [],
+  );
+
   const handleGps = useCallback(
     async (shouldApply?: () => boolean) => {
       if (submittingRef.current) {
@@ -96,21 +112,37 @@ export function useMeasuringInteractions({
         return;
       }
 
+      searchTaskRef.current?.cancel();
+      const task = createLoadTask({ label: "Searching places" });
+      searchTaskRef.current = task;
+      setNamedLoadTask(MEASURING_SEARCH_TASK, task);
       setMeasuringSearchRole(role);
       setMeasuringSearchLoading(true);
       setMeasuringError(null);
 
       try {
-        const results = await searchPlaces(trimmed);
+        const results = await searchPlaces(trimmed, { signal: task.signal, node: task.root });
+        task.complete();
         setMeasuringSearchResults(results);
         if (results.length === 0) {
           setMeasuringError("No matching places found. Try a more specific name.");
         }
       } catch (error) {
-        setMeasuringSearchResults([]);
-        setMeasuringError(error instanceof Error ? error.message : "Place search failed.");
+        if (task.signal.aborted) {
+          task.cancel();
+        } else {
+          task.fail(error);
+          setMeasuringSearchResults([]);
+          setMeasuringError(error instanceof Error ? error.message : "Place search failed.");
+        }
       }
-      setMeasuringSearchLoading(false);
+      if (getNamedLoadTask(MEASURING_SEARCH_TASK) === task) {
+        setNamedLoadTask(MEASURING_SEARCH_TASK, null);
+      }
+      if (searchTaskRef.current === task) {
+        searchTaskRef.current = null;
+        setMeasuringSearchLoading(false);
+      }
     },
     [
       measuringSearchQuery,

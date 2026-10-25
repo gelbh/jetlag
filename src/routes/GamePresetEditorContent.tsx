@@ -75,6 +75,7 @@ export function GamePresetEditorContent() {
               onLocationQueryChange={model.placeSearch.setLocationQuery}
               onSearch={() => void model.placeSearch.handleSearch()}
               searchLoading={model.placeSearch.searchLoading}
+              searchTask={model.placeSearch.searchTask}
               searchResults={model.placeSearch.searchResults}
               selectedPlaceId={model.placeSearch.selectedPlaceId}
               selectedPlace={model.placeSearch.selectedPlace}

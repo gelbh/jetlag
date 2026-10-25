@@ -1,20 +1,29 @@
 import { Progress } from "@mantine/core";
+import { formatEta } from "@/domain/progress/estimator";
+import { useLoadTask, useNamedLoadTask } from "@/hooks/progress/useLoadTask";
+import { PACK_PLAY_AREA_TASK } from "@/services/core/progress/namedTasks";
+import { routeProgressPercent } from "./routeLoadingSteps";
 import { useRouteTransition } from "./useRouteTransition";
-
-/** Share of the bar a step shows while it is still running, so the bar moves on entry. */
-const RUNNING_STEP_CREDIT = 0.35;
 
 export function RouteProgressChrome() {
   const { phase, loadingProgress } = useRouteTransition();
+  const boundaryTask = useNamedLoadTask(PACK_PLAY_AREA_TASK);
+  const boundarySnapshot = useLoadTask(boundaryTask);
   if (phase !== "settling" || !loadingProgress) {
     return null;
   }
 
   const total = Math.max(1, loadingProgress.steps.length);
   const stepNumber = Math.min(total, loadingProgress.currentStepIndex + 1);
-  const percent = Math.round(
-    ((loadingProgress.currentStepIndex + RUNNING_STEP_CREDIT) / total) * 100,
+  const onBoundaryStep =
+    loadingProgress.steps[loadingProgress.currentStepIndex] === "load-boundaries" &&
+    boundarySnapshot?.status === "running";
+  const percent = routeProgressPercent(
+    loadingProgress,
+    onBoundaryStep ? boundarySnapshot.percent : null,
   );
+  const eta =
+    onBoundaryStep && boundarySnapshot.etaMs !== null ? formatEta(boundarySnapshot.etaMs) : null;
 
   return (
     <div
@@ -34,6 +43,11 @@ export function RouteProgressChrome() {
           aria-label={`Opening ${loadingProgress.destinationTitle}`}
           className="motion-reduce:[&_*]:transition-none"
         />
+        {eta ? (
+          <p className="m-0 font-normal text-ink-muted" aria-hidden>
+            {eta}
+          </p>
+        ) : null}
       </div>
     </div>
   );

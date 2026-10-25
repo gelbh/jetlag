@@ -100,6 +100,40 @@ describe("usePlaceAreaSearch", () => {
     expect(result.current.searchLoading).toBe(false);
   });
 
+  it("tracks each search with a load task and cancels a superseded one", async () => {
+    const first = deferred<GeocodedPlace[]>();
+    searchPlaces
+      .mockImplementationOnce(() => first.promise)
+      .mockResolvedValueOnce([place("cork", "Cork", 51.9, -8.5)]);
+    const { result } = renderHook(() => usePlaceAreaSearch());
+
+    act(() => {
+      result.current.setLocationQuery("Dublin");
+    });
+    let firstSearch!: Promise<void>;
+    act(() => {
+      firstSearch = result.current.handleSearch();
+    });
+    const firstTask = result.current.searchTask;
+    expect(firstTask?.getSnapshot().status).toBe("running");
+    expect(searchPlaces).toHaveBeenLastCalledWith(
+      "Dublin",
+      expect.objectContaining({ signal: firstTask?.signal, node: firstTask?.root }),
+    );
+
+    await act(async () => {
+      await result.current.handleSearch();
+    });
+    expect(firstTask?.getSnapshot().status).toBe("cancelled");
+    expect(result.current.searchTask?.getSnapshot().status).toBe("done");
+
+    await act(async () => {
+      first.resolve([]);
+      await firstSearch;
+    });
+    expect(result.current.selectedPlace?.id).toBe("cork");
+  });
+
   it("always applies the first ranked result and keeps extras for switching", async () => {
     const dublin = place("dublin", "Dublin", 53.35, -6.26);
     const cork = place("cork", "Cork", 51.9, -8.5);

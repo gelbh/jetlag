@@ -8,6 +8,7 @@ describe("preloadStore", () => {
       totalJobs: 0,
       completedJobs: 0,
       failedJobs: 0,
+      critical: null,
       dismissed: false,
       adminDivisionCounts: null,
       categoryPresenceCounts: null,
@@ -64,5 +65,65 @@ describe("preloadStore", () => {
     usePreloadStore.getState().dismiss();
 
     expect(selectPreloadBanner(usePreloadStore.getState()).visible).toBe(false);
+  });
+});
+
+describe("preloadStore critical slice", () => {
+  beforeEach(() => {
+    usePreloadStore.setState({
+      activeGameAreaKey: null,
+      totalJobs: 0,
+      completedJobs: 0,
+      failedJobs: 0,
+      critical: null,
+      dismissed: false,
+      adminDivisionCounts: null,
+    });
+  });
+
+  it("shows critical jobs before the main preload starts", () => {
+    usePreloadStore.getState().resetCritical("area-1", 3);
+    usePreloadStore.getState().recordCriticalJob("area-1", "success");
+
+    expect(selectPreloadBanner(usePreloadStore.getState())).toMatchObject({
+      visible: true,
+      loading: true,
+      completedJobs: 1,
+      totalJobs: 3,
+    });
+  });
+
+  it("survives the main preload reset and sums with it", () => {
+    usePreloadStore.getState().resetCritical("area-1", 3);
+    usePreloadStore.getState().recordCriticalJob("area-1", "success");
+    usePreloadStore.getState().reset("area-1", 5);
+    usePreloadStore.getState().recordSuccess("area-1");
+
+    expect(usePreloadStore.getState().critical).toMatchObject({ totalJobs: 3, completedJobs: 1 });
+    expect(selectPreloadBanner(usePreloadStore.getState())).toMatchObject({
+      completedJobs: 2,
+      totalJobs: 8,
+    });
+  });
+
+  it("ignores jobs for another play area", () => {
+    usePreloadStore.getState().resetCritical("area-1", 2);
+    usePreloadStore.getState().recordCriticalJob("area-2", "failure");
+    expect(usePreloadStore.getState().critical).toMatchObject({ completedJobs: 0, failedJobs: 0 });
+
+    usePreloadStore.getState().reset("area-2", 1);
+    expect(selectPreloadBanner(usePreloadStore.getState()).totalJobs).toBe(1);
+  });
+
+  it("reports a failed critical job once all jobs settle", () => {
+    usePreloadStore.getState().resetCritical("area-1", 2);
+    usePreloadStore.getState().recordCriticalJob("area-1", "success");
+    usePreloadStore.getState().recordCriticalJob("area-1", "failure");
+
+    expect(selectPreloadBanner(usePreloadStore.getState())).toMatchObject({
+      visible: true,
+      loading: false,
+      failed: true,
+    });
   });
 });

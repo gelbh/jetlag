@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import type { AdminDivisionCounts } from "../services/geo/overpass/adminDivisionAvailability";
 
+export interface PreloadJobCounts {
+  gameAreaKey: string;
+  totalJobs: number;
+  completedJobs: number;
+  failedJobs: number;
+}
+
 export type CategoryPresenceCounts = Record<string, number>;
 
 interface PreloadStoreState {
@@ -8,12 +15,19 @@ interface PreloadStoreState {
   totalJobs: number;
   completedJobs: number;
   failedJobs: number;
+  /**
+   * Critical preload (admin boundaries) started at create/join. Kept apart so
+   * the map screen's main preload `reset` cannot wipe its counts.
+   */
+  critical: PreloadJobCounts | null;
   dismissed: boolean;
   adminDivisionCounts: AdminDivisionCounts | null;
   categoryPresenceCounts: CategoryPresenceCounts | null;
   reset: (gameAreaKey: string, totalJobs: number) => void;
   recordSuccess: (gameAreaKey: string) => void;
   recordFailure: (gameAreaKey: string) => void;
+  resetCritical: (gameAreaKey: string, totalJobs: number) => void;
+  recordCriticalJob: (gameAreaKey: string, outcome: "success" | "failure") => void;
   dismiss: () => void;
   setAdminDivisionCounts: (gameAreaKey: string, counts: AdminDivisionCounts) => void;
   setCategoryPresenceCounts: (gameAreaKey: string, counts: CategoryPresenceCounts) => void;
@@ -24,6 +38,7 @@ export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
   totalJobs: 0,
   completedJobs: 0,
   failedJobs: 0,
+  critical: null,
   dismissed: false,
   adminDivisionCounts: null,
   categoryPresenceCounts: null,
@@ -56,6 +71,25 @@ export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
       completedJobs: state.completedJobs + 1,
     }));
   },
+  resetCritical: (gameAreaKey, totalJobs) =>
+    set({
+      critical: { gameAreaKey, totalJobs, completedJobs: 0, failedJobs: 0 },
+      dismissed: false,
+    }),
+  recordCriticalJob: (gameAreaKey, outcome) => {
+    const critical = get().critical;
+    if (critical?.gameAreaKey !== gameAreaKey) {
+      return;
+    }
+
+    set({
+      critical: {
+        ...critical,
+        completedJobs: critical.completedJobs + 1,
+        failedJobs: critical.failedJobs + (outcome === "failure" ? 1 : 0),
+      },
+    });
+  },
   dismiss: () => set({ dismissed: true }),
   setAdminDivisionCounts: (gameAreaKey, counts) => {
     if (get().activeGameAreaKey !== gameAreaKey) {
@@ -73,6 +107,29 @@ export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
   },
 }));
 
+/** Main and critical job counts for the active play area, summed. */
+function combinedJobs(state: PreloadStoreState): Omit<PreloadJobCounts, "gameAreaKey"> {
+  const main = state.activeGameAreaKey
+    ? {
+        totalJobs: state.totalJobs,
+        completedJobs: state.completedJobs,
+        failedJobs: state.failedJobs,
+      }
+    : { totalJobs: 0, completedJobs: 0, failedJobs: 0 };
+  const critical = state.critical;
+  if (
+    !critical ||
+    (state.activeGameAreaKey !== null && critical.gameAreaKey !== state.activeGameAreaKey)
+  ) {
+    return main;
+  }
+  return {
+    totalJobs: main.totalJobs + critical.totalJobs,
+    completedJobs: main.completedJobs + critical.completedJobs,
+    failedJobs: main.failedJobs + critical.failedJobs,
+  };
+}
+
 export function selectPreloadBanner(state: PreloadStoreState): {
   visible: boolean;
   loading: boolean;
@@ -82,7 +139,8 @@ export function selectPreloadBanner(state: PreloadStoreState): {
   title: string;
   body: string;
 } {
-  if (!state.activeGameAreaKey || state.dismissed || state.totalJobs === 0) {
+  const jobs = combinedJobs(state);
+  if (state.dismissed || jobs.totalJobs === 0) {
     return {
       visible: false,
       loading: false,
@@ -94,9 +152,9 @@ export function selectPreloadBanner(state: PreloadStoreState): {
     };
   }
 
-  const finished = state.completedJobs >= state.totalJobs;
+  const finished = jobs.completedJobs >= jobs.totalJobs;
   const loading = !finished;
-  const failed = state.failedJobs > 0;
+  const failed = jobs.failedJobs > 0;
 
   if (!loading && !failed) {
     return {
@@ -115,8 +173,8 @@ export function selectPreloadBanner(state: PreloadStoreState): {
       visible: true,
       loading: true,
       failed: false,
-      completedJobs: state.completedJobs,
-      totalJobs: state.totalJobs,
+      completedJobs: jobs.completedJobs,
+      totalJobs: jobs.totalJobs,
       title: "Map preload",
       body: "Caching coastlines, transit, and tool data for this play area.",
     };
@@ -126,8 +184,8 @@ export function selectPreloadBanner(state: PreloadStoreState): {
     visible: true,
     loading: false,
     failed: true,
-    completedJobs: state.completedJobs,
-    totalJobs: state.totalJobs,
+    completedJobs: jobs.completedJobs,
+    totalJobs: jobs.totalJobs,
     title: "Preload incomplete",
     body: "Some caches failed. Tools may run slower until the next session.",
   };
