@@ -28,6 +28,7 @@ import {
 } from "@/config/env";
 import { firebaseEmulatorEndpoints } from "@/config/firebaseEmulatorEndpoints";
 import { claimsLookAdmin } from "@/domain/admin/adminAccess";
+import type { AnalyticsIdentity } from "../analytics/analytics";
 import {
   captureAuthBootstrapFailureLazy,
   captureAuthPersistenceFallbackLazy,
@@ -304,6 +305,17 @@ function getAuthBootstrapPromise(): Promise<void> {
   return authStateReadyPromise;
 }
 
+function toAnalyticsIdentity(user: User, isInternal: boolean): AnalyticsIdentity {
+  return {
+    uid: user.uid,
+    isAnonymous: user.isAnonymous,
+    isInternal,
+    email: user.email ?? null,
+    name: user.displayName ?? null,
+    authProvider: mapFirebaseAuthProvider(user.providerData[0]?.providerId),
+  };
+}
+
 export function startAuthBootstrap(): void {
   if (!isFirebaseConfigured()) {
     return;
@@ -314,27 +326,20 @@ export function startAuthBootstrap(): void {
       syncAnalyticsIdentityLazy(null);
       return;
     }
+    const auth = getFirebaseAuth();
     void user
       .getIdTokenResult()
       .then((token) => {
-        syncAnalyticsIdentityLazy({
-          uid: user.uid,
-          isAnonymous: user.isAnonymous,
-          isInternal: claimsLookAdmin(token.claims),
-          email: user.email ?? null,
-          name: user.displayName ?? null,
-          authProvider: mapFirebaseAuthProvider(user.providerData[0]?.providerId),
-        });
+        if (user !== auth.currentUser) {
+          return;
+        }
+        syncAnalyticsIdentityLazy(toAnalyticsIdentity(user, claimsLookAdmin(token.claims)));
       })
       .catch(() => {
-        syncAnalyticsIdentityLazy({
-          uid: user.uid,
-          isAnonymous: user.isAnonymous,
-          isInternal: false,
-          email: user.email ?? null,
-          name: user.displayName ?? null,
-          authProvider: mapFirebaseAuthProvider(user.providerData[0]?.providerId),
-        });
+        if (user !== auth.currentUser) {
+          return;
+        }
+        syncAnalyticsIdentityLazy(toAnalyticsIdentity(user, false));
       });
   });
 

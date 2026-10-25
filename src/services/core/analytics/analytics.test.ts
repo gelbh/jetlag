@@ -33,6 +33,7 @@ const {
   posthogOptIn,
   posthogIdentify,
   posthogSetPersonProperties,
+  posthogUnsetPersonProperties,
   posthogStopSessionRecording,
   posthogStartSessionRecording,
 } = vi.hoisted(() => ({
@@ -45,6 +46,7 @@ const {
   posthogOptIn: vi.fn(),
   posthogIdentify: vi.fn(),
   posthogSetPersonProperties: vi.fn(),
+  posthogUnsetPersonProperties: vi.fn(),
   posthogStopSessionRecording: vi.fn(),
   posthogStartSessionRecording: vi.fn(),
 }));
@@ -60,6 +62,7 @@ vi.mock("posthog-js", () => ({
     opt_in_capturing: posthogOptIn,
     identify: posthogIdentify,
     setPersonProperties: posthogSetPersonProperties,
+    unsetPersonProperties: posthogUnsetPersonProperties,
     stopSessionRecording: posthogStopSessionRecording,
     startSessionRecording: posthogStartSessionRecording,
   },
@@ -140,6 +143,7 @@ describe("analytics facade", () => {
     posthogOptIn.mockReset();
     posthogIdentify.mockReset();
     posthogSetPersonProperties.mockReset();
+    posthogUnsetPersonProperties.mockReset();
     posthogStopSessionRecording.mockReset();
     posthogStartSessionRecording.mockReset();
   });
@@ -574,6 +578,7 @@ describe("analytics facade", () => {
       auth_provider: "unknown",
       is_internal: false,
     });
+    expect(posthogUnsetPersonProperties).toHaveBeenCalledWith(["email", "name"]);
   });
 
   it("deny then grant reuses core init and opts product back in", () => {
@@ -612,7 +617,8 @@ describe("analytics facade", () => {
       authProvider: "unknown",
     });
     expect(posthogIdentify).toHaveBeenCalledTimes(1);
-    expect(posthogIdentify).toHaveBeenCalledWith("user-1", {
+    expect(posthogIdentify).toHaveBeenCalledWith("user-1");
+    expect(posthogSetPersonProperties).toHaveBeenCalledWith({
       auth_provider: "unknown",
       is_internal: false,
     });
@@ -705,12 +711,14 @@ describe("analytics facade", () => {
       name: "Ada",
       authProvider: "google",
     });
-    expect(posthogIdentify).toHaveBeenCalledWith("user-1", {
+    expect(posthogIdentify).toHaveBeenCalledWith("user-1");
+    expect(posthogSetPersonProperties).toHaveBeenCalledWith({
       email: "a@example.com",
       name: "Ada",
       auth_provider: "google",
       is_internal: false,
     });
+    expect(posthogUnsetPersonProperties).not.toHaveBeenCalled();
   });
 
   it("pre-Accept identify is uid-only", () => {
@@ -727,6 +735,7 @@ describe("analytics facade", () => {
     });
     expect(posthogIdentify).toHaveBeenCalledWith("user-error");
     expect(posthogIdentify.mock.calls[0]?.length).toBe(1);
+    expect(posthogSetPersonProperties).not.toHaveBeenCalled();
   });
 
   it("Accept after pre-Accept identify applies setPersonProperties", () => {
@@ -748,6 +757,68 @@ describe("analytics facade", () => {
       auth_provider: "apple",
       is_internal: true,
     });
+    expect(posthogUnsetPersonProperties).toHaveBeenCalledWith(["name"]);
+  });
+
+  it("Decline unsets Accept-gated person props before writing denied consent", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    syncAnalyticsIdentity({
+      uid: "user-1",
+      isAnonymous: false,
+      isInternal: false,
+      email: "a@example.com",
+      name: "Ada",
+      authProvider: "google",
+    });
+    posthogUnsetPersonProperties.mockClear();
+    posthogReset.mockClear();
+    posthogIdentify.mockClear();
+    posthogSetPersonProperties.mockClear();
+
+    denyAnalyticsConsent();
+
+    expect(posthogUnsetPersonProperties).toHaveBeenCalledWith(["email", "name", "auth_provider"]);
+    expect(posthogUnsetPersonProperties.mock.invocationCallOrder[0]).toBeLessThan(
+      posthogReset.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
+    );
+    expect(posthogIdentify).toHaveBeenCalledWith("user-1");
+    expect(posthogSetPersonProperties).not.toHaveBeenCalled();
+  });
+
+  it("cleared displayName unsets name on the person while Accept remains", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    syncAnalyticsIdentity({
+      uid: "user-1",
+      isAnonymous: false,
+      isInternal: false,
+      email: "a@example.com",
+      name: "Ada",
+      authProvider: "google",
+    });
+    posthogSetPersonProperties.mockClear();
+    posthogUnsetPersonProperties.mockClear();
+
+    syncAnalyticsIdentity({
+      uid: "user-1",
+      isAnonymous: false,
+      isInternal: false,
+      email: "a@example.com",
+      name: null,
+      authProvider: "google",
+    });
+
+    expect(posthogSetPersonProperties).toHaveBeenCalledWith({
+      email: "a@example.com",
+      auth_provider: "google",
+      is_internal: false,
+    });
+    expect(posthogUnsetPersonProperties).toHaveBeenCalledWith(["name"]);
   });
 
   const lastRegistered = () => posthogRegister.mock.calls.at(-1)?.[0] as Record<string, unknown>;
