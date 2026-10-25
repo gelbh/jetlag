@@ -1,9 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  awaitFreshLiveLocationReading,
   clearLiveLocationReading,
   getFreshLiveLocationReading,
   getLiveLocationReadingSnapshot,
+  hasLiveLocationRetainers,
   LIVE_LOCATION_FRESH_MS,
+  LIVE_WAIT_AFTER_TIMEOUT_MS,
+  LIVE_WAIT_BEFORE_ONESHOT_MS,
   publishLiveLocationReading,
   releaseLiveLocationReading,
   resetLiveLocationReadingForTests,
@@ -76,5 +80,42 @@ describe("liveLocationReading", () => {
     unsubscribe();
     publishLiveLocationReading(sample, 2_000);
     expect(listener).toHaveBeenCalledTimes(2);
+  });
+
+  it("exports wait constants from the design", () => {
+    expect(LIVE_WAIT_BEFORE_ONESHOT_MS).toBe(8_000);
+    expect(LIVE_WAIT_AFTER_TIMEOUT_MS).toBe(5_000);
+  });
+
+  it("hasLiveLocationRetainers tracks retain/release", () => {
+    expect(hasLiveLocationRetainers()).toBe(false);
+    retainLiveLocationReading();
+    expect(hasLiveLocationRetainers()).toBe(true);
+    releaseLiveLocationReading();
+    expect(hasLiveLocationRetainers()).toBe(false);
+  });
+
+  it("awaitFreshLiveLocationReading resolves immediately when already fresh", async () => {
+    publishLiveLocationReading(sample, 1_000);
+    await expect(awaitFreshLiveLocationReading(5_000, () => 1_000)).resolves.toEqual(sample);
+  });
+
+  it("awaitFreshLiveLocationReading resolves when publish arrives before deadline", async () => {
+    vi.useFakeTimers();
+    const pending = awaitFreshLiveLocationReading(5_000, () => Date.now());
+    queueMicrotask(() => {
+      publishLiveLocationReading(sample, Date.now());
+    });
+    await vi.runAllTimersAsync();
+    await expect(pending).resolves.toEqual(sample);
+    vi.useRealTimers();
+  });
+
+  it("awaitFreshLiveLocationReading resolves null when deadline elapses", async () => {
+    vi.useFakeTimers();
+    const pending = awaitFreshLiveLocationReading(1_000, () => Date.now());
+    await vi.advanceTimersByTimeAsync(1_000);
+    await expect(pending).resolves.toBeNull();
+    vi.useRealTimers();
   });
 });

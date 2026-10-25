@@ -3,6 +3,9 @@ import type { GeolocationReading } from "./geolocation";
 /** Align with low-accuracy getCurrentPosition maximumAge default. */
 export const LIVE_LOCATION_FRESH_MS = 30_000;
 
+export const LIVE_WAIT_BEFORE_ONESHOT_MS = 8_000;
+export const LIVE_WAIT_AFTER_TIMEOUT_MS = 5_000;
+
 export type LiveLocationReadingSnapshot = {
   reading: GeolocationReading | null;
   updatedAtMs: number | null;
@@ -68,6 +71,47 @@ export function getFreshLiveLocationReading(nowMs: number = Date.now()): Geoloca
     return null;
   }
   return reading;
+}
+
+export function hasLiveLocationRetainers(): boolean {
+  return retainCount > 0;
+}
+
+export function awaitFreshLiveLocationReading(
+  timeoutMs: number,
+  nowMs: () => number = Date.now,
+): Promise<GeolocationReading | null> {
+  const immediate = getFreshLiveLocationReading(nowMs());
+  if (immediate) {
+    return Promise.resolve(immediate);
+  }
+
+  return new Promise((resolve) => {
+    let settled = false;
+    let timerId: ReturnType<typeof setTimeout>;
+    let unsubscribe: () => void;
+
+    const finish = (value: GeolocationReading | null) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timerId);
+      unsubscribe();
+      resolve(value);
+    };
+
+    unsubscribe = subscribeLiveLocationReading(() => {
+      const next = getFreshLiveLocationReading(nowMs());
+      if (next) {
+        finish(next);
+      }
+    });
+
+    timerId = setTimeout(() => {
+      finish(getFreshLiveLocationReading(nowMs()));
+    }, timeoutMs);
+  });
 }
 
 export function resetLiveLocationReadingForTests(): void {
