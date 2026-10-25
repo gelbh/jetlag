@@ -161,13 +161,33 @@ export async function readSessionCode(page: Page): Promise<string> {
 
 export async function joinAsRole(guestPage: Page, code: string, role: PlayerRole) {
   await guestPage.goto("/join");
-  const roleName = role === "hider" ? "Hider" : "Seeker";
+  const roleName = role === "hider" ? "Hider" : role === "observer" ? "Observer" : "Seeker";
+  await guestPage.getByPlaceholder("ABCD").fill(code);
+  // Stepped join: code → preview → seat → (passcode?) → commit.
+  const continueBtn = guestPage.getByRole("button", { name: "Continue" });
+  await expect(continueBtn).toBeEnabled({ timeout: 15_000 });
+  await continueBtn.click();
+  await expect(guestPage.getByText(/Classic Jet Lag|Castle Siege/)).toBeVisible({
+    timeout: 15_000,
+  });
+  await continueBtn.click();
   // SegmentedControl radios are visually hidden; click the visible label.
   const side = guestPage.getByLabel("Player side");
   await expect(side).toBeVisible({ timeout: 15_000 });
   await side.getByText(roleName, { exact: true }).click();
-  await guestPage.getByPlaceholder("ABCD").fill(code);
-  await guestPage.getByRole("button", { name: "Join session" }).click();
+  await guestPage.getByRole("button", { name: /^(Join session|Continue)$/ }).click();
+  const roleCode = guestPage.getByLabel(/Role code|Seat code/);
+  const mapMarker =
+    role === "hider"
+      ? guestPage.getByRole("button", { name: /Set zone|Change zone|Play move/i })
+      : guestPage.getByRole("button", { name: "Radar" });
+  await Promise.race([
+    roleCode.waitFor({ state: "visible", timeout: 15_000 }),
+    mapMarker.waitFor({ state: "visible", timeout: 15_000 }),
+  ]);
+  if (await roleCode.isVisible().catch(() => false)) {
+    await guestPage.getByRole("button", { name: "Join session" }).click();
+  }
 
   if (role === "hider") {
     await expect(

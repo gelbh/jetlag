@@ -1,6 +1,7 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import {
   buildInitialRoleSecrets,
+  buildRoleGatesForCastleSiegeHost,
   buildRoleGatesForHost,
   isRoleGatedSession,
 } from "./roleGateShared.mjs";
@@ -32,20 +33,43 @@ export async function initSessionRoleGatesHandler(db, uid, sessionId) {
     }
 
     const hostRole = data.memberRoles?.[uid];
-    // Castle Siege stamps classic memberRoles host as observer (play role lives in
-    // castleSiegeRoles). Classic create still requires seeker/hider.
-    const castleSiegeObserverHost = data.mode === "castleSiege" && hostRole === "observer";
-    if (hostRole !== "seeker" && hostRole !== "hider" && !castleSiegeObserverHost) {
+    // Castle Siege: classic memberRoles host is always observer; play seat is castleSiegeRoles.
+    // Classic create still requires seeker/hider.
+    const isCastleSiege = data.mode === "castleSiege";
+    if (isCastleSiege) {
+      if (hostRole !== "observer") {
+        throw new HttpsError(
+          "failed-precondition",
+          "Castle Siege host classic role must be observer.",
+        );
+      }
+    } else if (hostRole !== "seeker" && hostRole !== "hider") {
       throw new HttpsError("failed-precondition", "Host player role must be seeker or hider.");
     }
 
-    const roleGates = isRoleGatedSession(data)
-      ? data.roleGates
-      : buildRoleGatesForHost(uid, hostRole);
-    const secrets = buildInitialRoleSecrets(hostRole);
+    let roleGates;
+    let secrets;
 
-    observerPasscode = secrets.observer.code;
-    rolePasscode = secrets[hostRole]?.code;
+    if (isCastleSiege) {
+      const hostSeat = data.castleSiegeRoles?.[uid];
+      if (hostSeat !== "teamA" && hostSeat !== "teamB") {
+        throw new HttpsError(
+          "failed-precondition",
+          "Castle Siege host must be on team A or team B.",
+        );
+      }
+      roleGates = isRoleGatedSession(data)
+        ? data.roleGates
+        : buildRoleGatesForCastleSiegeHost(uid, hostSeat);
+      secrets = buildInitialRoleSecrets(hostRole, { mode: "castleSiege" });
+      observerPasscode = secrets.observer.code;
+      rolePasscode = secrets[hostSeat].code;
+    } else {
+      roleGates = isRoleGatedSession(data) ? data.roleGates : buildRoleGatesForHost(uid, hostRole);
+      secrets = buildInitialRoleSecrets(hostRole);
+      observerPasscode = secrets.observer.code;
+      rolePasscode = secrets[hostRole]?.code;
+    }
 
     tx.update(sessionRef, { roleGates });
     tx.set(secretsRef, secrets);

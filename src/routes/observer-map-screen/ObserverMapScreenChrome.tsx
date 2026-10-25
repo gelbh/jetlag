@@ -49,6 +49,8 @@ export function ObserverMapScreenChrome({
     visibleRoleCodeRoles({
       roleGates: session.roleGates,
       memberRoles: session.memberRoles,
+      castleSiegeRoles: session.castleSiegeRoles,
+      mode: session.mode,
       myUid,
       isHost,
     }).length > 0;
@@ -59,6 +61,7 @@ export function ObserverMapScreenChrome({
         model={{
           sessionCode: session.code,
           sessionId: session.id,
+          mode: session.mode,
           roleGates: session.roleGates,
           sessionRules: session,
           playerRole: roleConfig.statusPlayerRole,

@@ -9,7 +9,13 @@ import {
 export const REVEAL_SESSION_NOT_FOUND = "REVEAL_SESSION_NOT_FOUND";
 export const REVEAL_NOT_AUTHORIZED = "REVEAL_NOT_AUTHORIZED";
 
-const VALID_REVEAL_ROLES = new Set(["seeker", "hider", "observer"]);
+const VALID_REVEAL_ROLES = new Set(["seeker", "hider", "observer", "teamA", "teamB", "referee"]);
+
+function readCastleSiegeRoles(data) {
+  return data.castleSiegeRoles && typeof data.castleSiegeRoles === "object"
+    ? { ...data.castleSiegeRoles }
+    : {};
+}
 
 function readSessionRole(data, uid) {
   const hostUid = typeof data.hostUid === "string" ? data.hostUid : "";
@@ -17,15 +23,29 @@ function readSessionRole(data, uid) {
     data.memberRoles && typeof data.memberRoles === "object" ? data.memberRoles[uid] : undefined;
   const leaders =
     data.roleGates && typeof data.roleGates === "object" ? (data.roleGates.leaders ?? {}) : {};
+  const mode = data.mode;
+  const castleSiegeRoles = readCastleSiegeRoles(data);
 
-  return { hostUid, memberRole, leaders };
+  return { hostUid, memberRole, leaders, mode, castleSiegeRoles };
 }
 
 function assertRevealAuthorized(data, uid, role) {
-  const { hostUid, memberRole, leaders } = readSessionRole(data, uid);
+  const { hostUid, memberRole, leaders, mode, castleSiegeRoles } = readSessionRole(data, uid);
 
-  if (role === "observer") {
+  if (role === "observer" || role === "referee") {
     if (hostUid !== uid) {
+      throw new Error(REVEAL_NOT_AUTHORIZED);
+    }
+    return;
+  }
+
+  if (mode === "castleSiege") {
+    if (role !== "teamA" && role !== "teamB") {
+      throw new HttpsError("invalid-argument", "Invalid role.");
+    }
+
+    const memberSeat = castleSiegeRoles[uid];
+    if (leaders[role] !== uid || memberSeat !== role) {
       throw new Error(REVEAL_NOT_AUTHORIZED);
     }
     return;

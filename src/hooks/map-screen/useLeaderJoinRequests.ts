@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { SessionRecord } from "../../domain/map/annotations";
 import {
   isJoinRequestExpired,
   type RoleJoinRequest,
@@ -17,6 +18,7 @@ interface UseLeaderJoinRequestsParams {
   roleGates?: RoleGates | null;
   myUid: string | undefined;
   isHost: boolean;
+  mode?: SessionRecord["mode"];
 }
 
 export function useLeaderJoinRequests({
@@ -24,6 +26,7 @@ export function useLeaderJoinRequests({
   roleGates,
   myUid,
   isHost,
+  mode,
 }: UseLeaderJoinRequestsParams) {
   const [requests, setRequests] = useState<RoleJoinRequest[]>([]);
   const [busy, setBusy] = useState(false);
@@ -31,8 +34,8 @@ export function useLeaderJoinRequests({
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   const roles = useMemo(
-    () => ledJoinRequestRoles({ roleGates, myUid, isHost }),
-    [isHost, myUid, roleGates],
+    () => ledJoinRequestRoles({ roleGates, myUid, isHost, mode }),
+    [isHost, mode, myUid, roleGates],
   );
 
   const enabled = Boolean(sessionId) && sessionId !== LOCAL_SESSION_ID && roles.length > 0;

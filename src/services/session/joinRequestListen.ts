@@ -6,7 +6,14 @@ import type {
 } from "../../domain/session/players/joinRequest";
 import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase/firebase";
 
-const JOIN_REQUEST_ROLES = new Set<JoinRequestRole>(["seeker", "hider", "observer"]);
+const JOIN_REQUEST_ROLES = new Set<JoinRequestRole>([
+  "seeker",
+  "hider",
+  "observer",
+  "teamA",
+  "teamB",
+  "referee",
+]);
 
 const JOIN_REQUEST_STATUSES = new Set<JoinRequestStatus>([
   "pending",

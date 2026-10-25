@@ -1,8 +1,11 @@
 import { z } from "zod";
 
+const castleSiegeSeatSchema = z.enum(["teamA", "teamB", "referee", "observer"]);
+
 export const joinSessionFormSchema = z.object({
   code: z.string().regex(/^[A-Z]{4}$/, "Enter a 4-letter session code."),
   playerRole: z.enum(["seeker", "hider", "observer", "admin"]),
+  castleSiegeRole: castleSiegeSeatSchema.optional(),
   rolePasscode: z
     .string()
     .max(4)
@@ -10,3 +13,4 @@ export const joinSessionFormSchema = z.object({
 });
 
 export type JoinSessionFormValues = z.infer<typeof joinSessionFormSchema>;
+export type JoinCastleSiegeSeat = z.infer<typeof castleSiegeSeatSchema>;

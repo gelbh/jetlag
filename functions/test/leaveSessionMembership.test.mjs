@@ -105,3 +105,66 @@ test("leave last role member clears secret without read-after-write", async () =
   assert.ok(secrets.observer);
   assert.equal(secretWrites.length, 1);
 });
+
+test("castleSiege leave promotes lexicographic next teamA leader", async () => {
+  const writes = [];
+  const secretWrites = [];
+  const sessionData = {
+    status: "active",
+    mode: "castleSiege",
+    hostUid: "host",
+    memberUids: ["host", "leader", "b", "a"],
+    memberRoles: {
+      host: "observer",
+      leader: "observer",
+      a: "observer",
+      b: "observer",
+    },
+    castleSiegeRoles: {
+      host: "teamB",
+      leader: "teamA",
+      a: "teamA",
+      b: "teamA",
+    },
+    roleGates: {
+      version: 1,
+      leaders: { teamA: "leader", teamB: "host" },
+    },
+  };
+  const secrets = { teamA: newRoleSecret(), teamB: newRoleSecret() };
+  const db = buildMockDb({ sessionData, secrets, writes, secretWrites });
+
+  await leaveSessionMembershipHandler(db, "leader", "sess-1");
+
+  assert.deepEqual(sessionData.memberUids, ["host", "b", "a"]);
+  assert.equal(sessionData.roleGates.leaders.teamA, "a");
+  assert.ok(secrets.teamA);
+  assert.equal(sessionData.castleSiegeRoles.leader, undefined);
+});
+
+test("castleSiege leave last teamA member clears team secret", async () => {
+  const writes = [];
+  const secretWrites = [];
+  const sessionData = {
+    status: "active",
+    mode: "castleSiege",
+    hostUid: "host",
+    memberUids: ["host", "solo-a"],
+    memberRoles: { host: "observer", "solo-a": "observer" },
+    castleSiegeRoles: { host: "teamB", "solo-a": "teamA" },
+    roleGates: {
+      version: 1,
+      leaders: { teamA: "solo-a", teamB: "host" },
+    },
+  };
+  const secrets = { teamA: newRoleSecret(), teamB: newRoleSecret(), observer: newRoleSecret() };
+  const db = buildMockDb({ sessionData, secrets, writes, secretWrites });
+
+  await leaveSessionMembershipHandler(db, "solo-a", "sess-1");
+
+  assert.equal(sessionData.roleGates.leaders.teamA, undefined);
+  assert.equal(secrets.teamA, undefined);
+  assert.ok(secrets.teamB);
+  assert.ok(secrets.observer);
+  assert.equal(secretWrites.length, 1);
+});

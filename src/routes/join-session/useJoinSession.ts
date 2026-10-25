@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { APP_VERSION } from "@/domain/device/changelog";
 import type { SessionRecord } from "@/domain/map/annotations";
+import { isCastleSiegeSession } from "@/domain/session/castleSiege/mode";
+import type { CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { JOIN_ERROR_HEAL_PROOF_INVALID } from "@/domain/session/join/joinErrorCopy";
 import { type JoinFailureReason, joinFailureReason } from "@/domain/session/join/joinFailureReason";
 import { isPlaceholderGameArea } from "@/domain/session/join/joinPreviewGameArea";
@@ -14,7 +16,9 @@ import {
 } from "@/domain/session/players/joinRequest";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import {
+  isCastleSiegePasscodeRequired,
   isRolePasscodeRequired,
+  joinRequiresCastleSiegePasscode,
   joinRequiresRolePasscode,
 } from "@/domain/session/players/roleGates";
 import { useSubmitLock } from "@/hooks/forms/useSubmitLock";
@@ -72,8 +76,15 @@ async function fetchAcceptedJoinSession(
   return confirmed;
 }
 
-function isJoinRequestRole(role: PlayerRole): role is JoinRequestRole {
-  return role === "seeker" || role === "hider" || role === "observer";
+function isJoinRequestRole(role: PlayerRole | string): role is JoinRequestRole {
+  return (
+    role === "seeker" ||
+    role === "hider" ||
+    role === "observer" ||
+    role === "teamA" ||
+    role === "teamB" ||
+    role === "referee"
+  );
 }
 
 export function waitingLeaderCopy(role: JoinRequestRole): string {
@@ -83,6 +94,12 @@ export function waitingLeaderCopy(role: JoinRequestRole): string {
     case "hider":
       return "Waiting for hider leader…";
     case "observer":
+      return "Waiting for host…";
+    case "teamA":
+      return "Waiting for Team A leader…";
+    case "teamB":
+      return "Waiting for Team B leader…";
+    case "referee":
       return "Waiting for host…";
     default: {
       const _exhaustive: never = role;
@@ -112,8 +129,10 @@ function joinRequestStatusMessage(status: JoinRequestStatus): string {
 export type UseJoinSessionArgs = {
   code: string;
   playerRole: PlayerRole;
+  castleSiegeRole?: CastleSiegeTeamRole;
   rolePasscode: string;
   onExistingRole?: (role: PlayerRole) => void;
+  onExistingCastleSiegeRole?: (seat: CastleSiegeTeamRole) => void;
 };
 
 const JOIN_STAGES = {
@@ -126,8 +145,10 @@ const JOIN_STAGES = {
 export function useJoinSession({
   code,
   playerRole,
+  castleSiegeRole,
   rolePasscode: _rolePasscode,
   onExistingRole,
+  onExistingCastleSiegeRole,
 }: UseJoinSessionArgs) {
   void _rolePasscode;
   const navigate = useAppNavigate();
@@ -135,6 +156,7 @@ export function useJoinSession({
   const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
   const onExistingRoleRef = useRef(onExistingRole);
+  const onExistingCastleSiegeRoleRef = useRef(onExistingCastleSiegeRole);
   const joinAttemptRef = useRef(0);
 
   const [error, setError] = useState<string | null>(null);
@@ -145,23 +167,37 @@ export function useJoinSession({
   const [pendingRequest, setPendingRequest] = useState<PendingJoinRequest | null>(null);
   const [requestBusy, setRequestBusy] = useState(false);
 
-  const { previewSession, previewPremium, lookupLoading, existingRole } =
+  const { previewSession, previewPremium, lookupLoading, existingRole, existingCastleSiegeRole } =
     useJoinSessionPreview(code);
 
+  const castleSiegeJoin = isCastleSiegeSession(previewSession);
+  const activeCastleSiegeRole = castleSiegeRole ?? "teamA";
   const rolePasscodeOccupancyKnown = Boolean(
     previewSession && !isPlaceholderGameArea(previewSession.gameArea),
   );
   const needsRolePasscode = Boolean(
     previewSession &&
-      joinRequiresRolePasscode(
-        previewSession.memberRoles,
-        playerRole,
-        myUid ?? undefined,
-        rolePasscodeOccupancyKnown,
-      ),
+      (castleSiegeJoin
+        ? joinRequiresCastleSiegePasscode(
+            previewSession.castleSiegeRoles,
+            activeCastleSiegeRole,
+            myUid ?? undefined,
+            rolePasscodeOccupancyKnown,
+          )
+        : joinRequiresRolePasscode(
+            previewSession.memberRoles,
+            playerRole,
+            myUid ?? undefined,
+            rolePasscodeOccupancyKnown,
+          )),
   );
+  const requestAccessRole: JoinRequestRole | null = castleSiegeJoin
+    ? activeCastleSiegeRole
+    : isJoinRequestRole(playerRole)
+      ? playerRole
+      : null;
   const canRequestAccess =
-    Boolean(previewSession) && needsRolePasscode && isJoinRequestRole(playerRole);
+    Boolean(previewSession) && needsRolePasscode && requestAccessRole != null;
   const formBusy = joinBusy || requestBusy || pendingRequest != null;
 
   useEffect(() => {
@@ -169,11 +205,22 @@ export function useJoinSession({
   }, [onExistingRole]);
 
   useEffect(() => {
+    onExistingCastleSiegeRoleRef.current = onExistingCastleSiegeRole;
+  }, [onExistingCastleSiegeRole]);
+
+  useEffect(() => {
     if (!existingRole) {
       return;
     }
     onExistingRoleRef.current?.(existingRole);
   }, [existingRole]);
+
+  useEffect(() => {
+    if (!existingCastleSiegeRole) {
+      return;
+    }
+    onExistingCastleSiegeRoleRef.current?.(existingCastleSiegeRole);
+  }, [existingCastleSiegeRole]);
 
   useEffect(() => {
     if (!pendingRequest) {
@@ -347,12 +394,27 @@ export function useJoinSession({
         settled = true;
         trackJoinFailed(role, reason);
       };
+      const joiningCastleSiege = isCastleSiegeSession(previewSession);
+      const joinAnalyticsRole = joiningCastleSiege
+        ? (values.castleSiegeRole ?? "teamA")
+        : values.playerRole;
+      if (joiningCastleSiege && !values.castleSiegeRole) {
+        fail("Choose a Castle Siege seat.", joinAnalyticsRole as PlayerRole, "other");
+        return;
+      }
       if (
         !values.rolePasscode &&
-        existingRole !== values.playerRole &&
-        isRolePasscodeRequired(previewSession, values.playerRole, myUid ?? undefined)
+        (joiningCastleSiege
+          ? existingCastleSiegeRole !== values.castleSiegeRole &&
+            isCastleSiegePasscodeRequired(
+              previewSession,
+              values.castleSiegeRole ?? "teamA",
+              myUid ?? undefined,
+            )
+          : existingRole !== values.playerRole &&
+            isRolePasscodeRequired(previewSession, values.playerRole, myUid ?? undefined))
       ) {
-        fail(ROLE_CODE_REQUIRED_COPY, values.playerRole, "role_code_required");
+        fail(ROLE_CODE_REQUIRED_COPY, joinAnalyticsRole as PlayerRole, "role_code_required");
         return;
       }
       setLoading(true);
@@ -361,7 +423,9 @@ export function useJoinSession({
       const signInStage = task.stage(JOIN_STAGES.signIn);
       const joinStage = task.stage(JOIN_STAGES.join);
       const roleStage =
-        values.playerRole === "hider" ? task.stage(JOIN_STAGES.hiderRole) : undefined;
+        !joiningCastleSiege && values.playerRole === "hider"
+          ? task.stage(JOIN_STAGES.hiderRole)
+          : undefined;
       const openStage = task.stage(JOIN_STAGES.openMap);
       setJoinTask(task);
 
@@ -379,7 +443,11 @@ export function useJoinSession({
               const user = await retryAsync(() => ensureFreshAnonymousUser());
               signInStage.finish();
               joinStage.start();
-              const freshJoinOptions = { rolePasscode: values.rolePasscode || undefined };
+              const membershipRole = joiningCastleSiege ? "observer" : values.playerRole;
+              const freshJoinOptions = {
+                rolePasscode: values.rolePasscode || undefined,
+                castleSiegeRole: joiningCastleSiege ? values.castleSiegeRole : undefined,
+              };
               const returningMemberUid = session?.code === normalized ? myUid : null;
               const joinWith = (
                 options: typeof freshJoinOptions & {
@@ -391,7 +459,7 @@ export function useJoinSession({
                   joinRemoteSessionByCode(
                     normalized,
                     user.uid,
-                    values.playerRole,
+                    membershipRole,
                     APP_VERSION,
                     options,
                   ),
@@ -450,7 +518,7 @@ export function useJoinSession({
 
               joinStage.finish();
               let joinedSession = result.session;
-              if (values.playerRole === "hider") {
+              if (!joiningCastleSiege && values.playerRole === "hider") {
                 roleStage?.start();
                 const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
                 roleStage?.finish();
@@ -481,7 +549,7 @@ export function useJoinSession({
               await enterJoinedSession(
                 joinedSession,
                 user.uid,
-                values.playerRole,
+                membershipRole,
                 result.rolePasscode,
               );
             })(),
@@ -520,7 +588,7 @@ export function useJoinSession({
 
   const handleRequestAccess = () =>
     void runLocked(async () => {
-      if (!previewSession || !isJoinRequestRole(playerRole)) {
+      if (!previewSession || requestAccessRole == null) {
         return;
       }
 
@@ -532,11 +600,11 @@ export function useJoinSession({
           setError("Firebase is not configured. Create a local session instead.");
         } else {
           await ensureFreshAnonymousUser();
-          const result = await requestRoleJoin(previewSession.id, playerRole);
+          const result = await requestRoleJoin(previewSession.id, requestAccessRole);
           setPendingRequest({
             requestId: result.requestId,
             sessionId: previewSession.id,
-            role: playerRole,
+            role: requestAccessRole,
             expiresAt: result.expiresAt,
           });
         }
@@ -570,6 +638,8 @@ export function useJoinSession({
     previewPremium,
     lookupLoading,
     existingRole,
+    existingCastleSiegeRole,
+    castleSiegeJoin,
     needsRolePasscode,
     rolePasscodeOccupancyKnown,
     canRequestAccess,

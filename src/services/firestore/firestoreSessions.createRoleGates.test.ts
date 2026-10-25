@@ -230,7 +230,7 @@ describe("createRemoteSession role-gate bootstrap", () => {
     expect(session.setupMode).toBeUndefined();
   });
 
-  it("calls initSessionRoleGates for castleSiege outside emulator and stamps empty leaders", async () => {
+  it("calls initSessionRoleGates for castleSiege outside emulator and stamps team leader", async () => {
     clientEnvUsesFirebaseEmulator.mockReturnValue(false);
 
     const session = await createRemoteSession(
@@ -249,9 +249,32 @@ describe("createRemoteSession role-gate bootstrap", () => {
     expect(initSessionRoleGates).toHaveBeenCalledOnce();
     expect(initSessionRoleGates).toHaveBeenCalledWith(session.id);
     expect(session.memberRoles).toEqual({ "host-1": "observer" });
-    expect(session.roleGates).toEqual({ version: 1, leaders: {} });
+    expect(session.roleGates).toEqual({
+      version: 1,
+      leaders: { teamA: "host-1" },
+    });
     expect(updateDoc).not.toHaveBeenCalled();
     expect(deleteDoc).not.toHaveBeenCalled();
+  });
+
+  it("stamps teamB leader when host picks teamB outside emulator", async () => {
+    const session = await createRemoteSession(
+      AREA,
+      "host-2",
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      {},
+      "imperial",
+      undefined,
+      { mode: "castleSiege", hostCastleSiegeRole: "teamB" },
+    );
+
+    expect(session.roleGates).toEqual({
+      version: 1,
+      leaders: { teamB: "host-2" },
+    });
   });
 
   it("keeps classic create free of castleSiege fields", async () => {

@@ -1,5 +1,6 @@
 import { doc, getDocFromServer } from "firebase/firestore";
 import type { SessionRecord, SessionTier } from "../../domain/map/annotations";
+import type { CastleSiegeTeamRole } from "../../domain/session/castleSiege/teamRole";
 import { generateHealSecret, hashHealSecret } from "../../domain/session/join/healSecret";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useSessionStore } from "../../state/sessionStore";
@@ -48,6 +49,7 @@ export async function joinGatedRemoteSessionByCode(input: {
   uid: string;
   codeRecord: SessionCodeRecord;
   role: PlayerRole;
+  castleSiegeRole?: CastleSiegeTeamRole;
   clientVersion: string;
   rolePasscode?: string;
   returningMemberUid?: string;
@@ -66,6 +68,7 @@ export async function joinGatedRemoteSessionByCode(input: {
     const callableResult = await joinSessionWithRole({
       code: input.code,
       role: input.role,
+      castleSiegeRole: input.castleSiegeRole,
       rolePasscode: input.rolePasscode,
       clientVersion: input.clientVersion,
       returningMemberUid: input.returningMemberUid,
