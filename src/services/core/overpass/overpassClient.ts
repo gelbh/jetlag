@@ -377,8 +377,9 @@ async function fetchOverpass(query: string, context: AttemptContext = {}): Promi
 
 const QUEUE_LABEL = "Waiting for map server";
 
-function queueLabel(position: number): string {
-  return position === 0 ? `${QUEUE_LABEL} (next)` : `${QUEUE_LABEL} (${position + 1} ahead)`;
+/** `position` counts the requests served before this one, so 0 means next. */
+export function queueLabel(position: number): string {
+  return position === 0 ? `${QUEUE_LABEL} (next)` : `${QUEUE_LABEL} (${position} ahead)`;
 }
 
 export async function queryOverpass<T>(
@@ -386,12 +387,16 @@ export async function queryOverpass<T>(
   options: OverpassQueryOptions = {},
 ): Promise<T> {
   const { signal, node } = options;
+  // The stage's own label (e.g. a bbox part) once it holds a slot; retries append to it
+  // and a failure restores it, so a later split never inherits "retrying".
+  let baseLabel: string | null = null;
   const result = await withOverpassConcurrencyLimit(
     async () => {
       node?.start();
+      baseLabel = node?.label ?? null;
       const response = await fetchOverpass(query, {
         signal,
-        onRetry: (attempt) => node?.setLabel(`Retrying map server (attempt ${attempt + 1})`),
+        onRetry: (attempt) => node?.setLabel(`${baseLabel}, retrying (attempt ${attempt + 1})`),
       });
       const text = await response.text();
       throwIfAborted(signal);
@@ -410,7 +415,12 @@ export async function queryOverpass<T>(
             node.queue(queueLabel(position), (position + 1) * stagePriorMs("queue:overpass"))
         : undefined,
     },
-  );
+  ).catch((error: unknown) => {
+    if (node && baseLabel !== null) {
+      node.setLabel(baseLabel === node.spec.label ? null : baseLabel);
+    }
+    throw error;
+  });
   node?.setLabel(null);
   node?.finish();
   return result;

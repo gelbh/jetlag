@@ -24,6 +24,7 @@ const MAX_BUCKET_SCALE = 4;
 
 let records: HistoryBlob = {};
 let hydratePromise: Promise<void> | null = null;
+let hydrationFailed = false;
 let writeTimer: ReturnType<typeof setTimeout> | null = null;
 
 function recordKey(historyKey: string, bucket: number | undefined): string {
@@ -40,6 +41,7 @@ export function hydrateDurationHistory(): Promise<void> {
     })
     .catch(() => {
       // History is an optimisation; priors still work without it.
+      hydrationFailed = true;
     });
   return hydratePromise;
 }
@@ -50,7 +52,13 @@ function scheduleWrite(): void {
   }
   writeTimer = setTimeout(() => {
     writeTimer = null;
-    void writePersistedEntry(PROGRESS_HISTORY_CACHE_KEY, records);
+    // Writing before hydration merges would replace the stored history with this
+    // session's few records; after a failed read, leave the stored blob alone.
+    void hydrateDurationHistory().then(() => {
+      if (!hydrationFailed) {
+        void writePersistedEntry(PROGRESS_HISTORY_CACHE_KEY, records);
+      }
+    });
   }, WRITE_DEBOUNCE_MS);
 }
 
@@ -120,6 +128,7 @@ export function readDurationRecordsForTests(): HistoryBlob {
 export function resetDurationHistoryForTests(): void {
   records = {};
   hydratePromise = null;
+  hydrationFailed = false;
   if (writeTimer !== null) {
     clearTimeout(writeTimer);
     writeTimer = null;

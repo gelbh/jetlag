@@ -27,11 +27,12 @@ export async function fetchAndReadWithTimeout<T>(
   throwIfAborted(outerSignal);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const combined = anySignal([controller.signal, outerSignal]);
 
   try {
     const response = await fetch(input, {
       ...init,
-      signal: anySignal([controller.signal, outerSignal]),
+      signal: combined.signal,
     });
     return await read(response);
   } catch (error) {
@@ -45,6 +46,8 @@ export async function fetchAndReadWithTimeout<T>(
     throw error;
   } finally {
     clearTimeout(timeoutId);
+    // Long-lived task signals would otherwise collect one listener per fetch.
+    combined.dispose();
   }
 }
 

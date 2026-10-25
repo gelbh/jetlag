@@ -17,26 +17,32 @@ export function throwIfAborted(signal: AbortSignal | undefined): void {
  * Signal that aborts when any input aborts. `AbortSignal.any` needs Safari
  * 17.4+, and the build targets es2022, so this combines manually.
  */
-export function anySignal(signals: ReadonlyArray<AbortSignal | undefined>): AbortSignal {
+export function anySignal(signals: ReadonlyArray<AbortSignal | undefined>): {
+  signal: AbortSignal;
+  /** Detaches from the inputs; call when the combined signal is no longer needed. */
+  dispose: () => void;
+} {
   const controller = new AbortController();
   const present = signals.filter((signal): signal is AbortSignal => signal !== undefined);
   for (const signal of present) {
     if (signal.aborted) {
       controller.abort(signal.reason);
-      return controller.signal;
+      return { signal: controller.signal, dispose: () => {} };
     }
   }
-  const onAbort = (event: Event) => {
-    const source = event.target as AbortSignal;
-    controller.abort(source.reason);
+  const dispose = () => {
     for (const signal of present) {
       signal.removeEventListener("abort", onAbort);
     }
   };
+  const onAbort = (event: Event) => {
+    controller.abort((event.target as AbortSignal).reason);
+    dispose();
+  };
   for (const signal of present) {
     signal.addEventListener("abort", onAbort, { once: true });
   }
-  return controller.signal;
+  return { signal: controller.signal, dispose };
 }
 
 /** `setTimeout` as a promise that rejects with the abort reason when `signal` aborts. */

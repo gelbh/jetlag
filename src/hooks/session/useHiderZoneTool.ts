@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
 import { isAbortError } from "@/services/core/network/anySignal";
-import { createLoadTask, type LoadTask, setNamedLoadTask } from "@/services/core/progress/loadTask";
+import {
+  createLoadTask,
+  type LoadTask,
+  publishNamedLoadTask,
+} from "@/services/core/progress/loadTask";
 import { HIDER_STATIONS_TASK } from "@/services/core/progress/namedTasks";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import { overpassLoadFromTask } from "@/services/geo/overpass/overpassLoad";
@@ -182,6 +186,10 @@ export function useHiderZoneTool({
     window.history.back();
   }, []);
 
+  // Clears this hook's published station task; also run on unmount.
+  const stationsClearRef = useRef<() => void>(() => {});
+  useEffect(() => () => stationsClearRef.current(), []);
+
   const searchStationsInArea = useCallback(
     async (viewport: MapViewportBounds) => {
       const requestId = beginRequest();
@@ -189,7 +197,9 @@ export function useHiderZoneTool({
       setStationsError(null);
 
       const task = createLoadTask({ label: "Loading stations", signal: requestSignal() });
-      setNamedLoadTask(HIDER_STATIONS_TASK, task);
+      stationsClearRef.current();
+      const clearPublished = publishNamedLoadTask(HIDER_STATIONS_TASK, task);
+      stationsClearRef.current = clearPublished;
       const applyStations = (loaded: TransitStation[]) => {
         if (!isLatestRequest(requestId) || loaded.length === 0) {
           return;
@@ -204,8 +214,10 @@ export function useHiderZoneTool({
       const outcome = await loadStationsWithProgress(viewport, gameArea, task, {
         onStations: applyStations,
         // A superseded search must not clear the newer search's spinner.
-        onSettled: () =>
-          setStationsLoading((loading) => (isLatestRequest(requestId) ? false : loading)),
+        onSettled: () => {
+          clearPublished();
+          setStationsLoading((loading) => (isLatestRequest(requestId) ? false : loading));
+        },
       });
       if (!isLatestRequest(requestId) || outcome.status === "cancelled") {
         return;
