@@ -1,10 +1,9 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-const PWA_INSTALL_TIP_DISMISS_KEY = "jetlag:pwa-install-tip-dismissed";
-
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { PwaInstallTipBanner } from "./PwaInstallTipBanner";
+
+const PWA_INSTALL_TIP_DISMISS_KEY = "jetlag:pwa-install-tip-dismissed";
 
 vi.mock("../../../domain/device/pwa/isStandalonePwa", () => ({
   isStandalonePwa: vi.fn(() => false),
