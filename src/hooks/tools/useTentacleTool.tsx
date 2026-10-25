@@ -280,6 +280,7 @@ export function useTentacleTool({
               label: "Confirming locations",
               signal,
               global: true,
+              priority: "background",
               cancellable: false,
             }),
           onEnrich: (enrichedPois) => {
