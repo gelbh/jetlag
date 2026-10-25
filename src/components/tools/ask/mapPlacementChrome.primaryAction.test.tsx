@@ -30,12 +30,7 @@ function mantine(children: React.ReactNode) {
   );
 }
 
-type PrimaryRender = () => { onCommit: ReturnType<typeof vi.fn> };
-
-function primaryPair(renderChrome: (onCommit: ReturnType<typeof vi.fn>, busy: boolean) => void): {
-  renderUnavailable: PrimaryRender;
-  renderBusy: PrimaryRender;
-} {
+function primaryPair(renderChrome: (onCommit: () => void, busy: boolean) => void) {
   return {
     renderUnavailable() {
       const onCommit = vi.fn();
