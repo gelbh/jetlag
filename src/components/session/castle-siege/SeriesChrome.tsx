@@ -1,3 +1,4 @@
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import type {
   SeriesLength,
   SeriesOutcome,
@@ -70,10 +71,8 @@ export function SeriesChrome({
       data-testid="castle-siege-series-chrome"
       className="flex flex-col gap-2 rounded-md border px-3 py-2.5"
       style={{
-        borderColor: "var(--color-rule)",
-        background: "oklch(from var(--color-canvas) l c h / 92%)",
+        ...mapChromeSurfaceStyles,
         color: "var(--color-field-ink)",
-        boxShadow: "var(--shadow-hud-float)",
       }}
     >
       <p

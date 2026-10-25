@@ -1,5 +1,6 @@
 import { MapTrifold } from "@phosphor-icons/react";
 import { type MouseEvent, type Ref, useId } from "react";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 
 const facadePlateStyle = {
   backgroundColor: "var(--color-canvas)",
@@ -15,7 +16,7 @@ const facadeBoundaryStyle = {
   border: "1.5px dashed oklch(from var(--color-flag) l c h / 0.55)",
 } as const;
 
-const facadeChipStyle = { boxShadow: "var(--shadow-hud-float)" } as const;
+const facadeChipStyle = { ...mapChromeSurfaceStyles } as const;
 
 interface CreateSessionMapFacadeProps {
   /**
