@@ -58,6 +58,7 @@ async function flush() {
 
 describe("getOrFetchCached shared in-flight fetches", () => {
   afterEach(async () => {
+    vi.useRealTimers();
     await clearGeographicFeatureCacheForTests();
   });
 
@@ -83,15 +84,18 @@ describe("getOrFetchCached shared in-flight fetches", () => {
     const a = getOrFetchCached("k:abort", fetch.fetcher, { signal: first.signal });
     const b = getOrFetchCached("k:abort", fetch.fetcher, { signal: second.signal });
     await fetch.started();
+    // Fake only timers, after the IndexedDB read, so the grace period is instant and exact.
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     first.abort(cancelError());
     second.abort(cancelError());
     await expect(a).rejects.toMatchObject({ name: "AbortError" });
     await expect(b).rejects.toMatchObject({ name: "AbortError" });
     // Aborted after the grace period, not at once.
+    await vi.advanceTimersByTimeAsync(ABANDON_GRACE_MS - 1);
     expect(fetch.context().signal.aborted).toBe(false);
-    await vi.waitFor(() => expect(fetch.context().signal.aborted).toBe(true), {
-      timeout: ABANDON_GRACE_MS + 1_000,
-    });
+    await vi.advanceTimersByTimeAsync(1);
+    expect(fetch.context().signal.aborted).toBe(true);
+    vi.useRealTimers();
     await flush();
     expect(await readPersistedEntryIgnoringExpiry("k:abort")).toBeUndefined();
   });
@@ -101,13 +105,15 @@ describe("getOrFetchCached shared in-flight fetches", () => {
     const old = new AbortController();
     const stale = getOrFetchCached("k:rejoin", fetch.fetcher, { signal: old.signal });
     await fetch.started();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     old.abort(cancelError());
     await expect(stale).rejects.toMatchObject({ name: "AbortError" });
     const next = getOrFetchCached("k:rejoin", fetch.fetcher, {
       signal: new AbortController().signal,
     });
-    await new Promise((resolve) => setTimeout(resolve, ABANDON_GRACE_MS + 200));
+    await vi.advanceTimersByTimeAsync(ABANDON_GRACE_MS * 2);
     expect(fetch.context().signal.aborted).toBe(false);
+    vi.useRealTimers();
     fetch.resolve(["kept"]);
     await expect(next).resolves.toEqual(["kept"]);
     expect(fetch.calls()).toBe(1);
