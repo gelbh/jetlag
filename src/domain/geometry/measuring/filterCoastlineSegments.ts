@@ -6,6 +6,10 @@ const MIN_MEASURING_SEGMENT_LENGTH_METERS = 5;
 const HARBOUR_LOOP_MAX_LENGTH_METERS = 5_000;
 const BBOX_EDGE_EPSILON = 1e-6;
 
+function isLngLatPair(coord: number[]): coord is [number, number] {
+  return coord.length >= 2 && Number.isFinite(coord[0]) && Number.isFinite(coord[1]);
+}
+
 function isClosedRing(segment: Feature<LineString>): boolean {
   const coordinates = segment.geometry.coordinates;
   const first = coordinates[0];
@@ -86,7 +90,7 @@ function touchesBboxEdge(segment: Feature<LineString>, bbox: BoundingBox): boole
 
   return coordinates.some((start, index) => {
     const end = coordinates[index + 1];
-    if (end === undefined) {
+    if (end === undefined || !isLngLatPair(start) || !isLngLatPair(end)) {
       return false;
     }
 
