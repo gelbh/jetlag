@@ -9,6 +9,7 @@ import {
 } from "./bundledGamePresets";
 import { AUSTRALIA_STATE_PRESETS } from "./bundledPresets/australia";
 import { SOUTHAMPTON_WARDS } from "./bundledPresets/southampton";
+import { SYDNEY_LGAS } from "./bundledPresets/sydney";
 
 describe("bundledGamePresets", () => {
   it("includes southampton city and ward presets on the southampton pack", () => {
@@ -43,21 +44,63 @@ describe("bundledGamePresets", () => {
     );
   });
 
-  it("ships sydney specialty preset on the sydney pack", () => {
+  it("ships sydney metro + LGA presets on the sydney pack", () => {
     const sydney = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "sydney");
-    expect(sydney).toHaveLength(1);
-    expect(sydney[0]?.id).toBe("bundled:sydney");
-    expect(sydney[0]?.subregionId).toBeUndefined();
-    expect(sydney[0]?.transitMetroId).toBe("sydney");
-    expect(sydney[0]?.distanceUnit).toBe("metric");
-    expect(sydney[0]?.advancedSettingsPatch?.expansionPackEnabled).toBe(false);
-    expect(sydney[0]?.hierarchy).toEqual([
+    expect(sydney).toHaveLength(1 + SYDNEY_LGAS.length);
+    expect(SYDNEY_LGAS).toHaveLength(33);
+
+    const metro = sydney.find((p) => p.id === "bundled:sydney");
+    expect(metro).toBeDefined();
+    expect(metro?.subregionId).toBeUndefined();
+    expect(metro?.transitMetroId).toBe("sydney");
+    expect(metro?.distanceUnit).toBe("metric");
+    expect(metro?.advancedSettingsPatch?.expansionPackEnabled).toBe(false);
+    expect(metro?.hierarchy).toEqual([
       { id: "continent-oceania", category: "Continent", name: "Oceania" },
       { id: "country-au", category: "Country", name: "Australia" },
       { id: "state-nsw", category: "State/Territory", name: "New South Wales" },
       { id: "sydney-metro", category: "City", name: "Sydney" },
     ]);
-    expect(sydney.some((p) => /ced|sed|lga|sal/i.test(p.id))).toBe(false);
+
+    const lgaHierarchyTail = {
+      id: "sydney-lgas",
+      category: "LGAs",
+      name: "LGAs",
+    };
+    for (const lga of SYDNEY_LGAS) {
+      const preset = sydney.find((p) => p.id === `bundled:sydney-lga-${lga.id}`);
+      expect(preset, lga.id).toBeDefined();
+      expect(preset?.name).toBe(lga.name);
+      expect(preset?.subregionId).toBe(lga.id);
+      expect(preset?.transitMetroId).toBe("sydney");
+      expect(preset?.hierarchy).toEqual([
+        { id: "continent-oceania", category: "Continent", name: "Oceania" },
+        { id: "country-au", category: "Country", name: "Australia" },
+        { id: "state-nsw", category: "State/Territory", name: "New South Wales" },
+        { id: "sydney-metro", category: "City", name: "Sydney" },
+        lgaHierarchyTail,
+      ]);
+    }
+
+    expect(sydney.some((p) => /ced|sed|sal/i.test(p.id))).toBe(false);
+  });
+
+  it("keeps SYDNEY_LGAS 1:1 with public/geo/sydney/lgas.geojson id and name", () => {
+    const collection = JSON.parse(
+      readFileSync(resolve(import.meta.dirname, "../../../public/geo/sydney/lgas.geojson"), "utf8"),
+    ) as {
+      features: Array<{ properties: { lgaId: string; name: string } }>;
+    };
+    const fromGeo = collection.features
+      .map((feature) => ({
+        id: feature.properties.lgaId,
+        name: feature.properties.name,
+      }))
+      .sort((left, right) => left.id.localeCompare(right.id));
+    const fromCatalog = [...SYDNEY_LGAS]
+      .map((lga) => ({ id: lga.id, name: lga.name }))
+      .sort((left, right) => left.id.localeCompare(right.id));
+    expect(fromCatalog).toEqual(fromGeo);
   });
 
   it("ships switzerland country + 26 canton presets on the switzerland pack", () => {
