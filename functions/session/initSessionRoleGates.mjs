@@ -33,14 +33,20 @@ export async function initSessionRoleGatesHandler(db, uid, sessionId) {
     }
 
     const hostRole = data.memberRoles?.[uid];
-    // Castle Siege stamps classic memberRoles host as observer (play role lives in
-    // castleSiegeRoles). Classic create still requires seeker/hider.
-    const castleSiegeObserverHost = data.mode === "castleSiege" && hostRole === "observer";
-    if (hostRole !== "seeker" && hostRole !== "hider" && !castleSiegeObserverHost) {
+    // Castle Siege: classic memberRoles host is always observer; play seat is castleSiegeRoles.
+    // Classic create still requires seeker/hider.
+    const isCastleSiege = data.mode === "castleSiege";
+    if (isCastleSiege) {
+      if (hostRole !== "observer") {
+        throw new HttpsError(
+          "failed-precondition",
+          "Castle Siege host classic role must be observer.",
+        );
+      }
+    } else if (hostRole !== "seeker" && hostRole !== "hider") {
       throw new HttpsError("failed-precondition", "Host player role must be seeker or hider.");
     }
 
-    const isCastleSiege = data.mode === "castleSiege";
     let roleGates;
     let secrets;
 

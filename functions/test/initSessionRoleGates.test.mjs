@@ -117,6 +117,24 @@ test("castleSiege teamA host mints seat secrets and team leader", async () => {
   assert.equal(db.secretsWritten?.hider, undefined);
 });
 
+test("castleSiege seeker classic host is rejected", async () => {
+  const sessionData = {
+    hostUid: "host-1",
+    mode: "castleSiege",
+    memberRoles: { "host-1": "seeker" },
+    castleSiegeRoles: { "host-1": "teamA" },
+  };
+  const db = buildMockDb({ sessionData });
+
+  await assert.rejects(
+    () => initSessionRoleGatesHandler(db, "host-1", "sess-1"),
+    (error) =>
+      error instanceof HttpsError &&
+      error.code === "failed-precondition" &&
+      error.message === "Castle Siege host classic role must be observer.",
+  );
+});
+
 test("castleSiege teamB host returns teamB passcode and leader", async () => {
   const sessionData = {
     hostUid: "host-1",
