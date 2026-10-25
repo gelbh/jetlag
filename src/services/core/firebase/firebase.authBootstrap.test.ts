@@ -36,6 +36,8 @@ vi.mock("firebase/auth", () => ({
   signInAnonymously: authMocks.signInAnonymously,
   signOut: vi.fn(),
   onAuthStateChanged: authMocks.onAuthStateChanged,
+  GoogleAuthProvider: { PROVIDER_ID: "google.com" },
+  EmailAuthProvider: { PROVIDER_ID: "password" },
 }));
 
 vi.mock("firebase/app-check", () => ({
@@ -135,6 +137,9 @@ describe("auth bootstrap start", () => {
       user: {
         uid: string;
         isAnonymous: boolean;
+        email?: string | null;
+        displayName?: string | null;
+        providerData?: Array<{ providerId: string }>;
         getIdTokenResult?: () => Promise<{ claims: Record<string, unknown> }>;
       } | null,
     ) => void;
@@ -142,12 +147,18 @@ describe("auth bootstrap start", () => {
     authCallback({
       uid: "user-1",
       isAnonymous: false,
+      email: "user@example.com",
+      displayName: "User One",
+      providerData: [{ providerId: "google.com" }],
       getIdTokenResult: async () => ({ claims: { email_verified: true } }),
     });
     authCallback(null);
     authCallback({
       uid: "admin-1",
       isAnonymous: false,
+      email: "admin@example.com",
+      displayName: "Admin One",
+      providerData: [{ providerId: "password" }],
       getIdTokenResult: async () => ({ claims: { admin: true, email_verified: true } }),
     });
 
@@ -156,18 +167,18 @@ describe("auth bootstrap start", () => {
         uid: "user-1",
         isAnonymous: false,
         isInternal: false,
-        email: null,
-        name: null,
-        authProvider: "unknown",
+        email: "user@example.com",
+        name: "User One",
+        authProvider: "google",
       });
       expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith(null);
       expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith({
         uid: "admin-1",
         isAnonymous: false,
         isInternal: true,
-        email: null,
-        name: null,
-        authProvider: "unknown",
+        email: "admin@example.com",
+        name: "Admin One",
+        authProvider: "email",
       });
     });
   });

@@ -33,6 +33,7 @@ import {
   captureAuthPersistenceFallbackLazy,
   syncAnalyticsIdentityLazy,
 } from "../analytics/lazyTelemetry";
+import { mapFirebaseAuthProvider } from "../auth/authProvider";
 import { markAppCheckArmed, resetAppCheckArmedStateForTests } from "./appCheckArmedState";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
 import {
@@ -320,9 +321,9 @@ export function startAuthBootstrap(): void {
           uid: user.uid,
           isAnonymous: user.isAnonymous,
           isInternal: claimsLookAdmin(token.claims),
-          email: null,
-          name: null,
-          authProvider: "unknown",
+          email: user.email ?? null,
+          name: user.displayName ?? null,
+          authProvider: mapFirebaseAuthProvider(user.providerData[0]?.providerId),
         });
       })
       .catch(() => {
@@ -330,9 +331,9 @@ export function startAuthBootstrap(): void {
           uid: user.uid,
           isAnonymous: user.isAnonymous,
           isInternal: false,
-          email: null,
-          name: null,
-          authProvider: "unknown",
+          email: user.email ?? null,
+          name: user.displayName ?? null,
+          authProvider: mapFirebaseAuthProvider(user.providerData[0]?.providerId),
         });
       });
   });
