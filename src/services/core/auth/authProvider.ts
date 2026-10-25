@@ -1,11 +1,10 @@
-import { EmailAuthProvider, GoogleAuthProvider } from "firebase/auth";
-
 export type AnalyticsAuthProvider = "google" | "apple" | "email" | "unknown";
 
+/** Firebase Auth providerId strings (avoid importing firebase/auth so test mocks stay thin). */
 const BY_ID: Partial<Record<string, Exclude<AnalyticsAuthProvider, "unknown">>> = {
-  [GoogleAuthProvider.PROVIDER_ID]: "google",
+  "google.com": "google",
   "apple.com": "apple",
-  [EmailAuthProvider.PROVIDER_ID]: "email",
+  password: "email",
 };
 
 export function mapFirebaseAuthProvider(
