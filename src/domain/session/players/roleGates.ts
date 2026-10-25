@@ -1,15 +1,22 @@
 import type { SessionRecord } from "../../map/annotations";
+import type { CastleSiegeRoles, CastleSiegeTeamRole } from "../castleSiege/teamRole";
 import { isPlaceholderGameArea } from "../join/joinPreviewGameArea";
 import type { JoinRequestRole } from "./joinRequest";
 import type { PlayerRole } from "./playerRole";
 
+/** Classic keys (seeker/hider) and CS keys (teamA/teamB) coexist by session mode, not mixed on one session. */
 export type RoleGates = {
   version: 1;
   leaders: {
     seeker?: string;
     hider?: string;
+    teamA?: string;
+    teamB?: string;
   };
 };
+
+const CASTLE_SIEGE_PLAYING_TEAM_MAX = 4;
+const CASTLE_SIEGE_REFEREE_MAX = 1;
 
 export function isSessionRoleGated(
   session: Pick<SessionRecord, "roleGates"> | null | undefined,
@@ -130,4 +137,67 @@ export function isRolePasscodeRequired(
   }
 
   return joinRequiresRolePasscode(previewSession.memberRoles, role, uid, true);
+}
+
+export function countCastleSiegeSeat(
+  roles: CastleSiegeRoles | undefined,
+  seat: CastleSiegeTeamRole,
+): number {
+  if (!roles) {
+    return 0;
+  }
+
+  return Object.values(roles).filter((memberSeat) => memberSeat === seat).length;
+}
+
+export function joinRequiresCastleSiegePasscode(
+  roles: CastleSiegeRoles | undefined,
+  seat: CastleSiegeTeamRole,
+  uid: string | undefined,
+  occupancyKnown = true,
+): boolean {
+  const existingSeat = uid ? roles?.[uid] : undefined;
+  if (existingSeat === seat) {
+    return false;
+  }
+
+  if (seat === "observer" || seat === "referee") {
+    return true;
+  }
+
+  if (!occupancyKnown) {
+    return true;
+  }
+
+  return countCastleSiegeSeat(roles, seat) > 0;
+}
+
+export function isCastleSiegeSeatFull(
+  roles: CastleSiegeRoles | undefined,
+  seat: CastleSiegeTeamRole,
+): boolean {
+  if (seat === "observer") {
+    return false;
+  }
+
+  const count = countCastleSiegeSeat(roles, seat);
+  if (seat === "referee") {
+    return count >= CASTLE_SIEGE_REFEREE_MAX;
+  }
+
+  if (seat === "teamA" || seat === "teamB") {
+    return count >= CASTLE_SIEGE_PLAYING_TEAM_MAX;
+  }
+
+  return false;
+}
+
+export function buildRoleGatesForCastleSiegeHost(
+  hostUid: string,
+  hostSeat: "teamA" | "teamB",
+): RoleGates {
+  return {
+    version: 1,
+    leaders: { [hostSeat]: hostUid },
+  };
 }
