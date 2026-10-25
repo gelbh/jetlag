@@ -40,7 +40,7 @@ export function InsetRow({
   "aria-label"?: string;
 }) {
   const ink = tone === "halt" ? "var(--color-halt)" : "var(--color-field-ink)";
-  const iconColor = tone === "halt" ? "var(--color-halt)" : "var(--color-flag)";
+  const iconColor = tone === "halt" ? "var(--color-halt)" : "var(--color-field-ink)";
 
   const content = (
     <>
