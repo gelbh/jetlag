@@ -17,18 +17,20 @@ describe("SessionIslandSlots", () => {
     expect(labels[0]).toBe("Open settings");
   });
 
-  it("shows Codes when onOpenCodes is provided and opens on tap", () => {
+  it("shows Codes in More when onOpenCodes is provided and opens on tap", async () => {
     const onOpenCodes = vi.fn();
 
     renderWithAppUi(<SessionIslandSlots onOpenSettings={vi.fn()} onOpenCodes={onOpenCodes} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Open role codes" }));
+    fireEvent.click(screen.getByRole("button", { name: "More session tools" }));
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Open role codes" }));
     expect(onOpenCodes).toHaveBeenCalledTimes(1);
   });
 
-  it("hides Codes when onOpenCodes is omitted", () => {
+  it("hides Codes and More when onOpenCodes is omitted", () => {
     renderWithAppUi(<SessionIslandSlots onOpenSettings={vi.fn()} />);
 
+    expect(screen.queryByRole("button", { name: "More session tools" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Open role codes" })).not.toBeInTheDocument();
   });
 });

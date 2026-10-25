@@ -56,10 +56,10 @@ describe("ToolDock", () => {
     expect(screen.getByRole("button", { name: "Tentacles" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Thermometer" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Photo" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /More/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More question tools" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Pin" })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /More/i }));
+    fireEvent.click(screen.getByRole("button", { name: "More question tools" }));
     expect(await screen.findByRole("menuitemradio", { name: /Thermometer/i })).toBeInTheDocument();
     expect(screen.getByRole("menuitemradio", { name: /Photo/i })).toBeInTheDocument();
 
@@ -85,7 +85,7 @@ describe("ToolDock", () => {
     expect(onSelect).toHaveBeenCalledWith("pin");
   });
 
-  it("renders session island tools including Log", () => {
+  it("renders session island tools and demotes secondary actions behind More", async () => {
     const onOpenReportProblem = vi.fn();
     const onOpenSettings = vi.fn();
     const onOpenCodes = vi.fn();
@@ -104,11 +104,14 @@ describe("ToolDock", () => {
     );
 
     const sessionTools = screen.getByLabelText("Session tools");
-    fireEvent.click(within(sessionTools).getByRole("button", { name: "Report a problem" }));
     fireEvent.click(within(sessionTools).getByRole("button", { name: "Open settings" }));
-    fireEvent.click(within(sessionTools).getByRole("button", { name: "Open role codes" }));
     fireEvent.click(within(sessionTools).getByRole("button", { name: "Open chat" }));
-    fireEvent.click(within(sessionTools).getByRole("button", { name: "Open session log" }));
+    fireEvent.click(within(sessionTools).getByRole("button", { name: "More session tools" }));
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Report a problem" }));
+    fireEvent.click(within(sessionTools).getByRole("button", { name: "More session tools" }));
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Open role codes" }));
+    fireEvent.click(within(sessionTools).getByRole("button", { name: "More session tools" }));
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Open session log" }));
 
     expect(onOpenReportProblem).toHaveBeenCalledTimes(1);
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
@@ -117,13 +120,14 @@ describe("ToolDock", () => {
     expect(onOpenLog).toHaveBeenCalledTimes(1);
   });
 
-  it("omits Codes from session island when onOpenCodes is omitted", () => {
+  it("omits Codes from the session overflow when onOpenCodes is omitted", async () => {
     renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
 
     const sessionTools = screen.getByLabelText("Session tools");
-    expect(
-      within(sessionTools).queryByRole("button", { name: "Open role codes" }),
-    ).not.toBeInTheDocument();
+    fireEvent.click(within(sessionTools).getByRole("button", { name: "More session tools" }));
+    expect(await screen.findByRole("menu", { name: "More session tools" })).not.toHaveTextContent(
+      "Codes",
+    );
   });
 
   it("keeps Chat, Settings, and Draw off the hunt island", () => {
@@ -146,7 +150,7 @@ describe("ToolDock", () => {
     renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} hasUnreadChat unreadCount={1} />);
 
     expect(screen.getByRole("button", { name: "Open chat, unread messages" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /More/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More session tools" })).toBeInTheDocument();
     expect(document.querySelectorAll(".jl-unread-badge")).toHaveLength(1);
   });
 
@@ -154,7 +158,7 @@ describe("ToolDock", () => {
     renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} hasUnreadChat={false} />);
 
     expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /More/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More session tools" })).toBeInTheDocument();
     expect(document.querySelector(".jl-unread-badge")).toBeNull();
   });
 
@@ -204,8 +208,6 @@ describe("ToolDock", () => {
         "Radar",
         "Draw",
         "Chat",
-        "Log",
-        "Report",
         "Settings",
       ]),
     );
@@ -317,7 +319,7 @@ describe("ToolDock", () => {
     expect(document.querySelector(".border-highlight\\/70")).toBeNull();
     expect(document.querySelector(".bg-highlight\\/18")).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: /More/i }));
+    fireEvent.click(screen.getByRole("button", { name: "More question tools" }));
     const thermometer = await screen.findByRole("menuitemradio", { name: /Thermometer/i });
     expect(thermometer).toHaveAttribute("aria-checked", "false");
     fireEvent.click(thermometer);
@@ -343,7 +345,7 @@ describe("ToolDock", () => {
 });
 
 describe("HiderToolDock", () => {
-  it("keeps session tools on the session island without a bottom Recenter chip", () => {
+  it("keeps session tools on the session island without a bottom Recenter chip", async () => {
     const onOpenReportProblem = vi.fn();
     renderDock(
       <HiderToolDock
@@ -373,12 +375,11 @@ describe("HiderToolDock", () => {
 
     const sessionTools = screen.getByLabelText("Session tools");
     expect(within(sessionTools).getByRole("button", { name: "Open chat" })).toBeInTheDocument();
-    expect(
-      within(sessionTools).getByRole("button", { name: "Open session log" }),
-    ).toBeInTheDocument();
     expect(within(sessionTools).getByRole("button", { name: "Open settings" })).toBeInTheDocument();
+    fireEvent.click(within(sessionTools).getByRole("button", { name: "More session tools" }));
+    expect(await screen.findByRole("menuitem", { name: "Open session log" })).toBeInTheDocument();
 
-    fireEvent.click(within(sessionTools).getByRole("button", { name: "Report a problem" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Report a problem" }));
     expect(onOpenReportProblem).toHaveBeenCalledTimes(1);
     expect(document.querySelector(".jl-tool-dock-bar--secondary")).toBeNull();
   });
