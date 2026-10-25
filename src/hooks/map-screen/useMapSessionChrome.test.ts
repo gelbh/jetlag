@@ -500,7 +500,9 @@ describe("useMapSessionChrome", () => {
 
     expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
     expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
-    expect(mockTrackSessionEnded).toHaveBeenCalledWith("host_leave_ended");
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("host_leave_ended", {
+      gameId: "session-remote",
+    });
   });
 
   it("tracks fallback_client_end when host end falls back to client write", async () => {
@@ -527,7 +529,9 @@ describe("useMapSessionChrome", () => {
 
     expect(mockEndRemoteSession).toHaveBeenCalledWith("session-remote");
     expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
-    expect(mockTrackSessionEnded).toHaveBeenCalledWith("fallback_client_end");
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("fallback_client_end", {
+      gameId: "session-remote",
+    });
   });
 
   it("confirms promote copy when host leave has another player", async () => {
@@ -702,7 +706,9 @@ describe("useMapSessionChrome", () => {
     expect(mockCaptureException).not.toHaveBeenCalled();
     expect(alertSpy).not.toHaveBeenCalled();
     expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
-    expect(mockTrackSessionEnded).toHaveBeenCalledWith("expected_already_ended");
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("expected_already_ended", {
+      gameId: "session-remote",
+    });
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
     );
@@ -735,7 +741,9 @@ describe("useMapSessionChrome", () => {
     expect(mockCaptureException).not.toHaveBeenCalled();
     expect(mockEndRemoteSession).not.toHaveBeenCalled();
     expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
-    expect(mockTrackSessionEnded).toHaveBeenCalledWith("expected_already_ended");
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("expected_already_ended", {
+      gameId: "session-remote",
+    });
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "end", sessionId: "session-remote" }),
     );
@@ -774,7 +782,7 @@ describe("useMapSessionChrome", () => {
     expect(ensureSpy).not.toHaveBeenCalled();
     expect(mockLeaveHostSession).not.toHaveBeenCalled();
     expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
-    expect(mockTrackSessionEnded).toHaveBeenCalledWith("local");
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("local", { gameId: LOCAL_SESSION_ID });
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: LOCAL_SESSION_ID }),
     );

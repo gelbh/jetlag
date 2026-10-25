@@ -82,7 +82,7 @@ export function emitGameEndedActivity(
   });
   // Host end / leave paths track separately; ended_early must not double-fire.
   if (isGameOverAnalyticsOutcome(payload.outcome)) {
-    trackSessionEnded("game_over");
+    trackSessionEnded("game_over", { gameId: sessionId });
   }
 }
 
