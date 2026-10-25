@@ -1,4 +1,5 @@
 import { type RefObject } from "react";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
 import { type DistanceUnit } from "../../domain/map/distance";
 import {
@@ -56,6 +57,7 @@ export type MeasuringPanelModel = {
   targetPlaceName: string | null;
   distanceMeters: number | null;
   loading: boolean;
+  loadTask?: LoadTask | null;
   gpsLoading: boolean;
   searchQuery: string;
   searchResults: GeocodedPlace[];
@@ -108,6 +110,7 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
     targetPlaceName,
     distanceMeters,
     loading,
+    loadTask = null,
     gpsLoading,
     searchQuery,
     searchResults,
@@ -231,6 +234,7 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
             distanceMeters={distanceMeters}
             anchorAltitudeMeters={anchorAltitudeMeters}
             loading={loading}
+            loadTask={loadTask}
             searchQuery={searchQuery}
             searchLoading={searchLoading}
             distanceUnit={distanceUnit}

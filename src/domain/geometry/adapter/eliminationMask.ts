@@ -257,25 +257,31 @@ export function computeEliminationUnionInputTs(
   return { polygons, disks };
 }
 
+/** Called after each annotation; awaited, so the caller can yield to the browser between them. */
+export type UnionInputProgress = (done: number, total: number) => void | Promise<void>;
+
 export async function computeEliminationUnionInput(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
   draftFeatures: readonly PolygonFeature[] = [],
+  onProgress?: UnionInputProgress,
 ): Promise<EliminationUnionInput> {
   const polygons: PolygonFeature[] = [...draftFeatures];
   const disks: DiskSpec[] = [];
 
-  for (const annotation of annotations) {
+  for (const [index, annotation] of annotations.entries()) {
     const disk = eliminationDiskForAnnotation(annotation);
     if (disk) {
       disks.push(disk);
-      continue;
+    } else {
+      // react-doctor-disable-next-line react-doctor/async-await-in-loop -- sequential on purpose: progress yields to the main thread between annotations
+      const feature = await eliminationFeatureForAnnotation(annotation, gameArea);
+      if (feature) {
+        polygons.push(feature);
+      }
     }
-
-    const feature = await eliminationFeatureForAnnotation(annotation, gameArea);
-    if (feature) {
-      polygons.push(feature);
-    }
+    // react-doctor-disable-next-line react-doctor/async-await-in-loop -- the yield between annotations is the point: it lets the progress bar paint
+    await onProgress?.(index + 1, annotations.length);
   }
 
   return { polygons, disks };

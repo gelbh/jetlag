@@ -4,7 +4,10 @@ import { type CSSProperties, type ReactNode, useEffect } from "react";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
 import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineError";
 import { compactFilledStyles, mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
+import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
+import { useLoadTask } from "@/hooks/progress/useLoadTask";
 import { cn } from "@/lib/cn";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 
 export type AskMapPlacementPhase =
   | "locating"
@@ -27,6 +30,8 @@ export type AskMapPlacementChromeProps = {
   error?: string | null;
   statusTitle: string;
   statusBody: string;
+  /** While running, replaces the status body with a progress bar, stage and ETA. */
+  statusTask?: LoadTask | null;
   toolIcon: ReactNode;
   questionAriaLabel?: string;
   onChangeConfigure?: () => void;
@@ -169,6 +174,7 @@ export function AskMapPlacementChrome({
   error = null,
   statusTitle,
   statusBody,
+  statusTask = null,
   toolIcon,
   questionAriaLabel,
   onChangeConfigure,
@@ -184,6 +190,7 @@ export function AskMapPlacementChrome({
   const showSnap = showAnswer && showSnapLocation;
   const snapBusy = gpsLoading || isSubmitting;
   const showStatus = phase === "locating" || phase === "resolving";
+  const statusTaskRunning = useLoadTask(statusTask)?.status === "running";
   const failedErrorCopy = phase === "failed" && error ? askInlineErrorCopy(error) : null;
   const answerErrorCopy = phase === "answer" && error ? askInlineErrorCopy(error) : null;
 
@@ -339,12 +346,22 @@ export function AskMapPlacementChrome({
               >
                 {statusTitle}
               </p>
-              <p
-                className="m-0 mt-1 truncate text-sm font-medium leading-snug"
-                style={{ color: "var(--color-field-ink)" }}
-              >
-                {statusBody}
-              </p>
+              {statusTask ? (
+                <LoadProgress
+                  task={statusTask}
+                  variant="compact"
+                  compactDetail="stage"
+                  className="mt-1"
+                />
+              ) : null}
+              {statusTaskRunning ? null : (
+                <p
+                  className="m-0 mt-1 truncate text-sm font-medium leading-snug"
+                  style={{ color: "var(--color-field-ink)" }}
+                >
+                  {statusBody}
+                </p>
+              )}
             </div>
           </div>
         ) : null}

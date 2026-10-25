@@ -13,6 +13,7 @@ import {
   measuringTargetKind,
   measuringTargetLabel,
 } from "@/domain/questions";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { BinaryAnswerPicker } from "../answers/BinaryAnswerPicker";
 import { closerFurtherAnswerOptions } from "../answers/binaryAnswerOptions";
 import { SegmentedControl } from "../controls/SegmentedControl";
@@ -33,6 +34,8 @@ interface MeasuringTargetSectionProps {
   distanceMeters: number | null;
   anchorAltitudeMeters: number | null;
   loading: boolean;
+  /** Live progress for the anchor resolve; replaces the spinner while running. */
+  loadTask?: LoadTask | null;
   searchQuery: string;
   searchLoading: boolean;
   distanceUnit: DistanceUnit;
@@ -60,6 +63,7 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
     distanceMeters,
     anchorAltitudeMeters,
     loading,
+    loadTask = null,
     searchQuery,
     searchLoading,
     distanceUnit,
@@ -97,7 +101,9 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
   if (isCoastline) {
     return (
       <>
-        {loading ? <LoadingReadout>Finding coastline in the play area…</LoadingReadout> : null}
+        {loading ? (
+          <LoadingReadout task={loadTask}>Finding coastline in the play area…</LoadingReadout>
+        ) : null}
         {hasTargetPoint && distanceMeters !== null ? (
           <ResolvedReadout>
             Nearest coastline is {formatDistance(distanceMeters, distanceUnit)} away.
@@ -120,7 +126,9 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
     return (
       <>
         {loading ? (
-          <LoadingReadout>Reading elevation and shading the play area…</LoadingReadout>
+          <LoadingReadout task={loadTask}>
+            Reading elevation and shading the play area…
+          </LoadingReadout>
         ) : null}
         {hasTargetPoint && anchorAltitudeMeters !== null ? (
           <ResolvedReadout>
@@ -144,7 +152,9 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
     return (
       <>
         {loading ? (
-          <LoadingReadout>Finding {targetLabel.toLowerCase()} in the play area…</LoadingReadout>
+          <LoadingReadout task={loadTask}>
+            Finding {targetLabel.toLowerCase()} in the play area…
+          </LoadingReadout>
         ) : null}
         {hasTargetPoint && distanceMeters !== null ? (
           <ResolvedReadout>
@@ -169,7 +179,7 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
     return (
       <>
         {loading ? (
-          <LoadingReadout>
+          <LoadingReadout task={loadTask}>
             {anchorLoadingMessage ?? `Loading ${targetLabel.toLowerCase()}s in the play area…`}
           </LoadingReadout>
         ) : (

@@ -25,6 +25,7 @@ import {
   isPreviewQuestionBeforeSendEnabled,
 } from "@/domain/session/catalog/sessionCatalogAvailability";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
 import { adminBorderKindAvailability } from "@/services/geo/overpass/adminDivisionAvailability";
 import { measuringLinearNotFoundMessage } from "@/services/geo/overpass/measuringLinearFeatures";
@@ -58,6 +59,7 @@ export function useMeasuringDraftState(
   const [measuringDistanceMeters, setMeasuringDistanceMeters] = useState<number | null>(null);
   const [measuringAnswer, setMeasuringAnswer] = useState<MeasuringAnswer | null>(null);
   const [measuringLoading, setMeasuringLoading] = useState(false);
+  const [measuringLoadTask, setMeasuringLoadTask] = useState<LoadTask | null>(null);
   const [measuringError, setMeasuringError] = useState<string | null>(null);
   const [measuringCoastSegments, setMeasuringCoastSegments] = useState<Feature<LineString>[]>([]);
   const [coastlineContextVersion, setCoastlineContextVersion] = useState(0);
@@ -261,6 +263,8 @@ export function useMeasuringDraftState(
     setMeasuringAnswer,
     measuringLoading,
     setMeasuringLoading,
+    measuringLoadTask,
+    setMeasuringLoadTask,
     measuringError,
     setMeasuringError,
     measuringCoastSegments,

@@ -16,6 +16,7 @@ import {
   tentacleQuestionPrompt,
 } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { TentacleLocationsChord } from "./TentacleLocationsChord";
 import { tentacleCategoryIcon } from "./tentacleCategoryIcons";
 
@@ -35,6 +36,8 @@ export type TentacleHudBodyProps = {
   selectedPoiId: string | null;
   outOfReach: boolean;
   loading: boolean;
+  /** Live progress for the location search; replaces the spinner while running. */
+  loadTask?: LoadTask | null;
   awaitingPlacement: boolean;
   hasCenter: boolean;
   gpsLoading?: boolean;
@@ -62,6 +65,7 @@ export function TentacleHudBody({
   selectedPoiId,
   outOfReach,
   loading,
+  loadTask = null,
   awaitingPlacement,
   hasCenter,
   gpsLoading = false,
@@ -168,7 +172,7 @@ export function TentacleHudBody({
                 gpsLoadingLabel="Locating…"
               />
               {loading ? (
-                <LoadingReadout>
+                <LoadingReadout task={loadTask}>
                   {poiOptions.length > 0
                     ? `Confirming ${poiOptions.length} map preview${
                         poiOptions.length === 1 ? "" : "s"

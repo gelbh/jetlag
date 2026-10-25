@@ -1,8 +1,11 @@
+import type { ProgressNode } from "@/domain/progress/progressTree";
+import { stagePriorMs } from "@/domain/progress/stagePriors";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../geo/overpass/endpoints";
-import { withOverpassConcurrencyLimit } from "../../geo/overpass/requestQueue";
+import { type SlotRequest, withOverpassConcurrencyLimit } from "../../geo/overpass/requestQueue";
 import { buildPremiumProxyHeaders } from "../auth/accessControl";
 import { getFirebaseAuth } from "../firebase/firebase";
 import { waitForRestoredFirebaseAuth } from "../firebase/firebaseAuthReady";
+import { abortableSleep, throwIfAborted } from "../network/anySignal";
 import { FetchTimeoutError, fetchWithTimeout } from "../network/fetchWithTimeout";
 import { isOverpassHostCooled, recordOverpassHostCooldown } from "./overpassHostCooldown";
 
@@ -53,10 +56,18 @@ export function overpassErrorMessage(error: unknown, fallback = "Map data didn't
   return fallback;
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+export interface OverpassQueryOptions {
+  /** Cancels the request, its retries and backoff, and releases its pool slot. */
+  signal?: AbortSignal;
+  /** Pool lane; a getter is read live so a shared fetch can be promoted. */
+  priority?: SlotRequest["priority"];
+  /** Stage to drive: queued while waiting for a slot, finished on success. */
+  node?: ProgressNode;
+}
+
+interface AttemptContext {
+  signal?: AbortSignal;
+  onRetry?: (attempt: number) => void;
 }
 
 function retryDelayMs(attempt: number, retryAfterHeader: string | null): number {
@@ -132,11 +143,16 @@ function throwIfOverpassQueryTooExpensive(source: { status: number } | { error: 
   }
 }
 
-async function postOverpassQuery(endpoint: string, query: string): Promise<Response> {
+async function postOverpassQuery(
+  endpoint: string,
+  query: string,
+  signal?: AbortSignal,
+): Promise<Response> {
   return fetchWithTimeout(
     endpoint,
     {
       method: "POST",
+      signal,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
         "User-Agent": OVERPASS_USER_AGENT,
@@ -147,7 +163,8 @@ async function postOverpassQuery(endpoint: string, query: string): Promise<Respo
   );
 }
 
-async function fetchOverpassDirect(query: string): Promise<Response> {
+async function fetchOverpassDirect(query: string, context: AttemptContext = {}): Promise<Response> {
+  const { signal } = context;
   let lastError: Error | null = null;
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
@@ -159,7 +176,10 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
 
     for (let attempt = 0; attempt <= OVERPASS_MAX_RETRIES; attempt += 1) {
       try {
-        const response = await postOverpassQuery(endpoint, query);
+        if (attempt > 0) {
+          context.onRetry?.(attempt);
+        }
+        const response = await postOverpassQuery(endpoint, query, signal);
 
         if (response.ok) {
           return response;
@@ -175,7 +195,7 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
 
         if (isRetryableUpstreamOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
           lastError = new OverpassUnavailableError();
-          await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
+          await abortableSleep(retryDelayMs(attempt, response.headers.get("Retry-After")), signal);
           continue;
         }
 
@@ -190,6 +210,8 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
 
         throw new Error("Overpass query failed.");
       } catch (error) {
+        // A cancel must not retry, fail over, or read as "too expensive" (which splits).
+        throwIfAborted(signal);
         if (isNonRetryableOverpassFailure(error)) {
           throw error;
         }
@@ -202,7 +224,7 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
 
         lastError = new OverpassUnavailableError();
         if (attempt < OVERPASS_MAX_RETRIES) {
-          await sleep(retryDelayMs(attempt, null));
+          await abortableSleep(retryDelayMs(attempt, null), signal);
           continue;
         }
 
@@ -228,20 +250,29 @@ function proxyHeadersIncludeAuth(headers: HeadersInit): boolean {
   );
 }
 
-async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): Promise<Response> {
+async function fetchOverpassViaProxy(
+  query: string,
+  proxyHeaders: HeadersInit,
+  context: AttemptContext = {},
+): Promise<Response> {
+  const { signal } = context;
   const proxyUrl = overpassProxyUrl();
   if (!proxyUrl) {
-    return fetchOverpassDirect(query);
+    return fetchOverpassDirect(query, context);
   }
 
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= OVERPASS_PROXY_MAX_RETRIES; attempt += 1) {
     try {
+      if (attempt > 0) {
+        context.onRetry?.(attempt);
+      }
       const response = await fetchWithTimeout(
         proxyUrl,
         {
           method: "POST",
+          signal,
           headers: {
             "Content-Type": "application/json",
             ...proxyHeaders,
@@ -269,7 +300,7 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
 
       if (isRetryableProxyStatus(response.status) && attempt < OVERPASS_PROXY_MAX_RETRIES) {
         lastError = new OverpassUnavailableError();
-        await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
+        await abortableSleep(retryDelayMs(attempt, response.headers.get("Retry-After")), signal);
         continue;
       }
 
@@ -283,6 +314,7 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
 
       throw new Error("Overpass query failed.");
     } catch (error) {
+      throwIfAborted(signal);
       if (error instanceof OverpassUnavailableError || isNonRetryableOverpassFailure(error)) {
         throw error;
       }
@@ -295,7 +327,7 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
 
       lastError = new OverpassUnavailableError();
       if (attempt < OVERPASS_PROXY_MAX_RETRIES) {
-        await sleep(retryDelayMs(attempt, null));
+        await abortableSleep(retryDelayMs(attempt, null), signal);
         continue;
       }
     }
@@ -304,10 +336,10 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
   throw lastError ?? new OverpassUnavailableError();
 }
 
-async function fetchOverpass(query: string): Promise<Response> {
+async function fetchOverpass(query: string, context: AttemptContext = {}): Promise<Response> {
   const proxyUrl = overpassProxyUrl();
   if (!proxyUrl) {
-    return fetchOverpassDirect(query);
+    return fetchOverpassDirect(query, context);
   }
 
   let proxyHeaders = await buildPremiumProxyHeaders();
@@ -317,10 +349,10 @@ async function fetchOverpass(query: string): Promise<Response> {
   }
 
   if (!proxyHeadersIncludeAuth(proxyHeaders)) {
-    return fetchOverpassDirect(query);
+    return fetchOverpassDirect(query, context);
   }
 
-  let response = await fetchOverpassViaProxy(query, proxyHeaders);
+  let response = await fetchOverpassViaProxy(query, proxyHeaders, context);
   if (response.status !== 401) {
     return response;
   }
@@ -331,8 +363,9 @@ async function fetchOverpass(query: string): Promise<Response> {
   }
 
   await user.getIdToken(true);
+  throwIfAborted(context.signal);
   proxyHeaders = await buildPremiumProxyHeaders();
-  response = await fetchOverpassViaProxy(query, proxyHeaders);
+  response = await fetchOverpassViaProxy(query, proxyHeaders, context);
   if (response.status === 401 || response.status === 403) {
     throw new OverpassUnavailableError(
       "Map data unavailable. Rejoin session or create a new Premium session.",
@@ -342,15 +375,53 @@ async function fetchOverpass(query: string): Promise<Response> {
   return response;
 }
 
-export async function queryOverpass<T>(query: string): Promise<T> {
-  return withOverpassConcurrencyLimit(async () => {
-    const response = await fetchOverpass(query);
-    const text = await response.text();
+const QUEUE_LABEL = "Waiting for map server";
 
-    try {
-      return JSON.parse(text) as T;
-    } catch {
-      throw new Error("Overpass query returned an invalid response.");
+/** `position` counts the requests served before this one, so 0 means next. */
+export function queueLabel(position: number): string {
+  return position === 0 ? `${QUEUE_LABEL} (next)` : `${QUEUE_LABEL} (${position} ahead)`;
+}
+
+export async function queryOverpass<T>(
+  query: string,
+  options: OverpassQueryOptions = {},
+): Promise<T> {
+  const { signal, node } = options;
+  // The stage's own label (e.g. a bbox part) once it holds a slot; retries append to it
+  // and a failure restores it, so a later split never inherits "retrying".
+  let baseLabel: string | null = null;
+  const result = await withOverpassConcurrencyLimit(
+    async () => {
+      node?.start();
+      baseLabel = node?.label ?? null;
+      const response = await fetchOverpass(query, {
+        signal,
+        onRetry: (attempt) => node?.setLabel(`${baseLabel}, retrying (attempt ${attempt + 1})`),
+      });
+      const text = await response.text();
+      throwIfAborted(signal);
+
+      try {
+        return JSON.parse(text) as T;
+      } catch {
+        throw new Error("Overpass query returned an invalid response.");
+      }
+    },
+    {
+      priority: options.priority,
+      signal,
+      onQueuePosition: node
+        ? (position) =>
+            node.queue(queueLabel(position), (position + 1) * stagePriorMs("queue:overpass"))
+        : undefined,
+    },
+  ).catch((error: unknown) => {
+    if (node && baseLabel !== null) {
+      node.setLabel(baseLabel === node.spec.label ? null : baseLabel);
     }
+    throw error;
   });
+  node?.setLabel(null);
+  node?.finish();
+  return result;
 }

@@ -223,7 +223,7 @@ describe("gameAreaPreload", () => {
         category,
         [],
         "dublin",
-        undefined,
+        { priority: "background" },
       );
     }
   });
@@ -249,7 +249,7 @@ describe("gameAreaPreload", () => {
         category,
         [],
         "australia",
-        { subregionId: "nsw" },
+        { priority: "background", subregionId: "nsw" },
       );
     }
   });

@@ -6,6 +6,7 @@ import {
   isMatchingCategoryEnabled,
   type MatchingCategoryId,
 } from "@/domain/questions";
+import { isAbortError } from "@/services/core/network/anySignal";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
 import {
   countMatchingFeaturesInPlayArea,
@@ -166,6 +167,10 @@ export async function resolveMatchingAnchor(input: {
 
     return buildResolveMatchingAnchorResult(seekerPoint, categoryId, features);
   } catch (error) {
+    // Cancelled or superseded: the caller resets its own UI, so no error text.
+    if (isAbortError(error)) {
+      throw error;
+    }
     return {
       features: [],
       featureCount: 0,

@@ -417,6 +417,59 @@ describe("useTentacleTool", () => {
     });
   });
 
+  it("returns to the category step when the user cancels the location search", async () => {
+    // Stable rules: a fresh object each render would restart the search every render.
+    const sessionRules = { gameSize: "medium" as const };
+    vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([]);
+    vi.spyOn(tentacleOverpassModule, "fetchTentaclePois").mockImplementation(
+      (_center, _radius, _category, options) =>
+        new Promise((_resolve, reject) => {
+          options?.task?.signal.addEventListener("abort", () =>
+            reject(new DOMException("Cancelled.", "AbortError")),
+          );
+        }),
+    );
+
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useTentacleTool({
+        active: true,
+        annotations: [],
+        gameArea: mocks.gameArea,
+        sessionRules,
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: mocks.awaitingPlacement,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: mocks.armPlacement,
+      }),
+    );
+
+    act(() => {
+      result.current.panel.props.model.onCategoryChange("museum");
+    });
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+    await waitFor(() => expect(result.current.panel.props.model.loadTask).toBeTruthy());
+
+    await act(async () => {
+      result.current.panel.props.model.loadTask?.cancel();
+    });
+
+    await waitFor(() => {
+      expect(result.current.panel.props.model.categoryChosen).toBe(false);
+    });
+    expect(result.current.panel.props.model.loading).toBe(false);
+    expect(result.current.panel.props.model.error ?? null).toBeNull();
+  });
+
   it("seeds unavailable categories from play-area presence before pick", async () => {
     usePreloadStore.setState({
       categoryPresenceCounts: { museum: 0 },

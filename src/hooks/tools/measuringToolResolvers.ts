@@ -13,6 +13,7 @@ import type { RegionPackId } from "../../domain/regions/regionPack";
 import type { SessionCustomMeasureGeometry } from "../../domain/session/catalog/customMeasureGeometry";
 import { isCustomMeasureGeometryId } from "../../domain/session/catalog/customMeasureGeometry";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/catalog/sessionCustomContent";
+import type { LoadTask } from "../../services/core/progress/loadTask";
 import { loadSeaLevelContext, type SeaLevelContext } from "../../services/geo/elevation/seaLevel";
 import { loadCoastlineContext } from "../../services/geo/overpass/coastline";
 import { loadCustomMeasureGeometryContext } from "../../services/geo/overpass/customMeasureGeometryFeatures";
@@ -70,9 +71,11 @@ export async function fetchMeasuringSeaLevelContext(
   options?: {
     regionPackId?: RegionPackId;
     onEnrich?: (result: MeasuringSeaLevelResult) => void;
+    task?: LoadTask;
   },
 ): Promise<MeasuringSeaLevelResult> {
   const result = await loadSeaLevelContext(seekerPoint, gameArea, {
+    task: options?.task,
     regionPackId: options?.regionPackId,
     onEnrich: options?.onEnrich
       ? (context) => {
@@ -111,9 +114,13 @@ export async function fetchMeasuringCoastlineContext(
       distanceMeters: number;
       segments: Feature<LineString>[];
     }) => void;
+    task?: LoadTask;
+    createEnrichTask?: () => LoadTask;
   },
 ) {
   const result = await loadCoastlineContext(seekerPoint, gameArea, {
+    task: options?.task,
+    createEnrichTask: options?.createEnrichTask,
     regionPackId: options?.regionPackId,
     onEnrich: options?.onEnrich
       ? (prepared) => {
@@ -154,6 +161,7 @@ export async function fetchMeasuringLinearContext(
   customMeasureGeometries: readonly SessionCustomMeasureGeometry[] = [],
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
+  task?: LoadTask,
 ) {
   const kind = measuringFromKind(subject, locationCategory);
   if (!isMeasuringLinearLocation(subject, locationCategory)) {
@@ -194,6 +202,7 @@ export async function fetchMeasuringLinearContext(
     kind,
     customMatchingAreas,
     regionPackId,
+    task,
   );
   if (!result) {
     return {

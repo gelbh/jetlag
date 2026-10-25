@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
+import { isAbortError } from "@/services/core/network/anySignal";
+import {
+  createLoadTask,
+  type LoadTask,
+  publishNamedLoadTask,
+} from "@/services/core/progress/loadTask";
+import { HIDER_STATIONS_TASK } from "@/services/core/progress/namedTasks";
 import { commitWrite } from "@/services/firestore/commitWrite";
+import { overpassLoadFromTask } from "@/services/geo/overpass/overpassLoad";
 import { enqueueMoveTimerIntent } from "@/services/session/sessionIntents";
 import { expandBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
@@ -54,6 +62,44 @@ interface UseHiderZoneToolParams {
   consumeMoveCard?: () => Promise<void>;
 }
 
+type StationLoadOutcome =
+  | { status: "loaded"; stations: TransitStation[] }
+  | { status: "cancelled" }
+  | { status: "failed" };
+
+/**
+ * Runs the station search under `task` and never rejects. Kept outside the hook
+ * because React Compiler cannot compile try/finally inside a component or hook.
+ */
+async function loadStationsWithProgress(
+  viewport: MapViewportBounds,
+  gameArea: GameArea,
+  task: LoadTask,
+  callbacks: { onStations: (stations: TransitStation[]) => void; onSettled: () => void },
+): Promise<StationLoadOutcome> {
+  try {
+    const stations = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
+      onStations: callbacks.onStations,
+      load: overpassLoadFromTask(task, {
+        kind: "fetch",
+        label: "Searching map data",
+        historyKey: "overpass:stations",
+      }),
+    });
+    task.complete();
+    return { status: "loaded", stations };
+  } catch (error) {
+    if (isAbortError(error)) {
+      task.cancel();
+      return { status: "cancelled" };
+    }
+    task.fail(error);
+    return { status: "failed" };
+  } finally {
+    callbacks.onSettled();
+  }
+}
+
 export function useHiderZoneTool({
   sessionId,
   hiderUid,
@@ -88,7 +134,8 @@ export function useHiderZoneTool({
   const moveModeRef = useRef(false);
   const historyPushedRef = useRef(false);
 
-  const { beginRequest, cancelRequests, isLatestRequest, requestIdRef } = useLatestRequest();
+  const { beginRequest, cancelRequests, isLatestRequest, requestIdRef, requestSignal } =
+    useLatestRequest();
   const {
     beginRequest: beginSnapRequest,
     cancelRequests: cancelSnapRequests,
@@ -139,12 +186,20 @@ export function useHiderZoneTool({
     window.history.back();
   }, []);
 
+  // Clears this hook's published station task; also run on unmount.
+  const stationsClearRef = useRef<() => void>(() => {});
+  useEffect(() => () => stationsClearRef.current(), []);
+
   const searchStationsInArea = useCallback(
     async (viewport: MapViewportBounds) => {
       const requestId = beginRequest();
       setStationsLoading(true);
       setStationsError(null);
 
+      const task = createLoadTask({ label: "Loading stations", signal: requestSignal() });
+      stationsClearRef.current();
+      const clearPublished = publishNamedLoadTask(HIDER_STATIONS_TASK, task);
+      stationsClearRef.current = clearPublished;
       const applyStations = (loaded: TransitStation[]) => {
         if (!isLatestRequest(requestId) || loaded.length === 0) {
           return;
@@ -156,31 +211,29 @@ export function useHiderZoneTool({
         );
       };
 
-      try {
-        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
-          onStations: applyStations,
-        });
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
-        setStations(loaded);
-        setSelectedStation((current) =>
-          current && loaded.some((station) => station.id === current.id) ? current : null,
-        );
-      } catch {
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
+      const outcome = await loadStationsWithProgress(viewport, gameArea, task, {
+        onStations: applyStations,
+        // A superseded search must not clear the newer search's spinner.
+        onSettled: () => {
+          clearPublished();
+          setStationsLoading((loading) => (isLatestRequest(requestId) ? false : loading));
+        },
+      });
+      if (!isLatestRequest(requestId) || outcome.status === "cancelled") {
+        return;
+      }
+      if (outcome.status === "failed") {
         setStationsError("Couldn't load transit stations for this area.");
+        return;
       }
 
-      if (isLatestRequest(requestId)) {
-        setStationsLoading(false);
-      }
+      const loaded = outcome.stations;
+      setStations(loaded);
+      setSelectedStation((current) =>
+        current && loaded.some((station) => station.id === current.id) ? current : null,
+      );
     },
-    [beginRequest, gameArea, isLatestRequest],
+    [beginRequest, gameArea, isLatestRequest, requestSignal],
   );
 
   const filteredStations = useMemo(() => searchStations(query, stations), [query, stations]);

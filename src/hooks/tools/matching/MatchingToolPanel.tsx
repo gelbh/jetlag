@@ -9,6 +9,7 @@ import type {
   MatchingCategoryId,
   MatchingQuestionDefinition,
 } from "@/domain/questions";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 
 export type MatchingToolPanelModel = {
   distanceUnit: DistanceUnit;
@@ -27,6 +28,8 @@ export type MatchingToolPanelModel = {
   matchingNearestOutsidePlayArea: boolean;
   matchingNullAnswer: boolean;
   matchingLoading: boolean;
+  matchingLoadTask?: LoadTask | null;
+  matchingEnrichTask?: LoadTask | null;
   nearestProvisional?: boolean;
   satelliteBasemap?: boolean;
   gpsLoading: boolean;
@@ -69,6 +72,8 @@ export function MatchingToolPanel({ model }: MatchingToolPanelProps) {
     matchingNearestOutsidePlayArea,
     matchingNullAnswer,
     matchingLoading,
+    matchingLoadTask = null,
+    matchingEnrichTask = null,
     nearestProvisional = false,
     satelliteBasemap = false,
     gpsLoading,
@@ -111,6 +116,8 @@ export function MatchingToolPanel({ model }: MatchingToolPanelProps) {
           nearestOutsidePlayArea: matchingNearestOutsidePlayArea,
           nullAnswer: matchingNullAnswer,
           loading: matchingLoading,
+          loadTask: matchingLoadTask,
+          enrichTask: matchingEnrichTask,
           nearestProvisional,
           satelliteBasemap,
           gpsLoading,

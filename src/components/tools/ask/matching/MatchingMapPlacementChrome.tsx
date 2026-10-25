@@ -15,6 +15,7 @@ import {
   mapChromeSurfaceStyles,
 } from "@/components/ui/entry/entryChrome";
 import type { MatchingAnswer } from "@/domain/questions";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 
 export type MatchingMapPlacementPhase = AskMapPlacementPhase;
 
@@ -26,6 +27,8 @@ export type MatchingMapPlacementChromeProps = {
   onUseGps: () => void;
   gpsLoading?: boolean;
   error?: string | null;
+  /** Live progress for the resolve shown in the status card. */
+  loadTask?: LoadTask | null;
   nearestPlaceName?: string | null;
   awaitHiderAnswer?: boolean;
   nearestSummary?: string | null;
@@ -101,6 +104,7 @@ export function MatchingMapPlacementChrome({
   onUseGps,
   gpsLoading = false,
   error = null,
+  loadTask = null,
   nearestPlaceName = null,
   awaitHiderAnswer = false,
   nearestSummary = null,
@@ -239,6 +243,7 @@ export function MatchingMapPlacementChrome({
       error={error}
       statusTitle={statusTitle}
       statusBody={statusBody}
+      statusTask={loadTask}
       toolIcon={<HudMatchingIcon width={20} height={20} />}
       questionAriaLabel="Matching question"
       onChangeConfigure={onChangeCategory}

@@ -1,3 +1,5 @@
+import { anySignal, throwIfAborted } from "./anySignal";
+
 export const GEO_FETCH_TIMEOUT_MS = 15_000;
 
 export class FetchTimeoutError extends Error {
@@ -21,16 +23,22 @@ export async function fetchAndReadWithTimeout<T>(
   timeoutMs: number,
   read: (response: Response) => Promise<T>,
 ): Promise<T> {
+  const outerSignal = init?.signal ?? undefined;
+  throwIfAborted(outerSignal);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const combined = anySignal([controller.signal, outerSignal]);
 
   try {
     const response = await fetch(input, {
       ...init,
-      signal: controller.signal,
+      signal: combined.signal,
     });
     return await read(response);
   } catch (error) {
+    // A caller abort is a cancel, not a timeout: Overpass treats timeouts as
+    // "query too expensive" and would split the bbox into more requests.
+    throwIfAborted(outerSignal);
     if (controller.signal.aborted) {
       throw new FetchTimeoutError(timeoutMs);
     }
@@ -38,6 +46,8 @@ export async function fetchAndReadWithTimeout<T>(
     throw error;
   } finally {
     clearTimeout(timeoutId);
+    // Long-lived task signals would otherwise collect one listener per fetch.
+    combined.dispose();
   }
 }
 

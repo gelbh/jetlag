@@ -12,16 +12,20 @@ import {
 import { runUnionPolygonFeatures } from "@/domain/geometry/kernel/unionKernelRunner";
 import { dispatchGeodesicLineBuffer } from "@/domain/geometry/measuring/geodesicLineBuffer";
 import type { GameArea } from "@/domain/map/annotations";
+import type { ProgressNode } from "@/domain/progress/progressTree";
 import type { RegionPackId } from "@/domain/regions/regionPack";
-import { queryOverpass } from "../../core/overpass/overpassClient";
+import { yieldToMain } from "../../core/progress/yieldToMain";
 import { getOrFetchCached, landmassCacheKey } from "../cache";
 import { isBundledAdminRegionPack } from "./adminDivisionAvailability";
 import { type AdminDivisionFeature, classifyAdminDivisionAtPoint } from "./adminDivisionBoundaries";
+import { mergeOverpassElementPayloads, type OverpassBbox } from "./overpassBboxSplit";
 import {
-  mergeOverpassElementPayloads,
-  type OverpassBbox,
-  queryOverpassWithBboxSplit,
-} from "./overpassBboxSplit";
+  cachedFetchOptions,
+  type OverpassLoad,
+  overpassLoadFromFetch,
+  overpassSearchStage,
+  queryOverpassSplitLoaded,
+} from "./overpassLoad";
 
 export type LandmassFeature = AdminDivisionFeature;
 
@@ -298,26 +302,61 @@ export function buildLandmassQuery(gameArea: GameArea): string {
   return buildLandmassQueryForBbox(gameAreaToBoundingBox(gameArea));
 }
 
+const LANDMASS_GROUP_STAGE = {
+  kind: "group",
+  label: "Finding landmasses",
+  historyKey: "matching:landmass",
+} as const;
+
+const LANDMASS_COMPUTE_STAGE = {
+  kind: "compute",
+  label: "Working out landmasses",
+  historyKey: "compute:landmass-union",
+} as const;
+
+async function computeLandmassStage(
+  node: ProgressNode,
+  gameArea: GameArea,
+  elements: OverpassElement[],
+): Promise<LandmassFeature[]> {
+  const compute = node.stage(LANDMASS_COMPUTE_STAGE).start();
+  // Let the stage label paint before the main-thread union.
+  await yieldToMain();
+  const features = await computeLandmassFeatures(gameArea, elements);
+  compute.finish();
+  return features;
+}
+
 export async function fetchLandmassFeaturesInArea(
   gameArea: GameArea,
   regionPackId?: RegionPackId,
+  load?: OverpassLoad,
 ): Promise<LandmassFeature[]> {
+  const options = cachedFetchOptions(load, LANDMASS_GROUP_STAGE);
   if (isBundledAdminRegionPack(regionPackId)) {
-    return getOrFetchCached(landmassCacheKey(gameArea, regionPackId), async () =>
-      computeLandmassFeatures(gameArea, []),
+    return getOrFetchCached(
+      landmassCacheKey(gameArea, regionPackId),
+      async (context) => computeLandmassStage(context.node, gameArea, []),
+      options,
     );
   }
 
-  return getOrFetchCached(landmassCacheKey(gameArea, regionPackId), async () => {
-    const payload = await queryOverpassWithBboxSplit(
-      buildLandmassQueryForBbox,
-      gameAreaToBoundingBox(gameArea),
-      (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
-      mergeOverpassElementPayloads,
-    );
+  const bbox = gameAreaToBoundingBox(gameArea);
+  return getOrFetchCached(
+    landmassCacheKey(gameArea, regionPackId),
+    async (context) => {
+      const search = context.node.stage(overpassSearchStage("overpass:landmass", bbox));
+      const payload = await queryOverpassSplitLoaded<{ elements: OverpassElement[] }>(
+        buildLandmassQueryForBbox,
+        bbox,
+        mergeOverpassElementPayloads,
+        { ...overpassLoadFromFetch(context), node: search },
+      );
 
-    return computeLandmassFeatures(gameArea, payload.elements);
-  });
+      return computeLandmassStage(context.node, gameArea, payload.elements);
+    },
+    options,
+  );
 }
 
 export function classifyLandmassAtPoint(

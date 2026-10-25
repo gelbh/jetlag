@@ -8,6 +8,7 @@ import type {
 } from "../../domain/map/transit";
 import { queryOverpass } from "../core/overpass/overpassClient";
 import { getOrFetchCached, staticTransitCacheKey } from "../geo/cache";
+import { cachedFetchOptions, type OverpassLoad } from "../geo/overpass/overpassLoad";
 import { buildTransitStopOverpassQuery, transitStopDisplayName } from "./transitStops";
 
 const MAX_STOPS = 250;
@@ -89,57 +90,71 @@ function parseRoute(element: {
   };
 }
 
-export async function fetchStaticTransit(gameArea: GameArea): Promise<TransitStaticData> {
-  return getOrFetchCached(staticTransitCacheKey(gameArea), async () => {
-    const bounds = gameAreaToBoundingBox(gameArea);
-    const [stopsPayload, routesPayload] = await Promise.all([
-      queryOverpass<{
-        elements: Array<{
-          id: number;
-          type: "node" | "way";
-          lat?: number;
-          lon?: number;
-          tags?: Record<string, string>;
-          geometry?: Array<{ lat: number; lon: number }>;
-        }>;
-      }>(buildStaticTransitStopsQuery(bounds)),
-      queryOverpass<{
-        elements: Array<{
-          id: number;
-          type: "node" | "way";
-          lat?: number;
-          lon?: number;
-          tags?: Record<string, string>;
-          geometry?: Array<{ lat: number; lon: number }>;
-        }>;
-      }>(buildStaticTransitRoutesQuery(bounds)),
-    ]);
+const STATIC_TRANSIT_STAGE = {
+  kind: "fetch",
+  label: "Loading transit data",
+  historyKey: "overpass:transit",
+} as const;
 
-    const stops: TransitStop[] = [];
-    const routes: TransitRouteLine[] = [];
+export async function fetchStaticTransit(
+  gameArea: GameArea,
+  load?: OverpassLoad,
+): Promise<TransitStaticData> {
+  return getOrFetchCached(
+    staticTransitCacheKey(gameArea),
+    async (context) => {
+      const lane = { signal: context.signal, priority: context.priority };
+      const bounds = gameAreaToBoundingBox(gameArea);
+      const [stopsPayload, routesPayload] = await Promise.all([
+        queryOverpass<{
+          elements: Array<{
+            id: number;
+            type: "node" | "way";
+            lat?: number;
+            lon?: number;
+            tags?: Record<string, string>;
+            geometry?: Array<{ lat: number; lon: number }>;
+          }>;
+        }>(buildStaticTransitStopsQuery(bounds), lane),
+        queryOverpass<{
+          elements: Array<{
+            id: number;
+            type: "node" | "way";
+            lat?: number;
+            lon?: number;
+            tags?: Record<string, string>;
+            geometry?: Array<{ lat: number; lon: number }>;
+          }>;
+        }>(buildStaticTransitRoutesQuery(bounds), lane),
+      ]);
 
-    for (const element of stopsPayload.elements) {
-      if (element.type === "node" && stops.length < MAX_STOPS) {
-        const stop = parseStop(element);
-        if (stop) {
-          stops.push(stop);
+      const stops: TransitStop[] = [];
+      const routes: TransitRouteLine[] = [];
+
+      for (const element of stopsPayload.elements) {
+        if (element.type === "node" && stops.length < MAX_STOPS) {
+          const stop = parseStop(element);
+          if (stop) {
+            stops.push(stop);
+          }
         }
       }
-    }
 
-    for (const element of routesPayload.elements) {
-      if (element.type === "way" && routes.length < MAX_ROUTES) {
-        const route = parseRoute(element);
-        if (route) {
-          routes.push(route);
+      for (const element of routesPayload.elements) {
+        if (element.type === "way" && routes.length < MAX_ROUTES) {
+          const route = parseRoute(element);
+          if (route) {
+            routes.push(route);
+          }
         }
       }
-    }
 
-    return {
-      stops,
-      routes,
-      fetchedAt: new Date().toISOString(),
-    };
-  });
+      return {
+        stops,
+        routes,
+        fetchedAt: new Date().toISOString(),
+      };
+    },
+    cachedFetchOptions(load, STATIC_TRANSIT_STAGE),
+  );
 }
