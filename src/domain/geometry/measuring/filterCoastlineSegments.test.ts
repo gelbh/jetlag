@@ -43,6 +43,18 @@ describe("filterCoastlineSegmentsForMeasuring", () => {
     expect(filterCoastlineSegmentsForMeasuring([harbourLoop], bbox)).toEqual([]);
   });
 
+  it("keeps a short closed ring whose side crosses the bbox edge", () => {
+    const crossingLoop = segment("crossing-loop", [
+      [-0.0001, 0.4],
+      [0.0001, 0.4],
+      [0.0001, 0.4001],
+      [-0.0001, 0.4001],
+      [-0.0001, 0.4],
+    ]);
+
+    expect(filterCoastlineSegmentsForMeasuring([crossingLoop], bbox)).toEqual([crossingLoop]);
+  });
+
   it("keeps open ways and closed rings that reach the bbox edge", () => {
     const openWay = segment("open", [
       [0.2, 0.2],
