@@ -60,6 +60,30 @@ function applyRoleLeaderPromotionOnLeave(uid, role, roleGates, memberUids, membe
   };
 }
 
+function applyCastleSiegeLeaderPromotionOnLeave(uid, castleSiegeRoles, roleGates, memberUids) {
+  if (!castleSiegeRoles || typeof castleSiegeRoles !== "object") {
+    return { roleGates, clearSecretSeat: null };
+  }
+
+  const seat = castleSiegeRoles[uid];
+  if (seat !== "teamA" && seat !== "teamB") {
+    return { roleGates, clearSecretSeat: null };
+  }
+
+  if (roleGates?.leaders?.[seat] !== uid) {
+    return { roleGates, clearSecretSeat: null };
+  }
+
+  const remainingCastleRoles = { ...castleSiegeRoles };
+  delete remainingCastleRoles[uid];
+  const promoted = promoteOrClearRoleLeader(roleGates, memberUids, remainingCastleRoles, seat, uid);
+
+  return {
+    roleGates: promoted.roleGates,
+    clearSecretSeat: promoted.clearSecret ? seat : null,
+  };
+}
+
 /**
  * Shared remove-member → promote role leader → optional secret clear.
  * Callers must read session + secrets before invoking, then write once.
@@ -86,6 +110,14 @@ export function applyGatedMemberRemoval({ uid, data, secrets }) {
   );
   roleGates = leaderUpdate.roleGates;
 
+  const castleLeaderUpdate = applyCastleSiegeLeaderPromotionOnLeave(
+    uid,
+    data.castleSiegeRoles,
+    roleGates,
+    withoutMember.memberUids,
+  );
+  roleGates = castleLeaderUpdate.roleGates;
+
   const sessionUpdate = {
     memberUids: withoutMember.memberUids,
     memberRoles: withoutMember.memberRoles,
@@ -93,10 +125,17 @@ export function applyGatedMemberRemoval({ uid, data, secrets }) {
     roleGates,
   };
 
+  const secretKeysToClear = [
+    leaderUpdate.clearSecretRole,
+    castleLeaderUpdate.clearSecretSeat,
+  ].filter((key) => typeof key === "string");
+
   let nextSecrets = null;
-  if (leaderUpdate.clearSecretRole && secrets) {
+  if (secretKeysToClear.length > 0 && secrets) {
     nextSecrets = { ...secrets };
-    delete nextSecrets[leaderUpdate.clearSecretRole];
+    for (const key of secretKeysToClear) {
+      delete nextSecrets[key];
+    }
   }
 
   return {
@@ -104,7 +143,7 @@ export function applyGatedMemberRemoval({ uid, data, secrets }) {
     withoutMember,
     sessionUpdate,
     nextSecrets,
-    clearSecretRole: leaderUpdate.clearSecretRole,
+    clearSecretRole: leaderUpdate.clearSecretRole ?? castleLeaderUpdate.clearSecretSeat,
   };
 }
 

@@ -104,6 +104,43 @@ test("reveal returns code for role leader with overlapped reads", async () => {
   assert.ok(db.readOrder.includes("secrets"));
 });
 
+test("reveal returns teamA code for CS team leader", async () => {
+  const secret = newRoleSecret();
+  const sessionData = {
+    mode: "castleSiege",
+    hostUid: "host",
+    memberRoles: { host: "observer" },
+    castleSiegeRoles: { leader: "teamA", host: "teamA" },
+    roleGates: { version: 1, leaders: { teamA: "leader" } },
+  };
+  const db = buildMockDb({ sessionData, secrets: { teamA: secret } });
+
+  const result = await revealRolePasscodeHandler(db, "leader", "sess-1", "teamA");
+
+  assert.equal(result.role, "teamA");
+  assert.equal(result.rolePasscode, secret.code);
+});
+
+test("reveal observer for CS host only", async () => {
+  const secret = newRoleSecret();
+  const sessionData = {
+    mode: "castleSiege",
+    hostUid: "host",
+    memberRoles: { host: "observer" },
+    castleSiegeRoles: { host: "teamA" },
+    roleGates: { version: 1, leaders: { teamA: "host" } },
+  };
+  const db = buildMockDb({ sessionData, secrets: { observer: secret } });
+
+  const result = await revealRolePasscodeHandler(db, "host", "sess-1", "observer");
+  assert.equal(result.rolePasscode, secret.code);
+
+  await assert.rejects(
+    () => revealRolePasscodeHandler(db, "guest", "sess-1", "observer"),
+    (error) => error instanceof Error && error.message === REVEAL_NOT_AUTHORIZED,
+  );
+});
+
 test("regenerate rotates verify code for leader", async () => {
   const secret = newRoleSecret();
   const sessionData = {

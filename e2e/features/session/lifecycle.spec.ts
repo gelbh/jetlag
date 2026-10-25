@@ -69,7 +69,6 @@ test.describe("session lifecycle", () => {
     await prepareE2EPage(page);
     await page.goto("/join");
     await page.getByPlaceholder("ABCD").fill("ZZZZ");
-    await page.getByRole("button", { name: "Join session" }).click();
     await expect(page.getByText(/No session found/i)).toBeVisible({
       timeout: 15_000,
     });

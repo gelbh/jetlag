@@ -43,11 +43,14 @@ import {
   JOIN_REQ_SIDE_EMPTY,
 } from "../../session/joinRequest.mjs";
 import {
+  JOIN_CS_ROLE_REQUIRED,
   JOIN_HEAL_PROOF_INVALID,
   JOIN_HEAL_ROLE_MISMATCH,
   JOIN_INCOMPATIBLE_VERSION,
   JOIN_NOT_GATED,
   JOIN_PASSCODE_REQUIRED,
+  JOIN_ROLE_MODE_MISMATCH,
+  JOIN_SEAT_FULL,
   JOIN_SESSION_ENDED,
   JOIN_SESSION_NOT_FOUND,
   JOIN_WRONG_PASSCODE,
@@ -97,9 +100,18 @@ export function requireAuthSessionId(request) {
   return { uid: request.auth.uid, sessionId };
 }
 
+const VALID_CALLABLE_SESSION_ROLES = new Set([
+  "seeker",
+  "hider",
+  "observer",
+  "teamA",
+  "teamB",
+  "referee",
+]);
+
 export function requireSessionRole(request) {
   const role = request.data?.role;
-  if (role !== "seeker" && role !== "hider" && role !== "observer") {
+  if (!VALID_CALLABLE_SESSION_ROLES.has(role)) {
     throw new HttpsError("invalid-argument", "role is required.");
   }
   return role;
@@ -148,6 +160,15 @@ export function mapJoinSessionWithRoleError(error) {
   }
   if (error.message === JOIN_HEAL_PROOF_INVALID) {
     throw new HttpsError("failed-precondition", HTTPS_MSG_HEAL_PROOF_INVALID);
+  }
+  if (error.message === JOIN_CS_ROLE_REQUIRED) {
+    throw new HttpsError("invalid-argument", "Pick a Castle Siege seat to join.");
+  }
+  if (error.message === JOIN_ROLE_MODE_MISMATCH) {
+    throw new HttpsError("invalid-argument", "That role is not available for this session.");
+  }
+  if (error.message === JOIN_SEAT_FULL) {
+    throw new HttpsError("failed-precondition", "That seat is full.");
   }
   throwIfClientUpdateRequired(error);
   throw error;

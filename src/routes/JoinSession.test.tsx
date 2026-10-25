@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionRecord } from "@/domain/map/annotations";
@@ -15,6 +15,7 @@ const previewState = vi.hoisted(() => ({
     previewPremium: false,
     lookupLoading: false,
     existingRole: null as PlayerRole | null,
+    existingCastleSiegeRole: null,
   },
 }));
 
@@ -47,6 +48,7 @@ beforeEach(() => {
     previewPremium: false,
     lookupLoading: false,
     existingRole: null,
+    existingCastleSiegeRole: null,
   };
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
@@ -68,21 +70,28 @@ beforeEach(() => {
   );
 });
 
+function advanceToPasscodeStep() {
+  fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+  fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+  fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+  fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+}
+
 describe("JoinSession", () => {
-  it("renders session code field and Join submit control", () => {
+  it("renders session code field and step continue control", () => {
     renderJoin();
 
     expect(screen.getByLabelText(/session code/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /join session/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^continue$/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^join$/i })).toBeInTheDocument();
   });
 
-  it("disables Join while the session preview is loading", () => {
+  it("disables Continue while the session preview is loading", () => {
     previewState.value = { ...previewState.value, lookupLoading: true };
 
     renderJoin();
 
-    expect(screen.getByRole("button", { name: /join session/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^continue$/i })).toBeDisabled();
   });
 
   it("asks for a teammate's code when the chosen side is occupied", () => {
@@ -92,6 +101,7 @@ describe("JoinSession", () => {
     };
 
     renderJoin();
+    advanceToPasscodeStep();
 
     expect(screen.getByText("Ask a teammate on that side for the role code.")).toBeInTheDocument();
     expect(screen.queryByText(/Leave it blank only if/)).not.toBeInTheDocument();
@@ -107,11 +117,30 @@ describe("JoinSession", () => {
     };
 
     renderJoin();
+    advanceToPasscodeStep();
 
     expect(
       screen.getByText(
         "If anyone is already on that side, ask them for the role code. Leave it blank only if you know you're first.",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("shows Castle Siege seat picker on the seat step", () => {
+    previewState.value = {
+      ...previewState.value,
+      previewSession: createTestRemoteSession({
+        mode: "castleSiege",
+        seriesLength: 3,
+      }),
+    };
+
+    renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+    fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+    expect(screen.getByText("Castle Siege")).toBeInTheDocument();
+    expect(screen.getByText("Best of 3")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+    expect(screen.getByRole("radiogroup", { name: /Castle Siege seat/i })).toBeInTheDocument();
   });
 });

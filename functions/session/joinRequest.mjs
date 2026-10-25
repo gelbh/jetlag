@@ -4,9 +4,12 @@ import {
   assertClientMeetsGlobalMin,
   resolveClientMinVersion,
 } from "./clientMinVersion.mjs";
+import { JOIN_SEAT_FULL } from "./joinSessionWithRole.mjs";
 import {
   buildMembershipHealState,
+  countCastleSiegeSeat,
   countMembersWithRole,
+  isCastleSiegeSeatFull,
   isRoleGatedSession,
   promoteOrClearRoleLeader,
   readMembershipFields,
@@ -26,7 +29,17 @@ export const JOIN_REQ_NOT_REQUESTER = "JOIN_REQ_NOT_REQUESTER";
 export const JOIN_REQ_NOT_AUTHORIZED = "JOIN_REQ_NOT_AUTHORIZED";
 export const JOIN_REQ_INVALID_DECISION = "JOIN_REQ_INVALID_DECISION";
 
-const VALID_JOIN_REQUEST_ROLES = new Set(["seeker", "hider", "observer"]);
+const VALID_JOIN_REQUEST_ROLES = new Set([
+  "seeker",
+  "hider",
+  "observer",
+  "teamA",
+  "teamB",
+  "referee",
+]);
+
+const CASTLE_SIEGE_JOIN_REQUEST_ROLES = new Set(["teamA", "teamB", "referee", "observer"]);
+const CLASSIC_JOIN_REQUEST_ROLES = new Set(["seeker", "hider", "observer"]);
 
 export function computeJoinRequestExpiresAt(createdAtMs) {
   return new Date(createdAtMs + JOIN_REQUEST_TTL_MS).toISOString();
@@ -88,8 +101,28 @@ function assertSessionJoinable(data) {
   }
 }
 
+function readCastleSiegeRoles(data) {
+  return data.castleSiegeRoles && typeof data.castleSiegeRoles === "object"
+    ? { ...data.castleSiegeRoles }
+    : {};
+}
+
+function assertJoinRequestRoleForSession(data, role) {
+  const isCastleSiege = data.mode === "castleSiege";
+  if (isCastleSiege) {
+    if (!CASTLE_SIEGE_JOIN_REQUEST_ROLES.has(role)) {
+      throw new Error(JOIN_REQ_INVALID_ROLE);
+    }
+    return;
+  }
+
+  if (!CLASSIC_JOIN_REQUEST_ROLES.has(role)) {
+    throw new Error(JOIN_REQ_INVALID_ROLE);
+  }
+}
+
 function assertCanApproveRole(data, uid, role) {
-  if (role === "observer") {
+  if (role === "observer" || role === "referee") {
     if (data.hostUid !== uid) {
       throw new Error(JOIN_REQ_NOT_AUTHORIZED);
     }
@@ -98,11 +131,62 @@ function assertCanApproveRole(data, uid, role) {
 
   const leaders =
     data.roleGates && typeof data.roleGates === "object" ? (data.roleGates.leaders ?? {}) : {};
+
+  if (data.mode === "castleSiege") {
+    const castleSiegeRoles = readCastleSiegeRoles(data);
+    const memberSeat = castleSiegeRoles[uid];
+    if (role !== "teamA" && role !== "teamB") {
+      throw new Error(JOIN_REQ_INVALID_ROLE);
+    }
+    if (leaders[role] !== uid || memberSeat !== role) {
+      throw new Error(JOIN_REQ_NOT_AUTHORIZED);
+    }
+    return;
+  }
+
   const memberRole =
     data.memberRoles && typeof data.memberRoles === "object" ? data.memberRoles[uid] : undefined;
 
   if (leaders[role] !== uid || memberRole !== role) {
     throw new Error(JOIN_REQ_NOT_AUTHORIZED);
+  }
+}
+
+function applyCsLeaderPromotionOnSeatSwitch({
+  uid,
+  currentSeat,
+  roleGates,
+  memberUids,
+  castleSiegeRoles,
+}) {
+  if (currentSeat !== "teamA" && currentSeat !== "teamB") {
+    return { roleGates, clearSecret: false };
+  }
+
+  if (roleGates?.leaders?.[currentSeat] !== uid) {
+    return { roleGates, clearSecret: false };
+  }
+
+  const promoted = promoteOrClearRoleLeader(
+    roleGates,
+    memberUids,
+    castleSiegeRoles,
+    currentSeat,
+    uid,
+  );
+  return {
+    roleGates: promoted.roleGates,
+    clearSecret: promoted.clearSecret,
+  };
+}
+
+function assertCastleSiegeSeatCapacity(castleSiegeRoles, seat, uid) {
+  if (castleSiegeRoles[uid] === seat) {
+    return;
+  }
+
+  if (isCastleSiegeSeatFull(castleSiegeRoles, seat)) {
+    throw new Error(JOIN_SEAT_FULL);
   }
 }
 
@@ -158,10 +242,18 @@ export async function requestRoleJoinHandler(db, auth, _authAdmin, rawInput, now
 
   const data = sessionSnap.data() ?? {};
   assertSessionJoinable(data);
+  assertJoinRequestRoleForSession(data, role);
 
   const { memberRoles } = readMembershipFields(data);
   if (role === "seeker" || role === "hider") {
     if (countMembersWithRole(memberRoles, role) === 0) {
+      throw new Error(JOIN_REQ_SIDE_EMPTY);
+    }
+  }
+
+  if (data.mode === "castleSiege" && (role === "teamA" || role === "teamB")) {
+    const castleSiegeRoles = readCastleSiegeRoles(data);
+    if (countCastleSiegeSeat(castleSiegeRoles, role) === 0) {
       throw new Error(JOIN_REQ_SIDE_EMPTY);
     }
   }
@@ -270,6 +362,7 @@ export async function resolveRoleJoinRequestHandler(db, auth, rawInput, nowMs = 
     if (!VALID_JOIN_REQUEST_ROLES.has(role)) {
       throw new Error(JOIN_REQ_INVALID_ROLE);
     }
+    assertJoinRequestRoleForSession(data, role);
 
     assertCanApproveRole(data, uid, role);
 
@@ -313,51 +406,113 @@ export async function resolveRoleJoinRequestHandler(db, auth, rawInput, nowMs = 
     const secrets = secretsSnap.exists ? { ...secretsSnap.data() } : {};
     let secretsChanged = false;
 
-    const currentRole = memberRoles[requesterUid];
-    if (
-      currentRole &&
-      currentRole !== role &&
-      (currentRole === "seeker" || currentRole === "hider")
-    ) {
-      const switched = applyLeaderPromotionOnRoleSwitch({
-        uid: requesterUid,
-        currentRole,
-        roleGates,
-        memberUids,
-        memberRoles,
-      });
-      roleGates = switched.roleGates;
-      if (switched.clearSecret) {
-        delete secrets[currentRole];
-        secretsChanged = true;
+    if (data.mode === "castleSiege") {
+      const castleSiegeRoles = readCastleSiegeRoles(data);
+
+      const currentCsSeat = castleSiegeRoles[requesterUid];
+      if (currentCsSeat && currentCsSeat !== role) {
+        const switched = applyCsLeaderPromotionOnSeatSwitch({
+          uid: requesterUid,
+          currentSeat: currentCsSeat,
+          roleGates,
+          memberUids,
+          castleSiegeRoles,
+        });
+        roleGates = switched.roleGates;
+        if (switched.clearSecret) {
+          delete secrets[currentCsSeat];
+          secretsChanged = true;
+        }
       }
-    }
 
-    // Accept never mints secrets — side must already be occupied (or observer).
-    const heal = buildMembershipHealState({
-      existingMemberUids: memberUids,
-      existingRoles: memberRoles,
-      existingAppVersions: memberAppVersions,
-      uid: requesterUid,
-      role,
-      clientVersion,
-      returningMemberUid: undefined,
-      currentHostUid: hostUid,
-    });
+      assertCastleSiegeSeatCapacity(castleSiegeRoles, role, requesterUid);
 
-    const sessionUpdate = {
-      memberUids: heal.memberUids,
-      memberRoles: heal.memberRoles,
-      memberAppVersions: heal.memberAppVersions,
-      roleGates,
-    };
-    if (heal.nextHostUid != null) {
-      sessionUpdate.hostUid = heal.nextHostUid;
-    }
+      const heal = buildMembershipHealState({
+        existingMemberUids: memberUids,
+        existingRoles: memberRoles,
+        existingAppVersions: memberAppVersions,
+        uid: requesterUid,
+        role: "observer",
+        clientVersion,
+        returningMemberUid: undefined,
+        currentHostUid: hostUid,
+      });
 
-    tx.update(sessionRef, sessionUpdate);
-    if (secretsChanged) {
-      tx.set(secretsRef, secrets);
+      castleSiegeRoles[requesterUid] = role;
+      if (heal.removedUid != null) {
+        delete castleSiegeRoles[heal.removedUid];
+      }
+
+      if (heal.removedUid != null) {
+        for (const gateSeat of ["teamA", "teamB"]) {
+          if (roleGates.leaders[gateSeat] === heal.removedUid) {
+            roleGates.leaders[gateSeat] = requesterUid;
+          }
+        }
+      }
+
+      const sessionUpdate = {
+        memberUids: heal.memberUids,
+        memberRoles: heal.memberRoles,
+        memberAppVersions: heal.memberAppVersions,
+        castleSiegeRoles,
+        roleGates,
+      };
+      if (heal.nextHostUid != null) {
+        sessionUpdate.hostUid = heal.nextHostUid;
+      }
+
+      tx.update(sessionRef, sessionUpdate);
+      if (secretsChanged) {
+        tx.set(secretsRef, secrets);
+      }
+    } else {
+      const currentRole = memberRoles[requesterUid];
+      if (
+        currentRole &&
+        currentRole !== role &&
+        (currentRole === "seeker" || currentRole === "hider")
+      ) {
+        const switched = applyLeaderPromotionOnRoleSwitch({
+          uid: requesterUid,
+          currentRole,
+          roleGates,
+          memberUids,
+          memberRoles,
+        });
+        roleGates = switched.roleGates;
+        if (switched.clearSecret) {
+          delete secrets[currentRole];
+          secretsChanged = true;
+        }
+      }
+
+      // Accept never mints secrets — side must already be occupied (or observer).
+      const heal = buildMembershipHealState({
+        existingMemberUids: memberUids,
+        existingRoles: memberRoles,
+        existingAppVersions: memberAppVersions,
+        uid: requesterUid,
+        role,
+        clientVersion,
+        returningMemberUid: undefined,
+        currentHostUid: hostUid,
+      });
+
+      const sessionUpdate = {
+        memberUids: heal.memberUids,
+        memberRoles: heal.memberRoles,
+        memberAppVersions: heal.memberAppVersions,
+        roleGates,
+      };
+      if (heal.nextHostUid != null) {
+        sessionUpdate.hostUid = heal.nextHostUid;
+      }
+
+      tx.update(sessionRef, sessionUpdate);
+      if (secretsChanged) {
+        tx.set(secretsRef, secrets);
+      }
     }
 
     tx.update(requestRef, {

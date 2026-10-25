@@ -90,7 +90,7 @@ test("classic observer host is rejected", async () => {
   );
 });
 
-test("castleSiege observer host initializes observer-only secrets", async () => {
+test("castleSiege teamA host mints seat secrets and team leader", async () => {
   const sessionData = {
     hostUid: "host-1",
     mode: "castleSiege",
@@ -102,12 +102,55 @@ test("castleSiege observer host initializes observer-only secrets", async () => 
   const result = await initSessionRoleGatesHandler(db, "host-1", "sess-1");
 
   assert.equal(typeof result.observerPasscode, "string");
-  // hostRole is observer → rolePasscode is the observer secret (no seeker/hider mint).
-  assert.equal(result.rolePasscode, result.observerPasscode);
-  assert.deepEqual(db.roleGatesWritten, { version: 1, leaders: {} });
+  assert.equal(typeof result.rolePasscode, "string");
+  assert.notEqual(result.rolePasscode, result.observerPasscode);
+  assert.equal(result.rolePasscode, db.secretsWritten?.teamA?.code);
+  assert.deepEqual(db.roleGatesWritten, {
+    version: 1,
+    leaders: { teamA: "host-1" },
+  });
+  assert.ok(db.secretsWritten?.teamA?.code);
+  assert.ok(db.secretsWritten?.teamB?.code);
+  assert.ok(db.secretsWritten?.referee?.code);
   assert.ok(db.secretsWritten?.observer?.code);
   assert.equal(db.secretsWritten?.seeker, undefined);
   assert.equal(db.secretsWritten?.hider, undefined);
+});
+
+test("castleSiege seeker classic host is rejected", async () => {
+  const sessionData = {
+    hostUid: "host-1",
+    mode: "castleSiege",
+    memberRoles: { "host-1": "seeker" },
+    castleSiegeRoles: { "host-1": "teamA" },
+  };
+  const db = buildMockDb({ sessionData });
+
+  await assert.rejects(
+    () => initSessionRoleGatesHandler(db, "host-1", "sess-1"),
+    (error) =>
+      error instanceof HttpsError &&
+      error.code === "failed-precondition" &&
+      error.message === "Castle Siege host classic role must be observer.",
+  );
+});
+
+test("castleSiege teamB host returns teamB passcode and leader", async () => {
+  const sessionData = {
+    hostUid: "host-1",
+    mode: "castleSiege",
+    memberRoles: { "host-1": "observer" },
+    castleSiegeRoles: { "host-1": "teamB" },
+  };
+  const db = buildMockDb({ sessionData });
+
+  const result = await initSessionRoleGatesHandler(db, "host-1", "sess-1");
+
+  assert.equal(result.rolePasscode, db.secretsWritten?.teamB?.code);
+  assert.deepEqual(db.roleGatesWritten, {
+    version: 1,
+    leaders: { teamB: "host-1" },
+  });
 });
 
 test("non-host cannot initialize", async () => {

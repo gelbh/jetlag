@@ -1,4 +1,5 @@
 import { APP_VERSION } from "../../domain/device/changelog";
+import type { CastleSiegeTeamRole } from "../../domain/session/castleSiege/teamRole";
 import { JOIN_ERROR_HEAL_PROOF_INVALID } from "../../domain/session/join/joinErrorCopy";
 import { JOIN_ERROR_MARKERS } from "../../domain/session/join/joinErrorMarkers";
 import type { JoinRequestRole } from "../../domain/session/players/joinRequest";
@@ -18,7 +19,7 @@ export type InitSessionRoleGatesResult = {
 };
 
 export type RolePasscodeActionResult = {
-  role: "seeker" | "hider" | "observer";
+  role: JoinRequestRole;
   rolePasscode: string;
 };
 
@@ -42,6 +43,7 @@ function recoverJoinRequestNoLongerPending(error: unknown): { ok: boolean } | un
 export async function joinSessionWithRole(input: {
   code: string;
   role: PlayerRole;
+  castleSiegeRole?: CastleSiegeTeamRole;
   rolePasscode?: string;
   clientVersion: string;
   returningMemberUid?: string;

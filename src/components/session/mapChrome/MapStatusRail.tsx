@@ -5,6 +5,7 @@ import {
   userErrorFromSyncMessage,
 } from "@/domain/device/feedback/userErrors";
 import type { SyncStatus } from "@/domain/device/sync/sync";
+import type { SessionRecord } from "@/domain/map/annotations";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
@@ -77,6 +78,7 @@ function MapPlayerErrorChannel({
 export type MapStatusRailModel = {
   sessionCode: string;
   sessionId?: string | null;
+  mode?: SessionRecord["mode"];
   roleGates?: RoleGates | null;
   sessionRules?: SessionRulesInput;
   playerRole?: PlayerRole;
@@ -127,6 +129,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
   const {
     sessionCode,
     sessionId = null,
+    mode,
     roleGates = null,
     sessionRules = { gameSize: "medium" },
     playerRole = "seeker",
@@ -181,6 +184,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
     roleGates,
     myUid,
     isHost,
+    mode,
   });
   const sync = syncRailDisplay(syncStatus, queuedWrites, message);
   const syncErrorDisplay = userErrorFromSyncMessage(message);
