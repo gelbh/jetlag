@@ -167,6 +167,37 @@ describe("SessionLogBody", () => {
     expect(onDelete).toHaveBeenCalledWith("ann-1");
   });
 
+  it("hides Edit for tentacle annotations but keeps Delete", () => {
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+    const tentacleAnn: AnnotationRecord = { ...annotation("ann-1"), type: "tentacle" };
+
+    renderUi(
+      <SessionLogBody
+        events={[
+          event({
+            id: "answered",
+            type: "question_answered",
+            createdAt: "2026-07-25T13:00:00.000Z",
+            payload: {
+              toolType: "tentacle",
+              promptText: "Which POI?",
+              annotationId: "ann-1",
+              answerSummary: "poi-1",
+            },
+          }),
+        ]}
+        annotations={[tentacleAnn]}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        onSelect={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+  });
+
   it("keeps lifecycle rows read-only (no Edit/Delete)", () => {
     renderUi(
       <SessionLogBody

@@ -211,6 +211,8 @@ export function SessionLogBody({
         const focus = entryFocusEvent(entry);
         const linkedId = activityAnnotationId(focus);
         const liveId = linkedId && activeById.has(linkedId) ? linkedId : undefined;
+        const liveAnnotation = liveId ? activeById.get(liveId) : undefined;
+        const canEdit = liveAnnotation?.type !== "tentacle";
         const showActions = Boolean(liveId) && !readOnly;
         const selectable = Boolean(liveId && onSelect);
         const markEvent = entry.kind === "pair" ? entry.resolved : entry.event;
@@ -378,9 +380,15 @@ export function SessionLogBody({
 
             {showActions && liveId ? (
               <Stack gap={4} style={{ flexShrink: 0 }}>
-                <Button size="compact-xs" onClick={() => onEdit(liveId)} styles={compactGrayStyles}>
-                  Edit
-                </Button>
+                {canEdit ? (
+                  <Button
+                    size="compact-xs"
+                    onClick={() => onEdit(liveId)}
+                    styles={compactGrayStyles}
+                  >
+                    Edit
+                  </Button>
+                ) : null}
                 <Button
                   size="compact-xs"
                   onClick={() => onDelete(liveId)}

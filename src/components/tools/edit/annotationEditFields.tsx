@@ -7,7 +7,6 @@ import { type MatchingAnnotation, MatchingEditFields } from "./MatchingEditField
 import { type MeasuringAnnotation, MeasuringEditFields } from "./MeasuringEditFields";
 import { type PinZoneAnnotation, PinZoneEditFields } from "./PinZoneEditFields";
 import { type RadarAnnotation, RadarEditFields } from "./RadarEditFields";
-import { type TentacleAnnotation, TentacleEditFields } from "./TentacleEditFields";
 import { type ThermometerAnnotation, ThermometerEditFields } from "./ThermometerEditFields";
 import type { EditSavePayload } from "./types";
 
@@ -44,14 +43,7 @@ export function annotationEditFields(
         />
       );
     case "tentacle":
-      return (
-        <TentacleEditFields
-          annotation={annotation as TentacleAnnotation}
-          gameArea={context.gameArea}
-          distanceUnit={context.distanceUnit}
-          onSavePayloadChange={context.onSavePayloadChange}
-        />
-      );
+      return null;
     case "matching":
       return (
         <MatchingEditFields

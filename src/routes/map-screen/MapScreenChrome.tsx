@@ -430,7 +430,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
       />
       {reportProblemSheet}
 
-      {selectedAnnotation ? (
+      {selectedAnnotation && selectedAnnotation.type !== "tentacle" ? (
         <AnnotationEditSheet
           annotation={selectedAnnotation}
           gameArea={gameArea!}
@@ -457,12 +457,21 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
           overlay.closeSheet();
           setActiveTool("none");
           setAwaitingPlacement(false);
+          const ann = annotations.find((a) => a.id === id);
+          if (ann?.type === "tentacle") {
+            return;
+          }
           setSelectedAnnotationId(id);
         }}
         onSelect={(id) => {
           overlay.closeSheet();
           setActiveTool("none");
           setAwaitingPlacement(false);
+          const ann = annotations.find((a) => a.id === id);
+          if (ann?.type === "tentacle") {
+            markAnnotationPulse(id);
+            return;
+          }
           setSelectedAnnotationId(id);
           markAnnotationPulse(id);
         }}
