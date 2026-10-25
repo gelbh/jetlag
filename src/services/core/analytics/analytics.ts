@@ -11,6 +11,7 @@ import {
 } from "@/domain/device/consent/analyticsConsent";
 import { isEmbedMode } from "@/domain/device/embed/embedMode";
 import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
+import type { AnalyticsAuthProvider } from "@/services/core/auth/authProvider";
 import { shouldEnableAnalytics } from "./analyticsEnabled";
 import {
   ANALYTICS_EVENTS,
@@ -66,9 +67,12 @@ const FORBIDDEN_PROP_KEYS = new Set([
   "sessionid",
 ]);
 
+type TraitFingerprint = string;
+
 let coreInitialized = false;
 let initialized = false;
 let identifiedUid: string | null = null;
+let lastTraitFingerprint: TraitFingerprint | null = null;
 let lastSeenIdentity: AnalyticsIdentity | null = null;
 let appInstalledHandler: (() => void) | null = null;
 
@@ -76,6 +80,9 @@ export type AnalyticsIdentity = {
   uid: string;
   isAnonymous: boolean;
   isInternal: boolean;
+  email: string | null;
+  name: string | null;
+  authProvider: AnalyticsAuthProvider;
 };
 
 export { shouldEnableAnalytics };
@@ -132,15 +139,50 @@ function registerSuperProperties(): void {
   });
 }
 
+function personSetProps(user: AnalyticsIdentity): Record<string, string | boolean> {
+  const props: Record<string, string | boolean> = {
+    auth_provider: user.authProvider,
+    is_internal: user.isInternal,
+  };
+  if (user.email) props.email = user.email;
+  if (user.name) props.name = user.name;
+  return props;
+}
+
+function traitFingerprint(user: AnalyticsIdentity): TraitFingerprint {
+  return [
+    user.uid,
+    user.email ?? "",
+    user.name ?? "",
+    user.authProvider,
+    String(user.isInternal),
+  ].join("|");
+}
+
 function applyIdentity(user: AnalyticsIdentity | null): void {
   if (!coreInitialized) {
     return;
   }
   try {
     if (user && !user.isAnonymous) {
+      const productGranted = initialized;
       if (identifiedUid !== user.uid) {
-        posthog.identify(user.uid);
+        if (productGranted) {
+          posthog.identify(user.uid, personSetProps(user));
+          lastTraitFingerprint = traitFingerprint(user);
+        } else {
+          posthog.identify(user.uid);
+          lastTraitFingerprint = null;
+        }
         identifiedUid = user.uid;
+        return;
+      }
+      if (productGranted) {
+        const fp = traitFingerprint(user);
+        if (fp !== lastTraitFingerprint) {
+          posthog.setPersonProperties(personSetProps(user));
+          lastTraitFingerprint = fp;
+        }
       }
       return;
     }
@@ -148,6 +190,7 @@ function applyIdentity(user: AnalyticsIdentity | null): void {
       posthog.reset(true);
       registerSuperProperties();
       identifiedUid = null;
+      lastTraitFingerprint = null;
     }
   } catch {
     // Soft-fail: identity must never break app boot.
@@ -247,6 +290,7 @@ export function denyAnalyticsConsent(): void {
     registerSuperProperties();
   } catch {}
   identifiedUid = null;
+  lastTraitFingerprint = null;
   initialized = false;
   applyIdentity(lastSeenIdentity);
 }
@@ -369,6 +413,7 @@ export function resetAnalyticsForTests(options?: { initialized?: boolean }): voi
   coreInitialized = options?.initialized ?? false;
   initialized = options?.initialized ?? false;
   identifiedUid = null;
+  lastTraitFingerprint = null;
   lastSeenIdentity = null;
   if (appInstalledHandler) {
     window.removeEventListener("appinstalled", appInstalledHandler);

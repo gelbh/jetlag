@@ -320,6 +320,9 @@ export function startAuthBootstrap(): void {
           uid: user.uid,
           isAnonymous: user.isAnonymous,
           isInternal: claimsLookAdmin(token.claims),
+          email: null,
+          name: null,
+          authProvider: "unknown",
         });
       })
       .catch(() => {
@@ -327,6 +330,9 @@ export function startAuthBootstrap(): void {
           uid: user.uid,
           isAnonymous: user.isAnonymous,
           isInternal: false,
+          email: null,
+          name: null,
+          authProvider: "unknown",
         });
       });
   });

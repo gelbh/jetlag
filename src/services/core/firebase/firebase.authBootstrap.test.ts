@@ -156,12 +156,18 @@ describe("auth bootstrap start", () => {
         uid: "user-1",
         isAnonymous: false,
         isInternal: false,
+        email: null,
+        name: null,
+        authProvider: "unknown",
       });
       expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith(null);
       expect(lazyTelemetryMocks.syncAnalyticsIdentityLazy).toHaveBeenCalledWith({
         uid: "admin-1",
         isAnonymous: false,
         isInternal: true,
+        email: null,
+        name: null,
+        authProvider: "unknown",
       });
     });
   });
