@@ -1095,20 +1095,6 @@ describe("AdminOpsDesk", () => {
     });
   });
 
-  it("clears retired desk layout storage on mount", () => {
-    authState.state = "admin";
-    authState.authReady = true;
-    authState.user = { email: "admin@example.com", emailVerified: true };
-    sessionListState.sessions = [];
-    localStorage.setItem("jetlag.adminOpsDesk.v1", "{}");
-    localStorage.setItem("jetlag.adminOpsDesk.v1:uid-admin", "{}");
-
-    renderOpsDesk();
-
-    expect(localStorage.getItem("jetlag.adminOpsDesk.v1")).toBeNull();
-    expect(localStorage.getItem("jetlag.adminOpsDesk.v1:uid-admin")).toBeNull();
-  });
-
   it("continues sign-in back to the opened route", () => {
     authState.state = "unsigned";
     authState.authReady = true;

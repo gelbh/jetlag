@@ -1,10 +1,9 @@
 import { Alert, Box, Button, Drawer, Group, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { signOut } from "firebase/auth";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import type { AdminTableTab } from "../../../domain/admin/adminTablePrefs";
-import { clearLegacyOpsDeskStorage } from "../../../domain/admin/clearLegacyOpsDeskStorage";
 import { useAdminAccessState } from "../../../hooks/admin/useAdminAccessState";
 import { useAdminJoinSession } from "../../../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../../../hooks/admin/useAdminSessionList";
@@ -126,10 +125,6 @@ function AdminOpsDeskContent() {
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const deskRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    clearLegacyOpsDeskStorage();
-  }, []);
 
   const tables = useAdminDeskTables({
     sessions,
