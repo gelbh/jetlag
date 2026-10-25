@@ -4,9 +4,10 @@ import type { MapTool } from "../../state/sessionStore";
 
 export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
   const [drawMenuOpen, setDrawMenuOpen] = useState(false);
+  const [questionMoreMenuOpen, setQuestionMoreMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!drawMenuOpen) {
+    if (!drawMenuOpen && !questionMoreMenuOpen) {
       return;
     }
 
@@ -31,11 +32,13 @@ export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
         return;
       }
       setDrawMenuOpen(false);
+      setQuestionMoreMenuOpen(false);
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setDrawMenuOpen(false);
+        setQuestionMoreMenuOpen(false);
       }
     };
 
@@ -45,15 +48,18 @@ export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [drawMenuOpen, dockRef]);
+  }, [drawMenuOpen, questionMoreMenuOpen, dockRef]);
 
   const closeMenus = useCallback(() => {
     setDrawMenuOpen(false);
+    setQuestionMoreMenuOpen(false);
   }, []);
 
   return {
     drawMenuOpen,
     setDrawMenuOpen,
+    questionMoreMenuOpen,
+    setQuestionMoreMenuOpen,
     closeMenus,
   };
 }

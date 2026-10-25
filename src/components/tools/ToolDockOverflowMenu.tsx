@@ -1,5 +1,6 @@
 import { BoundingBoxIcon, MapPinIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import {
+  type DockableMapTool,
   isMarkupDockTool,
   MAP_TOOL_DOCK_ENTRIES,
   mapToolDockMenuHint,
@@ -7,6 +8,7 @@ import {
 } from "../../domain/map/mapTools";
 import { cn } from "../../lib/cn";
 import type { MapTool } from "../../state/sessionStore";
+import { HudToolIcon } from "../map/icons/ToolIcons";
 import { JlIcon } from "../ui/brand/JlIcon";
 import { SheetHost } from "../ui/sheets/SheetHost";
 
@@ -81,6 +83,86 @@ export function ToolDockDrawMenu({ open, activeTool, onSelect, onClose }: ToolDo
                     className={cn(
                       "mt-0.5 block text-xs leading-snug",
                       active ? "text-highlight/80" : "text-field-ink-muted",
+                    )}
+                  >
+                    {hint}
+                  </span>
+                ) : null}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </SheetHost>
+  );
+}
+
+interface ToolDockQuestionMoreMenuProps {
+  open: boolean;
+  activeTool: MapTool;
+  toolIds: readonly DockableMapTool[];
+  onSelect: (tool: MapTool) => void;
+  onClose: () => void;
+}
+
+/** Labeled action sheet for secondary seeker question tools. */
+export function ToolDockQuestionMoreMenu({
+  open,
+  activeTool,
+  toolIds,
+  onSelect,
+  onClose,
+}: ToolDockQuestionMoreMenuProps) {
+  return (
+    <SheetHost
+      open={open}
+      onClose={onClose}
+      ariaLabel="More question tools"
+      maxHeightClassName="max-h-[min(50dvh,24rem)]"
+      pinned={
+        <h2 className="text-[1.25rem] font-bold tracking-tight text-field-ink">
+          More question tools
+        </h2>
+      }
+    >
+      <div className="flex flex-col gap-1" role="menu" aria-label="More question tools">
+        {toolIds.map((toolId) => {
+          const tool = MAP_TOOL_DOCK_ENTRIES.find((entry) => entry.id === toolId);
+          if (!tool || !tool.cost) {
+            return null;
+          }
+          const active = activeTool === tool.id;
+          const hint = mapToolDockMenuHint(tool);
+
+          return (
+            <button
+              key={tool.id}
+              type="button"
+              role="menuitemradio"
+              aria-checked={active}
+              onClick={() => {
+                onSelect(tool.id);
+                onClose();
+              }}
+              className={cn(
+                "flex min-h-14 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left",
+                active
+                  ? "bg-flag-soft text-flag"
+                  : "bg-transparent text-field-ink hover:bg-surface-raised/80",
+              )}
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-raised/90">
+                <HudToolIcon tool={tool.id} className="h-5 w-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[0.9375rem] font-semibold tracking-tight">
+                  {mapToolDockMenuLabel(tool)}
+                </span>
+                {hint ? (
+                  <span
+                    className={cn(
+                      "mt-0.5 block text-xs leading-snug",
+                      active ? "text-flag/80" : "text-field-ink-muted",
                     )}
                   >
                     {hint}

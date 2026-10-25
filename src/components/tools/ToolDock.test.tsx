@@ -48,12 +48,20 @@ function renderDock(ui: React.ReactElement) {
 
 describe("ToolDock", () => {
   it("exposes question tools on the dock and markup tools in Draw", async () => {
-    renderDock(<ToolDock {...dockBase} />);
+    renderDock(<ToolDock {...dockBase} hasHiders />);
 
     expect(screen.getByRole("button", { name: "Matching" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Measuring" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tentacles" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Thermometer" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Photo" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /More/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Pin" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /More/i }));
+    expect(await screen.findByRole("menuitemradio", { name: /Thermometer/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitemradio", { name: /Photo/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
 
@@ -138,7 +146,7 @@ describe("ToolDock", () => {
     renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} hasUnreadChat unreadCount={1} />);
 
     expect(screen.getByRole("button", { name: "Open chat, unread messages" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "More tools" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /More/i })).toBeInTheDocument();
     expect(document.querySelectorAll(".jl-unread-badge")).toHaveLength(1);
   });
 
@@ -146,7 +154,7 @@ describe("ToolDock", () => {
     renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} hasUnreadChat={false} />);
 
     expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "More tools" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /More/i })).toBeInTheDocument();
     expect(document.querySelector(".jl-unread-badge")).toBeNull();
   });
 
@@ -180,7 +188,7 @@ describe("ToolDock", () => {
   });
 
   it("renders short plain labels on every dock slot", () => {
-    renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+    renderDock(<ToolDock {...dockBase} hasHiders onOpenChat={vi.fn()} />);
 
     const labels = [...document.querySelectorAll(DOCK_LABEL)].map(
       (node) => node.textContent?.trim() ?? "",
@@ -192,7 +200,7 @@ describe("ToolDock", () => {
         "Redo",
         "Match",
         "Measure",
-        "Thermo",
+        "Tentacles",
         "Radar",
         "Draw",
         "Chat",
@@ -201,7 +209,7 @@ describe("ToolDock", () => {
         "Settings",
       ]),
     );
-    expect(labels).not.toContain("More");
+    expect(labels).toContain("More");
     for (const label of labels) {
       expect(label.length).toBeGreaterThan(0);
       expect(label.endsWith(".")).toBe(false);
@@ -300,6 +308,20 @@ describe("ToolDock", () => {
     expect(document.querySelector('[data-island="hunt"]')).toBeNull();
     expect(document.querySelector('[data-island="session"]')).toBeNull();
     expect(document.querySelector('[data-overlay-chrome][data-ask-first="true"]')).not.toBeNull();
+  });
+
+  it("keeps overflow questions selectable and uses Survey flag wash", async () => {
+    const onSelect = vi.fn();
+    renderDock(<ToolDock {...dockBase} hasHiders onSelect={onSelect} onOpenChat={vi.fn()} />);
+
+    expect(document.querySelector(".border-highlight\\/70")).toBeNull();
+    expect(document.querySelector(".bg-highlight\\/18")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /More/i }));
+    const thermometer = await screen.findByRole("menuitemradio", { name: /Thermometer/i });
+    expect(thermometer).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(thermometer);
+    expect(onSelect).toHaveBeenCalledWith("thermometer");
   });
 
   it("keeps idle Mantine hunt without ask-first until a question tool is active", () => {

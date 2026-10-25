@@ -1,6 +1,10 @@
 import { useEffect, useRef } from "react";
 import { isAskHudOwnedTool } from "../../domain/ask/askHudModes";
-import { MARKUP_DOCK_TOOL_IDS, QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
+import {
+  MARKUP_DOCK_TOOL_IDS,
+  QUESTION_DOCK_OVERFLOW_IDS,
+  QUESTION_DOCK_PRIMARY_IDS,
+} from "../../domain/map/mapTools";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
 import type { GameSize } from "../../domain/session/size/gameSize";
@@ -10,7 +14,7 @@ import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
 import { ToolDeckGroup, ToolDeckInner, ToolDeckQuestionStrip } from "./ToolDeck";
-import { ToolDockDrawMenu } from "./ToolDockOverflowMenu";
+import { ToolDockDrawMenu, ToolDockQuestionMoreMenu } from "./ToolDockOverflowMenu";
 import { ToolDockDrawControl, ToolDockHistorySlot, ToolDockQuestionSlot } from "./ToolDockSlot";
 import { useToolDockHighlight, useToolDockMenus } from "./useToolDockState";
 
@@ -70,9 +74,16 @@ export function ToolDock({
   const dockRef = useRef<HTMLDivElement>(null);
   const mainGroupRef = useRef<HTMLDivElement>(null);
   const viewportBottomInset = useVisualViewportBottomInset(true);
-  const { drawMenuOpen, setDrawMenuOpen, closeMenus } = useToolDockMenus(dockRef);
+  const {
+    drawMenuOpen,
+    setDrawMenuOpen,
+    questionMoreMenuOpen,
+    setQuestionMoreMenuOpen,
+    closeMenus,
+  } = useToolDockMenus(dockRef);
 
   const drawMenuVisible = drawMenuOpen && !dismissOverflowMenus && !inactive;
+  const questionMoreMenuVisible = questionMoreMenuOpen && !dismissOverflowMenus && !inactive;
 
   useEffect(() => {
     if (inactive) {
@@ -81,14 +92,20 @@ export function ToolDock({
   }, [inactive, closeMenus]);
   const markupActive = MARKUP_DOCK_TOOL_IDS.some((toolId) => activeTool === toolId);
   const rulesInput = sessionRules ?? { gameSize };
-  const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
+  const visiblePrimaryQuestionTools = QUESTION_DOCK_PRIMARY_IDS.filter((toolId) =>
     resolveToolDockEnabled(rulesInput, toolId, { hasHiders }),
+  );
+  const visibleOverflowQuestionTools = QUESTION_DOCK_OVERFLOW_IDS.filter((toolId) =>
+    resolveToolDockEnabled(rulesInput, toolId, { hasHiders }),
+  );
+  const hasActiveOverflowQuestion = visibleOverflowQuestionTools.some(
+    (toolId) => activeTool === toolId,
   );
   const dockHighlight = useToolDockHighlight(
     mainGroupRef,
     activeTool,
     viewportBottomInset,
-    visibleQuestionTools.length,
+    visiblePrimaryQuestionTools.length,
   );
 
   const selectTool = (tool: MapTool) => {
@@ -115,7 +132,7 @@ export function ToolDock({
               data-tool-highlight=""
               className={cn(
                 "jl-tool-dock-highlight pointer-events-none absolute z-0 will-change-[transform,width,height] motion-safe:transition-[transform,width,height,opacity] motion-safe:duration-[var(--motion-base)] motion-safe:ease-[var(--ease-spring-subtle)]",
-                "rounded-[10px] border-[0.33px] border-highlight/70 bg-highlight/18",
+                "rounded-[10px] border-[0.33px] border-flag/70 bg-flag-soft",
               )}
               style={{
                 transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,
@@ -145,7 +162,7 @@ export function ToolDock({
               </>
             ) : null}
             <ToolDeckQuestionStrip askFirst={askFirst}>
-              {visibleQuestionTools.map((toolId) => (
+              {visiblePrimaryQuestionTools.map((toolId) => (
                 <ToolDockQuestionSlot
                   key={toolId}
                   toolId={toolId}
@@ -154,6 +171,20 @@ export function ToolDock({
                   onSelect={selectTool}
                 />
               ))}
+              {visibleOverflowQuestionTools.length > 0 ? (
+                <ToolDockMoreControl
+                  open={questionMoreMenuOpen}
+                  active={hasActiveOverflowQuestion}
+                  inactive={inactive}
+                  onToggle={() => {
+                    if (inactive) {
+                      return;
+                    }
+                    setDrawMenuOpen(false);
+                    setQuestionMoreMenuOpen((open) => !open);
+                  }}
+                />
+              ) : null}
             </ToolDeckQuestionStrip>
           </ToolDeckGroup>
         </ToolDeckInner>
@@ -169,6 +200,7 @@ export function ToolDock({
                 if (inactive) {
                   return;
                 }
+                setQuestionMoreMenuOpen(false);
                 setDrawMenuOpen((open) => !open);
               }}
             />
@@ -188,13 +220,57 @@ export function ToolDock({
         />
       }
       overlay={
-        <ToolDockDrawMenu
-          open={drawMenuVisible}
-          activeTool={activeTool}
-          onSelect={selectTool}
-          onClose={closeMenus}
-        />
+        <>
+          <ToolDockDrawMenu
+            open={drawMenuVisible}
+            activeTool={activeTool}
+            onSelect={selectTool}
+            onClose={closeMenus}
+          />
+          <ToolDockQuestionMoreMenu
+            open={questionMoreMenuVisible}
+            activeTool={activeTool}
+            toolIds={visibleOverflowQuestionTools}
+            onSelect={selectTool}
+            onClose={closeMenus}
+          />
+        </>
       }
     />
+  );
+}
+
+function ToolDockMoreControl({
+  open,
+  active,
+  inactive,
+  onToggle,
+}: {
+  open: boolean;
+  active: boolean;
+  inactive: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label="More question tools"
+      aria-expanded={open}
+      aria-haspopup="menu"
+      aria-pressed={active}
+      disabled={inactive}
+      className={cn(
+        "jl-tool-slot flex min-h-11 min-w-11 flex-none flex-col items-center justify-center rounded-xl px-1 text-field-ink",
+        (open || active) && "bg-flag-soft text-flag",
+      )}
+      onClick={onToggle}
+    >
+      <span className="jl-tool-slot-icon text-base leading-none" aria-hidden="true">
+        ⋯
+      </span>
+      <span className="jl-tool-slot-label" data-ios-tool-label="">
+        More
+      </span>
+    </button>
   );
 }
