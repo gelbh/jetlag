@@ -3,7 +3,7 @@ import { eliminationFeatureForAnnotation } from "../geometry/adapter/elimination
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 import { milesToMeters } from "../map/distance";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
-import { buildPendingQuestionOverlay } from "./pendingQuestionOverlays";
+import { buildPendingQuestionOverlay } from "./overlays";
 
 const gameArea: GameArea = {
   type: "Polygon",

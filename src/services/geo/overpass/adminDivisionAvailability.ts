@@ -1,6 +1,5 @@
 import type { GameArea } from "@/domain/map/annotations";
 import type { MatchingCategoryId, MeasuringFromKind } from "@/domain/questions";
-import { adminLevelForMatchingCategory } from "@/domain/questions";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import { getRegionPackConfig } from "@/domain/regions/regionPackRegistry";
 import type {
@@ -279,10 +278,4 @@ export function adminLevelForMeasuringBorderKind(
       return _exhaustive;
     }
   }
-}
-
-export function matchingCategoryAdminLevel(
-  categoryId: AdminDivisionMatchingCategory,
-): number | null {
-  return adminLevelForMatchingCategory(categoryId);
 }

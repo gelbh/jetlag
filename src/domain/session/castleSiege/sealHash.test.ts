@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { canonicalSealPayload, hashSealPayload, verifySealReveal } from "./sealHash";
+import { canonicalSealPayload, hashSealPayload } from "./sealHash";
 
 const ANCHOR = "Castle";
 const LAT = 53.35;
@@ -35,41 +35,5 @@ describe("hashSealPayload", () => {
     expect(renamed).not.toBe(base);
     expect(moved).not.toBe(base);
     expect(rephrased).not.toBe(base);
-  });
-});
-
-describe("verifySealReveal", () => {
-  it("accepts a reveal that matches the committed hash", async () => {
-    const committed = await hashSealPayload(canonicalSealPayload(ANCHOR, LAT, LNG, SECRET));
-
-    await expect(
-      verifySealReveal(committed, {
-        anchorName: ANCHOR,
-        lat: LAT,
-        lng: LNG,
-        secretPhrase: SECRET,
-      }),
-    ).resolves.toEqual({ ok: true });
-  });
-
-  it("flags an audit hash_mismatch when reveal does not match committed hash", async () => {
-    const committed = await hashSealPayload(canonicalSealPayload(ANCHOR, LAT, LNG, SECRET));
-    const computed = await hashSealPayload(canonicalSealPayload(ANCHOR, LAT, LNG, "tampered"));
-
-    await expect(
-      verifySealReveal(committed, {
-        anchorName: ANCHOR,
-        lat: LAT,
-        lng: LNG,
-        secretPhrase: "tampered",
-      }),
-    ).resolves.toEqual({
-      ok: false,
-      flag: {
-        kind: "hash_mismatch",
-        committedHash: committed,
-        computedHash: computed,
-      },
-    });
   });
 });

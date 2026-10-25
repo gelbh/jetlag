@@ -2,12 +2,6 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { Feature, Polygon } from "geojson";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as measuringGeometryBudgets from "@/domain/geometry/measuring/measuringGeometryBudgets";
-import {
-  MEASURING_LINEAR_MAX_VERTICES,
-  MEASURING_LINEAR_OVER_BUDGET_MESSAGE,
-  MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE,
-  MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
-} from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
 import type { GameArea } from "@/domain/map/annotations";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
@@ -229,8 +223,6 @@ describe("useMeasuringPreviews budget gate", () => {
     await waitFor(() => {
       expect(result.current.measuringNearRegion).not.toBeNull();
     });
-
-    expect(setMeasuringError).not.toHaveBeenCalledWith(MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE);
   });
 
   it("completed preview uses full geometry, not persist-slim", async () => {
@@ -285,7 +277,7 @@ describe("useMeasuringPreviews budget gate", () => {
           geometry: {
             type: "LineString" as const,
             coordinates: Array.from(
-              { length: MEASURING_LINEAR_MAX_VERTICES + 1 },
+              { length: 12_001 },
               (_, i) => [i * 0.0001, 0] as [number, number],
             ),
           },
@@ -303,8 +295,6 @@ describe("useMeasuringPreviews budget gate", () => {
     await waitFor(() => {
       expect(result.current.measuringNearRegion).not.toBeNull();
     });
-
-    expect(setMeasuringError).not.toHaveBeenCalledWith(MEASURING_LINEAR_OVER_BUDGET_MESSAGE);
   });
 
   it("paints coarse LOD instead of refusing oversized geometry on preview", async () => {
@@ -346,12 +336,6 @@ describe("useMeasuringPreviews budget gate", () => {
       expect(result.current.measuringNearRegion).not.toBeNull();
     });
 
-    expect(setMeasuringError).not.toHaveBeenCalledWith(MEASURING_OUTPUT_OVER_BUDGET_MESSAGE);
-    expect(
-      setMeasuringError.mock.calls.every(
-        (call) => call[0] !== MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
-      ),
-    ).toBe(true);
     expect(buildCoarsePolygonFeature).toHaveBeenCalledWith(near);
     expect(result.current.measuringNearRegion).toBeTruthy();
   });
