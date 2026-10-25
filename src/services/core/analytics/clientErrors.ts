@@ -47,8 +47,11 @@ export function captureErrorBoundaryException(
   });
 }
 
-export function captureException(error: unknown): void {
-  captureClientException(error);
+export function captureException(
+  error: unknown,
+  additionalProperties?: Record<string, unknown>,
+): void {
+  captureClientException(error, additionalProperties);
 }
 
 export function capturePhotoUploadFailure(

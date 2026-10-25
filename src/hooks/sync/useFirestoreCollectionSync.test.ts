@@ -54,6 +54,16 @@ describe("useFirestoreCollectionSync", () => {
     expect(subscribe).not.toHaveBeenCalled();
   });
 
+  it("reports loaded false while enabled is false", () => {
+    const subscribe = vi.fn();
+    const { result } = renderHook(() =>
+      useFirestoreCollectionSyncWithStatus("remote-session", subscribe, { enabled: false }),
+    );
+
+    expect(result.current).toEqual({ items: [], loaded: false });
+    expect(subscribe).not.toHaveBeenCalled();
+  });
+
   it("re-subscribes when enabled flips to true", async () => {
     const unsubscribe = vi.fn();
     const subscribe = vi.fn((_sessionId: string, onData: (items: string[]) => void) => {
