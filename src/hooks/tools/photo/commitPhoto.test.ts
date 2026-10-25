@@ -42,7 +42,7 @@ describeCastleSiegeOracleCommit({
     const { sessionMode, submitPendingQuestion, ...rest } = overrides;
     return baseInput({
       awaitHiderAnswer: sessionMode === "classic",
-      sessionMode,
+      sessionMode: sessionMode as Parameters<typeof commitPhoto>[0]["sessionMode"],
       submitPendingQuestion:
         sessionMode === "classic"
           ? (submitPendingQuestion as Parameters<typeof commitPhoto>[0]["submitPendingQuestion"])
