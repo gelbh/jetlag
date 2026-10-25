@@ -3,15 +3,19 @@ import type { ElevationSampleCell } from "@/domain/geometry/measuring/seaLevel";
 import type { GameArea } from "@/domain/map/annotations";
 import type { LoadPriority, ProgressNode, StageSpec } from "@/domain/progress/progressTree";
 import { abortReason, throwIfAborted } from "../../core/network/anySignal";
+import { configureDurationHistoryStore } from "../../core/progress/durationHistory";
 import { createDetachedProgressRoot } from "../../core/progress/loadTask";
-import { notifyOverpassPriorityChanged } from "../overpass/requestQueue";
 import {
   clearPersistedCacheForTests,
   readPersistedEntry,
   readPersistedEntryIgnoringExpiry,
   writePersistedEntry,
 } from "./indexedDb";
-import { coastlineSegmentsCacheKey, seaLevelSamplingCacheKey } from "./keys";
+import {
+  coastlineSegmentsCacheKey,
+  PROGRESS_HISTORY_CACHE_KEY,
+  seaLevelSamplingCacheKey,
+} from "./keys";
 import {
   type InFlightEntry,
   inFlight,
@@ -78,6 +82,30 @@ async function writeCachedValue<T>(
 
   await writePersistedEntry(key, value);
 }
+
+const priorityListeners = new Set<() => void>();
+
+/**
+ * Lets a request scheduler re-check its lanes when a shared fetch's subscribers
+ * change. Keeps this generic cache free of any one scheduler.
+ */
+export function onSharedFetchPriorityChange(listener: () => void): () => void {
+  priorityListeners.add(listener);
+  return () => {
+    priorityListeners.delete(listener);
+  };
+}
+
+function notifyPriorityChange(): void {
+  for (const listener of priorityListeners) {
+    listener();
+  }
+}
+
+configureDurationHistoryStore({
+  read: () => readPersistedEntryIgnoringExpiry(PROGRESS_HISTORY_CACHE_KEY),
+  write: (blob) => writePersistedEntry(PROGRESS_HISTORY_CACHE_KEY, blob),
+});
 
 /** How long a fetch with no remaining subscribers keeps running before it is aborted. */
 export const ABANDON_GRACE_MS = 1_500;
@@ -181,7 +209,7 @@ function subscribe<T>(key: string, entry: InFlightEntry, options: CachedFetchOpt
     entry.abandonTimer = null;
   }
   options.node?.mirror(entry.node);
-  notifyOverpassPriorityChanged();
+  notifyPriorityChange();
 
   let attached = true;
   const detach = (): void => {
@@ -214,7 +242,7 @@ function subscribe<T>(key: string, entry: InFlightEntry, options: CachedFetchOpt
         entry.controller.abort(reason);
       }, ABANDON_GRACE_MS);
     }
-    notifyOverpassPriorityChanged();
+    notifyPriorityChange();
   };
 
   return new Promise<T>((resolve, reject) => {
