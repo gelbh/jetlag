@@ -45,6 +45,15 @@ describe("privacyPolicyContent", () => {
     expect(productAnalytics).toMatch(/PostHog session replay/i);
   });
 
+  it("discloses Accept-gated person email name and sign-in provider", () => {
+    const section = PRIVACY_POLICY_SECTIONS.find((entry) => entry.id === "errors-analytics");
+    const productAnalytics = section?.paragraphs[1] ?? "";
+    expect(productAnalytics).toMatch(/email address/i);
+    expect(productAnalytics).toMatch(/display name/i);
+    expect(productAnalytics).toMatch(/sign-in provider/i);
+    expect(productAnalytics).toMatch(/Accept/i);
+  });
+
   it("third-parties omit Sentry after Functions exception cutover", () => {
     const mapSection = PRIVACY_POLICY_SECTIONS.find((section) => section.id === "third-parties");
     const copy = mapSection?.paragraphs.join(" ") ?? "";
