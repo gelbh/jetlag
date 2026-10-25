@@ -153,25 +153,17 @@ export async function buildMapDraftOverlays(
   }
 
   if (activeTool === "tentacle" && sources.tentacle.center) {
-    const {
-      center,
-      searchRadiusMeters,
-      answerRadiusMeters,
-      pois,
-      selectedPoiId,
-      outOfReach,
-      seekerResolving,
-    } = sources.tentacle;
+    const { center, searchRadiusMeters, pois, selectedPoiId, outOfReach, seekerResolving } =
+      sources.tentacle;
     const hasPoiAnswer = !outOfReach && selectedPoiId !== null;
     const answered = outOfReach || hasPoiAnswer;
-    const displayRadius = hasPoiAnswer ? answerRadiusMeters : searchRadiusMeters;
 
     if (!answered && searchRadiusMeters > 0) {
       overlays.push({
         kind: "circle",
         id: "tentacle-draft-range",
         center,
-        radiusMeters: displayRadius,
+        radiusMeters: searchRadiusMeters,
         style: {
           color: c.tentacleAccent,
           dashArray: "6 6",

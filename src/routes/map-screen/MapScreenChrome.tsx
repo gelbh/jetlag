@@ -7,7 +7,11 @@ import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettings
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
-import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
+import {
+  annotationSupportsPostAnswerEdit,
+  isEndGameActive,
+  isFoundHiderPending,
+} from "../../domain/map/annotations";
 import { sessionHasHiders } from "../../domain/session/players/playerRole";
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
@@ -430,7 +434,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
       />
       {reportProblemSheet}
 
-      {selectedAnnotation && selectedAnnotation.type !== "tentacle" ? (
+      {selectedAnnotation && annotationSupportsPostAnswerEdit(selectedAnnotation) ? (
         <AnnotationEditSheet
           annotation={selectedAnnotation}
           gameArea={gameArea!}
@@ -458,7 +462,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
           setActiveTool("none");
           setAwaitingPlacement(false);
           const ann = annotations.find((a) => a.id === id);
-          if (ann?.type === "tentacle") {
+          if (!ann || !annotationSupportsPostAnswerEdit(ann)) {
             return;
           }
           setSelectedAnnotationId(id);
@@ -468,12 +472,11 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
           setActiveTool("none");
           setAwaitingPlacement(false);
           const ann = annotations.find((a) => a.id === id);
-          if (ann?.type === "tentacle") {
-            markAnnotationPulse(id);
+          markAnnotationPulse(id);
+          if (!ann || !annotationSupportsPostAnswerEdit(ann)) {
             return;
           }
           setSelectedAnnotationId(id);
-          markAnnotationPulse(id);
         }}
       />
 

@@ -135,14 +135,13 @@ describe("useMapGeometryEdit", () => {
       coordinates: [-6.27, 53.36],
     });
 
-    // flushSync commits the tentacle render so result.current updates, while the
-    // clear effect still waits until act ends, leaving the stale draft live.
+    // Exposed draft nulls with the annotation at the API boundary; effect clears store.
     await act(async () => {
       flushSync(() => {
         rerender({ annotations: [tentacle] });
       });
       expect(result.current.geometryEditAnnotation).toBeNull();
-      expect(result.current.geometryDraft).not.toBeNull();
+      expect(result.current.geometryDraft).toBeNull();
       expect(result.current.handleGeometryEditClick([53.37, -6.28])).toBe(false);
       await result.current.saveGeometryEdit();
     });

@@ -2,7 +2,11 @@ import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon, Point } 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { PolygonFeature } from "../../domain/geometry/kernel";
-import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import {
+  type AnnotationRecord,
+  annotationSupportsGeometryEdit,
+  type GameArea,
+} from "../../domain/map/annotations";
 import { useAnnotationStore, useMapStore } from "../../state/sessionStore";
 import { clipZoneToGameArea, ZONE_OUTSIDE_PLAY_AREA_MESSAGE } from "../tools/useZoneTool";
 
@@ -27,7 +31,7 @@ export function useMapGeometryEdit({
   const setGeometryEditAnnotationId = useAnnotationStore(
     (state) => state.setGeometryEditAnnotationId,
   );
-  const [geometryDraft, setGeometryDraft] = useState<Feature<
+  const [geometryDraftState, setGeometryDraft] = useState<Feature<
     Point | LineString | GeoPolygon | MultiPolygon
   > | null>(null);
   const [thermoEditStep, setThermoEditStep] = useState<"a" | "b">("a");
@@ -37,7 +41,10 @@ export function useMapGeometryEdit({
     [annotations, geometryEditAnnotationId],
   );
   const geometryEditAnnotation =
-    resolvedGeometryEditAnnotation?.type === "tentacle" ? null : resolvedGeometryEditAnnotation;
+    resolvedGeometryEditAnnotation && annotationSupportsGeometryEdit(resolvedGeometryEditAnnotation)
+      ? resolvedGeometryEditAnnotation
+      : null;
+  const geometryDraft = geometryEditAnnotation ? geometryDraftState : null;
 
   const cancelGeometryEdit = useCallback(() => {
     setGeometryEditAnnotationId(null);
@@ -46,7 +53,10 @@ export function useMapGeometryEdit({
   }, [setGeometryEditAnnotationId]);
 
   useEffect(() => {
-    if (resolvedGeometryEditAnnotation?.type === "tentacle") {
+    if (
+      resolvedGeometryEditAnnotation &&
+      !annotationSupportsGeometryEdit(resolvedGeometryEditAnnotation)
+    ) {
       cancelGeometryEdit();
     }
   }, [cancelGeometryEdit, resolvedGeometryEditAnnotation]);
@@ -54,10 +64,7 @@ export function useMapGeometryEdit({
   const startGeometryEdit = useCallback(
     (annotationId: string) => {
       const annotation = annotations.find((item) => item.id === annotationId);
-      if (!annotation) {
-        return;
-      }
-      if (annotation.type === "tentacle") {
+      if (!annotation || !annotationSupportsGeometryEdit(annotation)) {
         return;
       }
 
@@ -72,10 +79,6 @@ export function useMapGeometryEdit({
   );
 
   const saveGeometryEdit = useCallback(async () => {
-    if (resolvedGeometryEditAnnotation?.type === "tentacle") {
-      cancelGeometryEdit();
-      return;
-    }
     if (!geometryEditAnnotation || !geometryDraft) {
       return;
     }
@@ -101,17 +104,12 @@ export function useMapGeometryEdit({
     gameArea,
     geometryDraft,
     geometryEditAnnotation,
-    resolvedGeometryEditAnnotation,
     setMapError,
     updateAnnotation,
   ]);
 
   const handleGeometryEditClick = useCallback(
     (point: LatLngTuple) => {
-      if (resolvedGeometryEditAnnotation?.type === "tentacle") {
-        cancelGeometryEdit();
-        return false;
-      }
       if (!geometryEditAnnotation || !geometryDraft) {
         return false;
       }
@@ -169,14 +167,7 @@ export function useMapGeometryEdit({
 
       return true;
     },
-    [
-      cancelGeometryEdit,
-      ensurePointInGameArea,
-      geometryDraft,
-      geometryEditAnnotation,
-      resolvedGeometryEditAnnotation,
-      thermoEditStep,
-    ],
+    [ensurePointInGameArea, geometryDraft, geometryEditAnnotation, thermoEditStep],
   );
 
   return {

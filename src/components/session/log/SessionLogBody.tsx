@@ -11,7 +11,11 @@ import { useMemo } from "react";
 import { HudToolIcon } from "@/components/map/icons/ToolIcons";
 import { compactDangerStyles, compactGrayStyles } from "@/components/ui/entry/entryChrome";
 import { EmptyState } from "@/components/ui/feedback/EmptyState";
-import { type AnnotationRecord, isActive } from "@/domain/map/annotations";
+import {
+  type AnnotationRecord,
+  annotationSupportsPostAnswerEdit,
+  isActive,
+} from "@/domain/map/annotations";
 import type { DockableMapTool } from "@/domain/map/mapTools";
 import {
   activityAnnotationId,
@@ -212,7 +216,7 @@ export function SessionLogBody({
         const linkedId = activityAnnotationId(focus);
         const liveId = linkedId && activeById.has(linkedId) ? linkedId : undefined;
         const liveAnnotation = liveId ? activeById.get(liveId) : undefined;
-        const canEdit = liveAnnotation?.type !== "tentacle";
+        const canEdit = liveAnnotation ? annotationSupportsPostAnswerEdit(liveAnnotation) : false;
         const showActions = Boolean(liveId) && !readOnly;
         const selectable = Boolean(liveId && onSelect);
         const markEvent = entry.kind === "pair" ? entry.resolved : entry.event;

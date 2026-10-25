@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
-import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
+import {
+  type AnnotationRecord,
+  annotationSupportsPostAnswerEdit,
+  type GameArea,
+} from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { RadarDistanceOptionKey, ThermometerDistanceOptionKey } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
@@ -23,6 +27,9 @@ export function annotationEditFields(
   annotation: AnnotationRecord,
   context: AnnotationEditFieldsContext,
 ): ReactNode {
+  if (!annotationSupportsPostAnswerEdit(annotation)) {
+    return null;
+  }
   switch (annotation.type) {
     case "radar":
       return (
