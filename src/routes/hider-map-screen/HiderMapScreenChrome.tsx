@@ -348,6 +348,8 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     visibleRoleCodeRoles({
       roleGates: session.roleGates,
       memberRoles: session.memberRoles,
+      castleSiegeRoles: session.castleSiegeRoles,
+      mode: session.mode,
       myUid: uid ?? undefined,
       isHost,
     }).length > 0;

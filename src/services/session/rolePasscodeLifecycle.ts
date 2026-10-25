@@ -19,7 +19,7 @@ export type InitSessionRoleGatesResult = {
 };
 
 export type RolePasscodeActionResult = {
-  role: "seeker" | "hider" | "observer";
+  role: JoinRequestRole;
   rolePasscode: string;
 };
 

@@ -220,6 +220,8 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
   const canOpenCodes = canOpenMapScreenRoleCodes({
     roleGates: session!.roleGates,
     memberRoles: session!.memberRoles,
+    castleSiegeRoles: session!.castleSiegeRoles,
+    mode: session!.mode,
     myUid: uid,
     isHost,
   });

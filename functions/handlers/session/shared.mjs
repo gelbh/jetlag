@@ -100,9 +100,18 @@ export function requireAuthSessionId(request) {
   return { uid: request.auth.uid, sessionId };
 }
 
+const VALID_CALLABLE_SESSION_ROLES = new Set([
+  "seeker",
+  "hider",
+  "observer",
+  "teamA",
+  "teamB",
+  "referee",
+]);
+
 export function requireSessionRole(request) {
   const role = request.data?.role;
-  if (role !== "seeker" && role !== "hider" && role !== "observer") {
+  if (!VALID_CALLABLE_SESSION_ROLES.has(role)) {
     throw new HttpsError("invalid-argument", "role is required.");
   }
   return role;
