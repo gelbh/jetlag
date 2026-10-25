@@ -87,11 +87,12 @@ export function useHiderLocationsSync(sessionId: string | undefined, enabled = t
   );
 }
 
-export function useHidingZonesSync(sessionId: string | undefined) {
+export function useHidingZonesSync(sessionId: string | undefined, enabled = true) {
   const sessionResetAt = useSessionResetAt();
   const { items, loaded } = useFirestoreCollectionSyncWithStatus<HidingZoneRecord>(
     sessionId,
     subscribeToHidingZones,
+    { enabled },
   );
 
   const zones = useMemo(
@@ -101,11 +102,12 @@ export function useHidingZonesSync(sessionId: string | undefined) {
   return { zones, loaded };
 }
 
-export function useSessionMessagesSync(sessionId: string | undefined) {
+export function useSessionMessagesSync(sessionId: string | undefined, enabled = true) {
   const sessionResetAt = useSessionResetAt();
   const items = useFirestoreCollectionSync<SessionMessageRecord>(
     sessionId,
     subscribeToSessionMessages,
+    { enabled },
   );
 
   return useMemo(
@@ -114,11 +116,12 @@ export function useSessionMessagesSync(sessionId: string | undefined) {
   );
 }
 
-export function usePendingQuestionsSync(sessionId: string | undefined) {
+export function usePendingQuestionsSync(sessionId: string | undefined, enabled = true) {
   const sessionResetAt = useSessionResetAt();
   const items = useFirestoreCollectionSync<PendingQuestionRecord>(
     sessionId,
     subscribeToPendingQuestions,
+    { enabled },
   );
 
   return useMemo(

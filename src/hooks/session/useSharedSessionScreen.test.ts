@@ -55,12 +55,18 @@ vi.mock("./useChatUnread", () => ({
     acknowledgeFingerprints: vi.fn(),
   })),
 }));
+const usePendingQuestionsSync = vi.fn(() => []);
+const useHidingZonesSync = vi.fn(() => ({ zones: [], loaded: true }));
+const useSeekerLocationsSync = vi.fn(() => []);
+const useHiderLocationsSync = vi.fn(() => []);
+const useSessionMessagesSync = vi.fn(() => []);
+
 vi.mock("./useSessionExtrasSync", () => ({
-  usePendingQuestionsSync: vi.fn(() => []),
-  useHidingZonesSync: vi.fn(() => ({ zones: [], loaded: true })),
-  useSeekerLocationsSync: vi.fn(() => []),
-  useHiderLocationsSync: vi.fn(() => []),
-  useSessionMessagesSync: vi.fn(() => []),
+  usePendingQuestionsSync: (...args: unknown[]) => usePendingQuestionsSync(...args),
+  useHidingZonesSync: (...args: unknown[]) => useHidingZonesSync(...args),
+  useSeekerLocationsSync: (...args: unknown[]) => useSeekerLocationsSync(...args),
+  useHiderLocationsSync: (...args: unknown[]) => useHiderLocationsSync(...args),
+  useSessionMessagesSync: (...args: unknown[]) => useSessionMessagesSync(...args),
 }));
 vi.mock("./useRemoteSessionTimerSync", () => ({
   useRemoteSessionTimerSync: vi.fn(() => ({
@@ -88,7 +94,7 @@ vi.mock("../sync/useFirebaseAuthReady", () => ({
   useFirebaseAuthReady: vi.fn(() => true),
 }));
 
-const ensureSessionMembershipMock = vi.fn();
+const ensureSessionMembershipMock = vi.fn(() => ({ membershipSettled: true }));
 vi.mock("./useEnsureSessionMembership", () => ({
   useEnsureSessionMembership: (...args: unknown[]) => ensureSessionMembershipMock(...args),
 }));
@@ -100,7 +106,13 @@ describe("useSharedSessionScreen", () => {
     setMyUid.mockClear();
     setLastSyncError.mockClear();
     ensureSessionMembershipMock.mockClear();
+    ensureSessionMembershipMock.mockReturnValue({ membershipSettled: true });
     ensureAnonymousUser.mockReset();
+    usePendingQuestionsSync.mockClear();
+    useHidingZonesSync.mockClear();
+    useSeekerLocationsSync.mockClear();
+    useHiderLocationsSync.mockClear();
+    useSessionMessagesSync.mockClear();
   });
 
   it("heals membership for hider-anonymous auth mode", () => {
@@ -221,5 +233,33 @@ describe("useSharedSessionScreen", () => {
     rerender();
 
     expect(useSessionSyncMock).toHaveBeenLastCalledWith({ syncEnabled: false });
+  });
+
+  it("defers extras listeners until membership heal settles", () => {
+    ensureAnonymousUser.mockResolvedValue({ uid: "hider-uid" });
+    ensureSessionMembershipMock.mockReturnValue({ membershipSettled: false });
+
+    const { rerender } = renderHook(() =>
+      useSharedSessionScreen({
+        isChatOpen: false,
+        notificationRole: "hider",
+        authMode: "hider-anonymous",
+      }),
+    );
+
+    expect(usePendingQuestionsSync).toHaveBeenLastCalledWith("session-1", false);
+    expect(useHidingZonesSync).toHaveBeenLastCalledWith("session-1", false);
+    expect(useSessionMessagesSync).toHaveBeenLastCalledWith("session-1", false);
+    expect(useSeekerLocationsSync).toHaveBeenLastCalledWith("session-1", false);
+    expect(useHiderLocationsSync).toHaveBeenLastCalledWith("session-1", false);
+
+    ensureSessionMembershipMock.mockReturnValue({ membershipSettled: true });
+    rerender();
+
+    expect(usePendingQuestionsSync).toHaveBeenLastCalledWith("session-1", true);
+    expect(useHidingZonesSync).toHaveBeenLastCalledWith("session-1", true);
+    expect(useSessionMessagesSync).toHaveBeenLastCalledWith("session-1", true);
+    expect(useSeekerLocationsSync).toHaveBeenLastCalledWith("session-1", true);
+    expect(useHiderLocationsSync).toHaveBeenLastCalledWith("session-1", true);
   });
 });

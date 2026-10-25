@@ -81,11 +81,11 @@ export function subscribeActivityLog(
             `[activityLog] Skipping invalid doc ${eventDoc.id} in session ${sessionId}`,
             error,
           );
-          captureException(error);
+          captureException(error, { firestore_op: "deserialize:activityLog" });
         }
       }
       onChange(sortActivityEventsDesc(events));
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) => handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:activityLog" }),
   );
 }
