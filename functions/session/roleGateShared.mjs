@@ -33,6 +33,13 @@ export function buildRoleGatesForHost(hostUid, hostRole) {
   return { version: 1, leaders };
 }
 
+export function buildRoleGatesForCastleSiegeHost(hostUid, hostSeat) {
+  return {
+    version: 1,
+    leaders: { [hostSeat]: hostUid },
+  };
+}
+
 export function countMembersWithRole(memberRoles, role) {
   if (!memberRoles || typeof memberRoles !== "object") {
     return 0;
@@ -120,7 +127,16 @@ export function promoteOrClearRoleLeader(roleGates, memberUids, memberRoles, rol
   return { roleGates: { version: 1, leaders: nextLeaders }, clearSecret: false };
 }
 
-export function buildInitialRoleSecrets(hostRole) {
+export function buildInitialRoleSecrets(hostRole, options = {}) {
+  if (options.mode === "castleSiege") {
+    return {
+      teamA: newRoleSecret(),
+      teamB: newRoleSecret(),
+      referee: newRoleSecret(),
+      observer: newRoleSecret(),
+    };
+  }
+
   const secrets = {
     observer: newRoleSecret(),
   };
