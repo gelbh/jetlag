@@ -22,7 +22,7 @@ export type EntryAsyncButtonProps = Omit<
   unavailable?: boolean;
   showSpinner?: boolean;
   statusMessage?: string;
-  /** While running, shows its stage as the busy label and a thin bar under the button. */
+  /** While running, its stage becomes the busy label and its progress fills the button. */
   task?: LoadTask | null;
 };
 

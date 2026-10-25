@@ -8,8 +8,6 @@ type LoadProgressVariant = "full" | "compact";
 interface LoadProgressProps {
   task: LoadTask;
   variant?: LoadProgressVariant;
-  /** Hides the task label when the surrounding UI already shows it. */
-  hideLabel?: boolean;
   /**
    * What the compact footer names: the task label, or the current step when the
    * surrounding card already has a title.
@@ -31,7 +29,6 @@ function timeText(etaMs: number | null, overdue: boolean): string | null {
 export function LoadProgress({
   task,
   variant = "full",
-  hideLabel = false,
   compactDetail = "label",
   className = "",
 }: LoadProgressProps) {
@@ -49,7 +46,7 @@ export function LoadProgress({
       <div role="status" aria-live="polite" className="sr-only">
         {`${snapshot.label}. ${snapshot.stageLabel}.`}
       </div>
-      {!hideLabel && !compact ? (
+      {!compact ? (
         <p className="m-0 text-sm text-field-ink" aria-hidden>
           {snapshot.label}
         </p>

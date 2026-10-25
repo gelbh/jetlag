@@ -42,10 +42,6 @@ export function cachedFetchOptions(
   return { ...base, signal: load?.signal, priority: load?.priority, node: load?.node, stage };
 }
 
-export function queryOverpassLoaded<T>(query: string, load: OverpassLoad = {}): Promise<T> {
-  return queryOverpass<T>(query, load);
-}
-
 export function queryOverpassSplitLoaded<T>(
   buildQuery: (bbox: OverpassBbox) => string,
   bbox: OverpassBbox,

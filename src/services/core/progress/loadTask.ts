@@ -268,19 +268,6 @@ export async function runLoadTask<T>(
   }
 }
 
-/** Runs a stage around `work`, finishing it on success. */
-export async function withStage<T>(
-  parent: ProgressNode | undefined,
-  spec: StageSpec,
-  work: (node: ProgressNode | undefined) => Promise<T>,
-): Promise<T> {
-  const node = parent?.stage(spec);
-  node?.start();
-  const result = await work(node);
-  node?.finish();
-  return result;
-}
-
 /**
  * Progress root that belongs to no task, for work shared between callers
  * (an in-flight cache fetch). Callers follow it with `node.mirror()`.

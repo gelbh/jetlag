@@ -79,10 +79,6 @@ export class ProgressNode {
     return this.status === "running" || this.status === "queued";
   }
 
-  get parentNode(): ProgressNode | null {
-    return this.parent;
-  }
-
   get label(): string {
     if (this.status === "queued" && this.queueLabel !== null) {
       return this.queueLabel;
@@ -125,12 +121,6 @@ export class ProgressNode {
 
   setLabel(label: string | null): void {
     this.labelOverride = label;
-    this.notify();
-  }
-
-  /** Overrides the expected duration, e.g. once a queue position is known. */
-  setExpectedMs(expectedMs: number): void {
-    this.expected = clampExpectedMs(expectedMs);
     this.notify();
   }
 
