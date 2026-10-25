@@ -50,21 +50,33 @@ export type SessionEndedReason =
   | "local"
   | "abandoned";
 
+/**
+ * Opaque session document id for funnel correlation.
+ * Prefer this over join codes / `sessionId` keys: those are stripped by analytics scrubbing.
+ */
+export type AnalyticsGameIdProps = {
+  gameId: string;
+};
+
 export type AnalyticsEventProps = {
-  session_created: {
+  session_created: AnalyticsGameIdProps & {
     tier: SessionTier;
     gameSize: GameSize;
     role: PlayerRole;
   };
-  session_joined: {
+  session_joined: AnalyticsGameIdProps & {
     role: AnalyticsSessionRole;
   };
   join_failed: {
     role: PlayerRole;
     reason: JoinFailureReason;
+    /** Present when the join target session was already resolved. */
+    gameId?: string;
   };
-  session_ended: {
+  session_ended: AnalyticsGameIdProps & {
     reason: SessionEndedReason;
+    /** Session `createdAt` when known (abandoned sweep). */
+    createdAt?: string;
   };
   session_leave_already_left: Record<string, never>;
   role_selected: {

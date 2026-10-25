@@ -812,6 +812,7 @@ export function useCreateSession() {
           : {}),
       };
 
+      let gameId = LOCAL_SESSION_ID;
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
         const premiumSubmitError = validatePremiumHostSubmit(
@@ -857,6 +858,7 @@ export function useCreateSession() {
                 castleSiegeCreate,
               ),
             );
+        gameId = session.id;
         setSession(session, user.uid);
         setPremiumApiContext(session);
         emitSessionStartedActivity(session.id, user.uid);
@@ -883,6 +885,7 @@ export function useCreateSession() {
       }
 
       track(ANALYTICS_EVENTS.session_created, {
+        gameId,
         tier: isFirebaseConfigured() ? tier : "free",
         gameSize,
         role: playerRole,

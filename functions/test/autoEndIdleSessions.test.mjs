@@ -135,7 +135,12 @@ test("autoEndIdleSession ends session and deletes session code", async () => {
 });
 
 test("autoEndIdleSession captures session_ended abandoned for host", async () => {
-  const sessionData = { code: "WXYZ", status: "active", hostUid: "host_1" };
+  const sessionData = {
+    code: "WXYZ",
+    status: "active",
+    hostUid: "host_1",
+    createdAt: "2026-10-01T12:00:00.000Z",
+  };
   const { db } = createEndSessionDb(sessionData);
   const sessionDoc = {
     id: "sess_1",
@@ -159,7 +164,11 @@ test("autoEndIdleSession captures session_ended abandoned for host", async () =>
   assert.equal(captureCalls.length, 1);
   assert.equal(captureCalls[0].distinctId, "host_1");
   assert.equal(captureCalls[0].event, "session_ended");
-  assert.deepEqual(captureCalls[0].properties, { reason: "abandoned" });
+  assert.deepEqual(captureCalls[0].properties, {
+    reason: "abandoned",
+    gameId: "sess_1",
+    createdAt: "2026-10-01T12:00:00.000Z",
+  });
   assert.equal(captureCalls[0].uuid, uuidFromSeed("session_ended:abandoned:sess_1"));
 });
 

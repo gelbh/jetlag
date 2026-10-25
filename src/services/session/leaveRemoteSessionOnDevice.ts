@@ -48,7 +48,7 @@ export async function leaveRemoteSessionOnDevice(params: {
     try {
       const leaveResult = await leaveHostSession(session.id);
       if (leaveResult.action === "ended") {
-        trackSessionEnded("host_leave_ended");
+        trackSessionEnded("host_leave_ended", { gameId: session.id });
       }
     } catch (error) {
       if (alertIfNeedsConnection(error)) {
@@ -56,13 +56,13 @@ export async function leaveRemoteSessionOnDevice(params: {
         return "failed";
       }
       if (isExpectedSessionLeaveError(error)) {
-        trackSessionEnded("expected_already_ended");
+        trackSessionEnded("expected_already_ended", { gameId: session.id });
       } else {
         captureException(error);
         if (alone) {
           const sessionId = session.id;
           commitWrite("session.end", () => endRemoteSession(sessionId));
-          trackSessionEnded("fallback_client_end");
+          trackSessionEnded("fallback_client_end", { gameId: sessionId });
         } else {
           allowPlayerLocationPublishes();
           window.alert("Couldn't leave the session. Try again.");

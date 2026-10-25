@@ -73,7 +73,7 @@ describe("sessionLifecycle", () => {
     });
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
     expect(trackSessionEnded).toHaveBeenCalledOnce();
-    expect(trackSessionEnded).toHaveBeenCalledWith("host_end");
+    expect(trackSessionEnded).toHaveBeenCalledWith("host_end", { gameId: "session-42" });
   });
 
   it("tracks expected_already_ended when the server reports alreadyEnded", async () => {
@@ -81,7 +81,9 @@ describe("sessionLifecycle", () => {
     await endSession("session-42");
 
     expect(trackSessionEnded).toHaveBeenCalledOnce();
-    expect(trackSessionEnded).toHaveBeenCalledWith("expected_already_ended");
+    expect(trackSessionEnded).toHaveBeenCalledWith("expected_already_ended", {
+      gameId: "session-42",
+    });
   });
 
   it("does not track when endSession callable fails", async () => {
