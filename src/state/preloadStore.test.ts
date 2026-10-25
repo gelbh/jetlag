@@ -10,7 +10,21 @@ describe("preloadStore", () => {
       failedJobs: 0,
       dismissed: false,
       adminDivisionCounts: null,
+      categoryPresenceCounts: null,
     });
+  });
+
+  it("stores category presence counts for the active game area and clears on reset", () => {
+    usePreloadStore.getState().reset("area-1", 1);
+    usePreloadStore.getState().setCategoryPresenceCounts("area-1", { zoo: 0, museum: 3 });
+
+    expect(usePreloadStore.getState().categoryPresenceCounts).toEqual({ zoo: 0, museum: 3 });
+
+    usePreloadStore.getState().setCategoryPresenceCounts("other-area", { zoo: 9 });
+    expect(usePreloadStore.getState().categoryPresenceCounts).toEqual({ zoo: 0, museum: 3 });
+
+    usePreloadStore.getState().reset("area-2", 2);
+    expect(usePreloadStore.getState().categoryPresenceCounts).toBeNull();
   });
 
   it("shows loading banner while jobs are in progress", () => {

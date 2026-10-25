@@ -33,6 +33,8 @@ export type TentaclePanelModel = {
   categoryChosen: boolean;
   searchRadiusMeters: number;
   usedCategoryIds: ReadonlySet<TentacleExtendedCategoryId>;
+  unavailableCategoryIds?: ReadonlySet<TentacleExtendedCategoryId>;
+  catalogNotice?: string | null;
   distanceUnit: DistanceUnit;
   poiOptions: TentaclePoi[];
   selectedPoiId: string | null;
@@ -67,6 +69,9 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
     categoryId,
     categoryChosen,
     searchRadiusMeters,
+    usedCategoryIds,
+    unavailableCategoryIds = new Set<TentacleExtendedCategoryId>(),
+    catalogNotice = null,
     distanceUnit,
     poiOptions,
     selectedPoiId,
@@ -145,6 +150,9 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {catalogNotice ? (
+            <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
+          ) : null}
           <QuestionPromptBlock
             prompt={prompt}
             ruleSummary={
@@ -168,7 +176,14 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
             >
               <option value="">Choose a category</option>
               {availableCategories.map((category) => (
-                <option key={category.id} value={category.id}>
+                <option
+                  key={category.id}
+                  value={category.id}
+                  disabled={
+                    (usedCategoryIds.has(category.id) || unavailableCategoryIds.has(category.id)) &&
+                    category.id !== categoryId
+                  }
+                >
                   {category.label}
                 </option>
               ))}

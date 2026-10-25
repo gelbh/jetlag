@@ -17,3 +17,16 @@ GTFS static bundle (public/geo/gtfs/sydney.json): Mobility Database mdb-2449
 (Transport for NSW Greater Sydney complete static), clipped to the Sydney
 specialty pack AABB. Attribution: Transport for NSW (CC BY 4.0). Rebuild:
 node scripts/rebuild-all-gtfs-metros.mjs --metro sydney
+
+Suburb and Locality (SAL) — public/geo/sydney/sals.geojson
+Upstream: Australian Bureau of Statistics (ABS), ASGS Edition 3 / ASGS2021 SAL,
+CC BY 4.0. Source REST:
+https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SAL/MapServer/0/query
+Download: envelope intersects Greater Sydney reference AABB (west 150.0148,
+south -34.3374, east 151.343, north -32.9961), NSW state filter, outSR=4326.
+Server-generalized with maxAllowableOffset≈0.0014°, then @turf/simplify
+tolerance 0.002 (same band as national Australia pack). Metro clip: keep SAL
+features whose largest-area outer-ring centroid lies inside the SAL polygon and
+inside one of the 33 Greater Sydney LGAs in public/geo/sydney/lgas.geojson;
+parent lgaId is that containing LGA. Feature properties.id mirrors ABS salId
+for matching. Rebuild: node scripts/geo/build-sydney-sals.mjs

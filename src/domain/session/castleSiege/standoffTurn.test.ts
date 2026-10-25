@@ -25,6 +25,12 @@ describe("standoffTurn clocks", () => {
     expect(turn.deadlineMs).toBe(1_000 + DEFAULT_STANDOFF_CLOCKS.turnSeconds * 1000);
   });
 
+  it("honors seriesStandoffOpener as activeTeam", () => {
+    const turn = createInitialStandoffTurn(0, DEFAULT_STANDOFF_CLOCKS, "teamB");
+    expect(whoseTurn(turn)).toBe("teamB");
+    expect(turn.activeTeam).toBe("teamB");
+  });
+
   it("Double Time doubles the answer window", () => {
     const turn = createInitialStandoffTurn(0);
     const answering = startAnswerWindow(turn, { nowMs: 100, photo: false, doubleTime: true });

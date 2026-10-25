@@ -98,6 +98,7 @@ import {
   resetEndGameSession,
   resetFoundHiderSession,
 } from "../services/firestore/firestoreAnnotations";
+import { randomizePresenceFromPreload } from "../services/questions/randomizePresence";
 import { emitGameEndedActivity } from "../services/session/emitSessionActivity";
 import { useAnnotationStore } from "../state/annotationStore";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
@@ -473,9 +474,22 @@ export function HiderMapScreen() {
     }
     setChatAnswerError(null);
     const sessionRules = session ?? DEFAULT_SESSION_RULES;
+    const presenceTool =
+      pending.toolType === "matching" ||
+      pending.toolType === "measuring" ||
+      pending.toolType === "tentacle"
+        ? pending.toolType
+        : null;
     const randomizedTo =
       card === "randomize"
-        ? pickRandomizeOption(pending, sessionRules, annotations, pendingQuestions)
+        ? pickRandomizeOption(
+            pending,
+            sessionRules,
+            annotations,
+            pendingQuestions,
+            Math.random,
+            presenceTool ? randomizePresenceFromPreload(sessionRules, presenceTool) : undefined,
+          )
         : null;
     if (card === "randomize" && !randomizedTo) {
       setChatAnswerError(`No other ${pending.toolType} questions left to randomize to.`);

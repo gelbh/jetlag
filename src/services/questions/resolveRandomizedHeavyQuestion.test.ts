@@ -28,6 +28,7 @@ import {
 
 const preload = vi.hoisted(() => ({
   adminDivisionCounts: null as AdminDivisionCounts | null,
+  categoryPresenceCounts: null as Record<string, number> | null,
 }));
 
 vi.mock("../../hooks/tools/matching/resolveMatchingAnchor", () => ({
@@ -99,6 +100,7 @@ beforeEach(() => {
   vi.mocked(fetchMeasuringLinearContext).mockReset();
   vi.mocked(fetchMeasuringPlacesInArea).mockReset();
   preload.adminDivisionCounts = null;
+  preload.categoryPresenceCounts = null;
 });
 
 describe("resolveRandomizedMatching", () => {
@@ -140,6 +142,13 @@ describe("resolveRandomizedMatching", () => {
     );
 
     expect(await resolveRandomizedMatching(anchor, "museum", cards, ctx())).toBeNull();
+  });
+
+  it("returns null without resolving when probe count is 0", async () => {
+    preload.categoryPresenceCounts = { museum: 0 };
+
+    expect(await resolveRandomizedMatching(anchor, "museum", cards, ctx())).toBeNull();
+    expect(resolveMatchingAnchor).not.toHaveBeenCalled();
   });
 });
 
@@ -184,6 +193,13 @@ describe("resolveRandomizedTentacle", () => {
     expect(
       await resolveRandomizedTentacle(anchor, "museum", cards, ctx({ tentaclesEnabled: false })),
     ).toBeNull();
+    expect(fetchTentaclePois).not.toHaveBeenCalled();
+  });
+
+  it("returns null without fetching when probe count is 0", async () => {
+    preload.categoryPresenceCounts = { museum: 0 };
+
+    expect(await resolveRandomizedTentacle(anchor, "museum", cards, ctx())).toBeNull();
     expect(fetchTentaclePois).not.toHaveBeenCalled();
   });
 });
@@ -261,8 +277,10 @@ describe("resolveRandomizedMeasuring", () => {
       distanceMeters: 5_000,
       segments: [segment],
     });
+    // Tokyo keeps high_speed_rail_line off the play-area denylist.
+    const tokyo = ctx({ regionPackId: "tokyo" });
 
-    const built = await resolveRandomizedMeasuring(anchor, "high_speed_rail_line", cards, ctx());
+    const built = await resolveRandomizedMeasuring(anchor, "high_speed_rail_line", cards, tokyo);
 
     const metadata = built?.placement.metadata;
     expect(metadata?.measuringSubject).toBe("location");
@@ -278,14 +296,19 @@ describe("resolveRandomizedMeasuring", () => {
     expect(point).toEqual(anchor);
     expect(subject).toBe("location");
     expect(category).toBe("high_speed_rail_line");
-    expect(regionPackId).toBe("london");
+    expect(regionPackId).toBe("tokyo");
   });
 
   it("returns null when the linear fetch reports not ok", async () => {
     vi.mocked(fetchMeasuringLinearContext).mockResolvedValue({ ok: false, message: "none" });
 
     expect(
-      await resolveRandomizedMeasuring(anchor, "high_speed_rail_line", cards, ctx()),
+      await resolveRandomizedMeasuring(
+        anchor,
+        "high_speed_rail_line",
+        cards,
+        ctx({ regionPackId: "tokyo" }),
+      ),
     ).toBeNull();
   });
 
@@ -293,7 +316,12 @@ describe("resolveRandomizedMeasuring", () => {
     vi.mocked(fetchMeasuringLinearContext).mockRejectedValue(new Error("overpass down"));
 
     expect(
-      await resolveRandomizedMeasuring(anchor, "high_speed_rail_line", cards, ctx()),
+      await resolveRandomizedMeasuring(
+        anchor,
+        "high_speed_rail_line",
+        cards,
+        ctx({ regionPackId: "tokyo" }),
+      ),
     ).toBeNull();
   });
 
@@ -354,6 +382,25 @@ describe("resolveRandomizedMeasuring", () => {
   it("returns null without fetching for an admin border while counts are unknown", async () => {
     expect(await resolveRandomizedMeasuring(anchor, "admin1_border", cards, ctx())).toBeNull();
     expect(fetchMeasuringLinearContext).not.toHaveBeenCalled();
+  });
+
+  it("returns null without fetching for a denylisted measuring kind", async () => {
+    expect(
+      await resolveRandomizedMeasuring(
+        anchor,
+        "high_speed_rail_line",
+        cards,
+        ctx({ regionPackId: "dublin" }),
+      ),
+    ).toBeNull();
+    expect(fetchMeasuringLinearContext).not.toHaveBeenCalled();
+  });
+
+  it("returns null without fetching when probe count is 0", async () => {
+    preload.categoryPresenceCounts = { museum: 0 };
+
+    expect(await resolveRandomizedMeasuring(anchor, "museum", cards, ctx())).toBeNull();
+    expect(fetchMeasuringPlacesInArea).not.toHaveBeenCalled();
   });
 
   it("routes an available admin border through the linear fetch", async () => {

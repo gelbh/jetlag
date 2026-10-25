@@ -15,6 +15,8 @@ import {
   type TentacleExtendedCategoryId,
   tentacleSearchRadiusMetersForSession,
 } from "../../domain/questions";
+import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
+import { resolveCategoryPresence } from "../../domain/session/catalog/playAreaCategoryPresence";
 import {
   sessionCustomContentFromRules,
   taggedSetupPinsForCategory,
@@ -32,12 +34,11 @@ import {
   fetchMeasuringLinearContext,
 } from "../../hooks/tools/measuringToolResolvers";
 import { buildTentaclePendingInput } from "../../hooks/tools/tentacle/tentaclePendingInput";
-import { usePreloadStore } from "../../state/preloadStore";
 import type { LoadTask } from "../core/progress/loadTask";
-import { adminBorderKindAvailability } from "../geo/overpass/adminDivisionAvailability";
 import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
 import { fetchTentaclePois } from "../geo/overpass/tentacleOverpass";
 import { inferTransitMetroId } from "../transit/transitCatalog";
+import { randomizePresenceFromPreload } from "./randomizePresence";
 
 export interface HeavyResolveContext {
   session: SessionRulesInput;
@@ -49,6 +50,27 @@ export interface HeavyResolveContext {
 
 type RandomizedCards = { cardDraw?: number; cardKeep?: number };
 
+type PresenceToolType = Extract<PendingQuestionToolType, "matching" | "measuring" | "tentacle">;
+
+function isCategoryPresentForHeavyResolve(
+  categoryId: string,
+  session: SessionRulesInput,
+  toolType: PresenceToolType,
+): boolean {
+  const regionPackId = session.regionPackId;
+  if (!regionPackId) {
+    return true;
+  }
+  const presence = randomizePresenceFromPreload(session, toolType);
+  return resolveCategoryPresence({
+    categoryId,
+    regionPackId,
+    adminUnavailable: presence.isAdminUnavailable?.(categoryId) ?? false,
+    probeCount: presence.categoryPresenceCounts?.[categoryId],
+    probePending: presence.categoryPresenceCounts === null,
+  }).available;
+}
+
 /** Builds the pending payload for a rolled matching option at `anchor`, or null when it cannot be sent. */
 export async function resolveRandomizedMatching(
   anchor: LatLngTuple,
@@ -57,6 +79,9 @@ export async function resolveRandomizedMatching(
   ctx: HeavyResolveContext,
 ): Promise<ToolPendingInput | null> {
   const { session, annotations, gameArea } = ctx;
+  if (!isCategoryPresentForHeavyResolve(categoryId, session, "matching")) {
+    return null;
+  }
   const { customMatchingAreas, customCategories } = sessionCustomContentFromRules(session);
   const result = await resolveMatchingAnchor({
     seekerPoint: anchor,
@@ -107,6 +132,7 @@ export async function resolveRandomizedTentacle(
 ): Promise<ToolPendingInput | null> {
   const { session, annotations } = ctx;
   if (!isTentacleCategoryAvailableInSession(session, categoryId)) return null;
+  if (!isCategoryPresentForHeavyResolve(categoryId, session, "tentacle")) return null;
 
   const searchRadiusMeters = tentacleSearchRadiusMetersForSession(session, categoryId);
   let fetched: TentaclePoi[];
@@ -225,11 +251,7 @@ export async function resolveRandomizedMeasuring(
     kind === "custom_place" ||
     kind.startsWith("custom:") ||
     kind.startsWith("custom_geo:") ||
-    !adminBorderKindAvailability(
-      kind,
-      usePreloadStore.getState().adminDivisionCounts,
-      ctx.session.regionPackId,
-    )
+    !isCategoryPresentForHeavyResolve(kind, ctx.session, "measuring")
   ) {
     return null;
   }

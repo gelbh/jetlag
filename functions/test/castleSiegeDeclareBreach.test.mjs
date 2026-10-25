@@ -28,6 +28,7 @@ describe("evaluateDeclareBreach", () => {
       breachToleranceMeters: 50,
     });
     assert.equal(result.outcome, "breach");
+    assert.equal(typeof result.distanceMeters, "number");
     assert.equal("withinTolerance" in result, false);
     assert.equal("lat" in result, false);
     assert.equal("lng" in result, false);

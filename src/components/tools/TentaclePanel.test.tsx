@@ -51,4 +51,19 @@ describe("TentaclePanel public props (AC #1)", () => {
 
     expect(screen.getByText("Location type")).toBeInTheDocument();
   });
+
+  it("greys unavailable categories and shows catalog notice", () => {
+    render(
+      <TentaclePanel
+        model={{
+          ...baseModel,
+          unavailableCategoryIds: new Set(["museum"]),
+          catalogNotice: "No named museum found in this play area.",
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("option", { name: "Museum" })).toBeDisabled();
+    expect(screen.getByText("No named museum found in this play area.")).toBeInTheDocument();
+  });
 });

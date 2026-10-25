@@ -21,6 +21,7 @@ export function teardownSessionUiState(): void {
     failedJobs: 0,
     dismissed: true,
     adminDivisionCounts: null,
+    categoryPresenceCounts: null,
   });
 }
 

@@ -180,6 +180,8 @@ describe("createRemoteSession role-gate bootstrap", () => {
       memberRoles: { "host-1": "observer" },
       castleSiegeRoles: { "host-1": "teamB" },
       seriesLength: 3,
+      gameIndex: 1,
+      score: { teamA: 0, teamB: 0 },
       setupMode: "fairSplit",
       dials,
     });
@@ -191,13 +193,15 @@ describe("createRemoteSession role-gate bootstrap", () => {
         memberRoles: { "host-1": "observer" },
         castleSiegeRoles: { "host-1": "teamB" },
         seriesLength: 3,
+        gameIndex: 1,
+        score: { teamA: 0, teamB: 0 },
         setupMode: "fairSplit",
         dials,
       }),
     );
   });
 
-  it("defaults castleSiege host team to teamA and omits optional series fields", async () => {
+  it("defaults castleSiege host team to teamA and BO1 scoreboard", async () => {
     clientEnvUsesFirebaseEmulator.mockReturnValue(true);
 
     const session = await createRemoteSession(
@@ -216,7 +220,9 @@ describe("createRemoteSession role-gate bootstrap", () => {
     expect(session.mode).toBe("castleSiege");
     expect(session.memberRoles).toEqual({ "host-1": "observer" });
     expect(session.castleSiegeRoles).toEqual({ "host-1": "teamA" });
-    expect(session.seriesLength).toBeUndefined();
+    expect(session.seriesLength).toBe(1);
+    expect(session.gameIndex).toBe(1);
+    expect(session.score).toEqual({ teamA: 0, teamB: 0 });
     expect(session.setupMode).toBeUndefined();
   });
 
@@ -257,6 +263,8 @@ describe("createRemoteSession role-gate bootstrap", () => {
     expect(payload).not.toHaveProperty("mode");
     expect(payload).not.toHaveProperty("castleSiegeRoles");
     expect(payload).not.toHaveProperty("seriesLength");
+    expect(payload).not.toHaveProperty("gameIndex");
+    expect(payload).not.toHaveProperty("score");
     expect(payload).not.toHaveProperty("setupMode");
   });
 });
