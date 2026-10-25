@@ -47,8 +47,9 @@ describe("mapTools", () => {
   });
 
   it("partitions question dock tools into primary and overflow without overlap", () => {
-    const primary = new Set(QUESTION_DOCK_PRIMARY_IDS);
-    const overflow = new Set(QUESTION_DOCK_OVERFLOW_IDS);
+    type QuestionDockToolId = (typeof QUESTION_DOCK_TOOL_IDS)[number];
+    const primary = new Set<QuestionDockToolId>(QUESTION_DOCK_PRIMARY_IDS);
+    const overflow = new Set<QuestionDockToolId>(QUESTION_DOCK_OVERFLOW_IDS);
     for (const id of QUESTION_DOCK_TOOL_IDS) {
       expect(primary.has(id) || overflow.has(id)).toBe(true);
     }
