@@ -56,7 +56,7 @@ describe("buildGeometryEditModel", () => {
     });
   });
 
-  it("computes tentacle out-of-reach disk once in the model", () => {
+  it("returns empty for tentacle (no post-answer geometry edit)", () => {
     const draft: Feature<Point> = {
       type: "Feature",
       properties: {},
@@ -70,13 +70,7 @@ describe("buildGeometryEditModel", () => {
       draft,
       gameArea,
     );
-    expect(model.kind).toBe("tentacle");
-    if (model.kind !== "tentacle") {
-      return;
-    }
-    expect(model.outOfReach).toBe(true);
-    expect(model.noRadarDisk?.geometry.type).toBe("Polygon");
-    expect(model.yesRadarOutside).toBeNull();
+    expect(model).toEqual({ kind: "empty" });
   });
 
   it("builds zone ring vertices from the draft polygon", () => {

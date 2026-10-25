@@ -76,7 +76,6 @@ function MapLibreEditCircleWithMarker({
 function geometryEditMarkers(model: GeometryEditModel): CircleMarkerProps[] {
   switch (model.kind) {
     case "radar":
-    case "tentacle":
       return [];
     case "pin":
       return [
@@ -140,50 +139,6 @@ function renderGeometryEditMapLibre(model: GeometryEditModel, markers: CircleMar
           dashArray="6 6"
           fillOpacity={0.08}
         />
-      );
-    case "tentacle":
-      if (model.outOfReach) {
-        return (
-          <>
-            <MapLibreEditCircleWithMarker
-              id="geometry-edit-tentacle-search"
-              center={model.center}
-              radiusMeters={model.searchRadiusMeters}
-              markerFillColor={model.color}
-              color={model.color}
-              fillOpacity={0.05}
-            />
-            {model.noRadarDisk ? (
-              <MapLibreGeoJsonOverlay
-                id="tentacle-edit-no-radar"
-                data={model.noRadarDisk}
-                fill={{ fillColor: model.color, fillOpacity: 0.35 }}
-                line={{ color: model.color, width: 1 }}
-              />
-            ) : null}
-          </>
-        );
-      }
-      return (
-        <>
-          <MapLibreEditCircleWithMarker
-            id="geometry-edit-tentacle-search"
-            center={model.center}
-            radiusMeters={model.searchRadiusMeters}
-            markerFillColor={model.color}
-            color={model.color}
-            dashArray="6 6"
-            fillOpacity={0.05}
-          />
-          {model.yesRadarOutside ? (
-            <MapLibreGeoJsonOverlay
-              id="tentacle-edit-yes-radar"
-              data={model.yesRadarOutside}
-              fill={{ fillColor: model.color, fillOpacity: 0.35 }}
-              line={{ color: model.color, width: 1 }}
-            />
-          ) : null}
-        </>
       );
     case "pin":
     case "thermometer":
