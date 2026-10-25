@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
 import { isFirestorePermissionDenied } from "@/services/firestore/sessions/shared";
 import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
 import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
@@ -17,7 +18,6 @@ import {
 } from "../../services/session/offlineQueue";
 import type { MapTool } from "../../state/sessionStore";
 import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
-import { shouldQueueAnnotationOffline } from "./shouldQueueAnnotationOffline";
 
 export const ANNOTATION_PERMISSION_DENIED_MESSAGE =
   "Couldn't save that map change. The server rejected it.";
@@ -97,7 +97,7 @@ export function useAnnotations() {
       try {
         const user = await ensureAnonymousUser();
 
-        if (shouldQueueAnnotationOffline()) {
+        if (isEffectivelyOfflineNow()) {
           queueOffline = true;
         } else {
           await withSessionWriteAccess({
