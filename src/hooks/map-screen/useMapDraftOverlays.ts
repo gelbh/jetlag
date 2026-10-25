@@ -153,37 +153,32 @@ export async function buildMapDraftOverlays(
   }
 
   if (activeTool === "tentacle" && sources.tentacle.center) {
-    const {
-      center,
-      searchRadiusMeters,
-      answerRadiusMeters,
-      pois,
-      selectedPoiId,
-      outOfReach,
-      seekerResolving,
-    } = sources.tentacle;
+    const { center, searchRadiusMeters, pois, selectedPoiId, outOfReach, seekerResolving } =
+      sources.tentacle;
     const hasPoiAnswer = !outOfReach && selectedPoiId !== null;
-    const displayRadius = hasPoiAnswer ? answerRadiusMeters : searchRadiusMeters;
+    const answered = outOfReach || hasPoiAnswer;
 
-    if (searchRadiusMeters > 0) {
+    if (!answered && searchRadiusMeters > 0) {
       overlays.push({
         kind: "circle",
         id: "tentacle-draft-range",
         center,
-        radiusMeters: displayRadius,
+        radiusMeters: searchRadiusMeters,
         style: {
           color: c.tentacleAccent,
-          dashArray: outOfReach ? undefined : "6 6",
-          fillOpacity: outOfReach || selectedPoiId ? 0.05 : 0.06,
+          dashArray: "6 6",
+          fillOpacity: 0.06,
         },
       });
     }
-    overlays.push({
-      kind: "marker",
-      id: "tentacle-draft-center",
-      point: center,
-      style: { fillColor: c.tentacle, pulsing: seekerResolving },
-    });
+    if (!answered) {
+      overlays.push({
+        kind: "marker",
+        id: "tentacle-draft-center",
+        point: center,
+        style: { fillColor: c.tentacle, pulsing: seekerResolving },
+      });
+    }
 
     if (outOfReach) {
       overlays.push({

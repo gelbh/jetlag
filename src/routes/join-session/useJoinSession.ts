@@ -258,7 +258,10 @@ export function useJoinSession({
         setPendingRequest(null);
         setSession(joinedSession, user.uid);
         setPremiumApiContext(joinedSession);
-        track(ANALYTICS_EVENTS.session_joined, { role: joinedRole });
+        track(ANALYTICS_EVENTS.session_joined, {
+          role: joinedRole,
+          gameId: joinedSession.id,
+        });
         if (joinedSession.gameArea) {
           void (async () => {
             const matchingAreas = await resolveSessionMatchingAreas(joinedSession);
@@ -358,7 +361,7 @@ export function useJoinSession({
 
     setSession(joinedSession, uid);
     setPremiumApiContext(joinedSession);
-    track(ANALYTICS_EVENTS.session_joined, { role });
+    track(ANALYTICS_EVENTS.session_joined, { role, gameId: joinedSession.id });
     if (joinedSession.gameArea) {
       void (async () => {
         const matchingAreas = await resolveSessionMatchingAreas(joinedSession);
@@ -373,7 +376,11 @@ export function useJoinSession({
   };
 
   const trackJoinFailed = (role: PlayerRole, reason: JoinFailureReason) => {
-    track(ANALYTICS_EVENTS.join_failed, { role, reason });
+    track(ANALYTICS_EVENTS.join_failed, {
+      role,
+      reason,
+      ...(previewSession?.id ? { gameId: previewSession.id } : {}),
+    });
   };
 
   const runJoin = (values: JoinSessionFormValues) =>

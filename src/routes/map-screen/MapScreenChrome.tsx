@@ -7,7 +7,11 @@ import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettings
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
-import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
+import {
+  annotationSupportsPostAnswerEdit,
+  isEndGameActive,
+  isFoundHiderPending,
+} from "../../domain/map/annotations";
 import { sessionHasHiders } from "../../domain/session/players/playerRole";
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
@@ -430,7 +434,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
       />
       {reportProblemSheet}
 
-      {selectedAnnotation ? (
+      {selectedAnnotation && annotationSupportsPostAnswerEdit(selectedAnnotation) ? (
         <AnnotationEditSheet
           annotation={selectedAnnotation}
           gameArea={gameArea!}
@@ -457,14 +461,22 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
           overlay.closeSheet();
           setActiveTool("none");
           setAwaitingPlacement(false);
+          const ann = annotations.find((a) => a.id === id);
+          if (!ann || !annotationSupportsPostAnswerEdit(ann)) {
+            return;
+          }
           setSelectedAnnotationId(id);
         }}
         onSelect={(id) => {
           overlay.closeSheet();
           setActiveTool("none");
           setAwaitingPlacement(false);
-          setSelectedAnnotationId(id);
+          const ann = annotations.find((a) => a.id === id);
           markAnnotationPulse(id);
+          if (!ann || !annotationSupportsPostAnswerEdit(ann)) {
+            return;
+          }
+          setSelectedAnnotationId(id);
         }}
       />
 

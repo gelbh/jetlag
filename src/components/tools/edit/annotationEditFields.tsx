@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
-import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
+import {
+  type AnnotationRecord,
+  annotationSupportsPostAnswerEdit,
+  type GameArea,
+} from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { RadarDistanceOptionKey, ThermometerDistanceOptionKey } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
@@ -7,7 +11,6 @@ import { type MatchingAnnotation, MatchingEditFields } from "./MatchingEditField
 import { type MeasuringAnnotation, MeasuringEditFields } from "./MeasuringEditFields";
 import { type PinZoneAnnotation, PinZoneEditFields } from "./PinZoneEditFields";
 import { type RadarAnnotation, RadarEditFields } from "./RadarEditFields";
-import { type TentacleAnnotation, TentacleEditFields } from "./TentacleEditFields";
 import { type ThermometerAnnotation, ThermometerEditFields } from "./ThermometerEditFields";
 import type { EditSavePayload } from "./types";
 
@@ -24,6 +27,9 @@ export function annotationEditFields(
   annotation: AnnotationRecord,
   context: AnnotationEditFieldsContext,
 ): ReactNode {
+  if (!annotationSupportsPostAnswerEdit(annotation)) {
+    return null;
+  }
   switch (annotation.type) {
     case "radar":
       return (
@@ -44,14 +50,7 @@ export function annotationEditFields(
         />
       );
     case "tentacle":
-      return (
-        <TentacleEditFields
-          annotation={annotation as TentacleAnnotation}
-          gameArea={context.gameArea}
-          distanceUnit={context.distanceUnit}
-          onSavePayloadChange={context.onSavePayloadChange}
-        />
-      );
+      return null;
     case "matching":
       return (
         <MatchingEditFields

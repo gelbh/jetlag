@@ -281,6 +281,10 @@ export {
   isRoundComplete,
 } from "../game/foundHider";
 export { isActive } from "./annotationActive";
+export {
+  annotationSupportsGeometryEdit,
+  annotationSupportsPostAnswerEdit,
+} from "./annotationEditPolicy";
 
 export function migrateAnnotationRecord(annotation: AnnotationRecord): AnnotationRecord {
   if (annotation.type === "thermometer" && annotation.metadata.measuringSubject) {

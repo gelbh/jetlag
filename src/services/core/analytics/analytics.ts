@@ -318,8 +318,11 @@ export function track<E extends AnalyticsEventName>(
   posthog.capture(event, scrubbed);
 }
 
-export function trackSessionEnded(reason: SessionEndedReason): void {
-  track(ANALYTICS_EVENTS.session_ended, { reason });
+export function trackSessionEnded(
+  reason: SessionEndedReason,
+  props: { gameId: string; createdAt?: string },
+): void {
+  track(ANALYTICS_EVENTS.session_ended, { reason, ...props });
 }
 
 export function trackSessionLeaveAlreadyLeft(): void {
