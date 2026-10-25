@@ -21,10 +21,6 @@ vi.mock("../components/friends/FriendsBody", () => ({
   FriendsBody: () => <div data-testid="friends-body">Friends body</div>,
 }));
 
-vi.mock("../components/friends/FriendsBody", () => ({
-  FriendsBody: () => <div data-testid="friends-body">Friends body</div>,
-}));
-
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
