@@ -185,3 +185,54 @@ describe("getOrFetchCached shared in-flight fetches", () => {
     expect(node.isFinished).toBe(true);
   });
 });
+
+describe("getOrFetchCached nested priority", () => {
+  afterEach(async () => {
+    await clearGeographicFeatureCacheForTests();
+  });
+
+  it("promotes an inner shared fetch when a foreground caller joins the outer one", async () => {
+    const inner = controllableFetch<string[]>();
+    let outerContext!: FetchContext;
+    // Preload starts the outer fetch in the background lane; its fetcher starts the inner one.
+    const outerFetcher = async (context: FetchContext) => {
+      outerContext = context;
+      return getOrFetchCached("k:inner", inner.fetcher, {
+        signal: context.signal,
+        priority: context.priority,
+      });
+    };
+    const preload = getOrFetchCached("k:outer", outerFetcher, { priority: "background" });
+    await inner.started();
+    expect(inner.context().priority()).toBe("background");
+
+    const user = getOrFetchCached("k:outer", outerFetcher, {
+      signal: new AbortController().signal,
+    });
+    expect(outerContext.priority()).toBe("foreground");
+    expect(inner.context().priority()).toBe("foreground");
+
+    inner.resolve(["done"]);
+    await expect(Promise.all([preload, user])).resolves.toEqual([["done"], ["done"]]);
+  });
+
+  it("keeps a fetch foreground while either of two subscribers sharing a getter remains", async () => {
+    const fetch = controllableFetch<string[]>();
+    const shared = () => "foreground" as const;
+    const first = new AbortController();
+    const a = getOrFetchCached("k:shared-getter", fetch.fetcher, {
+      signal: first.signal,
+      priority: shared,
+    });
+    const b = getOrFetchCached("k:shared-getter", fetch.fetcher, {
+      signal: new AbortController().signal,
+      priority: shared,
+    });
+    await fetch.started();
+    first.abort(cancelError());
+    await expect(a).rejects.toMatchObject({ name: "AbortError" });
+    expect(fetch.context().priority()).toBe("foreground");
+    fetch.resolve([]);
+    await b;
+  });
+});

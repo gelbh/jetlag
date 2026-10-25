@@ -1,4 +1,4 @@
-import type { ProgressNode } from "@/domain/progress/progressTree";
+import type { LoadPriority, ProgressNode } from "@/domain/progress/progressTree";
 import type { GeoCacheLayer } from "../shared/cacheInterface";
 import { isStableCacheKey } from "./keys";
 
@@ -20,8 +20,8 @@ export interface InFlightEntry {
   cancellable: number;
   /** A subscriber with no signal keeps the fetch alive until it settles. */
   pinned: boolean;
-  /** Live foreground subscribers; any one promotes the fetch to the foreground lane. */
-  foreground: number;
+  /** Each live subscriber's lane, read live; any foreground one promotes the fetch. */
+  priorities: Set<() => LoadPriority>;
   settled: boolean;
   /** Pending abort after the last subscriber left; a new subscriber cancels it. */
   abandonTimer: ReturnType<typeof setTimeout> | null;

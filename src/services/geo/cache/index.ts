@@ -56,7 +56,8 @@ export interface FetchContext {
 export interface CachedFetchOptions extends CacheOptions {
   /** This caller's cancel; other callers of the same key keep the fetch alive. */
   signal?: AbortSignal;
-  priority?: LoadPriority;
+  /** A getter is read live, so a nested fetch follows its parent's promotion. */
+  priority?: LoadPriority | (() => LoadPriority);
   /** This caller's stage; mirrors the shared fetch, or finishes at once on a cache hit. */
   node?: ProgressNode;
   /** Spec of the shared fetch stage (history key, size bucket). */
@@ -88,7 +89,12 @@ const DEFAULT_FETCH_STAGE: StageSpec = {
 };
 
 function entryPriority(entry: InFlightEntry): LoadPriority {
-  return entry.foreground > 0 ? "foreground" : "background";
+  for (const priority of entry.priorities) {
+    if (priority() === "foreground") {
+      return "foreground";
+    }
+  }
+  return "background";
 }
 
 function startInFlight<T>(
@@ -105,7 +111,7 @@ function startInFlight<T>(
     node,
     cancellable: 0,
     pinned: false,
-    foreground: 0,
+    priorities: new Set(),
     settled: false,
     abandonTimer: null,
   };
@@ -136,7 +142,8 @@ function startInFlight<T>(
       const stale = await readPersistedEntryIgnoringExpiry<T>(key);
       if (stale !== undefined) {
         staleServedKeys.add(key);
-        node.finish();
+        // A failed fetch rescued by stale data is not a duration worth learning from.
+        node.cancel();
         return stale;
       }
 
@@ -159,10 +166,11 @@ function startInFlight<T>(
 
 function subscribe<T>(key: string, entry: InFlightEntry, options: CachedFetchOptions): Promise<T> {
   const { signal } = options;
-  const foreground = (options.priority ?? "foreground") === "foreground";
-  if (foreground) {
-    entry.foreground += 1;
-  }
+  const requested = options.priority ?? "foreground";
+  // A fresh closure per subscription, so two subscribers sharing a getter stay distinct.
+  const priorityOf = (): LoadPriority =>
+    typeof requested === "function" ? requested() : requested;
+  entry.priorities.add(priorityOf);
   if (signal) {
     entry.cancellable += 1;
   } else {
@@ -181,9 +189,7 @@ function subscribe<T>(key: string, entry: InFlightEntry, options: CachedFetchOpt
       return;
     }
     attached = false;
-    if (foreground) {
-      entry.foreground -= 1;
-    }
+    entry.priorities.delete(priorityOf);
     if (signal) {
       entry.cancellable -= 1;
     }
