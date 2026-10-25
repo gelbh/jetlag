@@ -1,5 +1,5 @@
 import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon, Point } from "geojson";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { PolygonFeature } from "../../domain/geometry/kernel";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
@@ -32,10 +32,24 @@ export function useMapGeometryEdit({
   > | null>(null);
   const [thermoEditStep, setThermoEditStep] = useState<"a" | "b">("a");
 
-  const geometryEditAnnotation = useMemo(
+  const resolvedGeometryEditAnnotation = useMemo(
     () => annotations.find((annotation) => annotation.id === geometryEditAnnotationId) ?? null,
     [annotations, geometryEditAnnotationId],
   );
+  const geometryEditAnnotation =
+    resolvedGeometryEditAnnotation?.type === "tentacle" ? null : resolvedGeometryEditAnnotation;
+
+  const cancelGeometryEdit = useCallback(() => {
+    setGeometryEditAnnotationId(null);
+    setGeometryDraft(null);
+    setThermoEditStep("a");
+  }, [setGeometryEditAnnotationId]);
+
+  useEffect(() => {
+    if (resolvedGeometryEditAnnotation?.type === "tentacle") {
+      cancelGeometryEdit();
+    }
+  }, [cancelGeometryEdit, resolvedGeometryEditAnnotation]);
 
   const startGeometryEdit = useCallback(
     (annotationId: string) => {
@@ -57,13 +71,11 @@ export function useMapGeometryEdit({
     [annotations, setActiveTool, setGeometryEditAnnotationId, setMapError, setSelectedAnnotationId],
   );
 
-  const cancelGeometryEdit = useCallback(() => {
-    setGeometryEditAnnotationId(null);
-    setGeometryDraft(null);
-    setThermoEditStep("a");
-  }, [setGeometryEditAnnotationId]);
-
   const saveGeometryEdit = useCallback(async () => {
+    if (resolvedGeometryEditAnnotation?.type === "tentacle") {
+      cancelGeometryEdit();
+      return;
+    }
     if (!geometryEditAnnotation || !geometryDraft) {
       return;
     }
@@ -89,12 +101,17 @@ export function useMapGeometryEdit({
     gameArea,
     geometryDraft,
     geometryEditAnnotation,
+    resolvedGeometryEditAnnotation,
     setMapError,
     updateAnnotation,
   ]);
 
   const handleGeometryEditClick = useCallback(
     (point: LatLngTuple) => {
+      if (resolvedGeometryEditAnnotation?.type === "tentacle") {
+        cancelGeometryEdit();
+        return false;
+      }
       if (!geometryEditAnnotation || !geometryDraft) {
         return false;
       }
@@ -152,7 +169,14 @@ export function useMapGeometryEdit({
 
       return true;
     },
-    [ensurePointInGameArea, geometryDraft, geometryEditAnnotation, thermoEditStep],
+    [
+      cancelGeometryEdit,
+      ensurePointInGameArea,
+      geometryDraft,
+      geometryEditAnnotation,
+      resolvedGeometryEditAnnotation,
+      thermoEditStep,
+    ],
   );
 
   return {
