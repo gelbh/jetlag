@@ -171,6 +171,26 @@ export function isRolePasscodeRequired(
   return joinRequiresRolePasscode(previewSession.memberRoles, role, uid, true);
 }
 
+export function isCastleSiegePasscodeRequired(
+  previewSession: Pick<SessionRecord, "castleSiegeRoles" | "gameArea"> | null | undefined,
+  seat: CastleSiegeTeamRole,
+  uid: string | undefined,
+): boolean {
+  if (!previewSession) {
+    return false;
+  }
+
+  if (seat === "observer" || seat === "referee") {
+    return true;
+  }
+
+  if (isPlaceholderGameArea(previewSession.gameArea)) {
+    return false;
+  }
+
+  return joinRequiresCastleSiegePasscode(previewSession.castleSiegeRoles, seat, uid, true);
+}
+
 export function countCastleSiegeSeat(
   roles: CastleSiegeRoles | undefined,
   seat: CastleSiegeTeamRole,

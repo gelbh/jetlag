@@ -22,6 +22,7 @@ const mockUseJoinSessionPreview = vi.fn(() => ({
   previewPremium: false,
   lookupLoading: false,
   existingRole: null,
+  existingCastleSiegeRole: null,
 }));
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
@@ -119,6 +120,79 @@ describe("useJoinSession", () => {
       previewPremium: false,
       lookupLoading: false,
       existingRole: null,
+      existingCastleSiegeRole: null,
+    });
+  });
+
+  it("uses joinRequiresCastleSiegePasscode for CS needsRolePasscode", () => {
+    mockUseJoinSessionPreview.mockReturnValue({
+      previewSession: createTestRemoteSession({
+        mode: "castleSiege",
+        castleSiegeRoles: { host: "teamA" },
+      }),
+      previewPremium: false,
+      lookupLoading: false,
+      existingRole: null,
+      existingCastleSiegeRole: null,
+    });
+
+    const { result } = renderHook(() =>
+      useJoinSession({
+        code: "ABCD",
+        playerRole: "observer",
+        castleSiegeRole: "teamA",
+        rolePasscode: "",
+      }),
+    );
+
+    expect(result.current.castleSiegeJoin).toBe(true);
+    expect(result.current.needsRolePasscode).toBe(true);
+  });
+
+  it("joins a Castle Siege session with castleSiegeRole on the callable path", async () => {
+    const session = createTestRemoteSession({
+      code: "ABCD",
+      mode: "castleSiege",
+      castleSiegeRoles: { host: "teamA" },
+    });
+    mockUseJoinSessionPreview.mockReturnValue({
+      previewSession: session,
+      previewPremium: false,
+      lookupLoading: false,
+      existingRole: null,
+      existingCastleSiegeRole: null,
+    });
+    mockJoinRemoteSessionByCode.mockResolvedValue({
+      status: "joined",
+      session,
+    });
+
+    const { result } = renderHook(() =>
+      useJoinSession({
+        code: "ABCD",
+        playerRole: "hider",
+        castleSiegeRole: "teamB",
+        rolePasscode: "WXYZ",
+      }),
+    );
+
+    await act(async () => {
+      result.current.runJoin({
+        code: "ABCD",
+        playerRole: "hider",
+        castleSiegeRole: "teamB",
+        rolePasscode: "WXYZ",
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockJoinRemoteSessionByCode).toHaveBeenCalledWith(
+        "ABCD",
+        "u1",
+        "observer",
+        expect.any(String),
+        expect.objectContaining({ castleSiegeRole: "teamB", rolePasscode: "WXYZ" }),
+      );
     });
   });
 

@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import type { SessionRecord } from "../../domain/map/annotations";
 import { isPremiumSession } from "../../domain/map/annotations";
+import type { CastleSiegeTeamRole } from "../../domain/session/castleSiege/teamRole";
+import { resolveCastleSiegeRole } from "../../domain/session/castleSiege/teamRole";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
@@ -22,6 +24,7 @@ export type JoinSessionPreviewState = {
   previewPremium: boolean;
   lookupLoading: boolean;
   existingRole: PlayerRole | null;
+  existingCastleSiegeRole: CastleSiegeTeamRole | null;
 };
 
 async function fetchJoinPreview(normalized: string): Promise<{
@@ -68,6 +71,7 @@ export function useJoinSessionPreview(code: string): JoinSessionPreviewState {
       previewPremium: false,
       lookupLoading: isFirebaseConfigured() && isValidSessionCode(liveNormalized) && !settled,
       existingRole: null,
+      existingCastleSiegeRole: null,
     };
   }
 
@@ -79,11 +83,16 @@ export function useJoinSessionPreview(code: string): JoinSessionPreviewState {
     previewSession && payload?.uid && previewSession.memberRoles?.[payload.uid]
       ? resolvePlayerRole(previewSession.memberRoles, payload.uid)
       : null;
+  const existingCastleSiegeRole =
+    previewSession && payload?.uid
+      ? resolveCastleSiegeRole(previewSession.castleSiegeRoles, payload.uid)
+      : null;
 
   return {
     previewSession,
     previewPremium,
     lookupLoading: query.isFetching || query.isPending,
     existingRole,
+    existingCastleSiegeRole,
   };
 }
