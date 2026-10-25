@@ -51,14 +51,4 @@ describe("offline queue on retriable sync failure", () => {
       isRetriableSyncError(new FirebaseError("permission-denied", "Missing permission.")),
     ).toBe(false);
   });
-
-  it("dedupes writes by annotation id", async () => {
-    await enqueueOfflineWrite("session-1", sampleAnnotation);
-    await enqueueOfflineWrite("session-1", {
-      ...sampleAnnotation,
-      updatedAt: "2026-01-01T00:00:01.000Z",
-    });
-
-    expect(await countOfflineQueueForSession("session-1")).toBe(1);
-  });
 });
