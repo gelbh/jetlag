@@ -86,4 +86,28 @@ describe("resolvePresetPlayAreas", () => {
       expect(result.presetId).toBe("b");
     }
   });
+
+  it("fails closed when loadBoundaries throws, naming that preset id", async () => {
+    const loadBoundaries = vi.fn(async () => {
+      throw new Error("pack missing");
+    });
+    const map = new Map([
+      ["a", preset({ id: "a", name: "A", gameArea: areaA })],
+      [
+        "b",
+        preset({
+          id: "b",
+          name: "B",
+          regionPackId: "sydney",
+          subregionId: "17200",
+        }),
+      ],
+    ]);
+    const result = await resolvePresetPlayAreas(map, ["a", "b"], loadBoundaries as never);
+    expect(result).toEqual({
+      ok: false,
+      presetId: "b",
+      message: "pack missing",
+    });
+  });
 });

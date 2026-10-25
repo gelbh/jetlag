@@ -38,8 +38,19 @@ export async function resolvePresetPlayAreas(
     }
 
     if (draft.regionPackId) {
-      const boundaries = await loadBoundaries(draft.regionPackId, draft.subregionId);
-      areas.push(boundaries.playArea);
+      try {
+        const boundaries = await loadBoundaries(draft.regionPackId, draft.subregionId);
+        areas.push(boundaries.playArea);
+      } catch (error) {
+        return {
+          ok: false,
+          presetId,
+          message:
+            error instanceof Error
+              ? error.message
+              : `Failed to load play area for preset "${preset.name}".`,
+        };
+      }
       continue;
     }
 
