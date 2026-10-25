@@ -98,7 +98,7 @@ export function useMatchingTool({
     }
   }, [active]);
 
-  const draft = useMatchingDraftState();
+  const draft = useMatchingDraftState(sessionRules);
   const {
     matchingSeekerPoint,
     matchingCategoryId,

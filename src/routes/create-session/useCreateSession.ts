@@ -34,6 +34,7 @@ import {
   BUNDLED_REGION_PACK_GEO_REVISION,
   type RegionPackId,
 } from "../../domain/regions/regionPack";
+import { mergeRegionPackFlavorCategories } from "../../domain/regions/regionPackFlavorCategories";
 import type { SessionMode } from "../../domain/session/castleSiege/mode";
 import { generateLocalCode } from "../../domain/session/meta/sessionCode";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
@@ -301,11 +302,15 @@ export function useCreateSession() {
       }
 
       const resolvedGameSize = gameArea ? recommendGameSize(gameArea, unit) : draft.gameSize;
+      const draftCustomCategories =
+        draft.customCategories ?? draft.advancedSettings.customCategories ?? [];
       const resolvedAdvanced = {
         ...defaultAdvancedSessionSettings(resolvedGameSize, unit),
         ...draft.advancedSettings,
         customMatchingAreas,
-        customCategories: draft.customCategories ?? draft.advancedSettings.customCategories,
+        customCategories: draft.regionPackId
+          ? mergeRegionPackFlavorCategories(draftCustomCategories, draft.regionPackId)
+          : draftCustomCategories,
         customLocationPins: draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
         hidingZoneRadiusMeters: hidingZoneRadiusMeters(resolvedGameSize, unit),
       };
