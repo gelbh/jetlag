@@ -754,7 +754,8 @@ export function useCreateSession() {
     const playAreaStage = task.stage(CREATE_STAGES.playArea);
     setCreateTask(task);
 
-    const submitSession = async () => {
+    /** Resolves true once the session exists; false when validation stopped it. */
+    const submitSession = async (): Promise<boolean> => {
       playAreaStage.start();
       const manualArea =
         framing.userFramed &&
@@ -781,7 +782,7 @@ export function useCreateSession() {
 
       if (!gameArea) {
         setError(MISSING_GAME_AREA_ERROR);
-        return;
+        return false;
       }
       playAreaStage.finish();
 
@@ -805,7 +806,7 @@ export function useCreateSession() {
         const trimmedCode = accessCode.trim();
         if (!trimmedCode) {
           setAccessCodeError("Unlock premium or enter a host access code.");
-          return;
+          return false;
         }
 
         setVerifyingAccess(true);
@@ -822,7 +823,7 @@ export function useCreateSession() {
         setVerifyingAccess(false);
         if (grantError !== null) {
           setAccessCodeError(grantError);
-          return;
+          return false;
         }
       }
 
@@ -861,7 +862,7 @@ export function useCreateSession() {
         );
         if (premiumSubmitError) {
           setError(premiumSubmitError);
-          return;
+          return false;
         }
 
         const usePremiumCallable =
@@ -945,18 +946,19 @@ export function useCreateSession() {
         void preloadCriticalGameAreaCaches(gameArea, matchingAreas, regionPackId);
       }
       navigate("/map");
+      return true;
     };
 
     try {
-      await submitSession();
-      task.complete();
+      // A validation stop is not a timed outcome, so it cancels rather than completes.
+      if (await submitSession()) {
+        task.complete();
+      } else {
+        task.cancel();
+      }
     } catch (nextError) {
       task.fail(nextError);
       setError(nextError instanceof Error ? nextError.message : "Couldn't create session.");
-    }
-    if (task.getSnapshot().status === "running") {
-      // Returned early (validation): nothing finished worth timing.
-      task.cancel();
     }
     setLoading(false);
   };
