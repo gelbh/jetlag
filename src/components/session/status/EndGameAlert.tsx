@@ -29,7 +29,7 @@ export function EndGameAlert({
         className="pointer-events-auto mx-3 mt-1.5"
         data-testid="end-game-alert-panel"
       >
-        <p className="text-sm font-semibold text-ink">End game started</p>
+        <p className="text-sm font-semibold text-field-ink">End game started</p>
         <Button type="button" variant="default" size="md" onClick={onResetEndGame}>
           End end game
         </Button>

@@ -40,7 +40,7 @@ export function HiderTruthRevealBanner({ reveal, onDismiss }: HiderTruthRevealBa
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
               Bluff sent
             </p>
-            <p className="mt-1 text-sm text-ink">
+            <p className="mt-1 text-sm text-field-ink">
               Sent: {reveal.selectedLabel}, answer truth was {reveal.truth.label}
             </p>
             <p className="mt-1.5 inline-flex rounded-md bg-status-warning-surface px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-status-warning">
