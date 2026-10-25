@@ -6,7 +6,10 @@ import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastl
 import { fetchMeasuringPlacesInArea } from "@/services/geo/overpass/measuringPlaces";
 import { useMapStore } from "@/state/mapStore";
 import { createTestPinAnnotation } from "@/test/fixtures/sessions";
-import { fetchMeasuringCoastlineContext } from "../measuringToolResolvers";
+import {
+  fetchMeasuringCoastlineContext,
+  fetchMeasuringLinearContext,
+} from "../measuringToolResolvers";
 import { useMeasuringAnchorLoaders } from "./useMeasuringAnchorLoaders";
 import { useMeasuringDraftState } from "./useMeasuringDraftState";
 
@@ -28,12 +31,14 @@ vi.mock("../measuringToolResolvers", async (importOriginal) => {
   return {
     ...actual,
     fetchMeasuringCoastlineContext: vi.fn(),
+    fetchMeasuringLinearContext: vi.fn(),
   };
 });
 
 const fetchMock = vi.mocked(fetchMeasuringPlacesInArea);
 const resolveCoastlineCacheMock = vi.mocked(resolveCoastlineContextFromCache);
 const fetchCoastlineMock = vi.mocked(fetchMeasuringCoastlineContext);
+const fetchLinearMock = vi.mocked(fetchMeasuringLinearContext);
 
 const dublinishArea = {
   type: "Polygon",
@@ -244,6 +249,51 @@ describe("useMeasuringAnchorLoaders coastline pack seed", () => {
 
     expect(result.current.draft.measuringLoading).toBe(false);
     expect(result.current.draft.measuringCoastSegments).toEqual([packCoastSegment]);
+  });
+});
+
+describe("useMeasuringAnchorLoaders linear empty", () => {
+  beforeEach(() => {
+    fetchLinearMock.mockReset();
+  });
+
+  it("marks kind unavailable and reopens catalog when linear resolve is empty", async () => {
+    fetchLinearMock.mockResolvedValue({
+      ok: false,
+      message: "No high speed train line found in this play area.",
+    });
+
+    const { result } = renderHook(() => {
+      const draft = useMeasuringDraftState([]);
+      const loaders = useMeasuringAnchorLoaders({
+        active: true,
+        gameArea: dublinishArea as never,
+        setMapError: vi.fn(),
+        draft,
+      });
+      return { draft, loaders };
+    });
+
+    act(() => {
+      result.current.draft.setMeasuringSubject("location");
+      result.current.draft.setMeasuringLocationCategory("high_speed_rail_line");
+      result.current.draft.setMeasuringOptionChosen(true);
+      result.current.draft.setMeasuringSeekerPoint([53.35, -6.26]);
+    });
+
+    await act(async () => {
+      await result.current.loaders.loadMeasuringLinearAt([53.35, -6.26]);
+    });
+
+    expect(result.current.draft.unavailableMeasuringFromKinds.has("high_speed_rail_line")).toBe(
+      true,
+    );
+    expect(result.current.draft.catalogNotice).toBe(
+      "No high speed train line found in this play area.",
+    );
+    expect(result.current.draft.measuringOptionChosen).toBe(false);
+    expect(result.current.draft.measuringSeekerPoint).toBeNull();
+    expect(result.current.draft.measuringLoading).toBe(false);
   });
 });
 

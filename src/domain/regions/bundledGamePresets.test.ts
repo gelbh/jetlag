@@ -175,6 +175,30 @@ describe("bundledGamePresets", () => {
     expect(nyc?.gameSize).toBe("medium");
     expect(manhattan?.gameSize).toBe("small");
   });
+
+  it("attaches Dublin pack flavor categories to Dublin bundled presets", () => {
+    const presets = buildBundledGamePresets();
+    const dublin = presets.find((preset) => preset.id === "bundled:dublin-county");
+    const ids = (dublin?.advancedSettings.customCategories ?? []).map((category) => category.id);
+
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        "custom:dublin-luas-stop",
+        "custom:dublin-canal-lock",
+        "custom:dublin-gaa-ground",
+        "custom:dublin-castle-fort",
+      ]),
+    );
+  });
+
+  it("does not invent pack flavor on NYC bundled presets", () => {
+    const presets = buildBundledGamePresets();
+    const nyc = presets.find((preset) => preset.id === "bundled:nyc");
+    const ids = (nyc?.advancedSettings.customCategories ?? []).map((category) => category.id);
+
+    expect(ids).toEqual([]);
+    expect(ids.some((id) => id.startsWith("custom:dublin-"))).toBe(false);
+  });
 });
 
 describe("Dublin GeoJSON asset counts", () => {

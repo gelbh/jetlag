@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 import * as previewBasemapPoisModule from "@/services/geo/maplibre/previewBasemapPois";
 import { useMapStore } from "@/state/mapStore";
+import { usePreloadStore } from "@/state/preloadStore";
+import { formatDistance } from "../../domain/map/distance";
 import { tentacleSearchRadiusMetersForSession } from "../../domain/questions";
 import * as tentacleOverpassModule from "../../services/geo/overpass/tentacleOverpass";
 import { createTestPinAnnotation } from "../../test/fixtures/sessions";
@@ -13,6 +15,11 @@ import { useTentacleTool } from "./useTentacleTool";
 describe("useTentacleTool", () => {
   beforeEach(() => {
     resetAllStores();
+    usePreloadStore.setState({
+      activeGameAreaKey: null,
+      categoryPresenceCounts: null,
+      adminDivisionCounts: null,
+    });
     useMapStore.setState({ mapStyle: "standard" });
     useMapStore.getState().setActiveTool("tentacle");
     registerMapLibreMap(null);
@@ -407,6 +414,80 @@ describe("useTentacleTool", () => {
         props: { canCommit: boolean };
       } | null;
       expect(overlay?.props.canCommit).toBe(true);
+    });
+  });
+
+  it("seeds unavailable categories from play-area presence before pick", async () => {
+    usePreloadStore.setState({
+      categoryPresenceCounts: { museum: 0 },
+    });
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useTentacleTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        sessionRules: { gameSize: "medium", regionPackId: "dublin" },
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: mocks.awaitingPlacement,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: mocks.armPlacement,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.panel.props.model.unavailableCategoryIds?.has("museum")).toBe(true);
+      expect(result.current.panel.props.model.catalogNotice).not.toBeNull();
+    });
+  });
+
+  it("keeps category available and shows radius error when POI resolve is empty", async () => {
+    vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([]);
+    vi.spyOn(tentacleOverpassModule, "fetchTentaclePois").mockResolvedValue([]);
+
+    const mocks = createToolHookMocks();
+    const sessionRules = { gameSize: "medium" as const, regionPackId: "dublin" as const };
+    const radiusMeters = tentacleSearchRadiusMetersForSession(sessionRules, "museum");
+    const { result } = renderHook(() =>
+      useTentacleTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        sessionRules,
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: mocks.awaitingPlacement,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: mocks.armPlacement,
+      }),
+    );
+
+    act(() => {
+      result.current.panel.props.model.onCategoryChange("museum");
+    });
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.panel.props.model.categoryChosen).toBe(true);
+      expect(result.current.panel.props.model.unavailableCategoryIds?.has("museum")).toBe(false);
+      expect(result.current.panel.props.model.error).toBe(
+        `No named locations were found within ${formatDistance(radiusMeters, mocks.distanceUnit)}.`,
+      );
     });
   });
 });

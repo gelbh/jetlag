@@ -407,17 +407,21 @@ export function useMeasuringAnchorLoaders({
         );
 
         if (requestId === linearRequestIdRef.current) {
-          if (result.ok) {
+          if (result.ok && result.segments.length > 0) {
             setMeasuringTargetPoint(result.point);
             setMeasuringTargetPlaceName(null);
             setMeasuringDistanceMeters(result.distanceMeters);
             setMeasuringCoastSegments(result.segments);
           } else {
-            setMeasuringTargetPoint(null);
-            setMeasuringTargetPlaceName(null);
-            setMeasuringDistanceMeters(null);
-            setMeasuringCoastSegments([]);
-            setMeasuringError(result.message);
+            const notice = result.ok ? measuringLinearNotFoundMessage(kind) : result.message;
+            setUnavailableMeasuringFromKinds((prev) => {
+              const next = new Map(prev);
+              next.set(kind, notice);
+              return next;
+            });
+            setCatalogNotice(notice);
+            setMeasuringLoading(false);
+            reopenCatalog();
           }
         }
       } catch (error) {
@@ -440,13 +444,16 @@ export function useMeasuringAnchorLoaders({
       linearRequestIdRef,
       measuringLocationCategory,
       measuringSubject,
+      reopenCatalog,
       sessionRules,
+      setCatalogNotice,
       setMeasuringCoastSegments,
       setMeasuringDistanceMeters,
       setMeasuringError,
       setMeasuringLoading,
       setMeasuringTargetPlaceName,
       setMeasuringTargetPoint,
+      setUnavailableMeasuringFromKinds,
     ],
   );
 
