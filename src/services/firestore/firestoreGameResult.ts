@@ -29,6 +29,6 @@ export function subscribeToGameResult(
         ),
       );
     },
-    (error) => handleFirestoreListenError(error, onError),
+    (error) => handleFirestoreListenError(error, onError, { firestoreOp: "subscribe:gameResult" }),
   );
 }

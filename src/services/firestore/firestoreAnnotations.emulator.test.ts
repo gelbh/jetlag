@@ -1,11 +1,15 @@
+import { getDoc } from "firebase/firestore";
 import { beforeEach, describe, expect, it } from "vitest";
 import { APP_VERSION } from "../../domain/device/changelog";
+import { generateHealSecret, hashHealSecret } from "../../domain/session/join/healSecret";
+import { useSessionStore } from "../../state/sessionStore";
 import {
   connectEmulatorsForTests,
   teardownEmulatorsForTests,
 } from "../../test/emulator/connectEmulators";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { createTestPinAnnotation } from "../../test/fixtures/sessions";
+import { JOIN_ERROR_HEAL_PROOF_INVALID } from "../session/rolePasscodeLifecycle";
 import {
   createRemoteSession,
   endRemoteSession,
@@ -16,10 +20,39 @@ import {
   subscribeToRemoteAnnotations,
   writeRemoteAnnotation,
 } from "./firestoreAnnotations";
+import { ensureMemberProof, memberProofDoc, resetMemberProofCacheForTests } from "./memberProofs";
 import { buildAnnotationDocument } from "./serialization/serializeAnnotation";
+
+// Rules only let a uid read its own proof, so cross-uid checks use the
+// emulator's admin bypass ("Bearer owner") over REST.
+async function proofExistsAsAdmin(sessionId: string, uid: string): Promise<boolean> {
+  const port = process.env.VITE_FIRESTORE_EMULATOR_PORT ?? "8180";
+  const response = await fetch(
+    `http://127.0.0.1:${port}/v1/projects/demo-jetlag/databases/(default)/documents/sessions/${sessionId}/memberProofs/${uid}`,
+    { headers: { Authorization: "Bearer owner" } },
+  );
+  if (response.status === 404) return false;
+  expect(response.status).toBe(200);
+  return true;
+}
+
+async function memberUidsAsAdmin(sessionId: string): Promise<string[]> {
+  const port = process.env.VITE_FIRESTORE_EMULATOR_PORT ?? "8180";
+  const response = await fetch(
+    `http://127.0.0.1:${port}/v1/projects/demo-jetlag/databases/(default)/documents/sessions/${sessionId}`,
+    { headers: { Authorization: "Bearer owner" } },
+  );
+  expect(response.status).toBe(200);
+  const body = (await response.json()) as {
+    fields: { memberUids: { arrayValue: { values?: { stringValue: string }[] } } };
+  };
+  return (body.fields.memberUids.arrayValue.values ?? []).map((value) => value.stringValue);
+}
 
 describe("firestoreAnnotations emulator", () => {
   beforeEach(async () => {
+    resetMemberProofCacheForTests();
+    useSessionStore.setState({ healSecrets: {} });
     await teardownEmulatorsForTests();
     await connectEmulatorsForTests();
   });
@@ -55,12 +88,21 @@ describe("firestoreAnnotations emulator", () => {
   it("heals membership when auth uid drifted from a returning member", async () => {
     const { uid: hostUid } = await connectEmulatorsForTests();
     const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, hostUid);
+    await ensureMemberProof(session.id, hostUid);
 
+    // Switch to the guest's device: its store has no secret for this session.
+    useSessionStore.setState({ healSecrets: {} });
     await teardownEmulatorsForTests();
     const { uid: guestUid } = await connectEmulatorsForTests();
 
     await joinRemoteSessionByCode(session.code, guestUid);
+    // Proof writes after join are fire-and-forget; wait for the in-flight one.
+    await ensureMemberProof(session.id, guestUid);
+    const guestSecret = useSessionStore.getState().healSecrets[session.id];
+    expect(guestSecret).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    expect((await getDoc(memberProofDoc(session.id, guestUid))).exists()).toBe(true);
 
+    // Auth storage lost, jetlag-session intact: same store, new uid.
     await teardownEmulatorsForTests();
     const { uid: driftedGuestUid } = await connectEmulatorsForTests();
 
@@ -71,6 +113,67 @@ describe("firestoreAnnotations emulator", () => {
 
     expect(healed.memberUids).toContain(driftedGuestUid);
     expect(healed.memberUids).not.toContain(guestUid);
+    const movedProof = await getDoc(memberProofDoc(session.id, driftedGuestUid));
+    expect(movedProof.data()).toEqual({
+      hash: await hashHealSecret(guestSecret as string),
+      createdAt: expect.any(String),
+    });
+    // Moved, not copied.
+    expect(await proofExistsAsAdmin(session.id, guestUid)).toBe(false);
+  });
+
+  it("rejects a drifted heal whose stored secret does not match the proof", async () => {
+    const { uid: hostUid } = await connectEmulatorsForTests();
+    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, hostUid);
+    await ensureMemberProof(session.id, hostUid);
+
+    useSessionStore.setState({ healSecrets: {} });
+    await teardownEmulatorsForTests();
+    const { uid: guestUid } = await connectEmulatorsForTests();
+    await joinRemoteSessionByCode(session.code, guestUid);
+    await ensureMemberProof(session.id, guestUid);
+
+    // A forger knows the code and the old uid but not the device secret.
+    useSessionStore.getState().setHealSecret(session.id, generateHealSecret());
+    await teardownEmulatorsForTests();
+    const { uid: forgerUid } = await connectEmulatorsForTests();
+
+    await expect(
+      ensureRemoteSessionMembership(session, forgerUid, "seeker", {
+        returningMemberUid: guestUid,
+        persistedMyUid: guestUid,
+      }),
+    ).rejects.toThrow(JOIN_ERROR_HEAL_PROOF_INVALID);
+
+    const memberUids = await memberUidsAsAdmin(session.id);
+    expect(memberUids).toContain(guestUid);
+    expect(memberUids).not.toContain(forgerUid);
+    expect(await proofExistsAsAdmin(session.id, guestUid)).toBe(true);
+    expect(await proofExistsAsAdmin(session.id, forgerUid)).toBe(false);
+  });
+
+  it("rejects a drifted heal when the device has no stored secret", async () => {
+    const { uid: hostUid } = await connectEmulatorsForTests();
+    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, hostUid);
+    await ensureMemberProof(session.id, hostUid);
+
+    useSessionStore.setState({ healSecrets: {} });
+    await teardownEmulatorsForTests();
+    const { uid: guestUid } = await connectEmulatorsForTests();
+    await joinRemoteSessionByCode(session.code, guestUid);
+    await ensureMemberProof(session.id, guestUid);
+
+    // Site data cleared: the proof survives server-side, the secret does not.
+    useSessionStore.setState({ healSecrets: {} });
+    await teardownEmulatorsForTests();
+    const { uid: driftedUid } = await connectEmulatorsForTests();
+
+    await expect(
+      ensureRemoteSessionMembership(session, driftedUid, "seeker", {
+        returningMemberUid: guestUid,
+        persistedMyUid: guestUid,
+      }),
+    ).rejects.toThrow(JOIN_ERROR_HEAL_PROOF_INVALID);
   });
 
   it("rejects version bypass without a persisted returning uid", async () => {

@@ -491,7 +491,9 @@ describe("firestoreSessionExtras writes", () => {
 
     await cancelWalkingThermometersAfterIdentityHeal("session-1", "old-uid", "new-uid", "seeker");
 
-    expect(mockCaptureException).toHaveBeenCalledWith(expect.any(Error));
+    expect(mockCaptureException).toHaveBeenCalledWith(expect.any(Error), {
+      firestore_op: "write:cancelWalkingThermometersAfterIdentityHeal",
+    });
   });
 });
 

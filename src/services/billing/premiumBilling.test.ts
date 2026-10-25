@@ -25,6 +25,10 @@ vi.mock("../core/firebase/firebase", () => ({
   getFirebaseFunctions: vi.fn(async () => ({})),
 }));
 
+const ensureMemberProof = vi.hoisted(() => vi.fn(async () => undefined));
+
+vi.mock("../firestore/memberProofs", () => ({ ensureMemberProof }));
+
 vi.mock("../../config/env", () => ({
   clientEnvUsesFirebaseEmulator: vi.fn(() => false),
 }));
@@ -241,6 +245,25 @@ describe("premiumBilling", () => {
 
     expect(created.id).toBe("session-premium");
     expect(created.code).toBe("PREM");
+    expect(ensureMemberProof).toHaveBeenCalledWith("session-premium", "host-uid");
+  });
+
+  it("does not create a member proof when the premium create fails", async () => {
+    callable.mockRejectedValue(new FirebaseError("functions/internal", "boom"));
+
+    await expect(
+      createPremiumRemoteSession({
+        gameArea: createTestSession().gameArea,
+        hostUid: "host-uid",
+        tier: "premium",
+        hostRole: "seeker",
+        gameSize: "medium",
+        rulesPatch: {},
+        distanceUnit: "imperial",
+        hostAppVersion: "0.4.0",
+      }),
+    ).rejects.toThrow();
+    expect(ensureMemberProof).not.toHaveBeenCalled();
   });
 
   it("strips pack customMatchingAreas from premium create rulesPatch", async () => {

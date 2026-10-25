@@ -65,9 +65,11 @@ export function useFirestoreCollectionSyncWithStatus<T>(
     };
   }, [enabled, sessionId, subscribe]);
 
-  const waiting = enabled && isRemoteSession(sessionId);
-  const loaded =
-    !waiting || (loadedFor?.sessionId === sessionId && loadedFor.subscribe === subscribe);
+  // Disabled gates must not report vacuous loaded=true (hider truthReferenceReady).
+  const loaded = !enabled
+    ? false
+    : !isRemoteSession(sessionId) ||
+      (loadedFor?.sessionId === sessionId && loadedFor.subscribe === subscribe);
 
   return { items, loaded };
 }
