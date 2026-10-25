@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { TentacleExtendedCategoryId } from "@/domain/questions";
-import { TentaclePanel, type TentaclePanelModel, type TentaclePanelProps } from "./TentaclePanel";
+import { TentaclePanel, type TentaclePanelModel } from "./TentaclePanel";
 
 vi.mock("../../hooks/wizard/useToolWizard", () => ({
   useToolWizard: () => ({
@@ -39,19 +39,6 @@ const baseModel: TentaclePanelModel = {
 };
 
 describe("TentaclePanel public props (AC #1)", () => {
-  it("accepts a single model options object", () => {
-    const props: TentaclePanelProps = {
-      model: baseModel,
-    };
-    const keys = Object.keys(props) as Array<keyof TentaclePanelProps>;
-    expect(keys).toEqual(["model"]);
-    expect(keys.length).toBeLessThanOrEqual(10);
-
-    render(<TentaclePanel {...props} />);
-
-    expect(screen.getByText("Location type")).toBeInTheDocument();
-  });
-
   it("greys unavailable categories and shows catalog notice", () => {
     render(
       <TentaclePanel

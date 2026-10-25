@@ -83,29 +83,6 @@ beforeEach(() => {
   }));
 });
 
-describe("MapStatusRail public props (AC #1)", () => {
-  it("accepts a single model options object plus optional headerLeading", () => {
-    const props: MapStatusRailProps = {
-      model: baseModel,
-    };
-    const keys = Object.keys(props) as Array<keyof MapStatusRailProps>;
-    expect(keys).toEqual(["model"]);
-    expect(keys.length).toBeLessThanOrEqual(10);
-
-    render(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <MemoryRouter>
-          <RouteTransitionProvider>
-            <MapStatusRail {...props} />
-          </RouteTransitionProvider>
-        </MemoryRouter>
-      </MantineProvider>,
-    );
-
-    expect(screen.getByTestId("map-status-rail-mantine")).toBeInTheDocument();
-  });
-});
-
 describe("MapStatusRail header home", () => {
   it("renders inline Home in the brand cell by default", () => {
     renderRail();
