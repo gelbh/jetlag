@@ -14,6 +14,7 @@ import { getFirestoreDb } from "@/services/core/firebase/firebase";
 import { initSessionRoleGates } from "@/services/session/rolePasscodeLifecycle";
 import { generateSessionCode } from "@/services/session/sessionCodes";
 import { useSessionStore } from "@/state/sessionStore";
+import { ensureMemberProof } from "../memberProofs";
 import { buildSessionDocument } from "../serialization/serializeSession";
 import * as sessionJoin from "./join";
 import {
@@ -78,6 +79,8 @@ export async function ensureRemoteSessionMembership(
   }
 
   if (serverSession.memberUids.includes(uid)) {
+    // Resume-time repair for a member whose proof or stored secret is missing.
+    void ensureMemberProof(serverSession.id, uid);
     return serverSession;
   }
 
@@ -237,6 +240,9 @@ export async function createRemoteSession(
   // CI e2e / local emulator run auth+firestore+storage only — no Functions.
   // Leave ungated (legacy join); design: sessions without roleGates stay open.
   if (clientEnvUsesFirebaseEmulator()) {
+    // After commit: the rule's membership get() must see the new session doc.
+    // Not awaited, so a stalled proof write never blocks session create.
+    void ensureMemberProof(session.id, hostUid);
     return session;
   }
 
@@ -250,6 +256,8 @@ export async function createRemoteSession(
     });
   }
   session.roleGates = buildRoleGatesForHost(hostUid, effectiveHostRole);
+  // Only once gates stick: a rolled-back create must not leave a proof or replace the stored secret.
+  void ensureMemberProof(session.id, hostUid);
 
   return session;
 }

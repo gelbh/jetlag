@@ -1,14 +1,19 @@
 import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getDoc, updateDoc, joinGatedRemoteSessionByCode, cancelWalkingThermometers } = vi.hoisted(
-  () => ({
-    getDoc: vi.fn(),
-    updateDoc: vi.fn(),
-    joinGatedRemoteSessionByCode: vi.fn(),
-    cancelWalkingThermometers: vi.fn(),
-  }),
-);
+const {
+  getDoc,
+  updateDoc,
+  joinGatedRemoteSessionByCode,
+  cancelWalkingThermometers,
+  ensureMemberProof,
+} = vi.hoisted(() => ({
+  getDoc: vi.fn(),
+  updateDoc: vi.fn(),
+  joinGatedRemoteSessionByCode: vi.fn(),
+  cancelWalkingThermometers: vi.fn(),
+  ensureMemberProof: vi.fn(async () => undefined),
+}));
 
 vi.mock("firebase/firestore", async (importOriginal) => ({
   ...(await importOriginal<typeof import("firebase/firestore")>()),
@@ -23,6 +28,8 @@ vi.mock("@/services/core/firebase/firebase", () => ({
 }));
 
 vi.mock("../joinGatedRemoteSession", () => ({ joinGatedRemoteSessionByCode }));
+
+vi.mock("../memberProofs", () => ({ ensureMemberProof }));
 
 vi.mock("../firestoreSessionExtras", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../firestoreSessionExtras")>()),
@@ -91,6 +98,7 @@ describe("joinRemoteSessionByCode returning-member heal", () => {
     expect(result).toEqual({ status: "missing" });
     expect(updateDoc).not.toHaveBeenCalled();
     expect(cancelWalkingThermometers).not.toHaveBeenCalled();
+    expect(ensureMemberProof).not.toHaveBeenCalled();
   });
 
   it("maps an ended-session callable error to the ended status", async () => {
@@ -125,6 +133,7 @@ describe("joinRemoteSessionByCode returning-member heal", () => {
       expect.objectContaining({ "memberRoles.new-uid": "seeker" }),
     );
     expect(cancelWalkingThermometers).not.toHaveBeenCalled();
+    expect(ensureMemberProof).toHaveBeenCalledWith("session-1", "new-uid");
   });
 
   it("rethrows other callable errors", async () => {
