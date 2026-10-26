@@ -4,13 +4,7 @@ import { createRequire } from "node:module";
 import { test } from "node:test";
 
 const require = createRequire(import.meta.url);
-
-const BYTE_CAPS = {
-  home: 1_111_869,
-  premium: 1_159_081,
-  join: 1_187_071,
-  create: 1_845_794,
-};
+const { BYTE_WEIGHT } = require("../../lighthouserc.shared.cjs");
 
 const ERROR_KEYS = ["categories:accessibility", "cumulative-layout-shift", "target-size"];
 
@@ -19,7 +13,9 @@ function routeKey(pattern) {
   if (pattern.includes("/create")) return "create";
   if (pattern.includes("/premium")) return "premium";
   if (pattern.includes("/join")) return "join";
-  return "home";
+  // Home is ORIGIN_PATTERN + END (no path segment).
+  if (pattern.includes("4173")) return "home";
+  throw new Error(`unknown LHCI matchingUrlPattern: ${pattern}`);
 }
 
 /** @param {string} path @param {string | undefined} [cpuModel] */
@@ -62,7 +58,7 @@ function assertHybridLevels(config) {
     const bytes = assertions["total-byte-weight"];
     assert.deepEqual(bytes, [
       "error",
-      { maxNumericValue: BYTE_CAPS[key], aggregationMethod: "median" },
+      { maxNumericValue: BYTE_WEIGHT[key], aggregationMethod: "median" },
     ]);
 
     if (assertions["total-blocking-time"] !== undefined) {

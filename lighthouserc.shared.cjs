@@ -4,6 +4,14 @@ const ORIGIN_PATTERN = "http://127\\.0\\.0\\.1:4173";
 // route that rewrites its URL keeps its gates (an unmatched URL is silently unasserted).
 const END = "/?(\\?.*)?$";
 
+// Byte caps: CI run 40217639375 medians ×1.15 (same mobile + desktop).
+const BYTE_WEIGHT = {
+  home: 1_111_869,
+  premium: 1_159_081,
+  join: 1_187_071,
+  create: 1_845_794,
+};
+
 /**
  * Every audited route gets the same a11y / CLS / target-size / byte-weight gates plus its own
  * perf floor (warn). Perf and optional create TBT use median of `numberOfRuns`, not LHCI's
@@ -11,7 +19,7 @@ const END = "/?(\\?.*)?$";
  *
  * @param {{
  *   perf: { home: number, join: number, premium: number, create: number },
- *   byteWeight: { home: number, join: number, premium: number, create: number },
+ *   byteWeight?: { home: number, join: number, premium: number, create: number },
  *   numberOfRuns?: number,
  *   createMaxTbtMs?: number,
  *   outputDir: string,
@@ -20,7 +28,7 @@ const END = "/?(\\?.*)?$";
  */
 function createLhciConfig({
   perf,
-  byteWeight,
+  byteWeight = BYTE_WEIGHT,
   numberOfRuns = 3,
   createMaxTbtMs,
   outputDir,
@@ -102,4 +110,4 @@ function createLhciConfig({
 }
 
 // LHCI loadRcFile require()s only .cjs/.js; keep .cjs under "type":"module".
-module.exports = { createLhciConfig };
+module.exports = { BYTE_WEIGHT, createLhciConfig };
