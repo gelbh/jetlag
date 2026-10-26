@@ -11,6 +11,7 @@ import {
   drawKeep,
   enforceHandLimit,
   heldQuestionPowerUps,
+  playMoveCard,
   playQuestionPowerUp,
   resolveDrawKeep,
   rewardForQuestion,
@@ -144,5 +145,18 @@ describe("board economy engine", () => {
     expect(played.hand.map((c) => c.instanceId)).toEqual([other.instanceId]);
     expect(played.discard.map((c) => c.instanceId)).toEqual([veto.instanceId]);
     expect(playQuestionPowerUp(holding, "randomize")).toBe(holding);
+  });
+
+  it("playMoveCard discards only the played move", () => {
+    const state = createInitialBoardEconomyState("move");
+    const move = state.deck.find((c) => c.def.kind === "move")!;
+    const other = state.deck.find((c) => c.def.kind === "timeBonus")!;
+    const holding = { ...state, hand: [move, other], handLimit: 8 };
+
+    const played = playMoveCard(holding, move.instanceId);
+
+    expect(played.hand).toEqual([other]);
+    expect(played.discard).toEqual([move]);
+    expect(played.handLimit).toBe(8);
   });
 });

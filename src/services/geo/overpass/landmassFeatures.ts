@@ -17,7 +17,11 @@ import type { RegionPackId } from "@/domain/regions/regionPack";
 import { yieldToMain } from "../../core/progress/yieldToMain";
 import { getOrFetchCached, landmassCacheKey } from "../cache";
 import { isBundledAdminRegionPack } from "./adminDivisionAvailability";
-import { type AdminDivisionFeature, classifyAdminDivisionAtPoint } from "./adminDivisionBoundaries";
+import {
+  type AdminDivisionFeature,
+  classifyAdminDivisionAtPoint,
+  representativePointForBoundary,
+} from "./adminDivisionBoundaries";
 import { mergeOverpassElementPayloads, type OverpassBbox } from "./overpassBboxSplit";
 import {
   cachedFetchOptions,
@@ -88,30 +92,6 @@ function wayGeometryToPolygon(
 
 function polygonFeatureToGameArea(feature: Feature<Polygon | MultiPolygon>): GameArea {
   return featureToGameArea(feature);
-}
-
-function representativePointForBoundary(boundary: GameArea): LatLngTuple {
-  const feature = gameAreaToPolygon(boundary);
-  const coordinates =
-    feature.geometry.type === "Polygon"
-      ? feature.geometry.coordinates[0]
-      : feature.geometry.coordinates[0]?.[0];
-
-  if (!coordinates || coordinates.length === 0) {
-    return [0, 0];
-  }
-
-  let latSum = 0;
-  let lngSum = 0;
-  let count = 0;
-
-  for (const [lng, lat] of coordinates) {
-    latSum += lat;
-    lngSum += lng;
-    count += 1;
-  }
-
-  return [latSum / count, lngSum / count];
 }
 
 export async function obstacleFeaturesFromElements(
@@ -346,12 +326,12 @@ export async function fetchLandmassFeaturesInArea(
     landmassCacheKey(gameArea, regionPackId),
     async (context) => {
       const search = context.node.stage(overpassSearchStage("overpass:landmass", bbox));
-      const payload = await queryOverpassSplitLoaded<{ elements: OverpassElement[] }>(
-        buildLandmassQueryForBbox,
-        bbox,
-        mergeOverpassElementPayloads,
-        { ...overpassLoadFromFetch(context), node: search },
-      );
+      const payload = await queryOverpassSplitLoaded<{
+        elements: OverpassElement[];
+      }>(buildLandmassQueryForBbox, bbox, mergeOverpassElementPayloads, {
+        ...overpassLoadFromFetch(context),
+        node: search,
+      });
 
       return computeLandmassStage(context.node, gameArea, payload.elements);
     },

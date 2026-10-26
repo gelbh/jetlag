@@ -1,3 +1,5 @@
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { point as turfPoint } from "@turf/helpers";
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import {
@@ -5,6 +7,7 @@ import {
   classifyAdminDivisionAtPoint,
   parseAdminDivisionFeatures,
   relationBoundaryFromElements,
+  representativePointForBoundary,
 } from "./adminDivisionBoundaries";
 
 const sampleGameArea: GameArea = {
@@ -21,6 +24,55 @@ const sampleGameArea: GameArea = {
 };
 
 describe("admin division boundaries", () => {
+  it("returns a point inside a concave boundary", () => {
+    const boundary: GameArea = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [4, 0],
+          [4, 1],
+          [1, 1],
+          [1, 4],
+          [0, 4],
+          [0, 0],
+        ],
+      ],
+    };
+    const point = representativePointForBoundary(boundary);
+
+    expect(booleanPointInPolygon(turfPoint([point[1], point[0]]), boundary)).toBe(true);
+  });
+
+  it("returns a point inside one component of a MultiPolygon boundary", () => {
+    const boundary: GameArea = {
+      type: "MultiPolygon",
+      coordinates: [
+        [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+            [0, 0],
+          ],
+        ],
+        [
+          [
+            [10, 0],
+            [11, 0],
+            [11, 1],
+            [10, 1],
+            [10, 0],
+          ],
+        ],
+      ],
+    };
+    const point = representativePointForBoundary(boundary);
+
+    expect(booleanPointInPolygon(turfPoint([point[1], point[0]]), boundary)).toBe(true);
+  });
+
   it("builds a bbox admin query without empty area.searchArea", () => {
     const query = buildAdminDivisionQuery(sampleGameArea, 6);
 
