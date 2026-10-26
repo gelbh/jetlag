@@ -37,6 +37,7 @@ const baseModel: GameAreaSectionModel = {
   bundledPresetSelectGroups: [],
   favouritePresetSelectOptions: [],
   userPresets: [],
+  presetsForSearch: [],
   loadedPreset: null,
   appliedPresetIds: [],
   pendingPresetIds: [],
@@ -343,6 +344,57 @@ describe("GameAreaSection create wizard steps", () => {
     expect(document.querySelector(".jl-inset-group")).toBeTruthy();
     expect(document.querySelector("select.field-input")).toBeNull();
     expect(screen.getByRole("combobox", { name: /game preset/i })).toBeInTheDocument();
+  });
+
+  it("Preset Select groups show parent path and filters by place haystack", async () => {
+    const onPendingPresetAdd = vi.fn();
+    renderSection(
+      {
+        ...baseModel,
+        onPendingPresetAdd,
+        bundledPresetSelectGroups: [
+          {
+            label: "Europe · Switzerland",
+            options: [
+              { presetId: "bundled:switzerland-aargau", name: "Canton of Aargau" },
+              {
+                presetId: "bundled:switzerland-appenzell-ausserrhoden",
+                name: "Canton of Appenzell Ausserrhoden",
+              },
+            ],
+          },
+        ],
+        presetsForSearch: [
+          {
+            id: "bundled:switzerland-appenzell-ausserrhoden",
+            name: "Canton of Appenzell Ausserrhoden",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            updatedAt: "2026-01-01T00:00:00.000Z",
+            schemaVersion: 1,
+            gameSize: "medium",
+            distanceUnit: "metric",
+            advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+            placeLabel: "Appenzell Ausserrhoden, Switzerland",
+            migrationStatus: "ok",
+          },
+        ],
+      },
+      undefined,
+      "where",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Preset" }));
+    const combobox = screen.getByRole("combobox", { name: /game preset/i });
+    fireEvent.click(combobox);
+    expect(await screen.findByText("Europe · Switzerland")).toBeInTheDocument();
+    fireEvent.change(combobox, { target: { value: "Appenzell" } });
+    fireEvent.input(combobox, { target: { value: "Appenzell" } });
+    fireEvent.click(combobox);
+    const option = await screen.findByRole("option", {
+      name: /Canton of Appenzell Ausserrhoden/i,
+      hidden: true,
+    });
+    fireEvent.click(option);
+    expect(onPendingPresetAdd).toHaveBeenCalledWith("bundled:switzerland-appenzell-ausserrhoden");
   });
 
   it("does not double-pad the groups wrapper when NestedSplitLayout already pads", () => {

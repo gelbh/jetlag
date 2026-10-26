@@ -16,6 +16,7 @@ import { useGamePresetStore } from "@/state/gamePresetStore";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
+import { pickCreateSessionPreset } from "./createSessionPresetSelectTest";
 import { gpsReadingToFocusBounds, placeToFocusBounds } from "./utils";
 
 const ensureAnonymousUser = vi.hoisted(() => vi.fn(async () => ({ uid: "host-1" })));
@@ -569,12 +570,8 @@ describe("CreateSession", () => {
 
     renderCreateSession();
     fireEvent.click(screen.getByRole("button", { name: "Preset" }));
-    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
-      target: { value: "preset-a" },
-    });
-    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
-      target: { value: "preset-b" },
-    });
+    await pickCreateSessionPreset("Preset A");
+    await pickCreateSessionPreset("Preset B");
     expect(screen.getByRole("combobox", { name: /game preset/i })).toHaveValue("");
     expect(screen.getByRole("button", { name: /Primary · Preset A/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Preset B/i })).toBeInTheDocument();
@@ -655,9 +652,7 @@ describe("CreateSession", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Preset" }));
-    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
-      target: { value: "preset-extra" },
-    });
+    await pickCreateSessionPreset("Extra chip");
     expect(screen.getByRole("button", { name: /Extra chip/i })).toBeInTheDocument();
 
     await act(async () => {
@@ -713,9 +708,7 @@ describe("CreateSession", () => {
       expect(silentReuseProbe.loadedPresetId).toBe("preset-cork");
     });
 
-    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
-      target: { value: "preset-broken" },
-    });
+    await pickCreateSessionPreset("Broken empty");
     fireEvent.click(screen.getByRole("button", { name: /apply presets/i }));
 
     expect(await screen.findByText(/has no play area/i)).toBeInTheDocument();

@@ -1,5 +1,6 @@
-import { NativeSelect, Text } from "@mantine/core";
+import { Select, Text } from "@mantine/core";
 import { BoundingBoxIcon, CheckIcon } from "@phosphor-icons/react";
+import { useState } from "react";
 import {
   PlaceAreaSearchFields,
   PlaceAreaSearchInsetResults,
@@ -13,6 +14,7 @@ import {
 } from "../../domain/regions/bundledGamePresets";
 import { flagMarkForBundledPresetId } from "../../domain/regions/bundledPresetFlags";
 import { formatBundledPresetLocation } from "../../domain/regions/bundledPresetHierarchy";
+import { filterGamePresetsForSearch } from "../../domain/session/presets/gamePresetSearch";
 import type { GameAreaSectionModel, WhereSource } from "./GameAreaSection";
 
 function pendingPresetLabel(model: GameAreaSectionModel, presetId: string): string {
@@ -44,10 +46,13 @@ export function GameAreaWhereStep({
   whereSource: WhereSource;
   onWhereSourceChange: (source: WhereSource) => void;
 }) {
+  const [presetSearch, setPresetSearch] = useState("");
+  const [selectValue, setSelectValue] = useState<string | null>(null);
   const {
     bundledPresetSelectGroups,
     favouritePresetSelectOptions,
     userPresets,
+    presetsForSearch,
     loadedPreset,
     appliedPresetIds,
     pendingPresetIds,
@@ -86,8 +91,7 @@ export function GameAreaWhereStep({
     ...bundledPresetSelectGroups.flatMap((group) => group.options.map((option) => option.presetId)),
     ...userPresets.map((preset) => preset.id),
   ]);
-  const presetSelectData = [
-    { value: "", label: "Load preset…" },
+  const emptyQueryData = [
     ...(favouritePresetSelectOptions.length > 0
       ? [
           {
@@ -114,6 +118,13 @@ export function GameAreaWhereStep({
       ? [{ value: loadedPreset.id, label: loadedPreset.name }]
       : []),
   ];
+  const searching = presetSearch.trim().length > 0;
+  const presetSelectData = searching
+    ? filterGamePresetsForSearch(presetsForSearch, presetSearch).map((preset) => ({
+        value: preset.id,
+        label: preset.name,
+      }))
+    : emptyQueryData;
 
   return (
     <div className="space-y-5">
@@ -133,17 +144,24 @@ export function GameAreaWhereStep({
         </div>
         <InsetGroup>
           {whereSource === "preset" ? (
-            <NativeSelect
+            <Select
               aria-label="Game preset"
               data={presetSelectData}
-              value=""
+              placeholder="Load preset…"
+              searchable
+              clearable={false}
+              value={selectValue}
+              searchValue={presetSearch}
+              onSearchChange={setPresetSearch}
+              onInput={(event) => setPresetSearch(event.currentTarget.value)}
+              filter={({ options }) => options}
               disabled={loading || verifyingAccess}
-              onChange={(event) => {
-                const presetId = event.currentTarget.value;
-                if (presetId) {
-                  onWhereSourceChange("preset");
-                  onPendingPresetAdd(presetId);
-                }
+              onChange={(presetId) => {
+                if (!presetId) return;
+                onWhereSourceChange("preset");
+                onPendingPresetAdd(presetId);
+                setSelectValue(null);
+                setPresetSearch("");
               }}
               styles={insetTextInputStyles}
             />
