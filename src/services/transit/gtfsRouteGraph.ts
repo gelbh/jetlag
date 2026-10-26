@@ -13,7 +13,13 @@ import {
   type LatLngTuple,
 } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
-import type { TransitRouteFilter, TransitRouteMode } from "../../domain/map/transit";
+import {
+  normalizeTransitStationFilter,
+  stationModesMatchFilter,
+  type TransitRouteFilter,
+  type TransitRouteMode,
+  type TransitStationFilter,
+} from "../../domain/map/transit";
 import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 import type { GtfsBundleRoute, GtfsBundleStop, GtfsStaticBundle } from "./gtfsBundle";
 import { GTFS_BUNDLE_MANIFEST_PATH } from "./gtfsBundle";
@@ -220,12 +226,15 @@ export function gtfsStopModes(stopId: string, bundle: GtfsStaticBundle): Set<Tra
 export function filterGtfsStopsByMode(
   stops: readonly GtfsBundleStop[],
   bundle: GtfsStaticBundle,
-  filter: TransitRouteFilter,
+  filter: TransitStationFilter | TransitRouteFilter,
 ): GtfsBundleStop[] {
-  if (filter === "all") {
+  const normalized = normalizeTransitStationFilter(filter);
+  if (normalized === "all") {
     return [...stops];
   }
-  return stops.filter((stop) => gtfsStopModes(stop.id, bundle).has(filter));
+  return stops.filter((stop) =>
+    stationModesMatchFilter(gtfsStopModes(stop.id, bundle), normalized),
+  );
 }
 
 export function gtfsStopsToTransitStations(

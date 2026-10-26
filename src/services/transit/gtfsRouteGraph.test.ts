@@ -139,6 +139,11 @@ describe("gtfsRouteGraph", () => {
     );
   });
 
+  it("filters stops by multiple modes (OR)", () => {
+    const mixed = filterGtfsStopsByMode(NYC_BUNDLE.stops, NYC_BUNDLE, ["bus", "metro"]);
+    expect(mixed.map((s) => s.id)).toEqual(expect.arrayContaining(["nyc:bus", "nyc:penn"]));
+  });
+
   it("filters stops to an explicit bounding box", () => {
     const bbox = gameAreaToBoundingBox(MIDTOWN_GAME_AREA);
     const stops = filterGtfsStopsForBoundingBox(NYC_BUNDLE, bbox);

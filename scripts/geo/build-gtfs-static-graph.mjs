@@ -243,7 +243,7 @@ function routeMode(routeType) {
     case "4":
       return "ferry";
     case "7":
-      return "other";
+      return "funicular";
     default:
       break;
   }
@@ -269,6 +269,9 @@ function routeMode(routeType) {
   }
   if ((n >= 1000 && n <= 1099) || (n >= 1200 && n <= 1299)) {
     return "ferry";
+  }
+  if (n >= 1400 && n <= 1499) {
+    return "funicular";
   }
   return "other";
 }

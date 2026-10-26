@@ -1,8 +1,82 @@
 import type { LatLngTuple } from "../geometry/gameArea/geometry";
 
-export type TransitRouteMode = "rail" | "metro" | "tram" | "bus" | "ferry" | "other";
+export const TRANSIT_ROUTE_MODES = [
+  "rail",
+  "metro",
+  "tram",
+  "bus",
+  "ferry",
+  "funicular",
+  "other",
+] as const;
+
+export type TransitRouteMode = (typeof TRANSIT_ROUTE_MODES)[number];
 
 export type TransitRouteFilter = "all" | TransitRouteMode;
+
+/** Session filter: all modes, or a non-empty set (OR). Never empty array. */
+export type TransitStationFilter = "all" | readonly TransitRouteMode[];
+
+const TRANSIT_ROUTE_MODE_SET = new Set<string>(TRANSIT_ROUTE_MODES);
+
+const MODE_SORT_INDEX = new Map<TransitRouteMode, number>(
+  TRANSIT_ROUTE_MODES.map((mode, index) => [mode, index]),
+);
+
+function isTransitRouteMode(value: unknown): value is TransitRouteMode {
+  return typeof value === "string" && TRANSIT_ROUTE_MODE_SET.has(value);
+}
+
+function sortTransitRouteModes(modes: Iterable<TransitRouteMode>): TransitRouteMode[] {
+  return [...modes].sort((a, b) => (MODE_SORT_INDEX.get(a) ?? 0) - (MODE_SORT_INDEX.get(b) ?? 0));
+}
+
+/**
+ * Normalize wire/UI filter input to `TransitStationFilter`.
+ * Unknown tokens and empty selections become `"all"` (deserialize-safe).
+ * Legacy single-mode strings become a one-element array.
+ */
+export function normalizeTransitStationFilter(raw: unknown): TransitStationFilter {
+  if (raw === undefined || raw === null || raw === "all") {
+    return "all";
+  }
+  if (typeof raw === "string") {
+    return isTransitRouteMode(raw) ? [raw] : "all";
+  }
+  if (!Array.isArray(raw)) {
+    return "all";
+  }
+  const unique = new Set<TransitRouteMode>();
+  for (const entry of raw) {
+    if (isTransitRouteMode(entry)) {
+      unique.add(entry);
+    }
+  }
+  if (unique.size === 0) {
+    return "all";
+  }
+  return sortTransitRouteModes(unique);
+}
+
+export function isTransitStationFilterAll(filter: TransitStationFilter): boolean {
+  return filter === "all";
+}
+
+/** Stop matches when filter is all, or any stop mode intersects the selected modes. */
+export function stationModesMatchFilter(
+  stopModes: ReadonlySet<TransitRouteMode>,
+  filter: TransitStationFilter,
+): boolean {
+  if (filter === "all") {
+    return true;
+  }
+  for (const mode of filter) {
+    if (stopModes.has(mode)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export interface TransitBoundingBox {
   south: number;
