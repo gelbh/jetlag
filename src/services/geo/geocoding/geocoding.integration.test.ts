@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearGeographicFeatureCacheForTests } from "../cache";
-import { searchPlaces, suggestPlacesAtPoint } from "./index";
+import { reverseGeocodePoint, searchPlaces, suggestPlacesAtPoint } from "./index";
 
 describe("geocoding integration", () => {
   beforeEach(async () => {
@@ -387,5 +387,42 @@ describe("geocoding integration", () => {
       "Leinster, Ireland",
     ]);
     expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("keys reverse geocode cache by accept-language", async () => {
+    const nominatimCity = (displayName: string, city: string) => ({
+      ok: true,
+      json: async () => ({
+        place_id: 7,
+        display_name: displayName,
+        lat: "53.3498",
+        lon: "-6.2603",
+        boundingbox: ["53.3", "53.4", "-6.4", "-6.1"],
+        addresstype: "city",
+        address: { city },
+      }),
+    });
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(nominatimCity("Dublin, Ireland", "Dublin"))
+      .mockResolvedValueOnce(nominatimCity("Dublin, Ierland", "Dublin"));
+
+    vi.stubGlobal("fetch", fetchMock);
+    vi.stubGlobal("navigator", { language: "en" });
+
+    const point: [number, number] = [53.35, -6.26];
+    const first = await reverseGeocodePoint(point, 8);
+    expect(first?.displayName).toBe("Dublin");
+
+    vi.stubGlobal("navigator", { language: "nl-NL" });
+    const second = await reverseGeocodePoint(point, 8);
+    expect(second?.displayName).toBe("Dublin");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    const languages = fetchMock.mock.calls.map(([input]) =>
+      new URL(String(input)).searchParams.get("accept-language"),
+    );
+    expect(languages).toEqual(["en", "nl-NL"]);
   });
 });
