@@ -176,45 +176,67 @@ export function representativePointForBoundary(boundary: GameArea): LatLngTuple 
   const feature = gameAreaToPolygon(boundary);
   const rings =
     feature.geometry.type === "Polygon"
-      ? [feature.geometry.coordinates[0]]
-      : feature.geometry.coordinates.map((polygon) => polygon[0]);
+      ? [feature.geometry.coordinates]
+      : feature.geometry.coordinates;
 
-  let weightedLat = 0;
-  let weightedLng = 0;
-  let totalArea = 0;
+  const largestRing = rings
+    .map((polygon) => polygon[0])
+    .filter((ring): ring is number[][] => Boolean(ring && ring.length >= 3))
+    .sort(
+      (left, right) =>
+        area({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Polygon", coordinates: [right] },
+        }) -
+        area({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Polygon", coordinates: [left] },
+        }),
+    )[0];
 
-  for (const coordinates of rings) {
-    if (!coordinates || coordinates.length < 3) {
-      continue;
-    }
-
-    let twiceArea = 0;
-    let centroidLng = 0;
-    let centroidLat = 0;
-    for (let index = 0; index < coordinates.length - 1; index += 1) {
-      const [lng, lat] = coordinates[index];
-      const [nextLng, nextLat] = coordinates[index + 1];
-      const cross = lng * nextLat - nextLng * lat;
-      twiceArea += cross;
-      centroidLng += (lng + nextLng) * cross;
-      centroidLat += (lat + nextLat) * cross;
-    }
-
-    const ringArea = Math.abs(twiceArea) / 2;
-    if (ringArea === 0) {
-      continue;
-    }
-
-    weightedLng += (centroidLng / (3 * twiceArea)) * ringArea;
-    weightedLat += (centroidLat / (3 * twiceArea)) * ringArea;
-    totalArea += ringArea;
-  }
-
-  if (totalArea === 0) {
+  if (!largestRing) {
     return [0, 0];
   }
 
-  return [weightedLat / totalArea, weightedLng / totalArea];
+  let twiceArea = 0;
+  let centroidLng = 0;
+  let centroidLat = 0;
+  for (let index = 0; index < largestRing.length - 1; index += 1) {
+    const [lng, lat] = largestRing[index];
+    const [nextLng, nextLat] = largestRing[index + 1];
+    const cross = lng * nextLat - nextLng * lat;
+    twiceArea += cross;
+    centroidLng += (lng + nextLng) * cross;
+    centroidLat += (lat + nextLat) * cross;
+  }
+
+  if (twiceArea !== 0) {
+    const centroid: LatLngTuple = [centroidLat / (3 * twiceArea), centroidLng / (3 * twiceArea)];
+    if (booleanPointInPolygon(turfPoint([centroid[1], centroid[0]]), feature)) {
+      return centroid;
+    }
+  }
+
+  // A boundary midpoint is on the surface even when the centroid falls outside
+  // a concave polygon. Use the longest edge for a stable label location.
+  let longestEdge = largestRing.slice(0, 2);
+  let longestLength = -1;
+  for (let index = 0; index < largestRing.length - 1; index += 1) {
+    const edge = [largestRing[index], largestRing[index + 1]];
+    const [lng, lat] = edge[0];
+    const [nextLng, nextLat] = edge[1];
+    const length = (nextLng - lng) ** 2 + (nextLat - lat) ** 2;
+    if (length > longestLength) {
+      longestLength = length;
+      longestEdge = edge;
+    }
+  }
+
+  const [lng, lat] = longestEdge[0];
+  const [nextLng, nextLat] = longestEdge[1];
+  return [(lat + nextLat) / 2, (lng + nextLng) / 2];
 }
 
 function intersectsGameArea(boundary: GameArea, gameArea: GameArea): boolean {
