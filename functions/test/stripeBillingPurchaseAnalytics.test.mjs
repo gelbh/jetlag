@@ -56,6 +56,19 @@ function createMockDb(initialData = {}) {
               applyMockWrite(documents, writes, path, data, options);
               return Promise.resolve();
             },
+            create(data) {
+              if (documents[path] !== undefined) {
+                const error = new Error("Already exists");
+                error.code = 6;
+                return Promise.reject(error);
+              }
+              applyMockWrite(documents, writes, path, data);
+              return Promise.resolve();
+            },
+            delete() {
+              delete documents[path];
+              return Promise.resolve();
+            },
           };
         },
       };
