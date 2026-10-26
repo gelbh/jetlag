@@ -3,15 +3,15 @@ import { attachPlayArea } from "./attachPlayArea";
 import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
 export const AMSTERDAM_STADSDELEN = [
-  { id: "centrum", name: "Centrum" },
-  { id: "westpoort", name: "Westpoort" },
-  { id: "west", name: "West" },
-  { id: "nieuw-west", name: "Nieuw-West" },
-  { id: "zuid", name: "Zuid" },
-  { id: "oost", name: "Oost" },
-  { id: "noord", name: "Noord" },
-  { id: "zuidoost", name: "Zuidoost" },
-  { id: "weesp", name: "Weesp" },
+  { id: "ams-centrum", name: "Centrum" },
+  { id: "ams-westpoort", name: "Westpoort" },
+  { id: "ams-west", name: "West" },
+  { id: "ams-nieuw-west", name: "Nieuw-West" },
+  { id: "ams-zuid", name: "Zuid" },
+  { id: "ams-oost", name: "Oost" },
+  { id: "ams-noord", name: "Noord" },
+  { id: "ams-zuidoost", name: "Zuidoost" },
+  { id: "ams-weesp", name: "Weesp" },
 ] as const;
 
 export function amsterdamPresets(): BundledGamePresetDefinition[] {

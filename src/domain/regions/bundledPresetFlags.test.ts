@@ -296,15 +296,15 @@ describe("bundledPresetFlags", () => {
     expect(BUNDLED_PRESET_FLAG_ASSETS["country-netherlands"].source).toMatch(/^flagcdn:nl$/);
     expect(BUNDLED_PRESET_FLAG_ASSETS["metro-amsterdam"].source).toMatch(/^wikidata:Q9899:/);
     for (const stadsdeel of [
-      "centrum",
-      "westpoort",
-      "west",
-      "nieuw-west",
-      "zuid",
-      "oost",
-      "noord",
-      "zuidoost",
-      "weesp",
+      "ams-centrum",
+      "ams-westpoort",
+      "ams-west",
+      "ams-nieuw-west",
+      "ams-zuid",
+      "ams-oost",
+      "ams-noord",
+      "ams-zuidoost",
+      "ams-weesp",
     ] as const) {
       const mark = flagMarkForBundledPresetId(`bundled:amsterdam-${stadsdeel}`);
       expect(mark, stadsdeel).not.toBeNull();
