@@ -70,13 +70,13 @@ function geocodeSearchBiasCacheKey(query: string, near: LatLngTuple, language: s
   );
 }
 
-function geocodeReverseCacheKey(point: LatLngTuple, adminLevel: number): string {
+function geocodeReverseCacheKey(point: LatLngTuple, adminLevel: number, language: string): string {
   return geographicCacheKey(
     {
       type: "Polygon",
       coordinates: [[[point[0], point[1]]]],
     },
-    `geocode:reverse:${adminLevel}`,
+    `geocode:reverse:v2:${adminLevel}:${language}`,
   );
 }
 
@@ -363,8 +363,9 @@ export async function reverseGeocodePoint(
   point: LatLngTuple,
   adminLevel: number,
 ): Promise<GeocodedPlace | null> {
+  const language = nominatimAcceptLanguage();
   return getOrFetchCached(
-    geocodeReverseCacheKey(point, adminLevel),
+    geocodeReverseCacheKey(point, adminLevel, language),
     async () => {
       const url = new URL(NOMINATIM_REVERSE_ENDPOINT);
       url.searchParams.set("lat", String(point[0]));
@@ -372,7 +373,7 @@ export async function reverseGeocodePoint(
       url.searchParams.set("format", "json");
       url.searchParams.set("addressdetails", "1");
       url.searchParams.set("zoom", String(adminLevel));
-      url.searchParams.set("accept-language", nominatimAcceptLanguage());
+      url.searchParams.set("accept-language", language);
 
       const payload = (await fetchNominatim(url, "Reverse geocoding failed.")) as NominatimResult;
       const adminLabel = adminLabelFromAddress(payload.address, adminLevel);
