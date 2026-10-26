@@ -160,6 +160,7 @@ export function useJoinSession({
   const joinAttemptRef = useRef(0);
 
   const [error, setError] = useState<string | null>(null);
+  const [roleCodeRequiredByServer, setRoleCodeRequiredByServer] = useState(false);
   const [loading, setLoading] = useState(false);
   const [joinTask, setJoinTask] = useState<LoadTask | null>(null);
   const { isSubmitting, runLocked } = useSubmitLock();
@@ -178,21 +179,22 @@ export function useJoinSession({
   const needsRolePasscode = Boolean(
     previewSession &&
       roleChosen &&
-      (castleSiegeJoin
-        ? castleSiegeRole != null &&
-          joinRequiresCastleSiegePasscode(
-            previewSession.castleSiegeRoles,
-            castleSiegeRole,
-            myUid ?? undefined,
-            rolePasscodeOccupancyKnown,
-          )
-        : playerRole != null &&
-          joinRequiresRolePasscode(
-            previewSession.memberRoles,
-            playerRole,
-            myUid ?? undefined,
-            rolePasscodeOccupancyKnown,
-          )),
+      (roleCodeRequiredByServer ||
+        (castleSiegeJoin
+          ? castleSiegeRole != null &&
+            joinRequiresCastleSiegePasscode(
+              previewSession.castleSiegeRoles,
+              castleSiegeRole,
+              myUid ?? undefined,
+              rolePasscodeOccupancyKnown,
+            )
+          : playerRole != null &&
+            joinRequiresRolePasscode(
+              previewSession.memberRoles,
+              playerRole,
+              myUid ?? undefined,
+              rolePasscodeOccupancyKnown,
+            ))),
   );
   const requestAccessRole: JoinRequestRole | null = !roleChosen
     ? null
@@ -214,6 +216,10 @@ export function useJoinSession({
   useEffect(() => {
     onExistingCastleSiegeRoleRef.current = onExistingCastleSiegeRole;
   }, [onExistingCastleSiegeRole]);
+
+  useEffect(() => {
+    setRoleCodeRequiredByServer(false);
+  }, [playerRole, castleSiegeRole, code]);
 
   useEffect(() => {
     if (!existingRole) {
@@ -402,6 +408,9 @@ export function useJoinSession({
       let claimed = false;
       const fail = (message: string, role: PlayerRole, reason: JoinFailureReason) => {
         setError(message);
+        if (reason === "role_code_required") {
+          setRoleCodeRequiredByServer(true);
+        }
         if (settled) {
           return;
         }

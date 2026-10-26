@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionRecord } from "@/domain/map/annotations";
@@ -20,6 +20,12 @@ const previewState = vi.hoisted(() => ({
   },
 }));
 
+const joinMocks = vi.hoisted(() => ({
+  firebaseConfigured: false,
+  joinRemoteSessionByCode: vi.fn(),
+  ensureFreshAnonymousUser: vi.fn(async () => ({ uid: "u1" })),
+}));
+
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => vi.fn(),
 }));
@@ -29,8 +35,17 @@ vi.mock("@/hooks/session/useJoinSessionPreview", () => ({
 }));
 
 vi.mock("@/services/core/firebase/firebase", () => ({
-  isFirebaseConfigured: () => false,
-  ensureFreshAnonymousUser: vi.fn(),
+  isFirebaseConfigured: () => joinMocks.firebaseConfigured,
+  ensureFreshAnonymousUser: (...args: unknown[]) =>
+    joinMocks.ensureFreshAnonymousUser(...(args as [])),
+}));
+
+vi.mock("@/services/firestore/firestoreAnnotations", () => ({
+  joinRemoteSessionByCode: (...args: unknown[]) =>
+    joinMocks.joinRemoteSessionByCode(...(args as [])),
+  waitForServerHiderRole: vi.fn(),
+  getRemoteSessionByIdFromServer: vi.fn(),
+  lookupRemoteSessionByCode: vi.fn(),
 }));
 
 function renderJoin() {
@@ -51,6 +66,9 @@ beforeEach(() => {
     existingRole: null,
     existingCastleSiegeRole: null,
   };
+  joinMocks.firebaseConfigured = false;
+  joinMocks.joinRemoteSessionByCode.mockReset();
+  joinMocks.ensureFreshAnonymousUser.mockClear();
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -177,6 +195,37 @@ describe("JoinSession", () => {
 
     expect(screen.queryByLabelText(/role code/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Leave it blank only if/)).not.toBeInTheDocument();
+  });
+
+  it("shows role code after server requires it when occupancy is unknown", async () => {
+    joinMocks.firebaseConfigured = true;
+    joinMocks.joinRemoteSessionByCode.mockRejectedValue(
+      new Error("Enter the role code for that side.", {
+        cause: Object.assign(new Error("Role code is required."), {
+          code: "functions/invalid-argument",
+        }),
+      }),
+    );
+    previewState.value = {
+      ...previewState.value,
+      previewSession: createTestRemoteSession({
+        gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
+        memberRoles: {},
+      }),
+    };
+
+    renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+    fireEvent.click(screen.getByRole("radio", { name: /^Seeker\./i }));
+    expect(screen.queryByLabelText(/role code/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^join session$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Enter the role code for that side.")).toBeInTheDocument();
+    });
+    expect(screen.getByLabelText(/role code/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /request access/i })).toBeInTheDocument();
   });
 
   it("shows Castle Siege details and seat picker without Continue", () => {
