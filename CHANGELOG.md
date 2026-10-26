@@ -6,6 +6,25 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.12.0 - 2026-10-26
+
+### Fixes
+
+- Area caching and Saving progress sit at the top instead of covering the map dock
+- Playing a move card discards only that card, not the whole hand
+- Admin and landmass matching points stay inside the boundary (including holes)
+- Bundled Tokyo and Osaka ward play-area sizes no longer ship as negatives
+
+### Improvements
+
+- Add Amsterdam pack with 9 stadsdeel presets, POIs, and flags
+- Add Land Berlin pack with 12 Bezirk presets, POIs, and flags
+- Add City of Brisbane LGA pack with 26 ward presets, POIs, and flags
+- Add Brussels-Capital Region pack with 19 commune presets, POIs, and flags
+- Add Singapore pack with 55 planning-area presets, POIs, and flags
+- Add Utrecht pack with 10 wijk presets, POIs, and flags
+- Add Wrocław pack with 48 dzielnica presets, POIs, and flags
+
 ## 1.11.0 - 2026-10-26
 
 ### Fixes
