@@ -31,7 +31,7 @@ export function FoundHiderAlert({
   if (playerRole === "hider" && onAcceptFoundHider) {
     return (
       <MapFloatSurface tone="info" role="alert" actionRow className={foundHiderPanelClassName}>
-        <p className="text-sm font-semibold text-ink">Seekers say you&apos;re found</p>
+        <p className="text-sm font-semibold text-field-ink">Seekers say you&apos;re found</p>
         <Group gap="sm" wrap="nowrap">
           {onDeclineFoundHider ? (
             <Button type="button" variant="default" size="md" onClick={onDeclineFoundHider}>
@@ -49,7 +49,9 @@ export function FoundHiderAlert({
   if (myUid && foundRequestedByUid === myUid && onDeclineFoundHider) {
     return (
       <MapFloatSurface tone="info" role="alert" actionRow className={foundHiderPanelClassName}>
-        <p className="text-sm font-semibold text-ink">Waiting for hider to confirm found hider</p>
+        <p className="text-sm font-semibold text-field-ink">
+          Waiting for hider to confirm found hider
+        </p>
         <Button type="button" variant="default" size="md" onClick={onDeclineFoundHider}>
           Cancel request
         </Button>
@@ -60,7 +62,9 @@ export function FoundHiderAlert({
   if (isHost && onDeclineFoundHider) {
     return (
       <MapFloatSurface tone="info" role="alert" actionRow className={foundHiderPanelClassName}>
-        <p className="text-sm font-semibold text-ink">Found hider pending hider confirmation</p>
+        <p className="text-sm font-semibold text-field-ink">
+          Found hider pending hider confirmation
+        </p>
         <Button type="button" variant="default" size="md" onClick={onDeclineFoundHider}>
           Cancel found hider
         </Button>

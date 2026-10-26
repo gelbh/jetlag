@@ -1,4 +1,5 @@
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import {
   type CastleSiegeOracleReceipt,
   formatOracleAskReceiptLabel,
@@ -25,10 +26,8 @@ export function OracleAskReceipt({
       data-testid="castle-siege-oracle-ask-receipt"
       className="rounded-md border px-3 py-2.5"
       style={{
-        borderColor: "var(--color-rule)",
-        background: "oklch(from var(--color-canvas) l c h / 92%)",
+        ...mapChromeSurfaceStyles,
         color: "var(--color-field-ink)",
-        boxShadow: "var(--shadow-hud-float)",
       }}
     >
       <p

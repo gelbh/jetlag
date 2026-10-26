@@ -4,6 +4,7 @@ import { type CSSProperties, type ReactNode, useEffect } from "react";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
 import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineError";
 import { compactFilledStyles, mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
+import { GlobalLoadProgressList } from "@/components/ui/feedback/GlobalLoadProgressList";
 import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
 import { useLoadTask } from "@/hooks/progress/useLoadTask";
 import { cn } from "@/lib/cn";
@@ -306,6 +307,7 @@ export function AskMapPlacementChrome({
             </p>
           </div>
         </div>
+        <GlobalLoadProgressList />
         {showAnswer && answerErrorCopy ? (
           <HaltErrorAlert
             testId={`${testId}-answer-error`}

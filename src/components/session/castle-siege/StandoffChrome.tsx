@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import type { StandoffTeamId, StandoffTurnState } from "@/domain/session/castleSiege/standoffTurn";
 
 export type StandoffChromeProps = {
@@ -56,10 +57,8 @@ export function StandoffChrome({
       data-testid="castle-siege-standoff-chrome"
       className="flex flex-col gap-2 rounded-md border px-3 py-2.5"
       style={{
-        borderColor: "var(--color-rule)",
-        background: "oklch(from var(--color-canvas) l c h / 92%)",
+        ...mapChromeSurfaceStyles,
         color: "var(--color-field-ink)",
-        boxShadow: "var(--shadow-hud-float)",
       }}
     >
       <p

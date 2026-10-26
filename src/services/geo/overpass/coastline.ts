@@ -1,6 +1,7 @@
 import type { Feature, LineString } from "geojson";
 import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { filterCoastlineSegmentsForMeasuring } from "@/domain/geometry/measuring/filterCoastlineSegments";
 import {
   nearestPointToCoastlines,
   type PreparedLinearSegments,
@@ -88,20 +89,22 @@ async function fetchCoastlineSegmentsFromOverpass(
     load,
   );
 
-  return payload.elements
+  const segments = payload.elements
     .filter((element) => element.type === "way" && element.geometry)
     .map((element) => wayToLineString(element.geometry ?? []))
     .filter((segment): segment is Feature<LineString> => segment !== null);
+
+  return filterCoastlineSegmentsForMeasuring(segments, gameAreaToBoundingBox(gameArea));
 }
 
 async function prepareMergedCoastlineSegments(
   gameArea: GameArea,
-  bundledSegments: Feature<LineString>[],
+  filteredBundledSegments: Feature<LineString>[],
   load: OverpassLoad = {},
   prepareNode?: ProgressNode,
 ): Promise<PreparedLinearSegments> {
   const overpassSegments = await fetchCoastlineSegmentsFromOverpass(gameArea, load);
-  const segments = mergeCoastlineSegments(overpassSegments, bundledSegments);
+  const segments = mergeCoastlineSegments(overpassSegments, filteredBundledSegments);
   prepareNode?.start();
   if (prepareNode) {
     await yieldToMain();
@@ -140,16 +143,24 @@ export async function fetchPreparedCoastlineSegments(
   }
 
   const bundledSegments = pack?.segments ?? [];
+  const filteredBundledSegments = filterCoastlineSegmentsForMeasuring(
+    bundledSegments,
+    pack?.bbox ?? gameAreaToBoundingBox(gameArea),
+  );
 
   // Pack-first: return immediately without writing the incomplete pack into the
   // shared coastline cache (same dual-phase shape as measuringPlaces).
-  if (bundledSegments.length > 0 && options?.onEnrich) {
-    const prepared = prepareMeasuringLineSegments(bundledSegments, gameArea);
+  if (filteredBundledSegments.length > 0 && options?.onEnrich) {
+    const prepared = prepareMeasuringLineSegments(filteredBundledSegments, gameArea);
     enrichInBackground(
       options.createEnrichTask,
       searchSpec,
       async (load) => {
-        const merged = await prepareMergedCoastlineSegments(gameArea, bundledSegments, load);
+        const merged = await prepareMergedCoastlineSegments(
+          gameArea,
+          filteredBundledSegments,
+          load,
+        );
         await writeCoastlineSegmentsCache(gameArea, merged);
         return merged;
       },
@@ -165,7 +176,7 @@ export async function fetchPreparedCoastlineSegments(
     (context) =>
       prepareMergedCoastlineSegments(
         gameArea,
-        bundledSegments,
+        filteredBundledSegments,
         overpassLoadFromFetch(context),
         prepareNode,
       ),

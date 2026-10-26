@@ -1,22 +1,15 @@
 import { GlobalActivity } from "../components/ui/feedback/GlobalActivity";
-import { LoadProgress } from "../components/ui/feedback/LoadProgress";
-import { useGlobalLoadTasks } from "../hooks/progress/useLoadTask";
+import { GlobalLoadProgressList } from "../components/ui/feedback/GlobalLoadProgressList";
+import { useAskMapPlacementActive } from "../hooks/progress/useAskMapPlacementActive";
 import { useSessionStore } from "../state/sessionStore";
 
 export function AppGlobalActivity() {
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
-  const tasks = useGlobalLoadTasks();
+  const askMapPlacementActive = useAskMapPlacementActive();
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-banner)] flex flex-col items-center gap-2 px-3 pb-[max(0.75rem,var(--safe-area-bottom))]">
-      {tasks.map((task) => (
-        <div
-          key={task.id}
-          className="pointer-events-auto w-full max-w-xs rounded-md border border-border bg-surface-panel/95 px-2 py-1.5 shadow-hud-float"
-        >
-          <LoadProgress task={task} variant="compact" />
-        </div>
-      ))}
+      {!askMapPlacementActive ? <GlobalLoadProgressList /> : null}
       <GlobalActivity pendingWrites={pendingWrites} className="pointer-events-auto" />
     </div>
   );

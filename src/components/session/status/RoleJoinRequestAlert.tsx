@@ -31,7 +31,7 @@ export function RoleJoinRequestAlert({
       data-testid="role-join-request-alert"
     >
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-ink">
+        <p className="text-sm font-semibold text-field-ink">
           {request.identityLabel} wants to join as {joinRequestRoleLabel(request.role)}
         </p>
         {error ? <p className="text-sm text-status-error">{error}</p> : null}

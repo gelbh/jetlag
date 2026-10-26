@@ -1,3 +1,4 @@
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import type { CastleSiegeArena } from "@/domain/session/castleSiege/arena";
 import {
   type CastleSiegeDials,
@@ -37,10 +38,8 @@ export function ArenaLedger({ arena, setupMode, dials }: ArenaLedgerProps) {
       data-testid="castle-siege-arena-ledger"
       className="rounded-md border border-rule bg-canvas px-3 py-2.5"
       style={{
-        borderColor: "var(--color-rule)",
-        background: "oklch(from var(--color-canvas) l c h / 92%)",
+        ...mapChromeSurfaceStyles,
         color: "var(--color-field-ink)",
-        boxShadow: "var(--shadow-hud-float)",
       }}
     >
       <p
