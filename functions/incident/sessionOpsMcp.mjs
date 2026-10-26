@@ -10,6 +10,9 @@
  */
 
 import { timingSafeEqual } from "node:crypto";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { z } from "zod";
 import { requestHostConfirm } from "./hostConfirm.mjs";
 import {
   consumeSessionOpsTool,
@@ -17,16 +20,33 @@ import {
   SESSION_OPS_TOOL_CAP,
 } from "./sessionOpsCaps.mjs";
 import { appendSupportThreadMessage } from "./sessionOpsThread.mjs";
-import {
-  SESSION_OPS_TOOL_IDS,
-  SESSION_OPS_TOOL_JSON_SCHEMAS,
-  SESSION_OPS_TOOLS,
-} from "./sessionOpsTools.mjs";
+import { SESSION_OPS_TOOL_IDS, SESSION_OPS_TOOLS } from "./sessionOpsTools.mjs";
 import {
   SESSION_OPS_HOST_CONFIRM_REQUIRED,
   SESSION_OPS_UNKNOWN_TOOL,
   validateSessionOpsTool,
 } from "./sessionOpsValidate.mjs";
+
+const SESSION_OPS_MCP_SERVER_INFO = { name: "jetlag-session-ops", version: "1.0.0" };
+
+/** Mirrors SESSION_OPS_TOOL_JSON_SCHEMAS note fields for McpServer.tool() Zod shapes. */
+const sessionOpsNoteField = z.string().max(140).optional();
+
+/** Zod shapes for tool registration (SDK requires Zod, not JSON Schema). */
+const SESSION_OPS_TOOL_ZOD_SHAPES = {
+  soft_reload: { note: sessionOpsNoteField },
+  reset_board: { note: sessionOpsNoteField },
+  clear_pending_questions: { note: sessionOpsNoteField },
+  cancel_pending_question: {
+    questionId: z.string().min(1),
+    note: sessionOpsNoteField,
+  },
+  end_session: { note: sessionOpsNoteField },
+  soft_delete_annotation: {
+    annotationId: z.string().min(1),
+    note: sessionOpsNoteField,
+  },
+};
 
 export const SESSION_OPS_MCP_UNAUTHORIZED = "SESSION_OPS_MCP_UNAUTHORIZED";
 export const SESSION_OPS_MCP_HEADER_INCIDENT = "x-jetlag-incident-id";
@@ -92,17 +112,6 @@ export function readSessionOpsMcpBinding(headers) {
   };
 }
 
-function buildToolsList() {
-  return SESSION_OPS_TOOL_IDS.map((id) => ({
-    name: id,
-    description: SESSION_OPS_TOOLS[id]?.description ?? id,
-    inputSchema: SESSION_OPS_TOOL_JSON_SCHEMAS[id] ?? {
-      type: "object",
-      properties: {},
-    },
-  }));
-}
-
 /**
  * @param {unknown} args
  */
@@ -114,6 +123,74 @@ function stripBindingArgs(args) {
   delete next.sessionId;
   delete next.incidentId;
   return next;
+}
+
+/**
+ * Per-request McpServer + StreamableHTTP transport (do not reuse across clients).
+ *
+ * @param {object} deps
+ * @param {{
+ *   headers?: Record<string, string | string[] | undefined>,
+ *   binding?: { incidentId: string, sessionId: string, actorUid: string, summonId: string },
+ *   posthog?: unknown,
+ * }} [requestContext]
+ * @returns {{ server: McpServer, transport: StreamableHTTPServerTransport }}
+ */
+export function createSessionOpsMcpServer(deps, requestContext = {}) {
+  const headers = requestContext.headers ?? {};
+  const binding = requestContext.binding ?? readSessionOpsMcpBinding(headers);
+  const server = new McpServer(SESSION_OPS_MCP_SERVER_INFO);
+
+  for (const toolId of SESSION_OPS_TOOL_IDS) {
+    const description = SESSION_OPS_TOOLS[toolId]?.description ?? toolId;
+    const inputSchema = SESSION_OPS_TOOL_ZOD_SHAPES[toolId] ?? {};
+    server.tool(toolId, description, inputSchema, async (args) => {
+      if (!binding.incidentId || !binding.sessionId || !binding.actorUid) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text",
+              text: "Missing bound incident/session/actor headers.",
+            },
+          ],
+        };
+      }
+      try {
+        const outcome = await runSessionOpsMcpBoundTool(
+          {
+            incidentId: binding.incidentId,
+            sessionId: binding.sessionId,
+            actorUid: binding.actorUid,
+            summonId: binding.summonId,
+            tool: toolId,
+            args: stripBindingArgs(args),
+          },
+          deps,
+        );
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(outcome ?? { ok: true }),
+            },
+          ],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "SESSION_OPS_MCP_FAILED";
+        return {
+          isError: true,
+          content: [{ type: "text", text: message }],
+        };
+      }
+    });
+  }
+
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+    enableJsonResponse: true,
+  });
+  return { server, transport };
 }
 
 /**
@@ -361,179 +438,4 @@ export async function runSessionOpsMcpBoundTool(input, deps) {
     });
   }
   return outcome;
-}
-
-/**
- * Core JSON-RPC MCP handler (streamable-HTTP compatible request body).
- *
- * @param {{
- *   headers: Record<string, string | string[] | undefined>,
- *   body: unknown,
- * }} request
- * @param {{
- *   authSecret: string,
- *   db?: object,
- *   execute?: Function,
- *   requestConfirm?: Function,
- *   consumeTool?: Function,
- *   resolveCaps?: Function,
- *   appendSupportMessage?: Function,
- *   notify?: Function,
- *   now?: () => Date,
- *   generateId?: () => string,
- * }} deps
- * @returns {Promise<{ status: number, body: Record<string, unknown> }>}
- */
-export async function handleSessionOpsMcpRequest(request, deps) {
-  const headers = request?.headers ?? {};
-  if (!authenticateSessionOpsMcp(headers, deps.authSecret)) {
-    return {
-      status: 401,
-      body: { error: SESSION_OPS_MCP_UNAUTHORIZED },
-    };
-  }
-
-  const body = request?.body;
-  if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return {
-      status: 400,
-      body: {
-        jsonrpc: "2.0",
-        id: null,
-        error: { code: -32700, message: "Parse error" },
-      },
-    };
-  }
-
-  const id = "id" in body ? body.id : null;
-  const method = typeof body.method === "string" ? body.method : "";
-
-  if (method === "initialize") {
-    return {
-      status: 200,
-      body: {
-        jsonrpc: "2.0",
-        id,
-        result: {
-          protocolVersion: "2024-11-05",
-          capabilities: { tools: {} },
-          serverInfo: { name: "jetlag-session-ops", version: "1.0.0" },
-        },
-      },
-    };
-  }
-
-  if (method === "notifications/initialized" || method === "ping") {
-    return {
-      status: 200,
-      body: { jsonrpc: "2.0", id, result: {} },
-    };
-  }
-
-  if (method === "tools/list") {
-    return {
-      status: 200,
-      body: {
-        jsonrpc: "2.0",
-        id,
-        result: { tools: buildToolsList() },
-      },
-    };
-  }
-
-  if (method === "tools/call") {
-    const params = body.params && typeof body.params === "object" ? body.params : {};
-    const toolName = typeof params.name === "string" ? params.name : "";
-    const binding = readSessionOpsMcpBinding(headers);
-
-    if (!SESSION_OPS_TOOL_IDS.includes(toolName)) {
-      return {
-        status: 200,
-        body: {
-          jsonrpc: "2.0",
-          id,
-          result: {
-            isError: true,
-            content: [
-              {
-                type: "text",
-                text: `${SESSION_OPS_UNKNOWN_TOOL}: Unknown session-ops tool.`,
-              },
-            ],
-          },
-        },
-      };
-    }
-
-    if (!binding.incidentId || !binding.sessionId || !binding.actorUid) {
-      return {
-        status: 200,
-        body: {
-          jsonrpc: "2.0",
-          id,
-          result: {
-            isError: true,
-            content: [
-              {
-                type: "text",
-                text: "Missing bound incident/session/actor headers.",
-              },
-            ],
-          },
-        },
-      };
-    }
-
-    const args = stripBindingArgs(params.arguments);
-    try {
-      const outcome = await runSessionOpsMcpBoundTool(
-        {
-          incidentId: binding.incidentId,
-          sessionId: binding.sessionId,
-          actorUid: binding.actorUid,
-          summonId: binding.summonId,
-          tool: toolName,
-          args,
-        },
-        deps,
-      );
-      return {
-        status: 200,
-        body: {
-          jsonrpc: "2.0",
-          id,
-          result: {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify(outcome ?? { ok: true }),
-              },
-            ],
-          },
-        },
-      };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "SESSION_OPS_MCP_FAILED";
-      return {
-        status: 200,
-        body: {
-          jsonrpc: "2.0",
-          id,
-          result: {
-            isError: true,
-            content: [{ type: "text", text: message }],
-          },
-        },
-      };
-    }
-  }
-
-  return {
-    status: 200,
-    body: {
-      jsonrpc: "2.0",
-      id,
-      error: { code: -32601, message: `Method not found: ${method}` },
-    },
-  };
 }
