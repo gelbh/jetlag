@@ -158,6 +158,75 @@ describe("bundledPresetFlags", () => {
     }
   });
 
+  it("ships distinct flag or coat marks for every Singapore preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:singapore")?.src).toBe(
+      "/region-flags/metro-singapore.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-singapore"].source).toMatch(/^flagcdn:sg$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-singapore"].source).toMatch(/^wikidata:Q334:/);
+    for (const planningArea of [
+      "ang-mo-kio",
+      "bedok",
+      "bishan",
+      "boon-lay",
+      "bukit-batok",
+      "bukit-merah",
+      "bukit-panjang",
+      "bukit-timah",
+      "central-water-catchment",
+      "changi",
+      "changi-bay",
+      "choa-chu-kang",
+      "clementi",
+      "downtown-core",
+      "geylang",
+      "hougang",
+      "jurong-east",
+      "jurong-west",
+      "kallang",
+      "lim-chu-kang",
+      "mandai",
+      "marina-east",
+      "marina-south",
+      "marine-parade",
+      "museum",
+      "newton",
+      "north-eastern-islands",
+      "novena",
+      "orchard",
+      "outram",
+      "pasir-ris",
+      "paya-lebar",
+      "pioneer",
+      "punggol",
+      "queenstown",
+      "river-valley",
+      "rochor",
+      "seletar",
+      "sembawang",
+      "sengkang",
+      "serangoon",
+      "simpang",
+      "singapore-river",
+      "southern-islands",
+      "straits-view",
+      "sungei-kadut",
+      "tampines",
+      "tanglin",
+      "tengah",
+      "toa-payoh",
+      "tuas",
+      "western-islands",
+      "western-water-catchment",
+      "woodlands",
+      "yishun",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:singapore-${planningArea}`);
+      expect(mark, planningArea).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${planningArea}.png`);
+    }
+  });
+
   it("ships distinct flag or coat marks for every Berlin preset leaf", () => {
     expect(flagMarkForBundledPresetId("bundled:berlin")?.src).toBe(
       "/region-flags/metro-berlin.png",

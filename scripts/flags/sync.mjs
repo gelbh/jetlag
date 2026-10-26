@@ -22,6 +22,10 @@ import {
   BRISBANE_WARD_FLAG_OVERRIDES,
   ensureBrisbaneWardOverridePngs,
 } from "./brisbane-ward-flags.mjs";
+import {
+  ensureSingaporePlanningOverridePngs,
+  SINGAPORE_PLANNING_FLAG_OVERRIDES,
+} from "./singapore-planning-flags.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "../..");
@@ -43,6 +47,7 @@ const FLAGCDN = {
   "country-au": { code: "au", alt: "Australia" },
   "country-belgium": { code: "be", alt: "Belgium" },
   "country-germany": { code: "de", alt: "Germany" },
+  "country-singapore": { code: "sg", alt: "Singapore" },
 };
 
 /**
@@ -383,6 +388,62 @@ const WIKIDATA = {
   "marzahn-hellersdorf": { qid: "Q702029", alt: "Marzahn-Hellersdorf" },
   lichtenberg: { qid: "Q163011", alt: "Lichtenberg" },
   reinickendorf: { qid: "Q158876", alt: "Reinickendorf" },
+  "metro-singapore": { qid: "Q334", alt: "Singapore" },
+  "ang-mo-kio": { qid: "Q4761845", alt: "Ang Mo Kio" },
+  bedok: { qid: "Q4879339", alt: "Bedok" },
+  bishan: { qid: "Q3249777", alt: "Bishan" },
+  "boon-lay": { qid: "Q12684211", alt: "Boon Lay" },
+  "bukit-batok": { qid: "Q1906213", alt: "Bukit Batok" },
+  "bukit-merah": { qid: "Q4986926", alt: "Bukit Merah" },
+  "bukit-panjang": { qid: "Q2224065", alt: "Bukit Panjang" },
+  "bukit-timah": { qid: "Q22970788", alt: "Bukit Timah" },
+  "central-water-catchment": { qid: "Q25171659", alt: "Central Water Catchment" },
+  changi: { qid: "Q1812824", alt: "Changi" },
+  "changi-bay": { qid: "Q5071983", alt: "Changi Bay" },
+  "choa-chu-kang": { qid: "Q1069101", alt: "Choa Chu Kang" },
+  clementi: { qid: "Q4259064", alt: "Clementi" },
+  "downtown-core": { qid: "Q3810086", alt: "Downtown Core" },
+  geylang: { qid: "Q525295", alt: "Geylang" },
+  hougang: { qid: "Q10860944", alt: "Hougang" },
+  "jurong-east": { qid: "Q1714023", alt: "Jurong East" },
+  "jurong-west": { qid: "Q6315392", alt: "Jurong West" },
+  kallang: { qid: "Q4216846", alt: "Kallang" },
+  "lim-chu-kang": { qid: "Q6548667", alt: "Lim Chu Kang" },
+  mandai: { qid: "Q6747714", alt: "Mandai" },
+  "marina-east": { qid: "Q6763814", alt: "Marina East" },
+  "marina-south": { qid: "Q16056488", alt: "Marina South" },
+  "marine-parade": { qid: "Q6764201", alt: "Marine Parade" },
+  museum: { qid: "Q16056508", alt: "Museum" },
+  newton: { qid: "Q6453025", alt: "Newton" },
+  "north-eastern-islands": { qid: "Q7053543", alt: "North-Eastern Islands" },
+  novena: { qid: "Q985660", alt: "Novena" },
+  orchard: { qid: "Q104535027", alt: "Orchard" },
+  outram: { qid: "Q15077913", alt: "Outram" },
+  "pasir-ris": { qid: "Q4259440", alt: "Pasir Ris" },
+  "paya-lebar": { qid: "Q7156634", alt: "Paya Lebar" },
+  pioneer: { qid: "Q16887503", alt: "Pioneer" },
+  punggol: { qid: "Q7260156", alt: "Punggol" },
+  queenstown: { qid: "Q9079137", alt: "Queenstown" },
+  "river-valley": { qid: "Q7337921", alt: "River Valley" },
+  rochor: { qid: "Q7354099", alt: "Rochor" },
+  seletar: { qid: "Q7447926", alt: "Seletar" },
+  sembawang: { qid: "Q7449155", alt: "Sembawang" },
+  sengkang: { qid: "Q10861365", alt: "Sengkang" },
+  serangoon: { qid: "Q10861231", alt: "Serangoon" },
+  simpang: { qid: "Q16928238", alt: "Simpang" },
+  "singapore-river": { qid: "Q1454776", alt: "Singapore River" },
+  "southern-islands": { qid: "Q7570048", alt: "Southern Islands" },
+  "straits-view": { qid: "Q24882679", alt: "Straits View" },
+  "sungei-kadut": { qid: "Q7640199", alt: "Sungei Kadut" },
+  tampines: { qid: "Q5110386", alt: "Tampines" },
+  tanglin: { qid: "Q7683056", alt: "Tanglin" },
+  tengah: { qid: "Q7699745", alt: "Tengah" },
+  "toa-payoh": { qid: "Q2734905", alt: "Toa Payoh" },
+  tuas: { qid: "Q7850658", alt: "Tuas" },
+  "western-islands": { qid: "Q7987985", alt: "Western Islands" },
+  "western-water-catchment": { qid: "Q7988434", alt: "Western Water Catchment" },
+  woodlands: { qid: "Q5254438", alt: "Woodlands" },
+  yishun: { qid: "Q8053845", alt: "Yishun" },
   // Kantō / Kansai have no P41/P94 on Wikidata — local overrides.
   // Tokyo special wards (List of municipal flags of Kantō region).
   "ward-13101": { qid: "Q214051", alt: "Chiyoda" },
@@ -567,6 +628,7 @@ async function writeAsset(assets, segmentId, { alt, source, identity, presentati
 
 async function main() {
   await ensureBrisbaneWardOverridePngs();
+  await ensureSingaporePlanningOverridePngs();
   await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
 
@@ -735,6 +797,27 @@ async function main() {
     const srcPath = path.join(overrideDir, file);
     const dest = path.join(outDir, file);
     process.stdout.write(`BrisbaneWard ${segmentId} ← ${file}… `);
+    try {
+      await finalizePng(srcPath, dest, presentation);
+      await writeAsset(assets, segmentId, {
+        alt,
+        source: `local:${file}`,
+        identity,
+        presentation,
+        destPath: dest,
+      });
+      console.log("ok");
+    } catch (error) {
+      console.log(`fail (${error.message}) — skip`);
+    }
+  }
+
+  for (const [segmentId, { file, alt, identity, presentation }] of Object.entries(
+    SINGAPORE_PLANNING_FLAG_OVERRIDES,
+  )) {
+    const srcPath = path.join(overrideDir, file);
+    const dest = path.join(outDir, file);
+    process.stdout.write(`SingaporePlanning ${segmentId} ← ${file}… `);
     try {
       await finalizePng(srcPath, dest, presentation);
       await writeAsset(assets, segmentId, {

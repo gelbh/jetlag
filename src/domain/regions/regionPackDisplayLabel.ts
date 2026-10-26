@@ -17,6 +17,7 @@ const REGION_PACK_DISPLAY_LABELS: Record<RegionPackId, string> = {
   brussels: "Brussels",
   brisbane: "Brisbane",
   berlin: "Berlin",
+  singapore: "Singapore",
 };
 
 export function regionPackDisplayLabel(packId: RegionPackId): string {

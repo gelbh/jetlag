@@ -15,6 +15,7 @@ import { osakaPresets } from "./osaka";
 import { portlandMainePresets } from "./portlandMaine";
 import { princeRupertPresets } from "./princeRupert";
 import type { BundledGamePresetDefinition } from "./shared";
+import { singaporePresets } from "./singapore";
 import { southamptonPresets } from "./southampton";
 import { swissPresets } from "./swiss";
 import { sydneyPresets } from "./sydney";
@@ -38,6 +39,7 @@ export const BUNDLED_GAME_PRESET_DEFINITIONS: readonly BundledGamePresetDefiniti
   ...brusselsPresets(),
   ...brisbanePresets(),
   ...berlinPresets(),
+  ...singaporePresets(),
 ];
 
 export function isBundledPresetId(id: string): boolean {

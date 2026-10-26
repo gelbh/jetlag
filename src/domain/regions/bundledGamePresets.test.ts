@@ -11,6 +11,7 @@ import { AUSTRALIA_STATE_PRESETS } from "./bundledPresets/australia";
 import { BERLIN_BEZIRKE } from "./bundledPresets/berlin";
 import { BRISBANE_WARDS } from "./bundledPresets/brisbane";
 import { BRUSSELS_COMMUNES } from "./bundledPresets/brussels";
+import { SINGAPORE_PLANNING_AREAS } from "./bundledPresets/singapore";
 import { SOUTHAMPTON_WARDS } from "./bundledPresets/southampton";
 import { SYDNEY_LGAS } from "./bundledPresets/sydney";
 
@@ -49,6 +50,18 @@ describe("bundledGamePresets", () => {
       expect(preset?.hierarchy.at(-1)?.id).toBe(bezirk.id);
     }
     expect(presets).toHaveLength(1 + BERLIN_BEZIRKE.length);
+  });
+
+  it("includes singapore metro and planning-area presets on the singapore pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "singapore");
+    expect(presets.some((p) => p.id === "bundled:singapore")).toBe(true);
+    for (const planningArea of SINGAPORE_PLANNING_AREAS) {
+      const preset = presets.find((p) => p.id === `bundled:singapore-${planningArea.id}`);
+      expect(preset, planningArea.id).toBeDefined();
+      expect(preset?.subregionId).toBe(planningArea.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(planningArea.id);
+    }
+    expect(presets).toHaveLength(1 + SINGAPORE_PLANNING_AREAS.length);
   });
 
   it("includes southampton city and ward presets on the southampton pack", () => {

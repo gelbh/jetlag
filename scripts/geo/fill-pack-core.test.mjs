@@ -65,6 +65,7 @@ describe("resolvePackMapping", () => {
       "osaka",
       "portland-maine",
       "prince-rupert",
+      "singapore",
       "southampton",
       "switzerland",
       "sydney",

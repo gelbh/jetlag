@@ -1,0 +1,42 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q1836723",
+      "name": "Changi Air Base (East)",
+      "lat": 1.344138,
+      "lng": 104.009043
+    },
+    {
+      "id": "Q1432865",
+      "name": "Seletar Airport",
+      "lat": 1.416944,
+      "lng": 103.867778
+    },
+    {
+      "id": "Q3497722",
+      "name": "Sembawang Air Base",
+      "lat": 1.425278,
+      "lng": 103.812778
+    },
+    {
+      "id": "Q32159",
+      "name": "Singapore Changi Airport",
+      "lat": 1.359167,
+      "lng": 103.989444
+    },
+    {
+      "id": "Q35302552",
+      "name": "Singapore Highway Strip Pioneer",
+      "lat": 1.3225,
+      "lng": 103.648889
+    }
+  ]
+}

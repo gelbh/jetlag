@@ -1,0 +1,66 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q1018484",
+      "name": "Haw Par Villa",
+      "lat": 1.284167,
+      "lng": 103.782222
+    },
+    {
+      "id": "Q6003536",
+      "name": "Imbiah Lookout",
+      "lat": 1.256,
+      "lng": 103.815
+    },
+    {
+      "id": "Q6808067",
+      "name": "MegaZip Adventure Park",
+      "lat": 1.255941,
+      "lng": 103.812297
+    },
+    {
+      "id": "Q16259504",
+      "name": "New World Amusement Park",
+      "lat": 1.310278,
+      "lng": 103.857917
+    },
+    {
+      "id": "Q14874458",
+      "name": "NTUC Downtown East",
+      "lat": 1.37639,
+      "lng": 103.954
+    },
+    {
+      "id": "Q7548200",
+      "name": "Snow City",
+      "lat": 1.335167,
+      "lng": 103.735194
+    },
+    {
+      "id": "Q65066849",
+      "name": "Tang Dynasty City",
+      "lat": 1.326472,
+      "lng": 103.726111
+    },
+    {
+      "id": "Q1186714",
+      "name": "Universal Studios Singapore",
+      "lat": 1.255,
+      "lng": 103.821667
+    },
+    {
+      "id": "Q8000861",
+      "name": "Wild Wild Wet",
+      "lat": 1.37722,
+      "lng": 103.954
+    }
+  ]
+}
