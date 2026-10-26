@@ -1,6 +1,84 @@
 {
   "category": "zoo",
-  "source": "none",
-  "bbox": { "south": -34.2, "west": 150.5, "north": -33.3, "east": 151.35 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -34.3574,
+    "west": 149.9948,
+    "north": -32.9761,
+    "east": 151.363
+  },
+  "places": [
+    {
+      "id": "Q4689846",
+      "name": "African Lion Safari",
+      "lat": -33.899487,
+      "lng": 150.602646
+    },
+    {
+      "id": "Q4273332",
+      "name": "Australian Reptile Park",
+      "lat": -33.4182,
+      "lng": 151.277
+    },
+    {
+      "id": "Q5439615",
+      "name": "Featherdale Sydney Wildlife Park",
+      "lat": -33.766111,
+      "lng": 150.884167
+    },
+    {
+      "id": "Q6424208",
+      "name": "Koala Park Sanctuary",
+      "lat": -33.7419,
+      "lng": 151.045
+    },
+    {
+      "id": "Q6750618",
+      "name": "Manly Sea Life Sanctuary",
+      "lat": -33.7991,
+      "lng": 151.281
+    },
+    {
+      "id": "Q2591764",
+      "name": "Sea Life Sydney Aquarium",
+      "lat": -33.8694,
+      "lng": 151.202
+    },
+    {
+      "id": "Q55634508",
+      "name": "Sydney Zoo",
+      "lat": -33.791111,
+      "lng": 150.866944
+    },
+    {
+      "id": "Q7661113",
+      "name": "Symbio Wildlife Park",
+      "lat": -34.2048,
+      "lng": 150.968
+    },
+    {
+      "id": "Q1064813",
+      "name": "Taronga Zoo",
+      "lat": -33.843333,
+      "lng": 151.241111
+    },
+    {
+      "id": "Q60227907",
+      "name": "Waratah Park",
+      "lat": -33.6762,
+      "lng": 151.177
+    },
+    {
+      "id": "Q8000710",
+      "name": "Wild Life Sydney",
+      "lat": -33.8698,
+      "lng": 151.202
+    },
+    {
+      "id": "Q135004110",
+      "name": "Zambi Wildlife Retreat",
+      "lat": -33.869722,
+      "lng": 150.67
+    }
+  ]
 }

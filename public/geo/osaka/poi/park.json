@@ -1,1 +1,336 @@
-{ "category": "park", "source": "none", "places": [] }
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 34.5865,
+    "west": 135.3435,
+    "north": 34.7688,
+    "east": 135.5993
+  },
+  "places": [
+    {
+      "id": "Q17191742",
+      "name": "Amagasaki Memorial Park",
+      "lat": 34.731167,
+      "lng": 135.422986
+    },
+    {
+      "id": "Q116733984",
+      "name": "Buson Park",
+      "lat": 34.718951,
+      "lng": 135.519824
+    },
+    {
+      "id": "Q136674288",
+      "name": "Forest of Tranquility",
+      "lat": 34.6499,
+      "lng": 135.3835
+    },
+    {
+      "id": "Q140392072",
+      "name": "Garden of Medicinal Plants, Kindai University",
+      "lat": 34.651337,
+      "lng": 135.582663
+    },
+    {
+      "id": "Q17218195",
+      "name": "Hyogo Prefectural Amagasaki Forest Central Green Space",
+      "lat": 34.695306,
+      "lng": 135.383528
+    },
+    {
+      "id": "Q11554782",
+      "name": "Izuo Park",
+      "lat": 34.656583,
+      "lng": 135.469028
+    },
+    {
+      "id": "Q134487344",
+      "name": "Kamisakabe-Nishi Park",
+      "lat": 34.748861,
+      "lng": 135.423194
+    },
+    {
+      "id": "Q118141662",
+      "name": "Kema Park",
+      "lat": 34.712822,
+      "lng": 135.519356
+    },
+    {
+      "id": "Q5358677",
+      "name": "KidZania Koshien",
+      "lat": 34.716861,
+      "lng": 135.363861
+    },
+    {
+      "id": "Q30934192",
+      "name": "Legoland Discovery Center Osaka",
+      "lat": 34.655806,
+      "lng": 135.430167
+    },
+    {
+      "id": "Q11613637",
+      "name": "Maishima Sports Island",
+      "lat": 34.664222,
+      "lng": 135.395139
+    },
+    {
+      "id": "Q70532158",
+      "name": "Mandaiike Park",
+      "lat": 34.61935,
+      "lng": 135.50218
+    },
+    {
+      "id": "Q11407698",
+      "name": "Minami-Temma Park",
+      "lat": 34.691879,
+      "lng": 135.514528
+    },
+    {
+      "id": "Q11536933",
+      "name": "Momogaike Park",
+      "lat": 34.630944,
+      "lng": 135.521444
+    },
+    {
+      "id": "Q6149771",
+      "name": "Nagai Botanical Garden",
+      "lat": 34.610556,
+      "lng": 135.521667
+    },
+    {
+      "id": "Q5359309",
+      "name": "Nagai Park",
+      "lat": 34.611944,
+      "lng": 135.520556
+    },
+    {
+      "id": "Q137637534",
+      "name": "Nakakosaka-park",
+      "lat": 34.661072,
+      "lng": 135.582431
+    },
+    {
+      "id": "Q6960289",
+      "name": "Nakanoshima Park",
+      "lat": 34.693056,
+      "lng": 135.506431
+    },
+    {
+      "id": "Q117417589",
+      "name": "Nishi-Umeda Park",
+      "lat": 34.697472,
+      "lng": 135.490972
+    },
+    {
+      "id": "Q11496859",
+      "name": "Ōgimachi Park",
+      "lat": 34.703972,
+      "lng": 135.509028
+    },
+    {
+      "id": "Q1191885",
+      "name": "Osaka Aquarium Kaiyukan",
+      "lat": 34.654472,
+      "lng": 135.428889
+    },
+    {
+      "id": "Q150118",
+      "name": "Osaka Castle Park",
+      "lat": 34.687378,
+      "lng": 135.525844
+    },
+    {
+      "id": "Q118141449",
+      "name": "Osaka Fureai no Mizube",
+      "lat": 34.702344,
+      "lng": 135.521447
+    },
+    {
+      "id": "Q11549303",
+      "name": "Osaka Water Museum",
+      "lat": 34.724361,
+      "lng": 135.505361
+    },
+    {
+      "id": "Q11428132",
+      "name": "Sakai Soccer National Trading Center",
+      "lat": 34.604081,
+      "lng": 135.443917
+    },
+    {
+      "id": "Q11537741",
+      "name": "Sakuranomiya Park",
+      "lat": 34.699167,
+      "lng": 135.523333
+    },
+    {
+      "id": "Q7403230",
+      "name": "Sakuya Konohana Kan",
+      "lat": 34.71,
+      "lng": 135.573611
+    },
+    {
+      "id": "Q18459139",
+      "name": "Sanadayama Park",
+      "lat": 34.668889,
+      "lng": 135.528056
+    },
+    {
+      "id": "Q7496942",
+      "name": "Shimo-fukushima Park",
+      "lat": 34.6908,
+      "lng": 135.4825
+    },
+    {
+      "id": "Q11381709",
+      "name": "Suminoe Park",
+      "lat": 34.611944,
+      "lng": 135.474444
+    },
+    {
+      "id": "Q7637168",
+      "name": "Sumiyoshi Park",
+      "lat": 34.6124,
+      "lng": 135.48848
+    },
+    {
+      "id": "Q5364342",
+      "name": "Tennōji Park",
+      "lat": 34.65,
+      "lng": 135.51
+    },
+    {
+      "id": "Q1054648",
+      "name": "Tennōji Zoo",
+      "lat": 34.6526,
+      "lng": 135.508
+    },
+    {
+      "id": "Q11615139",
+      "name": "Tsurumiryokuchi Expo '90 Commemorative Park",
+      "lat": 34.713389,
+      "lng": 135.574722
+    },
+    {
+      "id": "Q55532427",
+      "name": "Umekita Umedai Garden",
+      "lat": 34.706222,
+      "lng": 135.492972
+    },
+    {
+      "id": "Q1375103",
+      "name": "Universal Studios Japan",
+      "lat": 34.6647,
+      "lng": 135.433
+    },
+    {
+      "id": "Q7903271",
+      "name": "Utsubo Park",
+      "lat": 34.6851,
+      "lng": 135.493
+    },
+    {
+      "id": "Q105673327",
+      "name": "West Morofuku Park",
+      "lat": 34.7047,
+      "lng": 135.59823
+    },
+    {
+      "id": "Q11390949",
+      "name": "Yahataya Park",
+      "lat": 34.660472,
+      "lng": 135.447167
+    },
+    {
+      "id": "Q124726677",
+      "name": "ZERO CARBON BASEBALL PARK",
+      "lat": 34.71576,
+      "lng": 135.430861
+    },
+    {
+      "id": "Q11369280",
+      "name": "久宝寺緑地",
+      "lat": 34.630028,
+      "lng": 135.578222
+    },
+    {
+      "id": "Q11408095",
+      "name": "南津守さくら公園",
+      "lat": 34.636378,
+      "lng": 135.483667
+    },
+    {
+      "id": "Q11408096",
+      "name": "南津守中央公園",
+      "lat": 34.626361,
+      "lng": 135.4825
+    },
+    {
+      "id": "Q11426002",
+      "name": "城北公園",
+      "lat": 34.729389,
+      "lng": 135.538306
+    },
+    {
+      "id": "Q97311231",
+      "name": "堀江公園",
+      "lat": 34.672167,
+      "lng": 135.494722
+    },
+    {
+      "id": "Q137608944",
+      "name": "大井戸公園 (尼崎市)",
+      "lat": 34.748278,
+      "lng": 135.392028
+    },
+    {
+      "id": "Q134111588",
+      "name": "大物公園",
+      "lat": 34.718333,
+      "lng": 135.428611
+    },
+    {
+      "id": "Q109292273",
+      "name": "尼崎の森中央緑地",
+      "lat": 34.695306,
+      "lng": 135.383528
+    },
+    {
+      "id": "Q74535926",
+      "name": "江坂公園",
+      "lat": 34.759139,
+      "lng": 135.4995
+    },
+    {
+      "id": "Q48763880",
+      "name": "浦江公園",
+      "lat": 34.701333,
+      "lng": 135.482694
+    },
+    {
+      "id": "Q133188187",
+      "name": "海とのふれあい広場",
+      "lat": 34.602135,
+      "lng": 135.428018
+    },
+    {
+      "id": "Q118141461",
+      "name": "自然再生ゾーン",
+      "lat": 34.703064,
+      "lng": 135.520375
+    },
+    {
+      "id": "Q11627630",
+      "name": "西宮市立中央運動公園",
+      "lat": 34.748806,
+      "lng": 135.345861
+    },
+    {
+      "id": "Q55525226",
+      "name": "西武庫公園",
+      "lat": 34.76,
+      "lng": 135.376944
+    }
+  ]
+}

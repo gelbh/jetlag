@@ -1,1 +1,156 @@
-{ "category": "foreign_consulate", "source": "none", "places": [] }
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": 40.49,
+    "west": -74.26,
+    "north": 40.92,
+    "east": -73.7
+  },
+  "places": [
+    {
+      "id": "Q107053861",
+      "name": "12 West 56th Street",
+      "lat": 40.7625,
+      "lng": -73.975556
+    },
+    {
+      "id": "Q124618434",
+      "name": "Australian Consulate-General, New York",
+      "lat": 40.750816,
+      "lng": -73.975534
+    },
+    {
+      "id": "Q121792639",
+      "name": "Consulate General of Belgium in New York",
+      "lat": 40.753478,
+      "lng": -73.970015
+    },
+    {
+      "id": "Q19854364",
+      "name": "Consulate General of China, New York",
+      "lat": 40.762062,
+      "lng": -74.000313
+    },
+    {
+      "id": "Q65258818",
+      "name": "Consulate General of Estonia, New York",
+      "lat": 40.752907,
+      "lng": -73.969072
+    },
+    {
+      "id": "Q134876068",
+      "name": "Consulate General of Finland, New York",
+      "lat": 40.748999,
+      "lng": -73.975027
+    },
+    {
+      "id": "Q2995343",
+      "name": "Consulate General of France in New York",
+      "lat": 40.7739,
+      "lng": -73.9656
+    },
+    {
+      "id": "Q115644072",
+      "name": "Consulate General of Germany, New York",
+      "lat": 40.753194,
+      "lng": -73.966927
+    },
+    {
+      "id": "Q63616520",
+      "name": "Consulate General of Hungary, New York",
+      "lat": 40.756667,
+      "lng": -73.968778
+    },
+    {
+      "id": "Q115760763",
+      "name": "Consulate General of Israel, New York",
+      "lat": 40.750159,
+      "lng": -73.971701
+    },
+    {
+      "id": "Q49167127",
+      "name": "Consulate General of Norway in New York",
+      "lat": 40.755876,
+      "lng": -73.97021
+    },
+    {
+      "id": "Q130390757",
+      "name": "Consulate General of Pakistan, New York",
+      "lat": 40.767462,
+      "lng": -73.969555
+    },
+    {
+      "id": "Q12789679",
+      "name": "Consulate General of Slovenia, New York",
+      "lat": 40.707853,
+      "lng": -74.008972
+    },
+    {
+      "id": "Q109533889",
+      "name": "Consulate General of South Korea, New York",
+      "lat": 40.762022,
+      "lng": -73.971005
+    },
+    {
+      "id": "Q110853416",
+      "name": "Consulate General of Spain in New York",
+      "lat": 40.761249,
+      "lng": -73.967986
+    },
+    {
+      "id": "Q19978223",
+      "name": "Consulate General of Sweden in New York City",
+      "lat": 40.76089,
+      "lng": -73.97079
+    },
+    {
+      "id": "Q7209895",
+      "name": "Consulate General of the Republic of Poland in New York",
+      "lat": 40.749687,
+      "lng": -73.981202
+    },
+    {
+      "id": "Q80566127",
+      "name": "Consulate General of the United Arab Emirates, New York",
+      "lat": 40.75482,
+      "lng": -73.97935
+    },
+    {
+      "id": "Q131448416",
+      "name": "Consulate General of Turkey, New York City",
+      "lat": 40.751389,
+      "lng": -73.968333
+    },
+    {
+      "id": "Q111182740",
+      "name": "Consulate General of Ukraine, New York",
+      "lat": 40.754424,
+      "lng": -73.969816
+    },
+    {
+      "id": "Q84760380",
+      "name": "Consulate-General of Japan, New York",
+      "lat": 40.75605,
+      "lng": -73.974139
+    },
+    {
+      "id": "Q5164557",
+      "name": "Consulate-General of Russia in New York City",
+      "lat": 40.7845,
+      "lng": -73.957
+    },
+    {
+      "id": "Q7185000",
+      "name": "Philippine Center",
+      "lat": 40.7559,
+      "lng": -73.9794
+    },
+    {
+      "id": "Q135792408",
+      "name": "The Bahamas Consulate General  New York City",
+      "lat": 40.75308,
+      "lng": -73.97098
+    }
+  ]
+}

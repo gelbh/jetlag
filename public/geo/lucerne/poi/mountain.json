@@ -1,1 +1,246 @@
-{ "category": "mountain", "source": "none", "places": [] }
+{
+  "category": "mountain",
+  "source": "wikidata",
+  "bbox": {
+    "south": 46.775,
+    "west": 7.839,
+    "north": 47.2903,
+    "east": 8.5213
+  },
+  "places": [
+    {
+      "id": "Q18378087",
+      "name": "Arnihaaggen",
+      "lat": 46.7906,
+      "lng": 8.0725
+    },
+    {
+      "id": "Q8537700",
+      "name": "Beichle",
+      "lat": 46.8975,
+      "lng": 7.973056
+    },
+    {
+      "id": "Q43237",
+      "name": "Beichlen",
+      "lat": 46.897778,
+      "lng": 7.973056
+    },
+    {
+      "id": "Q15226",
+      "name": "Brienzer Rothorn",
+      "lat": 46.786944,
+      "lng": 8.046944
+    },
+    {
+      "id": "Q1010079",
+      "name": "Buochserhorn",
+      "lat": 46.945556,
+      "lng": 8.428611
+    },
+    {
+      "id": "Q43246",
+      "name": "Bürgenstock",
+      "lat": 47.000306,
+      "lng": 8.398389
+    },
+    {
+      "id": "Q3646315",
+      "name": "Chli Spannort",
+      "lat": 46.780361,
+      "lng": 8.516667
+    },
+    {
+      "id": "Q8537703",
+      "name": "Farneren",
+      "lat": 46.934167,
+      "lng": 8.041389
+    },
+    {
+      "id": "Q25201",
+      "name": "Fürstein",
+      "lat": 46.895833,
+      "lng": 8.069722
+    },
+    {
+      "id": "Q3115732",
+      "name": "Graustock",
+      "lat": 46.787861,
+      "lng": 8.368778
+    },
+    {
+      "id": "Q5610478",
+      "name": "Gross Sättelistock",
+      "lat": 46.8525,
+      "lng": 8.436389
+    },
+    {
+      "id": "Q5627116",
+      "name": "Güpfi",
+      "lat": 46.796111,
+      "lng": 8.195278
+    },
+    {
+      "id": "Q5638754",
+      "name": "Haglere",
+      "lat": 46.836389,
+      "lng": 8.0425
+    },
+    {
+      "id": "Q16659",
+      "name": "Hahnen",
+      "lat": 46.823889,
+      "lng": 8.455611
+    },
+    {
+      "id": "Q5701139",
+      "name": "Heitlistock",
+      "lat": 46.810833,
+      "lng": 8.250556
+    },
+    {
+      "id": "Q5877438",
+      "name": "Hoh Brisen",
+      "lat": 46.8975,
+      "lng": 8.465694
+    },
+    {
+      "id": "Q16536",
+      "name": "Hohgant",
+      "lat": 46.788167,
+      "lng": 7.901833
+    },
+    {
+      "id": "Q43268",
+      "name": "Huetstock",
+      "lat": 46.814778,
+      "lng": 8.326194
+    },
+    {
+      "id": "Q6552373",
+      "name": "Lindenberg",
+      "lat": 47.253611,
+      "lng": 8.293056
+    },
+    {
+      "id": "Q43160",
+      "name": "Mittaggüpfi",
+      "lat": 46.971667,
+      "lng": 8.1875
+    },
+    {
+      "id": "Q15265",
+      "name": "Mount Pilatus",
+      "lat": 46.973889,
+      "lng": 8.241111
+    },
+    {
+      "id": "Q16887799",
+      "name": "Musenalper Grat",
+      "lat": 46.9308,
+      "lng": 8.44167
+    },
+    {
+      "id": "Q15299",
+      "name": "Napf",
+      "lat": 47.00361,
+      "lng": 7.94005
+    },
+    {
+      "id": "Q43265",
+      "name": "Nünalphorn",
+      "lat": 46.8239,
+      "lng": 8.32556
+    },
+    {
+      "id": "Q15291",
+      "name": "Rigi",
+      "lat": 47.056753,
+      "lng": 8.486142
+    },
+    {
+      "id": "Q7333786",
+      "name": "Rigi Dossen",
+      "lat": 47.026944,
+      "lng": 8.49875
+    },
+    {
+      "id": "Q7366599",
+      "name": "Rooterberg",
+      "lat": 47.09833,
+      "lng": 8.3946
+    },
+    {
+      "id": "Q1150350",
+      "name": "Rotsandnollen",
+      "lat": 46.8006,
+      "lng": 8.34389
+    },
+    {
+      "id": "Q2410351",
+      "name": "Ruchstock",
+      "lat": 46.856639,
+      "lng": 8.470472
+    },
+    {
+      "id": "Q7430922",
+      "name": "Schafmatt LU",
+      "lat": 46.911944,
+      "lng": 8.063333
+    },
+    {
+      "id": "Q7431320",
+      "name": "Schimbrig",
+      "lat": 46.939639,
+      "lng": 8.113944
+    },
+    {
+      "id": "Q8537233",
+      "name": "Schluchberg",
+      "lat": 46.866667,
+      "lng": 8.333889
+    },
+    {
+      "id": "Q16532",
+      "name": "Schrattenfluh",
+      "lat": 46.834361,
+      "lng": 7.957722
+    },
+    {
+      "id": "Q7629909",
+      "name": "Stäfeliflue",
+      "lat": 46.9646,
+      "lng": 8.16444
+    },
+    {
+      "id": "Q16613",
+      "name": "Stanserhorn",
+      "lat": 46.929722,
+      "lng": 8.340278
+    },
+    {
+      "id": "Q7616387",
+      "name": "Stierenberg",
+      "lat": 47.2383,
+      "lng": 8.15889
+    },
+    {
+      "id": "Q15267",
+      "name": "Tomlishorn",
+      "lat": 46.973889,
+      "lng": 8.241111
+    },
+    {
+      "id": "Q2538509",
+      "name": "Wachthubel",
+      "lat": 46.8472,
+      "lng": 7.8698
+    },
+    {
+      "id": "Q16708",
+      "name": "Wissigstock",
+      "lat": 46.845556,
+      "lng": 8.5065
+    }
+  ]
+}

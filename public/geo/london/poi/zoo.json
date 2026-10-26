@@ -1,1 +1,72 @@
-{ "category": "zoo", "source": "none", "places": [] }
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.28,
+    "west": -0.51,
+    "north": 51.7,
+    "east": 0.3357
+  },
+  "places": [
+    {
+      "id": "Q56757815",
+      "name": "Battersea Park Children's Zoo",
+      "lat": 51.481696,
+      "lng": -0.156707
+    },
+    {
+      "id": "Q4915315",
+      "name": "Biota!",
+      "lat": 51.5031,
+      "lng": 0.032
+    },
+    {
+      "id": "Q1070642",
+      "name": "Chessington World of Adventures",
+      "lat": 51.348611,
+      "lng": -0.316667
+    },
+    {
+      "id": "Q84042267",
+      "name": "Eagle Heights Wildlife Foundation",
+      "lat": 51.369525,
+      "lng": 0.192566
+    },
+    {
+      "id": "Q56856819",
+      "name": "Golders Hill Park Zoo",
+      "lat": 51.566852,
+      "lng": -0.188938
+    },
+    {
+      "id": "Q56857421",
+      "name": "Hanwell Zoo",
+      "lat": 51.512267,
+      "lng": -0.347834
+    },
+    {
+      "id": "Q57027455",
+      "name": "Hobbledown",
+      "lat": 51.347058,
+      "lng": -0.289691
+    },
+    {
+      "id": "Q270263",
+      "name": "London Zoo",
+      "lat": 51.535556,
+      "lng": -0.155833
+    },
+    {
+      "id": "Q3312744",
+      "name": "Sea Life London Aquarium",
+      "lat": 51.5019,
+      "lng": -0.118889
+    },
+    {
+      "id": "Q124650480",
+      "name": "Willow's Birds of Prey & Wildlife Trail",
+      "lat": 51.315573,
+      "lng": 0.11554
+    }
+  ]
+}

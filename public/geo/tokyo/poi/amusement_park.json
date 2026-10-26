@@ -1,1 +1,144 @@
-{ "category": "amusement_park", "source": "none", "places": [] }
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 35.5282,
+    "west": 139.5628,
+    "north": 35.8175,
+    "east": 139.9189
+  },
+  "places": [
+    {
+      "id": "Q17191904",
+      "name": "Arakawa Amusement Park",
+      "lat": 35.753611,
+      "lng": 139.758611
+    },
+    {
+      "id": "Q11330769",
+      "name": "Big Fun Heiwajima",
+      "lat": 35.584472,
+      "lng": 139.740722
+    },
+    {
+      "id": "Q11411934",
+      "name": "Daiba 1-chōme Shōtengai",
+      "lat": 35.629285,
+      "lng": 139.776218
+    },
+    {
+      "id": "Q863180",
+      "name": "Hanayashiki",
+      "lat": 35.715497,
+      "lng": 139.794689
+    },
+    {
+      "id": "Q130711537",
+      "name": "Immersive Fort Tokyo",
+      "lat": 35.625005,
+      "lng": 139.779946
+    },
+    {
+      "id": "Q11310533",
+      "name": "Joypolis",
+      "lat": 35.628508,
+      "lng": 139.775161
+    },
+    {
+      "id": "Q5363436",
+      "name": "Kidzania Tokyo",
+      "lat": 35.655833,
+      "lng": 139.791944
+    },
+    {
+      "id": "Q30934236",
+      "name": "Legoland Discovery Center Tokyo",
+      "lat": 35.628817,
+      "lng": 139.775669
+    },
+    {
+      "id": "Q11350364",
+      "name": "Lost River Delta",
+      "lat": 35.626667,
+      "lng": 139.881389
+    },
+    {
+      "id": "Q5364305",
+      "name": "Namco Namja Town",
+      "lat": 35.728611,
+      "lng": 139.72
+    },
+    {
+      "id": "Q3915464",
+      "name": "Shitamachi Museum",
+      "lat": 35.7102,
+      "lng": 139.7726
+    },
+    {
+      "id": "Q30926669",
+      "name": "Small Worlds",
+      "lat": 35.638131,
+      "lng": 139.788327
+    },
+    {
+      "id": "Q605492",
+      "name": "Tokyo Disney Resort",
+      "lat": 35.629722,
+      "lng": 139.882778
+    },
+    {
+      "id": "Q843997",
+      "name": "Tokyo Disneyland",
+      "lat": 35.632778,
+      "lng": 139.880556
+    },
+    {
+      "id": "Q1202341",
+      "name": "Tokyo DisneySea",
+      "lat": 35.626667,
+      "lng": 139.888056
+    },
+    {
+      "id": "Q564554",
+      "name": "Tokyo Dome City",
+      "lat": 35.7056,
+      "lng": 139.752
+    },
+    {
+      "id": "Q564646",
+      "name": "Tokyo Dome City Attractions",
+      "lat": 35.7053,
+      "lng": 139.754
+    },
+    {
+      "id": "Q28531358",
+      "name": "Tokyo One Piece Tower",
+      "lat": 35.658611,
+      "lng": 139.745556
+    },
+    {
+      "id": "Q11347767",
+      "name": "Tokyo Ramen Kokugikan Mai",
+      "lat": 35.62812,
+      "lng": 139.773732
+    },
+    {
+      "id": "Q11259876",
+      "name": "いぬたま・ねこたま",
+      "lat": 35.610556,
+      "lng": 139.630556
+    },
+    {
+      "id": "Q11418454",
+      "name": "品達どんぶり五人衆",
+      "lat": 35.626306,
+      "lng": 139.738056
+    },
+    {
+      "id": "Q11517752",
+      "name": "朝霞テック",
+      "lat": 35.808836,
+      "lng": 139.581383
+    }
+  ]
+}

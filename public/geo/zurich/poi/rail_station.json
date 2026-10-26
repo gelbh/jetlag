@@ -1,1 +1,1680 @@
-{ "category": "rail_station", "source": "none", "places": [] }
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q5845566",
+      "name": "Aadorf railway station",
+      "lat": 47.48812,
+      "lng": 8.903269
+    },
+    {
+      "id": "Q5845572",
+      "name": "Aathal railway station",
+      "lat": 47.335957,
+      "lng": 8.765611
+    },
+    {
+      "id": "Q4683323",
+      "name": "Adliswil railway station",
+      "lat": 47.3124,
+      "lng": 8.524
+    },
+    {
+      "id": "Q2032410",
+      "name": "Affoltern am Albis railway station",
+      "lat": 47.27607,
+      "lng": 8.446595
+    },
+    {
+      "id": "Q140812303",
+      "name": "Airside Center",
+      "lat": 47.452542,
+      "lng": 8.560278
+    },
+    {
+      "id": "Q15089973",
+      "name": "Altendorf railway station",
+      "lat": 47.193962,
+      "lng": 8.82288
+    },
+    {
+      "id": "Q4753679",
+      "name": "Andelfingen railway station",
+      "lat": 47.593864,
+      "lng": 8.678056
+    },
+    {
+      "id": "Q2157807",
+      "name": "Au ZH railway station",
+      "lat": 47.24681,
+      "lng": 8.6437
+    },
+    {
+      "id": "Q15964067",
+      "name": "Baar Lindenpark railway station",
+      "lat": 47.183137,
+      "lng": 8.517058
+    },
+    {
+      "id": "Q31454826",
+      "name": "Baar Neufeld railway station",
+      "lat": 47.18848,
+      "lng": 8.51775
+    },
+    {
+      "id": "Q576514",
+      "name": "Baar railway station",
+      "lat": 47.195362,
+      "lng": 8.52325
+    },
+    {
+      "id": "Q5845873",
+      "name": "Bäch railway station",
+      "lat": 47.200977,
+      "lng": 8.727163
+    },
+    {
+      "id": "Q31448985",
+      "name": "Bäretswil railway station",
+      "lat": 47.337313,
+      "lng": 8.852163
+    },
+    {
+      "id": "Q15088450",
+      "name": "Bassersdorf railway station",
+      "lat": 47.438335,
+      "lng": 8.626564
+    },
+    {
+      "id": "Q10640358",
+      "name": "Bauma railway station",
+      "lat": 47.368837,
+      "lng": 8.878233
+    },
+    {
+      "id": "Q15964066",
+      "name": "Benzenschwil railway station",
+      "lat": 47.24684,
+      "lng": 8.36559
+    },
+    {
+      "id": "Q33454199",
+      "name": "Bergfrieden station",
+      "lat": 47.397714,
+      "lng": 8.399086
+    },
+    {
+      "id": "Q33454354",
+      "name": "Berikon-Widen station",
+      "lat": 47.362187,
+      "lng": 8.366793
+    },
+    {
+      "id": "Q9169065",
+      "name": "Beringen Badischer Bahnhof",
+      "lat": 47.69499,
+      "lng": 8.574448
+    },
+    {
+      "id": "Q128898640",
+      "name": "Beringen railway station",
+      "lat": 47.696867,
+      "lng": 8.57505
+    },
+    {
+      "id": "Q33512182",
+      "name": "Beringerfeld railway station",
+      "lat": 47.695372,
+      "lng": 8.592182
+    },
+    {
+      "id": "Q4916567",
+      "name": "Birmensdorf railway station",
+      "lat": 47.357431,
+      "lng": 8.437555
+    },
+    {
+      "id": "Q15088514",
+      "name": "Blumenau railway station",
+      "lat": 47.223671,
+      "lng": 8.842405
+    },
+    {
+      "id": "Q126362353",
+      "name": "Bollingen railway station",
+      "lat": 47.21734,
+      "lng": 8.87937
+    },
+    {
+      "id": "Q4942600",
+      "name": "Bonstetten-Wettswil railway station",
+      "lat": 47.325901,
+      "lng": 8.468197
+    },
+    {
+      "id": "Q4982310",
+      "name": "Bubikon railway station",
+      "lat": 47.270705,
+      "lng": 8.822907
+    },
+    {
+      "id": "Q1771486",
+      "name": "Buchs-Dällikon railway station",
+      "lat": 47.453405,
+      "lng": 8.435602
+    },
+    {
+      "id": "Q1097222",
+      "name": "Bülach railway station",
+      "lat": 47.52395,
+      "lng": 8.536209
+    },
+    {
+      "id": "Q2157443",
+      "name": "Burghalden railway station",
+      "lat": 47.208658,
+      "lng": 8.692862
+    },
+    {
+      "id": "Q15964095",
+      "name": "Cham Alpenblick railway station",
+      "lat": 47.182282,
+      "lng": 8.471463
+    },
+    {
+      "id": "Q15964094",
+      "name": "Cham railway station",
+      "lat": 47.178244,
+      "lng": 8.457505
+    },
+    {
+      "id": "Q5207606",
+      "name": "Dachsen railway station",
+      "lat": 47.666342,
+      "lng": 8.614333
+    },
+    {
+      "id": "Q5274922",
+      "name": "Dielsdorf railway station",
+      "lat": 47.48241,
+      "lng": 8.459407
+    },
+    {
+      "id": "Q15964127",
+      "name": "Diessenhofen railway station",
+      "lat": 47.6853,
+      "lng": 8.7525
+    },
+    {
+      "id": "Q800666",
+      "name": "Dietikon railway station",
+      "lat": 47.4061,
+      "lng": 8.405
+    },
+    {
+      "id": "Q33512113",
+      "name": "Dietikon Schöneggstrasse station",
+      "lat": 47.401989,
+      "lng": 8.400912
+    },
+    {
+      "id": "Q33452859",
+      "name": "Dietikon Stoffelbach station",
+      "lat": 47.393407,
+      "lng": 8.398942
+    },
+    {
+      "id": "Q1960552",
+      "name": "Dietlikon railway station",
+      "lat": 47.42048,
+      "lng": 8.61959
+    },
+    {
+      "id": "Q5846114",
+      "name": "Dinhard railway station",
+      "lat": 47.55335,
+      "lng": 8.752958
+    },
+    {
+      "id": "Q140812321",
+      "name": "Dock E",
+      "lat": 47.461158,
+      "lng": 8.55505
+    },
+    {
+      "id": "Q1961198",
+      "name": "Dübendorf railway station",
+      "lat": 47.39998,
+      "lng": 8.622943
+    },
+    {
+      "id": "Q135297944",
+      "name": "Dürnten railway station",
+      "lat": 47.27863,
+      "lng": 8.83648
+    },
+    {
+      "id": "Q5347522",
+      "name": "Effretikon railway station",
+      "lat": 47.42581,
+      "lng": 8.686663
+    },
+    {
+      "id": "Q33455854",
+      "name": "Egg railway station",
+      "lat": 47.3015,
+      "lng": 8.68961
+    },
+    {
+      "id": "Q5348085",
+      "name": "Eglisau railway station",
+      "lat": 47.572375,
+      "lng": 8.516558
+    },
+    {
+      "id": "Q5359988",
+      "name": "Elgg railway station",
+      "lat": 47.49853,
+      "lng": 8.863379
+    },
+    {
+      "id": "Q13423578",
+      "name": "Embrach-Rorbas railway station with goods shed",
+      "lat": 47.52059,
+      "lng": 8.58705
+    },
+    {
+      "id": "Q33456018",
+      "name": "Emmat railway station",
+      "lat": 47.292389,
+      "lng": 8.701806
+    },
+    {
+      "id": "Q15089930",
+      "name": "Erlenbach ZH railway station",
+      "lat": 47.305339,
+      "lng": 8.591609
+    },
+    {
+      "id": "Q15964125",
+      "name": "Eschenz railway station",
+      "lat": 47.6456,
+      "lng": 8.87639
+    },
+    {
+      "id": "Q5846210",
+      "name": "Eschlikon railway station",
+      "lat": 47.461491,
+      "lng": 8.958536
+    },
+    {
+      "id": "Q23001754",
+      "name": "Esslingen railway station",
+      "lat": 47.28786,
+      "lng": 8.70969
+    },
+    {
+      "id": "Q31448924",
+      "name": "Ettenhausen-Emmetschloo railway station",
+      "lat": 47.32482,
+      "lng": 8.8343
+    },
+    {
+      "id": "Q5405186",
+      "name": "Etzwilen railway station",
+      "lat": 47.661144,
+      "lng": 8.818594
+    },
+    {
+      "id": "Q127868823",
+      "name": "Express Cargo Yard Zürich-Altstetten",
+      "lat": 47.39288,
+      "lng": 8.48228
+    },
+    {
+      "id": "Q15082526",
+      "name": "Fehraltorf railway station",
+      "lat": 47.38512,
+      "lng": 8.750265
+    },
+    {
+      "id": "Q5483347",
+      "name": "Felben-Wellhausen railway station",
+      "lat": 47.577103,
+      "lng": 8.943161
+    },
+    {
+      "id": "Q5441639",
+      "name": "Feldbach railway station",
+      "lat": 47.238802,
+      "lng": 8.783537
+    },
+    {
+      "id": "Q31449831",
+      "name": "Feuerthalen Station",
+      "lat": 47.692164,
+      "lng": 8.645952
+    },
+    {
+      "id": "Q15086148",
+      "name": "Fischenthal railway station",
+      "lat": 47.333384,
+      "lng": 8.923184
+    },
+    {
+      "id": "Q23001746",
+      "name": "Forch railway station",
+      "lat": 47.32534,
+      "lng": 8.64797
+    },
+    {
+      "id": "Q135297923",
+      "name": "Former Buchs-Schwenkelberg railway station",
+      "lat": 47.46027,
+      "lng": 8.44048
+    },
+    {
+      "id": "Q15964193",
+      "name": "Former Mammern Railway Station",
+      "lat": 47.644167,
+      "lng": 8.913897
+    },
+    {
+      "id": "Q33505342",
+      "name": "Frauenfeld Marktplatz station",
+      "lat": 47.554202,
+      "lng": 8.898715
+    },
+    {
+      "id": "Q800779",
+      "name": "Frauenfeld railway station",
+      "lat": 47.55816,
+      "lng": 8.896539
+    },
+    {
+      "id": "Q15089966",
+      "name": "Freienbach SBB railway station",
+      "lat": 47.207306,
+      "lng": 8.7562
+    },
+    {
+      "id": "Q15089963",
+      "name": "Freienbach SOB railway station",
+      "lat": 47.204205,
+      "lng": 8.759383
+    },
+    {
+      "id": "Q15088502",
+      "name": "Gibswil railway station",
+      "lat": 47.313421,
+      "lng": 8.915663
+    },
+    {
+      "id": "Q1960777",
+      "name": "Glanzenberg railway station",
+      "lat": 47.398651,
+      "lng": 8.421364
+    },
+    {
+      "id": "Q5567244",
+      "name": "Glattbrugg railway station",
+      "lat": 47.430827,
+      "lng": 8.558854
+    },
+    {
+      "id": "Q5567247",
+      "name": "Glattfelden railway station",
+      "lat": 47.548558,
+      "lng": 8.524055
+    },
+    {
+      "id": "Q135297958",
+      "name": "Gossau ZH former railway station",
+      "lat": 47.30189,
+      "lng": 8.7628
+    },
+    {
+      "id": "Q5846327",
+      "name": "Grüenfeld railway station",
+      "lat": 47.198288,
+      "lng": 8.687278
+    },
+    {
+      "id": "Q135297959",
+      "name": "Grüningen former railway station",
+      "lat": 47.28139,
+      "lng": 8.76029
+    },
+    {
+      "id": "Q5846352",
+      "name": "Guntershausen railway station",
+      "lat": 47.474121,
+      "lng": 8.917032
+    },
+    {
+      "id": "Q5846360",
+      "name": "Hedingen railway station",
+      "lat": 47.298785,
+      "lng": 8.445966
+    },
+    {
+      "id": "Q31454091",
+      "name": "Hemishofen railway station",
+      "lat": 47.677966,
+      "lng": 8.833139
+    },
+    {
+      "id": "Q5714280",
+      "name": "Henggart railway station",
+      "lat": 47.564542,
+      "lng": 8.685069
+    },
+    {
+      "id": "Q15089920",
+      "name": "Herrliberg-Feldmeilen railway station",
+      "lat": 47.281467,
+      "lng": 8.613195
+    },
+    {
+      "id": "Q5748058",
+      "name": "Hettlingen railway station",
+      "lat": 47.545189,
+      "lng": 8.694783
+    },
+    {
+      "id": "Q33455872",
+      "name": "Hinteregg railway station",
+      "lat": 47.30573,
+      "lng": 8.68434
+    },
+    {
+      "id": "Q5767755",
+      "name": "Hinwil railway station",
+      "lat": 47.300057,
+      "lng": 8.83972
+    },
+    {
+      "id": "Q135297963",
+      "name": "Hombrechtikon former railway station",
+      "lat": 47.25258,
+      "lng": 8.77135
+    },
+    {
+      "id": "Q15225131",
+      "name": "Horgen Oberdorf railway station",
+      "lat": 47.25875,
+      "lng": 8.589816
+    },
+    {
+      "id": "Q2157409",
+      "name": "Horgen railway station",
+      "lat": 47.261482,
+      "lng": 8.596889
+    },
+    {
+      "id": "Q15964144",
+      "name": "Hünenberg Chämleten railway station",
+      "lat": 47.169159,
+      "lng": 8.449908
+    },
+    {
+      "id": "Q15964145",
+      "name": "Hünenberg Zythus railway station",
+      "lat": 47.173608,
+      "lng": 8.450095
+    },
+    {
+      "id": "Q5964939",
+      "name": "Hüntwangen-Wil railway station",
+      "lat": 47.581114,
+      "lng": 8.512783
+    },
+    {
+      "id": "Q15089954",
+      "name": "Hurden railway station",
+      "lat": 47.213629,
+      "lng": 8.80066
+    },
+    {
+      "id": "Q5846391",
+      "name": "Hüttlingen-Mettendorf railway station",
+      "lat": 47.58234,
+      "lng": 8.974539
+    },
+    {
+      "id": "Q6000178",
+      "name": "Illnau railway station",
+      "lat": 47.40882,
+      "lng": 8.722704
+    },
+    {
+      "id": "Q5846405",
+      "name": "Islikon railway station",
+      "lat": 47.547836,
+      "lng": 8.846181
+    },
+    {
+      "id": "Q33505408",
+      "name": "Jakobstal railway station",
+      "lat": 47.508903,
+      "lng": 8.944257
+    },
+    {
+      "id": "Q551883",
+      "name": "Jona railway station",
+      "lat": 47.229885,
+      "lng": 8.834215
+    },
+    {
+      "id": "Q6348524",
+      "name": "Kaiserstuhl AG railway station",
+      "lat": 47.566447,
+      "lng": 8.419162
+    },
+    {
+      "id": "Q6387108",
+      "name": "Kempraten railway station",
+      "lat": 47.238398,
+      "lng": 8.814311
+    },
+    {
+      "id": "Q6387141",
+      "name": "Kempten railway station",
+      "lat": 47.331832,
+      "lng": 8.80419
+    },
+    {
+      "id": "Q15083538",
+      "name": "Kemptthal railway station",
+      "lat": 47.451722,
+      "lng": 8.704755
+    },
+    {
+      "id": "Q2110348",
+      "name": "Kilchberg railway station",
+      "lat": 47.32442,
+      "lng": 8.547989
+    },
+    {
+      "id": "Q6421405",
+      "name": "Kloten Balsberg railway station",
+      "lat": 47.44228,
+      "lng": 8.570688
+    },
+    {
+      "id": "Q1771183",
+      "name": "Kloten railway station",
+      "lat": 47.4482,
+      "lng": 8.582972
+    },
+    {
+      "id": "Q5846446",
+      "name": "Knonau railway station",
+      "lat": 47.220264,
+      "lng": 8.466731
+    },
+    {
+      "id": "Q6427358",
+      "name": "Kollbrunn railway station",
+      "lat": 47.45807,
+      "lng": 8.773012
+    },
+    {
+      "id": "Q6454193",
+      "name": "Küsnacht Goldbach railway station",
+      "lat": 47.327181,
+      "lng": 8.575784
+    },
+    {
+      "id": "Q6454194",
+      "name": "Küsnacht ZH railway station",
+      "lat": 47.31932,
+      "lng": 8.580698
+    },
+    {
+      "id": "Q5846544",
+      "name": "Lachen railway station",
+      "lat": 47.190067,
+      "lng": 8.852693
+    },
+    {
+      "id": "Q10640352",
+      "name": "Langnau-Gattikon railway station",
+      "lat": 47.286704,
+      "lng": 8.544477
+    },
+    {
+      "id": "Q33455831",
+      "name": "Langwies ZH railway station",
+      "lat": 47.29605,
+      "lng": 8.69439
+    },
+    {
+      "id": "Q15964170",
+      "name": "Langwiesen railway station",
+      "lat": 47.6833,
+      "lng": 8.66222
+    },
+    {
+      "id": "Q135297972",
+      "name": "Litti service railway station",
+      "lat": 47.21062,
+      "lng": 8.5413
+    },
+    {
+      "id": "Q33505488",
+      "name": "Lüdem railway station",
+      "lat": 47.541941,
+      "lng": 8.90235
+    },
+    {
+      "id": "Q33455979",
+      "name": "Maiacher railway station",
+      "lat": 47.32817,
+      "lng": 8.63107
+    },
+    {
+      "id": "Q4405921",
+      "name": "Männedorf railway station",
+      "lat": 47.253474,
+      "lng": 8.692353
+    },
+    {
+      "id": "Q6774635",
+      "name": "Marthalen railway station",
+      "lat": 47.63123,
+      "lng": 8.65606
+    },
+    {
+      "id": "Q33505389",
+      "name": "Matzingen railway station",
+      "lat": 47.520474,
+      "lng": 8.932965
+    },
+    {
+      "id": "Q4405750",
+      "name": "Meilen railway station",
+      "lat": 47.269522,
+      "lng": 8.644266
+    },
+    {
+      "id": "Q135297978",
+      "name": "Menzingen former railway station",
+      "lat": 47.17827,
+      "lng": 8.59055
+    },
+    {
+      "id": "Q5846711",
+      "name": "Mettmenstetten railway station",
+      "lat": 47.244071,
+      "lng": 8.457382
+    },
+    {
+      "id": "Q15964191",
+      "name": "Mühlau railway station",
+      "lat": 47.22501,
+      "lng": 8.3885
+    },
+    {
+      "id": "Q2033229",
+      "name": "Nänikon-Greifensee railway station",
+      "lat": 47.36907,
+      "lng": 8.686624
+    },
+    {
+      "id": "Q33456040",
+      "name": "Neuhaus bei Hinteregg railway station",
+      "lat": 47.312783,
+      "lng": 8.67403
+    },
+    {
+      "id": "Q11790768",
+      "name": "Neuhausen Badischer Bahnhof",
+      "lat": 47.6829,
+      "lng": 8.61171
+    },
+    {
+      "id": "Q15098423",
+      "name": "Neuhausen railway station",
+      "lat": 47.682897,
+      "lng": 8.625856
+    },
+    {
+      "id": "Q25102181",
+      "name": "Neuhausen Rheinfall railway station",
+      "lat": 47.679653,
+      "lng": 8.617435
+    },
+    {
+      "id": "Q11790775",
+      "name": "Neunkirch railway station",
+      "lat": 47.68916,
+      "lng": 8.49481
+    },
+    {
+      "id": "Q31449044",
+      "name": "Neuthal railway station",
+      "lat": 47.35788,
+      "lng": 8.864358
+    },
+    {
+      "id": "Q15094352",
+      "name": "Niederglatt railway station",
+      "lat": 47.487419,
+      "lng": 8.503644
+    },
+    {
+      "id": "Q15108744",
+      "name": "Niederhasli railway station",
+      "lat": 47.47833,
+      "lng": 8.488677
+    },
+    {
+      "id": "Q7031187",
+      "name": "Niederweningen Dorf railway station",
+      "lat": 47.5059,
+      "lng": 8.381038
+    },
+    {
+      "id": "Q7031189",
+      "name": "Niederweningen railway station",
+      "lat": 47.51119,
+      "lng": 8.369597
+    },
+    {
+      "id": "Q15094361",
+      "name": "Oberglatt railway station",
+      "lat": 47.4702,
+      "lng": 8.510587
+    },
+    {
+      "id": "Q7074806",
+      "name": "Oberrieden Dorf railway station",
+      "lat": 47.276732,
+      "lng": 8.577653
+    },
+    {
+      "id": "Q2110622",
+      "name": "Oberrieden railway station",
+      "lat": 47.27967,
+      "lng": 8.57844
+    },
+    {
+      "id": "Q15964213",
+      "name": "Oberrüti railway station",
+      "lat": 47.16592,
+      "lng": 8.40476
+    },
+    {
+      "id": "Q801283",
+      "name": "Oberwinterthur railway station",
+      "lat": 47.507922,
+      "lng": 8.760358
+    },
+    {
+      "id": "Q1771424",
+      "name": "Opfikon railway station",
+      "lat": 47.42995,
+      "lng": 8.561758
+    },
+    {
+      "id": "Q5846849",
+      "name": "Ossingen railroad station with ancillary buildings and signal box",
+      "lat": 47.61461,
+      "lng": 8.724093
+    },
+    {
+      "id": "Q5391049",
+      "name": "Otelfingen Golfpark railway station",
+      "lat": 47.455814,
+      "lng": 8.402098
+    },
+    {
+      "id": "Q5846852",
+      "name": "Otelfingen railway station",
+      "lat": 47.454933,
+      "lng": 8.387507
+    },
+    {
+      "id": "Q135297988",
+      "name": "Ottikon former railway station",
+      "lat": 47.29577,
+      "lng": 8.7787
+    },
+    {
+      "id": "Q582292",
+      "name": "Pfäffikon SZ railway station",
+      "lat": 47.202989,
+      "lng": 8.7781
+    },
+    {
+      "id": "Q15082377",
+      "name": "Pfäffikon ZH railway station",
+      "lat": 47.367085,
+      "lng": 8.784777
+    },
+    {
+      "id": "Q15094246",
+      "name": "Pfungen railway station",
+      "lat": 47.51603,
+      "lng": 8.64661
+    },
+    {
+      "id": "Q7282749",
+      "name": "Rafz railway station",
+      "lat": 47.6034,
+      "lng": 8.543394
+    },
+    {
+      "id": "Q15088578",
+      "name": "Rämismühle-Zell railway station",
+      "lat": 47.44155,
+      "lng": 8.818915
+    },
+    {
+      "id": "Q597204",
+      "name": "Rapperswil SG railway station",
+      "lat": 47.224887,
+      "lng": 8.816745
+    },
+    {
+      "id": "Q4348861",
+      "name": "Räterschen railway station",
+      "lat": 47.498672,
+      "lng": 8.794978
+    },
+    {
+      "id": "Q1771429",
+      "name": "Regensdorf-Watt railway station",
+      "lat": 47.436564,
+      "lng": 8.472085
+    },
+    {
+      "id": "Q5847034",
+      "name": "Reichenburg railway station",
+      "lat": 47.172695,
+      "lng": 8.982302
+    },
+    {
+      "id": "Q33454411",
+      "name": "Reppischhof station",
+      "lat": 47.384731,
+      "lng": 8.39623
+    },
+    {
+      "id": "Q5847046",
+      "name": "Reutlingen railway station",
+      "lat": 47.5294,
+      "lng": 8.7525
+    },
+    {
+      "id": "Q2912665",
+      "name": "Richterswil railway station",
+      "lat": 47.208363,
+      "lng": 8.70745
+    },
+    {
+      "id": "Q5847052",
+      "name": "Rickenbach-Attikon railway station",
+      "lat": 47.535355,
+      "lng": 8.78916
+    },
+    {
+      "id": "Q15272547",
+      "name": "Riedmatt railway station",
+      "lat": 47.196846,
+      "lng": 8.712078
+    },
+    {
+      "id": "Q7334094",
+      "name": "Rikon railway station",
+      "lat": 47.444503,
+      "lng": 8.796551
+    },
+    {
+      "id": "Q7334922",
+      "name": "Ringlikon railway station",
+      "lat": 47.35999,
+      "lng": 8.477433
+    },
+    {
+      "id": "Q33505444",
+      "name": "Rosental railway station",
+      "lat": 47.492277,
+      "lng": 8.975242
+    },
+    {
+      "id": "Q33452889",
+      "name": "Rudolfstetten Hofacker station",
+      "lat": 47.36474,
+      "lng": 8.377032
+    },
+    {
+      "id": "Q33454381",
+      "name": "Rudolfstetten station",
+      "lat": 47.369501,
+      "lng": 8.38118
+    },
+    {
+      "id": "Q15094442",
+      "name": "Rümikon AG railway station",
+      "lat": 47.565417,
+      "lng": 8.373647
+    },
+    {
+      "id": "Q135297993",
+      "name": "Rümikon-Mellikon railway station",
+      "lat": 47.56712,
+      "lng": 8.36359
+    },
+    {
+      "id": "Q15108737",
+      "name": "Rümlang railway station",
+      "lat": 47.45425,
+      "lng": 8.53276
+    },
+    {
+      "id": "Q2110655",
+      "name": "Rüschlikon railway station",
+      "lat": 47.307133,
+      "lng": 8.55514
+    },
+    {
+      "id": "Q7386787",
+      "name": "Rüti ZH railway station",
+      "lat": 47.260126,
+      "lng": 8.85468
+    },
+    {
+      "id": "Q15088567",
+      "name": "Saland railway station",
+      "lat": 47.393839,
+      "lng": 8.854884
+    },
+    {
+      "id": "Q5493882",
+      "name": "Samstagern railway station",
+      "lat": 47.191547,
+      "lng": 8.685972
+    },
+    {
+      "id": "Q690055",
+      "name": "Schaffhausen railway station",
+      "lat": 47.698282,
+      "lng": 8.632756
+    },
+    {
+      "id": "Q33455893",
+      "name": "Scheuren railway station",
+      "lat": 47.3226,
+      "lng": 8.65955
+    },
+    {
+      "id": "Q5847203",
+      "name": "Schindellegi-Feusisberg railway station",
+      "lat": 47.176403,
+      "lng": 8.709368
+    },
+    {
+      "id": "Q15964271",
+      "name": "Schlatt railway station",
+      "lat": 47.6794,
+      "lng": 8.6875
+    },
+    {
+      "id": "Q15964269",
+      "name": "Schlattingen railway station",
+      "lat": 47.66685,
+      "lng": 8.77036
+    },
+    {
+      "id": "Q1960753",
+      "name": "Schlieren railway station",
+      "lat": 47.398553,
+      "lng": 8.447864
+    },
+    {
+      "id": "Q7431736",
+      "name": "Schloss Laufen am Rheinfall",
+      "lat": 47.676428,
+      "lng": 8.613872
+    },
+    {
+      "id": "Q12174831",
+      "name": "Schmerikon railway station",
+      "lat": 47.22516,
+      "lng": 8.943382
+    },
+    {
+      "id": "Q7433314",
+      "name": "Schöfflisdorf-Oberweningen railway station",
+      "lat": 47.49797,
+      "lng": 8.411777
+    },
+    {
+      "id": "Q5847205",
+      "name": "Schottikon railway station",
+      "lat": 47.500118,
+      "lng": 8.811719
+    },
+    {
+      "id": "Q5847216",
+      "name": "Schübelbach-Buttikon railway station",
+      "lat": 47.176384,
+      "lng": 8.938763
+    },
+    {
+      "id": "Q5847212",
+      "name": "Schwerzenbach railway station",
+      "lat": 47.38438,
+      "lng": 8.65866
+    },
+    {
+      "id": "Q14553574",
+      "name": "Sennhof-Kyburg railway station",
+      "lat": 47.4652,
+      "lng": 8.76033
+    },
+    {
+      "id": "Q5847239",
+      "name": "Seuzach railway station",
+      "lat": 47.535767,
+      "lng": 8.738869
+    },
+    {
+      "id": "Q5847248",
+      "name": "Siebnen-Wangen railway station",
+      "lat": 47.182667,
+      "lng": 8.900699
+    },
+    {
+      "id": "Q10640355",
+      "name": "Sihlau railway station",
+      "lat": 47.303171,
+      "lng": 8.525219
+    },
+    {
+      "id": "Q7513432",
+      "name": "Sihlbrugg railway station",
+      "lat": 47.238428,
+      "lng": 8.577059
+    },
+    {
+      "id": "Q7513438",
+      "name": "Sihlwald railway station",
+      "lat": 47.2683,
+      "lng": 8.5575
+    },
+    {
+      "id": "Q15964259",
+      "name": "Sins railway station",
+      "lat": 47.1883,
+      "lng": 8.3978
+    },
+    {
+      "id": "Q10640357",
+      "name": "Sood-Oberleimbach railway station",
+      "lat": 47.319697,
+      "lng": 8.521501
+    },
+    {
+      "id": "Q33456111",
+      "name": "Spital Zollikerberg railway station",
+      "lat": 47.34731,
+      "lng": 8.5968
+    },
+    {
+      "id": "Q15964270",
+      "name": "St. Katharinental railway station",
+      "lat": 47.6875,
+      "lng": 8.73194
+    },
+    {
+      "id": "Q5847287",
+      "name": "Stäfa railway station",
+      "lat": 47.2406,
+      "lng": 8.72167
+    },
+    {
+      "id": "Q5847284",
+      "name": "Stammheim railway station",
+      "lat": 47.63488,
+      "lng": 8.788727
+    },
+    {
+      "id": "Q15964268",
+      "name": "Steckborn Station",
+      "lat": 47.6644,
+      "lng": 8.98111
+    },
+    {
+      "id": "Q15086051",
+      "name": "Steg railway station",
+      "lat": 47.35395,
+      "lng": 8.932357
+    },
+    {
+      "id": "Q13416896",
+      "name": "Stein am Rhein railway station",
+      "lat": 47.65611,
+      "lng": 8.855007
+    },
+    {
+      "id": "Q16900708",
+      "name": "Steinhausen railway station",
+      "lat": 47.194581,
+      "lng": 8.478437
+    },
+    {
+      "id": "Q31454891",
+      "name": "Steinhausen Rigiblick railway station",
+      "lat": 47.187864,
+      "lng": 8.479704
+    },
+    {
+      "id": "Q15108757",
+      "name": "Steinmaur railway station",
+      "lat": 47.48998,
+      "lng": 8.446827
+    },
+    {
+      "id": "Q801466",
+      "name": "Stettbach railway station",
+      "lat": 47.397222,
+      "lng": 8.596111
+    },
+    {
+      "id": "Q15088508",
+      "name": "Tann-Dürnten railway station",
+      "lat": 47.268457,
+      "lng": 8.852596
+    },
+    {
+      "id": "Q5847328",
+      "name": "Thalheim-Altikon railway station",
+      "lat": 47.56962,
+      "lng": 8.757627
+    },
+    {
+      "id": "Q801512",
+      "name": "Thalwil railway station",
+      "lat": 47.29597,
+      "lng": 8.564739
+    },
+    {
+      "id": "Q29932530",
+      "name": "Train station with a station building, freight shed, wall fountain, and a residential house with a barn (the former Hotel Witzig)",
+      "lat": 47.667145,
+      "lng": 8.613885
+    },
+    {
+      "id": "Q9361343",
+      "name": "Trasadingen railway station",
+      "lat": 47.6656,
+      "lng": 8.4374
+    },
+    {
+      "id": "Q15088574",
+      "name": "Turbenthal railway station",
+      "lat": 47.437268,
+      "lng": 8.843586
+    },
+    {
+      "id": "Q10640359",
+      "name": "Uerikon railway station",
+      "lat": 47.235881,
+      "lng": 8.752069
+    },
+    {
+      "id": "Q5847377",
+      "name": "Uetikon railway station",
+      "lat": 47.25903,
+      "lng": 8.678775
+    },
+    {
+      "id": "Q7877484",
+      "name": "Uetliberg railway station",
+      "lat": 47.3518,
+      "lng": 8.4876
+    },
+    {
+      "id": "Q7878137",
+      "name": "Uitikon Waldegg railway station",
+      "lat": 47.3659,
+      "lng": 8.466
+    },
+    {
+      "id": "Q7900321",
+      "name": "Urdorf railway station",
+      "lat": 47.390883,
+      "lng": 8.434731
+    },
+    {
+      "id": "Q7900319",
+      "name": "Urdorf Weihermatt railway station",
+      "lat": 47.38097,
+      "lng": 8.430343
+    },
+    {
+      "id": "Q555254",
+      "name": "Uster railway station",
+      "lat": 47.35081,
+      "lng": 8.71793
+    },
+    {
+      "id": "Q12174836",
+      "name": "Uznach railway station",
+      "lat": 47.224283,
+      "lng": 8.980691
+    },
+    {
+      "id": "Q2157839",
+      "name": "Wädenswil railway station",
+      "lat": 47.2293,
+      "lng": 8.67518
+    },
+    {
+      "id": "Q7961361",
+      "name": "Wald railway station",
+      "lat": 47.272372,
+      "lng": 8.913872
+    },
+    {
+      "id": "Q33456136",
+      "name": "Waldburg railway station",
+      "lat": 47.34547,
+      "lng": 8.59302
+    },
+    {
+      "id": "Q801576",
+      "name": "Wallisellen railway station",
+      "lat": 47.4127,
+      "lng": 8.59191
+    },
+    {
+      "id": "Q33456087",
+      "name": "Waltikon railway station",
+      "lat": 47.33679,
+      "lng": 8.61702
+    },
+    {
+      "id": "Q33505426",
+      "name": "Wängi railway station",
+      "lat": 47.496398,
+      "lng": 8.953314
+    },
+    {
+      "id": "Q33505371",
+      "name": "Weberei Matzingen railway station",
+      "lat": 47.527224,
+      "lng": 8.922198
+    },
+    {
+      "id": "Q2032616",
+      "name": "Wetzikon railway station",
+      "lat": 47.316978,
+      "lng": 8.79227
+    },
+    {
+      "id": "Q5847529",
+      "name": "Wiesendangen railway station",
+      "lat": 47.52554,
+      "lng": 8.776015
+    },
+    {
+      "id": "Q33505313",
+      "name": "Wiesengrund railway station",
+      "lat": 47.502177,
+      "lng": 8.948872
+    },
+    {
+      "id": "Q8000034",
+      "name": "Wila railway station",
+      "lat": 47.417811,
+      "lng": 8.848694
+    },
+    {
+      "id": "Q9374306",
+      "name": "Wilchingen-Hallau railway station",
+      "lat": 47.67949,
+      "lng": 8.46401
+    },
+    {
+      "id": "Q10640354",
+      "name": "Wildpark-Höfli railway station",
+      "lat": 47.296666,
+      "lng": 8.535079
+    },
+    {
+      "id": "Q15964272",
+      "name": "Wilen bei Wollerau railway station",
+      "lat": 47.1976,
+      "lng": 8.73444
+    },
+    {
+      "id": "Q15089925",
+      "name": "Winkel am Zürichsee railway station",
+      "lat": 47.2974,
+      "lng": 8.59892
+    },
+    {
+      "id": "Q801617",
+      "name": "Winterthur Grüze railway station",
+      "lat": 47.498753,
+      "lng": 8.751019
+    },
+    {
+      "id": "Q15088592",
+      "name": "Winterthur Hegi railway station",
+      "lat": 47.50156,
+      "lng": 8.769288
+    },
+    {
+      "id": "Q677527",
+      "name": "Winterthur railway station",
+      "lat": 47.500328,
+      "lng": 8.723786
+    },
+    {
+      "id": "Q801618",
+      "name": "Winterthur Seen railway station",
+      "lat": 47.4874,
+      "lng": 8.76674
+    },
+    {
+      "id": "Q801619",
+      "name": "Winterthur Töss railway station",
+      "lat": 47.48981,
+      "lng": 8.70929
+    },
+    {
+      "id": "Q16903530",
+      "name": "Winterthur Wallrüti railway station",
+      "lat": 47.5167,
+      "lng": 8.76097
+    },
+    {
+      "id": "Q801620",
+      "name": "Winterthur Wülflingen railway station",
+      "lat": 47.50643,
+      "lng": 8.6809
+    },
+    {
+      "id": "Q135298013",
+      "name": "Wolfhausen former railway station",
+      "lat": 47.25823,
+      "lng": 8.80091
+    },
+    {
+      "id": "Q15964299",
+      "name": "Wollerau railway station",
+      "lat": 47.1954,
+      "lng": 8.72476
+    },
+    {
+      "id": "Q33455956",
+      "name": "Zollikerberg railway station",
+      "lat": 47.34605,
+      "lng": 8.6034
+    },
+    {
+      "id": "Q8073578",
+      "name": "Zollikon railway station",
+      "lat": 47.337278,
+      "lng": 8.569432
+    },
+    {
+      "id": "Q33454123",
+      "name": "Zufikon Belvédère station",
+      "lat": 47.357579,
+      "lng": 8.359234
+    },
+    {
+      "id": "Q15964302",
+      "name": "Zug Chollermüli railway station",
+      "lat": 47.180238,
+      "lng": 8.486646
+    },
+    {
+      "id": "Q15964304",
+      "name": "Zug Postplatz railway station",
+      "lat": 47.168276,
+      "lng": 8.516937
+    },
+    {
+      "id": "Q178444",
+      "name": "Zug railway station",
+      "lat": 47.173622,
+      "lng": 8.51529
+    },
+    {
+      "id": "Q15964303",
+      "name": "Zug Schutzengel railway station",
+      "lat": 47.173725,
+      "lng": 8.507242
+    },
+    {
+      "id": "Q33455933",
+      "name": "Zumikon railway station",
+      "lat": 47.33169,
+      "lng": 8.62381
+    },
+    {
+      "id": "Q1771435",
+      "name": "Zürich Affoltern railway station",
+      "lat": 47.420909,
+      "lng": 8.508583
+    },
+    {
+      "id": "Q40700",
+      "name": "Zurich Airport railway station",
+      "lat": 47.450382,
+      "lng": 8.562367
+    },
+    {
+      "id": "Q678652",
+      "name": "Zurich Altstetten railway station",
+      "lat": 47.391483,
+      "lng": 8.488963
+    },
+    {
+      "id": "Q33512591",
+      "name": "Zürich Balgrist railway station",
+      "lat": 47.354578,
+      "lng": 8.57502
+    },
+    {
+      "id": "Q8076076",
+      "name": "Zürich Binz railway station",
+      "lat": 47.362846,
+      "lng": 8.517945
+    },
+    {
+      "id": "Q8075390",
+      "name": "Zurich Brunau railway station",
+      "lat": 47.351952,
+      "lng": 8.526496
+    },
+    {
+      "id": "Q801676",
+      "name": "Zürich Enge railway station",
+      "lat": 47.3641,
+      "lng": 8.530788
+    },
+    {
+      "id": "Q136490857",
+      "name": "Zürich Flughafen, Bahnhof",
+      "lat": 47.450325,
+      "lng": 8.564106
+    },
+    {
+      "id": "Q10640221",
+      "name": "Zürich Friesenberg railway station",
+      "lat": 47.3647,
+      "lng": 8.508
+    },
+    {
+      "id": "Q801675",
+      "name": "Zürich Giesshübel railway station",
+      "lat": 47.362222,
+      "lng": 8.521944
+    },
+    {
+      "id": "Q801678",
+      "name": "Zurich Hardbrücke railway station",
+      "lat": 47.385193,
+      "lng": 8.517106
+    },
+    {
+      "id": "Q224494",
+      "name": "Zürich Hauptbahnhof",
+      "lat": 47.378169,
+      "lng": 8.540178
+    },
+    {
+      "id": "Q33456193",
+      "name": "Zürich HB SZU",
+      "lat": 47.377431,
+      "lng": 8.53917
+    },
+    {
+      "id": "Q33512599",
+      "name": "Zürich Hegibachplatz railway station",
+      "lat": 47.36169,
+      "lng": 8.560623
+    },
+    {
+      "id": "Q33512609",
+      "name": "Zürich Kreuzplatz railway station",
+      "lat": 47.364875,
+      "lng": 8.554083
+    },
+    {
+      "id": "Q8075395",
+      "name": "Zürich Leimbach railway station",
+      "lat": 47.3336,
+      "lng": 8.5191
+    },
+    {
+      "id": "Q8075397",
+      "name": "Zürich Manegg railway station",
+      "lat": 47.338216,
+      "lng": 8.519881
+    },
+    {
+      "id": "Q194887",
+      "name": "Zürich Oerlikon railway station",
+      "lat": 47.41153,
+      "lng": 8.544098
+    },
+    {
+      "id": "Q23001760",
+      "name": "Zürich Rehalp railway station",
+      "lat": 47.351027,
+      "lng": 8.582979
+    },
+    {
+      "id": "Q8076079",
+      "name": "Zürich Saalsporthalle-Sihlcity railway station",
+      "lat": 47.3579,
+      "lng": 8.5218
+    },
+    {
+      "id": "Q8076080",
+      "name": "Zürich Schweighof railway station",
+      "lat": 47.365,
+      "lng": 8.5033
+    },
+    {
+      "id": "Q250500",
+      "name": "Zürich Seebach railway station",
+      "lat": 47.41875,
+      "lng": 8.54466
+    },
+    {
+      "id": "Q637602",
+      "name": "Zürich Selnau railway station",
+      "lat": 47.372238,
+      "lng": 8.531725
+    },
+    {
+      "id": "Q33455795",
+      "name": "Zürich Stadelhofen FB railway station",
+      "lat": 47.36635,
+      "lng": 8.54813
+    },
+    {
+      "id": "Q673228",
+      "name": "Zürich Stadelhofen railway station",
+      "lat": 47.366667,
+      "lng": 8.548611
+    },
+    {
+      "id": "Q505460",
+      "name": "Zürich Tiefenbrunnen railway station",
+      "lat": 47.3501,
+      "lng": 8.5613
+    },
+    {
+      "id": "Q8076081",
+      "name": "Zürich Triemli railway station",
+      "lat": 47.365,
+      "lng": 8.4952
+    },
+    {
+      "id": "Q679393",
+      "name": "Zurich Wiedikon railway station",
+      "lat": 47.37147,
+      "lng": 8.523449
+    },
+    {
+      "id": "Q679416",
+      "name": "Zurich Wipkingen railway station",
+      "lat": 47.392222,
+      "lng": 8.529167
+    },
+    {
+      "id": "Q801680",
+      "name": "Zürich Wollishofen railway station",
+      "lat": 47.347443,
+      "lng": 8.533579
+    },
+    {
+      "id": "Q33514141",
+      "name": "Zürich, Dolder station",
+      "lat": 47.373203,
+      "lng": 8.57453
+    },
+    {
+      "id": "Q33514137",
+      "name": "Zürich, Römerhof station",
+      "lat": 47.368089,
+      "lng": 8.560281
+    },
+    {
+      "id": "Q33516072",
+      "name": "Zürich, Titlisstrasse station",
+      "lat": 47.370976,
+      "lng": 8.564949
+    },
+    {
+      "id": "Q33516079",
+      "name": "Zürich, Waldhaus Dolder station",
+      "lat": 47.373244,
+      "lng": 8.568546
+    },
+    {
+      "id": "Q8075646",
+      "name": "Zweidlen railway station",
+      "lat": 47.570441,
+      "lng": 8.467892
+    }
+  ]
+}

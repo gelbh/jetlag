@@ -1,1 +1,48 @@
-{ "category": "golf_course", "source": "none", "places": [] }
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 40.49,
+    "west": -74.26,
+    "north": 40.92,
+    "east": -73.7
+  },
+  "places": [
+    {
+      "id": "Q141791189",
+      "name": "Bayonne Golf Club",
+      "lat": 40.66275,
+      "lng": -74.09523
+    },
+    {
+      "id": "Q5378123",
+      "name": "Englewood Golf Club",
+      "lat": 40.8725,
+      "lng": -73.975
+    },
+    {
+      "id": "Q14706277",
+      "name": "Fresh Meadow Country Club",
+      "lat": 40.7758,
+      "lng": -73.7086
+    },
+    {
+      "id": "Q14706544",
+      "name": "Inwood Country Club",
+      "lat": 40.6211,
+      "lng": -73.7561
+    },
+    {
+      "id": "Q20880738",
+      "name": "Preakness Valley",
+      "lat": 40.917358,
+      "lng": -74.233923
+    },
+    {
+      "id": "Q54954293",
+      "name": "Weequahic Golf Course",
+      "lat": 40.69651,
+      "lng": -74.207078
+    }
+  ]
+}

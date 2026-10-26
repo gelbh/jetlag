@@ -1,1 +1,54 @@
-{ "category": "body_of_water", "source": "none", "places": [] }
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 54.2016,
+    "west": -130.45,
+    "north": 54.4,
+    "east": -130.2
+  },
+  "places": [
+    {
+      "id": "Q22400422",
+      "name": "Alwyn Lake",
+      "lat": 54.21889,
+      "lng": -130.23472
+    },
+    {
+      "id": "Q22386009",
+      "name": "Bencke Lagoon",
+      "lat": 54.33459,
+      "lng": -130.41098
+    },
+    {
+      "id": "Q22442357",
+      "name": "Oliver Lake",
+      "lat": 54.28083,
+      "lng": -130.2725
+    },
+    {
+      "id": "Q22553608",
+      "name": "Porpoise Lake",
+      "lat": 54.22278,
+      "lng": -130.23
+    },
+    {
+      "id": "Q22395964",
+      "name": "Salt Lake",
+      "lat": 54.33639,
+      "lng": -130.36278
+    },
+    {
+      "id": "Q22607518",
+      "name": "Shawatlan Lake",
+      "lat": 54.33361,
+      "lng": -130.23806
+    },
+    {
+      "id": "Q22538840",
+      "name": "Tsook Lake",
+      "lat": 54.35333,
+      "lng": -130.43139
+    }
+  ]
+}

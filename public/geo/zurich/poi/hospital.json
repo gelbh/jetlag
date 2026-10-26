@@ -1,1 +1,126 @@
-{ "category": "hospital", "source": "none", "places": [] }
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q23783969",
+      "name": "AndreasKlinik",
+      "lat": 47.182095,
+      "lng": 8.455388
+    },
+    {
+      "id": "Q14544326",
+      "name": "Bürgerspital Rapperswil",
+      "lat": 47.225853,
+      "lng": 8.816033
+    },
+    {
+      "id": "Q1374004",
+      "name": "Children's Hospital Zurich",
+      "lat": 47.371586,
+      "lng": 8.55801
+    },
+    {
+      "id": "Q61857547",
+      "name": "Höhenklinik Wald",
+      "lat": 47.276389,
+      "lng": 8.943333
+    },
+    {
+      "id": "Q29880252",
+      "name": "Hospital of the Holy Ghost",
+      "lat": 47.659813,
+      "lng": 8.860224
+    },
+    {
+      "id": "Q1519815",
+      "name": "Hospital Waid",
+      "lat": 47.398772,
+      "lng": 8.519842
+    },
+    {
+      "id": "Q1728154",
+      "name": "Hospital Winterthur",
+      "lat": 47.507,
+      "lng": 8.729
+    },
+    {
+      "id": "Q137298476",
+      "name": "IROC AG",
+      "lat": 47.367212,
+      "lng": 8.534758
+    },
+    {
+      "id": "Q23783912",
+      "name": "Klinik Hirslanden",
+      "lat": 47.351237,
+      "lng": 8.575898
+    },
+    {
+      "id": "Q23784014",
+      "name": "Klinik Im Park",
+      "lat": 47.352543,
+      "lng": 8.531654
+    },
+    {
+      "id": "Q123120881",
+      "name": "Privatklinik Lindberg",
+      "lat": 47.510236,
+      "lng": 8.730181
+    },
+    {
+      "id": "Q577131",
+      "name": "Psychiatrische Universitätsklinik Zürich",
+      "lat": 47.3527,
+      "lng": 8.5706
+    },
+    {
+      "id": "Q55503256",
+      "name": "Spital Männedorf",
+      "lat": 47.25088,
+      "lng": 8.69529
+    },
+    {
+      "id": "Q1535635",
+      "name": "Triemli Hospital",
+      "lat": 47.365853,
+      "lng": 8.497769
+    },
+    {
+      "id": "Q2494392",
+      "name": "University Hospital Balgrist",
+      "lat": 47.3531,
+      "lng": 8.57515
+    },
+    {
+      "id": "Q450139",
+      "name": "University Hospital Zurich",
+      "lat": 47.376667,
+      "lng": 8.549722
+    },
+    {
+      "id": "Q2525487",
+      "name": "Villa Nager",
+      "lat": 47.329,
+      "lng": 8.59727
+    },
+    {
+      "id": "Q18689545",
+      "name": "Voliere Zürich",
+      "lat": 47.3617,
+      "lng": 8.53583
+    },
+    {
+      "id": "Q137298584",
+      "name": "YOUSEEZÜRI AG",
+      "lat": 47.374264,
+      "lng": 8.53864
+    }
+  ]
+}

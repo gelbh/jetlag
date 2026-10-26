@@ -1,1 +1,42 @@
-{ "category": "movie_theater", "source": "none", "places": [] }
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 34.5865,
+    "west": 135.3435,
+    "north": 34.7688,
+    "east": 135.5993
+  },
+  "places": [
+    {
+      "id": "Q11307454",
+      "name": "Cine Nouveau",
+      "lat": 34.674306,
+      "lng": 135.475444
+    },
+    {
+      "id": "Q11480802",
+      "name": "Fuse Line Cinema",
+      "lat": 34.664361,
+      "lng": 135.560889
+    },
+    {
+      "id": "Q35134623",
+      "name": "O.S. Cinerama Gekijo",
+      "lat": 34.705362,
+      "lng": 135.510025
+    },
+    {
+      "id": "Q18338714",
+      "name": "塚口サンサン劇場",
+      "lat": 34.752389,
+      "lng": 135.416528
+    },
+    {
+      "id": "Q11602154",
+      "name": "第七藝術劇場",
+      "lat": 34.718889,
+      "lng": 135.480611
+    }
+  ]
+}

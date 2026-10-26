@@ -1,15 +1,24 @@
 {
   "category": "commercial_airport",
   "source": "wikidata",
-  "bbox": { "south": 43.55, "west": -70.45, "north": 43.75, "east": -70.1 },
+  "bbox": {
+    "south": 43.4669,
+    "west": -70.492,
+    "north": 43.8488,
+    "east": -69.9759
+  },
   "places": [
     {
       "id": "Q1432470",
       "name": "Portland International Jetport",
-      "lat": 43.646111111,
-      "lng": -70.309166666
+      "lat": 43.646111,
+      "lng": -70.309167
     },
-    { "id": "Q35290268", "name": "Port O'Maine Airport", "lat": 43.60814, "lng": -70.30533 },
-    { "id": "Q35285210", "name": "Oak Knoll Airport", "lat": 43.59203, "lng": -70.36561 }
+    {
+      "id": "Q35303688",
+      "name": "Slip Knot Landing Airport",
+      "lat": 43.822222,
+      "lng": -70.442778
+    }
   ]
 }

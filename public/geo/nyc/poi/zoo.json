@@ -1,1 +1,54 @@
-{ "category": "zoo", "source": "none", "places": [] }
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 40.49,
+    "west": -74.26,
+    "north": 40.92,
+    "east": -73.7
+  },
+  "places": [
+    {
+      "id": "Q739792",
+      "name": "Bronx Zoo",
+      "lat": 40.850278,
+      "lng": -73.878333
+    },
+    {
+      "id": "Q1049423",
+      "name": "Castle Clinton",
+      "lat": 40.703611,
+      "lng": -74.016667
+    },
+    {
+      "id": "Q954207",
+      "name": "Central Park Zoo",
+      "lat": 40.767778,
+      "lng": -73.971667
+    },
+    {
+      "id": "Q1060884",
+      "name": "New York Aquarium",
+      "lat": 40.5743,
+      "lng": -73.9751
+    },
+    {
+      "id": "Q1058899",
+      "name": "Prospect Park Zoo",
+      "lat": 40.665772,
+      "lng": -73.964361
+    },
+    {
+      "id": "Q901214",
+      "name": "Queens Zoo",
+      "lat": 40.745,
+      "lng": -73.848333
+    },
+    {
+      "id": "Q4193914",
+      "name": "Staten Island Zoo",
+      "lat": 40.6251,
+      "lng": -74.1157
+    }
+  ]
+}

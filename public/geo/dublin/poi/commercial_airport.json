@@ -1,6 +1,30 @@
 {
   "category": "commercial_airport",
   "source": "wikidata",
-  "bbox": { "south": 53.24, "west": -6.45, "north": 53.43, "east": -6.07 },
-  "places": [{ "id": "Q178021", "name": "Dublin Airport", "lat": 53.421388888, "lng": -6.27 }]
+  "bbox": {
+    "south": 53.1782,
+    "west": -6.5469,
+    "north": 53.6347,
+    "east": -5.9945
+  },
+  "places": [
+    {
+      "id": "Q178021",
+      "name": "Dublin Airport",
+      "lat": 53.421389,
+      "lng": -6.27
+    },
+    {
+      "id": "Q20462163",
+      "name": "Gormanston Airport",
+      "lat": 53.633333,
+      "lng": -6.233333
+    },
+    {
+      "id": "Q7989399",
+      "name": "Weston Airport",
+      "lat": 53.352222,
+      "lng": -6.488333
+    }
+  ]
 }

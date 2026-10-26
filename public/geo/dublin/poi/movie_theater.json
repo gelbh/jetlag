@@ -1,1 +1,102 @@
-{ "category": "movie_theater", "source": "none", "places": [] }
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 53.1782,
+    "west": -6.5469,
+    "north": 53.6347,
+    "east": -5.9945
+  },
+  "places": [
+    {
+      "id": "Q4682065",
+      "name": "Adelphi Cinema",
+      "lat": 53.348199,
+      "lng": -6.262244
+    },
+    {
+      "id": "Q35105713",
+      "name": "Bethesda Chapel",
+      "lat": 53.354543,
+      "lng": -6.266988
+    },
+    {
+      "id": "Q5042971",
+      "name": "Carlton Cinema",
+      "lat": 53.350975,
+      "lng": -6.261194
+    },
+    {
+      "id": "Q5120904",
+      "name": "Cineworld Dublin",
+      "lat": 53.350449,
+      "lng": -6.26707
+    },
+    {
+      "id": "Q5592523",
+      "name": "Grafton Cinema",
+      "lat": 53.341355,
+      "lng": -6.260606
+    },
+    {
+      "id": "Q5602415",
+      "name": "Green Cinema",
+      "lat": 53.33936,
+      "lng": -6.26155
+    },
+    {
+      "id": "Q6070747",
+      "name": "Irish Film Institute",
+      "lat": 53.3446,
+      "lng": -6.2649
+    },
+    {
+      "id": "Q6070744",
+      "name": "Irish Film Theatre",
+      "lat": 53.335624,
+      "lng": -6.257025
+    },
+    {
+      "id": "Q35105627",
+      "name": "Light House Cinema",
+      "lat": 53.348611,
+      "lng": -6.279167
+    },
+    {
+      "id": "Q35118256",
+      "name": "Pavilion Theatre",
+      "lat": 53.29384,
+      "lng": -6.13358
+    },
+    {
+      "id": "Q7307907",
+      "name": "Regal Cinema",
+      "lat": 53.35,
+      "lng": -6.25
+    },
+    {
+      "id": "Q7428427",
+      "name": "Savoy Cinema",
+      "lat": 53.351111,
+      "lng": -6.260556
+    },
+    {
+      "id": "Q7438996",
+      "name": "Screen Cinema",
+      "lat": 53.346193,
+      "lng": -6.25684
+    },
+    {
+      "id": "Q35105854",
+      "name": "Theatre Royal",
+      "lat": 53.346017,
+      "lng": -6.256811
+    },
+    {
+      "id": "Q7940709",
+      "name": "Volta Cinematograph",
+      "lat": 53.348986,
+      "lng": -6.265883
+    }
+  ]
+}

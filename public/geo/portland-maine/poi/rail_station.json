@@ -1,14 +1,24 @@
 {
   "category": "rail_station",
   "source": "wikidata",
-  "bbox": { "south": 43.55, "west": -70.45, "north": 43.75, "east": -70.1 },
+  "bbox": {
+    "south": 43.4669,
+    "west": -70.492,
+    "north": 43.8488,
+    "east": -69.9759
+  },
   "places": [
-    { "id": "Q16964506", "name": "Union Station", "lat": 43.6511, "lng": -70.16 },
     {
-      "id": "Q7284092",
-      "name": "railroad history of Portland, Maine",
-      "lat": 43.6519,
-      "lng": -70.28
+      "id": "Q5595186",
+      "name": "Grand Trunk Railroad Station",
+      "lat": 43.801667,
+      "lng": -70.191111
+    },
+    {
+      "id": "Q14715334",
+      "name": "Old Orchard Beach",
+      "lat": 43.5144,
+      "lng": -70.3761
     },
     {
       "id": "Q7232062",
@@ -16,6 +26,17 @@
       "lat": 43.653611,
       "lng": -70.291111
     },
-    { "id": "Q125407889", "name": "Portland station", "lat": 43.6595, "lng": -70.24845 }
+    {
+      "id": "Q7396892",
+      "name": "Saco Transportation Center",
+      "lat": 43.49622,
+      "lng": -70.44913
+    },
+    {
+      "id": "Q113450164",
+      "name": "Yarmouth Junction station",
+      "lat": 43.81547,
+      "lng": -70.19029
+    }
   ]
 }

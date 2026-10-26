@@ -1,1 +1,6930 @@
-{ "category": "movie_theater", "source": "none", "places": [] }
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 40.49,
+    "west": -74.26,
+    "north": 40.92,
+    "east": -73.7
+  },
+  "places": [
+    {
+      "id": "Q45102362",
+      "name": "116th Street Theatre",
+      "lat": 40.80264,
+      "lng": -73.95147
+    },
+    {
+      "id": "Q43018644",
+      "name": "14th Street Theatre",
+      "lat": 40.753735,
+      "lng": -74.02883
+    },
+    {
+      "id": "Q45033864",
+      "name": "16th Street Theatre",
+      "lat": 40.664951,
+      "lng": -73.990818
+    },
+    {
+      "id": "Q45107251",
+      "name": "2nd Avenue Theatre",
+      "lat": 40.724885,
+      "lng": -73.990543
+    },
+    {
+      "id": "Q45101988",
+      "name": "34th Street East Theatre",
+      "lat": 40.744979,
+      "lng": -73.976344
+    },
+    {
+      "id": "Q45101665",
+      "name": "42nd Street Cinema",
+      "lat": 40.758866,
+      "lng": -73.993727
+    },
+    {
+      "id": "Q45020958",
+      "name": "43rd Street Theatre",
+      "lat": 40.740582,
+      "lng": -73.922504
+    },
+    {
+      "id": "Q45103507",
+      "name": "55th Street Playhouse",
+      "lat": 40.759189,
+      "lng": -73.969159
+    },
+    {
+      "id": "Q45102106",
+      "name": "5th Avenue Cinema",
+      "lat": 40.735295,
+      "lng": -73.994432
+    },
+    {
+      "id": "Q45109175",
+      "name": "68th Street Playhouse",
+      "lat": 40.767091,
+      "lng": -73.962792
+    },
+    {
+      "id": "Q45109189",
+      "name": "72nd Street Playhouse",
+      "lat": 40.76818,
+      "lng": -73.95693
+    },
+    {
+      "id": "Q45109814",
+      "name": "77th Street Theatre",
+      "lat": 40.782653,
+      "lng": -73.980278
+    },
+    {
+      "id": "Q45109202",
+      "name": "86th Street Grande Theatre",
+      "lat": 40.779169,
+      "lng": -73.954873
+    },
+    {
+      "id": "Q5448944",
+      "name": "8th Street Playhouse",
+      "lat": 40.7332,
+      "lng": -73.9988
+    },
+    {
+      "id": "Q45105038",
+      "name": "96th Street Theatre",
+      "lat": 40.785448,
+      "lng": -73.94913
+    },
+    {
+      "id": "Q45036448",
+      "name": "Abbey Theatre",
+      "lat": 40.816045,
+      "lng": -73.895739
+    },
+    {
+      "id": "Q45102119",
+      "name": "Academy of Music",
+      "lat": 40.733854,
+      "lng": -73.988577
+    },
+    {
+      "id": "Q45109214",
+      "name": "Academy Theater at Lighthouse International",
+      "lat": 40.762954,
+      "lng": -73.96894
+    },
+    {
+      "id": "Q45108174",
+      "name": "Academy Theatre",
+      "lat": 40.721395,
+      "lng": -73.984233
+    },
+    {
+      "id": "Q45020280",
+      "name": "Ace Theatre",
+      "lat": 40.684309,
+      "lng": -73.845804
+    },
+    {
+      "id": "Q45019376",
+      "name": "Acme Theatre",
+      "lat": 40.740615,
+      "lng": -73.879305
+    },
+    {
+      "id": "Q45102270",
+      "name": "Acorn Theatre",
+      "lat": 40.820187,
+      "lng": -73.954861
+    },
+    {
+      "id": "Q43020271",
+      "name": "Adams Theatre",
+      "lat": 40.735072,
+      "lng": -74.174056
+    },
+    {
+      "id": "Q45103532",
+      "name": "Adonis Theatre",
+      "lat": 40.762704,
+      "lng": -73.985829
+    },
+    {
+      "id": "Q43036323",
+      "name": "Airdome",
+      "lat": 40.621738,
+      "lng": -73.726188
+    },
+    {
+      "id": "Q45102376",
+      "name": "Airdome Pictures",
+      "lat": 40.800586,
+      "lng": -73.96007
+    },
+    {
+      "id": "Q42298362",
+      "name": "Alamo Drafthouse Downtown Brooklyn",
+      "lat": 40.6907,
+      "lng": -73.983479
+    },
+    {
+      "id": "Q45034285",
+      "name": "Alba Theatre",
+      "lat": 40.700663,
+      "lng": -73.942596
+    },
+    {
+      "id": "Q45032050",
+      "name": "Albany Moving Picture Parlor",
+      "lat": 40.680038,
+      "lng": -73.938603
+    },
+    {
+      "id": "Q45033438",
+      "name": "Albemarle Theatre",
+      "lat": 40.647518,
+      "lng": -73.957418
+    },
+    {
+      "id": "Q45034174",
+      "name": "Alben Theatre",
+      "lat": 40.645525,
+      "lng": -74.017488
+    },
+    {
+      "id": "Q45033870",
+      "name": "Alhambra Theatre",
+      "lat": 40.676003,
+      "lng": -73.980857
+    },
+    {
+      "id": "Q43020250",
+      "name": "All Jersey Multiplex Cinemas",
+      "lat": 40.730209,
+      "lng": -74.132463
+    },
+    {
+      "id": "Q45036815",
+      "name": "Allerton Theatre",
+      "lat": 40.865314,
+      "lng": -73.86566
+    },
+    {
+      "id": "Q43017250",
+      "name": "Allwood Cinemas 6",
+      "lat": 40.845815,
+      "lng": -74.163224
+    },
+    {
+      "id": "Q45032002",
+      "name": "Alpine Theatre",
+      "lat": 40.633611,
+      "lng": -74.020694
+    },
+    {
+      "id": "Q43018328",
+      "name": "Alvin Theatre",
+      "lat": 40.79518,
+      "lng": -74.011605
+    },
+    {
+      "id": "Q45033176",
+      "name": "Alvon Theatre",
+      "lat": 40.679542,
+      "lng": -73.885095
+    },
+    {
+      "id": "Q45032571",
+      "name": "Ambassador Theatre",
+      "lat": 40.66172,
+      "lng": -73.915541
+    },
+    {
+      "id": "Q43037863",
+      "name": "Amboy Twin",
+      "lat": 40.544935,
+      "lng": -74.161189
+    },
+    {
+      "id": "Q45102000",
+      "name": "AMC 19th Street East 6",
+      "lat": 40.738414,
+      "lng": -73.989444
+    },
+    {
+      "id": "Q45101419",
+      "name": "AMC 34th Street 14",
+      "lat": 40.752488,
+      "lng": -73.994216
+    },
+    {
+      "id": "Q45036128",
+      "name": "AMC Bay Plaza 13",
+      "lat": 40.86896,
+      "lng": -73.82339
+    },
+    {
+      "id": "Q43017256",
+      "name": "AMC Clifton Commons 16",
+      "lat": 40.829399,
+      "lng": -74.138608
+    },
+    {
+      "id": "Q78916040",
+      "name": "AMC DINE-IN Staten Island 11",
+      "lat": 40.58132,
+      "lng": -74.16704
+    },
+    {
+      "id": "Q15032136",
+      "name": "AMC Empire 25",
+      "lat": 40.75667,
+      "lng": -73.98925
+    },
+    {
+      "id": "Q43023727",
+      "name": "AMC Essex Green",
+      "lat": 40.792208,
+      "lng": -74.254935
+    },
+    {
+      "id": "Q43021179",
+      "name": "AMC Garden State 16",
+      "lat": 40.918116,
+      "lng": -74.076363
+    },
+    {
+      "id": "Q45102014",
+      "name": "AMC Kips Bay 15",
+      "lat": 40.742973,
+      "lng": -73.977009
+    },
+    {
+      "id": "Q45109828",
+      "name": "AMC Loews 84th Street 6",
+      "lat": 40.786699,
+      "lng": -73.9775
+    },
+    {
+      "id": "Q45019062",
+      "name": "AMC Loews Bay Terrace 6",
+      "lat": 40.779063,
+      "lng": -73.778679
+    },
+    {
+      "id": "Q45019680",
+      "name": "AMC Loews Fresh Meadows 7",
+      "lat": 40.742193,
+      "lng": -73.780722
+    },
+    {
+      "id": "Q43017712",
+      "name": "AMC Loews Jersey Gardens 20",
+      "lat": 40.660587,
+      "lng": -74.169796
+    },
+    {
+      "id": "Q45109841",
+      "name": "AMC Loews Lincoln Square 13 with IMAX",
+      "lat": 40.775221,
+      "lng": -73.982054
+    },
+    {
+      "id": "Q43022410",
+      "name": "AMC Loews Meadow 6",
+      "lat": 40.785769,
+      "lng": -74.045518
+    },
+    {
+      "id": "Q45109229",
+      "name": "AMC Loews Orpheum 7",
+      "lat": 40.779404,
+      "lng": -73.953723
+    },
+    {
+      "id": "Q43021189",
+      "name": "AMC Loews Paramus Route 4 Tenplex",
+      "lat": 40.91492,
+      "lng": -74.050559
+    },
+    {
+      "id": "Q43022418",
+      "name": "AMC Loews Plaza 8",
+      "lat": 40.789522,
+      "lng": -74.044457
+    },
+    {
+      "id": "Q45102389",
+      "name": "AMC Magic Johnson Harlem 9",
+      "lat": 40.809686,
+      "lng": -73.951782
+    },
+    {
+      "id": "Q43019094",
+      "name": "AMC Newport Centre 11",
+      "lat": 40.726944,
+      "lng": -74.038333
+    },
+    {
+      "id": "Q43022101",
+      "name": "AMC Starplex Ridgefield Park 12",
+      "lat": 40.849298,
+      "lng": -74.013
+    },
+    {
+      "id": "Q43023599",
+      "name": "AMC Wayne 14",
+      "lat": 40.888447,
+      "lng": -74.251377
+    },
+    {
+      "id": "Q45107273",
+      "name": "American Movies",
+      "lat": 40.722047,
+      "lng": -73.981668
+    },
+    {
+      "id": "Q4744541",
+      "name": "American Music Hall",
+      "lat": 40.756779,
+      "lng": -73.989429
+    },
+    {
+      "id": "Q43019644",
+      "name": "American Theater",
+      "lat": 40.873955,
+      "lng": -74.08735
+    },
+    {
+      "id": "Q45032975",
+      "name": "American Theatre",
+      "lat": 40.641021,
+      "lng": -73.904561
+    },
+    {
+      "id": "Q43017471",
+      "name": "Ampere Theatre",
+      "lat": 40.765649,
+      "lng": -74.195569
+    },
+    {
+      "id": "Q45034293",
+      "name": "Amphion Theatre",
+      "lat": 40.708551,
+      "lng": -73.964201
+    },
+    {
+      "id": "Q45032055",
+      "name": "Amusu Theatre",
+      "lat": 40.687197,
+      "lng": -73.942494
+    },
+    {
+      "id": "Q45103544",
+      "name": "Anco Theatre",
+      "lat": 40.756643,
+      "lng": -73.988446
+    },
+    {
+      "id": "Q45107286",
+      "name": "Anderson Theatre",
+      "lat": 40.725865,
+      "lng": -73.989274
+    },
+    {
+      "id": "Q45103559",
+      "name": "Angelika 57",
+      "lat": 40.766104,
+      "lng": -73.981328
+    },
+    {
+      "id": "Q45104731",
+      "name": "Angelika Film Center",
+      "lat": 40.725844,
+      "lng": -73.996975
+    },
+    {
+      "id": "Q45109244",
+      "name": "Annex Theatre",
+      "lat": 40.769455,
+      "lng": -73.956098
+    },
+    {
+      "id": "Q572548",
+      "name": "Anthology Film Archives",
+      "lat": 40.7247,
+      "lng": -73.9901
+    },
+    {
+      "id": "Q43015507",
+      "name": "Anthony Wayne Drive-In",
+      "lat": 40.888447,
+      "lng": -74.251377
+    },
+    {
+      "id": "Q45036296",
+      "name": "Antin Place Cinema 14",
+      "lat": 40.851746,
+      "lng": -73.864506
+    },
+    {
+      "id": "Q619124",
+      "name": "Apollo Theater",
+      "lat": 40.809932,
+      "lng": -73.950113
+    },
+    {
+      "id": "Q43019011",
+      "name": "Apollo Theatre",
+      "lat": 40.707312,
+      "lng": -74.082753
+    },
+    {
+      "id": "Q45102027",
+      "name": "Arch Theatre",
+      "lat": 40.742137,
+      "lng": -73.980722
+    },
+    {
+      "id": "Q45018842",
+      "name": "Arena Theatre",
+      "lat": 40.768852,
+      "lng": -73.91093
+    },
+    {
+      "id": "Q43037841",
+      "name": "Argo Theater",
+      "lat": 40.708252,
+      "lng": -73.7104
+    },
+    {
+      "id": "Q45020171",
+      "name": "Arion Theatre",
+      "lat": 40.72188,
+      "lng": -73.904431
+    },
+    {
+      "id": "Q45103583",
+      "name": "Arrow Theatre",
+      "lat": 40.758999,
+      "lng": -73.968674
+    },
+    {
+      "id": "Q45109257",
+      "name": "Art East Cinema",
+      "lat": 40.760652,
+      "lng": -73.961425
+    },
+    {
+      "id": "Q45107727",
+      "name": "Art Greenwich Twin",
+      "lat": 40.737579,
+      "lng": -74.001812
+    },
+    {
+      "id": "Q45034183",
+      "name": "Art Theater",
+      "lat": 40.641403,
+      "lng": -74.00692
+    },
+    {
+      "id": "Q45032067",
+      "name": "Art Theatre",
+      "lat": 40.680612,
+      "lng": -73.946299
+    },
+    {
+      "id": "Q45018777",
+      "name": "Arverne Pier Theatre",
+      "lat": 40.589619,
+      "lng": -73.786266
+    },
+    {
+      "id": "Q45018827",
+      "name": "Arverne Theatre",
+      "lat": 40.589947,
+      "lng": -73.798119
+    },
+    {
+      "id": "Q43020281",
+      "name": "Ascher's Halsey Theatre",
+      "lat": 40.73558,
+      "lng": -74.173716
+    },
+    {
+      "id": "Q45036146",
+      "name": "Ascot Theatre",
+      "lat": 40.857948,
+      "lng": -73.899878
+    },
+    {
+      "id": "Q45034300",
+      "name": "Aster Theater",
+      "lat": 40.708888,
+      "lng": -73.959855
+    },
+    {
+      "id": "Q43020855",
+      "name": "Astor Theatre",
+      "lat": 40.797704,
+      "lng": -74.002667
+    },
+    {
+      "id": "Q45018856",
+      "name": "Astoria Theatre",
+      "lat": 40.764069,
+      "lng": -73.914995
+    },
+    {
+      "id": "Q45033877",
+      "name": "Atlantic Theater",
+      "lat": 40.681909,
+      "lng": -73.97586
+    },
+    {
+      "id": "Q45032580",
+      "name": "Atlantic Theatre",
+      "lat": 40.676133,
+      "lng": -73.9082
+    },
+    {
+      "id": "Q45019782",
+      "name": "Atlas Park Stadium 8",
+      "lat": 40.709431,
+      "lng": -73.869043
+    },
+    {
+      "id": "Q45105051",
+      "name": "Atlas Theatre",
+      "lat": 40.790517,
+      "lng": -73.945554
+    },
+    {
+      "id": "Q43038853",
+      "name": "Atrium Cinemas",
+      "lat": 40.55945,
+      "lng": -74.1642
+    },
+    {
+      "id": "Q45104855",
+      "name": "Audubon Theatre",
+      "lat": 40.839493,
+      "lng": -73.940763
+    },
+    {
+      "id": "Q4827605",
+      "name": "Avalon Theatre",
+      "lat": 40.61,
+      "lng": -73.9557
+    },
+    {
+      "id": "Q45107300",
+      "name": "Avenue A Theater",
+      "lat": 40.723944,
+      "lng": -73.985227
+    },
+    {
+      "id": "Q45033347",
+      "name": "Avenue D Theater",
+      "lat": 40.641748,
+      "lng": -73.935654
+    },
+    {
+      "id": "Q45103597",
+      "name": "Avenue Playhouse",
+      "lat": 40.757773,
+      "lng": -73.982016
+    },
+    {
+      "id": "Q45034120",
+      "name": "Avenue U Theater",
+      "lat": 40.59871,
+      "lng": -73.955211
+    },
+    {
+      "id": "Q45103605",
+      "name": "Avon 42nd Street Theatre",
+      "lat": 40.754919,
+      "lng": -73.984234
+    },
+    {
+      "id": "Q45033883",
+      "name": "Avon 9th Street Theatre",
+      "lat": 40.66962,
+      "lng": -73.986858
+    },
+    {
+      "id": "Q43020569",
+      "name": "Avon Theatre",
+      "lat": 40.721167,
+      "lng": -74.198773
+    },
+    {
+      "id": "Q45105063",
+      "name": "Azteca Theatre",
+      "lat": 40.791366,
+      "lng": -73.951553
+    },
+    {
+      "id": "Q45036082",
+      "name": "Bainbridge Theatre",
+      "lat": 40.873282,
+      "lng": -73.879083
+    },
+    {
+      "id": "Q45033553",
+      "name": "BAM Harvey Theater",
+      "lat": 40.68828,
+      "lng": -73.979001
+    },
+    {
+      "id": "Q45031924",
+      "name": "BAM Rose Cinemas",
+      "lat": 40.68664,
+      "lng": -73.97751
+    },
+    {
+      "id": "Q45032071",
+      "name": "Banco Theatre",
+      "lat": 40.680304,
+      "lng": -73.948847
+    },
+    {
+      "id": "Q45036822",
+      "name": "Barnes Theatre",
+      "lat": 40.865323,
+      "lng": -73.865774
+    },
+    {
+      "id": "Q45102039",
+      "name": "Bay Cinema",
+      "lat": 40.742973,
+      "lng": -73.977009
+    },
+    {
+      "id": "Q45032010",
+      "name": "Bay Ridge Theatre",
+      "lat": 40.633724,
+      "lng": -74.026893
+    },
+    {
+      "id": "Q45019047",
+      "name": "Bayside Theatre",
+      "lat": 40.76562,
+      "lng": -73.771566
+    },
+    {
+      "id": "Q45036430",
+      "name": "Beach Theatre",
+      "lat": 40.817052,
+      "lng": -73.862504
+    },
+    {
+      "id": "Q45020126",
+      "name": "Beacon Theater",
+      "lat": 40.756874,
+      "lng": -73.944101
+    },
+    {
+      "id": "Q264186",
+      "name": "Beacon Theatre",
+      "lat": 40.7805,
+      "lng": -73.98108
+    },
+    {
+      "id": "Q45036089",
+      "name": "Bedford Theatre",
+      "lat": 40.871549,
+      "lng": -73.876532
+    },
+    {
+      "id": "Q45109270",
+      "name": "Beekman Theatre",
+      "lat": 40.764965,
+      "lng": -73.961152
+    },
+    {
+      "id": "Q43065568",
+      "name": "Belair Twin Theatre",
+      "lat": 40.667476,
+      "lng": -73.704781
+    },
+    {
+      "id": "Q45034006",
+      "name": "Bell Cinema",
+      "lat": 40.672495,
+      "lng": -73.962726
+    },
+    {
+      "id": "Q45020209",
+      "name": "Bellaire Theatre",
+      "lat": 40.714443,
+      "lng": -73.752972
+    },
+    {
+      "id": "Q45020808",
+      "name": "Belle Harbor Twin",
+      "lat": 40.577948,
+      "lng": -73.836332
+    },
+    {
+      "id": "Q45036324",
+      "name": "Belle Paree Theatre",
+      "lat": 40.816055,
+      "lng": -73.917625
+    },
+    {
+      "id": "Q43038127",
+      "name": "Bellerose Theater",
+      "lat": 40.724491,
+      "lng": -73.72269
+    },
+    {
+      "id": "Q43020289",
+      "name": "Bellevue Theatre",
+      "lat": 40.797404,
+      "lng": -74.182904
+    },
+    {
+      "id": "Q45103621",
+      "name": "Belmont Theatre",
+      "lat": 40.758985,
+      "lng": -73.982119
+    },
+    {
+      "id": "Q45019768",
+      "name": "Belvedere Theatre",
+      "lat": 40.70246,
+      "lng": -73.874208
+    },
+    {
+      "id": "Q45036461",
+      "name": "Benenson Theatre",
+      "lat": 40.838241,
+      "lng": -73.902672
+    },
+    {
+      "id": "Q45032342",
+      "name": "Benson Twins",
+      "lat": 40.604555,
+      "lng": -73.997901
+    },
+    {
+      "id": "Q43019020",
+      "name": "Bergen Airdome",
+      "lat": 40.714073,
+      "lng": -74.080756
+    },
+    {
+      "id": "Q18357599",
+      "name": "Bergen Performing Arts Center",
+      "lat": 40.8953,
+      "lng": -73.9749
+    },
+    {
+      "id": "Q43020262",
+      "name": "Bergen Theatre",
+      "lat": 40.733683,
+      "lng": -74.195205
+    },
+    {
+      "id": "Q45034189",
+      "name": "Berkshire Theatre",
+      "lat": 40.635693,
+      "lng": -74.009321
+    },
+    {
+      "id": "Q45032425",
+      "name": "Beverley Theatre",
+      "lat": 40.642629,
+      "lng": -73.969824
+    },
+    {
+      "id": "Q45032430",
+      "name": "Beverly Theater",
+      "lat": 40.643059,
+      "lng": -73.979106
+    },
+    {
+      "id": "Q45103635",
+      "name": "Beverly Theatre",
+      "lat": 40.75602,
+      "lng": -73.970598
+    },
+    {
+      "id": "Q45103647",
+      "name": "Big Cinemas Manhattan",
+      "lat": 40.760952,
+      "lng": -73.964932
+    },
+    {
+      "id": "Q45103663",
+      "name": "Big Show",
+      "lat": 40.761131,
+      "lng": -73.966886
+    },
+    {
+      "id": "Q45103674",
+      "name": "Big Top Theatre",
+      "lat": 40.760461,
+      "lng": -73.984245
+    },
+    {
+      "id": "Q45107314",
+      "name": "Bijou Cinema",
+      "lat": 40.732508,
+      "lng": -73.988155
+    },
+    {
+      "id": "Q43019071",
+      "name": "Bijou Dream Theatre",
+      "lat": 40.721316,
+      "lng": -74.045052
+    },
+    {
+      "id": "Q45103687",
+      "name": "Bijou Theatre",
+      "lat": 40.747245,
+      "lng": -73.988577
+    },
+    {
+      "id": "Q43041713",
+      "name": "Biltmore Theater",
+      "lat": 40.908952,
+      "lng": -73.837111
+    },
+    {
+      "id": "Q45033366",
+      "name": "Biltmore Theatre",
+      "lat": 40.662901,
+      "lng": -73.890078
+    },
+    {
+      "id": "Q45109855",
+      "name": "Bim's Endicott Theatre",
+      "lat": 40.789046,
+      "lng": -73.972202
+    },
+    {
+      "id": "Q45036468",
+      "name": "Blenheim Theatre",
+      "lat": 40.833358,
+      "lng": -73.907026
+    },
+    {
+      "id": "Q45020959",
+      "name": "Bliss Theatre",
+      "lat": 40.741814,
+      "lng": -73.920156
+    },
+    {
+      "id": "Q45108207",
+      "name": "Blue Balcony Cinema",
+      "lat": 40.721243,
+      "lng": -73.981718
+    },
+    {
+      "id": "Q43345152",
+      "name": "Boardwalk Theater",
+      "lat": 40.588163,
+      "lng": -73.791212
+    },
+    {
+      "id": "Q43041533",
+      "name": "Boardwalk Theatre",
+      "lat": 40.573056,
+      "lng": -74.094444
+    },
+    {
+      "id": "Q45032077",
+      "name": "Bobby Theater",
+      "lat": 40.693053,
+      "lng": -73.928358
+    },
+    {
+      "id": "Q45019716",
+      "name": "Bombay Theatre",
+      "lat": 40.732915,
+      "lng": -73.794399
+    },
+    {
+      "id": "Q43019086",
+      "name": "Bon Ton Theatre",
+      "lat": 40.719598,
+      "lng": -74.042425
+    },
+    {
+      "id": "Q45032438",
+      "name": "Boro Park Theatre",
+      "lat": 40.634828,
+      "lng": -73.995492
+    },
+    {
+      "id": "Q45036476",
+      "name": "Boro Theatre",
+      "lat": 40.821081,
+      "lng": -73.915459
+    },
+    {
+      "id": "Q45036484",
+      "name": "Boston Road Theatre",
+      "lat": 40.834045,
+      "lng": -73.894662
+    },
+    {
+      "id": "Q45019856",
+      "name": "Boulevard Theatre",
+      "lat": 40.755523,
+      "lng": -73.884588
+    },
+    {
+      "id": "Q43023450",
+      "name": "Bow-Tie Bellevue Cinema 4",
+      "lat": 40.841229,
+      "lng": -74.208926
+    },
+    {
+      "id": "Q43019941",
+      "name": "Bow-Tie Clairidge Cinemas",
+      "lat": 40.814385,
+      "lng": -74.218215
+    },
+    {
+      "id": "Q43018658",
+      "name": "Bow-Tie Hoboken Cinemas",
+      "lat": 40.754143,
+      "lng": -74.032227
+    },
+    {
+      "id": "Q43038699",
+      "name": "Bow-Tie Squire Cinemas",
+      "lat": 40.789779,
+      "lng": -73.730058
+    },
+    {
+      "id": "Q45019594",
+      "name": "Brandon Cinemas 2",
+      "lat": 40.720509,
+      "lng": -73.846392
+    },
+    {
+      "id": "Q45104692",
+      "name": "Brandt's Murray Hill Theatre",
+      "lat": 40.752016,
+      "lng": -73.977486
+    },
+    {
+      "id": "Q43020299",
+      "name": "Branford Theatre",
+      "lat": 40.734981,
+      "lng": -74.173355
+    },
+    {
+      "id": "Q45104868",
+      "name": "Bridge Theatre",
+      "lat": 40.845991,
+      "lng": -73.936151
+    },
+    {
+      "id": "Q45032517",
+      "name": "Brighton Theatre",
+      "lat": 40.575813,
+      "lng": -73.968276
+    },
+    {
+      "id": "Q45018871",
+      "name": "Broadway Theatre",
+      "lat": 40.761665,
+      "lng": -73.924668
+    },
+    {
+      "id": "Q45036329",
+      "name": "Bronx Aerodome",
+      "lat": 40.815072,
+      "lng": -73.91948
+    },
+    {
+      "id": "Q45036336",
+      "name": "Bronx Theatre",
+      "lat": 40.815866,
+      "lng": -73.916717
+    },
+    {
+      "id": "Q45032588",
+      "name": "Brook Theatre",
+      "lat": 40.621187,
+      "lng": -73.936301
+    },
+    {
+      "id": "Q45032543",
+      "name": "Brooklyn Heights Cinema I & II",
+      "lat": 40.698962,
+      "lng": -73.9924
+    },
+    {
+      "id": "Q7135369",
+      "name": "Brooklyn Paramount Theater",
+      "lat": 40.6903,
+      "lng": -73.9809
+    },
+    {
+      "id": "Q45103704",
+      "name": "Bryant Theatre",
+      "lat": 40.755404,
+      "lng": -73.98549
+    },
+    {
+      "id": "Q45036829",
+      "name": "Burke Theatre",
+      "lat": 40.871791,
+      "lng": -73.866966
+    },
+    {
+      "id": "Q45036672",
+      "name": "Burnside Theatre",
+      "lat": 40.853699,
+      "lng": -73.905881
+    },
+    {
+      "id": "Q45032726",
+      "name": "Bushwick-Hancock Airdrome",
+      "lat": 40.688042,
+      "lng": -73.915057
+    },
+    {
+      "id": "Q45019122",
+      "name": "Cambria Theater",
+      "lat": 40.695445,
+      "lng": -73.74064
+    },
+    {
+      "id": "Q43022595",
+      "name": "Cameo Theatre",
+      "lat": 40.745646,
+      "lng": -74.256988
+    },
+    {
+      "id": "Q43020320",
+      "name": "Cameo Twin Cinema XXX",
+      "lat": 40.745657,
+      "lng": -74.170477
+    },
+    {
+      "id": "Q45032735",
+      "name": "Cameraphone",
+      "lat": 40.695811,
+      "lng": -73.932839
+    },
+    {
+      "id": "Q45104793",
+      "name": "Canal Park Playhouse",
+      "lat": 40.724848,
+      "lng": -74.009852
+    },
+    {
+      "id": "Q45032981",
+      "name": "Canarsie Theater",
+      "lat": 40.636954,
+      "lng": -73.897937
+    },
+    {
+      "id": "Q43016994",
+      "name": "Canda Hall",
+      "lat": 40.573724,
+      "lng": -74.22114
+    },
+    {
+      "id": "Q43021288",
+      "name": "Capitol Theater",
+      "lat": 40.906702,
+      "lng": -74.158068
+    },
+    {
+      "id": "Q43017769",
+      "name": "Capitol Theatre",
+      "lat": 40.662065,
+      "lng": -74.215069
+    },
+    {
+      "id": "Q45103723",
+      "name": "Capri Cinema",
+      "lat": 40.759467,
+      "lng": -73.987992
+    },
+    {
+      "id": "Q45109869",
+      "name": "Caribe Theatre",
+      "lat": 40.797291,
+      "lng": -73.964321
+    },
+    {
+      "id": "Q45019936",
+      "name": "Carlton Theatre",
+      "lat": 40.707862,
+      "lng": -73.785702
+    },
+    {
+      "id": "Q45102145",
+      "name": "Carmine Theatre",
+      "lat": 40.730218,
+      "lng": -74.002863
+    },
+    {
+      "id": "Q45038834",
+      "name": "Carnegie Hall Cinema",
+      "lat": 40.765016,
+      "lng": -73.9799
+    },
+    {
+      "id": "Q45033127",
+      "name": "Carroll Theater",
+      "lat": 40.665204,
+      "lng": -73.93144
+    },
+    {
+      "id": "Q43017005",
+      "name": "Carteret Twin Cinema",
+      "lat": 40.586941,
+      "lng": -74.226091
+    },
+    {
+      "id": "Q45032091",
+      "name": "Carver Theatre",
+      "lat": 40.678835,
+      "lng": -73.918878
+    },
+    {
+      "id": "Q45020370",
+      "name": "Casino Theatre",
+      "lat": 40.685276,
+      "lng": -73.828786
+    },
+    {
+      "id": "Q43018910",
+      "name": "Castle Theater",
+      "lat": 40.726559,
+      "lng": -74.22882
+    },
+    {
+      "id": "Q43063715",
+      "name": "Castleton Theater",
+      "lat": 40.63432,
+      "lng": -74.119052
+    },
+    {
+      "id": "Q45020960",
+      "name": "Center Cinemas",
+      "lat": 40.743827,
+      "lng": -73.921863
+    },
+    {
+      "id": "Q45034197",
+      "name": "Center Theater",
+      "lat": 40.64037,
+      "lng": -74.011856
+    },
+    {
+      "id": "Q43020514",
+      "name": "Central Theater",
+      "lat": 40.748993,
+      "lng": -74.194134
+    },
+    {
+      "id": "Q43036334",
+      "name": "Central Theatre",
+      "lat": 40.620519,
+      "lng": -73.72535
+    },
+    {
+      "id": "Q45032101",
+      "name": "Century Theatre",
+      "lat": 40.688512,
+      "lng": -73.922026
+    },
+    {
+      "id": "Q43062817",
+      "name": "Century's Alan Theatre",
+      "lat": 40.738933,
+      "lng": -73.700842
+    },
+    {
+      "id": "Q45033477",
+      "name": "Century's College Theater",
+      "lat": 40.632044,
+      "lng": -73.947327
+    },
+    {
+      "id": "Q43038136",
+      "name": "Century's Floral Theatre",
+      "lat": 40.726308,
+      "lng": -73.715411
+    },
+    {
+      "id": "Q43062867",
+      "name": "Century's Mall Theatre",
+      "lat": 40.906438,
+      "lng": -73.785292
+    },
+    {
+      "id": "Q43018920",
+      "name": "Chancellor Theater",
+      "lat": 40.716257,
+      "lng": -74.239761
+    },
+    {
+      "id": "Q45107346",
+      "name": "Charles Theatre",
+      "lat": 40.728068,
+      "lng": -73.979004
+    },
+    {
+      "id": "Q45020359",
+      "name": "Chelita Movie House",
+      "lat": 40.680483,
+      "lng": -73.860032
+    },
+    {
+      "id": "Q45101433",
+      "name": "Chelsea Theater",
+      "lat": 40.74691,
+      "lng": -73.99703
+    },
+    {
+      "id": "Q4741073",
+      "name": "Chicago The Musical Ambassador Theater",
+      "lat": 40.761111,
+      "lng": -73.985
+    },
+    {
+      "id": "Q45033702",
+      "name": "Chopin Theatre",
+      "lat": 40.730484,
+      "lng": -73.953955
+    },
+    {
+      "id": "Q45033218",
+      "name": "Cinart Theatre",
+      "lat": 40.690882,
+      "lng": -73.991816
+    },
+    {
+      "id": "Q45103738",
+      "name": "Cine 42",
+      "lat": 40.756128,
+      "lng": -73.987892
+    },
+    {
+      "id": "Q45107360",
+      "name": "Cinema 14",
+      "lat": 40.733391,
+      "lng": -73.987245
+    },
+    {
+      "id": "Q43017045",
+      "name": "Cinema 23 Fiveplex",
+      "lat": 40.882098,
+      "lng": -74.243271
+    },
+    {
+      "id": "Q45103750",
+      "name": "Cinema 3",
+      "lat": 40.764574,
+      "lng": -73.973677
+    },
+    {
+      "id": "Q43022909",
+      "name": "Cinema 46",
+      "lat": 40.891548,
+      "lng": -74.22071
+    },
+    {
+      "id": "Q45103762",
+      "name": "Cinema 49",
+      "lat": 40.761456,
+      "lng": -73.986041
+    },
+    {
+      "id": "Q43314198",
+      "name": "Cinema Kings Highway",
+      "lat": 40.606535,
+      "lng": -73.965225
+    },
+    {
+      "id": "Q45109898",
+      "name": "Cinema Studio",
+      "lat": 40.772898,
+      "lng": -73.982338
+    },
+    {
+      "id": "Q43023306",
+      "name": "Cinema Theater",
+      "lat": 40.779563,
+      "lng": -74.02285
+    },
+    {
+      "id": "Q45102157",
+      "name": "Cinema Village",
+      "lat": 40.734096,
+      "lng": -73.993354
+    },
+    {
+      "id": "Q45033709",
+      "name": "Cinema Warsaw",
+      "lat": 40.722531,
+      "lng": -73.948516
+    },
+    {
+      "id": "Q45019610",
+      "name": "Cinemart Cinemas",
+      "lat": 40.709823,
+      "lng": -73.846758
+    },
+    {
+      "id": "Q43020865",
+      "name": "Cineplaza 13",
+      "lat": 40.805373,
+      "lng": -74.024137
+    },
+    {
+      "id": "Q43021195",
+      "name": "Cineplex Odeon Route 17 Triplex",
+      "lat": 40.917,
+      "lng": -74.072821
+    },
+    {
+      "id": "Q45101444",
+      "name": "Cinépolis Chelsea",
+      "lat": 40.744947,
+      "lng": -73.997971
+    },
+    {
+      "id": "Q45039290",
+      "name": "Circle in the Square Downtown",
+      "lat": 40.728748,
+      "lng": -73.999832
+    },
+    {
+      "id": "Q45036751",
+      "name": "Circle Theatre",
+      "lat": 40.8324,
+      "lng": -73.860458
+    },
+    {
+      "id": "Q45103775",
+      "name": "Circus Cinema",
+      "lat": 40.760461,
+      "lng": -73.984245
+    },
+    {
+      "id": "Q45036133",
+      "name": "City Cinema",
+      "lat": 40.869593,
+      "lng": -73.827705
+    },
+    {
+      "id": "Q45109296",
+      "name": "City Cinemas Cinema 1, 2, and 3",
+      "lat": 40.761805,
+      "lng": -73.966227
+    },
+    {
+      "id": "Q45105302",
+      "name": "City Hall Theatre",
+      "lat": 40.7115,
+      "lng": -74.007292
+    },
+    {
+      "id": "Q45036103",
+      "name": "City Island Theater",
+      "lat": 40.849209,
+      "lng": -73.787637
+    },
+    {
+      "id": "Q45033038",
+      "name": "City Line Cinema",
+      "lat": 40.678483,
+      "lng": -73.868193
+    },
+    {
+      "id": "Q43018672",
+      "name": "City Theatre",
+      "lat": 40.739248,
+      "lng": -74.041102
+    },
+    {
+      "id": "Q78543331",
+      "name": "Cityplex 12",
+      "lat": 40.73341,
+      "lng": -74.19617
+    },
+    {
+      "id": "Q45102284",
+      "name": "Claremont Theatre",
+      "lat": 40.82021,
+      "lng": -73.95487
+    },
+    {
+      "id": "Q45033451",
+      "name": "Clarendon Theatre",
+      "lat": 40.643394,
+      "lng": -73.957786
+    },
+    {
+      "id": "Q45033777",
+      "name": "Claridge Theater",
+      "lat": 40.609049,
+      "lng": -73.971064
+    },
+    {
+      "id": "Q45032108",
+      "name": "Classic Theatre",
+      "lat": 40.692864,
+      "lng": -73.946131
+    },
+    {
+      "id": "Q45109310",
+      "name": "Clearview's First & 62nd",
+      "lat": 40.761366,
+      "lng": -73.960326
+    },
+    {
+      "id": "Q45033372",
+      "name": "Cleveland Theatre",
+      "lat": 40.673607,
+      "lng": -73.884179
+    },
+    {
+      "id": "Q45104777",
+      "name": "Clifton Theatre",
+      "lat": 40.757338,
+      "lng": -73.966179
+    },
+    {
+      "id": "Q43020483",
+      "name": "Clinton Square Theatre",
+      "lat": 40.723306,
+      "lng": -74.186947
+    },
+    {
+      "id": "Q45034078",
+      "name": "Clinton Theatre",
+      "lat": 40.674838,
+      "lng": -74.001373
+    },
+    {
+      "id": "Q45033050",
+      "name": "Cobble Hill Cinemas",
+      "lat": 40.684967,
+      "lng": -73.994498
+    },
+    {
+      "id": "Q45034205",
+      "name": "Coliseum Theatre",
+      "lat": 40.645017,
+      "lng": -74.013826
+    },
+    {
+      "id": "Q45019479",
+      "name": "College Point Multiplex",
+      "lat": 40.771586,
+      "lng": -73.836443
+    },
+    {
+      "id": "Q45019136",
+      "name": "College Theater",
+      "lat": 40.78391,
+      "lng": -73.845902
+    },
+    {
+      "id": "Q45109919",
+      "name": "Colon Theatre",
+      "lat": 40.785367,
+      "lng": -73.973275
+    },
+    {
+      "id": "Q43020496",
+      "name": "Colonial Theatre",
+      "lat": 40.756177,
+      "lng": -74.17321
+    },
+    {
+      "id": "Q45032113",
+      "name": "Colonnade Theatre",
+      "lat": 40.680062,
+      "lng": -73.949774
+    },
+    {
+      "id": "Q45032352",
+      "name": "Colony Theater",
+      "lat": 40.619174,
+      "lng": -73.990605
+    },
+    {
+      "id": "Q43023329",
+      "name": "Colony Theatre",
+      "lat": 40.779529,
+      "lng": -74.017161
+    },
+    {
+      "id": "Q45109933",
+      "name": "Columbia Cinema",
+      "lat": 40.799116,
+      "lng": -73.968038
+    },
+    {
+      "id": "Q45032548",
+      "name": "Columbia Theatre",
+      "lat": 40.696167,
+      "lng": -73.990048
+    },
+    {
+      "id": "Q45103790",
+      "name": "Columbus Theatre",
+      "lat": 40.76718,
+      "lng": -73.982565
+    },
+    {
+      "id": "Q45032118",
+      "name": "Comet Theatre",
+      "lat": 40.688552,
+      "lng": -73.930131
+    },
+    {
+      "id": "Q45034305",
+      "name": "Commodore Cinemas",
+      "lat": 40.708152,
+      "lng": -73.956266
+    },
+    {
+      "id": "Q45020222",
+      "name": "Community Twin Theatre",
+      "lat": 40.722772,
+      "lng": -73.729267
+    },
+    {
+      "id": "Q45036123",
+      "name": "Concourse Plaza Multiplex Cinemas",
+      "lat": 40.825556,
+      "lng": -73.920358
+    },
+    {
+      "id": "Q45036152",
+      "name": "Concourse Theatre",
+      "lat": 40.862441,
+      "lng": -73.896496
+    },
+    {
+      "id": "Q45033065",
+      "name": "Coney Island USA",
+      "lat": 40.575329,
+      "lng": -73.979783
+    },
+    {
+      "id": "Q43020767",
+      "name": "Congress Theatre",
+      "lat": 40.739123,
+      "lng": -74.19439
+    },
+    {
+      "id": "Q45019622",
+      "name": "Continental 3",
+      "lat": 40.723041,
+      "lng": -73.843688
+    },
+    {
+      "id": "Q45019197",
+      "name": "Corona Theatre",
+      "lat": 40.74962,
+      "lng": -73.869675
+    },
+    {
+      "id": "Q45109337",
+      "name": "Coronet 1 & 2",
+      "lat": 40.761678,
+      "lng": -73.966467
+    },
+    {
+      "id": "Q45033457",
+      "name": "Cortelyou Photoplay Theatre",
+      "lat": 40.641384,
+      "lng": -73.963771
+    },
+    {
+      "id": "Q45101785",
+      "name": "Cosmo Theatre",
+      "lat": 40.797842,
+      "lng": -73.940902
+    },
+    {
+      "id": "Q45104880",
+      "name": "Costello Theatre",
+      "lat": 40.835984,
+      "lng": -73.944897
+    },
+    {
+      "id": "Q43020710",
+      "name": "Court Theater",
+      "lat": 40.73799,
+      "lng": -74.179623
+    },
+    {
+      "id": "Q45033011",
+      "name": "Court Theatre",
+      "lat": 40.679072,
+      "lng": -73.995479
+    },
+    {
+      "id": "Q45032762",
+      "name": "Covert Theatre",
+      "lat": 40.684744,
+      "lng": -73.913987
+    },
+    {
+      "id": "Q45032767",
+      "name": "Cozy Corner Theatre",
+      "lat": 40.700166,
+      "lng": -73.924261
+    },
+    {
+      "id": "Q45036783",
+      "name": "Craft Theatre",
+      "lat": 40.898991,
+      "lng": -73.853584
+    },
+    {
+      "id": "Q45033182",
+      "name": "Crescent Motion Picture Theatre",
+      "lat": 40.683907,
+      "lng": -73.870564
+    },
+    {
+      "id": "Q45018898",
+      "name": "Crescent Theatre",
+      "lat": 40.771103,
+      "lng": -73.92204
+    },
+    {
+      "id": "Q45036215",
+      "name": "Crest Theatre",
+      "lat": 40.83642,
+      "lng": -73.927433
+    },
+    {
+      "id": "Q45033560",
+      "name": "Criterion Theatre",
+      "lat": 40.682465,
+      "lng": -73.962029
+    },
+    {
+      "id": "Q45103801",
+      "name": "Criterion Theatre, 1514 Broadway",
+      "lat": 40.757306,
+      "lng": -73.98586
+    },
+    {
+      "id": "Q45103399",
+      "name": "Criterion Theatre, Broadway & 44th",
+      "lat": 40.757286,
+      "lng": -73.985876
+    },
+    {
+      "id": "Q45020961",
+      "name": "Cross Island Cinemas",
+      "lat": 40.78763,
+      "lng": -73.814204
+    },
+    {
+      "id": "Q45036682",
+      "name": "Crotona Theatre",
+      "lat": 40.847553,
+      "lng": -73.898535
+    },
+    {
+      "id": "Q45103814",
+      "name": "Crown Gotham Theatre",
+      "lat": 40.760892,
+      "lng": -73.967058
+    },
+    {
+      "id": "Q45102415",
+      "name": "Crown Theater",
+      "lat": 40.802516,
+      "lng": -73.950451
+    },
+    {
+      "id": "Q45102178",
+      "name": "Crystal Hall",
+      "lat": 40.735,
+      "lng": -73.991244
+    },
+    {
+      "id": "Q45033715",
+      "name": "Crystal Palace Theatre",
+      "lat": 40.729848,
+      "lng": -73.956431
+    },
+    {
+      "id": "Q45032132",
+      "name": "Crystal Theatre",
+      "lat": 40.6819,
+      "lng": -73.960246
+    },
+    {
+      "id": "Q45033785",
+      "name": "Culver Theatre",
+      "lat": 40.630598,
+      "lng": -73.976708
+    },
+    {
+      "id": "Q45033564",
+      "name": "Cumberland Theatre",
+      "lat": 40.685286,
+      "lng": -73.972291
+    },
+    {
+      "id": "Q45020459",
+      "name": "Cypress Air Drome",
+      "lat": 40.700144,
+      "lng": -73.90622
+    },
+    {
+      "id": "Q45036260",
+      "name": "Dale Theatre",
+      "lat": 40.878773,
+      "lng": -73.904221
+    },
+    {
+      "id": "Q45101460",
+      "name": "Daly's Theatre",
+      "lat": 40.746701,
+      "lng": -73.988486
+    },
+    {
+      "id": "Q43019141",
+      "name": "Danforth Theater",
+      "lat": 40.696874,
+      "lng": -74.091704
+    },
+    {
+      "id": "Q45039569",
+      "name": "David Cinema, 236 West 54th Street",
+      "lat": 40.764172,
+      "lng": -73.982991
+    },
+    {
+      "id": "Q45039579",
+      "name": "David Cinema, 238 West 55th Street",
+      "lat": 40.764961,
+      "lng": -73.982767
+    },
+    {
+      "id": "Q45036096",
+      "name": "David Marcus Theatre",
+      "lat": 40.881773,
+      "lng": -73.882087
+    },
+    {
+      "id": "Q43020505",
+      "name": "De Luxe Theatre",
+      "lat": 40.740692,
+      "lng": -74.202864
+    },
+    {
+      "id": "Q45031995",
+      "name": "De-Luxe Theatre",
+      "lat": 40.60147,
+      "lng": -74.001099
+    },
+    {
+      "id": "Q45032773",
+      "name": "Decatur Theater",
+      "lat": 40.684143,
+      "lng": -73.912858
+    },
+    {
+      "id": "Q45102292",
+      "name": "Delmar Theatre",
+      "lat": 40.822204,
+      "lng": -73.953156
+    },
+    {
+      "id": "Q45020975",
+      "name": "Deluxe Theater",
+      "lat": 40.745361,
+      "lng": -73.902001
+    },
+    {
+      "id": "Q45036692",
+      "name": "Devon Theatre",
+      "lat": 40.848998,
+      "lng": -73.904715
+    },
+    {
+      "id": "Q45034126",
+      "name": "Dewey Theater",
+      "lat": 40.598855,
+      "lng": -73.961384
+    },
+    {
+      "id": "Q45102192",
+      "name": "Dewey Theatre",
+      "lat": 40.733345,
+      "lng": -73.98823
+    },
+    {
+      "id": "Q43016114",
+      "name": "DeWitt Theater",
+      "lat": 40.665543,
+      "lng": -74.117168
+    },
+    {
+      "id": "Q43062872",
+      "name": "Dillon Park Theatre",
+      "lat": 40.91969,
+      "lng": -73.788969
+    },
+    {
+      "id": "Q45103826",
+      "name": "Directors Guild of America Theater",
+      "lat": 40.764862,
+      "lng": -73.978471
+    },
+    {
+      "id": "Q45019019",
+      "name": "Ditmars Theatre",
+      "lat": 40.778297,
+      "lng": -73.908112
+    },
+    {
+      "id": "Q45032446",
+      "name": "Ditmas Theater",
+      "lat": 40.635892,
+      "lng": -73.977567
+    },
+    {
+      "id": "Q45033792",
+      "name": "Ditmas Theatre",
+      "lat": 40.629521,
+      "lng": -73.97732
+    },
+    {
+      "id": "Q45107374",
+      "name": "DMac Theatre",
+      "lat": 40.726578,
+      "lng": -73.990604
+    },
+    {
+      "id": "Q45103841",
+      "name": "Doll Theater",
+      "lat": 40.759617,
+      "lng": -73.983967
+    },
+    {
+      "id": "Q45033771",
+      "name": "Dorchester Theatre",
+      "lat": 40.638953,
+      "lng": -73.968664
+    },
+    {
+      "id": "Q45102431",
+      "name": "Douglas Theatre",
+      "lat": 40.818899,
+      "lng": -73.937242
+    },
+    {
+      "id": "Q45036510",
+      "name": "Dover Theatre",
+      "lat": 40.836999,
+      "lng": -73.888499
+    },
+    {
+      "id": "Q45020343",
+      "name": "Drake Theatre",
+      "lat": 40.724675,
+      "lng": -73.869582
+    },
+    {
+      "id": "Q45034211",
+      "name": "Dreamland Theatre",
+      "lat": 40.65143,
+      "lng": -74.010221
+    },
+    {
+      "id": "Q45033691",
+      "name": "Driggs Palace",
+      "lat": 40.722953,
+      "lng": -73.946437
+    },
+    {
+      "id": "Q45103853",
+      "name": "Drury Lane Theatre",
+      "lat": 40.755872,
+      "lng": -73.99081
+    },
+    {
+      "id": "Q45102678",
+      "name": "Dyckman Theatre",
+      "lat": 40.866041,
+      "lng": -73.920168
+    },
+    {
+      "id": "Q45019880",
+      "name": "Eagle Theater",
+      "lat": 40.747222,
+      "lng": -73.892083
+    },
+    {
+      "id": "Q45105073",
+      "name": "Eagle Theatre",
+      "lat": 40.78941,
+      "lng": -73.946476
+    },
+    {
+      "id": "Q45036220",
+      "name": "Earl Theatre",
+      "lat": 40.828023,
+      "lng": -73.926632
+    },
+    {
+      "id": "Q45109349",
+      "name": "East 86th Street Cinemas",
+      "lat": 40.778336,
+      "lng": -73.953244
+    },
+    {
+      "id": "Q45107390",
+      "name": "East Side Beauty Theatre",
+      "lat": 40.730379,
+      "lng": -73.980414
+    },
+    {
+      "id": "Q45103866",
+      "name": "Eastside Cinema",
+      "lat": 40.758733,
+      "lng": -73.96779
+    },
+    {
+      "id": "Q45034309",
+      "name": "Echo Theater",
+      "lat": 40.704046,
+      "lng": -73.938609
+    },
+    {
+      "id": "Q45033896",
+      "name": "Eden Theater",
+      "lat": 40.670172,
+      "lng": -73.985449
+    },
+    {
+      "id": "Q43021299",
+      "name": "Eden Theatre",
+      "lat": 40.904811,
+      "lng": -74.146079
+    },
+    {
+      "id": "Q45019417",
+      "name": "Edgemere Theater",
+      "lat": 40.594113,
+      "lng": -73.765228
+    },
+    {
+      "id": "Q45102442",
+      "name": "Eldorado Theatre",
+      "lat": 40.807082,
+      "lng": -73.944149
+    },
+    {
+      "id": "Q45032018",
+      "name": "Electra Theater",
+      "lat": 40.631702,
+      "lng": -74.027718
+    },
+    {
+      "id": "Q45109947",
+      "name": "Elinor Bunin Munroe Film Center",
+      "lat": 40.773586,
+      "lng": -73.984004
+    },
+    {
+      "id": "Q43021309",
+      "name": "Elite Theater",
+      "lat": 40.916226,
+      "lng": -74.170143
+    },
+    {
+      "id": "Q45033827",
+      "name": "Elm Theater",
+      "lat": 40.618181,
+      "lng": -73.958507
+    },
+    {
+      "id": "Q43017778",
+      "name": "Elmora Theater",
+      "lat": 40.662266,
+      "lng": -74.233604
+    },
+    {
+      "id": "Q45019391",
+      "name": "Elmwood Theatre",
+      "lat": 40.733749,
+      "lng": -73.874152
+    },
+    {
+      "id": "Q43020620",
+      "name": "Elwood Theatre",
+      "lat": 40.755938,
+      "lng": -74.170258
+    },
+    {
+      "id": "Q45103877",
+      "name": "Elysee Theatre",
+      "lat": 40.766259,
+      "lng": -73.980286
+    },
+    {
+      "id": "Q45103893",
+      "name": "Embassy 1 Theatre",
+      "lat": 40.758577,
+      "lng": -73.984464
+    },
+    {
+      "id": "Q45109960",
+      "name": "Embassy 72nd Street Twin 1 and 2",
+      "lat": 40.779232,
+      "lng": -73.981966
+    },
+    {
+      "id": "Q43021118",
+      "name": "Embassy Theatre",
+      "lat": 40.772881,
+      "lng": -74.23142
+    },
+    {
+      "id": "Q45033190",
+      "name": "Embassy Theatrer",
+      "lat": 40.682207,
+      "lng": -73.877031
+    },
+    {
+      "id": "Q43020898",
+      "name": "Empire Cinemas Columbia Park 12",
+      "lat": 40.77552,
+      "lng": -74.036087
+    },
+    {
+      "id": "Q43063723",
+      "name": "Empire Theater",
+      "lat": 40.640287,
+      "lng": -74.133042
+    },
+    {
+      "id": "Q45032139",
+      "name": "Empire Theatre",
+      "lat": 40.690267,
+      "lng": -73.924292
+    },
+    {
+      "id": "Q45033163",
+      "name": "Empress Theater",
+      "lat": 40.664436,
+      "lng": -73.944502
+    },
+    {
+      "id": "Q45032145",
+      "name": "Empress Theatre",
+      "lat": 40.692363,
+      "lng": -73.940588
+    },
+    {
+      "id": "Q45033334",
+      "name": "Endicott Theatre",
+      "lat": 40.622832,
+      "lng": -74.00483
+    },
+    {
+      "id": "Q43017932",
+      "name": "Englewood Theater",
+      "lat": 40.892936,
+      "lng": -73.973432
+    },
+    {
+      "id": "Q45034087",
+      "name": "Erie Basin Theatre",
+      "lat": 40.679587,
+      "lng": -74.010637
+    },
+    {
+      "id": "Q45103905",
+      "name": "Eros Theatre",
+      "lat": 40.759298,
+      "lng": -73.987849
+    },
+    {
+      "id": "Q43020684",
+      "name": "Essex Theater",
+      "lat": 40.736033,
+      "lng": -74.18139
+    },
+    {
+      "id": "Q45108240",
+      "name": "Essex Theatre",
+      "lat": 40.716325,
+      "lng": -73.988488
+    },
+    {
+      "id": "Q45033379",
+      "name": "Euclid Theatre",
+      "lat": 40.675349,
+      "lng": -73.872395
+    },
+    {
+      "id": "Q43018346",
+      "name": "Eureka Theatre",
+      "lat": 40.885345,
+      "lng": -74.043567
+    },
+    {
+      "id": "Q43018691",
+      "name": "Europa Theatre",
+      "lat": 40.737728,
+      "lng": -74.031322
+    },
+    {
+      "id": "Q45020518",
+      "name": "Evergreen Theatre",
+      "lat": 40.700174,
+      "lng": -73.903264
+    },
+    {
+      "id": "Q43010940",
+      "name": "Fabian 8 Cinema",
+      "lat": 40.91501,
+      "lng": -74.17114
+    },
+    {
+      "id": "Q43018705",
+      "name": "Fabian Theatre",
+      "lat": 40.736815,
+      "lng": -74.030638
+    },
+    {
+      "id": "Q45019359",
+      "name": "Fair Theatre",
+      "lat": 40.763381,
+      "lng": -73.878699
+    },
+    {
+      "id": "Q43017953",
+      "name": "Fairview Cinema",
+      "lat": 40.819683,
+      "lng": -74.001511
+    },
+    {
+      "id": "Q45033204",
+      "name": "Family Theatre, 2831 Fulton Street",
+      "lat": 40.678438,
+      "lng": -73.890245
+    },
+    {
+      "id": "Q45033198",
+      "name": "Family Theatre, 3186 Fulton Street",
+      "lat": 40.682188,
+      "lng": -73.877293
+    },
+    {
+      "id": "Q45033491",
+      "name": "Farragut Theatre, Flatbush Avenue",
+      "lat": 40.636615,
+      "lng": -73.951457
+    },
+    {
+      "id": "Q45033497",
+      "name": "Farragut Theatre, Rodgers Avenue",
+      "lat": 40.636332,
+      "lng": -73.950612
+    },
+    {
+      "id": "Q45020903",
+      "name": "Farrell Theatre",
+      "lat": 40.676168,
+      "lng": -73.819563
+    },
+    {
+      "id": "Q5448940",
+      "name": "Film Forum",
+      "lat": 40.7284,
+      "lng": -74.0043
+    },
+    {
+      "id": "Q45037427",
+      "name": "Film Forum 1 & 2",
+      "lat": 40.723353,
+      "lng": -74.005405
+    },
+    {
+      "id": "Q88024870",
+      "name": "Film Noir Cinema",
+      "lat": 40.72729,
+      "lng": -73.95154
+    },
+    {
+      "id": "Q43017785",
+      "name": "Fine Arts Theater",
+      "lat": 40.663746,
+      "lng": -74.214727
+    },
+    {
+      "id": "Q45103920",
+      "name": "Fine Arts Theatre",
+      "lat": 40.761824,
+      "lng": -73.969195
+    },
+    {
+      "id": "Q45108254",
+      "name": "First Avenue Theater",
+      "lat": 40.723133,
+      "lng": -73.988516
+    },
+    {
+      "id": "Q45020977",
+      "name": "Fisk Theatre",
+      "lat": 40.742648,
+      "lng": -73.896241
+    },
+    {
+      "id": "Q45020857",
+      "name": "Five Towns Theatre",
+      "lat": 40.637203,
+      "lng": -73.740341
+    },
+    {
+      "id": "Q45033902",
+      "name": "Flatbush Pavilion",
+      "lat": 40.677097,
+      "lng": -73.972425
+    },
+    {
+      "id": "Q45034048",
+      "name": "Flatbush Theatre",
+      "lat": 40.650422,
+      "lng": -73.958443
+    },
+    {
+      "id": "Q45036523",
+      "name": "Fleetwood Theatre",
+      "lat": 40.828922,
+      "lng": -73.916521
+    },
+    {
+      "id": "Q45033227",
+      "name": "Flora Theatre",
+      "lat": 40.689964,
+      "lng": -73.992823
+    },
+    {
+      "id": "Q45034323",
+      "name": "Folly Theatre",
+      "lat": 40.701623,
+      "lng": -73.942542
+    },
+    {
+      "id": "Q45019635",
+      "name": "Forest Hills Theatre",
+      "lat": 40.719298,
+      "lng": -73.845304
+    },
+    {
+      "id": "Q45108269",
+      "name": "Forsyth Theatre",
+      "lat": 40.718848,
+      "lng": -73.992593
+    },
+    {
+      "id": "Q45033664",
+      "name": "Fort Hamilton Army Base Theater",
+      "lat": 40.700165,
+      "lng": -73.953856
+    },
+    {
+      "id": "Q45101979",
+      "name": "Fort Jay Theatre",
+      "lat": 40.691377,
+      "lng": -74.015746
+    },
+    {
+      "id": "Q43018046",
+      "name": "Fort Lee Theater",
+      "lat": 40.851819,
+      "lng": -73.972331
+    },
+    {
+      "id": "Q45033341",
+      "name": "Fortway Theatre",
+      "lat": 40.629261,
+      "lng": -74.011314
+    },
+    {
+      "id": "Q45034165",
+      "name": "Fourth Avenue Showhouse",
+      "lat": 40.662689,
+      "lng": -73.995935
+    },
+    {
+      "id": "Q45019661",
+      "name": "Fox Kew Gardens Theatre",
+      "lat": 40.715,
+      "lng": -73.831556
+    },
+    {
+      "id": "Q43018359",
+      "name": "Fox Theatre",
+      "lat": 40.888316,
+      "lng": -74.041349
+    },
+    {
+      "id": "Q43020926",
+      "name": "Franklin Theater",
+      "lat": 40.823618,
+      "lng": -74.155205
+    },
+    {
+      "id": "Q45102464",
+      "name": "Franklin Theatre",
+      "lat": 40.811996,
+      "lng": -73.942099
+    },
+    {
+      "id": "Q45036531",
+      "name": "Freeman Theatre",
+      "lat": 40.829797,
+      "lng": -73.891863
+    },
+    {
+      "id": "Q45103932",
+      "name": "Frisco Theatre",
+      "lat": 40.760258,
+      "lng": -73.984133
+    },
+    {
+      "id": "Q45104740",
+      "name": "Fugazy Theatre",
+      "lat": 40.728071,
+      "lng": -74.00205
+    },
+    {
+      "id": "Q43019150",
+      "name": "Fulton Theatre",
+      "lat": 40.704259,
+      "lng": -74.086927
+    },
+    {
+      "id": "Q45034328",
+      "name": "G & M Theatre",
+      "lat": 40.702062,
+      "lng": -73.937084
+    },
+    {
+      "id": "Q43017793",
+      "name": "Gaiety Theatre",
+      "lat": 40.650464,
+      "lng": -74.187564
+    },
+    {
+      "id": "Q43018336",
+      "name": "Galaxy Triplex",
+      "lat": 40.789102,
+      "lng": -74.002255
+    },
+    {
+      "id": "Q45103944",
+      "name": "Ganes Manhattan Theater",
+      "lat": 40.747727,
+      "lng": -73.987829
+    },
+    {
+      "id": "Q45020388",
+      "name": "Garden Theater",
+      "lat": 40.698114,
+      "lng": -73.835131
+    },
+    {
+      "id": "Q43021334",
+      "name": "Garden Theatre",
+      "lat": 40.916254,
+      "lng": -74.170382
+    },
+    {
+      "id": "Q45032451",
+      "name": "Garden Theatre, 46th Street",
+      "lat": 40.639864,
+      "lng": -73.995832
+    },
+    {
+      "id": "Q45032456",
+      "name": "Garden Theatre, New Utrecht Avenue",
+      "lat": 40.638978,
+      "lng": -73.994269
+    },
+    {
+      "id": "Q45033909",
+      "name": "Garfield Theater",
+      "lat": 40.673964,
+      "lng": -73.982014
+    },
+    {
+      "id": "Q45102217",
+      "name": "Garrick Cinema",
+      "lat": 40.728369,
+      "lng": -73.999612
+    },
+    {
+      "id": "Q5527001",
+      "name": "Gate Theatre",
+      "lat": 40.7299,
+      "lng": -73.9866
+    },
+    {
+      "id": "Q45033211",
+      "name": "Gem Theatre",
+      "lat": 40.683817,
+      "lng": -73.871666
+    },
+    {
+      "id": "Q43023736",
+      "name": "General Cinema Essex Green I-III",
+      "lat": 40.806049,
+      "lng": -74.246662
+    },
+    {
+      "id": "Q45103958",
+      "name": "George M. Cohan Theatre",
+      "lat": 40.756296,
+      "lng": -73.986237
+    },
+    {
+      "id": "Q45032986",
+      "name": "Georgetowne Twin",
+      "lat": 40.625964,
+      "lng": -73.916317
+    },
+    {
+      "id": "Q45020529",
+      "name": "Germania Air-Drome",
+      "lat": 40.708555,
+      "lng": -73.90896
+    },
+    {
+      "id": "Q45019736",
+      "name": "Glen Oaks Theater",
+      "lat": 40.745127,
+      "lng": -73.715752
+    },
+    {
+      "id": "Q45033508",
+      "name": "Glenwood Theater",
+      "lat": 40.634587,
+      "lng": -73.949274
+    },
+    {
+      "id": "Q45020545",
+      "name": "Glenwood Theatre",
+      "lat": 40.700459,
+      "lng": -73.895707
+    },
+    {
+      "id": "Q43020353",
+      "name": "Globe Theater",
+      "lat": 40.733589,
+      "lng": -74.173343
+    },
+    {
+      "id": "Q45032151",
+      "name": "Globe Theatre",
+      "lat": 40.679437,
+      "lng": -73.926777
+    },
+    {
+      "id": "Q45033018",
+      "name": "Gloria Theater",
+      "lat": 40.679845,
+      "lng": -73.996991
+    },
+    {
+      "id": "Q45033570",
+      "name": "Glory Theatre",
+      "lat": 40.696416,
+      "lng": -73.977974
+    },
+    {
+      "id": "Q45034341",
+      "name": "Gold Theatre",
+      "lat": 40.699688,
+      "lng": -73.981685
+    },
+    {
+      "id": "Q45019150",
+      "name": "Golden Rod Theatre",
+      "lat": 40.780848,
+      "lng": -73.845998
+    },
+    {
+      "id": "Q45108300",
+      "name": "Golden Rule Theatre",
+      "lat": 40.719512,
+      "lng": -73.987228
+    },
+    {
+      "id": "Q45103970",
+      "name": "Golden Theatre",
+      "lat": 40.758713,
+      "lng": -73.98795
+    },
+    {
+      "id": "Q45032782",
+      "name": "Gotham Theater",
+      "lat": 40.677194,
+      "lng": -73.901212
+    },
+    {
+      "id": "Q45102490",
+      "name": "Gotham Theatre",
+      "lat": 40.804103,
+      "lng": -73.936382
+    },
+    {
+      "id": "Q45101603",
+      "name": "Governor Theatre",
+      "lat": 40.714054,
+      "lng": -73.998458
+    },
+    {
+      "id": "Q45034349",
+      "name": "Grace Theatre",
+      "lat": 40.70023,
+      "lng": -73.946265
+    },
+    {
+      "id": "Q43018716",
+      "name": "Graf's Nicolet",
+      "lat": 40.739227,
+      "lng": -74.038751
+    },
+    {
+      "id": "Q45033670",
+      "name": "Graham Cinema",
+      "lat": 40.598095,
+      "lng": -73.932425
+    },
+    {
+      "id": "Q45034358",
+      "name": "Graham Theater",
+      "lat": 40.712013,
+      "lng": -73.944112
+    },
+    {
+      "id": "Q45092860",
+      "name": "Gramercy Theater",
+      "lat": 40.733877,
+      "lng": -73.980303
+    },
+    {
+      "id": "Q5593640",
+      "name": "Gramercy Theatre",
+      "lat": 40.7398,
+      "lng": -73.985
+    },
+    {
+      "id": "Q45019224",
+      "name": "Granada Theatre",
+      "lat": 40.752794,
+      "lng": -73.866151
+    },
+    {
+      "id": "Q45103981",
+      "name": "Grand Central Theatre",
+      "lat": 40.751985,
+      "lng": -73.96978
+    },
+    {
+      "id": "Q45103991",
+      "name": "Grand Pussycat Cinema",
+      "lat": 40.760651,
+      "lng": -73.984546
+    },
+    {
+      "id": "Q43020531",
+      "name": "Grand Theatre",
+      "lat": 40.730334,
+      "lng": -74.210577
+    },
+    {
+      "id": "Q45034371",
+      "name": "Grand Unique Theatre",
+      "lat": 40.71151,
+      "lng": -73.947621
+    },
+    {
+      "id": "Q45020560",
+      "name": "Grand View Theatre",
+      "lat": 40.704628,
+      "lng": -73.905268
+    },
+    {
+      "id": "Q45020575",
+      "name": "Grandview Theater",
+      "lat": 40.707724,
+      "lng": -73.904295
+    },
+    {
+      "id": "Q45102304",
+      "name": "Grange Theatre",
+      "lat": 40.821103,
+      "lng": -73.953899
+    },
+    {
+      "id": "Q45101473",
+      "name": "Greeley Theatre",
+      "lat": 40.74745,
+      "lng": -73.98978
+    },
+    {
+      "id": "Q43065572",
+      "name": "Green Acres Cinemas",
+      "lat": 40.664687,
+      "lng": -73.723188
+    },
+    {
+      "id": "Q45033696",
+      "name": "Green Street Arcade Theater",
+      "lat": 40.733858,
+      "lng": -73.955452
+    },
+    {
+      "id": "Q45033728",
+      "name": "Greenpoint Star Theatre",
+      "lat": 40.722661,
+      "lng": -73.948028
+    },
+    {
+      "id": "Q45101485",
+      "name": "Greenwich Theater",
+      "lat": 40.740728,
+      "lng": -74.001839
+    },
+    {
+      "id": "Q45107756",
+      "name": "Greenwich Village Theatre",
+      "lat": 40.733778,
+      "lng": -74.003168
+    },
+    {
+      "id": "Q43018933",
+      "name": "Grove International Theater",
+      "lat": 40.737821,
+      "lng": -74.212662
+    },
+    {
+      "id": "Q45032787",
+      "name": "Grove Theater",
+      "lat": 40.692793,
+      "lng": -73.911851
+    },
+    {
+      "id": "Q45104001",
+      "name": "Guild Theater",
+      "lat": 40.758731,
+      "lng": -73.977606
+    },
+    {
+      "id": "Q43015156",
+      "name": "Hackensack Drive-In",
+      "lat": 40.854843,
+      "lng": -74.032352
+    },
+    {
+      "id": "Q45032158",
+      "name": "Halsey Theatre",
+      "lat": 40.685531,
+      "lng": -73.917289
+    },
+    {
+      "id": "Q43017492",
+      "name": "Halsted Theatre",
+      "lat": 40.759576,
+      "lng": -74.221896
+    },
+    {
+      "id": "Q45032461",
+      "name": "Hamilton Theatre",
+      "lat": 40.643463,
+      "lng": -73.990022
+    },
+    {
+      "id": "Q45033234",
+      "name": "Hanover Theatre",
+      "lat": 40.689557,
+      "lng": -73.981985
+    },
+    {
+      "id": "Q45032554",
+      "name": "Happy Hour Theatre",
+      "lat": 40.684096,
+      "lng": -74.003178
+    },
+    {
+      "id": "Q43063461",
+      "name": "Happy Land Theater",
+      "lat": 40.909821,
+      "lng": -73.807911
+    },
+    {
+      "id": "Q45032022",
+      "name": "Harbor Theatre",
+      "lat": 40.617803,
+      "lng": -74.030304
+    },
+    {
+      "id": "Q45104019",
+      "name": "Harem Theatre",
+      "lat": 40.756998,
+      "lng": -73.989196
+    },
+    {
+      "id": "Q49263",
+      "name": "Harlem Alhambra",
+      "lat": 40.809528,
+      "lng": -73.948064
+    },
+    {
+      "id": "Q45101795",
+      "name": "Harlem Grand Theatre",
+      "lat": 40.804764,
+      "lng": -73.9383
+    },
+    {
+      "id": "Q23091760",
+      "name": "Harlem Opera House",
+      "lat": 40.809286,
+      "lng": -73.94902
+    },
+    {
+      "id": "Q45104032",
+      "name": "Harris Theatre",
+      "lat": 40.756474,
+      "lng": -73.988043
+    },
+    {
+      "id": "Q45020964",
+      "name": "Haven Theatre",
+      "lat": 40.69193,
+      "lng": -73.861707
+    },
+    {
+      "id": "Q43020726",
+      "name": "Hawthorne Theatre",
+      "lat": 40.717893,
+      "lng": -74.209078
+    },
+    {
+      "id": "Q45032792",
+      "name": "Heart of Ridgewood Theatre",
+      "lat": 40.698689,
+      "lng": -73.916811
+    },
+    {
+      "id": "Q45033240",
+      "name": "Heights Theater",
+      "lat": 40.70078,
+      "lng": -73.989705
+    },
+    {
+      "id": "Q45034378",
+      "name": "High Theatre",
+      "lat": 40.699304,
+      "lng": -73.984536
+    },
+    {
+      "id": "Q45033677",
+      "name": "Highway Theater",
+      "lat": 40.605192,
+      "lng": -73.980124
+    },
+    {
+      "id": "Q43020544",
+      "name": "Hill Theatre",
+      "lat": 40.73602,
+      "lng": -74.181399
+    },
+    {
+      "id": "Q43018725",
+      "name": "Hippodrome Theatre",
+      "lat": 40.742104,
+      "lng": -74.029816
+    },
+    {
+      "id": "Q45020972",
+      "name": "Hobart Theatre",
+      "lat": 40.756668,
+      "lng": -73.907651
+    },
+    {
+      "id": "Q45019798",
+      "name": "Hollis Cinema",
+      "lat": 40.712649,
+      "lng": -73.768288
+    },
+    {
+      "id": "Q43017559",
+      "name": "Hollywood Cinemas",
+      "lat": 40.762068,
+      "lng": -74.22535
+    },
+    {
+      "id": "Q45032360",
+      "name": "Hollywood Theatre",
+      "lat": 40.613468,
+      "lng": -74.000665
+    },
+    {
+      "id": "Q45104043",
+      "name": "Hombre Theatre",
+      "lat": 40.758149,
+      "lng": -73.970505
+    },
+    {
+      "id": "Q45108333",
+      "name": "Houston Hippodrome",
+      "lat": 40.723189,
+      "lng": -73.989836
+    },
+    {
+      "id": "Q45102691",
+      "name": "Houston Theatre",
+      "lat": 40.724429,
+      "lng": -73.993679
+    },
+    {
+      "id": "Q45036359",
+      "name": "Hub Theatre",
+      "lat": 40.816292,
+      "lng": -73.914912
+    },
+    {
+      "id": "Q43019158",
+      "name": "Hudson Mall Cinemas 7",
+      "lat": 40.716147,
+      "lng": -74.095491
+    },
+    {
+      "id": "Q43018732",
+      "name": "Hudson Street Cinemas",
+      "lat": 40.737413,
+      "lng": -74.029123
+    },
+    {
+      "id": "Q43023349",
+      "name": "Hudson Theatre",
+      "lat": 40.774817,
+      "lng": -74.025938
+    },
+    {
+      "id": "Q45034094",
+      "name": "Huntington Theatre",
+      "lat": 40.676507,
+      "lng": -74.002183
+    },
+    {
+      "id": "Q43062772",
+      "name": "Hylan Cinema",
+      "lat": 40.570018,
+      "lng": -74.110062
+    },
+    {
+      "id": "Q43062780",
+      "name": "Hylan Plaza Cinemas",
+      "lat": 40.566729,
+      "lng": -74.109837
+    },
+    {
+      "id": "Q45019242",
+      "name": "Hyperion Theatre",
+      "lat": 40.749832,
+      "lng": -73.854752
+    },
+    {
+      "id": "Q45020142",
+      "name": "Idle Hour Theater",
+      "lat": 40.746598,
+      "lng": -73.944532
+    },
+    {
+      "id": "Q45032799",
+      "name": "Idle Hour Theatre",
+      "lat": 40.700942,
+      "lng": -73.911041
+    },
+    {
+      "id": "Q5970652",
+      "name": "IFC Center",
+      "lat": 40.7311,
+      "lng": -74.0015
+    },
+    {
+      "id": "Q7741449",
+      "name": "ImaginAsian",
+      "lat": 40.761,
+      "lng": -73.965
+    },
+    {
+      "id": "Q43019191",
+      "name": "IMAX Dome Theater",
+      "lat": 40.707624,
+      "lng": -74.05311
+    },
+    {
+      "id": "Q45032163",
+      "name": "Imperial Theatre",
+      "lat": 40.685699,
+      "lng": -73.917927
+    },
+    {
+      "id": "Q45101703",
+      "name": "IndieHouse Cinema at the Producers Club",
+      "lat": 40.759389,
+      "lng": -73.991319
+    },
+    {
+      "id": "Q45033071",
+      "name": "Inman's Casino",
+      "lat": 40.574801,
+      "lng": -73.980893
+    },
+    {
+      "id": "Q45036654",
+      "name": "Interboro Theatre",
+      "lat": 40.831772,
+      "lng": -73.827388
+    },
+    {
+      "id": "Q45034101",
+      "name": "International Moving Pictures",
+      "lat": 40.684808,
+      "lng": -74.003719
+    },
+    {
+      "id": "Q45102230",
+      "name": "Iris & B. Gerald Cantor Film Center",
+      "lat": 40.731168,
+      "lng": -73.994435
+    },
+    {
+      "id": "Q43020651",
+      "name": "Ironbound Theatre",
+      "lat": 40.728922,
+      "lng": -74.157533
+    },
+    {
+      "id": "Q45032810",
+      "name": "Irving Theatre",
+      "lat": 40.699304,
+      "lng": -73.913743
+    },
+    {
+      "id": "Q43062909",
+      "name": "Island Theatre",
+      "lat": 40.579297,
+      "lng": -74.169336
+    },
+    {
+      "id": "Q45034384",
+      "name": "Italian Theatre",
+      "lat": 40.707104,
+      "lng": -73.93977
+    },
+    {
+      "id": "Q45019897",
+      "name": "Jackson Heights Airdrome",
+      "lat": 40.74763,
+      "lng": -73.883936
+    },
+    {
+      "id": "Q45019841",
+      "name": "Jackson Heights Cinema",
+      "lat": 40.746572,
+      "lng": -73.883727
+    },
+    {
+      "id": "Q45036537",
+      "name": "Jackson Theatre",
+      "lat": 40.817612,
+      "lng": -73.905906
+    },
+    {
+      "id": "Q45101616",
+      "name": "Jade Cinema",
+      "lat": 40.716791,
+      "lng": -73.99857
+    },
+    {
+      "id": "Q45019949",
+      "name": "Jamaica Multiplex Cinemas",
+      "lat": 40.703399,
+      "lng": -73.800052
+    },
+    {
+      "id": "Q45019963",
+      "name": "Jamaica Theatre",
+      "lat": 40.702897,
+      "lng": -73.800692
+    },
+    {
+      "id": "Q45019518",
+      "name": "Janice Theatre",
+      "lat": 40.740337,
+      "lng": -73.824992
+    },
+    {
+      "id": "Q45109974",
+      "name": "Japanese Roof Garden Theatre",
+      "lat": 40.794729,
+      "lng": -73.971867
+    },
+    {
+      "id": "Q45032170",
+      "name": "Jefferson Theater",
+      "lat": 40.695345,
+      "lng": -73.949652
+    },
+    {
+      "id": "Q43018742",
+      "name": "Jefferson Theatre",
+      "lat": 40.738685,
+      "lng": -74.038008
+    },
+    {
+      "id": "Q45020404",
+      "name": "Jerome Theater",
+      "lat": 40.688668,
+      "lng": -73.830462
+    },
+    {
+      "id": "Q45036272",
+      "name": "Jerome Theatre",
+      "lat": 40.851824,
+      "lng": -73.909173
+    },
+    {
+      "id": "Q43038651",
+      "name": "Jerry Lewis Cinemas",
+      "lat": 40.626631,
+      "lng": -74.161648
+    },
+    {
+      "id": "Q45102517",
+      "name": "Jewel Theater",
+      "lat": 40.801116,
+      "lng": -73.947048
+    },
+    {
+      "id": "Q88106863",
+      "name": "Joseph D. Williams Science Theater",
+      "lat": 40.70838,
+      "lng": -74.05459
+    },
+    {
+      "id": "Q45033930",
+      "name": "Joyce Theatre",
+      "lat": 40.658609,
+      "lng": -73.981914
+    },
+    {
+      "id": "Q45109365",
+      "name": "Juliet I & II",
+      "lat": 40.777254,
+      "lng": -73.955535
+    },
+    {
+      "id": "Q45036699",
+      "name": "Kameo Theatre",
+      "lat": 40.850369,
+      "lng": -73.894298
+    },
+    {
+      "id": "Q45036278",
+      "name": "Kelton Theater",
+      "lat": 40.854486,
+      "lng": -73.910096
+    },
+    {
+      "id": "Q45034056",
+      "name": "Kenmore Theatre",
+      "lat": 40.65054,
+      "lng": -73.95958
+    },
+    {
+      "id": "Q45032469",
+      "name": "Kensington Theatre",
+      "lat": 40.63482,
+      "lng": -73.977769
+    },
+    {
+      "id": "Q43066035",
+      "name": "Kent Cinema",
+      "lat": 40.9034,
+      "lng": -73.866532
+    },
+    {
+      "id": "Q6391935",
+      "name": "Kent Theater",
+      "lat": 40.8341,
+      "lng": -73.9172
+    },
+    {
+      "id": "Q43020521",
+      "name": "Kent Theatre",
+      "lat": 40.78163,
+      "lng": -74.162839
+    },
+    {
+      "id": "Q43022428",
+      "name": "Kerasotes Showplace 14",
+      "lat": 40.788211,
+      "lng": -74.044021
+    },
+    {
+      "id": "Q45032597",
+      "name": "Kerman's Vaudeville House Theatre",
+      "lat": 40.669764,
+      "lng": -73.909458
+    },
+    {
+      "id": "Q45020083",
+      "name": "Kew Gardens Cinemas",
+      "lat": 40.709166,
+      "lng": -73.829954
+    },
+    {
+      "id": "Q43066041",
+      "name": "Kimball Theatre",
+      "lat": 40.914773,
+      "lng": -73.850875
+    },
+    {
+      "id": "Q45033386",
+      "name": "Kinema Theatre",
+      "lat": 40.674537,
+      "lng": -73.879598
+    },
+    {
+      "id": "Q45036545",
+      "name": "King Theatre",
+      "lat": 40.831467,
+      "lng": -73.899828
+    },
+    {
+      "id": "Q45104056",
+      "name": "Kings Cinema",
+      "lat": 40.761986,
+      "lng": -73.985426
+    },
+    {
+      "id": "Q45032993",
+      "name": "Kings Plaza 6 Theaters",
+      "lat": 40.61035,
+      "lng": -73.92104
+    },
+    {
+      "id": "Q6413028",
+      "name": "Kings Theatre",
+      "lat": 40.645833,
+      "lng": -73.9575
+    },
+    {
+      "id": "Q45036172",
+      "name": "Kingsbridge Theatre",
+      "lat": 40.86715,
+      "lng": -73.896514
+    },
+    {
+      "id": "Q45032175",
+      "name": "Kingston Theatre",
+      "lat": 40.679781,
+      "lng": -73.940577
+    },
+    {
+      "id": "Q45034135",
+      "name": "Kingsway Theatre",
+      "lat": 40.607123,
+      "lng": -73.962146
+    },
+    {
+      "id": "Q45032183",
+      "name": "Kismet Temple",
+      "lat": 40.679184,
+      "lng": -73.950536
+    },
+    {
+      "id": "Q45032189",
+      "name": "Kismet Theatre",
+      "lat": 40.692158,
+      "lng": -73.944709
+    },
+    {
+      "id": "Q45032816",
+      "name": "Knickerbocker Casino Theater",
+      "lat": 40.702001,
+      "lng": -73.924482
+    },
+    {
+      "id": "Q45020476",
+      "name": "Kossuth Theater",
+      "lat": 40.698005,
+      "lng": -73.887936
+    },
+    {
+      "id": "Q45036796",
+      "name": "Laconia Theatre",
+      "lat": 40.886787,
+      "lng": -73.861054
+    },
+    {
+      "id": "Q45107421",
+      "name": "LaGrange Theatre",
+      "lat": 40.729344,
+      "lng": -73.992242
+    },
+    {
+      "id": "Q45032524",
+      "name": "Lakeland Theatre",
+      "lat": 40.577193,
+      "lng": -73.964872
+    },
+    {
+      "id": "Q43062789",
+      "name": "Lane Theater",
+      "lat": 40.573193,
+      "lng": -74.115519
+    },
+    {
+      "id": "Q45104930",
+      "name": "Lane Theatre",
+      "lat": 40.84891,
+      "lng": -73.932806
+    },
+    {
+      "id": "Q11983435",
+      "name": "Latin Quarter",
+      "lat": 40.75986,
+      "lng": -73.98456
+    },
+    {
+      "id": "Q45020100",
+      "name": "Laurelton Theatre",
+      "lat": 40.676546,
+      "lng": -73.742955
+    },
+    {
+      "id": "Q43040649",
+      "name": "Lawrence Theatre",
+      "lat": 40.628636,
+      "lng": -73.737363
+    },
+    {
+      "id": "Q3225754",
+      "name": "Le Poisson Rouge",
+      "lat": 40.7284,
+      "lng": -74
+    },
+    {
+      "id": "Q45034259",
+      "name": "Leader Theater",
+      "lat": 40.634397,
+      "lng": -73.967361
+    },
+    {
+      "id": "Q43018065",
+      "name": "Lee Theater",
+      "lat": 40.856252,
+      "lng": -73.966905
+    },
+    {
+      "id": "Q45020418",
+      "name": "Lefferts Theatre",
+      "lat": 40.687211,
+      "lng": -73.821603
+    },
+    {
+      "id": "Q45109988",
+      "name": "LeFrak Theater",
+      "lat": 40.781389,
+      "lng": -73.973889
+    },
+    {
+      "id": "Q45034390",
+      "name": "Leonard Theatre",
+      "lat": 40.711764,
+      "lng": -73.947212
+    },
+    {
+      "id": "Q43019585",
+      "name": "Leonia Theatre",
+      "lat": 40.863235,
+      "lng": -73.987163
+    },
+    {
+      "id": "Q45032194",
+      "name": "Lewis Theatre",
+      "lat": 40.697529,
+      "lng": -73.937895
+    },
+    {
+      "id": "Q43017803",
+      "name": "Liberty Theater",
+      "lat": 40.662182,
+      "lng": -74.212384
+    },
+    {
+      "id": "Q43018752",
+      "name": "Liberty Theatre",
+      "lat": 40.738425,
+      "lng": -74.036441
+    },
+    {
+      "id": "Q45020430",
+      "name": "Library Square Theater",
+      "lat": 40.691179,
+      "lng": -73.826594
+    },
+    {
+      "id": "Q45109377",
+      "name": "Lido East",
+      "lat": 40.761488,
+      "lng": -73.965834
+    },
+    {
+      "id": "Q43021128",
+      "name": "Lido Theater",
+      "lat": 40.780482,
+      "lng": -74.223852
+    },
+    {
+      "id": "Q45102314",
+      "name": "Lido Theatre",
+      "lat": 40.826669,
+      "lng": -73.94613
+    },
+    {
+      "id": "Q45108348",
+      "name": "Lighthouse Cinema",
+      "lat": 40.718901,
+      "lng": -73.985841
+    },
+    {
+      "id": "Q43038151",
+      "name": "Lily Theatre",
+      "lat": 40.728678,
+      "lng": -73.703072
+    },
+    {
+      "id": "Q43019329",
+      "name": "Lincoln Cinemas",
+      "lat": 40.780728,
+      "lng": -74.13928
+    },
+    {
+      "id": "Q45110004",
+      "name": "Lincoln Plaza Cinemas",
+      "lat": 40.770633,
+      "lng": -73.981999
+    },
+    {
+      "id": "Q45033577",
+      "name": "Lincoln Theater",
+      "lat": 40.670716,
+      "lng": -73.954617
+    },
+    {
+      "id": "Q43020557",
+      "name": "Lincoln Theatre",
+      "lat": 40.743557,
+      "lng": -74.208568
+    },
+    {
+      "id": "Q45033391",
+      "name": "Linden Boulevard Multiplex Cinemas",
+      "lat": 40.669359,
+      "lng": -73.861793
+    },
+    {
+      "id": "Q45034027",
+      "name": "Linden Theatre",
+      "lat": 40.656288,
+      "lng": -73.950183
+    },
+    {
+      "id": "Q43019605",
+      "name": "Linden Twin Cinema I & II",
+      "lat": 40.63228,
+      "lng": -74.255736
+    },
+    {
+      "id": "Q45034397",
+      "name": "Lindy Theatre",
+      "lat": 40.70538,
+      "lng": -73.94277
+    },
+    {
+      "id": "Q43018080",
+      "name": "Linwood Theatre",
+      "lat": 40.861719,
+      "lng": -73.969465
+    },
+    {
+      "id": "Q45105327",
+      "name": "Little Bijou Theatre",
+      "lat": 40.712092,
+      "lng": -74.004919
+    },
+    {
+      "id": "Q45109388",
+      "name": "Little Lenox Theatre",
+      "lat": 40.775307,
+      "lng": -73.962095
+    },
+    {
+      "id": "Q45020112",
+      "name": "Little Neck Theatre",
+      "lat": 40.771636,
+      "lng": -73.734559
+    },
+    {
+      "id": "Q45104082",
+      "name": "Little Picture House",
+      "lat": 40.756312,
+      "lng": -73.971307
+    },
+    {
+      "id": "Q43020362",
+      "name": "Little Theatre",
+      "lat": 40.742142,
+      "lng": -74.169185
+    },
+    {
+      "id": "Q45032610",
+      "name": "Livonia Theatre",
+      "lat": 40.66335,
+      "lng": -73.903381
+    },
+    {
+      "id": "Q45036226",
+      "name": "Loew's 167th Street Theatre",
+      "lat": 40.83533,
+      "lng": -73.920937
+    },
+    {
+      "id": "Q45102051",
+      "name": "Loew's 34th Street Showplace",
+      "lat": 40.745094,
+      "lng": -73.9767
+    },
+    {
+      "id": "Q45104706",
+      "name": "Loew's 42nd Street Theatre",
+      "lat": 40.751401,
+      "lng": -73.976001
+    },
+    {
+      "id": "Q45032474",
+      "name": "Loew's 46th Street Theatre",
+      "lat": 40.639111,
+      "lng": -73.993888
+    },
+    {
+      "id": "Q45109401",
+      "name": "Loew's 72nd Street East",
+      "lat": 40.76935,
+      "lng": -73.961117
+    },
+    {
+      "id": "Q45109411",
+      "name": "Loew's 72nd Street Theatre",
+      "lat": 40.769753,
+      "lng": -73.96138
+    },
+    {
+      "id": "Q45102543",
+      "name": "Loew's 7th Avenue Theatre",
+      "lat": 40.808302,
+      "lng": -73.948241
+    },
+    {
+      "id": "Q45110016",
+      "name": "Loew's 83rd Street Quad",
+      "lat": 40.786508,
+      "lng": -73.977637
+    },
+    {
+      "id": "Q45109424",
+      "name": "Loew's 86th Street Theatre",
+      "lat": 40.779158,
+      "lng": -73.954847
+    },
+    {
+      "id": "Q45107434",
+      "name": "Loew's Avenue B Theatre",
+      "lat": 40.723807,
+      "lng": -73.98216
+    },
+    {
+      "id": "Q45019077",
+      "name": "Loew's Bay Terrace",
+      "lat": 40.778506,
+      "lng": -73.776502
+    },
+    {
+      "id": "Q45033582",
+      "name": "Loew's Bedford Theatre",
+      "lat": 40.676584,
+      "lng": -73.953262
+    },
+    {
+      "id": "Q45033245",
+      "name": "Loew's Bijou Theatre",
+      "lat": 40.691239,
+      "lng": -73.987652
+    },
+    {
+      "id": "Q45033588",
+      "name": "Loew's Brevoort Theatre",
+      "lat": 40.680252,
+      "lng": -73.953316
+    },
+    {
+      "id": "Q45032199",
+      "name": "Loew's Broadway Theatre",
+      "lat": 40.697331,
+      "lng": -73.936717
+    },
+    {
+      "id": "Q45036552",
+      "name": "Loew's Burland Theatre",
+      "lat": 40.823225,
+      "lng": -73.900263
+    },
+    {
+      "id": "Q45108363",
+      "name": "Loew's Canal Theatre",
+      "lat": 40.7147,
+      "lng": -73.99072
+    },
+    {
+      "id": "Q45108376",
+      "name": "Loew's Delancey Theatre",
+      "lat": 40.718284,
+      "lng": -73.986597
+    },
+    {
+      "id": "Q45036706",
+      "name": "Loew's Elsmere Theatre",
+      "lat": 40.841271,
+      "lng": -73.885547
+    },
+    {
+      "id": "Q45036711",
+      "name": "Loew's Fairmount Theatre",
+      "lat": 40.845092,
+      "lng": -73.890683
+    },
+    {
+      "id": "Q45032205",
+      "name": "Loew's Fulton Theatre",
+      "lat": 40.680434,
+      "lng": -73.950029
+    },
+    {
+      "id": "Q45032821",
+      "name": "Loew's Gates Theatre",
+      "lat": 40.689955,
+      "lng": -73.922903
+    },
+    {
+      "id": "Q45036765",
+      "name": "Loew's Grand Theater",
+      "lat": 40.862918,
+      "lng": -73.900984
+    },
+    {
+      "id": "Q45019978",
+      "name": "Loew's Hillside Theatre",
+      "lat": 40.702004,
+      "lng": -73.807974
+    },
+    {
+      "id": "Q45104941",
+      "name": "Loew's Inwood Theater",
+      "lat": 40.862575,
+      "lng": -73.925413
+    },
+    {
+      "id": "Q6666598",
+      "name": "Loew's Jersey Theatre",
+      "lat": 40.732222,
+      "lng": -74.064444
+    },
+    {
+      "id": "Q45033132",
+      "name": "Loew's Kameo Theatre",
+      "lat": 40.669859,
+      "lng": -73.95079
+    },
+    {
+      "id": "Q45019286",
+      "name": "Loew's Lefrak",
+      "lat": 40.736947,
+      "lng": -73.863342
+    },
+    {
+      "id": "Q45104097",
+      "name": "Loew's Lexington Theatre",
+      "lat": 40.757036,
+      "lng": -73.972003
+    },
+    {
+      "id": "Q45110029",
+      "name": "Loew's Lincoln Square Theatre",
+      "lat": 40.773907,
+      "lng": -73.982371
+    },
+    {
+      "id": "Q45032401",
+      "name": "Loew's Melba Theatre",
+      "lat": 40.688382,
+      "lng": -73.982607
+    },
+    {
+      "id": "Q45033253",
+      "name": "Loew's Metropolitan Theatre",
+      "lat": 40.691268,
+      "lng": -73.986902
+    },
+    {
+      "id": "Q43041739",
+      "name": "Loew's Mt. Vernon Theatre",
+      "lat": 40.912093,
+      "lng": -73.838541
+    },
+    {
+      "id": "Q45036365",
+      "name": "Loew's National Theatre",
+      "lat": 40.81614,
+      "lng": -73.916038
+    },
+    {
+      "id": "Q45032365",
+      "name": "Loew's Oriental Theatre",
+      "lat": 40.606629,
+      "lng": -74.001957
+    },
+    {
+      "id": "Q45099572",
+      "name": "Loew's Orpheum Theatre",
+      "lat": 40.779126,
+      "lng": -73.954768
+    },
+    {
+      "id": "Q45032616",
+      "name": "Loew's Pitkin Theatre",
+      "lat": 40.668658,
+      "lng": -73.917776
+    },
+    {
+      "id": "Q45036804",
+      "name": "Loew's Post Road",
+      "lat": 40.876676,
+      "lng": -73.847538
+    },
+    {
+      "id": "Q45104952",
+      "name": "Loew's Rio Theatre",
+      "lat": 40.835868,
+      "lng": -73.943713
+    },
+    {
+      "id": "Q45033261",
+      "name": "Loew's Royal Theatre",
+      "lat": 40.692269,
+      "lng": -73.987889
+    },
+    {
+      "id": "Q45036557",
+      "name": "Loew's Spooner Theatre",
+      "lat": 40.821772,
+      "lng": -73.891756
+    },
+    {
+      "id": "Q43020373",
+      "name": "Loew's State Theatre",
+      "lat": 40.739806,
+      "lng": -74.169878
+    },
+    {
+      "id": "Q45018913",
+      "name": "Loew's Triboro Theatre",
+      "lat": 40.765321,
+      "lng": -73.913948
+    },
+    {
+      "id": "Q20979316",
+      "name": "Loew's Valencia Theatre",
+      "lat": 40.706111,
+      "lng": -73.794722
+    },
+    {
+      "id": "Q45102548",
+      "name": "Loew's Victoria Theatre",
+      "lat": 40.810019,
+      "lng": -73.94933
+    },
+    {
+      "id": "Q45036564",
+      "name": "Loew's Victory Theatre",
+      "lat": 40.818933,
+      "lng": -73.914021
+    },
+    {
+      "id": "Q45033396",
+      "name": "Loew's Warwick Theatre",
+      "lat": 40.678813,
+      "lng": -73.888173
+    },
+    {
+      "id": "Q45020965",
+      "name": "Loew's Willard Theatre",
+      "lat": 40.694666,
+      "lng": -73.849078
+    },
+    {
+      "id": "Q45020984",
+      "name": "Loew's Woodside Theatre",
+      "lat": 40.744944,
+      "lng": -73.906381
+    },
+    {
+      "id": "Q45109435",
+      "name": "Loew's Yorkville Theatre",
+      "lat": 40.779196,
+      "lng": -73.954857
+    },
+    {
+      "id": "Q45019698",
+      "name": "Loews Cineplex Cinema 5",
+      "lat": 40.738817,
+      "lng": -73.806836
+    },
+    {
+      "id": "Q45104109",
+      "name": "Loews Festival Theatre",
+      "lat": 40.763056,
+      "lng": -73.974931
+    },
+    {
+      "id": "Q43022439",
+      "name": "Loews Harmon Cove",
+      "lat": 40.794277,
+      "lng": -74.069886
+    },
+    {
+      "id": "Q43017647",
+      "name": "Loews Showboat Quad",
+      "lat": 40.819377,
+      "lng": -73.977449
+    },
+    {
+      "id": "Q45097340",
+      "name": "Loews State Theatre 4",
+      "lat": 40.758127,
+      "lng": -73.985557
+    },
+    {
+      "id": "Q45104964",
+      "name": "Loyal Theatre",
+      "lat": 40.851477,
+      "lng": -73.932183
+    },
+    {
+      "id": "Q6697298",
+      "name": "Lucille Lortel Theatre",
+      "lat": 40.7333,
+      "lng": -74.0058
+    },
+    {
+      "id": "Q45107445",
+      "name": "Lucky Star Theatre",
+      "lat": 40.725763,
+      "lng": -73.987047
+    },
+    {
+      "id": "Q45034109",
+      "name": "Luna Theater",
+      "lat": 40.684711,
+      "lng": -74.002441
+    },
+    {
+      "id": "Q43020384",
+      "name": "Luxor Theater",
+      "lat": 40.734631,
+      "lng": -74.168442
+    },
+    {
+      "id": "Q45036570",
+      "name": "Luxor Theatre",
+      "lat": 40.838116,
+      "lng": -73.913222
+    },
+    {
+      "id": "Q43016137",
+      "name": "Lyceum Theater",
+      "lat": 40.67559,
+      "lng": -74.108376
+    },
+    {
+      "id": "Q1756846",
+      "name": "Lyceum Theatre",
+      "lat": 40.7577,
+      "lng": -73.9847
+    },
+    {
+      "id": "Q43019681",
+      "name": "Lyndhurst Theatre",
+      "lat": 40.799549,
+      "lng": -74.116517
+    },
+    {
+      "id": "Q43018369",
+      "name": "Lyric Theater",
+      "lat": 40.883509,
+      "lng": -74.043174
+    },
+    {
+      "id": "Q43017812",
+      "name": "Lyric Theatre",
+      "lat": 40.65676,
+      "lng": -74.195921
+    },
+    {
+      "id": "Q45098293",
+      "name": "Lyric Theatre, 23rd Street",
+      "lat": 40.743917,
+      "lng": -73.995232
+    },
+    {
+      "id": "Q45108394",
+      "name": "M & S Theatre",
+      "lat": 40.720438,
+      "lng": -73.993337
+    },
+    {
+      "id": "Q45038353",
+      "name": "M & S Waco Theatre",
+      "lat": 40.719643,
+      "lng": -73.986936
+    },
+    {
+      "id": "Q45032837",
+      "name": "Madison Theater",
+      "lat": 40.68838,
+      "lng": -73.92047
+    },
+    {
+      "id": "Q43062883",
+      "name": "Main Street Cinema",
+      "lat": 40.906958,
+      "lng": -73.784498
+    },
+    {
+      "id": "Q45019531",
+      "name": "Main Street Cinemas",
+      "lat": 40.725184,
+      "lng": -73.821311
+    },
+    {
+      "id": "Q43021358",
+      "name": "Majestic Theater",
+      "lat": 40.915058,
+      "lng": -74.173372
+    },
+    {
+      "id": "Q43019113",
+      "name": "Majestic Theatre",
+      "lat": 40.717712,
+      "lng": -74.044014
+    },
+    {
+      "id": "Q45098422",
+      "name": "Majestic Theatre, 2nd Avenue",
+      "lat": 40.724241,
+      "lng": -73.99105
+    },
+    {
+      "id": "Q45104806",
+      "name": "Major Theatre",
+      "lat": 40.719297,
+      "lng": -74.001327
+    },
+    {
+      "id": "Q45020872",
+      "name": "Malboe Theatre",
+      "lat": 40.679887,
+      "lng": -73.792371
+    },
+    {
+      "id": "Q43021207",
+      "name": "Mall Theatre",
+      "lat": 40.917967,
+      "lng": -74.067021
+    },
+    {
+      "id": "Q45104123",
+      "name": "Manhattan 1 and 2",
+      "lat": 40.761171,
+      "lng": -73.965727
+    },
+    {
+      "id": "Q45098560",
+      "name": "Manhattan Theatre",
+      "lat": 40.800742,
+      "lng": -73.959973
+    },
+    {
+      "id": "Q43018777",
+      "name": "Manor Theatre",
+      "lat": 40.753186,
+      "lng": -74.025669
+    },
+    {
+      "id": "Q45033936",
+      "name": "Marathon Theater",
+      "lat": 40.661497,
+      "lng": -73.979525
+    },
+    {
+      "id": "Q45032371",
+      "name": "Marboro Theatre",
+      "lat": 40.611275,
+      "lng": -73.98387
+    },
+    {
+      "id": "Q45034415",
+      "name": "Marcy Theatre",
+      "lat": 40.708213,
+      "lng": -73.957663
+    },
+    {
+      "id": "Q45033079",
+      "name": "Mardi Gras Theater",
+      "lat": 40.575899,
+      "lng": -73.980913
+    },
+    {
+      "id": "Q45034035",
+      "name": "Mardi Gras Theatre",
+      "lat": 40.655276,
+      "lng": -73.950024
+    },
+    {
+      "id": "Q45032479",
+      "name": "Margareth Theater",
+      "lat": 40.642796,
+      "lng": -73.979442
+    },
+    {
+      "id": "Q45033540",
+      "name": "Marine Theatre",
+      "lat": 40.622009,
+      "lng": -73.936248
+    },
+    {
+      "id": "Q6767988",
+      "name": "Mark Hellinger Theatre",
+      "lat": 40.7625,
+      "lng": -73.984167
+    },
+    {
+      "id": "Q45032210",
+      "name": "Marvin Theatre",
+      "lat": 40.691975,
+      "lng": -73.926441
+    },
+    {
+      "id": "Q45020181",
+      "name": "Maspeth Theatre",
+      "lat": 40.725528,
+      "lng": -73.896013
+    },
+    {
+      "id": "Q43018632",
+      "name": "Mayfair Theater",
+      "lat": 40.698661,
+      "lng": -74.216015
+    },
+    {
+      "id": "Q43020743",
+      "name": "Mayfair Theatre",
+      "lat": 40.746439,
+      "lng": -74.230174
+    },
+    {
+      "id": "Q43023707",
+      "name": "Mayfair Triplex",
+      "lat": 40.789347,
+      "lng": -74.006518
+    },
+    {
+      "id": "Q45102556",
+      "name": "Maysles Cinema at The Maysles Institute",
+      "lat": 40.809426,
+      "lng": -73.944795
+    },
+    {
+      "id": "Q122958796",
+      "name": "Maysles Documentary Center",
+      "lat": 40.80947,
+      "lng": -73.94474
+    },
+    {
+      "id": "Q45036576",
+      "name": "McLean's Theatre",
+      "lat": 40.817567,
+      "lng": -73.905907
+    },
+    {
+      "id": "Q45102560",
+      "name": "Mecca Theatre",
+      "lat": 40.804263,
+      "lng": -73.954952
+    },
+    {
+      "id": "Q45036808",
+      "name": "Melba Theatre",
+      "lat": 40.875989,
+      "lng": -73.849485
+    },
+    {
+      "id": "Q45036584",
+      "name": "Melrose Theatre",
+      "lat": 40.824276,
+      "lng": -73.912896
+    },
+    {
+      "id": "Q45033085",
+      "name": "Mermaid Theater",
+      "lat": 40.57549,
+      "lng": -73.99489
+    },
+    {
+      "id": "Q45020063",
+      "name": "Merrick Theater",
+      "lat": 40.704712,
+      "lng": -73.796762
+    },
+    {
+      "id": "Q45033733",
+      "name": "Meserole Theatre",
+      "lat": 40.726006,
+      "lng": -73.952207
+    },
+    {
+      "id": "Q45034423",
+      "name": "Metro Theater",
+      "lat": 40.714183,
+      "lng": -73.960578
+    },
+    {
+      "id": "Q45033799",
+      "name": "Metro Theatre",
+      "lat": 40.61694,
+      "lng": -73.985414
+    },
+    {
+      "id": "Q45108410",
+      "name": "Metrograph",
+      "lat": 40.715078,
+      "lng": -73.991181
+    },
+    {
+      "id": "Q43018787",
+      "name": "Metropole Theatre",
+      "lat": 40.7407,
+      "lng": -74.028252
+    },
+    {
+      "id": "Q6824942",
+      "name": "Metropolis Theatre",
+      "lat": 40.8128,
+      "lng": -73.9238
+    },
+    {
+      "id": "Q45034428",
+      "name": "Metropolitan Theater",
+      "lat": 40.708587,
+      "lng": -73.945099
+    },
+    {
+      "id": "Q45107466",
+      "name": "Metropolitan Theater, 225 East 14th Street",
+      "lat": 40.733014,
+      "lng": -73.986041
+    },
+    {
+      "id": "Q45107478",
+      "name": "Metropolitan Theater, 241 East 14th Street",
+      "lat": 40.732704,
+      "lng": -73.985319
+    },
+    {
+      "id": "Q45033761",
+      "name": "Midway Theatre",
+      "lat": 40.734872,
+      "lng": -73.955153
+    },
+    {
+      "id": "Q45033846",
+      "name": "Midwood Theatre",
+      "lat": 40.625006,
+      "lng": -73.962911
+    },
+    {
+      "id": "Q45033514",
+      "name": "Midwout Theatre",
+      "lat": 40.638929,
+      "lng": -73.954072
+    },
+    {
+      "id": "Q4293464",
+      "name": "Millennium Theater",
+      "lat": 40.578308,
+      "lng": -73.958427
+    },
+    {
+      "id": "Q45032218",
+      "name": "Miller Theater",
+      "lat": 40.673727,
+      "lng": -73.916429
+    },
+    {
+      "id": "Q45034434",
+      "name": "Milton Photo Theatre",
+      "lat": 40.711818,
+      "lng": -73.953653
+    },
+    {
+      "id": "Q43020409",
+      "name": "Mindlin's Playhouse",
+      "lat": 40.729762,
+      "lng": -74.175326
+    },
+    {
+      "id": "Q43020345",
+      "name": "Miner's Empire Theatre",
+      "lat": 40.735894,
+      "lng": -74.175628
+    },
+    {
+      "id": "Q45033942",
+      "name": "Minerva Theatre",
+      "lat": 40.663888,
+      "lng": -73.983773
+    },
+    {
+      "id": "Q45034440",
+      "name": "Model Theater",
+      "lat": 40.70394,
+      "lng": -73.957807
+    },
+    {
+      "id": "Q45109445",
+      "name": "Modern Playhouse",
+      "lat": 40.776109,
+      "lng": -73.954952
+    },
+    {
+      "id": "Q45033595",
+      "name": "Momart Theatre",
+      "lat": 40.687779,
+      "lng": -73.978851
+    },
+    {
+      "id": "Q45032224",
+      "name": "Monroe Theatre",
+      "lat": 40.688598,
+      "lng": -73.921174
+    },
+    {
+      "id": "Q45033417",
+      "name": "Montauk Arcade Theatre",
+      "lat": 40.674223,
+      "lng": -73.878448
+    },
+    {
+      "id": "Q43021260",
+      "name": "Montauk Theatre",
+      "lat": 40.862532,
+      "lng": -74.127755
+    },
+    {
+      "id": "Q43019950",
+      "name": "Montclair Theatre",
+      "lat": 40.81596,
+      "lng": -74.220221
+    },
+    {
+      "id": "Q43019199",
+      "name": "Monticello Theatre",
+      "lat": 40.717428,
+      "lng": -74.072383
+    },
+    {
+      "id": "Q45102562",
+      "name": "Morningside Theatre",
+      "lat": 40.804173,
+      "lng": -73.956077
+    },
+    {
+      "id": "Q45036233",
+      "name": "Mount Eden Theatre",
+      "lat": 40.84449,
+      "lng": -73.916435
+    },
+    {
+      "id": "Q43020631",
+      "name": "Mount Prospect Theatre",
+      "lat": 40.775092,
+      "lng": -74.166004
+    },
+    {
+      "id": "Q45104135",
+      "name": "Movie-Plex 42",
+      "lat": 40.756591,
+      "lng": -73.988322
+    },
+    {
+      "id": "Q45019326",
+      "name": "Movieworld Douglaston",
+      "lat": 40.754707,
+      "lng": -73.738934
+    },
+    {
+      "id": "Q43016349",
+      "name": "Multi-Media Arts Center",
+      "lat": 40.79269,
+      "lng": -74.19767
+    },
+    {
+      "id": "Q28919139",
+      "name": "Murray Hill Lyceum",
+      "lat": 40.745825,
+      "lng": -73.978564
+    },
+    {
+      "id": "Q43041849",
+      "name": "Music Hall",
+      "lat": 40.644051,
+      "lng": -74.101755
+    },
+    {
+      "id": "Q45101632",
+      "name": "Music Palace",
+      "lat": 40.717041,
+      "lng": -73.995171
+    },
+    {
+      "id": "Q45102569",
+      "name": "Mystic Theatre",
+      "lat": 40.815306,
+      "lng": -73.943699
+    },
+    {
+      "id": "Q45033739",
+      "name": "Nassau Arcade",
+      "lat": 40.726081,
+      "lng": -73.939399
+    },
+    {
+      "id": "Q45034447",
+      "name": "Nassau Theater",
+      "lat": 40.71252,
+      "lng": -73.956123
+    },
+    {
+      "id": "Q45033767",
+      "name": "Nassau Theatre",
+      "lat": 40.723901,
+      "lng": -73.950367
+    },
+    {
+      "id": "Q45034014",
+      "name": "National Theater",
+      "lat": 40.676201,
+      "lng": -73.963845
+    },
+    {
+      "id": "Q43020643",
+      "name": "National Theatre",
+      "lat": 40.728262,
+      "lng": -74.190878
+    },
+    {
+      "id": "Q45104159",
+      "name": "National Twin",
+      "lat": 40.756547,
+      "lng": -73.985903
+    },
+    {
+      "id": "Q45104679",
+      "name": "Nemo Theatre",
+      "lat": 40.804187,
+      "lng": -73.966553
+    },
+    {
+      "id": "Q45033137",
+      "name": "New Albany Theatre",
+      "lat": 40.670854,
+      "lng": -73.938969
+    },
+    {
+      "id": "Q2004827",
+      "name": "New Amsterdam Theatre",
+      "lat": 40.756111,
+      "lng": -73.987778
+    },
+    {
+      "id": "Q45101644",
+      "name": "New Atlantic Theatre",
+      "lat": 40.715975,
+      "lng": -73.996551
+    },
+    {
+      "id": "Q45104170",
+      "name": "New Cinema Playhouse",
+      "lat": 40.755154,
+      "lng": -73.984893
+    },
+    {
+      "id": "Q45108445",
+      "name": "New Delancey Theater",
+      "lat": 40.719475,
+      "lng": -73.990901
+    },
+    {
+      "id": "Q45109471",
+      "name": "New Europe Theatre",
+      "lat": 40.771963,
+      "lng": -73.953383
+    },
+    {
+      "id": "Q45033603",
+      "name": "New Franklin Theatre",
+      "lat": 40.691074,
+      "lng": -73.957222
+    },
+    {
+      "id": "Q45019830",
+      "name": "New Howard Theatre",
+      "lat": 40.659714,
+      "lng": -73.83099
+    },
+    {
+      "id": "Q45032844",
+      "name": "New Ideal Theater",
+      "lat": 40.704367,
+      "lng": -73.928088
+    },
+    {
+      "id": "Q45033141",
+      "name": "New Kingston Theater",
+      "lat": 40.67124,
+      "lng": -73.94294
+    },
+    {
+      "id": "Q45107488",
+      "name": "New Law Theatre",
+      "lat": 40.724584,
+      "lng": -73.990796
+    },
+    {
+      "id": "Q45032850",
+      "name": "New Linden Theatre",
+      "lat": 40.692521,
+      "lng": -73.920352
+    },
+    {
+      "id": "Q45033425",
+      "name": "New Lots Theatre",
+      "lat": 40.661676,
+      "lng": -73.893396
+    },
+    {
+      "id": "Q45020251",
+      "name": "New Ozone Theatre",
+      "lat": 40.674722,
+      "lng": -73.80305
+    },
+    {
+      "id": "Q43017029",
+      "name": "New Palace Theatre",
+      "lat": 40.571309,
+      "lng": -74.226565
+    },
+    {
+      "id": "Q45033149",
+      "name": "New Parkway Theatre",
+      "lat": 40.670126,
+      "lng": -73.933706
+    },
+    {
+      "id": "Q45101811",
+      "name": "New Pearl Theatre",
+      "lat": 40.796597,
+      "lng": -73.941034
+    },
+    {
+      "id": "Q45033327",
+      "name": "New Plaza Theatre",
+      "lat": 40.699214,
+      "lng": -73.986908
+    },
+    {
+      "id": "Q45105083",
+      "name": "New Progress Theatre",
+      "lat": 40.790653,
+      "lng": -73.945545
+    },
+    {
+      "id": "Q45032230",
+      "name": "New Prospect Theatre",
+      "lat": 40.673182,
+      "lng": -73.922491
+    },
+    {
+      "id": "Q45102592",
+      "name": "New Regent Theatre",
+      "lat": 40.773606,
+      "lng": -73.951742
+    },
+    {
+      "id": "Q45108460",
+      "name": "New Strand Theatre",
+      "lat": 40.713717,
+      "lng": -73.994361
+    },
+    {
+      "id": "Q45020767",
+      "name": "New Theatre",
+      "lat": 40.588071,
+      "lng": -73.806638
+    },
+    {
+      "id": "Q45033610",
+      "name": "New United Theatre",
+      "lat": 40.69362,
+      "lng": -73.982186
+    },
+    {
+      "id": "Q45033948",
+      "name": "New Venus Theater",
+      "lat": 40.653168,
+      "lng": -73.976557
+    },
+    {
+      "id": "Q1467005",
+      "name": "New Victory Theatre",
+      "lat": 40.7565,
+      "lng": -73.9875
+    },
+    {
+      "id": "Q1983008",
+      "name": "New World Stages",
+      "lat": 40.7628,
+      "lng": -73.9876
+    },
+    {
+      "id": "Q45104184",
+      "name": "New York Theatre",
+      "lat": 40.756296,
+      "lng": -73.986237
+    },
+    {
+      "id": "Q45101732",
+      "name": "New Yorker Theater",
+      "lat": 40.753813,
+      "lng": -73.992661
+    },
+    {
+      "id": "Q45110050",
+      "name": "New Yorker Theatre",
+      "lat": 40.790061,
+      "lng": -73.975484
+    },
+    {
+      "id": "Q43015248",
+      "name": "Newark Drive-In",
+      "lat": 40.708523,
+      "lng": -74.174647
+    },
+    {
+      "id": "Q45034265",
+      "name": "Newkirk Theater",
+      "lat": 40.635737,
+      "lng": -73.962309
+    },
+    {
+      "id": "Q43020426",
+      "name": "Newsreel Theatre",
+      "lat": 40.735116,
+      "lng": -74.172342
+    },
+    {
+      "id": "Q45019402",
+      "name": "Newtown Theatre",
+      "lat": 40.742731,
+      "lng": -73.873116
+    },
+    {
+      "id": "Q45036591",
+      "name": "Nicoland Theatre",
+      "lat": 40.818219,
+      "lng": -73.904585
+    },
+    {
+      "id": "Q45104197",
+      "name": "Night Shift Theatre",
+      "lat": 40.760813,
+      "lng": -73.987319
+    },
+    {
+      "id": "Q45034279",
+      "name": "Nitehawk Cinema",
+      "lat": 40.716447,
+      "lng": -73.962733
+    },
+    {
+      "id": "Q78542289",
+      "name": "Nitehawk Cinema Prospect Park",
+      "lat": 40.66162,
+      "lng": -73.97985
+    },
+    {
+      "id": "Q45104209",
+      "name": "Normandie Theatre",
+      "lat": 40.759389,
+      "lng": -73.973384
+    },
+    {
+      "id": "Q45032484",
+      "name": "Normandy Theatre",
+      "lat": 40.641781,
+      "lng": -73.993801
+    },
+    {
+      "id": "Q45019343",
+      "name": "North Shore Towers Cinema",
+      "lat": 40.757726,
+      "lng": -73.716297
+    },
+    {
+      "id": "Q45105093",
+      "name": "North Star Theater",
+      "lat": 40.794442,
+      "lng": -73.95079
+    },
+    {
+      "id": "Q45033851",
+      "name": "Nostrand Theatre",
+      "lat": 40.615533,
+      "lng": -73.944666
+    },
+    {
+      "id": "Q45032235",
+      "name": "Nostrand Theatre, 276 Nostrand Avenue",
+      "lat": 40.689864,
+      "lng": -73.951464
+    },
+    {
+      "id": "Q45032243",
+      "name": "Nostrand Theatre, 657 Nostrand Avenue",
+      "lat": 40.674716,
+      "lng": -73.950044
+    },
+    {
+      "id": "Q45102328",
+      "name": "Nova Theatre",
+      "lat": 40.828066,
+      "lng": -73.949427
+    },
+    {
+      "id": "Q45034451",
+      "name": "Novelty Theater",
+      "lat": 40.711349,
+      "lng": -73.961421
+    },
+    {
+      "id": "Q45110067",
+      "name": "NYIT Auditorium",
+      "lat": 40.770416,
+      "lng": -73.982265
+    },
+    {
+      "id": "Q45020627",
+      "name": "Oasis Theatre",
+      "lat": 40.710858,
+      "lng": -73.899376
+    },
+    {
+      "id": "Q45102604",
+      "name": "Odeon Theatre",
+      "lat": 40.822447,
+      "lng": -73.941042
+    },
+    {
+      "id": "Q45036239",
+      "name": "Ogden Theatre",
+      "lat": 40.843267,
+      "lng": -73.923779
+    },
+    {
+      "id": "Q45110080",
+      "name": "Olympia Cinemas",
+      "lat": 40.801878,
+      "lng": -73.967453
+    },
+    {
+      "id": "Q43017824",
+      "name": "Olympia Theatre",
+      "lat": 40.660434,
+      "lng": -74.20738
+    },
+    {
+      "id": "Q45036596",
+      "name": "Olympic Theater Concert Hall",
+      "lat": 40.820244,
+      "lng": -73.902005
+    },
+    {
+      "id": "Q43016358",
+      "name": "Olympic Theatre",
+      "lat": 40.794847,
+      "lng": -74.19836
+    },
+    {
+      "id": "Q45033091",
+      "name": "Opera House",
+      "lat": 40.574004,
+      "lng": -73.989686
+    },
+    {
+      "id": "Q43019027",
+      "name": "Orient Theatre",
+      "lat": 40.708614,
+      "lng": -74.076965
+    },
+    {
+      "id": "Q45033024",
+      "name": "Oriole Theatre",
+      "lat": 40.684524,
+      "lng": -73.999333
+    },
+    {
+      "id": "Q43018378",
+      "name": "Oritani Theatre",
+      "lat": 40.887804,
+      "lng": -74.040861
+    },
+    {
+      "id": "Q43017570",
+      "name": "Ormont Theatre",
+      "lat": 40.765741,
+      "lng": -74.216618
+    },
+    {
+      "id": "Q45020506",
+      "name": "Orpheum Theatre",
+      "lat": 40.705801,
+      "lng": -73.91032
+    },
+    {
+      "id": "Q45036371",
+      "name": "Osceola Theatre",
+      "lat": 40.807167,
+      "lng": -73.917222
+    },
+    {
+      "id": "Q45034216",
+      "name": "Osiris Theatre",
+      "lat": 40.639064,
+      "lng": -74.016735
+    },
+    {
+      "id": "Q45020445",
+      "name": "Owl Theater",
+      "lat": 40.702112,
+      "lng": -73.817936
+    },
+    {
+      "id": "Q45034458",
+      "name": "Owl Theatre",
+      "lat": 40.703092,
+      "lng": -73.946125
+    },
+    {
+      "id": "Q45032406",
+      "name": "Oxford Theatre",
+      "lat": 40.68539,
+      "lng": -73.978842
+    },
+    {
+      "id": "Q45108490",
+      "name": "Pagoda Theatre",
+      "lat": 40.713206,
+      "lng": -73.997402
+    },
+    {
+      "id": "Q45104973",
+      "name": "Palace Annex Theatre",
+      "lat": 40.844844,
+      "lng": -73.937003
+    },
+    {
+      "id": "Q43021138",
+      "name": "Palace Cinema",
+      "lat": 40.767973,
+      "lng": -74.220923
+    },
+    {
+      "id": "Q43017582",
+      "name": "Palace Theater",
+      "lat": 40.759508,
+      "lng": -74.207702
+    },
+    {
+      "id": "Q43018796",
+      "name": "Palace Theatre",
+      "lat": 40.741863,
+      "lng": -74.029936
+    },
+    {
+      "id": "Q45032248",
+      "name": "Palace Theatre, Fulton Street",
+      "lat": 40.678697,
+      "lng": -73.923349
+    },
+    {
+      "id": "Q45032254",
+      "name": "Palace Theatre, Strauss Street",
+      "lat": 40.669765,
+      "lng": -73.916569
+    },
+    {
+      "id": "Q4896607",
+      "name": "Palladium Times Square",
+      "lat": 40.7578,
+      "lng": -73.9864
+    },
+    {
+      "id": "Q45036284",
+      "name": "Pantheon Theatre",
+      "lat": 40.854486,
+      "lng": -73.910096
+    },
+    {
+      "id": "Q2051407",
+      "name": "Paradise Theater",
+      "lat": 40.860556,
+      "lng": -73.898889
+    },
+    {
+      "id": "Q45034222",
+      "name": "Paradise Theatre",
+      "lat": 40.658909,
+      "lng": -73.999784
+    },
+    {
+      "id": "Q45032259",
+      "name": "Paragon Theatre",
+      "lat": 40.678342,
+      "lng": -73.909556
+    },
+    {
+      "id": "Q45101837",
+      "name": "Paraiso Theater",
+      "lat": 40.798159,
+      "lng": -73.946221
+    },
+    {
+      "id": "Q43020436",
+      "name": "Paramount Theatre",
+      "lat": 40.735306,
+      "lng": -74.171126
+    },
+    {
+      "id": "Q43015293",
+      "name": "Paramus Drive-In",
+      "lat": 40.918499,
+      "lng": -74.063698
+    },
+    {
+      "id": "Q45033058",
+      "name": "Paras Court Theatre",
+      "lat": 40.684042,
+      "lng": -73.995202
+    },
+    {
+      "id": "Q45104223",
+      "name": "Paree Adult Cinema and Live Show",
+      "lat": 40.760917,
+      "lng": -73.983387
+    },
+    {
+      "id": "Q7756121",
+      "name": "Paris Theater",
+      "lat": 40.7284,
+      "lng": -74.0043
+    },
+    {
+      "id": "Q45109482",
+      "name": "Park & 86th Street Cinemas",
+      "lat": 40.780095,
+      "lng": -73.955163
+    },
+    {
+      "id": "Q45104234",
+      "name": "Park Avenue Theatre",
+      "lat": 40.762412,
+      "lng": -73.969978
+    },
+    {
+      "id": "Q43066061",
+      "name": "Park Hill Theatre",
+      "lat": 40.918886,
+      "lng": -73.89656
+    },
+    {
+      "id": "Q43021160",
+      "name": "Park Lane Theater",
+      "lat": 40.846463,
+      "lng": -73.998758
+    },
+    {
+      "id": "Q45109491",
+      "name": "Park Lane Theatre",
+      "lat": 40.77916,
+      "lng": -73.947689
+    },
+    {
+      "id": "Q45036291",
+      "name": "Park Plaza Theatre",
+      "lat": 40.849209,
+      "lng": -73.917074
+    },
+    {
+      "id": "Q45032868",
+      "name": "Park Theater",
+      "lat": 40.702241,
+      "lng": -73.924589
+    },
+    {
+      "id": "Q43018805",
+      "name": "Park Theatre",
+      "lat": 40.743206,
+      "lng": -74.035048
+    },
+    {
+      "id": "Q45033519",
+      "name": "Parkside Theater",
+      "lat": 40.655311,
+      "lng": -73.959824
+    },
+    {
+      "id": "Q45033964",
+      "name": "Parkview Theatre",
+      "lat": 40.660773,
+      "lng": -73.979551
+    },
+    {
+      "id": "Q45033806",
+      "name": "Parkville Theatre",
+      "lat": 40.629571,
+      "lng": -73.977062
+    },
+    {
+      "id": "Q45036601",
+      "name": "Parkway Theatre",
+      "lat": 40.840498,
+      "lng": -73.899429
+    },
+    {
+      "id": "Q45110096",
+      "name": "Parkwest Theatre",
+      "lat": 40.796007,
+      "lng": -73.96896
+    },
+    {
+      "id": "Q45019546",
+      "name": "Parsons Theatre",
+      "lat": 40.721561,
+      "lng": -73.809558
+    },
+    {
+      "id": "Q45020643",
+      "name": "Parthenon Theatre",
+      "lat": 40.69979,
+      "lng": -73.911052
+    },
+    {
+      "id": "Q45034116",
+      "name": "Pastime Movie Theatre",
+      "lat": 40.684418,
+      "lng": -74.002743
+    },
+    {
+      "id": "Q43018816",
+      "name": "Pastime Theatre",
+      "lat": 40.74371,
+      "lng": -74.029035
+    },
+    {
+      "id": "Q43021373",
+      "name": "Paterson Show",
+      "lat": 40.916518,
+      "lng": -74.172389
+    },
+    {
+      "id": "Q45033524",
+      "name": "Patio Theatre",
+      "lat": 40.659575,
+      "lng": -73.960571
+    },
+    {
+      "id": "Q45033970",
+      "name": "Pavilion Theatre",
+      "lat": 40.661497,
+      "lng": -73.979525
+    },
+    {
+      "id": "Q45104248",
+      "name": "Peepland",
+      "lat": 40.759493,
+      "lng": -73.98458
+    },
+    {
+      "id": "Q45033616",
+      "name": "Peerless Theater",
+      "lat": 40.693296,
+      "lng": -73.96827
+    },
+    {
+      "id": "Q7161362",
+      "name": "Pelham Picture House",
+      "lat": 40.909167,
+      "lng": -73.811667
+    },
+    {
+      "id": "Q45104264",
+      "name": "Penn Newsreel Theatre",
+      "lat": 40.751458,
+      "lng": -73.991654
+    },
+    {
+      "id": "Q45101514",
+      "name": "Penn Theatre",
+      "lat": 40.750025,
+      "lng": -73.995258
+    },
+    {
+      "id": "Q45032998",
+      "name": "Pennway Theater",
+      "lat": 40.657731,
+      "lng": -73.889908
+    },
+    {
+      "id": "Q45032625",
+      "name": "People's Cinema",
+      "lat": 40.662808,
+      "lng": -73.915437
+    },
+    {
+      "id": "Q45108520",
+      "name": "Peoples Theatre",
+      "lat": 40.720933,
+      "lng": -73.993542
+    },
+    {
+      "id": "Q45101848",
+      "name": "Peoples Vaudeville Theatre",
+      "lat": 40.799633,
+      "lng": -73.938812
+    },
+    {
+      "id": "Q45034465",
+      "name": "Phillip's Lyceum Theatre",
+      "lat": 40.70708,
+      "lng": -73.94566
+    },
+    {
+      "id": "Q45099951",
+      "name": "Phoenix Theatre",
+      "lat": 40.7737,
+      "lng": -73.952468
+    },
+    {
+      "id": "Q45105103",
+      "name": "Photoplay Theatre",
+      "lat": 40.786497,
+      "lng": -73.948406
+    },
+    {
+      "id": "Q45032881",
+      "name": "Pictureland Theater",
+      "lat": 40.687481,
+      "lng": -73.918653
+    },
+    {
+      "id": "Q45036397",
+      "name": "Pilgrim Theatre",
+      "lat": 40.846833,
+      "lng": -73.833195
+    },
+    {
+      "id": "Q45107501",
+      "name": "Pioneer Theater",
+      "lat": 40.723554,
+      "lng": -73.984795
+    },
+    {
+      "id": "Q45034082",
+      "name": "Pioneer Theatre",
+      "lat": 40.677951,
+      "lng": -74.009651
+    },
+    {
+      "id": "Q45032631",
+      "name": "Pitkin Market Theatre",
+      "lat": 40.668924,
+      "lng": -73.915678
+    },
+    {
+      "id": "Q43021149",
+      "name": "Pix Theater",
+      "lat": 40.772712,
+      "lng": -74.230482
+    },
+    {
+      "id": "Q45019431",
+      "name": "Pix Theatre",
+      "lat": 40.604042,
+      "lng": -73.752266
+    },
+    {
+      "id": "Q43036344",
+      "name": "Playhouse",
+      "lat": 40.621124,
+      "lng": -73.725425
+    },
+    {
+      "id": "Q43021279",
+      "name": "Playhouse Theatre",
+      "lat": 40.85927,
+      "lng": -74.124691
+    },
+    {
+      "id": "Q45101746",
+      "name": "Playpen Theatre",
+      "lat": 40.75848,
+      "lng": -73.989294
+    },
+    {
+      "id": "Q43020582",
+      "name": "Plaza Theater",
+      "lat": 40.753853,
+      "lng": -74.190553
+    },
+    {
+      "id": "Q45019315",
+      "name": "Plaza Theatre",
+      "lat": 40.749444,
+      "lng": -73.862222
+    },
+    {
+      "id": "Q45104291",
+      "name": "Plaza Theatre, East 58th Street",
+      "lat": 40.762634,
+      "lng": -73.971343
+    },
+    {
+      "id": "Q45104304",
+      "name": "Plaza Theatre, Madison Avenue",
+      "lat": 40.76339,
+      "lng": -73.971525
+    },
+    {
+      "id": "Q45033624",
+      "name": "Pleasant Hour Theatre",
+      "lat": 40.694725,
+      "lng": -73.956991
+    },
+    {
+      "id": "Q43023998",
+      "name": "Pleasure Park Airdome",
+      "lat": 40.847794,
+      "lng": -74.078355
+    },
+    {
+      "id": "Q45032886",
+      "name": "Politeani Theatre",
+      "lat": 40.701104,
+      "lng": -73.92646
+    },
+    {
+      "id": "Q45019912",
+      "name": "Polk Theater",
+      "lat": 40.750882,
+      "lng": -73.873616
+    },
+    {
+      "id": "Q45036374",
+      "name": "Port Morris Theater",
+      "lat": 40.806449,
+      "lng": -73.916954
+    },
+    {
+      "id": "Q45032638",
+      "name": "Premier Theatre",
+      "lat": 40.668641,
+      "lng": -73.900223
+    },
+    {
+      "id": "Q45036609",
+      "name": "President Theatre",
+      "lat": 40.819403,
+      "lng": -73.902189
+    },
+    {
+      "id": "Q45104751",
+      "name": "Prince Theatre",
+      "lat": 40.728279,
+      "lng": -74.010896
+    },
+    {
+      "id": "Q45032263",
+      "name": "Princess Theatre",
+      "lat": 40.686443,
+      "lng": -73.947848
+    },
+    {
+      "id": "Q43017844",
+      "name": "Proctor's Broad Street Theatre",
+      "lat": 40.662103,
+      "lng": -74.215087
+    },
+    {
+      "id": "Q43017855",
+      "name": "Proctor's Theatre",
+      "lat": 40.664822,
+      "lng": -74.213299
+    },
+    {
+      "id": "Q45033977",
+      "name": "Prospect Palace",
+      "lat": 40.665165,
+      "lng": -73.989973
+    },
+    {
+      "id": "Q45019489",
+      "name": "Prospect Theatre",
+      "lat": 40.7578,
+      "lng": -73.829732
+    },
+    {
+      "id": "Q45033744",
+      "name": "Public Palace Theatre",
+      "lat": 40.722083,
+      "lng": -73.947328
+    },
+    {
+      "id": "Q45104349",
+      "name": "Pussycat 2 Cinema",
+      "lat": 40.760845,
+      "lng": -73.984661
+    },
+    {
+      "id": "Q7268258",
+      "name": "Quad Cinema",
+      "lat": 40.736,
+      "lng": -73.9959
+    },
+    {
+      "id": "Q43016399",
+      "name": "Queen Anne Theater",
+      "lat": 40.866769,
+      "lng": -74.022785
+    },
+    {
+      "id": "Q45020236",
+      "name": "Queens Theatre",
+      "lat": 40.718641,
+      "lng": -73.734841
+    },
+    {
+      "id": "Q45019209",
+      "name": "Queens Theatre in the Park",
+      "lat": 40.735683,
+      "lng": -73.840334
+    },
+    {
+      "id": "Q45033821",
+      "name": "Quentin Theater",
+      "lat": 40.614134,
+      "lng": -73.937133
+    },
+    {
+      "id": "Q45032491",
+      "name": "Radio Theatre",
+      "lat": 40.639069,
+      "lng": -73.987548
+    },
+    {
+      "id": "Q43063140",
+      "name": "Rae Twin Theater",
+      "lat": 40.553258,
+      "lng": -74.132177
+    },
+    {
+      "id": "Q45034481",
+      "name": "Rainbow Theatre",
+      "lat": 40.707721,
+      "lng": -73.943419
+    },
+    {
+      "id": "Q45032270",
+      "name": "Ralph Theatre",
+      "lat": 40.681463,
+      "lng": -73.922117
+    },
+    {
+      "id": "Q45104363",
+      "name": "Ramrod Theatre",
+      "lat": 40.76082,
+      "lng": -73.984615
+    },
+    {
+      "id": "Q45101861",
+      "name": "Regal Amusement Theatre",
+      "lat": 40.795218,
+      "lng": -73.942282
+    },
+    {
+      "id": "Q45101404",
+      "name": "Regal Battery Park",
+      "lat": 40.714533,
+      "lng": -74.015396
+    },
+    {
+      "id": "Q78168970",
+      "name": "Regal Bricktown Charleston",
+      "lat": 40.53065,
+      "lng": -74.22983
+    },
+    {
+      "id": "Q45104377",
+      "name": "Regal E-Walk Stadium 13",
+      "lat": 40.757082,
+      "lng": -73.989113
+    },
+    {
+      "id": "Q78915206",
+      "name": "Regal Essex Crossing & RPX",
+      "lat": 40.71805,
+      "lng": -73.98803
+    },
+    {
+      "id": "Q43062891",
+      "name": "Regal New Roc City 18 & IMAX",
+      "lat": 40.91969,
+      "lng": -73.788969
+    },
+    {
+      "id": "Q45019649",
+      "name": "Regal UA Midway",
+      "lat": 40.720397,
+      "lng": -73.843597
+    },
+    {
+      "id": "Q45102242",
+      "name": "Regal Union Square Stadium 14",
+      "lat": 40.734279,
+      "lng": -73.990495
+    },
+    {
+      "id": "Q45110113",
+      "name": "Regency Theatre",
+      "lat": 40.775122,
+      "lng": -73.982309
+    },
+    {
+      "id": "Q43017589",
+      "name": "Regent Theater",
+      "lat": 40.757147,
+      "lng": -74.201594
+    },
+    {
+      "id": "Q43017869",
+      "name": "Regent Theatre",
+      "lat": 40.663433,
+      "lng": -74.214765
+    },
+    {
+      "id": "Q45095091",
+      "name": "Regun Theater",
+      "lat": 40.801609,
+      "lng": -73.949027
+    },
+    {
+      "id": "Q45102629",
+      "name": "Renaissance Theatre",
+      "lat": 40.80845,
+      "lng": -73.945117
+    },
+    {
+      "id": "Q45104393",
+      "name": "Rendezvous Cinema",
+      "lat": 40.76305,
+      "lng": -73.980337
+    },
+    {
+      "id": "Q45102641",
+      "name": "Reo Theater",
+      "lat": 40.804234,
+      "lng": -73.935458
+    },
+    {
+      "id": "Q45032646",
+      "name": "Reo Theatre",
+      "lat": 40.66959,
+      "lng": -73.906965
+    },
+    {
+      "id": "Q45034489",
+      "name": "Republic Theatre",
+      "lat": 40.711772,
+      "lng": -73.952581
+    },
+    {
+      "id": "Q45034496",
+      "name": "reRun Gastropub Theater",
+      "lat": 40.702506,
+      "lng": -73.986882
+    },
+    {
+      "id": "Q45033432",
+      "name": "Review Theatre",
+      "lat": 40.661558,
+      "lng": -73.893531
+    },
+    {
+      "id": "Q43017597",
+      "name": "Rex Theatre",
+      "lat": 40.829589,
+      "lng": -74.099563
+    },
+    {
+      "id": "Q43020449",
+      "name": "Rialto Theatre",
+      "lat": 40.73215,
+      "lng": -74.174168
+    },
+    {
+      "id": "Q45037761",
+      "name": "Rialto Theatre (1916-1935)",
+      "lat": 40.756842,
+      "lng": -73.98584
+    },
+    {
+      "id": "Q43038836",
+      "name": "Richmond Theatre",
+      "lat": 40.597704,
+      "lng": -74.165099
+    },
+    {
+      "id": "Q45104404",
+      "name": "Rick Nelson Screening Room",
+      "lat": 40.756253,
+      "lng": -73.987507
+    },
+    {
+      "id": "Q45020661",
+      "name": "Ridgewood Amusement Palace",
+      "lat": 40.707624,
+      "lng": -73.910354
+    },
+    {
+      "id": "Q45032893",
+      "name": "Ridgewood Casino Theatre",
+      "lat": 40.700392,
+      "lng": -73.92091
+    },
+    {
+      "id": "Q45020490",
+      "name": "Ridgewood Folly Theatre",
+      "lat": 40.701819,
+      "lng": -73.882366
+    },
+    {
+      "id": "Q45032283",
+      "name": "Ridgewood Hippodrome",
+      "lat": 40.672396,
+      "lng": -73.922554
+    },
+    {
+      "id": "Q45020693",
+      "name": "Ridgewood Theatre",
+      "lat": 40.700088,
+      "lng": -73.907467
+    },
+    {
+      "id": "Q45018942",
+      "name": "Riklis Theater",
+      "lat": 40.760338,
+      "lng": -73.933192
+    },
+    {
+      "id": "Q45036732",
+      "name": "Ritz Theater",
+      "lat": 40.84293,
+      "lng": -73.878766
+    },
+    {
+      "id": "Q43018245",
+      "name": "Ritz Theatre",
+      "lat": 40.866278,
+      "lng": -74.104752
+    },
+    {
+      "id": "Q45033156",
+      "name": "Rivera Theatre",
+      "lat": 40.671238,
+      "lng": -73.94316
+    },
+    {
+      "id": "Q45036779",
+      "name": "Riverdale Twin",
+      "lat": 40.906559,
+      "lng": -73.904205
+    },
+    {
+      "id": "Q43344814",
+      "name": "Riverside Galleria",
+      "lat": 40.521868,
+      "lng": -74.239943
+    },
+    {
+      "id": "Q45110126",
+      "name": "Riverside Theatre",
+      "lat": 40.79474,
+      "lng": -73.971859
+    },
+    {
+      "id": "Q45110139",
+      "name": "Riviera Theatre",
+      "lat": 40.795268,
+      "lng": -73.971476
+    },
+    {
+      "id": "Q43020661",
+      "name": "Rivoli Theater",
+      "lat": 40.728307,
+      "lng": -74.155609
+    },
+    {
+      "id": "Q43021410",
+      "name": "Rivoli Theatre",
+      "lat": 40.91876,
+      "lng": -74.173036
+    },
+    {
+      "id": "Q45110151",
+      "name": "RKO 81st Street Theatre",
+      "lat": 40.785022,
+      "lng": -73.978934
+    },
+    {
+      "id": "Q45105117",
+      "name": "RKO 86th Street Theatre",
+      "lat": 40.779826,
+      "lng": -73.955365
+    },
+    {
+      "id": "Q45033268",
+      "name": "RKO Albee Theatre",
+      "lat": 40.69123,
+      "lng": -73.982877
+    },
+    {
+      "id": "Q45020007",
+      "name": "RKO Alden Theatre",
+      "lat": 40.705556,
+      "lng": -73.79425
+    },
+    {
+      "id": "Q45032903",
+      "name": "RKO Bushwick Theatre",
+      "lat": 40.688391,
+      "lng": -73.920614
+    },
+    {
+      "id": "Q45036404",
+      "name": "RKO Castle Hill Theatre",
+      "lat": 40.834819,
+      "lng": -73.851854
+    },
+    {
+      "id": "Q45036737",
+      "name": "RKO Chester Theatre",
+      "lat": 40.839725,
+      "lng": -73.881248
+    },
+    {
+      "id": "Q45019448",
+      "name": "RKO Columbia Theater",
+      "lat": 40.602731,
+      "lng": -73.753223
+    },
+    {
+      "id": "Q45032028",
+      "name": "RKO Dyker Theater",
+      "lat": 40.621088,
+      "lng": -74.025511
+    },
+    {
+      "id": "Q45036186",
+      "name": "RKO Fordham Theatre",
+      "lat": 40.862684,
+      "lng": -73.895949
+    },
+    {
+      "id": "Q45036623",
+      "name": "RKO Franklin Theatre",
+      "lat": 40.821035,
+      "lng": -73.90108
+    },
+    {
+      "id": "Q45033751",
+      "name": "RKO Greenpoint Theatre",
+      "lat": 40.72825,
+      "lng": -73.953699
+    },
+    {
+      "id": "Q45102337",
+      "name": "RKO Hamilton Theatre",
+      "lat": 40.827154,
+      "lng": -73.95007
+    },
+    {
+      "id": "Q45107513",
+      "name": "RKO Jefferson Theatre",
+      "lat": 40.73249,
+      "lng": -73.986819
+    },
+    {
+      "id": "Q7276883",
+      "name": "RKO Keith's Theater",
+      "lat": 40.763333,
+      "lng": -73.831944
+    },
+    {
+      "id": "Q45020721",
+      "name": "RKO Madison Theatre",
+      "lat": 40.69968,
+      "lng": -73.909559
+    },
+    {
+      "id": "Q45036267",
+      "name": "RKO Marble Hill Theatre",
+      "lat": 40.87942,
+      "lng": -73.904408
+    },
+    {
+      "id": "Q45033629",
+      "name": "RKO Orpheum Theatre",
+      "lat": 40.688239,
+      "lng": -73.979321
+    },
+    {
+      "id": "Q45036318",
+      "name": "RKO Pelham Theatre",
+      "lat": 40.856869,
+      "lng": -73.867551
+    },
+    {
+      "id": "Q45101872",
+      "name": "RKO Proctor's 125th Street Theatre",
+      "lat": 40.804778,
+      "lng": -73.938414
+    },
+    {
+      "id": "Q45104433",
+      "name": "RKO Proctor's 58th Street Theatre",
+      "lat": 40.761242,
+      "lng": -73.96782
+    },
+    {
+      "id": "Q43020463",
+      "name": "RKO Proctor's Theatre",
+      "lat": 40.736137,
+      "lng": -74.174235
+    },
+    {
+      "id": "Q45101540",
+      "name": "RKO Proctor's Twenty-Third Street Theatre",
+      "lat": 40.743584,
+      "lng": -73.99436
+    },
+    {
+      "id": "Q45033985",
+      "name": "RKO Prospect Theatre",
+      "lat": 40.66901,
+      "lng": -73.98528
+    },
+    {
+      "id": "Q45036380",
+      "name": "RKO Royal Theatre",
+      "lat": 40.816717,
+      "lng": -73.915701
+    },
+    {
+      "id": "Q45032035",
+      "name": "RKO Shore Road Theatre",
+      "lat": 40.622216,
+      "lng": -74.027376
+    },
+    {
+      "id": "Q45019465",
+      "name": "RKO Strand Theatre",
+      "lat": 40.601759,
+      "lng": -73.752583
+    },
+    {
+      "id": "Q45020021",
+      "name": "Rochdale Cinema",
+      "lat": 40.679037,
+      "lng": -73.778294
+    },
+    {
+      "id": "Q45033168",
+      "name": "Rogers Theater",
+      "lat": 40.665041,
+      "lng": -73.953627
+    },
+    {
+      "id": "Q45032288",
+      "name": "Rogers Theatre",
+      "lat": 40.699287,
+      "lng": -73.938916
+    },
+    {
+      "id": "Q45107530",
+      "name": "Roma Theater",
+      "lat": 40.729099,
+      "lng": -73.983809
+    },
+    {
+      "id": "Q45032296",
+      "name": "Ronly Theatre",
+      "lat": 40.678489,
+      "lng": -73.919441
+    },
+    {
+      "id": "Q43020801",
+      "name": "Ronson Theatre",
+      "lat": 40.739262,
+      "lng": -74.196139
+    },
+    {
+      "id": "Q43015101",
+      "name": "Roosevelt Drive-In",
+      "lat": 40.73276,
+      "lng": -74.075485
+    },
+    {
+      "id": "Q43023372",
+      "name": "Roosevelt Theatre",
+      "lat": 40.765969,
+      "lng": -74.038557
+    },
+    {
+      "id": "Q45104448",
+      "name": "Rose Garden Theatre",
+      "lat": 40.762935,
+      "lng": -73.982499
+    },
+    {
+      "id": "Q45110163",
+      "name": "Rose Theatre",
+      "lat": 40.79774,
+      "lng": -73.967289
+    },
+    {
+      "id": "Q45036436",
+      "name": "Rosedale Theatre",
+      "lat": 40.831633,
+      "lng": -73.866175
+    },
+    {
+      "id": "Q45101654",
+      "name": "Rosemary Theatre",
+      "lat": 40.716485,
+      "lng": -73.995575
+    },
+    {
+      "id": "Q43015355",
+      "name": "Route 3 Drive-In",
+      "lat": 40.814565,
+      "lng": -74.109544
+    },
+    {
+      "id": "Q43015365",
+      "name": "Route 46 Drive-In",
+      "lat": 40.88994,
+      "lng": -74.097749
+    },
+    {
+      "id": "Q43018948",
+      "name": "Roxy Theater",
+      "lat": 40.726231,
+      "lng": -74.23294
+    },
+    {
+      "id": "Q43021423",
+      "name": "Royal Theater",
+      "lat": 40.91574,
+      "lng": -74.173313
+    },
+    {
+      "id": "Q43017882",
+      "name": "Royal Theatre",
+      "lat": 40.659296,
+      "lng": -74.204118
+    },
+    {
+      "id": "Q45108536",
+      "name": "Ruby Theatre",
+      "lat": 40.720004,
+      "lng": -73.988127
+    },
+    {
+      "id": "Q45033359",
+      "name": "Rugby Theatre",
+      "lat": 40.65292,
+      "lng": -73.930156
+    },
+    {
+      "id": "Q45108551",
+      "name": "Rutger Theatre",
+      "lat": 40.712407,
+      "lng": -73.989897
+    },
+    {
+      "id": "Q45101554",
+      "name": "S.V.A. Theatre",
+      "lat": 40.745927,
+      "lng": -73.999747
+    },
+    {
+      "id": "Q5935075",
+      "name": "Samuel J. Friedman Theater",
+      "lat": 40.7605,
+      "lng": -73.9867
+    },
+    {
+      "id": "Q45104462",
+      "name": "San Francisco Adult Movies",
+      "lat": 40.758139,
+      "lng": -73.985568
+    },
+    {
+      "id": "Q43063747",
+      "name": "Sands Point Theatre",
+      "lat": 40.837639,
+      "lng": -73.703077
+    },
+    {
+      "id": "Q43018957",
+      "name": "Sanford Theater",
+      "lat": 40.724601,
+      "lng": -74.241394
+    },
+    {
+      "id": "Q45032303",
+      "name": "Saratoga Theatre",
+      "lat": 40.67178,
+      "lng": -73.916769
+    },
+    {
+      "id": "Q43016388",
+      "name": "Savoy Theater",
+      "lat": 40.782432,
+      "lng": -74.199248
+    },
+    {
+      "id": "Q45020040",
+      "name": "Savoy Theatre",
+      "lat": 40.702392,
+      "lng": -73.803421
+    },
+    {
+      "id": "Q45110177",
+      "name": "Schuyler Theatre",
+      "lat": 40.786056,
+      "lng": -73.978778
+    },
+    {
+      "id": "Q43019960",
+      "name": "Screening Zone",
+      "lat": 40.815243,
+      "lng": -74.219539
+    },
+    {
+      "id": "Q45033003",
+      "name": "Seaview Theater",
+      "lat": 40.642005,
+      "lng": -73.898828
+    },
+    {
+      "id": "Q45032652",
+      "name": "Select Theater",
+      "lat": 40.669833,
+      "lng": -73.911505
+    },
+    {
+      "id": "Q45032378",
+      "name": "Senate Theatre",
+      "lat": 40.6143,
+      "lng": -73.995032
+    },
+    {
+      "id": "Q43018089",
+      "name": "Sharon Cinema",
+      "lat": 40.832109,
+      "lng": -73.982982
+    },
+    {
+      "id": "Q45034141",
+      "name": "Sheepshead Theatre",
+      "lat": 40.585482,
+      "lng": -73.951662
+    },
+    {
+      "id": "Q45032658",
+      "name": "Sheffield Theatre",
+      "lat": 40.669606,
+      "lng": -73.896317
+    },
+    {
+      "id": "Q45034147",
+      "name": "Sheldon Theatre",
+      "lat": 40.586649,
+      "lng": -73.952497
+    },
+    {
+      "id": "Q45033044",
+      "name": "Sheridan Theatre",
+      "lat": 40.678752,
+      "lng": -73.866863
+    },
+    {
+      "id": "Q45104490",
+      "name": "Show Palace Theatre",
+      "lat": 40.757635,
+      "lng": -73.989472
+    },
+    {
+      "id": "Q45108568",
+      "name": "Silver Star Playhouse",
+      "lat": 40.713271,
+      "lng": -73.999018
+    },
+    {
+      "id": "Q45104502",
+      "name": "Sony Columbus Circle",
+      "lat": 40.767955,
+      "lng": -73.98236
+    },
+    {
+      "id": "Q43063752",
+      "name": "Soundview Cinemas",
+      "lat": 40.843473,
+      "lng": -73.704695
+    },
+    {
+      "id": "Q43016159",
+      "name": "South Cove Stadium 12",
+      "lat": 40.668119,
+      "lng": -74.105895
+    },
+    {
+      "id": "Q45034506",
+      "name": "Spectacle Theater",
+      "lat": 40.712901,
+      "lng": -73.963505
+    },
+    {
+      "id": "Q45018957",
+      "name": "Square Theatre",
+      "lat": 40.771578,
+      "lng": -73.9256
+    },
+    {
+      "id": "Q45020956",
+      "name": "St. Albans Theatre",
+      "lat": 40.692182,
+      "lng": -73.761126
+    },
+    {
+      "id": "Q45032562",
+      "name": "St. George Playhouse",
+      "lat": 40.698056,
+      "lng": -73.9925
+    },
+    {
+      "id": "Q14707335",
+      "name": "St. George Theater",
+      "lat": 40.642,
+      "lng": -74.0775
+    },
+    {
+      "id": "Q45107543",
+      "name": "St. Marks Cinema",
+      "lat": 40.728868,
+      "lng": -73.987916
+    },
+    {
+      "id": "Q45033032",
+      "name": "St. Thomas Aquinas Airdrome",
+      "lat": 40.670311,
+      "lng": -73.988611
+    },
+    {
+      "id": "Q45032667",
+      "name": "Stadium Theatre",
+      "lat": 40.669129,
+      "lng": -73.911816
+    },
+    {
+      "id": "Q45032910",
+      "name": "Standard Theatre",
+      "lat": 40.703042,
+      "lng": -73.917674
+    },
+    {
+      "id": "Q1281874",
+      "name": "Stanley Theater",
+      "lat": 40.7332,
+      "lng": -74.0621
+    },
+    {
+      "id": "Q45032043",
+      "name": "Stanley Theatre",
+      "lat": 40.629738,
+      "lng": -74.022167
+    },
+    {
+      "id": "Q45033277",
+      "name": "Star Theatre",
+      "lat": 40.691938,
+      "lng": -73.987285
+    },
+    {
+      "id": "Q45032918",
+      "name": "Starr Theater",
+      "lat": 40.702894,
+      "lng": -73.925505
+    },
+    {
+      "id": "Q43017893",
+      "name": "State Theater",
+      "lat": 40.65448,
+      "lng": -74.198467
+    },
+    {
+      "id": "Q43023382",
+      "name": "State Theatre",
+      "lat": 40.781479,
+      "lng": -74.021947
+    },
+    {
+      "id": "Q43031454",
+      "name": "Staten Island Drive-In",
+      "lat": 40.579297,
+      "lng": -74.169336
+    },
+    {
+      "id": "Q43062794",
+      "name": "Staten Theatre",
+      "lat": 40.573893,
+      "lng": -74.115832
+    },
+    {
+      "id": "Q45020751",
+      "name": "Steeplechase Theatre",
+      "lat": 40.577247,
+      "lng": -73.844851
+    },
+    {
+      "id": "Q45018974",
+      "name": "Steinway Theatre",
+      "lat": 40.761166,
+      "lng": -73.917607
+    },
+    {
+      "id": "Q45032382",
+      "name": "Stillwell Theatre",
+      "lat": 40.59899,
+      "lng": -73.98921
+    },
+    {
+      "id": "Q45110195",
+      "name": "Stoddard Theatre",
+      "lat": 40.790694,
+      "lng": -73.974815
+    },
+    {
+      "id": "Q45032672",
+      "name": "Stone Theatre",
+      "lat": 40.669591,
+      "lng": -73.906803
+    },
+    {
+      "id": "Q43023394",
+      "name": "Strand Theater",
+      "lat": 40.765026,
+      "lng": -74.034181
+    },
+    {
+      "id": "Q43018854",
+      "name": "Strand Theatre",
+      "lat": 40.749036,
+      "lng": -74.027429
+    },
+    {
+      "id": "Q78907289",
+      "name": "Stuart Cinema & Cafe",
+      "lat": 40.729315,
+      "lng": -73.959849
+    },
+    {
+      "id": "Q45033650",
+      "name": "Subway Theater",
+      "lat": 40.693609,
+      "lng": -73.982861
+    },
+    {
+      "id": "Q45032311",
+      "name": "Sumner Theatre",
+      "lat": 40.68854,
+      "lng": -73.93879
+    },
+    {
+      "id": "Q45032926",
+      "name": "Sun Ray Theatre",
+      "lat": 40.680383,
+      "lng": -73.906033
+    },
+    {
+      "id": "Q45108580",
+      "name": "Sun Sing Theatre",
+      "lat": 40.713638,
+      "lng": -73.993873
+    },
+    {
+      "id": "Q45034520",
+      "name": "Sun Theatre",
+      "lat": 40.702819,
+      "lng": -73.945512
+    },
+    {
+      "id": "Q45020995",
+      "name": "Sunnyside Theatre",
+      "lat": 40.744704,
+      "lng": -73.910782
+    },
+    {
+      "id": "Q43032042",
+      "name": "Sunrise Drive-In",
+      "lat": 40.663662,
+      "lng": -73.726793
+    },
+    {
+      "id": "Q43065576",
+      "name": "Sunrise Multiplex Cinemas",
+      "lat": 40.663662,
+      "lng": -73.726793
+    },
+    {
+      "id": "Q45102666",
+      "name": "Sunset Theater",
+      "lat": 40.81046,
+      "lng": -73.951904
+    },
+    {
+      "id": "Q45102096",
+      "name": "Superior Theatre",
+      "lat": 40.743502,
+      "lng": -73.979403
+    },
+    {
+      "id": "Q45032678",
+      "name": "Supreme Theater",
+      "lat": 40.664192,
+      "lng": -73.897716
+    },
+    {
+      "id": "Q45033120",
+      "name": "Surf Theater",
+      "lat": 40.573098,
+      "lng": -73.997882
+    },
+    {
+      "id": "Q45020825",
+      "name": "Surfside Twins",
+      "lat": 40.582279,
+      "lng": -73.828801
+    },
+    {
+      "id": "Q45036245",
+      "name": "Surrey Theatre",
+      "lat": 40.843481,
+      "lng": -73.913677
+    },
+    {
+      "id": "Q45032707",
+      "name": "Sutter Theatre",
+      "lat": 40.665409,
+      "lng": -73.923127
+    },
+    {
+      "id": "Q45104526",
+      "name": "Sutton Theater",
+      "lat": 40.760046,
+      "lng": -73.967008
+    },
+    {
+      "id": "Q105821354",
+      "name": "Symphony Auditorium",
+      "lat": 40.731845,
+      "lng": -74.174764
+    },
+    {
+      "id": "Q45110211",
+      "name": "Symphony Space/Leonard Nimoy Thalia Theatre",
+      "lat": 40.793933,
+      "lng": -73.972639
+    },
+    {
+      "id": "Q45110229",
+      "name": "Symphony Space/Peter Jay Sharp Theatre",
+      "lat": 40.79397,
+      "lng": -73.972414
+    },
+    {
+      "id": "Q45032934",
+      "name": "Syndicated Theater",
+      "lat": 40.704991,
+      "lng": -73.933104
+    },
+    {
+      "id": "Q43022799",
+      "name": "Teaneck Cinemas",
+      "lat": 40.889744,
+      "lng": -74.023525
+    },
+    {
+      "id": "Q45101894",
+      "name": "Teatro Hispano",
+      "lat": 40.800762,
+      "lng": -73.945946
+    },
+    {
+      "id": "Q43020472",
+      "name": "Terminal Theatre",
+      "lat": 40.737962,
+      "lng": -74.170155
+    },
+    {
+      "id": "Q45101566",
+      "name": "Terrace Theater",
+      "lat": 40.74613,
+      "lng": -74.000441
+    },
+    {
+      "id": "Q80477624",
+      "name": "The Landmark at 57 West",
+      "lat": 40.77159,
+      "lng": -73.99368
+    },
+    {
+      "id": "Q131382414",
+      "name": "The Public Theater building",
+      "lat": 40.728889,
+      "lng": -73.991944
+    },
+    {
+      "id": "Q45107558",
+      "name": "Theatre 80 St. Marks",
+      "lat": 40.727639,
+      "lng": -73.985778
+    },
+    {
+      "id": "Q45102257",
+      "name": "Theatre Unique",
+      "lat": 40.733707,
+      "lng": -73.988219
+    },
+    {
+      "id": "Q45032320",
+      "name": "Throop Theater",
+      "lat": 40.69598,
+      "lng": -73.944121
+    },
+    {
+      "id": "Q45032686",
+      "name": "Tiffany Theatre",
+      "lat": 40.662928,
+      "lng": -73.910118
+    },
+    {
+      "id": "Q45033534",
+      "name": "Tilden Airdrome",
+      "lat": 40.648542,
+      "lng": -73.949329
+    },
+    {
+      "id": "Q45033104",
+      "name": "Tilyou Theatre",
+      "lat": 40.575843,
+      "lng": -73.984109
+    },
+    {
+      "id": "Q45036641",
+      "name": "Time Theatre",
+      "lat": 40.822438,
+      "lng": -73.916736
+    },
+    {
+      "id": "Q45104538",
+      "name": "Times Theatre",
+      "lat": 40.757266,
+      "lng": -73.989934
+    },
+    {
+      "id": "Q45032942",
+      "name": "Tip Top Theatre",
+      "lat": 40.695708,
+      "lng": -73.916914
+    },
+    {
+      "id": "Q43020592",
+      "name": "Tivoli Theater",
+      "lat": 40.754455,
+      "lng": -74.193766
+    },
+    {
+      "id": "Q43019035",
+      "name": "Tivoli Theatre",
+      "lat": 40.71618,
+      "lng": -74.069679
+    },
+    {
+      "id": "Q4742962",
+      "name": "Todd Haimes Theatre",
+      "lat": 40.756833,
+      "lng": -73.988056
+    },
+    {
+      "id": "Q45032326",
+      "name": "Tompkins Theater",
+      "lat": 40.686862,
+      "lng": -73.944259
+    },
+    {
+      "id": "Q45107575",
+      "name": "Tompkins Vaudeville Theatre",
+      "lat": 40.724792,
+      "lng": -73.981222
+    },
+    {
+      "id": "Q43015430",
+      "name": "Totowa Drive-In",
+      "lat": 40.892528,
+      "lng": -74.227765
+    },
+    {
+      "id": "Q45033992",
+      "name": "Touraine Theatre",
+      "lat": 40.672725,
+      "lng": -73.976887
+    },
+    {
+      "id": "Q43062897",
+      "name": "Town Theatre",
+      "lat": 40.906609,
+      "lng": -73.78487
+    },
+    {
+      "id": "Q45034529",
+      "name": "Towne Theatre",
+      "lat": 40.704426,
+      "lng": -73.989524
+    },
+    {
+      "id": "Q45104568",
+      "name": "Trans-Lux 52nd Street Theatre",
+      "lat": 40.757521,
+      "lng": -73.9717
+    },
+    {
+      "id": "Q45109525",
+      "name": "Trans-Lux 60th Street",
+      "lat": 40.763755,
+      "lng": -73.971318
+    },
+    {
+      "id": "Q45109538",
+      "name": "Trans-Lux 85th Street Theatre",
+      "lat": 40.780042,
+      "lng": -73.959448
+    },
+    {
+      "id": "Q45033292",
+      "name": "Trans-Lux Fulton Street",
+      "lat": 40.689352,
+      "lng": -73.982054
+    },
+    {
+      "id": "Q45104580",
+      "name": "Trans-Lux Modern Theatre, Madison Avenue",
+      "lat": 40.763202,
+      "lng": -73.971548
+    },
+    {
+      "id": "Q45104593",
+      "name": "Trans-Lux Modern Theatres, Broadway",
+      "lat": 40.761052,
+      "lng": -73.984649
+    },
+    {
+      "id": "Q45105339",
+      "name": "Trans-Lux Southstreet Seaport Cinema",
+      "lat": 40.707287,
+      "lng": -74.002612
+    },
+    {
+      "id": "Q45033353",
+      "name": "Traymore Theater",
+      "lat": 40.618762,
+      "lng": -73.930258
+    },
+    {
+      "id": "Q7838166",
+      "name": "Tremont Theatre",
+      "lat": 40.849,
+      "lng": -73.899
+    },
+    {
+      "id": "Q45034153",
+      "name": "Triangle Theatre",
+      "lat": 40.608004,
+      "lng": -73.960619
+    },
+    {
+      "id": "Q45104820",
+      "name": "Tribeca Cinemas",
+      "lat": 40.721666,
+      "lng": -74.006321
+    },
+    {
+      "id": "Q45105350",
+      "name": "Tribune Theatre",
+      "lat": 40.711697,
+      "lng": -74.005774
+    },
+    {
+      "id": "Q45033113",
+      "name": "Trump Cinema",
+      "lat": 40.579872,
+      "lng": -73.974619
+    },
+    {
+      "id": "Q45020326",
+      "name": "Trylon Theater",
+      "lat": 40.727965,
+      "lng": -73.855178
+    },
+    {
+      "id": "Q45104721",
+      "name": "Tudor Theatre",
+      "lat": 40.750482,
+      "lng": -73.974687
+    },
+    {
+      "id": "Q45032538",
+      "name": "Tuxedo Theater",
+      "lat": 40.576841,
+      "lng": -73.968679
+    },
+    {
+      "id": "Q45032497",
+      "name": "Tuxedo Theatre",
+      "lat": 40.631977,
+      "lng": -73.994845
+    },
+    {
+      "id": "Q43021446",
+      "name": "U.S. Theatre",
+      "lat": 40.915422,
+      "lng": -74.17368
+    },
+    {
+      "id": "Q45033297",
+      "name": "UA Court Street Stadium 12",
+      "lat": 40.690756,
+      "lng": -73.991876
+    },
+    {
+      "id": "Q45020312",
+      "name": "UA Crossbay",
+      "lat": 40.680783,
+      "lng": -73.844322
+    },
+    {
+      "id": "Q45020265",
+      "name": "UA Crossbay II",
+      "lat": 40.680626,
+      "lng": -73.846693
+    },
+    {
+      "id": "Q45033306",
+      "name": "UA Duffield Twin Theatre",
+      "lat": 40.690634,
+      "lng": -73.984399
+    },
+    {
+      "id": "Q45019000",
+      "name": "UA Kaufman Astoria Cinema 14",
+      "lat": 40.754583,
+      "lng": -73.923333
+    },
+    {
+      "id": "Q43344837",
+      "name": "UA Movies at Staten Island 14",
+      "lat": 40.588024,
+      "lng": -74.191524
+    },
+    {
+      "id": "Q45019578",
+      "name": "UA Quartet",
+      "lat": 40.762337,
+      "lng": -73.80517
+    },
+    {
+      "id": "Q45034159",
+      "name": "UA Sheepshead Bay Stadium 14",
+      "lat": 40.586166,
+      "lng": -73.9305
+    },
+    {
+      "id": "Q43041177",
+      "name": "UA Staten Island Stadium 16 RPX",
+      "lat": 40.625923,
+      "lng": -74.172833
+    },
+    {
+      "id": "Q43062902",
+      "name": "Union Avenue Theatre",
+      "lat": 40.909624,
+      "lng": -73.794217
+    },
+    {
+      "id": "Q45101772",
+      "name": "Union Theatre",
+      "lat": 40.759837,
+      "lng": -73.995926
+    },
+    {
+      "id": "Q45109551",
+      "name": "United Artists 64th & Second",
+      "lat": 40.763317,
+      "lng": -73.961844
+    },
+    {
+      "id": "Q45109569",
+      "name": "United Artists East 85th Street",
+      "lat": 40.776023,
+      "lng": -73.950027
+    },
+    {
+      "id": "Q7889018",
+      "name": "United Palace",
+      "lat": 40.846389,
+      "lng": -73.938056
+    },
+    {
+      "id": "Q45036771",
+      "name": "University Theatre",
+      "lat": 40.862724,
+      "lng": -73.902512
+    },
+    {
+      "id": "Q45105000",
+      "name": "Uptown Theatre",
+      "lat": 40.842405,
+      "lng": -73.939386
+    },
+    {
+      "id": "Q45032332",
+      "name": "Utica Theater",
+      "lat": 40.670622,
+      "lng": -73.932556
+    },
+    {
+      "id": "Q45019926",
+      "name": "Utopia Theater",
+      "lat": 40.728885,
+      "lng": -73.781948
+    },
+    {
+      "id": "Q45036200",
+      "name": "Valentine Theatre",
+      "lat": 40.862429,
+      "lng": -73.895343
+    },
+    {
+      "id": "Q45034252",
+      "name": "Vanity Theatre",
+      "lat": 40.641636,
+      "lng": -74.01412
+    },
+    {
+      "id": "Q45107588",
+      "name": "Variety Theatre",
+      "lat": 40.73291,
+      "lng": -73.987706
+    },
+    {
+      "id": "Q45108615",
+      "name": "Venice Theatre",
+      "lat": 40.713208,
+      "lng": -73.999399
+    },
+    {
+      "id": "Q45104603",
+      "name": "Venus Theater",
+      "lat": 40.759231,
+      "lng": -73.98797
+    },
+    {
+      "id": "Q45032693",
+      "name": "Vermont Theatre",
+      "lat": 40.672099,
+      "lng": -73.894409
+    },
+    {
+      "id": "Q45020159",
+      "name": "Vernon Theatre",
+      "lat": 40.742579,
+      "lng": -73.953408
+    },
+    {
+      "id": "Q43023472",
+      "name": "Verona Theater",
+      "lat": 40.834827,
+      "lng": -74.259843
+    },
+    {
+      "id": "Q45105145",
+      "name": "Verona Theatre",
+      "lat": 40.791859,
+      "lng": -73.941512
+    },
+    {
+      "id": "Q45032336",
+      "name": "Victoria Theater",
+      "lat": 40.670639,
+      "lng": -73.933016
+    },
+    {
+      "id": "Q45019090",
+      "name": "Victory Theater",
+      "lat": 40.76985,
+      "lng": -73.789913
+    },
+    {
+      "id": "Q45032387",
+      "name": "Victory Theatre",
+      "lat": 40.620651,
+      "lng": -74.007079
+    },
+    {
+      "id": "Q29097592",
+      "name": "Village East Cinema",
+      "lat": 40.730917,
+      "lng": -73.986222
+    },
+    {
+      "id": "Q45101577",
+      "name": "Village Theatre",
+      "lat": 40.74325,
+      "lng": -74.000188
+    },
+    {
+      "id": "Q45033857",
+      "name": "Vogue Theatre",
+      "lat": 40.621646,
+      "lng": -73.964213
+    },
+    {
+      "id": "Q45105010",
+      "name": "Wadsworth Theatre",
+      "lat": 40.849604,
+      "lng": -73.934866
+    },
+    {
+      "id": "Q45032950",
+      "name": "Wagner Theater",
+      "lat": 40.703958,
+      "lng": -73.918701
+    },
+    {
+      "id": "Q45036790",
+      "name": "Wakefield Theatre",
+      "lat": 40.89389,
+      "lng": -73.856908
+    },
+    {
+      "id": "Q45032699",
+      "name": "Waldorf Theatre",
+      "lat": 40.655003,
+      "lng": -73.916999
+    },
+    {
+      "id": "Q45033814",
+      "name": "Walker Theater",
+      "lat": 40.619265,
+      "lng": -73.989304
+    },
+    {
+      "id": "Q7965343",
+      "name": "Walter Kerr Theatre",
+      "lat": 40.760556,
+      "lng": -73.985556
+    },
+    {
+      "id": "Q3565863",
+      "name": "Walter Reade Theater",
+      "lat": 40.7735,
+      "lng": -73.9827
+    },
+    {
+      "id": "Q43017905",
+      "name": "Walton Theatre",
+      "lat": 40.651921,
+      "lng": -74.191385
+    },
+    {
+      "id": "Q45036442",
+      "name": "Ward Theatre",
+      "lat": 40.828661,
+      "lng": -73.877978
+    },
+    {
+      "id": "Q45104626",
+      "name": "Warners' Theatre",
+      "lat": 40.762501,
+      "lng": -73.98332
+    },
+    {
+      "id": "Q45034021",
+      "name": "Washington Moving Picture Theatre",
+      "lat": 40.678528,
+      "lng": -73.963854
+    },
+    {
+      "id": "Q45033313",
+      "name": "Washington Street Theater",
+      "lat": 40.70078,
+      "lng": -73.989705
+    },
+    {
+      "id": "Q45033657",
+      "name": "Washington Theatre",
+      "lat": 40.693306,
+      "lng": -73.9663
+    },
+    {
+      "id": "Q45101588",
+      "name": "Weber's Theatre",
+      "lat": 40.74669,
+      "lng": -73.98895
+    },
+    {
+      "id": "Q45036648",
+      "name": "Webster Theatre",
+      "lat": 40.830485,
+      "lng": -73.910139
+    },
+    {
+      "id": "Q45033321",
+      "name": "Werba's Brooklyn Theatre",
+      "lat": 40.689208,
+      "lng": -73.980993
+    },
+    {
+      "id": "Q43020822",
+      "name": "West End Theatre",
+      "lat": 40.737187,
+      "lng": -74.210032
+    },
+    {
+      "id": "Q45036425",
+      "name": "Westchester Theatre",
+      "lat": 40.836103,
+      "lng": -73.847543
+    },
+    {
+      "id": "Q45107792",
+      "name": "Westworld Cinema",
+      "lat": 40.729844,
+      "lng": -74.010721
+    },
+    {
+      "id": "Q45036071",
+      "name": "Whitestone Drive-In",
+      "lat": 40.830097,
+      "lng": -73.838598
+    },
+    {
+      "id": "Q45036757",
+      "name": "Whitestone Multiplex Cinemas",
+      "lat": 40.828732,
+      "lng": -73.842416
+    },
+    {
+      "id": "Q45020737",
+      "name": "Whitney Theatre",
+      "lat": 40.705871,
+      "lng": -73.896073
+    },
+    {
+      "id": "Q8006562",
+      "name": "Williams Center",
+      "lat": 40.8271,
+      "lng": -74.103
+    },
+    {
+      "id": "Q20880928",
+      "name": "Williamsburg Cinemas",
+      "lat": 40.714144,
+      "lng": -73.959859
+    },
+    {
+      "id": "Q45034535",
+      "name": "Williamsburg Theatre",
+      "lat": 40.708875,
+      "lng": -73.958405
+    },
+    {
+      "id": "Q45032956",
+      "name": "Willoughby Theater",
+      "lat": 40.702171,
+      "lng": -73.925093
+    },
+    {
+      "id": "Q45034543",
+      "name": "Wilson Theater",
+      "lat": 40.706866,
+      "lng": -73.961177
+    },
+    {
+      "id": "Q45032507",
+      "name": "Windsor Theater",
+      "lat": 40.637391,
+      "lng": -73.982457
+    },
+    {
+      "id": "Q43023754",
+      "name": "Windsor Theatre",
+      "lat": 40.786233,
+      "lng": -74.23239
+    },
+    {
+      "id": "Q45108632",
+      "name": "Windsor Theatre, Grand Street",
+      "lat": 40.715775,
+      "lng": -73.986103
+    },
+    {
+      "id": "Q45108648",
+      "name": "Winston Theatre, Clinton Street",
+      "lat": 40.720958,
+      "lng": -73.984133
+    },
+    {
+      "id": "Q3569403",
+      "name": "Winter Garden Theatre",
+      "lat": 40.761667,
+      "lng": -73.983611
+    },
+    {
+      "id": "Q45033756",
+      "name": "Winthrop Theater",
+      "lat": 40.723085,
+      "lng": -73.944035
+    },
+    {
+      "id": "Q45104641",
+      "name": "Wonderland Theatre",
+      "lat": 40.757439,
+      "lng": -73.985807
+    },
+    {
+      "id": "Q45032963",
+      "name": "Woodrow Theater",
+      "lat": 40.689505,
+      "lng": -73.906593
+    },
+    {
+      "id": "Q45104656",
+      "name": "World Theatre",
+      "lat": 40.759845,
+      "lng": -73.982215
+    },
+    {
+      "id": "Q45032971",
+      "name": "Wyckoff Theater",
+      "lat": 40.701485,
+      "lng": -73.91457
+    },
+    {
+      "id": "Q45101146",
+      "name": "York Theatre",
+      "lat": 40.762838,
+      "lng": -73.959789
+    },
+    {
+      "id": "Q45036249",
+      "name": "Zenith Theatre",
+      "lat": 40.840476,
+      "lng": -73.918403
+    }
+  ]
+}

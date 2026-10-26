@@ -1,1 +1,42 @@
-{ "category": "zoo", "source": "none", "places": [] }
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q688446",
+      "name": "Knie's Kinderzoo",
+      "lat": 47.223652,
+      "lng": 8.821989
+    },
+    {
+      "id": "Q2570812",
+      "name": "Langenberg Wildlife Park",
+      "lat": 47.2928,
+      "lng": 8.52917
+    },
+    {
+      "id": "Q21973904",
+      "name": "Plättli Zoo",
+      "lat": 47.560556,
+      "lng": 8.915833
+    },
+    {
+      "id": "Q1372195",
+      "name": "Wildpark Bruderhaus",
+      "lat": 47.4772,
+      "lng": 8.72619
+    },
+    {
+      "id": "Q220109",
+      "name": "Zürich Zoo",
+      "lat": 47.385,
+      "lng": 8.573056
+    }
+  ]
+}

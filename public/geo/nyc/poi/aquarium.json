@@ -1,1 +1,24 @@
-{ "category": "aquarium", "source": "none", "places": [] }
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": {
+    "south": 40.49,
+    "west": -74.26,
+    "north": 40.92,
+    "east": -73.7
+  },
+  "places": [
+    {
+      "id": "Q1049423",
+      "name": "Castle Clinton",
+      "lat": 40.70348,
+      "lng": -74.01681
+    },
+    {
+      "id": "Q1060884",
+      "name": "New York Aquarium",
+      "lat": 40.5743,
+      "lng": -73.9751
+    }
+  ]
+}

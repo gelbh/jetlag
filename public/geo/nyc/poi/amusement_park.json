@@ -1,1 +1,90 @@
-{ "category": "amusement_park", "source": "none", "places": [] }
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 40.49,
+    "west": -74.26,
+    "north": 40.92,
+    "east": -73.7
+  },
+  "places": [
+    {
+      "id": "Q4875870",
+      "name": "Beachland Amusements",
+      "lat": 40.591603,
+      "lng": -74.068104
+    },
+    {
+      "id": "Q5259266",
+      "name": "Deno's Wonder Wheel Amusement Park",
+      "lat": 40.5743,
+      "lng": -73.9792
+    },
+    {
+      "id": "Q3039284",
+      "name": "Dreamland",
+      "lat": 40.574444,
+      "lng": -73.976944
+    },
+    {
+      "id": "Q85757654",
+      "name": "DreamWorks Water Park",
+      "lat": 40.807101,
+      "lng": -74.069175
+    },
+    {
+      "id": "Q49494388",
+      "name": "Golden City Amusement Park",
+      "lat": 40.63,
+      "lng": -73.885833
+    },
+    {
+      "id": "Q924944",
+      "name": "Luna Park",
+      "lat": 40.577778,
+      "lng": -73.978611
+    },
+    {
+      "id": "Q14706862",
+      "name": "Magic Towne House",
+      "lat": 40.7627,
+      "lng": -73.9661
+    },
+    {
+      "id": "Q3361454",
+      "name": "Palisades Amusement Park",
+      "lat": 40.8281,
+      "lng": -73.9778
+    },
+    {
+      "id": "Q3476665",
+      "name": "Sea Lion Park",
+      "lat": 40.5775,
+      "lng": -73.979
+    },
+    {
+      "id": "Q18392862",
+      "name": "Starin's Glen Island",
+      "lat": 40.8852,
+      "lng": -73.7838
+    },
+    {
+      "id": "Q7602080",
+      "name": "Starlight Park",
+      "lat": 40.837,
+      "lng": -73.879
+    },
+    {
+      "id": "Q741612",
+      "name": "Steeplechase Park",
+      "lat": 40.574167,
+      "lng": -73.980556
+    },
+    {
+      "id": "Q7927217",
+      "name": "Victorian Gardens",
+      "lat": 40.7686,
+      "lng": -73.9773
+    }
+  ]
+}
