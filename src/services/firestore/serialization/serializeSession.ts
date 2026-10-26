@@ -1,5 +1,6 @@
 import type { TimeTrapRecord } from "@/domain/expansion/timeTraps";
 import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
+import { normalizeTransitStationFilter } from "@/domain/map/transit";
 import { parseRegionPackId } from "@/domain/regions/regionPack";
 import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
 import type { SessionMode } from "@/domain/session/castleSiege/mode";
@@ -339,8 +340,9 @@ export function buildSessionDocument(
     payload.transitMetroId = transitMetroId;
   }
 
-  if (options?.transitStationFilter && options.transitStationFilter !== "all") {
-    payload.transitStationFilter = options.transitStationFilter;
+  const transitStationFilter = normalizeTransitStationFilter(options?.transitStationFilter);
+  if (transitStationFilter !== "all") {
+    payload.transitStationFilter = transitStationFilter;
   }
 
   if (hostAppVersion) {
@@ -451,16 +453,7 @@ export function deserializeSessionFromFirestore(
     tier: parseSessionTier(document.tier),
     transitMetroId:
       typeof document.transitMetroId === "string" ? document.transitMetroId : undefined,
-    transitStationFilter:
-      document.transitStationFilter === "all" ||
-      document.transitStationFilter === "rail" ||
-      document.transitStationFilter === "metro" ||
-      document.transitStationFilter === "tram" ||
-      document.transitStationFilter === "bus" ||
-      document.transitStationFilter === "ferry" ||
-      document.transitStationFilter === "other"
-        ? document.transitStationFilter
-        : undefined,
+    transitStationFilter: normalizeTransitStationFilter(document.transitStationFilter),
     endedAt: typeof document.endedAt === "string" ? document.endedAt : undefined,
     status:
       document.status === "active" || document.status === "ended" ? document.status : undefined,

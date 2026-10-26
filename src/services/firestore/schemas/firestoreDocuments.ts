@@ -46,7 +46,11 @@ export const sessionDocumentSchema = z
     tier: z.enum(["free", "premium"]).optional(),
     transitMetroId: z.string().optional(),
     transitStationFilter: z
-      .enum(["all", "rail", "metro", "tram", "bus", "ferry", "other"])
+      .union([
+        z.literal("all"),
+        z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"]),
+        z.array(z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"])),
+      ])
       .optional(),
     endedAt: z.string().optional(),
     status: z.enum(["active", "ended"]).optional(),

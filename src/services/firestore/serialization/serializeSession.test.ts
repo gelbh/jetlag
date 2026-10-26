@@ -150,7 +150,7 @@ describe("serializeSession", () => {
     expect(payload.tier).toBe("premium");
   });
 
-  it("omits transitStationFilter all and round-trips metro", () => {
+  it("writes sorted mode array and omits all", () => {
     const omitted = buildSessionDocument(
       "ALL1",
       sampleGameArea,
@@ -168,6 +168,32 @@ describe("serializeSession", () => {
     expect(omitted).not.toHaveProperty("transitStationFilter");
     expect(omitted.transitMetroId).toBe("sydney");
 
+    const multi = buildSessionDocument(
+      "MUL1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      "sydney",
+      "seeker",
+      "medium",
+      {},
+      undefined,
+      undefined,
+      { transitStationFilter: ["tram", "metro"] },
+    );
+    expect(multi.transitStationFilter).toEqual(["metro", "tram"]);
+
+    const restoredOmitted = deserializeSessionFromFirestore("sess-2", {
+      ...omitted,
+      code: "ALL1",
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
+    });
+    expect(restoredOmitted.transitStationFilter).toBe("all");
+  });
+
+  it("normalizes legacy string on restore", () => {
     const withMetro = buildSessionDocument(
       "MET1",
       sampleGameArea,
@@ -180,25 +206,45 @@ describe("serializeSession", () => {
       {},
       undefined,
       undefined,
-      { transitStationFilter: "metro" },
+      { transitStationFilter: ["metro"] },
     );
-    expect(withMetro.transitStationFilter).toBe("metro");
+    expect(withMetro.transitStationFilter).toEqual(["metro"]);
 
     const restored = deserializeSessionFromFirestore("sess-1", {
       ...withMetro,
       code: "MET1",
       hostUid: "host-uid",
       createdAt: "2026-05-14T00:00:00.000Z",
+      // Legacy wire shape: single mode string
+      transitStationFilter: "metro",
     });
-    expect(restored.transitStationFilter).toBe("metro");
+    expect(restored.transitStationFilter).toEqual(["metro"]);
+  });
 
-    const restoredOmitted = deserializeSessionFromFirestore("sess-2", {
-      ...omitted,
-      code: "ALL1",
+  it("accepts funicular in array", () => {
+    const multi = buildSessionDocument(
+      "FUN1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      "sydney",
+      "seeker",
+      "medium",
+      {},
+      undefined,
+      undefined,
+      { transitStationFilter: ["funicular"] },
+    );
+    expect(multi.transitStationFilter).toEqual(["funicular"]);
+
+    const restored = deserializeSessionFromFirestore("sess-fun", {
+      ...multi,
+      code: "FUN1",
       hostUid: "host-uid",
       createdAt: "2026-05-14T00:00:00.000Z",
     });
-    expect(restoredOmitted.transitStationFilter).toBeUndefined();
+    expect(restored.transitStationFilter).toEqual(["funicular"]);
   });
 
   it("omits pack customMatchingAreas from Firestore create payload when regionPackId is set", () => {

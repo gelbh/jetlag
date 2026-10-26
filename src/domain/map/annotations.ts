@@ -40,7 +40,7 @@ import type { DistanceUnit } from "./distance";
 import { DEFAULT_RADIUS_METERS } from "./distance";
 import type { MapTool } from "./mapToolTypes";
 import type { PoiPinCategoryId } from "./poiPinCategories";
-import type { TransitRouteFilter } from "./transit";
+import type { TransitStationFilter } from "./transit";
 
 export type { SessionMode } from "../session/castleSiege/mode";
 export type { CastleSiegeRoles, CastleSiegeTeamRole } from "../session/castleSiege/teamRole";
@@ -186,7 +186,7 @@ export interface SessionRecord {
   tier?: SessionTier;
   transitMetroId?: string;
   /** Filters GTFS stations for hiding zone, Measuring rail_station, Matching transit_line. */
-  transitStationFilter?: TransitRouteFilter;
+  transitStationFilter?: TransitStationFilter;
   endedAt?: string;
   status?: "active" | "ended";
   timerAccumulatedMs?: number;
