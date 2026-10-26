@@ -100,7 +100,8 @@ async function main() {
   );
   await writeFile(
     path.join(outDir, "coastline.json"),
-    `${JSON.stringify({ source: "none", bbox: box, segments: [] }, null, 2)}\n`,
+    // stub (not none): empty bundle still allows Overpass at runtime (London/Sydney pattern).
+    `${JSON.stringify({ source: "stub", bbox: box, segments: [] }, null, 2)}\n`,
   );
   await writeFile(
     path.join(outDir, "international_border.json"),
@@ -120,7 +121,7 @@ Sea level seed
 - Open-Meteo elevation API.
 
 Coastline
-- Harbor city stub (empty segments; IJ/Markermeer not bundled as coastline).
+- Harbor city stub source (empty segments; IJ/Markermeer not bundled; coastline via Overpass in gameplay).
 
 International border
 - Municipality extent stub (empty segments).

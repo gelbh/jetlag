@@ -28,6 +28,10 @@ const PACK_IDS = [
   "brussels",
   "brisbane",
   "berlin",
+  "singapore",
+  "utrecht",
+  "wroclaw",
+  "amsterdam",
 ];
 
 const PACK_BBOXES = {
@@ -80,6 +84,30 @@ const PACK_BBOXES = {
     west: 13.0783,
     north: 52.6855,
     east: 13.7712,
+  },
+  singapore: {
+    south: 1.1395,
+    west: 103.5912,
+    north: 1.4884,
+    east: 104.1292,
+  },
+  utrecht: {
+    south: 52.0163,
+    west: 4.9601,
+    north: 52.1521,
+    east: 5.2052,
+  },
+  wroclaw: {
+    south: 51.0327,
+    west: 16.7973,
+    north: 51.2201,
+    east: 17.1862,
+  },
+  amsterdam: {
+    south: 52.268,
+    west: 4.7188,
+    north: 52.4411,
+    east: 5.1177,
   },
 };
 

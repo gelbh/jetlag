@@ -10,7 +10,7 @@ Sea level seed
 - Open-Meteo elevation API.
 
 Coastline
-- Island nation stub (empty segments; coastline via Overpass in gameplay where needed).
+- Island nation stub source (empty segments; coastline via Overpass in gameplay).
 
 International border
 - City-state stub (empty segments).
