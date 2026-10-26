@@ -1,6 +1,6 @@
 import { type ReactNode, type RefObject, useState } from "react";
 import type { GameArea } from "../../domain/map/annotations";
-import type { TransitMetro } from "../../domain/map/transit";
+import type { TransitMetro, TransitRouteFilter } from "../../domain/map/transit";
 import type { BundledPresetSelectGroup } from "../../domain/regions/bundledPresetHierarchy";
 import type { GamePreset } from "../../domain/session/presets/gamePreset";
 import type { LoadTask } from "../../services/core/progress/loadTask";
@@ -28,6 +28,7 @@ export type GameAreaSectionModel = {
   selectedAreas: GameArea[];
   previewGameArea: GameArea | null;
   transitMetroId: string;
+  transitStationFilter: TransitRouteFilter;
   metros: TransitMetro[];
   onPendingPresetAdd: (presetId: string) => void;
   onPendingPresetRemove: (presetId: string) => void;
@@ -41,6 +42,7 @@ export type GameAreaSectionModel = {
   onBoundaryImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onApplyPlace: (place: GeocodedPlace) => void;
   onTransitMetroChange: (metroId: string) => void;
+  onTransitStationFilterChange: (filter: TransitRouteFilter) => void;
 };
 
 export type CreateSheetStep = "where" | "rules" | "play";

@@ -1,8 +1,10 @@
 import { NativeSelect } from "@mantine/core";
 import { FloppyDiskIcon, PlusCircleIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { type ReactNode, useState } from "react";
+import { TransitStationModePicker } from "@/components/session/TransitStationModePicker";
 import { InsetGroup, insetTextInputStyles } from "@/components/ui/entry/entryChrome";
 import { InsetHairline, InsetRow } from "@/components/ui/entry/InsetRow";
+import type { TransitRouteFilter } from "@/domain/map/transit";
 import type { GameAreaSectionModel } from "./GameAreaSection";
 
 export function GameAreaRulesStep({
@@ -25,10 +27,12 @@ export function GameAreaRulesStep({
     previewGameArea,
     importFileInputRef,
     transitMetroId,
+    transitStationFilter,
     metros,
     onSavePreset,
     onAddCurrentArea,
     onTransitMetroChange,
+    onTransitStationFilterChange,
   } = model;
   const searchDisabled = searchLoading || importLoading;
   const [moreToolsOpen, setMoreToolsOpen] = useState(false);
@@ -42,6 +46,12 @@ export function GameAreaRulesStep({
         </p>
       ) : null}
       <div className="space-y-4">{settingsSlot}</div>
+      <TransitStationModePicker
+        value={(transitStationFilter ?? "all") as TransitRouteFilter}
+        onChange={onTransitStationFilterChange}
+        disabled={loading || verifyingAccess}
+        visible={Boolean(transitMetroId)}
+      />
       <details
         onToggle={(event) => {
           setMoreToolsOpen(event.currentTarget.open);
