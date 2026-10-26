@@ -23,27 +23,31 @@ export function EntryScreenLayout({
   void _skin;
   const justifyClass =
     justify === "center"
-      ? "jl-scroll justify-center gap-8 overflow-y-auto"
+      ? "jl-scroll justify-center gap-[var(--entry-gap-flow-center)] overflow-y-auto"
       : justify === "start"
-        ? "justify-start gap-4"
+        ? "justify-start gap-[var(--entry-gap-viewport-start)]"
         : "justify-between";
 
-  const paddingClass = viewport ? "py-4" : justify === "start" ? "py-6" : "py-8";
+  const paddingClass = viewport
+    ? "py-[var(--entry-pad-y-viewport)]"
+    : justify === "start"
+      ? "py-6"
+      : "py-8";
 
   /* Heights live in base.css (dvh + W5-G standalone lvh + phone-shell fill). */
   const viewportClass = viewport
     ? viewportLayout === "between"
-      ? "home-poster-viewport min-h-0 overflow-hidden justify-between gap-2"
+      ? "home-poster-viewport min-h-0 overflow-hidden justify-between gap-[var(--entry-gap-viewport-between)]"
       : viewportLayout === "center"
-        ? "home-poster-viewport jl-scroll min-h-0 overflow-y-auto overscroll-y-contain justify-center gap-6"
-        : "home-poster-viewport jl-scroll min-h-0 overflow-y-auto overscroll-y-contain justify-start gap-4"
+        ? "home-poster-viewport jl-scroll min-h-0 overflow-y-auto overscroll-y-contain justify-center gap-[var(--entry-gap-viewport-center)]"
+        : "home-poster-viewport jl-scroll min-h-0 overflow-y-auto overscroll-y-contain justify-start gap-[var(--entry-gap-viewport-start)]"
     : "";
 
   const minHeightClass = viewport ? "min-h-0" : "entry-screen-layout-flow";
 
   const topPad = topBreathing
-    ? "pt-[max(1.75rem,calc(var(--safe-area-top)+1.25rem))]"
-    : "pt-[max(1.25rem,calc(var(--safe-area-top)+0.75rem))]";
+    ? "pt-[max(1.75rem,calc(var(--safe-area-top)+var(--entry-top-breathing-extra)))]"
+    : "pt-[max(1.25rem,calc(var(--safe-area-top)+var(--entry-top-extra)))]";
 
   const insetClass = flush
     ? "px-0 pt-0 pb-[max(1rem,var(--safe-area-bottom))]"
