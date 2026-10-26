@@ -1,0 +1,732 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q24229903",
+      "name": "Albert Couvreur Pharmaceutical Museum",
+      "lat": 50.851379,
+      "lng": 4.45546
+    },
+    {
+      "id": "Q29539839",
+      "name": "Allende Room",
+      "lat": 50.813253,
+      "lng": 4.381569
+    },
+    {
+      "id": "Q42416750",
+      "name": "Ancien atelier et maison du sculpteur Ernest Salu",
+      "lat": 50.878397,
+      "lng": 4.354531
+    },
+    {
+      "id": "Q42431683",
+      "name": "Ancienne maison et atelier du peintre Hennebicq",
+      "lat": 50.830983,
+      "lng": 4.352942
+    },
+    {
+      "id": "Q42416565",
+      "name": "Ancienne maison et atelier du peintre Rogiers",
+      "lat": 50.849206,
+      "lng": 4.386361
+    },
+    {
+      "id": "Q96998633",
+      "name": "Archives et Musée de la Littérature",
+      "lat": 50.843333,
+      "lng": 4.356389
+    },
+    {
+      "id": "Q5121082",
+      "name": "Art & History Museum",
+      "lat": 50.83903,
+      "lng": 4.39187
+    },
+    {
+      "id": "Q23893732",
+      "name": "Art)&(marges Museum",
+      "lat": 50.834729,
+      "lng": 4.346382
+    },
+    {
+      "id": "Q2277238",
+      "name": "Autoworld",
+      "lat": 50.839266,
+      "lng": 4.393317
+    },
+    {
+      "id": "Q2675725",
+      "name": "Autrique House",
+      "lat": 50.863056,
+      "lng": 4.373056
+    },
+    {
+      "id": "Q106518303",
+      "name": "Beeldentuin",
+      "lat": 50.850743,
+      "lng": 4.453757
+    },
+    {
+      "id": "Q112161617",
+      "name": "Belgian Beer World",
+      "lat": 50.84795,
+      "lng": 4.35043
+    },
+    {
+      "id": "Q13437154",
+      "name": "Belgian Chocolate Village",
+      "lat": 50.864867,
+      "lng": 4.330392
+    },
+    {
+      "id": "Q815542",
+      "name": "Belgian Comic Strip Center",
+      "lat": 50.85125,
+      "lng": 4.36016
+    },
+    {
+      "id": "Q23893730",
+      "name": "Belgisch Museum voor Radiologie",
+      "lat": 50.906333,
+      "lng": 4.389306
+    },
+    {
+      "id": "Q728437",
+      "name": "BELvue",
+      "lat": 50.84261,
+      "lng": 4.360689
+    },
+    {
+      "id": "Q23893728",
+      "name": "Black Sisters Museum",
+      "lat": 50.866944,
+      "lng": 4.316944
+    },
+    {
+      "id": "Q106556431",
+      "name": "Bosmuseum Jan Van Ruusbroec",
+      "lat": 50.766648,
+      "lng": 4.435694
+    },
+    {
+      "id": "Q3330266",
+      "name": "Braille League Museum of Birds",
+      "lat": 50.83465,
+      "lng": 4.340767
+    },
+    {
+      "id": "Q968055",
+      "name": "Brussels City Museum",
+      "lat": 50.846961,
+      "lng": 4.35277
+    },
+    {
+      "id": "Q2776372",
+      "name": "Brussels Museum van de Geuze",
+      "lat": 50.84153,
+      "lng": 4.33561
+    },
+    {
+      "id": "Q3329505",
+      "name": "Brussels Museum van de Molen en de Voeding",
+      "lat": 50.8731,
+      "lng": 4.39498
+    },
+    {
+      "id": "Q609692",
+      "name": "Brussels Urban Transport Museum",
+      "lat": 50.83084,
+      "lng": 4.433846
+    },
+    {
+      "id": "Q23893739",
+      "name": "Camille Lemonnier Museum",
+      "lat": 50.835969,
+      "lng": 4.368924
+    },
+    {
+      "id": "Q2869992",
+      "name": "Cauchie House",
+      "lat": 50.838373,
+      "lng": 4.395334
+    },
+    {
+      "id": "Q23893738",
+      "name": "Centrum voor onderzoek en technologische Studies van plastische kunsten",
+      "lat": 50.812845,
+      "lng": 4.3802
+    },
+    {
+      "id": "Q256200",
+      "name": "Charlier Museum",
+      "lat": 50.847556,
+      "lng": 4.369928
+    },
+    {
+      "id": "Q28841853",
+      "name": "Chinamuseum",
+      "lat": 50.84705,
+      "lng": 4.30563
+    },
+    {
+      "id": "Q11775274",
+      "name": "Choco-Story Brussels",
+      "lat": 50.845328,
+      "lng": 4.350156
+    },
+    {
+      "id": "Q2859916",
+      "name": "Cinquantenaire Arcade",
+      "lat": 50.840553,
+      "lng": 4.392994
+    },
+    {
+      "id": "Q3330338",
+      "name": "Clockarium",
+      "lat": 50.8484,
+      "lng": 4.4022
+    },
+    {
+      "id": "Q106556516",
+      "name": "Collections of Public Welfare Institute Brussels",
+      "lat": 50.838616,
+      "lng": 4.350226
+    },
+    {
+      "id": "Q125958811",
+      "name": "Confederate Museum",
+      "lat": 50.850314,
+      "lng": 4.422501
+    },
+    {
+      "id": "Q28149770",
+      "name": "Design Museum Brussels",
+      "lat": 50.8975,
+      "lng": 4.341944
+    },
+    {
+      "id": "Q42432068",
+      "name": "Devos House",
+      "lat": 50.850345,
+      "lng": 4.422446
+    },
+    {
+      "id": "Q29566810",
+      "name": "Experimentarium",
+      "lat": 50.833343,
+      "lng": 4.366629
+    },
+    {
+      "id": "Q106556577",
+      "name": "Farmaceutische collectie Albert Couvreur",
+      "lat": 50.85138,
+      "lng": 4.45546
+    },
+    {
+      "id": "Q2193737",
+      "name": "Fashion & Lace Museum",
+      "lat": 50.845778,
+      "lng": 4.351989
+    },
+    {
+      "id": "Q2936399",
+      "name": "FeliXart Museum",
+      "lat": 50.78922,
+      "lng": 4.314927
+    },
+    {
+      "id": "Q17354571",
+      "name": "Fin-de-Siècle Museum",
+      "lat": 50.84168,
+      "lng": 4.358238
+    },
+    {
+      "id": "Q42418737",
+      "name": "Former atelier Alfred Crick",
+      "lat": 50.825483,
+      "lng": 4.360481
+    },
+    {
+      "id": "Q42418719",
+      "name": "Former home and workshop of coal merchant Edouard Taymans",
+      "lat": 50.831994,
+      "lng": 4.366028
+    },
+    {
+      "id": "Q2868867",
+      "name": "Former House and Workplace of Clas Grüner Sterner",
+      "lat": 50.824353,
+      "lng": 4.370747
+    },
+    {
+      "id": "Q42432246",
+      "name": "Former Wolfers Studio",
+      "lat": 50.83355,
+      "lng": 4.414817
+    },
+    {
+      "id": "Q107293126",
+      "name": "GardeRobe MannekenPis",
+      "lat": 50.84408,
+      "lng": 4.35098
+    },
+    {
+      "id": "Q106556613",
+      "name": "Gemeentelijk Museum Evere",
+      "lat": 50.873935,
+      "lng": 4.400942
+    },
+    {
+      "id": "Q106556640",
+      "name": "Gemeentelijk Museum van het Graafschap Jette",
+      "lat": 50.886475,
+      "lng": 4.317771
+    },
+    {
+      "id": "Q2988142",
+      "name": "Halle Gate Museum",
+      "lat": 50.833015,
+      "lng": 4.344894
+    },
+    {
+      "id": "Q1995367",
+      "name": "Horta Museum",
+      "lat": 50.824169,
+      "lng": 4.355561
+    },
+    {
+      "id": "Q46012",
+      "name": "House of European History",
+      "lat": 50.839939,
+      "lng": 4.378761
+    },
+    {
+      "id": "Q42853753",
+      "name": "Huis van Herman Teirlinck",
+      "lat": 50.76672,
+      "lng": 4.30498
+    },
+    {
+      "id": "Q124656202",
+      "name": "Humanist Sculpture Park",
+      "lat": 50.82275,
+      "lng": 4.39475
+    },
+    {
+      "id": "Q23893740",
+      "name": "International Puppet Museum - Peruchet",
+      "lat": 50.801944,
+      "lng": 4.3925
+    },
+    {
+      "id": "Q1165167",
+      "name": "Jewish Museum of Belgium",
+      "lat": 50.840797,
+      "lng": 4.3532
+    },
+    {
+      "id": "Q52676370",
+      "name": "Kanal",
+      "lat": 50.858528,
+      "lng": 4.348333
+    },
+    {
+      "id": "Q99521191",
+      "name": "KBR Museum",
+      "lat": 50.844625,
+      "lng": 4.35689
+    },
+    {
+      "id": "Q96064727",
+      "name": "Koloniaal museum Wivinaklooster",
+      "lat": 50.86975,
+      "lng": 4.24525
+    },
+    {
+      "id": "Q29533956",
+      "name": "Louis Deroubaix Museum of Human Anatomy and Embryology",
+      "lat": 50.813236,
+      "lng": 4.268429
+    },
+    {
+      "id": "Q943581",
+      "name": "Magritte Museum",
+      "lat": 50.842418,
+      "lng": 4.358796
+    },
+    {
+      "id": "Q3279924",
+      "name": "Maison des Arts",
+      "lat": 50.8596,
+      "lng": 4.37009
+    },
+    {
+      "id": "Q42431690",
+      "name": "Maison Eugène Broerman",
+      "lat": 50.822844,
+      "lng": 4.347347
+    },
+    {
+      "id": "Q42431507",
+      "name": "Maison personnelle et atelier de l'artiste Alfred Ruytincx",
+      "lat": 50.865925,
+      "lng": 4.376122
+    },
+    {
+      "id": "Q42431444",
+      "name": "Maison personnelle et atelier du peintre Oleffe",
+      "lat": 50.8148,
+      "lng": 4.432692
+    },
+    {
+      "id": "Q42432788",
+      "name": "Maison personnelle et atelier du peintre Rik Wouters",
+      "lat": 50.791592,
+      "lng": 4.422439
+    },
+    {
+      "id": "Q42432023",
+      "name": "Maison personnelle et atelier du sculpteur Oscar Jespers",
+      "lat": 50.845828,
+      "lng": 4.408886
+    },
+    {
+      "id": "Q41682937",
+      "name": "Maison-atelier de Jean Gouweloos",
+      "lat": 50.825794,
+      "lng": 4.352486
+    },
+    {
+      "id": "Q116051197",
+      "name": "Mansion Hannon",
+      "lat": 50.82088,
+      "lng": 4.3522
+    },
+    {
+      "id": "Q29533887",
+      "name": "Maurice Carême Museum",
+      "lat": 50.831778,
+      "lng": 4.294403
+    },
+    {
+      "id": "Q842660",
+      "name": "Meunier Museum",
+      "lat": 50.819116,
+      "lng": 4.367099
+    },
+    {
+      "id": "Q29537023",
+      "name": "Michel de Ghelderode museum",
+      "lat": 50.811948,
+      "lng": 4.382617
+    },
+    {
+      "id": "Q3330786",
+      "name": "Modern Museum",
+      "lat": 50.8421,
+      "lng": 4.35812
+    },
+    {
+      "id": "Q29957439",
+      "name": "MoMuse",
+      "lat": 50.85769,
+      "lng": 4.338052
+    },
+    {
+      "id": "Q23893737",
+      "name": "Musée belge de l'Ascenseur",
+      "lat": 50.831583,
+      "lng": 4.35025
+    },
+    {
+      "id": "Q141220953",
+      "name": "Musée d'Art abstrait",
+      "lat": 50.876639,
+      "lng": 4.33575
+    },
+    {
+      "id": "Q16665628",
+      "name": "musée de l'érotisme et de la mythologie",
+      "lat": 50.84129,
+      "lng": 4.35562
+    },
+    {
+      "id": "Q3330255",
+      "name": "musée des lettres et manuscrits",
+      "lat": 50.8478,
+      "lng": 4.35517
+    },
+    {
+      "id": "Q24276476",
+      "name": "Musée du slip",
+      "lat": 50.845111,
+      "lng": 4.353224
+    },
+    {
+      "id": "Q29541724",
+      "name": "Museum for Minealogy and Geology",
+      "lat": 50.811771,
+      "lng": 4.384558
+    },
+    {
+      "id": "Q2007959",
+      "name": "Museum of Ixelles",
+      "lat": 50.831611,
+      "lng": 4.372301
+    },
+    {
+      "id": "Q29110200",
+      "name": "Museum of letters and manuscripts of Brussels",
+      "lat": 50.846667,
+      "lng": 4.354722
+    },
+    {
+      "id": "Q3329930",
+      "name": "Museum of Medicine",
+      "lat": 50.813236,
+      "lng": 4.268429
+    },
+    {
+      "id": "Q222297",
+      "name": "Museum of Natural Sciences of Belgium",
+      "lat": 50.836546,
+      "lng": 4.37656
+    },
+    {
+      "id": "Q23893733",
+      "name": "Museum of the Public Social Welfare Centre of Brussels",
+      "lat": 50.835278,
+      "lng": 4.347167
+    },
+    {
+      "id": "Q29534172",
+      "name": "Museum van de Belgische Brouwers",
+      "lat": 50.846251,
+      "lng": 4.352533
+    },
+    {
+      "id": "Q24203115",
+      "name": "Museum van de geïntegreerde politie",
+      "lat": 50.826706,
+      "lng": 4.391043
+    },
+    {
+      "id": "Q19974092",
+      "name": "Museum van de Nationale Bank van België",
+      "lat": 50.849848,
+      "lng": 4.357278
+    },
+    {
+      "id": "Q23893734",
+      "name": "Museum van de Orthodoxe Kerk",
+      "lat": 50.841575,
+      "lng": 4.34469
+    },
+    {
+      "id": "Q29538809",
+      "name": "Museum van Geneeskrachtige planten en Farmacie",
+      "lat": 50.821878,
+      "lng": 4.401594
+    },
+    {
+      "id": "Q106556502",
+      "name": "Museum voor Architectuur - De Loge",
+      "lat": 50.82846,
+      "lng": 4.365647
+    },
+    {
+      "id": "Q2009311",
+      "name": "Museum voor dierkunde ULB Auguste Lameere",
+      "lat": 50.81167,
+      "lng": 4.38278
+    },
+    {
+      "id": "Q18088356",
+      "name": "Museum voor moderne en hedendaagse kunst (Brussel)",
+      "lat": 50.8586,
+      "lng": 4.34806
+    },
+    {
+      "id": "Q3329651",
+      "name": "Museum voor Spontane Kunst",
+      "lat": 50.8603,
+      "lng": 4.37004
+    },
+    {
+      "id": "Q1131318",
+      "name": "Musical Instruments Museum",
+      "lat": 50.842778,
+      "lng": 4.358889
+    },
+    {
+      "id": "Q6974517",
+      "name": "National Museum of the Resistance",
+      "lat": 50.839328,
+      "lng": 4.327914
+    },
+    {
+      "id": "Q3330782",
+      "name": "Oldmasters Museum",
+      "lat": 50.84168,
+      "lng": 4.358241
+    },
+    {
+      "id": "Q42418611",
+      "name": "Own house and studio of painter Lemmers",
+      "lat": 50.819828,
+      "lng": 4.358497
+    },
+    {
+      "id": "Q42418727",
+      "name": "Own house and studio of the painter Géo Bernier",
+      "lat": 50.820833,
+      "lng": 4.355
+    },
+    {
+      "id": "Q42418723",
+      "name": "Own house and studio of the painter Paul Mathieu",
+      "lat": 50.821747,
+      "lng": 4.364186
+    },
+    {
+      "id": "Q42418803",
+      "name": "Own house and studio of the painter Paul Verdussen",
+      "lat": 50.81535,
+      "lng": 4.348789
+    },
+    {
+      "id": "Q93941138",
+      "name": "Pixel Museum",
+      "lat": 50.863346,
+      "lng": 4.347265
+    },
+    {
+      "id": "Q23893731",
+      "name": "Printing Museum",
+      "lat": 50.844625,
+      "lng": 4.35689
+    },
+    {
+      "id": "Q123992596",
+      "name": "Regional Center for Science Promotion",
+      "lat": 50.84924,
+      "lng": 4.32206
+    },
+    {
+      "id": "Q1718294",
+      "name": "René Magritte House",
+      "lat": 50.87689,
+      "lng": 4.33583
+    },
+    {
+      "id": "Q1395176",
+      "name": "Royal Museum of the Armed Forces and Military History",
+      "lat": 50.84082,
+      "lng": 4.393361
+    },
+    {
+      "id": "Q377500",
+      "name": "Royal Museums of Fine Arts of Belgium",
+      "lat": 50.84168,
+      "lng": 4.358238
+    },
+    {
+      "id": "Q106556595",
+      "name": "Schaarbeeks Museum van het bier",
+      "lat": 50.86355,
+      "lng": 4.375024
+    },
+    {
+      "id": "Q3330801",
+      "name": "Schaerbeek Beer Museum",
+      "lat": 50.863354,
+      "lng": 4.380362
+    },
+    {
+      "id": "Q106556532",
+      "name": "Schermsportmuseum Charles Debeur",
+      "lat": 50.841393,
+      "lng": 4.390483
+    },
+    {
+      "id": "Q110509913",
+      "name": "Smile Safari",
+      "lat": 50.849447,
+      "lng": 4.351723
+    },
+    {
+      "id": "Q116655565",
+      "name": "Square du Petit Sablon - Kleine Zavelsquare",
+      "lat": 50.839503,
+      "lng": 4.356582
+    },
+    {
+      "id": "Q106517846",
+      "name": "The Children's Museum",
+      "lat": 50.82171,
+      "lng": 4.37859
+    },
+    {
+      "id": "Q4492555",
+      "name": "Toy Museum",
+      "lat": 50.851539,
+      "lng": 4.365919
+    },
+    {
+      "id": "Q14931504",
+      "name": "Train World",
+      "lat": 50.8781,
+      "lng": 4.37944
+    },
+    {
+      "id": "Q92095590",
+      "name": "Tuin der Onlusten",
+      "lat": 50.75562,
+      "lng": 4.30535
+    },
+    {
+      "id": "Q3162570",
+      "name": "Tuin van Geneeskrachtige planten",
+      "lat": 50.85097,
+      "lng": 4.454278
+    },
+    {
+      "id": "Q126810860",
+      "name": "Van Buuren Museum & Gardens",
+      "lat": 50.81005,
+      "lng": 4.353814
+    },
+    {
+      "id": "Q14512839",
+      "name": "Vanhaerents Art Collection",
+      "lat": 50.84792,
+      "lng": 4.3411
+    },
+    {
+      "id": "Q93183026",
+      "name": "War Heritage Institute",
+      "lat": 50.8411,
+      "lng": 4.39421
+    },
+    {
+      "id": "Q488688",
+      "name": "Wiertz Museum",
+      "lat": 50.837185,
+      "lng": 4.375694
+    },
+    {
+      "id": "Q2901267",
+      "name": "Wittockiana",
+      "lat": 50.83218,
+      "lng": 4.420339
+    }
+  ]
+}

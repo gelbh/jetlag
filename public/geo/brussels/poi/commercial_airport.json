@@ -1,0 +1,18 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q28934",
+      "name": "Brussels Airport",
+      "lat": 50.901389,
+      "lng": 4.484444
+    }
+  ]
+}

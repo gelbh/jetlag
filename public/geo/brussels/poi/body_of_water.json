@@ -1,0 +1,24 @@
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q1073360",
+      "name": "Ixelles Ponds",
+      "lat": 50.823611,
+      "lng": 4.373333
+    },
+    {
+      "id": "Q56854583",
+      "name": "lake in Bois de la Cambre",
+      "lat": 50.804008,
+      "lng": 4.383016
+    }
+  ]
+}

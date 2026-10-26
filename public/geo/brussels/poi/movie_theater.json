@@ -1,0 +1,894 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q37980061",
+      "name": "ABC Cinema",
+      "lat": 50.854843,
+      "lng": 4.357523
+    },
+    {
+      "id": "Q37980069",
+      "name": "Acropole Centre",
+      "lat": 50.854786,
+      "lng": 4.356171
+    },
+    {
+      "id": "Q37980077",
+      "name": "Actor's Studio",
+      "lat": 50.847771,
+      "lng": 4.353265
+    },
+    {
+      "id": "Q37980085",
+      "name": "Agora Cinema",
+      "lat": 50.846361,
+      "lng": 4.354371
+    },
+    {
+      "id": "Q37992172",
+      "name": "Albert Hall Cinema",
+      "lat": 50.830604,
+      "lng": 4.390431
+    },
+    {
+      "id": "Q37992180",
+      "name": "Albert Hall et Salle Roseland",
+      "lat": 50.830568,
+      "lng": 4.389251
+    },
+    {
+      "id": "Q37982747",
+      "name": "Alfa Cinema",
+      "lat": 50.798935,
+      "lng": 4.336225
+    },
+    {
+      "id": "Q37980093",
+      "name": "Ambassador Disney Ciné",
+      "lat": 50.848808,
+      "lng": 4.348822
+    },
+    {
+      "id": "Q37980099",
+      "name": "American Cinema",
+      "lat": 50.853366,
+      "lng": 4.355897
+    },
+    {
+      "id": "Q2288214",
+      "name": "American Theatre",
+      "lat": 50.89417,
+      "lng": 4.35222
+    },
+    {
+      "id": "Q37992568",
+      "name": "Asti Cinema",
+      "lat": 50.859533,
+      "lng": 4.415708
+    },
+    {
+      "id": "Q37980109",
+      "name": "Astor Cinema",
+      "lat": 50.851765,
+      "lng": 4.355128
+    },
+    {
+      "id": "Q37982696",
+      "name": "Astrid Cinema",
+      "lat": 50.842754,
+      "lng": 4.460963
+    },
+    {
+      "id": "Q37980115",
+      "name": "Auditorium Shell",
+      "lat": 50.845517,
+      "lng": 4.359079
+    },
+    {
+      "id": "Q37980126",
+      "name": "Avia Cinema",
+      "lat": 50.843498,
+      "lng": 4.352438
+    },
+    {
+      "id": "Q37981366",
+      "name": "Bercy Cinema",
+      "lat": 50.824154,
+      "lng": 4.329352
+    },
+    {
+      "id": "Q37982626",
+      "name": "Brazil Cinema",
+      "lat": 50.844782,
+      "lng": 4.415718
+    },
+    {
+      "id": "Q37980138",
+      "name": "Carly Cinema",
+      "lat": 50.838127,
+      "lng": 4.349699
+    },
+    {
+      "id": "Q37952669",
+      "name": "Casino Cinema",
+      "lat": 50.815682,
+      "lng": 4.426425
+    },
+    {
+      "id": "Q37980144",
+      "name": "Centra Cinema",
+      "lat": 50.848409,
+      "lng": 4.343913
+    },
+    {
+      "id": "Q37980149",
+      "name": "Central Cinema",
+      "lat": 50.848902,
+      "lng": 4.349881
+    },
+    {
+      "id": "Q2944991",
+      "name": "Centre Culturel Jacques Franck",
+      "lat": 50.829349,
+      "lng": 4.344622
+    },
+    {
+      "id": "Q37995162",
+      "name": "Centre Marignan",
+      "lat": 50.849623,
+      "lng": 4.37143
+    },
+    {
+      "id": "Q37995148",
+      "name": "Century Cinma",
+      "lat": 50.853772,
+      "lng": 4.370466
+    },
+    {
+      "id": "Q37994344",
+      "name": "Ciné Aiglon",
+      "lat": 50.835224,
+      "lng": 4.363679
+    },
+    {
+      "id": "Q37995381",
+      "name": "Ciné Alto",
+      "lat": 50.857043,
+      "lng": 4.324914
+    },
+    {
+      "id": "Q37994109",
+      "name": "Ciné Astra",
+      "lat": 50.875335,
+      "lng": 4.349341
+    },
+    {
+      "id": "Q37994351",
+      "name": "Ciné Avenue",
+      "lat": 50.836564,
+      "lng": 4.357902
+    },
+    {
+      "id": "Q37995295",
+      "name": "Ciné Bali",
+      "lat": 50.832544,
+      "lng": 4.340588
+    },
+    {
+      "id": "Q37992584",
+      "name": "Ciné Basilic",
+      "lat": 50.867896,
+      "lng": 4.313618
+    },
+    {
+      "id": "Q37995301",
+      "name": "Ciné Bristol",
+      "lat": 50.829828,
+      "lng": 4.344482
+    },
+    {
+      "id": "Q37995575",
+      "name": "Ciné Capri",
+      "lat": 50.874592,
+      "lng": 4.387996
+    },
+    {
+      "id": "Q37994117",
+      "name": "Ciné Centenaire",
+      "lat": 50.892097,
+      "lng": 4.334346
+    },
+    {
+      "id": "Q37994366",
+      "name": "Ciné Chaplin",
+      "lat": 50.807574,
+      "lng": 4.391378
+    },
+    {
+      "id": "Q37994121",
+      "name": "Ciné Christine",
+      "lat": 50.876539,
+      "lng": 4.350133
+    },
+    {
+      "id": "Q37995583",
+      "name": "Ciné Cinex",
+      "lat": 50.860738,
+      "lng": 4.363437
+    },
+    {
+      "id": "Q37995589",
+      "name": "Ciné City",
+      "lat": 50.85711,
+      "lng": 4.37289
+    },
+    {
+      "id": "Q37980158",
+      "name": "Ciné Colisee",
+      "lat": 50.85331,
+      "lng": 4.356043
+    },
+    {
+      "id": "Q37995388",
+      "name": "Ciné Corso",
+      "lat": 50.857107,
+      "lng": 4.332185
+    },
+    {
+      "id": "Q37995397",
+      "name": "Ciné Crystal",
+      "lat": 50.853723,
+      "lng": 4.336977
+    },
+    {
+      "id": "Q37994373",
+      "name": "Ciné Dauphin",
+      "lat": 50.820101,
+      "lng": 4.385978
+    },
+    {
+      "id": "Q37995308",
+      "name": "Ciné Dixy",
+      "lat": 50.826134,
+      "lng": 4.348265
+    },
+    {
+      "id": "Q37992715",
+      "name": "Ciné Ecran",
+      "lat": 50.876668,
+      "lng": 4.328132
+    },
+    {
+      "id": "Q37995593",
+      "name": "Ciné Eldo",
+      "lat": 50.861607,
+      "lng": 4.364193
+    },
+    {
+      "id": "Q37995600",
+      "name": "Ciné Elite",
+      "lat": 50.864611,
+      "lng": 4.373726
+    },
+    {
+      "id": "Q37995316",
+      "name": "Ciné Faby",
+      "lat": 50.830481,
+      "lng": 4.336965
+    },
+    {
+      "id": "Q37995609",
+      "name": "Ciné Familia",
+      "lat": 50.860068,
+      "lng": 4.371368
+    },
+    {
+      "id": "Q37995403",
+      "name": "Ciné Forum",
+      "lat": 50.853403,
+      "lng": 4.337961
+    },
+    {
+      "id": "Q37942530",
+      "name": "Ciné Ideal",
+      "lat": 50.76172,
+      "lng": 4.277043
+    },
+    {
+      "id": "Q37995411",
+      "name": "Ciné Idéal",
+      "lat": 50.852926,
+      "lng": 4.336332
+    },
+    {
+      "id": "Q37995419",
+      "name": "Ciné Kinox",
+      "lat": 50.854177,
+      "lng": 4.338072
+    },
+    {
+      "id": "Q37980168",
+      "name": "Ciné Le Francais",
+      "lat": 50.850949,
+      "lng": 4.35231
+    },
+    {
+      "id": "Q37952493",
+      "name": "Ciné Le Prince",
+      "lat": 50.847169,
+      "lng": 4.30363
+    },
+    {
+      "id": "Q37995427",
+      "name": "Ciné Léopold",
+      "lat": 50.860509,
+      "lng": 4.341022
+    },
+    {
+      "id": "Q37995616",
+      "name": "Ciné Louvre",
+      "lat": 50.855921,
+      "lng": 4.402198
+    },
+    {
+      "id": "Q37994135",
+      "name": "Ciné Lux",
+      "lat": 50.898005,
+      "lng": 4.359374
+    },
+    {
+      "id": "Q37995625",
+      "name": "Ciné Luxor",
+      "lat": 50.868719,
+      "lng": 4.376627
+    },
+    {
+      "id": "Q37994389",
+      "name": "Ciné Mogador",
+      "lat": 50.826139,
+      "lng": 4.360875
+    },
+    {
+      "id": "Q37994396",
+      "name": "Ciné Monty",
+      "lat": 50.833107,
+      "lng": 4.367927
+    },
+    {
+      "id": "Q37995435",
+      "name": "Ciné Movy",
+      "lat": 50.863394,
+      "lng": 4.333482
+    },
+    {
+      "id": "Q37980176",
+      "name": "Ciné Nord",
+      "lat": 50.855043,
+      "lng": 4.357055
+    },
+    {
+      "id": "Q37980271",
+      "name": "Cine Paris",
+      "lat": 50.853292,
+      "lng": 4.354932
+    },
+    {
+      "id": "Q37994412",
+      "name": "Ciné Piron",
+      "lat": 50.833725,
+      "lng": 4.366195
+    },
+    {
+      "id": "Q37995447",
+      "name": "Ciné Real",
+      "lat": 50.849424,
+      "lng": 4.327091
+    },
+    {
+      "id": "Q37994422",
+      "name": "Ciné Relais",
+      "lat": 50.811336,
+      "lng": 4.392906
+    },
+    {
+      "id": "Q37994141",
+      "name": "Ciné Rio",
+      "lat": 50.87503,
+      "lng": 4.354574
+    },
+    {
+      "id": "Q37992724",
+      "name": "Ciné Ritz",
+      "lat": 50.877078,
+      "lng": 4.326924
+    },
+    {
+      "id": "Q37994428",
+      "name": "Ciné Royal",
+      "lat": 50.838919,
+      "lng": 4.363319
+    },
+    {
+      "id": "Q37995323",
+      "name": "Ciné Tivoli",
+      "lat": 50.832094,
+      "lng": 4.344637
+    },
+    {
+      "id": "Q37995331",
+      "name": "Ciné Vox",
+      "lat": 50.839109,
+      "lng": 4.339167
+    },
+    {
+      "id": "Q37994149",
+      "name": "Ciné Wagram",
+      "lat": 50.875387,
+      "lng": 4.354488
+    },
+    {
+      "id": "Q37980185",
+      "name": "Cineac Centre Cinema",
+      "lat": 50.849732,
+      "lng": 4.351065
+    },
+    {
+      "id": "Q37980119",
+      "name": "Cinéma Aventure",
+      "lat": 50.848618,
+      "lng": 4.352288
+    },
+    {
+      "id": "Q16507476",
+      "name": "Cinéma Caméo",
+      "lat": 50.8508,
+      "lng": 4.35328
+    },
+    {
+      "id": "Q2973104",
+      "name": "Cinéma des Galeries",
+      "lat": 50.847533,
+      "lng": 4.354692
+    },
+    {
+      "id": "Q37995153",
+      "name": "Cinéma Filmac",
+      "lat": 50.856897,
+      "lng": 4.359002
+    },
+    {
+      "id": "Q33100417",
+      "name": "Cinéma Marivaux",
+      "lat": 50.853909,
+      "lng": 4.35576
+    },
+    {
+      "id": "Q2973116",
+      "name": "Cinéma Métropole",
+      "lat": 50.8512,
+      "lng": 4.35427
+    },
+    {
+      "id": "Q37951755",
+      "name": "Cinema Minerva",
+      "lat": 50.787625,
+      "lng": 4.280038
+    },
+    {
+      "id": "Q37995170",
+      "name": "Cinéma Mirano",
+      "lat": 50.84937,
+      "lng": 4.371385
+    },
+    {
+      "id": "Q2364244",
+      "name": "Cinéma Nova",
+      "lat": 50.848342,
+      "lng": 4.356084
+    },
+    {
+      "id": "Q37995179",
+      "name": "Cinéma Odéon Nord",
+      "lat": 50.86014,
+      "lng": 4.355382
+    },
+    {
+      "id": "Q37995639",
+      "name": "Cinéma Pavy",
+      "lat": 50.8702,
+      "lng": 4.371625
+    },
+    {
+      "id": "Q37995648",
+      "name": "Cinéma Pigalle",
+      "lat": 50.864552,
+      "lng": 4.36727
+    },
+    {
+      "id": "Q42416899",
+      "name": "Cinéma Plaza",
+      "lat": 50.854319,
+      "lng": 4.356247
+    },
+    {
+      "id": "Q37995657",
+      "name": "Cinéma Riga",
+      "lat": 50.87221,
+      "lng": 4.385729
+    },
+    {
+      "id": "Q37995662",
+      "name": "Cinéma Roxy",
+      "lat": 50.874495,
+      "lng": 4.390319
+    },
+    {
+      "id": "Q37995226",
+      "name": "Cinéma Savoy",
+      "lat": 50.852947,
+      "lng": 4.389539
+    },
+    {
+      "id": "Q37994437",
+      "name": "Cinéma Styx",
+      "lat": 50.832828,
+      "lng": 4.36386
+    },
+    {
+      "id": "Q37994468",
+      "name": "Cinéma Vendôme",
+      "lat": 50.837492,
+      "lng": 4.362936
+    },
+    {
+      "id": "Q37992190",
+      "name": "Cinquantenaire Cinema",
+      "lat": 50.838647,
+      "lng": 4.398338
+    },
+    {
+      "id": "Q37980200",
+      "name": "Coliseum Cinema",
+      "lat": 50.848618,
+      "lng": 4.352288
+    },
+    {
+      "id": "Q37980208",
+      "name": "Crosly Cinema",
+      "lat": 50.854773,
+      "lng": 4.358251
+    },
+    {
+      "id": "Q37980217",
+      "name": "Crosly Leopold 3",
+      "lat": 50.854772,
+      "lng": 4.358075
+    },
+    {
+      "id": "Q37980232",
+      "name": "Ecuyer Cinema",
+      "lat": 50.84939,
+      "lng": 4.354901
+    },
+    {
+      "id": "Q37992198",
+      "name": "Eden Cinema",
+      "lat": 50.83507,
+      "lng": 4.382139
+    },
+    {
+      "id": "Q37992575",
+      "name": "Étoile Cinema",
+      "lat": 50.871202,
+      "lng": 4.399459
+    },
+    {
+      "id": "Q37952499",
+      "name": "Excelsior Cinema",
+      "lat": 50.838912,
+      "lng": 4.331209
+    },
+    {
+      "id": "Q37982756",
+      "name": "Floreal Cinema",
+      "lat": 50.80794,
+      "lng": 4.337064
+    },
+    {
+      "id": "Q3091103",
+      "name": "Fuse",
+      "lat": 50.835397,
+      "lng": 4.344687
+    },
+    {
+      "id": "Q33100275",
+      "name": "Het Oog",
+      "lat": 50.841925,
+      "lng": 4.352042
+    },
+    {
+      "id": "Q37980240",
+      "name": "Ira Ciné",
+      "lat": 50.841959,
+      "lng": 4.351966
+    },
+    {
+      "id": "Q110362932",
+      "name": "Kinepolis Brussels",
+      "lat": 50.8954,
+      "lng": 4.3374
+    },
+    {
+      "id": "Q37994127",
+      "name": "Kinepolis Bruxelles",
+      "lat": 50.893942,
+      "lng": 4.342162
+    },
+    {
+      "id": "Q37952506",
+      "name": "Kursaal Cinema",
+      "lat": 50.83623,
+      "lng": 4.316035
+    },
+    {
+      "id": "Q3527719",
+      "name": "La Toison d'Or",
+      "lat": 50.837,
+      "lng": 4.36024
+    },
+    {
+      "id": "Q37952575",
+      "name": "La Vaillance",
+      "lat": 50.83555,
+      "lng": 4.30702
+    },
+    {
+      "id": "Q3224318",
+      "name": "Le Marignan",
+      "lat": 50.849597,
+      "lng": 4.371453
+    },
+    {
+      "id": "Q33100347",
+      "name": "Le Senghor",
+      "lat": 50.836589,
+      "lng": 4.380438
+    },
+    {
+      "id": "Q37982707",
+      "name": "Le Stockel",
+      "lat": 50.841487,
+      "lng": 4.465615
+    },
+    {
+      "id": "Q37982763",
+      "name": "Leo Cinema",
+      "lat": 50.800239,
+      "lng": 4.336876
+    },
+    {
+      "id": "Q37992211",
+      "name": "Léopold Palace Cinema",
+      "lat": 50.830768,
+      "lng": 4.390572
+    },
+    {
+      "id": "Q37952513",
+      "name": "Metro Cinema",
+      "lat": 50.835969,
+      "lng": 4.312755
+    },
+    {
+      "id": "Q37980248",
+      "name": "Midi-Minuit Cinema",
+      "lat": 50.852212,
+      "lng": 4.355673
+    },
+    {
+      "id": "Q37952517",
+      "name": "Monaco Cinema",
+      "lat": 50.841431,
+      "lng": 4.328696
+    },
+    {
+      "id": "Q37980256",
+      "name": "Normandie Cinema",
+      "lat": 50.848966,
+      "lng": 4.3504
+    },
+    {
+      "id": "Q37952558",
+      "name": "Nova Cinema",
+      "lat": 50.84167,
+      "lng": 4.329413
+    },
+    {
+      "id": "Q37995634",
+      "name": "Nova Cinéma",
+      "lat": 50.867382,
+      "lng": 4.376689
+    },
+    {
+      "id": "Q37992219",
+      "name": "Novelty Cinema",
+      "lat": 50.828307,
+      "lng": 4.393928
+    },
+    {
+      "id": "Q3225153",
+      "name": "Palace",
+      "lat": 50.847761,
+      "lng": 4.348739
+    },
+    {
+      "id": "Q37980264",
+      "name": "Palladium Cinema",
+      "lat": 50.851765,
+      "lng": 4.355128
+    },
+    {
+      "id": "Q37994405",
+      "name": "Pathé Empire Cinema",
+      "lat": 50.837724,
+      "lng": 4.362286
+    },
+    {
+      "id": "Q37980278",
+      "name": "Piccadilly Cinema",
+      "lat": 50.850563,
+      "lng": 4.353686
+    },
+    {
+      "id": "Q37980284",
+      "name": "Raf Cinema",
+      "lat": 50.835169,
+      "lng": 4.344667
+    },
+    {
+      "id": "Q37995185",
+      "name": "Real Palace",
+      "lat": 50.849631,
+      "lng": 4.373915
+    },
+    {
+      "id": "Q37993342",
+      "name": "Regent Cinema",
+      "lat": 50.828405,
+      "lng": 4.373944
+    },
+    {
+      "id": "Q37980291",
+      "name": "Rialto Cinema",
+      "lat": 50.837299,
+      "lng": 4.348838
+    },
+    {
+      "id": "Q37952565",
+      "name": "Rio Cinema",
+      "lat": 50.823791,
+      "lng": 4.295394
+    },
+    {
+      "id": "Q37981380",
+      "name": "Roma Cinema",
+      "lat": 50.808385,
+      "lng": 4.316684
+    },
+    {
+      "id": "Q37980297",
+      "name": "Royal Bourse Cinema",
+      "lat": 50.847284,
+      "lng": 4.349845
+    },
+    {
+      "id": "Q37995192",
+      "name": "Royal Palace Nord",
+      "lat": 50.857307,
+      "lng": 4.361186
+    },
+    {
+      "id": "Q37980305",
+      "name": "Scala Cinema",
+      "lat": 50.851811,
+      "lng": 4.352965
+    },
+    {
+      "id": "Q37980312",
+      "name": "Star Cinema",
+      "lat": 50.843956,
+      "lng": 4.34344
+    },
+    {
+      "id": "Q37980320",
+      "name": "Stuart Cinema",
+      "lat": 50.847907,
+      "lng": 4.354961
+    },
+    {
+      "id": "Q37980328",
+      "name": "Tabora Cinema",
+      "lat": 50.852435,
+      "lng": 4.346143
+    },
+    {
+      "id": "Q3224323",
+      "name": "Théâtre Marni",
+      "lat": 50.828796,
+      "lng": 4.371311
+    },
+    {
+      "id": "Q37980334",
+      "name": "Trianon Cinema",
+      "lat": 50.852494,
+      "lng": 4.35558
+    },
+    {
+      "id": "Q37980344",
+      "name": "Twin's Cinema",
+      "lat": 50.853231,
+      "lng": 4.362451
+    },
+    {
+      "id": "Q37980352",
+      "name": "UGC City 2",
+      "lat": 50.852728,
+      "lng": 4.355968
+    },
+    {
+      "id": "Q3547186",
+      "name": "UGC-de Brouckère",
+      "lat": 50.8517,
+      "lng": 4.35167
+    },
+    {
+      "id": "Q37994461",
+      "name": "UGC-Toison d'Or",
+      "lat": 50.83747,
+      "lng": 4.359979
+    },
+    {
+      "id": "Q37982588",
+      "name": "Venerie Espace Delvaux",
+      "lat": 50.80914,
+      "lng": 4.402579
+    },
+    {
+      "id": "Q37980368",
+      "name": "Victory Cinema",
+      "lat": 50.851274,
+      "lng": 4.354656
+    },
+    {
+      "id": "Q37993128",
+      "name": "White Cinema",
+      "lat": 50.877451,
+      "lng": 4.366387
+    },
+    {
+      "id": "Q37952581",
+      "name": "Winston Cinema",
+      "lat": 50.823369,
+      "lng": 4.298253
+    },
+    {
+      "id": "Q37982649",
+      "name": "Wolu Cinema",
+      "lat": 50.843375,
+      "lng": 4.411583
+    },
+    {
+      "id": "Q37952590",
+      "name": "Zinema",
+      "lat": 50.83432,
+      "lng": 4.307013
+    }
+  ]
+}

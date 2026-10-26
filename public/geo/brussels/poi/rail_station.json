@@ -1,0 +1,786 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q2070052",
+      "name": "Alma metro station",
+      "lat": 50.849763,
+      "lng": 4.453113
+    },
+    {
+      "id": "Q98436002",
+      "name": "Anderlecht railway station",
+      "lat": 50.8179,
+      "lng": 4.2918
+    },
+    {
+      "id": "Q537979",
+      "name": "Arcades railway station",
+      "lat": 50.80972,
+      "lng": 4.39833
+    },
+    {
+      "id": "Q893211",
+      "name": "Arts-Loi/Kunst-Wet metro station",
+      "lat": 50.845556,
+      "lng": 4.368611
+    },
+    {
+      "id": "Q782118",
+      "name": "Aumale metro station",
+      "lat": 50.839722,
+      "lng": 4.3125
+    },
+    {
+      "id": "Q2893215",
+      "name": "Beaulieu metro station",
+      "lat": 50.815,
+      "lng": 4.409444
+    },
+    {
+      "id": "Q2893679",
+      "name": "Beekkant metro station",
+      "lat": 50.853333,
+      "lng": 4.3225
+    },
+    {
+      "id": "Q2462704",
+      "name": "Beersel railway station",
+      "lat": 50.76644,
+      "lng": 4.30208
+    },
+    {
+      "id": "Q1841002",
+      "name": "Belgica metro station",
+      "lat": 50.868333,
+      "lng": 4.336667
+    },
+    {
+      "id": "Q3095968",
+      "name": "Berchem-Sainte-Agathe railway station",
+      "lat": 50.872658,
+      "lng": 4.289921
+    },
+    {
+      "id": "Q2132820",
+      "name": "Bizet metro station",
+      "lat": 50.825278,
+      "lng": 4.297778
+    },
+    {
+      "id": "Q2443023",
+      "name": "Bockstael metro station",
+      "lat": 50.879506,
+      "lng": 4.347814
+    },
+    {
+      "id": "Q4936291",
+      "name": "Bockstael railway station",
+      "lat": 50.8795,
+      "lng": 4.3484
+    },
+    {
+      "id": "Q1932552",
+      "name": "Boitsfort railway station",
+      "lat": 50.794667,
+      "lng": 4.408156
+    },
+    {
+      "id": "Q2100626",
+      "name": "Boondael railway station",
+      "lat": 50.80194,
+      "lng": 4.39361
+    },
+    {
+      "id": "Q3096028",
+      "name": "Bordet railway station",
+      "lat": 50.87722,
+      "lng": 4.40944
+    },
+    {
+      "id": "Q656395",
+      "name": "Botanique/Kruidtuin metro station",
+      "lat": 50.853611,
+      "lng": 4.365833
+    },
+    {
+      "id": "Q852880",
+      "name": "Brussels Airport-Zaventem railway station",
+      "lat": 50.897222,
+      "lng": 4.484722
+    },
+    {
+      "id": "Q800588",
+      "name": "Brussels-Central railway station",
+      "lat": 50.845556,
+      "lng": 4.357222
+    },
+    {
+      "id": "Q2627408",
+      "name": "Brussels-Chapel Station",
+      "lat": 50.841222,
+      "lng": 4.348528
+    },
+    {
+      "id": "Q2201793",
+      "name": "Brussels-Congress station",
+      "lat": 50.852222,
+      "lng": 4.361944
+    },
+    {
+      "id": "Q800583",
+      "name": "Brussels-Luxembourg railway station",
+      "lat": 50.838889,
+      "lng": 4.373333
+    },
+    {
+      "id": "Q660792",
+      "name": "Brussels-North railway station",
+      "lat": 50.860278,
+      "lng": 4.360833
+    },
+    {
+      "id": "Q800589",
+      "name": "Brussels-Schuman Station",
+      "lat": 50.84328,
+      "lng": 4.380725
+    },
+    {
+      "id": "Q15882301",
+      "name": "Brussels-South international railway station",
+      "lat": 50.8361,
+      "lng": 4.33583
+    },
+    {
+      "id": "Q800587",
+      "name": "Brussels-South railway station",
+      "lat": 50.835278,
+      "lng": 4.335833
+    },
+    {
+      "id": "Q3096078",
+      "name": "Brussels-West railway station",
+      "lat": 50.849045,
+      "lng": 4.321345
+    },
+    {
+      "id": "Q21012685",
+      "name": "Bruxelles-petite-île",
+      "lat": 50.830986,
+      "lng": 4.322023
+    },
+    {
+      "id": "Q2621086",
+      "name": "Buda railway station",
+      "lat": 50.90805,
+      "lng": 4.41733
+    },
+    {
+      "id": "Q2931286",
+      "name": "CERIA/COOVI metro station",
+      "lat": 50.816445,
+      "lng": 4.290084
+    },
+    {
+      "id": "Q375048",
+      "name": "Clemenceau metro station",
+      "lat": 50.841111,
+      "lng": 4.330556
+    },
+    {
+      "id": "Q56459159",
+      "name": "Colignon Station",
+      "lat": 50.867018,
+      "lng": 4.373333
+    },
+    {
+      "id": "Q2542141",
+      "name": "Comte de Flandre/Graaf van Vlaanderen metro station",
+      "lat": 50.854722,
+      "lng": 4.340278
+    },
+    {
+      "id": "Q893271",
+      "name": "Crainhem/Kraainem metro station",
+      "lat": 50.848889,
+      "lng": 4.458333
+    },
+    {
+      "id": "Q3020106",
+      "name": "De Brouckère metro station",
+      "lat": 50.850833,
+      "lng": 4.352222
+    },
+    {
+      "id": "Q673398",
+      "name": "Delacroix metro station",
+      "lat": 50.845,
+      "lng": 4.324444
+    },
+    {
+      "id": "Q3021907",
+      "name": "Delta metro station",
+      "lat": 50.8189,
+      "lng": 4.40417
+    },
+    {
+      "id": "Q663260",
+      "name": "Delta station",
+      "lat": 50.818889,
+      "lng": 4.404167
+    },
+    {
+      "id": "Q948997",
+      "name": "Demey metro station",
+      "lat": 50.813611,
+      "lng": 4.420833
+    },
+    {
+      "id": "Q2112006",
+      "name": "Diegem railway station",
+      "lat": 50.89039,
+      "lng": 4.44331
+    },
+    {
+      "id": "Q2005976",
+      "name": "Dilbeek railway station",
+      "lat": 50.86624,
+      "lng": 4.24441
+    },
+    {
+      "id": "Q679095",
+      "name": "Eddy Merckx metro station",
+      "lat": 50.816667,
+      "lng": 4.280833
+    },
+    {
+      "id": "Q16507858",
+      "name": "Elisabeth",
+      "lat": 50.863,
+      "lng": 4.33055
+    },
+    {
+      "id": "Q800158",
+      "name": "Érasme/Erasmus metro station",
+      "lat": 50.815278,
+      "lng": 4.266944
+    },
+    {
+      "id": "Q2630230",
+      "name": "Étangs Noirs/Zwarte Vijvers metro station",
+      "lat": 50.856944,
+      "lng": 4.332222
+    },
+    {
+      "id": "Q2723162",
+      "name": "Etterbeek railway station",
+      "lat": 50.822222,
+      "lng": 4.389444
+    },
+    {
+      "id": "Q2969853",
+      "name": "Evere railway station",
+      "lat": 50.86778,
+      "lng": 4.40111
+    },
+    {
+      "id": "Q2479446",
+      "name": "Forest-East railway station",
+      "lat": 50.80917,
+      "lng": 4.32056
+    },
+    {
+      "id": "Q952542",
+      "name": "Forest-South railway station",
+      "lat": 50.809094,
+      "lng": 4.309056
+    },
+    {
+      "id": "Q4727665",
+      "name": "Ganshoren railway station",
+      "lat": 50.879896,
+      "lng": 4.315696
+    },
+    {
+      "id": "Q3095502",
+      "name": "Gare Centrale/Centraal Station",
+      "lat": 50.846497,
+      "lng": 4.358674
+    },
+    {
+      "id": "Q1942383",
+      "name": "Gare de l'Ouest/Weststation",
+      "lat": 50.848889,
+      "lng": 4.320833
+    },
+    {
+      "id": "Q3098217",
+      "name": "Gare du Midi/Zuidstation",
+      "lat": 50.836747,
+      "lng": 4.337228
+    },
+    {
+      "id": "Q16638569",
+      "name": "Gare Maritime",
+      "lat": 50.865188,
+      "lng": 4.345559
+    },
+    {
+      "id": "Q3033646",
+      "name": "Germoir railway station",
+      "lat": 50.82992,
+      "lng": 4.37955
+    },
+    {
+      "id": "Q2677535",
+      "name": "Gribaumont metro station",
+      "lat": 50.842445,
+      "lng": 4.41789
+    },
+    {
+      "id": "Q2231881",
+      "name": "Groenendaal railway station",
+      "lat": 50.76611,
+      "lng": 4.44917
+    },
+    {
+      "id": "Q636471",
+      "name": "Groot-Bijgaarden railway station",
+      "lat": 50.868309,
+      "lng": 4.273366
+    },
+    {
+      "id": "Q2611718",
+      "name": "Hankar metro station",
+      "lat": 50.821389,
+      "lng": 4.405556
+    },
+    {
+      "id": "Q736902",
+      "name": "Haren railway station",
+      "lat": 50.888611,
+      "lng": 4.419722
+    },
+    {
+      "id": "Q39075580",
+      "name": "Haren-Nord railway station",
+      "lat": 50.9027,
+      "lng": 4.4144
+    },
+    {
+      "id": "Q2697132",
+      "name": "Haren-South railway station",
+      "lat": 50.88917,
+      "lng": 4.41444
+    },
+    {
+      "id": "Q2802438",
+      "name": "Herrmann-Debroux metro station",
+      "lat": 50.812222,
+      "lng": 4.428056
+    },
+    {
+      "id": "Q2192952",
+      "name": "Heysel/Heizel metro station",
+      "lat": 50.896667,
+      "lng": 4.336389
+    },
+    {
+      "id": "Q3096630",
+      "name": "Hoeilaart railway station",
+      "lat": 50.76,
+      "lng": 4.46778
+    },
+    {
+      "id": "Q94967635",
+      "name": "Hoeilaart tram station",
+      "lat": 50.767836,
+      "lng": 4.47437
+    },
+    {
+      "id": "Q3022258",
+      "name": "Holleken railway station",
+      "lat": 50.767503,
+      "lng": 4.354131
+    },
+    {
+      "id": "Q2560888",
+      "name": "Hôtel des Monnaies/Munthof metro station",
+      "lat": 50.833333,
+      "lng": 4.349444
+    },
+    {
+      "id": "Q3141239",
+      "name": "Houba-Brugmann metro station",
+      "lat": 50.890278,
+      "lng": 4.336944
+    },
+    {
+      "id": "Q304194",
+      "name": "Jacques Brel metro station",
+      "lat": 50.845,
+      "lng": 4.318611
+    },
+    {
+      "id": "Q2745256",
+      "name": "Jette railway station",
+      "lat": 50.880965,
+      "lng": 4.328565
+    },
+    {
+      "id": "Q3140853",
+      "name": "Joséphine-Charlotte metro station",
+      "lat": 50.840266,
+      "lng": 4.413655
+    },
+    {
+      "id": "Q125545115",
+      "name": "Kapelleveld railway station",
+      "lat": 50.844266,
+      "lng": 4.460361
+    },
+    {
+      "id": "Q2090541",
+      "name": "King Baudouin metro station",
+      "lat": 50.896389,
+      "lng": 4.327778
+    },
+    {
+      "id": "Q745104",
+      "name": "La Roue/Het Rad metro station",
+      "lat": 50.821667,
+      "lng": 4.294167
+    },
+    {
+      "id": "Q56683151",
+      "name": "Liedts Station",
+      "lat": 50.86385,
+      "lng": 4.36661
+    },
+    {
+      "id": "Q56683152",
+      "name": "Linden Station",
+      "lat": 50.87665,
+      "lng": 4.39426
+    },
+    {
+      "id": "Q545517",
+      "name": "Linkebeek railway station",
+      "lat": 50.77389,
+      "lng": 4.33917
+    },
+    {
+      "id": "Q1824209",
+      "name": "Lot railway station",
+      "lat": 50.766393,
+      "lng": 4.273815
+    },
+    {
+      "id": "Q2262956",
+      "name": "Louise/Louiza metro station",
+      "lat": 50.835833,
+      "lng": 4.355278
+    },
+    {
+      "id": "Q657347",
+      "name": "Madou metro station",
+      "lat": 50.85,
+      "lng": 4.368889
+    },
+    {
+      "id": "Q2206139",
+      "name": "Maelbeek/Maalbeek metro station",
+      "lat": 50.843889,
+      "lng": 4.376944
+    },
+    {
+      "id": "Q654988",
+      "name": "Meiser railway station",
+      "lat": 50.855,
+      "lng": 4.39417
+    },
+    {
+      "id": "Q3141073",
+      "name": "Merode metro station",
+      "lat": 50.839444,
+      "lng": 4.397778
+    },
+    {
+      "id": "Q16964678",
+      "name": "Merode railway station",
+      "lat": 50.8391,
+      "lng": 4.39987
+    },
+    {
+      "id": "Q2331977",
+      "name": "Moensberg railway station",
+      "lat": 50.77861,
+      "lng": 4.33167
+    },
+    {
+      "id": "Q2169736",
+      "name": "Montgomery metro station",
+      "lat": 50.837836,
+      "lng": 4.407341
+    },
+    {
+      "id": "Q2753646",
+      "name": "Osseghem/Ossegem metro station",
+      "lat": 50.856944,
+      "lng": 4.325
+    },
+    {
+      "id": "Q125545140",
+      "name": "Oudergem-Waverse steenweg railway station",
+      "lat": 50.81686,
+      "lng": 4.424493
+    },
+    {
+      "id": "Q2114262",
+      "name": "Pannenhuis metro station",
+      "lat": 50.873333,
+      "lng": 4.3425
+    },
+    {
+      "id": "Q2016757",
+      "name": "Parc/Park metro station",
+      "lat": 50.846667,
+      "lng": 4.3625
+    },
+    {
+      "id": "Q56459168",
+      "name": "Peace Station",
+      "lat": 50.87675,
+      "lng": 4.399944
+    },
+    {
+      "id": "Q2676250",
+      "name": "Pétillon metro station",
+      "lat": 50.827778,
+      "lng": 4.403889
+    },
+    {
+      "id": "Q2475970",
+      "name": "Porte de Hal/Hallepoort metro station",
+      "lat": 50.833611,
+      "lng": 4.343333
+    },
+    {
+      "id": "Q2153197",
+      "name": "Porte de Namur/Naamsepoort metro station",
+      "lat": 50.838333,
+      "lng": 4.362222
+    },
+    {
+      "id": "Q3087217",
+      "name": "Ribaucourt metro station",
+      "lat": 50.860556,
+      "lng": 4.34
+    },
+    {
+      "id": "Q56683164",
+      "name": "Riga Station",
+      "lat": 50.87446,
+      "lng": 4.38571
+    },
+    {
+      "id": "Q3087261",
+      "name": "Rogier metro station",
+      "lat": 50.855556,
+      "lng": 4.358333
+    },
+    {
+      "id": "Q2676500",
+      "name": "Roodebeek metro station",
+      "lat": 50.8475,
+      "lng": 4.435833
+    },
+    {
+      "id": "Q2509613",
+      "name": "Ruisbroek railway station",
+      "lat": 50.79056,
+      "lng": 4.29417
+    },
+    {
+      "id": "Q2852012",
+      "name": "Sainctelette",
+      "lat": 50.8579,
+      "lng": 4.35024
+    },
+    {
+      "id": "Q3087216",
+      "name": "Saint-Guidon/Sint-Guido metro station",
+      "lat": 50.835,
+      "lng": 4.305278
+    },
+    {
+      "id": "Q1823157",
+      "name": "Saint-Job railway station",
+      "lat": 50.79417,
+      "lng": 4.36167
+    },
+    {
+      "id": "Q2744420",
+      "name": "Sainte-Catherine/Sint-Katelijne metro station",
+      "lat": 50.852222,
+      "lng": 4.347778
+    },
+    {
+      "id": "Q801418",
+      "name": "Schaarbeek railway station",
+      "lat": 50.878069,
+      "lng": 4.379683
+    },
+    {
+      "id": "Q2176793",
+      "name": "Schuman metro station",
+      "lat": 50.8428,
+      "lng": 4.38167
+    },
+    {
+      "id": "Q2628257",
+      "name": "Simonis metro station",
+      "lat": 50.863056,
+      "lng": 4.330556
+    },
+    {
+      "id": "Q3097746",
+      "name": "Simonis railway station",
+      "lat": 50.863525,
+      "lng": 4.331084
+    },
+    {
+      "id": "Q1974935",
+      "name": "Stockel/Stokkel metro station",
+      "lat": 50.841667,
+      "lng": 4.464444
+    },
+    {
+      "id": "Q2559761",
+      "name": "Stuyvenbergh metro station",
+      "lat": 50.886111,
+      "lng": 4.341944
+    },
+    {
+      "id": "Q2085424",
+      "name": "Thieffry metro station",
+      "lat": 50.833333,
+      "lng": 4.401944
+    },
+    {
+      "id": "Q671645",
+      "name": "Tomberg metro station",
+      "lat": 50.843889,
+      "lng": 4.425278
+    },
+    {
+      "id": "Q25397201",
+      "name": "Toots Thielemans Station",
+      "lat": 50.839722,
+      "lng": 4.341667
+    },
+    {
+      "id": "Q2314359",
+      "name": "Tour and Taxis railway station",
+      "lat": 50.873,
+      "lng": 4.3425
+    },
+    {
+      "id": "Q122459947",
+      "name": "Trimodal Terminal Brussel",
+      "lat": 50.885251,
+      "lng": 4.385777
+    },
+    {
+      "id": "Q2889894",
+      "name": "Trône/Troon metro station",
+      "lat": 50.841111,
+      "lng": 4.366389
+    },
+    {
+      "id": "Q3095852",
+      "name": "Uccle-Calevoet railway station",
+      "lat": 50.7919,
+      "lng": 4.3321
+    },
+    {
+      "id": "Q2478426",
+      "name": "Uccle-Stalle railway station",
+      "lat": 50.8025,
+      "lng": 4.32361
+    },
+    {
+      "id": "Q1881592",
+      "name": "Vandervelde metro station",
+      "lat": 50.8475,
+      "lng": 4.448056
+    },
+    {
+      "id": "Q3500216",
+      "name": "Veeweyde/Veeweide metro station",
+      "lat": 50.83,
+      "lng": 4.300833
+    },
+    {
+      "id": "Q56683175",
+      "name": "Verboekhoven Station",
+      "lat": 50.8705,
+      "lng": 4.378894
+    },
+    {
+      "id": "Q749343",
+      "name": "Vivier d'Oie railway station",
+      "lat": 50.79594,
+      "lng": 4.37333
+    },
+    {
+      "id": "Q125545161",
+      "name": "Watermaal-Tervuren railway station",
+      "lat": 50.815155,
+      "lng": 4.405256
+    },
+    {
+      "id": "Q739090",
+      "name": "Watermael railway station",
+      "lat": 50.80917,
+      "lng": 4.39972
+    },
+    {
+      "id": "Q125545109",
+      "name": "Wezembeek railway station",
+      "lat": 50.846327,
+      "lng": 4.48431
+    },
+    {
+      "id": "Q2715354",
+      "name": "Yser/IJzer metro station",
+      "lat": 50.857222,
+      "lng": 4.351667
+    },
+    {
+      "id": "Q4370800",
+      "name": "Zaventem railway station",
+      "lat": 50.88472,
+      "lng": 4.47306
+    },
+    {
+      "id": "Q1943023",
+      "name": "Zellik railway station",
+      "lat": 50.889702,
+      "lng": 4.275094
+    },
+    {
+      "id": "Q2879221",
+      "name": "Zellik-Renbaan railway station",
+      "lat": 50.881975,
+      "lng": 4.299667
+    }
+  ]
+}

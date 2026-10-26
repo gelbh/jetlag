@@ -1,0 +1,24 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q110041201",
+      "name": "Ferme du Parc Maximilien - Boerderij van het Maximiliaanpark",
+      "lat": 50.85856,
+      "lng": 4.35007
+    },
+    {
+      "id": "Q130746173",
+      "name": "Meli Meise",
+      "lat": 50.919367,
+      "lng": 4.339364
+    }
+  ]
+}

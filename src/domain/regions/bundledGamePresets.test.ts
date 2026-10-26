@@ -8,10 +8,23 @@ import {
   mergeBundledPresets,
 } from "./bundledGamePresets";
 import { AUSTRALIA_STATE_PRESETS } from "./bundledPresets/australia";
+import { BRUSSELS_COMMUNES } from "./bundledPresets/brussels";
 import { SOUTHAMPTON_WARDS } from "./bundledPresets/southampton";
 import { SYDNEY_LGAS } from "./bundledPresets/sydney";
 
 describe("bundledGamePresets", () => {
+  it("includes brussels metro and commune presets on the brussels pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "brussels");
+    expect(presets.some((p) => p.id === "bundled:brussels")).toBe(true);
+    for (const commune of BRUSSELS_COMMUNES) {
+      const preset = presets.find((p) => p.id === `bundled:brussels-${commune.id}`);
+      expect(preset, commune.id).toBeDefined();
+      expect(preset?.subregionId).toBe(commune.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(`commune-${commune.id}`);
+    }
+    expect(presets).toHaveLength(1 + BRUSSELS_COMMUNES.length);
+  });
+
   it("includes southampton city and ward presets on the southampton pack", () => {
     const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "southampton");
     expect(presets.some((p) => p.id === "bundled:southampton")).toBe(true);

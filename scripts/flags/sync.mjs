@@ -37,6 +37,7 @@ const FLAGCDN = {
   "country-canada": { code: "ca", alt: "Canada" },
   "country-japan": { code: "jp", alt: "Japan" },
   "country-au": { code: "au", alt: "Australia" },
+  "country-belgium": { code: "be", alt: "Belgium" },
 };
 
 /**
@@ -176,6 +177,34 @@ const COMMONS_FLAGS = {
     commonsFile: "Flag of Westminster.png",
     alt: "City Of Westminster",
   },
+  // Brussels communes lacking Wikidata P41/P94 — Commons blasons.
+  anderlecht: { commonsFile: "Blason Anderlecht.svg", alt: "Anderlecht" },
+  auderghem: { commonsFile: "Blason Auderghem.svg", alt: "Auderghem" },
+  "berchem-sainte-agathe": {
+    commonsFile: "Blason Berchem-Sainte-Agathe.svg",
+    alt: "Berchem-Sainte-Agathe",
+  },
+  evere: { commonsFile: "Blason Evere.svg", alt: "Evere" },
+  ganshoren: { commonsFile: "Blason Ganshoren.svg", alt: "Ganshoren" },
+  jette: { commonsFile: "Jette wapen.svg", alt: "Jette" },
+  koekelberg: { commonsFile: "Blason Koekelberg.svg", alt: "Koekelberg" },
+  "molenbeek-saint-jean": {
+    commonsFile: "Blason Molenbeek Saint Jean.svg",
+    alt: "Molenbeek-Saint-Jean",
+  },
+  "saint-gilles": { commonsFile: "Sint-Gillis wapen.svg", alt: "Saint-Gilles" },
+  "watermael-boitsfort": {
+    commonsFile: "Blason Watermael-Boitsfort.svg",
+    alt: "Watermael-Boitsfort",
+  },
+  "woluwe-saint-lambert": {
+    commonsFile: "Blason ville be Woluwé-Saint-Lambert Sint-Lambrechts-Woluwe.svg",
+    alt: "Woluwe-Saint-Lambert",
+  },
+  "woluwe-saint-pierre": {
+    commonsFile: "Blason Woluwe SaintPierre.jpg",
+    alt: "Woluwe-Saint-Pierre",
+  },
   // NYC boroughs — https://en.wikipedia.org/wiki/Flags_of_New_York_City
   // Staten Island uses a local override (not on Commons).
   bronx: {
@@ -293,6 +322,28 @@ const WIKIDATA = {
   "metro-southampton": { qid: "Q79848", alt: "Southampton" },
   "lucerne-metro": { qid: "Q4191", alt: "Lucerne" },
   "zurich-city": { qid: "Q72", alt: "Zürich" },
+  "region-brussels-capital": { qid: "Q240", alt: "Brussels-Capital Region" },
+  "metro-brussels": { qid: "Q240", alt: "Brussels" },
+  // Bare communeId keys match preset subregionId (NYC borough pattern).
+  anderlecht: { qid: "Q275268", alt: "Anderlecht" },
+  auderghem: { qid: "Q237243", alt: "Auderghem" },
+  "berchem-sainte-agathe": { qid: "Q288002", alt: "Berchem-Sainte-Agathe" },
+  bruxelles: { qid: "Q239", alt: "City of Brussels" },
+  etterbeek: { qid: "Q192859", alt: "Etterbeek" },
+  evere: { qid: "Q179541", alt: "Evere" },
+  forest: { qid: "Q72946", alt: "Forest" },
+  ganshoren: { qid: "Q269711", alt: "Ganshoren" },
+  ixelles: { qid: "Q208713", alt: "Ixelles" },
+  jette: { qid: "Q241895", alt: "Jette" },
+  koekelberg: { qid: "Q180985", alt: "Koekelberg" },
+  "molenbeek-saint-jean": { qid: "Q180806", alt: "Molenbeek-Saint-Jean" },
+  "saint-gilles": { qid: "Q203322", alt: "Saint-Gilles" },
+  "saint-josse-ten-noode": { qid: "Q272243", alt: "Saint-Josse-ten-Noode" },
+  schaerbeek: { qid: "Q12892", alt: "Schaerbeek" },
+  uccle: { qid: "Q203312", alt: "Uccle" },
+  "watermael-boitsfort": { qid: "Q211242", alt: "Watermael-Boitsfort" },
+  "woluwe-saint-lambert": { qid: "Q211634", alt: "Woluwe-Saint-Lambert" },
+  "woluwe-saint-pierre": { qid: "Q216082", alt: "Woluwe-Saint-Pierre" },
   // Kantō / Kansai have no P41/P94 on Wikidata — local overrides.
   // Tokyo special wards (List of municipal flags of Kantō region).
   "ward-13101": { qid: "Q214051", alt: "Chiyoda" },

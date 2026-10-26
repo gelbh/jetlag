@@ -77,6 +77,7 @@ const PACK_FLAVOR_CATEGORIES: Record<RegionPackId, readonly SessionCustomCategor
   southampton: EMPTY,
   australia: EMPTY,
   sydney: EMPTY,
+  brussels: EMPTY,
 };
 
 const KNOWN_PACK_FLAVOR_IDS: ReadonlySet<string> = new Set(

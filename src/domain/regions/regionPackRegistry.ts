@@ -7,6 +7,12 @@ import {
   AUSTRALIA_REGION_PACK_ID,
 } from "./australiaRegionPack";
 import {
+  BRUSSELS_GEO_ASSETS,
+  BRUSSELS_MATCHING_LABEL_OVERRIDES,
+  BRUSSELS_MEASURING_LABEL_OVERRIDES,
+  BRUSSELS_REGION_PACK_ID,
+} from "./brusselsRegionPack";
+import {
   DUBLIN_GEO_ASSETS,
   DUBLIN_MATCHING_LABEL_OVERRIDES,
   DUBLIN_MEASURING_LABEL_OVERRIDES,
@@ -133,6 +139,8 @@ const SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>([
 
 const SOUTHAMPTON_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
 const SOUTHAMPTON_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
+const BRUSSELS_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const BRUSSELS_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
 
 /** Australia: show admin 1–4 (CED/SED/S/T/LGA); hide empty land international border. */
 const AUSTRALIA_UNSUPPORTED_MATCHING = new Set<
@@ -314,6 +322,20 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     matchingLabelOverrides: SYDNEY_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: SYDNEY_MEASURING_LABEL_OVERRIDES,
   }),
+  [BRUSSELS_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: BRUSSELS_REGION_PACK_ID,
+      geoAssets: {
+        primary: BRUSSELS_GEO_ASSETS.communes,
+        playArea: BRUSSELS_GEO_ASSETS.city,
+      },
+      subregionPropertyKey: "communeId",
+      matchingLabelOverrides: BRUSSELS_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: BRUSSELS_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: BRUSSELS_UNSUPPORTED_MATCHING,
+    unsupportedBorders: BRUSSELS_UNSUPPORTED_BORDERS,
+  },
 };
 
 export function getRegionPackConfig(packId: RegionPackId): RegionPackConfig | undefined {

@@ -85,6 +85,39 @@ describe("bundledPresetFlags", () => {
     expect(flagMarkForHierarchySegmentId("metro-southampton")?.alt).toBe("Southampton");
   });
 
+  it("ships distinct flag or coat marks for every Brussels preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:brussels")?.src).toBe(
+      "/region-flags/metro-brussels.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-belgium"].source).toMatch(/^flagcdn:be$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-brussels"].source).toMatch(/^wikidata:Q240:/);
+    for (const commune of [
+      "anderlecht",
+      "auderghem",
+      "berchem-sainte-agathe",
+      "bruxelles",
+      "etterbeek",
+      "evere",
+      "forest",
+      "ganshoren",
+      "ixelles",
+      "jette",
+      "koekelberg",
+      "molenbeek-saint-jean",
+      "saint-gilles",
+      "saint-josse-ten-noode",
+      "schaerbeek",
+      "uccle",
+      "watermael-boitsfort",
+      "woluwe-saint-lambert",
+      "woluwe-saint-pierre",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:brussels-${commune}`);
+      expect(mark, commune).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${commune}.png`);
+    }
+  });
+
   it("uses Osaka ward flower marks on ward leaves", () => {
     expect(flagMarkForBundledPresetId("bundled:osaka-ward-27127")?.src).toBe(
       "/region-flags/ward-27127.png",

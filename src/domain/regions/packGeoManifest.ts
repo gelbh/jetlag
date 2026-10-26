@@ -34,6 +34,8 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
   australia: { south: -43.7604, west: 112.9011, north: -9.1225, east: 159.1292 },
   // AABB from public/geo/sydney/lgas.geojson (+0.02° pad).
   sydney: { south: -34.3574, west: 149.9948, north: -32.9761, east: 151.363 },
+  // AABB from public/geo/brussels/communes.geojson (+0.01° pad).
+  brussels: { south: 50.7537, west: 4.2338, north: 50.9239, east: 4.4923 },
 };
 
 export const PACK_GEO_POINT_CATEGORIES = BASE_MEASURING_CATALOG.filter(
