@@ -163,19 +163,17 @@ export async function joinAsRole(guestPage: Page, code: string, role: PlayerRole
   await guestPage.goto("/join");
   const roleName = role === "hider" ? "Hider" : role === "observer" ? "Observer" : "Seeker";
   await guestPage.getByPlaceholder("ABCD").fill(code);
-  // Stepped join: code → preview → seat → (passcode?) → commit.
-  const continueBtn = guestPage.getByRole("button", { name: "Continue" });
-  await expect(continueBtn).toBeEnabled({ timeout: 15_000 });
-  await continueBtn.click();
+  // Progressive join: code → preview + seat → (passcode?) → commit (no Continue steps).
   await expect(guestPage.getByText(/Classic Jet Lag|Castle Siege/)).toBeVisible({
     timeout: 15_000,
   });
-  await continueBtn.click();
   // SegmentedControl radios are visually hidden; click the visible label.
   const side = guestPage.getByLabel("Player side");
   await expect(side).toBeVisible({ timeout: 15_000 });
   await side.getByText(roleName, { exact: true }).click();
-  await guestPage.getByRole("button", { name: /^(Join session|Continue)$/ }).click();
+  const joinBtn = guestPage.getByRole("button", { name: "Join session" });
+  await expect(joinBtn).toBeEnabled({ timeout: 15_000 });
+  await joinBtn.click();
   const roleCode = guestPage.getByLabel(/Role code|Seat code/);
   const mapMarker =
     role === "hider"
