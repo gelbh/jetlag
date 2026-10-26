@@ -49,7 +49,7 @@ export const sessionDocumentSchema = z
       .union([
         z.literal("all"),
         z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"]),
-        z.array(z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"])),
+        z.array(z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"])).nonempty(),
       ])
       .optional(),
     endedAt: z.string().optional(),

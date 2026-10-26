@@ -76,6 +76,20 @@ describe("sessionStore", () => {
     expect(useSessionStore.getState()).toBe(before);
   });
 
+  it("skips setSession when transitStationFilter arrays match by content", () => {
+    const filterA: Array<"metro" | "tram"> = ["metro", "tram"];
+    const filterB: Array<"metro" | "tram"> = ["metro", "tram"];
+    expect(filterA).not.toBe(filterB);
+
+    const session = createTestRemoteSession({ transitStationFilter: filterA });
+    useSessionStore.getState().setSession(session);
+    const before = useSessionStore.getState();
+
+    useSessionStore.getState().setSession({ ...session, transitStationFilter: filterB });
+
+    expect(useSessionStore.getState()).toBe(before);
+  });
+
   it("updates session when timer fields change", () => {
     const session = createTestRemoteSession({
       timerAccumulatedMs: 1000,
