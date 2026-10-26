@@ -1,6 +1,6 @@
+import { getRequestHeaders, instrument } from "@posthog/mcp";
 import { getFirestore } from "firebase-admin/firestore";
 import { onRequest } from "firebase-functions/v2/https";
-import { instrument, getRequestHeaders } from "@posthog/mcp";
 import { PostHog } from "posthog-node";
 import { requestHostConfirm } from "../../incident/hostConfirm.mjs";
 import { consumeSessionOpsTool } from "../../incident/sessionOpsCaps.mjs";
@@ -131,7 +131,10 @@ export async function handleSessionOpsMcpHttp(req, res, deps) {
       ? deps.posthog
       : getOrCreateSessionOpsMcpPosthog(deps.posthogApiKey ?? "");
 
-  const body = deps.body !== undefined ? deps.body : readJsonBody(/** @type {import("express").Request} */ (req));
+  const body =
+    deps.body !== undefined
+      ? deps.body
+      : readJsonBody(/** @type {import("express").Request} */ (req));
   const { server, transport } = createSessionOpsMcpServer(deps, { headers });
 
   instrument(server, posthog, {

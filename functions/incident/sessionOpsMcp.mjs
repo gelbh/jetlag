@@ -20,10 +20,7 @@ import {
   SESSION_OPS_TOOL_CAP,
 } from "./sessionOpsCaps.mjs";
 import { appendSupportThreadMessage } from "./sessionOpsThread.mjs";
-import {
-  SESSION_OPS_TOOL_IDS,
-  SESSION_OPS_TOOLS,
-} from "./sessionOpsTools.mjs";
+import { SESSION_OPS_TOOL_IDS, SESSION_OPS_TOOLS } from "./sessionOpsTools.mjs";
 import {
   SESSION_OPS_HOST_CONFIRM_REQUIRED,
   SESSION_OPS_UNKNOWN_TOOL,

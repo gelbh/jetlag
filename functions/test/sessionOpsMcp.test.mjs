@@ -70,11 +70,10 @@ test("createSessionOpsMcpServer registers allowlisted tools only", async () => {
 
 test("handleSessionOpsMcpHttp returns 401 without auth", async () => {
   const { res, state } = createExpressLikeRes();
-  await handleSessionOpsMcpHttp(
-    { method: "POST", headers: {} },
-    res,
-    { authSecret: "secret", posthog: { flush: async () => {} } },
-  );
+  await handleSessionOpsMcpHttp({ method: "POST", headers: {} }, res, {
+    authSecret: "secret",
+    posthog: { flush: async () => {} },
+  });
   assert.equal(state.statusCode, 401);
   assert.equal(state.body.error, SESSION_OPS_MCP_UNAUTHORIZED);
 });
