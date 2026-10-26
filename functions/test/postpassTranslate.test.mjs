@@ -4,6 +4,19 @@ import { geoJsonToOverpassElements } from "../proxies/geoJsonToOverpassElements.
 import { classifyOverpassQuery } from "../proxies/postpassClassify.mjs";
 import { buildPostpassSql } from "../proxies/postpassSql.mjs";
 
+function pointInRing(point, ring) {
+  let inside = false;
+  for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index++) {
+    const [x, y] = ring[index];
+    const [previousX, previousY] = ring[previous];
+    if (y > point.lat !== previousY > point.lat) {
+      const intersection = ((previousX - x) * (point.lat - y)) / (previousY - y) + x;
+      if (point.lon < intersection) inside = !inside;
+    }
+  }
+  return inside;
+}
+
 describe("postpassTranslate", () => {
   it("classifies admin QL and builds polygon SQL", () => {
     const ql = `
@@ -56,6 +69,57 @@ describe("postpassTranslate", () => {
     const { elements } = geoJsonToOverpassElements(fc, "admin");
     assert.ok(elements.some((e) => e.type === "relation" && e.id === 42));
     assert.ok(elements.some((e) => e.type === "way" && e.geometry?.length >= 4));
+  });
+
+  it("keeps an admin MultiPolygon center inside its largest component", () => {
+    const { elements } = geoJsonToOverpassElements(
+      {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: { osm_type: "R", osm_id: 43 },
+            geometry: {
+              type: "MultiPolygon",
+              coordinates: [
+                [
+                  [
+                    [0, 0],
+                    [1, 0],
+                    [1, 1],
+                    [0, 1],
+                    [0, 0],
+                  ],
+                ],
+                [
+                  [
+                    [2, 0],
+                    [4, 0],
+                    [4, 2],
+                    [2, 2],
+                    [2, 0],
+                  ],
+                ],
+              ],
+            },
+          },
+        ],
+      },
+      "admin",
+    );
+
+    const center = elements[0].center;
+    assert.ok(center);
+    assert.equal(
+      pointInRing(center, [
+        [2, 0],
+        [4, 0],
+        [4, 2],
+        [2, 2],
+        [2, 0],
+      ]),
+      true,
+    );
   });
 
   it("classifies places QL", () => {
