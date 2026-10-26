@@ -408,4 +408,98 @@ describe("stripeWebhook", () => {
     assert.equal(db.documents["users/host-1"]?.stripeCustomerId, undefined);
     assert.ok(db.documents["stripeEvents/evt_customer_deleted_retry"]);
   });
+
+  it("retries subscription.updated sync when the first attempt fails before mark", async () => {
+    const db = createWebhookMockDb({
+      "users/uid-sub": {
+        stripeCustomerId: "cus_sub",
+      },
+    });
+    const request = signedWebhookRequest({
+      id: "evt_sub_updated_retry",
+      type: "customer.subscription.updated",
+      object: {
+        id: "sub_retry",
+        object: "subscription",
+        customer: "cus_sub",
+        status: "active",
+        current_period_end: 1_700_000_000,
+        metadata: { firebaseUid: "uid-sub", plan: "monthly" },
+      },
+    });
+
+    let userSetAttempts = 0;
+    const originalCollection = db.collection.bind(db);
+    db.collection = (name) => {
+      const collection = originalCollection(name);
+      if (name !== "users") {
+        return collection;
+      }
+      const originalDoc = collection.doc.bind(collection);
+      collection.doc = (id) => {
+        const ref = originalDoc(id);
+        const originalSet = ref.set.bind(ref);
+        ref.set = (data, options) => {
+          userSetAttempts += 1;
+          if (userSetAttempts === 1) {
+            return Promise.reject(new Error("transient firestore failure"));
+          }
+          return originalSet(data, options);
+        };
+        return ref;
+      };
+      return collection;
+    };
+
+    const failed = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, failed);
+    assert.equal(failed.statusCode, 500);
+    assert.equal(db.documents["stripeEvents/evt_sub_updated_retry"], undefined);
+    assert.equal(db.documents["users/uid-sub"]?.subscription, undefined);
+
+    const retried = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, retried);
+    assert.equal(retried.statusCode, 200);
+    assert.deepEqual(retried.body, { received: true });
+    assert.equal(db.documents["users/uid-sub"]?.subscription?.status, "active");
+    assert.ok(db.documents["stripeEvents/evt_sub_updated_retry"]);
+  });
+
+  it("short-circuits duplicate subscription.updated without a second entitlements write", async () => {
+    const db = createWebhookMockDb({
+      "users/uid-sub": {
+        stripeCustomerId: "cus_sub",
+      },
+    });
+    const request = signedWebhookRequest({
+      id: "evt_sub_updated_dup",
+      type: "customer.subscription.updated",
+      object: {
+        id: "sub_dup",
+        object: "subscription",
+        customer: "cus_sub",
+        status: "active",
+        current_period_end: 1_700_000_000,
+        metadata: { firebaseUid: "uid-sub", plan: "yearly" },
+      },
+    });
+
+    const first = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, first);
+    assert.equal(first.statusCode, 200);
+    assert.deepEqual(first.body, { received: true });
+    assert.equal(db.documents["users/uid-sub"]?.subscription?.plan, "yearly");
+    assert.ok(db.documents["stripeEvents/evt_sub_updated_dup"]);
+
+    const userWritesAfterFirst = db.writes.filter((write) => write.path === "users/uid-sub").length;
+
+    const second = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, second);
+    assert.equal(second.statusCode, 200);
+    assert.deepEqual(second.body, { received: true, duplicate: true });
+    assert.equal(
+      db.writes.filter((write) => write.path === "users/uid-sub").length,
+      userWritesAfterFirst,
+    );
+  });
 });

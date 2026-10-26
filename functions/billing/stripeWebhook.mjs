@@ -111,28 +111,21 @@ export async function handleStripeWebhook(db, webhookSecret, req, res, options) 
   }
 
   try {
-    // customer.deleted: clear first, then mark processed so a failed clear can retry.
-    if (event.type === "customer.deleted") {
-      const existing = await db.collection("stripeEvents").doc(event.id).get();
-      if (existing.exists) {
-        res.status(200).json({ received: true, duplicate: true });
-        return;
-      }
-
-      const customer = /** @type {Stripe.Customer | Stripe.DeletedCustomer} */ (event.data.object);
-      await clearStripeCustomerIdForDeletedCustomer(db, customer);
-      await markStripeEventProcessed(db, event.id);
-      res.status(200).json({ received: true });
-      return;
-    }
-
-    const shouldProcess = await markStripeEventProcessed(db, event.id);
-    if (!shouldProcess) {
+    // Process first, then mark so a mid-handler failure can retry (Stripe redelivery).
+    const existing = await db.collection("stripeEvents").doc(event.id).get();
+    if (existing.exists) {
       res.status(200).json({ received: true, duplicate: true });
       return;
     }
 
     switch (event.type) {
+      case "customer.deleted": {
+        const customer = /** @type {Stripe.Customer | Stripe.DeletedCustomer} */ (
+          event.data.object
+        );
+        await clearStripeCustomerIdForDeletedCustomer(db, customer);
+        break;
+      }
       case "checkout.session.completed": {
         const session = /** @type {Stripe.Checkout.Session} */ (event.data.object);
         if (session.mode === "payment") {
@@ -161,6 +154,7 @@ export async function handleStripeWebhook(db, webhookSecret, req, res, options) 
         break;
     }
 
+    await markStripeEventProcessed(db, event.id);
     res.status(200).json({ received: true });
   } catch (error) {
     await captureFunctionsException(error);
