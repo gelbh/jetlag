@@ -12,6 +12,7 @@ function buildMockDb({ sessionData, secretsExists = false }) {
   const secretsRef = { id: "sess-1", path: "sessionRoleSecrets/sess-1" };
   let roleGatesWritten = null;
   let secretsWritten = null;
+  let codeStamp = null;
 
   return {
     get roleGatesWritten() {
@@ -20,12 +21,24 @@ function buildMockDb({ sessionData, secretsExists = false }) {
     get secretsWritten() {
       return secretsWritten;
     },
+    get codeStamp() {
+      return codeStamp;
+    },
     collection: (name) => {
       if (name === "sessions") {
         return { doc: () => sessionRef };
       }
       if (name === "sessionRoleSecrets") {
         return { doc: () => secretsRef };
+      }
+      if (name === "sessionCodes") {
+        return {
+          doc: (code) => ({
+            set: async (payload, options) => {
+              codeStamp = { code, payload, options };
+            },
+          }),
+        };
       }
       throw new Error(`unexpected ${name}`);
     },
@@ -58,6 +71,7 @@ function buildMockDb({ sessionData, secretsExists = false }) {
 test("classic seeker host initializes role gates and secrets", async () => {
   const sessionData = {
     hostUid: "host-1",
+    code: "WXYZ",
     memberRoles: { "host-1": "seeker" },
   };
   const db = buildMockDb({ sessionData });
@@ -72,6 +86,7 @@ test("classic seeker host initializes role gates and secrets", async () => {
   });
   assert.ok(db.secretsWritten?.observer?.code);
   assert.ok(db.secretsWritten?.seeker?.code);
+  assert.equal(db.codeStamp, null);
 });
 
 test("classic observer host is rejected", async () => {
@@ -93,7 +108,9 @@ test("classic observer host is rejected", async () => {
 test("castleSiege teamA host mints seat secrets and team leader", async () => {
   const sessionData = {
     hostUid: "host-1",
+    code: "ABCD",
     mode: "castleSiege",
+    seriesLength: 3,
     memberRoles: { "host-1": "observer" },
     castleSiegeRoles: { "host-1": "teamA" },
   };
@@ -115,6 +132,11 @@ test("castleSiege teamA host mints seat secrets and team leader", async () => {
   assert.ok(db.secretsWritten?.observer?.code);
   assert.equal(db.secretsWritten?.seeker, undefined);
   assert.equal(db.secretsWritten?.hider, undefined);
+  assert.deepEqual(db.codeStamp, {
+    code: "ABCD",
+    payload: { mode: "castleSiege", seriesLength: 3 },
+    options: { merge: true },
+  });
 });
 
 test("castleSiege seeker classic host is rejected", async () => {

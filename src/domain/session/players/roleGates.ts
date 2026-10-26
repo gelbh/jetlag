@@ -135,7 +135,7 @@ export function joinRequiresRolePasscode(
   }
 
   if (!occupancyKnown) {
-    return true;
+    return false;
   }
 
   return countMembersWithRole(memberRoles, role) > 0;
@@ -218,7 +218,7 @@ export function joinRequiresCastleSiegePasscode(
   }
 
   if (!occupancyKnown) {
-    return true;
+    return false;
   }
 
   return countCastleSiegeSeat(roles, seat) > 0;

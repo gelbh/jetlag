@@ -4,7 +4,6 @@ import { type ReactNode, useState } from "react";
 import { TransitStationModePicker } from "@/components/session/TransitStationModePicker";
 import { InsetGroup, insetTextInputStyles } from "@/components/ui/entry/entryChrome";
 import { InsetHairline, InsetRow } from "@/components/ui/entry/InsetRow";
-import type { TransitRouteFilter } from "@/domain/map/transit";
 import type { GameAreaSectionModel } from "./GameAreaSection";
 
 export function GameAreaRulesStep({
@@ -47,7 +46,7 @@ export function GameAreaRulesStep({
       ) : null}
       <div className="space-y-4">{settingsSlot}</div>
       <TransitStationModePicker
-        value={(transitStationFilter ?? "all") as TransitRouteFilter}
+        value={transitStationFilter ?? "all"}
         onChange={onTransitStationFilterChange}
         disabled={loading || verifyingAccess}
         visible={Boolean(transitMetroId)}

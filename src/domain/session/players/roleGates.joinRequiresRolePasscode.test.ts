@@ -19,7 +19,12 @@ describe("joinRequiresRolePasscode", () => {
     expect(joinRequiresRolePasscode({ u1: "hider" }, "hider", "u1", true)).toBe(false);
   });
 
-  it("keeps collecting when occupancy is unknown (permission-denied preview)", () => {
-    expect(joinRequiresRolePasscode({}, "seeker", "u1", false)).toBe(true);
+  it("hides the field when occupancy is unknown", () => {
+    expect(joinRequiresRolePasscode({}, "seeker", "u1", false)).toBe(false);
+    expect(joinRequiresRolePasscode({}, "hider", "u1", false)).toBe(false);
+  });
+
+  it("still requires a code for observers when occupancy is unknown", () => {
+    expect(joinRequiresRolePasscode({}, "observer", "u1", false)).toBe(true);
   });
 });

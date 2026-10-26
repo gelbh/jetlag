@@ -1,6 +1,7 @@
 import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { gameAreaToBoundingBox, type LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
+import { normalizeTransitStationFilter } from "@/domain/map/transit";
 import { adminLevelForMatchingCategory, type MatchingCategoryId } from "@/domain/questions";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import { geographicCacheKey } from "../cache";
@@ -11,6 +12,11 @@ import {
 } from "../overpass/queryHelpers";
 import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
 import type { MatchingFetchOptions } from "./types";
+
+function transitStationFilterCacheKey(raw: unknown): string {
+  const filter = normalizeTransitStationFilter(raw);
+  return filter === "all" ? "all" : filter.join(",");
+}
 
 export function matchingFeaturesCacheKey(
   gameArea: GameArea,
@@ -26,7 +32,7 @@ export function matchingFeaturesCacheKey(
         )
       : "";
   const metro = options?.transitMetroId?.trim() || "auto";
-  const filter = options?.transitStationFilter ?? "all";
+  const filter = transitStationFilterCacheKey(options?.transitStationFilter);
   return geographicCacheKey(
     gameArea,
     `matching:v3:in:${categoryId}:metro:${metro}:filter:${filter}${customSuffix}`,

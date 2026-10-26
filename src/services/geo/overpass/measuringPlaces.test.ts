@@ -228,7 +228,7 @@ describe("measuring places", () => {
 
     const places = await fetchMeasuringPlacesInArea(sampleGameArea, "rail_station", [], undefined, {
       transitMetroId: "sydney",
-      transitStationFilter: "tram",
+      transitStationFilter: ["tram"],
     });
 
     expect(queryOverpass).toHaveBeenCalled();

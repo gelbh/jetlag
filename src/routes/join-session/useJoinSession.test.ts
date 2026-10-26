@@ -662,6 +662,47 @@ describe("useJoinSession", () => {
     });
   });
 
+  it("shows role passcode after server requires it when occupancy is unknown", async () => {
+    mockUseJoinSessionPreview.mockReturnValue({
+      previewSession: createTestRemoteSession({
+        code: "ABCD",
+        gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
+        memberRoles: {},
+      }),
+      previewPremium: false,
+      lookupLoading: false,
+      existingRole: null,
+    } as never);
+    mockJoinRemoteSessionByCode.mockRejectedValue(
+      new Error("Enter the role code for that side.", {
+        cause: Object.assign(new Error("Role code is required."), {
+          code: "functions/invalid-argument",
+        }),
+      }),
+    );
+
+    const { result, rerender } = renderHook(
+      ({ role }: { role: PlayerRole }) =>
+        useJoinSession({ code: "ABCD", playerRole: role, rolePasscode: "" }),
+      { initialProps: { role: "seeker" as PlayerRole } },
+    );
+
+    expect(result.current.needsRolePasscode).toBe(false);
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("Enter the role code for that side.");
+    });
+    expect(result.current.needsRolePasscode).toBe(true);
+    expect(result.current.canRequestAccess).toBe(true);
+
+    rerender({ role: "hider" });
+    expect(result.current.needsRolePasscode).toBe(false);
+  });
+
   it("tracks join_failed once when the client blocks a blank code", async () => {
     mockUseJoinSessionPreview.mockReturnValue({
       previewSession: createTestRemoteSession({ code: "ABCD", memberRoles: { leader: "seeker" } }),

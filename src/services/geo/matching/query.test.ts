@@ -20,12 +20,23 @@ describe("matchingFeaturesCacheKey", () => {
     const base = matchingFeaturesCacheKey(AREA, "transit_line");
     const filtered = matchingFeaturesCacheKey(AREA, "transit_line", {
       transitMetroId: "sydney",
-      transitStationFilter: "tram",
+      transitStationFilter: ["tram"],
     });
     expect(base).toContain("metro:auto");
     expect(base).toContain("filter:all");
     expect(filtered).toContain("metro:sydney");
     expect(filtered).toContain("filter:tram");
     expect(filtered).not.toBe(base);
+  });
+
+  it("normalizes mode array order so cache keys match", () => {
+    const a = matchingFeaturesCacheKey(AREA, "transit_line", {
+      transitStationFilter: ["tram", "metro"],
+    });
+    const b = matchingFeaturesCacheKey(AREA, "transit_line", {
+      transitStationFilter: ["metro", "tram"],
+    });
+    expect(a).toBe(b);
+    expect(a).toContain("filter:metro,tram");
   });
 });

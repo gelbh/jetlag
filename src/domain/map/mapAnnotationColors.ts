@@ -37,6 +37,7 @@ export const MAP_ANNOTATION_COLORS = {
     tram: "#22c55e",
     bus: "#E4B352",
     ferry: "#588CBC",
+    funicular: "#7A6BB0",
     other: "#A8B0B8",
   },
 } as const;

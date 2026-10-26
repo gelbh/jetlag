@@ -150,7 +150,7 @@ describe("serializeSession", () => {
     expect(payload.tier).toBe("premium");
   });
 
-  it("omits transitStationFilter all and round-trips metro", () => {
+  it("writes sorted mode array and omits all", () => {
     const omitted = buildSessionDocument(
       "ALL1",
       sampleGameArea,
@@ -168,6 +168,32 @@ describe("serializeSession", () => {
     expect(omitted).not.toHaveProperty("transitStationFilter");
     expect(omitted.transitMetroId).toBe("sydney");
 
+    const multi = buildSessionDocument(
+      "MUL1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      "sydney",
+      "seeker",
+      "medium",
+      {},
+      undefined,
+      undefined,
+      { transitStationFilter: ["tram", "metro"] },
+    );
+    expect(multi.transitStationFilter).toEqual(["metro", "tram"]);
+
+    const restoredOmitted = deserializeSessionFromFirestore("sess-2", {
+      ...omitted,
+      code: "ALL1",
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
+    });
+    expect(restoredOmitted.transitStationFilter).toBe("all");
+  });
+
+  it("dual-writes single mode as legacy string and restores both shapes", () => {
     const withMetro = buildSessionDocument(
       "MET1",
       sampleGameArea,
@@ -180,25 +206,86 @@ describe("serializeSession", () => {
       {},
       undefined,
       undefined,
-      { transitStationFilter: "metro" },
+      { transitStationFilter: ["metro"] },
     );
     expect(withMetro.transitStationFilter).toBe("metro");
 
-    const restored = deserializeSessionFromFirestore("sess-1", {
+    const restoredFromWire = deserializeSessionFromFirestore("sess-1", {
       ...withMetro,
       code: "MET1",
       hostUid: "host-uid",
       createdAt: "2026-05-14T00:00:00.000Z",
     });
-    expect(restored.transitStationFilter).toBe("metro");
+    expect(restoredFromWire.transitStationFilter).toEqual(["metro"]);
 
-    const restoredOmitted = deserializeSessionFromFirestore("sess-2", {
-      ...omitted,
-      code: "ALL1",
+    const restoredFromLegacy = deserializeSessionFromFirestore("sess-1b", {
+      ...withMetro,
+      code: "MET1",
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
+      transitStationFilter: "metro",
+    });
+    expect(restoredFromLegacy.transitStationFilter).toEqual(["metro"]);
+  });
+
+  it("recovers empty and unknown filter arrays on deserialize", () => {
+    const base = buildSessionDocument(
+      "BAD1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      "sydney",
+      "seeker",
+      "medium",
+      {},
+    );
+
+    expect(
+      deserializeSessionFromFirestore("sess-empty", {
+        ...base,
+        code: "BAD1",
+        hostUid: "host-uid",
+        createdAt: "2026-05-14T00:00:00.000Z",
+        transitStationFilter: [],
+      }).transitStationFilter,
+    ).toBe("all");
+
+    expect(
+      deserializeSessionFromFirestore("sess-partial", {
+        ...base,
+        code: "BAD1",
+        hostUid: "host-uid",
+        createdAt: "2026-05-14T00:00:00.000Z",
+        transitStationFilter: ["metro", "spaceship"],
+      }).transitStationFilter,
+    ).toEqual(["metro"]);
+  });
+
+  it("accepts funicular as dual-written string", () => {
+    const multi = buildSessionDocument(
+      "FUN1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      "sydney",
+      "seeker",
+      "medium",
+      {},
+      undefined,
+      undefined,
+      { transitStationFilter: ["funicular"] },
+    );
+    expect(multi.transitStationFilter).toBe("funicular");
+
+    const restored = deserializeSessionFromFirestore("sess-fun", {
+      ...multi,
+      code: "FUN1",
       hostUid: "host-uid",
       createdAt: "2026-05-14T00:00:00.000Z",
     });
-    expect(restoredOmitted.transitStationFilter).toBeUndefined();
+    expect(restored.transitStationFilter).toEqual(["funicular"]);
   });
 
   it("omits pack customMatchingAreas from Firestore create payload when regionPackId is set", () => {

@@ -1,9 +1,10 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionRecord } from "@/domain/map/annotations";
 import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "@/domain/session/join/joinPreviewGameArea";
+import { buildJoinPreviewSession } from "@/domain/session/join/joinPreviewSession";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
 import { jetlagTheme } from "@/theme/theme";
@@ -19,6 +20,12 @@ const previewState = vi.hoisted(() => ({
   },
 }));
 
+const joinMocks = vi.hoisted(() => ({
+  firebaseConfigured: false,
+  joinRemoteSessionByCode: vi.fn(),
+  ensureFreshAnonymousUser: vi.fn(async () => ({ uid: "u1" })),
+}));
+
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => vi.fn(),
 }));
@@ -28,8 +35,17 @@ vi.mock("@/hooks/session/useJoinSessionPreview", () => ({
 }));
 
 vi.mock("@/services/core/firebase/firebase", () => ({
-  isFirebaseConfigured: () => false,
-  ensureFreshAnonymousUser: vi.fn(),
+  isFirebaseConfigured: () => joinMocks.firebaseConfigured,
+  ensureFreshAnonymousUser: (...args: unknown[]) =>
+    joinMocks.ensureFreshAnonymousUser(...(args as [])),
+}));
+
+vi.mock("@/services/firestore/firestoreAnnotations", () => ({
+  joinRemoteSessionByCode: (...args: unknown[]) =>
+    joinMocks.joinRemoteSessionByCode(...(args as [])),
+  waitForServerHiderRole: vi.fn(),
+  getRemoteSessionByIdFromServer: vi.fn(),
+  lookupRemoteSessionByCode: vi.fn(),
 }));
 
 function renderJoin() {
@@ -50,6 +66,9 @@ beforeEach(() => {
     existingRole: null,
     existingCastleSiegeRole: null,
   };
+  joinMocks.firebaseConfigured = false;
+  joinMocks.joinRemoteSessionByCode.mockReset();
+  joinMocks.ensureFreshAnonymousUser.mockClear();
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -145,7 +164,23 @@ describe("JoinSession", () => {
     expect(screen.queryByText(/Leave it blank only if/)).not.toBeInTheDocument();
   });
 
-  it("asks for the role code first when occupancy is unknown", () => {
+  it("keeps Observer in the same row as Seeker and Hider", () => {
+    previewState.value = {
+      ...previewState.value,
+      previewSession: createTestRemoteSession({ memberRoles: {} }),
+    };
+
+    renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+
+    const group = screen.getByRole("radiogroup", { name: /Player side/i });
+    expect(screen.getByRole("radio", { name: /^Seeker\./i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^Hider\./i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^Observer\./i })).toBeInTheDocument();
+    expect(group.className).toContain("grid-cols-3");
+  });
+
+  it("does not show role code when occupancy is unknown", () => {
     previewState.value = {
       ...previewState.value,
       previewSession: createTestRemoteSession({
@@ -158,11 +193,39 @@ describe("JoinSession", () => {
     fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
     fireEvent.click(screen.getByRole("radio", { name: /^Seeker\./i }));
 
-    expect(
-      screen.getByText(
-        "If anyone is already on that side, ask them for the role code. Leave it blank only if you know you're first.",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.queryByLabelText(/role code/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Leave it blank only if/)).not.toBeInTheDocument();
+  });
+
+  it("shows role code after server requires it when occupancy is unknown", async () => {
+    joinMocks.firebaseConfigured = true;
+    joinMocks.joinRemoteSessionByCode.mockRejectedValue(
+      new Error("Enter the role code for that side.", {
+        cause: Object.assign(new Error("Role code is required."), {
+          code: "functions/invalid-argument",
+        }),
+      }),
+    );
+    previewState.value = {
+      ...previewState.value,
+      previewSession: createTestRemoteSession({
+        gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
+        memberRoles: {},
+      }),
+    };
+
+    renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+    fireEvent.click(screen.getByRole("radio", { name: /^Seeker\./i }));
+    expect(screen.queryByLabelText(/role code/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^join session$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Enter the role code for that side.")).toBeInTheDocument();
+    });
+    expect(screen.getByLabelText(/role code/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /request access/i })).toBeInTheDocument();
   });
 
   it("shows Castle Siege details and seat picker without Continue", () => {
@@ -181,5 +244,24 @@ describe("JoinSession", () => {
     expect(screen.getByText("Best of 3")).toBeInTheDocument();
     expect(screen.getByRole("radiogroup", { name: /Castle Siege seat/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^continue$/i })).not.toBeInTheDocument();
+  });
+
+  it("shows Castle Siege seat picker for code-record-shaped preview", () => {
+    previewState.value = {
+      ...previewState.value,
+      previewSession: buildJoinPreviewSession("sess-1", "ABCD", {
+        hostUid: "host",
+        mode: "castleSiege",
+        seriesLength: 3,
+      }),
+    };
+
+    renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+
+    expect(screen.getByText("Castle Siege")).toBeInTheDocument();
+    expect(screen.getByText("Best of 3")).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: /Castle Siege seat/i })).toBeInTheDocument();
+    expect(screen.queryByRole("radiogroup", { name: /Player side/i })).not.toBeInTheDocument();
   });
 });

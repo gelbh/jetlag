@@ -45,6 +45,7 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "siegeClock",
   "siegeCapture",
   "score",
+  "transitStationFilter",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordStructuredKey = (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
@@ -73,7 +74,6 @@ const SESSION_RECORD_SCALAR_KEYS = [
   "previewQuestionBeforeSend",
   "tier",
   "transitMetroId",
-  "transitStationFilter",
   "endedAt",
   "status",
   "timerAccumulatedMs",

@@ -17,10 +17,19 @@ const TRANSIT_ICON_IDS: Record<TransitRouteMode, string> = {
   tram: "jl-icon-transit-tram",
   bus: "jl-icon-transit-bus",
   ferry: "jl-icon-transit-ferry",
+  funicular: "jl-icon-transit-funicular",
   other: "jl-icon-transit-other",
 };
 
-const TRANSIT_MODES: TransitRouteMode[] = ["rail", "metro", "tram", "bus", "ferry", "other"];
+const TRANSIT_MODES: TransitRouteMode[] = [
+  "rail",
+  "metro",
+  "tram",
+  "bus",
+  "ferry",
+  "funicular",
+  "other",
+];
 
 const registerInFlight = new WeakMap<MapLibreMap, Promise<void>>();
 

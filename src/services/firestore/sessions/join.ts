@@ -72,6 +72,8 @@ type SessionCodeRecord = {
   tier?: SessionTier;
   status?: "active" | "ended";
   createdAt?: string;
+  mode?: "castleSiege";
+  seriesLength?: 1 | 3;
 };
 
 function sanitizeJoinReturningMemberUid(options: JoinRemoteSessionOptions): string | undefined {
@@ -89,6 +91,10 @@ async function readSessionCodeRecord(code: string): Promise<SessionCodeRecord | 
     return null;
   }
 
+  const mode = data.mode === "castleSiege" ? ("castleSiege" as const) : undefined;
+  const seriesLength =
+    data.seriesLength === 3 ? (3 as const) : data.seriesLength === 1 ? (1 as const) : undefined;
+
   return {
     sessionId: data.sessionId,
     hostUid: data.hostUid,
@@ -96,6 +102,7 @@ async function readSessionCodeRecord(code: string): Promise<SessionCodeRecord | 
     tier: data.tier === "premium" ? "premium" : "free",
     status: data.status === "ended" ? "ended" : "active",
     createdAt: typeof data.createdAt === "string" ? data.createdAt : undefined,
+    ...(mode ? { mode, ...(seriesLength !== undefined ? { seriesLength } : {}) } : {}),
   };
 }
 

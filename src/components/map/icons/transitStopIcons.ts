@@ -7,6 +7,7 @@ const MODE_COLORS: Record<TransitRouteMode, string> = {
   tram: MAP_ANNOTATION_COLORS.transit.tram,
   bus: MAP_ANNOTATION_COLORS.transit.bus,
   ferry: MAP_ANNOTATION_COLORS.transit.ferry,
+  funicular: MAP_ANNOTATION_COLORS.transit.funicular,
   other: MAP_ANNOTATION_COLORS.transit.other,
 };
 
@@ -23,6 +24,7 @@ const MODE_SHAPES: Record<TransitRouteMode, string> = {
   metro: `<rect x="6" y="6" width="8" height="8" fill="${MODE_COLORS.metro}"/><text x="10" y="12.5" text-anchor="middle" font-size="7" font-weight="700" fill="${MAP_ANNOTATION_COLORS.playAreaMask}">M</text>`,
   rail: `<path d="M5 13h10V8H5v5zm1.5-4.5h7v3h-7v-3z" fill="${MODE_COLORS.rail}"/>`,
   ferry: `<path d="M4 12h12l-1.5-4H5.5L4 12zm2.2-3.5h7.6l.8-2H5.4l.8 2z" fill="${MODE_COLORS.ferry}"/>`,
+  funicular: `<path d="M5 13.5l2-7h6l2 7H5zm3-5.5h4v2H8V8z" fill="${MODE_COLORS.funicular}"/>`,
   other: `<circle cx="10" cy="10" r="3" fill="${MODE_COLORS.other}"/>`,
 };
 

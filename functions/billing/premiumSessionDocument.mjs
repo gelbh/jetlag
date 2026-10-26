@@ -31,7 +31,12 @@ export const createPremiumSessionInputSchema = z.object({
   gameArea: gameAreaSchema,
   transitMetroId: z.string().min(1).optional(),
   transitStationFilter: z
-    .enum(["all", "rail", "metro", "tram", "bus", "ferry", "other"])
+    .union([
+      z.literal("all"),
+      z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"]),
+      // Recoverable: empty / unknown tokens → normalizeTransitStationFilter
+      z.array(z.string()),
+    ])
     .optional(),
   hostRole: z.enum(["seeker", "hider"]).default("seeker"),
   gameSize: z.enum(["small", "medium", "large"]).default("medium"),
@@ -39,6 +44,37 @@ export const createPremiumSessionInputSchema = z.object({
   hostAppVersion: z.string().min(1).max(32),
   rulesPatch: rulesPatchSchema.default({}),
 });
+
+const TRANSIT_ROUTE_MODES = ["rail", "metro", "tram", "bus", "ferry", "funicular", "other"];
+const TRANSIT_ROUTE_MODE_SET = new Set(TRANSIT_ROUTE_MODES);
+const MODE_SORT_INDEX = new Map(TRANSIT_ROUTE_MODES.map((mode, index) => [mode, index]));
+
+/**
+ * Mirror of `normalizeTransitStationFilter` (src/domain/map/transit.ts).
+ * @param {unknown} raw
+ * @returns {"all" | string[]}
+ */
+function normalizeTransitStationFilter(raw) {
+  if (raw === undefined || raw === null || raw === "all") {
+    return "all";
+  }
+  if (typeof raw === "string") {
+    return TRANSIT_ROUTE_MODE_SET.has(raw) ? [raw] : "all";
+  }
+  if (!Array.isArray(raw)) {
+    return "all";
+  }
+  const unique = new Set();
+  for (const entry of raw) {
+    if (typeof entry === "string" && TRANSIT_ROUTE_MODE_SET.has(entry)) {
+      unique.add(entry);
+    }
+  }
+  if (unique.size === 0) {
+    return "all";
+  }
+  return [...unique].sort((a, b) => (MODE_SORT_INDEX.get(a) ?? 0) - (MODE_SORT_INDEX.get(b) ?? 0));
+}
 
 const QUARTER_MILE_METERS = 402.336;
 const HALF_MILE_METERS = 804.672;
@@ -106,8 +142,11 @@ export function buildPremiumSessionFirestoreDocument(input, code, hostUid, creat
     payload.transitMetroId = input.transitMetroId;
   }
 
-  if (input.transitStationFilter && input.transitStationFilter !== "all") {
-    payload.transitStationFilter = input.transitStationFilter;
+  const transitStationFilter = normalizeTransitStationFilter(input.transitStationFilter);
+  if (transitStationFilter !== "all") {
+    // Dual-write: single mode as legacy string for older clients; multi as array.
+    payload.transitStationFilter =
+      transitStationFilter.length === 1 ? transitStationFilter[0] : transitStationFilter;
   }
 
   return payload;

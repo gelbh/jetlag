@@ -86,7 +86,6 @@ export function JoinSession() {
     lookupLoading,
     castleSiegeJoin,
     needsRolePasscode,
-    rolePasscodeOccupancyKnown,
     canRequestAccess,
     error,
     loading,
@@ -145,14 +144,10 @@ export function JoinSession() {
   const passcodeHint = castleSiegeJoin
     ? castleSiegeRole === "observer" || castleSiegeRole === "referee"
       ? "Ask the host for the seat code."
-      : rolePasscodeOccupancyKnown
-        ? "Ask a teammate on that team for the seat code."
-        : "If anyone is already on that team, ask them for the seat code. Leave it blank only if you know you're first."
+      : "Ask a teammate on that team for the seat code."
     : playerRole === "observer"
       ? "Ask the host for the observer code."
-      : rolePasscodeOccupancyKnown
-        ? "Ask a teammate on that side for the role code."
-        : "If anyone is already on that side, ask them for the role code. Leave it blank only if you know you're first.";
+      : "Ask a teammate on that side for the role code.";
 
   return (
     <EntryRouteShell title="Join" centerBody>
