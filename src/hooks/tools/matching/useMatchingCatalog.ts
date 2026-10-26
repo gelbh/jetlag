@@ -32,7 +32,7 @@ import type { SessionRulesInput } from "@/domain/session/rules";
 import { paintPolygonLod } from "@/hooks/tools/framework/paintPolygonLod";
 import type { MatchingFeature, MatchingFetchOptions } from "@/services/geo/matching";
 import { isAdminDivisionCategoryAvailable } from "@/services/geo/overpass/adminDivisionAvailability";
-import { inferTransitMetroId } from "@/services/transit/transitCatalog";
+import { resolveTransitMetroId } from "@/services/transit/transitCatalog";
 import { usePreloadStore } from "@/state/preloadStore";
 
 export const MATCHING_CATALOG_COARSE_PREFIX = 16;
@@ -129,12 +129,17 @@ export function useMatchingCatalog(input: {
       customCategories: content.customCategories,
       regionPackId: sessionRules?.regionPackId,
       subregionId: sessionRules?.regionPackSubregionId,
+      transitMetroId: sessionRules?.transitMetroId,
+      transitStationFilter: sessionRules?.transitStationFilter,
     };
   }, [sessionRules]);
 
   const matchingTransitMetroId = useMemo(
-    () => (matchingCategoryId === "transit_line" ? inferTransitMetroId(gameArea) : null),
-    [matchingCategoryId, gameArea],
+    () =>
+      matchingCategoryId === "transit_line"
+        ? resolveTransitMetroId(sessionRules?.transitMetroId, gameArea)
+        : null,
+    [matchingCategoryId, gameArea, sessionRules?.transitMetroId],
   );
 
   const customCategories = matchingFetchOptions.customCategories ?? [];

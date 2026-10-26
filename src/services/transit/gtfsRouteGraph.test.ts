@@ -3,6 +3,7 @@ import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/geometry";
 import type { GtfsStaticBundle } from "./gtfsBundle";
 import {
   clearGtfsBundleCacheForTests,
+  filterGtfsStopsByMode,
   filterGtfsStopsForBoundingBox,
   filterGtfsStopsForGameArea,
   gtfsStopsShareStationOrRoute,
@@ -49,14 +50,26 @@ const NYC_BUNDLE: GtfsStaticBundle = {
       lng: -73.9904,
       parentStationId: "nyc:union",
     },
+    {
+      id: "nyc:bus",
+      name: "34 St & 7 Av",
+      lat: 40.7508,
+      lng: -73.9938,
+    },
   ],
-  routes: [],
+  routes: [
+    { id: "route-1", shortName: "1", longName: "Broadway-7 Avenue Local", mode: "metro" },
+    { id: "route-l", shortName: "L", longName: "14 Street-Canarsie Local", mode: "metro" },
+    { id: "route-4", shortName: "4", longName: "Lexington Avenue Express", mode: "metro" },
+    { id: "route-bus", shortName: "M15", longName: "M15 SBS", mode: "bus" },
+  ],
   stopRouteIds: {
     "nyc:penn": ["route-1"],
     "nyc:times": ["route-1", "route-l"],
     "nyc:grand": ["route-4"],
     "nyc:union": ["route-l"],
     "nyc:union-n": ["route-l"],
+    "nyc:bus": ["route-bus"],
   },
 };
 
@@ -112,6 +125,18 @@ describe("gtfsRouteGraph", () => {
     const stops = filterGtfsStopsForGameArea(NYC_BUNDLE, MIDTOWN_GAME_AREA);
     expect(stops.map((stop) => stop.id)).toContain("nyc:penn");
     expect(stops.map((stop) => stop.id)).not.toContain("nyc:union");
+  });
+
+  it("filters stops by route mode", () => {
+    const busOnly = filterGtfsStopsByMode(NYC_BUNDLE.stops, NYC_BUNDLE, "bus");
+    expect(busOnly.map((stop) => stop.id)).toEqual(["nyc:bus"]);
+    const metroOnly = filterGtfsStopsByMode(NYC_BUNDLE.stops, NYC_BUNDLE, "metro");
+    expect(metroOnly.map((stop) => stop.id)).toContain("nyc:penn");
+    expect(metroOnly.map((stop) => stop.id)).not.toContain("nyc:bus");
+    expect(filterGtfsStopsByMode(NYC_BUNDLE.stops, NYC_BUNDLE, "tram")).toEqual([]);
+    expect(filterGtfsStopsByMode(NYC_BUNDLE.stops, NYC_BUNDLE, "all")).toHaveLength(
+      NYC_BUNDLE.stops.length,
+    );
   });
 
   it("filters stops to an explicit bounding box", () => {

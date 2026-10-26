@@ -38,6 +38,8 @@ export type SessionRulesInput = Pick<
   | "expansionPackEnabled"
   | "customQuestionPackEnabled"
   | "previewQuestionBeforeSend"
+  | "transitMetroId"
+  | "transitStationFilter"
 >;
 
 export const DEFAULT_SESSION_RULES: SessionRulesInput = { gameSize: "medium" };

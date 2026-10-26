@@ -68,7 +68,7 @@
       "id": "sydney",
       "bundlePath": "/geo/gtfs/sydney.json",
       "feedOnestopId": "mdb-2449",
-      "builtAt": "2026-10-23T17:56:28.346Z",
+      "builtAt": "2026-10-26T15:56:29.926Z",
       "stopCount": 25346,
       "routeCount": 4620
     }

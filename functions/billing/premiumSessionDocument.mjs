@@ -30,6 +30,9 @@ const rulesPatchSchema = z
 export const createPremiumSessionInputSchema = z.object({
   gameArea: gameAreaSchema,
   transitMetroId: z.string().min(1).optional(),
+  transitStationFilter: z
+    .enum(["all", "rail", "metro", "tram", "bus", "ferry", "other"])
+    .optional(),
   hostRole: z.enum(["seeker", "hider"]).default("seeker"),
   gameSize: z.enum(["small", "medium", "large"]).default("medium"),
   distanceUnit: z.enum(["imperial", "metric"]).default("imperial"),
@@ -101,6 +104,10 @@ export function buildPremiumSessionFirestoreDocument(input, code, hostUid, creat
 
   if (input.transitMetroId) {
     payload.transitMetroId = input.transitMetroId;
+  }
+
+  if (input.transitStationFilter && input.transitStationFilter !== "all") {
+    payload.transitStationFilter = input.transitStationFilter;
   }
 
   return payload;

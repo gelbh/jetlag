@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { metroSupportsLiveVehicles, TRANSIT_METROS } from "./transitCatalog";
+import type { GameArea } from "../../domain/map/annotations";
+import {
+  inferTransitMetroId,
+  metroSupportsLiveVehicles,
+  resolveTransitMetroId,
+  TRANSIT_METROS,
+} from "./transitCatalog";
+
+const BLUE_MOUNTAINS_AREA: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [150.2, -33.8],
+      [150.6, -33.8],
+      [150.6, -33.5],
+      [150.2, -33.5],
+      [150.2, -33.8],
+    ],
+  ],
+};
 
 describe("transitCatalog", () => {
   it("enables live vehicles for metros with RT feeds", () => {
@@ -42,5 +61,15 @@ describe("transitCatalog", () => {
     expect(sydney?.transitlandFeed).toBeTruthy();
     expect(sydney?.transitlandRtFeed).toBeUndefined();
     expect(metroSupportsLiveVehicles(sydney ?? null)).toBe(false);
+  });
+
+  it("infers no metro for outer Blue Mountains bbox beyond Sydney radius", () => {
+    expect(inferTransitMetroId(BLUE_MOUNTAINS_AREA)).toBeNull();
+  });
+
+  it("resolveTransitMetroId prefers explicit sydney over outer-LGA infer miss", () => {
+    expect(resolveTransitMetroId("sydney", BLUE_MOUNTAINS_AREA)).toBe("sydney");
+    expect(resolveTransitMetroId(null, BLUE_MOUNTAINS_AREA)).toBeNull();
+    expect(resolveTransitMetroId("not-a-metro", BLUE_MOUNTAINS_AREA)).toBeNull();
   });
 });

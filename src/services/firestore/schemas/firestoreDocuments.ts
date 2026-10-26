@@ -45,6 +45,9 @@ export const sessionDocumentSchema = z
     previewQuestionBeforeSend: z.boolean().optional(),
     tier: z.enum(["free", "premium"]).optional(),
     transitMetroId: z.string().optional(),
+    transitStationFilter: z
+      .enum(["all", "rail", "metro", "tram", "bus", "ferry", "other"])
+      .optional(),
     endedAt: z.string().optional(),
     status: z.enum(["active", "ended"]).optional(),
     timerAccumulatedMs: z.number().finite().optional(),
