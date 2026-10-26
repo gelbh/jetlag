@@ -1251,6 +1251,7 @@ describe("CreateSession", () => {
       hostCastleSiegeRole: "teamB",
       seriesLength: 3,
       setupMode: "fairSplit",
+      transitStationFilter: "all",
     });
   });
 
