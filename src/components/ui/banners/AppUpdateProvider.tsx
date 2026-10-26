@@ -104,14 +104,14 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       ? session.requiredMinAppVersionGraceSeconds
       : (effectiveRuntimeConfig?.hotfixGraceSeconds ?? DEFAULT_HOTFIX_GRACE_SECONDS);
 
-  const applyHotfixReload = useCallback(() => {
+  const applyPendingUpdate = useCallback(() => {
     void applyServiceWorkerUpdate(registrationRef.current, updateSW ?? undefined);
   }, [updateSW]);
 
   const hotfixGrace = useHotfixGraceReload({
     requiredMinAppVersion,
     graceSeconds,
-    reload: applyHotfixReload,
+    reload: applyPendingUpdate,
   });
 
   // Honor admin soft_reload mitigations once per mitigation id (durable across reloads).
@@ -138,8 +138,8 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     if (!acknowledgeSoftReload(mitigation.id)) {
       return;
     }
-    void applyServiceWorkerUpdate(registrationRef.current, updateSW ?? undefined);
-  }, [session?.opsMitigation, updateSW]);
+    applyPendingUpdate();
+  }, [session?.opsMitigation, applyPendingUpdate]);
 
   useEffect(() => {
     if (import.meta.env.DEV) {
@@ -250,20 +250,18 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       needsRefresh,
       safeToReload,
       showGlobalBanner,
-      applyUpdate: () => {
-        void applyServiceWorkerUpdate(registrationRef.current, updateSW ?? undefined);
-      },
+      applyUpdate: applyPendingUpdate,
       hotfixGraceActive: hotfixGrace.active,
       hotfixGraceSecondsRemaining: hotfixGrace.secondsRemaining,
       hotfixRequiredMinAppVersion: hotfixGrace.requiredMinAppVersion,
     };
   }, [
+    applyPendingUpdate,
     hotfixGrace.active,
     hotfixGrace.requiredMinAppVersion,
     hotfixGrace.secondsRemaining,
     needsRefresh,
     safeToReload,
-    updateSW,
   ]);
 
   return <AppUpdateContext.Provider value={value}>{children}</AppUpdateContext.Provider>;
