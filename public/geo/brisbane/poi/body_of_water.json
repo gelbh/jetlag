@@ -1,0 +1,120 @@
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q21919180",
+      "name": "Blaksley Lagoon",
+      "lat": -27.566667,
+      "lng": 153.416667
+    },
+    {
+      "id": "Q21919410",
+      "name": "Blue Lagoon",
+      "lat": -27.08709,
+      "lng": 153.4379
+    },
+    {
+      "id": "Q21919413",
+      "name": "Blue Lake",
+      "lat": -27.53198,
+      "lng": 153.47741
+    },
+    {
+      "id": "Q3915027",
+      "name": "Brown Lake",
+      "lat": -27.49,
+      "lng": 153.4325
+    },
+    {
+      "id": "Q107132221",
+      "name": "Dowse Lagoon",
+      "lat": -27.317,
+      "lng": 153.064
+    },
+    {
+      "id": "Q21913076",
+      "name": "Enoggera Reservoir",
+      "lat": -27.44688,
+      "lng": 152.92188
+    },
+    {
+      "id": "Q21911881",
+      "name": "Gold Creek Reservoir",
+      "lat": -27.45945,
+      "lng": 152.87973
+    },
+    {
+      "id": "Q24090134",
+      "name": "Green Hill Reservoir",
+      "lat": -27.49457,
+      "lng": 152.957612
+    },
+    {
+      "id": "Q27889639",
+      "name": "Honeyeater Lake",
+      "lat": -27.096117,
+      "lng": 153.435005
+    },
+    {
+      "id": "Q21910201",
+      "name": "Lake Karboora",
+      "lat": -27.483333,
+      "lng": 153.45
+    },
+    {
+      "id": "Q21910551",
+      "name": "Lake Kounpee",
+      "lat": -27.55,
+      "lng": 153.416667
+    },
+    {
+      "id": "Q6476514",
+      "name": "Lake Kurwongbah",
+      "lat": -27.2576,
+      "lng": 152.952
+    },
+    {
+      "id": "Q21908182",
+      "name": "Lake Manchester",
+      "lat": -27.48282,
+      "lng": 152.76467
+    },
+    {
+      "id": "Q21910495",
+      "name": "Lake Samsonvale",
+      "lat": -27.26667,
+      "lng": 152.9
+    },
+    {
+      "id": "Q6920310",
+      "name": "Mount Crosby Weir",
+      "lat": -27.5373,
+      "lng": 152.7979
+    },
+    {
+      "id": "Q21923541",
+      "name": "Swallow Lagoon",
+      "lat": -27.49873,
+      "lng": 153.45479
+    },
+    {
+      "id": "Q21954531",
+      "name": "Tingalpa Reservoir",
+      "lat": -27.53507,
+      "lng": 153.17168
+    },
+    {
+      "id": "Q21972052",
+      "name": "Weisby Lagoons",
+      "lat": -27.43776,
+      "lng": 153.44971
+    }
+  ]
+}

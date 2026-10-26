@@ -1,0 +1,336 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q38241527",
+      "name": "4Men Gay Cinema",
+      "lat": 52.376734,
+      "lng": 4.893422
+    },
+    {
+      "id": "Q38242003",
+      "name": "Adonis Gay Cinema",
+      "lat": 52.374693,
+      "lng": 4.897223
+    },
+    {
+      "id": "Q38243583",
+      "name": "Alfa 1-4",
+      "lat": 52.363667,
+      "lng": 4.883235
+    },
+    {
+      "id": "Q38243591",
+      "name": "Alhambra Theater",
+      "lat": 52.359165,
+      "lng": 4.897563
+    },
+    {
+      "id": "Q38243599",
+      "name": "Bellevue Cinerama",
+      "lat": 52.364507,
+      "lng": 4.880885
+    },
+    {
+      "id": "Q38243605",
+      "name": "Bioscoop Café Blauw",
+      "lat": 52.365966,
+      "lng": 4.895502
+    },
+    {
+      "id": "Q126709359",
+      "name": "Bioscooptheater Astoria",
+      "lat": 52.392225,
+      "lng": 4.913269
+    },
+    {
+      "id": "Q38243612",
+      "name": "Calypso Cinema",
+      "lat": 52.364368,
+      "lng": 4.880882
+    },
+    {
+      "id": "Q15873788",
+      "name": "Ceintuurtheater",
+      "lat": 52.352714,
+      "lng": 4.891469
+    },
+    {
+      "id": "Q38243621",
+      "name": "Centraal Bioscoop",
+      "lat": 52.377231,
+      "lng": 4.896645
+    },
+    {
+      "id": "Q17299373",
+      "name": "Cineac Cinema",
+      "lat": 52.36673,
+      "lng": 4.89508
+    },
+    {
+      "id": "Q38243628",
+      "name": "Cineac Damrak Cinema",
+      "lat": 52.374854,
+      "lng": 4.895016
+    },
+    {
+      "id": "Q37999948",
+      "name": "Cinema Amstelveen",
+      "lat": 52.302606,
+      "lng": 4.859244
+    },
+    {
+      "id": "Q15873926",
+      "name": "Cinema International",
+      "lat": 52.3636,
+      "lng": 4.83878
+    },
+    {
+      "id": "Q2686504",
+      "name": "Cinema Parisien",
+      "lat": 52.3772,
+      "lng": 4.89672
+    },
+    {
+      "id": "Q2430185",
+      "name": "City of Wesopa",
+      "lat": 52.3088,
+      "lng": 5.03944
+    },
+    {
+      "id": "Q37577973",
+      "name": "City Theatergebouw",
+      "lat": 52.363333,
+      "lng": 4.883889
+    },
+    {
+      "id": "Q38243638",
+      "name": "Corso Cinema",
+      "lat": 52.369786,
+      "lng": 4.891172
+    },
+    {
+      "id": "Q2451093",
+      "name": "De Balie",
+      "lat": 52.363056,
+      "lng": 4.883333
+    },
+    {
+      "id": "Q2601635",
+      "name": "De Roode bioscoop",
+      "lat": 52.3845,
+      "lng": 4.88456
+    },
+    {
+      "id": "Q1954473",
+      "name": "Desmet Studio's Amsterdam",
+      "lat": 52.366975,
+      "lng": 4.909778
+    },
+    {
+      "id": "Q1538389",
+      "name": "Eye Filmmuseum",
+      "lat": 52.384411,
+      "lng": 4.900594
+    },
+    {
+      "id": "Q68575121",
+      "name": "FC Hyena",
+      "lat": 52.383406,
+      "lng": 4.928919
+    },
+    {
+      "id": "Q18040925",
+      "name": "Filmhallen",
+      "lat": 52.366701,
+      "lng": 4.868556
+    },
+    {
+      "id": "Q1965640",
+      "name": "Filmhuis Cavia",
+      "lat": 52.38199,
+      "lng": 4.87027
+    },
+    {
+      "id": "Q2452070",
+      "name": "Filmtheater Cinecenter",
+      "lat": 52.36499,
+      "lng": 4.88168
+    },
+    {
+      "id": "Q38241551",
+      "name": "Filmtheater de Fabriek",
+      "lat": 52.440871,
+      "lng": 4.825253
+    },
+    {
+      "id": "Q2207577",
+      "name": "Filmtheater De Uitkijk",
+      "lat": 52.36479,
+      "lng": 4.88434
+    },
+    {
+      "id": "Q2344748",
+      "name": "Filmtheater Kriterion",
+      "lat": 52.3625,
+      "lng": 4.91056
+    },
+    {
+      "id": "Q54413794",
+      "name": "Flora Theater",
+      "lat": 52.366111,
+      "lng": 4.899108
+    },
+    {
+      "id": "Q15876023",
+      "name": "Hallen Theater",
+      "lat": 52.375083,
+      "lng": 4.864028
+    },
+    {
+      "id": "Q4805072",
+      "name": "Het Ketelhuis",
+      "lat": 52.386333,
+      "lng": 4.873528
+    },
+    {
+      "id": "Q130928042",
+      "name": "LAB111",
+      "lat": 52.363667,
+      "lng": 4.867444
+    },
+    {
+      "id": "Q60481",
+      "name": "Melkweg",
+      "lat": 52.364778,
+      "lng": 4.881336
+    },
+    {
+      "id": "Q4342649",
+      "name": "Nassaubioscoop",
+      "lat": 52.38049,
+      "lng": 4.88123
+    },
+    {
+      "id": "Q38243646",
+      "name": "New York Bioscoop",
+      "lat": 52.372196,
+      "lng": 4.894787
+    },
+    {
+      "id": "Q2203441",
+      "name": "Nöggerath",
+      "lat": 52.366413,
+      "lng": 4.894998
+    },
+    {
+      "id": "Q109451278",
+      "name": "Pathé Amsterdam Noord",
+      "lat": 52.401052,
+      "lng": 4.93461
+    },
+    {
+      "id": "Q2436160",
+      "name": "Pathé Arena",
+      "lat": 52.3122,
+      "lng": 4.9453
+    },
+    {
+      "id": "Q2218141",
+      "name": "Pathé City",
+      "lat": 52.36333,
+      "lng": 4.88389
+    },
+    {
+      "id": "Q1914608",
+      "name": "Pathé De Munt",
+      "lat": 52.36639,
+      "lng": 4.8936
+    },
+    {
+      "id": "Q38241558",
+      "name": "Pathé Zaandam",
+      "lat": 52.438296,
+      "lng": 4.81651
+    },
+    {
+      "id": "Q38243656",
+      "name": "Plaza Theater",
+      "lat": 52.367267,
+      "lng": 4.892727
+    },
+    {
+      "id": "Q38243666",
+      "name": "Rembrandt Theater",
+      "lat": 52.36641,
+      "lng": 4.896677
+    },
+    {
+      "id": "Q2113356",
+      "name": "Rialto",
+      "lat": 52.352972,
+      "lng": 4.893944
+    },
+    {
+      "id": "Q15881480",
+      "name": "Roxy",
+      "lat": 52.367641,
+      "lng": 4.892153
+    },
+    {
+      "id": "Q38243683",
+      "name": "Rozen Theater",
+      "lat": 52.373181,
+      "lng": 4.879248
+    },
+    {
+      "id": "Q20967531",
+      "name": "Studio's Aalsmeer",
+      "lat": 52.268714,
+      "lng": 4.752042
+    },
+    {
+      "id": "Q1864855",
+      "name": "The Movies",
+      "lat": 52.38403,
+      "lng": 4.88469
+    },
+    {
+      "id": "Q42116414",
+      "name": "This is Holland",
+      "lat": 52.384044,
+      "lng": 4.902697
+    },
+    {
+      "id": "Q2523111",
+      "name": "Tip Top Theater",
+      "lat": 52.369661,
+      "lng": 4.901632
+    },
+    {
+      "id": "Q599272",
+      "name": "Tuschinski Theatre",
+      "lat": 52.366111,
+      "lng": 4.894444
+    },
+    {
+      "id": "Q15883422",
+      "name": "Victora",
+      "lat": 52.350464,
+      "lng": 4.851664
+    },
+    {
+      "id": "Q2723520",
+      "name": "Vondelparkpaviljoen",
+      "lat": 52.36083,
+      "lng": 4.875
+    }
+  ]
+}

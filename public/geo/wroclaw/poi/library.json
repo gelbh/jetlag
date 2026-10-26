@@ -1,0 +1,66 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.0327,
+    "west": 16.7973,
+    "north": 51.2201,
+    "east": 17.1862
+  },
+  "places": [
+    {
+      "id": "Q110416522",
+      "name": "Biblioteka Kapitulna we Wrocławiu",
+      "lat": 51.115111,
+      "lng": 17.047278
+    },
+    {
+      "id": "Q136202527",
+      "name": "Biblioteka Papieskiego Wydziału Teologicznego we Wrocławiu",
+      "lat": 51.113238,
+      "lng": 17.046643
+    },
+    {
+      "id": "Q121765506",
+      "name": "Biblioteka Uniwersytetu Medycznego we Wrocławiu",
+      "lat": 51.111918,
+      "lng": 17.068647
+    },
+    {
+      "id": "Q9170762",
+      "name": "Digital Library of the University of Wrocław",
+      "lat": 51.111472,
+      "lng": 17.0515
+    },
+    {
+      "id": "Q134481053",
+      "name": "Diocesan archives and chapter library of Wrocław",
+      "lat": 51.113941,
+      "lng": 17.046677
+    },
+    {
+      "id": "Q11694612",
+      "name": "Dolnośląska Biblioteka Pedagogiczna we Wrocławiu",
+      "lat": 51.1035,
+      "lng": 17.046194
+    },
+    {
+      "id": "Q9209195",
+      "name": "Dolnośląska Biblioteka Publiczna im. Tadeusza Mikulskiego we Wrocławiu",
+      "lat": 51.111,
+      "lng": 17.0313
+    },
+    {
+      "id": "Q11694610",
+      "name": "Lower Silesian Digital Library",
+      "lat": 51.107889,
+      "lng": 17.061667
+    },
+    {
+      "id": "Q98683489",
+      "name": "Tadeusz Taube Department of Jewish Studies Library",
+      "lat": 51.114318,
+      "lng": 17.040692
+    }
+  ]
+}

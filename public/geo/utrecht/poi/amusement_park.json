@@ -1,0 +1,18 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q2466852",
+      "name": "KidZcity",
+      "lat": 52.10472,
+      "lng": 5.08496
+    }
+  ]
+}

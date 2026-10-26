@@ -1,11 +1,35 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
 import {
+  AMSTERDAM_GEO_ASSETS,
+  AMSTERDAM_MATCHING_LABEL_OVERRIDES,
+  AMSTERDAM_MEASURING_LABEL_OVERRIDES,
+  AMSTERDAM_REGION_PACK_ID,
+} from "./amsterdamRegionPack";
+import {
   AUSTRALIA_GEO_ASSETS,
   AUSTRALIA_MATCHING_LABEL_OVERRIDES,
   AUSTRALIA_MEASURING_LABEL_OVERRIDES,
   AUSTRALIA_REGION_PACK_ID,
 } from "./australiaRegionPack";
+import {
+  BERLIN_GEO_ASSETS,
+  BERLIN_MATCHING_LABEL_OVERRIDES,
+  BERLIN_MEASURING_LABEL_OVERRIDES,
+  BERLIN_REGION_PACK_ID,
+} from "./berlinRegionPack";
+import {
+  BRISBANE_GEO_ASSETS,
+  BRISBANE_MATCHING_LABEL_OVERRIDES,
+  BRISBANE_MEASURING_LABEL_OVERRIDES,
+  BRISBANE_REGION_PACK_ID,
+} from "./brisbaneRegionPack";
+import {
+  BRUSSELS_GEO_ASSETS,
+  BRUSSELS_MATCHING_LABEL_OVERRIDES,
+  BRUSSELS_MEASURING_LABEL_OVERRIDES,
+  BRUSSELS_REGION_PACK_ID,
+} from "./brusselsRegionPack";
 import {
   DUBLIN_GEO_ASSETS,
   DUBLIN_MATCHING_LABEL_OVERRIDES,
@@ -50,6 +74,12 @@ import {
 } from "./princeRupertRegionPack";
 import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 import {
+  SINGAPORE_GEO_ASSETS,
+  SINGAPORE_MATCHING_LABEL_OVERRIDES,
+  SINGAPORE_MEASURING_LABEL_OVERRIDES,
+  SINGAPORE_REGION_PACK_ID,
+} from "./singaporeRegionPack";
+import {
   SOUTHAMPTON_GEO_ASSETS,
   SOUTHAMPTON_MATCHING_LABEL_OVERRIDES,
   SOUTHAMPTON_MEASURING_LABEL_OVERRIDES,
@@ -73,6 +103,18 @@ import {
   TOKYO_MEASURING_LABEL_OVERRIDES,
   TOKYO_REGION_PACK_ID,
 } from "./tokyoRegionPack";
+import {
+  UTRECHT_GEO_ASSETS,
+  UTRECHT_MATCHING_LABEL_OVERRIDES,
+  UTRECHT_MEASURING_LABEL_OVERRIDES,
+  UTRECHT_REGION_PACK_ID,
+} from "./utrechtRegionPack";
+import {
+  WROCLAW_GEO_ASSETS,
+  WROCLAW_MATCHING_LABEL_OVERRIDES,
+  WROCLAW_MEASURING_LABEL_OVERRIDES,
+  WROCLAW_REGION_PACK_ID,
+} from "./wroclawRegionPack";
 import {
   ZURICH_GEO_ASSETS,
   ZURICH_MATCHING_LABEL_OVERRIDES,
@@ -133,6 +175,20 @@ const SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS = new Set<MeasuringFromKind>([
 
 const SOUTHAMPTON_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
 const SOUTHAMPTON_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
+const BRUSSELS_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const BRUSSELS_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
+const BRISBANE_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const BRISBANE_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
+const BERLIN_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const BERLIN_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
+const SINGAPORE_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const SINGAPORE_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
+const UTRECHT_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const UTRECHT_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
+const WROCLAW_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const WROCLAW_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
+const AMSTERDAM_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const AMSTERDAM_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
 
 /** Australia: show admin 1–4 (CED/SED/S/T/LGA); hide empty land international border. */
 const AUSTRALIA_UNSUPPORTED_MATCHING = new Set<
@@ -314,6 +370,104 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     matchingLabelOverrides: SYDNEY_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: SYDNEY_MEASURING_LABEL_OVERRIDES,
   }),
+  [BRUSSELS_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: BRUSSELS_REGION_PACK_ID,
+      geoAssets: {
+        primary: BRUSSELS_GEO_ASSETS.communes,
+        playArea: BRUSSELS_GEO_ASSETS.city,
+      },
+      subregionPropertyKey: "communeId",
+      matchingLabelOverrides: BRUSSELS_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: BRUSSELS_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: BRUSSELS_UNSUPPORTED_MATCHING,
+    unsupportedBorders: BRUSSELS_UNSUPPORTED_BORDERS,
+  },
+  [BRISBANE_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: BRISBANE_REGION_PACK_ID,
+      geoAssets: {
+        primary: BRISBANE_GEO_ASSETS.wards,
+        playArea: BRISBANE_GEO_ASSETS.city,
+      },
+      subregionPropertyKey: "wardId",
+      matchingLabelOverrides: BRISBANE_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: BRISBANE_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: BRISBANE_UNSUPPORTED_MATCHING,
+    unsupportedBorders: BRISBANE_UNSUPPORTED_BORDERS,
+  },
+  [BERLIN_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: BERLIN_REGION_PACK_ID,
+      geoAssets: {
+        primary: BERLIN_GEO_ASSETS.bezirke,
+        playArea: BERLIN_GEO_ASSETS.city,
+      },
+      subregionPropertyKey: "bezirkId",
+      matchingLabelOverrides: BERLIN_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: BERLIN_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: BERLIN_UNSUPPORTED_MATCHING,
+    unsupportedBorders: BERLIN_UNSUPPORTED_BORDERS,
+  },
+  [SINGAPORE_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: SINGAPORE_REGION_PACK_ID,
+      geoAssets: {
+        primary: SINGAPORE_GEO_ASSETS.planningAreas,
+        playArea: SINGAPORE_GEO_ASSETS.city,
+      },
+      subregionPropertyKey: "planningAreaId",
+      matchingLabelOverrides: SINGAPORE_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: SINGAPORE_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: SINGAPORE_UNSUPPORTED_MATCHING,
+    unsupportedBorders: SINGAPORE_UNSUPPORTED_BORDERS,
+  },
+  [UTRECHT_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: UTRECHT_REGION_PACK_ID,
+      geoAssets: {
+        primary: UTRECHT_GEO_ASSETS.wijken,
+        playArea: UTRECHT_GEO_ASSETS.city,
+      },
+      subregionPropertyKey: "wijkId",
+      matchingLabelOverrides: UTRECHT_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: UTRECHT_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: UTRECHT_UNSUPPORTED_MATCHING,
+    unsupportedBorders: UTRECHT_UNSUPPORTED_BORDERS,
+  },
+  [WROCLAW_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: WROCLAW_REGION_PACK_ID,
+      geoAssets: {
+        primary: WROCLAW_GEO_ASSETS.dzielnice,
+        playArea: WROCLAW_GEO_ASSETS.city,
+      },
+      subregionPropertyKey: "dzielnicaId",
+      matchingLabelOverrides: WROCLAW_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: WROCLAW_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: WROCLAW_UNSUPPORTED_MATCHING,
+    unsupportedBorders: WROCLAW_UNSUPPORTED_BORDERS,
+  },
+  [AMSTERDAM_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: AMSTERDAM_REGION_PACK_ID,
+      geoAssets: {
+        primary: AMSTERDAM_GEO_ASSETS.stadsdelen,
+        playArea: AMSTERDAM_GEO_ASSETS.city,
+      },
+      subregionPropertyKey: "stadsdeelId",
+      matchingLabelOverrides: AMSTERDAM_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: AMSTERDAM_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: AMSTERDAM_UNSUPPORTED_MATCHING,
+    unsupportedBorders: AMSTERDAM_UNSUPPORTED_BORDERS,
+  },
 };
 
 export function getRegionPackConfig(packId: RegionPackId): RegionPackConfig | undefined {

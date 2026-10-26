@@ -1,0 +1,30 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q16507535",
+      "name": "Consulate General of France, Amsterdam",
+      "lat": 52.362,
+      "lng": 4.89132
+    },
+    {
+      "id": "Q131397685",
+      "name": "Consulate General of Germany, Amsterdam",
+      "lat": 52.357641,
+      "lng": 4.885011
+    },
+    {
+      "id": "Q136298260",
+      "name": "U.S. Consulate General Amsterdam",
+      "lat": 52.356187,
+      "lng": 4.88201
+    }
+  ]
+}

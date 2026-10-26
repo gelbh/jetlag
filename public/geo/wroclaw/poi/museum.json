@@ -1,0 +1,252 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.0327,
+    "west": 16.7973,
+    "north": 51.2201,
+    "east": 17.1862
+  },
+  "places": [
+    {
+      "id": "Q24945346",
+      "name": "Archaeological Museum of Wrocław",
+      "lat": 51.112858,
+      "lng": 17.026428
+    },
+    {
+      "id": "Q11786913",
+      "name": "Archdiocesan Museum in Wrocław",
+      "lat": 51.1147,
+      "lng": 17.0473
+    },
+    {
+      "id": "Q9186475",
+      "name": "Centrum Sztuki WRO",
+      "lat": 51.106108,
+      "lng": 17.032948
+    },
+    {
+      "id": "Q136946",
+      "name": "City Museum of Wrocław",
+      "lat": 51.1097,
+      "lng": 17.0325
+    },
+    {
+      "id": "Q48841505",
+      "name": "Depot Historical Centre",
+      "lat": 51.096489,
+      "lng": 16.991128
+    },
+    {
+      "id": "Q112032039",
+      "name": "Dolnośląskie Społeczne Muzeum Kolejnictwa",
+      "lat": 51.0921,
+      "lng": 17.04758
+    },
+    {
+      "id": "Q28675652",
+      "name": "Ethnographic Museum of the National Museum in Wrocław",
+      "lat": 51.099833,
+      "lng": 17.053
+    },
+    {
+      "id": "Q11814615",
+      "name": "Four Domes Pavilion, Wrocław",
+      "lat": 51.1083,
+      "lng": 17.0761
+    },
+    {
+      "id": "Q9162984",
+      "name": "Galeria Awangarda",
+      "lat": 51.10975,
+      "lng": 17.0374
+    },
+    {
+      "id": "Q9265517",
+      "name": "Galeria Entropia",
+      "lat": 51.111275,
+      "lng": 17.028214
+    },
+    {
+      "id": "Q11682743",
+      "name": "Galeria Sztuki BWA w Jeleniej Górze",
+      "lat": 51.10969,
+      "lng": 17.03755
+    },
+    {
+      "id": "Q11787011",
+      "name": "Historical Museum of Wrocław",
+      "lat": 51.1075,
+      "lng": 17.028611
+    },
+    {
+      "id": "Q48840882",
+      "name": "Hydropolis",
+      "lat": 51.1038,
+      "lng": 17.0574
+    },
+    {
+      "id": "Q30905575",
+      "name": "Kolejkowo",
+      "lat": 51.108056,
+      "lng": 17.020278
+    },
+    {
+      "id": "Q11787044",
+      "name": "Lubomirski Museum",
+      "lat": 51.1139,
+      "lng": 17.0366
+    },
+    {
+      "id": "Q11780475",
+      "name": "Mieszkanie Gepperta",
+      "lat": 51.10871,
+      "lng": 17.03007
+    },
+    {
+      "id": "Q86674279",
+      "name": "Military Museum in Wrocław",
+      "lat": 51.11309,
+      "lng": 17.02709
+    },
+    {
+      "id": "Q11787080",
+      "name": "Mineralogical Museum in Wrocław",
+      "lat": 51.1162,
+      "lng": 17.0289
+    },
+    {
+      "id": "Q6940763",
+      "name": "Museum of Architecture, Wrocław",
+      "lat": 51.109444,
+      "lng": 17.042222
+    },
+    {
+      "id": "Q48847374",
+      "name": "Museum of Games and Computers of the Past Era",
+      "lat": 51.108111,
+      "lng": 17.018083
+    },
+    {
+      "id": "Q4845391",
+      "name": "Museum of Medallic Art",
+      "lat": 51.1074,
+      "lng": 17.0289
+    },
+    {
+      "id": "Q20033870",
+      "name": "Museum of Motorisation Topacz in Ślęza",
+      "lat": 51.035457,
+      "lng": 16.98967
+    },
+    {
+      "id": "Q6940963",
+      "name": "Museum of Natural History at University of Wrocław",
+      "lat": 51.116944,
+      "lng": 17.046389
+    },
+    {
+      "id": "Q11786966",
+      "name": "Museum of Pharmacy, Wrocław",
+      "lat": 51.1094,
+      "lng": 17.0339
+    },
+    {
+      "id": "Q55624210",
+      "name": "Museum of the University of Wrocław",
+      "lat": 51.1138,
+      "lng": 17.03353
+    },
+    {
+      "id": "Q11786890",
+      "name": "Muzeum \"Pana Tadeusza\"",
+      "lat": 51.110417,
+      "lng": 17.030583
+    },
+    {
+      "id": "Q110389315",
+      "name": "Muzeum Akademii Sztuk Pięknych we Wrocławiu",
+      "lat": 51.106711,
+      "lng": 17.044219
+    },
+    {
+      "id": "Q48842331",
+      "name": "Muzeum Człowieka we Wrocławiu",
+      "lat": 51.11352,
+      "lng": 17.034953
+    },
+    {
+      "id": "Q11786980",
+      "name": "Muzeum Geologiczne im. Henryka Teisseyre we Wrocławiu",
+      "lat": 51.1162,
+      "lng": 17.0289
+    },
+    {
+      "id": "Q11787131",
+      "name": "Muzeum poczty i telekomunikacji Wrocław",
+      "lat": 51.1083,
+      "lng": 17.0442
+    },
+    {
+      "id": "Q19401647",
+      "name": "Muzeum Radia Wrocław",
+      "lat": 51.0717,
+      "lng": 17.0069
+    },
+    {
+      "id": "Q28675649",
+      "name": "Muzeum Zamkowe we Wrocławiu",
+      "lat": 51.107389,
+      "lng": 17.028806
+    },
+    {
+      "id": "Q1329563",
+      "name": "National Museum in Wrocław",
+      "lat": 51.111,
+      "lng": 17.0475
+    },
+    {
+      "id": "Q114597",
+      "name": "Old Jewish Cemetery",
+      "lat": 51.086944,
+      "lng": 17.025
+    },
+    {
+      "id": "Q106782306",
+      "name": "OP ENHEIM",
+      "lat": 51.109722,
+      "lng": 17.029167
+    },
+    {
+      "id": "Q11801156",
+      "name": "Otwarte Muzeum Odry we Wrocławiu",
+      "lat": 51.10673,
+      "lng": 17.06251
+    },
+    {
+      "id": "Q1753248",
+      "name": "Racławice Panorama",
+      "lat": 51.110139,
+      "lng": 17.044583
+    },
+    {
+      "id": "Q28675639",
+      "name": "Śląskie Muzeum Rzemiosła Artystycznego i Starożytności",
+      "lat": 51.107194,
+      "lng": 17.026111
+    },
+    {
+      "id": "Q11787258",
+      "name": "Wrocław Contemporary Museum",
+      "lat": 51.1133,
+      "lng": 17.005
+    },
+    {
+      "id": "Q910225",
+      "name": "Wrocław Town Hall",
+      "lat": 51.109611,
+      "lng": 17.031817
+    }
+  ]
+}

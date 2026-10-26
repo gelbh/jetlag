@@ -1,0 +1,19 @@
+Miasto Wrocław metro pack geo
+
+Boundaries
+- Dzielnica polygons: Miasto Wrocław SIP, Osiedla wg uchwały XX/419/16 (no reuse restrictions).
+
+POI
+- Wikidata Query Service (CC0).
+
+Sea level seed
+- Open-Meteo elevation API.
+
+Coastline
+- River city stub (empty segments).
+
+International border
+- City extent stub (empty segments).
+
+GTFS
+- Skipped in v1 (no trustworthy static feed bundled; rail/tram stops use Overpass).

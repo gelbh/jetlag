@@ -1,0 +1,36 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q16507576",
+      "name": "Consulate General of France in Brussels",
+      "lat": 50.8466,
+      "lng": 4.36852
+    },
+    {
+      "id": "Q101070007",
+      "name": "Consulate General of Sweden in Brussels",
+      "lat": 50.8407,
+      "lng": 4.3697
+    },
+    {
+      "id": "Q131573857",
+      "name": "Consulate General of Turkey, Brussels",
+      "lat": 50.841861,
+      "lng": 4.367639
+    },
+    {
+      "id": "Q63247384",
+      "name": "Embassy of Hungary in Belgium, Brussel",
+      "lat": 50.800944,
+      "lng": 4.369472
+    }
+  ]
+}

@@ -1,0 +1,2100 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q28738266",
+      "name": "Administration Library for Tempelhof-Schöneberg, Berlin",
+      "lat": 52.48492,
+      "lng": 13.34463
+    },
+    {
+      "id": "Q55153258",
+      "name": "Adolf-Reichwein-Bibliothek",
+      "lat": 52.477584,
+      "lng": 13.287888
+    },
+    {
+      "id": "Q2828987",
+      "name": "akg-images",
+      "lat": 52.42707,
+      "lng": 13.19878
+    },
+    {
+      "id": "Q28738818",
+      "name": "Alice Salomon Hochschule Berlin, Bibliothek",
+      "lat": 52.53699,
+      "lng": 13.60586
+    },
+    {
+      "id": "Q28739601",
+      "name": "AlliiertenMuseum, Bibliothek",
+      "lat": 52.4557,
+      "lng": 13.27252
+    },
+    {
+      "id": "Q435399",
+      "name": "Alte Bibliothek",
+      "lat": 52.5164,
+      "lng": 13.3933
+    },
+    {
+      "id": "Q46084404",
+      "name": "Alte Bibliothek des Instituts für Gärungsgewerbe",
+      "lat": 52.544869,
+      "lng": 13.342421
+    },
+    {
+      "id": "Q467903",
+      "name": "Amerika-Gedenkbibliothek",
+      "lat": 52.496597,
+      "lng": 13.39251
+    },
+    {
+      "id": "Q28738261",
+      "name": "Amt für Statistik Berlin-Brandenburg, Bibliothek",
+      "lat": 52.50819,
+      "lng": 13.52577
+    },
+    {
+      "id": "Q28738453",
+      "name": "Amtsgericht Charlottenburg, Bibliothek",
+      "lat": 52.50568,
+      "lng": 13.29472
+    },
+    {
+      "id": "Q28738454",
+      "name": "Amtsgericht Schöneberg, Bibliothek",
+      "lat": 52.49045,
+      "lng": 13.35942
+    },
+    {
+      "id": "Q28681426",
+      "name": "Anna-Seghers-Bibliothek",
+      "lat": 52.564976,
+      "lng": 13.506118
+    },
+    {
+      "id": "Q575202",
+      "name": "Antifaschistisches Pressearchiv und Bildungszentrum Berlin",
+      "lat": 52.49738,
+      "lng": 13.42858
+    },
+    {
+      "id": "Q28738330",
+      "name": "Anton-Saefkow-Bibliothek",
+      "lat": 52.53066,
+      "lng": 13.47063
+    },
+    {
+      "id": "Q28737886",
+      "name": "Archenhold-Sternwarte, Bibliothek",
+      "lat": 52.48588,
+      "lng": 13.47654
+    },
+    {
+      "id": "Q635512",
+      "name": "Archiv Grünes Gedächtnis",
+      "lat": 52.520555,
+      "lng": 13.466363
+    },
+    {
+      "id": "Q5939963",
+      "name": "Archive for Research and Documentation of Iran",
+      "lat": 52.503965,
+      "lng": 13.41927
+    },
+    {
+      "id": "Q635522",
+      "name": "Archive of the Academy of Arts",
+      "lat": 52.52793,
+      "lng": 13.37943
+    },
+    {
+      "id": "Q125306816",
+      "name": "Außenmagazin",
+      "lat": 52.515564,
+      "lng": 13.404136
+    },
+    {
+      "id": "Q28739589",
+      "name": "BAU International Berlin, University of Applied Sciences, Library",
+      "lat": 52.50767,
+      "lng": 13.41417
+    },
+    {
+      "id": "Q811389",
+      "name": "Bauhaus-Archiv",
+      "lat": 52.50634,
+      "lng": 13.35383
+    },
+    {
+      "id": "Q136709319",
+      "name": "Bauhaus-Archiv, Bibliothek",
+      "lat": 52.506111,
+      "lng": 13.354194
+    },
+    {
+      "id": "Q189928",
+      "name": "Berlin Central and Regional Library",
+      "lat": 52.496486,
+      "lng": 13.392397
+    },
+    {
+      "id": "Q821763",
+      "name": "Berlin City Library",
+      "lat": 52.5156,
+      "lng": 13.4041
+    },
+    {
+      "id": "Q28737655",
+      "name": "Berlin House of Representatives library",
+      "lat": 52.50804,
+      "lng": 13.38165
+    },
+    {
+      "id": "Q170109",
+      "name": "Berlin State Library",
+      "lat": 52.507222,
+      "lng": 13.370833
+    },
+    {
+      "id": "Q125306817",
+      "name": "Berlin-Sammlungen",
+      "lat": 52.515535,
+      "lng": 13.405085
+    },
+    {
+      "id": "Q134474972",
+      "name": "Bertolt Brecht library",
+      "lat": 52.521226,
+      "lng": 13.423511
+    },
+    {
+      "id": "Q28739312",
+      "name": "Best Sabel Bildungszentrum GmbH, Bibliothek",
+      "lat": 52.51557,
+      "lng": 13.4148
+    },
+    {
+      "id": "Q125298945",
+      "name": "Bettina-von-Arnim-Bibliothek",
+      "lat": 52.549174,
+      "lng": 13.414269
+    },
+    {
+      "id": "Q28738256",
+      "name": "Beuth Hochschule für Technik Berlin, Hochschulbibliothek",
+      "lat": 52.54504,
+      "lng": 13.35482
+    },
+    {
+      "id": "Q55153703",
+      "name": "Bezirkszentralbibliothek Eva-Maria-Buch-Haus",
+      "lat": 52.46372,
+      "lng": 13.38779
+    },
+    {
+      "id": "Q55153376",
+      "name": "Bezirkszentralbibliothek Helene-Nathan-Bibliothek",
+      "lat": 52.482413,
+      "lng": 13.432522
+    },
+    {
+      "id": "Q28681443",
+      "name": "Bezirkszentralbibliothek Mark Twain",
+      "lat": 52.54722,
+      "lng": 13.5567
+    },
+    {
+      "id": "Q125300179",
+      "name": "Bezirkszentralbibliothek Pablo Neruda",
+      "lat": 52.514551,
+      "lng": 13.457053
+    },
+    {
+      "id": "Q125306823",
+      "name": "Bibl. Reinickendorf - West",
+      "lat": 52.571412,
+      "lng": 13.315554
+    },
+    {
+      "id": "Q106653783",
+      "name": "Bibliothek am Schäfersee",
+      "lat": 52.565868,
+      "lng": 13.359745
+    },
+    {
+      "id": "Q99940997",
+      "name": "Bibliothek Blumberg",
+      "lat": 52.604275,
+      "lng": 13.616138
+    },
+    {
+      "id": "Q125306819",
+      "name": "Bibliothek Buch",
+      "lat": 52.635637,
+      "lng": 13.493983
+    },
+    {
+      "id": "Q28737942",
+      "name": "Bibliothek der Abteilung Landwirtschaft und Gartenbau, Teltow",
+      "lat": 52.37497,
+      "lng": 13.26517
+    },
+    {
+      "id": "Q135900905",
+      "name": "Bibliothek der Akkon Hochschule für Humanwissenschaften",
+      "lat": 52.455648,
+      "lng": 13.394449
+    },
+    {
+      "id": "Q28739307",
+      "name": "Bibliothek der Business School Berlin",
+      "lat": 52.44123,
+      "lng": 13.33316
+    },
+    {
+      "id": "Q28739426",
+      "name": "Bibliothek der Stiftung Flucht, Vertreibung, Versöhnung",
+      "lat": 52.50885,
+      "lng": 13.38869
+    },
+    {
+      "id": "Q28739474",
+      "name": "Bibliothek der Stiftung Wissenschaft und Politik",
+      "lat": 52.49826,
+      "lng": 13.32156
+    },
+    {
+      "id": "Q28733592",
+      "name": "Bibliothek des Amtsgerichtes Tiergarten",
+      "lat": 52.52649,
+      "lng": 13.35428
+    },
+    {
+      "id": "Q28739558",
+      "name": "Bibliothek des Berlin Herzzentrums",
+      "lat": 52.54263,
+      "lng": 13.34731
+    },
+    {
+      "id": "Q28739539",
+      "name": "Bibliothek des Bundesbeauftragten für die Stasi-Unterlagen",
+      "lat": 52.52596,
+      "lng": 13.4129
+    },
+    {
+      "id": "Q28737654",
+      "name": "Bibliothek des Canisius-Kollegs",
+      "lat": 52.50877,
+      "lng": 13.3543
+    },
+    {
+      "id": "Q28738452",
+      "name": "Bibliothek des Deutschen Institut für Wirtschaftsforschung",
+      "lat": 52.51221,
+      "lng": 13.3886
+    },
+    {
+      "id": "Q28727629",
+      "name": "Bibliothek des Fraunhofer-Instituts für Rechnerarchitektur und Softwaretechnik (FIRST)",
+      "lat": 52.42913,
+      "lng": 13.5315
+    },
+    {
+      "id": "Q140352006",
+      "name": "Bibliothek des Handwerks",
+      "lat": 52.51742,
+      "lng": 13.301497
+    },
+    {
+      "id": "Q28737643",
+      "name": "Bibliothek des Herold - Verein für Heraldik, Genealogie und verwandte Wissenschaften",
+      "lat": 52.46217,
+      "lng": 13.2926
+    },
+    {
+      "id": "Q15788496",
+      "name": "Bibliothek des Konservatismus",
+      "lat": 52.50735,
+      "lng": 13.32781
+    },
+    {
+      "id": "Q125306820",
+      "name": "Bibliothek Frohnau",
+      "lat": 52.63544,
+      "lng": 13.295141
+    },
+    {
+      "id": "Q65099871",
+      "name": "Bibliothek für Sozialwissenschaften und Osteuropastudien der Freien Universität Berlin",
+      "lat": 52.44937,
+      "lng": 13.27586
+    },
+    {
+      "id": "Q134532140",
+      "name": "Bibliothek Gemeinde Eichwalde",
+      "lat": 52.3744,
+      "lng": 13.61992
+    },
+    {
+      "id": "Q134532187",
+      "name": "Bibliothek in der KultOurkate",
+      "lat": 52.48117,
+      "lng": 13.70362
+    },
+    {
+      "id": "Q125306821",
+      "name": "Bibliothek Karow",
+      "lat": 52.616509,
+      "lng": 13.491824
+    },
+    {
+      "id": "Q125306822",
+      "name": "Bibliothek Märkisches Viertel",
+      "lat": 52.59756,
+      "lng": 13.35241
+    },
+    {
+      "id": "Q28734136",
+      "name": "Bibliothek Neuenhagen",
+      "lat": 52.52127,
+      "lng": 13.70477
+    },
+    {
+      "id": "Q134532175",
+      "name": "Bibliothek Panketal",
+      "lat": 52.65991,
+      "lng": 13.53312
+    },
+    {
+      "id": "Q28681523",
+      "name": "Bibliothek Tiergarten Süd",
+      "lat": 52.50375,
+      "lng": 13.36342
+    },
+    {
+      "id": "Q28734900",
+      "name": "Bibliothek und Dokumentationsstelle der Deutschen Gesellschaft für Auswärtige Politik e.V.",
+      "lat": 52.50885,
+      "lng": 13.34675
+    },
+    {
+      "id": "Q134532202",
+      "name": "Bibliothek Zeuthen",
+      "lat": 52.34054,
+      "lng": 13.61223
+    },
+    {
+      "id": "Q134532152",
+      "name": "Bibliotheken der Stadt Hohen Neuendorf",
+      "lat": 52.66912,
+      "lng": 13.28791
+    },
+    {
+      "id": "Q28737652",
+      "name": "Bibliothèque de l'Institut Français de Berlin",
+      "lat": 52.50213,
+      "lng": 13.32487
+    },
+    {
+      "id": "Q125306824",
+      "name": "BiboBike (mobile Bibliotheksstation)",
+      "lat": 52.514551,
+      "lng": 13.457053
+    },
+    {
+      "id": "Q28737904",
+      "name": "Bildungszentrum am Müggelsee GmbH, Bibliothek",
+      "lat": 52.4428,
+      "lng": 13.68111
+    },
+    {
+      "id": "Q125306825",
+      "name": "Blindenbibliothek Betty Hirsch",
+      "lat": 52.455998,
+      "lng": 13.313835
+    },
+    {
+      "id": "Q28733591",
+      "name": "Blindenbücherei der Johann-August-Zeune-Schule für Blinde",
+      "lat": 52.4558,
+      "lng": 13.31508
+    },
+    {
+      "id": "Q125306826",
+      "name": "Bodo-Uhse-Bibliothek",
+      "lat": 52.497675,
+      "lng": 13.520937
+    },
+    {
+      "id": "Q28738463",
+      "name": "Bombardier Transportation GmbH, Technische Bibliothek",
+      "lat": 52.63044,
+      "lng": 13.20721
+    },
+    {
+      "id": "Q135900756",
+      "name": "Bona-Peiser-Bibliothek",
+      "lat": 52.50487,
+      "lng": 13.40689
+    },
+    {
+      "id": "Q28681449",
+      "name": "Bruno-Lösche-Bücherei",
+      "lat": 52.53127,
+      "lng": 13.34756
+    },
+    {
+      "id": "Q28737899",
+      "name": "Bundesamt für Strahlenschutz, Dienststelle Berlin, Bibliothek",
+      "lat": 52.48326,
+      "lng": 13.53768
+    },
+    {
+      "id": "Q28739001",
+      "name": "Bundesamt für Verbraucherschutz und Lebensmittelsicherheit Bibliothek",
+      "lat": 52.51418,
+      "lng": 13.38474
+    },
+    {
+      "id": "Q28738892",
+      "name": "Bundesamt für zentrale Dienste und offene Vermögensfragen, Bibliothek",
+      "lat": 52.55899,
+      "lng": 13.44096
+    },
+    {
+      "id": "Q28737888",
+      "name": "Bundesanstalt für Arbeitsschutz und Arbeitsmedizin, Wissenschaftliche Information - Fachbibliothek",
+      "lat": 52.501883,
+      "lng": 13.482306
+    },
+    {
+      "id": "Q28739182",
+      "name": "Bundesanstalt für Materialforschung und -prüfung (BAM), Bibliothek",
+      "lat": 52.44193,
+      "lng": 13.28705
+    },
+    {
+      "id": "Q28739195",
+      "name": "Bundesinstitut für Risikobewertung, Bibliothek",
+      "lat": 52.40948,
+      "lng": 13.36448
+    },
+    {
+      "id": "Q28738486",
+      "name": "Bundesministerium der Finanzen, Bibliothek",
+      "lat": 52.50863,
+      "lng": 13.38356
+    },
+    {
+      "id": "Q28738295",
+      "name": "Bundesministerium für Arbeit und Soziales, Bibliothek",
+      "lat": 52.5126,
+      "lng": 13.38458
+    },
+    {
+      "id": "Q28738294",
+      "name": "Bundesministerium für Verkehr und digitale Infrastruktur, Bibliothek",
+      "lat": 52.52945,
+      "lng": 13.37847
+    },
+    {
+      "id": "Q28738476",
+      "name": "Bundesministerium für Wirtschaft und Technologie, Bibliothek",
+      "lat": 52.52971,
+      "lng": 13.37224
+    },
+    {
+      "id": "Q28738483",
+      "name": "Bundespräsidialamt Library",
+      "lat": 52.51631,
+      "lng": 13.35267
+    },
+    {
+      "id": "Q28738484",
+      "name": "Bundesrat Library",
+      "lat": 52.50943,
+      "lng": 13.38077
+    },
+    {
+      "id": "Q28738542",
+      "name": "Bundesverband der Betriebskrankenkassen",
+      "lat": 52.50868,
+      "lng": 13.38886
+    },
+    {
+      "id": "Q28739544",
+      "name": "Bundesvereinigung der Deutschen Arbeitgeberverbände, Bibliothek",
+      "lat": 52.51511,
+      "lng": 13.40514
+    },
+    {
+      "id": "Q28738822",
+      "name": "Charité - Universitätsmedizin Berlin, Medizinische Bibliothek, Campus Charité Mitte (CCM)",
+      "lat": 52.52689,
+      "lng": 13.38159
+    },
+    {
+      "id": "Q28739223",
+      "name": "Charité - Universitätsmedizin Berlin, Medizinische Bibliothek, elektronische Zeitschriften",
+      "lat": 52.52689,
+      "lng": 13.38159
+    },
+    {
+      "id": "Q29015381",
+      "name": "Charité medical library",
+      "lat": 52.542312,
+      "lng": 13.345595
+    },
+    {
+      "id": "Q84431534",
+      "name": "Charlottenburg-Wilmersdorf district office library and information center",
+      "lat": 52.517245,
+      "lng": 13.306077
+    },
+    {
+      "id": "Q15848804",
+      "name": "City library Friedrichshain-Kreuzberg",
+      "lat": 52.51463,
+      "lng": 13.45726
+    },
+    {
+      "id": "Q1101728",
+      "name": "CLIO online",
+      "lat": 52.51874,
+      "lng": 13.393478
+    },
+    {
+      "id": "Q130744426",
+      "name": "Comicbibliothek \"Renate\"",
+      "lat": 52.526207,
+      "lng": 13.393888
+    },
+    {
+      "id": "Q28738271",
+      "name": "Consistorium der Französischen Kirche, Hugenottenbibliothek",
+      "lat": 52.51362,
+      "lng": 13.39272
+    },
+    {
+      "id": "Q1141115",
+      "name": "CrossAsia",
+      "lat": 52.506389,
+      "lng": 13.370281
+    },
+    {
+      "id": "Q28738866",
+      "name": "DATADIWAN, Bibliothek für Naturheilkunde, Ganzheitsmedizin und Grenzgebiete der Wissenschaft",
+      "lat": 52.48669,
+      "lng": 13.35514
+    },
+    {
+      "id": "Q28739003",
+      "name": "Dental Library of the Charité, Benjamin Franklin campus",
+      "lat": 52.477,
+      "lng": 13.31303
+    },
+    {
+      "id": "Q119041381",
+      "name": "Deutsche Gartenbaubibliothek",
+      "lat": 52.51017,
+      "lng": 13.3304
+    },
+    {
+      "id": "Q876997",
+      "name": "Deutsche Kinemathek",
+      "lat": 52.5096,
+      "lng": 13.3735
+    },
+    {
+      "id": "Q28733696",
+      "name": "Deutsche Messebibliothek",
+      "lat": 52.51773,
+      "lng": 13.41428
+    },
+    {
+      "id": "Q28739584",
+      "name": "Deutsche Rentenversicherung Bund, Bibliothek",
+      "lat": 52.4904,
+      "lng": 13.31178
+    },
+    {
+      "id": "Q28738265",
+      "name": "Deutscher Staatsbürgerinnen-Verband, Bibliothek",
+      "lat": 52.48369,
+      "lng": 13.38562
+    },
+    {
+      "id": "Q28738461",
+      "name": "Deutscher Verein für Versicherungswissenschaft e.V., Bibliothek",
+      "lat": 52.46587,
+      "lng": 13.33003
+    },
+    {
+      "id": "Q28737646",
+      "name": "Deutsches Archäologisches Institut, Bibliothek der Zentrale Berlin",
+      "lat": 52.46471,
+      "lng": 13.29654
+    },
+    {
+      "id": "Q28737892",
+      "name": "Deutsches Archäologisches Institut, Eurasien-Abteilung, Bibliothek",
+      "lat": 52.46312,
+      "lng": 13.28168
+    },
+    {
+      "id": "Q28739613",
+      "name": "Deutsches Archäologisches Institut, Orient Abteilung, Bibliothek",
+      "lat": 52.45999,
+      "lng": 13.30027
+    },
+    {
+      "id": "Q28737936",
+      "name": "Deutsches Institut für Ernährungsforschung (DIfE) Potsdam-Rehbrücke, Bibliothek",
+      "lat": 52.34843,
+      "lng": 13.10578
+    },
+    {
+      "id": "Q28738903",
+      "name": "Deutsches Institut für Menschenrechte, Bibliothek",
+      "lat": 52.50751,
+      "lng": 13.38782
+    },
+    {
+      "id": "Q28783594",
+      "name": "Deutsches Orient-Institut, Bibliothek und Archiv",
+      "lat": 52.51094,
+      "lng": 13.38719
+    },
+    {
+      "id": "Q28738809",
+      "name": "Deutsches Rheuma-Forschungszentrum, Bibliothek",
+      "lat": 52.52361,
+      "lng": 13.37817
+    },
+    {
+      "id": "Q28738922",
+      "name": "Deutsches Zentrum für Altersfragen e.V. (DZA), Bibliothek",
+      "lat": 52.48466,
+      "lng": 13.38452
+    },
+    {
+      "id": "Q55153027",
+      "name": "Dietrich-Bonhoeffer-Bibliothek",
+      "lat": 52.487211,
+      "lng": 13.32004
+    },
+    {
+      "id": "Q125306827",
+      "name": "Eberhard-Alexander-Burgh-Bibliothek",
+      "lat": 52.471364,
+      "lng": 13.313439
+    },
+    {
+      "id": "Q28739256",
+      "name": "Ecologic Institute",
+      "lat": 52.49285,
+      "lng": 13.32173
+    },
+    {
+      "id": "Q125306889",
+      "name": "Edith-Stein-Bibliothek",
+      "lat": 52.387873,
+      "lng": 13.397154
+    },
+    {
+      "id": "Q125306828",
+      "name": "Egon-Erwin-Kisch-Bibliothek",
+      "lat": 52.513579,
+      "lng": 13.481254
+    },
+    {
+      "id": "Q28681447",
+      "name": "Ehm-Welk-Bibliothek",
+      "lat": 52.5465,
+      "lng": 13.59209
+    },
+    {
+      "id": "Q28739145",
+      "name": "Entwicklungspolitisches Bildungs- und Informationszentrum (EPIZ) e.V., Bibliothek",
+      "lat": 52.50983,
+      "lng": 13.29857
+    },
+    {
+      "id": "Q134313367",
+      "name": "Erwin Schrödinger Centre",
+      "lat": 52.431033,
+      "lng": 13.531635
+    },
+    {
+      "id": "Q28738269",
+      "name": "Evangelische Hochschule Berlin, Bibliothek",
+      "lat": 52.42374,
+      "lng": 13.2624
+    },
+    {
+      "id": "Q140562466",
+      "name": "Evangelische Zentralstelle für Weltanschauungsfragen Berlin (EZW), Bibliothek",
+      "lat": 52.526703,
+      "lng": 13.392589
+    },
+    {
+      "id": "Q28737905",
+      "name": "Evangelisches Krankenhaus Königin Elisabeth Herzberge, Bibliothek",
+      "lat": 52.526413,
+      "lng": 13.51131
+    },
+    {
+      "id": "Q28739031",
+      "name": "Evangelisches Werk für Diakonie und Entwicklung, Bibliothek, Bestand Berlin",
+      "lat": 52.53166,
+      "lng": 13.38527
+    },
+    {
+      "id": "Q1276373",
+      "name": "EVIFA",
+      "lat": 52.518306,
+      "lng": 13.386694
+    },
+    {
+      "id": "Q28737901",
+      "name": "Fachkrankenhaus für Lungenheilkunde und Thoraxchirurgie, Bibliothek",
+      "lat": 52.63406,
+      "lng": 13.5036
+    },
+    {
+      "id": "Q125306829",
+      "name": "Fahrbibliothek Mitte Bus 1",
+      "lat": 52.553614,
+      "lng": 13.379496
+    },
+    {
+      "id": "Q125306830",
+      "name": "Fahrbibliothek Mitte Bus 2",
+      "lat": 52.553614,
+      "lng": 13.379496
+    },
+    {
+      "id": "Q125306831",
+      "name": "Fahrbibliothek Mitte Bus 3",
+      "lat": 52.553614,
+      "lng": 13.379496
+    },
+    {
+      "id": "Q125306833",
+      "name": "Fahrbibliothek Spandau",
+      "lat": 52.536133,
+      "lng": 13.201386
+    },
+    {
+      "id": "Q125306834",
+      "name": "Fahrbibliothek Steglitz-Zehlendorf",
+      "lat": 52.431992,
+      "lng": 13.2556
+    },
+    {
+      "id": "Q125306835",
+      "name": "Fahrbibliothek Tempelhof-Schöneberg",
+      "lat": 52.464406,
+      "lng": 13.390933
+    },
+    {
+      "id": "Q125306839",
+      "name": "Fahrbibliothek Treptow-Köpenick Kleiner Bus",
+      "lat": 52.445837,
+      "lng": 13.578795
+    },
+    {
+      "id": "Q125306840",
+      "name": "Familienbibliothek Else Ury",
+      "lat": 52.49255,
+      "lng": 13.436214
+    },
+    {
+      "id": "Q28733477",
+      "name": "Federal Archives Library",
+      "lat": 52.43086,
+      "lng": 13.29988
+    },
+    {
+      "id": "Q28739524",
+      "name": "Federal Foundation for the Reappraisal of the SED Dictatorship, library",
+      "lat": 52.51108,
+      "lng": 13.38791
+    },
+    {
+      "id": "Q28738492",
+      "name": "Federal Ministry for Education, Family Affairs, Senior Citizens, Women and Youth, Library",
+      "lat": 52.51332,
+      "lng": 13.38773
+    },
+    {
+      "id": "Q28738447",
+      "name": "Federal Ministry of Justice and Consumer Protection, Library",
+      "lat": 52.51235,
+      "lng": 13.39527
+    },
+    {
+      "id": "Q28738464",
+      "name": "Ferdinand-Braun-Institut, Leibniz-Institut für Höchstfrequenztechnik, Bibliothek",
+      "lat": 52.42876,
+      "lng": 13.53406
+    },
+    {
+      "id": "Q15809131",
+      "name": "FFBIZ",
+      "lat": 52.52025,
+      "lng": 13.46637
+    },
+    {
+      "id": "Q63827043",
+      "name": "FID Lateinamerika, Karibik und Latino Studies",
+      "lat": 52.506694,
+      "lng": 13.369694
+    },
+    {
+      "id": "Q130548545",
+      "name": "Freie Universität Berlin, Bibliothek des Fachbereichs Rechtswissenschaft",
+      "lat": 52.44699,
+      "lng": 13.28329
+    },
+    {
+      "id": "Q130548546",
+      "name": "Freie Universität Berlin, Fachbereich Geowissenschaften, Geowissenschaftliche Bibliothek",
+      "lat": 52.42608,
+      "lng": 13.35741
+    },
+    {
+      "id": "Q28739816",
+      "name": "freshpages MHMK Bibliothek Berlin",
+      "lat": 52.49344,
+      "lng": 13.38847
+    },
+    {
+      "id": "Q16837847",
+      "name": "Friedrich-von-Raumer-Bibliothek",
+      "lat": 52.485195,
+      "lng": 13.38296
+    },
+    {
+      "id": "Q134532173",
+      "name": "Gemeindebibliothek Bergholz-Rehbrücke",
+      "lat": 52.34858,
+      "lng": 13.10413
+    },
+    {
+      "id": "Q28729304",
+      "name": "Gemeindebibliothek Blankenfelde-Mahlow",
+      "lat": 52.33162,
+      "lng": 13.39534
+    },
+    {
+      "id": "Q134532144",
+      "name": "Gemeindebibliothek Fredersdorf-Vogelsdorf",
+      "lat": 52.52404,
+      "lng": 13.75138
+    },
+    {
+      "id": "Q28729269",
+      "name": "Gemeindebibliothek Hoppegarten",
+      "lat": 52.51545,
+      "lng": 13.66776
+    },
+    {
+      "id": "Q134532188",
+      "name": "Gemeindebibliothek Schulzendorf",
+      "lat": 52.359495,
+      "lng": 13.592843
+    },
+    {
+      "id": "Q134532190",
+      "name": "Gemeindebibliothek Stahnsdorf",
+      "lat": 52.3813,
+      "lng": 13.212219
+    },
+    {
+      "id": "Q1501334",
+      "name": "Gender library",
+      "lat": 52.5203,
+      "lng": 13.39406
+    },
+    {
+      "id": "Q28739064",
+      "name": "Georg-Kolbe-Museum, Bibliothek",
+      "lat": 52.50993,
+      "lng": 13.25478
+    },
+    {
+      "id": "Q28739505",
+      "name": "Gerichte für Arbeitssachen, Bibliothek",
+      "lat": 52.50334,
+      "lng": 13.35968
+    },
+    {
+      "id": "Q1205934",
+      "name": "German Broadcasting Archive",
+      "lat": 52.389672,
+      "lng": 13.119806
+    },
+    {
+      "id": "Q28739485",
+      "name": "German Historical Museum Foundation, Library",
+      "lat": 52.51888,
+      "lng": 13.39666
+    },
+    {
+      "id": "Q28738838",
+      "name": "German Museum of Technology library",
+      "lat": 52.49851,
+      "lng": 13.37655
+    },
+    {
+      "id": "Q125306841",
+      "name": "Gertrud-Haß-Bibliothek",
+      "lat": 52.41903,
+      "lng": 13.494335
+    },
+    {
+      "id": "Q125306843",
+      "name": "Gertrud-Junge-Bibliothek",
+      "lat": 52.425517,
+      "lng": 13.462447
+    },
+    {
+      "id": "Q28737644",
+      "name": "Gesellschaft für Erdkunde zu Berlin, Library",
+      "lat": 52.42702,
+      "lng": 13.35607
+    },
+    {
+      "id": "Q28681436",
+      "name": "Gottfried-Benn-Bibliothek",
+      "lat": 52.43208,
+      "lng": 13.25549
+    },
+    {
+      "id": "Q28739566",
+      "name": "Gottfried-Keller-Gymnasium Berlin, Schulbibliothek",
+      "lat": 52.52869,
+      "lng": 13.30214
+    },
+    {
+      "id": "Q125306844",
+      "name": "Grosser Bücherbus Reinickendorf",
+      "lat": 52.597608,
+      "lng": 13.352092
+    },
+    {
+      "id": "Q49677548",
+      "name": "Hansabibliothek",
+      "lat": 52.51707,
+      "lng": 13.34277
+    },
+    {
+      "id": "Q28739287",
+      "name": "Haus der Kulturen der Welt, Bibliothek",
+      "lat": 52.51846,
+      "lng": 13.36481
+    },
+    {
+      "id": "Q125306845",
+      "name": "Heimatmuseum Neukölln (kein Ausgabeort)",
+      "lat": 52.445966,
+      "lng": 13.437778
+    },
+    {
+      "id": "Q28737426",
+      "name": "Heimatmuseum Zehlendorf, Archiv",
+      "lat": 52.43545,
+      "lng": 13.2603
+    },
+    {
+      "id": "Q28681431",
+      "name": "Heinrich-Schulz-Bibliothek mit Musikabteilung",
+      "lat": 52.5171,
+      "lng": 13.30886
+    },
+    {
+      "id": "Q28733856",
+      "name": "HELIOS Zentralbibliothek der HELIOS Kliniken GmbH",
+      "lat": 52.52282,
+      "lng": 13.38752
+    },
+    {
+      "id": "Q28739032",
+      "name": "Hertie School of Governance, Library and Information Services",
+      "lat": 52.51287,
+      "lng": 13.38927
+    },
+    {
+      "id": "Q28737890",
+      "name": "Hochschule für Musik 'Hanns Eisler', Bibliothek",
+      "lat": 52.5135,
+      "lng": 13.39086
+    },
+    {
+      "id": "Q28739237",
+      "name": "Hochschule für Schauspielkunst 'Ernst Busch' Berlin, Bibliothek",
+      "lat": 52.45411,
+      "lng": 13.52014
+    },
+    {
+      "id": "Q28739477",
+      "name": "Hochschule für Wirtschaft und Recht Berlin, Hochschulbibliothek, E-Medien",
+      "lat": 52.48561,
+      "lng": 13.33882
+    },
+    {
+      "id": "Q28738909",
+      "name": "Hochschule für Wirtschaft und Recht, Hochschulbibliothek, Campus Lichtenberg",
+      "lat": 52.50803,
+      "lng": 13.52637
+    },
+    {
+      "id": "Q28739452",
+      "name": "HTW Berlin University Library",
+      "lat": 52.49277,
+      "lng": 13.52621
+    },
+    {
+      "id": "Q27926646",
+      "name": "Humboldt Library",
+      "lat": 52.5919,
+      "lng": 13.2808
+    },
+    {
+      "id": "Q73146656",
+      "name": "Humboldt University of Berlin University Library Theology Branch Library",
+      "lat": 52.52099,
+      "lng": 13.40121
+    },
+    {
+      "id": "Q75251125",
+      "name": "Humboldt University of Berlin, Institute of Art and Visual History",
+      "lat": 52.520465,
+      "lng": 13.394414
+    },
+    {
+      "id": "Q130548547",
+      "name": "Humboldt-Universität zu Berlin, Universitätsbibliothek, Zweigbibliothek Asien-/Afrikawissenschaften und Islamische Theologie",
+      "lat": 52.53064,
+      "lng": 13.38574
+    },
+    {
+      "id": "Q130548549",
+      "name": "Humboldt-Universität zu Berlin, Universitätsbibliothek, Zweigbibliothek Campus Nord",
+      "lat": 52.52879,
+      "lng": 13.38156
+    },
+    {
+      "id": "Q125306846",
+      "name": "Humboldtschule (nicht öffentlich)",
+      "lat": 52.592307,
+      "lng": 13.291379
+    },
+    {
+      "id": "Q28739236",
+      "name": "ICI Berlin Institute for Cultural Inquiry",
+      "lat": 52.53217,
+      "lng": 13.41088
+    },
+    {
+      "id": "Q28737887",
+      "name": "IGB Library",
+      "lat": 52.44878,
+      "lng": 13.64753
+    },
+    {
+      "id": "Q28737937",
+      "name": "IGV Institut für Getreideverarbeitung GmbH, Bibliothek",
+      "lat": 52.35291,
+      "lng": 13.10317
+    },
+    {
+      "id": "Q28737645",
+      "name": "Informationszentrum und Bibliothek Berlin-Dahlem des Julius Kühn-Instituts",
+      "lat": 52.45822,
+      "lng": 13.29867
+    },
+    {
+      "id": "Q28738908",
+      "name": "Institut für Binnenfischerei Potsdam-Sacrow, Bibliothek",
+      "lat": 52.4494,
+      "lng": 13.09901
+    },
+    {
+      "id": "Q28738262",
+      "name": "Institut für soziale Demokratie (August-Bebel-Institut), Bibliothek",
+      "lat": 52.5437,
+      "lng": 13.36359
+    },
+    {
+      "id": "Q28737906",
+      "name": "Institut für Zoo- und Wildtierforschung im Forschungsverbund Berlin",
+      "lat": 52.50614,
+      "lng": 13.52126
+    },
+    {
+      "id": "Q28738933",
+      "name": "Institut Kirche und Judentum, Bibliothek",
+      "lat": 52.52108,
+      "lng": 13.40089
+    },
+    {
+      "id": "Q28738705",
+      "name": "Institute for Urban Design of the German Academy of Urban Design and Planning, Library",
+      "lat": 52.50474,
+      "lng": 13.38243
+    },
+    {
+      "id": "Q1525910",
+      "name": "Jacob-und-Wilhelm-Grimm-Zentrum",
+      "lat": 52.5206,
+      "lng": 13.3911
+    },
+    {
+      "id": "Q28681445",
+      "name": "Janusz-Korczak-Library",
+      "lat": 52.56845,
+      "lng": 13.41235
+    },
+    {
+      "id": "Q28738458",
+      "name": "Japanisch-Deutsches Zentrum Berlin, Bibliothek",
+      "lat": 52.45051,
+      "lng": 13.27135
+    },
+    {
+      "id": "Q55153202",
+      "name": "Johanna-Moosdorf-Bibliothek",
+      "lat": 52.510658,
+      "lng": 13.25861
+    },
+    {
+      "id": "Q111144671",
+      "name": "Johannes-Bobrowski-Bibliothek",
+      "lat": 52.454801,
+      "lng": 13.621401
+    },
+    {
+      "id": "Q134548372",
+      "name": "Joseph Wulf Bibliothek",
+      "lat": 52.43317,
+      "lng": 13.1651
+    },
+    {
+      "id": "Q125306847",
+      "name": "Ju.bibl. Humboldt-Bibliothek",
+      "lat": 52.591951,
+      "lng": 13.280665
+    },
+    {
+      "id": "Q28737931",
+      "name": "Julius Kühn-Institut, Bibliothek Kleinmachnow",
+      "lat": 52.39631,
+      "lng": 13.20786
+    },
+    {
+      "id": "Q28739528",
+      "name": "Justizvollzugsanstalt Heidering, Gefangenenbibliothek",
+      "lat": 52.33877,
+      "lng": 13.27403
+    },
+    {
+      "id": "Q28738465",
+      "name": "Katholische Hochschule für Sozialwesen Berlin, Bibliothek",
+      "lat": 52.48816,
+      "lng": 13.53438
+    },
+    {
+      "id": "Q125306853",
+      "name": "Kinder- und Jugendbibliothek mit Lernzentrum",
+      "lat": 52.496567,
+      "lng": 13.392494
+    },
+    {
+      "id": "Q28733492",
+      "name": "Kirchenbibliotheken Sankt Marien - Sankt Nicolai",
+      "lat": 52.50596,
+      "lng": 13.42764
+    },
+    {
+      "id": "Q125306855",
+      "name": "Kleiner Bücherbus Reinickendorf",
+      "lat": 52.571412,
+      "lng": 13.315554
+    },
+    {
+      "id": "Q6445022",
+      "name": "Kunstbibliothek Berlin",
+      "lat": 52.50861,
+      "lng": 13.36666
+    },
+    {
+      "id": "Q108218674",
+      "name": "Kurt-Tucholsky-Bibliothek",
+      "lat": 52.53161,
+      "lng": 13.32616
+    },
+    {
+      "id": "Q125306857",
+      "name": "Kurt-Tucholsky-Bibliothek (Pankow)",
+      "lat": 52.532882,
+      "lng": 13.432172
+    },
+    {
+      "id": "Q28737916",
+      "name": "Länderinstitut für Bienenkunde Hohen Neuendorf e.V., Bibliothek",
+      "lat": 52.6751,
+      "lng": 13.26848
+    },
+    {
+      "id": "Q1610731",
+      "name": "Landesarchiv Berlin",
+      "lat": 52.58025,
+      "lng": 13.31638
+    },
+    {
+      "id": "Q28739641",
+      "name": "Landesgeschichtliche Vereinigung für die Mark Brandenburg",
+      "lat": 52.51602,
+      "lng": 13.40406
+    },
+    {
+      "id": "Q28734878",
+      "name": "Language Centre Media Library, Humbolt University",
+      "lat": 52.51845,
+      "lng": 13.3867
+    },
+    {
+      "id": "Q28737939",
+      "name": "LAS - Landesamt für Arbeitsschutz, Bibliothek",
+      "lat": 52.3812,
+      "lng": 13.08726
+    },
+    {
+      "id": "Q28737912",
+      "name": "Leibniz Institute for Astrophysics Potsdam (AIP) Library",
+      "lat": 52.40449,
+      "lng": 13.10229
+    },
+    {
+      "id": "Q28737898",
+      "name": "Leibniz-Institut für Regionalentwicklung und Strukturplanung e.V.(IRS), Bibliothek",
+      "lat": 52.42758,
+      "lng": 13.75625
+    },
+    {
+      "id": "Q28735046",
+      "name": "Lette Verein Library",
+      "lat": 52.49602,
+      "lng": 13.34117
+    },
+    {
+      "id": "Q28739490",
+      "name": "Library at the Court of Appeal Berlin",
+      "lat": 52.4925,
+      "lng": 13.35689
+    },
+    {
+      "id": "Q110501434",
+      "name": "Library at the Water Tower",
+      "lat": 52.53365,
+      "lng": 13.419202
+    },
+    {
+      "id": "Q28739464",
+      "name": "Library for Design, Berliner Technische Kunsthochschule GmbH",
+      "lat": 52.5052,
+      "lng": 13.37797
+    },
+    {
+      "id": "Q28739002",
+      "name": "Library for the History of Medicine and Social Medicine, Charité",
+      "lat": 52.44629,
+      "lng": 13.28354
+    },
+    {
+      "id": "Q28738451",
+      "name": "Library of DESY Zeuthen",
+      "lat": 52.34538,
+      "lng": 13.63313
+    },
+    {
+      "id": "Q85667528",
+      "name": "library of Instituto Cervantes Berlin",
+      "lat": 52.521574,
+      "lng": 13.40493
+    },
+    {
+      "id": "Q28738861",
+      "name": "Library of Jewish Museum Berlin",
+      "lat": 52.50176,
+      "lng": 13.39571
+    },
+    {
+      "id": "Q28720068",
+      "name": "Library of the Archive of the Max-Planck-Gesellschaft",
+      "lat": 52.44679,
+      "lng": 13.27785
+    },
+    {
+      "id": "Q28738864",
+      "name": "Library of the Berlin-Brandenburg Academy of Sciences",
+      "lat": 52.51779,
+      "lng": 13.39221
+    },
+    {
+      "id": "Q28739302",
+      "name": "Library of the Berlinische Galerie, State Museum for Modern Art, Photography and Architecture",
+      "lat": 52.50392,
+      "lng": 13.39851
+    },
+    {
+      "id": "Q28737895",
+      "name": "Library of the Center for Literature and Cultural Research",
+      "lat": 52.50878,
+      "lng": 13.39609
+    },
+    {
+      "id": "Q28737651",
+      "name": "Library of the Federal Environment Agency",
+      "lat": 52.49296,
+      "lng": 13.28235
+    },
+    {
+      "id": "Q28739101",
+      "name": "Library of the Film University Babelsberg KONRAD WOLF",
+      "lat": 52.38875,
+      "lng": 13.11673
+    },
+    {
+      "id": "Q28727665",
+      "name": "Library of the Fraunhofer Institute for Open Communication Systems",
+      "lat": 52.52596,
+      "lng": 13.31442
+    },
+    {
+      "id": "Q856487",
+      "name": "Library of the Free",
+      "lat": 52.5286,
+      "lng": 13.4254
+    },
+    {
+      "id": "Q28720011",
+      "name": "Library of the Fritz Haber Institute",
+      "lat": 52.44943,
+      "lng": 13.28269
+    },
+    {
+      "id": "Q856510",
+      "name": "Library of the German Bundestag",
+      "lat": 52.520626,
+      "lng": 13.377738
+    },
+    {
+      "id": "Q28739533",
+      "name": "library of the German Resistance Memorial Center",
+      "lat": 52.50772,
+      "lng": 13.36299
+    },
+    {
+      "id": "Q28737641",
+      "name": "Library of the Ibero-American Institute Berlin",
+      "lat": 52.50691,
+      "lng": 13.36973
+    },
+    {
+      "id": "Q28734785",
+      "name": "Library of the International Psychoanalytic University Berlin (IPU)",
+      "lat": 52.52349,
+      "lng": 13.34254
+    },
+    {
+      "id": "Q48755368",
+      "name": "Library of the Jewish Community of Berlin",
+      "lat": 52.504333,
+      "lng": 13.328333
+    },
+    {
+      "id": "Q28737926",
+      "name": "Library of the Leibniz Institute of Vegetable and Ornamental Crops",
+      "lat": 52.34824,
+      "lng": 13.30978
+    },
+    {
+      "id": "Q28738284",
+      "name": "Library of the Max Born Institute for Nonlinear Optics and Short Pulse Spectorscopy",
+      "lat": 52.43097,
+      "lng": 13.52815
+    },
+    {
+      "id": "Q28720130",
+      "name": "Library of the Max Planck Institute for Human Development",
+      "lat": 52.46859,
+      "lng": 13.30382
+    },
+    {
+      "id": "Q28720049",
+      "name": "Library of the Max Planck Institute for Molecular Genetics",
+      "lat": 52.44674,
+      "lng": 13.27525
+    },
+    {
+      "id": "Q28720071",
+      "name": "Library of the Max Planck Institute for the History of Science",
+      "lat": 52.4454,
+      "lng": 13.27705
+    },
+    {
+      "id": "Q28738259",
+      "name": "Library of the Physikalisch-Technische Bundesanstalt, Institut Berlin",
+      "lat": 52.51577,
+      "lng": 13.32034
+    },
+    {
+      "id": "Q28737889",
+      "name": "Library of the Weißensee Academy of Art Berlin",
+      "lat": 52.55801,
+      "lng": 13.43932
+    },
+    {
+      "id": "Q28733487",
+      "name": "Local Legal library of the Chamber Court in the Ministry of Justice and Consumer Protection",
+      "lat": 52.48626,
+      "lng": 13.34274
+    },
+    {
+      "id": "Q28733430",
+      "name": "Lorberg-Bibliothek des Instituts für Gärungsgewerbe und Biotechnologie",
+      "lat": 52.54508,
+      "lng": 13.34275
+    },
+    {
+      "id": "Q23786640",
+      "name": "Luisenbad Library",
+      "lat": 52.553429,
+      "lng": 13.379294
+    },
+    {
+      "id": "Q125306858",
+      "name": "Margarete-Kubicka-Bibliothek",
+      "lat": 52.436687,
+      "lng": 13.446022
+    },
+    {
+      "id": "Q55153443",
+      "name": "Marzahn-Hellersdorf municipal library",
+      "lat": 52.547152,
+      "lng": 13.55628
+    },
+    {
+      "id": "Q28738466",
+      "name": "Max Delbrück Center Library",
+      "lat": 52.62467,
+      "lng": 13.50199
+    },
+    {
+      "id": "Q28738830",
+      "name": "Medical Library of the Charité – Universitätsmedizin",
+      "lat": 52.54183,
+      "lng": 13.34014
+    },
+    {
+      "id": "Q125306859",
+      "name": "Medienschrank 1 - BZB Spandau, Erwachsenenbereich (1. OG)",
+      "lat": 52.536133,
+      "lng": 13.201386
+    },
+    {
+      "id": "Q125306860",
+      "name": "Medienschrank 2 - BZB Spandau, Kinder- und Jugendbibliothek (2. OG)",
+      "lat": 52.536133,
+      "lng": 13.201386
+    },
+    {
+      "id": "Q28733429",
+      "name": "Mittelpunktbibliothek Adalbertstraße",
+      "lat": 52.4999,
+      "lng": 13.41849
+    },
+    {
+      "id": "Q125306863",
+      "name": "Mittelpunktbibliothek Treptow Alte Feuerwache",
+      "lat": 52.453993,
+      "lng": 13.514275
+    },
+    {
+      "id": "Q125306867",
+      "name": "Mittelpunktbibliothek Wilhelm Liebknecht / Namik Kemal",
+      "lat": 52.499831,
+      "lng": 13.418501
+    },
+    {
+      "id": "Q28739216",
+      "name": "Museum für Kommunikation Berlin, Bibliothek",
+      "lat": 52.50993,
+      "lng": 13.38725
+    },
+    {
+      "id": "Q28739305",
+      "name": "Museum für Naturkunde Berlin, Library",
+      "lat": 52.53015,
+      "lng": 13.37929
+    },
+    {
+      "id": "Q125306869",
+      "name": "Museum Pankow - Termin nach Absprache",
+      "lat": 52.533316,
+      "lng": 13.420244
+    },
+    {
+      "id": "Q131736352",
+      "name": "Museum Reinickendorf",
+      "lat": 52.615472,
+      "lng": 13.318716
+    },
+    {
+      "id": "Q125306870",
+      "name": "Musikbibliothek (in der Mark-Twain-Bibliothek)",
+      "lat": 52.547362,
+      "lng": 13.556528
+    },
+    {
+      "id": "Q28681438",
+      "name": "Neukölln municipal library",
+      "lat": 52.48196,
+      "lng": 13.43277
+    },
+    {
+      "id": "Q28733481",
+      "name": "Oberhavel Klinikum GmbH / Bibliothek",
+      "lat": 52.65558,
+      "lng": 13.19068
+    },
+    {
+      "id": "Q134532148",
+      "name": "Öffentliche Bibliothek Großbeeren",
+      "lat": 52.355301,
+      "lng": 13.308678
+    },
+    {
+      "id": "Q28734549",
+      "name": "Öffentliche Bibliothek Kleinmachnow",
+      "lat": 52.40322,
+      "lng": 13.21991
+    },
+    {
+      "id": "Q15848805",
+      "name": "Pankow city library",
+      "lat": 52.541771,
+      "lng": 13.441123
+    },
+    {
+      "id": "Q28657184",
+      "name": "Philipp-Schaeffer-Bibliothek",
+      "lat": 52.531606,
+      "lng": 13.398696
+    },
+    {
+      "id": "Q875031",
+      "name": "Philological Library of Freie Universität Berlin",
+      "lat": 52.4519,
+      "lng": 13.2883
+    },
+    {
+      "id": "Q28738455",
+      "name": "Polizeibibliothek Berlin",
+      "lat": 52.48718,
+      "lng": 13.383251
+    },
+    {
+      "id": "Q28738926",
+      "name": "Polnisches Institut Berlin, Bibliothek",
+      "lat": 52.52156,
+      "lng": 13.40081
+    },
+    {
+      "id": "Q130548542",
+      "name": "Presse- und Informationsamt der Bundesregierung, Zentrales Dokumentationssystem, Pressearchiv / Bibliothek",
+      "lat": 52.51851,
+      "lng": 13.38365
+    },
+    {
+      "id": "Q28729303",
+      "name": "Public library Glienicke/Nordbahn",
+      "lat": 52.6305,
+      "lng": 13.31924
+    },
+    {
+      "id": "Q28739369",
+      "name": "Quadriga Hochschule Berlin, Bibliothek",
+      "lat": 52.51511,
+      "lng": 13.39733
+    },
+    {
+      "id": "Q28737741",
+      "name": "Referat Bibliothek, Informationsvermittlung des Auswärtigen Amtes",
+      "lat": 52.51513,
+      "lng": 13.39907
+    },
+    {
+      "id": "Q15848806",
+      "name": "Reinickendorf city library",
+      "lat": 52.59182,
+      "lng": 13.28046
+    },
+    {
+      "id": "Q856552",
+      "name": "Research Library for the History of Education",
+      "lat": 52.5047,
+      "lng": 13.4478
+    },
+    {
+      "id": "Q28739596",
+      "name": "Robert-Koch-Institut, Bibliothek Berlin",
+      "lat": 52.53917,
+      "lng": 13.34755
+    },
+    {
+      "id": "Q28739469",
+      "name": "Rosa-Luxemburg-Stiftung, Bibliothek",
+      "lat": 52.51285,
+      "lng": 13.44011
+    },
+    {
+      "id": "Q28738460",
+      "name": "Rundfunk Berlin Brandenburg, Bibliothek",
+      "lat": 52.50888,
+      "lng": 13.27628
+    },
+    {
+      "id": "Q2217373",
+      "name": "Sammlung Industrielle Gestaltung",
+      "lat": 52.5403,
+      "lng": 13.414
+    },
+    {
+      "id": "Q23786107",
+      "name": "Schiller Library",
+      "lat": 52.546484,
+      "lng": 13.357359
+    },
+    {
+      "id": "Q125306871",
+      "name": "Schiller-Bibliothek mit @hugo Jugendmedienetage",
+      "lat": 52.54645,
+      "lng": 13.357276
+    },
+    {
+      "id": "Q125306872",
+      "name": "Schulbibliothek Blücherstr. (nicht öffentlich)",
+      "lat": 52.496261,
+      "lng": 13.395204
+    },
+    {
+      "id": "Q125306874",
+      "name": "Schulbibliothek Carlo Schmid (nicht oeffentlich)",
+      "lat": 52.525843,
+      "lng": 13.174084
+    },
+    {
+      "id": "Q28739314",
+      "name": "Schwules Museum Berlin Library",
+      "lat": 52.50425,
+      "lng": 13.35821
+    },
+    {
+      "id": "Q28738267",
+      "name": "Sozialgericht Berlin, Bibliothek",
+      "lat": 52.52737,
+      "lng": 13.37134
+    },
+    {
+      "id": "Q15848809",
+      "name": "Spandau city library",
+      "lat": 52.53613,
+      "lng": 13.20138
+    },
+    {
+      "id": "Q63877343",
+      "name": "Specialised Information Service Cartography and Geodata",
+      "lat": 52.506389,
+      "lng": 13.370281
+    },
+    {
+      "id": "Q76632536",
+      "name": "Sportmuseum Berlin",
+      "lat": 52.519299,
+      "lng": 13.245542
+    },
+    {
+      "id": "Q28739304",
+      "name": "SRH Hochschule Berlin, Hochschulbibliothek",
+      "lat": 52.51421,
+      "lng": 13.32135
+    },
+    {
+      "id": "Q28739404",
+      "name": "SRH Hochschule der populären Künste (hdpk), Bibliothek",
+      "lat": 52.49188,
+      "lng": 13.36009
+    },
+    {
+      "id": "Q130548544",
+      "name": "Staatliche Museen zu Berlin, Preußischer Kulturbesitz, Ägyptisches Museum und Papyrussammlung, Bibliothek",
+      "lat": 52.51987,
+      "lng": 13.39871
+    },
+    {
+      "id": "Q130548152",
+      "name": "Staatliche Museen zu Berlin, Preußischer Kulturbesitz, Ethnologisches Museum, library",
+      "lat": 52.45504,
+      "lng": 13.29231
+    },
+    {
+      "id": "Q28737653",
+      "name": "Staatliches Institut für Deutsche Musikforschung",
+      "lat": 52.50994,
+      "lng": 13.37072
+    },
+    {
+      "id": "Q28681476",
+      "name": "Stadtbibliothek \"Im Alten Bahnhof\" Hennigsdorf",
+      "lat": 52.63996,
+      "lng": 13.20555
+    },
+    {
+      "id": "Q28681585",
+      "name": "Stadtbibliothek Bernau bei Berlin",
+      "lat": 52.67527,
+      "lng": 13.58858
+    },
+    {
+      "id": "Q134532142",
+      "name": "Stadtbibliothek Erkner",
+      "lat": 52.42434,
+      "lng": 13.75214
+    },
+    {
+      "id": "Q28681904",
+      "name": "Stadtbibliothek Falkensee",
+      "lat": 52.56269,
+      "lng": 13.09283
+    },
+    {
+      "id": "Q28681434",
+      "name": "Stadtbibliothek Steglitz-Zehlendorf",
+      "lat": 52.45742,
+      "lng": 13.32016
+    },
+    {
+      "id": "Q28685774",
+      "name": "Stadtbibliothek Teltow",
+      "lat": 52.40361,
+      "lng": 13.25897
+    },
+    {
+      "id": "Q28650388",
+      "name": "Stadtbibliothek Treptow-Köpenick",
+      "lat": 52.45395,
+      "lng": 13.51384
+    },
+    {
+      "id": "Q28650367",
+      "name": "Stadtbibliothek Treptow-Köpenick, Mittelpunktbibliothek Köpenick",
+      "lat": 52.44588,
+      "lng": 13.57901
+    },
+    {
+      "id": "Q47660008",
+      "name": "Städtische Volksbibliothek und Lesehalle Charlottenburg",
+      "lat": 52.518889,
+      "lng": 13.305
+    },
+    {
+      "id": "Q125306875",
+      "name": "Stadtteilbibliothek Adlershof Stefan Heym",
+      "lat": 52.438872,
+      "lng": 13.549722
+    },
+    {
+      "id": "Q125306877",
+      "name": "Stadtteilbibliothek Alt-Treptow Manfred Bofinger",
+      "lat": 52.488831,
+      "lng": 13.450809
+    },
+    {
+      "id": "Q125306876",
+      "name": "Stadtteilbibliothek Altglienicke",
+      "lat": 52.403297,
+      "lng": 13.528686
+    },
+    {
+      "id": "Q110626815",
+      "name": "Stadtteilbibliothek Erich Weinert",
+      "lat": 52.528282,
+      "lng": 13.538245
+    },
+    {
+      "id": "Q125306881",
+      "name": "Stadtteilbibliothek Falkenhagener Feld",
+      "lat": 52.549919,
+      "lng": 13.178104
+    },
+    {
+      "id": "Q55153230",
+      "name": "Stadtteilbibliothek Halemweg",
+      "lat": 52.537504,
+      "lng": 13.287186
+    },
+    {
+      "id": "Q125306883",
+      "name": "Stadtteilbibliothek Haselhorst",
+      "lat": 52.542926,
+      "lng": 13.239048
+    },
+    {
+      "id": "Q125306884",
+      "name": "Stadtteilbibliothek Heerstrasse",
+      "lat": 52.522404,
+      "lng": 13.16541
+    },
+    {
+      "id": "Q108747059",
+      "name": "Stadtteilbibliothek Heinrich von Kleist",
+      "lat": 52.56823,
+      "lng": 13.57396
+    },
+    {
+      "id": "Q55153171",
+      "name": "Stadtteilbibliothek Ingeborg Bachmann",
+      "lat": 52.514628,
+      "lng": 13.293999
+    },
+    {
+      "id": "Q125306885",
+      "name": "Stadtteilbibliothek Kaulsdorf - Nord",
+      "lat": 52.529364,
+      "lng": 13.592892
+    },
+    {
+      "id": "Q125306886",
+      "name": "Stadtteilbibliothek Kladow",
+      "lat": 52.453325,
+      "lng": 13.143035
+    },
+    {
+      "id": "Q125306887",
+      "name": "Stadtteilbibliothek Lankwitz",
+      "lat": 52.436074,
+      "lng": 13.350607
+    },
+    {
+      "id": "Q125306890",
+      "name": "Stadtteilbibliothek Mahlsdorf",
+      "lat": 52.505555,
+      "lng": 13.612789
+    },
+    {
+      "id": "Q125306893",
+      "name": "Stadtteilbibliothek Marienfelde",
+      "lat": 52.416761,
+      "lng": 13.366539
+    },
+    {
+      "id": "Q125306894",
+      "name": "Stadtteilbibliothek Schöneberg-Nord",
+      "lat": 52.494366,
+      "lng": 13.357841
+    },
+    {
+      "id": "Q2324837",
+      "name": "State Library of Berlin (Haus Unter den Linden)",
+      "lat": 52.5178,
+      "lng": 13.3917
+    },
+    {
+      "id": "Q28777973",
+      "name": "State Library of Berlin (Westhafenspeicher)",
+      "lat": 52.536794,
+      "lng": 13.336138
+    },
+    {
+      "id": "Q28737885",
+      "name": "Stiftung 'Oper in Berlin', Deutsche Staatsoper, Bibliothek",
+      "lat": 52.51659,
+      "lng": 13.3947
+    },
+    {
+      "id": "Q28777933",
+      "name": "Stiftung Stadtmuseum Berlin, Bibliothek",
+      "lat": 52.55921,
+      "lng": 13.21975
+    },
+    {
+      "id": "Q28738268",
+      "name": "Stiftung Warentest, Bibliothek",
+      "lat": 52.50416,
+      "lng": 13.35331
+    },
+    {
+      "id": "Q28738555",
+      "name": "Studiengesellschaft für den Kombinierten Verkehr",
+      "lat": 52.5427,
+      "lng": 13.3557
+    },
+    {
+      "id": "Q2326915",
+      "name": "Tempelhof-Schöneberg district library",
+      "lat": 52.46481,
+      "lng": 13.38567
+    },
+    {
+      "id": "Q105549323",
+      "name": "TERRE DES FEMMES Documentation Center",
+      "lat": 52.53948,
+      "lng": 13.39465
+    },
+    {
+      "id": "Q2527961",
+      "name": "The Virtual Law Library",
+      "lat": 52.506389,
+      "lng": 13.370281
+    },
+    {
+      "id": "Q28681428",
+      "name": "Theodor-Heuss-Bibliothek",
+      "lat": 52.48406,
+      "lng": 13.35046
+    },
+    {
+      "id": "Q125306895",
+      "name": "Thomas-Dehler-Bibliothek",
+      "lat": 52.488389,
+      "lng": 13.346074
+    },
+    {
+      "id": "Q28738920",
+      "name": "Topography of Terror, Library",
+      "lat": 52.50686,
+      "lng": 13.38397
+    },
+    {
+      "id": "Q2496344",
+      "name": "University Library of Freie Universität Berlin",
+      "lat": 52.4481,
+      "lng": 13.2775
+    },
+    {
+      "id": "Q1407819",
+      "name": "University Library of Humboldt-Universität zu Berlin",
+      "lat": 52.5183,
+      "lng": 13.3867
+    },
+    {
+      "id": "Q28650468",
+      "name": "University Library of the Technische Universität Berlin",
+      "lat": 52.51046,
+      "lng": 13.33064
+    },
+    {
+      "id": "Q28650451",
+      "name": "University Library of the UDK Berlin",
+      "lat": 52.51049,
+      "lng": 13.33045
+    },
+    {
+      "id": "Q28738253",
+      "name": "Verein für die Geschichte Berlins e.V., Bibliothek",
+      "lat": 52.51599,
+      "lng": 13.40337
+    },
+    {
+      "id": "Q28737909",
+      "name": "Vivantes Klinikum Hellersdorf, Library",
+      "lat": 52.50744,
+      "lng": 13.59218
+    },
+    {
+      "id": "Q28737891",
+      "name": "Weierstraß-Institut für Angewandte Analysis und Stochastik im Forschungsverbund Berlin e.V., Bibliothek",
+      "lat": 52.513,
+      "lng": 13.39578
+    },
+    {
+      "id": "Q28738462",
+      "name": "Wilhelm-Foerster-Sternwarte mit Zeiss-Planetarium, Bibliothek",
+      "lat": 52.45765,
+      "lng": 13.34917
+    },
+    {
+      "id": "Q28737893",
+      "name": "Wissenschaftliche Spezialbibliothek Physik des Paul-Drude-Instituts für Festkörperelektronik",
+      "lat": 52.513,
+      "lng": 13.39578
+    },
+    {
+      "id": "Q28739375",
+      "name": "Wissenschaftskolleg zu Berlin - Institute for Advanced Study, Bibliothek",
+      "lat": 52.491561,
+      "lng": 13.276499
+    },
+    {
+      "id": "Q28681459",
+      "name": "Wolfdietrich-Schnurre-Library",
+      "lat": 52.54773,
+      "lng": 13.45283
+    },
+    {
+      "id": "Q28733708",
+      "name": "WZB library",
+      "lat": 52.50645,
+      "lng": 13.36501
+    },
+    {
+      "id": "Q28739619",
+      "name": "Yunus Emre Enstitüsü - Türkisches Kulturzentrum Berlin, Bibliothek",
+      "lat": 52.51093,
+      "lng": 13.38717
+    },
+    {
+      "id": "Q28733593",
+      "name": "Zentralbibliothek der Evangelischen Kirche Berlin-Brandenburg-schlesische Oberlausitz und Bibliothek des Berliner Missionswerkes",
+      "lat": 52.52734,
+      "lng": 13.42559
+    },
+    {
+      "id": "Q190261",
+      "name": "Zentralbibliothek der TU und UdK Berlin",
+      "lat": 52.5103,
+      "lng": 13.3306
+    },
+    {
+      "id": "Q28739286",
+      "name": "Zentrum für Historische Forschung Berlin der Polnischen Akademie der Wissenschaften, Bibliothek",
+      "lat": 52.57524,
+      "lng": 13.40055
+    },
+    {
+      "id": "Q28738341",
+      "name": "Zentrum Moderner Orient, Bibliothek, Geisteswissenschaftliche Zentren Berlin e.V.",
+      "lat": 52.42807,
+      "lng": 13.20232
+    },
+    {
+      "id": "Q28738841",
+      "name": "Zuse Institute Berlin Library",
+      "lat": 52.45601,
+      "lng": 13.29834
+    }
+  ]
+}

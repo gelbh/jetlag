@@ -1,0 +1,570 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q1244372",
+      "name": "Allard Pierson Museum",
+      "lat": 52.368611,
+      "lng": 4.893331
+    },
+    {
+      "id": "Q2134254",
+      "name": "Amsterdam Dungeon",
+      "lat": 52.37,
+      "lng": 4.89194
+    },
+    {
+      "id": "Q1820897",
+      "name": "Amsterdam Museum",
+      "lat": 52.370278,
+      "lng": 4.890833
+    },
+    {
+      "id": "Q2020907",
+      "name": "Amsterdam Tulip Museum",
+      "lat": 52.376111,
+      "lng": 4.883889
+    },
+    {
+      "id": "Q165366",
+      "name": "Anne Frank House",
+      "lat": 52.375147,
+      "lng": 4.88404
+    },
+    {
+      "id": "Q27603080",
+      "name": "annex Prinsengracht 263",
+      "lat": 52.37558,
+      "lng": 4.8844
+    },
+    {
+      "id": "Q2098441",
+      "name": "ARCAM",
+      "lat": 52.371444,
+      "lng": 4.912639
+    },
+    {
+      "id": "Q108290266",
+      "name": "Beeldenbos Noord",
+      "lat": 52.389722,
+      "lng": 4.938611
+    },
+    {
+      "id": "Q104529844",
+      "name": "Beeldentuin Emmaplein",
+      "lat": 52.354306,
+      "lng": 4.862778
+    },
+    {
+      "id": "Q2919762",
+      "name": "Bijbels Museum",
+      "lat": 52.36861,
+      "lng": 4.88639
+    },
+    {
+      "id": "Q66764684",
+      "name": "Bijlmermuseum",
+      "lat": 52.319214,
+      "lng": 4.976081
+    },
+    {
+      "id": "Q2916386",
+      "name": "Cat Cabinet",
+      "lat": 52.36554,
+      "lng": 4.89158
+    },
+    {
+      "id": "Q75192507",
+      "name": "Circusmuseum",
+      "lat": 52.369001,
+      "lng": 4.893372
+    },
+    {
+      "id": "Q2161858",
+      "name": "Cobra Museum",
+      "lat": 52.303958,
+      "lng": 4.857894
+    },
+    {
+      "id": "Q47472405",
+      "name": "Cromhouthuis",
+      "lat": 52.368611,
+      "lng": 4.886389
+    },
+    {
+      "id": "Q1179733",
+      "name": "De Appel",
+      "lat": 52.352545,
+      "lng": 4.90635
+    },
+    {
+      "id": "Q1208561",
+      "name": "Diamond Museum Amsterdam",
+      "lat": 52.359444,
+      "lng": 4.8825
+    },
+    {
+      "id": "Q28920136",
+      "name": "Dutch Costume Museum",
+      "lat": 52.36732,
+      "lng": 4.887859
+    },
+    {
+      "id": "Q2383603",
+      "name": "Dutch Funeral museum",
+      "lat": 52.34611,
+      "lng": 4.93861
+    },
+    {
+      "id": "Q828307",
+      "name": "Dutch Resistance Museum",
+      "lat": 52.367861,
+      "lng": 4.912667
+    },
+    {
+      "id": "Q41574019",
+      "name": "Electric Ladyland",
+      "lat": 52.375589,
+      "lng": 4.880753
+    },
+    {
+      "id": "Q56452182",
+      "name": "Embassy of the Free Mind",
+      "lat": 52.376593,
+      "lng": 4.887744
+    },
+    {
+      "id": "Q14541115",
+      "name": "Erotic Museum",
+      "lat": 52.374167,
+      "lng": 4.899444
+    },
+    {
+      "id": "Q1538389",
+      "name": "Eye Filmmuseum",
+      "lat": 52.384411,
+      "lng": 4.900594
+    },
+    {
+      "id": "Q110995897",
+      "name": "Fashion for Good",
+      "lat": 52.369372,
+      "lng": 4.891864
+    },
+    {
+      "id": "Q5422840",
+      "name": "Foam Fotografiemuseum Amsterdam",
+      "lat": 52.363889,
+      "lng": 4.893564
+    },
+    {
+      "id": "Q28145622",
+      "name": "G. Perlee Draaiorgelmuseum",
+      "lat": 52.378189,
+      "lng": 4.88303
+    },
+    {
+      "id": "Q115172749",
+      "name": "Groote Museum",
+      "lat": 52.366167,
+      "lng": 4.913139
+    },
+    {
+      "id": "Q1350009",
+      "name": "H'Art Museum",
+      "lat": 52.365,
+      "lng": 4.9025
+    },
+    {
+      "id": "Q3783595",
+      "name": "Hash, Marihuana & Hemp Museum",
+      "lat": 52.371753,
+      "lng": 4.896911
+    },
+    {
+      "id": "Q2087161",
+      "name": "Heineken Experience",
+      "lat": 52.35778,
+      "lng": 4.89111
+    },
+    {
+      "id": "Q2454702",
+      "name": "Hembrug Museum",
+      "lat": 52.423056,
+      "lng": 4.8325
+    },
+    {
+      "id": "Q17744530",
+      "name": "Hermanusje van Alles",
+      "lat": 52.378328,
+      "lng": 4.88263
+    },
+    {
+      "id": "Q1616123",
+      "name": "Het Scheepvaartmuseum",
+      "lat": 52.371389,
+      "lng": 4.914719
+    },
+    {
+      "id": "Q13866204",
+      "name": "Historical house Tuindorp Oostzaan",
+      "lat": 52.413686,
+      "lng": 4.884117
+    },
+    {
+      "id": "Q2206529",
+      "name": "Hollandsche Schouwburg",
+      "lat": 52.3665,
+      "lng": 4.9111
+    },
+    {
+      "id": "Q1576733",
+      "name": "Hortus Botanicus Amsterdam",
+      "lat": 52.366969,
+      "lng": 4.908442
+    },
+    {
+      "id": "Q14544962",
+      "name": "Houseboat Museum",
+      "lat": 52.370176,
+      "lng": 4.882607
+    },
+    {
+      "id": "Q2141968",
+      "name": "Huis Marseille",
+      "lat": 52.36756,
+      "lng": 4.88488
+    },
+    {
+      "id": "Q702726",
+      "name": "Jewish Museum",
+      "lat": 52.3673,
+      "lng": 4.903844
+    },
+    {
+      "id": "Q20621177",
+      "name": "Joods Historisch Kindermuseum",
+      "lat": 52.367086,
+      "lng": 4.903769
+    },
+    {
+      "id": "Q2205322",
+      "name": "Luther Museum Amsterdam",
+      "lat": 52.365278,
+      "lng": 4.909167
+    },
+    {
+      "id": "Q3275333",
+      "name": "Madame Tussauds Amsterdam",
+      "lat": 52.37259,
+      "lng": 4.8926
+    },
+    {
+      "id": "Q122818171",
+      "name": "Mahatma Gandhi Plantsoen",
+      "lat": 52.368194,
+      "lng": 4.913694
+    },
+    {
+      "id": "Q2533298",
+      "name": "Max Euwe Centrum",
+      "lat": 52.362722,
+      "lng": 4.883056
+    },
+    {
+      "id": "Q18169481",
+      "name": "Micropia",
+      "lat": 52.366861,
+      "lng": 4.912583
+    },
+    {
+      "id": "Q26832671",
+      "name": "Moco Museum",
+      "lat": 52.358714,
+      "lng": 4.881892
+    },
+    {
+      "id": "Q1925731",
+      "name": "Molen van Sloten",
+      "lat": 52.341389,
+      "lng": 4.792222
+    },
+    {
+      "id": "Q18169482",
+      "name": "Multatuli Museum",
+      "lat": 52.377444,
+      "lng": 4.891083
+    },
+    {
+      "id": "Q2787871",
+      "name": "Museum Amsterdam-Noord",
+      "lat": 52.38862,
+      "lng": 4.92685
+    },
+    {
+      "id": "Q15991959",
+      "name": "Museum CRASH '40-'45",
+      "lat": 52.268694,
+      "lng": 4.734656
+    },
+    {
+      "id": "Q372829",
+      "name": "Museum Geelvinck-Hinlopen",
+      "lat": 52.36467,
+      "lng": 4.89463
+    },
+    {
+      "id": "Q93137985",
+      "name": "Museum Het Broekerhuis",
+      "lat": 52.354861,
+      "lng": 4.855083
+    },
+    {
+      "id": "Q113759644",
+      "name": "Museum Het Schip",
+      "lat": 52.390514,
+      "lng": 4.873233
+    },
+    {
+      "id": "Q18286337",
+      "name": "Museum house Van Eesteren",
+      "lat": 52.37935,
+      "lng": 4.828824
+    },
+    {
+      "id": "Q2514360",
+      "name": "Museum Jan van der Togt",
+      "lat": 52.3023,
+      "lng": 4.8466
+    },
+    {
+      "id": "Q2574390",
+      "name": "Museum of the Canals,  Amsterdam",
+      "lat": 52.367882,
+      "lng": 4.886241
+    },
+    {
+      "id": "Q2191110",
+      "name": "Museum Van Loon",
+      "lat": 52.36333,
+      "lng": 4.89278
+    },
+    {
+      "id": "Q138717595",
+      "name": "Museum Villa",
+      "lat": 52.386138,
+      "lng": 4.875298
+    },
+    {
+      "id": "Q2480545",
+      "name": "Museum Vrolik",
+      "lat": 52.2944,
+      "lng": 4.960363
+    },
+    {
+      "id": "Q20970639",
+      "name": "Museum Weesp",
+      "lat": 52.306764,
+      "lng": 5.042767
+    },
+    {
+      "id": "Q1886176",
+      "name": "Museum Willet-Holthuysen",
+      "lat": 52.36556,
+      "lng": 4.89917
+    },
+    {
+      "id": "Q26822174",
+      "name": "National Holocaust Museum",
+      "lat": 52.366861,
+      "lng": 4.911111
+    },
+    {
+      "id": "Q713124",
+      "name": "Natura Artis Magistra",
+      "lat": 52.366111,
+      "lng": 4.916667
+    },
+    {
+      "id": "Q1422000",
+      "name": "NEMO Science Center",
+      "lat": 52.374106,
+      "lng": 4.912392
+    },
+    {
+      "id": "Q1419675",
+      "name": "Nieuwe Kerk",
+      "lat": 52.373889,
+      "lng": 4.891944
+    },
+    {
+      "id": "Q10611062",
+      "name": "Orange Football Museum",
+      "lat": 52.367229,
+      "lng": 4.89279
+    },
+    {
+      "id": "Q623558",
+      "name": "Oude Kerk",
+      "lat": 52.374167,
+      "lng": 4.898056
+    },
+    {
+      "id": "Q493160",
+      "name": "Our Lord in the Attic Museum",
+      "lat": 52.375076,
+      "lng": 4.899363
+    },
+    {
+      "id": "Q56459179",
+      "name": "Outsider Art Museum",
+      "lat": 52.365312,
+      "lng": 4.902542
+    },
+    {
+      "id": "Q924769",
+      "name": "Pampus",
+      "lat": 52.364722,
+      "lng": 5.068889
+    },
+    {
+      "id": "Q15124806",
+      "name": "Pianola museum",
+      "lat": 52.378604,
+      "lng": 4.883593
+    },
+    {
+      "id": "Q2218690",
+      "name": "Pijpenkabinet & Smokiana",
+      "lat": 52.363861,
+      "lng": 4.88575
+    },
+    {
+      "id": "Q1853707",
+      "name": "Portuguese Synagogue",
+      "lat": 52.3675,
+      "lng": 4.905278
+    },
+    {
+      "id": "Q277316",
+      "name": "Rembrandt House Museum",
+      "lat": 52.369444,
+      "lng": 4.901389
+    },
+    {
+      "id": "Q190804",
+      "name": "Rijksmuseum",
+      "lat": 52.36,
+      "lng": 4.885278
+    },
+    {
+      "id": "Q113006081",
+      "name": "Rijksmuseum Muiderslot",
+      "lat": 52.334231,
+      "lng": 5.071806
+    },
+    {
+      "id": "Q3329876",
+      "name": "Sexmuseum Amsterdam",
+      "lat": 52.376583,
+      "lng": 4.897278
+    },
+    {
+      "id": "Q2370540",
+      "name": "Six Collection",
+      "lat": 52.36505,
+      "lng": 4.90067
+    },
+    {
+      "id": "Q924335",
+      "name": "Stedelijk Museum Amsterdam",
+      "lat": 52.358011,
+      "lng": 4.879755
+    },
+    {
+      "id": "Q42175133",
+      "name": "Stedelijk Museum building",
+      "lat": 52.358078,
+      "lng": 4.879652
+    },
+    {
+      "id": "Q110995934",
+      "name": "Stichting Levend Paardenmuseum Hollandsche Manege",
+      "lat": 52.36152,
+      "lng": 4.87181
+    },
+    {
+      "id": "Q136419680",
+      "name": "Suriname Museum",
+      "lat": 52.366097,
+      "lng": 4.927933
+    },
+    {
+      "id": "Q70328225",
+      "name": "The small museum",
+      "lat": 52.362319,
+      "lng": 4.883911
+    },
+    {
+      "id": "Q113947640",
+      "name": "The Upside Down Amsterdam",
+      "lat": 52.339915,
+      "lng": 4.892878
+    },
+    {
+      "id": "Q17146713",
+      "name": "Torture Museum, Amsterdam",
+      "lat": 52.36732,
+      "lng": 4.890555
+    },
+    {
+      "id": "Q18772132",
+      "name": "Tsaar Peterhuisje",
+      "lat": 52.43732,
+      "lng": 4.82341
+    },
+    {
+      "id": "Q224124",
+      "name": "Van Gogh Museum",
+      "lat": 52.358333,
+      "lng": 4.881111
+    },
+    {
+      "id": "Q2723520",
+      "name": "Vondelparkpaviljoen",
+      "lat": 52.36083,
+      "lng": 4.875
+    },
+    {
+      "id": "Q2633772",
+      "name": "Weesper Automaten Kabinet",
+      "lat": 52.30694,
+      "lng": 5.04306
+    },
+    {
+      "id": "Q1131589",
+      "name": "Wereldmuseum Amsterdam",
+      "lat": 52.3625,
+      "lng": 4.921111
+    },
+    {
+      "id": "Q17292023",
+      "name": "Willem Witsenhuis",
+      "lat": 52.359583,
+      "lng": 4.924139
+    },
+    {
+      "id": "Q15964404",
+      "name": "World of Ajax",
+      "lat": 52.3127,
+      "lng": 4.94249
+    }
+  ]
+}

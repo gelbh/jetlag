@@ -1,0 +1,24 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q130261980",
+      "name": "Marina Bay Golf Course",
+      "lat": 1.292876,
+      "lng": 103.871369
+    },
+    {
+      "id": "Q2290074",
+      "name": "Sentosa Golf Club",
+      "lat": 1.2439,
+      "lng": 103.8294
+    }
+  ]
+}

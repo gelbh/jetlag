@@ -1,0 +1,36 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q994229",
+      "name": "Bruparck",
+      "lat": 50.895035,
+      "lng": 4.339251
+    },
+    {
+      "id": "Q124477722",
+      "name": "LEGO Discovery Centre Brussels",
+      "lat": 50.878875,
+      "lng": 4.373008
+    },
+    {
+      "id": "Q130746173",
+      "name": "Meli Meise",
+      "lat": 50.919367,
+      "lng": 4.339364
+    },
+    {
+      "id": "Q3074870",
+      "name": "Midi Fair",
+      "lat": 50.8405,
+      "lng": 4.34043
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q2216414",
+      "name": "Golfclub Houtrak",
+      "lat": 52.405556,
+      "lng": 4.727778
+    }
+  ]
+}

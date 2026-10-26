@@ -1,0 +1,17 @@
+Brussels-Capital Region pack geo
+
+Boundaries
+- Commune polygons via OpenStreetMap / Nominatim (ODbL).
+- Display names: French commune names commonly used in BCR; City of Brussels for Bruxelles-Ville.
+
+POI
+- Wikidata Query Service (CC0).
+
+Sea level seed
+- Open-Meteo elevation API.
+
+Coastline / international border
+- Inland metro stubs (empty segments).
+
+GTFS
+- Deferred in v1 (stations use Overpass until a trustworthy STIB/MIVB static feed is registered).

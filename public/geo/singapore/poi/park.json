@@ -1,0 +1,582 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q140133056",
+      "name": "ActiveSG Park @ Jurong Lake Gardens",
+      "lat": 1.330525,
+      "lng": 103.726042
+    },
+    {
+      "id": "Q4683775",
+      "name": "Admiralty Park",
+      "lat": 1.446392,
+      "lng": 103.780653
+    },
+    {
+      "id": "Q31879038",
+      "name": "Aljunied Park",
+      "lat": 1.330278,
+      "lng": 103.887778
+    },
+    {
+      "id": "Q31883376",
+      "name": "Ang Mo Kio Park",
+      "lat": 1.360278,
+      "lng": 103.848889
+    },
+    {
+      "id": "Q4761854",
+      "name": "Ang Mo Kio Town Garden West",
+      "lat": 1.374369,
+      "lng": 103.843433
+    },
+    {
+      "id": "Q131766760",
+      "name": "Ann Siang Hill Park",
+      "lat": 1.28082,
+      "lng": 103.846432
+    },
+    {
+      "id": "Q125996757",
+      "name": "Bedok Reservoir Park",
+      "lat": 1.342131,
+      "lng": 103.925892
+    },
+    {
+      "id": "Q4879350",
+      "name": "Bedok Town Park",
+      "lat": 1.33333,
+      "lng": 103.933
+    },
+    {
+      "id": "Q60764847",
+      "name": "Bidadari Garden",
+      "lat": 1.339694,
+      "lng": 103.876861
+    },
+    {
+      "id": "Q60764291",
+      "name": "Bidadari Park",
+      "lat": 1.339833,
+      "lng": 103.873333
+    },
+    {
+      "id": "Q113800717",
+      "name": "Bird Paradise",
+      "lat": 1.407471,
+      "lng": 103.781823
+    },
+    {
+      "id": "Q866299",
+      "name": "Bishan-Ang Mo Kio Park",
+      "lat": 1.366667,
+      "lng": 103.833333
+    },
+    {
+      "id": "Q4986869",
+      "name": "Bukit Batok Nature Park",
+      "lat": 1.348889,
+      "lng": 103.765278
+    },
+    {
+      "id": "Q4986872",
+      "name": "Bukit Batok Town Park",
+      "lat": 1.35591,
+      "lng": 103.755
+    },
+    {
+      "id": "Q5100456",
+      "name": "Chinese Garden, Singapore",
+      "lat": 1.338611,
+      "lng": 103.73
+    },
+    {
+      "id": "Q5103411",
+      "name": "Choa Chu Kang Park",
+      "lat": 1.3885,
+      "lng": 103.747
+    },
+    {
+      "id": "Q5130451",
+      "name": "CleanTech Park",
+      "lat": 1.351881,
+      "lng": 103.693233
+    },
+    {
+      "id": "Q34928409",
+      "name": "Clementi Park",
+      "lat": 1.3275,
+      "lng": 103.768056
+    },
+    {
+      "id": "Q5131478",
+      "name": "Clementi Woods Park",
+      "lat": 1.29849,
+      "lng": 103.76837
+    },
+    {
+      "id": "Q15213898",
+      "name": "Dhoby Ghaut Green",
+      "lat": 1.298611,
+      "lng": 103.845
+    },
+    {
+      "id": "Q140373060",
+      "name": "Dog Run",
+      "lat": 1.333286,
+      "lng": 103.726341
+    },
+    {
+      "id": "Q134389649",
+      "name": "Duxton Plain Park",
+      "lat": 1.2785,
+      "lng": 103.84137
+    },
+    {
+      "id": "Q3521764",
+      "name": "East Coast Park",
+      "lat": 1.303956,
+      "lng": 103.926373
+    },
+    {
+      "id": "Q65118363",
+      "name": "Eco-Link@BKE",
+      "lat": 1.356661,
+      "lng": 103.78356
+    },
+    {
+      "id": "Q5399032",
+      "name": "Esplanade Park",
+      "lat": 1.2899,
+      "lng": 103.854
+    },
+    {
+      "id": "Q49488526",
+      "name": "Farrer Park Field",
+      "lat": 1.312222,
+      "lng": 103.848889
+    },
+    {
+      "id": "Q1438470",
+      "name": "Fort Canning Hill",
+      "lat": 1.29444,
+      "lng": 103.847
+    },
+    {
+      "id": "Q630135",
+      "name": "Gardens by the Bay",
+      "lat": 1.283319,
+      "lng": 103.86527
+    },
+    {
+      "id": "Q1018484",
+      "name": "Haw Par Villa",
+      "lat": 1.284167,
+      "lng": 103.782222
+    },
+    {
+      "id": "Q125989678",
+      "name": "Heritage Gardens",
+      "lat": 1.283085,
+      "lng": 103.863543
+    },
+    {
+      "id": "Q28403800",
+      "name": "Hindhede Nature Park",
+      "lat": 1.34874,
+      "lng": 103.7758
+    },
+    {
+      "id": "Q5895617",
+      "name": "Hong Lim Park",
+      "lat": 1.286592,
+      "lng": 103.846394
+    },
+    {
+      "id": "Q5906603",
+      "name": "HortPark",
+      "lat": 1.278,
+      "lng": 103.801
+    },
+    {
+      "id": "Q6003536",
+      "name": "Imbiah Lookout",
+      "lat": 1.256,
+      "lng": 103.815
+    },
+    {
+      "id": "Q6088537",
+      "name": "Istana Park",
+      "lat": 1.299444,
+      "lng": 103.843611
+    },
+    {
+      "id": "Q98270252",
+      "name": "Jacob Ballas Children's Garden",
+      "lat": 1.320783,
+      "lng": 103.817952
+    },
+    {
+      "id": "Q139913086",
+      "name": "Jurong Lake Gardens",
+      "lat": 1.336321,
+      "lng": 103.728793
+    },
+    {
+      "id": "Q49509081",
+      "name": "Jurong Park",
+      "lat": 1.326944,
+      "lng": 103.728333
+    },
+    {
+      "id": "Q136102015",
+      "name": "Kallang Park Connector",
+      "lat": 1.320921,
+      "lng": 103.867169
+    },
+    {
+      "id": "Q6353557",
+      "name": "Kallang Riverside Park",
+      "lat": 1.307,
+      "lng": 103.866
+    },
+    {
+      "id": "Q49509282",
+      "name": "Kampong Java Park",
+      "lat": 1.310833,
+      "lng": 103.846111
+    },
+    {
+      "id": "Q647955",
+      "name": "Kent Ridge Park",
+      "lat": 1.28376,
+      "lng": 103.791
+    },
+    {
+      "id": "Q27963552",
+      "name": "Kranji Reservoir Park",
+      "lat": 1.43972,
+      "lng": 103.73778
+    },
+    {
+      "id": "Q139934706",
+      "name": "Lakeside Garden",
+      "lat": 1.334522,
+      "lng": 103.727105
+    },
+    {
+      "id": "Q28404017",
+      "name": "Lower Peirce Reservoir Park",
+      "lat": 1.3712,
+      "lng": 103.8244
+    },
+    {
+      "id": "Q49521725",
+      "name": "Marina Park",
+      "lat": 1.299722,
+      "lng": 103.864722
+    },
+    {
+      "id": "Q3082977",
+      "name": "Marine Life Park",
+      "lat": 1.2587,
+      "lng": 103.8186
+    },
+    {
+      "id": "Q6808067",
+      "name": "MegaZip Adventure Park",
+      "lat": 1.255941,
+      "lng": 103.812297
+    },
+    {
+      "id": "Q6920714",
+      "name": "Mount Faber",
+      "lat": 1.272222,
+      "lng": 103.820833
+    },
+    {
+      "id": "Q16259504",
+      "name": "New World Amusement Park",
+      "lat": 1.310278,
+      "lng": 103.857917
+    },
+    {
+      "id": "Q2234723",
+      "name": "Night Safari",
+      "lat": 1.404015,
+      "lng": 103.789223
+    },
+    {
+      "id": "Q14874458",
+      "name": "NTUC Downtown East",
+      "lat": 1.37639,
+      "lng": 103.954
+    },
+    {
+      "id": "Q7142176",
+      "name": "Pasir Ris Park",
+      "lat": 1.38148,
+      "lng": 103.951
+    },
+    {
+      "id": "Q7142179",
+      "name": "Pasir Ris Town Park",
+      "lat": 1.373306,
+      "lng": 103.952389
+    },
+    {
+      "id": "Q7158006",
+      "name": "Pearl's Hill City Park",
+      "lat": 1.2845,
+      "lng": 103.84
+    },
+    {
+      "id": "Q49542178",
+      "name": "Phoenix Park",
+      "lat": 1.376389,
+      "lng": 103.756389
+    },
+    {
+      "id": "Q7260160",
+      "name": "Punggol Point Park",
+      "lat": 1.421139,
+      "lng": 103.910833
+    },
+    {
+      "id": "Q15269248",
+      "name": "Punggol Waterway Park",
+      "lat": 1.414444,
+      "lng": 103.903056
+    },
+    {
+      "id": "Q115959798",
+      "name": "Punggol Zoo",
+      "lat": 1.411917,
+      "lng": 103.911667
+    },
+    {
+      "id": "Q7282591",
+      "name": "Raffles Place Park",
+      "lat": 1.28388,
+      "lng": 103.852
+    },
+    {
+      "id": "Q134437707",
+      "name": "Rainforest Wild Asia",
+      "lat": 1.409236,
+      "lng": 103.78093
+    },
+    {
+      "id": "Q7337785",
+      "name": "River Wonders",
+      "lat": 1.403873,
+      "lng": 103.790744
+    },
+    {
+      "id": "Q49559451",
+      "name": "Seletar Reservoir Park",
+      "lat": 1.399722,
+      "lng": 103.806944
+    },
+    {
+      "id": "Q7449157",
+      "name": "Sembawang Hot Spring Park",
+      "lat": 1.43446,
+      "lng": 103.822
+    },
+    {
+      "id": "Q10991930",
+      "name": "Sembawang Park",
+      "lat": 1.461047,
+      "lng": 103.836522
+    },
+    {
+      "id": "Q17053618",
+      "name": "Sengkang Riverside Park",
+      "lat": 1.398194,
+      "lng": 103.883889
+    },
+    {
+      "id": "Q7450580",
+      "name": "Sengkang Sculpture Park",
+      "lat": 1.39494,
+      "lng": 103.897
+    },
+    {
+      "id": "Q49559730",
+      "name": "Serangoon Park",
+      "lat": 1.350556,
+      "lng": 103.866944
+    },
+    {
+      "id": "Q3046409",
+      "name": "Singapore Botanic Gardens",
+      "lat": 1.3151,
+      "lng": 103.8162
+    },
+    {
+      "id": "Q109283876",
+      "name": "Singapore Miniature Zoo",
+      "lat": 1.2928,
+      "lng": 103.7675
+    },
+    {
+      "id": "Q55756195",
+      "name": "Singapore Oceanarium",
+      "lat": 1.258611,
+      "lng": 103.818611
+    },
+    {
+      "id": "Q2709506",
+      "name": "Singapore Zoo",
+      "lat": 1.404709,
+      "lng": 103.79105
+    },
+    {
+      "id": "Q19840828",
+      "name": "Sisters' Islands Marine Park",
+      "lat": 1.215,
+      "lng": 103.833
+    },
+    {
+      "id": "Q7548200",
+      "name": "Snow City",
+      "lat": 1.335167,
+      "lng": 103.735194
+    },
+    {
+      "id": "Q17054244",
+      "name": "Sun Plaza Park",
+      "lat": 1.359126,
+      "lng": 103.943891
+    },
+    {
+      "id": "Q24943931",
+      "name": "Tampines Eco Green",
+      "lat": 1.3638,
+      "lng": 103.9482
+    },
+    {
+      "id": "Q65066849",
+      "name": "Tang Dynasty City",
+      "lat": 1.326472,
+      "lng": 103.726111
+    },
+    {
+      "id": "Q7683390",
+      "name": "Tanjong Pagar Park",
+      "lat": 1.276528,
+      "lng": 103.846667
+    },
+    {
+      "id": "Q7697797",
+      "name": "Telok Blangah Hill Park",
+      "lat": 1.278972,
+      "lng": 103.81018
+    },
+    {
+      "id": "Q7808728",
+      "name": "Tiong Bahru Park",
+      "lat": 1.28737,
+      "lng": 103.824684
+    },
+    {
+      "id": "Q7811341",
+      "name": "Toa Payoh Town Park",
+      "lat": 1.33057,
+      "lng": 103.84778
+    },
+    {
+      "id": "Q2125883",
+      "name": "Underwater World, Singapore",
+      "lat": 1.258567,
+      "lng": 103.811211
+    },
+    {
+      "id": "Q1186714",
+      "name": "Universal Studios Singapore",
+      "lat": 1.255,
+      "lng": 103.821667
+    },
+    {
+      "id": "Q7898851",
+      "name": "Upper Peirce Reservoir Park",
+      "lat": 1.372917,
+      "lng": 103.811111
+    },
+    {
+      "id": "Q7968476",
+      "name": "War Memorial Park, Singapore",
+      "lat": 1.292917,
+      "lng": 103.854833
+    },
+    {
+      "id": "Q48734687",
+      "name": "Waterboat House Garden",
+      "lat": 1.287306,
+      "lng": 103.853389
+    },
+    {
+      "id": "Q7984822",
+      "name": "West Coast Park",
+      "lat": 1.29544,
+      "lng": 103.76376
+    },
+    {
+      "id": "Q8000861",
+      "name": "Wild Wild Wet",
+      "lat": 1.37722,
+      "lng": 103.954
+    },
+    {
+      "id": "Q49582823",
+      "name": "Woodlands Garden",
+      "lat": 1.438611,
+      "lng": 103.77
+    },
+    {
+      "id": "Q28404036",
+      "name": "Woodlands Waterfront Park",
+      "lat": 1.4527,
+      "lng": 103.7786
+    },
+    {
+      "id": "Q28404039",
+      "name": "Yishun Neighbourhood Park",
+      "lat": 1.4379,
+      "lng": 103.8331
+    },
+    {
+      "id": "Q8053846",
+      "name": "Yishun Park",
+      "lat": 1.424289,
+      "lng": 103.842431
+    },
+    {
+      "id": "Q28404037",
+      "name": "Yishun Pond Park",
+      "lat": 1.427889,
+      "lng": 103.839722
+    },
+    {
+      "id": "Q8059236",
+      "name": "Youth Olympic Park",
+      "lat": 1.289,
+      "lng": 103.8604
+    },
+    {
+      "id": "Q107042863",
+      "name": "Zhongshan Park (Singapore)",
+      "lat": 1.327269,
+      "lng": 103.847057
+    }
+  ]
+}

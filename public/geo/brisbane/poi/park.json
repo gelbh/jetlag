@@ -1,0 +1,456 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q4733588",
+      "name": "Alma Park Zoo",
+      "lat": -27.2267,
+      "lng": 152.983
+    },
+    {
+      "id": "Q21925205",
+      "name": "Beachmere Conservation Park",
+      "lat": -27.109722,
+      "lng": 153.066667
+    },
+    {
+      "id": "Q21925213",
+      "name": "Bird Island Conservation Park",
+      "lat": -27.508611,
+      "lng": 153.385833
+    },
+    {
+      "id": "Q4950819",
+      "name": "Bowen Park",
+      "lat": -27.4487,
+      "lng": 153.03
+    },
+    {
+      "id": "Q141606010",
+      "name": "Bribie Island Butterfly House",
+      "lat": -27.079869,
+      "lng": 153.178972
+    },
+    {
+      "id": "Q917672",
+      "name": "Brisbane Botanic Gardens, Mount Coot-tha",
+      "lat": -27.4765,
+      "lng": 152.976
+    },
+    {
+      "id": "Q21925191",
+      "name": "Buckleys Hole Conservation Park",
+      "lat": -27.09674,
+      "lng": 153.17052
+    },
+    {
+      "id": "Q21925179",
+      "name": "Bullock Creek Conservation Park",
+      "lat": -27.014444,
+      "lng": 153.071944
+    },
+    {
+      "id": "Q21925187",
+      "name": "Byron Creek Conservation Park",
+      "lat": -27.1025,
+      "lng": 152.738056
+    },
+    {
+      "id": "Q21929675",
+      "name": "Cape Moreton Conservation Park",
+      "lat": -27.031667,
+      "lng": 153.465556
+    },
+    {
+      "id": "Q21929677",
+      "name": "Carbrook Wetlands Conservation Park Number One",
+      "lat": -27.668056,
+      "lng": 153.261667
+    },
+    {
+      "id": "Q917681",
+      "name": "City Botanic Gardens",
+      "lat": -27.4747,
+      "lng": 153.03
+    },
+    {
+      "id": "Q21973155",
+      "name": "Curlew Park",
+      "lat": -27.32504,
+      "lng": 153.0729
+    },
+    {
+      "id": "Q1272834",
+      "name": "D'Aguilar National Park",
+      "lat": -27.308889,
+      "lng": 152.777778
+    },
+    {
+      "id": "Q21929662",
+      "name": "Daisy Hill Conservation Park",
+      "lat": -27.625833,
+      "lng": 153.1675
+    },
+    {
+      "id": "Q19872742",
+      "name": "Davies Park",
+      "lat": -27.4786,
+      "lng": 153.005
+    },
+    {
+      "id": "Q21928664",
+      "name": "Denmark Hill Conservation Park",
+      "lat": -27.621111,
+      "lng": 152.755556
+    },
+    {
+      "id": "Q21963476",
+      "name": "Downey Park",
+      "lat": -27.44119,
+      "lng": 153.02431
+    },
+    {
+      "id": "Q48642",
+      "name": "Fort Lytton National Park",
+      "lat": -27.412222,
+      "lng": 153.15
+    },
+    {
+      "id": "Q1284505",
+      "name": "Freshwater National Park",
+      "lat": -27.175556,
+      "lng": 152.989722
+    },
+    {
+      "id": "Q21930695",
+      "name": "Goat Island Conservation Park",
+      "lat": -27.516111,
+      "lng": 153.384444
+    },
+    {
+      "id": "Q21930677",
+      "name": "Hays Inlet Conservation Park One",
+      "lat": -27.248611,
+      "lng": 153.0575
+    },
+    {
+      "id": "Q21930675",
+      "name": "Hays Inlet Conservation Park Two",
+      "lat": -27.230556,
+      "lng": 153.066944
+    },
+    {
+      "id": "Q125450412",
+      "name": "Heinrich Gerns Park",
+      "lat": -27.380236,
+      "lng": 153.048533
+    },
+    {
+      "id": "Q21973156",
+      "name": "Hutchison Park",
+      "lat": -27.32631,
+      "lng": 153.08063
+    },
+    {
+      "id": "Q2837507",
+      "name": "IndigiScapes Centre",
+      "lat": -27.547684,
+      "lng": 153.217209
+    },
+    {
+      "id": "Q110641395",
+      "name": "Ipswich Nature Centre",
+      "lat": -27.61891,
+      "lng": 152.76717
+    },
+    {
+      "id": "Q21930870",
+      "name": "Ipswich Pteropus Conservation Park",
+      "lat": -27.60313,
+      "lng": 152.74802
+    },
+    {
+      "id": "Q6115272",
+      "name": "Jack Speare Park",
+      "lat": -27.5023,
+      "lng": 152.981
+    },
+    {
+      "id": "Q21972065",
+      "name": "JC Trotter Memorial Park",
+      "lat": -27.55169,
+      "lng": 153.1722
+    },
+    {
+      "id": "Q6352870",
+      "name": "Kalinga Park",
+      "lat": -27.4067,
+      "lng": 153.052
+    },
+    {
+      "id": "Q6368869",
+      "name": "Karawatha Forest",
+      "lat": -27.63,
+      "lng": 153.08
+    },
+    {
+      "id": "Q68884392",
+      "name": "Kholo Botanic Gardens",
+      "lat": -27.567107,
+      "lng": 152.741099
+    },
+    {
+      "id": "Q19462763",
+      "name": "Kianawah Park",
+      "lat": -27.477,
+      "lng": 153.125
+    },
+    {
+      "id": "Q21930846",
+      "name": "King Island Conservation Park",
+      "lat": -27.456944,
+      "lng": 153.233889
+    },
+    {
+      "id": "Q21930842",
+      "name": "Koala Bushland National Park",
+      "lat": -27.63,
+      "lng": 153.198611
+    },
+    {
+      "id": "Q21973479",
+      "name": "Mala Park",
+      "lat": -27.33349,
+      "lng": 152.76307
+    },
+    {
+      "id": "Q59569774",
+      "name": "Moora Park",
+      "lat": -27.324645,
+      "lng": 153.084844
+    },
+    {
+      "id": "Q6911451",
+      "name": "Moreton Bay Marine Park",
+      "lat": -27.25,
+      "lng": 153.25
+    },
+    {
+      "id": "Q3385028",
+      "name": "Moreton Island National Park",
+      "lat": -27.0525,
+      "lng": 153.391
+    },
+    {
+      "id": "Q18166159",
+      "name": "Mowbray Park, Brisbane",
+      "lat": -27.4786,
+      "lng": 153.044
+    },
+    {
+      "id": "Q21932664",
+      "name": "Mud Island Conservation Park",
+      "lat": -27.338889,
+      "lng": 153.251111
+    },
+    {
+      "id": "Q6941170",
+      "name": "Musgrave Park, Brisbane",
+      "lat": -27.479,
+      "lng": 153.017
+    },
+    {
+      "id": "Q21932678",
+      "name": "Myora Conservation Park",
+      "lat": -27.47565,
+      "lng": 153.41347
+    },
+    {
+      "id": "Q1965237",
+      "name": "Naree Budjong Djara National Park",
+      "lat": -27.532222,
+      "lng": 153.4625
+    },
+    {
+      "id": "Q7007567",
+      "name": "New Farm Park",
+      "lat": -27.469,
+      "lng": 153.051
+    },
+    {
+      "id": "Q21934723",
+      "name": "Ningi Creek Conservation Park",
+      "lat": -27.055833,
+      "lng": 153.051944
+    },
+    {
+      "id": "Q21924244",
+      "name": "Oakman Park",
+      "lat": -27.48911,
+      "lng": 152.98547
+    },
+    {
+      "id": "Q21924243",
+      "name": "Perrin Park",
+      "lat": -27.49168,
+      "lng": 152.99056
+    },
+    {
+      "id": "Q21971742",
+      "name": "Pinklands",
+      "lat": -27.56665,
+      "lng": 153.27722
+    },
+    {
+      "id": "Q7270765",
+      "name": "Queens Gardens, Brisbane",
+      "lat": -27.4723,
+      "lng": 153.024
+    },
+    {
+      "id": "Q24089865",
+      "name": "Queens Park, Ipswich, Queensland",
+      "lat": -27.6177,
+      "lng": 152.7682
+    },
+    {
+      "id": "Q24185354",
+      "name": "Raymond Park, Brisbane",
+      "lat": -27.4805,
+      "lng": 153.039013
+    },
+    {
+      "id": "Q69388013",
+      "name": "Redcliffe Botanic Gardens",
+      "lat": -27.231598,
+      "lng": 153.099182
+    },
+    {
+      "id": "Q7355564",
+      "name": "Rocks Riverside Park",
+      "lat": -27.5429,
+      "lng": 152.961
+    },
+    {
+      "id": "Q112245391",
+      "name": "Rocksberg Park Heritage Reserve",
+      "lat": -27.094429,
+      "lng": 152.837195
+    },
+    {
+      "id": "Q7361492",
+      "name": "Roma Street Parkland",
+      "lat": -27.463,
+      "lng": 153.019
+    },
+    {
+      "id": "Q21935923",
+      "name": "Sheep Station Creek Conservation Park",
+      "lat": -27.13,
+      "lng": 152.899444
+    },
+    {
+      "id": "Q18754813",
+      "name": "Sherwood Arboretum",
+      "lat": -27.5311,
+      "lng": 152.975
+    },
+    {
+      "id": "Q3492231",
+      "name": "South Bank Parklands",
+      "lat": -27.4787,
+      "lng": 153.023
+    },
+    {
+      "id": "Q21935911",
+      "name": "Springwood Conservation Park",
+      "lat": -27.624722,
+      "lng": 153.143611
+    },
+    {
+      "id": "Q2316148",
+      "name": "St Helena Island National Park",
+      "lat": -27.393333,
+      "lng": 153.231667
+    },
+    {
+      "id": "Q2400166",
+      "name": "Teerk Roo Ra National Park",
+      "lat": -27.496389,
+      "lng": 153.353611
+    },
+    {
+      "id": "Q21935841",
+      "name": "Tingalpa Creek Conservation Park",
+      "lat": -27.494167,
+      "lng": 153.186111
+    },
+    {
+      "id": "Q21935893",
+      "name": "Toohey Forest Conservation Park",
+      "lat": -27.543611,
+      "lng": 153.048889
+    },
+    {
+      "id": "Q21935855",
+      "name": "Toorbul Conservation Park",
+      "lat": -27.037222,
+      "lng": 153.027778
+    },
+    {
+      "id": "Q1424489",
+      "name": "Venman Bushland National Park",
+      "lat": -27.6275,
+      "lng": 153.200278
+    },
+    {
+      "id": "Q21898299",
+      "name": "Victoria Park",
+      "lat": -27.45,
+      "lng": 153.016667
+    },
+    {
+      "id": "Q21030032",
+      "name": "Victoria Park, Brisbane",
+      "lat": -27.4546,
+      "lng": 153.0248
+    },
+    {
+      "id": "Q21935878",
+      "name": "Waraba Creek Conservation Park",
+      "lat": -27.049167,
+      "lng": 152.803889
+    },
+    {
+      "id": "Q7998390",
+      "name": "Wickham Park",
+      "lat": -27.4657,
+      "lng": 153.022
+    },
+    {
+      "id": "Q23003244",
+      "name": "Windsor War Memorial Park",
+      "lat": -27.4308,
+      "lng": 153.0322
+    },
+    {
+      "id": "Q21971739",
+      "name": "Yeo Park",
+      "lat": -27.59015,
+      "lng": 153.30794
+    },
+    {
+      "id": "Q8052644",
+      "name": "Yeronga Park",
+      "lat": -27.52,
+      "lng": 153.023
+    }
+  ]
+}

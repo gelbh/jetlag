@@ -1,0 +1,30 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q174194",
+      "name": "Archerfield Airport",
+      "lat": -27.570278,
+      "lng": 153.008056
+    },
+    {
+      "id": "Q45523",
+      "name": "Brisbane Airport",
+      "lat": -27.383333,
+      "lng": 153.118333
+    },
+    {
+      "id": "Q7305556",
+      "name": "Redcliffe Airport",
+      "lat": -27.206667,
+      "lng": 153.068333
+    }
+  ]
+}

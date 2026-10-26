@@ -1,0 +1,360 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.0327,
+    "west": 16.7973,
+    "north": 51.2201,
+    "east": 17.1862
+  },
+  "places": [
+    {
+      "id": "Q18420920",
+      "name": "Africarium",
+      "lat": 51.104679,
+      "lng": 17.074388
+    },
+    {
+      "id": "Q11811327",
+      "name": "Anders Park in Wrocław",
+      "lat": 51.0875,
+      "lng": 17.0303
+    },
+    {
+      "id": "Q16484874",
+      "name": "Aquapark Wrocław",
+      "lat": 51.090833,
+      "lng": 17.0325
+    },
+    {
+      "id": "Q11811307",
+      "name": "Brochowski Park in Wrocław",
+      "lat": 51.06144,
+      "lng": 17.07181
+    },
+    {
+      "id": "Q137179740",
+      "name": "Centrum Południe",
+      "lat": 51.095999,
+      "lng": 17.022083
+    },
+    {
+      "id": "Q11811539",
+      "name": "Eastern Park in Wrocław",
+      "lat": 51.0853,
+      "lng": 17.0831
+    },
+    {
+      "id": "Q30075811",
+      "name": "Fontanna (w parku)",
+      "lat": 51.171833,
+      "lng": 17.115888
+    },
+    {
+      "id": "Q9381064",
+      "name": "Gajowicki Park in Wrocław",
+      "lat": 51.0936,
+      "lng": 16.9967
+    },
+    {
+      "id": "Q30075806",
+      "name": "Glorieta (w parku)",
+      "lat": 51.171398,
+      "lng": 17.119317
+    },
+    {
+      "id": "Q30075280",
+      "name": "Grabiszyński Park",
+      "lat": 51.091153,
+      "lng": 16.979369
+    },
+    {
+      "id": "Q11796752",
+      "name": "Japanese Garden in Wrocław",
+      "lat": 51.1101,
+      "lng": 17.0794
+    },
+    {
+      "id": "Q11811355",
+      "name": "Juliusz Słowacki Park in Wrocław",
+      "lat": 51.1097,
+      "lng": 17.0456
+    },
+    {
+      "id": "Q11811348",
+      "name": "Kasprowicz Park in Wrocław",
+      "lat": 51.1358,
+      "lng": 17.0486
+    },
+    {
+      "id": "Q131741168",
+      "name": "Leonardo da Vinci park",
+      "lat": 51.125332,
+      "lng": 16.96511
+    },
+    {
+      "id": "Q30075410",
+      "name": "Leśnicki Park in Wrocław",
+      "lat": 51.146621,
+      "lng": 16.871319
+    },
+    {
+      "id": "Q11811403",
+      "name": "Maria Dąbrowska Park",
+      "lat": 51.1447,
+      "lng": 17.0447
+    },
+    {
+      "id": "Q11811525",
+      "name": "Millennium Park",
+      "lat": 51.1128,
+      "lng": 16.9383
+    },
+    {
+      "id": "Q30075808",
+      "name": "Mostek (w parku)",
+      "lat": 51.171903,
+      "lng": 17.119494
+    },
+    {
+      "id": "Q11811424",
+      "name": "Nicolaus Copernicus Park",
+      "lat": 51.1047,
+      "lng": 17.0344
+    },
+    {
+      "id": "Q30076472",
+      "name": "ogród szpitala MSWiA",
+      "lat": 51.123799,
+      "lng": 17.036852
+    },
+    {
+      "id": "Q30075734",
+      "name": "Park",
+      "lat": 51.140102,
+      "lng": 17.050721
+    },
+    {
+      "id": "Q11811302",
+      "name": "Park Bieńkowicki",
+      "lat": 51.0494,
+      "lng": 17.0825
+    },
+    {
+      "id": "Q11811303",
+      "name": "Park Biskupiński",
+      "lat": 51.0969,
+      "lng": 17.1025
+    },
+    {
+      "id": "Q11811320",
+      "name": "Park Dąbski",
+      "lat": 51.1011,
+      "lng": 17.0797
+    },
+    {
+      "id": "Q30079221",
+      "name": "Park dworski",
+      "lat": 51.215097,
+      "lng": 16.827062
+    },
+    {
+      "id": "Q11811326",
+      "name": "Park Gajowicki",
+      "lat": 51.0911,
+      "lng": 17.0067
+    },
+    {
+      "id": "Q30075607",
+      "name": "Park Górka Skarbowców (lub Mała Sobótka)",
+      "lat": 51.081958,
+      "lng": 16.996772
+    },
+    {
+      "id": "Q11811328",
+      "name": "Park Grabiszyński",
+      "lat": 51.0881,
+      "lng": 16.9792
+    },
+    {
+      "id": "Q11811365",
+      "name": "Park Kleciński",
+      "lat": 51.0628,
+      "lng": 16.9889
+    },
+    {
+      "id": "Q11811389",
+      "name": "Park Leśnicki",
+      "lat": 51.1494,
+      "lng": 16.8742
+    },
+    {
+      "id": "Q30075407",
+      "name": "Park leśny w Praczach Odrzańskich",
+      "lat": 51.168137,
+      "lng": 16.906549
+    },
+    {
+      "id": "Q111699563",
+      "name": "Park Mamuta we Wrocławiu",
+      "lat": 51.081227,
+      "lng": 16.975518
+    },
+    {
+      "id": "Q11811639",
+      "name": "Park na Niskich Łąkach",
+      "lat": 51.0991,
+      "lng": 17.0596
+    },
+    {
+      "id": "Q30075803",
+      "name": "Park Pawłowicki",
+      "lat": 51.17168,
+      "lng": 17.116688
+    },
+    {
+      "id": "Q11811499",
+      "name": "Park Skowroni",
+      "lat": 51.0814,
+      "lng": 17.0281
+    },
+    {
+      "id": "Q11811501",
+      "name": "Park Stabłowicki",
+      "lat": 51.1597,
+      "lng": 16.8925
+    },
+    {
+      "id": "Q11811504",
+      "name": "Park Staszica in Wrocław",
+      "lat": 51.1242,
+      "lng": 17.0308
+    },
+    {
+      "id": "Q11811511",
+      "name": "Park Strachowicki",
+      "lat": 51.1089,
+      "lng": 16.8986
+    },
+    {
+      "id": "Q122261673",
+      "name": "park w Gądowie",
+      "lat": 51.05367,
+      "lng": 16.91164
+    },
+    {
+      "id": "Q122261060",
+      "name": "park w Sadowicach",
+      "lat": 51.05943,
+      "lng": 16.8112
+    },
+    {
+      "id": "Q30075850",
+      "name": "Park z aleją dojazdową we Wrocławiu",
+      "lat": 51.158088,
+      "lng": 17.033051
+    },
+    {
+      "id": "Q11811571",
+      "name": "Park Złotnicki",
+      "lat": 51.1364,
+      "lng": 16.8803
+    },
+    {
+      "id": "Q122261058",
+      "name": "park, Biskupice Podgórne",
+      "lat": 51.03356,
+      "lng": 16.88204
+    },
+    {
+      "id": "Q11811479",
+      "name": "Popowice Park",
+      "lat": 51.1283,
+      "lng": 16.9969
+    },
+    {
+      "id": "Q11811671",
+      "name": "Saint Edith Stein Park in Wrocław",
+      "lat": 51.1214,
+      "lng": 17.0511
+    },
+    {
+      "id": "Q11811507",
+      "name": "Stanisław Tołpa Park in Wrocław",
+      "lat": 51.12,
+      "lng": 17.0528
+    },
+    {
+      "id": "Q3886511",
+      "name": "Szczytnicki Park",
+      "lat": 51.1139,
+      "lng": 17.0817
+    },
+    {
+      "id": "Q30076580",
+      "name": "Szczytnicki Park in Wrocław",
+      "lat": 51.109248,
+      "lng": 17.082943
+    },
+    {
+      "id": "Q30075508",
+      "name": "Teren zadrzewiony Dworca Górnośląskiego we Wrocławiu",
+      "lat": 51.0982,
+      "lng": 17.042121
+    },
+    {
+      "id": "Q30076805",
+      "name": "terrarium ogrodu zoologicznego we Wrocławiu",
+      "lat": 51.103906,
+      "lng": 17.07162
+    },
+    {
+      "id": "Q11811548",
+      "name": "Western Park in Wrocław",
+      "lat": 51.1308,
+      "lng": 16.9733
+    },
+    {
+      "id": "Q30079274",
+      "name": "Wojnowice Castle Park",
+      "lat": 51.19694,
+      "lng": 16.79806
+    },
+    {
+      "id": "Q3363883",
+      "name": "Wrocław South Park",
+      "lat": 51.077,
+      "lng": 17.0109
+    },
+    {
+      "id": "Q3886274",
+      "name": "Wrocław University Botanical Garden",
+      "lat": 51.116111,
+      "lng": 17.0475
+    },
+    {
+      "id": "Q220237",
+      "name": "Wrocław Zoological Garden",
+      "lat": 51.104708,
+      "lng": 17.070752
+    },
+    {
+      "id": "Q9381091",
+      "name": "Wzgórze Słowiańskie",
+      "lat": 51.1249,
+      "lng": 17.0437
+    },
+    {
+      "id": "Q30075421",
+      "name": "Zieleń parkowa",
+      "lat": 51.128411,
+      "lng": 16.983582
+    },
+    {
+      "id": "Q136218873",
+      "name": "zieleniec przy ulicy Przestrzennej we Wrocławiu",
+      "lat": 51.089344,
+      "lng": 17.039661
+    }
+  ]
+}

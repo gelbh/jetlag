@@ -1,0 +1,144 @@
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q4879346",
+      "name": "Bedok Reservoir",
+      "lat": 1.342222,
+      "lng": 103.925
+    },
+    {
+      "id": "Q5071991",
+      "name": "Changi Creek Reservoir",
+      "lat": 1.386389,
+      "lng": 103.995
+    },
+    {
+      "id": "Q126002799",
+      "name": "Dragonfly Lake",
+      "lat": 1.281569,
+      "lng": 103.862233
+    },
+    {
+      "id": "Q5470891",
+      "name": "Fort Canning Reservoir",
+      "lat": 1.293611,
+      "lng": 103.846667
+    },
+    {
+      "id": "Q6315365",
+      "name": "Jurong Lake",
+      "lat": 1.341633,
+      "lng": 103.726747
+    },
+    {
+      "id": "Q6436092",
+      "name": "Kranji Reservoir",
+      "lat": 1.428333,
+      "lng": 103.743056
+    },
+    {
+      "id": "Q6693708",
+      "name": "Lower Peirce Reservoir",
+      "lat": 1.369444,
+      "lng": 103.823333
+    },
+    {
+      "id": "Q7332333",
+      "name": "Lower Seletar Reservoir",
+      "lat": 1.404167,
+      "lng": 103.839722
+    },
+    {
+      "id": "Q7331703",
+      "name": "MacRitchie Reservoir",
+      "lat": 1.343611,
+      "lng": 103.831111
+    },
+    {
+      "id": "Q6763896",
+      "name": "Marina Reservoir",
+      "lat": 1.286258,
+      "lng": 103.867536
+    },
+    {
+      "id": "Q86752348",
+      "name": "Mount Emily Reservoir",
+      "lat": 1.304167,
+      "lng": 103.847222
+    },
+    {
+      "id": "Q6937236",
+      "name": "Murai Reservoir",
+      "lat": 1.401111,
+      "lng": 103.674444
+    },
+    {
+      "id": "Q7130485",
+      "name": "Pandan Reservoir",
+      "lat": 1.313889,
+      "lng": 103.741667
+    },
+    {
+      "id": "Q7236974",
+      "name": "Poyan Reservoir",
+      "lat": 1.376944,
+      "lng": 103.663889
+    },
+    {
+      "id": "Q7259253",
+      "name": "Pulau Tekong Reservoir",
+      "lat": 1.413333,
+      "lng": 104.042222
+    },
+    {
+      "id": "Q7347476",
+      "name": "Sarimbun Reservoir",
+      "lat": 1.425,
+      "lng": 103.684167
+    },
+    {
+      "id": "Q7567189",
+      "name": "South End Reservoir",
+      "lat": 1.344444,
+      "lng": 103.979444
+    },
+    {
+      "id": "Q7333929",
+      "name": "Swan Lake",
+      "lat": 1.3079,
+      "lng": 103.816
+    },
+    {
+      "id": "Q122069354",
+      "name": "Symphony Lake",
+      "lat": 1.3143,
+      "lng": 103.8147
+    },
+    {
+      "id": "Q7332379",
+      "name": "Tengeh Reservoir",
+      "lat": 1.349444,
+      "lng": 103.6425
+    },
+    {
+      "id": "Q7337882",
+      "name": "Upper Peirce Reservoir",
+      "lat": 1.3675,
+      "lng": 103.801944
+    },
+    {
+      "id": "Q7334084",
+      "name": "Upper Seletar Reservoir",
+      "lat": 1.401111,
+      "lng": 103.803889
+    }
+  ]
+}

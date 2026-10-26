@@ -1,0 +1,192 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q4761842",
+      "name": "Ang Mo Kio Public Library",
+      "lat": 1.37477,
+      "lng": 103.845
+    },
+    {
+      "id": "Q4806628",
+      "name": "Asian Film Archive",
+      "lat": 1.297586,
+      "lng": 103.854305
+    },
+    {
+      "id": "Q4879343",
+      "name": "Bedok Public Library",
+      "lat": 1.326853,
+      "lng": 103.931973
+    },
+    {
+      "id": "Q4917325",
+      "name": "Bishan Public Library",
+      "lat": 1.34984,
+      "lng": 103.849
+    },
+    {
+      "id": "Q4986867",
+      "name": "Bukit Batok Library",
+      "lat": 1.34985,
+      "lng": 103.749
+    },
+    {
+      "id": "Q43083298",
+      "name": "Cheng San Public Library",
+      "lat": 1.372503,
+      "lng": 103.891702
+    },
+    {
+      "id": "Q5103409",
+      "name": "Choa Chu Kang Public Library",
+      "lat": 1.38507,
+      "lng": 103.745
+    },
+    {
+      "id": "Q85752786",
+      "name": "Clementi Public Library",
+      "lat": 1.314717,
+      "lng": 103.761882
+    },
+    {
+      "id": "Q85763359",
+      "name": "Geylang East Public Library",
+      "lat": 1.317364,
+      "lng": 103.885721
+    },
+    {
+      "id": "Q126737127",
+      "name": "Hon Sui Sen Memorial Library",
+      "lat": 1.293,
+      "lng": 103.7745
+    },
+    {
+      "id": "Q48730928",
+      "name": "Jurong West Public Library",
+      "lat": 1.340461,
+      "lng": 103.704529
+    },
+    {
+      "id": "Q47089571",
+      "name": "Kwa Geok Choo Law Library",
+      "lat": 1.2955,
+      "lng": 103.848528
+    },
+    {
+      "id": "Q47089415",
+      "name": "Li Ka Shing Library",
+      "lat": 1.296306,
+      "lng": 103.850278
+    },
+    {
+      "id": "Q44658242",
+      "name": "library@chinatown",
+      "lat": 1.285209,
+      "lng": 103.842534
+    },
+    {
+      "id": "Q6542471",
+      "name": "Library@Esplanade",
+      "lat": 1.28969,
+      "lng": 103.856
+    },
+    {
+      "id": "Q48730812",
+      "name": "library@harbourfront",
+      "lat": 1.263684,
+      "lng": 103.82121
+    },
+    {
+      "id": "Q16926586",
+      "name": "library@orchard",
+      "lat": 1.300453,
+      "lng": 103.837284
+    },
+    {
+      "id": "Q85783886",
+      "name": "Marine Parade Public Library",
+      "lat": 1.304893,
+      "lng": 103.909489
+    },
+    {
+      "id": "Q890364",
+      "name": "National Library Singapore",
+      "lat": 1.29778,
+      "lng": 103.854
+    },
+    {
+      "id": "Q85792347",
+      "name": "Pasir Ris Public Library",
+      "lat": 1.372806,
+      "lng": 103.947779
+    },
+    {
+      "id": "Q86752744",
+      "name": "Punggol Library",
+      "lat": 1.4086,
+      "lng": 103.9024
+    },
+    {
+      "id": "Q22101196",
+      "name": "Queenstown Public Library",
+      "lat": 1.298645,
+      "lng": 103.802994
+    },
+    {
+      "id": "Q7314414",
+      "name": "Republic Polytechnic Library",
+      "lat": 1.444,
+      "lng": 103.7829
+    },
+    {
+      "id": "Q16961686",
+      "name": "Sembawang Public Library",
+      "lat": 1.448282,
+      "lng": 103.817368
+    },
+    {
+      "id": "Q43082925",
+      "name": "Sengkang Public Library",
+      "lat": 1.391741,
+      "lng": 103.89252
+    },
+    {
+      "id": "Q7681804",
+      "name": "Tampines Library",
+      "lat": 1.35625,
+      "lng": 103.944
+    },
+    {
+      "id": "Q7720497",
+      "name": "The Buddhist Library",
+      "lat": 1.31311,
+      "lng": 103.884
+    },
+    {
+      "id": "Q7811334",
+      "name": "Toa Payoh Public Library",
+      "lat": 1.3335,
+      "lng": 103.8505
+    },
+    {
+      "id": "Q8032955",
+      "name": "Woodlands Regional Library",
+      "lat": 1.435,
+      "lng": 103.787
+    },
+    {
+      "id": "Q620647",
+      "name": "Yishun Library",
+      "lat": 1.428167,
+      "lng": 103.836111
+    }
+  ]
+}

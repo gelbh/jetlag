@@ -1,0 +1,138 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q5035846",
+      "name": "Capitol Building",
+      "lat": 1.29356,
+      "lng": 103.852
+    },
+    {
+      "id": "Q36158363",
+      "name": "Capitol Theatre",
+      "lat": 1.293487,
+      "lng": 103.851359
+    },
+    {
+      "id": "Q5052142",
+      "name": "Cathay Building",
+      "lat": 1.29931,
+      "lng": 103.848
+    },
+    {
+      "id": "Q5052143",
+      "name": "Cathay Cineleisure Orchard",
+      "lat": 1.3015,
+      "lng": 103.836
+    },
+    {
+      "id": "Q36158442",
+      "name": "Gala Cinema",
+      "lat": 1.296496,
+      "lng": 103.85657
+    },
+    {
+      "id": "Q36158475",
+      "name": "Golden Theatre",
+      "lat": 1.303012,
+      "lng": 103.865106
+    },
+    {
+      "id": "Q5514862",
+      "name": "GV Yishun",
+      "lat": 1.43,
+      "lng": 103.836389
+    },
+    {
+      "id": "Q36158502",
+      "name": "Jade 1 and 2 / Prince 1 and 2 Cineplex",
+      "lat": 1.29656,
+      "lng": 103.85679
+    },
+    {
+      "id": "Q36158533",
+      "name": "Kreta Ayer People's Theatre",
+      "lat": 1.28141,
+      "lng": 103.84281
+    },
+    {
+      "id": "Q36158563",
+      "name": "Lido 8 Cineplex",
+      "lat": 1.305543,
+      "lng": 103.83177
+    },
+    {
+      "id": "Q36158594",
+      "name": "Majestic Theatre",
+      "lat": 1.283739,
+      "lng": 103.842832
+    },
+    {
+      "id": "Q36158620",
+      "name": "Metropole Cinema",
+      "lat": 1.279963,
+      "lng": 103.844318
+    },
+    {
+      "id": "Q36158647",
+      "name": "Odeon Theatre",
+      "lat": 1.296526,
+      "lng": 103.853359
+    },
+    {
+      "id": "Q7523067",
+      "name": "Omni-Theatre, Science Centre Singapore",
+      "lat": 1.334556,
+      "lng": 103.73525
+    },
+    {
+      "id": "Q36158682",
+      "name": "Picturehouse",
+      "lat": 1.29882,
+      "lng": 103.847715
+    },
+    {
+      "id": "Q36158707",
+      "name": "Queensway Theatre",
+      "lat": 1.29722,
+      "lng": 103.80503
+    },
+    {
+      "id": "Q36158730",
+      "name": "Republic Theatre",
+      "lat": 1.303056,
+      "lng": 103.907778
+    },
+    {
+      "id": "Q7491172",
+      "name": "Shaw House and Centre",
+      "lat": 1.30583,
+      "lng": 103.832
+    },
+    {
+      "id": "Q779865",
+      "name": "The Cathay",
+      "lat": 1.29882,
+      "lng": 103.847715
+    },
+    {
+      "id": "Q130461936",
+      "name": "The Projector at Cineleisure",
+      "lat": 1.301527,
+      "lng": 103.836344
+    },
+    {
+      "id": "Q130461588",
+      "name": "The Projector at Golden Mile Tower",
+      "lat": 1.301958,
+      "lng": 103.864015
+    }
+  ]
+}

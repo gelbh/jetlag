@@ -54,7 +54,11 @@ describe("resolvePackMapping", () => {
 
   it("lists known packs", () => {
     assert.deepEqual([...KNOWN_PACK_IDS].sort(), [
+      "amsterdam",
       "australia",
+      "berlin",
+      "brisbane",
+      "brussels",
       "dublin",
       "london",
       "lucerne",
@@ -62,10 +66,13 @@ describe("resolvePackMapping", () => {
       "osaka",
       "portland-maine",
       "prince-rupert",
+      "singapore",
       "southampton",
       "switzerland",
       "sydney",
       "tokyo",
+      "utrecht",
+      "wroclaw",
       "zurich",
     ]);
   });

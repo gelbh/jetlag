@@ -1,0 +1,228 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q4645189",
+      "name": "8Q SAM",
+      "lat": 1.296667,
+      "lng": 103.851389
+    },
+    {
+      "id": "Q2744014",
+      "name": "ArtScience Museum",
+      "lat": 1.28611,
+      "lng": 103.859
+    },
+    {
+      "id": "Q633033",
+      "name": "Asian Civilisations Museum",
+      "lat": 1.2875,
+      "lng": 103.851389
+    },
+    {
+      "id": "Q4837312",
+      "name": "Baba House",
+      "lat": 1.277204,
+      "lng": 103.837358
+    },
+    {
+      "id": "Q5072000",
+      "name": "Changi Chapel and Museum",
+      "lat": 1.362194,
+      "lng": 103.974
+    },
+    {
+      "id": "Q4420043",
+      "name": "Children’s Museum Singapore",
+      "lat": 1.292927,
+      "lng": 103.848725
+    },
+    {
+      "id": "Q107803671",
+      "name": "Chinatown Heritage Centre",
+      "lat": 1.283461,
+      "lng": 103.844404
+    },
+    {
+      "id": "Q7084005",
+      "name": "Former Ford Factory",
+      "lat": 1.352778,
+      "lng": 103.768889
+    },
+    {
+      "id": "Q4419293",
+      "name": "Fort Siloso",
+      "lat": 1.258889,
+      "lng": 103.808056
+    },
+    {
+      "id": "Q4845494",
+      "name": "Fuk Tak Chi Temple",
+      "lat": 1.282919,
+      "lng": 103.84875
+    },
+    {
+      "id": "Q6003536",
+      "name": "Imbiah Lookout",
+      "lat": 1.256,
+      "lng": 103.815
+    },
+    {
+      "id": "Q25551594",
+      "name": "Indian Heritage Centre",
+      "lat": 1.305556,
+      "lng": 103.852222
+    },
+    {
+      "id": "Q6268908",
+      "name": "Johore battery",
+      "lat": 1.36517,
+      "lng": 103.98
+    },
+    {
+      "id": "Q19840336",
+      "name": "Lee Kong Chian Natural History Museum",
+      "lat": 1.3016,
+      "lng": 103.774
+    },
+    {
+      "id": "Q6741538",
+      "name": "Malay Heritage Centre",
+      "lat": 1.302222,
+      "lng": 103.860278
+    },
+    {
+      "id": "Q6869564",
+      "name": "Mint Museum of Toys",
+      "lat": 1.296306,
+      "lng": 103.854611
+    },
+    {
+      "id": "Q131577631",
+      "name": "Museum of Ice Cream",
+      "lat": 1.30273,
+      "lng": 103.812423
+    },
+    {
+      "id": "Q632689",
+      "name": "National Museum of Singapore",
+      "lat": 1.29672,
+      "lng": 103.84864
+    },
+    {
+      "id": "Q6987949",
+      "name": "Nei Xue Tang Museum",
+      "lat": 1.2751,
+      "lng": 103.839
+    },
+    {
+      "id": "Q15961357",
+      "name": "NUS Museum",
+      "lat": 1.301629,
+      "lng": 103.773648
+    },
+    {
+      "id": "Q7075069",
+      "name": "Objectifs",
+      "lat": 1.299889,
+      "lng": 103.851889
+    },
+    {
+      "id": "Q140987131",
+      "name": "Peranakan Mansion",
+      "lat": 1.310074,
+      "lng": 103.902027
+    },
+    {
+      "id": "Q3078303",
+      "name": "Peranakan Museum",
+      "lat": 1.29422,
+      "lng": 103.849
+    },
+    {
+      "id": "Q126098933",
+      "name": "Red Dot Design Museum",
+      "lat": 1.280129,
+      "lng": 103.856218
+    },
+    {
+      "id": "Q7307287",
+      "name": "Reflections at Bukit Chandu",
+      "lat": 1.27945,
+      "lng": 103.79407
+    },
+    {
+      "id": "Q7450580",
+      "name": "Sengkang Sculpture Park",
+      "lat": 1.39494,
+      "lng": 103.897
+    },
+    {
+      "id": "Q123468250",
+      "name": "Singapore Air Force Museum",
+      "lat": 1.346762,
+      "lng": 103.899347
+    },
+    {
+      "id": "Q2032637",
+      "name": "Singapore Art Museum",
+      "lat": 1.297381,
+      "lng": 103.851002
+    },
+    {
+      "id": "Q133254242",
+      "name": "Singapore Art Museum at Tanjong Pagar Distripark",
+      "lat": 1.271953,
+      "lng": 103.836752
+    },
+    {
+      "id": "Q7522958",
+      "name": "Singapore Discovery Centre",
+      "lat": 1.33248,
+      "lng": 103.679
+    },
+    {
+      "id": "Q131720413",
+      "name": "Singapore Navy Museum",
+      "lat": 1.316587,
+      "lng": 104.017147
+    },
+    {
+      "id": "Q23839262",
+      "name": "Singapore Pinacothèque de Paris",
+      "lat": 1.29523,
+      "lng": 103.84676
+    },
+    {
+      "id": "Q7579759",
+      "name": "Sports Museum",
+      "lat": 1.300694,
+      "lng": 103.874222
+    },
+    {
+      "id": "Q7715823",
+      "name": "The Battle Box",
+      "lat": 1.296123,
+      "lng": 103.846234
+    },
+    {
+      "id": "Q7750331",
+      "name": "The Maritime Experiential Museum",
+      "lat": 1.258333,
+      "lng": 103.8205
+    },
+    {
+      "id": "Q131577809",
+      "name": "Trickeye Singapore",
+      "lat": 1.258777,
+      "lng": 103.812112
+    }
+  ]
+}

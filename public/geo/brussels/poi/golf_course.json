@@ -1,0 +1,30 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q2061283",
+      "name": "Brabantse Golf",
+      "lat": 50.915,
+      "lng": 4.468056
+    },
+    {
+      "id": "Q2312886",
+      "name": "Brussels Droh!me Golf Club",
+      "lat": 50.794444,
+      "lng": 4.395833
+    },
+    {
+      "id": "Q2034179",
+      "name": "Royal Amicale Anderlecht Golf Club",
+      "lat": 50.822,
+      "lng": 4.26849
+    }
+  ]
+}

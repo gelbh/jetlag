@@ -1,0 +1,18 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q137486005",
+      "name": "ShortGolf Utrecht",
+      "lat": 52.074444,
+      "lng": 5.078889
+    }
+  ]
+}

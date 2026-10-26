@@ -1,0 +1,822 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q3363762",
+      "name": "Abbé Froidure Regional Park",
+      "lat": 50.8197,
+      "lng": 4.35278
+    },
+    {
+      "id": "Q23905469",
+      "name": "Albert Park",
+      "lat": 50.851389,
+      "lng": 4.315
+    },
+    {
+      "id": "Q67408161",
+      "name": "Annie Cordy Park",
+      "lat": 50.8779,
+      "lng": 4.3552
+    },
+    {
+      "id": "Q3230295",
+      "name": "Astrid Park",
+      "lat": 50.83278,
+      "lng": 4.29806
+    },
+    {
+      "id": "Q111836487",
+      "name": "Audrey Hepburn Garden",
+      "lat": 50.83315,
+      "lng": 4.36353
+    },
+    {
+      "id": "Q139718475",
+      "name": "Beco Park",
+      "lat": 50.862778,
+      "lng": 4.349444
+    },
+    {
+      "id": "Q3364332",
+      "name": "Bergoje Park",
+      "lat": 50.8142,
+      "lng": 4.43066
+    },
+    {
+      "id": "Q833646",
+      "name": "Bois de la Cambre - Ter Kamerenbos",
+      "lat": 50.806944,
+      "lng": 4.377778
+    },
+    {
+      "id": "Q739334",
+      "name": "Botanical Garden of Brussels",
+      "lat": 50.854722,
+      "lng": 4.365278
+    },
+    {
+      "id": "Q2234130",
+      "name": "Brucargo",
+      "lat": 50.906389,
+      "lng": 4.456944
+    },
+    {
+      "id": "Q21619522",
+      "name": "Brugmann Park",
+      "lat": 50.809739,
+      "lng": 4.351875
+    },
+    {
+      "id": "Q994229",
+      "name": "Bruparck",
+      "lat": 50.895035,
+      "lng": 4.339251
+    },
+    {
+      "id": "Q1892311",
+      "name": "Brussels Park",
+      "lat": 50.8446,
+      "lng": 4.3637
+    },
+    {
+      "id": "Q130332483",
+      "name": "Centrumpark",
+      "lat": 50.879606,
+      "lng": 4.475664
+    },
+    {
+      "id": "Q139412522",
+      "name": "Children's Paradise",
+      "lat": 50.829455,
+      "lng": 4.405738
+    },
+    {
+      "id": "Q1101790",
+      "name": "Cinquantenaire Park",
+      "lat": 50.840556,
+      "lng": 4.392778
+    },
+    {
+      "id": "Q104217232",
+      "name": "Coloma Domain",
+      "lat": 50.78,
+      "lng": 4.248
+    },
+    {
+      "id": "Q91787715",
+      "name": "Coloma Rose Garden",
+      "lat": 50.77743,
+      "lng": 4.25058
+    },
+    {
+      "id": "Q16070594",
+      "name": "Colonial Garden",
+      "lat": 50.888449,
+      "lng": 4.345307
+    },
+    {
+      "id": "Q137569690",
+      "name": "Crosses Park",
+      "lat": 50.886788,
+      "lng": 4.377896
+    },
+    {
+      "id": "Q139412976",
+      "name": "Dailly Park",
+      "lat": 50.851612,
+      "lng": 4.388663
+    },
+    {
+      "id": "Q24025080",
+      "name": "De Mulderpark",
+      "lat": 50.866208,
+      "lng": 4.304903
+    },
+    {
+      "id": "Q24020377",
+      "name": "Dieleghem Wood",
+      "lat": 50.887533,
+      "lng": 4.323347
+    },
+    {
+      "id": "Q42432644",
+      "name": "Domaine de la Magnanerie",
+      "lat": 50.810153,
+      "lng": 4.329678
+    },
+    {
+      "id": "Q2111052",
+      "name": "Domein Drie Fonteinen",
+      "lat": 50.917257,
+      "lng": 4.412702
+    },
+    {
+      "id": "Q2795360",
+      "name": "Duden Park",
+      "lat": 50.817,
+      "lng": 4.331
+    },
+    {
+      "id": "Q55333977",
+      "name": "Eclair Park",
+      "lat": 50.86453,
+      "lng": 4.45668
+    },
+    {
+      "id": "Q3363962",
+      "name": "Egmont Park",
+      "lat": 50.838056,
+      "lng": 4.356667
+    },
+    {
+      "id": "Q22443719",
+      "name": "Elisabeth Park",
+      "lat": 50.865,
+      "lng": 4.32444
+    },
+    {
+      "id": "Q3162373",
+      "name": "Experimental Garden Jean Massart",
+      "lat": 50.8139,
+      "lng": 4.43806
+    },
+    {
+      "id": "Q110041201",
+      "name": "Ferme du Parc Maximilien - Boerderij van het Maximiliaanpark",
+      "lat": 50.85856,
+      "lng": 4.35007
+    },
+    {
+      "id": "Q3364134",
+      "name": "Forest Park",
+      "lat": 50.82278,
+      "lng": 4.3375
+    },
+    {
+      "id": "Q114839797",
+      "name": "Forests of Brabant National Park",
+      "lat": 50.7611,
+      "lng": 4.4332
+    },
+    {
+      "id": "Q124337206",
+      "name": "Foundry Park",
+      "lat": 50.85201,
+      "lng": 4.33411
+    },
+    {
+      "id": "Q106435401",
+      "name": "Frankveld",
+      "lat": 50.77833,
+      "lng": 4.318
+    },
+    {
+      "id": "Q134327973",
+      "name": "Garcet Park",
+      "lat": 50.883333,
+      "lng": 4.333333
+    },
+    {
+      "id": "Q66974704",
+      "name": "Garden of Erasmus House",
+      "lat": 50.836247,
+      "lng": 4.308439
+    },
+    {
+      "id": "Q23783446",
+      "name": "Garden of the Mont des Arts",
+      "lat": 50.843833,
+      "lng": 4.356861
+    },
+    {
+      "id": "Q29566785",
+      "name": "Gardens of Fontenay-Sous-Bois",
+      "lat": 50.829639,
+      "lng": 4.393306
+    },
+    {
+      "id": "Q122169379",
+      "name": "Gardens of La Cambre Abbey",
+      "lat": 50.81883,
+      "lng": 4.3742
+    },
+    {
+      "id": "Q84726458",
+      "name": "Gaucheret Park",
+      "lat": 50.864467,
+      "lng": 4.360344
+    },
+    {
+      "id": "Q3363821",
+      "name": "Georges Henri Park",
+      "lat": 50.8454,
+      "lng": 4.41998
+    },
+    {
+      "id": "Q23796627",
+      "name": "Halle Gate Park",
+      "lat": 50.83316,
+      "lng": 4.346014
+    },
+    {
+      "id": "Q28040809",
+      "name": "Haren Park",
+      "lat": 50.896623,
+      "lng": 4.418503
+    },
+    {
+      "id": "Q118712563",
+      "name": "Hélène De Rudder Garden",
+      "lat": 50.82935,
+      "lng": 4.34533
+    },
+    {
+      "id": "Q42432018",
+      "name": "Hof ter Musschen Park",
+      "lat": 50.852522,
+      "lng": 4.445678
+    },
+    {
+      "id": "Q124656202",
+      "name": "Humanist Sculpture Park",
+      "lat": 50.82275,
+      "lng": 4.39475
+    },
+    {
+      "id": "Q1073360",
+      "name": "Ixelles Ponds",
+      "lat": 50.823611,
+      "lng": 4.373333
+    },
+    {
+      "id": "Q23759753",
+      "name": "Jacques Brel Park",
+      "lat": 50.802778,
+      "lng": 4.3225
+    },
+    {
+      "id": "Q42432772",
+      "name": "Jagersveld Park",
+      "lat": 50.7961,
+      "lng": 4.416244
+    },
+    {
+      "id": "Q108049873",
+      "name": "Jardin des Moineaux - Mussentuin",
+      "lat": 50.83384,
+      "lng": 4.37967
+    },
+    {
+      "id": "Q2087980",
+      "name": "Jean-Félix Hap Garden",
+      "lat": 50.83444,
+      "lng": 4.38583
+    },
+    {
+      "id": "Q1704088",
+      "name": "Josaphat Park",
+      "lat": 50.8625,
+      "lng": 4.385
+    },
+    {
+      "id": "Q126002304",
+      "name": "Joséphine-Hortense Mairesse Park",
+      "lat": 50.82843,
+      "lng": 4.34516
+    },
+    {
+      "id": "Q42431824",
+      "name": "Karreveld Park",
+      "lat": 50.860383,
+      "lng": 4.315442
+    },
+    {
+      "id": "Q123748788",
+      "name": "Kerremanspark",
+      "lat": 50.878878,
+      "lng": 4.293172
+    },
+    {
+      "id": "Q3363894",
+      "name": "King Baudouin Park",
+      "lat": 50.881389,
+      "lng": 4.319167
+    },
+    {
+      "id": "Q16508371",
+      "name": "King's Garden",
+      "lat": 50.8217,
+      "lng": 4.3715
+    },
+    {
+      "id": "Q108052332",
+      "name": "La Halte - De Halte",
+      "lat": 50.87529,
+      "lng": 4.36105
+    },
+    {
+      "id": "Q108053098",
+      "name": "La Terrasse - Het Terras",
+      "lat": 50.87996,
+      "lng": 4.34643
+    },
+    {
+      "id": "Q1801127",
+      "name": "Laeken Park",
+      "lat": 50.8925,
+      "lng": 4.348611
+    },
+    {
+      "id": "Q124477722",
+      "name": "LEGO Discovery Centre Brussels",
+      "lat": 50.878875,
+      "lng": 4.373008
+    },
+    {
+      "id": "Q2423861",
+      "name": "Leopold Park",
+      "lat": 50.83833,
+      "lng": 4.37944
+    },
+    {
+      "id": "Q26837252",
+      "name": "Line 28 Park",
+      "lat": 50.871072,
+      "lng": 4.340569
+    },
+    {
+      "id": "Q131577831",
+      "name": "Little Island Park",
+      "lat": 50.83122,
+      "lng": 4.316458
+    },
+    {
+      "id": "Q3162528",
+      "name": "Maelbeek Valley Garden",
+      "lat": 50.8439,
+      "lng": 4.3787
+    },
+    {
+      "id": "Q111938309",
+      "name": "Malibran Garden",
+      "lat": 50.83283,
+      "lng": 4.36719
+    },
+    {
+      "id": "Q586521",
+      "name": "Malou Park",
+      "lat": 50.841869,
+      "lng": 4.439367
+    },
+    {
+      "id": "Q125316826",
+      "name": "Mariahof",
+      "lat": 50.793444,
+      "lng": 4.483508
+    },
+    {
+      "id": "Q19974089",
+      "name": "Marie-José Park",
+      "lat": 50.851452,
+      "lng": 4.318755
+    },
+    {
+      "id": "Q20970389",
+      "name": "Maximilian Park",
+      "lat": 50.862156,
+      "lng": 4.353461
+    },
+    {
+      "id": "Q130746173",
+      "name": "Meli Meise",
+      "lat": 50.919367,
+      "lng": 4.339364
+    },
+    {
+      "id": "Q3364328",
+      "name": "Mellaerts Ponds",
+      "lat": 50.8274,
+      "lng": 4.4338
+    },
+    {
+      "id": "Q3364145",
+      "name": "Meudon Park",
+      "lat": 50.8931,
+      "lng": 4.39226
+    },
+    {
+      "id": "Q3074870",
+      "name": "Midi Fair",
+      "lat": 50.8405,
+      "lng": 4.34043
+    },
+    {
+      "id": "Q1067006",
+      "name": "Mini-Europe",
+      "lat": 50.89417,
+      "lng": 4.33861
+    },
+    {
+      "id": "Q42432225",
+      "name": "Monsanto Park",
+      "lat": 50.836644,
+      "lng": 4.421058
+    },
+    {
+      "id": "Q21619524",
+      "name": "Montjoie Park",
+      "lat": 50.809753,
+      "lng": 4.357475
+    },
+    {
+      "id": "Q19974093",
+      "name": "Muses Park",
+      "lat": 50.85468,
+      "lng": 4.31694
+    },
+    {
+      "id": "Q126734660",
+      "name": "Ninove Gate Park",
+      "lat": 50.84913,
+      "lng": 4.33612
+    },
+    {
+      "id": "Q114726496",
+      "name": "Olympe de Gouges Park",
+      "lat": 50.82805,
+      "lng": 4.388425
+    },
+    {
+      "id": "Q20669821",
+      "name": "Osseghem Park",
+      "lat": 50.895294,
+      "lng": 4.346547
+    },
+    {
+      "id": "Q107261304",
+      "name": "Pannenhuis Park",
+      "lat": 50.8736,
+      "lng": 4.3439
+    },
+    {
+      "id": "Q22037809",
+      "name": "Parc de cité Jouët-Rey",
+      "lat": 50.831944,
+      "lng": 4.393611
+    },
+    {
+      "id": "Q134328189",
+      "name": "parc de la Héronnière",
+      "lat": 50.811317,
+      "lng": 4.410968
+    },
+    {
+      "id": "Q112134455",
+      "name": "Parc de la Rosée/Dauwpark",
+      "lat": 50.845022,
+      "lng": 4.336711
+    },
+    {
+      "id": "Q23782718",
+      "name": "Parc des Étangs",
+      "lat": 50.824444,
+      "lng": 4.284444
+    },
+    {
+      "id": "Q16510005",
+      "name": "Parc Fond’Roy - Vronerodepark",
+      "lat": 50.788153,
+      "lng": 4.366736
+    },
+    {
+      "id": "Q18785757",
+      "name": "Parc Forestier",
+      "lat": 50.8413,
+      "lng": 4.31109
+    },
+    {
+      "id": "Q16467174",
+      "name": "Parc Hauwaert",
+      "lat": 50.855114,
+      "lng": 4.300879
+    },
+    {
+      "id": "Q23766523",
+      "name": "Parc Jupiter",
+      "lat": 50.819444,
+      "lng": 4.335833
+    },
+    {
+      "id": "Q51879640",
+      "name": "Parc Pirsoul",
+      "lat": 50.864444,
+      "lng": 4.292667
+    },
+    {
+      "id": "Q124631056",
+      "name": "Park Jourdain",
+      "lat": 50.862914,
+      "lng": 4.470286
+    },
+    {
+      "id": "Q23772822",
+      "name": "Park Marconi",
+      "lat": 50.817778,
+      "lng": 4.341389
+    },
+    {
+      "id": "Q42417245",
+      "name": "Park of the Sint-Annadreef",
+      "lat": 50.885483,
+      "lng": 4.353678
+    },
+    {
+      "id": "Q42432628",
+      "name": "Park of the villa des Trois fontaines",
+      "lat": 50.801583,
+      "lng": 4.315636
+    },
+    {
+      "id": "Q24930746",
+      "name": "Park Schaveys",
+      "lat": 50.7632,
+      "lng": 4.3396
+    },
+    {
+      "id": "Q3363925",
+      "name": "Park Walckiers",
+      "lat": 50.8797,
+      "lng": 4.38779
+    },
+    {
+      "id": "Q3363878",
+      "name": "Parmentier Park",
+      "lat": 50.8297,
+      "lng": 4.43836
+    },
+    {
+      "id": "Q17636361",
+      "name": "Pede Park",
+      "lat": 50.825556,
+      "lng": 4.271944
+    },
+    {
+      "id": "Q16964734",
+      "name": "Pierre Paulus Park",
+      "lat": 50.8289,
+      "lng": 4.34918
+    },
+    {
+      "id": "Q111600755",
+      "name": "Plaine de Liverpool - Liverpoolplein",
+      "lat": 50.84465,
+      "lng": 4.33238
+    },
+    {
+      "id": "Q42432197",
+      "name": "Propriété Crousse",
+      "lat": 50.835033,
+      "lng": 4.440989
+    },
+    {
+      "id": "Q22343252",
+      "name": "Raspailpark",
+      "lat": 50.8003,
+      "lng": 4.3342
+    },
+    {
+      "id": "Q3363891",
+      "name": "Reine-Verte Park",
+      "lat": 50.8596,
+      "lng": 4.36661
+    },
+    {
+      "id": "Q126810636",
+      "name": "René Pechère Garden",
+      "lat": 50.85164,
+      "lng": 4.36313
+    },
+    {
+      "id": "Q135479335",
+      "name": "René Pechère Park",
+      "lat": 50.843059,
+      "lng": 4.425594
+    },
+    {
+      "id": "Q42432035",
+      "name": "Roodebeek Park",
+      "lat": 50.850514,
+      "lng": 4.423978
+    },
+    {
+      "id": "Q22343250",
+      "name": "Sauvagère Park",
+      "lat": 50.787634,
+      "lng": 4.347796
+    },
+    {
+      "id": "Q17494227",
+      "name": "Scherdemael Park",
+      "lat": 50.831667,
+      "lng": 4.2875
+    },
+    {
+      "id": "Q3364761",
+      "name": "Scheutbos Park",
+      "lat": 50.85,
+      "lng": 4.29167
+    },
+    {
+      "id": "Q42417219",
+      "name": "Sculpture garden of the Royal Museums of Fine Arts",
+      "lat": 50.841403,
+      "lng": 4.357575
+    },
+    {
+      "id": "Q28040043",
+      "name": "Senne Park",
+      "lat": 50.86904,
+      "lng": 4.361336
+    },
+    {
+      "id": "Q3363908",
+      "name": "Seny Park",
+      "lat": 50.8095,
+      "lng": 4.42871
+    },
+    {
+      "id": "Q97278609",
+      "name": "Siège D'Ieteren",
+      "lat": 50.82222,
+      "lng": 4.36069
+    },
+    {
+      "id": "Q23796565",
+      "name": "Simone de Beauvoir Park",
+      "lat": 50.845861,
+      "lng": 4.344889
+    },
+    {
+      "id": "Q20669823",
+      "name": "Sobieski Park",
+      "lat": 50.886,
+      "lng": 4.34552
+    },
+    {
+      "id": "Q42432079",
+      "name": "Sources Park",
+      "lat": 50.836614,
+      "lng": 4.435461
+    },
+    {
+      "id": "Q42432730",
+      "name": "Surroundigns of Church of Saint Clement",
+      "lat": 50.809783,
+      "lng": 4.4054
+    },
+    {
+      "id": "Q3363922",
+      "name": "Tenbosch Park",
+      "lat": 50.82,
+      "lng": 4.3645
+    },
+    {
+      "id": "Q3363917",
+      "name": "Tenreuken Park",
+      "lat": 50.8068,
+      "lng": 4.42828
+    },
+    {
+      "id": "Q20127595",
+      "name": "Tour & Taxis Park",
+      "lat": 50.867742,
+      "lng": 4.344381
+    },
+    {
+      "id": "Q3363920",
+      "name": "Tournay-Solvay Park",
+      "lat": 50.7932,
+      "lng": 4.41109
+    },
+    {
+      "id": "Q92095590",
+      "name": "Tuin der Onlusten",
+      "lat": 50.75562,
+      "lng": 4.30535
+    },
+    {
+      "id": "Q3162570",
+      "name": "Tuin van Geneeskrachtige planten",
+      "lat": 50.85097,
+      "lng": 4.454278
+    },
+    {
+      "id": "Q3553424",
+      "name": "Val d'Or - Gulledelle",
+      "lat": 50.851907,
+      "lng": 4.429596
+    },
+    {
+      "id": "Q84718213",
+      "name": "Val Duchesse",
+      "lat": 50.82175,
+      "lng": 4.434172
+    },
+    {
+      "id": "Q124417030",
+      "name": "Verregat Park",
+      "lat": 50.89888,
+      "lng": 4.33178
+    },
+    {
+      "id": "Q139155036",
+      "name": "Viaduct Park",
+      "lat": 50.834493,
+      "lng": 4.37442
+    },
+    {
+      "id": "Q134387350",
+      "name": "Victoria Park",
+      "lat": 50.859268,
+      "lng": 4.329289
+    },
+    {
+      "id": "Q16467171",
+      "name": "Wilder Wood",
+      "lat": 50.85853,
+      "lng": 4.290633
+    },
+    {
+      "id": "Q3364173",
+      "name": "Woluwe Park",
+      "lat": 50.828564,
+      "lng": 4.427811
+    },
+    {
+      "id": "Q3364358",
+      "name": "Wolvendael Park",
+      "lat": 50.8,
+      "lng": 4.344
+    },
+    {
+      "id": "Q131702358",
+      "name": "Youth Park",
+      "lat": 50.882134,
+      "lng": 4.333275
+    },
+    {
+      "id": "Q42432491",
+      "name": "Zeecrabbe",
+      "lat": 50.805175,
+      "lng": 4.353828
+    }
+  ]
+}

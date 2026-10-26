@@ -25,6 +25,13 @@ const PACK_IDS = [
   "prince-rupert",
   "southampton",
   "australia",
+  "brussels",
+  "brisbane",
+  "berlin",
+  "singapore",
+  "utrecht",
+  "wroclaw",
+  "amsterdam",
 ];
 
 const PACK_BBOXES = {
@@ -59,6 +66,48 @@ const PACK_BBOXES = {
     west: 112.9011,
     north: -9.1225,
     east: 159.1292,
+  },
+  brussels: {
+    south: 50.7537,
+    west: 4.2338,
+    north: 50.9239,
+    east: 4.4923,
+  },
+  brisbane: {
+    south: -27.6702,
+    west: 152.6697,
+    north: -27.0116,
+    east: 153.4782,
+  },
+  berlin: {
+    south: 52.3283,
+    west: 13.0783,
+    north: 52.6855,
+    east: 13.7712,
+  },
+  singapore: {
+    south: 1.1395,
+    west: 103.5912,
+    north: 1.4884,
+    east: 104.1292,
+  },
+  utrecht: {
+    south: 52.0163,
+    west: 4.9601,
+    north: 52.1521,
+    east: 5.2052,
+  },
+  wroclaw: {
+    south: 51.0327,
+    west: 16.7973,
+    north: 51.2201,
+    east: 17.1862,
+  },
+  amsterdam: {
+    south: 52.268,
+    west: 4.7188,
+    north: 52.4411,
+    east: 5.1177,
   },
 };
 
