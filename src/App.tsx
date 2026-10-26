@@ -39,7 +39,6 @@ import { useEdgeSwipeBack } from "./hooks/navigation/useEdgeSwipeBack";
 import { useRouteSeo } from "./hooks/navigation/useRouteSeo";
 import { appQueryClient } from "./lib/queryClient";
 import { AppGlobalActivity } from "./navigation/AppGlobalActivity";
-import { RouteProgressChrome } from "./navigation/RouteProgressChrome";
 import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
 import {
@@ -224,7 +223,6 @@ export default function App() {
                   <AppUpdateBanner />
                   <ClientMinVersionGate>
                     <MotionDatasetEffect />
-                    <RouteProgressChrome />
                     <AppGlobalActivity />
                     <RouteReadinessSensor />
                     <EdgeSwipeBackBinder />
