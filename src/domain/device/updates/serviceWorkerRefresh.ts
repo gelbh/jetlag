@@ -82,17 +82,34 @@ export async function applyServiceWorkerUpdate(
   registration: ServiceWorkerRegistration | undefined,
   registerApplyUpdate?: (reloadPage?: boolean) => Promise<void>,
 ): Promise<void> {
-  registration?.waiting?.postMessage({ type: "SKIP_WAITING" });
+  let reloaded = false;
+  const reloadOnce = () => {
+    if (reloaded) {
+      return;
+    }
+    reloaded = true;
+    window.location.reload();
+  };
+
+  if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("controllerchange", reloadOnce, {
+      once: true,
+    });
+  }
 
   try {
     if (registerApplyUpdate) {
       await registerApplyUpdate(true);
+    } else {
+      registration?.waiting?.postMessage({ type: "SKIP_WAITING" });
     }
   } finally {
-    // Manual "Refresh now" must always reload. vite-plugin-pwa's registerSW(true)
-    // can no-op when no worker is waiting, so keep a reload fallback either way.
-    window.setTimeout(() => {
-      window.location.reload();
-    }, RELOAD_FALLBACK_MS);
+    // Manual refresh must always reload. vite-plugin-pwa's updater only
+    // skip-waits; reload is via controllerchange, with Safari fallback below.
+    if (!registration?.waiting && !registerApplyUpdate) {
+      reloadOnce();
+    } else {
+      window.setTimeout(reloadOnce, RELOAD_FALLBACK_MS);
+    }
   }
 }
