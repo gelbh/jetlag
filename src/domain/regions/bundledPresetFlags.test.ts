@@ -289,6 +289,29 @@ describe("bundledPresetFlags", () => {
     }
   });
 
+  it("ships distinct flag or coat marks for every Amsterdam preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:amsterdam")?.src).toBe(
+      "/region-flags/metro-amsterdam.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-netherlands"].source).toMatch(/^flagcdn:nl$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-amsterdam"].source).toMatch(/^wikidata:Q9899:/);
+    for (const stadsdeel of [
+      "centrum",
+      "westpoort",
+      "west",
+      "nieuw-west",
+      "zuid",
+      "oost",
+      "noord",
+      "zuidoost",
+      "weesp",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:amsterdam-${stadsdeel}`);
+      expect(mark, stadsdeel).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${stadsdeel}.png`);
+    }
+  });
+
   it("ships distinct flag or coat marks for every Utrecht preset leaf", () => {
     expect(flagMarkForBundledPresetId("bundled:utrecht")?.src).toBe(
       "/region-flags/metro-utrecht.png",

@@ -1,6 +1,12 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
 import {
+  AMSTERDAM_GEO_ASSETS,
+  AMSTERDAM_MATCHING_LABEL_OVERRIDES,
+  AMSTERDAM_MEASURING_LABEL_OVERRIDES,
+  AMSTERDAM_REGION_PACK_ID,
+} from "./amsterdamRegionPack";
+import {
   AUSTRALIA_GEO_ASSETS,
   AUSTRALIA_MATCHING_LABEL_OVERRIDES,
   AUSTRALIA_MEASURING_LABEL_OVERRIDES,
@@ -181,6 +187,8 @@ const UTRECHT_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
 const UTRECHT_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
 const WROCLAW_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
 const WROCLAW_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
+const AMSTERDAM_UNSUPPORTED_MATCHING = SINGLE_DEPTH_METRO_UNSUPPORTED_MATCHING;
+const AMSTERDAM_UNSUPPORTED_BORDERS = SINGLE_DEPTH_METRO_UNSUPPORTED_BORDERS;
 
 /** Australia: show admin 1–4 (CED/SED/S/T/LGA); hide empty land international border. */
 const AUSTRALIA_UNSUPPORTED_MATCHING = new Set<
@@ -445,6 +453,20 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     }),
     unsupportedMatching: WROCLAW_UNSUPPORTED_MATCHING,
     unsupportedBorders: WROCLAW_UNSUPPORTED_BORDERS,
+  },
+  [AMSTERDAM_REGION_PACK_ID]: {
+    ...metroRegionPack({
+      id: AMSTERDAM_REGION_PACK_ID,
+      geoAssets: {
+        primary: AMSTERDAM_GEO_ASSETS.stadsdelen,
+        playArea: AMSTERDAM_GEO_ASSETS.city,
+      },
+      subregionPropertyKey: "stadsdeelId",
+      matchingLabelOverrides: AMSTERDAM_MATCHING_LABEL_OVERRIDES,
+      measuringLabelOverrides: AMSTERDAM_MEASURING_LABEL_OVERRIDES,
+    }),
+    unsupportedMatching: AMSTERDAM_UNSUPPORTED_MATCHING,
+    unsupportedBorders: AMSTERDAM_UNSUPPORTED_BORDERS,
   },
 };
 

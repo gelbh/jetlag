@@ -1,0 +1,42 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q2461839",
+      "name": "'t Brinkie",
+      "lat": 52.301533,
+      "lng": 4.976289
+    },
+    {
+      "id": "Q91808229",
+      "name": "Menagerie of Blauw Jan",
+      "lat": 52.369306,
+      "lng": 4.897639
+    },
+    {
+      "id": "Q713124",
+      "name": "Natura Artis Magistra",
+      "lat": 52.366111,
+      "lng": 4.916667
+    },
+    {
+      "id": "Q139590121",
+      "name": "Uylenburg",
+      "lat": 52.367361,
+      "lng": 4.845278
+    },
+    {
+      "id": "Q139374159",
+      "name": "Zimmerhoeve",
+      "lat": 52.368694,
+      "lng": 4.864222
+    }
+  ]
+}

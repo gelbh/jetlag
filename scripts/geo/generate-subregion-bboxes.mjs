@@ -31,6 +31,7 @@ const SOURCES = [
   { packId: "brisbane", file: "wards.geojson", idProperty: "wardId" },
   { packId: "berlin", file: "bezirke.geojson", idProperty: "bezirkId" },
   { packId: "singapore", file: "planning-areas.geojson", idProperty: "planningAreaId" },
+  { packId: "amsterdam", file: "stadsdelen.geojson", idProperty: "stadsdeelId" },
   { packId: "utrecht", file: "wijken.geojson", idProperty: "wijkId" },
   { packId: "wroclaw", file: "dzielnice.geojson", idProperty: "dzielnicaId" },
 ];

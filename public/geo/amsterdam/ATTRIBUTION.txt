@@ -1,0 +1,19 @@
+Gemeente Amsterdam metro pack geo
+
+Boundaries
+- Stadsdeel polygons: Gemeente Amsterdam Datapunt gebieden/stadsdelen (CC-0).
+
+POI
+- Wikidata Query Service (CC0).
+
+Sea level seed
+- Open-Meteo elevation API.
+
+Coastline
+- Harbor city stub (empty segments; IJ/Markermeer not bundled as coastline).
+
+International border
+- Municipality extent stub (empty segments).
+
+GTFS
+- Skipped in v1 (GVB/GTFS.nl clip not bundled; tram/metro stops use Overpass).

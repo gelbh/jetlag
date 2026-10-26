@@ -3,6 +3,7 @@ import { GAME_PRESET_SCHEMA_VERSION } from "../../session/presets/gamePreset";
 import { recommendGameSizeFromPlayAreaSquareMiles } from "../../session/size/gameSize";
 import { defaultAdvancedSessionSettings } from "../../session/tools/advancedSessionSettings";
 import { mergeRegionPackFlavorCategories } from "../regionPackFlavorCategories";
+import { amsterdamPresets } from "./amsterdam";
 import { attachPlayArea } from "./attachPlayArea";
 import { australiaPresets } from "./australia";
 import { berlinPresets } from "./berlin";
@@ -44,6 +45,7 @@ export const BUNDLED_GAME_PRESET_DEFINITIONS: readonly BundledGamePresetDefiniti
   ...singaporePresets(),
   ...utrechtPresets(),
   ...wroclawPresets(),
+  ...amsterdamPresets(),
 ];
 
 export function isBundledPresetId(id: string): boolean {

@@ -31,6 +31,7 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
     east: -130.2,
   },
   southampton: { south: 50.86, west: -1.4973, north: 50.9761, east: -1.302 },
+  amsterdam: { south: 52.268, west: 4.7188, north: 52.4411, east: 5.1177 },
   australia: { south: -43.7604, west: 112.9011, north: -9.1225, east: 159.1292 },
   // AABB from public/geo/sydney/lgas.geojson (+0.02° pad).
   sydney: { south: -34.3574, west: 149.9948, north: -32.9761, east: 151.363 },

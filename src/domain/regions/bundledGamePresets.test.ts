@@ -7,6 +7,7 @@ import {
   buildBundledGamePresets,
   mergeBundledPresets,
 } from "./bundledGamePresets";
+import { AMSTERDAM_STADSDELEN } from "./bundledPresets/amsterdam";
 import { AUSTRALIA_STATE_PRESETS } from "./bundledPresets/australia";
 import { BERLIN_BEZIRKE } from "./bundledPresets/berlin";
 import { BRISBANE_WARDS } from "./bundledPresets/brisbane";
@@ -64,6 +65,18 @@ describe("bundledGamePresets", () => {
       expect(preset?.hierarchy.at(-1)?.id).toBe(planningArea.id);
     }
     expect(presets).toHaveLength(1 + SINGAPORE_PLANNING_AREAS.length);
+  });
+
+  it("includes amsterdam metro and stadsdeel presets on the amsterdam pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "amsterdam");
+    expect(presets.some((p) => p.id === "bundled:amsterdam")).toBe(true);
+    for (const stadsdeel of AMSTERDAM_STADSDELEN) {
+      const preset = presets.find((p) => p.id === `bundled:amsterdam-${stadsdeel.id}`);
+      expect(preset, stadsdeel.id).toBeDefined();
+      expect(preset?.subregionId).toBe(stadsdeel.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(stadsdeel.id);
+    }
+    expect(presets).toHaveLength(1 + AMSTERDAM_STADSDELEN.length);
   });
 
   it("includes utrecht metro and wijk presets on the utrecht pack", () => {

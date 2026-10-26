@@ -75,6 +75,7 @@ const PACK_FLAVOR_CATEGORIES: Record<RegionPackId, readonly SessionCustomCategor
   "portland-maine": EMPTY,
   "prince-rupert": EMPTY,
   southampton: EMPTY,
+  amsterdam: EMPTY,
   australia: EMPTY,
   sydney: EMPTY,
   brussels: EMPTY,

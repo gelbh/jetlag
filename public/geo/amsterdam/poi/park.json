@@ -1,0 +1,978 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q126947356",
+      "name": "’t Breedland",
+      "lat": 52.3294,
+      "lng": 5.0235
+    },
+    {
+      "id": "Q2461839",
+      "name": "'t Brinkie",
+      "lat": 52.301533,
+      "lng": 4.976289
+    },
+    {
+      "id": "Q2744224",
+      "name": "'t Kleine Loopveld",
+      "lat": 52.3225,
+      "lng": 4.8775
+    },
+    {
+      "id": "Q2797572",
+      "name": "Abberdaan",
+      "lat": 52.39184,
+      "lng": 4.78549
+    },
+    {
+      "id": "Q2326175",
+      "name": "Achtersluispolder",
+      "lat": 52.423133,
+      "lng": 4.850531
+    },
+    {
+      "id": "Q655469",
+      "name": "Amstelpark",
+      "lat": 52.329167,
+      "lng": 4.893333
+    },
+    {
+      "id": "Q511560",
+      "name": "Amsterdamse Bos",
+      "lat": 52.310833,
+      "lng": 4.8325
+    },
+    {
+      "id": "Q18813217",
+      "name": "Amsterdamseweg bij 204 te Amstelveen",
+      "lat": 52.31284,
+      "lng": 4.84981
+    },
+    {
+      "id": "Q2783520",
+      "name": "Baanakkerspark",
+      "lat": 52.397336,
+      "lng": 4.947322
+    },
+    {
+      "id": "Q1845531",
+      "name": "Beatrixpark",
+      "lat": 52.342778,
+      "lng": 4.881944
+    },
+    {
+      "id": "Q107182475",
+      "name": "Bedrijventerrein Sloterdijk",
+      "lat": 52.387222,
+      "lng": 4.846389
+    },
+    {
+      "id": "Q108290266",
+      "name": "Beeldenbos Noord",
+      "lat": 52.389722,
+      "lng": 4.938611
+    },
+    {
+      "id": "Q104529844",
+      "name": "Beeldentuin Emmaplein",
+      "lat": 52.354306,
+      "lng": 4.862778
+    },
+    {
+      "id": "Q107182484",
+      "name": "Bella Vistapark",
+      "lat": 52.338056,
+      "lng": 4.916944
+    },
+    {
+      "id": "Q19973971",
+      "name": "Bergwijkpark",
+      "lat": 52.328621,
+      "lng": 4.964305
+    },
+    {
+      "id": "Q124418939",
+      "name": "Bijdorpplantsoen",
+      "lat": 52.336475,
+      "lng": 4.926306
+    },
+    {
+      "id": "Q2396981",
+      "name": "Bijlmerweide",
+      "lat": 52.32535,
+      "lng": 4.98894
+    },
+    {
+      "id": "Q2312608",
+      "name": "Bilderdijkpark",
+      "lat": 52.3714,
+      "lng": 4.8698
+    },
+    {
+      "id": "Q18962861",
+      "name": "Bos en Lommerplantsoen",
+      "lat": 52.376111,
+      "lng": 4.845556
+    },
+    {
+      "id": "Q119132176",
+      "name": "Botteskerkpark",
+      "lat": 52.3595,
+      "lng": 4.793889
+    },
+    {
+      "id": "Q111189566",
+      "name": "Brasapark",
+      "lat": 52.30753,
+      "lng": 4.96886
+    },
+    {
+      "id": "Q2274000",
+      "name": "Broersepark",
+      "lat": 52.30648,
+      "lng": 4.84849
+    },
+    {
+      "id": "Q198164",
+      "name": "Bullewijk",
+      "lat": 52.306815,
+      "lng": 4.952127
+    },
+    {
+      "id": "Q140042692",
+      "name": "Candy Castle",
+      "lat": 52.373131,
+      "lng": 4.845066
+    },
+    {
+      "id": "Q21292171",
+      "name": "Carel Willinkplantsoen",
+      "lat": 52.359632,
+      "lng": 4.887215
+    },
+    {
+      "id": "Q135287016",
+      "name": "Coentje Gansplantsoen",
+      "lat": 52.370786,
+      "lng": 4.908683
+    },
+    {
+      "id": "Q80251178",
+      "name": "Corfuplantsoen",
+      "lat": 52.344925,
+      "lng": 4.790883
+    },
+    {
+      "id": "Q31942374",
+      "name": "Darwinplantsoen",
+      "lat": 52.345303,
+      "lng": 4.930658
+    },
+    {
+      "id": "Q18813222",
+      "name": "De Braak",
+      "lat": 52.31435,
+      "lng": 4.85058
+    },
+    {
+      "id": "Q20747911",
+      "name": "De Heining",
+      "lat": 52.395833,
+      "lng": 4.767222
+    },
+    {
+      "id": "Q2188815",
+      "name": "De Hoek",
+      "lat": 52.2922,
+      "lng": 4.7211
+    },
+    {
+      "id": "Q2499724",
+      "name": "De Hoge Dijk",
+      "lat": 52.28479,
+      "lng": 4.96781
+    },
+    {
+      "id": "Q13571351",
+      "name": "De Oeverlanden",
+      "lat": 52.336114,
+      "lng": 4.818911
+    },
+    {
+      "id": "Q3028713",
+      "name": "Diemen-Zuid",
+      "lat": 52.333,
+      "lng": 4.956
+    },
+    {
+      "id": "Q1220779",
+      "name": "Diemerpark",
+      "lat": 52.352433,
+      "lng": 4.986933
+    },
+    {
+      "id": "Q15874583",
+      "name": "Domela Nieuwenhuis park",
+      "lat": 52.387167,
+      "lng": 4.880722
+    },
+    {
+      "id": "Q2409341",
+      "name": "Eendrachtspark",
+      "lat": 52.38167,
+      "lng": 4.80917
+    },
+    {
+      "id": "Q1948956",
+      "name": "Eerste Marnixplantsoen, Amsterdam",
+      "lat": 52.37432,
+      "lng": 4.8761
+    },
+    {
+      "id": "Q13576484",
+      "name": "Elsenhove",
+      "lat": 52.2985,
+      "lng": 4.88618
+    },
+    {
+      "id": "Q3122189",
+      "name": "Erasmuspark",
+      "lat": 52.37489,
+      "lng": 4.85145
+    },
+    {
+      "id": "Q2335366",
+      "name": "Flevopark",
+      "lat": 52.361111,
+      "lng": 4.95
+    },
+    {
+      "id": "Q1896666",
+      "name": "Florapark",
+      "lat": 52.39306,
+      "lng": 4.91889
+    },
+    {
+      "id": "Q131551956",
+      "name": "Food Center Amsterdam",
+      "lat": 52.378611,
+      "lng": 4.866111
+    },
+    {
+      "id": "Q2195300",
+      "name": "Frankendael",
+      "lat": 52.35111,
+      "lng": 4.93333
+    },
+    {
+      "id": "Q2550411",
+      "name": "Frederik Hendrikplantsoen",
+      "lat": 52.37883,
+      "lng": 4.87703
+    },
+    {
+      "id": "Q128778837",
+      "name": "Fun Forest Amsterdam",
+      "lat": 52.32678,
+      "lng": 4.85564
+    },
+    {
+      "id": "Q2681897",
+      "name": "Gaasperpark",
+      "lat": 52.30889,
+      "lng": 4.99417
+    },
+    {
+      "id": "Q2514026",
+      "name": "Gaasperzoom",
+      "lat": 52.29419,
+      "lng": 4.9994
+    },
+    {
+      "id": "Q16069197",
+      "name": "Galileïplantsoen",
+      "lat": 52.353469,
+      "lng": 4.938711
+    },
+    {
+      "id": "Q2632605",
+      "name": "Gerbrandypark",
+      "lat": 52.377778,
+      "lng": 4.830556
+    },
+    {
+      "id": "Q2638599",
+      "name": "Geuzenbos",
+      "lat": 52.3939,
+      "lng": 4.76194
+    },
+    {
+      "id": "Q1883754",
+      "name": "Gijsbrecht van Aemstelpark",
+      "lat": 52.32873,
+      "lng": 4.87425
+    },
+    {
+      "id": "Q126947350",
+      "name": "Gouwpark",
+      "lat": 52.3191,
+      "lng": 5.05191
+    },
+    {
+      "id": "Q127432870",
+      "name": "Graspark, Amsterdam",
+      "lat": 52.387814,
+      "lng": 4.901297
+    },
+    {
+      "id": "Q128103526",
+      "name": "Greenhouse in the Botanical Garden",
+      "lat": 52.3668,
+      "lng": 4.9071
+    },
+    {
+      "id": "Q20972686",
+      "name": "Heemtuin Sloterpark",
+      "lat": 52.369825,
+      "lng": 4.812547
+    },
+    {
+      "id": "Q117802342",
+      "name": "Henriette Schwarzpark",
+      "lat": 52.361206,
+      "lng": 4.787508
+    },
+    {
+      "id": "Q19252865",
+      "name": "Hildo Kropplein",
+      "lat": 52.368333,
+      "lng": 4.9425
+    },
+    {
+      "id": "Q17301791",
+      "name": "Historische parkaanleg Vondelpark",
+      "lat": 52.36038,
+      "lng": 4.8773
+    },
+    {
+      "id": "Q126193215",
+      "name": "Hoftuin",
+      "lat": 52.36555,
+      "lng": 4.90419
+    },
+    {
+      "id": "Q1576733",
+      "name": "Hortus Botanicus Amsterdam",
+      "lat": 52.366969,
+      "lng": 4.908442
+    },
+    {
+      "id": "Q2610973",
+      "name": "Hortus Botanicus Vrije Universiteit Amsterdam",
+      "lat": 52.332778,
+      "lng": 4.860556
+    },
+    {
+      "id": "Q7476523",
+      "name": "Hortusplantsoen",
+      "lat": 52.36611,
+      "lng": 4.90722
+    },
+    {
+      "id": "Q106730240",
+      "name": "Houthavenpark",
+      "lat": 52.392222,
+      "lng": 4.878056
+    },
+    {
+      "id": "Q111220182",
+      "name": "IJselplein",
+      "lat": 52.347667,
+      "lng": 4.902778
+    },
+    {
+      "id": "Q2060246",
+      "name": "Jaap Eden baan",
+      "lat": 52.347778,
+      "lng": 4.944444
+    },
+    {
+      "id": "Q18530624",
+      "name": "Jac. P. Thijssepark",
+      "lat": 52.3165,
+      "lng": 4.842972
+    },
+    {
+      "id": "Q1820526",
+      "name": "Jan van Zutphenplantsoen",
+      "lat": 52.349389,
+      "lng": 4.799694
+    },
+    {
+      "id": "Q85308262",
+      "name": "Jan Wolkerstuin",
+      "lat": 52.388283,
+      "lng": 4.878192
+    },
+    {
+      "id": "Q123402144",
+      "name": "Johanna Westerdijkplein",
+      "lat": 52.361289,
+      "lng": 4.926811
+    },
+    {
+      "id": "Q2620183",
+      "name": "Julianapark",
+      "lat": 52.347301,
+      "lng": 4.922926
+    },
+    {
+      "id": "Q88665308",
+      "name": "Kersenbloesempark",
+      "lat": 52.303931,
+      "lng": 4.835489
+    },
+    {
+      "id": "Q139679409",
+      "name": "Klaprozenpark",
+      "lat": 52.4025,
+      "lng": 4.904444
+    },
+    {
+      "id": "Q131316728",
+      "name": "Krijtmolenpark",
+      "lat": 52.401272,
+      "lng": 4.924042
+    },
+    {
+      "id": "Q52324598",
+      "name": "Kröller-Möllerpark",
+      "lat": 52.36598,
+      "lng": 4.82845
+    },
+    {
+      "id": "Q2582087",
+      "name": "Lange Bretten",
+      "lat": 52.386667,
+      "lng": 4.788889
+    },
+    {
+      "id": "Q2355276",
+      "name": "Leidsebosje",
+      "lat": 52.363233,
+      "lng": 4.880592
+    },
+    {
+      "id": "Q105732488",
+      "name": "Lutkemeerpark",
+      "lat": 52.3616,
+      "lng": 4.7581
+    },
+    {
+      "id": "Q122818171",
+      "name": "Mahatma Gandhi Plantsoen",
+      "lat": 52.368194,
+      "lng": 4.913694
+    },
+    {
+      "id": "Q2285562",
+      "name": "Martin Luther Kingpark",
+      "lat": 52.33944,
+      "lng": 4.90667
+    },
+    {
+      "id": "Q117550307",
+      "name": "Meerwaldtplantsoen",
+      "lat": 52.3825,
+      "lng": 4.828056
+    },
+    {
+      "id": "Q91808229",
+      "name": "Menagerie of Blauw Jan",
+      "lat": 52.369306,
+      "lng": 4.897639
+    },
+    {
+      "id": "Q66981243",
+      "name": "Mien Ruysplantsoen",
+      "lat": 52.376667,
+      "lng": 4.938889
+    },
+    {
+      "id": "Q713124",
+      "name": "Natura Artis Magistra",
+      "lat": 52.366111,
+      "lng": 4.916667
+    },
+    {
+      "id": "Q2019305",
+      "name": "Natuurpark Vrije Geer",
+      "lat": 52.34583,
+      "lng": 4.79806
+    },
+    {
+      "id": "Q2172747",
+      "name": "Nelson Mandelapark",
+      "lat": 52.3125,
+      "lng": 4.9625
+    },
+    {
+      "id": "Q2480678",
+      "name": "Noorderpark",
+      "lat": 52.39472,
+      "lng": 4.91944
+    },
+    {
+      "id": "Q966809",
+      "name": "Omval",
+      "lat": 52.3431,
+      "lng": 4.9164
+    },
+    {
+      "id": "Q19395266",
+      "name": "Oostenburgerpark",
+      "lat": 52.3688,
+      "lng": 4.9252
+    },
+    {
+      "id": "Q2718912",
+      "name": "Oosterpark",
+      "lat": 52.360278,
+      "lng": 4.919722
+    },
+    {
+      "id": "Q2008350",
+      "name": "Oudenaardeplantsoen",
+      "lat": 52.346389,
+      "lng": 4.802611
+    },
+    {
+      "id": "Q126897024",
+      "name": "Overhoekspark",
+      "lat": 52.385556,
+      "lng": 4.9
+    },
+    {
+      "id": "Q126947570",
+      "name": "Park aan de Muiderslotlaan",
+      "lat": 52.31896,
+      "lng": 5.03965
+    },
+    {
+      "id": "Q2524822",
+      "name": "Park de Kuil",
+      "lat": 52.377158,
+      "lng": 4.790747
+    },
+    {
+      "id": "Q21170398",
+      "name": "Park Schinkeleilanden",
+      "lat": 52.343889,
+      "lng": 4.850278
+    },
+    {
+      "id": "Q26710903",
+      "name": "Park Somerlust",
+      "lat": 52.340583,
+      "lng": 4.916939
+    },
+    {
+      "id": "Q2119692",
+      "name": "Piet Wiedijkpark",
+      "lat": 52.354444,
+      "lng": 4.818056
+    },
+    {
+      "id": "Q17292180",
+      "name": "Plantsoen",
+      "lat": 52.34761,
+      "lng": 4.885461
+    },
+    {
+      "id": "Q17292334",
+      "name": "Plantsoen Harmoniehof",
+      "lat": 52.351278,
+      "lng": 4.883222
+    },
+    {
+      "id": "Q2695151",
+      "name": "Prins Bernhardpark",
+      "lat": 52.34823,
+      "lng": 4.92573
+    },
+    {
+      "id": "Q1979741",
+      "name": "Prins Hendrikplantsoen",
+      "lat": 52.37768,
+      "lng": 4.89793
+    },
+    {
+      "id": "Q108700630",
+      "name": "Professor Joop van Stigtpark",
+      "lat": 52.325106,
+      "lng": 4.975606
+    },
+    {
+      "id": "Q3460619",
+      "name": "Rembrandtpark",
+      "lat": 52.36278,
+      "lng": 4.84556
+    },
+    {
+      "id": "Q1938287",
+      "name": "Rietlandpark",
+      "lat": 52.373611,
+      "lng": 4.933889
+    },
+    {
+      "id": "Q52161042",
+      "name": "Ringpark",
+      "lat": 52.359572,
+      "lng": 4.844369
+    },
+    {
+      "id": "Q645372",
+      "name": "Sarphatipark",
+      "lat": 52.354444,
+      "lng": 4.896389
+    },
+    {
+      "id": "Q2578343",
+      "name": "Schellingwouderpark",
+      "lat": 52.385009,
+      "lng": 4.954984
+    },
+    {
+      "id": "Q14318871",
+      "name": "Schinkel",
+      "lat": 52.34306,
+      "lng": 4.84417
+    },
+    {
+      "id": "Q28008098",
+      "name": "Schiphol Noordwest",
+      "lat": 52.321667,
+      "lng": 4.755278
+    },
+    {
+      "id": "Q28018088",
+      "name": "Schiphol-Centrum",
+      "lat": 52.308611,
+      "lng": 4.760278
+    },
+    {
+      "id": "Q2527753",
+      "name": "Schiphol-Oost",
+      "lat": 52.3003,
+      "lng": 4.7969
+    },
+    {
+      "id": "Q1614044",
+      "name": "Schiphol-Rijk",
+      "lat": 52.28,
+      "lng": 4.7567
+    },
+    {
+      "id": "Q2330826",
+      "name": "Schiphol-Zuidoost",
+      "lat": 52.2986,
+      "lng": 4.7722
+    },
+    {
+      "id": "Q2211622",
+      "name": "Siegerpark",
+      "lat": 52.340556,
+      "lng": 4.819444
+    },
+    {
+      "id": "Q118132089",
+      "name": "Sloterdijk Poort",
+      "lat": 52.3925,
+      "lng": 4.791111
+    },
+    {
+      "id": "Q2660476",
+      "name": "Sloterpark",
+      "lat": 52.364722,
+      "lng": 4.822222
+    },
+    {
+      "id": "Q4035885",
+      "name": "Snodenhoekpark",
+      "lat": 52.29072,
+      "lng": 4.97484
+    },
+    {
+      "id": "Q132132821",
+      "name": "Spoorpark, Amsterdam",
+      "lat": 52.366042,
+      "lng": 4.834886
+    },
+    {
+      "id": "Q7579624",
+      "name": "Sportpark 't Loopveld",
+      "lat": 52.319722,
+      "lng": 4.886389
+    },
+    {
+      "id": "Q131460707",
+      "name": "Sportpark Goed Genoeg",
+      "lat": 52.337222,
+      "lng": 4.880833
+    },
+    {
+      "id": "Q19543807",
+      "name": "Sportpark Kadoelen",
+      "lat": 52.415,
+      "lng": 4.911111
+    },
+    {
+      "id": "Q15882251",
+      "name": "Sportpark Ookmeer",
+      "lat": 52.368889,
+      "lng": 4.799444
+    },
+    {
+      "id": "Q136361429",
+      "name": "Sportpark Riekerhaven",
+      "lat": 52.342361,
+      "lng": 4.837722
+    },
+    {
+      "id": "Q2168003",
+      "name": "Sportpark Sloten",
+      "lat": 52.337778,
+      "lng": 4.805833
+    },
+    {
+      "id": "Q19543827",
+      "name": "Sportpark Spieringhorn",
+      "lat": 52.385833,
+      "lng": 4.826944
+    },
+    {
+      "id": "Q29390389",
+      "name": "Sportpark Strandvliet",
+      "lat": 52.316389,
+      "lng": 4.937222
+    },
+    {
+      "id": "Q110070518",
+      "name": "Sportpark Transformatorweg",
+      "lat": 52.393333,
+      "lng": 4.860278
+    },
+    {
+      "id": "Q19545893",
+      "name": "Staalmanpark",
+      "lat": 52.349306,
+      "lng": 4.831333
+    },
+    {
+      "id": "Q2189238",
+      "name": "Stadspark Osdorp",
+      "lat": 52.355556,
+      "lng": 4.799722
+    },
+    {
+      "id": "Q3065251",
+      "name": "Suikerfabriek, Halfweg",
+      "lat": 52.3852,
+      "lng": 4.74433
+    },
+    {
+      "id": "Q19559109",
+      "name": "Suze Groenewegplantsoen",
+      "lat": 52.3835,
+      "lng": 4.8102
+    },
+    {
+      "id": "Q2401884",
+      "name": "Teleport",
+      "lat": 52.388333,
+      "lng": 4.836944
+    },
+    {
+      "id": "Q109521987",
+      "name": "Tennispark Sloterplas",
+      "lat": 52.371389,
+      "lng": 4.833333
+    },
+    {
+      "id": "Q18088669",
+      "name": "Theo van Goghpark",
+      "lat": 52.349722,
+      "lng": 5.006944
+    },
+    {
+      "id": "Q117302816",
+      "name": "Thérèse Schwartzepark, Diemen",
+      "lat": 52.328031,
+      "lng": 4.959275
+    },
+    {
+      "id": "Q84027709",
+      "name": "Touwbaanpark",
+      "lat": 52.369833,
+      "lng": 4.922844
+    },
+    {
+      "id": "Q14509055",
+      "name": "Tuinen van West",
+      "lat": 52.378333,
+      "lng": 4.771389
+    },
+    {
+      "id": "Q19575087",
+      "name": "Tweede Weteringplantsoen",
+      "lat": 52.358889,
+      "lng": 4.892778
+    },
+    {
+      "id": "Q139590121",
+      "name": "Uylenburg",
+      "lat": 52.367361,
+      "lng": 4.845278
+    },
+    {
+      "id": "Q111231919",
+      "name": "Venserpark",
+      "lat": 52.332973,
+      "lng": 4.947064
+    },
+    {
+      "id": "Q2024262",
+      "name": "Verbindingszone De Groene AS",
+      "lat": 52.315344,
+      "lng": 4.822656
+    },
+    {
+      "id": "Q85306745",
+      "name": "Veroneseplantsoen",
+      "lat": 52.349025,
+      "lng": 4.870458
+    },
+    {
+      "id": "Q4356098",
+      "name": "Vijfhoekpark",
+      "lat": 52.42839,
+      "lng": 4.84673
+    },
+    {
+      "id": "Q29110180",
+      "name": "Vivaldi",
+      "lat": 52.33647,
+      "lng": 4.88437
+    },
+    {
+      "id": "Q2290261",
+      "name": "Vliegenbos",
+      "lat": 52.389167,
+      "lng": 4.931944
+    },
+    {
+      "id": "Q2777350",
+      "name": "Volewijkspark",
+      "lat": 52.39139,
+      "lng": 4.92338
+    },
+    {
+      "id": "Q1419691",
+      "name": "Vondelpark",
+      "lat": 52.356944,
+      "lng": 4.866389
+    },
+    {
+      "id": "Q2192419",
+      "name": "Vrije Geer",
+      "lat": 52.344722,
+      "lng": 4.799333
+    },
+    {
+      "id": "Q127331646",
+      "name": "Vuurwerkerplantsoen",
+      "lat": 52.400189,
+      "lng": 4.907906
+    },
+    {
+      "id": "Q2620380",
+      "name": "Wachterliedplantsoen",
+      "lat": 52.37765,
+      "lng": 4.8535
+    },
+    {
+      "id": "Q100975163",
+      "name": "Weesperplantsoen",
+      "lat": 52.365667,
+      "lng": 4.904889
+    },
+    {
+      "id": "Q126947349",
+      "name": "Weespersluispark",
+      "lat": 52.31609,
+      "lng": 5.04572
+    },
+    {
+      "id": "Q3149634",
+      "name": "Wertheimpark",
+      "lat": 52.368056,
+      "lng": 4.909167
+    },
+    {
+      "id": "Q2187279",
+      "name": "Westerpark",
+      "lat": 52.386111,
+      "lng": 4.877778
+    },
+    {
+      "id": "Q61790180",
+      "name": "Westzaanplantsoen, Amsterdam",
+      "lat": 52.387917,
+      "lng": 4.882639
+    },
+    {
+      "id": "Q140365372",
+      "name": "Wilhelmina Druckerpark",
+      "lat": 52.385278,
+      "lng": 4.902778
+    },
+    {
+      "id": "Q101623741",
+      "name": "Wilhelminapark",
+      "lat": 52.353908,
+      "lng": 4.837975
+    },
+    {
+      "id": "Q52351100",
+      "name": "Wim Verstappenplantsoen",
+      "lat": 52.35966,
+      "lng": 4.9888
+    },
+    {
+      "id": "Q139374159",
+      "name": "Zimmerhoeve",
+      "lat": 52.368694,
+      "lng": 4.864222
+    },
+    {
+      "id": "Q15884220",
+      "name": "Zimmerterrein",
+      "lat": 52.368889,
+      "lng": 4.864722
+    },
+    {
+      "id": "Q17596853",
+      "name": "Zwaanwijck: park",
+      "lat": 52.28113,
+      "lng": 5.04808
+    }
+  ]
+}
