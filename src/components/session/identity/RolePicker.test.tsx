@@ -28,4 +28,22 @@ describe("RolePicker", () => {
 
     expect(screen.getByRole("radio", { name: /Observer/ })).toHaveAttribute("aria-checked", "true");
   });
+
+  it("uses three columns when observer is included and two when omitted", () => {
+    const { rerender } = renderPicker(
+      <RolePicker value="seeker" onChange={() => undefined} includeObserver />,
+    );
+    expect(screen.getByRole("radiogroup", { name: /Player side/i }).className).toContain(
+      "grid-cols-3",
+    );
+
+    rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <RolePicker value="seeker" onChange={() => undefined} />
+      </MantineProvider>,
+    );
+    expect(screen.getByRole("radiogroup", { name: /Player side/i }).className).toContain(
+      "grid-cols-2",
+    );
+  });
 });

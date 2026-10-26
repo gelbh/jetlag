@@ -59,7 +59,11 @@ export function RolePicker({
   return (
     <div className="px-1 py-3">
       <SectionLabel>Choose your side</SectionLabel>
-      <div role="radiogroup" aria-label="Player side" className="mt-3 grid grid-cols-2 gap-3">
+      <div
+        role="radiogroup"
+        aria-label="Player side"
+        className={`mt-3 grid gap-3 ${includeObserver ? "grid-cols-3" : "grid-cols-2"}`}
+      >
         {roleOptions.map((option) => {
           const selected = value === option.value;
           return (

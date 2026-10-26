@@ -46,9 +46,14 @@ describe("joinRequiresCastleSiegePasscode", () => {
     expect(joinRequiresCastleSiegePasscode({ u1: "teamA" }, "teamA", "u1", true)).toBe(false);
   });
 
-  it("keeps collecting when occupancy is unknown", () => {
-    expect(joinRequiresCastleSiegePasscode({}, "teamA", "u1", false)).toBe(true);
-    expect(joinRequiresCastleSiegePasscode({}, "teamB", "u1", false)).toBe(true);
+  it("hides passcode for team seats when occupancy is unknown", () => {
+    expect(joinRequiresCastleSiegePasscode({}, "teamA", "u1", false)).toBe(false);
+    expect(joinRequiresCastleSiegePasscode({}, "teamB", "u1", false)).toBe(false);
+  });
+
+  it("still requires a code for observer and referee when occupancy is unknown", () => {
+    expect(joinRequiresCastleSiegePasscode({}, "observer", "u1", false)).toBe(true);
+    expect(joinRequiresCastleSiegePasscode({}, "referee", "u1", false)).toBe(true);
   });
 });
 

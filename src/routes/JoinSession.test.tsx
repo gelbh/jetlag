@@ -145,7 +145,23 @@ describe("JoinSession", () => {
     expect(screen.queryByText(/Leave it blank only if/)).not.toBeInTheDocument();
   });
 
-  it("asks for the role code first when occupancy is unknown", () => {
+  it("keeps Observer in the same row as Seeker and Hider", () => {
+    previewState.value = {
+      ...previewState.value,
+      previewSession: createTestRemoteSession({ memberRoles: {} }),
+    };
+
+    renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+
+    const group = screen.getByRole("radiogroup", { name: /Player side/i });
+    expect(screen.getByRole("radio", { name: /^Seeker\./i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^Hider\./i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^Observer\./i })).toBeInTheDocument();
+    expect(group.className).toContain("grid-cols-3");
+  });
+
+  it("does not show role code when occupancy is unknown", () => {
     previewState.value = {
       ...previewState.value,
       previewSession: createTestRemoteSession({
@@ -158,11 +174,8 @@ describe("JoinSession", () => {
     fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
     fireEvent.click(screen.getByRole("radio", { name: /^Seeker\./i }));
 
-    expect(
-      screen.getByText(
-        "If anyone is already on that side, ask them for the role code. Leave it blank only if you know you're first.",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.queryByLabelText(/role code/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Leave it blank only if/)).not.toBeInTheDocument();
   });
 
   it("shows Castle Siege details and seat picker without Continue", () => {
