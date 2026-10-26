@@ -85,6 +85,8 @@
     --dock-float-gap: 0.5rem;
     --chrome-gap-above-dock: 0.35rem;
     --chrome-gap-bottom: 0.5rem;
+    --chrome-side-stack-gap: 0.5rem;
+    --chrome-side-stack-lift: 0.35rem;
 
     --entry-pad-y-viewport: 0.75rem;
     --entry-gap-viewport-center: 1rem;

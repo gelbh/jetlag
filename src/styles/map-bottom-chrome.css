@@ -36,14 +36,6 @@
   }
 }
 
-/* Short portrait: tighter side-stack clearance (same breakpoint as base.css). */
-@media (height <= 700px) and (orientation: portrait) {
-  :root {
-    --chrome-side-stack-gap: 0.5rem;
-    --chrome-side-stack-lift: 0.35rem;
-  }
-}
-
 @layer components {
   /*
    * Documented data-attr wrappers (D7) — legacy chassis selectors retired.
