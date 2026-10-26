@@ -4,7 +4,7 @@ import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { SectionLabel } from "../../ui/entry/entryChrome";
 
 interface RolePickerProps {
-  value: PlayerRole;
+  value: PlayerRole | null;
   onChange: (role: PlayerRole) => void;
   disabled?: boolean;
   includeObserver?: boolean;

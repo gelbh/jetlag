@@ -24,4 +24,18 @@ describe("joinSessionFormSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("allows an unset player role before the host picks a side", () => {
+    expect(
+      joinSessionFormSchema.parse({
+        code: "ABCD",
+        playerRole: null,
+        rolePasscode: "",
+      }),
+    ).toEqual({
+      code: "ABCD",
+      playerRole: null,
+      rolePasscode: "",
+    });
+  });
 });

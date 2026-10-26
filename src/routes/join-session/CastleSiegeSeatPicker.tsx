@@ -3,7 +3,7 @@ import { InsetHairline } from "@/components/ui/entry/InsetRow";
 import type { CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 
 export type CastleSiegeSeatPickerProps = {
-  value: CastleSiegeTeamRole;
+  value: CastleSiegeTeamRole | null;
   onChange: (seat: CastleSiegeTeamRole) => void;
   disabled?: boolean;
 };

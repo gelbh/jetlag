@@ -128,8 +128,8 @@ function joinRequestStatusMessage(status: JoinRequestStatus): string {
 
 export type UseJoinSessionArgs = {
   code: string;
-  playerRole: PlayerRole;
-  castleSiegeRole?: CastleSiegeTeamRole;
+  playerRole: PlayerRole | null;
+  castleSiegeRole?: CastleSiegeTeamRole | null;
   rolePasscode: string;
   onExistingRole?: (role: PlayerRole) => void;
   onExistingCastleSiegeRole?: (seat: CastleSiegeTeamRole) => void;
@@ -171,31 +171,38 @@ export function useJoinSession({
     useJoinSessionPreview(code);
 
   const castleSiegeJoin = isCastleSiegeSession(previewSession);
-  const activeCastleSiegeRole = castleSiegeRole ?? "teamA";
+  const roleChosen = castleSiegeJoin ? castleSiegeRole != null : playerRole != null;
   const rolePasscodeOccupancyKnown = Boolean(
     previewSession && !isPlaceholderGameArea(previewSession.gameArea),
   );
   const needsRolePasscode = Boolean(
     previewSession &&
+      roleChosen &&
       (castleSiegeJoin
-        ? joinRequiresCastleSiegePasscode(
+        ? castleSiegeRole != null &&
+          joinRequiresCastleSiegePasscode(
             previewSession.castleSiegeRoles,
-            activeCastleSiegeRole,
+            castleSiegeRole,
             myUid ?? undefined,
             rolePasscodeOccupancyKnown,
           )
-        : joinRequiresRolePasscode(
+        : playerRole != null &&
+          joinRequiresRolePasscode(
             previewSession.memberRoles,
             playerRole,
             myUid ?? undefined,
             rolePasscodeOccupancyKnown,
           )),
   );
-  const requestAccessRole: JoinRequestRole | null = castleSiegeJoin
-    ? activeCastleSiegeRole
-    : isJoinRequestRole(playerRole)
-      ? playerRole
-      : null;
+  const requestAccessRole: JoinRequestRole | null = !roleChosen
+    ? null
+    : castleSiegeJoin
+      ? castleSiegeRole != null && isJoinRequestRole(castleSiegeRole)
+        ? castleSiegeRole
+        : null
+      : playerRole != null && isJoinRequestRole(playerRole)
+        ? playerRole
+        : null;
   const canRequestAccess =
     Boolean(previewSession) && needsRolePasscode && requestAccessRole != null;
   const formBusy = joinBusy || requestBusy || pendingRequest != null;
@@ -402,26 +409,37 @@ export function useJoinSession({
         trackJoinFailed(role, reason);
       };
       const joiningCastleSiege = isCastleSiegeSession(previewSession);
-      const joinAnalyticsRole = joiningCastleSiege
-        ? (values.castleSiegeRole ?? "teamA")
-        : values.playerRole;
-      if (joiningCastleSiege && !values.castleSiegeRole) {
-        fail("Choose a Castle Siege seat.", joinAnalyticsRole as PlayerRole, "other");
-        return;
+      let selectedSeat: CastleSiegeTeamRole | undefined;
+      let selectedRole: PlayerRole;
+      if (joiningCastleSiege) {
+        if (values.castleSiegeRole == null) {
+          fail("Choose a Castle Siege seat.", "observer", "other");
+          return;
+        }
+        selectedSeat = values.castleSiegeRole;
+        selectedRole = "observer";
+      } else {
+        if (values.playerRole == null) {
+          fail("Choose your side.", "seeker", "other");
+          return;
+        }
+        selectedRole = values.playerRole;
       }
+      const joinAnalyticsRole: PlayerRole = joiningCastleSiege
+        ? selectedSeat === "referee" || selectedSeat === "observer"
+          ? "observer"
+          : "seeker"
+        : selectedRole;
       if (
         !values.rolePasscode &&
         (joiningCastleSiege
-          ? existingCastleSiegeRole !== values.castleSiegeRole &&
-            isCastleSiegePasscodeRequired(
-              previewSession,
-              values.castleSiegeRole ?? "teamA",
-              myUid ?? undefined,
-            )
-          : existingRole !== values.playerRole &&
-            isRolePasscodeRequired(previewSession, values.playerRole, myUid ?? undefined))
+          ? selectedSeat != null &&
+            existingCastleSiegeRole !== selectedSeat &&
+            isCastleSiegePasscodeRequired(previewSession, selectedSeat, myUid ?? undefined)
+          : existingRole !== selectedRole &&
+            isRolePasscodeRequired(previewSession, selectedRole, myUid ?? undefined))
       ) {
-        fail(ROLE_CODE_REQUIRED_COPY, joinAnalyticsRole as PlayerRole, "role_code_required");
+        fail(ROLE_CODE_REQUIRED_COPY, joinAnalyticsRole, "role_code_required");
         return;
       }
       setLoading(true);
@@ -430,7 +448,7 @@ export function useJoinSession({
       const signInStage = task.stage(JOIN_STAGES.signIn);
       const joinStage = task.stage(JOIN_STAGES.join);
       const roleStage =
-        !joiningCastleSiege && values.playerRole === "hider"
+        !joiningCastleSiege && selectedRole === "hider"
           ? task.stage(JOIN_STAGES.hiderRole)
           : undefined;
       const openStage = task.stage(JOIN_STAGES.openMap);
@@ -440,7 +458,7 @@ export function useJoinSession({
         if (!isFirebaseConfigured()) {
           fail(
             "Firebase is not configured. Create a local session instead.",
-            values.playerRole,
+            selectedRole,
             "other",
           );
         } else {
@@ -450,10 +468,13 @@ export function useJoinSession({
               const user = await retryAsync(() => ensureFreshAnonymousUser());
               signInStage.finish();
               joinStage.start();
-              const membershipRole = joiningCastleSiege ? "observer" : values.playerRole;
-              const freshJoinOptions = {
+              const membershipRole = joiningCastleSiege ? "observer" : selectedRole;
+              const freshJoinOptions: {
+                rolePasscode: string | undefined;
+                castleSiegeRole?: CastleSiegeTeamRole;
+              } = {
                 rolePasscode: values.rolePasscode || undefined,
-                castleSiegeRole: joiningCastleSiege ? values.castleSiegeRole : undefined,
+                castleSiegeRole: joiningCastleSiege ? selectedSeat : undefined,
               };
               const returningMemberUid = session?.code === normalized ? myUid : null;
               const joinWith = (
@@ -495,7 +516,7 @@ export function useJoinSession({
                 if (!isCurrent()) {
                   return;
                 }
-                fail("No session found for that code.", values.playerRole, "session_missing");
+                fail("No session found for that code.", selectedRole, "session_missing");
                 return;
               }
 
@@ -505,7 +526,7 @@ export function useJoinSession({
                 }
                 fail(
                   "That session has ended. Ask the host for a new code.",
-                  values.playerRole,
+                  selectedRole,
                   "session_ended",
                 );
                 return;
@@ -517,7 +538,7 @@ export function useJoinSession({
                 }
                 fail(
                   sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
-                  values.playerRole,
+                  selectedRole,
                   "version_mismatch",
                 );
                 return;
@@ -525,7 +546,7 @@ export function useJoinSession({
 
               joinStage.finish();
               let joinedSession = result.session;
-              if (!joiningCastleSiege && values.playerRole === "hider") {
+              if (!joiningCastleSiege && selectedRole === "hider") {
                 roleStage?.start();
                 const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
                 roleStage?.finish();
@@ -535,7 +556,7 @@ export function useJoinSession({
                   }
                   fail(
                     "Couldn't confirm your hider role. Wait a moment and try again.",
-                    values.playerRole,
+                    selectedRole,
                     "other",
                   );
                   return;
@@ -575,7 +596,7 @@ export function useJoinSession({
             : joinFailureReason(nextError);
           fail(
             nextError instanceof Error ? nextError.message : "Couldn't join that session.",
-            values.playerRole,
+            selectedRole,
             reason,
           );
         }

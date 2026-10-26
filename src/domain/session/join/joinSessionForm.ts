@@ -4,8 +4,8 @@ const castleSiegeSeatSchema = z.enum(["teamA", "teamB", "referee", "observer"]);
 
 export const joinSessionFormSchema = z.object({
   code: z.string().regex(/^[A-Z]{4}$/, "Enter a 4-letter session code."),
-  playerRole: z.enum(["seeker", "hider", "observer", "admin"]),
-  castleSiegeRole: castleSiegeSeatSchema.optional(),
+  playerRole: z.enum(["seeker", "hider", "observer", "admin"]).nullable(),
+  castleSiegeRole: castleSiegeSeatSchema.nullable().optional(),
   rolePasscode: z
     .string()
     .max(4)
