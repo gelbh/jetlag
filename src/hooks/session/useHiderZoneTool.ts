@@ -14,7 +14,7 @@ import { expandBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
-import type { TransitRouteFilter } from "../../domain/map/transit";
+import type { TransitStationFilter } from "../../domain/map/transit";
 import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import {
   buildHidingZoneCircle,
@@ -62,7 +62,7 @@ interface UseHiderZoneToolParams {
   hasMoveCard?: () => boolean;
   consumeMoveCard?: () => Promise<void>;
   transitMetroId?: string | null;
-  transitStationFilter?: TransitRouteFilter | null;
+  transitStationFilter?: TransitStationFilter | null;
 }
 
 type StationLoadOutcome =
@@ -82,7 +82,7 @@ async function loadStationsWithProgress(
     onStations: (stations: TransitStation[]) => void;
     onSettled: () => void;
     transitMetroId?: string | null;
-    transitStationFilter?: TransitRouteFilter | null;
+    transitStationFilter?: TransitStationFilter | null;
   },
 ): Promise<StationLoadOutcome> {
   try {

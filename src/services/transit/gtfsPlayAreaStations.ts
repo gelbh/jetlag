@@ -1,6 +1,6 @@
 import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import type { GameArea } from "../../domain/map/annotations";
-import type { TransitRouteFilter } from "../../domain/map/transit";
+import type { TransitStationFilter } from "../../domain/map/transit";
 import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 import type { GtfsBundleStop } from "./gtfsBundle";
 import {
@@ -15,10 +15,10 @@ import { resolveTransitMetroId } from "./transitCatalog";
 
 export type GtfsStationQuery = {
   transitMetroId?: string | null;
-  transitStationFilter?: TransitRouteFilter | null;
+  transitStationFilter?: TransitStationFilter | null;
 };
 
-function resolveFilter(query?: GtfsStationQuery): TransitRouteFilter {
+function resolveFilter(query?: GtfsStationQuery): TransitStationFilter {
   return query?.transitStationFilter ?? "all";
 }
 

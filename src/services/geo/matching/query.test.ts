@@ -20,7 +20,7 @@ describe("matchingFeaturesCacheKey", () => {
     const base = matchingFeaturesCacheKey(AREA, "transit_line");
     const filtered = matchingFeaturesCacheKey(AREA, "transit_line", {
       transitMetroId: "sydney",
-      transitStationFilter: "tram",
+      transitStationFilter: ["tram"],
     });
     expect(base).toContain("metro:auto");
     expect(base).toContain("filter:all");

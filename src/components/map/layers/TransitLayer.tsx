@@ -33,6 +33,7 @@ const MODE_COLORS: Record<TransitRouteMode, string> = {
   tram: MAP_ANNOTATION_COLORS.transit.tram,
   bus: MAP_ANNOTATION_COLORS.transit.bus,
   ferry: MAP_ANNOTATION_COLORS.transit.ferry,
+  funicular: MAP_ANNOTATION_COLORS.transit.funicular,
   other: MAP_ANNOTATION_COLORS.transit.other,
 };
 

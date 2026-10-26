@@ -62,6 +62,29 @@ export function isTransitStationFilterAll(filter: TransitStationFilter): boolean
   return filter === "all";
 }
 
+/**
+ * Toggle All (exclusive) or a mode chip for the session station filter.
+ * Last mode off returns `"all"`. Modes are OR-selected and sorted.
+ */
+export function toggleTransitStationMode(
+  current: TransitStationFilter,
+  mode: TransitRouteMode | "all",
+): TransitStationFilter {
+  if (mode === "all") {
+    return "all";
+  }
+  const set = new Set(current === "all" ? [] : current);
+  if (set.has(mode)) {
+    set.delete(mode);
+  } else {
+    set.add(mode);
+  }
+  if (set.size === 0) {
+    return "all";
+  }
+  return normalizeTransitStationFilter([...set]) as TransitRouteMode[];
+}
+
 /** Stop matches when filter is all, or any stop mode intersects the selected modes. */
 export function stationModesMatchFilter(
   stopModes: ReadonlySet<TransitRouteMode>,

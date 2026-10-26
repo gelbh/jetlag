@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { normalizeTransitStationFilter, stationModesMatchFilter } from "./transit";
+import {
+  normalizeTransitStationFilter,
+  stationModesMatchFilter,
+  toggleTransitStationMode,
+} from "./transit";
 
 describe("normalizeTransitStationFilter", () => {
   it("maps legacy string metro to single-element array", () => {
@@ -15,6 +19,22 @@ describe("normalizeTransitStationFilter", () => {
   });
   it("rejects unknown tokens as all (reject to all for deserialize safety)", () => {
     expect(normalizeTransitStationFilter("spaceship")).toBe("all");
+  });
+});
+
+describe("toggleTransitStationMode", () => {
+  it("All chip resets to all", () => {
+    expect(toggleTransitStationMode(["metro", "tram"], "all")).toBe("all");
+  });
+  it("adds a mode from all", () => {
+    expect(toggleTransitStationMode("all", "tram")).toEqual(["tram"]);
+  });
+  it("adds a second mode and sorts", () => {
+    expect(toggleTransitStationMode(["tram"], "metro")).toEqual(["metro", "tram"]);
+  });
+  it("removes a mode; last mode off returns all", () => {
+    expect(toggleTransitStationMode(["metro", "tram"], "tram")).toEqual(["metro"]);
+    expect(toggleTransitStationMode(["metro"], "metro")).toBe("all");
   });
 });
 
