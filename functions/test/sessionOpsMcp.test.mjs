@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import {
   authenticateSessionOpsMcp,
+  createSessionOpsMcpServer,
   handleSessionOpsMcpRequest,
   SESSION_OPS_MCP_HEADER_ACTOR,
   SESSION_OPS_MCP_HEADER_INCIDENT,
@@ -10,10 +13,39 @@ import {
   SESSION_OPS_MCP_UNAUTHORIZED,
 } from "../incident/sessionOpsMcp.mjs";
 
+/**
+ * @param {object} deps
+ * @param {Record<string, string>} headers
+ */
+async function connectSessionOpsMcpClient(deps, headers) {
+  const { server } = createSessionOpsMcpServer(deps, { headers });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const client = new Client({ name: "session-ops-mcp-test", version: "1.0.0" });
+  await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+  return client;
+}
+
 test("authenticateSessionOpsMcp rejects missing bearer", () => {
   assert.equal(authenticateSessionOpsMcp({ authorization: "" }, "secret"), false);
   assert.equal(authenticateSessionOpsMcp({ authorization: "Bearer wrong" }, "secret"), false);
   assert.equal(authenticateSessionOpsMcp({ authorization: "Bearer secret" }, "secret"), true);
+});
+
+test("createSessionOpsMcpServer registers allowlisted tools only", async () => {
+  const client = await connectSessionOpsMcpClient(
+    { authSecret: "secret" },
+    {
+      [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
+      [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
+      [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
+    },
+  );
+  const { tools } = await client.listTools();
+  const names = tools.map((t) => t.name);
+  assert.ok(names.includes("soft_reload"));
+  assert.ok(names.includes("end_session"));
+  assert.equal(names.includes("not_a_tool"), false);
+  assert.equal(names.includes("drop_database"), false);
 });
 
 test("handleSessionOpsMcpRequest returns 401 without auth", async () => {
@@ -73,7 +105,10 @@ test("tools/call rejects unknown tool", async () => {
   );
   assert.equal(response.status, 200);
   assert.equal(response.body.result.isError, true);
-  assert.match(response.body.result.content[0].text, /Unknown|unknown|SESSION_OPS_UNKNOWN/);
+  assert.match(
+    response.body.result.content[0].text,
+    /Unknown|unknown|SESSION_OPS_UNKNOWN|not found/i,
+  );
 });
 
 test("tools/call soft_reload uses bound session not model args", async () => {
