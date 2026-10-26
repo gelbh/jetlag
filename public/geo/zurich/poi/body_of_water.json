@@ -1,1 +1,594 @@
-{ "category": "body_of_water", "source": "none", "places": [] }
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q21036895",
+      "name": "Aabach-Weiher",
+      "lat": 47.231313,
+      "lng": 8.623229
+    },
+    {
+      "id": "Q141691440",
+      "name": "Aalte liswäier",
+      "lat": 47.69096,
+      "lng": 8.60783
+    },
+    {
+      "id": "Q141687743",
+      "name": "Aatalweier",
+      "lat": 47.23986,
+      "lng": 8.95149
+    },
+    {
+      "id": "Q141689388",
+      "name": "Äntenweier",
+      "lat": 47.44607,
+      "lng": 8.75145
+    },
+    {
+      "id": "Q22698258",
+      "name": "Ausee",
+      "lat": 47.24839,
+      "lng": 8.64015
+    },
+    {
+      "id": "Q141690180",
+      "name": "Bachtelweier",
+      "lat": 47.2958,
+      "lng": 8.89828
+    },
+    {
+      "id": "Q141690184",
+      "name": "Badweier",
+      "lat": 47.52082,
+      "lng": 8.87931
+    },
+    {
+      "id": "Q60522663",
+      "name": "Barchetsee",
+      "lat": 47.615556,
+      "lng": 8.753056
+    },
+    {
+      "id": "Q141691522",
+      "name": "Bergemer Weier",
+      "lat": 47.56683,
+      "lng": 8.73391
+    },
+    {
+      "id": "Q4903605",
+      "name": "Bichelsee",
+      "lat": 47.4575,
+      "lng": 8.900278
+    },
+    {
+      "id": "Q141691049",
+      "name": "Binzerliweier",
+      "lat": 47.4226,
+      "lng": 8.40277
+    },
+    {
+      "id": "Q141691577",
+      "name": "Birriweiher",
+      "lat": 47.27764,
+      "lng": 8.37616
+    },
+    {
+      "id": "Q141686695",
+      "name": "Brändliweier",
+      "lat": 47.23719,
+      "lng": 8.84994
+    },
+    {
+      "id": "Q63681617",
+      "name": "Brauiweiher",
+      "lat": 47.424556,
+      "lng": 8.752278
+    },
+    {
+      "id": "Q141687826",
+      "name": "Bucketensee",
+      "lat": 47.60466,
+      "lng": 8.6944
+    },
+    {
+      "id": "Q141687679",
+      "name": "Buecher Weier",
+      "lat": 47.56459,
+      "lng": 8.7438
+    },
+    {
+      "id": "Q141688683",
+      "name": "Chatzenweier",
+      "lat": 47.64711,
+      "lng": 8.6327
+    },
+    {
+      "id": "Q141687374",
+      "name": "Chernensee",
+      "lat": 47.52133,
+      "lng": 8.49251
+    },
+    {
+      "id": "Q141690193",
+      "name": "Chlisee",
+      "lat": 47.33836,
+      "lng": 8.77746
+    },
+    {
+      "id": "Q141690588",
+      "name": "Chloosterweier",
+      "lat": 47.4129,
+      "lng": 8.97064
+    },
+    {
+      "id": "Q141690610",
+      "name": "Cholgruebsee",
+      "lat": 47.612,
+      "lng": 8.68855
+    },
+    {
+      "id": "Q664630",
+      "name": "Egelsee",
+      "lat": 47.2578,
+      "lng": 8.81667
+    },
+    {
+      "id": "Q141690191",
+      "name": "Entenweier",
+      "lat": 47.47228,
+      "lng": 8.66492
+    },
+    {
+      "id": "Q141690152",
+      "name": "Fabrikweier",
+      "lat": 47.23561,
+      "lng": 8.96577
+    },
+    {
+      "id": "Q141688724",
+      "name": "Fischbachweiher",
+      "lat": 47.32943,
+      "lng": 8.46707
+    },
+    {
+      "id": "Q141690835",
+      "name": "Fistelweiher",
+      "lat": 47.32735,
+      "lng": 8.91906
+    },
+    {
+      "id": "Q672769",
+      "name": "Flachsee",
+      "lat": 47.328056,
+      "lng": 8.369444
+    },
+    {
+      "id": "Q1450467",
+      "name": "Franzosenweiher",
+      "lat": 47.4058,
+      "lng": 8.375
+    },
+    {
+      "id": "Q141691570",
+      "name": "Freyenweijer",
+      "lat": 47.18597,
+      "lng": 8.69249
+    },
+    {
+      "id": "Q141691666",
+      "name": "Fridgrabenweiher",
+      "lat": 47.33061,
+      "lng": 8.46889
+    },
+    {
+      "id": "Q141691502",
+      "name": "Gattikerweiher",
+      "lat": 47.28411,
+      "lng": 8.55292
+    },
+    {
+      "id": "Q141687695",
+      "name": "Getschhuuserweier",
+      "lat": 47.5432,
+      "lng": 8.98593
+    },
+    {
+      "id": "Q14497",
+      "name": "Greifensee",
+      "lat": 47.35,
+      "lng": 8.683333
+    },
+    {
+      "id": "Q141688622",
+      "name": "Gütighauser Weier",
+      "lat": 47.58642,
+      "lng": 8.72184
+    },
+    {
+      "id": "Q664613",
+      "name": "Hasensee",
+      "lat": 47.607778,
+      "lng": 8.83
+    },
+    {
+      "id": "Q141687578",
+      "name": "Hätteliweier",
+      "lat": 47.58538,
+      "lng": 8.70862
+    },
+    {
+      "id": "Q141691670",
+      "name": "Heinrichensee",
+      "lat": 47.60464,
+      "lng": 8.69697
+    },
+    {
+      "id": "Q141690918",
+      "name": "Hellweiher",
+      "lat": 47.31931,
+      "lng": 8.90719
+    },
+    {
+      "id": "Q141691308",
+      "name": "Heurütiweiher",
+      "lat": 47.47273,
+      "lng": 8.86527
+    },
+    {
+      "id": "Q141691194",
+      "name": "Hindere Weier",
+      "lat": 47.51539,
+      "lng": 8.89926
+    },
+    {
+      "id": "Q22949157",
+      "name": "Hirschlensee",
+      "lat": 47.17636,
+      "lng": 8.97709
+    },
+    {
+      "id": "Q22640199",
+      "name": "Horgener Bergweiher",
+      "lat": 47.242681,
+      "lng": 8.598281
+    },
+    {
+      "id": "Q141691662",
+      "name": "Hugiweiher",
+      "lat": 47.57187,
+      "lng": 8.86138
+    },
+    {
+      "id": "Q141691230",
+      "name": "Humbelweier",
+      "lat": 47.35401,
+      "lng": 8.82434
+    },
+    {
+      "id": "Q5819787",
+      "name": "Husemersee",
+      "lat": 47.621944,
+      "lng": 8.704444
+    },
+    {
+      "id": "Q141686618",
+      "name": "Hüttenweier",
+      "lat": 47.37021,
+      "lng": 8.81634
+    },
+    {
+      "id": "Q492680",
+      "name": "Hüttnersee",
+      "lat": 47.183333,
+      "lng": 8.675
+    },
+    {
+      "id": "Q689321",
+      "name": "Hüttwilersee",
+      "lat": 47.610556,
+      "lng": 8.8425
+    },
+    {
+      "id": "Q141691323",
+      "name": "Iisweier",
+      "lat": 47.50249,
+      "lng": 8.90672
+    },
+    {
+      "id": "Q672290",
+      "name": "Katzensee",
+      "lat": 47.4325,
+      "lng": 8.492778
+    },
+    {
+      "id": "Q141691214",
+      "name": "Kemptweier",
+      "lat": 47.46966,
+      "lng": 8.70394
+    },
+    {
+      "id": "Q141690820",
+      "name": "Laichsee",
+      "lat": 47.18274,
+      "lng": 8.96331
+    },
+    {
+      "id": "Q14407",
+      "name": "Lake Zurich",
+      "lat": 47.2475,
+      "lng": 8.6775
+    },
+    {
+      "id": "Q141690948",
+      "name": "Langweier",
+      "lat": 47.62897,
+      "lng": 8.92936
+    },
+    {
+      "id": "Q141691477",
+      "name": "Lätteweier",
+      "lat": 47.68316,
+      "lng": 8.74906
+    },
+    {
+      "id": "Q141691510",
+      "name": "Lättiweier",
+      "lat": 47.57061,
+      "lng": 8.91391
+    },
+    {
+      "id": "Q141691671",
+      "name": "Lochsee",
+      "lat": 47.60043,
+      "lng": 8.69353
+    },
+    {
+      "id": "Q141690862",
+      "name": "Lochweier",
+      "lat": 47.46247,
+      "lng": 8.4717
+    },
+    {
+      "id": "Q141689956",
+      "name": "Luppmenweier",
+      "lat": 47.35977,
+      "lng": 8.8356
+    },
+    {
+      "id": "Q676816",
+      "name": "Lützelsee",
+      "lat": 47.259722,
+      "lng": 8.7725
+    },
+    {
+      "id": "Q141690764",
+      "name": "Mädlestenweiher",
+      "lat": 47.55373,
+      "lng": 8.69099
+    },
+    {
+      "id": "Q5820636",
+      "name": "Mettmenhaslisee",
+      "lat": 47.474444,
+      "lng": 8.491944
+    },
+    {
+      "id": "Q141687323",
+      "name": "Mördersee",
+      "lat": 47.60261,
+      "lng": 8.70177
+    },
+    {
+      "id": "Q141686627",
+      "name": "Müliweier",
+      "lat": 47.59781,
+      "lng": 8.89765
+    },
+    {
+      "id": "Q141687597",
+      "name": "Nägelsee",
+      "lat": 47.61607,
+      "lng": 8.8913
+    },
+    {
+      "id": "Q2309428",
+      "name": "Nussbaumersee",
+      "lat": 47.616111,
+      "lng": 8.817222
+    },
+    {
+      "id": "Q141687485",
+      "name": "Obere Müliwäier",
+      "lat": 47.66563,
+      "lng": 8.8718
+    },
+    {
+      "id": "Q141688818",
+      "name": "Obere Weier",
+      "lat": 47.68671,
+      "lng": 8.69191
+    },
+    {
+      "id": "Q141690757",
+      "name": "Oberer Luppmenweier",
+      "lat": 47.35949,
+      "lng": 8.83816
+    },
+    {
+      "id": "Q18508926",
+      "name": "Obersee",
+      "lat": 47.2189,
+      "lng": 8.84657
+    },
+    {
+      "id": "Q141691294",
+      "name": "Öliweier",
+      "lat": 47.63029,
+      "lng": 8.65182
+    },
+    {
+      "id": "Q14514",
+      "name": "Pfäffikersee",
+      "lat": 47.352222,
+      "lng": 8.78
+    },
+    {
+      "id": "Q141691438",
+      "name": "Räubrichsee",
+      "lat": 47.61297,
+      "lng": 8.67692
+    },
+    {
+      "id": "Q2147944",
+      "name": "Rheinsee",
+      "lat": 47.6625,
+      "lng": 8.960278
+    },
+    {
+      "id": "Q141690563",
+      "name": "Ringwiler Weiher",
+      "lat": 47.31182,
+      "lng": 8.85405
+    },
+    {
+      "id": "Q141688634",
+      "name": "Rümbeli",
+      "lat": 47.5677,
+      "lng": 8.7439
+    },
+    {
+      "id": "Q141689613",
+      "name": "Sägiweier",
+      "lat": 47.45796,
+      "lng": 8.97738
+    },
+    {
+      "id": "Q141691566",
+      "name": "Schübelweiher",
+      "lat": 47.32336,
+      "lng": 8.59442
+    },
+    {
+      "id": "Q5823683",
+      "name": "Seeweidsee",
+      "lat": 47.256944,
+      "lng": 8.746111
+    },
+    {
+      "id": "Q141688333",
+      "name": "Siessenweier",
+      "lat": 47.2456,
+      "lng": 8.93407
+    },
+    {
+      "id": "Q33216150",
+      "name": "Staanegger Weier",
+      "lat": 47.62004,
+      "lng": 8.8452
+    },
+    {
+      "id": "Q141691239",
+      "name": "Stadlersee",
+      "lat": 47.52333,
+      "lng": 8.48274
+    },
+    {
+      "id": "Q141691668",
+      "name": "Staldenweiher",
+      "lat": 47.39536,
+      "lng": 8.76283
+    },
+    {
+      "id": "Q492672",
+      "name": "Sternenweiher",
+      "lat": 47.195556,
+      "lng": 8.691944
+    },
+    {
+      "id": "Q141690172",
+      "name": "Stilli Rüss",
+      "lat": 47.31373,
+      "lng": 8.36911
+    },
+    {
+      "id": "Q141690840",
+      "name": "Stöckweier",
+      "lat": 47.32756,
+      "lng": 8.86962
+    },
+    {
+      "id": "Q141690175",
+      "name": "Storzeweier",
+      "lat": 47.55139,
+      "lng": 8.87149
+    },
+    {
+      "id": "Q141690808",
+      "name": "Strickelweier",
+      "lat": 47.27131,
+      "lng": 8.94427
+    },
+    {
+      "id": "Q141691196",
+      "name": "Teiliger Weier",
+      "lat": 47.42515,
+      "lng": 8.76999
+    },
+    {
+      "id": "Q492669",
+      "name": "Teufenbachweiher",
+      "lat": 47.180731,
+      "lng": 8.638539
+    },
+    {
+      "id": "Q141691419",
+      "name": "Tobelweier",
+      "lat": 47.37441,
+      "lng": 8.80247
+    },
+    {
+      "id": "Q676682",
+      "name": "Türlersee",
+      "lat": 47.268333,
+      "lng": 8.502778
+    },
+    {
+      "id": "Q141690839",
+      "name": "Wäbereggweiher",
+      "lat": 47.28811,
+      "lng": 8.93509
+    },
+    {
+      "id": "Q141691655",
+      "name": "Wildertweiher",
+      "lat": 47.39642,
+      "lng": 8.72475
+    },
+    {
+      "id": "Q141691191",
+      "name": "Wilemer See",
+      "lat": 47.59998,
+      "lng": 8.79911
+    },
+    {
+      "id": "Q5825174",
+      "name": "Wilersee",
+      "lat": 47.171111,
+      "lng": 8.618889
+    },
+    {
+      "id": "Q141691667",
+      "name": "Ziegelweier",
+      "lat": 47.55676,
+      "lng": 8.75997
+    }
+  ]
+}

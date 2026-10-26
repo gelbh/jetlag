@@ -1,1 +1,42 @@
-{ "category": "body_of_water", "source": "none", "places": [] }
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 43.4669,
+    "west": -70.492,
+    "north": 43.8488,
+    "east": -69.9759
+  },
+  "places": [
+    {
+      "id": "Q33237764",
+      "name": "Chaffin Pond",
+      "lat": 43.848333,
+      "lng": -70.443333
+    },
+    {
+      "id": "Q34884269",
+      "name": "Dundee Pond",
+      "lat": 43.787222,
+      "lng": -70.454444
+    },
+    {
+      "id": "Q33253238",
+      "name": "Forest Lake",
+      "lat": 43.821667,
+      "lng": -70.329167
+    },
+    {
+      "id": "Q33257615",
+      "name": "Great Pond",
+      "lat": 43.574722,
+      "lng": -70.232222
+    },
+    {
+      "id": "Q25238418",
+      "name": "Highland Lake",
+      "lat": 43.766667,
+      "lng": -70.35
+    }
+  ]
+}

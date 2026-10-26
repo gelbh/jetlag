@@ -1,1 +1,42 @@
-{ "category": "amusement_park", "source": "none", "places": [] }
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.28,
+    "west": -0.51,
+    "north": 51.7,
+    "east": 0.3357
+  },
+  "places": [
+    {
+      "id": "Q1070642",
+      "name": "Chessington World of Adventures",
+      "lat": 51.348611,
+      "lng": -0.316667
+    },
+    {
+      "id": "Q5189711",
+      "name": "Croydon Water Palace",
+      "lat": 51.356,
+      "lng": -0.115
+    },
+    {
+      "id": "Q7135338",
+      "name": "London Paramount",
+      "lat": 51.4618,
+      "lng": 0.311745
+    },
+    {
+      "id": "Q125662212",
+      "name": "Phantom Peak",
+      "lat": 51.4977,
+      "lng": -0.0451
+    },
+    {
+      "id": "Q107176945",
+      "name": "SegaWorld London",
+      "lat": 51.511,
+      "lng": -0.133
+    }
+  ]
+}

@@ -1,6 +1,72 @@
 {
   "category": "amusement_park",
-  "source": "none",
-  "bbox": { "south": -34.2, "west": 150.5, "north": -33.3, "east": 151.35 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -34.3574,
+    "west": 149.9948,
+    "north": -32.9761,
+    "east": 151.363
+  },
+  "places": [
+    {
+      "id": "Q116229538",
+      "name": "Bigge Park Water Playground",
+      "lat": -33.92237,
+      "lng": 150.92839
+    },
+    {
+      "id": "Q5350849",
+      "name": "El Caballo Blanco",
+      "lat": -34.0097,
+      "lng": 150.775
+    },
+    {
+      "id": "Q65047541",
+      "name": "Fairyland, Lane Cove River",
+      "lat": -33.798351,
+      "lng": 151.149661
+    },
+    {
+      "id": "Q1165470",
+      "name": "Luna Park",
+      "lat": -33.847557,
+      "lng": 151.210066
+    },
+    {
+      "id": "Q6730737",
+      "name": "Magic Kingdom",
+      "lat": -33.8991,
+      "lng": 150.97
+    },
+    {
+      "id": "Q6750613",
+      "name": "Manly Fun Pier",
+      "lat": -33.799265,
+      "lng": 151.284751
+    },
+    {
+      "id": "Q6750622",
+      "name": "Manly Waterworks",
+      "lat": -33.7991,
+      "lng": 151.281
+    },
+    {
+      "id": "Q97455426",
+      "name": "Stante Reserve",
+      "lat": -33.919167,
+      "lng": 150.850556
+    },
+    {
+      "id": "Q7989947",
+      "name": "Sydney Action Park",
+      "lat": -33.8088,
+      "lng": 150.911
+    },
+    {
+      "id": "Q8031906",
+      "name": "Wonderland Sydney",
+      "lat": -33.8012,
+      "lng": 150.848
+    }
+  ]
 }

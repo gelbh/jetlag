@@ -1,1 +1,180 @@
-{ "category": "library", "source": "none", "places": [] }
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 43.4669,
+    "west": -70.492,
+    "north": 43.8488,
+    "east": -69.9759
+  },
+  "places": [
+    {
+      "id": "Q4709796",
+      "name": "Albert Brenner Glickman Family Library",
+      "lat": 43.6626,
+      "lng": -70.2725
+    },
+    {
+      "id": "Q4848369",
+      "name": "Bailey Island Library Hall",
+      "lat": 43.7325,
+      "lng": -69.995278
+    },
+    {
+      "id": "Q14715176",
+      "name": "Baxter Building (Portland, Maine)",
+      "lat": 43.6539,
+      "lng": -70.2643
+    },
+    {
+      "id": "Q4873853",
+      "name": "Baxter Memorial Library",
+      "lat": 43.677,
+      "lng": -70.4417
+    },
+    {
+      "id": "Q69773175",
+      "name": "Chebeague Island Library",
+      "lat": 43.739657,
+      "lng": -70.107668
+    },
+    {
+      "id": "Q69773693",
+      "name": "Cliff Island Library",
+      "lat": 43.697711,
+      "lng": -70.105744
+    },
+    {
+      "id": "Q5318562",
+      "name": "Dyer Library",
+      "lat": 43.501,
+      "lng": -70.4416
+    },
+    {
+      "id": "Q5432595",
+      "name": "Falmouth Memorial Library",
+      "lat": 43.723,
+      "lng": -70.2361
+    },
+    {
+      "id": "Q18152581",
+      "name": "J.G. Deering House",
+      "lat": 43.5015,
+      "lng": -70.4421
+    },
+    {
+      "id": "Q69773397",
+      "name": "Libby Memorial Library",
+      "lat": 43.515876,
+      "lng": -70.376436
+    },
+    {
+      "id": "Q69773626",
+      "name": "Long Island Community Library",
+      "lat": 43.683748,
+      "lng": -70.160871
+    },
+    {
+      "id": "Q6736375",
+      "name": "Maine Historical Society",
+      "lat": 43.6568,
+      "lng": -70.2603
+    },
+    {
+      "id": "Q20164457",
+      "name": "McArthur Public Library",
+      "lat": 43.49457,
+      "lng": -70.45799
+    },
+    {
+      "id": "Q69773596",
+      "name": "Merrill Memorial Library",
+      "lat": 43.800858,
+      "lng": -70.187297
+    },
+    {
+      "id": "Q69773611",
+      "name": "North Gorham Public Library",
+      "lat": 43.798582,
+      "lng": -70.45491
+    },
+    {
+      "id": "Q69773689",
+      "name": "Ocean Park Memorial Library",
+      "lat": 43.5002,
+      "lng": -70.384792
+    },
+    {
+      "id": "Q69773235",
+      "name": "Orrs Island Library",
+      "lat": 43.761274,
+      "lng": -69.976297
+    },
+    {
+      "id": "Q69773444",
+      "name": "Portland - Burbank Branch Library",
+      "lat": 43.67139,
+      "lng": -70.295014
+    },
+    {
+      "id": "Q69773437",
+      "name": "Portland - Peaks Island Branch Library",
+      "lat": 43.658337,
+      "lng": -70.198554
+    },
+    {
+      "id": "Q69773441",
+      "name": "Portland - Riverton Branch Library",
+      "lat": 43.697234,
+      "lng": -70.307591
+    },
+    {
+      "id": "Q7232014",
+      "name": "Portland Public Library",
+      "lat": 43.657937,
+      "lng": -70.259401
+    },
+    {
+      "id": "Q69773446",
+      "name": "Portland Public Portable Library",
+      "lat": 43.697234,
+      "lng": -70.307591
+    },
+    {
+      "id": "Q7430309",
+      "name": "Scarborough Public Library",
+      "lat": 43.596,
+      "lng": -70.3361
+    },
+    {
+      "id": "Q69773491",
+      "name": "South Portland - Memorial Branch Library",
+      "lat": 43.626362,
+      "lng": -70.305472
+    },
+    {
+      "id": "Q7568268",
+      "name": "South Portland Public Library",
+      "lat": 43.634,
+      "lng": -70.25
+    },
+    {
+      "id": "Q69773136",
+      "name": "Thomas Memorial Library",
+      "lat": 43.596034,
+      "lng": -70.23062
+    },
+    {
+      "id": "Q7962296",
+      "name": "Walker Memorial Library",
+      "lat": 43.676,
+      "lng": -70.3637
+    },
+    {
+      "id": "Q69773575",
+      "name": "Windham Public Library",
+      "lat": 43.791082,
+      "lng": -70.411741
+    }
+  ]
+}

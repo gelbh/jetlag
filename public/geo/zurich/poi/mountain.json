@@ -1,1 +1,66 @@
-{ "category": "mountain", "source": "none", "places": [] }
+{
+  "category": "mountain",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q16589",
+      "name": "Bachtel",
+      "lat": 47.294722,
+      "lng": 8.886389
+    },
+    {
+      "id": "Q997950",
+      "name": "Buechberg",
+      "lat": 47.2014,
+      "lng": 8.90893
+    },
+    {
+      "id": "Q8537747",
+      "name": "Bürglen",
+      "lat": 47.257778,
+      "lng": 8.537222
+    },
+    {
+      "id": "Q5964585",
+      "name": "Höchhand",
+      "lat": 47.29779,
+      "lng": 8.97927
+    },
+    {
+      "id": "Q442082",
+      "name": "Hörnli",
+      "lat": 47.371,
+      "lng": 8.94175
+    },
+    {
+      "id": "Q6004799",
+      "name": "Immenberg",
+      "lat": 47.53214,
+      "lng": 8.97871
+    },
+    {
+      "id": "Q15259",
+      "name": "Irchel",
+      "lat": 47.55,
+      "lng": 8.583333
+    },
+    {
+      "id": "Q15258",
+      "name": "Lägern",
+      "lat": 47.48187,
+      "lng": 8.39385
+    },
+    {
+      "id": "Q15283",
+      "name": "Pfannenstiel",
+      "lat": 47.2922,
+      "lng": 8.67083
+    }
+  ]
+}

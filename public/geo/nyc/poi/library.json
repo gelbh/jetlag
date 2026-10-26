@@ -1,1 +1,2022 @@
-{ "category": "library", "source": "none", "places": [] }
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 40.49,
+    "west": -74.26,
+    "north": 40.92,
+    "east": -73.7
+  },
+  "places": [
+    {
+      "id": "Q28739775",
+      "name": "103 West 135th Street",
+      "lat": 40.814167,
+      "lng": -73.940833
+    },
+    {
+      "id": "Q69968659",
+      "name": "125th Street Library",
+      "lat": 40.803056,
+      "lng": -73.934861
+    },
+    {
+      "id": "Q69968765",
+      "name": "53rd Street Library",
+      "lat": 40.760773,
+      "lng": -73.97675
+    },
+    {
+      "id": "Q69968572",
+      "name": "58th Street Library",
+      "lat": 40.761819,
+      "lng": -73.969078
+    },
+    {
+      "id": "Q69968678",
+      "name": "67th Street Library",
+      "lat": 40.765071,
+      "lng": -73.959474
+    },
+    {
+      "id": "Q69968656",
+      "name": "96th Street Library",
+      "lat": 40.786111,
+      "lng": -73.951667
+    },
+    {
+      "id": "Q4650212",
+      "name": "ABC No Rio",
+      "lat": 40.7192,
+      "lng": -73.9856
+    },
+    {
+      "id": "Q4680028",
+      "name": "Adam and Sophie Gimbel Design Library",
+      "lat": 40.7352,
+      "lng": -73.9948
+    },
+    {
+      "id": "Q116771964",
+      "name": "Adams Street Library",
+      "lat": 40.704167,
+      "lng": -73.988333
+    },
+    {
+      "id": "Q69968512",
+      "name": "Aguilar Library",
+      "lat": 40.794443,
+      "lng": -73.943625
+    },
+    {
+      "id": "Q69968515",
+      "name": "Allerton Library",
+      "lat": 40.86671,
+      "lng": -73.863451
+    },
+    {
+      "id": "Q69957874",
+      "name": "Alwood Branch",
+      "lat": 40.847266,
+      "lng": -74.161838
+    },
+    {
+      "id": "Q69957113",
+      "name": "Ampere Branch",
+      "lat": 40.765529,
+      "lng": -74.194698
+    },
+    {
+      "id": "Q69968629",
+      "name": "Andrew Heiskell Braille and Talking Book Library",
+      "lat": 40.740374,
+      "lng": -73.992644
+    },
+    {
+      "id": "Q572548",
+      "name": "Anthology Film Archives",
+      "lat": 40.7247,
+      "lng": -73.9901
+    },
+    {
+      "id": "Q4653639",
+      "name": "ARChive of Contemporary Music",
+      "lat": 40.7186,
+      "lng": -74.0037
+    },
+    {
+      "id": "Q124547473",
+      "name": "Arlington Brooklyn Library",
+      "lat": 40.681333,
+      "lng": -73.887313
+    },
+    {
+      "id": "Q105027447",
+      "name": "Art & Architecture Collection",
+      "lat": 40.753056,
+      "lng": -73.981944
+    },
+    {
+      "id": "Q72000845",
+      "name": "Arthur W. Diamond Law Library, Columbia University",
+      "lat": 40.8071,
+      "lng": -73.9603
+    },
+    {
+      "id": "Q124667409",
+      "name": "Arverne Library",
+      "lat": 40.593066,
+      "lng": -73.784341
+    },
+    {
+      "id": "Q124667410",
+      "name": "Astoria Library",
+      "lat": 40.772173,
+      "lng": -73.928757
+    },
+    {
+      "id": "Q124667411",
+      "name": "Auburndale Library",
+      "lat": 40.773525,
+      "lng": -73.796552
+    },
+    {
+      "id": "Q790646",
+      "name": "Avery Architectural and Fine Arts Library",
+      "lat": 40.8082,
+      "lng": -73.961
+    },
+    {
+      "id": "Q69967875",
+      "name": "Baisley Park Library",
+      "lat": 40.680341,
+      "lng": -73.792019
+    },
+    {
+      "id": "Q16982711",
+      "name": "Battery Park City Library",
+      "lat": 40.715614,
+      "lng": -74.015853
+    },
+    {
+      "id": "Q124667412",
+      "name": "Bay Terrace Library",
+      "lat": 40.783103,
+      "lng": -73.777013
+    },
+    {
+      "id": "Q69968523",
+      "name": "Baychester Library",
+      "lat": 40.871119,
+      "lng": -73.829446
+    },
+    {
+      "id": "Q4874699",
+      "name": "Bayonne Public Library",
+      "lat": 40.671428,
+      "lng": -74.115228
+    },
+    {
+      "id": "Q124667413",
+      "name": "Bayside Library",
+      "lat": 40.760363,
+      "lng": -73.768588
+    },
+    {
+      "id": "Q110320251",
+      "name": "Bedford Library",
+      "lat": 40.68183,
+      "lng": -73.95602
+    },
+    {
+      "id": "Q124667414",
+      "name": "Bellerose Library",
+      "lat": 40.735403,
+      "lng": -73.717266
+    },
+    {
+      "id": "Q4883867",
+      "name": "Belleville Public Library and Information Center",
+      "lat": 40.788692,
+      "lng": -74.152449
+    },
+    {
+      "id": "Q69968526",
+      "name": "Belmont Library and Enrico Fermi Cultural Center",
+      "lat": 40.85453,
+      "lng": -73.887807
+    },
+    {
+      "id": "Q124896276",
+      "name": "Benjamin S. Rosenthal Library",
+      "lat": 40.736375,
+      "lng": -73.820027
+    },
+    {
+      "id": "Q69968530",
+      "name": "Bloomingdale Library",
+      "lat": 40.796184,
+      "lng": -73.967407
+    },
+    {
+      "id": "Q69966352",
+      "name": "Bookmobile (transit Van)",
+      "lat": 40.674506,
+      "lng": -73.970431
+    },
+    {
+      "id": "Q124667415",
+      "name": "Briarwood Library",
+      "lat": 40.71014,
+      "lng": -73.819621
+    },
+    {
+      "id": "Q124667416",
+      "name": "Broad Channel Library",
+      "lat": 40.600838,
+      "lng": -73.820374
+    },
+    {
+      "id": "Q124667417",
+      "name": "Broadway Library",
+      "lat": 40.758859,
+      "lng": -73.918772
+    },
+    {
+      "id": "Q35186815",
+      "name": "Brockway Memorial Library",
+      "lat": 40.767618,
+      "lng": -73.959285
+    },
+    {
+      "id": "Q18148660",
+      "name": "Bronx Community College Library",
+      "lat": 40.85901,
+      "lng": -73.91255
+    },
+    {
+      "id": "Q4974191",
+      "name": "Bronx Library Center",
+      "lat": 40.8631,
+      "lng": -73.8945
+    },
+    {
+      "id": "Q22329565",
+      "name": "Brooklyn Heights Branch",
+      "lat": 40.6957,
+      "lng": -73.9913
+    },
+    {
+      "id": "Q1198796",
+      "name": "Brooklyn Public Library",
+      "lat": 40.6725,
+      "lng": -73.968333
+    },
+    {
+      "id": "Q116448438",
+      "name": "Brooklyn Public Library - Bushwick Branch",
+      "lat": 40.70456,
+      "lng": -73.93961
+    },
+    {
+      "id": "Q69966304",
+      "name": "Brower Park",
+      "lat": 40.675157,
+      "lng": -73.948609
+    },
+    {
+      "id": "Q63969940",
+      "name": "Burke Library at Union Theological Seminary",
+      "lat": 40.811,
+      "lng": -73.9616
+    },
+    {
+      "id": "Q5002628",
+      "name": "Butler Library",
+      "lat": 40.806389,
+      "lng": -73.963333
+    },
+    {
+      "id": "Q72000857",
+      "name": "C.V. Starr East Asian Library",
+      "lat": 40.807287,
+      "lng": -73.961625
+    },
+    {
+      "id": "Q69967878",
+      "name": "Cambria Heights Library",
+      "lat": 40.695551,
+      "lng": -73.741307
+    },
+    {
+      "id": "Q69966305",
+      "name": "Canarsie",
+      "lat": 40.642293,
+      "lng": -73.899194
+    },
+    {
+      "id": "Q5043927",
+      "name": "Carnegie Library",
+      "lat": 40.8153,
+      "lng": -74.2208
+    },
+    {
+      "id": "Q69957418",
+      "name": "Carteret Public Library",
+      "lat": 40.578687,
+      "lng": -74.219699
+    },
+    {
+      "id": "Q69968533",
+      "name": "Castle Hill Library",
+      "lat": 40.826528,
+      "lng": -73.850139
+    },
+    {
+      "id": "Q69957107",
+      "name": "Cedar Grove Free Public Library",
+      "lat": 40.851384,
+      "lng": -74.229218
+    },
+    {
+      "id": "Q4974851",
+      "name": "Center for Brooklyn History",
+      "lat": 40.694761,
+      "lng": -73.992794
+    },
+    {
+      "id": "Q124667419",
+      "name": "Central Library",
+      "lat": 40.707865,
+      "lng": -73.795295
+    },
+    {
+      "id": "Q111147738",
+      "name": "Charleston Library",
+      "lat": 40.52957,
+      "lng": -74.23043
+    },
+    {
+      "id": "Q69968537",
+      "name": "Chatham Square Library",
+      "lat": 40.71351,
+      "lng": -73.996419
+    },
+    {
+      "id": "Q69968539",
+      "name": "City Island Library",
+      "lat": 40.847595,
+      "lng": -73.786583
+    },
+    {
+      "id": "Q69968542",
+      "name": "Clason's Point Library",
+      "lat": 40.830072,
+      "lng": -73.874776
+    },
+    {
+      "id": "Q69956684",
+      "name": "Cliffside Park Free Library",
+      "lat": 40.820476,
+      "lng": -73.988579
+    },
+    {
+      "id": "Q69966308",
+      "name": "Clinton Hill Library",
+      "lat": 40.6874,
+      "lng": -73.965833
+    },
+    {
+      "id": "Q139591278",
+      "name": "College of Staten Island Library",
+      "lat": 40.59748,
+      "lng": -74.14842
+    },
+    {
+      "id": "Q5149897",
+      "name": "Columbia University Libraries",
+      "lat": 40.808194,
+      "lng": -73.960972
+    },
+    {
+      "id": "Q69968552",
+      "name": "Columbus Library",
+      "lat": 40.765025,
+      "lng": -73.991505
+    },
+    {
+      "id": "Q124667420",
+      "name": "Corona Library",
+      "lat": 40.750871,
+      "lng": -73.862204
+    },
+    {
+      "id": "Q69966309",
+      "name": "Cortelyou Library",
+      "lat": 40.640508,
+      "lng": -73.966069
+    },
+    {
+      "id": "Q69968555",
+      "name": "Countee Cullen Library",
+      "lat": 40.814872,
+      "lng": -73.940648
+    },
+    {
+      "id": "Q124667421",
+      "name": "Court Square Library",
+      "lat": 40.748456,
+      "lng": -73.944539
+    },
+    {
+      "id": "Q69966312",
+      "name": "Cypress Hills",
+      "lat": 40.672518,
+      "lng": -73.87391
+    },
+    {
+      "id": "Q2901276",
+      "name": "Dag Hammarskjöld Library",
+      "lat": 40.748889,
+      "lng": -73.969194
+    },
+    {
+      "id": "Q5215926",
+      "name": "Danforth Memorial Library",
+      "lat": 40.918654,
+      "lng": -74.164125
+    },
+    {
+      "id": "Q111153864",
+      "name": "DeKalb Library",
+      "lat": 40.694834,
+      "lng": -73.928402
+    },
+    {
+      "id": "Q69968558",
+      "name": "Dongan Hills Library",
+      "lat": 40.59057,
+      "lng": -74.100875
+    },
+    {
+      "id": "Q119846970",
+      "name": "Dorot Jewish Division",
+      "lat": 40.753056,
+      "lng": -73.981944
+    },
+    {
+      "id": "Q69967881",
+      "name": "Douglaston/Little Neck Library",
+      "lat": 40.767952,
+      "lng": -73.738089
+    },
+    {
+      "id": "Q69957932",
+      "name": "Dwight D. Eisenhower Library",
+      "lat": 40.904032,
+      "lng": -74.21763
+    },
+    {
+      "id": "Q35187837",
+      "name": "Eagle Lake Public Library",
+      "lat": 40.751962,
+      "lng": -74.19138
+    },
+    {
+      "id": "Q69967884",
+      "name": "East Elmhurst Library",
+      "lat": 40.76278,
+      "lng": -73.874016
+    },
+    {
+      "id": "Q69966314",
+      "name": "East Flatbush",
+      "lat": 40.655854,
+      "lng": -73.915135
+    },
+    {
+      "id": "Q69967888",
+      "name": "East Flushing Library",
+      "lat": 40.757854,
+      "lng": -73.785382
+    },
+    {
+      "id": "Q5329081",
+      "name": "East Orange Public Library",
+      "lat": 40.759796,
+      "lng": -74.211733
+    },
+    {
+      "id": "Q69956705",
+      "name": "East Rutherford Memorial Library",
+      "lat": 40.832795,
+      "lng": -74.098549
+    },
+    {
+      "id": "Q69968561",
+      "name": "Eastchester Library",
+      "lat": 40.870145,
+      "lng": -73.845541
+    },
+    {
+      "id": "Q85848054",
+      "name": "Eastern Parkway",
+      "lat": 40.66855,
+      "lng": -73.93366
+    },
+    {
+      "id": "Q69968565",
+      "name": "Edenwald Library",
+      "lat": 40.888618,
+      "lng": -73.8408
+    },
+    {
+      "id": "Q4543236",
+      "name": "Edgewater Public Library",
+      "lat": 40.829437,
+      "lng": -73.974088
+    },
+    {
+      "id": "Q69958066",
+      "name": "Elizabeth Free Public Library",
+      "lat": 40.661551,
+      "lng": -74.215145
+    },
+    {
+      "id": "Q3051566",
+      "name": "Elmer Holmes Bobst Library",
+      "lat": 40.729444,
+      "lng": -73.997222
+    },
+    {
+      "id": "Q124667424",
+      "name": "Elmhurst Library",
+      "lat": 40.738498,
+      "lng": -73.877382
+    },
+    {
+      "id": "Q69958070",
+      "name": "Elmora Branch",
+      "lat": 40.663888,
+      "lng": -74.235287
+    },
+    {
+      "id": "Q69957116",
+      "name": "Elmwood Branch",
+      "lat": 40.75502,
+      "lng": -74.22255
+    },
+    {
+      "id": "Q69956711",
+      "name": "Elmwood Park Free Public Library",
+      "lat": 40.908352,
+      "lng": -74.1194
+    },
+    {
+      "id": "Q69968568",
+      "name": "Epiphany Library",
+      "lat": 40.738265,
+      "lng": -73.981861
+    },
+    {
+      "id": "Q69956716",
+      "name": "Fairview Free Public Library",
+      "lat": 40.815634,
+      "lng": -73.995668
+    },
+    {
+      "id": "Q5431858",
+      "name": "Fales Library",
+      "lat": 40.7297,
+      "lng": -73.997
+    },
+    {
+      "id": "Q124667426",
+      "name": "Far Rockaway Teen Library",
+      "lat": 40.603169,
+      "lng": -73.752307
+    },
+    {
+      "id": "Q69957274",
+      "name": "Five Corners Branch",
+      "lat": 40.734938,
+      "lng": -74.059494
+    },
+    {
+      "id": "Q69967289",
+      "name": "Floral Park Public Library",
+      "lat": 40.724909,
+      "lng": -73.706479
+    },
+    {
+      "id": "Q124667428",
+      "name": "Flushing Library",
+      "lat": 40.757784,
+      "lng": -73.829252
+    },
+    {
+      "id": "Q5464073",
+      "name": "Fogelman Social Sciences and Humanities Library",
+      "lat": 40.7366,
+      "lng": -73.9965
+    },
+    {
+      "id": "Q124667429",
+      "name": "Forest Hills Library",
+      "lat": 40.721777,
+      "lng": -73.843378
+    },
+    {
+      "id": "Q69956718",
+      "name": "Fort Lee Free Public Library",
+      "lat": 40.852312,
+      "lng": -73.972713
+    },
+    {
+      "id": "Q35188505",
+      "name": "Fort Meade Public Library",
+      "lat": 40.713649,
+      "lng": -73.994112
+    },
+    {
+      "id": "Q69968573",
+      "name": "Fort Washington Library",
+      "lat": 40.847554,
+      "lng": -73.933551
+    },
+    {
+      "id": "Q69968577",
+      "name": "Francis Martin Library",
+      "lat": 40.855783,
+      "lng": -73.910349
+    },
+    {
+      "id": "Q5500018",
+      "name": "Free Public Library, Upper Montclair Branch",
+      "lat": 40.840504,
+      "lng": -74.204647
+    },
+    {
+      "id": "Q69967889",
+      "name": "Fresh Meadows Library",
+      "lat": 40.741734,
+      "lng": -73.782405
+    },
+    {
+      "id": "Q5503390",
+      "name": "Frick Art Research Library",
+      "lat": 40.7714,
+      "lng": -73.9669
+    },
+    {
+      "id": "Q71854762",
+      "name": "Gabe M. Wiener Music & Arts Library",
+      "lat": 40.80806,
+      "lng": -73.96336
+    },
+    {
+      "id": "Q69956722",
+      "name": "Garfield Free Public Library",
+      "lat": 40.880641,
+      "lng": -74.10129
+    },
+    {
+      "id": "Q119846947",
+      "name": "General Research Division",
+      "lat": 40.753056,
+      "lng": -73.981944
+    },
+    {
+      "id": "Q69968586",
+      "name": "George Bruce Library",
+      "lat": 40.813854,
+      "lng": -73.956793
+    },
+    {
+      "id": "Q5539161",
+      "name": "George F Smith Library of the Health Sciences",
+      "lat": 40.7434,
+      "lng": -74.1918
+    },
+    {
+      "id": "Q69966322",
+      "name": "Gerritsen Beach",
+      "lat": 40.591335,
+      "lng": -73.923584
+    },
+    {
+      "id": "Q124667431",
+      "name": "Glen Oaks Library",
+      "lat": 40.745388,
+      "lng": -73.715036
+    },
+    {
+      "id": "Q69957121",
+      "name": "Glen Ridge Free Public Library",
+      "lat": 40.801189,
+      "lng": -74.203525
+    },
+    {
+      "id": "Q124667432",
+      "name": "Glendale Library",
+      "lat": 40.703149,
+      "lng": -73.875748
+    },
+    {
+      "id": "Q69957270",
+      "name": "Glenn D. Cunningham Branch",
+      "lat": 40.708462,
+      "lng": -74.081835
+    },
+    {
+      "id": "Q85852060",
+      "name": "Gottesman Libraries",
+      "lat": 40.81011,
+      "lng": -73.96064
+    },
+    {
+      "id": "Q69968588",
+      "name": "Grand Concourse Library",
+      "lat": 40.84384,
+      "lng": -73.910215
+    },
+    {
+      "id": "Q69968591",
+      "name": "Great Kills Library",
+      "lat": 40.552417,
+      "lng": -74.150868
+    },
+    {
+      "id": "Q69967296",
+      "name": "Great Neck Library",
+      "lat": 40.798525,
+      "lng": -73.747727
+    },
+    {
+      "id": "Q69967308",
+      "name": "Great Neck Library - Lakeville Branch",
+      "lat": 40.775025,
+      "lng": -73.732359
+    },
+    {
+      "id": "Q69967306",
+      "name": "Great Neck Library - Station Branch",
+      "lat": 40.786202,
+      "lng": -73.727409
+    },
+    {
+      "id": "Q125454746",
+      "name": "Greenpoint Library",
+      "lat": 40.725954,
+      "lng": -73.95064
+    },
+    {
+      "id": "Q69968594",
+      "name": "Hamilton Fish Park Library",
+      "lat": 40.718986,
+      "lng": -73.976189
+    },
+    {
+      "id": "Q7013883",
+      "name": "Hamilton Grange Library",
+      "lat": 40.825356,
+      "lng": -73.947805
+    },
+    {
+      "id": "Q110302635",
+      "name": "Harlem Library",
+      "lat": 40.806184,
+      "lng": -73.943306
+    },
+    {
+      "id": "Q7013880",
+      "name": "Harry Belafonte 115th Street Library",
+      "lat": 40.802778,
+      "lng": -73.953889
+    },
+    {
+      "id": "Q69956749",
+      "name": "Hasbrouck Heights Free Public Library",
+      "lat": 40.865184,
+      "lng": -74.074839
+    },
+    {
+      "id": "Q69967403",
+      "name": "Henry Waldinger Memorial Library",
+      "lat": 40.663589,
+      "lng": -73.706838
+    },
+    {
+      "id": "Q69967314",
+      "name": "Hewlett-Woodmere Public Library",
+      "lat": 40.633358,
+      "lng": -73.705612
+    },
+    {
+      "id": "Q95113812",
+      "name": "High Bridge Library",
+      "lat": 40.837929,
+      "lng": -73.923553
+    },
+    {
+      "id": "Q69966323",
+      "name": "Highlawn",
+      "lat": 40.605709,
+      "lng": -73.985971
+    },
+    {
+      "id": "Q124667433",
+      "name": "Hillcrest Library",
+      "lat": 40.728981,
+      "lng": -73.781902
+    },
+    {
+      "id": "Q69958090",
+      "name": "Hillside Free Public Library",
+      "lat": 40.69537,
+      "lng": -74.230213
+    },
+    {
+      "id": "Q2420849",
+      "name": "Hispanic Society of America",
+      "lat": 40.83327,
+      "lng": -73.94643
+    },
+    {
+      "id": "Q69957263",
+      "name": "Hoboken Public Library",
+      "lat": 40.743143,
+      "lng": -74.032023
+    },
+    {
+      "id": "Q124667434",
+      "name": "Hollis Library",
+      "lat": 40.719914,
+      "lng": -73.762191
+    },
+    {
+      "id": "Q69966326",
+      "name": "Homecrest",
+      "lat": 40.59526,
+      "lng": -73.960858
+    },
+    {
+      "id": "Q118903892",
+      "name": "Horological Society of New York",
+      "lat": 40.755278,
+      "lng": -73.981389
+    },
+    {
+      "id": "Q124667435",
+      "name": "Howard Beach Library",
+      "lat": 40.664069,
+      "lng": -73.841928
+    },
+    {
+      "id": "Q69957277",
+      "name": "Hudson City Branch",
+      "lat": 40.745651,
+      "lng": -74.050469
+    },
+    {
+      "id": "Q69968602",
+      "name": "Hudson Park Library",
+      "lat": 40.730107,
+      "lng": -74.005331
+    },
+    {
+      "id": "Q69968604",
+      "name": "Huguenot Park Library",
+      "lat": 40.534123,
+      "lng": -74.192958
+    },
+    {
+      "id": "Q73902356",
+      "name": "Hunters Point Library",
+      "lat": 40.74629,
+      "lng": -73.9566
+    },
+    {
+      "id": "Q5945327",
+      "name": "Huntington Free Library and Reading Room",
+      "lat": 40.84,
+      "lng": -73.843111
+    },
+    {
+      "id": "Q69968607",
+      "name": "Hunts Point Library",
+      "lat": 40.818635,
+      "lng": -73.893881
+    },
+    {
+      "id": "Q69968614",
+      "name": "Inwood Library–Joseph and Sheila Rosenblatt Building",
+      "lat": 40.866119,
+      "lng": -73.925541
+    },
+    {
+      "id": "Q119847031",
+      "name": "Irma and Paul Milstein Division of United States History, Local History and Genealogy",
+      "lat": 40.753056,
+      "lng": -73.981944
+    },
+    {
+      "id": "Q117712185",
+      "name": "Jackson Heights Library",
+      "lat": 40.751319,
+      "lng": -73.885533
+    },
+    {
+      "id": "Q69966329",
+      "name": "Jamaica Bay",
+      "lat": 40.634071,
+      "lng": -73.889486
+    },
+    {
+      "id": "Q119823580",
+      "name": "Jean Blackwell Hutson Research and Reference Division",
+      "lat": 40.814444,
+      "lng": -73.941111
+    },
+    {
+      "id": "Q69968618",
+      "name": "Jefferson Market Library",
+      "lat": 40.734424,
+      "lng": -73.999012
+    },
+    {
+      "id": "Q69968620",
+      "name": "Jerome Park Library",
+      "lat": 40.869231,
+      "lng": -73.901207
+    },
+    {
+      "id": "Q62578152",
+      "name": "Jerome Robbins Dance Division",
+      "lat": 40.773611,
+      "lng": -73.984444
+    },
+    {
+      "id": "Q69957303",
+      "name": "Jersey City Bookmobile",
+      "lat": 40.718705,
+      "lng": -74.0477
+    },
+    {
+      "id": "Q69957268",
+      "name": "Jersey City Public Library",
+      "lat": 40.718705,
+      "lng": -74.0477
+    },
+    {
+      "id": "Q107722626",
+      "name": "Jewish Theological Seminary Library",
+      "lat": 40.8117,
+      "lng": -73.95971
+    },
+    {
+      "id": "Q18749583",
+      "name": "John Cotton Dana Library",
+      "lat": 40.741811,
+      "lng": -74.174963
+    },
+    {
+      "id": "Q69956867",
+      "name": "John F. Kennedy Memorial Library",
+      "lat": 40.856667,
+      "lng": -74.113333
+    },
+    {
+      "id": "Q69956744",
+      "name": "Johnson Free Public Library",
+      "lat": 40.886869,
+      "lng": -74.041314
+    },
+    {
+      "id": "Q85726620",
+      "name": "Jorge Luis Borges Library, Instituto Cervantes New York",
+      "lat": 40.754909,
+      "lng": -73.970492
+    },
+    {
+      "id": "Q69957308",
+      "name": "Kearny Branch Library",
+      "lat": 40.777983,
+      "lng": -74.141399
+    },
+    {
+      "id": "Q69957306",
+      "name": "Kearny Public Library",
+      "lat": 40.761825,
+      "lng": -74.150095
+    },
+    {
+      "id": "Q69967914",
+      "name": "Kew Gardens Hills Library",
+      "lat": 40.726024,
+      "lng": -73.820995
+    },
+    {
+      "id": "Q69966350",
+      "name": "Kidsmobile",
+      "lat": 40.674506,
+      "lng": -73.970431
+    },
+    {
+      "id": "Q69968622",
+      "name": "Kingsbridge Library",
+      "lat": 40.880437,
+      "lng": -73.907772
+    },
+    {
+      "id": "Q69968625",
+      "name": "Kips Bay Library",
+      "lat": 40.743701,
+      "lng": -73.979624
+    },
+    {
+      "id": "Q75733055",
+      "name": "Klapper Library",
+      "lat": 40.736214,
+      "lng": -73.817441
+    },
+    {
+      "id": "Q105203250",
+      "name": "Kurt R. Schmeller Library",
+      "lat": 40.755957,
+      "lng": -73.756539
+    },
+    {
+      "id": "Q69958075",
+      "name": "La Corte Branch Library",
+      "lat": 40.653287,
+      "lng": -74.2064
+    },
+    {
+      "id": "Q69957280",
+      "name": "Lafayette Branch",
+      "lat": 40.711637,
+      "lng": -74.062425
+    },
+    {
+      "id": "Q115682972",
+      "name": "Langston Hughes Library",
+      "lat": 40.757773,
+      "lng": -73.868071
+    },
+    {
+      "id": "Q69967891",
+      "name": "Laurelton Library",
+      "lat": 40.67683,
+      "lng": -73.745338
+    },
+    {
+      "id": "Q124667439",
+      "name": "Lefferts Library",
+      "lat": 40.687273,
+      "lng": -73.824691
+    },
+    {
+      "id": "Q69967898",
+      "name": "Lefrak City Library",
+      "lat": 40.737892,
+      "lng": -73.861547
+    },
+    {
+      "id": "Q69966331",
+      "name": "Leonard",
+      "lat": 40.713611,
+      "lng": -73.948056
+    },
+    {
+      "id": "Q135455631",
+      "name": "Leonard Lief Library",
+      "lat": 40.870764,
+      "lng": -73.886641
+    },
+    {
+      "id": "Q69956762",
+      "name": "Leonia Public Library",
+      "lat": 40.862498,
+      "lng": -73.989175
+    },
+    {
+      "id": "Q2906262",
+      "name": "Library of Agudas Chassidei Chabad",
+      "lat": 40.669019,
+      "lng": -73.943081
+    },
+    {
+      "id": "Q69958094",
+      "name": "Linden Free Public Library",
+      "lat": 40.634148,
+      "lng": -74.258223
+    },
+    {
+      "id": "Q119847000",
+      "name": "Lionel Pincus and Princess Firyal Map Division",
+      "lat": 40.753056,
+      "lng": -73.981944
+    },
+    {
+      "id": "Q69957889",
+      "name": "Little Falls Public Library",
+      "lat": 40.880486,
+      "lng": -74.22932
+    },
+    {
+      "id": "Q69956764",
+      "name": "Little Ferry Free Public Library",
+      "lat": 40.851228,
+      "lng": -74.043797
+    },
+    {
+      "id": "Q6659659",
+      "name": "Livingston Library",
+      "lat": 40.7428,
+      "lng": -73.9921
+    },
+    {
+      "id": "Q6662727",
+      "name": "Lloyd Sealy Library",
+      "lat": 40.7703,
+      "lng": -73.9883
+    },
+    {
+      "id": "Q69956767",
+      "name": "Lodi Memorial Library",
+      "lat": 40.875535,
+      "lng": -74.087718
+    },
+    {
+      "id": "Q124667441",
+      "name": "Long Island City Library",
+      "lat": 40.757826,
+      "lng": -73.938771
+    },
+    {
+      "id": "Q31079305",
+      "name": "LuEsther T. Mertz Library",
+      "lat": 40.866667,
+      "lng": -73.878889
+    },
+    {
+      "id": "Q69956778",
+      "name": "Lyndhurst Free Public Library",
+      "lat": 40.812318,
+      "lng": -74.125028
+    },
+    {
+      "id": "Q69968632",
+      "name": "Macomb's Bridge Library",
+      "lat": 40.825496,
+      "lng": -73.935825
+    },
+    {
+      "id": "Q27988211",
+      "name": "Macon Library",
+      "lat": 40.683007,
+      "lng": -73.934831
+    },
+    {
+      "id": "Q69966334",
+      "name": "Marcy Library",
+      "lat": 40.691413,
+      "lng": -73.951258
+    },
+    {
+      "id": "Q69968763",
+      "name": "Mariners Harbor Library",
+      "lat": 40.634745,
+      "lng": -74.166264
+    },
+    {
+      "id": "Q69957281",
+      "name": "Marion Branch",
+      "lat": 40.73414,
+      "lng": -74.071566
+    },
+    {
+      "id": "Q69967901",
+      "name": "Maspeth Library",
+      "lat": 40.727119,
+      "lng": -73.893335
+    },
+    {
+      "id": "Q69967899",
+      "name": "McGoldrick Library",
+      "lat": 40.763962,
+      "lng": -73.809899
+    },
+    {
+      "id": "Q69966336",
+      "name": "McKinley Park",
+      "lat": 40.629111,
+      "lng": -74.011559
+    },
+    {
+      "id": "Q110302737",
+      "name": "Melrose Library",
+      "lat": 40.826592,
+      "lng": -73.917562
+    },
+    {
+      "id": "Q124667444",
+      "name": "Middle Village Library",
+      "lat": 40.71258,
+      "lng": -73.880885
+    },
+    {
+      "id": "Q69967903",
+      "name": "Mitchell-Linden Library",
+      "lat": 40.771375,
+      "lng": -73.826606
+    },
+    {
+      "id": "Q27757129",
+      "name": "Montclair Public Library",
+      "lat": 40.841389,
+      "lng": -74.205278
+    },
+    {
+      "id": "Q69968543",
+      "name": "Morningside Heights Library",
+      "lat": 40.806104,
+      "lng": -73.965122
+    },
+    {
+      "id": "Q69968753",
+      "name": "Morris Park Library",
+      "lat": 40.847931,
+      "lng": -73.856713
+    },
+    {
+      "id": "Q69968637",
+      "name": "Morrisania Library",
+      "lat": 40.83134,
+      "lng": -73.9018
+    },
+    {
+      "id": "Q69968644",
+      "name": "Mosholu Library",
+      "lat": 40.87421,
+      "lng": -73.878003
+    },
+    {
+      "id": "Q69968647",
+      "name": "Mott Haven Library",
+      "lat": 40.811331,
+      "lng": -73.924035
+    },
+    {
+      "id": "Q69968439",
+      "name": "Mount Vernon Public Library",
+      "lat": 40.910166,
+      "lng": -73.833495
+    },
+    {
+      "id": "Q69968649",
+      "name": "Muhlenberg Library",
+      "lat": 40.744245,
+      "lng": -73.995902
+    },
+    {
+      "id": "Q69968755",
+      "name": "Mulberry Street Library",
+      "lat": 40.724165,
+      "lng": -73.995519
+    },
+    {
+      "id": "Q110302182",
+      "name": "Music Division",
+      "lat": 40.773611,
+      "lng": -73.984444
+    },
+    {
+      "id": "Q69968652",
+      "name": "New Amsterdam Library",
+      "lat": 40.713283,
+      "lng": -74.007666
+    },
+    {
+      "id": "Q69968654",
+      "name": "New Dorp Library",
+      "lat": 40.57182,
+      "lng": -74.112216
+    },
+    {
+      "id": "Q19877135",
+      "name": "New Rochelle Public Library",
+      "lat": 40.9097,
+      "lng": -73.7825
+    },
+    {
+      "id": "Q7013694",
+      "name": "New York Law Institute",
+      "lat": 40.7083,
+      "lng": -74.0111
+    },
+    {
+      "id": "Q219555",
+      "name": "New York Public Library",
+      "lat": 40.712775,
+      "lng": -74.005973
+    },
+    {
+      "id": "Q7013890",
+      "name": "New York Public Library for the Performing Arts",
+      "lat": 40.773611,
+      "lng": -73.984444
+    },
+    {
+      "id": "Q7013887",
+      "name": "New York Public Library Main Branch",
+      "lat": 40.753333,
+      "lng": -73.982222
+    },
+    {
+      "id": "Q7013996",
+      "name": "New York Society Library",
+      "lat": 40.7762,
+      "lng": -73.9615
+    },
+    {
+      "id": "Q7016733",
+      "name": "Newark Public Library",
+      "lat": 40.7446,
+      "lng": -74.1707
+    },
+    {
+      "id": "Q69957310",
+      "name": "North Bergen Public Library",
+      "lat": 40.804763,
+      "lng": -74.004508
+    },
+    {
+      "id": "Q69957149",
+      "name": "North End Branch",
+      "lat": 40.776563,
+      "lng": -74.162662
+    },
+    {
+      "id": "Q69967905",
+      "name": "North Forest Park Library",
+      "lat": 40.71093,
+      "lng": -73.853599
+    },
+    {
+      "id": "Q124667447",
+      "name": "North Hills Library",
+      "lat": 40.75942,
+      "lng": -73.731307
+    },
+    {
+      "id": "Q69957166",
+      "name": "Nutley Free Public Library",
+      "lat": 40.817542,
+      "lng": -74.158952
+    },
+    {
+      "id": "Q7099697",
+      "name": "Orange Public Library",
+      "lat": 40.7725,
+      "lng": -74.231389
+    },
+    {
+      "id": "Q7109347",
+      "name": "Ottendorfer Library",
+      "lat": 40.729722,
+      "lng": -73.9875
+    },
+    {
+      "id": "Q124667448",
+      "name": "Ozone Park Library",
+      "lat": 40.681283,
+      "lng": -73.847111
+    },
+    {
+      "id": "Q110320328",
+      "name": "Pacific Library",
+      "lat": 40.68348,
+      "lng": -73.978532
+    },
+    {
+      "id": "Q69966337",
+      "name": "Paerdegat",
+      "lat": 40.632517,
+      "lng": -73.919694
+    },
+    {
+      "id": "Q69956796",
+      "name": "Palisades Park Free Public Library",
+      "lat": 40.846544,
+      "lng": -73.997003
+    },
+    {
+      "id": "Q110320327",
+      "name": "Park Slope Library",
+      "lat": 40.668225,
+      "lng": -73.983417
+    },
+    {
+      "id": "Q69968662",
+      "name": "Parkchester Library",
+      "lat": 40.833536,
+      "lng": -73.85822
+    },
+    {
+      "id": "Q69957894",
+      "name": "Passaic Public Library",
+      "lat": 40.857595,
+      "lng": -74.127744
+    },
+    {
+      "id": "Q69957920",
+      "name": "Paterson Public Library Bookmobile",
+      "lat": 40.918654,
+      "lng": -74.164125
+    },
+    {
+      "id": "Q69957295",
+      "name": "Pavonia Branch",
+      "lat": 40.727143,
+      "lng": -74.04763
+    },
+    {
+      "id": "Q69968664",
+      "name": "Pelham Bay Library",
+      "lat": 40.844558,
+      "lng": -73.828019
+    },
+    {
+      "id": "Q69968706",
+      "name": "Pelham Parkway-Van Nest Library",
+      "lat": 40.854949,
+      "lng": -73.863907
+    },
+    {
+      "id": "Q124667449",
+      "name": "Peninsula Library",
+      "lat": 40.5863,
+      "lng": -73.815797
+    },
+    {
+      "id": "Q124667450",
+      "name": "Pomonok Library",
+      "lat": 40.732272,
+      "lng": -73.809902
+    },
+    {
+      "id": "Q110320323",
+      "name": "Poppenhusen Library",
+      "lat": 40.786052,
+      "lng": -73.846536
+    },
+    {
+      "id": "Q69968668",
+      "name": "Port Richmond Library",
+      "lat": 40.637458,
+      "lng": -74.131375
+    },
+    {
+      "id": "Q20011448",
+      "name": "Pratt Institute Libraries",
+      "lat": 40.690857,
+      "lng": -73.965024
+    },
+    {
+      "id": "Q1337750",
+      "name": "Queens Public Library",
+      "lat": 40.7078,
+      "lng": -73.795
+    },
+    {
+      "id": "Q124667451",
+      "name": "Queens Village Library",
+      "lat": 40.719749,
+      "lng": -73.739299
+    },
+    {
+      "id": "Q124667452",
+      "name": "Queensboro Hill Library",
+      "lat": 40.743081,
+      "lng": -73.825526
+    },
+    {
+      "id": "Q124667453",
+      "name": "Queensbridge Tech Lab",
+      "lat": 40.755,
+      "lng": -73.944167
+    },
+    {
+      "id": "Q124667454",
+      "name": "Ravenswood Library",
+      "lat": 40.761583,
+      "lng": -73.933481
+    },
+    {
+      "id": "Q124667456",
+      "name": "Rego Park Library",
+      "lat": 40.726991,
+      "lng": -73.864371
+    },
+    {
+      "id": "Q69957897",
+      "name": "Reid Memorial Branch",
+      "lat": 40.864113,
+      "lng": -74.115605
+    },
+    {
+      "id": "Q131414735",
+      "name": "Rene Wanner Research Library",
+      "lat": 40.74335,
+      "lng": -73.99349
+    },
+    {
+      "id": "Q124667457",
+      "name": "Richmond Hill Library",
+      "lat": 40.701022,
+      "lng": -73.83211
+    },
+    {
+      "id": "Q69968730",
+      "name": "Richmondtown Library",
+      "lat": 40.566888,
+      "lng": -74.138107
+    },
+    {
+      "id": "Q69956824",
+      "name": "Ridgefield Free Public Library",
+      "lat": 40.831936,
+      "lng": -74.004932
+    },
+    {
+      "id": "Q69956827",
+      "name": "Ridgefield Park Public Library",
+      "lat": 40.854515,
+      "lng": -74.022053
+    },
+    {
+      "id": "Q124667458",
+      "name": "Ridgewood Library",
+      "lat": 40.705193,
+      "lng": -73.902867
+    },
+    {
+      "id": "Q95116189",
+      "name": "Riverdale Library",
+      "lat": 40.903702,
+      "lng": -73.902634
+    },
+    {
+      "id": "Q110302683",
+      "name": "Riverside Library",
+      "lat": 40.77426,
+      "lng": -73.98458
+    },
+    {
+      "id": "Q7344839",
+      "name": "Robert Goldwater Library",
+      "lat": 40.778,
+      "lng": -73.963
+    },
+    {
+      "id": "Q137886271",
+      "name": "Robert W. Van Houten Library",
+      "lat": 40.743807,
+      "lng": -74.17799
+    },
+    {
+      "id": "Q69967907",
+      "name": "Rochdale Village Library",
+      "lat": 40.672693,
+      "lng": -73.770639
+    },
+    {
+      "id": "Q69956839",
+      "name": "Rochelle Park Public Library",
+      "lat": 40.912939,
+      "lng": -74.078957
+    },
+    {
+      "id": "Q69968736",
+      "name": "Roosevelt Island Library",
+      "lat": 40.76084,
+      "lng": -73.95073
+    },
+    {
+      "id": "Q124667460",
+      "name": "Rosedale Library",
+      "lat": 40.660152,
+      "lng": -73.739488
+    },
+    {
+      "id": "Q69957152",
+      "name": "Roseville Branch",
+      "lat": 40.750914,
+      "lng": -74.190274
+    },
+    {
+      "id": "Q69956853",
+      "name": "Rutherford Free Pub. Lib.",
+      "lat": 40.826398,
+      "lng": -74.106722
+    },
+    {
+      "id": "Q69956856",
+      "name": "Saddle Brook Free Pub. Lib.",
+      "lat": 40.904958,
+      "lng": -74.089403
+    },
+    {
+      "id": "Q111153262",
+      "name": "Saratoga Library",
+      "lat": 40.684828,
+      "lng": -73.915163
+    },
+    {
+      "id": "Q1060566",
+      "name": "Schomburg Center for Research in Black Culture",
+      "lat": 40.814444,
+      "lng": -73.941111
+    },
+    {
+      "id": "Q124667461",
+      "name": "Seaside Library",
+      "lat": 40.57971,
+      "lng": -73.837487
+    },
+    {
+      "id": "Q69957313",
+      "name": "Secaucus Free Public Library",
+      "lat": 40.793868,
+      "lng": -74.058318
+    },
+    {
+      "id": "Q69968673",
+      "name": "Sedgwick Library",
+      "lat": 40.849333,
+      "lng": -73.917387
+    },
+    {
+      "id": "Q69968676",
+      "name": "Seward Park Library",
+      "lat": 40.71427,
+      "lng": -73.988119
+    },
+    {
+      "id": "Q69968682",
+      "name": "Soundview Library",
+      "lat": 40.818489,
+      "lng": -73.86305
+    },
+    {
+      "id": "Q69968683",
+      "name": "South Beach Library",
+      "lat": 40.595615,
+      "lng": -74.063264
+    },
+    {
+      "id": "Q69967910",
+      "name": "South Hollis Library",
+      "lat": 40.706821,
+      "lng": -73.753626
+    },
+    {
+      "id": "Q124667462",
+      "name": "South Jamaica Library",
+      "lat": 40.695879,
+      "lng": -73.790734
+    },
+    {
+      "id": "Q69957180",
+      "name": "South Orange Public Library",
+      "lat": 40.74711,
+      "lng": -74.256794
+    },
+    {
+      "id": "Q69967911",
+      "name": "South Ozone Park Library",
+      "lat": 40.675076,
+      "lng": -73.809599
+    },
+    {
+      "id": "Q69957911",
+      "name": "South Paterson Branch",
+      "lat": 40.895765,
+      "lng": -74.160517
+    },
+    {
+      "id": "Q69966339",
+      "name": "Spring Creek",
+      "lat": 40.653129,
+      "lng": -73.885658
+    },
+    {
+      "id": "Q69957153",
+      "name": "Springfield Branch",
+      "lat": 40.738106,
+      "lng": -74.189606
+    },
+    {
+      "id": "Q110302861",
+      "name": "Spuyten Duyvil Library",
+      "lat": 40.88624,
+      "lng": -73.91459
+    },
+    {
+      "id": "Q69968670",
+      "name": "St. Agnes Library",
+      "lat": 40.78472,
+      "lng": -73.977218
+    },
+    {
+      "id": "Q124667465",
+      "name": "St. Albans Library",
+      "lat": 40.692284,
+      "lng": -73.760112
+    },
+    {
+      "id": "Q69968672",
+      "name": "St. George Library Center",
+      "lat": 40.641757,
+      "lng": -74.076957
+    },
+    {
+      "id": "Q69968685",
+      "name": "Stapleton Library",
+      "lat": 40.626446,
+      "lng": -74.077915
+    },
+    {
+      "id": "Q69968634",
+      "name": "Stavros Niarchos Foundation Library",
+      "lat": 40.752063,
+      "lng": -73.981891
+    },
+    {
+      "id": "Q124667466",
+      "name": "Steinway Library",
+      "lat": 40.777105,
+      "lng": -73.909496
+    },
+    {
+      "id": "Q61579331",
+      "name": "Stephen B. Luce Library",
+      "lat": 40.805833,
+      "lng": -73.7925
+    },
+    {
+      "id": "Q124667468",
+      "name": "Sunnyside Library",
+      "lat": 40.740977,
+      "lng": -73.921797
+    },
+    {
+      "id": "Q69966348",
+      "name": "Sunset Park",
+      "lat": 40.645866,
+      "lng": -74.013346
+    },
+    {
+      "id": "Q3514826",
+      "name": "Tamiment Library and Robert F. Wagner Archives",
+      "lat": 40.7295,
+      "lng": -73.9973
+    },
+    {
+      "id": "Q69956861",
+      "name": "Teaneck Public Library",
+      "lat": 40.885068,
+      "lng": -74.006358
+    },
+    {
+      "id": "Q69968534",
+      "name": "Terence Cardinal Cooke-Cathedral Library",
+      "lat": 40.756711,
+      "lng": -73.972246
+    },
+    {
+      "id": "Q1478423",
+      "name": "The Morgan Library & Museum",
+      "lat": 40.748803,
+      "lng": -73.981556
+    },
+    {
+      "id": "Q15961559",
+      "name": "Thomas J. Watson Library",
+      "lat": 40.7792,
+      "lng": -73.9629
+    },
+    {
+      "id": "Q69968691",
+      "name": "Throg's Neck Library",
+      "lat": 40.823171,
+      "lng": -73.820066
+    },
+    {
+      "id": "Q69968695",
+      "name": "Todt Hill-Westerleigh Library",
+      "lat": 40.609918,
+      "lng": -74.147797
+    },
+    {
+      "id": "Q69968743",
+      "name": "Tompkins Square Library",
+      "lat": 40.727174,
+      "lng": -73.980552
+    },
+    {
+      "id": "Q69968697",
+      "name": "Tottenville Library",
+      "lat": 40.50988,
+      "lng": -74.244047
+    },
+    {
+      "id": "Q69968700",
+      "name": "Tremont Library",
+      "lat": 40.846153,
+      "lng": -73.89852
+    },
+    {
+      "id": "Q69966349",
+      "name": "Ulmer Park",
+      "lat": 40.592901,
+      "lng": -73.988609
+    },
+    {
+      "id": "Q69957318",
+      "name": "Union City Branch Public Library",
+      "lat": 40.766577,
+      "lng": -74.038111
+    },
+    {
+      "id": "Q69957156",
+      "name": "Vailsburg Branch",
+      "lat": 40.743169,
+      "lng": -74.225257
+    },
+    {
+      "id": "Q69957160",
+      "name": "Van Buren Branch",
+      "lat": 40.727828,
+      "lng": -74.157591
+    },
+    {
+      "id": "Q69968703",
+      "name": "Van Cortlandt Library",
+      "lat": 40.882958,
+      "lng": -73.893899
+    },
+    {
+      "id": "Q69957182",
+      "name": "Verona Free Public Library",
+      "lat": 40.832986,
+      "lng": -74.246614
+    },
+    {
+      "id": "Q69968709",
+      "name": "Wakefield Library",
+      "lat": 40.891019,
+      "lng": -73.859808
+    },
+    {
+      "id": "Q110320325",
+      "name": "Walt Whitman Library",
+      "lat": 40.694473,
+      "lng": -73.977736
+    },
+    {
+      "id": "Q69968711",
+      "name": "Washington Heights Library",
+      "lat": 40.834578,
+      "lng": -73.939975
+    },
+    {
+      "id": "Q110302700",
+      "name": "Webster Library",
+      "lat": 40.77039,
+      "lng": -73.951164
+    },
+    {
+      "id": "Q7979379",
+      "name": "Weehawken Public Library",
+      "lat": 40.769212,
+      "lng": -74.022757
+    },
+    {
+      "id": "Q69957163",
+      "name": "Weequahic Branch",
+      "lat": 40.711033,
+      "lng": -74.211383
+    },
+    {
+      "id": "Q69957298",
+      "name": "West Bergen Branch",
+      "lat": 40.718129,
+      "lng": -74.08395
+    },
+    {
+      "id": "Q69968712",
+      "name": "West Farms Library",
+      "lat": 40.844653,
+      "lng": -73.882761
+    },
+    {
+      "id": "Q69968722",
+      "name": "West New Brighton Library",
+      "lat": 40.634583,
+      "lng": -74.114722
+    },
+    {
+      "id": "Q69957336",
+      "name": "West New York Public Library",
+      "lat": 40.788336,
+      "lng": -74.015309
+    },
+    {
+      "id": "Q69957189",
+      "name": "West Orange Free Pub. Lib.",
+      "lat": 40.779392,
+      "lng": -74.240855
+    },
+    {
+      "id": "Q69957945",
+      "name": "West Paterson Free Pub. Lib.",
+      "lat": 40.896058,
+      "lng": -74.200466
+    },
+    {
+      "id": "Q69968725",
+      "name": "Westchester Square Library",
+      "lat": 40.84054,
+      "lng": -73.846873
+    },
+    {
+      "id": "Q124667469",
+      "name": "Whitestone Library",
+      "lat": 40.78864,
+      "lng": -73.810893
+    },
+    {
+      "id": "Q18619578",
+      "name": "William and Anita Newman Library",
+      "lat": 40.74075,
+      "lng": -73.982778
+    },
+    {
+      "id": "Q8007523",
+      "name": "William D. Walsh Family Library",
+      "lat": 40.8613,
+      "lng": -73.8893
+    },
+    {
+      "id": "Q69956681",
+      "name": "William E. Dermody Public Library",
+      "lat": 40.837554,
+      "lng": -74.091638
+    },
+    {
+      "id": "Q124667470",
+      "name": "Windsor Park Library",
+      "lat": 40.734444,
+      "lng": -73.755556
+    },
+    {
+      "id": "Q69956879",
+      "name": "Wood-Ridge Memorial Library",
+      "lat": 40.847941,
+      "lng": -74.081635
+    },
+    {
+      "id": "Q124667471",
+      "name": "Woodhaven Library",
+      "lat": 40.694619,
+      "lng": -73.861812
+    },
+    {
+      "id": "Q69968728",
+      "name": "Woodlawn Heights Library",
+      "lat": 40.900588,
+      "lng": -73.867789
+    },
+    {
+      "id": "Q124667472",
+      "name": "Woodside Library",
+      "lat": 40.745524,
+      "lng": -73.90982
+    },
+    {
+      "id": "Q110303007",
+      "name": "Woodstock Library",
+      "lat": 40.820617,
+      "lng": -73.904636
+    },
+    {
+      "id": "Q14707084",
+      "name": "Yorkville Library",
+      "lat": 40.7736,
+      "lng": -73.9564
+    }
+  ]
+}

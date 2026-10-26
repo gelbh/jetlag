@@ -11,13 +11,10 @@ import { throwIfAborted } from "../../core/network/anySignal";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { withTimeout } from "../../core/withTimeout";
 import {
-  filterGtfsStopsForBoundingBox,
-  filterGtfsStopsForGameArea,
-  gtfsStopsToMatchingFeatures,
-  gtfsStopsToTransitStations,
-  loadGtfsBundle,
-} from "../../transit/gtfsRouteGraph";
-import { inferTransitMetroId } from "../../transit/transitCatalog";
+  fetchGtfsHidingZoneStations,
+  fetchGtfsMatchingStationsForPlayArea,
+  type GtfsStationQuery,
+} from "../../transit/gtfsPlayAreaStations";
 import {
   buildHidingZoneTransitStopOverpassQuery,
   buildTransitStopOverpassQuery,
@@ -35,7 +32,7 @@ export const HIDING_ZONE_OVERPASS_TIMEOUT_MS = 4000;
 
 const OVERPASS_TIMEOUT_MESSAGE = "Couldn't load transit stations for this area.";
 
-export type HidingZoneStationsOptions = {
+export type HidingZoneStationsOptions = GtfsStationQuery & {
   onStations?: (stations: TransitStation[]) => void;
   /** Cancel, lane and progress for the Overpass lookup. */
   load?: OverpassLoad;
@@ -60,20 +57,13 @@ function overpassStopsToMatchingFeatures(
 async function tryHidingZoneGtfsStations(
   gameArea: GameArea,
   bbox: BoundingBox,
+  query?: GtfsStationQuery,
 ): Promise<TransitStation[] | null> {
-  const metroId = inferTransitMetroId(gameArea);
-  if (!metroId) {
+  const stations = await fetchGtfsHidingZoneStations(gameArea, bbox, query);
+  if (stations === null) {
     return null;
   }
-
-  const bundle = await loadGtfsBundle(metroId);
-  if (!bundle) {
-    return null;
-  }
-
-  const stops = filterGtfsStopsForBoundingBox(bundle, bbox);
-  const stations = dedupeTransitStations(gtfsStopsToTransitStations(stops, gameArea));
-  return stations.length > 0 ? stations : null;
+  return dedupeTransitStations(stations);
 }
 
 async function fetchOverpassHidingZoneStations(
@@ -132,16 +122,11 @@ export async function fetchStationFeaturesInArea(
 export async function fetchTransitLineMatchingFeaturesInArea(
   gameArea: GameArea,
   load?: OverpassLoad,
+  query?: GtfsStationQuery,
 ): Promise<MatchingFeature[]> {
-  const metroId = inferTransitMetroId(gameArea);
-  if (metroId) {
-    const bundle = await loadGtfsBundle(metroId);
-    if (bundle) {
-      const stops = filterGtfsStopsForGameArea(bundle, gameArea);
-      if (stops.length > 0) {
-        return gtfsStopsToMatchingFeatures(stops, gameArea);
-      }
-    }
+  const gtfsFeatures = await fetchGtfsMatchingStationsForPlayArea(gameArea, query);
+  if (gtfsFeatures !== null) {
+    return gtfsFeatures;
   }
 
   return fetchStationFeaturesInArea(gameArea, load);
@@ -152,10 +137,28 @@ async function fetchHidingZoneStationsUnion(
   gameArea: GameArea,
   options?: HidingZoneStationsOptions,
 ): Promise<TransitStation[]> {
-  const gtfsPromise = tryHidingZoneGtfsStations(gameArea, bbox).then((stations) => stations ?? []);
-  const overpassPromise = fetchOverpassHidingZoneStations(bbox, gameArea, options);
+  const gtfsQuery: GtfsStationQuery = {
+    transitMetroId: options?.transitMetroId,
+    transitStationFilter: options?.transitStationFilter,
+  };
+  const filter = options?.transitStationFilter ?? "all";
+  const gtfsPromise = tryHidingZoneGtfsStations(gameArea, bbox, gtfsQuery);
+  // Mode filter + GTFS available: do not union unfiltered Overpass (would reintroduce other modes).
+  if (filter !== "all") {
+    const gtfsStations = await gtfsPromise;
+    if (gtfsStations !== null) {
+      if (gtfsStations.length > 0) {
+        options?.onStations?.(gtfsStations);
+      }
+      return gtfsStations;
+    }
+  }
 
-  const [gtfsResult, overpassResult] = await Promise.allSettled([gtfsPromise, overpassPromise]);
+  const overpassPromise = fetchOverpassHidingZoneStations(bbox, gameArea, options);
+  const [gtfsResult, overpassResult] = await Promise.allSettled([
+    gtfsPromise.then((stations) => stations ?? []),
+    overpassPromise,
+  ]);
   // A Cancel rejects only the Overpass half; the GTFS half must not be applied either.
   throwIfAborted(options?.load?.signal);
 

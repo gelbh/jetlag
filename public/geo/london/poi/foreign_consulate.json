@@ -1,1 +1,36 @@
-{ "category": "foreign_consulate", "source": "none", "places": [] }
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.28,
+    "west": -0.51,
+    "north": 51.7,
+    "east": 0.3357
+  },
+  "places": [
+    {
+      "id": "Q137701167",
+      "name": "Consulate General of Algeria, London",
+      "lat": 51.521722,
+      "lng": -0.262993
+    },
+    {
+      "id": "Q128191822",
+      "name": "Consulate General of Turkey, London",
+      "lat": 51.50072,
+      "lng": -0.16696
+    },
+    {
+      "id": "Q16891034",
+      "name": "Embassy of Hungary, London",
+      "lat": 51.4973,
+      "lng": -0.152611
+    },
+    {
+      "id": "Q7857104",
+      "name": "Tuvalu House",
+      "lat": 51.412,
+      "lng": -0.2245
+    }
+  ]
+}

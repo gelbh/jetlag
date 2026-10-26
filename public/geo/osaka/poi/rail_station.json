@@ -1,1 +1,1728 @@
-{ "category": "rail_station", "source": "none", "places": [] }
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": {
+    "south": 34.5865,
+    "west": 135.3435,
+    "north": 34.7688,
+    "east": 135.5993
+  },
+  "places": [
+    {
+      "id": "Q135196",
+      "name": "Abeno Station",
+      "lat": 34.642989,
+      "lng": 135.512194
+    },
+    {
+      "id": "Q2084534",
+      "name": "Abiko Station",
+      "lat": 34.598964,
+      "lng": 135.512783
+    },
+    {
+      "id": "Q857356",
+      "name": "Abikochō Station",
+      "lat": 34.601756,
+      "lng": 135.506339
+    },
+    {
+      "id": "Q281912",
+      "name": "Abikomae Station",
+      "lat": 34.600556,
+      "lng": 135.497083
+    },
+    {
+      "id": "Q377279",
+      "name": "Aikawa Station",
+      "lat": 34.757933,
+      "lng": 135.533856
+    },
+    {
+      "id": "Q1042791",
+      "name": "Ajikawaguchi Station",
+      "lat": 34.673767,
+      "lng": 135.4441
+    },
+    {
+      "id": "Q4739116",
+      "name": "Amagasaki Center Pool-mae Station",
+      "lat": 34.71799,
+      "lng": 135.395194
+    },
+    {
+      "id": "Q1151109",
+      "name": "Amagasaki Station",
+      "lat": 34.731667,
+      "lng": 135.431667
+    },
+    {
+      "id": "Q3028634",
+      "name": "Amagasaki Station",
+      "lat": 34.718661,
+      "lng": 135.417308
+    },
+    {
+      "id": "Q4803423",
+      "name": "Asakayama Station",
+      "lat": 34.589083,
+      "lng": 135.490889
+    },
+    {
+      "id": "Q1134463",
+      "name": "Asashiobashi Station",
+      "lat": 34.660833,
+      "lng": 135.448889
+    },
+    {
+      "id": "Q1130913",
+      "name": "Ashiharabashi Station",
+      "lat": 34.659206,
+      "lng": 135.4889
+    },
+    {
+      "id": "Q4805066",
+      "name": "Ashiharachō Station",
+      "lat": 34.660531,
+      "lng": 135.486278
+    },
+    {
+      "id": "Q2070830",
+      "name": "Awaji Station",
+      "lat": 34.738844,
+      "lng": 135.516508
+    },
+    {
+      "id": "Q1134468",
+      "name": "Awaza Station",
+      "lat": 34.681444,
+      "lng": 135.486361
+    },
+    {
+      "id": "Q1131017",
+      "name": "Bentenchō Station",
+      "lat": 34.669083,
+      "lng": 135.462667
+    },
+    {
+      "id": "Q2728956",
+      "name": "Bishōen Station",
+      "lat": 34.638067,
+      "lng": 135.523964
+    },
+    {
+      "id": "Q5095355",
+      "name": "Chibune Station",
+      "lat": 34.712265,
+      "lng": 135.445177
+    },
+    {
+      "id": "Q2700642",
+      "name": "Chidoribashi Station",
+      "lat": 34.6856,
+      "lng": 135.4575
+    },
+    {
+      "id": "Q1136734",
+      "name": "Cosmosquare Station",
+      "lat": 34.642602,
+      "lng": 135.41221
+    },
+    {
+      "id": "Q180979",
+      "name": "Daidō-Toyosato Station",
+      "lat": 34.7438,
+      "lng": 135.5444
+    },
+    {
+      "id": "Q1052129",
+      "name": "Daikokuchō Station",
+      "lat": 34.656072,
+      "lng": 135.497803
+    },
+    {
+      "id": "Q2039189",
+      "name": "Daimotsu Station",
+      "lat": 34.716458,
+      "lng": 135.426022
+    },
+    {
+      "id": "Q681742",
+      "name": "Dainichi Station",
+      "lat": 34.749406,
+      "lng": 135.578275
+    },
+    {
+      "id": "Q2799364",
+      "name": "Dekijima Station",
+      "lat": 34.7073,
+      "lng": 135.4371
+    },
+    {
+      "id": "Q281199",
+      "name": "Dempō Station",
+      "lat": 34.6893,
+      "lng": 135.4517
+    },
+    {
+      "id": "Q151413",
+      "name": "Deto Station",
+      "lat": 34.608862,
+      "lng": 135.566225
+    },
+    {
+      "id": "Q5268529",
+      "name": "Deyashiki Station",
+      "lat": 34.718218,
+      "lng": 135.404617
+    },
+    {
+      "id": "Q1038365",
+      "name": "Dōbutsuen-mae Station",
+      "lat": 34.648817,
+      "lng": 135.504411
+    },
+    {
+      "id": "Q888035",
+      "name": "Doi Station",
+      "lat": 34.73517,
+      "lng": 135.565
+    },
+    {
+      "id": "Q666822",
+      "name": "Dome-mae Chiyozaki Station",
+      "lat": 34.6708,
+      "lng": 135.479
+    },
+    {
+      "id": "Q112154188",
+      "name": "Dome-mae station",
+      "lat": 34.67046,
+      "lng": 135.47843
+    },
+    {
+      "id": "Q1073347",
+      "name": "Ebie Station",
+      "lat": 34.695439,
+      "lng": 135.473275
+    },
+    {
+      "id": "Q2066656",
+      "name": "Ebisuchō Station",
+      "lat": 34.655585,
+      "lng": 135.505663
+    },
+    {
+      "id": "Q691770",
+      "name": "Esaka Station",
+      "lat": 34.7588,
+      "lng": 135.4967
+    },
+    {
+      "id": "Q180477",
+      "name": "Ferry Terminal Station",
+      "lat": 34.619242,
+      "lng": 135.434883
+    },
+    {
+      "id": "Q126032",
+      "name": "Fukaebashi Station",
+      "lat": 34.679092,
+      "lng": 135.557186
+    },
+    {
+      "id": "Q2207010",
+      "name": "Fuku Station",
+      "lat": 34.6997,
+      "lng": 135.4429
+    },
+    {
+      "id": "Q15141642",
+      "name": "Fukushima station",
+      "lat": 34.696028,
+      "lng": 135.488275
+    },
+    {
+      "id": "Q855584",
+      "name": "Fukushima station",
+      "lat": 34.6971,
+      "lng": 135.487
+    },
+    {
+      "id": "Q29457",
+      "name": "Fuminosato Station",
+      "lat": 34.636039,
+      "lng": 135.518022
+    },
+    {
+      "id": "Q1027543",
+      "name": "Furukawabashi Station",
+      "lat": 34.74,
+      "lng": 135.59154
+    },
+    {
+      "id": "Q5509990",
+      "name": "Fuse Station",
+      "lat": 34.664117,
+      "lng": 135.563211
+    },
+    {
+      "id": "Q1042492",
+      "name": "Gamō-yonchōme Station",
+      "lat": 34.700366,
+      "lng": 135.546292
+    },
+    {
+      "id": "Q5215898",
+      "name": "Haginochaya Station",
+      "lat": 34.64575,
+      "lng": 135.499111
+    },
+    {
+      "id": "Q762983",
+      "name": "Hanaten Station",
+      "lat": 34.688042,
+      "lng": 135.563
+    },
+    {
+      "id": "Q126102",
+      "name": "Hanazonochō Station",
+      "lat": 34.6431,
+      "lng": 135.4959
+    },
+    {
+      "id": "Q5651101",
+      "name": "Hanshin-Kokudō Station",
+      "lat": 34.7372,
+      "lng": 135.3545
+    },
+    {
+      "id": "Q5657576",
+      "name": "Harinakano Station",
+      "lat": 34.617111,
+      "lng": 135.532972
+    },
+    {
+      "id": "Q3969777",
+      "name": "Hattori-tenjin Station",
+      "lat": 34.762934,
+      "lng": 135.475181
+    },
+    {
+      "id": "Q1136561",
+      "name": "Higashi-Mikuni Station",
+      "lat": 34.7408,
+      "lng": 135.4987
+    },
+    {
+      "id": "Q5753761",
+      "name": "Higashi-Naruo Station",
+      "lat": 34.71256,
+      "lng": 135.37912
+    },
+    {
+      "id": "Q83600",
+      "name": "Higashi-Umeda Station",
+      "lat": 34.700978,
+      "lng": 135.499556
+    },
+    {
+      "id": "Q1195539",
+      "name": "Higashi-Yodogawa Station",
+      "lat": 34.7392,
+      "lng": 135.5041
+    },
+    {
+      "id": "Q126343",
+      "name": "Higobashi Station",
+      "lat": 34.691351,
+      "lng": 135.496388
+    },
+    {
+      "id": "Q3611326",
+      "name": "Himejima Station",
+      "lat": 34.704497,
+      "lng": 135.458379
+    },
+    {
+      "id": "Q180457",
+      "name": "Hirabayashi Station",
+      "lat": 34.610556,
+      "lng": 135.458611
+    },
+    {
+      "id": "Q135184",
+      "name": "Hirano Station",
+      "lat": 34.621111,
+      "lng": 135.548889
+    },
+    {
+      "id": "Q856598",
+      "name": "Hirano Station",
+      "lat": 34.630736,
+      "lng": 135.551725
+    },
+    {
+      "id": "Q1134631",
+      "name": "Hommachi Station",
+      "lat": 34.681936,
+      "lng": 135.498983
+    },
+    {
+      "id": "Q135348",
+      "name": "Imafuku-Tsurumi Station",
+      "lat": 34.7018,
+      "lng": 135.56
+    },
+    {
+      "id": "Q6002049",
+      "name": "Imagawa Station",
+      "lat": 34.626181,
+      "lng": 135.531111
+    },
+    {
+      "id": "Q1131355",
+      "name": "Imamiya Station",
+      "lat": 34.654178,
+      "lng": 135.493042
+    },
+    {
+      "id": "Q6003186",
+      "name": "Imamiyaebisu Station",
+      "lat": 34.655102,
+      "lng": 135.501603
+    },
+    {
+      "id": "Q6003466",
+      "name": "Imazato Station",
+      "lat": 34.664747,
+      "lng": 135.549922
+    },
+    {
+      "id": "Q949884",
+      "name": "Imazato Station",
+      "lat": 34.668658,
+      "lng": 135.544289
+    },
+    {
+      "id": "Q6622053",
+      "name": "Imazu Station",
+      "lat": 34.731,
+      "lng": 135.351
+    },
+    {
+      "id": "Q848148",
+      "name": "Inadera Station",
+      "lat": 34.764081,
+      "lng": 135.422606
+    },
+    {
+      "id": "Q304717",
+      "name": "Inano Station",
+      "lat": 34.7648,
+      "lng": 135.4153
+    },
+    {
+      "id": "Q180463",
+      "name": "Itakano Station",
+      "lat": 34.75992,
+      "lng": 135.547236
+    },
+    {
+      "id": "Q133234398",
+      "name": "JR Central Shin-Osaka Station",
+      "lat": 34.733333,
+      "lng": 135.5
+    },
+    {
+      "id": "Q856052",
+      "name": "JR Nagase Station",
+      "lat": 34.649444,
+      "lng": 135.570278
+    },
+    {
+      "id": "Q945659",
+      "name": "JR Namba Station",
+      "lat": 34.666417,
+      "lng": 135.495333
+    },
+    {
+      "id": "Q124361997",
+      "name": "JR Shin‐Ōsaka Station",
+      "lat": 34.7334,
+      "lng": 135.500145
+    },
+    {
+      "id": "Q10854600",
+      "name": "JR Shuntokumichi Station",
+      "lat": 34.6583,
+      "lng": 135.572
+    },
+    {
+      "id": "Q124330677",
+      "name": "JR West Kyōbashi Station",
+      "lat": 34.69657,
+      "lng": 135.53404
+    },
+    {
+      "id": "Q124615217",
+      "name": "JR West Taishō Station",
+      "lat": 34.665515,
+      "lng": 135.479995
+    },
+    {
+      "id": "Q124329093",
+      "name": "JR West Tennōji Station",
+      "lat": 34.64675,
+      "lng": 135.51562
+    },
+    {
+      "id": "Q56346892",
+      "name": "JR-Awaji Station",
+      "lat": 34.740694,
+      "lng": 135.519861
+    },
+    {
+      "id": "Q10854599",
+      "name": "JR-Kawachi-Eiwa Station",
+      "lat": 34.6638,
+      "lng": 135.572
+    },
+    {
+      "id": "Q55876612",
+      "name": "JR-Noe Station",
+      "lat": 34.706944,
+      "lng": 135.541389
+    },
+    {
+      "id": "Q866163",
+      "name": "Jūsō Station",
+      "lat": 34.719892,
+      "lng": 135.482792
+    },
+    {
+      "id": "Q135207",
+      "name": "Kadoma-minami Station",
+      "lat": 34.7171,
+      "lng": 135.5926
+    },
+    {
+      "id": "Q1027541",
+      "name": "Kadoma-shi Station",
+      "lat": 34.73816,
+      "lng": 135.58328
+    },
+    {
+      "id": "Q856615",
+      "name": "Kami Station",
+      "lat": 34.626833,
+      "lng": 135.56725
+    },
+    {
+      "id": "Q3969848",
+      "name": "Kami-Shinjō Station",
+      "lat": 34.7508,
+      "lng": 135.533
+    },
+    {
+      "id": "Q3969851",
+      "name": "Kanzakigawa Station",
+      "lat": 34.732,
+      "lng": 135.473
+    },
+    {
+      "id": "Q1037092",
+      "name": "Kashima Station",
+      "lat": 34.727497,
+      "lng": 135.454183
+    },
+    {
+      "id": "Q6379447",
+      "name": "Kawachi-Amami Station",
+      "lat": 34.586648,
+      "lng": 135.534991
+    },
+    {
+      "id": "Q1942407",
+      "name": "Kawachi-Eiwa Station",
+      "lat": 34.6642,
+      "lng": 135.573
+    },
+    {
+      "id": "Q6379454",
+      "name": "Kawachi-Kosaka Station",
+      "lat": 34.664082,
+      "lng": 135.581321
+    },
+    {
+      "id": "Q124330744",
+      "name": "Keihan Electric Railway Kyōbashi Station",
+      "lat": 34.69702,
+      "lng": 135.532415
+    },
+    {
+      "id": "Q6414369",
+      "name": "Kintetsu Nippombashi Station",
+      "lat": 34.66695,
+      "lng": 135.505817
+    },
+    {
+      "id": "Q151539",
+      "name": "Kire-Uriwari Station",
+      "lat": 34.6095,
+      "lng": 135.5519
+    },
+    {
+      "id": "Q126082",
+      "name": "Kishinosato Station",
+      "lat": 34.634364,
+      "lng": 135.493848
+    },
+    {
+      "id": "Q6416603",
+      "name": "Kishinosato-Tamade Station",
+      "lat": 34.629194,
+      "lng": 135.494639
+    },
+    {
+      "id": "Q6417611",
+      "name": "Kita-Tanabe Station",
+      "lat": 34.632383,
+      "lng": 135.528872
+    },
+    {
+      "id": "Q126096",
+      "name": "Kita-Tatsumi Station",
+      "lat": 34.652982,
+      "lng": 135.554962
+    },
+    {
+      "id": "Q1042837",
+      "name": "Kitahama Station",
+      "lat": 34.69159,
+      "lng": 135.506637
+    },
+    {
+      "id": "Q126335",
+      "name": "Kitakagaya Station",
+      "lat": 34.621272,
+      "lng": 135.478849
+    },
+    {
+      "id": "Q1073390",
+      "name": "Kitashinchi Station",
+      "lat": 34.698322,
+      "lng": 135.497036
+    },
+    {
+      "id": "Q6419252",
+      "name": "Kizugawa Station",
+      "lat": 34.6547,
+      "lng": 135.4829
+    },
+    {
+      "id": "Q41092442",
+      "name": "Kizuri-Kamikita Station",
+      "lat": 34.638333,
+      "lng": 135.567028
+    },
+    {
+      "id": "Q6424479",
+      "name": "Koboreguchi Station",
+      "lat": 34.64135,
+      "lng": 135.523947
+    },
+    {
+      "id": "Q6425907",
+      "name": "Kohama Station",
+      "lat": 34.618208,
+      "lng": 135.491853
+    },
+    {
+      "id": "Q135198",
+      "name": "Komagawa-Nakano Station",
+      "lat": 34.6215,
+      "lng": 135.533036
+    },
+    {
+      "id": "Q637397",
+      "name": "Kōnoikeshinden Station",
+      "lat": 34.6987,
+      "lng": 135.5975
+    },
+    {
+      "id": "Q6455288",
+      "name": "Kōshien Station",
+      "lat": 34.723908,
+      "lng": 135.363192
+    },
+    {
+      "id": "Q1073423",
+      "name": "Kōshienguchi Station",
+      "lat": 34.7389,
+      "lng": 135.3742
+    },
+    {
+      "id": "Q6455321",
+      "name": "Kōtōen Station",
+      "lat": 34.767086,
+      "lng": 135.359792
+    },
+    {
+      "id": "Q10855493",
+      "name": "Kudara Freight Terminal",
+      "lat": 34.6371,
+      "lng": 135.541
+    },
+    {
+      "id": "Q11523768",
+      "name": "Kuise Station",
+      "lat": 34.718372,
+      "lng": 135.438876
+    },
+    {
+      "id": "Q1132633",
+      "name": "Kujō Station",
+      "lat": 34.6755,
+      "lng": 135.474
+    },
+    {
+      "id": "Q6444676",
+      "name": "Kunijima Station",
+      "lat": 34.728228,
+      "lng": 135.511433
+    },
+    {
+      "id": "Q6448204",
+      "name": "Kusugawa Station",
+      "lat": 34.726956,
+      "lng": 135.356838
+    },
+    {
+      "id": "Q1073400",
+      "name": "Kyōbashi Station",
+      "lat": 34.696,
+      "lng": 135.535
+    },
+    {
+      "id": "Q123033953",
+      "name": "Kyōbashi Station",
+      "lat": 34.69757,
+      "lng": 135.53052
+    },
+    {
+      "id": "Q856114",
+      "name": "Kyūhōji Station",
+      "lat": 34.62235,
+      "lng": 135.584331
+    },
+    {
+      "id": "Q11369277",
+      "name": "Kyūhōjiguchi Station",
+      "lat": 34.634797,
+      "lng": 135.590342
+    },
+    {
+      "id": "Q126080",
+      "name": "Matsuyamachi Station",
+      "lat": 34.675478,
+      "lng": 135.512467
+    },
+    {
+      "id": "Q1131699",
+      "name": "Midoribashi Station",
+      "lat": 34.68075,
+      "lng": 135.544581
+    },
+    {
+      "id": "Q866211",
+      "name": "Mikuni Station",
+      "lat": 34.737466,
+      "lng": 135.482986
+    },
+    {
+      "id": "Q3970135",
+      "name": "Minami Settsu Station",
+      "lat": 34.7653,
+      "lng": 135.5687
+    },
+    {
+      "id": "Q1039923",
+      "name": "Minami-morimachi Station",
+      "lat": 34.697697,
+      "lng": 135.511019
+    },
+    {
+      "id": "Q55790072",
+      "name": "Minami-Suita Station",
+      "lat": 34.749444,
+      "lng": 135.51125
+    },
+    {
+      "id": "Q856538",
+      "name": "Minami-Tanabe Station",
+      "lat": 34.625672,
+      "lng": 135.520644
+    },
+    {
+      "id": "Q126112",
+      "name": "Minami-Tatsumi Station",
+      "lat": 34.643262,
+      "lng": 135.553297
+    },
+    {
+      "id": "Q6863079",
+      "name": "Minamikata Station",
+      "lat": 34.725833,
+      "lng": 135.499167
+    },
+    {
+      "id": "Q1037111",
+      "name": "Mitejima Station",
+      "lat": 34.7127,
+      "lng": 135.4558
+    },
+    {
+      "id": "Q6881841",
+      "name": "Mito Station",
+      "lat": 34.640836,
+      "lng": 135.583983
+    },
+    {
+      "id": "Q83604",
+      "name": "Miyakojima Station",
+      "lat": 34.709,
+      "lng": 135.5256
+    },
+    {
+      "id": "Q1130995",
+      "name": "Momodani Station",
+      "lat": 34.65855,
+      "lng": 135.527892
+    },
+    {
+      "id": "Q6898731",
+      "name": "Mondo-Yakujin Station",
+      "lat": 34.757911,
+      "lng": 135.358214
+    },
+    {
+      "id": "Q83608",
+      "name": "Moriguchi Station",
+      "lat": 34.7379,
+      "lng": 135.5639
+    },
+    {
+      "id": "Q888039",
+      "name": "Moriguchishi Station",
+      "lat": 34.73517,
+      "lng": 135.565
+    },
+    {
+      "id": "Q1131146",
+      "name": "Morinomiya Station",
+      "lat": 34.6811,
+      "lng": 135.534
+    },
+    {
+      "id": "Q2430458",
+      "name": "Morishōji Station",
+      "lat": 34.71936,
+      "lng": 135.55175
+    },
+    {
+      "id": "Q6933572",
+      "name": "Mukogawa Station",
+      "lat": 34.718431,
+      "lng": 135.382848
+    },
+    {
+      "id": "Q11545984",
+      "name": "Mukogawadanchimae Station",
+      "lat": 34.704933,
+      "lng": 135.374756
+    },
+    {
+      "id": "Q3970247",
+      "name": "Mukonosō Station",
+      "lat": 34.751617,
+      "lng": 135.393114
+    },
+    {
+      "id": "Q151508",
+      "name": "Nagahara Station",
+      "lat": 34.602453,
+      "lng": 135.573751
+    },
+    {
+      "id": "Q1038083",
+      "name": "Nagahoribashi Station",
+      "lat": 34.674647,
+      "lng": 135.506322
+    },
+    {
+      "id": "Q1044114",
+      "name": "Nagai Station",
+      "lat": 34.61086,
+      "lng": 135.51249
+    },
+    {
+      "id": "Q125503934",
+      "name": "Nagai Station",
+      "lat": 34.60902,
+      "lng": 135.5137
+    },
+    {
+      "id": "Q11653090",
+      "name": "Nagara Station",
+      "lat": 34.717417,
+      "lng": 135.51225
+    },
+    {
+      "id": "Q6958637",
+      "name": "Nagase Station",
+      "lat": 34.650294,
+      "lng": 135.577437
+    },
+    {
+      "id": "Q126064",
+      "name": "Nagata Station",
+      "lat": 34.678764,
+      "lng": 135.591911
+    },
+    {
+      "id": "Q180450",
+      "name": "Nakafuto Station",
+      "lat": 34.63432,
+      "lng": 135.417352
+    },
+    {
+      "id": "Q858693",
+      "name": "Nakanoshima Station",
+      "lat": 34.690914,
+      "lng": 135.486861
+    },
+    {
+      "id": "Q2520333",
+      "name": "Nakatsu Station",
+      "lat": 34.711028,
+      "lng": 135.496911
+    },
+    {
+      "id": "Q610516",
+      "name": "Nakatsu Station",
+      "lat": 34.709736,
+      "lng": 135.492989
+    },
+    {
+      "id": "Q83601",
+      "name": "Nakazakichō Station",
+      "lat": 34.7068,
+      "lng": 135.5053
+    },
+    {
+      "id": "Q20079977",
+      "name": "Namba Station",
+      "lat": 34.663411,
+      "lng": 135.501911
+    },
+    {
+      "id": "Q20080133",
+      "name": "Namba Station",
+      "lat": 34.666317,
+      "lng": 135.500314
+    },
+    {
+      "id": "Q858429",
+      "name": "Naniwabashi Station",
+      "lat": 34.692972,
+      "lng": 135.505937
+    },
+    {
+      "id": "Q124608605",
+      "name": "Nankai Electric Railway Tengachaya Station",
+      "lat": 34.637125,
+      "lng": 135.49666
+    },
+    {
+      "id": "Q105576301",
+      "name": "Nankai Shin-Namba  Station",
+      "lat": 34.66575,
+      "lng": 135.4989
+    },
+    {
+      "id": "Q180517",
+      "name": "Nankō-higashi Station",
+      "lat": 34.613846,
+      "lng": 135.438638
+    },
+    {
+      "id": "Q180437",
+      "name": "Nankōguchi Station",
+      "lat": 34.613811,
+      "lng": 135.445966
+    },
+    {
+      "id": "Q6966460",
+      "name": "Naruo·Mukogawajoshidai-Mae Station",
+      "lat": 34.719591,
+      "lng": 135.3704
+    },
+    {
+      "id": "Q1040630",
+      "name": "Nippombashi Station",
+      "lat": 34.666994,
+      "lng": 135.506133
+    },
+    {
+      "id": "Q304193",
+      "name": "Nishi-Nagahori Station",
+      "lat": 34.6755,
+      "lng": 135.4871
+    },
+    {
+      "id": "Q7040412",
+      "name": "Nishi-Suita Station",
+      "lat": 34.749475,
+      "lng": 135.511325
+    },
+    {
+      "id": "Q7040427",
+      "name": "Nishi-Tengachaya Station",
+      "lat": 34.639,
+      "lng": 135.4889
+    },
+    {
+      "id": "Q126023",
+      "name": "Nishi-Umeda Station",
+      "lat": 34.699606,
+      "lng": 135.495667
+    },
+    {
+      "id": "Q1130919",
+      "name": "Nishikujō Station",
+      "lat": 34.682664,
+      "lng": 135.466789
+    },
+    {
+      "id": "Q1136738",
+      "name": "Nishinakajima-Minamigata Station",
+      "lat": 34.7265,
+      "lng": 135.4984
+    },
+    {
+      "id": "Q1038072",
+      "name": "Nishinomiya Station",
+      "lat": 34.738972,
+      "lng": 135.347861
+    },
+    {
+      "id": "Q7040671",
+      "name": "Nishinomiya-Kitaguchi Station",
+      "lat": 34.745922,
+      "lng": 135.356664
+    },
+    {
+      "id": "Q112719",
+      "name": "Nishiōhashi Station",
+      "lat": 34.675442,
+      "lng": 135.493575
+    },
+    {
+      "id": "Q1027383",
+      "name": "Nishisansō Station",
+      "lat": 34.73729,
+      "lng": 135.57592
+    },
+    {
+      "id": "Q2084578",
+      "name": "Nishitanabe Station",
+      "lat": 34.621627,
+      "lng": 135.515153
+    },
+    {
+      "id": "Q1131361",
+      "name": "Noda Station",
+      "lat": 34.688981,
+      "lng": 135.474858
+    },
+    {
+      "id": "Q5359642",
+      "name": "Noda Station",
+      "lat": 34.694367,
+      "lng": 135.476086
+    },
+    {
+      "id": "Q126087",
+      "name": "Nodahanshin Station",
+      "lat": 34.694608,
+      "lng": 135.474847
+    },
+    {
+      "id": "Q856571",
+      "name": "Noe Station",
+      "lat": 34.70716,
+      "lng": 135.54334
+    },
+    {
+      "id": "Q83607",
+      "name": "Noe-Uchindai Station",
+      "lat": 34.7091,
+      "lng": 135.5382
+    },
+    {
+      "id": "Q981704",
+      "name": "Ōebashi Station",
+      "lat": 34.694356,
+      "lng": 135.499964
+    },
+    {
+      "id": "Q843811",
+      "name": "Ogimachi Station",
+      "lat": 34.703808,
+      "lng": 135.510833
+    },
+    {
+      "id": "Q6801405",
+      "name": "Ōsaka Abenobashi Station",
+      "lat": 34.645636,
+      "lng": 135.513906
+    },
+    {
+      "id": "Q135205",
+      "name": "Osaka Business Park Station",
+      "lat": 34.692134,
+      "lng": 135.529688
+    },
+    {
+      "id": "Q113164878",
+      "name": "Osaka Metro Shin-Osaka Station",
+      "lat": 34.73286,
+      "lng": 135.49854
+    },
+    {
+      "id": "Q123033277",
+      "name": "Osaka Metro Taishō Station",
+      "lat": 34.66563,
+      "lng": 135.47869
+    },
+    {
+      "id": "Q111751098",
+      "name": "Osaka Metro Tengachaya Station",
+      "lat": 34.63769,
+      "lng": 135.49713
+    },
+    {
+      "id": "Q2310134",
+      "name": "Ōsaka Namba Station",
+      "lat": 34.667114,
+      "lng": 135.499142
+    },
+    {
+      "id": "Q801694",
+      "name": "Ōsaka Station",
+      "lat": 34.7025,
+      "lng": 135.496111
+    },
+    {
+      "id": "Q872600",
+      "name": "Ōsaka Uehommachi Station",
+      "lat": 34.6656,
+      "lng": 135.521
+    },
+    {
+      "id": "Q20023053",
+      "name": "Osaka-Umeda Station (Hankyu)",
+      "lat": 34.705514,
+      "lng": 135.498311
+    },
+    {
+      "id": "Q20023052",
+      "name": "Osaka-Umeda Station (Hanshin)",
+      "lat": 34.700969,
+      "lng": 135.496444
+    },
+    {
+      "id": "Q585132",
+      "name": "Ōsakajō-kitazume Station",
+      "lat": 34.6939,
+      "lng": 135.526
+    },
+    {
+      "id": "Q1131304",
+      "name": "Ōsakajōkōen Station",
+      "lat": 34.6886,
+      "lng": 135.534
+    },
+    {
+      "id": "Q1132628",
+      "name": "Ōsakakō Station",
+      "lat": 34.6539,
+      "lng": 135.434
+    },
+    {
+      "id": "Q1073324",
+      "name": "Ōsakatemmangū Station",
+      "lat": 34.6973,
+      "lng": 135.513
+    },
+    {
+      "id": "Q180504",
+      "name": "Port Town-higashi Station",
+      "lat": 34.630913,
+      "lng": 135.429196
+    },
+    {
+      "id": "Q180510",
+      "name": "Port Town-nishi Station",
+      "lat": 34.630948,
+      "lng": 135.422823
+    },
+    {
+      "id": "Q1074425",
+      "name": "Sakaisuji-Hommachi Station",
+      "lat": 34.681861,
+      "lng": 135.506911
+    },
+    {
+      "id": "Q126339",
+      "name": "Sakuragawa Station",
+      "lat": 34.6684,
+      "lng": 135.489
+    },
+    {
+      "id": "Q1042687",
+      "name": "Sakurajima Station",
+      "lat": 34.661936,
+      "lng": 135.432167
+    },
+    {
+      "id": "Q1131330",
+      "name": "Sakuranomiya Station",
+      "lat": 34.704919,
+      "lng": 135.520322
+    },
+    {
+      "id": "Q7428584",
+      "name": "Sawanochō Station",
+      "lat": 34.606167,
+      "lng": 135.497
+    },
+    {
+      "id": "Q857367",
+      "name": "Sekime Station",
+      "lat": 34.71247,
+      "lng": 135.54696
+    },
+    {
+      "id": "Q180511",
+      "name": "Sekime-Seiiku Station",
+      "lat": 34.712761,
+      "lng": 135.546464
+    },
+    {
+      "id": "Q83606",
+      "name": "Sekime-Takadono Station",
+      "lat": 34.715195,
+      "lng": 135.545792
+    },
+    {
+      "id": "Q857384",
+      "name": "Sembayashi Station",
+      "lat": 34.72419,
+      "lng": 135.55494
+    },
+    {
+      "id": "Q83605",
+      "name": "Sembayashi-Omiya Station",
+      "lat": 34.724,
+      "lng": 135.5491
+    },
+    {
+      "id": "Q5567705",
+      "name": "Shichidō Station",
+      "lat": 34.592354,
+      "lng": 135.480579
+    },
+    {
+      "id": "Q131826347",
+      "name": "Shigino",
+      "lat": 34.693023,
+      "lng": 135.546176
+    },
+    {
+      "id": "Q180485",
+      "name": "Shigino Station",
+      "lat": 34.6926,
+      "lng": 135.5453
+    },
+    {
+      "id": "Q180473",
+      "name": "Shimizu Station",
+      "lat": 34.7216,
+      "lng": 135.5608
+    },
+    {
+      "id": "Q180443",
+      "name": "Shimmori-Furuichi Station",
+      "lat": 34.7152,
+      "lng": 135.558
+    },
+    {
+      "id": "Q11360932",
+      "name": "Shimo-Shinjō Station",
+      "lat": 34.7465,
+      "lng": 135.5198
+    },
+    {
+      "id": "Q126056",
+      "name": "Shin-Fukae Station",
+      "lat": 34.6679,
+      "lng": 135.5541
+    },
+    {
+      "id": "Q1073002",
+      "name": "Shin-Fukushima Station",
+      "lat": 34.694958,
+      "lng": 135.485667
+    },
+    {
+      "id": "Q59349",
+      "name": "Shin-Imamiya Station",
+      "lat": 34.6502,
+      "lng": 135.501
+    },
+    {
+      "id": "Q855847",
+      "name": "Shin-Kami Station",
+      "lat": 34.626667,
+      "lng": 135.568889
+    },
+    {
+      "id": "Q801438",
+      "name": "Shin‐Ōsaka Station",
+      "lat": 34.733611,
+      "lng": 135.5
+    },
+    {
+      "id": "Q1074440",
+      "name": "Shinsaibashi Station",
+      "lat": 34.675022,
+      "lng": 135.500308
+    },
+    {
+      "id": "Q7497881",
+      "name": "Shiomibashi Station",
+      "lat": 34.668239,
+      "lng": 135.486167
+    },
+    {
+      "id": "Q56346891",
+      "name": "Shirokitakōendōri Station",
+      "lat": 34.720833,
+      "lng": 135.532778
+    },
+    {
+      "id": "Q83603",
+      "name": "Shitennōji-mae Yūhigaoka Station",
+      "lat": 34.6584,
+      "lng": 135.5139
+    },
+    {
+      "id": "Q126040",
+      "name": "Shōji Station",
+      "lat": 34.6613,
+      "lng": 135.5565
+    },
+    {
+      "id": "Q7506184",
+      "name": "Shōnai Station",
+      "lat": 34.750365,
+      "lng": 135.475125
+    },
+    {
+      "id": "Q2084551",
+      "name": "Shōwachō Station",
+      "lat": 34.633559,
+      "lng": 135.516964
+    },
+    {
+      "id": "Q1928015",
+      "name": "Shuntokumichi Station",
+      "lat": 34.6575,
+      "lng": 135.572222
+    },
+    {
+      "id": "Q3971022",
+      "name": "Sonoda Station",
+      "lat": 34.752006,
+      "lng": 135.448208
+    },
+    {
+      "id": "Q3971070",
+      "name": "Sōzenji Station",
+      "lat": 34.7312,
+      "lng": 135.5104
+    },
+    {
+      "id": "Q857446",
+      "name": "Sugimotochō Station",
+      "lat": 34.593639,
+      "lng": 135.503111
+    },
+    {
+      "id": "Q59351",
+      "name": "Suita Station",
+      "lat": 34.763175,
+      "lng": 135.523669
+    },
+    {
+      "id": "Q7635540",
+      "name": "Suita Station",
+      "lat": 34.7603,
+      "lng": 135.517
+    },
+    {
+      "id": "Q7637134",
+      "name": "Suminoe Station",
+      "lat": 34.6052,
+      "lng": 135.487
+    },
+    {
+      "id": "Q126046",
+      "name": "Suminoekōen Station",
+      "lat": 34.6092,
+      "lng": 135.472
+    },
+    {
+      "id": "Q7637175",
+      "name": "Sumiyoshihigashi Station",
+      "lat": 34.6129,
+      "lng": 135.497
+    },
+    {
+      "id": "Q7637174",
+      "name": "Sumiyoshitaisha Station",
+      "lat": 34.6128,
+      "lng": 135.49
+    },
+    {
+      "id": "Q7650660",
+      "name": "Suzaki Station",
+      "lat": 34.7089,
+      "lng": 135.378
+    },
+    {
+      "id": "Q1042508",
+      "name": "Taishibashi-Imaichi Station",
+      "lat": 34.7314,
+      "lng": 135.555
+    },
+    {
+      "id": "Q1131158",
+      "name": "Taishō Station",
+      "lat": 34.665806,
+      "lng": 135.479333
+    },
+    {
+      "id": "Q126027",
+      "name": "Takaida Station",
+      "lat": 34.678611,
+      "lng": 135.573056
+    },
+    {
+      "id": "Q4385578",
+      "name": "Takaida-Chūō Station",
+      "lat": 34.679114,
+      "lng": 135.572464
+    },
+    {
+      "id": "Q1820138",
+      "name": "Takii Station",
+      "lat": 34.72771,
+      "lng": 135.55735
+    },
+    {
+      "id": "Q125822",
+      "name": "Tamade Station",
+      "lat": 34.6241,
+      "lng": 135.491
+    },
+    {
+      "id": "Q126069",
+      "name": "Tamagawa Station",
+      "lat": 34.6896,
+      "lng": 135.476
+    },
+    {
+      "id": "Q131833294",
+      "name": "Tamatsukuri",
+      "lat": 34.674608,
+      "lng": 135.530493
+    },
+    {
+      "id": "Q1131039",
+      "name": "Tamatsukuri Station",
+      "lat": 34.673522,
+      "lng": 135.532828
+    },
+    {
+      "id": "Q135203",
+      "name": "Tanabe Station",
+      "lat": 34.6282,
+      "lng": 135.526
+    },
+    {
+      "id": "Q1041977",
+      "name": "Tanimachi Kyūchōme Station",
+      "lat": 34.667144,
+      "lng": 135.515842
+    },
+    {
+      "id": "Q1041967",
+      "name": "Tanimachi Rokuchōme Station",
+      "lat": 34.674917,
+      "lng": 135.516958
+    },
+    {
+      "id": "Q1131709",
+      "name": "Tanimachi Yonchōme Station",
+      "lat": 34.681914,
+      "lng": 135.517286
+    },
+    {
+      "id": "Q468599",
+      "name": "Temma Station",
+      "lat": 34.704933,
+      "lng": 135.512136
+    },
+    {
+      "id": "Q1043084",
+      "name": "Temmabashi Station",
+      "lat": 34.690197,
+      "lng": 135.516631
+    },
+    {
+      "id": "Q2084603",
+      "name": "Tengachaya Station",
+      "lat": 34.637194,
+      "lng": 135.496744
+    },
+    {
+      "id": "Q1143934",
+      "name": "Tenjimbashisuji Rokuchōme Station",
+      "lat": 34.7106,
+      "lng": 135.511
+    },
+    {
+      "id": "Q106798781",
+      "name": "Tennōji Station",
+      "lat": 34.6461,
+      "lng": 135.51526
+    },
+    {
+      "id": "Q1132328",
+      "name": "Tennōji Station",
+      "lat": 34.647361,
+      "lng": 135.513889
+    },
+    {
+      "id": "Q1131188",
+      "name": "Teradachō Station",
+      "lat": 34.6479,
+      "lng": 135.523
+    },
+    {
+      "id": "Q7708641",
+      "name": "Tezukayama Station",
+      "lat": 34.6223,
+      "lng": 135.498
+    },
+    {
+      "id": "Q856565",
+      "name": "Tōbu-shijō-mae Station",
+      "lat": 34.6381,
+      "lng": 135.538
+    },
+    {
+      "id": "Q855759",
+      "name": "Tokuan Station",
+      "lat": 34.6924,
+      "lng": 135.581
+    },
+    {
+      "id": "Q11633911",
+      "name": "Toyotsu Station",
+      "lat": 34.7642,
+      "lng": 135.509
+    },
+    {
+      "id": "Q180469",
+      "name": "Trade Center-mae Station",
+      "lat": 34.6388,
+      "lng": 135.412
+    },
+    {
+      "id": "Q3971207",
+      "name": "Tsukaguchi Station",
+      "lat": 34.7528,
+      "lng": 135.416
+    },
+    {
+      "id": "Q847972",
+      "name": "Tsukaguchi Station",
+      "lat": 34.751,
+      "lng": 135.425
+    },
+    {
+      "id": "Q1072858",
+      "name": "Tsukamoto Station",
+      "lat": 34.712729,
+      "lng": 135.468917
+    },
+    {
+      "id": "Q7850134",
+      "name": "Tsumori Station",
+      "lat": 34.6471,
+      "lng": 135.483
+    },
+    {
+      "id": "Q856981",
+      "name": "Tsurugaoka Station",
+      "lat": 34.6177,
+      "lng": 135.517
+    },
+    {
+      "id": "Q1131704",
+      "name": "Tsuruhashi Station",
+      "lat": 34.6653,
+      "lng": 135.53
+    },
+    {
+      "id": "Q135181",
+      "name": "Tsurumi-ryokuchi Station",
+      "lat": 34.7109,
+      "lng": 135.581
+    },
+    {
+      "id": "Q20023054",
+      "name": "Umeda Station",
+      "lat": 34.702833,
+      "lng": 135.497722
+    },
+    {
+      "id": "Q20023084",
+      "name": "Umeda Station",
+      "lat": 34.703717,
+      "lng": 135.493231
+    },
+    {
+      "id": "Q1131139",
+      "name": "Universal City Station",
+      "lat": 34.667842,
+      "lng": 135.438594
+    },
+    {
+      "id": "Q981701",
+      "name": "Watanabebashi Station",
+      "lat": 34.6938,
+      "lng": 135.495
+    },
+    {
+      "id": "Q8046634",
+      "name": "Yaenosato Station",
+      "lat": 34.663675,
+      "lng": 135.58955
+    },
+    {
+      "id": "Q856485",
+      "name": "Yao Station",
+      "lat": 34.6176,
+      "lng": 135.597
+    },
+    {
+      "id": "Q151767",
+      "name": "Yaominami Station",
+      "lat": 34.5974,
+      "lng": 135.583
+    },
+    {
+      "id": "Q8050150",
+      "name": "Yata Station",
+      "lat": 34.606,
+      "lng": 135.533
+    },
+    {
+      "id": "Q8054295",
+      "name": "Yodogawa Station",
+      "lat": 34.6964,
+      "lng": 135.465
+    },
+    {
+      "id": "Q1131721",
+      "name": "Yodoyabashi Station",
+      "lat": 34.6923,
+      "lng": 135.501
+    },
+    {
+      "id": "Q135186",
+      "name": "Yokozutsumi Station",
+      "lat": 34.7036,
+      "lng": 135.573
+    },
+    {
+      "id": "Q291023",
+      "name": "Yotsubashi Station",
+      "lat": 34.674097,
+      "lng": 135.496778
+    },
+    {
+      "id": "Q60987816",
+      "name": "Yumeshima Station",
+      "lat": 34.652356,
+      "lng": 135.38995
+    },
+    {
+      "id": "Q180497",
+      "name": "Zuikō Yonchōme Station",
+      "lat": 34.752314,
+      "lng": 135.544614
+    },
+    {
+      "id": "Q11385621",
+      "name": "俊徳道信号場",
+      "lat": 34.658447,
+      "lng": 135.572478
+    },
+    {
+      "id": "Q133250744",
+      "name": "北陸新幹線新大阪駅",
+      "lat": 34.732778,
+      "lng": 135.500278
+    },
+    {
+      "id": "Q11252484",
+      "name": "正覚寺信号場",
+      "lat": 34.6322,
+      "lng": 135.565
+    },
+    {
+      "id": "Q11545983",
+      "name": "武庫川信号場",
+      "lat": 34.719223,
+      "lng": 135.377925
+    },
+    {
+      "id": "Q55533848",
+      "name": "神崎川信号場",
+      "lat": 34.7475,
+      "lng": 135.515194
+    },
+    {
+      "id": "Q11625532",
+      "name": "蛇草信号場",
+      "lat": 34.650044,
+      "lng": 135.570322
+    }
+  ]
+}

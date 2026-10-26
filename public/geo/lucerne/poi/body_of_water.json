@@ -1,1 +1,306 @@
-{ "category": "body_of_water", "source": "none", "places": [] }
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 46.775,
+    "west": 7.839,
+    "north": 47.2903,
+    "east": 8.5213
+  },
+  "places": [
+    {
+      "id": "Q141691238",
+      "name": "Äbnetweier",
+      "lat": 47.04753,
+      "lng": 8.36654
+    },
+    {
+      "id": "Q141687572",
+      "name": "Adligeweier",
+      "lat": 47.09079,
+      "lng": 8.28541
+    },
+    {
+      "id": "Q679875",
+      "name": "Alpnachersee",
+      "lat": 46.9625,
+      "lng": 8.306389
+    },
+    {
+      "id": "Q115142453",
+      "name": "Änggelaueneseeli",
+      "lat": 46.89548,
+      "lng": 8.06174
+    },
+    {
+      "id": "Q141691545",
+      "name": "Arniseeli",
+      "lat": 46.79053,
+      "lng": 8.08576
+    },
+    {
+      "id": "Q4856863",
+      "name": "Bannalpsee",
+      "lat": 46.868333,
+      "lng": 8.428889
+    },
+    {
+      "id": "Q141691577",
+      "name": "Birriweiher",
+      "lat": 47.27764,
+      "lng": 8.37616
+    },
+    {
+      "id": "Q141691675",
+      "name": "Blindseeli",
+      "lat": 46.92203,
+      "lng": 8.28866
+    },
+    {
+      "id": "Q141690804",
+      "name": "Chänzeliweier",
+      "lat": 47.10269,
+      "lng": 8.33708
+    },
+    {
+      "id": "Q141690140",
+      "name": "Eggerweier",
+      "lat": 47.28341,
+      "lng": 8.35036
+    },
+    {
+      "id": "Q63436435",
+      "name": "Egolzwilersee",
+      "lat": 47.1845,
+      "lng": 7.999
+    },
+    {
+      "id": "Q141689429",
+      "name": "Eisee",
+      "lat": 46.79068,
+      "lng": 8.06531
+    },
+    {
+      "id": "Q5408352",
+      "name": "Eugenisee",
+      "lat": 46.818694,
+      "lng": 8.390528
+    },
+    {
+      "id": "Q141689412",
+      "name": "Fluebergweiher",
+      "lat": 47.17317,
+      "lng": 7.88241
+    },
+    {
+      "id": "Q141687319",
+      "name": "Follenseeli",
+      "lat": 46.78928,
+      "lng": 8.3566
+    },
+    {
+      "id": "Q141690768",
+      "name": "Gerzenseeli",
+      "lat": 46.924,
+      "lng": 8.29171
+    },
+    {
+      "id": "Q141687402",
+      "name": "Gundolingerweier",
+      "lat": 47.14021,
+      "lng": 8.24729
+    },
+    {
+      "id": "Q141691324",
+      "name": "Gütschweier",
+      "lat": 47.15126,
+      "lng": 8.31211
+    },
+    {
+      "id": "Q141596958",
+      "name": "Hasemoosweier",
+      "lat": 47.09932,
+      "lng": 8.23995
+    },
+    {
+      "id": "Q141690190",
+      "name": "Jochseeli",
+      "lat": 46.77852,
+      "lng": 8.38747
+    },
+    {
+      "id": "Q14509",
+      "name": "Lake Baldegg",
+      "lat": 47.198611,
+      "lng": 8.260556
+    },
+    {
+      "id": "Q14465",
+      "name": "Lake Hallwil",
+      "lat": 47.284167,
+      "lng": 8.216111
+    },
+    {
+      "id": "Q14381",
+      "name": "Lake Lucerne",
+      "lat": 47.0194,
+      "lng": 8.4011
+    },
+    {
+      "id": "Q14505",
+      "name": "Lake Sarnen",
+      "lat": 46.8625,
+      "lng": 8.208611
+    },
+    {
+      "id": "Q14459",
+      "name": "Lake Sempach",
+      "lat": 47.15,
+      "lng": 8.15
+    },
+    {
+      "id": "Q14436",
+      "name": "Lake Zug",
+      "lat": 47.116667,
+      "lng": 8.483333
+    },
+    {
+      "id": "Q141687592",
+      "name": "Längweier",
+      "lat": 47.05361,
+      "lng": 8.27361
+    },
+    {
+      "id": "Q14527",
+      "name": "Lungerersee",
+      "lat": 46.8025,
+      "lng": 8.163333
+    },
+    {
+      "id": "Q680346",
+      "name": "Mauensee",
+      "lat": 47.172222,
+      "lng": 8.075
+    },
+    {
+      "id": "Q141691287",
+      "name": "Moosschürweier",
+      "lat": 47.07491,
+      "lng": 8.20907
+    },
+    {
+      "id": "Q141690783",
+      "name": "Moosweier",
+      "lat": 47.077,
+      "lng": 8.39073
+    },
+    {
+      "id": "Q141686631",
+      "name": "Müliweier",
+      "lat": 47.15069,
+      "lng": 8.28782
+    },
+    {
+      "id": "Q141691818",
+      "name": "Riffigweier",
+      "lat": 47.08889,
+      "lng": 8.26739
+    },
+    {
+      "id": "Q16940",
+      "name": "Rotsee",
+      "lat": 47.069722,
+      "lng": 8.314167
+    },
+    {
+      "id": "Q141690196",
+      "name": "Scharleteweier",
+      "lat": 47.24022,
+      "lng": 7.91737
+    },
+    {
+      "id": "Q141692878",
+      "name": "Schwandalpweier",
+      "lat": 46.88059,
+      "lng": 8.02284
+    },
+    {
+      "id": "Q51064147",
+      "name": "Seefeldsee",
+      "lat": 46.7883,
+      "lng": 8.23138
+    },
+    {
+      "id": "Q458850",
+      "name": "Soppensee",
+      "lat": 47.090278,
+      "lng": 8.080833
+    },
+    {
+      "id": "Q3301707",
+      "name": "Steinibühlweiher",
+      "lat": 47.1375,
+      "lng": 8.208889
+    },
+    {
+      "id": "Q141690935",
+      "name": "Südiweier",
+      "lat": 47.16757,
+      "lng": 8.28383
+    },
+    {
+      "id": "Q141691808",
+      "name": "Täschlerhüsliweier",
+      "lat": 47.10051,
+      "lng": 8.33348
+    },
+    {
+      "id": "Q141692214",
+      "name": "Trübelbachweier",
+      "lat": 47.23463,
+      "lng": 7.84742
+    },
+    {
+      "id": "Q670173",
+      "name": "Trüebsee",
+      "lat": 46.793889,
+      "lng": 8.390833
+    },
+    {
+      "id": "Q5824706",
+      "name": "Tuetenseeli",
+      "lat": 47.071944,
+      "lng": 8.059167
+    },
+    {
+      "id": "Q141690871",
+      "name": "Tüffeweier",
+      "lat": 47.0917,
+      "lng": 8.20582
+    },
+    {
+      "id": "Q141687535",
+      "name": "Turbiweier",
+      "lat": 47.17517,
+      "lng": 8.28027
+    },
+    {
+      "id": "Q676682",
+      "name": "Türlersee",
+      "lat": 47.268333,
+      "lng": 8.502778
+    },
+    {
+      "id": "Q141689607",
+      "name": "Wellnauweier",
+      "lat": 47.23963,
+      "lng": 8.08979
+    },
+    {
+      "id": "Q664269",
+      "name": "Wichelsee",
+      "lat": 46.919444,
+      "lng": 8.2725
+    }
+  ]
+}

@@ -26,6 +26,7 @@ import {
 import { unionGameAreas } from "../../domain/geometry/masks/unionGameAreas";
 import { type GameArea, LOCAL_SESSION_ID, type SessionTier } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
+import type { TransitRouteFilter } from "../../domain/map/transit";
 import {
   BUNDLED_GAME_PRESET_DEFINITIONS,
   isBundledPresetId,
@@ -219,6 +220,7 @@ export function useCreateSession() {
     subregionId: string | undefined;
   } | null>(null);
   const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
+  const [transitStationFilter, setTransitStationFilter] = useState<TransitRouteFilter>("all");
   const loadedPresetId = searchParams.get("preset");
   const loadedPreset = useMemo(() => {
     if (!loadedPresetId) {
@@ -1066,6 +1068,7 @@ export function useCreateSession() {
                 hostUid: user.uid,
                 tier: createTier,
                 transitMetroId: metroId,
+                transitStationFilter,
                 hostRole: playerRole,
                 gameSize,
                 rulesPatch,
@@ -1084,7 +1087,10 @@ export function useCreateSession() {
                 rulesPatch,
                 distanceUnit,
                 APP_VERSION,
-                castleSiegeCreate,
+                {
+                  ...castleSiegeCreate,
+                  transitStationFilter,
+                },
               ),
             );
         createStage?.finish();
@@ -1104,6 +1110,7 @@ export function useCreateSession() {
           distanceUnit,
           tier: "free" as const,
           transitMetroId: metroId,
+          transitStationFilter,
           ...rulesPatch,
           hidingZoneRadiusMeters:
             rulesPatch.hidingZoneRadiusMeters ?? hidingZoneRadiusMeters(gameSize, distanceUnit),
@@ -1279,10 +1286,12 @@ export function useCreateSession() {
     mapFocusToken,
     mapPreviewGameArea,
     transitMetroId,
+    transitStationFilter,
     regionPackId,
     regionPackSubregionId,
     metros,
     setTransitMetroOverride,
+    setTransitStationFilter,
     playerRole,
     handlePlayerRoleChange,
     castleSiegeFlagEnabled,

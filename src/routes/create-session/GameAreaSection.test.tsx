@@ -52,6 +52,7 @@ const baseModel: GameAreaSectionModel = {
   selectedAreas: [],
   previewGameArea: null,
   transitMetroId: "",
+  transitStationFilter: "all",
   metros: [],
   onPendingPresetAdd: vi.fn(),
   onPendingPresetRemove: vi.fn(),
@@ -65,6 +66,7 @@ const baseModel: GameAreaSectionModel = {
   onBoundaryImport: vi.fn(),
   onApplyPlace: vi.fn(),
   onTransitMetroChange: vi.fn(),
+  onTransitStationFilterChange: vi.fn(),
 };
 
 function renderSection(

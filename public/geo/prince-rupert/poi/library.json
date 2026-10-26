@@ -1,1 +1,18 @@
-{ "category": "library", "source": "none", "places": [] }
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 54.2016,
+    "west": -130.45,
+    "north": 54.4,
+    "east": -130.2
+  },
+  "places": [
+    {
+      "id": "Q85690876",
+      "name": "Prince Rupert Library",
+      "lat": 54.313174,
+      "lng": -130.317858
+    }
+  ]
+}

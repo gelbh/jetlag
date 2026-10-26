@@ -1,1 +1,24 @@
-{ "category": "amusement_park", "source": "none", "places": [] }
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 53.1782,
+    "west": -6.5469,
+    "north": 53.6347,
+    "east": -5.9945
+  },
+  "places": [
+    {
+      "id": "Q4782846",
+      "name": "Aquazone",
+      "lat": 53.3971,
+      "lng": -6.3701
+    },
+    {
+      "id": "Q20971849",
+      "name": "Emerald Park",
+      "lat": 53.545377,
+      "lng": -6.459375
+    }
+  ]
+}

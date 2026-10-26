@@ -1,1 +1,5604 @@
-{ "category": "movie_theater", "source": "none", "places": [] }
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.28,
+    "west": -0.51,
+    "north": 51.7,
+    "east": 0.3357
+  },
+  "places": [
+    {
+      "id": "Q83020677",
+      "name": "117 Church Road",
+      "lat": 51.4752,
+      "lng": -0.2407
+    },
+    {
+      "id": "Q42166344",
+      "name": "Abbey Picture Palace",
+      "lat": 51.416034,
+      "lng": -0.184063
+    },
+    {
+      "id": "Q41964744",
+      "name": "ABC Baker Street",
+      "lat": 51.52202,
+      "lng": -0.15888
+    },
+    {
+      "id": "Q42041415",
+      "name": "ABC Catford",
+      "lat": 51.443683,
+      "lng": -0.020321
+    },
+    {
+      "id": "Q41895605",
+      "name": "ABC Cinema Blackheath",
+      "lat": 51.476792,
+      "lng": 0.020226
+    },
+    {
+      "id": "Q42118243",
+      "name": "ABC Clapton",
+      "lat": 51.557142,
+      "lng": -0.055893
+    },
+    {
+      "id": "Q42120448",
+      "name": "ABC Edgware Road",
+      "lat": 51.520817,
+      "lng": -0.18013
+    },
+    {
+      "id": "Q42162648",
+      "name": "ABC Eltham",
+      "lat": 51.450611,
+      "lng": 0.054504
+    },
+    {
+      "id": "Q42162697",
+      "name": "ABC Enfield",
+      "lat": 51.650276,
+      "lng": -0.063451
+    },
+    {
+      "id": "Q41562155",
+      "name": "ABC Ewell",
+      "lat": 51.366438,
+      "lng": -0.261979
+    },
+    {
+      "id": "Q42118638",
+      "name": "ABC Hackney",
+      "lat": 51.547351,
+      "lng": -0.054854
+    },
+    {
+      "id": "Q42163072",
+      "name": "ABC Hampstead",
+      "lat": 51.553782,
+      "lng": -0.167201
+    },
+    {
+      "id": "Q42163419",
+      "name": "ABC Hendon",
+      "lat": 51.58257,
+      "lng": -0.22643
+    },
+    {
+      "id": "Q42163721",
+      "name": "ABC Hounslow",
+      "lat": 51.467512,
+      "lng": -0.367885
+    },
+    {
+      "id": "Q42163897",
+      "name": "ABC Ilford",
+      "lat": 51.565763,
+      "lng": 0.105686
+    },
+    {
+      "id": "Q42047969",
+      "name": "ABC Ionic Golders Green",
+      "lat": 51.570743,
+      "lng": -0.195243
+    },
+    {
+      "id": "Q42164317",
+      "name": "ABC Kensal Rise",
+      "lat": 51.52979,
+      "lng": -0.215885
+    },
+    {
+      "id": "Q42201921",
+      "name": "ABC Leyton",
+      "lat": 51.574402,
+      "lng": -0.010796
+    },
+    {
+      "id": "Q42202326",
+      "name": "ABC Muswell Hill",
+      "lat": 51.590713,
+      "lng": -0.140748
+    },
+    {
+      "id": "Q41893623",
+      "name": "ABC Old Kent Road",
+      "lat": 51.4794,
+      "lng": -0.0576
+    },
+    {
+      "id": "Q41964758",
+      "name": "ABC Piccadilly Circus",
+      "lat": 51.509615,
+      "lng": -0.135156
+    },
+    {
+      "id": "Q41630595",
+      "name": "ABC Purley",
+      "lat": 51.33956,
+      "lng": -0.114852
+    },
+    {
+      "id": "Q42203777",
+      "name": "ABC Putney",
+      "lat": 51.465046,
+      "lng": -0.214624
+    },
+    {
+      "id": "Q42203871",
+      "name": "ABC Richmond",
+      "lat": 51.461072,
+      "lng": -0.299986
+    },
+    {
+      "id": "Q41562569",
+      "name": "ABC Romford",
+      "lat": 51.573556,
+      "lng": 0.183999
+    },
+    {
+      "id": "Q41743004",
+      "name": "ABC Sidcup",
+      "lat": 51.426466,
+      "lng": 0.102347
+    },
+    {
+      "id": "Q41781692",
+      "name": "ABC Staines",
+      "lat": 51.488019,
+      "lng": -0.305424
+    },
+    {
+      "id": "Q42213189",
+      "name": "ABC Stoke Newington",
+      "lat": 51.551107,
+      "lng": -0.07516
+    },
+    {
+      "id": "Q27086831",
+      "name": "ABC Streatham",
+      "lat": 51.436853,
+      "lng": -0.127071
+    },
+    {
+      "id": "Q42213698",
+      "name": "ABC Upton Park",
+      "lat": 51.545822,
+      "lng": 0.031495
+    },
+    {
+      "id": "Q42140350",
+      "name": "ABC Walham Green",
+      "lat": 51.48032,
+      "lng": -0.198946
+    },
+    {
+      "id": "Q41104835",
+      "name": "ABC Walton-on-Thames",
+      "lat": 51.384656,
+      "lng": -0.422772
+    },
+    {
+      "id": "Q42166240",
+      "name": "ABC Wembley",
+      "lat": 51.542988,
+      "lng": -0.297505
+    },
+    {
+      "id": "Q42166356",
+      "name": "ABC Wimbledon",
+      "lat": 51.419171,
+      "lng": -0.19911
+    },
+    {
+      "id": "Q42212851",
+      "name": "Abcat Cine Club",
+      "lat": 51.532723,
+      "lng": -0.119704
+    },
+    {
+      "id": "Q23035307",
+      "name": "Academy 1-2-3",
+      "lat": 51.515556,
+      "lng": -0.137778
+    },
+    {
+      "id": "Q42118327",
+      "name": "Academy Cinema",
+      "lat": 51.525828,
+      "lng": 0.056763
+    },
+    {
+      "id": "Q38515985",
+      "name": "Ace-State Cinema",
+      "lat": 51.592202,
+      "lng": 0.080993
+    },
+    {
+      "id": "Q110074635",
+      "name": "ActOne Cinema",
+      "lat": 51.506598,
+      "lng": -0.268413
+    },
+    {
+      "id": "Q38517806",
+      "name": "Addiscombe Picture Palace",
+      "lat": 51.379305,
+      "lng": -0.088551
+    },
+    {
+      "id": "Q42202566",
+      "name": "Albert Cinema",
+      "lat": 51.501081,
+      "lng": 0.054455
+    },
+    {
+      "id": "Q41819134",
+      "name": "Albert Picture Theatre",
+      "lat": 51.47585,
+      "lng": -0.149492
+    },
+    {
+      "id": "Q42213198",
+      "name": "Albion Cinema",
+      "lat": 51.561177,
+      "lng": -0.083497
+    },
+    {
+      "id": "Q42162289",
+      "name": "Alcazar Picture Theatre",
+      "lat": 51.615536,
+      "lng": -0.064417
+    },
+    {
+      "id": "Q42046922",
+      "name": "Aldgate Picture Theatre",
+      "lat": 51.516063,
+      "lng": -0.069693
+    },
+    {
+      "id": "Q42213206",
+      "name": "Alexandra Theatre",
+      "lat": 51.553207,
+      "lng": -0.074871
+    },
+    {
+      "id": "Q42117026",
+      "name": "Ambassador Theatre",
+      "lat": 51.507829,
+      "lng": -0.418089
+    },
+    {
+      "id": "Q42119767",
+      "name": "Amhurst Hall",
+      "lat": 51.547338,
+      "lng": -0.075574
+    },
+    {
+      "id": "Q42162302",
+      "name": "Andrews Pictures",
+      "lat": 51.625635,
+      "lng": -0.058649
+    },
+    {
+      "id": "Q41895658",
+      "name": "Anglo-American Bioscope",
+      "lat": 51.503339,
+      "lng": -0.106458
+    },
+    {
+      "id": "Q42120260",
+      "name": "Apollo Picture Theatre",
+      "lat": 51.513985,
+      "lng": 0.025338
+    },
+    {
+      "id": "Q42047543",
+      "name": "Arcadia Picture Palace",
+      "lat": 51.585442,
+      "lng": -0.001694
+    },
+    {
+      "id": "Q42118145",
+      "name": "Army and Navy Cinema",
+      "lat": 51.496542,
+      "lng": -0.133757
+    },
+    {
+      "id": "Q42119644",
+      "name": "ArtHouse Crouch End",
+      "lat": 51.581944,
+      "lng": -0.120076
+    },
+    {
+      "id": "Q42203785",
+      "name": "Assembly Rooms Cinema",
+      "lat": 51.462694,
+      "lng": -0.21618
+    },
+    {
+      "id": "Q41894862",
+      "name": "Astor Cinema",
+      "lat": 51.457423,
+      "lng": 0.149394
+    },
+    {
+      "id": "Q38518659",
+      "name": "Astoria Cinema",
+      "lat": 51.434675,
+      "lng": -0.465538
+    },
+    {
+      "id": "Q41965938",
+      "name": "Astral 1 & 2 Cinemas",
+      "lat": 51.512438,
+      "lng": -0.133681
+    },
+    {
+      "id": "Q42202339",
+      "name": "Athenaeum Picture Playhouse",
+      "lat": 51.59,
+      "lng": -0.1454
+    },
+    {
+      "id": "Q42041358",
+      "name": "Avenue Picture Palace",
+      "lat": 51.539441,
+      "lng": -0.135347
+    },
+    {
+      "id": "Q30545033",
+      "name": "Avenue Theatre",
+      "lat": 51.4985,
+      "lng": -0.314949
+    },
+    {
+      "id": "Q793894",
+      "name": "Aziziye Mosque",
+      "lat": 51.5553,
+      "lng": -0.075
+    },
+    {
+      "id": "Q41818863",
+      "name": "Balham Hippodrome Theatre",
+      "lat": 51.448966,
+      "lng": -0.147884
+    },
+    {
+      "id": "Q42014950",
+      "name": "Barbican Cinema 1",
+      "lat": 51.519904,
+      "lng": -0.091849
+    },
+    {
+      "id": "Q42014966",
+      "name": "Barbican Cinemas 2 & 3",
+      "lat": 51.520571,
+      "lng": -0.094868
+    },
+    {
+      "id": "Q41018022",
+      "name": "Barnard's Imperial Bioscope",
+      "lat": 51.444875,
+      "lng": 0.214488
+    },
+    {
+      "id": "Q4869746",
+      "name": "Battersea Arts Centre",
+      "lat": 51.4648,
+      "lng": -0.1607
+    },
+    {
+      "id": "Q41893449",
+      "name": "Bayswater Cinema Theatre",
+      "lat": 51.515383,
+      "lng": -0.188205
+    },
+    {
+      "id": "Q41818873",
+      "name": "Bedford Cinema",
+      "lat": 51.44428,
+      "lng": -0.150224
+    },
+    {
+      "id": "Q41104845",
+      "name": "Bedford Hall",
+      "lat": 51.385012,
+      "lng": -0.418381
+    },
+    {
+      "id": "Q42041371",
+      "name": "Bedford Theatre",
+      "lat": 51.536832,
+      "lng": -0.140789
+    },
+    {
+      "id": "Q42046935",
+      "name": "Belle Vue Cinema",
+      "lat": 51.516702,
+      "lng": -0.06819
+    },
+    {
+      "id": "Q42166301",
+      "name": "Belle-Vue Cinema",
+      "lat": 51.549225,
+      "lng": -0.242436
+    },
+    {
+      "id": "Q41894836",
+      "name": "Belvedere Cinema",
+      "lat": 51.490966,
+      "lng": 0.151447
+    },
+    {
+      "id": "Q42117592",
+      "name": "Ben Hur Cinema",
+      "lat": 51.517132,
+      "lng": -0.040286
+    },
+    {
+      "id": "Q41965952",
+      "name": "Berkeley Cinema",
+      "lat": 51.508516,
+      "lng": -0.144459
+    },
+    {
+      "id": "Q41893755",
+      "name": "Bethnal Green Picture Palace",
+      "lat": 51.526549,
+      "lng": -0.063644
+    },
+    {
+      "id": "Q6670485",
+      "name": "BFI IMAX",
+      "lat": 51.505,
+      "lng": -0.113611
+    },
+    {
+      "id": "Q683076",
+      "name": "BFI Southbank",
+      "lat": 51.5072,
+      "lng": -0.1157
+    },
+    {
+      "id": "Q41802329",
+      "name": "Bijou Picture Palace",
+      "lat": 51.384439,
+      "lng": -0.292682
+    },
+    {
+      "id": "Q42041222",
+      "name": "Bijou Picture Theatre",
+      "lat": 51.472863,
+      "lng": -0.093148
+    },
+    {
+      "id": "Q42047847",
+      "name": "Bijou Theatre",
+      "lat": 51.549164,
+      "lng": 0.024435
+    },
+    {
+      "id": "Q42118154",
+      "name": "Biograph Cinema",
+      "lat": 51.4942,
+      "lng": -0.1418
+    },
+    {
+      "id": "Q41820086",
+      "name": "Biograph Theatre",
+      "lat": 51.462787,
+      "lng": -0.167694
+    },
+    {
+      "id": "Q41895614",
+      "name": "Bloomsbury Super Cinema",
+      "lat": 51.521618,
+      "lng": -0.112977
+    },
+    {
+      "id": "Q41965963",
+      "name": "Blue Film Cinema Club",
+      "lat": 51.512535,
+      "lng": -0.132697
+    },
+    {
+      "id": "Q42164030",
+      "name": "Blue Hall Annexe Cinema",
+      "lat": 51.536697,
+      "lng": -0.10137
+    },
+    {
+      "id": "Q42202131",
+      "name": "Blue Hall Cinema",
+      "lat": 51.518027,
+      "lng": -0.167168
+    },
+    {
+      "id": "Q42046222",
+      "name": "Blue Hall Cinema & Blue Hall Annexe Cinema",
+      "lat": 51.492842,
+      "lng": -0.234579
+    },
+    {
+      "id": "Q42118339",
+      "name": "Boleyn Cinema",
+      "lat": 51.530437,
+      "lng": 0.039228
+    },
+    {
+      "id": "Q42033686",
+      "name": "Bow Electric Theatre",
+      "lat": 51.527813,
+      "lng": -0.021889
+    },
+    {
+      "id": "Q42204091",
+      "name": "Brick Lane Palace",
+      "lat": 51.518475,
+      "lng": -0.069766
+    },
+    {
+      "id": "Q41819146",
+      "name": "Brighton Cinema",
+      "lat": 51.47585,
+      "lng": -0.149492
+    },
+    {
+      "id": "Q42200885",
+      "name": "British Bioscope",
+      "lat": 51.49676,
+      "lng": -0.110334
+    },
+    {
+      "id": "Q42035891",
+      "name": "Brixton Hill Bioscope Theatre",
+      "lat": 51.452698,
+      "lng": -0.120995
+    },
+    {
+      "id": "Q41894872",
+      "name": "Broadway Cinema",
+      "lat": 51.457125,
+      "lng": 0.141087
+    },
+    {
+      "id": "Q42046240",
+      "name": "Broadway Electric Theatre",
+      "lat": 51.492947,
+      "lng": -0.224687
+    },
+    {
+      "id": "Q42139913",
+      "name": "Broadway Palace Theatre",
+      "lat": 51.419363,
+      "lng": -0.161892
+    },
+    {
+      "id": "Q41894884",
+      "name": "Broadway Picture Palace",
+      "lat": 51.454335,
+      "lng": 0.147334
+    },
+    {
+      "id": "Q4972519",
+      "name": "Broadway Theatre",
+      "lat": 51.445272,
+      "lng": -0.020451
+    },
+    {
+      "id": "Q42041185",
+      "name": "Bromley Picturehouse",
+      "lat": 51.4063,
+      "lng": 0.0121
+    },
+    {
+      "id": "Q42139963",
+      "name": "Bruce Grove Cinema",
+      "lat": 51.594458,
+      "lng": -0.070164
+    },
+    {
+      "id": "Q42046949",
+      "name": "Cable Picture Palace",
+      "lat": 51.511056,
+      "lng": -0.060668
+    },
+    {
+      "id": "Q42041233",
+      "name": "Camberwell Electric Theatre",
+      "lat": 51.486798,
+      "lng": -0.073789
+    },
+    {
+      "id": "Q42041246",
+      "name": "Camberwell Palace Theatre",
+      "lat": 51.472872,
+      "lng": -0.093125
+    },
+    {
+      "id": "Q42204099",
+      "name": "Cambridge Theatre of Varieties",
+      "lat": 51.521509,
+      "lng": -0.075727
+    },
+    {
+      "id": "Q41893457",
+      "name": "Cannon Bayswater",
+      "lat": 51.515977,
+      "lng": -0.187886
+    },
+    {
+      "id": "Q41894894",
+      "name": "Cannon Bexleyheath",
+      "lat": 51.457106,
+      "lng": 0.141223
+    },
+    {
+      "id": "Q41965974",
+      "name": "Cannon Charing Cross Road",
+      "lat": 51.512155,
+      "lng": -0.128484
+    },
+    {
+      "id": "Q41965981",
+      "name": "Cannon Dilly",
+      "lat": 51.511107,
+      "lng": -0.134146
+    },
+    {
+      "id": "Q42047980",
+      "name": "Cannon Golders Green",
+      "lat": 51.576741,
+      "lng": -0.205612
+    },
+    {
+      "id": "Q42201881",
+      "name": "Cannon Lewisham",
+      "lat": 51.450091,
+      "lng": -0.017024
+    },
+    {
+      "id": "Q41965993",
+      "name": "Cannon Moulin Complex",
+      "lat": 51.510905,
+      "lng": -0.134019
+    },
+    {
+      "id": "Q41966006",
+      "name": "Cannon Royal Cinema",
+      "lat": 51.511971,
+      "lng": -0.128431
+    },
+    {
+      "id": "Q42213448",
+      "name": "Cannon Sutton",
+      "lat": 51.36144,
+      "lng": -0.19308
+    },
+    {
+      "id": "Q41104390",
+      "name": "Cannon Watford",
+      "lat": 51.653041,
+      "lng": -0.400034
+    },
+    {
+      "id": "Q41428312",
+      "name": "Capitol Cinema",
+      "lat": 51.29008,
+      "lng": -0.076147
+    },
+    {
+      "id": "Q41742139",
+      "name": "Carlton Cinema",
+      "lat": 51.285617,
+      "lng": 0.195508
+    },
+    {
+      "id": "Q17552178",
+      "name": "Carlton Cinema, Islington",
+      "lat": 51.5404,
+      "lng": -0.097198
+    },
+    {
+      "id": "Q41966022",
+      "name": "Casino de Paris",
+      "lat": 51.514971,
+      "lng": -0.144257
+    },
+    {
+      "id": "Q42163640",
+      "name": "Castle Cinema",
+      "lat": 51.549952,
+      "lng": -0.042877
+    },
+    {
+      "id": "Q42203877",
+      "name": "Castle Electric Cinema",
+      "lat": 51.458924,
+      "lng": -0.306619
+    },
+    {
+      "id": "Q41428320",
+      "name": "Caterham Valley Cinema",
+      "lat": 51.28156,
+      "lng": -0.071038
+    },
+    {
+      "id": "Q42166517",
+      "name": "Central Cinema",
+      "lat": 51.596404,
+      "lng": -0.114473
+    },
+    {
+      "id": "Q42204338",
+      "name": "Central Hall Picture Palace",
+      "lat": 51.458642,
+      "lng": 0.004613
+    },
+    {
+      "id": "Q41819158",
+      "name": "Century Cinema",
+      "lat": 51.460205,
+      "lng": -0.166723
+    },
+    {
+      "id": "Q42200836",
+      "name": "Century Elite Cinema",
+      "lat": 51.410824,
+      "lng": -0.300422
+    },
+    {
+      "id": "Q42045798",
+      "name": "Chapman's Pictures",
+      "lat": 51.4814,
+      "lng": -0.0115
+    },
+    {
+      "id": "Q41966029",
+      "name": "Charing Cross Cinema",
+      "lat": 51.510014,
+      "lng": -0.122427
+    },
+    {
+      "id": "Q16890141",
+      "name": "Charing Cross Theatre",
+      "lat": 51.5081,
+      "lng": -0.124134
+    },
+    {
+      "id": "Q17986385",
+      "name": "Charles Cryer Theatre",
+      "lat": 51.36588,
+      "lng": -0.15956
+    },
+    {
+      "id": "Q5090057",
+      "name": "Chelsea Classic Cinema",
+      "lat": 51.4891,
+      "lng": -0.16513
+    },
+    {
+      "id": "Q42045806",
+      "name": "Chelsea Electric Palace",
+      "lat": 51.488428,
+      "lng": -0.166461
+    },
+    {
+      "id": "Q42046514",
+      "name": "Chepstow Hall",
+      "lat": 51.474295,
+      "lng": -0.076153
+    },
+    {
+      "id": "Q42119553",
+      "name": "Chiswick Empire",
+      "lat": 51.492687,
+      "lng": -0.266557
+    },
+    {
+      "id": "Q39594850",
+      "name": "Ciné Lumière",
+      "lat": 51.494563,
+      "lng": -0.177217
+    },
+    {
+      "id": "Q42203791",
+      "name": "CineCenta Cinema",
+      "lat": 51.46463,
+      "lng": -0.238929
+    },
+    {
+      "id": "Q41966080",
+      "name": "Cineclub 24",
+      "lat": 51.517615,
+      "lng": -0.131346
+    },
+    {
+      "id": "Q42045823",
+      "name": "Cinema",
+      "lat": 51.480205,
+      "lng": -0.191739
+    },
+    {
+      "id": "Q41966091",
+      "name": "Cinema Blue, Dean Street",
+      "lat": 51.513324,
+      "lng": -0.132267
+    },
+    {
+      "id": "Q41966099",
+      "name": "Cinema Blue, Lisle Street",
+      "lat": 51.511566,
+      "lng": -0.130431
+    },
+    {
+      "id": "Q42118497",
+      "name": "Cinema De Luxe",
+      "lat": 51.475904,
+      "lng": -0.012862
+    },
+    {
+      "id": "Q42163912",
+      "name": "Cinema DeLuxe",
+      "lat": 51.558754,
+      "lng": 0.07214
+    },
+    {
+      "id": "Q41104852",
+      "name": "Cinema House",
+      "lat": 51.385012,
+      "lng": -0.418381
+    },
+    {
+      "id": "Q42213777",
+      "name": "Cinema Palace",
+      "lat": 51.491472,
+      "lng": -0.082013
+    },
+    {
+      "id": "Q40366188",
+      "name": "Cinema Royal",
+      "lat": 51.333283,
+      "lng": -0.267482
+    },
+    {
+      "id": "Q41966115",
+      "name": "Cinema XXX, Great Windmill Street",
+      "lat": 51.511446,
+      "lng": -0.134367
+    },
+    {
+      "id": "Q41966105",
+      "name": "Cinema XXX, Macclesfield Street",
+      "lat": 51.511931,
+      "lng": -0.131259
+    },
+    {
+      "id": "Q42046963",
+      "name": "Cinema, 127 Whitechapel Road E1",
+      "lat": 51.519824,
+      "lng": -0.05665
+    },
+    {
+      "id": "Q42204116",
+      "name": "Cinema, 52 Hanbury Street",
+      "lat": 51.52025,
+      "lng": -0.071189
+    },
+    {
+      "id": "Q42046970",
+      "name": "Cinema, 63 Whitechapel Road E1",
+      "lat": 51.51723,
+      "lng": -0.06711
+    },
+    {
+      "id": "Q42204108",
+      "name": "Cinema, 68 Brick Lane",
+      "lat": 51.518808,
+      "lng": -0.071542
+    },
+    {
+      "id": "Q42046979",
+      "name": "Cinematograph Theatre",
+      "lat": 51.515136,
+      "lng": -0.070325
+    },
+    {
+      "id": "Q41562076",
+      "name": "Cinemax Cinema",
+      "lat": 51.613682,
+      "lng": -0.276132
+    },
+    {
+      "id": "Q41966127",
+      "name": "Cinephone Cinema",
+      "lat": 51.514024,
+      "lng": -0.152522
+    },
+    {
+      "id": "Q42162714",
+      "name": "Cineworld Cinema & IMAX Enfield",
+      "lat": 51.650503,
+      "lng": -0.064949
+    },
+    {
+      "id": "Q41894909",
+      "name": "Cineworld Cinema Bexleyheath",
+      "lat": 51.456357,
+      "lng": 0.146761
+    },
+    {
+      "id": "Q41537376",
+      "name": "Cineworld Cinema Feltham",
+      "lat": 51.443209,
+      "lng": -0.40614
+    },
+    {
+      "id": "Q42163924",
+      "name": "Cineworld Cinema Ilford",
+      "lat": 51.558162,
+      "lng": 0.074533
+    },
+    {
+      "id": "Q41782148",
+      "name": "Cineworld Cinema South Ruislip",
+      "lat": 51.559069,
+      "lng": -0.400181
+    },
+    {
+      "id": "Q42119602",
+      "name": "Cineworld Cinema Staples Corner",
+      "lat": 51.568196,
+      "lng": -0.227079
+    },
+    {
+      "id": "Q42213912",
+      "name": "Cineworld Cinema Wandsworth",
+      "lat": 51.456811,
+      "lng": -0.192907
+    },
+    {
+      "id": "Q42166251",
+      "name": "Cineworld Cinema Wembley",
+      "lat": 51.557785,
+      "lng": -0.281576
+    },
+    {
+      "id": "Q42117435",
+      "name": "Cineworld Cinema West India Quay",
+      "lat": 51.507898,
+      "lng": -0.023756
+    },
+    {
+      "id": "Q42166532",
+      "name": "Cineworld Cinema Wood Green",
+      "lat": 51.599071,
+      "lng": -0.110941
+    },
+    {
+      "id": "Q32270553",
+      "name": "Cineworld Cinema, Kings Road",
+      "lat": 51.48552,
+      "lng": -0.17309
+    },
+    {
+      "id": "Q41820095",
+      "name": "Clapham Picturehouse",
+      "lat": 51.46252,
+      "lng": -0.138206
+    },
+    {
+      "id": "Q42118252",
+      "name": "Clapton Rink Cinema",
+      "lat": 51.555112,
+      "lng": -0.054685
+    },
+    {
+      "id": "Q42118647",
+      "name": "Clarence Cinema",
+      "lat": 51.552655,
+      "lng": -0.056141
+    },
+    {
+      "id": "Q38518679",
+      "name": "Clarendon Cinema",
+      "lat": 51.433585,
+      "lng": -0.466136
+    },
+    {
+      "id": "Q42029696",
+      "name": "Classic Baker Street",
+      "lat": 51.52061,
+      "lng": -0.156803
+    },
+    {
+      "id": "Q42119520",
+      "name": "Classic Chingford",
+      "lat": 51.617694,
+      "lng": -0.018605
+    },
+    {
+      "id": "Q42202222",
+      "name": "Classic Cinema",
+      "lat": 51.520746,
+      "lng": -0.051658
+    },
+    {
+      "id": "Q42119608",
+      "name": "Classic Colindale",
+      "lat": 51.589197,
+      "lng": -0.253558
+    },
+    {
+      "id": "Q42046270",
+      "name": "Classic Hammersmith",
+      "lat": 51.492545,
+      "lng": -0.231108
+    },
+    {
+      "id": "Q42117033",
+      "name": "Classic Hayes",
+      "lat": 51.518745,
+      "lng": -0.410457
+    },
+    {
+      "id": "Q42212801",
+      "name": "Classic Kilburn",
+      "lat": 51.54644,
+      "lng": -0.203205
+    },
+    {
+      "id": "Q42201958",
+      "name": "Classic Leyton",
+      "lat": 51.574682,
+      "lng": -0.01382
+    },
+    {
+      "id": "Q42029712",
+      "name": "Classic Piccadilly Circus",
+      "lat": 51.510135,
+      "lng": -0.134578
+    },
+    {
+      "id": "Q42120457",
+      "name": "Classic Praed Street",
+      "lat": 51.518976,
+      "lng": -0.169518
+    },
+    {
+      "id": "Q42204187",
+      "name": "Classic South Croydon",
+      "lat": 51.344359,
+      "lng": -0.106268
+    },
+    {
+      "id": "Q42213166",
+      "name": "Classic Stockwell",
+      "lat": 51.472736,
+      "lng": -0.121877
+    },
+    {
+      "id": "Q42029727",
+      "name": "Classic Strand",
+      "lat": 51.509737,
+      "lng": -0.124393
+    },
+    {
+      "id": "Q42139920",
+      "name": "Classic Tooting",
+      "lat": 51.435071,
+      "lng": -0.160931
+    },
+    {
+      "id": "Q42118164",
+      "name": "Classic Victoria",
+      "lat": 51.49705,
+      "lng": -0.14346
+    },
+    {
+      "id": "Q42214036",
+      "name": "Classic Waterloo",
+      "lat": 51.501574,
+      "lng": -0.112606
+    },
+    {
+      "id": "Q42035901",
+      "name": "Clifton Brixton",
+      "lat": 51.454737,
+      "lng": -0.119657
+    },
+    {
+      "id": "Q42213923",
+      "name": "Clock Tower Cinema",
+      "lat": 51.478529,
+      "lng": -0.129135
+    },
+    {
+      "id": "Q42204126",
+      "name": "Close-Up Film Centre",
+      "lat": 51.523633,
+      "lng": -0.072081
+    },
+    {
+      "id": "Q137534936",
+      "name": "Coldharbour Blue",
+      "lat": 51.465053,
+      "lng": -0.101027
+    },
+    {
+      "id": "Q42118359",
+      "name": "Coliseum Cinema",
+      "lat": 51.541605,
+      "lng": 0.050581
+    },
+    {
+      "id": "Q42029738",
+      "name": "Colt Cinema",
+      "lat": 51.514874,
+      "lng": -0.135988
+    },
+    {
+      "id": "Q42162986",
+      "name": "Columbia Cinema",
+      "lat": 51.529329,
+      "lng": -0.075296
+    },
+    {
+      "id": "Q41749784",
+      "name": "Commodore Cinema",
+      "lat": 51.3742,
+      "lng": 0.0986
+    },
+    {
+      "id": "Q42029748",
+      "name": "Compton Cinema",
+      "lat": 51.513387,
+      "lng": -0.130788
+    },
+    {
+      "id": "Q42202141",
+      "name": "Connaught Cinema",
+      "lat": 51.517566,
+      "lng": -0.166512
+    },
+    {
+      "id": "Q41408231",
+      "name": "Constitutional Hall Cinema",
+      "lat": 51.390003,
+      "lng": -0.505401
+    },
+    {
+      "id": "Q42202104",
+      "name": "Cook's Bioscope",
+      "lat": 51.547509,
+      "lng": 0.035374
+    },
+    {
+      "id": "Q42164040",
+      "name": "Copenhagen Cinema",
+      "lat": 51.536894,
+      "lng": -0.115573
+    },
+    {
+      "id": "Q42117048",
+      "name": "Corinth Cinema",
+      "lat": 51.522555,
+      "lng": -0.420758
+    },
+    {
+      "id": "Q42204211",
+      "name": "Corner Cinema",
+      "lat": 51.58269,
+      "lng": -0.073117
+    },
+    {
+      "id": "Q42029760",
+      "name": "Corniche Cinema",
+      "lat": 51.513857,
+      "lng": -0.131664
+    },
+    {
+      "id": "Q41802355",
+      "name": "Corona Cinema",
+      "lat": 51.397549,
+      "lng": 0.176343
+    },
+    {
+      "id": "Q42201645",
+      "name": "Coronation Cinema",
+      "lat": 51.596503,
+      "lng": -0.114933
+    },
+    {
+      "id": "Q41802339",
+      "name": "Coronation Hall",
+      "lat": 51.393818,
+      "lng": -0.302854
+    },
+    {
+      "id": "Q42163171",
+      "name": "Coronation Hall Picture Palace",
+      "lat": 51.508768,
+      "lng": -0.335298
+    },
+    {
+      "id": "Q26544908",
+      "name": "Coronation Picture Palace",
+      "lat": 51.549994,
+      "lng": 0.0475
+    },
+    {
+      "id": "Q42035623",
+      "name": "Coronet Cinema",
+      "lat": 51.484923,
+      "lng": -0.301901
+    },
+    {
+      "id": "Q41896127",
+      "name": "Coronet Electric Theatre",
+      "lat": 51.517864,
+      "lng": 0.012792
+    },
+    {
+      "id": "Q41895843",
+      "name": "Cosie Picture Palace",
+      "lat": 51.374932,
+      "lng": -0.100846
+    },
+    {
+      "id": "Q42046525",
+      "name": "Cosy Bioscope",
+      "lat": 51.46706,
+      "lng": -0.066114
+    },
+    {
+      "id": "Q42163390",
+      "name": "Cosy Cinema",
+      "lat": 51.595935,
+      "lng": -0.335269
+    },
+    {
+      "id": "Q42212866",
+      "name": "Cosy Corner Picture Playhouse",
+      "lat": 51.531071,
+      "lng": -0.118369
+    },
+    {
+      "id": "Q42202115",
+      "name": "Cosy Corner Picture Theatre",
+      "lat": 51.551412,
+      "lng": 0.049385
+    },
+    {
+      "id": "Q41818895",
+      "name": "Cosy Electric Theatre",
+      "lat": 51.442149,
+      "lng": -0.153915
+    },
+    {
+      "id": "Q41818244",
+      "name": "County Cinema",
+      "lat": 51.372379,
+      "lng": -0.460358
+    },
+    {
+      "id": "Q41562019",
+      "name": "Court Cinema",
+      "lat": 51.401553,
+      "lng": -0.346078
+    },
+    {
+      "id": "Q42029780",
+      "name": "Covent Garden Cinema Club",
+      "lat": 51.51152,
+      "lng": -0.124804
+    },
+    {
+      "id": "Q42045854",
+      "name": "Cremorne Cinema",
+      "lat": 51.482396,
+      "lng": -0.18347
+    },
+    {
+      "id": "Q28407259",
+      "name": "Crouch End Hippodrome",
+      "lat": 51.581,
+      "lng": -0.1229
+    },
+    {
+      "id": "Q42119650",
+      "name": "Crouch End Picturehouse",
+      "lat": 51.581629,
+      "lng": -0.120788
+    },
+    {
+      "id": "Q42047561",
+      "name": "Crown Cinema",
+      "lat": 51.588482,
+      "lng": -0.004211
+    },
+    {
+      "id": "Q41818741",
+      "name": "Crown Kinema",
+      "lat": 51.507456,
+      "lng": -0.27226
+    },
+    {
+      "id": "Q42166547",
+      "name": "Crown Picture Theatre",
+      "lat": 51.593274,
+      "lng": -0.106962
+    },
+    {
+      "id": "Q42117892",
+      "name": "Croydon Pavilion Cinema",
+      "lat": 51.400043,
+      "lng": -0.117508
+    },
+    {
+      "id": "Q42158275",
+      "name": "Crystal Palace Picture House",
+      "lat": 51.42206,
+      "lng": -0.077351
+    },
+    {
+      "id": "Q42046988",
+      "name": "Curzon Aldgate",
+      "lat": 51.513779,
+      "lng": -0.069226
+    },
+    {
+      "id": "Q41895623",
+      "name": "Curzon Bloomsbury",
+      "lat": 51.524432,
+      "lng": -0.122733
+    },
+    {
+      "id": "Q42045860",
+      "name": "Curzon Chelsea Cinema",
+      "lat": 51.48825,
+      "lng": -0.167858
+    },
+    {
+      "id": "Q42029791",
+      "name": "Curzon Cinema",
+      "lat": 51.506662,
+      "lng": -0.148137
+    },
+    {
+      "id": "Q42202393",
+      "name": "Curzon Goldsmiths (University of London)",
+      "lat": 51.474385,
+      "lng": -0.034336
+    },
+    {
+      "id": "Q42027350",
+      "name": "Curzon Millbank",
+      "lat": 51.492425,
+      "lng": -0.125338
+    },
+    {
+      "id": "Q41895667",
+      "name": "Curzon Mondrian",
+      "lat": 51.507957,
+      "lng": -0.107032
+    },
+    {
+      "id": "Q42029802",
+      "name": "Curzon Phoenix Cinema",
+      "lat": 51.514382,
+      "lng": -0.129166
+    },
+    {
+      "id": "Q42203890",
+      "name": "Curzon Richmond",
+      "lat": 51.458947,
+      "lng": -0.307783
+    },
+    {
+      "id": "Q42029812",
+      "name": "Curzon Soho",
+      "lat": 51.512694,
+      "lng": -0.13022
+    },
+    {
+      "id": "Q42118171",
+      "name": "Curzon Victoria",
+      "lat": 51.497323,
+      "lng": -0.136732
+    },
+    {
+      "id": "Q42119779",
+      "name": "Dalston Picture Palace",
+      "lat": 51.546261,
+      "lng": -0.073938
+    },
+    {
+      "id": "Q42119784",
+      "name": "Dalston Picture Playhouse",
+      "lat": 51.547961,
+      "lng": -0.075432
+    },
+    {
+      "id": "Q5236404",
+      "name": "David Lean Cinema",
+      "lat": 51.3721,
+      "lng": -0.099
+    },
+    {
+      "id": "Q42158297",
+      "name": "Deptford Cinema",
+      "lat": 51.474486,
+      "lng": -0.024526
+    },
+    {
+      "id": "Q17551504",
+      "name": "Dominion Centre",
+      "lat": 51.5962,
+      "lng": -0.110128
+    },
+    {
+      "id": "Q31209278",
+      "name": "Dominion Cinema",
+      "lat": 51.474909,
+      "lng": -0.342138
+    },
+    {
+      "id": "Q2173732",
+      "name": "Dominion Theatre",
+      "lat": 51.5166,
+      "lng": -0.130139
+    },
+    {
+      "id": "Q42164056",
+      "name": "Dreadnought Picture Palace",
+      "lat": 51.537484,
+      "lng": -0.100383
+    },
+    {
+      "id": "Q42119585",
+      "name": "Dream City Cinema Club",
+      "lat": 51.525806,
+      "lng": -0.104047
+    },
+    {
+      "id": "Q32270536",
+      "name": "Ealing Hippodrome",
+      "lat": 51.513309,
+      "lng": -0.301519
+    },
+    {
+      "id": "Q123147571",
+      "name": "Ealing Picturehouse",
+      "lat": 51.5122,
+      "lng": -0.3071
+    },
+    {
+      "id": "Q42158540",
+      "name": "East Dulwich Picturehouse",
+      "lat": 51.457196,
+      "lng": -0.075554
+    },
+    {
+      "id": "Q42046995",
+      "name": "East London Palace",
+      "lat": 51.51704,
+      "lng": -0.064523
+    },
+    {
+      "id": "Q41893766",
+      "name": "East London Picture Palace",
+      "lat": 51.53171,
+      "lng": -0.056844
+    },
+    {
+      "id": "Q42163845",
+      "name": "East Road Cinema",
+      "lat": 51.527136,
+      "lng": -0.087919
+    },
+    {
+      "id": "Q42117598",
+      "name": "Eastern Grand Central Theatre",
+      "lat": 51.51457,
+      "lng": -0.05794
+    },
+    {
+      "id": "Q42162319",
+      "name": "Edmonton Cinematograph Theatre",
+      "lat": 51.621961,
+      "lng": -0.061618
+    },
+    {
+      "id": "Q42162332",
+      "name": "Edmonton Empire",
+      "lat": 51.626371,
+      "lng": -0.057202
+    },
+    {
+      "id": "Q42120366",
+      "name": "Electric Alhambra Cinematograph Theatre",
+      "lat": 51.549515,
+      "lng": -0.140928
+    },
+    {
+      "id": "Q42204135",
+      "name": "Electric Cinema Shoreditch",
+      "lat": 51.524495,
+      "lng": -0.074108
+    },
+    {
+      "id": "Q42035634",
+      "name": "Electric Cinematograph Theatre",
+      "lat": 51.483549,
+      "lng": -0.309304
+    },
+    {
+      "id": "Q42202401",
+      "name": "Electric Empire Theatre",
+      "lat": 51.47455,
+      "lng": -0.0468
+    },
+    {
+      "id": "Q42118506",
+      "name": "Electric Fun Palace",
+      "lat": 51.481421,
+      "lng": -0.010041
+    },
+    {
+      "id": "Q42029822",
+      "name": "Electric Palace",
+      "lat": 51.514958,
+      "lng": -0.144463
+    },
+    {
+      "id": "Q42035912",
+      "name": "Electric Palace Cinema",
+      "lat": 51.46299,
+      "lng": -0.113889
+    },
+    {
+      "id": "Q42029835",
+      "name": "Electric Palace of Pictures",
+      "lat": 51.515563,
+      "lng": -0.123457
+    },
+    {
+      "id": "Q42046298",
+      "name": "Electric Palace Theatre",
+      "lat": 51.492594,
+      "lng": -0.228182
+    },
+    {
+      "id": "Q42041381",
+      "name": "Electric Palladium Cinema",
+      "lat": 51.537865,
+      "lng": -0.141779
+    },
+    {
+      "id": "Q42203803",
+      "name": "Electric Pavilion Picture House",
+      "lat": 51.461886,
+      "lng": -0.205779
+    },
+    {
+      "id": "Q41819170",
+      "name": "Electric Picture Palace",
+      "lat": 51.471361,
+      "lng": -0.168628
+    },
+    {
+      "id": "Q38515751",
+      "name": "Electric Theatre",
+      "lat": 51.53768,
+      "lng": 0.08047
+    },
+    {
+      "id": "Q42158519",
+      "name": "Electric Theatre Charming",
+      "lat": 51.510138,
+      "lng": -0.324309
+    },
+    {
+      "id": "Q42163519",
+      "name": "Electric Theatre Cinema",
+      "lat": 51.545915,
+      "lng": -0.103142
+    },
+    {
+      "id": "Q42164094",
+      "name": "Electric Theatre, Junction Road",
+      "lat": 51.558121,
+      "lng": -0.138236
+    },
+    {
+      "id": "Q42164080",
+      "name": "Electric Theatre, Upper Street",
+      "lat": 51.536336,
+      "lng": -0.103566
+    },
+    {
+      "id": "Q42162884",
+      "name": "Electric Vaudeville Theatre",
+      "lat": 51.562905,
+      "lng": -0.108488
+    },
+    {
+      "id": "Q42202242",
+      "name": "Electrodrome",
+      "lat": 51.524573,
+      "lng": -0.033588
+    },
+    {
+      "id": "Q27965068",
+      "name": "Elite Cinema, Wembley Park",
+      "lat": 51.5587,
+      "lng": -0.285
+    },
+    {
+      "id": "Q42117698",
+      "name": "Elmfield Picture Hall",
+      "lat": 51.429232,
+      "lng": -0.333235
+    },
+    {
+      "id": "Q42162660",
+      "name": "Eltham Cinema Theatre",
+      "lat": 51.425613,
+      "lng": 0.1044
+    },
+    {
+      "id": "Q42027358",
+      "name": "Embankment Garden Cinema",
+      "lat": 51.507953,
+      "lng": -0.123706
+    },
+    {
+      "id": "Q41562690",
+      "name": "Embassy Cinema",
+      "lat": 51.573115,
+      "lng": -0.423062
+    },
+    {
+      "id": "Q42029845",
+      "name": "Embassy Cinema, High Holborn",
+      "lat": 51.51746,
+      "lng": -0.121377
+    },
+    {
+      "id": "Q42029861",
+      "name": "Embassy Cinema, Tottenham Court Road",
+      "lat": 51.521484,
+      "lng": -0.1352
+    },
+    {
+      "id": "Q41893778",
+      "name": "Empire Cinema",
+      "lat": 51.528268,
+      "lng": -0.050045
+    },
+    {
+      "id": "Q42140308",
+      "name": "Empire Electric Cinema",
+      "lat": 51.538026,
+      "lng": -0.46022
+    },
+    {
+      "id": "Q42118517",
+      "name": "Empire Electric Theatre",
+      "lat": 51.481499,
+      "lng": -0.010074
+    },
+    {
+      "id": "Q5043063",
+      "name": "Empire Haymarket",
+      "lat": 51.5087,
+      "lng": -0.1323
+    },
+    {
+      "id": "Q3724821",
+      "name": "Empire Leicester Square",
+      "lat": 51.5108,
+      "lng": -0.130278
+    },
+    {
+      "id": "Q42213378",
+      "name": "Empire Picture Palace",
+      "lat": 51.428979,
+      "lng": -0.131031
+    },
+    {
+      "id": "Q41820119",
+      "name": "Empire Picture Theatre",
+      "lat": 51.460847,
+      "lng": -0.177472
+    },
+    {
+      "id": "Q41537682",
+      "name": "Empire Theatre",
+      "lat": 51.478299,
+      "lng": 0.323352
+    },
+    {
+      "id": "Q42047585",
+      "name": "Empire Walthamstow",
+      "lat": 51.582808,
+      "lng": -0.018273
+    },
+    {
+      "id": "Q42117446",
+      "name": "Empress Electric Theatre",
+      "lat": 51.508184,
+      "lng": -0.004051
+    },
+    {
+      "id": "Q42203643",
+      "name": "Endeavour Cinema",
+      "lat": 51.532587,
+      "lng": 0.015133
+    },
+    {
+      "id": "Q32270147",
+      "name": "Enfield Ritz",
+      "lat": 51.61358,
+      "lng": -0.12288
+    },
+    {
+      "id": "Q5389574",
+      "name": "Erith Playhouse",
+      "lat": 51.4763,
+      "lng": 0.1681
+    },
+    {
+      "id": "Q31209361",
+      "name": "Eros Cinema",
+      "lat": 51.376619,
+      "lng": -0.101758
+    },
+    {
+      "id": "Q41893790",
+      "name": "Essoldo Bethnal Green",
+      "lat": 51.526416,
+      "lng": -0.065177
+    },
+    {
+      "id": "Q42212880",
+      "name": "Essoldo Caledonian Road",
+      "lat": 51.549806,
+      "lng": -0.117955
+    },
+    {
+      "id": "Q42041283",
+      "name": "Essoldo Camberwell",
+      "lat": 51.47306,
+      "lng": -0.09317
+    },
+    {
+      "id": "Q41896138",
+      "name": "Essoldo Canning Town",
+      "lat": 51.528313,
+      "lng": 0.03301
+    },
+    {
+      "id": "Q39536944",
+      "name": "Essoldo East Barnet",
+      "lat": 51.643108,
+      "lng": -0.164622
+    },
+    {
+      "id": "Q42118661",
+      "name": "Essoldo Hackney",
+      "lat": 51.5473,
+      "lng": -0.054879
+    },
+    {
+      "id": "Q42120154",
+      "name": "Essoldo Holloway",
+      "lat": 51.552015,
+      "lng": -0.111506
+    },
+    {
+      "id": "Q42212825",
+      "name": "Essoldo Kilburn",
+      "lat": 51.535714,
+      "lng": -0.190108
+    },
+    {
+      "id": "Q42201969",
+      "name": "Essoldo Leyton",
+      "lat": 51.559583,
+      "lng": -0.008965
+    },
+    {
+      "id": "Q42202121",
+      "name": "Essoldo Manor Park",
+      "lat": 51.555901,
+      "lng": 0.063901
+    },
+    {
+      "id": "Q42120478",
+      "name": "Essoldo Paddington",
+      "lat": 51.523279,
+      "lng": -0.201762
+    },
+    {
+      "id": "Q42117457",
+      "name": "Essoldo Poplar",
+      "lat": 51.51128,
+      "lng": -0.011448
+    },
+    {
+      "id": "Q42204224",
+      "name": "Essoldo Tottenham",
+      "lat": 51.586239,
+      "lng": -0.090453
+    },
+    {
+      "id": "Q41104407",
+      "name": "Essoldo Watford",
+      "lat": 51.653154,
+      "lng": -0.39595
+    },
+    {
+      "id": "Q42213108",
+      "name": "Euston Cinema",
+      "lat": 51.528645,
+      "lng": -0.127172
+    },
+    {
+      "id": "Q42029879",
+      "name": "Everyman Baker Street",
+      "lat": 51.520523,
+      "lng": -0.15676
+    },
+    {
+      "id": "Q42163105",
+      "name": "Everyman Belsize Park",
+      "lat": 51.550937,
+      "lng": -0.165592
+    },
+    {
+      "id": "Q42117465",
+      "name": "Everyman Canary Wharf",
+      "lat": 51.505999,
+      "lng": -0.019246
+    },
+    {
+      "id": "Q5417851",
+      "name": "Everyman Cinema",
+      "lat": 51.55633,
+      "lng": -0.17898
+    },
+    {
+      "id": "Q42158284",
+      "name": "Everyman Crystal Palace",
+      "lat": 51.419105,
+      "lng": -0.07919
+    },
+    {
+      "id": "Q26554332",
+      "name": "Everyman Esher",
+      "lat": 51.370789,
+      "lng": -0.364008
+    },
+    {
+      "id": "Q42212892",
+      "name": "Everyman King's Cross",
+      "lat": 51.537378,
+      "lng": -0.124727
+    },
+    {
+      "id": "Q42198143",
+      "name": "Everyman Maida Vale",
+      "lat": 51.528035,
+      "lng": -0.182059
+    },
+    {
+      "id": "Q17551377",
+      "name": "Everyman Muswell Hill",
+      "lat": 51.5896,
+      "lng": -0.146375
+    },
+    {
+      "id": "Q42029887",
+      "name": "Everyman Selfridge's",
+      "lat": 51.514205,
+      "lng": -0.1528
+    },
+    {
+      "id": "Q41893801",
+      "name": "Excelsior Kinema",
+      "lat": 51.527104,
+      "lng": -0.064016
+    },
+    {
+      "id": "Q5430286",
+      "name": "Fairfield Halls",
+      "lat": 51.372222,
+      "lng": -0.095833
+    },
+    {
+      "id": "Q42119791",
+      "name": "Fairyland",
+      "lat": 51.547168,
+      "lng": -0.075609
+    },
+    {
+      "id": "Q41820127",
+      "name": "Falcon Cinema",
+      "lat": 51.464127,
+      "lng": -0.167962
+    },
+    {
+      "id": "Q42164120",
+      "name": "Fantasy Videos Cinema",
+      "lat": 51.529968,
+      "lng": -0.098381
+    },
+    {
+      "id": "Q42162896",
+      "name": "Finsbury Park Empire Theatre",
+      "lat": 51.562829,
+      "lng": -0.105494
+    },
+    {
+      "id": "Q42029899",
+      "name": "Fitzroy Picture Palace",
+      "lat": 51.520072,
+      "lng": -0.136406
+    },
+    {
+      "id": "Q42162730",
+      "name": "Florida Cinema",
+      "lat": 51.65036,
+      "lng": -0.080172
+    },
+    {
+      "id": "Q41895884",
+      "name": "Focus Cinema",
+      "lat": 51.37366,
+      "lng": -0.10171
+    },
+    {
+      "id": "Q41893813",
+      "name": "Foresters Cinema",
+      "lat": 51.523156,
+      "lng": -0.054897
+    },
+    {
+      "id": "Q32270376",
+      "name": "Forum, Ealing",
+      "lat": 51.51261,
+      "lng": -0.30771
+    },
+    {
+      "id": "Q41894852",
+      "name": "Freemantle Hall",
+      "lat": 51.441383,
+      "lng": 0.148675
+    },
+    {
+      "id": "Q42118669",
+      "name": "Frinton Cinema Club",
+      "lat": 51.537752,
+      "lng": -0.045681
+    },
+    {
+      "id": "Q42043155",
+      "name": "Fulham Picture Palace",
+      "lat": 51.487478,
+      "lng": -0.203548
+    },
+    {
+      "id": "Q32270636",
+      "name": "Fulham Road Picturehouse",
+      "lat": 51.487184,
+      "lng": -0.179772
+    },
+    {
+      "id": "Q41407601",
+      "name": "Gaiety Cinema",
+      "lat": 51.361582,
+      "lng": -0.147582
+    },
+    {
+      "id": "Q42213718",
+      "name": "Gaiety Picture Palace",
+      "lat": 51.534836,
+      "lng": 0.035604
+    },
+    {
+      "id": "Q42120380",
+      "name": "Gaisford Cinema",
+      "lat": 51.547981,
+      "lng": -0.140701
+    },
+    {
+      "id": "Q42029910",
+      "name": "Gala Berkeley Cinema",
+      "lat": 51.51822,
+      "lng": -0.132455
+    },
+    {
+      "id": "Q42163431",
+      "name": "Gala Cinema",
+      "lat": 51.586416,
+      "lng": -0.220005
+    },
+    {
+      "id": "Q42120487",
+      "name": "Gala Royal Cinema",
+      "lat": 51.51551,
+      "lng": -0.163634
+    },
+    {
+      "id": "Q42204010",
+      "name": "Galaxy Cinema",
+      "lat": 51.503876,
+      "lng": -0.220752
+    },
+    {
+      "id": "Q42213120",
+      "name": "Gale Cinematograph Hall",
+      "lat": 51.527915,
+      "lng": -0.129232
+    },
+    {
+      "id": "Q41896143",
+      "name": "Gale's Electric Theatre",
+      "lat": 51.518076,
+      "lng": 0.013184
+    },
+    {
+      "id": "Q42120387",
+      "name": "Garden Cinema",
+      "lat": 51.546004,
+      "lng": -0.148752
+    },
+    {
+      "id": "Q27086823",
+      "name": "Gate Cinema",
+      "lat": 51.508693,
+      "lng": -0.197329
+    },
+    {
+      "id": "Q42029920",
+      "name": "Gate Mayfair",
+      "lat": 51.507316,
+      "lng": -0.143654
+    },
+    {
+      "id": "Q42214055",
+      "name": "Gatti's Cinema",
+      "lat": 51.500035,
+      "lng": -0.114694
+    },
+    {
+      "id": "Q41818757",
+      "name": "Gaumont Acton",
+      "lat": 51.50832,
+      "lng": -0.276164
+    },
+    {
+      "id": "Q41818906",
+      "name": "Gaumont Balham",
+      "lat": 51.442107,
+      "lng": -0.153952
+    },
+    {
+      "id": "Q39536985",
+      "name": "Gaumont Barnet",
+      "lat": 51.655279,
+      "lng": -0.201822
+    },
+    {
+      "id": "Q42041197",
+      "name": "Gaumont Bromley",
+      "lat": 51.401,
+      "lng": 0.016
+    },
+    {
+      "id": "Q41104430",
+      "name": "Gaumont Cinema",
+      "lat": 51.657863,
+      "lng": -0.399232
+    },
+    {
+      "id": "Q42120248",
+      "name": "Gaumont Cricklewood",
+      "lat": 51.556829,
+      "lng": -0.215534
+    },
+    {
+      "id": "Q42119801",
+      "name": "Gaumont Dalston",
+      "lat": 51.545887,
+      "lng": -0.073981
+    },
+    {
+      "id": "Q42118366",
+      "name": "Gaumont East Ham",
+      "lat": 51.535624,
+      "lng": 0.052636
+    },
+    {
+      "id": "Q42202154",
+      "name": "Gaumont Edgware Road",
+      "lat": 51.5201,
+      "lng": -0.1694
+    },
+    {
+      "id": "Q42162677",
+      "name": "Gaumont Eltham Hill",
+      "lat": 51.45297,
+      "lng": 0.02922
+    },
+    {
+      "id": "Q39048079",
+      "name": "Gaumont Finchley",
+      "lat": 51.615,
+      "lng": -0.1764
+    },
+    {
+      "id": "Q42162910",
+      "name": "Gaumont Finsbury Park",
+      "lat": 51.565283,
+      "lng": -0.105755
+    },
+    {
+      "id": "Q42120396",
+      "name": "Gaumont Kentish Town",
+      "lat": 51.548913,
+      "lng": -0.141073
+    },
+    {
+      "id": "Q42202412",
+      "name": "Gaumont New Cross",
+      "lat": 51.4761,
+      "lng": -0.0366
+    },
+    {
+      "id": "Q42029932",
+      "name": "Gaumont News Theatre",
+      "lat": 51.512997,
+      "lng": -0.129576
+    },
+    {
+      "id": "Q42203536",
+      "name": "Gaumont Palmers Green",
+      "lat": 51.61863,
+      "lng": -0.107749
+    },
+    {
+      "id": "Q42046486",
+      "name": "Gaumont Peckham",
+      "lat": 51.474079,
+      "lng": -0.066187
+    },
+    {
+      "id": "Q42203610",
+      "name": "Gaumont Penge",
+      "lat": 51.412342,
+      "lng": -0.04998
+    },
+    {
+      "id": "Q42203914",
+      "name": "Gaumont Richmond",
+      "lat": 51.45917,
+      "lng": -0.306202
+    },
+    {
+      "id": "Q41562575",
+      "name": "Gaumont Romford",
+      "lat": 51.571479,
+      "lng": 0.184551
+    },
+    {
+      "id": "Q26669111",
+      "name": "Gaumont Rose Hill",
+      "lat": 51.38551,
+      "lng": -0.188881
+    },
+    {
+      "id": "Q42041446",
+      "name": "Gaumont Rushey Green",
+      "lat": 51.447091,
+      "lng": -0.018678
+    },
+    {
+      "id": "Q5527683",
+      "name": "Gaumont State Cinema",
+      "lat": 51.5413,
+      "lng": -0.19757
+    },
+    {
+      "id": "Q42213291",
+      "name": "Gaumont Stratford",
+      "lat": 51.540183,
+      "lng": 0.002728
+    },
+    {
+      "id": "Q42213395",
+      "name": "Gaumont Streatham",
+      "lat": 51.439479,
+      "lng": -0.126198
+    },
+    {
+      "id": "Q42213493",
+      "name": "Gaumont Sutton",
+      "lat": 51.364252,
+      "lng": -0.193433
+    },
+    {
+      "id": "Q42213636",
+      "name": "Gaumont Twickenham",
+      "lat": 51.448405,
+      "lng": -0.324952
+    },
+    {
+      "id": "Q41782817",
+      "name": "Gaumont Upminster",
+      "lat": 51.556474,
+      "lng": 0.253619
+    },
+    {
+      "id": "Q42140369",
+      "name": "Gaumont Walham Green",
+      "lat": 51.481367,
+      "lng": -0.198682
+    },
+    {
+      "id": "Q42213943",
+      "name": "Gaumont Wandsworth",
+      "lat": 51.456755,
+      "lng": -0.19186
+    },
+    {
+      "id": "Q41818182",
+      "name": "Gaumont West Wickham",
+      "lat": 51.376747,
+      "lng": -0.015004
+    },
+    {
+      "id": "Q39055440",
+      "name": "Gem Cinema",
+      "lat": 51.652595,
+      "lng": -0.278516
+    },
+    {
+      "id": "Q42203959",
+      "name": "Gem Electric Theatre",
+      "lat": 51.491647,
+      "lng": -0.047144
+    },
+    {
+      "id": "Q41820152",
+      "name": "Gem Picture Palace",
+      "lat": 51.465567,
+      "lng": -0.155723
+    },
+    {
+      "id": "Q32271096",
+      "name": "Genesis Cinema",
+      "lat": 51.52134,
+      "lng": -0.051238
+    },
+    {
+      "id": "Q42029943",
+      "name": "Global Village",
+      "lat": 51.508087,
+      "lng": -0.124122
+    },
+    {
+      "id": "Q42213811",
+      "name": "Globe Cinema",
+      "lat": 51.493741,
+      "lng": -0.085328
+    },
+    {
+      "id": "Q41820166",
+      "name": "Globe Electric Theatre",
+      "lat": 51.462401,
+      "lng": -0.136486
+    },
+    {
+      "id": "Q42203651",
+      "name": "Globe Picture Palace",
+      "lat": 51.533041,
+      "lng": 0.021943
+    },
+    {
+      "id": "Q42213409",
+      "name": "Golden Domes Picture Theatre",
+      "lat": 51.428817,
+      "lng": -0.131043
+    },
+    {
+      "id": "Q32271178",
+      "name": "Grafton Theatre",
+      "lat": 51.524338,
+      "lng": -0.138077
+    },
+    {
+      "id": "Q17551049",
+      "name": "Granada Cinema",
+      "lat": 51.4932,
+      "lng": 0.061883
+    },
+    {
+      "id": "Q41018063",
+      "name": "Granada Dartford",
+      "lat": 51.444816,
+      "lng": 0.214758
+    },
+    {
+      "id": "Q42162745",
+      "name": "Granada Enfield",
+      "lat": 51.652544,
+      "lng": -0.083332
+    },
+    {
+      "id": "Q40366205",
+      "name": "Granada Epsom",
+      "lat": 51.331831,
+      "lng": -0.261117
+    },
+    {
+      "id": "Q42162949",
+      "name": "Granada Greenford",
+      "lat": 51.528596,
+      "lng": -0.352067
+    },
+    {
+      "id": "Q42118525",
+      "name": "Granada Greenwich",
+      "lat": 51.484305,
+      "lng": 0.001888
+    },
+    {
+      "id": "Q42163767",
+      "name": "Granada Hounslow",
+      "lat": 51.457177,
+      "lng": -0.411351
+    },
+    {
+      "id": "Q42164231",
+      "name": "Granada Kennington",
+      "lat": 51.491811,
+      "lng": -0.111023
+    },
+    {
+      "id": "Q42202033",
+      "name": "Granada Leytonstone",
+      "lat": 51.559367,
+      "lng": 0.007293
+    },
+    {
+      "id": "Q41538273",
+      "name": "Granada North Cheam",
+      "lat": 51.372351,
+      "lng": -0.22647
+    },
+    {
+      "id": "Q42213506",
+      "name": "Granada Sutton",
+      "lat": 51.361948,
+      "lng": -0.189304
+    },
+    {
+      "id": "Q42213528",
+      "name": "Granada Sydenham",
+      "lat": 51.427869,
+      "lng": -0.07467
+    },
+    {
+      "id": "Q16707735",
+      "name": "Granada Theatre, Clapham Junction",
+      "lat": 51.4621,
+      "lng": -0.173313
+    },
+    {
+      "id": "Q42213602",
+      "name": "Granada Thornton Heath",
+      "lat": 51.399817,
+      "lng": -0.117362
+    },
+    {
+      "id": "Q42213954",
+      "name": "Granada Wandsworth Road",
+      "lat": 51.478529,
+      "lng": -0.129135
+    },
+    {
+      "id": "Q41816052",
+      "name": "Granada Welling",
+      "lat": 51.463338,
+      "lng": 0.102514
+    },
+    {
+      "id": "Q30963773",
+      "name": "Granada, East Ham",
+      "lat": 51.532667,
+      "lng": 0.050875
+    },
+    {
+      "id": "Q5594079",
+      "name": "Granada, Tooting",
+      "lat": 51.4265,
+      "lng": -0.167198
+    },
+    {
+      "id": "Q31270906",
+      "name": "Granada, Willesden",
+      "lat": 51.548713,
+      "lng": -0.247607
+    },
+    {
+      "id": "Q42029956",
+      "name": "Grand Casino Cinema",
+      "lat": 51.51042,
+      "lng": -0.121418
+    },
+    {
+      "id": "Q41895679",
+      "name": "Grand Central Theatre",
+      "lat": 51.503628,
+      "lng": -0.104576
+    },
+    {
+      "id": "Q41893636",
+      "name": "Grand Cinema",
+      "lat": 51.496235,
+      "lng": -0.080116
+    },
+    {
+      "id": "Q42117616",
+      "name": "Grand Electric Theatre",
+      "lat": 51.512217,
+      "lng": -0.048615
+    },
+    {
+      "id": "Q42162817",
+      "name": "Grand Hall Cinema",
+      "lat": 51.612423,
+      "lng": -0.175706
+    },
+    {
+      "id": "Q42117512",
+      "name": "Grand Palace Cinema",
+      "lat": 51.510197,
+      "lng": -0.007451
+    },
+    {
+      "id": "Q32270284",
+      "name": "Grand Palais",
+      "lat": 51.51479,
+      "lng": -0.062536
+    },
+    {
+      "id": "Q42043264",
+      "name": "Grand Theatre",
+      "lat": 51.469697,
+      "lng": -0.2102
+    },
+    {
+      "id": "Q42119730",
+      "name": "Grange Cinema",
+      "lat": 51.53419,
+      "lng": 0.132145
+    },
+    {
+      "id": "Q42201982",
+      "name": "Grange Park Hall",
+      "lat": 51.564181,
+      "lng": -0.012677
+    },
+    {
+      "id": "Q42202255",
+      "name": "Great Assembly Hall",
+      "lat": 51.520463,
+      "lng": -0.054232
+    },
+    {
+      "id": "Q42202165",
+      "name": "Great Central Picture Palace",
+      "lat": 51.522558,
+      "lng": -0.165433
+    },
+    {
+      "id": "Q42203660",
+      "name": "Greengate Cinema",
+      "lat": 51.526234,
+      "lng": 0.029784
+    },
+    {
+      "id": "Q42118542",
+      "name": "Greenwich Picturehouse",
+      "lat": 51.479864,
+      "lng": -0.009602
+    },
+    {
+      "id": "Q17551589",
+      "name": "Grosvenor Theatre",
+      "lat": 51.5739,
+      "lng": -0.370667
+    },
+    {
+      "id": "Q42213302",
+      "name": "Grove Cinema",
+      "lat": 51.544814,
+      "lng": 0.004504
+    },
+    {
+      "id": "Q42163018",
+      "name": "Hackney Grand Central Theatre",
+      "lat": 51.531117,
+      "lng": -0.067461
+    },
+    {
+      "id": "Q42118679",
+      "name": "Hackney Pavilion",
+      "lat": 51.547229,
+      "lng": -0.054928
+    },
+    {
+      "id": "Q42118688",
+      "name": "Hackney Picture Palace",
+      "lat": 51.547202,
+      "lng": -0.054947
+    },
+    {
+      "id": "Q42118694",
+      "name": "Hackney Picturehouse",
+      "lat": 51.541883,
+      "lng": -0.055255
+    },
+    {
+      "id": "Q42213822",
+      "name": "Hall's Picture Palace",
+      "lat": 51.49227,
+      "lng": -0.0834
+    },
+    {
+      "id": "Q42029969",
+      "name": "Ham Yard Hotel Cinema",
+      "lat": 51.511188,
+      "lng": -0.134755
+    },
+    {
+      "id": "Q1337772",
+      "name": "Hammersmith Apollo",
+      "lat": 51.4907,
+      "lng": -0.224458
+    },
+    {
+      "id": "Q42163121",
+      "name": "Hampstead Picture Palace",
+      "lat": 51.557297,
+      "lng": -0.178258
+    },
+    {
+      "id": "Q42164245",
+      "name": "Hanover Hall Electric Theatre",
+      "lat": 51.481994,
+      "lng": -0.112336
+    },
+    {
+      "id": "Q42117621",
+      "name": "Happyland",
+      "lat": 51.514818,
+      "lng": -0.06401
+    },
+    {
+      "id": "Q42163401",
+      "name": "Harrow Empire and Picturedrome",
+      "lat": 51.580686,
+      "lng": -0.337979
+    },
+    {
+      "id": "Q42163478",
+      "name": "Herne Hill Picture Theatre",
+      "lat": 51.45235,
+      "lng": -0.101528
+    },
+    {
+      "id": "Q42162347",
+      "name": "Hippodrome Cinema",
+      "lat": 51.614477,
+      "lng": -0.073193
+    },
+    {
+      "id": "Q42166369",
+      "name": "HMVCurzon Cinema",
+      "lat": 51.420046,
+      "lng": -0.204236
+    },
+    {
+      "id": "Q27086332",
+      "name": "Holborn Town Hall and Library",
+      "lat": 51.516959,
+      "lng": -0.12259
+    },
+    {
+      "id": "Q42120161",
+      "name": "Holloway Empire Theatre",
+      "lat": 51.552015,
+      "lng": -0.111506
+    },
+    {
+      "id": "Q42120201",
+      "name": "Holloway Road Rehearsal Rooms",
+      "lat": 51.559458,
+      "lng": -0.122148
+    },
+    {
+      "id": "Q42163655",
+      "name": "Homerton Picture Palladium",
+      "lat": 51.548778,
+      "lng": -0.040417
+    },
+    {
+      "id": "Q42029977",
+      "name": "Hong Kong Cinema",
+      "lat": 51.512073,
+      "lng": -0.130292
+    },
+    {
+      "id": "Q5905460",
+      "name": "Horse Hospital",
+      "lat": 51.522767,
+      "lng": -0.124385
+    },
+    {
+      "id": "Q42139980",
+      "name": "Hotspur Cinema",
+      "lat": 51.602457,
+      "lng": -0.067799
+    },
+    {
+      "id": "Q42163872",
+      "name": "Hoxton Cinema Theatre",
+      "lat": 51.527134,
+      "lng": -0.083549
+    },
+    {
+      "id": "Q41562029",
+      "name": "Ideal Cinema",
+      "lat": 51.57582,
+      "lng": -0.397148
+    },
+    {
+      "id": "Q42163953",
+      "name": "Ilford Hippodrome Theatre",
+      "lat": 51.558243,
+      "lng": 0.070096
+    },
+    {
+      "id": "Q41896162",
+      "name": "Imperial Bioscope",
+      "lat": 51.517746,
+      "lng": 0.012449
+    },
+    {
+      "id": "Q42202176",
+      "name": "Imperial Cinematograph Theatre",
+      "lat": 51.5219,
+      "lng": -0.1723
+    },
+    {
+      "id": "Q42166627",
+      "name": "Imperial Picture Palace",
+      "lat": 51.490885,
+      "lng": 0.07279
+    },
+    {
+      "id": "Q42046556",
+      "name": "Imperial Playhouse",
+      "lat": 51.464956,
+      "lng": -0.066563
+    },
+    {
+      "id": "Q42117424",
+      "name": "Institute of Light",
+      "lat": 51.53945,
+      "lng": -0.058584
+    },
+    {
+      "id": "Q41893465",
+      "name": "International Film Theatre",
+      "lat": 51.514787,
+      "lng": -0.197136
+    },
+    {
+      "id": "Q42047989",
+      "name": "Ionic Picture Theatre",
+      "lat": 51.545729,
+      "lng": -0.178454
+    },
+    {
+      "id": "Q41896176",
+      "name": "Iron Bridge Picture Palace",
+      "lat": 51.516954,
+      "lng": 0.010753
+    },
+    {
+      "id": "Q6082378",
+      "name": "Islamic Centre of England",
+      "lat": 51.535466,
+      "lng": -0.188964
+    },
+    {
+      "id": "Q42164136",
+      "name": "Islington Picture Palace",
+      "lat": 51.536336,
+      "lng": -0.103566
+    },
+    {
+      "id": "Q42029986",
+      "name": "Jacey in the Strand",
+      "lat": 51.510507,
+      "lng": -0.1212
+    },
+    {
+      "id": "Q42029998",
+      "name": "Jacey Leicester Square",
+      "lat": 51.510706,
+      "lng": -0.130578
+    },
+    {
+      "id": "Q42030013",
+      "name": "Jacey Marble Arch",
+      "lat": 51.513248,
+      "lng": -0.158272
+    },
+    {
+      "id": "Q42030020",
+      "name": "Jacey Trafalgar Square",
+      "lat": 51.515485,
+      "lng": -0.097161
+    },
+    {
+      "id": "Q41893645",
+      "name": "Jamaica Cinema",
+      "lat": 51.498037,
+      "lng": -0.066078
+    },
+    {
+      "id": "Q42030035",
+      "name": "Jardin de Paris",
+      "lat": 51.512802,
+      "lng": -0.13508
+    },
+    {
+      "id": "Q41802356",
+      "name": "Jubilee Cinema",
+      "lat": 51.444385,
+      "lng": 0.30899
+    },
+    {
+      "id": "Q41820177",
+      "name": "Junction Picture Theatre",
+      "lat": 51.463883,
+      "lng": -0.166705
+    },
+    {
+      "id": "Q42198382",
+      "name": "JW3 Cinema",
+      "lat": 51.550932,
+      "lng": -0.184441
+    },
+    {
+      "id": "Q42118259",
+      "name": "Kenning Hall Cinema",
+      "lat": 51.557409,
+      "lng": -0.055935
+    },
+    {
+      "id": "Q42164259",
+      "name": "Kennington Picture Palace",
+      "lat": 51.488198,
+      "lng": -0.111223
+    },
+    {
+      "id": "Q42164272",
+      "name": "Kennington Theatre",
+      "lat": 51.485874,
+      "lng": -0.107915
+    },
+    {
+      "id": "Q42212834",
+      "name": "Kilburn Picture Palace",
+      "lat": 51.537855,
+      "lng": -0.191562
+    },
+    {
+      "id": "Q7841332",
+      "name": "Kiln Theatre",
+      "lat": 51.5433,
+      "lng": -0.2
+    },
+    {
+      "id": "Q41491946",
+      "name": "Kinema",
+      "lat": 51.41471,
+      "lng": -0.365752
+    },
+    {
+      "id": "Q42033701",
+      "name": "Kinematograph Theatre",
+      "lat": 51.519806,
+      "lng": -0.021672
+    },
+    {
+      "id": "Q42046316",
+      "name": "King Street Cinematograph Theatre",
+      "lat": 51.492714,
+      "lng": -0.227264
+    },
+    {
+      "id": "Q42047859",
+      "name": "King's Cinema",
+      "lat": 51.547259,
+      "lng": 0.025336
+    },
+    {
+      "id": "Q42212904",
+      "name": "King's Cross Cinema",
+      "lat": 51.530969,
+      "lng": -0.119943
+    },
+    {
+      "id": "Q42213011",
+      "name": "King's Hall Cinema",
+      "lat": 51.507715,
+      "lng": -0.378094
+    },
+    {
+      "id": "Q42117625",
+      "name": "King's Hall Electric Theatre",
+      "lat": 51.51482,
+      "lng": -0.064311
+    },
+    {
+      "id": "Q42166380",
+      "name": "King's Palace Cinema",
+      "lat": 51.419269,
+      "lng": -0.20068
+    },
+    {
+      "id": "Q42117901",
+      "name": "King's Picture Palace",
+      "lat": 51.377999,
+      "lng": -0.102394
+    },
+    {
+      "id": "Q42119815",
+      "name": "Kings Cinema",
+      "lat": 51.542484,
+      "lng": -0.076298
+    },
+    {
+      "id": "Q42140374",
+      "name": "Kings Hall",
+      "lat": 51.474104,
+      "lng": -0.196016
+    },
+    {
+      "id": "Q42047870",
+      "name": "Kings Hall Cinema",
+      "lat": 51.550126,
+      "lng": 0.024945
+    },
+    {
+      "id": "Q42119823",
+      "name": "Kingsland Palace of Animated Pictures",
+      "lat": 51.550167,
+      "lng": -0.075245
+    },
+    {
+      "id": "Q27082029",
+      "name": "Kingsway International Christian Centre",
+      "lat": 51.575742,
+      "lng": -0.014368
+    },
+    {
+      "id": "Q1028419",
+      "name": "KOKO",
+      "lat": 51.5347,
+      "lng": -0.138333
+    },
+    {
+      "id": "Q42030046",
+      "name": "La Continentale Cinema",
+      "lat": 51.519288,
+      "lng": -0.133011
+    },
+    {
+      "id": "Q41781758",
+      "name": "Langham Cinema",
+      "lat": 51.595548,
+      "lng": -0.384883
+    },
+    {
+      "id": "Q26666980",
+      "name": "Leatherhead Theatre",
+      "lat": 51.294831,
+      "lng": -0.328471
+    },
+    {
+      "id": "Q42140316",
+      "name": "Lecture Hall Cinema",
+      "lat": 51.539641,
+      "lng": -0.473057
+    },
+    {
+      "id": "Q42041434",
+      "name": "Lewisham Hippodrome",
+      "lat": 51.447091,
+      "lng": -0.018678
+    },
+    {
+      "id": "Q16932600",
+      "name": "Lewisham Odeon",
+      "lat": 51.463939,
+      "lng": -0.012119
+    },
+    {
+      "id": "Q42164327",
+      "name": "Lexi Cinema",
+      "lat": 51.537864,
+      "lng": -0.222589
+    },
+    {
+      "id": "Q42202044",
+      "name": "Leytonstone Palace Cinema",
+      "lat": 51.569363,
+      "lng": 0.012433
+    },
+    {
+      "id": "Q42203973",
+      "name": "Lion Cinema",
+      "lat": 51.489226,
+      "lng": -0.056929
+    },
+    {
+      "id": "Q42201992",
+      "name": "Lion Picture Palace",
+      "lat": 51.57384,
+      "lng": -0.00972
+    },
+    {
+      "id": "Q42163144",
+      "name": "Lismore Cinema",
+      "lat": 51.554359,
+      "lng": -0.144274
+    },
+    {
+      "id": "Q41895627",
+      "name": "London Bridge Picture Palace",
+      "lat": 51.502884,
+      "lng": -0.092178
+    },
+    {
+      "id": "Q42030058",
+      "name": "London Experience",
+      "lat": 51.510953,
+      "lng": -0.133012
+    },
+    {
+      "id": "Q3561816",
+      "name": "London Planetarium",
+      "lat": 51.5228,
+      "lng": -0.155556
+    },
+    {
+      "id": "Q42162522",
+      "name": "London Road Cinema",
+      "lat": 51.496286,
+      "lng": -0.101796
+    },
+    {
+      "id": "Q42030069",
+      "name": "Lumière Cinema",
+      "lat": 51.51074,
+      "lng": -0.126972
+    },
+    {
+      "id": "Q42163884",
+      "name": "Lux Cinema",
+      "lat": 51.527355,
+      "lng": -0.081586
+    },
+    {
+      "id": "Q41781982",
+      "name": "Luxor Cinema",
+      "lat": 51.38662,
+      "lng": -0.097707
+    },
+    {
+      "id": "Q42213654",
+      "name": "Lyric Picture House",
+      "lat": 51.447687,
+      "lng": -0.32635
+    },
+    {
+      "id": "Q30512364",
+      "name": "Lytton Road Assembly Rooms",
+      "lat": 51.5247,
+      "lng": -0.3192
+    },
+    {
+      "id": "Q42158316",
+      "name": "Mackesey's Picture Palace",
+      "lat": 51.477593,
+      "lng": -0.024335
+    },
+    {
+      "id": "Q42117631",
+      "name": "Majestic Cinema",
+      "lat": 51.519895,
+      "lng": -0.048445
+    },
+    {
+      "id": "Q41630272",
+      "name": "Majestic Theatre",
+      "lat": 51.405962,
+      "lng": -0.163735
+    },
+    {
+      "id": "Q42118703",
+      "name": "Manor Feature Film Theatre",
+      "lat": 51.548772,
+      "lng": -0.056376
+    },
+    {
+      "id": "Q42030081",
+      "name": "Mansell's Picture Gallery",
+      "lat": 51.521616,
+      "lng": -0.160941
+    },
+    {
+      "id": "Q42030094",
+      "name": "Marble Arch Pavilion",
+      "lat": 51.513248,
+      "lng": -0.158272
+    },
+    {
+      "id": "Q42166559",
+      "name": "Market Cinema",
+      "lat": 51.596466,
+      "lng": -0.10795
+    },
+    {
+      "id": "Q32270201",
+      "name": "Marlborough Hall",
+      "lat": 51.516889,
+      "lng": -0.143336
+    },
+    {
+      "id": "Q42213833",
+      "name": "Mascot Electric Theatre",
+      "lat": 51.488547,
+      "lng": -0.077955
+    },
+    {
+      "id": "Q42030105",
+      "name": "Maxim's Cinema",
+      "lat": 51.512628,
+      "lng": -0.130809
+    },
+    {
+      "id": "Q42139931",
+      "name": "Mayfair Cinema",
+      "lat": 51.433686,
+      "lng": -0.155026
+    },
+    {
+      "id": "Q42163216",
+      "name": "Mean Fiddler",
+      "lat": 51.53531,
+      "lng": -0.243638
+    },
+    {
+      "id": "Q42045882",
+      "name": "MediCinema Chelsea and Westminster Hospital",
+      "lat": 51.484875,
+      "lng": -0.182327
+    },
+    {
+      "id": "Q42139881",
+      "name": "Methodist Central Hall",
+      "lat": 51.419682,
+      "lng": -0.161728
+    },
+    {
+      "id": "Q42030114",
+      "name": "Metro Cinema",
+      "lat": 51.510565,
+      "lng": -0.132344
+    },
+    {
+      "id": "Q42118180",
+      "name": "Metropole Cinema",
+      "lat": 51.497,
+      "lng": -0.1439
+    },
+    {
+      "id": "Q14993801",
+      "name": "Metropolitan Theatre",
+      "lat": 51.5204,
+      "lng": -0.1712
+    },
+    {
+      "id": "Q42030124",
+      "name": "MGM Oxford Street",
+      "lat": 51.51639,
+      "lng": -0.131249
+    },
+    {
+      "id": "Q42202265",
+      "name": "Mile End Empire Theatre",
+      "lat": 51.520578,
+      "lng": -0.052381
+    },
+    {
+      "id": "Q29014",
+      "name": "Millennium Dome",
+      "lat": 51.502817,
+      "lng": 0.003117
+    },
+    {
+      "id": "Q33083971",
+      "name": "Miller Centre Theatre",
+      "lat": 51.282769,
+      "lng": -0.072833
+    },
+    {
+      "id": "Q42117534",
+      "name": "Millwall Picture Theatre",
+      "lat": 51.491239,
+      "lng": -0.02388
+    },
+    {
+      "id": "Q42042509",
+      "name": "Minema Cinema",
+      "lat": 51.501664,
+      "lng": -0.161363
+    },
+    {
+      "id": "Q5323389",
+      "name": "Mirth, Marvel and Maud",
+      "lat": 51.586,
+      "lng": -0.020434
+    },
+    {
+      "id": "Q42046563",
+      "name": "Montpelier Cinema",
+      "lat": 51.474493,
+      "lng": -0.060063
+    },
+    {
+      "id": "Q42118742",
+      "name": "Morley Hall Electric Theatre",
+      "lat": 51.54734,
+      "lng": -0.054859
+    },
+    {
+      "id": "Q42043276",
+      "name": "Munster Electric Theatre",
+      "lat": 51.481117,
+      "lng": -0.212817
+    },
+    {
+      "id": "Q42202418",
+      "name": "Naborhood Cinema",
+      "lat": 51.4734,
+      "lng": -0.0518
+    },
+    {
+      "id": "Q42030135",
+      "name": "National Bioscope Electric Theatre",
+      "lat": 51.513512,
+      "lng": -0.131421
+    },
+    {
+      "id": "Q42203817",
+      "name": "Negal's Picture Theatre",
+      "lat": 51.468166,
+      "lng": -0.223166
+    },
+    {
+      "id": "Q42166393",
+      "name": "Nelson Hall Picture Palace",
+      "lat": 51.415759,
+      "lng": -0.18916
+    },
+    {
+      "id": "Q42047953",
+      "name": "New Astoria Cinema",
+      "lat": 51.443179,
+      "lng": -0.045959
+    },
+    {
+      "id": "Q42162831",
+      "name": "New Bohemia Cinema",
+      "lat": 51.600108,
+      "lng": -0.195158
+    },
+    {
+      "id": "Q42118375",
+      "name": "New Boleyn Electric Theatre",
+      "lat": 51.530437,
+      "lng": 0.039228
+    },
+    {
+      "id": "Q42166641",
+      "name": "New Cinema",
+      "lat": 51.490208,
+      "lng": 0.068879
+    },
+    {
+      "id": "Q32436710",
+      "name": "New Curzon Cinema, Harringay",
+      "lat": 51.586878,
+      "lng": -0.101758
+    },
+    {
+      "id": "Q42119530",
+      "name": "New Doric Cinema",
+      "lat": 51.632703,
+      "lng": 0.007665
+    },
+    {
+      "id": "Q42030148",
+      "name": "New Egyptian Hall",
+      "lat": 51.508776,
+      "lng": -0.137613
+    },
+    {
+      "id": "Q42117641",
+      "name": "New Electric Empire Cinema",
+      "lat": 51.514789,
+      "lng": -0.063932
+    },
+    {
+      "id": "Q41781707",
+      "name": "New Empire Cinema",
+      "lat": 51.43455,
+      "lng": -0.509795
+    },
+    {
+      "id": "Q42198388",
+      "name": "New Frognal Kinema",
+      "lat": 51.549182,
+      "lng": -0.181359
+    },
+    {
+      "id": "Q7007729",
+      "name": "New Gallery",
+      "lat": 51.5106,
+      "lng": -0.139
+    },
+    {
+      "id": "Q42213971",
+      "name": "New Lyric Cinema",
+      "lat": 51.457128,
+      "lng": -0.197276
+    },
+    {
+      "id": "Q41749507",
+      "name": "New Malden Picture Palace",
+      "lat": 51.40652,
+      "lng": -0.257739
+    },
+    {
+      "id": "Q42204033",
+      "name": "New Park Cinema",
+      "lat": 51.499903,
+      "lng": -0.238553
+    },
+    {
+      "id": "Q42041211",
+      "name": "New Theatre",
+      "lat": 51.404,
+      "lng": 0.0146
+    },
+    {
+      "id": "Q7012453",
+      "name": "New Wine Church",
+      "lat": 51.493211,
+      "lng": 0.060486
+    },
+    {
+      "id": "Q42163778",
+      "name": "News Cinema",
+      "lat": 51.470852,
+      "lng": -0.45272
+    },
+    {
+      "id": "Q42204369",
+      "name": "Norbury Cinema",
+      "lat": 51.407716,
+      "lng": -0.121561
+    },
+    {
+      "id": "Q3878878",
+      "name": "Notting Hill Coronet",
+      "lat": 51.5083,
+      "lng": -0.198889
+    },
+    {
+      "id": "Q2239788",
+      "name": "O2 Academy Brixton",
+      "lat": 51.4651,
+      "lng": -0.114922
+    },
+    {
+      "id": "Q638511",
+      "name": "O2 Academy Islington",
+      "lat": 51.5345,
+      "lng": -0.1058
+    },
+    {
+      "id": "Q42201902",
+      "name": "Obelisk Cinema",
+      "lat": 51.464545,
+      "lng": -0.015234
+    },
+    {
+      "id": "Q41818765",
+      "name": "Odeon Acton",
+      "lat": 51.507782,
+      "lng": -0.272769
+    },
+    {
+      "id": "Q41893657",
+      "name": "Odeon Astoria Old Kent Road",
+      "lat": 51.483372,
+      "lng": -0.064578
+    },
+    {
+      "id": "Q41818919",
+      "name": "Odeon Balham",
+      "lat": 51.4442,
+      "lng": -0.120945
+    },
+    {
+      "id": "Q38515769",
+      "name": "Odeon Barking",
+      "lat": 51.53968,
+      "lng": 0.082367
+    },
+    {
+      "id": "Q41894825",
+      "name": "Odeon Becontree",
+      "lat": 51.561244,
+      "lng": 0.14107
+    },
+    {
+      "id": "Q41893823",
+      "name": "Odeon Bethnal Green",
+      "lat": 51.532015,
+      "lng": -0.056924
+    },
+    {
+      "id": "Q41895600",
+      "name": "Odeon Blackfen",
+      "lat": 51.45108,
+      "lng": 0.10332
+    },
+    {
+      "id": "Q41421132",
+      "name": "Odeon Brentwood",
+      "lat": 51.619831,
+      "lng": 0.301215
+    },
+    {
+      "id": "Q41431245",
+      "name": "Odeon Burnt Oak",
+      "lat": 51.602781,
+      "lng": -0.270505
+    },
+    {
+      "id": "Q42041318",
+      "name": "Odeon Camberwell",
+      "lat": 51.471667,
+      "lng": -0.093286
+    },
+    {
+      "id": "Q42041392",
+      "name": "Odeon Camden Town",
+      "lat": 51.538768,
+      "lng": -0.143325
+    },
+    {
+      "id": "Q41896185",
+      "name": "Odeon Canning Town",
+      "lat": 51.519606,
+      "lng": 0.017459
+    },
+    {
+      "id": "Q42041461",
+      "name": "Odeon Chadwell Heath",
+      "lat": 51.570305,
+      "lng": 0.128364
+    },
+    {
+      "id": "Q26282949",
+      "name": "Odeon Cinema and Regal Ballroom",
+      "lat": 51.407105,
+      "lng": -0.031342
+    },
+    {
+      "id": "Q20876247",
+      "name": "Odeon Cinema, Barnet",
+      "lat": 51.646651,
+      "lng": -0.188049
+    },
+    {
+      "id": "Q7428236",
+      "name": "Odeon Covent Garden",
+      "lat": 51.514288,
+      "lng": -0.12822
+    },
+    {
+      "id": "Q41895896",
+      "name": "Odeon Croydon",
+      "lat": 51.376974,
+      "lng": -0.101951
+    },
+    {
+      "id": "Q42119738",
+      "name": "Odeon Dagenham",
+      "lat": 51.541564,
+      "lng": 0.147944
+    },
+    {
+      "id": "Q42119874",
+      "name": "Odeon Dalston",
+      "lat": 51.54497,
+      "lng": -0.075941
+    },
+    {
+      "id": "Q42158321",
+      "name": "Odeon Deptford",
+      "lat": 51.4751,
+      "lng": -0.0241
+    },
+    {
+      "id": "Q42158546",
+      "name": "Odeon East Dulwich",
+      "lat": 51.461512,
+      "lng": -0.076402
+    },
+    {
+      "id": "Q42158573",
+      "name": "Odeon East Sheen",
+      "lat": 51.462222,
+      "lng": -0.293524
+    },
+    {
+      "id": "Q42120500",
+      "name": "Odeon Edgware Road",
+      "lat": 51.5214,
+      "lng": -0.1728
+    },
+    {
+      "id": "Q42162538",
+      "name": "Odeon Elephant & Castle",
+      "lat": 51.494112,
+      "lng": -0.091595
+    },
+    {
+      "id": "Q41894805",
+      "name": "Odeon Elmers End",
+      "lat": 51.399089,
+      "lng": -0.042603
+    },
+    {
+      "id": "Q40366225",
+      "name": "Odeon Epsom",
+      "lat": 51.333204,
+      "lng": -0.267955
+    },
+    {
+      "id": "Q42047883",
+      "name": "Odeon Forest Gate",
+      "lat": 51.546426,
+      "lng": 0.024842
+    },
+    {
+      "id": "Q42163028",
+      "name": "Odeon Hackney Road",
+      "lat": 51.530997,
+      "lng": -0.070992
+    },
+    {
+      "id": "Q42163233",
+      "name": "Odeon Harlesden",
+      "lat": 51.539066,
+      "lng": -0.250901
+    },
+    {
+      "id": "Q42163159",
+      "name": "Odeon Haverstock Hill",
+      "lat": 51.550889,
+      "lng": -0.165523
+    },
+    {
+      "id": "Q42117060",
+      "name": "Odeon Hayes",
+      "lat": 51.377541,
+      "lng": 0.009861
+    },
+    {
+      "id": "Q7077681",
+      "name": "Odeon Haymarket",
+      "lat": 51.5096,
+      "lng": -0.1312
+    },
+    {
+      "id": "Q42163447",
+      "name": "Odeon Hendon",
+      "lat": 51.590026,
+      "lng": -0.224424
+    },
+    {
+      "id": "Q42163563",
+      "name": "Odeon Highgate",
+      "lat": 51.564761,
+      "lng": -0.134938
+    },
+    {
+      "id": "Q26664794",
+      "name": "Odeon Holloway",
+      "lat": 51.558604,
+      "lng": -0.121463
+    },
+    {
+      "id": "Q42163797",
+      "name": "Odeon Hounslow West",
+      "lat": 51.477169,
+      "lng": -0.403977
+    },
+    {
+      "id": "Q42163963",
+      "name": "Odeon Ilford",
+      "lat": 51.574408,
+      "lng": 0.078794
+    },
+    {
+      "id": "Q26568843",
+      "name": "Odeon Islington, High Street",
+      "lat": 51.532287,
+      "lng": -0.106648
+    },
+    {
+      "id": "Q42164147",
+      "name": "Odeon Islington, Upper Street",
+      "lat": 51.540703,
+      "lng": -0.102682
+    },
+    {
+      "id": "Q42164338",
+      "name": "Odeon Kensal Rise",
+      "lat": 51.530989,
+      "lng": -0.21677
+    },
+    {
+      "id": "Q39593777",
+      "name": "Odeon Kensington",
+      "lat": 51.49892,
+      "lng": -0.199394
+    },
+    {
+      "id": "Q41557720",
+      "name": "Odeon Kenton",
+      "lat": 51.58416,
+      "lng": -0.31366
+    },
+    {
+      "id": "Q41535494",
+      "name": "Odeon Kingsbury",
+      "lat": 51.584872,
+      "lng": -0.279834
+    },
+    {
+      "id": "Q42200859",
+      "name": "Odeon Kingston upon Thames",
+      "lat": 51.410723,
+      "lng": -0.302091
+    },
+    {
+      "id": "Q42162360",
+      "name": "Odeon Lee Valley",
+      "lat": 51.632,
+      "lng": -0.037839
+    },
+    {
+      "id": "Q3349144",
+      "name": "Odeon Leicester Square",
+      "lat": 51.5106,
+      "lng": -0.129167
+    },
+    {
+      "id": "Q42202274",
+      "name": "Odeon Mile End",
+      "lat": 51.52465,
+      "lng": -0.036001
+    },
+    {
+      "id": "Q41749429",
+      "name": "Odeon Morden",
+      "lat": 51.402552,
+      "lng": -0.193883
+    },
+    {
+      "id": "Q42162841",
+      "name": "Odeon North Finchley",
+      "lat": 51.62748,
+      "lng": -0.174984
+    },
+    {
+      "id": "Q42118568",
+      "name": "Odeon North Greenwich",
+      "lat": 51.49059,
+      "lng": 0.01278
+    },
+    {
+      "id": "Q41104417",
+      "name": "Odeon North Watford",
+      "lat": 51.682821,
+      "lng": -0.391969
+    },
+    {
+      "id": "Q41749792",
+      "name": "Odeon Orpington",
+      "lat": 51.376667,
+      "lng": 0.101333
+    },
+    {
+      "id": "Q42030169",
+      "name": "Odeon Panton Street",
+      "lat": 51.50957,
+      "lng": -0.13122
+    },
+    {
+      "id": "Q42203560",
+      "name": "Odeon Park Royal",
+      "lat": 51.52922,
+      "lng": -0.290846
+    },
+    {
+      "id": "Q42046572",
+      "name": "Odeon Peckham",
+      "lat": 51.513961,
+      "lng": -0.075501
+    },
+    {
+      "id": "Q42203620",
+      "name": "Odeon Penge",
+      "lat": 51.407471,
+      "lng": -0.027611
+    },
+    {
+      "id": "Q42203828",
+      "name": "Odeon Putney",
+      "lat": 51.4505,
+      "lng": -0.23885
+    },
+    {
+      "id": "Q27082557",
+      "name": "Odeon Richmond",
+      "lat": 51.458411,
+      "lng": -0.305157
+    },
+    {
+      "id": "Q41742098",
+      "name": "Odeon Rickmansworth",
+      "lat": 51.638837,
+      "lng": -0.468515
+    },
+    {
+      "id": "Q41562579",
+      "name": "Odeon Romford",
+      "lat": 51.573998,
+      "lng": 0.183892
+    },
+    {
+      "id": "Q41749513",
+      "name": "Odeon Shannon Corner",
+      "lat": 51.393954,
+      "lng": -0.256376
+    },
+    {
+      "id": "Q41743010",
+      "name": "Odeon Sidcup",
+      "lat": 51.43536,
+      "lng": 0.102088
+    },
+    {
+      "id": "Q41782118",
+      "name": "Odeon South Harrow",
+      "lat": 51.562162,
+      "lng": -0.356426
+    },
+    {
+      "id": "Q42204393",
+      "name": "Odeon South Norwood",
+      "lat": 51.397465,
+      "lng": -0.075154
+    },
+    {
+      "id": "Q42203392",
+      "name": "Odeon South Woodford",
+      "lat": 51.594251,
+      "lng": 0.02268
+    },
+    {
+      "id": "Q42213025",
+      "name": "Odeon Southall",
+      "lat": 51.510807,
+      "lng": -0.372507
+    },
+    {
+      "id": "Q42213139",
+      "name": "Odeon Stamford Hill",
+      "lat": 51.573996,
+      "lng": -0.074912
+    },
+    {
+      "id": "Q42204152",
+      "name": "Odeon Stepney",
+      "lat": 51.518358,
+      "lng": -0.071317
+    },
+    {
+      "id": "Q41802317",
+      "name": "Odeon Sudbury",
+      "lat": 51.551561,
+      "lng": -0.319669
+    },
+    {
+      "id": "Q41802333",
+      "name": "Odeon Surbiton",
+      "lat": 51.393556,
+      "lng": -0.304362
+    },
+    {
+      "id": "Q42203985",
+      "name": "Odeon Surrey Quays",
+      "lat": 51.49322,
+      "lng": -0.046922
+    },
+    {
+      "id": "Q42198399",
+      "name": "Odeon Swiss Cottage",
+      "lat": 51.54313,
+      "lng": -0.175039
+    },
+    {
+      "id": "Q42047998",
+      "name": "Odeon Temple Fortune",
+      "lat": 51.585398,
+      "lng": -0.199176
+    },
+    {
+      "id": "Q41814663",
+      "name": "Odeon Tolworth",
+      "lat": 51.381142,
+      "lng": -0.279071
+    },
+    {
+      "id": "Q42030194",
+      "name": "Odeon Tottenham Court Road",
+      "lat": 51.523397,
+      "lng": -0.13698
+    },
+    {
+      "id": "Q42213665",
+      "name": "Odeon Twickenham",
+      "lat": 51.443836,
+      "lng": -0.330584
+    },
+    {
+      "id": "Q42140329",
+      "name": "Odeon Uxbridge",
+      "lat": 51.54589,
+      "lng": -0.479094
+    },
+    {
+      "id": "Q42140323",
+      "name": "Odeon Uxbridge, Harefield Road",
+      "lat": 51.553585,
+      "lng": -0.477609
+    },
+    {
+      "id": "Q41407628",
+      "name": "Odeon Wallington",
+      "lat": 51.359982,
+      "lng": -0.149675
+    },
+    {
+      "id": "Q41104861",
+      "name": "Odeon Walton-on-Thames",
+      "lat": 51.383584,
+      "lng": -0.416589
+    },
+    {
+      "id": "Q42030219",
+      "name": "Odeon Wardour Street",
+      "lat": 51.510515,
+      "lng": -0.131147
+    },
+    {
+      "id": "Q41104439",
+      "name": "Odeon Watford",
+      "lat": 51.659065,
+      "lng": -0.400421
+    },
+    {
+      "id": "Q42214100",
+      "name": "Odeon Wealdstone",
+      "lat": 51.598862,
+      "lng": -0.337437
+    },
+    {
+      "id": "Q41816062",
+      "name": "Odeon Welling",
+      "lat": 51.468921,
+      "lng": 0.109984
+    },
+    {
+      "id": "Q42166278",
+      "name": "Odeon Wembley, 365 High Road",
+      "lat": 51.553074,
+      "lng": -0.295289
+    },
+    {
+      "id": "Q42166262",
+      "name": "Odeon Wembley, 47 High Road",
+      "lat": 51.553074,
+      "lng": -0.295289
+    },
+    {
+      "id": "Q3349143",
+      "name": "Odeon West End",
+      "lat": 51.5099,
+      "lng": -0.1303
+    },
+    {
+      "id": "Q41537687",
+      "name": "Odeon West Thurrock",
+      "lat": 51.487034,
+      "lng": 0.269703
+    },
+    {
+      "id": "Q41893476",
+      "name": "Odeon Westbourne Grove",
+      "lat": 51.517011,
+      "lng": -0.181628
+    },
+    {
+      "id": "Q41818259",
+      "name": "Odeon Weybridge",
+      "lat": 51.37109,
+      "lng": -0.450869
+    },
+    {
+      "id": "Q42041471",
+      "name": "Odeon Whalebone Lane",
+      "lat": 51.566448,
+      "lng": 0.145326
+    },
+    {
+      "id": "Q41893489",
+      "name": "Odeon Whiteleys & The Lounge",
+      "lat": 51.515917,
+      "lng": -0.188556
+    },
+    {
+      "id": "Q42117919",
+      "name": "Odeon Whitton",
+      "lat": 51.452421,
+      "lng": -0.358357
+    },
+    {
+      "id": "Q42166436",
+      "name": "Odeon Wimbledon",
+      "lat": 51.419924,
+      "lng": -0.205141
+    },
+    {
+      "id": "Q42166406",
+      "name": "Odeon Wimbledon, The Broadway",
+      "lat": 51.41914,
+      "lng": -0.199479
+    },
+    {
+      "id": "Q42166421",
+      "name": "Odeon Wimbledon, Worple Road",
+      "lat": 51.420783,
+      "lng": -0.210146
+    },
+    {
+      "id": "Q41818603",
+      "name": "Odeon Worcester Park",
+      "lat": 51.378189,
+      "lng": -0.240868
+    },
+    {
+      "id": "Q30940748",
+      "name": "Odeon, Streatham",
+      "lat": 51.432202,
+      "lng": -0.128367
+    },
+    {
+      "id": "Q41741972",
+      "name": "Old Town Hall",
+      "lat": 51.638834,
+      "lng": -0.469438
+    },
+    {
+      "id": "Q42042434",
+      "name": "Olympia Cinema",
+      "lat": 51.496641,
+      "lng": -0.210557
+    },
+    {
+      "id": "Q42047012",
+      "name": "Original American Bioscope Exhibition",
+      "lat": 51.514222,
+      "lng": -0.074731
+    },
+    {
+      "id": "Q42118747",
+      "name": "Original Bioscopic Theatre",
+      "lat": 51.547268,
+      "lng": -0.054901
+    },
+    {
+      "id": "Q42204328",
+      "name": "Oscar's Cinema",
+      "lat": 51.532529,
+      "lng": -0.11961
+    },
+    {
+      "id": "Q42030228",
+      "name": "Oxford Village Cartoon Cinema",
+      "lat": 51.515764,
+      "lng": -0.137787
+    },
+    {
+      "id": "Q41893666",
+      "name": "Palace Cinema",
+      "lat": 51.49224,
+      "lng": -0.062242
+    },
+    {
+      "id": "Q42158328",
+      "name": "Palace Cinema, High Street",
+      "lat": 51.459516,
+      "lng": -0.011979
+    },
+    {
+      "id": "Q42158337",
+      "name": "Palace Cinema, Tanner's Hill",
+      "lat": 51.474447,
+      "lng": -0.026451
+    },
+    {
+      "id": "Q42158559",
+      "name": "Palace Electric Theatre",
+      "lat": 51.457118,
+      "lng": -0.075563
+    },
+    {
+      "id": "Q31283311",
+      "name": "Palace of Varieties",
+      "lat": 51.542772,
+      "lng": -0.268196
+    },
+    {
+      "id": "Q42166651",
+      "name": "Palace Picture Theatre",
+      "lat": 51.489864,
+      "lng": 0.068332
+    },
+    {
+      "id": "Q42047593",
+      "name": "Palace Theatre",
+      "lat": 51.584196,
+      "lng": -0.023209
+    },
+    {
+      "id": "Q42119576",
+      "name": "Palais Cinema",
+      "lat": 51.492741,
+      "lng": -0.272193
+    },
+    {
+      "id": "Q42117648",
+      "name": "Palaseum Cinema",
+      "lat": 51.514701,
+      "lng": -0.058947
+    },
+    {
+      "id": "Q41893677",
+      "name": "Palasino Electric Theatre",
+      "lat": 51.483129,
+      "lng": -0.064182
+    },
+    {
+      "id": "Q41818931",
+      "name": "Palladium Cinema",
+      "lat": 51.441852,
+      "lng": -0.154173
+    },
+    {
+      "id": "Q41895914",
+      "name": "Palladium Cinema, North End",
+      "lat": 51.375966,
+      "lng": -0.101404
+    },
+    {
+      "id": "Q41895922",
+      "name": "Palladium Cinema, Surrey Street",
+      "lat": 51.37199,
+      "lng": -0.100748
+    },
+    {
+      "id": "Q42030239",
+      "name": "Palm Court Cinema",
+      "lat": 51.51097,
+      "lng": -0.129744
+    },
+    {
+      "id": "Q41421160",
+      "name": "Parade Cinema",
+      "lat": 51.614352,
+      "lng": 0.29954
+    },
+    {
+      "id": "Q42213038",
+      "name": "Paragon Palace",
+      "lat": 51.510673,
+      "lng": -0.375916
+    },
+    {
+      "id": "Q42043288",
+      "name": "Paris Pullman Cinema",
+      "lat": 51.488458,
+      "lng": -0.180583
+    },
+    {
+      "id": "Q42163609",
+      "name": "Park Cinema",
+      "lat": 51.45032,
+      "lng": -0.005519
+    },
+    {
+      "id": "Q42213745",
+      "name": "Park Picture Theatre",
+      "lat": 51.536868,
+      "lng": 0.022103
+    },
+    {
+      "id": "Q42203670",
+      "name": "Parker's Electric Bioscope",
+      "lat": 51.523298,
+      "lng": 0.022574
+    },
+    {
+      "id": "Q42120192",
+      "name": "Parkhurst Theatre",
+      "lat": 51.557657,
+      "lng": -0.119055
+    },
+    {
+      "id": "Q42162555",
+      "name": "Pastimes Electric Theatre",
+      "lat": 51.496718,
+      "lng": -0.102285
+    },
+    {
+      "id": "Q41820191",
+      "name": "Pavilion Cinema",
+      "lat": 51.464206,
+      "lng": -0.131534
+    },
+    {
+      "id": "Q41820201",
+      "name": "Pavilion Picture Palace",
+      "lat": 51.464133,
+      "lng": -0.164647
+    },
+    {
+      "id": "Q40366262",
+      "name": "Pavilion Theatre",
+      "lat": 51.338848,
+      "lng": -0.256894
+    },
+    {
+      "id": "Q42046579",
+      "name": "Peckham Central Hall",
+      "lat": 51.4737,
+      "lng": -0.0714
+    },
+    {
+      "id": "Q32270914",
+      "name": "Peckham Hippodrome",
+      "lat": 51.4741,
+      "lng": -0.0657
+    },
+    {
+      "id": "Q42046590",
+      "name": "Peckham Picture Playhouse",
+      "lat": 51.4732,
+      "lng": -0.0701
+    },
+    {
+      "id": "Q42046603",
+      "name": "Peckham Picture Theatre",
+      "lat": 51.4732,
+      "lng": -0.0722
+    },
+    {
+      "id": "Q42046612",
+      "name": "PeckhamPlex",
+      "lat": 51.470763,
+      "lng": -0.068406
+    },
+    {
+      "id": "Q42203631",
+      "name": "Penge Picturedrome",
+      "lat": 51.41746,
+      "lng": -0.058553
+    },
+    {
+      "id": "Q42118274",
+      "name": "People's Electric Theatre",
+      "lat": 51.506395,
+      "lng": -0.470148
+    },
+    {
+      "id": "Q42139988",
+      "name": "People's Palace",
+      "lat": 51.5916,
+      "lng": -0.0712
+    },
+    {
+      "id": "Q42047603",
+      "name": "People's Picture Palace",
+      "lat": 51.583629,
+      "lng": -0.025899
+    },
+    {
+      "id": "Q42162569",
+      "name": "People's Picture Parlour",
+      "lat": 51.492766,
+      "lng": -0.098667
+    },
+    {
+      "id": "Q42030249",
+      "name": "Pepsi IMAX Theatre",
+      "lat": 51.510953,
+      "lng": -0.133012
+    },
+    {
+      "id": "Q42030258",
+      "name": "Phoenix Cinema",
+      "lat": 51.516352,
+      "lng": -0.131357
+    },
+    {
+      "id": "Q42163261",
+      "name": "Picardy Cinema",
+      "lat": 51.53531,
+      "lng": -0.243638
+    },
+    {
+      "id": "Q42046620",
+      "name": "Pictorial Playhouse",
+      "lat": 51.465301,
+      "lng": -0.059071
+    },
+    {
+      "id": "Q42046325",
+      "name": "Picture Hall",
+      "lat": 51.492689,
+      "lng": -0.232792
+    },
+    {
+      "id": "Q41742102",
+      "name": "Picture House",
+      "lat": 51.639093,
+      "lng": -0.470817
+    },
+    {
+      "id": "Q42120221",
+      "name": "Picture Land",
+      "lat": 51.559984,
+      "lng": -0.115499
+    },
+    {
+      "id": "Q41428330",
+      "name": "Picture Palace",
+      "lat": 51.29008,
+      "lng": -0.076147
+    },
+    {
+      "id": "Q40366281",
+      "name": "Picture Palladium",
+      "lat": 51.329533,
+      "lng": -0.258935
+    },
+    {
+      "id": "Q41893836",
+      "name": "Picture Theatre",
+      "lat": 51.526398,
+      "lng": -0.06311
+    },
+    {
+      "id": "Q42158578",
+      "name": "Picturedrome",
+      "lat": 51.464148,
+      "lng": -0.266621
+    },
+    {
+      "id": "Q42030269",
+      "name": "Picturehouse Central",
+      "lat": 51.510835,
+      "lng": -0.133856
+    },
+    {
+      "id": "Q42030283",
+      "name": "Pigalle Cinema",
+      "lat": 51.510186,
+      "lng": -0.132995
+    },
+    {
+      "id": "Q41742223",
+      "name": "Pinewood Cinema at Shepperton Studios",
+      "lat": 51.408247,
+      "lng": -0.466659
+    },
+    {
+      "id": "Q42030289",
+      "name": "Playboy Cinema",
+      "lat": 51.512035,
+      "lng": -0.132637
+    },
+    {
+      "id": "Q42041482",
+      "name": "Playhouse Cinema",
+      "lat": 51.48774,
+      "lng": 0.03047
+    },
+    {
+      "id": "Q38518379",
+      "name": "Plaza Cinema",
+      "lat": 51.372284,
+      "lng": -0.485498
+    },
+    {
+      "id": "Q42035935",
+      "name": "Pleasure Land Cinema",
+      "lat": 51.462725,
+      "lng": -0.113279
+    },
+    {
+      "id": "Q41781800",
+      "name": "Ponders End Electric Theatre",
+      "lat": 51.6497,
+      "lng": -0.046591
+    },
+    {
+      "id": "Q42117541",
+      "name": "Poplar Hippodrome Theatre",
+      "lat": 51.510795,
+      "lng": -0.020947
+    },
+    {
+      "id": "Q42117660",
+      "name": "Popular Cinema",
+      "lat": 51.513104,
+      "lng": -0.0428
+    },
+    {
+      "id": "Q42047612",
+      "name": "Popular Picture Palace",
+      "lat": 51.593295,
+      "lng": -0.037213
+    },
+    {
+      "id": "Q42030297",
+      "name": "Porno Palace Cinema",
+      "lat": 51.513684,
+      "lng": -0.131543
+    },
+    {
+      "id": "Q42162780",
+      "name": "Premier Cinema",
+      "lat": 51.666941,
+      "lng": -0.042532
+    },
+    {
+      "id": "Q42163278",
+      "name": "Premier Electric Theatre",
+      "lat": 51.54094,
+      "lng": -0.250447
+    },
+    {
+      "id": "Q41562583",
+      "name": "Premiere Cinemas",
+      "lat": 51.577763,
+      "lng": 0.186142
+    },
+    {
+      "id": "Q7243849",
+      "name": "Prince Charles Cinema",
+      "lat": 51.511389,
+      "lng": -0.130278
+    },
+    {
+      "id": "Q42120511",
+      "name": "Prince of Wales' Cinema",
+      "lat": 51.523739,
+      "lng": -0.19974
+    },
+    {
+      "id": "Q42120522",
+      "name": "Prince of Wales' Picture Playhouse",
+      "lat": 51.523609,
+      "lng": -0.199958
+    },
+    {
+      "id": "Q42164287",
+      "name": "Prince's Cinema",
+      "lat": 51.487076,
+      "lng": -0.107192
+    },
+    {
+      "id": "Q42046335",
+      "name": "Prince's Electric Theatre",
+      "lat": 51.492067,
+      "lng": -0.23035
+    },
+    {
+      "id": "Q42047625",
+      "name": "Prince's Pavilion Cinema",
+      "lat": 51.582377,
+      "lng": -0.030051
+    },
+    {
+      "id": "Q41895931",
+      "name": "Prince's Picture House",
+      "lat": 51.37715,
+      "lng": -0.102397
+    },
+    {
+      "id": "Q42119746",
+      "name": "Princess Cinema",
+      "lat": 51.529919,
+      "lng": 0.153953
+    },
+    {
+      "id": "Q41562001",
+      "name": "Public Hall",
+      "lat": 51.374224,
+      "lng": -0.096128
+    },
+    {
+      "id": "Q42163491",
+      "name": "Pullman Cinema",
+      "lat": 51.452942,
+      "lng": -0.102346
+    },
+    {
+      "id": "Q42213884",
+      "name": "Purple Picture House",
+      "lat": 51.484879,
+      "lng": -0.092828
+    },
+    {
+      "id": "Q42043305",
+      "name": "Putney Bridge Kinema",
+      "lat": 51.468221,
+      "lng": -0.211429
+    },
+    {
+      "id": "Q42203854",
+      "name": "Putney Hippodrome Theatre",
+      "lat": 51.465316,
+      "lng": -0.215032
+    },
+    {
+      "id": "Q7265653",
+      "name": "Q Theatre",
+      "lat": 51.489,
+      "lng": -0.2865
+    },
+    {
+      "id": "Q41819183",
+      "name": "Queen's Cinema",
+      "lat": 51.467334,
+      "lng": -0.150586
+    },
+    {
+      "id": "Q41895941",
+      "name": "Queen's Hall",
+      "lat": 51.37532,
+      "lng": -0.101064
+    },
+    {
+      "id": "Q42203548",
+      "name": "Queen's Hall Cinema",
+      "lat": 51.617928,
+      "lng": -0.108344
+    },
+    {
+      "id": "Q42162583",
+      "name": "Queen's Hall Electric Theatre",
+      "lat": 51.502923,
+      "lng": -0.096264
+    },
+    {
+      "id": "Q42046627",
+      "name": "Queen's Hall Picture Theatre",
+      "lat": 51.4733,
+      "lng": -0.0722
+    },
+    {
+      "id": "Q42047892",
+      "name": "Queen's Theatre",
+      "lat": 51.546425,
+      "lng": 0.02531
+    },
+    {
+      "id": "Q41894844",
+      "name": "Queensland Cinema",
+      "lat": 51.491106,
+      "lng": 0.146885
+    },
+    {
+      "id": "Q41819197",
+      "name": "Radium Picture Playhouse",
+      "lat": 51.469794,
+      "lng": -0.175056
+    },
+    {
+      "id": "Q41781828",
+      "name": "Radlett Cinema",
+      "lat": 51.688475,
+      "lng": -0.319902
+    },
+    {
+      "id": "Q26671597",
+      "name": "RAF Cinema",
+      "lat": 51.542869,
+      "lng": -0.472298
+    },
+    {
+      "id": "Q3288732",
+      "name": "Rainbow Theatre",
+      "lat": 51.5623,
+      "lng": -0.108346
+    },
+    {
+      "id": "Q41896196",
+      "name": "Rathbone Cinema",
+      "lat": 51.513602,
+      "lng": 0.011738
+    },
+    {
+      "id": "Q40366297",
+      "name": "Recreation Hall",
+      "lat": 51.308694,
+      "lng": -0.267827
+    },
+    {
+      "id": "Q42203707",
+      "name": "Red Triangle Theatre",
+      "lat": 51.527278,
+      "lng": 0.027835
+    },
+    {
+      "id": "Q39055492",
+      "name": "Reel Cinema",
+      "lat": 51.656057,
+      "lng": -0.275225
+    },
+    {
+      "id": "Q41630601",
+      "name": "Regal Cinema",
+      "lat": 51.332717,
+      "lng": -0.123524
+    },
+    {
+      "id": "Q42118382",
+      "name": "Regal Palace Theatre",
+      "lat": 51.538996,
+      "lng": 0.051447
+    },
+    {
+      "id": "Q41794578",
+      "name": "Regent Cinema",
+      "lat": 51.684658,
+      "lng": -0.033216
+    },
+    {
+      "id": "Q42163815",
+      "name": "Regent Picture House",
+      "lat": 51.457292,
+      "lng": -0.37227
+    },
+    {
+      "id": "Q42117073",
+      "name": "Regent Theatre",
+      "lat": 51.500831,
+      "lng": -0.42431
+    },
+    {
+      "id": "Q39055596",
+      "name": "Rex Cinema",
+      "lat": 51.294804,
+      "lng": 0.308097
+    },
+    {
+      "id": "Q42030307",
+      "name": "Rex Cinema & Bar",
+      "lat": 51.510895,
+      "lng": -0.132583
+    },
+    {
+      "id": "Q41893690",
+      "name": "Rialto Cinema",
+      "lat": 51.49189,
+      "lng": -0.065274
+    },
+    {
+      "id": "Q7323366",
+      "name": "Rich Mix",
+      "lat": 51.5243,
+      "lng": -0.0733
+    },
+    {
+      "id": "Q42213555",
+      "name": "Rink Cinema",
+      "lat": 51.42877,
+      "lng": -0.052627
+    },
+    {
+      "id": "Q18161458",
+      "name": "Rio Cinema",
+      "lat": 51.5496,
+      "lng": -0.0756
+    },
+    {
+      "id": "Q41741485",
+      "name": "Ritz Cinema",
+      "lat": 51.699305,
+      "lng": -0.190228
+    },
+    {
+      "id": "Q41965927",
+      "name": "Ritz Cinema, Leicester Square",
+      "lat": 51.510092,
+      "lng": -0.129857
+    },
+    {
+      "id": "Q7336933",
+      "name": "Ritzy Picturehouse",
+      "lat": 51.4613,
+      "lng": -0.1148
+    },
+    {
+      "id": "Q42119600",
+      "name": "Rivers Electric Theatre",
+      "lat": 51.529327,
+      "lng": -0.109381
+    },
+    {
+      "id": "Q7338619",
+      "name": "Riverside Studios",
+      "lat": 51.488306,
+      "lng": -0.228083
+    },
+    {
+      "id": "Q41562694",
+      "name": "Rivoli Cinema",
+      "lat": 51.574178,
+      "lng": -0.425461
+    },
+    {
+      "id": "Q42140343",
+      "name": "Rockingham Hall",
+      "lat": 51.54575,
+      "lng": -0.484199
+    },
+    {
+      "id": "Q42203998",
+      "name": "Rotherhithe Hippodrome Theatre",
+      "lat": 51.497412,
+      "lng": -0.053877
+    },
+    {
+      "id": "Q42030318",
+      "name": "Roxie Cinema",
+      "lat": 51.512974,
+      "lng": -0.13364
+    },
+    {
+      "id": "Q41895636",
+      "name": "Roxy Bar & Screen",
+      "lat": 51.503602,
+      "lng": -0.09139
+    },
+    {
+      "id": "Q41537390",
+      "name": "Roxy Cinema",
+      "lat": 51.447132,
+      "lng": -0.413568
+    },
+    {
+      "id": "Q42166675",
+      "name": "Royal Artillery Theatre",
+      "lat": 51.485671,
+      "lng": 0.062757
+    },
+    {
+      "id": "Q42042517",
+      "name": "Royal Cinema",
+      "lat": 51.500189,
+      "lng": -0.195496
+    },
+    {
+      "id": "Q42202081",
+      "name": "Royal Electric Palace",
+      "lat": 51.561005,
+      "lng": 0.008267
+    },
+    {
+      "id": "Q42203516",
+      "name": "Royal Victoria Music Hall",
+      "lat": 51.534129,
+      "lng": -0.038788
+    },
+    {
+      "id": "Q42202198",
+      "name": "Royal West London Theatre",
+      "lat": 51.523213,
+      "lng": -0.170595
+    },
+    {
+      "id": "Q42202552",
+      "name": "Royalty Cinema",
+      "lat": 51.517012,
+      "lng": -0.208926
+    },
+    {
+      "id": "Q41018082",
+      "name": "Ruffel's Bioscope",
+      "lat": 51.444069,
+      "lng": 0.219053
+    },
+    {
+      "id": "Q42166322",
+      "name": "Rutland Park Cinema",
+      "lat": 51.549239,
+      "lng": -0.242498
+    },
+    {
+      "id": "Q7398384",
+      "name": "Safari Cinema",
+      "lat": 51.3825,
+      "lng": -0.1075
+    },
+    {
+      "id": "Q41893700",
+      "name": "Salisbury Cinema",
+      "lat": 51.499087,
+      "lng": -0.062942
+    },
+    {
+      "id": "Q41487214",
+      "name": "Savoy Cinema",
+      "lat": 51.333488,
+      "lng": -0.425088
+    },
+    {
+      "id": "Q27086822",
+      "name": "Savoy Cinema, Burnt Oak",
+      "lat": 51.597798,
+      "lng": -0.264825
+    },
+    {
+      "id": "Q7429657",
+      "name": "Scala",
+      "lat": 51.5308,
+      "lng": -0.1208
+    },
+    {
+      "id": "Q41895948",
+      "name": "Scala Cinema",
+      "lat": 51.366704,
+      "lng": -0.099064
+    },
+    {
+      "id": "Q42030326",
+      "name": "Scala Cinema Club",
+      "lat": 51.520082,
+      "lng": -0.136459
+    },
+    {
+      "id": "Q41018100",
+      "name": "Scala Theatre",
+      "lat": 51.445746,
+      "lng": 0.214653
+    },
+    {
+      "id": "Q42042496",
+      "name": "Science Museum IMAX Cinema",
+      "lat": 51.497247,
+      "lng": -0.177683
+    },
+    {
+      "id": "Q7762705",
+      "name": "Screen On The Green",
+      "lat": 51.5368,
+      "lng": -0.103641
+    },
+    {
+      "id": "Q41104880",
+      "name": "Screen Walton-on-Thames",
+      "lat": 51.383584,
+      "lng": -0.416589
+    },
+    {
+      "id": "Q42163042",
+      "name": "Sebright Picture Palace",
+      "lat": 51.53209,
+      "lng": -0.063472
+    },
+    {
+      "id": "Q42120528",
+      "name": "Select Electric Theatre",
+      "lat": 51.5235,
+      "lng": -0.1755
+    },
+    {
+      "id": "Q41819209",
+      "name": "Shakespeare Grand Cinema",
+      "lat": 51.46461,
+      "lng": -0.161178
+    },
+    {
+      "id": "Q42042531",
+      "name": "Shanley's Animated Pictures",
+      "lat": 51.5009,
+      "lng": -0.157
+    },
+    {
+      "id": "Q2778511",
+      "name": "Shepherd's Bush Empire",
+      "lat": 51.50349,
+      "lng": -0.22433
+    },
+    {
+      "id": "Q7494502",
+      "name": "Shepherd's Bush Palladium",
+      "lat": 51.5037,
+      "lng": -0.22462
+    },
+    {
+      "id": "Q7494518",
+      "name": "Shepherd’s Bush Pavilion",
+      "lat": 51.504054,
+      "lng": -0.224748
+    },
+    {
+      "id": "Q42204163",
+      "name": "Shoreditch Empire Theatre",
+      "lat": 51.524663,
+      "lng": -0.077643
+    },
+    {
+      "id": "Q42204176",
+      "name": "Shoreditch Olympia Theatre",
+      "lat": 51.522719,
+      "lng": -0.077895
+    },
+    {
+      "id": "Q41893712",
+      "name": "Shortwave Cinema",
+      "lat": 51.495406,
+      "lng": -0.105912
+    },
+    {
+      "id": "Q41490734",
+      "name": "Showcase Cinemas Bluewater",
+      "lat": 51.437736,
+      "lng": 0.271445
+    },
+    {
+      "id": "Q38515785",
+      "name": "Showcase Cinemas Newham",
+      "lat": 51.526369,
+      "lng": 0.081204
+    },
+    {
+      "id": "Q42162792",
+      "name": "Silver Cinema",
+      "lat": 51.653621,
+      "lng": -0.080587
+    },
+    {
+      "id": "Q42117671",
+      "name": "Silverland",
+      "lat": 51.514492,
+      "lng": -0.056872
+    },
+    {
+      "id": "Q42030336",
+      "name": "Soho Cinema",
+      "lat": 51.512376,
+      "lng": -0.133892
+    },
+    {
+      "id": "Q42118753",
+      "name": "South Hackney Picture House",
+      "lat": 51.541894,
+      "lng": -0.048901
+    },
+    {
+      "id": "Q42041344",
+      "name": "Southampton Cinema",
+      "lat": 51.478205,
+      "lng": -0.084876
+    },
+    {
+      "id": "Q42030362",
+      "name": "Sphere News Theatre",
+      "lat": 51.518273,
+      "lng": -0.131995
+    },
+    {
+      "id": "Q42047915",
+      "name": "Splendid Cinema",
+      "lat": 51.548088,
+      "lng": 0.015942
+    },
+    {
+      "id": "Q42214066",
+      "name": "St George's Picture Palace",
+      "lat": 51.498587,
+      "lng": -0.10649
+    },
+    {
+      "id": "Q42047016",
+      "name": "St. George's Central Hall",
+      "lat": 51.519539,
+      "lng": -0.036679
+    },
+    {
+      "id": "Q42117548",
+      "name": "St. George's Picture Hall",
+      "lat": 51.510862,
+      "lng": -0.020243
+    },
+    {
+      "id": "Q42163058",
+      "name": "Standard Super Cinema",
+      "lat": 51.534892,
+      "lng": -0.063096
+    },
+    {
+      "id": "Q42162853",
+      "name": "Stanhope Hall Picture Palace",
+      "lat": 51.614803,
+      "lng": -0.175602
+    },
+    {
+      "id": "Q42163595",
+      "name": "Stanley Cinema",
+      "lat": 51.557174,
+      "lng": -0.138305
+    },
+    {
+      "id": "Q41893724",
+      "name": "Star Cinema",
+      "lat": 51.498053,
+      "lng": -0.073545
+    },
+    {
+      "id": "Q42043317",
+      "name": "Star Kinema",
+      "lat": 51.47263,
+      "lng": -0.191612
+    },
+    {
+      "id": "Q42117556",
+      "name": "Star Picture Palace",
+      "lat": 51.505581,
+      "lng": -0.05445
+    },
+    {
+      "id": "Q41742132",
+      "name": "State Cinema",
+      "lat": 51.564251,
+      "lng": 0.097045
+    },
+    {
+      "id": "Q42035945",
+      "name": "Station Cinema",
+      "lat": 51.463247,
+      "lng": -0.11384
+    },
+    {
+      "id": "Q42117680",
+      "name": "Stepney Central Hall",
+      "lat": 51.513187,
+      "lng": -0.043287
+    },
+    {
+      "id": "Q42117688",
+      "name": "Stepney Electric Theatre",
+      "lat": 51.518846,
+      "lng": -0.053001
+    },
+    {
+      "id": "Q42213176",
+      "name": "Stockwell Cinematograph Theatre",
+      "lat": 51.473336,
+      "lng": -0.121366
+    },
+    {
+      "id": "Q42213184",
+      "name": "Stockwell Electric Palace",
+      "lat": 51.473336,
+      "lng": -0.121366
+    },
+    {
+      "id": "Q42030373",
+      "name": "Stoll Theatre",
+      "lat": 51.51426,
+      "lng": -0.118055
+    },
+    {
+      "id": "Q42213350",
+      "name": "Stratford East Picturehouse",
+      "lat": 51.543426,
+      "lng": 0.00198
+    },
+    {
+      "id": "Q42213439",
+      "name": "Streatham Hill Bioscope Theatre",
+      "lat": 51.438191,
+      "lng": -0.127134
+    },
+    {
+      "id": "Q42030382",
+      "name": "Stud Cinema",
+      "lat": 51.513189,
+      "lng": -0.134572
+    },
+    {
+      "id": "Q41964728",
+      "name": "Studio 1, 2, 3, 4",
+      "lat": 51.51547,
+      "lng": -0.140401
+    },
+    {
+      "id": "Q42200867",
+      "name": "Studio 7",
+      "lat": 51.412301,
+      "lng": -0.298704
+    },
+    {
+      "id": "Q39055542",
+      "name": "Studio 70",
+      "lat": 51.658732,
+      "lng": -0.27024
+    },
+    {
+      "id": "Q42139995",
+      "name": "Studios 5, 6, 7, 8",
+      "lat": 51.595158,
+      "lng": -0.070711
+    },
+    {
+      "id": "Q42202350",
+      "name": "Summerland Cinema",
+      "lat": 51.590406,
+      "lng": -0.142846
+    },
+    {
+      "id": "Q42030393",
+      "name": "Sunset Cinemas & Rainbow Gay Cinema",
+      "lat": 51.512172,
+      "lng": -0.134353
+    },
+    {
+      "id": "Q42163990",
+      "name": "Super Cinema",
+      "lat": 51.566652,
+      "lng": 0.083833
+    },
+    {
+      "id": "Q41819224",
+      "name": "Super Palace",
+      "lat": 51.469924,
+      "lng": -0.173573
+    },
+    {
+      "id": "Q42214009",
+      "name": "Super Show Cinema",
+      "lat": 51.48277,
+      "lng": -0.127313
+    },
+    {
+      "id": "Q41802346",
+      "name": "Surbiton Assembly Rooms",
+      "lat": 51.398904,
+      "lng": -0.303202
+    },
+    {
+      "id": "Q41819237",
+      "name": "Surrey Bioscope",
+      "lat": 51.472125,
+      "lng": -0.165683
+    },
+    {
+      "id": "Q41104885",
+      "name": "Surrey Continental Cinema",
+      "lat": 51.387318,
+      "lng": -0.4183
+    },
+    {
+      "id": "Q41896205",
+      "name": "Sweetingham's Cinema",
+      "lat": 51.517386,
+      "lng": 0.011725
+    },
+    {
+      "id": "Q42213568",
+      "name": "Sydenham Picture Palace",
+      "lat": 51.430909,
+      "lng": -0.059535
+    },
+    {
+      "id": "Q42203945",
+      "name": "Talbot Picture Theatre",
+      "lat": 51.458784,
+      "lng": -0.305902
+    },
+    {
+      "id": "Q41740831",
+      "name": "Tatler Cinema",
+      "lat": 51.60787,
+      "lng": -0.4153
+    },
+    {
+      "id": "Q42047670",
+      "name": "Tatler Cinema Club",
+      "lat": 51.582806,
+      "lng": -0.018301
+    },
+    {
+      "id": "Q138020271",
+      "name": "The Arzner",
+      "lat": 51.4977,
+      "lng": -0.0807
+    },
+    {
+      "id": "Q30780845",
+      "name": "The Coronet",
+      "lat": 51.555292,
+      "lng": -0.115661
+    },
+    {
+      "id": "Q7734912",
+      "name": "The Forum",
+      "lat": 51.5522,
+      "lng": -0.1422
+    },
+    {
+      "id": "Q7735292",
+      "name": "The Fridge",
+      "lat": 51.4602,
+      "lng": -0.1169
+    },
+    {
+      "id": "Q124707501",
+      "name": "The Garden Cinema",
+      "lat": 51.516228,
+      "lng": -0.121359
+    },
+    {
+      "id": "Q27086655",
+      "name": "The National Club",
+      "lat": 51.542606,
+      "lng": -0.198314
+    },
+    {
+      "id": "Q42030405",
+      "name": "Theatre de Luxe",
+      "lat": 51.510014,
+      "lng": -0.122427
+    },
+    {
+      "id": "Q41894957",
+      "name": "Tivoli Cinema",
+      "lat": 51.481615,
+      "lng": 0.169401
+    },
+    {
+      "id": "Q42162804",
+      "name": "Tolmer Cinema",
+      "lat": 51.530175,
+      "lng": -0.138691
+    },
+    {
+      "id": "Q42139947",
+      "name": "Tooting Electric Palace",
+      "lat": 51.428748,
+      "lng": -0.167302
+    },
+    {
+      "id": "Q32270237",
+      "name": "Tottenham Palace Theatre",
+      "lat": 51.5911,
+      "lng": -0.07041
+    },
+    {
+      "id": "Q42046635",
+      "name": "Tower Annexe Cinema",
+      "lat": 51.467796,
+      "lng": -0.067032
+    },
+    {
+      "id": "Q41893737",
+      "name": "Tower Cinema",
+      "lat": 51.501421,
+      "lng": -0.077979
+    },
+    {
+      "id": "Q21062395",
+      "name": "Towers Cinema",
+      "lat": 51.563348,
+      "lng": 0.214526
+    },
+    {
+      "id": "Q42030415",
+      "name": "Trade Cinema",
+      "lat": 51.514886,
+      "lng": -0.136146
+    },
+    {
+      "id": "Q41895641",
+      "name": "Trinity Hall Cinema",
+      "lat": 51.499497,
+      "lng": -0.094793
+    },
+    {
+      "id": "Q42212842",
+      "name": "Troc Cinema",
+      "lat": 51.53641,
+      "lng": -0.20558
+    },
+    {
+      "id": "Q41893746",
+      "name": "Troc-Ette Cinema",
+      "lat": 51.497039,
+      "lng": -0.081093
+    },
+    {
+      "id": "Q42162631",
+      "name": "Trocadero Cinema",
+      "lat": 51.494976,
+      "lng": -0.099002
+    },
+    {
+      "id": "Q7846709",
+      "name": "Troxy",
+      "lat": 51.512771,
+      "lng": -0.04403
+    },
+    {
+      "id": "Q42163181",
+      "name": "Tudor Cinema",
+      "lat": 51.510848,
+      "lng": -0.320018
+    },
+    {
+      "id": "Q42212917",
+      "name": "Tudor Rose",
+      "lat": 51.503421,
+      "lng": -0.380756
+    },
+    {
+      "id": "Q42213686",
+      "name": "Twickenham Picture Palace",
+      "lat": 51.445652,
+      "lng": -0.329538
+    },
+    {
+      "id": "Q42214075",
+      "name": "Underground Film Club",
+      "lat": 51.501229,
+      "lng": -0.112818
+    },
+    {
+      "id": "Q42213763",
+      "name": "Upton Park Picture Palace",
+      "lat": 51.53844,
+      "lng": 0.042791
+    },
+    {
+      "id": "Q42164171",
+      "name": "Variety Picture Palace",
+      "lat": 51.541837,
+      "lng": -0.11725
+    },
+    {
+      "id": "Q42164301",
+      "name": "Vauxhall Electric Theatre",
+      "lat": 51.487156,
+      "lng": -0.112729
+    },
+    {
+      "id": "Q42120408",
+      "name": "Venus Cinema",
+      "lat": 51.545691,
+      "lng": -0.141182
+    },
+    {
+      "id": "Q42164183",
+      "name": "Victoria Cinema",
+      "lat": 51.539812,
+      "lng": -0.094436
+    },
+    {
+      "id": "Q7926899",
+      "name": "Victoria Palace Theatre",
+      "lat": 51.496944,
+      "lng": -0.1425
+    },
+    {
+      "id": "Q42203528",
+      "name": "Victoria Park Cinema",
+      "lat": 51.531888,
+      "lng": -0.040758
+    },
+    {
+      "id": "Q41893859",
+      "name": "Victoria Park Square Hall",
+      "lat": 51.528736,
+      "lng": -0.053964
+    },
+    {
+      "id": "Q42030426",
+      "name": "Victoria Picture Hall",
+      "lat": 51.51042,
+      "lng": -0.121418
+    },
+    {
+      "id": "Q42118196",
+      "name": "Victoria Picture Palace",
+      "lat": 51.494364,
+      "lng": -0.142279
+    },
+    {
+      "id": "Q42047683",
+      "name": "Victoria Picture Theatre",
+      "lat": 51.582955,
+      "lng": -0.018829
+    },
+    {
+      "id": "Q42118204",
+      "name": "Victoria Station Cartoon Cinema",
+      "lat": 51.495616,
+      "lng": -0.145521
+    },
+    {
+      "id": "Q41562587",
+      "name": "Victory Palace Cinema",
+      "lat": 51.571479,
+      "lng": 0.184551
+    },
+    {
+      "id": "Q41487219",
+      "name": "Village Hall Cinema",
+      "lat": 51.331238,
+      "lng": -0.412552
+    },
+    {
+      "id": "Q41562594",
+      "name": "Vogue Cinema",
+      "lat": 51.579107,
+      "lng": 0.181588
+    },
+    {
+      "id": "Q42213223",
+      "name": "Vogue Continental Cinema",
+      "lat": 51.558143,
+      "lng": -0.074034
+    },
+    {
+      "id": "Q42203571",
+      "name": "Vue Acton",
+      "lat": 51.525324,
+      "lng": -0.281324
+    },
+    {
+      "id": "Q41895968",
+      "name": "Vue Croydon Grants",
+      "lat": 51.397969,
+      "lng": -0.093548
+    },
+    {
+      "id": "Q42119761",
+      "name": "Vue Dagenham",
+      "lat": 51.5326,
+      "lng": 0.1349
+    },
+    {
+      "id": "Q42183496",
+      "name": "Vue Finchley Road",
+      "lat": 51.547477,
+      "lng": -0.180183
+    },
+    {
+      "id": "Q42140381",
+      "name": "Vue Fulham Broadway",
+      "lat": 51.479939,
+      "lng": -0.198613
+    },
+    {
+      "id": "Q42163377",
+      "name": "Vue Harrow",
+      "lat": 51.553989,
+      "lng": -0.299481
+    },
+    {
+      "id": "Q42164191",
+      "name": "Vue Islington",
+      "lat": 51.534981,
+      "lng": -0.10563
+    },
+    {
+      "id": "Q42162866",
+      "name": "Vue North Finchley",
+      "lat": 51.604798,
+      "lng": -0.173556
+    },
+    {
+      "id": "Q27083618",
+      "name": "Vue Piccadilly",
+      "lat": 51.508889,
+      "lng": -0.134724
+    },
+    {
+      "id": "Q41895981",
+      "name": "Vue Purley Way",
+      "lat": 51.380253,
+      "lng": -0.125736
+    },
+    {
+      "id": "Q41562599",
+      "name": "Vue Romford",
+      "lat": 51.575953,
+      "lng": 0.180722
+    },
+    {
+      "id": "Q42204067",
+      "name": "Vue Shepherd's Bush",
+      "lat": 51.503876,
+      "lng": -0.220752
+    },
+    {
+      "id": "Q41104380",
+      "name": "Vue Watford",
+      "lat": 51.692634,
+      "lng": -0.394519
+    },
+    {
+      "id": "Q16902818",
+      "name": "Vue West End",
+      "lat": 51.5114,
+      "lng": -0.129444
+    },
+    {
+      "id": "Q41537695",
+      "name": "Vue West Thurrock",
+      "lat": 51.4904,
+      "lng": 0.282691
+    },
+    {
+      "id": "Q42204080",
+      "name": "Vue Westfield Shepherd's Bush",
+      "lat": 51.509431,
+      "lng": -0.221773
+    },
+    {
+      "id": "Q42203261",
+      "name": "Vue Westfield Stratford City",
+      "lat": 51.54321,
+      "lng": -0.007689
+    },
+    {
+      "id": "Q42166605",
+      "name": "Vue Wood Green",
+      "lat": 51.596973,
+      "lng": -0.108709
+    },
+    {
+      "id": "Q42140389",
+      "name": "Walham Green Cinematograph Theatre",
+      "lat": 51.480473,
+      "lng": -0.197616
+    },
+    {
+      "id": "Q42158527",
+      "name": "Walpole Cinema",
+      "lat": 51.512106,
+      "lng": -0.305943
+    },
+    {
+      "id": "Q41749612",
+      "name": "Wardona Cinema",
+      "lat": 51.445121,
+      "lng": 0.330582
+    },
+    {
+      "id": "Q7974626",
+      "name": "Watford Palace Theatre",
+      "lat": 51.65701,
+      "lng": -0.397065
+    },
+    {
+      "id": "Q41895992",
+      "name": "Weekend Picture Palace",
+      "lat": 51.372593,
+      "lng": -0.101081
+    },
+    {
+      "id": "Q41562024",
+      "name": "Welling Kinema",
+      "lat": 51.47071,
+      "lng": 0.11061
+    },
+    {
+      "id": "Q42046354",
+      "name": "Weltje Road Cinema",
+      "lat": 51.491856,
+      "lng": -0.237633
+    },
+    {
+      "id": "Q42163464",
+      "name": "Wentworth Hall",
+      "lat": 51.591206,
+      "lng": -0.228312
+    },
+    {
+      "id": "Q42162397",
+      "name": "Weslyan Central Hall",
+      "lat": 51.618485,
+      "lng": -0.062984
+    },
+    {
+      "id": "Q42043165",
+      "name": "West Kensington Super Cinema",
+      "lat": 51.487583,
+      "lng": -0.203591
+    },
+    {
+      "id": "Q7987154",
+      "name": "Westbourne Studios",
+      "lat": 51.52127,
+      "lng": -0.20271
+    },
+    {
+      "id": "Q42035964",
+      "name": "Whirled Cinema",
+      "lat": 51.465066,
+      "lng": -0.101196
+    },
+    {
+      "id": "Q42047017",
+      "name": "Whitechapel Picture Theatre",
+      "lat": 51.514125,
+      "lng": -0.075043
+    },
+    {
+      "id": "Q42033717",
+      "name": "Whitehorn Cinema",
+      "lat": 51.519806,
+      "lng": -0.021672
+    },
+    {
+      "id": "Q42166482",
+      "name": "Wimbledon Picture Palace",
+      "lat": 51.415529,
+      "lng": -0.218783
+    },
+    {
+      "id": "Q42166495",
+      "name": "Wimbledon Picture Playhouse",
+      "lat": 51.418106,
+      "lng": -0.203768
+    },
+    {
+      "id": "Q26640476",
+      "name": "Wimbledon Town Hall",
+      "lat": 51.42079,
+      "lng": -0.205079
+    },
+    {
+      "id": "Q42203765",
+      "name": "Windsor Castle Hall",
+      "lat": 51.49005,
+      "lng": 0.076049
+    },
+    {
+      "id": "Q41968785",
+      "name": "Winter Garden Theatre",
+      "lat": 51.515117,
+      "lng": -0.122794
+    },
+    {
+      "id": "Q42047018",
+      "name": "Wonderland",
+      "lat": 51.51982,
+      "lng": -0.056667
+    },
+    {
+      "id": "Q41819252",
+      "name": "Wonderland Picture Palace",
+      "lat": 51.463866,
+      "lng": -0.176656
+    },
+    {
+      "id": "Q42166616",
+      "name": "Wood Green Empire Theatre",
+      "lat": 51.599071,
+      "lng": -0.110941
+    },
+    {
+      "id": "Q42166688",
+      "name": "Woolwich Empire Theatre",
+      "lat": 51.492316,
+      "lng": 0.067667
+    },
+    {
+      "id": "Q41741491",
+      "name": "Wyllyotts Theatre",
+      "lat": 51.696007,
+      "lng": -0.19381
+    }
+  ]
+}

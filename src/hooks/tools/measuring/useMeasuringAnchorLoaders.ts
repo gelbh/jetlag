@@ -247,6 +247,8 @@ export function useMeasuringAnchorLoaders({
           sessionRules?.regionPackId,
           {
             subregionId: sessionRules?.regionPackSubregionId,
+            transitMetroId: sessionRules?.transitMetroId,
+            transitStationFilter: sessionRules?.transitStationFilter,
             task,
             createEnrichTask: () =>
               createLoadTask({

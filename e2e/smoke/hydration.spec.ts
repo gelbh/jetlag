@@ -112,7 +112,7 @@ test("@smoke prerendered home hydrates without recoverable errors", async ({ pag
   });
   await page.getByRole("link", { name: "Join session" }).click();
   await expect(page).toHaveURL(/\/join$/);
-  await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
+  await expect(page.getByPlaceholder("ABCD")).toBeVisible();
   expect(documents).toEqual([]);
 });
 

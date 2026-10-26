@@ -1,1 +1,132 @@
-{ "category": "body_of_water", "source": "none", "places": [] }
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 40.49,
+    "west": -74.26,
+    "north": 40.92,
+    "east": -73.7
+  },
+  "places": [
+    {
+      "id": "Q18708243",
+      "name": "Beaver Pond",
+      "lat": 40.701051,
+      "lng": -73.799631
+    },
+    {
+      "id": "Q34651404",
+      "name": "Clove Lake",
+      "lat": 40.617778,
+      "lng": -74.108611
+    },
+    {
+      "id": "Q5146020",
+      "name": "Collect Pond",
+      "lat": 40.71639,
+      "lng": -74.00167
+    },
+    {
+      "id": "Q5188981",
+      "name": "Croton Distributing Reservoir",
+      "lat": 40.753333,
+      "lng": -73.9825
+    },
+    {
+      "id": "Q5637240",
+      "name": "Hackensack Water Company Complex",
+      "lat": 40.7733,
+      "lng": -74.0203
+    },
+    {
+      "id": "Q3508849",
+      "name": "Harlem Meer",
+      "lat": 40.7966,
+      "lng": -73.9517
+    },
+    {
+      "id": "Q34889656",
+      "name": "Hendricks Pond",
+      "lat": 40.790278,
+      "lng": -74.173611
+    },
+    {
+      "id": "Q5757847",
+      "name": "Highbridge Reservoir",
+      "lat": 40.8425,
+      "lng": -73.933611
+    },
+    {
+      "id": "Q5764166",
+      "name": "Hillview Reservoir",
+      "lat": 40.9122,
+      "lng": -73.8692
+    },
+    {
+      "id": "Q1190219",
+      "name": "Jacqueline Kennedy Onassis Reservoir",
+      "lat": 40.785089,
+      "lng": -73.960475
+    },
+    {
+      "id": "Q6182872",
+      "name": "Jerome Park Reservoir",
+      "lat": 40.877778,
+      "lng": -73.895556
+    },
+    {
+      "id": "Q6184797",
+      "name": "Jersey City Reservoir No. 3",
+      "lat": 40.7402,
+      "lng": -74.0546
+    },
+    {
+      "id": "Q107709572",
+      "name": "Lake Success",
+      "lat": 40.763889,
+      "lng": -73.708333
+    },
+    {
+      "id": "Q108113053",
+      "name": "Leeds Pond",
+      "lat": 40.813175,
+      "lng": -73.700953
+    },
+    {
+      "id": "Q34705978",
+      "name": "Pelham Lake",
+      "lat": 40.913056,
+      "lng": -73.813611
+    },
+    {
+      "id": "Q7332868",
+      "name": "Ridgewood Reservoir",
+      "lat": 40.6889,
+      "lng": -73.8869
+    },
+    {
+      "id": "Q20858390",
+      "name": "Strack Pond",
+      "lat": 40.6994,
+      "lng": -73.8554
+    },
+    {
+      "id": "Q104523187",
+      "name": "The Lake",
+      "lat": 40.7765,
+      "lng": -73.9725
+    },
+    {
+      "id": "Q49315587",
+      "name": "Weequahic Lake",
+      "lat": 40.701389,
+      "lng": -74.204167
+    },
+    {
+      "id": "Q8021141",
+      "name": "Williamsbridge Reservoir",
+      "lat": 40.8775,
+      "lng": -73.8775
+    }
+  ]
+}

@@ -1,1 +1,282 @@
-{ "category": "museum", "source": "none", "places": [] }
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 34.5865,
+    "west": 135.3435,
+    "north": 34.7688,
+    "east": 135.5993
+  },
+  "places": [
+    {
+      "id": "Q59536065",
+      "name": "Abeno Harukas Art Museum",
+      "lat": 34.645798,
+      "lng": 135.51407
+    },
+    {
+      "id": "Q11464987",
+      "name": "Amagasaki City Museum of History",
+      "lat": 34.714889,
+      "lng": 135.420944
+    },
+    {
+      "id": "Q11464999",
+      "name": "Amagasaki Cultural Center",
+      "lat": 34.721111,
+      "lng": 135.420278
+    },
+    {
+      "id": "Q11464905",
+      "name": "Amashin Museum",
+      "lat": 34.716639,
+      "lng": 135.413389
+    },
+    {
+      "id": "Q17214457",
+      "name": "Doshōmachi Pharmaceutical and Historical Museum",
+      "lat": 34.688636,
+      "lng": 135.505997
+    },
+    {
+      "id": "Q11664968",
+      "name": "Egawa Museum of Art",
+      "lat": 34.766889,
+      "lng": 135.357361
+    },
+    {
+      "id": "Q11440034",
+      "name": "Entrepreneurial Museum of Challenge and Innovation",
+      "lat": 34.683889,
+      "lng": 135.50925
+    },
+    {
+      "id": "Q11463585",
+      "name": "Former Konishi Family Residence",
+      "lat": 34.688694,
+      "lng": 135.506889
+    },
+    {
+      "id": "Q3329563",
+      "name": "Fujita Art Museum",
+      "lat": 34.694978,
+      "lng": 135.525124
+    },
+    {
+      "id": "Q138316977",
+      "name": "Fukae Heritage Museum",
+      "lat": 34.669951,
+      "lng": 135.560921
+    },
+    {
+      "id": "Q117794301",
+      "name": "Glico Museum",
+      "lat": 34.718278,
+      "lng": 135.46125
+    },
+    {
+      "id": "Q11508057",
+      "name": "Japan Folk Art Museum",
+      "lat": 34.66115,
+      "lng": 135.498636
+    },
+    {
+      "id": "Q11296794",
+      "name": "KTV Ōgimachi Square",
+      "lat": 34.704697,
+      "lng": 135.510267
+    },
+    {
+      "id": "Q6541903",
+      "name": "Liberty Osaka",
+      "lat": 34.654444,
+      "lng": 135.486667
+    },
+    {
+      "id": "Q11271546",
+      "name": "Mint Museum",
+      "lat": 34.695917,
+      "lng": 135.521667
+    },
+    {
+      "id": "Q137773156",
+      "name": "MOL Museum \"Funeshiru\"",
+      "lat": 34.637851,
+      "lng": 135.411708
+    },
+    {
+      "id": "Q11440106",
+      "name": "Museum of Commercial History, Osaka University of Commerce",
+      "lat": 34.666833,
+      "lng": 135.584139
+    },
+    {
+      "id": "Q10855326",
+      "name": "Museum of Hanshin Koshien Stadium",
+      "lat": 34.720394,
+      "lng": 135.361806
+    },
+    {
+      "id": "Q11440555",
+      "name": "Museum of Oriental Ceramics, Osaka",
+      "lat": 34.693444,
+      "lng": 135.505472
+    },
+    {
+      "id": "Q11441681",
+      "name": "Museum of the Osaka College of Music",
+      "lat": 34.756417,
+      "lng": 135.463083
+    },
+    {
+      "id": "Q127503070",
+      "name": "Nakanoshima Art Center, Osaka University",
+      "lat": 34.692734,
+      "lng": 135.490434
+    },
+    {
+      "id": "Q50375431",
+      "name": "Nakanoshima Museum of Art, Osaka",
+      "lat": 34.692389,
+      "lng": 135.491472
+    },
+    {
+      "id": "Q1055037",
+      "name": "National Museum of Art, Osaka",
+      "lat": 34.691786,
+      "lng": 135.492024
+    },
+    {
+      "id": "Q11508663",
+      "name": "Nihonsakari Sakagura Dōri Rengakan",
+      "lat": 34.730222,
+      "lng": 135.344694
+    },
+    {
+      "id": "Q140157366",
+      "name": "Okashi Museum Tempozan",
+      "lat": 34.653916,
+      "lng": 135.429543
+    },
+    {
+      "id": "Q96338884",
+      "name": "Osaka Castle Museum",
+      "lat": 34.687287,
+      "lng": 135.52587
+    },
+    {
+      "id": "Q9004920",
+      "name": "Osaka City Museum of Fine Arts",
+      "lat": 34.650111,
+      "lng": 135.510528
+    },
+    {
+      "id": "Q11440200",
+      "name": "Osaka City Sewerage Science Museum",
+      "lat": 34.693472,
+      "lng": 135.462472
+    },
+    {
+      "id": "Q7105564",
+      "name": "Osaka International Peace Center",
+      "lat": 34.681667,
+      "lng": 135.53
+    },
+    {
+      "id": "Q11261312",
+      "name": "Osaka Museum of History",
+      "lat": 34.682722,
+      "lng": 135.520806
+    },
+    {
+      "id": "Q11439926",
+      "name": "Osaka Museum of Housing and Living",
+      "lat": 34.710306,
+      "lng": 135.511694
+    },
+    {
+      "id": "Q11440688",
+      "name": "Osaka Museum of Natural History",
+      "lat": 34.610361,
+      "lng": 135.522611
+    },
+    {
+      "id": "Q11441568",
+      "name": "Osaka Science & Technology Center",
+      "lat": 34.686472,
+      "lng": 135.496306
+    },
+    {
+      "id": "Q875709",
+      "name": "Osaka Science Museum",
+      "lat": 34.69124,
+      "lng": 135.49152
+    },
+    {
+      "id": "Q11549303",
+      "name": "Osaka Water Museum",
+      "lat": 34.724361,
+      "lng": 135.505361
+    },
+    {
+      "id": "Q11329151",
+      "name": "Panasonic Kōnosuke Matsushita Museum",
+      "lat": 34.738111,
+      "lng": 135.572722
+    },
+    {
+      "id": "Q141594172",
+      "name": "Sannō Art Museum",
+      "lat": 34.694213,
+      "lng": 135.533018
+    },
+    {
+      "id": "Q11412294",
+      "name": "Shiba Ryotaro Memorial Museum",
+      "lat": 34.6605,
+      "lng": 135.585667
+    },
+    {
+      "id": "Q104721234",
+      "name": "Shitennō-ji Treasure Hall",
+      "lat": 34.654181,
+      "lng": 135.517345
+    },
+    {
+      "id": "Q139800437",
+      "name": "Tanabe Seiko Museum of Literature",
+      "lat": 34.663401,
+      "lng": 135.578129
+    },
+    {
+      "id": "Q127503364",
+      "name": "University of Osaka Tekijuku Commemoration Center",
+      "lat": 34.69104,
+      "lng": 135.503307
+    },
+    {
+      "id": "Q11362202",
+      "name": "World Money Box Museum",
+      "lat": 34.716694,
+      "lng": 135.413417
+    },
+    {
+      "id": "Q11563573",
+      "name": "Yuki Museum of Art",
+      "lat": 34.6875,
+      "lng": 135.50225
+    },
+    {
+      "id": "Q86744876",
+      "name": "はりきゅうミュージアム",
+      "lat": 34.678611,
+      "lng": 135.540139
+    },
+    {
+      "id": "Q11503970",
+      "name": "新聞屋さん博物館",
+      "lat": 34.623583,
+      "lng": 135.555111
+    }
+  ]
+}

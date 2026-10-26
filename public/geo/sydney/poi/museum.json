@@ -1,6 +1,360 @@
 {
   "category": "museum",
-  "source": "none",
-  "bbox": { "south": -34.2, "west": 150.5, "north": -33.3, "east": 151.35 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -34.3574,
+    "west": 149.9948,
+    "north": -32.9761,
+    "east": 151.363
+  },
+  "places": [
+    {
+      "id": "Q108663292",
+      "name": "4A Centre for Contemporary Asian Art",
+      "lat": -33.88,
+      "lng": 151.2058
+    },
+    {
+      "id": "Q844556",
+      "name": "Anzac Memorial",
+      "lat": -33.875722,
+      "lng": 151.210944
+    },
+    {
+      "id": "Q4823870",
+      "name": "Australian Aviation Museum",
+      "lat": -33.9265,
+      "lng": 150.981
+    },
+    {
+      "id": "Q55604505",
+      "name": "Australian Centre for Photography",
+      "lat": -33.8788,
+      "lng": 151.215
+    },
+    {
+      "id": "Q4824027",
+      "name": "Australian Computer Museum Society",
+      "lat": -33.874714,
+      "lng": 151.1235
+    },
+    {
+      "id": "Q769416",
+      "name": "Australian Museum",
+      "lat": -33.8743,
+      "lng": 151.213
+    },
+    {
+      "id": "Q844329",
+      "name": "Australian National Maritime Museum",
+      "lat": -33.8692,
+      "lng": 151.199
+    },
+    {
+      "id": "Q30102902",
+      "name": "Australiana Pioneer Village",
+      "lat": -33.567552,
+      "lng": 150.840382
+    },
+    {
+      "id": "Q102188173",
+      "name": "Brett Whiteley Studio",
+      "lat": -33.888716,
+      "lng": 151.21456
+    },
+    {
+      "id": "Q56279721",
+      "name": "Brislington, Parramatta",
+      "lat": -33.813,
+      "lng": 151.0021
+    },
+    {
+      "id": "Q18172917",
+      "name": "Camden Museum of Aviation",
+      "lat": -34.0372,
+      "lng": 150.7387
+    },
+    {
+      "id": "Q113059363",
+      "name": "Chau Chak Wing Museum",
+      "lat": -33.885278,
+      "lng": 151.190278
+    },
+    {
+      "id": "Q5123616",
+      "name": "City of Canada Bay Museum",
+      "lat": -33.8555,
+      "lng": 151.104
+    },
+    {
+      "id": "Q30103055",
+      "name": "Don Bank",
+      "lat": -33.837686,
+      "lng": 151.205233
+    },
+    {
+      "id": "Q656521",
+      "name": "Elizabeth Bay House",
+      "lat": -33.8701,
+      "lng": 151.226
+    },
+    {
+      "id": "Q3748475",
+      "name": "Fort Denison",
+      "lat": -33.854781,
+      "lng": 151.225628
+    },
+    {
+      "id": "Q5630230",
+      "name": "HMAS Advance",
+      "lat": -33.869167,
+      "lng": 151.199917
+    },
+    {
+      "id": "Q5630499",
+      "name": "HMAS Onslow",
+      "lat": -33.86925,
+      "lng": 151.19995
+    },
+    {
+      "id": "Q721087",
+      "name": "HMAS Vampire",
+      "lat": -33.8692,
+      "lng": 151.2
+    },
+    {
+      "id": "Q116004776",
+      "name": "Hunters Hill Historical Society Museum",
+      "lat": -33.83441,
+      "lng": 151.15282
+    },
+    {
+      "id": "Q1577600",
+      "name": "Hyde Park Barracks",
+      "lat": -33.869611,
+      "lng": 151.212806
+    },
+    {
+      "id": "Q42915912",
+      "name": "Justice and Police Museum",
+      "lat": -33.862236,
+      "lng": 151.212323
+    },
+    {
+      "id": "Q6534610",
+      "name": "Leuralla",
+      "lat": -33.7246,
+      "lng": 150.33
+    },
+    {
+      "id": "Q6552443",
+      "name": "Lindesay, Darling Point",
+      "lat": -33.8676,
+      "lng": 151.24
+    },
+    {
+      "id": "Q118896692",
+      "name": "Lithgow Small Arms Factory Museum",
+      "lat": -33.48757,
+      "lng": 150.14192
+    },
+    {
+      "id": "Q6647856",
+      "name": "Lithgow State Mine Heritage Park & Railway",
+      "lat": -33.460556,
+      "lng": 150.168889
+    },
+    {
+      "id": "Q116258122",
+      "name": "Liverpool Regional Museum and Family History Centre",
+      "lat": -33.93374,
+      "lng": 150.91683
+    },
+    {
+      "id": "Q22271907",
+      "name": "Madame Tussauds Sydney",
+      "lat": -33.869756,
+      "lng": 151.201539
+    },
+    {
+      "id": "Q6750607",
+      "name": "Manly Art Gallery and Museum",
+      "lat": -33.7985,
+      "lng": 151.281
+    },
+    {
+      "id": "Q30267357",
+      "name": "Museum of Applied Arts & Sciences",
+      "lat": -33.878517,
+      "lng": 151.199539
+    },
+    {
+      "id": "Q2107035",
+      "name": "Museum of Applied Arts and Science",
+      "lat": -33.878611,
+      "lng": 151.199444
+    },
+    {
+      "id": "Q140995100",
+      "name": "Museum of Chinese in Australia",
+      "lat": -33.879909,
+      "lng": 151.205511
+    },
+    {
+      "id": "Q690242",
+      "name": "Museum of Contemporary Art Australia",
+      "lat": -33.86,
+      "lng": 151.208889
+    },
+    {
+      "id": "Q910232",
+      "name": "Museum of Sydney",
+      "lat": -33.8636,
+      "lng": 151.211
+    },
+    {
+      "id": "Q56279777",
+      "name": "New South Wales Lancers Memorial Museum",
+      "lat": -33.8168,
+      "lng": 151.0068
+    },
+    {
+      "id": "Q7026623",
+      "name": "Nicholson Museum",
+      "lat": -33.8864,
+      "lng": 151.189
+    },
+    {
+      "id": "Q7052498",
+      "name": "Norman Lindsay Gallery and Museum",
+      "lat": -33.680556,
+      "lng": 150.561389
+    },
+    {
+      "id": "Q7011771",
+      "name": "NSW Rail Museum",
+      "lat": -34.2064,
+      "lng": 150.57
+    },
+    {
+      "id": "Q109419728",
+      "name": "NSW Schoolhouse Museum",
+      "lat": -33.794633,
+      "lng": 151.121475
+    },
+    {
+      "id": "Q58204626",
+      "name": "Penrith Museum of Fire",
+      "lat": -33.7477,
+      "lng": 150.6936
+    },
+    {
+      "id": "Q99438812",
+      "name": "Penrith Museum of Printing",
+      "lat": -33.757,
+      "lng": 150.688
+    },
+    {
+      "id": "Q124652092",
+      "name": "Qtopia",
+      "lat": -33.8797,
+      "lng": 151.2172
+    },
+    {
+      "id": "Q105612423",
+      "name": "Reserve Bank of Australia Museum",
+      "lat": -33.868003,
+      "lng": 151.211964
+    },
+    {
+      "id": "Q7367931",
+      "name": "Rose Seidler House",
+      "lat": -33.70977,
+      "lng": 151.14209
+    },
+    {
+      "id": "Q7373759",
+      "name": "Royal Australian Navy Heritage Centre",
+      "lat": -33.8595,
+      "lng": 151.23
+    },
+    {
+      "id": "Q6133813",
+      "name": "State Library of New South Wales",
+      "lat": -33.866389,
+      "lng": 151.213333
+    },
+    {
+      "id": "Q7648734",
+      "name": "Susannah Place Museum",
+      "lat": -33.86009,
+      "lng": 151.205244
+    },
+    {
+      "id": "Q7659846",
+      "name": "Sydney Bus Museum",
+      "lat": -33.8765,
+      "lng": 151.158
+    },
+    {
+      "id": "Q1722305",
+      "name": "Sydney Jewish Museum",
+      "lat": -33.87903,
+      "lng": 151.22015
+    },
+    {
+      "id": "Q7660031",
+      "name": "Sydney Maritime Museum",
+      "lat": -33.8699,
+      "lng": 151.199
+    },
+    {
+      "id": "Q1641346",
+      "name": "Sydney Mint",
+      "lat": -33.868889,
+      "lng": 151.2125
+    },
+    {
+      "id": "Q7660067",
+      "name": "Sydney Observatory",
+      "lat": -33.859559,
+      "lng": 151.204583
+    },
+    {
+      "id": "Q1109301",
+      "name": "Sydney Tramway Museum",
+      "lat": -34.0446,
+      "lng": 151.052
+    },
+    {
+      "id": "Q135263995",
+      "name": "The Rocks Discovery Museum",
+      "lat": -33.8589,
+      "lng": 151.208651
+    },
+    {
+      "id": "Q7912084",
+      "name": "Valley Heights Locomotive Depot Heritage Museum",
+      "lat": -33.7026,
+      "lng": 150.58
+    },
+    {
+      "id": "Q58203041",
+      "name": "Woodford Academy",
+      "lat": -33.733,
+      "lng": 150.4736
+    },
+    {
+      "id": "Q8052939",
+      "name": "Yester Grange",
+      "lat": -33.7263,
+      "lng": 150.3781
+    },
+    {
+      "id": "Q199312",
+      "name": "Zig Zag Railway",
+      "lat": -33.471758,
+      "lng": 150.194222
+    }
+  ]
 }

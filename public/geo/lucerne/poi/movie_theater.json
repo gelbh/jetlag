@@ -1,1 +1,60 @@
-{ "category": "movie_theater", "source": "none", "places": [] }
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 46.775,
+    "west": 7.839,
+    "north": 47.2903,
+    "east": 8.5213
+  },
+  "places": [
+    {
+      "id": "Q895178",
+      "name": "Bourbaki-Panorama",
+      "lat": 47.056972,
+      "lng": 8.311222
+    },
+    {
+      "id": "Q47361129",
+      "name": "Capitol",
+      "lat": 47.04593,
+      "lng": 8.30994
+    },
+    {
+      "id": "Q47354392",
+      "name": "Kino Seehof",
+      "lat": 47.16921,
+      "lng": 8.51501
+    },
+    {
+      "id": "Q50873012",
+      "name": "limelight",
+      "lat": 47.05572,
+      "lng": 8.31129
+    },
+    {
+      "id": "Q47361272",
+      "name": "Maxx",
+      "lat": 47.06896,
+      "lng": 8.28029
+    },
+    {
+      "id": "Q47361209",
+      "name": "Moderne",
+      "lat": 47.04845,
+      "lng": 8.30602
+    },
+    {
+      "id": "Q47354389",
+      "name": "Stattkino",
+      "lat": 47.05692,
+      "lng": 8.31142
+    },
+    {
+      "id": "Q47354386",
+      "name": "TaB Atelierkino",
+      "lat": 47.25014,
+      "lng": 8.18546
+    }
+  ]
+}

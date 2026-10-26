@@ -1,1 +1,24 @@
-{ "category": "amusement_park", "source": "none", "places": [] }
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q2650746",
+      "name": "Alpamare",
+      "lat": 47.1992,
+      "lng": 8.79083
+    },
+    {
+      "id": "Q123258732",
+      "name": "Findlingsgarten Kappenbühl",
+      "lat": 47.4067,
+      "lng": 8.499497
+    }
+  ]
+}

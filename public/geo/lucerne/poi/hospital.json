@@ -1,1 +1,48 @@
-{ "category": "hospital", "source": "none", "places": [] }
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 46.775,
+    "west": 7.839,
+    "north": 47.2903,
+    "east": 8.5213
+  },
+  "places": [
+    {
+      "id": "Q23783969",
+      "name": "AndreasKlinik",
+      "lat": 47.182095,
+      "lng": 8.455388
+    },
+    {
+      "id": "Q14956909",
+      "name": "Canton Hospital Obwalden",
+      "lat": 46.889788,
+      "lng": 8.246258
+    },
+    {
+      "id": "Q1878385",
+      "name": "Hospital Luzern",
+      "lat": 47.05831,
+      "lng": 8.29764
+    },
+    {
+      "id": "Q1728152",
+      "name": "Hospital Nidwalden",
+      "lat": 46.96002,
+      "lng": 8.357345
+    },
+    {
+      "id": "Q104959125",
+      "name": "Klinik Meissenberg",
+      "lat": 47.15341,
+      "lng": 8.515
+    },
+    {
+      "id": "Q16854951",
+      "name": "Schweizer Paraplegiker-Zentrum",
+      "lat": 47.1414,
+      "lng": 8.1312
+    }
+  ]
+}

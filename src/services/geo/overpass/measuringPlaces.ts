@@ -10,6 +10,10 @@ import { type MeasuringLocationCategory, measuringLocationLabel } from "@/domain
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import { measuringOverpassSelectorsForKind } from "@/domain/session/catalog/sessionCustomCatalog";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
+import {
+  fetchGtfsMeasuringStationsForPlayArea,
+  type GtfsStationQuery,
+} from "../../transit/gtfsPlayAreaStations";
 import { getOrFetchCached, measuringPlacesCacheKey } from "../cache";
 import { parseWikidataId } from "../parseWikidataId";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
@@ -85,7 +89,8 @@ export type FetchMeasuringPlacesOptions = {
   priority?: LoadPriority;
   /** Pack subregion (e.g. Australia `stateId`) for bandwidth-scoped POI slices. */
   subregionId?: string;
-} & PackThenOverpassProgress;
+} & PackThenOverpassProgress &
+  GtfsStationQuery;
 
 export function buildMeasuringPlacesQuery(
   gameArea: GameArea,
@@ -212,6 +217,20 @@ export async function fetchMeasuringPlacesInArea(
   const selectors = measuringOverpassSelectorsForKind(category, customCategories);
   if (selectors.length === 0) {
     return [];
+  }
+
+  if (category === "rail_station") {
+    const gtfsStations = await fetchGtfsMeasuringStationsForPlayArea(gameArea, {
+      transitMetroId: options?.transitMetroId,
+      transitStationFilter: options?.transitStationFilter,
+    });
+    if (gtfsStations !== null) {
+      return gtfsStations.map((station) => ({
+        id: station.id,
+        name: station.name,
+        point: station.point,
+      }));
+    }
   }
 
   const cacheScope =

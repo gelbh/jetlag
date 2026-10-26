@@ -13,8 +13,9 @@ import {
   type LatLngTuple,
 } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
+import type { TransitRouteFilter, TransitRouteMode } from "../../domain/map/transit";
 import type { TransitStation } from "../../domain/session/hiding/hidingZone";
-import type { GtfsBundleStop, GtfsStaticBundle } from "./gtfsBundle";
+import type { GtfsBundleRoute, GtfsBundleStop, GtfsStaticBundle } from "./gtfsBundle";
 import { GTFS_BUNDLE_MANIFEST_PATH } from "./gtfsBundle";
 
 const bundleCache = new Map<string, GtfsStaticBundle>();
@@ -190,6 +191,41 @@ export function filterGtfsStopsForGameArea(
   gameArea: GameArea,
 ): GtfsBundleStop[] {
   return filterGtfsStopsForBoundingBox(bundle, gameAreaToBoundingBox(gameArea));
+}
+
+const routesByIdCache = new WeakMap<GtfsStaticBundle, Map<string, GtfsBundleRoute>>();
+
+function getRoutesById(bundle: GtfsStaticBundle): Map<string, GtfsBundleRoute> {
+  let routesById = routesByIdCache.get(bundle);
+  if (!routesById) {
+    routesById = new Map(bundle.routes.map((route) => [route.id, route]));
+    routesByIdCache.set(bundle, routesById);
+  }
+  return routesById;
+}
+
+/** Modes served by routes linked to this stop (via stopRouteIds). */
+export function gtfsStopModes(stopId: string, bundle: GtfsStaticBundle): Set<TransitRouteMode> {
+  const modes = new Set<TransitRouteMode>();
+  const routesById = getRoutesById(bundle);
+  for (const routeId of routeIdsForStop(stopId, bundle)) {
+    const route = routesById.get(routeId);
+    if (route) {
+      modes.add(route.mode);
+    }
+  }
+  return modes;
+}
+
+export function filterGtfsStopsByMode(
+  stops: readonly GtfsBundleStop[],
+  bundle: GtfsStaticBundle,
+  filter: TransitRouteFilter,
+): GtfsBundleStop[] {
+  if (filter === "all") {
+    return [...stops];
+  }
+  return stops.filter((stop) => gtfsStopModes(stop.id, bundle).has(filter));
 }
 
 export function gtfsStopsToTransitStations(

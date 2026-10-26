@@ -1,1 +1,240 @@
-{ "category": "movie_theater", "source": "none", "places": [] }
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 43.4669,
+    "west": -70.492,
+    "north": 43.8488,
+    "east": -69.9759
+  },
+  "places": [
+    {
+      "id": "Q42564753",
+      "name": "Apple Cinemas Saco IMAX",
+      "lat": 43.528349,
+      "lng": -70.424715
+    },
+    {
+      "id": "Q42564851",
+      "name": "Apple Cinemas Westbrook",
+      "lat": 43.651541,
+      "lng": -70.350362
+    },
+    {
+      "id": "Q42564839",
+      "name": "Brook Theatre",
+      "lat": 43.680453,
+      "lng": -70.352566
+    },
+    {
+      "id": "Q42564690",
+      "name": "Cameo Theatre",
+      "lat": 43.663481,
+      "lng": -70.272652
+    },
+    {
+      "id": "Q42564236",
+      "name": "Central Theater",
+      "lat": 43.49171,
+      "lng": -70.454549
+    },
+    {
+      "id": "Q42564694",
+      "name": "Cinema",
+      "lat": 43.662669,
+      "lng": -70.298065
+    },
+    {
+      "id": "Q42564772",
+      "name": "Cinemagic Grand in Clarks Pond",
+      "lat": 43.631289,
+      "lng": -70.322942
+    },
+    {
+      "id": "Q127116",
+      "name": "City Theater",
+      "lat": 43.493528,
+      "lng": -70.456369
+    },
+    {
+      "id": "Q42564697",
+      "name": "Deering Theatre",
+      "lat": 43.662669,
+      "lng": -70.298065
+    },
+    {
+      "id": "Q105871242",
+      "name": "Dreamland Theatre",
+      "lat": 43.65552,
+      "lng": -70.26188
+    },
+    {
+      "id": "Q42564700",
+      "name": "Elm Theatre",
+      "lat": 43.658085,
+      "lng": -70.259244
+    },
+    {
+      "id": "Q42564702",
+      "name": "Fine Arts Theatre",
+      "lat": 43.654632,
+      "lng": -70.273924
+    },
+    {
+      "id": "Q42564405",
+      "name": "Flagship Premium Cinemas Falmouth",
+      "lat": 43.720877,
+      "lng": -70.235118
+    },
+    {
+      "id": "Q42564703",
+      "name": "Jefferson Theatre",
+      "lat": 43.654885,
+      "lng": -70.261234
+    },
+    {
+      "id": "Q42564774",
+      "name": "Maine Mall Cinema 7",
+      "lat": 43.632646,
+      "lng": -70.33918
+    },
+    {
+      "id": "Q42564704",
+      "name": "Maine Theatre",
+      "lat": 43.653439,
+      "lng": -70.264937
+    },
+    {
+      "id": "Q42564707",
+      "name": "Movies at the Museum",
+      "lat": 43.654428,
+      "lng": -70.262396
+    },
+    {
+      "id": "Q42564754",
+      "name": "Mutual Theater",
+      "lat": 43.504732,
+      "lng": -70.439251
+    },
+    {
+      "id": "Q42564653",
+      "name": "New Theatre",
+      "lat": 43.516001,
+      "lng": -70.374714
+    },
+    {
+      "id": "Q42564658",
+      "name": "Palace Theatre",
+      "lat": 43.512525,
+      "lng": -70.376735
+    },
+    {
+      "id": "Q42564711",
+      "name": "Paris Cinema",
+      "lat": 43.655434,
+      "lng": -70.261993
+    },
+    {
+      "id": "Q42564713",
+      "name": "Patriot Cinemas Nickelodeon Cinemas 1-6",
+      "lat": 43.657018,
+      "lng": -70.256167
+    },
+    {
+      "id": "Q42564659",
+      "name": "Pier Theatre",
+      "lat": 43.517766,
+      "lng": -70.377291
+    },
+    {
+      "id": "Q42564455",
+      "name": "Playhouse",
+      "lat": 43.679105,
+      "lng": -70.443523
+    },
+    {
+      "id": "Q42564716",
+      "name": "Port City Music Hall",
+      "lat": 43.656327,
+      "lng": -70.260578
+    },
+    {
+      "id": "Q42564778",
+      "name": "Portland Players",
+      "lat": 43.635688,
+      "lng": -70.234175
+    },
+    {
+      "id": "Q42564717",
+      "name": "Portland Theatre",
+      "lat": 43.657578,
+      "lng": -70.259982
+    },
+    {
+      "id": "Q42564068",
+      "name": "Portland Twin Drive-In",
+      "lat": 43.589337,
+      "lng": -70.342939
+    },
+    {
+      "id": "Q42564090",
+      "name": "Prides Corner Drive-In",
+      "lat": 43.721763,
+      "lng": -70.339397
+    },
+    {
+      "id": "Q42564063",
+      "name": "Saco Drive-In",
+      "lat": 43.54999,
+      "lng": -70.406067
+    },
+    {
+      "id": "Q42564781",
+      "name": "Seville Theatre",
+      "lat": 43.647646,
+      "lng": -70.240801
+    },
+    {
+      "id": "Q42564867",
+      "name": "Smitty's Cinema Windham",
+      "lat": 43.838982,
+      "lng": -70.442022
+    },
+    {
+      "id": "Q42564845",
+      "name": "Star Theatre",
+      "lat": 43.680454,
+      "lng": -70.352569
+    },
+    {
+      "id": "Q14715352",
+      "name": "State Theatre",
+      "lat": 43.6539,
+      "lng": -70.2636
+    },
+    {
+      "id": "Q42564721",
+      "name": "Strand Theatre",
+      "lat": 43.655092,
+      "lng": -70.262233
+    },
+    {
+      "id": "Q42564095",
+      "name": "Windham Drive-In",
+      "lat": 43.825099,
+      "lng": -70.43385
+    },
+    {
+      "id": "Q42564104",
+      "name": "Yarmouth Drive-In",
+      "lat": 43.805406,
+      "lng": -70.179876
+    },
+    {
+      "id": "Q42564914",
+      "name": "Yarmouth Theatre",
+      "lat": 43.802647,
+      "lng": -70.190226
+    }
+  ]
+}

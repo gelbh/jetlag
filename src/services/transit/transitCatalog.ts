@@ -117,6 +117,18 @@ export function inferTransitMetroId(gameArea: GameArea): string | null {
   return best?.id ?? null;
 }
 
+/** Prefer an explicit session metro, then geometry inference. */
+export function resolveTransitMetroId(
+  explicit: string | null | undefined,
+  gameArea: GameArea,
+): string | null {
+  const trimmed = typeof explicit === "string" ? explicit.trim() : "";
+  if (trimmed && getTransitMetro(trimmed)) {
+    return trimmed;
+  }
+  return inferTransitMetroId(gameArea);
+}
+
 export function listTransitMetros(): TransitMetro[] {
   return TRANSIT_METROS;
 }

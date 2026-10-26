@@ -150,6 +150,57 @@ describe("serializeSession", () => {
     expect(payload.tier).toBe("premium");
   });
 
+  it("omits transitStationFilter all and round-trips metro", () => {
+    const omitted = buildSessionDocument(
+      "ALL1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      "sydney",
+      "seeker",
+      "medium",
+      {},
+      undefined,
+      undefined,
+      { transitStationFilter: "all" },
+    );
+    expect(omitted).not.toHaveProperty("transitStationFilter");
+    expect(omitted.transitMetroId).toBe("sydney");
+
+    const withMetro = buildSessionDocument(
+      "MET1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      "sydney",
+      "seeker",
+      "medium",
+      {},
+      undefined,
+      undefined,
+      { transitStationFilter: "metro" },
+    );
+    expect(withMetro.transitStationFilter).toBe("metro");
+
+    const restored = deserializeSessionFromFirestore("sess-1", {
+      ...withMetro,
+      code: "MET1",
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
+    });
+    expect(restored.transitStationFilter).toBe("metro");
+
+    const restoredOmitted = deserializeSessionFromFirestore("sess-2", {
+      ...omitted,
+      code: "ALL1",
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
+    });
+    expect(restoredOmitted.transitStationFilter).toBeUndefined();
+  });
+
   it("omits pack customMatchingAreas from Firestore create payload when regionPackId is set", () => {
     const payload = buildSessionDocument(
       "AUS1",

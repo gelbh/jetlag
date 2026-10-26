@@ -1,1 +1,420 @@
-{ "category": "park", "source": "none", "places": [] }
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q27331422",
+      "name": "Albert-Steiner-Garten",
+      "lat": 47.408607,
+      "lng": 8.509766
+    },
+    {
+      "id": "Q27330573",
+      "name": "Alfred-Altherr-Terrasse",
+      "lat": 47.395056,
+      "lng": 8.552267
+    },
+    {
+      "id": "Q2650746",
+      "name": "Alpamare",
+      "lat": 47.1992,
+      "lng": 8.79083
+    },
+    {
+      "id": "Q27322855",
+      "name": "Andreaspark",
+      "lat": 47.41316,
+      "lng": 8.558239
+    },
+    {
+      "id": "Q630465",
+      "name": "Arboretum Zürich",
+      "lat": 47.362722,
+      "lng": 8.536453
+    },
+    {
+      "id": "Q1018919",
+      "name": "Bäckeranlage",
+      "lat": 47.3778,
+      "lng": 8.52374
+    },
+    {
+      "id": "Q686324",
+      "name": "Botanical Garden of the University of Zurich",
+      "lat": 47.358647,
+      "lng": 8.561106
+    },
+    {
+      "id": "Q996940",
+      "name": "Brühlgutpark",
+      "lat": 47.4967,
+      "lng": 8.71397
+    },
+    {
+      "id": "Q19668360",
+      "name": "Duftrosengarten Rapperswil",
+      "lat": 47.227567,
+      "lng": 8.818778
+    },
+    {
+      "id": "Q27332056",
+      "name": "Emil-Oberhänsli-Anlage",
+      "lat": 47.417587,
+      "lng": 8.545151
+    },
+    {
+      "id": "Q123309249",
+      "name": "Ensemble Adlergarten, Parkanlage",
+      "lat": 47.496857,
+      "lng": 8.736904
+    },
+    {
+      "id": "Q123309574",
+      "name": "Ensemble Villa Frohberg, Gartenanlage",
+      "lat": 47.495835,
+      "lng": 8.72212
+    },
+    {
+      "id": "Q21037200",
+      "name": "Eulachpark",
+      "lat": 47.505406,
+      "lng": 8.763731
+    },
+    {
+      "id": "Q112196009",
+      "name": "Fäsenstaubpromenade",
+      "lat": 47.694807,
+      "lng": 8.628653
+    },
+    {
+      "id": "Q123258732",
+      "name": "Findlingsgarten Kappenbühl",
+      "lat": 47.4067,
+      "lng": 8.499497
+    },
+    {
+      "id": "Q27330333",
+      "name": "Flora-Ruchat-Roncati-Garten",
+      "lat": 47.409361,
+      "lng": 8.506994
+    },
+    {
+      "id": "Q71875924",
+      "name": "Grüzefeld",
+      "lat": 47.490769,
+      "lng": 8.755948
+    },
+    {
+      "id": "Q1555480",
+      "name": "Gustav-Ammann-Park",
+      "lat": 47.411278,
+      "lng": 8.534569
+    },
+    {
+      "id": "Q27329983",
+      "name": "Hans-Leibundgut-Garten",
+      "lat": 47.409815,
+      "lng": 8.508865
+    },
+    {
+      "id": "Q27325549",
+      "name": "Hardaupark",
+      "lat": 47.379533,
+      "lng": 8.509356
+    },
+    {
+      "id": "Q27325565",
+      "name": "Hermine-Raths-Garten",
+      "lat": 47.40743,
+      "lng": 8.508361
+    },
+    {
+      "id": "Q27321720",
+      "name": "Im Hofgarten",
+      "lat": 47.395074,
+      "lng": 8.536883
+    },
+    {
+      "id": "Q27326775",
+      "name": "Im Tiergarten",
+      "lat": 47.365843,
+      "lng": 8.511952
+    },
+    {
+      "id": "Q960186",
+      "name": "Irchelpark",
+      "lat": 47.3964,
+      "lng": 8.54778
+    },
+    {
+      "id": "Q27331874",
+      "name": "J.-R.-von-Salis-Anlage",
+      "lat": 47.372458,
+      "lng": 8.547013
+    },
+    {
+      "id": "Q118436098",
+      "name": "Josefwiese",
+      "lat": 47.385851,
+      "lng": 8.523552
+    },
+    {
+      "id": "Q688446",
+      "name": "Knie's Kinderzoo",
+      "lat": 47.223652,
+      "lng": 8.821989
+    },
+    {
+      "id": "Q27322215",
+      "name": "Kurt-Guggenheim-Anlage",
+      "lat": 47.366868,
+      "lng": 8.54012
+    },
+    {
+      "id": "Q115650564",
+      "name": "Landiwiese",
+      "lat": 47.350339,
+      "lng": 8.535181
+    },
+    {
+      "id": "Q2570812",
+      "name": "Langenberg Wildlife Park",
+      "lat": 47.2928,
+      "lng": 8.52917
+    },
+    {
+      "id": "Q940251",
+      "name": "Leutschenpark",
+      "lat": 47.418,
+      "lng": 8.55672
+    },
+    {
+      "id": "Q27330101",
+      "name": "Looächeranlage",
+      "lat": 47.424113,
+      "lng": 8.497814
+    },
+    {
+      "id": "Q1871416",
+      "name": "Louis-Häfliger-Park",
+      "lat": 47.4124,
+      "lng": 8.53381
+    },
+    {
+      "id": "Q1416783",
+      "name": "Max-Bill-Platz",
+      "lat": 47.414094,
+      "lng": 8.539907
+    },
+    {
+      "id": "Q110989577",
+      "name": "Mentona-Moser-Anlage",
+      "lat": 47.37457,
+      "lng": 8.52826
+    },
+    {
+      "id": "Q488815",
+      "name": "MFO-Park",
+      "lat": 47.4122,
+      "lng": 8.54028
+    },
+    {
+      "id": "Q96971026",
+      "name": "Murg Auen Park",
+      "lat": 47.56363,
+      "lng": 8.89613
+    },
+    {
+      "id": "Q972732",
+      "name": "Oerliker Park",
+      "lat": 47.414614,
+      "lng": 8.537246
+    },
+    {
+      "id": "Q437802",
+      "name": "Old Botanical Garden, Zurich",
+      "lat": 47.371111,
+      "lng": 8.533611
+    },
+    {
+      "id": "Q1729273",
+      "name": "Park im Grüene",
+      "lat": 47.3003,
+      "lng": 8.55144
+    },
+    {
+      "id": "Q27322362",
+      "name": "Pestalozzianlage",
+      "lat": 47.375553,
+      "lng": 8.538804
+    },
+    {
+      "id": "Q1772465",
+      "name": "Pestalozziwiese",
+      "lat": 47.3756,
+      "lng": 8.53883
+    },
+    {
+      "id": "Q21973904",
+      "name": "Plättli Zoo",
+      "lat": 47.560556,
+      "lng": 8.915833
+    },
+    {
+      "id": "Q2098914",
+      "name": "Platzspitz park",
+      "lat": 47.380278,
+      "lng": 8.54
+    },
+    {
+      "id": "Q14541552",
+      "name": "Rapperswil Rose Gardens",
+      "lat": 47.2264,
+      "lng": 8.81291
+    },
+    {
+      "id": "Q136001989",
+      "name": "Rechberggarten",
+      "lat": 47.373299,
+      "lng": 8.548481
+    },
+    {
+      "id": "Q29932574",
+      "name": "residential houses Sulzerhof with former washhouse, greenhouse and park grounds",
+      "lat": 47.49505,
+      "lng": 8.89282
+    },
+    {
+      "id": "Q692097",
+      "name": "Rieterpark",
+      "lat": 47.3585,
+      "lng": 8.53074
+    },
+    {
+      "id": "Q86195151",
+      "name": "Rosengarten",
+      "lat": 47.496058,
+      "lng": 8.724267
+    },
+    {
+      "id": "Q27331246",
+      "name": "Rötelterrasse",
+      "lat": 47.398653,
+      "lng": 8.529695
+    },
+    {
+      "id": "Q27330099",
+      "name": "Ruggächeranlage",
+      "lat": 47.423249,
+      "lng": 8.501037
+    },
+    {
+      "id": "Q112753060",
+      "name": "Seleger Moor",
+      "lat": 47.245474,
+      "lng": 8.507472
+    },
+    {
+      "id": "Q27326692",
+      "name": "Sigi-Feigel-Terrasse",
+      "lat": 47.375835,
+      "lng": 8.535179
+    },
+    {
+      "id": "Q105414717",
+      "name": "Smilestones",
+      "lat": 47.67922,
+      "lng": 8.6179
+    },
+    {
+      "id": "Q383059",
+      "name": "St. Andrew's Castle (castle complex with outbuildings, chapel and park",
+      "lat": 47.178836,
+      "lng": 8.466256
+    },
+    {
+      "id": "Q24037826",
+      "name": "Stadtgarten",
+      "lat": 47.500906,
+      "lng": 8.728239
+    },
+    {
+      "id": "Q2364115",
+      "name": "Sukkulenten-Sammlung Zürich",
+      "lat": 47.356111,
+      "lng": 8.535
+    },
+    {
+      "id": "Q1554373",
+      "name": "Tennisanlage Geiselweid",
+      "lat": 47.49882,
+      "lng": 8.74043
+    },
+    {
+      "id": "Q27330112",
+      "name": "Ueberlandpark",
+      "lat": 47.409,
+      "lng": 8.568122
+    },
+    {
+      "id": "Q816289",
+      "name": "Villa Belvoir",
+      "lat": 47.356736,
+      "lng": 8.533625
+    },
+    {
+      "id": "Q137669084",
+      "name": "Villa Brandt",
+      "lat": 47.353066,
+      "lng": 8.563963
+    },
+    {
+      "id": "Q2525631",
+      "name": "Villa Rieter (Schönberg) with outbuildings",
+      "lat": 47.359557,
+      "lng": 8.530247
+    },
+    {
+      "id": "Q59586381",
+      "name": "Villette Park",
+      "lat": 47.178119,
+      "lng": 8.460268
+    },
+    {
+      "id": "Q2539700",
+      "name": "Wahlenpark",
+      "lat": 47.4157,
+      "lng": 8.54116
+    },
+    {
+      "id": "Q1372195",
+      "name": "Wildpark Bruderhaus",
+      "lat": 47.4772,
+      "lng": 8.72619
+    },
+    {
+      "id": "Q27328988",
+      "name": "Wipkingerpark",
+      "lat": 47.392668,
+      "lng": 8.521096
+    },
+    {
+      "id": "Q220109",
+      "name": "Zürich Zoo",
+      "lat": 47.385,
+      "lng": 8.573056
+    },
+    {
+      "id": "Q1907213",
+      "name": "Zürich Zoo Masoala Hall",
+      "lat": 47.3847,
+      "lng": 8.57869
+    }
+  ]
+}

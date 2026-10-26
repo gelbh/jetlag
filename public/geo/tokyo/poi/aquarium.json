@@ -1,1 +1,60 @@
-{ "category": "aquarium", "source": "none", "places": [] }
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": {
+    "south": 35.5282,
+    "west": 139.5628,
+    "north": 35.8175,
+    "east": 139.9189
+  },
+  "places": [
+    {
+      "id": "Q11636941",
+      "name": "Adachi Park of Living Things",
+      "lat": 35.792444,
+      "lng": 139.807222
+    },
+    {
+      "id": "Q3055859",
+      "name": "Aqua Park Shinagawa",
+      "lat": 35.628056,
+      "lng": 139.735278
+    },
+    {
+      "id": "Q116921556",
+      "name": "Art Aquarium Museum",
+      "lat": 35.67137,
+      "lng": 139.765738
+    },
+    {
+      "id": "Q97169050",
+      "name": "Kawasui Kawasaki Aquarium",
+      "lat": 35.529611,
+      "lng": 139.696306
+    },
+    {
+      "id": "Q11254393",
+      "name": "Shinagawa Aquarium",
+      "lat": 35.588472,
+      "lng": 139.7375
+    },
+    {
+      "id": "Q8134074",
+      "name": "Sumida Aquarium",
+      "lat": 35.709889,
+      "lng": 139.809861
+    },
+    {
+      "id": "Q11250698",
+      "name": "Sunshine Aquarium",
+      "lat": 35.728583,
+      "lng": 139.71975
+    },
+    {
+      "id": "Q4925165",
+      "name": "Tokyo Sea Life Park",
+      "lat": 35.640083,
+      "lng": 139.862167
+    }
+  ]
+}

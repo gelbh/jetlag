@@ -194,6 +194,7 @@ export function CreateSession() {
               selectedAreas: session.selectedAreas,
               previewGameArea: session.previewGameArea,
               transitMetroId: session.transitMetroId,
+              transitStationFilter: session.transitStationFilter,
               metros: session.metros,
               onPendingPresetAdd: session.onPendingPresetAdd,
               onPendingPresetRemove: session.onPendingPresetRemove,
@@ -210,6 +211,7 @@ export function CreateSession() {
               onBoundaryImport: (event) => void session.handleBoundaryImport(event),
               onApplyPlace: session.applyPlace,
               onTransitMetroChange: session.setTransitMetroOverride,
+              onTransitStationFilterChange: session.setTransitStationFilter,
             }}
             settingsSlot={
               <SessionSettingsSection

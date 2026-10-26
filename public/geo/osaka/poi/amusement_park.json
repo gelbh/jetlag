@@ -1,1 +1,30 @@
-{ "category": "amusement_park", "source": "none", "places": [] }
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 34.5865,
+    "west": 135.3435,
+    "north": 34.7688,
+    "east": 135.5993
+  },
+  "places": [
+    {
+      "id": "Q5358677",
+      "name": "KidZania Koshien",
+      "lat": 34.716861,
+      "lng": 135.363861
+    },
+    {
+      "id": "Q30934192",
+      "name": "Legoland Discovery Center Osaka",
+      "lat": 34.655806,
+      "lng": 135.430167
+    },
+    {
+      "id": "Q1375103",
+      "name": "Universal Studios Japan",
+      "lat": 34.6647,
+      "lng": 135.433
+    }
+  ]
+}

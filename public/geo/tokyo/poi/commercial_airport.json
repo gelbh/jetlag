@@ -1,1 +1,18 @@
-{ "category": "commercial_airport", "source": "none", "places": [] }
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": 35.5282,
+    "west": 139.5628,
+    "north": 35.8175,
+    "east": 139.9189
+  },
+  "places": [
+    {
+      "id": "Q204853",
+      "name": "Tokyo International Airport",
+      "lat": 35.553333,
+      "lng": 139.781111
+    }
+  ]
+}

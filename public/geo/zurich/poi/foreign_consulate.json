@@ -1,1 +1,5 @@
-{ "category": "foreign_consulate", "source": "none", "places": [] }
+{
+  "category": "foreign_consulate",
+  "source": "none",
+  "places": []
+}

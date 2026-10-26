@@ -1,1 +1,60 @@
-{ "category": "golf_course", "source": "none", "places": [] }
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.28,
+    "west": -0.51,
+    "north": 51.7,
+    "east": 0.3357
+  },
+  "places": [
+    {
+      "id": "Q5001495",
+      "name": "Bushey Hall Golf Club",
+      "lat": 51.6452,
+      "lng": -0.3604
+    },
+    {
+      "id": "Q18748756",
+      "name": "Fulwell Golf Course",
+      "lat": 51.4333,
+      "lng": -0.352111
+    },
+    {
+      "id": "Q20876159",
+      "name": "Hadley Wood Golf Course",
+      "lat": 51.6655,
+      "lng": -0.164
+    },
+    {
+      "id": "Q18748759",
+      "name": "Hounslow Heath Golf Centre",
+      "lat": 51.4596,
+      "lng": -0.396481
+    },
+    {
+      "id": "Q2216632",
+      "name": "London Golf Club",
+      "lat": 51.346,
+      "lng": 0.2886
+    },
+    {
+      "id": "Q2021305",
+      "name": "Moor Park Golf Club",
+      "lat": 51.628,
+      "lng": -0.449
+    },
+    {
+      "id": "Q7330936",
+      "name": "Richmond Park Golf Course",
+      "lat": 51.4519,
+      "lng": -0.2547
+    },
+    {
+      "id": "Q14289218",
+      "name": "Royal Blackheath Golf Club",
+      "lat": 51.44558,
+      "lng": 0.05556
+    }
+  ]
+}

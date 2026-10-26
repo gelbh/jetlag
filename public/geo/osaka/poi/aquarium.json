@@ -1,1 +1,24 @@
-{ "category": "aquarium", "source": "none", "places": [] }
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": {
+    "south": 34.5865,
+    "west": 135.3435,
+    "north": 34.7688,
+    "east": 135.5993
+  },
+  "places": [
+    {
+      "id": "Q1191885",
+      "name": "Osaka Aquarium Kaiyukan",
+      "lat": 34.654472,
+      "lng": 135.428889
+    },
+    {
+      "id": "Q11549303",
+      "name": "Osaka Water Museum",
+      "lat": 34.724361,
+      "lng": 135.505361
+    }
+  ]
+}

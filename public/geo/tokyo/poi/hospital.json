@@ -1,1 +1,780 @@
-{ "category": "hospital", "source": "none", "places": [] }
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 35.5282,
+    "west": 139.5628,
+    "north": 35.8175,
+    "east": 139.9189
+  },
+  "places": [
+    {
+      "id": "Q11073872",
+      "name": "Aiiku Hospital",
+      "lat": 35.646,
+      "lng": 139.752389
+    },
+    {
+      "id": "Q11478545",
+      "name": "AOI Universal Hospital",
+      "lat": 35.533611,
+      "lng": 139.745833
+    },
+    {
+      "id": "Q11257525",
+      "name": "Asoka Hospital",
+      "lat": 35.689889,
+      "lng": 139.811861
+    },
+    {
+      "id": "Q30254277",
+      "name": "Cardiovascular Institute Hospital",
+      "lat": 35.659148,
+      "lng": 139.727243
+    },
+    {
+      "id": "Q11525250",
+      "name": "Ebara Hospital",
+      "lat": 35.593889,
+      "lng": 139.692778
+    },
+    {
+      "id": "Q11551075",
+      "name": "Edogawa Hospital",
+      "lat": 35.728611,
+      "lng": 139.893333
+    },
+    {
+      "id": "Q11346511",
+      "name": "Eiju General Hospital",
+      "lat": 35.70975,
+      "lng": 139.77963
+    },
+    {
+      "id": "Q11408997",
+      "name": "Hakujikai Memorial Hospital",
+      "lat": 35.785,
+      "lng": 139.749444
+    },
+    {
+      "id": "Q11407115",
+      "name": "Hanzomon Hospital",
+      "lat": 35.685472,
+      "lng": 139.742778
+    },
+    {
+      "id": "Q11396444",
+      "name": "Hatsudai Rehabilitation Hospital",
+      "lat": 35.686389,
+      "lng": 139.684167
+    },
+    {
+      "id": "Q11551483",
+      "name": "Ikegami General Hospital",
+      "lat": 35.572667,
+      "lng": 139.704306
+    },
+    {
+      "id": "Q11524665",
+      "name": "IMSUT Hospital",
+      "lat": 35.640278,
+      "lng": 139.724722
+    },
+    {
+      "id": "Q30280120",
+      "name": "Inoue Hospital",
+      "lat": 35.668943,
+      "lng": 139.688361
+    },
+    {
+      "id": "Q30280121",
+      "name": "Inouye Eye Hospital",
+      "lat": 35.698579,
+      "lng": 139.765413
+    },
+    {
+      "id": "Q11611083",
+      "name": "International Catholic Hospital",
+      "lat": 35.720278,
+      "lng": 139.694167
+    },
+    {
+      "id": "Q120517992",
+      "name": "International University of Health and Welfare Ichikawa Hospital",
+      "lat": 35.757579,
+      "lng": 139.90175
+    },
+    {
+      "id": "Q24861382",
+      "name": "Ishikawajima Memorial Hospital",
+      "lat": 35.667528,
+      "lng": 139.785333
+    },
+    {
+      "id": "Q11259329",
+      "name": "Isuzu Hospital",
+      "lat": 35.589556,
+      "lng": 139.732694
+    },
+    {
+      "id": "Q11380295",
+      "name": "Ito Hospital",
+      "lat": 35.666373,
+      "lng": 139.710549
+    },
+    {
+      "id": "Q11509183",
+      "name": "Japanese Red Cross Medical Center",
+      "lat": 35.654485,
+      "lng": 139.717974
+    },
+    {
+      "id": "Q11621088",
+      "name": "Japanese Red Cross Tokyo Katsushika Perinatal Center",
+      "lat": 35.742444,
+      "lng": 139.846408
+    },
+    {
+      "id": "Q11524595",
+      "name": "JCHO Tokyo Shinjuku Medical Center",
+      "lat": 35.703389,
+      "lng": 139.742111
+    },
+    {
+      "id": "Q11270211",
+      "name": "JCHO Tokyo Takanawa Hospital",
+      "lat": 35.631389,
+      "lng": 139.731944
+    },
+    {
+      "id": "Q11524866",
+      "name": "Jikei University Aoto Hospital",
+      "lat": 35.752361,
+      "lng": 139.858194
+    },
+    {
+      "id": "Q11226238",
+      "name": "JR Tokyo General Hospital",
+      "lat": 35.685674,
+      "lng": 139.699872
+    },
+    {
+      "id": "Q11613045",
+      "name": "JSDF Central Hospital",
+      "lat": 35.643611,
+      "lng": 139.683611
+    },
+    {
+      "id": "Q11664448",
+      "name": "Juntendo Tokyo Koto Geriatric Medical Center",
+      "lat": 35.665278,
+      "lng": 139.833333
+    },
+    {
+      "id": "Q11664449",
+      "name": "Juntendo University Hospital",
+      "lat": 35.7025,
+      "lng": 139.762639
+    },
+    {
+      "id": "Q11664446",
+      "name": "Juntendo University Nerima Hospital",
+      "lat": 35.742222,
+      "lng": 139.615
+    },
+    {
+      "id": "Q11664445",
+      "name": "Juntendo University Urayasu Hospital",
+      "lat": 35.646167,
+      "lng": 139.907361
+    },
+    {
+      "id": "Q11392149",
+      "name": "Kanto Central Hospital for Public School Teachers",
+      "lat": 35.636696,
+      "lng": 139.625859
+    },
+    {
+      "id": "Q11655886",
+      "name": "Kanto Rosai Hospital",
+      "lat": 35.568333,
+      "lng": 139.656667
+    },
+    {
+      "id": "Q11524860",
+      "name": "Katsushika Medical Center",
+      "lat": 35.751849,
+      "lng": 139.85861
+    },
+    {
+      "id": "Q11477965",
+      "name": "Kawaguchi Kogyo General Hospital",
+      "lat": 35.804056,
+      "lng": 139.730194
+    },
+    {
+      "id": "Q64143411",
+      "name": "Kawakita Rehabilitation Hospital",
+      "lat": 35.685516,
+      "lng": 139.650595
+    },
+    {
+      "id": "Q11478432",
+      "name": "Kawasaki Municipal Tama Hospital",
+      "lat": 35.619667,
+      "lng": 139.5725
+    },
+    {
+      "id": "Q65265932",
+      "name": "Kawasaki Saiwai Hospital",
+      "lat": 35.528502,
+      "lng": 139.692278
+    },
+    {
+      "id": "Q11495148",
+      "name": "Keio University Hospital",
+      "lat": 35.681667,
+      "lng": 139.718056
+    },
+    {
+      "id": "Q11404247",
+      "name": "Kitasato Institute Hospital",
+      "lat": 35.645556,
+      "lng": 139.726389
+    },
+    {
+      "id": "Q11404239",
+      "name": "Kitasato University Oriental Medicine Research Center",
+      "lat": 35.645889,
+      "lng": 139.726326
+    },
+    {
+      "id": "Q11607597",
+      "name": "Kohsei Chuo General Hospital",
+      "lat": 35.641389,
+      "lng": 139.7125
+    },
+    {
+      "id": "Q11463271",
+      "name": "Koishikawa Yōjōsho",
+      "lat": 35.719806,
+      "lng": 139.744583
+    },
+    {
+      "id": "Q11551201",
+      "name": "Koto Hospital",
+      "lat": 35.690556,
+      "lng": 139.834083
+    },
+    {
+      "id": "Q30280522",
+      "name": "Kudanzaka Hospital",
+      "lat": 35.693826,
+      "lng": 139.752114
+    },
+    {
+      "id": "Q11522606",
+      "name": "Kyorin University Hospital",
+      "lat": 35.6775,
+      "lng": 139.566667
+    },
+    {
+      "id": "Q11635436",
+      "name": "Maeda Hospital",
+      "lat": 35.67825,
+      "lng": 139.734083
+    },
+    {
+      "id": "Q97190317",
+      "name": "MisatoKenwa Hospital",
+      "lat": 35.800208,
+      "lng": 139.879829
+    },
+    {
+      "id": "Q97183924",
+      "name": "Mishuku Hospital",
+      "lat": 35.643356,
+      "lng": 139.685153
+    },
+    {
+      "id": "Q11422388",
+      "name": "Mita Hospital",
+      "lat": 35.653833,
+      "lng": 139.742404
+    },
+    {
+      "id": "Q11354313",
+      "name": "Mitsui Memorial Hospital",
+      "lat": 35.700254,
+      "lng": 139.779348
+    },
+    {
+      "id": "Q11524576",
+      "name": "Nakano General Hospital",
+      "lat": 35.702583,
+      "lng": 139.666944
+    },
+    {
+      "id": "Q11571594",
+      "name": "National Hospital Organization Saitama National Hospital",
+      "lat": 35.776944,
+      "lng": 139.618889
+    },
+    {
+      "id": "Q11571621",
+      "name": "National Hospital Organization Tokyo Medical Center",
+      "lat": 35.626111,
+      "lng": 139.666667
+    },
+    {
+      "id": "Q11608085",
+      "name": "Nerima General Hospital",
+      "lat": 35.733333,
+      "lng": 139.677222
+    },
+    {
+      "id": "Q11424227",
+      "name": "Nerima Hikarigaoka Hospital",
+      "lat": 35.7614,
+      "lng": 139.6336
+    },
+    {
+      "id": "Q30260604",
+      "name": "New Tokyo Hospital",
+      "lat": 35.786537,
+      "lng": 139.901829
+    },
+    {
+      "id": "Q11668487",
+      "name": "Nihon University Hospital",
+      "lat": 35.698415,
+      "lng": 139.763556
+    },
+    {
+      "id": "Q11507852",
+      "name": "Nihon University Hospital at Matsudo",
+      "lat": 35.809972,
+      "lng": 139.899194
+    },
+    {
+      "id": "Q11507840",
+      "name": "Nihon University Itabashi Hospital",
+      "lat": 35.749722,
+      "lng": 139.691667
+    },
+    {
+      "id": "Q11507461",
+      "name": "Nippon Medical School Hospital",
+      "lat": 35.720833,
+      "lng": 139.758889
+    },
+    {
+      "id": "Q11507464",
+      "name": "Nippon Medical School Musashi Kosugi Hospital",
+      "lat": 35.579389,
+      "lng": 139.658056
+    },
+    {
+      "id": "Q11628305",
+      "name": "Nishiarai Hospital",
+      "lat": 35.776286,
+      "lng": 139.780976
+    },
+    {
+      "id": "Q11572587",
+      "name": "Nissan Tamagawa Hospital",
+      "lat": 35.620417,
+      "lng": 139.624167
+    },
+    {
+      "id": "Q9032184",
+      "name": "NTT Medical Center Tokyo",
+      "lat": 35.631256,
+      "lng": 139.725764
+    },
+    {
+      "id": "Q11436421",
+      "name": "Omori Red Cross Hospital",
+      "lat": 35.579167,
+      "lng": 139.7175
+    },
+    {
+      "id": "Q11432553",
+      "name": "Oouchi Hospital",
+      "lat": 35.785056,
+      "lng": 139.778361
+    },
+    {
+      "id": "Q11525340",
+      "name": "Saiseikai Central Hospital",
+      "lat": 35.653611,
+      "lng": 139.743889
+    },
+    {
+      "id": "Q11426580",
+      "name": "Saiseikai Kawaguchi General Hospital",
+      "lat": 35.809444,
+      "lng": 139.703056
+    },
+    {
+      "id": "Q22127867",
+      "name": "Saitama Kaisei Hospital",
+      "lat": 35.805435,
+      "lng": 139.839398
+    },
+    {
+      "id": "Q11635058",
+      "name": "San-ikukai Hospital",
+      "lat": 35.702535,
+      "lng": 139.813967
+    },
+    {
+      "id": "Q11470055",
+      "name": "Sanno Hospital",
+      "lat": 35.669722,
+      "lng": 139.727222
+    },
+    {
+      "id": "Q11355990",
+      "name": "Sanraku Hospital",
+      "lat": 35.700028,
+      "lng": 139.761167
+    },
+    {
+      "id": "Q11495370",
+      "name": "Seijin Hospital",
+      "lat": 35.778722,
+      "lng": 139.796306
+    },
+    {
+      "id": "Q11514724",
+      "name": "Seiwa Hospital",
+      "lat": 35.702222,
+      "lng": 139.727222
+    },
+    {
+      "id": "Q30281159",
+      "name": "Shioda General Hospital",
+      "lat": 35.529649,
+      "lng": 139.678166
+    },
+    {
+      "id": "Q11514048",
+      "name": "Showa University East Hospital",
+      "lat": 35.609722,
+      "lng": 139.705556
+    },
+    {
+      "id": "Q11514052",
+      "name": "Showa University Karasuyama Hospital",
+      "lat": 35.672222,
+      "lng": 139.595833
+    },
+    {
+      "id": "Q11514051",
+      "name": "Showa University Koto Toyosu Hospital",
+      "lat": 35.650797,
+      "lng": 139.796225
+    },
+    {
+      "id": "Q11514047",
+      "name": "Showa University Northern Yokohama Hospital",
+      "lat": 35.547535,
+      "lng": 139.569754
+    },
+    {
+      "id": "Q7589810",
+      "name": "St. Luke's International Hospital",
+      "lat": 35.667222,
+      "lng": 139.777222
+    },
+    {
+      "id": "Q82145950",
+      "name": "St. Marianna Medical University Toyoko Hospital",
+      "lat": 35.574722,
+      "lng": 139.657972
+    },
+    {
+      "id": "Q11525275",
+      "name": "Taito Hospital",
+      "lat": 35.722778,
+      "lng": 139.792778
+    },
+    {
+      "id": "Q22125190",
+      "name": "Takashimadaira Chuo General Hospital",
+      "lat": 35.786929,
+      "lng": 139.667744
+    },
+    {
+      "id": "Q11480978",
+      "name": "Teikyo University Hospital",
+      "lat": 35.759167,
+      "lng": 139.714722
+    },
+    {
+      "id": "Q11480975",
+      "name": "Teikyo University School of medicine University Hospital, Mizonokuchi",
+      "lat": 35.603056,
+      "lng": 139.615
+    },
+    {
+      "id": "Q11264699",
+      "name": "The Cancer Institute Hospital",
+      "lat": 35.634419,
+      "lng": 139.794967
+    },
+    {
+      "id": "Q11414648",
+      "name": "The Fraternity Memorial Hospital",
+      "lat": 35.699814,
+      "lng": 139.794281
+    },
+    {
+      "id": "Q11524863",
+      "name": "The Jikei University Hospital",
+      "lat": 35.663607,
+      "lng": 139.751522
+    },
+    {
+      "id": "Q11524865",
+      "name": "The Jikei University West Medical Center",
+      "lat": 35.644722,
+      "lng": 139.566
+    },
+    {
+      "id": "Q11524663",
+      "name": "The University of Tokyo Hospital",
+      "lat": 35.711389,
+      "lng": 139.765556
+    },
+    {
+      "id": "Q22123432",
+      "name": "TMG Asaka Medical Center",
+      "lat": 35.811234,
+      "lng": 139.593372
+    },
+    {
+      "id": "Q11525251",
+      "name": "Tobu Chiiki Hospital",
+      "lat": 35.766111,
+      "lng": 139.844444
+    },
+    {
+      "id": "Q11496476",
+      "name": "Toda Chuo General Hospital",
+      "lat": 35.81136,
+      "lng": 139.68013
+    },
+    {
+      "id": "Q30265213",
+      "name": "Toho University Ohashi Medical Center",
+      "lat": 35.652306,
+      "lng": 139.683917
+    },
+    {
+      "id": "Q11528444",
+      "name": "Toho University Omori Medical Center",
+      "lat": 35.569444,
+      "lng": 139.724444
+    },
+    {
+      "id": "Q11524391",
+      "name": "Tokyo Bay Urayasu Ichikawa Medical Center",
+      "lat": 35.671389,
+      "lng": 139.894444
+    },
+    {
+      "id": "Q11580500",
+      "name": "Tokyo Hikifune Hospital",
+      "lat": 35.7175,
+      "lng": 139.816944
+    },
+    {
+      "id": "Q11588239",
+      "name": "Tokyo Kamata Medical Center",
+      "lat": 35.554444,
+      "lng": 139.723056
+    },
+    {
+      "id": "Q11524570",
+      "name": "Tokyo kita Medical Center",
+      "lat": 35.784028,
+      "lng": 139.711222
+    },
+    {
+      "id": "Q11524555",
+      "name": "Tokyo Kyosai Hospital",
+      "lat": 35.641667,
+      "lng": 139.703889
+    },
+    {
+      "id": "Q11524580",
+      "name": "Tokyo Medical University Hospital",
+      "lat": 35.693333,
+      "lng": 139.691944
+    },
+    {
+      "id": "Q11525433",
+      "name": "Tokyo Metropolitan Bokutoh Hospital",
+      "lat": 35.694614,
+      "lng": 139.818632
+    },
+    {
+      "id": "Q11525644",
+      "name": "Tokyo Metropolitan Cancer and Infectious diseases Center Komagome Hospital",
+      "lat": 35.729722,
+      "lng": 139.756389
+    },
+    {
+      "id": "Q11525257",
+      "name": "Tokyo Metropolitan Geriatric Hospital",
+      "lat": 35.751389,
+      "lng": 139.704167
+    },
+    {
+      "id": "Q11525252",
+      "name": "Tokyo Metropolitan Health and Medical Corporation Toshima Hospital",
+      "lat": 35.752778,
+      "lng": 139.700833
+    },
+    {
+      "id": "Q11525480",
+      "name": "Tokyo Metropolitan Hiroo General Hospital",
+      "lat": 35.6468,
+      "lng": 139.7217
+    },
+    {
+      "id": "Q5308447",
+      "name": "Tokyo Metropolitan Matsuzawa Hospital",
+      "lat": 35.6664,
+      "lng": 139.62
+    },
+    {
+      "id": "Q11525249",
+      "name": "Tokyo Metropolitan Ohkubo Hospital",
+      "lat": 35.696944,
+      "lng": 139.701667
+    },
+    {
+      "id": "Q11525441",
+      "name": "Tokyo Metropolitan Ohtsuka Hospital",
+      "lat": 35.725278,
+      "lng": 139.732222
+    },
+    {
+      "id": "Q11525156",
+      "name": "Tokyo Metropolitan Police Hospital",
+      "lat": 35.709167,
+      "lng": 139.659167
+    },
+    {
+      "id": "Q11525201",
+      "name": "Tokyo Metropolitan Prefecture Rehabilitation Hospital",
+      "lat": 35.735833,
+      "lng": 139.815833
+    },
+    {
+      "id": "Q11525114",
+      "name": "Tokyo Rinkai Hospital",
+      "lat": 35.652361,
+      "lng": 139.85375
+    },
+    {
+      "id": "Q11524565",
+      "name": "Tokyo Rosai Hospital",
+      "lat": 35.565556,
+      "lng": 139.746944
+    },
+    {
+      "id": "Q11528260",
+      "name": "Tokyo Shinagawa Hospital",
+      "lat": 35.601667,
+      "lng": 139.734722
+    },
+    {
+      "id": "Q11525177",
+      "name": "Tokyo Teishin Hospital",
+      "lat": 35.696944,
+      "lng": 139.7425
+    },
+    {
+      "id": "Q11524733",
+      "name": "Tokyo Women's Medical University Hospital",
+      "lat": 35.697222,
+      "lng": 139.719722
+    },
+    {
+      "id": "Q11588215",
+      "name": "Tokyo Yamate Medical Center",
+      "lat": 35.704779,
+      "lng": 139.699004
+    },
+    {
+      "id": "Q11527018",
+      "name": "Tokyu Hospital",
+      "lat": 35.6076,
+      "lng": 139.6861
+    },
+    {
+      "id": "Q11625273",
+      "name": "Toranomon Hospital",
+      "lat": 35.669167,
+      "lng": 139.746389
+    },
+    {
+      "id": "Q30281209",
+      "name": "Toujinkai Hospital",
+      "lat": 35.704216,
+      "lng": 139.582728
+    },
+    {
+      "id": "Q11528296",
+      "name": "Toukatsu Hospital",
+      "lat": 35.792362,
+      "lng": 139.893521
+    },
+    {
+      "id": "Q30281269",
+      "name": "Yokufukai Hospital",
+      "lat": 35.680375,
+      "lng": 139.609097
+    },
+    {
+      "id": "Q131457218",
+      "name": "国立がん研究センター中央病院",
+      "lat": 35.665556,
+      "lng": 139.768056
+    },
+    {
+      "id": "Q131029110",
+      "name": "明理会東京大和病院",
+      "lat": 35.761703,
+      "lng": 139.706264
+    },
+    {
+      "id": "Q115537336",
+      "name": "東京女子医科大学附属足立医療センター",
+      "lat": 35.773611,
+      "lng": 139.766667
+    },
+    {
+      "id": "Q135644259",
+      "name": "東京蒲田病院",
+      "lat": 35.564255,
+      "lng": 139.711924
+    },
+    {
+      "id": "Q11525422",
+      "name": "東京都立台東病院",
+      "lat": 35.722778,
+      "lng": 139.792778
+    },
+    {
+      "id": "Q128815025",
+      "name": "東葛クリニックみらい",
+      "lat": 35.78613,
+      "lng": 139.90052
+    }
+  ]
+}

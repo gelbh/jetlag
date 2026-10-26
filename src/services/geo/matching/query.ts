@@ -25,7 +25,12 @@ export function matchingFeaturesCacheKey(
           adminLevel,
         )
       : "";
-  return geographicCacheKey(gameArea, `matching:v2:in:${categoryId}${customSuffix}`);
+  const metro = options?.transitMetroId?.trim() || "auto";
+  const filter = options?.transitStationFilter ?? "all";
+  return geographicCacheKey(
+    gameArea,
+    `matching:v3:in:${categoryId}:metro:${metro}:filter:${filter}${customSuffix}`,
+  );
 }
 
 export function matchingSearchBoundingBox(gameArea: GameArea): BoundingBox {

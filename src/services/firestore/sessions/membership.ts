@@ -39,6 +39,7 @@ export type CreateRemoteSessionOptions = {
   seriesLength?: 1 | 3;
   setupMode?: "pregame" | "fairSplit";
   dials?: CastleSiegeDials;
+  transitStationFilter?: SessionRecord["transitStationFilter"];
 };
 
 function isTrustedCachedMemberWhileOffline(session: SessionRecord, uid: string): boolean {
@@ -187,6 +188,7 @@ export async function createRemoteSession(
       hidingZoneRadiusMeters: radiusMeters,
       tier,
       transitMetroId,
+      transitStationFilter: options?.transitStationFilter,
       hostAppVersion,
       ...rulesPatch,
       ...(isCastleSiege
@@ -216,15 +218,18 @@ export async function createRemoteSession(
         rulesPatch,
         unit,
         hostAppVersion,
-        isCastleSiege
-          ? {
-              mode: "castleSiege",
-              castleSiegeRoles,
-              seriesLength: options?.seriesLength,
-              setupMode: options?.setupMode,
-              dials: options?.dials,
-            }
-          : undefined,
+        {
+          ...(isCastleSiege
+            ? {
+                mode: "castleSiege" as const,
+                castleSiegeRoles,
+                seriesLength: options?.seriesLength,
+                setupMode: options?.setupMode,
+                dials: options?.dials,
+              }
+            : {}),
+          transitStationFilter: options?.transitStationFilter,
+        },
       ),
       createdAtServer: serverTimestamp(),
     });

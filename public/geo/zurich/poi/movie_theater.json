@@ -1,1 +1,288 @@
-{ "category": "movie_theater", "source": "none", "places": [] }
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q50873017",
+      "name": "AllianzCinema Zürich",
+      "lat": 47.35284,
+      "lng": 8.5525
+    },
+    {
+      "id": "Q35721927",
+      "name": "Arena Cinemas",
+      "lat": 47.358482,
+      "lng": 8.522628
+    },
+    {
+      "id": "Q35722072",
+      "name": "Arthouse Alba",
+      "lat": 47.376061,
+      "lng": 8.544646
+    },
+    {
+      "id": "Q35722218",
+      "name": "Arthouse Le Paris",
+      "lat": 47.366414,
+      "lng": 8.547482
+    },
+    {
+      "id": "Q35721957",
+      "name": "Arthouse Movie 1 & 2",
+      "lat": 47.370786,
+      "lng": 8.54348
+    },
+    {
+      "id": "Q35722315",
+      "name": "Arthouse Piccadilly",
+      "lat": 47.365932,
+      "lng": 8.548957
+    },
+    {
+      "id": "Q35722518",
+      "name": "Arthouse Uto",
+      "lat": 47.374133,
+      "lng": 8.521333
+    },
+    {
+      "id": "Q35721984",
+      "name": "Cinema Abaton 1-12",
+      "lat": 47.389451,
+      "lng": 8.521481
+    },
+    {
+      "id": "Q35722011",
+      "name": "Cinema ABC 1, 2, 3, 4",
+      "lat": 47.376218,
+      "lng": 8.540883
+    },
+    {
+      "id": "Q47354403",
+      "name": "Cinema Luna",
+      "lat": 47.55828,
+      "lng": 8.8958
+    },
+    {
+      "id": "Q47354402",
+      "name": "Cinema Schwanen",
+      "lat": 47.65737,
+      "lng": 8.85844
+    },
+    {
+      "id": "Q29933661",
+      "name": "Corso",
+      "lat": 47.366376,
+      "lng": 8.546727
+    },
+    {
+      "id": "Q35722041",
+      "name": "Filmpodium der Stadt Zürich",
+      "lat": 47.372466,
+      "lng": 8.535732
+    },
+    {
+      "id": "Q35722161",
+      "name": "Frosch Studio",
+      "lat": 47.373328,
+      "lng": 8.544991
+    },
+    {
+      "id": "Q47354396",
+      "name": "Kino Cameo",
+      "lat": 47.49437,
+      "lng": 8.71802
+    },
+    {
+      "id": "Q35722101",
+      "name": "Kino Capitol",
+      "lat": 47.377834,
+      "lng": 8.544181
+    },
+    {
+      "id": "Q35722188",
+      "name": "Kino Houdini",
+      "lat": 47.374683,
+      "lng": 8.520766
+    },
+    {
+      "id": "Q35719100",
+      "name": "Kino Lux",
+      "lat": 47.193294,
+      "lng": 8.524256
+    },
+    {
+      "id": "Q35722250",
+      "name": "Kino Metropol",
+      "lat": 47.373934,
+      "lng": 8.530424
+    },
+    {
+      "id": "Q35722283",
+      "name": "Kino Nord-Süd",
+      "lat": 47.369039,
+      "lng": 8.543829
+    },
+    {
+      "id": "Q47354395",
+      "name": "Kino Orion",
+      "lat": 47.39941,
+      "lng": 8.62228
+    },
+    {
+      "id": "Q35722342",
+      "name": "Kino Radium",
+      "lat": 47.374385,
+      "lng": 8.543547
+    },
+    {
+      "id": "Q35722370",
+      "name": "Kino Razzia",
+      "lat": 47.360867,
+      "lng": 8.551732
+    },
+    {
+      "id": "Q35722402",
+      "name": "Kino Rex",
+      "lat": 47.375836,
+      "lng": 8.539521
+    },
+    {
+      "id": "Q35722434",
+      "name": "Kino Riffraff",
+      "lat": 47.382618,
+      "lng": 8.529341
+    },
+    {
+      "id": "Q35722464",
+      "name": "Kino Roland",
+      "lat": 47.378949,
+      "lng": 8.527124
+    },
+    {
+      "id": "Q47354392",
+      "name": "Kino Seehof",
+      "lat": 47.16921,
+      "lng": 8.51501
+    },
+    {
+      "id": "Q35722490",
+      "name": "Kino Stüssihof",
+      "lat": 47.372324,
+      "lng": 8.543619
+    },
+    {
+      "id": "Q35722550",
+      "name": "Kino Walche",
+      "lat": 47.380011,
+      "lng": 8.542203
+    },
+    {
+      "id": "Q13142736",
+      "name": "Kino Wildenmann",
+      "lat": 47.25305,
+      "lng": 8.69025
+    },
+    {
+      "id": "Q15136000",
+      "name": "Kino Xenix",
+      "lat": 47.375276,
+      "lng": 8.526113
+    },
+    {
+      "id": "Q140773743",
+      "name": "KINOKONI Zurich",
+      "lat": 47.3803,
+      "lng": 8.52908
+    },
+    {
+      "id": "Q50873013",
+      "name": "Kiwi Center",
+      "lat": 47.49877,
+      "lng": 8.72613
+    },
+    {
+      "id": "Q47354398",
+      "name": "Kiwi Loge",
+      "lat": 47.4986,
+      "lng": 8.73146
+    },
+    {
+      "id": "Q47354401",
+      "name": "Kiwi Scala",
+      "lat": 47.69618,
+      "lng": 8.63837
+    },
+    {
+      "id": "Q50873015",
+      "name": "Kosmos",
+      "lat": 47.37992,
+      "lng": 8.52927
+    },
+    {
+      "id": "Q35721751",
+      "name": "Leuzinger Cinema",
+      "lat": 47.227512,
+      "lng": 8.81933
+    },
+    {
+      "id": "Q47361383",
+      "name": "Maxx",
+      "lat": 47.49833,
+      "lng": 8.72113
+    },
+    {
+      "id": "Q47354399",
+      "name": "Neues Kino Freienstein",
+      "lat": 47.52951,
+      "lng": 8.58335
+    },
+    {
+      "id": "Q29787622",
+      "name": "Orient cinema",
+      "lat": 47.696882,
+      "lng": 8.634861
+    },
+    {
+      "id": "Q35792302",
+      "name": "Pathé Dietlikon",
+      "lat": 47.41404,
+      "lng": 8.62245
+    },
+    {
+      "id": "Q47354394",
+      "name": "qtopia Kino + Bar",
+      "lat": 47.34644,
+      "lng": 8.7178
+    },
+    {
+      "id": "Q35722612",
+      "name": "Scala Kino-Theater",
+      "lat": 47.373142,
+      "lng": 8.536221
+    },
+    {
+      "id": "Q35721781",
+      "name": "Schlosskino",
+      "lat": 47.225657,
+      "lng": 8.816406
+    },
+    {
+      "id": "Q35722644",
+      "name": "Sternen Erotic Cinema",
+      "lat": 47.408946,
+      "lng": 8.545522
+    },
+    {
+      "id": "Q688143",
+      "name": "Swiss Film Archive",
+      "lat": 47.382701,
+      "lng": 8.532101
+    }
+  ]
+}

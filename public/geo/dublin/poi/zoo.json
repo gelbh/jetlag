@@ -1,1 +1,24 @@
-{ "category": "zoo", "source": "none", "places": [] }
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 53.1782,
+    "west": -6.5469,
+    "north": 53.6347,
+    "east": -5.9945
+  },
+  "places": [
+    {
+      "id": "Q220027",
+      "name": "Dublin Zoo",
+      "lat": 53.353889,
+      "lng": -6.303889
+    },
+    {
+      "id": "Q55029991",
+      "name": "Sealife",
+      "lat": 53.20339,
+      "lng": -6.09822
+    }
+  ]
+}

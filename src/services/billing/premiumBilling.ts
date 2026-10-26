@@ -123,6 +123,7 @@ export interface CreatePremiumSessionInput {
   hostUid: string;
   tier: SessionTier;
   transitMetroId?: string;
+  transitStationFilter?: SessionRecord["transitStationFilter"];
   hostRole: PlayerRole;
   gameSize: GameSize;
   rulesPatch: SessionRulesPatch;
@@ -166,6 +167,7 @@ export async function createPremiumRemoteSession(
     {
       gameArea: typeof serializedArea;
       transitMetroId?: string;
+      transitStationFilter?: SessionRecord["transitStationFilter"];
       hostRole: PlayerRole;
       gameSize: GameSize;
       distanceUnit: SessionRecord["distanceUnit"];
@@ -180,6 +182,7 @@ export async function createPremiumRemoteSession(
       return await callable({
         gameArea: serializedArea,
         transitMetroId: input.transitMetroId,
+        transitStationFilter: input.transitStationFilter,
         hostRole: input.hostRole,
         gameSize: input.gameSize,
         distanceUnit: input.distanceUnit ?? "imperial",

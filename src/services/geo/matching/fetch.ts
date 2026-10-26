@@ -300,7 +300,10 @@ export async function fetchMatchingFeaturesInArea(
         case "landmass":
           return fetchLandmassMatchingFeaturesInArea(gameArea, options?.regionPackId, load);
         case "transitLine":
-          return fetchTransitLineMatchingFeaturesInArea(gameArea, load);
+          return fetchTransitLineMatchingFeaturesInArea(gameArea, load, {
+            transitMetroId: options?.transitMetroId,
+            transitStationFilter: options?.transitStationFilter,
+          });
         default: {
           const _exhaustive: never = resolver;
           return _exhaustive;

@@ -1,6 +1,504 @@
 {
   "category": "body_of_water",
-  "source": "none",
-  "bbox": { "south": -34.2, "west": 150.5, "north": -33.3, "east": 151.35 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -34.3574,
+    "west": 149.9948,
+    "north": -32.9761,
+    "east": 151.363
+  },
+  "places": [
+    {
+      "id": "Q115682197",
+      "name": "Badu Lake",
+      "lat": -33.92765,
+      "lng": 150.834552
+    },
+    {
+      "id": "Q21950924",
+      "name": "Bakers Lagoon",
+      "lat": -33.581667,
+      "lng": 150.784722
+    },
+    {
+      "id": "Q4852343",
+      "name": "Balmain Reservoir",
+      "lat": -33.858944,
+      "lng": 151.182239
+    },
+    {
+      "id": "Q21950896",
+      "name": "Belgeny Lagoon",
+      "lat": -34.090278,
+      "lng": 150.723611
+    },
+    {
+      "id": "Q21954872",
+      "name": "Bennelong Pond",
+      "lat": -33.815278,
+      "lng": 151.081111
+    },
+    {
+      "id": "Q21954871",
+      "name": "Billabong",
+      "lat": -33.84345,
+      "lng": 151.08116
+    },
+    {
+      "id": "Q106407583",
+      "name": "Blue Lake Jenolan",
+      "lat": -33.819668,
+      "lng": 150.025307
+    },
+    {
+      "id": "Q21953006",
+      "name": "Botany Dams",
+      "lat": -33.9318,
+      "lng": 151.2179
+    },
+    {
+      "id": "Q21954737",
+      "name": "Bushells Lagoon",
+      "lat": -33.565278,
+      "lng": 150.817778
+    },
+    {
+      "id": "Q58202675",
+      "name": "Centennial Park Reservoir",
+      "lat": -33.8913,
+      "lng": 151.2386
+    },
+    {
+      "id": "Q5101701",
+      "name": "Chipping Norton Lake",
+      "lat": -33.90301,
+      "lng": 150.95831
+    },
+    {
+      "id": "Q56049807",
+      "name": "Crown Street Reservoir & Site",
+      "lat": -33.881,
+      "lng": 151.214
+    },
+    {
+      "id": "Q21952700",
+      "name": "Curl Curl Lagoon",
+      "lat": -33.7818,
+      "lng": 151.28461
+    },
+    {
+      "id": "Q21957575",
+      "name": "Dee Why Lagoon",
+      "lat": -33.7485,
+      "lng": 151.30119
+    },
+    {
+      "id": "Q21954773",
+      "name": "Double Lagoon",
+      "lat": -33.506667,
+      "lng": 151.234722
+    },
+    {
+      "id": "Q55610032",
+      "name": "Drummoyne Reservoir",
+      "lat": -33.855,
+      "lng": 151.153
+    },
+    {
+      "id": "Q115706402",
+      "name": "Dujoun Lake",
+      "lat": -33.887913,
+      "lng": 150.848115
+    },
+    {
+      "id": "Q21952688",
+      "name": "Elephants Eye",
+      "lat": -33.9985,
+      "lng": 151.1512
+    },
+    {
+      "id": "Q21912977",
+      "name": "Elouera Bushland Reserve",
+      "lat": -33.716667,
+      "lng": 151.05
+    },
+    {
+      "id": "Q115682793",
+      "name": "Francis Lake",
+      "lat": -33.934895,
+      "lng": 150.842573
+    },
+    {
+      "id": "Q21952890",
+      "name": "Gees Lagoon",
+      "lat": -33.431667,
+      "lng": 150.784722
+    },
+    {
+      "id": "Q5568195",
+      "name": "Glenbrook Lagoon",
+      "lat": -33.7574,
+      "lng": 150.616
+    },
+    {
+      "id": "Q21952875",
+      "name": "Gospers Lagoon",
+      "lat": -33.4152,
+      "lng": 150.7179
+    },
+    {
+      "id": "Q21971986",
+      "name": "Greaves",
+      "lat": -33.65625,
+      "lng": 150.30739
+    },
+    {
+      "id": "Q21952775",
+      "name": "Halls Lagoon",
+      "lat": -33.531667,
+      "lng": 150.901111
+    },
+    {
+      "id": "Q21952668",
+      "name": "Harbord Lagoon",
+      "lat": -33.766667,
+      "lng": 151.293333
+    },
+    {
+      "id": "Q21952761",
+      "name": "Hopwoods Lagoon",
+      "lat": -33.215278,
+      "lng": 150.934722
+    },
+    {
+      "id": "Q21954729",
+      "name": "Iluka Lagoon",
+      "lat": -33.525556,
+      "lng": 151.303611
+    },
+    {
+      "id": "Q125814921",
+      "name": "Ironbark Lake",
+      "lat": -33.695083,
+      "lng": 150.913667
+    },
+    {
+      "id": "Q21922369",
+      "name": "Jibbon Lagoon",
+      "lat": -34.081667,
+      "lng": 151.167778
+    },
+    {
+      "id": "Q21962616",
+      "name": "Kippax Lake",
+      "lat": -33.88944,
+      "lng": 151.2224
+    },
+    {
+      "id": "Q21910599",
+      "name": "Lachlan Swamps",
+      "lat": -33.931667,
+      "lng": 151.217778
+    },
+    {
+      "id": "Q21954873",
+      "name": "Lake Belvedere",
+      "lat": -33.8152,
+      "lng": 151.0679
+    },
+    {
+      "id": "Q21923970",
+      "name": "Lake Burragorang",
+      "lat": -33.99319,
+      "lng": 150.42274
+    },
+    {
+      "id": "Q21921282",
+      "name": "Lake Cataract",
+      "lat": -34.3,
+      "lng": 150.816667
+    },
+    {
+      "id": "Q21954719",
+      "name": "Lake Currans",
+      "lat": -34.0449,
+      "lng": 150.7646
+    },
+    {
+      "id": "Q21952886",
+      "name": "Lake Gillawarna",
+      "lat": -33.898611,
+      "lng": 150.967778
+    },
+    {
+      "id": "Q1800985",
+      "name": "Lake Lyell",
+      "lat": -33.525002,
+      "lng": 150.077225
+    },
+    {
+      "id": "Q16893900",
+      "name": "Lake Moore",
+      "lat": -33.927176,
+      "lng": 150.938261
+    },
+    {
+      "id": "Q21955096",
+      "name": "Lake Northam",
+      "lat": -33.885,
+      "lng": 151.193333
+    },
+    {
+      "id": "Q21957564",
+      "name": "Lake Parramatta",
+      "lat": -33.79,
+      "lng": 151.0075
+    },
+    {
+      "id": "Q21954726",
+      "name": "Lake Thomas Moore",
+      "lat": -33.898611,
+      "lng": 150.951111
+    },
+    {
+      "id": "Q21954897",
+      "name": "Lake Wallace",
+      "lat": -33.4125,
+      "lng": 150.076111
+    },
+    {
+      "id": "Q21954842",
+      "name": "Lake Wentworth",
+      "lat": -33.698611,
+      "lng": 150.367778
+    },
+    {
+      "id": "Q21955145",
+      "name": "Lake Woronora",
+      "lat": -34.1152,
+      "lng": 150.9346
+    },
+    {
+      "id": "Q21954712",
+      "name": "Lake Yandel'ora",
+      "lat": -34.0668,
+      "lng": 150.75571
+    },
+    {
+      "id": "Q17011248",
+      "name": "Liverpool Offtake Reservoir",
+      "lat": -33.889869,
+      "lng": 150.82679
+    },
+    {
+      "id": "Q21957570",
+      "name": "Longneck Lagoon",
+      "lat": -33.5652,
+      "lng": 150.9012
+    },
+    {
+      "id": "Q21952802",
+      "name": "Manly Lagoon",
+      "lat": -33.7818,
+      "lng": 151.28461
+    },
+    {
+      "id": "Q21952798",
+      "name": "Marley Lagoon",
+      "lat": -34.10985,
+      "lng": 151.13784
+    },
+    {
+      "id": "Q21952795",
+      "name": "Medlow",
+      "lat": -33.65725,
+      "lng": 150.29793
+    },
+    {
+      "id": "Q56052125",
+      "name": "Mount Dorothy Reservoir",
+      "lat": -33.798,
+      "lng": 150.97
+    },
+    {
+      "id": "Q21952836",
+      "name": "Mountain Lagoon",
+      "lat": -33.431667,
+      "lng": 150.634722
+    },
+    {
+      "id": "Q21906807",
+      "name": "Napean Reservoir",
+      "lat": -34.33333,
+      "lng": 150.58333
+    },
+    {
+      "id": "Q21906823",
+      "name": "Narrabeen Lagoon",
+      "lat": -33.714722,
+      "lng": 151.285278
+    },
+    {
+      "id": "Q21955076",
+      "name": "Pearl Beach Lagoon",
+      "lat": -33.5413,
+      "lng": 151.3082
+    },
+    {
+      "id": "Q118514358",
+      "name": "Pemulwuy Lake",
+      "lat": -33.811135,
+      "lng": 150.931211
+    },
+    {
+      "id": "Q24521705",
+      "name": "Penrith Lakes",
+      "lat": -33.707792,
+      "lng": 150.675453
+    },
+    {
+      "id": "Q58201173",
+      "name": "Petersham Reservoir",
+      "lat": -33.8962,
+      "lng": 151.1558
+    },
+    {
+      "id": "Q21955054",
+      "name": "Pitt Town Lagoon",
+      "lat": -33.590278,
+      "lng": 150.851111
+    },
+    {
+      "id": "Q21904579",
+      "name": "Potts Hill Reservoirs",
+      "lat": -33.9,
+      "lng": 151.033333
+    },
+    {
+      "id": "Q55630332",
+      "name": "Potts Hill Reservoirs 1 and 2",
+      "lat": -33.8936,
+      "lng": 151.0327
+    },
+    {
+      "id": "Q3407726",
+      "name": "Prospect Reservoir",
+      "lat": -33.823,
+      "lng": 150.893
+    },
+    {
+      "id": "Q58202939",
+      "name": "Pymble Reservoirs No. 1 and No. 2",
+      "lat": -33.7413,
+      "lng": 151.1391
+    },
+    {
+      "id": "Q118519749",
+      "name": "Riverside Park Lake",
+      "lat": -33.92281,
+      "lng": 150.9722
+    },
+    {
+      "id": "Q21955013",
+      "name": "Scirpus Mere",
+      "lat": -34.215278,
+      "lng": 150.534722
+    },
+    {
+      "id": "Q21954994",
+      "name": "Smiths Lagoon",
+      "lat": -34.165278,
+      "lng": 150.317778
+    },
+    {
+      "id": "Q21950907",
+      "name": "The Bargo Lagoons",
+      "lat": -34.215278,
+      "lng": 150.534722
+    },
+    {
+      "id": "Q21952707",
+      "name": "The Coradjery Lagoons",
+      "lat": -34.215278,
+      "lng": 150.534722
+    },
+    {
+      "id": "Q21912491",
+      "name": "The Dry Lake",
+      "lat": -34.216667,
+      "lng": 150.55
+    },
+    {
+      "id": "Q21954924",
+      "name": "Towra Lagoon",
+      "lat": -33.998611,
+      "lng": 151.151111
+    },
+    {
+      "id": "Q58202931",
+      "name": "Wahroonga Reservoir",
+      "lat": -33.7193,
+      "lng": 151.1141
+    },
+    {
+      "id": "Q2542729",
+      "name": "Wallerawang Reservoir",
+      "lat": -33.4175,
+      "lng": 150.08003
+    },
+    {
+      "id": "Q7974930",
+      "name": "Wattamolla",
+      "lat": -34.1375,
+      "lng": 151.118
+    },
+    {
+      "id": "Q14935034",
+      "name": "Wattle Grove Lake",
+      "lat": -33.9492,
+      "lng": 150.941
+    },
+    {
+      "id": "Q55637472",
+      "name": "Waverley Reservoirs",
+      "lat": -33.895,
+      "lng": 151.256
+    },
+    {
+      "id": "Q21954845",
+      "name": "Wellums Lake",
+      "lat": -33.298611,
+      "lng": 150.992778
+    },
+    {
+      "id": "Q116197049",
+      "name": "Wentworth Falls Lake Park",
+      "lat": -33.70413,
+      "lng": 150.36922
+    },
+    {
+      "id": "Q7983591",
+      "name": "Werrington Lake",
+      "lat": -33.753649,
+      "lng": 150.739054
+    },
+    {
+      "id": "Q21954840",
+      "name": "Wheeny Lagoon",
+      "lat": -33.531667,
+      "lng": 150.917778
+    },
+    {
+      "id": "Q58202668",
+      "name": "Woollahra Reservoir",
+      "lat": -33.8904,
+      "lng": 151.2411
+    },
+    {
+      "id": "Q21954786",
+      "name": "Yeramba Lagoon",
+      "lat": -33.973611,
+      "lng": 151.009722
+    }
+  ]
 }

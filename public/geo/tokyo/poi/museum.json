@@ -1,1 +1,1602 @@
-{ "category": "museum", "source": "none", "places": [] }
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 35.5282,
+    "west": 139.5628,
+    "north": 35.8175,
+    "east": 139.9189
+  },
+  "places": [
+    {
+      "id": "Q863044",
+      "name": "21 21 DESIGN SIGHT",
+      "lat": 35.6675,
+      "lng": 139.73027
+    },
+    {
+      "id": "Q140173887",
+      "name": "Acupuncture, Moxibustion, and Anma Museum",
+      "lat": 35.691441,
+      "lng": 139.792818
+    },
+    {
+      "id": "Q11284141",
+      "name": "Ad Museum Tokyo",
+      "lat": 35.664333,
+      "lng": 139.762222
+    },
+    {
+      "id": "Q11636983",
+      "name": "Adachi City Museum",
+      "lat": 35.784416,
+      "lng": 139.84143
+    },
+    {
+      "id": "Q1048740",
+      "name": "Ancient Orient Museum",
+      "lat": 35.728534,
+      "lng": 139.720785
+    },
+    {
+      "id": "Q104698248",
+      "name": "Arakawa Furusato Museum",
+      "lat": 35.737519,
+      "lng": 139.795418
+    },
+    {
+      "id": "Q137374855",
+      "name": "Arakawa Museum of Aqua",
+      "lat": 35.785567,
+      "lng": 139.730111
+    },
+    {
+      "id": "Q38266999",
+      "name": "Archi-Depot Museum",
+      "lat": 35.620914,
+      "lng": 139.748709
+    },
+    {
+      "id": "Q116921556",
+      "name": "Art Aquarium Museum",
+      "lat": 35.67137,
+      "lng": 139.765738
+    },
+    {
+      "id": "Q913808",
+      "name": "Artizon Museum",
+      "lat": 35.678889,
+      "lng": 139.771944
+    },
+    {
+      "id": "Q104696837",
+      "name": "Asaka City Museum",
+      "lat": 35.812639,
+      "lng": 139.597222
+    },
+    {
+      "id": "Q11517304",
+      "name": "Asakura Museum of Sculpture",
+      "lat": 35.726847,
+      "lng": 139.76855
+    },
+    {
+      "id": "Q11263157",
+      "name": "Banknote & Postage Stamp Museum",
+      "lat": 35.754366,
+      "lng": 139.739354
+    },
+    {
+      "id": "Q1134380",
+      "name": "Baseball Hall of Fame and Museum",
+      "lat": 35.705658,
+      "lng": 139.751914
+    },
+    {
+      "id": "Q809981",
+      "name": "Bashō Museum",
+      "lat": 35.68629,
+      "lng": 139.794101
+    },
+    {
+      "id": "Q11378949",
+      "name": "Beni Museum",
+      "lat": 35.659917,
+      "lng": 139.717972
+    },
+    {
+      "id": "Q104698204",
+      "name": "Bicycle Culture Center",
+      "lat": 35.634043,
+      "lng": 139.717953
+    },
+    {
+      "id": "Q137685727",
+      "name": "blue-ing!",
+      "lat": 35.704128,
+      "lng": 139.753973
+    },
+    {
+      "id": "Q140237475",
+      "name": "Bunkamura Museum of Art",
+      "lat": 35.660647,
+      "lng": 139.695074
+    },
+    {
+      "id": "Q84836242",
+      "name": "Bunkyō City Mori Ōgai Memorial Museum",
+      "lat": 35.724917,
+      "lng": 139.760667
+    },
+    {
+      "id": "Q11499743",
+      "name": "Bunkyo Museum",
+      "lat": 35.708,
+      "lng": 139.7566
+    },
+    {
+      "id": "Q15961648",
+      "name": "Center of the Tokyo Raids and War Damage",
+      "lat": 35.6817,
+      "lng": 139.822
+    },
+    {
+      "id": "Q11271822",
+      "name": "Chihiro Art Museum Tokyo",
+      "lat": 35.72865,
+      "lng": 139.60535
+    },
+    {
+      "id": "Q104698117",
+      "name": "Chōfu City Mushanokōji Saneatsu Memorial Museum",
+      "lat": 35.656689,
+      "lng": 139.581297
+    },
+    {
+      "id": "Q139822774",
+      "name": "Chūō City Chūō Historical Museum",
+      "lat": 35.673686,
+      "lng": 139.775311
+    },
+    {
+      "id": "Q865607",
+      "name": "Currency Museum of the Bank of Japan",
+      "lat": 35.685479,
+      "lng": 139.771666
+    },
+    {
+      "id": "Q11525586",
+      "name": "Daigo Fukuryu Maru Exhibition Hall",
+      "lat": 35.650972,
+      "lng": 139.826278
+    },
+    {
+      "id": "Q17224188",
+      "name": "Daiichi Sankyo Kusuri Museum",
+      "lat": 35.688472,
+      "lng": 139.775694
+    },
+    {
+      "id": "Q10856362",
+      "name": "Daimyo Clock Museum",
+      "lat": 35.72128,
+      "lng": 139.7662
+    },
+    {
+      "id": "Q104698257",
+      "name": "Drum Museum",
+      "lat": 35.711863,
+      "lng": 139.791783
+    },
+    {
+      "id": "Q3330210",
+      "name": "Ebara Hatakeyama Museum of Art",
+      "lat": 35.632306,
+      "lng": 139.72689
+    },
+    {
+      "id": "Q1191042",
+      "name": "Edo-Tokyo Museum",
+      "lat": 35.696389,
+      "lng": 139.796083
+    },
+    {
+      "id": "Q117424691",
+      "name": "Edogawa-ku Local Museum",
+      "lat": 35.705778,
+      "lng": 139.866306
+    },
+    {
+      "id": "Q728781",
+      "name": "Eisei Bunko Museum",
+      "lat": 35.713171,
+      "lng": 139.723296
+    },
+    {
+      "id": "Q11660383",
+      "name": "Electric Power Historical Museum",
+      "lat": 35.533875,
+      "lng": 139.673028
+    },
+    {
+      "id": "Q11559505",
+      "name": "Fire Museum",
+      "lat": 35.688278,
+      "lng": 139.719972
+    },
+    {
+      "id": "Q104708388",
+      "name": "Folk Museum of Ōta City",
+      "lat": 35.588529,
+      "lng": 139.710621
+    },
+    {
+      "id": "Q11623792",
+      "name": "Fujiko·F·Fujio Museum",
+      "lat": 35.61,
+      "lng": 139.573611
+    },
+    {
+      "id": "Q3090685",
+      "name": "Fukagawa Edo Museum",
+      "lat": 35.68092,
+      "lng": 139.8007
+    },
+    {
+      "id": "Q133305825",
+      "name": "Fukuzawa Yukichi Memorial Keio History Museum",
+      "lat": 35.649421,
+      "lng": 139.743803
+    },
+    {
+      "id": "Q11298177",
+      "name": "GALAXCITY",
+      "lat": 35.779889,
+      "lng": 139.7905
+    },
+    {
+      "id": "Q11295937",
+      "name": "Gas Science Museum",
+      "lat": 35.652231,
+      "lng": 139.792528
+    },
+    {
+      "id": "Q947907",
+      "name": "Ghibli Museum",
+      "lat": 35.696233,
+      "lng": 139.570431
+    },
+    {
+      "id": "Q2374140",
+      "name": "Gotoh Museum",
+      "lat": 35.612195,
+      "lng": 139.635294
+    },
+    {
+      "id": "Q24895832",
+      "name": "Great Kanto Earthquake Memorial Museum",
+      "lat": 35.699844,
+      "lng": 139.796906
+    },
+    {
+      "id": "Q138028271",
+      "name": "Hamao Umezawa Memorial Museum",
+      "lat": 35.608819,
+      "lng": 139.630286
+    },
+    {
+      "id": "Q138028244",
+      "name": "Hamao Umezawa Memorial Museum Meguro",
+      "lat": 35.630271,
+      "lng": 139.720518
+    },
+    {
+      "id": "Q130213553",
+      "name": "Hanzōmon Museum",
+      "lat": 35.685864,
+      "lng": 139.741949
+    },
+    {
+      "id": "Q3788646",
+      "name": "Hasegawa Machiko Art Museum",
+      "lat": 35.62799,
+      "lng": 139.64362
+    },
+    {
+      "id": "Q871522",
+      "name": "Hatoyama Hall",
+      "lat": 35.713822,
+      "lng": 139.731208
+    },
+    {
+      "id": "Q11533289",
+      "name": "Hayashi Fumiko Memorial Hall",
+      "lat": 35.715861,
+      "lng": 139.68425
+    },
+    {
+      "id": "Q11509583",
+      "name": "Hibiya Library & Museum",
+      "lat": 35.671778,
+      "lng": 139.7545
+    },
+    {
+      "id": "Q104698247",
+      "name": "Historical Materials Section, Yoshioka Yayoi Memorial Room Tokyo Women's Medical University",
+      "lat": 35.697551,
+      "lng": 139.720637
+    },
+    {
+      "id": "Q122929555",
+      "name": "History Museum of J-Koreans",
+      "lat": 35.65154,
+      "lng": 139.73703
+    },
+    {
+      "id": "Q139661070",
+      "name": "Hosei University Museum",
+      "lat": 35.693812,
+      "lng": 139.740785
+    },
+    {
+      "id": "Q140025038",
+      "name": "Ichigaya Letterpress Factory",
+      "lat": 35.696135,
+      "lng": 139.731826
+    },
+    {
+      "id": "Q11353179",
+      "name": "Ichiyo Memorial Museum",
+      "lat": 35.725556,
+      "lng": 139.792806
+    },
+    {
+      "id": "Q3076590",
+      "name": "Idemitsu Museum of Arts",
+      "lat": 35.676372,
+      "lng": 139.760908
+    },
+    {
+      "id": "Q85881822",
+      "name": "Ikebukuro Life Safety Learning Center",
+      "lat": 35.703908,
+      "lng": 139.815309
+    },
+    {
+      "id": "Q139814437",
+      "name": "Ikenami Shōtarō Memorial Museum",
+      "lat": 35.717383,
+      "lng": 139.789538
+    },
+    {
+      "id": "Q42312899",
+      "name": "Ikō Archaeological Site Park",
+      "lat": 35.80452,
+      "lng": 139.78661
+    },
+    {
+      "id": "Q97706262",
+      "name": "Ikō Archeological Park Exhibition Hall",
+      "lat": 35.804417,
+      "lng": 139.786361
+    },
+    {
+      "id": "Q5557026",
+      "name": "Institute for Nature Study",
+      "lat": 35.636007,
+      "lng": 139.721312
+    },
+    {
+      "id": "Q11532663",
+      "name": "Itabashi Art Museum",
+      "lat": 35.784214,
+      "lng": 139.644491
+    },
+    {
+      "id": "Q104696866",
+      "name": "Itabashi Historical Museum",
+      "lat": 35.785471,
+      "lng": 139.643257
+    },
+    {
+      "id": "Q11532661",
+      "name": "Itabashi Science and Education Hall",
+      "lat": 35.763406,
+      "lng": 139.679572
+    },
+    {
+      "id": "Q136707259",
+      "name": "Jade Ore Museum",
+      "lat": 35.620438,
+      "lng": 139.735336
+    },
+    {
+      "id": "Q139973974",
+      "name": "JAL Sky Museum",
+      "lat": 35.541519,
+      "lng": 139.786344
+    },
+    {
+      "id": "Q11506477",
+      "name": "Japan Football Museum",
+      "lat": 35.704222,
+      "lng": 139.763889
+    },
+    {
+      "id": "Q11658528",
+      "name": "Japan Ground Self-Defense Force Public Information Center",
+      "lat": 35.784917,
+      "lng": 139.599694
+    },
+    {
+      "id": "Q140078016",
+      "name": "Japan Kaleidoscope Museum",
+      "lat": 35.805066,
+      "lng": 139.718655
+    },
+    {
+      "id": "Q140042196",
+      "name": "Japan Olympic Museum",
+      "lat": 35.674894,
+      "lng": 139.715199
+    },
+    {
+      "id": "Q3789149",
+      "name": "Japanese Folk Crafts Museum",
+      "lat": 35.660833,
+      "lng": 139.679167
+    },
+    {
+      "id": "Q3329874",
+      "name": "Japanese Sword Museum",
+      "lat": 35.698982,
+      "lng": 139.793633
+    },
+    {
+      "id": "Q21019310",
+      "name": "JCII Camera Museum",
+      "lat": 35.686044,
+      "lng": 139.742875
+    },
+    {
+      "id": "Q109160363",
+      "name": "Kachidoki hashi no shiryōkan",
+      "lat": 35.66305,
+      "lng": 139.77366
+    },
+    {
+      "id": "Q104698211",
+      "name": "Kagawa Archives & Resource Center",
+      "lat": 35.667824,
+      "lng": 139.625857
+    },
+    {
+      "id": "Q132576457",
+      "name": "Kasumi Kaikan Memorial Gakushūin Museum",
+      "lat": 35.718968,
+      "lng": 139.709768
+    },
+    {
+      "id": "Q97371284",
+      "name": "Katsu Kaishū Memorial Museum",
+      "lat": 35.602402,
+      "lng": 139.692248
+    },
+    {
+      "id": "Q11621071",
+      "name": "Katsushika City Museum",
+      "lat": 35.752917,
+      "lng": 139.843447
+    },
+    {
+      "id": "Q21018928",
+      "name": "Katsushika Shibamata Tora-san Museum",
+      "lat": 35.757139,
+      "lng": 139.880528
+    },
+    {
+      "id": "Q139783736",
+      "name": "Kawaguchi Museum of Art",
+      "lat": 35.80106,
+      "lng": 139.716616
+    },
+    {
+      "id": "Q11554289",
+      "name": "Kawanabe Kyosai Memorial Museum",
+      "lat": 35.815822,
+      "lng": 139.693425
+    },
+    {
+      "id": "Q11478412",
+      "name": "Kawasaki City Museum",
+      "lat": 35.588583,
+      "lng": 139.64725
+    },
+    {
+      "id": "Q11478345",
+      "name": "Kawasaki Isago no Sato Museum",
+      "lat": 35.532028,
+      "lng": 139.701833
+    },
+    {
+      "id": "Q11478414",
+      "name": "Kawasaki Peace Museum",
+      "lat": 35.568744,
+      "lng": 139.659
+    },
+    {
+      "id": "Q133238216",
+      "name": "Keio Museum Commons",
+      "lat": 35.648767,
+      "lng": 139.744376
+    },
+    {
+      "id": "Q123309852",
+      "name": "Kiki's Museum of Literature",
+      "lat": 35.64925,
+      "lng": 139.88225
+    },
+    {
+      "id": "Q19340630",
+      "name": "Kikuchi Kanjitsu Memorial Tomo Museum",
+      "lat": 35.6661,
+      "lng": 139.745
+    },
+    {
+      "id": "Q11401205",
+      "name": "Kita City Asukayama Museum",
+      "lat": 35.749583,
+      "lng": 139.739028
+    },
+    {
+      "id": "Q134972437",
+      "name": "Kochikame Museum",
+      "lat": 35.765156,
+      "lng": 139.850294
+    },
+    {
+      "id": "Q3788846",
+      "name": "Kodansha Noma Memorial Museum",
+      "lat": 35.714,
+      "lng": 139.725028
+    },
+    {
+      "id": "Q3815581",
+      "name": "Koishikawa Annex, The University Museum, The University of Tokyo",
+      "lat": 35.721404,
+      "lng": 139.741142
+    },
+    {
+      "id": "Q81916990",
+      "name": "Kokugakuin University Museum",
+      "lat": 35.656306,
+      "lng": 139.711167
+    },
+    {
+      "id": "Q11369635",
+      "name": "Kume Museum of Art",
+      "lat": 35.634556,
+      "lng": 139.714694
+    },
+    {
+      "id": "Q11530056",
+      "name": "Matsuoka Museum of Art",
+      "lat": 35.639944,
+      "lng": 139.721722
+    },
+    {
+      "id": "Q11279688",
+      "name": "Meguro History Museum",
+      "lat": 35.639333,
+      "lng": 139.702583
+    },
+    {
+      "id": "Q3815450",
+      "name": "Meguro Museum of Art",
+      "lat": 35.634907,
+      "lng": 139.707663
+    },
+    {
+      "id": "Q11581651",
+      "name": "Meguro Parasitological Museum",
+      "lat": 35.631667,
+      "lng": 139.706667
+    },
+    {
+      "id": "Q133288913",
+      "name": "Meiji Jingū Hōmotsuden",
+      "lat": 35.679952,
+      "lng": 139.69777
+    },
+    {
+      "id": "Q127692420",
+      "name": "Meiji Jingū Museum",
+      "lat": 35.672287,
+      "lng": 139.702319
+    },
+    {
+      "id": "Q85880847",
+      "name": "Meiji University Museum",
+      "lat": 35.6987,
+      "lng": 139.7619
+    },
+    {
+      "id": "Q56025796",
+      "name": "Memorial Museum for Soldiers, Detainees in Siberia, and Postwar Repatriates",
+      "lat": 35.691306,
+      "lng": 139.692611
+    },
+    {
+      "id": "Q16872707",
+      "name": "Meteorological Science Museum",
+      "lat": 35.665611,
+      "lng": 139.746056
+    },
+    {
+      "id": "Q30266382",
+      "name": "Middle Eastern Culture Center in Japan",
+      "lat": 35.689779,
+      "lng": 139.563732
+    },
+    {
+      "id": "Q65272034",
+      "name": "Min-on Music Museum",
+      "lat": 35.6823,
+      "lng": 139.71927
+    },
+    {
+      "id": "Q115212362",
+      "name": "Minato City Local History Museum",
+      "lat": 35.640083,
+      "lng": 139.726889
+    },
+    {
+      "id": "Q656957",
+      "name": "Miraikan",
+      "lat": 35.619167,
+      "lng": 139.776667
+    },
+    {
+      "id": "Q21019634",
+      "name": "Mitaka City Yūzō Yamamoto Memorial Museum",
+      "lat": 35.699572,
+      "lng": 139.567667
+    },
+    {
+      "id": "Q3815458",
+      "name": "Mitsubishi Ichigokan Museum",
+      "lat": 35.678355,
+      "lng": 139.763255
+    },
+    {
+      "id": "Q864700",
+      "name": "Mitsui Memorial Museum",
+      "lat": 35.686298,
+      "lng": 139.773144
+    },
+    {
+      "id": "Q11582309",
+      "name": "Mitsuo Aida Museum",
+      "lat": 35.676944,
+      "lng": 139.7635
+    },
+    {
+      "id": "Q136463408",
+      "name": "MoN Takanawa: The Museum of Narratives",
+      "lat": 35.63969,
+      "lng": 139.741829
+    },
+    {
+      "id": "Q4410434",
+      "name": "Mori Art Museum",
+      "lat": 35.660506,
+      "lng": 139.729067
+    },
+    {
+      "id": "Q131314431",
+      "name": "Mori Building Digital Art Museum: EPSON teamLab Borderless",
+      "lat": 35.660882,
+      "lng": 139.740657
+    },
+    {
+      "id": "Q17216772",
+      "name": "Muikara Minka-en",
+      "lat": 35.63279,
+      "lng": 139.57097
+    },
+    {
+      "id": "Q104696857",
+      "name": "Municipal Museum of Archaeology in Ichikawa",
+      "lat": 35.759093,
+      "lng": 139.911985
+    },
+    {
+      "id": "Q104696858",
+      "name": "Municipal Museum of History in Ichikawa",
+      "lat": 35.759774,
+      "lng": 139.911625
+    },
+    {
+      "id": "Q1649688",
+      "name": "Museum of Contemporary Art Tokyo",
+      "lat": 35.68,
+      "lng": 139.808056
+    },
+    {
+      "id": "Q139814882",
+      "name": "Museum of Haiku Literature",
+      "lat": 35.704729,
+      "lng": 139.695418
+    },
+    {
+      "id": "Q137994122",
+      "name": "Museum of Imaginary Narrative Arts",
+      "lat": 35.657899,
+      "lng": 139.704514
+    },
+    {
+      "id": "Q17228804",
+      "name": "Museum of Life in the Shōwa Era",
+      "lat": 35.575222,
+      "lng": 139.685833
+    },
+    {
+      "id": "Q21654524",
+      "name": "Museum of Logistics",
+      "lat": 35.62909,
+      "lng": 139.732234
+    },
+    {
+      "id": "Q133225949",
+      "name": "Museum of Marine Science, Tokyo University of Marine Science and Technology",
+      "lat": 35.627514,
+      "lng": 139.748205
+    },
+    {
+      "id": "Q1048709",
+      "name": "Museum of Maritime Science",
+      "lat": 35.619444,
+      "lng": 139.772778
+    },
+    {
+      "id": "Q1954709",
+      "name": "Museum of Modern Japanese Literature",
+      "lat": 35.662808,
+      "lng": 139.680929
+    },
+    {
+      "id": "Q11525035",
+      "name": "Museum of Science, TUS",
+      "lat": 35.699167,
+      "lng": 139.740833
+    },
+    {
+      "id": "Q3076188",
+      "name": "Museum of the Imperial Collections",
+      "lat": 35.686302,
+      "lng": 139.759247
+    },
+    {
+      "id": "Q104698258",
+      "name": "Museum of Toshima City",
+      "lat": 35.727773,
+      "lng": 139.706728
+    },
+    {
+      "id": "Q104696842",
+      "name": "Museum of Wayo Women's University",
+      "lat": 35.74256,
+      "lng": 139.904497
+    },
+    {
+      "id": "Q11364944",
+      "name": "Nakagawa Funabansho Museum",
+      "lat": 35.687667,
+      "lng": 139.846278
+    },
+    {
+      "id": "Q104708387",
+      "name": "Nakano Historical Museum",
+      "lat": 35.724246,
+      "lng": 139.665008
+    },
+    {
+      "id": "Q28312009",
+      "name": "National Archives of Modern Architecture",
+      "lat": 35.709836,
+      "lng": 139.766639
+    },
+    {
+      "id": "Q1362638",
+      "name": "National Art Center, Tokyo",
+      "lat": 35.66528,
+      "lng": 139.72634
+    },
+    {
+      "id": "Q74940",
+      "name": "National Museum of Nature and Science",
+      "lat": 35.716319,
+      "lng": 139.776544
+    },
+    {
+      "id": "Q47495157",
+      "name": "National Museum of Territory and Sovereignty",
+      "lat": 35.671417,
+      "lng": 139.7555
+    },
+    {
+      "id": "Q1362629",
+      "name": "National Museum of Western Art",
+      "lat": 35.715357,
+      "lng": 139.77585
+    },
+    {
+      "id": "Q3788883",
+      "name": "National Showa Memorial Museum",
+      "lat": 35.695028,
+      "lng": 139.750722
+    },
+    {
+      "id": "Q24862403",
+      "name": "Natsume Soseki Memorial Museum",
+      "lat": 35.703917,
+      "lng": 139.725472
+    },
+    {
+      "id": "Q11608069",
+      "name": "Nerima Art Museum",
+      "lat": 35.73711,
+      "lng": 139.63611
+    },
+    {
+      "id": "Q11608060",
+      "name": "Nerima Shakujiikoen Furusato Museum",
+      "lat": 35.7375,
+      "lng": 139.599444
+    },
+    {
+      "id": "Q1047097",
+      "name": "Nezu Museum",
+      "lat": 35.66216,
+      "lng": 139.717603
+    },
+    {
+      "id": "Q11235312",
+      "name": "NHK Museum of Broadcasting",
+      "lat": 35.663778,
+      "lng": 139.748278
+    },
+    {
+      "id": "Q21654020",
+      "name": "Nikon Museum",
+      "lat": 35.6027,
+      "lng": 139.7241
+    },
+    {
+      "id": "Q20043894",
+      "name": "NTT History Center of Technologies",
+      "lat": 35.719428,
+      "lng": 139.564767
+    },
+    {
+      "id": "Q3788869",
+      "name": "NTT InterCommunication Center",
+      "lat": 35.6829,
+      "lng": 139.6874
+    },
+    {
+      "id": "Q17224098",
+      "name": "Okamura Chair Museum",
+      "lat": 35.675,
+      "lng": 139.738667
+    },
+    {
+      "id": "Q3329598",
+      "name": "Okura Museum of Art",
+      "lat": 35.666944,
+      "lng": 139.743333
+    },
+    {
+      "id": "Q104698226",
+      "name": "Old Shimbashi Station Railway History Exhibition Hall",
+      "lat": 35.665978,
+      "lng": 139.761469
+    },
+    {
+      "id": "Q20748918",
+      "name": "Omori Nori Museum",
+      "lat": 35.577117,
+      "lng": 139.742747
+    },
+    {
+      "id": "Q21018910",
+      "name": "Onko Gakkai Hall",
+      "lat": 35.654333,
+      "lng": 139.711928
+    },
+    {
+      "id": "Q11464085",
+      "name": "Ono Tadashige Print Museum",
+      "lat": 35.706069,
+      "lng": 139.630114
+    },
+    {
+      "id": "Q3815442",
+      "name": "Ōta Memorial Museum of Art",
+      "lat": 35.6694,
+      "lng": 139.705
+    },
+    {
+      "id": "Q20043481",
+      "name": "Oyama Kaido Furusatokan",
+      "lat": 35.603478,
+      "lng": 139.612718
+    },
+    {
+      "id": "Q11550512",
+      "name": "Panasonic Shiodome Museum of Art",
+      "lat": 35.66582,
+      "lng": 139.76195
+    },
+    {
+      "id": "Q11605492",
+      "name": "Paper Museum",
+      "lat": 35.749861,
+      "lng": 139.738694
+    },
+    {
+      "id": "Q11495238",
+      "name": "Parliamentary Museum",
+      "lat": 35.678333,
+      "lng": 139.747
+    },
+    {
+      "id": "Q11396206",
+      "name": "Philatelic Museum",
+      "lat": 35.718356,
+      "lng": 139.705788
+    },
+    {
+      "id": "Q11632332",
+      "name": "Police Museum",
+      "lat": 35.675108,
+      "lng": 139.769542
+    },
+    {
+      "id": "Q17225229",
+      "name": "Postal Museum Japan",
+      "lat": 35.71,
+      "lng": 139.8125
+    },
+    {
+      "id": "Q11596124",
+      "name": "Prince Chichibu Memorial Sports Museum",
+      "lat": 35.679167,
+      "lng": 139.714722
+    },
+    {
+      "id": "Q994083",
+      "name": "Printing Museum",
+      "lat": 35.709333,
+      "lng": 139.741611
+    },
+    {
+      "id": "Q115977950",
+      "name": "Roppongi Museum",
+      "lat": 35.659774,
+      "lng": 139.734038
+    },
+    {
+      "id": "Q21014218",
+      "name": "Ryōgoku Fireworks Museum",
+      "lat": 35.693753,
+      "lng": 139.791653
+    },
+    {
+      "id": "Q112192996",
+      "name": "Ryūshi Memorial Museum",
+      "lat": 35.58234,
+      "lng": 139.71562
+    },
+    {
+      "id": "Q11382880",
+      "name": "Saeki Yuzo Atelier Museum",
+      "lat": 35.720861,
+      "lng": 139.693639
+    },
+    {
+      "id": "Q3891462",
+      "name": "Safety Promotion Center",
+      "lat": 35.553665,
+      "lng": 139.753634
+    },
+    {
+      "id": "Q140211319",
+      "name": "Saita Museum",
+      "lat": 35.653396,
+      "lng": 139.659947
+    },
+    {
+      "id": "Q116917907",
+      "name": "Samurai Museum",
+      "lat": 35.695484,
+      "lng": 139.703543
+    },
+    {
+      "id": "Q11384365",
+      "name": "Sato Museum of Art",
+      "lat": 35.681722,
+      "lng": 139.715
+    },
+    {
+      "id": "Q10855424",
+      "name": "Science Museum",
+      "lat": 35.691583,
+      "lng": 139.753056
+    },
+    {
+      "id": "Q24874167",
+      "name": "Science Tokyo Museum and Archives",
+      "lat": 35.606833,
+      "lng": 139.684806
+    },
+    {
+      "id": "Q104698221",
+      "name": "Seikei Gakuen Archives / Museum",
+      "lat": 35.710424,
+      "lng": 139.573251
+    },
+    {
+      "id": "Q11405795",
+      "name": "Senshū Bunko",
+      "lat": 35.693223,
+      "lng": 139.746492
+    },
+    {
+      "id": "Q3892314",
+      "name": "Setagaya Art Museum",
+      "lat": 35.6316,
+      "lng": 139.622
+    },
+    {
+      "id": "Q104708389",
+      "name": "Setagaya City Local Museum",
+      "lat": 35.641272,
+      "lng": 139.647245
+    },
+    {
+      "id": "Q11362100",
+      "name": "Setagaya Literary Museum",
+      "lat": 35.6671,
+      "lng": 139.609
+    },
+    {
+      "id": "Q11254595",
+      "name": "Shibusawa Memorial Museum",
+      "lat": 35.749139,
+      "lng": 139.739222
+    },
+    {
+      "id": "Q21019078",
+      "name": "Shibuya Folk and Literary Shirane Memorial Museum",
+      "lat": 35.656389,
+      "lng": 139.71255
+    },
+    {
+      "id": "Q11418382",
+      "name": "Shinagawa Historical Museum",
+      "lat": 35.596806,
+      "lng": 139.730139
+    },
+    {
+      "id": "Q11501857",
+      "name": "Shinjuku Historical Museum",
+      "lat": 35.689978,
+      "lng": 139.725859
+    },
+    {
+      "id": "Q3915464",
+      "name": "Shitamachi Museum",
+      "lat": 35.7102,
+      "lng": 139.7726
+    },
+    {
+      "id": "Q59268117",
+      "name": "Shitamachi Museum Annex",
+      "lat": 35.721353,
+      "lng": 139.770876
+    },
+    {
+      "id": "Q11269143",
+      "name": "Shokei-kan",
+      "lat": 35.697076,
+      "lng": 139.751081
+    },
+    {
+      "id": "Q11561694",
+      "name": "Shoto Museum of Art",
+      "lat": 35.658667,
+      "lng": 139.691778
+    },
+    {
+      "id": "Q104708392",
+      "name": "Showa Women's University Koyo Museum",
+      "lat": 35.643551,
+      "lng": 139.676977
+    },
+    {
+      "id": "Q29570077",
+      "name": "Shunkaen Bonsai Museum",
+      "lat": 35.7027,
+      "lng": 139.8883
+    },
+    {
+      "id": "Q1614504",
+      "name": "Sompo Museum of Art",
+      "lat": 35.692778,
+      "lng": 139.696111
+    },
+    {
+      "id": "Q11095134",
+      "name": "Suginami Animation Museum",
+      "lat": 35.710444,
+      "lng": 139.607778
+    },
+    {
+      "id": "Q20045092",
+      "name": "Suginami Historical Museum",
+      "lat": 35.685917,
+      "lng": 139.645447
+    },
+    {
+      "id": "Q140173655",
+      "name": "Sugiyama Waichi Memorial Hall",
+      "lat": 35.691441,
+      "lng": 139.792828
+    },
+    {
+      "id": "Q104698259",
+      "name": "Sumida Heritage Museum",
+      "lat": 35.713905,
+      "lng": 139.805882
+    },
+    {
+      "id": "Q17220332",
+      "name": "Sumida Hokusai Museum",
+      "lat": 35.69675,
+      "lng": 139.800389
+    },
+    {
+      "id": "Q11582043",
+      "name": "Sumo Museum",
+      "lat": 35.697139,
+      "lng": 139.793528
+    },
+    {
+      "id": "Q11249110",
+      "name": "Suntory Museum of Art",
+      "lat": 35.666389,
+      "lng": 139.730278
+    },
+    {
+      "id": "Q11577225",
+      "name": "Tabata Memorial Museum of Writers and Artists",
+      "lat": 35.738472,
+      "lng": 139.759278
+    },
+    {
+      "id": "Q29570254",
+      "name": "Tachibana Taishō Minkaen (Former Koyama Residence)",
+      "lat": 35.709862,
+      "lng": 139.838089
+    },
+    {
+      "id": "Q17209701",
+      "name": "Tagawa Suiho・Norakuro Museum",
+      "lat": 35.685222,
+      "lng": 139.802194
+    },
+    {
+      "id": "Q11411955",
+      "name": "Taito City Calligraphy Museum",
+      "lat": 35.724694,
+      "lng": 139.776444
+    },
+    {
+      "id": "Q62029384",
+      "name": "Taiwan Cultural Center, Taipei Economic and Cultural Representative Office in Japan",
+      "lat": 35.670069,
+      "lng": 139.751548
+    },
+    {
+      "id": "Q3514129",
+      "name": "Takagi Bonsai Museum",
+      "lat": 35.7031,
+      "lng": 139.772
+    },
+    {
+      "id": "Q11598754",
+      "name": "Takehisa Yumeji Museum",
+      "lat": 35.71473,
+      "lng": 139.76349
+    },
+    {
+      "id": "Q133272975",
+      "name": "Tamagawadai Park Kofun Tomb Exhibition Room",
+      "lat": 35.590009,
+      "lng": 139.666979
+    },
+    {
+      "id": "Q11473108",
+      "name": "Taro Okamoto Memorial Museum",
+      "lat": 35.661308,
+      "lng": 139.715583
+    },
+    {
+      "id": "Q11319358",
+      "name": "TEPIA",
+      "lat": 35.673056,
+      "lng": 139.717222
+    },
+    {
+      "id": "Q38255018",
+      "name": "Terrada Art Complex",
+      "lat": 35.61975,
+      "lng": 139.746417
+    },
+    {
+      "id": "Q139987820",
+      "name": "The Kitasato Institute Kitasato Shibasaburo Memorial Museum",
+      "lat": 35.644829,
+      "lng": 139.725413
+    },
+    {
+      "id": "Q29570263",
+      "name": "The National Film Center",
+      "lat": 35.675537,
+      "lng": 139.77063
+    },
+    {
+      "id": "Q1359908",
+      "name": "The National Museum of Modern Art",
+      "lat": 35.690553,
+      "lng": 139.754642
+    },
+    {
+      "id": "Q15524927",
+      "name": "The University Museum, The University of Tokyo",
+      "lat": 35.708611,
+      "lng": 139.761194
+    },
+    {
+      "id": "Q11271253",
+      "name": "Tobacco and Salt Museum",
+      "lat": 35.706,
+      "lng": 139.80869
+    },
+    {
+      "id": "Q3915461",
+      "name": "Tobu Museum",
+      "lat": 35.724361,
+      "lng": 139.819167
+    },
+    {
+      "id": "Q18337440",
+      "name": "Toei Animation Museum",
+      "lat": 35.752028,
+      "lng": 139.594667
+    },
+    {
+      "id": "Q11496415",
+      "name": "Toguri Museum of Art",
+      "lat": 35.6614,
+      "lng": 139.692931
+    },
+    {
+      "id": "Q60059496",
+      "name": "Tojō Museum of History",
+      "lat": 35.77791,
+      "lng": 139.89944
+    },
+    {
+      "id": "Q17229268",
+      "name": "Tokaido Kawasaki Shuku Koryukan",
+      "lat": 35.532472,
+      "lng": 139.702944
+    },
+    {
+      "id": "Q6128676",
+      "name": "Tokyo Anime Center",
+      "lat": 35.661628,
+      "lng": 139.700519
+    },
+    {
+      "id": "Q48750957",
+      "name": "Tokyo Garbage War History　Miraikan Museum",
+      "lat": 35.683889,
+      "lng": 139.617778
+    },
+    {
+      "id": "Q104708375",
+      "name": "Tokyo Kasei University Museum",
+      "lat": 35.755125,
+      "lng": 139.721353
+    },
+    {
+      "id": "Q11424081",
+      "name": "Tokyo Metro Museum",
+      "lat": 35.6635,
+      "lng": 139.873861
+    },
+    {
+      "id": "Q864957",
+      "name": "Tokyo Metropolitan Art Museum",
+      "lat": 35.7172,
+      "lng": 139.773
+    },
+    {
+      "id": "Q743773",
+      "name": "Tokyo Metropolitan Teien Art Museum",
+      "lat": 35.636862,
+      "lng": 139.719269
+    },
+    {
+      "id": "Q653433",
+      "name": "Tokyo National Museum",
+      "lat": 35.718889,
+      "lng": 139.776389
+    },
+    {
+      "id": "Q862884",
+      "name": "Tokyo Photographic Art Museum",
+      "lat": 35.6417,
+      "lng": 139.7132
+    },
+    {
+      "id": "Q11625416",
+      "name": "Tokyo Sewerage Museum \"Rainbow\"",
+      "lat": 35.633167,
+      "lng": 139.783806
+    },
+    {
+      "id": "Q11524776",
+      "name": "Tokyo Takarakuji Dream Palace",
+      "lat": 35.676111,
+      "lng": 139.770944
+    },
+    {
+      "id": "Q11524018",
+      "name": "Tokyo Toy Museum",
+      "lat": 35.689639,
+      "lng": 139.718028
+    },
+    {
+      "id": "Q11525336",
+      "name": "Tokyo Water Science Museum",
+      "lat": 35.630806,
+      "lng": 139.7855
+    },
+    {
+      "id": "Q11525339",
+      "name": "Tokyo Waterworks Historical Museum",
+      "lat": 35.703333,
+      "lng": 139.760444
+    },
+    {
+      "id": "Q96707302",
+      "name": "Toshima City Tokiwasō Manga Museum",
+      "lat": 35.724306,
+      "lng": 139.686056
+    },
+    {
+      "id": "Q11527629",
+      "name": "Toyo University Inoue Enryo Memorial Museum",
+      "lat": 35.723706,
+      "lng": 139.749783
+    },
+    {
+      "id": "Q11660619",
+      "name": "Train and Bus Museum",
+      "lat": 35.587858,
+      "lng": 139.592386
+    },
+    {
+      "id": "Q10882995",
+      "name": "Transportation Museum",
+      "lat": 35.696917,
+      "lng": 139.770083
+    },
+    {
+      "id": "Q109166065",
+      "name": "Tsukuda Machikado Museum",
+      "lat": 35.66779,
+      "lng": 139.78223
+    },
+    {
+      "id": "Q104698254",
+      "name": "Tsuri Bunka Shiryoukan",
+      "lat": 35.690926,
+      "lng": 139.719441
+    },
+    {
+      "id": "Q111103855",
+      "name": "Tsuzuki Minka-en",
+      "lat": 35.550306,
+      "lng": 139.581694
+    },
+    {
+      "id": "Q11360245",
+      "name": "Ueno Royal Museum",
+      "lat": 35.712722,
+      "lng": 139.774806
+    },
+    {
+      "id": "Q137773264",
+      "name": "Ueshima Museum",
+      "lat": 35.663865,
+      "lng": 139.703513
+    },
+    {
+      "id": "Q11540553",
+      "name": "Umemura Adventure Museum",
+      "lat": 35.782639,
+      "lng": 139.676833
+    },
+    {
+      "id": "Q11660112",
+      "name": "Unyo Maru",
+      "lat": 35.625131,
+      "lng": 139.749172
+    },
+    {
+      "id": "Q11558212",
+      "name": "Urayasu City Folk Museum",
+      "lat": 35.655222,
+      "lng": 139.901083
+    },
+    {
+      "id": "Q30938116",
+      "name": "Waseda Aizu Museum",
+      "lat": 35.709972,
+      "lng": 139.7195
+    },
+    {
+      "id": "Q85880820",
+      "name": "Waseda International House of Literature",
+      "lat": 35.709778,
+      "lng": 139.719889
+    },
+    {
+      "id": "Q3951945",
+      "name": "Waseda University Tsubouchi Memorial Theatre Museum",
+      "lat": 35.71,
+      "lng": 139.72
+    },
+    {
+      "id": "Q17217914",
+      "name": "Watami Dream Street",
+      "lat": 35.552,
+      "lng": 139.741083
+    },
+    {
+      "id": "Q3915469",
+      "name": "Watari Museum of Contemporary Art",
+      "lat": 35.670722,
+      "lng": 139.713389
+    },
+    {
+      "id": "Q3567503",
+      "name": "Western River Railroad",
+      "lat": 35.633717,
+      "lng": 139.882425
+    },
+    {
+      "id": "Q11446206",
+      "name": "Women's Active Museum on War and Peace",
+      "lat": 35.708036,
+      "lng": 139.7167
+    },
+    {
+      "id": "Q11518627",
+      "name": "Wood & Plywood Museum",
+      "lat": 35.645747,
+      "lng": 139.831842
+    },
+    {
+      "id": "Q104698116",
+      "name": "World Bags & Luggage Museum",
+      "lat": 35.708052,
+      "lng": 139.795286
+    },
+    {
+      "id": "Q3329572",
+      "name": "Yamatane Museum of Art",
+      "lat": 35.653174,
+      "lng": 139.713641
+    },
+    {
+      "id": "Q65941212",
+      "name": "Yayoi Kusama Museum",
+      "lat": 35.7032,
+      "lng": 139.72648
+    },
+    {
+      "id": "Q11487473",
+      "name": "Yayoi Museum",
+      "lat": 35.71493,
+      "lng": 139.76348
+    },
+    {
+      "id": "Q4902594",
+      "name": "Yokohama History Museum",
+      "lat": 35.5502,
+      "lng": 139.578
+    },
+    {
+      "id": "Q30925115",
+      "name": "Yokoyama Taikan Memorial Hall",
+      "lat": 35.712095,
+      "lng": 139.768166
+    },
+    {
+      "id": "Q131904628",
+      "name": "Yoku Moku Museum",
+      "lat": 35.6596,
+      "lng": 139.714
+    },
+    {
+      "id": "Q38277897",
+      "name": "Yoshimura Akira Commemorative Museum of Modern Literature",
+      "lat": 35.7395,
+      "lng": 139.784194
+    },
+    {
+      "id": "Q140067005",
+      "name": "Yūrakuchō Museum",
+      "lat": 35.676725,
+      "lng": 139.763775
+    },
+    {
+      "id": "Q2855971",
+      "name": "Yūshūkan",
+      "lat": 35.69513,
+      "lng": 139.74333
+    },
+    {
+      "id": "Q3915272",
+      "name": "Zoshigaya Missionary Museum",
+      "lat": 35.720722,
+      "lng": 139.720583
+    },
+    {
+      "id": "Q116026360",
+      "name": "Zukan Museum Ginza",
+      "lat": 35.672392,
+      "lng": 139.762414
+    },
+    {
+      "id": "Q17193183",
+      "name": "いたばしボローニャ絵本館",
+      "lat": 35.762917,
+      "lng": 139.681639
+    },
+    {
+      "id": "Q104698236",
+      "name": "井草民俗資料館",
+      "lat": 35.716478,
+      "lng": 139.595119
+    },
+    {
+      "id": "Q11501293",
+      "name": "新京成鉄道模型館",
+      "lat": 35.789667,
+      "lng": 139.916472
+    },
+    {
+      "id": "Q140197839",
+      "name": "築堤ギャラリー",
+      "lat": 35.637943,
+      "lng": 139.74112
+    }
+  ]
+}
