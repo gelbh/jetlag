@@ -1,11 +1,18 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  getAskMapPlacementActive,
+  resetAskMapPlacementStoreForTests,
+} from "@/hooks/progress/askMapPlacementStore";
 import { jetlagTheme } from "@/theme/theme";
 import { AskMapPlacementChrome } from "./AskMapPlacementChrome";
 
 beforeEach(() => {
+  resetAskMapPlacementStoreForTests();
+  document.documentElement.removeAttribute("data-ask-map-placement");
+  document.documentElement.removeAttribute("data-matching-map-placement");
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -41,6 +48,24 @@ function renderChrome(
   );
   return { onUseGps };
 }
+
+describe("AskMapPlacementChrome placement store and CSS bridge", () => {
+  it("sets store active and data-ask-map-placement while mounted", () => {
+    renderChrome({ phase: "locating", answerSlot: undefined });
+
+    expect(getAskMapPlacementActive()).toBe(true);
+    expect(document.documentElement.hasAttribute("data-ask-map-placement")).toBe(true);
+    expect(document.documentElement.getAttribute("data-ask-map-placement")).toBe("1");
+  });
+
+  it("clears store and removes attribute on unmount", () => {
+    renderChrome({ phase: "locating", answerSlot: undefined });
+    cleanup();
+
+    expect(getAskMapPlacementActive()).toBe(false);
+    expect(document.documentElement.hasAttribute("data-ask-map-placement")).toBe(false);
+  });
+});
 
 describe("AskMapPlacementChrome answer-phase errors", () => {
   it("shows inline error under the question card when phase is answer", () => {

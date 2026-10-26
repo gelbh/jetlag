@@ -6,6 +6,7 @@ import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineE
 import { compactFilledStyles, mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { GlobalLoadProgressList } from "@/components/ui/feedback/GlobalLoadProgressList";
 import { LoadProgress } from "@/components/ui/feedback/LoadProgress";
+import { setAskMapPlacementActive } from "@/hooks/progress/askMapPlacementStore";
 import { useLoadTask } from "@/hooks/progress/useLoadTask";
 import { cn } from "@/lib/cn";
 import type { LoadTask } from "@/services/core/progress/loadTask";
@@ -199,12 +200,14 @@ export function AskMapPlacementChrome({
   const bottomClearance = bottomClearanceForPhase(phase, Boolean(failedErrorCopy), answerTall);
 
   useEffect(() => {
+    setAskMapPlacementActive(true);
     const root = document.documentElement;
     root.setAttribute("data-ask-map-placement", "1");
     root.setAttribute("data-matching-map-placement", "1");
     root.style.setProperty("--ask-map-placement-bottom-clearance", bottomClearance);
     root.style.setProperty("--matching-map-bottom-clearance", bottomClearance);
     return () => {
+      setAskMapPlacementActive(false);
       root.removeAttribute("data-ask-map-placement");
       root.removeAttribute("data-matching-map-placement");
       root.style.removeProperty("--ask-map-placement-bottom-clearance");
