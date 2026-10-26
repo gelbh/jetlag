@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.10.0";
+export const APP_VERSION = "1.11.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,40 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.11.0",
+    date: "2026-10-26",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Ask measuring progress sits under the question instead of covering Send",
+          "Confirming coastline no longer looks overdue while waiting for the map server",
+          "Dublin coastline measuring drops short inland harbour loops that skewed shade",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Sessions with a transit metro use GTFS stops for hiding zones, Measuring rail stations, and Transit Line matching, with an optional mode filter on create.",
+          "Join shows session details and role cards as soon as a valid code resolves, with Join enabled only after you pick a role.",
+          "Region packs with empty POI stubs (Sydney and other metros) now ship filled Wikidata places where available.",
+          "Map float progress and siege chips use the same frosted chrome as ask HUD",
+          "Measuring coastline keeps mid-size inland islands by area so shade can look more accurate",
+          "Create Preset picker groups by parent region and searches by name or place",
+          "Shorter phones get tighter spacing on Home entry and the seeker map chrome",
+          "App updates apply faster after Leave & refresh or Refresh now (reload as soon as the new version takes over; Safari still has a short safety wait)",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "refactor: Ask map placement progress reads a React store instead of watching the DOM",
+          "Create session: combine multiple presets into one play area (union), using the first selected preset for rules.",
+        ],
+      },
+    ],
+  },
   {
     version: "1.10.0",
     date: "2026-10-25",
