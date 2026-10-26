@@ -28,4 +28,15 @@ describe("matchingFeaturesCacheKey", () => {
     expect(filtered).toContain("filter:tram");
     expect(filtered).not.toBe(base);
   });
+
+  it("normalizes mode array order so cache keys match", () => {
+    const a = matchingFeaturesCacheKey(AREA, "transit_line", {
+      transitStationFilter: ["tram", "metro"],
+    });
+    const b = matchingFeaturesCacheKey(AREA, "transit_line", {
+      transitStationFilter: ["metro", "tram"],
+    });
+    expect(a).toBe(b);
+    expect(a).toContain("filter:metro,tram");
+  });
 });
