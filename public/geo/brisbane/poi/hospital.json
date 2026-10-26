@@ -1,0 +1,156 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q85142306",
+      "name": "Caboolture Hospital",
+      "lat": -27.0802,
+      "lng": 152.9637
+    },
+    {
+      "id": "Q24089789",
+      "name": "Fortitude Valley Child Health Centre",
+      "lat": -27.4562,
+      "lng": 153.0331
+    },
+    {
+      "id": "Q30279988",
+      "name": "Holy Spirit Northside Private Hospital",
+      "lat": -27.39081,
+      "lng": 153.023948
+    },
+    {
+      "id": "Q6065590",
+      "name": "Ipswich Hospital",
+      "lat": -27.619267,
+      "lng": 152.758842
+    },
+    {
+      "id": "Q24089904",
+      "name": "Ipswich Mental Hospital",
+      "lat": -27.6284,
+      "lng": 152.7555
+    },
+    {
+      "id": "Q16893884",
+      "name": "Lady Bowen Hospital, Spring Hill",
+      "lat": -27.461,
+      "lng": 153.02
+    },
+    {
+      "id": "Q6667071",
+      "name": "Logan Hospital",
+      "lat": -27.6668,
+      "lng": 153.149
+    },
+    {
+      "id": "Q30280909",
+      "name": "Mater Adult Hospital",
+      "lat": -27.484905,
+      "lng": 153.026868
+    },
+    {
+      "id": "Q30280910",
+      "name": "Mater Children's Hospital",
+      "lat": -27.48362,
+      "lng": 153.026496
+    },
+    {
+      "id": "Q30280918",
+      "name": "Mater Mothers' Hospital",
+      "lat": -27.485572,
+      "lng": 153.0276
+    },
+    {
+      "id": "Q30280917",
+      "name": "Mater Private Hospital",
+      "lat": -27.484069,
+      "lng": 153.0286
+    },
+    {
+      "id": "Q7244522",
+      "name": "Princess Alexandra Hospital, Brisbane",
+      "lat": -27.4993,
+      "lng": 153.0332
+    },
+    {
+      "id": "Q7270363",
+      "name": "Queen Elizabeth II Jubilee Hospital",
+      "lat": -27.5594,
+      "lng": 153.0489
+    },
+    {
+      "id": "Q7270916",
+      "name": "Queensland Children's Hospital",
+      "lat": -27.483972,
+      "lng": 153.027972
+    },
+    {
+      "id": "Q50036976",
+      "name": "Redcliffe Hospital",
+      "lat": -27.228336,
+      "lng": 153.104851
+    },
+    {
+      "id": "Q7306019",
+      "name": "Redland Hospital",
+      "lat": -27.540311,
+      "lng": 153.251833
+    },
+    {
+      "id": "Q7373845",
+      "name": "Royal Brisbane and Women's Hospital",
+      "lat": -27.4469,
+      "lng": 153.0283
+    },
+    {
+      "id": "Q42850202",
+      "name": "Royal Children's Hospital, Brisbane",
+      "lat": -27.4495,
+      "lng": 153.0251
+    },
+    {
+      "id": "Q16932711",
+      "name": "St Martin's House",
+      "lat": -27.4642,
+      "lng": 153.0297
+    },
+    {
+      "id": "Q7595608",
+      "name": "St Vincent's Private Hospital Brisbane",
+      "lat": -27.4734,
+      "lng": 153.035
+    },
+    {
+      "id": "Q109729188",
+      "name": "St Vincent's Private Hospital, Northside",
+      "lat": -27.390658,
+      "lng": 153.023735
+    },
+    {
+      "id": "Q7756132",
+      "name": "The Park Centre for Mental Health",
+      "lat": -27.5999,
+      "lng": 152.91
+    },
+    {
+      "id": "Q7758249",
+      "name": "The Prince Charles Hospital",
+      "lat": -27.3899,
+      "lng": 153.023
+    },
+    {
+      "id": "Q7983933",
+      "name": "Wesley Hospital",
+      "lat": -27.477583,
+      "lng": 152.9975
+    }
+  ]
+}

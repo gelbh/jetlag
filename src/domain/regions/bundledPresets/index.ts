@@ -5,6 +5,7 @@ import { defaultAdvancedSessionSettings } from "../../session/tools/advancedSess
 import { mergeRegionPackFlavorCategories } from "../regionPackFlavorCategories";
 import { attachPlayArea } from "./attachPlayArea";
 import { australiaPresets } from "./australia";
+import { brisbanePresets } from "./brisbane";
 import { brusselsPresets } from "./brussels";
 import { dublinPresets } from "./dublin";
 import { londonPresets } from "./london";
@@ -34,6 +35,7 @@ export const BUNDLED_GAME_PRESET_DEFINITIONS: readonly BundledGamePresetDefiniti
   ...australiaPresets(),
   ...sydneyPresets(),
   ...brusselsPresets(),
+  ...brisbanePresets(),
 ];
 
 export function isBundledPresetId(id: string): boolean {

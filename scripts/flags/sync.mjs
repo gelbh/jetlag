@@ -18,6 +18,10 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import {
+  BRISBANE_WARD_FLAG_OVERRIDES,
+  ensureBrisbaneWardOverridePngs,
+} from "./brisbane-ward-flags.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "../..");
@@ -324,6 +328,7 @@ const WIKIDATA = {
   "zurich-city": { qid: "Q72", alt: "Zürich" },
   "region-brussels-capital": { qid: "Q240", alt: "Brussels-Capital Region" },
   "metro-brussels": { qid: "Q240", alt: "Brussels" },
+  "metro-brisbane": { qid: "Q34932", alt: "Brisbane" },
   // Bare communeId keys match preset subregionId (NYC borough pattern).
   anderlecht: { qid: "Q275268", alt: "Anderlecht" },
   auderghem: { qid: "Q237243", alt: "Auderghem" },
@@ -527,6 +532,7 @@ async function writeAsset(assets, segmentId, { alt, source, identity, presentati
 }
 
 async function main() {
+  await ensureBrisbaneWardOverridePngs();
   await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
 
@@ -674,6 +680,27 @@ async function main() {
     const srcPath = path.join(overrideDir, file);
     const dest = path.join(outDir, file);
     process.stdout.write(`Local ${segmentId} ← ${file}… `);
+    try {
+      await finalizePng(srcPath, dest, presentation);
+      await writeAsset(assets, segmentId, {
+        alt,
+        source: `local:${file}`,
+        identity,
+        presentation,
+        destPath: dest,
+      });
+      console.log("ok");
+    } catch (error) {
+      console.log(`fail (${error.message}) — skip`);
+    }
+  }
+
+  for (const [segmentId, { file, alt, identity, presentation }] of Object.entries(
+    BRISBANE_WARD_FLAG_OVERRIDES,
+  )) {
+    const srcPath = path.join(overrideDir, file);
+    const dest = path.join(outDir, file);
+    process.stdout.write(`BrisbaneWard ${segmentId} ← ${file}… `);
     try {
       await finalizePng(srcPath, dest, presentation);
       await writeAsset(assets, segmentId, {

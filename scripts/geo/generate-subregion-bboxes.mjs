@@ -28,6 +28,7 @@ const SOURCES = [
   { packId: "zurich", file: "districts.geojson", idProperty: "districtId" },
   { packId: "lucerne", file: "districts.geojson", idProperty: "districtId" },
   { packId: "brussels", file: "communes.geojson", idProperty: "communeId" },
+  { packId: "brisbane", file: "wards.geojson", idProperty: "wardId" },
 ];
 
 const ROUND_DECIMALS = 4;

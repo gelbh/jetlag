@@ -118,6 +118,46 @@ describe("bundledPresetFlags", () => {
     }
   });
 
+  it("ships distinct flag or coat marks for every Brisbane preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:brisbane")?.src).toBe(
+      "/region-flags/metro-brisbane.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-au"].source).toMatch(/^flagcdn:au$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["state-qld"].source).toMatch(/^wikidata:Q36074:/);
+    for (const ward of [
+      "bracken-ridge",
+      "calamvale",
+      "central",
+      "chandler",
+      "coorparoo",
+      "deagon",
+      "doboy",
+      "enoggera",
+      "forest-lake",
+      "hamilton",
+      "holland-park",
+      "jamboree",
+      "macgregor",
+      "marchant",
+      "mcdowall",
+      "moorooka",
+      "morningside",
+      "northgate",
+      "paddington",
+      "pullenvale",
+      "runcorn",
+      "tennyson",
+      "the-gabba",
+      "the-gap",
+      "walter-taylor",
+      "wynnum-manly",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:brisbane-${ward}`);
+      expect(mark, ward).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${ward}.png`);
+    }
+  });
+
   it("uses Osaka ward flower marks on ward leaves", () => {
     expect(flagMarkForBundledPresetId("bundled:osaka-ward-27127")?.src).toBe(
       "/region-flags/ward-27127.png",

@@ -1,0 +1,36 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q4733588",
+      "name": "Alma Park Zoo",
+      "lat": -27.2267,
+      "lng": 152.983
+    },
+    {
+      "id": "Q141606010",
+      "name": "Bribie Island Butterfly House",
+      "lat": -27.079869,
+      "lng": 153.178972
+    },
+    {
+      "id": "Q110641395",
+      "name": "Ipswich Nature Centre",
+      "lat": -27.61891,
+      "lng": 152.76717
+    },
+    {
+      "id": "Q641873",
+      "name": "Lone Pine Koala Sanctuary",
+      "lat": -27.5329,
+      "lng": 152.969
+    }
+  ]
+}

@@ -1,0 +1,324 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q47001585",
+      "name": "Balmoral Cineplex",
+      "lat": -27.451347,
+      "lng": 153.059456
+    },
+    {
+      "id": "Q47001378",
+      "name": "BCC Cinemas Strathpine",
+      "lat": -27.307133,
+      "lng": 152.990899
+    },
+    {
+      "id": "Q47001382",
+      "name": "BCC Cinemas Toombul",
+      "lat": -27.409015,
+      "lng": 153.061338
+    },
+    {
+      "id": "Q45308261",
+      "name": "Ben & Jerry's Openair Cinema Brisbane",
+      "lat": -27.393787,
+      "lng": 152.982469
+    },
+    {
+      "id": "Q47001335",
+      "name": "Birch Carroll and Coyle Cinemas Ipswich",
+      "lat": -27.613944,
+      "lng": 152.757873
+    },
+    {
+      "id": "Q45308256",
+      "name": "Boomerang Theatre",
+      "lat": -27.503798,
+      "lng": 153.034375
+    },
+    {
+      "id": "Q47001263",
+      "name": "Bribie Twin Theatre",
+      "lat": -27.078003,
+      "lng": 153.18139
+    },
+    {
+      "id": "Q45308268",
+      "name": "Brisbane City Cinemas",
+      "lat": -27.470474,
+      "lng": 153.026083
+    },
+    {
+      "id": "Q47001405",
+      "name": "Capalaba Drive-In",
+      "lat": -27.534744,
+      "lng": 153.204609
+    },
+    {
+      "id": "Q45308272",
+      "name": "Carlton Theatre",
+      "lat": -27.470132,
+      "lng": 153.024565
+    },
+    {
+      "id": "Q47001269",
+      "name": "Event Cinemas Browns Plain",
+      "lat": -27.662739,
+      "lng": 153.040202
+    },
+    {
+      "id": "Q47001279",
+      "name": "Event Cinemas Capalaba",
+      "lat": -27.523226,
+      "lng": 153.195239
+    },
+    {
+      "id": "Q47001282",
+      "name": "Event Cinemas Carindale",
+      "lat": -27.503158,
+      "lng": 153.101651
+    },
+    {
+      "id": "Q47001586",
+      "name": "Event Cinemas Chermside",
+      "lat": -27.385965,
+      "lng": 153.030822
+    },
+    {
+      "id": "Q47001387",
+      "name": "Event Cinemas Garden City Mt Gravatt",
+      "lat": -27.559992,
+      "lng": 153.081135
+    },
+    {
+      "id": "Q47001592",
+      "name": "Event Cinemas Indooroopilly",
+      "lat": -27.499167,
+      "lng": 152.972694
+    },
+    {
+      "id": "Q47001338",
+      "name": "Event Cinemas Loganholme",
+      "lat": -27.658748,
+      "lng": 153.169309
+    },
+    {
+      "id": "Q47001351",
+      "name": "Event Cinemas Morayfield",
+      "lat": -27.104494,
+      "lng": 152.947287
+    },
+    {
+      "id": "Q47001362",
+      "name": "Event Cinemas North Lakes",
+      "lat": -27.242586,
+      "lng": 153.020684
+    },
+    {
+      "id": "Q45308277",
+      "name": "Forum Theatre",
+      "lat": -27.470746,
+      "lng": 153.025906
+    },
+    {
+      "id": "Q47001404",
+      "name": "Galaxy Drive-In",
+      "lat": -27.473208,
+      "lng": 153.100544
+    },
+    {
+      "id": "Q47001587",
+      "name": "Globe Theatre",
+      "lat": -27.456509,
+      "lng": 153.032679
+    },
+    {
+      "id": "Q47001591",
+      "name": "Hawthorne Cinema",
+      "lat": -27.462369,
+      "lng": 153.060492
+    },
+    {
+      "id": "Q47001337",
+      "name": "Hoyts Redcliffe",
+      "lat": -27.225887,
+      "lng": 153.087748
+    },
+    {
+      "id": "Q47001600",
+      "name": "Hoyts Stafford",
+      "lat": -27.409979,
+      "lng": 153.012617
+    },
+    {
+      "id": "Q47001601",
+      "name": "Hoyts Sunnybank",
+      "lat": -27.571975,
+      "lng": 153.064175
+    },
+    {
+      "id": "Q47001424",
+      "name": "Keperra Drive-In",
+      "lat": -27.414548,
+      "lng": 152.94888
+    },
+    {
+      "id": "Q47001594",
+      "name": "Moonlight Cinema Brisbane",
+      "lat": -27.46653,
+      "lng": 153.051633
+    },
+    {
+      "id": "Q45308282",
+      "name": "Myer Centre 8",
+      "lat": -27.470647,
+      "lng": 153.02489
+    },
+    {
+      "id": "Q47001596",
+      "name": "New Farm Six Cinemas",
+      "lat": -27.464783,
+      "lng": 153.042642
+    },
+    {
+      "id": "Q45308285",
+      "name": "Odeon Theatre",
+      "lat": -27.468911,
+      "lng": 153.027164
+    },
+    {
+      "id": "Q47001588",
+      "name": "Palace Centro Cinemas",
+      "lat": -27.457245,
+      "lng": 153.039666
+    },
+    {
+      "id": "Q45308290",
+      "name": "Paris Cinema",
+      "lat": -27.470177,
+      "lng": 153.025398
+    },
+    {
+      "id": "Q45308297",
+      "name": "Pavilion Theatre",
+      "lat": -27.467565,
+      "lng": 153.027927
+    },
+    {
+      "id": "Q18754811",
+      "name": "Plaza Theatre",
+      "lat": -27.4581,
+      "lng": 152.995
+    },
+    {
+      "id": "Q47001445",
+      "name": "Redcliffe Drive-In",
+      "lat": -27.242798,
+      "lng": 153.08575
+    },
+    {
+      "id": "Q47001371",
+      "name": "Redcliffe Picture Palace",
+      "lat": -27.228031,
+      "lng": 153.113922
+    },
+    {
+      "id": "Q47001589",
+      "name": "Regal Twin Cinemas",
+      "lat": -27.522222,
+      "lng": 152.97595
+    },
+    {
+      "id": "Q7308111",
+      "name": "Regent Theatre",
+      "lat": -27.4699,
+      "lng": 153.027
+    },
+    {
+      "id": "Q47001446",
+      "name": "Richlands Drive-In",
+      "lat": -27.587853,
+      "lng": 152.958822
+    },
+    {
+      "id": "Q7432113",
+      "name": "Schonell Theatre",
+      "lat": -27.4971,
+      "lng": 153.015
+    },
+    {
+      "id": "Q47001410",
+      "name": "Skyline Drive-In",
+      "lat": -27.564817,
+      "lng": 153.049596
+    },
+    {
+      "id": "Q47001599",
+      "name": "Southbank 5 Cinemas",
+      "lat": -27.478842,
+      "lng": 153.021545
+    },
+    {
+      "id": "Q47001392",
+      "name": "Starlight Drive-In",
+      "lat": -27.362785,
+      "lng": 153.009311
+    },
+    {
+      "id": "Q47001597",
+      "name": "State Theatre",
+      "lat": -27.453006,
+      "lng": 153.004315
+    },
+    {
+      "id": "Q47001409",
+      "name": "Tivoli Drive-In",
+      "lat": -27.57037,
+      "lng": 152.784031
+    },
+    {
+      "id": "Q45308303",
+      "name": "Tivoli Theatre and Roof Garden",
+      "lat": -27.468462,
+      "lng": 153.023961
+    },
+    {
+      "id": "Q45308308",
+      "name": "Tribal Theatre",
+      "lat": -27.469148,
+      "lng": 153.021737
+    },
+    {
+      "id": "Q19880075",
+      "name": "Triumph Cinema",
+      "lat": -27.4884,
+      "lng": 153.047
+    },
+    {
+      "id": "Q47001593",
+      "name": "United Cinemas El Dorado",
+      "lat": -27.50305,
+      "lng": 152.974953
+    },
+    {
+      "id": "Q47001444",
+      "name": "Western Drive-In",
+      "lat": -27.549886,
+      "lng": 152.958311
+    },
+    {
+      "id": "Q45308313",
+      "name": "Winter Garden Theatre",
+      "lat": -27.468911,
+      "lng": 153.027164
+    }
+  ]
+}

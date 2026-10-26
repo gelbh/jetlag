@@ -26,6 +26,7 @@ const PACK_IDS = [
   "southampton",
   "australia",
   "brussels",
+  "brisbane",
 ];
 
 const PACK_BBOXES = {
@@ -66,6 +67,12 @@ const PACK_BBOXES = {
     west: 4.2338,
     north: 50.9239,
     east: 4.4923,
+  },
+  brisbane: {
+    south: -27.6702,
+    west: 152.6697,
+    north: -27.0116,
+    east: 153.4782,
   },
 };
 

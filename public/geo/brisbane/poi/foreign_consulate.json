@@ -1,0 +1,18 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q66085161",
+      "name": "Consulate-General of Japan, Brisbane",
+      "lat": -27.468472,
+      "lng": 153.029583
+    }
+  ]
+}

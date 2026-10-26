@@ -1,0 +1,150 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q17000681",
+      "name": "Abbey Museum of Art and Archaeology",
+      "lat": -27.0709,
+      "lng": 153.023
+    },
+    {
+      "id": "Q130755218",
+      "name": "Australian Cinémathèque",
+      "lat": -27.4726,
+      "lng": 153.01828
+    },
+    {
+      "id": "Q4965829",
+      "name": "Bribie Island Seaside Museum",
+      "lat": -27.0859,
+      "lng": 153.159
+    },
+    {
+      "id": "Q4968620",
+      "name": "Brisbane Tramway Museum",
+      "lat": -27.4073,
+      "lng": 152.938
+    },
+    {
+      "id": "Q5152612",
+      "name": "Commissariat Store, Brisbane",
+      "lat": -27.47327,
+      "lng": 153.02425
+    },
+    {
+      "id": "Q48642",
+      "name": "Fort Lytton National Park",
+      "lat": -27.412222,
+      "lng": 153.15
+    },
+    {
+      "id": "Q112920181",
+      "name": "Griffith University Art Museum",
+      "lat": -27.481802,
+      "lng": 153.024165
+    },
+    {
+      "id": "Q3061684",
+      "name": "HMAS Diamantina",
+      "lat": -27.4819,
+      "lng": 153.027
+    },
+    {
+      "id": "Q87734889",
+      "name": "MAAP",
+      "lat": -27.455,
+      "lng": 153.03525
+    },
+    {
+      "id": "Q30315197",
+      "name": "Marks-Hirschfeld Museum of Medical History",
+      "lat": -27.4482,
+      "lng": 153.0238
+    },
+    {
+      "id": "Q1389172",
+      "name": "Museum of Brisbane",
+      "lat": -27.4688,
+      "lng": 153.023
+    },
+    {
+      "id": "Q60746927",
+      "name": "Museum of Lands, Mapping and Surveying",
+      "lat": -27.4651,
+      "lng": 153.025
+    },
+    {
+      "id": "Q14935534",
+      "name": "North Stradbroke Island Historical Museum",
+      "lat": -27.4977,
+      "lng": 153.404
+    },
+    {
+      "id": "Q104604483",
+      "name": "Old Petrie Town",
+      "lat": -27.261195,
+      "lng": 152.953629
+    },
+    {
+      "id": "Q19917343",
+      "name": "QAGOMA",
+      "lat": -27.4726,
+      "lng": 153.01828
+    },
+    {
+      "id": "Q7270964",
+      "name": "Queensland Maritime Museum",
+      "lat": -27.4819,
+      "lng": 153.026
+    },
+    {
+      "id": "Q1537684",
+      "name": "Queensland Museum",
+      "lat": -27.473173,
+      "lng": 153.017423
+    },
+    {
+      "id": "Q60740586",
+      "name": "Queensland Police Museum",
+      "lat": -27.4666,
+      "lng": 153.018
+    },
+    {
+      "id": "Q23073813",
+      "name": "Redland Museum",
+      "lat": -27.534242,
+      "lng": 153.259663
+    },
+    {
+      "id": "Q7527050",
+      "name": "Sir Harry Gibbs Legal Heritage Centre",
+      "lat": -27.4676,
+      "lng": 153.021
+    },
+    {
+      "id": "Q18166789",
+      "name": "University of Queensland Anthropology Museum",
+      "lat": -27.4973,
+      "lng": 153.012
+    },
+    {
+      "id": "Q7896183",
+      "name": "University of Queensland Art Museum",
+      "lat": -27.4965,
+      "lng": 153.012
+    },
+    {
+      "id": "Q22032353",
+      "name": "Workshops Rail Museum",
+      "lat": -27.6023,
+      "lng": 152.7572
+    }
+  ]
+}

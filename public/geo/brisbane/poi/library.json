@@ -1,0 +1,384 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q85461679",
+      "name": "Albany Creek Library",
+      "lat": -27.344783,
+      "lng": 152.968287
+    },
+    {
+      "id": "Q85461690",
+      "name": "Amity Point Library",
+      "lat": -27.395949,
+      "lng": 153.440373
+    },
+    {
+      "id": "Q85461693",
+      "name": "Annerley Library",
+      "lat": -27.509441,
+      "lng": 153.033381
+    },
+    {
+      "id": "Q85461700",
+      "name": "Arana Hills Library",
+      "lat": -27.394612,
+      "lng": 152.948974
+    },
+    {
+      "id": "Q56564119",
+      "name": "Ashgrove Library",
+      "lat": -27.444395,
+      "lng": 152.987098
+    },
+    {
+      "id": "Q85461723",
+      "name": "Banyo Library",
+      "lat": -27.374268,
+      "lng": 153.075954
+    },
+    {
+      "id": "Q85461862",
+      "name": "Bracken Ridge Library",
+      "lat": -27.317972,
+      "lng": 153.037873
+    },
+    {
+      "id": "Q85461865",
+      "name": "Bribie Island Library",
+      "lat": -27.083525,
+      "lng": 153.159231
+    },
+    {
+      "id": "Q85465322",
+      "name": "Brisbane mobile library services",
+      "lat": -27.470842,
+      "lng": 153.022721
+    },
+    {
+      "id": "Q85461870",
+      "name": "Brisbane Square Library",
+      "lat": -27.470837,
+      "lng": 153.022455
+    },
+    {
+      "id": "Q85461879",
+      "name": "Bulimba Library",
+      "lat": -27.452083,
+      "lng": 153.06286
+    },
+    {
+      "id": "Q85461964",
+      "name": "Burpengary Library",
+      "lat": -27.155202,
+      "lng": 152.967303
+    },
+    {
+      "id": "Q85461977",
+      "name": "Caboolture Library",
+      "lat": -27.083668,
+      "lng": 152.951261
+    },
+    {
+      "id": "Q5034504",
+      "name": "Capalaba Library",
+      "lat": -27.523,
+      "lng": 153.193
+    },
+    {
+      "id": "Q85462157",
+      "name": "Carina Library",
+      "lat": -27.493334,
+      "lng": 153.090068
+    },
+    {
+      "id": "Q85462161",
+      "name": "Carindale Library",
+      "lat": -27.501353,
+      "lng": 153.100562
+    },
+    {
+      "id": "Q85462327",
+      "name": "Chermside Library",
+      "lat": -27.38621,
+      "lng": 153.032693
+    },
+    {
+      "id": "Q85462404",
+      "name": "Cleveland Library",
+      "lat": -27.525767,
+      "lng": 153.266946
+    },
+    {
+      "id": "Q85462486",
+      "name": "Coopers Plains Library",
+      "lat": -27.565053,
+      "lng": 153.096605
+    },
+    {
+      "id": "Q85462493",
+      "name": "Corinda Library",
+      "lat": -27.538885,
+      "lng": 152.981475
+    },
+    {
+      "id": "Q85462516",
+      "name": "Deception Bay Library",
+      "lat": -27.185159,
+      "lng": 153.029546
+    },
+    {
+      "id": "Q85462618",
+      "name": "Dunwich Library",
+      "lat": -27.501486,
+      "lng": 153.404095
+    },
+    {
+      "id": "Q85462731",
+      "name": "Everton Park Library",
+      "lat": -27.405307,
+      "lng": 152.990503
+    },
+    {
+      "id": "Q85462735",
+      "name": "Fairfield Libary",
+      "lat": -27.509219,
+      "lng": 153.026714
+    },
+    {
+      "id": "Q85462745",
+      "name": "Garden City Library",
+      "lat": -27.562695,
+      "lng": 153.079847
+    },
+    {
+      "id": "Q85462959",
+      "name": "Grange Library",
+      "lat": -27.425142,
+      "lng": 153.017606
+    },
+    {
+      "id": "Q85463009",
+      "name": "Hamilton Library",
+      "lat": -27.38613,
+      "lng": 153.002051
+    },
+    {
+      "id": "Q85463089",
+      "name": "Holland Park Library",
+      "lat": -27.523092,
+      "lng": 153.072059
+    },
+    {
+      "id": "Q85463125",
+      "name": "Inala Library",
+      "lat": -27.600167,
+      "lng": 152.973768
+    },
+    {
+      "id": "Q56564177",
+      "name": "Indooroopilly Library",
+      "lat": -27.499611,
+      "lng": 152.972644
+    },
+    {
+      "id": "Q85463208",
+      "name": "Ipswich Central Library",
+      "lat": -27.616609,
+      "lng": 152.759952
+    },
+    {
+      "id": "Q85465326",
+      "name": "Ipswich Mobile Library Service",
+      "lat": -27.61696,
+      "lng": 152.760038
+    },
+    {
+      "id": "Q56564129",
+      "name": "Kenmore Library",
+      "lat": -27.506052,
+      "lng": 152.938584
+    },
+    {
+      "id": "Q85463390",
+      "name": "Logan Central Library",
+      "lat": -27.642929,
+      "lng": 153.111659
+    },
+    {
+      "id": "Q85463395",
+      "name": "Logan Hyperdome Library",
+      "lat": -27.655759,
+      "lng": 153.171349
+    },
+    {
+      "id": "Q85463400",
+      "name": "Logan North Library",
+      "lat": -27.610966,
+      "lng": 153.118982
+    },
+    {
+      "id": "Q85463409",
+      "name": "Logan West Library",
+      "lat": -27.665295,
+      "lng": 153.042673
+    },
+    {
+      "id": "Q85463568",
+      "name": "Mitchelton Library",
+      "lat": -27.417154,
+      "lng": 152.978381
+    },
+    {
+      "id": "Q85465332",
+      "name": "Moreton Bay Region Mobile Library",
+      "lat": -27.178626,
+      "lng": 152.983804
+    },
+    {
+      "id": "Q85463591",
+      "name": "Mount Coot-tha Library",
+      "lat": -27.475615,
+      "lng": 152.976016
+    },
+    {
+      "id": "Q85463596",
+      "name": "Mount Gravatt Library",
+      "lat": -27.53868,
+      "lng": 153.080299
+    },
+    {
+      "id": "Q85463604",
+      "name": "Mount Ommaney Library",
+      "lat": -27.548034,
+      "lng": 152.939348
+    },
+    {
+      "id": "Q85463743",
+      "name": "New Farm Library",
+      "lat": -27.467293,
+      "lng": 153.049626
+    },
+    {
+      "id": "Q85463765",
+      "name": "North Lakes Library",
+      "lat": -27.239184,
+      "lng": 153.017566
+    },
+    {
+      "id": "Q85463777",
+      "name": "Nundah Library",
+      "lat": -27.400712,
+      "lng": 153.058333
+    },
+    {
+      "id": "Q134972840",
+      "name": "Queensland Council of Carers",
+      "lat": -27.50041,
+      "lng": 153.07697
+    },
+    {
+      "id": "Q85463887",
+      "name": "Redbank Plains Library",
+      "lat": -27.648284,
+      "lng": 152.863941
+    },
+    {
+      "id": "Q85463892",
+      "name": "Redbank Plaza Branch Library",
+      "lat": -27.605875,
+      "lng": 152.869477
+    },
+    {
+      "id": "Q85463897",
+      "name": "Redcliffe Library",
+      "lat": -27.225116,
+      "lng": 153.110994
+    },
+    {
+      "id": "Q85465338",
+      "name": "Redland Mobile Library",
+      "lat": -27.525603,
+      "lng": 153.266828
+    },
+    {
+      "id": "Q85463937",
+      "name": "Russell Island Library",
+      "lat": -27.647617,
+      "lng": 153.382141
+    },
+    {
+      "id": "Q85463942",
+      "name": "Sandgate Library",
+      "lat": -27.320605,
+      "lng": 153.070492
+    },
+    {
+      "id": "Q2050653",
+      "name": "State Library of Queensland",
+      "lat": -27.471191,
+      "lng": 153.018104
+    },
+    {
+      "id": "Q85464147",
+      "name": "Stones Corner Library",
+      "lat": -27.497925,
+      "lng": 153.043663
+    },
+    {
+      "id": "Q85464155",
+      "name": "Strathpine Library",
+      "lat": -27.311858,
+      "lng": 152.990598
+    },
+    {
+      "id": "Q85464160",
+      "name": "Sunnybank Hills Library",
+      "lat": -27.610537,
+      "lng": 153.0549
+    },
+    {
+      "id": "Q85464230",
+      "name": "Toowong Library",
+      "lat": -27.485812,
+      "lng": 152.99302
+    },
+    {
+      "id": "Q7896192",
+      "name": "University of Queensland Library",
+      "lat": -27.496031,
+      "lng": 153.014753
+    },
+    {
+      "id": "Q85464430",
+      "name": "Victoria Point Library",
+      "lat": -27.584981,
+      "lng": 153.280402
+    },
+    {
+      "id": "Q85464537",
+      "name": "West End Library",
+      "lat": -27.482444,
+      "lng": 153.01186
+    },
+    {
+      "id": "Q85464650",
+      "name": "Wynnum Library",
+      "lat": -27.445,
+      "lng": 153.17168
+    },
+    {
+      "id": "Q85464671",
+      "name": "Zillmere Library",
+      "lat": -27.359812,
+      "lng": 153.040649
+    }
+  ]
+}

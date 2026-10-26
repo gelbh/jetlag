@@ -1,0 +1,20 @@
+City of Brisbane LGA pack geo
+
+Boundaries
+- Ward polygons: Queensland ECQ / Department of Resources Administrative Boundaries (Brisbane City Council ward layer, MapServer/8), © State of Queensland.
+- Display names: Brisbane City Council ward names.
+
+POI
+- Wikidata Query Service (CC0).
+
+Sea level seed
+- Open-Meteo elevation API.
+
+Coastline
+- OpenStreetMap contributors (ODbL 1.0), natural=coastline ways (Moreton Bay / Brisbane River when fetch succeeds).
+
+International border
+- Inland metro stub (empty segments).
+
+GTFS
+- Skipped in v1 (TransLink GTFS not registered; stations use Overpass).
