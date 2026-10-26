@@ -277,4 +277,18 @@ export const REGION_PACK_SUBREGION_REFERENCE_BBOXES: Partial<
     "walter-taylor": { south: -27.5437, west: 152.9471, north: -27.4771, east: 153.0206 },
     "wynnum-manly": { south: -27.4776, west: 153.1361, north: -27.3233, east: 153.2649 },
   },
+  berlin: {
+    "charlottenburg-wilmersdorf": { south: 52.4665, west: 13.1866, north: 52.5494, east: 13.3414 },
+    "friedrichshain-kreuzberg": { south: 52.4828, west: 13.3682, north: 52.531, east: 13.4915 },
+    lichtenberg: { south: 52.4679, west: 13.4562, north: 52.5965, east: 13.5677 },
+    "marzahn-hellersdorf": { south: 52.4705, west: 13.5169, north: 52.5745, east: 13.6585 },
+    mitte: { south: 52.4987, west: 13.3015, north: 52.5677, east: 13.4294 },
+    neukoelln: { south: 52.3959, west: 13.3995, north: 52.4959, east: 13.5241 },
+    pankow: { south: 52.5199, west: 13.3476, north: 52.6755, east: 13.523 },
+    reinickendorf: { south: 52.5488, west: 13.2016, north: 52.6607, east: 13.3893 },
+    spandau: { south: 52.4396, west: 13.1093, north: 52.5988, east: 13.2822 },
+    "steglitz-zehlendorf": { south: 52.3872, west: 13.0883, north: 52.4718, east: 13.3716 },
+    "tempelhof-schoeneberg": { south: 52.3761, west: 13.32, north: 52.5049, east: 13.4275 },
+    "treptow-koepenick": { south: 52.3383, west: 13.4397, north: 52.4976, east: 13.7612 },
+  },
 };

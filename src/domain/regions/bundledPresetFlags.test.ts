@@ -158,6 +158,32 @@ describe("bundledPresetFlags", () => {
     }
   });
 
+  it("ships distinct flag or coat marks for every Berlin preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:berlin")?.src).toBe(
+      "/region-flags/metro-berlin.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-germany"].source).toMatch(/^flagcdn:de$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-berlin"].source).toMatch(/^wikidata:Q64:/);
+    for (const bezirk of [
+      "mitte",
+      "friedrichshain-kreuzberg",
+      "pankow",
+      "charlottenburg-wilmersdorf",
+      "spandau",
+      "steglitz-zehlendorf",
+      "tempelhof-schoeneberg",
+      "neukoelln",
+      "treptow-koepenick",
+      "marzahn-hellersdorf",
+      "lichtenberg",
+      "reinickendorf",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:berlin-${bezirk}`);
+      expect(mark, bezirk).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${bezirk}.png`);
+    }
+  });
+
   it("uses Osaka ward flower marks on ward leaves", () => {
     expect(flagMarkForBundledPresetId("bundled:osaka-ward-27127")?.src).toBe(
       "/region-flags/ward-27127.png",

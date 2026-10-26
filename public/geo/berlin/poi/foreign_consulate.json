@@ -1,0 +1,18 @@
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q2493389",
+      "name": "Embassy of Hungary, Berlin",
+      "lat": 52.5168,
+      "lng": 13.381
+    }
+  ]
+}

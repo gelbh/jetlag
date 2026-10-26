@@ -1,0 +1,684 @@
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q624895",
+      "name": "Aradosee",
+      "lat": 52.3875,
+      "lng": 13.0831
+    },
+    {
+      "id": "Q673340",
+      "name": "Arkenberger Baggersee",
+      "lat": 52.636111,
+      "lng": 13.411111
+    },
+    {
+      "id": "Q16830574",
+      "name": "Barssee",
+      "lat": 52.477338,
+      "lng": 13.215044
+    },
+    {
+      "id": "Q15392080",
+      "name": "Bauersee",
+      "lat": 52.452778,
+      "lng": 13.759722
+    },
+    {
+      "id": "Q26333989",
+      "name": "Biesdorfer Baggersee",
+      "lat": 52.503333,
+      "lng": 13.548889
+    },
+    {
+      "id": "Q31915795",
+      "name": "Blakesee",
+      "lat": 52.566667,
+      "lng": 13.666667
+    },
+    {
+      "id": "Q19636338",
+      "name": "Bogensee",
+      "lat": 52.6425,
+      "lng": 13.47
+    },
+    {
+      "id": "Q31918306",
+      "name": "Borg-See",
+      "lat": 52.65,
+      "lng": 13.683333
+    },
+    {
+      "id": "Q26271357",
+      "name": "Butzer See",
+      "lat": 52.50016,
+      "lng": 13.59125
+    },
+    {
+      "id": "Q1269642",
+      "name": "Dämeritzsee",
+      "lat": 52.422778,
+      "lng": 13.733889
+    },
+    {
+      "id": "Q2407221",
+      "name": "Devil's Lake",
+      "lat": 52.4197,
+      "lng": 13.63
+    },
+    {
+      "id": "Q1208924",
+      "name": "Dianasee",
+      "lat": 52.486463,
+      "lng": 13.268334
+    },
+    {
+      "id": "Q33639165",
+      "name": "Döringsee",
+      "lat": 52.62275,
+      "lng": 13.63472
+    },
+    {
+      "id": "Q26271493",
+      "name": "Elsensee",
+      "lat": 52.49867,
+      "lng": 13.60189
+    },
+    {
+      "id": "Q108458130",
+      "name": "Entenpfuhl",
+      "lat": 52.555961,
+      "lng": 13.330301
+    },
+    {
+      "id": "Q1394216",
+      "name": "Falkenhagener See",
+      "lat": 52.570838,
+      "lng": 13.126786
+    },
+    {
+      "id": "Q111818552",
+      "name": "Fasanenpfuhl",
+      "lat": 52.55083,
+      "lng": 13.58487
+    },
+    {
+      "id": "Q1398420",
+      "name": "Fauler See",
+      "lat": 52.5144,
+      "lng": 13.3407
+    },
+    {
+      "id": "Q59924987",
+      "name": "Fennpfuhl",
+      "lat": 52.52917,
+      "lng": 13.47558
+    },
+    {
+      "id": "Q1404799",
+      "name": "Fennsee",
+      "lat": 52.483628,
+      "lng": 13.315814
+    },
+    {
+      "id": "Q1426847",
+      "name": "Flakensee",
+      "lat": 52.436,
+      "lng": 13.7626
+    },
+    {
+      "id": "Q1433356",
+      "name": "Flughafensee",
+      "lat": 52.566667,
+      "lng": 13.283333
+    },
+    {
+      "id": "Q16801800",
+      "name": "Freseteich",
+      "lat": 52.408173,
+      "lng": 13.374916
+    },
+    {
+      "id": "Q1498553",
+      "name": "Gehrensee",
+      "lat": 52.576,
+      "lng": 13.562
+    },
+    {
+      "id": "Q1531392",
+      "name": "Glienicker Lake",
+      "lat": 52.4114,
+      "lng": 13.0911
+    },
+    {
+      "id": "Q896125",
+      "name": "Griebnitzsee",
+      "lat": 52.3975,
+      "lng": 13.123889
+    },
+    {
+      "id": "Q1546905",
+      "name": "Grimnitzsee",
+      "lat": 52.5149,
+      "lng": 13.2007
+    },
+    {
+      "id": "Q882857",
+      "name": "Groß Glienicker See",
+      "lat": 52.465278,
+      "lng": 13.111111
+    },
+    {
+      "id": "Q15111868",
+      "name": "Großer Spektesee",
+      "lat": 52.545043,
+      "lng": 13.165054
+    },
+    {
+      "id": "Q3908364",
+      "name": "Großer Wannsee",
+      "lat": 52.4275,
+      "lng": 13.173056
+    },
+    {
+      "id": "Q895938",
+      "name": "Grunewaldsee",
+      "lat": 52.470278,
+      "lng": 13.262778
+    },
+    {
+      "id": "Q107400876",
+      "name": "Güterfelder Haussee",
+      "lat": 52.363889,
+      "lng": 13.1875
+    },
+    {
+      "id": "Q26271355",
+      "name": "Habermannsee",
+      "lat": 52.4924,
+      "lng": 13.59364
+    },
+    {
+      "id": "Q1570872",
+      "name": "Halensee",
+      "lat": 52.4947,
+      "lng": 13.2811
+    },
+    {
+      "id": "Q32054340",
+      "name": "Haussee",
+      "lat": 52.55,
+      "lng": 13.633333
+    },
+    {
+      "id": "Q15114169",
+      "name": "Haussee (Seefeld-Löhme)",
+      "lat": 52.6252,
+      "lng": 13.6733
+    },
+    {
+      "id": "Q1595216",
+      "name": "Heiligensee",
+      "lat": 52.60409,
+      "lng": 13.21505
+    },
+    {
+      "id": "Q1613657",
+      "name": "Hermsdorfer See",
+      "lat": 52.6154,
+      "lng": 13.3301
+    },
+    {
+      "id": "Q1614715",
+      "name": "Herthasee",
+      "lat": 52.4883,
+      "lng": 13.2761
+    },
+    {
+      "id": "Q1616489",
+      "name": "Hubertussee",
+      "lat": 52.486301,
+      "lng": 13.28007
+    },
+    {
+      "id": "Q1263106",
+      "name": "Hundekehlesee",
+      "lat": 52.4822,
+      "lng": 13.2589
+    },
+    {
+      "id": "Q181494",
+      "name": "Jungfernsee",
+      "lat": 52.416667,
+      "lng": 13.083333
+    },
+    {
+      "id": "Q1722387",
+      "name": "Kalksee",
+      "lat": 52.458056,
+      "lng": 13.769167
+    },
+    {
+      "id": "Q1623939",
+      "name": "Karpfenteich",
+      "lat": 52.635556,
+      "lng": 13.464722
+    },
+    {
+      "id": "Q16911010",
+      "name": "Karpfenteich im Treptower Park",
+      "lat": 52.484312,
+      "lng": 13.471817
+    },
+    {
+      "id": "Q32063985",
+      "name": "Karutzsee",
+      "lat": 52.410952,
+      "lng": 13.757797
+    },
+    {
+      "id": "Q32064887",
+      "name": "Kiebitzsee",
+      "lat": 52.588139,
+      "lng": 13.655919
+    },
+    {
+      "id": "Q32065012",
+      "name": "Kindelsee",
+      "lat": 52.636311,
+      "lng": 13.3412
+    },
+    {
+      "id": "Q32579887",
+      "name": "Kleiner Müggelsee",
+      "lat": 52.429444,
+      "lng": 13.676944
+    },
+    {
+      "id": "Q32065756",
+      "name": "Kleiner See",
+      "lat": 52.479167,
+      "lng": 13.118889
+    },
+    {
+      "id": "Q453692",
+      "name": "Kleiner Wannsee",
+      "lat": 52.415761,
+      "lng": 13.159431
+    },
+    {
+      "id": "Q63342534",
+      "name": "Kochsee",
+      "lat": 52.526241,
+      "lng": 13.28527
+    },
+    {
+      "id": "Q1778289",
+      "name": "Koenigssee",
+      "lat": 52.4883,
+      "lng": 13.2714
+    },
+    {
+      "id": "Q16216455",
+      "name": "Krossinsee",
+      "lat": 52.364167,
+      "lng": 13.675833
+    },
+    {
+      "id": "Q32068338",
+      "name": "Krumme Laake",
+      "lat": 52.418056,
+      "lng": 13.688056
+    },
+    {
+      "id": "Q568396",
+      "name": "Krumme Lanke",
+      "lat": 52.45,
+      "lng": 13.2311
+    },
+    {
+      "id": "Q32068382",
+      "name": "Krummer See",
+      "lat": 52.580185,
+      "lng": 13.632927
+    },
+    {
+      "id": "Q104215543",
+      "name": "Lake Köppchen",
+      "lat": 52.6265,
+      "lng": 13.3715
+    },
+    {
+      "id": "Q1882699",
+      "name": "Lake Machnow",
+      "lat": 52.397,
+      "lng": 13.222
+    },
+    {
+      "id": "Q697916",
+      "name": "Lake Tegel",
+      "lat": 52.583333,
+      "lng": 13.266667
+    },
+    {
+      "id": "Q1805169",
+      "name": "Langer See",
+      "lat": 52.4052,
+      "lng": 13.6271
+    },
+    {
+      "id": "Q15057377",
+      "name": "Laßzinssee",
+      "lat": 52.5976,
+      "lng": 13.161922
+    },
+    {
+      "id": "Q131873128",
+      "name": "Lichtenrader Dorfteich",
+      "lat": 52.390579,
+      "lng": 13.410439
+    },
+    {
+      "id": "Q258569",
+      "name": "Lietzensee",
+      "lat": 52.507778,
+      "lng": 13.288333
+    },
+    {
+      "id": "Q123186316",
+      "name": "Mahlower See",
+      "lat": 52.36644,
+      "lng": 13.37844
+    },
+    {
+      "id": "Q1886945",
+      "name": "Malchower See",
+      "lat": 52.5742,
+      "lng": 13.4883
+    },
+    {
+      "id": "Q108449394",
+      "name": "Möwensee",
+      "lat": 52.55378,
+      "lng": 13.33382
+    },
+    {
+      "id": "Q694789",
+      "name": "Müggelsee",
+      "lat": 52.433333,
+      "lng": 13.65
+    },
+    {
+      "id": "Q73364635",
+      "name": "Neuer See",
+      "lat": 52.511778,
+      "lng": 13.341861
+    },
+    {
+      "id": "Q95147113",
+      "name": "Neuer See Falkenhagen",
+      "lat": 52.56831,
+      "lng": 13.12541
+    },
+    {
+      "id": "Q15836779",
+      "name": "Nieder Neuendorfer See",
+      "lat": 52.612778,
+      "lng": 13.211111
+    },
+    {
+      "id": "Q1991313",
+      "name": "Nikolassee",
+      "lat": 52.4241,
+      "lng": 13.1926
+    },
+    {
+      "id": "Q2010954",
+      "name": "Obersee",
+      "lat": 52.5486,
+      "lng": 13.4892
+    },
+    {
+      "id": "Q2028278",
+      "name": "Orankesee",
+      "lat": 52.548889,
+      "lng": 13.4825
+    },
+    {
+      "id": "Q59873908",
+      "name": "Pechsee Grunewald",
+      "lat": 52.48209,
+      "lng": 13.21272
+    },
+    {
+      "id": "Q33084959",
+      "name": "Pichelssee",
+      "lat": 52.507383,
+      "lng": 13.201156
+    },
+    {
+      "id": "Q138872392",
+      "name": "Pieperpfuhl",
+      "lat": 52.485691,
+      "lng": 13.697446
+    },
+    {
+      "id": "Q32224685",
+      "name": "Pietzstall",
+      "lat": 52.61587,
+      "lng": 13.64871
+    },
+    {
+      "id": "Q541313",
+      "name": "Plötzensee",
+      "lat": 52.543889,
+      "lng": 13.330278
+    },
+    {
+      "id": "Q1236041",
+      "name": "Pohlesee",
+      "lat": 52.4114,
+      "lng": 13.15
+    },
+    {
+      "id": "Q59616382",
+      "name": "Rainwater retention basins in the district of Marzahn-Hellersdorf",
+      "lat": 52.545,
+      "lng": 13.585
+    },
+    {
+      "id": "Q48261223",
+      "name": "Rohrpfuhl",
+      "lat": 52.5142,
+      "lng": 13.61458
+    },
+    {
+      "id": "Q2202929",
+      "name": "Röthepfuhl",
+      "lat": 52.3743,
+      "lng": 13.2598
+    },
+    {
+      "id": "Q1114660",
+      "name": "Rummelsburger See",
+      "lat": 52.4948,
+      "lng": 13.4795
+    },
+    {
+      "id": "Q464562",
+      "name": "Sacrower See",
+      "lat": 52.440538,
+      "lng": 13.097324
+    },
+    {
+      "id": "Q2258294",
+      "name": "Schäfersee",
+      "lat": 52.5644,
+      "lng": 13.3611
+    },
+    {
+      "id": "Q19697563",
+      "name": "Scharfe Lanke",
+      "lat": 52.5088,
+      "lng": 13.19279
+    },
+    {
+      "id": "Q124718891",
+      "name": "Schilfteich",
+      "lat": 52.51456,
+      "lng": 13.55613
+    },
+    {
+      "id": "Q896095",
+      "name": "Schlachtensee",
+      "lat": 52.442778,
+      "lng": 13.216667
+    },
+    {
+      "id": "Q1313714",
+      "name": "Schleipfuhl",
+      "lat": 52.5283,
+      "lng": 13.6103
+    },
+    {
+      "id": "Q32285875",
+      "name": "Schleusensee",
+      "lat": 52.5946,
+      "lng": 13.620561
+    },
+    {
+      "id": "Q2264279",
+      "name": "Seddinsee",
+      "lat": 52.3876,
+      "lng": 13.6793
+    },
+    {
+      "id": "Q108514940",
+      "name": "Septimerbecken",
+      "lat": 52.565977,
+      "lng": 13.341732
+    },
+    {
+      "id": "Q108457984",
+      "name": "Sperlingsee",
+      "lat": 52.555256,
+      "lng": 13.331248
+    },
+    {
+      "id": "Q56395569",
+      "name": "Springpfuhl",
+      "lat": 52.52913,
+      "lng": 13.54087
+    },
+    {
+      "id": "Q84075401",
+      "name": "Steinberg pond",
+      "lat": 52.5975,
+      "lng": 13.308611
+    },
+    {
+      "id": "Q32749102",
+      "name": "Steinhöfel",
+      "lat": 52.566667,
+      "lng": 13.616667
+    },
+    {
+      "id": "Q2360565",
+      "name": "Stölpchensee",
+      "lat": 52.4092,
+      "lng": 13.1406
+    },
+    {
+      "id": "Q1968543",
+      "name": "Stößensee",
+      "lat": 52.508056,
+      "lng": 13.211667
+    },
+    {
+      "id": "Q97444507",
+      "name": "Teich Rudow",
+      "lat": 52.406579,
+      "lng": 13.509209
+    },
+    {
+      "id": "Q1793677",
+      "name": "Teufelssee",
+      "lat": 52.4911,
+      "lng": 13.2336
+    },
+    {
+      "id": "Q1484237",
+      "name": "Tiefer See",
+      "lat": 52.405,
+      "lng": 13.0792
+    },
+    {
+      "id": "Q106778863",
+      "name": "Waldsee",
+      "lat": 52.442,
+      "lng": 13.23635
+    },
+    {
+      "id": "Q14537598",
+      "name": "Weidensee",
+      "lat": 52.4826,
+      "lng": 13.6886
+    },
+    {
+      "id": "Q58099803",
+      "name": "Weiher Friedrichsfelde Nord",
+      "lat": 52.515355,
+      "lng": 13.521377
+    },
+    {
+      "id": "Q2557099",
+      "name": "Weißer See",
+      "lat": 52.554167,
+      "lng": 13.464028
+    },
+    {
+      "id": "Q133728610",
+      "name": "Wernsdorfer See",
+      "lat": 52.38575,
+      "lng": 13.71616
+    },
+    {
+      "id": "Q1670887",
+      "name": "Wilmersdorfer See",
+      "lat": 52.483611,
+      "lng": 13.324167
+    },
+    {
+      "id": "Q655452",
+      "name": "Wuhlebecken",
+      "lat": 52.481944,
+      "lng": 13.562222
+    },
+    {
+      "id": "Q2594724",
+      "name": "Wuhleteich",
+      "lat": 52.5297,
+      "lng": 13.583
+    },
+    {
+      "id": "Q59421",
+      "name": "Zeuthener See",
+      "lat": 52.356389,
+      "lng": 13.638611
+    },
+    {
+      "id": "Q198615",
+      "name": "Ziegeleisee",
+      "lat": 52.616667,
+      "lng": 13.333333
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import {
   mergeBundledPresets,
 } from "./bundledGamePresets";
 import { AUSTRALIA_STATE_PRESETS } from "./bundledPresets/australia";
+import { BERLIN_BEZIRKE } from "./bundledPresets/berlin";
 import { BRISBANE_WARDS } from "./bundledPresets/brisbane";
 import { BRUSSELS_COMMUNES } from "./bundledPresets/brussels";
 import { SOUTHAMPTON_WARDS } from "./bundledPresets/southampton";
@@ -36,6 +37,18 @@ describe("bundledGamePresets", () => {
       expect(preset?.hierarchy.at(-1)?.id).toBe(`ward-${ward.id}`);
     }
     expect(presets).toHaveLength(1 + BRISBANE_WARDS.length);
+  });
+
+  it("includes berlin metro and bezirk presets on the berlin pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "berlin");
+    expect(presets.some((p) => p.id === "bundled:berlin")).toBe(true);
+    for (const bezirk of BERLIN_BEZIRKE) {
+      const preset = presets.find((p) => p.id === `bundled:berlin-${bezirk.id}`);
+      expect(preset, bezirk.id).toBeDefined();
+      expect(preset?.subregionId).toBe(bezirk.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(bezirk.id);
+    }
+    expect(presets).toHaveLength(1 + BERLIN_BEZIRKE.length);
   });
 
   it("includes southampton city and ward presets on the southampton pack", () => {

@@ -1,0 +1,4416 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q47092862",
+      "name": "ABC-Kinos",
+      "lat": 52.502084,
+      "lng": 13.324317
+    },
+    {
+      "id": "Q47155464",
+      "name": "ABC-Lichtspiele",
+      "lat": 52.49699,
+      "lng": 13.42629
+    },
+    {
+      "id": "Q47155861",
+      "name": "Aboli-Lichtspiele",
+      "lat": 52.50647,
+      "lng": 13.46934
+    },
+    {
+      "id": "Q414078",
+      "name": "Academy of Arts (Hanseatenweg)",
+      "lat": 52.5179,
+      "lng": 13.3461
+    },
+    {
+      "id": "Q288846",
+      "name": "ACUD",
+      "lat": 52.5334,
+      "lng": 13.4009
+    },
+    {
+      "id": "Q47034787",
+      "name": "Adler-Lichtspiele",
+      "lat": 52.443671,
+      "lng": 13.385825
+    },
+    {
+      "id": "Q359242",
+      "name": "Admiralspalast",
+      "lat": 52.5208,
+      "lng": 13.3886
+    },
+    {
+      "id": "Q47053623",
+      "name": "Adria-Filmbühne",
+      "lat": 52.454724,
+      "lng": 13.321137
+    },
+    {
+      "id": "Q47089278",
+      "name": "AKI",
+      "lat": 52.475507,
+      "lng": 13.44003
+    },
+    {
+      "id": "Q47092807",
+      "name": "AKI-Aktualitäten-Kino am Zoo, Hardenbergstraße",
+      "lat": 52.505629,
+      "lng": 13.333245
+    },
+    {
+      "id": "Q47092810",
+      "name": "AKI-Aktualitäten-Kino am Zoo, Joachimsthaler Straße",
+      "lat": 52.505732,
+      "lng": 13.332254
+    },
+    {
+      "id": "Q47092796",
+      "name": "Akme-Lichtspiele",
+      "lat": 52.511323,
+      "lng": 13.306461
+    },
+    {
+      "id": "Q34071053",
+      "name": "ALA Kino Falkensee",
+      "lat": 52.5587,
+      "lng": 13.0907
+    },
+    {
+      "id": "Q47083060",
+      "name": "Ala-Filmpalast",
+      "lat": 52.568225,
+      "lng": 13.310245
+    },
+    {
+      "id": "Q47459850",
+      "name": "Aladin & Camera",
+      "lat": 52.508826,
+      "lng": 13.375047
+    },
+    {
+      "id": "Q47053747",
+      "name": "Albrechtshof-Lichtspiele",
+      "lat": 52.457068,
+      "lng": 13.339543
+    },
+    {
+      "id": "Q47168271",
+      "name": "Alexandra-Palast",
+      "lat": 52.530841,
+      "lng": 13.400724
+    },
+    {
+      "id": "Q47304458",
+      "name": "Alfa-Lichtspiele",
+      "lat": 52.532521,
+      "lng": 13.405652
+    },
+    {
+      "id": "Q47034795",
+      "name": "Alhambra",
+      "lat": 52.448061,
+      "lng": 13.380502
+    },
+    {
+      "id": "Q47053775",
+      "name": "Allegro",
+      "lat": 52.462179,
+      "lng": 13.339958
+    },
+    {
+      "id": "Q47155304",
+      "name": "Allotria-Lichtspiele",
+      "lat": 52.490142,
+      "lng": 13.388044
+    },
+    {
+      "id": "Q47091354",
+      "name": "Amor-Lichtspiele",
+      "lat": 52.490008,
+      "lng": 13.322645
+    },
+    {
+      "id": "Q47034847",
+      "name": "Apartment building Hauptstraße 30-31",
+      "lat": 52.485148,
+      "lng": 13.353562
+    },
+    {
+      "id": "Q47053798",
+      "name": "Apollo-Filmbühne",
+      "lat": 52.461816,
+      "lng": 13.343488
+    },
+    {
+      "id": "Q47034805",
+      "name": "Apollo-Lichtspiele",
+      "lat": 52.450332,
+      "lng": 13.384595
+    },
+    {
+      "id": "Q47088898",
+      "name": "Apollo-Theater",
+      "lat": 52.551376,
+      "lng": 13.413426
+    },
+    {
+      "id": "Q34766982",
+      "name": "Apollo-Theater Köpenick",
+      "lat": 52.452683,
+      "lng": 13.575723
+    },
+    {
+      "id": "Q34767000",
+      "name": "Apollo-Theater Oberschöneweide",
+      "lat": 52.461268,
+      "lng": 13.518417
+    },
+    {
+      "id": "Q47089281",
+      "name": "Apollo-Theater Rixdorf",
+      "lat": 52.470345,
+      "lng": 13.441281
+    },
+    {
+      "id": "Q47460006",
+      "name": "Arena-Lichtspiele",
+      "lat": 52.526492,
+      "lng": 13.348856
+    },
+    {
+      "id": "Q47091325",
+      "name": "Arkadia-Lichtspiele",
+      "lat": 52.487792,
+      "lng": 13.335339
+    },
+    {
+      "id": "Q47340946",
+      "name": "Arkona Filmtheater",
+      "lat": 52.538983,
+      "lng": 13.402512
+    },
+    {
+      "id": "Q47088899",
+      "name": "Arnim-Lichtspiele",
+      "lat": 52.550903,
+      "lng": 13.409312
+    },
+    {
+      "id": "Q47034859",
+      "name": "Arsenal",
+      "lat": 52.546306,
+      "lng": 13.366028
+    },
+    {
+      "id": "Q47053834",
+      "name": "Asta-Lichtspiele",
+      "lat": 52.462178,
+      "lng": 13.338398
+    },
+    {
+      "id": "Q42297614",
+      "name": "ASTOR Film Lounge",
+      "lat": 52.50325,
+      "lng": 13.32994
+    },
+    {
+      "id": "Q42297611",
+      "name": "Astor-Filmtheater",
+      "lat": 52.5027,
+      "lng": 13.32786
+    },
+    {
+      "id": "Q47083065",
+      "name": "Astoria",
+      "lat": 52.566345,
+      "lng": 13.317597
+    },
+    {
+      "id": "Q47034881",
+      "name": "Astoria-Lichtspiele",
+      "lat": 52.49607,
+      "lng": 13.361598
+    },
+    {
+      "id": "Q34767022",
+      "name": "Astra",
+      "lat": 52.446532,
+      "lng": 13.507156
+    },
+    {
+      "id": "Q47078509",
+      "name": "Astra Cinema Gatow",
+      "lat": 52.466687,
+      "lng": 13.160741
+    },
+    {
+      "id": "Q47083641",
+      "name": "Astra-Filmtheater",
+      "lat": 52.5943,
+      "lng": 13.33473
+    },
+    {
+      "id": "Q47307201",
+      "name": "Astra-Lichtspiele",
+      "lat": 52.529762,
+      "lng": 13.384399
+    },
+    {
+      "id": "Q47311645",
+      "name": "Astrada",
+      "lat": 52.51127,
+      "lng": 13.396176
+    },
+    {
+      "id": "Q47034820",
+      "name": "Astrid-Theater",
+      "lat": 52.43925,
+      "lng": 13.382376
+    },
+    {
+      "id": "Q47497720",
+      "name": "Atlantic",
+      "lat": 52.53913,
+      "lng": 13.394977
+    },
+    {
+      "id": "Q47092793",
+      "name": "Atlantic-Lichtspiele",
+      "lat": 52.511828,
+      "lng": 13.304765
+    },
+    {
+      "id": "Q47459934",
+      "name": "Atlantik-Lichtspiele",
+      "lat": 52.50373,
+      "lng": 13.365761
+    },
+    {
+      "id": "Q47083071",
+      "name": "Atlas-Filmtheater",
+      "lat": 52.57166,
+      "lng": 13.31351
+    },
+    {
+      "id": "Q47089262",
+      "name": "Atlas-Palast",
+      "lat": 52.48166,
+      "lng": 13.43327
+    },
+    {
+      "id": "Q47091331",
+      "name": "Atrium",
+      "lat": 52.487101,
+      "lng": 13.331553
+    },
+    {
+      "id": "Q47092823",
+      "name": "Augusta-Lichtspiele",
+      "lat": 52.52554,
+      "lng": 13.309022
+    },
+    {
+      "id": "Q47459584",
+      "name": "Autokino auf dem Festplatz",
+      "lat": 52.55014,
+      "lng": 13.30968
+    },
+    {
+      "id": "Q47089233",
+      "name": "Autokino Rudow",
+      "lat": 52.402968,
+      "lng": 13.511351
+    },
+    {
+      "id": "Q34780215",
+      "name": "AVO-Lichtspiele",
+      "lat": 52.410022,
+      "lng": 13.665779
+    },
+    {
+      "id": "Q47155923",
+      "name": "b-ware! ladenkino",
+      "lat": 52.511904,
+      "lng": 13.461516
+    },
+    {
+      "id": "Q47188140",
+      "name": "b-ware! ladenkino, Corinthstraße",
+      "lat": 52.49906,
+      "lng": 13.46498
+    },
+    {
+      "id": "Q47459982",
+      "name": "B.U.K.-Palast",
+      "lat": 52.52078,
+      "lng": 13.338364
+    },
+    {
+      "id": "Q47012896",
+      "name": "Baby-Filmtheater",
+      "lat": 52.472316,
+      "lng": 13.324361
+    },
+    {
+      "id": "Q27973374",
+      "name": "Babylon Kreuzberg",
+      "lat": 52.495268,
+      "lng": 13.430861
+    },
+    {
+      "id": "Q47497951",
+      "name": "Baldur-Lichtspiele",
+      "lat": 52.548753,
+      "lng": 13.369363
+    },
+    {
+      "id": "Q47055870",
+      "name": "Bali",
+      "lat": 52.431881,
+      "lng": 13.265763
+    },
+    {
+      "id": "Q47497577",
+      "name": "Ballschmieder-Lichtspiele",
+      "lat": 52.551017,
+      "lng": 13.38452
+    },
+    {
+      "id": "Q47089294",
+      "name": "Bambi-Filmtheater",
+      "lat": 52.467547,
+      "lng": 13.427493
+    },
+    {
+      "id": "Q47459996",
+      "name": "Bambi-Lichtspiele",
+      "lat": 52.532732,
+      "lng": 13.351404
+    },
+    {
+      "id": "Q47088861",
+      "name": "Bat-Studiotheater",
+      "lat": 52.53192,
+      "lng": 13.41839
+    },
+    {
+      "id": "Q47155413",
+      "name": "BBB",
+      "lat": 52.49789,
+      "lng": 13.4185
+    },
+    {
+      "id": "Q47083083",
+      "name": "Beba-Lichtspiele",
+      "lat": 52.56713,
+      "lng": 13.362946
+    },
+    {
+      "id": "Q47497632",
+      "name": "Bella-Lichtspiele",
+      "lat": 52.553143,
+      "lng": 13.387229
+    },
+    {
+      "id": "Q47155420",
+      "name": "Belle-Alliance-Lichtspiele",
+      "lat": 52.49114,
+      "lng": 13.38637
+    },
+    {
+      "id": "Q42297615",
+      "name": "Berliner Kabarett-Theater",
+      "lat": 52.508789,
+      "lng": 13.270737
+    },
+    {
+      "id": "Q47042808",
+      "name": "Berliner Theater, Tempelhofer Damm",
+      "lat": 52.460396,
+      "lng": 13.385081
+    },
+    {
+      "id": "Q47165269",
+      "name": "Berolina",
+      "lat": 52.51953,
+      "lng": 13.426
+    },
+    {
+      "id": "Q47088900",
+      "name": "Berolina-Lichtspiele",
+      "lat": 52.536907,
+      "lng": 13.423345
+    },
+    {
+      "id": "Q47459973",
+      "name": "Beussel-Lichtspiele",
+      "lat": 52.528856,
+      "lng": 13.329119
+    },
+    {
+      "id": "Q107526901",
+      "name": "Biesdorfer Parkbühne",
+      "lat": 52.51168,
+      "lng": 13.55912
+    },
+    {
+      "id": "Q47088901",
+      "name": "Bilderbühne Metropol",
+      "lat": 52.545534,
+      "lng": 13.41347
+    },
+    {
+      "id": "Q47116902",
+      "name": "Bio",
+      "lat": 52.523,
+      "lng": 13.5512
+    },
+    {
+      "id": "Q47079108",
+      "name": "Bio-Filmtheater",
+      "lat": 52.537649,
+      "lng": 13.200714
+    },
+    {
+      "id": "Q47304501",
+      "name": "Bio-Lichtspiele, Ackerstraße",
+      "lat": 52.532765,
+      "lng": 13.395827
+    },
+    {
+      "id": "Q47307719",
+      "name": "Bio-Lichtspiele, Hackerscher Markt",
+      "lat": 52.523822,
+      "lng": 13.401963
+    },
+    {
+      "id": "Q47316085",
+      "name": "Biograph-Theater",
+      "lat": 52.524259,
+      "lng": 13.408275
+    },
+    {
+      "id": "Q47012906",
+      "name": "Biophon",
+      "lat": 52.469878,
+      "lng": 13.333112
+    },
+    {
+      "id": "Q47307381",
+      "name": "Biophon Varieté",
+      "lat": 52.513322,
+      "lng": 13.388995
+    },
+    {
+      "id": "Q47079120",
+      "name": "Biophon-Theater",
+      "lat": 52.53232,
+      "lng": 13.197429
+    },
+    {
+      "id": "Q47304549",
+      "name": "Biophon-Theater-Lichtspiele",
+      "lat": 52.521,
+      "lng": 13.416476
+    },
+    {
+      "id": "Q47155339",
+      "name": "Bioscope-Theater",
+      "lat": 52.503297,
+      "lng": 13.391139
+    },
+    {
+      "id": "Q47340601",
+      "name": "Bioskop-Theater, Rosenthaler Straße",
+      "lat": 52.526196,
+      "lng": 13.403774
+    },
+    {
+      "id": "Q47079653",
+      "name": "Birken-Lichtspiele",
+      "lat": 52.518884,
+      "lng": 13.171031
+    },
+    {
+      "id": "Q47053869",
+      "name": "Bismarck-Lichtspiele",
+      "lat": 52.463483,
+      "lng": 13.321775
+    },
+    {
+      "id": "Q47086121",
+      "name": "Blauer Stern",
+      "lat": 52.580248,
+      "lng": 13.401511
+    },
+    {
+      "id": "Q47088903",
+      "name": "Blow Up",
+      "lat": 52.531595,
+      "lng": 13.42579
+    },
+    {
+      "id": "Q47125887",
+      "name": "Blücher-Lichtspiele",
+      "lat": 52.494114,
+      "lng": 13.398486
+    },
+    {
+      "id": "Q17353438",
+      "name": "BlueMax Theater",
+      "lat": 52.507136,
+      "lng": 13.372998
+    },
+    {
+      "id": "Q47459972",
+      "name": "Bolle Festsäle",
+      "lat": 52.524625,
+      "lng": 13.347904
+    },
+    {
+      "id": "Q47307166",
+      "name": "Börse",
+      "lat": 52.521464,
+      "lng": 13.400808
+    },
+    {
+      "id": "Q47156120",
+      "name": "Börsen-Lichtspiele",
+      "lat": 52.519545,
+      "lng": 13.46285
+    },
+    {
+      "id": "Q47035046",
+      "name": "Broadway",
+      "lat": 52.478553,
+      "lng": 13.342765
+    },
+    {
+      "id": "Q990769",
+      "name": "Brotfabrik",
+      "lat": 52.5527,
+      "lng": 13.4303
+    },
+    {
+      "id": "Q47460005",
+      "name": "BTL-Lichtspiele",
+      "lat": 52.526548,
+      "lng": 13.350889
+    },
+    {
+      "id": "Q47085961",
+      "name": "Buchholzer Lichtspiele",
+      "lat": 52.596102,
+      "lng": 13.432346
+    },
+    {
+      "id": "Q47035048",
+      "name": "Bülow-Kinotheater",
+      "lat": 52.494783,
+      "lng": 13.366528
+    },
+    {
+      "id": "Q42297608",
+      "name": "Bundesplatz Studio",
+      "lat": 52.478949,
+      "lng": 13.328909
+    },
+    {
+      "id": "Q106301256",
+      "name": "Buntes Theater",
+      "lat": 52.510556,
+      "lng": 13.420194
+    },
+    {
+      "id": "Q47083091",
+      "name": "Camera",
+      "lat": 52.57757,
+      "lng": 13.33229
+    },
+    {
+      "id": "Q47046383",
+      "name": "Capitol",
+      "lat": 52.45303,
+      "lng": 13.272584
+    },
+    {
+      "id": "Q47082599",
+      "name": "Capitol Frohnau",
+      "lat": 52.63291,
+      "lng": 13.287061
+    },
+    {
+      "id": "Q47082808",
+      "name": "Capitol Heiligensee",
+      "lat": 52.608399,
+      "lng": 13.235208
+    },
+    {
+      "id": "Q47083097",
+      "name": "Capitol Reinickendorf",
+      "lat": 52.565745,
+      "lng": 13.322074
+    },
+    {
+      "id": "Q47013032",
+      "name": "Casa-Candida-Lichtspiele",
+      "lat": 52.400866,
+      "lng": 13.412689
+    },
+    {
+      "id": "Q34965979",
+      "name": "Casablanca",
+      "lat": 52.435768,
+      "lng": 13.548016
+    },
+    {
+      "id": "Q47155482",
+      "name": "Casino-Lichtspiele",
+      "lat": 52.499361,
+      "lng": 13.449631
+    },
+    {
+      "id": "Q47116908",
+      "name": "Central",
+      "lat": 52.4869,
+      "lng": 13.5608
+    },
+    {
+      "id": "Q47047889",
+      "name": "Central-Lichtspiele",
+      "lat": 52.442763,
+      "lng": 13.315665
+    },
+    {
+      "id": "Q47089267",
+      "name": "Central-Theater",
+      "lat": 52.465698,
+      "lng": 13.432054
+    },
+    {
+      "id": "Q47089282",
+      "name": "Central-Theater-Lichtspiele",
+      "lat": 52.468603,
+      "lng": 13.442339
+    },
+    {
+      "id": "Q47086480",
+      "name": "Charlotten-Lichtspiele",
+      "lat": 52.554581,
+      "lng": 13.438003
+    },
+    {
+      "id": "Q47012912",
+      "name": "Cinema",
+      "lat": 52.466896,
+      "lng": 13.328683
+    },
+    {
+      "id": "Q47092822",
+      "name": "Cinema 105",
+      "lat": 52.510199,
+      "lng": 13.288797
+    },
+    {
+      "id": "Q34158266",
+      "name": "Cinema am Tauentzien",
+      "lat": 52.501096,
+      "lng": 13.337484
+    },
+    {
+      "id": "Q42297616",
+      "name": "Cinema Paris",
+      "lat": 52.50228,
+      "lng": 13.3249
+    },
+    {
+      "id": "Q47459889",
+      "name": "CinemaxX Berlin Potsdamer Platz",
+      "lat": 52.508773,
+      "lng": 13.373789
+    },
+    {
+      "id": "Q47118867",
+      "name": "CineMotion Berlin-Hohenschönhausen",
+      "lat": 52.565928,
+      "lng": 13.509242
+    },
+    {
+      "id": "Q22573555",
+      "name": "Cineplex Alhambra",
+      "lat": 52.550597,
+      "lng": 13.351093
+    },
+    {
+      "id": "Q47089242",
+      "name": "Cineplex Neukölln",
+      "lat": 52.482037,
+      "lng": 13.432342
+    },
+    {
+      "id": "Q47079139",
+      "name": "Cineplex Spandau",
+      "lat": 52.538478,
+      "lng": 13.206239
+    },
+    {
+      "id": "Q47164876",
+      "name": "CineStar Berlin Cubix am Alexanderplatz",
+      "lat": 52.52018,
+      "lng": 13.41208
+    },
+    {
+      "id": "Q47117283",
+      "name": "CineStar Berlin Hellersdorf",
+      "lat": 52.537798,
+      "lng": 13.604115
+    },
+    {
+      "id": "Q47083255",
+      "name": "Cinestar Berlin Tegel",
+      "lat": 52.585428,
+      "lng": 13.287015
+    },
+    {
+      "id": "Q47164545",
+      "name": "CineStar IMAX Sony Center",
+      "lat": 52.51008,
+      "lng": 13.37268
+    },
+    {
+      "id": "Q47155334",
+      "name": "City",
+      "lat": 52.506952,
+      "lng": 13.390262
+    },
+    {
+      "id": "Q28963572",
+      "name": "City Kino Wedding",
+      "lat": 52.558516,
+      "lng": 13.339459
+    },
+    {
+      "id": "Q47307419",
+      "name": "City-Lichtspiele",
+      "lat": 52.508735,
+      "lng": 13.390152
+    },
+    {
+      "id": "Q47303779",
+      "name": "Clubkino Felix",
+      "lat": 52.518605,
+      "lng": 13.395597
+    },
+    {
+      "id": "Q47035051",
+      "name": "Coelia-Kino",
+      "lat": 52.486737,
+      "lng": 13.356416
+    },
+    {
+      "id": "Q47155507",
+      "name": "Colosseum",
+      "lat": 52.499109,
+      "lng": 13.426804
+    },
+    {
+      "id": "Q47498060",
+      "name": "Colosseum am Wedding",
+      "lat": 52.548414,
+      "lng": 13.371327
+    },
+    {
+      "id": "Q47042869",
+      "name": "Columbia",
+      "lat": 52.484717,
+      "lng": 13.391455
+    },
+    {
+      "id": "Q34967140",
+      "name": "Come In JKZ",
+      "lat": 52.434764,
+      "lng": 13.537686
+    },
+    {
+      "id": "Q47156030",
+      "name": "Comenius-Lichtspiele",
+      "lat": 52.511288,
+      "lng": 13.446483
+    },
+    {
+      "id": "Q47092944",
+      "name": "Comet-Lichtspiele",
+      "lat": 52.526871,
+      "lng": 13.302158
+    },
+    {
+      "id": "Q47091274",
+      "name": "Concordia-Lichtspiele",
+      "lat": 52.496072,
+      "lng": 13.296318
+    },
+    {
+      "id": "Q47155841",
+      "name": "Concordia-Palast",
+      "lat": 52.514054,
+      "lng": 13.429739
+    },
+    {
+      "id": "Q47091349",
+      "name": "Corso-Lichtspiele",
+      "lat": 52.497543,
+      "lng": 13.323919
+    },
+    {
+      "id": "Q47012920",
+      "name": "Cosima-Filmtheater",
+      "lat": 52.476947,
+      "lng": 13.330306
+    },
+    {
+      "id": "Q47035052",
+      "name": "Das Lebende Bild",
+      "lat": 52.482757,
+      "lng": 13.350347
+    },
+    {
+      "id": "Q47091288",
+      "name": "Dedy-Lichtspiele",
+      "lat": 52.4731,
+      "lng": 13.2905
+    },
+    {
+      "id": "Q1299542",
+      "name": "Delphi",
+      "lat": 52.5517,
+      "lng": 13.4311
+    },
+    {
+      "id": "Q1184623",
+      "name": "Delphi Filmpalast",
+      "lat": 52.50595,
+      "lng": 13.32848
+    },
+    {
+      "id": "Q47092839",
+      "name": "Delphi Lux",
+      "lat": 52.50605,
+      "lng": 13.33059
+    },
+    {
+      "id": "Q47048017",
+      "name": "Der Spiegel",
+      "lat": 52.441803,
+      "lng": 13.315421
+    },
+    {
+      "id": "Q34969329",
+      "name": "Deutsche Lichtschauspiele",
+      "lat": 52.420836,
+      "lng": 13.536544
+    },
+    {
+      "id": "Q47091341",
+      "name": "Deutsche Lichtspiele",
+      "lat": 52.497062,
+      "lng": 13.333231
+    },
+    {
+      "id": "Q47091289",
+      "name": "Deutsches Lichtspielhaus",
+      "lat": 52.474534,
+      "lng": 13.292778
+    },
+    {
+      "id": "Q47053909",
+      "name": "Deutsches Theater, Steglitz",
+      "lat": 52.457477,
+      "lng": 13.321684
+    },
+    {
+      "id": "Q20825901",
+      "name": "Deutschlandhaus",
+      "lat": 52.505067,
+      "lng": 13.381989
+    },
+    {
+      "id": "Q47035056",
+      "name": "Diana-Lichtspiele",
+      "lat": 52.489898,
+      "lng": 13.351385
+    },
+    {
+      "id": "Q47048074",
+      "name": "Die Brücke",
+      "lat": 52.44771,
+      "lng": 13.315359
+    },
+    {
+      "id": "Q47117291",
+      "name": "Die Kiste",
+      "lat": 52.5361,
+      "lng": 13.6094
+    },
+    {
+      "id": "Q47340615",
+      "name": "Dokument-Kino",
+      "lat": 52.512611,
+      "lng": 13.419615
+    },
+    {
+      "id": "Q47459997",
+      "name": "Domela-Lichtspiele",
+      "lat": 52.529621,
+      "lng": 13.326939
+    },
+    {
+      "id": "Q47089261",
+      "name": "Donau-Lichtspiele",
+      "lat": 52.48268,
+      "lng": 13.434735
+    },
+    {
+      "id": "Q47311638",
+      "name": "Dönhoff-Lichtspiele",
+      "lat": 52.511382,
+      "lng": 13.398189
+    },
+    {
+      "id": "Q47042903",
+      "name": "Dorfeck-Kurfürst-Lichtspiele",
+      "lat": 52.465362,
+      "lng": 13.386266
+    },
+    {
+      "id": "Q47088904",
+      "name": "Downstairs Kino im Filmcafé",
+      "lat": 52.543628,
+      "lng": 13.419847
+    },
+    {
+      "id": "Q47089223",
+      "name": "Echo",
+      "lat": 52.441684,
+      "lng": 13.457917
+    },
+    {
+      "id": "Q47035060",
+      "name": "Edda-Lichtspiele",
+      "lat": 52.482449,
+      "lng": 13.348718
+    },
+    {
+      "id": "Q47091295",
+      "name": "Eden-Lichtspiele",
+      "lat": 52.518235,
+      "lng": 13.277868
+    },
+    {
+      "id": "Q47155412",
+      "name": "Eden-Palast",
+      "lat": 52.4984,
+      "lng": 13.41773
+    },
+    {
+      "id": "Q47307427",
+      "name": "Edison-Theater",
+      "lat": 52.516461,
+      "lng": 13.389153
+    },
+    {
+      "id": "Q47497772",
+      "name": "Eisenstein",
+      "lat": 52.556163,
+      "lng": 13.385966
+    },
+    {
+      "id": "Q47126040",
+      "name": "Eiszeit",
+      "lat": 52.50023,
+      "lng": 13.43328
+    },
+    {
+      "id": "Q47497767",
+      "name": "Elektra Kino-Palast",
+      "lat": 52.548106,
+      "lng": 13.371339
+    },
+    {
+      "id": "Q47078756",
+      "name": "Elektra-Lichtspiele",
+      "lat": 52.53649,
+      "lng": 13.266879
+    },
+    {
+      "id": "Q47055927",
+      "name": "Elfi-Lichtspiele",
+      "lat": 52.414468,
+      "lng": 13.216528
+    },
+    {
+      "id": "Q47092799",
+      "name": "Elite-Kino",
+      "lat": 52.515726,
+      "lng": 13.290474
+    },
+    {
+      "id": "Q47035062",
+      "name": "Elite-Lichtspiele",
+      "lat": 52.498205,
+      "lng": 13.358939
+    },
+    {
+      "id": "Q47088905",
+      "name": "Elite-Theater",
+      "lat": 52.532983,
+      "lng": 13.42856
+    },
+    {
+      "id": "Q47035063",
+      "name": "Elite-Theater Lichtspiele",
+      "lat": 52.497463,
+      "lng": 13.361514
+    },
+    {
+      "id": "Q34970801",
+      "name": "Elster-Lichtspiele",
+      "lat": 52.399598,
+      "lng": 13.579797
+    },
+    {
+      "id": "Q47035066",
+      "name": "Elvi-Lichtspiele",
+      "lat": 52.48733,
+      "lng": 13.353659
+    },
+    {
+      "id": "Q34971154",
+      "name": "Elysium",
+      "lat": 52.456975,
+      "lng": 13.519154
+    },
+    {
+      "id": "Q47088906",
+      "name": "Elysium-Lichtspiele",
+      "lat": 52.539696,
+      "lng": 13.424641
+    },
+    {
+      "id": "Q47119487",
+      "name": "Emanuel-Lichtspiele",
+      "lat": 52.5023,
+      "lng": 13.4914
+    },
+    {
+      "id": "Q47307394",
+      "name": "Empire-Theater",
+      "lat": 52.511684,
+      "lng": 13.389453
+    },
+    {
+      "id": "Q42297618",
+      "name": "Erdbeermund Sex Kino",
+      "lat": 52.502089,
+      "lng": 13.306385
+    },
+    {
+      "id": "Q47088907",
+      "name": "Erra-Lichtspiele",
+      "lat": 52.54481,
+      "lng": 13.427984
+    },
+    {
+      "id": "Q11722059",
+      "name": "Erste Kirche Christi, Wissenschafter, Berlin",
+      "lat": 52.4851,
+      "lng": 13.3213
+    },
+    {
+      "id": "Q34972360",
+      "name": "Europa-Lichtspiele",
+      "lat": 52.414787,
+      "lng": 13.581569
+    },
+    {
+      "id": "Q20184003",
+      "name": "Eva Lichtspiele",
+      "lat": 52.484682,
+      "lng": 13.320006
+    },
+    {
+      "id": "Q47089304",
+      "name": "Excelsior-Lichtspiele",
+      "lat": 52.481511,
+      "lng": 13.441097
+    },
+    {
+      "id": "Q47092918",
+      "name": "Excelsior-Theater",
+      "lat": 52.513862,
+      "lng": 13.316949
+    },
+    {
+      "id": "Q47307370",
+      "name": "Fata Morgana Lichtspiele",
+      "lat": 52.518476,
+      "lng": 13.388376
+    },
+    {
+      "id": "Q47092855",
+      "name": "Faunlichtspiele",
+      "lat": 52.508733,
+      "lng": 13.309375
+    },
+    {
+      "id": "Q47035068",
+      "name": "Fery-Lichtspiele",
+      "lat": 52.467254,
+      "lng": 13.342523
+    },
+    {
+      "id": "Q47091333",
+      "name": "Film-Eck",
+      "lat": 52.487296,
+      "lng": 13.324073
+    },
+    {
+      "id": "Q47077712",
+      "name": "Film-Eck Spandau",
+      "lat": 52.547003,
+      "lng": 13.186259
+    },
+    {
+      "id": "Q47086361",
+      "name": "Film-Palast",
+      "lat": 52.58157,
+      "lng": 13.405826
+    },
+    {
+      "id": "Q47092806",
+      "name": "Film-Studio",
+      "lat": 52.507009,
+      "lng": 13.329893
+    },
+    {
+      "id": "Q42297619",
+      "name": "Filmbühne am Steinplatz",
+      "lat": 52.50839,
+      "lng": 13.3269
+    },
+    {
+      "id": "Q47155374",
+      "name": "Filmbühne Graefestraße",
+      "lat": 52.492257,
+      "lng": 13.416858
+    },
+    {
+      "id": "Q47092898",
+      "name": "Filmbühne Mali",
+      "lat": 52.517685,
+      "lng": 13.293216
+    },
+    {
+      "id": "Q47155434",
+      "name": "Filmbühne Naunynstraße",
+      "lat": 52.50072,
+      "lng": 13.425945
+    },
+    {
+      "id": "Q47077666",
+      "name": "Filmbühne Spandau Stadtrand",
+      "lat": 52.55649,
+      "lng": 13.15443
+    },
+    {
+      "id": "Q47079622",
+      "name": "Filmbühne Staaken",
+      "lat": 52.546073,
+      "lng": 13.139391
+    },
+    {
+      "id": "Q34972987",
+      "name": "Filmbühne Treptow",
+      "lat": 52.487342,
+      "lng": 13.456651
+    },
+    {
+      "id": "Q1414402",
+      "name": "Filmbühne Wien",
+      "lat": 52.5036,
+      "lng": 13.3287
+    },
+    {
+      "id": "Q47079658",
+      "name": "Filmbühne Wilhelmstadt",
+      "lat": 52.523614,
+      "lng": 13.201249
+    },
+    {
+      "id": "Q47053979",
+      "name": "Filmburg",
+      "lat": 52.458109,
+      "lng": 13.325998
+    },
+    {
+      "id": "Q47083104",
+      "name": "Filmeck",
+      "lat": 52.558312,
+      "lng": 13.365678
+    },
+    {
+      "id": "Q47085988",
+      "name": "Filmeck Alt-Karow",
+      "lat": 52.609389,
+      "lng": 13.481596
+    },
+    {
+      "id": "Q47089214",
+      "name": "Filmeck Britz",
+      "lat": 52.452339,
+      "lng": 13.438966
+    },
+    {
+      "id": "Q42297620",
+      "name": "Filmkunst 66",
+      "lat": 52.50436,
+      "lng": 13.3195
+    },
+    {
+      "id": "Q47083360",
+      "name": "Filmpalast",
+      "lat": 52.5891,
+      "lng": 13.2875
+    },
+    {
+      "id": "Q47085902",
+      "name": "Filmpalast Buchholz",
+      "lat": 52.596102,
+      "lng": 13.432346
+    },
+    {
+      "id": "Q47155310",
+      "name": "Filmpalast Kammersäle",
+      "lat": 52.496421,
+      "lng": 13.388691
+    },
+    {
+      "id": "Q47078283",
+      "name": "Filmpalast Schützenhaus",
+      "lat": 52.549242,
+      "lng": 13.210389
+    },
+    {
+      "id": "Q47340897",
+      "name": "Filmpavillon der Jugend",
+      "lat": 52.51731,
+      "lng": 13.388912
+    },
+    {
+      "id": "Q47155985",
+      "name": "Filmstern",
+      "lat": 52.51823,
+      "lng": 13.432585
+    },
+    {
+      "id": "Q47078305",
+      "name": "Filmstudio Wichern",
+      "lat": 52.5676,
+      "lng": 13.206411
+    },
+    {
+      "id": "Q32662590",
+      "name": "Filmtheater am Friedrichshain",
+      "lat": 52.5291,
+      "lng": 13.4304
+    },
+    {
+      "id": "Q47082906",
+      "name": "Filmtheater am Tegeler See",
+      "lat": 52.56857,
+      "lng": 13.23286
+    },
+    {
+      "id": "Q47092858",
+      "name": "Filmtheater Berlin",
+      "lat": 52.50109,
+      "lng": 13.31787
+    },
+    {
+      "id": "Q47078232",
+      "name": "Filmtheater Gatow",
+      "lat": 52.486715,
+      "lng": 13.182403
+    },
+    {
+      "id": "Q34977464",
+      "name": "Filmtheater Gérard Philipe",
+      "lat": 52.488804,
+      "lng": 13.45063
+    },
+    {
+      "id": "Q47315982",
+      "name": "Filmtheater im Fernsehturm",
+      "lat": 52.520383,
+      "lng": 13.408517
+    },
+    {
+      "id": "Q47316097",
+      "name": "Filmtheater Münz",
+      "lat": 52.524118,
+      "lng": 13.408706
+    },
+    {
+      "id": "Q47054011",
+      "name": "Flora-Lichtspiele",
+      "lat": 52.462917,
+      "lng": 13.325972
+    },
+    {
+      "id": "Q47156164",
+      "name": "Försters Lichtspiele",
+      "lat": 52.51825,
+      "lng": 13.428821
+    },
+    {
+      "id": "Q47082922",
+      "name": "Fortuna-Filmtheater",
+      "lat": 52.620076,
+      "lng": 13.355974
+    },
+    {
+      "id": "Q47459528",
+      "name": "Fortuna-Lichtspiele",
+      "lat": 52.543013,
+      "lng": 13.36581
+    },
+    {
+      "id": "Q47035070",
+      "name": "Forum",
+      "lat": 52.486213,
+      "lng": 13.356946
+    },
+    {
+      "id": "Q47079212",
+      "name": "Forum Filmtheater",
+      "lat": 52.538083,
+      "lng": 13.204634
+    },
+    {
+      "id": "Q34976725",
+      "name": "Forum-Lichtspiele",
+      "lat": 52.44677,
+      "lng": 13.504311
+    },
+    {
+      "id": "Q47088909",
+      "name": "Fransecky-Theater",
+      "lat": 52.538205,
+      "lng": 13.41718
+    },
+    {
+      "id": "Q47086489",
+      "name": "Freilichtbühne am Weissen See",
+      "lat": 52.556259,
+      "lng": 13.463328
+    },
+    {
+      "id": "Q105423617",
+      "name": "Freilichtbühne Rehberge",
+      "lat": 52.5548,
+      "lng": 13.33037
+    },
+    {
+      "id": "Q47459917",
+      "name": "Freilichtkino im Tiergarten",
+      "lat": 52.510862,
+      "lng": 13.344622
+    },
+    {
+      "id": "Q47156065",
+      "name": "Freiluftkino Friedrichshain",
+      "lat": 52.525334,
+      "lng": 13.435402
+    },
+    {
+      "id": "Q47089247",
+      "name": "Freiluftkino Hasenheide",
+      "lat": 52.483127,
+      "lng": 13.41642
+    },
+    {
+      "id": "Q47156124",
+      "name": "Freiluftkino Insel im Cassiopeia",
+      "lat": 52.50711,
+      "lng": 13.454798
+    },
+    {
+      "id": "Q47089263",
+      "name": "Friedel-Lichtspiele",
+      "lat": 52.492862,
+      "lng": 13.428364
+    },
+    {
+      "id": "Q47126595",
+      "name": "fsk",
+      "lat": 52.49742,
+      "lng": 13.428741
+    },
+    {
+      "id": "Q47126528",
+      "name": "fsk - Kino am Oranienplatz",
+      "lat": 52.501741,
+      "lng": 13.414574
+    },
+    {
+      "id": "Q47034807",
+      "name": "Gaby-Filmtheater",
+      "lat": 52.444293,
+      "lng": 13.38633
+    },
+    {
+      "id": "Q47497989",
+      "name": "Gala Lichtbühne",
+      "lat": 52.53961,
+      "lng": 13.38782
+    },
+    {
+      "id": "Q47089284",
+      "name": "Gala-Lichtspiele",
+      "lat": 52.480233,
+      "lng": 13.435699
+    },
+    {
+      "id": "Q47046836",
+      "name": "Gemeindehalle Lankwitz",
+      "lat": 52.436736,
+      "lng": 13.343014
+    },
+    {
+      "id": "Q47091290",
+      "name": "Germania",
+      "lat": 52.476565,
+      "lng": 13.284605
+    },
+    {
+      "id": "Q47155905",
+      "name": "Germania-Palast",
+      "lat": 52.515583,
+      "lng": 13.458728
+    },
+    {
+      "id": "Q47497976",
+      "name": "Globus-Lichtspiele",
+      "lat": 52.54359,
+      "lng": 13.397607
+    },
+    {
+      "id": "Q47089268",
+      "name": "Globus-Palast",
+      "lat": 52.464584,
+      "lng": 13.433221
+    },
+    {
+      "id": "Q47054042",
+      "name": "Globus-Palast Südende",
+      "lat": 52.449495,
+      "lng": 13.349154
+    },
+    {
+      "id": "Q47117004",
+      "name": "Gloria",
+      "lat": 52.5118,
+      "lng": 13.6125
+    },
+    {
+      "id": "Q47459600",
+      "name": "Gong-Lichtspiele",
+      "lat": 52.552336,
+      "lng": 13.359551
+    },
+    {
+      "id": "Q47091340",
+      "name": "Graffiti",
+      "lat": 52.49781,
+      "lng": 13.319645
+    },
+    {
+      "id": "Q47088912",
+      "name": "Greifswalder Filmbühne",
+      "lat": 52.536417,
+      "lng": 13.433847
+    },
+    {
+      "id": "Q525243",
+      "name": "Grips-Theater",
+      "lat": 52.518856,
+      "lng": 13.341735
+    },
+    {
+      "id": "Q47089289",
+      "name": "Grotten-Kino",
+      "lat": 52.490541,
+      "lng": 13.424008
+    },
+    {
+      "id": "Q47035072",
+      "name": "Guckkasten",
+      "lat": 52.491163,
+      "lng": 13.342464
+    },
+    {
+      "id": "Q47164843",
+      "name": "Hackesche Höfe Kino",
+      "lat": 52.524096,
+      "lng": 13.401836
+    },
+    {
+      "id": "Q47078348",
+      "name": "HaKi-Filmtheater",
+      "lat": 52.543053,
+      "lng": 13.206186
+    },
+    {
+      "id": "Q47078379",
+      "name": "HaLi-Lichtspiele",
+      "lat": 52.557406,
+      "lng": 13.208071
+    },
+    {
+      "id": "Q47155417",
+      "name": "Hallesches-Tor-Lichtspiele",
+      "lat": 52.494689,
+      "lng": 13.388866
+    },
+    {
+      "id": "Q25392875",
+      "name": "Hansa-Theater",
+      "lat": 52.524276,
+      "lng": 13.33131
+    },
+    {
+      "id": "Q47307841",
+      "name": "Harmonie-Kino",
+      "lat": 52.532665,
+      "lng": 13.398188
+    },
+    {
+      "id": "Q47054074",
+      "name": "Häsi-Lichtspiele",
+      "lat": 52.451088,
+      "lng": 13.324393
+    },
+    {
+      "id": "Q1590736",
+      "name": "Haus der Berliner Festspiele",
+      "lat": 52.4986,
+      "lng": 13.3286
+    },
+    {
+      "id": "Q704933",
+      "name": "Haus der Kulturen der Welt",
+      "lat": 52.5188,
+      "lng": 13.3648
+    },
+    {
+      "id": "Q52598236",
+      "name": "Haus Schwarzenberg",
+      "lat": 52.524312,
+      "lng": 13.402203
+    },
+    {
+      "id": "Q47192501",
+      "name": "Haus Ungarn",
+      "lat": 52.521446,
+      "lng": 13.406493
+    },
+    {
+      "id": "Q47035073",
+      "name": "Heine-Lichtspiele",
+      "lat": 52.498785,
+      "lng": 13.36279
+    },
+    {
+      "id": "Q47089292",
+      "name": "Heli-Filmtheater",
+      "lat": 52.49401,
+      "lng": 13.421802
+    },
+    {
+      "id": "Q47155346",
+      "name": "Helios",
+      "lat": 52.50265,
+      "lng": 13.39008
+    },
+    {
+      "id": "Q47088913",
+      "name": "Helmholtz-Lichtspiele",
+      "lat": 52.542128,
+      "lng": 13.419682
+    },
+    {
+      "id": "Q47089269",
+      "name": "Hermann-Lichtspiele",
+      "lat": 52.469653,
+      "lng": 13.430316
+    },
+    {
+      "id": "Q47497738",
+      "name": "Hifa-Freilichtkino",
+      "lat": 52.544563,
+      "lng": 13.389761
+    },
+    {
+      "id": "Q47316117",
+      "name": "High End 54",
+      "lat": 52.525792,
+      "lng": 13.388778
+    },
+    {
+      "id": "Q47155391",
+      "name": "Hofjäger-Lichtspiele",
+      "lat": 52.48941,
+      "lng": 13.41038
+    },
+    {
+      "id": "Q47088914",
+      "name": "Hofkino",
+      "lat": 52.547669,
+      "lng": 13.412285
+    },
+    {
+      "id": "Q47118294",
+      "name": "Hohenschönhausener Lichtspiele",
+      "lat": 52.540736,
+      "lng": 13.494769
+    },
+    {
+      "id": "Q47118301",
+      "name": "Hohenschönhauser Ton-Lichtspiele",
+      "lat": 52.540854,
+      "lng": 13.486414
+    },
+    {
+      "id": "Q47012938",
+      "name": "Hohenzollern-Lichtspiele",
+      "lat": 52.469265,
+      "lng": 13.331006
+    },
+    {
+      "id": "Q47092865",
+      "name": "Hollywood",
+      "lat": 52.500623,
+      "lng": 13.310394
+    },
+    {
+      "id": "Q47083591",
+      "name": "Hubertus-Lichtspiele",
+      "lat": 52.60671,
+      "lng": 13.31747
+    },
+    {
+      "id": "Q47497609",
+      "name": "Humboldt-Lichtspiele",
+      "lat": 52.551684,
+      "lng": 13.383375
+    },
+    {
+      "id": "Q47089250",
+      "name": "Il Kino",
+      "lat": 52.491644,
+      "lng": 13.433038
+    },
+    {
+      "id": "Q47089276",
+      "name": "Ili-Lichtspiele",
+      "lat": 52.481115,
+      "lng": 13.44392
+    },
+    {
+      "id": "Q47315783",
+      "name": "Imperial, Märkisches Ufer",
+      "lat": 52.514009,
+      "lng": 13.416578
+    },
+    {
+      "id": "Q47340594",
+      "name": "Imperial, Rosenthaler Straße",
+      "lat": 52.523878,
+      "lng": 13.402266
+    },
+    {
+      "id": "Q34977694",
+      "name": "Insel-Kino",
+      "lat": 52.486858,
+      "lng": 13.481143
+    },
+    {
+      "id": "Q47035076",
+      "name": "Insel-Lichtspiele",
+      "lat": 52.501741,
+      "lng": 13.344305
+    },
+    {
+      "id": "Q47307897",
+      "name": "Ira-Palast",
+      "lat": 52.519549,
+      "lng": 13.423348
+    },
+    {
+      "id": "Q47119501",
+      "name": "Jahn-Lichtspiele",
+      "lat": 52.503,
+      "lng": 13.4747
+    },
+    {
+      "id": "Q47079663",
+      "name": "Jerboa-Cinema",
+      "lat": 52.521124,
+      "lng": 13.186878
+    },
+    {
+      "id": "Q47086495",
+      "name": "Jugend",
+      "lat": 52.550561,
+      "lng": 13.444906
+    },
+    {
+      "id": "Q47304556",
+      "name": "Kakadu-Lichtspiele",
+      "lat": 52.51776,
+      "lng": 13.417957
+    },
+    {
+      "id": "Q34978282",
+      "name": "Kamera-Lichtspiele Wilhelmshagen",
+      "lat": 52.438028,
+      "lng": 13.721844
+    },
+    {
+      "id": "Q47035087",
+      "name": "Kammer-Lichtspiele",
+      "lat": 52.491739,
+      "lng": 13.353572
+    },
+    {
+      "id": "Q47460002",
+      "name": "Kammer-Lichtspiele Hansa",
+      "lat": 52.519088,
+      "lng": 13.333885
+    },
+    {
+      "id": "Q47078785",
+      "name": "Kammerlichtspiele",
+      "lat": 52.53701,
+      "lng": 13.26798
+    },
+    {
+      "id": "Q47119518",
+      "name": "Kammerspiele",
+      "lat": 52.5076,
+      "lng": 13.4973
+    },
+    {
+      "id": "Q47091332",
+      "name": "Kammerspiele Kaiserallee",
+      "lat": 52.493708,
+      "lng": 13.330367
+    },
+    {
+      "id": "Q42297621",
+      "name": "Kant Kino",
+      "lat": 52.5069,
+      "lng": 13.30834
+    },
+    {
+      "id": "Q47316163",
+      "name": "Karl Kino",
+      "lat": 52.522213,
+      "lng": 13.378322
+    },
+    {
+      "id": "Q47088915",
+      "name": "Kasino-Kino",
+      "lat": 52.541354,
+      "lng": 13.419497
+    },
+    {
+      "id": "Q47155316",
+      "name": "Kellerkino",
+      "lat": 52.50076,
+      "lng": 13.41657
+    },
+    {
+      "id": "Q47307207",
+      "name": "Kinematographen-Theater, Chausseestraße",
+      "lat": 52.530831,
+      "lng": 13.383052
+    },
+    {
+      "id": "Q47155893",
+      "name": "Kinematographen-Theater, Frankfurter Allee",
+      "lat": 52.513952,
+      "lng": 13.474611
+    },
+    {
+      "id": "Q47083545",
+      "name": "Kinematographen-Theater, Tegel",
+      "lat": 52.58705,
+      "lng": 13.2843
+    },
+    {
+      "id": "Q34986973",
+      "name": "Kinematographentheater",
+      "lat": 52.458019,
+      "lng": 13.511809
+    },
+    {
+      "id": "Q47155844",
+      "name": "Kinematographentheater, Andreasstraße",
+      "lat": 52.515046,
+      "lng": 13.432127
+    },
+    {
+      "id": "Q47497623",
+      "name": "Kinematographentheater, Badstraße",
+      "lat": 52.550505,
+      "lng": 13.38432
+    },
+    {
+      "id": "Q47497627",
+      "name": "Kinematographentheater, Bellermannstraße",
+      "lat": 52.554416,
+      "lng": 13.384317
+    },
+    {
+      "id": "Q47497643",
+      "name": "Kinematographentheater, Bernauer Straße",
+      "lat": 52.540487,
+      "lng": 13.403982
+    },
+    {
+      "id": "Q47459975",
+      "name": "Kinematographentheater, Beusselstraße",
+      "lat": 52.532185,
+      "lng": 13.328815
+    },
+    {
+      "id": "Q47497724",
+      "name": "Kinematographentheater, Brunnenstraße",
+      "lat": 52.53988,
+      "lng": 13.395311
+    },
+    {
+      "id": "Q47012952",
+      "name": "Kinematographentheater, Büsingstraße",
+      "lat": 52.465464,
+      "lng": 13.325804
+    },
+    {
+      "id": "Q47088916",
+      "name": "Kinematographentheater, Danziger Straße",
+      "lat": 52.540124,
+      "lng": 13.416666
+    },
+    {
+      "id": "Q47043823",
+      "name": "Kinematographentheater, Friedrich-Wilhelm-Straße",
+      "lat": 52.460396,
+      "lng": 13.385081
+    },
+    {
+      "id": "Q70000175",
+      "name": "Kinematographentheater, Friedrichstraße 122/23",
+      "lat": 52.52633,
+      "lng": 13.38693
+    },
+    {
+      "id": "Q47155343",
+      "name": "Kinematographentheater, Friedrichstraße 226",
+      "lat": 52.50349,
+      "lng": 13.39109
+    },
+    {
+      "id": "Q47012965",
+      "name": "Kinematographentheater, Goßlerstraße",
+      "lat": 52.468903,
+      "lng": 13.324316
+    },
+    {
+      "id": "Q47497733",
+      "name": "Kinematographentheater, Grünthaler Straße",
+      "lat": 52.554319,
+      "lng": 13.390526
+    },
+    {
+      "id": "Q47092809",
+      "name": "Kinematographentheater, Holtzendorffstraße",
+      "lat": 52.506547,
+      "lng": 13.296269
+    },
+    {
+      "id": "Q47034832",
+      "name": "Kinematographentheater, Kiepertplatz",
+      "lat": 52.422798,
+      "lng": 13.374034
+    },
+    {
+      "id": "Q47035090",
+      "name": "Kinematographentheater, Potsdamer Straße",
+      "lat": 52.499563,
+      "lng": 13.362273
+    },
+    {
+      "id": "Q47497848",
+      "name": "Kinematographentheater, Prinzenallee",
+      "lat": 52.554546,
+      "lng": 13.383644
+    },
+    {
+      "id": "Q47088930",
+      "name": "Kinematographentheater, Schönhauser Allee 157",
+      "lat": 52.537162,
+      "lng": 13.411769
+    },
+    {
+      "id": "Q47459604",
+      "name": "Kinematographentheater, Seestraße",
+      "lat": 52.548887,
+      "lng": 13.350134
+    },
+    {
+      "id": "Q47043712",
+      "name": "Kinematographentheater, Tempelhofer Damm",
+      "lat": 52.460396,
+      "lng": 13.385081
+    },
+    {
+      "id": "Q47459612",
+      "name": "Kinematographentheater, Togostraße",
+      "lat": 52.549509,
+      "lng": 13.346691
+    },
+    {
+      "id": "Q47497985",
+      "name": "Kino & Café am Ufer",
+      "lat": 52.551176,
+      "lng": 13.373489
+    },
+    {
+      "id": "Q47155458",
+      "name": "Kino am Heinrichplatz",
+      "lat": 52.500392,
+      "lng": 13.422102
+    },
+    {
+      "id": "Q1742238",
+      "name": "Kino Babylon",
+      "lat": 52.5258,
+      "lng": 13.4119
+    },
+    {
+      "id": "Q47156217",
+      "name": "Kino des Ostens",
+      "lat": 52.504601,
+      "lng": 13.447923
+    },
+    {
+      "id": "Q47340913",
+      "name": "Kino im Centre Culturel Français",
+      "lat": 52.51629,
+      "lng": 13.38819
+    },
+    {
+      "id": "Q47155741",
+      "name": "Kino im Hauptbahnhof",
+      "lat": 52.509731,
+      "lng": 13.435397
+    },
+    {
+      "id": "Q47079217",
+      "name": "Kino im Kulturhaus Spandau",
+      "lat": 52.535583,
+      "lng": 13.202247
+    },
+    {
+      "id": "Q47459936",
+      "name": "Kino im Quartier Latin",
+      "lat": 52.502217,
+      "lng": 13.364598
+    },
+    {
+      "id": "Q34992208",
+      "name": "Kino in der Sternwarte",
+      "lat": 52.485831,
+      "lng": 13.476344
+    },
+    {
+      "id": "Q1670774",
+      "name": "Kino International",
+      "lat": 52.5203,
+      "lng": 13.4228
+    },
+    {
+      "id": "Q47155856",
+      "name": "Kino Intimes",
+      "lat": 52.512877,
+      "lng": 13.457998
+    },
+    {
+      "id": "Q34991764",
+      "name": "Kino Spreehöfe",
+      "lat": 52.462049,
+      "lng": 13.51215
+    },
+    {
+      "id": "Q40289735",
+      "name": "Kino Toni & Tonino",
+      "lat": 52.548826,
+      "lng": 13.450898
+    },
+    {
+      "id": "Q47155486",
+      "name": "Kino-Theater",
+      "lat": 52.500491,
+      "lng": 13.443312
+    },
+    {
+      "id": "Q47340932",
+      "name": "KinoKlub der Humboldt-Uni",
+      "lat": 52.517831,
+      "lng": 13.394614
+    },
+    {
+      "id": "Q47155376",
+      "name": "Kinomuseum Berlin",
+      "lat": 52.49241,
+      "lng": 13.38335
+    },
+    {
+      "id": "Q47092863",
+      "name": "Kinos im Ku'damm-Eck",
+      "lat": 52.503574,
+      "lng": 13.331604
+    },
+    {
+      "id": "Q47307410",
+      "name": "Kinotheater, Friedrichstraße",
+      "lat": 52.510705,
+      "lng": 13.389766
+    },
+    {
+      "id": "Q47091336",
+      "name": "Kleines Lichtspielhaus",
+      "lat": 52.491491,
+      "lng": 13.316537
+    },
+    {
+      "id": "Q47012971",
+      "name": "Kleines Theater",
+      "lat": 52.473351,
+      "lng": 13.322345
+    },
+    {
+      "id": "Q47092950",
+      "name": "Klick",
+      "lat": 52.50544,
+      "lng": 13.299443
+    },
+    {
+      "id": "Q47155387",
+      "name": "Kliems Festsäle",
+      "lat": 52.487539,
+      "lng": 13.421331
+    },
+    {
+      "id": "Q1776792",
+      "name": "Knaack-Klub",
+      "lat": 52.5303,
+      "lng": 13.4258
+    },
+    {
+      "id": "Q47155423",
+      "name": "Kolibri-Lichtspiele",
+      "lat": 52.498595,
+      "lng": 13.392817
+    },
+    {
+      "id": "Q47497758",
+      "name": "Kolonie-Lichtspiele",
+      "lat": 52.554677,
+      "lng": 13.377829
+    },
+    {
+      "id": "Q47311624",
+      "name": "Kolonnaden Kino",
+      "lat": 52.51101,
+      "lng": 13.400776
+    },
+    {
+      "id": "Q47497964",
+      "name": "Komet-Lichtspiele",
+      "lat": 52.55529,
+      "lng": 13.375916
+    },
+    {
+      "id": "Q47155919",
+      "name": "Königsberger Lichtspiele",
+      "lat": 52.513709,
+      "lng": 13.441692
+    },
+    {
+      "id": "Q47304568",
+      "name": "Königshaus-Lichtspiele",
+      "lat": 52.524151,
+      "lng": 13.417494
+    },
+    {
+      "id": "Q47035093",
+      "name": "Königsspiele",
+      "lat": 52.484932,
+      "lng": 13.363819
+    },
+    {
+      "id": "Q47088919",
+      "name": "Königstor-Lichtspiele",
+      "lat": 52.527385,
+      "lng": 13.422131
+    },
+    {
+      "id": "Q47088920",
+      "name": "Kopenhagener Kinotheater",
+      "lat": 52.548997,
+      "lng": 13.405063
+    },
+    {
+      "id": "Q47044072",
+      "name": "Korso-Lichtspiele",
+      "lat": 52.483992,
+      "lng": 13.385555
+    },
+    {
+      "id": "Q386565",
+      "name": "Kosmos",
+      "lat": 52.5172,
+      "lng": 13.45
+    },
+    {
+      "id": "Q47083552",
+      "name": "Kosmos Filmbühne",
+      "lat": 52.58925,
+      "lng": 13.2803
+    },
+    {
+      "id": "Q47119545",
+      "name": "Kosmos-Lichtspiele",
+      "lat": 52.5025,
+      "lng": 13.4875
+    },
+    {
+      "id": "Q47311547",
+      "name": "Kristall-Palast",
+      "lat": 52.52277,
+      "lng": 13.422569
+    },
+    {
+      "id": "Q47088923",
+      "name": "Krokodil",
+      "lat": 52.552263,
+      "lng": 13.419418
+    },
+    {
+      "id": "Q47012976",
+      "name": "Kronen-Filmtheater",
+      "lat": 52.471003,
+      "lng": 13.335131
+    },
+    {
+      "id": "Q47340606",
+      "name": "Kronen-Lichtspiele",
+      "lat": 52.527441,
+      "lng": 13.403169
+    },
+    {
+      "id": "Q47089291",
+      "name": "Kukuk-Lichtspielhaus",
+      "lat": 52.493502,
+      "lng": 13.422098
+    },
+    {
+      "id": "Q467867",
+      "name": "Kulturbrauerei",
+      "lat": 52.5389,
+      "lng": 13.4136
+    },
+    {
+      "id": "Q1791672",
+      "name": "Kulturfabrik Moabit",
+      "lat": 52.5333,
+      "lng": 13.36
+    },
+    {
+      "id": "Q47155755",
+      "name": "Kulturhaus der Bauarbeiter",
+      "lat": 52.515173,
+      "lng": 13.43337
+    },
+    {
+      "id": "Q34987626",
+      "name": "Kulturhaus des Werks für Fernsehelektronik",
+      "lat": 52.457667,
+      "lng": 13.528
+    },
+    {
+      "id": "Q47118590",
+      "name": "Kulturhaus Karlshorst",
+      "lat": 52.482,
+      "lng": 13.5252
+    },
+    {
+      "id": "Q42297617",
+      "name": "Kurbel",
+      "lat": 52.50234,
+      "lng": 13.30907
+    },
+    {
+      "id": "Q47081214",
+      "name": "Kurmark-Lichtspiele",
+      "lat": 52.583323,
+      "lng": 13.303294
+    },
+    {
+      "id": "Q47459581",
+      "name": "L’Aiglon",
+      "lat": 52.558987,
+      "lng": 13.314671
+    },
+    {
+      "id": "Q47311554",
+      "name": "Landsberger Lichtspiele",
+      "lat": 52.52226,
+      "lng": 13.423255
+    },
+    {
+      "id": "Q47155947",
+      "name": "Lasdehner Lichtspiele",
+      "lat": 52.515754,
+      "lng": 13.450375
+    },
+    {
+      "id": "Q47054157",
+      "name": "Laterna-Filmtheater",
+      "lat": 52.458096,
+      "lng": 13.325155
+    },
+    {
+      "id": "Q47083649",
+      "name": "Le Flambeau",
+      "lat": 52.60288,
+      "lng": 13.32194
+    },
+    {
+      "id": "Q47088929",
+      "name": "Libelle-Filmtheater",
+      "lat": 52.543056,
+      "lng": 13.41415
+    },
+    {
+      "id": "Q47092897",
+      "name": "Licht-Bühne",
+      "lat": 52.50716,
+      "lng": 13.314212
+    },
+    {
+      "id": "Q34993572",
+      "name": "Lichtbild Theater",
+      "lat": 52.446126,
+      "lng": 13.574647
+    },
+    {
+      "id": "Q47497763",
+      "name": "Lichtbild-Theater",
+      "lat": 52.566623,
+      "lng": 13.384971
+    },
+    {
+      "id": "Q47091327",
+      "name": "Lichtbilderbühne",
+      "lat": 52.486154,
+      "lng": 13.320131
+    },
+    {
+      "id": "Q47082836",
+      "name": "Lichtbildtheater, Hermsdorf",
+      "lat": 52.6176,
+      "lng": 13.309362
+    },
+    {
+      "id": "Q26254837",
+      "name": "Lichtblick-Kino",
+      "lat": 52.543056,
+      "lng": 13.41415
+    },
+    {
+      "id": "Q47046725",
+      "name": "Lichtburg",
+      "lat": 52.436736,
+      "lng": 13.343014
+    },
+    {
+      "id": "Q34993738",
+      "name": "Lichtpalast",
+      "lat": 52.444802,
+      "lng": 13.576159
+    },
+    {
+      "id": "Q47078832",
+      "name": "Lichtspiel-Palast",
+      "lat": 52.537637,
+      "lng": 13.26622
+    },
+    {
+      "id": "Q47307828",
+      "name": "Lichtspiel-Theater",
+      "lat": 52.530412,
+      "lng": 13.382914
+    },
+    {
+      "id": "Q47155514",
+      "name": "Lichtspiele",
+      "lat": 52.50085,
+      "lng": 13.436471
+    },
+    {
+      "id": "Q47307903",
+      "name": "Lichtspiele Alt-Berlin",
+      "lat": 52.51413,
+      "lng": 13.40582
+    },
+    {
+      "id": "Q47307834",
+      "name": "Lichtspiele am Stettiner Bahnhof",
+      "lat": 52.531484,
+      "lng": 13.387678
+    },
+    {
+      "id": "Q47307194",
+      "name": "Lichtspiele Chausseestraße",
+      "lat": 52.529046,
+      "lng": 13.384722
+    },
+    {
+      "id": "Q47307728",
+      "name": "Lichtspiele Das lebende Bild",
+      "lat": 52.509652,
+      "lng": 13.414561
+    },
+    {
+      "id": "Q47092795",
+      "name": "Lichtspiele des Westens",
+      "lat": 52.511324,
+      "lng": 13.298333
+    },
+    {
+      "id": "Q47091277",
+      "name": "Lichtspiele Georg Wilhelm",
+      "lat": 52.498559,
+      "lng": 13.290687
+    },
+    {
+      "id": "Q47091338",
+      "name": "Lichtspiele Nikolsburger Platz",
+      "lat": 52.49202,
+      "lng": 13.328659
+    },
+    {
+      "id": "Q47079616",
+      "name": "Lichtspiele Staaken",
+      "lat": 52.53118,
+      "lng": 13.141189
+    },
+    {
+      "id": "Q47155309",
+      "name": "Lichtspiele Südwest",
+      "lat": 52.495531,
+      "lng": 13.396166
+    },
+    {
+      "id": "Q47497946",
+      "name": "Lichtspiele, Reinickendorfer Straße",
+      "lat": 52.546487,
+      "lng": 13.369769
+    },
+    {
+      "id": "Q47035847",
+      "name": "Lichtspielhaus Bülowstraße",
+      "lat": 52.497859,
+      "lng": 13.360658
+    },
+    {
+      "id": "Q47092962",
+      "name": "Lichtspielhaus Charlottenburg",
+      "lat": 52.508181,
+      "lng": 13.306016
+    },
+    {
+      "id": "Q47085711",
+      "name": "Lichtspieltheater Buch",
+      "lat": 52.645715,
+      "lng": 13.506906
+    },
+    {
+      "id": "Q47054181",
+      "name": "Lida-Lichtspiele",
+      "lat": 52.465995,
+      "lng": 13.321715
+    },
+    {
+      "id": "Q47155480",
+      "name": "Lido",
+      "lat": 52.49919,
+      "lng": 13.44506
+    },
+    {
+      "id": "Q47155910",
+      "name": "Liebig-Lichtspiele",
+      "lat": 52.51596,
+      "lng": 13.455657
+    },
+    {
+      "id": "Q47082862",
+      "name": "Linden-Lichtspiele",
+      "lat": 52.614965,
+      "lng": 13.316867
+    },
+    {
+      "id": "Q47091339",
+      "name": "Ludwig-Kirch-Lichtspiele",
+      "lat": 52.498035,
+      "lng": 13.324007
+    },
+    {
+      "id": "Q47155508",
+      "name": "Luisen-Kino",
+      "lat": 52.4986,
+      "lng": 13.428249
+    },
+    {
+      "id": "Q47155465",
+      "name": "Luisentheater",
+      "lat": 52.49751,
+      "lng": 13.42293
+    },
+    {
+      "id": "Q47056347",
+      "name": "Lumina-Filmtheater Schlachtensee",
+      "lat": 52.437056,
+      "lng": 13.253775
+    },
+    {
+      "id": "Q47035849",
+      "name": "Luna-Lichtspiele",
+      "lat": 52.486946,
+      "lng": 13.356632
+    },
+    {
+      "id": "Q47155981",
+      "name": "Luna-Palast",
+      "lat": 52.517223,
+      "lng": 13.434931
+    },
+    {
+      "id": "Q47086328",
+      "name": "Lunik",
+      "lat": 52.5883,
+      "lng": 13.36857
+    },
+    {
+      "id": "Q47092860",
+      "name": "Lupe 1",
+      "lat": 52.501287,
+      "lng": 13.321335
+    },
+    {
+      "id": "Q47092900",
+      "name": "Lupe 2",
+      "lat": 52.499862,
+      "lng": 13.314673
+    },
+    {
+      "id": "Q47035853",
+      "name": "Luther-Lichtspiele",
+      "lat": 52.498368,
+      "lng": 13.346465
+    },
+    {
+      "id": "Q47459922",
+      "name": "Lützow-Palast",
+      "lat": 52.501867,
+      "lng": 13.370421
+    },
+    {
+      "id": "Q47089307",
+      "name": "Lux-Filmtheater",
+      "lat": 52.474436,
+      "lng": 13.454283
+    },
+    {
+      "id": "Q47044078",
+      "name": "Luxor-Palast",
+      "lat": 52.459339,
+      "lng": 13.376999
+    },
+    {
+      "id": "Q34994059",
+      "name": "Lyra-Lichtspiele",
+      "lat": 52.444062,
+      "lng": 13.689154
+    },
+    {
+      "id": "Q47034817",
+      "name": "Mali",
+      "lat": 52.4485,
+      "lng": 13.385855
+    },
+    {
+      "id": "Q47082968",
+      "name": "Manhattan",
+      "lat": 52.59622,
+      "lng": 13.35521
+    },
+    {
+      "id": "Q47088931",
+      "name": "Märchenbrunnen-Lichtspiele",
+      "lat": 52.528426,
+      "lng": 13.427175
+    },
+    {
+      "id": "Q47459563",
+      "name": "Marga-Lichtspiele",
+      "lat": 52.550016,
+      "lng": 13.365365
+    },
+    {
+      "id": "Q47497614",
+      "name": "Marienbad-Lichtspiele",
+      "lat": 52.553503,
+      "lng": 13.37931
+    },
+    {
+      "id": "Q1902249",
+      "name": "Marmorhaus",
+      "lat": 52.5042,
+      "lng": 13.3344
+    },
+    {
+      "id": "Q47089239",
+      "name": "Mars-Lichtspiele",
+      "lat": 52.420171,
+      "lng": 13.491933
+    },
+    {
+      "id": "Q569445",
+      "name": "Martin-Gropius-Bau",
+      "lat": 52.5066,
+      "lng": 13.3818
+    },
+    {
+      "id": "Q47092933",
+      "name": "Mascotte",
+      "lat": 52.505793,
+      "lng": 13.303459
+    },
+    {
+      "id": "Q47460012",
+      "name": "Maxim",
+      "lat": 52.526822,
+      "lng": 13.332513
+    },
+    {
+      "id": "Q47089308",
+      "name": "Maxim-Lichtspiele",
+      "lat": 52.485123,
+      "lng": 13.433679
+    },
+    {
+      "id": "Q1372342",
+      "name": "Meistersaal",
+      "lat": 52.5062,
+      "lng": 13.377
+    },
+    {
+      "id": "Q47091291",
+      "name": "Melodie am Roseneck",
+      "lat": 52.477975,
+      "lng": 13.284097
+    },
+    {
+      "id": "Q47091292",
+      "name": "Melodie-Lichtspiele",
+      "lat": 52.485567,
+      "lng": 13.297126
+    },
+    {
+      "id": "Q47035886",
+      "name": "Menschners Reise-Lichtspiele",
+      "lat": 52.497301,
+      "lng": 13.361381
+    },
+    {
+      "id": "Q47035888",
+      "name": "Meraner Lichtspiele",
+      "lat": 52.485965,
+      "lng": 13.338963
+    },
+    {
+      "id": "Q47459614",
+      "name": "Mercedes-Palast",
+      "lat": 52.551033,
+      "lng": 13.360107
+    },
+    {
+      "id": "Q47156044",
+      "name": "Merkur-Palast-Lichtspiele",
+      "lat": 52.520422,
+      "lng": 13.430183
+    },
+    {
+      "id": "Q47307213",
+      "name": "Metro-Palast",
+      "lat": 52.532321,
+      "lng": 13.381201
+    },
+    {
+      "id": "Q1724204",
+      "name": "Metropol",
+      "lat": 52.4989,
+      "lng": 13.3527
+    },
+    {
+      "id": "Q47054294",
+      "name": "Metropol-Lichtbild-Theater",
+      "lat": 52.458413,
+      "lng": 13.321959
+    },
+    {
+      "id": "Q47079223",
+      "name": "Metropol-Lichtspiele",
+      "lat": 52.546353,
+      "lng": 13.202213
+    },
+    {
+      "id": "Q47092859",
+      "name": "MGM-Theater – Fenster zur Welt",
+      "lat": 52.501393,
+      "lng": 13.319678
+    },
+    {
+      "id": "Q34969892",
+      "name": "Mietvilla Puschkinallee 5",
+      "lat": 52.494763,
+      "lng": 13.455267
+    },
+    {
+      "id": "Q47119549",
+      "name": "Mila-Lichtspiele",
+      "lat": 52.5024,
+      "lng": 13.4815
+    },
+    {
+      "id": "Q47088933",
+      "name": "Mila-Lichtspielpalast",
+      "lat": 52.545498,
+      "lng": 13.412145
+    },
+    {
+      "id": "Q47092963",
+      "name": "Minerva-Lichtspiele",
+      "lat": 52.503017,
+      "lng": 13.307526
+    },
+    {
+      "id": "Q47155850",
+      "name": "Mirbach-Lichtspiele",
+      "lat": 52.517407,
+      "lng": 13.46865
+    },
+    {
+      "id": "Q47460018",
+      "name": "Moabiter Lichtspiele",
+      "lat": 52.530604,
+      "lng": 13.333203
+    },
+    {
+      "id": "Q47307157",
+      "name": "Moderne Lichtspiele",
+      "lat": 52.533512,
+      "lng": 13.398857
+    },
+    {
+      "id": "Q47034833",
+      "name": "Monopol-Lichtspiele",
+      "lat": 52.413364,
+      "lng": 13.363032
+    },
+    {
+      "id": "Q100786403",
+      "name": "Movieland",
+      "lat": 52.42215,
+      "lng": 13.75368
+    },
+    {
+      "id": "Q1657924",
+      "name": "Moviemento",
+      "lat": 52.4903,
+      "lng": 13.4235
+    },
+    {
+      "id": "Q47013034",
+      "name": "Mozart-Lichtspiele",
+      "lat": 52.382598,
+      "lng": 13.398352
+    },
+    {
+      "id": "Q47047054",
+      "name": "Mühlen-Lichtspiele",
+      "lat": 52.436945,
+      "lng": 13.344859
+    },
+    {
+      "id": "Q47315796",
+      "name": "Münz-Lichtspiele",
+      "lat": 52.523752,
+      "lng": 13.410343
+    },
+    {
+      "id": "Q1971567",
+      "name": "Naturtheater Friedrichshagen",
+      "lat": 52.4596,
+      "lng": 13.6238
+    },
+    {
+      "id": "Q61613869",
+      "name": "Neue Kammerspiele Kleinmachnow",
+      "lat": 52.417577,
+      "lng": 13.226342
+    },
+    {
+      "id": "Q47311541",
+      "name": "Neue Philharmonie-Lichtspiele",
+      "lat": 52.511189,
+      "lng": 13.414342
+    },
+    {
+      "id": "Q47086394",
+      "name": "Neue Schönholzer Lichtspiele",
+      "lat": 52.568487,
+      "lng": 13.401404
+    },
+    {
+      "id": "Q1979838",
+      "name": "Neue Welt",
+      "lat": 52.486452,
+      "lng": 13.42147
+    },
+    {
+      "id": "Q47497618",
+      "name": "Neues Alhambra",
+      "lat": 52.551508,
+      "lng": 13.382725
+    },
+    {
+      "id": "Q47092149",
+      "name": "Neues Lichtspielhaus",
+      "lat": 52.511669,
+      "lng": 13.310244
+    },
+    {
+      "id": "Q47089254",
+      "name": "Neues Off",
+      "lat": 52.48341,
+      "lng": 13.424489
+    },
+    {
+      "id": "Q47340743",
+      "name": "Nickelodeon",
+      "lat": 52.527627,
+      "lng": 13.390299
+    },
+    {
+      "id": "Q34994229",
+      "name": "Niederschöneweider Lichtspiele",
+      "lat": 52.455746,
+      "lng": 13.513316
+    },
+    {
+      "id": "Q47307143",
+      "name": "Noack-Lichtspiele",
+      "lat": 52.531889,
+      "lng": 13.399636
+    },
+    {
+      "id": "Q47088934",
+      "name": "Nord-Ost-Kino",
+      "lat": 52.536867,
+      "lng": 13.427735
+    },
+    {
+      "id": "Q47315777",
+      "name": "Nordlicht-Lichtspiele",
+      "lat": 52.528824,
+      "lng": 13.399581
+    },
+    {
+      "id": "Q47036013",
+      "name": "Notausgang",
+      "lat": 52.488853,
+      "lng": 13.358071
+    },
+    {
+      "id": "Q35006754",
+      "name": "Oberschöneweider Lichtspiele",
+      "lat": 52.459,
+      "lng": 13.52576
+    },
+    {
+      "id": "Q47036016",
+      "name": "Odeon",
+      "lat": 52.482111,
+      "lng": 13.349579
+    },
+    {
+      "id": "Q47311528",
+      "name": "Odeon-Filmtheater",
+      "lat": 52.50845,
+      "lng": 13.426279
+    },
+    {
+      "id": "Q47052263",
+      "name": "Odeon-Lichtspiele",
+      "lat": 52.418678,
+      "lng": 13.326803
+    },
+    {
+      "id": "Q47086397",
+      "name": "Odeum-Lichtspiele",
+      "lat": 52.558484,
+      "lng": 13.413036
+    },
+    {
+      "id": "Q42297622",
+      "name": "Olympia am Zoo",
+      "lat": 52.505183,
+      "lng": 13.332741
+    },
+    {
+      "id": "Q47036024",
+      "name": "Olympia-Lichtspiele",
+      "lat": 52.496533,
+      "lng": 13.364992
+    },
+    {
+      "id": "Q47036135",
+      "name": "Olympia-Theater",
+      "lat": 52.48804,
+      "lng": 13.339717
+    },
+    {
+      "id": "Q47056485",
+      "name": "Onkel-Tom-Kino",
+      "lat": 52.44949,
+      "lng": 13.25358
+    },
+    {
+      "id": "Q47079340",
+      "name": "Openair-Kino",
+      "lat": 52.53642,
+      "lng": 13.2015
+    },
+    {
+      "id": "Q47155438",
+      "name": "Oppelner Lichtspiele",
+      "lat": 52.498526,
+      "lng": 13.439214
+    },
+    {
+      "id": "Q47155460",
+      "name": "Orania-Lichtspiele",
+      "lat": 52.501065,
+      "lng": 13.420656
+    },
+    {
+      "id": "Q47155446",
+      "name": "Oranien-Theater",
+      "lat": 52.502609,
+      "lng": 13.413763
+    },
+    {
+      "id": "Q47092921",
+      "name": "Orient-Theater",
+      "lat": 52.515863,
+      "lng": 13.312566
+    },
+    {
+      "id": "Q47089293",
+      "name": "Orion",
+      "lat": 52.467103,
+      "lng": 13.461902
+    },
+    {
+      "id": "Q47459978",
+      "name": "Orion-Lichtspiele",
+      "lat": 52.526403,
+      "lng": 13.328561
+    },
+    {
+      "id": "Q47304966",
+      "name": "Orpheum",
+      "lat": 52.511986,
+      "lng": 13.417127
+    },
+    {
+      "id": "Q47092946",
+      "name": "Orpheum-Theater",
+      "lat": 52.526417,
+      "lng": 13.301936
+    },
+    {
+      "id": "Q47092854",
+      "name": "Orsika-Tonlichtspiele",
+      "lat": 52.517814,
+      "lng": 13.29146
+    },
+    {
+      "id": "Q47046631",
+      "name": "Outpost",
+      "lat": 52.45597,
+      "lng": 13.346065
+    },
+    {
+      "id": "Q47459933",
+      "name": "P.P.P.",
+      "lat": 52.507414,
+      "lng": 13.371226
+    },
+    {
+      "id": "Q47089274",
+      "name": "Palast-Kino Stern",
+      "lat": 52.478247,
+      "lng": 13.425627
+    },
+    {
+      "id": "Q47082867",
+      "name": "Palast-Lichtspiele",
+      "lat": 52.618903,
+      "lng": 13.307946
+    },
+    {
+      "id": "Q47036144",
+      "name": "Palast-Theater",
+      "lat": 52.484684,
+      "lng": 13.352251
+    },
+    {
+      "id": "Q47054321",
+      "name": "Palast-Theater am Stadtpark",
+      "lat": 52.452135,
+      "lng": 13.334293
+    },
+    {
+      "id": "Q47036151",
+      "name": "Palette-Filmtheater",
+      "lat": 52.469248,
+      "lng": 13.341171
+    },
+    {
+      "id": "Q47155279",
+      "name": "Palladium-Lichtspiele",
+      "lat": 52.49245,
+      "lng": 13.40164
+    },
+    {
+      "id": "Q47459538",
+      "name": "Pamela-Lichtspiele",
+      "lat": 52.545586,
+      "lng": 13.360169
+    },
+    {
+      "id": "Q47036166",
+      "name": "Pamet-Lichtspiele",
+      "lat": 52.497582,
+      "lng": 13.361595
+    },
+    {
+      "id": "Q47091254",
+      "name": "Pan Filmtheater",
+      "lat": 52.485116,
+      "lng": 13.275931
+    },
+    {
+      "id": "Q47056595",
+      "name": "Panorama",
+      "lat": 52.439193,
+      "lng": 13.262531
+    },
+    {
+      "id": "Q47092808",
+      "name": "Panoramik-Lichtspiele",
+      "lat": 52.515388,
+      "lng": 13.299595
+    },
+    {
+      "id": "Q47155348",
+      "name": "Parade-Theater",
+      "lat": 52.507529,
+      "lng": 13.390389
+    },
+    {
+      "id": "Q35006876",
+      "name": "Paradies-Lichtspiele",
+      "lat": 52.403045,
+      "lng": 13.567446
+    },
+    {
+      "id": "Q47054345",
+      "name": "Park-Lichtspiele",
+      "lat": 52.448498,
+      "lng": 13.317916
+    },
+    {
+      "id": "Q47155975",
+      "name": "Passage",
+      "lat": 52.51785,
+      "lng": 13.43089
+    },
+    {
+      "id": "Q47089203",
+      "name": "Passage-Kino",
+      "lat": 52.477577,
+      "lng": 13.439527
+    },
+    {
+      "id": "Q47340904",
+      "name": "Passage-Lichtspiele",
+      "lat": 52.516646,
+      "lng": 13.388384
+    },
+    {
+      "id": "Q47036184",
+      "name": "Passage-Theater",
+      "lat": 52.485072,
+      "lng": 13.355685
+    },
+    {
+      "id": "Q47307402",
+      "name": "Pathéphon Salon Theater",
+      "lat": 52.511913,
+      "lng": 13.389401
+    },
+    {
+      "id": "Q47315771",
+      "name": "Patria-Lichtspiele",
+      "lat": 52.527009,
+      "lng": 13.388042
+    },
+    {
+      "id": "Q47051965",
+      "name": "Paulus-Zentrum",
+      "lat": 52.438707,
+      "lng": 13.305432
+    },
+    {
+      "id": "Q47156112",
+      "name": "Petersburger Lichtspiele",
+      "lat": 52.524944,
+      "lng": 13.448025
+    },
+    {
+      "id": "Q47012978",
+      "name": "Pfalzburg-Lichtspiele",
+      "lat": 52.474498,
+      "lng": 13.32799
+    },
+    {
+      "id": "Q23786080",
+      "name": "Pharussäle",
+      "lat": 52.548823,
+      "lng": 13.354381
+    },
+    {
+      "id": "Q47340728",
+      "name": "Phönix-Lichtspiele",
+      "lat": 52.529329,
+      "lng": 13.398996
+    },
+    {
+      "id": "Q42297623",
+      "name": "Piccadilly Kino",
+      "lat": 52.51165,
+      "lng": 13.310256
+    },
+    {
+      "id": "Q47155899",
+      "name": "Plath-Lichtspiele",
+      "lat": 52.515019,
+      "lng": 13.459342
+    },
+    {
+      "id": "Q47155913",
+      "name": "Plaza",
+      "lat": 52.514182,
+      "lng": 13.438195
+    },
+    {
+      "id": "Q47459445",
+      "name": "Polo-Lichtspiele Tageskino",
+      "lat": 52.538221,
+      "lng": 13.372809
+    },
+    {
+      "id": "Q47091342",
+      "name": "Prachtsäle des Westens",
+      "lat": 52.498045,
+      "lng": 13.333028
+    },
+    {
+      "id": "Q873829",
+      "name": "Prater",
+      "lat": 52.5403,
+      "lng": 13.4094
+    },
+    {
+      "id": "Q47056688",
+      "name": "Primus-Palast",
+      "lat": 52.43469,
+      "lng": 13.26259
+    },
+    {
+      "id": "Q47155491",
+      "name": "Primus-Palast am Hermannplatz",
+      "lat": 52.488054,
+      "lng": 13.423771
+    },
+    {
+      "id": "Q47497858",
+      "name": "Prinzen-Lichtspielhaus",
+      "lat": 52.55546,
+      "lng": 13.383672
+    },
+    {
+      "id": "Q47497852",
+      "name": "Prinzen-Palast",
+      "lat": 52.559341,
+      "lng": 13.386891
+    },
+    {
+      "id": "Q47036198",
+      "name": "Prinzess-Lichtspiele",
+      "lat": 52.486533,
+      "lng": 13.356306
+    },
+    {
+      "id": "Q22693536",
+      "name": "Prinzeß-Theater",
+      "lat": 52.504995,
+      "lng": 13.332713
+    },
+    {
+      "id": "Q47155418",
+      "name": "Prisma-Lichtspiele",
+      "lat": 52.49227,
+      "lng": 13.38787
+    },
+    {
+      "id": "Q47497866",
+      "name": "Provinz-Kino",
+      "lat": 52.565198,
+      "lng": 13.3782
+    },
+    {
+      "id": "Q47091297",
+      "name": "Puck-Filmtheater",
+      "lat": 52.516948,
+      "lng": 13.261492
+    },
+    {
+      "id": "Q15841203",
+      "name": "Puhlmann-Theater",
+      "lat": 52.539376,
+      "lng": 13.411591
+    },
+    {
+      "id": "Q36692531",
+      "name": "Rathaus Zehlendorf",
+      "lat": 52.433056,
+      "lng": 13.259167
+    },
+    {
+      "id": "Q47497715",
+      "name": "Record-Lichtspiele",
+      "lat": 52.542712,
+      "lng": 13.392315
+    },
+    {
+      "id": "Q47092803",
+      "name": "Reform-Lichtspiele",
+      "lat": 52.51567,
+      "lng": 13.331976
+    },
+    {
+      "id": "Q47118306",
+      "name": "Reform-Theater",
+      "lat": 52.5385,
+      "lng": 13.4817
+    },
+    {
+      "id": "Q47155416",
+      "name": "Regenbogenkino",
+      "lat": 52.49579,
+      "lng": 13.42679
+    },
+    {
+      "id": "Q47079665",
+      "name": "Regina",
+      "lat": 52.525204,
+      "lng": 13.197534
+    },
+    {
+      "id": "Q47079456",
+      "name": "Regina-Lichtspiele",
+      "lat": 52.530475,
+      "lng": 13.19592
+    },
+    {
+      "id": "Q876556",
+      "name": "Renaissance-Theater",
+      "lat": 52.5104,
+      "lng": 13.3234
+    },
+    {
+      "id": "Q47092852",
+      "name": "Residenz",
+      "lat": 52.506092,
+      "lng": 13.3142
+    },
+    {
+      "id": "Q47083111",
+      "name": "Residenz-Theater",
+      "lat": 52.57181,
+      "lng": 13.36051
+    },
+    {
+      "id": "Q47083118",
+      "name": "Rex",
+      "lat": 52.574716,
+      "lng": 13.355397
+    },
+    {
+      "id": "Q47078443",
+      "name": "Rex-Filmtheater",
+      "lat": 52.544794,
+      "lng": 13.237934
+    },
+    {
+      "id": "Q47052647",
+      "name": "Rex-Lichtspiele",
+      "lat": 52.446773,
+      "lng": 13.294993
+    },
+    {
+      "id": "Q47091324",
+      "name": "Rheingau-Theater",
+      "lat": 52.470404,
+      "lng": 13.318967
+    },
+    {
+      "id": "Q47092927",
+      "name": "Rheingold",
+      "lat": 52.517239,
+      "lng": 13.305783
+    },
+    {
+      "id": "Q47012982",
+      "name": "Rheinschloß-Filmtheater",
+      "lat": 52.470038,
+      "lng": 13.334164
+    },
+    {
+      "id": "Q47092853",
+      "name": "Rialto-Palast",
+      "lat": 52.505339,
+      "lng": 13.328219
+    },
+    {
+      "id": "Q47119125",
+      "name": "Ringbahn-Theater",
+      "lat": 52.5057,
+      "lng": 13.5136
+    },
+    {
+      "id": "Q47052686",
+      "name": "Rio-Lichtspiele",
+      "lat": 52.442781,
+      "lng": 13.317916
+    },
+    {
+      "id": "Q47091278",
+      "name": "Rivoli",
+      "lat": 52.496739,
+      "lng": 13.287335
+    },
+    {
+      "id": "Q47155305",
+      "name": "Rivoli-Palast",
+      "lat": 52.489369,
+      "lng": 13.388652
+    },
+    {
+      "id": "Q47086377",
+      "name": "Roland-Lichtspiele",
+      "lat": 52.566373,
+      "lng": 13.396774
+    },
+    {
+      "id": "Q47092934",
+      "name": "Roland-Theater",
+      "lat": 52.50822,
+      "lng": 13.296244
+    },
+    {
+      "id": "Q47091356",
+      "name": "Rolandtheater",
+      "lat": 52.487849,
+      "lng": 13.322505
+    },
+    {
+      "id": "Q47086305",
+      "name": "Roli-Lichtspiele",
+      "lat": 52.59973,
+      "lng": 13.377516
+    },
+    {
+      "id": "Q47089256",
+      "name": "Rollberg-Kinos",
+      "lat": 52.478844,
+      "lng": 13.427426
+    },
+    {
+      "id": "Q47089279",
+      "name": "Rollkrug-Lichtspiele",
+      "lat": 52.486016,
+      "lng": 13.424528
+    },
+    {
+      "id": "Q47013042",
+      "name": "Roma-Lichtspiele",
+      "lat": 52.38657,
+      "lng": 13.408541
+    },
+    {
+      "id": "Q47091280",
+      "name": "Rote Mühle",
+      "lat": 52.496397,
+      "lng": 13.287156
+    },
+    {
+      "id": "Q47497728",
+      "name": "Roxy-Lichtspiele",
+      "lat": 52.5463,
+      "lng": 13.395649
+    },
+    {
+      "id": "Q47083657",
+      "name": "Roxy-Palast",
+      "lat": 52.59606,
+      "lng": 13.33326
+    },
+    {
+      "id": "Q1687214",
+      "name": "Royal Palast",
+      "lat": 52.5041,
+      "lng": 13.3382
+    },
+    {
+      "id": "Q47089240",
+      "name": "Ru-To-Li",
+      "lat": 52.420929,
+      "lng": 13.494781
+    },
+    {
+      "id": "Q47091337",
+      "name": "Rüdesheimer Lichtspiele",
+      "lat": 52.474216,
+      "lng": 13.314007
+    },
+    {
+      "id": "Q2177146",
+      "name": "Russisches Haus",
+      "lat": 52.5134,
+      "lng": 13.3889
+    },
+    {
+      "id": "Q2208948",
+      "name": "Saalbau Neukölln",
+      "lat": 52.4769,
+      "lng": 13.4391
+    },
+    {
+      "id": "Q35009249",
+      "name": "Saalkino Bohnsdorf",
+      "lat": 52.399502,
+      "lng": 13.567446
+    },
+    {
+      "id": "Q47091281",
+      "name": "Saba",
+      "lat": 52.502406,
+      "lng": 13.321448
+    },
+    {
+      "id": "Q47079464",
+      "name": "Savoy",
+      "lat": 52.536245,
+      "lng": 13.190281
+    },
+    {
+      "id": "Q47036204",
+      "name": "Savoy-Lichtspiele",
+      "lat": 52.495563,
+      "lng": 13.345802
+    },
+    {
+      "id": "Q47307355",
+      "name": "Scala",
+      "lat": 52.525559,
+      "lng": 13.387769
+    },
+    {
+      "id": "Q47459543",
+      "name": "Scala-Filmtheater",
+      "lat": 52.553314,
+      "lng": 13.347594
+    },
+    {
+      "id": "Q47092773",
+      "name": "Schalotte",
+      "lat": 52.516624,
+      "lng": 13.303159
+    },
+    {
+      "id": "Q43061296",
+      "name": "Schaubude Berlin",
+      "lat": 52.540928,
+      "lng": 13.439106
+    },
+    {
+      "id": "Q569461",
+      "name": "Schaubühne am Lehniner Platz",
+      "lat": 52.498611,
+      "lng": 13.302222
+    },
+    {
+      "id": "Q47340620",
+      "name": "Schauburg",
+      "lat": 52.507243,
+      "lng": 13.378954
+    },
+    {
+      "id": "Q47088936",
+      "name": "Schauburg am Arnimplatz",
+      "lat": 52.551582,
+      "lng": 13.407953
+    },
+    {
+      "id": "Q47092826",
+      "name": "Schiller-Lichtspiele",
+      "lat": 52.506348,
+      "lng": 13.310016
+    },
+    {
+      "id": "Q47092928",
+      "name": "Schloß-Lichtspiele",
+      "lat": 52.511831,
+      "lng": 13.297554
+    },
+    {
+      "id": "Q47036294",
+      "name": "Schlossbrauerei-Lichtspiele",
+      "lat": 52.482791,
+      "lng": 13.35094
+    },
+    {
+      "id": "Q47085752",
+      "name": "Schloßkrug-Lichtspiele Buch",
+      "lat": 52.635188,
+      "lng": 13.499475
+    },
+    {
+      "id": "Q2244661",
+      "name": "Schlosspark Theater",
+      "lat": 52.4547,
+      "lng": 13.3181
+    },
+    {
+      "id": "Q35010272",
+      "name": "Schlossplatztheater",
+      "lat": 52.445042,
+      "lng": 13.57434
+    },
+    {
+      "id": "Q42297625",
+      "name": "Schlüter-Lichtspiele",
+      "lat": 52.50721,
+      "lng": 13.31715
+    },
+    {
+      "id": "Q47088938",
+      "name": "Schönhauser Lichtbild-Theater",
+      "lat": 52.553339,
+      "lng": 13.413925
+    },
+    {
+      "id": "Q47119131",
+      "name": "Schwarzer Adler",
+      "lat": 52.5057,
+      "lng": 13.5136
+    },
+    {
+      "id": "Q47082815",
+      "name": "Seeschloss-Lichtspiele",
+      "lat": 52.605074,
+      "lng": 13.209856
+    },
+    {
+      "id": "Q47078865",
+      "name": "Siesta",
+      "lat": 52.537143,
+      "lng": 13.272359
+    },
+    {
+      "id": "Q47156072",
+      "name": "Silesia-Lichtspiele",
+      "lat": 52.525584,
+      "lng": 13.443359
+    },
+    {
+      "id": "Q35010623",
+      "name": "Silvana",
+      "lat": 52.464235,
+      "lng": 13.484782
+    },
+    {
+      "id": "Q47156157",
+      "name": "Simplon-Lichtspiele",
+      "lat": 52.509691,
+      "lng": 13.456476
+    },
+    {
+      "id": "Q47088864",
+      "name": "Skala-Lichtspiele",
+      "lat": 52.54984,
+      "lng": 13.41523
+    },
+    {
+      "id": "Q47117127",
+      "name": "Sojus",
+      "lat": 52.5265,
+      "lng": 13.5424
+    },
+    {
+      "id": "Q47118312",
+      "name": "Solita",
+      "lat": 52.534912,
+      "lng": 13.496364
+    },
+    {
+      "id": "Q47091298",
+      "name": "Splendid",
+      "lat": 52.510214,
+      "lng": 13.280018
+    },
+    {
+      "id": "Q47459602",
+      "name": "Sputnik",
+      "lat": 52.550016,
+      "lng": 13.365365
+    },
+    {
+      "id": "Q47155393",
+      "name": "Sputnik Kino",
+      "lat": 52.488941,
+      "lng": 13.409935
+    },
+    {
+      "id": "Q47155950",
+      "name": "Städtische Jugendbühne",
+      "lat": 52.507236,
+      "lng": 13.465332
+    },
+    {
+      "id": "Q47082605",
+      "name": "Stadtrand-Lichtspiele",
+      "lat": 52.655268,
+      "lng": 13.284629
+    },
+    {
+      "id": "Q47088939",
+      "name": "Stargarder Lichtspiele",
+      "lat": 52.546139,
+      "lng": 13.4198
+    },
+    {
+      "id": "Q47307374",
+      "name": "Stattkino",
+      "lat": 52.515432,
+      "lng": 13.3889
+    },
+    {
+      "id": "Q47155399",
+      "name": "Stella-Palast",
+      "lat": 52.50384,
+      "lng": 13.43735
+    },
+    {
+      "id": "Q47459999",
+      "name": "Stephan-Lichtspiele",
+      "lat": 52.534652,
+      "lng": 13.353793
+    },
+    {
+      "id": "Q47307712",
+      "name": "Stern",
+      "lat": 52.52011,
+      "lng": 13.389503
+    },
+    {
+      "id": "Q47459970",
+      "name": "Stern-Lichtspiele",
+      "lat": 52.524526,
+      "lng": 13.335221
+    },
+    {
+      "id": "Q47460000",
+      "name": "Strom-Lichtspiele",
+      "lat": 52.53071,
+      "lng": 13.342977
+    },
+    {
+      "id": "Q47092861",
+      "name": "Studio, Kurfürstendamm 206",
+      "lat": 52.501986,
+      "lng": 13.323435
+    },
+    {
+      "id": "Q47092866",
+      "name": "Studio, Kurfürstendamm 71",
+      "lat": 52.50018,
+      "lng": 13.306619
+    },
+    {
+      "id": "Q47089295",
+      "name": "Süd-Palast",
+      "lat": 52.466075,
+      "lng": 13.430197
+    },
+    {
+      "id": "Q47092941",
+      "name": "TAKI Tageskino am Tauentzien",
+      "lat": 52.50468,
+      "lng": 13.336924
+    },
+    {
+      "id": "Q47155445",
+      "name": "TAM",
+      "lat": 52.503565,
+      "lng": 13.410224
+    },
+    {
+      "id": "Q47036396",
+      "name": "Tauentzien-Tageskino",
+      "lat": 52.502573,
+      "lng": 13.339968
+    },
+    {
+      "id": "Q25089244",
+      "name": "Tauentzienpalast",
+      "lat": 52.50275,
+      "lng": 13.339389
+    },
+    {
+      "id": "Q47311520",
+      "name": "Taunus-Lichtspiele",
+      "lat": 52.507598,
+      "lng": 13.427619
+    },
+    {
+      "id": "Q47044087",
+      "name": "TeFi Filmtheater",
+      "lat": 52.465741,
+      "lng": 13.37843
+    },
+    {
+      "id": "Q47083559",
+      "name": "Teli",
+      "lat": 52.591327,
+      "lng": 13.286312
+    },
+    {
+      "id": "Q47156154",
+      "name": "Tempo-Lichtspiele",
+      "lat": 52.510565,
+      "lng": 13.456228
+    },
+    {
+      "id": "Q47459601",
+      "name": "Thalia",
+      "lat": 52.55102,
+      "lng": 13.362776
+    },
+    {
+      "id": "Q46809580",
+      "name": "Thalia Filmtheater",
+      "lat": 52.39189,
+      "lng": 13.09519
+    },
+    {
+      "id": "Q47047390",
+      "name": "Thalia Kino Berlin",
+      "lat": 52.435087,
+      "lng": 13.297524
+    },
+    {
+      "id": "Q47155978",
+      "name": "Thalia Lichtspiele",
+      "lat": 52.518099,
+      "lng": 13.433121
+    },
+    {
+      "id": "Q47013007",
+      "name": "Thalia-Lichtspiele",
+      "lat": 52.466134,
+      "lng": 13.32792
+    },
+    {
+      "id": "Q47036519",
+      "name": "Thalia-Theater, Goebenstraße",
+      "lat": 52.493663,
+      "lng": 13.363703
+    },
+    {
+      "id": "Q2416046",
+      "name": "Theater an der Parkaue",
+      "lat": 52.5169,
+      "lng": 13.4772
+    },
+    {
+      "id": "Q328706",
+      "name": "Theater at Potsdamer Platz",
+      "lat": 52.507,
+      "lng": 13.372
+    },
+    {
+      "id": "Q1483262",
+      "name": "Tilsiter Lichtspiele",
+      "lat": 52.5207,
+      "lng": 13.4473
+    },
+    {
+      "id": "Q47036535",
+      "name": "Titania",
+      "lat": 52.482403,
+      "lng": 13.348667
+    },
+    {
+      "id": "Q2436848",
+      "name": "Titania-Palast",
+      "lat": 52.4639,
+      "lng": 13.3267
+    },
+    {
+      "id": "Q47044113",
+      "name": "Tivoli",
+      "lat": 52.455648,
+      "lng": 13.383399
+    },
+    {
+      "id": "Q47078410",
+      "name": "Tivoli-Lichtspiele",
+      "lat": 52.56392,
+      "lng": 13.204316
+    },
+    {
+      "id": "Q47459534",
+      "name": "Tivoli-Lichtspieltheater",
+      "lat": 52.550016,
+      "lng": 13.359722
+    },
+    {
+      "id": "Q47036544",
+      "name": "Tonburg",
+      "lat": 52.488928,
+      "lng": 13.359358
+    },
+    {
+      "id": "Q47311534",
+      "name": "Toneck-Lichtspiele",
+      "lat": 52.511074,
+      "lng": 13.416018
+    },
+    {
+      "id": "Q47340538",
+      "name": "Toneck-Lichtspiele, Rosa-Luxemburg-Straße",
+      "lat": 52.528387,
+      "lng": 13.409968
+    },
+    {
+      "id": "Q47119305",
+      "name": "Toni-Lichtspiele",
+      "lat": 52.5156,
+      "lng": 13.4859
+    },
+    {
+      "id": "Q314446",
+      "name": "Tränenpalast",
+      "lat": 52.5208,
+      "lng": 13.3869
+    },
+    {
+      "id": "Q47156199",
+      "name": "Traveplatz-Lichtspiele",
+      "lat": 52.51073,
+      "lng": 13.468651
+    },
+    {
+      "id": "Q47079669",
+      "name": "Tropfstein-Lichtspiele",
+      "lat": 52.517897,
+      "lng": 13.197461
+    },
+    {
+      "id": "Q47340734",
+      "name": "Trumpf",
+      "lat": 52.529196,
+      "lng": 13.395866
+    },
+    {
+      "id": "Q47155451",
+      "name": "Truxa-Lichtspiele",
+      "lat": 52.501592,
+      "lng": 13.4177
+    },
+    {
+      "id": "Q47460011",
+      "name": "Turm-Lichtspiele",
+      "lat": 52.526893,
+      "lng": 13.331989
+    },
+    {
+      "id": "Q47036565",
+      "name": "Turma-Flora-Filmtheater",
+      "lat": 52.485586,
+      "lng": 13.356035
+    },
+    {
+      "id": "Q47460008",
+      "name": "Turmpalast",
+      "lat": 52.526466,
+      "lng": 13.344447
+    },
+    {
+      "id": "Q47117136",
+      "name": "UCI Kinowelt Am Eastgate",
+      "lat": 52.5417,
+      "lng": 13.5421
+    },
+    {
+      "id": "Q47089227",
+      "name": "UCI Kinowelt Gropius Passagen",
+      "lat": 52.429983,
+      "lng": 13.456167
+    },
+    {
+      "id": "Q118744391",
+      "name": "UCI Luxe",
+      "lat": 52.505222,
+      "lng": 13.441982
+    },
+    {
+      "id": "Q1285122",
+      "name": "Ufa-Palast am Zoo",
+      "lat": 52.5061,
+      "lng": 13.3342
+    },
+    {
+      "id": "Q47088941",
+      "name": "Ufa-Palast Königstadt",
+      "lat": 52.530796,
+      "lng": 13.411683
+    },
+    {
+      "id": "Q47340938",
+      "name": "UFA-Palast Weinbergsweg",
+      "lat": 52.532161,
+      "lng": 13.403288
+    },
+    {
+      "id": "Q21035819",
+      "name": "Ufa-Pavillon am Nollendorfplatz",
+      "lat": 52.499444,
+      "lng": 13.3525
+    },
+    {
+      "id": "Q47304524",
+      "name": "Ufa-Theater Alexanderplatz",
+      "lat": 52.521334,
+      "lng": 13.412648
+    },
+    {
+      "id": "Q47307388",
+      "name": "Ufa-Theater Friedrichstraße",
+      "lat": 52.512809,
+      "lng": 13.389277
+    },
+    {
+      "id": "Q47091355",
+      "name": "Uhlandtheater",
+      "lat": 52.489421,
+      "lng": 13.322569
+    },
+    {
+      "id": "Q47089287",
+      "name": "Union",
+      "lat": 52.475943,
+      "lng": 13.427608
+    },
+    {
+      "id": "Q47088942",
+      "name": "Union-Festsäle",
+      "lat": 52.530886,
+      "lng": 13.426126
+    },
+    {
+      "id": "Q35013869",
+      "name": "Union-Filmtheater",
+      "lat": 52.456327,
+      "lng": 13.625878
+    },
+    {
+      "id": "Q47497981",
+      "name": "Union-Kino",
+      "lat": 52.54575,
+      "lng": 13.39532
+    },
+    {
+      "id": "Q47092911",
+      "name": "Union-Lichtspiele",
+      "lat": 52.516723,
+      "lng": 13.307788
+    },
+    {
+      "id": "Q47044153",
+      "name": "Union-Theater",
+      "lat": 52.468279,
+      "lng": 13.384932
+    },
+    {
+      "id": "Q47083567",
+      "name": "Union-Theater Tegel",
+      "lat": 52.58977,
+      "lng": 13.28122
+    },
+    {
+      "id": "Q47340918",
+      "name": "Union-Theater Unter den Linden",
+      "lat": 52.516676,
+      "lng": 13.387946
+    },
+    {
+      "id": "Q47088943",
+      "name": "Union-Theater, Metzer Straße",
+      "lat": 52.532279,
+      "lng": 13.414304
+    },
+    {
+      "id": "Q47088944",
+      "name": "Union-Theater, Naugarder Straße",
+      "lat": 52.542763,
+      "lng": 13.438291
+    },
+    {
+      "id": "Q47089280",
+      "name": "Universal-Theater",
+      "lat": 52.471777,
+      "lng": 13.440934
+    },
+    {
+      "id": "Q47459932",
+      "name": "Universum",
+      "lat": 52.507776,
+      "lng": 13.372272
+    },
+    {
+      "id": "Q47155469",
+      "name": "Universum-Theater",
+      "lat": 52.494892,
+      "lng": 13.432585
+    },
+    {
+      "id": "Q47086316",
+      "name": "Urania-Lichtspiele",
+      "lat": 52.59973,
+      "lng": 13.377516
+    },
+    {
+      "id": "Q47155511",
+      "name": "Urania-Theater",
+      "lat": 52.504075,
+      "lng": 13.428529
+    },
+    {
+      "id": "Q47497993",
+      "name": "Usedom-Lichtspiele",
+      "lat": 52.540711,
+      "lng": 13.391364
+    },
+    {
+      "id": "Q35014108",
+      "name": "UT-Lichtspiele",
+      "lat": 52.461565,
+      "lng": 13.518851
+    },
+    {
+      "id": "Q47459449",
+      "name": "Valencia Film-Palast",
+      "lat": 52.551623,
+      "lng": 13.348091
+    },
+    {
+      "id": "Q25964547",
+      "name": "Venus",
+      "lat": 52.5479,
+      "lng": 13.4995
+    },
+    {
+      "id": "Q47036594",
+      "name": "Victoria-Filmtheater",
+      "lat": 52.495003,
+      "lng": 13.340189
+    },
+    {
+      "id": "Q47034825",
+      "name": "Viktoria-Lichtspiele",
+      "lat": 52.494801,
+      "lng": 13.349478
+    },
+    {
+      "id": "Q47036597",
+      "name": "Viktoria-Luise-Lichtspiele",
+      "lat": 52.496233,
+      "lng": 13.341476
+    },
+    {
+      "id": "Q47079522",
+      "name": "Viktoria-Saal",
+      "lat": 52.531616,
+      "lng": 13.205267
+    },
+    {
+      "id": "Q47498055",
+      "name": "Vineta-Lichtspiele",
+      "lat": 52.541666,
+      "lng": 13.39933
+    },
+    {
+      "id": "Q47155331",
+      "name": "Vitascope–Theater",
+      "lat": 52.50124,
+      "lng": 13.391664
+    },
+    {
+      "id": "Q35014409",
+      "name": "Völkerbund-Lichtspiele",
+      "lat": 52.438703,
+      "lng": 13.57115
+    },
+    {
+      "id": "Q47156025",
+      "name": "Volks-Bilder-Bühne",
+      "lat": 52.510746,
+      "lng": 13.458119
+    },
+    {
+      "id": "Q47459976",
+      "name": "Volks-Kino-Theater",
+      "lat": 52.529777,
+      "lng": 13.328408
+    },
+    {
+      "id": "Q47498051",
+      "name": "Volks-Kino-Vinetaplatz",
+      "lat": 52.540643,
+      "lng": 13.400648
+    },
+    {
+      "id": "Q47116930",
+      "name": "Volks-Lichtspiele",
+      "lat": 52.5054,
+      "lng": 13.582
+    },
+    {
+      "id": "Q47119313",
+      "name": "Volkshaus",
+      "lat": 52.5104,
+      "lng": 13.5056
+    },
+    {
+      "id": "Q47497647",
+      "name": "Vox-Lichtspiele",
+      "lat": 52.537267,
+      "lng": 13.392484
+    },
+    {
+      "id": "Q35014630",
+      "name": "W.B.T.-Lichtspiele",
+      "lat": 52.46468,
+      "lng": 13.51312
+    },
+    {
+      "id": "Q644028",
+      "name": "Waldbühne",
+      "lat": 52.5159,
+      "lng": 13.229
+    },
+    {
+      "id": "Q47083574",
+      "name": "Waldkater-Lichtspiele",
+      "lat": 52.575713,
+      "lng": 13.270508
+    },
+    {
+      "id": "Q47079552",
+      "name": "Walhalla-Lichtspiele",
+      "lat": 52.543312,
+      "lng": 13.206102
+    },
+    {
+      "id": "Q2542256",
+      "name": "Walhalla-Theater",
+      "lat": 52.5313,
+      "lng": 13.4023
+    },
+    {
+      "id": "Q47055006",
+      "name": "Wannsee-Lichtspiele",
+      "lat": 52.418392,
+      "lng": 13.259704
+    },
+    {
+      "id": "Q47089283",
+      "name": "Weichsel-Lichtspiele",
+      "lat": 52.483183,
+      "lng": 13.431849
+    },
+    {
+      "id": "Q47307362",
+      "name": "Weidenhof-Lichtspiele",
+      "lat": 52.522832,
+      "lng": 13.387568
+    },
+    {
+      "id": "Q47086383",
+      "name": "Welt im Licht",
+      "lat": 52.569112,
+      "lng": 13.398105
+    },
+    {
+      "id": "Q47155854",
+      "name": "Welt-Lichtspiele",
+      "lat": 52.512731,
+      "lng": 13.45917
+    },
+    {
+      "id": "Q47459551",
+      "name": "Welt-Theater",
+      "lat": 52.541516,
+      "lng": 13.36816
+    },
+    {
+      "id": "Q47089290",
+      "name": "Weltfilmbühne",
+      "lat": 52.490823,
+      "lng": 13.424593
+    },
+    {
+      "id": "Q47088945",
+      "name": "Welttheater „Das lebende Bild“",
+      "lat": 52.541349,
+      "lng": 13.411734
+    },
+    {
+      "id": "Q47083127",
+      "name": "West-Reinickendorfer Lichtspielhaus",
+      "lat": 52.57439,
+      "lng": 13.31462
+    },
+    {
+      "id": "Q47092929",
+      "name": "Westend-Lichtspiele",
+      "lat": 52.519136,
+      "lng": 13.286293
+    },
+    {
+      "id": "Q47088946",
+      "name": "White Trash",
+      "lat": 52.529645,
+      "lng": 13.410455
+    },
+    {
+      "id": "Q47089272",
+      "name": "Wien Berlin",
+      "lat": 52.482112,
+      "lng": 13.425143
+    },
+    {
+      "id": "Q47092960",
+      "name": "Wien-Berlin Kino",
+      "lat": 52.514143,
+      "lng": 13.305064
+    },
+    {
+      "id": "Q47155509",
+      "name": "Wiener Lichtspiele",
+      "lat": 52.496074,
+      "lng": 13.43513
+    },
+    {
+      "id": "Q35014758",
+      "name": "Wilhelminenhof-Lichtspiele",
+      "lat": 52.459674,
+      "lng": 13.518465
+    },
+    {
+      "id": "Q47155860",
+      "name": "Wismar-Lichtspiele",
+      "lat": 52.511719,
+      "lng": 13.462168
+    },
+    {
+      "id": "Q47091326",
+      "name": "Wittelsbach-Palast",
+      "lat": 52.488045,
+      "lng": 13.336477
+    },
+    {
+      "id": "Q47036603",
+      "name": "Wittenberg-Kino",
+      "lat": 52.501741,
+      "lng": 13.344305
+    },
+    {
+      "id": "Q47036607",
+      "name": "Wochenschau am Tauentzien",
+      "lat": 52.503293,
+      "lng": 13.339992
+    },
+    {
+      "id": "Q47164663",
+      "name": "Wolf",
+      "lat": 52.48266,
+      "lng": 13.44189
+    },
+    {
+      "id": "Q47155520",
+      "name": "Wrangel-Lichtspiele",
+      "lat": 52.50391,
+      "lng": 13.42801
+    },
+    {
+      "id": "Q47036615",
+      "name": "Xenon",
+      "lat": 52.486306,
+      "lng": 13.359281
+    },
+    {
+      "id": "Q47126371",
+      "name": "Yorck",
+      "lat": 52.49283,
+      "lng": 13.385142
+    },
+    {
+      "id": "Q47165287",
+      "name": "Z-inema",
+      "lat": 52.529467,
+      "lng": 13.395719
+    },
+    {
+      "id": "Q184985",
+      "name": "Zeiss Major Planetarium",
+      "lat": 52.543333,
+      "lng": 13.427778
+    },
+    {
+      "id": "Q47168286",
+      "name": "Zeitkino Alexanderplatz",
+      "lat": 52.521537,
+      "lng": 13.411211
+    },
+    {
+      "id": "Q47168321",
+      "name": "Zeitkino Friedrichstraße",
+      "lat": 52.520289,
+      "lng": 13.386978
+    },
+    {
+      "id": "Q47057275",
+      "name": "Zeli",
+      "lat": 52.435299,
+      "lng": 13.246545
+    },
+    {
+      "id": "Q47085561",
+      "name": "Zentral-Lichtspiele Blankenburg",
+      "lat": 52.592682,
+      "lng": 13.453828
+    },
+    {
+      "id": "Q47316091",
+      "name": "Zentrum-Lichtspiele",
+      "lat": 52.524887,
+      "lng": 13.406403
+    },
+    {
+      "id": "Q196969",
+      "name": "Zeughauskino",
+      "lat": 52.5181,
+      "lng": 13.3978
+    },
+    {
+      "id": "Q47086388",
+      "name": "Zimmer 16",
+      "lat": 52.565539,
+      "lng": 13.401421
+    },
+    {
+      "id": "Q47058406",
+      "name": "Zinnowwald-Lichtspiele",
+      "lat": 52.44517,
+      "lng": 13.246269
+    },
+    {
+      "id": "Q220069",
+      "name": "Zoo Palast",
+      "lat": 52.5061,
+      "lng": 13.3342
+    }
+  ]
+}

@@ -42,6 +42,7 @@ const FLAGCDN = {
   "country-japan": { code: "jp", alt: "Japan" },
   "country-au": { code: "au", alt: "Australia" },
   "country-belgium": { code: "be", alt: "Belgium" },
+  "country-germany": { code: "de", alt: "Germany" },
 };
 
 /**
@@ -209,6 +210,26 @@ const COMMONS_FLAGS = {
     commonsFile: "Blason Woluwe SaintPierre.jpg",
     alt: "Woluwe-Saint-Pierre",
   },
+  // Berlin Bezirke lacking Wikidata P41/P94 — Commons district flags.
+  spandau: { commonsFile: "Flagge Bezirk Spandau.svg", alt: "Spandau" },
+  "steglitz-zehlendorf": {
+    commonsFile: "Flagge Bezirk Steglitz-Zehlendorf.svg",
+    alt: "Steglitz-Zehlendorf",
+  },
+  "tempelhof-schoeneberg": {
+    commonsFile: "Flagge Bezirk Tempelhof-Schöneberg.svg",
+    alt: "Tempelhof-Schöneberg",
+  },
+  neukoelln: { commonsFile: "Flagge Bezirk Neukölln.svg", alt: "Neukölln" },
+  "treptow-koepenick": {
+    commonsFile: "Flagge Bezirk Treptow-Köpenick.svg",
+    alt: "Treptow-Köpenick",
+  },
+  "marzahn-hellersdorf": {
+    commonsFile: "Flagge Bezirk Marzahn-Hellersdorf.svg",
+    alt: "Marzahn-Hellersdorf",
+  },
+  lichtenberg: { commonsFile: "Flagge Bezirk Lichtenberg.svg", alt: "Lichtenberg" },
   // NYC boroughs — https://en.wikipedia.org/wiki/Flags_of_New_York_City
   // Staten Island uses a local override (not on Commons).
   bronx: {
@@ -329,6 +350,7 @@ const WIKIDATA = {
   "region-brussels-capital": { qid: "Q240", alt: "Brussels-Capital Region" },
   "metro-brussels": { qid: "Q240", alt: "Brussels" },
   "metro-brisbane": { qid: "Q34932", alt: "Brisbane" },
+  "metro-berlin": { qid: "Q64", alt: "Berlin" },
   // Bare communeId keys match preset subregionId (NYC borough pattern).
   anderlecht: { qid: "Q275268", alt: "Anderlecht" },
   auderghem: { qid: "Q237243", alt: "Auderghem" },
@@ -349,6 +371,18 @@ const WIKIDATA = {
   "watermael-boitsfort": { qid: "Q211242", alt: "Watermael-Boitsfort" },
   "woluwe-saint-lambert": { qid: "Q211634", alt: "Woluwe-Saint-Lambert" },
   "woluwe-saint-pierre": { qid: "Q216082", alt: "Woluwe-Saint-Pierre" },
+  mitte: { qid: "Q163966", alt: "Mitte" },
+  "friedrichshain-kreuzberg": { qid: "Q158893", alt: "Friedrichshain-Kreuzberg" },
+  pankow: { qid: "Q163012", alt: "Pankow" },
+  "charlottenburg-wilmersdorf": { qid: "Q162049", alt: "Charlottenburg-Wilmersdorf" },
+  spandau: { qid: "Q158873", alt: "Spandau" },
+  "steglitz-zehlendorf": { qid: "Q158903", alt: "Steglitz-Zehlendorf" },
+  "tempelhof-schoeneberg": { qid: "Q158957", alt: "Tempelhof-Schöneberg" },
+  neukoelln: { qid: "Q158076", alt: "Neukölln" },
+  "treptow-koepenick": { qid: "Q158964", alt: "Treptow-Köpenick" },
+  "marzahn-hellersdorf": { qid: "Q702029", alt: "Marzahn-Hellersdorf" },
+  lichtenberg: { qid: "Q163011", alt: "Lichtenberg" },
+  reinickendorf: { qid: "Q158876", alt: "Reinickendorf" },
   // Kantō / Kansai have no P41/P94 on Wikidata — local overrides.
   // Tokyo special wards (List of municipal flags of Kantō region).
   "ward-13101": { qid: "Q214051", alt: "Chiyoda" },

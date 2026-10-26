@@ -1,0 +1,2592 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q570939",
+      "name": "Adenauerplatz",
+      "lat": 52.499722,
+      "lng": 13.307222
+    },
+    {
+      "id": "Q559239",
+      "name": "Afrikanische Straße",
+      "lat": 52.560028,
+      "lng": 13.334633
+    },
+    {
+      "id": "Q800363",
+      "name": "Ahrensfelde railway station",
+      "lat": 52.5711,
+      "lng": 13.5653
+    },
+    {
+      "id": "Q17173458",
+      "name": "Alexanderplatz u-bahn station",
+      "lat": 52.5214,
+      "lng": 13.4119
+    },
+    {
+      "id": "Q117663547",
+      "name": "Alexanderplatz underground station (U5)",
+      "lat": 52.521601,
+      "lng": 13.413873
+    },
+    {
+      "id": "Q262168",
+      "name": "Alt-Mariendorf metro station",
+      "lat": 52.4391,
+      "lng": 13.3877
+    },
+    {
+      "id": "Q656090",
+      "name": "Alt-Tegel metro station",
+      "lat": 52.58944,
+      "lng": 13.28389
+    },
+    {
+      "id": "Q559212",
+      "name": "Alt-Tempelhof metro station",
+      "lat": 52.465953,
+      "lng": 13.385897
+    },
+    {
+      "id": "Q111805130",
+      "name": "Alter Bahnhof Drebkau",
+      "lat": 52.4522,
+      "lng": 13.3237
+    },
+    {
+      "id": "Q4736651",
+      "name": "Altglienicke station",
+      "lat": 52.4073,
+      "lng": 13.5588
+    },
+    {
+      "id": "Q571402",
+      "name": "Altstadt Spandau",
+      "lat": 52.538889,
+      "lng": 13.206389
+    },
+    {
+      "id": "Q557577",
+      "name": "Amrumer Straße metro station",
+      "lat": 52.5425,
+      "lng": 13.350278
+    },
+    {
+      "id": "Q658391",
+      "name": "Anton-Wilhelm-Amo-Straße metro station",
+      "lat": 52.51167,
+      "lng": 13.38472
+    },
+    {
+      "id": "Q800497",
+      "name": "Attilastraße station",
+      "lat": 52.4478,
+      "lng": 13.3609
+    },
+    {
+      "id": "Q667035",
+      "name": "Augsburger Straße metro station",
+      "lat": 52.500556,
+      "lng": 13.336389
+    },
+    {
+      "id": "Q784053",
+      "name": "Auswandererbahnhof Ruhleben",
+      "lat": 52.5305,
+      "lng": 13.2237
+    },
+    {
+      "id": "Q140089865",
+      "name": "Badesee",
+      "lat": 52.466525,
+      "lng": 13.548349
+    },
+    {
+      "id": "Q140089886",
+      "name": "Bahnbetriebswerk",
+      "lat": 52.464715,
+      "lng": 13.538224
+    },
+    {
+      "id": "Q131310542",
+      "name": "Bahnhof Berlin Brandenburger Tor",
+      "lat": 52.516541,
+      "lng": 13.381562
+    },
+    {
+      "id": "Q73411529",
+      "name": "Bahnhof Berlin Johannesstift",
+      "lat": 52.56696,
+      "lng": 13.1898
+    },
+    {
+      "id": "Q14906353",
+      "name": "Bahnhof Berlin-Moabit",
+      "lat": 52.5345,
+      "lng": 13.3358
+    },
+    {
+      "id": "Q139672444",
+      "name": "Bahnhof Berlin-Tempelhof",
+      "lat": 52.47125,
+      "lng": 13.3774
+    },
+    {
+      "id": "Q567079",
+      "name": "Bahnhof Jungfernheide",
+      "lat": 52.530333,
+      "lng": 13.300833
+    },
+    {
+      "id": "Q73416802",
+      "name": "Bahnhof Kraftwerk",
+      "lat": 52.567077,
+      "lng": 13.18928
+    },
+    {
+      "id": "Q73417205",
+      "name": "Bahnhof Radelandstraße (Waldkrankenhaus)",
+      "lat": 52.560781,
+      "lng": 13.172092
+    },
+    {
+      "id": "Q668574",
+      "name": "Bayerischer Platz station",
+      "lat": 52.488333,
+      "lng": 13.340278
+    },
+    {
+      "id": "Q800759",
+      "name": "BER Airport station",
+      "lat": 52.364284,
+      "lng": 13.508157
+    },
+    {
+      "id": "Q4891640",
+      "name": "Bergfelde station",
+      "lat": 52.6702,
+      "lng": 13.3203
+    },
+    {
+      "id": "Q800470",
+      "name": "Berlin Albrechtshof railway station",
+      "lat": 52.5494,
+      "lng": 13.1283
+    },
+    {
+      "id": "Q111324900",
+      "name": "Berlin Alexanderplatz Regional Station",
+      "lat": 52.521389,
+      "lng": 13.411944
+    },
+    {
+      "id": "Q698497",
+      "name": "Berlin Alexanderplatz station",
+      "lat": 52.521389,
+      "lng": 13.411944
+    },
+    {
+      "id": "Q800496",
+      "name": "Berlin Alt-Reinickendorf station",
+      "lat": 52.5779,
+      "lng": 13.3506
+    },
+    {
+      "id": "Q374018",
+      "name": "Berlin Bellevue station",
+      "lat": 52.52,
+      "lng": 13.348056
+    },
+    {
+      "id": "Q323219",
+      "name": "Berlin Beusselstraße station",
+      "lat": 52.534444,
+      "lng": 13.329167
+    },
+    {
+      "id": "Q32662318",
+      "name": "Berlin Bornholmer Straße station",
+      "lat": 52.554287,
+      "lng": 13.397985
+    },
+    {
+      "id": "Q800498",
+      "name": "Berlin Botanischer Garten station",
+      "lat": 52.44806,
+      "lng": 13.30722
+    },
+    {
+      "id": "Q477185",
+      "name": "Berlin Brandenburger Tor station",
+      "lat": 52.516389,
+      "lng": 13.380833
+    },
+    {
+      "id": "Q464094",
+      "name": "Berlin Bundesplatz station",
+      "lat": 52.477658,
+      "lng": 13.328525
+    },
+    {
+      "id": "Q1097",
+      "name": "Berlin Central Station",
+      "lat": 52.525083,
+      "lng": 13.369389
+    },
+    {
+      "id": "Q800501",
+      "name": "Berlin Feuerbachstraße station",
+      "lat": 52.463611,
+      "lng": 13.332778
+    },
+    {
+      "id": "Q552872",
+      "name": "Berlin Frankfurter Allee station",
+      "lat": 52.514167,
+      "lng": 13.474722
+    },
+    {
+      "id": "Q439246",
+      "name": "Berlin Greifswalder Straße station",
+      "lat": 52.539722,
+      "lng": 13.439444
+    },
+    {
+      "id": "Q689312",
+      "name": "Berlin Hackescher Markt station",
+      "lat": 52.5226,
+      "lng": 13.4022
+    },
+    {
+      "id": "Q89936350",
+      "name": "Berlin Hamburger und Lehrter Bahnhof",
+      "lat": 52.532641,
+      "lng": 13.363494
+    },
+    {
+      "id": "Q111241067",
+      "name": "Berlin Hauptbahnhof (Stadtbahn)",
+      "lat": 52.525083,
+      "lng": 13.369389
+    },
+    {
+      "id": "Q111240901",
+      "name": "Berlin Hauptbahnhof (tief)",
+      "lat": 52.525083,
+      "lng": 13.369389
+    },
+    {
+      "id": "Q140285597",
+      "name": "Berlin Hauptbahnhof Tunnel (S-Bahn) railway station",
+      "lat": 52.5269,
+      "lng": 13.3693
+    },
+    {
+      "id": "Q800502",
+      "name": "Berlin Heerstraße station",
+      "lat": 52.5086,
+      "lng": 13.2586
+    },
+    {
+      "id": "Q302810",
+      "name": "Berlin Heidelberger Platz station",
+      "lat": 52.479672,
+      "lng": 13.312442
+    },
+    {
+      "id": "Q4892435",
+      "name": "Berlin Hirschgarten station",
+      "lat": 52.4579,
+      "lng": 13.6032
+    },
+    {
+      "id": "Q800503",
+      "name": "Berlin Hohenzollerndamm station",
+      "lat": 52.4885,
+      "lng": 13.3004
+    },
+    {
+      "id": "Q481276",
+      "name": "Berlin Humboldthain station",
+      "lat": 52.5451,
+      "lng": 13.3796
+    },
+    {
+      "id": "Q3799011",
+      "name": "Berlin Innsbrucker Platz station",
+      "lat": 52.4786,
+      "lng": 13.3439
+    },
+    {
+      "id": "Q1647893",
+      "name": "Berlin Jannowitzbrücke station",
+      "lat": 52.514822,
+      "lng": 13.41795
+    },
+    {
+      "id": "Q319809",
+      "name": "Berlin Julius-Leber-Brücke station",
+      "lat": 52.486394,
+      "lng": 13.361033
+    },
+    {
+      "id": "Q22284875",
+      "name": "Berlin Jungfernheide station",
+      "lat": 52.53035,
+      "lng": 13.299433
+    },
+    {
+      "id": "Q800507",
+      "name": "Berlin Landsberger Allee station",
+      "lat": 52.5295,
+      "lng": 13.4548
+    },
+    {
+      "id": "Q111311343",
+      "name": "Berlin Lichterfelde East Regional Station",
+      "lat": 52.43,
+      "lng": 13.3289
+    },
+    {
+      "id": "Q111311299",
+      "name": "Berlin Lichterfelde Ost S-Bahn station",
+      "lat": 52.43,
+      "lng": 13.3289
+    },
+    {
+      "id": "Q321266",
+      "name": "Berlin Messe Nord/ZOB station",
+      "lat": 52.5078,
+      "lng": 13.2836
+    },
+    {
+      "id": "Q315891",
+      "name": "Berlin Mexikoplatz station",
+      "lat": 52.4375,
+      "lng": 13.2325
+    },
+    {
+      "id": "Q129666541",
+      "name": "Berlin Nordbahnhof (S-Bahn)",
+      "lat": 52.532475,
+      "lng": 13.387736
+    },
+    {
+      "id": "Q800506",
+      "name": "Berlin Olympiastadion station",
+      "lat": 52.511,
+      "lng": 13.2416
+    },
+    {
+      "id": "Q480249",
+      "name": "Berlin Oranienburger Straße station",
+      "lat": 52.525,
+      "lng": 13.3929
+    },
+    {
+      "id": "Q683239",
+      "name": "Berlin Ostbahnhof railway station",
+      "lat": 52.51,
+      "lng": 13.4347
+    },
+    {
+      "id": "Q107742813",
+      "name": "Berlin Perleberger Brücke S-Bahn station",
+      "lat": 52.53548,
+      "lng": 13.3599
+    },
+    {
+      "id": "Q2180548",
+      "name": "Berlin Poelchaustraße station",
+      "lat": 52.53556,
+      "lng": 13.53556
+    },
+    {
+      "id": "Q672579",
+      "name": "Berlin Potsdamer Platz station",
+      "lat": 52.5094,
+      "lng": 13.3758
+    },
+    {
+      "id": "Q32661483",
+      "name": "Berlin Prenzlauer Allee station",
+      "lat": 52.544775,
+      "lng": 13.426116
+    },
+    {
+      "id": "Q555492",
+      "name": "Berlin Rathaus Steglitz station",
+      "lat": 52.4562,
+      "lng": 13.3216
+    },
+    {
+      "id": "Q554382",
+      "name": "Berlin Savignyplatz station",
+      "lat": 52.505175,
+      "lng": 13.319066
+    },
+    {
+      "id": "Q111323931",
+      "name": "Berlin Schöneweide S-Bahn station",
+      "lat": 52.455,
+      "lng": 13.509444
+    },
+    {
+      "id": "Q571403",
+      "name": "Berlin Schönhauser Allee station",
+      "lat": 52.549329,
+      "lng": 13.413706
+    },
+    {
+      "id": "Q481364",
+      "name": "Berlin Sonnenallee station",
+      "lat": 52.473,
+      "lng": 13.4558
+    },
+    {
+      "id": "Q320263",
+      "name": "Berlin Springpfuhl station",
+      "lat": 52.5272,
+      "lng": 13.5364
+    },
+    {
+      "id": "Q800512",
+      "name": "Berlin Storkower Straße station",
+      "lat": 52.5238,
+      "lng": 13.4644
+    },
+    {
+      "id": "Q376589",
+      "name": "Berlin Südkreuz station",
+      "lat": 52.4756,
+      "lng": 13.3644
+    },
+    {
+      "id": "Q800513",
+      "name": "Berlin Sundgauer Straße station",
+      "lat": 52.436291,
+      "lng": 13.273772
+    },
+    {
+      "id": "Q559274",
+      "name": "Berlin Treptower Park station",
+      "lat": 52.4938,
+      "lng": 13.4618
+    },
+    {
+      "id": "Q664036",
+      "name": "Berlin Warschauer Straße station",
+      "lat": 52.506417,
+      "lng": 13.450956
+    },
+    {
+      "id": "Q96077001",
+      "name": "Berlin Wernerwerk station",
+      "lat": 52.534863,
+      "lng": 13.27599
+    },
+    {
+      "id": "Q465972",
+      "name": "Berlin Westhafen station",
+      "lat": 52.536,
+      "lng": 13.344
+    },
+    {
+      "id": "Q678125",
+      "name": "Berlin Westkreuz station",
+      "lat": 52.5011,
+      "lng": 13.2839
+    },
+    {
+      "id": "Q800494",
+      "name": "Berlin Wilhelmshagen station",
+      "lat": 52.4386,
+      "lng": 13.7222
+    },
+    {
+      "id": "Q800515",
+      "name": "Berlin Wollankstraße station",
+      "lat": 52.565153,
+      "lng": 13.392363
+    },
+    {
+      "id": "Q552867",
+      "name": "Berlin Wuhletal station",
+      "lat": 52.5126,
+      "lng": 13.5752
+    },
+    {
+      "id": "Q106913154",
+      "name": "Berlin Wuhlheide Parkeisenbahn",
+      "lat": 52.468305,
+      "lng": 13.554151
+    },
+    {
+      "id": "Q110738653",
+      "name": "Berlin Wuhlheide Rangierbahnhof",
+      "lat": 52.4869,
+      "lng": 13.5507
+    },
+    {
+      "id": "Q800514",
+      "name": "Berlin Wuhlheide station",
+      "lat": 52.4689,
+      "lng": 13.5533
+    },
+    {
+      "id": "Q681785",
+      "name": "Berlin Zoologischer Garten railway station",
+      "lat": 52.507222,
+      "lng": 13.3325
+    },
+    {
+      "id": "Q323551",
+      "name": "Berlin-Adlershof station",
+      "lat": 52.434722,
+      "lng": 13.541389
+    },
+    {
+      "id": "Q111307757",
+      "name": "Berlin-Ahrensfelde regional railway station",
+      "lat": 52.571445,
+      "lng": 13.565302
+    },
+    {
+      "id": "Q111307724",
+      "name": "Berlin-Ahrensfelde S-Bahn station",
+      "lat": 52.5711,
+      "lng": 13.5653
+    },
+    {
+      "id": "Q324336",
+      "name": "Berlin-Baumschulenweg station",
+      "lat": 52.4675,
+      "lng": 13.489722
+    },
+    {
+      "id": "Q4892357",
+      "name": "Berlin-Biesdorf station",
+      "lat": 52.5131,
+      "lng": 13.5554
+    },
+    {
+      "id": "Q800469",
+      "name": "Berlin-Blankenburg station",
+      "lat": 52.5915,
+      "lng": 13.4435
+    },
+    {
+      "id": "Q104215529",
+      "name": "Berlin-Blankenfelde railway station",
+      "lat": 52.617142,
+      "lng": 13.381618
+    },
+    {
+      "id": "Q108523538",
+      "name": "Berlin-Britz railway station",
+      "lat": 52.442252,
+      "lng": 13.431666
+    },
+    {
+      "id": "Q4892359",
+      "name": "Berlin-Buch station",
+      "lat": 52.6359,
+      "lng": 13.4917
+    },
+    {
+      "id": "Q702596",
+      "name": "Berlin-Charlottenburg railway station",
+      "lat": 52.504722,
+      "lng": 13.303333
+    },
+    {
+      "id": "Q800471",
+      "name": "Berlin-Friedenau station",
+      "lat": 52.47,
+      "lng": 13.341
+    },
+    {
+      "id": "Q800473",
+      "name": "Berlin-Friedrichsfelde Ost station",
+      "lat": 52.5141,
+      "lng": 13.5198
+    },
+    {
+      "id": "Q800474",
+      "name": "Berlin-Friedrichshagen station",
+      "lat": 52.4574,
+      "lng": 13.6233
+    },
+    {
+      "id": "Q702402",
+      "name": "Berlin-Friedrichstraße railway station",
+      "lat": 52.520278,
+      "lng": 13.386944
+    },
+    {
+      "id": "Q800472",
+      "name": "Berlin-Frohnau station",
+      "lat": 52.6325,
+      "lng": 13.2902
+    },
+    {
+      "id": "Q324777",
+      "name": "Berlin-Grünau station",
+      "lat": 52.4122,
+      "lng": 13.5746
+    },
+    {
+      "id": "Q457266",
+      "name": "Berlin-Grunewald station",
+      "lat": 52.4892,
+      "lng": 13.2614
+    },
+    {
+      "id": "Q800476",
+      "name": "Berlin-Halensee station",
+      "lat": 52.4961,
+      "lng": 13.2906
+    },
+    {
+      "id": "Q263189",
+      "name": "Berlin-Hermsdorf station",
+      "lat": 52.6178,
+      "lng": 13.3069
+    },
+    {
+      "id": "Q800477",
+      "name": "Berlin-Hohenschönhausen railway station",
+      "lat": 52.5664,
+      "lng": 13.5122
+    },
+    {
+      "id": "Q4526101",
+      "name": "Berlin-Johannisthal railway station",
+      "lat": 52.44676,
+      "lng": 13.52391
+    },
+    {
+      "id": "Q464170",
+      "name": "Berlin-Karlshorst station",
+      "lat": 52.4808,
+      "lng": 13.5258
+    },
+    {
+      "id": "Q800480",
+      "name": "Berlin-Karow railway station",
+      "lat": 52.615,
+      "lng": 13.4692
+    },
+    {
+      "id": "Q111324490",
+      "name": "Berlin-Karow regional railway station",
+      "lat": 52.61482,
+      "lng": 13.468735
+    },
+    {
+      "id": "Q800478",
+      "name": "Berlin-Kaulsdorf railway station",
+      "lat": 52.5121,
+      "lng": 13.5904
+    },
+    {
+      "id": "Q800479",
+      "name": "Berlin-Köpenick station",
+      "lat": 52.4586,
+      "lng": 13.5808
+    },
+    {
+      "id": "Q634247",
+      "name": "Berlin-Lichtenberg railway station",
+      "lat": 52.5106,
+      "lng": 13.4964
+    },
+    {
+      "id": "Q469743",
+      "name": "Berlin-Lichterfelde Ost railway station",
+      "lat": 52.43,
+      "lng": 13.3289
+    },
+    {
+      "id": "Q800483",
+      "name": "Berlin-Lichterfelde West station",
+      "lat": 52.4433,
+      "lng": 13.2947
+    },
+    {
+      "id": "Q800484",
+      "name": "Berlin-Mahlsdorf railway station",
+      "lat": 52.5121,
+      "lng": 13.6106
+    },
+    {
+      "id": "Q800486",
+      "name": "Berlin-Marzahn station",
+      "lat": 52.5436,
+      "lng": 13.5411
+    },
+    {
+      "id": "Q569905",
+      "name": "Berlin-Neukölln station",
+      "lat": 52.469167,
+      "lng": 13.441667
+    },
+    {
+      "id": "Q637052",
+      "name": "Berlin-Nikolassee station",
+      "lat": 52.4317,
+      "lng": 13.1933
+    },
+    {
+      "id": "Q4892366",
+      "name": "Berlin-Pankow-Heinersdorf station",
+      "lat": 52.578065,
+      "lng": 13.429509
+    },
+    {
+      "id": "Q800488",
+      "name": "Berlin-Pichelsberg railway station",
+      "lat": 52.5103,
+      "lng": 13.2271
+    },
+    {
+      "id": "Q800489",
+      "name": "Berlin-Rahnsdorf station",
+      "lat": 52.451637,
+      "lng": 13.689978
+    },
+    {
+      "id": "Q108524036",
+      "name": "Berlin-Rosenthal railway station",
+      "lat": 52.600382,
+      "lng": 13.371402
+    },
+    {
+      "id": "Q16054531",
+      "name": "Berlin-Rudow railway station",
+      "lat": 52.413043,
+      "lng": 13.490546
+    },
+    {
+      "id": "Q15107132",
+      "name": "Berlin-Rummelsburg railway station",
+      "lat": 52.501244,
+      "lng": 13.478545
+    },
+    {
+      "id": "Q800509",
+      "name": "Berlin-Schlachtensee station",
+      "lat": 52.4401,
+      "lng": 13.2153
+    },
+    {
+      "id": "Q543855",
+      "name": "Berlin-Schöneberg station",
+      "lat": 52.4794,
+      "lng": 13.3517
+    },
+    {
+      "id": "Q540899",
+      "name": "Berlin-Schöneweide railway station",
+      "lat": 52.455,
+      "lng": 13.509444
+    },
+    {
+      "id": "Q111324099",
+      "name": "Berlin-Schöneweide regional railway station",
+      "lat": 52.455,
+      "lng": 13.509444
+    },
+    {
+      "id": "Q800490",
+      "name": "Berlin-Schönholz station",
+      "lat": 52.5714,
+      "lng": 13.3814
+    },
+    {
+      "id": "Q96080453",
+      "name": "Berlin-Siemensstadt railway station",
+      "lat": 52.53923,
+      "lng": 13.26365
+    },
+    {
+      "id": "Q654980",
+      "name": "Berlin-Spandau railway station",
+      "lat": 52.5347,
+      "lng": 13.1958
+    },
+    {
+      "id": "Q4892371",
+      "name": "Berlin-Spindlersfeld station",
+      "lat": 52.4472,
+      "lng": 13.5613
+    },
+    {
+      "id": "Q477545",
+      "name": "Berlin-Staaken railway stop",
+      "lat": 52.5378,
+      "lng": 13.1414
+    },
+    {
+      "id": "Q800491",
+      "name": "Berlin-Stresow railway station",
+      "lat": 52.532,
+      "lng": 13.2089
+    },
+    {
+      "id": "Q800493",
+      "name": "Berlin-Tegel railway station",
+      "lat": 52.5886,
+      "lng": 13.2894
+    },
+    {
+      "id": "Q571405",
+      "name": "Berlin-Tempelhof station",
+      "lat": 52.4708,
+      "lng": 13.3854
+    },
+    {
+      "id": "Q572112",
+      "name": "Berlin-Tiergarten station",
+      "lat": 52.5144,
+      "lng": 13.3365
+    },
+    {
+      "id": "Q800492",
+      "name": "Berlin-Waidmannslust station",
+      "lat": 52.6064,
+      "lng": 13.321
+    },
+    {
+      "id": "Q567336",
+      "name": "Berlin-Wannsee railway station",
+      "lat": 52.4214,
+      "lng": 13.1792
+    },
+    {
+      "id": "Q638604",
+      "name": "Berlin-Wedding station",
+      "lat": 52.5425,
+      "lng": 13.3661
+    },
+    {
+      "id": "Q323214",
+      "name": "Berlin-Westend station",
+      "lat": 52.5181,
+      "lng": 13.2844
+    },
+    {
+      "id": "Q800495",
+      "name": "Berlin-Wilhelmsruh station",
+      "lat": 52.5814,
+      "lng": 13.3631
+    },
+    {
+      "id": "Q175212",
+      "name": "Berlin-Wittenau station",
+      "lat": 52.597013,
+      "lng": 13.334329
+    },
+    {
+      "id": "Q737962",
+      "name": "Berlin-Zehlendorf station",
+      "lat": 52.4309,
+      "lng": 13.2584
+    },
+    {
+      "id": "Q637739",
+      "name": "Berliner Straße",
+      "lat": 52.487222,
+      "lng": 13.330833
+    },
+    {
+      "id": "Q479789",
+      "name": "Bernau railway station",
+      "lat": 52.6763,
+      "lng": 13.5931
+    },
+    {
+      "id": "Q4894023",
+      "name": "Bernau-Friedenstal station",
+      "lat": 52.6685,
+      "lng": 13.5648
+    },
+    {
+      "id": "Q689293",
+      "name": "Bernauer Straße station",
+      "lat": 52.5375,
+      "lng": 13.396667
+    },
+    {
+      "id": "Q33284476",
+      "name": "Bernburger Straße station",
+      "lat": 52.505329,
+      "lng": 13.375769
+    },
+    {
+      "id": "Q829009",
+      "name": "Betriebsbahnhof Rummelsburg station",
+      "lat": 52.4939,
+      "lng": 13.4978
+    },
+    {
+      "id": "Q551805",
+      "name": "Biesdorf-Süd",
+      "lat": 52.4997,
+      "lng": 13.5465
+    },
+    {
+      "id": "Q4916462",
+      "name": "Birkenstein station",
+      "lat": 52.5157,
+      "lng": 13.6475
+    },
+    {
+      "id": "Q555998",
+      "name": "Birkenstraße metro station",
+      "lat": 52.532222,
+      "lng": 13.341389
+    },
+    {
+      "id": "Q686132",
+      "name": "Bismarckstraße",
+      "lat": 52.511389,
+      "lng": 13.305
+    },
+    {
+      "id": "Q800539",
+      "name": "Blankenfelde railway station",
+      "lat": 52.3376,
+      "lng": 13.4158
+    },
+    {
+      "id": "Q111311372",
+      "name": "Blankenfelde S-Bahn station",
+      "lat": 52.3376,
+      "lng": 13.4158
+    },
+    {
+      "id": "Q666911",
+      "name": "Blaschkoallee",
+      "lat": 52.451944,
+      "lng": 13.449444
+    },
+    {
+      "id": "Q571397",
+      "name": "Blissestraße",
+      "lat": 52.486667,
+      "lng": 13.321944
+    },
+    {
+      "id": "Q52677427",
+      "name": "Blumberg (bei Berlin) railway station",
+      "lat": 52.605334,
+      "lng": 13.611902
+    },
+    {
+      "id": "Q819495",
+      "name": "Boddinstraße",
+      "lat": 52.48,
+      "lng": 13.425278
+    },
+    {
+      "id": "Q525185",
+      "name": "Borsigwerke",
+      "lat": 52.5819,
+      "lng": 13.2907
+    },
+    {
+      "id": "Q3643649",
+      "name": "Brandenburger Tor metro station",
+      "lat": 52.516389,
+      "lng": 13.380833
+    },
+    {
+      "id": "Q571339",
+      "name": "Breitenbachplatz metro station",
+      "lat": 52.466389,
+      "lng": 13.308056
+    },
+    {
+      "id": "Q571845",
+      "name": "Britz-Süd",
+      "lat": 52.437778,
+      "lng": 13.448056
+    },
+    {
+      "id": "Q800499",
+      "name": "Buckower Chaussee station",
+      "lat": 52.4103,
+      "lng": 13.3829
+    },
+    {
+      "id": "Q374881",
+      "name": "Bülowstraße metro station",
+      "lat": 52.497553,
+      "lng": 13.363419
+    },
+    {
+      "id": "Q3647008",
+      "name": "Bundesplatz metro station",
+      "lat": 52.478081,
+      "lng": 13.328519
+    },
+    {
+      "id": "Q694848",
+      "name": "Bundestag metro station",
+      "lat": 52.520014,
+      "lng": 13.373006
+    },
+    {
+      "id": "Q73413256",
+      "name": "Bürgerablage railway station",
+      "lat": 52.58226,
+      "lng": 13.20536
+    },
+    {
+      "id": "Q557547",
+      "name": "Cottbusser Platz metro station",
+      "lat": 52.5339,
+      "lng": 13.5964
+    },
+    {
+      "id": "Q668585",
+      "name": "Dahlem-Dorf",
+      "lat": 52.456944,
+      "lng": 13.289444
+    },
+    {
+      "id": "Q869501",
+      "name": "Deutsche Oper",
+      "lat": 52.511944,
+      "lng": 13.310556
+    },
+    {
+      "id": "Q571382",
+      "name": "Eberswalder Straße metro station",
+      "lat": 52.541667,
+      "lng": 13.412222
+    },
+    {
+      "id": "Q800500",
+      "name": "Eichborndamm station",
+      "lat": 52.5776,
+      "lng": 13.3169
+    },
+    {
+      "id": "Q121917104",
+      "name": "Eichgestell train station",
+      "lat": 52.459669,
+      "lng": 13.552849
+    },
+    {
+      "id": "Q19274479",
+      "name": "Eichwalde station",
+      "lat": 52.3715,
+      "lng": 13.6152
+    },
+    {
+      "id": "Q571170",
+      "name": "Eisenacher Straße",
+      "lat": 52.489444,
+      "lng": 13.350278
+    },
+    {
+      "id": "Q551802",
+      "name": "Elsterwerdaer Platz",
+      "lat": 52.505,
+      "lng": 13.56056
+    },
+    {
+      "id": "Q14434071",
+      "name": "Erkner railway station",
+      "lat": 52.4296,
+      "lng": 13.7513
+    },
+    {
+      "id": "Q658361",
+      "name": "Ernst-Reuter-Platz metro station",
+      "lat": 52.511944,
+      "lng": 13.322222
+    },
+    {
+      "id": "Q5431918",
+      "name": "Falkensee railway station",
+      "lat": 52.559722,
+      "lng": 13.088889
+    },
+    {
+      "id": "Q21777502",
+      "name": "Fehrbelliner Platz (U3)",
+      "lat": 52.490839,
+      "lng": 13.315525
+    },
+    {
+      "id": "Q4482920",
+      "name": "Fehrbelliner Platz (U7)",
+      "lat": 52.490278,
+      "lng": 13.314444
+    },
+    {
+      "id": "Q111326252",
+      "name": "Fern- und Regionalbahnhof Berlin-Zoologischer Garten",
+      "lat": 52.507222,
+      "lng": 13.3325
+    },
+    {
+      "id": "Q73412042",
+      "name": "former Nieder Neuendorf station",
+      "lat": 52.60112,
+      "lng": 13.19672
+    },
+    {
+      "id": "Q3752007",
+      "name": "Frankfurter Allee metro station",
+      "lat": 52.513639,
+      "lng": 13.475694
+    },
+    {
+      "id": "Q568627",
+      "name": "Frankfurter Tor metro station",
+      "lat": 52.515833,
+      "lng": 13.454167
+    },
+    {
+      "id": "Q555992",
+      "name": "Franz-Neumann-Platz (Am Schäfersee)",
+      "lat": 52.564722,
+      "lng": 13.363889
+    },
+    {
+      "id": "Q15197387",
+      "name": "Fredersdorf station",
+      "lat": 52.5265,
+      "lng": 13.7625
+    },
+    {
+      "id": "Q571331",
+      "name": "Freie Universität (Thielplatz) metro station",
+      "lat": 52.451111,
+      "lng": 13.282222
+    },
+    {
+      "id": "Q559207",
+      "name": "Friedrich-Wilhelm-Platz metro station",
+      "lat": 52.47194,
+      "lng": 13.32861
+    },
+    {
+      "id": "Q429781",
+      "name": "Friedrichsfelde",
+      "lat": 52.506111,
+      "lng": 13.512778
+    },
+    {
+      "id": "Q3753274",
+      "name": "Friedrichstraße metro station",
+      "lat": 52.520111,
+      "lng": 13.388306
+    },
+    {
+      "id": "Q96080469",
+      "name": "Gartenfeld",
+      "lat": 52.54695,
+      "lng": 13.24882
+    },
+    {
+      "id": "Q5530084",
+      "name": "Gehrenseestraße station",
+      "lat": 52.55639,
+      "lng": 13.52472
+    },
+    {
+      "id": "Q678372",
+      "name": "Gleisdreieck",
+      "lat": 52.49952,
+      "lng": 13.37409
+    },
+    {
+      "id": "Q668618",
+      "name": "Gneisenaustraße",
+      "lat": 52.491389,
+      "lng": 13.395556
+    },
+    {
+      "id": "Q597759",
+      "name": "Görlitzer Bahnhof",
+      "lat": 52.4992,
+      "lng": 13.428
+    },
+    {
+      "id": "Q571836",
+      "name": "Grenzallee",
+      "lat": 52.463333,
+      "lng": 13.443889
+    },
+    {
+      "id": "Q108523472",
+      "name": "Groß Kienitz railway station",
+      "lat": 52.329871,
+      "lng": 13.486447
+    },
+    {
+      "id": "Q800846",
+      "name": "Großbeeren railway station",
+      "lat": 52.350556,
+      "lng": 13.284444
+    },
+    {
+      "id": "Q5612896",
+      "name": "Grünbergallee station",
+      "lat": 52.3992,
+      "lng": 13.5416
+    },
+    {
+      "id": "Q571563",
+      "name": "Güntzelstraße metro station",
+      "lat": 52.49194,
+      "lng": 13.33083
+    },
+    {
+      "id": "Q61769949",
+      "name": "Güterbahnhof Lübars",
+      "lat": 52.607197,
+      "lng": 13.35608
+    },
+    {
+      "id": "Q571025",
+      "name": "Halemweg metro station",
+      "lat": 52.536667,
+      "lng": 13.286389
+    },
+    {
+      "id": "Q658302",
+      "name": "Hallesches Tor",
+      "lat": 52.497778,
+      "lng": 13.391111
+    },
+    {
+      "id": "Q287552",
+      "name": "Hansaplatz metro station",
+      "lat": 52.517778,
+      "lng": 13.342222
+    },
+    {
+      "id": "Q570916",
+      "name": "Haselhorst metro station",
+      "lat": 52.538889,
+      "lng": 13.232778
+    },
+    {
+      "id": "Q140089857",
+      "name": "Hauptbahnhof",
+      "lat": 52.457952,
+      "lng": 13.543417
+    },
+    {
+      "id": "Q3783674",
+      "name": "Hauptbahnhof metro station",
+      "lat": 52.525278,
+      "lng": 13.369444
+    },
+    {
+      "id": "Q656523",
+      "name": "Hausvogteiplatz station",
+      "lat": 52.513056,
+      "lng": 13.396667
+    },
+    {
+      "id": "Q21777872",
+      "name": "Heidelberger Platz",
+      "lat": 52.479808,
+      "lng": 13.313236
+    },
+    {
+      "id": "Q800475",
+      "name": "Heiligensee station",
+      "lat": 52.6247,
+      "lng": 13.2292
+    },
+    {
+      "id": "Q663204",
+      "name": "Heinrich-Heine-Straße station",
+      "lat": 52.510833,
+      "lng": 13.416389
+    },
+    {
+      "id": "Q571676",
+      "name": "Hellersdorf metro station",
+      "lat": 52.53667,
+      "lng": 13.60639
+    },
+    {
+      "id": "Q800909",
+      "name": "Hennigsdorf (b Berlin) railway station",
+      "lat": 52.638,
+      "lng": 13.2057
+    },
+    {
+      "id": "Q658929",
+      "name": "Hermannplatz",
+      "lat": 52.48629,
+      "lng": 13.42455
+    },
+    {
+      "id": "Q21235258",
+      "name": "Hermannstraße metro station",
+      "lat": 52.467273,
+      "lng": 13.431451
+    },
+    {
+      "id": "Q1421962",
+      "name": "Hermannstraße railway station",
+      "lat": 52.4675,
+      "lng": 13.431111
+    },
+    {
+      "id": "Q4500489",
+      "name": "Hohen Neuendorf station",
+      "lat": 52.6684,
+      "lng": 13.287
+    },
+    {
+      "id": "Q15107188",
+      "name": "Hohen Neuendorf West railway station",
+      "lat": 52.67252,
+      "lng": 13.27144
+    },
+    {
+      "id": "Q571570",
+      "name": "Hohenzollernplatz",
+      "lat": 52.493889,
+      "lng": 13.325
+    },
+    {
+      "id": "Q557566",
+      "name": "Holzhauser Straße",
+      "lat": 52.575833,
+      "lng": 13.296111
+    },
+    {
+      "id": "Q550317",
+      "name": "Hönow metro station",
+      "lat": 52.5383,
+      "lng": 13.6339
+    },
+    {
+      "id": "Q15197357",
+      "name": "Hoppegarten (Mark) station",
+      "lat": 52.5183,
+      "lng": 13.6734
+    },
+    {
+      "id": "Q10275871",
+      "name": "Innsbrucker Platz metro station",
+      "lat": 52.4786,
+      "lng": 13.3439
+    },
+    {
+      "id": "Q638526",
+      "name": "Jakob-Kaiser-Platz",
+      "lat": 52.536333,
+      "lng": 13.293361
+    },
+    {
+      "id": "Q27955418",
+      "name": "Jannowitzbrücke metro station",
+      "lat": 52.515656,
+      "lng": 13.418185
+    },
+    {
+      "id": "Q638553",
+      "name": "Johannisthaler Chaussee",
+      "lat": 52.429167,
+      "lng": 13.453333
+    },
+    {
+      "id": "Q19951075",
+      "name": "Jungfernheide metro station",
+      "lat": 52.530788,
+      "lng": 13.30063
+    },
+    {
+      "id": "Q656409",
+      "name": "Kaiserdamm",
+      "lat": 52.51,
+      "lng": 13.2822
+    },
+    {
+      "id": "Q559226",
+      "name": "Kaiserin-Augusta-Straße",
+      "lat": 52.460153,
+      "lng": 13.384578
+    },
+    {
+      "id": "Q29964084",
+      "name": "Karl-Bonhoeffer-Nervenklinik metro station",
+      "lat": 52.578384,
+      "lng": 13.331265
+    },
+    {
+      "id": "Q519494",
+      "name": "Karl-Marx-Straße",
+      "lat": 52.476111,
+      "lng": 13.439167
+    },
+    {
+      "id": "Q553140",
+      "name": "Kaulsdorf-Nord",
+      "lat": 52.521,
+      "lng": 13.589
+    },
+    {
+      "id": "Q33285518",
+      "name": "Kemperplatz station",
+      "lat": 52.510581,
+      "lng": 13.371819
+    },
+    {
+      "id": "Q556003",
+      "name": "Kienberg (Gärten der Welt) metro station",
+      "lat": 52.52861,
+      "lng": 13.59056
+    },
+    {
+      "id": "Q571161",
+      "name": "Kleistpark",
+      "lat": 52.490556,
+      "lng": 13.360278
+    },
+    {
+      "id": "Q657893",
+      "name": "Klosterstraße station",
+      "lat": 52.516111,
+      "lng": 13.412222
+    },
+    {
+      "id": "Q201849",
+      "name": "Kochstraße",
+      "lat": 52.505897,
+      "lng": 13.390611
+    },
+    {
+      "id": "Q800505",
+      "name": "Köllnische Heide station",
+      "lat": 52.4694,
+      "lng": 13.4675
+    },
+    {
+      "id": "Q571019",
+      "name": "Konstanzer Straße",
+      "lat": 52.494167,
+      "lng": 13.309722
+    },
+    {
+      "id": "Q819768",
+      "name": "Kottbusser Tor station",
+      "lat": 52.499167,
+      "lng": 13.418056
+    },
+    {
+      "id": "Q663945",
+      "name": "Krumme Lanke metro station",
+      "lat": 52.443333,
+      "lng": 13.241389
+    },
+    {
+      "id": "Q663933",
+      "name": "Kurfürstendamm metro station",
+      "lat": 52.504167,
+      "lng": 13.332778
+    },
+    {
+      "id": "Q690203",
+      "name": "Kurfürstenstraße metro station",
+      "lat": 52.5,
+      "lng": 13.361944
+    },
+    {
+      "id": "Q555916",
+      "name": "Kurt-Schumacher-Platz",
+      "lat": 52.563556,
+      "lng": 13.326572
+    },
+    {
+      "id": "Q800481",
+      "name": "Lankwitz station",
+      "lat": 52.4386,
+      "lng": 13.3417
+    },
+    {
+      "id": "Q668563",
+      "name": "Leinestraße",
+      "lat": 52.472778,
+      "lng": 13.428333
+    },
+    {
+      "id": "Q1960809",
+      "name": "Leopoldplatz metro station",
+      "lat": 52.5465,
+      "lng": 13.3591
+    },
+    {
+      "id": "Q3831986",
+      "name": "Lichtenberg metro station",
+      "lat": 52.510556,
+      "lng": 13.496389
+    },
+    {
+      "id": "Q6543354",
+      "name": "Lichtenrade station",
+      "lat": 52.3876,
+      "lng": 13.3963
+    },
+    {
+      "id": "Q800482",
+      "name": "Lichterfelde Süd station",
+      "lat": 52.41,
+      "lng": 13.3086
+    },
+    {
+      "id": "Q555939",
+      "name": "Lindauer Allee",
+      "lat": 52.5753,
+      "lng": 13.3392
+    },
+    {
+      "id": "Q571467",
+      "name": "Lipschitzallee metro station",
+      "lat": 52.424722,
+      "lng": 13.462778
+    },
+    {
+      "id": "Q111241233",
+      "name": "Long-distance and regional railway station Berlin-Hauptbahnhof",
+      "lat": 52.525083,
+      "lng": 13.369389
+    },
+    {
+      "id": "Q111365476",
+      "name": "Long-distance and regional railway station Berlin-Spandau",
+      "lat": 52.5347,
+      "lng": 13.1958
+    },
+    {
+      "id": "Q111323608",
+      "name": "Long-distance and regional railway station Berlin-Südkreuz",
+      "lat": 52.476572,
+      "lng": 13.36604
+    },
+    {
+      "id": "Q557558",
+      "name": "Louis-Lewin-Straße metro station",
+      "lat": 52.53889,
+      "lng": 13.61833
+    },
+    {
+      "id": "Q473901",
+      "name": "Magdalenenstraße",
+      "lat": 52.5125,
+      "lng": 13.486389
+    },
+    {
+      "id": "Q2641431",
+      "name": "Mahlow station",
+      "lat": 52.3602,
+      "lng": 13.4085
+    },
+    {
+      "id": "Q800485",
+      "name": "Marienfelde station",
+      "lat": 52.4242,
+      "lng": 13.3747
+    },
+    {
+      "id": "Q657871",
+      "name": "Märkisches Museum station",
+      "lat": 52.511944,
+      "lng": 13.408889
+    },
+    {
+      "id": "Q657905",
+      "name": "Mehringdamm",
+      "lat": 52.493889,
+      "lng": 13.388333
+    },
+    {
+      "id": "Q1973570",
+      "name": "Mehrower Allee station",
+      "lat": 52.5575,
+      "lng": 13.55361
+    },
+    {
+      "id": "Q658405",
+      "name": "Mendelssohn-Bartholdy-Park",
+      "lat": 52.50389,
+      "lng": 13.375
+    },
+    {
+      "id": "Q571393",
+      "name": "Mierendorffplatz",
+      "lat": 52.526389,
+      "lng": 13.305
+    },
+    {
+      "id": "Q105410952",
+      "name": "Militärbahnhof Schöneberg",
+      "lat": 52.48334,
+      "lng": 13.36856
+    },
+    {
+      "id": "Q704716",
+      "name": "Möckernbrücke U-Bahn station",
+      "lat": 52.499167,
+      "lng": 13.382778
+    },
+    {
+      "id": "Q374225",
+      "name": "Moritzplatz station",
+      "lat": 52.503611,
+      "lng": 13.410833
+    },
+    {
+      "id": "Q108524060",
+      "name": "Mühlenbeck railway station",
+      "lat": 52.664203,
+      "lng": 13.389115
+    },
+    {
+      "id": "Q6950467",
+      "name": "Mühlenbeck-Mönchmühle station",
+      "lat": 52.6546,
+      "lng": 13.3867
+    },
+    {
+      "id": "Q1459924",
+      "name": "Museumsinsel metro station",
+      "lat": 52.5174,
+      "lng": 13.3982
+    },
+    {
+      "id": "Q554399",
+      "name": "Naturkundemuseum metro station",
+      "lat": 52.531111,
+      "lng": 13.3825
+    },
+    {
+      "id": "Q555986",
+      "name": "Nauener Platz metro station",
+      "lat": 52.551667,
+      "lng": 13.3675
+    },
+    {
+      "id": "Q656431",
+      "name": "Neu-Westend",
+      "lat": 52.515556,
+      "lng": 13.261111
+    },
+    {
+      "id": "Q7001614",
+      "name": "Neuenhagen station",
+      "lat": 52.5208,
+      "lng": 13.7003
+    },
+    {
+      "id": "Q21272767",
+      "name": "Neukölln (Südring) metro station",
+      "lat": 52.469444,
+      "lng": 13.442222
+    },
+    {
+      "id": "Q4892447",
+      "name": "Nöldnerplatz S-Bahn station",
+      "lat": 52.5038,
+      "lng": 13.4853
+    },
+    {
+      "id": "Q571039",
+      "name": "Nollendorfplatz metro station",
+      "lat": 52.499167,
+      "lng": 13.353889
+    },
+    {
+      "id": "Q15192700",
+      "name": "Oberspree station",
+      "lat": 52.4525,
+      "lng": 13.5382
+    },
+    {
+      "id": "Q656441",
+      "name": "Olympia-Stadion station",
+      "lat": 52.517222,
+      "lng": 13.25
+    },
+    {
+      "id": "Q389214",
+      "name": "Onkel Toms Hütte metro station",
+      "lat": 52.450278,
+      "lng": 13.253333
+    },
+    {
+      "id": "Q571485",
+      "name": "Oranienburger Tor metro station",
+      "lat": 52.524886,
+      "lng": 13.387478
+    },
+    {
+      "id": "Q7106446",
+      "name": "Osdorfer Straße station",
+      "lat": 52.4194,
+      "lng": 13.3145
+    },
+    {
+      "id": "Q681336",
+      "name": "Oskar-Helene-Heim metro station",
+      "lat": 52.450278,
+      "lng": 13.269722
+    },
+    {
+      "id": "Q662217",
+      "name": "Osloer Straße metro station",
+      "lat": 52.55694,
+      "lng": 13.37361
+    },
+    {
+      "id": "Q660045",
+      "name": "Ostkreuz railway station",
+      "lat": 52.5031,
+      "lng": 13.4689
+    },
+    {
+      "id": "Q557582",
+      "name": "Otisstraße",
+      "lat": 52.571111,
+      "lng": 13.302778
+    },
+    {
+      "id": "Q21712049",
+      "name": "Pankow metro station",
+      "lat": 52.566784,
+      "lng": 13.411721
+    },
+    {
+      "id": "Q571380",
+      "name": "Pankstraße",
+      "lat": 52.55222,
+      "lng": 13.38167
+    },
+    {
+      "id": "Q557562",
+      "name": "Paracelsus-Bad",
+      "lat": 52.574167,
+      "lng": 13.349167
+    },
+    {
+      "id": "Q557543",
+      "name": "Paradestraße metro station",
+      "lat": 52.478056,
+      "lng": 13.386111
+    },
+    {
+      "id": "Q571855",
+      "name": "Parchimer Allee",
+      "lat": 52.444722,
+      "lng": 13.449444
+    },
+    {
+      "id": "Q570943",
+      "name": "Paulsternstraße",
+      "lat": 52.538056,
+      "lng": 13.247778
+    },
+    {
+      "id": "Q7205917",
+      "name": "Plänterwald railway station",
+      "lat": 52.4786,
+      "lng": 13.4733
+    },
+    {
+      "id": "Q553146",
+      "name": "Platz der Luftbrücke",
+      "lat": 52.485556,
+      "lng": 13.385833
+    },
+    {
+      "id": "Q571324",
+      "name": "Podbielskiallee",
+      "lat": 52.464444,
+      "lng": 13.296389
+    },
+    {
+      "id": "Q16855765",
+      "name": "Postbahnhof am Ostbahnhof",
+      "lat": 52.508631,
+      "lng": 13.436395
+    },
+    {
+      "id": "Q315133",
+      "name": "Potsdam Griebnitzsee railway station",
+      "lat": 52.3944,
+      "lng": 13.1272
+    },
+    {
+      "id": "Q801327",
+      "name": "Potsdam Medienstadt Babelsberg railway station",
+      "lat": 52.3819,
+      "lng": 13.1217
+    },
+    {
+      "id": "Q801326",
+      "name": "Potsdam-Babelsberg station",
+      "lat": 52.3914,
+      "lng": 13.0928
+    },
+    {
+      "id": "Q55630330",
+      "name": "Potsdam-Rehbrücke railway station",
+      "lat": 52.358269,
+      "lng": 13.097996
+    },
+    {
+      "id": "Q3909578",
+      "name": "Potsdamer Platz metro station",
+      "lat": 52.5092,
+      "lng": 13.3782
+    },
+    {
+      "id": "Q91233723",
+      "name": "Potsdamer Platz regional station",
+      "lat": 52.5093,
+      "lng": 13.3759
+    },
+    {
+      "id": "Q106086519",
+      "name": "Potsdamer Platz S-Bahn station",
+      "lat": 52.5094,
+      "lng": 13.3766
+    },
+    {
+      "id": "Q800508",
+      "name": "Priesterweg railway station",
+      "lat": 52.4601,
+      "lng": 13.3563
+    },
+    {
+      "id": "Q689797",
+      "name": "Prinzenstraße",
+      "lat": 52.498333,
+      "lng": 13.406111
+    },
+    {
+      "id": "Q2150651",
+      "name": "Raoul-Wallenberg-Straße railway station",
+      "lat": 52.55056,
+      "lng": 13.5475
+    },
+    {
+      "id": "Q628770",
+      "name": "Rathaus Neukölln",
+      "lat": 52.481667,
+      "lng": 13.434167
+    },
+    {
+      "id": "Q554477",
+      "name": "Rathaus Reinickendorf station",
+      "lat": 52.5882,
+      "lng": 13.3257
+    },
+    {
+      "id": "Q570926",
+      "name": "Rathaus Schöneberg",
+      "lat": 52.483117,
+      "lng": 13.341931
+    },
+    {
+      "id": "Q650704",
+      "name": "Rathaus Spandau metro station",
+      "lat": 52.535,
+      "lng": 13.200278
+    },
+    {
+      "id": "Q28945859",
+      "name": "Rathaus Steglitz metro station",
+      "lat": 52.456794,
+      "lng": 13.320901
+    },
+    {
+      "id": "Q111326054",
+      "name": "Regionalbahnhof Berlin Jungfernheide",
+      "lat": 52.53035,
+      "lng": 13.299433
+    },
+    {
+      "id": "Q111268492",
+      "name": "Regionalbahnhof Friedrichstraße",
+      "lat": 52.520278,
+      "lng": 13.386944
+    },
+    {
+      "id": "Q253850",
+      "name": "Rehberge",
+      "lat": 52.5567,
+      "lng": 13.3412
+    },
+    {
+      "id": "Q559249",
+      "name": "Reinickendorfer Straße",
+      "lat": 52.539911,
+      "lng": 13.370378
+    },
+    {
+      "id": "Q557513",
+      "name": "Residenzstraße",
+      "lat": 52.571111,
+      "lng": 13.360556
+    },
+    {
+      "id": "Q662201",
+      "name": "Richard-Wagner-Platz metro station",
+      "lat": 52.5175,
+      "lng": 13.306389
+    },
+    {
+      "id": "Q570911",
+      "name": "Rohrdamm metro station",
+      "lat": 52.537222,
+      "lng": 13.2625
+    },
+    {
+      "id": "Q801386",
+      "name": "Röntgental station",
+      "lat": 52.6487,
+      "lng": 13.5136
+    },
+    {
+      "id": "Q658790",
+      "name": "Rosa-Luxemburg-Platz station",
+      "lat": 52.528333,
+      "lng": 13.410278
+    },
+    {
+      "id": "Q663231",
+      "name": "Rosenthaler Platz station",
+      "lat": 52.53,
+      "lng": 13.401111
+    },
+    {
+      "id": "Q2465837",
+      "name": "Rotes Rathaus metro station",
+      "lat": 52.518889,
+      "lng": 13.408056
+    },
+    {
+      "id": "Q167147",
+      "name": "Rüdesheimer Platz",
+      "lat": 52.473333,
+      "lng": 13.314444
+    },
+    {
+      "id": "Q660024",
+      "name": "Rudow metro station",
+      "lat": 52.415833,
+      "lng": 13.496111
+    },
+    {
+      "id": "Q656401",
+      "name": "Ruhleben station",
+      "lat": 52.525556,
+      "lng": 13.241389
+    },
+    {
+      "id": "Q111324700",
+      "name": "S-Bahnhof Berlin Alexanderplatz",
+      "lat": 52.521389,
+      "lng": 13.411944
+    },
+    {
+      "id": "Q111324573",
+      "name": "S-Bahnhof Berlin Anhalter Bahnhof",
+      "lat": 52.503056,
+      "lng": 13.381944
+    },
+    {
+      "id": "Q111326217",
+      "name": "S-Bahnhof Berlin Charlottenburg",
+      "lat": 52.504722,
+      "lng": 13.303333
+    },
+    {
+      "id": "Q111324168",
+      "name": "S-Bahnhof Berlin Karow",
+      "lat": 52.615,
+      "lng": 13.4692
+    },
+    {
+      "id": "Q111325951",
+      "name": "S-Bahnhof Berlin Lichtenberg",
+      "lat": 52.5106,
+      "lng": 13.4964
+    },
+    {
+      "id": "Q111327103",
+      "name": "S-Bahnhof Berlin Lichterfelde West",
+      "lat": 52.4433,
+      "lng": 13.2947
+    },
+    {
+      "id": "Q111325412",
+      "name": "S-Bahnhof Berlin Neukölln",
+      "lat": 52.469167,
+      "lng": 13.441667
+    },
+    {
+      "id": "Q111325075",
+      "name": "S-Bahnhof Berlin Ostbahnhof",
+      "lat": 52.51,
+      "lng": 13.4347
+    },
+    {
+      "id": "Q111325678",
+      "name": "S-Bahnhof Berlin Spandau",
+      "lat": 52.5347,
+      "lng": 13.1958
+    },
+    {
+      "id": "Q111323139",
+      "name": "S-Bahnhof Berlin Südkreuz",
+      "lat": 52.4756,
+      "lng": 13.3644
+    },
+    {
+      "id": "Q111325896",
+      "name": "S-Bahnhof Berlin Wannsee",
+      "lat": 52.4214,
+      "lng": 13.1792
+    },
+    {
+      "id": "Q111326238",
+      "name": "S-Bahnhof Berlin Zoologischer Garten",
+      "lat": 52.507222,
+      "lng": 13.3325
+    },
+    {
+      "id": "Q111239092",
+      "name": "S-Bahnhof Berlin-Gesundbrunnen",
+      "lat": 52.548611,
+      "lng": 13.389444
+    },
+    {
+      "id": "Q111240799",
+      "name": "S-Bahnhof Berlin-Hauptbahnhof",
+      "lat": 52.525083,
+      "lng": 13.369389
+    },
+    {
+      "id": "Q111307677",
+      "name": "S-Bahnhof Berlin-Hohenschönhausen",
+      "lat": 52.5664,
+      "lng": 13.5122
+    },
+    {
+      "id": "Q111264368",
+      "name": "S-Bahnhof Berlin-Tempelhof",
+      "lat": 52.4708,
+      "lng": 13.3854
+    },
+    {
+      "id": "Q111264319",
+      "name": "S-Bahnhof Berlin-Wittenau",
+      "lat": 52.597013,
+      "lng": 13.334329
+    },
+    {
+      "id": "Q111250033",
+      "name": "S-Bahnhof Frankfurter Allee",
+      "lat": 52.514167,
+      "lng": 13.474722
+    },
+    {
+      "id": "Q111219456",
+      "name": "S-Bahnhof Friedrichstraße",
+      "lat": 52.520278,
+      "lng": 13.386944
+    },
+    {
+      "id": "Q111307258",
+      "name": "S-Bahnhof Grünau",
+      "lat": 52.4122,
+      "lng": 13.5746
+    },
+    {
+      "id": "Q111263802",
+      "name": "S-Bahnhof Hermannstraße",
+      "lat": 52.4675,
+      "lng": 13.431111
+    },
+    {
+      "id": "Q111263876",
+      "name": "S-Bahnhof Innsbrucker Platz",
+      "lat": 52.4786,
+      "lng": 13.3439
+    },
+    {
+      "id": "Q110977325",
+      "name": "S-Bahnhof Jungfernheide",
+      "lat": 52.53035,
+      "lng": 13.299433
+    },
+    {
+      "id": "Q111260049",
+      "name": "S-Bahnhof Karl-Bonhoeffer-Nervenklinik",
+      "lat": 52.5782,
+      "lng": 13.3326
+    },
+    {
+      "id": "Q111251530",
+      "name": "S-Bahnhof Ostkreuz",
+      "lat": 52.5031,
+      "lng": 13.4689
+    },
+    {
+      "id": "Q111273850",
+      "name": "S-Bahnhof Pankow",
+      "lat": 52.5667,
+      "lng": 13.4111
+    },
+    {
+      "id": "Q111264179",
+      "name": "S-Bahnhof Rathaus Steglitz",
+      "lat": 52.4562,
+      "lng": 13.3216
+    },
+    {
+      "id": "Q116137319",
+      "name": "S-Bahnhof Schulzendorf Ruppiner Chaussee 237",
+      "lat": 52.612728,
+      "lng": 13.246275
+    },
+    {
+      "id": "Q111252298",
+      "name": "S-Bahnhof Warschauer Straße",
+      "lat": 52.506417,
+      "lng": 13.450956
+    },
+    {
+      "id": "Q110977238",
+      "name": "S-Bahnhof Wuhletal",
+      "lat": 52.512611,
+      "lng": 13.575194
+    },
+    {
+      "id": "Q27955427",
+      "name": "S-Jannowitzbrücke station",
+      "lat": 52.514822,
+      "lng": 13.41795
+    },
+    {
+      "id": "Q552891",
+      "name": "Samariterstraße metro station",
+      "lat": 52.514722,
+      "lng": 13.464444
+    },
+    {
+      "id": "Q557586",
+      "name": "Scharnweberstraße",
+      "lat": 52.566944,
+      "lng": 13.312778
+    },
+    {
+      "id": "Q3672596",
+      "name": "Schichauweg railway station",
+      "lat": 52.3985,
+      "lng": 13.3894
+    },
+    {
+      "id": "Q105962372",
+      "name": "Schildow railway station",
+      "lat": 52.637114,
+      "lng": 13.372852
+    },
+    {
+      "id": "Q552899",
+      "name": "Schillingstraße station",
+      "lat": 52.520278,
+      "lng": 13.421667
+    },
+    {
+      "id": "Q602282",
+      "name": "Schlesisches Tor",
+      "lat": 52.500833,
+      "lng": 13.441667
+    },
+    {
+      "id": "Q554474",
+      "name": "Schloßstraße metro station",
+      "lat": 52.46083,
+      "lng": 13.32444
+    },
+    {
+      "id": "Q661069",
+      "name": "Schönefeld (bei Berlin) railway station",
+      "lat": 52.3914,
+      "lng": 13.5128
+    },
+    {
+      "id": "Q108523478",
+      "name": "Schönefeld (Kr Teltow) Dorf railway station",
+      "lat": 52.384087,
+      "lng": 13.500588
+    },
+    {
+      "id": "Q65480881",
+      "name": "Schönerlinde railway station",
+      "lat": 52.652165,
+      "lng": 13.428719
+    },
+    {
+      "id": "Q801423",
+      "name": "Schönfließ railway station",
+      "lat": 52.6648,
+      "lng": 13.3397
+    },
+    {
+      "id": "Q47014936",
+      "name": "Schönhauser Allee (metro station)",
+      "lat": 52.549329,
+      "lng": 13.413706
+    },
+    {
+      "id": "Q666868",
+      "name": "Schönleinstraße metro station",
+      "lat": 52.493056,
+      "lng": 13.421944
+    },
+    {
+      "id": "Q108524070",
+      "name": "Schönwalde railway station",
+      "lat": 52.679387,
+      "lng": 13.426859
+    },
+    {
+      "id": "Q800487",
+      "name": "Schulzendorf railway station",
+      "lat": 52.6128,
+      "lng": 13.2462
+    },
+    {
+      "id": "Q554360",
+      "name": "Schwartzkopffstraße",
+      "lat": 52.535278,
+      "lng": 13.377222
+    },
+    {
+      "id": "Q554391",
+      "name": "Seestraße",
+      "lat": 52.55056,
+      "lng": 13.35194
+    },
+    {
+      "id": "Q663264",
+      "name": "Siemensdamm",
+      "lat": 52.536667,
+      "lng": 13.273056
+    },
+    {
+      "id": "Q657879",
+      "name": "Sophie-Charlotte-Platz",
+      "lat": 52.510833,
+      "lng": 13.296667
+    },
+    {
+      "id": "Q667046",
+      "name": "Spichernstraße metro station",
+      "lat": 52.496389,
+      "lng": 13.330556
+    },
+    {
+      "id": "Q569489",
+      "name": "Spittelmarkt station",
+      "lat": 52.511111,
+      "lng": 13.403611
+    },
+    {
+      "id": "Q660066",
+      "name": "Stadtmitte station",
+      "lat": 52.5122,
+      "lng": 13.3894
+    },
+    {
+      "id": "Q19274514",
+      "name": "Stolpe Süd railway station",
+      "lat": 52.63018,
+      "lng": 13.22333
+    },
+    {
+      "id": "Q570999",
+      "name": "Strausberger Platz",
+      "lat": 52.518056,
+      "lng": 13.430833
+    },
+    {
+      "id": "Q800511",
+      "name": "Südende station",
+      "lat": 52.4481,
+      "lng": 13.3536
+    },
+    {
+      "id": "Q656081",
+      "name": "Südstern",
+      "lat": 52.489444,
+      "lng": 13.407778
+    },
+    {
+      "id": "Q7697868",
+      "name": "Teltow railway station",
+      "lat": 52.388056,
+      "lng": 13.299444
+    },
+    {
+      "id": "Q7697867",
+      "name": "Teltow Stadt railway station",
+      "lat": 52.3969,
+      "lng": 13.2767
+    },
+    {
+      "id": "Q3983109",
+      "name": "Tempelhof (Südring) metro station",
+      "lat": 52.47075,
+      "lng": 13.385361
+    },
+    {
+      "id": "Q657857",
+      "name": "Theodor-Heuss-Platz",
+      "lat": 52.509722,
+      "lng": 13.273056
+    },
+    {
+      "id": "Q571400",
+      "name": "Turmstraße metro station",
+      "lat": 52.52585,
+      "lng": 13.341353
+    },
+    {
+      "id": "Q663212",
+      "name": "U-Bahn station Zitadelle",
+      "lat": 52.537778,
+      "lng": 13.217778
+    },
+    {
+      "id": "Q3761416",
+      "name": "U-Bahnhof Gesundbrunnen",
+      "lat": 52.548611,
+      "lng": 13.389444
+    },
+    {
+      "id": "Q135116811",
+      "name": "U-Bahnhof Oranienplatz",
+      "lat": 52.503055,
+      "lng": 13.41538
+    },
+    {
+      "id": "Q32661454",
+      "name": "U-Bahnhof Senefelderplatz",
+      "lat": 52.53242,
+      "lng": 13.412743
+    },
+    {
+      "id": "Q4018733",
+      "name": "U-Bahnhof Wedding",
+      "lat": 52.5425,
+      "lng": 13.366111
+    },
+    {
+      "id": "Q110977221",
+      "name": "U-Bahnhof Wuhletal",
+      "lat": 52.512611,
+      "lng": 13.575194
+    },
+    {
+      "id": "Q570954",
+      "name": "U-Tierpark",
+      "lat": 52.4964,
+      "lng": 13.5233
+    },
+    {
+      "id": "Q568224",
+      "name": "Uhlandstraße",
+      "lat": 52.5025,
+      "lng": 13.325556
+    },
+    {
+      "id": "Q637870",
+      "name": "Ullsteinstraße",
+      "lat": 52.453775,
+      "lng": 13.384303
+    },
+    {
+      "id": "Q1737815",
+      "name": "Unter den Linden metro station",
+      "lat": 52.517,
+      "lng": 13.3889
+    },
+    {
+      "id": "Q19274518",
+      "name": "Velten (Mark) railway station",
+      "lat": 52.685,
+      "lng": 13.172222
+    },
+    {
+      "id": "Q178685",
+      "name": "Viktoria-Luise-Platz",
+      "lat": 52.496161,
+      "lng": 13.342703
+    },
+    {
+      "id": "Q570906",
+      "name": "Vinetastraße metro station",
+      "lat": 52.559167,
+      "lng": 13.413333
+    },
+    {
+      "id": "Q663308",
+      "name": "Voltastraße",
+      "lat": 52.542093,
+      "lng": 13.393022
+    },
+    {
+      "id": "Q638584",
+      "name": "Walther-Schreiber-Platz metro station",
+      "lat": 52.465,
+      "lng": 13.328333
+    },
+    {
+      "id": "Q10276232",
+      "name": "Warschauer Straße metro station",
+      "lat": 52.5051,
+      "lng": 13.4491
+    },
+    {
+      "id": "Q2784530",
+      "name": "Wartenberg S-Bahn station",
+      "lat": 52.57306,
+      "lng": 13.50389
+    },
+    {
+      "id": "Q16902993",
+      "name": "Waßmannsdorf station",
+      "lat": 52.3684,
+      "lng": 13.4637
+    },
+    {
+      "id": "Q551768",
+      "name": "Weberwiese",
+      "lat": 52.516794,
+      "lng": 13.444992
+    },
+    {
+      "id": "Q661876",
+      "name": "Weinmeisterstraße metro station",
+      "lat": 52.525833,
+      "lng": 13.403889
+    },
+    {
+      "id": "Q20191237",
+      "name": "Werneuchen railway station",
+      "lat": 52.637473,
+      "lng": 13.738472
+    },
+    {
+      "id": "Q4019188",
+      "name": "Westhafen metro station",
+      "lat": 52.536795,
+      "lng": 13.342724
+    },
+    {
+      "id": "Q554481",
+      "name": "Westphalweg",
+      "lat": 52.446,
+      "lng": 13.386
+    },
+    {
+      "id": "Q73416976",
+      "name": "Wichernstraße",
+      "lat": 52.56968,
+      "lng": 13.202015
+    },
+    {
+      "id": "Q570961",
+      "name": "Wilmersdorfer Straße",
+      "lat": 52.506667,
+      "lng": 13.306667
+    },
+    {
+      "id": "Q10276235",
+      "name": "Wittenau metro station",
+      "lat": 52.595606,
+      "lng": 13.334715
+    },
+    {
+      "id": "Q692727",
+      "name": "Wittenbergplatz metro station",
+      "lat": 52.501944,
+      "lng": 13.343056
+    },
+    {
+      "id": "Q571841",
+      "name": "Wutzkyallee",
+      "lat": 52.423333,
+      "lng": 13.475
+    },
+    {
+      "id": "Q21776726",
+      "name": "Yorckstraße (Großgörschenstraße) station",
+      "lat": 52.492275,
+      "lng": 13.367859
+    },
+    {
+      "id": "Q12011022",
+      "name": "Yorckstraße metro station",
+      "lat": 52.493056,
+      "lng": 13.370833
+    },
+    {
+      "id": "Q21776729",
+      "name": "Yorckstraße station",
+      "lat": 52.491778,
+      "lng": 13.372142
+    },
+    {
+      "id": "Q801657",
+      "name": "Zepernick station",
+      "lat": 52.6598,
+      "lng": 13.5342
+    },
+    {
+      "id": "Q8069824",
+      "name": "Zeuthen railway station",
+      "lat": 52.3486,
+      "lng": 13.6274
+    },
+    {
+      "id": "Q4024764",
+      "name": "Zoologischer Garten metro station",
+      "lat": 52.505867,
+      "lng": 13.333024
+    },
+    {
+      "id": "Q572096",
+      "name": "Zwickauer Damm",
+      "lat": 52.423333,
+      "lng": 13.483889
+    }
+  ]
+}

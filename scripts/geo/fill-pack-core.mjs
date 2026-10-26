@@ -97,6 +97,7 @@ const PACK_DEFS = {
   "prince-rupert": boxPack("PrinceRupert", "Q16"),
   brussels: boxPack("Brussels", "Q31", ["en", "fr", "nl", "mul"]),
   brisbane: boxPack("Brisbane", "Q408"),
+  berlin: boxPack("Berlin", "Q183", ["en", "de", "mul"]),
 };
 
 export const KNOWN_PACK_IDS = Object.freeze(Object.keys(PACK_DEFS));

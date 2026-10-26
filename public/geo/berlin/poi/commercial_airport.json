@@ -1,0 +1,30 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q160556",
+      "name": "Berlin Brandenburg Airport",
+      "lat": 52.362247,
+      "lng": 13.500672
+    },
+    {
+      "id": "Q9689",
+      "name": "Berlin Schönefeld Airport",
+      "lat": 52.378611,
+      "lng": 13.520556
+    },
+    {
+      "id": "Q116139805",
+      "name": "Luftbrückenflughafen Avenue Jean Mermoz 44-44A",
+      "lat": 52.565143,
+      "lng": 13.299027
+    }
+  ]
+}
