@@ -32,6 +32,16 @@ const DENSITY_GAP_TOKENS = [
   "--chrome-side-stack-lift",
 ] as const;
 
+const ENTRY_DENSITY_TOKENS = [
+  "--entry-pad-y-viewport",
+  "--entry-gap-viewport-center",
+  "--entry-gap-viewport-start",
+  "--entry-gap-viewport-between",
+  "--entry-gap-flow-center",
+  "--entry-top-breathing-extra",
+  "--entry-top-extra",
+] as const;
+
 describe("short-portrait density CSS contract", () => {
   it("defines height<=700px portrait media that reassigns chrome density tokens", () => {
     const chromeCss = [
@@ -51,6 +61,33 @@ describe("short-portrait density CSS contract", () => {
     expect(
       DENSITY_GAP_TOKENS.some((token) => new RegExp(`${token}\\s*:`).test(shortPortraitBlock)),
     ).toBe(true);
+  });
+
+  it("reassigns entry density vars under the same short-portrait media", () => {
+    const baseCss = readSource("src/styles/base.css");
+
+    expect(baseCss).toMatch(SHORT_PORTRAIT_MEDIA);
+
+    // Defaults exist on :root before the short-portrait override.
+    for (const token of ENTRY_DENSITY_TOKENS) {
+      expect(baseCss).toMatch(new RegExp(`${token}\\s*:`));
+    }
+
+    const mediaMatch = SHORT_PORTRAIT_MEDIA.exec(baseCss);
+    expect(mediaMatch).not.toBeNull();
+    const braceIndex = baseCss.indexOf("{", mediaMatch!.index);
+    expect(braceIndex).toBeGreaterThan(-1);
+    const shortPortraitBlock = balancedBlock(baseCss, braceIndex);
+
+    for (const token of ENTRY_DENSITY_TOKENS) {
+      expect(shortPortraitBlock).toMatch(new RegExp(`${token}\\s*:`));
+    }
+
+    // Single shared breakpoint: no second short-portrait height threshold.
+    const shortPortraitHits = baseCss.match(
+      /@media\s*\(\s*height\s*<=\s*700px\s*\)\s*and\s*\(\s*orientation:\s*portrait\s*\)/g,
+    );
+    expect(shortPortraitHits).toHaveLength(1);
   });
 
   it("does not downscale phone-shell / root density via transform scale or zoom", () => {
