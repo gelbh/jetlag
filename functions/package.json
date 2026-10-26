@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@posthog/mcp": "0.23.0",
     "firebase-admin": "^14.5.0",
     "firebase-functions": "^7.4.0",
     "posthog-node": "^5.57.0",
