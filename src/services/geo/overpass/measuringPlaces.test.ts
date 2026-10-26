@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import * as overpassClient from "../../core/overpass/overpassClient";
+import * as gtfsPlayAreaStations from "../../transit/gtfsPlayAreaStations";
 import { clearGeographicFeatureCacheForTests } from "../cache";
 import {
   fetchMeasuringPlacesInArea,
@@ -210,6 +211,28 @@ describe("measuring places", () => {
     expect(query).toContain("[aeroway=aerodrome][iata]");
     expect(query).toContain("[aeroway=aerodrome][icao]");
     expect(query).not.toContain("aerodrome:type");
+  });
+
+  it("falls through to Overpass when GTFS measuring stations are empty", async () => {
+    vi.spyOn(gtfsPlayAreaStations, "fetchGtfsMeasuringStationsForPlayArea").mockResolvedValue(null);
+    const queryOverpass = vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          id: 99,
+          tags: { name: "Overpass Station", railway: "station" },
+          lat: 51.45,
+          lon: -0.16,
+        },
+      ],
+    });
+
+    const places = await fetchMeasuringPlacesInArea(sampleGameArea, "rail_station", [], undefined, {
+      transitMetroId: "sydney",
+      transitStationFilter: "tram",
+    });
+
+    expect(queryOverpass).toHaveBeenCalled();
+    expect(places.some((place) => place.name === "Overpass Station")).toBe(true);
   });
 
   it("includes named bodies of water and excludes pools and unnamed water", () => {

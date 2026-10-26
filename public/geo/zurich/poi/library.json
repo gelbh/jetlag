@@ -1,1 +1,258 @@
-{ "category": "library", "source": "none", "places": [] }
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q115327260",
+      "name": "Altes Primarschulhaus",
+      "lat": 47.443301,
+      "lng": 8.628141
+    },
+    {
+      "id": "Q135569342",
+      "name": "Archive and Library of the Polish Museum",
+      "lat": 47.227137,
+      "lng": 8.815969
+    },
+    {
+      "id": "Q29933277",
+      "name": "Bibliothek in Münzkabinett und Antikensammlung der Stadt Winterthur",
+      "lat": 47.50308,
+      "lng": 8.73104
+    },
+    {
+      "id": "Q137774347",
+      "name": "Bibliothek Schlieren",
+      "lat": 47.398815,
+      "lng": 8.448351
+    },
+    {
+      "id": "Q132854104",
+      "name": "Bibliothek Veltheim",
+      "lat": 47.509297,
+      "lng": 8.716
+    },
+    {
+      "id": "Q130359207",
+      "name": "Bücherraum f",
+      "lat": 47.415102,
+      "lng": 8.5445
+    },
+    {
+      "id": "Q1440938",
+      "name": "Canton Thurgau library (collection)",
+      "lat": 47.556219,
+      "lng": 8.899439
+    },
+    {
+      "id": "Q15806227",
+      "name": "doku-zug.ch",
+      "lat": 47.16479,
+      "lng": 8.51507
+    },
+    {
+      "id": "Q1273325",
+      "name": "e-rara.ch",
+      "lat": 47.376563,
+      "lng": 8.547585
+    },
+    {
+      "id": "Q106411923",
+      "name": "Eastern Switzerland University of Applied Sciences",
+      "lat": 47.223638,
+      "lng": 8.817298
+    },
+    {
+      "id": "Q684773",
+      "name": "ETH Library",
+      "lat": 47.376389,
+      "lng": 8.547778
+    },
+    {
+      "id": "Q107195551",
+      "name": "Fermento Anarchistische Bibliothek",
+      "lat": 47.372756,
+      "lng": 8.524921
+    },
+    {
+      "id": "Q111747298",
+      "name": "Forschungsbibliothek Pestalozzianum",
+      "lat": 47.377904,
+      "lng": 8.534661
+    },
+    {
+      "id": "Q141125135",
+      "name": "Gemeindebibliothek Rosengarten Thalwil",
+      "lat": 47.29337,
+      "lng": 8.563357
+    },
+    {
+      "id": "Q131763782",
+      "name": "HfH-Bibliothek",
+      "lat": 47.403505,
+      "lng": 8.54713
+    },
+    {
+      "id": "Q1312689",
+      "name": "Iron Library",
+      "lat": 47.684418,
+      "lng": 8.675844
+    },
+    {
+      "id": "Q107195625",
+      "name": "Kasama",
+      "lat": 47.378522,
+      "lng": 8.529275
+    },
+    {
+      "id": "Q27490247",
+      "name": "Keystone Press AG",
+      "lat": 47.361164,
+      "lng": 8.512511
+    },
+    {
+      "id": "Q1278450",
+      "name": "Lib4RI",
+      "lat": 47.4048,
+      "lng": 8.60967
+    },
+    {
+      "id": "Q85848332",
+      "name": "Library in the Botanical Garden",
+      "lat": 47.359136,
+      "lng": 8.560081
+    },
+    {
+      "id": "Q27490177",
+      "name": "Library of former Kapuzinerkloster St. Anna",
+      "lat": 47.16659,
+      "lng": 8.51736
+    },
+    {
+      "id": "Q27490207",
+      "name": "Library of the Israelitische Cultusgemeinde Zürich",
+      "lat": 47.363056,
+      "lng": 8.5325
+    },
+    {
+      "id": "Q856475",
+      "name": "Library Zug",
+      "lat": 47.1645,
+      "lng": 8.51518
+    },
+    {
+      "id": "Q27490270",
+      "name": "Neue Zürcher Zeitung, Redaktionsarchiv",
+      "lat": 47.36505,
+      "lng": 8.54745
+    },
+    {
+      "id": "Q29933182",
+      "name": "Paul Kläui-Bibliothek",
+      "lat": 47.3496,
+      "lng": 8.71344
+    },
+    {
+      "id": "Q2073008",
+      "name": "Pestalozzi Library Zurich",
+      "lat": 47.3748,
+      "lng": 8.54448
+    },
+    {
+      "id": "Q27490282",
+      "name": "Psychology Club Zürich",
+      "lat": 47.368919,
+      "lng": 8.552485
+    },
+    {
+      "id": "Q112232608",
+      "name": "Reference library Edition Moderne",
+      "lat": 47.382039,
+      "lng": 8.53415
+    },
+    {
+      "id": "Q2205249",
+      "name": "SBS Swiss Library for the Blind, Visual Impaired and Print Disabled",
+      "lat": 47.362,
+      "lng": 8.51643
+    },
+    {
+      "id": "Q2326916",
+      "name": "Schaffhausen City Library",
+      "lat": 47.698872,
+      "lng": 8.636849
+    },
+    {
+      "id": "Q125928681",
+      "name": "Schema f",
+      "lat": 47.382988,
+      "lng": 8.530646
+    },
+    {
+      "id": "Q137821644",
+      "name": "Stadt- und Regionalbibliothek Uster",
+      "lat": 47.351015,
+      "lng": 8.716841
+    },
+    {
+      "id": "Q27489639",
+      "name": "Stadtarchiv und Kläui-Bibliothek Uster",
+      "lat": 47.348537,
+      "lng": 8.719027
+    },
+    {
+      "id": "Q2585160",
+      "name": "Stadtbibliothek Winterthur",
+      "lat": 47.4987,
+      "lng": 8.7294
+    },
+    {
+      "id": "Q27490308",
+      "name": "Studienbibliothek zur Geschichte der Arbeiterbewegung",
+      "lat": 47.385523,
+      "lng": 8.527598
+    },
+    {
+      "id": "Q688143",
+      "name": "Swiss Film Archive",
+      "lat": 47.382701,
+      "lng": 8.532101
+    },
+    {
+      "id": "Q18643284",
+      "name": "Swiss Foundation for Photography",
+      "lat": 47.4958,
+      "lng": 8.7383
+    },
+    {
+      "id": "Q56219566",
+      "name": "Swiss Social Archives (biblioteca)",
+      "lat": 47.366944,
+      "lng": 8.5475
+    },
+    {
+      "id": "Q114044012",
+      "name": "University Library Zurich",
+      "lat": 47.375587,
+      "lng": 8.547932
+    },
+    {
+      "id": "Q856547",
+      "name": "University of Zurich Law Library",
+      "lat": 47.3733,
+      "lng": 8.55056
+    },
+    {
+      "id": "Q190260",
+      "name": "Zentralbibliothek Zürich",
+      "lat": 47.374167,
+      "lng": 8.545278
+    }
+  ]
+}

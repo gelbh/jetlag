@@ -1,1 +1,24 @@
-{ "category": "golf_course", "source": "none", "places": [] }
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 43.4669,
+    "west": -70.492,
+    "north": 43.8488,
+    "east": -69.9759
+  },
+  "places": [
+    {
+      "id": "Q22022635",
+      "name": "Great Chebeague Golf Club",
+      "lat": 43.750556,
+      "lng": -70.105833
+    },
+    {
+      "id": "Q14715325",
+      "name": "Nonesuch River Golf Course",
+      "lat": 43.6208,
+      "lng": -70.3681
+    }
+  ]
+}

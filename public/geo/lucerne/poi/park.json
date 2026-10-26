@@ -1,1 +1,102 @@
-{ "category": "park", "source": "none", "places": [] }
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 46.775,
+    "west": 7.839,
+    "north": 47.2903,
+    "east": 8.5213
+  },
+  "places": [
+    {
+      "id": "Q1257952",
+      "name": "Dreilindenpark",
+      "lat": 47.060834,
+      "lng": 8.321995
+    },
+    {
+      "id": "Q1534495",
+      "name": "Heidegg Castle with residential building and chapel",
+      "lat": 47.216758,
+      "lng": 8.273033
+    },
+    {
+      "id": "Q19362411",
+      "name": "Heiternplatz",
+      "lat": 47.284167,
+      "lng": 7.954856
+    },
+    {
+      "id": "Q22640001",
+      "name": "Horben",
+      "lat": 47.21954,
+      "lng": 8.32592
+    },
+    {
+      "id": "Q138446102",
+      "name": "Inseli",
+      "lat": 47.04964,
+      "lng": 8.314129
+    },
+    {
+      "id": "Q29785703",
+      "name": "Quaianlagen",
+      "lat": 47.054512,
+      "lng": 8.315148
+    },
+    {
+      "id": "Q112753060",
+      "name": "Seleger Moor",
+      "lat": 47.245474,
+      "lng": 8.507472
+    },
+    {
+      "id": "Q110728500",
+      "name": "so-called forest cathedral of the Beromünster Abbey",
+      "lat": 47.20217,
+      "lng": 8.1842
+    },
+    {
+      "id": "Q383059",
+      "name": "St. Andrew's Castle (castle complex with outbuildings, chapel and park",
+      "lat": 47.178836,
+      "lng": 8.466256
+    },
+    {
+      "id": "Q2442063",
+      "name": "Toni's Zoo",
+      "lat": 47.107447,
+      "lng": 8.262156
+    },
+    {
+      "id": "Q140001512",
+      "name": "Ufschötti",
+      "lat": 47.046556,
+      "lng": 8.32165
+    },
+    {
+      "id": "Q29522419",
+      "name": "Villa Bellerive with park",
+      "lat": 47.056913,
+      "lng": 8.329999
+    },
+    {
+      "id": "Q29785594",
+      "name": "Villa Krämerstein with gatehouse and park",
+      "lat": 47.014857,
+      "lng": 8.339937
+    },
+    {
+      "id": "Q59586381",
+      "name": "Villette Park",
+      "lat": 47.178119,
+      "lng": 8.460268
+    },
+    {
+      "id": "Q126486259",
+      "name": "Vögeligärtli",
+      "lat": 47.04858,
+      "lng": 8.308076
+    }
+  ]
+}

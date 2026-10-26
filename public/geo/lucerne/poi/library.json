@@ -1,1 +1,132 @@
-{ "category": "library", "source": "none", "places": [] }
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 46.775,
+    "west": 7.839,
+    "north": 47.2903,
+    "east": 8.5213
+  },
+  "places": [
+    {
+      "id": "Q109302756",
+      "name": "Alpnach library",
+      "lat": 46.941064,
+      "lng": 8.268276
+    },
+    {
+      "id": "Q29522222",
+      "name": "Bibliothek des Kapuzinerklosters auf dem Wesemlin",
+      "lat": 47.06162,
+      "lng": 8.31334
+    },
+    {
+      "id": "Q118669483",
+      "name": "Bibliothek HSLU - Campus Zug-Rotkreuz",
+      "lat": 47.143741,
+      "lng": 8.435377
+    },
+    {
+      "id": "Q118669482",
+      "name": "Bibliothek HSLU - Design Film Kunst",
+      "lat": 47.07159,
+      "lng": 8.277611
+    },
+    {
+      "id": "Q118669484",
+      "name": "Bibliothek HSLU - Musik",
+      "lat": 47.033282,
+      "lng": 8.296855
+    },
+    {
+      "id": "Q118669486",
+      "name": "Bibliothek HSLU - Technik & Architektur",
+      "lat": 47.014258,
+      "lng": 8.305273
+    },
+    {
+      "id": "Q118669487",
+      "name": "Bibliothek HSLU - Wirtschaft",
+      "lat": 47.049065,
+      "lng": 8.308551
+    },
+    {
+      "id": "Q1434830",
+      "name": "Cantonal Library Nidwalden",
+      "lat": 46.9566,
+      "lng": 8.36982
+    },
+    {
+      "id": "Q1728093",
+      "name": "Cantonal Library Obwalden",
+      "lat": 46.89389,
+      "lng": 8.24824
+    },
+    {
+      "id": "Q17322888",
+      "name": "Cooperative Storage Library Switzerland",
+      "lat": 47.214269,
+      "lng": 8.087774
+    },
+    {
+      "id": "Q15806227",
+      "name": "doku-zug.ch",
+      "lat": 47.16479,
+      "lng": 8.51507
+    },
+    {
+      "id": "Q27490177",
+      "name": "Library of former Kapuzinerkloster St. Anna",
+      "lat": 47.16659,
+      "lng": 8.51736
+    },
+    {
+      "id": "Q27479818",
+      "name": "library St. Michael Beromünster",
+      "lat": 47.2058,
+      "lng": 8.19031
+    },
+    {
+      "id": "Q856475",
+      "name": "Library Zug",
+      "lat": 47.1645,
+      "lng": 8.51518
+    },
+    {
+      "id": "Q189926",
+      "name": "Lucerne central and university library",
+      "lat": 47.048333,
+      "lng": 8.3075
+    },
+    {
+      "id": "Q118669485",
+      "name": "Mediothek HSLU - Soziale Arbeit",
+      "lat": 47.048022,
+      "lng": 8.314806
+    },
+    {
+      "id": "Q27480201",
+      "name": "Monastic library",
+      "lat": 46.820578,
+      "lng": 8.409202
+    },
+    {
+      "id": "Q118669481",
+      "name": "ZHB Luzern - Standort UNI/PH-Gebäude",
+      "lat": 47.049491,
+      "lng": 8.31254
+    },
+    {
+      "id": "Q118718244",
+      "name": "ZHB Luzern Sempacherstrasse",
+      "lat": 47.048333,
+      "lng": 8.307222
+    },
+    {
+      "id": "Q19362414",
+      "name": "Zofingen City Library",
+      "lat": 47.28919,
+      "lng": 7.945955
+    }
+  ]
+}

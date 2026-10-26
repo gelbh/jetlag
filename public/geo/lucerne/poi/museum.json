@@ -1,1 +1,390 @@
-{ "category": "museum", "source": "none", "places": [] }
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 46.775,
+    "west": 7.839,
+    "north": 47.2903,
+    "east": 8.5213
+  },
+  "places": [
+    {
+      "id": "Q4735602",
+      "name": "Alpineum",
+      "lat": 47.057913,
+      "lng": 8.310394
+    },
+    {
+      "id": "Q27488800",
+      "name": "Archaeological Museum Schötz (former Wiggertal Museum of Local History)",
+      "lat": 47.169701,
+      "lng": 7.988327
+    },
+    {
+      "id": "Q27478289",
+      "name": "Archiv Burgrain",
+      "lat": 47.150517,
+      "lng": 8.001066
+    },
+    {
+      "id": "Q31838040",
+      "name": "Art house Zofingen",
+      "lat": 47.288958,
+      "lng": 7.94779
+    },
+    {
+      "id": "Q820482",
+      "name": "Bergwerk Riedhof",
+      "lat": 47.287284,
+      "lng": 8.480582
+    },
+    {
+      "id": "Q124432983",
+      "name": "Besuchszentrum der Schweizerischen Vogelwarte",
+      "lat": 47.1277,
+      "lng": 8.19242
+    },
+    {
+      "id": "Q27479972",
+      "name": "Brickyard Museum",
+      "lat": 47.19628,
+      "lng": 8.42537
+    },
+    {
+      "id": "Q14559710",
+      "name": "Collection Meinrad Burch-Korrodi",
+      "lat": 46.891398,
+      "lng": 8.244712
+    },
+    {
+      "id": "Q27481455",
+      "name": "Collection of Heidegg Castle",
+      "lat": 47.216649,
+      "lng": 8.272975
+    },
+    {
+      "id": "Q27480203",
+      "name": "crest house (valley museum), (1787)(collection)",
+      "lat": 46.82145,
+      "lng": 8.4076
+    },
+    {
+      "id": "Q27478264",
+      "name": "Dorfmuseum Affoltern am Albis / Zwillikon",
+      "lat": 47.287453,
+      "lng": 8.432148
+    },
+    {
+      "id": "Q14565152",
+      "name": "Dr. Edmund Müller collection",
+      "lat": 47.2063,
+      "lng": 8.19178
+    },
+    {
+      "id": "Q27478248",
+      "name": "Feuerwehrmuseum Adligenswil",
+      "lat": 47.07042,
+      "lng": 8.36646
+    },
+    {
+      "id": "Q27490181",
+      "name": "Fischereimuseum (Zug)",
+      "lat": 47.16599,
+      "lng": 8.514373
+    },
+    {
+      "id": "Q27489008",
+      "name": "Frey-Naepflin-Stiftung",
+      "lat": 46.968153,
+      "lng": 8.351517
+    },
+    {
+      "id": "Q113383120",
+      "name": "Gameorama",
+      "lat": 47.050834,
+      "lng": 8.300873
+    },
+    {
+      "id": "Q1531237",
+      "name": "Glacier Garden of Lucerne",
+      "lat": 47.058889,
+      "lng": 8.310417
+    },
+    {
+      "id": "Q110534709",
+      "name": "Gutenberg Werkstatt Reitnau",
+      "lat": 47.25131,
+      "lng": 8.045229
+    },
+    {
+      "id": "Q3329191",
+      "name": "Hans Erni Museum",
+      "lat": 47.05191,
+      "lng": 8.33682
+    },
+    {
+      "id": "Q138201630",
+      "name": "Haus der Instrumente",
+      "lat": 47.030737,
+      "lng": 8.296069
+    },
+    {
+      "id": "Q1526318",
+      "name": "Historical Museum (collection)",
+      "lat": 47.051333,
+      "lng": 8.301833
+    },
+    {
+      "id": "Q131937731",
+      "name": "Informationspavillon «Hohle Gasse»",
+      "lat": 47.091235,
+      "lng": 8.451526
+    },
+    {
+      "id": "Q27479816",
+      "name": "Kirchenschatz (Beromünster)",
+      "lat": 47.20598,
+      "lng": 8.19021
+    },
+    {
+      "id": "Q27489043",
+      "name": "Kirchenschatz (Sursee)",
+      "lat": 47.173738,
+      "lng": 8.109528
+    },
+    {
+      "id": "Q18410543",
+      "name": "Kunsthaus Zug",
+      "lat": 47.164907,
+      "lng": 8.517413
+    },
+    {
+      "id": "Q1792543",
+      "name": "Kunstmuseum Luzern",
+      "lat": 47.050278,
+      "lng": 8.311944
+    },
+    {
+      "id": "Q27487146",
+      "name": "Kunstsammlung Robert Spreng",
+      "lat": 47.244642,
+      "lng": 7.972418
+    },
+    {
+      "id": "Q27479913",
+      "name": "Local museum of Brittnau",
+      "lat": 47.258961,
+      "lng": 7.947377
+    },
+    {
+      "id": "Q27481328",
+      "name": "Local museum of Gontenschwil",
+      "lat": 47.271598,
+      "lng": 8.145284
+    },
+    {
+      "id": "Q27489034",
+      "name": "Local museum of Strengelbach",
+      "lat": 47.277829,
+      "lng": 7.930436
+    },
+    {
+      "id": "Q27485132",
+      "name": "Local museum Postlonzihus",
+      "lat": 47.259846,
+      "lng": 8.374629
+    },
+    {
+      "id": "Q665311",
+      "name": "Lucerne Culture and Congress Centre",
+      "lat": 47.0506,
+      "lng": 8.312122
+    },
+    {
+      "id": "Q27481660",
+      "name": "Militärmuseum Luzern",
+      "lat": 47.025877,
+      "lng": 8.288616
+    },
+    {
+      "id": "Q27485287",
+      "name": "Muri monastery museum",
+      "lat": 47.27516,
+      "lng": 8.33819
+    },
+    {
+      "id": "Q1954711",
+      "name": "Museum at Bellpark",
+      "lat": 47.034538,
+      "lng": 8.282893
+    },
+    {
+      "id": "Q1541023",
+      "name": "Museum Bruder Klaus",
+      "lat": 46.8682,
+      "lng": 8.23925
+    },
+    {
+      "id": "Q27485268",
+      "name": "Museum Caspar Wolf",
+      "lat": 47.275138,
+      "lng": 8.337449
+    },
+    {
+      "id": "Q27488803",
+      "name": "Museum Entlebucherhaus",
+      "lat": 46.956714,
+      "lng": 8.020767
+    },
+    {
+      "id": "Q27487168",
+      "name": "Museum für Aargauer Tabak- und Zigarrenindustrie",
+      "lat": 47.240772,
+      "lng": 8.184074
+    },
+    {
+      "id": "Q17635485",
+      "name": "Museum in der Burg Zug",
+      "lat": 47.16512,
+      "lng": 8.51677
+    },
+    {
+      "id": "Q27489010",
+      "name": "Museum Nidwalden",
+      "lat": 46.960079,
+      "lng": 8.357242
+    },
+    {
+      "id": "Q110597558",
+      "name": "Museum of medical history books",
+      "lat": 47.275171,
+      "lng": 8.337655
+    },
+    {
+      "id": "Q27489041",
+      "name": "Museum of the Swiss Capuchins and monastery library of the former Capuchin monastery Sursee",
+      "lat": 47.173922,
+      "lng": 8.11082
+    },
+    {
+      "id": "Q27485289",
+      "name": "Museum zwischen Pflug und Korn",
+      "lat": 47.267346,
+      "lng": 8.34333
+    },
+    {
+      "id": "Q27489845",
+      "name": "Musikinstrumentensammlung Willisau",
+      "lat": 47.120772,
+      "lng": 7.98739
+    },
+    {
+      "id": "Q1275772",
+      "name": "Natur-Museum Luzern",
+      "lat": 47.051611,
+      "lng": 8.301056
+    },
+    {
+      "id": "Q27488751",
+      "name": "Obwalden historical museum",
+      "lat": 46.89804,
+      "lng": 8.24649
+    },
+    {
+      "id": "Q27478260",
+      "name": "Pegasus Small World",
+      "lat": 47.277876,
+      "lng": 8.503367
+    },
+    {
+      "id": "Q27485020",
+      "name": "Puppenhausmuseum Luzern",
+      "lat": 47.055721,
+      "lng": 8.330742
+    },
+    {
+      "id": "Q26836733",
+      "name": "Rathausmuseum Sempach",
+      "lat": 47.135883,
+      "lng": 8.191258
+    },
+    {
+      "id": "Q18221786",
+      "name": "Richard-Wagner-Museum",
+      "lat": 47.042444,
+      "lng": 8.328944
+    },
+    {
+      "id": "Q2217420",
+      "name": "Rosengart Collection",
+      "lat": 47.049561,
+      "lng": 8.307403
+    },
+    {
+      "id": "Q27489045",
+      "name": "Sankturbanhof Museum",
+      "lat": 47.17367,
+      "lng": 8.10946
+    },
+    {
+      "id": "Q27479817",
+      "name": "Schlossmuseum Beromünster",
+      "lat": 47.207745,
+      "lng": 8.190552
+    },
+    {
+      "id": "Q2256313",
+      "name": "Schweizer Schachmuseum",
+      "lat": 47.024392,
+      "lng": 8.299314
+    },
+    {
+      "id": "Q27489849",
+      "name": "Schweizerisches Flaschenmuseum",
+      "lat": 47.117013,
+      "lng": 7.974619
+    },
+    {
+      "id": "Q124257606",
+      "name": "Skulpturenpark Ennetbuergen",
+      "lat": 46.980436,
+      "lng": 8.406429
+    },
+    {
+      "id": "Q131937727",
+      "name": "Stiftung Rosengart",
+      "lat": 47.049685,
+      "lng": 8.307317
+    },
+    {
+      "id": "Q27478286",
+      "name": "Swiss Agricultural Museum Burgrain",
+      "lat": 47.143392,
+      "lng": 7.996499
+    },
+    {
+      "id": "Q670595",
+      "name": "Swiss Museum of Transport",
+      "lat": 47.052778,
+      "lng": 8.335833
+    },
+    {
+      "id": "Q27485122",
+      "name": "Tabak- und Zigarren-Museum aargauSüd",
+      "lat": 47.240503,
+      "lng": 8.184059
+    },
+    {
+      "id": "Q27488826",
+      "name": "Teddybär Museum (Sempach)",
+      "lat": 47.136178,
+      "lng": 8.191348
+    },
+    {
+      "id": "Q20012703",
+      "name": "Verein Historische Eisenbahn Emmental",
+      "lat": 47.114671,
+      "lng": 7.842563
+    }
+  ]
+}

@@ -1,1 +1,108 @@
-{ "category": "foreign_consulate", "source": "none", "places": [] }
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": 34.5865,
+    "west": 135.3435,
+    "north": 34.7688,
+    "east": 135.5993
+  },
+  "places": [
+    {
+      "id": "Q59290223",
+      "name": "British Consulate General Osaka",
+      "lat": 34.678611,
+      "lng": 135.500833
+    },
+    {
+      "id": "Q50344678",
+      "name": "consulate general of Indonesia, Osaka",
+      "lat": 34.688056,
+      "lng": 135.484944
+    },
+    {
+      "id": "Q56237429",
+      "name": "Consulate General of South Korea in Osaka",
+      "lat": 34.680944,
+      "lng": 135.503972
+    },
+    {
+      "id": "Q134270250",
+      "name": "Consulate of Hungary, Osaka",
+      "lat": 34.695556,
+      "lng": 135.500833
+    },
+    {
+      "id": "Q50319241",
+      "name": "Consulate of Pakistan, Osaka",
+      "lat": 34.638,
+      "lng": 135.411
+    },
+    {
+      "id": "Q55971902",
+      "name": "Consulate-General of Australia, Osaka",
+      "lat": 34.692722,
+      "lng": 135.531444
+    },
+    {
+      "id": "Q89971170",
+      "name": "Consulate-General of Canada, Osaka",
+      "lat": 34.616465,
+      "lng": 135.448122
+    },
+    {
+      "id": "Q53479024",
+      "name": "Consulate-General of China, Osaka",
+      "lat": 34.68275,
+      "lng": 135.487306
+    },
+    {
+      "id": "Q54556046",
+      "name": "Consulate-General of Germany, Osaka-Kobe",
+      "lat": 34.705278,
+      "lng": 135.490139
+    },
+    {
+      "id": "Q60661604",
+      "name": "Consulate-General of India, Osaka",
+      "lat": 34.681389,
+      "lng": 135.506833
+    },
+    {
+      "id": "Q56033327",
+      "name": "Consulate-General of Italy, Osaka",
+      "lat": 34.693528,
+      "lng": 135.49675
+    },
+    {
+      "id": "Q48200928",
+      "name": "Consulate-General of Mongolia, Osaka",
+      "lat": 34.678083,
+      "lng": 135.509028
+    },
+    {
+      "id": "Q56107213",
+      "name": "Consulate-General of Thailand, Osaka",
+      "lat": 34.680861,
+      "lng": 135.506694
+    },
+    {
+      "id": "Q112661961",
+      "name": "Consulate-General of the Netherlands, Osaka",
+      "lat": 34.691333,
+      "lng": 135.50875
+    },
+    {
+      "id": "Q78704594",
+      "name": "Consulate-General of the Philippines, Osaka",
+      "lat": 34.692714,
+      "lng": 135.531386
+    },
+    {
+      "id": "Q50822896",
+      "name": "Consulate-General of the United States, Osaka-Kobe",
+      "lat": 34.696833,
+      "lng": 135.501917
+    }
+  ]
+}

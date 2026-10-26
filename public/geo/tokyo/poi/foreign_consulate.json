@@ -1,1 +1,48 @@
-{ "category": "foreign_consulate", "source": "none", "places": [] }
+{
+  "category": "foreign_consulate",
+  "source": "wikidata",
+  "bbox": {
+    "south": 35.5282,
+    "west": 139.5628,
+    "north": 35.8175,
+    "east": 139.9189
+  },
+  "places": [
+    {
+      "id": "Q63750735",
+      "name": "Consulate-General of Brazil, Tokyo",
+      "lat": 35.62675,
+      "lng": 139.724528
+    },
+    {
+      "id": "Q61314535",
+      "name": "Consulate-General of Peru, Tokyo",
+      "lat": 35.626667,
+      "lng": 139.724528
+    },
+    {
+      "id": "Q117662372",
+      "name": "Consulate-General of the Dominican Republic, Tokyo",
+      "lat": 35.656194,
+      "lng": 139.736361
+    },
+    {
+      "id": "Q61911520",
+      "name": "Embassy of Hungary, Tokyo",
+      "lat": 35.648453,
+      "lng": 139.741194
+    },
+    {
+      "id": "Q61923727",
+      "name": "Honorary Consulate General of Malta, Tokyo",
+      "lat": 35.668754,
+      "lng": 139.665029
+    },
+    {
+      "id": "Q61877324",
+      "name": "Honorary Consulate of Niger, Tokyo",
+      "lat": 35.655263,
+      "lng": 139.750525
+    }
+  ]
+}

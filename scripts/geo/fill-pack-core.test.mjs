@@ -49,10 +49,24 @@ describe("resolvePackMapping", () => {
   });
 
   it("throws on unknown pack", () => {
-    assert.throws(() => resolvePackMapping("nyc", ROOT), /unknown pack/i);
+    assert.throws(() => resolvePackMapping("not-a-pack", ROOT), /unknown pack/i);
   });
 
   it("lists known packs", () => {
-    assert.deepEqual([...KNOWN_PACK_IDS].sort(), ["australia", "southampton", "switzerland"]);
+    assert.deepEqual([...KNOWN_PACK_IDS].sort(), [
+      "australia",
+      "dublin",
+      "london",
+      "lucerne",
+      "nyc",
+      "osaka",
+      "portland-maine",
+      "prince-rupert",
+      "southampton",
+      "switzerland",
+      "sydney",
+      "tokyo",
+      "zurich",
+    ]);
   });
 });

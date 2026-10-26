@@ -1,1 +1,288 @@
-{ "category": "library", "source": "none", "places": [] }
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 53.1782,
+    "west": -6.5469,
+    "north": 53.6347,
+    "east": -5.9945
+  },
+  "places": [
+    {
+      "id": "Q56260803",
+      "name": "Balbriggan Library",
+      "lat": 53.608445,
+      "lng": -6.182544
+    },
+    {
+      "id": "Q56260804",
+      "name": "Baldoyle Library",
+      "lat": 53.396771,
+      "lng": -6.125696
+    },
+    {
+      "id": "Q56260797",
+      "name": "Ballyroan Library",
+      "lat": 53.290678,
+      "lng": -6.299322
+    },
+    {
+      "id": "Q56260827",
+      "name": "Blackrock Town Hall, Library and Technical Institute",
+      "lat": 53.300821,
+      "lng": -6.175457
+    },
+    {
+      "id": "Q56260812",
+      "name": "Blanchardstown Library",
+      "lat": 53.390898,
+      "lng": -6.391565
+    },
+    {
+      "id": "Q56260823",
+      "name": "Cabinteely Library",
+      "lat": 53.259831,
+      "lng": -6.149555
+    },
+    {
+      "id": "Q56260801",
+      "name": "Castletymon Library",
+      "lat": 53.295663,
+      "lng": -6.342031
+    },
+    {
+      "id": "Q391976",
+      "name": "Chester Beatty Library",
+      "lat": 53.342,
+      "lng": -6.267
+    },
+    {
+      "id": "Q56260802",
+      "name": "Clondalkin Library",
+      "lat": 53.32072,
+      "lng": -6.388526
+    },
+    {
+      "id": "Q56260796",
+      "name": "County Library, Tallaght",
+      "lat": 53.288466,
+      "lng": -6.373348
+    },
+    {
+      "id": "Q56260826",
+      "name": "Dalkey Library",
+      "lat": 53.277281,
+      "lng": -6.104633
+    },
+    {
+      "id": "Q56260825",
+      "name": "Deansgrange Library",
+      "lat": 53.277552,
+      "lng": -6.164615
+    },
+    {
+      "id": "Q47461569",
+      "name": "Digital Repository of Ireland",
+      "lat": 53.340868,
+      "lng": -6.258081
+    },
+    {
+      "id": "Q18646116",
+      "name": "Dlr Lexicon",
+      "lat": 53.293,
+      "lng": -6.1321
+    },
+    {
+      "id": "Q56260805",
+      "name": "Donabate Portrane Community Library",
+      "lat": 53.489748,
+      "lng": -6.143007
+    },
+    {
+      "id": "Q73786263",
+      "name": "Dublin City University Library",
+      "lat": 53.3842,
+      "lng": -6.25458
+    },
+    {
+      "id": "Q56260821",
+      "name": "Dundrum Library",
+      "lat": 53.29262,
+      "lng": -6.246828
+    },
+    {
+      "id": "Q66485292",
+      "name": "Eavan Boland Library, Trinity College, Dublin",
+      "lat": 53.3438,
+      "lng": -6.2546
+    },
+    {
+      "id": "Q56260811",
+      "name": "Fingal Local Studies and Archives",
+      "lat": 53.457868,
+      "lng": -6.219769
+    },
+    {
+      "id": "Q56260813",
+      "name": "Garristown Library",
+      "lat": 53.566537,
+      "lng": -6.383226
+    },
+    {
+      "id": "Q66485706",
+      "name": "Glencullen Carnegie Free Library",
+      "lat": 53.223,
+      "lng": -6.216
+    },
+    {
+      "id": "Q101138724",
+      "name": "Hamilton Library, Trinity College, Dublin",
+      "lat": 53.34327,
+      "lng": -6.25063
+    },
+    {
+      "id": "Q55049727",
+      "name": "Howth Public Library",
+      "lat": 53.38554,
+      "lng": -6.06473
+    },
+    {
+      "id": "Q85726762",
+      "name": "Instituto Cervantes Library in Dublin",
+      "lat": 53.342068,
+      "lng": -6.2516
+    },
+    {
+      "id": "Q6070737",
+      "name": "Irish Film Archive",
+      "lat": 53.344658,
+      "lng": -6.26487
+    },
+    {
+      "id": "Q101140963",
+      "name": "James Ussher Library, Trinity College, Dublin",
+      "lat": 53.34291,
+      "lng": -6.25602
+    },
+    {
+      "id": "Q56260798",
+      "name": "John Jennings Library",
+      "lat": 53.355862,
+      "lng": -6.36575
+    },
+    {
+      "id": "Q101139769",
+      "name": "John Stearne Medical Library",
+      "lat": 53.34159,
+      "lng": -6.29432
+    },
+    {
+      "id": "Q856559",
+      "name": "Library of Trinity College Dublin",
+      "lat": 53.343813,
+      "lng": -6.254636
+    },
+    {
+      "id": "Q56260799",
+      "name": "Lucan Library",
+      "lat": 53.347955,
+      "lng": -6.453018
+    },
+    {
+      "id": "Q55049560",
+      "name": "Lusk Community Hall",
+      "lat": 53.52913,
+      "lng": -6.17113
+    },
+    {
+      "id": "Q56260808",
+      "name": "Malahide Library",
+      "lat": 53.450877,
+      "lng": -6.152461
+    },
+    {
+      "id": "Q110830588",
+      "name": "Marino College",
+      "lat": 53.364261,
+      "lng": -6.231387
+    },
+    {
+      "id": "Q1238147",
+      "name": "Marsh's Library",
+      "lat": 53.339221,
+      "lng": -6.270573
+    },
+    {
+      "id": "Q1672830",
+      "name": "National Library of Ireland",
+      "lat": 53.341111,
+      "lng": -6.254444
+    },
+    {
+      "id": "Q15261141",
+      "name": "National Photographic Archive",
+      "lat": 53.345279,
+      "lng": -6.265375
+    },
+    {
+      "id": "Q54870032",
+      "name": "PhotoIreland Foundation",
+      "lat": 53.345618,
+      "lng": -6.263891
+    },
+    {
+      "id": "Q56260809",
+      "name": "Rush Library",
+      "lat": 53.521849,
+      "lng": -6.102057
+    },
+    {
+      "id": "Q56260824",
+      "name": "Shankill Library",
+      "lat": 53.233579,
+      "lng": -6.127006
+    },
+    {
+      "id": "Q56260806",
+      "name": "Skerries Library",
+      "lat": 53.578579,
+      "lng": -6.106618
+    },
+    {
+      "id": "Q56260822",
+      "name": "Stillorgan Library",
+      "lat": 53.289807,
+      "lng": -6.196607
+    },
+    {
+      "id": "Q56260807",
+      "name": "Swords Library",
+      "lat": 53.462376,
+      "lng": -6.229267
+    },
+    {
+      "id": "Q1319605",
+      "name": "The Old Library",
+      "lat": 53.343844,
+      "lng": -6.256882
+    },
+    {
+      "id": "Q22945754",
+      "name": "The Radharc Archive",
+      "lat": 53.3446,
+      "lng": -6.2649
+    },
+    {
+      "id": "Q7894620",
+      "name": "University College Dublin Library",
+      "lat": 53.3068,
+      "lng": -6.22299
+    },
+    {
+      "id": "Q56260800",
+      "name": "Whitechurch Library",
+      "lat": 53.281365,
+      "lng": -6.293253
+    }
+  ]
+}

@@ -223,8 +223,13 @@ function splitCsvLine(line) {
   return values;
 }
 
+/**
+ * Basic GTFS route_type (0–7) plus Google extended ranges used by feeds like TfNSW.
+ * @see https://developers.google.com/transit/gtfs/reference/extended-route-types
+ */
 function routeMode(routeType) {
-  switch (routeType) {
+  const raw = String(routeType ?? "").trim();
+  switch (raw) {
     case "0":
     case "5":
     case "6":
@@ -237,9 +242,35 @@ function routeMode(routeType) {
       return "bus";
     case "4":
       return "ferry";
-    default:
+    case "7":
       return "other";
+    default:
+      break;
   }
+  const n = Number(raw);
+  if (!Number.isFinite(n)) {
+    return "other";
+  }
+  // Extended route types (HVT / Google):
+  if (n >= 100 && n <= 199) {
+    return "rail";
+  }
+  if (n >= 200 && n <= 299) {
+    return "bus";
+  }
+  if (n >= 400 && n <= 499) {
+    return "metro";
+  }
+  if (n >= 700 && n <= 899) {
+    return "bus";
+  }
+  if (n >= 900 && n <= 999) {
+    return "tram";
+  }
+  if ((n >= 1000 && n <= 1099) || (n >= 1200 && n <= 1299)) {
+    return "ferry";
+  }
+  return "other";
 }
 
 function stopInBbox(stop, bbox) {

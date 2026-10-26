@@ -1,1 +1,1098 @@
-{ "category": "museum", "source": "none", "places": [] }
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q1663690",
+      "name": "Aathal Dinosaur Museum",
+      "lat": 47.338822,
+      "lng": 8.761881
+    },
+    {
+      "id": "Q27490197",
+      "name": "Abwasser-Museum",
+      "lat": 47.400288,
+      "lng": 8.481053
+    },
+    {
+      "id": "Q27037504",
+      "name": "Agrotechnorama Tänikon",
+      "lat": 47.479915,
+      "lng": 8.90669
+    },
+    {
+      "id": "Q1428489",
+      "name": "Air Force and Air Defense Museum",
+      "lat": 47.398044,
+      "lng": 8.630978
+    },
+    {
+      "id": "Q27490262",
+      "name": "Anthropologisches Museum der Universität Zürich",
+      "lat": 47.39784,
+      "lng": 8.54734
+    },
+    {
+      "id": "Q27490203",
+      "name": "Atelier Hermann Haller",
+      "lat": 47.356359,
+      "lng": 8.551153
+    },
+    {
+      "id": "Q85986325",
+      "name": "Atelier Righini-Fries",
+      "lat": 47.369367,
+      "lng": 8.572292
+    },
+    {
+      "id": "Q122330802",
+      "name": "Bechtler Stiftung",
+      "lat": 47.347381,
+      "lng": 8.703739
+    },
+    {
+      "id": "Q820463",
+      "name": "Bergwerk Käpfnach",
+      "lat": 47.253056,
+      "lng": 8.613056
+    },
+    {
+      "id": "Q820482",
+      "name": "Bergwerk Riedhof",
+      "lat": 47.287284,
+      "lng": 8.480582
+    },
+    {
+      "id": "Q686324",
+      "name": "Botanical Garden of the University of Zurich",
+      "lat": 47.358647,
+      "lng": 8.561106
+    },
+    {
+      "id": "Q27479972",
+      "name": "Brickyard Museum",
+      "lat": 47.19628,
+      "lng": 8.42537
+    },
+    {
+      "id": "Q18018874",
+      "name": "Bruno Weber Park",
+      "lat": 47.3132,
+      "lng": 8.52003
+    },
+    {
+      "id": "Q650299",
+      "name": "Building of the Winterthur Museum of Art",
+      "lat": 47.501518,
+      "lng": 8.730394
+    },
+    {
+      "id": "Q10861597",
+      "name": "C. G. Jung House Museum",
+      "lat": 47.310592,
+      "lng": 8.583119
+    },
+    {
+      "id": "Q14553724",
+      "name": "Castle of Maur",
+      "lat": 47.338512,
+      "lng": 8.668592
+    },
+    {
+      "id": "Q2327693",
+      "name": "City Museum (formerly: Local History Museum)",
+      "lat": 47.22794,
+      "lng": 8.81768
+    },
+    {
+      "id": "Q1773583",
+      "name": "Coin Cabinet and Collection of Classical Antiquities of Winterthur",
+      "lat": 47.5031,
+      "lng": 8.73105
+    },
+    {
+      "id": "Q1126071",
+      "name": "Coninx-Museum",
+      "lat": 47.3692,
+      "lng": 8.56654
+    },
+    {
+      "id": "Q1158760",
+      "name": "Dampfbahn-Verein Zürcher Oberland",
+      "lat": 47.368561,
+      "lng": 8.8805
+    },
+    {
+      "id": "Q15804615",
+      "name": "Daros-Latinamerica",
+      "lat": 47.389368,
+      "lng": 8.524846
+    },
+    {
+      "id": "Q27478264",
+      "name": "Dorfmuseum Affoltern am Albis / Zwillikon",
+      "lat": 47.287453,
+      "lng": 8.432148
+    },
+    {
+      "id": "Q67768751",
+      "name": "Enea Tree Museum",
+      "lat": 47.2234,
+      "lng": 8.8657
+    },
+    {
+      "id": "Q2536345",
+      "name": "Ethnographic Museum of the University of Zurich",
+      "lat": 47.370811,
+      "lng": 8.534322
+    },
+    {
+      "id": "Q1392772",
+      "name": "Fahrzeug-Museum Bäretswil",
+      "lat": 47.3227,
+      "lng": 8.86049
+    },
+    {
+      "id": "Q27489814",
+      "name": "FBW-Museum",
+      "lat": 47.328422,
+      "lng": 8.780965
+    },
+    {
+      "id": "Q85986333",
+      "name": "FCZ-Museum",
+      "lat": 47.372628,
+      "lng": 8.530333
+    },
+    {
+      "id": "Q27489899",
+      "name": "Feuerwehrmuseum Wollerau",
+      "lat": 47.197253,
+      "lng": 8.723737
+    },
+    {
+      "id": "Q22984572",
+      "name": "FIFA Museum",
+      "lat": 47.363509,
+      "lng": 8.531749
+    },
+    {
+      "id": "Q123258732",
+      "name": "Findlingsgarten Kappenbühl",
+      "lat": 47.4067,
+      "lng": 8.499497
+    },
+    {
+      "id": "Q27490181",
+      "name": "Fischereimuseum (Zug)",
+      "lat": 47.16599,
+      "lng": 8.514373
+    },
+    {
+      "id": "Q118314200",
+      "name": "Flieger-Flab-Museumshangar",
+      "lat": 47.3975,
+      "lng": 8.6321
+    },
+    {
+      "id": "Q27490233",
+      "name": "focusTerra",
+      "lat": 47.37779,
+      "lng": 8.54771
+    },
+    {
+      "id": "Q29882700",
+      "name": "Folklore collection in the granary of the former Dominican convent of St. Katharinental",
+      "lat": 47.691556,
+      "lng": 8.736397
+    },
+    {
+      "id": "Q1408868",
+      "name": "Fort Ebersberg",
+      "lat": 47.5709,
+      "lng": 8.57978
+    },
+    {
+      "id": "Q1350100",
+      "name": "Fotomuseum Winterthur",
+      "lat": 47.496019,
+      "lng": 8.739019
+    },
+    {
+      "id": "Q666331",
+      "name": "Foundation E.G. Bührle Collection",
+      "lat": 47.353045,
+      "lng": 8.561758
+    },
+    {
+      "id": "Q111884267",
+      "name": "Galerie Milchhütte",
+      "lat": 47.334384,
+      "lng": 8.622291
+    },
+    {
+      "id": "Q27489757",
+      "name": "Gärten im Grüental",
+      "lat": 47.221287,
+      "lng": 8.681294
+    },
+    {
+      "id": "Q27487132",
+      "name": "Gebert Stiftung für Kultur *ALTEFABRIK",
+      "lat": 47.227523,
+      "lng": 8.820636
+    },
+    {
+      "id": "Q27487143",
+      "name": "Gemeindemuseum Regensdorf",
+      "lat": 47.429817,
+      "lng": 8.463582
+    },
+    {
+      "id": "Q1520451",
+      "name": "Gewerbemuseum",
+      "lat": 47.4992,
+      "lng": 8.72946
+    },
+    {
+      "id": "Q27481319",
+      "name": "Gottfried Keller-Zentrum",
+      "lat": 47.55913,
+      "lng": 8.499517
+    },
+    {
+      "id": "Q27490235",
+      "name": "Graphische Sammlung der ETH",
+      "lat": 47.37658,
+      "lng": 8.54803
+    },
+    {
+      "id": "Q27489635",
+      "name": "Graphos Museum",
+      "lat": 47.350671,
+      "lng": 8.712149
+    },
+    {
+      "id": "Q1234473",
+      "name": "gta Archives",
+      "lat": 47.408337,
+      "lng": 8.506934
+    },
+    {
+      "id": "Q27490225",
+      "name": "gta Ausstellungen",
+      "lat": 47.373895,
+      "lng": 8.547972
+    },
+    {
+      "id": "Q27479718",
+      "name": "Handmaschinen-Stickerei Neuthal",
+      "lat": 47.359866,
+      "lng": 8.865144
+    },
+    {
+      "id": "Q27479931",
+      "name": "Hasenmuseum",
+      "lat": 47.270799,
+      "lng": 8.821257
+    },
+    {
+      "id": "Q252513",
+      "name": "Haus Konstruktiv",
+      "lat": 47.3724,
+      "lng": 8.53224
+    },
+    {
+      "id": "Q27480018",
+      "name": "Hausmuseum St. Katharinental",
+      "lat": 47.69107,
+      "lng": 8.73795
+    },
+    {
+      "id": "Q2241497",
+      "name": "Hegi Castle",
+      "lat": 47.5083,
+      "lng": 8.77146
+    },
+    {
+      "id": "Q27489769",
+      "name": "Heimatmuseum «Windegg»",
+      "lat": 47.276199,
+      "lng": 8.914496
+    },
+    {
+      "id": "Q27490241",
+      "name": "Helmhaus",
+      "lat": 47.370156,
+      "lng": 8.543291
+    },
+    {
+      "id": "Q27480235",
+      "name": "Historical Museum Thurgau",
+      "lat": 47.55556,
+      "lng": 8.89743
+    },
+    {
+      "id": "Q27487134",
+      "name": "IG Halle",
+      "lat": 47.227825,
+      "lng": 8.826592
+    },
+    {
+      "id": "Q27481383",
+      "name": "Imkereimuseum Müli",
+      "lat": 47.284987,
+      "lng": 8.760594
+    },
+    {
+      "id": "Q27489794",
+      "name": "Ittinger Museum",
+      "lat": 47.584167,
+      "lng": 8.866476
+    },
+    {
+      "id": "Q27488768",
+      "name": "IWC Museum",
+      "lat": 47.694991,
+      "lng": 8.636788
+    },
+    {
+      "id": "Q27490245",
+      "name": "Johann Jacobs Museum",
+      "lat": 47.3597,
+      "lng": 8.54808
+    },
+    {
+      "id": "Q27481453",
+      "name": "Johanna Spyri Museum",
+      "lat": 47.216378,
+      "lng": 8.606514
+    },
+    {
+      "id": "Q27490249",
+      "name": "Kriminalmuseum der Kantonspolizei Zürich",
+      "lat": 47.374882,
+      "lng": 8.532268
+    },
+    {
+      "id": "Q95810029",
+      "name": "KrippenWelt",
+      "lat": 47.659422,
+      "lng": 8.860089
+    },
+    {
+      "id": "Q1791619",
+      "name": "Kulturama",
+      "lat": 47.3688,
+      "lng": 8.55565
+    },
+    {
+      "id": "Q689829",
+      "name": "Kunst Museum Winterthur | Reinhart am Stadtgarten",
+      "lat": 47.5004,
+      "lng": 8.729
+    },
+    {
+      "id": "Q27487136",
+      "name": "Kunst(Zeug)Haus (Rapperswil, Switzerland)",
+      "lat": 47.228019,
+      "lng": 8.826645
+    },
+    {
+      "id": "Q1792423",
+      "name": "Kunsthalle Winterthur",
+      "lat": 47.4996,
+      "lng": 8.72905
+    },
+    {
+      "id": "Q1792425",
+      "name": "Kunsthalle Zürich",
+      "lat": 47.389278,
+      "lng": 8.525203
+    },
+    {
+      "id": "Q18410543",
+      "name": "Kunsthaus Zug",
+      "lat": 47.164907,
+      "lng": 8.517413
+    },
+    {
+      "id": "Q685038",
+      "name": "Kunsthaus Zürich",
+      "lat": 47.370278,
+      "lng": 8.548056
+    },
+    {
+      "id": "Q119816375",
+      "name": "Kunstmuseum Winterthur",
+      "lat": 47.501389,
+      "lng": 8.730278
+    },
+    {
+      "id": "Q125946609",
+      "name": "Lindt Home of Chocolate",
+      "lat": 47.3184,
+      "lng": 8.5511
+    },
+    {
+      "id": "Q1112395",
+      "name": "Literaturhaus Zürich",
+      "lat": 47.368056,
+      "lng": 8.544167
+    },
+    {
+      "id": "Q27481486",
+      "name": "Living and Porcelain Museum (Agent House Horgen)",
+      "lat": 47.259897,
+      "lng": 8.600633
+    },
+    {
+      "id": "Q1461747",
+      "name": "Local museum Hallau",
+      "lat": 47.6986,
+      "lng": 8.46222
+    },
+    {
+      "id": "Q27481670",
+      "name": "Local museum Küsnacht",
+      "lat": 47.317243,
+      "lng": 8.586936
+    },
+    {
+      "id": "Q27479772",
+      "name": "Local museum of Bergdietikon",
+      "lat": 47.390692,
+      "lng": 8.386841
+    },
+    {
+      "id": "Q27485132",
+      "name": "Local museum Postlonzihus",
+      "lat": 47.259846,
+      "lng": 8.374629
+    },
+    {
+      "id": "Q27488696",
+      "name": "local museum Rüti",
+      "lat": 47.259537,
+      "lng": 8.848508
+    },
+    {
+      "id": "Q23681769",
+      "name": "Maag Halle",
+      "lat": 47.38675,
+      "lng": 8.517139
+    },
+    {
+      "id": "Q13142772",
+      "name": "Mammutmuseum Niederweningen",
+      "lat": 47.50535,
+      "lng": 8.37732
+    },
+    {
+      "id": "Q3329670",
+      "name": "Medizinhistorisches Museum der Universität Zürich",
+      "lat": 47.3741,
+      "lng": 8.54954
+    },
+    {
+      "id": "Q1380528",
+      "name": "Migros Museum of Contemporary Art",
+      "lat": 47.3894,
+      "lng": 8.52485
+    },
+    {
+      "id": "Q24718649",
+      "name": "MoneyMuseum",
+      "lat": 47.38882,
+      "lng": 8.55157
+    },
+    {
+      "id": "Q2242517",
+      "name": "Mörsburg Castle",
+      "lat": 47.539756,
+      "lng": 8.768856
+    },
+    {
+      "id": "Q28449178",
+      "name": "MuDA",
+      "lat": 47.39,
+      "lng": 8.508889
+    },
+    {
+      "id": "Q25111216",
+      "name": "Musée Visionnaire",
+      "lat": 47.373951,
+      "lng": 8.548295
+    },
+    {
+      "id": "Q27490260",
+      "name": "Musée Visionnaire Zürich",
+      "lat": 47.373818,
+      "lng": 8.545277
+    },
+    {
+      "id": "Q1954464",
+      "name": "museum at Lindengut",
+      "lat": 47.5002,
+      "lng": 8.73498
+    },
+    {
+      "id": "Q1670093",
+      "name": "Museum Briner und Kern",
+      "lat": 47.5002,
+      "lng": 8.72984
+    },
+    {
+      "id": "Q682406",
+      "name": "Museum collection Am Römerholz",
+      "lat": 47.511111,
+      "lng": 8.731667
+    },
+    {
+      "id": "Q27489878",
+      "name": "Museum der AXA Winterthur",
+      "lat": 47.500711,
+      "lng": 8.7341
+    },
+    {
+      "id": "Q27480237",
+      "name": "Museum für Archäologie des Kantons Thurgau",
+      "lat": 47.55651,
+      "lng": 8.89855
+    },
+    {
+      "id": "Q27485395",
+      "name": "Museum Holzhausen",
+      "lat": 47.271061,
+      "lng": 8.739479
+    },
+    {
+      "id": "Q17635485",
+      "name": "Museum in der Burg Zug",
+      "lat": 47.16512,
+      "lng": 8.51677
+    },
+    {
+      "id": "Q27489014",
+      "name": "museum in the Turmhof",
+      "lat": 47.668943,
+      "lng": 8.982847
+    },
+    {
+      "id": "Q27489027",
+      "name": "Museum Lindwurm",
+      "lat": 47.660593,
+      "lng": 8.858401
+    },
+    {
+      "id": "Q1954786",
+      "name": "Museum of All Saints",
+      "lat": 47.694833,
+      "lng": 8.635889
+    },
+    {
+      "id": "Q27480019",
+      "name": "Museum of Art and Knowledge, Rösch Collection",
+      "lat": 47.68985,
+      "lng": 8.75309
+    },
+    {
+      "id": "Q1792557",
+      "name": "Museum of Art of the Canton of Thurgau",
+      "lat": 47.58355,
+      "lng": 8.86691
+    },
+    {
+      "id": "Q668213",
+      "name": "Museum of Design",
+      "lat": 47.382797,
+      "lng": 8.536367
+    },
+    {
+      "id": "Q1970407",
+      "name": "Museum of Nature of Winterthur",
+      "lat": 47.5017,
+      "lng": 8.73003
+    },
+    {
+      "id": "Q16186067",
+      "name": "museum of wax moulages",
+      "lat": 47.380351,
+      "lng": 8.548632
+    },
+    {
+      "id": "Q668300",
+      "name": "Museum Rietberg",
+      "lat": 47.35892,
+      "lng": 8.53027
+    },
+    {
+      "id": "Q79131764",
+      "name": "Museum Schaffen",
+      "lat": 47.49577,
+      "lng": 8.718352
+    },
+    {
+      "id": "Q110608755",
+      "name": "Museum Schneisingen",
+      "lat": 47.519703,
+      "lng": 8.361737
+    },
+    {
+      "id": "Q27490264",
+      "name": "Museum Strauhof Literaturausstellungen",
+      "lat": 47.371694,
+      "lng": 8.540031
+    },
+    {
+      "id": "Q27489074",
+      "name": "Museum Thalwil",
+      "lat": 47.29126,
+      "lng": 8.56632
+    },
+    {
+      "id": "Q18629299",
+      "name": "Museum Wetzikon",
+      "lat": 47.326177,
+      "lng": 8.796523
+    },
+    {
+      "id": "Q21027962",
+      "name": "Museum zur Farb",
+      "lat": 47.238637,
+      "lng": 8.734318
+    },
+    {
+      "id": "Q27480038",
+      "name": "Nähmaschinen-Museum",
+      "lat": 47.270141,
+      "lng": 8.878524
+    },
+    {
+      "id": "Q17379537",
+      "name": "Nähmaschinenmuseum am Pilgersteg",
+      "lat": 47.269471,
+      "lng": 8.878469
+    },
+    {
+      "id": "Q691896",
+      "name": "National Museum Zurich",
+      "lat": 47.379167,
+      "lng": 8.539722
+    },
+    {
+      "id": "Q134929065",
+      "name": "Natural History Museum of the University of Zurich",
+      "lat": 47.375278,
+      "lng": 8.548056
+    },
+    {
+      "id": "Q15836395",
+      "name": "Naturmuseum Thurgau",
+      "lat": 47.55655,
+      "lng": 8.8986
+    },
+    {
+      "id": "Q27480227",
+      "name": "Naturzentrum Thurauen",
+      "lat": 47.578522,
+      "lng": 8.582254
+    },
+    {
+      "id": "Q27479720",
+      "name": "Neuthal museum spinning mill",
+      "lat": 47.359462,
+      "lng": 8.865149
+    },
+    {
+      "id": "Q1997549",
+      "name": "North America Native Museum",
+      "lat": 47.3471,
+      "lng": 8.5656
+    },
+    {
+      "id": "Q27480039",
+      "name": "Ortskundliche Sammlung Dürnten",
+      "lat": 47.265742,
+      "lng": 8.850643
+    },
+    {
+      "id": "Q27479832",
+      "name": "Ortsmuseum Birmensdorf",
+      "lat": 47.352295,
+      "lng": 8.439591
+    },
+    {
+      "id": "Q27479937",
+      "name": "Ortsmuseum Bülach",
+      "lat": 47.518281,
+      "lng": 8.541555
+    },
+    {
+      "id": "Q27480021",
+      "name": "Ortsmuseum Dietikon",
+      "lat": 47.40158,
+      "lng": 8.4034
+    },
+    {
+      "id": "Q27891193",
+      "name": "Ortsmuseum Eglisau",
+      "lat": 47.575797,
+      "lng": 8.528339
+    },
+    {
+      "id": "Q20012744",
+      "name": "Ortsmuseum Hinwil",
+      "lat": 47.3022,
+      "lng": 8.84606
+    },
+    {
+      "id": "Q27488690",
+      "name": "Ortsmuseum Rüschlikon",
+      "lat": 47.307692,
+      "lng": 8.553099
+    },
+    {
+      "id": "Q27489801",
+      "name": "Ortsmuseum Weiach",
+      "lat": 47.554599,
+      "lng": 8.44166
+    },
+    {
+      "id": "Q97952849",
+      "name": "Ortsmuseum Weisslingen",
+      "lat": 47.431389,
+      "lng": 8.762639
+    },
+    {
+      "id": "Q27489821",
+      "name": "Ortsmuseum Wiesendangen",
+      "lat": 47.520865,
+      "lng": 8.788468
+    },
+    {
+      "id": "Q20850692",
+      "name": "Ortsmuseum Wila",
+      "lat": 47.417716,
+      "lng": 8.843452
+    },
+    {
+      "id": "Q111968420",
+      "name": "oxyd – Kunsträume",
+      "lat": 47.498114,
+      "lng": 8.722705
+    },
+    {
+      "id": "Q1536888",
+      "name": "Palaeontological Museum of the University of Zurich",
+      "lat": 47.375222,
+      "lng": 8.548011
+    },
+    {
+      "id": "Q638236",
+      "name": "Pavillon Le Corbusier",
+      "lat": 47.35635,
+      "lng": 8.551119
+    },
+    {
+      "id": "Q27478260",
+      "name": "Pegasus Small World",
+      "lat": 47.277876,
+      "lng": 8.503367
+    },
+    {
+      "id": "Q27490323",
+      "name": "Phonogram Archives of the University of Zurich",
+      "lat": 47.374596,
+      "lng": 8.548883
+    },
+    {
+      "id": "Q689839",
+      "name": "Polish Museum",
+      "lat": 47.226667,
+      "lng": 8.818333
+    },
+    {
+      "id": "Q2117985",
+      "name": "Puls 5",
+      "lat": 47.3906,
+      "lng": 8.51778
+    },
+    {
+      "id": "Q27490285",
+      "name": "Radgenossenschaft der Landstrasse",
+      "lat": 47.394177,
+      "lng": 8.474554
+    },
+    {
+      "id": "Q27481414",
+      "name": "Schaffhauser Weinbaumuseum",
+      "lat": 47.69864,
+      "lng": 8.460689
+    },
+    {
+      "id": "Q27480020",
+      "name": "Schaudepot St. Katharinental",
+      "lat": 47.691389,
+      "lng": 8.736944
+    },
+    {
+      "id": "Q20164882",
+      "name": "Schreibmaschinenmuseum Beck",
+      "lat": 47.37072,
+      "lng": 8.770773
+    },
+    {
+      "id": "Q27489636",
+      "name": "Schweizerisches Unteroffiziersmuseum",
+      "lat": 47.350689,
+      "lng": 8.712189
+    },
+    {
+      "id": "Q27489885",
+      "name": "Schwingermuseum",
+      "lat": 47.509178,
+      "lng": 8.718676
+    },
+    {
+      "id": "Q27490302",
+      "name": "Shedhalle",
+      "lat": 47.343428,
+      "lng": 8.536159
+    },
+    {
+      "id": "Q26836743",
+      "name": "Sperrlinie Etzel",
+      "lat": 47.174141,
+      "lng": 8.779102
+    },
+    {
+      "id": "Q27489025",
+      "name": "St. George’s abbey museum",
+      "lat": 47.658572,
+      "lng": 8.860204
+    },
+    {
+      "id": "Q27488772",
+      "name": "Stemmler Museum",
+      "lat": 47.696654,
+      "lng": 8.634598
+    },
+    {
+      "id": "Q27490359",
+      "name": "Stiftung Spielzeug-Eisenbahnen Dr. Bommer",
+      "lat": 47.513837,
+      "lng": 8.763952
+    },
+    {
+      "id": "Q2364115",
+      "name": "Sukkulenten-Sammlung Zürich",
+      "lat": 47.356111,
+      "lng": 8.535
+    },
+    {
+      "id": "Q107588810",
+      "name": "Sust local museum",
+      "lat": 47.261168,
+      "lng": 8.599538
+    },
+    {
+      "id": "Q44259711",
+      "name": "Swiss Finance Museum",
+      "lat": 47.3915,
+      "lng": 8.50683
+    },
+    {
+      "id": "Q18643284",
+      "name": "Swiss Foundation for Photography",
+      "lat": 47.4958,
+      "lng": 8.7383
+    },
+    {
+      "id": "Q2256718",
+      "name": "Swiss National Museum",
+      "lat": 47.379024,
+      "lng": 8.541004
+    },
+    {
+      "id": "Q1501500",
+      "name": "Swiss Science Center Technorama",
+      "lat": 47.5135,
+      "lng": 8.76426
+    },
+    {
+      "id": "Q27489641",
+      "name": "SwissJazzOrama",
+      "lat": 47.356256,
+      "lng": 8.706743
+    },
+    {
+      "id": "Q27480256",
+      "name": "Telefonmuseum TELEPHONICA",
+      "lat": 47.545221,
+      "lng": 8.840586
+    },
+    {
+      "id": "Q27490314",
+      "name": "Theatermuseum Stok",
+      "lat": 47.388119,
+      "lng": 8.529206
+    },
+    {
+      "id": "Q27490316",
+      "name": "Thomas Mann Archives",
+      "lat": 47.376111,
+      "lng": 8.547778
+    },
+    {
+      "id": "Q27487075",
+      "name": "Transitorisches Museum zu Pfyn",
+      "lat": 47.594455,
+      "lng": 8.960434
+    },
+    {
+      "id": "Q7878010",
+      "name": "Uhrenmuseum Beyer",
+      "lat": 47.37083,
+      "lng": 8.53848
+    },
+    {
+      "id": "Q2474187",
+      "name": "Uhrenmuseum zum Rösli",
+      "lat": 47.3901,
+      "lng": 8.54439
+    },
+    {
+      "id": "Q2474194",
+      "name": "Uhrensammlung Kellenberger",
+      "lat": 47.499233,
+      "lng": 8.729464
+    },
+    {
+      "id": "Q27490199",
+      "name": "Universität Zürich. Archäologische Sammlung",
+      "lat": 47.375186,
+      "lng": 8.548931
+    },
+    {
+      "id": "Q684556",
+      "name": "Villa Flora",
+      "lat": 47.496489,
+      "lng": 8.735236
+    },
+    {
+      "id": "Q27487071",
+      "name": "Vögele Cultural Center Pfäffikon",
+      "lat": 47.200728,
+      "lng": 8.794209
+    },
+    {
+      "id": "Q27488776",
+      "name": "Waffenkammer im Munot-Turm",
+      "lat": 47.697253,
+      "lng": 8.639834
+    },
+    {
+      "id": "Q61968416",
+      "name": "WAGI Museum Schlieren",
+      "lat": 47.399415,
+      "lng": 8.457119
+    },
+    {
+      "id": "Q477189",
+      "name": "Wasserkirche",
+      "lat": 47.369611,
+      "lng": 8.543333
+    },
+    {
+      "id": "Q27490353",
+      "name": "Webmaschinen-Sammlung Neuthal",
+      "lat": 47.345161,
+      "lng": 8.830984
+    },
+    {
+      "id": "Q27479570",
+      "name": "Weinbaumuseum am Zürichsee",
+      "lat": 47.247531,
+      "lng": 8.649431
+    },
+    {
+      "id": "Q1485034",
+      "name": "Weinbaumuseum Au",
+      "lat": 47.2475,
+      "lng": 8.64943
+    },
+    {
+      "id": "Q2563591",
+      "name": "Wertpapierwelt",
+      "lat": 47.3915,
+      "lng": 8.50683
+    },
+    {
+      "id": "Q27480004",
+      "name": "Wohn- und Ortsmuseum Pfungen-Dättlikon",
+      "lat": 47.525376,
+      "lng": 8.624335
+    },
+    {
+      "id": "Q190260",
+      "name": "Zentralbibliothek Zürich",
+      "lat": 47.374167,
+      "lng": 8.545278
+    },
+    {
+      "id": "Q27481391",
+      "name": "Zinnfigurenmuseum Müli",
+      "lat": 47.284493,
+      "lng": 8.761084
+    },
+    {
+      "id": "Q206929",
+      "name": "Zivilschutz-Museum",
+      "lat": 47.3919,
+      "lng": 8.52694
+    },
+    {
+      "id": "Q220270",
+      "name": "Zoological museum of the university of Zurich",
+      "lat": 47.375278,
+      "lng": 8.548056
+    },
+    {
+      "id": "Q27490330",
+      "name": "Zunfthaus zur Meisen",
+      "lat": 47.370183,
+      "lng": 8.54172
+    },
+    {
+      "id": "Q12357087",
+      "name": "Zürcher Museums-Bahn",
+      "lat": 47.269297,
+      "lng": 8.557759
+    },
+    {
+      "id": "Q248517",
+      "name": "Zürcher Spielzeugmuseum",
+      "lat": 47.3731,
+      "lng": 8.53978
+    },
+    {
+      "id": "Q230416",
+      "name": "Zürich James Joyce Foundation",
+      "lat": 47.371694,
+      "lng": 8.540031
+    },
+    {
+      "id": "Q2448500",
+      "name": "Zurich Tram Museum",
+      "lat": 47.357667,
+      "lng": 8.571278
+    }
+  ]
+}

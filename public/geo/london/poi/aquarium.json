@@ -1,1 +1,24 @@
-{ "category": "aquarium", "source": "none", "places": [] }
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.28,
+    "west": -0.51,
+    "north": 51.7,
+    "east": 0.3357
+  },
+  "places": [
+    {
+      "id": "Q4915315",
+      "name": "Biota!",
+      "lat": 51.5031,
+      "lng": 0.032
+    },
+    {
+      "id": "Q3312744",
+      "name": "Sea Life London Aquarium",
+      "lat": 51.5019,
+      "lng": -0.118889
+    }
+  ]
+}

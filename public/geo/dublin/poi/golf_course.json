@@ -1,1 +1,24 @@
-{ "category": "golf_course", "source": "none", "places": [] }
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": 53.1782,
+    "west": -6.5469,
+    "north": 53.6347,
+    "east": -5.9945
+  },
+  "places": [
+    {
+      "id": "Q7232122",
+      "name": "Portmarnock Golf Club",
+      "lat": 53.41099,
+      "lng": -6.12101
+    },
+    {
+      "id": "Q1976232",
+      "name": "The Royal Dublin Golf Club",
+      "lat": 53.3569,
+      "lng": -6.17058
+    }
+  ]
+}

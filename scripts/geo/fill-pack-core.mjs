@@ -56,6 +56,15 @@ const CATEGORIES = {
  * }} PackDef
  */
 
+function boxPack(uaSlug, countryQid, labelLangs = ["en", "mul"]) {
+  return {
+    ua: `Jetlag${uaSlug}PoiFill/1.0 (https://github.com/gelbh/jetlag; ${uaSlug} pack fill)`,
+    countryQid,
+    queryMode: "box-closed",
+    labelLangs,
+  };
+}
+
 /** @type {Readonly<Record<string, PackDef>>} */
 const PACK_DEFS = {
   switzerland: {
@@ -76,6 +85,16 @@ const PACK_DEFS = {
     queryMode: "box-closed",
     labelLangs: ["en", "mul"],
   },
+  sydney: boxPack("Sydney", "Q408"),
+  dublin: boxPack("Dublin", "Q27"),
+  london: boxPack("London", "Q145"),
+  nyc: boxPack("Nyc", "Q30"),
+  tokyo: boxPack("Tokyo", "Q17", ["en", "ja", "mul"]),
+  osaka: boxPack("Osaka", "Q17", ["en", "ja", "mul"]),
+  zurich: boxPack("Zurich", "Q39", ["en", "de", "mul"]),
+  lucerne: boxPack("Lucerne", "Q39", ["en", "de", "mul"]),
+  "portland-maine": boxPack("PortlandMaine", "Q30"),
+  "prince-rupert": boxPack("PrinceRupert", "Q16"),
 };
 
 export const KNOWN_PACK_IDS = Object.freeze(Object.keys(PACK_DEFS));

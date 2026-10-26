@@ -14,6 +14,7 @@ import { expandBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
+import type { TransitRouteFilter } from "../../domain/map/transit";
 import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import {
   buildHidingZoneCircle,
@@ -60,6 +61,8 @@ interface UseHiderZoneToolParams {
   mapPickEnabled?: boolean;
   hasMoveCard?: () => boolean;
   consumeMoveCard?: () => Promise<void>;
+  transitMetroId?: string | null;
+  transitStationFilter?: TransitRouteFilter | null;
 }
 
 type StationLoadOutcome =
@@ -75,11 +78,18 @@ async function loadStationsWithProgress(
   viewport: MapViewportBounds,
   gameArea: GameArea,
   task: LoadTask,
-  callbacks: { onStations: (stations: TransitStation[]) => void; onSettled: () => void },
+  callbacks: {
+    onStations: (stations: TransitStation[]) => void;
+    onSettled: () => void;
+    transitMetroId?: string | null;
+    transitStationFilter?: TransitRouteFilter | null;
+  },
 ): Promise<StationLoadOutcome> {
   try {
     const stations = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea, {
       onStations: callbacks.onStations,
+      transitMetroId: callbacks.transitMetroId,
+      transitStationFilter: callbacks.transitStationFilter,
       load: overpassLoadFromTask(task, {
         kind: "fetch",
         label: "Searching map data",
@@ -115,6 +125,8 @@ export function useHiderZoneTool({
   mapPickEnabled = false,
   hasMoveCard,
   consumeMoveCard,
+  transitMetroId = null,
+  transitStationFilter = null,
 }: UseHiderZoneToolParams) {
   const [stations, setStations] = useState<TransitStation[]>([]);
   const [stationsLoading, setStationsLoading] = useState(false);
@@ -213,6 +225,8 @@ export function useHiderZoneTool({
 
       const outcome = await loadStationsWithProgress(viewport, gameArea, task, {
         onStations: applyStations,
+        transitMetroId,
+        transitStationFilter,
         // A superseded search must not clear the newer search's spinner.
         onSettled: () => {
           clearPublished();
@@ -233,7 +247,7 @@ export function useHiderZoneTool({
         current && loaded.some((station) => station.id === current.id) ? current : null,
       );
     },
-    [beginRequest, gameArea, isLatestRequest, requestSignal],
+    [beginRequest, gameArea, isLatestRequest, requestSignal, transitMetroId, transitStationFilter],
   );
 
   const filteredStations = useMemo(() => searchStations(query, stations), [query, stations]);
@@ -429,7 +443,11 @@ export function useHiderZoneTool({
             TAP_SNAP_SEARCH_METERS,
           ),
           gameArea,
-          { onStations: cacheNearby },
+          {
+            onStations: cacheNearby,
+            transitMetroId,
+            transitStationFilter,
+          },
         ).catch((): TransitStation[] => []);
         cacheNearby(nearby);
         station = nearestStation(point, nearby);
@@ -444,7 +462,16 @@ export function useHiderZoneTool({
         setSelectedStation(station);
       }
     },
-    [beginSnapRequest, gameArea, isLatestRequest, isLatestSnapRequest, requestIdRef, stations],
+    [
+      beginSnapRequest,
+      gameArea,
+      isLatestRequest,
+      isLatestSnapRequest,
+      requestIdRef,
+      stations,
+      transitMetroId,
+      transitStationFilter,
+    ],
   );
 
   const handleMapClick = useCallback(

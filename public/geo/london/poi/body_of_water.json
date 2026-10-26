@@ -1,1 +1,300 @@
-{ "category": "body_of_water", "source": "none", "places": [] }
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.28,
+    "west": -0.51,
+    "north": 51.7,
+    "east": 0.3357
+  },
+  "places": [
+    {
+      "id": "Q24677150",
+      "name": "Abbey Lake",
+      "lat": 51.4021,
+      "lng": -0.50848
+    },
+    {
+      "id": "Q4713598",
+      "name": "Aldenham Reservoir",
+      "lat": 51.645833,
+      "lng": -0.311111
+    },
+    {
+      "id": "Q4854017",
+      "name": "Banbury Reservoir",
+      "lat": 51.6047,
+      "lng": -0.035
+    },
+    {
+      "id": "Q24677104",
+      "name": "Battersea Park Lake",
+      "lat": 51.47798,
+      "lng": -0.15224
+    },
+    {
+      "id": "Q4896398",
+      "name": "Bessborough Reservoir",
+      "lat": 51.401639,
+      "lng": -0.386139
+    },
+    {
+      "id": "Q24662439",
+      "name": "Boldermere Lake",
+      "lat": 51.31452,
+      "lng": -0.45722
+    },
+    {
+      "id": "Q104868097",
+      "name": "Bomb Crater Pond",
+      "lat": 51.566948,
+      "lng": -0.048746
+    },
+    {
+      "id": "Q24679131",
+      "name": "Bowyer's Water",
+      "lat": 51.69606,
+      "lng": -0.02249
+    },
+    {
+      "id": "Q909797",
+      "name": "Brent Reservoir",
+      "lat": 51.57,
+      "lng": -0.247
+    },
+    {
+      "id": "Q5101017",
+      "name": "Chingford Reservoirs",
+      "lat": 51.6389,
+      "lng": -0.021944
+    },
+    {
+      "id": "Q24677552",
+      "name": "Claremont Lake",
+      "lat": 51.35542,
+      "lng": -0.37884
+    },
+    {
+      "id": "Q5223820",
+      "name": "Darland's Lake",
+      "lat": 51.6254,
+      "lng": -0.2047
+    },
+    {
+      "id": "Q5329636",
+      "name": "East Warwick Reservoir",
+      "lat": 51.580456,
+      "lng": -0.056178
+    },
+    {
+      "id": "Q130487173",
+      "name": "Ferris Meadow Lake",
+      "lat": 51.385,
+      "lng": -0.454
+    },
+    {
+      "id": "Q130557593",
+      "name": "Garden Lake, Osterley Park",
+      "lat": 51.489084,
+      "lng": -0.349782
+    },
+    {
+      "id": "Q136564622",
+      "name": "Glassmill Pond",
+      "lat": 51.402485,
+      "lng": 0.0109
+    },
+    {
+      "id": "Q5755927",
+      "name": "High Maynard Reservoir",
+      "lat": 51.5889,
+      "lng": -0.0466
+    },
+    {
+      "id": "Q15637830",
+      "name": "Highams Park Lake",
+      "lat": 51.6106,
+      "lng": 0.01
+    },
+    {
+      "id": "Q24662577",
+      "name": "Hollow Pond",
+      "lat": 51.57974,
+      "lng": 0.00925
+    },
+    {
+      "id": "Q24679191",
+      "name": "Horse Shoe Bay",
+      "lat": 51.60413,
+      "lng": -0.49831
+    },
+    {
+      "id": "Q7348387",
+      "name": "Island Barn Reservoir",
+      "lat": 51.390556,
+      "lng": -0.363333
+    },
+    {
+      "id": "Q6387154",
+      "name": "Kempton Park Reservoirs",
+      "lat": 51.426,
+      "lng": -0.395
+    },
+    {
+      "id": "Q124791030",
+      "name": "Kew Gardens Lake",
+      "lat": 51.477,
+      "lng": -0.3
+    },
+    {
+      "id": "Q6411660",
+      "name": "King George V Reservoir",
+      "lat": 51.6499,
+      "lng": -0.0161
+    },
+    {
+      "id": "Q6411639",
+      "name": "King George VI Reservoir",
+      "lat": 51.449075,
+      "lng": -0.502481
+    },
+    {
+      "id": "Q7348386",
+      "name": "Knight Reservoir",
+      "lat": 51.399056,
+      "lng": -0.393389
+    },
+    {
+      "id": "Q6665898",
+      "name": "Lockwood Reservoir",
+      "lat": 51.595,
+      "lng": -0.0479
+    },
+    {
+      "id": "Q16996931",
+      "name": "Lonsdale Road Reservoir",
+      "lat": 51.4824,
+      "lng": -0.2473
+    },
+    {
+      "id": "Q6692917",
+      "name": "Low Maynard Reservoir",
+      "lat": 51.588481,
+      "lng": -0.049781
+    },
+    {
+      "id": "Q24677676",
+      "name": "Lynsters Lake",
+      "lat": 51.61419,
+      "lng": -0.49951
+    },
+    {
+      "id": "Q135004765",
+      "name": "Middle Lake, Osterley Park",
+      "lat": 51.494075,
+      "lng": -0.34607
+    },
+    {
+      "id": "Q6896106",
+      "name": "Molesey Reservoirs",
+      "lat": 51.407,
+      "lng": -0.3887
+    },
+    {
+      "id": "Q24677630",
+      "name": "Pynesfield Lake",
+      "lat": 51.60988,
+      "lng": -0.50486
+    },
+    {
+      "id": "Q7270369",
+      "name": "Queen Elizabeth II Reservoir",
+      "lat": 51.390833,
+      "lng": -0.392222
+    },
+    {
+      "id": "Q7270464",
+      "name": "Queen Mary Reservoir",
+      "lat": 51.416667,
+      "lng": -0.45
+    },
+    {
+      "id": "Q12067731",
+      "name": "Ruislip Lido",
+      "lat": 51.5903,
+      "lng": -0.4323
+    },
+    {
+      "id": "Q139879551",
+      "name": "Sawyers Lake",
+      "lat": 51.439001,
+      "lng": 0.331222
+    },
+    {
+      "id": "Q1471930",
+      "name": "Serpentine",
+      "lat": 51.505278,
+      "lng": -0.169444
+    },
+    {
+      "id": "Q141259663",
+      "name": "Silvermere",
+      "lat": 51.336667,
+      "lng": -0.45
+    },
+    {
+      "id": "Q21333980",
+      "name": "St. James's Park Lake",
+      "lat": 51.5027,
+      "lng": -0.1337
+    },
+    {
+      "id": "Q7348384",
+      "name": "Staines Reservoirs",
+      "lat": 51.446944,
+      "lng": -0.486667
+    },
+    {
+      "id": "Q7617977",
+      "name": "Stocker's Lake",
+      "lat": 51.63,
+      "lng": -0.488
+    },
+    {
+      "id": "Q7348388",
+      "name": "Sunnyside Reservoir",
+      "lat": 51.4093,
+      "lng": -0.3811
+    },
+    {
+      "id": "Q24677550",
+      "name": "The Lake",
+      "lat": 51.36066,
+      "lng": -0.36259
+    },
+    {
+      "id": "Q16901511",
+      "name": "The Long Water",
+      "lat": 51.5074,
+      "lng": -0.174444
+    },
+    {
+      "id": "Q24677678",
+      "name": "Tumbling Bay",
+      "lat": 51.61482,
+      "lng": -0.4987
+    },
+    {
+      "id": "Q7349298",
+      "name": "West Warwick Reservoir",
+      "lat": 51.576456,
+      "lng": -0.058494
+    },
+    {
+      "id": "Q7347117",
+      "name": "William Girling Reservoir",
+      "lat": 51.6316,
+      "lng": -0.0244
+    }
+  ]
+}

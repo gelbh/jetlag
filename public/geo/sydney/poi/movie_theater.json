@@ -1,6 +1,1506 @@
 {
   "category": "movie_theater",
-  "source": "none",
-  "bbox": { "south": -34.2, "west": 150.5, "north": -33.3, "east": 151.35 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -34.3574,
+    "west": 149.9948,
+    "north": -32.9761,
+    "east": 151.363
+  },
+  "places": [
+    {
+      "id": "Q47002290",
+      "name": "Academy Twin Cinemas",
+      "lat": -33.881906,
+      "lng": 151.21949
+    },
+    {
+      "id": "Q47002367",
+      "name": "Addison Theatre",
+      "lat": -33.90269,
+      "lng": 151.164617
+    },
+    {
+      "id": "Q47002210",
+      "name": "Amusu Theatre",
+      "lat": -33.858947,
+      "lng": 151.171992
+    },
+    {
+      "id": "Q47002114",
+      "name": "Anita's Theatre",
+      "lat": -34.314439,
+      "lng": 150.922823
+    },
+    {
+      "id": "Q47002193",
+      "name": "Annandale Royal Theatre",
+      "lat": -33.880995,
+      "lng": 151.170811
+    },
+    {
+      "id": "Q45305889",
+      "name": "Apollo Theatre",
+      "lat": -33.873154,
+      "lng": 151.20812
+    },
+    {
+      "id": "Q47002374",
+      "name": "Ascot Theatre",
+      "lat": -33.931688,
+      "lng": 151.194557
+    },
+    {
+      "id": "Q47002198",
+      "name": "Ashfield Kings Theatre",
+      "lat": -33.889479,
+      "lng": 151.125759
+    },
+    {
+      "id": "Q47002419",
+      "name": "Astoria Theatre",
+      "lat": -33.925061,
+      "lng": 151.054729
+    },
+    {
+      "id": "Q47002412",
+      "name": "Astra Theatre",
+      "lat": -33.814779,
+      "lng": 151.001713
+    },
+    {
+      "id": "Q47002296",
+      "name": "Atlas Theatre",
+      "lat": -33.926548,
+      "lng": 151.127372
+    },
+    {
+      "id": "Q47002208",
+      "name": "Balgowlah Cinema",
+      "lat": -33.794458,
+      "lng": 151.265506
+    },
+    {
+      "id": "Q47002211",
+      "name": "Balmain Kings Theatre",
+      "lat": -33.856011,
+      "lng": 151.175773
+    },
+    {
+      "id": "Q45305916",
+      "name": "Barclay Theatre",
+      "lat": -33.879627,
+      "lng": 151.205291
+    },
+    {
+      "id": "Q47002219",
+      "name": "Bass Hill Drive-In",
+      "lat": -33.899907,
+      "lng": 150.989512
+    },
+    {
+      "id": "Q47002230",
+      "name": "Ben & Jerry's Openair Cinema Bondi Beach",
+      "lat": -33.890776,
+      "lng": 151.276508
+    },
+    {
+      "id": "Q47002291",
+      "name": "Ben & Jerry's Openair Cinema Inner West",
+      "lat": -33.889348,
+      "lng": 151.191842
+    },
+    {
+      "id": "Q47002212",
+      "name": "Bijou Theatre",
+      "lat": -33.856041,
+      "lng": 151.178148
+    },
+    {
+      "id": "Q47002231",
+      "name": "Bondi Beach Kings Theatre",
+      "lat": -33.883496,
+      "lng": 151.277284
+    },
+    {
+      "id": "Q47002281",
+      "name": "Boomerang Theatre",
+      "lat": -33.92305,
+      "lng": 151.257135
+    },
+    {
+      "id": "Q45305930",
+      "name": "Broadway Theatre",
+      "lat": -33.884186,
+      "lng": 151.196669
+    },
+    {
+      "id": "Q47002470",
+      "name": "Bronte Theatre",
+      "lat": -33.90245,
+      "lng": 151.255283
+    },
+    {
+      "id": "Q47002308",
+      "name": "Ca'd'Or Cinema",
+      "lat": -33.865467,
+      "lng": 151.130111
+    },
+    {
+      "id": "Q5035941",
+      "name": "Capitol Theatre",
+      "lat": -33.8797,
+      "lng": 151.207
+    },
+    {
+      "id": "Q47002253",
+      "name": "Caringbah Skyline Drive-In",
+      "lat": -34.026572,
+      "lng": 151.120339
+    },
+    {
+      "id": "Q47002259",
+      "name": "Castle Hill Theatre",
+      "lat": -33.761863,
+      "lng": 150.992918
+    },
+    {
+      "id": "Q45305944",
+      "name": "Century Theatre",
+      "lat": -33.874832,
+      "lng": 151.206776
+    },
+    {
+      "id": "Q47002270",
+      "name": "Chatswood Kings Theatre",
+      "lat": -33.796696,
+      "lng": 151.180171
+    },
+    {
+      "id": "Q47002403",
+      "name": "Chauvel Cinema",
+      "lat": -33.885016,
+      "lng": 151.225906
+    },
+    {
+      "id": "Q47002031",
+      "name": "Cinema Paradiso",
+      "lat": -33.514471,
+      "lng": 151.340825
+    },
+    {
+      "id": "Q47002384",
+      "name": "Cinema Paris",
+      "lat": -33.888799,
+      "lng": 151.228594
+    },
+    {
+      "id": "Q47002413",
+      "name": "Civic Theatre",
+      "lat": -33.813568,
+      "lng": 151.004877
+    },
+    {
+      "id": "Q47002274",
+      "name": "Clovelly Kings Theatre",
+      "lat": -33.911845,
+      "lng": 151.2565
+    },
+    {
+      "id": "Q45305956",
+      "name": "Club X Cinema",
+      "lat": -33.880712,
+      "lng": 151.204734
+    },
+    {
+      "id": "Q47002277",
+      "name": "Collaroy Cinema",
+      "lat": -33.732938,
+      "lng": 151.301564
+    },
+    {
+      "id": "Q47002314",
+      "name": "Crest Theatre",
+      "lat": -33.845854,
+      "lng": 151.009965
+    },
+    {
+      "id": "Q47002284",
+      "name": "Cronulla Cinemas",
+      "lat": -34.051731,
+      "lng": 151.153582
+    },
+    {
+      "id": "Q47002287",
+      "name": "Croydon Park Theatre",
+      "lat": -33.895751,
+      "lng": 151.1061
+    },
+    {
+      "id": "Q47002289",
+      "name": "De-Luxe Theatre",
+      "lat": -33.882363,
+      "lng": 151.116035
+    },
+    {
+      "id": "Q47002091",
+      "name": "Deluxe Theatre",
+      "lat": -33.833256,
+      "lng": 151.208115
+    },
+    {
+      "id": "Q47002393",
+      "name": "Dendy Newtown",
+      "lat": -33.89618,
+      "lng": 151.18037
+    },
+    {
+      "id": "Q45305968",
+      "name": "Dendy Opera Quays",
+      "lat": -33.858415,
+      "lng": 151.214061
+    },
+    {
+      "id": "Q47002339",
+      "name": "Doncaster Theatre",
+      "lat": -33.912082,
+      "lng": 151.224616
+    },
+    {
+      "id": "Q47002225",
+      "name": "Drive-In Blacktown",
+      "lat": -33.806941,
+      "lng": 150.902459
+    },
+    {
+      "id": "Q47002442",
+      "name": "Dundas Skyline Drive-In",
+      "lat": -33.806437,
+      "lng": 151.042971
+    },
+    {
+      "id": "Q47002306",
+      "name": "El Rancho Drive-In",
+      "lat": -33.87156,
+      "lng": 150.933391
+    },
+    {
+      "id": "Q47002317",
+      "name": "Elite Theatre",
+      "lat": -33.880088,
+      "lng": 151.138675
+    },
+    {
+      "id": "Q47002395",
+      "name": "Elizabethan Theatre",
+      "lat": -33.896856,
+      "lng": 151.18037
+    },
+    {
+      "id": "Q47002054",
+      "name": "Embassy Cinema",
+      "lat": -33.71409,
+      "lng": 150.3113
+    },
+    {
+      "id": "Q45305981",
+      "name": "Embassy Theatre",
+      "lat": -33.870187,
+      "lng": 151.209398
+    },
+    {
+      "id": "Q47002240",
+      "name": "Empire Theatre",
+      "lat": -33.944485,
+      "lng": 151.196354
+    },
+    {
+      "id": "Q5379114",
+      "name": "Enmore Theatre",
+      "lat": -33.8989,
+      "lng": 151.174
+    },
+    {
+      "id": "Q47002301",
+      "name": "Epping Kings Theatre",
+      "lat": -33.773321,
+      "lng": 151.081798
+    },
+    {
+      "id": "Q47002234",
+      "name": "Event Cinemas Bondi Junction",
+      "lat": -33.891669,
+      "lng": 151.25027
+    },
+    {
+      "id": "Q47002243",
+      "name": "Event Cinemas Burwood",
+      "lat": -33.874617,
+      "lng": 151.105921
+    },
+    {
+      "id": "Q47001981",
+      "name": "Event Cinemas Campbelltown",
+      "lat": -34.073538,
+      "lng": 150.80062
+    },
+    {
+      "id": "Q47002263",
+      "name": "Event Cinemas Castle Hill",
+      "lat": -33.731825,
+      "lng": 151.007393
+    },
+    {
+      "id": "Q23701436",
+      "name": "Event Cinemas George Street",
+      "lat": -33.875183,
+      "lng": 151.205952
+    },
+    {
+      "id": "Q47002222",
+      "name": "Event Cinemas GU Film House Sydney",
+      "lat": -33.950851,
+      "lng": 151.081847
+    },
+    {
+      "id": "Q47002321",
+      "name": "Event Cinemas Hornsby",
+      "lat": -33.704976,
+      "lng": 151.100215
+    },
+    {
+      "id": "Q47002336",
+      "name": "Event Cinemas Hurstville",
+      "lat": -33.965519,
+      "lng": 151.10493
+    },
+    {
+      "id": "Q47002353",
+      "name": "Event Cinemas Liverpool",
+      "lat": -33.918658,
+      "lng": 150.924469
+    },
+    {
+      "id": "Q47002443",
+      "name": "Event Cinemas Macquarie",
+      "lat": -33.777482,
+      "lng": 151.118175
+    },
+    {
+      "id": "Q47002382",
+      "name": "Event Cinemas Miranda",
+      "lat": -34.035123,
+      "lng": 151.100016
+    },
+    {
+      "id": "Q47002414",
+      "name": "Event Cinemas Parramatta",
+      "lat": -33.817705,
+      "lng": 151.002119
+    },
+    {
+      "id": "Q47002305",
+      "name": "Event Cinemas Top Ryde City",
+      "lat": -33.812087,
+      "lng": 151.105739
+    },
+    {
+      "id": "Q47002404",
+      "name": "Five Ways Picture Palace",
+      "lat": -33.882123,
+      "lng": 151.227993
+    },
+    {
+      "id": "Q47002310",
+      "name": "Frenchs Forest Skyline Drive-In",
+      "lat": -33.750442,
+      "lng": 151.238396
+    },
+    {
+      "id": "Q47002453",
+      "name": "Gaelic Club",
+      "lat": -33.88585,
+      "lng": 151.207485
+    },
+    {
+      "id": "Q45305996",
+      "name": "Gala Theatre",
+      "lat": -33.87202,
+      "lng": 151.20819
+    },
+    {
+      "id": "Q47002173",
+      "name": "Gayline Drive-In",
+      "lat": -34.046942,
+      "lng": 150.753538
+    },
+    {
+      "id": "Q47002311",
+      "name": "Gladesville Palace Theatre",
+      "lat": -33.83026,
+      "lng": 151.126207
+    },
+    {
+      "id": "Q47002035",
+      "name": "Glenbrook Cinema",
+      "lat": -33.766921,
+      "lng": 150.621912
+    },
+    {
+      "id": "Q45306008",
+      "name": "Globe Newsreel Theatre",
+      "lat": -33.87589,
+      "lng": 151.206339
+    },
+    {
+      "id": "Q47002473",
+      "name": "Gothic Theatre",
+      "lat": -33.802973,
+      "lng": 151.198308
+    },
+    {
+      "id": "Q45304057",
+      "name": "Govindas Cinema & Restaurant",
+      "lat": -33.876559,
+      "lng": 151.221385
+    },
+    {
+      "id": "Q47002387",
+      "name": "Greater Union Mosman Cinemas",
+      "lat": -33.823981,
+      "lng": 151.242203
+    },
+    {
+      "id": "Q45306034",
+      "name": "Greater Union Pitt Centre",
+      "lat": -33.872084,
+      "lng": 151.208573
+    },
+    {
+      "id": "Q47002316",
+      "name": "Guildford Regent Theatre",
+      "lat": -33.854106,
+      "lng": 150.986571
+    },
+    {
+      "id": "Q47002283",
+      "name": "Hayden Orpheum Picture Palace",
+      "lat": -33.828167,
+      "lng": 151.229805
+    },
+    {
+      "id": "Q45306043",
+      "name": "Hippodrome Cinema",
+      "lat": -33.877872,
+      "lng": 151.205033
+    },
+    {
+      "id": "Q47002322",
+      "name": "Hornsby Odeon Cinema",
+      "lat": -33.703584,
+      "lng": 151.097118
+    },
+    {
+      "id": "Q47002201",
+      "name": "Hoyt's Embassy Theatre",
+      "lat": -33.850389,
+      "lng": 151.031798
+    },
+    {
+      "id": "Q47002323",
+      "name": "Hoyts Arcadia Theatre",
+      "lat": -33.794821,
+      "lng": 151.186712
+    },
+    {
+      "id": "Q47002196",
+      "name": "Hoyts Arncliffe",
+      "lat": -33.96593,
+      "lng": 151.111469
+    },
+    {
+      "id": "Q47002244",
+      "name": "Hoyts Astor Burwood",
+      "lat": -33.878175,
+      "lng": 151.103536
+    },
+    {
+      "id": "Q47002294",
+      "name": "Hoyts Astra Theatre",
+      "lat": -33.850217,
+      "lng": 151.153687
+    },
+    {
+      "id": "Q47002215",
+      "name": "Hoyts Bankstown",
+      "lat": -33.91928,
+      "lng": 151.03496
+    },
+    {
+      "id": "Q47002217",
+      "name": "Hoyts Bankstown 8",
+      "lat": -33.916039,
+      "lng": 151.035183
+    },
+    {
+      "id": "Q47002227",
+      "name": "Hoyts Blacktown",
+      "lat": -33.770287,
+      "lng": 150.905934
+    },
+    {
+      "id": "Q47002233",
+      "name": "Hoyts Bondi Beach Six Ways Theatre",
+      "lat": -33.888675,
+      "lng": 151.270313
+    },
+    {
+      "id": "Q47002238",
+      "name": "Hoyts Bondi Road Theatre",
+      "lat": -33.89414,
+      "lng": 151.265115
+    },
+    {
+      "id": "Q45306053",
+      "name": "Hoyts Broadway",
+      "lat": -33.881877,
+      "lng": 151.194794
+    },
+    {
+      "id": "Q47002315",
+      "name": "Hoyts Castle Theatre",
+      "lat": -33.834334,
+      "lng": 151.011076
+    },
+    {
+      "id": "Q47002266",
+      "name": "Hoyts Casula Drive-In",
+      "lat": -33.953878,
+      "lng": 150.894026
+    },
+    {
+      "id": "Q47002271",
+      "name": "Hoyts Chatswood Mandarin",
+      "lat": -33.798098,
+      "lng": 151.182871
+    },
+    {
+      "id": "Q47001991",
+      "name": "Hoyts Chatswood Theatre",
+      "lat": -33.795608,
+      "lng": 151.185339
+    },
+    {
+      "id": "Q47002272",
+      "name": "Hoyts Chatswood Westfield",
+      "lat": -33.796157,
+      "lng": 151.183255
+    },
+    {
+      "id": "Q47002202",
+      "name": "Hoyts Civic Theatre",
+      "lat": -33.848411,
+      "lng": 151.031528
+    },
+    {
+      "id": "Q47002275",
+      "name": "Hoyts Clovelly Theatre",
+      "lat": -33.910301,
+      "lng": 151.252262
+    },
+    {
+      "id": "Q47002235",
+      "name": "Hoyts Coronet Theatre",
+      "lat": -33.891782,
+      "lng": 151.251577
+    },
+    {
+      "id": "Q47002307",
+      "name": "Hoyts Crescent Fairfield",
+      "lat": -33.869567,
+      "lng": 150.957569
+    },
+    {
+      "id": "Q47002285",
+      "name": "Hoyts Crows Nest Theatre",
+      "lat": -33.827836,
+      "lng": 151.20191
+    },
+    {
+      "id": "Q47002199",
+      "name": "Hoyts De Luxe Theatre",
+      "lat": -33.888206,
+      "lng": 151.123743
+    },
+    {
+      "id": "Q47002325",
+      "name": "Hoyts Double Bay Theatre",
+      "lat": -33.877317,
+      "lng": 151.243958
+    },
+    {
+      "id": "Q47002410",
+      "name": "Hoyts Eastgardens",
+      "lat": -33.944812,
+      "lng": 151.224256
+    },
+    {
+      "id": "Q47002386",
+      "name": "Hoyts Entertainment Quarter",
+      "lat": -33.894533,
+      "lng": 151.227212
+    },
+    {
+      "id": "Q47002043",
+      "name": "Hoyts Granville",
+      "lat": -33.829499,
+      "lng": 151.012459
+    },
+    {
+      "id": "Q47002326",
+      "name": "Hoyts Hurlstone Park Theatre",
+      "lat": -33.904884,
+      "lng": 151.129246
+    },
+    {
+      "id": "Q47002218",
+      "name": "Hoyts Jewel De-Luxe Theatre",
+      "lat": -33.923241,
+      "lng": 151.050515
+    },
+    {
+      "id": "Q47002388",
+      "name": "Hoyts Kinema Theatre",
+      "lat": -33.828344,
+      "lng": 151.243962
+    },
+    {
+      "id": "Q47002357",
+      "name": "Hoyts Manly",
+      "lat": -33.79626,
+      "lng": 151.285309
+    },
+    {
+      "id": "Q47002368",
+      "name": "Hoyts Marrickville Theatre",
+      "lat": -33.911017,
+      "lng": 151.15627
+    },
+    {
+      "id": "Q47002450",
+      "name": "Hoyts Melba Strathfield",
+      "lat": -33.870535,
+      "lng": 151.094921
+    },
+    {
+      "id": "Q47002047",
+      "name": "Hoyts Merrylands",
+      "lat": -33.836384,
+      "lng": 150.989235
+    },
+    {
+      "id": "Q47002075",
+      "name": "Hoyts Mortdale",
+      "lat": -33.97152,
+      "lng": 151.082179
+    },
+    {
+      "id": "Q47002076",
+      "name": "Hoyts Mount Druitt",
+      "lat": -33.76429,
+      "lng": 150.817337
+    },
+    {
+      "id": "Q47002396",
+      "name": "Hoyts Newtown Theatre",
+      "lat": -33.895257,
+      "lng": 151.182078
+    },
+    {
+      "id": "Q47002097",
+      "name": "Hoyts Penrith",
+      "lat": -33.750472,
+      "lng": 150.694478
+    },
+    {
+      "id": "Q47002279",
+      "name": "Hoyts Ritz Concord Central",
+      "lat": -33.856744,
+      "lng": 151.103508
+    },
+    {
+      "id": "Q47002440",
+      "name": "Hoyts Rozelle Theatre",
+      "lat": -33.864897,
+      "lng": 151.168478
+    },
+    {
+      "id": "Q47002300",
+      "name": "Hoyts Savoy Theatre",
+      "lat": -33.886858,
+      "lng": 151.092922
+    },
+    {
+      "id": "Q47002331",
+      "name": "Hoyts South Hurstville",
+      "lat": -33.978005,
+      "lng": 151.105564
+    },
+    {
+      "id": "Q47002392",
+      "name": "Hoyts Southern Cross Theatre",
+      "lat": -33.830816,
+      "lng": 151.220923
+    },
+    {
+      "id": "Q47002236",
+      "name": "Hoyts Star Theatre",
+      "lat": -33.893783,
+      "lng": 151.249569
+    },
+    {
+      "id": "Q47002320",
+      "name": "Hoyts Vogue Theatre",
+      "lat": -33.864984,
+      "lng": 151.085383
+    },
+    {
+      "id": "Q47002241",
+      "name": "Hoyts Warringah Mall",
+      "lat": -33.770349,
+      "lng": 151.266088
+    },
+    {
+      "id": "Q47002126",
+      "name": "Hoyts Wetherill Park",
+      "lat": -33.858701,
+      "lng": 150.897833
+    },
+    {
+      "id": "Q47002476",
+      "name": "Hoyts Woollahra Theatre",
+      "lat": -33.890139,
+      "lng": 151.235366
+    },
+    {
+      "id": "Q47002397",
+      "name": "Hub Theatre",
+      "lat": -33.897377,
+      "lng": 151.178205
+    },
+    {
+      "id": "Q45306081",
+      "name": "IMAX Theatre Sydney",
+      "lat": -33.873899,
+      "lng": 151.201026
+    },
+    {
+      "id": "Q47002356",
+      "name": "Khartoum Theatre",
+      "lat": -33.777645,
+      "lng": 151.12649
+    },
+    {
+      "id": "Q45304070",
+      "name": "King's Cross Newsreel Theatrette",
+      "lat": -33.875143,
+      "lng": 151.222205
+    },
+    {
+      "id": "Q45304083",
+      "name": "King's Cross Theatre",
+      "lat": -33.874933,
+      "lng": 151.222343
+    },
+    {
+      "id": "Q47002313",
+      "name": "Kings Theatre",
+      "lat": -33.756754,
+      "lng": 151.155707
+    },
+    {
+      "id": "Q47002340",
+      "name": "Kingsford Odeon",
+      "lat": -33.921885,
+      "lng": 151.22706
+    },
+    {
+      "id": "Q47002059",
+      "name": "Kurrajong Theatre",
+      "lat": -33.577758,
+      "lng": 150.716997
+    },
+    {
+      "id": "Q47002425",
+      "name": "Lawson Theatre",
+      "lat": -33.891689,
+      "lng": 151.199803
+    },
+    {
+      "id": "Q45306092",
+      "name": "Liberty Theatre",
+      "lat": -33.872084,
+      "lng": 151.208573
+    },
+    {
+      "id": "Q45306103",
+      "name": "Lido Theatre",
+      "lat": -33.868161,
+      "lng": 151.206695
+    },
+    {
+      "id": "Q47002352",
+      "name": "Lindfield Kings Theatre",
+      "lat": -33.775104,
+      "lng": 151.168441
+    },
+    {
+      "id": "Q45306117",
+      "name": "Lyceum Theatre",
+      "lat": -33.871752,
+      "lng": 151.20846
+    },
+    {
+      "id": "Q28219845",
+      "name": "Lyric Theatre, Sydney",
+      "lat": -33.868574,
+      "lng": 151.196235
+    },
+    {
+      "id": "Q47002343",
+      "name": "Magnet Theatre",
+      "lat": -33.922592,
+      "lng": 151.078684
+    },
+    {
+      "id": "Q45306129",
+      "name": "Mandolin Cinema",
+      "lat": -33.877794,
+      "lng": 151.209364
+    },
+    {
+      "id": "Q47002358",
+      "name": "Manly Cinemas",
+      "lat": -33.799575,
+      "lng": 151.28527
+    },
+    {
+      "id": "Q47002347",
+      "name": "Marlboro Theatre",
+      "lat": -33.880903,
+      "lng": 151.156695
+    },
+    {
+      "id": "Q47002371",
+      "name": "Marrickville Kings Theatre",
+      "lat": -33.912059,
+      "lng": 151.159477
+    },
+    {
+      "id": "Q45306143",
+      "name": "Mayfair Theatre",
+      "lat": -33.873334,
+      "lng": 151.20917
+    },
+    {
+      "id": "Q47002337",
+      "name": "Mecca Theatre",
+      "lat": -33.967848,
+      "lng": 151.10251
+    },
+    {
+      "id": "Q47002429",
+      "name": "Melody Theatre",
+      "lat": -33.952957,
+      "lng": 151.0518
+    },
+    {
+      "id": "Q47002237",
+      "name": "Metro Bondi Junction",
+      "lat": -33.89221,
+      "lng": 151.251327
+    },
+    {
+      "id": "Q47002286",
+      "name": "Metro Crows Nest",
+      "lat": -33.826625,
+      "lng": 151.199469
+    },
+    {
+      "id": "Q47002273",
+      "name": "Metro Twin Drive-In",
+      "lat": -33.892139,
+      "lng": 151.059794
+    },
+    {
+      "id": "Q19321660",
+      "name": "Minerva Theatre",
+      "lat": -33.871867,
+      "lng": 151.224339
+    },
+    {
+      "id": "Q47002405",
+      "name": "Moonlight Cinema Sydney",
+      "lat": -33.891599,
+      "lng": 151.240346
+    },
+    {
+      "id": "Q47002098",
+      "name": "Nepean Theatre",
+      "lat": -33.756289,
+      "lng": 150.710257
+    },
+    {
+      "id": "Q47002389",
+      "name": "New Kings Theatre",
+      "lat": -33.823981,
+      "lng": 151.242203
+    },
+    {
+      "id": "Q47002445",
+      "name": "North Ryde Skyline Drive-In",
+      "lat": -33.785133,
+      "lng": 151.12838
+    },
+    {
+      "id": "Q47002093",
+      "name": "North Sydney Orpheum Theatre",
+      "lat": -33.840613,
+      "lng": 151.211182
+    },
+    {
+      "id": "Q47002401",
+      "name": "Northbridge Theatre",
+      "lat": -33.810431,
+      "lng": 151.207989
+    },
+    {
+      "id": "Q47002348",
+      "name": "Norton Street Cinemas",
+      "lat": -33.884799,
+      "lng": 151.157296
+    },
+    {
+      "id": "Q47002402",
+      "name": "Oatley Theatre",
+      "lat": -33.981934,
+      "lng": 151.081444
+    },
+    {
+      "id": "Q47002223",
+      "name": "Odeon Bexley",
+      "lat": -33.949586,
+      "lng": 151.127922
+    },
+    {
+      "id": "Q47002247",
+      "name": "Odeon Campsie",
+      "lat": -33.912683,
+      "lng": 151.104043
+    },
+    {
+      "id": "Q47002257",
+      "name": "Odeon Carlton",
+      "lat": -33.968518,
+      "lng": 151.12511
+    },
+    {
+      "id": "Q47002278",
+      "name": "Odeon Concord West",
+      "lat": -33.848726,
+      "lng": 151.090053
+    },
+    {
+      "id": "Q47002292",
+      "name": "Odeon Dee Why",
+      "lat": -33.752759,
+      "lng": 151.287055
+    },
+    {
+      "id": "Q47002295",
+      "name": "Odeon Drummoyne",
+      "lat": -33.851199,
+      "lng": 151.153118
+    },
+    {
+      "id": "Q47002298",
+      "name": "Odeon Eastwood",
+      "lat": -33.792075,
+      "lng": 151.078913
+    },
+    {
+      "id": "Q47002302",
+      "name": "Odeon Erskineville",
+      "lat": -33.899628,
+      "lng": 151.183854
+    },
+    {
+      "id": "Q47002344",
+      "name": "Odeon Lakemba",
+      "lat": -33.922523,
+      "lng": 151.078621
+    },
+    {
+      "id": "Q47002391",
+      "name": "Odeon Narabeen",
+      "lat": -33.713341,
+      "lng": 151.299531
+    },
+    {
+      "id": "Q47002418",
+      "name": "Odeon Petersham",
+      "lat": -33.896378,
+      "lng": 151.153013
+    },
+    {
+      "id": "Q47002104",
+      "name": "Odeon Ramsgate",
+      "lat": -33.987511,
+      "lng": 151.134906
+    },
+    {
+      "id": "Q47002422",
+      "name": "Odeon Randwick",
+      "lat": -33.917207,
+      "lng": 151.241176
+    },
+    {
+      "id": "Q47002430",
+      "name": "Odeon Rockdale",
+      "lat": -33.954366,
+      "lng": 151.13765
+    },
+    {
+      "id": "Q47002457",
+      "name": "Odeon Sutherland",
+      "lat": -34.03302,
+      "lng": 151.058131
+    },
+    {
+      "id": "Q47002195",
+      "name": "Olympia De-Luxe Theatre",
+      "lat": -33.887298,
+      "lng": 151.173854
+    },
+    {
+      "id": "Q47002362",
+      "name": "Olympic Theatre",
+      "lat": -33.797008,
+      "lng": 151.287223
+    },
+    {
+      "id": "Q47002249",
+      "name": "Orion Theatre",
+      "lat": -33.908786,
+      "lng": 151.103446
+    },
+    {
+      "id": "Q28220272",
+      "name": "Palace Theatre",
+      "lat": -33.8718,
+      "lng": 151.208052
+    },
+    {
+      "id": "Q47002246",
+      "name": "Palatial Cinema",
+      "lat": -33.877369,
+      "lng": 151.102562
+    },
+    {
+      "id": "Q47002220",
+      "name": "Paragon No 1 Theatre",
+      "lat": -33.917987,
+      "lng": 151.085958
+    },
+    {
+      "id": "Q47002221",
+      "name": "Paragon No 2 Theatre",
+      "lat": -33.909926,
+      "lng": 151.084206
+    },
+    {
+      "id": "Q45306157",
+      "name": "Paramount Theatre",
+      "lat": -33.875502,
+      "lng": 151.206304
+    },
+    {
+      "id": "Q15697693",
+      "name": "Paris Theatre",
+      "lat": -33.876884,
+      "lng": 151.211477
+    },
+    {
+      "id": "Q47002181",
+      "name": "Penrith Skyline Drive-In",
+      "lat": -33.771036,
+      "lng": 150.737989
+    },
+    {
+      "id": "Q47002099",
+      "name": "Penshurst Theatre",
+      "lat": -33.965421,
+      "lng": 151.090353
+    },
+    {
+      "id": "Q47002455",
+      "name": "Premier Theatre",
+      "lat": -33.889513,
+      "lng": 151.213176
+    },
+    {
+      "id": "Q45306171",
+      "name": "Prince Edward Theatre",
+      "lat": -33.873334,
+      "lng": 151.20917
+    },
+    {
+      "id": "Q47002424",
+      "name": "Racecourse Drive-In",
+      "lat": -33.915912,
+      "lng": 151.23331
+    },
+    {
+      "id": "Q45306181",
+      "name": "Rapallo Theatre",
+      "lat": -33.870538,
+      "lng": 151.206945
+    },
+    {
+      "id": "Q47002204",
+      "name": "Reading Auburn",
+      "lat": -33.847349,
+      "lng": 151.044846
+    },
+    {
+      "id": "Q45306195",
+      "name": "Reading Market City",
+      "lat": -33.879773,
+      "lng": 151.203388
+    },
+    {
+      "id": "Q47002427",
+      "name": "Reading Rhodes",
+      "lat": -33.832518,
+      "lng": 151.085809
+    },
+    {
+      "id": "Q47002439",
+      "name": "Reading Rouse Hill Cinemas",
+      "lat": -33.69043,
+      "lng": 150.922399
+    },
+    {
+      "id": "Q47002038",
+      "name": "Regal Theatre",
+      "lat": -33.426937,
+      "lng": 151.341851
+    },
+    {
+      "id": "Q47002390",
+      "name": "Rex Theatre",
+      "lat": -33.825718,
+      "lng": 151.243616
+    },
+    {
+      "id": "Q47002361",
+      "name": "Rialto Theatre",
+      "lat": -33.798011,
+      "lng": 151.286457
+    },
+    {
+      "id": "Q47002105",
+      "name": "Richmond Regent Twin Cinema",
+      "lat": -33.597949,
+      "lng": 150.753536
+    },
+    {
+      "id": "Q47002346",
+      "name": "Rio Theatre",
+      "lat": -33.814518,
+      "lng": 151.170024
+    },
+    {
+      "id": "Q47002462",
+      "name": "Rocket Theatre",
+      "lat": -33.784255,
+      "lng": 150.949708
+    },
+    {
+      "id": "Q47002432",
+      "name": "Rose Bay North Kings Theatre",
+      "lat": -33.865226,
+      "lng": 151.278436
+    },
+    {
+      "id": "Q47002376",
+      "name": "Rosebery Cinema",
+      "lat": -33.922599,
+      "lng": 151.201806
+    },
+    {
+      "id": "Q47002436",
+      "name": "Rosebery Theatre",
+      "lat": -33.921857,
+      "lng": 151.197277
+    },
+    {
+      "id": "Q47002437",
+      "name": "Roseville Cinemas",
+      "lat": -33.784229,
+      "lng": 151.176358
+    },
+    {
+      "id": "Q47002400",
+      "name": "Roxy Theatre",
+      "lat": -33.839267,
+      "lng": 151.210122
+    },
+    {
+      "id": "Q47002127",
+      "name": "Royal Picture Theatre",
+      "lat": -33.608096,
+      "lng": 150.818545
+    },
+    {
+      "id": "Q47002475",
+      "name": "Royal Theatre",
+      "lat": -33.816001,
+      "lng": 151.201002
+    },
+    {
+      "id": "Q47002055",
+      "name": "Savoy Cinema",
+      "lat": -33.712829,
+      "lng": 150.312149
+    },
+    {
+      "id": "Q45306208",
+      "name": "Savoy Theatre",
+      "lat": -33.865689,
+      "lng": 151.210232
+    },
+    {
+      "id": "Q47002364",
+      "name": "Silver Screen Theatre",
+      "lat": -33.796656,
+      "lng": 151.287786
+    },
+    {
+      "id": "Q47002154",
+      "name": "Skyline Drive-In",
+      "lat": -33.865177,
+      "lng": 150.911023
+    },
+    {
+      "id": "Q47002379",
+      "name": "Skyline Matraville Drive-In",
+      "lat": -33.962584,
+      "lng": 151.238096
+    },
+    {
+      "id": "Q45305866",
+      "name": "St. George Open Air Cinema",
+      "lat": -33.863796,
+      "lng": 151.220673
+    },
+    {
+      "id": "Q45306222",
+      "name": "St. James Theatre",
+      "lat": -33.869903,
+      "lng": 151.209991
+    },
+    {
+      "id": "Q47002304",
+      "name": "St. Peters Theatre",
+      "lat": -33.905883,
+      "lng": 151.181037
+    },
+    {
+      "id": "Q47002449",
+      "name": "Stanmore Odeon",
+      "lat": -33.899207,
+      "lng": 151.170136
+    },
+    {
+      "id": "Q47002411",
+      "name": "Star Theatre",
+      "lat": -33.956089,
+      "lng": 150.997702
+    },
+    {
+      "id": "Q45306235",
+      "name": "State Newsreel Theatrette",
+      "lat": -33.870894,
+      "lng": 151.207452
+    },
+    {
+      "id": "Q7603582",
+      "name": "State Theatre",
+      "lat": -33.87096,
+      "lng": 151.20739
+    },
+    {
+      "id": "Q47002349",
+      "name": "Strand Theatre",
+      "lat": -33.887715,
+      "lng": 151.161927
+    },
+    {
+      "id": "Q47002452",
+      "name": "Summer Hill Theatre",
+      "lat": -33.890058,
+      "lng": 151.139489
+    },
+    {
+      "id": "Q47002197",
+      "name": "Sun Theatre",
+      "lat": -33.80943,
+      "lng": 151.185671
+    },
+    {
+      "id": "Q47002073",
+      "name": "Tabcorp Park",
+      "lat": -34.101831,
+      "lng": 150.745825
+    },
+    {
+      "id": "Q17027896",
+      "name": "The Ritz Cinema",
+      "lat": -33.92,
+      "lng": 151.243333
+    },
+    {
+      "id": "Q47002065",
+      "name": "Theatre Royal",
+      "lat": -33.482436,
+      "lng": 150.151607
+    },
+    {
+      "id": "Q45306248",
+      "name": "Town Theatre",
+      "lat": -33.873455,
+      "lng": 151.207869
+    },
+    {
+      "id": "Q47002066",
+      "name": "Trades Hall Theatre",
+      "lat": -33.479611,
+      "lng": 150.159392
+    },
+    {
+      "id": "Q47002068",
+      "name": "Union Theatre",
+      "lat": -33.483111,
+      "lng": 150.160959
+    },
+    {
+      "id": "Q47002207",
+      "name": "United Cinemas Avalon",
+      "lat": -33.636808,
+      "lng": 151.328871
+    },
+    {
+      "id": "Q47002056",
+      "name": "United Cinemas Edge Cinema",
+      "lat": -33.708843,
+      "lng": 150.316259
+    },
+    {
+      "id": "Q47002080",
+      "name": "United Cinemas Narellan",
+      "lat": -34.042238,
+      "lng": 150.737118
+    },
+    {
+      "id": "Q118088257",
+      "name": "United Cinemas Opera Quays",
+      "lat": -33.859529,
+      "lng": 151.213128
+    },
+    {
+      "id": "Q47002465",
+      "name": "United Cinemas Warriewood",
+      "lat": -33.693795,
+      "lng": 151.302442
+    },
+    {
+      "id": "Q45306261",
+      "name": "Variety Theatre",
+      "lat": -33.872218,
+      "lng": 151.208541
+    },
+    {
+      "id": "Q47002407",
+      "name": "Verona Cinema",
+      "lat": -33.882583,
+      "lng": 151.219801
+    },
+    {
+      "id": "Q47001972",
+      "name": "Victory Theatre",
+      "lat": -33.636243,
+      "lng": 150.285712
+    },
+    {
+      "id": "Q47002469",
+      "name": "Village Cinema",
+      "lat": -33.844318,
+      "lng": 151.284391
+    },
+    {
+      "id": "Q45306276",
+      "name": "Village Cinema City",
+      "lat": -33.875897,
+      "lng": 151.205898
+    },
+    {
+      "id": "Q47002293",
+      "name": "Village Twin Theatre",
+      "lat": -33.878135,
+      "lng": 151.242505
+    },
+    {
+      "id": "Q47002365",
+      "name": "Vocalist Theatre",
+      "lat": -33.945688,
+      "lng": 151.240527
+    },
+    {
+      "id": "Q47002229",
+      "name": "Warrick Theatre",
+      "lat": -33.769681,
+      "lng": 150.908573
+    },
+    {
+      "id": "Q47002466",
+      "name": "Warriewood Skyline Drive-In",
+      "lat": -33.686605,
+      "lng": 151.294149
+    },
+    {
+      "id": "Q47002252",
+      "name": "Windsor Theatre",
+      "lat": -33.913421,
+      "lng": 151.116513
+    },
+    {
+      "id": "Q47002435",
+      "name": "Wintergarden Theatre",
+      "lat": -33.870697,
+      "lng": 151.267062
+    },
+    {
+      "id": "Q47002134",
+      "name": "Woy Woy Cinema",
+      "lat": -33.492962,
+      "lng": 151.327521
+    },
+    {
+      "id": "Q45306289",
+      "name": "Wynyard Newsreel Theatre",
+      "lat": -33.865405,
+      "lng": 151.207041
+    }
+  ]
 }

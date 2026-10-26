@@ -1,1 +1,522 @@
-{ "category": "library", "source": "none", "places": [] }
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 35.5282,
+    "west": 139.5628,
+    "north": 35.8175,
+    "east": 139.9189
+  },
+  "places": [
+    {
+      "id": "Q11284141",
+      "name": "Ad Museum Tokyo",
+      "lat": 35.664333,
+      "lng": 139.762222
+    },
+    {
+      "id": "Q67175975",
+      "name": "Archives of Modern Japanese Music",
+      "lat": 35.637333,
+      "lng": 139.731028
+    },
+    {
+      "id": "Q30934326",
+      "name": "BIC Library",
+      "lat": 35.659722,
+      "lng": 139.745278
+    },
+    {
+      "id": "Q111736052",
+      "name": "Chuo University Science and Engineering Library",
+      "lat": 35.708499,
+      "lng": 139.74591
+    },
+    {
+      "id": "Q11573388",
+      "name": "Contemporary Manga Library",
+      "lat": 35.709528,
+      "lng": 139.72675
+    },
+    {
+      "id": "Q61887109",
+      "name": "Edogawa City Koiwa Library",
+      "lat": 35.731333,
+      "lng": 139.8905
+    },
+    {
+      "id": "Q728781",
+      "name": "Eisei Bunko Museum",
+      "lat": 35.713171,
+      "lng": 139.723296
+    },
+    {
+      "id": "Q20041605",
+      "name": "Goethe Archive Tokyo",
+      "lat": 35.746194,
+      "lng": 139.739556
+    },
+    {
+      "id": "Q11509583",
+      "name": "Hibiya Library & Museum",
+      "lat": 35.671778,
+      "lng": 139.7545
+    },
+    {
+      "id": "Q11524667",
+      "name": "Historiographical Institute of the University of Tokyo",
+      "lat": 35.712706,
+      "lng": 139.763267
+    },
+    {
+      "id": "Q35443228",
+      "name": "Hozuka Library",
+      "lat": 35.78662,
+      "lng": 139.81605
+    },
+    {
+      "id": "Q24949865",
+      "name": "Institute of Global Concern",
+      "lat": 35.683181,
+      "lng": 139.732061
+    },
+    {
+      "id": "Q4346431",
+      "name": "International Library of Children's Literature",
+      "lat": 35.719583,
+      "lng": 139.773722
+    },
+    {
+      "id": "Q17988745",
+      "name": "Ishikawa Takeyoshi Memorial Library",
+      "lat": 35.700939,
+      "lng": 139.759139
+    },
+    {
+      "id": "Q3776020",
+      "name": "Japan Braille Library",
+      "lat": 35.710889,
+      "lng": 139.704722
+    },
+    {
+      "id": "Q101051941",
+      "name": "Japan Foundation Library",
+      "lat": 35.68753,
+      "lng": 139.72899
+    },
+    {
+      "id": "Q38279308",
+      "name": "Japan Special Libraries Association",
+      "lat": 35.676761,
+      "lng": 139.782042
+    },
+    {
+      "id": "Q35439010",
+      "name": "Kameari Library",
+      "lat": 35.75913,
+      "lng": 139.84606
+    },
+    {
+      "id": "Q48752035",
+      "name": "Katsushikakuritsutateishi Library",
+      "lat": 35.737083,
+      "lng": 139.845722
+    },
+    {
+      "id": "Q17208954",
+      "name": "Kawasaki Shiritsu Nakahara Toshokan",
+      "lat": 35.575866,
+      "lng": 139.659253
+    },
+    {
+      "id": "Q11495141",
+      "name": "Keio University Old Library",
+      "lat": 35.649444,
+      "lng": 139.743806
+    },
+    {
+      "id": "Q35442244",
+      "name": "Komorebi Owada Library",
+      "lat": 35.655746,
+      "lng": 139.700072
+    },
+    {
+      "id": "Q11385448",
+      "name": "Kosei Library",
+      "lat": 35.689987,
+      "lng": 139.665103
+    },
+    {
+      "id": "Q3280212",
+      "name": "Maison franco-japonaise",
+      "lat": 35.644083,
+      "lng": 139.715666
+    },
+    {
+      "id": "Q54645285",
+      "name": "Matsudo city library",
+      "lat": 35.785889,
+      "lng": 139.895944
+    },
+    {
+      "id": "Q61886647",
+      "name": "Matsudoshiritsu Library",
+      "lat": 35.785835,
+      "lng": 139.895955
+    },
+    {
+      "id": "Q61886648",
+      "name": "Matsudoshiritsu Library Akirabunkan",
+      "lat": 35.79208,
+      "lng": 139.91889
+    },
+    {
+      "id": "Q61886649",
+      "name": "Matsudoshiritsu Library Kogasakibunkan",
+      "lat": 35.803542,
+      "lng": 139.900898
+    },
+    {
+      "id": "Q61886655",
+      "name": "Matsudoshiritsu Library Mabashibunkan",
+      "lat": 35.814074,
+      "lng": 139.912341
+    },
+    {
+      "id": "Q61886665",
+      "name": "Matsudoshiritsu Library Nijusseikigaokabunkan",
+      "lat": 35.771487,
+      "lng": 139.908393
+    },
+    {
+      "id": "Q61886658",
+      "name": "Matsudoshiritsu Library Yagiribunkan",
+      "lat": 35.769051,
+      "lng": 139.897215
+    },
+    {
+      "id": "Q61886903",
+      "name": "Meguro City Yakumo Chuo Library",
+      "lat": 35.62148,
+      "lng": 139.67278
+    },
+    {
+      "id": "Q17220188",
+      "name": "Michio Bunko Library",
+      "lat": 35.577309,
+      "lng": 139.719926
+    },
+    {
+      "id": "Q24862422",
+      "name": "Misuterī Bungaku Shiryōkan",
+      "lat": 35.733247,
+      "lng": 139.702544
+    },
+    {
+      "id": "Q30266015",
+      "name": "Mitsui Bunko",
+      "lat": 35.717967,
+      "lng": 139.675965
+    },
+    {
+      "id": "Q477675",
+      "name": "National Diet Library",
+      "lat": 35.678333,
+      "lng": 139.744167
+    },
+    {
+      "id": "Q61887066",
+      "name": "Nerimakuritsuhikarigaoka Library",
+      "lat": 35.763056,
+      "lng": 139.63
+    },
+    {
+      "id": "Q11434308",
+      "name": "Oya Soichi Bunko",
+      "lat": 35.664575,
+      "lng": 139.619294
+    },
+    {
+      "id": "Q28683257",
+      "name": "Sankō Library",
+      "lat": 35.656989,
+      "lng": 139.746642
+    },
+    {
+      "id": "Q3329573",
+      "name": "Seikadō Bunko Library",
+      "lat": 35.622778,
+      "lng": 139.619167
+    },
+    {
+      "id": "Q61886931",
+      "name": "Setagaya City Umegaoka Library",
+      "lat": 35.657443,
+      "lng": 139.654717
+    },
+    {
+      "id": "Q35442218",
+      "name": "Shibuya City Central Library",
+      "lat": 35.67242,
+      "lng": 139.706173
+    },
+    {
+      "id": "Q11561699",
+      "name": "Shibuya City Sasazuka Library",
+      "lat": 35.673475,
+      "lng": 139.667812
+    },
+    {
+      "id": "Q35442322",
+      "name": "Shibuya City Shibuya Library",
+      "lat": 35.656467,
+      "lng": 139.709786
+    },
+    {
+      "id": "Q11500883",
+      "name": "SHIDO-BUNKO, Institute of Oriental Classics, Keio University",
+      "lat": 35.649242,
+      "lng": 139.742889
+    },
+    {
+      "id": "Q21019071",
+      "name": "Shochiku Otani Library",
+      "lat": 35.668278,
+      "lng": 139.769417
+    },
+    {
+      "id": "Q35443118",
+      "name": "Suginamikuritsuasagaya Library",
+      "lat": 35.71175,
+      "lng": 139.63325
+    },
+    {
+      "id": "Q35442898",
+      "name": "Suginamikuritsuminamiogikubo Library",
+      "lat": 35.695,
+      "lng": 139.614583
+    },
+    {
+      "id": "Q11515702",
+      "name": "Supreme Court Library",
+      "lat": 35.68,
+      "lng": 139.743889
+    },
+    {
+      "id": "Q62029384",
+      "name": "Taiwan Cultural Center, Taipei Economic and Cultural Representative Office in Japan",
+      "lat": 35.670069,
+      "lng": 139.751548
+    },
+    {
+      "id": "Q28738875",
+      "name": "The Library of the German Institute for Japanese Studies",
+      "lat": 35.68239,
+      "lng": 139.73414
+    },
+    {
+      "id": "Q11524751",
+      "name": "Tokyo Children's Library",
+      "lat": 35.727611,
+      "lng": 139.675056
+    },
+    {
+      "id": "Q18337459",
+      "name": "Tokyo Metropolitan Archives",
+      "lat": 35.609281,
+      "lng": 139.634032
+    },
+    {
+      "id": "Q11525377",
+      "name": "Tokyo Metropolitan Central Library",
+      "lat": 35.652096,
+      "lng": 139.72634
+    },
+    {
+      "id": "Q61886991",
+      "name": "Toshimakuritsuchihaya Library",
+      "lat": 35.735639,
+      "lng": 139.688417
+    },
+    {
+      "id": "Q61886987",
+      "name": "Toshimakuritsuchuo Library",
+      "lat": 35.727028,
+      "lng": 139.718917
+    },
+    {
+      "id": "Q61886997",
+      "name": "Toshimakuritsuikebukuro Library",
+      "lat": 35.735917,
+      "lng": 139.705806
+    },
+    {
+      "id": "Q61886998",
+      "name": "Toshimakuritsukamiikebukuro Library",
+      "lat": 35.738583,
+      "lng": 139.717028
+    },
+    {
+      "id": "Q61886996",
+      "name": "Toshimakuritsukomagome Library",
+      "lat": 35.737194,
+      "lng": 139.747333
+    },
+    {
+      "id": "Q61886994",
+      "name": "Toshimakuritsumejiro Library",
+      "lat": 35.725778,
+      "lng": 139.698889
+    },
+    {
+      "id": "Q61886988",
+      "name": "Toshimakuritsusugamo Library",
+      "lat": 35.733972,
+      "lng": 139.733139
+    },
+    {
+      "id": "Q11527261",
+      "name": "Tōsho Bunko",
+      "lat": 35.751306,
+      "lng": 139.743389
+    },
+    {
+      "id": "Q1036261",
+      "name": "Tōyō Bunko",
+      "lat": 35.731389,
+      "lng": 139.748611
+    },
+    {
+      "id": "Q7896467",
+      "name": "University of Tokyo Library",
+      "lat": 35.7114,
+      "lng": 139.761
+    },
+    {
+      "id": "Q85880820",
+      "name": "Waseda International House of Literature",
+      "lat": 35.709778,
+      "lng": 139.719889
+    },
+    {
+      "id": "Q7971387",
+      "name": "Waseda University Library",
+      "lat": 35.709,
+      "lng": 139.719
+    },
+    {
+      "id": "Q17193183",
+      "name": "いたばしボローニャ絵本館",
+      "lat": 35.762917,
+      "lng": 139.681639
+    },
+    {
+      "id": "Q35442430",
+      "name": "代々木図書館",
+      "lat": 35.682003,
+      "lng": 139.695962
+    },
+    {
+      "id": "Q11417170",
+      "name": "和光市図書館",
+      "lat": 35.787389,
+      "lng": 139.6075
+    },
+    {
+      "id": "Q35442351",
+      "name": "富ケ谷図書館",
+      "lat": 35.668504,
+      "lng": 139.687247
+    },
+    {
+      "id": "Q11499347",
+      "name": "教科書図書館",
+      "lat": 35.678847,
+      "lng": 139.813867
+    },
+    {
+      "id": "Q29584455",
+      "name": "文京区立本郷図書館",
+      "lat": 35.725564,
+      "lng": 139.761494
+    },
+    {
+      "id": "Q17222065",
+      "name": "文京区立真砂中央図書館",
+      "lat": 35.708556,
+      "lng": 139.757
+    },
+    {
+      "id": "Q11517759",
+      "name": "朝霞市立図書館",
+      "lat": 35.793528,
+      "lng": 139.596111
+    },
+    {
+      "id": "Q123348117",
+      "name": "気象庁図書館",
+      "lat": 35.665817,
+      "lng": 139.74607
+    },
+    {
+      "id": "Q21653252",
+      "name": "渋谷区立本町図書館",
+      "lat": 35.680739,
+      "lng": 139.681641
+    },
+    {
+      "id": "Q11563053",
+      "name": "港区立高輪図書館",
+      "lat": 35.641893,
+      "lng": 139.734365
+    },
+    {
+      "id": "Q35442295",
+      "name": "笹塚こども図書館",
+      "lat": 35.678704,
+      "lng": 139.669747
+    },
+    {
+      "id": "Q11608066",
+      "name": "練馬区立練馬図書館",
+      "lat": 35.733972,
+      "lng": 139.651833
+    },
+    {
+      "id": "Q11610917",
+      "name": "聖三木図書館",
+      "lat": 35.684944,
+      "lng": 139.731306
+    },
+    {
+      "id": "Q35442459",
+      "name": "臨川みんなの図書館",
+      "lat": 35.649499,
+      "lng": 139.716338
+    },
+    {
+      "id": "Q35442378",
+      "name": "西原図書館",
+      "lat": 35.674947,
+      "lng": 139.677734
+    },
+    {
+      "id": "Q11636943",
+      "name": "足立区立中央図書館",
+      "lat": 35.756472,
+      "lng": 139.802361
+    },
+    {
+      "id": "Q141147447",
+      "name": "銀鱗文庫",
+      "lat": 35.644389,
+      "lng": 139.784472
+    },
+    {
+      "id": "Q135553228",
+      "name": "青淵文庫",
+      "lat": 35.749167,
+      "lng": 139.739722
+    }
+  ]
+}

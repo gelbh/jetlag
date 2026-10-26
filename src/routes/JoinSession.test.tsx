@@ -70,28 +70,65 @@ beforeEach(() => {
   );
 });
 
-function advanceToPasscodeStep() {
-  fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
-  fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
-  fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
-  fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
-}
-
 describe("JoinSession", () => {
-  it("renders session code field and step continue control", () => {
+  it("renders session code without Continue or Join before a preview", () => {
     renderJoin();
 
     expect(screen.getByLabelText(/session code/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^continue$/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^continue$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^join session$/i })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^join$/i })).toBeInTheDocument();
   });
 
-  it("disables Continue while the session preview is loading", () => {
-    previewState.value = { ...previewState.value, lookupLoading: true };
+  it("shows session details and RolePicker when preview resolves", () => {
+    previewState.value = {
+      ...previewState.value,
+      previewSession: createTestRemoteSession({
+        gameAreaLabel: "Sydney, Australia",
+        gameSize: "medium",
+        memberRoles: {},
+      }),
+    };
 
     renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
 
-    expect(screen.getByRole("button", { name: /^continue$/i })).toBeDisabled();
+    expect(screen.getByText("Classic Jet Lag")).toBeInTheDocument();
+    expect(screen.getByText(/Location: Sydney, Australia/)).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: /Player side/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^join session$/i })).toBeDisabled();
+  });
+
+  it("enables Join after a role is chosen", () => {
+    previewState.value = {
+      ...previewState.value,
+      previewSession: createTestRemoteSession({ memberRoles: {} }),
+    };
+
+    renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+    fireEvent.click(screen.getByRole("radio", { name: /^Seeker\./i }));
+
+    expect(screen.getByRole("button", { name: /^join session$/i })).not.toBeDisabled();
+    expect(screen.queryByLabelText(/role code/i)).not.toBeInTheDocument();
+  });
+
+  it("hides role code until a side is chosen even when seeker is occupied", () => {
+    previewState.value = {
+      ...previewState.value,
+      previewSession: createTestRemoteSession({ memberRoles: { host: "seeker" } }),
+    };
+
+    renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+
+    expect(screen.queryByLabelText(/role code/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /request access/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: /^Seeker\./i }));
+
+    expect(screen.getByLabelText(/role code/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /request access/i })).toBeInTheDocument();
   });
 
   it("asks for a teammate's code when the chosen side is occupied", () => {
@@ -101,7 +138,8 @@ describe("JoinSession", () => {
     };
 
     renderJoin();
-    advanceToPasscodeStep();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+    fireEvent.click(screen.getByRole("radio", { name: /^Hider\./i }));
 
     expect(screen.getByText("Ask a teammate on that side for the role code.")).toBeInTheDocument();
     expect(screen.queryByText(/Leave it blank only if/)).not.toBeInTheDocument();
@@ -117,7 +155,8 @@ describe("JoinSession", () => {
     };
 
     renderJoin();
-    advanceToPasscodeStep();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+    fireEvent.click(screen.getByRole("radio", { name: /^Seeker\./i }));
 
     expect(
       screen.getByText(
@@ -126,7 +165,7 @@ describe("JoinSession", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows Castle Siege seat picker on the seat step", () => {
+  it("shows Castle Siege details and seat picker without Continue", () => {
     previewState.value = {
       ...previewState.value,
       previewSession: createTestRemoteSession({
@@ -137,10 +176,10 @@ describe("JoinSession", () => {
 
     renderJoin();
     fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
-    fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+
     expect(screen.getByText("Castle Siege")).toBeInTheDocument();
     expect(screen.getByText("Best of 3")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
     expect(screen.getByRole("radiogroup", { name: /Castle Siege seat/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^continue$/i })).not.toBeInTheDocument();
   });
 });

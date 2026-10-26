@@ -71,6 +71,7 @@ export type BuildSessionDocumentOptions = {
   seriesLength?: 1 | 3;
   setupMode?: "pregame" | "fairSplit";
   dials?: CastleSiegeDials;
+  transitStationFilter?: SessionRecord["transitStationFilter"];
 };
 
 function parseSessionMode(value: unknown): SessionMode | undefined {
@@ -338,6 +339,10 @@ export function buildSessionDocument(
     payload.transitMetroId = transitMetroId;
   }
 
+  if (options?.transitStationFilter && options.transitStationFilter !== "all") {
+    payload.transitStationFilter = options.transitStationFilter;
+  }
+
   if (hostAppVersion) {
     payload.hostAppVersion = hostAppVersion;
   }
@@ -446,6 +451,16 @@ export function deserializeSessionFromFirestore(
     tier: parseSessionTier(document.tier),
     transitMetroId:
       typeof document.transitMetroId === "string" ? document.transitMetroId : undefined,
+    transitStationFilter:
+      document.transitStationFilter === "all" ||
+      document.transitStationFilter === "rail" ||
+      document.transitStationFilter === "metro" ||
+      document.transitStationFilter === "tram" ||
+      document.transitStationFilter === "bus" ||
+      document.transitStationFilter === "ferry" ||
+      document.transitStationFilter === "other"
+        ? document.transitStationFilter
+        : undefined,
     endedAt: typeof document.endedAt === "string" ? document.endedAt : undefined,
     status:
       document.status === "active" || document.status === "ended" ? document.status : undefined,

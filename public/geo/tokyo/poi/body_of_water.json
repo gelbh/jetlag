@@ -1,1 +1,24 @@
-{ "category": "body_of_water", "source": "none", "places": [] }
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 35.5282,
+    "west": 139.5628,
+    "north": 35.8175,
+    "east": 139.9189
+  },
+  "places": [
+    {
+      "id": "Q21652344",
+      "name": "朝霞調節池",
+      "lat": 35.814528,
+      "lng": 139.61325
+    },
+    {
+      "id": "Q65276873",
+      "name": "神田川・環状七号線地下調節池",
+      "lat": 35.680347,
+      "lng": 139.656789
+    }
+  ]
+}

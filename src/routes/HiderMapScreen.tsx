@@ -677,6 +677,8 @@ export function HiderMapScreen() {
     ensureWriteAccess: ensureHiderWriteAccess,
     writesEnabled: authReady && Boolean(uid),
     mapPickEnabled,
+    transitMetroId: session?.transitMetroId,
+    transitStationFilter: session?.transitStationFilter,
     ...hiderBoardEconomyZoneOpts(boardEconomyEnabled, boardEconomy.state, boardEconomy.runMove),
   });
 

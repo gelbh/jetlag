@@ -1,6 +1,1680 @@
 {
   "category": "rail_station",
-  "source": "none",
-  "bbox": { "south": -34.2, "west": 150.5, "north": -33.3, "east": 151.35 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -34.3574,
+    "west": 149.9948,
+    "north": -32.9761,
+    "east": 151.363
+  },
+  "places": [
+    {
+      "id": "Q4731188",
+      "name": "Allawah railway station",
+      "lat": -33.969622,
+      "lng": 151.1142
+    },
+    {
+      "id": "Q4794511",
+      "name": "Arncliffe railway station",
+      "lat": -33.936328,
+      "lng": 151.147403
+    },
+    {
+      "id": "Q4797346",
+      "name": "Artarmon railway station",
+      "lat": -33.808653,
+      "lng": 151.184878
+    },
+    {
+      "id": "Q4804978",
+      "name": "Ashfield railway station",
+      "lat": -33.887611,
+      "lng": 151.1255
+    },
+    {
+      "id": "Q4808254",
+      "name": "Asquith railway station",
+      "lat": -33.688572,
+      "lng": 151.107897
+    },
+    {
+      "id": "Q4819340",
+      "name": "Auburn railway station",
+      "lat": -33.849306,
+      "lng": 151.03285
+    },
+    {
+      "id": "Q4823353",
+      "name": "Austinmer railway station",
+      "lat": -34.306448,
+      "lng": 150.929248
+    },
+    {
+      "id": "Q4856687",
+      "name": "Banksia railway station",
+      "lat": -33.945342,
+      "lng": 151.140431
+    },
+    {
+      "id": "Q4856790",
+      "name": "Bankstown railway station",
+      "lat": -33.917869,
+      "lng": 151.034639
+    },
+    {
+      "id": "Q20717240",
+      "name": "Barangaroo railway station",
+      "lat": -33.859675,
+      "lng": 151.202635
+    },
+    {
+      "id": "Q4860238",
+      "name": "Bardwell Park railway station",
+      "lat": -33.931622,
+      "lng": 151.124803
+    },
+    {
+      "id": "Q4860594",
+      "name": "Bargo railway station",
+      "lat": -34.291013,
+      "lng": 150.580078
+    },
+    {
+      "id": "Q4879721",
+      "name": "Beecroft railway station",
+      "lat": -33.749606,
+      "lng": 151.066311
+    },
+    {
+      "id": "Q4883326",
+      "name": "Bell railway station, New South Wales",
+      "lat": -33.505658,
+      "lng": 150.27886
+    },
+    {
+      "id": "Q16926938",
+      "name": "Bella Vista metro station",
+      "lat": -33.731111,
+      "lng": 150.944167
+    },
+    {
+      "id": "Q4884450",
+      "name": "Belmore railway station",
+      "lat": -33.917258,
+      "lng": 151.088711
+    },
+    {
+      "id": "Q58204390",
+      "name": "Ben Bullen railway station",
+      "lat": -33.215,
+      "lng": 150.017778
+    },
+    {
+      "id": "Q4890984",
+      "name": "Berala railway station",
+      "lat": -33.871864,
+      "lng": 151.032211
+    },
+    {
+      "id": "Q4894668",
+      "name": "Berowra railway station",
+      "lat": -33.623483,
+      "lng": 151.153036
+    },
+    {
+      "id": "Q4899569",
+      "name": "Beverly Hills railway station",
+      "lat": -33.948869,
+      "lng": 151.081431
+    },
+    {
+      "id": "Q4899801",
+      "name": "Bexley North railway station",
+      "lat": -33.937497,
+      "lng": 151.113194
+    },
+    {
+      "id": "Q4916962",
+      "name": "Birrong railway station",
+      "lat": -33.893281,
+      "lng": 151.023914
+    },
+    {
+      "id": "Q4923000",
+      "name": "Blackheath railway station, New South Wales",
+      "lat": -33.633255,
+      "lng": 150.284343
+    },
+    {
+      "id": "Q4923490",
+      "name": "Blacktown railway station",
+      "lat": -33.768431,
+      "lng": 150.90735
+    },
+    {
+      "id": "Q4925565",
+      "name": "Blaxland railway station",
+      "lat": -33.743643,
+      "lng": 150.609649
+    },
+    {
+      "id": "Q2737350",
+      "name": "Bondi Junction railway station",
+      "lat": -33.89123,
+      "lng": 151.24844
+    },
+    {
+      "id": "Q16255297",
+      "name": "Bottom Points railway station, New South Wales",
+      "lat": -33.473346,
+      "lng": 150.202492
+    },
+    {
+      "id": "Q99646085",
+      "name": "Bradfield metro station",
+      "lat": -33.924722,
+      "lng": 150.735444
+    },
+    {
+      "id": "Q135397491",
+      "name": "Brickworks railway station",
+      "lat": -33.8398,
+      "lng": 151.0752
+    },
+    {
+      "id": "Q4996662",
+      "name": "Bullaburra railway station",
+      "lat": -33.723572,
+      "lng": 150.414677
+    },
+    {
+      "id": "Q4996906",
+      "name": "Bulli railway station",
+      "lat": -34.334444,
+      "lng": 150.914737
+    },
+    {
+      "id": "Q5001068",
+      "name": "Burwood railway station",
+      "lat": -33.877289,
+      "lng": 151.104319
+    },
+    {
+      "id": "Q5015812",
+      "name": "Cabramatta railway station",
+      "lat": -33.894856,
+      "lng": 150.938614
+    },
+    {
+      "id": "Q107599455",
+      "name": "Camden railway station",
+      "lat": -34.0522,
+      "lng": 150.6984
+    },
+    {
+      "id": "Q5025918",
+      "name": "Camellia railway station",
+      "lat": -33.818361,
+      "lng": 151.024397
+    },
+    {
+      "id": "Q5028228",
+      "name": "Campbelltown railway station",
+      "lat": -34.063658,
+      "lng": 150.814347
+    },
+    {
+      "id": "Q5028550",
+      "name": "Campsie railway station",
+      "lat": -33.910378,
+      "lng": 151.102578
+    },
+    {
+      "id": "Q5032518",
+      "name": "Canley Vale railway station",
+      "lat": -33.886889,
+      "lng": 150.943653
+    },
+    {
+      "id": "Q5033717",
+      "name": "Canterbury railway station",
+      "lat": -33.911878,
+      "lng": 151.118347
+    },
+    {
+      "id": "Q5039635",
+      "name": "Caringbah railway station",
+      "lat": -34.041489,
+      "lng": 151.122253
+    },
+    {
+      "id": "Q5041324",
+      "name": "Carlingford railway station",
+      "lat": -33.782189,
+      "lng": 151.047004
+    },
+    {
+      "id": "Q5043087",
+      "name": "Carlton railway station",
+      "lat": -33.968325,
+      "lng": 151.124333
+    },
+    {
+      "id": "Q5046008",
+      "name": "Carramar railway station",
+      "lat": -33.884256,
+      "lng": 150.961347
+    },
+    {
+      "id": "Q16927048",
+      "name": "Castle Hill metro station",
+      "lat": -33.731601,
+      "lng": 151.007372
+    },
+    {
+      "id": "Q5050940",
+      "name": "Casula railway station",
+      "lat": -33.94985,
+      "lng": 150.91193
+    },
+    {
+      "id": "Q5058713",
+      "name": "Cemetery Station No. 1 railway station",
+      "lat": -33.8697,
+      "lng": 151.051
+    },
+    {
+      "id": "Q5058712",
+      "name": "Cemetery Station No. 2 railway station",
+      "lat": -33.8776,
+      "lng": 151.052
+    },
+    {
+      "id": "Q5058715",
+      "name": "Cemetery Station No. 3 railway station",
+      "lat": -33.8789,
+      "lng": 151.055
+    },
+    {
+      "id": "Q5058716",
+      "name": "Cemetery Station No. 4 railway station",
+      "lat": -33.8739,
+      "lng": 151.06
+    },
+    {
+      "id": "Q1585639",
+      "name": "Central railway station",
+      "lat": -33.8825,
+      "lng": 151.206667
+    },
+    {
+      "id": "Q5087801",
+      "name": "Chatswood railway station",
+      "lat": -33.797322,
+      "lng": 151.180886
+    },
+    {
+      "id": "Q5090256",
+      "name": "Cheltenham railway station",
+      "lat": -33.755839,
+      "lng": 151.07865
+    },
+    {
+      "id": "Q16927063",
+      "name": "Cherrybrook metro station",
+      "lat": -33.736514,
+      "lng": 151.031791
+    },
+    {
+      "id": "Q5093601",
+      "name": "Chester Hill railway station",
+      "lat": -33.8835,
+      "lng": 150.999386
+    },
+    {
+      "id": "Q5121652",
+      "name": "Circular Quay railway station",
+      "lat": -33.861331,
+      "lng": 151.210778
+    },
+    {
+      "id": "Q5126897",
+      "name": "Clarendon railway station",
+      "lat": -33.608997,
+      "lng": 150.788161
+    },
+    {
+      "id": "Q5136808",
+      "name": "Clyburn railway station",
+      "lat": -33.8413,
+      "lng": 151.0244
+    },
+    {
+      "id": "Q5137066",
+      "name": "Clyde railway station",
+      "lat": -33.836172,
+      "lng": 151.017217
+    },
+    {
+      "id": "Q5137853",
+      "name": "Coalcliff railway station",
+      "lat": -34.242171,
+      "lng": 150.977377
+    },
+    {
+      "id": "Q5142738",
+      "name": "Coledale railway station",
+      "lat": -34.289369,
+      "lng": 150.943335
+    },
+    {
+      "id": "Q5155158",
+      "name": "Como railway station",
+      "lat": -34.0043,
+      "lng": 151.068019
+    },
+    {
+      "id": "Q5158901",
+      "name": "Concord West railway station",
+      "lat": -33.848714,
+      "lng": 151.085536
+    },
+    {
+      "id": "Q5163599",
+      "name": "Constance railway station",
+      "lat": -33.196,
+      "lng": 150.249
+    },
+    {
+      "id": "Q5179454",
+      "name": "Cowan railway station",
+      "lat": -33.59354,
+      "lng": 151.17175
+    },
+    {
+      "id": "Q96418169",
+      "name": "Cream Of Tartar Works Platform railway station",
+      "lat": -33.8202,
+      "lng": 151.0338
+    },
+    {
+      "id": "Q5187751",
+      "name": "Cronulla railway station",
+      "lat": -34.055647,
+      "lng": 151.151472
+    },
+    {
+      "id": "Q22271866",
+      "name": "Crows Nest railway station",
+      "lat": -33.825707,
+      "lng": 151.199207
+    },
+    {
+      "id": "Q5189722",
+      "name": "Croydon railway station",
+      "lat": -33.883389,
+      "lng": 151.115619
+    },
+    {
+      "id": "Q126959932",
+      "name": "Currans Hill railway station",
+      "lat": -34.0446,
+      "lng": 150.7575
+    },
+    {
+      "id": "Q5257853",
+      "name": "Denistone railway station",
+      "lat": -33.799839,
+      "lng": 151.087364
+    },
+    {
+      "id": "Q5290203",
+      "name": "Domestic railway station",
+      "lat": -33.933653,
+      "lng": 151.180708
+    },
+    {
+      "id": "Q5297179",
+      "name": "Doonside railway station",
+      "lat": -33.763975,
+      "lng": 150.868428
+    },
+    {
+      "id": "Q5301878",
+      "name": "Douglas Park railway station",
+      "lat": -34.183237,
+      "lng": 150.710117
+    },
+    {
+      "id": "Q5313550",
+      "name": "Dulwich Hill railway station",
+      "lat": -33.910528,
+      "lng": 151.140678
+    },
+    {
+      "id": "Q5314780",
+      "name": "Dundas railway station",
+      "lat": -33.806667,
+      "lng": 151.034444
+    },
+    {
+      "id": "Q5328615",
+      "name": "East Hills railway station",
+      "lat": -33.961506,
+      "lng": 150.984978
+    },
+    {
+      "id": "Q5329246",
+      "name": "East Richmond railway station",
+      "lat": -33.601875,
+      "lng": 150.759783
+    },
+    {
+      "id": "Q5331038",
+      "name": "Eastwood railway station",
+      "lat": -33.790178,
+      "lng": 151.082261
+    },
+    {
+      "id": "Q5337745",
+      "name": "Edgecliff railway station",
+      "lat": -33.879111,
+      "lng": 151.2362
+    },
+    {
+      "id": "Q5338965",
+      "name": "Edmondson Park railway station",
+      "lat": -33.969194,
+      "lng": 150.858678
+    },
+    {
+      "id": "Q127781254",
+      "name": "Elderslie railway station, Sydney",
+      "lat": -34.0543,
+      "lng": 150.7068
+    },
+    {
+      "id": "Q5374857",
+      "name": "Emu Plains railway station",
+      "lat": -33.745681,
+      "lng": 150.671889
+    },
+    {
+      "id": "Q5377390",
+      "name": "Engadine railway station",
+      "lat": -34.067631,
+      "lng": 151.014731
+    },
+    {
+      "id": "Q5383901",
+      "name": "Epping railway station",
+      "lat": -33.773172,
+      "lng": 151.082219
+    },
+    {
+      "id": "Q5395859",
+      "name": "Erskineville railway station",
+      "lat": -33.900986,
+      "lng": 151.185261
+    },
+    {
+      "id": "Q56806258",
+      "name": "Eskbank Railway Station, New South Wales",
+      "lat": -33.478865,
+      "lng": 150.163604
+    },
+    {
+      "id": "Q5430413",
+      "name": "Fairfield railway station",
+      "lat": -33.872433,
+      "lng": 150.957058
+    },
+    {
+      "id": "Q5438097",
+      "name": "Faulconbridge railway station",
+      "lat": -33.696445,
+      "lng": 150.535017
+    },
+    {
+      "id": "Q85761154",
+      "name": "Five Dock railway station",
+      "lat": -33.867378,
+      "lng": 151.129467
+    },
+    {
+      "id": "Q5458627",
+      "name": "Flemington railway station",
+      "lat": -33.864956,
+      "lng": 151.069878
+    },
+    {
+      "id": "Q20718108",
+      "name": "Gadigal metro station",
+      "lat": -33.87385,
+      "lng": 151.20863
+    },
+    {
+      "id": "Q5568209",
+      "name": "Glenbrook railway station",
+      "lat": -33.76903,
+      "lng": 150.62074
+    },
+    {
+      "id": "Q5568515",
+      "name": "Glenfield railway station",
+      "lat": -33.972214,
+      "lng": 150.893069
+    },
+    {
+      "id": "Q5586031",
+      "name": "Gordon railway station",
+      "lat": -33.7561,
+      "lng": 151.154481
+    },
+    {
+      "id": "Q5587195",
+      "name": "Gosford railway station",
+      "lat": -33.423687,
+      "lng": 151.341664
+    },
+    {
+      "id": "Q127691205",
+      "name": "Grahams Hill railway station",
+      "lat": -34.0408,
+      "lng": 150.7311
+    },
+    {
+      "id": "Q5596979",
+      "name": "Granville railway station",
+      "lat": -33.833203,
+      "lng": 151.012458
+    },
+    {
+      "id": "Q5603235",
+      "name": "Green Square railway station",
+      "lat": -33.905989,
+      "lng": 151.202714
+    },
+    {
+      "id": "Q5615859",
+      "name": "Guildford railway station",
+      "lat": -33.8545,
+      "lng": 150.984408
+    },
+    {
+      "id": "Q5624155",
+      "name": "Gymea railway station",
+      "lat": -34.0349,
+      "lng": 151.085389
+    },
+    {
+      "id": "Q96418529",
+      "name": "Hardies Platform railway station",
+      "lat": -33.81951,
+      "lng": 151.023986
+    },
+    {
+      "id": "Q13219741",
+      "name": "Harris Park railway station",
+      "lat": -33.8232,
+      "lng": 151.008
+    },
+    {
+      "id": "Q14934826",
+      "name": "Hawkesbury River railway station",
+      "lat": -33.546844,
+      "lng": 151.226305
+    },
+    {
+      "id": "Q5688042",
+      "name": "Hazelbrook railway station",
+      "lat": -33.723978,
+      "lng": 150.454475
+    },
+    {
+      "id": "Q13219771",
+      "name": "Heathcote railway station",
+      "lat": -34.088199,
+      "lng": 151.008019
+    },
+    {
+      "id": "Q5704044",
+      "name": "Helensburgh railway station",
+      "lat": -34.176993,
+      "lng": 150.994554
+    },
+    {
+      "id": "Q16927462",
+      "name": "Hills Showground metro station",
+      "lat": -33.727778,
+      "lng": 150.9875
+    },
+    {
+      "id": "Q5884489",
+      "name": "Holsworthy railway station",
+      "lat": -33.9632,
+      "lng": 150.956772
+    },
+    {
+      "id": "Q13219786",
+      "name": "Homebush railway station",
+      "lat": -33.867,
+      "lng": 151.087
+    },
+    {
+      "id": "Q12060538",
+      "name": "Hornsby railway station",
+      "lat": -33.702989,
+      "lng": 151.098567
+    },
+    {
+      "id": "Q107103972",
+      "name": "Hunter Street railway station",
+      "lat": -33.865664,
+      "lng": 151.209647
+    },
+    {
+      "id": "Q5946764",
+      "name": "Hurlstone Park railway station",
+      "lat": -33.9102,
+      "lng": 151.1324
+    },
+    {
+      "id": "Q5948687",
+      "name": "Hurstville railway station",
+      "lat": -33.967258,
+      "lng": 151.102369
+    },
+    {
+      "id": "Q6032562",
+      "name": "Ingleburn railway station",
+      "lat": -33.997325,
+      "lng": 150.864722
+    },
+    {
+      "id": "Q12060765",
+      "name": "International railway station",
+      "lat": -33.934058,
+      "lng": 151.165783
+    },
+    {
+      "id": "Q6155087",
+      "name": "Jannali railway station",
+      "lat": -34.016,
+      "lng": 151.064581
+    },
+    {
+      "id": "Q6377796",
+      "name": "Katoomba railway station",
+      "lat": -33.711904,
+      "lng": 150.311347
+    },
+    {
+      "id": "Q16927255",
+      "name": "Kellyville metro station",
+      "lat": -33.713711,
+      "lng": 150.935446
+    },
+    {
+      "id": "Q126946456",
+      "name": "Kenny Hill railway station",
+      "lat": -34.0551,
+      "lng": 150.7763
+    },
+    {
+      "id": "Q6407291",
+      "name": "Killara railway station",
+      "lat": -33.765519,
+      "lng": 151.161669
+    },
+    {
+      "id": "Q1851882",
+      "name": "Kings Cross railway station",
+      "lat": -33.874681,
+      "lng": 151.222419
+    },
+    {
+      "id": "Q6413226",
+      "name": "Kingsgrove railway station",
+      "lat": -33.940644,
+      "lng": 151.100511
+    },
+    {
+      "id": "Q6413790",
+      "name": "Kingswood railway station",
+      "lat": -33.758256,
+      "lng": 150.720211
+    },
+    {
+      "id": "Q127699545",
+      "name": "Kirkham railway station",
+      "lat": -34.0466,
+      "lng": 150.7166
+    },
+    {
+      "id": "Q6416000",
+      "name": "Kirrawee railway station",
+      "lat": -34.034983,
+      "lng": 151.071175
+    },
+    {
+      "id": "Q6425775",
+      "name": "Kogarah railway station",
+      "lat": -33.962231,
+      "lng": 151.132614
+    },
+    {
+      "id": "Q6430607",
+      "name": "Koolewong railway station",
+      "lat": -33.4664,
+      "lng": 151.319
+    },
+    {
+      "id": "Q6478868",
+      "name": "Lakemba railway station",
+      "lat": -33.920089,
+      "lng": 151.076078
+    },
+    {
+      "id": "Q14934870",
+      "name": "Lapstone railway station",
+      "lat": -33.7736,
+      "lng": 150.6427
+    },
+    {
+      "id": "Q14934872",
+      "name": "Lawson railway station",
+      "lat": -33.719,
+      "lng": 150.4299
+    },
+    {
+      "id": "Q6519803",
+      "name": "Leightonfield railway station",
+      "lat": -33.881478,
+      "lng": 150.9848
+    },
+    {
+      "id": "Q6527804",
+      "name": "Leppington railway station",
+      "lat": -33.955,
+      "lng": 150.808
+    },
+    {
+      "id": "Q13219799",
+      "name": "Leumeah railway station",
+      "lat": -34.050928,
+      "lng": 150.830267
+    },
+    {
+      "id": "Q6534609",
+      "name": "Leura railway station",
+      "lat": -33.711877,
+      "lng": 150.330461
+    },
+    {
+      "id": "Q6537342",
+      "name": "Lewisham railway station",
+      "lat": -33.893419,
+      "lng": 151.147619
+    },
+    {
+      "id": "Q6543598",
+      "name": "Lidcombe railway station",
+      "lat": -33.863875,
+      "lng": 151.045192
+    },
+    {
+      "id": "Q6548642",
+      "name": "Lilyvale railway station",
+      "lat": -34.198333,
+      "lng": 151.001111
+    },
+    {
+      "id": "Q6552367",
+      "name": "Linden railway station",
+      "lat": -33.714912,
+      "lng": 150.505453
+    },
+    {
+      "id": "Q6552466",
+      "name": "Lindfield railway station",
+      "lat": -33.775131,
+      "lng": 151.169
+    },
+    {
+      "id": "Q6647866",
+      "name": "Lithgow railway station",
+      "lat": -33.480487,
+      "lng": 150.157388
+    },
+    {
+      "id": "Q12061337",
+      "name": "Liverpool railway station",
+      "lat": -33.924953,
+      "lng": 150.927156
+    },
+    {
+      "id": "Q6666738",
+      "name": "Loftus railway station",
+      "lat": -34.045119,
+      "lng": 151.051278
+    },
+    {
+      "id": "Q130535598",
+      "name": "Log Cabin railway station",
+      "lat": -33.7466,
+      "lng": 150.6831
+    },
+    {
+      "id": "Q6696383",
+      "name": "Lucasville",
+      "lat": -33.761181,
+      "lng": 150.639052
+    },
+    {
+      "id": "Q104858460",
+      "name": "Luddenham railway station",
+      "lat": -33.8385,
+      "lng": 150.740389
+    },
+    {
+      "id": "Q6722672",
+      "name": "Macarthur railway station",
+      "lat": -34.071894,
+      "lng": 150.796869
+    },
+    {
+      "id": "Q6723000",
+      "name": "Macdonaldtown railway station",
+      "lat": -33.896739,
+      "lng": 151.1864
+    },
+    {
+      "id": "Q6724967",
+      "name": "Macquarie Fields railway station",
+      "lat": -33.985,
+      "lng": 150.878528
+    },
+    {
+      "id": "Q7212362",
+      "name": "Macquarie Park metro station",
+      "lat": -33.785094,
+      "lng": 151.128392
+    },
+    {
+      "id": "Q6725028",
+      "name": "Macquarie University metro station",
+      "lat": -33.777336,
+      "lng": 151.118075
+    },
+    {
+      "id": "Q6742888",
+      "name": "Maldon railway station",
+      "lat": -34.198333,
+      "lng": 150.634444
+    },
+    {
+      "id": "Q6755118",
+      "name": "Marayong railway station",
+      "lat": -33.7461,
+      "lng": 150.900161
+    },
+    {
+      "id": "Q6772915",
+      "name": "Marrickville railway station",
+      "lat": -33.914081,
+      "lng": 151.154078
+    },
+    {
+      "id": "Q6776386",
+      "name": "Martin Place railway station",
+      "lat": -33.86785,
+      "lng": 151.210139
+    },
+    {
+      "id": "Q126910546",
+      "name": "Maryfields railway station",
+      "lat": -34.0647,
+      "lng": 150.7919
+    },
+    {
+      "id": "Q6782892",
+      "name": "Mascot railway station",
+      "lat": -33.922533,
+      "lng": 151.187261
+    },
+    {
+      "id": "Q6803312",
+      "name": "Meadowbank railway station",
+      "lat": -33.816356,
+      "lng": 151.090019
+    },
+    {
+      "id": "Q6807239",
+      "name": "Medlow Bath railway station",
+      "lat": -33.673595,
+      "lng": 150.280674
+    },
+    {
+      "id": "Q6816450",
+      "name": "Menangle Park railway station",
+      "lat": -34.103741,
+      "lng": 150.744953
+    },
+    {
+      "id": "Q14934897",
+      "name": "Menangle railway station",
+      "lat": -34.1256,
+      "lng": 150.7442
+    },
+    {
+      "id": "Q6820505",
+      "name": "Merrylands railway station",
+      "lat": -33.836392,
+      "lng": 150.992925
+    },
+    {
+      "id": "Q130223600",
+      "name": "Metropolitan Meat Platform railway station",
+      "lat": -33.8505,
+      "lng": 151.07
+    },
+    {
+      "id": "Q6860759",
+      "name": "Milsons Point (Lavender Bay sites) railway stations",
+      "lat": -33.84509,
+      "lng": 151.20958
+    },
+    {
+      "id": "Q2295534",
+      "name": "Milsons Point railway station",
+      "lat": -33.8461,
+      "lng": 151.2118
+    },
+    {
+      "id": "Q6869674",
+      "name": "Minto railway station",
+      "lat": -34.027331,
+      "lng": 150.842536
+    },
+    {
+      "id": "Q6872848",
+      "name": "Miranda railway station",
+      "lat": -34.036244,
+      "lng": 151.102122
+    },
+    {
+      "id": "Q13219851",
+      "name": "Mortdale railway station",
+      "lat": -33.9707,
+      "lng": 151.081
+    },
+    {
+      "id": "Q6920200",
+      "name": "Mount Colah railway station",
+      "lat": -33.671997,
+      "lng": 151.114531
+    },
+    {
+      "id": "Q12062110",
+      "name": "Mount Druitt railway station",
+      "lat": -33.769614,
+      "lng": 150.819797
+    },
+    {
+      "id": "Q6921729",
+      "name": "Mount Kuring-gai railway station",
+      "lat": -33.653033,
+      "lng": 151.136864
+    },
+    {
+      "id": "Q6924438",
+      "name": "Mount Victoria railway station",
+      "lat": -33.587856,
+      "lng": 150.256914
+    },
+    {
+      "id": "Q6933978",
+      "name": "Mulgrave railway station",
+      "lat": -33.626731,
+      "lng": 150.830231
+    },
+    {
+      "id": "Q6941132",
+      "name": "Museum railway station",
+      "lat": -33.8762,
+      "lng": 151.2097
+    },
+    {
+      "id": "Q6965396",
+      "name": "Narara railway station",
+      "lat": -33.394815,
+      "lng": 151.344266
+    },
+    {
+      "id": "Q127417081",
+      "name": "Narellan railway station",
+      "lat": -34.0394,
+      "lng": 150.7366
+    },
+    {
+      "id": "Q6966519",
+      "name": "Narwee railway station",
+      "lat": -33.947383,
+      "lng": 151.069947
+    },
+    {
+      "id": "Q13219858",
+      "name": "Newtown railway station",
+      "lat": -33.8979,
+      "lng": 151.18
+    },
+    {
+      "id": "Q14934954",
+      "name": "Niagara Park railway station",
+      "lat": -33.3832,
+      "lng": 151.3545
+    },
+    {
+      "id": "Q7053077",
+      "name": "Normanhurst railway station",
+      "lat": -33.720903,
+      "lng": 151.097147
+    },
+    {
+      "id": "Q7056566",
+      "name": "North Ryde metro station",
+      "lat": -33.794678,
+      "lng": 151.138439
+    },
+    {
+      "id": "Q7056879",
+      "name": "North Strathfield railway station",
+      "lat": -33.858939,
+      "lng": 151.088081
+    },
+    {
+      "id": "Q2356455",
+      "name": "North Sydney railway station",
+      "lat": -33.841111,
+      "lng": 151.207222
+    },
+    {
+      "id": "Q16927372",
+      "name": "Norwest metro station",
+      "lat": -33.734251,
+      "lng": 150.963931
+    },
+    {
+      "id": "Q7074501",
+      "name": "Oatley railway station",
+      "lat": -33.980669,
+      "lng": 151.079019
+    },
+    {
+      "id": "Q7089111",
+      "name": "Olympic Park railway station",
+      "lat": -33.846631,
+      "lng": 151.069483
+    },
+    {
+      "id": "Q104858459",
+      "name": "Orchard Hills railway station",
+      "lat": -33.787694,
+      "lng": 150.75325
+    },
+    {
+      "id": "Q7108543",
+      "name": "Otford railway station, New South Wales",
+      "lat": -34.210436,
+      "lng": 151.006125
+    },
+    {
+      "id": "Q7123964",
+      "name": "Padstow railway station",
+      "lat": -33.951889,
+      "lng": 151.032325
+    },
+    {
+      "id": "Q7130031",
+      "name": "Panania railway station",
+      "lat": -33.954336,
+      "lng": 150.997781
+    },
+    {
+      "id": "Q7139752",
+      "name": "Parramatta railway station",
+      "lat": -33.817708,
+      "lng": 151.005569
+    },
+    {
+      "id": "Q7162442",
+      "name": "Pendle Hill railway station",
+      "lat": -33.801533,
+      "lng": 150.956439
+    },
+    {
+      "id": "Q13219867",
+      "name": "Pennant Hills railway station",
+      "lat": -33.738,
+      "lng": 151.072
+    },
+    {
+      "id": "Q7164620",
+      "name": "Penrith railway station",
+      "lat": -33.750069,
+      "lng": 150.696192
+    },
+    {
+      "id": "Q7164748",
+      "name": "Penshurst railway station",
+      "lat": -33.966172,
+      "lng": 151.089133
+    },
+    {
+      "id": "Q7178226",
+      "name": "Petersham railway station",
+      "lat": -33.893961,
+      "lng": 151.155169
+    },
+    {
+      "id": "Q7191114",
+      "name": "Picton railway station",
+      "lat": -34.179088,
+      "lng": 150.612575
+    },
+    {
+      "id": "Q7207984",
+      "name": "Point Clare railway station",
+      "lat": -33.4462,
+      "lng": 151.329
+    },
+    {
+      "id": "Q7259975",
+      "name": "Punchbowl railway station",
+      "lat": -33.925478,
+      "lng": 151.055867
+    },
+    {
+      "id": "Q7263110",
+      "name": "Pymble railway station",
+      "lat": -33.744789,
+      "lng": 151.142219
+    },
+    {
+      "id": "Q7268588",
+      "name": "Quakers Hill railway station",
+      "lat": -33.728081,
+      "lng": 150.886769
+    },
+    {
+      "id": "Q7305835",
+      "name": "Redfern railway station",
+      "lat": -33.892019,
+      "lng": 151.198731
+    },
+    {
+      "id": "Q2373736",
+      "name": "Regent Street railway station",
+      "lat": -33.8868,
+      "lng": 151.2024
+    },
+    {
+      "id": "Q7308134",
+      "name": "Regents Park railway station",
+      "lat": -33.882986,
+      "lng": 151.024169
+    },
+    {
+      "id": "Q7318326",
+      "name": "Revesby railway station",
+      "lat": -33.952439,
+      "lng": 151.014819
+    },
+    {
+      "id": "Q7321047",
+      "name": "Rhodes railway station",
+      "lat": -33.830528,
+      "lng": 151.086983
+    },
+    {
+      "id": "Q7331057",
+      "name": "Richmond railway station",
+      "lat": -33.599128,
+      "lng": 150.753183
+    },
+    {
+      "id": "Q131299108",
+      "name": "River Wharf railway station",
+      "lat": -33.5403,
+      "lng": 151.2305
+    },
+    {
+      "id": "Q7338659",
+      "name": "Riverstone railway station",
+      "lat": -33.679131,
+      "lng": 150.860331
+    },
+    {
+      "id": "Q7338803",
+      "name": "Riverwood railway station",
+      "lat": -33.951528,
+      "lng": 151.052069
+    },
+    {
+      "id": "Q7355031",
+      "name": "Rockdale railway station",
+      "lat": -33.952053,
+      "lng": 151.136658
+    },
+    {
+      "id": "Q7366237",
+      "name": "Rookwood railway station, Sydney",
+      "lat": -33.8646,
+      "lng": 151.0525
+    },
+    {
+      "id": "Q7366680",
+      "name": "Rooty Hill railway station",
+      "lat": -33.771564,
+      "lng": 150.845094
+    },
+    {
+      "id": "Q7368208",
+      "name": "Rosehill railway station",
+      "lat": -33.823292,
+      "lng": 151.022069
+    },
+    {
+      "id": "Q7368745",
+      "name": "Roseville railway station",
+      "lat": -33.784211,
+      "lng": 151.177281
+    },
+    {
+      "id": "Q16927449",
+      "name": "Rouse Hill metro station",
+      "lat": -33.691301,
+      "lng": 150.923669
+    },
+    {
+      "id": "Q19878299",
+      "name": "Rydal railway station",
+      "lat": -33.4836,
+      "lng": 150.0318
+    },
+    {
+      "id": "Q7384868",
+      "name": "Rydalmere railway station",
+      "lat": -33.815,
+      "lng": 151.034444
+    },
+    {
+      "id": "Q7430327",
+      "name": "Scarborough railway station, New South Wales",
+      "lat": -34.264931,
+      "lng": 150.965731
+    },
+    {
+      "id": "Q7432006",
+      "name": "Schofields railway station",
+      "lat": -33.704669,
+      "lng": 150.873903
+    },
+    {
+      "id": "Q7446129",
+      "name": "Sefton railway station",
+      "lat": -33.8853,
+      "lng": 151.011525
+    },
+    {
+      "id": "Q13219875",
+      "name": "Seven Hills railway station",
+      "lat": -33.7744,
+      "lng": 150.937
+    },
+    {
+      "id": "Q7581283",
+      "name": "Springwood railway station",
+      "lat": -33.698931,
+      "lng": 150.563765
+    },
+    {
+      "id": "Q7593512",
+      "name": "St James railway station",
+      "lat": -33.870403,
+      "lng": 151.211197
+    },
+    {
+      "id": "Q7594018",
+      "name": "St Leonards railway station",
+      "lat": -33.822231,
+      "lng": 151.194131
+    },
+    {
+      "id": "Q7594682",
+      "name": "St Marys railway station",
+      "lat": -33.762186,
+      "lng": 150.775583
+    },
+    {
+      "id": "Q7595383",
+      "name": "St Peters railway station",
+      "lat": -33.907458,
+      "lng": 151.180275
+    },
+    {
+      "id": "Q7600107",
+      "name": "Stanmore railway station",
+      "lat": -33.8944,
+      "lng": 151.164
+    },
+    {
+      "id": "Q7600310",
+      "name": "Stanwell Park railway station",
+      "lat": -34.226494,
+      "lng": 150.981063
+    },
+    {
+      "id": "Q7622110",
+      "name": "Strathfield railway station",
+      "lat": -33.8718,
+      "lng": 151.094331
+    },
+    {
+      "id": "Q12070273",
+      "name": "Summer Hill railway station",
+      "lat": -33.89055,
+      "lng": 151.139511
+    },
+    {
+      "id": "Q2866507",
+      "name": "Sutherland railway station",
+      "lat": -34.03175,
+      "lng": 151.057319
+    },
+    {
+      "id": "Q7659790",
+      "name": "Sydenham railway station",
+      "lat": -33.915,
+      "lng": 151.167778
+    },
+    {
+      "id": "Q7675598",
+      "name": "Tahmoor railway station",
+      "lat": -34.22361,
+      "lng": 150.589959
+    },
+    {
+      "id": "Q16927099",
+      "name": "Tallawong metro station",
+      "lat": -33.691757,
+      "lng": 150.905458
+    },
+    {
+      "id": "Q7687120",
+      "name": "Tascott railway station",
+      "lat": -33.451,
+      "lng": 151.319
+    },
+    {
+      "id": "Q7697822",
+      "name": "Telopea railway station",
+      "lat": -33.798333,
+      "lng": 151.034444
+    },
+    {
+      "id": "Q7698269",
+      "name": "Tempe railway station",
+      "lat": -33.924497,
+      "lng": 151.15645
+    },
+    {
+      "id": "Q7785128",
+      "name": "Thirroul railway station",
+      "lat": -34.318048,
+      "lng": 150.918911
+    },
+    {
+      "id": "Q7796459",
+      "name": "Thornleigh railway station",
+      "lat": -33.731881,
+      "lng": 151.078253
+    },
+    {
+      "id": "Q7824178",
+      "name": "Toongabbie railway station",
+      "lat": -33.787408,
+      "lng": 150.951567
+    },
+    {
+      "id": "Q16939619",
+      "name": "Top Points railway station",
+      "lat": -33.47119,
+      "lng": 150.18965
+    },
+    {
+      "id": "Q7829976",
+      "name": "Town Hall railway station",
+      "lat": -33.8734,
+      "lng": 151.206781
+    },
+    {
+      "id": "Q7856214",
+      "name": "Turramurra railway station",
+      "lat": -33.732419,
+      "lng": 151.128461
+    },
+    {
+      "id": "Q7856222",
+      "name": "Turrella railway station",
+      "lat": -33.929947,
+      "lng": 151.139947
+    },
+    {
+      "id": "Q7912086",
+      "name": "Valley Heights railway station",
+      "lat": -33.704541,
+      "lng": 150.583876
+    },
+    {
+      "id": "Q20861559",
+      "name": "Victoria Cross railway station",
+      "lat": -33.836455,
+      "lng": 151.207414
+    },
+    {
+      "id": "Q7930979",
+      "name": "Villawood railway station",
+      "lat": -33.880881,
+      "lng": 150.976089
+    },
+    {
+      "id": "Q7932497",
+      "name": "Vineyard railway station",
+      "lat": -33.650978,
+      "lng": 150.851072
+    },
+    {
+      "id": "Q12072386",
+      "name": "Wahroonga railway station",
+      "lat": -33.717511,
+      "lng": 151.116981
+    },
+    {
+      "id": "Q7960475",
+      "name": "Waitara railway station",
+      "lat": -33.710111,
+      "lng": 151.104439
+    },
+    {
+      "id": "Q24185350",
+      "name": "Wallerawang railway station",
+      "lat": -33.4079,
+      "lng": 150.0681
+    },
+    {
+      "id": "Q7969966",
+      "name": "Warrawee railway station",
+      "lat": -33.724239,
+      "lng": 151.121761
+    },
+    {
+      "id": "Q7970700",
+      "name": "Warrimoo railway station",
+      "lat": -33.721228,
+      "lng": 150.602104
+    },
+    {
+      "id": "Q7971134",
+      "name": "Warwick Farm railway station",
+      "lat": -33.913369,
+      "lng": 150.935039
+    },
+    {
+      "id": "Q7973970",
+      "name": "Waterfall railway station, Sydney",
+      "lat": -34.134361,
+      "lng": 150.994519
+    },
+    {
+      "id": "Q24190750",
+      "name": "Waterloo railway station, Sydney",
+      "lat": -33.897707,
+      "lng": 151.200321
+    },
+    {
+      "id": "Q7975506",
+      "name": "Waverton railway station",
+      "lat": -33.8379,
+      "lng": 151.1975
+    },
+    {
+      "id": "Q7983019",
+      "name": "Wentworth Falls railway station",
+      "lat": -33.709878,
+      "lng": 150.376418
+    },
+    {
+      "id": "Q7983052",
+      "name": "Wentworthville railway station",
+      "lat": -33.807239,
+      "lng": 150.972628
+    },
+    {
+      "id": "Q7983590",
+      "name": "Werrington railway station",
+      "lat": -33.759278,
+      "lng": 150.758356
+    },
+    {
+      "id": "Q7986412",
+      "name": "West Ryde railway station",
+      "lat": -33.807233,
+      "lng": 151.090206
+    },
+    {
+      "id": "Q7989079",
+      "name": "Westmead railway station",
+      "lat": -33.808531,
+      "lng": 150.987972
+    },
+    {
+      "id": "Q13219893",
+      "name": "Wiley Park railway station",
+      "lat": -33.9229,
+      "lng": 151.067
+    },
+    {
+      "id": "Q8024759",
+      "name": "Windsor railway station",
+      "lat": -33.613811,
+      "lng": 150.810833
+    },
+    {
+      "id": "Q8030356",
+      "name": "Wolli Creek railway station",
+      "lat": -33.928317,
+      "lng": 151.154025
+    },
+    {
+      "id": "Q8030384",
+      "name": "Wollstonecraft railway station",
+      "lat": -33.832,
+      "lng": 151.1917
+    },
+    {
+      "id": "Q8030781",
+      "name": "Wombarra railway station",
+      "lat": -34.275686,
+      "lng": 150.953361
+    },
+    {
+      "id": "Q8031707",
+      "name": "Wondabyne railway station",
+      "lat": -33.4922,
+      "lng": 151.257
+    },
+    {
+      "id": "Q8032672",
+      "name": "Woodford railway station",
+      "lat": -33.735484,
+      "lng": 150.482172
+    },
+    {
+      "id": "Q8033832",
+      "name": "Woollahra railway station",
+      "lat": -33.88535,
+      "lng": 151.24294
+    },
+    {
+      "id": "Q8033909",
+      "name": "Woolooware railway station",
+      "lat": -34.047678,
+      "lng": 151.144036
+    },
+    {
+      "id": "Q8034015",
+      "name": "Woonona railway station",
+      "lat": -34.349699,
+      "lng": 150.915139
+    },
+    {
+      "id": "Q8037476",
+      "name": "Woy Woy railway station",
+      "lat": -33.4842,
+      "lng": 151.324
+    },
+    {
+      "id": "Q8040272",
+      "name": "Wynyard railway station",
+      "lat": -33.865869,
+      "lng": 151.205547
+    },
+    {
+      "id": "Q8046737",
+      "name": "Yagoona railway station",
+      "lat": -33.906631,
+      "lng": 151.024197
+    },
+    {
+      "id": "Q130240362",
+      "name": "Yanderra railway station",
+      "lat": -34.3244,
+      "lng": 150.5675
+    },
+    {
+      "id": "Q13219898",
+      "name": "Yennora railway station",
+      "lat": -33.8647,
+      "lng": 150.971
+    },
+    {
+      "id": "Q8071754",
+      "name": "Zig Zag railway station",
+      "lat": -33.4705,
+      "lng": 150.2005
+    }
+  ]
 }

@@ -1,1 +1,222 @@
-{ "category": "library", "source": "none", "places": [] }
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 34.5865,
+    "west": 135.3435,
+    "north": 34.7688,
+    "east": 135.5993
+  },
+  "places": [
+    {
+      "id": "Q61888400",
+      "name": "Kadoma City Library",
+      "lat": 34.737686,
+      "lng": 135.5849
+    },
+    {
+      "id": "Q61888379",
+      "name": "Matsubarashimimmiyake Library",
+      "lat": 34.588421,
+      "lng": 135.556412
+    },
+    {
+      "id": "Q61888351",
+      "name": "Moriguchi Lifelong-Learning Information & Center",
+      "lat": 34.751797,
+      "lng": 135.577744
+    },
+    {
+      "id": "Q11441549",
+      "name": "Osaka Labor Archive",
+      "lat": 34.689917,
+      "lng": 135.512944
+    },
+    {
+      "id": "Q11440766",
+      "name": "Osaka Municipal Abeno Library",
+      "lat": 34.640583,
+      "lng": 135.5105
+    },
+    {
+      "id": "Q11440525",
+      "name": "Osaka Municipal Asahi Library",
+      "lat": 34.721278,
+      "lng": 135.542417
+    },
+    {
+      "id": "Q11440289",
+      "name": "Osaka Municipal Central Library",
+      "lat": 34.673944,
+      "lng": 135.485972
+    },
+    {
+      "id": "Q11440674",
+      "name": "Osaka Municipal Fukushima Library",
+      "lat": 34.691528,
+      "lng": 135.473083
+    },
+    {
+      "id": "Q11440552",
+      "name": "Osaka Municipal Higashinari Library",
+      "lat": 34.668056,
+      "lng": 135.541389
+    },
+    {
+      "id": "Q11440548",
+      "name": "Osaka Municipal Higashisumiyoshi Library",
+      "lat": 34.620583,
+      "lng": 135.527556
+    },
+    {
+      "id": "Q11440556",
+      "name": "Osaka Municipal Higashiyodogawa Library",
+      "lat": 34.733972,
+      "lng": 135.519778
+    },
+    {
+      "id": "Q11440484",
+      "name": "Osaka Municipal Hirano Library",
+      "lat": 34.624361,
+      "lng": 135.559361
+    },
+    {
+      "id": "Q11440645",
+      "name": "Osaka Municipal Ikuno Library",
+      "lat": 34.653111,
+      "lng": 135.53975
+    },
+    {
+      "id": "Q11440403",
+      "name": "Osaka Municipal Joto Library",
+      "lat": 34.703167,
+      "lng": 135.544639
+    },
+    {
+      "id": "Q11440356",
+      "name": "Osaka Municipal Kita Library",
+      "lat": 34.715806,
+      "lng": 135.5085
+    },
+    {
+      "id": "Q11440594",
+      "name": "Osaka Municipal Konohana Library",
+      "lat": 34.685917,
+      "lng": 135.457056
+    },
+    {
+      "id": "Q11440621",
+      "name": "Osaka Municipal Minato Library",
+      "lat": 34.667722,
+      "lng": 135.458833
+    },
+    {
+      "id": "Q11440735",
+      "name": "Osaka Municipal Miyakojima Library",
+      "lat": 34.700889,
+      "lng": 135.527917
+    },
+    {
+      "id": "Q11440604",
+      "name": "Osaka Municipal Naniwa Library",
+      "lat": 34.658583,
+      "lng": 135.496056
+    },
+    {
+      "id": "Q11440713",
+      "name": "Osaka Municipal Nishinari Library",
+      "lat": 34.634556,
+      "lng": 135.494972
+    },
+    {
+      "id": "Q11440714",
+      "name": "Osaka Municipal Nishiyodogawa Library",
+      "lat": 34.711399,
+      "lng": 135.456207
+    },
+    {
+      "id": "Q11440463",
+      "name": "Osaka Municipal Shimanouchi Library",
+      "lat": 34.671611,
+      "lng": 135.507917
+    },
+    {
+      "id": "Q11440325",
+      "name": "Osaka Municipal Suminoe Library",
+      "lat": 34.606444,
+      "lng": 135.474944
+    },
+    {
+      "id": "Q11440329",
+      "name": "Osaka Municipal Sumiyoshi Library",
+      "lat": 34.604111,
+      "lng": 135.500861
+    },
+    {
+      "id": "Q11440428",
+      "name": "Osaka Municipal Taisho Library",
+      "lat": 34.650917,
+      "lng": 135.472139
+    },
+    {
+      "id": "Q11440449",
+      "name": "Osaka Municipal Tennoji Library",
+      "lat": 34.6615,
+      "lng": 135.522083
+    },
+    {
+      "id": "Q11440796",
+      "name": "Osaka Municipal Tsurumi Library",
+      "lat": 34.704306,
+      "lng": 135.5735
+    },
+    {
+      "id": "Q11440610",
+      "name": "Osaka Municipal Yodogawa Library",
+      "lat": 34.716028,
+      "lng": 135.481194
+    },
+    {
+      "id": "Q7105601",
+      "name": "Osaka Prefectural Nakanoshima Library",
+      "lat": 34.69366,
+      "lng": 135.5032
+    },
+    {
+      "id": "Q113159427",
+      "name": "Osaka University of Arts Junior College Library",
+      "lat": 34.60801,
+      "lng": 135.53131
+    },
+    {
+      "id": "Q61888326",
+      "name": "Sakaishiritsuseishonensentatoshoshitsu",
+      "lat": 34.587299,
+      "lng": 135.480957
+    },
+    {
+      "id": "Q61888344",
+      "name": "Suita City Esaka Library",
+      "lat": 34.759308,
+      "lng": 135.499588
+    },
+    {
+      "id": "Q61888343",
+      "name": "Suita City Sankusu Library",
+      "lat": 34.762569,
+      "lng": 135.524429
+    },
+    {
+      "id": "Q61888332",
+      "name": "Toyonakashiritsushonai Library",
+      "lat": 34.742008,
+      "lng": 135.474548
+    },
+    {
+      "id": "Q63860592",
+      "name": "八尾市立龍華図書館",
+      "lat": 34.612213,
+      "lng": 135.589035
+    }
+  ]
+}

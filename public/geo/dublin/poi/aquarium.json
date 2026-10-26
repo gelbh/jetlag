@@ -1,1 +1,18 @@
-{ "category": "aquarium", "source": "none", "places": [] }
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": {
+    "south": 53.1782,
+    "west": -6.5469,
+    "north": 53.6347,
+    "east": -5.9945
+  },
+  "places": [
+    {
+      "id": "Q55029991",
+      "name": "Sealife",
+      "lat": 53.20339,
+      "lng": -6.09822
+    }
+  ]
+}

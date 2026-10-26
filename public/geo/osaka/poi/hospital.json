@@ -1,1 +1,426 @@
-{ "category": "hospital", "source": "none", "places": [] }
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 34.5865,
+    "west": 135.3435,
+    "north": 34.7688,
+    "east": 135.5993
+  },
+  "places": [
+    {
+      "id": "Q11493940",
+      "name": "Aizenbashi Hospital",
+      "lat": 34.657611,
+      "lng": 135.505
+    },
+    {
+      "id": "Q24875636",
+      "name": "Amagasaki Daimotsu Hospital",
+      "lat": 34.717417,
+      "lng": 135.428028
+    },
+    {
+      "id": "Q11405843",
+      "name": "Chibune General Hospital",
+      "lat": 34.711694,
+      "lng": 135.446194
+    },
+    {
+      "id": "Q97194937",
+      "name": "Fujita Hospital",
+      "lat": 34.692645,
+      "lng": 135.475396
+    },
+    {
+      "id": "Q11440022",
+      "name": "Hakuhokai Osaka Central Hospital",
+      "lat": 34.699028,
+      "lng": 135.491167
+    },
+    {
+      "id": "Q11656656",
+      "name": "Hanwa Memorial Hospital",
+      "lat": 34.6038,
+      "lng": 135.5037
+    },
+    {
+      "id": "Q11526543",
+      "name": "Higashiosaka City Medical Center",
+      "lat": 34.665833,
+      "lng": 135.597222
+    },
+    {
+      "id": "Q11525987",
+      "name": "Higashisumiyoshi Morimoto Hospital",
+      "lat": 34.611028,
+      "lng": 135.527667
+    },
+    {
+      "id": "Q22120116",
+      "name": "Hyogo Prefectural Amagasaki General Medical Center",
+      "lat": 34.730308,
+      "lng": 135.413408
+    },
+    {
+      "id": "Q11440094",
+      "name": "Japan Community Healthcare Organization Osaka Hospital",
+      "lat": 34.692181,
+      "lng": 135.482428
+    },
+    {
+      "id": "Q97167348",
+      "name": "Jishinkai Abiko Hospital",
+      "lat": 34.600742,
+      "lng": 135.509615
+    },
+    {
+      "id": "Q11656395",
+      "name": "Kansai Electric Power Hospital",
+      "lat": 34.693123,
+      "lng": 135.487648
+    },
+    {
+      "id": "Q11656276",
+      "name": "Kansai Medical University Medical Center",
+      "lat": 34.728306,
+      "lng": 135.555056
+    },
+    {
+      "id": "Q11656269",
+      "name": "Kansai Rosai Hospital",
+      "lat": 34.735905,
+      "lng": 135.385573
+    },
+    {
+      "id": "Q11392148",
+      "name": "Kinki Central Hospital of the Mutual Aid Association of Public School Teachers",
+      "lat": 34.763641,
+      "lng": 135.401384
+    },
+    {
+      "id": "Q11404306",
+      "name": "Kitano Hospital, The Tazuke Kofukai Medical Research Institute",
+      "lat": 34.705343,
+      "lng": 135.506688
+    },
+    {
+      "id": "Q11522611",
+      "name": "Kyo-rin memorial hospital",
+      "lat": 34.642694,
+      "lng": 135.499667
+    },
+    {
+      "id": "Q11528992",
+      "name": "Matsushita Memorial Hospital",
+      "lat": 34.743611,
+      "lng": 135.56275
+    },
+    {
+      "id": "Q30280769",
+      "name": "Morinomiya Hospital",
+      "lat": 34.68299,
+      "lng": 135.538688
+    },
+    {
+      "id": "Q11651570",
+      "name": "Nagayoshi Hospital",
+      "lat": 34.606389,
+      "lng": 135.567778
+    },
+    {
+      "id": "Q11571596",
+      "name": "National Hospital Organization Osaka Medical Center",
+      "lat": 34.681165,
+      "lng": 135.519639
+    },
+    {
+      "id": "Q30280821",
+      "name": "Nishi Eye Hospital",
+      "lat": 34.674418,
+      "lng": 135.537021
+    },
+    {
+      "id": "Q30280832",
+      "name": "Nishinomiya Kyoritsu Neurosurgical Hospital",
+      "lat": 34.732068,
+      "lng": 135.357473
+    },
+    {
+      "id": "Q11627631",
+      "name": "Nishinomiya Municipal Central Hospital",
+      "lat": 34.757448,
+      "lng": 135.36195
+    },
+    {
+      "id": "Q30280842",
+      "name": "Nissay Hospital",
+      "lat": 34.679707,
+      "lng": 135.484447
+    },
+    {
+      "id": "Q11440681",
+      "name": "Osaka City General Hospital",
+      "lat": 34.7075,
+      "lng": 135.52375
+    },
+    {
+      "id": "Q11440368",
+      "name": "Osaka City Juso Hospital",
+      "lat": 34.728333,
+      "lng": 135.477083
+    },
+    {
+      "id": "Q11440333",
+      "name": "Osaka City Sumiyoshi Hospital",
+      "lat": 34.620417,
+      "lng": 135.485719
+    },
+    {
+      "id": "Q30260613",
+      "name": "Osaka Ekisaikai Hospital",
+      "lat": 34.678749,
+      "lng": 135.479132
+    },
+    {
+      "id": "Q17221791",
+      "name": "Osaka General Hospital of West Japan Railway Company",
+      "lat": 34.645089,
+      "lng": 135.517369
+    },
+    {
+      "id": "Q11441082",
+      "name": "Osaka International Cancer Institute",
+      "lat": 34.68521,
+      "lng": 135.519538
+    },
+    {
+      "id": "Q97161362",
+      "name": "Osaka Kaisei Hospital",
+      "lat": 34.73537,
+      "lng": 135.499165
+    },
+    {
+      "id": "Q11441624",
+      "name": "Osaka Keisatsu Hospital",
+      "lat": 34.658867,
+      "lng": 135.521217
+    },
+    {
+      "id": "Q11440418",
+      "name": "Osaka Metropolitan University Hospital",
+      "lat": 34.646633,
+      "lng": 135.508822
+    },
+    {
+      "id": "Q98101149",
+      "name": "Osaka Orthopedic Hospital",
+      "lat": 34.688058,
+      "lng": 135.464976
+    },
+    {
+      "id": "Q11441505",
+      "name": "Osaka Pharmacology Clinical Research Hospital",
+      "lat": 34.735167,
+      "lng": 135.496944
+    },
+    {
+      "id": "Q11441079",
+      "name": "Osaka Prefectural Medical Center",
+      "lat": 34.616839,
+      "lng": 135.505233
+    },
+    {
+      "id": "Q11440996",
+      "name": "Osaka Prefectural Nakakawachi Medical Center of Acute Medicine",
+      "lat": 34.665389,
+      "lng": 135.597417
+    },
+    {
+      "id": "Q11441631",
+      "name": "Osaka Red Cross Hospital",
+      "lat": 34.664583,
+      "lng": 135.525472
+    },
+    {
+      "id": "Q11440972",
+      "name": "Osaka Saiseikai Nakatsu Hospital",
+      "lat": 34.708167,
+      "lng": 135.495028
+    },
+    {
+      "id": "Q11441108",
+      "name": "Osaka Women's and Children's Hospital",
+      "lat": 34.680226,
+      "lng": 135.519993
+    },
+    {
+      "id": "Q11435549",
+      "name": "Otemae Hospital",
+      "lat": 34.68947,
+      "lng": 135.519646
+    },
+    {
+      "id": "Q28686196",
+      "name": "Ozone Hospital",
+      "lat": 34.752417,
+      "lng": 135.484861
+    },
+    {
+      "id": "Q11440977",
+      "name": "Pref Osaka Saiseikai Izuo Hospital",
+      "lat": 34.649333,
+      "lng": 135.466667
+    },
+    {
+      "id": "Q11607879",
+      "name": "Ryokufukai Hospital",
+      "lat": 34.621583,
+      "lng": 135.543278
+    },
+    {
+      "id": "Q11440980",
+      "name": "Saiseikai Noe Hospital",
+      "lat": 34.706611,
+      "lng": 135.555028
+    },
+    {
+      "id": "Q11440975",
+      "name": "Saiseikai Suita Hospital",
+      "lat": 34.761663,
+      "lng": 135.534642
+    },
+    {
+      "id": "Q30280981",
+      "name": "Sakurabashi Watanabe Hospital",
+      "lat": 34.699081,
+      "lng": 135.49467
+    },
+    {
+      "id": "Q30280643",
+      "name": "Shirasagi Hospital",
+      "lat": 34.632366,
+      "lng": 135.538674
+    },
+    {
+      "id": "Q11610887",
+      "name": "St. Barnabas' Hospital",
+      "lat": 34.663056,
+      "lng": 135.524444
+    },
+    {
+      "id": "Q11381771",
+      "name": "Sumitomo Hospital",
+      "lat": 34.688889,
+      "lng": 135.487222
+    },
+    {
+      "id": "Q11436722",
+      "name": "Taishō Hospital",
+      "lat": 34.66,
+      "lng": 135.475667
+    },
+    {
+      "id": "Q11430804",
+      "name": "Tane General Hospital",
+      "lat": 34.668808,
+      "lng": 135.474402
+    },
+    {
+      "id": "Q11392836",
+      "name": "The Hospital of Hyogo College of Medicine",
+      "lat": 34.71875,
+      "lng": 135.379017
+    },
+    {
+      "id": "Q30281186",
+      "name": "Tominaga hospital",
+      "lat": 34.667043,
+      "lng": 135.49489
+    },
+    {
+      "id": "Q11390831",
+      "name": "Yao Municipal Hospital",
+      "lat": 34.62075,
+      "lng": 135.587083
+    },
+    {
+      "id": "Q11559700",
+      "name": "Yodogawa Christian Hospital",
+      "lat": 34.729889,
+      "lng": 135.511944
+    },
+    {
+      "id": "Q30281274",
+      "name": "Yukioka Hospital",
+      "lat": 34.710224,
+      "lng": 135.509017
+    },
+    {
+      "id": "Q97276401",
+      "name": "八戸の里病院",
+      "lat": 34.660667,
+      "lng": 135.588444
+    },
+    {
+      "id": "Q97310271",
+      "name": "大阪社会医療センター付属病院",
+      "lat": 34.64917,
+      "lng": 135.50057
+    },
+    {
+      "id": "Q97168761",
+      "name": "守口生野記念病院",
+      "lat": 34.760111,
+      "lng": 135.59
+    },
+    {
+      "id": "Q97192200",
+      "name": "尼崎医療生協病院",
+      "lat": 34.740391,
+      "lng": 135.384259
+    },
+    {
+      "id": "Q97275023",
+      "name": "摂南総合病院",
+      "lat": 34.738222,
+      "lng": 135.588667
+    },
+    {
+      "id": "Q46544713",
+      "name": "東大阪病院",
+      "lat": 34.701253,
+      "lng": 135.543551
+    },
+    {
+      "id": "Q97275221",
+      "name": "松原徳洲会病院",
+      "lat": 34.588333,
+      "lng": 135.536139
+    },
+    {
+      "id": "Q11236199",
+      "name": "第二大阪警察病院",
+      "lat": 34.657059,
+      "lng": 135.525109
+    },
+    {
+      "id": "Q108374064",
+      "name": "藍の都脳神経外科病院",
+      "lat": 34.690694,
+      "lng": 135.565917
+    },
+    {
+      "id": "Q109602747",
+      "name": "越宗整形外科病院",
+      "lat": 34.615528,
+      "lng": 135.49175
+    },
+    {
+      "id": "Q97173796",
+      "name": "阪本病院",
+      "lat": 34.652639,
+      "lng": 135.582
+    }
+  ]
+}

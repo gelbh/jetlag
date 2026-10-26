@@ -1,1 +1,36 @@
-{ "category": "amusement_park", "source": "none", "places": [] }
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 43.4669,
+    "west": -70.492,
+    "north": 43.8488,
+    "east": -69.9759
+  },
+  "places": [
+    {
+      "id": "Q34808702",
+      "name": "Aquaboggan Park",
+      "lat": 43.534722,
+      "lng": -70.425833
+    },
+    {
+      "id": "Q3090976",
+      "name": "Funtown Splashtown USA",
+      "lat": 43.5272,
+      "lng": -70.4276
+    },
+    {
+      "id": "Q7126185",
+      "name": "Palace Playland",
+      "lat": 43.5145,
+      "lng": -70.3744
+    },
+    {
+      "id": "Q134395574",
+      "name": "Riverton Park",
+      "lat": 43.703332,
+      "lng": -70.322617
+    }
+  ]
+}

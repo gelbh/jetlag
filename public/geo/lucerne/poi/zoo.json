@@ -1,1 +1,18 @@
-{ "category": "zoo", "source": "none", "places": [] }
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 46.775,
+    "west": 7.839,
+    "north": 47.2903,
+    "east": 8.5213
+  },
+  "places": [
+    {
+      "id": "Q2442063",
+      "name": "Toni's Zoo",
+      "lat": 47.107447,
+      "lng": 8.262156
+    }
+  ]
+}

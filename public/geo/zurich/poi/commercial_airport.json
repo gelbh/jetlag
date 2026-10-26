@@ -1,1 +1,18 @@
-{ "category": "commercial_airport", "source": "none", "places": [] }
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": 47.1637,
+    "west": 8.3589,
+    "north": 47.699,
+    "east": 8.986
+  },
+  "places": [
+    {
+      "id": "Q15114",
+      "name": "Zurich Airport",
+      "lat": 47.458056,
+      "lng": 8.548056
+    }
+  ]
+}

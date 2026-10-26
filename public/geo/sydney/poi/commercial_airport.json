@@ -1,6 +1,42 @@
 {
   "category": "commercial_airport",
-  "source": "none",
-  "bbox": { "south": -34.2, "west": 150.5, "north": -33.3, "east": 151.35 },
-  "places": []
+  "source": "wikidata",
+  "bbox": {
+    "south": -34.3574,
+    "west": 149.9948,
+    "north": -32.9761,
+    "east": 151.363
+  },
+  "places": [
+    {
+      "id": "Q17521",
+      "name": "Bankstown Airport",
+      "lat": -33.923333,
+      "lng": 150.984444
+    },
+    {
+      "id": "Q17529",
+      "name": "Camden Airport",
+      "lat": -34.048333,
+      "lng": 150.684444
+    },
+    {
+      "id": "Q17581",
+      "name": "Sydney Airport",
+      "lat": -33.948333,
+      "lng": 151.176111
+    },
+    {
+      "id": "Q7979035",
+      "name": "Wedderburn Airport",
+      "lat": -34.18,
+      "lng": 150.808
+    },
+    {
+      "id": "Q16903158",
+      "name": "Western Sydney Airport",
+      "lat": -33.886389,
+      "lng": 150.719167
+    }
+  ]
 }

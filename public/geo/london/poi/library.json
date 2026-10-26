@@ -1,1 +1,2850 @@
-{ "category": "library", "source": "none", "places": [] }
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.28,
+    "west": -0.51,
+    "north": 51.7,
+    "east": 0.3357
+  },
+  "places": [
+    {
+      "id": "Q26406937",
+      "name": "14-15 Gordon Square",
+      "lat": 51.523937,
+      "lng": -0.131573
+    },
+    {
+      "id": "Q55125804",
+      "name": "Abbey Wood Library",
+      "lat": 51.493748,
+      "lng": 0.110155
+    },
+    {
+      "id": "Q76834801",
+      "name": "Abdus Salam Library",
+      "lat": 51.498333,
+      "lng": -0.178333
+    },
+    {
+      "id": "Q55125708",
+      "name": "Acton Town Hall Library",
+      "lat": 51.506501,
+      "lng": -0.267169
+    },
+    {
+      "id": "Q55121861",
+      "name": "Addlestone Library",
+      "lat": 51.370654,
+      "lng": -0.490779
+    },
+    {
+      "id": "Q124619951",
+      "name": "Aga Khan Library",
+      "lat": 51.537533,
+      "lng": -0.12496
+    },
+    {
+      "id": "Q26397659",
+      "name": "Aldenham School Library",
+      "lat": 51.663572,
+      "lng": -0.327241
+    },
+    {
+      "id": "Q55125731",
+      "name": "Aldersbrook Library",
+      "lat": 51.563365,
+      "lng": 0.032975
+    },
+    {
+      "id": "Q55125717",
+      "name": "Alexandra Park Library",
+      "lat": 51.598836,
+      "lng": -0.13682
+    },
+    {
+      "id": "Q55125710",
+      "name": "Angel Raynham Library",
+      "lat": 51.613681,
+      "lng": -0.061282
+    },
+    {
+      "id": "Q55125725",
+      "name": "Archway Library",
+      "lat": 51.565755,
+      "lng": -0.135633
+    },
+    {
+      "id": "Q55125382",
+      "name": "Artizan Street Library",
+      "lat": 51.515761,
+      "lng": -0.077138
+    },
+    {
+      "id": "Q55125706",
+      "name": "Ashburton Library",
+      "lat": 51.382928,
+      "lng": -0.063788
+    },
+    {
+      "id": "Q54888849",
+      "name": "Ashen Drive Library",
+      "lat": 51.44395,
+      "lng": 0.190483
+    },
+    {
+      "id": "Q55121863",
+      "name": "Ashford Library",
+      "lat": 51.433757,
+      "lng": -0.464156
+    },
+    {
+      "id": "Q55121864",
+      "name": "Ashtead Library",
+      "lat": 51.314086,
+      "lng": -0.303495
+    },
+    {
+      "id": "Q55125715",
+      "name": "Askew Road Library",
+      "lat": 51.503684,
+      "lng": -0.24306
+    },
+    {
+      "id": "Q53911596",
+      "name": "Aveley Library",
+      "lat": 51.499335,
+      "lng": 0.250966
+    },
+    {
+      "id": "Q55125526",
+      "name": "Avonmore Library and Neighbourhood Centre",
+      "lat": 51.492578,
+      "lng": -0.207144
+    },
+    {
+      "id": "Q55125756",
+      "name": "Balham Library",
+      "lat": 51.445485,
+      "lng": -0.152355
+    },
+    {
+      "id": "Q55121867",
+      "name": "Banstead Library",
+      "lat": 51.321793,
+      "lng": -0.205748
+    },
+    {
+      "id": "Q55125385",
+      "name": "Barbican Library",
+      "lat": 51.519812,
+      "lng": -0.09392
+    },
+    {
+      "id": "Q55125699",
+      "name": "Barham Park Library",
+      "lat": 51.55214,
+      "lng": -0.31137
+    },
+    {
+      "id": "Q55125694",
+      "name": "Barking Library",
+      "lat": 51.536219,
+      "lng": 0.079796
+    },
+    {
+      "id": "Q119266745",
+      "name": "Barts Health Archives",
+      "lat": 51.516984,
+      "lng": -0.100917
+    },
+    {
+      "id": "Q63344489",
+      "name": "Battersea Central Library",
+      "lat": 51.464011,
+      "lng": -0.1642
+    },
+    {
+      "id": "Q27971953",
+      "name": "Battersea Park Library",
+      "lat": 51.474417,
+      "lng": -0.154639
+    },
+    {
+      "id": "Q18149385",
+      "name": "Battersea Reference Library",
+      "lat": 51.463845,
+      "lng": -0.163771
+    },
+    {
+      "id": "Q55125723",
+      "name": "Beavers Library",
+      "lat": 51.47013,
+      "lng": -0.396381
+    },
+    {
+      "id": "Q55125701",
+      "name": "Beckenham Library",
+      "lat": 51.408629,
+      "lng": -0.036957
+    },
+    {
+      "id": "Q55125729",
+      "name": "Beckton Library",
+      "lat": 51.515033,
+      "lng": 0.055372
+    },
+    {
+      "id": "Q55125649",
+      "name": "Bedfont Library",
+      "lat": 51.45197,
+      "lng": -0.434566
+    },
+    {
+      "id": "Q53911619",
+      "name": "Belhus Library",
+      "lat": 51.510475,
+      "lng": 0.282247
+    },
+    {
+      "id": "Q27087698",
+      "name": "Belsize Library",
+      "lat": 51.547895,
+      "lng": -0.162238
+    },
+    {
+      "id": "Q27087071",
+      "name": "Bethnal Green Library",
+      "lat": 51.526446,
+      "lng": -0.053678
+    },
+    {
+      "id": "Q55125304",
+      "name": "Bexley Central Library",
+      "lat": 51.45586,
+      "lng": 0.14365
+    },
+    {
+      "id": "Q55125696",
+      "name": "Bexley Community Library",
+      "lat": 51.442763,
+      "lng": 0.150814
+    },
+    {
+      "id": "Q55125334",
+      "name": "Biggin Hill Memorial Library and Pool",
+      "lat": 51.312104,
+      "lng": 0.034482
+    },
+    {
+      "id": "Q4918092",
+      "name": "Bishopsgate Institute Special Collections and Archives",
+      "lat": 51.5187,
+      "lng": -0.0793
+    },
+    {
+      "id": "Q55125300",
+      "name": "Blackfen Community Library",
+      "lat": 51.450187,
+      "lng": 0.104402
+    },
+    {
+      "id": "Q55125493",
+      "name": "Blackheath Library",
+      "lat": 51.476981,
+      "lng": 0.021528
+    },
+    {
+      "id": "Q55111331",
+      "name": "Blackheath Village Community Library",
+      "lat": 51.465533,
+      "lng": 0.009385
+    },
+    {
+      "id": "Q55125740",
+      "name": "Blue Anchor Library",
+      "lat": 51.492863,
+      "lng": -0.063767
+    },
+    {
+      "id": "Q55111242",
+      "name": "Borehamwood Library",
+      "lat": 51.655974,
+      "lng": -0.274102
+    },
+    {
+      "id": "Q54888860",
+      "name": "Borough Green Library",
+      "lat": 51.291814,
+      "lng": 0.306841
+    },
+    {
+      "id": "Q55125302",
+      "name": "Bostall Community Library",
+      "lat": 51.475635,
+      "lng": 0.129938
+    },
+    {
+      "id": "Q55125721",
+      "name": "Botwell Green Library",
+      "lat": 51.5086,
+      "lng": -0.418274
+    },
+    {
+      "id": "Q27086813",
+      "name": "Bowes Road Library And Arnos Pool",
+      "lat": 51.615373,
+      "lng": -0.130239
+    },
+    {
+      "id": "Q55125395",
+      "name": "Bradmore Green Library",
+      "lat": 51.307569,
+      "lng": -0.123999
+    },
+    {
+      "id": "Q55125808",
+      "name": "Brandon Library",
+      "lat": 51.48272,
+      "lng": -0.102955
+    },
+    {
+      "id": "Q15461207",
+      "name": "Brentford Library",
+      "lat": 51.486581,
+      "lng": -0.30755
+    },
+    {
+      "id": "Q53357002",
+      "name": "Brentwood Library",
+      "lat": 51.618933,
+      "lng": 0.303164
+    },
+    {
+      "id": "Q23308",
+      "name": "British Library",
+      "lat": 51.529444,
+      "lng": -0.126944
+    },
+    {
+      "id": "Q2371017",
+      "name": "British Library of Political and Economic Science",
+      "lat": 51.5146,
+      "lng": -0.115556
+    },
+    {
+      "id": "Q27086853",
+      "name": "Brixton Library",
+      "lat": 51.461074,
+      "lng": -0.114812
+    },
+    {
+      "id": "Q55125398",
+      "name": "Broad Green Library",
+      "lat": 51.385387,
+      "lng": -0.117129
+    },
+    {
+      "id": "Q26482037",
+      "name": "Bromley Central Library",
+      "lat": 51.40361,
+      "lng": 0.01465
+    },
+    {
+      "id": "Q52955060",
+      "name": "Brompton Library",
+      "lat": 51.490023,
+      "lng": -0.188334
+    },
+    {
+      "id": "Q53437458",
+      "name": "Buckhurst Hill Library",
+      "lat": 51.626159,
+      "lng": 0.036396
+    },
+    {
+      "id": "Q55125447",
+      "name": "Bullsmoor Library",
+      "lat": 51.676415,
+      "lng": -0.049527
+    },
+    {
+      "id": "Q55125337",
+      "name": "Burnt Ash Library",
+      "lat": 51.419883,
+      "lng": 0.019656
+    },
+    {
+      "id": "Q52953967",
+      "name": "Burnt Oak Library",
+      "lat": 51.603204,
+      "lng": -0.26322
+    },
+    {
+      "id": "Q55111249",
+      "name": "Bushey Library",
+      "lat": 51.63855,
+      "lng": -0.352948
+    },
+    {
+      "id": "Q55121871",
+      "name": "Byfleet Library",
+      "lat": 51.339385,
+      "lng": -0.475233
+    },
+    {
+      "id": "Q55125810",
+      "name": "Camberwell Library",
+      "lat": 51.475705,
+      "lng": -0.092059
+    },
+    {
+      "id": "Q55125703",
+      "name": "Camden Town Library",
+      "lat": 51.53425,
+      "lng": -0.137764
+    },
+    {
+      "id": "Q55125811",
+      "name": "Canada Water Library",
+      "lat": 51.497728,
+      "lng": -0.049183
+    },
+    {
+      "id": "Q55125735",
+      "name": "Castelnau Library",
+      "lat": 51.480213,
+      "lng": -0.237669
+    },
+    {
+      "id": "Q133963759",
+      "name": "Cat and Mouse Library",
+      "lat": 51.552746,
+      "lng": -0.124937
+    },
+    {
+      "id": "Q55121874",
+      "name": "Caterham Hill Library",
+      "lat": 51.287597,
+      "lng": -0.091744
+    },
+    {
+      "id": "Q55121875",
+      "name": "Caterham Valley Library",
+      "lat": 51.283178,
+      "lng": -0.080171
+    },
+    {
+      "id": "Q55111296",
+      "name": "Catford Library",
+      "lat": 51.444632,
+      "lng": -0.021097
+    },
+    {
+      "id": "Q26423485",
+      "name": "Cecil Sharp House",
+      "lat": 51.538103,
+      "lng": -0.149363
+    },
+    {
+      "id": "Q55125392",
+      "name": "Charing Cross Library",
+      "lat": 51.51025,
+      "lng": -0.128048
+    },
+    {
+      "id": "Q55125494",
+      "name": "Charlton Library",
+      "lat": 51.480479,
+      "lng": 0.037159
+    },
+    {
+      "id": "Q55125614",
+      "name": "Charville Library",
+      "lat": 51.535055,
+      "lng": -0.427453
+    },
+    {
+      "id": "Q26528962",
+      "name": "Chats Palace",
+      "lat": 51.550266,
+      "lng": -0.042739
+    },
+    {
+      "id": "Q55125744",
+      "name": "Cheam Library",
+      "lat": 51.360239,
+      "lng": -0.216772
+    },
+    {
+      "id": "Q47528805",
+      "name": "Chelsea Library",
+      "lat": 51.487472,
+      "lng": -0.168194
+    },
+    {
+      "id": "Q55121876",
+      "name": "Chertsey Library",
+      "lat": 51.388863,
+      "lng": -0.506178
+    },
+    {
+      "id": "Q26393023",
+      "name": "Cheshunt Library",
+      "lat": 51.699868,
+      "lng": -0.033208
+    },
+    {
+      "id": "Q53454364",
+      "name": "Chigwell Library",
+      "lat": 51.619537,
+      "lng": 0.07678
+    },
+    {
+      "id": "Q52955176",
+      "name": "Childs Hill Library",
+      "lat": 51.562238,
+      "lng": -0.200781
+    },
+    {
+      "id": "Q52954007",
+      "name": "Chipping Barnet Library",
+      "lat": 51.656074,
+      "lng": -0.204753
+    },
+    {
+      "id": "Q55125339",
+      "name": "Chislehurst Library",
+      "lat": 51.42004,
+      "lng": 0.064728
+    },
+    {
+      "id": "Q55083366",
+      "name": "Chiswick Library",
+      "lat": 51.491579,
+      "lng": -0.261029
+    },
+    {
+      "id": "Q55125920",
+      "name": "Church Street Library",
+      "lat": 51.52296,
+      "lng": -0.17023
+    },
+    {
+      "id": "Q55125387",
+      "name": "City Business Library",
+      "lat": 51.515842,
+      "lng": -0.092802
+    },
+    {
+      "id": "Q55125727",
+      "name": "Clapham Library",
+      "lat": 51.463132,
+      "lng": -0.133668
+    },
+    {
+      "id": "Q26669954",
+      "name": "Clapton Library",
+      "lat": 51.562672,
+      "lng": -0.059954
+    },
+    {
+      "id": "Q55183878",
+      "name": "Clayhall Library",
+      "lat": 51.590302,
+      "lng": 0.049421
+    },
+    {
+      "id": "Q55121877",
+      "name": "Cobham Library",
+      "lat": 51.328837,
+      "lng": -0.409989
+    },
+    {
+      "id": "Q55125497",
+      "name": "Coldharbour Library",
+      "lat": 51.430335,
+      "lng": 0.057267
+    },
+    {
+      "id": "Q52954169",
+      "name": "Colindale Library",
+      "lat": 51.601795,
+      "lng": -0.244895
+    },
+    {
+      "id": "Q55125720",
+      "name": "Collier Row Library",
+      "lat": 51.598506,
+      "lng": 0.16088
+    },
+    {
+      "id": "Q55125760",
+      "name": "Colliers Wood Library",
+      "lat": 51.418766,
+      "lng": -0.177299
+    },
+    {
+      "id": "Q129793154",
+      "name": "Congregational Library London",
+      "lat": 51.511125,
+      "lng": -0.01937
+    },
+    {
+      "id": "Q55125536",
+      "name": "Coombes Croft Library",
+      "lat": 51.603547,
+      "lng": -0.068242
+    },
+    {
+      "id": "Q27082529",
+      "name": "Corbett Community Library",
+      "lat": 51.442292,
+      "lng": -0.0017
+    },
+    {
+      "id": "Q55125401",
+      "name": "Coulsdon Library",
+      "lat": 51.320007,
+      "lng": -0.13869
+    },
+    {
+      "id": "Q55125652",
+      "name": "Cranford Library",
+      "lat": 51.47815,
+      "lng": -0.406466
+    },
+    {
+      "id": "Q55125306",
+      "name": "Crayford Library",
+      "lat": 51.449935,
+      "lng": 0.180106
+    },
+    {
+      "id": "Q55125322",
+      "name": "Cricklewood Library",
+      "lat": 51.556877,
+      "lng": -0.227507
+    },
+    {
+      "id": "Q55111298",
+      "name": "Crofton Park Community Library",
+      "lat": 51.455445,
+      "lng": -0.036322
+    },
+    {
+      "id": "Q55111252",
+      "name": "Croxley Green Library",
+      "lat": 51.648377,
+      "lng": -0.446409
+    },
+    {
+      "id": "Q5189648",
+      "name": "Croydon Central Library",
+      "lat": 51.372,
+      "lng": -0.0995
+    },
+    {
+      "id": "Q27087079",
+      "name": "Cubitt Town Library",
+      "lat": 51.495966,
+      "lng": -0.011804
+    },
+    {
+      "id": "Q55125773",
+      "name": "Custom House Library",
+      "lat": 51.515252,
+      "lng": 0.031357
+    },
+    {
+      "id": "Q55125290",
+      "name": "Dagenham Library",
+      "lat": 51.54038,
+      "lng": 0.148434
+    },
+    {
+      "id": "Q55125713",
+      "name": "Dalston Library",
+      "lat": 51.546076,
+      "lng": -0.073928
+    },
+    {
+      "id": "Q5225616",
+      "name": "Dartford Library",
+      "lat": 51.4431,
+      "lng": 0.218889
+    },
+    {
+      "id": "Q53537471",
+      "name": "Debden Library",
+      "lat": 51.647346,
+      "lng": 0.079998
+    },
+    {
+      "id": "Q55121880",
+      "name": "Dittons Library",
+      "lat": 51.387365,
+      "lng": -0.333684
+    },
+    {
+      "id": "Q55111299",
+      "name": "Downham Library",
+      "lat": 51.426041,
+      "lng": 0.012585
+    },
+    {
+      "id": "Q5304565",
+      "name": "Dr Williams's Library",
+      "lat": 51.523944,
+      "lng": -0.131583
+    },
+    {
+      "id": "Q5313551",
+      "name": "Dulwich Library",
+      "lat": 51.4489,
+      "lng": -0.0746
+    },
+    {
+      "id": "Q27085482",
+      "name": "Durning Library",
+      "lat": 51.488892,
+      "lng": -0.110218
+    },
+    {
+      "id": "Q55125417",
+      "name": "Ealing Central Library",
+      "lat": 51.512565,
+      "lng": -0.302512
+    },
+    {
+      "id": "Q55125324",
+      "name": "Ealing Road Library",
+      "lat": 51.549533,
+      "lng": -0.297446
+    },
+    {
+      "id": "Q55125904",
+      "name": "Earlsfield Library",
+      "lat": 51.442537,
+      "lng": -0.186761
+    },
+    {
+      "id": "Q52954033",
+      "name": "East Barnet Library",
+      "lat": 51.644438,
+      "lng": -0.1616
+    },
+    {
+      "id": "Q27087017",
+      "name": "East Finchley Library",
+      "lat": 51.593929,
+      "lng": -0.16759
+    },
+    {
+      "id": "Q55125784",
+      "name": "East Sheen Library",
+      "lat": 51.465311,
+      "lng": -0.267538
+    },
+    {
+      "id": "Q55125814",
+      "name": "East Street Library",
+      "lat": 51.491049,
+      "lng": -0.081934
+    },
+    {
+      "id": "Q55125617",
+      "name": "Eastcote Library",
+      "lat": 51.580326,
+      "lng": -0.400726
+    },
+    {
+      "id": "Q52954057",
+      "name": "Edgware Library",
+      "lat": 51.616295,
+      "lng": -0.273997
+    },
+    {
+      "id": "Q55125453",
+      "name": "Edmonton Green Library",
+      "lat": 51.623912,
+      "lng": -0.058047
+    },
+    {
+      "id": "Q55125593",
+      "name": "Elm Park Library",
+      "lat": 51.552505,
+      "lng": 0.19848
+    },
+    {
+      "id": "Q27083458",
+      "name": "Eltham Library",
+      "lat": 51.451031,
+      "lng": 0.057923
+    },
+    {
+      "id": "Q55125457",
+      "name": "Enfield Highway Library",
+      "lat": 51.65887,
+      "lng": -0.047461
+    },
+    {
+      "id": "Q55125465",
+      "name": "Enfield Town Library",
+      "lat": 51.651715,
+      "lng": -0.08628
+    },
+    {
+      "id": "Q53620858",
+      "name": "Epping Library",
+      "lat": 51.699097,
+      "lng": 0.109706
+    },
+    {
+      "id": "Q55121883",
+      "name": "Epsom Library",
+      "lat": 51.334289,
+      "lng": -0.266419
+    },
+    {
+      "id": "Q55121884",
+      "name": "Esher Library",
+      "lat": 51.369658,
+      "lng": -0.363621
+    },
+    {
+      "id": "Q5415683",
+      "name": "Evangelical Library",
+      "lat": 51.6094,
+      "lng": -0.135833
+    },
+    {
+      "id": "Q26671827",
+      "name": "Ewell Court House, Including Attached Grotto",
+      "lat": 51.361559,
+      "lng": -0.261028
+    },
+    {
+      "id": "Q124407499",
+      "name": "Ewell Library",
+      "lat": 51.350418,
+      "lng": -0.252313
+    },
+    {
+      "id": "Q55125924",
+      "name": "Express Library",
+      "lat": 51.497557,
+      "lng": -0.130138
+    },
+    {
+      "id": "Q55125654",
+      "name": "Feltham Library",
+      "lat": 51.446363,
+      "lng": -0.411092
+    },
+    {
+      "id": "Q5442858",
+      "name": "Feminist Library",
+      "lat": 51.477901,
+      "lng": -0.073155
+    },
+    {
+      "id": "Q52955147",
+      "name": "Finchley Church End Library",
+      "lat": 51.59992,
+      "lng": -0.19516
+    },
+    {
+      "id": "Q55125666",
+      "name": "Finsbury Library",
+      "lat": 51.526485,
+      "lng": -0.104552
+    },
+    {
+      "id": "Q54888891",
+      "name": "Fleetdown Library",
+      "lat": 51.43498,
+      "lng": 0.246111
+    },
+    {
+      "id": "Q55125468",
+      "name": "Fore Street Library",
+      "lat": 51.612131,
+      "lng": -0.065422
+    },
+    {
+      "id": "Q27082873",
+      "name": "Forest Hill Library",
+      "lat": 51.435824,
+      "lng": -0.056124
+    },
+    {
+      "id": "Q3918721",
+      "name": "Francis Skaryna Belarusian Library and Museum",
+      "lat": 51.6162,
+      "lng": -0.1848
+    },
+    {
+      "id": "Q28402033",
+      "name": "Franses Tapestry Archive",
+      "lat": 51.5078,
+      "lng": -0.138
+    },
+    {
+      "id": "Q52954084",
+      "name": "Friern Barnet Community Library",
+      "lat": 51.613535,
+      "lng": -0.153451
+    },
+    {
+      "id": "Q15978992",
+      "name": "Fulham Library",
+      "lat": 51.477126,
+      "lng": -0.202609
+    },
+    {
+      "id": "Q27087112",
+      "name": "Fullwell Cross Library",
+      "lat": 51.593152,
+      "lng": 0.085157
+    },
+    {
+      "id": "Q55183879",
+      "name": "Gants Hill Library",
+      "lat": 51.577631,
+      "lng": 0.07005
+    },
+    {
+      "id": "Q52954108",
+      "name": "Garden Suburb Community Library",
+      "lat": 51.586301,
+      "lng": -0.183345
+    },
+    {
+      "id": "Q55125718",
+      "name": "Gayton Library",
+      "lat": 51.581681,
+      "lng": -0.331788
+    },
+    {
+      "id": "Q55125597",
+      "name": "Gidea Park Library",
+      "lat": 51.579998,
+      "lng": 0.205886
+    },
+    {
+      "id": "Q52954142",
+      "name": "Golders Green Library",
+      "lat": 51.574791,
+      "lng": -0.201727
+    },
+    {
+      "id": "Q55183881",
+      "name": "Goodmayes Library",
+      "lat": 51.5595,
+      "lng": 0.108975
+    },
+    {
+      "id": "Q53996524",
+      "name": "Grays Library",
+      "lat": 51.479519,
+      "lng": 0.324747
+    },
+    {
+      "id": "Q55125777",
+      "name": "Green Street Library",
+      "lat": 51.536287,
+      "lng": 0.035266
+    },
+    {
+      "id": "Q55125420",
+      "name": "Greenford Library",
+      "lat": 51.529809,
+      "lng": -0.355263
+    },
+    {
+      "id": "Q54888892",
+      "name": "Greenhithe Library",
+      "lat": 51.450369,
+      "lng": 0.28951
+    },
+    {
+      "id": "Q55125500",
+      "name": "Greenwich Centre Library",
+      "lat": 51.485583,
+      "lng": 0.00876
+    },
+    {
+      "id": "Q16840362",
+      "name": "Grosvenor Gallery Library",
+      "lat": 51.5137,
+      "lng": -0.148
+    },
+    {
+      "id": "Q55111301",
+      "name": "Grove Park Community Library",
+      "lat": 51.435956,
+      "lng": 0.023466
+    },
+    {
+      "id": "Q55125816",
+      "name": "Grove Vale Library",
+      "lat": 51.461621,
+      "lng": -0.079327
+    },
+    {
+      "id": "Q3779557",
+      "name": "Guildhall Library",
+      "lat": 51.5164,
+      "lng": -0.09
+    },
+    {
+      "id": "Q55125513",
+      "name": "Hackney Central Library",
+      "lat": 51.544481,
+      "lng": -0.056104
+    },
+    {
+      "id": "Q55183883",
+      "name": "Hainault Library",
+      "lat": 51.608041,
+      "lng": 0.10413
+    },
+    {
+      "id": "Q55125751",
+      "name": "Hale End Library",
+      "lat": 51.609252,
+      "lng": 0.001103
+    },
+    {
+      "id": "Q55125785",
+      "name": "Ham Library",
+      "lat": 51.43789,
+      "lng": -0.313254
+    },
+    {
+      "id": "Q18160113",
+      "name": "Hammersmith Library",
+      "lat": 51.494632,
+      "lng": -0.223674
+    },
+    {
+      "id": "Q55125789",
+      "name": "Hampton Hill Library",
+      "lat": 51.426552,
+      "lng": -0.356025
+    },
+    {
+      "id": "Q55125787",
+      "name": "Hampton Library",
+      "lat": 51.413883,
+      "lng": -0.370306
+    },
+    {
+      "id": "Q55125791",
+      "name": "Hampton Wick Library",
+      "lat": 51.413752,
+      "lng": -0.313595
+    },
+    {
+      "id": "Q55125423",
+      "name": "Hanwell Library",
+      "lat": 51.50984,
+      "lng": -0.336047
+    },
+    {
+      "id": "Q55125657",
+      "name": "Hanworth Library",
+      "lat": 51.440399,
+      "lng": -0.38889
+    },
+    {
+      "id": "Q55125619",
+      "name": "Harefield Library",
+      "lat": 51.60442,
+      "lng": -0.482932
+    },
+    {
+      "id": "Q55125326",
+      "name": "Harlesden Library",
+      "lat": 51.538654,
+      "lng": -0.250651
+    },
+    {
+      "id": "Q16252198",
+      "name": "Harlington Library",
+      "lat": 51.497639,
+      "lng": -0.436889
+    },
+    {
+      "id": "Q55125599",
+      "name": "Harold Hill Library",
+      "lat": 51.607772,
+      "lng": 0.218422
+    },
+    {
+      "id": "Q55125600",
+      "name": "Harold Wood Library",
+      "lat": 51.594545,
+      "lng": 0.235497
+    },
+    {
+      "id": "Q55125882",
+      "name": "Harrow Green Community Library",
+      "lat": 51.559696,
+      "lng": 0.005419
+    },
+    {
+      "id": "Q54888896",
+      "name": "Hartley Library",
+      "lat": 51.383734,
+      "lng": 0.30582
+    },
+    {
+      "id": "Q55125623",
+      "name": "Hayes End Library",
+      "lat": 51.52585,
+      "lng": -0.436142
+    },
+    {
+      "id": "Q55125340",
+      "name": "Hayes Library",
+      "lat": 51.377394,
+      "lng": 0.018063
+    },
+    {
+      "id": "Q55125792",
+      "name": "Heathfield Library Access Point",
+      "lat": 51.44397,
+      "lng": -0.364405
+    },
+    {
+      "id": "Q27087003",
+      "name": "Hendon Library",
+      "lat": 51.588619,
+      "lng": -0.229028
+    },
+    {
+      "id": "Q55121892",
+      "name": "Hersham Library",
+      "lat": 51.369006,
+      "lng": -0.395496
+    },
+    {
+      "id": "Q55125658",
+      "name": "Heston Library",
+      "lat": 51.485872,
+      "lng": -0.37545
+    },
+    {
+      "id": "Q115477807",
+      "name": "Heythrop Library",
+      "lat": 51.5099,
+      "lng": -0.1491
+    },
+    {
+      "id": "Q55125886",
+      "name": "Higham Hill Library",
+      "lat": 51.595865,
+      "lng": -0.027342
+    },
+    {
+      "id": "Q27083524",
+      "name": "Highgate Library",
+      "lat": 51.563766,
+      "lng": -0.144109
+    },
+    {
+      "id": "Q55120586",
+      "name": "Hillingdon Museum and Archives Services",
+      "lat": 51.545357,
+      "lng": -0.478158
+    },
+    {
+      "id": "Q54888903",
+      "name": "Hive House Library, Northfleet",
+      "lat": 51.446246,
+      "lng": 0.328599
+    },
+    {
+      "id": "Q20870267",
+      "name": "Holborn Library",
+      "lat": 51.521,
+      "lng": -0.1155
+    },
+    {
+      "id": "Q55125516",
+      "name": "Homerton Library",
+      "lat": 51.548958,
+      "lng": -0.04177
+    },
+    {
+      "id": "Q55125806",
+      "name": "Hook and Chessington Library",
+      "lat": 51.368112,
+      "lng": -0.30597
+    },
+    {
+      "id": "Q55125602",
+      "name": "Hornchurch Library",
+      "lat": 51.564836,
+      "lng": 0.220525
+    },
+    {
+      "id": "Q27082175",
+      "name": "Hornsey Library",
+      "lat": 51.578288,
+      "lng": -0.121907
+    },
+    {
+      "id": "Q55125660",
+      "name": "Hounslow Library",
+      "lat": 51.468173,
+      "lng": -0.362346
+    },
+    {
+      "id": "Q15226006",
+      "name": "House of Commons Library",
+      "lat": 51.4999,
+      "lng": -0.1241
+    },
+    {
+      "id": "Q5915114",
+      "name": "House of Lords Library",
+      "lat": 51.4986,
+      "lng": -0.1243
+    },
+    {
+      "id": "Q27081630",
+      "name": "Hungerford House",
+      "lat": 51.507367,
+      "lng": -0.122034
+    },
+    {
+      "id": "Q55125530",
+      "name": "Hurlingham and Chelsea School and Community Library",
+      "lat": 51.467899,
+      "lng": -0.195858
+    },
+    {
+      "id": "Q55125628",
+      "name": "Ickenham Library",
+      "lat": 51.563464,
+      "lng": -0.443743
+    },
+    {
+      "id": "Q55125877",
+      "name": "Idea Store Bow Library",
+      "lat": 51.532853,
+      "lng": -0.029716
+    },
+    {
+      "id": "Q55125879",
+      "name": "Idea Store Canary Wharf Library",
+      "lat": 51.504618,
+      "lng": -0.014614
+    },
+    {
+      "id": "Q55125746",
+      "name": "Idea Store Chrisp Street Library",
+      "lat": 51.5115,
+      "lng": -0.01436
+    },
+    {
+      "id": "Q55125873",
+      "name": "Idea Store Watney Market Library",
+      "lat": 51.514349,
+      "lng": -0.057287
+    },
+    {
+      "id": "Q55125876",
+      "name": "Idea Store Whitechapel Library",
+      "lat": 51.519853,
+      "lng": -0.057958
+    },
+    {
+      "id": "Q6035600",
+      "name": "Inner Temple Library",
+      "lat": 51.5131,
+      "lng": -0.1095
+    },
+    {
+      "id": "Q55125662",
+      "name": "Isleworth Library",
+      "lat": 51.46691,
+      "lng": -0.330138
+    },
+    {
+      "id": "Q26580587",
+      "name": "Islington Central Library",
+      "lat": 51.549156,
+      "lng": -0.10713
+    },
+    {
+      "id": "Q64605555",
+      "name": "Jerwood Library of the Performing Arts",
+      "lat": 51.483547,
+      "lng": -0.006714
+    },
+    {
+      "id": "Q55125667",
+      "name": "John Barnes Library",
+      "lat": 51.550936,
+      "lng": -0.125822
+    },
+    {
+      "id": "Q6238101",
+      "name": "John Harvard Library",
+      "lat": 51.5019,
+      "lng": -0.0924
+    },
+    {
+      "id": "Q55125471",
+      "name": "John Jackson Library",
+      "lat": 51.645413,
+      "lng": -0.066532
+    },
+    {
+      "id": "Q55125425",
+      "name": "Jubilee Gardens Library",
+      "lat": 51.521232,
+      "lng": -0.369506
+    },
+    {
+      "id": "Q27087696",
+      "name": "Keats Community Library",
+      "lat": 51.555479,
+      "lng": -0.168234
+    },
+    {
+      "id": "Q55183885",
+      "name": "Keith Axon Library",
+      "lat": 51.574419,
+      "lng": 0.120948
+    },
+    {
+      "id": "Q54888906",
+      "name": "Kemsing Library",
+      "lat": 51.306375,
+      "lng": 0.221151
+    },
+    {
+      "id": "Q52955089",
+      "name": "Kensal Library",
+      "lat": 51.523845,
+      "lng": -0.206881
+    },
+    {
+      "id": "Q6391366",
+      "name": "Kensal Rise Library",
+      "lat": 51.5339,
+      "lng": -0.2261
+    },
+    {
+      "id": "Q15979028",
+      "name": "Kensington Central Library",
+      "lat": 51.5014,
+      "lng": -0.194421
+    },
+    {
+      "id": "Q55125367",
+      "name": "Kentish Town Library",
+      "lat": 51.550007,
+      "lng": -0.140471
+    },
+    {
+      "id": "Q26407189",
+      "name": "Kenton Library",
+      "lat": 51.592638,
+      "lng": -0.311296
+    },
+    {
+      "id": "Q55125794",
+      "name": "Kew Library",
+      "lat": 51.476515,
+      "lng": -0.284655
+    },
+    {
+      "id": "Q6406615",
+      "name": "Kilburn Library",
+      "lat": 51.535165,
+      "lng": -0.20517
+    },
+    {
+      "id": "Q55125369",
+      "name": "Kilburn Library Centre",
+      "lat": 51.536366,
+      "lng": -0.191152
+    },
+    {
+      "id": "Q55125328",
+      "name": "Kingsbury Library",
+      "lat": 51.58609,
+      "lng": -0.276466
+    },
+    {
+      "id": "Q26354478",
+      "name": "Kingston Library",
+      "lat": 51.409459,
+      "lng": -0.300255
+    },
+    {
+      "id": "Q55125817",
+      "name": "Kingswood Library",
+      "lat": 51.430463,
+      "lng": -0.081649
+    },
+    {
+      "id": "Q30264838",
+      "name": "Lambeth Palace Library",
+      "lat": 51.497734,
+      "lng": -0.118234
+    },
+    {
+      "id": "Q26485877",
+      "name": "Lea Bridge Library",
+      "lat": 51.570736,
+      "lng": -0.023577
+    },
+    {
+      "id": "Q55121896",
+      "name": "Leatherhead Library",
+      "lat": 51.293555,
+      "lng": -0.328955
+    },
+    {
+      "id": "Q55125670",
+      "name": "Lewis Carroll Children's Library",
+      "lat": 51.537095,
+      "lng": -0.120118
+    },
+    {
+      "id": "Q27085545",
+      "name": "Lewisham Arthouse",
+      "lat": 51.47147,
+      "lng": -0.03075
+    },
+    {
+      "id": "Q55083191",
+      "name": "Lewisham Library",
+      "lat": 51.459275,
+      "lng": -0.011681
+    },
+    {
+      "id": "Q26485743",
+      "name": "Leyton Public Library",
+      "lat": 51.55851,
+      "lng": -0.007329
+    },
+    {
+      "id": "Q17531944",
+      "name": "Leytonstone Library",
+      "lat": 51.5682,
+      "lng": 0.0104
+    },
+    {
+      "id": "Q55184160",
+      "name": "Library @ The Life Centre",
+      "lat": 51.378901,
+      "lng": -0.201703
+    },
+    {
+      "id": "Q55184162",
+      "name": "Library @ the Phoenix Centre",
+      "lat": 51.353327,
+      "lng": -0.13308
+    },
+    {
+      "id": "Q55184163",
+      "name": "Library @ Westcroft Centre",
+      "lat": 51.368084,
+      "lng": -0.158298
+    },
+    {
+      "id": "Q6542562",
+      "name": "Library for Iranian Studies",
+      "lat": 51.5075,
+      "lng": -0.275278
+    },
+    {
+      "id": "Q55125925",
+      "name": "Little Venice Sports Centre Library",
+      "lat": 51.522514,
+      "lng": -0.177084
+    },
+    {
+      "id": "Q269192",
+      "name": "London Library",
+      "lat": 51.50735,
+      "lng": -0.13685
+    },
+    {
+      "id": "Q54888909",
+      "name": "Longfield Library",
+      "lat": 51.39898,
+      "lng": 0.300618
+    },
+    {
+      "id": "Q53642701",
+      "name": "Loughton Library",
+      "lat": 51.648924,
+      "lng": 0.059303
+    },
+    {
+      "id": "Q55076580",
+      "name": "LSE Shaw Library",
+      "lat": 51.514,
+      "lng": -0.117
+    },
+    {
+      "id": "Q55125927",
+      "name": "Maida Vale Library",
+      "lat": 51.524665,
+      "lng": -0.190464
+    },
+    {
+      "id": "Q55125631",
+      "name": "Manor Farm Library",
+      "lat": 51.577997,
+      "lng": -0.428441
+    },
+    {
+      "id": "Q17553094",
+      "name": "Manor House Library",
+      "lat": 51.4573,
+      "lng": 0.004497
+    },
+    {
+      "id": "Q55125537",
+      "name": "Marcus Garvey Library",
+      "lat": 51.588181,
+      "lng": -0.074053
+    },
+    {
+      "id": "Q55125292",
+      "name": "Marks Gate Library",
+      "lat": 51.585313,
+      "lng": 0.135983
+    },
+    {
+      "id": "Q93844",
+      "name": "Marx Memorial Library",
+      "lat": 51.522974,
+      "lng": -0.105692
+    },
+    {
+      "id": "Q55125929",
+      "name": "Marylebone Library",
+      "lat": 51.518845,
+      "lng": -0.150619
+    },
+    {
+      "id": "Q1167115",
+      "name": "Maughan Library",
+      "lat": 51.5153,
+      "lng": -0.1106
+    },
+    {
+      "id": "Q55125931",
+      "name": "Mayfair Library",
+      "lat": 51.509372,
+      "lng": -0.151143
+    },
+    {
+      "id": "Q55125674",
+      "name": "Mildmay Library",
+      "lat": 51.547552,
+      "lng": -0.084409
+    },
+    {
+      "id": "Q52954199",
+      "name": "Mill Hill Library",
+      "lat": 51.615345,
+      "lng": -0.243
+    },
+    {
+      "id": "Q55125472",
+      "name": "Millfield House Library",
+      "lat": 51.615935,
+      "lng": -0.080245
+    },
+    {
+      "id": "Q29914103",
+      "name": "Minet Library",
+      "lat": 51.4714,
+      "lng": -0.1052
+    },
+    {
+      "id": "Q6881042",
+      "name": "Mitcham Library",
+      "lat": 51.4084,
+      "lng": -0.16257
+    },
+    {
+      "id": "Q55121900",
+      "name": "Molesey Library",
+      "lat": 51.402235,
+      "lng": -0.362915
+    },
+    {
+      "id": "Q55125763",
+      "name": "Morden Library",
+      "lat": 51.401409,
+      "lng": -0.19613
+    },
+    {
+      "id": "Q55125342",
+      "name": "Mottingham Library",
+      "lat": 51.437464,
+      "lng": 0.043584
+    },
+    {
+      "id": "Q27082187",
+      "name": "Muswell Hill Library",
+      "lat": 51.591144,
+      "lng": -0.143311
+    },
+    {
+      "id": "Q55125676",
+      "name": "N4 Library",
+      "lat": 51.563777,
+      "lng": -0.103378
+    },
+    {
+      "id": "Q6970481",
+      "name": "National Art Library",
+      "lat": 51.4968,
+      "lng": -0.1726
+    },
+    {
+      "id": "Q28963377",
+      "name": "National Central Library",
+      "lat": 51.52,
+      "lng": -0.1315
+    },
+    {
+      "id": "Q15116334",
+      "name": "National Poetry Library",
+      "lat": 51.505711,
+      "lng": -0.116761
+    },
+    {
+      "id": "Q69792905",
+      "name": "Natural History Museum Library and Archives",
+      "lat": 51.496892,
+      "lng": -0.176367
+    },
+    {
+      "id": "Q15261952",
+      "name": "New Addington Library",
+      "lat": 51.3406,
+      "lng": -0.0158
+    },
+    {
+      "id": "Q54889024",
+      "name": "New Ash Green Library",
+      "lat": 51.366898,
+      "lng": 0.305204
+    },
+    {
+      "id": "Q55111305",
+      "name": "New Cross Community Library",
+      "lat": 51.475458,
+      "lng": -0.038559
+    },
+    {
+      "id": "Q55125504",
+      "name": "New Eltham Library",
+      "lat": 51.437452,
+      "lng": 0.071207
+    },
+    {
+      "id": "Q17548897",
+      "name": "New Hall Library",
+      "lat": 51.5167,
+      "lng": -0.114657
+    },
+    {
+      "id": "Q55121901",
+      "name": "New Haw Library",
+      "lat": 51.349117,
+      "lng": -0.503566
+    },
+    {
+      "id": "Q26545186",
+      "name": "New Malden Library",
+      "lat": 51.399275,
+      "lng": -0.260837
+    },
+    {
+      "id": "Q55125820",
+      "name": "Newington Temporary Library",
+      "lat": 51.493253,
+      "lng": -0.098378
+    },
+    {
+      "id": "Q55125404",
+      "name": "Norbury Library",
+      "lat": 51.405597,
+      "lng": -0.120652
+    },
+    {
+      "id": "Q55125891",
+      "name": "North Chingford Library",
+      "lat": 51.63165,
+      "lng": 0.00284
+    },
+    {
+      "id": "Q52954227",
+      "name": "North Finchley Library",
+      "lat": 51.618619,
+      "lng": -0.175999
+    },
+    {
+      "id": "Q55125308",
+      "name": "North Heath Community Library",
+      "lat": 51.473332,
+      "lng": 0.161315
+    },
+    {
+      "id": "Q27083340",
+      "name": "North Kensington Library",
+      "lat": 51.516668,
+      "lng": -0.209239
+    },
+    {
+      "id": "Q26490251",
+      "name": "North Library",
+      "lat": 51.560423,
+      "lng": -0.121638
+    },
+    {
+      "id": "Q55111271",
+      "name": "North Watford Library",
+      "lat": 51.680313,
+      "lng": -0.394376
+    },
+    {
+      "id": "Q55125782",
+      "name": "North Woolwich Library",
+      "lat": 51.501008,
+      "lng": 0.062377
+    },
+    {
+      "id": "Q55125908",
+      "name": "Northcote Library",
+      "lat": 51.455218,
+      "lng": -0.164348
+    },
+    {
+      "id": "Q55125427",
+      "name": "Northfields Library",
+      "lat": 51.499086,
+      "lng": -0.31411
+    },
+    {
+      "id": "Q55125429",
+      "name": "Northolt Leisure Centre Library",
+      "lat": 51.549201,
+      "lng": -0.367452
+    },
+    {
+      "id": "Q55125431",
+      "name": "Northolt Library",
+      "lat": 51.539675,
+      "lng": -0.38512
+    },
+    {
+      "id": "Q55125633",
+      "name": "Northwood Hills Library",
+      "lat": 51.602797,
+      "lng": -0.408303
+    },
+    {
+      "id": "Q55125636",
+      "name": "Northwood Library",
+      "lat": 51.61209,
+      "lng": -0.424833
+    },
+    {
+      "id": "Q52955115",
+      "name": "Notting Hill Gate Library",
+      "lat": 51.511277,
+      "lng": -0.197409
+    },
+    {
+      "id": "Q55125870",
+      "name": "Nunhead Library",
+      "lat": 51.465765,
+      "lng": -0.05959
+    },
+    {
+      "id": "Q55125637",
+      "name": "Oak Farm Library",
+      "lat": 51.541503,
+      "lng": -0.450096
+    },
+    {
+      "id": "Q55111272",
+      "name": "Oakmere Library",
+      "lat": 51.697985,
+      "lng": -0.173298
+    },
+    {
+      "id": "Q55125474",
+      "name": "Oakwood Library",
+      "lat": 51.648833,
+      "lng": -0.129171
+    },
+    {
+      "id": "Q55125678",
+      "name": "Old Malden Library",
+      "lat": 51.383763,
+      "lng": -0.254904
+    },
+    {
+      "id": "Q55125476",
+      "name": "Ordnance Unity Centre Library",
+      "lat": 51.672005,
+      "lng": -0.039449
+    },
+    {
+      "id": "Q55125343",
+      "name": "Orpington Library",
+      "lat": 51.376056,
+      "lng": 0.10125
+    },
+    {
+      "id": "Q52954252",
+      "name": "Osidge Library",
+      "lat": 51.630377,
+      "lng": -0.149068
+    },
+    {
+      "id": "Q55125663",
+      "name": "Osterley Library",
+      "lat": 51.482331,
+      "lng": -0.345913
+    },
+    {
+      "id": "Q54889031",
+      "name": "Otford Library",
+      "lat": 51.313144,
+      "lng": 0.186389
+    },
+    {
+      "id": "Q55111273",
+      "name": "Oxhey Library",
+      "lat": 51.627451,
+      "lng": -0.389235
+    },
+    {
+      "id": "Q55125934",
+      "name": "Paddington Library",
+      "lat": 51.517416,
+      "lng": -0.188645
+    },
+    {
+      "id": "Q55125478",
+      "name": "Palmers Green Library",
+      "lat": 51.615479,
+      "lng": -0.110362
+    },
+    {
+      "id": "Q7595037",
+      "name": "Pancras Square Library",
+      "lat": 51.533824,
+      "lng": -0.12641
+    },
+    {
+      "id": "Q3511923",
+      "name": "Peckham Library",
+      "lat": 51.4743,
+      "lng": -0.06933
+    },
+    {
+      "id": "Q55125345",
+      "name": "Penge Library",
+      "lat": 51.413847,
+      "lng": -0.051024
+    },
+    {
+      "id": "Q55111308",
+      "name": "Pepys Community Library",
+      "lat": 51.489816,
+      "lng": -0.030691
+    },
+    {
+      "id": "Q55125433",
+      "name": "Perivale Library",
+      "lat": 51.5406,
+      "lng": -0.324067
+    },
+    {
+      "id": "Q55125348",
+      "name": "Petts Wood Library",
+      "lat": 51.390012,
+      "lng": 0.070912
+    },
+    {
+      "id": "Q11713080",
+      "name": "Pilsudski Institute of London",
+      "lat": 51.523711,
+      "lng": -0.125683
+    },
+    {
+      "id": "Q55125936",
+      "name": "Pimlico Library",
+      "lat": 51.488017,
+      "lng": -0.137979
+    },
+    {
+      "id": "Q55125585",
+      "name": "Pinner Library",
+      "lat": 51.591505,
+      "lng": -0.380475
+    },
+    {
+      "id": "Q55125435",
+      "name": "Pitshanger Library",
+      "lat": 51.525894,
+      "lng": -0.313936
+    },
+    {
+      "id": "Q26660438",
+      "name": "Plaistow Library",
+      "lat": 51.529705,
+      "lng": 0.025603
+    },
+    {
+      "id": "Q27087693",
+      "name": "Plumstead Library",
+      "lat": 51.486315,
+      "lng": 0.096286
+    },
+    {
+      "id": "Q92099415",
+      "name": "Polish Library POSK in London",
+      "lat": 51.493584,
+      "lng": -0.237489
+    },
+    {
+      "id": "Q55125766",
+      "name": "Pollards Hill Library",
+      "lat": 51.400015,
+      "lng": -0.131909
+    },
+    {
+      "id": "Q55125481",
+      "name": "Ponders End Library",
+      "lat": 51.645206,
+      "lng": -0.0476
+    },
+    {
+      "id": "Q55125330",
+      "name": "Preston Library",
+      "lat": 51.57019,
+      "lng": -0.295765
+    },
+    {
+      "id": "Q55125362",
+      "name": "Primrose Hill Community Library",
+      "lat": 51.541186,
+      "lng": -0.156832
+    },
+    {
+      "id": "Q53996639",
+      "name": "Purfleet Library",
+      "lat": 51.485276,
+      "lng": 0.229381
+    },
+    {
+      "id": "Q27086972",
+      "name": "Purley Library",
+      "lat": 51.339163,
+      "lng": -0.118655
+    },
+    {
+      "id": "Q15979253",
+      "name": "Putney Library",
+      "lat": 51.46171,
+      "lng": -0.215955
+    },
+    {
+      "id": "Q55125938",
+      "name": "Queen's Park Library, London",
+      "lat": 51.527021,
+      "lng": -0.210934
+    },
+    {
+      "id": "Q55125376",
+      "name": "Queens Crescent Library",
+      "lat": 51.550486,
+      "lng": -0.1512
+    },
+    {
+      "id": "Q55111274",
+      "name": "Radlett Library",
+      "lat": 51.682028,
+      "lng": -0.317369
+    },
+    {
+      "id": "Q55125606",
+      "name": "Rainham Library",
+      "lat": 51.517266,
+      "lng": 0.191027
+    },
+    {
+      "id": "Q55125768",
+      "name": "Raynes Park Library",
+      "lat": 51.409066,
+      "lng": -0.227765
+    },
+    {
+      "id": "Q55183887",
+      "name": "Redbridge Central Library",
+      "lat": 51.558063,
+      "lng": 0.075301
+    },
+    {
+      "id": "Q31440245",
+      "name": "RIBA Library",
+      "lat": 51.521377,
+      "lng": -0.14481
+    },
+    {
+      "id": "Q55125797",
+      "name": "Richmond Information & Reference Library",
+      "lat": 51.458838,
+      "lng": -0.306534
+    },
+    {
+      "id": "Q26388362",
+      "name": "Richmond Library",
+      "lat": 51.462231,
+      "lng": -0.303709
+    },
+    {
+      "id": "Q55125798",
+      "name": "Richmond Local Studies Library & Archive",
+      "lat": 51.458913,
+      "lng": -0.306391
+    },
+    {
+      "id": "Q55111276",
+      "name": "Rickmansworth Library",
+      "lat": 51.639131,
+      "lng": -0.468804
+    },
+    {
+      "id": "Q55125484",
+      "name": "Ridge Avenue Library",
+      "lat": 51.636132,
+      "lng": -0.082073
+    },
+    {
+      "id": "Q54889039",
+      "name": "Riverhead Library",
+      "lat": 51.284975,
+      "lng": 0.169671
+    },
+    {
+      "id": "Q55125294",
+      "name": "Robert Jeyes Community Library",
+      "lat": 51.572658,
+      "lng": 0.14306
+    },
+    {
+      "id": "Q55125909",
+      "name": "Roehampton Library",
+      "lat": 51.449857,
+      "lng": -0.242292
+    },
+    {
+      "id": "Q55125608",
+      "name": "Romford Central Library",
+      "lat": 51.580788,
+      "lng": 0.183514
+    },
+    {
+      "id": "Q55125587",
+      "name": "Roxeth Library",
+      "lat": 51.562621,
+      "lng": -0.35653
+    },
+    {
+      "id": "Q111983687",
+      "name": "Royal College of Nursing Library & Museum",
+      "lat": 51.5159,
+      "lng": -0.1461
+    },
+    {
+      "id": "Q2100215",
+      "name": "Royal Horticultural Society Lindley Library",
+      "lat": 51.494444,
+      "lng": -0.134722
+    },
+    {
+      "id": "Q111983697",
+      "name": "Royal Society of Medicine Library",
+      "lat": 51.516,
+      "lng": -0.147
+    },
+    {
+      "id": "Q55125640",
+      "name": "Ruislip Manor Library",
+      "lat": 51.572438,
+      "lng": -0.411419
+    },
+    {
+      "id": "Q55125406",
+      "name": "Sanderstead Library",
+      "lat": 51.340824,
+      "lng": -0.085561
+    },
+    {
+      "id": "Q54889052",
+      "name": "Seal Library",
+      "lat": 51.288925,
+      "lng": 0.219387
+    },
+    {
+      "id": "Q55125409",
+      "name": "Selsdon Library",
+      "lat": 51.342254,
+      "lng": -0.063387
+    },
+    {
+      "id": "Q116167248",
+      "name": "Senate House Library",
+      "lat": 51.520943,
+      "lng": -0.127823
+    },
+    {
+      "id": "Q55183888",
+      "name": "Seven Kings Library",
+      "lat": 51.564756,
+      "lng": 0.099838
+    },
+    {
+      "id": "Q53678429",
+      "name": "Shenfield Library",
+      "lat": 51.629924,
+      "lng": 0.327331
+    },
+    {
+      "id": "Q55125534",
+      "name": "Shepherds Bush Library",
+      "lat": 51.505948,
+      "lng": -0.224226
+    },
+    {
+      "id": "Q55121909",
+      "name": "Shepperton Library",
+      "lat": 51.394341,
+      "lng": -0.448274
+    },
+    {
+      "id": "Q55125414",
+      "name": "Shirley Library",
+      "lat": 51.375171,
+      "lng": -0.045188
+    },
+    {
+      "id": "Q55125390",
+      "name": "Shoe Lane Library",
+      "lat": 51.515407,
+      "lng": -0.106676
+    },
+    {
+      "id": "Q55125518",
+      "name": "Shoreditch Library",
+      "lat": 51.530439,
+      "lng": -0.080133
+    },
+    {
+      "id": "Q55125351",
+      "name": "Shortlands Library",
+      "lat": 51.399776,
+      "lng": -0.007197
+    },
+    {
+      "id": "Q55125311",
+      "name": "Sidcup Library",
+      "lat": 51.425753,
+      "lng": 0.105171
+    },
+    {
+      "id": "Q55125506",
+      "name": "Slade Centre Library",
+      "lat": 51.478841,
+      "lng": 0.085222
+    },
+    {
+      "id": "Q55125312",
+      "name": "Slade Green Community Library",
+      "lat": 51.473123,
+      "lng": 0.190955
+    },
+    {
+      "id": "Q55125895",
+      "name": "South Chingford Community Library",
+      "lat": 51.616595,
+      "lng": -0.017799
+    },
+    {
+      "id": "Q52954280",
+      "name": "South Friern Library",
+      "lat": 51.600464,
+      "lng": -0.148019
+    },
+    {
+      "id": "Q55125609",
+      "name": "South Hornchurch Library",
+      "lat": 51.530239,
+      "lng": 0.187581
+    },
+    {
+      "id": "Q50735533",
+      "name": "South Lambeth Library",
+      "lat": 51.47925,
+      "lng": -0.123833
+    },
+    {
+      "id": "Q26585584",
+      "name": "South Library",
+      "lat": 51.539067,
+      "lng": -0.098868
+    },
+    {
+      "id": "Q7568046",
+      "name": "South Norwood Library",
+      "lat": 51.3974,
+      "lng": -0.0787
+    },
+    {
+      "id": "Q55125642",
+      "name": "South Ruislip Library",
+      "lat": 51.557361,
+      "lng": -0.395147
+    },
+    {
+      "id": "Q55183897",
+      "name": "South Woodford Library",
+      "lat": 51.597133,
+      "lng": 0.021944
+    },
+    {
+      "id": "Q55125436",
+      "name": "Southall Library (Dominion Centre and Library)",
+      "lat": 51.503235,
+      "lng": -0.379585
+    },
+    {
+      "id": "Q55125355",
+      "name": "Southborough Library",
+      "lat": 51.38991,
+      "lng": 0.043377
+    },
+    {
+      "id": "Q55125911",
+      "name": "Southfields Library",
+      "lat": 51.443549,
+      "lng": -0.208734
+    },
+    {
+      "id": "Q55125487",
+      "name": "Southgate Circus Library",
+      "lat": 51.630377,
+      "lng": -0.128342
+    },
+    {
+      "id": "Q113454732",
+      "name": "Southwark Heritage Centre & Walworth Library",
+      "lat": 51.490102,
+      "lng": -0.096253
+    },
+    {
+      "id": "Q55125542",
+      "name": "St Ann's Library",
+      "lat": 51.580919,
+      "lng": -0.082993
+    },
+    {
+      "id": "Q17531647",
+      "name": "St Augustine with St Philip's Church, Whitechapel",
+      "lat": 51.5173,
+      "lng": -0.060456
+    },
+    {
+      "id": "Q7592712",
+      "name": "St Bride Library",
+      "lat": 51.513447,
+      "lng": -0.105047
+    },
+    {
+      "id": "Q55125940",
+      "name": "St John's Wood Library",
+      "lat": 51.533741,
+      "lng": -0.172451
+    },
+    {
+      "id": "Q173882",
+      "name": "St Paul's Cathedral",
+      "lat": 51.513778,
+      "lng": -0.098306
+    },
+    {
+      "id": "Q55125357",
+      "name": "St Pauls Cray Library",
+      "lat": 51.404606,
+      "lng": 0.103271
+    },
+    {
+      "id": "Q55125521",
+      "name": "Stamford Hill Library",
+      "lat": 51.570366,
+      "lng": -0.072445
+    },
+    {
+      "id": "Q55125589",
+      "name": "Stanmore Library",
+      "lat": 51.618437,
+      "lng": -0.311648
+    },
+    {
+      "id": "Q55121911",
+      "name": "Stanwell Library",
+      "lat": 51.452557,
+      "lng": -0.477033
+    },
+    {
+      "id": "Q26669953",
+      "name": "Stoke Newington Library",
+      "lat": 51.561568,
+      "lng": -0.082776
+    },
+    {
+      "id": "Q55121912",
+      "name": "Stoneleigh Library",
+      "lat": 51.36359,
+      "lng": -0.247793
+    },
+    {
+      "id": "Q27083468",
+      "name": "Stourhead House Lillington Gardens Estate With Attached Public Library And Walls And Steps",
+      "lat": 51.489552,
+      "lng": -0.134605
+    },
+    {
+      "id": "Q55120991",
+      "name": "Stratford Library",
+      "lat": 51.542749,
+      "lng": 0.004189
+    },
+    {
+      "id": "Q7622734",
+      "name": "Streatham Library",
+      "lat": 51.43166,
+      "lng": -0.128987
+    },
+    {
+      "id": "Q55125544",
+      "name": "Stroud Green and Harringay Library",
+      "lat": 51.577547,
+      "lng": -0.106416
+    },
+    {
+      "id": "Q7626617",
+      "name": "Stuart Hall Library",
+      "lat": 51.5263,
+      "lng": -0.0794
+    },
+    {
+      "id": "Q54889089",
+      "name": "Summerhouse Drive Library",
+      "lat": 51.426226,
+      "lng": 0.166706
+    },
+    {
+      "id": "Q55121913",
+      "name": "Sunbury Library",
+      "lat": 51.419777,
+      "lng": -0.421086
+    },
+    {
+      "id": "Q55125683",
+      "name": "Surbiton Library",
+      "lat": 51.3928,
+      "lng": -0.297906
+    },
+    {
+      "id": "Q55184164",
+      "name": "Sutton Central Library",
+      "lat": 51.361625,
+      "lng": -0.194741
+    },
+    {
+      "id": "Q54889090",
+      "name": "Sutton-at-Hone Library",
+      "lat": 51.411017,
+      "lng": 0.236066
+    },
+    {
+      "id": "Q54889096",
+      "name": "Swan Valley Library",
+      "lat": 51.441477,
+      "lng": 0.31251
+    },
+    {
+      "id": "Q54889099",
+      "name": "Swanley Library",
+      "lat": 51.39725,
+      "lng": 0.172646
+    },
+    {
+      "id": "Q7658861",
+      "name": "Swiss Cottage Library",
+      "lat": 51.5424,
+      "lng": -0.173411
+    },
+    {
+      "id": "Q55111310",
+      "name": "Sydenham Community Library",
+      "lat": 51.426929,
+      "lng": -0.04062
+    },
+    {
+      "id": "Q55121914",
+      "name": "Tattenhams Library",
+      "lat": 51.310222,
+      "lng": -0.239442
+    },
+    {
+      "id": "Q27087427",
+      "name": "Teddington Library",
+      "lat": 51.427716,
+      "lng": -0.334386
+    },
+    {
+      "id": "Q54889101",
+      "name": "Temple Hill Library",
+      "lat": 51.450554,
+      "lng": 0.227489
+    },
+    {
+      "id": "Q55125296",
+      "name": "Thames View Library",
+      "lat": 51.527865,
+      "lng": 0.104427
+    },
+    {
+      "id": "Q55125314",
+      "name": "Thamesmead Library",
+      "lat": 51.500672,
+      "lng": 0.122292
+    },
+    {
+      "id": "Q55125508",
+      "name": "Thamesmere Library",
+      "lat": 51.507531,
+      "lng": 0.108902
+    },
+    {
+      "id": "Q131321382",
+      "name": "The BFI Reuben Library",
+      "lat": 51.50655,
+      "lng": -0.1149
+    },
+    {
+      "id": "Q55184166",
+      "name": "The Circle Library",
+      "lat": 51.385667,
+      "lng": -0.174697
+    },
+    {
+      "id": "Q55125775",
+      "name": "The Gate Library",
+      "lat": 51.546915,
+      "lng": 0.02578
+    },
+    {
+      "id": "Q55111303",
+      "name": "The Library at Deptford Lounge",
+      "lat": 51.477707,
+      "lng": -0.024303
+    },
+    {
+      "id": "Q131845130",
+      "name": "The Library of the Society of Friends",
+      "lat": 51.526517,
+      "lng": -0.132364
+    },
+    {
+      "id": "Q26279734",
+      "name": "The Mansion",
+      "lat": 51.293679,
+      "lng": -0.329043
+    },
+    {
+      "id": "Q26268218",
+      "name": "The Oratory House",
+      "lat": 51.497136,
+      "lng": -0.169608
+    },
+    {
+      "id": "Q55125416",
+      "name": "Thornton Heath Library",
+      "lat": 51.396903,
+      "lng": -0.105602
+    },
+    {
+      "id": "Q55125686",
+      "name": "Tolworth Community Library",
+      "lat": 51.38108,
+      "lng": -0.282281
+    },
+    {
+      "id": "Q55125913",
+      "name": "Tooting Library",
+      "lat": 51.426618,
+      "lng": -0.165682
+    },
+    {
+      "id": "Q55125687",
+      "name": "Tudor Drive Library",
+      "lat": 51.426287,
+      "lng": -0.297482
+    },
+    {
+      "id": "Q27087525",
+      "name": "Twickenham Library",
+      "lat": 51.44753,
+      "lng": -0.327899
+    },
+    {
+      "id": "Q130548601",
+      "name": "UCL Library Services",
+      "lat": 51.523571,
+      "lng": -0.132398
+    },
+    {
+      "id": "Q122984874",
+      "name": "Una Marson Library",
+      "lat": 51.487375,
+      "lng": -0.08566
+    },
+    {
+      "id": "Q55183901",
+      "name": "Uphall School Library",
+      "lat": 51.547532,
+      "lng": 0.07217
+    },
+    {
+      "id": "Q55125612",
+      "name": "Upminster Library",
+      "lat": 51.555099,
+      "lng": 0.248196
+    },
+    {
+      "id": "Q55125315",
+      "name": "Upper Belvedere Community Library",
+      "lat": 51.483928,
+      "lng": 0.145217
+    },
+    {
+      "id": "Q7898831",
+      "name": "Upper Norwood Library",
+      "lat": 51.4198,
+      "lng": -0.0814
+    },
+    {
+      "id": "Q55125298",
+      "name": "Valence Library",
+      "lat": 51.558578,
+      "lng": 0.13384
+    },
+    {
+      "id": "Q17551613",
+      "name": "Vaughan Library",
+      "lat": 51.5729,
+      "lng": -0.336594
+    },
+    {
+      "id": "Q7917325",
+      "name": "Vaughan Williams Memorial Library",
+      "lat": 51.5381,
+      "lng": -0.1493
+    },
+    {
+      "id": "Q27087104",
+      "name": "Victoria Library",
+      "lat": 51.492884,
+      "lng": -0.148059
+    },
+    {
+      "id": "Q55184167",
+      "name": "Wallington Library",
+      "lat": 51.357893,
+      "lng": -0.150998
+    },
+    {
+      "id": "Q53734293",
+      "name": "Waltham Abbey Library",
+      "lat": 51.686683,
+      "lng": 0
+    },
+    {
+      "id": "Q55111289",
+      "name": "Waltham Cross Library",
+      "lat": 51.686522,
+      "lng": -0.033725
+    },
+    {
+      "id": "Q26485794",
+      "name": "Walthamstow Library",
+      "lat": 51.584307,
+      "lng": -0.02101
+    },
+    {
+      "id": "Q55121917",
+      "name": "Walton Library",
+      "lat": 51.385112,
+      "lng": -0.420105
+    },
+    {
+      "id": "Q55125916",
+      "name": "Wandsworth Town Library",
+      "lat": 51.456185,
+      "lng": -0.192478
+    },
+    {
+      "id": "Q55183904",
+      "name": "Wanstead Library",
+      "lat": 51.575884,
+      "lng": 0.025267
+    },
+    {
+      "id": "Q55121918",
+      "name": "Warlingham Library",
+      "lat": 51.310127,
+      "lng": -0.057233
+    },
+    {
+      "id": "Q55125689",
+      "name": "Waterloo Library",
+      "lat": 51.503857,
+      "lng": -0.108025
+    },
+    {
+      "id": "Q55111290",
+      "name": "Watford Central Library",
+      "lat": 51.660215,
+      "lng": -0.403085
+    },
+    {
+      "id": "Q55125590",
+      "name": "Wealdstone Library",
+      "lat": 51.594218,
+      "lng": -0.334883
+    },
+    {
+      "id": "Q7981191",
+      "name": "Wellcome Collection",
+      "lat": 51.525944,
+      "lng": -0.133889
+    },
+    {
+      "id": "Q7981192",
+      "name": "Wellcome Library",
+      "lat": 51.526008,
+      "lng": -0.133723
+    },
+    {
+      "id": "Q55125318",
+      "name": "Welling Library",
+      "lat": 51.462467,
+      "lng": 0.106129
+    },
+    {
+      "id": "Q55125333",
+      "name": "Wembley Library",
+      "lat": 51.558981,
+      "lng": -0.281446
+    },
+    {
+      "id": "Q55125770",
+      "name": "West Barnes Library",
+      "lat": 51.395162,
+      "lng": -0.239119
+    },
+    {
+      "id": "Q55121919",
+      "name": "West Byfleet Library",
+      "lat": 51.337854,
+      "lng": -0.504401
+    },
+    {
+      "id": "Q55125643",
+      "name": "West Drayton Library",
+      "lat": 51.505685,
+      "lng": -0.470291
+    },
+    {
+      "id": "Q55125440",
+      "name": "West Ealing Library",
+      "lat": 51.509427,
+      "lng": -0.324472
+    },
+    {
+      "id": "Q27085795",
+      "name": "West Greenwich Library",
+      "lat": 51.477959,
+      "lng": -0.011346
+    },
+    {
+      "id": "Q55125378",
+      "name": "West Hampstead Library",
+      "lat": 51.550315,
+      "lng": -0.191636
+    },
+    {
+      "id": "Q54889112",
+      "name": "West Kingsdown Library",
+      "lat": 51.344345,
+      "lng": 0.258206
+    },
+    {
+      "id": "Q26570049",
+      "name": "West Library",
+      "lat": 51.540751,
+      "lng": -0.116276
+    },
+    {
+      "id": "Q55125692",
+      "name": "West Norwood Library",
+      "lat": 51.433189,
+      "lng": -0.103295
+    },
+    {
+      "id": "Q55125358",
+      "name": "West Wickham Library",
+      "lat": 51.375934,
+      "lng": -0.013839
+    },
+    {
+      "id": "Q24883304",
+      "name": "Westminster Reference Library",
+      "lat": 51.50964,
+      "lng": -0.1298
+    },
+    {
+      "id": "Q55121920",
+      "name": "Weybridge Library",
+      "lat": 51.372072,
+      "lng": -0.460318
+    },
+    {
+      "id": "Q55125801",
+      "name": "Whitton Library",
+      "lat": 51.452749,
+      "lng": -0.359166
+    },
+    {
+      "id": "Q2569007",
+      "name": "Wiener Library",
+      "lat": 51.521611,
+      "lng": -0.128
+    },
+    {
+      "id": "Q8003682",
+      "name": "Willesden Green Library",
+      "lat": 51.5467,
+      "lng": -0.228889
+    },
+    {
+      "id": "Q55125771",
+      "name": "Wimbledon Library",
+      "lat": 51.422325,
+      "lng": -0.208097
+    },
+    {
+      "id": "Q55125490",
+      "name": "Winchmore Hill Library",
+      "lat": 51.628406,
+      "lng": -0.098513
+    },
+    {
+      "id": "Q81165404",
+      "name": "Women's Art Library Collections, Goldsmiths, University of London",
+      "lat": 51.474144,
+      "lng": -0.035401
+    },
+    {
+      "id": "Q8030967",
+      "name": "Women's Library",
+      "lat": 51.5147,
+      "lng": -0.115818
+    },
+    {
+      "id": "Q55125443",
+      "name": "Wood End Library",
+      "lat": 51.552745,
+      "lng": -0.34988
+    },
+    {
+      "id": "Q55125545",
+      "name": "Wood Green Central Library and Customer Services",
+      "lat": 51.595525,
+      "lng": -0.10967
+    },
+    {
+      "id": "Q55125899",
+      "name": "Wood Street Library",
+      "lat": 51.591565,
+      "lng": -0.004251
+    },
+    {
+      "id": "Q55125524",
+      "name": "Woodberry Down Library",
+      "lat": 51.570085,
+      "lng": -0.091374
+    },
+    {
+      "id": "Q55183906",
+      "name": "Woodford Green Library",
+      "lat": 51.607594,
+      "lng": 0.032319
+    },
+    {
+      "id": "Q55125511",
+      "name": "Woolwich Library",
+      "lat": 51.489152,
+      "lng": 0.066618
+    },
+    {
+      "id": "Q55184168",
+      "name": "Worcester Park Library",
+      "lat": 51.378056,
+      "lng": -0.241395
+    },
+    {
+      "id": "Q55125646",
+      "name": "Yeading Library",
+      "lat": 51.520813,
+      "lng": -0.404139
+    },
+    {
+      "id": "Q55125647",
+      "name": "Yiewsley Library",
+      "lat": 51.515306,
+      "lng": -0.474208
+    },
+    {
+      "id": "Q55125918",
+      "name": "York Gardens Library",
+      "lat": 51.467058,
+      "lng": -0.177821
+    }
+  ]
+}

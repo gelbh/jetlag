@@ -1,1 +1,222 @@
-{ "category": "movie_theater", "source": "none", "places": [] }
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 35.5282,
+    "west": 139.5628,
+    "north": 35.8175,
+    "east": 139.9189
+  },
+  "places": [
+    {
+      "id": "Q4778641",
+      "name": "Aoikan",
+      "lat": 35.6711,
+      "lng": 139.744
+    },
+    {
+      "id": "Q35134652",
+      "name": "Chueigekijo Theater",
+      "lat": 35.689487,
+      "lng": 139.691706
+    },
+    {
+      "id": "Q28068492",
+      "name": "CINEMA Chupki TABATA",
+      "lat": 35.741139,
+      "lng": 139.761722
+    },
+    {
+      "id": "Q35134665",
+      "name": "Cinema Rise",
+      "lat": 35.660513,
+      "lng": 139.69904
+    },
+    {
+      "id": "Q35134678",
+      "name": "Empire Theatre",
+      "lat": 35.681559,
+      "lng": 139.743277
+    },
+    {
+      "id": "Q11345967",
+      "name": "EUROSPACE",
+      "lat": 35.659278,
+      "lng": 139.695194
+    },
+    {
+      "id": "Q35134697",
+      "name": "Grant Heights Theater",
+      "lat": 35.689487,
+      "lng": 139.691706
+    },
+    {
+      "id": "Q11475314",
+      "name": "Iwanami Hall",
+      "lat": 35.695694,
+      "lng": 139.757722
+    },
+    {
+      "id": "Q11349138",
+      "name": "LE CINEMA",
+      "lat": 35.661083,
+      "lng": 139.695583
+    },
+    {
+      "id": "Q11530708",
+      "name": "Matsudo Tokiwakan",
+      "lat": 35.785478,
+      "lng": 139.898528
+    },
+    {
+      "id": "Q35134725",
+      "name": "Meigaza Theater",
+      "lat": 35.689487,
+      "lng": 139.691706
+    },
+    {
+      "id": "Q11339367",
+      "name": "PolePole Higashi-Nakano",
+      "lat": 35.706556,
+      "lng": 139.684528
+    },
+    {
+      "id": "Q11561648",
+      "name": "Shibuya Toei Plaza",
+      "lat": 35.659972,
+      "lng": 139.701917
+    },
+    {
+      "id": "Q11561742",
+      "name": "Shibuya Tokyu",
+      "lat": 35.658889,
+      "lng": 139.705278
+    },
+    {
+      "id": "Q28684231",
+      "name": "Shimokitazawa Tollywood",
+      "lat": 35.658861,
+      "lng": 139.667583
+    },
+    {
+      "id": "Q35134751",
+      "name": "Shingekijo Theater",
+      "lat": 35.689487,
+      "lng": 139.691706
+    },
+    {
+      "id": "Q28689115",
+      "name": "Shinjuku Cinema Qualite",
+      "lat": 35.690389,
+      "lng": 139.701306
+    },
+    {
+      "id": "Q5206990",
+      "name": "Shinjuku Musashinokan",
+      "lat": 35.6911,
+      "lng": 139.7021
+    },
+    {
+      "id": "Q11501802",
+      "name": "Shinjuku Piccadilly",
+      "lat": 35.692583,
+      "lng": 139.703806
+    },
+    {
+      "id": "Q128569016",
+      "name": "Stranger",
+      "lat": 35.688056,
+      "lng": 139.806306
+    },
+    {
+      "id": "Q11249601",
+      "name": "TOHO CINEMAS CHANTER",
+      "lat": 35.673444,
+      "lng": 139.760528
+    },
+    {
+      "id": "Q141837872",
+      "name": "TOHO CINEMAS HIBIYA",
+      "lat": 35.673741,
+      "lng": 139.759161
+    },
+    {
+      "id": "Q11249605",
+      "name": "TOHO CINEMAS NICHIGEKI",
+      "lat": 35.673667,
+      "lng": 139.762722
+    },
+    {
+      "id": "Q57304509",
+      "name": "Toho Cinemas Shinjyuku & IMAX",
+      "lat": 35.695154,
+      "lng": 139.701964
+    },
+    {
+      "id": "Q11249602",
+      "name": "TOHOシネマズスカラ座",
+      "lat": 35.673,
+      "lng": 139.759167
+    },
+    {
+      "id": "Q11249598",
+      "name": "TOHOシネマズみゆき座",
+      "lat": 35.673,
+      "lng": 139.759167
+    },
+    {
+      "id": "Q11249608",
+      "name": "TOHOシネマズ有楽座",
+      "lat": 35.672972,
+      "lng": 139.761611
+    },
+    {
+      "id": "Q11249610",
+      "name": "TOHOシネマズ渋谷",
+      "lat": 35.659028,
+      "lng": 139.698917
+    },
+    {
+      "id": "Q564461",
+      "name": "Tokyo Gekijo",
+      "lat": 35.667806,
+      "lng": 139.768556
+    },
+    {
+      "id": "Q35134789",
+      "name": "United Cinemas Toshimaen",
+      "lat": 35.739759,
+      "lng": 139.655716
+    },
+    {
+      "id": "Q11307395",
+      "name": "シネスイッチ銀座",
+      "lat": 35.672083,
+      "lng": 139.765111
+    },
+    {
+      "id": "Q11367942",
+      "name": "丸の内ピカデリー",
+      "lat": 35.673611,
+      "lng": 139.763417
+    },
+    {
+      "id": "Q24873238",
+      "name": "帝都座",
+      "lat": 35.71,
+      "lng": 139.72
+    },
+    {
+      "id": "Q56346586",
+      "name": "新宿ロマン劇場",
+      "lat": 35.691667,
+      "lng": 139.705556
+    },
+    {
+      "id": "Q11511526",
+      "name": "早稲田松竹",
+      "lat": 35.711631,
+      "lng": 139.708211
+    }
+  ]
+}

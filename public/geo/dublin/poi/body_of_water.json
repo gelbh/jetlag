@@ -1,1 +1,36 @@
-{ "category": "body_of_water", "source": "none", "places": [] }
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 53.1782,
+    "west": -6.5469,
+    "north": 53.6347,
+    "east": -5.9945
+  },
+  "places": [
+    {
+      "id": "Q883906",
+      "name": "Blessington Street Basin",
+      "lat": 53.357262,
+      "lng": -6.270813
+    },
+    {
+      "id": "Q116922455",
+      "name": "Brittas Pond",
+      "lat": 53.2424,
+      "lng": -6.4535
+    },
+    {
+      "id": "Q33282210",
+      "name": "Lough Bray Lower",
+      "lat": 53.184444,
+      "lng": -6.301111
+    },
+    {
+      "id": "Q34918419",
+      "name": "Rathmines and Rathgar Waterworks",
+      "lat": 53.233333,
+      "lng": -6.35
+    }
+  ]
+}
