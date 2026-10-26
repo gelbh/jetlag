@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getAskMapPlacementActive,
   resetAskMapPlacementStoreForTests,
+  subscribeAskMapPlacement,
 } from "@/hooks/progress/askMapPlacementStore";
 import { jetlagTheme } from "@/theme/theme";
 import { AskMapPlacementChrome } from "./AskMapPlacementChrome";
@@ -64,6 +65,59 @@ describe("AskMapPlacementChrome placement store and CSS bridge", () => {
 
     expect(getAskMapPlacementActive()).toBe(false);
     expect(document.documentElement.hasAttribute("data-ask-map-placement")).toBe(false);
+  });
+
+  it("keeps store active when bottom clearance changes with phase", () => {
+    const seenInactive: boolean[] = [];
+    const unsubscribe = subscribeAskMapPlacement(() => {
+      seenInactive.push(!getAskMapPlacementActive());
+    });
+
+    const { rerender } = render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <AskMapPlacementChrome
+          testId="matching-map-placement"
+          toolTitle="Matching"
+          configureLabel="Commercial Airport"
+          questionPrompt="Is your nearest commercial airport the same?"
+          onUseGps={vi.fn()}
+          phase="locating"
+          statusTitle="Finding location"
+          statusBody="Waiting for GPS…"
+          toolIcon={<span />}
+        />
+      </MantineProvider>,
+    );
+
+    expect(getAskMapPlacementActive()).toBe(true);
+    expect(
+      document.documentElement.style.getPropertyValue("--ask-map-placement-bottom-clearance"),
+    ).toBe("6.5rem");
+
+    rerender(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <AskMapPlacementChrome
+          testId="matching-map-placement"
+          toolTitle="Matching"
+          configureLabel="Commercial Airport"
+          questionPrompt="Is your nearest commercial airport the same?"
+          onUseGps={vi.fn()}
+          phase="resolving"
+          statusTitle="Finding location"
+          statusBody="Waiting for GPS…"
+          toolIcon={<span />}
+        />
+      </MantineProvider>,
+    );
+
+    unsubscribe();
+
+    expect(getAskMapPlacementActive()).toBe(true);
+    expect(document.documentElement.hasAttribute("data-ask-map-placement")).toBe(true);
+    expect(
+      document.documentElement.style.getPropertyValue("--ask-map-placement-bottom-clearance"),
+    ).toBe("5.5rem");
+    expect(seenInactive.some(Boolean)).toBe(false);
   });
 });
 

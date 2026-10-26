@@ -204,12 +204,18 @@ export function AskMapPlacementChrome({
     const root = document.documentElement;
     root.setAttribute("data-ask-map-placement", "1");
     root.setAttribute("data-matching-map-placement", "1");
-    root.style.setProperty("--ask-map-placement-bottom-clearance", bottomClearance);
-    root.style.setProperty("--matching-map-bottom-clearance", bottomClearance);
     return () => {
       setAskMapPlacementActive(false);
       root.removeAttribute("data-ask-map-placement");
       root.removeAttribute("data-matching-map-placement");
+    };
+  }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--ask-map-placement-bottom-clearance", bottomClearance);
+    root.style.setProperty("--matching-map-bottom-clearance", bottomClearance);
+    return () => {
       root.style.removeProperty("--ask-map-placement-bottom-clearance");
       root.style.removeProperty("--matching-map-bottom-clearance");
     };
