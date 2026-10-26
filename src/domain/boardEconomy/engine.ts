@@ -402,9 +402,8 @@ export function playMoveCard(state: BoardEconomyState, moveInstanceId: string): 
   }
   return {
     ...state,
-    hand: [],
-    discard: [...state.discard, ...state.hand],
-    handLimit: DEFAULT_HAND_LIMIT,
+    hand: state.hand.filter((card) => card.instanceId !== moveInstanceId),
+    discard: [...state.discard, move],
   };
 }
 
