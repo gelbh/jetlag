@@ -58,6 +58,46 @@ describe("postpassTranslate", () => {
     assert.ok(elements.some((e) => e.type === "way" && e.geometry?.length >= 4));
   });
 
+  it("uses every polygon component when deriving an admin center", () => {
+    const { elements } = geoJsonToOverpassElements(
+      {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: { osm_type: "R", osm_id: 43 },
+            geometry: {
+              type: "MultiPolygon",
+              coordinates: [
+                [
+                  [
+                    [0, 0],
+                    [1, 0],
+                    [1, 1],
+                    [0, 1],
+                    [0, 0],
+                  ],
+                ],
+                [
+                  [
+                    [2, 0],
+                    [4, 0],
+                    [4, 2],
+                    [2, 2],
+                    [2, 0],
+                  ],
+                ],
+              ],
+            },
+          },
+        ],
+      },
+      "admin",
+    );
+
+    assert.deepEqual(elements[0].center, { lat: 0.9, lon: 2.5 });
+  });
+
   it("classifies places QL", () => {
     const ql = `
       [out:json][timeout:25];

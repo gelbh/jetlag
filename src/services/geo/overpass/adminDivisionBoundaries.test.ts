@@ -5,6 +5,7 @@ import {
   classifyAdminDivisionAtPoint,
   parseAdminDivisionFeatures,
   relationBoundaryFromElements,
+  representativePointForBoundary,
 } from "./adminDivisionBoundaries";
 
 const sampleGameArea: GameArea = {
@@ -21,6 +22,26 @@ const sampleGameArea: GameArea = {
 };
 
 describe("admin division boundaries", () => {
+  it("uses the area-weighted centroid for a concave boundary", () => {
+    const point = representativePointForBoundary({
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [4, 0],
+          [4, 1],
+          [1, 1],
+          [1, 4],
+          [0, 4],
+          [0, 0],
+        ],
+      ],
+    });
+
+    expect(point[0]).toBeCloseTo(1.3571, 4);
+    expect(point[1]).toBeCloseTo(1.3571, 4);
+  });
+
   it("builds a bbox admin query without empty area.searchArea", () => {
     const query = buildAdminDivisionQuery(sampleGameArea, 6);
 

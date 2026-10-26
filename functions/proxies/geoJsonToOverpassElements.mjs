@@ -73,28 +73,54 @@ function geometryCentroid(geometry) {
     return { lat: mid.lat, lon: mid.lon };
   }
   if (geometry.type === "Polygon") {
-    const pts = ringToGeometry(geometry.coordinates[0]);
-    if (pts.length === 0) return null;
-    let latSum = 0;
-    let lonSum = 0;
-    for (const p of pts) {
-      latSum += p.lat;
-      lonSum += p.lon;
-    }
-    return { lat: latSum / pts.length, lon: lonSum / pts.length };
+    return polygonCentroid(geometry.coordinates[0]);
   }
   if (geometry.type === "MultiPolygon") {
-    const pts = ringToGeometry(geometry.coordinates[0]?.[0]);
-    if (pts.length === 0) return null;
-    let latSum = 0;
-    let lonSum = 0;
-    for (const p of pts) {
-      latSum += p.lat;
-      lonSum += p.lon;
+    const components = geometry.coordinates
+      .map((polygon) => ({
+        centroid: polygonCentroid(polygon[0]),
+        area: polygonArea(polygon[0]),
+      }))
+      .filter((component) => component.centroid && component.area > 0);
+    if (components.length === 0) return null;
+    const totalArea = components.reduce((sum, component) => sum + component.area, 0);
+    let lat = 0;
+    let lon = 0;
+    for (const component of components) {
+      lat += component.centroid.lat * component.area;
+      lon += component.centroid.lon * component.area;
     }
-    return { lat: latSum / pts.length, lon: lonSum / pts.length };
+    return { lat: lat / totalArea, lon: lon / totalArea };
   }
   return null;
+}
+
+function polygonArea(ring) {
+  let twiceArea = 0;
+  for (let index = 0; index < ring.length - 1; index += 1) {
+    const [lon, lat] = ring[index];
+    const [nextLon, nextLat] = ring[index + 1];
+    twiceArea += lon * nextLat - nextLon * lat;
+  }
+  return Math.abs(twiceArea) / 2;
+}
+
+function polygonCentroid(ring) {
+  const pts = ringToGeometry(ring);
+  if (pts.length < 3) return null;
+  let twiceArea = 0;
+  let lat = 0;
+  let lon = 0;
+  for (let index = 0; index < pts.length - 1; index += 1) {
+    const current = pts[index];
+    const next = pts[index + 1];
+    const cross = current.lon * next.lat - next.lon * current.lat;
+    twiceArea += cross;
+    lon += (current.lon + next.lon) * cross;
+    lat += (current.lat + next.lat) * cross;
+  }
+  if (twiceArea === 0) return null;
+  return { lat: lat / (3 * twiceArea), lon: lon / (3 * twiceArea) };
 }
 
 /**
