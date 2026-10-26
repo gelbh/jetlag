@@ -178,6 +178,7 @@ export function CreateSession() {
               bundledPresetSelectGroups: session.bundledPresetSelectGroups,
               favouritePresetSelectOptions: session.favouritePresetSelectOptions,
               userPresets: session.userPresets,
+              presetsForSearch: session.presetsForSearch,
               loadedPreset: session.loadedPreset,
               appliedPresetIds: session.appliedPresetIds,
               pendingPresetIds: session.pendingPresetIds,

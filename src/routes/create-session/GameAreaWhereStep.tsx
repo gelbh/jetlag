@@ -1,5 +1,6 @@
-import { NativeSelect, Text } from "@mantine/core";
+import { Select, Text } from "@mantine/core";
 import { BoundingBoxIcon, CheckIcon } from "@phosphor-icons/react";
+import { useState } from "react";
 import {
   PlaceAreaSearchFields,
   PlaceAreaSearchInsetResults,
@@ -13,6 +14,7 @@ import {
 } from "../../domain/regions/bundledGamePresets";
 import { flagMarkForBundledPresetId } from "../../domain/regions/bundledPresetFlags";
 import { formatBundledPresetLocation } from "../../domain/regions/bundledPresetHierarchy";
+import { filterGamePresetsForSearch } from "../../domain/session/presets/gamePresetSearch";
 import type { GameAreaSectionModel, WhereSource } from "./GameAreaSection";
 
 function pendingPresetLabel(model: GameAreaSectionModel, presetId: string): string {
@@ -44,10 +46,12 @@ export function GameAreaWhereStep({
   whereSource: WhereSource;
   onWhereSourceChange: (source: WhereSource) => void;
 }) {
+  const [presetSearch, setPresetSearch] = useState("");
   const {
     bundledPresetSelectGroups,
     favouritePresetSelectOptions,
     userPresets,
+    presetsForSearch,
     loadedPreset,
     appliedPresetIds,
     pendingPresetIds,
@@ -81,13 +85,24 @@ export function GameAreaWhereStep({
   const loadedPresetFlag = loadedPreset ? flagMarkForBundledPresetId(loadedPreset.id) : null;
   const secondaryAreaCount = Math.max(0, appliedPresetIds.length - 1);
 
+  const favouritePresetIds = new Set(favouritePresetSelectOptions.map((option) => option.presetId));
+  const bundledGroupsWithoutFavourites = bundledPresetSelectGroups
+    .map((group) => ({
+      ...group,
+      options: group.options.filter((option) => !favouritePresetIds.has(option.presetId)),
+    }))
+    .filter((group) => group.options.length > 0);
+  const userPresetsWithoutFavourites = userPresets.filter(
+    (preset) => !favouritePresetIds.has(preset.id),
+  );
   const presetIdsInSelect = new Set<string>([
-    ...favouritePresetSelectOptions.map((option) => option.presetId),
-    ...bundledPresetSelectGroups.flatMap((group) => group.options.map((option) => option.presetId)),
-    ...userPresets.map((preset) => preset.id),
+    ...favouritePresetIds,
+    ...bundledGroupsWithoutFavourites.flatMap((group) =>
+      group.options.map((option) => option.presetId),
+    ),
+    ...userPresetsWithoutFavourites.map((preset) => preset.id),
   ]);
-  const presetSelectData = [
-    { value: "", label: "Load preset…" },
+  const emptyQueryData = [
     ...(favouritePresetSelectOptions.length > 0
       ? [
           {
@@ -99,14 +114,14 @@ export function GameAreaWhereStep({
           },
         ]
       : []),
-    ...bundledPresetSelectGroups.map((group) => ({
+    ...bundledGroupsWithoutFavourites.map((group) => ({
       group: group.label,
       items: group.options.map((option) => ({
         value: option.presetId,
         label: option.name,
       })),
     })),
-    ...userPresets.map((preset) => ({
+    ...userPresetsWithoutFavourites.map((preset) => ({
       value: preset.id,
       label: preset.name,
     })),
@@ -114,6 +129,13 @@ export function GameAreaWhereStep({
       ? [{ value: loadedPreset.id, label: loadedPreset.name }]
       : []),
   ];
+  const searching = presetSearch.trim().length > 0;
+  const presetSelectData = searching
+    ? filterGamePresetsForSearch(presetsForSearch, presetSearch).map((preset) => ({
+        value: preset.id,
+        label: preset.name,
+      }))
+    : emptyQueryData;
 
   return (
     <div className="space-y-5">
@@ -133,17 +155,22 @@ export function GameAreaWhereStep({
         </div>
         <InsetGroup>
           {whereSource === "preset" ? (
-            <NativeSelect
+            <Select
               aria-label="Game preset"
               data={presetSelectData}
-              value=""
+              placeholder="Load preset…"
+              searchable
+              clearable={false}
+              value={null}
+              searchValue={presetSearch}
+              onSearchChange={setPresetSearch}
+              filter={({ options }) => options}
               disabled={loading || verifyingAccess}
-              onChange={(event) => {
-                const presetId = event.currentTarget.value;
-                if (presetId) {
-                  onWhereSourceChange("preset");
-                  onPendingPresetAdd(presetId);
-                }
+              onChange={(presetId) => {
+                if (!presetId) return;
+                onWhereSourceChange("preset");
+                onPendingPresetAdd(presetId);
+                setPresetSearch("");
               }}
               styles={insetTextInputStyles}
             />
@@ -239,7 +266,11 @@ export function GameAreaWhereStep({
               <Text
                 component="p"
                 c="var(--color-field-ink-muted)"
-                style={{ margin: 0, marginTop: "0.25rem", fontSize: "0.8125rem" }}
+                style={{
+                  margin: 0,
+                  marginTop: "0.25rem",
+                  fontSize: "0.8125rem",
+                }}
               >
                 {loadedPreset.gameSize} · {loadedPreset.distanceUnit}
                 {loadedPreset.placeLabel ? ` · ${loadedPreset.placeLabel}` : ""}
@@ -248,7 +279,11 @@ export function GameAreaWhereStep({
                 <Text
                   component="p"
                   c="var(--color-field-ink-muted)"
-                  style={{ margin: 0, marginTop: "0.25rem", fontSize: "0.8125rem" }}
+                  style={{
+                    margin: 0,
+                    marginTop: "0.25rem",
+                    fontSize: "0.8125rem",
+                  }}
                 >
                   + {secondaryAreaCount} {secondaryAreaCount === 1 ? "area" : "areas"}
                 </Text>
@@ -257,7 +292,11 @@ export function GameAreaWhereStep({
                 <Text
                   component="p"
                   c="var(--color-field-ink-muted)"
-                  style={{ margin: 0, marginTop: "0.25rem", fontSize: "0.8125rem" }}
+                  style={{
+                    margin: 0,
+                    marginTop: "0.25rem",
+                    fontSize: "0.8125rem",
+                  }}
                 >
                   {loadedPresetLocation}
                 </Text>
@@ -266,7 +305,11 @@ export function GameAreaWhereStep({
                 <Text
                   component="p"
                   c="var(--color-field-ink-muted)"
-                  style={{ margin: 0, marginTop: "0.5rem", fontSize: "0.8125rem" }}
+                  style={{
+                    margin: 0,
+                    marginTop: "0.5rem",
+                    fontSize: "0.8125rem",
+                  }}
                 >
                   {loadedBundledDefinition.description}
                 </Text>

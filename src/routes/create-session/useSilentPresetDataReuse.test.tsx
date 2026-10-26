@@ -13,6 +13,7 @@ import { useSessionStore } from "@/state/sessionStore";
 import { DUBLIN_CITY_GAME_AREA, DUBLIN_COUNTY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import { jetlagTheme } from "@/theme/theme";
 import { CreateSession } from "./CreateSession";
+import { pickCreateSessionPreset } from "./createSessionPresetSelectTest";
 
 const ensureAnonymousUser = vi.hoisted(() => vi.fn(async () => ({ uid: "host-1" })));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => false));
@@ -446,12 +447,8 @@ describe("CreateSession silent preset data reuse", () => {
 
     renderCreateSession();
     fireEvent.click(screen.getByRole("button", { name: "Preset" }));
-    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
-      target: { value: "preset-a" },
-    });
-    fireEvent.change(screen.getByRole("combobox", { name: /game preset/i }), {
-      target: { value: "preset-b" },
-    });
+    await pickCreateSessionPreset("Preset A");
+    await pickCreateSessionPreset("Preset B");
     fireEvent.click(screen.getByRole("button", { name: /apply presets/i }));
 
     await waitFor(() => {

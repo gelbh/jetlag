@@ -1254,6 +1254,7 @@ export function useCreateSession() {
     bundledPresetSelectGroups,
     favouritePresetSelectOptions,
     userPresets,
+    presetsForSearch: presets,
     loadedPresetId,
     loadedPreset,
     appliedPresetIds,
