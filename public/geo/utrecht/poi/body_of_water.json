@@ -1,0 +1,24 @@
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q1857518",
+      "name": "Haarrijnseplas",
+      "lat": 52.11858,
+      "lng": 5.01666
+    },
+    {
+      "id": "Q731679",
+      "name": "Maarsseveense Plassen",
+      "lat": 52.14111,
+      "lng": 5.08694
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q1735318",
+      "name": "Castle de Haar",
+      "lat": 52.121431,
+      "lng": 4.986347
+    },
+    {
+      "id": "Q260913",
+      "name": "Centraal Museum",
+      "lat": 52.083333,
+      "lng": 5.125833
+    },
+    {
+      "id": "Q1980158",
+      "name": "Dutch Museum of working-class districts",
+      "lat": 52.09522,
+      "lng": 5.11461
+    },
+    {
+      "id": "Q2267655",
+      "name": "Kruideniersmuseum",
+      "lat": 52.093136,
+      "lng": 5.120014
+    },
+    {
+      "id": "Q110062508",
+      "name": "Mobach Keramiek Museum",
+      "lat": 52.07027,
+      "lng": 5.11066
+    },
+    {
+      "id": "Q1954426",
+      "name": "Museum Catharijneconvent",
+      "lat": 52.087222,
+      "lng": 5.124167
+    },
+    {
+      "id": "Q28058453",
+      "name": "Museum IJsselstein",
+      "lat": 52.020298,
+      "lng": 5.047579
+    },
+    {
+      "id": "Q2519854",
+      "name": "Museum Maarssen",
+      "lat": 52.14417,
+      "lng": 5.03222
+    },
+    {
+      "id": "Q2028538",
+      "name": "Museum of Money",
+      "lat": 52.08746,
+      "lng": 5.09604
+    },
+    {
+      "id": "Q28956940",
+      "name": "Museum Oud Amelisweerd",
+      "lat": 52.067486,
+      "lng": 5.169556
+    },
+    {
+      "id": "Q1624224",
+      "name": "Museum Speelklok",
+      "lat": 52.090292,
+      "lng": 5.118899
+    },
+    {
+      "id": "Q66085540",
+      "name": "Museum van Zuilen",
+      "lat": 52.10634,
+      "lng": 5.08041
+    },
+    {
+      "id": "Q2361897",
+      "name": "Museum Warsenhoeck",
+      "lat": 52.022639,
+      "lng": 5.082778
+    },
+    {
+      "id": "Q1986962",
+      "name": "nijntje museum",
+      "lat": 52.083869,
+      "lng": 5.125625
+    },
+    {
+      "id": "Q2117962",
+      "name": "Oude Hortus",
+      "lat": 52.084722,
+      "lng": 5.126389
+    },
+    {
+      "id": "Q2588709",
+      "name": "Provinciaal JitsArt Museum, Beelden op Beerschoten",
+      "lat": 52.10631,
+      "lng": 5.20061
+    },
+    {
+      "id": "Q914231",
+      "name": "Rietveld Schröder House",
+      "lat": 52.085333,
+      "lng": 5.147597
+    },
+    {
+      "id": "Q2220007",
+      "name": "Sculpture Park Leidsche Rijn",
+      "lat": 52.098284,
+      "lng": 5.021686
+    },
+    {
+      "id": "Q847166",
+      "name": "Spoorwegmuseum",
+      "lat": 52.087778,
+      "lng": 5.131667
+    },
+    {
+      "id": "Q14510918",
+      "name": "University Museum Utrecht",
+      "lat": 52.0849,
+      "lng": 5.12571
+    },
+    {
+      "id": "Q1519288",
+      "name": "Utrecht Observatory",
+      "lat": 52.085389,
+      "lng": 5.129194
+    },
+    {
+      "id": "Q2498387",
+      "name": "Utrecht University Botanic Gardens",
+      "lat": 52.0883,
+      "lng": 5.1725
+    },
+    {
+      "id": "Q2621420",
+      "name": "Water tower",
+      "lat": 52.09569,
+      "lng": 5.118771
+    },
+    {
+      "id": "Q22572503",
+      "name": "Waterliniemuseum",
+      "lat": 52.058611,
+      "lng": 5.168333
+    },
+    {
+      "id": "Q2131198",
+      "name": "Zuylen Castle",
+      "lat": 52.1271,
+      "lng": 5.073086
+    }
+  ]
+}

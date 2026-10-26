@@ -70,6 +70,7 @@ describe("resolvePackMapping", () => {
       "switzerland",
       "sydney",
       "tokyo",
+      "utrecht",
       "zurich",
     ]);
   });

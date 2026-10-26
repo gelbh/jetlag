@@ -42,6 +42,8 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
   berlin: { south: 52.3283, west: 13.0783, north: 52.6855, east: 13.7712 },
   // AABB from public/geo/singapore/planning-areas.geojson (+0.01° pad).
   singapore: { south: 1.1395, west: 103.5912, north: 1.4884, east: 104.1292 },
+  // AABB from public/geo/utrecht/wijken.geojson (+0.01° pad).
+  utrecht: { south: 52.0163, west: 4.9601, north: 52.1521, east: 5.2052 },
 };
 
 export const PACK_GEO_POINT_CATEGORIES = BASE_MEASURING_CATALOG.filter(

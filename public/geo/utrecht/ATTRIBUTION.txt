@@ -1,0 +1,19 @@
+Gemeente Utrecht metro pack geo
+
+Boundaries
+- Wijk polygons: Gemeente Utrecht, UtrechtOpen WIJK WFS (CC-BY-SA 4.0).
+
+POI
+- Wikidata Query Service (CC0).
+
+Sea level seed
+- Open-Meteo elevation API.
+
+Coastline
+- Inland municipality stub (empty segments).
+
+International border
+- Landlocked municipality stub (empty segments).
+
+GTFS
+- Skipped in v1 (OVapi/GTFS.nl clip not bundled; rail stations use Overpass).

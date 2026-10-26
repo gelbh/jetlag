@@ -348,4 +348,16 @@ export const REGION_PACK_SUBREGION_REFERENCE_BBOXES: Partial<
     woodlands: { south: 1.4215, west: 103.759, north: 1.4655, east: 103.8117 },
     yishun: { south: 1.3929, west: 103.8058, north: 1.4456, east: 103.8674 },
   },
+  utrecht: {
+    binnenstad: { south: 52.0787, west: 5.0983, north: 52.0979, east: 5.1298 },
+    "leidsche-rijn": { south: 52.061, west: 5.0273, north: 52.1176, east: 5.0972 },
+    noordoost: { south: 52.095, west: 5.1098, north: 52.1152, east: 5.1619 },
+    noordwest: { south: 52.0936, west: 5.0612, north: 52.1272, east: 5.1152 },
+    oost: { south: 52.0567, west: 5.1224, north: 52.0984, east: 5.1952 },
+    overvecht: { south: 52.1064, west: 5.0723, north: 52.1357, east: 5.1494 },
+    "vleuten-de-meern": { south: 52.0263, west: 4.9701, north: 52.1421, east: 5.0983 },
+    west: { south: 52.0789, west: 5.0344, north: 52.13, east: 5.1074 },
+    zuid: { south: 52.0525, west: 5.1107, north: 52.0787, east: 5.1528 },
+    zuidwest: { south: 52.0499, west: 5.0813, north: 52.0852, east: 5.1224 },
+  },
 };

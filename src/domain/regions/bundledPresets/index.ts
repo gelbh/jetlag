@@ -20,6 +20,7 @@ import { southamptonPresets } from "./southampton";
 import { swissPresets } from "./swiss";
 import { sydneyPresets } from "./sydney";
 import { tokyoPresets } from "./tokyo";
+import { utrechtPresets } from "./utrecht";
 
 export type { BundledGamePresetDefinition } from "./shared";
 export { EXPANSION_OFF, titleCase } from "./shared";
@@ -40,6 +41,7 @@ export const BUNDLED_GAME_PRESET_DEFINITIONS: readonly BundledGamePresetDefiniti
   ...brisbanePresets(),
   ...berlinPresets(),
   ...singaporePresets(),
+  ...utrechtPresets(),
 ];
 
 export function isBundledPresetId(id: string): boolean {

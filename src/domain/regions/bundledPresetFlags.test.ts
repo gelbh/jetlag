@@ -227,6 +227,30 @@ describe("bundledPresetFlags", () => {
     }
   });
 
+  it("ships distinct flag or coat marks for every Utrecht preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:utrecht")?.src).toBe(
+      "/region-flags/metro-utrecht.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-netherlands"].source).toMatch(/^flagcdn:nl$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-utrecht"].source).toMatch(/^wikidata:Q803:/);
+    for (const wijk of [
+      "west",
+      "noordwest",
+      "overvecht",
+      "noordoost",
+      "oost",
+      "binnenstad",
+      "zuid",
+      "zuidwest",
+      "leidsche-rijn",
+      "vleuten-de-meern",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:utrecht-${wijk}`);
+      expect(mark, wijk).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${wijk}.png`);
+    }
+  });
+
   it("ships distinct flag or coat marks for every Berlin preset leaf", () => {
     expect(flagMarkForBundledPresetId("bundled:berlin")?.src).toBe(
       "/region-flags/metro-berlin.png",

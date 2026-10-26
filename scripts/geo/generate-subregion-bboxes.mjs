@@ -31,6 +31,7 @@ const SOURCES = [
   { packId: "brisbane", file: "wards.geojson", idProperty: "wardId" },
   { packId: "berlin", file: "bezirke.geojson", idProperty: "bezirkId" },
   { packId: "singapore", file: "planning-areas.geojson", idProperty: "planningAreaId" },
+  { packId: "utrecht", file: "wijken.geojson", idProperty: "wijkId" },
 ];
 
 const ROUND_DECIMALS = 4;

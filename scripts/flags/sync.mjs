@@ -26,6 +26,10 @@ import {
   ensureSingaporePlanningOverridePngs,
   SINGAPORE_PLANNING_FLAG_OVERRIDES,
 } from "./singapore-planning-flags.mjs";
+import {
+  ensureUtrechtWijkOverridePngs,
+  UTRECHT_WIJK_FLAG_OVERRIDES,
+} from "./utrecht-wijk-flags.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "../..");
@@ -48,6 +52,7 @@ const FLAGCDN = {
   "country-belgium": { code: "be", alt: "Belgium" },
   "country-germany": { code: "de", alt: "Germany" },
   "country-singapore": { code: "sg", alt: "Singapore" },
+  "country-netherlands": { code: "nl", alt: "Netherlands" },
 };
 
 /**
@@ -389,6 +394,7 @@ const WIKIDATA = {
   lichtenberg: { qid: "Q163011", alt: "Lichtenberg" },
   reinickendorf: { qid: "Q158876", alt: "Reinickendorf" },
   "metro-singapore": { qid: "Q334", alt: "Singapore" },
+  "metro-utrecht": { qid: "Q803", alt: "Utrecht" },
   "ang-mo-kio": { qid: "Q4761845", alt: "Ang Mo Kio" },
   bedok: { qid: "Q4879339", alt: "Bedok" },
   bishan: { qid: "Q3249777", alt: "Bishan" },
@@ -629,6 +635,7 @@ async function writeAsset(assets, segmentId, { alt, source, identity, presentati
 async function main() {
   await ensureBrisbaneWardOverridePngs();
   await ensureSingaporePlanningOverridePngs();
+  await ensureUtrechtWijkOverridePngs();
   await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
 
@@ -818,6 +825,27 @@ async function main() {
     const srcPath = path.join(overrideDir, file);
     const dest = path.join(outDir, file);
     process.stdout.write(`SingaporePlanning ${segmentId} ← ${file}… `);
+    try {
+      await finalizePng(srcPath, dest, presentation);
+      await writeAsset(assets, segmentId, {
+        alt,
+        source: `local:${file}`,
+        identity,
+        presentation,
+        destPath: dest,
+      });
+      console.log("ok");
+    } catch (error) {
+      console.log(`fail (${error.message}) — skip`);
+    }
+  }
+
+  for (const [segmentId, { file, alt, identity, presentation }] of Object.entries(
+    UTRECHT_WIJK_FLAG_OVERRIDES,
+  )) {
+    const srcPath = path.join(overrideDir, file);
+    const dest = path.join(outDir, file);
+    process.stdout.write(`UtrechtWijk ${segmentId} ← ${file}… `);
     try {
       await finalizePng(srcPath, dest, presentation);
       await writeAsset(assets, segmentId, {
