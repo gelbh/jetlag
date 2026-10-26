@@ -34,13 +34,25 @@ describe("filterCoastlineSegmentsForMeasuring", () => {
   it("drops short closed rings that do not touch the bbox edge", () => {
     const harbourLoop = segment("harbour-loop", [
       [0.4, 0.4],
-      [0.405, 0.4],
-      [0.405, 0.405],
-      [0.4, 0.405],
+      [0.4004, 0.4],
+      [0.4004, 0.4004],
+      [0.4, 0.4004],
       [0.4, 0.4],
     ]);
 
     expect(filterCoastlineSegmentsForMeasuring([harbourLoop], bbox)).toEqual([]);
+  });
+
+  it("keeps a short inland closed ring when enclosed area meets the island floor", () => {
+    const inlandIsland = segment("inland-island", [
+      [0.45, 0.45],
+      [0.4512, 0.45],
+      [0.4512, 0.4512],
+      [0.45, 0.4512],
+      [0.45, 0.45],
+    ]);
+
+    expect(filterCoastlineSegmentsForMeasuring([inlandIsland], bbox)).toEqual([inlandIsland]);
   });
 
   it("keeps a short closed ring whose side crosses the bbox edge", () => {

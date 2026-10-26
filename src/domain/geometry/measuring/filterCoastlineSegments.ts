@@ -1,10 +1,23 @@
+import turfArea from "@turf/area";
 import turfLength from "@turf/length";
-import type { Feature, LineString } from "geojson";
+import type { Feature, LineString, Polygon } from "geojson";
 import type { BoundingBox } from "../gameArea/gameAreaBounds";
 
 const MIN_MEASURING_SEGMENT_LENGTH_METERS = 5;
 const HARBOUR_LOOP_MAX_LENGTH_METERS = 5_000;
+const ISLAND_MIN_AREA_M2 = 10_000;
 const BBOX_EDGE_EPSILON = 1e-6;
+
+function closedRingToPolygon(segment: Feature<LineString>): Feature<Polygon> {
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "Polygon",
+      coordinates: [segment.geometry.coordinates],
+    },
+  };
+}
 
 function isLngLatPair(coord: number[]): coord is [number, number] {
   return coord.length >= 2 && Number.isFinite(coord[0]) && Number.isFinite(coord[1]);
@@ -113,10 +126,15 @@ export function filterCoastlineSegmentsForMeasuring(
       return false;
     }
 
-    return (
-      !isClosedRing(segment) ||
-      lengthMeters >= HARBOUR_LOOP_MAX_LENGTH_METERS ||
-      touchesBboxEdge(segment, bbox)
-    );
+    if (!isClosedRing(segment)) {
+      return true;
+    }
+    if (lengthMeters >= HARBOUR_LOOP_MAX_LENGTH_METERS) {
+      return true;
+    }
+    if (touchesBboxEdge(segment, bbox)) {
+      return true;
+    }
+    return turfArea(closedRingToPolygon(segment)) >= ISLAND_MIN_AREA_M2;
   });
 }
