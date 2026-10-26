@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionRecord } from "@/domain/map/annotations";
 import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "@/domain/session/join/joinPreviewGameArea";
+import { buildJoinPreviewSession } from "@/domain/session/join/joinPreviewSession";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
 import { jetlagTheme } from "@/theme/theme";
@@ -194,5 +195,24 @@ describe("JoinSession", () => {
     expect(screen.getByText("Best of 3")).toBeInTheDocument();
     expect(screen.getByRole("radiogroup", { name: /Castle Siege seat/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^continue$/i })).not.toBeInTheDocument();
+  });
+
+  it("shows Castle Siege seat picker for code-record-shaped preview", () => {
+    previewState.value = {
+      ...previewState.value,
+      previewSession: buildJoinPreviewSession("sess-1", "ABCD", {
+        hostUid: "host",
+        mode: "castleSiege",
+        seriesLength: 3,
+      }),
+    };
+
+    renderJoin();
+    fireEvent.change(screen.getByLabelText(/session code/i), { target: { value: "ABCD" } });
+
+    expect(screen.getByText("Castle Siege")).toBeInTheDocument();
+    expect(screen.getByText("Best of 3")).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: /Castle Siege seat/i })).toBeInTheDocument();
+    expect(screen.queryByRole("radiogroup", { name: /Player side/i })).not.toBeInTheDocument();
   });
 });

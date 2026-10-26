@@ -240,6 +240,9 @@ export async function createRemoteSession(
       tier,
       status: "active",
       createdAt,
+      ...(isCastleSiege
+        ? { mode: "castleSiege" as const, seriesLength: options?.seriesLength === 3 ? 3 : 1 }
+        : {}),
     });
     await batch.commit();
     return record;

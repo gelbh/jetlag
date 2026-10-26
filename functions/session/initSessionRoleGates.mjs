@@ -15,6 +15,7 @@ export async function initSessionRoleGatesHandler(db, uid, sessionId) {
   const secretsRef = db.collection("sessionRoleSecrets").doc(sessionId);
   let observerPasscode;
   let rolePasscode;
+  let codeStamp = null;
 
   await db.runTransaction(async (tx) => {
     const sessionSnap = await tx.get(sessionRef);
@@ -64,6 +65,12 @@ export async function initSessionRoleGatesHandler(db, uid, sessionId) {
       secrets = buildInitialRoleSecrets(hostRole, { mode: "castleSiege" });
       observerPasscode = secrets.observer.code;
       rolePasscode = secrets[hostSeat].code;
+      if (typeof data.code === "string" && data.code.length === 4) {
+        codeStamp = {
+          code: data.code,
+          seriesLength: data.seriesLength === 3 ? 3 : 1,
+        };
+      }
     } else {
       roleGates = isRoleGatedSession(data) ? data.roleGates : buildRoleGatesForHost(uid, hostRole);
       secrets = buildInitialRoleSecrets(hostRole);
@@ -74,6 +81,15 @@ export async function initSessionRoleGatesHandler(db, uid, sessionId) {
     tx.update(sessionRef, { roleGates });
     tx.set(secretsRef, secrets);
   });
+
+  // Public join preview reads sessionCodes; stamp mode without role secrets.
+  // Client create also writes these; this covers older creates / missed stamps.
+  if (codeStamp) {
+    await db
+      .collection("sessionCodes")
+      .doc(codeStamp.code)
+      .set({ mode: "castleSiege", seriesLength: codeStamp.seriesLength }, { merge: true });
+  }
 
   return { observerPasscode, rolePasscode };
 }

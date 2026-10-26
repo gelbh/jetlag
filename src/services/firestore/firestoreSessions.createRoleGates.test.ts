@@ -203,6 +203,14 @@ describe("createRemoteSession role-gate bootstrap", () => {
         dials,
       }),
     );
+
+    const [, codePayload] = batchSet.mock.calls[1] ?? [];
+    expect(codePayload).toMatchObject({
+      mode: "castleSiege",
+      seriesLength: 3,
+      status: "active",
+    });
+    expect(codePayload).not.toHaveProperty("castleSiegeRoles");
   });
 
   it("defaults castleSiege host team to teamA and BO1 scoreboard", async () => {
@@ -228,6 +236,12 @@ describe("createRemoteSession role-gate bootstrap", () => {
     expect(session.gameIndex).toBe(1);
     expect(session.score).toEqual({ teamA: 0, teamB: 0 });
     expect(session.setupMode).toBeUndefined();
+
+    const [, codePayload] = batchSet.mock.calls[1] ?? [];
+    expect(codePayload).toMatchObject({
+      mode: "castleSiege",
+      seriesLength: 1,
+    });
   });
 
   it("calls initSessionRoleGates for castleSiege outside emulator and stamps team leader", async () => {
@@ -293,6 +307,11 @@ describe("createRemoteSession role-gate bootstrap", () => {
     expect(payload).not.toHaveProperty("gameIndex");
     expect(payload).not.toHaveProperty("score");
     expect(payload).not.toHaveProperty("setupMode");
+
+    const [, codePayload] = batchSet.mock.calls[1] ?? [];
+    expect(codePayload).not.toHaveProperty("mode");
+    expect(codePayload).not.toHaveProperty("seriesLength");
+    expect(codePayload).not.toHaveProperty("castleSiegeRoles");
   });
 
   it("creates the host's heal proof after the session batch commits", async () => {
