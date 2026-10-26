@@ -1,6 +1,7 @@
 import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   resetAskMapPlacementStoreForTests,
@@ -14,8 +15,12 @@ vi.mock("./useRouteTransition", () => ({
   useRouteTransition: () => ({ phase: "idle", loadingProgress: null }),
 }));
 
-function renderActivity(ui: ReactElement = <AppGlobalActivity />) {
-  return render(<MantineProvider>{ui}</MantineProvider>);
+function renderActivity(ui: ReactElement = <AppGlobalActivity />, initialPath = "/") {
+  return render(
+    <MemoryRouter initialEntries={[initialPath]}>
+      <MantineProvider>{ui}</MantineProvider>
+    </MemoryRouter>,
+  );
 }
 
 afterEach(() => {
@@ -25,15 +30,29 @@ afterEach(() => {
 });
 
 describe("AppGlobalActivity", () => {
-  it("anchors global load progress at the top, not the bottom dock", () => {
+  it("on /map clears the status rail with map-banner-top and stays centered", () => {
     const task = createLoadTask({ label: "Caching area boundaries", global: true });
     try {
-      renderActivity();
+      renderActivity(<AppGlobalActivity />, "/map");
       const list = screen.getByTestId("global-load-progress-list");
       const host = screen.getByTestId("app-global-status-host");
       expect(host).toContainElement(list);
-      expect(host.className).toMatch(/\btop-0\b/);
+      expect(host.className).toContain("--map-banner-top");
+      expect(host.className).toMatch(/\bitems-center\b/);
       expect(host.className).not.toMatch(/\bbottom-0\b/);
+    } finally {
+      task.cancel();
+    }
+  });
+
+  it("off /map keeps safe-area top host without map-banner-top", () => {
+    const task = createLoadTask({ label: "Caching area boundaries", global: true });
+    try {
+      renderActivity(<AppGlobalActivity />, "/");
+      const host = screen.getByTestId("app-global-status-host");
+      expect(host.className).toMatch(/\btop-0\b/);
+      expect(host.className).not.toContain("--map-banner-top");
+      expect(host.className).toMatch(/\bitems-center\b/);
     } finally {
       task.cancel();
     }
@@ -44,7 +63,7 @@ describe("AppGlobalActivity", () => {
     const task = createLoadTask({ label: "Loading map", global: true });
 
     try {
-      renderActivity();
+      renderActivity(<AppGlobalActivity />, "/map");
 
       expect(screen.queryByTestId("global-load-progress-list")).not.toBeInTheDocument();
     } finally {
@@ -52,18 +71,11 @@ describe("AppGlobalActivity", () => {
     }
   });
 
-  it("anchors Saving in the top status host, not the bottom dock", () => {
+  it("on /map Saving uses the same under-rail host", () => {
     useSessionStore.getState().incrementPendingWrites();
-
-    renderActivity();
-
-    const saving = screen.getByRole("status");
-    expect(saving).toHaveTextContent("Saving…");
-
+    renderActivity(<AppGlobalActivity />, "/map");
     const host = screen.getByTestId("app-global-status-host");
-    expect(host).toContainElement(saving);
-    expect(host.className).toMatch(/\btop-0\b/);
-    expect(host.className).not.toMatch(/\bbottom-0\b/);
-    expect(saving.closest(".bottom-0")).toBeNull();
+    expect(host).toContainElement(screen.getByRole("status"));
+    expect(host.className).toContain("--map-banner-top");
   });
 });
