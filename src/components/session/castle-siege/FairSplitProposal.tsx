@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import type { GameArea } from "@/domain/map/annotations";
 import {
   assignHalvesByCastleSide,
@@ -199,10 +200,8 @@ export function FairSplitProposal({
       data-testid="castle-siege-fair-split-proposal"
       className="rounded-md border px-3 py-2.5"
       style={{
-        borderColor: "var(--color-rule)",
-        background: "oklch(from var(--color-canvas) l c h / 92%)",
+        ...mapChromeSurfaceStyles,
         color: "var(--color-field-ink)",
-        boxShadow: "var(--shadow-hud-float)",
       }}
     >
       <p

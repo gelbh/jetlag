@@ -127,7 +127,11 @@ export function createLoadTask(options: LoadTaskOptions): LoadTask {
       status === "done" ? 100 : Math.min(MAX_RUNNING_PERCENT, root.fraction() * 100);
     shownPercent = Math.max(shownPercent, rawPercent);
 
-    const overdue = status === "running" && isOverdue(elapsedMs, root.weight());
+    const activeLeaf = root.activeLeaf();
+    const overdue =
+      status === "running" &&
+      activeLeaf.durationMs() !== null &&
+      isOverdue(elapsedMs, root.weight());
     const warm = elapsedMs >= ETA_WARMUP_MS || root.hasWarmRate();
     const rawEta = status === "running" && warm && !overdue ? root.remainingMs() : null;
     shownEta = nextDisplayedEta(shownEta, rawEta);

@@ -55,11 +55,14 @@ export function PwaInstallTipBanner() {
       >
         <p
           id="pwa-install-tip-title"
-          className="font-display text-xs font-semibold uppercase tracking-wide text-ink"
+          className="font-display text-xs font-semibold uppercase tracking-wide text-field-ink"
         >
           {title}
         </p>
-        <p id="pwa-install-tip-body" className="text-pretty text-sm leading-snug text-ink-muted">
+        <p
+          id="pwa-install-tip-body"
+          className="text-pretty text-sm leading-snug text-field-ink-muted"
+        >
           {body}
         </p>
         <Group gap="sm" mt="sm" justify="flex-end" wrap="wrap">

@@ -1,3 +1,4 @@
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { LoadingSpinnerRing } from "./LoadingSpinner";
 
 interface GlobalActivityProps {
@@ -32,7 +33,11 @@ export function GlobalActivity({
 
   return (
     <div
-      className={`pointer-events-auto inline-flex items-center gap-2 rounded-md border border-border bg-surface-panel/95 px-2 py-1 text-xs text-ink shadow-hud-float ${className}`}
+      className={`pointer-events-auto inline-flex items-center gap-2 rounded-md px-2 py-1 text-xs ${className}`}
+      style={{
+        ...mapChromeSurfaceStyles,
+        color: "var(--color-field-ink)",
+      }}
       role="status"
       aria-live="polite"
     >

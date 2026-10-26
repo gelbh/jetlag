@@ -39,11 +39,14 @@ export function AnalyticsConsentBanner() {
       >
         <p
           id="analytics-consent-title"
-          className="font-display text-xs font-semibold uppercase tracking-wide text-ink"
+          className="font-display text-xs font-semibold uppercase tracking-wide text-field-ink"
         >
           Analytics
         </p>
-        <p id="analytics-consent-body" className="text-pretty text-sm leading-snug text-ink-muted">
+        <p
+          id="analytics-consent-body"
+          className="text-pretty text-sm leading-snug text-field-ink-muted"
+        >
           Optional product analytics (PostHog). After Accept, an analytics ID may be stored on this
           device and linked if you sign in.{" "}
           <AppLink to="/privacy" className="underline">

@@ -82,6 +82,20 @@ describe("createLoadTask", () => {
     expect(snapshot.percent).toBeLessThan(100);
   });
 
+  it("does not flag a queued stage as overdue", async () => {
+    const task = createLoadTask({ label: "Finding museum" });
+    task.subscribe(() => {});
+    const stage = task.stage(fetchSpec);
+    stage.queue("Waiting for map server", 4_000);
+
+    await vi.advanceTimersByTimeAsync(6_500);
+    expect(task.getSnapshot()).toMatchObject({ overdue: false, percent: 0 });
+
+    stage.start();
+    await vi.advanceTimersByTimeAsync(6_500);
+    expect(task.getSnapshot().overdue).toBe(true);
+  });
+
   it("reaches 100 only on complete", () => {
     const task = createLoadTask({ label: "Finding museum" });
     task.stage(fetchSpec).start();
