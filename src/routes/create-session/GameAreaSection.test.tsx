@@ -338,12 +338,41 @@ describe("GameAreaSection create wizard steps", () => {
     expect(screen.queryByRole("button", { name: "Save as preset" })).toBeNull();
   });
 
-  it("uses inset groups and NativeSelect instead of field-input selects", () => {
+  it("uses inset groups and Select instead of field-input selects", () => {
     renderSection(baseModel, undefined, "where");
     fireEvent.click(screen.getByRole("button", { name: "Preset" }));
     expect(document.querySelector(".jl-inset-group")).toBeTruthy();
     expect(document.querySelector("select.field-input")).toBeNull();
     expect(screen.getByRole("combobox", { name: /game preset/i })).toBeInTheDocument();
+  });
+
+  it("Preset Select mounts when a favourite id also appears in bundled groups", () => {
+    expect(() => {
+      renderSection(
+        {
+          ...baseModel,
+          favouritePresetSelectOptions: [
+            { presetId: "bundled:switzerland-aargau", name: "Canton of Aargau" },
+          ],
+          bundledPresetSelectGroups: [
+            {
+              label: "Europe · Switzerland",
+              options: [
+                { presetId: "bundled:switzerland-aargau", name: "Canton of Aargau" },
+                {
+                  presetId: "bundled:switzerland-appenzell-ausserrhoden",
+                  name: "Canton of Appenzell Ausserrhoden",
+                },
+              ],
+            },
+          ],
+        },
+        undefined,
+        "where",
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Preset" }));
+      expect(screen.getByRole("combobox", { name: /game preset/i })).toBeInTheDocument();
+    }).not.toThrow();
   });
 
   it("Preset Select groups show parent path and filters by place haystack", async () => {
@@ -387,7 +416,6 @@ describe("GameAreaSection create wizard steps", () => {
     fireEvent.click(combobox);
     expect(await screen.findByText("Europe · Switzerland")).toBeInTheDocument();
     fireEvent.change(combobox, { target: { value: "Appenzell" } });
-    fireEvent.input(combobox, { target: { value: "Appenzell" } });
     fireEvent.click(combobox);
     const option = await screen.findByRole("option", {
       name: /Canton of Appenzell Ausserrhoden/i,

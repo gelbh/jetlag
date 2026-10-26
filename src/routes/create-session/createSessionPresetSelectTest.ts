@@ -6,6 +6,9 @@ export async function pickCreateSessionPreset(presetName: RegExp | string) {
   if (typeof presetName === "string") {
     fireEvent.input(combobox, { target: { value: presetName } });
   }
-  const option = await screen.findByRole("option", { name: presetName, hidden: true });
+  const option = await screen.findByRole("option", {
+    name: presetName,
+    hidden: true,
+  });
   fireEvent.click(option);
 }
