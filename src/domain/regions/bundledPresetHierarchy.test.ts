@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { BUNDLED_GAME_PRESET_DEFINITIONS, bundledPresetDefinition } from "./bundledGamePresets";
-import { buildBundledPresetTree, formatBundledPresetLocation } from "./bundledPresetHierarchy";
+import {
+  buildBundledPresetSelectGroups,
+  buildBundledPresetTree,
+  formatBundledPresetLocation,
+  formatBundledPresetSelectGroupLabel,
+} from "./bundledPresetHierarchy";
 
 describe("bundledPresetHierarchy", () => {
   it("builds continent → country → county → local authority tree", () => {
@@ -91,5 +96,36 @@ describe("bundledPresetHierarchy", () => {
     expect(formatBundledPresetLocation(definition!)).toBe(
       "Europe · Ireland · Dublin · Local authorities",
     );
+  });
+
+  it("formats select group labels as parent path", () => {
+    const canton = bundledPresetDefinition("bundled:switzerland-aargau")!;
+    expect(formatBundledPresetSelectGroupLabel(canton)).toBe("Europe · Switzerland");
+    const country = bundledPresetDefinition("bundled:switzerland")!;
+    expect(formatBundledPresetSelectGroupLabel(country)).toBe("Europe");
+    const county = bundledPresetDefinition("bundled:dublin-county")!;
+    expect(formatBundledPresetSelectGroupLabel(county)).toBe("Europe · Ireland");
+    const council = bundledPresetDefinition("bundled:dublin-city")!;
+    expect(formatBundledPresetSelectGroupLabel(council)).toBe("Europe · Ireland · Dublin");
+  });
+
+  it("groups Swiss cantons under one Europe · Switzerland optgroup", () => {
+    const groups = buildBundledPresetSelectGroups(BUNDLED_GAME_PRESET_DEFINITIONS);
+    const swiss = groups.find((g) => g.label === "Europe · Switzerland");
+    expect(swiss).toBeTruthy();
+    const cantonIds = swiss!.options.map((o) => o.presetId);
+    expect(cantonIds).toEqual(
+      expect.arrayContaining([
+        "bundled:switzerland-aargau",
+        "bundled:switzerland-appenzell-ausserrhoden",
+      ]),
+    );
+    expect(groups.filter((g) => g.label.includes("Appenzell Ausserrhoden"))).toHaveLength(0);
+  });
+
+  it("puts country Switzerland under Europe", () => {
+    const groups = buildBundledPresetSelectGroups(BUNDLED_GAME_PRESET_DEFINITIONS);
+    const europe = groups.find((g) => g.label === "Europe");
+    expect(europe?.options.some((o) => o.presetId === "bundled:switzerland")).toBe(true);
   });
 });
