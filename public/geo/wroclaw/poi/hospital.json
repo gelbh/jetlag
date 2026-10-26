@@ -1,0 +1,102 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.0327,
+    "west": 16.7973,
+    "north": 51.2201,
+    "east": 17.1862
+  },
+  "places": [
+    {
+      "id": "Q11684729",
+      "name": "Akademicki Szpital Kliniczny, Wrocław",
+      "lat": 51.0744,
+      "lng": 17.0309
+    },
+    {
+      "id": "Q122172162",
+      "name": "budynek C-19 Politechniki Wrocławskiej",
+      "lat": 51.10794,
+      "lng": 17.05733
+    },
+    {
+      "id": "Q9352184",
+      "name": "Jewish Hospital in Wrocław ul.  Antoni",
+      "lat": 51.1088,
+      "lng": 17.0262
+    },
+    {
+      "id": "Q28673233",
+      "name": "Klinika Transplantacji Szpiku, Onkologii i Hematologii Dziecięcej „Przylądek Nadziei”",
+      "lat": 51.074861,
+      "lng": 17.026694
+    },
+    {
+      "id": "Q56328821",
+      "name": "Lower Silesian Lung Disease Centre",
+      "lat": 51.101667,
+      "lng": 17.005556
+    },
+    {
+      "id": "Q24946000",
+      "name": "Lower Silesian Oncology Center in Wroclaw",
+      "lat": 51.094798,
+      "lng": 17.016368
+    },
+    {
+      "id": "Q64554067",
+      "name": "Military Clinical Hospital in Wrocław",
+      "lat": 51.07407,
+      "lng": 17.02118
+    },
+    {
+      "id": "Q9377122",
+      "name": "Provincial Specialist Hospital in Wroclaw",
+      "lat": 51.1485,
+      "lng": 17.0442
+    },
+    {
+      "id": "Q64554099",
+      "name": "Psychiatric hospital in Wrocław",
+      "lat": 51.1289,
+      "lng": 17.03131
+    },
+    {
+      "id": "Q48867372",
+      "name": "Szpital im. Ludwika Rydygiera we Wrocławiu",
+      "lat": 51.119444,
+      "lng": 17.032639
+    },
+    {
+      "id": "Q43896433",
+      "name": "Szpital Kliniczny Nr 1 we Wrocławiu",
+      "lat": 51.130225,
+      "lng": 17.052799
+    },
+    {
+      "id": "Q9352183",
+      "name": "Szpital Żydowski we Wrocławiu (ul. Włodkowica 19)",
+      "lat": 51.1088,
+      "lng": 17.0235
+    },
+    {
+      "id": "Q9352186",
+      "name": "Szpital Żydowski we Wrocławiu ul. Sudecka",
+      "lat": 51.08622,
+      "lng": 17.01784
+    },
+    {
+      "id": "Q30280556",
+      "name": "Wojskowy Szpital Kliniczny z Polikliniką",
+      "lat": 51.074431,
+      "lng": 17.019288
+    },
+    {
+      "id": "Q9352114",
+      "name": "Wrocław, Szpital Bożego Grobu",
+      "lat": 51.1114,
+      "lng": 17.0264
+    }
+  ]
+}

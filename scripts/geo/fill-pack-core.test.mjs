@@ -71,6 +71,7 @@ describe("resolvePackMapping", () => {
       "sydney",
       "tokyo",
       "utrecht",
+      "wroclaw",
       "zurich",
     ]);
   });

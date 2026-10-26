@@ -1,0 +1,24 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.0327,
+    "west": 16.7973,
+    "north": 51.2201,
+    "east": 17.1862
+  },
+  "places": [
+    {
+      "id": "Q11764657",
+      "name": "Szymanow Airport",
+      "lat": 51.2061,
+      "lng": 16.9986
+    },
+    {
+      "id": "Q1107152",
+      "name": "Wrocław – Copernicus Airport",
+      "lat": 51.102778,
+      "lng": 16.885833
+    }
+  ]
+}

@@ -227,6 +227,68 @@ describe("bundledPresetFlags", () => {
     }
   });
 
+  it("ships distinct flag or coat marks for every Wrocław preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:wroclaw")?.src).toBe(
+      "/region-flags/metro-wroclaw.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-poland"].source).toMatch(/^flagcdn:pl$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-wroclaw"].source).toMatch(/^wikidata:Q1799:/);
+    for (const dzielnica of [
+      "stare-miasto",
+      "przedmiescie-swidnickie",
+      "szczepin",
+      "nadodrze",
+      "kleczkow",
+      "olbin",
+      "plac-grunwaldzki",
+      "zacisze-zalesie-szczytniki",
+      "biskupin-sepolno-dabie-bartoszowice",
+      "przedmiescie-olawskie",
+      "tarnogaj",
+      "huby",
+      "powstancow-slaskich",
+      "gaj",
+      "borek",
+      "ksieze",
+      "brochow",
+      "bienkowice",
+      "jagodno",
+      "otaszyn",
+      "krzyki-partynice",
+      "klecina",
+      "pilczyce-kozanow-popowice-pn",
+      "gadow-popowice-pld",
+      "muchobor-maly",
+      "gajowice",
+      "grabiszyn-grabiszynek",
+      "oporow",
+      "muchobor-wielki",
+      "nowy-dwor",
+      "kuzniki",
+      "zerniki",
+      "jerzmanowo-jarnoltow-strachowice-osiniec",
+      "lesnica",
+      "maslice",
+      "pracze-odrzanskie",
+      "karowice-rozanka",
+      "kowale",
+      "strachocin-swojczyce-wojnow",
+      "psie-pole-zawidawie",
+      "pawlowice",
+      "soltysowice",
+      "polanowice-poswietne-ligota",
+      "widawa",
+      "lipa-piotrowska",
+      "swiniary",
+      "osobowice-redzin",
+      "wojszyce",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:wroclaw-${dzielnica}`);
+      expect(mark, dzielnica).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${dzielnica}.png`);
+    }
+  });
+
   it("ships distinct flag or coat marks for every Utrecht preset leaf", () => {
     expect(flagMarkForBundledPresetId("bundled:utrecht")?.src).toBe(
       "/region-flags/metro-utrecht.png",
