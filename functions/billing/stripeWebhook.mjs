@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { setCors } from "../lib/cors.mjs";
 import { captureFunctionsException } from "../lib/functionsException.mjs";
 import { captureAnalyticsEvent } from "../lib/posthog.mjs";
-import { markStripeEventProcessed } from "./premiumEntitlements.mjs";
+import { claimStripeEvent, releaseStripeEventClaim } from "./premiumEntitlements.mjs";
 import {
   applyCheckoutSessionCompleted,
   clearStripeCustomerIdForDeletedCustomer,
@@ -111,50 +111,55 @@ export async function handleStripeWebhook(db, webhookSecret, req, res, options) 
   }
 
   try {
-    // Process first, then mark so a mid-handler failure can retry (Stripe redelivery).
-    const existing = await db.collection("stripeEvents").doc(event.id).get();
-    if (existing.exists) {
+    // Claim first (atomic create) so concurrent deliveries cannot both apply.
+    // Release the claim if the handler fails so Stripe redelivery can retry.
+    const claimed = await claimStripeEvent(db, event.id);
+    if (!claimed) {
       res.status(200).json({ received: true, duplicate: true });
       return;
     }
 
-    switch (event.type) {
-      case "customer.deleted": {
-        const customer = /** @type {Stripe.Customer | Stripe.DeletedCustomer} */ (
-          event.data.object
-        );
-        await clearStripeCustomerIdForDeletedCustomer(db, customer);
-        break;
-      }
-      case "checkout.session.completed": {
-        const session = /** @type {Stripe.Checkout.Session} */ (event.data.object);
-        if (session.mode === "payment") {
-          await applyCheckoutSessionCompleted(db, session, {
-            stripeEventId: event.id,
-            posthogApiKey,
-            captureAnalyticsEvent: captureEvent,
-            captureImpl: options?.captureImpl,
-          });
+    try {
+      switch (event.type) {
+        case "customer.deleted": {
+          const customer = /** @type {Stripe.Customer | Stripe.DeletedCustomer} */ (
+            event.data.object
+          );
+          await clearStripeCustomerIdForDeletedCustomer(db, customer);
+          break;
         }
-        break;
+        case "checkout.session.completed": {
+          const session = /** @type {Stripe.Checkout.Session} */ (event.data.object);
+          if (session.mode === "payment") {
+            await applyCheckoutSessionCompleted(db, session, {
+              stripeEventId: event.id,
+              posthogApiKey,
+              captureAnalyticsEvent: captureEvent,
+              captureImpl: options?.captureImpl,
+            });
+          }
+          break;
+        }
+        case "customer.subscription.created":
+        case "customer.subscription.updated": {
+          const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
+          await syncSubscriptionEntitlements(db, subscription);
+          await captureSubscriptionPurchaseIfEligible(subscription, purchaseCaptureOptions);
+          break;
+        }
+        case "customer.subscription.deleted": {
+          const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
+          await syncSubscriptionEntitlements(db, subscription);
+          break;
+        }
+        default:
+          break;
       }
-      case "customer.subscription.created":
-      case "customer.subscription.updated": {
-        const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
-        await syncSubscriptionEntitlements(db, subscription);
-        await captureSubscriptionPurchaseIfEligible(subscription, purchaseCaptureOptions);
-        break;
-      }
-      case "customer.subscription.deleted": {
-        const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
-        await syncSubscriptionEntitlements(db, subscription);
-        break;
-      }
-      default:
-        break;
+    } catch (error) {
+      await releaseStripeEventClaim(db, event.id);
+      throw error;
     }
 
-    await markStripeEventProcessed(db, event.id);
     res.status(200).json({ received: true });
   } catch (error) {
     await captureFunctionsException(error);

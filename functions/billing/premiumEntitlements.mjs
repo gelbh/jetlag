@@ -243,21 +243,38 @@ export function consumePremiumSessionCredit(transaction, userRef, data) {
   );
 }
 
+/** Firestore `ALREADY_EXISTS` from `DocumentReference.create`. */
+const ALREADY_EXISTS_CODE = 6;
+
 /**
+ * Atomically claim a Stripe event id before applying side effects.
+ * Uses create() so concurrent deliveries cannot both claim the same id.
+ * @param {import('firebase-admin/firestore').Firestore} db
+ * @param {string} eventId
+ * @returns {Promise<boolean>} true if this caller claimed the event; false if already claimed
+ */
+export async function claimStripeEvent(db, eventId) {
+  const ref = db.collection("stripeEvents").doc(eventId);
+  try {
+    await ref.create({
+      claimedAt: FieldValue.serverTimestamp(),
+    });
+    return true;
+  } catch (error) {
+    if (error?.code === ALREADY_EXISTS_CODE) {
+      return false;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Drop a claim so Stripe can redeliver after a failed handler.
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {string} eventId
  */
-export async function markStripeEventProcessed(db, eventId) {
-  const ref = db.collection("stripeEvents").doc(eventId);
-  const existing = await ref.get();
-  if (existing.exists) {
-    return false;
-  }
-
-  await ref.set({
-    processedAt: FieldValue.serverTimestamp(),
-  });
-  return true;
+export async function releaseStripeEventClaim(db, eventId) {
+  await db.collection("stripeEvents").doc(eventId).delete();
 }
 
 /**

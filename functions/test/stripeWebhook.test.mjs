@@ -82,6 +82,19 @@ function createWebhookMockDb(initialData = {}) {
               applyWebhookMockWrite(documents, writes, path, data, options);
               return Promise.resolve();
             },
+            create(data) {
+              if (documents[path] !== undefined) {
+                const error = new Error("Already exists");
+                error.code = 6;
+                return Promise.reject(error);
+              }
+              applyWebhookMockWrite(documents, writes, path, data);
+              return Promise.resolve();
+            },
+            delete() {
+              delete documents[path];
+              return Promise.resolve();
+            },
           };
         },
         where(field, op, value) {
@@ -409,7 +422,7 @@ describe("stripeWebhook", () => {
     assert.ok(db.documents["stripeEvents/evt_customer_deleted_retry"]);
   });
 
-  it("retries subscription.updated sync when the first attempt fails before mark", async () => {
+  it("retries subscription.updated sync when the first attempt fails after claim", async () => {
     const db = createWebhookMockDb({
       "users/uid-sub": {
         stripeCustomerId: "cus_sub",
@@ -501,5 +514,93 @@ describe("stripeWebhook", () => {
       db.writes.filter((write) => write.path === "users/uid-sub").length,
       userWritesAfterFirst,
     );
+  });
+
+  it("grants checkout credit pack once and short-circuits duplicate delivery", async () => {
+    const db = createWebhookMockDb({
+      "users/uid-pack": {
+        stripeCustomerId: "cus_pack",
+        premiumSessionCredits: 0,
+      },
+    });
+    const request = signedWebhookRequest({
+      id: "evt_checkout_pack_dup",
+      type: "checkout.session.completed",
+      object: {
+        id: "cs_pack_dup",
+        object: "checkout.session",
+        mode: "payment",
+        customer: "cus_pack",
+        metadata: { firebaseUid: "uid-pack", productKey: "pack_1" },
+      },
+    });
+
+    const first = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, first);
+    assert.equal(first.statusCode, 200);
+    assert.deepEqual(first.body, { received: true });
+    assert.equal(db.documents["users/uid-pack"]?.premiumSessionCredits, 1);
+    assert.ok(db.documents["stripeEvents/evt_checkout_pack_dup"]);
+
+    const creditWritesAfterFirst = db.writes.filter(
+      (write) =>
+        write.path === "users/uid-pack" && Object.hasOwn(write.data, "premiumSessionCredits"),
+    ).length;
+
+    const second = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, second);
+    assert.equal(second.statusCode, 200);
+    assert.deepEqual(second.body, { received: true, duplicate: true });
+    assert.equal(db.documents["users/uid-pack"]?.premiumSessionCredits, 1);
+    assert.equal(
+      db.writes.filter(
+        (write) =>
+          write.path === "users/uid-pack" && Object.hasOwn(write.data, "premiumSessionCredits"),
+      ).length,
+      creditWritesAfterFirst,
+    );
+  });
+
+  it("retries checkout credit pack when the first attempt fails after claim", async () => {
+    const db = createWebhookMockDb({
+      "users/uid-pack-retry": {
+        stripeCustomerId: "cus_pack_retry",
+        premiumSessionCredits: 2,
+      },
+    });
+    const request = signedWebhookRequest({
+      id: "evt_checkout_pack_retry",
+      type: "checkout.session.completed",
+      object: {
+        id: "cs_pack_retry",
+        object: "checkout.session",
+        mode: "payment",
+        customer: "cus_pack_retry",
+        metadata: { firebaseUid: "uid-pack-retry", productKey: "pack_1" },
+      },
+    });
+
+    let txnAttempts = 0;
+    const originalRunTransaction = db.runTransaction.bind(db);
+    db.runTransaction = async (callback) => {
+      txnAttempts += 1;
+      if (txnAttempts === 1) {
+        throw new Error("transient firestore failure");
+      }
+      return originalRunTransaction(callback);
+    };
+
+    const failed = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, failed);
+    assert.equal(failed.statusCode, 500);
+    assert.equal(db.documents["stripeEvents/evt_checkout_pack_retry"], undefined);
+    assert.equal(db.documents["users/uid-pack-retry"]?.premiumSessionCredits, 2);
+
+    const retried = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, retried);
+    assert.equal(retried.statusCode, 200);
+    assert.deepEqual(retried.body, { received: true });
+    assert.equal(db.documents["users/uid-pack-retry"]?.premiumSessionCredits, 3);
+    assert.ok(db.documents["stripeEvents/evt_checkout_pack_retry"]);
   });
 });
