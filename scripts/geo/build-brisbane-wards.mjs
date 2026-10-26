@@ -111,7 +111,9 @@ async function main() {
 
   let coastlineSegments = [];
   try {
-    coastlineSegments = await fetchCoastlineSegments(box);
+    coastlineSegments = (await fetchCoastlineSegments(box)).map((feature) =>
+      simplify(feature, { tolerance: 0.0004, highQuality: true, mutate: false }),
+    );
     console.log(`coastline segments: ${coastlineSegments.length}`);
   } catch (error) {
     console.warn(`coastline fetch failed (${error.message}); writing empty stub`);
@@ -132,6 +134,7 @@ async function main() {
     path.join(outDir, "city.geojson"),
     `${JSON.stringify({ type: "FeatureCollection", features: [city] })}\n`,
   );
+  // Simplify before write: raw Overpass ways exceed Biome files.maxSize (1 MiB) when pretty-printed.
   await writeFile(
     path.join(outDir, "coastline.json"),
     `${JSON.stringify(
