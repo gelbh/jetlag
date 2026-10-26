@@ -73,24 +73,18 @@ function geometryCentroid(geometry) {
     return { lat: mid.lat, lon: mid.lon };
   }
   if (geometry.type === "Polygon") {
-    return polygonCentroid(geometry.coordinates[0]);
+    return polygonRepresentativePoint(geometry.coordinates[0]);
   }
   if (geometry.type === "MultiPolygon") {
     const components = geometry.coordinates
       .map((polygon) => ({
-        centroid: polygonCentroid(polygon[0]),
+        point: polygonRepresentativePoint(polygon[0]),
         area: polygonArea(polygon[0]),
       }))
-      .filter((component) => component.centroid && component.area > 0);
+      .filter((component) => component.point && component.area > 0)
+      .sort((left, right) => right.area - left.area);
     if (components.length === 0) return null;
-    const totalArea = components.reduce((sum, component) => sum + component.area, 0);
-    let lat = 0;
-    let lon = 0;
-    for (const component of components) {
-      lat += component.centroid.lat * component.area;
-      lon += component.centroid.lon * component.area;
-    }
-    return { lat: lat / totalArea, lon: lon / totalArea };
+    return components[0].point;
   }
   return null;
 }
@@ -121,6 +115,38 @@ function polygonCentroid(ring) {
   }
   if (twiceArea === 0) return null;
   return { lat: lat / (3 * twiceArea), lon: lon / (3 * twiceArea) };
+}
+
+function pointInRing(point, ring) {
+  const pts = ringToGeometry(ring);
+  let inside = false;
+  for (let index = 0, previous = pts.length - 1; index < pts.length; previous = index++) {
+    const current = pts[index];
+    const prior = pts[previous];
+    const cross =
+      (point.lon - current.lon) * (prior.lat - current.lat) -
+      (point.lat - current.lat) * (prior.lon - current.lon);
+    const withinSegment =
+      Math.min(current.lon, prior.lon) <= point.lon &&
+      point.lon <= Math.max(current.lon, prior.lon) &&
+      Math.min(current.lat, prior.lat) <= point.lat &&
+      point.lat <= Math.max(current.lat, prior.lat);
+    if (Math.abs(cross) < Number.EPSILON && withinSegment) return true;
+    if (current.lat > point.lat !== prior.lat > point.lat) {
+      const intersection =
+        ((prior.lon - current.lon) * (point.lat - current.lat)) / (prior.lat - current.lat) +
+        current.lon;
+      if (point.lon < intersection) inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function polygonRepresentativePoint(ring) {
+  const points = ringToGeometry(ring);
+  if (points.length === 0) return null;
+  const centroid = polygonCentroid(ring);
+  return centroid && pointInRing(centroid, ring) ? centroid : points[0];
 }
 
 /**

@@ -4,6 +4,19 @@ import { geoJsonToOverpassElements } from "../proxies/geoJsonToOverpassElements.
 import { classifyOverpassQuery } from "../proxies/postpassClassify.mjs";
 import { buildPostpassSql } from "../proxies/postpassSql.mjs";
 
+function pointInRing(point, ring) {
+  let inside = false;
+  for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index++) {
+    const [x, y] = ring[index];
+    const [previousX, previousY] = ring[previous];
+    if (y > point.lat !== previousY > point.lat) {
+      const intersection = ((previousX - x) * (point.lat - y)) / (previousY - y) + x;
+      if (point.lon < intersection) inside = !inside;
+    }
+  }
+  return inside;
+}
+
 describe("postpassTranslate", () => {
   it("classifies admin QL and builds polygon SQL", () => {
     const ql = `
@@ -58,7 +71,7 @@ describe("postpassTranslate", () => {
     assert.ok(elements.some((e) => e.type === "way" && e.geometry?.length >= 4));
   });
 
-  it("uses every polygon component when deriving an admin center", () => {
+  it("keeps an admin MultiPolygon center inside its largest component", () => {
     const { elements } = geoJsonToOverpassElements(
       {
         type: "FeatureCollection",
@@ -95,7 +108,18 @@ describe("postpassTranslate", () => {
       "admin",
     );
 
-    assert.deepEqual(elements[0].center, { lat: 0.9, lon: 2.5 });
+    const center = elements[0].center;
+    assert.ok(center);
+    assert.equal(
+      pointInRing(center, [
+        [2, 0],
+        [4, 0],
+        [4, 2],
+        [2, 2],
+        [2, 0],
+      ]),
+      true,
+    );
   });
 
   it("classifies places QL", () => {
