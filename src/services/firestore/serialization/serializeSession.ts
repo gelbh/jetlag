@@ -1,6 +1,6 @@
 import type { TimeTrapRecord } from "@/domain/expansion/timeTraps";
 import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
-import { normalizeTransitStationFilter } from "@/domain/map/transit";
+import { normalizeTransitStationFilter, toTransitStationFilterWire } from "@/domain/map/transit";
 import { parseRegionPackId } from "@/domain/regions/regionPack";
 import type { CastleSiegeDials } from "@/domain/session/castleSiege/dials";
 import type { SessionMode } from "@/domain/session/castleSiege/mode";
@@ -340,9 +340,11 @@ export function buildSessionDocument(
     payload.transitMetroId = transitMetroId;
   }
 
-  const transitStationFilter = normalizeTransitStationFilter(options?.transitStationFilter);
-  if (transitStationFilter !== "all") {
-    payload.transitStationFilter = transitStationFilter;
+  const transitStationFilterWire = toTransitStationFilterWire(
+    normalizeTransitStationFilter(options?.transitStationFilter),
+  );
+  if (transitStationFilterWire !== undefined) {
+    payload.transitStationFilter = transitStationFilterWire;
   }
 
   if (hostAppVersion) {

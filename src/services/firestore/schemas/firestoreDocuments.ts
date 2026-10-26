@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRANSIT_ROUTE_MODES } from "@/domain/map/transit";
 import { SESSION_ACTIVITY_TYPES } from "@/domain/session/activity/sessionActivityLog";
 
 export const firestoreGameAreaSchema = z
@@ -48,8 +49,9 @@ export const sessionDocumentSchema = z
     transitStationFilter: z
       .union([
         z.literal("all"),
-        z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"]),
-        z.array(z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"])).nonempty(),
+        z.enum(TRANSIT_ROUTE_MODES),
+        // Recoverable: empty / unknown tokens → normalizeTransitStationFilter
+        z.array(z.string()),
       ])
       .optional(),
     endedAt: z.string().optional(),

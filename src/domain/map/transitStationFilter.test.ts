@@ -3,6 +3,7 @@ import {
   normalizeTransitStationFilter,
   stationModesMatchFilter,
   toggleTransitStationMode,
+  toTransitStationFilterWire,
 } from "./transit";
 
 describe("normalizeTransitStationFilter", () => {
@@ -19,6 +20,16 @@ describe("normalizeTransitStationFilter", () => {
   });
   it("rejects unknown tokens as all (reject to all for deserialize safety)", () => {
     expect(normalizeTransitStationFilter("spaceship")).toBe("all");
+    expect(normalizeTransitStationFilter(["spaceship"])).toBe("all");
+    expect(normalizeTransitStationFilter(["metro", "spaceship"])).toEqual(["metro"]);
+  });
+});
+
+describe("toTransitStationFilterWire", () => {
+  it("omits all, writes single as string, multi as array", () => {
+    expect(toTransitStationFilterWire("all")).toBeUndefined();
+    expect(toTransitStationFilterWire(["metro"])).toBe("metro");
+    expect(toTransitStationFilterWire(["metro", "tram"])).toEqual(["metro", "tram"]);
   });
 });
 

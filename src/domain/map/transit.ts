@@ -58,6 +58,22 @@ export function normalizeTransitStationFilter(raw: unknown): TransitStationFilte
   return sortTransitRouteModes(unique);
 }
 
+/**
+ * Firestore wire shape for older clients: omit `"all"`, write one mode as a
+ * legacy string, write two or more modes as a sorted array.
+ */
+export function toTransitStationFilterWire(
+  filter: TransitStationFilter,
+): TransitRouteMode | TransitRouteMode[] | undefined {
+  if (filter === "all") {
+    return undefined;
+  }
+  if (filter.length === 1) {
+    return filter[0];
+  }
+  return [...filter];
+}
+
 export function isTransitStationFilterAll(filter: TransitStationFilter): boolean {
   return filter === "all";
 }

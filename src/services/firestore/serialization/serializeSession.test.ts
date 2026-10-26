@@ -193,7 +193,7 @@ describe("serializeSession", () => {
     expect(restoredOmitted.transitStationFilter).toBe("all");
   });
 
-  it("normalizes legacy string on restore", () => {
+  it("dual-writes single mode as legacy string and restores both shapes", () => {
     const withMetro = buildSessionDocument(
       "MET1",
       sampleGameArea,
@@ -208,20 +208,61 @@ describe("serializeSession", () => {
       undefined,
       { transitStationFilter: ["metro"] },
     );
-    expect(withMetro.transitStationFilter).toEqual(["metro"]);
+    expect(withMetro.transitStationFilter).toBe("metro");
 
-    const restored = deserializeSessionFromFirestore("sess-1", {
+    const restoredFromWire = deserializeSessionFromFirestore("sess-1", {
       ...withMetro,
       code: "MET1",
       hostUid: "host-uid",
       createdAt: "2026-05-14T00:00:00.000Z",
-      // Legacy wire shape: single mode string
+    });
+    expect(restoredFromWire.transitStationFilter).toEqual(["metro"]);
+
+    const restoredFromLegacy = deserializeSessionFromFirestore("sess-1b", {
+      ...withMetro,
+      code: "MET1",
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
       transitStationFilter: "metro",
     });
-    expect(restored.transitStationFilter).toEqual(["metro"]);
+    expect(restoredFromLegacy.transitStationFilter).toEqual(["metro"]);
   });
 
-  it("accepts funicular in array", () => {
+  it("recovers empty and unknown filter arrays on deserialize", () => {
+    const base = buildSessionDocument(
+      "BAD1",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "free",
+      "sydney",
+      "seeker",
+      "medium",
+      {},
+    );
+
+    expect(
+      deserializeSessionFromFirestore("sess-empty", {
+        ...base,
+        code: "BAD1",
+        hostUid: "host-uid",
+        createdAt: "2026-05-14T00:00:00.000Z",
+        transitStationFilter: [],
+      }).transitStationFilter,
+    ).toBe("all");
+
+    expect(
+      deserializeSessionFromFirestore("sess-partial", {
+        ...base,
+        code: "BAD1",
+        hostUid: "host-uid",
+        createdAt: "2026-05-14T00:00:00.000Z",
+        transitStationFilter: ["metro", "spaceship"],
+      }).transitStationFilter,
+    ).toEqual(["metro"]);
+  });
+
+  it("accepts funicular as dual-written string", () => {
     const multi = buildSessionDocument(
       "FUN1",
       sampleGameArea,
@@ -236,7 +277,7 @@ describe("serializeSession", () => {
       undefined,
       { transitStationFilter: ["funicular"] },
     );
-    expect(multi.transitStationFilter).toEqual(["funicular"]);
+    expect(multi.transitStationFilter).toBe("funicular");
 
     const restored = deserializeSessionFromFirestore("sess-fun", {
       ...multi,

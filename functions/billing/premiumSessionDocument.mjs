@@ -34,7 +34,8 @@ export const createPremiumSessionInputSchema = z.object({
     .union([
       z.literal("all"),
       z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"]),
-      z.array(z.enum(["rail", "metro", "tram", "bus", "ferry", "funicular", "other"])).nonempty(),
+      // Recoverable: empty / unknown tokens → normalizeTransitStationFilter
+      z.array(z.string()),
     ])
     .optional(),
   hostRole: z.enum(["seeker", "hider"]).default("seeker"),
@@ -143,7 +144,9 @@ export function buildPremiumSessionFirestoreDocument(input, code, hostUid, creat
 
   const transitStationFilter = normalizeTransitStationFilter(input.transitStationFilter);
   if (transitStationFilter !== "all") {
-    payload.transitStationFilter = transitStationFilter;
+    // Dual-write: single mode as legacy string for older clients; multi as array.
+    payload.transitStationFilter =
+      transitStationFilter.length === 1 ? transitStationFilter[0] : transitStationFilter;
   }
 
   return payload;
