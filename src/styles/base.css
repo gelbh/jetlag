@@ -69,6 +69,16 @@
   }
 }
 
+/* Short portrait: denser map chrome; companion to landscape height <= 430px. */
+@media (height <= 700px) and (orientation: portrait) {
+  :root {
+    --status-bar-height: 2.75rem;
+    --dock-float-gap: 0.5rem;
+    --chrome-gap-above-dock: 0.35rem;
+    --chrome-gap-bottom: 0.5rem;
+  }
+}
+
 @media (width <= 639px) {
   :root {
     --hider-action-bar-height: 6.5rem;
