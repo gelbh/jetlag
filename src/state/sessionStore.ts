@@ -73,6 +73,7 @@ const SESSION_RECORD_SCALAR_KEYS = [
   "previewQuestionBeforeSend",
   "tier",
   "transitMetroId",
+  "transitStationFilter",
   "endedAt",
   "status",
   "timerAccumulatedMs",
