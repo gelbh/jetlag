@@ -314,7 +314,7 @@ describe("Home", () => {
     const main = screen.getByRole("main");
     expect(main.className).toContain("justify-center");
     expect(main.className).toContain("overflow-y-auto");
-    expect(main.className).toContain("safe-area-top)+1.25rem");
+    expect(main.className).toContain("safe-area-top)+var(--entry-top-breathing-extra)");
   });
 
   it("renders the brand mark and LEGAL_APP_NAME heading", () => {
