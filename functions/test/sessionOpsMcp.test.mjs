@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
+import http from "node:http";
 import test from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { handleSessionOpsMcpHttp } from "../handlers/incident/sessionOpsMcpHttp.mjs";
 import {
   authenticateSessionOpsMcp,
   createSessionOpsMcpServer,
-  handleSessionOpsMcpRequest,
   SESSION_OPS_MCP_HEADER_ACTOR,
   SESSION_OPS_MCP_HEADER_INCIDENT,
   SESSION_OPS_MCP_HEADER_SESSION,
@@ -23,6 +24,25 @@ async function connectSessionOpsMcpClient(deps, headers) {
   const client = new Client({ name: "session-ops-mcp-test", version: "1.0.0" });
   await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
   return client;
+}
+
+/**
+ * Minimal Express-shaped res for auth / health paths (before StreamableHTTP).
+ */
+function createExpressLikeRes() {
+  /** @type {{ statusCode: number, body: unknown }} */
+  const state = { statusCode: 200, body: null };
+  const res = {
+    status(code) {
+      state.statusCode = code;
+      return res;
+    },
+    json(body) {
+      state.body = body;
+      return res;
+    },
+  };
+  return { res, state };
 }
 
 test("authenticateSessionOpsMcp rejects missing bearer", () => {
@@ -48,91 +68,56 @@ test("createSessionOpsMcpServer registers allowlisted tools only", async () => {
   assert.equal(names.includes("drop_database"), false);
 });
 
-test("handleSessionOpsMcpRequest returns 401 without auth", async () => {
-  const response = await handleSessionOpsMcpRequest(
-    {
-      headers: {},
-      body: { jsonrpc: "2.0", id: 1, method: "tools/list" },
-    },
-    { authSecret: "secret" },
+test("handleSessionOpsMcpHttp returns 401 without auth", async () => {
+  const { res, state } = createExpressLikeRes();
+  await handleSessionOpsMcpHttp(
+    { method: "POST", headers: {} },
+    res,
+    { authSecret: "secret", posthog: { flush: async () => {} } },
   );
-  assert.equal(response.status, 401);
-  assert.equal(response.body.error, SESSION_OPS_MCP_UNAUTHORIZED);
+  assert.equal(state.statusCode, 401);
+  assert.equal(state.body.error, SESSION_OPS_MCP_UNAUTHORIZED);
 });
 
 test("tools/list returns allowlisted tools only", async () => {
-  const response = await handleSessionOpsMcpRequest(
-    {
-      headers: {
-        authorization: "Bearer secret",
-        [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
-        [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
-        [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
-      },
-      body: { jsonrpc: "2.0", id: 1, method: "tools/list" },
-    },
+  const client = await connectSessionOpsMcpClient(
     { authSecret: "secret" },
+    {
+      [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
+      [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
+      [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
+    },
   );
-  assert.equal(response.status, 200);
-  const names = response.body.result.tools.map((t) => t.name);
+  const { tools } = await client.listTools();
+  const names = tools.map((t) => t.name);
   assert.ok(names.includes("soft_reload"));
   assert.ok(names.includes("end_session"));
   assert.equal(names.includes("not_a_tool"), false);
 });
 
 test("tools/call rejects unknown tool", async () => {
-  const response = await handleSessionOpsMcpRequest(
-    {
-      headers: {
-        authorization: "Bearer secret",
-        [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
-        [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
-        [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
-      },
-      body: {
-        jsonrpc: "2.0",
-        id: 2,
-        method: "tools/call",
-        params: { name: "drop_database", arguments: {} },
-      },
-    },
+  const client = await connectSessionOpsMcpClient(
     {
       authSecret: "secret",
       execute: async () => {
         throw new Error("should not execute");
       },
     },
+    {
+      [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
+      [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
+      [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
+    },
   );
-  assert.equal(response.status, 200);
-  assert.equal(response.body.result.isError, true);
-  assert.match(
-    response.body.result.content[0].text,
-    /Unknown|unknown|SESSION_OPS_UNKNOWN|not found/i,
-  );
+  const result = await client.callTool({ name: "drop_database", arguments: {} });
+  assert.equal(result.isError, true);
+  assert.match(result.content[0].text, /Unknown|unknown|SESSION_OPS_UNKNOWN|not found/i);
 });
 
 test("tools/call soft_reload uses bound session not model args", async () => {
   const calls = [];
   const caps = [];
-  const response = await handleSessionOpsMcpRequest(
-    {
-      headers: {
-        authorization: "Bearer secret",
-        [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
-        [SESSION_OPS_MCP_HEADER_SESSION]: "sess-bound",
-        [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
-        [SESSION_OPS_MCP_HEADER_SUMMON]: "sum-1",
-      },
-      body: {
-        jsonrpc: "2.0",
-        id: 3,
-        method: "tools/call",
-        params: {
-          name: "soft_reload",
-          arguments: { sessionId: "evil-session", note: "ok" },
-        },
-      },
-    },
+  const client = await connectSessionOpsMcpClient(
     {
       authSecret: "secret",
       consumeTool: async (_db, input) => {
@@ -145,10 +130,20 @@ test("tools/call soft_reload uses bound session not model args", async () => {
       },
       resolveCaps: () => ({ toolsPerSummon: 20, globalToolAttemptsPerUidPerHour: 100 }),
     },
+    {
+      [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
+      [SESSION_OPS_MCP_HEADER_SESSION]: "sess-bound",
+      [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
+      [SESSION_OPS_MCP_HEADER_SUMMON]: "sum-1",
+    },
   );
 
-  assert.equal(response.status, 200);
-  assert.equal(response.body.result.isError, undefined);
+  const result = await client.callTool({
+    name: "soft_reload",
+    arguments: { sessionId: "evil-session", note: "ok" },
+  });
+
+  assert.equal(result.isError, undefined);
   assert.equal(caps.length, 1);
   assert.equal(caps[0].summonId, "sum-1");
   assert.equal(calls.length, 1);
@@ -163,22 +158,7 @@ test("tools/call soft_reload uses bound session not model args", async () => {
 test("tools/call destructive tool requests host confirm", async () => {
   const confirms = [];
   const messages = [];
-  const response = await handleSessionOpsMcpRequest(
-    {
-      headers: {
-        authorization: "Bearer secret",
-        [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
-        [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
-        [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
-        [SESSION_OPS_MCP_HEADER_SUMMON]: "sum-1",
-      },
-      body: {
-        jsonrpc: "2.0",
-        id: 4,
-        method: "tools/call",
-        params: { name: "reset_board", arguments: {} },
-      },
-    },
+  const client = await connectSessionOpsMcpClient(
     {
       authSecret: "secret",
       requestConfirm: async (_db, input) => {
@@ -200,11 +180,17 @@ test("tools/call destructive tool requests host confirm", async () => {
         throw new Error("should not consume tool on gate");
       },
     },
+    {
+      [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
+      [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
+      [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
+      [SESSION_OPS_MCP_HEADER_SUMMON]: "sum-1",
+    },
   );
 
-  assert.equal(response.status, 200);
-  assert.equal(response.body.result.isError, undefined);
-  const outcome = JSON.parse(response.body.result.content[0].text);
+  const result = await client.callTool({ name: "reset_board", arguments: {} });
+  assert.equal(result.isError, undefined);
+  const outcome = JSON.parse(result.content[0].text);
   assert.equal(outcome.status, "host_confirm_required");
   assert.equal(outcome.confirmId, "c-1");
   assert.equal(outcome.tool, "reset_board");
@@ -216,22 +202,7 @@ test("tools/call destructive tool requests host confirm", async () => {
 });
 
 test("tools/call rejects when tool cap is exhausted", async () => {
-  const response = await handleSessionOpsMcpRequest(
-    {
-      headers: {
-        authorization: "Bearer secret",
-        [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
-        [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
-        [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
-        [SESSION_OPS_MCP_HEADER_SUMMON]: "sum-1",
-      },
-      body: {
-        jsonrpc: "2.0",
-        id: 5,
-        method: "tools/call",
-        params: { name: "soft_reload", arguments: {} },
-      },
-    },
+  const client = await connectSessionOpsMcpClient(
     {
       authSecret: "secret",
       consumeTool: async () => ({ ok: false, code: "SESSION_OPS_TOOL_CAP" }),
@@ -240,10 +211,82 @@ test("tools/call rejects when tool cap is exhausted", async () => {
       },
       resolveCaps: () => ({ toolsPerSummon: 1, globalToolAttemptsPerUidPerHour: 1 }),
     },
+    {
+      [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
+      [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
+      [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
+      [SESSION_OPS_MCP_HEADER_SUMMON]: "sum-1",
+    },
   );
 
-  assert.equal(response.status, 200);
-  const outcome = JSON.parse(response.body.result.content[0].text);
+  const result = await client.callTool({ name: "soft_reload", arguments: {} });
+  const outcome = JSON.parse(result.content[0].text);
   assert.equal(outcome.status, "rejected");
   assert.equal(outcome.code, "SESSION_OPS_TOOL_CAP");
+});
+
+test("handleSessionOpsMcpHttp flushes posthog after tools/call", async () => {
+  const flushCalls = [];
+  const posthog = {
+    flush: async () => {
+      flushCalls.push(Date.now());
+    },
+  };
+
+  const httpServer = http.createServer(async (req, res) => {
+    res.status = (code) => {
+      res.statusCode = code;
+      return res;
+    };
+    res.json = (body) => {
+      res.setHeader("content-type", "application/json");
+      res.end(JSON.stringify(body));
+    };
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
+    const raw = Buffer.concat(chunks).toString("utf8");
+    const body = raw ? JSON.parse(raw) : null;
+    await handleSessionOpsMcpHttp(req, res, {
+      authSecret: "secret",
+      posthog,
+      body,
+      consumeTool: async () => ({ ok: true }),
+      execute: async () => ({ status: "accepted", tool: "soft_reload" }),
+      resolveCaps: () => ({ toolsPerSummon: 20, globalToolAttemptsPerUidPerHour: 100 }),
+    });
+  });
+
+  await new Promise((resolve) => httpServer.listen(0, "127.0.0.1", resolve));
+  const { port } = /** @type {import("node:net").AddressInfo} */ (httpServer.address());
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/`, {
+      method: "POST",
+      headers: {
+        authorization: "Bearer secret",
+        "content-type": "application/json",
+        accept: "application/json, text/event-stream",
+        [SESSION_OPS_MCP_HEADER_INCIDENT]: "inc-1",
+        [SESSION_OPS_MCP_HEADER_SESSION]: "sess-1",
+        [SESSION_OPS_MCP_HEADER_ACTOR]: "uid-1",
+        [SESSION_OPS_MCP_HEADER_SUMMON]: "sum-1",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: { name: "soft_reload", arguments: { note: "flush-check" } },
+      }),
+    });
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.result.isError, undefined);
+    const outcome = JSON.parse(payload.result.content[0].text);
+    assert.equal(outcome.status, "accepted");
+    assert.equal(flushCalls.length, 1);
+  } finally {
+    await new Promise((resolve) => httpServer.close(resolve));
+  }
 });
