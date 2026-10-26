@@ -131,6 +131,22 @@ export function formatBundledPresetLocation(definition: BundledGamePresetDefinit
   return definition.hierarchy.map((segment) => segment.name).join(" · ");
 }
 
+export function formatBundledPresetSelectGroupLabel(
+  definition: BundledGamePresetDefinition,
+): string {
+  const { hierarchy } = definition;
+  if (hierarchy.length === 0) {
+    return "Bundled";
+  }
+  if (hierarchy.length === 1) {
+    return hierarchy[0]!.name;
+  }
+  return hierarchy
+    .slice(0, -1)
+    .map((segment) => segment.name)
+    .join(" · ");
+}
+
 export interface BundledPresetSelectGroup {
   label: string;
   options: Array<{ presetId: string; name: string }>;
@@ -142,7 +158,7 @@ export function buildBundledPresetSelectGroups(
   const groups = new Map<string, BundledPresetSelectGroup>();
 
   for (const definition of definitions) {
-    const label = formatBundledPresetLocation(definition);
+    const label = formatBundledPresetSelectGroupLabel(definition);
     const group = groups.get(label) ?? { label, options: [] };
     group.options.push({ presetId: definition.id, name: definition.name });
     groups.set(label, group);

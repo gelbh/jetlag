@@ -12,6 +12,7 @@ export type GameAreaSectionModel = {
   bundledPresetSelectGroups: BundledPresetSelectGroup[];
   favouritePresetSelectOptions: { presetId: string; name: string }[];
   userPresets: GamePreset[];
+  presetsForSearch: GamePreset[];
   loadedPreset: GamePreset | null;
   appliedPresetIds: string[];
   pendingPresetIds: string[];
