@@ -1,0 +1,492 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q31122428",
+      "name": "Arona Klinik für Altersmedizin",
+      "lat": 52.515,
+      "lng": 13.563889
+    },
+    {
+      "id": "Q54810500",
+      "name": "Augenklinik Berlin-Marzahn",
+      "lat": 52.5143,
+      "lng": 13.5677
+    },
+    {
+      "id": "Q831173",
+      "name": "Bethanien",
+      "lat": 52.5039,
+      "lng": 13.4244
+    },
+    {
+      "id": "Q1009265",
+      "name": "Bundeswehrkrankenhaus Berlin",
+      "lat": 52.535,
+      "lng": 13.3703
+    },
+    {
+      "id": "Q30254110",
+      "name": "Campus Benjamin Franklin",
+      "lat": 52.441934,
+      "lng": 13.320836
+    },
+    {
+      "id": "Q2172279",
+      "name": "Campus Virchow-Klinikum",
+      "lat": 52.543554,
+      "lng": 13.347971
+    },
+    {
+      "id": "Q77078238",
+      "name": "Caritas-Klinik St. Anna Berlin-Charlottenburg",
+      "lat": 52.508611,
+      "lng": 13.251667
+    },
+    {
+      "id": "Q162684",
+      "name": "Charité",
+      "lat": 52.526944,
+      "lng": 13.377222
+    },
+    {
+      "id": "Q16830635",
+      "name": "Charité-Bettenhochhaus",
+      "lat": 52.5266,
+      "lng": 13.3797
+    },
+    {
+      "id": "Q64555481",
+      "name": "Charité-Nervenklinik",
+      "lat": 52.526403,
+      "lng": 13.376115
+    },
+    {
+      "id": "Q1205694",
+      "name": "Deutsches Herzzentrum Berlin",
+      "lat": 52.5422,
+      "lng": 13.3469
+    },
+    {
+      "id": "Q19963300",
+      "name": "DRK-Kliniken-Köpenick",
+      "lat": 52.441097,
+      "lng": 13.596667
+    },
+    {
+      "id": "Q97072929",
+      "name": "Elisabeth sanatorium",
+      "lat": 52.376464,
+      "lng": 13.167199
+    },
+    {
+      "id": "Q1381050",
+      "name": "Evangelische Lungenklinik Berlin",
+      "lat": 52.6317,
+      "lng": 13.5049
+    },
+    {
+      "id": "Q1381349",
+      "name": "Evangelisches Krankenhaus Königin Elisabeth Herzberge",
+      "lat": 52.5268,
+      "lng": 13.5086
+    },
+    {
+      "id": "Q15110572",
+      "name": "Evangelisches Waldkrankenhaus Spandau",
+      "lat": 52.562416,
+      "lng": 13.15763
+    },
+    {
+      "id": "Q50358758",
+      "name": "Franziskus-Krankenhaus Berlin",
+      "lat": 52.506111,
+      "lng": 13.345278
+    },
+    {
+      "id": "Q106676760",
+      "name": "Frauenklinik des Krankenhaus Neukölln",
+      "lat": 52.463627,
+      "lng": 13.423113
+    },
+    {
+      "id": "Q1508724",
+      "name": "Georgenhospital",
+      "lat": 52.5222,
+      "lng": 13.4161
+    },
+    {
+      "id": "Q104631011",
+      "name": "Haftkrankenhaus des Ministeriums für Staatssicherheit",
+      "lat": 52.541389,
+      "lng": 13.501111
+    },
+    {
+      "id": "Q1594900",
+      "name": "Heilig-Geist-Spital",
+      "lat": 52.520786,
+      "lng": 13.403212
+    },
+    {
+      "id": "Q97120043",
+      "name": "Heiligenfeld Klinik Berlin",
+      "lat": 52.517879,
+      "lng": 13.569337
+    },
+    {
+      "id": "Q1602557",
+      "name": "Helios Hospital Berlin-Buch",
+      "lat": 52.630944,
+      "lng": 13.510033
+    },
+    {
+      "id": "Q50038610",
+      "name": "Helios Klinikum Emil von Behring",
+      "lat": 52.423822,
+      "lng": 13.254061
+    },
+    {
+      "id": "Q1721653",
+      "name": "House of Empress Augustus Viktoria",
+      "lat": 52.5242,
+      "lng": 13.2892
+    },
+    {
+      "id": "Q28730386",
+      "name": "Immanuel Klinikum Bernau",
+      "lat": 52.683056,
+      "lng": 13.5825
+    },
+    {
+      "id": "Q319026",
+      "name": "Jewish Hospital Berlin",
+      "lat": 52.5556,
+      "lng": 13.3706
+    },
+    {
+      "id": "Q106900720",
+      "name": "Justizvollzugskrankenhaus Berlin",
+      "lat": 52.539625,
+      "lng": 13.324174
+    },
+    {
+      "id": "Q22574418",
+      "name": "Kaiser- und Kaiserin-Friedrich-Kinderkrankenhaus",
+      "lat": 52.554704,
+      "lng": 13.363731
+    },
+    {
+      "id": "Q1666233",
+      "name": "Kaiserin-Augusta-Hospital",
+      "lat": 52.5319,
+      "lng": 13.3731
+    },
+    {
+      "id": "Q1774574",
+      "name": "Kinderklinik Lindenhof",
+      "lat": 52.5186,
+      "lng": 13.5072
+    },
+    {
+      "id": "Q11722062",
+      "name": "Kirche Vom Guten Hirten",
+      "lat": 52.4156,
+      "lng": 13.36
+    },
+    {
+      "id": "Q97013118",
+      "name": "Klinik Helle Mitte",
+      "lat": 52.53725,
+      "lng": 13.603333
+    },
+    {
+      "id": "Q1774663",
+      "name": "Klinikum im Friedrichshain",
+      "lat": 52.525,
+      "lng": 13.439
+    },
+    {
+      "id": "Q27595384",
+      "name": "Klinikum Prenzlauer Berg",
+      "lat": 52.539879,
+      "lng": 13.429019
+    },
+    {
+      "id": "Q1297273",
+      "name": "Krankenhaus Am Urban",
+      "lat": 52.4942,
+      "lng": 13.4086
+    },
+    {
+      "id": "Q106905620",
+      "name": "Krankenhaus des Maßregelvollzugs Berlin",
+      "lat": 52.582995,
+      "lng": 13.326533
+    },
+    {
+      "id": "Q1764107",
+      "name": "Krankenhaus Hedwigshöhe",
+      "lat": 52.4062,
+      "lng": 13.5691
+    },
+    {
+      "id": "Q1786539",
+      "name": "Krankenhaus Moabit",
+      "lat": 52.5273,
+      "lng": 13.3479
+    },
+    {
+      "id": "Q130211333",
+      "name": "Krankenhaus Reinickendorf",
+      "lat": 52.590748,
+      "lng": 13.307633
+    },
+    {
+      "id": "Q3145246",
+      "name": "Krankenhaus Waldfriede",
+      "lat": 52.444306,
+      "lng": 13.240289
+    },
+    {
+      "id": "Q111225052",
+      "name": "Kurhaus Westend für Nervenleidende",
+      "lat": 52.51807,
+      "lng": 13.267528
+    },
+    {
+      "id": "Q1877465",
+      "name": "Lungenklinik Heckeshorn",
+      "lat": 52.42262,
+      "lng": 13.25418
+    },
+    {
+      "id": "Q1903245",
+      "name": "Martin-Luther-Hospital",
+      "lat": 52.491536,
+      "lng": 13.291357
+    },
+    {
+      "id": "Q1949450",
+      "name": "Mosse-Stift",
+      "lat": 52.4746,
+      "lng": 13.3037
+    },
+    {
+      "id": "Q105045350",
+      "name": "Nervenheilanstalt Westend",
+      "lat": 52.518605,
+      "lng": 13.266787
+    },
+    {
+      "id": "Q1979838",
+      "name": "Neue Welt",
+      "lat": 52.486452,
+      "lng": 13.42147
+    },
+    {
+      "id": "Q96575418",
+      "name": "Oberlin hospital",
+      "lat": 52.393906,
+      "lng": 13.088919
+    },
+    {
+      "id": "Q97011208",
+      "name": "Oberlin Rehazentrum",
+      "lat": 52.393125,
+      "lng": 13.088168
+    },
+    {
+      "id": "Q2791678",
+      "name": "Oskar-Helene-Heim",
+      "lat": 52.4333,
+      "lng": 13.25
+    },
+    {
+      "id": "Q2033508",
+      "name": "Oskar-Ziethen-Krankenhaus",
+      "lat": 52.5143,
+      "lng": 13.4951
+    },
+    {
+      "id": "Q1689390",
+      "name": "Park-Klinik Weißensee",
+      "lat": 52.5553,
+      "lng": 13.4513
+    },
+    {
+      "id": "Q29793946",
+      "name": "Paulinen Krankenhaus",
+      "lat": 52.507969,
+      "lng": 13.233408
+    },
+    {
+      "id": "Q1802956",
+      "name": "Pépinière",
+      "lat": 52.52885,
+      "lng": 13.374383
+    },
+    {
+      "id": "Q1743009",
+      "name": "Preußisches Institut für Infektionskrankheiten",
+      "lat": 52.539167,
+      "lng": 13.347222
+    },
+    {
+      "id": "Q22674668",
+      "name": "Regierungskrankenhaus der DDR",
+      "lat": 52.52948,
+      "lng": 13.37456
+    },
+    {
+      "id": "Q50038789",
+      "name": "Sana Klinikum Lichtenberg",
+      "lat": 52.514205,
+      "lng": 13.495181
+    },
+    {
+      "id": "Q72575211",
+      "name": "Sanatorium am Hansaplatz",
+      "lat": 52.518889,
+      "lng": 13.340056
+    },
+    {
+      "id": "Q2220257",
+      "name": "Sanatorium Schloss Tegel",
+      "lat": 52.5943,
+      "lng": 13.2722
+    },
+    {
+      "id": "Q20181173",
+      "name": "Sankt-Gertrauden-Krankenhaus",
+      "lat": 52.48063,
+      "lng": 13.31719
+    },
+    {
+      "id": "Q1767557",
+      "name": "Schloss Börnicke",
+      "lat": 52.662,
+      "lng": 13.6332
+    },
+    {
+      "id": "Q19308767",
+      "name": "Schlosspark-Klinik",
+      "lat": 52.52225,
+      "lng": 13.2897
+    },
+    {
+      "id": "Q61770073",
+      "name": "St. Gertrauden-Krankenhaus",
+      "lat": 52.480918,
+      "lng": 13.317272
+    },
+    {
+      "id": "Q2318710",
+      "name": "St. Hedwig hospital",
+      "lat": 52.5258,
+      "lng": 13.3978
+    },
+    {
+      "id": "Q97122586",
+      "name": "St. Hedwig Kliniken Berlin",
+      "lat": 52.525833,
+      "lng": 13.397778
+    },
+    {
+      "id": "Q50358759",
+      "name": "St. Joseph Krankenhaus Berlin-Tempelhof",
+      "lat": 52.4781,
+      "lng": 13.37296
+    },
+    {
+      "id": "Q30260752",
+      "name": "St. Joseph-Krankenhaus",
+      "lat": 52.4781,
+      "lng": 13.37296
+    },
+    {
+      "id": "Q1725046",
+      "name": "St. Maria-Victoria-Heilanstalt",
+      "lat": 52.5236,
+      "lng": 13.3853
+    },
+    {
+      "id": "Q46995505",
+      "name": "Städtische Nervenklinik für Kinder und Jugendliche Wiesengrund",
+      "lat": 52.589722,
+      "lng": 13.325833
+    },
+    {
+      "id": "Q2221924",
+      "name": "Stiftung Sankt-Georgen-Hospital zu Bernau",
+      "lat": 52.6813,
+      "lng": 13.583
+    },
+    {
+      "id": "Q105045393",
+      "name": "Thalia-Grundschule",
+      "lat": 52.49292,
+      "lng": 13.476155
+    },
+    {
+      "id": "Q2493169",
+      "name": "Unfallkrankenhaus Berlin",
+      "lat": 52.519,
+      "lng": 13.5657
+    },
+    {
+      "id": "Q766049",
+      "name": "Vivantes Auguste-Viktoria-Klinikum",
+      "lat": 52.4625,
+      "lng": 13.3464
+    },
+    {
+      "id": "Q2528982",
+      "name": "Vivantes Humboldt-Klinikum",
+      "lat": 52.5896,
+      "lng": 13.3079
+    },
+    {
+      "id": "Q2528984",
+      "name": "Vivantes Klinikum Kaulsdorf",
+      "lat": 52.506648,
+      "lng": 13.593792
+    },
+    {
+      "id": "Q2528989",
+      "name": "Vivantes Klinikum Neukölln",
+      "lat": 52.4392,
+      "lng": 13.4597
+    },
+    {
+      "id": "Q62269171",
+      "name": "Vivantes Klinikum Spandau",
+      "lat": 52.54947,
+      "lng": 13.20619
+    },
+    {
+      "id": "Q50037209",
+      "name": "Waldkrankenhaus Protestant Hospital",
+      "lat": 52.533316,
+      "lng": 13.20808
+    },
+    {
+      "id": "Q25089093",
+      "name": "Wilhelm-Griesinger-Krankenhaus",
+      "lat": 52.516944,
+      "lng": 13.569444
+    },
+    {
+      "id": "Q126373395",
+      "name": "Zentralinstitut für Herz-Kreislaufforschung (Franz-Vollhardt-Klinik)",
+      "lat": 52.6423,
+      "lng": 13.4882
+    }
+  ]
+}

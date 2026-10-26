@@ -1,0 +1,108 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q1846745",
+      "name": "Academisch Ziekenhuis Utrecht",
+      "lat": 52.085783,
+      "lng": 5.117011
+    },
+    {
+      "id": "Q2006627",
+      "name": "Catharijnegasthuis",
+      "lat": 52.08784,
+      "lng": 5.12503
+    },
+    {
+      "id": "Q2780411",
+      "name": "Centraal Militair Hospitaal",
+      "lat": 52.0873,
+      "lng": 5.17732
+    },
+    {
+      "id": "Q2126530",
+      "name": "Diaconessenhuis",
+      "lat": 52.08157,
+      "lng": 5.137663
+    },
+    {
+      "id": "Q2323422",
+      "name": "Johannes de Deo",
+      "lat": 52.09,
+      "lng": 5.119167
+    },
+    {
+      "id": "Q2530764",
+      "name": "Jutfaseweg 7, Utrecht",
+      "lat": 52.07723,
+      "lng": 5.12088
+    },
+    {
+      "id": "Q2727648",
+      "name": "Leeuwenbergh Gasthuis",
+      "lat": 52.08778,
+      "lng": 5.12778
+    },
+    {
+      "id": "Q2472637",
+      "name": "Nederlandsch Gasthuis voor Ooglijders te Utrecht",
+      "lat": 52.09848,
+      "lng": 5.1393
+    },
+    {
+      "id": "Q43895414",
+      "name": "Princess Máxima Center",
+      "lat": 52.089378,
+      "lng": 5.182099
+    },
+    {
+      "id": "Q2203359",
+      "name": "Sint Antonius Ziekenhuis",
+      "lat": 52.08639,
+      "lng": 5.14562
+    },
+    {
+      "id": "Q96584966",
+      "name": "St. Antonius Ziekenhuis Nieuwegein",
+      "lat": 52.024966,
+      "lng": 5.08101
+    },
+    {
+      "id": "Q96602135",
+      "name": "St. Antonius Ziekenhuis Utrecht",
+      "lat": 52.102961,
+      "lng": 5.05594
+    },
+    {
+      "id": "Q3140947",
+      "name": "St. Eloy's Hospice",
+      "lat": 52.089444,
+      "lng": 5.119167
+    },
+    {
+      "id": "Q2456800",
+      "name": "University Medical Center Utrecht",
+      "lat": 52.088611,
+      "lng": 5.179722
+    },
+    {
+      "id": "Q847384",
+      "name": "Utrechts Conservatorium",
+      "lat": 52.08926,
+      "lng": 5.117327
+    },
+    {
+      "id": "Q2685451",
+      "name": "Wilhelmina Children's Hospital",
+      "lat": 52.089394,
+      "lng": 5.18175
+    }
+  ]
+}

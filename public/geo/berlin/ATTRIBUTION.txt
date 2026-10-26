@@ -1,0 +1,19 @@
+Land Berlin metro pack geo
+
+Boundaries
+- Bezirk polygons: Senatsverwaltung für Stadtentwicklung, Bauen und Wohnen Berlin, ALKIS WFS alkis_bezirke:bezirksgrenzen (Datenlizenz Deutschland – Zero – Version 2.0).
+
+POI
+- Wikidata Query Service (CC0).
+
+Sea level seed
+- Open-Meteo elevation API.
+
+Coastline
+- Inland city stub (empty segments).
+
+International border
+- Landlocked city-state stub (empty segments).
+
+GTFS
+- Skipped in v1 (VBB/BVG static GTFS requires registration; rail stations use Overpass).

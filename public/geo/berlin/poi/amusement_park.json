@@ -1,0 +1,24 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q1415173",
+      "name": "Filmpark Babelsberg",
+      "lat": 52.38655,
+      "lng": 13.11705
+    },
+    {
+      "id": "Q134579421",
+      "name": "Steglitzer Woche",
+      "lat": 52.434694,
+      "lng": 13.318056
+    }
+  ]
+}

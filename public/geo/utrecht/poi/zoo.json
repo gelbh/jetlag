@@ -1,0 +1,24 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q59209464",
+      "name": "Animal park Vleuten",
+      "lat": 52.105139,
+      "lng": 5.004083
+    },
+    {
+      "id": "Q117279424",
+      "name": "Kinderboerderij IJsselstee",
+      "lat": 52.0225,
+      "lng": 5.082778
+    }
+  ]
+}

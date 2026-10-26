@@ -1,0 +1,98 @@
+import { SINGAPORE_REGION_PACK_ID } from "../singaporeRegionPack";
+import { attachPlayArea } from "./attachPlayArea";
+import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
+
+export const SINGAPORE_PLANNING_AREAS = [
+  { id: "ang-mo-kio", name: "Ang Mo Kio" },
+  { id: "bedok", name: "Bedok" },
+  { id: "bishan", name: "Bishan" },
+  { id: "boon-lay", name: "Boon Lay" },
+  { id: "bukit-batok", name: "Bukit Batok" },
+  { id: "bukit-merah", name: "Bukit Merah" },
+  { id: "bukit-panjang", name: "Bukit Panjang" },
+  { id: "bukit-timah", name: "Bukit Timah" },
+  { id: "central-water-catchment", name: "Central Water Catchment" },
+  { id: "changi", name: "Changi" },
+  { id: "changi-bay", name: "Changi Bay" },
+  { id: "choa-chu-kang", name: "Choa Chu Kang" },
+  { id: "clementi", name: "Clementi" },
+  { id: "downtown-core", name: "Downtown Core" },
+  { id: "geylang", name: "Geylang" },
+  { id: "hougang", name: "Hougang" },
+  { id: "jurong-east", name: "Jurong East" },
+  { id: "jurong-west", name: "Jurong West" },
+  { id: "kallang", name: "Kallang" },
+  { id: "lim-chu-kang", name: "Lim Chu Kang" },
+  { id: "mandai", name: "Mandai" },
+  { id: "marina-east", name: "Marina East" },
+  { id: "marina-south", name: "Marina South" },
+  { id: "marine-parade", name: "Marine Parade" },
+  { id: "museum", name: "Museum" },
+  { id: "newton", name: "Newton" },
+  { id: "north-eastern-islands", name: "North-Eastern Islands" },
+  { id: "novena", name: "Novena" },
+  { id: "orchard", name: "Orchard" },
+  { id: "outram", name: "Outram" },
+  { id: "pasir-ris", name: "Pasir Ris" },
+  { id: "paya-lebar", name: "Paya Lebar" },
+  { id: "pioneer", name: "Pioneer" },
+  { id: "punggol", name: "Punggol" },
+  { id: "queenstown", name: "Queenstown" },
+  { id: "river-valley", name: "River Valley" },
+  { id: "rochor", name: "Rochor" },
+  { id: "seletar", name: "Seletar" },
+  { id: "sembawang", name: "Sembawang" },
+  { id: "sengkang", name: "Sengkang" },
+  { id: "serangoon", name: "Serangoon" },
+  { id: "simpang", name: "Simpang" },
+  { id: "singapore-river", name: "Singapore River" },
+  { id: "southern-islands", name: "Southern Islands" },
+  { id: "straits-view", name: "Straits View" },
+  { id: "sungei-kadut", name: "Sungei Kadut" },
+  { id: "tampines", name: "Tampines" },
+  { id: "tanglin", name: "Tanglin" },
+  { id: "tengah", name: "Tengah" },
+  { id: "toa-payoh", name: "Toa Payoh" },
+  { id: "tuas", name: "Tuas" },
+  { id: "western-islands", name: "Western Islands" },
+  { id: "western-water-catchment", name: "Western Water Catchment" },
+  { id: "woodlands", name: "Woodlands" },
+  { id: "yishun", name: "Yishun" },
+] as const;
+
+export function singaporePresets(): BundledGamePresetDefinition[] {
+  const baseHierarchy = [
+    { id: "continent-asia", category: "Continent", name: "Asia" },
+    { id: "country-singapore", category: "Country", name: "Singapore" },
+    { id: "metro-singapore", category: "Metro", name: "Singapore" },
+  ] as const;
+
+  return [
+    attachPlayArea({
+      id: "bundled:singapore",
+      name: "Singapore",
+      description: "55 URA planning areas covering the city-state.",
+      placeLabel: "Singapore",
+      regionPackId: SINGAPORE_REGION_PACK_ID,
+      hierarchy: baseHierarchy,
+      distanceUnit: "metric",
+      advancedSettingsPatch: EXPANSION_OFF,
+    }),
+    ...SINGAPORE_PLANNING_AREAS.map((planningArea) =>
+      attachPlayArea({
+        id: `bundled:singapore-${planningArea.id}`,
+        name: planningArea.name,
+        description: `${planningArea.name} planning area.`,
+        placeLabel: `${planningArea.name}, Singapore`,
+        regionPackId: SINGAPORE_REGION_PACK_ID,
+        subregionId: planningArea.id,
+        hierarchy: [
+          ...baseHierarchy,
+          { id: planningArea.id, category: "Planning area", name: planningArea.name },
+        ],
+        distanceUnit: "metric",
+        advancedSettingsPatch: EXPANSION_OFF,
+      }),
+    ),
+  ];
+}

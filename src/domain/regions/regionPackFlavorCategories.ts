@@ -75,8 +75,15 @@ const PACK_FLAVOR_CATEGORIES: Record<RegionPackId, readonly SessionCustomCategor
   "portland-maine": EMPTY,
   "prince-rupert": EMPTY,
   southampton: EMPTY,
+  amsterdam: EMPTY,
   australia: EMPTY,
   sydney: EMPTY,
+  brussels: EMPTY,
+  brisbane: EMPTY,
+  berlin: EMPTY,
+  singapore: EMPTY,
+  utrecht: EMPTY,
+  wroclaw: EMPTY,
 };
 
 const KNOWN_PACK_FLAVOR_IDS: ReadonlySet<string> = new Set(

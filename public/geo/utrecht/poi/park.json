@@ -1,0 +1,402 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q18813503",
+      "name": "Amaliapark",
+      "lat": 52.09048,
+      "lng": 5.05593
+    },
+    {
+      "id": "Q59209464",
+      "name": "Animal park Vleuten",
+      "lat": 52.105139,
+      "lng": 5.004083
+    },
+    {
+      "id": "Q13442808",
+      "name": "Botanical Garden Fort Hoofddijk",
+      "lat": 52.08778,
+      "lng": 5.17028
+    },
+    {
+      "id": "Q17604843",
+      "name": "brug bij Oud Amelisweerd",
+      "lat": 52.067447,
+      "lng": 5.169654
+    },
+    {
+      "id": "Q18813711",
+      "name": "Bunnikseweg bij 39 te De Bilt",
+      "lat": 52.08883,
+      "lng": 5.19363
+    },
+    {
+      "id": "Q2400941",
+      "name": "Daelwijck",
+      "lat": 52.11929,
+      "lng": 5.07851
+    },
+    {
+      "id": "Q17609684",
+      "name": "De Haar, bank bij tennishuisje",
+      "lat": 52.120069,
+      "lng": 4.984124
+    },
+    {
+      "id": "Q17606676",
+      "name": "De Haar, grote hertenkamp met verblijf",
+      "lat": 52.120069,
+      "lng": 4.984124
+    },
+    {
+      "id": "Q17451190",
+      "name": "Goudestein, historische tuin en park",
+      "lat": 52.14474,
+      "lng": 5.03463
+    },
+    {
+      "id": "Q2078523",
+      "name": "Griftpark",
+      "lat": 52.100556,
+      "lng": 5.126944
+    },
+    {
+      "id": "Q17453802",
+      "name": "Heemstede: parkaanleg",
+      "lat": 52.03456,
+      "lng": 5.13188
+    },
+    {
+      "id": "Q17458702",
+      "name": "Herteveld, historische tuin en park",
+      "lat": 52.14089,
+      "lng": 5.03075
+    },
+    {
+      "id": "Q17460991",
+      "name": "Houdringe: speelhuisje",
+      "lat": 52.10783,
+      "lng": 5.18977
+    },
+    {
+      "id": "Q17460994",
+      "name": "Houdringe: tuinmuur",
+      "lat": 52.10815,
+      "lng": 5.1885
+    },
+    {
+      "id": "Q17605456",
+      "name": "Huis Oudegein, tuin en parkaanleg",
+      "lat": 52.02222,
+      "lng": 5.08789
+    },
+    {
+      "id": "Q17604841",
+      "name": "ijskelder Oud Amelisweerd",
+      "lat": 52.067447,
+      "lng": 5.169654
+    },
+    {
+      "id": "Q2467179",
+      "name": "Julianapark",
+      "lat": 52.106308,
+      "lng": 5.087356
+    },
+    {
+      "id": "Q2466852",
+      "name": "KidZcity",
+      "lat": 52.10472,
+      "lng": 5.08496
+    },
+    {
+      "id": "Q117279424",
+      "name": "Kinderboerderij IJsselstee",
+      "lat": 52.0225,
+      "lng": 5.082778
+    },
+    {
+      "id": "Q51040134",
+      "name": "Koningspark",
+      "lat": 52.087192,
+      "lng": 4.963497
+    },
+    {
+      "id": "Q133054641",
+      "name": "Krommerijnpark",
+      "lat": 52.077999,
+      "lng": 5.137059
+    },
+    {
+      "id": "Q2192088",
+      "name": "Lage Weide",
+      "lat": 52.113358,
+      "lng": 5.060148
+    },
+    {
+      "id": "Q2588444",
+      "name": "Lepelenburg",
+      "lat": 52.08926,
+      "lng": 5.12847
+    },
+    {
+      "id": "Q2674659",
+      "name": "Majellapark",
+      "lat": 52.09515,
+      "lng": 5.08928
+    },
+    {
+      "id": "Q2696874",
+      "name": "Máximapark",
+      "lat": 52.100142,
+      "lng": 5.024692
+    },
+    {
+      "id": "Q2130788",
+      "name": "Moreelsepark",
+      "lat": 52.08809,
+      "lng": 5.11459
+    },
+    {
+      "id": "Q109101272",
+      "name": "Nynkeplantsoen",
+      "lat": 52.112778,
+      "lng": 5.086111
+    },
+    {
+      "id": "Q2748913",
+      "name": "Oorsprongpark",
+      "lat": 52.0949,
+      "lng": 5.13773
+    },
+    {
+      "id": "Q2619795",
+      "name": "Oranjepark, Utrecht",
+      "lat": 52.09559,
+      "lng": 5.11307
+    },
+    {
+      "id": "Q17604836",
+      "name": "Oud Amelisweerd: historische tuin- en parkaanleg",
+      "lat": 52.069708,
+      "lng": 5.167732
+    },
+    {
+      "id": "Q2117962",
+      "name": "Oude Hortus",
+      "lat": 52.084722,
+      "lng": 5.126389
+    },
+    {
+      "id": "Q2358121",
+      "name": "Park de Gagel",
+      "lat": 52.121264,
+      "lng": 5.104522
+    },
+    {
+      "id": "Q114258321",
+      "name": "Park De Groene Kop",
+      "lat": 52.111199,
+      "lng": 5.138286
+    },
+    {
+      "id": "Q130762108",
+      "name": "Park De Hoge Weide",
+      "lat": 52.08805,
+      "lng": 5.06663
+    },
+    {
+      "id": "Q114263243",
+      "name": "Park de Watertoren",
+      "lat": 52.115306,
+      "lng": 5.119167
+    },
+    {
+      "id": "Q17190897",
+      "name": "Park Groot Zandveld",
+      "lat": 52.094825,
+      "lng": 5.050828
+    },
+    {
+      "id": "Q136003662",
+      "name": "Park Kokkebogaard",
+      "lat": 52.039894,
+      "lng": 5.084997
+    },
+    {
+      "id": "Q1966267",
+      "name": "Park Transwijk",
+      "lat": 52.07056,
+      "lng": 5.10361
+    },
+    {
+      "id": "Q134436418",
+      "name": "Park Vechtzoom",
+      "lat": 52.116025,
+      "lng": 5.09727
+    },
+    {
+      "id": "Q17594291",
+      "name": "Park Voordaan",
+      "lat": 52.12398,
+      "lng": 5.15461
+    },
+    {
+      "id": "Q17607317",
+      "name": "Park Voorn",
+      "lat": 52.085,
+      "lng": 5.072222
+    },
+    {
+      "id": "Q17594294",
+      "name": "Persijn: historische aanleg",
+      "lat": 52.1508,
+      "lng": 5.15864
+    },
+    {
+      "id": "Q17605490",
+      "name": "Rhijnauwen",
+      "lat": 52.07095,
+      "lng": 5.178505
+    },
+    {
+      "id": "Q104995899",
+      "name": "Ringpark Dichterswijk",
+      "lat": 52.082172,
+      "lng": 5.113861
+    },
+    {
+      "id": "Q2573639",
+      "name": "Rosarium (Utrecht Oudwijk)",
+      "lat": 52.09182,
+      "lng": 5.14165
+    },
+    {
+      "id": "Q2220007",
+      "name": "Sculpture Park Leidsche Rijn",
+      "lat": 52.098284,
+      "lng": 5.021686
+    },
+    {
+      "id": "Q17596193",
+      "name": "Slangenmuur, Slot Zuylen",
+      "lat": 52.12695,
+      "lng": 5.0732
+    },
+    {
+      "id": "Q17452997",
+      "name": "slingermuur",
+      "lat": 52.08764,
+      "lng": 5.12698
+    },
+    {
+      "id": "Q2235985",
+      "name": "Sportpark Maarschalkerweerd",
+      "lat": 52.07494,
+      "lng": 5.15138
+    },
+    {
+      "id": "Q109588942",
+      "name": "Sportpark Zuilen",
+      "lat": 52.120861,
+      "lng": 5.067417
+    },
+    {
+      "id": "Q2086983",
+      "name": "Sterrenbos",
+      "lat": 52.08626,
+      "lng": 5.11586
+    },
+    {
+      "id": "Q17458657",
+      "name": "Theekoepel, Vechtoever",
+      "lat": 52.14809,
+      "lng": 5.03394
+    },
+    {
+      "id": "Q17468135",
+      "name": "Tuinpaviljoen",
+      "lat": 52.13319,
+      "lng": 5.0057
+    },
+    {
+      "id": "Q17605164",
+      "name": "Tuinvazen en Piedestal",
+      "lat": 52.070803,
+      "lng": 5.157532
+    },
+    {
+      "id": "Q2498387",
+      "name": "Utrecht University Botanic Gardens",
+      "lat": 52.0883,
+      "lng": 5.1725
+    },
+    {
+      "id": "Q135104837",
+      "name": "Van Boetzelaerpark",
+      "lat": 52.104058,
+      "lng": 5.174886
+    },
+    {
+      "id": "Q108434758",
+      "name": "Van Heukelompark",
+      "lat": 52.11707,
+      "lng": 5.076896
+    },
+    {
+      "id": "Q17458630",
+      "name": "Vechtoever, historische tuin en park",
+      "lat": 52.14746,
+      "lng": 5.03438
+    },
+    {
+      "id": "Q17458632",
+      "name": "Vechtoever, vier borstbeelden",
+      "lat": 52.1468,
+      "lng": 5.03406
+    },
+    {
+      "id": "Q130762104",
+      "name": "Veldhuizerpark",
+      "lat": 52.07679,
+      "lng": 5.01341
+    },
+    {
+      "id": "Q14856699",
+      "name": "Voorveldse Polder",
+      "lat": 52.09871,
+      "lng": 5.14903
+    },
+    {
+      "id": "Q3916683",
+      "name": "Wilhelminapark",
+      "lat": 52.0875,
+      "lng": 5.141111
+    },
+    {
+      "id": "Q17466714",
+      "name": "Wilhelminapark: stadspark",
+      "lat": 52.08795,
+      "lng": 5.14031
+    },
+    {
+      "id": "Q3057391",
+      "name": "Zocherpark",
+      "lat": 52.0828,
+      "lng": 5.12622
+    },
+    {
+      "id": "Q17605166",
+      "name": "Zuil op piedestal",
+      "lat": 52.070803,
+      "lng": 5.157532
+    }
+  ]
+}

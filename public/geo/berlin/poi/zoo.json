@@ -1,0 +1,36 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q317985",
+      "name": "Aquarium Berlin",
+      "lat": 52.505833,
+      "lng": 13.340556
+    },
+    {
+      "id": "Q154828",
+      "name": "Berlin Zoological Garden",
+      "lat": 52.508333,
+      "lng": 13.3375
+    },
+    {
+      "id": "Q71028343",
+      "name": "Tiergarten Teltow",
+      "lat": 52.39783,
+      "lng": 13.28671
+    },
+    {
+      "id": "Q702771",
+      "name": "Tierpark Berlin",
+      "lat": 52.500278,
+      "lng": 13.5325
+    }
+  ]
+}

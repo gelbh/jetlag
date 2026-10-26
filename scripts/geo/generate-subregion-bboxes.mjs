@@ -27,6 +27,13 @@ const SOURCES = [
   { packId: "sydney", file: "lgas.geojson", idProperty: "lgaId" },
   { packId: "zurich", file: "districts.geojson", idProperty: "districtId" },
   { packId: "lucerne", file: "districts.geojson", idProperty: "districtId" },
+  { packId: "brussels", file: "communes.geojson", idProperty: "communeId" },
+  { packId: "brisbane", file: "wards.geojson", idProperty: "wardId" },
+  { packId: "berlin", file: "bezirke.geojson", idProperty: "bezirkId" },
+  { packId: "singapore", file: "planning-areas.geojson", idProperty: "planningAreaId" },
+  { packId: "amsterdam", file: "stadsdelen.geojson", idProperty: "stadsdeelId" },
+  { packId: "utrecht", file: "wijken.geojson", idProperty: "wijkId" },
+  { packId: "wroclaw", file: "dzielnice.geojson", idProperty: "dzielnicaId" },
 ];
 
 const ROUND_DECIMALS = 4;

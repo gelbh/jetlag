@@ -1,0 +1,138 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q42418527",
+      "name": "Ancien Institut chirurgical",
+      "lat": 50.846472,
+      "lng": 4.380547
+    },
+    {
+      "id": "Q48757316",
+      "name": "Ancienne maternité de l'hôpital d'Ixelles",
+      "lat": 50.823525,
+      "lng": 4.379614
+    },
+    {
+      "id": "Q3145145",
+      "name": "Brugmann University Hospital",
+      "lat": 50.8859,
+      "lng": 4.33297
+    },
+    {
+      "id": "Q43896796",
+      "name": "Centre Hospitalier Interrégional Edith Cavell",
+      "lat": 50.81361,
+      "lng": 4.356897
+    },
+    {
+      "id": "Q2945672",
+      "name": "centre hospitalier Jean Titeca",
+      "lat": 50.854,
+      "lng": 4.3919
+    },
+    {
+      "id": "Q20669939",
+      "name": "Centre hospitalier Paul Brien",
+      "lat": 50.8713,
+      "lng": 4.38682
+    },
+    {
+      "id": "Q19950939",
+      "name": "Clinique César De Paepe",
+      "lat": 50.8435,
+      "lng": 4.34975
+    },
+    {
+      "id": "Q2186806",
+      "name": "Erasmus Hospital",
+      "lat": 50.81361,
+      "lng": 4.26611
+    },
+    {
+      "id": "Q30281577",
+      "name": "Etterbeek-Ixelles Hospital",
+      "lat": 50.82566,
+      "lng": 4.379285
+    },
+    {
+      "id": "Q28496344",
+      "name": "Former Surgical Institute of Doctor Depage and former National Institute of Blood",
+      "lat": 50.816739,
+      "lng": 4.354531
+    },
+    {
+      "id": "Q42431591",
+      "name": "French Hospital Queen Elisabeth",
+      "lat": 50.866853,
+      "lng": 4.304511
+    },
+    {
+      "id": "Q3140927",
+      "name": "Grand Hospice",
+      "lat": 50.853814,
+      "lng": 4.350147
+    },
+    {
+      "id": "Q16642766",
+      "name": "Hôpitaux Iris Sud",
+      "lat": 50.834722,
+      "lng": 4.389444
+    },
+    {
+      "id": "Q28496317",
+      "name": "Institut chirurgical Berkendael",
+      "lat": 50.816688,
+      "lng": 4.354285
+    },
+    {
+      "id": "Q42432430",
+      "name": "Institut des Deux-Alice",
+      "lat": 50.801919,
+      "lng": 4.353819
+    },
+    {
+      "id": "Q964636",
+      "name": "Institut Jules Bordet",
+      "lat": 50.833407,
+      "lng": 4.346602
+    },
+    {
+      "id": "Q2371999",
+      "name": "Military Hospital Queen Astrid",
+      "lat": 50.90694,
+      "lng": 4.39167
+    },
+    {
+      "id": "Q19951059",
+      "name": "Queen Fabiola Children's University Hospital",
+      "lat": 50.8888,
+      "lng": 4.32828
+    },
+    {
+      "id": "Q2979314",
+      "name": "Saint-Luc University Hospital",
+      "lat": 50.852056,
+      "lng": 4.452361
+    },
+    {
+      "id": "Q3145220",
+      "name": "Saint-Pierre Hospital",
+      "lat": 50.8336,
+      "lng": 4.34593
+    },
+    {
+      "id": "Q2123187",
+      "name": "Universitair Ziekenhuis Brussel",
+      "lat": 50.88726,
+      "lng": 4.30775
+    }
+  ]
+}

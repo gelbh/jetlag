@@ -1,0 +1,204 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 50.7537,
+    "west": 4.2338,
+    "north": 50.9239,
+    "east": 4.4923
+  },
+  "places": [
+    {
+      "id": "Q47144231",
+      "name": "Argos, Centrum voor Kunst en Media",
+      "lat": 50.8567,
+      "lng": 4.349685
+    },
+    {
+      "id": "Q59263874",
+      "name": "BAIU-Bruxelles",
+      "lat": 50.821296,
+      "lng": 4.350055
+    },
+    {
+      "id": "Q106556527",
+      "name": "Belfius Bank | Bibliotheek voor lokale geschiedenis",
+      "lat": 50.84222,
+      "lng": 4.365121
+    },
+    {
+      "id": "Q106556519",
+      "name": "Bibliotheek Conservatorium Brussel",
+      "lat": 50.839395,
+      "lng": 4.355752
+    },
+    {
+      "id": "Q106557475",
+      "name": "Bibliotheek van de Koninklijke Musea voor Schone Kunsten van België",
+      "lat": 50.842368,
+      "lng": 4.357957
+    },
+    {
+      "id": "Q106556593",
+      "name": "Bibliotheek van de Vereniging voor Alcohol- en andere Drugproblemen",
+      "lat": 50.86255,
+      "lng": 4.37966
+    },
+    {
+      "id": "Q106556630",
+      "name": "Bibliotheek van het departement Campus Jette van de  Erasmushogeschool Brussel",
+      "lat": 50.884304,
+      "lng": 4.306156
+    },
+    {
+      "id": "Q106556596",
+      "name": "Bibliotheek van het Vlaams Instituut voor het Onroerend Erfgoed",
+      "lat": 50.86583,
+      "lng": 4.349341
+    },
+    {
+      "id": "Q106518159",
+      "name": "Center for American Studies",
+      "lat": 50.844375,
+      "lng": 4.355922
+    },
+    {
+      "id": "Q29601294",
+      "name": "Contredanse",
+      "lat": 50.851361,
+      "lng": 4.346425
+    },
+    {
+      "id": "Q106556598",
+      "name": "Corelio Documentatie-, Informatie- en Archiefcentrum",
+      "lat": 50.872894,
+      "lng": 4.27903
+    },
+    {
+      "id": "Q106557476",
+      "name": "Cultura Fonds Bibliotheek De Eik",
+      "lat": 50.851712,
+      "lng": 4.277105
+    },
+    {
+      "id": "Q41793073",
+      "name": "Dacob Archief en Bibliotheek voor de studie van het communisme - bibliotheek",
+      "lat": 50.842217,
+      "lng": 4.342205
+    },
+    {
+      "id": "Q106556574",
+      "name": "Documentatiecentrum De Vlaamse Rand",
+      "lat": 50.856776,
+      "lng": 4.354802
+    },
+    {
+      "id": "Q190256",
+      "name": "European Commission Library",
+      "lat": 50.84117,
+      "lng": 4.378028
+    },
+    {
+      "id": "Q106556518",
+      "name": "Faculteit voor Protestantse Godgeleerdheid - Bibliotheek",
+      "lat": 50.835534,
+      "lng": 4.40447
+    },
+    {
+      "id": "Q106556520",
+      "name": "Federale Overheidsdienst Buitenlandse Zaken, Buitenlandse Handel en Ontwikkelingssamenwerking - Bibliotheek",
+      "lat": 50.84033,
+      "lng": 4.358568
+    },
+    {
+      "id": "Q106556578",
+      "name": "Federale Overheidsdienst Economie, K.M.O., Middenstand en Energie - Bibliotheek Queteletfonds",
+      "lat": 50.857419,
+      "lng": 4.359538
+    },
+    {
+      "id": "Q106556501",
+      "name": "Historische Dienst van de Politie",
+      "lat": 50.826706,
+      "lng": 4.391043
+    },
+    {
+      "id": "Q106556463",
+      "name": "Koninklijke Sterrenwacht van België - Biblioheek",
+      "lat": 50.796821,
+      "lng": 4.3569
+    },
+    {
+      "id": "Q2058942",
+      "name": "Library of the National Bank of Belgium",
+      "lat": 50.849778,
+      "lng": 4.357278
+    },
+    {
+      "id": "Q106556515",
+      "name": "Library of the Royal Belgian Institute of Natural Sciences",
+      "lat": 50.836547,
+      "lng": 4.37656
+    },
+    {
+      "id": "Q29537023",
+      "name": "Michel de Ghelderode museum",
+      "lat": 50.811948,
+      "lng": 4.382617
+    },
+    {
+      "id": "Q23779394",
+      "name": "Muntpunt",
+      "lat": 50.849375,
+      "lng": 4.35375
+    },
+    {
+      "id": "Q106556500",
+      "name": "Muziekbibliotheek Vlaams Radio Koor",
+      "lat": 50.827102,
+      "lng": 4.372799
+    },
+    {
+      "id": "Q383931",
+      "name": "Royal Library of Belgium",
+      "lat": 50.843333,
+      "lng": 4.356389
+    },
+    {
+      "id": "Q106556529",
+      "name": "Royal Museums of Art and History - Library",
+      "lat": 50.840489,
+      "lng": 4.392985
+    },
+    {
+      "id": "Q3333028",
+      "name": "Stichting Auschwitz - Auschwitz in Gedachtenis",
+      "lat": 50.838307,
+      "lng": 4.355106
+    },
+    {
+      "id": "Q115126108",
+      "name": "The KANAL Foundation’s Library",
+      "lat": 50.858528,
+      "lng": 4.348333
+    },
+    {
+      "id": "Q106557477",
+      "name": "University Library of Defence",
+      "lat": 50.845229,
+      "lng": 4.393592
+    },
+    {
+      "id": "Q106556548",
+      "name": "Vlaams Parlement - COMINFER",
+      "lat": 50.848105,
+      "lng": 4.367744
+    },
+    {
+      "id": "Q93183026",
+      "name": "War Heritage Institute",
+      "lat": 50.8411,
+      "lng": 4.39421
+    }
+  ]
+}

@@ -95,6 +95,13 @@ const PACK_DEFS = {
   lucerne: boxPack("Lucerne", "Q39", ["en", "de", "mul"]),
   "portland-maine": boxPack("PortlandMaine", "Q30"),
   "prince-rupert": boxPack("PrinceRupert", "Q16"),
+  brussels: boxPack("Brussels", "Q31", ["en", "fr", "nl", "mul"]),
+  brisbane: boxPack("Brisbane", "Q408"),
+  berlin: boxPack("Berlin", "Q183", ["en", "de", "mul"]),
+  singapore: boxPack("Singapore", "Q334", ["en", "ms", "zh", "ta", "mul"]),
+  amsterdam: boxPack("Amsterdam", "Q55", ["en", "nl", "mul"]),
+  utrecht: boxPack("Utrecht", "Q55", ["en", "nl", "mul"]),
+  wroclaw: boxPack("Wroclaw", "Q36", ["en", "pl", "mul"]),
 };
 
 export const KNOWN_PACK_IDS = Object.freeze(Object.keys(PACK_DEFS));

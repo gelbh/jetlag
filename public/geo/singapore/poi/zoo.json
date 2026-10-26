@@ -1,0 +1,72 @@
+{
+  "category": "zoo",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q113800717",
+      "name": "Bird Paradise",
+      "lat": 1.407471,
+      "lng": 103.781823
+    },
+    {
+      "id": "Q3082977",
+      "name": "Marine Life Park",
+      "lat": 1.2587,
+      "lng": 103.8186
+    },
+    {
+      "id": "Q2234723",
+      "name": "Night Safari",
+      "lat": 1.404015,
+      "lng": 103.789223
+    },
+    {
+      "id": "Q115959798",
+      "name": "Punggol Zoo",
+      "lat": 1.411917,
+      "lng": 103.911667
+    },
+    {
+      "id": "Q134437707",
+      "name": "Rainforest Wild Asia",
+      "lat": 1.409236,
+      "lng": 103.78093
+    },
+    {
+      "id": "Q7337785",
+      "name": "River Wonders",
+      "lat": 1.403873,
+      "lng": 103.790744
+    },
+    {
+      "id": "Q109283876",
+      "name": "Singapore Miniature Zoo",
+      "lat": 1.2928,
+      "lng": 103.7675
+    },
+    {
+      "id": "Q55756195",
+      "name": "Singapore Oceanarium",
+      "lat": 1.258611,
+      "lng": 103.818611
+    },
+    {
+      "id": "Q2709506",
+      "name": "Singapore Zoo",
+      "lat": 1.404709,
+      "lng": 103.79105
+    },
+    {
+      "id": "Q2125883",
+      "name": "Underwater World, Singapore",
+      "lat": 1.258567,
+      "lng": 103.811211
+    }
+  ]
+}

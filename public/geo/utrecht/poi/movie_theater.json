@@ -1,0 +1,102 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q2430141",
+      "name": "Bioscoop Catharijne",
+      "lat": 52.09073,
+      "lng": 5.11271
+    },
+    {
+      "id": "Q38240236",
+      "name": "Bioscoop Fulcotheater",
+      "lat": 52.017877,
+      "lng": 5.040285
+    },
+    {
+      "id": "Q38240197",
+      "name": "CineLounge",
+      "lat": 52.034513,
+      "lng": 5.169202
+    },
+    {
+      "id": "Q38240204",
+      "name": "Film aan de Slinger",
+      "lat": 52.032831,
+      "lng": 5.167309
+    },
+    {
+      "id": "Q14941892",
+      "name": "Filmtheater 't Hoogt",
+      "lat": 52.093068,
+      "lng": 5.119799
+    },
+    {
+      "id": "Q38239287",
+      "name": "Kinepolis Jaarbeurs",
+      "lat": 52.085764,
+      "lng": 5.104798
+    },
+    {
+      "id": "Q1984352",
+      "name": "Kinepolis Utrecht City",
+      "lat": 52.09498,
+      "lng": 5.12313
+    },
+    {
+      "id": "Q1818096",
+      "name": "Louis Hartlooper Complex",
+      "lat": 52.08167,
+      "lng": 5.12417
+    },
+    {
+      "id": "Q15732639",
+      "name": "Olympia",
+      "lat": 52.102847,
+      "lng": 5.095958
+    },
+    {
+      "id": "Q19832756",
+      "name": "Palace",
+      "lat": 52.093104,
+      "lng": 5.11307
+    },
+    {
+      "id": "Q14050983",
+      "name": "Pathé Rembrandt Utrecht",
+      "lat": 52.093941,
+      "lng": 5.11635
+    },
+    {
+      "id": "Q21000562",
+      "name": "Pathé Utrecht Leidsche Rijn",
+      "lat": 52.096587,
+      "lng": 5.070067
+    },
+    {
+      "id": "Q114702902",
+      "name": "Plaza Bioscoop",
+      "lat": 52.028,
+      "lng": 5.08296
+    },
+    {
+      "id": "Q111976151",
+      "name": "Slachtstraat Filmtheater",
+      "lat": 52.093092,
+      "lng": 5.119666
+    },
+    {
+      "id": "Q2045136",
+      "name": "Springhaver",
+      "lat": 52.088168,
+      "lng": 5.119158
+    }
+  ]
+}

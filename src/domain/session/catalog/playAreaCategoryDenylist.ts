@@ -16,6 +16,13 @@ const PACK_CATEGORY_DENYLIST: Record<RegionPackId, readonly string[]> = {
   southampton: ["high_speed_rail_line"],
   australia: ["high_speed_rail_line"],
   sydney: ["high_speed_rail_line"],
+  brussels: ["high_speed_rail_line"],
+  brisbane: ["high_speed_rail_line"],
+  berlin: ["high_speed_rail_line"],
+  singapore: ["high_speed_rail_line"],
+  utrecht: ["high_speed_rail_line"],
+  wroclaw: ["high_speed_rail_line"],
+  amsterdam: ["high_speed_rail_line"],
 };
 
 export function packCategoryDenylist(regionPackId: RegionPackId): ReadonlySet<string> {

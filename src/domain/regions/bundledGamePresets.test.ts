@@ -7,11 +7,102 @@ import {
   buildBundledGamePresets,
   mergeBundledPresets,
 } from "./bundledGamePresets";
+import { AMSTERDAM_STADSDELEN } from "./bundledPresets/amsterdam";
 import { AUSTRALIA_STATE_PRESETS } from "./bundledPresets/australia";
+import { BERLIN_BEZIRKE } from "./bundledPresets/berlin";
+import { BRISBANE_WARDS } from "./bundledPresets/brisbane";
+import { BRUSSELS_COMMUNES } from "./bundledPresets/brussels";
+import { SINGAPORE_PLANNING_AREAS } from "./bundledPresets/singapore";
 import { SOUTHAMPTON_WARDS } from "./bundledPresets/southampton";
 import { SYDNEY_LGAS } from "./bundledPresets/sydney";
+import { UTRECHT_WIJKEN } from "./bundledPresets/utrecht";
+import { WROCLAW_DZIELNICE } from "./bundledPresets/wroclaw";
 
 describe("bundledGamePresets", () => {
+  it("includes brussels metro and commune presets on the brussels pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "brussels");
+    expect(presets.some((p) => p.id === "bundled:brussels")).toBe(true);
+    for (const commune of BRUSSELS_COMMUNES) {
+      const preset = presets.find((p) => p.id === `bundled:brussels-${commune.id}`);
+      expect(preset, commune.id).toBeDefined();
+      expect(preset?.subregionId).toBe(commune.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(`commune-${commune.id}`);
+    }
+    expect(presets).toHaveLength(1 + BRUSSELS_COMMUNES.length);
+  });
+
+  it("includes brisbane metro and ward presets on the brisbane pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "brisbane");
+    expect(presets.some((p) => p.id === "bundled:brisbane")).toBe(true);
+    for (const ward of BRISBANE_WARDS) {
+      const preset = presets.find((p) => p.id === `bundled:brisbane-${ward.id}`);
+      expect(preset, ward.id).toBeDefined();
+      expect(preset?.subregionId).toBe(ward.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(`ward-${ward.id}`);
+    }
+    expect(presets).toHaveLength(1 + BRISBANE_WARDS.length);
+  });
+
+  it("includes berlin metro and bezirk presets on the berlin pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "berlin");
+    expect(presets.some((p) => p.id === "bundled:berlin")).toBe(true);
+    for (const bezirk of BERLIN_BEZIRKE) {
+      const preset = presets.find((p) => p.id === `bundled:berlin-${bezirk.id}`);
+      expect(preset, bezirk.id).toBeDefined();
+      expect(preset?.subregionId).toBe(bezirk.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(bezirk.id);
+    }
+    expect(presets).toHaveLength(1 + BERLIN_BEZIRKE.length);
+  });
+
+  it("includes singapore metro and planning-area presets on the singapore pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "singapore");
+    expect(presets.some((p) => p.id === "bundled:singapore")).toBe(true);
+    for (const planningArea of SINGAPORE_PLANNING_AREAS) {
+      const preset = presets.find((p) => p.id === `bundled:singapore-${planningArea.id}`);
+      expect(preset, planningArea.id).toBeDefined();
+      expect(preset?.subregionId).toBe(planningArea.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(planningArea.id);
+    }
+    expect(presets).toHaveLength(1 + SINGAPORE_PLANNING_AREAS.length);
+  });
+
+  it("includes amsterdam metro and stadsdeel presets on the amsterdam pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "amsterdam");
+    expect(presets.some((p) => p.id === "bundled:amsterdam")).toBe(true);
+    for (const stadsdeel of AMSTERDAM_STADSDELEN) {
+      const preset = presets.find((p) => p.id === `bundled:amsterdam-${stadsdeel.id}`);
+      expect(preset, stadsdeel.id).toBeDefined();
+      expect(preset?.subregionId).toBe(stadsdeel.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(stadsdeel.id);
+    }
+    expect(presets).toHaveLength(1 + AMSTERDAM_STADSDELEN.length);
+  });
+
+  it("includes utrecht metro and wijk presets on the utrecht pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "utrecht");
+    expect(presets.some((p) => p.id === "bundled:utrecht")).toBe(true);
+    for (const wijk of UTRECHT_WIJKEN) {
+      const preset = presets.find((p) => p.id === `bundled:utrecht-${wijk.id}`);
+      expect(preset, wijk.id).toBeDefined();
+      expect(preset?.subregionId).toBe(wijk.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(wijk.id);
+    }
+    expect(presets).toHaveLength(1 + UTRECHT_WIJKEN.length);
+  });
+
+  it("includes wroclaw metro and dzielnica presets on the wroclaw pack", () => {
+    const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "wroclaw");
+    expect(presets.some((p) => p.id === "bundled:wroclaw")).toBe(true);
+    for (const dzielnica of WROCLAW_DZIELNICE) {
+      const preset = presets.find((p) => p.id === `bundled:wroclaw-${dzielnica.id}`);
+      expect(preset, dzielnica.id).toBeDefined();
+      expect(preset?.subregionId).toBe(dzielnica.id);
+      expect(preset?.hierarchy.at(-1)?.id).toBe(dzielnica.id);
+    }
+    expect(presets).toHaveLength(1 + WROCLAW_DZIELNICE.length);
+  });
+
   it("includes southampton city and ward presets on the southampton pack", () => {
     const presets = BUNDLED_GAME_PRESET_DEFINITIONS.filter((p) => p.regionPackId === "southampton");
     expect(presets.some((p) => p.id === "bundled:southampton")).toBe(true);

@@ -18,6 +18,26 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import {
+  AMSTERDAM_STADSDEL_FLAG_OVERRIDES,
+  ensureAmsterdamStadsdeelOverridePngs,
+} from "./amsterdam-stadsdeel-flags.mjs";
+import {
+  BRISBANE_WARD_FLAG_OVERRIDES,
+  ensureBrisbaneWardOverridePngs,
+} from "./brisbane-ward-flags.mjs";
+import {
+  ensureSingaporePlanningOverridePngs,
+  SINGAPORE_PLANNING_FLAG_OVERRIDES,
+} from "./singapore-planning-flags.mjs";
+import {
+  ensureUtrechtWijkOverridePngs,
+  UTRECHT_WIJK_FLAG_OVERRIDES,
+} from "./utrecht-wijk-flags.mjs";
+import {
+  ensureWroclawDzielnicaOverridePngs,
+  WROCLAW_DZIELNICA_FLAG_OVERRIDES,
+} from "./wroclaw-dzielnica-flags.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "../..");
@@ -37,6 +57,11 @@ const FLAGCDN = {
   "country-canada": { code: "ca", alt: "Canada" },
   "country-japan": { code: "jp", alt: "Japan" },
   "country-au": { code: "au", alt: "Australia" },
+  "country-belgium": { code: "be", alt: "Belgium" },
+  "country-germany": { code: "de", alt: "Germany" },
+  "country-singapore": { code: "sg", alt: "Singapore" },
+  "country-netherlands": { code: "nl", alt: "Netherlands" },
+  "country-poland": { code: "pl", alt: "Poland" },
 };
 
 /**
@@ -62,7 +87,7 @@ const REGION_ORG = {
  * Local overrides (checked into scripts/flags/flag-overrides/).
  * presentation: "flag" keeps opaque field colours; "cutout" punches near-white to alpha.
  */
-const LOCAL_OVERRIDES = {
+const LOCAL_OVERRIDES_BASE = {
   "region-kansai": {
     file: "region-kansai.png",
     alt: "Kansai",
@@ -137,6 +162,24 @@ const LOCAL_OVERRIDES = {
   },
 };
 
+/** Hand-authored + generated metro child overrides (one sync loop). */
+const LOCAL_OVERRIDES = {
+  ...LOCAL_OVERRIDES_BASE,
+  ...BRISBANE_WARD_FLAG_OVERRIDES,
+  ...SINGAPORE_PLANNING_FLAG_OVERRIDES,
+  ...AMSTERDAM_STADSDEL_FLAG_OVERRIDES,
+  ...UTRECHT_WIJK_FLAG_OVERRIDES,
+  ...WROCLAW_DZIELNICA_FLAG_OVERRIDES,
+};
+
+const LOCAL_OVERRIDE_PNG_ENSURERS = [
+  ensureBrisbaneWardOverridePngs,
+  ensureSingaporePlanningOverridePngs,
+  ensureAmsterdamStadsdeelOverridePngs,
+  ensureUtrechtWijkOverridePngs,
+  ensureWroclawDzielnicaOverridePngs,
+];
+
 /**
  * Direct Commons files (Category:Flags of London boroughs).
  * Applied after Wikidata so real flag art wins over coat-of-arms (P94).
@@ -176,6 +219,54 @@ const COMMONS_FLAGS = {
     commonsFile: "Flag of Westminster.png",
     alt: "City Of Westminster",
   },
+  // Brussels communes lacking Wikidata P41/P94 — Commons blasons.
+  anderlecht: { commonsFile: "Blason Anderlecht.svg", alt: "Anderlecht" },
+  auderghem: { commonsFile: "Blason Auderghem.svg", alt: "Auderghem" },
+  "berchem-sainte-agathe": {
+    commonsFile: "Blason Berchem-Sainte-Agathe.svg",
+    alt: "Berchem-Sainte-Agathe",
+  },
+  evere: { commonsFile: "Blason Evere.svg", alt: "Evere" },
+  ganshoren: { commonsFile: "Blason Ganshoren.svg", alt: "Ganshoren" },
+  jette: { commonsFile: "Jette wapen.svg", alt: "Jette" },
+  koekelberg: { commonsFile: "Blason Koekelberg.svg", alt: "Koekelberg" },
+  "molenbeek-saint-jean": {
+    commonsFile: "Blason Molenbeek Saint Jean.svg",
+    alt: "Molenbeek-Saint-Jean",
+  },
+  "saint-gilles": { commonsFile: "Sint-Gillis wapen.svg", alt: "Saint-Gilles" },
+  "watermael-boitsfort": {
+    commonsFile: "Blason Watermael-Boitsfort.svg",
+    alt: "Watermael-Boitsfort",
+  },
+  "woluwe-saint-lambert": {
+    commonsFile: "Blason ville be Woluwé-Saint-Lambert Sint-Lambrechts-Woluwe.svg",
+    alt: "Woluwe-Saint-Lambert",
+  },
+  "woluwe-saint-pierre": {
+    commonsFile: "Blason Woluwe SaintPierre.jpg",
+    alt: "Woluwe-Saint-Pierre",
+  },
+  // Berlin Bezirke lacking Wikidata P41/P94 — Commons district flags.
+  spandau: { commonsFile: "Flagge Bezirk Spandau.svg", alt: "Spandau" },
+  "steglitz-zehlendorf": {
+    commonsFile: "Flagge Bezirk Steglitz-Zehlendorf.svg",
+    alt: "Steglitz-Zehlendorf",
+  },
+  "tempelhof-schoeneberg": {
+    commonsFile: "Flagge Bezirk Tempelhof-Schöneberg.svg",
+    alt: "Tempelhof-Schöneberg",
+  },
+  neukoelln: { commonsFile: "Flagge Bezirk Neukölln.svg", alt: "Neukölln" },
+  "treptow-koepenick": {
+    commonsFile: "Flagge Bezirk Treptow-Köpenick.svg",
+    alt: "Treptow-Köpenick",
+  },
+  "marzahn-hellersdorf": {
+    commonsFile: "Flagge Bezirk Marzahn-Hellersdorf.svg",
+    alt: "Marzahn-Hellersdorf",
+  },
+  lichtenberg: { commonsFile: "Flagge Bezirk Lichtenberg.svg", alt: "Lichtenberg" },
   // NYC boroughs — https://en.wikipedia.org/wiki/Flags_of_New_York_City
   // Staten Island uses a local override (not on Commons).
   bronx: {
@@ -293,6 +384,101 @@ const WIKIDATA = {
   "metro-southampton": { qid: "Q79848", alt: "Southampton" },
   "lucerne-metro": { qid: "Q4191", alt: "Lucerne" },
   "zurich-city": { qid: "Q72", alt: "Zürich" },
+  "region-brussels-capital": { qid: "Q240", alt: "Brussels-Capital Region" },
+  "metro-brussels": { qid: "Q240", alt: "Brussels" },
+  "metro-brisbane": { qid: "Q34932", alt: "Brisbane" },
+  "metro-berlin": { qid: "Q64", alt: "Berlin" },
+  // Bare communeId keys match preset subregionId (NYC borough pattern).
+  anderlecht: { qid: "Q275268", alt: "Anderlecht" },
+  auderghem: { qid: "Q237243", alt: "Auderghem" },
+  "berchem-sainte-agathe": { qid: "Q288002", alt: "Berchem-Sainte-Agathe" },
+  bruxelles: { qid: "Q239", alt: "City of Brussels" },
+  etterbeek: { qid: "Q192859", alt: "Etterbeek" },
+  evere: { qid: "Q179541", alt: "Evere" },
+  forest: { qid: "Q72946", alt: "Forest" },
+  ganshoren: { qid: "Q269711", alt: "Ganshoren" },
+  ixelles: { qid: "Q208713", alt: "Ixelles" },
+  jette: { qid: "Q241895", alt: "Jette" },
+  koekelberg: { qid: "Q180985", alt: "Koekelberg" },
+  "molenbeek-saint-jean": { qid: "Q180806", alt: "Molenbeek-Saint-Jean" },
+  "saint-gilles": { qid: "Q203322", alt: "Saint-Gilles" },
+  "saint-josse-ten-noode": { qid: "Q272243", alt: "Saint-Josse-ten-Noode" },
+  schaerbeek: { qid: "Q12892", alt: "Schaerbeek" },
+  uccle: { qid: "Q203312", alt: "Uccle" },
+  "watermael-boitsfort": { qid: "Q211242", alt: "Watermael-Boitsfort" },
+  "woluwe-saint-lambert": { qid: "Q211634", alt: "Woluwe-Saint-Lambert" },
+  "woluwe-saint-pierre": { qid: "Q216082", alt: "Woluwe-Saint-Pierre" },
+  mitte: { qid: "Q163966", alt: "Mitte" },
+  "friedrichshain-kreuzberg": { qid: "Q158893", alt: "Friedrichshain-Kreuzberg" },
+  pankow: { qid: "Q163012", alt: "Pankow" },
+  "charlottenburg-wilmersdorf": { qid: "Q162049", alt: "Charlottenburg-Wilmersdorf" },
+  spandau: { qid: "Q158873", alt: "Spandau" },
+  "steglitz-zehlendorf": { qid: "Q158903", alt: "Steglitz-Zehlendorf" },
+  "tempelhof-schoeneberg": { qid: "Q158957", alt: "Tempelhof-Schöneberg" },
+  neukoelln: { qid: "Q158076", alt: "Neukölln" },
+  "treptow-koepenick": { qid: "Q158964", alt: "Treptow-Köpenick" },
+  "marzahn-hellersdorf": { qid: "Q702029", alt: "Marzahn-Hellersdorf" },
+  lichtenberg: { qid: "Q163011", alt: "Lichtenberg" },
+  reinickendorf: { qid: "Q158876", alt: "Reinickendorf" },
+  "metro-singapore": { qid: "Q334", alt: "Singapore" },
+  "metro-amsterdam": { qid: "Q9899", alt: "Amsterdam" },
+  "metro-utrecht": { qid: "Q803", alt: "Utrecht" },
+  "metro-wroclaw": { qid: "Q1799", alt: "Wrocław" },
+  "ang-mo-kio": { qid: "Q4761845", alt: "Ang Mo Kio" },
+  bedok: { qid: "Q4879339", alt: "Bedok" },
+  bishan: { qid: "Q3249777", alt: "Bishan" },
+  "boon-lay": { qid: "Q12684211", alt: "Boon Lay" },
+  "bukit-batok": { qid: "Q1906213", alt: "Bukit Batok" },
+  "bukit-merah": { qid: "Q4986926", alt: "Bukit Merah" },
+  "bukit-panjang": { qid: "Q2224065", alt: "Bukit Panjang" },
+  "bukit-timah": { qid: "Q22970788", alt: "Bukit Timah" },
+  "central-water-catchment": { qid: "Q25171659", alt: "Central Water Catchment" },
+  changi: { qid: "Q1812824", alt: "Changi" },
+  "changi-bay": { qid: "Q5071983", alt: "Changi Bay" },
+  "choa-chu-kang": { qid: "Q1069101", alt: "Choa Chu Kang" },
+  clementi: { qid: "Q4259064", alt: "Clementi" },
+  "downtown-core": { qid: "Q3810086", alt: "Downtown Core" },
+  geylang: { qid: "Q525295", alt: "Geylang" },
+  hougang: { qid: "Q10860944", alt: "Hougang" },
+  "jurong-east": { qid: "Q1714023", alt: "Jurong East" },
+  "jurong-west": { qid: "Q6315392", alt: "Jurong West" },
+  kallang: { qid: "Q4216846", alt: "Kallang" },
+  "lim-chu-kang": { qid: "Q6548667", alt: "Lim Chu Kang" },
+  mandai: { qid: "Q6747714", alt: "Mandai" },
+  "marina-east": { qid: "Q6763814", alt: "Marina East" },
+  "marina-south": { qid: "Q16056488", alt: "Marina South" },
+  "marine-parade": { qid: "Q6764201", alt: "Marine Parade" },
+  museum: { qid: "Q16056508", alt: "Museum" },
+  newton: { qid: "Q6453025", alt: "Newton" },
+  "north-eastern-islands": { qid: "Q7053543", alt: "North-Eastern Islands" },
+  novena: { qid: "Q985660", alt: "Novena" },
+  orchard: { qid: "Q104535027", alt: "Orchard" },
+  outram: { qid: "Q15077913", alt: "Outram" },
+  "pasir-ris": { qid: "Q4259440", alt: "Pasir Ris" },
+  "paya-lebar": { qid: "Q7156634", alt: "Paya Lebar" },
+  pioneer: { qid: "Q16887503", alt: "Pioneer" },
+  punggol: { qid: "Q7260156", alt: "Punggol" },
+  queenstown: { qid: "Q9079137", alt: "Queenstown" },
+  "river-valley": { qid: "Q7337921", alt: "River Valley" },
+  rochor: { qid: "Q7354099", alt: "Rochor" },
+  seletar: { qid: "Q7447926", alt: "Seletar" },
+  sembawang: { qid: "Q7449155", alt: "Sembawang" },
+  sengkang: { qid: "Q10861365", alt: "Sengkang" },
+  serangoon: { qid: "Q10861231", alt: "Serangoon" },
+  simpang: { qid: "Q16928238", alt: "Simpang" },
+  "singapore-river": { qid: "Q1454776", alt: "Singapore River" },
+  "southern-islands": { qid: "Q7570048", alt: "Southern Islands" },
+  "straits-view": { qid: "Q24882679", alt: "Straits View" },
+  "sungei-kadut": { qid: "Q7640199", alt: "Sungei Kadut" },
+  tampines: { qid: "Q5110386", alt: "Tampines" },
+  tanglin: { qid: "Q7683056", alt: "Tanglin" },
+  tengah: { qid: "Q7699745", alt: "Tengah" },
+  "toa-payoh": { qid: "Q2734905", alt: "Toa Payoh" },
+  tuas: { qid: "Q7850658", alt: "Tuas" },
+  "western-islands": { qid: "Q7987985", alt: "Western Islands" },
+  "western-water-catchment": { qid: "Q7988434", alt: "Western Water Catchment" },
+  woodlands: { qid: "Q5254438", alt: "Woodlands" },
+  yishun: { qid: "Q8053845", alt: "Yishun" },
   // Kantō / Kansai have no P41/P94 on Wikidata — local overrides.
   // Tokyo special wards (List of municipal flags of Kantō region).
   "ward-13101": { qid: "Q214051", alt: "Chiyoda" },
@@ -476,6 +662,9 @@ async function writeAsset(assets, segmentId, { alt, source, identity, presentati
 }
 
 async function main() {
+  for (const ensure of LOCAL_OVERRIDE_PNG_ENSURERS) {
+    await ensure();
+  }
   await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
 

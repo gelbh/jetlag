@@ -1,0 +1,132 @@
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q307092",
+      "name": "Abcoudermeer",
+      "lat": 52.27861,
+      "lng": 4.96444
+    },
+    {
+      "id": "Q101626245",
+      "name": "Bozenmeertje",
+      "lat": 52.426625,
+      "lng": 5.017953
+    },
+    {
+      "id": "Q33329573",
+      "name": "Buiten-IJ",
+      "lat": 52.37067,
+      "lng": 4.98462
+    },
+    {
+      "id": "Q138847713",
+      "name": "Diemerlagune",
+      "lat": 52.36355,
+      "lng": 4.96844
+    },
+    {
+      "id": "Q1487911",
+      "name": "Gaasperplas",
+      "lat": 52.306389,
+      "lng": 4.991111
+    },
+    {
+      "id": "Q126947352",
+      "name": "Gouw",
+      "lat": 52.320684,
+      "lng": 5.048046
+    },
+    {
+      "id": "Q18042494",
+      "name": "Grote Poel",
+      "lat": 52.298333,
+      "lng": 4.839722
+    },
+    {
+      "id": "Q1653947",
+      "name": "IJmeer",
+      "lat": 52.362778,
+      "lng": 5.051944
+    },
+    {
+      "id": "Q66686310",
+      "name": "Kadoelerbreek",
+      "lat": 52.409444,
+      "lng": 4.910278
+    },
+    {
+      "id": "Q2785842",
+      "name": "Kinselmeer",
+      "lat": 52.391667,
+      "lng": 5.018056
+    },
+    {
+      "id": "Q141270142",
+      "name": "Kleine Poel",
+      "lat": 52.292778,
+      "lng": 4.828333
+    },
+    {
+      "id": "Q18433841",
+      "name": "Kwakerspoel",
+      "lat": 52.3688,
+      "lng": 4.87037
+    },
+    {
+      "id": "Q2792235",
+      "name": "Lutkemeer",
+      "lat": 52.358725,
+      "lng": 4.761714
+    },
+    {
+      "id": "Q3354654",
+      "name": "Nieuwe Diep",
+      "lat": 52.361944,
+      "lng": 4.953333
+    },
+    {
+      "id": "Q2832221",
+      "name": "Nieuwe Meer",
+      "lat": 52.331944,
+      "lng": 4.829444
+    },
+    {
+      "id": "Q33219885",
+      "name": "Noorder IJplas",
+      "lat": 52.423022,
+      "lng": 4.864936
+    },
+    {
+      "id": "Q21287555",
+      "name": "Oosteinderpoel",
+      "lat": 52.287961,
+      "lng": 4.792206
+    },
+    {
+      "id": "Q2041641",
+      "name": "Ouderkerkerplas",
+      "lat": 52.290833,
+      "lng": 4.931667
+    },
+    {
+      "id": "Q2677308",
+      "name": "Sloterplas",
+      "lat": 52.364722,
+      "lng": 4.816944
+    },
+    {
+      "id": "Q2003756",
+      "name": "Spiegel- en Blijkpolderplas",
+      "lat": 52.26833,
+      "lng": 5.06667
+    }
+  ]
+}

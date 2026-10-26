@@ -1,0 +1,108 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q2487297",
+      "name": "Academic Medical Center Amsterdam",
+      "lat": 52.293333,
+      "lng": 4.957778
+    },
+    {
+      "id": "Q52159910",
+      "name": "Andreas-ziekenhuis",
+      "lat": 52.356833,
+      "lng": 4.845222
+    },
+    {
+      "id": "Q2536586",
+      "name": "Antoni van Leeuwenhoekziekenhuis",
+      "lat": 52.350028,
+      "lng": 4.825722
+    },
+    {
+      "id": "Q2638520",
+      "name": "Binnengasthuis",
+      "lat": 52.36861,
+      "lng": 4.89472
+    },
+    {
+      "id": "Q2043120",
+      "name": "BovenIJ Ziekenhuis",
+      "lat": 52.40486,
+      "lng": 4.92152
+    },
+    {
+      "id": "Q5815672",
+      "name": "Emma Children’s Hospital",
+      "lat": 52.29333,
+      "lng": 4.95778
+    },
+    {
+      "id": "Q97600131",
+      "name": "OLVG IJburg",
+      "lat": 52.357639,
+      "lng": 4.991333
+    },
+    {
+      "id": "Q3269552",
+      "name": "OLVG West",
+      "lat": 52.371389,
+      "lng": 4.839167
+    },
+    {
+      "id": "Q2491047",
+      "name": "Onze Lieve Vrouwe Gasthuis",
+      "lat": 52.358333,
+      "lng": 4.915278
+    },
+    {
+      "id": "Q97600130",
+      "name": "Onze Lieve Vrouwe Gasthuis Spuistraat",
+      "lat": 52.371056,
+      "lng": 4.889444
+    },
+    {
+      "id": "Q61875737",
+      "name": "Sinai Centrum",
+      "lat": 52.292972,
+      "lng": 4.875861
+    },
+    {
+      "id": "Q3100901",
+      "name": "Slotervaartziekenhuis",
+      "lat": 52.348056,
+      "lng": 4.825556
+    },
+    {
+      "id": "Q17307940",
+      "name": "Vijzelgracht 2A",
+      "lat": 52.36169,
+      "lng": 4.89118
+    },
+    {
+      "id": "Q1888218",
+      "name": "VU University Medical Center",
+      "lat": 52.335,
+      "lng": 4.859444
+    },
+    {
+      "id": "Q17291768",
+      "name": "Wilhelminagasthuis",
+      "lat": 52.36265,
+      "lng": 4.87058
+    },
+    {
+      "id": "Q30270640",
+      "name": "Ziekenhuis Amstelland",
+      "lat": 52.29392,
+      "lng": 4.874091
+    }
+  ]
+}

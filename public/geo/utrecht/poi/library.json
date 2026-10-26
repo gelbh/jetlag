@@ -1,0 +1,114 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q61500938",
+      "name": "De Meern public library",
+      "lat": 52.080108,
+      "lng": 5.038841
+    },
+    {
+      "id": "Q61500952",
+      "name": "Hoograven public library",
+      "lat": 52.07277,
+      "lng": 5.123471
+    },
+    {
+      "id": "Q61500957",
+      "name": "Kanaleneiland public library",
+      "lat": 52.073102,
+      "lng": 5.095256
+    },
+    {
+      "id": "Q61500960",
+      "name": "Lunetten public library",
+      "lat": 52.064088,
+      "lng": 5.136226
+    },
+    {
+      "id": "Q61500919",
+      "name": "Neude public library",
+      "lat": 52.091511,
+      "lng": 5.119116
+    },
+    {
+      "id": "Q61764054",
+      "name": "Nieuwegein public library",
+      "lat": 52.0279,
+      "lng": 5.084878
+    },
+    {
+      "id": "Q61500921",
+      "name": "Oog in Al public library",
+      "lat": 52.088805,
+      "lng": 5.089665
+    },
+    {
+      "id": "Q61500925",
+      "name": "Overvecht public library",
+      "lat": 52.114891,
+      "lng": 5.111179
+    },
+    {
+      "id": "Q61500926",
+      "name": "Parkwijk public library",
+      "lat": 52.091622,
+      "lng": 5.064352
+    },
+    {
+      "id": "Q61500928",
+      "name": "Tuinwijk public library",
+      "lat": 52.103355,
+      "lng": 5.124173
+    },
+    {
+      "id": "Q61487192",
+      "name": "Utrecht Public Library Administration Office",
+      "lat": 52.091656,
+      "lng": 5.119628
+    },
+    {
+      "id": "Q2496353",
+      "name": "Utrecht University Library",
+      "lat": 52.0842,
+      "lng": 5.17264
+    },
+    {
+      "id": "Q61500930",
+      "name": "Vleuten public library",
+      "lat": 52.106358,
+      "lng": 5.011632
+    },
+    {
+      "id": "Q61500932",
+      "name": "Vleuterweide  public library and drop point",
+      "lat": 52.094062,
+      "lng": 5.011691
+    },
+    {
+      "id": "Q130464862",
+      "name": "Vrouwenbibliotheek Utrecht",
+      "lat": 52.078918,
+      "lng": 5.12774
+    },
+    {
+      "id": "Q61500954",
+      "name": "Waterwin public youth library",
+      "lat": 52.10483,
+      "lng": 5.0434
+    },
+    {
+      "id": "Q61500936",
+      "name": "Zuilen public library",
+      "lat": 52.113398,
+      "lng": 5.087426
+    }
+  ]
+}

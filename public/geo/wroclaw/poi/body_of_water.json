@@ -1,0 +1,36 @@
+{
+  "category": "body_of_water",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.0327,
+    "west": 16.7973,
+    "north": 51.2201,
+    "east": 17.1862
+  },
+  "places": [
+    {
+      "id": "Q11751928",
+      "name": "Glinianki Spa Centre",
+      "lat": 51.14,
+      "lng": 16.9342
+    },
+    {
+      "id": "Q11726510",
+      "name": "Jezioro Leśne (Wrocław)",
+      "lat": 51.0956,
+      "lng": 17.1497
+    },
+    {
+      "id": "Q131033565",
+      "name": "kąpielisko, d. staw gondolowy",
+      "lat": 51.080595,
+      "lng": 16.961234
+    },
+    {
+      "id": "Q9164344",
+      "name": "Zalew Bajkał",
+      "lat": 51.0583,
+      "lng": 17.165
+    }
+  ]
+}

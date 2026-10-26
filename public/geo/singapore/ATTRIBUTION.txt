@@ -1,0 +1,19 @@
+Singapore metro pack geo
+
+Boundaries
+- Planning area polygons: Urban Redevelopment Authority Master Plan 2014 (via Esri FeatureServer Planning_Area / data.gov.sg dataset Master Plan 2014 Planning Area Boundary).
+
+POI
+- Wikidata Query Service (CC0).
+
+Sea level seed
+- Open-Meteo elevation API.
+
+Coastline
+- Island nation stub source (empty segments; coastline via Overpass in gameplay).
+
+International border
+- City-state stub (empty segments).
+
+GTFS
+- Skipped in v1 (LTA static GTFS not bundled; rail stations use Overpass).

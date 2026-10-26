@@ -1,0 +1,18 @@
+{
+  "category": "aquarium",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q317985",
+      "name": "Aquarium Berlin",
+      "lat": 52.505833,
+      "lng": 13.340556
+    }
+  ]
+}

@@ -1,0 +1,270 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.0327,
+    "west": 16.7973,
+    "north": 51.2201,
+    "east": 17.1862
+  },
+  "places": [
+    {
+      "id": "Q11695365",
+      "name": "Brandenburg Station in Wrocław",
+      "lat": 51.1092,
+      "lng": 17.0178
+    },
+    {
+      "id": "Q9180910",
+      "name": "Brzezinka Średzka",
+      "lat": 51.22,
+      "lng": 16.834444
+    },
+    {
+      "id": "Q9208386",
+      "name": "Dobrzykowice Wrocławskie",
+      "lat": 51.0878,
+      "lng": 17.18
+    },
+    {
+      "id": "Q30075427",
+      "name": "Dworzec",
+      "lat": 51.126098,
+      "lng": 16.915654
+    },
+    {
+      "id": "Q20032382",
+      "name": "Dworzec Miejski Prawego Brzegu Odry we Wrocławiu",
+      "lat": 51.110006,
+      "lng": 17.016389
+    },
+    {
+      "id": "Q11833748",
+      "name": "Ramiszów",
+      "lat": 51.193889,
+      "lng": 17.099167
+    },
+    {
+      "id": "Q1943212",
+      "name": "Sadowice Wrocławskie railway station",
+      "lat": 51.0562,
+      "lng": 16.8251
+    },
+    {
+      "id": "Q1996656",
+      "name": "Siechnice train station",
+      "lat": 51.038333,
+      "lng": 17.145556
+    },
+    {
+      "id": "Q2158681",
+      "name": "Smolec train stop",
+      "lat": 51.0715,
+      "lng": 16.8817
+    },
+    {
+      "id": "Q3053696",
+      "name": "Szewce",
+      "lat": 51.215167,
+      "lng": 16.954639
+    },
+    {
+      "id": "Q30075428",
+      "name": "Wiata peronowa",
+      "lat": 51.126167,
+      "lng": 16.915648
+    },
+    {
+      "id": "Q15887139",
+      "name": "Widawa",
+      "lat": 51.1786,
+      "lng": 17.0233
+    },
+    {
+      "id": "Q2248223",
+      "name": "Wrocław Brochów",
+      "lat": 51.063889,
+      "lng": 17.085
+    },
+    {
+      "id": "Q21680490",
+      "name": "Wrocław Brochów Towarowy",
+      "lat": 51.056389,
+      "lng": 17.094722
+    },
+    {
+      "id": "Q9378098",
+      "name": "Wrocław Gądów",
+      "lat": 51.115833,
+      "lng": 16.977794
+    },
+    {
+      "id": "Q16616465",
+      "name": "Wrocław Karłowice",
+      "lat": 51.1353,
+      "lng": 17.0364
+    },
+    {
+      "id": "Q2429165",
+      "name": "Wrocław Klecina train station",
+      "lat": 51.0568,
+      "lng": 16.9868
+    },
+    {
+      "id": "Q1881535",
+      "name": "Wrocław Kowale",
+      "lat": 51.135,
+      "lng": 17.1003
+    },
+    {
+      "id": "Q2879097",
+      "name": "Wrocław Kuźniki",
+      "lat": 51.127222,
+      "lng": 16.953611
+    },
+    {
+      "id": "Q3026509",
+      "name": "Wrocław Leśnica",
+      "lat": 51.143056,
+      "lng": 16.865833
+    },
+    {
+      "id": "Q428443",
+      "name": "Wrocław Main Railway Station",
+      "lat": 51.0988,
+      "lng": 17.0365
+    },
+    {
+      "id": "Q3492677",
+      "name": "Wrocław Mikołajów",
+      "lat": 51.115278,
+      "lng": 16.998056
+    },
+    {
+      "id": "Q9378099",
+      "name": "Wrocław Muchobór",
+      "lat": 51.110556,
+      "lng": 16.975
+    },
+    {
+      "id": "Q11837968",
+      "name": "Wrocław Nadodrze",
+      "lat": 51.125556,
+      "lng": 17.0325
+    },
+    {
+      "id": "Q2488828",
+      "name": "Wrocław Osobowice",
+      "lat": 51.166347,
+      "lng": 16.997497
+    },
+    {
+      "id": "Q1921474",
+      "name": "Wrocław Partynice",
+      "lat": 51.0641,
+      "lng": 17.0107
+    },
+    {
+      "id": "Q2257160",
+      "name": "Wrocław Pawłowice",
+      "lat": 51.168547,
+      "lng": 17.108689
+    },
+    {
+      "id": "Q772582",
+      "name": "Wrocław Popowice",
+      "lat": 51.12715,
+      "lng": 17.001378
+    },
+    {
+      "id": "Q16616468",
+      "name": "Wrocław Poświętne",
+      "lat": 51.1553,
+      "lng": 17.0278
+    },
+    {
+      "id": "Q1897009",
+      "name": "Wrocław Pracze",
+      "lat": 51.169228,
+      "lng": 16.903661
+    },
+    {
+      "id": "Q9378102",
+      "name": "Wrocław Psie Pole",
+      "lat": 51.1504,
+      "lng": 17.1192
+    },
+    {
+      "id": "Q16616474",
+      "name": "Wrocław Różanka Wąskotorowy",
+      "lat": 51.1442,
+      "lng": 17.0306
+    },
+    {
+      "id": "Q2529968",
+      "name": "Wrocław Sołtysowice",
+      "lat": 51.1419,
+      "lng": 17.0822
+    },
+    {
+      "id": "Q9378103",
+      "name": "Wrocław Stadion train station",
+      "lat": 51.137028,
+      "lng": 16.940611
+    },
+    {
+      "id": "Q2616401",
+      "name": "Wrocław Świniary",
+      "lat": 51.197931,
+      "lng": 16.969892
+    },
+    {
+      "id": "Q646479",
+      "name": "Wrocław Swojczyce",
+      "lat": 51.1157,
+      "lng": 17.122
+    },
+    {
+      "id": "Q16616477",
+      "name": "Wrocław Towarowy",
+      "lat": 51.1331,
+      "lng": 17.0289
+    },
+    {
+      "id": "Q9378105",
+      "name": "Wrocław Wąskotorowy",
+      "lat": 51.12289,
+      "lng": 17.029756
+    },
+    {
+      "id": "Q2417614",
+      "name": "Wrocław Wojnów train station",
+      "lat": 51.1034,
+      "lng": 17.1577
+    },
+    {
+      "id": "Q5266740",
+      "name": "Wrocław Wojszyce",
+      "lat": 51.0695,
+      "lng": 17.0366
+    },
+    {
+      "id": "Q2898419",
+      "name": "Wrocław Zachodni train station",
+      "lat": 51.0904,
+      "lng": 16.9505
+    },
+    {
+      "id": "Q2190302",
+      "name": "Wrocław Zakrzów",
+      "lat": 51.1592,
+      "lng": 17.1219
+    },
+    {
+      "id": "Q2471657",
+      "name": "Wrocław Żerniki",
+      "lat": 51.126183,
+      "lng": 16.915625
+    }
+  ]
+}

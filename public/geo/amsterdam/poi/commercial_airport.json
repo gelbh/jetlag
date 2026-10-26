@@ -1,0 +1,18 @@
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q9694",
+      "name": "Amsterdam Schiphol Airport",
+      "lat": 52.3081,
+      "lng": 4.764169
+    }
+  ]
+}

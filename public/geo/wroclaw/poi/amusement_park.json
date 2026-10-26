@@ -1,0 +1,24 @@
+{
+  "category": "amusement_park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.0327,
+    "west": 16.7973,
+    "north": 51.2201,
+    "east": 17.1862
+  },
+  "places": [
+    {
+      "id": "Q18420920",
+      "name": "Africarium",
+      "lat": 51.104679,
+      "lng": 17.074388
+    },
+    {
+      "id": "Q16484874",
+      "name": "Aquapark Wrocław",
+      "lat": 51.090833,
+      "lng": 17.0325
+    }
+  ]
+}

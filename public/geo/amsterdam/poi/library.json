@@ -1,0 +1,276 @@
+{
+  "category": "library",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q130736773",
+      "name": "Allard Pierson",
+      "lat": 52.368826,
+      "lng": 4.893062
+    },
+    {
+      "id": "Q61915720",
+      "name": "Amstelveen Stadsplein public library",
+      "lat": 52.303145,
+      "lng": 4.858232
+    },
+    {
+      "id": "Q61915722",
+      "name": "Amstelveen Westwijk public library",
+      "lat": 52.281472,
+      "lng": 4.826084
+    },
+    {
+      "id": "Q60290428",
+      "name": "Amsterdam Public Library, OBA Banne",
+      "lat": 52.408096,
+      "lng": 4.916894
+    },
+    {
+      "id": "Q60290413",
+      "name": "Amsterdam Public Library, OBA Bijlmerplein",
+      "lat": 52.315493,
+      "lng": 4.953512
+    },
+    {
+      "id": "Q60290415",
+      "name": "Amsterdam Public Library, OBA Bos en Lommer",
+      "lat": 52.37874,
+      "lng": 4.851215
+    },
+    {
+      "id": "Q60290387",
+      "name": "Amsterdam Public Library, OBA Buitenveldert",
+      "lat": 52.332607,
+      "lng": 4.875945
+    },
+    {
+      "id": "Q60290434",
+      "name": "Amsterdam Public Library, OBA CC Amstel",
+      "lat": 52.353333,
+      "lng": 4.906222
+    },
+    {
+      "id": "Q60290390",
+      "name": "Amsterdam Public Library, OBA De Hallen",
+      "lat": 52.366904,
+      "lng": 4.868892
+    },
+    {
+      "id": "Q60290411",
+      "name": "Amsterdam Public Library, OBA Diemen",
+      "lat": 52.341498,
+      "lng": 4.961281
+    },
+    {
+      "id": "Q60290412",
+      "name": "Amsterdam Public Library, OBA Duivendrecht",
+      "lat": 52.332472,
+      "lng": 4.938538
+    },
+    {
+      "id": "Q60290388",
+      "name": "Amsterdam Public Library, OBA Geuzenveld",
+      "lat": 52.378028,
+      "lng": 4.802581
+    },
+    {
+      "id": "Q60290430",
+      "name": "Amsterdam Public Library, OBA IJburg",
+      "lat": 52.356655,
+      "lng": 4.996847
+    },
+    {
+      "id": "Q60290416",
+      "name": "Amsterdam Public Library, OBA Javaplein",
+      "lat": 52.364146,
+      "lng": 4.93888
+    },
+    {
+      "id": "Q60290392",
+      "name": "Amsterdam Public Library, OBA Linnaeus",
+      "lat": 52.358075,
+      "lng": 4.92625
+    },
+    {
+      "id": "Q60290398",
+      "name": "Amsterdam Public Library, OBA Mercatorplein",
+      "lat": 52.369389,
+      "lng": 4.850232
+    },
+    {
+      "id": "Q60290407",
+      "name": "Amsterdam Public Library, OBA Molenwijk",
+      "lat": 52.417805,
+      "lng": 4.892972
+    },
+    {
+      "id": "Q60290418",
+      "name": "Amsterdam Public Library, OBA Olympisch Kwartier",
+      "lat": 52.345312,
+      "lng": 4.85578
+    },
+    {
+      "id": "Q60290393",
+      "name": "Amsterdam Public Library, OBA Osdorp",
+      "lat": 52.358922,
+      "lng": 4.80687
+    },
+    {
+      "id": "Q60290432",
+      "name": "Amsterdam Public Library, OBA Ouderkerk",
+      "lat": 52.295327,
+      "lng": 4.907575
+    },
+    {
+      "id": "Q60290425",
+      "name": "Amsterdam Public Library, OBA Reigersbos",
+      "lat": 52.296222,
+      "lng": 4.976162
+    },
+    {
+      "id": "Q60290426",
+      "name": "Amsterdam Public Library, OBA Roelof Hartplein",
+      "lat": 52.352587,
+      "lng": 4.882572
+    },
+    {
+      "id": "Q60290394",
+      "name": "Amsterdam Public Library, OBA Slotermeer",
+      "lat": 52.37933,
+      "lng": 4.820175
+    },
+    {
+      "id": "Q60290395",
+      "name": "Amsterdam Public Library, OBA Slotervaart",
+      "lat": 52.355994,
+      "lng": 4.825621
+    },
+    {
+      "id": "Q60290410",
+      "name": "Amsterdam Public Library, OBA Spaarndammerbuurt",
+      "lat": 52.388909,
+      "lng": 4.88
+    },
+    {
+      "id": "Q60290431",
+      "name": "Amsterdam Public Library, OBA Staatsliedenbuurt",
+      "lat": 52.379621,
+      "lng": 4.872005
+    },
+    {
+      "id": "Q60290396",
+      "name": "Amsterdam Public Library, OBA Van der Pek",
+      "lat": 52.390937,
+      "lng": 4.911796
+    },
+    {
+      "id": "Q60290408",
+      "name": "Amsterdam Public Library, OBA Waterlandplein",
+      "lat": 52.393105,
+      "lng": 4.954923
+    },
+    {
+      "id": "Q2017571",
+      "name": "Amsterdam University Library",
+      "lat": 52.3675,
+      "lng": 4.889722
+    },
+    {
+      "id": "Q17298534",
+      "name": "Artis Library",
+      "lat": 52.365472,
+      "lng": 4.915056
+    },
+    {
+      "id": "Q315883",
+      "name": "Bibliotheca Philosophica Hermetica",
+      "lat": 52.373577,
+      "lng": 4.878833
+    },
+    {
+      "id": "Q856435",
+      "name": "Bibliotheca Rosenthaliana",
+      "lat": 52.368333,
+      "lng": 4.890278
+    },
+    {
+      "id": "Q124439346",
+      "name": "Bibliotheek Weesp",
+      "lat": 52.306167,
+      "lng": 5.043194
+    },
+    {
+      "id": "Q17296485",
+      "name": "Brink 43-45, Amsterdam",
+      "lat": 52.339972,
+      "lng": 4.943278
+    },
+    {
+      "id": "Q63385162",
+      "name": "C. Bibliotheek Badhoevedorp",
+      "lat": 52.337285,
+      "lng": 4.779821
+    },
+    {
+      "id": "Q63385163",
+      "name": "C. Bibliotheek Zwanenburg",
+      "lat": 52.376715,
+      "lng": 4.748797
+    },
+    {
+      "id": "Q856452",
+      "name": "Ets Haim library",
+      "lat": 52.3675,
+      "lng": 4.905278
+    },
+    {
+      "id": "Q1538389",
+      "name": "Eye Filmmuseum",
+      "lat": 52.384411,
+      "lng": 4.900594
+    },
+    {
+      "id": "Q124438026",
+      "name": "FlexBieb",
+      "lat": 52.357028,
+      "lng": 4.99425
+    },
+    {
+      "id": "Q29108154",
+      "name": "Leesmuseum voor Vrouwen",
+      "lat": 52.365892,
+      "lng": 4.889228
+    },
+    {
+      "id": "Q131302166",
+      "name": "OBA Postjesweg",
+      "lat": 52.364333,
+      "lng": 4.835111
+    },
+    {
+      "id": "Q50413436",
+      "name": "Oosterdokskade 143",
+      "lat": 52.37616,
+      "lng": 4.9082
+    },
+    {
+      "id": "Q2310268",
+      "name": "Rijksmuseum Research Library",
+      "lat": 52.359998,
+      "lng": 4.885219
+    },
+    {
+      "id": "Q63385167",
+      "name": "The Base Schiphol public library",
+      "lat": 52.305496,
+      "lng": 4.752527
+    }
+  ]
+}

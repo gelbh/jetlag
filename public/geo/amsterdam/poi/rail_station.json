@@ -1,0 +1,504 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.268,
+    "west": 4.7188,
+    "north": 52.4411,
+    "east": 5.1177
+  },
+  "places": [
+    {
+      "id": "Q1893105",
+      "name": "Abcoude railway station",
+      "lat": 52.278611,
+      "lng": 4.976944
+    },
+    {
+      "id": "Q1846380",
+      "name": "Amstelveenseweg",
+      "lat": 52.338333,
+      "lng": 4.8575
+    },
+    {
+      "id": "Q2657132",
+      "name": "Amsterdam Aletta Jacobslaan railway station",
+      "lat": 52.346928,
+      "lng": 4.834414
+    },
+    {
+      "id": "Q50720",
+      "name": "Amsterdam Amstel",
+      "lat": 52.346389,
+      "lng": 4.917778
+    },
+    {
+      "id": "Q50723",
+      "name": "Amsterdam Bijlmer ArenA",
+      "lat": 52.313056,
+      "lng": 4.946111
+    },
+    {
+      "id": "Q50719",
+      "name": "Amsterdam Central station",
+      "lat": 52.37895,
+      "lng": 4.90016
+    },
+    {
+      "id": "Q122947242",
+      "name": "Amsterdam Doklaan",
+      "lat": 52.36712,
+      "lng": 4.91663
+    },
+    {
+      "id": "Q800381",
+      "name": "Amsterdam Holendrecht",
+      "lat": 52.298333,
+      "lng": 4.96
+    },
+    {
+      "id": "Q50722",
+      "name": "Amsterdam Lelylaan",
+      "lat": 52.357222,
+      "lng": 4.833889
+    },
+    {
+      "id": "Q50724",
+      "name": "Amsterdam Muiderpoort railway station",
+      "lat": 52.360833,
+      "lng": 4.931111
+    },
+    {
+      "id": "Q2102286",
+      "name": "Amsterdam Science Park railway station",
+      "lat": 52.353056,
+      "lng": 4.949444
+    },
+    {
+      "id": "Q50721",
+      "name": "Amsterdam Sloterdijk",
+      "lat": 52.389167,
+      "lng": 4.838056
+    },
+    {
+      "id": "Q2159291",
+      "name": "Amsterdam Westhaven",
+      "lat": 52.40504,
+      "lng": 4.83862
+    },
+    {
+      "id": "Q49872",
+      "name": "Amsterdam Zuid",
+      "lat": 52.338889,
+      "lng": 4.873056
+    },
+    {
+      "id": "Q1986388",
+      "name": "Bullewijk",
+      "lat": 52.306667,
+      "lng": 4.952222
+    },
+    {
+      "id": "Q2501300",
+      "name": "De Pijp",
+      "lat": 52.353611,
+      "lng": 4.890556
+    },
+    {
+      "id": "Q2061210",
+      "name": "De Vlugtlaan",
+      "lat": 52.379444,
+      "lng": 4.838056
+    },
+    {
+      "id": "Q2692686",
+      "name": "Diemen railway station",
+      "lat": 52.345278,
+      "lng": 4.966944
+    },
+    {
+      "id": "Q800664",
+      "name": "Diemen Zuid railway station",
+      "lat": 52.330272,
+      "lng": 4.955717
+    },
+    {
+      "id": "Q49870",
+      "name": "Duivendrecht railway station",
+      "lat": 52.323333,
+      "lng": 4.936389
+    },
+    {
+      "id": "Q2875188",
+      "name": "Europaplein",
+      "lat": 52.34159,
+      "lng": 4.89151
+    },
+    {
+      "id": "Q2187835",
+      "name": "Gaasperplas metro station",
+      "lat": 52.311111,
+      "lng": 4.984444
+    },
+    {
+      "id": "Q2534934",
+      "name": "Ganzenhoef metro station",
+      "lat": 52.323611,
+      "lng": 4.973056
+    },
+    {
+      "id": "Q2331863",
+      "name": "Gein",
+      "lat": 52.296111,
+      "lng": 4.988889
+    },
+    {
+      "id": "Q2272349",
+      "name": "Halfweg-Zwanenburg railway station",
+      "lat": 52.385833,
+      "lng": 4.747222
+    },
+    {
+      "id": "Q2658464",
+      "name": "Halte Amsterdam ArenA",
+      "lat": 52.316111,
+      "lng": 4.942778
+    },
+    {
+      "id": "Q1974354",
+      "name": "Halte Kalfjeslaan",
+      "lat": 52.32162,
+      "lng": 4.85643
+    },
+    {
+      "id": "Q2287739",
+      "name": "Heemstedestraat",
+      "lat": 52.352778,
+      "lng": 4.834167
+    },
+    {
+      "id": "Q2751200",
+      "name": "Henk Sneevlietweg",
+      "lat": 52.346389,
+      "lng": 4.834444
+    },
+    {
+      "id": "Q2146949",
+      "name": "Isolatorweg",
+      "lat": 52.395278,
+      "lng": 4.850556
+    },
+    {
+      "id": "Q3273303",
+      "name": "Jan van Galenstraat",
+      "lat": 52.3725,
+      "lng": 4.835278
+    },
+    {
+      "id": "Q2200582",
+      "name": "Karselaan railway halt",
+      "lat": 52.31155,
+      "lng": 4.85065
+    },
+    {
+      "id": "Q3241211",
+      "name": "Kraaiennest metro station",
+      "lat": 52.316389,
+      "lng": 4.979444
+    },
+    {
+      "id": "Q2109813",
+      "name": "Kronenburg",
+      "lat": 52.316389,
+      "lng": 4.870278
+    },
+    {
+      "id": "Q9719923",
+      "name": "Metrostation Centraal Station",
+      "lat": 52.378333,
+      "lng": 4.9
+    },
+    {
+      "id": "Q1865371",
+      "name": "Metrostation Rokin",
+      "lat": 52.371111,
+      "lng": 4.892778
+    },
+    {
+      "id": "Q1913095",
+      "name": "Nieuwmarkt",
+      "lat": 52.371944,
+      "lng": 4.901111
+    },
+    {
+      "id": "Q3007607",
+      "name": "Noord metro station",
+      "lat": 52.401667,
+      "lng": 4.932222
+    },
+    {
+      "id": "Q2673118",
+      "name": "Noorderpark",
+      "lat": 52.389167,
+      "lng": 4.919167
+    },
+    {
+      "id": "Q13922931",
+      "name": "Onderuit",
+      "lat": 52.30778,
+      "lng": 4.8725
+    },
+    {
+      "id": "Q3371836",
+      "name": "Overamstel",
+      "lat": 52.331667,
+      "lng": 4.9175
+    },
+    {
+      "id": "Q5225775",
+      "name": "Post CS-gebouw",
+      "lat": 52.376056,
+      "lng": 4.909722
+    },
+    {
+      "id": "Q2436525",
+      "name": "Postjesweg",
+      "lat": 52.364722,
+      "lng": 4.833889
+    },
+    {
+      "id": "Q136764308",
+      "name": "RAI",
+      "lat": 52.337712,
+      "lng": 4.889326
+    },
+    {
+      "id": "Q1941199",
+      "name": "Reigersbos",
+      "lat": 52.295556,
+      "lng": 4.974167
+    },
+    {
+      "id": "Q801410",
+      "name": "Schiphol Airport railway station",
+      "lat": 52.308889,
+      "lng": 4.761667
+    },
+    {
+      "id": "Q14358713",
+      "name": "Sixhaven station",
+      "lat": 52.382233,
+      "lng": 4.906131
+    },
+    {
+      "id": "Q132685881",
+      "name": "Sloterdijk metrostation",
+      "lat": 52.389034,
+      "lng": 4.838871
+    },
+    {
+      "id": "Q3364889",
+      "name": "Spaklerweg",
+      "lat": 52.34,
+      "lng": 4.920833
+    },
+    {
+      "id": "Q2626762",
+      "name": "Station Amsterdam Koenenkade",
+      "lat": 52.33104,
+      "lng": 4.85596
+    },
+    {
+      "id": "Q2665373",
+      "name": "Station Amsterdam Museumplein",
+      "lat": 52.3577,
+      "lng": 4.88857
+    },
+    {
+      "id": "Q4950373",
+      "name": "Station Amsterdamseweg",
+      "lat": 52.3155,
+      "lng": 4.85532
+    },
+    {
+      "id": "Q133889516",
+      "name": "Station Diemen Zuid",
+      "lat": 52.330197,
+      "lng": 4.956328
+    },
+    {
+      "id": "Q14386649",
+      "name": "Station Legmeerpolder",
+      "lat": 52.27155,
+      "lng": 4.82868
+    },
+    {
+      "id": "Q512214",
+      "name": "Station RAI",
+      "lat": 52.336667,
+      "lng": 4.890556
+    },
+    {
+      "id": "Q105083608",
+      "name": "Station Zuid",
+      "lat": 52.339179,
+      "lng": 4.874075
+    },
+    {
+      "id": "Q2684923",
+      "name": "Stopplaats Kerkweg",
+      "lat": 52.28265,
+      "lng": 4.80384
+    },
+    {
+      "id": "Q2043827",
+      "name": "Stopplaats Lijnbaan",
+      "lat": 52.27078,
+      "lng": 4.75908
+    },
+    {
+      "id": "Q1994617",
+      "name": "Stopplaats Schinkeldijk",
+      "lat": 52.29112,
+      "lng": 4.82676
+    },
+    {
+      "id": "Q2181403",
+      "name": "Strandvliet metro station",
+      "lat": 52.318611,
+      "lng": 4.941389
+    },
+    {
+      "id": "Q2313853",
+      "name": "Tram stop A.J. Ernststraat",
+      "lat": 52.33298,
+      "lng": 4.868873
+    },
+    {
+      "id": "Q2240034",
+      "name": "Tram stop Brink",
+      "lat": 52.280556,
+      "lng": 4.851111
+    },
+    {
+      "id": "Q2224590",
+      "name": "Tram stop De Boelelaan/VU",
+      "lat": 52.335197,
+      "lng": 4.866386
+    },
+    {
+      "id": "Q1824137",
+      "name": "Tram stop Meent",
+      "lat": 52.280833,
+      "lng": 4.856944
+    },
+    {
+      "id": "Q1867682",
+      "name": "Tram stop Oranjebaan",
+      "lat": 52.302941,
+      "lng": 4.871907
+    },
+    {
+      "id": "Q2739727",
+      "name": "Tram stop Ouderkerkerlaan",
+      "lat": 52.296111,
+      "lng": 4.8675
+    },
+    {
+      "id": "Q1807246",
+      "name": "Tram stop Poortwachter",
+      "lat": 52.283056,
+      "lng": 4.844722
+    },
+    {
+      "id": "Q2218736",
+      "name": "Tram stop Sacharovlaan",
+      "lat": 52.282222,
+      "lng": 4.8325
+    },
+    {
+      "id": "Q2292205",
+      "name": "Tram stop Sportlaan",
+      "lat": 52.290472,
+      "lng": 4.863861
+    },
+    {
+      "id": "Q2637401",
+      "name": "Tram stop Van Boshuizenstraat",
+      "lat": 52.325,
+      "lng": 4.868889
+    },
+    {
+      "id": "Q2044925",
+      "name": "Tram stop Westwijk",
+      "lat": 52.274444,
+      "lng": 4.830556
+    },
+    {
+      "id": "Q3079905",
+      "name": "Tram stop Zonnestein",
+      "lat": 52.312222,
+      "lng": 4.871944
+    },
+    {
+      "id": "Q2457557",
+      "name": "Uilenstede",
+      "lat": 52.321667,
+      "lng": 4.868889
+    },
+    {
+      "id": "Q7913863",
+      "name": "Van der Madeweg",
+      "lat": 52.33,
+      "lng": 4.93
+    },
+    {
+      "id": "Q3184721",
+      "name": "Venserpolder metro station",
+      "lat": 52.326667,
+      "lng": 4.946389
+    },
+    {
+      "id": "Q2593698",
+      "name": "Verrijn Stuartweg metro station",
+      "lat": 52.328333,
+      "lng": 4.967222
+    },
+    {
+      "id": "Q2722265",
+      "name": "Vijzelgracht",
+      "lat": 52.360833,
+      "lng": 4.891111
+    },
+    {
+      "id": "Q2486332",
+      "name": "Waterlooplein",
+      "lat": 52.366958,
+      "lng": 4.903261
+    },
+    {
+      "id": "Q801585",
+      "name": "Weesp railway station",
+      "lat": 52.313056,
+      "lng": 5.043611
+    },
+    {
+      "id": "Q7979626",
+      "name": "Weesperplein",
+      "lat": 52.361111,
+      "lng": 4.907778
+    },
+    {
+      "id": "Q3186873",
+      "name": "Wibautstraat metro station",
+      "lat": 52.353333,
+      "lng": 4.912778
+    },
+    {
+      "id": "Q801653",
+      "name": "Zaandam railway station",
+      "lat": 52.438333,
+      "lng": 4.813889
+    }
+  ]
+}

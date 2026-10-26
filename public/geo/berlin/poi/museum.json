@@ -1,0 +1,1464 @@
+{
+  "category": "museum",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q240613",
+      "name": "500mm Feldbahnprojekt",
+      "lat": 52.460556,
+      "lng": 13.549722
+    },
+    {
+      "id": "Q270106",
+      "name": "7hours",
+      "lat": 52.524839,
+      "lng": 13.382673
+    },
+    {
+      "id": "Q76632399",
+      "name": "Abgußsammlung antiker Plastik",
+      "lat": 52.518867,
+      "lng": 13.296953
+    },
+    {
+      "id": "Q414110",
+      "name": "Academy of Arts, Berlin",
+      "lat": 52.515,
+      "lng": 13.379444
+    },
+    {
+      "id": "Q76632407",
+      "name": "Alfred Ehrhardt Foundation",
+      "lat": 52.526633,
+      "lng": 13.393737
+    },
+    {
+      "id": "Q1741851",
+      "name": "Alice Museum For Children",
+      "lat": 52.4588,
+      "lng": 13.5534
+    },
+    {
+      "id": "Q316329",
+      "name": "Allied Museum",
+      "lat": 52.4558,
+      "lng": 13.2725
+    },
+    {
+      "id": "Q162111",
+      "name": "Alte Nationalgalerie",
+      "lat": 52.52081,
+      "lng": 13.398353
+    },
+    {
+      "id": "Q156722",
+      "name": "Altes Museum",
+      "lat": 52.519444,
+      "lng": 13.398889
+    },
+    {
+      "id": "Q76632408",
+      "name": "Anna Seghers Museum",
+      "lat": 52.438171,
+      "lng": 13.540719
+    },
+    {
+      "id": "Q565296",
+      "name": "Anne Frank Zentrum",
+      "lat": 52.5245,
+      "lng": 13.4017
+    },
+    {
+      "id": "Q574690",
+      "name": "Anti-Kriegs-Museum",
+      "lat": 52.5458,
+      "lng": 13.3475
+    },
+    {
+      "id": "Q475394",
+      "name": "Antikensammlung Berlin",
+      "lat": 52.5194,
+      "lng": 13.3983
+    },
+    {
+      "id": "Q635323",
+      "name": "Architekturmuseum der TU Berlin",
+      "lat": 52.513611,
+      "lng": 13.323889
+    },
+    {
+      "id": "Q76633398",
+      "name": "Ausstellung Fontane und Hankels Ablage",
+      "lat": 52.35098,
+      "lng": 13.629506
+    },
+    {
+      "id": "Q790845",
+      "name": "Aviatisches Museum",
+      "lat": 52.4403,
+      "lng": 13.5056
+    },
+    {
+      "id": "Q132181662",
+      "name": "Balloon Museum BERLIN",
+      "lat": 52.497044,
+      "lng": 13.453722
+    },
+    {
+      "id": "Q811389",
+      "name": "Bauhaus-Archiv",
+      "lat": 52.50634,
+      "lng": 13.35383
+    },
+    {
+      "id": "Q641630",
+      "name": "Berggruen Museum",
+      "lat": 52.5192,
+      "lng": 13.2953
+    },
+    {
+      "id": "Q20828849",
+      "name": "Berlin Lapidarium",
+      "lat": 52.501667,
+      "lng": 13.377778
+    },
+    {
+      "id": "Q27831261",
+      "name": "berlin modern",
+      "lat": 52.50808,
+      "lng": 13.3685
+    },
+    {
+      "id": "Q821643",
+      "name": "Berlin Museum of Medical History at the Charité",
+      "lat": 52.5261,
+      "lng": 13.3745
+    },
+    {
+      "id": "Q567069",
+      "name": "Berlin Musical Instrument Museum",
+      "lat": 52.5103,
+      "lng": 13.3709
+    },
+    {
+      "id": "Q122705459",
+      "name": "Berlin Story Bunker",
+      "lat": 52.50276,
+      "lng": 13.38023
+    },
+    {
+      "id": "Q55176630",
+      "name": "Berlin Tourist Info im Europa-Center",
+      "lat": 52.50408,
+      "lng": 13.33866
+    },
+    {
+      "id": "Q76632437",
+      "name": "Berlin Wall Memorial",
+      "lat": 52.535207,
+      "lng": 13.389446
+    },
+    {
+      "id": "Q469234",
+      "name": "Berlin-Dahlem Museum Centre",
+      "lat": 52.456111,
+      "lng": 13.292222
+    },
+    {
+      "id": "Q390508",
+      "name": "Berlin-Hohenschönhausen Memorial",
+      "lat": 52.5417,
+      "lng": 13.5011
+    },
+    {
+      "id": "Q28496337",
+      "name": "Berlin’s Huguenot museum",
+      "lat": 52.514417,
+      "lng": 13.3925
+    },
+    {
+      "id": "Q821832",
+      "name": "Berliner U-Bahn Museum",
+      "lat": 52.5167,
+      "lng": 13.2506
+    },
+    {
+      "id": "Q76632419",
+      "name": "Berliner Waldmuseum mit Waldschule Grunewald der SDW",
+      "lat": 52.487149,
+      "lng": 13.251242
+    },
+    {
+      "id": "Q700222",
+      "name": "Berlinische Galerie",
+      "lat": 52.5039,
+      "lng": 13.3981
+    },
+    {
+      "id": "Q76632421",
+      "name": "Bernhard-Heiliger-Stiftung",
+      "lat": 52.465629,
+      "lng": 13.27617
+    },
+    {
+      "id": "Q76632424",
+      "name": "Bezirksmuseum Marzahn-Hellersdorf",
+      "lat": 52.543151,
+      "lng": 13.561022
+    },
+    {
+      "id": "Q157825",
+      "name": "Bode Museum",
+      "lat": 52.521944,
+      "lng": 13.394722
+    },
+    {
+      "id": "Q892452",
+      "name": "Bonhoeffer-Haus",
+      "lat": 52.5036,
+      "lng": 13.2625
+    },
+    {
+      "id": "Q163255",
+      "name": "Botanic Garden and Botanical Museum Berlin",
+      "lat": 52.455,
+      "lng": 13.3036
+    },
+    {
+      "id": "Q131542539",
+      "name": "Braun-Sammlung Ettel",
+      "lat": 52.524148,
+      "lng": 13.336358
+    },
+    {
+      "id": "Q76632426",
+      "name": "Brecht-Weigel-Gedenkstätte",
+      "lat": 52.528918,
+      "lng": 13.384677
+    },
+    {
+      "id": "Q568767",
+      "name": "Bröhan Museum",
+      "lat": 52.5188,
+      "lng": 13.2954
+    },
+    {
+      "id": "Q833759",
+      "name": "Brücke Museum",
+      "lat": 52.4669,
+      "lng": 13.2736
+    },
+    {
+      "id": "Q76632415",
+      "name": "Celine and Heiner Bastian exhibition room",
+      "lat": 52.519167,
+      "lng": 13.396667
+    },
+    {
+      "id": "Q154996",
+      "name": "Charlottenburg Palace",
+      "lat": 52.521111,
+      "lng": 13.295833
+    },
+    {
+      "id": "Q76632556",
+      "name": "City History Museum Spandau",
+      "lat": 52.536858,
+      "lng": 13.220055
+    },
+    {
+      "id": "Q76632516",
+      "name": "Collection of the Winkelmann Institute & Classical Archaeology Teaching Collection",
+      "lat": 52.518358,
+      "lng": 13.392947
+    },
+    {
+      "id": "Q825232",
+      "name": "Computerspielemuseum Berlin",
+      "lat": 52.5175,
+      "lng": 13.4419
+    },
+    {
+      "id": "Q112041310",
+      "name": "Das kleine Grosz-Museum",
+      "lat": 52.498004,
+      "lng": 13.359723
+    },
+    {
+      "id": "Q70922889",
+      "name": "David Hasselhoff Museum",
+      "lat": 52.530112,
+      "lng": 13.401736
+    },
+    {
+      "id": "Q573322",
+      "name": "DDR Museum",
+      "lat": 52.51944,
+      "lng": 13.40222
+    },
+    {
+      "id": "Q161768",
+      "name": "DDR Museum Motorcycle",
+      "lat": 52.5231,
+      "lng": 13.4077
+    },
+    {
+      "id": "Q1200705",
+      "name": "Designpanoptikum",
+      "lat": 52.5282,
+      "lng": 13.3909
+    },
+    {
+      "id": "Q876997",
+      "name": "Deutsche Kinemathek",
+      "lat": 52.5096,
+      "lng": 13.3735
+    },
+    {
+      "id": "Q315644",
+      "name": "Deutscher Dom",
+      "lat": 52.512756,
+      "lng": 13.392506
+    },
+    {
+      "id": "Q76632433",
+      "name": "Deutsches Blinden-Museum",
+      "lat": 52.45559,
+      "lng": 13.314173
+    },
+    {
+      "id": "Q571728",
+      "name": "Deutsches Currywurst Museum",
+      "lat": 52.5088,
+      "lng": 13.3912
+    },
+    {
+      "id": "Q688335",
+      "name": "Deutsches Historisches Museum",
+      "lat": 52.518056,
+      "lng": 13.396944
+    },
+    {
+      "id": "Q15109343",
+      "name": "Deutsches Pressemuseum im Ullsteinhaus",
+      "lat": 52.453333,
+      "lng": 13.385278
+    },
+    {
+      "id": "Q1205965",
+      "name": "Deutsches Schweinemuseum",
+      "lat": 52.3739,
+      "lng": 13.2654
+    },
+    {
+      "id": "Q120122369",
+      "name": "Deutschlandmuseum",
+      "lat": 52.508788,
+      "lng": 13.378434
+    },
+    {
+      "id": "Q1238787",
+      "name": "Domäne Dahlem",
+      "lat": 52.4594,
+      "lng": 13.2892
+    },
+    {
+      "id": "Q885171",
+      "name": "Düppel museum village",
+      "lat": 52.4245,
+      "lng": 13.2334
+    },
+    {
+      "id": "Q254156",
+      "name": "Egyptian Museum of Berlin",
+      "lat": 52.520239,
+      "lng": 13.397742
+    },
+    {
+      "id": "Q1341197",
+      "name": "Energie-Museum Berlin",
+      "lat": 52.4436,
+      "lng": 13.33
+    },
+    {
+      "id": "Q878325",
+      "name": "Ephraim-Palais",
+      "lat": 52.515848,
+      "lng": 13.40714
+    },
+    {
+      "id": "Q688353",
+      "name": "Ethnological Museum Berlin",
+      "lat": 52.5175,
+      "lng": 13.402778
+    },
+    {
+      "id": "Q46448088",
+      "name": "Europa Experience",
+      "lat": 52.516,
+      "lng": 13.38
+    },
+    {
+      "id": "Q1410037",
+      "name": "Feuerwehrmuseum Berlin",
+      "lat": 52.5864,
+      "lng": 13.2861
+    },
+    {
+      "id": "Q568921",
+      "name": "Filmmuseum Berlin",
+      "lat": 52.50944,
+      "lng": 13.37306
+    },
+    {
+      "id": "Q76632568",
+      "name": "Foundation for Digital Games Culture",
+      "lat": 52.527265,
+      "lng": 13.414355
+    },
+    {
+      "id": "Q43239811",
+      "name": "Frauenmuseum Berlin",
+      "lat": 52.509115,
+      "lng": 13.307068
+    },
+    {
+      "id": "Q76632435",
+      "name": "Friedenbibliothek Antikriegsmuseum",
+      "lat": 52.528715,
+      "lng": 13.425402
+    },
+    {
+      "id": "Q854289",
+      "name": "Friedrichshain-Kreuzberg Museum",
+      "lat": 52.5006,
+      "lng": 13.4186
+    },
+    {
+      "id": "Q833817",
+      "name": "Friedrichswerder Church",
+      "lat": 52.515833,
+      "lng": 13.397222
+    },
+    {
+      "id": "Q20829682",
+      "name": "Futurium",
+      "lat": 52.523879,
+      "lng": 13.374336
+    },
+    {
+      "id": "Q1495184",
+      "name": "Gaslaternen-Freilichtmuseum Berlin",
+      "lat": 52.512683,
+      "lng": 13.337053
+    },
+    {
+      "id": "Q140145912",
+      "name": "GDR museum apartment WBS 70",
+      "lat": 52.534299,
+      "lng": 13.593003
+    },
+    {
+      "id": "Q95517",
+      "name": "Gedenkstätte Berliner Mauer",
+      "lat": 52.535,
+      "lng": 13.3897
+    },
+    {
+      "id": "Q76632863",
+      "name": "Gedenkstätte Großbeeren 1813",
+      "lat": 52.354089,
+      "lng": 13.307754
+    },
+    {
+      "id": "Q76632442",
+      "name": "Gedenkstätte Köpenicker Blutwoche im Juni 1933",
+      "lat": 52.454318,
+      "lng": 13.578418
+    },
+    {
+      "id": "Q165631",
+      "name": "Gemäldegalerie Berlin",
+      "lat": 52.508611,
+      "lng": 13.364722
+    },
+    {
+      "id": "Q1503409",
+      "name": "Georg Kolbe Museum",
+      "lat": 52.50991,
+      "lng": 13.25478
+    },
+    {
+      "id": "Q1509331",
+      "name": "Gerhart-Hauptmann-Museum (Erkner)",
+      "lat": 52.4187,
+      "lng": 13.7549
+    },
+    {
+      "id": "Q706530",
+      "name": "German Museum of Technology",
+      "lat": 52.498611,
+      "lng": 13.3775
+    },
+    {
+      "id": "Q2168818",
+      "name": "German Red Cross Museum Berlin",
+      "lat": 52.4743,
+      "lng": 13.3267
+    },
+    {
+      "id": "Q880798",
+      "name": "German Resistance Memorial Center",
+      "lat": 52.5078,
+      "lng": 13.3625
+    },
+    {
+      "id": "Q20971579",
+      "name": "Germany Spy Museum",
+      "lat": 52.509,
+      "lng": 13.379278
+    },
+    {
+      "id": "Q1526549",
+      "name": "Gipsformerei",
+      "lat": 52.5192,
+      "lng": 13.2867
+    },
+    {
+      "id": "Q1551805",
+      "name": "Grünau Water Sports Museum",
+      "lat": 52.4119,
+      "lng": 13.5875
+    },
+    {
+      "id": "Q1551866",
+      "name": "Gründerzeitmuseum im Gutshaus Mahlsdorf",
+      "lat": 52.5024,
+      "lng": 13.6139
+    },
+    {
+      "id": "Q76632444",
+      "name": "Gurltsche Sammlung - Mißbildungen aus dem Bereich der Veterinärmedizin",
+      "lat": 52.46135,
+      "lng": 13.294192
+    },
+    {
+      "id": "Q584756",
+      "name": "Hamburger Bahnhof",
+      "lat": 52.528333,
+      "lng": 13.372222
+    },
+    {
+      "id": "Q1590714",
+      "name": "Haus am Checkpoint Charlie",
+      "lat": 52.5069,
+      "lng": 13.3907
+    },
+    {
+      "id": "Q704933",
+      "name": "Haus der Kulturen der Welt",
+      "lat": 52.5188,
+      "lng": 13.3648
+    },
+    {
+      "id": "Q107313410",
+      "name": "Haus des Papiers",
+      "lat": 52.51045,
+      "lng": 13.40329
+    },
+    {
+      "id": "Q1595575",
+      "name": "Heimathaus Schöneiche",
+      "lat": 52.481,
+      "lng": 13.7014
+    },
+    {
+      "id": "Q76632634",
+      "name": "Heimatmuseum Bernau bei Berlin",
+      "lat": 52.680565,
+      "lng": 13.588075
+    },
+    {
+      "id": "Q111890930",
+      "name": "Heimatmuseum Bernau bei Berlin — Henkerhaus",
+      "lat": 52.679834,
+      "lng": 13.585269
+    },
+    {
+      "id": "Q111890960",
+      "name": "Heimatmuseum Bernau bei Berlin — Steintor",
+      "lat": 52.678452,
+      "lng": 13.591959
+    },
+    {
+      "id": "Q76632752",
+      "name": "Heimatmuseum Erkner",
+      "lat": 52.412999,
+      "lng": 13.751665
+    },
+    {
+      "id": "Q76633291",
+      "name": "Heimatmuseum Stadt Teltow Ältestes Haus",
+      "lat": 52.402239,
+      "lng": 13.26138
+    },
+    {
+      "id": "Q76632451",
+      "name": "Heimatmuseum Zehlendorf",
+      "lat": 52.435444,
+      "lng": 13.260326
+    },
+    {
+      "id": "Q76632712",
+      "name": "Heimatstube Dahlwitz-Hoppegarten",
+      "lat": 52.519858,
+      "lng": 13.67213
+    },
+    {
+      "id": "Q76633399",
+      "name": "Heimatstube Zeuthen",
+      "lat": 52.340858,
+      "lng": 13.616274
+    },
+    {
+      "id": "Q76632836",
+      "name": "Heizmuseum Köpenick",
+      "lat": 52.396911,
+      "lng": 13.713393
+    },
+    {
+      "id": "Q1575394",
+      "name": "Hemp Museum",
+      "lat": 52.5167,
+      "lng": 13.4081
+    },
+    {
+      "id": "Q105781911",
+      "name": "Hertha BSC Museum",
+      "lat": 52.52054,
+      "lng": 13.24463
+    },
+    {
+      "id": "Q76632454",
+      "name": "Himmelskundliches Museum (Archenhold-Sternwarte)",
+      "lat": 52.486629,
+      "lng": 13.477523
+    },
+    {
+      "id": "Q1620937",
+      "name": "Historic harbor Berlin",
+      "lat": 52.5136,
+      "lng": 13.4119
+    },
+    {
+      "id": "Q28144141",
+      "name": "House of the Wannsee Conference",
+      "lat": 52.433056,
+      "lng": 13.165556
+    },
+    {
+      "id": "Q20196262",
+      "name": "Humboldt Forum",
+      "lat": 52.5175,
+      "lng": 13.402778
+    },
+    {
+      "id": "Q76632478",
+      "name": "Humboldt University of Berlin Art Museum",
+      "lat": 52.5126,
+      "lng": 13.39502
+    },
+    {
+      "id": "Q115812096",
+      "name": "Illuseum Berlin",
+      "lat": 52.521506,
+      "lng": 13.406914
+    },
+    {
+      "id": "Q1547444",
+      "name": "industry park Schöneweide",
+      "lat": 52.460041,
+      "lng": 13.51844
+    },
+    {
+      "id": "Q131470797",
+      "name": "Informationsort Schwerbelastungskörper",
+      "lat": 52.483972,
+      "lng": 13.37125
+    },
+    {
+      "id": "Q531032",
+      "name": "Jagdschloss Grunewald",
+      "lat": 52.4672,
+      "lng": 13.2614
+    },
+    {
+      "id": "Q157003",
+      "name": "Jewish Museum Berlin",
+      "lat": 52.502312,
+      "lng": 13.395447
+    },
+    {
+      "id": "Q76632468",
+      "name": "Johannes Bobrowski-Zimmer",
+      "lat": 52.452611,
+      "lng": 13.618396
+    },
+    {
+      "id": "Q76632470",
+      "name": "Juniormuseum im Ethnologischen Museum, Staatliche Museen zu Berlin",
+      "lat": 52.456737,
+      "lng": 13.29223
+    },
+    {
+      "id": "Q20892625",
+      "name": "Käthe Kollwitz Museum",
+      "lat": 52.520556,
+      "lng": 13.291944
+    },
+    {
+      "id": "Q1739162",
+      "name": "Keramik-Museum Berlin",
+      "lat": 52.5172,
+      "lng": 13.304
+    },
+    {
+      "id": "Q47155376",
+      "name": "Kinomuseum Berlin",
+      "lat": 52.49241,
+      "lng": 13.38335
+    },
+    {
+      "id": "Q1777246",
+      "name": "Knoblauchhaus",
+      "lat": 52.516434,
+      "lng": 13.406988
+    },
+    {
+      "id": "Q76632473",
+      "name": "Kommunale Galerie",
+      "lat": 52.489441,
+      "lng": 13.311874
+    },
+    {
+      "id": "Q6445022",
+      "name": "Kunstbibliothek Berlin",
+      "lat": 52.50861,
+      "lng": 13.36666
+    },
+    {
+      "id": "Q130999939",
+      "name": "Kunstgewerbemuseum (Schloss Köpenick)",
+      "lat": 52.4436,
+      "lng": 13.57289
+    },
+    {
+      "id": "Q477503",
+      "name": "Kunstgewerbemuseum Berlin",
+      "lat": 52.5097,
+      "lng": 13.3675
+    },
+    {
+      "id": "Q50672242",
+      "name": "Kunsthaus Dahlem",
+      "lat": 52.466944,
+      "lng": 13.273611
+    },
+    {
+      "id": "Q76632476",
+      "name": "Kunsthaus der Achim Freyer Stiftung",
+      "lat": 52.436049,
+      "lng": 13.298636
+    },
+    {
+      "id": "Q76632587",
+      "name": "Kunstsammlung Pankow",
+      "lat": 52.53797,
+      "lng": 13.43063
+    },
+    {
+      "id": "Q555946",
+      "name": "Kupferstichkabinett Berlin",
+      "lat": 52.5084,
+      "lng": 13.367
+    },
+    {
+      "id": "Q18288036",
+      "name": "Kurt Mühlenhaupt Museum",
+      "lat": 52.487415,
+      "lng": 13.388641
+    },
+    {
+      "id": "Q1792296",
+      "name": "KW Institute for Contemporary Art",
+      "lat": 52.527,
+      "lng": 13.3948
+    },
+    {
+      "id": "Q15824945",
+      "name": "Labyrinth Kindermuseum Berlin",
+      "lat": 52.556128,
+      "lng": 13.385998
+    },
+    {
+      "id": "Q118383774",
+      "name": "Lapidarium",
+      "lat": 52.5345,
+      "lng": 13.413
+    },
+    {
+      "id": "Q105045319",
+      "name": "Lapidarium Köllnischer Park",
+      "lat": 52.51332,
+      "lng": 13.41473
+    },
+    {
+      "id": "Q876474",
+      "name": "Lemke House",
+      "lat": 52.549167,
+      "lng": 13.491389
+    },
+    {
+      "id": "Q1881085",
+      "name": "MACHmit! Museum for Children",
+      "lat": 52.5406,
+      "lng": 13.4228
+    },
+    {
+      "id": "Q573672",
+      "name": "Märkisches Museum",
+      "lat": 52.5136,
+      "lng": 13.4147
+    },
+    {
+      "id": "Q569445",
+      "name": "Martin-Gropius-Bau",
+      "lat": 52.5066,
+      "lng": 13.3818
+    },
+    {
+      "id": "Q76632431",
+      "name": "Memorial to the Murdered Jews of Europe - Information Center",
+      "lat": 52.51396,
+      "lng": 13.378713
+    },
+    {
+      "id": "Q76632481",
+      "name": "Mies-van-der-Rohe-Haus",
+      "lat": 52.549364,
+      "lng": 13.490821
+    },
+    {
+      "id": "Q461359",
+      "name": "Militärhistorisches Museum Flugplatz Berlin-Gatow",
+      "lat": 52.4731,
+      "lng": 13.1447
+    },
+    {
+      "id": "Q41918510",
+      "name": "Mitte Museum",
+      "lat": 52.55095,
+      "lng": 13.38055
+    },
+    {
+      "id": "Q1441078",
+      "name": "Mori-Ôgai-Gedenkstätte",
+      "lat": 52.521736,
+      "lng": 13.379752
+    },
+    {
+      "id": "Q323169",
+      "name": "Münzkabinett Berlin",
+      "lat": 52.52203,
+      "lng": 13.39399
+    },
+    {
+      "id": "Q130999930",
+      "name": "Museen Tempelhof-Schöneberg von Berlin",
+      "lat": 52.483912,
+      "lng": 13.350977
+    },
+    {
+      "id": "Q536614",
+      "name": "Museum Berlin-Karlshorst",
+      "lat": 52.486111,
+      "lng": 13.539694
+    },
+    {
+      "id": "Q76632489",
+      "name": "Museum Charlottenburg-Wilmersdorf",
+      "lat": 52.51622,
+      "lng": 13.298053
+    },
+    {
+      "id": "Q1954549",
+      "name": "Museum der Münze Berlin",
+      "lat": 52.5728,
+      "lng": 13.3298
+    },
+    {
+      "id": "Q76632491",
+      "name": "Museum der St. Nikolai-Kirche Spandau",
+      "lat": 52.537811,
+      "lng": 13.205204
+    },
+    {
+      "id": "Q21712334",
+      "name": "Museum der Stille",
+      "lat": 52.5275,
+      "lng": 13.393611
+    },
+    {
+      "id": "Q27975079",
+      "name": "Museum des Kapitalismus",
+      "lat": 52.488444,
+      "lng": 13.442944
+    },
+    {
+      "id": "Q17353861",
+      "name": "Museum for Architectural Drawing",
+      "lat": 52.532071,
+      "lng": 13.410031
+    },
+    {
+      "id": "Q1271054",
+      "name": "Museum for Communication Berlin",
+      "lat": 52.5097,
+      "lng": 13.3869
+    },
+    {
+      "id": "Q555019",
+      "name": "Museum for prehistory and early history",
+      "lat": 52.5206,
+      "lng": 13.3978
+    },
+    {
+      "id": "Q233098",
+      "name": "Museum für Naturkunde - Leibniz Institute for Evolution and Biodiversity Science",
+      "lat": 52.5302,
+      "lng": 13.3792
+    },
+    {
+      "id": "Q76632498",
+      "name": "Museum im Böhmischen Dorf",
+      "lat": 52.475339,
+      "lng": 13.445547
+    },
+    {
+      "id": "Q76632499",
+      "name": "Museum im Wasserwerk",
+      "lat": 52.44947,
+      "lng": 13.657252
+    },
+    {
+      "id": "Q19963744",
+      "name": "Museum in the Kulturbrauerei",
+      "lat": 52.540368,
+      "lng": 13.413992
+    },
+    {
+      "id": "Q76632502",
+      "name": "Museum Kesselhaus Herzberge",
+      "lat": 52.527909,
+      "lng": 13.512046
+    },
+    {
+      "id": "Q76632446",
+      "name": "Museum Köpenick",
+      "lat": 52.445364,
+      "lng": 13.579097
+    },
+    {
+      "id": "Q15121282",
+      "name": "Museum Neukölln",
+      "lat": 52.445903,
+      "lng": 13.438056
+    },
+    {
+      "id": "Q370045",
+      "name": "Museum of Asian Art",
+      "lat": 52.5175,
+      "lng": 13.402778
+    },
+    {
+      "id": "Q318174",
+      "name": "Museum of European Cultures",
+      "lat": 52.4558,
+      "lng": 13.2928
+    },
+    {
+      "id": "Q1954632",
+      "name": "Museum of Islamic Art",
+      "lat": 52.5208,
+      "lng": 13.3964
+    },
+    {
+      "id": "Q998793",
+      "name": "Museum of Letters",
+      "lat": 52.52015,
+      "lng": 13.345
+    },
+    {
+      "id": "Q564747",
+      "name": "Museum of Photography",
+      "lat": 52.508139,
+      "lng": 13.332074
+    },
+    {
+      "id": "Q76632495",
+      "name": "Museum of the Unheard of Things",
+      "lat": 52.49083,
+      "lng": 13.365462
+    },
+    {
+      "id": "Q17353863",
+      "name": "Museum Pankow",
+      "lat": 52.53308,
+      "lng": 13.42024
+    },
+    {
+      "id": "Q131736352",
+      "name": "Museum Reinickendorf",
+      "lat": 52.615472,
+      "lng": 13.318716
+    },
+    {
+      "id": "Q76632504",
+      "name": "Museum Schloß Friedrichsfelde",
+      "lat": 52.504691,
+      "lng": 13.523584
+    },
+    {
+      "id": "Q76632759",
+      "name": "Museum und Galerie Falkensee",
+      "lat": 52.570773,
+      "lng": 13.093344
+    },
+    {
+      "id": "Q1360745",
+      "name": "museum-digital",
+      "lat": 52.45896,
+      "lng": 13.315988
+    },
+    {
+      "id": "Q1235194",
+      "name": "Nazi Forced Labour Documentation Centre",
+      "lat": 52.4529,
+      "lng": 13.5197
+    },
+    {
+      "id": "Q32659772",
+      "name": "Neue Nationalgalerie",
+      "lat": 52.506944,
+      "lng": 13.367778
+    },
+    {
+      "id": "Q157316",
+      "name": "Neues Museum",
+      "lat": 52.5202,
+      "lng": 13.3976
+    },
+    {
+      "id": "Q67921113",
+      "name": "New Synagogue Berlin - Jewish Center",
+      "lat": 52.524666,
+      "lng": 13.394812
+    },
+    {
+      "id": "Q76632629",
+      "name": "Oldtimer-Museum Herbert Propeller- Schmidt",
+      "lat": 52.338051,
+      "lng": 13.097643
+    },
+    {
+      "id": "Q111886950",
+      "name": "Oldtimermuseum Bergholz-Rehbrücke",
+      "lat": 52.338747,
+      "lng": 13.098696
+    },
+    {
+      "id": "Q117481529",
+      "name": "Park für heimatlose Skulpturen",
+      "lat": 52.56257,
+      "lng": 13.42681
+    },
+    {
+      "id": "Q157298",
+      "name": "Pergamon Museum",
+      "lat": 52.521,
+      "lng": 13.396
+    },
+    {
+      "id": "Q135313205",
+      "name": "PETRI Berlin",
+      "lat": 52.513165,
+      "lng": 13.403785
+    },
+    {
+      "id": "Q27926438",
+      "name": "Piano Salon Christophori",
+      "lat": 52.552619,
+      "lng": 13.374169
+    },
+    {
+      "id": "Q693653",
+      "name": "Plötzensee Prison",
+      "lat": 52.541,
+      "lng": 13.322
+    },
+    {
+      "id": "Q114704345",
+      "name": "Poddig Automobil-Museum Berlin",
+      "lat": 52.51369,
+      "lng": 13.28693
+    },
+    {
+      "id": "Q2101739",
+      "name": "Polizeihistorische Sammlung",
+      "lat": 52.483,
+      "lng": 13.387
+    },
+    {
+      "id": "Q131198902",
+      "name": "Radiomuseum Berlin in Brandenburg",
+      "lat": 52.616138,
+      "lng": 13.67859
+    },
+    {
+      "id": "Q2130301",
+      "name": "Ramones Museum",
+      "lat": 52.510847,
+      "lng": 13.467033
+    },
+    {
+      "id": "Q15126890",
+      "name": "Sammlung Boros",
+      "lat": 52.523517,
+      "lng": 13.383969
+    },
+    {
+      "id": "Q76632524",
+      "name": "Sammlung Schürmann Berlin",
+      "lat": 52.526254,
+      "lng": 13.41225
+    },
+    {
+      "id": "Q68106357",
+      "name": "Samurai Museum Berlin",
+      "lat": 52.526832,
+      "lng": 13.395283
+    },
+    {
+      "id": "Q322010",
+      "name": "Scharf-Gerstenberg Collection",
+      "lat": 52.5191,
+      "lng": 13.2967
+    },
+    {
+      "id": "Q76632527",
+      "name": "Scheringianum",
+      "lat": 52.548408,
+      "lng": 13.355483
+    },
+    {
+      "id": "Q76632529",
+      "name": "Schloss Britz Museum",
+      "lat": 52.446009,
+      "lng": 13.436414
+    },
+    {
+      "id": "Q76632546",
+      "name": "Schloss Pfaueninsel",
+      "lat": 52.421927,
+      "lng": 13.114904
+    },
+    {
+      "id": "Q76632532",
+      "name": "Schöneberg-Museum",
+      "lat": 52.483899,
+      "lng": 13.351014
+    },
+    {
+      "id": "Q1726921",
+      "name": "Schriftmuseum Rudolf Blanckertz",
+      "lat": 52.5272,
+      "lng": 13.4256
+    },
+    {
+      "id": "Q95997955",
+      "name": "Schulmuseum Blumberg",
+      "lat": 52.60215,
+      "lng": 13.61835
+    },
+    {
+      "id": "Q111893412",
+      "name": "Schulmuseum Börnicke",
+      "lat": 52.66301,
+      "lng": 13.637758
+    },
+    {
+      "id": "Q685162",
+      "name": "Schwules Museum",
+      "lat": 52.5043,
+      "lng": 13.3579
+    },
+    {
+      "id": "Q23786591",
+      "name": "Science Center Spectrum",
+      "lat": 52.498056,
+      "lng": 13.379444
+    },
+    {
+      "id": "Q136799326",
+      "name": "sculpture garden Evangelisches Krankenhaus Königin Elisabeth Herzberge",
+      "lat": 52.526813,
+      "lng": 13.507234
+    },
+    {
+      "id": "Q110344730",
+      "name": "Sculpture park Campus Berlin-Buch",
+      "lat": 52.62617,
+      "lng": 13.50392
+    },
+    {
+      "id": "Q2293079",
+      "name": "Skulpturengarten AVK",
+      "lat": 52.4625,
+      "lng": 13.346389
+    },
+    {
+      "id": "Q1650436",
+      "name": "Skulpturensammlung und Museum für Byzantinische Kunst",
+      "lat": 52.52163,
+      "lng": 13.39499
+    },
+    {
+      "id": "Q76632535",
+      "name": "Sonderausstellungshalle Tiergarten SMB",
+      "lat": 52.508076,
+      "lng": 13.367847
+    },
+    {
+      "id": "Q32660126",
+      "name": "Soviet War Memorial",
+      "lat": 52.516603,
+      "lng": 13.371931
+    },
+    {
+      "id": "Q76632536",
+      "name": "Sportmuseum Berlin",
+      "lat": 52.519299,
+      "lng": 13.245542
+    },
+    {
+      "id": "Q76633170",
+      "name": "SPSG / Flatowturm",
+      "lat": 52.406834,
+      "lng": 13.101043
+    },
+    {
+      "id": "Q76633186",
+      "name": "SPSG / Schloss Babelsberg",
+      "lat": 52.406834,
+      "lng": 13.101043
+    },
+    {
+      "id": "Q76632548",
+      "name": "SPSG / Schloss Schönhausen",
+      "lat": 52.578355,
+      "lng": 13.405687
+    },
+    {
+      "id": "Q76632553",
+      "name": "SPSG Berlin-Brandenburg/ Schloß Charlottenburg, Schloß Belvedere mit Porzellan-Museum der KPM",
+      "lat": 52.520532,
+      "lng": 13.29955
+    },
+    {
+      "id": "Q60583606",
+      "name": "Staatliche Kunsthalle Berlin",
+      "lat": 52.505378,
+      "lng": 13.336213
+    },
+    {
+      "id": "Q700216",
+      "name": "Staatliche Museen zu Berlin",
+      "lat": 52.509287,
+      "lng": 13.364498
+    },
+    {
+      "id": "Q117822507",
+      "name": "Stabi Kulturwerk",
+      "lat": 52.518223,
+      "lng": 13.391517
+    },
+    {
+      "id": "Q76632557",
+      "name": "Stadtmuseum Berlin / Naturwissenschaftliche Sammlung",
+      "lat": 52.511819,
+      "lng": 13.297212
+    },
+    {
+      "id": "Q76632560",
+      "name": "Stadtmuseum Berlin / Sammlung Kindheit und Jugend",
+      "lat": 52.511029,
+      "lng": 13.411199
+    },
+    {
+      "id": "Q76632563",
+      "name": "Ständige Ausstellung Umweltschutz",
+      "lat": 52.491451,
+      "lng": 13.284776
+    },
+    {
+      "id": "Q570472",
+      "name": "Stasi Museum",
+      "lat": 52.514444,
+      "lng": 13.4875
+    },
+    {
+      "id": "Q76632564",
+      "name": "STASI. Die Ausstellung zur DDR-Staatssicherheit",
+      "lat": 52.507915,
+      "lng": 13.394207
+    },
+    {
+      "id": "Q76632567",
+      "name": "Steglitz-Museum",
+      "lat": 52.441345,
+      "lng": 13.29847
+    },
+    {
+      "id": "Q2281397",
+      "name": "Stiftung Flucht, Vertreibung, Versöhnung",
+      "lat": 52.505067,
+      "lng": 13.381989
+    },
+    {
+      "id": "Q2349177",
+      "name": "Stiftung Stadtmuseum Berlin",
+      "lat": 52.516752,
+      "lng": 13.407166
+    },
+    {
+      "id": "Q227776",
+      "name": "Sugar Museum (Berlin)",
+      "lat": 52.5456,
+      "lng": 13.3453
+    },
+    {
+      "id": "Q76632506",
+      "name": "Tempelhof Museum",
+      "lat": 52.43955,
+      "lng": 13.385296
+    },
+    {
+      "id": "Q2412294",
+      "name": "The Kennedys",
+      "lat": 52.5167,
+      "lng": 13.3833
+    },
+    {
+      "id": "Q76632578",
+      "name": "The Story of Berlin - Die Erlebnisausstellung der Hauptstadt",
+      "lat": 52.500878,
+      "lng": 13.323112
+    },
+    {
+      "id": "Q54453799",
+      "name": "The Wall Museum",
+      "lat": 52.5027,
+      "lng": 13.443133
+    },
+    {
+      "id": "Q819081",
+      "name": "Topography of Terror",
+      "lat": 52.5064,
+      "lng": 13.3837
+    },
+    {
+      "id": "Q115281134",
+      "name": "Trabi Museum Berlin",
+      "lat": 52.50744,
+      "lng": 13.38891
+    },
+    {
+      "id": "Q314446",
+      "name": "Tränenpalast",
+      "lat": 52.5208,
+      "lng": 13.3869
+    },
+    {
+      "id": "Q111594318",
+      "name": "Urban Nation Museum For Urban Contempory Art",
+      "lat": 52.498668,
+      "lng": 13.356651
+    },
+    {
+      "id": "Q24090853",
+      "name": "Verborgene Museum",
+      "lat": 52.508027,
+      "lng": 13.318704
+    },
+    {
+      "id": "Q76632631",
+      "name": "Veteranen-Fahrzeugmuseum Herbert Schmidt",
+      "lat": 52.338051,
+      "lng": 13.097643
+    },
+    {
+      "id": "Q2525779",
+      "name": "Villa Schöningen",
+      "lat": 52.4136,
+      "lng": 13.0877
+    },
+    {
+      "id": "Q542084",
+      "name": "Vorderasiatisches Museum Berlin",
+      "lat": 52.520694,
+      "lng": 13.396806
+    },
+    {
+      "id": "Q382575",
+      "name": "Wall Museum",
+      "lat": 52.5078,
+      "lng": 13.3906
+    },
+    {
+      "id": "Q2560329",
+      "name": "Werkbundarchiv – museum of things",
+      "lat": 52.5116,
+      "lng": 13.39997
+    },
+    {
+      "id": "Q76632582",
+      "name": "Willy-Brandt-Ausstellung",
+      "lat": 52.516937,
+      "lng": 13.383298
+    },
+    {
+      "id": "Q76632636",
+      "name": "Wolf Kahlen Museum Bernau / Intermedia Arts Museum",
+      "lat": 52.679005,
+      "lng": 13.584741
+    },
+    {
+      "id": "Q73479704",
+      "name": "Zille Museum",
+      "lat": 52.516489,
+      "lng": 13.406314
+    },
+    {
+      "id": "Q76632584",
+      "name": "Zweiradmuseum",
+      "lat": 52.50273,
+      "lng": 13.43929
+    }
+  ]
+}

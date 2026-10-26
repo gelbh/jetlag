@@ -85,6 +85,283 @@ describe("bundledPresetFlags", () => {
     expect(flagMarkForHierarchySegmentId("metro-southampton")?.alt).toBe("Southampton");
   });
 
+  it("ships distinct flag or coat marks for every Brussels preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:brussels")?.src).toBe(
+      "/region-flags/metro-brussels.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-belgium"].source).toMatch(/^flagcdn:be$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-brussels"].source).toMatch(/^wikidata:Q240:/);
+    for (const commune of [
+      "anderlecht",
+      "auderghem",
+      "berchem-sainte-agathe",
+      "bruxelles",
+      "etterbeek",
+      "evere",
+      "forest",
+      "ganshoren",
+      "ixelles",
+      "jette",
+      "koekelberg",
+      "molenbeek-saint-jean",
+      "saint-gilles",
+      "saint-josse-ten-noode",
+      "schaerbeek",
+      "uccle",
+      "watermael-boitsfort",
+      "woluwe-saint-lambert",
+      "woluwe-saint-pierre",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:brussels-${commune}`);
+      expect(mark, commune).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${commune}.png`);
+    }
+  });
+
+  it("ships distinct flag or coat marks for every Brisbane preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:brisbane")?.src).toBe(
+      "/region-flags/metro-brisbane.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-au"].source).toMatch(/^flagcdn:au$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["state-qld"].source).toMatch(/^wikidata:Q36074:/);
+    for (const ward of [
+      "bracken-ridge",
+      "calamvale",
+      "central",
+      "chandler",
+      "coorparoo",
+      "deagon",
+      "doboy",
+      "enoggera",
+      "forest-lake",
+      "hamilton",
+      "holland-park",
+      "jamboree",
+      "macgregor",
+      "marchant",
+      "mcdowall",
+      "moorooka",
+      "morningside",
+      "northgate",
+      "paddington",
+      "pullenvale",
+      "runcorn",
+      "tennyson",
+      "the-gabba",
+      "the-gap",
+      "walter-taylor",
+      "wynnum-manly",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:brisbane-${ward}`);
+      expect(mark, ward).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${ward}.png`);
+    }
+  });
+
+  it("ships distinct flag or coat marks for every Singapore preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:singapore")?.src).toBe(
+      "/region-flags/metro-singapore.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-singapore"].source).toMatch(/^flagcdn:sg$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-singapore"].source).toMatch(/^wikidata:Q334:/);
+    for (const planningArea of [
+      "ang-mo-kio",
+      "bedok",
+      "bishan",
+      "boon-lay",
+      "bukit-batok",
+      "bukit-merah",
+      "bukit-panjang",
+      "bukit-timah",
+      "central-water-catchment",
+      "changi",
+      "changi-bay",
+      "choa-chu-kang",
+      "clementi",
+      "downtown-core",
+      "geylang",
+      "hougang",
+      "jurong-east",
+      "jurong-west",
+      "kallang",
+      "lim-chu-kang",
+      "mandai",
+      "marina-east",
+      "marina-south",
+      "marine-parade",
+      "museum",
+      "newton",
+      "north-eastern-islands",
+      "novena",
+      "orchard",
+      "outram",
+      "pasir-ris",
+      "paya-lebar",
+      "pioneer",
+      "punggol",
+      "queenstown",
+      "river-valley",
+      "rochor",
+      "seletar",
+      "sembawang",
+      "sengkang",
+      "serangoon",
+      "simpang",
+      "singapore-river",
+      "southern-islands",
+      "straits-view",
+      "sungei-kadut",
+      "tampines",
+      "tanglin",
+      "tengah",
+      "toa-payoh",
+      "tuas",
+      "western-islands",
+      "western-water-catchment",
+      "woodlands",
+      "yishun",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:singapore-${planningArea}`);
+      expect(mark, planningArea).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${planningArea}.png`);
+    }
+  });
+
+  it("ships distinct flag or coat marks for every Wrocław preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:wroclaw")?.src).toBe(
+      "/region-flags/metro-wroclaw.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-poland"].source).toMatch(/^flagcdn:pl$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-wroclaw"].source).toMatch(/^wikidata:Q1799:/);
+    for (const dzielnica of [
+      "stare-miasto",
+      "przedmiescie-swidnickie",
+      "szczepin",
+      "nadodrze",
+      "kleczkow",
+      "olbin",
+      "plac-grunwaldzki",
+      "zacisze-zalesie-szczytniki",
+      "biskupin-sepolno-dabie-bartoszowice",
+      "przedmiescie-olawskie",
+      "tarnogaj",
+      "huby",
+      "powstancow-slaskich",
+      "gaj",
+      "borek",
+      "ksieze",
+      "brochow",
+      "bienkowice",
+      "jagodno",
+      "otaszyn",
+      "krzyki-partynice",
+      "klecina",
+      "pilczyce-kozanow-popowice-pn",
+      "gadow-popowice-pld",
+      "muchobor-maly",
+      "gajowice",
+      "grabiszyn-grabiszynek",
+      "oporow",
+      "muchobor-wielki",
+      "nowy-dwor",
+      "kuzniki",
+      "zerniki",
+      "jerzmanowo-jarnoltow-strachowice-osiniec",
+      "lesnica",
+      "maslice",
+      "pracze-odrzanskie",
+      "karowice-rozanka",
+      "kowale",
+      "strachocin-swojczyce-wojnow",
+      "psie-pole-zawidawie",
+      "pawlowice",
+      "soltysowice",
+      "polanowice-poswietne-ligota",
+      "widawa",
+      "lipa-piotrowska",
+      "swiniary",
+      "osobowice-redzin",
+      "wojszyce",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:wroclaw-${dzielnica}`);
+      expect(mark, dzielnica).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${dzielnica}.png`);
+    }
+  });
+
+  it("ships distinct flag or coat marks for every Amsterdam preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:amsterdam")?.src).toBe(
+      "/region-flags/metro-amsterdam.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-netherlands"].source).toMatch(/^flagcdn:nl$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-amsterdam"].source).toMatch(/^wikidata:Q9899:/);
+    for (const stadsdeel of [
+      "ams-centrum",
+      "ams-westpoort",
+      "ams-west",
+      "ams-nieuw-west",
+      "ams-zuid",
+      "ams-oost",
+      "ams-noord",
+      "ams-zuidoost",
+      "ams-weesp",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:amsterdam-${stadsdeel}`);
+      expect(mark, stadsdeel).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${stadsdeel}.png`);
+    }
+  });
+
+  it("ships distinct flag or coat marks for every Utrecht preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:utrecht")?.src).toBe(
+      "/region-flags/metro-utrecht.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-netherlands"].source).toMatch(/^flagcdn:nl$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-utrecht"].source).toMatch(/^wikidata:Q803:/);
+    for (const wijk of [
+      "west",
+      "noordwest",
+      "overvecht",
+      "noordoost",
+      "oost",
+      "binnenstad",
+      "zuid",
+      "zuidwest",
+      "leidsche-rijn",
+      "vleuten-de-meern",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:utrecht-${wijk}`);
+      expect(mark, wijk).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${wijk}.png`);
+    }
+  });
+
+  it("ships distinct flag or coat marks for every Berlin preset leaf", () => {
+    expect(flagMarkForBundledPresetId("bundled:berlin")?.src).toBe(
+      "/region-flags/metro-berlin.png",
+    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-germany"].source).toMatch(/^flagcdn:de$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-berlin"].source).toMatch(/^wikidata:Q64:/);
+    for (const bezirk of [
+      "mitte",
+      "friedrichshain-kreuzberg",
+      "pankow",
+      "charlottenburg-wilmersdorf",
+      "spandau",
+      "steglitz-zehlendorf",
+      "tempelhof-schoeneberg",
+      "neukoelln",
+      "treptow-koepenick",
+      "marzahn-hellersdorf",
+      "lichtenberg",
+      "reinickendorf",
+    ] as const) {
+      const mark = flagMarkForBundledPresetId(`bundled:berlin-${bezirk}`);
+      expect(mark, bezirk).not.toBeNull();
+      expect(mark?.src).toBe(`/region-flags/${bezirk}.png`);
+    }
+  });
+
   it("uses Osaka ward flower marks on ward leaves", () => {
     expect(flagMarkForBundledPresetId("bundled:osaka-ward-27127")?.src).toBe(
       "/region-flags/ward-27127.png",

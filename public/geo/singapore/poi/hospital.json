@@ -1,0 +1,234 @@
+{
+  "category": "hospital",
+  "source": "wikidata",
+  "bbox": {
+    "south": 1.1395,
+    "west": 103.5912,
+    "north": 1.4884,
+    "east": 104.1292
+  },
+  "places": [
+    {
+      "id": "Q4679676",
+      "name": "Adam Road Hospital",
+      "lat": 1.32688,
+      "lng": 103.813
+    },
+    {
+      "id": "Q4720666",
+      "name": "Alexandra Hospital",
+      "lat": 1.286444,
+      "lng": 103.801222
+    },
+    {
+      "id": "Q4967491",
+      "name": "Bright Vision Hospital",
+      "lat": 1.372311,
+      "lng": 103.878017
+    },
+    {
+      "id": "Q5025792",
+      "name": "Camden Medical Centre",
+      "lat": 1.303099,
+      "lng": 103.823972
+    },
+    {
+      "id": "Q5071993",
+      "name": "Changi General Hospital",
+      "lat": 1.340556,
+      "lng": 103.949167
+    },
+    {
+      "id": "Q85753769",
+      "name": "Concord International Hospital",
+      "lat": 1.326789,
+      "lng": 103.813237
+    },
+    {
+      "id": "Q28859289",
+      "name": "Farrer Park Hospital",
+      "lat": 1.312609,
+      "lng": 103.854007
+    },
+    {
+      "id": "Q14874254",
+      "name": "Gleneagles Hospital",
+      "lat": 1.30722,
+      "lng": 103.82
+    },
+    {
+      "id": "Q123481893",
+      "name": "Health City Novena",
+      "lat": 1.321611,
+      "lng": 103.845944
+    },
+    {
+      "id": "Q986149",
+      "name": "Institute of Mental Health",
+      "lat": 1.3818,
+      "lng": 103.8825
+    },
+    {
+      "id": "Q23926492",
+      "name": "Jurong Community Hospital",
+      "lat": 1.332944,
+      "lng": 103.747083
+    },
+    {
+      "id": "Q6402273",
+      "name": "Khoo Teck Puat Hospital",
+      "lat": 1.42464,
+      "lng": 103.838
+    },
+    {
+      "id": "Q6332329",
+      "name": "KK Women's and Children's Hospital",
+      "lat": 1.310556,
+      "lng": 103.846944
+    },
+    {
+      "id": "Q6450553",
+      "name": "Kwong Wai Shiu Hospital",
+      "lat": 1.31803,
+      "lng": 103.858
+    },
+    {
+      "id": "Q6919390",
+      "name": "Mount Alvernia Hospital and Medical Centre",
+      "lat": 1.34184,
+      "lng": 103.838
+    },
+    {
+      "id": "Q1320916",
+      "name": "Mount Elizabeth Hospital",
+      "lat": 1.3045,
+      "lng": 103.835083
+    },
+    {
+      "id": "Q7138809",
+      "name": "Mount Elizabeth Novena Hospital",
+      "lat": 1.322236,
+      "lng": 103.84394
+    },
+    {
+      "id": "Q6971237",
+      "name": "National Cancer Centre Singapore",
+      "lat": 1.279379,
+      "lng": 103.83659
+    },
+    {
+      "id": "Q5154059",
+      "name": "National Centre for Infectious Diseases",
+      "lat": 1.32028,
+      "lng": 103.851
+    },
+    {
+      "id": "Q6973028",
+      "name": "National Heart Centre Singapore",
+      "lat": 1.27861,
+      "lng": 103.83594
+    },
+    {
+      "id": "Q6978455",
+      "name": "National Skin Centre",
+      "lat": 1.320132,
+      "lng": 103.849442
+    },
+    {
+      "id": "Q6979219",
+      "name": "National University Hospital",
+      "lat": 1.295083,
+      "lng": 103.782833
+    },
+    {
+      "id": "Q18639988",
+      "name": "Ng Teng Fong General Hospital",
+      "lat": 1.335043,
+      "lng": 103.74399
+    },
+    {
+      "id": "Q7085211",
+      "name": "Old Thong Chai Medical Institution",
+      "lat": 1.287306,
+      "lng": 103.845556
+    },
+    {
+      "id": "Q85791468",
+      "name": "Outram Community Hospital",
+      "lat": 1.28967,
+      "lng": 103.85007
+    },
+    {
+      "id": "Q7138794",
+      "name": "Parkway East Hospital",
+      "lat": 1.31511,
+      "lng": 103.908907
+    },
+    {
+      "id": "Q7282578",
+      "name": "Raffles Hospital",
+      "lat": 1.301297,
+      "lng": 103.857291
+    },
+    {
+      "id": "Q17053224",
+      "name": "Ren Ci Hospital and Medicare Centre",
+      "lat": 1.326062,
+      "lng": 103.850967
+    },
+    {
+      "id": "Q19646383",
+      "name": "Sengkang General Hospital",
+      "lat": 1.394612,
+      "lng": 103.89312
+    },
+    {
+      "id": "Q17125911",
+      "name": "Singapore Gamma Knife Centre",
+      "lat": 1.3221,
+      "lng": 103.844
+    },
+    {
+      "id": "Q7522983",
+      "name": "Singapore General Hospital",
+      "lat": 1.278667,
+      "lng": 103.834361
+    },
+    {
+      "id": "Q7523056",
+      "name": "Singapore National Eye Centre",
+      "lat": 1.282248,
+      "lng": 103.835785
+    },
+    {
+      "id": "Q50037075",
+      "name": "SingHealth Polyclinics",
+      "lat": 1.282623,
+      "lng": 103.818498
+    },
+    {
+      "id": "Q7594065",
+      "name": "St Luke's Hospital, Singapore",
+      "lat": 1.349393,
+      "lng": 103.742083
+    },
+    {
+      "id": "Q7682145",
+      "name": "Tan Tock Seng Hospital",
+      "lat": 1.321611,
+      "lng": 103.845944
+    },
+    {
+      "id": "Q7795887",
+      "name": "Thomson Medical Centre",
+      "lat": 1.32524,
+      "lng": 103.841
+    },
+    {
+      "id": "Q65052043",
+      "name": "Yishun Community Hospital",
+      "lat": 1.423889,
+      "lng": 103.837222
+    }
+  ]
+}

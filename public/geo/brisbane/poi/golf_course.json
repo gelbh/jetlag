@@ -1,0 +1,18 @@
+{
+  "category": "golf_course",
+  "source": "wikidata",
+  "bbox": {
+    "south": -27.6702,
+    "west": 152.6697,
+    "north": -27.0116,
+    "east": 153.4782
+  },
+  "places": [
+    {
+      "id": "Q100500041",
+      "name": "Brisbane Golf Club",
+      "lat": -27.5277,
+      "lng": 153.0086
+    }
+  ]
+}

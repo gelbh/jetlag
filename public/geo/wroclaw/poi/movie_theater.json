@@ -1,0 +1,48 @@
+{
+  "category": "movie_theater",
+  "source": "wikidata",
+  "bbox": {
+    "south": 51.0327,
+    "west": 16.7973,
+    "north": 51.2201,
+    "east": 17.1862
+  },
+  "places": [
+    {
+      "id": "Q9356098",
+      "name": "Capitol Musical Theatre",
+      "lat": 51.100516,
+      "lng": 17.030066
+    },
+    {
+      "id": "Q38245718",
+      "name": "Deli-Kino",
+      "lat": 51.112354,
+      "lng": 17.034298
+    },
+    {
+      "id": "Q48850092",
+      "name": "Dolnośląskie Centrum Filmowe",
+      "lat": 51.10171,
+      "lng": 17.030429
+    },
+    {
+      "id": "Q48850139",
+      "name": "Kino Nowe Horyzonty",
+      "lat": 51.109306,
+      "lng": 17.026094
+    },
+    {
+      "id": "Q38245871",
+      "name": "Kino Pionier",
+      "lat": 51.12059,
+      "lng": 17.04103
+    },
+    {
+      "id": "Q11739412",
+      "name": "Kino Śląsk we Wrocławiu",
+      "lat": 51.10081,
+      "lng": 17.03034
+    }
+  ]
+}

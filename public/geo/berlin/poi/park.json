@@ -1,0 +1,2220 @@
+{
+  "category": "park",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.3283,
+    "west": 13.0783,
+    "north": 52.6855,
+    "east": 13.7712
+  },
+  "places": [
+    {
+      "id": "Q113991205",
+      "name": "Adam-Kuckhoff-Platz",
+      "lat": 52.47254,
+      "lng": 13.32038
+    },
+    {
+      "id": "Q107443322",
+      "name": "Adidas Playground",
+      "lat": 52.46993,
+      "lng": 13.52514
+    },
+    {
+      "id": "Q107368261",
+      "name": "Adidas Playground (Böcklerpark)",
+      "lat": 52.49623,
+      "lng": 13.41029
+    },
+    {
+      "id": "Q381440",
+      "name": "Aerodynamic Park",
+      "lat": 52.4319,
+      "lng": 13.5289
+    },
+    {
+      "id": "Q136002347",
+      "name": "Agnes-Sorma-Park",
+      "lat": 52.523484,
+      "lng": 13.382708
+    },
+    {
+      "id": "Q113380486",
+      "name": "Akazienwäldchen",
+      "lat": 52.45208,
+      "lng": 13.44875
+    },
+    {
+      "id": "Q1236781",
+      "name": "Alice-Salomon-Park",
+      "lat": 52.4912,
+      "lng": 13.3503
+    },
+    {
+      "id": "Q438137",
+      "name": "Alter Park",
+      "lat": 52.4631,
+      "lng": 13.3835
+    },
+    {
+      "id": "Q106907240",
+      "name": "Altlandsberger Platz",
+      "lat": 52.54266,
+      "lng": 13.57354
+    },
+    {
+      "id": "Q24228375",
+      "name": "Amalienpark",
+      "lat": 52.572556,
+      "lng": 13.413861
+    },
+    {
+      "id": "Q99336285",
+      "name": "Anger Pankow",
+      "lat": 52.570556,
+      "lng": 13.408611
+    },
+    {
+      "id": "Q55220863",
+      "name": "Anita-Berber-Park",
+      "lat": 52.472375,
+      "lng": 13.426947
+    },
+    {
+      "id": "Q106907728",
+      "name": "Annemirl-Bauer-Platz",
+      "lat": 52.50484,
+      "lng": 13.46674
+    },
+    {
+      "id": "Q317985",
+      "name": "Aquarium Berlin",
+      "lat": 52.505833,
+      "lng": 13.340556
+    },
+    {
+      "id": "Q97585665",
+      "name": "Auerpark",
+      "lat": 52.5188,
+      "lng": 13.4453
+    },
+    {
+      "id": "Q116175037",
+      "name": "Außenanlagen und Mietergärten des IBA-Gebiets am Tegeler Hafen Am Tegeler Hafen 2/6, 8/44",
+      "lat": 52.590476,
+      "lng": 13.278033
+    },
+    {
+      "id": "Q315105",
+      "name": "Babelsberg Park",
+      "lat": 52.405386,
+      "lng": 13.092721
+    },
+    {
+      "id": "Q100958448",
+      "name": "Bäkepark",
+      "lat": 52.445743,
+      "lng": 13.322549
+    },
+    {
+      "id": "Q115744351",
+      "name": "BeachMitte",
+      "lat": 52.533824,
+      "lng": 13.384454
+    },
+    {
+      "id": "Q15787561",
+      "name": "Bellevuepark",
+      "lat": 52.453387,
+      "lng": 13.583393
+    },
+    {
+      "id": "Q154828",
+      "name": "Berlin Zoological Garden",
+      "lat": 52.508333,
+      "lng": 13.3375
+    },
+    {
+      "id": "Q830122",
+      "name": "Besselpark",
+      "lat": 52.503828,
+      "lng": 13.391778
+    },
+    {
+      "id": "Q107475453",
+      "name": "Bewegungsparcours an der Bürgerstraße",
+      "lat": 52.4615,
+      "lng": 13.43928
+    },
+    {
+      "id": "Q106830796",
+      "name": "Bewegungsparcours Basdorfer Straße",
+      "lat": 52.54511,
+      "lng": 13.54726
+    },
+    {
+      "id": "Q106830832",
+      "name": "Bewegungsparcours Burghardweg",
+      "lat": 52.53313,
+      "lng": 13.56954
+    },
+    {
+      "id": "Q107417230",
+      "name": "Bewegungsparcours im Spektepark",
+      "lat": 52.54928,
+      "lng": 13.16688
+    },
+    {
+      "id": "Q107486459",
+      "name": "Bewegungsparcours Invalidenpark",
+      "lat": 52.53024,
+      "lng": 13.37528
+    },
+    {
+      "id": "Q106822106",
+      "name": "Bewegungsparcours Seelgrabenpark",
+      "lat": 52.56588,
+      "lng": 13.55208
+    },
+    {
+      "id": "Q107361377",
+      "name": "Bewegungsparcours Vinetaplatz",
+      "lat": 52.54138,
+      "lng": 13.39999
+    },
+    {
+      "id": "Q15788726",
+      "name": "BiotechPark Berlin-Buch",
+      "lat": 52.625728,
+      "lng": 13.500843
+    },
+    {
+      "id": "Q883601",
+      "name": "Bleichröderpark",
+      "lat": 52.5692,
+      "lng": 13.4064
+    },
+    {
+      "id": "Q1019599",
+      "name": "Böckler Park",
+      "lat": 52.497219,
+      "lng": 13.407892
+    },
+    {
+      "id": "Q107521360",
+      "name": "Boschpoler Platz",
+      "lat": 52.52765,
+      "lng": 13.55456
+    },
+    {
+      "id": "Q894421",
+      "name": "Bosepark",
+      "lat": 52.463594,
+      "lng": 13.379567
+    },
+    {
+      "id": "Q163255",
+      "name": "Botanic Garden and Botanical Museum Berlin",
+      "lat": 52.455,
+      "lng": 13.3036
+    },
+    {
+      "id": "Q894630",
+      "name": "Botanischer Volkspark Blankenfelde-Pankow",
+      "lat": 52.604722,
+      "lng": 13.395278
+    },
+    {
+      "id": "Q1020149",
+      "name": "Böttcherberg",
+      "lat": 52.411111,
+      "lng": 13.105278
+    },
+    {
+      "id": "Q89432846",
+      "name": "Breitkopfbecken",
+      "lat": 52.572905,
+      "lng": 13.362917
+    },
+    {
+      "id": "Q565659",
+      "name": "Britzer Garten",
+      "lat": 52.433333,
+      "lng": 13.416667
+    },
+    {
+      "id": "Q921431",
+      "name": "Brixplatz",
+      "lat": 52.519444,
+      "lng": 13.254722
+    },
+    {
+      "id": "Q990695",
+      "name": "Brosepark",
+      "lat": 52.584444,
+      "lng": 13.404722
+    },
+    {
+      "id": "Q25089111",
+      "name": "Brunnenplatz",
+      "lat": 52.55,
+      "lng": 13.376389
+    },
+    {
+      "id": "Q24072618",
+      "name": "Bürgerpark Marzahn",
+      "lat": 52.551333,
+      "lng": 13.5609
+    },
+    {
+      "id": "Q1021367",
+      "name": "Bürgerpark Pankow",
+      "lat": 52.569444,
+      "lng": 13.393056
+    },
+    {
+      "id": "Q107420504",
+      "name": "Calisthenics Park Ackerstraße",
+      "lat": 52.54796,
+      "lng": 13.19888
+    },
+    {
+      "id": "Q107369355",
+      "name": "Calisthenics Park at Mehringplatz",
+      "lat": 52.49832,
+      "lng": 13.39019
+    },
+    {
+      "id": "Q107417160",
+      "name": "Calisthenics Park in Kladow",
+      "lat": 52.47361,
+      "lng": 13.13232
+    },
+    {
+      "id": "Q107417192",
+      "name": "Calisthenics Park in Staaken",
+      "lat": 52.52141,
+      "lng": 13.17012
+    },
+    {
+      "id": "Q113990213",
+      "name": "Calisthenics park in the Clara-Zetkin-Park",
+      "lat": 52.56677,
+      "lng": 13.56747
+    },
+    {
+      "id": "Q107364893",
+      "name": "calisthenics park in the Landschaftspark Johannisthal/Adlershof",
+      "lat": 52.43637,
+      "lng": 13.52323
+    },
+    {
+      "id": "Q107491653",
+      "name": "Calisthenics-Anlage Park am Gleisdreieck",
+      "lat": 52.49946,
+      "lng": 13.37294
+    },
+    {
+      "id": "Q14544284",
+      "name": "Carl-von-Ossietzky-Park",
+      "lat": 52.5228,
+      "lng": 13.3548
+    },
+    {
+      "id": "Q15791003",
+      "name": "Carl-Weder-Park",
+      "lat": 52.462439,
+      "lng": 13.43747
+    },
+    {
+      "id": "Q139394565",
+      "name": "Carmerplatz",
+      "lat": 52.452547,
+      "lng": 13.320751
+    },
+    {
+      "id": "Q130459518",
+      "name": "Çetin-Mert-Park",
+      "lat": 52.499469,
+      "lng": 13.423303
+    },
+    {
+      "id": "Q139394514",
+      "name": "Charkiw-Park",
+      "lat": 52.457281,
+      "lng": 13.318364
+    },
+    {
+      "id": "Q113913563",
+      "name": "Cheruskerpark",
+      "lat": 52.48129,
+      "lng": 13.35819
+    },
+    {
+      "id": "Q1494606",
+      "name": "Chinese Garden",
+      "lat": 52.536231,
+      "lng": 13.575659
+    },
+    {
+      "id": "Q15794696",
+      "name": "Coloniapark",
+      "lat": 52.404513,
+      "lng": 13.546271
+    },
+    {
+      "id": "Q131599092",
+      "name": "Danewendplatz",
+      "lat": 52.616147,
+      "lng": 13.476518
+    },
+    {
+      "id": "Q111345327",
+      "name": "Dora-Benjamin-Park",
+      "lat": 52.49589,
+      "lng": 13.46614
+    },
+    {
+      "id": "Q113132541",
+      "name": "Dora-Duncker-Park",
+      "lat": 52.49,
+      "lng": 13.3737
+    },
+    {
+      "id": "Q40737141",
+      "name": "Dorfanger Rosenthal",
+      "lat": 52.59959,
+      "lng": 13.37817
+    },
+    {
+      "id": "Q131353784",
+      "name": "Dorfkern Alt-Marzahn",
+      "lat": 52.543386,
+      "lng": 13.560369
+    },
+    {
+      "id": "Q111355369",
+      "name": "Dreipfuhlpark",
+      "lat": 52.446329,
+      "lng": 13.272066
+    },
+    {
+      "id": "Q1277695",
+      "name": "East-Side-Park",
+      "lat": 52.5042,
+      "lng": 13.4415
+    },
+    {
+      "id": "Q131873165",
+      "name": "Ehemaliger Güteraußenring",
+      "lat": 52.399565,
+      "lng": 13.375533
+    },
+    {
+      "id": "Q15055935",
+      "name": "Eichepark",
+      "lat": 52.564195,
+      "lng": 13.582385
+    },
+    {
+      "id": "Q15857454",
+      "name": "Einsteinpark",
+      "lat": 52.540293,
+      "lng": 13.44512
+    },
+    {
+      "id": "Q1330612",
+      "name": "Elise-Tilse-Park",
+      "lat": 52.5003,
+      "lng": 13.3801
+    },
+    {
+      "id": "Q107406113",
+      "name": "Erich-Weinert-Park",
+      "lat": 52.55011,
+      "lng": 13.43086
+    },
+    {
+      "id": "Q140377307",
+      "name": "Erna-Proskauer-Park",
+      "lat": 52.47764,
+      "lng": 13.34385
+    },
+    {
+      "id": "Q15906315",
+      "name": "Ernst-Grube-Park",
+      "lat": 52.451029,
+      "lng": 13.56173
+    },
+    {
+      "id": "Q689324",
+      "name": "Ernst-Thälmann-Park",
+      "lat": 52.538056,
+      "lng": 13.433889
+    },
+    {
+      "id": "Q56512049",
+      "name": "Essener Park",
+      "lat": 52.524722,
+      "lng": 13.340944
+    },
+    {
+      "id": "Q30539483",
+      "name": "EUREF",
+      "lat": 52.481667,
+      "lng": 13.356667
+    },
+    {
+      "id": "Q1375674",
+      "name": "Europarc Dreilinden",
+      "lat": 52.4072,
+      "lng": 13.1881
+    },
+    {
+      "id": "Q20658276",
+      "name": "Factory Berlin",
+      "lat": 52.536806,
+      "lng": 13.394861
+    },
+    {
+      "id": "Q1404794",
+      "name": "Fennpfuhlpark",
+      "lat": 52.528397,
+      "lng": 13.474706
+    },
+    {
+      "id": "Q1410981",
+      "name": "Fichtenberg",
+      "lat": 52.456389,
+      "lng": 13.311694
+    },
+    {
+      "id": "Q1415173",
+      "name": "Filmpark Babelsberg",
+      "lat": 52.38655,
+      "lng": 13.11705
+    },
+    {
+      "id": "Q113673359",
+      "name": "Fischtalpark",
+      "lat": 52.446389,
+      "lng": 13.258333
+    },
+    {
+      "id": "Q109753940",
+      "name": "fitness and motor skills trail",
+      "lat": 52.52949,
+      "lng": 13.36167
+    },
+    {
+      "id": "Q107343382",
+      "name": "Fitnessparcours im Schöneicher Schloßpark",
+      "lat": 52.48053,
+      "lng": 13.70044
+    },
+    {
+      "id": "Q107337249",
+      "name": "Fitnessparcours Rosenfelder Ring",
+      "lat": 52.51128,
+      "lng": 13.51475
+    },
+    {
+      "id": "Q1169176",
+      "name": "Franckepark",
+      "lat": 52.461306,
+      "lng": 13.389114
+    },
+    {
+      "id": "Q107325799",
+      "name": "Freeletics Training Ground",
+      "lat": 52.52278,
+      "lng": 13.39496
+    },
+    {
+      "id": "Q116175042",
+      "name": "Freiflächen der Wohnanlage der BVG Siegfriedstraße 17-27B, Hagenstraße 28-39, Rüdigerstraße 78-81",
+      "lat": 52.516742,
+      "lng": 13.499634
+    },
+    {
+      "id": "Q135189150",
+      "name": "Freizeitpark Lübars",
+      "lat": 52.611223,
+      "lng": 13.368679
+    },
+    {
+      "id": "Q1454998",
+      "name": "Freizeitpark Marienfelde",
+      "lat": 52.401389,
+      "lng": 13.368056
+    },
+    {
+      "id": "Q1457334",
+      "name": "Friedhof Grunewald-Forst",
+      "lat": 52.492652,
+      "lng": 13.210847
+    },
+    {
+      "id": "Q15810544",
+      "name": "Friedhof Rahnsdorf",
+      "lat": 52.437986,
+      "lng": 13.696471
+    },
+    {
+      "id": "Q116140427",
+      "name": "Friedrichsfelde Palace Park",
+      "lat": 52.502692,
+      "lng": 13.525301
+    },
+    {
+      "id": "Q1410149",
+      "name": "Fritz Schloß Park",
+      "lat": 52.528611,
+      "lng": 13.356667
+    },
+    {
+      "id": "Q112206644",
+      "name": "Futranplatz",
+      "lat": 52.44689,
+      "lng": 13.57855
+    },
+    {
+      "id": "Q860309",
+      "name": "Gardens of Charlottenburg Palace",
+      "lat": 52.5212,
+      "lng": 13.2957
+    },
+    {
+      "id": "Q464302",
+      "name": "Gardens of the World",
+      "lat": 52.539444,
+      "lng": 13.576667
+    },
+    {
+      "id": "Q111350415",
+      "name": "Garziner Platz",
+      "lat": 52.49592,
+      "lng": 13.55898
+    },
+    {
+      "id": "Q100782897",
+      "name": "Gatelands",
+      "lat": 52.37608,
+      "lng": 13.54183
+    },
+    {
+      "id": "Q1500491",
+      "name": "Gemeindepark Lankwitz",
+      "lat": 52.430833,
+      "lng": 13.352222
+    },
+    {
+      "id": "Q109836247",
+      "name": "Georg-Kolbe-Hain",
+      "lat": 52.51011,
+      "lng": 13.25106
+    },
+    {
+      "id": "Q111352994",
+      "name": "Georg-von-Siemens-Park",
+      "lat": 52.449055,
+      "lng": 13.358439
+    },
+    {
+      "id": "Q111972989",
+      "name": "Gerhart-Hauptmann-Anlage",
+      "lat": 52.49731,
+      "lng": 13.32978
+    },
+    {
+      "id": "Q15111585",
+      "name": "Geschichtspark Ehemaliges Zellengefängnis Moabit",
+      "lat": 52.526667,
+      "lng": 13.366111
+    },
+    {
+      "id": "Q97705428",
+      "name": "Gewerbepark Georg Knorr",
+      "lat": 52.542861,
+      "lng": 13.538194
+    },
+    {
+      "id": "Q2052591",
+      "name": "Gleisdreieck Park",
+      "lat": 52.4958,
+      "lng": 13.3758
+    },
+    {
+      "id": "Q25089985",
+      "name": "Goethepark",
+      "lat": 52.547032,
+      "lng": 13.337077
+    },
+    {
+      "id": "Q16831607",
+      "name": "Goethepark (Bernau bei Berlin)",
+      "lat": 52.677105,
+      "lng": 13.59054
+    },
+    {
+      "id": "Q896816",
+      "name": "Görlitzer Park",
+      "lat": 52.496419,
+      "lng": 13.437797
+    },
+    {
+      "id": "Q116140695",
+      "name": "Green area at the station Alt-Reinickendorf",
+      "lat": 52.577143,
+      "lng": 13.349099
+    },
+    {
+      "id": "Q109999054",
+      "name": "Griechischer Park",
+      "lat": 52.46425,
+      "lng": 13.51855
+    },
+    {
+      "id": "Q694020",
+      "name": "Großer Tiergarten",
+      "lat": 52.516667,
+      "lng": 13.366667
+    },
+    {
+      "id": "Q131873296",
+      "name": "Grünanlage am Munsterdamm",
+      "lat": 52.454898,
+      "lng": 13.349397
+    },
+    {
+      "id": "Q131873225",
+      "name": "Grünanlage Königsgraben Adolf-Kiepert-Steg",
+      "lat": 52.39836,
+      "lng": 13.375275
+    },
+    {
+      "id": "Q131873265",
+      "name": "Grünanlage Lichtenrader Graben Ost",
+      "lat": 52.39055,
+      "lng": 13.417482
+    },
+    {
+      "id": "Q131873277",
+      "name": "Grünanlage Lützowstraße",
+      "lat": 52.380754,
+      "lng": 13.410927
+    },
+    {
+      "id": "Q131873284",
+      "name": "Grünanlage Rauhe Berge",
+      "lat": 52.456519,
+      "lng": 13.347595
+    },
+    {
+      "id": "Q116140706",
+      "name": "Grünflächen des Buddhistischen Hauses Edelhofdamm 54",
+      "lat": 52.635559,
+      "lng": 13.303637
+    },
+    {
+      "id": "Q130751278",
+      "name": "Gutspark Amalienhof",
+      "lat": 52.520543,
+      "lng": 13.154379
+    },
+    {
+      "id": "Q111269646",
+      "name": "Gutspark Britz",
+      "lat": 52.446474,
+      "lng": 13.439413
+    },
+    {
+      "id": "Q50333435",
+      "name": "Gutspark Falkenberg",
+      "lat": 52.570139,
+      "lng": 13.540406
+    },
+    {
+      "id": "Q29386321",
+      "name": "Gutspark Groß Glienicke",
+      "lat": 52.475591,
+      "lng": 13.115789
+    },
+    {
+      "id": "Q50333431",
+      "name": "Gutspark Lichtenberg",
+      "lat": 52.521786,
+      "lng": 13.481572
+    },
+    {
+      "id": "Q116140607",
+      "name": "Gutspark Mahlsdorf",
+      "lat": 52.501934,
+      "lng": 13.613414
+    },
+    {
+      "id": "Q1557320",
+      "name": "Gutspark Marienfelde",
+      "lat": 52.41,
+      "lng": 13.372778
+    },
+    {
+      "id": "Q105045232",
+      "name": "Gutspark Neukladow",
+      "lat": 52.457739,
+      "lng": 13.158871
+    },
+    {
+      "id": "Q1576739",
+      "name": "Hans-Baluschek-Park",
+      "lat": 52.466944,
+      "lng": 13.359722
+    },
+    {
+      "id": "Q15056556",
+      "name": "Harry-Bresslau-Park",
+      "lat": 52.463449,
+      "lng": 13.322425
+    },
+    {
+      "id": "Q112861580",
+      "name": "Hasselwerder Park",
+      "lat": 52.45747,
+      "lng": 13.51772
+    },
+    {
+      "id": "Q23775658",
+      "name": "Hausburgpark",
+      "lat": 52.525301,
+      "lng": 13.454432
+    },
+    {
+      "id": "Q18287439",
+      "name": "Heinrich-Laehr-Park",
+      "lat": 52.418092,
+      "lng": 13.270004
+    },
+    {
+      "id": "Q1528716",
+      "name": "Heinrich-Lassen-Park",
+      "lat": 52.484556,
+      "lng": 13.348292
+    },
+    {
+      "id": "Q873246",
+      "name": "Heinrich-von-Kleist-Park",
+      "lat": 52.492222,
+      "lng": 13.358611
+    },
+    {
+      "id": "Q55100535",
+      "name": "Heinz-Graffunder-Park",
+      "lat": 52.5221,
+      "lng": 13.54249
+    },
+    {
+      "id": "Q110198480",
+      "name": "Heinz-Knobloch-Platz",
+      "lat": 52.56239,
+      "lng": 13.41132
+    },
+    {
+      "id": "Q25063997",
+      "name": "Henriette-Herz-Park",
+      "lat": 52.511,
+      "lng": 13.3734
+    },
+    {
+      "id": "Q15815185",
+      "name": "Herbert-Krause-Park",
+      "lat": 52.464789,
+      "lng": 13.470563
+    },
+    {
+      "id": "Q17322306",
+      "name": "Hochzeitspark",
+      "lat": 52.550403,
+      "lng": 13.553931
+    },
+    {
+      "id": "Q107420993",
+      "name": "Hohenzollernpark",
+      "lat": 52.55464,
+      "lng": 13.20824
+    },
+    {
+      "id": "Q138631737",
+      "name": "Holland-Park",
+      "lat": 52.620887,
+      "lng": 13.545187
+    },
+    {
+      "id": "Q2532125",
+      "name": "Humboldthain",
+      "lat": 52.547222,
+      "lng": 13.386111
+    },
+    {
+      "id": "Q111608749",
+      "name": "Hydra-Werk AG",
+      "lat": 52.558439,
+      "lng": 13.375562
+    },
+    {
+      "id": "Q116139767",
+      "name": "industrial estate Schillerstraße 94",
+      "lat": 52.510181,
+      "lng": 13.31069
+    },
+    {
+      "id": "Q1671664",
+      "name": "Invalid's Park",
+      "lat": 52.529167,
+      "lng": 13.376389
+    },
+    {
+      "id": "Q136002210",
+      "name": "Jacob-Teitel-Park",
+      "lat": 52.526843,
+      "lng": 13.403905
+    },
+    {
+      "id": "Q140204514",
+      "name": "Jagdschlosspark",
+      "lat": 52.411716,
+      "lng": 13.095928
+    },
+    {
+      "id": "Q100252595",
+      "name": "James-Simon-Park",
+      "lat": 52.521798,
+      "lng": 13.399222
+    },
+    {
+      "id": "Q1494608",
+      "name": "Japanese Garden",
+      "lat": 52.538492,
+      "lng": 13.580272
+    },
+    {
+      "id": "Q1686636",
+      "name": "Jelena-Šantić-Friedenspark",
+      "lat": 52.531111,
+      "lng": 13.585
+    },
+    {
+      "id": "Q28936909",
+      "name": "Johannaplatz",
+      "lat": 52.490009,
+      "lng": 13.281657
+    },
+    {
+      "id": "Q111333233",
+      "name": "Johannisthaler Park",
+      "lat": 52.448901,
+      "lng": 13.508949
+    },
+    {
+      "id": "Q1713427",
+      "name": "Jungfernheide",
+      "lat": 52.543,
+      "lng": 13.287
+    },
+    {
+      "id": "Q110645270",
+      "name": "Jürgen-Kuczynski-Park",
+      "lat": 52.55298,
+      "lng": 13.45252
+    },
+    {
+      "id": "Q112156111",
+      "name": "Kanzlergarten",
+      "lat": 52.52024,
+      "lng": 13.36255
+    },
+    {
+      "id": "Q94435481",
+      "name": "Karl-Holtz-Platz",
+      "lat": 52.55318,
+      "lng": 13.56909
+    },
+    {
+      "id": "Q111336230",
+      "name": "Kienbergpark",
+      "lat": 52.530532,
+      "lng": 13.590055
+    },
+    {
+      "id": "Q57699363",
+      "name": "Kienhorstpark",
+      "lat": 52.577446,
+      "lng": 13.345077
+    },
+    {
+      "id": "Q17048402",
+      "name": "Kiezpark Fortuna",
+      "lat": 52.557673,
+      "lng": 13.572454
+    },
+    {
+      "id": "Q84574503",
+      "name": "Kiezpark Schönagelstraße",
+      "lat": 52.54848,
+      "lng": 13.57123
+    },
+    {
+      "id": "Q116058306",
+      "name": "Kitty-Kuse-Platz",
+      "lat": 52.48122,
+      "lng": 13.36429
+    },
+    {
+      "id": "Q113054",
+      "name": "Kleiner Spreewald Park in Schöneiche bei Berlin",
+      "lat": 52.4731,
+      "lng": 13.6964
+    },
+    {
+      "id": "Q1746704",
+      "name": "Kleiner Tiergarten",
+      "lat": 52.525556,
+      "lng": 13.346111
+    },
+    {
+      "id": "Q91891758",
+      "name": "Klemkepark",
+      "lat": 52.575693,
+      "lng": 13.362695
+    },
+    {
+      "id": "Q112778880",
+      "name": "Klinkepark",
+      "lat": 52.55581,
+      "lng": 13.19894
+    },
+    {
+      "id": "Q33133250",
+      "name": "Koeltzepark",
+      "lat": 52.546319,
+      "lng": 13.204094
+    },
+    {
+      "id": "Q95640",
+      "name": "Köllnischer Park",
+      "lat": 52.5131,
+      "lng": 13.4147
+    },
+    {
+      "id": "Q31226",
+      "name": "Körnerpark",
+      "lat": 52.471944,
+      "lng": 13.437778
+    },
+    {
+      "id": "Q1786871",
+      "name": "Krausnickpark",
+      "lat": 52.524592,
+      "lng": 13.397728
+    },
+    {
+      "id": "Q126852931",
+      "name": "Külzpark",
+      "lat": 52.67802,
+      "lng": 13.59237
+    },
+    {
+      "id": "Q22936439",
+      "name": "Kurpark Friedrichshagen",
+      "lat": 52.4584,
+      "lng": 13.622618
+    },
+    {
+      "id": "Q1524361",
+      "name": "Kurt-Hiller-Park",
+      "lat": 52.4901,
+      "lng": 13.3583
+    },
+    {
+      "id": "Q108601058",
+      "name": "Kurt-Julius-Goldstein-Park",
+      "lat": 52.53618,
+      "lng": 13.6085
+    },
+    {
+      "id": "Q107147195",
+      "name": "Landschaftspark am Gehrensee",
+      "lat": 52.57695,
+      "lng": 13.56268
+    },
+    {
+      "id": "Q1803789",
+      "name": "Landschaftspark Herzberge",
+      "lat": 52.525556,
+      "lng": 13.51
+    },
+    {
+      "id": "Q14920453",
+      "name": "Landschaftspark Wartenberger Feldmark",
+      "lat": 52.5829,
+      "lng": 13.5072
+    },
+    {
+      "id": "Q111336333",
+      "name": "Landschaftspark Wuhletal",
+      "lat": 52.51443,
+      "lng": 13.57293
+    },
+    {
+      "id": "Q1413243",
+      "name": "Lehnepark, Berlin",
+      "lat": 52.464172,
+      "lng": 13.382811
+    },
+    {
+      "id": "Q26254879",
+      "name": "Leise-Park",
+      "lat": 52.530556,
+      "lng": 13.420833
+    },
+    {
+      "id": "Q101647501",
+      "name": "Lenné-Park Blumberg",
+      "lat": 52.604558,
+      "lng": 13.625879
+    },
+    {
+      "id": "Q123169561",
+      "name": "Lesegarten",
+      "lat": 52.54299,
+      "lng": 13.55863
+    },
+    {
+      "id": "Q1820938",
+      "name": "Lessinghöhe",
+      "lat": 52.4753,
+      "lng": 13.4363
+    },
+    {
+      "id": "Q122187190",
+      "name": "Liberty-Park",
+      "lat": 52.53871,
+      "lng": 13.59924
+    },
+    {
+      "id": "Q1543772",
+      "name": "Lichtenrader Volkspark",
+      "lat": 52.392222,
+      "lng": 13.413611
+    },
+    {
+      "id": "Q109783504",
+      "name": "Lietzenseepark",
+      "lat": 52.50502,
+      "lng": 13.28731
+    },
+    {
+      "id": "Q32319519",
+      "name": "Lilienthalpark",
+      "lat": 52.41339,
+      "lng": 13.32901
+    },
+    {
+      "id": "Q14536836",
+      "name": "Ludwig Lesser Park",
+      "lat": 52.6397,
+      "lng": 13.2892
+    },
+    {
+      "id": "Q21777213",
+      "name": "Ludwigkirchplatz",
+      "lat": 52.497628,
+      "lng": 13.321694
+    },
+    {
+      "id": "Q54643621",
+      "name": "Luisenhain",
+      "lat": 52.445511,
+      "lng": 13.573669
+    },
+    {
+      "id": "Q1876712",
+      "name": "Luiseninsel",
+      "lat": 52.511,
+      "lng": 13.3643
+    },
+    {
+      "id": "Q15118909",
+      "name": "Luisenstädtischer Kirchpark",
+      "lat": 52.508986,
+      "lng": 13.407269
+    },
+    {
+      "id": "Q702512",
+      "name": "Lustgarten",
+      "lat": 52.518611,
+      "lng": 13.399722
+    },
+    {
+      "id": "Q140320905",
+      "name": "Margarete-und-Arthur-Eloesser-Park",
+      "lat": 52.503728,
+      "lng": 13.301735
+    },
+    {
+      "id": "Q16218240",
+      "name": "Maria-Jankowski-Park",
+      "lat": 52.452305,
+      "lng": 13.572621
+    },
+    {
+      "id": "Q23785460",
+      "name": "Marienpark Berlin",
+      "lat": 52.44,
+      "lng": 13.370833
+    },
+    {
+      "id": "Q1900702",
+      "name": "Markgrafenpark",
+      "lat": 52.5062,
+      "lng": 13.3962
+    },
+    {
+      "id": "Q31752",
+      "name": "Marx-Engels Forum",
+      "lat": 52.5183,
+      "lng": 13.4042
+    },
+    {
+      "id": "Q84246211",
+      "name": "Maselakepark",
+      "lat": 52.55546,
+      "lng": 13.21432
+    },
+    {
+      "id": "Q639887",
+      "name": "Mauerpark",
+      "lat": 52.543611,
+      "lng": 13.403333
+    },
+    {
+      "id": "Q27069580",
+      "name": "Max-Josef-Metzger-Platz",
+      "lat": 52.544444,
+      "lng": 13.363889
+    },
+    {
+      "id": "Q135974872",
+      "name": "Mehrgenerationenplatz \"Drei Grazien\"",
+      "lat": 52.540404,
+      "lng": 13.450656
+    },
+    {
+      "id": "Q110798262",
+      "name": "Melli-Beese-Anlage",
+      "lat": 52.49447,
+      "lng": 13.2895
+    },
+    {
+      "id": "Q1243413",
+      "name": "Mendelssohn-Bartholdy-Park",
+      "lat": 52.5029,
+      "lng": 13.3766
+    },
+    {
+      "id": "Q15867295",
+      "name": "Mentzelpark",
+      "lat": 52.449075,
+      "lng": 13.568029
+    },
+    {
+      "id": "Q28931462",
+      "name": "Messelpark",
+      "lat": 52.470425,
+      "lng": 13.284497
+    },
+    {
+      "id": "Q1932161",
+      "name": "Mierendorffplatz",
+      "lat": 52.5265,
+      "lng": 13.3051
+    },
+    {
+      "id": "Q1941902",
+      "name": "Modellpark Wuhlheide",
+      "lat": 52.4669,
+      "lng": 13.5265
+    },
+    {
+      "id": "Q320525",
+      "name": "Monbijou Park",
+      "lat": 52.5231,
+      "lng": 13.3969
+    },
+    {
+      "id": "Q81742348",
+      "name": "Müggelpark",
+      "lat": 52.44487,
+      "lng": 13.626811
+    },
+    {
+      "id": "Q1422089",
+      "name": "Natur-Park Südgelände",
+      "lat": 52.459736,
+      "lng": 13.358003
+    },
+    {
+      "id": "Q1975500",
+      "name": "Nelly-Sachs-Park",
+      "lat": 52.498033,
+      "lng": 13.367153
+    },
+    {
+      "id": "Q24199442",
+      "name": "Neue Wiesen",
+      "lat": 52.602472,
+      "lng": 13.495083
+    },
+    {
+      "id": "Q50358747",
+      "name": "Nibelungenpark",
+      "lat": 52.51729,
+      "lng": 13.50133
+    },
+    {
+      "id": "Q41721427",
+      "name": "Nordhafenpark",
+      "lat": 52.537667,
+      "lng": 13.363889
+    },
+    {
+      "id": "Q25089180",
+      "name": "Nordpark",
+      "lat": 52.405048,
+      "lng": 13.504601
+    },
+    {
+      "id": "Q2010055",
+      "name": "Oberlandpark, Berlin",
+      "lat": 52.463292,
+      "lng": 13.419061
+    },
+    {
+      "id": "Q107484891",
+      "name": "Oberseepark",
+      "lat": 52.54788,
+      "lng": 13.489
+    },
+    {
+      "id": "Q116140697",
+      "name": "Öffentliche Grünanlage Am Schäfersee",
+      "lat": 52.56419,
+      "lng": 13.360156
+    },
+    {
+      "id": "Q108198116",
+      "name": "Onkel-Emil-Park",
+      "lat": 52.465328,
+      "lng": 13.324738
+    },
+    {
+      "id": "Q1494603",
+      "name": "Oriental-Islamic Garden",
+      "lat": 52.539794,
+      "lng": 13.575633
+    },
+    {
+      "id": "Q14540471",
+      "name": "Österreichpark",
+      "lat": 52.521914,
+      "lng": 13.30435
+    },
+    {
+      "id": "Q107406181",
+      "name": "Ostseeplatz",
+      "lat": 52.54709,
+      "lng": 13.44057
+    },
+    {
+      "id": "Q56479329",
+      "name": "Ottopark",
+      "lat": 52.525667,
+      "lng": 13.337083
+    },
+    {
+      "id": "Q117347790",
+      "name": "Outdoor fitness exercise stations at Rosenbecker Straße",
+      "lat": 52.56978,
+      "lng": 13.57147
+    },
+    {
+      "id": "Q118233714",
+      "name": "Outdoor fitness station at Lietzenseepark",
+      "lat": 52.50883,
+      "lng": 13.290313
+    },
+    {
+      "id": "Q15839544",
+      "name": "Park am Buschkrug",
+      "lat": 52.453721,
+      "lng": 13.449218
+    },
+    {
+      "id": "Q1482620",
+      "name": "Park am Nordbahnhof",
+      "lat": 52.535,
+      "lng": 13.384
+    },
+    {
+      "id": "Q59137196",
+      "name": "Park am Rathaus Lankwitz",
+      "lat": 52.437,
+      "lng": 13.343
+    },
+    {
+      "id": "Q32319241",
+      "name": "Park am Teltowkanal",
+      "lat": 52.433155,
+      "lng": 13.315867
+    },
+    {
+      "id": "Q113534802",
+      "name": "Park am Weidengrund",
+      "lat": 52.55981,
+      "lng": 13.57697
+    },
+    {
+      "id": "Q1423690",
+      "name": "Park am Weißen See",
+      "lat": 52.554167,
+      "lng": 13.464028
+    },
+    {
+      "id": "Q2052594",
+      "name": "Park an der Spree",
+      "lat": 52.5073,
+      "lng": 13.4353
+    },
+    {
+      "id": "Q109925428",
+      "name": "Park an der Südpanke",
+      "lat": 52.5331,
+      "lng": 13.3744
+    },
+    {
+      "id": "Q62998895",
+      "name": "park at the TV-Tower Berlin",
+      "lat": 52.52019,
+      "lng": 13.40797
+    },
+    {
+      "id": "Q1941334",
+      "name": "Park auf dem Moabiter Werder",
+      "lat": 52.518333,
+      "lng": 13.358333
+    },
+    {
+      "id": "Q117481529",
+      "name": "Park für heimatlose Skulpturen",
+      "lat": 52.56257,
+      "lng": 13.42681
+    },
+    {
+      "id": "Q2052534",
+      "name": "Park Glienicke",
+      "lat": 52.4167,
+      "lng": 13.1
+    },
+    {
+      "id": "Q116140712",
+      "name": "Parkanlage des St.-Josefs-Altenheimes",
+      "lat": 52.621987,
+      "lng": 13.29771
+    },
+    {
+      "id": "Q133415583",
+      "name": "Parkour Island THF",
+      "lat": 52.472158,
+      "lng": 13.41664
+    },
+    {
+      "id": "Q116140729",
+      "name": "Parkring Neu-Tempelhof",
+      "lat": 52.479054,
+      "lng": 13.377762
+    },
+    {
+      "id": "Q111369460",
+      "name": "Paul-Ernst-Park",
+      "lat": 52.44361,
+      "lng": 13.219756
+    },
+    {
+      "id": "Q137753462",
+      "name": "Paul-Henckels-Platz",
+      "lat": 52.457949,
+      "lng": 13.311958
+    },
+    {
+      "id": "Q139907221",
+      "name": "Paul-Mebes-Park",
+      "lat": 52.432626,
+      "lng": 13.246186
+    },
+    {
+      "id": "Q113455613",
+      "name": "Paul-Poser-Platz",
+      "lat": 52.62662,
+      "lng": 13.28069
+    },
+    {
+      "id": "Q122975035",
+      "name": "Paule-Park",
+      "lat": 52.57088,
+      "lng": 13.4023
+    },
+    {
+      "id": "Q111583571",
+      "name": "Peter-Weiss-Platz",
+      "lat": 52.53928,
+      "lng": 13.60891
+    },
+    {
+      "id": "Q117477950",
+      "name": "Peter-Witte-Park",
+      "lat": 52.58833,
+      "lng": 13.32941
+    },
+    {
+      "id": "Q111993536",
+      "name": "Plänterwald",
+      "lat": 52.4796,
+      "lng": 13.49
+    },
+    {
+      "id": "Q111360753",
+      "name": "Platz des 23. April",
+      "lat": 52.45065,
+      "lng": 13.57347
+    },
+    {
+      "id": "Q118131630",
+      "name": "Pleasureground Glienicke",
+      "lat": 52.414429,
+      "lng": 13.09423
+    },
+    {
+      "id": "Q140502415",
+      "name": "Pocketpark",
+      "lat": 52.565899,
+      "lng": 13.399165
+    },
+    {
+      "id": "Q107420716",
+      "name": "Poelzigpark",
+      "lat": 52.55937,
+      "lng": 13.21817
+    },
+    {
+      "id": "Q2114970",
+      "name": "Presidential Triangle",
+      "lat": 52.518889,
+      "lng": 13.353889
+    },
+    {
+      "id": "Q21777340",
+      "name": "Preußenpark",
+      "lat": 52.492433,
+      "lng": 13.313317
+    },
+    {
+      "id": "Q108104125",
+      "name": "pull-up bars Neues Ufer",
+      "lat": 52.523272,
+      "lng": 13.318097
+    },
+    {
+      "id": "Q50366954",
+      "name": "Quartierspark Mellenseestraße",
+      "lat": 52.49183,
+      "lng": 13.51045
+    },
+    {
+      "id": "Q23787879",
+      "name": "Quartierspark Randowstraße",
+      "lat": 52.566186,
+      "lng": 13.526224
+    },
+    {
+      "id": "Q2122380",
+      "name": "Quartierspark Rosenfelder Ring",
+      "lat": 52.5117,
+      "lng": 13.5147
+    },
+    {
+      "id": "Q128116738",
+      "name": "Quartierspark Warnitzer Bogen",
+      "lat": 52.5676,
+      "lng": 13.51981
+    },
+    {
+      "id": "Q47004106",
+      "name": "Rathauspark",
+      "lat": 52.515014,
+      "lng": 13.479581
+    },
+    {
+      "id": "Q114865596",
+      "name": "Reading garden at the Schiller Library",
+      "lat": 52.54651,
+      "lng": 13.35681
+    },
+    {
+      "id": "Q2138042",
+      "name": "Regine-Hildebrandt-Park",
+      "lat": 52.5351,
+      "lng": 13.6036
+    },
+    {
+      "id": "Q16292819",
+      "name": "Rheinsteinpark",
+      "lat": 52.482833,
+      "lng": 13.531036
+    },
+    {
+      "id": "Q2155179",
+      "name": "Ritterhof",
+      "lat": 52.5013,
+      "lng": 13.4114
+    },
+    {
+      "id": "Q106439203",
+      "name": "Ronnebypromenade",
+      "lat": 52.42117,
+      "lng": 13.17551
+    },
+    {
+      "id": "Q140130778",
+      "name": "rose garden at the Gardens of the World",
+      "lat": 52.538079,
+      "lng": 13.574172
+    },
+    {
+      "id": "Q136757365",
+      "name": "Rosenanger Park",
+      "lat": 52.629169,
+      "lng": 13.302
+    },
+    {
+      "id": "Q15126365",
+      "name": "Rosengarten",
+      "lat": 52.513857,
+      "lng": 13.357304
+    },
+    {
+      "id": "Q1264737",
+      "name": "Rousseau Island",
+      "lat": 52.51227,
+      "lng": 13.35798
+    },
+    {
+      "id": "Q881622",
+      "name": "Rudolph-Wilde-Park",
+      "lat": 52.483611,
+      "lng": 13.342222
+    },
+    {
+      "id": "Q18558325",
+      "name": "Ruhwaldpark",
+      "lat": 52.523889,
+      "lng": 13.258889
+    },
+    {
+      "id": "Q111939668",
+      "name": "Ruth-Andreas-Friedrich-Park",
+      "lat": 52.45541,
+      "lng": 13.30977
+    },
+    {
+      "id": "Q883008",
+      "name": "Schillerpark",
+      "lat": 52.5564,
+      "lng": 13.3525
+    },
+    {
+      "id": "Q1313714",
+      "name": "Schleipfuhl",
+      "lat": 52.5283,
+      "lng": 13.6103
+    },
+    {
+      "id": "Q1297200",
+      "name": "Schlesischer Busch",
+      "lat": 52.4955,
+      "lng": 13.4497
+    },
+    {
+      "id": "Q67319430",
+      "name": "Schlosspark Bellevue",
+      "lat": 52.5179,
+      "lng": 13.3508
+    },
+    {
+      "id": "Q24796469",
+      "name": "Schlosspark Biesdorf",
+      "lat": 52.5111,
+      "lng": 13.559417
+    },
+    {
+      "id": "Q24575493",
+      "name": "Schlosspark Buch",
+      "lat": 52.637,
+      "lng": 13.496367
+    },
+    {
+      "id": "Q140235152",
+      "name": "Schloßpark Glienicke",
+      "lat": 52.414504,
+      "lng": 13.093922
+    },
+    {
+      "id": "Q32319282",
+      "name": "Schloßpark Lichterfelde",
+      "lat": 52.4384,
+      "lng": 13.3181
+    },
+    {
+      "id": "Q107343450",
+      "name": "Schlosspark Schöneiche",
+      "lat": 52.48031,
+      "lng": 13.69958
+    },
+    {
+      "id": "Q105045374",
+      "name": "Schlosspark Schönhausen",
+      "lat": 52.577747,
+      "lng": 13.408411
+    },
+    {
+      "id": "Q116140691",
+      "name": "Schlosspark Tegel",
+      "lat": 52.595377,
+      "lng": 13.271879
+    },
+    {
+      "id": "Q107337216",
+      "name": "Schmetterlingswiesen",
+      "lat": 52.50015,
+      "lng": 13.57113
+    },
+    {
+      "id": "Q105119601",
+      "name": "Schoelerpark",
+      "lat": 52.484583,
+      "lng": 13.326833
+    },
+    {
+      "id": "Q18289358",
+      "name": "Schönower Park",
+      "lat": 52.427402,
+      "lng": 13.262773
+    },
+    {
+      "id": "Q2533101",
+      "name": "Schulenburgpark",
+      "lat": 52.467222,
+      "lng": 13.471111
+    },
+    {
+      "id": "Q2252095",
+      "name": "Schustehruspark",
+      "lat": 52.516344,
+      "lng": 13.299053
+    },
+    {
+      "id": "Q107135279",
+      "name": "Schwarzwurzelpark",
+      "lat": 52.56895,
+      "lng": 13.55804
+    },
+    {
+      "id": "Q136799326",
+      "name": "sculpture garden Evangelisches Krankenhaus Königin Elisabeth Herzberge",
+      "lat": 52.526813,
+      "lng": 13.507234
+    },
+    {
+      "id": "Q131453492",
+      "name": "sculpture garden of the Kunsthaus Dahlem",
+      "lat": 52.466325,
+      "lng": 13.274821
+    },
+    {
+      "id": "Q821279",
+      "name": "Sculpture garden of the Neue Nationalgalerie",
+      "lat": 52.507,
+      "lng": 13.367
+    },
+    {
+      "id": "Q110344730",
+      "name": "Sculpture park Campus Berlin-Buch",
+      "lat": 52.62617,
+      "lng": 13.50392
+    },
+    {
+      "id": "Q106822186",
+      "name": "Seelgrabenpark",
+      "lat": 52.5642,
+      "lng": 13.561
+    },
+    {
+      "id": "Q2265462",
+      "name": "Seepark",
+      "lat": 52.481111,
+      "lng": 13.514167
+    },
+    {
+      "id": "Q117358750",
+      "name": "Siedlungsgrün der Weißen Stadt",
+      "lat": 52.569618,
+      "lng": 13.351845
+    },
+    {
+      "id": "Q111345328",
+      "name": "Siegfried-Hirschmann-Park",
+      "lat": 52.50844,
+      "lng": 13.46814
+    },
+    {
+      "id": "Q2284267",
+      "name": "Siemens-Villa",
+      "lat": 52.438611,
+      "lng": 13.328611
+    },
+    {
+      "id": "Q2293079",
+      "name": "Skulpturengarten AVK",
+      "lat": 52.4625,
+      "lng": 13.346389
+    },
+    {
+      "id": "Q21468462",
+      "name": "South Park",
+      "lat": 52.400644,
+      "lng": 13.506553
+    },
+    {
+      "id": "Q820209",
+      "name": "Späth-Arboretum",
+      "lat": 52.4549,
+      "lng": 13.4748
+    },
+    {
+      "id": "Q107421113",
+      "name": "Spektepark",
+      "lat": 52.54661,
+      "lng": 13.16547
+    },
+    {
+      "id": "Q2313429",
+      "name": "Spreebogenpark",
+      "lat": 52.5225,
+      "lng": 13.372222
+    },
+    {
+      "id": "Q42409360",
+      "name": "Sprengelpark",
+      "lat": 52.541111,
+      "lng": 13.353056
+    },
+    {
+      "id": "Q28859935",
+      "name": "Springpfuhlpark",
+      "lat": 52.529483,
+      "lng": 13.539617
+    },
+    {
+      "id": "Q107521255",
+      "name": "Stadtgarten Biesdorf",
+      "lat": 52.50574,
+      "lng": 13.55481
+    },
+    {
+      "id": "Q137859322",
+      "name": "Stadtgarten Moabit",
+      "lat": 52.533938,
+      "lng": 13.337223
+    },
+    {
+      "id": "Q16857205",
+      "name": "Stadtpark",
+      "lat": 52.679094,
+      "lng": 13.584161
+    },
+    {
+      "id": "Q107446440",
+      "name": "Stadtpark Biesdorf",
+      "lat": 52.50214,
+      "lng": 13.5675
+    },
+    {
+      "id": "Q1793017",
+      "name": "Stadtpark Lichtenberg",
+      "lat": 52.518375,
+      "lng": 13.476781
+    },
+    {
+      "id": "Q14912409",
+      "name": "Stadtpark Steglitz",
+      "lat": 52.4484,
+      "lng": 13.3354
+    },
+    {
+      "id": "Q134579421",
+      "name": "Steglitzer Woche",
+      "lat": 52.434694,
+      "lng": 13.318056
+    },
+    {
+      "id": "Q1546008",
+      "name": "Steinbergpark",
+      "lat": 52.5986,
+      "lng": 13.3083
+    },
+    {
+      "id": "Q109734179",
+      "name": "Street-Workout-Park",
+      "lat": 52.52945,
+      "lng": 13.36068
+    },
+    {
+      "id": "Q113500890",
+      "name": "Südpark",
+      "lat": 52.51227,
+      "lng": 13.40054
+    },
+    {
+      "id": "Q33085080",
+      "name": "Südpark, Spandau",
+      "lat": 52.515403,
+      "lng": 13.192625
+    },
+    {
+      "id": "Q52835031",
+      "name": "Sven-Hedin-Platz",
+      "lat": 52.441028,
+      "lng": 13.245056
+    },
+    {
+      "id": "Q111347509",
+      "name": "Syringenplatz",
+      "lat": 52.5342,
+      "lng": 13.45754
+    },
+    {
+      "id": "Q2402748",
+      "name": "Tempelhofer Feld",
+      "lat": 52.4733,
+      "lng": 13.4014
+    },
+    {
+      "id": "Q1755194",
+      "name": "Teutoburger Platz",
+      "lat": 52.532019,
+      "lng": 13.408864
+    },
+    {
+      "id": "Q1630549",
+      "name": "Theodor-Wolff-Park",
+      "lat": 52.501431,
+      "lng": 13.390006
+    },
+    {
+      "id": "Q19933519",
+      "name": "Thielpark",
+      "lat": 52.453379,
+      "lng": 13.2814
+    },
+    {
+      "id": "Q71028343",
+      "name": "Tiergarten Teltow",
+      "lat": 52.39783,
+      "lng": 13.28671
+    },
+    {
+      "id": "Q702771",
+      "name": "Tierpark Berlin",
+      "lat": 52.500278,
+      "lng": 13.5325
+    },
+    {
+      "id": "Q1682390",
+      "name": "Tilla-Durieux-Park",
+      "lat": 52.506344,
+      "lng": 13.375111
+    },
+    {
+      "id": "Q666937",
+      "name": "Treptower Park",
+      "lat": 52.490278,
+      "lng": 13.47
+    },
+    {
+      "id": "Q111342713",
+      "name": "Triftpark",
+      "lat": 52.593,
+      "lng": 13.317707
+    },
+    {
+      "id": "Q113559919",
+      "name": "Turnbar",
+      "lat": 52.543831,
+      "lng": 13.364308
+    },
+    {
+      "id": "Q115185399",
+      "name": "Türrschmidtpark",
+      "lat": 52.5031,
+      "lng": 13.47614
+    },
+    {
+      "id": "Q107109994",
+      "name": "Unionpark",
+      "lat": 52.531694,
+      "lng": 13.337778
+    },
+    {
+      "id": "Q2467211",
+      "name": "Universum Landes-Ausstellungs-Park",
+      "lat": 52.523122,
+      "lng": 13.365089
+    },
+    {
+      "id": "Q116679346",
+      "name": "Ursula-Mamlok-Park",
+      "lat": 52.49589,
+      "lng": 13.35563
+    },
+    {
+      "id": "Q138784322",
+      "name": "Venusplatz",
+      "lat": 52.468722,
+      "lng": 13.466253
+    },
+    {
+      "id": "Q566495",
+      "name": "Viktoriapark",
+      "lat": 52.488889,
+      "lng": 13.380556
+    },
+    {
+      "id": "Q50902578",
+      "name": "Villengarten Sabersky",
+      "lat": 52.40583,
+      "lng": 13.28473
+    },
+    {
+      "id": "Q1648437",
+      "name": "Volkspark am Weinbergsweg",
+      "lat": 52.531944,
+      "lng": 13.401389
+    },
+    {
+      "id": "Q15853129",
+      "name": "Volkspark Anton Saefkow",
+      "lat": 52.536599,
+      "lng": 13.443983
+    },
+    {
+      "id": "Q648023",
+      "name": "Volkspark Friedrichshain",
+      "lat": 52.526667,
+      "lng": 13.433889
+    },
+    {
+      "id": "Q2027549",
+      "name": "Volkspark Hasenheide",
+      "lat": 52.484,
+      "lng": 13.416
+    },
+    {
+      "id": "Q31122415",
+      "name": "Volkspark Köpenick",
+      "lat": 52.440392,
+      "lng": 13.590521
+    },
+    {
+      "id": "Q24188576",
+      "name": "Volkspark Malchower See",
+      "lat": 52.571533,
+      "lng": 13.487667
+    },
+    {
+      "id": "Q427819",
+      "name": "Volkspark Mariendorf",
+      "lat": 52.442097,
+      "lng": 13.391592
+    },
+    {
+      "id": "Q877341",
+      "name": "Volkspark Prenzlauer Berg",
+      "lat": 52.536667,
+      "lng": 13.462222
+    },
+    {
+      "id": "Q2532119",
+      "name": "Volkspark Rehberge",
+      "lat": 52.550833,
+      "lng": 13.330833
+    },
+    {
+      "id": "Q2369660",
+      "name": "Volkspark Schönholzer Heide",
+      "lat": 52.576389,
+      "lng": 13.383333
+    },
+    {
+      "id": "Q1371159",
+      "name": "Volkspark Wilmersdorf",
+      "lat": 52.483611,
+      "lng": 13.324167
+    },
+    {
+      "id": "Q113604533",
+      "name": "Volkspark Wittenau",
+      "lat": 52.59529,
+      "lng": 13.3294
+    },
+    {
+      "id": "Q2532136",
+      "name": "Volkspark Wuhlheide",
+      "lat": 52.46667,
+      "lng": 13.52639
+    },
+    {
+      "id": "Q2541259",
+      "name": "Waldeckpark",
+      "lat": 52.506186,
+      "lng": 13.402839
+    },
+    {
+      "id": "Q17429818",
+      "name": "Waldowpark",
+      "lat": 52.506663,
+      "lng": 13.609166
+    },
+    {
+      "id": "Q63283683",
+      "name": "Waldpark Hakenfelder Straße",
+      "lat": 52.56605,
+      "lng": 13.20634
+    },
+    {
+      "id": "Q124957312",
+      "name": "Walslebener Platz",
+      "lat": 52.49752,
+      "lng": 13.54927
+    },
+    {
+      "id": "Q2549921",
+      "name": "Wartburgplatz",
+      "lat": 52.487503,
+      "lng": 13.346228
+    },
+    {
+      "id": "Q32651297",
+      "name": "Wasserturmplatz",
+      "lat": 52.533692,
+      "lng": 13.418009
+    },
+    {
+      "id": "Q124324610",
+      "name": "Wellenpark",
+      "lat": 52.54436,
+      "lng": 13.57431
+    },
+    {
+      "id": "Q136002234",
+      "name": "Werner-Klemke-Park",
+      "lat": 52.554419,
+      "lng": 13.456041
+    },
+    {
+      "id": "Q1575487",
+      "name": "Wiesenpark",
+      "lat": 52.5445,
+      "lng": 13.5804
+    },
+    {
+      "id": "Q112748553",
+      "name": "Wilhelm-von-Siemens-Park",
+      "lat": 52.54318,
+      "lng": 13.26755
+    },
+    {
+      "id": "Q1670887",
+      "name": "Wilmersdorfer See",
+      "lat": 52.483611,
+      "lng": 13.324167
+    },
+    {
+      "id": "Q110751397",
+      "name": "Wisbyer Platz",
+      "lat": 52.55354,
+      "lng": 13.42144
+    },
+    {
+      "id": "Q2537326",
+      "name": "WISTA",
+      "lat": 52.430226,
+      "lng": 13.531154
+    },
+    {
+      "id": "Q2594569",
+      "name": "Wröhmännerpark",
+      "lat": 52.542222,
+      "lng": 13.207222
+    },
+    {
+      "id": "Q113515839",
+      "name": "Wuhle-Park",
+      "lat": 52.57877,
+      "lng": 13.57513
+    },
+    {
+      "id": "Q65238735",
+      "name": "Wuhlheide Innovation Park",
+      "lat": 52.46891,
+      "lng": 13.56407
+    },
+    {
+      "id": "Q2596575",
+      "name": "Wühlischplatz",
+      "lat": 52.5074,
+      "lng": 13.4647
+    },
+    {
+      "id": "Q122959053",
+      "name": "Wustrower Park",
+      "lat": 52.5692,
+      "lng": 13.5074
+    },
+    {
+      "id": "Q145747",
+      "name": "Zamenhofpark",
+      "lat": 52.5094,
+      "lng": 13.5036
+    },
+    {
+      "id": "Q190494",
+      "name": "Zentralfriedhof Friedrichsfelde",
+      "lat": 52.515556,
+      "lng": 13.510556
+    },
+    {
+      "id": "Q23787543",
+      "name": "Ziegenhof",
+      "lat": 52.514336,
+      "lng": 13.289924
+    }
+  ]
+}

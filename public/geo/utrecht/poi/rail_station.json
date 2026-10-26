@@ -1,0 +1,108 @@
+{
+  "category": "rail_station",
+  "source": "wikidata",
+  "bbox": {
+    "south": 52.0163,
+    "west": 4.9601,
+    "north": 52.1521,
+    "east": 5.2052
+  },
+  "places": [
+    {
+      "id": "Q2400048",
+      "name": "Bunnik railway station",
+      "lat": 52.063056,
+      "lng": 5.194167
+    },
+    {
+      "id": "Q13734579",
+      "name": "CS Jaarbeursplein",
+      "lat": 52.0896,
+      "lng": 5.10578
+    },
+    {
+      "id": "Q1914597",
+      "name": "Houten Castellum railway station",
+      "lat": 52.016944,
+      "lng": 5.179444
+    },
+    {
+      "id": "Q800938",
+      "name": "Houten railway station",
+      "lat": 52.034167,
+      "lng": 5.167778
+    },
+    {
+      "id": "Q2266645",
+      "name": "Maarssen railway station",
+      "lat": 52.135278,
+      "lng": 5.033611
+    },
+    {
+      "id": "Q2495188",
+      "name": "Stopplaats Mereveldscheweg",
+      "lat": 52.05754,
+      "lng": 5.15187
+    },
+    {
+      "id": "Q14405573",
+      "name": "Stopplaats Vechtbrug",
+      "lat": 52.10462,
+      "lng": 5.10974
+    },
+    {
+      "id": "Q575655",
+      "name": "Utrecht Centraal railway station",
+      "lat": 52.089316,
+      "lng": 5.109972
+    },
+    {
+      "id": "Q2163764",
+      "name": "Utrecht Leidsche Rijn railway station",
+      "lat": 52.098611,
+      "lng": 5.068333
+    },
+    {
+      "id": "Q2987782",
+      "name": "Utrecht Lunetten railway station",
+      "lat": 52.065556,
+      "lng": 5.143333
+    },
+    {
+      "id": "Q2632448",
+      "name": "Utrecht Maliebaan railway station",
+      "lat": 52.087889,
+      "lng": 5.131222
+    },
+    {
+      "id": "Q2542171",
+      "name": "Utrecht Overvecht railway station",
+      "lat": 52.11,
+      "lng": 5.125278
+    },
+    {
+      "id": "Q2303538",
+      "name": "Utrecht Terwijde railway station",
+      "lat": 52.100833,
+      "lng": 5.043056
+    },
+    {
+      "id": "Q3397831",
+      "name": "Utrecht Vaartsche Rijn railway station",
+      "lat": 52.078889,
+      "lng": 5.121667
+    },
+    {
+      "id": "Q656925",
+      "name": "Utrecht Zuilen railway station",
+      "lat": 52.103333,
+      "lng": 5.088889
+    },
+    {
+      "id": "Q2222369",
+      "name": "Vleuten railway station",
+      "lat": 52.103056,
+      "lng": 5.011944
+    }
+  ]
+}
