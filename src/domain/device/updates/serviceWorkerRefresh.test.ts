@@ -9,6 +9,72 @@ import {
   shouldAutoApplyServiceWorkerUpdate,
 } from "./serviceWorkerRefresh";
 
+function stubReloadAndController() {
+  const reload = vi.fn();
+  const listeners = new Map<string, Set<EventListener>>();
+  const originalLocation = window.location;
+  const originalServiceWorker = Object.getOwnPropertyDescriptor(
+    Navigator.prototype,
+    "serviceWorker",
+  );
+  const hadOwnServiceWorker = Object.hasOwn(navigator, "serviceWorker");
+  const previousOwnServiceWorker = hadOwnServiceWorker
+    ? (navigator as Navigator & { serviceWorker?: unknown }).serviceWorker
+    : undefined;
+
+  Object.defineProperty(window, "location", {
+    configurable: true,
+    value: { ...originalLocation, reload },
+  });
+
+  const serviceWorker = {
+    addEventListener(type: string, listener: EventListener) {
+      let set = listeners.get(type);
+      if (!set) {
+        set = new Set();
+        listeners.set(type, set);
+      }
+      set.add(listener);
+    },
+    removeEventListener(type: string, listener: EventListener) {
+      listeners.get(type)?.delete(listener);
+    },
+  };
+
+  Object.defineProperty(navigator, "serviceWorker", {
+    configurable: true,
+    writable: true,
+    value: serviceWorker,
+  });
+
+  return {
+    reload,
+    dispatchControllerChange() {
+      for (const listener of listeners.get("controllerchange") ?? []) {
+        listener(new Event("controllerchange"));
+      }
+    },
+    restore() {
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        value: originalLocation,
+      });
+      if (hadOwnServiceWorker) {
+        Object.defineProperty(navigator, "serviceWorker", {
+          configurable: true,
+          writable: true,
+          value: previousOwnServiceWorker,
+        });
+      } else {
+        Reflect.deleteProperty(navigator, "serviceWorker");
+        if (originalServiceWorker) {
+          Object.defineProperty(Navigator.prototype, "serviceWorker", originalServiceWorker);
+        }
+      }
+    },
+  };
+}
+
 describe("serviceWorkerRefresh", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -49,14 +115,8 @@ describe("serviceWorkerRefresh", () => {
     expect(registration.update).toHaveBeenCalledOnce();
   });
 
-  it("reloads after skip-waiting when no register callback is provided", async () => {
-    const reload = vi.fn();
-    const originalLocation = window.location;
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: { ...originalLocation, reload },
-    });
-
+  it("reloads early on controllerchange and does not double-reload on fallback", async () => {
+    const stub = stubReloadAndController();
     try {
       const postMessage = vi.fn();
       const registration = {
@@ -65,64 +125,98 @@ describe("serviceWorkerRefresh", () => {
 
       await applyServiceWorkerUpdate(registration);
       expect(postMessage).toHaveBeenCalledWith({ type: "SKIP_WAITING" });
-      expect(reload).not.toHaveBeenCalled();
+      expect(stub.reload).not.toHaveBeenCalled();
+
+      stub.dispatchControllerChange();
+      expect(stub.reload).toHaveBeenCalledOnce();
 
       vi.advanceTimersByTime(1500);
-      expect(reload).toHaveBeenCalledOnce();
+      expect(stub.reload).toHaveBeenCalledOnce();
     } finally {
-      Object.defineProperty(window, "location", {
-        configurable: true,
-        value: originalLocation,
-      });
+      stub.restore();
     }
   });
 
-  it("delegates skip-waiting to the PWA register callback and still schedules reload fallback", async () => {
-    const reload = vi.fn();
-    const originalLocation = window.location;
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: { ...originalLocation, reload },
-    });
-
+  it("falls back to reload after 1500ms when controllerchange never fires", async () => {
+    const stub = stubReloadAndController();
     try {
-      const registerApplyUpdate = vi.fn().mockResolvedValue(undefined);
-      await applyServiceWorkerUpdate(undefined, registerApplyUpdate);
-      expect(registerApplyUpdate).toHaveBeenCalledWith(true);
-      expect(reload).not.toHaveBeenCalled();
+      const postMessage = vi.fn();
+      const registration = {
+        waiting: { postMessage },
+      } as unknown as ServiceWorkerRegistration;
+
+      await applyServiceWorkerUpdate(registration);
+      expect(stub.reload).not.toHaveBeenCalled();
 
       vi.advanceTimersByTime(1500);
-      expect(reload).toHaveBeenCalledOnce();
+      expect(stub.reload).toHaveBeenCalledOnce();
     } finally {
-      Object.defineProperty(window, "location", {
-        configurable: true,
-        value: originalLocation,
-      });
+      stub.restore();
     }
   });
 
-  it("still schedules reload fallback when the PWA register callback rejects", async () => {
-    const reload = vi.fn();
-    const originalLocation = window.location;
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: { ...originalLocation, reload },
-    });
+  it("uses the register updater only and never posts SKIP_WAITING to waiting", async () => {
+    const stub = stubReloadAndController();
+    try {
+      const postMessage = vi.fn();
+      const registration = {
+        waiting: { postMessage },
+      } as unknown as ServiceWorkerRegistration;
+      const registerApplyUpdate = vi.fn().mockResolvedValue(undefined);
 
+      await applyServiceWorkerUpdate(registration, registerApplyUpdate);
+      expect(registerApplyUpdate).toHaveBeenCalledWith(true);
+      expect(postMessage).not.toHaveBeenCalled();
+      expect(stub.reload).not.toHaveBeenCalled();
+
+      stub.dispatchControllerChange();
+      expect(stub.reload).toHaveBeenCalledOnce();
+
+      vi.advanceTimersByTime(1500);
+      expect(stub.reload).toHaveBeenCalledOnce();
+    } finally {
+      stub.restore();
+    }
+  });
+
+  it("posts SKIP_WAITING once when no register updater is provided", async () => {
+    const stub = stubReloadAndController();
+    try {
+      const postMessage = vi.fn();
+      const registration = {
+        waiting: { postMessage },
+      } as unknown as ServiceWorkerRegistration;
+
+      await applyServiceWorkerUpdate(registration);
+      expect(postMessage).toHaveBeenCalledExactlyOnceWith({ type: "SKIP_WAITING" });
+    } finally {
+      stub.restore();
+    }
+  });
+
+  it("propagates updater rejection and still schedules the fallback reload", async () => {
+    const stub = stubReloadAndController();
     try {
       const registerApplyUpdate = vi.fn().mockRejectedValue(new Error("nope"));
       await expect(applyServiceWorkerUpdate(undefined, registerApplyUpdate)).rejects.toThrow(
         "nope",
       );
 
-      expect(reload).not.toHaveBeenCalled();
+      expect(stub.reload).not.toHaveBeenCalled();
       vi.advanceTimersByTime(1500);
-      expect(reload).toHaveBeenCalledOnce();
+      expect(stub.reload).toHaveBeenCalledOnce();
     } finally {
-      Object.defineProperty(window, "location", {
-        configurable: true,
-        value: originalLocation,
-      });
+      stub.restore();
+    }
+  });
+
+  it("reloads immediately when there is no waiting worker and no updater", async () => {
+    const stub = stubReloadAndController();
+    try {
+      await applyServiceWorkerUpdate(undefined);
+      expect(stub.reload).toHaveBeenCalledOnce();
+    } finally {
+      stub.restore();
     }
   });
 
