@@ -326,12 +326,12 @@ export async function fetchLandmassFeaturesInArea(
     landmassCacheKey(gameArea, regionPackId),
     async (context) => {
       const search = context.node.stage(overpassSearchStage("overpass:landmass", bbox));
-      const payload = await queryOverpassSplitLoaded<{ elements: OverpassElement[] }>(
-        buildLandmassQueryForBbox,
-        bbox,
-        mergeOverpassElementPayloads,
-        { ...overpassLoadFromFetch(context), node: search },
-      );
+      const payload = await queryOverpassSplitLoaded<{
+        elements: OverpassElement[];
+      }>(buildLandmassQueryForBbox, bbox, mergeOverpassElementPayloads, {
+        ...overpassLoadFromFetch(context),
+        node: search,
+      });
 
       return computeLandmassStage(context.node, gameArea, payload.elements);
     },

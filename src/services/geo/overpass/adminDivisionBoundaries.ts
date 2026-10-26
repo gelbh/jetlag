@@ -327,7 +327,9 @@ export async function fetchAdminDivisionFeaturesInArea(
   return getOrFetchCached(
     adminDivisionCacheKey(gameArea, adminLevel),
     async (context) => {
-      const payload = await queryOverpassSplitLoaded<{ elements: OverpassElement[] }>(
+      const payload = await queryOverpassSplitLoaded<{
+        elements: OverpassElement[];
+      }>(
         (child) => buildAdminDivisionQueryForBbox(child, adminLevel),
         bbox,
         mergeOverpassElementPayloads,
