@@ -4,10 +4,12 @@ import { DrawerGrabber } from "@/components/ui/entry/entryChrome";
 import { bottomDrawerStyles } from "@/components/ui/entry/entryStyles";
 import { usePlayerPhoneShellPortalTarget } from "@/components/ui/layout/PlayerPhoneShellPortalContext";
 import { resolveDrawerSheetTransitionProps } from "@/components/ui/sheets/drawerSheetTransition";
+import { useLandscapeMapDominant } from "@/hooks/layout/useLandscapeMapDominant";
 import { useDrawerPresentOpen } from "@/hooks/motion/useDrawerPresentOpen";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { useSheetGesture } from "@/hooks/motion/useSheetGesture";
 import { cn } from "@/lib/cn";
+import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
 export interface DrawerSheetProps {
@@ -105,6 +107,7 @@ export function DrawerSheet({
   const baseStyles = bottomDrawerStyles(false);
   const portalTarget = usePlayerPhoneShellPortalTarget();
   const shellContained = portalTarget != null;
+  const phoneLandscape = useLandscapeMapDominant();
   /* Fixed → absolute when portaled into the shell (portal alone is not enough). */
   const shellPositionStyles = shellContained ? ({ position: "absolute" } as const) : undefined;
 
@@ -173,6 +176,7 @@ export function DrawerSheet({
         },
         content: {
           ...baseStyles.content,
+          ...(phoneLandscape ? { maxWidth: PHONE_SHELL_MAX_WIDTH_PX, marginInline: "auto" } : null),
           backgroundColor: "transparent",
           border: "none",
           borderRadius: 0,

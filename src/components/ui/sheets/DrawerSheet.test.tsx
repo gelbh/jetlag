@@ -1,10 +1,11 @@
 import { MantineProvider } from "@mantine/core";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ComponentProps, ReactNode } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
 import { useMapStore } from "@/state/mapStore";
 import { resetAllStores } from "@/test/helpers/storeReset";
+import { LANDSCAPE_MAP_DOMINANT_MEDIA } from "@/theme/phoneShell";
 import { jetlagTheme } from "@/theme/theme";
 import { DrawerSheet } from "./DrawerSheet";
 import { resolveDrawerSheetTransitionProps } from "./drawerSheetTransition";
@@ -96,6 +97,37 @@ describe("DrawerSheet", () => {
     stubSyncRaf();
     Element.prototype.setPointerCapture = vi.fn();
     Element.prototype.releasePointerCapture = vi.fn();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("caps sheet content at the phone column width in phone landscape", async () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === LANDSCAPE_MAP_DOMINANT_MEDIA,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    render(
+      withAppUi(
+        <DrawerSheet open onClose={() => {}} ariaLabel="Landscape sheet">
+          body
+        </DrawerSheet>,
+      ),
+    );
+
+    await waitFor(() => {
+      const content = document.querySelector(".mantine-Drawer-content") as HTMLElement | null;
+      expect(content).not.toBeNull();
+      expect(content!.style.maxWidth).toBe("440px");
+      expect(content!.style.marginInline).toBe("auto");
+    });
   });
 
   it("presents Drawer after mount so enter animation can run", async () => {
