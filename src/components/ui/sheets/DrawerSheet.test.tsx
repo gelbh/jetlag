@@ -2,10 +2,11 @@ import { MantineProvider } from "@mantine/core";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ComponentProps, ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { PlayerPhoneShell } from "@/components/ui/layout/PlayerPhoneShell";
 import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
 import { useMapStore } from "@/state/mapStore";
 import { resetAllStores } from "@/test/helpers/storeReset";
-import { LANDSCAPE_MAP_DOMINANT_MEDIA } from "@/theme/phoneShell";
+import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 import { jetlagTheme } from "@/theme/theme";
 import { DrawerSheet } from "./DrawerSheet";
 import { resolveDrawerSheetTransitionProps } from "./drawerSheetTransition";
@@ -103,30 +104,42 @@ describe("DrawerSheet", () => {
     vi.unstubAllGlobals();
   });
 
-  it("caps sheet content at the phone column width in phone landscape", async () => {
-    vi.stubGlobal("matchMedia", (query: string) => ({
-      matches: query === LANDSCAPE_MAP_DOMINANT_MEDIA,
-      media: query,
-      onchange: null,
-      addListener: () => {},
-      removeListener: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      dispatchEvent: () => false,
-    }));
+  it("caps shell-contained sheet content at the phone column with a class", async () => {
     render(
       withAppUi(
-        <DrawerSheet open onClose={() => {}} ariaLabel="Landscape sheet">
-          body
-        </DrawerSheet>,
+        <PlayerPhoneShell>
+          <DrawerSheet open onClose={() => {}} ariaLabel="Shell sheet">
+            body
+          </DrawerSheet>
+        </PlayerPhoneShell>,
       ),
     );
 
     await waitFor(() => {
       const content = document.querySelector(".mantine-Drawer-content") as HTMLElement | null;
       expect(content).not.toBeNull();
-      expect(content!.style.maxWidth).toBe("440px");
+      expect(content!.className).toContain(`max-w-[${PHONE_SHELL_MAX_WIDTH_PX / 16}rem]`);
+      expect(content!.style.maxWidth).toBe("");
       expect(content!.style.marginInline).toBe("auto");
+    });
+  });
+
+  it("lets a caller max-w class override the shell column cap", async () => {
+    render(
+      withAppUi(
+        <PlayerPhoneShell>
+          <DrawerSheet open onClose={() => {}} ariaLabel="Full bleed" sheetClassName="max-w-none">
+            body
+          </DrawerSheet>
+        </PlayerPhoneShell>,
+      ),
+    );
+
+    await waitFor(() => {
+      const content = document.querySelector(".mantine-Drawer-content") as HTMLElement | null;
+      expect(content).not.toBeNull();
+      expect(content!.classList.contains("max-w-none")).toBe(true);
+      expect(content!.className).not.toContain(`max-w-[${PHONE_SHELL_MAX_WIDTH_PX / 16}rem]`);
     });
   });
 
