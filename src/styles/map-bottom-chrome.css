@@ -92,6 +92,7 @@
     bottom: auto !important;
   }
 
+  /* Vertical room for the side stack; separate from LANDSCAPE_MAP_DOMINANT_MEDIA (phone detection) in src/theme/phoneShell.ts. */
   @media (height <= 430px) and (orientation: landscape) {
     [data-chrome-side-stack="phone"] {
       bottom: calc(
