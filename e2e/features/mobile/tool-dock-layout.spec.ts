@@ -436,6 +436,23 @@ test.describe("landscape map-dominant chrome", () => {
     expect(canvas!.x).toBeLessThanOrEqual(1);
     expect(canvas!.width).toBeGreaterThanOrEqual(844 - 1);
   });
+
+  test("revealed chip does not cover the tool dock", async ({ page }) => {
+    await page.getByRole("button", { name: /Show map controls/i }).click();
+    const dock = page.locator(".jl-tool-dock").first();
+    await expect(dock).toBeVisible();
+    const chip = page.getByRole("button", { name: "Hide map controls" });
+    await expect(chip).toBeVisible();
+    // Let the 200ms transition settle before measuring.
+    await expect.poll(() => chip.evaluate((el) => el.getAnimations().length)).toBe(0);
+    const d = await dock.boundingBox();
+    const c = await chip.boundingBox();
+    expect(d).not.toBeNull();
+    expect(c).not.toBeNull();
+    const overlapX = Math.min(d!.x + d!.width, c!.x + c!.width) - Math.max(d!.x, c!.x);
+    const overlapY = Math.min(d!.y + d!.height, c!.y + c!.height) - Math.max(d!.y, c!.y);
+    expect(overlapX > 1 && overlapY > 1).toBe(false);
+  });
 });
 
 test.describe("iPhone 13 PWA join safe area", () => {
