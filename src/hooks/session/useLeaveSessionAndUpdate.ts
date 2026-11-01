@@ -16,6 +16,7 @@ const loadFirebase = () => import("@/services/core/firebase/firebase");
 const loadClientErrors = () => import("@/services/core/analytics/clientErrors");
 const loadLeaveRemote = () => import("@/services/session/leaveRemoteSessionOnDevice");
 const loadPendingQuestions = () => import("@/services/firestore/firestoreSessionExtras");
+const loadFirestoreShared = () => import("@/services/firestore/sessions/shared");
 
 const LEAVE_FAILED_MESSAGE = "Couldn't leave the session. Try again.";
 
@@ -88,8 +89,14 @@ export function useLeaveSessionAndUpdate(): {
           const { listPendingQuestions } = await loadPendingQuestions();
           pendingQuestions = await listPendingQuestions(session.id);
         } catch (error) {
-          const { captureException } = await loadClientErrors();
-          captureException(error);
+          const [{ captureException }, { isFirestorePermissionDenied }] = await Promise.all([
+            loadClientErrors(),
+            loadFirestoreShared(),
+          ]);
+          // Denied once the member was removed or the session doc is gone.
+          if (!isFirestorePermissionDenied(error)) {
+            captureException(error);
+          }
         }
 
         const { leaveRemoteSessionOnDevice } = await loadLeaveRemote();
