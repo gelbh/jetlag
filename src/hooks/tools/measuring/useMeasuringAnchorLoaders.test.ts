@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { Feature, LineString } from "geojson";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { LoadTask } from "@/services/core/progress/loadTask";
 import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
 import { fetchMeasuringPlacesInArea } from "@/services/geo/overpass/measuringPlaces";
@@ -485,5 +486,99 @@ describe("useMeasuringAnchorLoaders cancel scope", () => {
       void result.current.loaders.loadAllPlacesAt([53.35, -6.31], "museum");
     });
     expect(enrichSignal?.aborted).toBe(true);
+  });
+});
+
+describe("useMeasuringAnchorLoaders enrich send gate", () => {
+  type FetchOptions = Parameters<typeof fetchMeasuringPlacesInArea>[4];
+  const bundled = [
+    { id: "pack:1", name: "Bundled Park", point: [53.34, -6.3] as [number, number] },
+  ];
+  const merged = [
+    ...bundled,
+    { id: "osm:2", name: "Overpass Park", point: [53.341, -6.301] as [number, number] },
+  ];
+
+  function renderLoaders() {
+    return renderHook(() => {
+      const draft = useMeasuringDraftState([]);
+      const loaders = useMeasuringAnchorLoaders({
+        active: true,
+        gameArea: dublinishArea as never,
+        setMapError: vi.fn(),
+        draft,
+      });
+      return { draft, loaders };
+    });
+  }
+
+  function mockBundledWithEnrich() {
+    const calls: Array<{ options: FetchOptions; enrich: LoadTask | undefined }> = [];
+    fetchMock.mockImplementation(async (_area, _category, _custom, _pack, options) => {
+      calls.push({ options, enrich: options?.createEnrichTask?.() });
+      return bundled;
+    });
+    return calls;
+  }
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    resolveCoastlineCacheMock.mockReset();
+    fetchCoastlineMock.mockReset();
+  });
+
+  it("holds send while the background enrich runs, then releases with the merged list", async () => {
+    const calls = mockBundledWithEnrich();
+    const { result } = renderLoaders();
+
+    await act(async () => {
+      await result.current.loaders.loadAllPlacesAt([53.34, -6.3], "park");
+    });
+    expect(result.current.draft.measuringPlaces).toHaveLength(1);
+    expect(result.current.draft.measuringLoading).toBe(true);
+    expect(result.current.draft.measuringLoadTask).toBe(calls[0]?.enrich);
+
+    act(() => {
+      calls[0]?.enrich?.complete();
+      calls[0]?.options?.onEnrich?.(merged);
+    });
+    expect(result.current.draft.measuringPlaces).toHaveLength(2);
+    expect(result.current.draft.measuringLoading).toBe(false);
+  });
+
+  it("releases send when the background enrich fails", async () => {
+    const calls = mockBundledWithEnrich();
+    const { result } = renderLoaders();
+
+    await act(async () => {
+      await result.current.loaders.loadAllPlacesAt([53.34, -6.3], "park");
+    });
+    expect(result.current.draft.measuringLoading).toBe(true);
+
+    act(() => {
+      calls[0]?.enrich?.fail(new Error("Overpass 504"));
+    });
+    expect(result.current.draft.measuringPlaces).toHaveLength(1);
+    expect(result.current.draft.measuringLoading).toBe(false);
+  });
+
+  it("keeps the newer load's gate when a superseded enrich stops", async () => {
+    const calls = mockBundledWithEnrich();
+    const { result } = renderLoaders();
+
+    await act(async () => {
+      await result.current.loaders.loadAllPlacesAt([53.34, -6.3], "park");
+    });
+    await act(async () => {
+      await result.current.loaders.loadAllPlacesAt([53.35, -6.31], "park");
+    });
+
+    expect(calls[0]?.enrich?.getSnapshot().status).toBe("cancelled");
+    expect(result.current.draft.measuringLoading).toBe(true);
+
+    act(() => {
+      calls[1]?.enrich?.fail(new Error("Overpass 504"));
+    });
+    expect(result.current.draft.measuringLoading).toBe(false);
   });
 });
