@@ -11,6 +11,7 @@ import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { buildMembershipHealState } from "@/domain/session/players/returningMember";
 import { forceRefreshIdToken } from "@/services/core/auth/forceRefreshIdToken";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
+import { serverNowIso } from "@/services/core/time/serverClock";
 
 export const HIDER_ROLE_POLL_MS = 250;
 export const HIDER_ROLE_POLL_MAX_MS = 3000;
@@ -187,6 +188,6 @@ export async function writeSessionMembershipPatch(
 
 export async function touchSessionLastActive(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
-    lastActiveAt: new Date().toISOString(),
+    lastActiveAt: serverNowIso(),
   });
 }

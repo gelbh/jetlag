@@ -42,7 +42,6 @@ import {
   readSessionMembershipFields,
   sessionCodeDoc,
   sessionsCollection,
-  touchSessionLastActive,
   withJoinPermissionRetry,
   writeSessionMembershipPatch,
 } from "./shared";
@@ -309,9 +308,6 @@ function callJoinGatedRemoteSession(
     returningMemberUid: options.returningMemberUid,
     persistedMyUid: options.persistedMyUid,
     lookupRemoteSessionByCode,
-    touchSessionLastActive: (sessionId) => {
-      void touchSessionLastActive(sessionId);
-    },
   });
 }
 
@@ -424,7 +420,6 @@ async function joinRemoteSessionByCodeOnce(
         returningMemberUid,
       );
       if (joinedWithoutRead.status === "joined") {
-        void touchSessionLastActive(codeRecord.sessionId);
         return {
           status: "joined",
           session: {
@@ -480,7 +475,6 @@ async function joinRemoteSessionByCodeOnce(
       returningMemberUid,
     );
     if (joined.status === "joined") {
-      void touchSessionLastActive(sessionDoc.id);
       return {
         status: "joined",
         session: {
