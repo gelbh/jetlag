@@ -48,3 +48,16 @@ test.describe("phone shell @ 1280", () => {
     await expect(page.getByTestId("player-phone-shell")).toHaveCount(0);
   });
 });
+
+test.describe("short desktop window @ 1000x700", () => {
+  test.use({ viewport: { width: 1000, height: 700 } });
+
+  test("keeps the phone column and portrait chrome", async ({ page }) => {
+    await openMapWithLocalSession(page);
+    const box = await page.getByTestId("player-phone-shell").boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width).toBeLessThanOrEqual(440 + 1);
+    await expect(page.locator(".jl-landscape-chrome-chip")).toHaveCount(0);
+    await expect(page.locator(".jl-tool-dock")).toBeVisible();
+  });
+});

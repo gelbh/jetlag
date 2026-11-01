@@ -460,3 +460,12 @@ test.describe("iPhone 13 PWA join safe area", () => {
     expect(metrics.backdropBackgroundImage).not.toBe("none");
   });
 });
+
+test.describe("portrait with a resized keyboard viewport", () => {
+  test("412x400 keeps portrait chrome (aspect guard)", async ({ page }) => {
+    await page.setViewportSize({ width: 412, height: 400 });
+    await openMapWithLocalSession(page);
+    await expect(page.locator(".jl-landscape-chrome-chip")).toHaveCount(0);
+    await expect(page.locator(".jl-tool-dock")).toBeVisible();
+  });
+});
