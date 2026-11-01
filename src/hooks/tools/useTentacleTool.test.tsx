@@ -151,7 +151,7 @@ describe("useTentacleTool", () => {
     expect(result.current.draft.tentacleCenter).toEqual([53.35, -6.26]);
   });
 
-  it("snaps place taps to nearby street basemap POIs", () => {
+  it("keeps the raw tap as the place center when a basemap POI is nearby", () => {
     registerMapLibreMap({
       getStyle: () => ({
         sources: { openmaptiles: {} },
@@ -196,7 +196,7 @@ describe("useTentacleTool", () => {
       result.current.handleMapClick([53.35, -6.26]);
     });
 
-    expect(result.current.draft.tentacleCenter).toEqual([53.3501, -6.2601]);
+    expect(result.current.draft.tentacleCenter).toEqual([53.35, -6.26]);
   });
 
   it("selectDraftPoi rejects provisional places (map marker path)", async () => {

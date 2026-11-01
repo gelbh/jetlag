@@ -444,43 +444,19 @@ export function useTentacleTool({
         return false;
       }
 
-      const mapStyle = useMapStore.getState().mapStyle;
-      const categoryForTap = tentacleCategoryChosen ? tentacleCategoryId : null;
-      const tapHit =
-        categoryForTap != null
-          ? previewBasemapPois({
-              mapStyle,
-              categoryIds: [categoryForTap],
-              point,
-              maxResults: 1,
-            })[0]
-          : previewBasemapPois({
-              mapStyle,
-              point,
-              maxResults: 1,
-            })[0];
-      const nextCenter = tapHit?.point ?? point;
-
       cancelRequests();
       setTentacleLoading(false);
       setTentaclePois([]);
       setTentacleOutOfReach(false);
       setSelectedPoiId(null);
       setOracleReceipt(null);
-      setTentacleCenter(nextCenter);
+      setTentacleCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
       setTentacleError(null);
       return true;
     },
-    [
-      active,
-      cancelRequests,
-      setAwaitingPlacement,
-      setMapError,
-      tentacleCategoryChosen,
-      tentacleCategoryId,
-    ],
+    [active, cancelRequests, setAwaitingPlacement, setMapError],
   );
 
   const handleUseGps = useCallback(
