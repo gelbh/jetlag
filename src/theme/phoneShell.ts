@@ -2,7 +2,10 @@
 export const PHONE_SHELL_MAX_WIDTH_PX = 440;
 
 /** Phones on their side are 360-466px tall; the smallest landscape tablet is 744px. */
-export const PHONE_LANDSCAPE_MAX_HEIGHT_PX = 500;
+const PHONE_LANDSCAPE_MAX_HEIGHT_PX = 500;
+
+/** Landscape phones top out at 956px wide; the ceiling excludes short desktop windows. */
+const PHONE_LANDSCAPE_MAX_WIDTH_PX = 1023;
 
 /** 13/9 keeps a portrait phone whose layout viewport shrinks for the keyboard out. */
-export const LANDSCAPE_MAP_DOMINANT_MEDIA = `(orientation: landscape) and (max-height: ${PHONE_LANDSCAPE_MAX_HEIGHT_PX}px) and (min-aspect-ratio: 13/9)`;
+export const LANDSCAPE_MAP_DOMINANT_MEDIA = `(orientation: landscape) and (max-width: ${PHONE_LANDSCAPE_MAX_WIDTH_PX}px) and (max-height: ${PHONE_LANDSCAPE_MAX_HEIGHT_PX}px) and (min-aspect-ratio: 13/9)`;
