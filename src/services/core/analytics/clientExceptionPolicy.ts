@@ -49,8 +49,11 @@ const EXPECTED_JOIN_UX_MESSAGE_SET = new Set<string>(EXPECTED_JOIN_UX_MESSAGES);
 const CALLABLE_CODE_PREFIX =
   /^(?:failed-precondition|permission-denied|invalid-argument|unauthenticated|not-found|resource-exhausted|internal)[:\s]+/i;
 
+/** The Functions SDK appends the HTTP status: `${description} [${httpStatus}]`. */
+const CALLABLE_STATUS_SUFFIX = /\s*\[\d+\]$/;
+
 function normalizeCallableMessage(message: string): string {
-  return message.replace(CALLABLE_CODE_PREFIX, "").trim();
+  return message.replace(CALLABLE_CODE_PREFIX, "").replace(CALLABLE_STATUS_SUFFIX, "").trim();
 }
 
 function isExpectedJoinUxMessage(message: string): boolean {

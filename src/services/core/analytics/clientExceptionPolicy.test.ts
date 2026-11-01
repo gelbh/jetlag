@@ -204,7 +204,17 @@ describe("classifyClientExceptionEvent", () => {
           message: `failed-precondition ${message}`,
         }),
       ).toBe("drop");
+      expect(classifyClientExceptionEvent(exc("FirebaseError", `${message} [404]`))).toBe("drop");
     }
+  });
+
+  it("keeps a status suffix on an unexpected callable message reported", () => {
+    expect(
+      classifyClientExceptionEvent(exc("FirebaseError", "Rejoin in your previous role. [403]")),
+    ).toBe("send");
+    expect(
+      classifyClientExceptionEvent(exc("FirebaseError", "Session membership required. [403]")),
+    ).toBe("send");
   });
 
   it("keeps heal role mismatch reported as a seat takeover signal", () => {
