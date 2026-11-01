@@ -7,7 +7,28 @@ vi.mock("@/services/core/auth/forceRefreshIdToken", () => ({
   forceRefreshIdToken,
 }));
 
-import { AUTH_FAILURE_MESSAGE, withPermissionDeniedAuthRetry } from "./shared";
+const updateDoc = vi.hoisted(() => vi.fn(async () => undefined));
+
+vi.mock("firebase/firestore", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("firebase/firestore")>()),
+  updateDoc,
+  doc: vi.fn(() => ({})),
+  collection: vi.fn(() => ({})),
+}));
+
+vi.mock("@/services/core/firebase/firebase", () => ({
+  getFirestoreDb: () => ({}),
+}));
+
+vi.mock("@/services/core/time/serverClock", () => ({
+  serverNowIso: () => "2026-11-01T12:00:00.000Z",
+}));
+
+import {
+  AUTH_FAILURE_MESSAGE,
+  touchSessionLastActive,
+  withPermissionDeniedAuthRetry,
+} from "./shared";
 
 describe("withPermissionDeniedAuthRetry", () => {
   beforeEach(() => {
@@ -52,5 +73,15 @@ describe("withPermissionDeniedAuthRetry", () => {
 
     await expect(withPermissionDeniedAuthRetry(op)).resolves.toBe("ok");
     expect(forceRefreshIdToken).toHaveBeenCalledOnce();
+  });
+});
+
+describe("touchSessionLastActive", () => {
+  it("stamps lastActiveAt from the server-offset clock", async () => {
+    await touchSessionLastActive("session-1");
+
+    expect(updateDoc).toHaveBeenCalledWith(expect.anything(), {
+      lastActiveAt: "2026-11-01T12:00:00.000Z",
+    });
   });
 });
