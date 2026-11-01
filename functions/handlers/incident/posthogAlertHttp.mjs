@@ -13,11 +13,12 @@ export const posthogAlertWebhookSecret = defineSecret("POSTHOG_ALERT_WEBHOOK_SEC
  * PostHog Error Tracking "issue created" / "issue reopened" alert → admin desk incident.
  * The admin email goes out from the `sendPosthogIncidentEmail` trigger, not this request.
  * No App Check: PostHog calls this server-to-server, authenticated by signature.
- * Runs next to the eur3 Firestore: from us-central1 the sequential writes alone neared PostHog's ~3s fetch timeout.
+ * europe-west1 sits next to the eur3 Firestore, keeping the sequential writes inside PostHog's ~3s fetch timeout.
+ * us-central1 stays only until the PostHog destination points at the europe-west1 URL.
  */
 export const posthogErrorAlert = onRequest(
   {
-    region: "europe-west1",
+    region: ["europe-west1", "us-central1"],
     secrets: [posthogProjectApiKey, posthogAlertWebhookSecret],
     enforceAppCheck: false,
     cors: false,
