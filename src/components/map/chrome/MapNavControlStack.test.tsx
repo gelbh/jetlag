@@ -9,6 +9,9 @@ import {
 } from "@/hooks/map/mapChromeDockPlacement";
 import { MapDraggableFixedStack } from "./MapDraggableFixedStack";
 
+const REST_LEFT = "max(12px, var(--jl-shell-safe-left, env(safe-area-inset-left, 0px)))";
+const REST_RIGHT = "max(12px, var(--jl-shell-safe-right, env(safe-area-inset-right, 0px)))";
+
 function Harness({
   initial = { side: "left", topRatio: 0.72 } satisfies MapChromeDockPlacement,
 }: {
@@ -72,7 +75,7 @@ describe("MapDraggableFixedStack (nav)", () => {
   it("rests with edge padding on left and right (React owns inset)", () => {
     const { container, unmount } = render(<Harness />);
     const stack = container.querySelector('[data-testid="map-nav-dock-stack"]') as HTMLElement;
-    expect(stack.style.left).toBe("12px");
+    expect(stack.style.left).toBe(REST_LEFT);
     expect(stack.style.right).toBe("auto");
     unmount();
 
@@ -80,7 +83,7 @@ describe("MapDraggableFixedStack (nav)", () => {
     const rightStack = right.container.querySelector(
       '[data-testid="map-nav-dock-stack"]',
     ) as HTMLElement;
-    expect(rightStack.style.right).toBe("12px");
+    expect(rightStack.style.right).toBe(REST_RIGHT);
     expect(rightStack.style.left).toBe("auto");
   });
 
@@ -185,12 +188,12 @@ describe("MapDraggableFixedStack (nav)", () => {
     expect(animators.length).toBeGreaterThanOrEqual(1);
     const first = animators[animators.length - 1]!;
     expect(stack.getAttribute("data-settling")).toBe("true");
-    expect(stack.style.left).toBe("12px");
+    expect(stack.style.left).toBe(REST_LEFT);
 
     first.cancel();
     // Cancel must not run finish→onDone (that cleared settleFromRef / snapped).
     expect(first.finishListeners.length).toBeGreaterThanOrEqual(1);
     expect(stack.getAttribute("data-settling")).toBe("true");
-    expect(stack.style.left).toBe("12px");
+    expect(stack.style.left).toBe(REST_LEFT);
   });
 });

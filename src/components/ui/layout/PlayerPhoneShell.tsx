@@ -1,5 +1,6 @@
 import { Box } from "@mantine/core";
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
+import { useLandscapeMapDominant } from "@/hooks/layout/useLandscapeMapDominant";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 import { PlayerPhoneShellPortalContext } from "./PlayerPhoneShellPortalContext";
 import {
@@ -10,6 +11,7 @@ import {
 export function PlayerPhoneShell({ children }: { children: ReactNode }) {
   const shellRef = useRef<HTMLDivElement>(null);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  const phoneLandscape = useLandscapeMapDominant();
 
   useLayoutEffect(() => {
     const el = shellRef.current;
@@ -30,7 +32,7 @@ export function PlayerPhoneShell({ children }: { children: ReactNode }) {
         data-player-phone-shell
         mx="auto"
         w="100%"
-        maw={PHONE_SHELL_MAX_WIDTH_PX}
+        maw={phoneLandscape ? undefined : PHONE_SHELL_MAX_WIDTH_PX}
         h="100%"
         mih="100%"
         pos="relative"

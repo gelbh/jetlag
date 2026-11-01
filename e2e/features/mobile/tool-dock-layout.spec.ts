@@ -429,6 +429,31 @@ test.describe("landscape map-dominant chrome", () => {
     await expect(page.getByRole("button", { name: "Report a problem" })).toBeHidden();
     await expect(page.getByRole("button", { name: "Open settings" })).toBeVisible();
   });
+
+  test("map canvas spans the full landscape width", async ({ page }) => {
+    const canvas = await page.locator(".maplibregl-canvas").first().boundingBox();
+    const viewport = page.viewportSize();
+    expect(canvas).not.toBeNull();
+    expect(viewport).not.toBeNull();
+    expect(canvas!.x).toBeLessThanOrEqual(1);
+    expect(canvas!.width).toBeGreaterThanOrEqual(viewport!.width - 1);
+  });
+
+  test("revealed chip does not cover the tool dock", async ({ page }) => {
+    await ensureLandscapeMapChromeExpanded(page);
+    const dock = page.locator(".jl-tool-dock").first();
+    await expect(dock).toBeVisible();
+    const chip = page.getByRole("button", { name: "Hide map controls" });
+    await expect(chip).toBeVisible();
+    await expect.poll(() => chip.evaluate((el) => el.getAnimations().length)).toBe(0);
+    const d = await dock.boundingBox();
+    const c = await chip.boundingBox();
+    expect(d).not.toBeNull();
+    expect(c).not.toBeNull();
+    const overlapX = Math.min(d!.x + d!.width, c!.x + c!.width) - Math.max(d!.x, c!.x);
+    const overlapY = Math.min(d!.y + d!.height, c!.y + c!.height) - Math.max(d!.y, c!.y);
+    expect(overlapX > 1 && overlapY > 1).toBe(false);
+  });
 });
 
 test.describe("iPhone 13 PWA join safe area", () => {
@@ -458,5 +483,14 @@ test.describe("iPhone 13 PWA join safe area", () => {
     expect(metrics.backdropTop).toBe("0px");
     expect(metrics.backdropBottom).toBe("0px");
     expect(metrics.backdropBackgroundImage).not.toBe("none");
+  });
+});
+
+test.describe("portrait with a resized keyboard viewport", () => {
+  test("412x400 keeps portrait chrome (aspect guard)", async ({ page }) => {
+    await page.setViewportSize({ width: 412, height: 400 });
+    await openMapWithLocalSession(page);
+    await expect(page.locator(".jl-landscape-chrome-chip")).toHaveCount(0);
+    await expect(page.locator(".jl-tool-dock")).toBeVisible();
   });
 });

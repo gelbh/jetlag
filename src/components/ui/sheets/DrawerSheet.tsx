@@ -83,7 +83,8 @@ function stripPaddingBottom(style: CSSProperties | undefined): CSSProperties | u
 
 /**
  * Phone-shell sheet path: iOS bottom Drawer with grabber + safe-area.
- * Portals into PlayerPhoneShell when mounted so overlays stay in the 440 column.
+ * Portals into PlayerPhoneShell when mounted: the overlay spans the shell and the
+ * sheet content is capped at the phone column unless the caller passes its own `max-w-*`.
  */
 export function DrawerSheet({
   open,
@@ -157,7 +158,14 @@ export function DrawerSheet({
         style: mapInteractive ? { pointerEvents: "none" as const } : undefined,
       }}
       classNames={{
-        content: cn("mantine-drawer-sheet", sheetClassName, maxHeightClassName, "flex flex-col"),
+        content: cn(
+          "mantine-drawer-sheet",
+          /* 27.5rem = PHONE_SHELL_MAX_WIDTH_PX / 16; Tailwind needs a static class. */
+          shellContained && "max-w-[27.5rem]",
+          sheetClassName,
+          maxHeightClassName,
+          "flex flex-col",
+        ),
         body: cn(
           "min-h-0 flex flex-1 flex-col",
           childScroll ? "overflow-hidden" : "overflow-hidden",
@@ -173,6 +181,7 @@ export function DrawerSheet({
         },
         content: {
           ...baseStyles.content,
+          ...(shellContained ? { maxWidth: undefined, marginInline: "auto" } : null),
           backgroundColor: "transparent",
           border: "none",
           borderRadius: 0,

@@ -19,6 +19,14 @@
   /* Top snaps sit below the status island. */
   --chrome-side-stack-top-clearance: 1rem;
 
+  /* Dock box is island + 0.75rem (MapBottomChrome min-h); --dock-total-height is shorter. */
+  --landscape-chip-bottom-revealed: calc(
+    var(--dock-island-height) +
+    0.75rem +
+    var(--dock-float-gap) +
+    0.75rem
+  );
+
   /* Continuous island radii; outer corner matches screen corners. */
   --chrome-side-island-radius: 1.125rem;
   --chrome-side-island-corner: 1.625rem;
@@ -84,6 +92,7 @@
     bottom: auto !important;
   }
 
+  /* Vertical room for the side stack; separate from LANDSCAPE_MAP_DOMINANT_MEDIA (phone detection) in src/theme/phoneShell.ts. */
   @media (height <= 430px) and (orientation: landscape) {
     [data-chrome-side-stack="phone"] {
       bottom: calc(
