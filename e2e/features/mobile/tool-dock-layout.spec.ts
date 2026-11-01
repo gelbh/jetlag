@@ -432,13 +432,15 @@ test.describe("landscape map-dominant chrome", () => {
 
   test("map canvas spans the full landscape width", async ({ page }) => {
     const canvas = await page.locator(".maplibregl-canvas").first().boundingBox();
+    const viewport = page.viewportSize();
     expect(canvas).not.toBeNull();
+    expect(viewport).not.toBeNull();
     expect(canvas!.x).toBeLessThanOrEqual(1);
-    expect(canvas!.width).toBeGreaterThanOrEqual(844 - 1);
+    expect(canvas!.width).toBeGreaterThanOrEqual(viewport!.width - 1);
   });
 
   test("revealed chip does not cover the tool dock", async ({ page }) => {
-    await page.getByRole("button", { name: /Show map controls/i }).click();
+    await ensureLandscapeMapChromeExpanded(page);
     const dock = page.locator(".jl-tool-dock").first();
     await expect(dock).toBeVisible();
     const chip = page.getByRole("button", { name: "Hide map controls" });
