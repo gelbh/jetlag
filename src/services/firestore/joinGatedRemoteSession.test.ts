@@ -34,7 +34,6 @@ function joinInput(overrides: Partial<Parameters<typeof joinGatedRemoteSessionBy
     role: "seeker" as const,
     clientVersion: "0.2.0",
     lookupRemoteSessionByCode: vi.fn(),
-    touchSessionLastActive: vi.fn(),
     ...overrides,
   };
 }

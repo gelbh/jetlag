@@ -132,6 +132,10 @@ describe("joinRemoteSessionByCode returning-member heal", () => {
       expect.anything(),
       expect.objectContaining({ "memberRoles.new-uid": "seeker" }),
     );
+    expect(updateDoc).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ lastActiveAt: expect.any(String) }),
+    );
     expect(cancelWalkingThermometers).not.toHaveBeenCalled();
     expect(ensureMemberProof).toHaveBeenCalledWith("session-1", "new-uid");
   });

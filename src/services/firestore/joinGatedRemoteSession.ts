@@ -30,8 +30,6 @@ type LookupRemoteSessionByCode = (
   { status: "missing" } | { status: "ended" } | { status: "found"; session: SessionRecord }
 >;
 
-type TouchSessionLastActive = (sessionId: string) => void;
-
 async function getRemoteSessionByIdFromServer(sessionId: string): Promise<SessionRecord> {
   const sessionDoc = await getDocFromServer(doc(getFirestoreDb(), "sessions", sessionId));
   if (!sessionDoc.exists()) {
@@ -55,7 +53,6 @@ export async function joinGatedRemoteSessionByCode(input: {
   returningMemberUid?: string;
   persistedMyUid?: string | null;
   lookupRemoteSessionByCode: LookupRemoteSessionByCode;
-  touchSessionLastActive: TouchSessionLastActive;
 }): Promise<JoinGatedRemoteSessionResult> {
   try {
     const sessionId = input.codeRecord.sessionId;
@@ -98,8 +95,6 @@ export async function joinGatedRemoteSessionByCode(input: {
     if (!session) {
       throw new Error("Joined session could not be loaded.");
     }
-
-    input.touchSessionLastActive(input.codeRecord.sessionId);
 
     return {
       status: "joined",
