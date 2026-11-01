@@ -255,7 +255,7 @@ export function useMeasuringInteractions({
         return false;
       }
 
-      setMeasuringSeekerAnchorAndResolve(snapPoint);
+      setMeasuringSeekerAnchorAndResolve(point);
       return true;
     },
     [

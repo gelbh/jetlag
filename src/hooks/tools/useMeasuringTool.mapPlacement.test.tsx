@@ -290,4 +290,33 @@ describe("useMeasuringTool map-first", () => {
     expect(result.current.draft.measuringSeekerPoint).toEqual([53.36, -6.25]);
     expect(result.current.draft.measuringTargetPoint).toEqual([53.34, -6.27]);
   });
+
+  it("keeps the raw tap as the seeker anchor when a basemap POI is nearby", async () => {
+    const { result } = renderMeasuringCoastline();
+    const previewSpy = vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([
+      {
+        id: "tile:park",
+        name: "St Mark's Churchyard",
+        point: [53.3502, -6.2602],
+        source: "tile",
+        confirmStatus: "provisional",
+      },
+    ]);
+
+    try {
+      await waitFor(() => {
+        expect(result.current.hud.suppressSheet).toBe(true);
+      });
+
+      act(() => {
+        result.current.handleMapClick([53.35, -6.26]);
+      });
+
+      await waitFor(() => {
+        expect(result.current.draft.measuringSeekerPoint).toEqual([53.35, -6.26]);
+      });
+    } finally {
+      previewSpy.mockRestore();
+    }
+  });
 });
