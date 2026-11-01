@@ -449,31 +449,12 @@ export function useMatchingTool({
         return false;
       }
 
-      const mapStyle = useMapStore.getState().mapStyle;
-      const categoryId = matchingCategoryChosen ? matchingCategoryId : null;
-      const resolver = categoryId != null ? getMatchingCategory(categoryId).resolver : null;
-      const tapHit =
-        resolver === "overpassPoint" && categoryId != null
-          ? previewBasemapPois({
-              mapStyle,
-              categoryIds: [categoryId],
-              point,
-              maxResults: 1,
-            })[0]
-          : null;
-
       setMatchingAnswerSynced(null);
       setOracleReceipt(null);
-      setMatchingSeekerAnchor(tapHit?.point ?? point);
+      setMatchingSeekerAnchor(point);
       return true;
     },
-    [
-      active,
-      matchingCategoryChosen,
-      matchingCategoryId,
-      setMatchingAnswerSynced,
-      setMatchingSeekerAnchor,
-    ],
+    [active, setMatchingAnswerSynced, setMatchingSeekerAnchor],
   );
 
   const handleGps = useCallback(

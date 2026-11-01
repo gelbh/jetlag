@@ -1,6 +1,7 @@
 import { MantineProvider } from "@mantine/core";
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as previewBasemapPoisModule from "@/services/geo/maplibre/previewBasemapPois";
 import { matchingEmptyPlayAreaMessage } from "@/services/geo/matching";
 import { useMapStore } from "@/state/mapStore";
 import { jetlagTheme } from "@/theme/theme";
@@ -384,5 +385,49 @@ describe("useMatchingTool map-first answer", () => {
       commitMatchingHang.release();
       await commitPromise;
     });
+  });
+
+  it("keeps the raw tap as the seeker anchor when a basemap POI is nearby", async () => {
+    const previewSpy = vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([
+      {
+        id: "tile:airport",
+        name: "Snapped Airport",
+        point: [53.3502, -6.2602],
+        source: "tile",
+        confirmStatus: "provisional",
+      },
+    ]);
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useMatchingTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        gpsLoading: mocks.gpsLoading,
+        mapError: mocks.mapError,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        awaitHiderAnswer: false,
+      }),
+    );
+
+    try {
+      await act(async () => {
+        result.current.panel.props.model.onCategoryChange("commercial_airport");
+      });
+
+      act(() => {
+        result.current.handleMapClick([53.35, -6.26]);
+      });
+
+      await waitFor(() => {
+        expect(result.current.draft.matchingSeekerPoint).toEqual([53.35, -6.26]);
+      });
+    } finally {
+      previewSpy.mockRestore();
+    }
   });
 });
