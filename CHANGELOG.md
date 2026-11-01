@@ -6,6 +6,17 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.12.2 - 2026-11-01
+
+### Fixes
+
+- Home-screen and link preview images use the current radar logo
+
+### Technical
+
+- The PostHog error alert webhook no longer deploys a us-central1 copy now that PostHog calls the europe-west1 one.
+- Session activity pings run only from the map heartbeat and use the server-corrected clock
+
 ## 1.12.1 - 2026-11-01
 
 ### Fixes
