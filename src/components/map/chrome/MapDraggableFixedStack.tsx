@@ -591,7 +591,15 @@ export function MapDraggableFixedStack({
     bottom: "auto",
     transform: "none",
     touchAction: "none",
-    ...(placement.side === "left" ? { left: pad, right: "auto" } : { right: pad, left: "auto" }),
+    ...(placement.side === "left"
+      ? {
+          left: `max(${pad}px, var(--jl-shell-safe-left, env(safe-area-inset-left, 0px)))`,
+          right: "auto",
+        }
+      : {
+          right: `max(${pad}px, var(--jl-shell-safe-right, env(safe-area-inset-right, 0px)))`,
+          left: "auto",
+        }),
   };
 
   const dragStyle: CSSProperties | undefined = dragPos
