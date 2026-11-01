@@ -1,14 +1,15 @@
 import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { DrawerSheet } from "@/components/ui/sheets/DrawerSheet";
-import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
+import { LANDSCAPE_MAP_DOMINANT_MEDIA, PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 import { jetlagTheme } from "@/theme/theme";
 import { PlayerPhoneShell } from "./PlayerPhoneShell";
 import { setPlayerPhoneShellPortalHost } from "./playerPhoneShellPortalHost";
 
 afterEach(() => {
   setPlayerPhoneShellPortalHost(null);
+  vi.unstubAllGlobals();
 });
 
 describe("PlayerPhoneShell", () => {
@@ -32,6 +33,27 @@ describe("PlayerPhoneShell", () => {
     expect(shell).toHaveAttribute("data-player-phone-shell");
     expect(shell).toHaveStyle({ transform: "translateZ(0)" });
     expect(screen.getByTestId("child")).toBeInTheDocument();
+  });
+
+  it("drops the max width in phone landscape", () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === LANDSCAPE_MAP_DOMINANT_MEDIA,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <PlayerPhoneShell>
+          <div>x</div>
+        </PlayerPhoneShell>
+      </MantineProvider>,
+    );
+    expect(screen.getByTestId("player-phone-shell").style.maxWidth).toBe("");
   });
 
   it("keeps an open drawer overlay width within the phone shell", () => {

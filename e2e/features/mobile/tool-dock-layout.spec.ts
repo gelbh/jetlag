@@ -429,6 +429,13 @@ test.describe("landscape map-dominant chrome", () => {
     await expect(page.getByRole("button", { name: "Report a problem" })).toBeHidden();
     await expect(page.getByRole("button", { name: "Open settings" })).toBeVisible();
   });
+
+  test("map canvas spans the full landscape width", async ({ page }) => {
+    const canvas = await page.locator(".maplibregl-canvas").first().boundingBox();
+    expect(canvas).not.toBeNull();
+    expect(canvas!.x).toBeLessThanOrEqual(1);
+    expect(canvas!.width).toBeGreaterThanOrEqual(844 - 1);
+  });
 });
 
 test.describe("iPhone 13 PWA join safe area", () => {
