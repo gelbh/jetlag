@@ -1,7 +1,7 @@
 const HOST_ONLY_MESSAGE = /Only the host can do that\.?/i;
 const ALREADY_ENDED_MESSAGE = /Session already ended\.?/i;
 
-/** Leave and end callables report a deleted session doc as not-found: nothing left to leave. */
+// Leave and end callables report a deleted session doc as not-found: nothing left to leave.
 function isSessionGoneCallableError(error: Error): boolean {
   return "code" in error && error.code === "functions/not-found";
 }
