@@ -19,6 +19,14 @@
   /* Top snaps sit below the status island. */
   --chrome-side-stack-top-clearance: 1rem;
 
+  /* Landscape chip when revealed: dock box (island + 0.75rem) + host float gap + 0.75rem. */
+  --landscape-chip-bottom-revealed: calc(
+    var(--dock-island-height) +
+    0.75rem +
+    var(--dock-float-gap) +
+    0.75rem
+  );
+
   /* Continuous island radii; outer corner matches screen corners. */
   --chrome-side-island-radius: 1.125rem;
   --chrome-side-island-corner: 1.625rem;

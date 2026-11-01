@@ -60,7 +60,7 @@ export function MapLandscapeChromeChip({
 
   const chipBottomClass = collapsed
     ? "bottom-[max(0.5rem,var(--safe-area-bottom))]"
-    : "bottom-[calc(var(--dock-total-height)+var(--dock-float-gap)+var(--safe-area-bottom)+0.75rem)]";
+    : "bottom-[var(--landscape-chip-bottom-revealed)]";
   const chipClassName = `jl-landscape-chrome-chip pointer-events-auto fixed inset-x-3 ${chipBottomClass} z-[calc(var(--z-dock)+2)] mx-auto flex min-h-11 w-fit max-w-[calc(100%-1.5rem)] items-center justify-center gap-2.5 px-3 py-1.5 font-display motion-safe:transition-[opacity,transform,bottom] motion-safe:duration-200 motion-reduce:transition-none`;
 
   return (
