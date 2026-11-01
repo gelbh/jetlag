@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.12.0";
+export const APP_VERSION = "1.12.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,26 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.12.1",
+    date: "2026-11-01",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          'Leaving a session that was already deleted now exits it instead of showing "Couldn\'t leave the session"',
+          "Measuring to all places in the play area waits for the full place list before Send, so the hider's nearest place is never left out",
+          "Tapping the map for your own spot in measure, match and tentacle questions keeps the exact point instead of jumping to a nearby place",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "The PostHog error alert webhook now runs in europe-west1 next to Firestore and no longer keeps a paid warm instance.",
+        ],
+      },
+    ],
+  },
   {
     version: "1.12.0",
     date: "2026-10-26",
