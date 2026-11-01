@@ -445,7 +445,6 @@ test.describe("landscape map-dominant chrome", () => {
     await expect(dock).toBeVisible();
     const chip = page.getByRole("button", { name: "Hide map controls" });
     await expect(chip).toBeVisible();
-    // Let the 200ms transition settle before measuring.
     await expect.poll(() => chip.evaluate((el) => el.getAnimations().length)).toBe(0);
     const d = await dock.boundingBox();
     const c = await chip.boundingBox();

@@ -19,7 +19,7 @@
   /* Top snaps sit below the status island. */
   --chrome-side-stack-top-clearance: 1rem;
 
-  /* Landscape chip when revealed: dock box (island + 0.75rem) + host float gap + 0.75rem. */
+  /* Dock box is island + 0.75rem (MapBottomChrome min-h); --dock-total-height is shorter. */
   --landscape-chip-bottom-revealed: calc(
     var(--dock-island-height) +
     0.75rem +
