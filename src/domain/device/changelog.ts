@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.12.1";
+export const APP_VERSION = "1.12.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,23 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.12.2",
+    date: "2026-11-01",
+    sections: [
+      {
+        title: "Fixes",
+        items: ["Home-screen and link preview images use the current radar logo"],
+      },
+      {
+        title: "Technical",
+        items: [
+          "The PostHog error alert webhook no longer deploys a us-central1 copy now that PostHog calls the europe-west1 one.",
+          "Session activity pings run only from the map heartbeat and use the server-corrected clock",
+        ],
+      },
+    ],
+  },
   {
     version: "1.12.1",
     date: "2026-11-01",
