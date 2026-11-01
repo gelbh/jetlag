@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { LOCAL_SESSION_ID } from "@/domain/map/annotations";
@@ -197,6 +198,41 @@ describe("useLeaveSessionAndUpdate", () => {
     expect(applyUpdate.mock.invocationCallOrder[0]).toBeGreaterThan(
       exitSession.mock.invocationCallOrder[0]!,
     );
+  });
+
+  it("leaves without capturing when the pending-question read is permission-denied", async () => {
+    listPendingQuestions.mockRejectedValueOnce(
+      new FirebaseError("permission-denied", "Missing or insufficient permissions."),
+    );
+    const { result } = renderHook(() => useLeaveSessionAndUpdate());
+    act(() => {
+      result.current.requestLeaveAndUpdate();
+    });
+
+    await act(async () => {
+      await result.current.confirmLeaveAndUpdate();
+    });
+
+    expect(captureException).not.toHaveBeenCalled();
+    expect(leaveRemoteSessionOnDevice).toHaveBeenCalledWith(
+      expect.objectContaining({ pendingQuestions: [] }),
+    );
+    expect(applyUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it("still captures other pending-question read failures", async () => {
+    listPendingQuestions.mockRejectedValueOnce(new Error("boom"));
+    const { result } = renderHook(() => useLeaveSessionAndUpdate());
+    act(() => {
+      result.current.requestLeaveAndUpdate();
+    });
+
+    await act(async () => {
+      await result.current.confirmLeaveAndUpdate();
+    });
+
+    expect(captureException).toHaveBeenCalledTimes(1);
+    expect(applyUpdate).toHaveBeenCalledTimes(1);
   });
 
   it("throws when remote leave fails so the sheet can stay open", async () => {

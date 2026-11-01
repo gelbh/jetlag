@@ -19,6 +19,15 @@ describe("isExpectedSessionLeaveError", () => {
     ).toBe(true);
   });
 
+  it.each(["Session not found.", "Session not found. [404]"])(
+    "matches callable not-found %j for a deleted session",
+    (message) => {
+      expect(isExpectedSessionLeaveError(new FirebaseError("functions/not-found", message))).toBe(
+        true,
+      );
+    },
+  );
+
   it("ignores unrelated Firebase errors", () => {
     expect(isExpectedSessionLeaveError(new FirebaseError("functions/internal", "INTERNAL"))).toBe(
       false,
