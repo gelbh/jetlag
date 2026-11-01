@@ -285,11 +285,8 @@ export function useMeasuringAnchorLoaders({
               return enrichTask;
             },
             onEnrich: (enrichedPlaces) => {
-              try {
-                applyAllPlacesResult(requestId, seekerPoint, category, enrichedPlaces, 1);
-              } finally {
-                releaseEnrichGate();
-              }
+              applyAllPlacesResult(requestId, seekerPoint, category, enrichedPlaces, 1);
+              releaseEnrichGate();
             },
           },
         );
