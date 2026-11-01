@@ -238,6 +238,15 @@ export function useMeasuringAnchorLoaders({
       }
 
       const { task, requestSignal } = beginLoadTask("Loading places in the play area");
+      // Send freezes the place list into the question, so it waits for the Overpass
+      // enrich behind a bundled list; a failed or superseded enrich releases it too.
+      let enrichPending = false;
+      const releaseEnrichGate = () => {
+        enrichPending = false;
+        if (requestId === placesRequestIdRef.current) {
+          setMeasuringLoading(false);
+        }
+      };
       try {
         const customCategories = sessionRules?.customCategories ?? [];
         const places = await fetchMeasuringPlacesInArea(
@@ -250,16 +259,38 @@ export function useMeasuringAnchorLoaders({
             transitMetroId: sessionRules?.transitMetroId,
             transitStationFilter: sessionRules?.transitStationFilter,
             task,
-            createEnrichTask: () =>
-              createLoadTask({
+            createEnrichTask: () => {
+              const enrichTask = createLoadTask({
                 label: "Confirming places",
                 signal: requestSignal,
                 global: true,
                 priority: "background",
                 cancellable: false,
-              }),
+              });
+              if (enrichTask.getSnapshot().status !== "running") {
+                return enrichTask;
+              }
+              enrichPending = true;
+              setMeasuringLoadTask(enrichTask);
+              const unsubscribe = enrichTask.subscribe(() => {
+                const { status } = enrichTask.getSnapshot();
+                if (status === "running") {
+                  return;
+                }
+                unsubscribe();
+                // A finished enrich releases in onEnrich, after the merged list lands.
+                if (status !== "done") {
+                  releaseEnrichGate();
+                }
+              });
+              return enrichTask;
+            },
             onEnrich: (enrichedPlaces) => {
-              applyAllPlacesResult(requestId, seekerPoint, category, enrichedPlaces, 1);
+              try {
+                applyAllPlacesResult(requestId, seekerPoint, category, enrichedPlaces, 1);
+              } finally {
+                releaseEnrichGate();
+              }
             },
           },
         );
@@ -280,7 +311,7 @@ export function useMeasuringAnchorLoaders({
           setMeasuringError(overpassErrorMessage(error, "Places in the play area didn't load."));
         }
       }
-      if (requestId === placesRequestIdRef.current) {
+      if (!enrichPending && requestId === placesRequestIdRef.current) {
         setMeasuringLoading(false);
       }
     },
@@ -294,6 +325,7 @@ export function useMeasuringAnchorLoaders({
       sessionRules,
       setMeasuringDistanceMeters,
       setMeasuringError,
+      setMeasuringLoadTask,
       setMeasuringLoading,
       setMeasuringPlaces,
       setMeasuringTargetPlaceName,
