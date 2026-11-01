@@ -238,8 +238,7 @@ export function useMeasuringAnchorLoaders({
       }
 
       const { task, requestSignal } = beginLoadTask("Loading places in the play area");
-      // Send freezes the place list into the question, so it waits for the Overpass
-      // enrich behind a bundled list; a failed or superseded enrich releases it too.
+      // Send freezes this list into the question, so it waits for the background enrich.
       let enrichPending = false;
       const releaseEnrichGate = () => {
         enrichPending = false;
