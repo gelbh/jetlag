@@ -350,6 +350,76 @@ describe("gameAreaPreload", () => {
     expect(selectPreloadBanner(state).loading).toBe(false);
   });
 
+  it("starts a new main preload when custom matching areas change", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(adminDivisionAvailability, "probeAdminDivisionCounts").mockResolvedValue(
+      adminDivisionAvailability.emptyAdminDivisionCounts(),
+    );
+
+    const first = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA);
+    await vi.runAllTimersAsync();
+    await first;
+
+    const customMatchingAreas = { 8: "{}" };
+    const second = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA, customMatchingAreas);
+    expect(second).not.toBe(first);
+    await vi.runAllTimersAsync();
+    await second;
+
+    expect(adminDivisionAvailability.probeAdminDivisionCounts).toHaveBeenLastCalledWith(
+      DUBLIN_CITY_GAME_AREA,
+      customMatchingAreas,
+      undefined,
+      expect.anything(),
+    );
+  });
+
+  it("re-probes category presence after a failed probe", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(adminDivisionAvailability, "probeAdminDivisionCounts").mockResolvedValue(
+      adminDivisionAvailability.emptyAdminDivisionCounts(),
+    );
+    vi.mocked(playAreaCategoryPresenceProbe.probePlayAreaCategoryCounts)
+      .mockRejectedValueOnce(new OverpassUnavailableError())
+      .mockResolvedValueOnce({ museum: 2 });
+
+    const main = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA);
+    await vi.runAllTimersAsync();
+    await main;
+    await preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA);
+
+    expect(playAreaCategoryPresenceProbe.probePlayAreaCategoryCounts).toHaveBeenCalledTimes(2);
+    expect(usePreloadStore.getState().categoryPresenceCounts).toEqual({ museum: 2 });
+  });
+
+  it("keeps a superseded run's late job out of the newer run's counts", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(adminDivisionAvailability, "probeAdminDivisionCounts").mockResolvedValue(
+      adminDivisionAvailability.emptyAdminDivisionCounts(),
+    );
+    let releaseHeldJob: (places: []) => void = () => {};
+    vi.mocked(fetchMeasuringPlacesInArea).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          releaseHeldJob = resolve;
+        }),
+    );
+
+    const runA = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA);
+    await vi.runAllTimersAsync();
+    expect(fetchMeasuringPlacesInArea).toHaveBeenCalledTimes(1);
+
+    const runB = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA, { 8: "{}" });
+    expect(runB).not.toBe(runA);
+    releaseHeldJob([]);
+    await vi.runAllTimersAsync();
+    await Promise.all([runA, runB]);
+
+    const state = usePreloadStore.getState();
+    expect(state.completedJobs).toBe(state.totalJobs);
+    expect(selectPreloadBanner(state).loading).toBe(false);
+  });
+
   it("reruns after session teardown and reports both runs", async () => {
     vi.useFakeTimers();
 

@@ -7,7 +7,11 @@ import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
 } from "../../domain/session/catalog/sessionCustomContent";
-import { type CategoryPresenceCounts, usePreloadStore } from "../../state/preloadStore";
+import {
+  type CategoryPresenceCounts,
+  type PreloadJobCounts,
+  usePreloadStore,
+} from "../../state/preloadStore";
 import { ANALYTICS_EVENTS } from "../core/analytics/analyticsEvents";
 import { trackLazy } from "../core/analytics/lazyTelemetry";
 import { createLoadTask, type LoadTask } from "../core/progress/loadTask";
@@ -25,10 +29,16 @@ let categoryProbe: { gameAreaKey: string; promise: Promise<CategoryPresenceCount
 
 async function warmCategoryPresenceCounts(gameArea: GameArea, gameAreaKey: string): Promise<void> {
   if (categoryProbe?.gameAreaKey !== gameAreaKey) {
-    categoryProbe = {
+    const entry = {
       gameAreaKey,
       promise: probePlayAreaCategoryCounts(gameArea, playAreaCategoryPresenceProbeSpecs()),
     };
+    categoryProbe = entry;
+    entry.promise.catch(() => {
+      if (categoryProbe === entry) {
+        categoryProbe = null;
+      }
+    });
   }
 
   try {
@@ -134,10 +144,7 @@ function waitUntilVisible(signal: AbortSignal): Promise<void> {
 }
 
 /** Per-run counts; the store may already belong to a newer run when this one ends. */
-interface PreloadRunTally {
-  completedJobs: number;
-  failedJobs: number;
-}
+type PreloadRunTally = Pick<PreloadJobCounts, "completedJobs" | "failedJobs">;
 
 async function runTrackedPreloadJob(
   gameAreaKey: string,
@@ -214,7 +221,7 @@ function preloadRunIdentity(
     gameAreaKey,
     regionPackId ?? null,
     subregionId ?? null,
-    adminBoundaryLevelsForSession(regionPackId, customMatchingAreas),
+    customMatchingAreas ?? null,
   ]);
 }
 
@@ -228,7 +235,10 @@ export function preloadGameAreaCaches(
   void preloadGameAreaCachesAsync(gameArea, customMatchingAreas, regionPackId, tier, subregionId);
 }
 
-/** Repeat calls with the same play-area inputs (tier ignored) join the current run, even after it settles, until session teardown. */
+/**
+ * Repeat calls with the same play-area inputs (tier ignored) join the current run,
+ * even after it settles, until session teardown.
+ */
 export function preloadGameAreaCachesAsync(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
@@ -272,7 +282,8 @@ async function runGameAreaPreload(
   });
   const store = usePreloadStore.getState();
   // +2: admin division probe + category presence probe (warmed before the queue).
-  store.reset(gameAreaKey, jobs.length + 2);
+  const totalJobs = jobs.length + 2;
+  store.reset(gameAreaKey, totalJobs);
 
   const tally: PreloadRunTally = { completedJobs: 0, failedJobs: 0 };
   const startedAt = Date.now();
@@ -309,7 +320,7 @@ async function runGameAreaPreload(
   } finally {
     trackLazy(ANALYTICS_EVENTS.game_area_preload_finished, {
       outcome: signal.aborted ? "aborted" : "completed",
-      totalJobs: jobs.length + 2,
+      totalJobs,
       completedJobs: tally.completedJobs,
       failedJobs: tally.failedJobs,
       durationMs: Date.now() - startedAt,
