@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.12.2";
+export const APP_VERSION = "1.12.3";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.12.3",
+    date: "2026-11-02",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map landscape on phones uses the full screen width again",
+          "Landscape timer chip no longer covers the tool dock when controls are shown",
+        ],
+      },
+    ],
+  },
   {
     version: "1.12.2",
     date: "2026-11-01",
