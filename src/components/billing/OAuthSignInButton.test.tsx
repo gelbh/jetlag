@@ -1,7 +1,14 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { OAUTH_RESUME_TIMEOUT_MESSAGE } from "../../services/core/auth/accountAuth";
-import { OAUTH_RESUME_GRACE_MS, OAuthSignInButton } from "./OAuthSignInButton";
+import {
+  OAUTH_RESUME_TIMEOUT_MESSAGE,
+  OAuthRedirectInProgressError,
+} from "../../services/core/auth/accountAuth";
+import {
+  OAUTH_NEVER_HIDDEN_GRACE_MS,
+  OAUTH_RESUME_GRACE_MS,
+  OAuthSignInButton,
+} from "./OAuthSignInButton";
 
 const { getFirebaseAuth, isIosStandalonePwa, mockAuth } = vi.hoisted(() => {
   const mockAuth = {
@@ -29,7 +36,7 @@ function setVisibility(state: DocumentVisibilityState) {
 
 describe("OAuthSignInButton", () => {
   beforeEach(() => {
-    mockAuth.currentUser = { uid: "anon-1" };
+    mockAuth.currentUser = { uid: "anon-1", isAnonymous: true };
     isIosStandalonePwa.mockReturnValue(false);
     Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
   });
@@ -123,7 +130,6 @@ describe("OAuthSignInButton", () => {
   describe("home-screen resume recovery", () => {
     beforeEach(() => {
       vi.useFakeTimers();
-      mockAuth.currentUser = { uid: "anon-1", isAnonymous: true };
     });
 
     afterEach(() => {
@@ -201,7 +207,7 @@ describe("OAuthSignInButton", () => {
       mockAuth.currentUser = { uid: "google-1", isAnonymous: false };
 
       await act(async () => {
-        vi.advanceTimersByTime(OAUTH_RESUME_GRACE_MS);
+        vi.advanceTimersByTime(OAUTH_NEVER_HIDDEN_GRACE_MS);
       });
       expect(onSuccess).toHaveBeenCalledTimes(1);
       expect(onError).not.toHaveBeenCalled();
@@ -211,6 +217,44 @@ describe("OAuthSignInButton", () => {
         resolveSignIn?.();
       });
       expect(onSuccess).toHaveBeenCalledTimes(1);
+    });
+
+    it("waits for the longer fallback when the app never went hidden", async () => {
+      isIosStandalonePwa.mockReturnValue(true);
+      const onSignIn = vi.fn(() => new Promise<void>(() => {}));
+      const onError = vi.fn();
+      renderButton({ onSignIn, onError });
+
+      fireEvent.click(screen.getByRole("button"));
+
+      await act(async () => {
+        vi.advanceTimersByTime(OAUTH_RESUME_GRACE_MS);
+      });
+      expect(onError).not.toHaveBeenCalled();
+      expect(screen.getByRole("button")).toBeDisabled();
+
+      await act(async () => {
+        vi.advanceTimersByTime(OAUTH_NEVER_HIDDEN_GRACE_MS - OAUTH_RESUME_GRACE_MS);
+      });
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onError).toHaveBeenCalledWith(OAUTH_RESUME_TIMEOUT_MESSAGE);
+      expect(screen.getByRole("button")).toBeEnabled();
+    });
+
+    it("keeps a home-screen redirect busy without a timeout error", async () => {
+      isIosStandalonePwa.mockReturnValue(true);
+      const onSignIn = vi.fn(() => Promise.reject(new OAuthRedirectInProgressError()));
+      const onError = vi.fn();
+      renderButton({ onSignIn, onError });
+
+      fireEvent.click(screen.getByRole("button"));
+      await act(async () => {});
+
+      await act(async () => {
+        vi.advanceTimersByTime(OAUTH_NEVER_HIDDEN_GRACE_MS * 2);
+      });
+      expect(onError).not.toHaveBeenCalled();
+      expect(screen.getByRole("button")).toBeDisabled();
     });
 
     it("leaves popup handling to Firebase outside home-screen mode", async () => {

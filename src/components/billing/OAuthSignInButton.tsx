@@ -11,10 +11,12 @@ import {
 } from "../../services/core/auth/accountAuth";
 import { getFirebaseAuth } from "../../services/core/firebase/firebase";
 
-// ponytail: fixed grace after the player returns. Exchanges slower than this are
-// reported as "try again" though they may still sign the player in (firebase-js-sdk#10407).
+// ponytail: fixed grace, 15s after the player returns, or 60s if the app never went hidden
+// (the provider sheet may not hide it). Slower exchanges are reported as "try again" though
+// they may still sign the player in (firebase-js-sdk#10407).
 // Drop once Firebase settles popups in iOS home-screen apps, or move them to redirect.
 export const OAUTH_RESUME_GRACE_MS = 15_000;
+export const OAUTH_NEVER_HIDDEN_GRACE_MS = 60_000;
 
 // iOS home-screen apps open the provider page without a window handle, so Firebase
 // never reports the popup as closed and the sign-in promise can hang forever.
@@ -26,23 +28,23 @@ function armResumeRecovery(onTimeout: () => void): () => void {
       timer = null;
     }
   };
-  const start = () => {
+  const start = (ms: number) => {
     clear();
     timer = window.setTimeout(() => {
       timer = null;
       onTimeout();
-    }, OAUTH_RESUME_GRACE_MS);
+    }, ms);
   };
   const onVisibilityChange = () => {
     if (document.visibilityState === "hidden") {
       clear();
       return;
     }
-    start();
+    start(OAUTH_RESUME_GRACE_MS);
   };
 
   if (document.visibilityState === "visible") {
-    start();
+    start(OAUTH_NEVER_HIDDEN_GRACE_MS);
   }
   document.addEventListener("visibilitychange", onVisibilityChange);
 
