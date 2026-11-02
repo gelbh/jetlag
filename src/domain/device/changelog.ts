@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.12.3";
+export const APP_VERSION = "1.12.4";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.12.4",
+    date: "2026-11-02",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          'Google sign-in on an iPhone home-screen app no longer stays on "Opening…"; if it can\'t finish, it asks you to try again',
+          "Map preload finishes after you switch apps or the session updates, instead of spinning forever",
+        ],
+      },
+    ],
+  },
   {
     version: "1.12.3",
     date: "2026-11-02",
