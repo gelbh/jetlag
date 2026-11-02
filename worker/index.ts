@@ -12,6 +12,7 @@ import {
   shouldApplyDocumentCsp,
 } from "./documentCsp";
 import { captureWorkerException } from "./exceptionCapture";
+import { handleFirebaseAuthProxyRequest, shouldHandleFirebaseAuthProxy } from "./firebaseAuthProxy";
 import { handleIncidentEmailRequest, INCIDENT_EMAIL_PATH } from "./incidentEmail";
 import { handlePosthogProxyRequest, shouldHandlePosthogProxy } from "./posthogProxy";
 import { handleTimeRequest, TIME_ENDPOINT_PATH } from "./timeEndpoint";
@@ -69,6 +70,9 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   const pathname = new URL(request.url).pathname;
   if (pathname === TIME_ENDPOINT_PATH) {
     return handleTimeRequest(request);
+  }
+  if (shouldHandleFirebaseAuthProxy(pathname)) {
+    return handleFirebaseAuthProxyRequest(request);
   }
   if (shouldHandlePosthogProxy(pathname)) {
     return handlePosthogProxyRequest(request);

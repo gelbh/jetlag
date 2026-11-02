@@ -683,6 +683,38 @@ describe("worker fetch", () => {
     }
   });
 
+  it("routes /__/auth/iframe through the Firebase auth proxy without hitting assets", async () => {
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        new Response("<!doctype html>", {
+          status: 200,
+          headers: { "Content-Type": "text/html" },
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const env = {
+        ASSETS: {
+          fetch: vi.fn(),
+        },
+      } as Env;
+
+      const response = await worker.fetch(
+        new Request("https://jetlag.gelbhart.dev/__/auth/iframe"),
+        env,
+      );
+
+      expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+      expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+        "https://jet-lag-map-companion.firebaseapp.com/__/auth/iframe",
+      );
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Security-Policy")).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("does not proxy /ph-anything prefix boundary paths", async () => {
     const assetResponse = new Response("missing", { status: 404 });
     const env = {
