@@ -6,6 +6,13 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.12.3 - 2026-11-02
+
+### Fixes
+
+- Map landscape on phones uses the full screen width again
+- Landscape timer chip no longer covers the tool dock when controls are shown
+
 ## 1.12.2 - 2026-11-01
 
 ### Fixes
