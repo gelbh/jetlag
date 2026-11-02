@@ -11,6 +11,7 @@ import { fetchPreparedMeasuringLinearSegments } from "../geo/overpass/measuringL
 import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
 import * as playAreaCategoryPresenceProbe from "../geo/overpass/playAreaCategoryPresenceProbe";
 import {
+  abortActiveGameAreaPreload,
   gameAreaPreloadKey,
   preloadCriticalGameAreaCaches,
   preloadGameAreaCachesAsync,
@@ -70,6 +71,7 @@ vi.mock("../geo/overpass/playAreaCategoryPresenceProbe", async (importOriginal) 
 
 describe("gameAreaPreload", () => {
   beforeEach(() => {
+    abortActiveGameAreaPreload();
     vi.useRealTimers();
     vi.restoreAllMocks();
     vi.clearAllMocks();
@@ -308,5 +310,49 @@ describe("gameAreaPreload", () => {
     expect(preloadJobGapMsForTier("premium")).toBe(preloadJobGapPremiumMsForTests());
     expect(preloadJobGapMsForTier("free")).toBe(preloadJobGapMsForTests());
     expect(preloadJobGapPremiumMsForTests()).toBeLessThan(preloadJobGapMsForTests());
+  });
+
+  it("runs the main preload once when called repeatedly for the same play area", async () => {
+    vi.useFakeTimers();
+
+    const first = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA, undefined, "dublin");
+    const second = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA, undefined, "dublin");
+    expect(second).toBe(first);
+
+    await vi.runAllTimersAsync();
+    await first;
+    await preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA, undefined, "dublin");
+
+    expect(fetchMeasuringPlacesInArea).toHaveBeenCalledTimes(
+      preloadMeasuringCategoriesForTests().length,
+    );
+    const state = usePreloadStore.getState();
+    expect(state.completedJobs).toBe(state.totalJobs);
+    expect(selectPreloadBanner(state).loading).toBe(false);
+  });
+
+  it("pauses while the tab is hidden and resumes when it is visible again", async () => {
+    vi.useFakeTimers();
+    const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+    vi.mocked(fetchMeasuringPlacesInArea).mockImplementationOnce(async () => {
+      visibility.mockReturnValue("hidden");
+      return [];
+    });
+
+    const run = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA, undefined, "dublin");
+    await vi.runAllTimersAsync();
+
+    expect(fetchMeasuringPlacesInArea).toHaveBeenCalledTimes(1);
+    expect(selectPreloadBanner(usePreloadStore.getState()).loading).toBe(true);
+
+    visibility.mockReturnValue("visible");
+    document.dispatchEvent(new Event("visibilitychange"));
+    await vi.runAllTimersAsync();
+    await run;
+
+    expect(fetchMeasuringPlacesInArea).toHaveBeenCalledTimes(
+      preloadMeasuringCategoriesForTests().length,
+    );
+    expect(selectPreloadBanner(usePreloadStore.getState()).loading).toBe(false);
   });
 });

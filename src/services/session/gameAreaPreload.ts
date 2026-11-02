@@ -106,15 +106,44 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
+function waitUntilVisible(signal: AbortSignal): Promise<void> {
+  if (typeof document === "undefined" || document.visibilityState !== "hidden" || signal.aborted) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const settle = () => {
+      if (document.visibilityState === "hidden" && !signal.aborted) {
+        return;
+      }
+      document.removeEventListener("visibilitychange", settle);
+      signal.removeEventListener("abort", settle);
+      resolve();
+    };
+    document.addEventListener("visibilitychange", settle);
+    signal.addEventListener("abort", settle);
+  });
+}
+
 async function runTrackedPreloadJob(
   gameAreaKey: string,
   task: () => Promise<unknown>,
+  signal: AbortSignal,
 ): Promise<void> {
+  let ok = true;
   try {
     await task();
-    usePreloadStore.getState().recordSuccess(gameAreaKey);
   } catch {
-    usePreloadStore.getState().recordFailure(gameAreaKey);
+    ok = false;
+  }
+
+  if (!signal.aborted) {
+    const store = usePreloadStore.getState();
+    if (ok) {
+      store.recordSuccess(gameAreaKey);
+    } else {
+      store.recordFailure(gameAreaKey);
+    }
   }
 }
 
@@ -122,15 +151,16 @@ async function runPreloadQueue(
   gameAreaKey: string,
   jobs: Array<() => Promise<unknown>>,
   jobGapMs: number,
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<void> {
   for (let index = 0; index < jobs.length; index += 1) {
-    if (signal?.aborted) {
+    await waitUntilVisible(signal);
+    if (signal.aborted) {
       return;
     }
 
-    await runTrackedPreloadJob(gameAreaKey, jobs[index]);
-    if (signal?.aborted) {
+    await runTrackedPreloadJob(gameAreaKey, jobs[index], signal);
+    if (signal.aborted) {
       return;
     }
 
@@ -140,25 +170,31 @@ async function runPreloadQueue(
   }
 }
 
-let activePreloadAbort: AbortController | null = null;
+interface PreloadRun {
+  identity: string;
+  controller: AbortController;
+  promise: Promise<void>;
+}
+
+let activeRun: PreloadRun | null = null;
 
 export function abortActiveGameAreaPreload(): void {
-  activePreloadAbort?.abort();
-  activePreloadAbort = null;
+  activeRun?.controller.abort();
+  activeRun = null;
 }
 
-function handleVisibilityForPreload(): void {
-  if (typeof document === "undefined") {
-    return;
-  }
-
-  if (document.visibilityState === "hidden") {
-    abortActiveGameAreaPreload();
-  }
-}
-
-if (typeof document !== "undefined") {
-  document.addEventListener("visibilitychange", handleVisibilityForPreload);
+function preloadRunIdentity(
+  gameAreaKey: string,
+  customMatchingAreas: CustomMatchingAreasByLevel | undefined,
+  regionPackId: RegionPackId | undefined,
+  subregionId: string | undefined,
+): string {
+  return JSON.stringify([
+    gameAreaKey,
+    regionPackId ?? null,
+    subregionId ?? null,
+    adminBoundaryLevelsForSession(regionPackId, customMatchingAreas),
+  ]);
 }
 
 export function preloadGameAreaCaches(
@@ -171,7 +207,8 @@ export function preloadGameAreaCaches(
   void preloadGameAreaCachesAsync(gameArea, customMatchingAreas, regionPackId, tier, subregionId);
 }
 
-export async function preloadGameAreaCachesAsync(
+/** Repeat calls with the same inputs join the current run, even after it settles, until session teardown. */
+export function preloadGameAreaCachesAsync(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
@@ -179,19 +216,45 @@ export async function preloadGameAreaCachesAsync(
   subregionId?: string,
 ): Promise<void> {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
+  const identity = preloadRunIdentity(gameAreaKey, customMatchingAreas, regionPackId, subregionId);
+  if (activeRun?.identity === identity) {
+    return activeRun.promise;
+  }
+
+  activeRun?.controller.abort();
+  const controller = new AbortController();
+  const promise = runGameAreaPreload(
+    gameArea,
+    gameAreaKey,
+    customMatchingAreas,
+    regionPackId,
+    tier,
+    subregionId,
+    controller.signal,
+  );
+  activeRun = { identity, controller, promise };
+  return promise;
+}
+
+async function runGameAreaPreload(
+  gameArea: GameArea,
+  gameAreaKey: string,
+  customMatchingAreas: CustomMatchingAreasByLevel | undefined,
+  regionPackId: RegionPackId | undefined,
+  tier: SessionTier,
+  subregionId: string | undefined,
+  signal: AbortSignal,
+): Promise<void> {
   const jobs = buildPreloadJobs(gameArea, customMatchingAreas, regionPackId, {
     includeAdminProbe: false,
     subregionId,
   });
+  const store = usePreloadStore.getState();
   // +2: admin division probe + category presence probe (warmed before the queue).
-  usePreloadStore.getState().reset(gameAreaKey, jobs.length + 2);
+  store.reset(gameAreaKey, jobs.length + 2);
 
-  activePreloadAbort?.abort();
-  activePreloadAbort = new AbortController();
-  const { signal } = activePreloadAbort;
-  const jobGapMs = preloadJobGapMsForTier(tier);
-
-  if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+  await waitUntilVisible(signal);
+  if (signal.aborted) {
     return;
   }
 
@@ -204,13 +267,19 @@ export async function preloadGameAreaCachesAsync(
       BACKGROUND_LANE,
     );
   } catch {}
-  usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
-  usePreloadStore.getState().recordSuccess(gameAreaKey);
+  if (signal.aborted) {
+    return;
+  }
+  store.setAdminDivisionCounts(gameAreaKey, counts);
+  store.recordSuccess(gameAreaKey);
 
   await warmCategoryPresenceCounts(gameArea, gameAreaKey);
-  usePreloadStore.getState().recordSuccess(gameAreaKey);
+  if (signal.aborted) {
+    return;
+  }
+  store.recordSuccess(gameAreaKey);
 
-  await runPreloadQueue(gameAreaKey, jobs, jobGapMs, signal);
+  await runPreloadQueue(gameAreaKey, jobs, preloadJobGapMsForTier(tier), signal);
 }
 
 let activeCriticalTask: LoadTask | null = null;
