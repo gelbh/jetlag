@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
+import { trackLazy } from "../core/analytics/lazyTelemetry";
 import { OverpassUnavailableError } from "../core/overpass/overpassClient";
 import { getGlobalLoadTasks } from "../core/progress/loadTask";
 import * as adminDivisionAvailability from "../geo/overpass/adminDivisionAvailability";
@@ -21,6 +22,10 @@ import {
   preloadMeasuringCategoriesForTests,
 } from "./gameAreaPreload";
 import { teardownSessionUiState } from "./sessionCleanup";
+
+vi.mock("../core/analytics/lazyTelemetry", () => ({
+  trackLazy: vi.fn(),
+}));
 
 // Mock implementation modules (not barrels) so importOriginal of availability
 // and other overpass/matching importers see the stub.
@@ -343,6 +348,34 @@ describe("gameAreaPreload", () => {
     const state = usePreloadStore.getState();
     expect(state.completedJobs).toBe(state.totalJobs);
     expect(selectPreloadBanner(state).loading).toBe(false);
+  });
+
+  it("reruns after session teardown and reports both runs", async () => {
+    vi.useFakeTimers();
+
+    const first = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA, undefined, "dublin");
+    teardownSessionUiState();
+    await vi.runAllTimersAsync();
+    await first;
+
+    expect(trackLazy).toHaveBeenCalledWith(
+      "game_area_preload_finished",
+      expect.objectContaining({ outcome: "aborted" }),
+    );
+
+    const second = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA, undefined, "dublin");
+    expect(second).not.toBe(first);
+    await vi.runAllTimersAsync();
+    await second;
+
+    const totalJobs = usePreloadStore.getState().totalJobs;
+    expect(trackLazy).toHaveBeenLastCalledWith("game_area_preload_finished", {
+      outcome: "completed",
+      totalJobs,
+      completedJobs: totalJobs,
+      failedJobs: 0,
+      durationMs: expect.any(Number),
+    });
   });
 
   it("pauses while the tab is hidden and resumes when it is visible again", async () => {

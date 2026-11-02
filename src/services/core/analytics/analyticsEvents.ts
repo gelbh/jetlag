@@ -36,6 +36,7 @@ export const ANALYTICS_EVENTS = {
   account_linked: "account_linked",
   pwa_installed: "pwa_installed",
   thermometer_send_blocked: "thermometer_send_blocked",
+  game_area_preload_finished: "game_area_preload_finished",
 } as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];
@@ -131,5 +132,12 @@ export type AnalyticsEventProps = {
     reason: ThermometerSendBlockReason;
     placementMode: "gps" | "manual";
     awaitHiderAnswer: boolean;
+  };
+  game_area_preload_finished: {
+    outcome: "completed" | "aborted";
+    totalJobs: number;
+    completedJobs: number;
+    failedJobs: number;
+    durationMs: number;
   };
 };
