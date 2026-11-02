@@ -228,7 +228,7 @@ export function preloadGameAreaCaches(
   void preloadGameAreaCachesAsync(gameArea, customMatchingAreas, regionPackId, tier, subregionId);
 }
 
-/** Repeat calls with the same inputs join the current run, even after it settles, until session teardown. */
+/** Repeat calls with the same play-area inputs (tier ignored) join the current run, even after it settles, until session teardown. */
 export function preloadGameAreaCachesAsync(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,

@@ -376,6 +376,7 @@ describe("gameAreaPreload", () => {
       failedJobs: 0,
       durationMs: expect.any(Number),
     });
+    expect(trackLazy).toHaveBeenCalledTimes(2);
   });
 
   it("pauses while the tab is hidden and resumes when it is visible again", async () => {
