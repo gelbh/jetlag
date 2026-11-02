@@ -204,6 +204,20 @@ describe("gameAreaPreload", () => {
     expect(selectPreloadBanner(usePreloadStore.getState()).loading).toBe(false);
   });
 
+  it("shares one category presence probe between critical and main preload", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(adminDivisionAvailability, "probeAdminDivisionCounts").mockResolvedValue(
+      adminDivisionAvailability.emptyAdminDivisionCounts(),
+    );
+
+    const main = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA);
+    const critical = preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA);
+    await vi.runAllTimersAsync();
+    await Promise.all([main, critical]);
+
+    expect(playAreaCategoryPresenceProbe.probePlayAreaCategoryCounts).toHaveBeenCalledTimes(1);
+  });
+
   it("never preloads landmass Overpass on background or critical paths", async () => {
     vi.useFakeTimers();
 

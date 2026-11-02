@@ -7,7 +7,7 @@ import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
 } from "../../domain/session/catalog/sessionCustomContent";
-import { usePreloadStore } from "../../state/preloadStore";
+import { type CategoryPresenceCounts, usePreloadStore } from "../../state/preloadStore";
 import { createLoadTask, type LoadTask } from "../core/progress/loadTask";
 import {
   adminBoundaryLevelsForSession,
@@ -19,12 +19,18 @@ import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
 import { probePlayAreaCategoryCounts } from "../geo/overpass/playAreaCategoryPresenceProbe";
 import { fetchStaticTransit } from "../transit/transitStatic";
 
+let categoryProbe: { gameAreaKey: string; promise: Promise<CategoryPresenceCounts> } | null = null;
+
 async function warmCategoryPresenceCounts(gameArea: GameArea, gameAreaKey: string): Promise<void> {
+  if (categoryProbe?.gameAreaKey !== gameAreaKey) {
+    categoryProbe = {
+      gameAreaKey,
+      promise: probePlayAreaCategoryCounts(gameArea, playAreaCategoryPresenceProbeSpecs()),
+    };
+  }
+
   try {
-    const counts = await probePlayAreaCategoryCounts(
-      gameArea,
-      playAreaCategoryPresenceProbeSpecs(),
-    );
+    const counts = await categoryProbe.promise;
     usePreloadStore.getState().setCategoryPresenceCounts(gameAreaKey, counts);
   } catch {
     // Soft-fail: leave categoryPresenceCounts unset so resolve stays available until reactive.
@@ -181,6 +187,7 @@ let activeRun: PreloadRun | null = null;
 export function abortActiveGameAreaPreload(): void {
   activeRun?.controller.abort();
   activeRun = null;
+  categoryProbe = null;
 }
 
 function preloadRunIdentity(
