@@ -47,6 +47,7 @@ describe("transitStops", () => {
 
     expect(query).toMatch(/->\.bus|\.bus out/);
     expect(query).toMatch(/->\.rail|\.rail out/);
+    expect(query.indexOf(".rail out")).toBeLessThan(query.indexOf(".bus out"));
     expect(query).toContain(`out center ${HIDING_ZONE_BUS_STOP_OVERPASS_CAP}`);
     expect(query).toContain(`out center ${HIDING_ZONE_RAIL_STOP_OVERPASS_CAP}`);
     expect(HIDING_ZONE_BUS_STOP_OVERPASS_CAP).toBe(150);
@@ -124,7 +125,7 @@ describe("transitStops", () => {
     expect(stations).toHaveLength(1);
   });
 
-  it("merges same-named platform stops that only differ by ref", () => {
+  it("merges same-named stop positions that only differ by ref", () => {
     const stations = parseOverpassTransitStops(
       [
         {
