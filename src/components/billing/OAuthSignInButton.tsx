@@ -6,7 +6,6 @@ import {
 import { isIosStandalonePwa } from "../../domain/device/pwa/isIosStandalonePwa";
 import {
   isOAuthRedirectInProgress,
-  isPermanentUser,
   OAUTH_RESUME_TIMEOUT_MESSAGE,
 } from "../../services/core/auth/accountAuth";
 import { getFirebaseAuth } from "../../services/core/firebase/firebase";
@@ -76,6 +75,7 @@ export function OAuthSignInButton({
   busyLabel = "Opening…",
 }: OAuthSignInButtonProps) {
   const [busy, setBusy] = useState(false);
+  const succeededRef = useRef(false);
   const stopRecoveryRef = useRef<() => void>(() => {});
 
   useEffect(() => () => stopRecoveryRef.current(), []);
@@ -100,17 +100,19 @@ export function OAuthSignInButton({
     }
     setBusy(true);
 
-    let finished = false;
-    let succeeded = false;
+    succeededRef.current = false;
+    let failed = false;
     let stopRecovery = () => {};
 
+    // First success across attempts wins: a timed-out attempt that resolves during a retry
+    // signs the player in, and the retry's own outcome is then ignored.
     const succeed = async () => {
-      if (succeeded) {
+      if (succeededRef.current) {
         return;
       }
-      succeeded = true;
-      finished = true;
+      succeededRef.current = true;
       stopRecovery();
+      stopRecoveryRef.current();
       try {
         await onSuccess();
       } catch (error) {
@@ -120,23 +122,17 @@ export function OAuthSignInButton({
     };
 
     const fail = (message: string) => {
-      if (finished) {
+      if (failed || succeededRef.current) {
         return;
       }
-      finished = true;
+      failed = true;
       stopRecovery();
       onError(message);
       setBusy(false);
     };
 
     if (isIosStandalonePwa()) {
-      stopRecovery = armResumeRecovery(() => {
-        if (isPermanentUser(getFirebaseAuth().currentUser)) {
-          void succeed();
-          return;
-        }
-        fail(OAUTH_RESUME_TIMEOUT_MESSAGE);
-      });
+      stopRecovery = armResumeRecovery(() => fail(OAUTH_RESUME_TIMEOUT_MESSAGE));
       stopRecoveryRef.current = stopRecovery;
     }
 

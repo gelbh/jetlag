@@ -30,7 +30,8 @@ export { OAUTH_REDIRECT_PENDING_KEY };
 
 export const OAUTH_REDIRECT_FAILED_MESSAGE =
   "Sign-in didn’t complete. Allow popups for this site and try again.";
-export const OAUTH_RESUME_TIMEOUT_MESSAGE = "Sign-in didn’t finish. Try again.";
+export const OAUTH_RESUME_TIMEOUT_MESSAGE =
+  "Sign-in didn’t finish. Try again, or sign in with an email link.";
 
 export class OAuthRedirectInProgressError extends Error {
   constructor() {

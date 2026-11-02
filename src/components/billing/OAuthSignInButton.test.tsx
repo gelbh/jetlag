@@ -190,13 +190,13 @@ describe("OAuthSignInButton", () => {
       expect(onError).toHaveBeenCalledTimes(1);
     });
 
-    it("treats a home-screen sign-in as done when the account is already signed in", async () => {
+    it("lets the first success win when a timed-out attempt resolves during a retry", async () => {
       isIosStandalonePwa.mockReturnValue(true);
-      let resolveSignIn: (() => void) | undefined;
+      const attempts: Array<{ resolve: () => void; reject: (error: Error) => void }> = [];
       const onSignIn = vi.fn(
         () =>
-          new Promise<void>((resolve) => {
-            resolveSignIn = resolve;
+          new Promise<void>((resolve, reject) => {
+            attempts.push({ resolve, reject });
           }),
       );
       const onSuccess = vi.fn(async () => undefined);
@@ -204,18 +204,34 @@ describe("OAuthSignInButton", () => {
       renderButton({ onSignIn, onSuccess, onError });
 
       fireEvent.click(screen.getByRole("button"));
-      mockAuth.currentUser = { uid: "google-1", isAnonymous: false };
+      await act(async () => {
+        setVisibility("hidden");
+        setVisibility("visible");
+        vi.advanceTimersByTime(OAUTH_RESUME_GRACE_MS);
+      });
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onError).toHaveBeenCalledWith(OAUTH_RESUME_TIMEOUT_MESSAGE);
+      expect(screen.getByRole("button")).toBeEnabled();
+
+      fireEvent.click(screen.getByRole("button"));
+      expect(screen.getByRole("button")).toBeDisabled();
+      expect(onSignIn).toHaveBeenCalledTimes(2);
 
       await act(async () => {
-        vi.advanceTimersByTime(OAUTH_NEVER_HIDDEN_GRACE_MS);
+        attempts[0].resolve();
       });
       expect(onSuccess).toHaveBeenCalledTimes(1);
-      expect(onError).not.toHaveBeenCalled();
       expect(screen.getByRole("button")).toBeEnabled();
 
       await act(async () => {
-        resolveSignIn?.();
+        vi.advanceTimersByTime(OAUTH_NEVER_HIDDEN_GRACE_MS * 2);
       });
+      expect(onError).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        attempts[1].reject(new Error("cancelled"));
+      });
+      expect(onError).toHaveBeenCalledTimes(1);
       expect(onSuccess).toHaveBeenCalledTimes(1);
     });
 
