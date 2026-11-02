@@ -33,7 +33,7 @@ clientsClaim();
 
 registerRoute(
   new NavigationRoute(createHandlerBoundToURL("index.html"), {
-    denylist: [/^\/assets\//],
+    denylist: [/^\/assets\//, /^\/__\//],
   }),
 );
 
