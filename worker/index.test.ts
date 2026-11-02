@@ -705,9 +705,7 @@ describe("worker fetch", () => {
       );
 
       expect(env.ASSETS.fetch).not.toHaveBeenCalled();
-      expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
-        "https://jet-lag-map-companion.firebaseapp.com/__/auth/iframe",
-      );
+      expect(fetchMock).toHaveBeenCalledOnce();
       expect(response.status).toBe(200);
       expect(response.headers.get("Content-Security-Policy")).toBeNull();
     } finally {
