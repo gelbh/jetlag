@@ -76,17 +76,14 @@ export function transitStopDisplayName(tags: Record<string, string> | undefined)
     return "Transit stop";
   }
 
-  const ref = tags.ref?.trim();
-  if (ref) {
-    return ref;
-  }
-
-  const localRef = tags.local_ref?.trim();
-  if (localRef) {
-    return localRef;
-  }
-
-  const candidates = [tags.name, tags["name:en"], tags.official_name, tags["official_name:en"]];
+  const candidates = [
+    tags.name,
+    tags["name:en"],
+    tags.official_name,
+    tags["official_name:en"],
+    tags.ref,
+    tags.local_ref,
+  ];
 
   for (const candidate of candidates) {
     const trimmed = candidate?.trim();

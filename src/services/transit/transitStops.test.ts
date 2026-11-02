@@ -56,18 +56,25 @@ describe("transitStops", () => {
     expect(query).not.toContain('public_transport"="stop_position"');
   });
 
-  it("prefers ref over name for display labels", () => {
+  it("prefers the stop name over stop codes for display labels", () => {
     expect(
       transitStopDisplayName({
         ref: "51",
         name: "3rd Avenue at McBride",
       }),
-    ).toBe("51");
+    ).toBe("3rd Avenue at McBride");
+    expect(
+      transitStopDisplayName({
+        local_ref: "PA",
+        name: "Princes Street (west)",
+      }),
+    ).toBe("Princes Street (west)");
   });
 
-  it("falls back to local_ref then name then Transit stop", () => {
+  it("falls back to ref then local_ref then Transit stop when unnamed", () => {
+    expect(transitStopDisplayName({ ref: "51", local_ref: "A" })).toBe("51");
     expect(transitStopDisplayName({ local_ref: "Stop A" })).toBe("Stop A");
-    expect(transitStopDisplayName({ name: "Central Station" })).toBe("Central Station");
+    expect(transitStopDisplayName({ name: "  ", ref: "7" })).toBe("7");
     expect(transitStopDisplayName({})).toBe("Transit stop");
   });
 
@@ -115,5 +122,28 @@ describe("transitStops", () => {
     );
 
     expect(stations).toHaveLength(1);
+  });
+
+  it("merges same-named platform stops that only differ by ref", () => {
+    const stations = parseOverpassTransitStops(
+      [
+        {
+          id: 3001,
+          lat: 54.3,
+          lon: -130.32,
+          tags: { public_transport: "stop_position", ref: "1", name: "Edinburgh Waverley" },
+        },
+        {
+          id: 3002,
+          lat: 54.3004,
+          lon: -130.32,
+          tags: { public_transport: "stop_position", ref: "4", name: "Edinburgh Waverley" },
+        },
+      ],
+      sampleGameArea,
+    );
+
+    expect(stations).toHaveLength(1);
+    expect(stations[0]?.name).toBe("Edinburgh Waverley");
   });
 });
