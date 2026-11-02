@@ -7,21 +7,23 @@ Edge entry for the Jet Lag SPA host (`worker/index.ts`). Handles a few special A
 Handlers run in this order (first match wins for early returns):
 
 1. **Server time** — `TIME_ENDPOINT_PATH` (`/api/time`) → `handleTimeRequest`
-2. **PostHog reverse proxy** — paths matched by `shouldHandlePosthogProxy` → `handlePosthogProxyRequest`
-3. **CSP report** — `POST /api/csp-report` (other methods → `204`) → logs truncated body
-4. **Incident email** — `INCIDENT_EMAIL_PATH` → `handleIncidentEmailRequest`
-5. **Static assets** — `env.ASSETS.fetch`
+2. **Firebase auth helper proxy**: `/__/auth/*` → `handleFirebaseAuthProxyRequest` (same-origin helper for redirect sign-in; responses skip `_headers` CSP)
+3. **PostHog reverse proxy** — paths matched by `shouldHandlePosthogProxy` → `handlePosthogProxyRequest`
+4. **CSP report** — `POST /api/csp-report` (other methods → `204`) → logs truncated body
+5. **Incident email** — `INCIDENT_EMAIL_PATH` → `handleIncidentEmailRequest`
+6. **Static assets** — `env.ASSETS.fetch`
    - Exact `/` is rewritten to `/prerender/home/` (prerendered home; Assets redirects are followed so the client stays on `/`)
    - `/prerender/home` and `/prerender/home/` **308** → `/`
    - Nested SPA routes still fall through to the asset shell as usual
-6. **Asset SPA-fallback guard** — if a `/assets/*` request would get HTML (`text/html` 200), respond `404` instead (stale chunk / missing file)
-7. **Document CSP nonce** — HTML documents get a per-response script nonce via `applyDocumentCspNonce`
-8. **Cache-Control** — `applyCacheControlHeader` on the (possibly CSP-rewritten) asset response
+7. **Asset SPA-fallback guard** — if a `/assets/*` request would get HTML (`text/html` 200), respond `404` instead (stale chunk / missing file)
+8. **Document CSP nonce** — HTML documents get a per-response script nonce via `applyDocumentCspNonce`
+9. **Cache-Control** — `applyCacheControlHeader` on the (possibly CSP-rewritten) asset response
 
 ## Modules
 
 | Path | Role |
 |------|------|
+| `firebaseAuthProxy.ts` | Same-origin Firebase auth helper `/__/auth/*` proxy |
 | `posthogProxy.ts` | First-party PostHog /ph proxy |
 | `documentCsp.ts` | Nonce generation + CSP header / HTML rewrite |
 | `assetCacheHeaders.ts` | Cache-Control by pathname |
