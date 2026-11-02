@@ -20,7 +20,7 @@ function isMiniatureGolf(tags: Record<string, string>): boolean {
   return tags.miniature === "yes" || tags.golf === "miniature";
 }
 
-function matchingFeatureName(tags: Record<string, string>): string | null {
+export function matchingFeatureName(tags: Record<string, string>): string | null {
   const candidates = [tags.name, tags["name:en"], tags.official_name, tags["official_name:en"]];
 
   for (const candidate of candidates) {

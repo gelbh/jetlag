@@ -2,6 +2,7 @@ import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds"
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
 import { dedupeTransitStations, type TransitStation } from "../../domain/session/hiding/hidingZone";
+import { matchingFeatureName } from "../geo/matching/parse";
 
 export const TRANSIT_STOP_OVERPASS_LIMIT = 250;
 export const HIDING_ZONE_BUS_STOP_OVERPASS_CAP = 150;
@@ -66,8 +67,8 @@ export function buildHidingZoneTransitStopOverpassQuery(
     node["station"="subway"](${formatted});
     node["station"="light_rail"](${formatted});
   )->.rail;
-  .bus out ${output} ${busCap};
   .rail out ${output} ${railCap};
+  .bus out ${output} ${busCap};
   `;
 }
 
@@ -76,26 +77,7 @@ export function transitStopDisplayName(tags: Record<string, string> | undefined)
     return "Transit stop";
   }
 
-  const ref = tags.ref?.trim();
-  if (ref) {
-    return ref;
-  }
-
-  const localRef = tags.local_ref?.trim();
-  if (localRef) {
-    return localRef;
-  }
-
-  const candidates = [tags.name, tags["name:en"], tags.official_name, tags["official_name:en"]];
-
-  for (const candidate of candidates) {
-    const trimmed = candidate?.trim();
-    if (trimmed) {
-      return trimmed;
-    }
-  }
-
-  return "Transit stop";
+  return matchingFeatureName(tags) || tags.ref?.trim() || tags.local_ref?.trim() || "Transit stop";
 }
 
 function isActiveTransitStop(tags: Record<string, string> | undefined): boolean {
