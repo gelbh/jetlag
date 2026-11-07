@@ -2,7 +2,6 @@ import {
   ActionIcon,
   Box,
   Button,
-  Drawer,
   Group,
   SegmentedControl,
   Stack,
@@ -28,9 +27,7 @@ import { type ReactNode, type PointerEvent as ReactPointerEvent, useRef, useStat
 import { useNavigate } from "react-router-dom";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import {
-  bottomDrawerStyles,
   compactFilledStyles,
-  DrawerGrabber,
   ErrorCallout,
   FieldError,
   filledStyles,
@@ -41,6 +38,7 @@ import {
   SuccessCallout,
 } from "@/components/ui/entry/entryChrome";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
+import { DrawerSheet } from "@/components/ui/sheets/DrawerSheet";
 import { USERNAME_MAX_LENGTH } from "@/domain/game/playerProfile";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
 import { copyToClipboard } from "@/platform/copyToClipboard";
@@ -575,20 +573,8 @@ function FriendDetailDrawer({
   };
 
   return (
-    <Drawer
-      opened
-      onClose={onClose}
-      position="bottom"
-      size="auto"
-      padding="md"
-      radius={24}
-      title={null}
-      withCloseButton={false}
-      overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
-      styles={bottomDrawerStyles()}
-    >
+    <DrawerSheet open onClose={onClose} ariaLabel={entry.username}>
       <Stack gap="md">
-        <DrawerGrabber />
         <Stack gap={8} align="center">
           <FriendMonogram username={entry.username} size={56} />
           <Text
@@ -758,7 +744,7 @@ function FriendDetailDrawer({
           Done
         </UnstyledButton>
       </Stack>
-    </Drawer>
+    </DrawerSheet>
   );
 }
 

@@ -58,6 +58,10 @@ export function SeekerMapScreen() {
 
   return (
     <MapLandscapeChromeShell
+      chromeOccupied={
+        controller.activeTool !== "none" ||
+        Boolean(controller.geometryEditAnnotation && controller.geometryDraft)
+      }
       sessionRules={controller.session!}
       timerState={controller.timer.timerState}
       timerHasStarted={controller.timer.hasStarted}

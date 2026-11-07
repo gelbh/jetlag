@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import {
   assertInViewport,
   clickViaEvaluate,
+  DOCK_FLOAT_GAP_PX,
   expect,
   injectSimulatedSafeAreaBottom,
   injectSimulatedSafeAreaTop,
@@ -258,11 +259,17 @@ test.describe("iPhone 13 PWA safe area", () => {
   });
 
   test("dock flush chassis absorbs home indicator with map full bleed", async ({ page }) => {
+    const mapRoot = page
+      .locator(".maplibregl-map")
+      .filter({ has: page.locator("canvas") })
+      .first();
+    await expect(mapRoot).toBeVisible();
     const metrics = await page.evaluate(() => {
       const host = document.querySelector(".jl-map-bottom-chrome-host");
-      const chrome = document.querySelector(".jl-map-bottom-chrome");
       const hunt = document.querySelector(".jl-map-island--hunt");
-      const map = document.querySelector(".maplibregl-map");
+      const map = [...document.querySelectorAll(".maplibregl-map")].find((el) =>
+        el.querySelector("canvas"),
+      );
       const hostRect = host?.getBoundingClientRect();
       const huntRect = hunt?.getBoundingClientRect();
       const mapRect = map?.getBoundingClientRect();
@@ -271,7 +278,6 @@ test.describe("iPhone 13 PWA safe area", () => {
       );
       const lowestSlotBottom = Math.max(...slots.map((el) => el.getBoundingClientRect().bottom), 0);
       const hostStyle = host ? getComputedStyle(host) : null;
-      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
       const huntStyle = hunt ? getComputedStyle(hunt) : null;
       return {
         viewportHeight: window.innerHeight,
@@ -279,7 +285,7 @@ test.describe("iPhone 13 PWA safe area", () => {
         barHeight: huntRect?.height ?? 0,
         barBottom: huntRect?.bottom ?? 0,
         mapBottom: mapRect?.bottom ?? 0,
-        dockPaddingBottom: chromeStyle ? Number.parseFloat(chromeStyle.paddingBottom) : 0,
+        dockPaddingBottom: hostStyle ? Number.parseFloat(hostStyle.paddingBottom) : 0,
         dockBottomOffset: hostStyle ? Number.parseFloat(hostStyle.bottom) : 0,
         barPaddingBottom: huntStyle ? Number.parseFloat(huntStyle.paddingBottom) : 0,
         lowestSlotBottom,
@@ -295,11 +301,12 @@ test.describe("iPhone 13 PWA safe area", () => {
 
     expect(metrics.backdropOnMap).toBeNull();
     expect(metrics.islandCount).toBeGreaterThanOrEqual(2);
-    // Host chassis: flush to physical bottom; chrome pad absorbs safe-area.
+    // Host chassis: flush to physical bottom; float gap under the dock island.
     expect(metrics.dockBottomOffset).toBeLessThanOrEqual(1);
     expect(metrics.gapBelowDock).toBeLessThanOrEqual(2);
     expect(Math.abs(metrics.dockBottom - metrics.viewportHeight)).toBeLessThanOrEqual(2);
-    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(SIMULATED_SAFE_AREA_BOTTOM_PX - 2);
+    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(DOCK_FLOAT_GAP_PX - 2);
+    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(DOCK_FLOAT_GAP_PX + 2);
     // Forbidden: safe-area pad inside the bordered island (reverted stripe).
     expect(metrics.barPaddingBottom).toBeLessThanOrEqual(6);
     expect(Math.abs(metrics.mapBottom - metrics.viewportHeight)).toBeLessThanOrEqual(2);
@@ -315,39 +322,44 @@ test.describe("iPhone 13 PWA safe area", () => {
 
     const metrics = await page.evaluate(() => {
       const host = document.querySelector(".jl-map-bottom-chrome-host");
-      const chrome = document.querySelector(".jl-map-bottom-chrome");
       const hostRect = host?.getBoundingClientRect();
-      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
+      const hostStyle = host ? getComputedStyle(host) : null;
       return {
         viewportHeight: window.innerHeight,
         dockBottom: hostRect?.bottom ?? 0,
-        dockPaddingBottom: chromeStyle ? Number.parseFloat(chromeStyle.paddingBottom) : 0,
+        dockPaddingBottom: hostStyle ? Number.parseFloat(hostStyle.paddingBottom) : 0,
       };
     });
 
     expect(Math.abs(metrics.dockBottom - metrics.viewportHeight)).toBeLessThanOrEqual(2);
-    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(SIMULATED_SAFE_AREA_BOTTOM_PX - 2);
+    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(DOCK_FLOAT_GAP_PX - 2);
+    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(DOCK_FLOAT_GAP_PX + 2);
   });
 
-  test("status rail clears the notch safe-area band", async ({ page }) => {
+  test("status island sits below the notch with float gap", async ({ page }) => {
     await injectSimulatedSafeAreaTop(page, SIMULATED_SAFE_AREA_TOP_PX);
 
     const metrics = await page.evaluate(() => {
-      const rail = document.querySelector('[data-testid="map-status-rail-mantine"]');
-      // Inner padded header row (Mantine path; .jl-status-bar retired).
-      const header = rail?.querySelector(":scope > .relative > div");
+      const float = document.querySelector(".jl-status-rail-float");
+      const rail = document.querySelector(".jl-status-rail");
+      const island = document.querySelector('[data-testid="tool-status-block-mantine"]');
+      const floatRect = float?.getBoundingClientRect();
       const railRect = rail?.getBoundingClientRect();
-      const headerRect = header?.getBoundingClientRect();
+      const islandRect = island?.getBoundingClientRect();
       return {
-        railPaddingTop: rail ? Number.parseFloat(getComputedStyle(rail).paddingTop) : 0,
-        headerTop: headerRect?.top ?? 0,
+        floatPaddingTop: float ? Number.parseFloat(getComputedStyle(float).paddingTop) : 0,
+        islandTop: islandRect?.top ?? 0,
+        floatTop: floatRect?.top ?? 0,
         railTop: railRect?.top ?? 0,
       };
     });
 
-    expect(metrics.railPaddingTop).toBeGreaterThanOrEqual(SIMULATED_SAFE_AREA_TOP_PX - 1);
-    expect(metrics.headerTop).toBeGreaterThanOrEqual(SIMULATED_SAFE_AREA_TOP_PX - 1);
+    const expectedTop = SIMULATED_SAFE_AREA_TOP_PX + DOCK_FLOAT_GAP_PX;
+    expect(metrics.floatPaddingTop).toBeGreaterThanOrEqual(expectedTop - 2);
+    expect(metrics.floatPaddingTop).toBeLessThanOrEqual(expectedTop + 2);
+    expect(metrics.islandTop).toBeGreaterThanOrEqual(expectedTop - 2);
     expect(metrics.railTop).toBeLessThanOrEqual(1);
+    expect(metrics.floatTop).toBeLessThanOrEqual(1);
   });
 });
 

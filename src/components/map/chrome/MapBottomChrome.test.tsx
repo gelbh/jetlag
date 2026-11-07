@@ -216,6 +216,15 @@ describe("MapBottomChrome", () => {
     expect(controlsCss).not.toMatch(/map-recenter-control/);
     expect(chromeCss).toMatch(/\.jl-map-nav-dock \.map-style-control__preview/);
   });
+
+  it("hides the nav dock only while landscape chrome is collapsed", () => {
+    expect(controlsCss).toMatch(
+      /\.map-screen-shell\[data-landscape-chrome="collapsed"\] \.jl-map-nav-dock/,
+    );
+    expect(controlsCss).not.toMatch(
+      /\.map-screen-shell\[data-landscape-chrome="revealed"\] \.jl-map-nav-dock/,
+    );
+  });
 });
 
 describe("MapBottomChrome Mantine", () => {
