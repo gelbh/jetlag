@@ -6,6 +6,21 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.12.5 - 2026-11-07
+
+### Fixes
+
+- Measuring send unlocks when place confirmation runs long
+- Top load progress chip stays centered
+- Friends and leaderboard sheets stay in the phone column in landscape
+- Landscape timer chip hides while a tool is open
+- Zoom controls hide with the tool dock when landscape chrome is collapsed
+- Transit stops show their real name instead of a stop code, so Station Name's Length and Station First Letter count the station name
+
+### Improvements
+
+- Support can show a short dismissable notice on the map during a session
+
 ## 1.12.4 - 2026-11-02
 
 ### Fixes
