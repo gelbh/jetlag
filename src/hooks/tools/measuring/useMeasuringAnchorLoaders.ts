@@ -239,8 +239,12 @@ export function useMeasuringAnchorLoaders({
 
       const { task, requestSignal } = beginLoadTask("Loading places in the play area");
       // Send freezes this list into the question, so it waits for the background enrich.
+      // Overdue (LoadTask ETA factor) also unlocks send: same soft-fail end state as enrich fail.
       let enrichPending = false;
       const releaseEnrichGate = () => {
+        if (!enrichPending) {
+          return;
+        }
         enrichPending = false;
         if (requestId === placesRequestIdRef.current) {
           setMeasuringLoading(false);
@@ -272,13 +276,13 @@ export function useMeasuringAnchorLoaders({
               enrichPending = true;
               setMeasuringLoadTask(enrichTask);
               const unsubscribe = enrichTask.subscribe(() => {
-                const { status } = enrichTask.getSnapshot();
-                if (status === "running") {
-                  return;
+                const { status, overdue } = enrichTask.getSnapshot();
+                const terminal = status !== "running";
+                if (terminal) {
+                  unsubscribe();
                 }
-                unsubscribe();
-                // A finished enrich releases in onEnrich, after the merged list lands.
-                if (status !== "done") {
+                // Done releases in onEnrich after the merged list lands.
+                if (terminal ? status !== "done" : overdue) {
                   releaseEnrichGate();
                 }
               });

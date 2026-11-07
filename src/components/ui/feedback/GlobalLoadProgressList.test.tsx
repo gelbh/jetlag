@@ -22,4 +22,22 @@ describe("GlobalLoadProgressList", () => {
       });
     }
   });
+
+  it("centers the list horizontally", () => {
+    const task = createLoadTask({ label: "Loading map", global: true });
+
+    try {
+      render(
+        <MantineProvider>
+          <GlobalLoadProgressList />
+        </MantineProvider>,
+      );
+
+      expect(screen.getByTestId("global-load-progress-list").className).toMatch(/\bmx-auto\b/);
+    } finally {
+      act(() => {
+        task.cancel();
+      });
+    }
+  });
 });
