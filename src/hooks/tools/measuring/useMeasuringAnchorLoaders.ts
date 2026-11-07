@@ -272,13 +272,16 @@ export function useMeasuringAnchorLoaders({
               enrichPending = true;
               setMeasuringLoadTask(enrichTask);
               const unsubscribe = enrichTask.subscribe(() => {
-                const { status } = enrichTask.getSnapshot();
-                if (status === "running") {
+                const snapshot = enrichTask.getSnapshot();
+                if (snapshot.status === "running") {
+                  if (snapshot.overdue) {
+                    releaseEnrichGate();
+                  }
                   return;
                 }
                 unsubscribe();
                 // A finished enrich releases in onEnrich, after the merged list lands.
-                if (status !== "done") {
+                if (snapshot.status !== "done") {
                   releaseEnrichGate();
                 }
               });

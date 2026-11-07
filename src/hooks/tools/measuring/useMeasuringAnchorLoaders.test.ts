@@ -581,4 +581,79 @@ describe("useMeasuringAnchorLoaders enrich send gate", () => {
     });
     expect(result.current.draft.measuringLoading).toBe(false);
   });
+
+  it("releases send when the background enrich becomes overdue", async () => {
+    vi.useFakeTimers();
+    try {
+      const calls = mockBundledWithEnrich();
+      const { result } = renderLoaders();
+
+      await act(async () => {
+        await result.current.loaders.loadAllPlacesAt([53.34, -6.3], "park");
+      });
+      expect(result.current.draft.measuringLoading).toBe(true);
+
+      const enrich = calls[0]?.enrich;
+      expect(enrich).toBeTruthy();
+
+      act(() => {
+        enrich!
+          .stage({
+            kind: "fetch",
+            label: "Searching map data",
+            historyKey: "test:measuring-enrich-overdue",
+            expectedMs: 4_000,
+          })
+          .start();
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(6_500);
+      });
+
+      expect(enrich!.getSnapshot().overdue).toBe(true);
+      expect(result.current.draft.measuringLoading).toBe(false);
+      expect(enrich!.getSnapshot().status).toBe("running");
+      expect(result.current.draft.measuringLoadTask).toBe(enrich);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("still merges places after an overdue send-gate release", async () => {
+    vi.useFakeTimers();
+    try {
+      const calls = mockBundledWithEnrich();
+      const { result } = renderLoaders();
+
+      await act(async () => {
+        await result.current.loaders.loadAllPlacesAt([53.34, -6.3], "park");
+      });
+
+      const enrich = calls[0]!.enrich!;
+      act(() => {
+        enrich
+          .stage({
+            kind: "fetch",
+            label: "Searching map data",
+            historyKey: "test:measuring-enrich-overdue-merge",
+            expectedMs: 4_000,
+          })
+          .start();
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(6_500);
+      });
+      expect(result.current.draft.measuringLoading).toBe(false);
+      expect(result.current.draft.measuringPlaces).toHaveLength(1);
+
+      act(() => {
+        enrich.complete();
+        calls[0]!.options?.onEnrich?.(merged);
+      });
+      expect(result.current.draft.measuringPlaces).toHaveLength(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
