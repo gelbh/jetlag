@@ -12,7 +12,7 @@ export function GlobalLoadProgressList() {
   return (
     <div
       data-testid="global-load-progress-list"
-      className="pointer-events-none flex w-full max-w-xs flex-col gap-2"
+      className="pointer-events-none mx-auto flex w-full max-w-xs flex-col gap-2"
     >
       {tasks.map((task) => (
         <div
