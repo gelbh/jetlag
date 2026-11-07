@@ -12,11 +12,7 @@ const VALID_ACTIONS = new Set([
   "recomputeThermometerFromHide",
 ]);
 
-/**
- * Pure: hotter/colder from hide vs thermometer A→B.
- * Matches client `truthThermometer` / `applyBoardOpPreview` comparison
- * (`distanceToB + 1e-6 < distanceToA ? hotter : colder`); no near-edge bailout.
- */
+/** Same hotter/colder rule as client `truthThermometer`, without near-edge bailout. */
 export function computeThermometerAnswerFromHide(pointA, pointB, hide) {
   const distanceToA = haversineMeters(hide.lat, hide.lng, pointA.lat, pointA.lng);
   const distanceToB = haversineMeters(hide.lat, hide.lng, pointB.lat, pointB.lng);

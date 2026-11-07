@@ -83,7 +83,6 @@ describe("useAdminBoardPreview", () => {
 
     const preview = result.current.previewAnnotations?.[0];
     expect(preview?.status).toBe("active");
-    // Hide at point A → colder (farther from B), hotterTowards a.
     expect(preview?.metadata.thermometerAnswer).toBe("colder");
     expect(preview?.metadata.hotterTowards).toBe("a");
   });

@@ -49,7 +49,6 @@ export function thermometerEndpointsFromAnnotation(
   };
 }
 
-/** Client-only draft annotations for spectator elim preview before Execute. */
 export function applyBoardOpPreview(
   annotations: readonly AnnotationRecord[],
   op: BoardOpPreview,
