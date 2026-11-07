@@ -7,6 +7,7 @@ import {
 import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
 import { MapChromeControl } from "../../components/map/chrome/MapChromeControl";
 import { AppLink } from "../../components/navigation/AppLink";
+import { SessionOpsNoticeBanner } from "../../components/session/banners/SessionOpsNoticeBanner";
 import { CastleSiegeSetupChrome } from "../../components/session/castle-siege";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
@@ -15,6 +16,7 @@ import type { SessionRecord } from "../../domain/map/annotations";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
+import { useSessionNotices } from "../../hooks/session/useSessionNotices";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
@@ -44,6 +46,7 @@ export function ObserverMapScreenChrome({
     myRole === "admin" ? getMapScreenRoleConfig("admin") : getMapScreenRoleConfig("observer");
   const leaveLabel = roleConfig.role === "admin" ? "Leave admin monitor" : "Leave observation";
   const isAdmin = roleConfig.role === "admin";
+  const opsNotice = useSessionNotices(session.id, myUid);
   const canOpenCodes =
     Boolean(myUid) &&
     visibleRoleCodeRoles({
@@ -156,7 +159,21 @@ export function ObserverMapScreenChrome({
 
   return (
     <>
-      <MapScreenChromeSlots layout="fragments" header={statusBar} toolbar={toolChrome}>
+      <MapScreenChromeSlots
+        layout="fragments"
+        header={
+          <>
+            {statusBar}
+            <SessionOpsNoticeBanner
+              notice={opsNotice.activeNotice}
+              onDismiss={() => {
+                void opsNotice.dismiss();
+              }}
+            />
+          </>
+        }
+        toolbar={toolChrome}
+      >
         {/* CS hosts are memberRole observer; seeker/hider chrome already mounts this. */}
         <CastleSiegeSetupChrome session={session} uid={myUid} isHost={isHost} />
       </MapScreenChromeSlots>

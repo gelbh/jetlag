@@ -1,4 +1,5 @@
 import { ActionIcon, Box, Divider, Group, ScrollArea, Stack, Tabs, Text } from "@mantine/core";
+import type { ReactNode } from "react";
 import { ChatPanelBody } from "../../components/chat/ChatPanelBody";
 import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
 import { SessionLogBody } from "../../components/session/log/SessionLogBody";
@@ -14,10 +15,8 @@ import type { LayerVisibility } from "../../state/sessionStore";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
 import { adminShellCell } from "./adminShellLayout";
 import { MapPanel } from "./panels/MapPanel";
-import { ModPanel } from "./panels/ModPanel";
 import { OverviewPanel } from "./panels/OverviewPanel";
 import { SyncPanel } from "./panels/SyncPanel";
-import type { ModerationAction } from "./useModerationConfirm";
 
 export type AdminMonitorRailTab = "overview" | "log" | "chat" | "sync" | "map" | "mod";
 
@@ -45,8 +44,7 @@ interface AdminMonitorRailProps {
   syncStatusLabel: string;
   controller: ObserverMapScreenController;
   chatDisplayRole: PlayerRole;
-  moderationBusy: boolean;
-  onModerationAction: (action: ModerationAction) => void;
+  modPanel: ReactNode;
   mapViewport: MapViewportState | null;
   onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
   onLowPowerModeChange: (enabled: boolean) => void;
@@ -62,8 +60,7 @@ export function AdminMonitorRail({
   syncStatusLabel,
   controller,
   chatDisplayRole,
-  moderationBusy,
-  onModerationAction,
+  modPanel,
   mapViewport,
   onLayerVisibilityChange,
   onLowPowerModeChange,
@@ -226,9 +223,9 @@ export function AdminMonitorRail({
             </Tabs.Panel>
 
             <Tabs.Panel value="mod">
-              <Box p="sm">
-                <ModPanel moderationBusy={moderationBusy} onModerationAction={onModerationAction} />
-              </Box>
+              <ScrollArea h="100%">
+                <Box p="sm">{modPanel}</Box>
+              </ScrollArea>
             </Tabs.Panel>
           </Tabs>
         )}

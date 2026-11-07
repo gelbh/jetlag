@@ -1190,6 +1190,18 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // Admin ops notices (created via Admin SDK callable). Members dismiss only.
+      match /notices/{noticeId} {
+        allow read: if isSessionMember(sessionId);
+        allow create, delete: if false;
+        allow update: if isSessionMember(sessionId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['dismissedBy'])
+          && request.resource.data.dismissedBy is map
+          && request.resource.data.dismissedBy.diff(resource.data.dismissedBy).affectedKeys()
+            .hasOnly([request.auth.uid])
+          && request.resource.data.dismissedBy[request.auth.uid] is string;
+      }
+
       match /pendingQuestions/{questionId} {
         allow read: if isSessionMember(sessionId);
         allow create: if isSeekerMember(sessionId)

@@ -10,13 +10,17 @@ import { ChatPanel } from "../components/chat/ChatPanel";
 import { MapView } from "../components/map/chrome/MapView";
 import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
 import { GameAreaMask } from "../components/map/layers/GameAreaMask";
+import { SessionOpsNoticeBanner } from "../components/session/banners/SessionOpsNoticeBanner";
 import { SessionLog } from "../components/session/log/SessionLog";
 import { InlineError } from "../components/ui/banners/InlineError";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
+import type { SessionNoticeDraft } from "../domain/session/opsNotice";
+import { useAdminBoardPreview } from "../hooks/admin/useAdminBoardPreview";
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { usePlayerLocationsSync } from "../hooks/session/useSessionExtrasSync";
+import { useSessionNotices } from "../hooks/session/useSessionNotices";
 import { AppNavigate } from "../navigation/AppNavigate";
 import { adminModerateSession } from "../services/admin/adminModeration";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
@@ -26,6 +30,7 @@ import { AdminDiagnosticsOverlay } from "./admin-map-screen/AdminDiagnosticsOver
 import { AdminMapScreenChrome } from "./admin-map-screen/AdminMapScreenChrome";
 import { AdminMonitorRail, type AdminMonitorRailTab } from "./admin-map-screen/AdminMonitorRail";
 import { adminShellCell, adminShellStyle } from "./admin-map-screen/adminShellLayout";
+import { ModPanel } from "./admin-map-screen/panels/ModPanel";
 import {
   type ModerationAction,
   useModerationConfirm,
@@ -53,6 +58,18 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const [moderationBusy, setModerationBusy] = useState(false);
   const [railCollapsed, setRailCollapsed] = useState(embeddedMonitor);
   const [railTab, setRailTab] = useState<AdminMonitorRailTab>("overview");
+  const [noticeDraft, setNoticeDraft] = useState<SessionNoticeDraft | null>(null);
+  const boardPreview = useAdminBoardPreview(controller.annotations);
+  const mapAnnotations = boardPreview.previewAnnotations ?? controller.annotations;
+  const liveOpsNotice = useSessionNotices(controller.session?.id, controller.uid);
+  const setNoticeDraftExclusive = (draft: SessionNoticeDraft | null) => {
+    if (draft) boardPreview.clear();
+    setNoticeDraft(draft);
+  };
+  const setBoardPreviewExclusive = (op: Parameters<typeof boardPreview.preview>[0]) => {
+    setNoticeDraft(null);
+    boardPreview.preview(op);
+  };
 
   const handleLeave = useCallback(async () => {
     const sessionId = controller.session?.id;
@@ -153,7 +170,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         effectiveBasemapStyle={controller.effectiveBasemapStyle}
         distanceUnit={controller.distanceUnit}
         spectatorLayers={controller.spectatorLayers}
-        annotations={controller.annotations}
+        annotations={mapAnnotations}
         hidingZones={controller.hidingZones}
         seekerLocations={controller.seekerLocations}
         hiderLocations={controller.hiderLocations}
@@ -212,6 +229,17 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         data-player-map={embeddedMonitor ? "" : undefined}
       >
         {mapLayers}
+        <SessionOpsNoticeBanner
+          notice={noticeDraft ?? liveOpsNotice.activeNotice}
+          preview={noticeDraft != null}
+          onDismiss={
+            noticeDraft
+              ? undefined
+              : () => {
+                  void liveOpsNotice.dismiss();
+                }
+          }
+        />
         {embeddedMonitor ? (
           <Box
             pos="absolute"
@@ -241,8 +269,20 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
           syncStatusLabel={syncStatusLabel}
           controller={controller}
           chatDisplayRole={chatDisplayRole}
-          moderationBusy={moderationBusy}
-          onModerationAction={moderation.request}
+          modPanel={
+            <ModPanel
+              sessionId={controller.session.id}
+              liveAnnotations={controller.annotations}
+              hidingZones={controller.hidingZones}
+              pendingBoardOp={boardPreview.pendingOp}
+              onBoardPreview={setBoardPreviewExclusive}
+              onClearBoardPreview={boardPreview.clear}
+              noticeDraft={noticeDraft}
+              onNoticeDraftChange={setNoticeDraftExclusive}
+              moderationBusy={moderationBusy}
+              onModerationAction={moderation.request}
+            />
+          }
           mapViewport={controller.mapViewport}
           onLayerVisibilityChange={setLayerVisibility}
           onLowPowerModeChange={setLowPowerMode}
