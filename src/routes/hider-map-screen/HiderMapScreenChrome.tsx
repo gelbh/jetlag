@@ -13,6 +13,7 @@ import { FirestorePersistenceBanner } from "../../components/session/banners/Fir
 import type { HiderTruthRevealState } from "../../components/session/banners/HiderTruthRevealBanner";
 import { HiderTruthRevealBanner } from "../../components/session/banners/HiderTruthRevealBanner";
 import { QuestionAlertBanner } from "../../components/session/banners/QuestionAlertBanner";
+import { SessionOpsNoticeBanner } from "../../components/session/banners/SessionOpsNoticeBanner";
 import { CastleSiegeSetupChrome } from "../../components/session/castle-siege";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { SessionLog } from "../../components/session/log/SessionLog";
@@ -44,6 +45,7 @@ import { useSheetExitMount } from "../../hooks/motion/useSheetExitMount";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
+import { useSessionNotices } from "../../hooks/session/useSessionNotices";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import type { useTimeTrapTool } from "../../hooks/session/useTimeTrapTool";
 import type { useSyncStatus } from "../../hooks/sync/useSyncStatus";
@@ -271,6 +273,7 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
     chromeHudRef,
   } = controller;
   const [pinPeeked, setPinPeeked] = useState(false);
+  const opsNotice = useSessionNotices(session.id, uid ?? undefined);
   const { messages: displayMessages, pendingQuestions: displayPendingQuestions } =
     useDevMockSessionFeed(session.id, messages, pendingQuestions);
   const syncMessage = syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError;
@@ -336,6 +339,12 @@ export function HiderMapScreenChrome({ controller }: HiderMapScreenChromeProps) 
           inactiveChrome,
           terminalSessionError,
           onReturnToJoin,
+        }}
+      />
+      <SessionOpsNoticeBanner
+        notice={opsNotice.activeNotice}
+        onDismiss={() => {
+          void opsNotice.dismiss();
         }}
       />
       <FirestorePersistenceBanner />

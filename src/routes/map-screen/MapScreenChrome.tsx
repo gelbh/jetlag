@@ -1,5 +1,6 @@
 import { ChatPanel } from "../../components/chat/ChatPanel";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
+import { SessionOpsNoticeBanner } from "../../components/session/banners/SessionOpsNoticeBanner";
 import { CastleSiegeSetupChrome } from "../../components/session/castle-siege";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { SessionLog } from "../../components/session/log/SessionLog";
@@ -16,6 +17,7 @@ import { sessionHasHiders } from "../../domain/session/players/playerRole";
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
+import { useSessionNotices } from "../../hooks/session/useSessionNotices";
 import { useAnnotationStore } from "../../state/annotationStore";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
 import { canOpenMapScreenRoleCodes } from "./shared/canOpenMapScreenRoleCodes";
@@ -287,9 +289,17 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
       (!askMapFirst && matchingLodRefining) || measuringLodRefining || tentacleLodRefining,
   });
 
+  const { activeNotice, dismiss } = useSessionNotices(session?.id, uid ?? undefined);
+
   const header = (
     <>
       {statusRail}
+      <SessionOpsNoticeBanner
+        notice={activeNotice}
+        onDismiss={() => {
+          void dismiss();
+        }}
+      />
       <MapScreenChromeBanners refineChip={refineChip} />
     </>
   );

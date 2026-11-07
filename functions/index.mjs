@@ -6,6 +6,8 @@ if (getApps().length === 0) {
 
 export { listActiveSessions } from "./admin/listActiveSessions.mjs";
 export { adminModerateSession } from "./admin/moderateSession.mjs";
+export { adminPublishSessionNotice } from "./admin/publishSessionNotice.mjs";
+export { adminSessionBoardOps } from "./admin/sessionBoardOps.mjs";
 export {
   createBillingPortalSession,
   createCheckoutSession,
