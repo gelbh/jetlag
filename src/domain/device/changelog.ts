@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.12.4";
+export const APP_VERSION = "1.12.5";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,21 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.12.5",
+    date: "2026-11-07",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Friends and leaderboard sheets stay in the phone column in landscape",
+          "Landscape timer chip hides while a tool is open",
+          "Zoom controls hide with the tool dock when landscape chrome is collapsed",
+          "Transit stops show their real name instead of a stop code, so Station Name's Length and Station First Letter count the station name",
+        ],
+      },
+    ],
+  },
   {
     version: "1.12.4",
     date: "2026-11-02",
