@@ -61,7 +61,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const [noticeDraft, setNoticeDraft] = useState<SessionNoticeDraft | null>(null);
   const boardPreview = useAdminBoardPreview(controller.annotations);
   const mapAnnotations = boardPreview.previewAnnotations ?? controller.annotations;
-  const liveOpsNotice = useSessionNotices(controller.session?.id, controller.uid);
+  const liveOpsNotice = useSessionNotices(controller.session?.id, controller.uid ?? undefined);
   const setNoticeDraftExclusive = (draft: SessionNoticeDraft | null) => {
     if (draft) boardPreview.clear();
     setNoticeDraft(draft);

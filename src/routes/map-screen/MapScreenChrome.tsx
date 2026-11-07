@@ -289,7 +289,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
       (!askMapFirst && matchingLodRefining) || measuringLodRefining || tentacleLodRefining,
   });
 
-  const { activeNotice, dismiss } = useSessionNotices(session.id, uid);
+  const { activeNotice, dismiss } = useSessionNotices(session?.id, uid ?? undefined);
 
   const header = (
     <>
