@@ -119,7 +119,8 @@ describe("LeaderboardBody", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: /Choose board/i }));
-    expect(screen.getByText("Choose board")).toBeInTheDocument();
+    expect(screen.getAllByText("Choose board").length).toBeGreaterThan(0);
+    expect(screen.getByTestId("mantine-drawer-sheet")).toBeInTheDocument();
     expect(screen.getByLabelText("Game size")).toBeInTheDocument();
     expect(screen.getByLabelText("Leaderboard metric")).toBeInTheDocument();
     expect(screen.getByRole("option", { name: /Distance traveled/i })).toBeInTheDocument();

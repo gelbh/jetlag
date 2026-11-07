@@ -210,10 +210,10 @@ test.describe("layout regression @ default mobile", () => {
   test("@smoke leaderboard board sheet opens", async ({ page }) => {
     await openSocialRoute(page, "/leaderboard");
     await page.getByRole("button", { name: /Choose board/i }).click();
-    // Mantine Drawer title is visual text; accessible name is often empty.
     const sheet = page.getByRole("dialog");
     await expect(sheet).toBeVisible();
-    await expect(sheet.getByText("Choose board", { exact: true })).toBeVisible();
+    await expect(sheet.getByTestId("mantine-drawer-sheet")).toBeVisible();
+    await expect(sheet.locator("p", { hasText: /^Choose board$/ })).toBeVisible();
   });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {

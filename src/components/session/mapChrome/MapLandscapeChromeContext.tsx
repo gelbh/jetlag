@@ -28,6 +28,7 @@ export type MapLandscapeChromeProviderProps = {
   syncStatus: SyncStatus;
   queuedWrites: number;
   syncMessage?: string | null;
+  chromeOccupied?: boolean;
 };
 
 export function MapLandscapeChromeProvider({
@@ -39,22 +40,24 @@ export function MapLandscapeChromeProvider({
   syncStatus,
   queuedWrites,
   syncMessage,
+  chromeOccupied = false,
 }: MapLandscapeChromeProviderProps) {
   const { mode, collapsed, active, toggle } = useMapLandscapeChromeReveal();
 
-  const chip = active ? (
-    <MapLandscapeChromeChip
-      collapsed={collapsed}
-      onToggle={toggle}
-      sessionRules={sessionRules}
-      timerState={timerState}
-      timerHasStarted={timerHasStarted}
-      pendingQuestions={pendingQuestions}
-      syncStatus={syncStatus}
-      queuedWrites={queuedWrites}
-      syncMessage={syncMessage}
-    />
-  ) : null;
+  const chip =
+    active && !chromeOccupied ? (
+      <MapLandscapeChromeChip
+        collapsed={collapsed}
+        onToggle={toggle}
+        sessionRules={sessionRules}
+        timerState={timerState}
+        timerHasStarted={timerHasStarted}
+        pendingQuestions={pendingQuestions}
+        syncStatus={syncStatus}
+        queuedWrites={queuedWrites}
+        syncMessage={syncMessage}
+      />
+    ) : null;
 
   return (
     <MapLandscapeChromeContext.Provider

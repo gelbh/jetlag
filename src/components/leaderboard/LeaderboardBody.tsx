@@ -2,7 +2,6 @@ import {
   ActionIcon,
   Box,
   Button,
-  Drawer,
   Group,
   SegmentedControl,
   Stack,
@@ -34,8 +33,6 @@ import {
 } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  bottomDrawerStyles,
-  DrawerGrabber,
   ErrorCallout,
   filledStyles,
   InsetGroup,
@@ -43,6 +40,7 @@ import {
   SuccessCallout,
 } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
+import { DrawerSheet } from "@/components/ui/sheets/DrawerSheet";
 import {
   formatLeaderboardValue,
   LEADERBOARD_METRICS,
@@ -661,21 +659,13 @@ function BoardPickerDrawer({
   const summary = leaderboardBoardSummaryLabel(selection);
 
   return (
-    <Drawer
-      opened
+    <DrawerSheet
+      open
       onClose={onClose}
-      position="bottom"
-      size="auto"
-      padding="md"
-      radius={24}
-      title={null}
-      withCloseButton={false}
-      overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
-      styles={bottomDrawerStyles("min(78dvh, 40rem)")}
+      ariaLabel="Choose board"
+      maxHeightClassName="max-h-[min(78dvh,40rem)]"
     >
       <Stack gap="lg">
-        <DrawerGrabber />
-
         <Stack gap={6} align="center">
           <Text
             fw={600}
@@ -797,7 +787,7 @@ function BoardPickerDrawer({
           Done
         </Button>
       </Stack>
-    </Drawer>
+    </DrawerSheet>
   );
 }
 
@@ -829,20 +819,8 @@ function PlayerDetailDrawer({
   }
 
   return (
-    <Drawer
-      opened
-      onClose={onClose}
-      position="bottom"
-      size="auto"
-      padding="md"
-      radius={24}
-      title={null}
-      withCloseButton={false}
-      overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
-      styles={bottomDrawerStyles()}
-    >
+    <DrawerSheet open onClose={onClose} ariaLabel={label}>
       <Stack gap="md">
-        <DrawerGrabber />
         <Stack gap={8} align="center">
           <PlayerMonogram username={label} size={56} />
           <Text
@@ -970,7 +948,7 @@ function PlayerDetailDrawer({
           Done
         </UnstyledButton>
       </Stack>
-    </Drawer>
+    </DrawerSheet>
   );
 }
 

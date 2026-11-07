@@ -56,3 +56,8 @@
 .map-crosshair {
   cursor: crosshair;
 }
+
+.map-screen-shell[data-landscape-chrome="collapsed"] .jl-map-nav-dock {
+  visibility: hidden;
+  pointer-events: none;
+}

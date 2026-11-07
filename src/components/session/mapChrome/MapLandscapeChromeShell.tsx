@@ -15,6 +15,7 @@ export type MapLandscapeChromeShellProps = {
   syncStatus: SyncStatus;
   queuedWrites: number;
   syncMessage?: string | null;
+  chromeOccupied?: boolean;
 };
 
 export function MapLandscapeChromeShell({
@@ -26,6 +27,7 @@ export function MapLandscapeChromeShell({
   syncStatus,
   queuedWrites,
   syncMessage,
+  chromeOccupied = false,
 }: MapLandscapeChromeShellProps) {
   return (
     <MapLandscapeChromeProvider
@@ -36,6 +38,7 @@ export function MapLandscapeChromeShell({
       syncStatus={syncStatus}
       queuedWrites={queuedWrites}
       syncMessage={syncMessage}
+      chromeOccupied={chromeOccupied}
     >
       <MapLandscapeChromeShellSync />
       {children}
