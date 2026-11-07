@@ -59,9 +59,9 @@ export function AdminBoardPanel({
     setLoadError(null);
     try {
       setRows(await adminListBoardAnnotations(sessionId));
+      setLoading(false);
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Could not load annotations.");
-    } finally {
       setLoading(false);
     }
   }, [sessionId]);
