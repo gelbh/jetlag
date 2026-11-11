@@ -1,0 +1,13 @@
+name: Setup Playwright Chromium
+description: >-
+  Install Playwright Chromium browser binaries without apt. GitHub-hosted
+  Ubuntu runners already ship Chromium system libraries; --with-deps only
+  pulls optional fonts and fails hard when Ubuntu archive DNS is down
+  (actions/runner-images#15296).
+
+runs:
+  using: composite
+  steps:
+    - name: Install Playwright Chromium
+      shell: bash
+      run: npx playwright install chromium
