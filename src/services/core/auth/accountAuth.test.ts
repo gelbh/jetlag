@@ -8,6 +8,7 @@ import {
   isPermanentUser,
   OAUTH_REDIRECT_FAILED_MESSAGE,
   OAUTH_REDIRECT_PENDING_KEY,
+  OAUTH_RESUME_TIMEOUT_MESSAGE,
   OAuthRedirectInProgressError,
   resetOAuthRedirectRecoveryForTests,
   signInWithApple,
@@ -17,6 +18,7 @@ import {
 
 const {
   mockAuth,
+  isIosStandalonePwa,
   linkWithCredential,
   linkWithPopup,
   linkWithRedirect,
@@ -33,6 +35,7 @@ const {
   mockAuth: {
     currentUser: null as { isAnonymous: boolean; uid: string } | null,
   },
+  isIosStandalonePwa: vi.fn(),
   linkWithCredential: vi.fn(),
   linkWithPopup: vi.fn(),
   linkWithRedirect: vi.fn(),
@@ -85,6 +88,8 @@ vi.mock("firebase/auth", () => ({
 vi.mock("../firebase/firebase", () => ({
   getFirebaseAuth: () => mockAuth,
 }));
+
+vi.mock("@/domain/device/pwa/isIosStandalonePwa", () => ({ isIosStandalonePwa }));
 
 describe("accountAuth", () => {
   beforeEach(() => {
@@ -202,6 +207,27 @@ describe("accountAuth", () => {
     expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeNull();
   });
 
+  it("redirects anonymous Google sign-in in iOS home-screen apps without a popup", async () => {
+    isIosStandalonePwa.mockReturnValue(true);
+    mockAuth.currentUser = { isAnonymous: true, uid: "anon-standalone" };
+    linkWithRedirect.mockResolvedValueOnce(undefined);
+
+    await expect(signInWithGoogle()).rejects.toBeInstanceOf(OAuthRedirectInProgressError);
+    expect(linkWithRedirect).toHaveBeenCalledWith(mockAuth.currentUser, expect.anything());
+    expect(linkWithPopup).not.toHaveBeenCalled();
+    expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeTruthy();
+  });
+
+  it("redirects signed-in Google sign-in in iOS home-screen apps without a popup", async () => {
+    isIosStandalonePwa.mockReturnValue(true);
+    mockAuth.currentUser = { isAnonymous: false, uid: "signed-in" };
+    signInWithRedirect.mockResolvedValueOnce(undefined);
+
+    await expect(signInWithGoogle()).rejects.toBeInstanceOf(OAuthRedirectInProgressError);
+    expect(signInWithRedirect).toHaveBeenCalledWith(mockAuth, expect.anything());
+    expect(signInWithPopup).not.toHaveBeenCalled();
+  });
+
   it("signs in with Google popup when credential is already in use", async () => {
     mockAuth.currentUser = { isAnonymous: true, uid: "anon-3" };
     linkWithPopup.mockRejectedValueOnce(
@@ -281,6 +307,16 @@ describe("accountAuth", () => {
     expect(consumeOAuthRedirectFailureMessage()).toBe(OAUTH_REDIRECT_FAILED_MESSAGE);
     expect(consumeOAuthRedirectFailureMessage()).toBeNull();
     expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeNull();
+  });
+
+  it("asks iOS home-screen players to retry when a pending redirect returns no user", async () => {
+    isIosStandalonePwa.mockReturnValue(true);
+    window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, String(Date.now()));
+    getRedirectResult.mockResolvedValueOnce(null);
+
+    await completeOAuthRedirectIfPending();
+
+    expect(consumeOAuthRedirectFailureMessage()).toBe(OAUTH_RESUME_TIMEOUT_MESSAGE);
   });
 
   it("ignores a stale redirect-pending flag without surfacing failure", async () => {

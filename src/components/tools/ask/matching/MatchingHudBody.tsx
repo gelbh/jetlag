@@ -19,6 +19,7 @@ import { AnchorControls } from "@/components/tools/shared/controls/AnchorControl
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
+import { ErrorWithRetry } from "@/components/tools/shared/readout/ErrorWithRetry";
 import { LoadingReadout } from "@/components/tools/shared/readout/LoadingReadout";
 import { ProvisionalBadge } from "@/components/tools/shared/readout/ProvisionalBadge";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
@@ -76,6 +77,8 @@ export type MatchingHudBodyProps = {
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
   unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
   catalogNotice?: string | null;
+  catalogProbeError?: string | null;
+  onCatalogProbeRetry?: () => void;
   catalogCategories?: readonly MatchingCategoryDefinition[];
   hasSeekerPoint: boolean;
   usesContainmentMatching: boolean;
@@ -109,6 +112,8 @@ export function MatchingHudBody({
   usedCategoryIds,
   unavailableCategoryIds = new Set<MatchingCategoryId>(),
   catalogNotice = null,
+  catalogProbeError = null,
+  onCatalogProbeRetry,
   catalogCategories = MATCHING_CATEGORIES,
   hasSeekerPoint,
   usesContainmentMatching,
@@ -232,10 +237,12 @@ export function MatchingHudBody({
       {chord === "category" ? (
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
-          {catalogNotice ? (
+          {catalogProbeError && onCatalogProbeRetry ? (
+            <ErrorWithRetry error={catalogProbeError} onRetry={onCatalogProbeRetry} />
+          ) : catalogNotice ? (
             <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
           ) : null}
-          {availableCategories.length === 0 ? (
+          {availableCategories.length === 0 && !catalogProbeError ? (
             <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every match category has already been used on this map." />
             </AskHudPanel>

@@ -30,12 +30,16 @@ import {
   matchingQuestionFor,
   usedMatchingCategoryIdsForSession,
 } from "../../domain/questions";
-import { taggedSetupPinsForCategory } from "../../domain/session/catalog/sessionCustomCatalog";
+import {
+  sessionCustomContentFromRules,
+  taggedSetupPinsForCategory,
+} from "../../domain/session/catalog/sessionCustomCatalog";
 import {
   matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
 } from "../../services/geo/matching";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
+import { retryAdminDivisionProbe } from "../../services/session/gameAreaPreload";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { useLatestRequest } from "../forms/useLatestRequest";
 import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
@@ -120,6 +124,7 @@ export function useMatchingTool({
     previewOpen,
     unavailableMatchingCategories,
     catalogNotice,
+    catalogProbeError,
     setUnavailableMatchingCategories,
     setCatalogNotice,
     setMatchingFeatures,
@@ -145,6 +150,15 @@ export function useMatchingTool({
     () => new Set(unavailableMatchingCategories.keys()),
     [unavailableMatchingCategories],
   );
+
+  const handleAdminDivisionProbeRetry = useCallback(() => {
+    const content = sessionRules ? sessionCustomContentFromRules(sessionRules) : undefined;
+    void retryAdminDivisionProbe(
+      gameArea,
+      content?.customMatchingAreas,
+      sessionRules?.regionPackId,
+    );
+  }, [gameArea, sessionRules]);
 
   const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
   // Read at resolve time so live annotation sync does not re-resolve the anchor.
@@ -607,6 +621,8 @@ export function useMatchingTool({
         usedCategoryIds: usedMatchingCategories,
         unavailableCategoryIds,
         catalogNotice,
+        catalogProbeError,
+        onCatalogProbeRetry: catalogProbeError ? handleAdminDivisionProbeRetry : undefined,
         catalogCategories: catalog.matchingCatalog,
         matchingSeekerPoint,
         matchingUsesContainment: catalog.matchingUsesContainment,
@@ -805,6 +821,8 @@ export function useMatchingTool({
           usedCategoryIds={usedMatchingCategories}
           unavailableCategoryIds={unavailableCategoryIds}
           catalogNotice={catalogNotice}
+          catalogProbeError={catalogProbeError}
+          onCatalogProbeRetry={catalogProbeError ? handleAdminDivisionProbeRetry : undefined}
           catalogCategories={catalog.matchingCatalog}
           hasSeekerPoint={matchingSeekerPoint !== null}
           usesContainmentMatching={catalog.matchingUsesContainment}

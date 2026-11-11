@@ -27,7 +27,12 @@ import {
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { LoadTask } from "@/services/core/progress/loadTask";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
-import { adminBorderKindAvailability } from "@/services/geo/overpass/adminDivisionAvailability";
+import { matchingAdminDivisionProbeFailedMessage } from "@/services/geo/matching";
+import {
+  adminBorderKindAvailability,
+  isMeasuringAdminBorderListed,
+  isMeasuringAdminBorderProbeFailed,
+} from "@/services/geo/overpass/adminDivisionAvailability";
 import { measuringLinearNotFoundMessage } from "@/services/geo/overpass/measuringLinearFeatures";
 import { measuringPlaceNotFoundMessage } from "@/services/geo/overpass/measuringPlaces";
 import { usePreloadStore } from "@/state/preloadStore";
@@ -98,18 +103,33 @@ export function useMeasuringDraftState(
       ? availableMeasuringCatalog(sessionRules)
       : availableMeasuringCatalog({ gameSize: "medium" });
     return catalog.filter((option) =>
-      adminBorderKindAvailability(option.id, adminDivisionCounts, regionPackId),
+      isMeasuringAdminBorderListed(option.id, adminDivisionCounts, regionPackId),
     );
+  }, [adminDivisionCounts, regionPackId, sessionRules]);
+
+  const catalogProbeError = useMemo(() => {
+    const catalog = sessionRules
+      ? availableMeasuringCatalog(sessionRules)
+      : availableMeasuringCatalog({ gameSize: "medium" });
+    const probeFailed = catalog.some((option) =>
+      isMeasuringAdminBorderProbeFailed(option.id, adminDivisionCounts, regionPackId),
+    );
+    return probeFailed ? matchingAdminDivisionProbeFailedMessage : null;
   }, [adminDivisionCounts, regionPackId, sessionRules]);
 
   const seedUnavailableFromPresence = useCallback((): Map<MeasuringFromKind, string> => {
     const next = new Map<MeasuringFromKind, string>();
-    if (!regionPackId) {
-      return next;
-    }
-
     const probePending = categoryPresenceCounts === null;
     for (const option of measuringCatalog) {
+      if (isMeasuringAdminBorderProbeFailed(option.id, adminDivisionCounts, regionPackId)) {
+        next.set(option.id, matchingAdminDivisionProbeFailedMessage);
+        continue;
+      }
+
+      if (!regionPackId) {
+        continue;
+      }
+
       const adminUnavailable = !adminBorderKindAvailability(
         option.id,
         adminDivisionCounts,
@@ -136,24 +156,31 @@ export function useMeasuringDraftState(
   useEffect(() => {
     const seeded = seedUnavailableFromPresence();
     setUnavailableMeasuringFromKinds((prev) => {
-      if (seeded.size === 0) {
-        return prev;
-      }
       let changed = false;
       const next = new Map(prev);
+      for (const [kind, notice] of prev) {
+        if (notice === matchingAdminDivisionProbeFailedMessage && !seeded.has(kind)) {
+          next.delete(kind);
+          changed = true;
+        }
+      }
       for (const [kind, notice] of seeded) {
-        if (!next.has(kind)) {
+        if (next.get(kind) !== notice) {
           next.set(kind, notice);
           changed = true;
         }
       }
       return changed ? next : prev;
     });
-    if (seeded.size > 0) {
+    if (catalogProbeError) {
+      setCatalogNotice(catalogProbeError);
+    } else if (seeded.size > 0) {
       const firstNotice = seeded.values().next().value;
       setCatalogNotice(firstNotice ?? "Some categories aren't available in this play area.");
+    } else {
+      setCatalogNotice((prev) => (prev === matchingAdminDivisionProbeFailedMessage ? null : prev));
     }
-  }, [seedUnavailableFromPresence]);
+  }, [catalogProbeError, seedUnavailableFromPresence]);
 
   const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
     sessionRules ?? { gameSize: "medium" },
@@ -221,12 +248,14 @@ export function useMeasuringDraftState(
       const seeded = seedUnavailableFromPresence();
       setUnavailableMeasuringFromKinds(seeded);
       setCatalogNotice(
-        seeded.size > 0
-          ? (seeded.values().next().value ?? "Some categories aren't available in this play area.")
-          : null,
+        catalogProbeError ??
+          (seeded.size > 0
+            ? (seeded.values().next().value ??
+              "Some categories aren't available in this play area.")
+            : null),
       );
     },
-    [measuringCatalog, seedUnavailableFromPresence, usedMeasuringFromKindsSet],
+    [catalogProbeError, measuringCatalog, seedUnavailableFromPresence, usedMeasuringFromKindsSet],
   );
 
   const reopenCatalog = useCallback(() => {
@@ -248,6 +277,7 @@ export function useMeasuringDraftState(
     unavailableMeasuringFromKinds,
     setUnavailableMeasuringFromKinds,
     catalogNotice,
+    catalogProbeError,
     setCatalogNotice,
     measuringSeekerPoint,
     setMeasuringSeekerPoint,

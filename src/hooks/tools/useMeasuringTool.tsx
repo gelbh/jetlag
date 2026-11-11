@@ -24,9 +24,11 @@ import {
 } from "../../domain/questions";
 import type { CastleSiegeOracleReceipt } from "../../domain/session/castleSiege/oracleAskReceipt";
 import { resolveAskPath } from "../../domain/session/castleSiege/resolveAskPath";
+import { sessionCustomContentFromRules } from "../../domain/session/catalog/sessionCustomCatalog";
 import { firstUnusedCatalogOption } from "../../domain/session/tools/toolSessionOptions";
 import { GeocodedPlaceLeading } from "../../services/geo/geocoding";
 import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
+import { retryAdminDivisionProbe } from "../../services/session/gameAreaPreload";
 import { useAutoPlacementGps } from "./framework/useAutoPlacementGps";
 import { useToolPreset } from "./framework/useToolPreset";
 import { useToolSession } from "./framework/useToolSession";
@@ -207,6 +209,15 @@ export function useMeasuringTool({
 
   const commit = () => session.submit();
 
+  const handleAdminDivisionProbeRetry = useCallback(() => {
+    const content = sessionRules ? sessionCustomContentFromRules(sessionRules) : undefined;
+    void retryAdminDivisionProbe(
+      gameArea,
+      content?.customMatchingAreas,
+      sessionRules?.regionPackId,
+    );
+  }, [gameArea, sessionRules]);
+
   const panel = (
     <MeasuringToolPanel
       distanceUnit={distanceUnit}
@@ -229,6 +240,7 @@ export function useMeasuringTool({
       handleSearch={interactions.handleSearch}
       applySearchResult={interactions.applySearchResult}
       loadNearest={interactions.loadNearest}
+      onCatalogProbeRetry={draft.catalogProbeError ? handleAdminDivisionProbeRetry : undefined}
     />
   );
 
@@ -447,6 +459,10 @@ export function useMeasuringTool({
             usedMeasuringFromKinds: draft.usedMeasuringFromKindsSet,
             unavailableMeasuringFromKinds: new Set(draft.unavailableMeasuringFromKinds.keys()),
             catalogNotice: draft.catalogNotice,
+            catalogProbeError: draft.catalogProbeError,
+            onCatalogProbeRetry: draft.catalogProbeError
+              ? handleAdminDivisionProbeRetry
+              : undefined,
             catalogOptions: draft.measuringCatalog,
             anchorLat: draft.measuringSeekerPoint?.[0] ?? null,
             anchorLng: draft.measuringSeekerPoint?.[1] ?? null,

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { captureException } from "@/services/core/analytics/clientErrors";
 import { trackRestoredWrites } from "@/services/firestore/commitWrite";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import { reportStoragePressureIfHigh } from "../../domain/device/pwa/pwaStorageBudget";
@@ -256,29 +257,35 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       setLastSyncError(lastError);
     };
 
+    const flushQueueCaught = () => {
+      void flushQueue().catch((error: unknown) => {
+        captureException(error, { firestore_op: "flush:offlineQueue" });
+      });
+    };
+
     const handleOnline = () => {
-      void flushQueue();
+      flushQueueCaught();
     };
 
     const handleServiceWorkerMessage = (event: MessageEvent) => {
       if (event.data?.type !== ANNOTATION_SYNC_MESSAGE_TYPE) {
         return;
       }
-      void flushQueue();
+      flushQueueCaught();
     };
 
     const unbindResumeFlush = bindOfflineQueueResumeFlush(() => {
-      void flushQueue();
+      flushQueueCaught();
     });
 
     window.addEventListener("online", handleOnline);
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.addEventListener("message", handleServiceWorkerMessage);
     }
-    void flushQueue();
+    flushQueueCaught();
 
     const intervalId = window.setInterval(() => {
-      void flushQueue();
+      flushQueueCaught();
     }, queueFlushMs);
 
     return () => {

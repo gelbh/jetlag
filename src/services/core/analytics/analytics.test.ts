@@ -948,6 +948,22 @@ describe("analytics facade", () => {
     expect(JSON.stringify(props)).not.toMatch(/ABCD/);
   });
 
+  it("capturePosthogException copies FirebaseError.code onto firebase_code", () => {
+    resetAnalyticsForTests({ initialized: true });
+    const error = Object.assign(new Error("Missing or insufficient permissions."), {
+      name: "FirebaseError",
+      code: "permission-denied",
+    });
+    capturePosthogException(error, { firestore_op: "write:dismissSessionNotice" });
+
+    expect(posthogCaptureException).toHaveBeenCalledOnce();
+    const [, props] = posthogCaptureException.mock.calls[0] ?? [];
+    expect(props).toMatchObject({
+      firebase_code: "permission-denied",
+      firestore_op: "write:dismissSessionNotice",
+    });
+  });
+
   it("trackSessionEnded captures session_ended with reason and gameId", () => {
     writeAnalyticsConsent("granted");
     resetAnalyticsForTests({ initialized: true });
