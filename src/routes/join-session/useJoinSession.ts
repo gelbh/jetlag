@@ -627,7 +627,7 @@ export function useJoinSession({
             nextError instanceof Error ? nextError.message : "Couldn't join that session.",
             selectedRole,
             reason,
-            "server",
+            isVerifyTimeout ? "client" : "server",
           );
         }
       }

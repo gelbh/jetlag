@@ -316,7 +316,7 @@ describe("useJoinSession", () => {
         role: "seeker",
         reason: "timeout",
         failureClass: "transport",
-        source: "server",
+        source: "client",
       });
 
       await act(async () => {
@@ -372,7 +372,7 @@ describe("useJoinSession", () => {
             role: "seeker",
             reason: "timeout",
             failureClass: "transport",
-            source: "server",
+            source: "client",
           },
         ],
         [
@@ -465,7 +465,7 @@ describe("useJoinSession", () => {
             role: "seeker",
             reason: "timeout",
             failureClass: "transport",
-            source: "server",
+            source: "client",
           },
         ],
       ]);
@@ -718,6 +718,32 @@ describe("useJoinSession", () => {
       role: "seeker",
       reason: "wrong_role_code",
       failureClass: "user_reject",
+      source: "server",
+    });
+  });
+
+  it("tracks callable deadline-exceeded as timeout with source server", async () => {
+    mockJoinRemoteSessionByCode.mockRejectedValue(
+      Object.assign(new Error("deadline-exceeded"), {
+        code: "functions/deadline-exceeded",
+      }),
+    );
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin(joinValues);
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("deadline-exceeded");
+    });
+    expect(mockTrack).toHaveBeenCalledWith("join_failed", {
+      role: "seeker",
+      reason: "timeout",
+      failureClass: "transport",
       source: "server",
     });
   });
