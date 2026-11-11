@@ -1,10 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MatchingFeature } from "@/domain/geo/types";
 import type { GameArea } from "@/domain/map/annotations";
+import { CUSTOM_QUESTION_PACK_MATCHING } from "@/domain/questions/customQuestionPack";
 import * as overpassClient from "../../core/overpass/overpassClient";
 import * as gtfsPlayAreaStations from "../../transit/gtfsPlayAreaStations";
 import { clearGeographicFeatureCacheForTests } from "../cache";
 import { fetchMatchingFeaturesInArea } from "./fetch";
+
+const FIRST_LETTER_CATEGORY = CUSTOM_QUESTION_PACK_MATCHING.find(
+  (category) => category.resolver === "stationFirstLetter",
+)!;
 
 vi.mock("../../transit/gtfsPlayAreaStations", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../transit/gtfsPlayAreaStations")>();
@@ -104,6 +109,59 @@ describe("station name categories use Transit Line station set", () => {
     expect(features[0]).toMatchObject({
       id: "station-name-length:16",
       name: "16 characters (Overpass Station)",
+    });
+    expect(features[0]?.point).toEqual([40.751, -73.99]);
+  });
+
+  it("uses filtered GTFS stations for station first letter when GTFS returns a set", async () => {
+    vi.mocked(gtfsPlayAreaStations.fetchGtfsMatchingStationsForPlayArea).mockResolvedValue(
+      FILTERED_GTFS,
+    );
+
+    const features = await fetchMatchingFeaturesInArea(GAME_AREA, FIRST_LETTER_CATEGORY.id, {
+      customCategories: [FIRST_LETTER_CATEGORY],
+      transitMetroId: "nyc",
+      transitStationFilter: ["metro"],
+    });
+
+    expect(gtfsPlayAreaStations.fetchGtfsMatchingStationsForPlayArea).toHaveBeenCalledWith(
+      GAME_AREA,
+      { transitMetroId: "nyc", transitStationFilter: ["metro"] },
+    );
+    expect(overpassClient.queryOverpass).not.toHaveBeenCalled();
+    expect(features).toEqual([
+      {
+        id: "station-first-letter:3",
+        name: "Letter 3 (34 St-Penn Station)",
+        point: [-73.9935, 40.7506],
+      },
+    ]);
+  });
+
+  it("falls through to Overpass for station first letter when GTFS returns null", async () => {
+    vi.mocked(gtfsPlayAreaStations.fetchGtfsMatchingStationsForPlayArea).mockResolvedValue(null);
+    vi.mocked(overpassClient.queryOverpass).mockResolvedValue({
+      elements: [
+        {
+          id: 9001,
+          tags: { name: "Overpass Station", railway: "station" },
+          lat: 40.751,
+          lon: -73.99,
+        },
+      ],
+    });
+
+    const features = await fetchMatchingFeaturesInArea(GAME_AREA, FIRST_LETTER_CATEGORY.id, {
+      customCategories: [FIRST_LETTER_CATEGORY],
+      transitMetroId: "nyc",
+      transitStationFilter: ["tram"],
+    });
+
+    expect(overpassClient.queryOverpass).toHaveBeenCalledTimes(1);
+    expect(features).toHaveLength(1);
+    expect(features[0]).toMatchObject({
+      id: "station-first-letter:O",
+      name: "Letter O (Overpass Station)",
     });
     expect(features[0]?.point).toEqual([40.751, -73.99]);
   });
