@@ -1,5 +1,6 @@
 import type { CaptureResult } from "posthog-js";
 import { readAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
+import { enrichFirebaseExceptionProperties } from "./firebaseExceptionEnrich";
 import { filterPosthogException } from "./posthogExceptionPolicy";
 import { scrubPosthogExceptionProperties } from "./telemetryScrub";
 
@@ -12,9 +13,13 @@ export function posthogBeforeSend(
   }
 
   if (capture.event === "$exception") {
+    const enriched =
+      enrichFirebaseExceptionProperties((capture.properties ?? {}) as Record<string, unknown>) ??
+      (capture.properties as Record<string, unknown> | undefined) ??
+      {};
     const scrubbed: CaptureResult = {
       ...capture,
-      properties: scrubPosthogExceptionProperties(capture.properties) ?? capture.properties,
+      properties: scrubPosthogExceptionProperties(enriched) ?? enriched,
     };
     return filterPosthogException(scrubbed, random);
   }

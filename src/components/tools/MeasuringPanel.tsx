@@ -31,6 +31,7 @@ import {
 import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
 import { ToolSection } from "./shared/panels/ToolSection";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
+import { ErrorWithRetry } from "./shared/readout/ErrorWithRetry";
 import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
 import { MEASURING_WIZARD } from "./shared/wizard/toolStepUtils";
 import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
@@ -45,6 +46,8 @@ export type MeasuringPanelModel = {
   usedMeasuringFromKinds: ReadonlySet<MeasuringFromKind>;
   unavailableMeasuringFromKinds?: ReadonlySet<MeasuringFromKind>;
   catalogNotice?: string | null;
+  catalogProbeError?: string | null;
+  onCatalogProbeRetry?: () => void;
   catalogOptions?: readonly MeasuringCatalogOption[];
   anchorLat?: number | null;
   anchorLng?: number | null;
@@ -98,6 +101,8 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
     usedMeasuringFromKinds,
     unavailableMeasuringFromKinds = new Set<MeasuringFromKind>(),
     catalogNotice = null,
+    catalogProbeError = null,
+    onCatalogProbeRetry,
     catalogOptions,
     anchorLat = null,
     anchorLng = null,
@@ -186,7 +191,9 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
       {phaseId === "configure" && stepId === "source" ? (
         <>
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
-          {catalogNotice ? (
+          {catalogProbeError && onCatalogProbeRetry ? (
+            <ErrorWithRetry error={catalogProbeError} onRetry={onCatalogProbeRetry} />
+          ) : catalogNotice ? (
             <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
           ) : null}
           <MeasuringSourceStep
@@ -198,6 +205,7 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
             subject={subject}
             locationCategory={locationCategory}
             onMeasureFromChange={onMeasureFromChange}
+            hideExhaustedMessage={Boolean(catalogProbeError)}
           />
         </>
       ) : null}

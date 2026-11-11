@@ -19,6 +19,7 @@ import {
   type User,
   type UserCredential,
 } from "firebase/auth";
+import { isIosStandalonePwa } from "@/domain/device/pwa/isIosStandalonePwa";
 import { ANALYTICS_EVENTS, type AnalyticsEventProps } from "../analytics/analyticsEvents";
 import { trackLazy } from "../analytics/lazyTelemetry";
 import { ensureAnonymousUser, getFirebaseAuth } from "../firebase/firebase";
@@ -240,7 +241,7 @@ export async function signInWithGoogleIdToken(idToken: string): Promise<User> {
 }
 
 export async function signInWithGoogle(): Promise<User> {
-  return signInWithOAuthPopup(new GoogleAuthProvider(), "Google sign-in failed.");
+  return signInWithOAuth(new GoogleAuthProvider(), "Google sign-in failed.");
 }
 
 function createAppleProvider(): OAuthProvider {
@@ -251,14 +252,16 @@ function createAppleProvider(): OAuthProvider {
 }
 
 export async function signInWithApple(): Promise<User> {
-  return signInWithOAuthPopup(createAppleProvider(), "Apple sign-in failed.");
+  return signInWithOAuth(createAppleProvider(), "Apple sign-in failed.");
 }
 
-async function signInWithOAuthPopup(
-  provider: AuthProvider,
-  fallbackMessage: string,
-): Promise<User> {
+// iOS home-screen apps open popups without a window handle, so Firebase never sees
+// them close and the popup promise can hang; redirect stays in one browsing context.
+async function signInWithOAuth(provider: AuthProvider, fallbackMessage: string): Promise<User> {
   try {
+    if (isIosStandalonePwa()) {
+      return await beginOAuthRedirect(provider);
+    }
     return await linkWithPopupOrSignInExisting(provider);
   } catch (error) {
     if (isOAuthRedirectInProgress(error)) {
@@ -272,7 +275,9 @@ let redirectResultPromise: Promise<User | null> | null = null;
 let pendingRedirectFailureMessage: string | null = null;
 
 function notePendingRedirectFailure(): void {
-  pendingRedirectFailureMessage = OAUTH_REDIRECT_FAILED_MESSAGE;
+  pendingRedirectFailureMessage = isIosStandalonePwa()
+    ? OAUTH_RESUME_TIMEOUT_MESSAGE
+    : OAUTH_REDIRECT_FAILED_MESSAGE;
 }
 
 export function consumeOAuthRedirectFailureMessage(): string | null {
