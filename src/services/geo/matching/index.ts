@@ -9,6 +9,7 @@ export {
   parseMatchingAreaGeoJson,
 } from "./matchingAreaGeoJson";
 export {
+  matchingAdminDivisionProbeFailedMessage,
   matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
   matchingFeatureNotFoundMessage,

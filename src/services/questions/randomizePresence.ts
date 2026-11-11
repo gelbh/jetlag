@@ -6,6 +6,8 @@ import { usePreloadStore } from "../../state/preloadStore";
 import {
   adminBorderKindAvailability,
   isAdminDivisionCategoryAvailable,
+  isAdminDivisionCategoryProbeFailed,
+  isMeasuringAdminBorderProbeFailed,
 } from "../geo/overpass/adminDivisionAvailability";
 
 type PresenceToolType = Extract<PendingQuestionToolType, "matching" | "measuring" | "tentacle">;
@@ -20,15 +22,36 @@ export function randomizePresenceFromPreload(
   return {
     categoryPresenceCounts,
     isAdminUnavailable: (categoryId) => {
-      if (!regionPackId) {
-        return false;
-      }
       if (toolType === "measuring") {
+        if (
+          isMeasuringAdminBorderProbeFailed(
+            categoryId as MeasuringFromKind,
+            adminDivisionCounts,
+            regionPackId,
+          )
+        ) {
+          return true;
+        }
+        if (!regionPackId) {
+          return false;
+        }
         return !adminBorderKindAvailability(
           categoryId as MeasuringFromKind,
           adminDivisionCounts,
           regionPackId,
         );
+      }
+      if (
+        isAdminDivisionCategoryProbeFailed(
+          categoryId as MatchingCategoryId,
+          adminDivisionCounts,
+          regionPackId,
+        )
+      ) {
+        return true;
+      }
+      if (!regionPackId) {
+        return false;
       }
       return !isAdminDivisionCategoryAvailable(
         categoryId as MatchingCategoryId,

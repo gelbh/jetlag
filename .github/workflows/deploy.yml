@@ -1,5 +1,10 @@
 name: Deploy
 
+# Pin runner image while ubuntu-latest migrates to 26.04 (resolute).
+# Playwright install skips --with-deps (see setup-playwright-chromium):
+# Ubuntu archive DNS outages break apt font fetches (runner-images#15296).
+# See also runner-images#14748.
+
 on:
   push:
     branches: [main]
@@ -13,7 +18,7 @@ permissions:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       actions: read
@@ -69,7 +74,7 @@ jobs:
               - '!LICENSE.md'
 
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -111,7 +116,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      - run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/setup-playwright-chromium
         if: needs.changes.outputs.code == 'true'
       - name: Cache Firebase emulators
         if: needs.changes.outputs.code == 'true'
@@ -132,7 +137,7 @@ jobs:
           path: playwright-report
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes, verify]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -144,12 +149,12 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/setup-playwright-chromium
       - run: npm run build
       - run: npx wrangler deploy --dry-run
 
   deploy-backend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes, build]
     environment: production
     permissions:
@@ -230,7 +235,7 @@ jobs:
         run: echo "functions_deployed=${FUNCTIONS_DEPLOYED:-false}" >> "$GITHUB_OUTPUT"
 
   deploy-frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes, deploy-backend]
     environment: production
     permissions:
@@ -319,7 +324,7 @@ jobs:
           fi
       - name: Install Playwright Chromium
         if: steps.changes.outputs.frontend == 'true'
-        run: npx playwright install --with-deps chromium
+        uses: ./.github/actions/setup-playwright-chromium
       - name: Build production bundle
         if: steps.changes.outputs.frontend == 'true'
         run: doppler run --config prd -- npm run build 2>&1 | tee build.log

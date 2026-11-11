@@ -19,6 +19,10 @@ import {
   type AnalyticsEventProps,
   type SessionEndedReason,
 } from "./analyticsEvents";
+import {
+  enrichFirebaseExceptionProperties,
+  readFirebaseErrorCode,
+} from "./firebaseExceptionEnrich";
 import { posthogBeforeSend } from "./posthogBeforeSend";
 import { scrubPosthogExceptionProperties, scrubTelemetryError } from "./telemetryScrub";
 
@@ -396,14 +400,8 @@ export function scrubExceptionCaptureProperties(
   if (!props) {
     return undefined;
   }
-  const normalized: Record<string, unknown> = { ...props };
-  if ("code" in normalized) {
-    if (normalized.firebase_code === undefined) {
-      normalized.firebase_code = normalized.code;
-    }
-    delete normalized.code;
-  }
-  return scrubPosthogExceptionProperties(scrubAnalyticsProperties(normalized));
+  const enriched = enrichFirebaseExceptionProperties({ ...props });
+  return scrubPosthogExceptionProperties(scrubAnalyticsProperties(enriched ?? props));
 }
 
 /**
@@ -419,7 +417,12 @@ export function capturePosthogException(
     return;
   }
   try {
-    const scrubbedProps = scrubExceptionCaptureProperties(additionalProperties);
+    const withCode: Record<string, unknown> = { ...(additionalProperties ?? {}) };
+    const code = readFirebaseErrorCode(error);
+    if (code !== undefined && withCode.firebase_code === undefined && withCode.code === undefined) {
+      withCode.firebase_code = code;
+    }
+    const scrubbedProps = scrubExceptionCaptureProperties(withCode);
     posthog.captureException(scrubTelemetryError(error), scrubbedProps);
   } catch {
     // Soft-fail: exception reporting must never break the app.

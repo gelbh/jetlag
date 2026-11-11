@@ -25,6 +25,7 @@ import {
 } from "@/components/tools/shared/measuring/measuringPanelUtils";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
+import { ErrorWithRetry } from "@/components/tools/shared/readout/ErrorWithRetry";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
 import { filterChipStyles, filterChipTrackStyle } from "@/components/ui/entry/entryChrome";
 import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
@@ -81,6 +82,8 @@ export type MeasuringHudBodyModel = {
   usedMeasuringFromKinds: ReadonlySet<MeasuringFromKind>;
   unavailableMeasuringFromKinds?: ReadonlySet<MeasuringFromKind>;
   catalogNotice?: string | null;
+  catalogProbeError?: string | null;
+  onCatalogProbeRetry?: () => void;
   catalogOptions?: readonly MeasuringCatalogOption[];
   anchorLat?: number | null;
   anchorLng?: number | null;
@@ -132,6 +135,8 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
     usedMeasuringFromKinds,
     unavailableMeasuringFromKinds = new Set<MeasuringFromKind>(),
     catalogNotice = null,
+    catalogProbeError = null,
+    onCatalogProbeRetry,
     catalogOptions,
     anchorLat = null,
     anchorLng = null,
@@ -261,10 +266,12 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
       {chord === "source" ? (
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
-          {catalogNotice ? (
+          {catalogProbeError && onCatalogProbeRetry ? (
+            <ErrorWithRetry error={catalogProbeError} onRetry={onCatalogProbeRetry} />
+          ) : catalogNotice ? (
             <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
           ) : null}
-          {!hasAvailableMeasureOptions ? (
+          {!hasAvailableMeasureOptions && !catalogProbeError ? (
             <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every measure category has already been used on this map." />
             </AskHudPanel>

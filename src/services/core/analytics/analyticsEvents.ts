@@ -6,7 +6,11 @@ import type { MapTool } from "@/domain/map/mapToolTypes";
 import type { ThermometerSendBlockReason } from "@/domain/questions/thermometerSendBlock";
 import type { LearnRoutePath } from "@/domain/seo/learnRoutePaths";
 import type { PendingQuestionToolType } from "@/domain/session/activity/sessionChat";
-import type { JoinFailureReason } from "@/domain/session/join/joinFailureReason";
+import type {
+  JoinFailureClass,
+  JoinFailureReason,
+  JoinFailureSource,
+} from "@/domain/session/join/joinFailureReason";
 import type { JoinRequestRole } from "@/domain/session/players/joinRequest";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 
@@ -71,6 +75,8 @@ export type AnalyticsEventProps = {
   join_failed: {
     role: PlayerRole;
     reason: JoinFailureReason;
+    failureClass: JoinFailureClass;
+    source: JoinFailureSource;
     /** Present when the join target session was already resolved. */
     gameId?: string;
   };
