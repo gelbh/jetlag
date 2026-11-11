@@ -100,11 +100,14 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
   useEffect(() => {
     const seeded = seedUnavailableFromPresence();
     setUnavailableMatchingCategories((prev) => {
-      if (seeded.size === 0) {
-        return prev;
-      }
       let changed = false;
       const next = new Map(prev);
+      for (const [categoryId, notice] of prev) {
+        if (notice === matchingAdminDivisionProbeFailedMessage && !seeded.has(categoryId)) {
+          next.delete(categoryId);
+          changed = true;
+        }
+      }
       for (const [categoryId, notice] of seeded) {
         if (next.get(categoryId) !== notice) {
           next.set(categoryId, notice);
@@ -118,6 +121,8 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
     } else if (seeded.size > 0) {
       const firstNotice = seeded.values().next().value;
       setCatalogNotice(firstNotice ?? "Some categories aren't available in this play area.");
+    } else {
+      setCatalogNotice((prev) => (prev === matchingAdminDivisionProbeFailedMessage ? null : prev));
     }
   }, [catalogProbeError, seedUnavailableFromPresence]);
 

@@ -156,11 +156,14 @@ export function useMeasuringDraftState(
   useEffect(() => {
     const seeded = seedUnavailableFromPresence();
     setUnavailableMeasuringFromKinds((prev) => {
-      if (seeded.size === 0) {
-        return prev;
-      }
       let changed = false;
       const next = new Map(prev);
+      for (const [kind, notice] of prev) {
+        if (notice === matchingAdminDivisionProbeFailedMessage && !seeded.has(kind)) {
+          next.delete(kind);
+          changed = true;
+        }
+      }
       for (const [kind, notice] of seeded) {
         if (next.get(kind) !== notice) {
           next.set(kind, notice);
@@ -174,6 +177,8 @@ export function useMeasuringDraftState(
     } else if (seeded.size > 0) {
       const firstNotice = seeded.values().next().value;
       setCatalogNotice(firstNotice ?? "Some categories aren't available in this play area.");
+    } else {
+      setCatalogNotice((prev) => (prev === matchingAdminDivisionProbeFailedMessage ? null : prev));
     }
   }, [catalogProbeError, seedUnavailableFromPresence]);
 

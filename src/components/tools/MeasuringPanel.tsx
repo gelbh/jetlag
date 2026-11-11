@@ -205,6 +205,7 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
             subject={subject}
             locationCategory={locationCategory}
             onMeasureFromChange={onMeasureFromChange}
+            hideExhaustedMessage={Boolean(catalogProbeError)}
           />
         </>
       ) : null}

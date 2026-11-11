@@ -271,7 +271,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
           ) : catalogNotice ? (
             <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
           ) : null}
-          {!hasAvailableMeasureOptions ? (
+          {!hasAvailableMeasureOptions && !catalogProbeError ? (
             <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every measure category has already been used on this map." />
             </AskHudPanel>

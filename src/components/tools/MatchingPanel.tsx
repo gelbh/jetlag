@@ -267,7 +267,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
           ) : catalogNotice ? (
             <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
           ) : null}
-          {availableCategories.length === 0 ? (
+          {availableCategories.length === 0 && !catalogProbeError ? (
             <CatalogExhaustedMessage message="Every match category has already been used on this map." />
           ) : null}
           <GroupedSelectField

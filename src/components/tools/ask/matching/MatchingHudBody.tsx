@@ -242,7 +242,7 @@ export function MatchingHudBody({
           ) : catalogNotice ? (
             <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
           ) : null}
-          {availableCategories.length === 0 ? (
+          {availableCategories.length === 0 && !catalogProbeError ? (
             <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every match category has already been used on this map." />
             </AskHudPanel>
