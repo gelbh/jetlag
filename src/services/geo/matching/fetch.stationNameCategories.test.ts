@@ -7,9 +7,9 @@ import * as gtfsPlayAreaStations from "../../transit/gtfsPlayAreaStations";
 import { clearGeographicFeatureCacheForTests } from "../cache";
 import { fetchMatchingFeaturesInArea } from "./fetch";
 
-const FIRST_LETTER_CATEGORY = CUSTOM_QUESTION_PACK_MATCHING.find(
+const FIRST_LETTER_CATEGORY_ID = CUSTOM_QUESTION_PACK_MATCHING.find(
   (category) => category.resolver === "stationFirstLetter",
-)!;
+)!.id;
 
 vi.mock("../../transit/gtfsPlayAreaStations", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../transit/gtfsPlayAreaStations")>();
@@ -118,8 +118,7 @@ describe("station name categories use Transit Line station set", () => {
       FILTERED_GTFS,
     );
 
-    const features = await fetchMatchingFeaturesInArea(GAME_AREA, FIRST_LETTER_CATEGORY.id, {
-      customCategories: [FIRST_LETTER_CATEGORY],
+    const features = await fetchMatchingFeaturesInArea(GAME_AREA, FIRST_LETTER_CATEGORY_ID, {
       transitMetroId: "nyc",
       transitStationFilter: ["metro"],
     });
@@ -151,8 +150,7 @@ describe("station name categories use Transit Line station set", () => {
       ],
     });
 
-    const features = await fetchMatchingFeaturesInArea(GAME_AREA, FIRST_LETTER_CATEGORY.id, {
-      customCategories: [FIRST_LETTER_CATEGORY],
+    const features = await fetchMatchingFeaturesInArea(GAME_AREA, FIRST_LETTER_CATEGORY_ID, {
       transitMetroId: "nyc",
       transitStationFilter: ["tram"],
     });
