@@ -6,6 +6,7 @@ import {
   type SessionNoticeTone,
 } from "@/domain/session/opsNotice";
 import { dismissSessionNotice } from "@/services/admin/adminSessionNotices";
+import { captureException } from "@/services/core/analytics/clientErrors";
 import { getFirestoreDb, isFirebaseConfigured } from "@/services/core/firebase/firebase";
 import { serverNow } from "@/services/core/time/serverClock";
 
@@ -31,6 +32,19 @@ function parseNotice(id: string, data: Record<string, unknown>): SessionNoticeRe
     supersedesNoticeId:
       typeof data.supersedesNoticeId === "string" ? data.supersedesNoticeId : undefined,
   };
+}
+
+/** Fire-and-forget dismiss: never reject into `void dismiss()` callers. */
+export async function runSessionNoticeDismiss(
+  sessionId: string,
+  noticeId: string,
+  uid: string,
+): Promise<void> {
+  try {
+    await dismissSessionNotice(sessionId, noticeId, uid);
+  } catch (error) {
+    captureException(error, { firestore_op: "write:dismissSessionNotice" });
+  }
 }
 
 export function useSessionNotices(sessionId: string | undefined, uid: string | undefined) {
@@ -83,7 +97,7 @@ export function useSessionNotices(sessionId: string | undefined, uid: string | u
 
   const dismiss = async () => {
     if (!sessionId || !uid || !activeNotice) return;
-    await dismissSessionNotice(sessionId, activeNotice.id, uid);
+    await runSessionNoticeDismiss(sessionId, activeNotice.id, uid);
   };
 
   return { activeNotice, dismiss };

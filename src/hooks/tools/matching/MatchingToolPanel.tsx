@@ -18,6 +18,8 @@ export type MatchingToolPanelModel = {
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
   unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
   catalogNotice?: string | null;
+  catalogProbeError?: string | null;
+  onCatalogProbeRetry?: () => void;
   catalogCategories: MatchingCategoryDefinition[];
   matchingSeekerPoint: LatLngTuple | null;
   matchingUsesContainment: boolean;
@@ -62,6 +64,8 @@ export function MatchingToolPanel({ model }: MatchingToolPanelProps) {
     usedCategoryIds,
     unavailableCategoryIds,
     catalogNotice,
+    catalogProbeError,
+    onCatalogProbeRetry,
     catalogCategories,
     matchingSeekerPoint,
     matchingUsesContainment,
@@ -104,6 +108,8 @@ export function MatchingToolPanel({ model }: MatchingToolPanelProps) {
           usedCategoryIds,
           unavailableCategoryIds,
           catalogNotice,
+          catalogProbeError,
+          onCatalogProbeRetry,
           catalogCategories,
           anchorLat: matchingSeekerPoint?.[0] ?? null,
           anchorLng: matchingSeekerPoint?.[1] ?? null,

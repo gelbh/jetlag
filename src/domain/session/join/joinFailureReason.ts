@@ -10,6 +10,28 @@ export type JoinFailureReason =
   | "timeout"
   | "other";
 
+export type JoinFailureClass = "expected_gate" | "user_reject" | "transport" | "other";
+
+/** Where the join attempt decided it had failed (client gate vs server). */
+export type JoinFailureSource = "client_gate" | "client" | "server";
+
+export function joinFailureClass(reason: JoinFailureReason): JoinFailureClass {
+  switch (reason) {
+    case "role_code_required":
+      return "expected_gate";
+    case "wrong_role_code":
+    case "version_mismatch":
+    case "update_required":
+      return "user_reject";
+    case "timeout":
+      return "transport";
+    case "session_missing":
+    case "session_ended":
+    case "other":
+      return "other";
+  }
+}
+
 function errorCode(error: Error): string | undefined {
   const code = (error as { code?: unknown }).code;
   return typeof code === "string" ? code : undefined;

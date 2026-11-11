@@ -60,11 +60,7 @@ import {
   buildStationNameLengthFeatures,
   letterZoneFeatureIdForDivision,
 } from "./specialized";
-import {
-  fetchStationFeaturesInArea,
-  fetchStreetPathFeaturesInArea,
-  fetchTransitLineMatchingFeaturesInArea,
-} from "./transit";
+import { fetchStreetPathFeaturesInArea, fetchTransitLineMatchingFeaturesInArea } from "./transit";
 import type { MatchingFetchOptions, OverpassElement } from "./types";
 
 const HYGIENE_MATCHING_CATEGORIES = new Set<MeasuringLocationCategory>([
@@ -278,9 +274,19 @@ export async function fetchMatchingFeaturesInArea(
         case "streetPath":
           return fetchStreetPathFeaturesInArea(gameArea, load);
         case "stationNameLength":
-          return buildStationNameLengthFeatures(await fetchStationFeaturesInArea(gameArea, load));
+          return buildStationNameLengthFeatures(
+            await fetchTransitLineMatchingFeaturesInArea(gameArea, load, {
+              transitMetroId: options?.transitMetroId,
+              transitStationFilter: options?.transitStationFilter,
+            }),
+          );
         case "stationFirstLetter":
-          return buildStationFirstLetterFeatures(await fetchStationFeaturesInArea(gameArea, load));
+          return buildStationFirstLetterFeatures(
+            await fetchTransitLineMatchingFeaturesInArea(gameArea, load, {
+              transitMetroId: options?.transitMetroId,
+              transitStationFilter: options?.transitStationFilter,
+            }),
+          );
         case "letterZone": {
           const divisions = await fetchAdminDivisionFeaturesInArea(
             gameArea,

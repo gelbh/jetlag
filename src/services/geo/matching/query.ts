@@ -35,7 +35,8 @@ export function matchingFeaturesCacheKey(
   const filter = transitStationFilterCacheKey(options?.transitStationFilter);
   return geographicCacheKey(
     gameArea,
-    `matching:v3:in:${categoryId}:metro:${metro}:filter:${filter}${customSuffix}`,
+    // v4: station name categories now share the filtered GTFS/Overpass set with transitLine.
+    `matching:v4:in:${categoryId}:metro:${metro}:filter:${filter}${customSuffix}`,
   );
 }
 

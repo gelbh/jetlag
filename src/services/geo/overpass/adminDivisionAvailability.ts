@@ -36,7 +36,12 @@ export type AdminDivisionMatchingCategory =
   | "admin_division_3"
   | "admin_division_4";
 
-export type AdminDivisionCounts = Record<AdminDivisionMatchingCategory, number>;
+export type AdminDivisionLevelStatus = { status: "ok"; count: number } | { status: "error" };
+
+export type AdminDivisionCounts = Record<
+  AdminDivisionMatchingCategory,
+  AdminDivisionLevelStatus | null
+>;
 
 const ADMIN_DIVISION_CATEGORIES: readonly AdminDivisionMatchingCategory[] = [
   "admin_division_1",
@@ -47,11 +52,44 @@ const ADMIN_DIVISION_CATEGORIES: readonly AdminDivisionMatchingCategory[] = [
 
 export function emptyAdminDivisionCounts(): AdminDivisionCounts {
   return {
-    admin_division_1: 0,
-    admin_division_2: 0,
-    admin_division_3: 0,
-    admin_division_4: 0,
+    admin_division_1: null,
+    admin_division_2: null,
+    admin_division_3: null,
+    admin_division_4: null,
   };
+}
+
+export function okAdminDivisionCounts(
+  partial: Partial<Record<AdminDivisionMatchingCategory, number>>,
+): AdminDivisionCounts {
+  const counts = emptyAdminDivisionCounts();
+  for (const category of ADMIN_DIVISION_CATEGORIES) {
+    const count = partial[category];
+    if (count !== undefined) {
+      counts[category] = { status: "ok", count };
+    }
+  }
+  return counts;
+}
+
+export function allAdminDivisionLevelsError(): AdminDivisionCounts {
+  return {
+    admin_division_1: { status: "error" },
+    admin_division_2: { status: "error" },
+    admin_division_3: { status: "error" },
+    admin_division_4: { status: "error" },
+  };
+}
+
+export function adminDivisionOkCount(
+  categoryId: AdminDivisionMatchingCategory,
+  counts: AdminDivisionCounts | null | undefined,
+): number | null {
+  const entry = counts?.[categoryId];
+  if (!entry || entry.status !== "ok") {
+    return null;
+  }
+  return entry.count;
 }
 
 export function adminCategoryForProbeLevel(level: number): AdminDivisionMatchingCategory | null {
@@ -102,9 +140,9 @@ export async function probeAdminDivisionCounts(
           load,
         );
 
-        counts[category] = features.length;
+        counts[category] = { status: "ok", count: features.length };
       } catch {
-        counts[category] = 0;
+        counts[category] = { status: "error" };
       }
     }),
   );
@@ -188,6 +226,98 @@ export function isMeasuringBorderKindSupportedForRegionPack(
   return !blocked?.has(kind);
 }
 
+function adminMatchingCategoryForBorderKind(
+  kind: "admin1_border" | "admin2_border" | "admin3_border" | "admin4_border",
+): AdminDivisionMatchingCategory {
+  switch (kind) {
+    case "admin1_border":
+      return "admin_division_1";
+    case "admin2_border":
+      return "admin_division_2";
+    case "admin3_border":
+      return "admin_division_3";
+    case "admin4_border":
+      return "admin_division_4";
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
+
+export function isAdminDivisionCategoryListed(
+  categoryId: MatchingCategoryId,
+  counts: AdminDivisionCounts | null | undefined,
+  regionPackId?: RegionPackId,
+): boolean {
+  if (!isAdminDivisionMatchingCategory(categoryId)) {
+    return true;
+  }
+
+  if (!isRegionPackMatchingCategorySupported(categoryId, regionPackId)) {
+    return false;
+  }
+
+  const entry = counts?.[categoryId];
+  if (entry === null || entry === undefined) {
+    return false;
+  }
+
+  if (entry.status === "error") {
+    return true;
+  }
+
+  return isAdminDivisionCountAvailable(entry.count);
+}
+
+export function isMeasuringAdminBorderListed(
+  kind: MeasuringFromKind,
+  counts: AdminDivisionCounts | null | undefined,
+  regionPackId?: RegionPackId,
+): boolean {
+  if (!isMeasuringAdminBorderKind(kind)) {
+    return true;
+  }
+
+  return isAdminDivisionCategoryListed(
+    adminMatchingCategoryForBorderKind(kind),
+    counts,
+    regionPackId,
+  );
+}
+
+export function isAdminDivisionCategoryProbeFailed(
+  categoryId: MatchingCategoryId,
+  counts: AdminDivisionCounts | null | undefined,
+  regionPackId?: RegionPackId,
+): boolean {
+  if (!isAdminDivisionMatchingCategory(categoryId)) {
+    return false;
+  }
+
+  if (!isRegionPackMatchingCategorySupported(categoryId, regionPackId)) {
+    return false;
+  }
+
+  return counts?.[categoryId]?.status === "error";
+}
+
+export function isMeasuringAdminBorderProbeFailed(
+  kind: MeasuringFromKind,
+  counts: AdminDivisionCounts | null | undefined,
+  regionPackId?: RegionPackId,
+): boolean {
+  if (!isMeasuringAdminBorderKind(kind)) {
+    return false;
+  }
+
+  return isAdminDivisionCategoryProbeFailed(
+    adminMatchingCategoryForBorderKind(kind),
+    counts,
+    regionPackId,
+  );
+}
+
 export function isAdminDivisionCategoryAvailable(
   categoryId: MatchingCategoryId,
   counts: AdminDivisionCounts | null | undefined,
@@ -201,11 +331,12 @@ export function isAdminDivisionCategoryAvailable(
     return false;
   }
 
-  if (!counts) {
+  const entry = counts?.[categoryId];
+  if (!entry || entry.status !== "ok") {
     return false;
   }
 
-  return isAdminDivisionCountAvailable(counts[categoryId]);
+  return isAdminDivisionCountAvailable(entry.count);
 }
 
 export function measuringBorderKindForAdminCategory(

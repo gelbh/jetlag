@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { matchingEmptyPlayAreaMessage, matchingNullAnswerMessage } from "./messages";
+import {
+  matchingAdminDivisionProbeFailedMessage,
+  matchingEmptyPlayAreaMessage,
+  matchingNullAnswerMessage,
+} from "./messages";
 
 describe("matching empty play-area messages", () => {
+  it("exports admin division probe failure copy", () => {
+    expect(matchingAdminDivisionProbeFailedMessage).toBe(
+      "Couldn't check area divisions. Try again.",
+    );
+  });
   it("empty play area message has no null-match suffix", () => {
     expect(matchingEmptyPlayAreaMessage("landmass")).toBe("No landmass intersects the play area.");
     expect(matchingEmptyPlayAreaMessage("landmass")).not.toMatch(/null match/i);

@@ -1,27 +1,46 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { GameArea } from "@/domain/map/annotations";
 import {
-  adminBorderKindAvailability,
   adminBoundaryLevelsForSession,
-  allowsOverpassAdminBorderFallthrough,
+  allAdminDivisionLevelsError,
   emptyAdminDivisionCounts,
   isAdminDivisionCategoryAvailable,
+  isAdminDivisionCategoryListed,
+  isAdminDivisionCategoryProbeFailed,
   isAdminDivisionCountAvailable,
-  isMeasuringAdminBorderKind,
+  isMeasuringAdminBorderListed,
+  isMeasuringAdminBorderProbeFailed,
+  okAdminDivisionCounts,
+  probeAdminDivisionCounts,
 } from "./adminDivisionAvailability";
+import * as adminDivisionBoundaries from "./adminDivisionBoundaries";
+
+const sampleGameArea: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [-6.3, 53.34],
+      [-6.29, 53.34],
+      [-6.29, 53.35],
+      [-6.3, 53.35],
+      [-6.3, 53.34],
+    ],
+  ],
+};
 
 describe("adminDivisionAvailability", () => {
-  it("requires at least two divisions before showing admin categories", () => {
+  it("treats counts under 2 as unavailable", () => {
     expect(isAdminDivisionCountAvailable(0)).toBe(false);
     expect(isAdminDivisionCountAvailable(1)).toBe(false);
     expect(isAdminDivisionCountAvailable(2)).toBe(true);
   });
 
-  it("hides admin division matching categories below the threshold", () => {
-    const counts = {
-      ...emptyAdminDivisionCounts(),
+  it("is available only for ok status with enough divisions", () => {
+    const counts = okAdminDivisionCounts({
       admin_division_3: 4,
       admin_division_4: 11,
-    };
+      admin_division_2: 1,
+    });
 
     expect(isAdminDivisionCategoryAvailable("admin_division_3", counts)).toBe(true);
     expect(isAdminDivisionCategoryAvailable("admin_division_4", counts)).toBe(true);
@@ -29,105 +48,101 @@ describe("adminDivisionAvailability", () => {
     expect(isAdminDivisionCategoryAvailable("commercial_airport", counts)).toBe(true);
   });
 
-  it("hides admin categories while preload counts are pending", () => {
+  it("hides pending and error from availability", () => {
     expect(isAdminDivisionCategoryAvailable("admin_division_3", null)).toBe(false);
     expect(isAdminDivisionCategoryAvailable("admin_division_3", undefined)).toBe(false);
+
+    const failed = okAdminDivisionCounts({ admin_division_3: 4 });
+    failed.admin_division_3 = { status: "error" };
+    expect(isAdminDivisionCategoryAvailable("admin_division_3", failed)).toBe(false);
   });
 
-  it("hides first- and second-level admin options for Dublin region packs", () => {
-    const counts = {
-      ...emptyAdminDivisionCounts(),
+  it("lists error categories but not pending or sparse ok", () => {
+    const pending = emptyAdminDivisionCounts();
+    expect(isAdminDivisionCategoryListed("admin_division_3", pending)).toBe(false);
+
+    const sparse = okAdminDivisionCounts({ admin_division_3: 1 });
+    expect(isAdminDivisionCategoryListed("admin_division_3", sparse)).toBe(false);
+
+    const failed = okAdminDivisionCounts({ admin_division_3: 4 });
+    failed.admin_division_3 = { status: "error" };
+    expect(isAdminDivisionCategoryListed("admin_division_3", failed)).toBe(true);
+    expect(isAdminDivisionCategoryProbeFailed("admin_division_3", failed)).toBe(true);
+  });
+
+  it("respects region-pack matching blocks", () => {
+    const counts = okAdminDivisionCounts({
       admin_division_1: 4,
       admin_division_2: 4,
       admin_division_3: 4,
       admin_division_4: 11,
-    };
+    });
 
     expect(isAdminDivisionCategoryAvailable("admin_division_1", counts, "dublin")).toBe(false);
     expect(isAdminDivisionCategoryAvailable("admin_division_2", counts, "dublin")).toBe(false);
     expect(isAdminDivisionCategoryAvailable("admin_division_3", counts, "dublin")).toBe(true);
-    expect(adminBorderKindAvailability("admin1_border", counts, "dublin")).toBe(false);
-    expect(adminBorderKindAvailability("admin2_border", counts, "dublin")).toBe(false);
-    expect(adminBorderKindAvailability("admin3_border", counts, "dublin")).toBe(true);
+    expect(isAdminDivisionCategoryListed("admin_division_1", counts, "dublin")).toBe(false);
   });
 
-  it("returns only Dublin region-pack admin levels for boundary layer", () => {
-    const counts = {
-      ...emptyAdminDivisionCounts(),
-      admin_division_1: 5,
-      admin_division_2: 5,
-      admin_division_3: 4,
-      admin_division_4: 31,
-    };
+  it("probe stores error per level on fetch failure", async () => {
+    vi.spyOn(adminDivisionBoundaries, "fetchAdminDivisionFeaturesInArea").mockImplementation(
+      async (_gameArea, level) => {
+        if (level === 8) {
+          throw new Error("overpass down");
+        }
+        return [{ id: "a" }, { id: "b" }] as never;
+      },
+    );
 
-    expect(adminBoundaryLevelsForSession("dublin", { 8: "{}", 9: "{}" }, counts)).toEqual([8, 9]);
-    expect(adminBoundaryLevelsForSession("dublin", { 8: "{}" }, counts)).toEqual([8]);
+    const counts = await probeAdminDivisionCounts(sampleGameArea);
+    expect(counts.admin_division_3).toEqual({ status: "error" });
+    expect(counts.admin_division_1).toEqual({ status: "ok", count: 2 });
   });
 
-  it("returns every standard admin level for preload sessions (counts omitted)", () => {
-    expect(adminBoundaryLevelsForSession(undefined, undefined)).toEqual([4, 6, 8, 9]);
+  it("measuring border probe failure mirrors matching category", () => {
+    const failed = allAdminDivisionLevelsError();
+    expect(isMeasuringAdminBorderProbeFailed("admin3_border", failed)).toBe(true);
+    expect(isMeasuringAdminBorderListed("admin3_border", failed)).toBe(true);
+    expect(isMeasuringAdminBorderProbeFailed("museum", failed)).toBe(false);
   });
 
-  it("still restricts Dublin region-pack preload to bundled admin levels", () => {
-    expect(adminBoundaryLevelsForSession("dublin", { 8: "{}", 9: "{}" })).toEqual([8, 9]);
-  });
-
-  it("gates Overpass admin-border fallthrough by bundled region packs only", () => {
-    expect(allowsOverpassAdminBorderFallthrough(undefined)).toBe(true);
-    expect(allowsOverpassAdminBorderFallthrough("dublin")).toBe(false);
-  });
-
-  it("mirrors matching availability for measuring admin border kinds", () => {
-    const counts = {
-      ...emptyAdminDivisionCounts(),
+  it("adminBoundaryLevelsForSession skips unavailable and error levels", () => {
+    const counts = okAdminDivisionCounts({
       admin_division_1: 2,
       admin_division_2: 1,
-      admin_division_3: 1,
+      admin_division_3: 4,
       admin_division_4: 7,
-    };
+    });
+    counts.admin_division_2 = { status: "error" };
 
-    expect(isMeasuringAdminBorderKind("admin3_border")).toBe(true);
-    expect(adminBorderKindAvailability("admin1_border", counts)).toBe(true);
-    expect(adminBorderKindAvailability("admin2_border", counts)).toBe(false);
-    expect(adminBorderKindAvailability("admin3_border", counts)).toBe(false);
-    expect(adminBorderKindAvailability("admin4_border", counts)).toBe(true);
-    expect(adminBorderKindAvailability("rail_station", counts)).toBe(true);
+    expect(adminBoundaryLevelsForSession(undefined, undefined, counts)).toEqual([4, 8, 9]);
   });
 
-  it("hides international_border on metro packs via unsupportedBorders", () => {
-    expect(adminBorderKindAvailability("international_border", null, "dublin")).toBe(false);
-    expect(adminBorderKindAvailability("international_border", null, "switzerland")).toBe(true);
+  it("okAdminDivisionCounts fills only provided categories", () => {
+    const partial = okAdminDivisionCounts({ admin_division_3: 17, admin_division_4: 11 });
+    expect(partial.admin_division_3).toEqual({ status: "ok", count: 17 });
+    expect(partial.admin_division_1).toBeNull();
   });
 
-  it("hard-hides admin4 matching and borders for Southampton even when counts pass", () => {
-    const counts = {
-      ...emptyAdminDivisionCounts(),
+  it("southampton hides blocked admin division 4 even with high counts", () => {
+    const counts = okAdminDivisionCounts({
       admin_division_3: 17,
       admin_division_4: 11,
-    };
-
+    });
     expect(isAdminDivisionCategoryAvailable("admin_division_3", counts, "southampton")).toBe(true);
     expect(isAdminDivisionCategoryAvailable("admin_division_4", counts, "southampton")).toBe(false);
-    expect(adminBorderKindAvailability("admin3_border", counts, "southampton")).toBe(true);
-    expect(adminBorderKindAvailability("admin4_border", counts, "southampton")).toBe(false);
   });
 
-  it("does not hide admin 1/2 for australia when counts pass (contrast dublin)", () => {
-    const counts = {
-      ...emptyAdminDivisionCounts(),
+  it("australia exposes all admin levels when counts are sufficient", () => {
+    const counts = okAdminDivisionCounts({
       admin_division_1: 4,
       admin_division_2: 4,
       admin_division_3: 8,
       admin_division_4: 11,
-    };
-
+    });
     expect(isAdminDivisionCategoryAvailable("admin_division_1", counts, "australia")).toBe(true);
     expect(isAdminDivisionCategoryAvailable("admin_division_2", counts, "australia")).toBe(true);
     expect(isAdminDivisionCategoryAvailable("admin_division_3", counts, "australia")).toBe(true);
     expect(isAdminDivisionCategoryAvailable("admin_division_4", counts, "australia")).toBe(true);
-    expect(adminBorderKindAvailability("admin1_border", counts, "australia")).toBe(true);
-    expect(adminBorderKindAvailability("admin2_border", counts, "australia")).toBe(true);
-    expect(adminBorderKindAvailability("admin3_border", counts, "australia")).toBe(true);
-    expect(adminBorderKindAvailability("admin4_border", counts, "australia")).toBe(true);
   });
 });
