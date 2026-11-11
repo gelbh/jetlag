@@ -6,6 +6,18 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.12.6 - 2026-11-11
+
+### Fixes
+
+- show unavailable admin division categories with retry when the area probe fails instead of hiding them as empty
+- Google sign-in in the iPhone home-screen app goes to Google and comes back signed in, instead of sometimes getting stuck on “Opening…”
+
+### Technical
+
+- Tag Firebase permission-denied exceptions and catch map notice dismiss rejections
+- Matching: Station Name's Length and Station First Letter use the session transit station filter (same set as Transit Line); matching cache bumped to v4 so warm clients do not keep pre-filter Overpass sets
+
 ## 1.12.5 - 2026-11-07
 
 ### Fixes
