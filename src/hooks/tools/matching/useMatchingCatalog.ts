@@ -31,7 +31,7 @@ import {
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { paintPolygonLod } from "@/hooks/tools/framework/paintPolygonLod";
 import type { MatchingFeature, MatchingFetchOptions } from "@/services/geo/matching";
-import { isAdminDivisionCategoryAvailable } from "@/services/geo/overpass/adminDivisionAvailability";
+import { isAdminDivisionCategoryListed } from "@/services/geo/overpass/adminDivisionAvailability";
 import { resolveTransitMetroId } from "@/services/transit/transitCatalog";
 import { usePreloadStore } from "@/state/preloadStore";
 
@@ -160,7 +160,7 @@ export function useMatchingCatalog(input: {
       ? availableMatchingCategories(sessionRules)
       : availableMatchingCategories({ gameSize: "medium" });
     return categories.filter((category) =>
-      isAdminDivisionCategoryAvailable(category.id, adminDivisionCounts, regionPackId),
+      isAdminDivisionCategoryListed(category.id, adminDivisionCounts, regionPackId),
     );
   }, [adminDivisionCounts, regionPackId, sessionRules]);
 

@@ -61,6 +61,8 @@ export function matchingEmptyPlayAreaMessage(categoryId: MatchingCategoryId): st
   return matchingEmptyCatalogBody(categoryId);
 }
 
+export const matchingAdminDivisionProbeFailedMessage = "Couldn't check area divisions. Try again.";
+
 export function matchingNullAnswerMessage(categoryId: MatchingCategoryId): string {
   return `${matchingEmptyCatalogBody(categoryId)} You can still answer Yes or No as a null match.`;
 }

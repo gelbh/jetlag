@@ -21,6 +21,7 @@ interface MeasuringSourceStepProps {
   subject: MeasuringSubject;
   locationCategory?: MeasuringLocationCategory;
   onMeasureFromChange: (kind: MeasuringFromKind) => void;
+  hideExhaustedMessage?: boolean;
 }
 
 export function MeasuringSourceStep({
@@ -32,6 +33,7 @@ export function MeasuringSourceStep({
   subject,
   locationCategory,
   onMeasureFromChange,
+  hideExhaustedMessage = false,
 }: MeasuringSourceStepProps) {
   const measureCatalog = catalogOptions ?? BASE_MEASURING_CATALOG;
   const availableGroups = MEASURING_GROUPS.map((group) => ({
@@ -56,7 +58,7 @@ export function MeasuringSourceStep({
 
   return (
     <ToolSection first compact status="active">
-      {hasAvailableMeasureOptions ? null : (
+      {hasAvailableMeasureOptions || hideExhaustedMessage ? null : (
         <CatalogExhaustedMessage message="Every measure category has already been added to this session." />
       )}
       <GroupedSelectField

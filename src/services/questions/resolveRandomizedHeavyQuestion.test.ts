@@ -16,7 +16,10 @@ import {
   fetchMeasuringCoastlineContext,
   fetchMeasuringLinearContext,
 } from "../../hooks/tools/measuringToolResolvers";
-import type { AdminDivisionCounts } from "../geo/overpass/adminDivisionAvailability";
+import {
+  type AdminDivisionCounts,
+  okAdminDivisionCounts,
+} from "../geo/overpass/adminDivisionAvailability";
 import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
 import { fetchTentaclePois } from "../geo/overpass/tentacleOverpass";
 import {
@@ -404,12 +407,12 @@ describe("resolveRandomizedMeasuring", () => {
   });
 
   it("routes an available admin border through the linear fetch", async () => {
-    preload.adminDivisionCounts = {
+    preload.adminDivisionCounts = okAdminDivisionCounts({
       admin_division_1: 5,
       admin_division_2: 5,
       admin_division_3: 5,
       admin_division_4: 5,
-    };
+    });
     vi.mocked(fetchMeasuringLinearContext).mockResolvedValue({
       ok: true,
       point: [51.45, -0.12],

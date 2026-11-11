@@ -16,7 +16,9 @@ import { ANALYTICS_EVENTS } from "../core/analytics/analyticsEvents";
 import { trackLazy } from "../core/analytics/lazyTelemetry";
 import { createLoadTask, type LoadTask } from "../core/progress/loadTask";
 import {
+  type AdminDivisionCounts,
   adminBoundaryLevelsForSession,
+  allAdminDivisionLevelsError,
   emptyAdminDivisionCounts,
   probeAdminDivisionCounts,
 } from "../geo/overpass/adminDivisionAvailability";
@@ -293,7 +295,7 @@ async function runGameAreaPreload(
       return;
     }
 
-    let counts = emptyAdminDivisionCounts();
+    let counts: AdminDivisionCounts = emptyAdminDivisionCounts();
     try {
       counts = await probeAdminDivisionCounts(
         gameArea,
@@ -301,7 +303,9 @@ async function runGameAreaPreload(
         regionPackId,
         BACKGROUND_LANE,
       );
-    } catch {}
+    } catch {
+      counts = allAdminDivisionLevelsError();
+    }
     if (signal.aborted) {
       return;
     }
@@ -381,7 +385,7 @@ export async function preloadCriticalGameAreaCaches(
   const categoryStage = task.stage(CRITICAL_CATEGORY_STAGE);
   const levelStages = adminLevels.map(() => task.stage(CRITICAL_LEVEL_STAGE));
 
-  let counts = emptyAdminDivisionCounts();
+  let counts: AdminDivisionCounts = emptyAdminDivisionCounts();
   try {
     probeStage.start();
     counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId, load);
@@ -389,6 +393,7 @@ export async function preloadCriticalGameAreaCaches(
     store.recordCriticalJob(gameAreaKey, "success");
   } catch {
     probeStage.cancel();
+    counts = allAdminDivisionLevelsError();
     store.recordCriticalJob(gameAreaKey, "failure");
   }
   usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
@@ -417,6 +422,19 @@ export async function preloadCriticalGameAreaCaches(
   if (activeCriticalTask === task) {
     activeCriticalTask = null;
   }
+}
+
+export async function retryAdminDivisionProbe(
+  gameArea: GameArea,
+  customMatchingAreas: CustomMatchingAreasByLevel | undefined,
+  regionPackId: RegionPackId | undefined,
+): Promise<AdminDivisionCounts> {
+  const gameAreaKey = gameAreaPreloadKey(gameArea);
+  const counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId, {
+    priority: "foreground",
+  });
+  usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
+  return counts;
 }
 
 export function preloadJobGapMsForTests(): number {
