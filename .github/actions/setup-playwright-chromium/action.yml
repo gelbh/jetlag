@@ -1,0 +1,9 @@
+name: Setup Playwright Chromium
+description: Install Playwright Chromium browser binaries and OS dependencies
+
+runs:
+  using: composite
+  steps:
+    - name: Install Playwright Chromium
+      shell: bash
+      run: npx playwright install --with-deps chromium

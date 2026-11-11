@@ -1,5 +1,10 @@
 name: CI
 
+# Pin runner image while ubuntu-latest migrates to 26.04 (resolute). Floating
+# latest was failing Playwright --with-deps on apt DNS for fonts-* packages.
+# Revisit ubuntu-latest / 26.04 when that path is stable for install-deps.
+# See actions/runner-images#14748.
+
 on:
   pull_request:
     branches: [main]
@@ -15,7 +20,7 @@ permissions:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       light: ${{ steps.light.outputs.light }}
       code: ${{ steps.code.outputs.code }}
@@ -58,7 +63,7 @@ jobs:
               - '!LICENSE.md'
 
   ci-light:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes]
     if: ${{ needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false' }}
     steps:
@@ -75,7 +80,7 @@ jobs:
       - run: npm run test:changeset-map
 
   unit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes]
     if: ${{ needs.changes.outputs.code == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
     steps:
@@ -157,7 +162,7 @@ jobs:
         run: npm run test:functions
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes]
     if: ${{ needs.changes.outputs.code == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
     steps:
@@ -177,15 +182,15 @@ jobs:
           cache: npm
       - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
         run: npm ci
-      - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
-        run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/setup-playwright-chromium
+        if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
       - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
         run: npm run build
       - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
         run: npx wrangler deploy --dry-run
 
   emulator:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes]
     if: ${{ needs.changes.outputs.code == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
     steps:
@@ -225,7 +230,7 @@ jobs:
         run: npm run test:emulator
 
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes, unit]
     if: ${{ needs.changes.outputs.code == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
     # Gate-smoke + resilience on PR CI; full features suite is too hang-prone under emulators.
@@ -252,8 +257,8 @@ jobs:
           cache: npm
       - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
         run: npm ci
-      - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
-        run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/setup-playwright-chromium
+        if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
       - name: Cache Firebase emulators
         if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -273,7 +278,7 @@ jobs:
             test-results
 
   lighthouse:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes]
     if: ${{ needs.changes.outputs.code == 'true' || (needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false') }}
     steps:
@@ -293,8 +298,8 @@ jobs:
           cache: npm
       - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
         run: npm ci
-      - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
-        run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/setup-playwright-chromium
+        if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
       - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
         run: npm run build
       - if: ${{ needs.changes.outputs.code == 'true' && needs.changes.outputs.release_pr != 'true' }}
