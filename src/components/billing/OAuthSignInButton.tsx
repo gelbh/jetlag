@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import {
   oauthProviderButtonIconStyle,
   oauthProviderButtonStyle,
@@ -28,6 +28,18 @@ export function OAuthSignInButton({
   busyLabel = "Opening…",
 }: OAuthSignInButtonProps) {
   const [busy, setBusy] = useState(false);
+
+  // WebKit may restore this page from BFCache after a cancelled OAuth redirect with
+  // busy still true; pageshow.persisted is the only signal that JS state survived.
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setBusy(false);
+      }
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   const failureMessage = `${provider === "apple" ? "Apple" : "Google"} sign-in failed.`;
 

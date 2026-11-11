@@ -130,4 +130,29 @@ describe("OAuthSignInButton", () => {
     expect(onError).not.toHaveBeenCalled();
     expect(screen.getByRole("button")).toBeDisabled();
   });
+
+  it("clears busy when WebKit restores the page from BFCache after a redirect", async () => {
+    const onSignIn = vi.fn(() => Promise.reject(new OAuthRedirectInProgressError()));
+
+    render(
+      <OAuthSignInButton
+        provider="google"
+        onSignIn={onSignIn}
+        onSuccess={vi.fn(async () => undefined)}
+        onError={vi.fn()}
+        label="Continue with Google"
+        icon={<span>G</span>}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
+    await act(async () => {});
+    expect(screen.getByRole("button")).toBeDisabled();
+
+    await act(async () => {
+      window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true }));
+    });
+
+    expect(screen.getByRole("button")).toBeEnabled();
+  });
 });
