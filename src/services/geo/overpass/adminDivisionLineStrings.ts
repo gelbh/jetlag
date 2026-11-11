@@ -8,6 +8,7 @@ import type {
 import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
 import {
   type AdminDivisionCounts,
+  adminDivisionOkCount,
   adminLevelForMeasuringBorderKind,
 } from "./adminDivisionAvailability";
 
@@ -56,8 +57,12 @@ export function hasEnoughAdminBorderSegments(
     return segmentCount >= 2;
   }
 
-  if (kind === "admin3_border") {
-    return counts.admin_division_3 >= 2;
+  const okCount =
+    kind === "admin3_border"
+      ? adminDivisionOkCount("admin_division_3", counts)
+      : adminDivisionOkCount("admin_division_4", counts);
+  if (okCount !== null) {
+    return okCount >= 2;
   }
-  return counts.admin_division_4 >= 2;
+  return segmentCount >= 2;
 }

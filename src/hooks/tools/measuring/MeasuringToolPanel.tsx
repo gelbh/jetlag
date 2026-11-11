@@ -24,6 +24,7 @@ interface MeasuringToolPanelProps {
   handleSearch: (role: "seeker" | "target") => Promise<void>;
   applySearchResult: (place: GeocodedPlace, role: "seeker" | "target") => void;
   loadNearest: () => Promise<void>;
+  onCatalogProbeRetry?: () => void;
 }
 
 export function MeasuringToolPanel({
@@ -43,12 +44,14 @@ export function MeasuringToolPanel({
   handleSearch,
   applySearchResult,
   loadNearest,
+  onCatalogProbeRetry,
 }: MeasuringToolPanelProps) {
   const {
     wizardStepRef,
     usedMeasuringFromKindsSet,
     unavailableMeasuringFromKinds,
     catalogNotice,
+    catalogProbeError,
     measuringCatalog,
     measuringOptionChosen,
     measuringSeekerPoint,
@@ -93,6 +96,8 @@ export function MeasuringToolPanel({
           usedMeasuringFromKinds: usedMeasuringFromKindsSet,
           unavailableMeasuringFromKinds: new Set(unavailableMeasuringFromKinds.keys()),
           catalogNotice,
+          catalogProbeError,
+          onCatalogProbeRetry,
           catalogOptions: measuringCatalog,
           anchorLat: measuringSeekerPoint?.[0] ?? null,
           anchorLng: measuringSeekerPoint?.[1] ?? null,

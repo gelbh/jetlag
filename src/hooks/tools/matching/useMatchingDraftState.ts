@@ -5,8 +5,15 @@ import { resolveCategoryPresence } from "@/domain/session/catalog/playAreaCatego
 import { availableMatchingCategories } from "@/domain/session/catalog/sessionCatalogAvailability";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { MatchingFeature } from "@/services/geo/matching";
-import { matchingEmptyPlayAreaMessage } from "@/services/geo/matching";
-import { isAdminDivisionCategoryAvailable } from "@/services/geo/overpass/adminDivisionAvailability";
+import {
+  matchingAdminDivisionProbeFailedMessage,
+  matchingEmptyPlayAreaMessage,
+} from "@/services/geo/matching";
+import {
+  isAdminDivisionCategoryAvailable,
+  isAdminDivisionCategoryListed,
+  isAdminDivisionCategoryProbeFailed,
+} from "@/services/geo/overpass/adminDivisionAvailability";
 import { usePreloadStore } from "@/state/preloadStore";
 
 export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
@@ -43,18 +50,34 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
       ? availableMatchingCategories(sessionRules)
       : availableMatchingCategories({ gameSize: "medium" });
     return categories.filter((category) =>
-      isAdminDivisionCategoryAvailable(category.id, adminDivisionCounts, regionPackId),
+      isAdminDivisionCategoryListed(category.id, adminDivisionCounts, regionPackId),
     );
+  }, [adminDivisionCounts, regionPackId, sessionRules]);
+
+  const catalogProbeError = useMemo(() => {
+    const categories = sessionRules
+      ? availableMatchingCategories(sessionRules)
+      : availableMatchingCategories({ gameSize: "medium" });
+    const probeFailed = categories.some((category) =>
+      isAdminDivisionCategoryProbeFailed(category.id, adminDivisionCounts, regionPackId),
+    );
+    return probeFailed ? matchingAdminDivisionProbeFailedMessage : null;
   }, [adminDivisionCounts, regionPackId, sessionRules]);
 
   const seedUnavailableFromPresence = useCallback((): Map<MatchingCategoryId, string> => {
     const next = new Map<MatchingCategoryId, string>();
-    if (!regionPackId) {
-      return next;
-    }
-
     const probePending = categoryPresenceCounts === null;
+
     for (const category of matchingCatalog) {
+      if (isAdminDivisionCategoryProbeFailed(category.id, adminDivisionCounts, regionPackId)) {
+        next.set(category.id, matchingAdminDivisionProbeFailedMessage);
+        continue;
+      }
+
+      if (!regionPackId) {
+        continue;
+      }
+
       const adminUnavailable = !isAdminDivisionCategoryAvailable(
         category.id,
         adminDivisionCounts,
@@ -83,18 +106,20 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
       let changed = false;
       const next = new Map(prev);
       for (const [categoryId, notice] of seeded) {
-        if (!next.has(categoryId)) {
+        if (next.get(categoryId) !== notice) {
           next.set(categoryId, notice);
           changed = true;
         }
       }
       return changed ? next : prev;
     });
-    if (seeded.size > 0) {
+    if (catalogProbeError) {
+      setCatalogNotice(catalogProbeError);
+    } else if (seeded.size > 0) {
       const firstNotice = seeded.values().next().value;
       setCatalogNotice(firstNotice ?? "Some categories aren't available in this play area.");
     }
-  }, [seedUnavailableFromPresence]);
+  }, [catalogProbeError, seedUnavailableFromPresence]);
 
   const clearResolvedFields = useCallback(() => {
     setMatchingFeatures([]);
@@ -131,11 +156,12 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
     const seeded = seedUnavailableFromPresence();
     setUnavailableMatchingCategories(seeded);
     setCatalogNotice(
-      seeded.size > 0
-        ? (seeded.values().next().value ?? "Some categories aren't available in this play area.")
-        : null,
+      catalogProbeError ??
+        (seeded.size > 0
+          ? (seeded.values().next().value ?? "Some categories aren't available in this play area.")
+          : null),
     );
-  }, [clearResolvedFields, seedUnavailableFromPresence]);
+  }, [catalogProbeError, clearResolvedFields, seedUnavailableFromPresence]);
 
   const selectCategory = useCallback(
     (categoryId: MatchingCategoryId) => {
@@ -175,6 +201,7 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
     previewOpen,
     unavailableMatchingCategories,
     catalogNotice,
+    catalogProbeError,
     setUnavailableMatchingCategories,
     setCatalogNotice,
     setMatchingCategoryId,
@@ -196,5 +223,6 @@ export function useMatchingDraftState(sessionRules?: SessionRulesInput) {
     selectCategory,
     reopenCategoryPicker,
     clearResolvedFields,
+    matchingCatalog,
   };
 }

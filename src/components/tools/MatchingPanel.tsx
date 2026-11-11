@@ -46,6 +46,8 @@ export type MatchingPanelModel = {
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
   unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
   catalogNotice?: string | null;
+  catalogProbeError?: string | null;
+  onCatalogProbeRetry?: () => void;
   catalogCategories?: readonly MatchingCategoryDefinition[];
   anchorLat?: number | null;
   anchorLng?: number | null;
@@ -88,6 +90,8 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     usedCategoryIds,
     unavailableCategoryIds = new Set<MatchingCategoryId>(),
     catalogNotice = null,
+    catalogProbeError = null,
+    onCatalogProbeRetry,
     catalogCategories = MATCHING_CATEGORIES,
     anchorLat = null,
     anchorLng = null,
@@ -258,7 +262,9 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
-          {catalogNotice ? (
+          {catalogProbeError && onCatalogProbeRetry ? (
+            <ErrorWithRetry error={catalogProbeError} onRetry={onCatalogProbeRetry} />
+          ) : catalogNotice ? (
             <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
           ) : null}
           {availableCategories.length === 0 ? (
