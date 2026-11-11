@@ -22,6 +22,7 @@ describe("matchingFeaturesCacheKey", () => {
       transitMetroId: "sydney",
       transitStationFilter: ["tram"],
     });
+    expect(base).toContain("matching:v4:");
     expect(base).toContain("metro:auto");
     expect(base).toContain("filter:all");
     expect(filtered).toContain("metro:sydney");
