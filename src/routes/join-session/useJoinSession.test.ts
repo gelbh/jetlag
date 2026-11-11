@@ -260,6 +260,8 @@ describe("useJoinSession", () => {
     expect(mockTrack).toHaveBeenCalledWith("join_failed", {
       role: "seeker",
       reason: "other",
+      failureClass: "other",
+      source: "client",
     });
   });
 
@@ -313,6 +315,8 @@ describe("useJoinSession", () => {
       expect(mockTrack).toHaveBeenCalledWith("join_failed", {
         role: "seeker",
         reason: "timeout",
+        failureClass: "transport",
+        source: "server",
       });
 
       await act(async () => {
@@ -362,8 +366,24 @@ describe("useJoinSession", () => {
       expect(navigate).not.toHaveBeenCalled();
       expect(result.current.error).toBe("No session found for that code.");
       expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
-        ["join_failed", { role: "seeker", reason: "timeout" }],
-        ["join_failed", { role: "seeker", reason: "session_missing" }],
+        [
+          "join_failed",
+          {
+            role: "seeker",
+            reason: "timeout",
+            failureClass: "transport",
+            source: "server",
+          },
+        ],
+        [
+          "join_failed",
+          {
+            role: "seeker",
+            reason: "session_missing",
+            failureClass: "other",
+            source: "server",
+          },
+        ],
       ]);
     });
 
@@ -439,7 +459,15 @@ describe("useJoinSession", () => {
       expect(navigate).toHaveBeenCalledWith("/map");
       expect(result.current.error).toBeNull();
       expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
-        ["join_failed", { role: "seeker", reason: "timeout" }],
+        [
+          "join_failed",
+          {
+            role: "seeker",
+            reason: "timeout",
+            failureClass: "transport",
+            source: "server",
+          },
+        ],
       ]);
     });
   });
@@ -492,6 +520,8 @@ describe("useJoinSession", () => {
     expect(mockTrack).toHaveBeenCalledWith("join_failed", {
       role: "hider",
       reason: "other",
+      failureClass: "other",
+      source: "server",
     });
   });
 
@@ -659,6 +689,36 @@ describe("useJoinSession", () => {
     expect(mockTrack).toHaveBeenCalledWith("join_failed", {
       role: "seeker",
       reason: "role_code_required",
+      failureClass: "expected_gate",
+      source: "server",
+    });
+  });
+
+  it("tracks join_failed with wrong_role_code as user_reject from the server", async () => {
+    mockJoinRemoteSessionByCode.mockRejectedValue(
+      new Error("Wrong role code.", {
+        cause: Object.assign(new Error("Wrong role code. [403]"), {
+          code: "functions/permission-denied",
+        }),
+      }),
+    );
+
+    const { result } = renderHook(() =>
+      useJoinSession({ code: "ABCD", playerRole: "seeker", rolePasscode: "WXYZ" }),
+    );
+
+    await act(async () => {
+      result.current.runJoin({ ...joinValues, rolePasscode: "WXYZ" });
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("Wrong role code.");
+    });
+    expect(mockTrack).toHaveBeenCalledWith("join_failed", {
+      role: "seeker",
+      reason: "wrong_role_code",
+      failureClass: "user_reject",
+      source: "server",
     });
   });
 
@@ -726,6 +786,8 @@ describe("useJoinSession", () => {
     expect(mockTrack).toHaveBeenCalledWith("join_failed", {
       role: "seeker",
       reason: "role_code_required",
+      failureClass: "expected_gate",
+      source: "client_gate",
       gameId: "remote-session-1",
     });
   });
@@ -747,6 +809,8 @@ describe("useJoinSession", () => {
     expect(mockTrack).toHaveBeenCalledWith("join_failed", {
       role: "seeker",
       reason: "session_missing",
+      failureClass: "other",
+      source: "server",
     });
     // A failed join must not feed its stage timings into duration history as a success.
     await waitFor(() => expect(result.current.joinTask?.getSnapshot().status).toBe("failed"));
@@ -767,7 +831,15 @@ describe("useJoinSession", () => {
       expect(result.current.error).toBe("That session has ended. Ask the host for a new code.");
     });
     expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
-      ["join_failed", { role: "seeker", reason: "session_ended" }],
+      [
+        "join_failed",
+        {
+          role: "seeker",
+          reason: "session_ended",
+          failureClass: "other",
+          source: "server",
+        },
+      ],
     ]);
   });
 
@@ -786,7 +858,15 @@ describe("useJoinSession", () => {
       expect(result.current.error).toEqual(expect.stringContaining("9.9.9"));
     });
     expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
-      ["join_failed", { role: "seeker", reason: "version_mismatch" }],
+      [
+        "join_failed",
+        {
+          role: "seeker",
+          reason: "version_mismatch",
+          failureClass: "user_reject",
+          source: "server",
+        },
+      ],
     ]);
   });
 
@@ -849,7 +929,15 @@ describe("useJoinSession", () => {
       });
       expect(mockJoinRemoteSessionByCode).toHaveBeenCalledTimes(2);
       expect(mockTrack.mock.calls.filter(([event]) => event === "join_failed")).toEqual([
-        ["join_failed", { role: "seeker", reason: "role_code_required" }],
+        [
+          "join_failed",
+          {
+            role: "seeker",
+            reason: "role_code_required",
+            failureClass: "expected_gate",
+            source: "server",
+          },
+        ],
       ]);
     });
 

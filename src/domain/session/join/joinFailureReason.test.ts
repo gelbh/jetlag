@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { joinFailureReason } from "./joinFailureReason";
+import { type JoinFailureReason, joinFailureClass, joinFailureReason } from "./joinFailureReason";
 
 function callableError(message: string, code: string): Error {
   return Object.assign(new Error(message), { code });
@@ -57,4 +57,22 @@ describe("joinFailureReason", () => {
     expect(joinFailureReason(new Error("Joined session could not be loaded."))).toBe("other");
     expect(joinFailureReason("not an error")).toBe("other");
   });
+});
+
+describe("joinFailureClass", () => {
+  it.each([
+    ["role_code_required", "expected_gate"],
+    ["wrong_role_code", "user_reject"],
+    ["version_mismatch", "user_reject"],
+    ["update_required", "user_reject"],
+    ["timeout", "transport"],
+    ["session_missing", "other"],
+    ["session_ended", "other"],
+    ["other", "other"],
+  ] as const satisfies ReadonlyArray<readonly [JoinFailureReason, string]>)(
+    "maps %s → %s",
+    (reason, failureClass) => {
+      expect(joinFailureClass(reason)).toBe(failureClass);
+    },
+  );
 });

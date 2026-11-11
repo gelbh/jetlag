@@ -4,7 +4,12 @@ import type { SessionRecord } from "@/domain/map/annotations";
 import { isCastleSiegeSession } from "@/domain/session/castleSiege/mode";
 import type { CastleSiegeTeamRole } from "@/domain/session/castleSiege/teamRole";
 import { JOIN_ERROR_HEAL_PROOF_INVALID } from "@/domain/session/join/joinErrorCopy";
-import { type JoinFailureReason, joinFailureReason } from "@/domain/session/join/joinFailureReason";
+import {
+  type JoinFailureReason,
+  type JoinFailureSource,
+  joinFailureClass,
+  joinFailureReason,
+} from "@/domain/session/join/joinFailureReason";
 import { isPlaceholderGameArea } from "@/domain/session/join/joinPreviewGameArea";
 import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
 import { sessionVersionMismatchMessage } from "@/domain/session/meta/sessionVersion";
@@ -388,10 +393,16 @@ export function useJoinSession({
     navigate("/map");
   };
 
-  const trackJoinFailed = (role: PlayerRole, reason: JoinFailureReason) => {
+  const trackJoinFailed = (
+    role: PlayerRole,
+    reason: JoinFailureReason,
+    source: JoinFailureSource,
+  ) => {
     track(ANALYTICS_EVENTS.join_failed, {
       role,
       reason,
+      failureClass: joinFailureClass(reason),
+      source,
       ...(previewSession?.id ? { gameId: previewSession.id } : {}),
     });
   };
@@ -406,7 +417,12 @@ export function useJoinSession({
       let settled = false;
       // Set once the join succeeded: a client timeout that fires while the session is being entered must not show copy or track.
       let claimed = false;
-      const fail = (message: string, role: PlayerRole, reason: JoinFailureReason) => {
+      const fail = (
+        message: string,
+        role: PlayerRole,
+        reason: JoinFailureReason,
+        source: JoinFailureSource,
+      ) => {
         setError(message);
         if (reason === "role_code_required") {
           setRoleCodeRequiredByServer(true);
@@ -415,21 +431,21 @@ export function useJoinSession({
           return;
         }
         settled = true;
-        trackJoinFailed(role, reason);
+        trackJoinFailed(role, reason, source);
       };
       const joiningCastleSiege = isCastleSiegeSession(previewSession);
       let selectedSeat: CastleSiegeTeamRole | undefined;
       let selectedRole: PlayerRole;
       if (joiningCastleSiege) {
         if (values.castleSiegeRole == null) {
-          fail("Choose a Castle Siege seat.", "observer", "other");
+          fail("Choose a Castle Siege seat.", "observer", "other", "client");
           return;
         }
         selectedSeat = values.castleSiegeRole;
         selectedRole = "observer";
       } else {
         if (values.playerRole == null) {
-          fail("Choose your side.", "seeker", "other");
+          fail("Choose your side.", "seeker", "other", "client");
           return;
         }
         selectedRole = values.playerRole;
@@ -448,7 +464,7 @@ export function useJoinSession({
           : existingRole !== selectedRole &&
             isRolePasscodeRequired(previewSession, selectedRole, myUid ?? undefined))
       ) {
-        fail(ROLE_CODE_REQUIRED_COPY, joinAnalyticsRole, "role_code_required");
+        fail(ROLE_CODE_REQUIRED_COPY, joinAnalyticsRole, "role_code_required", "client_gate");
         return;
       }
       setLoading(true);
@@ -469,6 +485,7 @@ export function useJoinSession({
             "Firebase is not configured. Create a local session instead.",
             selectedRole,
             "other",
+            "client",
           );
         } else {
           await withTimeout(
@@ -525,7 +542,7 @@ export function useJoinSession({
                 if (!isCurrent()) {
                   return;
                 }
-                fail("No session found for that code.", selectedRole, "session_missing");
+                fail("No session found for that code.", selectedRole, "session_missing", "server");
                 return;
               }
 
@@ -537,6 +554,7 @@ export function useJoinSession({
                   "That session has ended. Ask the host for a new code.",
                   selectedRole,
                   "session_ended",
+                  "server",
                 );
                 return;
               }
@@ -549,6 +567,7 @@ export function useJoinSession({
                   sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
                   selectedRole,
                   "version_mismatch",
+                  "server",
                 );
                 return;
               }
@@ -567,6 +586,7 @@ export function useJoinSession({
                     "Couldn't confirm your hider role. Wait a moment and try again.",
                     selectedRole,
                     "other",
+                    "server",
                   );
                   return;
                 }
@@ -607,6 +627,7 @@ export function useJoinSession({
             nextError instanceof Error ? nextError.message : "Couldn't join that session.",
             selectedRole,
             reason,
+            "server",
           );
         }
       }
