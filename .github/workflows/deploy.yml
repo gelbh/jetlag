@@ -1,9 +1,9 @@
 name: Deploy
 
-# Pin runner image while ubuntu-latest migrates to 26.04 (resolute). Floating
-# latest was failing Playwright --with-deps on apt DNS for fonts-* packages.
-# Revisit ubuntu-latest / 26.04 when that path is stable for install-deps.
-# See actions/runner-images#14748.
+# Pin runner image while ubuntu-latest migrates to 26.04 (resolute).
+# Playwright install skips --with-deps (see setup-playwright-chromium):
+# Ubuntu archive DNS outages break apt font fetches (runner-images#15296).
+# See also runner-images#14748.
 
 on:
   push:
