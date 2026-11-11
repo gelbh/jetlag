@@ -69,6 +69,14 @@ describe("posthogBeforeSend", () => {
     expect(list[0]?.value).toBe("Join **** failed");
   });
 
+  it("adds firebase_code for Firebase permission-denied autocapture", () => {
+    writeAnalyticsConsent("denied");
+    const result = posthogBeforeSend(
+      exceptionCapture("FirebaseError", "Missing or insufficient permissions."),
+    );
+    expect(result?.properties?.firebase_code).toBe("permission-denied");
+  });
+
   it("drops product events when consent is unset", () => {
     const capture: CaptureResult = {
       uuid: "test-uuid",

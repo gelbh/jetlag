@@ -1,5 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { isNoticeVisibleToUid, type SessionNoticeRecord } from "@/domain/session/opsNotice";
+
+const dismissSessionNotice = vi.hoisted(() => vi.fn());
+const captureException = vi.hoisted(() => vi.fn());
+
+vi.mock("@/services/admin/adminSessionNotices", () => ({
+  dismissSessionNotice,
+}));
+
+vi.mock("@/services/core/analytics/clientErrors", () => ({
+  captureException,
+}));
 
 function notice(overrides: Partial<SessionNoticeRecord> = {}): SessionNoticeRecord {
   return {
@@ -14,6 +25,36 @@ function notice(overrides: Partial<SessionNoticeRecord> = {}): SessionNoticeReco
     ...overrides,
   };
 }
+
+describe("runSessionNoticeDismiss", () => {
+  beforeEach(() => {
+    dismissSessionNotice.mockReset();
+    captureException.mockReset();
+  });
+
+  it("does not surface unhandled rejection when dismiss write is permission-denied", async () => {
+    const { runSessionNoticeDismiss } = await import("./useSessionNotices");
+    const error = Object.assign(new Error("Missing or insufficient permissions."), {
+      name: "FirebaseError",
+      code: "permission-denied",
+    });
+    dismissSessionNotice.mockRejectedValue(error);
+
+    const unhandled = vi.fn();
+    process.on("unhandledRejection", unhandled);
+    try {
+      void runSessionNoticeDismiss("session-1", "notice-1", "uid-1");
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(unhandled).not.toHaveBeenCalled();
+      expect(captureException).toHaveBeenCalledWith(error, {
+        firestore_op: "write:dismissSessionNotice",
+      });
+    } finally {
+      process.off("unhandledRejection", unhandled);
+    }
+  });
+});
 
 describe("session notice visibility", () => {
   it("hides expired notices", () => {
