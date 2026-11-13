@@ -4,6 +4,11 @@ import * as overpassClient from "../../core/overpass/overpassClient";
 import type { GtfsStaticBundle } from "../../transit/gtfsBundle";
 import { loadGtfsBundle } from "../../transit/gtfsRouteGraph";
 import {
+  HIDING_ZONE_BUS_STOP_OVERPASS_CAP,
+  HIDING_ZONE_RAIL_STOP_OVERPASS_CAP,
+} from "../../transit/transitStops";
+import {
+  fetchStationFeaturesInArea,
   fetchTransitStationsForHidingZone,
   fetchTransitStationsForHidingZoneViewport,
   HIDING_ZONE_OVERPASS_TIMEOUT_MS,
@@ -274,5 +279,27 @@ describe("hiding-zone transit station fetchers", () => {
         { load: { signal: controller.signal } },
       ),
     ).rejects.toMatchObject({ name: "AbortError" });
+  });
+});
+
+describe("matching station Overpass query", () => {
+  beforeEach(() => {
+    vi.mocked(overpassClient.queryOverpass).mockReset();
+  });
+
+  afterEach(() => {
+    vi.mocked(overpassClient.queryOverpass).mockReset();
+  });
+
+  it("uses hiding-zone rail and bus buckets instead of a single out 250", async () => {
+    vi.mocked(overpassClient.queryOverpass).mockResolvedValue({ elements: [] });
+
+    await fetchStationFeaturesInArea(MIDTOWN_GAME_AREA);
+
+    const query = String(vi.mocked(overpassClient.queryOverpass).mock.calls[0]?.[0] ?? "");
+    expect(query).toContain(`.rail out center ${HIDING_ZONE_RAIL_STOP_OVERPASS_CAP}`);
+    expect(query).toContain(`.bus out center ${HIDING_ZONE_BUS_STOP_OVERPASS_CAP}`);
+    expect(query).not.toContain("out center 250");
+    expect(query).not.toContain('public_transport"="stop_position"');
   });
 });
