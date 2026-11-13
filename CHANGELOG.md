@@ -6,6 +6,16 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.12.7 - 2026-11-13
+
+### Fixes
+
+- Show map Retry when WebGL shader compile fails
+
+### Technical
+
+- Matching: station Overpass fetch uses separate rail and bus caps (same as hiding zones) so one tag family cannot fill a single 250 limit
+
 ## 1.12.6 - 2026-11-11
 
 ### Fixes

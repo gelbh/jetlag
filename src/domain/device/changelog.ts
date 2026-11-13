@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.12.6";
+export const APP_VERSION = "1.12.7";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,22 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.12.7",
+    date: "2026-11-13",
+    sections: [
+      {
+        title: "Fixes",
+        items: ["Show map Retry when WebGL shader compile fails"],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Matching: station Overpass fetch uses separate rail and bus caps (same as hiding zones) so one tag family cannot fill a single 250 limit",
+        ],
+      },
+    ],
+  },
   {
     version: "1.12.6",
     date: "2026-11-11",
