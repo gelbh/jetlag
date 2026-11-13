@@ -21,6 +21,10 @@ import { getBasemapSurface, getMapLibreStyle } from "@/domain/map/mapBasemaps";
 import { MAP_CAMERA_HOME_ORIENTATION } from "@/domain/map/mapCameraHome";
 import { mapFocusApplyDependencyKeys } from "@/domain/map/mapFocusApplyDeps";
 import { shouldApplyMapFocus } from "@/domain/map/mapFocusPolicy";
+import {
+  attachMapLibreShaderCompileWindowListener,
+  isMapLibreShaderCompileFailure,
+} from "@/domain/map/mapLibreShaderCompileFailure";
 import { attachMapWebGlContextLostListener } from "@/domain/map/mapWebGlContextLoss";
 import { resolveMapPitchDegrees } from "@/domain/map/resolveMapPitchDegrees";
 import { stopMapCameraEase } from "@/domain/map/stopMapCameraEase";
@@ -306,7 +310,7 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
   const compassControlEnabled = showCompassControl ?? false;
   const [fallbackRecenterToken, setFallbackRecenterToken] = useState(0);
   const [orientationResetToken, setOrientationResetToken] = useState(0);
-  const [webGlContextLost, setWebGlContextLost] = useState(false);
+  const [glFailure, setGlFailure] = useState<null | "context-lost" | "shader-compile">(null);
   const [webGlRemountNonce, setWebGlRemountNonce] = useState(0);
   const focusRecenterToken = onRecenter ? recenterToken : fallbackRecenterToken;
   const handleCompassReset = useCallback(() => {
@@ -319,28 +323,48 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
     setFallbackRecenterToken((value) => value + 1);
   }, []);
   const detachWebGlListenerRef = useRef<(() => void) | null>(null);
-  const handleWebGlContextLost = useCallback(() => {
-    captureMapWebGlContextLostOnce();
-    setWebGlContextLost(true);
-  }, []);
-  const handleWebGlRetry = useCallback(() => {
+  const tearDownMapRegistration = useCallback(() => {
     detachWebGlListenerRef.current?.();
     detachWebGlListenerRef.current = null;
     registerMapLibreMap(null);
-    setWebGlRemountNonce((value) => value + 1);
   }, []);
+  const enterGlFailure = useCallback(
+    (kind: "context-lost" | "shader-compile") => {
+      captureMapWebGlContextLostOnce();
+      if (kind === "shader-compile") {
+        tearDownMapRegistration();
+      }
+      setGlFailure(kind);
+    },
+    [tearDownMapRegistration],
+  );
+  const handleMapError = useCallback(
+    (event: { error?: unknown }) => {
+      if (isMapLibreShaderCompileFailure(event.error)) {
+        enterGlFailure("shader-compile");
+        return;
+      }
+      // Match react-map-gl default when onError is unset: surface non-shader map errors.
+      console.error(event.error);
+    },
+    [enterGlFailure],
+  );
+  const handleWebGlRetry = useCallback(() => {
+    tearDownMapRegistration();
+    setGlFailure(null);
+    setWebGlRemountNonce((value) => value + 1);
+  }, [tearDownMapRegistration]);
   const handleWebGlReload = useCallback(() => {
     window.location.reload();
   }, []);
   const bindWebGlContextLost = useCallback(
     (map: MapLibreMap) => {
       detachWebGlListenerRef.current?.();
-      detachWebGlListenerRef.current = attachMapWebGlContextLostListener(
-        map.getCanvas(),
-        handleWebGlContextLost,
+      detachWebGlListenerRef.current = attachMapWebGlContextLostListener(map.getCanvas(), () =>
+        enterGlFailure("context-lost"),
       );
     },
-    [handleWebGlContextLost],
+    [enterGlFailure],
   );
   const mapStyleToggleEnabled =
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) && Boolean(onMapStyleChange);
@@ -357,12 +381,16 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
   }, [onBoundsChange, onUserViewportFramed, onRecenter]);
 
   useEffect(() => {
+    return attachMapLibreShaderCompileWindowListener(() => {
+      enterGlFailure("shader-compile");
+    });
+  }, [enterGlFailure]);
+
+  useEffect(() => {
     return () => {
-      detachWebGlListenerRef.current?.();
-      detachWebGlListenerRef.current = null;
-      registerMapLibreMap(null);
+      tearDownMapRegistration();
     };
-  }, []);
+  }, [tearDownMapRegistration]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
@@ -430,93 +458,96 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
             : `h-full w-full maplibregl-map pointer-events-auto ${containerSurfaceClass}${satelliteGradeClass}`
         }
       >
-        <Map
-          key={composedMapKey}
-          ref={mapRef}
-          initialViewState={{
-            longitude,
-            latitude,
-            zoom,
-            pitch: 0,
-            bearing: 0,
-          }}
-          style={{ width: "100%", height: "100%" }}
-          mapStyle={style}
-          fadeDuration={runtimeOptions.fadeDuration}
-          maxTileCacheSize={runtimeOptions.maxTileCacheSize}
-          // Slice D eval (hardening): reuseMaps skipped — style toggles already
-          // call setStyle in-place (not remount); session remounts via mapKey are
-          // rare; reuseMaps risks stale GL/image state without a measured win.
-          // cooperativeGestures skipped — play maps are full-viewport; create-
-          // session framing uses a touch-none fixed-height shell; no scrollable
-          // embed that needs ctrl+scroll to protect page scroll.
-          attributionControl={false}
-          maxPitch={maxPitchDegrees}
-          dragPan={interactive}
-          boxZoom={interactive}
-          keyboard={interactive}
-          scrollZoom={interactive}
-          doubleClickZoom={interactive}
-          dragRotate={false}
-          touchPitch={pitchGesturesEnabled}
-          touchZoomRotate={interactive}
-          pitchWithRotate={pitchGesturesEnabled && touchRotateEnabled}
-          onLoad={() => {
-            const map = mapRef.current?.getMap();
-            if (map) {
-              registerMapLibreMap(map);
-              bindWebGlContextLost(map);
-            }
-            if (interactive) {
-              map?.touchZoomRotate.enable();
-              if (touchRotateEnabled) {
-                map?.touchZoomRotate.enableRotation();
-              } else {
-                map?.touchZoomRotate.disableRotation();
+        {glFailure !== "shader-compile" ? (
+          <Map
+            key={composedMapKey}
+            ref={mapRef}
+            initialViewState={{
+              longitude,
+              latitude,
+              zoom,
+              pitch: 0,
+              bearing: 0,
+            }}
+            style={{ width: "100%", height: "100%" }}
+            mapStyle={style}
+            fadeDuration={runtimeOptions.fadeDuration}
+            maxTileCacheSize={runtimeOptions.maxTileCacheSize}
+            // Slice D eval (hardening): reuseMaps skipped — style toggles already
+            // call setStyle in-place (not remount); session remounts via mapKey are
+            // rare; reuseMaps risks stale GL/image state without a measured win.
+            // cooperativeGestures skipped — play maps are full-viewport; create-
+            // session framing uses a touch-none fixed-height shell; no scrollable
+            // embed that needs ctrl+scroll to protect page scroll.
+            attributionControl={false}
+            maxPitch={maxPitchDegrees}
+            dragPan={interactive}
+            boxZoom={interactive}
+            keyboard={interactive}
+            scrollZoom={interactive}
+            doubleClickZoom={interactive}
+            dragRotate={false}
+            touchPitch={pitchGesturesEnabled}
+            touchZoomRotate={interactive}
+            pitchWithRotate={pitchGesturesEnabled && touchRotateEnabled}
+            onLoad={() => {
+              const map = mapRef.current?.getMap();
+              if (map) {
+                registerMapLibreMap(map);
+                bindWebGlContextLost(map);
               }
-            }
-            map?.setMaxPitch(maxPitchDegrees);
-            if (maxPitchDegrees === 0) {
-              map?.easeTo({ pitch: 0, duration: 0 });
-            }
-            setWebGlContextLost(false);
-            emitBounds();
-          }}
-          onMoveEnd={handleMoveEnd}
-          onDragEnd={handleDragEnd}
-          onZoomEnd={handleZoomEnd}
-        >
-          <MapFeatureHitTestProvider>
-            <MapLibreMarkerImagesLoader />
-            <MapFeatureHitTestBridge onMapClick={onMapClick} />
-            <MapFocus
-              focusBounds={focusBounds ?? null}
-              focusMinZoom={focusMinZoom}
-              focusMaxZoom={focusMaxZoom}
-              fitBoundsMode={fitBoundsMode}
-              recenterToken={focusRecenterToken}
-              orientationResetToken={orientationResetToken}
-              fitBoundsPadding={fitBoundsPadding}
-              focusPaddingBias={focusPaddingBias}
-              focusPaddingTopBias={focusPaddingTopBias}
-              preferFly={focusPreferFly}
-            />
-            {chromeHudRef ? <MapChromeListener chromeHudRef={chromeHudRef} /> : null}
-            <MapNavControlStack
-              zoomEnabled={zoomControlEnabled}
-              compassEnabled={compassControlEnabled}
-              styleEnabled={mapStyleToggleEnabled}
-              mapStyle={mapStyle}
-              streetBasemap={streetBasemap}
-              onMapStyleChange={onMapStyleChange}
-              onResetCamera={handleCompassReset}
-            />
-            {children}
-          </MapFeatureHitTestProvider>
-        </Map>
+              if (interactive) {
+                map?.touchZoomRotate.enable();
+                if (touchRotateEnabled) {
+                  map?.touchZoomRotate.enableRotation();
+                } else {
+                  map?.touchZoomRotate.disableRotation();
+                }
+              }
+              map?.setMaxPitch(maxPitchDegrees);
+              if (maxPitchDegrees === 0) {
+                map?.easeTo({ pitch: 0, duration: 0 });
+              }
+              setGlFailure(null);
+              emitBounds();
+            }}
+            onError={handleMapError}
+            onMoveEnd={handleMoveEnd}
+            onDragEnd={handleDragEnd}
+            onZoomEnd={handleZoomEnd}
+          >
+            <MapFeatureHitTestProvider>
+              <MapLibreMarkerImagesLoader />
+              <MapFeatureHitTestBridge onMapClick={onMapClick} />
+              <MapFocus
+                focusBounds={focusBounds ?? null}
+                focusMinZoom={focusMinZoom}
+                focusMaxZoom={focusMaxZoom}
+                fitBoundsMode={fitBoundsMode}
+                recenterToken={focusRecenterToken}
+                orientationResetToken={orientationResetToken}
+                fitBoundsPadding={fitBoundsPadding}
+                focusPaddingBias={focusPaddingBias}
+                focusPaddingTopBias={focusPaddingTopBias}
+                preferFly={focusPreferFly}
+              />
+              {chromeHudRef ? <MapChromeListener chromeHudRef={chromeHudRef} /> : null}
+              <MapNavControlStack
+                zoomEnabled={zoomControlEnabled}
+                compassEnabled={compassControlEnabled}
+                styleEnabled={mapStyleToggleEnabled}
+                mapStyle={mapStyle}
+                streetBasemap={streetBasemap}
+                onMapStyleChange={onMapStyleChange}
+                onResetCamera={handleCompassReset}
+              />
+              {children}
+            </MapFeatureHitTestProvider>
+          </Map>
+        ) : null}
       </div>
       <MapWebGlContextLostBanner
-        visible={webGlContextLost}
+        visible={glFailure != null}
         onRetry={handleWebGlRetry}
         onReload={handleWebGlReload}
       />
