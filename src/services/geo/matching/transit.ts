@@ -17,7 +17,6 @@ import {
 } from "../../transit/gtfsPlayAreaStations";
 import {
   buildHidingZoneTransitStopOverpassQuery,
-  buildTransitStopOverpassQuery,
   type OverpassTransitStopElement,
   overpassTransitStopsToMatchingFeatures,
   parseOverpassTransitStops,
@@ -39,7 +38,7 @@ export type HidingZoneStationsOptions = GtfsStationQuery & {
 };
 
 function buildStationQuery(gameArea: GameArea): string {
-  return buildTransitStopOverpassQuery(matchingSearchBoundingBox(gameArea));
+  return buildHidingZoneTransitStopOverpassQuery(matchingSearchBoundingBox(gameArea));
 }
 
 function overpassStopsToMatchingFeatures(

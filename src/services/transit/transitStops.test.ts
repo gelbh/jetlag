@@ -37,6 +37,23 @@ describe("transitStops", () => {
     expect(query).not.toContain('["name"]');
   });
 
+  it("keeps the static layer on a single out body 250 union", () => {
+    const query = buildTransitStopOverpassQuery(
+      {
+        south: 54.28,
+        west: -130.35,
+        north: 54.32,
+        east: -130.3,
+      },
+      250,
+      "body",
+    );
+
+    expect(query).toContain("out body 250");
+    expect(query).not.toContain(".rail out");
+    expect(query).not.toContain(".bus out");
+  });
+
   it("builds a hiding-zone overpass query with bus and rail buckets", () => {
     const query = buildHidingZoneTransitStopOverpassQuery({
       south: 54.28,
