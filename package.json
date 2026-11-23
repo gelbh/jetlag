@@ -83,7 +83,7 @@
     "maplibre-gl": "^6.19.0",
     "martinez-polygon-clipping": "^0.9.1",
     "posthog-js": "^1.453.0",
-    "posthog-node": "^5.71.0",
+    "posthog-node": "^6.0.5",
     "rbush": "^4.0.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
