@@ -12,13 +12,13 @@
     "node": "24"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1168.0",
+    "@aws-sdk/client-s3": "^3.1173.0",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "@posthog/mcp": "0.25.1",
     "firebase-admin": "^14.5.1",
     "firebase-functions": "^7.4.0",
     "posthog-node": "^5.71.0",
-    "stripe": "^23.1.0",
+    "stripe": "^23.2.0",
     "zod": "^4.6.7"
   },
   "overrides": {
