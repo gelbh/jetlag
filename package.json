@@ -1,7 +1,7 @@
 {
   "name": "jetlag",
   "private": true,
-  "version": "1.12.6",
+  "version": "1.12.7",
   "type": "module",
   "engines": {
     "node": ">=24.12.0"
